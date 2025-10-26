@@ -406,6 +406,10 @@ export default defineComponent({
       // Ensure WoT data is hydrated from IndexedDB on first load
       await useNostrUserStore().ensureDbInitialized();
     } catch {}
+    try {
+      // Ensure latest reviews are fetched for this mint when dialog opens
+      await useMintRecommendationsStore().fetchReviewsForUrl(this.url);
+    } catch {}
     const uniquePks = Array.from(
       new Set((this.reviews || []).map((r: any) => r.pubkey))
     );
@@ -424,6 +428,15 @@ export default defineComponent({
       },
       deep: true,
       immediate: false,
+    },
+    url: {
+      async handler(newUrl: string) {
+        try {
+          if (newUrl)
+            await useMintRecommendationsStore().fetchReviewsForUrl(newUrl);
+        } catch {}
+      },
+      immediate: true,
     },
   },
 });

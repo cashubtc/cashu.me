@@ -98,6 +98,58 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       for (const ev of events) this.handleReviewEvent(ev);
       this.rebuildAggregates();
     },
+    // Fetch only the reviews relevant to a single mint URL.
+    // This queries by two strategies and merges results:
+    // 1) by '#u' (URL) with k=38172; 2) by '#a' identifiers discovered for this URL (38172:pubkey:d)
+    fetchReviewsForUrl: async function (url: string) {
+      try {
+        this.init();
+        if (!url || typeof url !== "string" || !url.startsWith("http")) return;
+
+        // Ensure we know identifiers for this URL; fetch infos if needed
+        const identifiersForUrl = () =>
+          Array.from(this.urlByIdentifier.entries())
+            .filter(([, u]) => u === url)
+            .map(([id]) => id);
+
+        let aIdentifiers = identifiersForUrl();
+        if (aIdentifiers.length === 0) {
+          await this.fetchMintInfoForUrl?.(url);
+          aIdentifiers = identifiersForUrl();
+        }
+
+        // Build filters
+        const filters: any[] = [];
+        // Strategy 1: events that tag the URL directly
+        filters.push({ kinds: [38000 as NDKKind], ['#k']: ['38172'], ['#u']: [url], limit: 5000 });
+        // Strategy 2: events that reference known identifiers for this URL
+        if (aIdentifiers.length > 0) {
+          const chunkSize = 256;
+          for (let i = 0; i < aIdentifiers.length; i += chunkSize) {
+            const chunk = aIdentifiers.slice(i, i + chunkSize);
+            filters.push({ kinds: [38000 as NDKKind], ['#a']: chunk, limit: 5000 });
+          }
+        }
+
+        // Execute all filters sequentially (few) and merge
+        for (const f of filters) {
+          const events = await this.ndk.fetchEvents(f as NDKFilter);
+          for (const ev of events) this.handleReviewEvent(ev);
+        }
+        this.rebuildAggregates();
+      } catch { }
+    },
+    // Fetch 38172 info events for a single URL to learn (pubkey,d) identifiers
+    fetchMintInfoForUrl: async function (url: string) {
+      try {
+        this.init();
+        if (!url || typeof url !== "string" || !url.startsWith("http")) return;
+        const filter: any = { kinds: [38172 as NDKKind], ['#u']: [url], limit: 1000 };
+        const events = await this.ndk.fetchEvents(filter as NDKFilter);
+        for (const ev of events) this.handleMintInfoEvent(ev);
+        this.rebuildAggregates();
+      } catch { }
+    },
     clearRecommendations: function () {
       this.recommendations.splice(0, this.recommendations.length);
     },
@@ -205,6 +257,10 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       if (!url || !url.startsWith("http")) return;
       // Update urlReviews map (dedupe by pubkey)
       const list = this.urlReviews.get(url) || [];
+      // Hard dedupe by eventId to avoid double counting from multiple filters
+      if (list.some((r) => r.eventId === review.eventId)) {
+        return;
+      }
       const withoutSameAuthor = list.filter((r) => r.pubkey !== review.pubkey);
       withoutSameAuthor.push(review);
       withoutSameAuthor.sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
@@ -303,6 +359,10 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
     },
     attachReviewToIdentifier: function (identifier: MintIdentifier, review: MintReview) {
       const existing = this.reviewsByIdentifier.get(identifier) || [];
+      // Hard dedupe by eventId to avoid double counting from multiple filters
+      if (existing.some((r) => r.eventId === review.eventId)) {
+        return;
+      }
       const withoutSameAuthor = existing.filter((r) => r.pubkey !== review.pubkey);
       withoutSameAuthor.push(review);
       withoutSameAuthor.sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
@@ -324,17 +384,21 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       // Merge new aggregates into existing recommendations to avoid wiping others
       const currentByUrl = new Map(this.recommendations.map((r) => [r.url, r] as [string, MintRecommendation]));
       for (const [url, reviews] of urlToReviews.entries()) {
+        // Dedupe by eventId across identifier- and url-attached reviews
+        const uniqMap = new Map<string, MintReview>();
+        for (const r of reviews) if (r && r.eventId && !uniqMap.has(r.eventId)) uniqMap.set(r.eventId, r);
+        const uniq = Array.from(uniqMap.values());
         // schedule HTTP info if missing
         if (!this.urlHttpInfo.has(url) && !this.inflightInfo.has(url) && !this.urlError.has(url)) {
           this.requestMintHttpInfo(url);
         }
-        const ratings = reviews.map((r) => r.rating).filter((n): n is number => typeof n === "number");
+        const ratings = uniq.map((r) => r.rating).filter((n): n is number => typeof n === "number");
         const avg = ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : null;
         const rec: MintRecommendation = {
           url,
-          reviewsCount: reviews.length,
+          reviewsCount: uniq.length,
           averageRating: avg,
-          reviews: reviews.slice().sort((a, b) => (b.created_at || 0) - (a.created_at || 0)),
+          reviews: uniq.slice().sort((a, b) => (b.created_at || 0) - (a.created_at || 0)),
           info: this.urlHttpInfo.get(url),
           error: this.urlError.has(url),
         };
