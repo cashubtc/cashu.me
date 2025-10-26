@@ -423,7 +423,15 @@ export default defineComponent({
   async mounted() {
     try {
       // Ensure WoT data is hydrated from IndexedDB on first load
-      await useNostrUserStore().ensureDbInitialized();
+      const nostrUser = useNostrUserStore();
+      await nostrUser.ensureDbInitialized();
+      // If no WoT data yet, proactively load first-hop follows so review sorting has minimal context
+      if (!nostrUser.wotCount && !nostrUser.wotLoading) {
+        // Let the store decide the source based on signerType:
+        // - SEED -> defaultWoTSeedPubkey (ODELL)
+        // - otherwise -> user's pubkey
+        void nostrUser.shallowCrawlWebOfTrust();
+      }
     } catch {}
 
     // Load local reviews immediately to show them instantly

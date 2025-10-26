@@ -31,7 +31,16 @@ export const useNostrUserStore = defineStore("nostrUser", {
     crawlCheckpointNextIndex: 0,
     crawlCheckpointTotal: 0,
     wotCancelRequested: false,
-    defaultWoTSeedPubkey: "04c915daefee38317fa734444acee390a8269fe5810b2241e5e6dd343dfbecc9"
+    defaultWoTSeedPubkey: "04c915daefee38317fa734444acee390a8269fe5810b2241e5e6dd343dfbecc9",
+    defaultShallowWoTPubkeys: [
+      "04c915daefee38317fa734444acee390a8269fe5810b2241e5e6dd343dfbecc9", // ODELL
+      "50d94fc2d8580c682b071a542f8b1e31a200b0508bab95a33bef0855df281d63", // Calle
+      "82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2", // jack
+      "b33bf9e97b78f35694a02e6bbef8e77059373e42b0a85a63f25a50ebfdadf50d", // Minibits
+      "1afe0c74e3d7784eba93a5e3fa554a6eeb01928d12739ae8ba4832786808e36d", // AmericanHodl
+      "c48e29f04b482cc01ca1f9ef8c86ef8318c059e0e9353235162f080f26e14c11", // Walker
+      "c43bbb58e2e6bc2f9455758257f6ba5329107bd4e8274068c2936c69d9980b7d", // roya
+    ]
   }),
   getters: {
     displayName(state): string {
@@ -182,6 +191,12 @@ export const useNostrUserStore = defineStore("nostrUser", {
           await db.wot.bulkPut(wotRows);
         }
       } catch { }
+    },
+    shallowCrawlWebOfTrust: async function () {
+      // call 1-hop crawlWebOfTrust for each of the defaultShallowWoTPubkeys
+      for (const pubkey of this.defaultShallowWoTPubkeys) {
+        await this.crawlWebOfTrust(1, pubkey);
+      }
     },
     crawlWebOfTrust: async function (
       maxHops: number | undefined = undefined,
