@@ -33,6 +33,8 @@ export type MintRecommendation = {
   reviews: MintReview[];
   info?: any;
   error?: boolean;
+  // unix seconds of the last successful HTTP info fetch for this mint
+  lastHttpInfoFetchAt?: number;
 };
 
 function makeIdentifier(kind: number, pubkey: string, d: string): MintIdentifier {
@@ -63,10 +65,12 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
     dToIdentifiers: new Map() as Map<string, Set<MintIdentifier>>, // d -> identifiers
     urlReviews: new Map() as Map<string, MintReview[]>, // fallback direct url reviews
     urlHttpInfo: new Map() as Map<string, any>,
+    urlHttpInfoFetchedAt: new Map() as Map<string, number>,
     urlError: new Set() as Set<string>,
     infoTimers: new Map() as Map<string, any>,
     inflightInfo: new Set() as Set<string>,
     infoTimeoutMs: 5000,
+    httpInfoFetchIntervalSeconds: 60 * 60 * 24, // 24 hours
     // cached averages for performance (not persisted)
     avgByUrl: new Map() as Map<string, { avg: number | null; count: number }>,
     // Aggregated list by URL
@@ -269,6 +273,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
     },
     clearDiscoveryCaches: function () {
       this.urlHttpInfo.clear();
+      this.urlHttpInfoFetchedAt.clear();
       this.urlError.clear();
       this.inflightInfo.clear();
       this.infoTimers.forEach((t) => clearTimeout(t));
@@ -314,7 +319,17 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       this.subsActive = true;
     },
     requestMintHttpInfo: async function (url: string, timeoutMs?: number) {
-      if (this.urlHttpInfo.has(url) || this.urlError.has(url) || this.inflightInfo.has(url)) return;
+      // Gate by last successful fetch time
+      const nowSec = Math.floor(Date.now() / 1000);
+      const last = this.urlHttpInfoFetchedAt.get(url) || 0;
+      const interval = this.httpInfoFetchIntervalSeconds || 0;
+      const isFresh = this.urlHttpInfo.has(url) && last > 0 && (nowSec - last) < interval;
+      if (isFresh) {
+        // Use stored info; surface timestamp via aggregates
+        this.rebuildAggregates();
+        return;
+      }
+      if (this.urlError.has(url) || this.inflightInfo.has(url)) return;
       this.inflightInfo.add(url);
       const ms = timeoutMs ?? this.infoTimeoutMs;
       if (!this.infoTimers.has(url)) {
@@ -333,6 +348,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
         console.log(`[mintRecs] fetching info for ${url}`);
         const info = await new (mod as any).MintClass(tempMint).api.getInfo();
         this.urlHttpInfo.set(url, info);
+        this.urlHttpInfoFetchedAt.set(url, Math.floor(Date.now() / 1000));
         const t = this.infoTimers.get(url);
         if (t) clearTimeout(t);
         this.infoTimers.delete(url);
@@ -402,6 +418,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
         reviews: [],
         info: this.urlHttpInfo.get(url),
         error: this.urlError.has(url),
+        lastHttpInfoFetchAt: this.urlHttpInfoFetchedAt.get(url),
       };
       if (existingIdx >= 0) {
         this.recommendations.splice(existingIdx, 1, updated);
@@ -523,6 +540,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
           reviews: [],
           info: this.urlHttpInfo.get(url),
           error: this.urlError.has(url),
+          lastHttpInfoFetchAt: this.urlHttpInfoFetchedAt.get(url),
         };
         currentByUrl.set(url, rec);
       }
