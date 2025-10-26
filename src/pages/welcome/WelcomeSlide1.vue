@@ -783,38 +783,6 @@ export default {
   flex-shrink: 0;
 }
 
-/* Mobile adjustments */
-@media (max-width: 600px) {
-  .welcome-slide {
-    padding: 30px 15px 15px 15px;
-  }
-
-  .logo-image {
-    width: 70px;
-    height: 70px;
-  }
-
-  .title {
-    font-size: 1.8rem;
-  }
-
-  .description {
-    font-size: 1rem;
-    max-width: 300px;
-    margin-bottom: 40px;
-  }
-
-  .welcome-next-btn {
-    width: 100%;
-    height: 40px;
-    font-size: 0.95rem;
-  }
-
-  .language-section {
-    padding: 8px 0;
-  }
-}
-
 /* Animation */
 .animated.bounce {
   animation-duration: 0.8s;
