@@ -10,11 +10,11 @@
       </div>
 
       <!-- Title -->
-      <h1 class="title">Set up your wallet</h1>
+      <h1 class="title">{{ $t("WelcomeSlideChoice.title") }}</h1>
 
       <!-- Description -->
       <p class="description">
-        Do you want to recover from a seed phrase or create a new wallet?
+        {{ $t("WelcomeSlideChoice.text") }}
       </p>
 
       <!-- Options -->
@@ -23,8 +23,12 @@
         <div class="option" @click="choose('new')">
           <q-icon name="auto_awesome" size="2em" color="primary" class="icon" />
           <div class="text">
-            <h3 class="title">Create new wallet</h3>
-            <p class="subtitle">Generate a new seed and add mints.</p>
+            <h3 class="title">
+              {{ $t("WelcomeSlideChoice.options.new.title") }}
+            </h3>
+            <p class="subtitle">
+              {{ $t("WelcomeSlideChoice.options.new.subtitle") }}
+            </p>
           </div>
         </div>
 
@@ -32,9 +36,11 @@
         <div class="option" @click="choose('recover')">
           <q-icon name="history" size="2em" color="primary" class="icon" />
           <div class="text">
-            <h3 class="title">Recover wallet</h3>
+            <h3 class="title">
+              {{ $t("WelcomeSlideChoice.options.recover.title") }}
+            </h3>
             <p class="subtitle">
-              Enter your seed phrase, restore mints and ecash.
+              {{ $t("WelcomeSlideChoice.options.recover.subtitle") }}
             </p>
           </div>
         </div>

@@ -10,19 +10,18 @@
       </div>
 
       <!-- Title -->
-      <h1 class="title">Add mints</h1>
+      <h1 class="title">{{ $t("WelcomeMintSetup.title") }}</h1>
 
       <!-- Description -->
       <p class="description">
-        Mints are servers that help you send and receive ecash. Choose a
-        discovered mint or add one manually. Skip to add mints later.
+        {{ $t("WelcomeMintSetup.text") }}
       </p>
 
       <!-- Your added mints -->
       <div class="mints-section">
         <div class="mints-section-header">
           <h3 v-if="mints.mints.length > 0" class="section-title">
-            Your mints
+            {{ $t("WelcomeMintSetup.sections.your_mints") }}
           </h3>
           <!-- Restoring indicator during recover + Nostr search -->
           <div
@@ -30,7 +29,9 @@
             class="row items-center q-mb-md q-px-lg"
           >
             <q-spinner-dots size="24px" color="grey-5" class="q-mr-sm" />
-            <div class="text-grey-6">Restoring mints…</div>
+            <div class="text-grey-6">
+              {{ $t("WelcomeMintSetup.restoring") }}
+            </div>
           </div>
         </div>
         <div v-for="mint in mints.mints" :key="mint.url" class="mint-item">
@@ -60,13 +61,13 @@
 
       <!-- Manual add mint -->
       <div class="add-mint-section">
-        <h3 class="section-title">Add mint</h3>
+        <h3 class="section-title">{{ $t("MintSettings.add.title") }}</h3>
         <div class="add-mint-inputs">
           <q-input
             rounded
             outlined
             v-model="addMintData.url"
-            placeholder="https://"
+            :placeholder="$t('WelcomeMintSetup.placeholder.mint_url')"
             @keydown.enter.prevent="sanitizeMintUrlAndShowAddDialog"
             ref="mintInput"
             class="q-mb-md mint-input url-input"
@@ -85,7 +86,7 @@
             class="add-mint-btn"
           >
             <q-icon name="add" size="18px" class="q-mr-sm" />
-            <span>Add mint</span>
+            <span>{{ $t("MintSettings.add.actions.add_mint.label") }}</span>
           </q-btn>
         </div>
       </div>

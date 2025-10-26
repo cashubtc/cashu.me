@@ -585,6 +585,8 @@ export default {
   },
   WelcomeSlide2: {
     title: "Instalar PWA",
+    alt: { pwa_example: "Ejemplo de instalación PWA" },
+    installing: "Instalando…",
     instruction: {
       intro: {
         text: "Para la mejor experiencia, usa esta billetera con el navegador web nativo de tu dispositivo para instalarla como una Aplicación Web Progresiva. Haz esto ahora mismo.",
@@ -621,6 +623,8 @@ export default {
       success: {
         title: "¡Éxito!",
         text: "Estás usando Cashu como una PWA. Cierra cualquier otra ventana del navegador abierta y usa la aplicación desde tu pantalla de inicio.",
+        nextSteps:
+          "Ahora puedes cerrar esta pestaña del navegador y abrir la app desde tu pantalla de inicio.",
       },
     },
   },
@@ -657,6 +661,53 @@ export default {
         label: "He leído y acepto estos términos y condiciones",
       },
     },
+  },
+  WelcomeSlideChoice: {
+    title: "Configura tu billetera",
+    text: "¿Quieres recuperar desde una frase semilla o crear una billetera nueva?",
+    options: {
+      new: { title: "Crear billetera nueva", subtitle: "Genera una semilla nueva y añade mints." },
+      recover: {
+        title: "Recuperar billetera",
+        subtitle: "Ingresa tu frase semilla, restaura mints y ecash.",
+      },
+    },
+  },
+  WelcomeMintSetup: {
+    title: "Añadir mints",
+    text:
+      "Los mints son servidores que te ayudan a enviar y recibir ecash. Elige un mint descubierto o añade uno manualmente. Puedes hacerlo más tarde.",
+    sections: { your_mints: "Tus mints" },
+    restoring: "Restaurando mints…",
+    placeholder: { mint_url: "https://" },
+  },
+  WelcomeRecoverSeed: {
+    title: "Ingresa tu frase semilla",
+    text: "Pega o escribe tu frase semilla de 12 palabras para recuperar.",
+    inputs: { word: "Palabra { index }" },
+    actions: { paste_all: "Pegar todo" },
+    disclaimer:
+      "Tu frase semilla solo se usa localmente para derivar las claves de tu billetera.",
+  },
+  WelcomeRestoreEcash: {
+    title: "Restaura tu ecash",
+    text:
+      "Busca comprobantes no gastados en tus mints configurados y agrégalos a tu billetera.",
+  },
+  MintRatings: {
+    title: "Reseñas del mint",
+    reviews: "reseñas",
+    no_reviews: "No se encontraron reseñas",
+    no_reviews_to_display: "No hay reseñas para mostrar.",
+    no_rating: "Sin calificación",
+    rows: "Filas",
+    actions: { write_review: "Escribir una reseña" },
+  },
+  CreateMintReview: {
+    title: "Reseñar mint",
+    publishing_as: "Publicando como",
+    inputs: { rating: { label: "Calificación" }, review: { label: "Reseña (opcional)" } },
+    actions: { publish: { label: "Publicar", in_progress: "Publicando…" } },
   },
   RestoreView: {
     seed_phrase: {

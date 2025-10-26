@@ -10,12 +10,11 @@
       </div>
 
       <!-- Title -->
-      <h1 class="title">Restore your ecash</h1>
+      <h1 class="title">{{ $t("WelcomeRestoreEcash.title") }}</h1>
 
       <!-- Description -->
       <p class="description">
-        Scan for unspent proofs on your configured mints and add them to your
-        wallet.
+        {{ $t("WelcomeRestoreEcash.text") }}
       </p>
 
       <!-- Restore View Component -->

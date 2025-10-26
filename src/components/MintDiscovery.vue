@@ -22,10 +22,10 @@
           "
         >
           <q-icon name="search" size="20px" class="q-mr-sm" />
-          <span>Start Discovery</span>
+          <span>{{ $t("MintSettings.discover.actions.discover.label") }}</span>
           <template v-slot:loading>
             <q-spinner-hourglass class="on-left" />
-            Searching...
+            {{ $t("MintSettings.discover.actions.discover.in_progress") }}
           </template>
         </q-btn>
       </div>
@@ -98,7 +98,7 @@
                         </span>
                       </div>
                       <div class="text-grey-7 q-mt-xs" v-else>
-                        <span>No reviews found</span>
+                        <span>{{ $t("MintRatings.no_reviews") }}</span>
                       </div>
                     </div>
                   </div>

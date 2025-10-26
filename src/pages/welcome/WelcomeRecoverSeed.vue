@@ -10,11 +10,11 @@
       </div>
 
       <!-- Title -->
-      <h1 class="title">Enter your seed phrase</h1>
+      <h1 class="title">{{ $t("WelcomeRecoverSeed.title") }}</h1>
 
       <!-- Description -->
       <p class="description">
-        Paste or type your 12 word seed phrase to recover.
+        {{ $t("WelcomeRecoverSeed.text") }}
       </p>
 
       <!-- Seed phrase input grid -->
@@ -30,13 +30,18 @@
               @paste="handlePaste($event, index - 1)"
               @input="handleInput(index - 1)"
               class="word-input"
-              :placeholder="`Word ${index}`"
+              :placeholder="$t('WelcomeRecoverSeed.inputs.word', { index })"
             />
           </div>
         </div>
 
         <!-- Paste button below inputs -->
-        <q-btn flat label="Paste all" @click="paste" class="paste-btn" />
+        <q-btn
+          flat
+          :label="$t('WelcomeRecoverSeed.actions.paste_all')"
+          @click="paste"
+          class="paste-btn"
+        />
 
         <!-- Error message -->
         <p v-if="errorMsg" class="error-msg">{{ errorMsg }}</p>
@@ -44,7 +49,7 @@
 
       <!-- Disclaimer -->
       <p class="disclaimer">
-        Your seed phrase is only used locally to derive your wallet keys.
+        {{ $t("WelcomeRecoverSeed.disclaimer") }}
       </p>
     </div>
   </div>

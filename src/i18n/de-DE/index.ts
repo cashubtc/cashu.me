@@ -573,6 +573,8 @@ export default {
   },
   WelcomeSlide2: {
     title: "PWA installieren",
+    alt: { pwa_example: "PWA Installationsbeispiel" },
+    installing: "Installiere…",
     instruction: {
       intro: {
         text: "Für die beste Erfahrung verwenden Sie diese Wallet mit dem nativen Webbrowser Ihres Geräts, um sie als Progressive Web App zu installieren. Machen Sie dies jetzt.",
@@ -609,6 +611,8 @@ export default {
       success: {
         title: "Erfolg!",
         text: "Sie verwenden Cashu als PWA. Schließen Sie alle anderen geöffneten Browserfenster und verwenden Sie die App von Ihrem Startbildschirm aus.",
+        nextSteps:
+          "Sie können nun diesen Tab schließen und die App vom Startbildschirm öffnen.",
       },
     },
   },
@@ -645,6 +649,53 @@ export default {
         label: "Ich habe diese Bedingungen gelesen und akzeptiere sie",
       },
     },
+  },
+  WelcomeSlideChoice: {
+    title: "Richten Sie Ihre Wallet ein",
+    text: "Möchten Sie aus einer Seed-Phrase wiederherstellen oder eine neue Wallet erstellen?",
+    options: {
+      new: { title: "Neue Wallet erstellen", subtitle: "Neue Seed erzeugen und Mints hinzufügen." },
+      recover: {
+        title: "Wallet wiederherstellen",
+        subtitle: "Seed-Phrase eingeben, Mints und Ecash wiederherstellen.",
+      },
+    },
+  },
+  WelcomeMintSetup: {
+    title: "Mints hinzufügen",
+    text:
+      "Mints sind Server, die beim Senden und Empfangen von Ecash helfen. Wählen Sie eine gefundene Mint oder fügen Sie manuell eine hinzu. Sie können dies auch später tun.",
+    sections: { your_mints: "Ihre Mints" },
+    restoring: "Mints werden wiederhergestellt…",
+    placeholder: { mint_url: "https://" },
+  },
+  WelcomeRecoverSeed: {
+    title: "Seed-Phrase eingeben",
+    text: "Fügen Sie Ihre 12 Wörter ein oder tippen Sie sie ein, um wiederherzustellen.",
+    inputs: { word: "Wort { index }" },
+    actions: { paste_all: "Alle einfügen" },
+    disclaimer:
+      "Ihre Seed-Phrase wird nur lokal verwendet, um Ihre Wallet-Schlüssel abzuleiten.",
+  },
+  WelcomeRestoreEcash: {
+    title: "Ihr Ecash wiederherstellen",
+    text:
+      "Scannen Sie nach nicht ausgegebenen Nachweisen auf Ihren konfigurierten Mints und fügen Sie sie Ihrer Wallet hinzu.",
+  },
+  MintRatings: {
+    title: "Mint-Bewertungen",
+    reviews: "Bewertungen",
+    no_reviews: "Keine Bewertungen gefunden",
+    no_reviews_to_display: "Keine Bewertungen anzuzeigen.",
+    no_rating: "Keine Bewertung",
+    rows: "Zeilen",
+    actions: { write_review: "Bewertung schreiben" },
+  },
+  CreateMintReview: {
+    title: "Mint bewerten",
+    publishing_as: "Veröffentlichen als",
+    inputs: { rating: { label: "Bewertung" }, review: { label: "Rezension (optional)" } },
+    actions: { publish: { label: "Veröffentlichen", in_progress: "Veröffentlichen…" } },
   },
   RestoreView: {
     seed_phrase: {

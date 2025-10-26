@@ -18,18 +18,20 @@
         <div v-else class="pwa-image-wrapper">
           <img
             src="/pwa-example.jpg"
-            alt="PWA Installation Example"
+            :alt="$t('WelcomeSlide2.alt.pwa_example')"
             class="pwa-image"
           />
           <div v-if="isInstalling" class="installing-overlay">
             <q-spinner color="primary" size="48px" />
-            <div class="installing-text">Installing…</div>
+            <div class="installing-text">
+              {{ $t("WelcomeSlide2.installing") }}
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Title -->
-      <h1 class="title">Install PWA</h1>
+      <h1 class="title">{{ $t("WelcomeSlide2.title") }}</h1>
 
       <!-- Content based on PWA status -->
       <div
@@ -41,7 +43,7 @@
           <q-btn
             color="primary"
             icon="add_box"
-            label="Install"
+            :label="$t('WalletPage.install.text')"
             rounded
             @click="promptInstall"
           />
@@ -114,8 +116,7 @@
           {{ $t("WelcomeSlide2.pwa.success.text") }}
         </p>
         <p v-else class="success-text">
-          You can now close this browser tab and open the app from your home
-          screen.
+          {{ $t("WelcomeSlide2.pwa.success.nextSteps") }}
         </p>
       </div>
     </div>

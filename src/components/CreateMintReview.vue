@@ -2,7 +2,7 @@
   <q-card style="min-width: 360px; max-width: 640px; width: 100%">
     <q-card-section class="row items-center justify-between">
       <div class="row items-center">
-        <div class="text-h6">Review Mint</div>
+        <div class="text-h6">{{ $t("CreateMintReview.title") }}</div>
       </div>
       <q-btn flat round dense icon="close" @click="$emit('close')" />
     </q-card-section>
@@ -26,7 +26,7 @@
           />
         </q-avatar>
         <div class="row items-center">
-          <span>Publishing as:</span>
+          <span>{{ $t("CreateMintReview.publishing_as") }}:</span>
           <span v-if="publisherName" class="text-white q-ml-xs">{{
             publisherName
           }}</span>
@@ -42,7 +42,9 @@
       </div>
 
       <div class="q-mt-sm">
-        <div class="text-subtitle2 q-mb-xs">Rating</div>
+        <div class="text-subtitle2 q-mb-xs">
+          {{ $t("CreateMintReview.inputs.rating.label") }}
+        </div>
         <q-rating
           v-model="rating"
           max="5"
@@ -56,7 +58,9 @@
       </div>
 
       <div class="q-mt-md">
-        <div class="text-subtitle2 q-mb-xs">Review (optional)</div>
+        <div class="text-subtitle2 q-mb-xs">
+          {{ $t("CreateMintReview.inputs.review.label") }}
+        </div>
         <q-input
           v-model="review"
           type="textarea"
@@ -75,7 +79,7 @@
         flat
         rounded
         class="q-px-md"
-        label="Cancel"
+        :label="$t('global.actions.cancel.label')"
         @click="$emit('close')"
       />
       <q-btn
@@ -87,10 +91,14 @@
         class="q-px-md publish-btn"
         style="min-width: 140px"
       >
-        <span class="nowrap">Publish</span>
+        <span class="nowrap">{{
+          $t("CreateMintReview.actions.publish.label")
+        }}</span>
         <template v-slot:loading>
           <q-spinner-hourglass class="on-left" />
-          <span class="nowrap">Publishing…</span>
+          <span class="nowrap">{{
+            $t("CreateMintReview.actions.publish.in_progress")
+          }}</span>
         </template>
       </q-btn>
     </q-card-actions>

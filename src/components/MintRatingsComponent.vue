@@ -2,7 +2,7 @@
   <q-card style="min-width: 360px; max-width: 820px; width: 100%">
     <q-card-section class="row items-center justify-between">
       <div class="row items-center">
-        <div class="text-h6">Mint Reviews</div>
+        <div class="text-h6">{{ $t("MintRatings.title") }}</div>
       </div>
       <q-btn flat round dense icon="close" @click="$emit('close')" />
     </q-card-section>
@@ -27,9 +27,12 @@
             style="min-width: 200px; flex-shrink: 0"
           >
             <span v-if="hasAnyReviews">
-              ⭐ {{ averageDisplay }} · {{ totalReviews }} reviews
+              ⭐ {{ averageDisplay }} · {{ totalReviews }}
+              {{ $t("MintRatings.reviews") }}
             </span>
-            <span v-else class="text-grey-6">No reviews yet</span>
+            <span v-else class="text-grey-6">{{
+              $t("MintRatings.no_reviews")
+            }}</span>
           </div>
         </div>
 
@@ -43,7 +46,7 @@
             class="q-px-md"
             @click="showCreateReviewDialog = true"
           >
-            Write a review
+            {{ $t("MintRatings.actions.write_review") }}
           </q-btn>
           <q-space />
           <div class="row items-center" style="margin-left: auto">
@@ -68,14 +71,14 @@
     <q-card-section style="max-height: 60vh; overflow-y: auto">
       <div v-if="!hasAnyReviews" class="text-grey-6">
         <div class="row items-center justify-between">
-          <div>No reviews to display.</div>
+          <div>{{ $t("MintRatings.no_reviews_to_display") }}</div>
           <q-btn
             v-if="allowCreateReview"
             color="primary"
             rounded
             class="q-ml-sm"
             @click="showCreateReviewDialog = true"
-            >Write a review</q-btn
+            >{{ $t("MintRatings.actions.write_review") }}</q-btn
           >
         </div>
       </div>
@@ -138,7 +141,9 @@
           </div>
           <div class="q-mt-sm">
             <span v-if="r.rating !== null">⭐ {{ r.rating }}/5</span>
-            <span v-else class="text-grey-6">No rating</span>
+            <span v-else class="text-grey-6">{{
+              $t("MintRatings.no_rating")
+            }}</span>
           </div>
           <div
             v-if="r.comment"
@@ -158,7 +163,7 @@
             :options="rowsPerPageOptions"
             emit-value
             map-options
-            label="Rows"
+            :label="$t('MintRatings.rows')"
             style="width: 100px"
           />
           <q-pagination

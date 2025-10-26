@@ -585,6 +585,10 @@ export default {
   },
   WelcomeSlide2: {
     title: "Install PWA",
+    alt: {
+      pwa_example: "PWA Installation Example",
+    },
+    installing: "Installing…",
     instruction: {
       intro: {
         text: "For the best experience, use this wallet with your device's native web browser to install it as a Progressive Web App.",
@@ -621,6 +625,8 @@ export default {
       success: {
         title: "Success!",
         text: "You are using Cashu as a PWA. Close any other open browser windows and use the app from your home screen.",
+        nextSteps:
+          "You can now close this browser tab and open the app from your home screen.",
       },
     },
   },
@@ -656,6 +662,71 @@ export default {
       checkbox: {
         label: "I've read and accept these terms and conditions",
       },
+    },
+  },
+  WelcomeSlideChoice: {
+    title: "Set up your wallet",
+    text: "Do you want to recover from a seed phrase or create a new wallet?",
+    options: {
+      new: {
+        title: "Create new wallet",
+        subtitle: "Generate a new seed and add mints.",
+      },
+      recover: {
+        title: "Recover wallet",
+        subtitle: "Enter your seed phrase, restore mints and ecash.",
+      },
+    },
+  },
+  WelcomeMintSetup: {
+    title: "Add mints",
+    text:
+      "Mints are servers that help you send and receive ecash. Choose a discovered mint or add one manually. Skip to add mints later.",
+    sections: {
+      your_mints: "Your mints",
+    },
+    restoring: "Restoring mints…",
+    placeholder: {
+      mint_url: "https://",
+    },
+  },
+  WelcomeRecoverSeed: {
+    title: "Enter your seed phrase",
+    text: "Paste or type your 12 word seed phrase to recover.",
+    inputs: {
+      word: "Word { index }",
+    },
+    actions: {
+      paste_all: "Paste all",
+    },
+    disclaimer:
+      "Your seed phrase is only used locally to derive your wallet keys.",
+  },
+  WelcomeRestoreEcash: {
+    title: "Restore your ecash",
+    text:
+      "Scan for unspent proofs on your configured mints and add them to your wallet.",
+  },
+  MintRatings: {
+    title: "Mint Reviews",
+    reviews: "reviews",
+    no_reviews: "No reviews found",
+    no_reviews_to_display: "No reviews to display.",
+    no_rating: "No rating",
+    rows: "Rows",
+    actions: {
+      write_review: "Write a review",
+    },
+  },
+  CreateMintReview: {
+    title: "Review Mint",
+    publishing_as: "Publishing as",
+    inputs: {
+      rating: { label: "Rating" },
+      review: { label: "Review (optional)" },
+    },
+    actions: {
+      publish: { label: "Publish", in_progress: "Publishing…" },
     },
   },
   RestoreView: {
