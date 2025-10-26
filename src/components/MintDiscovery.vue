@@ -198,6 +198,8 @@ export default defineComponent({
     const discover = async () => {
       discovering.value = true;
       try {
+        // ensure cached reviews from IndexedDB are visible immediately
+        await (recsStore as any).hydrateFromDb?.();
         recsStore.clearDiscoveryCaches();
         // recsStore.clearRecommendations();
         // Start live updates immediately

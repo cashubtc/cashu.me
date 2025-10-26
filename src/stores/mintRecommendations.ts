@@ -54,6 +54,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
     connected: false,
     // Dexie DB handle
     dbInitialized: false,
+    dbHydrated: false,
     db: null as MintReviewsDB | null,
     // Maps
     mintsByIdentifier: new Map() as Map<MintIdentifier, MintInfo>,
@@ -147,9 +148,55 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       // kick off DB and migration in background
       this.ensureDbInitialized();
       this.migrateFromLocalStorage();
+      // hydrate recommendations/averages from IndexedDB so UI shows cached data immediately
+      this.hydrateFromDb();
+    },
+    // Load all reviews from IndexedDB into in-memory caches and rebuild aggregates
+    hydrateFromDb: async function () {
+      try {
+        if (this.dbHydrated) return;
+        await this.ensureDbInitialized();
+        if (!this.db) return;
+        const rows = await (this.db as MintReviewsDB).reviews.toArray();
+        if (!rows || rows.length === 0) {
+          this.dbHydrated = true;
+          return;
+        }
+        const map = new Map<string, MintReview[]>();
+        for (const r of rows) {
+          if (!r || !r.url || !r.eventId) continue;
+          const list = map.get(r.url) || [];
+          list.push({
+            eventId: r.eventId,
+            pubkey: r.pubkey,
+            created_at: r.created_at,
+            rating: r.rating,
+            comment: r.comment,
+            raw: r.raw,
+          });
+          map.set(r.url, list);
+        }
+        // sort and commit to caches
+        for (const [url, list] of map.entries()) {
+          list.sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
+          this.urlReviews.set(url, list);
+          const ratings = list
+            .map((r) => r.rating)
+            .filter((n): n is number => typeof n === "number");
+          const avg = ratings.length
+            ? ratings.reduce((a, b) => a + b, 0) / ratings.length
+            : null;
+          this.avgByUrl.set(url, { avg, count: list.length });
+        }
+        this.dbHydrated = true;
+        this.rebuildAggregates();
+      } catch {
+        // ignore hydration failures
+      }
     },
     fetchMintInfos: async function () {
       this.init();
+      await this.hydrateFromDb();
       const filter: NDKFilter = { kinds: [38172 as NDKKind], limit: 5000 };
       const events = await this.ndk.fetchEvents(filter);
       console.log(`[mintRecs] fetched ${events.size} cashu info events (38172)`);
@@ -158,6 +205,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
     },
     fetchReviews: async function () {
       this.init();
+      await this.hydrateFromDb();
       const filter: NDKFilter = { kinds: [38000 as NDKKind], limit: 5000 };
       const events = await this.ndk.fetchEvents(filter);
       console.log(`[mintRecs] fetched ${events.size} review events (38000)`);
@@ -241,6 +289,8 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
     startSubscriptions: function () {
       if (this.subsActive) return;
       this.init();
+      // ensure cached DB data is reflected before live updates
+      this.hydrateFromDb();
       // Mint infos (38172)
       const subInfos = this.ndk.subscribe(
         { kinds: [38172 as NDKKind] } as NDKFilter,
@@ -549,6 +599,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       // reset in-memory caches
       this.urlReviews.clear();
       this.avgByUrl.clear();
+      this.dbHydrated = false;
       // keep recommendations (mints) but zero out counts/averages quickly
       this.rebuildAggregates();
     },
