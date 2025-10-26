@@ -26,6 +26,8 @@ export const useNostrUserStore = defineStore("nostrUser", {
     wotMaxHops: 2,
     profileRefreshIntervalSeconds: 60, // 1 minute
     dbInitialized: false,
+    crawlProcessed: 0,
+    crawlTotal: 0,
   }),
   getters: {
     displayName(state): string {
@@ -183,6 +185,8 @@ export const useNostrUserStore = defineStore("nostrUser", {
         const wot: Record<string, number> = {};
         // 1 hop: our follows
         const hop1 = Array.from(new Set(baseFollows));
+        this.crawlProcessed = 0;
+        this.crawlTotal = hop1.length;
         for (const pk of hop1) {
           if (pk && pk !== source) wot[pk] = 1;
         }
@@ -197,15 +201,14 @@ export const useNostrUserStore = defineStore("nostrUser", {
         if (maxHops >= 2 && hop1.length) {
           // Sequentially fetch to avoid blocking the UI; short delay between requests
           const stepDelayMs = 20; // ~1 frame
-          let processed = 0;
           for (const pk1 of hop1) {
             const followsOfFollow = await this.fetchFollowsOf(pk1);
             for (const pk2 of followsOfFollow) {
               if (!pk2 || pk2 === source) continue;
               if (!(pk2 in wot)) wot[pk2] = 2;
             }
-            processed++;
-            if (processed % 3 === 0) {
+            this.crawlProcessed++;
+            if (this.crawlProcessed % 3 === 0) {
               // Periodically update state so UI reflects progress
               const merged: Record<string, number> = { ...this.wotHopsByPubkey };
               for (const [k, v] of Object.entries(wot)) {
@@ -233,6 +236,9 @@ export const useNostrUserStore = defineStore("nostrUser", {
         console.log(`[nostrUser] Crawl complete. Known pubkeys: ${Object.keys(this.wotHopsByPubkey).length}`);
       } finally {
         this.wotLoading = false;
+        // Reset progress counters when done
+        this.crawlTotal = 0;
+        this.crawlProcessed = 0;
       }
     },
   },

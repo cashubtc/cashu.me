@@ -435,6 +435,19 @@
           >
         </q-item-section>
       </q-item>
+      <q-item v-if="wotLoading || crawlTotal > 0">
+        <q-item-section>
+          <q-linear-progress
+            rounded
+            size="10px"
+            color="primary"
+            :value="crawlTotal > 0 ? crawlProcessed / crawlTotal : 0"
+          />
+          <div class="text-caption q-mt-xs">
+            {{ crawlProcessed }} / {{ crawlTotal }}
+          </div>
+        </q-item-section>
+      </q-item>
     </div>
 
     <!-- PAYMENT REQUESTS SECTION -->
@@ -1887,7 +1900,12 @@ export default defineComponent({
       "signerType",
       "seedSignerPrivateKeyNsec",
     ]),
-    ...mapState(useNostrUserStore, ["wotCount", "wotLoading"]),
+    ...mapState(useNostrUserStore, [
+      "wotCount",
+      "wotLoading",
+      "crawlProcessed",
+      "crawlTotal",
+    ]),
     ...mapState(useWalletStore, ["mnemonic"]),
     ...mapState(useUiStore, ["ndefSupported"]),
     ...mapWritableState(useNPCV2Store, [
