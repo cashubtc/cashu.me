@@ -422,6 +422,19 @@
           </q-item-section>
         </q-item>
       </q-expansion-item>
+      <!-- Web of trust actions -->
+      <q-item>
+        <q-item-section>
+          <q-item-label caption>
+            Known pubkeys: {{ wotLoading ? "…" : wotCount }}
+          </q-item-label>
+        </q-item-section>
+        <q-item-section side>
+          <q-btn flat dense :loading="wotLoading" @click="crawlWebOfTrust(2)"
+            >Crawl web of trust</q-btn
+          >
+        </q-item-section>
+      </q-item>
     </div>
 
     <!-- PAYMENT REQUESTS SECTION -->
@@ -1757,6 +1770,7 @@ import { useNPCV2Store } from "src/stores/npcv2";
 import { useNostrMintBackupStore } from "src/stores/nostrMintBackup";
 import { usePriceStore } from "src/stores/price";
 import { useI18n } from "vue-i18n";
+import { useNostrUserStore } from "src/stores/nostrUser";
 
 export default defineComponent({
   name: "SettingsView",
@@ -1873,6 +1887,7 @@ export default defineComponent({
       "signerType",
       "seedSignerPrivateKeyNsec",
     ]),
+    ...mapState(useNostrUserStore, ["wotCount", "wotLoading"]),
     ...mapState(useWalletStore, ["mnemonic"]),
     ...mapState(useUiStore, ["ndefSupported"]),
     ...mapWritableState(useNPCV2Store, [
@@ -1930,6 +1945,16 @@ export default defineComponent({
     },
   },
   watch: {
+    pubkey: {
+      immediate: true,
+      handler(newPk) {
+        const nostrUser = useNostrUserStore();
+        if (newPk) {
+          nostrUser.setPubkey(newPk);
+          nostrUser.updateUserProfile(true);
+        }
+      },
+    },
     enableNwc: function () {
       if (this.enableNwc) {
         this.listenToNWCCommands();
@@ -2004,6 +2029,11 @@ export default defineComponent({
       "fetchBitcoinPrice",
       "updateBitcoinPriceForCurrentCurrency",
     ]),
+    ...mapActions(useNostrUserStore, [
+      "setPubkey",
+      "updateUserProfile",
+      "crawlWebOfTrust",
+    ]),
     generateNewMnemonic: async function () {
       this.newMnemonic();
       await this.initSigner();
@@ -2068,21 +2098,37 @@ export default defineComponent({
       await this.initWalletSeedPrivateKeySigner();
       await this.generateNPCConnection();
       await this.generateNPCV2Connection();
+      const nostr = useNostrStore();
+      const nostrUser = useNostrUserStore();
+      nostrUser.setPubkey(nostr.pubkey);
+      await nostrUser.updateUserProfile(true);
     },
     handleExtensionClick: async function () {
       await this.initNip07Signer();
       await this.generateNPCConnection();
       await this.generateNPCV2Connection();
+      const nostr = useNostrStore();
+      const nostrUser = useNostrUserStore();
+      nostrUser.setPubkey(nostr.pubkey);
+      await nostrUser.updateUserProfile(true);
     },
     handleBunkerClick: async function () {
       await this.initNip46Signer();
       await this.generateNPCConnection();
       await this.generateNPCV2Connection();
+      const nostr = useNostrStore();
+      const nostrUser = useNostrUserStore();
+      nostrUser.setPubkey(nostr.pubkey);
+      await nostrUser.updateUserProfile(true);
     },
     handleNsecClick: async function () {
       await this.initPrivateKeySigner();
       await this.generateNPCConnection();
       await this.generateNPCV2Connection();
+      const nostr = useNostrStore();
+      const nostrUser = useNostrUserStore();
+      nostrUser.setPubkey(nostr.pubkey);
+      await nostrUser.updateUserProfile(true);
     },
     handleResetPrivateKeySigner: async function () {
       await this.resetPrivateKeySigner();

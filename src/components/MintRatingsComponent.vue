@@ -40,24 +40,26 @@
             Write a review
           </q-btn>
           <q-space />
-          <q-toggle
-            v-model="onlyWithComment"
-            color="primary"
-            dense
-            label="Comments only"
-            class="q-mr-md"
-          />
-          <q-select
-            dense
-            outlined
-            color="primary"
-            v-model="sortMode"
-            :options="sortOptions"
-            emit-value
-            map-options
-            rounded
-            style="width: 160px"
-          />
+          <div class="row items-center" style="margin-left: auto">
+            <q-toggle
+              v-model="onlyWithComment"
+              color="primary"
+              dense
+              label="Comments only"
+              class="q-mx-md"
+            />
+            <q-select
+              dense
+              outlined
+              color="primary"
+              v-model="sortMode"
+              :options="sortOptions"
+              emit-value
+              map-options
+              rounded
+              style="width: 160px"
+            />
+          </div>
         </div>
       </div>
     </q-card-section>
@@ -117,6 +119,18 @@
                   class="q-ml-xs cursor-pointer text-grey-7"
                   @click="copyNpub(r.pubkey)"
                 />
+                <q-icon
+                  v-if="wotHop(r.pubkey)"
+                  name="verified"
+                  size="14px"
+                  :color="wotColor(wotHop(r.pubkey))"
+                  class="q-ml-xs"
+                >
+                  <q-tooltip
+                    >In your web of trust (hop
+                    {{ wotHop(r.pubkey) }})</q-tooltip
+                  >
+                </q-icon>
               </div>
             </div>
             <div class="text-caption text-grey-6">
@@ -179,6 +193,7 @@ import { nip19 } from "nostr-tools";
 import CreateMintReview from "./CreateMintReview.vue";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
 import MintInfoContainer from "./MintInfoContainer.vue";
+import { useNostrUserStore } from "src/stores/nostrUser";
 
 export default defineComponent({
   name: "MintRatingsComponent",
@@ -235,6 +250,20 @@ export default defineComponent({
     hasProfileName(pk: string) {
       const p = (this as any).profiles[pk];
       return !!(p && p.name && String(p.name).trim().length > 0);
+    },
+    wotHop(pk: string): number | null {
+      try {
+        const store = useNostrUserStore();
+        return store.getHop(pk);
+      } catch {
+        return null;
+      }
+    },
+    wotColor(hop: number | null): string {
+      if (!hop) return "";
+      if (hop === 1) return "light-green-5";
+      if (hop === 2) return "amber-5";
+      return "";
     },
     async ensureNdk() {
       const nostr = useNostrStore();
@@ -334,19 +363,23 @@ export default defineComponent({
     },
     sorted(): any[] {
       const list = [...this.filtered];
-      switch (this.sortMode) {
-        case "oldest":
-          list.sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
-          break;
-        case "best":
-          list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-          break;
-        case "worst":
-          list.sort((a, b) => (a.rating || 0) - (b.rating || 0));
-          break;
-        default:
-          list.sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
-      }
+      // Sort: in-web-of-trust first, then by selected mode
+      const getHopScore = (pk: string) => (this.wotHop(pk) ? 1 : 0);
+      list.sort((a, b) => {
+        const aw = getHopScore(a.pubkey);
+        const bw = getHopScore(b.pubkey);
+        if (aw !== bw) return bw - aw; // WOT first
+        switch (this.sortMode) {
+          case "oldest":
+            return (a.created_at || 0) - (b.created_at || 0);
+          case "best":
+            return (b.rating || 0) - (a.rating || 0);
+          case "worst":
+            return (a.rating || 0) - (b.rating || 0);
+          default:
+            return (b.created_at || 0) - (a.created_at || 0);
+        }
+      });
       // Pin our own review to the top if present in the filtered list
       if (this.myPubkey) {
         const idx = list.findIndex((r) => r.pubkey === this.myPubkey);
