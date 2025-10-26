@@ -19,6 +19,15 @@
 
       <!-- Options -->
       <div class="options">
+        <!-- Create New Option -->
+        <div class="option" @click="choose('new')">
+          <q-icon name="auto_awesome" size="2em" color="primary" class="icon" />
+          <div class="text">
+            <h3 class="title">Create new wallet</h3>
+            <p class="subtitle">Generate a new seed and add mints.</p>
+          </div>
+        </div>
+
         <!-- Recover Option -->
         <div class="option" @click="choose('recover')">
           <q-icon name="history" size="2em" color="primary" class="icon" />
@@ -27,15 +36,6 @@
             <p class="subtitle">
               Enter your seed phrase, restore mints and ecash.
             </p>
-          </div>
-        </div>
-
-        <!-- Create New Option -->
-        <div class="option" @click="choose('new')">
-          <q-icon name="auto_awesome" size="2em" color="primary" class="icon" />
-          <div class="text">
-            <h3 class="title">Create new wallet</h3>
-            <p class="subtitle">Generate a new seed and add mints.</p>
           </div>
         </div>
       </div>
@@ -125,6 +125,7 @@ export default {
   gap: 32px;
   width: 100%;
   max-width: 500px;
+  padding: 16px 0px;
 }
 
 .option {

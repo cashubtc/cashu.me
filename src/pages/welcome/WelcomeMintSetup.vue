@@ -10,29 +10,28 @@
       </div>
 
       <!-- Title -->
-      <h1 class="title">Add your mints</h1>
+      <h1 class="title">Add mints</h1>
 
       <!-- Description -->
       <p class="description">
-        Discover mints on Nostr or add manually. You need at least one mint.
+        Mints are servers that help you send and receive ecash. Choose a
+        discovered mint or add one manually. Skip to add mints later.
       </p>
 
       <!-- Your added mints -->
       <div class="mints-section">
-        <h3 class="section-title">Your mints</h3>
-        <!-- Restoring indicator during recover + Nostr search -->
-        <div
-          v-if="welcome.onboardingPath === 'recover' && restoringMints"
-          class="row items-center q-mb-md q-px-lg"
-        >
-          <q-spinner-dots size="24px" color="grey-5" class="q-mr-sm" />
-          <div class="text-grey-6">Restoring mints…</div>
-        </div>
-        <div
-          v-if="mints.mints.length === 0"
-          class="text-left q-mb-sm text-grey-6"
-        >
-          No mints added yet.
+        <div class="mints-section-header">
+          <h3 v-if="mints.mints.length > 0" class="section-title">
+            Your mints
+          </h3>
+          <!-- Restoring indicator during recover + Nostr search -->
+          <div
+            v-if="welcome.onboardingPath === 'recover' && restoringMints"
+            class="row items-center q-mb-md q-px-lg"
+          >
+            <q-spinner-dots size="24px" color="grey-5" class="q-mr-sm" />
+            <div class="text-grey-6">Restoring mints…</div>
+          </div>
         </div>
         <div v-for="mint in mints.mints" :key="mint.url" class="mint-item">
           <div class="mint-content">

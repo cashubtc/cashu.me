@@ -1,11 +1,11 @@
 <template>
   <div class="discover-section">
     <div class="discover-card">
-      <div class="discover-header">
+      <!-- <div class="discover-header">
         <p class="discover-subtitle">
           {{ $t("MintSettings.discover.caption") }}
         </p>
-      </div>
+      </div> -->
       <div class="discover-button">
         <q-btn
           color="primary"
