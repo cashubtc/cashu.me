@@ -2200,6 +2200,8 @@ export default defineComponent({
       await this.exportWalletState();
       // clear dexie tables
       this.deleteAllTables();
+      // clear nostr user databases
+      useNostrUserStore().clearAllDatabases();
       localStorage.clear();
       window.location.href = "/";
     },
