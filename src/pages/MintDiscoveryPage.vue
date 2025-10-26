@@ -6,7 +6,11 @@
         <div class="divider-text">{{ $t("MintSettings.discover.title") }}</div>
         <div class="divider-line"></div>
       </div>
-      <MintDiscovery class="q-px-md" :autoDiscover="true" />
+      <MintDiscovery
+        class="q-px-md"
+        :autoDiscover="true"
+        :allowCreateReview="false"
+      />
     </div>
   </div>
 </template>
