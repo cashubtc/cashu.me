@@ -4,6 +4,7 @@ import { useMintsStore } from "./mints";
 import { notifySuccess } from "../js/notify";
 import { useUiStore } from "./ui";
 import { useSettingsStore } from "./settings";
+import { useNostrMintBackupStore } from "./nostrMintBackup";
 
 // Define the migration version type
 export type Migration = {
@@ -119,6 +120,8 @@ export const useMigrationsStore = defineStore("migrations", {
         if (!settings.nostrMintBackupEnabled) {
           settings.nostrMintBackupEnabled = true;
           console.log("Enabled nostrMintBackupEnabled setting");
+          // kick off a backup
+          useNostrMintBackupStore().forceBackup();
         } else {
           console.log("nostrMintBackupEnabled already true");
         }
