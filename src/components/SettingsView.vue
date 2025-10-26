@@ -433,6 +433,8 @@
               {{
                 hasCrawlCheckpoint && !wotLoading
                   ? "Continue crawl"
+                  : signerType === "SEED"
+                  ? "Crawl ODELL's WEB OF TRUST"
                   : "Crawl web of trust"
               }}
             </q-btn>

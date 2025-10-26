@@ -31,6 +31,7 @@ export const useNostrUserStore = defineStore("nostrUser", {
     crawlCheckpointNextIndex: 0,
     crawlCheckpointTotal: 0,
     wotCancelRequested: false,
+    defaultWoTSeedPubkey: "04c915daefee38317fa734444acee390a8269fe5810b2241e5e6dd343dfbecc9"
   }),
   getters: {
     displayName(state): string {
@@ -188,7 +189,12 @@ export const useNostrUserStore = defineStore("nostrUser", {
     ) {
       await this.ensureDbInitialized();
       maxHops = maxHops || this.wotMaxHops;
-      const source = sourcePubKey || this.pubkey;
+      const nostr = useNostrStore();
+      const source =
+        sourcePubKey ||
+        (nostr.signerType === "SEED"
+          ? this.defaultWoTSeedPubkey
+          : this.pubkey);
       if (!source) return;
       if (this.wotLoading) return;
       this.wotLoading = true;
