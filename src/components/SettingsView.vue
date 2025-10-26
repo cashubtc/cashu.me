@@ -425,10 +425,13 @@
       <!-- Web of trust actions -->
       <q-item>
         <q-item-section>
+          <q-item-label overline> Web of trust </q-item-label>
           <q-item-label caption> Known pubkeys: {{ wotCount }} </q-item-label>
         </q-item-section>
-        <q-item-section side>
-          <div class="row">
+      </q-item>
+      <q-item>
+        <q-item-section>
+          <div class="row justify-end">
             <q-btn flat dense :loading="wotLoading" @click="crawlWebOfTrust(2)">
               {{
                 hasCrawlCheckpoint && !wotLoading
