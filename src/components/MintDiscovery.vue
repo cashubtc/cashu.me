@@ -134,7 +134,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, watch } from "vue";
+import { defineComponent, ref, computed, watch, onMounted } from "vue";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import MintRatingsComponent from "../components/MintRatingsComponent.vue";
@@ -146,6 +146,7 @@ export default defineComponent({
   components: { MintRatingsComponent, MintInfoContainer },
   props: {
     infoTimeoutMs: { type: Number, default: 5000 },
+    autoDiscover: { type: Boolean, default: false },
   },
   setup(props) {
     const recsStore = useMintRecommendationsStore();
@@ -208,6 +209,13 @@ export default defineComponent({
         discovering.value = false;
       }
     };
+
+    onMounted(() => {
+      if (props.autoDiscover) {
+        // Start discovery right away when mounted if enabled
+        discover();
+      }
+    });
     const addDiscovered = async (url: string) => {
       await mints.addMint({ url }, true);
     };
