@@ -148,7 +148,22 @@
           </q-item>
         </div>
       </q-list>
+
+      <!-- Mint discovery -->
+      <div class="q-px-md q-mb-md row justify-center">
+        <q-btn
+          color="primary"
+          rounded
+          @click="$router.push('/discoverMints')"
+          style="width: 100%"
+        >
+          <q-icon name="search" size="20px" class="q-mr-sm" />
+          <span>Discover mints</span>
+        </q-btn>
+      </div>
     </div>
+
+    <!-- Add mint section -->
     <div class="q-pt-xs q-px-md" ref="addMintDiv">
       <div class="add-mint-container">
         <div class="section-divider q-mb-md">
@@ -213,16 +228,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Mint discovery -->
-    <div class="section-divider q-mb-md q-px-md">
-      <div class="divider-line"></div>
-      <div class="divider-text">
-        {{ $t("MintSettings.discover.title") }}
-      </div>
-      <div class="divider-line"></div>
-    </div>
-    <MintDiscovery class="q-px-md" />
 
     <!-- Swap section -->
 
@@ -373,7 +378,6 @@ import AddMintDialog from "src/components/AddMintDialog.vue";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
 import MintRatingsComponent from "./MintRatingsComponent.vue";
 import CreateMintReview from "./CreateMintReview.vue";
-import MintDiscovery from "./MintDiscovery.vue";
 import MintInfoContainer from "./MintInfoContainer.vue";
 
 export default defineComponent({
@@ -382,7 +386,6 @@ export default defineComponent({
   components: {
     AddMintDialog,
     MintRatingsComponent,
-    MintDiscovery,
     CreateMintReview,
     MintInfoContainer,
   },
