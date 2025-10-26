@@ -437,6 +437,16 @@
               }}
             </q-btn>
             <q-btn
+              v-if="wotLoading"
+              flat
+              dense
+              class="q-ml-sm"
+              color="negative"
+              @click="cancelCrawl"
+            >
+              Cancel
+            </q-btn>
+            <q-btn
               v-if="!wotLoading"
               flat
               dense
@@ -2066,6 +2076,7 @@ export default defineComponent({
       "setPubkey",
       "updateUserProfile",
       "crawlWebOfTrust",
+      "cancelCrawl",
       "resetWebOfTrust",
     ]),
     generateNewMnemonic: async function () {

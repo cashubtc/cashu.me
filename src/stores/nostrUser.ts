@@ -30,6 +30,7 @@ export const useNostrUserStore = defineStore("nostrUser", {
     crawlTotal: 0,
     crawlCheckpointNextIndex: 0,
     crawlCheckpointTotal: 0,
+    wotCancelRequested: false,
   }),
   getters: {
     displayName(state): string {
@@ -191,6 +192,7 @@ export const useNostrUserStore = defineStore("nostrUser", {
       if (!source) return;
       if (this.wotLoading) return;
       this.wotLoading = true;
+      this.wotCancelRequested = false;
       try {
         console.log(
           `[nostrUser] Crawling web of trust from ${source} up to ${maxHops} hops…`
@@ -235,6 +237,8 @@ export const useNostrUserStore = defineStore("nostrUser", {
         // Update progress counters for UI
         this.crawlTotal = hop1.length;
         this.crawlProcessed = startIndex;
+        this.crawlCheckpointTotal = hop1.length;
+        this.crawlCheckpointNextIndex = startIndex;
         // Commit 1-hop immediately, keeping shortest hop in both state and DB
         const mergedInitial: Record<string, number> = {
           ...this.wotHopsByPubkey,
@@ -256,6 +260,7 @@ export const useNostrUserStore = defineStore("nostrUser", {
           // Sequentially fetch to avoid blocking the UI; short delay between requests
           const stepDelayMs = 20; // ~1 frame
           for (let i = startIndex; i < hop1.length; i++) {
+            if (this.wotCancelRequested) break;
             const pk1 = hop1[i];
             const followsOfFollow = await this.fetchFollowsOf(pk1);
             for (const pk2 of followsOfFollow) {
@@ -265,6 +270,7 @@ export const useNostrUserStore = defineStore("nostrUser", {
             this.crawlProcessed = i + 1;
             // Persist checkpoint so we can resume later
             await db.meta.put({ key: "wot.crawl.nextIndex", value: i + 1 });
+            this.crawlCheckpointNextIndex = i + 1;
             if (this.crawlProcessed % 3 === 0) {
               // Periodically update state so UI reflects progress
               const merged: Record<string, number> = { ...this.wotHopsByPubkey };
@@ -296,18 +302,29 @@ export const useNostrUserStore = defineStore("nostrUser", {
             }))
           );
         }
-        console.log(`[nostrUser] Crawl complete. Known pubkeys: ${Object.keys(this.wotHopsByPubkey).length}`);
-        // Clear checkpoint upon completion
-        await db.meta.delete("wot.crawl.hop1");
-        await db.meta.delete("wot.crawl.nextIndex");
-        this.crawlCheckpointNextIndex = 0;
-        this.crawlCheckpointTotal = 0;
+        if (!this.wotCancelRequested) {
+          console.log(`[nostrUser] Crawl complete. Known pubkeys: ${Object.keys(this.wotHopsByPubkey).length}`);
+          // Clear checkpoint upon completion
+          await db.meta.delete("wot.crawl.hop1");
+          await db.meta.delete("wot.crawl.nextIndex");
+          this.crawlCheckpointNextIndex = 0;
+          this.crawlCheckpointTotal = 0;
+        } else {
+          console.log(`[nostrUser] Crawl cancelled at ${this.crawlProcessed}/${this.crawlTotal}`);
+        }
       } finally {
         this.wotLoading = false;
         // Reset progress counters when done
-        this.crawlTotal = 0;
-        this.crawlProcessed = 0;
+        if (!this.wotCancelRequested) {
+          this.crawlTotal = 0;
+          this.crawlProcessed = 0;
+        }
+        this.wotCancelRequested = false;
       }
+    },
+    cancelCrawl: function () {
+      if (!this.wotLoading) return;
+      this.wotCancelRequested = true;
     },
     resetWebOfTrust: async function () {
       await this.ensureDbInitialized();
