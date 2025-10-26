@@ -251,7 +251,6 @@ export default defineComponent({
 
 .discover-section {
   width: 100%;
-  max-width: 500px;
   margin-bottom: 24px;
 }
 

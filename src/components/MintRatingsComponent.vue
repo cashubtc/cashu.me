@@ -2,7 +2,6 @@
   <q-card style="min-width: 360px; max-width: 820px; width: 100%">
     <q-card-section class="row items-center justify-between">
       <div class="row items-center">
-        <q-icon name="reviews" size="sm" color="primary" class="q-mr-sm" />
         <div class="text-h6">Mint Reviews</div>
       </div>
       <q-btn flat round dense icon="close" @click="$emit('close')" />
@@ -10,31 +9,54 @@
     <q-separator />
 
     <q-card-section>
-      <div class="q-mb-sm text-subtitle2 text-grey-6">{{ url }}</div>
       <div class="row items-center justify-between">
-        <div class="row items-center">
-          <div class="text-body1">
+        <!-- Mint identity and average rating -->
+        <div class="row items-center" style="width: 100%">
+          <div class="row items-center" style="flex: 1; min-width: 0">
+            <q-avatar v-if="mintInfo?.icon_url" size="34px" class="q-mr-sm">
+              <q-img
+                :src="mintInfo.icon_url"
+                spinner-color="white"
+                spinner-size="xs"
+                style="height: 34px; max-width: 34px; font-size: 12px"
+              />
+            </q-avatar>
+            <div class="mint-info-container">
+              <div v-if="mintInfo?.name" class="mint-name">
+                {{ mintInfo.name }}
+              </div>
+              <div class="text-grey-6 mint-url">
+                {{ url }}
+              </div>
+            </div>
+          </div>
+          <div class="text-body1 text-right" style="min-width: 200px">
             <span v-if="hasAnyReviews">
               ⭐ {{ averageDisplay }} · {{ totalReviews }} reviews
             </span>
             <span v-else class="text-grey-6">No reviews yet</span>
           </div>
         </div>
-        <div class="row items-center q-gutter-sm">
+
+        <!-- Write a review button and sort options -->
+        <div class="row items-center q-mt-md" style="width: 100%">
           <q-btn
             v-if="allowCreateReview"
             color="primary"
             rounded
             dense
-            class="q-ml-sm q-px-md"
+            class="q-px-md"
             @click="showCreateReviewDialog = true"
           >
             Write a review
           </q-btn>
+          <q-space />
           <q-toggle
             v-model="onlyWithComment"
             color="primary"
+            dense
             label="Comments only"
+            class="q-mr-md"
           />
           <q-select
             dense
@@ -44,7 +66,8 @@
             :options="sortOptions"
             emit-value
             map-options
-            style="min-width: 160px"
+            rounded
+            style="width: 160px"
           />
         </div>
       </div>
@@ -79,15 +102,15 @@
                 />
                 <q-icon v-else name="account_circle" />
               </q-avatar>
-              <div class="text-caption text-grey-7 row items-center">
-                <span>{{ displayName(r.pubkey) }}</span>
-                <span class="monospace q-ml-xs"
+              <div class="text-caption row items-center">
+                <span class="text-grey-2">{{ displayName(r.pubkey) }}</span>
+                <span class="monospace text-grey-7 q-ml-xs"
                   >({{ shortNpub(r.pubkey) }})</span
                 >
                 <q-icon
                   name="content_copy"
                   size="14px"
-                  class="q-ml-xs cursor-pointer"
+                  class="q-ml-xs cursor-pointer text-grey-7"
                   @click="copyNpub(r.pubkey)"
                 />
               </div>
@@ -96,11 +119,15 @@
               {{ formatDate(r.created_at) }}
             </div>
           </div>
-          <div class="q-mb-xs">
+          <div class="q-mt-sm">
             <span v-if="r.rating !== null">⭐ {{ r.rating }}/5</span>
             <span v-else class="text-grey-6">No rating</span>
           </div>
-          <div class="text-body2" style="white-space: pre-wrap">
+          <div
+            v-if="r.comment"
+            class="text-body2 q-mt-sm"
+            style="white-space: pre-wrap"
+          >
             {{ r.comment || "\u00A0" }}
           </div>
         </div>
@@ -108,7 +135,7 @@
         <div class="row justify-between items-center q-mt-sm">
           <q-select
             dense
-            outlined
+            class="q-ml-sm"
             color="primary"
             v-model="rowsPerPage"
             :options="rowsPerPageOptions"
@@ -123,6 +150,8 @@
             color="primary"
             max-pages="6"
             boundary-numbers
+            direction-links
+            rounded
           />
         </div>
       </div>

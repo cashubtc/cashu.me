@@ -2,7 +2,6 @@
   <q-card style="min-width: 360px; max-width: 640px; width: 100%">
     <q-card-section class="row items-center justify-between">
       <div class="row items-center">
-        <q-icon name="rate_review" size="sm" color="primary" class="q-mr-sm" />
         <div class="text-h6">Review Mint</div>
       </div>
       <q-btn flat round dense icon="close" @click="$emit('close')" />
@@ -10,19 +9,26 @@
     <q-separator />
 
     <q-card-section class="q-pt-sm">
-      <div class="text-subtitle2 text-grey-6 q-mb-xs">{{ mintUrl }}</div>
-      <div class="row items-center q-gutter-sm q-mb-md">
-        <q-avatar v-if="mintInfo?.icon_url" size="28px">
+      <div class="row items-center q-mb-md">
+        <q-avatar v-if="mintInfo?.icon_url" size="34px" class="q-mr-sm">
           <q-img
             :src="mintInfo.icon_url"
             spinner-color="white"
             spinner-size="xs"
+            style="height: 34px; max-width: 34px; font-size: 12px"
           />
         </q-avatar>
-        <div class="text-body1">{{ mintInfo?.name || "Mint" }}</div>
+        <div class="mint-info-container">
+          <div v-if="mintInfo?.name" class="mint-name">
+            {{ mintInfo.name }}
+          </div>
+          <div class="text-grey-6 mint-url">
+            {{ mintUrl }}
+          </div>
+        </div>
       </div>
 
-      <div class="q-mb-sm text-caption text-grey-6 row items-center">
+      <div class="q-my-sm text-caption text-grey-6 row items-center">
         <q-avatar v-if="publisherPicture" size="24px" class="q-mr-xs">
           <q-img
             :src="publisherPicture"
