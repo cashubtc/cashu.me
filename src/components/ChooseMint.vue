@@ -27,26 +27,16 @@
           <template v-slot:option="scope">
             <q-item v-bind="scope.itemProps">
               <q-item-section>
-                <q-item-label
-                  class="text-body1 q-pt-xs"
-                  :style="
-                    activeMintUrl === scope.opt.url ? 'font-weight: bold' : ''
-                  "
-                  >{{ scope.opt.nickname || scope.opt.shorturl }}</q-item-label
-                >
-                <q-item-label
-                  class="text-caption q-pb-xs"
-                  style="font-family: monospace; font-size: 11px"
-                >
-                  {{ scope.opt.url }}</q-item-label
-                >
+                <MintInfoContainer
+                  :iconUrl="scope.opt.iconUrl || undefined"
+                  :name="scope.opt.nickname || scope.opt.shorturl"
+                  :url="scope.opt.url"
+                />
                 <div v-if="showBalances">
                   <q-badge
                     v-for="unit in scope.opt.units"
                     :key="unit"
-                    :color="
-                      scope.opt.url === activeMintUrl ? 'primary' : 'grey'
-                    "
+                    color="primary"
                     :label="formatCurrency(scope.opt.balances[unit], unit)"
                     class="q-mr-xs q-mb-xs"
                   />
@@ -101,10 +91,12 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "stores/mints";
 import { MintClass } from "stores/mints";
 import { i18n } from "../boot/i18n";
+import MintInfoContainer from "./MintInfoContainer.vue";
 
 export default defineComponent({
   name: "ChooseMint",
   mixins: [windowMixin],
+  components: { MintInfoContainer },
   props: {
     rounded: {
       type: Boolean,
@@ -215,6 +207,7 @@ export default defineComponent({
           nickname: mint.mint.nickname || mint.mint.info?.name,
           url: mint.mint.url,
           shorturl: getShortUrl(m.url),
+          iconUrl: mint.mint.info?.icon_url,
           balances: mint.allBalances,
           errored: mint.mint.errored,
           units: units,
