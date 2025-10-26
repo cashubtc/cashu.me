@@ -43,6 +43,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
     db: null as MintReviewsDB | null,
     // Minimal in-memory caches for UI
     urlReviews: new Map() as Map<string, MintReview[]>,
+    httpInfoByUrl: new Map() as Map<string, any>,
     infoTimers: new Map() as Map<string, any>,
     inflightInfo: new Set() as Set<string>,
     infoTimeoutMs: 5000,
@@ -64,48 +65,6 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
     ensureDbInitialized: async function () {
       if (!this.dbInitialized || !this.db) await this.initDb();
     },
-    migrateFromLocalStorage: async function () {
-      try {
-        await this.ensureDbInitialized();
-        const key = "cashu.ndk.mintRecommendations";
-        const raw = localStorage.getItem(key);
-        if (!raw) return;
-        const arr: any[] = JSON.parse(raw || "[]");
-        if (!Array.isArray(arr) || arr.length === 0) return;
-        const rows: { url: string; review: MintReview }[] = [];
-        const pruned: any[] = [];
-        arr.forEach((rec) => {
-          if (rec && typeof rec.url === "string") {
-            const url = rec.url as string;
-            const reviews = Array.isArray(rec.reviews) ? rec.reviews : [];
-            for (const r of reviews) {
-              if (r && r.eventId) rows.push({ url, review: r as MintReview });
-            }
-            const { reviews: _omit, ...rest } = rec || {};
-            pruned.push({ ...rest, reviews: [] });
-          }
-        });
-        if (rows.length) {
-          const unique = new Map<string, { url: string; review: MintReview }>();
-          rows.forEach((row) => {
-            if (row.review && row.review.eventId && !unique.has(row.review.eventId)) unique.set(row.review.eventId, row);
-          });
-          const toPut = Array.from(unique.values()).map((row) => ({
-            eventId: row.review.eventId,
-            url: row.url,
-            pubkey: row.review.pubkey,
-            created_at: row.review.created_at,
-            rating: row.review.rating,
-            comment: row.review.comment,
-            raw: row.review.raw,
-          } as ReviewRow));
-          await (this.db as MintReviewsDB).reviews.bulkPut(toPut);
-        }
-        try {
-          localStorage.setItem(key, JSON.stringify(pruned));
-        } catch { }
-      } catch { }
-    },
     init: function () {
       if (this.connected) return;
       const settings = useSettingsStore();
@@ -115,7 +74,6 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       this.ndk.connect();
       this.connected = true;
       this.ensureDbInitialized();
-      this.migrateFromLocalStorage();
       this.hydrateFromDb();
     },
     // Load all reviews from DB into a lightweight cache for instant UI and build aggregates
@@ -188,7 +146,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
     clearDiscoveryCaches: async function () {
       try {
         await this.ensureDbInitialized();
-        await (this.db as MintReviewsDB).httpInfo.clear();
+        // Do NOT clear HTTP info; preserve last known info across reloads
       } catch { }
       this.inflightInfo.clear();
       this.infoTimers.forEach((t) => clearTimeout(t));
@@ -242,8 +200,16 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
         if (!this.infoTimers.has(url)) {
           const id = setTimeout(async () => {
             try {
-              const row: HttpInfoRow = { url, info: null, fetchedAt: 0, error: true };
+              // Timeout: mark error but DO NOT delete existing info if any
+              const existing = await (this.db as MintReviewsDB).httpInfo.get(url);
+              const row: HttpInfoRow = {
+                url,
+                info: existing?.info ?? null,
+                fetchedAt: existing?.fetchedAt ?? 0,
+                error: true,
+              };
               await (this.db as MintReviewsDB).httpInfo.put(row);
+              // Reflect error state via Dexie; localStorage recommendations will be rebuilt from Dexie
               void this.rebuildAggregates();
             } catch { }
             this.infoTimers.delete(url);
@@ -256,15 +222,42 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
         const info = await new (mod as any).MintClass(tempMint).api.getInfo();
         const row: HttpInfoRow = { url, info, fetchedAt: Math.floor(Date.now() / 1000), error: false };
         await (this.db as MintReviewsDB).httpInfo.put(row);
+        // Update in-memory cache only; do not persist info to localStorage
+        this.httpInfoByUrl.set(url, info);
+        // Rebuild aggregates to reflect fresh fetchedAt and clear error
+        await this.rebuildAggregates();
+        const t = this.infoTimers.get(url);
+        if (t) clearTimeout(t);
+        this.infoTimers.delete(url);
+        // done
+      } catch {
+        // Immediately persist error state (do not wait for timer)
+        try {
+          const existing = await (this.db as MintReviewsDB).httpInfo.get(url);
+          const nowSec = Math.floor(Date.now() / 1000);
+          // Failure: keep existing info/fetchedAt if present, only set error
+          const row: HttpInfoRow = {
+            url,
+            info: existing?.info ?? null,
+            fetchedAt: existing?.fetchedAt ?? nowSec,
+            error: true,
+          };
+          await (this.db as MintReviewsDB).httpInfo.put(row);
+        } catch { }
         const t = this.infoTimers.get(url);
         if (t) clearTimeout(t);
         this.infoTimers.delete(url);
         await this.rebuildAggregates();
-      } catch {
-        // timer will mark error
       } finally {
         this.inflightInfo.delete(url);
       }
+    },
+    // Expose getters for HTTP info from in-memory cache
+    getHttpInfoForUrl: function (url: string): any | undefined {
+      return this.httpInfoByUrl.get(url);
+    },
+    hasHttpInfo: function (url: string): boolean {
+      return this.httpInfoByUrl.has(url);
     },
     handleMintInfoEvent: async function (ev: NDKEvent) {
       try {
@@ -342,7 +335,12 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
         }
 
         const httpByUrl = new Map<string, HttpInfoRow>();
-        for (const h of httpRows) httpByUrl.set(h.url, h);
+        // Refresh in-memory cache from Dexie and build quick lookups
+        this.httpInfoByUrl.clear();
+        for (const h of httpRows) {
+          httpByUrl.set(h.url, h);
+          if (h.info) this.httpInfoByUrl.set(h.url, h.info);
+        }
 
         const recs: MintRecommendation[] = [];
         for (const url of urlSet) {

@@ -163,20 +163,25 @@ export default defineComponent({
     const isExistingMint = (url: string) =>
       mints.mints.some((m) => m.url === url);
     const discoverList = computed(() =>
-      recommendations.value.filter((r) => !isExistingMint(r.url))
+      recommendations.value.filter(
+        (r) =>
+          !isExistingMint(r.url) && !r.error && recsStore.hasHttpInfo(r.url)
+      )
     );
 
-    // Use store-persisted info
+    // Use store-managed HTTP info (Dexie + in-memory), persist only error in localStorage
     const fetchingMintInfo = ref(new Set<string>());
     const getRec = (url: string) =>
       recommendations.value.find((r) => r.url === url);
     const getMintIconUrlUrl = (url: string) =>
-      getRec(url)?.info?.icon_url || null;
+      recsStore.getHttpInfoForUrl(url)?.icon_url || null;
     const getMintDisplayName = (url: string) =>
-      getRec(url)?.info?.name || url.replace(/^https?:\/\//, "");
+      recsStore.getHttpInfoForUrl(url)?.name || url.replace(/^https?:\/\//, "");
     const isFetchingMintInfo = (url: string) => {
       const rec = getRec(url);
-      return rec ? !rec.info && !rec.error : fetchingMintInfo.value.has(url);
+      return rec
+        ? !recsStore.hasHttpInfo(url) && !rec.error
+        : fetchingMintInfo.value.has(url);
     };
 
     const fetchMintInfoForDiscovered = () => {
@@ -228,16 +233,14 @@ export default defineComponent({
       selectedRatingsUrl.value = url;
       // Reviews are loaded from IndexedDB via store inside the dialog
       selectedReviews.value = [];
-      selectedMintInfo.value = rec.info || null;
+      selectedMintInfo.value = recsStore.getHttpInfoForUrl(url) || null;
       showRatingsDialog.value = true;
     };
 
     return {
       discovering,
       discover,
-      discoverList: computed(() =>
-        recommendations.value.filter((r) => !isExistingMint(r.url))
-      ),
+      discoverList,
       avgFor: (url: string) => recsStore.getAverageForUrl(url),
       countFor: (url: string) => recsStore.getCountForUrl(url),
       getMintIconUrlUrl,
