@@ -4,7 +4,10 @@
     <!-- Main content area -->
     <div class="content">
       <!-- Header Image -->
-      <div class="header-image" :class="{ installing: isInstalling }">
+      <div
+        class="header-image"
+        :class="{ centered: isInstalling || wasInstalled }"
+      >
         <transition
           v-if="isPWA()"
           appear
@@ -290,7 +293,11 @@ export default {
   align-items: center;
 }
 
-.header-image.installing {
+.header-image {
+  transition: margin-top 0.45s ease-in-out;
+}
+
+.header-image.centered {
   margin-top: 15vh;
 }
 
