@@ -2,9 +2,6 @@
   <div class="discover-section">
     <div class="discover-card">
       <div class="discover-header">
-        <h3 class="discover-title">
-          {{ $t("MintSettings.discover.title") }}
-        </h3>
         <p class="discover-subtitle">
           {{ $t("MintSettings.discover.caption") }}
         </p>

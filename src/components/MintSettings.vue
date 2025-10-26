@@ -215,9 +215,18 @@
     </div>
 
     <!-- Mint discovery -->
+    <div class="section-divider q-mb-md q-px-md">
+      <div class="divider-line"></div>
+      <div class="divider-text">
+        {{ $t("MintSettings.discover.title") }}
+      </div>
+      <div class="divider-line"></div>
+    </div>
     <MintDiscovery class="q-px-md" />
 
-    <div class="section-divider q-mb-md">
+    <!-- Swap section -->
+
+    <div class="section-divider q-mb-md q-px-md">
       <div class="divider-line"></div>
       <div class="divider-text">
         {{ $t("MintSettings.swap.title") }}
