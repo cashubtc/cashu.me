@@ -521,8 +521,16 @@ export default {
   line-height: 1.5;
   color: rgba(255, 255, 255, 0.8);
   margin: 0 0 50px 0;
-  max-width: 350px;
+  max-width: 500px;
   text-align: left;
+}
+
+/* Unified content width */
+.title,
+.welcome-actions,
+.language-section {
+  width: 100%;
+  max-width: 500px;
 }
 
 .welcome-actions {

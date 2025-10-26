@@ -106,7 +106,7 @@ export default {
   line-height: 1.2;
   text-align: left;
   width: 100%;
-  max-width: 400px;
+  max-width: 500px;
 }
 
 .description {
@@ -115,7 +115,7 @@ export default {
   color: rgba(255, 255, 255, 0.8);
   margin: 0 0 32px 0;
   text-align: left;
-  max-width: 400px;
+  max-width: 500px;
   width: 100%;
 }
 
@@ -124,7 +124,7 @@ export default {
   flex-direction: column;
   gap: 32px;
   width: 100%;
-  max-width: 400px;
+  max-width: 500px;
 }
 
 .option {

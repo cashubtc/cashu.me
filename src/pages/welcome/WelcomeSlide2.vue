@@ -175,7 +175,7 @@ export default {
 }
 
 .instructions {
-  max-width: 400px;
+  max-width: 500px;
   width: 100%;
 }
 
@@ -230,7 +230,15 @@ export default {
 }
 
 .success-message {
-  max-width: 300px;
+  max-width: 500px;
+}
+
+/* Unified content width */
+.title,
+.instructions,
+.success-message {
+  width: 100%;
+  max-width: 500px;
 }
 
 .success-title {

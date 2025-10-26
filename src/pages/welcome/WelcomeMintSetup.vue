@@ -249,7 +249,7 @@ export default {
   line-height: 1.2;
   text-align: left;
   width: 100%;
-  max-width: 500px;
+  max-width: 500px; /* unified */
 }
 
 .description {
@@ -258,14 +258,14 @@ export default {
   color: rgba(255, 255, 255, 0.8);
   margin: 0 0 32px 0;
   text-align: left;
-  max-width: 500px;
+  max-width: 500px; /* unified */
   width: 100%;
 }
 
 .mints-section,
 .add-mint-section {
   width: 100%;
-  max-width: 500px;
+  max-width: 500px; /* unified */
   margin-bottom: 24px;
 }
 

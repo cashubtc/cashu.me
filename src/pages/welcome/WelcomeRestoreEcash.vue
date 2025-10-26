@@ -85,6 +85,7 @@ export default {
   line-height: 1.2;
   text-align: left;
   width: 100%;
+  max-width: 500px;
 }
 
 .description {
@@ -94,10 +95,12 @@ export default {
   margin: 0 0 32px 0;
   text-align: left;
   width: 100%;
+  max-width: 500px;
 }
 
 .restore-content {
   width: 100%;
+  max-width: 500px;
 }
 
 /* Override RestoreView component padding to align with title */

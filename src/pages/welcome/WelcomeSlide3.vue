@@ -69,10 +69,11 @@
 </template>
 
 <script lang="ts">
+declare const windowMixin: any;
 import { useWelcomeStore } from "src/stores/welcome";
 import { useWalletStore } from "src/stores/wallet";
 import { ref, computed, onMounted } from "vue";
-import { useQuasar } from "quasar";
+import { useQuasar, copyToClipboard } from "quasar";
 
 export default {
   name: "WelcomeSlide3",
@@ -104,6 +105,13 @@ export default {
       hideMnemonic.value = !hideMnemonic.value;
     };
 
+    const copyText = async (text: string) => {
+      try {
+        await copyToClipboard(text);
+        $q.notify({ message: "Copied to clipboard!", position: "bottom" });
+      } catch {}
+    };
+
     const proceed = () => {
       welcomeStore.seedPhraseValidated = true;
     };
@@ -115,6 +123,7 @@ export default {
       toggleMnemonicVisibility,
       hiddenMnemonic,
       hideMnemonic,
+      copyText,
     };
   },
 };
@@ -166,6 +175,7 @@ export default {
   line-height: 1.2;
   text-align: left;
   width: 100%;
+  max-width: 500px;
 }
 
 .description {
@@ -175,11 +185,18 @@ export default {
   margin: 0 0 32px 0;
   text-align: left;
   width: 100%;
+  max-width: 500px;
 }
 
 .seed-section {
   width: 100%;
   margin-bottom: 24px;
+}
+
+/* Unified content width */
+.seed-section,
+.checkbox-section {
+  max-width: 500px;
 }
 
 .seed-label {

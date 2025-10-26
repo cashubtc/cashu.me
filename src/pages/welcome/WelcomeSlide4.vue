@@ -362,4 +362,14 @@ p {
   font-size: 0.82rem;
   color: #c6c6c6;
 }
+
+/* Unified content width for consistency with other slides */
+.q-pa-md .text-center,
+.q-pa-md .q-expansion-item,
+.q-pa-md .q-checkbox {
+  max-width: 500px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
 </style>
