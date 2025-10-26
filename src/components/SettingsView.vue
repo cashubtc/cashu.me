@@ -425,14 +425,28 @@
       <!-- Web of trust actions -->
       <q-item>
         <q-item-section>
-          <q-item-label caption>
-            Known pubkeys: {{ wotLoading ? "…" : wotCount }}
-          </q-item-label>
+          <q-item-label caption> Known pubkeys: {{ wotCount }} </q-item-label>
         </q-item-section>
         <q-item-section side>
-          <q-btn flat dense :loading="wotLoading" @click="crawlWebOfTrust(2)"
-            >Crawl web of trust</q-btn
-          >
+          <div class="row">
+            <q-btn flat dense :loading="wotLoading" @click="crawlWebOfTrust(2)">
+              {{
+                hasCrawlCheckpoint && !wotLoading
+                  ? "Continue crawl"
+                  : "Crawl web of trust"
+              }}
+            </q-btn>
+            <q-btn
+              v-if="!wotLoading"
+              flat
+              dense
+              class="q-ml-sm"
+              :disable="wotLoading"
+              @click="resetWebOfTrust"
+            >
+              Reset
+            </q-btn>
+          </div>
         </q-item-section>
       </q-item>
       <q-item v-if="wotLoading || crawlTotal > 0">
@@ -1905,6 +1919,7 @@ export default defineComponent({
       "wotLoading",
       "crawlProcessed",
       "crawlTotal",
+      "hasCrawlCheckpoint",
     ]),
     ...mapState(useWalletStore, ["mnemonic"]),
     ...mapState(useUiStore, ["ndefSupported"]),
@@ -2051,6 +2066,7 @@ export default defineComponent({
       "setPubkey",
       "updateUserProfile",
       "crawlWebOfTrust",
+      "resetWebOfTrust",
     ]),
     generateNewMnemonic: async function () {
       this.newMnemonic();

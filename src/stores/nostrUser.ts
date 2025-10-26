@@ -28,6 +28,8 @@ export const useNostrUserStore = defineStore("nostrUser", {
     dbInitialized: false,
     crawlProcessed: 0,
     crawlTotal: 0,
+    crawlCheckpointNextIndex: 0,
+    crawlCheckpointTotal: 0,
   }),
   getters: {
     displayName(state): string {
@@ -44,6 +46,15 @@ export const useNostrUserStore = defineStore("nostrUser", {
     getHop: (state) => (pk: string): number | null => {
       return state.wotHopsByPubkey[pk] ?? null;
     },
+    hasCrawlCheckpoint(state): boolean {
+      return (
+        typeof state.crawlCheckpointNextIndex === "number" &&
+        typeof state.crawlCheckpointTotal === "number" &&
+        state.crawlCheckpointTotal > 0 &&
+        state.crawlCheckpointNextIndex > 0 &&
+        state.crawlCheckpointNextIndex < state.crawlCheckpointTotal
+      );
+    },
   },
   actions: {
     initDb: async function () {
@@ -54,16 +65,22 @@ export const useNostrUserStore = defineStore("nostrUser", {
       if (this.dbInitialized) return;
       await this.initDb();
       // Load persisted data
-      const [follows, wot, last] = await Promise.all([
+      const [follows, wot, last, nextIdx, hop1Saved] = await Promise.all([
         db.follows.toArray(),
         db.wot.toArray(),
         db.meta.get("lastUpdatedAt"),
+        db.meta.get("wot.crawl.nextIndex"),
+        db.meta.get("wot.crawl.hop1"),
       ]);
       this.follows = follows.map((f) => f.pubkey);
       this.wotHopsByPubkey = Object.fromEntries(
         wot.map((e) => [e.pubkey, e.hop])
       );
       this.lastUpdatedAt = (last?.value as number) || 0;
+      this.crawlCheckpointNextIndex = (nextIdx?.value as number) || 0;
+      this.crawlCheckpointTotal = Array.isArray(hop1Saved?.value)
+        ? (hop1Saved?.value as string[]).length
+        : 0;
       this.dbInitialized = true;
     },
     ensureNdk: function (): NDK {
@@ -156,7 +173,10 @@ export const useNostrUserStore = defineStore("nostrUser", {
         this.wotHopsByPubkey = next;
         if (Object.keys(next).length) {
           // Upsert WOT entries with hop=1
-          const wotRows = Object.entries(next).map(([pubkey, hop]) => ({ pubkey, hop }));
+          const wotRows = Object.entries(next).map(([pubkey]) => ({
+            pubkey,
+            hop: next[pubkey],
+          }));
           await db.wot.bulkPut(wotRows);
         }
       } catch { }
@@ -175,39 +195,76 @@ export const useNostrUserStore = defineStore("nostrUser", {
         console.log(
           `[nostrUser] Crawling web of trust from ${source} up to ${maxHops} hops…`
         );
-        // Start from source's follows
-        const baseFollows =
-          source === this.pubkey
-            ? this.follows.length
-              ? this.follows
-              : await this.fetchFollowsOf(source)
-            : await this.fetchFollowsOf(source);
+        // Determine resume vs fresh crawl
+        let hop1Saved = (await db.meta.get("wot.crawl.hop1"))?.value as
+          | string[]
+          | undefined;
+        let nextIndexSaved = (await db.meta.get("wot.crawl.nextIndex"))?.value as
+          | number
+          | undefined;
+        let hop1: string[] = [];
+        let startIndex = 0;
+        if (
+          Array.isArray(hop1Saved) &&
+          typeof nextIndexSaved === "number" &&
+          nextIndexSaved >= 0 &&
+          nextIndexSaved < hop1Saved.length
+        ) {
+          // Resume
+          hop1 = hop1Saved;
+          startIndex = nextIndexSaved;
+        } else {
+          // Fresh start from source's follows
+          const baseFollows =
+            source === this.pubkey
+              ? this.follows.length
+                ? this.follows
+                : await this.fetchFollowsOf(source)
+              : await this.fetchFollowsOf(source);
+          hop1 = Array.from(new Set(baseFollows));
+          startIndex = 0;
+          await db.meta.put({ key: "wot.crawl.hop1", value: hop1 });
+          await db.meta.put({ key: "wot.crawl.nextIndex", value: 0 });
+        }
+
         const wot: Record<string, number> = {};
-        // 1 hop: our follows
-        const hop1 = Array.from(new Set(baseFollows));
-        this.crawlProcessed = 0;
-        this.crawlTotal = hop1.length;
+        // Ensure 1 hop are reflected immediately
         for (const pk of hop1) {
           if (pk && pk !== source) wot[pk] = 1;
         }
-        // Commit 1-hop immediately for UI reflect
-        this.wotHopsByPubkey = { ...this.wotHopsByPubkey, ...wot };
+        // Update progress counters for UI
+        this.crawlTotal = hop1.length;
+        this.crawlProcessed = startIndex;
+        // Commit 1-hop immediately, keeping shortest hop in both state and DB
+        const mergedInitial: Record<string, number> = {
+          ...this.wotHopsByPubkey,
+        };
+        for (const [k, v] of Object.entries(wot)) {
+          mergedInitial[k] = Math.min(mergedInitial[k] ?? v, v);
+        }
+        this.wotHopsByPubkey = mergedInitial;
         if (Object.keys(wot).length) {
           await db.wot.bulkPut(
-            Object.entries(wot).map(([pubkey, hop]) => ({ pubkey, hop }))
+            Object.keys(wot).map((pubkey) => ({
+              pubkey,
+              hop: this.wotHopsByPubkey[pubkey],
+            }))
           );
         }
 
         if (maxHops >= 2 && hop1.length) {
           // Sequentially fetch to avoid blocking the UI; short delay between requests
           const stepDelayMs = 20; // ~1 frame
-          for (const pk1 of hop1) {
+          for (let i = startIndex; i < hop1.length; i++) {
+            const pk1 = hop1[i];
             const followsOfFollow = await this.fetchFollowsOf(pk1);
             for (const pk2 of followsOfFollow) {
               if (!pk2 || pk2 === source) continue;
               if (!(pk2 in wot)) wot[pk2] = 2;
             }
-            this.crawlProcessed++;
+            this.crawlProcessed = i + 1;
+            // Persist checkpoint so we can resume later
+            await db.meta.put({ key: "wot.crawl.nextIndex", value: i + 1 });
             if (this.crawlProcessed % 3 === 0) {
               // Periodically update state so UI reflects progress
               const merged: Record<string, number> = { ...this.wotHopsByPubkey };
@@ -216,7 +273,10 @@ export const useNostrUserStore = defineStore("nostrUser", {
               }
               this.wotHopsByPubkey = merged;
               await db.wot.bulkPut(
-                Object.entries(wot).map(([pubkey, hop]) => ({ pubkey, hop }))
+                Object.keys(wot).map((pubkey) => ({
+                  pubkey,
+                  hop: this.wotHopsByPubkey[pubkey],
+                }))
               );
             }
             await this.sleep(stepDelayMs);
@@ -230,16 +290,34 @@ export const useNostrUserStore = defineStore("nostrUser", {
         this.wotHopsByPubkey = merged;
         if (Object.keys(wot).length) {
           await db.wot.bulkPut(
-            Object.entries(wot).map(([pubkey, hop]) => ({ pubkey, hop }))
+            Object.keys(wot).map((pubkey) => ({
+              pubkey,
+              hop: this.wotHopsByPubkey[pubkey],
+            }))
           );
         }
         console.log(`[nostrUser] Crawl complete. Known pubkeys: ${Object.keys(this.wotHopsByPubkey).length}`);
+        // Clear checkpoint upon completion
+        await db.meta.delete("wot.crawl.hop1");
+        await db.meta.delete("wot.crawl.nextIndex");
+        this.crawlCheckpointNextIndex = 0;
+        this.crawlCheckpointTotal = 0;
       } finally {
         this.wotLoading = false;
         // Reset progress counters when done
         this.crawlTotal = 0;
         this.crawlProcessed = 0;
       }
+    },
+    resetWebOfTrust: async function () {
+      await this.ensureDbInitialized();
+      if (this.wotLoading) return;
+      this.wotHopsByPubkey = {};
+      await db.wot.clear();
+      await db.meta.delete("wot.crawl.hop1");
+      await db.meta.delete("wot.crawl.nextIndex");
+      this.crawlCheckpointNextIndex = 0;
+      this.crawlCheckpointTotal = 0;
     },
   },
 });
