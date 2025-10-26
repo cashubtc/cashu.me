@@ -10,22 +10,11 @@
 
     <q-card-section class="q-pt-sm">
       <div class="row items-center q-mb-md">
-        <q-avatar v-if="mintInfo?.icon_url" size="34px" class="q-mr-sm">
-          <q-img
-            :src="mintInfo.icon_url"
-            spinner-color="white"
-            spinner-size="xs"
-            style="height: 34px; max-width: 34px; font-size: 12px"
-          />
-        </q-avatar>
-        <div class="mint-info-container">
-          <div v-if="mintInfo?.name" class="mint-name">
-            {{ mintInfo.name }}
-          </div>
-          <div class="text-grey-6 mint-url">
-            {{ mintUrl }}
-          </div>
-        </div>
+        <MintInfoContainer
+          :iconUrl="mintInfo?.icon_url"
+          :name="mintInfo?.name"
+          :url="mintUrl"
+        />
       </div>
 
       <div class="q-my-sm text-caption text-grey-6 row items-center">
@@ -118,9 +107,11 @@ import NDK, { NDKEvent, NDKKind } from "@nostr-dev-kit/ndk";
 import { notifyError, notifySuccess } from "src/js/notify";
 import { nip19 } from "nostr-tools";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
+import MintInfoContainer from "./MintInfoContainer.vue";
 
 export default defineComponent({
   name: "CreateMintReview",
+  components: { MintInfoContainer },
   props: {
     mintUrl: { type: String, required: true },
     mintInfo: { type: Object, required: false },

@@ -69,61 +69,39 @@
                 <div class="row items-center q-pa-md">
                   <div class="col">
                     <div class="row items-center">
-                      <q-avatar
-                        v-if="getMintIconUrlUrl(rec.url)"
-                        size="34px"
-                        class="q-mr-sm"
-                      >
-                        <q-img
-                          spinner-color="white"
-                          spinner-size="xs"
-                          :src="getMintIconUrlUrl(rec.url)"
-                          alt="Mint Icon"
-                          style="height: 34px; max-width: 34px; font-size: 12px"
-                        >
-                          <template v-slot:error>
-                            <div
-                              class="row items-center justify-center"
-                              style="height: 100%; width: 100%"
-                            >
-                              <q-icon
-                                name="account_balance"
-                                color="grey-5"
-                                size="20px"
-                              />
-                            </div>
-                          </template>
-                        </q-img>
-                      </q-avatar>
+                      <MintInfoContainer
+                        :iconUrl="getMintIconUrlUrl(rec.url) || undefined"
+                        :name="getMintDisplayName(rec.url)"
+                        :url="rec.url"
+                      />
                       <q-spinner-dots
-                        v-else-if="isFetchingMintInfo(rec.url)"
+                        v-if="
+                          isFetchingMintInfo(rec.url) &&
+                          !getMintIconUrlUrl(rec.url)
+                        "
                         size="34px"
                         color="grey-5"
-                        class="q-mr-sm"
+                        class="q-ml-sm"
                       />
-                      <div class="mint-info-container">
-                        <div class="mint-name">
-                          {{ getMintDisplayName(rec.url) }}
-                        </div>
-                        <div class="text-grey-6 mint-url">{{ rec.url }}</div>
-                        <div
-                          class="text-grey-5 q-mt-xs"
-                          v-if="rec.averageRating !== null"
-                        >
-                          <span>
-                            ⭐ {{ rec.averageRating.toFixed(2) }} ·
-                            {{ rec.reviewsCount }}
-                            <span
-                              class="text-primary cursor-pointer"
-                              style="text-decoration: underline"
-                              @click.stop="openReviews(rec.url)"
-                              >reviews</span
-                            >
-                          </span>
-                        </div>
-                        <div class="text-grey-5 q-mt-xs" v-else>
-                          <span>No reviews yet</span>
-                        </div>
+                    </div>
+                    <div class="row">
+                      <div
+                        class="text-grey-5 q-mt-xs"
+                        v-if="rec.averageRating !== null"
+                      >
+                        <span>
+                          ⭐ {{ rec.averageRating.toFixed(2) }} ·
+                          {{ rec.reviewsCount }}
+                          <span
+                            class="text-primary cursor-pointer"
+                            style="text-decoration: underline"
+                            @click.stop="openReviews(rec.url)"
+                            >reviews</span
+                          >
+                        </span>
+                      </div>
+                      <div class="text-grey-7 q-mt-xs" v-else>
+                        <span>No reviews found</span>
                       </div>
                     </div>
                   </div>
@@ -163,11 +141,12 @@ import { defineComponent, ref, computed, watch } from "vue";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import MintRatingsComponent from "../components/MintRatingsComponent.vue";
+import MintInfoContainer from "./MintInfoContainer.vue";
 import { notifyError, notifySuccess } from "src/js/notify";
 
 export default defineComponent({
   name: "MintDiscovery",
-  components: { MintRatingsComponent },
+  components: { MintRatingsComponent, MintInfoContainer },
   props: {
     infoTimeoutMs: { type: Number, default: 5000 },
   },

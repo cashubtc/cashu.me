@@ -80,44 +80,11 @@
               <div class="row items-center q-pa-md">
                 <div class="col">
                   <div class="row items-center">
-                    <q-avatar
-                      v-if="getMintIconUrl(mint)"
-                      size="34px"
-                      class="q-mr-sm"
-                    >
-                      <q-img
-                        spinner-color="white"
-                        spinner-size="xs"
-                        :src="getMintIconUrl(mint)"
-                        alt="Mint Icon"
-                        style="height: 34px; max-width: 34px; font-size: 12px"
-                      >
-                        <template v-slot:error>
-                          <div
-                            class="row items-center justify-center"
-                            style="height: 100%; width: 100%"
-                          >
-                            <q-icon
-                              name="account_balance"
-                              color="grey-5"
-                              size="20px"
-                            />
-                          </div>
-                        </template>
-                      </q-img>
-                    </q-avatar>
-
-                    <div class="mint-info-container">
-                      <div
-                        v-if="mint.nickname || mint.info?.name"
-                        class="mint-name"
-                      >
-                        {{ mint.nickname || mint.info?.name }}
-                      </div>
-                      <div class="text-grey-6 mint-url">
-                        {{ mint.url }}
-                      </div>
-                    </div>
+                    <MintInfoContainer
+                      :iconUrl="getMintIconUrl(mint)"
+                      :name="mint.nickname || mint.info?.name"
+                      :url="mint.url"
+                    />
                   </div>
                 </div>
               </div>
@@ -398,6 +365,7 @@ import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
 import MintRatingsComponent from "./MintRatingsComponent.vue";
 import CreateMintReview from "./CreateMintReview.vue";
 import MintDiscovery from "./MintDiscovery.vue";
+import MintInfoContainer from "./MintInfoContainer.vue";
 
 export default defineComponent({
   name: "MintSettings",
@@ -407,6 +375,7 @@ export default defineComponent({
     MintRatingsComponent,
     MintDiscovery,
     CreateMintReview,
+    MintInfoContainer,
   },
   props: {},
   setup() {

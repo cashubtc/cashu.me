@@ -13,31 +13,11 @@
         <!-- Mint identity and average rating -->
         <div class="row items-center" style="width: 100%">
           <div class="row items-center" style="flex: 1; min-width: 0">
-            <q-avatar v-if="mintInfo?.icon_url" size="34px" class="q-mr-sm">
-              <q-img
-                :src="mintInfo.icon_url"
-                spinner-color="white"
-                spinner-size="xs"
-                style="height: 34px; max-width: 34px; font-size: 12px"
-              >
-                <template v-slot:error>
-                  <div
-                    class="row items-center justify-center"
-                    style="height: 100%; width: 100%"
-                  >
-                    <q-icon name="account_balance" color="grey-5" size="20px" />
-                  </div>
-                </template>
-              </q-img>
-            </q-avatar>
-            <div class="mint-info-container">
-              <div v-if="mintInfo?.name" class="mint-name">
-                {{ mintInfo.name }}
-              </div>
-              <div class="text-grey-6 mint-url">
-                {{ url }}
-              </div>
-            </div>
+            <MintInfoContainer
+              :iconUrl="mintInfo?.icon_url"
+              :name="mintInfo?.name"
+              :url="url"
+            />
           </div>
           <div class="text-body1 text-right" style="min-width: 200px">
             <span v-if="hasAnyReviews">
@@ -198,6 +178,7 @@ import NDK from "@nostr-dev-kit/ndk";
 import { nip19 } from "nostr-tools";
 import CreateMintReview from "./CreateMintReview.vue";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
+import MintInfoContainer from "./MintInfoContainer.vue";
 
 export default defineComponent({
   name: "MintRatingsComponent",
@@ -208,7 +189,7 @@ export default defineComponent({
     mintInfo: { type: Object, required: false },
   },
   emits: ["close"],
-  components: { CreateMintReview },
+  components: { CreateMintReview, MintInfoContainer },
   methods: {
     formatDate(ts: number) {
       try {
