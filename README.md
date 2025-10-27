@@ -40,6 +40,14 @@ npm run lint
 npm run format
 ```
 
+### Check translations
+
+Use this to verify non-English translations are in sync with the English source:
+
+```bash
+npm run i18n:check
+```
+
 ### Build the app for production
 
 ```bash

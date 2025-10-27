@@ -208,7 +208,14 @@ export default {
     },
   },
   Settings: {
+    language: {
+      title: "Idioma",
+      description: "Por favor, elige tu idioma preferido de la lista de abajo.",
+    },
     sections: {
+      backup_restore: "COPIA DE SEGURIDAD Y RESTAURACIÓN",
+      lightning_address: "DIRECCIÓN LIGHTNING",
+      nostr_keys: "CLAVES NOSTR",
       nostr: {
         title: "NOSTR",
         relays: {
@@ -226,16 +233,6 @@ export default {
           },
         },
       },
-    },
-    language: {
-      title: "Idioma",
-      description: "Por favor, elige tu idioma preferido de la lista de abajo.",
-    },
-    sections: {
-      backup_restore: "COPIA DE SEGURIDAD Y RESTAURACIÓN",
-      lightning_address: "DIRECCIÓN LIGHTNING",
-      nostr_keys: "CLAVES NOSTR",
-      nostr: "NOSTR",
       payment_requests: "SOLICITUDES DE PAGO",
       nostr_wallet_connect: "NOSTR WALLET CONNECT",
       hardware_features: "CARACTERÍSTICAS DE HARDWARE",
@@ -523,9 +520,7 @@ export default {
         title: "Configuración de desarrollador",
         description:
           "Las siguientes configuraciones son para desarrollo y depuración.",
-        keyset_counters: {
-          counter: "contador: {count}",
-        },
+        
         new_seed: {
           button: "Generar nueva frase semilla",
           description:
@@ -554,6 +549,7 @@ export default {
           title: "Incrementar contadores de keyset",
           description:
             'Haz clic en el ID del keyset para incrementar los contadores de la ruta de derivación para los keysets en tu billetera. Esto es útil si ves el error "las salidas ya han sido firmadas".',
+          counter: "contador: {count}",
         },
         unset_reserved: {
           button: "Desmarcar todos los tokens reservados",

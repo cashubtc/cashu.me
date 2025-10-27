@@ -8,8 +8,16 @@ export default {
     failed: 'فشل في المعالجة: {error}',
     paid: 'تم دفع {amount} عبر Lightning',
   },
+  
   Settings: {
+    language: {
+      title: "اللغة",
+      description: "الرجاء اختيار لغتك المفضلة من القائمة أدناه.",
+    },
     sections: {
+      backup_restore: "النسخ الاحتياطي والاستعادة",
+      lightning_address: "عنوان LIGHTNING",
+      nostr_keys: "مفاتيح NOSTR",
       nostr: {
         title: "نوستر",
         relays: {
@@ -27,14 +35,31 @@ export default {
           },
         },
       },
+      payment_requests: "طلبات الدفع",
+      nostr_wallet_connect: "اتصال محفظة NOSTR",
+      hardware_features: "ميزات الأجهزة",
+      p2pk_features: "ميزات P2PK",
+      privacy: "الخصوصية",
+      experimental: "تجريبي",
+      appearance: "المظهر",
     },
-    // remove legacy flat keys if present
-    nostr: undefined,
-    nostr_wallet_connect: { title: "Nostr Wallet Connect (NWC)", description: "", enable_toggle: "", payments_note: "", connection: { copy_tooltip: "", qr_tooltip: "", allowance_label: "" } },
+    backup_restore: {
+      backup_seed: {
+        title: "نسخ عبارة الاستعادة احتياطيًا",
+        description:
+          "يمكن لعبارة الاستعادة الخاصة بك استعادة محفظتك. احتفظ بها آمنة وخصوصية.",
+        seed_phrase_label: "عبارة الاستعادة",
+      },
+      restore_ecash: {
+        title: "استعادة ecash",
+        description:
+          "يتيح لك معالج الاستعادة استرداد ecash المفقود من عبارة استعادة. لن تتأثر عبارة استعادة محفظتك الحالية، وسيسمح لك المعالج فقط باستعادة ecash من عبارة استعادة أخرى.",
+        button: "استعادة",
+      },
+    },
     web_of_trust: {
       title: "شبكة الثقة",
       known_pubkeys: "المفاتيح العامة المعروفة: {wotCount}",
-      pubkeys: "المفاتيح العامة",
       continue_crawl: "متابعة الزحف",
       crawl_odell: "الزحف عبر شبكة الثقة الخاصة بـ ODELL",
       crawl_wot: "الزحف عبر شبكة الثقة",

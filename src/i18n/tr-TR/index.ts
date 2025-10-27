@@ -53,11 +53,6 @@ export default {
       },
     },
   },
-  global: {
-    process: 'Süreç',
-    Warning: 'Uyarı',
-    Note: 'Not',
-  },
   NostrBackup: {
     nostr_mints: 'Nostr mintleri',
     search_button: 'Ara',
@@ -73,6 +68,9 @@ export default {
     restore_selected_mints: 'Seçili mintleri geri yükle',
   },
   global: {
+    process: 'Süreç',
+    Warning: 'Uyarı',
+    Note: 'Not',
     copy_to_clipboard: {
       success: "Panoya kopyalandı!",
     },

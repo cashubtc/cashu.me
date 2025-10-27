@@ -53,16 +53,6 @@ export default {
     multinut: {
       use_multinut: "Χρήση Multinut",
     },
-    web_of_trust: {
-      title: "Δίκτυο εμπιστοσύνης",
-      known_pubkeys: "Γνωστά pubkeys: {wotCount}",
-      continue_crawl: "Συνέχιση ανίχνευσης",
-      crawl_odell: "Ανίχνευση του WEB OF TRUST του ODELL",
-      crawl_wot: "Ανίχνευση δικτύου εμπιστοσύνης",
-      pause: "Παύση",
-      reset: "Επαναφορά",
-      progress: "{crawlProcessed} / {crawlTotal}",
-    },
   },
   global: {
     copy_to_clipboard: {
