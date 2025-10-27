@@ -45,12 +45,11 @@ export default {
       },
     },
   },
-  Settings: {
-    advanced: {
-      developer: {
-        keyset_counters: {
-          counter: 'sayaç: {count}',
-        },
+  // merged into single Settings block above
+  advanced: {
+    developer: {
+      keyset_counters: {
+        counter: 'sayaç: {count}',
       },
     },
   },

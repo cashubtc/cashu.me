@@ -38,11 +38,6 @@ export default {
       use_multinut: '使用 Multinut',
     },
   },
-  global: {
-    process: '处理',
-    Warning: '警告',
-    Note: '备注',
-  },
   Settings: {
     advanced: {
       developer: {
@@ -51,8 +46,6 @@ export default {
         },
       },
     },
-  },
-  Settings: {
     appearance: {
       bip177: {
         title: '比特币符号',
@@ -60,6 +53,11 @@ export default {
         toggle: '使用 ₿ 符号',
       },
     },
+  },
+  global: {
+    process: '处理',
+    Warning: '警告',
+    Note: '备注',
   },
   NostrBackup: {
     nostr_mints: 'Nostr 铸币厂',

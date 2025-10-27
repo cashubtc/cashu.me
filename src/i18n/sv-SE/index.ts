@@ -37,12 +37,11 @@ export default {
       use_multinut: 'Använd Multinut',
     },
   },
-  Settings: {
-    advanced: {
-      developer: {
-        keyset_counters: {
-          counter: 'räknare: {count}',
-        },
+  // merge advanced into Settings below if needed
+  advanced: {
+    developer: {
+      keyset_counters: {
+        counter: 'räknare: {count}',
       },
     },
   },
@@ -55,6 +54,7 @@ export default {
       },
     },
   },
+  // merge global keys
   global: {
     process: 'Process',
     Warning: 'Varning',

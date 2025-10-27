@@ -38,12 +38,11 @@ export default {
       use_multinut: 'ใช้ Multinut',
     },
   },
-  Settings: {
-    advanced: {
-      developer: {
-        keyset_counters: {
-          counter: 'ตัวนับ: {count}',
-        },
+  // merged into the single Settings block above
+  advanced: {
+    developer: {
+      keyset_counters: {
+        counter: 'ตัวนับ: {count}',
       },
     },
   },

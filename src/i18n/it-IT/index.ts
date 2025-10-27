@@ -9,54 +9,25 @@ export default {
     paid: 'Pagato {amount} via Lightning',
   },
   global: {
+    // merged global keys
     copy_to_clipboard: {
       success: "Copiato negli appunti!",
     },
     actions: {
-      add_mint: {
-        label: "Aggiungi mint",
-      },
-      cancel: {
-        label: "Annulla",
-      },
-      copy: {
-        label: "Copia",
-      },
-      close: {
-        label: "Chiudi",
-      },
-      enter: {
-        label: "Invio",
-      },
-      lock: {
-        label: "Blocca",
-      },
-      paste: {
-        label: "Incolla",
-      },
-      receive: {
-        label: "Ricevi",
-      },
-      scan: {
-        label: "Scansiona",
-      },
-      send: {
-        label: "Invia",
-      },
-      swap: {
-        label: "Scambia",
-      },
-      update: {
-        label: "Aggiorna",
-      },
+      add_mint: { label: "Aggiungi mint" },
+      cancel: { label: "Annulla" },
+      copy: { label: "Copia" },
+      close: { label: "Chiudi" },
+      enter: { label: "Invio" },
+      lock: { label: "Blocca" },
+      paste: { label: "Incolla" },
+      receive: { label: "Ricevi" },
+      scan: { label: "Scansiona" },
+      send: { label: "Invia" },
+      swap: { label: "Scambia" },
+      update: { label: "Aggiorna" },
     },
-    inputs: {
-      mint_url: {
-        label: "URL Mint",
-      },
-    },
-  },
-  global: {
+    inputs: { mint_url: { label: "URL Mint" } },
     process: 'Processo',
     Warning: 'Avviso',
     Note: 'Nota',

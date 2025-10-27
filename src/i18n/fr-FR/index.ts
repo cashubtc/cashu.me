@@ -517,6 +517,7 @@ export default {
         },
       },
     },
+    // duplicate settings subsections removed (web_of_trust/npub_cash/multinut)
     web_of_trust: {
       title: "Web of trust",
       known_pubkeys: "Pubkeys connus : {wotCount}",
