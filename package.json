@@ -22,7 +22,7 @@
     "@capacitor/clipboard": "^6.0.2",
     "@capacitor/core": "^6.2.0",
     "@capacitor/haptics": "^6.0.2",
-    "@cashu/cashu-ts": "^2.7.2",
+    "@cashu/cashu-ts": "^2.7.3",
     "@cashu/crypto": "^0.3.4",
     "@chenfengyuan/vue-qrcode": "^2.0.0",
     "@gandlaf21/bc-ur": "^1.1.12",
