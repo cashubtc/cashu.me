@@ -47,7 +47,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
     infoTimers: new Map() as Map<string, any>,
     inflightInfo: new Set() as Set<string>,
     infoTimeoutMs: 10000,
-    httpInfoFetchIntervalSeconds: 60 * 60 * 24, // 24 hours
+    httpInfoFetchIntervalSeconds: 60 * 60, // 1 hour
     // Aggregated list by URL (persisted)
     recommendations: useLocalStorage<MintRecommendation[]>(
       "cashu.ndk.mintRecommendations",
@@ -217,7 +217,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
               const row: HttpInfoRow = {
                 url,
                 info: existing?.info ?? null,
-                fetchedAt: existing?.fetchedAt ?? 0,
+                fetchedAt: Math.floor(Date.now() / 1000) ?? 0,
                 error: false,
               };
               await (this.db as MintReviewsDB).httpInfo.put(row);
@@ -282,7 +282,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
           // Skip if a fetch is already in-flight for this URL
           if (this.inflightInfo.has(u)) continue;
           const existing = await (this.db as MintReviewsDB).httpInfo.get(u);
-          const fresh = !!existing && !!existing.info && !!existing.fetchedAt && (nowSec - existing.fetchedAt) < interval;
+          const fresh = !!existing && !!existing.fetchedAt && (nowSec - existing.fetchedAt) < interval;
           if (!fresh) toFetch.push(u);
         }
         if (!toFetch.length) return;
