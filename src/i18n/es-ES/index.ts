@@ -868,6 +868,10 @@ export default {
         },
       },
     },
+    error_badge: 'Error',
+    reviews_text: 'reseñas',
+    no_reviews_yet: 'Aún no hay reseñas',
+    discover_mints_button: 'Descubrir mints',
   },
   QrcodeReader: {
     progress: {

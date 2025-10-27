@@ -871,6 +871,10 @@ export default {
         },
       },
     },
+    error_badge: '错误',
+    reviews_text: '评论',
+    no_reviews_yet: '暂无评论',
+    discover_mints_button: '发现 Mints',
   },
   QrcodeReader: {
     progress: {

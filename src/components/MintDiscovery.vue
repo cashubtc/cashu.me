@@ -93,7 +93,7 @@
                             class="text-primary cursor-pointer"
                             style="text-decoration: underline"
                             @click.stop="openReviews(rec.url)"
-                            >reviews</span
+                            >{{ $t("MintSettings.reviews_text") }}</span
                           >
                         </span>
                       </div>

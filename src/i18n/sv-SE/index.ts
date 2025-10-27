@@ -877,6 +877,10 @@ export default {
         },
       },
     },
+    error_badge: 'Fel',
+    reviews_text: 'recensioner',
+    no_reviews_yet: 'Inga recensioner ännu',
+    discover_mints_button: 'Upptäck mints',
   },
   QrcodeReader: {
     progress: {

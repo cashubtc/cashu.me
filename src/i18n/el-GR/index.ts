@@ -877,6 +877,10 @@ export default {
         },
       },
     },
+    error_badge: 'Σφάλμα',
+    reviews_text: 'κριτικές',
+    no_reviews_yet: 'Δεν υπάρχουν κριτικές ακόμα',
+    discover_mints_button: 'Ανακαλύψτε mints',
   },
   QrcodeReader: {
     progress: {

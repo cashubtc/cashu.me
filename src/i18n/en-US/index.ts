@@ -885,6 +885,10 @@ export default {
         },
       },
     },
+    error_badge: 'Error',
+    reviews_text: 'reviews',
+    no_reviews_yet: 'No reviews yet',
+    discover_mints_button: 'Discover mints',
   },
   QrcodeReader: {
     progress: {

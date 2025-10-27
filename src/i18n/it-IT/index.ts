@@ -852,6 +852,10 @@ export default {
         },
       },
     },
+    error_badge: 'Errore',
+    reviews_text: 'recensioni',
+    no_reviews_yet: 'Nessuna recensione ancora',
+    discover_mints_button: 'Scopri mints',
   },
   QrcodeReader: {
     progress: {

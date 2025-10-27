@@ -875,6 +875,10 @@ export default {
         },
       },
     },
+    error_badge: 'ข้อผิดพลาด',
+    reviews_text: 'รีวิว',
+    no_reviews_yet: 'ยังไม่มีรีวิว',
+    discover_mints_button: 'สำรวจ Mints',
   },
   QrcodeReader: {
     progress: {

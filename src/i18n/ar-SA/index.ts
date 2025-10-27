@@ -868,6 +868,10 @@ export default {
         },
       },
     },
+    error_badge: 'خطأ',
+    reviews_text: 'مراجعات',
+    no_reviews_yet: 'لا توجد مراجعات بعد',
+    discover_mints_button: 'اكتشف mints',
   },
   QrcodeReader: {
     progress: {

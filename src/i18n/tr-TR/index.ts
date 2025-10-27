@@ -891,6 +891,10 @@ export default {
         },
       },
     },
+    error_badge: 'Hata',
+    reviews_text: 'yorumlar',
+    no_reviews_yet: 'Henüz yorum yok',
+    discover_mints_button: 'Naneleri keşfet',
   },
   QrcodeReader: {
     progress: {

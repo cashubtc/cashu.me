@@ -873,6 +873,10 @@ export default {
         },
       },
     },
+    error_badge: 'エラー',
+    reviews_text: 'レビュー',
+    no_reviews_yet: 'まだレビューはありません',
+    discover_mints_button: 'ミントを発見',
   },
   QrcodeReader: {
     progress: {

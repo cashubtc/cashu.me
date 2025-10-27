@@ -60,7 +60,7 @@
                   outline
                   class="q-mr-xs q-mt-sm text-weight-bold"
                 >
-                  Error
+                  {{ $t("MintSettings.error_badge") }}
                   <q-icon name="error" class="q-ml-xs" size="xs" />
                 </q-badge>
               </div>
@@ -130,20 +130,17 @@
                         class="text-primary cursor-pointer"
                         style="text-decoration: underline"
                         @click.stop="openReviews(mint.url, mint)"
-                        >reviews</span
+                        >{{ $t("MintSettings.reviews_text") }}</span
                       >
                     </span>
                   </template>
                   <template v-else>
                     <span
-                      >No
-                      <span
-                        class="text-primary cursor-pointer"
-                        style="text-decoration: underline"
-                        @click.stop="openReviews(mint.url, mint)"
-                        >reviews</span
-                      >
-                      yet
+                      class="text-primary cursor-pointer"
+                      style="text-decoration: underline"
+                      @click.stop="openReviews(mint.url, mint)"
+                    >
+                      {{ $t("MintSettings.no_reviews_yet") }}
                     </span>
                   </template>
                 </div>
@@ -162,7 +159,7 @@
           style="width: 100%"
         >
           <q-icon name="search" size="20px" class="q-mr-sm" />
-          <span>Discover mints</span>
+          <span>{{ $t("MintSettings.discover_mints_button") }}</span>
         </q-btn>
       </div>
     </div>
