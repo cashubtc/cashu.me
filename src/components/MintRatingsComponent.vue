@@ -23,7 +23,7 @@
             />
           </div>
           <div
-            class="text-body1 text-right"
+            class="text-body1 q-ml-xs"
             style="min-width: 200px; flex-shrink: 0"
           >
             <span v-if="hasAnyReviews">
@@ -37,7 +37,7 @@
         </div>
 
         <!-- Write a review button and sort options -->
-        <div class="row items-center q-mt-md" style="width: 100%">
+        <div class="row items-center q-mt-sm" style="width: 100%">
           <q-btn
             v-if="allowCreateReview"
             color="primary"
@@ -52,14 +52,13 @@
           <div class="row items-center" style="margin-left: auto">
             <q-select
               dense
-              outlined
               color="primary"
               v-model="sortMode"
               :options="sortOptions"
               emit-value
               map-options
-              rounded
-              style="width: 160px"
+              borderless
+              style="width: 120px"
             />
           </div>
         </div>
