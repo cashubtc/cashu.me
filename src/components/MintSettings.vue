@@ -111,7 +111,10 @@
                     </div>
                   </div>
                 </div>
-                <div class="text-grey-5">
+                <div
+                  class="text-grey-5"
+                  v-if="!isMintExcludedFromReviews(mint.url)"
+                >
                   <template
                     v-if="
                       getRecommendation(mint.url) &&
@@ -380,6 +383,12 @@ import MintRatingsComponent from "./MintRatingsComponent.vue";
 import CreateMintReview from "./CreateMintReview.vue";
 import MintInfoContainer from "./MintInfoContainer.vue";
 
+// Mints that should not show reviews
+const EXCLUDED_FROM_REVIEWS = [
+  "http://localhost*", // localhost with any port
+  "https://*cashu.space", // exact match and subdomains
+];
+
 export default defineComponent({
   name: "MintSettings",
   mixins: [windowMixin],
@@ -497,6 +506,15 @@ export default defineComponent({
     ...mapActions(useWorkersStore, ["clearAllWorkers"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useSwapStore, ["mintAmountSwap"]),
+    isMintExcludedFromReviews: function (mintUrl) {
+      // Check if mint URL should be excluded from reviews using regex matching
+      return EXCLUDED_FROM_REVIEWS.some((pattern) => {
+        // Convert asterisk pattern to regex
+        const regexPattern = pattern.replace(/\*/g, ".*");
+        const regex = new RegExp(`^${regexPattern}$`);
+        return regex.test(mintUrl);
+      });
+    },
     activateMintUrlInternal: async function (mintUrl) {
       this.activatingMintUrl = mintUrl;
       console.log(`Activating mint ${this.activatingMintUrl}`);
