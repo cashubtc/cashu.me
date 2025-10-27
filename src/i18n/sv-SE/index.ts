@@ -1,4 +1,79 @@
 export default {
+  MultinutPicker: {
+    payment: 'Multinut-betalning',
+    selectMints: 'Välj en eller flera mints att betala från.',
+    totalSelectedBalance: 'Totalt valt saldo',
+    multiMintPay: 'Multi-Mint-betalning',
+    balanceNotEnough: 'Multi-mint-saldo räcker inte för denna faktura',
+    failed: 'Misslyckades att behandla: {error}',
+    paid: 'Betalat {amount} via Lightning',
+  },
+  Settings: {
+    nostr_mint_backup: {
+      title: 'Nostr-mintbackup',
+      enabled: 'Aktiverad',
+      disabled: 'Inaktiverad',
+    },
+    web_of_trust: {
+      title: 'Web of trust',
+      known_pubkeys: 'Kända pubkeys: {wotCount}',
+      continue_crawl: 'Fortsätt genomsökning',
+      crawl_odell: "Genomsök ODELL'S WEB OF TRUST",
+      crawl_wot: 'Genomsök web of trust',
+      pause: 'Pausa',
+      reset: 'Återställ',
+      progress: '{crawlProcessed} / {crawlTotal}',
+    },
+    npub_cash: {
+      use_npubx: 'Använd npubx.cash',
+      copy_lightning_address: 'Kopiera Lightning-adress',
+      v2_mint: 'npub.cash v2 mint',
+      npc_v2: {
+        choose_mint_title: 'Välj mint för npub.cash v2',
+        choose_mint_placeholder: 'Välj en mint…',
+      },
+    },
+    multinut: {
+      use_multinut: 'Använd Multinut',
+    },
+  },
+  Settings: {
+    advanced: {
+      developer: {
+        keyset_counters: {
+          counter: 'räknare: {count}',
+        },
+      },
+    },
+  },
+  Settings: {
+    appearance: {
+      bip177: {
+        title: 'Bitcoin-symbol',
+        description: 'Använd ₿-symbol istället för sats.',
+        toggle: 'Använd ₿-symbol',
+      },
+    },
+  },
+  global: {
+    process: 'Process',
+    Warning: 'Varning',
+    Note: 'Notis',
+  },
+  NostrBackup: {
+    nostr_mints: 'Nostr-mints',
+    search_button: 'Sök',
+    backed_up: 'Säkerhetskopierad',
+    add_selected: 'Lägg till valda',
+    no_backups_found: 'Inga säkerhetskopior hittades',
+    no_backups_hint: 'Prova att byta relä eller öka timeout',
+    invalid_mnemonic: 'Ogiltig mnemonic',
+    search_error: 'Sökfel',
+    add_error: 'Tilläggsfel',
+    select_all: 'Markera alla',
+    deselect_all: 'Avmarkera alla',
+    restore_selected_mints: 'Återställ valda mints',
+  },
   global: {
     copy_to_clipboard: {
       success: "Kopierat till urklipp!",
@@ -61,6 +136,7 @@ export default {
       received_lightning: "Mottaget {amount} via Lightning",
       lightning_payment_failed: "Lightning-betalning misslyckades",
       failed_to_decode_invoice: "Kunde inte avkoda fakturan",
+      mint_validation_error: "Mint-valideringsfel",
       invalid_lnurl: "Ogiltig LNURL",
       lnurl_error: "LNURL-fel",
       no_amount: "Inget belopp",

@@ -1,4 +1,78 @@
 export default {
+  MultinutPicker: {
+    payment: 'Multinut ödeme',
+    selectMints: 'Ödeme yapmak için bir veya birden fazla mint seçin.',
+    totalSelectedBalance: 'Seçilen Toplam Bakiye',
+    multiMintPay: 'Çoklu-Mint Ödeme',
+    balanceNotEnough: 'Çoklu mint bakiyesi bu faturayı karşılamaya yetmiyor',
+    failed: 'İşlenemedi: {error}',
+    paid: 'Lightning ile {amount} ödendi',
+  },
+  Settings: {
+    nostr_mint_backup: {
+      title: 'Nostr mint yedeği',
+      enabled: 'Etkin',
+      disabled: 'Devre dışı',
+    },
+    web_of_trust: {
+      title: 'Web of trust',
+      known_pubkeys: 'Bilinen pubkeyler: {wotCount}',
+      pubkeys: 'Pubkeys',
+      continue_crawl: 'Taramaya devam et',
+      crawl_odell: "ODELL'İN WEB OF TRUST'unu tara",
+      crawl_wot: 'Web of trust tara',
+      pause: 'Duraklat',
+      reset: 'Sıfırla',
+      progress: '{crawlProcessed} / {crawlTotal}',
+    },
+    npub_cash: {
+      use_npubx: 'npubx.cash kullan',
+      copy_lightning_address: 'Lightning adresini kopyala',
+      v2_mint: 'npub.cash v2 mint',
+      npc_v2: {
+        choose_mint_title: 'npub.cash v2 için mint seçin',
+        choose_mint_placeholder: 'Bir mint seçin…',
+      },
+    },
+    multinut: {
+      use_multinut: 'Multinut kullan',
+    },
+    appearance: {
+      bip177: {
+        title: 'Bitcoin sembolü',
+        description: 'sats yerine ₿ sembolünü kullan.',
+        toggle: '₿ sembolünü kullan',
+      },
+    },
+  },
+  Settings: {
+    advanced: {
+      developer: {
+        keyset_counters: {
+          counter: 'sayaç: {count}',
+        },
+      },
+    },
+  },
+  global: {
+    process: 'Süreç',
+    Warning: 'Uyarı',
+    Note: 'Not',
+  },
+  NostrBackup: {
+    nostr_mints: 'Nostr mintleri',
+    search_button: 'Ara',
+    backed_up: 'Yedeklendi',
+    add_selected: 'Seçileni ekle',
+    no_backups_found: 'Yedek bulunamadı',
+    no_backups_hint: 'Röleyi değiştirmeyi veya zaman aşımını artırmayı deneyin',
+    invalid_mnemonic: 'Geçersiz mnemonic',
+    search_error: 'Arama hatası',
+    add_error: 'Ekleme hatası',
+    select_all: 'Tümünü seç',
+    deselect_all: 'Tümünü kaldır',
+    restore_selected_mints: 'Seçili mintleri geri yükle',
+  },
   global: {
     copy_to_clipboard: {
       success: "Panoya kopyalandı!",
@@ -62,6 +136,7 @@ export default {
       received_lightning: "Lightning üzerinden {amount} alındı",
       lightning_payment_failed: "Lightning ödemesi başarısız oldu",
       failed_to_decode_invoice: "Fatura çözülemedi",
+      mint_validation_error: "Mint doğrulama hatası",
       invalid_lnurl: "Geçersiz LNURL",
       lnurl_error: "LNURL hatası",
       no_amount: "Tutar yok",

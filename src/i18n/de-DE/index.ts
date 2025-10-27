@@ -1,4 +1,34 @@
 export default {
+  MultinutPicker: {
+    payment: 'Multinut-Zahlung',
+    selectMints: 'Wählen Sie eine oder mehrere Mints aus, um eine Zahlung auszuführen.',
+    totalSelectedBalance: 'Gesamtes ausgewähltes Guthaben',
+    multiMintPay: 'Multi-Mint-Zahlung',
+    balanceNotEnough: 'Das Multi-Mint-Guthaben reicht nicht aus, um diese Rechnung zu begleichen',
+    failed: 'Verarbeitung fehlgeschlagen: {error}',
+    paid: '{amount} über Lightning bezahlt',
+  },
+  Settings: {
+    web_of_trust: {
+      title: "Web of Trust",
+      known_pubkeys: "Bekannte Pubkeys: {wotCount}",
+      pubkeys: "Pubkeys",
+      continue_crawl: "Crawl fortsetzen",
+      crawl_odell: "ODELL'S WEB OF TRUST crawlen",
+      crawl_wot: "Web of Trust crawlen",
+      pause: "Pausieren",
+      reset: "Zurücksetzen",
+      progress: "{crawlProcessed} / {crawlTotal}",
+    },
+    npub_cash: {
+      use_npubx: "npubx.cash verwenden",
+      copy_lightning_address: "Lightning-Adresse kopieren",
+      v2_mint: "npub.cash v2 Mint",
+    },
+    multinut: {
+      use_multinut: "Multinut verwenden",
+    },
+  },
   global: {
     copy_to_clipboard: {
       success: "In die Zwischenablage kopiert!",
@@ -46,6 +76,9 @@ export default {
         label: "Mint URL",
       },
     },
+    process: "Prozess",
+    Warning: "Warnung",
+    Note: "Hinweis",
   },
   wallet: {
     notifications: {
@@ -83,6 +116,7 @@ export default {
         could_not_get_info: "Mint-Information konnte nicht abgerufen werden",
         could_not_get_keys: "Mint-Schlüssel konnten nicht abgerufen werden",
         could_not_get_keysets: "Mint-Keysets konnten nicht abgerufen werden",
+        mint_validation_error: "Mint-Validierungsfehler",
         removed: "Mint entfernt",
         error: "Mint-Fehler",
       },
@@ -197,6 +231,10 @@ export default {
       automatic_claim: {
         toggle: "Automatisch beanspruchen",
         description: "Eingehende Zahlungen automatisch empfangen.",
+      },
+      npc_v2: {
+        choose_mint_title: "Wählen Sie eine Mint für npub.cash v2",
+        choose_mint_placeholder: "Wählen Sie eine Mint...",
       },
     },
     nostr_keys: {
@@ -379,6 +417,19 @@ export default {
         url_label: "Auditor URL",
         api_url_label: "Auditor API URL",
       },
+      multinut: {
+        toggle: "Multinut aktivieren",
+        description: "Wenn aktiviert, verwendet die Wallet Multinut, um Rechnungen von mehreren Mints gleichzeitig zu bezahlen.",
+      },
+      nostr_mint_backup: {
+        toggle: "Mint-Liste auf Nostr sichern",
+        description: "Wenn aktiviert, wird Ihre Mint-Liste automatisch auf Nostr-Relays mit Ihren konfigurierten Nostr-Schlüsseln gesichert. Dies ermöglicht es Ihnen, Ihre Mint-Liste auf verschiedenen Geräten wiederherzustellen.",
+        notifications: {
+          enabled: "Nostr-Mint-Backup aktiviert",
+          disabled: "Nostr-Mint-Backup deaktiviert",
+          failed: "Fehler beim Aktivieren des Nostr-Mint-Backups",
+        },
+      },
     },
     appearance: {
       keyboard: {
@@ -403,6 +454,11 @@ export default {
           blu: "blu",
           flamingo: "flamingo",
         },
+      },
+      bip177: {
+        title: "Bitcoin-Symbol",
+        description: "Verwenden Sie das ₿-Symbol anstelle von sats.",
+        toggle: "₿-Symbol verwenden",
       },
     },
     advanced: {
@@ -439,6 +495,7 @@ export default {
           title: "Keyset-Zähler erhöhen",
           description:
             'Klicken Sie auf die Keyset-ID, um die Ableitungspfad-Zähler für die Keysets in Ihrer Wallet zu erhöhen. Dies ist nützlich, wenn Sie die Fehlermeldung "outputs have already been signed" sehen.',
+          counter: "Zähler: {count}",
         },
         unset_reserved: {
           button: "Alle reservierten Token freigeben",
@@ -726,6 +783,12 @@ export default {
       validate: {
         error: "Mnemonisch muss mindestens 12 Wörter enthalten.",
       },
+      select_all: {
+        label: "Alle auswählen",
+      },
+      deselect_all: {
+        label: "Alle abwählen",
+      },
       restore: {
         label: "Wiederherstellen",
         in_progress: "Mint wird wiederhergestellt…",
@@ -737,6 +800,27 @@ export default {
         success: "Wiederherstellung erfolgreich abgeschlossen",
         error: "Fehler beim Wiederherstellen der Mints: { error }",
       },
+      restore_selected_mints: {
+        label: "Ausgewählte Mints wiederherstellen ({count})",
+        in_progress: "Mint { index } von { length } wird wiederhergestellt…",
+        success: "{count} Mint(s) erfolgreich wiederhergestellt",
+        error: "Fehler beim Wiederherstellen ausgewählter Mints: { error }",
+      },
+    },
+    nostr_mints: {
+      label: "Mints von Nostr wiederherstellen",
+      caption: "Suchen Sie nach Mint-Backups, die auf Nostr-Relays mit Ihrer Seed-Phrase gespeichert sind. Dies hilft Ihnen, Mints zu entdecken, die Sie zuvor verwendet haben.",
+      search_button: "Nach Mint-Backups suchen",
+      select_all: "Alle auswählen",
+      deselect_all: "Alle abwählen",
+      backed_up: "Gesichert",
+      already_added: "Bereits hinzugefügt",
+      add_selected: "Ausgewählte hinzufügen ({count})",
+      no_backups_found: "Keine Mint-Backups gefunden",
+      no_backups_hint: "Stellen Sie sicher, dass das Nostr-Mint-Backup in den Einstellungen aktiviert ist, um Ihre Mint-Liste automatisch zu sichern.",
+      invalid_mnemonic: "Bitte geben Sie eine gültige Seed-Phrase ein, bevor Sie suchen.",
+      search_error: "Fehler bei der Suche nach Mint-Backups.",
+      add_error: "Fehler beim Hinzufügen ausgewählter Mints.",
     },
   },
   MintSettings: {

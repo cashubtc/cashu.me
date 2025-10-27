@@ -1,4 +1,74 @@
 export default {
+  MultinutPicker: {
+    payment: 'การชำระเงิน Multinut',
+    selectMints: 'เลือกหนึ่งหรือหลาย mint เพื่อทำการชำระเงิน',
+    totalSelectedBalance: 'ยอดคงเหลือที่เลือกทั้งหมด',
+    multiMintPay: 'จ่ายแบบหลาย Mint',
+    balanceNotEnough: 'ยอดหลาย mint ไม่เพียงพอสำหรับใบแจ้งหนี้นี้',
+    failed: 'ไม่สามารถประมวลผล: {error}',
+    paid: 'จ่าย {amount} ผ่าน Lightning',
+  },
+  Settings: {
+    nostr_mint_backup: {
+      title: 'สำรองข้อมูล Nostr mint',
+      enabled: 'เปิดใช้งาน',
+      disabled: 'ปิดใช้งาน',
+    },
+    web_of_trust: {
+      title: 'Web of trust',
+      known_pubkeys: 'Pubkey ที่รู้จัก: {wotCount}',
+      pubkeys: 'Pubkeys',
+      continue_crawl: 'ดำเนินการสำรวจต่อ',
+      crawl_odell: "สำรวจ ODELL'S WEB OF TRUST",
+      crawl_wot: 'สำรวจ web of trust',
+      pause: 'หยุดชั่วคราว',
+      reset: 'รีเซ็ต',
+      progress: '{crawlProcessed} / {crawlTotal}',
+    },
+    npub_cash: {
+      use_npubx: 'ใช้ npubx.cash',
+      copy_lightning_address: 'คัดลอกที่อยู่ Lightning',
+      v2_mint: 'npub.cash v2 mint',
+      npc_v2: {
+        choose_mint_title: 'เลือก mint สำหรับ npub.cash v2',
+        choose_mint_placeholder: 'เลือก mint...',
+      },
+    },
+    multinut: {
+      use_multinut: 'ใช้ Multinut',
+    },
+  },
+  Settings: {
+    advanced: {
+      developer: {
+        keyset_counters: {
+          counter: 'ตัวนับ: {count}',
+        },
+      },
+    },
+  },
+  global: {
+    process: 'ประมวลผล',
+    Warning: 'คำเตือน',
+    Note: 'บันทึก',
+  },
+  NostrBackup: {
+    share: 'แชร์',
+  },
+  NostrBackup: {
+    nostr_mints: 'Nostr mints',
+    search_button: 'ค้นหา',
+    backed_up: 'สำรองแล้ว',
+    add_selected: 'เพิ่มที่เลือก',
+    no_backups_found: 'ไม่พบการสำรองข้อมูล',
+    no_backups_hint: 'ลองเปลี่ยนรีเลย์หรือลดเวลาหมดอายุ',
+    invalid_mnemonic: 'มุนีมอนิกไม่ถูกต้อง',
+    search_error: 'ข้อผิดพลาดในการค้นหา',
+    add_error: 'ข้อผิดพลาดในการเพิ่ม',
+    select_all: 'เลือกทั้งหมด',
+    deselect_all: 'ไม่เลือกทั้งหมด',
+    restore_selected_mints: 'กู้คืน mint ที่เลือก',
+  },
   global: {
     copy_to_clipboard: {
       success: "คัดลอกไปยังคลิปบอร์ดแล้ว!",
@@ -62,6 +132,7 @@ export default {
       received_lightning: "ได้รับ {amount} ผ่าน Lightning",
       lightning_payment_failed: "การชำระเงิน Lightning ล้มเหลว",
       failed_to_decode_invoice: "ไม่สามารถถอดรหัสใบแจ้งหนี้",
+      mint_validation_error: "ข้อผิดพลาดในการตรวจสอบ mint",
       invalid_lnurl: "LNURL ไม่ถูกต้อง",
       lnurl_error: "ข้อผิดพลาด LNURL",
       no_amount: "ไม่มียอดเงิน",
@@ -349,9 +420,16 @@ export default {
         currency: {
           title: "สกุลเงินเฟียต",
           description: "เลือกสกุลเงินเฟียตสำหรับการแสดงราคา Bitcoin",
-        },
+    },
+    },
+    appearance: {
+      bip177: {
+        title: 'สัญลักษณ์ Bitcoin',
+        description: 'ใช้สัญลักษณ์ ₿ แทน sats',
+        toggle: 'ใช้สัญลักษณ์ ₿',
       },
     },
+  },
     experimental: {
       title: "ทดลอง",
       description: "คุณสมบัติเหล่านี้เป็นคุณสมบัติทดลอง",

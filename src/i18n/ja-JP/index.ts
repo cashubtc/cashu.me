@@ -1,4 +1,89 @@
 export default {
+  MultinutPicker: {
+    payment: 'マルチナット支払い',
+    selectMints: '支払いに使用するミントを一つ以上選択してください。',
+    totalSelectedBalance: '選択した合計残高',
+    multiMintPay: 'マルチミント支払い',
+    balanceNotEnough: '複数ミントの残高がこの請求書を満たすには不十分です',
+    failed: '処理に失敗しました: {error}',
+    paid: 'Lightningで{amount}を支払いました',
+  },
+  Settings: {
+    nostr_mint_backup: {
+      title: 'Nostr ミントのバックアップ',
+      enabled: '有効',
+      disabled: '無効',
+    },
+    web_of_trust: {
+      title: 'Web of trust',
+      known_pubkeys: '既知のpubkey: {wotCount}',
+      pubkeys: 'Pubkeys',
+      continue_crawl: 'クロールを続行',
+      crawl_odell: "ODELLのWEB OF TRUSTをクロール",
+      crawl_wot: 'Web of trust をクロール',
+      pause: '一時停止',
+      reset: 'リセット',
+      progress: '{crawlProcessed} / {crawlTotal}',
+    },
+    npub_cash: {
+      use_npubx: 'npubx.cash を使う',
+      copy_lightning_address: 'Lightningアドレスをコピー',
+      v2_mint: 'npub.cash v2 ミント',
+      npc_v2: {
+        choose_mint_title: 'npub.cash v2 用のミントを選択',
+        choose_mint_placeholder: 'ミントを選択…',
+      },
+    },
+    multinut: {
+      use_multinut: 'Multinut を使う',
+    },
+    appearance: {
+      bip177: {
+        title: 'ビットコイン記号',
+        description: 'sats の代わりに ₿ 記号を使う。',
+        toggle: '₿ 記号を使う',
+      },
+    },
+  },
+  Settings: {
+    advanced: {
+      developer: {
+        keyset_counters: {
+          counter: 'カウンター: {count}',
+        },
+      },
+    },
+  },
+  global: {
+    process: '処理',
+    Warning: '警告',
+    Note: '注記',
+  },
+  NostrBackup: {
+    select_all: 'すべて選択',
+    deselect_all: 'すべて解除',
+    restore_selected_mints: '選択したミントを復元',
+    nostr_mints: 'Nostr ミント',
+    search_button: '検索',
+    backed_up: 'バックアップ済み',
+    add_selected: '選択を追加',
+    no_backups_found: 'バックアップが見つかりません',
+    no_backups_hint: 'リレーを変更するかタイムアウトを延長してください',
+    invalid_mnemonic: '無効なニーモニック',
+    search_error: '検索エラー',
+    add_error: '追加エラー',
+  },
+  NostrBackup: {
+    nostr_mints: 'Nostr ミント',
+    search_button: '検索',
+    backed_up: 'バックアップ済み',
+    add_selected: '選択を追加',
+    no_backups_found: 'バックアップが見つかりません',
+    no_backups_hint: 'リレーを変更するかタイムアウトを延長してみてください',
+    invalid_mnemonic: '無効なニーモニック',
+    search_error: '検索エラー',
+    add_error: '追加エラー',
+  },
   global: {
     copy_to_clipboard: {
       success: "クリップボードにコピーしました！",
@@ -62,6 +147,7 @@ export default {
       received_lightning: "Lightningで{amount}を受け取りました",
       lightning_payment_failed: "Lightning支払いに失敗しました",
       failed_to_decode_invoice: "請求書をデコードできませんでした",
+      mint_validation_error: "ミントの検証エラー",
       invalid_lnurl: "無効なLNURL",
       lnurl_error: "LNURLエラー",
       no_amount: "金額がありません",

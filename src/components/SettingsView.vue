@@ -425,8 +425,8 @@
       <!-- Web of trust actions -->
       <q-item>
         <q-item-section>
-          <q-item-label overline> Web of trust </q-item-label>
-          <q-item-label caption> Known pubkeys: {{ wotCount }} </q-item-label>
+          <q-item-label overline> {{ $t('Settings.web_of_trust.title') }} </q-item-label>
+          <q-item-label caption> {{ $t('Settings.web_of_trust.known_pubkeys', { wotCount: wotCount }) }} </q-item-label>
         </q-item-section>
       </q-item>
       <q-item>
@@ -435,10 +435,10 @@
             <q-btn flat dense :loading="wotLoading" @click="crawlWebOfTrust(2)">
               {{
                 hasCrawlCheckpoint && !wotLoading
-                  ? "Continue crawl"
+                  ? $t('Settings.web_of_trust.continue_crawl')
                   : signerType === "SEED"
-                  ? "Crawl ODELL's WEB OF TRUST"
-                  : "Crawl web of trust"
+                  ? $t('Settings.web_of_trust.crawl_odell')
+                  : $t('Settings.web_of_trust.crawl_wot')
               }}
             </q-btn>
             <q-btn
@@ -449,7 +449,7 @@
               color="negative"
               @click="cancelCrawl"
             >
-              Pause
+              {{ $t('Settings.web_of_trust.pause') }}
             </q-btn>
             <q-btn
               v-if="!wotLoading"
@@ -459,7 +459,7 @@
               :disable="wotLoading"
               @click="resetWebOfTrust"
             >
-              Reset
+              {{ $t('Settings.web_of_trust.reset') }}
             </q-btn>
           </div>
         </q-item-section>
@@ -473,7 +473,7 @@
             :value="crawlTotal > 0 ? crawlProcessed / crawlTotal : 0"
           />
           <div class="text-caption q-mt-xs">
-            {{ crawlProcessed }} / {{ crawlTotal }}
+            {{ $t('Settings.web_of_trust.progress', { crawlProcessed: crawlProcessed, crawlTotal: crawlTotal }) }}
           </div>
         </q-item-section>
       </q-item>
@@ -1145,7 +1145,7 @@
             <div class="row q-pt-md">
               <q-toggle
                 v-model="npcV2Enabled"
-                label="Use npubx.cash"
+                :label="$t('Settings.npub_cash.use_npubx')"
                 color="primary"
               >
                 <q-badge
@@ -1169,7 +1169,7 @@
                     color="grey"
                     class="q-mr-sm cursor-pointer"
                   >
-                    <q-tooltip>Copy Lightning address</q-tooltip>
+                    <q-tooltip>{{ $t('Settings.npub_cash.copy_lightning_address') }}</q-tooltip>
                   </q-icon>
                 </template>
               </q-input>
@@ -1177,7 +1177,7 @@
           </div>
           <div class="row q-mx-md">
             <div class="col-12 q-pt-md">
-              <q-item-label caption>npub.cash v2 mint</q-item-label>
+              <q-item-label caption>{{ $t('Settings.npub_cash.v2_mint') }}</q-item-label>
               <q-input
                 outlined
                 v-model="npcV2Mint"
@@ -1227,7 +1227,7 @@
             <div class="row q-pt-md">
               <q-toggle
                 v-model="multinutEnabled"
-                label="Use Multinut"
+                :label="$t('Settings.multinut.use_multinut')"
                 color="primary"
               >
                 <q-badge
@@ -1645,7 +1645,7 @@
                         flat
                         click
                         @click="increaseKeysetCounter(counter.id, 1)"
-                        >{{ counter.id }} - counter: {{ counter.counter }}
+                        >{{ counter.id }} - {{$t('Settings.advanced.developer.keyset_counters.counter', {count: counter.counter})}}
                       </q-btn>
                     </row>
                   </row>

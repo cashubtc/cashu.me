@@ -1,4 +1,13 @@
 export default {
+  MultinutPicker: {
+    payment: 'Paiement Multinut',
+    selectMints: 'Sélectionnez une ou plusieurs mints pour exécuter un paiement.',
+    totalSelectedBalance: 'Solde total sélectionné',
+    multiMintPay: 'Paiement Multi-Mint',
+    balanceNotEnough: 'Le solde multi-mint n’est pas suffisant pour satisfaire cette facture',
+    failed: 'Échec du traitement: {error}',
+    paid: 'Payé {amount} via Lightning',
+  },
   global: {
     copy_to_clipboard: {
       success: "Copié dans le presse-papiers !",
@@ -46,6 +55,10 @@ export default {
         label: "URL de la mint",
       },
     },
+    process: "Processus",
+    Warning: "Avertissement",
+    Note: "Note",
+    counter: "Compteur",
   },
   wallet: {
     notifications: {
@@ -83,6 +96,7 @@ export default {
         could_not_get_info: "Impossible d'obtenir les informations de la mint",
         could_not_get_keys: "Impossible d'obtenir les clés de la mint",
         could_not_get_keysets: "Impossible d'obtenir les keysets de la mint",
+        mint_validation_error: "Erreur de validation de la menthe",
         removed: "Mint supprimée",
         error: "Erreur de la mint",
       },
@@ -197,6 +211,10 @@ export default {
       automatic_claim: {
         toggle: "Réclamer automatiquement",
         description: "Recevez les paiements entrants automatiquement.",
+      },
+      npc_v2: {
+        choose_mint_title: "Choisissez une menthe pour npub.cash v2",
+        choose_mint_placeholder: "Sélectionnez une menthe...",
       },
     },
     nostr_keys: {
@@ -378,6 +396,19 @@ export default {
         url_label: "URL de l'auditeur",
         api_url_label: "URL de l'API de l'auditeur",
       },
+      multinut: {
+        toggle: "Activer Multinut",
+        description: "Si cette option est activée, le portefeuille utilisera Multinut pour payer les factures de plusieurs टकसाल à la fois.",
+      },
+      nostr_mint_backup: {
+        toggle: "Sauvegarder la liste des टकसाल sur Nostr",
+        description: "Si cette option est activée, votre liste de टकसाल sera automatiquement sauvegardée sur les relais Nostr à l'aide de vos clés Nostr configurées. Cela vous permet de restaurer votre liste de टकसाल sur plusieurs appareils.",
+        notifications: {
+          enabled: "Sauvegarde de la टकसाल Nostr activée",
+          disabled: "Sauvegarde de la टकसाल Nostr désactivée",
+          failed: "Échec de l'activation de la sauvegarde de la टकसाल Nostr",
+        },
+      },
     },
     appearance: {
       keyboard: {
@@ -402,6 +433,29 @@ export default {
           flamingo: "flamingo",
         },
       },
+      bip177: {
+        title: "Symbole Bitcoin",
+        description: "Utilisez le symbole ₿ au lieu de sats.",
+        toggle: "Utiliser le symbole ₿",
+      },
+    },
+    web_of_trust: {
+      title: "Réseau de confiance",
+      known_pubkeys: "Clés publiques connues: {wotCount}",
+      pubkeys: "Clés publiques",
+      continue_crawl: "Poursuivre l'exploration",
+      crawl_odell: "EXPLORER LE RÉSEAU DE CONFIANCE D'ODELL",
+      crawl_wot: "Explorer le réseau de confiance",
+      pause: "Pause",
+      reset: "Réinitialiser",
+    },
+    npub_cash: {
+      use_npubx: "Utiliser npubx.cash",
+      copy_lightning_address: "Copier l'adresse Lightning",
+      v2_mint: "npub.cash v2 mint",
+    },
+    multinut: {
+      use_multinut: "Utiliser Multinut",
     },
     advanced: {
       title: "Avancé",
@@ -463,6 +517,35 @@ export default {
         },
       },
     },
+    web_of_trust: {
+      title: "Web of trust",
+      known_pubkeys: "Pubkeys connus : {wotCount}",
+      continue_crawl: "Continuer l'exploration",
+      crawl_odell: "Explorer le WEB OF TRUST d'ODELL",
+      crawl_wot: "Explorer le web of trust",
+      pause: "Pause",
+      reset: "Réinitialiser",
+      progress: "{crawlProcessed} / {crawlTotal}",
+    },
+    npub_cash: {
+      use_npubx: "Utiliser npubx.cash",
+      copy_lightning_address: "Copier l'adresse Lightning",
+      v2_mint: "Mint npub.cash v2",
+    },
+    multinut: {
+      use_multinut: "Utiliser Multinut",
+    },
+  },
+  NostrBackup: {
+    nostr_mints: "Mints Nostr",
+    search_button: "Rechercher",
+    backed_up: "Sauvegardé",
+    add_selected: "Ajouter la sélection",
+    no_backups_found: "Aucune sauvegarde trouvée",
+    no_backups_hint: "Essayez de changer de relais ou d'augmenter le délai",
+    invalid_mnemonic: "Mnémonique invalide",
+    search_error: "Erreur de recherche",
+    add_error: "Erreur d'ajout",
   },
   NoMintWarnBanner: {
     title: "Rejoindre une mint",
@@ -735,6 +818,12 @@ export default {
       validate: {
         error: "Le mnémonique doit comporter au moins 12 mots.",
       },
+      select_all: {
+        label: "Tout sélectionner",
+      },
+      deselect_all: {
+        label: "Tout désélectionner",
+      },
       restore: {
         label: "Restaurer",
         in_progress: "Restauration de la mint…",
@@ -745,6 +834,12 @@ export default {
         in_progress: "Restauration de la mint { index } sur { length }…",
         success: "Restauration terminée avec succès",
         error: "Erreur lors de la restauration des mints : { error }",
+      },
+      restore_selected_mints: {
+        label: "Restaurer les Mints sélectionnées ({count})",
+        in_progress: "Restauration de la menthe {index} de {length}…",
+        success: "{count} mint(s) restaurée(s) avec succès",
+        error: "Erreur lors de la restauration des mints sélectionnées: {error}",
       },
     },
   },

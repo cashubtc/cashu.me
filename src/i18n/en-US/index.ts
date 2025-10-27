@@ -418,6 +418,24 @@ export default {
         toggle: "Use ₿ symbol",
       },
     },
+    web_of_trust: {
+      title: "Web of trust",
+      known_pubkeys: "Known pubkeys: {wotCount}",
+      continue_crawl: "Continue crawl",
+      crawl_odell: "Crawl ODELL'S WEB OF TRUST",
+      crawl_wot: "Crawl web of trust",
+      pause: "Pause",
+      reset: "Reset",
+      progress: "{crawlProcessed} / {crawlTotal}",
+    },
+    npub_cash: {
+      use_npubx: "Use npubx.cash",
+      copy_lightning_address: "Copy Lightning address",
+      v2_mint: "npub.cash v2 mint",
+    },
+    multinut: {
+      use_multinut: "Use Multinut",
+    },
     advanced: {
       title: "Advanced",
       developer: {
@@ -452,6 +470,7 @@ export default {
           title: "Increment keyset counters",
           description:
             'Click the keyset ID to increment the derivation path counters for the keysets in your wallet. This is useful if you see the "outputs have already been signed" error.',
+          counter: "counter: {count}",
         },
         unset_reserved: {
           button: "Unset all reserved tokens",

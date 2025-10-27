@@ -1,4 +1,34 @@
 export default {
+  MultinutPicker: {
+    payment: 'دفع متعدد الجوز',
+    selectMints: 'حدد واحدًا أو أكثر من mints لتنفيذ الدفع منه.',
+    totalSelectedBalance: 'إجمالي الرصيد المحدد',
+    multiMintPay: 'دفع متعدد Mint',
+    balanceNotEnough: 'رصيد متعدد mints غير كافٍ لتلبية هذه الفاتورة',
+    failed: 'فشل في المعالجة: {error}',
+    paid: 'تم دفع {amount} عبر Lightning',
+  },
+  Settings: {
+    web_of_trust: {
+      title: "شبكة الثقة",
+      known_pubkeys: "المفاتيح العامة المعروفة: {wotCount}",
+      pubkeys: "المفاتيح العامة",
+      continue_crawl: "متابعة الزحف",
+      crawl_odell: "الزحف عبر شبكة الثقة الخاصة بـ ODELL",
+      crawl_wot: "الزحف عبر شبكة الثقة",
+      pause: "إيقاف مؤقت",
+      reset: "إعادة تعيين",
+      progress: "{crawlProcessed} / {crawlTotal}",
+    },
+    npub_cash: {
+      use_npubx: "استخدم npubx.cash",
+      copy_lightning_address: "نسخ عنوان Lightning",
+      v2_mint: "mint لـ npub.cash v2",
+    },
+    multinut: {
+      use_multinut: "استخدم Multinut",
+    },
+  },
   global: {
     copy_to_clipboard: {
       success: "تم النسخ إلى الحافظة!",
@@ -46,6 +76,9 @@ export default {
         label: "عنوان URL للـ Mint",
       },
     },
+    process: "معالجة",
+    Warning: "تحذير",
+    Note: "ملاحظة",
   },
   wallet: {
     notifications: {
@@ -82,6 +115,7 @@ export default {
         could_not_get_info: "تعذر الحصول على معلومات الـ Mint",
         could_not_get_keys: "تعذر الحصول على مفاتيح الـ Mint",
         could_not_get_keysets: "تعذر الحصول على مجموعات مفاتيح الـ Mint",
+        mint_validation_error: "خطأ في التحقق من صحة mint",
         removed: "تمت إزالة الـ Mint",
         error: "خطأ في الـ Mint",
       },
@@ -195,6 +229,10 @@ export default {
       automatic_claim: {
         toggle: "المطالبة تلقائيًا",
         description: "استلام المدفوعات الواردة تلقائيًا.",
+      },
+      npc_v2: {
+        choose_mint_title: "اختر mint لـ npub.cash v2",
+        choose_mint_placeholder: "حدد mint...",
       },
     },
     nostr_keys: {
@@ -373,6 +411,19 @@ export default {
         url_label: "عنوان URL للمدقق",
         api_url_label: "عنوان URL لواجهة برمجة تطبيقات المدقق",
       },
+      multinut: {
+        toggle: "تمكين Multinut",
+        description: "إذا تم تمكينه، ستستخدم المحفظة Multinut لدفع الفواتير من عدة mints في وقت واحد.",
+      },
+      nostr_mint_backup: {
+        toggle: "النسخ الاحتياطي لقائمة mint على Nostr",
+        description: "إذا تم تمكينه، سيتم نسخ قائمة mint الخاصة بك احتياطيًا تلقائيًا إلى مرحلات Nostr باستخدام مفاتيح Nostr التي تم تكوينها. يتيح لك هذا استعادة قائمة mint الخاصة بك عبر الأجهزة.",
+        notifications: {
+          enabled: "تمكين النسخ الاحتياطي لـ Nostr mint",
+          disabled: "تعطيل النسخ الاحتياطي لـ Nostr mint",
+          failed: "فشل تمكين النسخ الاحتياطي لـ Nostr mint",
+        },
+      },
     },
     appearance: {
       keyboard: {
@@ -396,6 +447,11 @@ export default {
           blu: "أزرق",
           flamingo: "فلامينجو",
         },
+      },
+      bip177: {
+        title: "رمز البيتكوين",
+        description: "استخدم رمز ₿ بدلاً من sats.",
+        toggle: "استخدام رمز ₿",
       },
     },
     advanced: {
@@ -430,6 +486,7 @@ export default {
           title: "زيادة عدادات مجموعة المفاتيح",
           description:
             'انقر على معرّف مجموعة المفاتيح لزيادة عدادات مسار الاشتقاق لمجموعات المفاتيح في محفظتك. هذا مفيد إذا رأيت خطأ "النواتج تم توقيعها بالفعل".',
+          counter: "العداد: {count}",
         },
         unset_reserved: {
           button: "إلغاء تعيين جميع الرموز المحجوزة",
@@ -725,6 +782,12 @@ export default {
       validate: {
         error: "يجب أن تكون الكلمة التذكيرية 12 كلمة على الأقل.",
       },
+      select_all: {
+        label: "تحديد الكل",
+      },
+      deselect_all: {
+        label: "إلغاء تحديد الكل",
+      },
       restore: {
         label: "استعادة",
         in_progress: "استعادة mint…",
@@ -736,6 +799,27 @@ export default {
         success: "تمت الاستعادة بنجاح",
         error: "خطأ في استعادة mints: { error }",
       },
+      restore_selected_mints: {
+        label: "استعادة المِنْتات المحددة ({count})",
+        in_progress: "استعادة mint { index } من { length } …",
+        success: "تمت استعادة {count} mint(s) بنجاح",
+        error: "خطأ في استعادة mints المحددة: { error }",
+      },
+    },
+    nostr_mints: {
+      label: "استعادة Mints من Nostr",
+      caption: "ابحث عن نسخ احتياطية لـ mint مخزنة على مرحلات Nostr باستخدام عبارة الاستعادة الخاصة بك. سيساعدك هذا على اكتشاف mints التي استخدمتها سابقًا.",
+      search_button: "البحث عن نسخ احتياطية لـ Mint",
+      select_all: "تحديد الكل",
+      deselect_all: "إلغاء تحديد الكل",
+      backed_up: "تم النسخ الاحتياطي",
+      already_added: "تمت الإضافة بالفعل",
+      add_selected: "إضافة المحدد ({count})",
+      no_backups_found: "لم يتم العثور على نسخ احتياطية لـ mint",
+      no_backups_hint: "تأكد من تمكين النسخ الاحتياطي لـ Nostr mint في الإعدادات لنسخ قائمة mint الخاصة بك احتياطيًا تلقائيًا.",
+      invalid_mnemonic: "الرجاء إدخال عبارة استعادة صالحة قبل البحث.",
+      search_error: "فشل البحث عن نسخ احتياطية لـ mint.",
+      add_error: "فشل إضافة mints المحددة.",
     },
   },
   MintSettings: {
@@ -893,6 +977,9 @@ export default {
       },
       copy_link: {
         tooltip_text: "نسخ الرابط",
+      },
+      share: {
+        tooltip_text: "مشاركة ecash",
       },
       lock: {
         label: "@:global.actions.lock.label",

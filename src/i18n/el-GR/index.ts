@@ -1,4 +1,40 @@
 export default {
+  MultinutPicker: {
+    payment: 'Πληρωμή Multinut',
+    selectMints: 'Επιλέξτε ένα ή περισσότερα mints για να εκτελέσετε μια πληρωμή.',
+    totalSelectedBalance: 'Συνολικό επιλεγμένο υπόλοιπο',
+    multiMintPay: 'Πληρωμή Multi-Mint',
+    balanceNotEnough: 'Το υπόλοιπο πολλών νομισματοκοπείων δεν επαρκεί για την κάλυψη αυτού του τιμολογίου',
+    failed: 'Η επεξεργασία απέτυχε: {error}',
+    paid: 'Πληρώθηκε {amount} μέσω Lightning',
+  },
+  Settings: {
+    web_of_trust: {
+      title: "Δίκτυο εμπιστοσύνης",
+      known_pubkeys: "Γνωστά pubkeys: {wotCount}",
+      continue_crawl: "Συνέχιση ανίχνευσης",
+      crawl_odell: "Ανίχνευση του WEB OF TRUST του ODELL",
+      crawl_wot: "Ανίχνευση δικτύου εμπιστοσύνης",
+      pause: "Παύση",
+      reset: "Επαναφορά",
+      progress: "{crawlProcessed} / {crawlTotal}",
+    },
+    advanced: {
+      developer: {
+        keyset_counters: {
+          counter: "μετρητής: {count}",
+        },
+      },
+    },
+    npub_cash: {
+      use_npubx: "Χρήση npubx.cash",
+      copy_lightning_address: "Αντιγραφή διεύθυνσης Lightning",
+      v2_mint: "npub.cash v2 mint",
+    },
+    multinut: {
+      use_multinut: "Χρήση Multinut",
+    },
+  },
   global: {
     copy_to_clipboard: {
       success: "Αντιγράφηκε στο πρόχειρο!",
@@ -46,6 +82,9 @@ export default {
         label: "URL Mint",
       },
     },
+    process: "Επεξεργασία",
+    Warning: "Προειδοποίηση",
+    Note: "Σημείωση",
   },
   wallet: {
     notifications: {
@@ -83,6 +122,7 @@ export default {
         could_not_get_info: "Δεν ήταν δυνατή η λήψη πληροφοριών mint",
         could_not_get_keys: "Δεν ήταν δυνατή η λήψη κλειδιών mint",
         could_not_get_keysets: "Δεν ήταν δυνατή η λήψη συνόλων κλειδιών mint",
+        mint_validation_error: "Σφάλμα επικύρωσης Mint",
         removed: "Το mint αφαιρέθηκε",
         error: "Σφάλμα mint",
       },
@@ -197,6 +237,10 @@ export default {
       automatic_claim: {
         toggle: "Αυτόματη διεκδίκηση",
         description: "Λήψη εισερχόμενων πληρωμών αυτόματα.",
+      },
+      npc_v2: {
+        choose_mint_title: "Επιλέξτε mint για npub.cash v2",
+        choose_mint_placeholder: "Επιλέξτε ένα mint...",
       },
     },
     nostr_keys: {
@@ -378,6 +422,19 @@ export default {
         url_label: "URL Ελεγκτή",
         api_url_label: "URL API Ελεγκτή",
       },
+      multinut: {
+        toggle: "Ενεργοποίηση Multinut",
+        description: "Εάν είναι ενεργοποιημένο, το πορτοφόλι θα χρησιμοποιεί το Multinut για την πληρωμή τιμολογίων από πολλαπλά mints ταυτόχρονα.",
+      },
+      nostr_mint_backup: {
+        toggle: "Δημιουργία αντιγράφων ασφαλείας της λίστας mint στο Nostr",
+        description: "Εάν είναι ενεργοποιημένο, η λίστα mint σας θα δημιουργείται αυτόματα αντίγραφα ασφαλείας στα ρελέ Nostr χρησιμοποιώντας τα διαμορφωμένα κλειδιά Nostr. Αυτό σας επιτρέπει να επαναφέρετε τη λίστα mint σας σε όλες τις συσκευές.",
+        notifications: {
+          enabled: "Ενεργοποιήθηκε το αντίγραφο ασφαλείας Nostr mint",
+          disabled: "Απενεργοποιήθηκε το αντίγραφο ασφαλείας Nostr mint",
+          failed: "Αποτυχία ενεργοποίησης του αντιγράφου ασφαλείας Nostr mint",
+        },
+      },
     },
     appearance: {
       keyboard: {
@@ -402,6 +459,11 @@ export default {
           blu: "blu",
           flamingo: "flamingo",
         },
+      },
+      bip177: {
+        title: "Σύμβολο Bitcoin",
+        description: "Χρησιμοποιήστε το σύμβολο ₿ αντί για sats.",
+        toggle: "Χρήση συμβόλου ₿",
       },
     },
     advanced: {
@@ -735,6 +797,12 @@ export default {
       validate: {
         error: "Το μνημονικό πρέπει να είναι τουλάχιστον 12 λέξεις.",
       },
+      select_all: {
+        label: "Επιλογή όλων",
+      },
+      deselect_all: {
+        label: "Αποεπιλογή όλων",
+      },
       restore: {
         label: "Επαναφορά",
         in_progress: "Επαναφορά mint…",
@@ -746,6 +814,27 @@ export default {
         success: "Η επαναφορά ολοκληρώθηκε με επιτυχία",
         error: "Σφάλμα κατά την επαναφορά των mints: { error }",
       },
+      restore_selected_mints: {
+        label: "Επαναφορά επιλεγμένων Mints ({count})",
+        in_progress: "Επαναφορά mint { index } από { length }…",
+        success: "Επιτυχής επαναφορά {count} mint(s)",
+        error: "Σφάλμα κατά την επαναφορά των mints: { error }",
+      },
+    },
+    nostr_mints: {
+      label: "Επαναφορά Mints από το Nostr",
+      caption: "Αναζητήστε αντίγραφα ασφαλείας mint που είναι αποθηκευμένα σε ρελέ Nostr χρησιμοποιώντας τη φράση-κλειδί σας. Αυτό θα σας βοηθήσει να ανακαλύψετε νομισματοκοπεία που χρησιμοποιήσατε προηγουμένως.",
+      search_button: "Αναζήτηση για αντίγραφα ασφαλείας Mint",
+      select_all: "Επιλογή όλων",
+      deselect_all: "Αποεπιλογή όλων",
+      backed_up: "Δημιουργήθηκαν αντίγραφα ασφαλείας",
+      already_added: "Έχει ήδη προστεθεί",
+      add_selected: "Προσθήκη επιλεγμένων ({count})",
+      no_backups_found: "Δεν βρέθηκαν αντίγραφα ασφαλείας mint",
+      no_backups_hint: "Βεβαιωθείτε ότι η δημιουργία αντιγράφων ασφαλείας του Nostr mint είναι ενεργοποιημένη στις ρυθμίσεις για την αυτόματη δημιουργία αντιγράφων ασφαλείας της λίστας mint σας.",
+      invalid_mnemonic: "Εισαγάγετε μια έγκυρη φράση-κλειδί πριν από την αναζήτηση.",
+      search_error: "Αποτυχία αναζήτησης αντιγράφων ασφαλείας mint.",
+      add_error: "Αποτυχία προσθήκης επιλεγμένων mints.",
     },
   },
   MintSettings: {

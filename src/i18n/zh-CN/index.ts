@@ -1,4 +1,80 @@
 export default {
+  MultinutPicker: {
+    payment: '多坚果支付',
+    selectMints: '选择一个或多个铸币厂来发起支付。',
+    totalSelectedBalance: '所选总余额',
+    multiMintPay: '多铸币支付',
+    balanceNotEnough: '多铸币余额不足以支付此发票',
+    failed: '处理失败：{error}',
+    paid: '通过闪电网络支付了 {amount}',
+  },
+  Settings: {
+    nostr_mint_backup: {
+      title: 'Nostr 铸币备份',
+      enabled: '已启用',
+      disabled: '已禁用',
+    },
+    web_of_trust: {
+      title: '信任网络',
+      known_pubkeys: '已知公钥：{wotCount}',
+      pubkeys: '公钥',
+      continue_crawl: '继续抓取',
+      crawl_odell: '抓取 ODELL 的信任网络',
+      crawl_wot: '抓取信任网络',
+      pause: '暂停',
+      reset: '重置',
+      progress: '{crawlProcessed} / {crawlTotal}',
+    },
+    npub_cash: {
+      use_npubx: '使用 npubx.cash',
+      copy_lightning_address: '复制闪电地址',
+      v2_mint: 'npub.cash v2 铸币厂',
+      npc_v2: {
+        choose_mint_title: '为 npub.cash v2 选择铸币厂',
+        choose_mint_placeholder: '选择一个铸币厂…',
+      },
+    },
+    multinut: {
+      use_multinut: '使用 Multinut',
+    },
+  },
+  global: {
+    process: '处理',
+    Warning: '警告',
+    Note: '备注',
+  },
+  Settings: {
+    advanced: {
+      developer: {
+        keyset_counters: {
+          counter: '计数器: {count}',
+        },
+      },
+    },
+  },
+  Settings: {
+    appearance: {
+      bip177: {
+        title: '比特币符号',
+        description: '使用 ₿ 符号代替 sats。',
+        toggle: '使用 ₿ 符号',
+      },
+    },
+  },
+  NostrBackup: {
+    nostr_mints: 'Nostr 铸币厂',
+    search_button: '搜索',
+    backed_up: '已备份',
+    add_selected: '添加所选',
+    no_backups_found: '未找到备份',
+    no_backups_hint: '尝试更换中继或增加超时时间',
+    invalid_mnemonic: '助记词无效',
+    search_error: '搜索错误',
+    add_error: '添加错误',
+    select_all: '全选',
+    deselect_all: '取消全选',
+    restore_selected_mints: '恢复所选铸币厂',
+  },
   global: {
     copy_to_clipboard: {
       success: "已复制到剪贴板！",
@@ -61,6 +137,7 @@ export default {
       received_lightning: "通过闪电网络收到 {amount}",
       lightning_payment_failed: "闪电网络支付失败",
       failed_to_decode_invoice: "无法解码发票",
+      mint_validation_error: "铸币厂验证错误",
       invalid_lnurl: "无效的LNURL",
       lnurl_error: "LNURL错误",
       no_amount: "没有金额",

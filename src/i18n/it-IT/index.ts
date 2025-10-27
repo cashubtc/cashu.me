@@ -1,4 +1,13 @@
 export default {
+  MultinutPicker: {
+    payment: 'Pagamento Multinut',
+    selectMints: 'Seleziona una o più mint da cui eseguire un pagamento.',
+    totalSelectedBalance: 'Saldo totale selezionato',
+    multiMintPay: 'Pagamento Multi-Mint',
+    balanceNotEnough: 'Il saldo multi-mint non è sufficiente per questa fattura',
+    failed: 'Impossibile elaborare: {error}',
+    paid: 'Pagato {amount} via Lightning',
+  },
   global: {
     copy_to_clipboard: {
       success: "Copiato negli appunti!",
@@ -44,6 +53,78 @@ export default {
     inputs: {
       mint_url: {
         label: "URL Mint",
+      },
+    },
+  },
+  global: {
+    process: 'Processo',
+    Warning: 'Avviso',
+    Note: 'Nota',
+  },
+  Settings: {
+    nostr_mint_backup: {
+      title: 'Backup mint Nostr',
+      enabled: 'Abilitato',
+      disabled: 'Disabilitato',
+    },
+    web_of_trust: {
+      title: 'Web of trust',
+      known_pubkeys: 'Pubkey conosciute: {wotCount}',
+      pubkeys: 'Pubkey',
+      continue_crawl: 'Continua crawl',
+      crawl_odell: "Crawl del WEB OF TRUST di ODELL",
+      crawl_wot: 'Crawl web of trust',
+      pause: 'Pausa',
+      reset: 'Reset',
+      progress: '{crawlProcessed} / {crawlTotal}',
+    },
+    npub_cash: {
+      use_npubx: 'Usa npubx.cash',
+      copy_lightning_address: 'Copia indirizzo Lightning',
+      v2_mint: 'npub.cash v2 mint',
+      npc_v2: {
+        choose_mint_title: 'Scegli il mint per npub.cash v2',
+        choose_mint_placeholder: 'Seleziona un mint…',
+      },
+    },
+    multinut: {
+      use_multinut: 'Usa Multinut',
+    },
+    appearance: {
+      bip177: {
+        title: 'Simbolo Bitcoin',
+        description: 'Usa il simbolo ₿ invece di sats.',
+        toggle: 'Usa simbolo ₿',
+      },
+    },
+  },
+  NostrBackup: {
+    nostr_mints: 'Mint Nostr',
+    search_button: 'Cerca',
+    backed_up: 'Salvato',
+    add_selected: 'Aggiungi selezionati',
+    no_backups_found: 'Nessun backup trovato',
+    no_backups_hint: 'Prova a cambiare relay o aumentare il timeout',
+    invalid_mnemonic: 'Mnemonica non valida',
+    search_error: 'Errore di ricerca',
+    add_error: 'Errore di aggiunta',
+    select_all: 'Seleziona tutto',
+    deselect_all: 'Deseleziona tutto',
+    restore_selected_mints: 'Ripristina mint selezionati',
+  },
+  wallet: {
+    mint: {
+      notifications: {
+        mint_validation_error: "Errore di validazione della mint",
+      },
+    },
+  },
+  Settings: {
+    advanced: {
+      developer: {
+        keyset_counters: {
+          counter: 'contatore: {count}',
+        },
       },
     },
   },
