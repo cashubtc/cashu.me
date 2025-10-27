@@ -55,7 +55,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
     // Aggregated list by URL (persisted)
     recommendations: useLocalStorage<MintRecommendation[]>(
       "cashu.ndk.mintRecommendations",
-      [],
+      []
     ),
     subsActive: false,
   }),
@@ -188,13 +188,13 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       this.hydrateFromDb();
       const subInfos = this.ndk.subscribe(
         { kinds: [38172 as NDKKind] } as NDKFilter,
-        { closeOnEose: false, groupable: false },
+        { closeOnEose: false, groupable: false }
       );
       subInfos.on("event", async (ev: NDKEvent) => {
         await this.handleMintInfoEvent(ev);
         try {
           const u = ev.tags.find(
-            (t) => t[0] === "u" && (t[2] === "cashu" || t.length >= 2),
+            (t) => t[0] === "u" && (t[2] === "cashu" || t.length >= 2)
           )?.[1];
           if (typeof u === "string" && u.startsWith("http")) {
             // Kick off HTTP info fetch (concurrency-limited via scheduler)
@@ -205,7 +205,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       });
       const subReviews = this.ndk.subscribe(
         { kinds: [38000 as NDKKind] } as NDKFilter,
-        { closeOnEose: false, groupable: false },
+        { closeOnEose: false, groupable: false }
       );
       subReviews.on("event", async (ev: NDKEvent) => {
         await this.handleReviewEvent(ev);
@@ -239,7 +239,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
           const id = setTimeout(async () => {
             try {
               const existing = await (this.db as MintReviewsDB).httpInfo.get(
-                url,
+                url
               );
               const row: HttpInfoRow = {
                 url,
@@ -299,7 +299,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       urls: string[],
       concurrency: number = 20,
       delayMs: number = 100,
-      timeoutMs?: number,
+      timeoutMs?: number
     ) {
       try {
         await this.ensureDbInitialized();
@@ -336,7 +336,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
         };
         const workers = Array.from(
           { length: Math.min(concurrency, toFetch.length) },
-          () => worker(),
+          () => worker()
         );
         await Promise.all(workers);
       } catch {}
@@ -359,7 +359,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       try {
         if (ev.kind !== 38172) return;
         const u = ev.tags.find(
-          (t) => t[0] === "u" && (t[2] === "cashu" || t.length >= 2),
+          (t) => t[0] === "u" && (t[2] === "cashu" || t.length >= 2)
         )?.[1];
         if (!u || typeof u !== "string" || !u.startsWith("http")) return;
         let content: any = undefined;
@@ -383,7 +383,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       const withoutSameAuthor = list.filter((r) => r.pubkey !== review.pubkey);
       withoutSameAuthor.push(review);
       withoutSameAuthor.sort(
-        (a, b) => (a.created_at || 0) - (b.created_at || 0),
+        (a, b) => (a.created_at || 0) - (b.created_at || 0)
       );
       this.urlReviews.set(url, withoutSameAuthor);
       await this.persistReviewRow(url, review);
@@ -394,7 +394,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
         const kTag = ev.tags.find((t) => t[0] === "k");
         if (!kTag || kTag[1] !== "38172") return;
         const uTags = ev.tags.filter(
-          (t) => t[0] === "u" && (t[2] === "cashu" || t.length >= 2),
+          (t) => t[0] === "u" && (t[2] === "cashu" || t.length >= 2)
         );
         if (!uTags.length) return;
         const { rating, comment } = parseRatingAndComment(ev.content || "");
@@ -467,7 +467,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
         recs.sort(
           (a, b) =>
             b.reviewsCount - a.reviewsCount ||
-            (b.averageRating || 0) - (a.averageRating || 0),
+            (b.averageRating || 0) - (a.averageRating || 0)
         );
         this.recommendations = recs;
       } catch {}
@@ -504,7 +504,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
               rating: r.rating,
               comment: r.comment,
               raw: r.raw,
-            }) as MintReview,
+            } as MintReview)
         );
         list.sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
         this.urlReviews.set(url, list);

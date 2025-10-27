@@ -99,7 +99,7 @@ export default defineComponent({
         mintToEdit.value = { ...newMint };
         editMintData.value = { ...newMint };
       },
-      { immediate: true },
+      { immediate: true }
     );
 
     const updateMintLocal = () => {

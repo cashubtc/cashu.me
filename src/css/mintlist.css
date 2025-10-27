@@ -89,9 +89,7 @@
 /* Transition animations */
 .fade-enter-active,
 .fade-leave-active {
-  transition:
-    transform 1s ease,
-    opacity 1s ease;
+  transition: transform 1s ease, opacity 1s ease;
 }
 
 /* Selection buttons styling */

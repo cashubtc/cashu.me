@@ -151,7 +151,7 @@ export default {
     // Set the initial selected language based on the current locale or from storage
     this.selectedLanguage =
       this.languageOptions.find(
-        (option) => option.value === this.$i18n.locale || navigator.language,
+        (option) => option.value === this.$i18n.locale || navigator.language
       )?.label || "Language";
   },
   setup() {

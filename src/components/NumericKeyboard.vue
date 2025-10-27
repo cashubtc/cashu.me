@@ -85,7 +85,7 @@ export default defineComponent({
       this.showNumericKeyboard = false;
       notify(
         this.$i18n.t("NumericKeyboard.actions.close.closed_info_text"),
-        "bottom",
+        "bottom"
       );
     },
     emitDone() {
@@ -129,9 +129,7 @@ export default defineComponent({
   border-radius: 8px;
   font-weight: 600;
   text-transform: capitalize;
-  transition:
-    background-color 0.3s,
-    transform 0.2s;
+  transition: background-color 0.3s, transform 0.2s;
   background-color: var(--q-color-grey-2);
   color: var(--q-color-grey-10);
 }
@@ -169,9 +167,7 @@ export default defineComponent({
 /* Transition styles */
 .slide-up-fade-enter-active,
 .slide-up-fade-leave-active {
-  transition:
-    transform 0.3s ease,
-    opacity 0.3s ease;
+  transition: transform 0.3s ease, opacity 0.3s ease;
 }
 .slide-up-fade-enter,
 .slide-up-fade-leave-to {

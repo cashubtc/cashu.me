@@ -108,7 +108,7 @@
           $t(
             filterPending
               ? 'HistoryTable.actions.show_all.label'
-              : 'HistoryTable.actions.filter_pending.label',
+              : 'HistoryTable.actions.filter_pending.label'
           )
         "
         class="q-ml-sm q-px-md"
@@ -234,12 +234,12 @@ export default defineComponent({
       if (this.filterPendingEcash) {
         return this.unifiedTransactions.filter(
           (transaction) =>
-            transaction.status === "pending" && transaction.type === "ecash",
+            transaction.status === "pending" && transaction.type === "ecash"
         );
       }
       if (this.filterPending) {
         return this.unifiedTransactions.filter(
-          (transaction) => transaction.status === "pending",
+          (transaction) => transaction.status === "pending"
         );
       }
       return this.unifiedTransactions;
@@ -418,7 +418,7 @@ export default defineComponent({
 
       // Sort by date (newest first) and cache the result
       this.cachedUnifiedTransactions = transactions.sort(
-        (a, b) => new Date(b.date) - new Date(a.date),
+        (a, b) => new Date(b.date) - new Date(a.date)
       );
     },
   },

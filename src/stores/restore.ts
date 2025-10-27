@@ -17,13 +17,13 @@ export const useRestoreStore = defineStore("restore", {
   state: () => ({
     showRestoreDialog: useLocalStorage<boolean>(
       "cashu.restore.showRestoreDialog",
-      false,
+      false
     ),
     restoringState: false,
     restoringMint: "",
     mnemonicToRestore: useLocalStorage<string>(
       "cashu.restore.mnemonicToRestore",
-      "",
+      ""
     ),
     restoreProgress: 0,
     restoreCounter: 0,
@@ -41,7 +41,7 @@ export const useRestoreStore = defineStore("restore", {
         await this._restoreMint(url);
       } catch (error) {
         notifyError(
-          i18n.global.t("restore.restore_mint_error_text", { error }),
+          i18n.global.t("restore.restore_mint_error_text", { error })
         );
       } finally {
         this.restoringState = false;
@@ -99,8 +99,8 @@ export const useRestoreStore = defineStore("restore", {
             console.log(
               `> Restored ${proofs.length} proofs with sum ${proofs.reduce(
                 (s, p) => s + p.amount,
-                0,
-              )}`,
+                0
+              )}`
             );
             restoreProofs = restoreProofs.concat(proofs);
             emptyBatchCount = 0;
@@ -112,7 +112,7 @@ export const useRestoreStore = defineStore("restore", {
             {
               restoreCounter: this.restoreCounter,
               keysetId: keyset.id,
-            },
+            }
           );
           start += BATCH_SIZE;
 
@@ -128,17 +128,18 @@ export const useRestoreStore = defineStore("restore", {
               startIndex: i,
               endIndex: i + BATCH_SIZE,
               keysetId: keyset.id,
-            },
+            }
           );
           const checkRestoreProofs = restoreProofs.slice(i, i + BATCH_SIZE);
-          const proofStates =
-            await wallet.checkProofsStates(checkRestoreProofs);
+          const proofStates = await wallet.checkProofsStates(
+            checkRestoreProofs
+          );
           const spentProofs = checkRestoreProofs.filter(
-            (p, i) => proofStates[i].state === CheckStateEnum.SPENT,
+            (p, i) => proofStates[i].state === CheckStateEnum.SPENT
           );
           const spentProofsSecrets = spentProofs.map((p) => p.secret);
           const unspentProofs = checkRestoreProofs.filter(
-            (p) => !spentProofsSecrets.includes(p.secret),
+            (p) => !spentProofsSecrets.includes(p.secret)
           );
           if (unspentProofs.length > 0) {
             console.log(
@@ -146,12 +147,12 @@ export const useRestoreStore = defineStore("restore", {
                 unspentProofs.length
               } unspent proofs with sum ${unspentProofs.reduce(
                 (s, p) => s + p.amount,
-                0,
-              )}`,
+                0
+              )}`
             );
           }
           const newProofs = unspentProofs.filter(
-            (p) => !proofsStore.proofs.some((pr) => pr.secret === p.secret),
+            (p) => !proofsStore.proofs.some((pr) => pr.secret === p.secret)
           );
           await useProofsStore().addProofs(newProofs);
           restoredProofs = restoredProofs.concat(newProofs);
@@ -161,13 +162,13 @@ export const useRestoreStore = defineStore("restore", {
         const restoredAmount = restoredProofs.reduce((s, p) => s + p.amount, 0);
         const restoredAmountStr = useUiStore().formatCurrency(
           restoredAmount,
-          keyset.unit,
+          keyset.unit
         );
         if (restoredAmount > 0) {
           notifySuccess(
             i18n.global.t("restore.restored_amount_success_text", {
               amount: restoredAmountStr,
-            }),
+            })
           );
           restoredSomething = true;
         }

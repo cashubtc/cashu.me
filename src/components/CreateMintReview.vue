@@ -153,7 +153,7 @@ export default defineComponent({
     });
 
     const canPublish = computed(
-      () => rating.value >= 1 && rating.value <= 5 && !!props.mintUrl,
+      () => rating.value >= 1 && rating.value <= 5 && !!props.mintUrl
     );
 
     const ensureNdk = async () => {
@@ -177,7 +177,7 @@ export default defineComponent({
         await ensureNdk();
         if (!nostr.signer) {
           notifyError(
-            "Please connect a Nostr account in Settings to publish a review.",
+            "Please connect a Nostr account in Settings to publish a review."
           );
           return;
         }
@@ -235,7 +235,7 @@ export default defineComponent({
         }
         if (latest) {
           const m = (latest.content || "").match(
-            /\s*\[(\d)\s*\/\s*5\]\s*(.*)$/s,
+            /\s*\[(\d)\s*\/\s*5\]\s*(.*)$/s
           );
           if (m) {
             const r = parseInt(m[1], 10);

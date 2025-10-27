@@ -29,7 +29,7 @@ export default {
         highlightScanRegion: true,
         highlightCodeOutline: true,
         onDecodeError: () => {},
-      },
+      }
     );
     this.qrScanner.start();
     this.urDecoder = new URDecoder();

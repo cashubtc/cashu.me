@@ -10,15 +10,8 @@
               class="text-weight-bold"
               style="
                 font-size: 15.2px;
-                font-family:
-                  Inter,
-                  -apple-system,
-                  &quot;system-ui&quot;,
-                  &quot;Segoe UI&quot;,
-                  Roboto,
-                  &quot;Helvetica Neue&quot;,
-                  Arial,
-                  sans-serif;
+                font-family: Inter, -apple-system, 'system-ui', 'Segoe UI',
+                  Roboto, 'Helvetica Neue', Arial, sans-serif;
                 font-weight: 600;
                 color: #ffffff;
                 text-transform: none;

@@ -28,7 +28,7 @@
                     value: sendData.amount
                       ? formatCurrency(
                           sendData.amount * activeUnitCurrencyMultiplyer,
-                          activeUnit,
+                          activeUnit
                         )
                       : $t("SendTokenDialog.title_ecash_text"),
                   })
@@ -44,7 +44,7 @@
                   {{
                     formatCurrency(
                       sendData.paymentRequest.amount,
-                      sendData.paymentRequest.unit,
+                      sendData.paymentRequest.unit
                     )
                   }}
                 </span>
@@ -59,7 +59,7 @@
                       sendData.amount *
                       activeUnitCurrencyMultiplyer,
                     bitcoinPriceCurrency,
-                    true,
+                    true
                   )
                 }})
               </span>
@@ -484,10 +484,10 @@
                     <q-tooltip>{{
                       ndefSupported
                         ? $t(
-                            "SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_supported_text",
+                            "SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_supported_text"
                           )
                         : $t(
-                            "SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_unsupported_text",
+                            "SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_unsupported_text"
                           )
                     }}</q-tooltip>
                     <template v-slot:loading>
@@ -729,7 +729,7 @@ export default defineComponent({
         spendableProofs,
         mintWallet,
         this.sendData.amount * this.activeUnitCurrencyMultiplyer,
-        this.includeFeesInSendAmount,
+        this.includeFeesInSendAmount
       );
       const feesToAdd = this.includeFeesInSendAmount
         ? this.getFeesForProofs(selectedProofs)
@@ -787,13 +787,13 @@ export default defineComponent({
         ) {
           if (!this.checkSentTokens) {
             console.log(
-              "settingsStore.checkSentTokens is disabled, skipping token check",
+              "settingsStore.checkSentTokens is disabled, skipping token check"
             );
             return;
           }
           const unspent = this.checkTokenSpendable(
             this.sendData.historyToken,
-            false,
+            false
           );
           if (!unspent) {
             this.sendData.historyToken.status = "paid";
@@ -909,7 +909,7 @@ export default defineComponent({
       }
       console.log(
         "### this.currentFragmentInterval",
-        this.currentFragmentInterval,
+        this.currentFragmentInterval
       );
       this.startQrCodeLoop();
     },
@@ -1008,7 +1008,7 @@ export default defineComponent({
                       break;
                     default:
                       throw new Error(
-                        `Unknown NFC encoding: ${this.nfcEncoding}`,
+                        `Unknown NFC encoding: ${this.nfcEncoding}`
                       );
                   }
                   notifySuccess("Writing to NFC card...");
@@ -1020,11 +1020,11 @@ export default defineComponent({
                     })
                     .catch((err) => {
                       console.error(
-                        `NFC write failed: The card may not have enough capacity (needed ${records[0].data.length} bytes).`,
+                        `NFC write failed: The card may not have enough capacity (needed ${records[0].data.length} bytes).`
                       );
                       notifyError(
                         `The card may not have enough capacity (needed ${records[0].data.length} bytes).`,
-                        "NFC write failed",
+                        "NFC write failed"
                       );
                     });
                 } catch (err) {
@@ -1052,7 +1052,7 @@ export default defineComponent({
     },
     lockTokens: async function () {
       let sendAmount = Math.floor(
-        this.sendData.amount * this.activeUnitCurrencyMultiplyer,
+        this.sendData.amount * this.activeUnitCurrencyMultiplyer
       );
       try {
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
@@ -1061,7 +1061,7 @@ export default defineComponent({
           this.activeProofs,
           mintWallet,
           sendAmount,
-          this.sendData.p2pkPubkey,
+          this.sendData.p2pkPubkey
         );
         // update UI
         this.sendData.tokens = sendProofs;
@@ -1089,7 +1089,7 @@ export default defineComponent({
       */
       this.showNumericKeyboard = false;
       this.sendData.p2pkPubkey = this.maybeConvertNpub(
-        this.sendData.p2pkPubkey,
+        this.sendData.p2pkPubkey
       );
       if (
         this.sendData.p2pkPubkey &&
@@ -1101,7 +1101,7 @@ export default defineComponent({
 
       try {
         let sendAmount = Math.floor(
-          this.sendData.amount * this.activeUnitCurrencyMultiplyer,
+          this.sendData.amount * this.activeUnitCurrencyMultiplyer
         );
         const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
@@ -1110,7 +1110,7 @@ export default defineComponent({
           mintWallet,
           sendAmount,
           true,
-          this.includeFeesInSendAmount,
+          this.includeFeesInSendAmount
         );
 
         // update UI

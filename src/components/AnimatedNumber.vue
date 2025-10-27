@@ -53,7 +53,7 @@ export default defineComponent({
 
         requestAnimationFrame(animate);
       },
-      { immediate: true },
+      { immediate: true }
     );
 
     const formattedValue = computed(() => {

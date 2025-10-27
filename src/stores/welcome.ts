@@ -21,24 +21,24 @@ export const useWelcomeStore = defineStore("welcome", {
     currentSlide: useLocalStorage<number>("cashu.welcome.currentSlide", 0),
     seedPhraseValidated: useLocalStorage<boolean>(
       "cashu.welcome.seedPhraseValidated",
-      false,
+      false
     ),
     termsAccepted: useLocalStorage<boolean>(
       "cashu.welcome.termsAccepted",
-      false,
+      false
     ),
     onboardingPath: useLocalStorage<string>("cashu.welcome.path", ""),
     seedEnteredValid: useLocalStorage<boolean>(
       "cashu.welcome.seedEnteredValid",
-      false,
+      false
     ),
     mintSetupCompleted: useLocalStorage<boolean>(
       "cashu.welcome.mintSetupCompleted",
-      false,
+      false
     ),
     ecashRestoreCompleted: useLocalStorage<boolean>(
       "cashu.welcome.ecashRestoreCompleted",
-      false,
+      false
     ),
   }),
   getters: {

@@ -104,7 +104,7 @@
                         {{
                           formatCurrency(
                             mintClass(mint).unitBalance(unit),
-                            unit,
+                            unit
                           )
                         }}
                       </span>
@@ -539,7 +539,7 @@ export default defineComponent({
       }
       if (!this.validateMintUrl(this.addMintData.url)) {
         notifyError(
-          this.$i18n.t("MintSettings.add.actions.add_mint.error_invalid_url"),
+          this.$i18n.t("MintSettings.add.actions.add_mint.error_invalid_url")
         );
         return;
       }
@@ -594,14 +594,14 @@ export default defineComponent({
         if (!recs || recs.length === 0) {
           this.notifyError(
             this.$i18n.t(
-              "MintSettings.discover.actions.discover.error_no_mints",
-            ),
+              "MintSettings.discover.actions.discover.error_no_mints"
+            )
           );
         } else {
           this.notifySuccess(
             this.$i18n.t("MintSettings.discover.actions.discover.success", {
               length: recs.length,
-            }),
+            })
           );
         }
         this.startSubscriptions();

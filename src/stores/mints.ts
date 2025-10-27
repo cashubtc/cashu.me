@@ -46,7 +46,7 @@ export class MintClass {
   get proofs() {
     const proofsStore = useProofsStore();
     return proofsStore.proofs.filter((p) =>
-      this.mint.keysets.map((k) => k.id).includes(p.id),
+      this.mint.keysets.map((k) => k.id).includes(p.id)
     );
   }
   get allBalances() {
@@ -76,7 +76,7 @@ export class MintClass {
     const proofsStore = useProofsStore();
     const unitKeysets = this.unitKeysets(unit);
     return proofsStore.proofs.filter(
-      (p) => unitKeysets.map((k) => k.id).includes(p.id) && !p.reserved,
+      (p) => unitKeysets.map((k) => k.id).includes(p.id) && !p.reserved
     );
   }
 
@@ -125,7 +125,7 @@ export const useMintsStore = defineStore("mints", {
     watch([activeMintUrl, activeUnit], async () => {
       const proofsStore = useProofsStore();
       console.log(
-        `watcher: activeMintUrl: ${activeMintUrl.value}, activeUnit: ${activeUnit.value}`,
+        `watcher: activeMintUrl: ${activeMintUrl.value}, activeUnit: ${activeUnit.value}`
       );
       await proofsStore.updateActiveProofs();
     });
@@ -160,7 +160,7 @@ export const useMintsStore = defineStore("mints", {
 
           const nut15 = m.info?.nuts[15];
           const viableMint = nut15?.methods.find(
-            (m) => m.method === "bolt11" && m.unit === activeUnit,
+            (m) => m.method === "bolt11" && m.unit === activeUnit
           );
           const balance = new MintClass(m).unitBalance(activeUnit);
           if (nut15 && viableMint && balance > 0) return true;
@@ -248,7 +248,7 @@ export const useMintsStore = defineStore("mints", {
       } else {
         if (this.mints.length) {
           console.error(
-            "No active mint. This should not happen. switching to first one.",
+            "No active mint. This should not happen. switching to first one."
           );
           this.activateMintUrl(this.mints[0].url, false, true);
           return new MintClass(this.mints[0]);
@@ -260,7 +260,7 @@ export const useMintsStore = defineStore("mints", {
       const proofsStore = useProofsStore();
       const unitKeysets = mint.keysets.filter((k) => k.unit === unit);
       return proofsStore.proofs.filter(
-        (p) => unitKeysets.map((k) => k.id).includes(p.id) && !p.reserved,
+        (p) => unitKeysets.map((k) => k.id).includes(p.id) && !p.reserved
       );
     },
     mintUnitKeysets(mint: Mint, unit: string): MintKeyset[] {
@@ -307,7 +307,7 @@ export const useMintsStore = defineStore("mints", {
     },
     addMint: async function (
       addMintData: { url: string; nickname?: string },
-      verbose = false,
+      verbose = false
     ): Promise<Mint> {
       let url = addMintData.url;
       this.addMintBlocking = true;
@@ -366,7 +366,7 @@ export const useMintsStore = defineStore("mints", {
       url: string,
       verbose = false,
       force = false,
-      unit: string | undefined = undefined,
+      unit: string | undefined = undefined
     ) {
       const mint = this.mints.filter((m) => m.url === url)[0];
       if (mint) {
@@ -377,7 +377,7 @@ export const useMintsStore = defineStore("mints", {
       } else {
         notifyError(
           this.t("wallet.mint.notifications.not_found"),
-          this.t("wallet.mint.notifications.activation_failed"),
+          this.t("wallet.mint.notifications.activation_failed")
         );
       }
     },
@@ -391,7 +391,7 @@ export const useMintsStore = defineStore("mints", {
       if (!mint) {
         notifyError(
           this.t("wallet.mint.notifications.no_active_mint"),
-          this.t("wallet.mint.notifications.unit_activation_failed"),
+          this.t("wallet.mint.notifications.unit_activation_failed")
         );
         return;
       }
@@ -401,7 +401,7 @@ export const useMintsStore = defineStore("mints", {
       } else {
         notifyError(
           this.t("wallet.mint.notifications.unit_not_supported"),
-          this.t("wallet.mint.notifications.unit_activation_failed"),
+          this.t("wallet.mint.notifications.unit_activation_failed")
         );
       }
       await uIStore.unlockMutex();
@@ -443,7 +443,7 @@ export const useMintsStore = defineStore("mints", {
         }
         await notifyError(
           err_msg,
-          this.t("wallet.mint.notifications.activation_failed"),
+          this.t("wallet.mint.notifications.activation_failed")
         );
         this.mints.filter((m) => m.url === mint.url)[0].errored = true;
         throw error;
@@ -471,7 +471,7 @@ export const useMintsStore = defineStore("mints", {
 
       // Navigate to mint details page with mint URL as query parameter
       window.location.href = `/mintdetails?mintUrl=${encodeURIComponent(
-        mint.url,
+        mint.url
       )}`;
     },
     fetchMintInfo: async function (mint: Mint) {
@@ -489,7 +489,7 @@ export const useMintsStore = defineStore("mints", {
     },
     checkForMintKeysetIdCollisions: async function (
       mintToAdd: Mint,
-      keysets: MintKeyset[],
+      keysets: MintKeyset[]
     ) {
       // check if there are any keysets with the same id in another mint
       const allKeysets = this.mints
@@ -497,7 +497,7 @@ export const useMintsStore = defineStore("mints", {
         .map((m) => m.keysets)
         .flat();
       const collisions = keysets.filter((k) =>
-        allKeysets.map((k) => k.id).includes(k.id),
+        allKeysets.map((k) => k.id).includes(k.id)
       );
       // perform the same check for the integer representation of the keyset id
       function keysetIdToBigInt(id: string): bigint {
@@ -511,11 +511,11 @@ export const useMintsStore = defineStore("mints", {
       }
       const allKeysetsIdsBigInt = allKeysets.map((k) => keysetIdToBigInt(k.id));
       const hasCollisions = keysets.some((k) =>
-        allKeysetsIdsBigInt.includes(keysetIdToBigInt(k.id)),
+        allKeysetsIdsBigInt.includes(keysetIdToBigInt(k.id))
       );
       if (hasCollisions) {
         const errorMessage = this.t(
-          "wallet.mint.notifications.mint_validation_error",
+          "wallet.mint.notifications.mint_validation_error"
         );
         throw new Error(errorMessage);
       }
@@ -596,7 +596,7 @@ export const useMintsStore = defineStore("mints", {
         if (verbose) {
           notifyError(
             response.error,
-            this.t("wallet.mint.notifications.error"),
+            this.t("wallet.mint.notifications.error")
           );
         }
         throw new Error(`Mint error: ${response.error}`);

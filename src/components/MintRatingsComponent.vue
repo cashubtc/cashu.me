@@ -292,7 +292,7 @@ export default defineComponent({
     loadProfilesForPagedReviews() {
       // Load profiles only for users currently shown in pagination
       const uniquePks = Array.from(
-        new Set((this.paged || []).map((r: any) => r.pubkey)),
+        new Set((this.paged || []).map((r: any) => r.pubkey))
       );
       uniquePks.forEach((pk) => {
         if (pk && !this.profiles[pk] && !this.loadingProfiles.has(pk)) {
@@ -358,7 +358,7 @@ export default defineComponent({
     },
     ratingsOnly(): any[] {
       return (this.allReviews || []).filter(
-        (r: any) => typeof r.rating === "number",
+        (r: any) => typeof r.rating === "number"
       );
     },
     average(): number | null {

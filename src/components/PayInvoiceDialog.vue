@@ -28,7 +28,7 @@
                       formatCurrency(
                         payInvoiceData.meltQuote.response.amount,
                         activeUnit,
-                        true,
+                        true
                       )
                     }}
                   </template>
@@ -43,7 +43,7 @@
                     (currentCurrencyPrice / 100000000) *
                       payInvoiceData.meltQuote.response.amount,
                     bitcoinPriceCurrency,
-                    true,
+                    true
                   )
                 }})
               </span>
@@ -93,8 +93,8 @@
               payInvoiceData.meltQuote.error != ''
                 ? $t('PayInvoiceDialog.invoice.actions.pay.error')
                 : !payInvoiceData.blocking
-                  ? $t('PayInvoiceDialog.invoice.actions.pay.label')
-                  : $t('PayInvoiceDialog.invoice.actions.pay.in_progress')
+                ? $t('PayInvoiceDialog.invoice.actions.pay.label')
+                : $t('PayInvoiceDialog.invoice.actions.pay.in_progress')
             "
             :loading="globalMutexLock && !payInvoiceData.blocking"
             class="q-px-lg"
@@ -388,7 +388,7 @@ export default defineComponent({
     hasMultinutSupport: function () {
       const totalMultinutBalance = this.multiMints.reduce(
         (acc, mint) => acc + new MintClass(mint).unitBalance(this.activeUnit),
-        0,
+        0
       );
       return (
         this.multiMints.length > 1 &&

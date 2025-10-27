@@ -32,7 +32,7 @@
                     invoiceData.amount *
                     activeUnitCurrencyMultiplyer,
                   bitcoinPriceCurrency,
-                  true,
+                  true
                 )
               }})
             </span>
@@ -246,7 +246,7 @@ export default defineComponent({
       let display = this.formatCurrency(
         this.invoiceData.amount,
         this.invoiceData.unit,
-        true,
+        true
       );
       return display;
     },
@@ -278,11 +278,11 @@ export default defineComponent({
         this.createInvoiceButtonBlocked = true;
         const mintWallet = useWalletStore().mintWallet(
           mintStore.activeMintUrl,
-          mintStore.activeUnit,
+          mintStore.activeUnit
         );
         const mintQuote = await this.requestMint(
           this.invoiceData.amount,
-          mintWallet,
+          mintWallet
         );
         await this.mintOnPaid(mintQuote.quote);
       } catch (e) {

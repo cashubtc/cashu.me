@@ -100,7 +100,7 @@ export default defineComponent({
       });
 
       const successfulRecentSwaps = recentSwaps.filter(
-        (swap) => swap.state === "OK",
+        (swap) => swap.state === "OK"
       );
       const recentSuccessRate =
         recentSwaps.length > 0
@@ -117,11 +117,11 @@ export default defineComponent({
           // Add "However, " prefix if success rate is above threshold
           if (recentSuccessRate >= props.successRateThreshold) {
             messages.push(
-              `${baseMessage} However, ${successMessage} This mint seems reliable, failures might be due to the receiving mint.`,
+              `${baseMessage} However, ${successMessage} This mint seems reliable, failures might be due to the receiving mint.`
             );
           } else {
             messages.push(
-              `${baseMessage} Only ${successMessage} This mint might be unreliable.`,
+              `${baseMessage} Only ${successMessage} This mint might be unreliable.`
             );
           }
         } else {
@@ -129,7 +129,7 @@ export default defineComponent({
         }
       } else if (props.mint.state === "UNKNOWN") {
         messages.push(
-          "The auditor was not able to determine the quality of this mint yet.",
+          "The auditor was not able to determine the quality of this mint yet."
         );
       } else if (props.mint.state === "OK") {
         // Add warnings for OK state mints with not enough successful swaps or low success rate
@@ -142,7 +142,7 @@ export default defineComponent({
               successfulRecentSwaps.length
             } successful ${
               successfulRecentSwaps.length === 1 ? "swap" : "swaps"
-            } in the last ${props.recentDaysThreshold} days.`,
+            } in the last ${props.recentDaysThreshold} days.`
           );
         }
 
@@ -155,8 +155,8 @@ export default defineComponent({
             `In the last ${
               props.recentDaysThreshold
             } days, this mint had a success rate of ${Math.round(
-              recentSuccessRate,
-            )}%, below the recommended ${props.successRateThreshold}%.`,
+              recentSuccessRate
+            )}%, below the recommended ${props.successRateThreshold}%.`
           );
         }
 
@@ -186,26 +186,26 @@ export default defineComponent({
 
         // Check if mint is slow
         const successfulSwapsWithTime = successfulSwaps.filter(
-          (swap) => swap.time_taken,
+          (swap) => swap.time_taken
         );
         if (successfulSwapsWithTime.length > 0) {
           const totalTime = successfulSwapsWithTime.reduce(
             (sum, swap) => sum + (swap.time_taken || 0),
-            0,
+            0
           );
           const averageTimeMs = totalTime / successfulSwapsWithTime.length;
 
           if (averageTimeMs > props.slowMintThresholdMs) {
             const averageTimeSeconds = (averageTimeMs / 1000).toFixed(1);
             messages.push(
-              `This mint is slow. Payments from this mint took ${averageTimeSeconds} seconds on average.`,
+              `This mint is slow. Payments from this mint took ${averageTimeSeconds} seconds on average.`
             );
           }
         }
       } else if (props.swaps.length > 0) {
         // If there are swaps but none are successful
         messages.push(
-          "No successful swaps recorded for this mint. It might be unreachable.",
+          "No successful swaps recorded for this mint. It might be unreachable."
         );
       }
 

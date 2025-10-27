@@ -110,8 +110,8 @@ export default defineComponent({
     const sortedSwaps = computed(() =>
       [...props.swaps].sort(
         (a, b) =>
-          new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
-      ),
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      )
     );
 
     // Calculate responsive maxBars based on container width
@@ -133,7 +133,7 @@ export default defineComponent({
         const widthRatio =
           (containerWidth.value - minWidth) / (maxWidth - minWidth);
         return Math.floor(
-          props.minBars + widthRatio * (props.maxPossibleBars - props.minBars),
+          props.minBars + widthRatio * (props.maxPossibleBars - props.minBars)
         );
       }
     });
@@ -145,7 +145,7 @@ export default defineComponent({
       // Formula: (containerWidth + barSpacing) / (minBarWidth + barSpacing)
       const maxPossibleBars = Math.floor(
         (containerWidth.value + spacing.value) /
-          (minBarWidth.value + spacing.value),
+          (minBarWidth.value + spacing.value)
       );
 
       // Limit to maxBars computed value
@@ -161,7 +161,7 @@ export default defineComponent({
       return Math.max(
         minBarWidth.value,
         (containerWidth.value - spacing.value * (barsCount.value - 1)) /
-          barsCount.value,
+          barsCount.value
       );
     });
 
@@ -200,7 +200,7 @@ export default defineComponent({
       // Use the same time range logic as in displayBuckets
       const startTime = new Date(sortedSwaps.value[0].created_at).getTime(); // Oldest swap
       const endTime = new Date(
-        sortedSwaps.value[sortedSwaps.value.length - 1].created_at,
+        sortedSwaps.value[sortedSwaps.value.length - 1].created_at
       ).getTime(); // Latest swap
 
       const interval = (startTime - endTime) / 3; // 4 ticks (now, 2 middle, end)
@@ -208,7 +208,7 @@ export default defineComponent({
       // Generate time ticks from oldest to newest to match bar positions
       return Array.from(
         { length: 4 },
-        (_, i) => new Date(endTime + interval * i),
+        (_, i) => new Date(endTime + interval * i)
       );
     });
 
@@ -226,7 +226,7 @@ export default defineComponent({
 
       // Create buckets based on time
       const endTime = new Date(
-        sortedSwaps.value[sortedSwaps.value.length - 1].created_at,
+        sortedSwaps.value[sortedSwaps.value.length - 1].created_at
       ).getTime(); // Latest swap
       const startTime = new Date(sortedSwaps.value[0].created_at).getTime(); // Oldest swap
       const timeRange = endTime - startTime;
@@ -247,7 +247,7 @@ export default defineComponent({
         buckets[0].swaps = [...sortedSwaps.value];
         buckets[0].count = sortedSwaps.value.length;
         buckets[0].successCount = sortedSwaps.value.filter(
-          (swap) => swap.state === "OK",
+          (swap) => swap.state === "OK"
         ).length;
         buckets[0].successRate =
           buckets[0].count > 0 ? buckets[0].successCount / buckets[0].count : 0;
@@ -278,7 +278,7 @@ export default defineComponent({
         const reversedPosition = 1 - normalizedPosition; // 0 = newest, 1 = oldest
         const bucketIndex = Math.min(
           Math.floor(reversedPosition * barsCount.value),
-          barsCount.value - 1,
+          barsCount.value - 1
         );
 
         if (bucketIndex >= 0) {
@@ -323,7 +323,7 @@ export default defineComponent({
       // Special case for the most recent time (leftmost tick)
       if (sortedSwaps.value.length > 0) {
         const latestSwapTime = new Date(
-          sortedSwaps.value[sortedSwaps.value.length - 1].created_at,
+          sortedSwaps.value[sortedSwaps.value.length - 1].created_at
         ).getTime();
         if (Math.abs(date.getTime() - latestSwapTime) < 1000) {
           // Within 1 second
@@ -405,7 +405,7 @@ export default defineComponent({
 
       if (bucket.startTime && bucket.endTime) {
         timeRange = `${formatDate(
-          bucket.startTime.toISOString(),
+          bucket.startTime.toISOString()
         )} - ${formatDate(bucket.endTime.toISOString())}`;
       }
 

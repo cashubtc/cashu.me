@@ -37,7 +37,7 @@
                 formatCurrency(
                   (currentCurrencyPrice / 100000000) * tokenAmount,
                   bitcoinPriceCurrency,
-                  true,
+                  true
                 )
               }})
             </span>
@@ -116,10 +116,10 @@
             <q-tooltip>{{
               ndefSupported
                 ? $t(
-                    "ReceiveTokenDialog.actions.nfc.tooltips.ndef_supported_text",
+                    "ReceiveTokenDialog.actions.nfc.tooltips.ndef_supported_text"
                   )
                 : $t(
-                    "ReceiveTokenDialog.actions.nfc.tooltips.ndef_unsupported_text",
+                    "ReceiveTokenDialog.actions.nfc.tooltips.ndef_unsupported_text"
                   )
             }}</q-tooltip>
             <template v-slot:loading>
@@ -376,7 +376,7 @@ export default defineComponent({
       const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
       return this.getProofs(decodedToken).reduce(
         (sum, el) => (sum += el.amount),
-        0,
+        0
       );
     },
     tokenUnit: function () {
@@ -478,8 +478,8 @@ export default defineComponent({
       if (this.tokenAlreadyInHistory(tokenStr)) {
         this.notifySuccess(
           this.$i18n.t(
-            "ReceiveTokenDialog.actions.later.already_in_history_success_text",
-          ),
+            "ReceiveTokenDialog.actions.later.already_in_history_success_text"
+          )
         );
         this.showReceiveTokens = false;
         return;
@@ -491,7 +491,7 @@ export default defineComponent({
       // get amount from decodedToken.token.proofs[..].amount
       const amount = this.getProofs(decodedToken).reduce(
         (sum, el) => (sum += el.amount),
-        0,
+        0
       );
 
       tokensStore.addPendingToken({
@@ -504,15 +504,15 @@ export default defineComponent({
       // show success notification
       this.notifySuccess(
         this.$i18n.t(
-          "ReceiveTokenDialog.actions.later.added_to_history_success_text",
-        ),
+          "ReceiveTokenDialog.actions.later.added_to_history_success_text"
+        )
       );
     },
     handleSwapToTrustedMint: async function () {
       const mint = useMintsStore().activeMint().mint;
       await useReceiveTokensStore().meltTokenToMint(
         this.receiveData.tokensBase64,
-        mint,
+        mint
       );
       this.swapSelected = false;
     },

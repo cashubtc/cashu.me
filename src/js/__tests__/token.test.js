@@ -26,7 +26,7 @@ describe("token", () => {
 
     it("should throw unsupported token error for a V2 token", () => {
       expect(() => token.decode(VALID_V2_TOKEN)).toThrow(
-        "Token version is not supported",
+        "Token version is not supported"
       );
     });
   });

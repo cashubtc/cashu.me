@@ -70,7 +70,7 @@ export const useNWCStore = defineStore("nwc", {
     connections: useLocalStorage<NWCConnection[]>("cashu.nwc.connections", []),
     seenCommandsUntil: useLocalStorage<number>(
       "cashu.nwc.seenCommandsUntil",
-      0,
+      0
     ),
     supportedMethods: [
       "pay_invoice",
@@ -191,7 +191,7 @@ export const useNWCStore = defineStore("nwc", {
       const walletStore = useWalletStore();
       const quote = await walletStore.requestMint(
         amount / 1000,
-        walletStore.wallet,
+        walletStore.wallet
       );
       if (!quote) {
         // requesting mint invoice can fail if no mint was selected yet
@@ -293,7 +293,7 @@ export const useNWCStore = defineStore("nwc", {
         const decoded = decodeBolt11(nwcCommand.params.invoice);
         // @ts-ignore
         const invHash = decoded.sections.find(
-          (s) => s.name === "payment_hash",
+          (s) => s.name === "payment_hash"
         )?.value;
         if (invHash === hash) {
           return {
@@ -333,7 +333,7 @@ export const useNWCStore = defineStore("nwc", {
     replyNWC: async function (
       result: NWCResult | NWCError,
       event: NDKEvent,
-      conn: NWCConnection,
+      conn: NWCConnection
     ) {
       // reply to NWC with result
       let replyEvent = new NDKEvent(event.ndk);
@@ -342,7 +342,7 @@ export const useNWCStore = defineStore("nwc", {
       replyEvent.content = await nip04.encrypt(
         conn.walletPrivateKey,
         event.author.pubkey,
-        JSON.stringify(result),
+        JSON.stringify(result)
       );
       replyEvent.tags = [
         ["p", event.author.pubkey],
@@ -356,7 +356,7 @@ export const useNWCStore = defineStore("nwc", {
     parseNWCCommand: async function (
       command: string,
       event: NDKEvent,
-      conn: NWCConnection,
+      conn: NWCConnection
     ) {
       // parse command to JSON object {method: 'pay_invoice', params: {invoice: '1234'}}
       let nwcCommand: NWCCommand = JSON.parse(command);
@@ -405,7 +405,7 @@ export const useNWCStore = defineStore("nwc", {
       const connectionSecretHex = connection.connectionSecret;
       const nostrStore = useNostrStore();
       return `nostr+walletconnect://${walletPublicKeyHex}?relay=${nostrStore.relays.join(
-        "&relay=",
+        "&relay="
       )}&secret=${connectionSecretHex}`;
     },
     generateNWCConnection: async function () {
@@ -485,7 +485,7 @@ export const useNWCStore = defineStore("nwc", {
       this.subscriptions.push(sub);
 
       sub.on("eose", () =>
-        console.log("All relays have reached the end of the event stream"),
+        console.log("All relays have reached the end of the event stream")
       );
       sub.on("close", () => console.log("Subscription closed"));
 
@@ -515,7 +515,7 @@ export const useNWCStore = defineStore("nwc", {
         const decryptedContent = await nip04.decrypt(
           conn.connectionSecret,
           conn.walletPublicKey,
-          event.content,
+          event.content
         );
         // console.log("### decryptedContent", decryptedContent)
         await this.parseNWCCommand(decryptedContent, event, conn);

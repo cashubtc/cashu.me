@@ -490,7 +490,7 @@ export default defineComponent({
     if (this.$route.query.mintUrl) {
       const mintsStore = useMintsStore();
       const mint = mintsStore.mints.find(
-        (m) => m.url === this.$route.query.mintUrl,
+        (m) => m.url === this.$route.query.mintUrl
       );
       if (mint) {
         this.mintData = mint;

@@ -11,7 +11,7 @@ export const useStorageStore = defineStore("storage", {
   state: () => ({
     lastLocalStorageCleanUp: useLocalStorage(
       "cashu.lastLocalStorageCleanUp",
-      new Date(),
+      new Date()
     ),
   }),
   actions: {
@@ -88,7 +88,7 @@ export const useStorageStore = defineStore("storage", {
       } catch (e) {
         console.log("Local storage quota exceeded");
         notifyError(
-          "Local storage quota exceeded. Clean up your local storage.",
+          "Local storage quota exceeded. Clean up your local storage."
         );
         return true;
       }
@@ -116,7 +116,7 @@ export const useStorageStore = defineStore("storage", {
       // from all paid invoices in this.invoiceHistory, delete the oldest so that only max 100 remain
       const max_history = 200;
       let paidInvoices = walletStore.invoiceHistory.filter(
-        (i) => i.status == "paid",
+        (i) => i.status == "paid"
       );
 
       if (paidInvoices.length > max_history) {
@@ -125,16 +125,16 @@ export const useStorageStore = defineStore("storage", {
         });
         const deleteInvoices = sortedInvoices.slice(
           0,
-          sortedInvoices.length - max_history,
+          sortedInvoices.length - max_history
         );
         walletStore.invoiceHistory = walletStore.invoiceHistory.filter(
-          (i) => !deleteInvoices.includes(i),
+          (i) => !deleteInvoices.includes(i)
         );
       }
 
       // walk through the oldest paid tokenStore.historyTokens and delete the token
       let paidTokens = tokenStore.historyTokens.filter(
-        (t) => t.status == "paid",
+        (t) => t.status == "paid"
       );
 
       if (paidTokens.length > max_history) {
@@ -143,7 +143,7 @@ export const useStorageStore = defineStore("storage", {
         });
         const deleteTokens = sortedTokens.slice(
           0,
-          sortedTokens.length - max_history,
+          sortedTokens.length - max_history
         );
         for (var i = 0; i < deleteTokens.length; i++) {
           deleteTokens[i].token = undefined;

@@ -10,7 +10,7 @@ const errorTypes = {
 async function notifyApiError(
   error: Error,
   caption: string = "",
-  position = "top" as QNotifyCreateOptions["position"],
+  position = "top" as QNotifyCreateOptions["position"]
 ) {
   try {
     Notify.create({
@@ -35,7 +35,7 @@ async function notifyApiError(
 
 async function notifySuccess(
   message: string,
-  position = "top" as QNotifyCreateOptions["position"],
+  position = "top" as QNotifyCreateOptions["position"]
 ) {
   Notify.create({
     timeout: 5000,
@@ -73,7 +73,7 @@ async function notifyError(message: string, caption?: string) {
 async function notifyWarning(
   message: string,
   caption?: string,
-  timeout = 5000,
+  timeout = 5000
 ) {
   Notify.create({
     timeout: timeout,
@@ -94,7 +94,7 @@ async function notifyWarning(
 
 async function notify(
   message: string,
-  position = "top" as QNotifyCreateOptions["position"],
+  position = "top" as QNotifyCreateOptions["position"]
 ) {
   // failure
   Notify.create({

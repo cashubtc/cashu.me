@@ -66,7 +66,7 @@ export const useNPCV2Store = defineStore("npcV2", {
     npcV2Enabled: useLocalStorage<boolean>("cashu.npc.v2.enabled", false),
     npcV2ClaimAutomatically: useLocalStorage<boolean>(
       "cashu.npc.v2.claimAutomatically",
-      true,
+      true
     ),
     npcV2LastCheck: useLocalStorage<number>("cashu.npc.v2.lastCheck", null),
     npcV2Address: useLocalStorage<string>("cashu.npc.v2.address", ""),
@@ -74,7 +74,7 @@ export const useNPCV2Store = defineStore("npcV2", {
     npcV2Domain: "",
     npcV2BaseURL: useLocalStorage<string>(
       "cashu.npc.v2.baseURL",
-      "https://npubx.cash",
+      "https://npubx.cash"
     ),
     npcV2Loading: false,
     // ndk: new NDK(),
@@ -131,7 +131,7 @@ export const useNPCV2Store = defineStore("npcV2", {
     }> {
       try {
         const response = await this.sendAuthedRequest(
-          `${this.npcV2BaseURL}/api/v2/user/info`,
+          `${this.npcV2BaseURL}/api/v2/user/info`
         );
         const info: NPCV2InfoReponse = await response.json();
         if (info.error) {
@@ -154,7 +154,7 @@ export const useNPCV2Store = defineStore("npcV2", {
       if (!mintstore.mints.find((m) => m.url === mintUrl)) {
         notifyError(
           `Please make sure ${mintUrl} is added to your wallet first!`,
-          "Could not update npubx.cash mint",
+          "Could not update npubx.cash mint"
         );
         return;
       }
@@ -167,7 +167,7 @@ export const useNPCV2Store = defineStore("npcV2", {
             },
             method: "PATCH",
             body: JSON.stringify({ mint_url: mintUrl }),
-          },
+          }
         );
         const data = await res.json();
         if (data.error) {
@@ -195,7 +195,7 @@ export const useNPCV2Store = defineStore("npcV2", {
         const response = await this.sendAuthedRequest(
           quoteUrl + since,
           undefined,
-          quoteUrl,
+          quoteUrl
         );
         const resData: NPCQuoteResponse = await response.json();
         if (resData.error) {
@@ -220,7 +220,7 @@ export const useNPCV2Store = defineStore("npcV2", {
             quote: quote.quoteId,
             date: date.formatDate(
               new Date(quote.createdAt * 1000),
-              "YYYY-MM-DD HH:mm:ss",
+              "YYYY-MM-DD HH:mm:ss"
             ),
             status: "pending",
             unit: "sat",
@@ -246,7 +246,7 @@ export const useNPCV2Store = defineStore("npcV2", {
       }
     },
     getUsernameQuote: async function (
-      username: string,
+      username: string
     ): Promise<UsernameQuote> {
       const res = await this.sendAuthedRequest(
         `${this.npcV2BaseURL}/api/v2/user/username`,
@@ -254,7 +254,7 @@ export const useNPCV2Store = defineStore("npcV2", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username }),
-        },
+        }
       );
       const data = (await res.json()) as NPCV2UsernameReponse;
       if (data.error) {
@@ -277,7 +277,7 @@ export const useNPCV2Store = defineStore("npcV2", {
             method: "POST",
             headers: { "Content-Type": "application/json", "X-Cashu": token },
             body: JSON.stringify({ username }),
-          },
+          }
         );
         const data = (await res.json()) as NPCV2UsernameReponse;
         if (data.error) {
@@ -294,11 +294,11 @@ export const useNPCV2Store = defineStore("npcV2", {
     sendAuthedRequest: async function (
       url: string,
       opts?: RequestInit,
-      authUrl?: string,
+      authUrl?: string
     ) {
       const authHeader = await this.generateNip98Event(
         authUrl || url,
-        opts?.method || "GET",
+        opts?.method || "GET"
       );
       return fetch(url, {
         ...opts,
@@ -307,7 +307,7 @@ export const useNPCV2Store = defineStore("npcV2", {
     },
     generateNip98Event: async function (
       url: string,
-      method: string,
+      method: string
     ): Promise<string> {
       const nostrStore = useNostrStore();
       await nostrStore.initSignerIfNotSet();

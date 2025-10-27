@@ -165,8 +165,8 @@ export default defineComponent({
     const discoverList = computed(() =>
       recommendations.value.filter(
         (r) =>
-          !isExistingMint(r.url) && !r.error && recsStore.hasHttpInfo(r.url),
-      ),
+          !isExistingMint(r.url) && !r.error && recsStore.hasHttpInfo(r.url)
+      )
     );
 
     // Use store-managed HTTP info (Dexie + in-memory), persist only error in localStorage
@@ -193,7 +193,7 @@ export default defineComponent({
         targets,
         10,
         100,
-        (defineComponent as any).props?.infoTimeoutMs?.default ?? 5000,
+        (defineComponent as any).props?.infoTimeoutMs?.default ?? 5000
       );
     };
     watch(discoverList, () => fetchMintInfoForDiscovered(), {
@@ -277,15 +277,8 @@ export default defineComponent({
 
 .discover-title {
   font-size: 15.2px;
-  font-family:
-    Inter,
-    -apple-system,
-    "system-ui",
-    "Segoe UI",
-    Roboto,
-    "Helvetica Neue",
-    Arial,
-    sans-serif;
+  font-family: Inter, -apple-system, "system-ui", "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
   font-weight: 600;
   color: #ffffff;
   margin: 0 0 8px 0;
