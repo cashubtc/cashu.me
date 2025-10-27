@@ -94,10 +94,10 @@ export const useTokensStore = defineStore("tokens", {
         newStatus?: "paid" | "pending";
         newToken?: string;
         newFee?: number;
-      }
+      },
     ): HistoryToken | undefined {
       const index = this.historyTokens.findIndex(
-        (t) => t.token === tokenToEdit
+        (t) => t.token === tokenToEdit,
       );
       if (index >= 0) {
         if (options) {
@@ -130,7 +130,7 @@ export const useTokensStore = defineStore("tokens", {
     },
     setTokenPaid(token: string) {
       const index = this.historyTokens.findIndex(
-        (t) => t.token === token && t.status == "pending"
+        (t) => t.token === token && t.status == "pending",
       );
       if (index >= 0) {
         this.historyTokens[index].status = "paid";

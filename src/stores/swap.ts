@@ -54,24 +54,24 @@ export const useSwapStore = defineStore("swap", {
         // await mintStore.activateMintUrl(swapAmountData.toUrl);
         const toWallet = walletStore.mintWallet(
           swapAmountData.toUrl,
-          mintStore.activeUnit
+          mintStore.activeUnit,
         );
         const mintQuote = await walletStore.requestMint(
           swapAmountData.amount,
-          toWallet
+          toWallet,
         );
 
         // pay invoice
         const fromWallet = walletStore.mintWallet(
           swapAmountData.fromUrl,
-          mintStore.activeUnit
+          mintStore.activeUnit,
         );
         const meltQuote = await walletStore.meltQuote(
           fromWallet,
-          mintQuote.request
+          mintQuote.request,
         );
         const mint = mintStore.mints.find(
-          (m) => m.url === swapAmountData.fromUrl
+          (m) => m.url === swapAmountData.fromUrl,
         );
         if (!mint) {
           throw new Error("mint not found");
@@ -125,7 +125,7 @@ export const useSwapStore = defineStore("swap", {
         const mintQuote = await walletStore.requestMint(meltAmount, toWallet);
         const meltQuote = await walletStore.meltQuote(
           fromWallet,
-          mintQuote.request
+          mintQuote.request,
         );
         await walletStore.melt(proofs, meltQuote, fromWallet);
 

@@ -174,12 +174,12 @@ export default {
     },
     averageTime() {
       const successfulSwapsWithTime = this.mintSwaps.filter(
-        (swap) => swap.state === "OK" && swap.time_taken
+        (swap) => swap.state === "OK" && swap.time_taken,
       );
       if (successfulSwapsWithTime.length === 0) return 0;
       const totalTime = successfulSwapsWithTime.reduce(
         (sum, swap) => sum + (swap.time_taken || 0),
-        0
+        0,
       );
       return totalTime / successfulSwapsWithTime.length;
     },
@@ -201,7 +201,7 @@ export default {
     async getMintInfo() {
       try {
         const response = await fetch(
-          `${this.auditorApiUrl}/mints/url?url=${this.mintUrl}`
+          `${this.auditorApiUrl}/mints/url?url=${this.mintUrl}`,
         );
         if (!response.ok) {
           if (response.status === 404) {
@@ -224,7 +224,7 @@ export default {
     async getMintSwaps(mintId: number, skip = 0, limit = 100) {
       try {
         const response = await fetch(
-          `${this.auditorApiUrl}/swaps/mint/${mintId}?skip=${skip}&limit=${limit}`
+          `${this.auditorApiUrl}/swaps/mint/${mintId}?skip=${skip}&limit=${limit}`,
         );
         if (!response.ok) {
           throw new Error(`API error: ${response.status}`);
@@ -249,7 +249,7 @@ export default {
       const mintStore = useMintsStore();
       try {
         const response = await fetch(
-          `${this.auditorApiUrl}/pr?url=${this.mintUrl}`
+          `${this.auditorApiUrl}/pr?url=${this.mintUrl}`,
         );
         const paymentRequestResponse = await response.json();
         const paymentRequestString = paymentRequestResponse.pr;

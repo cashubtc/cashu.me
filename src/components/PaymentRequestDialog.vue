@@ -134,7 +134,7 @@ export default defineComponent({
   },
   data() {
     const amountLabelDefault = this.$i18n.t(
-      "PaymentRequestDialog.actions.add_amount.label"
+      "PaymentRequestDialog.actions.add_amount.label",
     );
     return {
       paymentRequestAmount: undefined,
@@ -143,7 +143,7 @@ export default defineComponent({
       amountLabelDefault,
       amountLabel: amountLabelDefault,
       defaultAnyMint: this.$i18n.t(
-        "PaymentRequestDialog.actions.use_active_mint.label"
+        "PaymentRequestDialog.actions.use_active_mint.label",
       ),
       chosenMintUrl: undefined,
       memo: "",
@@ -166,14 +166,14 @@ export default defineComponent({
       this.newPaymentRequest(
         this.paymentRequestAmount,
         this.memo,
-        this.chosenMintUrl
+        this.chosenMintUrl,
       );
     },
     newRequest() {
       this.newPaymentRequest(
         this.paymentRequestAmount,
         this.memo,
-        this.chosenMintUrl
+        this.chosenMintUrl,
       );
     },
     getShortUrl(url) {
@@ -190,7 +190,7 @@ export default defineComponent({
       this.newPaymentRequest(
         this.paymentRequestAmount,
         this.memo,
-        this.chosenMintUrl
+        this.chosenMintUrl,
       );
     },
     startEditingAmount() {
@@ -210,13 +210,13 @@ export default defineComponent({
         this.paymentRequestAmount = amount * this.activeUnitCurrencyMultiplyer;
         this.amountLabel = useUiStore().formatCurrency(
           amount * this.activeUnitCurrencyMultiplyer,
-          this.activeUnit
+          this.activeUnit,
         );
       }
       this.newPaymentRequest(
         this.paymentRequestAmount,
         this.memo,
-        this.chosenMintUrl
+        this.chosenMintUrl,
       );
       this.isEditingAmount = false;
       this.amountInputValue = "";

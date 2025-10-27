@@ -31,7 +31,7 @@
               {{
                 formatCurrency(
                   payInvoiceData.meltQuote.response.amount,
-                  activeUnit
+                  activeUnit,
                 )
               }}
             </div>
@@ -213,7 +213,7 @@
                         {{
                           formatCurrency(
                             mintClass(mint).unitBalance(this.activeUnit),
-                            this.activeUnit
+                            this.activeUnit,
                           )
                         }}
                       </span>
@@ -257,7 +257,7 @@
                           {{
                             formatCurrency(
                               mintClass(mint).unitBalance(this.activeUnit),
-                              activeUnit
+                              activeUnit,
                             )
                           }}
                         </div>
@@ -343,7 +343,7 @@ export default defineComponent({
       const partialAmounts = this.getPartialAmounts();
       return Object.values(partialAmounts).reduce(
         (sum, amount) => sum + amount,
-        0
+        0,
       );
     },
   },
@@ -364,7 +364,7 @@ export default defineComponent({
     },
     toggleMint(mint) {
       const index = this.selectedMints.findIndex(
-        (selected) => selected.url === mint.url
+        (selected) => selected.url === mint.url,
       );
       if (index >= 0) {
         this.selectedMints.splice(index, 1);
@@ -389,7 +389,7 @@ export default defineComponent({
       // Calculate default proportions based on balance weights, but respect capacity constraints
       const { weights } = this.multiMintBalance(
         this.selectedMints,
-        this.activeUnit
+        this.activeUnit,
       );
       const newProportions = {};
 
@@ -403,7 +403,7 @@ export default defineComponent({
       // Check if we need to redistribute due to capacity constraints
       const totalAllocated = Object.values(newProportions).reduce(
         (sum, percentage) => sum + percentage,
-        0
+        0,
       );
 
       if (totalAllocated < 100) {
@@ -421,7 +421,7 @@ export default defineComponent({
               const maxPercentage = this.getMaxPercentageForMint(mint);
               return sum + (maxPercentage - newProportions[mint.url]);
             },
-            0
+            0,
           );
 
           if (totalAvailableCapacity > 0) {
@@ -432,7 +432,7 @@ export default defineComponent({
               const proportion = availableCapacity / totalAvailableCapacity;
               const additional = Math.min(
                 availableCapacity,
-                remaining * proportion
+                remaining * proportion,
               );
               newProportions[mint.url] += additional;
             });
@@ -470,13 +470,13 @@ export default defineComponent({
       // Calculate the maximum percentage this mint can handle based on its balance
       const maxPercentageForMint = Math.min(
         100,
-        (mintBalance / totalAmount) * 100
+        (mintBalance / totalAmount) * 100,
       );
 
       // Constrain the new percentage to not exceed the mint's capacity
       const constrainedPercentage = Math.min(
         newPercentage,
-        maxPercentageForMint
+        maxPercentageForMint,
       );
 
       const oldPercentage = this.mintProportions[mint.url] || 0;
@@ -492,7 +492,7 @@ export default defineComponent({
       const otherMints = this.selectedMints.filter((m) => m.url !== mint.url);
       const totalOtherPercentage = otherMints.reduce(
         (sum, m) => sum + (this.mintProportions[m.url] || 0),
-        0
+        0,
       );
 
       if (totalOtherPercentage > 0 && otherMints.length > 0) {
@@ -503,7 +503,7 @@ export default defineComponent({
         const mintsWithCapacity = otherMints
           .map((otherMint) => {
             const balance = this.mintClass(otherMint).unitBalance(
-              this.activeUnit
+              this.activeUnit,
             );
             const maxPercentage = Math.min(100, (balance / totalAmount) * 100);
             const currentPercentage = this.mintProportions[otherMint.url] || 0;
@@ -538,8 +538,8 @@ export default defineComponent({
             0,
             Math.min(
               mintInfo.maxPercentage,
-              mintInfo.currentPercentage - adjustment
-            )
+              mintInfo.currentPercentage - adjustment,
+            ),
           );
 
           this.mintProportions = {
@@ -554,7 +554,7 @@ export default defineComponent({
         const remainingPercentage = 100 - constrainedPercentage;
         const mintsWithCapacity = otherMints.map((otherMint) => {
           const balance = this.mintClass(otherMint).unitBalance(
-            this.activeUnit
+            this.activeUnit,
           );
           const maxPercentage = Math.min(100, (balance / totalAmount) * 100);
           return { mint: otherMint, maxPercentage, balance };
@@ -562,7 +562,7 @@ export default defineComponent({
 
         const totalMaxCapacity = mintsWithCapacity.reduce(
           (sum, m) => sum + m.maxPercentage,
-          0
+          0,
         );
 
         if (totalMaxCapacity > 0) {
@@ -570,7 +570,7 @@ export default defineComponent({
             const proportion = mintInfo.maxPercentage / totalMaxCapacity;
             const allocatedPercentage = Math.min(
               mintInfo.maxPercentage,
-              remainingPercentage * proportion
+              remainingPercentage * proportion,
             );
 
             this.mintProportions = {
@@ -588,7 +588,7 @@ export default defineComponent({
       const totalAmount = this.payInvoiceData.meltQuote.response.amount;
       const total = this.selectedMints.reduce(
         (sum, mint) => sum + (this.mintProportions[mint.url] || 0),
-        0
+        0,
       );
 
       if (total > 0 && Math.abs(total - 100) > 0.01) {
@@ -604,7 +604,7 @@ export default defineComponent({
           const mintBalance = this.mintClass(mint).unitBalance(this.activeUnit);
           const maxPercentageForMint = Math.min(
             100,
-            (mintBalance / totalAmount) * 100
+            (mintBalance / totalAmount) * 100,
           );
 
           if (scaledPercentage > maxPercentageForMint) {
@@ -651,7 +651,7 @@ export default defineComponent({
       mintsWithCapacity.forEach((mintInfo) => {
         const allocated = Math.min(
           mintInfo.maxPercentage,
-          mintInfo.currentPercentage
+          mintInfo.currentPercentage,
         );
         finalProportions[mintInfo.mint.url] = allocated;
         totalAllocated += allocated;
@@ -662,7 +662,7 @@ export default defineComponent({
       while (remaining > 0.01) {
         const availableMints = mintsWithCapacity.filter(
           (mintInfo) =>
-            finalProportions[mintInfo.mint.url] < mintInfo.maxPercentage
+            finalProportions[mintInfo.mint.url] < mintInfo.maxPercentage,
         );
 
         if (availableMints.length === 0) break;
@@ -671,7 +671,7 @@ export default defineComponent({
           (sum, mintInfo) =>
             sum +
             (mintInfo.maxPercentage - finalProportions[mintInfo.mint.url]),
-          0
+          0,
         );
 
         if (totalAvailableCapacity <= 0) break;
@@ -682,7 +682,7 @@ export default defineComponent({
           const proportion = availableCapacity / totalAvailableCapacity;
           const toAllocate = Math.min(
             availableCapacity,
-            remaining * proportion
+            remaining * proportion,
           );
           finalProportions[mintInfo.mint.url] += toAllocate;
           remaining -= toAllocate;
@@ -727,7 +727,7 @@ export default defineComponent({
 
           // Ensure we don't exceed the mint's balance
           const mintBalance = this.mintClass(largestMint).unitBalance(
-            this.activeUnit
+            this.activeUnit,
           );
           if (partialAmounts[largestMint.url] > mintBalance) {
             // If the largest mint can't handle the adjustment, distribute the difference
@@ -737,16 +737,16 @@ export default defineComponent({
 
             // Find other mints that can handle the remaining difference
             const otherMints = this.selectedMints.filter(
-              (m) => m.url !== largestMint.url
+              (m) => m.url !== largestMint.url,
             );
             for (const mint of otherMints) {
               const mintBalance = this.mintClass(mint).unitBalance(
-                this.activeUnit
+                this.activeUnit,
               );
               const currentAmount = partialAmounts[mint.url];
               const canTake = Math.min(
                 remainingDifference,
-                mintBalance - currentAmount
+                mintBalance - currentAmount,
               );
 
               if (canTake > 0) {
@@ -814,7 +814,7 @@ export default defineComponent({
     openMultinutDialog() {
       const mintsStore = useMintsStore();
       const previouslySelectedMints = mintsStore.multiMints.filter(
-        (mint) => mint.multinutSelected === true
+        (mint) => mint.multinutSelected === true,
       );
 
       // If no mints were previously selected, default to selecting all available mints
@@ -878,7 +878,7 @@ export default defineComponent({
           } else {
             // remove from selectedMints so we don't show progress in the UI
             this.selectedMints = this.selectedMints.filter(
-              (m) => m.url !== mint.url
+              (m) => m.url !== mint.url,
             );
           }
         }
@@ -886,18 +886,18 @@ export default defineComponent({
         // Verify total amounts match exactly
         const totalCalculated = mintsToAmounts.reduce(
           (sum, [mint, amount]) => sum + amount,
-          0
+          0,
         );
         console.log(
-          `Total calculated: ${totalCalculated}, Expected: ${totalQuoteAmount}`
+          `Total calculated: ${totalCalculated}, Expected: ${totalQuoteAmount}`,
         );
 
         if (totalCalculated !== totalQuoteAmount) {
           console.error(
-            `Amount mismatch: calculated ${totalCalculated}, expected ${totalQuoteAmount}`
+            `Amount mismatch: calculated ${totalCalculated}, expected ${totalQuoteAmount}`,
           );
           notifyError(
-            `Amount calculation error: ${totalCalculated} vs ${totalQuoteAmount}`
+            `Amount calculation error: ${totalCalculated} vs ${totalQuoteAmount}`,
           );
           return;
         }
@@ -911,14 +911,14 @@ export default defineComponent({
             console.log(`Quoting mint: ${mint.url}`);
             const mintWallet = useWalletStore().mintWallet(
               mint.url,
-              useMintsStore().activeUnit
+              useMintsStore().activeUnit,
             );
             try {
               this.setMintState(mint.url, "requesting");
               const quote = await this.meltQuote(
                 mintWallet,
                 this.payInvoiceData.input.request,
-                partialAmount
+                partialAmount,
               );
               console.log(quote);
               return [mint, quote];
@@ -927,7 +927,7 @@ export default defineComponent({
               this.setMintState(mint.url, "error");
               throw error;
             }
-          })
+          }),
         );
 
         // Filter out null values (for mints with partialAmount <= 0)
@@ -941,7 +941,7 @@ export default defineComponent({
               this.setMintState(mint.url, "paying");
               const mintWallet = useWalletStore().mintWallet(
                 mint.url,
-                activeUnit
+                activeUnit,
               );
               const mintClass = new MintClass(mint);
               const proofs = mintClass.unitProofs(activeUnit);
@@ -950,7 +950,7 @@ export default defineComponent({
                 quote,
                 mintWallet,
                 true,
-                true // ! RELEASE THE MUTEX !
+                true, // ! RELEASE THE MUTEX !
               );
 
               // Mark as success
@@ -961,7 +961,7 @@ export default defineComponent({
               this.setMintState(mint.url, "error");
               throw error;
             }
-          })
+          }),
         );
       } catch (error) {
         // notifyError(`Multi-nut payment failed: ${error}`);
@@ -981,17 +981,17 @@ export default defineComponent({
       const amountPaid =
         mintsToQuotes.reduce(
           (acc, q) => acc + q[1].amount + q[1].fee_reserve,
-          0
+          0,
         ) -
         data.reduce(
           (acc, d) => acc + d.change.reduce((acc1, p) => acc1 + p.amount, 0),
-          0
+          0,
         );
 
       notifySuccess(
         "Paid " +
           uiStore.formatCurrency(amountPaid, activeUnit) +
-          " via Lightning"
+          " via Lightning",
       );
 
       // Close the dialog after successful payment

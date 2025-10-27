@@ -201,8 +201,15 @@ export default {
 
 .seed-label {
   font-size: 15.2px;
-  font-family: Inter, -apple-system, "system-ui", "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  font-family:
+    Inter,
+    -apple-system,
+    "system-ui",
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
   font-weight: 600;
   color: #ffffff;
   margin-bottom: 12px;

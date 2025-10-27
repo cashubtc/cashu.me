@@ -35,7 +35,7 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
     // Last backup timestamp
     lastBackupTimestamp: useLocalStorage<number>(
       "cashu.nostrMintBackup.lastBackupTimestamp",
-      0
+      0,
     ),
 
     // Discovered mints from nostr
@@ -87,7 +87,7 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
         return null;
       return nip44.v2.utils.getConversationKey(
         state.mintBackupPrivateKey,
-        state.mintBackupPublicKey
+        state.mintBackupPublicKey,
       );
     },
   },
@@ -105,7 +105,7 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
 
     // Initialize backup keys from custom mnemonic (for restore)
     async initializeBackupKeysFromMnemonic(
-      mnemonic: string
+      mnemonic: string,
     ): Promise<{ privateKeyHex: string; publicKeyHex: string }> {
       // Derive seed from mnemonic
       const seed: Uint8Array = mnemonicToSeedSync(mnemonic);
@@ -162,11 +162,11 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
         // Encrypt the backup data
         const conversationKey = nip44.v2.utils.getConversationKey(
           this.mintBackupPrivateKey,
-          this.mintBackupPublicKey
+          this.mintBackupPublicKey,
         );
         const encryptedContent = nip44.v2.encrypt(
           JSON.stringify(backupData),
-          conversationKey
+          conversationKey,
         );
 
         // Create NDK instance
@@ -201,7 +201,7 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
       } catch (error) {
         console.error("Failed to backup mints to Nostr:", error);
         notifyError(
-          "Failed to backup mint list to Nostr: " + (error as Error).message
+          "Failed to backup mint list to Nostr: " + (error as Error).message,
         );
         throw error;
       } finally {
@@ -218,9 +218,8 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
         const settingsStore = useSettingsStore();
 
         // Derive keys from provided mnemonic
-        const { publicKeyHex } = await this.initializeBackupKeysFromMnemonic(
-          mnemonic
-        );
+        const { publicKeyHex } =
+          await this.initializeBackupKeysFromMnemonic(mnemonic);
 
         // Create read-only NDK instance
         const ndk = new NDK({
@@ -249,11 +248,11 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
               await this.initializeBackupKeysFromMnemonic(mnemonic);
             const conversationKey = nip44.v2.utils.getConversationKey(
               privateKeyHex,
-              publicKeyHex
+              publicKeyHex,
             );
             const decryptedContent = nip44.v2.decrypt(
               event.content,
-              conversationKey
+              conversationKey,
             );
 
             const backupData: MintBackupData = JSON.parse(decryptedContent);
@@ -261,7 +260,7 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
             // Add discovered mints
             for (const mintUrl of backupData.mints) {
               const existingMint = allDiscoveredMints.find(
-                (m) => m.url === mintUrl
+                (m) => m.url === mintUrl,
               );
               if (!existingMint) {
                 allDiscoveredMints.push({
@@ -293,7 +292,7 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
       } catch (error) {
         console.error("Failed to search mints on Nostr:", error);
         notifyError(
-          "Failed to search for mint backups: " + (error as Error).message
+          "Failed to search for mint backups: " + (error as Error).message,
         );
         throw error;
       } finally {
@@ -303,7 +302,7 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
 
     // Add selected mints to the wallet
     async addSelectedMintsToWallet(
-      selectedMints: DiscoveredMint[]
+      selectedMints: DiscoveredMint[],
     ): Promise<void> {
       const mintsStore = useMintsStore();
 
@@ -327,7 +326,7 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
           } catch (error) {
             console.error(`Failed to add mint ${mint.url}:`, error);
             notifyError(
-              `Failed to add mint ${mint.url}: ${(error as Error).message}`
+              `Failed to add mint ${mint.url}: ${(error as Error).message}`,
             );
           }
         }
@@ -340,7 +339,7 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
       } catch (error) {
         console.error("Failed to add selected mints:", error);
         notifyError(
-          "Failed to add selected mints: " + (error as Error).message
+          "Failed to add selected mints: " + (error as Error).message,
         );
         throw error;
       }

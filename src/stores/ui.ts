@@ -38,7 +38,7 @@ export const useUiStore = defineStore("ui", {
     lastBalanceCached: useLocalStorage("cashu.ui.lastBalanceCached", 0),
     multinutExperimentalWarningDismissed: useLocalStorage(
       "cashu.ui.multinutExperimentalWarningDismissed",
-      false
+      false,
     ),
   }),
   actions: {
@@ -93,7 +93,7 @@ export const useUiStore = defineStore("ui", {
     formatCurrency: function (
       value: number,
       currency: string,
-      showBalance = false
+      showBalance = false,
     ) {
       if (currency == undefined) {
         currency = "sat";

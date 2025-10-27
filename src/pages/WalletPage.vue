@@ -522,13 +522,13 @@ export default {
         this.deferredPWAInstallPrompt = e;
         console.log(
           `'beforeinstallprompt' event was fired.`,
-          this.getPwaDisplayMode()
+          this.getPwaDisplayMode(),
         );
       });
     },
     getPwaDisplayMode: function () {
       const isStandalone = window.matchMedia(
-        "(display-mode: standalone)"
+        "(display-mode: standalone)",
       ).matches;
       if (document.referrer.startsWith("android-app://")) {
         return "twa";
@@ -557,7 +557,7 @@ export default {
         sessionStorage.setItem(
           "tabId",
           Math.random().toString(36).substring(2) +
-            new Date().getTime().toString(36)
+            new Date().getTime().toString(36),
         );
       }
       const tabId = sessionStorage.getItem("tabId");
@@ -696,7 +696,7 @@ export default {
     // generate mnemonic only if onboarding is finished or path is 'new'
     try {
       const welcome = useWelcomeStore();
-      if (!welcome.showWelcome || welcome.onboardingPath === 'new') {
+      if (!welcome.showWelcome || welcome.onboardingPath === "new") {
         this.initializeMnemonic();
       }
     } catch (e) {

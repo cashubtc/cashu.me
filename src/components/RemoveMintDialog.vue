@@ -37,7 +37,7 @@
                 :label="
                   formatCurrency(
                     mintClass(mintToRemove).unitBalance(unit),
-                    unit
+                    unit,
                   )
                 "
                 class="q-mr-sm"

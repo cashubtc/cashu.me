@@ -443,8 +443,8 @@
                 hasCrawlCheckpoint && !wotLoading
                   ? $t("Settings.web_of_trust.continue_crawl")
                   : signerType === "SEED"
-                  ? $t("Settings.web_of_trust.crawl_odell")
-                  : $t("Settings.web_of_trust.crawl_wot")
+                    ? $t("Settings.web_of_trust.crawl_odell")
+                    : $t("Settings.web_of_trust.crawl_wot")
               }}
             </q-btn>
             <q-btn
@@ -762,7 +762,7 @@
               <q-item-label caption
                 >{{
                   $t(
-                    "Settings.hardware_features.webnfc.quick_access.description"
+                    "Settings.hardware_features.webnfc.quick_access.description",
                   )
                 }}
               </q-item-label>
@@ -1210,7 +1210,7 @@
                   "
                   :placeholder="
                     $t(
-                      'Settings.lightning_address.npc_v2.choose_mint_placeholder'
+                      'Settings.lightning_address.npc_v2.choose_mint_placeholder',
                     )
                   "
                   :show-balances="false"
@@ -1524,7 +1524,7 @@
                         <q-item-label class="q-px-sm" caption
                           >{{
                             $t(
-                              "Settings.advanced.developer.new_seed.description"
+                              "Settings.advanced.developer.new_seed.description",
                             )
                           }}
                         </q-item-label>
@@ -1534,7 +1534,7 @@
                       <span
                         >{{
                           $t(
-                            "Settings.advanced.developer.new_seed.confirm_question"
+                            "Settings.advanced.developer.new_seed.confirm_question",
                           )
                         }}
                       </span>
@@ -1582,7 +1582,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.remove_spent.description"
+                          "Settings.advanced.developer.remove_spent.description",
                         )
                       }}
                     </q-item-label>
@@ -1601,7 +1601,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.debug_console.description"
+                          "Settings.advanced.developer.debug_console.description",
                         )
                       }}
                     </q-item-label>
@@ -1620,7 +1620,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.export_proofs.description"
+                          "Settings.advanced.developer.export_proofs.description",
                         )
                       }}
                     </q-item-label>
@@ -1639,7 +1639,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.keyset_counters.description"
+                          "Settings.advanced.developer.keyset_counters.description",
                         )
                       }}
                     </q-item-label>
@@ -1664,7 +1664,7 @@
                         {{
                           $t(
                             "Settings.advanced.developer.keyset_counters.counter",
-                            { count: counter.counter }
+                            { count: counter.counter },
                           )
                         }}
                       </q-btn>
@@ -1690,7 +1690,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.unset_reserved.description"
+                          "Settings.advanced.developer.unset_reserved.description",
                         )
                       }}
                     </q-item-label>
@@ -1709,7 +1709,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.show_onboarding.description"
+                          "Settings.advanced.developer.show_onboarding.description",
                         )
                       }}
                     </q-item-label>
@@ -1735,7 +1735,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.reset_wallet.description"
+                          "Settings.advanced.developer.reset_wallet.description",
                         )
                       }}
                     </q-item-label>
@@ -1743,7 +1743,7 @@
                   <row v-if="confirmNuke">
                     <span>{{
                       $t(
-                        "Settings.advanced.developer.reset_wallet.confirm_question"
+                        "Settings.advanced.developer.reset_wallet.confirm_question",
                       )
                     }}</span>
                     <q-btn
@@ -1784,7 +1784,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.export_wallet.description"
+                          "Settings.advanced.developer.export_wallet.description",
                         )
                       }}
                     </q-item-label>
@@ -1988,7 +1988,7 @@ export default defineComponent({
       for (let mint of mints) {
         const mintIds = mint.keysets.map((keyset) => keyset.id);
         const keysetCounterThisMint = this.keysetCounters.filter((entry) =>
-          mintIds.includes(entry.id)
+          mintIds.includes(entry.id),
         );
         keysetCountersByMint[mint.url] = keysetCounterThisMint;
       }
@@ -2129,7 +2129,7 @@ export default defineComponent({
       // iterate over this.activeProofs in batches of 50 and check if they are spendable
       let wallet = useWalletStore().mintWallet(
         this.activeMintUrl,
-        this.activeUnit
+        this.activeUnit,
       );
       let proofs = this.activeProofs.flat();
       console.log("Checking proofs", proofs);
@@ -2256,15 +2256,15 @@ export default defineComponent({
           await nostrMintBackupStore.enableBackup();
           this.notifySuccess(
             this.$t(
-              "Settings.experimental.nostr_mint_backup.notifications.enabled"
-            )
+              "Settings.experimental.nostr_mint_backup.notifications.enabled",
+            ),
           );
         } catch (error) {
           console.error("Failed to enable Nostr mint backup:", error);
           this.notifyError(
             this.$t(
-              "Settings.experimental.nostr_mint_backup.notifications.failed"
-            )
+              "Settings.experimental.nostr_mint_backup.notifications.failed",
+            ),
           );
           // Revert the toggle
           this.nostrMintBackupEnabled = false;
@@ -2273,8 +2273,8 @@ export default defineComponent({
         nostrMintBackupStore.disableBackup();
         this.notifySuccess(
           this.$t(
-            "Settings.experimental.nostr_mint_backup.notifications.disabled"
-          )
+            "Settings.experimental.nostr_mint_backup.notifications.disabled",
+          ),
         );
       }
     },

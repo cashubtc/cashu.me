@@ -17,7 +17,7 @@ export const useP2PKStore = defineStore("p2pk", {
     p2pkKeys: useLocalStorage<P2PKKey[]>("cashu.P2PKKeys", []),
     showP2PkButtonInDrawer: useLocalStorage<boolean>(
       "cashu.p2pk.showP2PkButtonInDrawer",
-      false
+      false,
     ),
     showP2PKDialog: false,
     showP2PKData: {} as P2PKKey,
@@ -58,7 +58,7 @@ export const useP2PKStore = defineStore("p2pk", {
     showLastKey: function () {
       if (this.p2pkKeys.length) {
         this.showP2PKData = JSON.parse(
-          JSON.stringify(this.p2pkKeys[this.p2pkKeys.length - 1])
+          JSON.stringify(this.p2pkKeys[this.p2pkKeys.length - 1]),
         );
         this.showP2PKDialog = true;
       }

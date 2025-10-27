@@ -1,14 +1,14 @@
 export default {
   MultinutPicker: {
-    payment: 'دفع متعدد الجوز',
-    selectMints: 'حدد واحدًا أو أكثر من mints لتنفيذ الدفع منه.',
-    totalSelectedBalance: 'إجمالي الرصيد المحدد',
-    multiMintPay: 'دفع متعدد Mint',
-    balanceNotEnough: 'رصيد متعدد mints غير كافٍ لتلبية هذه الفاتورة',
-    failed: 'فشل في المعالجة: {error}',
-    paid: 'تم دفع {amount} عبر Lightning',
+    payment: "دفع متعدد الجوز",
+    selectMints: "حدد واحدًا أو أكثر من mints لتنفيذ الدفع منه.",
+    totalSelectedBalance: "إجمالي الرصيد المحدد",
+    multiMintPay: "دفع متعدد Mint",
+    balanceNotEnough: "رصيد متعدد mints غير كافٍ لتلبية هذه الفاتورة",
+    failed: "فشل في المعالجة: {error}",
+    paid: "تم دفع {amount} عبر Lightning",
   },
-  
+
   global: {
     copy_to_clipboard: {
       success: "تم النسخ إلى الحافظة!",
@@ -375,11 +375,13 @@ export default {
       },
       multinut: {
         toggle: "تمكين Multinut",
-        description: "إذا تم تمكينه، ستستخدم المحفظة Multinut لدفع الفواتير من عدة mints في وقت واحد.",
+        description:
+          "إذا تم تمكينه، ستستخدم المحفظة Multinut لدفع الفواتير من عدة mints في وقت واحد.",
       },
       nostr_mint_backup: {
         toggle: "النسخ الاحتياطي لقائمة mint على Nostr",
-        description: "إذا تم تمكينه، سيتم نسخ قائمة mint الخاصة بك احتياطيًا تلقائيًا إلى مرحلات Nostr باستخدام مفاتيح Nostr التي تم تكوينها. يتيح لك هذا استعادة قائمة mint الخاصة بك عبر الأجهزة.",
+        description:
+          "إذا تم تمكينه، سيتم نسخ قائمة mint الخاصة بك احتياطيًا تلقائيًا إلى مرحلات Nostr باستخدام مفاتيح Nostr التي تم تكوينها. يتيح لك هذا استعادة قائمة mint الخاصة بك عبر الأجهزة.",
         notifications: {
           enabled: "تمكين النسخ الاحتياطي لـ Nostr mint",
           disabled: "تعطيل النسخ الاحتياطي لـ Nostr mint",
@@ -679,8 +681,7 @@ export default {
   },
   WelcomeSlideChoice: {
     title: "إعداد محفظتك",
-    text:
-      "هل تريد الاستعادة من عبارة الاستعادة أم إنشاء محفظة جديدة؟",
+    text: "هل تريد الاستعادة من عبارة الاستعادة أم إنشاء محفظة جديدة؟",
     options: {
       new: {
         title: "إنشاء محفظة جديدة",
@@ -694,8 +695,7 @@ export default {
   },
   WelcomeMintSetup: {
     title: "إضافة mints",
-    text:
-      "المِنْت خوادم تساعدك على إرسال واستلام ecash. اختر mint مكتشفًا أو أضِف واحدًا يدويًا. يمكنك التخطي والإضافة لاحقًا.",
+    text: "المِنْت خوادم تساعدك على إرسال واستلام ecash. اختر mint مكتشفًا أو أضِف واحدًا يدويًا. يمكنك التخطي والإضافة لاحقًا.",
     sections: { your_mints: "المِنْت الخاصة بك" },
     restoring: "جارٍ استعادة المِنْت…",
     placeholder: { mint_url: "https://" },
@@ -705,13 +705,11 @@ export default {
     text: "الصق أو اكتب عبارة من 12 كلمة للاستعادة.",
     inputs: { word: "الكلمة { index }" },
     actions: { paste_all: "لصق الكل" },
-    disclaimer:
-      "تُستخدم عبارة الاستعادة محليًا فقط لاشتقاق مفاتيح محفظتك.",
+    disclaimer: "تُستخدم عبارة الاستعادة محليًا فقط لاشتقاق مفاتيح محفظتك.",
   },
   WelcomeRestoreEcash: {
     title: "استعد ecash الخاصة بك",
-    text:
-      "ابحث عن البراهين غير المصروفة على المِنْت المُكوَّنة لديك وأضِفها إلى محفظتك.",
+    text: "ابحث عن البراهين غير المصروفة على المِنْت المُكوَّنة لديك وأضِفها إلى محفظتك.",
   },
   MintRatings: {
     title: "مراجعات المِنْت",
@@ -788,7 +786,8 @@ export default {
     },
     nostr_mints: {
       label: "استعادة Mints من Nostr",
-      caption: "ابحث عن نسخ احتياطية لـ mint مخزنة على مرحلات Nostr باستخدام عبارة الاستعادة الخاصة بك. سيساعدك هذا على اكتشاف mints التي استخدمتها سابقًا.",
+      caption:
+        "ابحث عن نسخ احتياطية لـ mint مخزنة على مرحلات Nostr باستخدام عبارة الاستعادة الخاصة بك. سيساعدك هذا على اكتشاف mints التي استخدمتها سابقًا.",
       search_button: "البحث عن نسخ احتياطية لـ Mint",
       select_all: "تحديد الكل",
       deselect_all: "إلغاء تحديد الكل",
@@ -796,7 +795,8 @@ export default {
       already_added: "تمت الإضافة بالفعل",
       add_selected: "إضافة المحدد ({count})",
       no_backups_found: "لم يتم العثور على نسخ احتياطية لـ mint",
-      no_backups_hint: "تأكد من تمكين النسخ الاحتياطي لـ Nostr mint في الإعدادات لنسخ قائمة mint الخاصة بك احتياطيًا تلقائيًا.",
+      no_backups_hint:
+        "تأكد من تمكين النسخ الاحتياطي لـ Nostr mint في الإعدادات لنسخ قائمة mint الخاصة بك احتياطيًا تلقائيًا.",
       invalid_mnemonic: "الرجاء إدخال عبارة استعادة صالحة قبل البحث.",
       search_error: "فشل البحث عن نسخ احتياطية لـ mint.",
       add_error: "فشل إضافة mints المحددة.",
@@ -868,10 +868,10 @@ export default {
         },
       },
     },
-    error_badge: 'خطأ',
-    reviews_text: 'مراجعات',
-    no_reviews_yet: 'لا توجد مراجعات بعد',
-    discover_mints_button: 'اكتشف mints',
+    error_badge: "خطأ",
+    reviews_text: "مراجعات",
+    no_reviews_yet: "لا توجد مراجعات بعد",
+    discover_mints_button: "اكتشف mints",
   },
   QrcodeReader: {
     progress: {

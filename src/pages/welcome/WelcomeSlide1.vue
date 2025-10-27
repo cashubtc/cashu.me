@@ -470,7 +470,7 @@ export default {
   created() {
     this.selectedLanguage =
       this.languageOptions.find(
-        (option) => option.value === this.$i18n.locale || navigator.language
+        (option) => option.value === this.$i18n.locale || navigator.language,
       )?.label || "English";
   },
 };

@@ -1,12 +1,14 @@
 export default {
   MultinutPicker: {
-    payment: 'Paiement Multinut',
-    selectMints: 'Sélectionnez une ou plusieurs mints pour exécuter un paiement.',
-    totalSelectedBalance: 'Solde total sélectionné',
-    multiMintPay: 'Paiement Multi-Mint',
-    balanceNotEnough: 'Le solde multi-mint n’est pas suffisant pour satisfaire cette facture',
-    failed: 'Échec du traitement: {error}',
-    paid: 'Payé {amount} via Lightning',
+    payment: "Paiement Multinut",
+    selectMints:
+      "Sélectionnez une ou plusieurs mints pour exécuter un paiement.",
+    totalSelectedBalance: "Solde total sélectionné",
+    multiMintPay: "Paiement Multi-Mint",
+    balanceNotEnough:
+      "Le solde multi-mint n’est pas suffisant pour satisfaire cette facture",
+    failed: "Échec du traitement: {error}",
+    paid: "Payé {amount} via Lightning",
   },
   global: {
     copy_to_clipboard: {
@@ -379,11 +381,13 @@ export default {
       },
       multinut: {
         toggle: "Activer Multinut",
-        description: "Si cette option est activée, le portefeuille utilisera Multinut pour payer les factures de plusieurs टकसाल à la fois.",
+        description:
+          "Si cette option est activée, le portefeuille utilisera Multinut pour payer les factures de plusieurs टकसाल à la fois.",
       },
       nostr_mint_backup: {
         toggle: "Sauvegarder la liste des टकसाल sur Nostr",
-        description: "Si cette option est activée, votre liste de टकसाल sera automatiquement sauvegardée sur les relais Nostr à l'aide de vos clés Nostr configurées. Cela vous permet de restaurer votre liste de टकसाल sur plusieurs appareils.",
+        description:
+          "Si cette option est activée, votre liste de टकसाल sera automatiquement sauvegardée sur les relais Nostr à l'aide de vos clés Nostr configurées. Cela vous permet de restaurer votre liste de टकसाल sur plusieurs appareils.",
         notifications: {
           enabled: "Sauvegarde de la टकसाल Nostr activée",
           disabled: "Sauvegarde de la टकसाल Nostr désactivée",
@@ -686,8 +690,7 @@ export default {
   },
   WelcomeSlideChoice: {
     title: "Configurez votre portefeuille",
-    text:
-      "Souhaitez-vous restaurer à partir d’une phrase de récupération ou créer un nouveau portefeuille ?",
+    text: "Souhaitez-vous restaurer à partir d’une phrase de récupération ou créer un nouveau portefeuille ?",
     options: {
       new: {
         title: "Créer un nouveau portefeuille",
@@ -702,8 +705,7 @@ export default {
   },
   WelcomeMintSetup: {
     title: "Ajouter des mints",
-    text:
-      "Les mints sont des serveurs qui vous aident à envoyer et recevoir de l’ecash. Choisissez un mint découvert ou ajoutez-en un manuellement. Vous pouvez passer pour ajouter des mints plus tard.",
+    text: "Les mints sont des serveurs qui vous aident à envoyer et recevoir de l’ecash. Choisissez un mint découvert ou ajoutez-en un manuellement. Vous pouvez passer pour ajouter des mints plus tard.",
     sections: { your_mints: "Vos mints" },
     restoring: "Restauration des mints…",
     placeholder: { mint_url: "https://" },
@@ -718,8 +720,7 @@ export default {
   },
   WelcomeRestoreEcash: {
     title: "Restaurez votre ecash",
-    text:
-      "Recherchez les preuves non dépensées sur vos mints configurés et ajoutez-les à votre portefeuille.",
+    text: "Recherchez les preuves non dépensées sur vos mints configurés et ajoutez-les à votre portefeuille.",
   },
   MintRatings: {
     title: "Avis sur le mint",
@@ -792,7 +793,8 @@ export default {
         label: "Restaurer les Mints sélectionnées ({count})",
         in_progress: "Restauration de la menthe {index} de {length}…",
         success: "{count} mint(s) restaurée(s) avec succès",
-        error: "Erreur lors de la restauration des mints sélectionnées: {error}",
+        error:
+          "Erreur lors de la restauration des mints sélectionnées: {error}",
       },
     },
     nostr_mints: {
@@ -808,7 +810,8 @@ export default {
       no_backups_found: "Aucune sauvegarde de mint trouvée",
       no_backups_hint:
         "Assurez-vous que la sauvegarde de la liste des mints Nostr est activée dans les paramètres pour sauvegarder automatiquement votre liste de mints.",
-      invalid_mnemonic: "Veuillez entrer une phrase de départ valide avant de rechercher.",
+      invalid_mnemonic:
+        "Veuillez entrer une phrase de départ valide avant de rechercher.",
       search_error: "Échec de la recherche des sauvegardes de mints.",
       add_error: "Échec de l'ajout des mints sélectionnées.",
     },
@@ -880,10 +883,10 @@ export default {
         },
       },
     },
-    error_badge: 'Erreur',
-    reviews_text: 'avis',
-    no_reviews_yet: 'Aucun avis pour l\'instant',
-    discover_mints_button: 'Découvrir les mints',
+    error_badge: "Erreur",
+    reviews_text: "avis",
+    no_reviews_yet: "Aucun avis pour l'instant",
+    discover_mints_button: "Découvrir les mints",
   },
   QrcodeReader: {
     progress: {

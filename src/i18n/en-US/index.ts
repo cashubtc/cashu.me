@@ -699,8 +699,7 @@ export default {
   },
   WelcomeMintSetup: {
     title: "Add mints",
-    text:
-      "Mints are servers that help you send and receive ecash. Choose a discovered mint or add one manually. Skip to add mints later.",
+    text: "Mints are servers that help you send and receive ecash. Choose a discovered mint or add one manually. Skip to add mints later.",
     sections: {
       your_mints: "Your mints",
     },
@@ -723,8 +722,7 @@ export default {
   },
   WelcomeRestoreEcash: {
     title: "Restore your ecash",
-    text:
-      "Scan for unspent proofs on your configured mints and add them to your wallet.",
+    text: "Scan for unspent proofs on your configured mints and add them to your wallet.",
   },
   MintRatings: {
     title: "Mint Reviews",
@@ -885,10 +883,10 @@ export default {
         },
       },
     },
-    error_badge: 'Error',
-    reviews_text: 'reviews',
-    no_reviews_yet: 'No reviews yet',
-    discover_mints_button: 'Discover mints',
+    error_badge: "Error",
+    reviews_text: "reviews",
+    no_reviews_yet: "No reviews yet",
+    discover_mints_button: "Discover mints",
   },
   QrcodeReader: {
     progress: {

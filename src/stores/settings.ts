@@ -13,83 +13,83 @@ export const useSettingsStore = defineStore("settings", {
     return {
       getBitcoinPrice: useLocalStorage<boolean>(
         "cashu.settings.getBitcoinPrice",
-        false
+        false,
       ),
       bitcoinPriceCurrency: useLocalStorage<string>(
         "cashu.settings.bitcoinPriceCurrency",
-        "USD"
+        "USD",
       ),
       checkSentTokens: useLocalStorage<boolean>(
         "cashu.settings.checkSentTokens",
-        true
+        true,
       ),
       checkIncomingInvoices: useLocalStorage<boolean>(
         "cashu.settings.checkIncomingInvoices",
-        true
+        true,
       ),
       periodicallyCheckIncomingInvoices: useLocalStorage<boolean>(
         "cashu.settings.periodicallyCheckIncomingInvoices",
-        true
+        true,
       ),
       checkInvoicesOnStartup: useLocalStorage<boolean>(
         "cashu.settings.checkInvoicesOnStartup",
-        true
+        true,
       ),
       useWebsockets: useLocalStorage<boolean>(
         "cashu.settings.useWebsockets",
-        true
+        true,
       ),
       defaultNostrRelays: useLocalStorage<string[]>(
         "cashu.settings.defaultNostrRelays",
-        defaultNostrRelays
+        defaultNostrRelays,
       ),
       includeFeesInSendAmount: useLocalStorage<boolean>(
         "cashu.settings.includeFeesInSendAmount",
-        false
+        false,
       ),
       nfcEncoding: useLocalStorage<string>(
         "cashu.settings.nfcEncoding",
-        "weburl"
+        "weburl",
       ),
       useNumericKeyboard: useLocalStorage<boolean>(
         "cashu.settings.useNumericKeyboard",
-        false
+        false,
       ),
       enableReceiveSwaps: useLocalStorage<boolean>(
         "cashu.settings.enableReceiveSwaps",
-        false
+        false,
       ),
       showNfcButtonInDrawer: useLocalStorage(
         "cashu.ui.showNfcButtonInDrawer",
-        true
+        true,
       ),
       autoPasteEcashReceive: useLocalStorage(
         "cashu.settings.autoPasteEcashReceive",
-        true
+        true,
       ),
       auditorEnabled: useLocalStorage<boolean>(
         "cashu.settings.auditorEnabled",
-        false
+        false,
       ),
       auditorUrl: useLocalStorage<string>(
         "cashu.settings.auditorUrl",
-        "https://audit.8333.space"
+        "https://audit.8333.space",
       ),
       auditorApiUrl: useLocalStorage<string>(
         "cashu.settings.auditorApiUrl",
-        "https://api.audit.8333.space"
+        "https://api.audit.8333.space",
       ),
       bip177BitcoinSymbol: useLocalStorage<boolean>(
         "cashu.settings.bip177",
-        false
+        false,
       ),
       multinutEnabled: useLocalStorage<boolean>(
         "cashu.settings.multinutEnabled",
-        false
+        false,
       ),
       nostrMintBackupEnabled: useLocalStorage<boolean>(
         "cashu.settings.nostrMintBackupEnabled",
-        true
+        true,
       ),
     };
   },

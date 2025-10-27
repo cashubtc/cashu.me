@@ -1,14 +1,13 @@
 export default {
   MultinutPicker: {
-    payment: 'Multinut-betalning',
-    selectMints: 'Välj en eller flera mints att betala från.',
-    totalSelectedBalance: 'Totalt valt saldo',
-    multiMintPay: 'Multi-Mint-betalning',
-    balanceNotEnough: 'Multi-mint-saldo räcker inte för denna faktura',
-    failed: 'Misslyckades att behandla: {error}',
-    paid: 'Betalat {amount} via Lightning',
+    payment: "Multinut-betalning",
+    selectMints: "Välj en eller flera mints att betala från.",
+    totalSelectedBalance: "Totalt valt saldo",
+    multiMintPay: "Multi-Mint-betalning",
+    balanceNotEnough: "Multi-mint-saldo räcker inte för denna faktura",
+    failed: "Misslyckades att behandla: {error}",
+    paid: "Betalat {amount} via Lightning",
   },
-
 
   global: {
     copy_to_clipboard: {
@@ -164,22 +163,22 @@ export default {
   },
   Settings: {
     web_of_trust: {
-      title: 'Web of trust',
-      known_pubkeys: 'Kända pubkeys: {wotCount}',
-      continue_crawl: 'Fortsätt genomsökning',
+      title: "Web of trust",
+      known_pubkeys: "Kända pubkeys: {wotCount}",
+      continue_crawl: "Fortsätt genomsökning",
       crawl_odell: "Genomsök ODELL'S WEB OF TRUST",
-      crawl_wot: 'Genomsök web of trust',
-      pause: 'Pausa',
-      reset: 'Återställ',
-      progress: '{crawlProcessed} / {crawlTotal}',
+      crawl_wot: "Genomsök web of trust",
+      pause: "Pausa",
+      reset: "Återställ",
+      progress: "{crawlProcessed} / {crawlTotal}",
     },
     npub_cash: {
-      use_npubx: 'Använd npubx.cash',
-      copy_lightning_address: 'Kopiera Lightning-adress',
-      v2_mint: 'npub.cash v2 mint',
+      use_npubx: "Använd npubx.cash",
+      copy_lightning_address: "Kopiera Lightning-adress",
+      v2_mint: "npub.cash v2 mint",
     },
     multinut: {
-      use_multinut: 'Använd Multinut',
+      use_multinut: "Använd Multinut",
     },
     language: {
       title: "Språk",
@@ -252,7 +251,8 @@ export default {
       description: "Ställ in nostr-nycklarna för din Lightning-adress.",
       wallet_seed: {
         title: "Plånbokens återställningsfras",
-        description: "Generera nostr nyckelpar från plånbokens återställningsfras",
+        description:
+          "Generera nostr nyckelpar från plånbokens återställningsfras",
         copy_nsec: "Kopiera nsec",
       },
       nsec_bunker: {
@@ -685,8 +685,7 @@ export default {
   },
   WelcomeSlideChoice: {
     title: "Ställ in din plånbok",
-    text:
-      "Vill du återställa från en återställningsfras eller skapa en ny plånbok?",
+    text: "Vill du återställa från en återställningsfras eller skapa en ny plånbok?",
     options: {
       new: {
         title: "Skapa ny plånbok",
@@ -694,15 +693,13 @@ export default {
       },
       recover: {
         title: "Återställ plånbok",
-        subtitle:
-          "Ange din återställningsfras, återställ mints och ecash.",
+        subtitle: "Ange din återställningsfras, återställ mints och ecash.",
       },
     },
   },
   WelcomeMintSetup: {
     title: "Lägg till mints",
-    text:
-      "Mints är servrar som hjälper dig skicka och ta emot ecash. Välj en upptäckt mint eller lägg till en manuellt. Du kan hoppa över och lägga till senare.",
+    text: "Mints är servrar som hjälper dig skicka och ta emot ecash. Välj en upptäckt mint eller lägg till en manuellt. Du kan hoppa över och lägga till senare.",
     sections: { your_mints: "Dina mints" },
     restoring: "Återställer mints…",
     placeholder: { mint_url: "https://" },
@@ -717,8 +714,7 @@ export default {
   },
   WelcomeRestoreEcash: {
     title: "Återställ ditt ecash",
-    text:
-      "Sök efter ospenderade proofs på dina konfigurerade mints och lägg till dem i plånboken.",
+    text: "Sök efter ospenderade proofs på dina konfigurerade mints och lägg till dem i plånboken.",
   },
   MintRatings: {
     title: "Mint-recensioner",
@@ -877,10 +873,10 @@ export default {
         },
       },
     },
-    error_badge: 'Fel',
-    reviews_text: 'recensioner',
-    no_reviews_yet: 'Inga recensioner ännu',
-    discover_mints_button: 'Upptäck mints',
+    error_badge: "Fel",
+    reviews_text: "recensioner",
+    no_reviews_yet: "Inga recensioner ännu",
+    discover_mints_button: "Upptäck mints",
   },
   QrcodeReader: {
     progress: {

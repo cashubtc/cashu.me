@@ -15,12 +15,12 @@ export const usePriceStore = defineStore("price", {
     bitcoinPrice: useLocalStorage("cashu.price.bitcoinPrice", 0 as number),
     bitcoinPriceLastUpdated: useLocalStorage(
       "cashu.price.bitcoinPriceLastUpdated",
-      0 as number
+      0 as number,
     ),
     bitcoinPriceMinRefreshInterval: 60_000,
     bitcoinPrices: useLocalStorage(
       "cashu.price.bitcoinPrices",
-      {} as Record<string, number>
+      {} as Record<string, number>,
     ),
   }),
   actions: {
@@ -40,13 +40,13 @@ export const usePriceStore = defineStore("price", {
         console.log(
           `Not fetching bitcoin price, last updated ${
             Date.now() - this.bitcoinPriceLastUpdated
-          }ms ago: ${this.bitcoinPrice}`
+          }ms ago: ${this.bitcoinPrice}`,
         );
         return;
       }
       try {
         var { data } = await axios.get(
-          "https://api.coinbase.com/v2/exchange-rates?currency=BTC"
+          "https://api.coinbase.com/v2/exchange-rates?currency=BTC",
         );
         this.bitcoinPrices = data.data.rates;
         // Update the main bitcoinPrice to current selected currency for backward compatibility

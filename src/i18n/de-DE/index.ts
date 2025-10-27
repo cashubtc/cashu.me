@@ -1,14 +1,16 @@
 export default {
   MultinutPicker: {
-    payment: 'Multinut-Zahlung',
-    selectMints: 'Wählen Sie eine oder mehrere Mints aus, um eine Zahlung auszuführen.',
-    totalSelectedBalance: 'Gesamtes ausgewähltes Guthaben',
-    multiMintPay: 'Multi-Mint-Zahlung',
-    balanceNotEnough: 'Das Multi-Mint-Guthaben reicht nicht aus, um diese Rechnung zu begleichen',
-    failed: 'Verarbeitung fehlgeschlagen: {error}',
-    paid: '{amount} über Lightning bezahlt',
+    payment: "Multinut-Zahlung",
+    selectMints:
+      "Wählen Sie eine oder mehrere Mints aus, um eine Zahlung auszuführen.",
+    totalSelectedBalance: "Gesamtes ausgewähltes Guthaben",
+    multiMintPay: "Multi-Mint-Zahlung",
+    balanceNotEnough:
+      "Das Multi-Mint-Guthaben reicht nicht aus, um diese Rechnung zu begleichen",
+    failed: "Verarbeitung fehlgeschlagen: {error}",
+    paid: "{amount} über Lightning bezahlt",
   },
-  
+
   global: {
     copy_to_clipboard: {
       success: "In die Zwischenablage kopiert!",
@@ -56,7 +58,6 @@ export default {
         label: "Mint URL",
       },
     },
-    
   },
   wallet: {
     notifications: {
@@ -400,11 +401,13 @@ export default {
       },
       multinut: {
         toggle: "Multinut aktivieren",
-        description: "Wenn aktiviert, verwendet die Wallet Multinut, um Rechnungen von mehreren Mints gleichzeitig zu bezahlen.",
+        description:
+          "Wenn aktiviert, verwendet die Wallet Multinut, um Rechnungen von mehreren Mints gleichzeitig zu bezahlen.",
       },
       nostr_mint_backup: {
         toggle: "Mint-Liste auf Nostr sichern",
-        description: "Wenn aktiviert, wird Ihre Mint-Liste automatisch auf Nostr-Relays mit Ihren konfigurierten Nostr-Schlüsseln gesichert. Dies ermöglicht es Ihnen, Ihre Mint-Liste auf verschiedenen Geräten wiederherzustellen.",
+        description:
+          "Wenn aktiviert, wird Ihre Mint-Liste automatisch auf Nostr-Relays mit Ihren konfigurierten Nostr-Schlüsseln gesichert. Dies ermöglicht es Ihnen, Ihre Mint-Liste auf verschiedenen Geräten wiederherzustellen.",
         notifications: {
           enabled: "Nostr-Mint-Backup aktiviert",
           disabled: "Nostr-Mint-Backup deaktiviert",
@@ -692,7 +695,10 @@ export default {
     title: "Richten Sie Ihre Wallet ein",
     text: "Möchten Sie aus einer Seed-Phrase wiederherstellen oder eine neue Wallet erstellen?",
     options: {
-      new: { title: "Neue Wallet erstellen", subtitle: "Neue Seed erzeugen und Mints hinzufügen." },
+      new: {
+        title: "Neue Wallet erstellen",
+        subtitle: "Neue Seed erzeugen und Mints hinzufügen.",
+      },
       recover: {
         title: "Wallet wiederherstellen",
         subtitle: "Seed-Phrase eingeben, Mints und Ecash wiederherstellen.",
@@ -701,8 +707,7 @@ export default {
   },
   WelcomeMintSetup: {
     title: "Mints hinzufügen",
-    text:
-      "Mints sind Server, die beim Senden und Empfangen von Ecash helfen. Wählen Sie eine gefundene Mint oder fügen Sie manuell eine hinzu. Sie können dies auch später tun.",
+    text: "Mints sind Server, die beim Senden und Empfangen von Ecash helfen. Wählen Sie eine gefundene Mint oder fügen Sie manuell eine hinzu. Sie können dies auch später tun.",
     sections: { your_mints: "Ihre Mints" },
     restoring: "Mints werden wiederhergestellt…",
     placeholder: { mint_url: "https://" },
@@ -717,8 +722,7 @@ export default {
   },
   WelcomeRestoreEcash: {
     title: "Ihr Ecash wiederherstellen",
-    text:
-      "Scannen Sie nach nicht ausgegebenen Nachweisen auf Ihren konfigurierten Mints und fügen Sie sie Ihrer Wallet hinzu.",
+    text: "Scannen Sie nach nicht ausgegebenen Nachweisen auf Ihren konfigurierten Mints und fügen Sie sie Ihrer Wallet hinzu.",
   },
   MintRatings: {
     title: "Mint-Bewertungen",
@@ -732,8 +736,13 @@ export default {
   CreateMintReview: {
     title: "Mint bewerten",
     publishing_as: "Veröffentlichen als",
-    inputs: { rating: { label: "Bewertung" }, review: { label: "Rezension (optional)" } },
-    actions: { publish: { label: "Veröffentlichen", in_progress: "Veröffentlichen…" } },
+    inputs: {
+      rating: { label: "Bewertung" },
+      review: { label: "Rezension (optional)" },
+    },
+    actions: {
+      publish: { label: "Veröffentlichen", in_progress: "Veröffentlichen…" },
+    },
   },
   RestoreView: {
     seed_phrase: {
@@ -790,7 +799,8 @@ export default {
     },
     nostr_mints: {
       label: "Mints von Nostr wiederherstellen",
-      caption: "Suchen Sie nach Mint-Backups, die auf Nostr-Relays mit Ihrer Seed-Phrase gespeichert sind. Dies hilft Ihnen, Mints zu entdecken, die Sie zuvor verwendet haben.",
+      caption:
+        "Suchen Sie nach Mint-Backups, die auf Nostr-Relays mit Ihrer Seed-Phrase gespeichert sind. Dies hilft Ihnen, Mints zu entdecken, die Sie zuvor verwendet haben.",
       search_button: "Nach Mint-Backups suchen",
       select_all: "Alle auswählen",
       deselect_all: "Alle abwählen",
@@ -798,8 +808,10 @@ export default {
       already_added: "Bereits hinzugefügt",
       add_selected: "Ausgewählte hinzufügen ({count})",
       no_backups_found: "Keine Mint-Backups gefunden",
-      no_backups_hint: "Stellen Sie sicher, dass das Nostr-Mint-Backup in den Einstellungen aktiviert ist, um Ihre Mint-Liste automatisch zu sichern.",
-      invalid_mnemonic: "Bitte geben Sie eine gültige Seed-Phrase ein, bevor Sie suchen.",
+      no_backups_hint:
+        "Stellen Sie sicher, dass das Nostr-Mint-Backup in den Einstellungen aktiviert ist, um Ihre Mint-Liste automatisch zu sichern.",
+      invalid_mnemonic:
+        "Bitte geben Sie eine gültige Seed-Phrase ein, bevor Sie suchen.",
       search_error: "Fehler bei der Suche nach Mint-Backups.",
       add_error: "Fehler beim Hinzufügen ausgewählter Mints.",
     },
@@ -871,10 +883,10 @@ export default {
         },
       },
     },
-    error_badge: 'Fehler',
-    reviews_text: 'Bewertungen',
-    no_reviews_yet: 'Noch keine Bewertungen',
-    discover_mints_button: 'Mints entdecken',
+    error_badge: "Fehler",
+    reviews_text: "Bewertungen",
+    no_reviews_yet: "Noch keine Bewertungen",
+    discover_mints_button: "Mints entdecken",
   },
   QrcodeReader: {
     progress: {

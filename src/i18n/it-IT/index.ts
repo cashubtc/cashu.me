@@ -1,12 +1,13 @@
 export default {
   MultinutPicker: {
-    payment: 'Pagamento Multinut',
-    selectMints: 'Seleziona una o più mint da cui eseguire un pagamento.',
-    totalSelectedBalance: 'Saldo totale selezionato',
-    multiMintPay: 'Pagamento Multi-Mint',
-    balanceNotEnough: 'Il saldo multi-mint non è sufficiente per questa fattura',
-    failed: 'Impossibile elaborare: {error}',
-    paid: 'Pagato {amount} via Lightning',
+    payment: "Pagamento Multinut",
+    selectMints: "Seleziona una o più mint da cui eseguire un pagamento.",
+    totalSelectedBalance: "Saldo totale selezionato",
+    multiMintPay: "Pagamento Multi-Mint",
+    balanceNotEnough:
+      "Il saldo multi-mint non è sufficiente per questa fattura",
+    failed: "Impossibile elaborare: {error}",
+    paid: "Pagato {amount} via Lightning",
   },
   global: {
     // merged global keys
@@ -29,7 +30,6 @@ export default {
     },
     inputs: { mint_url: { label: "URL Mint" } },
   },
-
 
   wallet: {
     notifications: {
@@ -660,8 +660,7 @@ export default {
   },
   WelcomeSlideChoice: {
     title: "Configura il tuo portafoglio",
-    text:
-      "Vuoi recuperare da una frase seed o creare un nuovo portafoglio?",
+    text: "Vuoi recuperare da una frase seed o creare un nuovo portafoglio?",
     options: {
       new: {
         title: "Crea nuovo portafoglio",
@@ -669,15 +668,13 @@ export default {
       },
       recover: {
         title: "Recupera portafoglio",
-        subtitle:
-          "Inserisci la tua frase seed, ripristina mints ed ecash.",
+        subtitle: "Inserisci la tua frase seed, ripristina mints ed ecash.",
       },
     },
   },
   WelcomeMintSetup: {
     title: "Aggiungi mints",
-    text:
-      "I mints sono server che ti aiutano a inviare e ricevere ecash. Scegli un mint scoperto o aggiungine uno manualmente. Puoi saltare per aggiungere mints più tardi.",
+    text: "I mints sono server che ti aiutano a inviare e ricevere ecash. Scegli un mint scoperto o aggiungine uno manualmente. Puoi saltare per aggiungere mints più tardi.",
     sections: { your_mints: "I tuoi mints" },
     restoring: "Ripristino mints…",
     placeholder: { mint_url: "https://" },
@@ -692,8 +689,7 @@ export default {
   },
   WelcomeRestoreEcash: {
     title: "Ripristina il tuo ecash",
-    text:
-      "Scansiona le proofs non spese sui mints configurati e aggiungile al tuo portafoglio.",
+    text: "Scansiona le proofs non spese sui mints configurati e aggiungile al tuo portafoglio.",
   },
   MintRatings: {
     title: "Recensioni del mint",
@@ -852,10 +848,10 @@ export default {
         },
       },
     },
-    error_badge: 'Errore',
-    reviews_text: 'recensioni',
-    no_reviews_yet: 'Nessuna recensione ancora',
-    discover_mints_button: 'Scopri mints',
+    error_badge: "Errore",
+    reviews_text: "recensioni",
+    no_reviews_yet: "Nessuna recensione ancora",
+    discover_mints_button: "Scopri mints",
   },
   QrcodeReader: {
     progress: {

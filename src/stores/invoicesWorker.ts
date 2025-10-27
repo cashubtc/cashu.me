@@ -25,13 +25,13 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       invoiceWorkerRunning: false,
       quotes: useLocalStorage<InvoiceQuote[]>(
         "cashu.worker.invoices.quotesQueue",
-        []
+        [],
       ),
       lastInvoiceCheckTime: 0,
       maxQuotesToCheckOnStartup: 10,
       lastPendingInvoiceCheck: useLocalStorage<number>(
         "cashu.worker.invoices.lastPendingInvoiceCheck",
-        0
+        0,
       ),
       checkPendingInvoicesInterval: 1000 * 10, // delay between bulk invoice checks
     };
@@ -83,7 +83,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
           Math.min(
             this.checkInterval *
               Math.pow(2, q.checkCount - this.keepIntervalConstantForNChecks),
-            this.maxInterval
+            this.maxInterval,
           )
         );
       } else {
@@ -130,7 +130,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         (q) =>
           q.status === "pending" &&
           q.amount > 0 &&
-          Date.now() - Date.parse(q.date) < this.oneDay
+          Date.now() - Date.parse(q.date) < this.oneDay,
       );
       if (quotesToCheck.length > this.maxQuotesToCheckOnStartup) {
         quotesToCheck.splice(this.maxQuotesToCheckOnStartup);

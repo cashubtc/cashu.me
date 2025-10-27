@@ -380,11 +380,13 @@ export default {
       },
       multinut: {
         toggle: "Habilitar Multinut",
-        description: "Si está habilitado, el monedero utilizará Multinut para pagar facturas de varias cecas a la vez.",
+        description:
+          "Si está habilitado, el monedero utilizará Multinut para pagar facturas de varias cecas a la vez.",
       },
       nostr_mint_backup: {
         toggle: "Copia de seguridad de la lista de cecas en Nostr",
-        description: "Si está activada, se realizará una copia de seguridad automática de su lista de cecas en los relés de Nostr utilizando sus claves de Nostr configuradas. Esto le permite restaurar su lista de cecas en todos los dispositivos.",
+        description:
+          "Si está activada, se realizará una copia de seguridad automática de su lista de cecas en los relés de Nostr utilizando sus claves de Nostr configuradas. Esto le permite restaurar su lista de cecas en todos los dispositivos.",
         notifications: {
           enabled: "Copia de seguridad de la ceca de Nostr activada",
           disabled: "Copia de seguridad de la ceca de Nostr desactivada",
@@ -690,7 +692,10 @@ export default {
     title: "Configura tu billetera",
     text: "¿Quieres recuperar desde una frase semilla o crear una billetera nueva?",
     options: {
-      new: { title: "Crear billetera nueva", subtitle: "Genera una semilla nueva y añade mints." },
+      new: {
+        title: "Crear billetera nueva",
+        subtitle: "Genera una semilla nueva y añade mints.",
+      },
       recover: {
         title: "Recuperar billetera",
         subtitle: "Ingresa tu frase semilla, restaura mints y ecash.",
@@ -699,8 +704,7 @@ export default {
   },
   WelcomeMintSetup: {
     title: "Añadir mints",
-    text:
-      "Los mints son servidores que te ayudan a enviar y recibir ecash. Elige un mint descubierto o añade uno manualmente. Puedes hacerlo más tarde.",
+    text: "Los mints son servidores que te ayudan a enviar y recibir ecash. Elige un mint descubierto o añade uno manualmente. Puedes hacerlo más tarde.",
     sections: { your_mints: "Tus mints" },
     restoring: "Restaurando mints…",
     placeholder: { mint_url: "https://" },
@@ -715,8 +719,7 @@ export default {
   },
   WelcomeRestoreEcash: {
     title: "Restaura tu ecash",
-    text:
-      "Busca comprobantes no gastados en tus mints configurados y agrégalos a tu billetera.",
+    text: "Busca comprobantes no gastados en tus mints configurados y agrégalos a tu billetera.",
   },
   MintRatings: {
     title: "Reseñas del mint",
@@ -730,7 +733,10 @@ export default {
   CreateMintReview: {
     title: "Reseñar mint",
     publishing_as: "Publicando como",
-    inputs: { rating: { label: "Calificación" }, review: { label: "Reseña (opcional)" } },
+    inputs: {
+      rating: { label: "Calificación" },
+      review: { label: "Reseña (opcional)" },
+    },
     actions: { publish: { label: "Publicar", in_progress: "Publicando…" } },
   },
   RestoreView: {
@@ -757,7 +763,8 @@ export default {
     },
     nostr_mints: {
       label: "Restaurar Mints de Nostr",
-      caption: "Busque copias de seguridad de mints almacenadas en relés de Nostr utilizando su frase semilla. Esto le ayudará a descubrir mints que utilizó anteriormente.",
+      caption:
+        "Busque copias de seguridad de mints almacenadas en relés de Nostr utilizando su frase semilla. Esto le ayudará a descubrir mints que utilizó anteriormente.",
       search_button: "Buscar copias de seguridad de Mint",
       select_all: "Seleccionar todo",
       deselect_all: "Deseleccionar todo",
@@ -765,8 +772,10 @@ export default {
       already_added: "Ya añadido",
       add_selected: "Añadir seleccionados ({count})",
       no_backups_found: "No se han encontrado copias de seguridad de mints",
-      no_backups_hint: "Asegúrese de que la copia de seguridad de Nostr mint está activada en los ajustes para hacer una copia de seguridad automática de su lista de mints.",
-      invalid_mnemonic: "Por favor, introduzca una frase semilla válida antes de buscar.",
+      no_backups_hint:
+        "Asegúrese de que la copia de seguridad de Nostr mint está activada en los ajustes para hacer una copia de seguridad automática de su lista de mints.",
+      invalid_mnemonic:
+        "Por favor, introduzca una frase semilla válida antes de buscar.",
       search_error: "Error al buscar copias de seguridad de mints.",
       add_error: "Error al añadir los mints seleccionados.",
     },
@@ -868,10 +877,10 @@ export default {
         },
       },
     },
-    error_badge: 'Error',
-    reviews_text: 'reseñas',
-    no_reviews_yet: 'Aún no hay reseñas',
-    discover_mints_button: 'Descubrir mints',
+    error_badge: "Error",
+    reviews_text: "reseñas",
+    no_reviews_yet: "Aún no hay reseñas",
+    discover_mints_button: "Descubrir mints",
   },
   QrcodeReader: {
     progress: {

@@ -31,7 +31,8 @@ export const useNostrUserStore = defineStore("nostrUser", {
     crawlCheckpointNextIndex: 0,
     crawlCheckpointTotal: 0,
     wotCancelRequested: false,
-    defaultWoTSeedPubkey: "04c915daefee38317fa734444acee390a8269fe5810b2241e5e6dd343dfbecc9",
+    defaultWoTSeedPubkey:
+      "04c915daefee38317fa734444acee390a8269fe5810b2241e5e6dd343dfbecc9",
     defaultShallowWoTPubkeys: [
       "04c915daefee38317fa734444acee390a8269fe5810b2241e5e6dd343dfbecc9", // ODELL
       "50d94fc2d8580c682b071a542f8b1e31a200b0508bab95a33bef0855df281d63", // Calle
@@ -40,23 +41,32 @@ export const useNostrUserStore = defineStore("nostrUser", {
       "1afe0c74e3d7784eba93a5e3fa554a6eeb01928d12739ae8ba4832786808e36d", // AmericanHodl
       "c48e29f04b482cc01ca1f9ef8c86ef8318c059e0e9353235162f080f26e14c11", // Walker
       "c43bbb58e2e6bc2f9455758257f6ba5329107bd4e8274068c2936c69d9980b7d", // roya
-    ]
+    ],
   }),
   getters: {
     displayName(state): string {
       const p = state.profile || {};
       const name = (p.display_name || p.name || "").trim();
-      return name || (state.pubkey ? `${state.pubkey.slice(0, 8)}…${state.pubkey.slice(-4)}` : "");
+      return (
+        name ||
+        (state.pubkey
+          ? `${state.pubkey.slice(0, 8)}…${state.pubkey.slice(-4)}`
+          : "")
+      );
     },
     wotCount(state): number {
       return Object.keys(state.wotHopsByPubkey || {}).length;
     },
-    isInWebOfTrust: (state) => (pk: string): boolean => {
-      return pk in state.wotHopsByPubkey;
-    },
-    getHop: (state) => (pk: string): number | null => {
-      return state.wotHopsByPubkey[pk] ?? null;
-    },
+    isInWebOfTrust:
+      (state) =>
+      (pk: string): boolean => {
+        return pk in state.wotHopsByPubkey;
+      },
+    getHop:
+      (state) =>
+      (pk: string): number | null => {
+        return state.wotHopsByPubkey[pk] ?? null;
+      },
     hasCrawlCheckpoint(state): boolean {
       return (
         typeof state.crawlCheckpointNextIndex === "number" &&
@@ -85,7 +95,7 @@ export const useNostrUserStore = defineStore("nostrUser", {
       ]);
       this.follows = follows.map((f) => f.pubkey);
       this.wotHopsByPubkey = Object.fromEntries(
-        wot.map((e) => [e.pubkey, e.hop])
+        wot.map((e) => [e.pubkey, e.hop]),
       );
       this.lastUpdatedAt = (last?.value as number) || 0;
       this.crawlCheckpointNextIndex = (nextIdx?.value as number) || 0;
@@ -110,8 +120,14 @@ export const useNostrUserStore = defineStore("nostrUser", {
       await this.ensureDbInitialized();
       if (!this.pubkey) return;
       const now = Math.floor(Date.now() / 1000);
-      if (!force && now - this.lastUpdatedAt < this.profileRefreshIntervalSeconds) return; // throttle to profileRefreshIntervalSeconds seconds
-      console.log(`[nostrUser] Updating user profile for ${this.pubkey} (force=${force})`);
+      if (
+        !force &&
+        now - this.lastUpdatedAt < this.profileRefreshIntervalSeconds
+      )
+        return; // throttle to profileRefreshIntervalSeconds seconds
+      console.log(
+        `[nostrUser] Updating user profile for ${this.pubkey} (force=${force})`,
+      );
       await this.fetchProfile();
       await this.fetchFollows();
       this.lastUpdatedAt = now;
@@ -130,15 +146,16 @@ export const useNostrUserStore = defineStore("nostrUser", {
         const events = await ndk.fetchEvents(filter);
         let latest: NDKEvent | undefined;
         events.forEach((e) => {
-          if (!latest || (e.created_at || 0) > (latest.created_at || 0)) latest = e;
+          if (!latest || (e.created_at || 0) > (latest.created_at || 0))
+            latest = e;
         });
         if (latest) {
           try {
             const content = JSON.parse(latest.content || "{}");
             this.profile = content as NostrProfile;
-          } catch { }
+          } catch {}
         }
-      } catch { }
+      } catch {}
     },
     fetchFollowsOf: async function (pk: string): Promise<string[]> {
       const ndk = this.ensureNdk();
@@ -152,7 +169,8 @@ export const useNostrUserStore = defineStore("nostrUser", {
         const events = await ndk.fetchEvents(filter);
         let latest: NDKEvent | undefined;
         events.forEach((e) => {
-          if (!latest || (e.created_at || 0) > (latest.created_at || 0)) latest = e;
+          if (!latest || (e.created_at || 0) > (latest.created_at || 0))
+            latest = e;
         });
         if (!latest) return [];
         const follows = (latest.tags || [])
@@ -171,7 +189,9 @@ export const useNostrUserStore = defineStore("nostrUser", {
         console.log(`[nostrUser] Fetching follows (kind:3) for ${this.pubkey}`);
         const follows = await this.fetchFollowsOf(this.pubkey);
         this.follows = follows;
-        console.log(`[nostrUser] Fetched ${follows.length} follows for ${this.pubkey}`);
+        console.log(
+          `[nostrUser] Fetched ${follows.length} follows for ${this.pubkey}`,
+        );
         await db.follows.clear();
         if (follows.length) {
           await db.follows.bulkPut(follows.map((pk) => ({ pubkey: pk })));
@@ -190,7 +210,7 @@ export const useNostrUserStore = defineStore("nostrUser", {
           }));
           await db.wot.bulkPut(wotRows);
         }
-      } catch { }
+      } catch {}
     },
     shallowCrawlWebOfTrust: async function () {
       // call 1-hop crawlWebOfTrust for each of the defaultShallowWoTPubkeys
@@ -200,31 +220,28 @@ export const useNostrUserStore = defineStore("nostrUser", {
     },
     crawlWebOfTrust: async function (
       maxHops: number | undefined = undefined,
-      sourcePubKey: string | undefined = undefined
+      sourcePubKey: string | undefined = undefined,
     ) {
       await this.ensureDbInitialized();
       maxHops = maxHops || this.wotMaxHops;
       const nostr = useNostrStore();
       const source =
         sourcePubKey ||
-        (nostr.signerType === "SEED"
-          ? this.defaultWoTSeedPubkey
-          : this.pubkey);
+        (nostr.signerType === "SEED" ? this.defaultWoTSeedPubkey : this.pubkey);
       if (!source) return;
       if (this.wotLoading) return;
       this.wotLoading = true;
       this.wotCancelRequested = false;
       try {
         console.log(
-          `[nostrUser] Crawling web of trust from ${source} up to ${maxHops} hops…`
+          `[nostrUser] Crawling web of trust from ${source} up to ${maxHops} hops…`,
         );
         // Determine resume vs fresh crawl
         let hop1Saved = (await db.meta.get("wot.crawl.hop1"))?.value as
           | string[]
           | undefined;
-        let nextIndexSaved = (await db.meta.get("wot.crawl.nextIndex"))?.value as
-          | number
-          | undefined;
+        let nextIndexSaved = (await db.meta.get("wot.crawl.nextIndex"))
+          ?.value as number | undefined;
         let hop1: string[] = [];
         let startIndex = 0;
         if (
@@ -273,7 +290,7 @@ export const useNostrUserStore = defineStore("nostrUser", {
             Object.keys(wot).map((pubkey) => ({
               pubkey,
               hop: this.wotHopsByPubkey[pubkey],
-            }))
+            })),
           );
         }
 
@@ -294,7 +311,9 @@ export const useNostrUserStore = defineStore("nostrUser", {
             this.crawlCheckpointNextIndex = i + 1;
             if (this.crawlProcessed % 3 === 0) {
               // Periodically update state so UI reflects progress
-              const merged: Record<string, number> = { ...this.wotHopsByPubkey };
+              const merged: Record<string, number> = {
+                ...this.wotHopsByPubkey,
+              };
               for (const [k, v] of Object.entries(wot)) {
                 merged[k] = Math.min(merged[k] ?? v, v);
               }
@@ -303,7 +322,7 @@ export const useNostrUserStore = defineStore("nostrUser", {
                 Object.keys(wot).map((pubkey) => ({
                   pubkey,
                   hop: this.wotHopsByPubkey[pubkey],
-                }))
+                })),
               );
             }
             await this.sleep(stepDelayMs);
@@ -320,18 +339,22 @@ export const useNostrUserStore = defineStore("nostrUser", {
             Object.keys(wot).map((pubkey) => ({
               pubkey,
               hop: this.wotHopsByPubkey[pubkey],
-            }))
+            })),
           );
         }
         if (!this.wotCancelRequested) {
-          console.log(`[nostrUser] Crawl complete. Known pubkeys: ${Object.keys(this.wotHopsByPubkey).length}`);
+          console.log(
+            `[nostrUser] Crawl complete. Known pubkeys: ${Object.keys(this.wotHopsByPubkey).length}`,
+          );
           // Clear checkpoint upon completion
           await db.meta.delete("wot.crawl.hop1");
           await db.meta.delete("wot.crawl.nextIndex");
           this.crawlCheckpointNextIndex = 0;
           this.crawlCheckpointTotal = 0;
         } else {
-          console.log(`[nostrUser] Crawl cancelled at ${this.crawlProcessed}/${this.crawlTotal}`);
+          console.log(
+            `[nostrUser] Crawl cancelled at ${this.crawlProcessed}/${this.crawlTotal}`,
+          );
         }
       } finally {
         this.wotLoading = false;
@@ -381,5 +404,3 @@ class NostrUserDB extends Dexie {
 }
 
 const db = new NostrUserDB();
-
-

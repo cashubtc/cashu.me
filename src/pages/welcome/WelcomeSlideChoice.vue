@@ -160,8 +160,15 @@ export default {
 
 .text .title {
   font-size: 15.2px; /* Exact match to platform titles in WelcomeSlide2 */
-  font-family: Inter, -apple-system, "system-ui", "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  font-family:
+    Inter,
+    -apple-system,
+    "system-ui",
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
   font-weight: 600;
   color: #ffffff;
   margin: 0 0 8px 0;

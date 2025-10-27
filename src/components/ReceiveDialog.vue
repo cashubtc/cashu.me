@@ -137,7 +137,7 @@ export default defineComponent({
     showInvoiceCreateDialog: async function () {
       if (!this.canReceivePayments) {
         notifyWarning(
-          this.$i18n.t("ReceiveDialog.actions.lightning.error_no_mints")
+          this.$i18n.t("ReceiveDialog.actions.lightning.error_no_mints"),
         );
         this.showReceiveDialog = false;
         return;

@@ -32,7 +32,7 @@ export const useMigrationsStore = defineStore("migrations", {
     async runMigrations() {
       // Get migrations that need to be run (newer than current version)
       const pendingMigrations = this.migrations.filter(
-        (m) => m.version > this.currentVersion
+        (m) => m.version > this.currentVersion,
       );
 
       if (pendingMigrations.length === 0) {
@@ -48,14 +48,14 @@ export const useMigrationsStore = defineStore("migrations", {
       try {
         for (const migration of pendingMigrations) {
           console.log(
-            `Running migration ${migration.version}: ${migration.name}`
+            `Running migration ${migration.version}: ${migration.name}`,
           );
           try {
             await migration.execute();
             // Update the current version after successful migration
             this.currentVersion = migration.version;
             console.log(
-              `Migration ${migration.version} completed successfully`
+              `Migration ${migration.version} completed successfully`,
             );
           } catch (error) {
             console.error(`Migration ${migration.version} failed:`, error);
@@ -109,10 +109,15 @@ export const useMigrationsStore = defineStore("migrations", {
           settings.defaultNostrRelays = relays;
           console.log(`Added relay to defaultNostrRelays: ${relayToAdd}`);
         } else {
-          console.log(`Relay already present in defaultNostrRelays: ${relayToAdd}`);
+          console.log(
+            `Relay already present in defaultNostrRelays: ${relayToAdd}`,
+          );
         }
       } catch (e) {
-        console.error("Failed to update defaultNostrRelays during migration v2", e);
+        console.error(
+          "Failed to update defaultNostrRelays during migration v2",
+          e,
+        );
       }
 
       // 2) Ensure nostrMintBackupEnabled is true
@@ -126,7 +131,10 @@ export const useMigrationsStore = defineStore("migrations", {
           console.log("nostrMintBackupEnabled already true");
         }
       } catch (e) {
-        console.error("Failed to enable nostrMintBackupEnabled during migration v2", e);
+        console.error(
+          "Failed to enable nostrMintBackupEnabled during migration v2",
+          e,
+        );
       }
 
       // 3) Clear cached mint recommendations
@@ -134,7 +142,10 @@ export const useMigrationsStore = defineStore("migrations", {
         localStorage.removeItem("cashu.ndk.mintRecommendations");
         console.log("Cleared localStorage key: cashu.ndk.mintRecommendations");
       } catch (e) {
-        console.error("Failed to clear cashu.ndk.mintRecommendations during migration v2", e);
+        console.error(
+          "Failed to clear cashu.ndk.mintRecommendations during migration v2",
+          e,
+        );
       }
     },
 

@@ -1,21 +1,19 @@
 export default {
   MultinutPicker: {
-    payment: 'Multinut ödeme',
-    selectMints: 'Ödeme yapmak için bir veya birden fazla mint seçin.',
-    totalSelectedBalance: 'Seçilen Toplam Bakiye',
-    multiMintPay: 'Çoklu-Mint Ödeme',
-    balanceNotEnough: 'Çoklu mint bakiyesi bu faturayı karşılamaya yetmiyor',
-    failed: 'İşlenemedi: {error}',
-    paid: 'Lightning ile {amount} ödendi',
+    payment: "Multinut ödeme",
+    selectMints: "Ödeme yapmak için bir veya birden fazla mint seçin.",
+    totalSelectedBalance: "Seçilen Toplam Bakiye",
+    multiMintPay: "Çoklu-Mint Ödeme",
+    balanceNotEnough: "Çoklu mint bakiyesi bu faturayı karşılamaya yetmiyor",
+    failed: "İşlenemedi: {error}",
+    paid: "Lightning ile {amount} ödendi",
   },
   // merged into single Settings block above
   advanced: {
-    developer: {
-                  },
+    developer: {},
   },
 
   global: {
-
     copy_to_clipboard: {
       success: "Panoya kopyalandı!",
     },
@@ -233,8 +231,8 @@ export default {
         description: "Gelen ödemeleri otomatik olarak alın.",
       },
       npc_v2: {
-        choose_mint_title: 'npub.cash v2 için mint seçin',
-        choose_mint_placeholder: 'Bir mint seçin…',
+        choose_mint_title: "npub.cash v2 için mint seçin",
+        choose_mint_placeholder: "Bir mint seçin…",
       },
     },
     nostr_keys: {
@@ -285,7 +283,6 @@ export default {
         qr_tooltip: "QR kodunu göster",
         allowance_label: "Kalan ödenek (sat)",
       },
-
     },
     hardware_features: {
       webnfc: {
@@ -404,9 +401,9 @@ export default {
     },
     appearance: {
       bip177: {
-        title: 'Bitcoin sembolü',
-        description: 'sats yerine ₿ sembolünü kullan.',
-        toggle: '₿ sembolünü kullan',
+        title: "Bitcoin sembolü",
+        description: "sats yerine ₿ sembolünü kullan.",
+        toggle: "₿ sembolünü kullan",
       },
       keyboard: {
         title: "Ekran klavyesi",
@@ -494,25 +491,24 @@ export default {
     },
 
     web_of_trust: {
-      title: 'Web of trust',
-      known_pubkeys: 'Bilinen pubkeyler: {wotCount}',
+      title: "Web of trust",
+      known_pubkeys: "Bilinen pubkeyler: {wotCount}",
 
-      continue_crawl: 'Taramaya devam et',
+      continue_crawl: "Taramaya devam et",
       crawl_odell: "ODELL'İN WEB OF TRUST'unu tara",
-      crawl_wot: 'Web of trust tara',
-      pause: 'Duraklat',
-      reset: 'Sıfırla',
-      progress: '{crawlProcessed} / {crawlTotal}',
+      crawl_wot: "Web of trust tara",
+      pause: "Duraklat",
+      reset: "Sıfırla",
+      progress: "{crawlProcessed} / {crawlTotal}",
     },
     npub_cash: {
-      use_npubx: 'npubx.cash kullan',
-      copy_lightning_address: 'Lightning adresini kopyala',
-      v2_mint: 'npub.cash v2 mint',
-
+      use_npubx: "npubx.cash kullan",
+      copy_lightning_address: "Lightning adresini kopyala",
+      v2_mint: "npub.cash v2 mint",
     },
     multinut: {
-      use_multinut: 'Multinut kullan',
-    }
+      use_multinut: "Multinut kullan",
+    },
   },
   NoMintWarnBanner: {
     title: "Bir nane'ye katılın",
@@ -700,8 +696,7 @@ export default {
   },
   WelcomeSlideChoice: {
     title: "Cüzdanınızı ayarlayın",
-    text:
-      "Bir seed ifadesinden mi kurtarmak istersiniz yoksa yeni bir cüzdan mı oluşturmak istersiniz?",
+    text: "Bir seed ifadesinden mi kurtarmak istersiniz yoksa yeni bir cüzdan mı oluşturmak istersiniz?",
     options: {
       new: {
         title: "Yeni cüzdan oluştur",
@@ -715,8 +710,7 @@ export default {
   },
   WelcomeMintSetup: {
     title: "Mint ekle",
-    text:
-      "Mintler ecash göndermenize ve almanıza yardımcı olan sunuculardır. Keşfedilen bir minti seçin veya manuel ekleyin. Daha sonra da ekleyebilirsiniz.",
+    text: "Mintler ecash göndermenize ve almanıza yardımcı olan sunuculardır. Keşfedilen bir minti seçin veya manuel ekleyin. Daha sonra da ekleyebilirsiniz.",
     sections: { your_mints: "Mintleriniz" },
     restoring: "Mintler geri yükleniyor…",
     placeholder: { mint_url: "https://" },
@@ -731,8 +725,7 @@ export default {
   },
   WelcomeRestoreEcash: {
     title: "Ecash'inizi geri yükleyin",
-    text:
-      "Yapılandırılmış mintlerinizde harcanmamış kanıtları tarayın ve cüzdanınıza ekleyin.",
+    text: "Yapılandırılmış mintlerinizde harcanmamış kanıtları tarayın ve cüzdanınıza ekleyin.",
   },
   MintRatings: {
     title: "Mint yorumları",
@@ -891,10 +884,10 @@ export default {
         },
       },
     },
-    error_badge: 'Hata',
-    reviews_text: 'yorumlar',
-    no_reviews_yet: 'Henüz yorum yok',
-    discover_mints_button: 'Naneleri keşfet',
+    error_badge: "Hata",
+    reviews_text: "yorumlar",
+    no_reviews_yet: "Henüz yorum yok",
+    discover_mints_button: "Naneleri keşfet",
   },
   QrcodeReader: {
     progress: {

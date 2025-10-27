@@ -1,12 +1,12 @@
 export default {
   MultinutPicker: {
-    payment: 'マルチナット支払い',
-    selectMints: '支払いに使用するミントを一つ以上選択してください。',
-    totalSelectedBalance: '選択した合計残高',
-    multiMintPay: 'マルチミント支払い',
-    balanceNotEnough: '複数ミントの残高がこの請求書を満たすには不十分です',
-    failed: '処理に失敗しました: {error}',
-    paid: 'Lightningで{amount}を支払いました',
+    payment: "マルチナット支払い",
+    selectMints: "支払いに使用するミントを一つ以上選択してください。",
+    totalSelectedBalance: "選択した合計残高",
+    multiMintPay: "マルチミント支払い",
+    balanceNotEnough: "複数ミントの残高がこの請求書を満たすには不十分です",
+    failed: "処理に失敗しました: {error}",
+    paid: "Lightningで{amount}を支払いました",
   },
   global: {
     copy_to_clipboard: {
@@ -641,8 +641,7 @@ export default {
       success: {
         title: "成功！",
         text: "CashuをPWAとして使用しています。他の開いているブラウザウィンドウをすべて閉じ、ホーム画面からアプリを使用してください。",
-        nextSteps:
-          "このブラウザタブを閉じて、ホーム画面からアプリを開けます。",
+        nextSteps: "このブラウザタブを閉じて、ホーム画面からアプリを開けます。",
       },
     },
   },
@@ -682,8 +681,7 @@ export default {
   },
   WelcomeSlideChoice: {
     title: "ウォレットをセットアップ",
-    text:
-      "シードフレーズから復元しますか？ それとも新しいウォレットを作成しますか？",
+    text: "シードフレーズから復元しますか？ それとも新しいウォレットを作成しますか？",
     options: {
       new: {
         title: "新しいウォレットを作成",
@@ -697,8 +695,7 @@ export default {
   },
   WelcomeMintSetup: {
     title: "ミントを追加",
-    text:
-      "ミントはecashの送受信を助けるサーバーです。検出されたミントを選ぶか、手動で追加できます。後で追加することもできます。",
+    text: "ミントはecashの送受信を助けるサーバーです。検出されたミントを選ぶか、手動で追加できます。後で追加することもできます。",
     sections: { your_mints: "あなたのミント" },
     restoring: "ミントを復元中…",
     placeholder: { mint_url: "https://" },
@@ -713,8 +710,7 @@ export default {
   },
   WelcomeRestoreEcash: {
     title: "ecash を復元",
-    text:
-      "設定済みミントで未使用のproofをスキャンし、ウォレットに追加します。",
+    text: "設定済みミントで未使用のproofをスキャンし、ウォレットに追加します。",
   },
   MintRatings: {
     title: "ミントのレビュー",
@@ -776,37 +772,37 @@ export default {
         in_progress: "ミントを復元中…",
         error: "ミントの復元エラー: { error }",
       },
-            restore_all_mints: {
-              label: "すべてのミントを復元",
-              in_progress: "{ length }個のミントのうち{ index }個目を復元中…",
-              success: "復元が正常に完了しました",
-              error: "ミントの復元エラー: { error }",
-            },
-            restore_selected_mints: {
-              label: "選択したミントを復元 ({count})",
-              in_progress: "{length}個のミントのうち{index}個を復元しています…",
-              success: "{count}個のミントを正常に復元しました",
-              error: "選択したミントの復元中にエラーが発生しました: {error}",
-            },
-          },
-          nostr_mints: {
-            label: "Nostrからミントを復元",
-            caption:
-              "シードフレーズを使用してNostrリレーに保存されているミントのバックアップを検索します。これにより、以前使用したミントを発見できます。",
-            search_button: "ミントのバックアップを検索",
-            select_all: "すべて選択",
-            deselect_all: "すべて選択解除",
-            backed_up: "バックアップ済み",
-            already_added: "既に追加済み",
-            add_selected: "選択したものを追加 ({count})",
-            no_backups_found: "ミントのバックアップが見つかりません",
-            no_backups_hint:
-              "ミントリストを自動的にバックアップするには、設定でNostrミントのバックアップが有効になっていることを確認してください。",
-            invalid_mnemonic: "検索する前に有効なシードフレーズを入力してください。",
-            search_error: "ミントのバックアップの検索に失敗しました。",
-            add_error: "選択したミントの追加に失敗しました。",
-          },
-        },
+      restore_all_mints: {
+        label: "すべてのミントを復元",
+        in_progress: "{ length }個のミントのうち{ index }個目を復元中…",
+        success: "復元が正常に完了しました",
+        error: "ミントの復元エラー: { error }",
+      },
+      restore_selected_mints: {
+        label: "選択したミントを復元 ({count})",
+        in_progress: "{length}個のミントのうち{index}個を復元しています…",
+        success: "{count}個のミントを正常に復元しました",
+        error: "選択したミントの復元中にエラーが発生しました: {error}",
+      },
+    },
+    nostr_mints: {
+      label: "Nostrからミントを復元",
+      caption:
+        "シードフレーズを使用してNostrリレーに保存されているミントのバックアップを検索します。これにより、以前使用したミントを発見できます。",
+      search_button: "ミントのバックアップを検索",
+      select_all: "すべて選択",
+      deselect_all: "すべて選択解除",
+      backed_up: "バックアップ済み",
+      already_added: "既に追加済み",
+      add_selected: "選択したものを追加 ({count})",
+      no_backups_found: "ミントのバックアップが見つかりません",
+      no_backups_hint:
+        "ミントリストを自動的にバックアップするには、設定でNostrミントのバックアップが有効になっていることを確認してください。",
+      invalid_mnemonic: "検索する前に有効なシードフレーズを入力してください。",
+      search_error: "ミントのバックアップの検索に失敗しました。",
+      add_error: "選択したミントの追加に失敗しました。",
+    },
+  },
   MintSettings: {
     add: {
       title: "ミントを追加",
@@ -873,10 +869,10 @@ export default {
         },
       },
     },
-    error_badge: 'エラー',
-    reviews_text: 'レビュー',
-    no_reviews_yet: 'まだレビューはありません',
-    discover_mints_button: 'ミントを発見',
+    error_badge: "エラー",
+    reviews_text: "レビュー",
+    no_reviews_yet: "まだレビューはありません",
+    discover_mints_button: "ミントを発見",
   },
   QrcodeReader: {
     progress: {

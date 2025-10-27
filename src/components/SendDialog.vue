@@ -127,7 +127,7 @@ export default defineComponent({
     showParseDialog: function () {
       if (!this.canMakePayments) {
         notifyWarning(
-          this.$i18n.t("SendDialog.actions.lightning.error_no_mints")
+          this.$i18n.t("SendDialog.actions.lightning.error_no_mints"),
         );
         this.showSendDialog = false;
         return;

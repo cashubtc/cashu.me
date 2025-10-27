@@ -147,7 +147,7 @@ export default {
 
     // Show spinner while the Nostr mint search is in progress in recover flow
     const restoringMints = computed(
-      () => isSeedValid.value && nostrMintBackup.searchInProgress
+      () => isSeedValid.value && nostrMintBackup.searchInProgress,
     );
 
     const addMintData = mints.addMintData; // reactive from store
@@ -271,8 +271,15 @@ export default {
 
 .section-title {
   font-size: 15.2px;
-  font-family: Inter, -apple-system, "system-ui", "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  font-family:
+    Inter,
+    -apple-system,
+    "system-ui",
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
   font-weight: 600;
   color: #ffffff;
   margin: 0 0 16px 0;
@@ -302,8 +309,15 @@ export default {
 
 .mint-name {
   font-size: 15.2px;
-  font-family: Inter, -apple-system, "system-ui", "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  font-family:
+    Inter,
+    -apple-system,
+    "system-ui",
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
   font-weight: 600;
   color: #ffffff;
   margin: 0 0 4px 0;

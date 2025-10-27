@@ -58,7 +58,7 @@ export const useWorkersStore = defineStore("workers", {
       const settingsStore = useSettingsStore();
       if (!settingsStore.checkSentTokens) {
         console.log(
-          "settingsStore.checkSentTokens is disabled, not kicking off checkTokenSpendableWorker"
+          "settingsStore.checkSentTokens is disabled, not kicking off checkTokenSpendableWorker",
         );
         return;
       }

@@ -24,12 +24,16 @@ export type MintRecommendation = {
   lastHttpInfoFetchAt?: number; // unix seconds
 };
 
-function parseRatingAndComment(content: string): { rating: number | null; comment: string } {
+function parseRatingAndComment(content: string): {
+  rating: number | null;
+  comment: string;
+} {
   const m = content.match(/\s*\[(\d)\s*\/\s*5\]\s*(.*)$/s);
   if (!m) return { rating: null, comment: content || "" };
   const rating = parseInt(m[1], 10);
   const comment = (m[2] || "").trim();
-  if (isNaN(rating) || rating < 1 || rating > 5) return { rating: null, comment };
+  if (isNaN(rating) || rating < 1 || rating > 5)
+    return { rating: null, comment };
   return { rating, comment };
 }
 
@@ -51,7 +55,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
     // Aggregated list by URL (persisted)
     recommendations: useLocalStorage<MintRecommendation[]>(
       "cashu.ndk.mintRecommendations",
-      []
+      [],
     ),
     subsActive: false,
   }),
@@ -70,7 +74,9 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       const settings = useSettingsStore();
       const nostr = useNostrStore();
       if (!nostr.ndk || !(nostr.ndk as any).pool) nostr.initNdkReadOnly();
-      this.ndk = nostr.ndk || new NDK({ explicitRelayUrls: settings.defaultNostrRelays });
+      this.ndk =
+        nostr.ndk ||
+        new NDK({ explicitRelayUrls: settings.defaultNostrRelays });
       this.ndk.connect();
       this.connected = true;
       this.ensureDbInitialized();
@@ -104,7 +110,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
         await this.rebuildAggregates();
         // After hydration, opportunistically refetch stale HTTP info within interval
         void this.refetchStaleHttpInfoForKnownMints();
-      } catch { }
+      } catch {}
     },
     fetchMintInfos: async function () {
       this.init();
@@ -117,7 +123,11 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
     fetchReviews: async function () {
       this.init();
       await this.ensureDbInitialized();
-      const filter: NDKFilter = { kinds: [38000 as NDKKind], ['#k']: ['38172'], limit: 5000 } as any;
+      const filter: NDKFilter = {
+        kinds: [38000 as NDKKind],
+        ["#k"]: ["38172"],
+        limit: 5000,
+      } as any;
       const events = await this.ndk.fetchEvents(filter);
       for (const ev of events) await this.handleReviewEvent(ev);
       await this.rebuildAggregates();
@@ -126,21 +136,30 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       try {
         this.init();
         if (!url || typeof url !== "string" || !url.startsWith("http")) return;
-        const filter: NDKFilter = { kinds: [38000 as NDKKind], ['#k']: ['38172'], ['#u']: [url], limit: 5000 } as any;
+        const filter: NDKFilter = {
+          kinds: [38000 as NDKKind],
+          ["#k"]: ["38172"],
+          ["#u"]: [url],
+          limit: 5000,
+        } as any;
         const events = await this.ndk.fetchEvents(filter);
         for (const ev of events) await this.handleReviewEvent(ev);
         await this.rebuildAggregates();
-      } catch { }
+      } catch {}
     },
     fetchMintInfoForUrl: async function (url: string) {
       try {
         this.init();
         if (!url || typeof url !== "string" || !url.startsWith("http")) return;
-        const filter: NDKFilter = { kinds: [38172 as NDKKind], ['#u']: [url], limit: 1000 } as any;
+        const filter: NDKFilter = {
+          kinds: [38172 as NDKKind],
+          ["#u"]: [url],
+          limit: 1000,
+        } as any;
         const events = await this.ndk.fetchEvents(filter);
         for (const ev of events) await this.handleMintInfoEvent(ev);
         await this.rebuildAggregates();
-      } catch { }
+      } catch {}
     },
     clearRecommendations: function () {
       this.recommendations.splice(0, this.recommendations.length);
@@ -149,7 +168,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       try {
         await this.ensureDbInitialized();
         // Do NOT clear HTTP info; preserve last known info across reloads
-      } catch { }
+      } catch {}
       this.inflightInfo.clear();
       this.infoTimers.forEach((t) => clearTimeout(t));
       this.infoTimers.clear();
@@ -169,22 +188,24 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       this.hydrateFromDb();
       const subInfos = this.ndk.subscribe(
         { kinds: [38172 as NDKKind] } as NDKFilter,
-        { closeOnEose: false, groupable: false }
+        { closeOnEose: false, groupable: false },
       );
       subInfos.on("event", async (ev: NDKEvent) => {
         await this.handleMintInfoEvent(ev);
         try {
-          const u = ev.tags.find((t) => t[0] === "u" && (t[2] === "cashu" || t.length >= 2))?.[1];
+          const u = ev.tags.find(
+            (t) => t[0] === "u" && (t[2] === "cashu" || t.length >= 2),
+          )?.[1];
           if (typeof u === "string" && u.startsWith("http")) {
             // Kick off HTTP info fetch (concurrency-limited via scheduler)
             void this.scheduleHttpInfoFetches([u], 20, 100, this.infoTimeoutMs);
           }
-        } catch { }
+        } catch {}
         void this.rebuildAggregates();
       });
       const subReviews = this.ndk.subscribe(
         { kinds: [38000 as NDKKind] } as NDKFilter,
-        { closeOnEose: false, groupable: false }
+        { closeOnEose: false, groupable: false },
       );
       subReviews.on("event", async (ev: NDKEvent) => {
         await this.handleReviewEvent(ev);
@@ -198,7 +219,11 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
         const existing = await (this.db as MintReviewsDB).httpInfo.get(url);
         const nowSec = Math.floor(Date.now() / 1000);
         const interval = this.httpInfoFetchIntervalSeconds || 0;
-        const isFresh = !!existing && !!existing.info && !!existing.fetchedAt && (nowSec - existing.fetchedAt) < interval;
+        const isFresh =
+          !!existing &&
+          !!existing.info &&
+          !!existing.fetchedAt &&
+          nowSec - existing.fetchedAt < interval;
         if (isFresh) {
           await this.rebuildAggregates();
           return;
@@ -213,7 +238,9 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
         if (!this.infoTimers.has(url)) {
           const id = setTimeout(async () => {
             try {
-              const existing = await (this.db as MintReviewsDB).httpInfo.get(url);
+              const existing = await (this.db as MintReviewsDB).httpInfo.get(
+                url,
+              );
               const row: HttpInfoRow = {
                 url,
                 info: existing?.info ?? null,
@@ -222,14 +249,19 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
               };
               await (this.db as MintReviewsDB).httpInfo.put(row);
               void this.rebuildAggregates();
-            } catch { }
+            } catch {}
             this.infoTimers.delete(url);
           }, ms);
           this.infoTimers.set(url, id);
         }
         const info = await new (mod as any).MintClass(tempMint).api.getInfo();
         console.log("HTTP info for mint", url, info.name);
-        const row: HttpInfoRow = { url, info, fetchedAt: Math.floor(Date.now() / 1000), error: false };
+        const row: HttpInfoRow = {
+          url,
+          info,
+          fetchedAt: Math.floor(Date.now() / 1000),
+          error: false,
+        };
         // unset error in localstore too:
         await (this.db as MintReviewsDB).httpInfo.put(row);
         // Update in-memory cache only; do not persist info to localStorage
@@ -254,7 +286,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
             error: true,
           };
           await (this.db as MintReviewsDB).httpInfo.put(row);
-        } catch { }
+        } catch {}
         const t = this.infoTimers.get(url);
         if (t) clearTimeout(t);
         this.infoTimers.delete(url);
@@ -267,7 +299,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       urls: string[],
       concurrency: number = 20,
       delayMs: number = 100,
-      timeoutMs?: number
+      timeoutMs?: number,
     ) {
       try {
         await this.ensureDbInitialized();
@@ -282,7 +314,10 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
           // Skip if a fetch is already in-flight for this URL
           if (this.inflightInfo.has(u)) continue;
           const existing = await (this.db as MintReviewsDB).httpInfo.get(u);
-          const fresh = !!existing && !!existing.fetchedAt && (nowSec - existing.fetchedAt) < interval;
+          const fresh =
+            !!existing &&
+            !!existing.fetchedAt &&
+            nowSec - existing.fetchedAt < interval;
           if (!fresh) toFetch.push(u);
         }
         if (!toFetch.length) return;
@@ -295,20 +330,23 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
             const u = toFetch[i];
             try {
               await this.requestMintHttpInfo(u, timeoutMs);
-            } catch { }
+            } catch {}
             await delay(delayMs);
           }
         };
-        const workers = Array.from({ length: Math.min(concurrency, toFetch.length) }, () => worker());
+        const workers = Array.from(
+          { length: Math.min(concurrency, toFetch.length) },
+          () => worker(),
+        );
         await Promise.all(workers);
-      } catch { }
+      } catch {}
     },
     refetchStaleHttpInfoForKnownMints: async function () {
       try {
         await this.ensureDbInitialized();
         const urls = this.recommendations.map((r) => r.url);
         await this.scheduleHttpInfoFetches(urls, 10, 100);
-      } catch { }
+      } catch {}
     },
     // Expose getters for HTTP info from in-memory cache
     getHttpInfoForUrl: function (url: string): any | undefined {
@@ -320,12 +358,14 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
     handleMintInfoEvent: async function (ev: NDKEvent) {
       try {
         if (ev.kind !== 38172) return;
-        const u = ev.tags.find((t) => t[0] === "u" && (t[2] === "cashu" || t.length >= 2))?.[1];
+        const u = ev.tags.find(
+          (t) => t[0] === "u" && (t[2] === "cashu" || t.length >= 2),
+        )?.[1];
         if (!u || typeof u !== "string" || !u.startsWith("http")) return;
         let content: any = undefined;
         try {
           content = ev.content ? JSON.parse(ev.content) : undefined;
-        } catch { }
+        } catch {}
         const row: InfoRow = {
           url: u,
           pubkey: ev.pubkey,
@@ -334,7 +374,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
           created_at: ev.created_at || 0,
         };
         await (this.db as MintReviewsDB).infos.add(row);
-      } catch { }
+      } catch {}
     },
     upsertReviewForUrl: async function (url: string, review: MintReview) {
       if (!url || !url.startsWith("http")) return;
@@ -342,7 +382,9 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       if (list.some((r) => r.eventId === review.eventId)) return;
       const withoutSameAuthor = list.filter((r) => r.pubkey !== review.pubkey);
       withoutSameAuthor.push(review);
-      withoutSameAuthor.sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
+      withoutSameAuthor.sort(
+        (a, b) => (a.created_at || 0) - (b.created_at || 0),
+      );
       this.urlReviews.set(url, withoutSameAuthor);
       await this.persistReviewRow(url, review);
     },
@@ -351,7 +393,9 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
         if (ev.kind !== 38000) return;
         const kTag = ev.tags.find((t) => t[0] === "k");
         if (!kTag || kTag[1] !== "38172") return;
-        const uTags = ev.tags.filter((t) => t[0] === "u" && (t[2] === "cashu" || t.length >= 2));
+        const uTags = ev.tags.filter(
+          (t) => t[0] === "u" && (t[2] === "cashu" || t.length >= 2),
+        );
         if (!uTags.length) return;
         const { rating, comment } = parseRatingAndComment(ev.content || "");
         const review: MintReview = {
@@ -368,7 +412,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
             await this.upsertReviewForUrl(url, review);
           }
         }
-      } catch { }
+      } catch {}
     },
     rebuildAggregates: async function () {
       try {
@@ -406,7 +450,9 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
           const ratings = list
             .map((r) => r.rating)
             .filter((n): n is number => typeof n === "number");
-          const avg = ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : null;
+          const avg = ratings.length
+            ? ratings.reduce((a, b) => a + b, 0) / ratings.length
+            : null;
           const http = httpByUrl.get(url);
           recs.push({
             url,
@@ -419,10 +465,12 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
           });
         }
         recs.sort(
-          (a, b) => b.reviewsCount - a.reviewsCount || (b.averageRating || 0) - (a.averageRating || 0)
+          (a, b) =>
+            b.reviewsCount - a.reviewsCount ||
+            (b.averageRating || 0) - (a.averageRating || 0),
         );
         this.recommendations = recs;
-      } catch { }
+      } catch {}
     },
     persistReviewRow: async function (url: string, review: MintReview) {
       try {
@@ -437,7 +485,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
           raw: review.raw,
         };
         await (this.db as MintReviewsDB).reviews.put(row);
-      } catch { }
+      } catch {}
     },
     getReviewsForUrl: async function (url: string): Promise<MintReview[]> {
       try {
@@ -447,14 +495,17 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
           .where("url")
           .equals(url)
           .sortBy("created_at");
-        const list = rows.map((r) => ({
-          eventId: r.eventId,
-          pubkey: r.pubkey,
-          created_at: r.created_at,
-          rating: r.rating,
-          comment: r.comment,
-          raw: r.raw,
-        } as MintReview));
+        const list = rows.map(
+          (r) =>
+            ({
+              eventId: r.eventId,
+              pubkey: r.pubkey,
+              created_at: r.created_at,
+              rating: r.rating,
+              comment: r.comment,
+              raw: r.raw,
+            }) as MintReview,
+        );
         list.sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
         this.urlReviews.set(url, list);
         await this.rebuildAggregates();
@@ -479,7 +530,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
           (this.db as MintReviewsDB).infos.clear(),
           (this.db as MintReviewsDB).httpInfo.clear(),
         ]);
-      } catch { }
+      } catch {}
       this.urlReviews.clear();
       this.dbHydrated = false;
       await this.rebuildAggregates();
@@ -528,4 +579,3 @@ type HttpInfoRow = {
   fetchedAt: number; // unix seconds
   error?: boolean;
 };
-

@@ -240,7 +240,7 @@ export default {
     onBeforeUnmount(() => {
       window.removeEventListener(
         "beforeinstallprompt",
-        handleBeforeInstallPrompt
+        handleBeforeInstallPrompt,
       );
       window.removeEventListener("appinstalled", handleAppInstalled);
       const refHandler = (onMounted as any)._onBipAvailable;
@@ -348,7 +348,10 @@ export default {
   height: 0;
   margin: 0;
   overflow: hidden;
-  transition: opacity 0.3s ease, height 0.3s ease, margin 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    height 0.3s ease,
+    margin 0.3s ease;
 }
 
 .intro-text {

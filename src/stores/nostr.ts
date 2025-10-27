@@ -56,27 +56,27 @@ export const useNostrStore = defineStore("nostr", {
     pubkey: useLocalStorage<string>("cashu.ndk.pubkey", ""),
     relays: useLocalStorage<string[]>(
       "cashu.nostr.relays",
-      useSettingsStore().defaultNostrRelays
+      useSettingsStore().defaultNostrRelays,
     ),
     ndk: {} as NDK,
     signerType: useLocalStorage<SignerType>(
       "cashu.ndk.signerType",
-      SignerType.SEED
+      SignerType.SEED,
     ),
     nip07signer: {} as NDKNip07Signer,
     nip46Token: useLocalStorage<string>("cashu.ndk.nip46Token", ""),
     nip46signer: {} as NDKNip46Signer,
     privateKeySignerPrivateKey: useLocalStorage<string>(
       "cashu.ndk.privateKeySignerPrivateKey",
-      ""
+      "",
     ),
     seedSignerPrivateKey: useLocalStorage<string>(
       "cashu.ndk.seedSignerPrivateKey",
-      ""
+      "",
     ),
     seedSignerPublicKey: useLocalStorage<string>(
       "cashu.ndk.seedSignerPublicKey",
-      ""
+      "",
     ),
     seedSigner: {} as NDKPrivateKeySigner,
     seedSignerPrivateKeyNsec: "",
@@ -85,11 +85,11 @@ export const useNostrStore = defineStore("nostr", {
     initialized: false,
     lastEventTimestamp: useLocalStorage<number>(
       "cashu.ndk.lastEventTimestamp",
-      0
+      0,
     ),
     nip17EventIdsWeHaveSeen: useLocalStorage<NostrEventLog[]>(
       "cashu.ndk.nip17EventIdsWeHaveSeen",
-      []
+      [],
     ),
   }),
   getters: {
@@ -173,7 +173,7 @@ export const useNostrStore = defineStore("nostr", {
       const ndk = new NDK({ explicitRelayUrls: this.relays });
       if (!nip46Token && !this.nip46Token.length) {
         nip46Token = (await prompt(
-          "Enter your NIP-46 connection string"
+          "Enter your NIP-46 connection string",
         )) as string;
         if (!nip46Token) {
           return;
@@ -216,7 +216,7 @@ export const useNostrStore = defineStore("nostr", {
         }
       }
       this.privateKeySigner = new NDKPrivateKeySigner(
-        this.privateKeySignerPrivateKey
+        this.privateKeySignerPrivateKey,
       );
       this.privateKeySignerPrivateKey = bytesToHex(privateKeyBytes);
       this.signerType = SignerType.PRIVATEKEY;
@@ -252,7 +252,7 @@ export const useNostrStore = defineStore("nostr", {
 
     sendNip04DirectMessage: async function (
       recipient: string,
-      message: string
+      message: string,
     ) {
       const randomPrivateKey = generateSecretKey();
       const randomPublicKey = getPublicKey(randomPrivateKey);
@@ -285,7 +285,7 @@ export const useNostrStore = defineStore("nostr", {
           this.lastEventTimestamp = Math.floor(Date.now() / 1000);
         }
         console.log(
-          `### Subscribing to NIP-04 direct messages to ${this.seedSignerPublicKey} since ${this.lastEventTimestamp}`
+          `### Subscribing to NIP-04 direct messages to ${this.seedSignerPublicKey} since ${this.lastEventTimestamp}`,
         );
         this.ndk.connect();
         const sub = this.ndk.subscribe(
@@ -294,7 +294,7 @@ export const useNostrStore = defineStore("nostr", {
             "#p": [this.seedSignerPublicKey],
             since: this.lastEventTimestamp,
           } as NDKFilter,
-          { closeOnEose: false, groupable: false }
+          { closeOnEose: false, groupable: false },
         );
         sub.on("event", (event: NDKEvent) => {
           console.log("event");
@@ -302,7 +302,7 @@ export const useNostrStore = defineStore("nostr", {
             .decrypt(
               hexToBytes(this.seedSignerPrivateKey),
               event.pubkey,
-              event.content
+              event.content,
             )
             .then((content) => {
               console.log("NIP-04 DM from", event.pubkey);
@@ -321,7 +321,7 @@ export const useNostrStore = defineStore("nostr", {
     },
     sendNip17DirectMessageToNprofile: async function (
       nprofile: string,
-      message: string
+      message: string,
     ) {
       const result = nip19.decode(nprofile);
       const pubkey: string = (result.data as ProfilePointer).pubkey;
@@ -335,7 +335,7 @@ export const useNostrStore = defineStore("nostr", {
     sendNip17DirectMessage: async function (
       recipient: string,
       message: string,
-      relays?: string[]
+      relays?: string[],
     ) {
       await this.walletSeedGenerateKeyPair();
       const randomPrivateKey = generateSecretKey();
@@ -358,7 +358,7 @@ export const useNostrStore = defineStore("nostr", {
       sealEvent.kind = 13;
       sealEvent.content = nip44.v2.encrypt(
         dmEventString,
-        nip44.v2.utils.getConversationKey(this.seedSignerPrivateKey, recipient)
+        nip44.v2.utils.getConversationKey(this.seedSignerPrivateKey, recipient),
       );
       sealEvent.created_at = this.randomTimeUpTo2DaysInThePast();
       sealEvent.pubkey = this.seedSignerPublicKey;
@@ -377,8 +377,8 @@ export const useNostrStore = defineStore("nostr", {
         sealEventString,
         nip44.v2.utils.getConversationKey(
           bytesToHex(randomPrivateKey),
-          recipient
-        )
+          recipient,
+        ),
       );
       wrapEvent.created_at = this.randomTimeUpTo2DaysInThePast();
       wrapEvent.pubkey = randomPublicKey;
@@ -403,7 +403,7 @@ export const useNostrStore = defineStore("nostr", {
         }
         const since = this.lastEventTimestamp - 172800; // last 2 days
         console.log(
-          `### Subscribing to NIP-17 direct messages to ${this.seedSignerPublicKey} since ${since}`
+          `### Subscribing to NIP-17 direct messages to ${this.seedSignerPublicKey} since ${since}`,
         );
         this.ndk.connect();
         const sub = this.ndk.subscribe(
@@ -412,7 +412,7 @@ export const useNostrStore = defineStore("nostr", {
             "#p": [this.seedSignerPublicKey],
             since: since,
           } as NDKFilter,
-          { closeOnEose: false, groupable: false }
+          { closeOnEose: false, groupable: false },
         );
 
         sub.on("event", (wrapEvent: NDKEvent) => {
@@ -430,7 +430,7 @@ export const useNostrStore = defineStore("nostr", {
             const fourDaysAgo =
               Math.floor(Date.now() / 1000) - 10 * 24 * 60 * 60;
             this.nip17EventIdsWeHaveSeen = this.nip17EventIdsWeHaveSeen.filter(
-              (e) => e.created_at > fourDaysAgo
+              (e) => e.created_at > fourDaysAgo,
             );
           }
           let dmEvent: NDKEvent;
@@ -440,16 +440,16 @@ export const useNostrStore = defineStore("nostr", {
               wrapEvent.content,
               nip44.v2.utils.getConversationKey(
                 this.seedSignerPrivateKey,
-                wrapEvent.pubkey
-              )
+                wrapEvent.pubkey,
+              ),
             );
             const sealEvent = JSON.parse(wappedContent) as NostrEvent;
             const dmEventString = nip44.v2.decrypt(
               sealEvent.content,
               nip44.v2.utils.getConversationKey(
                 this.seedSignerPrivateKey,
-                sealEvent.pubkey
-              )
+                sealEvent.pubkey,
+              ),
             );
             dmEvent = JSON.parse(dmEventString) as NDKEvent;
             content = dmEvent.content;

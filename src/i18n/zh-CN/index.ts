@@ -1,12 +1,12 @@
 export default {
   MultinutPicker: {
-    payment: '多坚果支付',
-    selectMints: '选择一个或多个铸币厂来发起支付。',
-    totalSelectedBalance: '所选总余额',
-    multiMintPay: '多铸币支付',
-    balanceNotEnough: '多铸币余额不足以支付此发票',
-    failed: '处理失败：{error}',
-    paid: '通过闪电网络支付了 {amount}',
+    payment: "多坚果支付",
+    selectMints: "选择一个或多个铸币厂来发起支付。",
+    totalSelectedBalance: "所选总余额",
+    multiMintPay: "多铸币支付",
+    balanceNotEnough: "多铸币余额不足以支付此发票",
+    failed: "处理失败：{error}",
+    paid: "通过闪电网络支付了 {amount}",
   },
 
   global: {
@@ -163,26 +163,24 @@ export default {
     },
   },
   Settings: {
-
     web_of_trust: {
-      title: '信任网络',
-      known_pubkeys: '已知公钥：{wotCount}',
+      title: "信任网络",
+      known_pubkeys: "已知公钥：{wotCount}",
 
-      continue_crawl: '继续抓取',
-      crawl_odell: '抓取 ODELL 的信任网络',
-      crawl_wot: '抓取信任网络',
-      pause: '暂停',
-      reset: '重置',
-      progress: '{crawlProcessed} / {crawlTotal}',
+      continue_crawl: "继续抓取",
+      crawl_odell: "抓取 ODELL 的信任网络",
+      crawl_wot: "抓取信任网络",
+      pause: "暂停",
+      reset: "重置",
+      progress: "{crawlProcessed} / {crawlTotal}",
     },
     npub_cash: {
-      use_npubx: '使用 npubx.cash',
-      copy_lightning_address: '复制闪电地址',
-      v2_mint: 'npub.cash v2 铸币厂',
-
+      use_npubx: "使用 npubx.cash",
+      copy_lightning_address: "复制闪电地址",
+      v2_mint: "npub.cash v2 铸币厂",
     },
     multinut: {
-      use_multinut: '使用 Multinut',
+      use_multinut: "使用 Multinut",
     },
     language: {
       title: "语言",
@@ -296,7 +294,6 @@ export default {
         qr_tooltip: "显示二维码",
         allowance_label: "剩余额度 (sat)",
       },
-
     },
     hardware_features: {
       webnfc: {
@@ -398,8 +395,7 @@ export default {
       },
       multinut: {
         toggle: "启用 Multinut",
-        description:
-          "如果启用，钱包将使用 Multinut 同时从多个 Mint 支付发票。",
+        description: "如果启用，钱包将使用 Multinut 同时从多个 Mint 支付发票。",
       },
       nostr_mint_backup: {
         toggle: "在 Nostr 上备份 Mint 列表",
@@ -410,7 +406,8 @@ export default {
           disabled: "Nostr Mint 备份已禁用",
           failed: "无法启用 Nostr Mint 备份",
         },
-      },    },
+      },
+    },
     appearance: {
       keyboard: {
         title: "屏幕键盘",
@@ -437,7 +434,8 @@ export default {
         title: "比特币符号",
         description: "使用 ₿ 符号代替 sats。",
         toggle: "使用 ₿ 符号",
-      },    },
+      },
+    },
     advanced: {
       title: "高级",
       developer: {
@@ -470,7 +468,8 @@ export default {
           title: "增加 keyset 计数器",
           description:
             "点击 keyset ID 以增加您钱包中 keysets 的 derivation path 计数器。如果您看到输出已被签名错误，这将很有用。",
-          counter: "计数器: {count}",        },
+          counter: "计数器: {count}",
+        },
         unset_reserved: {
           button: "取消所有保留的 token",
           description:
@@ -641,8 +640,7 @@ export default {
       success: {
         title: "成功！",
         text: "您正在使用 Cashu 作为 PWA。关闭所有其他打开的浏览器窗口，并从主屏幕使用该应用。",
-        nextSteps:
-          "您现在可以关闭此标签页，并从主屏幕打开应用。",
+        nextSteps: "您现在可以关闭此标签页，并从主屏幕打开应用。",
       },
     },
   },
@@ -682,8 +680,7 @@ export default {
   },
   WelcomeSlideChoice: {
     title: "设置您的钱包",
-    text:
-      "您想从种子短语恢复，还是创建一个新钱包？",
+    text: "您想从种子短语恢复，还是创建一个新钱包？",
     options: {
       new: {
         title: "创建新钱包",
@@ -697,8 +694,7 @@ export default {
   },
   WelcomeMintSetup: {
     title: "添加 Mints",
-    text:
-      "Mint 是帮助您发送和接收 ecash 的服务器。选择一个已发现的 Mint 或手动添加。您也可以稍后添加。",
+    text: "Mint 是帮助您发送和接收 ecash 的服务器。选择一个已发现的 Mint 或手动添加。您也可以稍后添加。",
     sections: { your_mints: "您的 Mints" },
     restoring: "正在恢复 Mints…",
     placeholder: { mint_url: "https://" },
@@ -708,13 +704,11 @@ export default {
     text: "粘贴或输入您的 12 个词种子短语以进行恢复。",
     inputs: { word: "第 { index } 个词" },
     actions: { paste_all: "全部粘贴" },
-    disclaimer:
-      "您的种子短语仅在本地使用，用于派生您的钱包密钥。",
+    disclaimer: "您的种子短语仅在本地使用，用于派生您的钱包密钥。",
   },
   WelcomeRestoreEcash: {
     title: "恢复您的 ecash",
-    text:
-      "扫描您配置的 Mints 上未花费的证明，并将其添加到您的钱包。",
+    text: "扫描您配置的 Mints 上未花费的证明，并将其添加到您的钱包。",
   },
   MintRatings: {
     title: "Mint 评价",
@@ -804,7 +798,8 @@ export default {
         in_progress: "正在恢复第 { index } 个 Mint，共 { length } 个…",
         success: "成功恢复 {count} 个 Mint",
         error: "恢复所选 Mints 错误: { error }",
-      },    },
+      },
+    },
   },
   MintSettings: {
     add: {
@@ -871,10 +866,10 @@ export default {
         },
       },
     },
-    error_badge: '错误',
-    reviews_text: '评论',
-    no_reviews_yet: '暂无评论',
-    discover_mints_button: '发现 Mints',
+    error_badge: "错误",
+    reviews_text: "评论",
+    no_reviews_yet: "暂无评论",
+    discover_mints_button: "发现 Mints",
   },
   QrcodeReader: {
     progress: {

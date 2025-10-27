@@ -1,14 +1,13 @@
 export default {
   MultinutPicker: {
-    payment: 'การชำระเงิน Multinut',
-    selectMints: 'เลือกหนึ่งหรือหลาย mint เพื่อทำการชำระเงิน',
-    totalSelectedBalance: 'ยอดคงเหลือที่เลือกทั้งหมด',
-    multiMintPay: 'จ่ายแบบหลาย Mint',
-    balanceNotEnough: 'ยอดหลาย mint ไม่เพียงพอสำหรับใบแจ้งหนี้นี้',
-    failed: 'ไม่สามารถประมวลผล: {error}',
-    paid: 'จ่าย {amount} ผ่าน Lightning',
+    payment: "การชำระเงิน Multinut",
+    selectMints: "เลือกหนึ่งหรือหลาย mint เพื่อทำการชำระเงิน",
+    totalSelectedBalance: "ยอดคงเหลือที่เลือกทั้งหมด",
+    multiMintPay: "จ่ายแบบหลาย Mint",
+    balanceNotEnough: "ยอดหลาย mint ไม่เพียงพอสำหรับใบแจ้งหนี้นี้",
+    failed: "ไม่สามารถประมวลผล: {error}",
+    paid: "จ่าย {amount} ผ่าน Lightning",
   },
-
 
   global: {
     copy_to_clipboard: {
@@ -165,22 +164,22 @@ export default {
   },
   Settings: {
     web_of_trust: {
-      title: 'Web of trust',
-      known_pubkeys: 'Pubkey ที่รู้จัก: {wotCount}',
-      continue_crawl: 'ดำเนินการสำรวจต่อ',
+      title: "Web of trust",
+      known_pubkeys: "Pubkey ที่รู้จัก: {wotCount}",
+      continue_crawl: "ดำเนินการสำรวจต่อ",
       crawl_odell: "สำรวจ ODELL'S WEB OF TRUST",
-      crawl_wot: 'สำรวจ web of trust',
-      pause: 'หยุดชั่วคราว',
-      reset: 'รีเซ็ต',
-      progress: '{crawlProcessed} / {crawlTotal}',
+      crawl_wot: "สำรวจ web of trust",
+      pause: "หยุดชั่วคราว",
+      reset: "รีเซ็ต",
+      progress: "{crawlProcessed} / {crawlTotal}",
     },
     npub_cash: {
-      use_npubx: 'ใช้ npubx.cash',
-      copy_lightning_address: 'คัดลอกที่อยู่ Lightning',
-      v2_mint: 'npub.cash v2 mint',
+      use_npubx: "ใช้ npubx.cash",
+      copy_lightning_address: "คัดลอกที่อยู่ Lightning",
+      v2_mint: "npub.cash v2 mint",
     },
     multinut: {
-      use_multinut: 'ใช้ Multinut',
+      use_multinut: "ใช้ Multinut",
     },
     language: {
       title: "ภาษา",
@@ -643,8 +642,7 @@ export default {
       success: {
         title: "สำเร็จ!",
         text: "คุณกำลังใช้ Cashu เป็น PWA ปิดหน้าต่างเบราว์เซอร์อื่นที่เปิดอยู่และใช้แอปจากหน้าจอหลักของคุณ",
-        nextSteps:
-          "ตอนนี้คุณสามารถปิดแท็บนี้และเปิดแอปจากหน้าจอหลักได้",
+        nextSteps: "ตอนนี้คุณสามารถปิดแท็บนี้และเปิดแอปจากหน้าจอหลักได้",
       },
     },
   },
@@ -684,8 +682,7 @@ export default {
   },
   WelcomeSlideChoice: {
     title: "ตั้งค่ากระเป๋าเงินของคุณ",
-    text:
-      "คุณต้องการกู้คืนจากวลีสำหรับกู้คืนหรือสร้างกระเป๋าเงินใหม่?",
+    text: "คุณต้องการกู้คืนจากวลีสำหรับกู้คืนหรือสร้างกระเป๋าเงินใหม่?",
     options: {
       new: {
         title: "สร้างกระเป๋าเงินใหม่",
@@ -699,8 +696,7 @@ export default {
   },
   WelcomeMintSetup: {
     title: "เพิ่ม Mint",
-    text:
-      "Mint คือเซิร์ฟเวอร์ที่ช่วยให้คุณส่งและรับ ecash เลือก Mint ที่ค้นพบหรือเพิ่มด้วยตนเอง คุณสามารถข้ามและเพิ่มในภายหลังได้",
+    text: "Mint คือเซิร์ฟเวอร์ที่ช่วยให้คุณส่งและรับ ecash เลือก Mint ที่ค้นพบหรือเพิ่มด้วยตนเอง คุณสามารถข้ามและเพิ่มในภายหลังได้",
     sections: { your_mints: "Mint ของคุณ" },
     restoring: "กำลังกู้คืน Mint…",
     placeholder: { mint_url: "https://" },
@@ -715,8 +711,7 @@ export default {
   },
   WelcomeRestoreEcash: {
     title: "กู้คืน ecash ของคุณ",
-    text:
-      "สแกนหา proof ที่ยังไม่ถูกใช้บน Mint ที่กำหนดค่าไว้และเพิ่มลงในกระเป๋าเงินของคุณ",
+    text: "สแกนหา proof ที่ยังไม่ถูกใช้บน Mint ที่กำหนดค่าไว้และเพิ่มลงในกระเป๋าเงินของคุณ",
   },
   MintRatings: {
     title: "รีวิว Mint",
@@ -875,10 +870,10 @@ export default {
         },
       },
     },
-    error_badge: 'ข้อผิดพลาด',
-    reviews_text: 'รีวิว',
-    no_reviews_yet: 'ยังไม่มีรีวิว',
-    discover_mints_button: 'สำรวจ Mints',
+    error_badge: "ข้อผิดพลาด",
+    reviews_text: "รีวิว",
+    no_reviews_yet: "ยังไม่มีรีวิว",
+    discover_mints_button: "สำรวจ Mints",
   },
   QrcodeReader: {
     progress: {
