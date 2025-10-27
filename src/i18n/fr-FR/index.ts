@@ -55,10 +55,6 @@ export default {
         label: "URL de la mint",
       },
     },
-    process: "Processus",
-    Warning: "Avertissement",
-    Note: "Note",
-    counter: "Compteur",
   },
   wallet: {
     notifications: {
@@ -258,23 +254,6 @@ export default {
         not_found: "Aucune extension de signature NIP-07 trouvée",
       },
     },
-    nostr: {
-      title: "NOSTR",
-      relays: {
-        expand_label: "Cliquez pour modifier les relais",
-        add: {
-          title: "Ajouter un relais",
-          description:
-            "Votre portefeuille utilise ces relais pour les opérations nostr telles que les demandes de paiement, nostr wallet connect et les sauvegardes.",
-        },
-        list: {
-          title: "Relais",
-          description: "Votre portefeuille se connectera à ces relais.",
-          copy_tooltip: "Copier le relais",
-          remove_tooltip: "Supprimer le relais",
-        },
-      },
-    },
     payment_requests: {
       title: "Demandes de paiement",
       description:
@@ -296,20 +275,6 @@ export default {
         copy_tooltip: "Copier la chaîne de connexion",
         qr_tooltip: "Afficher le code QR",
         allowance_label: "Montant restant (sat)",
-      },
-      relays: {
-        expand_label: "Cliquez pour modifier les relais",
-        add: {
-          title: "Ajouter un relais",
-          description:
-            "Nostr Wallet Connect utilise les relais nostr pour connecter votre portefeuille à d'autres applications.",
-        },
-        list: {
-          title: "Relais",
-          description: "Votre portefeuille se connectera à ces relais.",
-          copy_tooltip: "Copier le relais",
-          remove_tooltip: "Supprimer le relais",
-        },
       },
     },
     hardware_features: {
@@ -426,6 +391,9 @@ export default {
         },
       },
     },
+    multinut: {
+      use_multinut: "Utiliser Multinut",
+    },
     appearance: {
       keyboard: {
         title: "Clavier à l'écran",
@@ -477,6 +445,9 @@ export default {
         description:
           "Les paramètres suivants sont pour le développement et le débogage.",
         keyset_counters: {
+          title: "Incrémenter les compteurs de keyset",
+          description:
+            "Cliquez sur l'ID du keyset pour incrémenter les compteurs de chemin de dérivation pour les keysets de votre portefeuille. Ceci est utile si vous voyez l'erreur \"les sorties ont déjà été signées\".",
           counter: "compteur : {count}",
         },
         new_seed: {
@@ -528,17 +499,6 @@ export default {
         },
       },
     },
-  },
-  NostrBackup: {
-    nostr_mints: "Mints Nostr",
-    search_button: "Rechercher",
-    backed_up: "Sauvegardé",
-    add_selected: "Ajouter la sélection",
-    no_backups_found: "Aucune sauvegarde trouvée",
-    no_backups_hint: "Essayez de changer de relais ou d'augmenter le délai",
-    invalid_mnemonic: "Mnémonique invalide",
-    search_error: "Erreur de recherche",
-    add_error: "Erreur d'ajout",
   },
   NoMintWarnBanner: {
     title: "Rejoindre une mint",
@@ -834,6 +794,23 @@ export default {
         success: "{count} mint(s) restaurée(s) avec succès",
         error: "Erreur lors de la restauration des mints sélectionnées: {error}",
       },
+    },
+    nostr_mints: {
+      label: "Restaurer les Mints de Nostr",
+      caption:
+        "Recherchez les sauvegardes de mints stockées sur les relais Nostr en utilisant votre phrase de départ. Cela vous aidera à découvrir les mints que vous avez précédemment utilisées.",
+      search_button: "Rechercher les sauvegardes de Mint",
+      select_all: "Tout sélectionner",
+      deselect_all: "Tout désélectionner",
+      backed_up: "Sauvegardé",
+      already_added: "Déjà ajouté",
+      add_selected: "Ajouter la sélection ({count})",
+      no_backups_found: "Aucune sauvegarde de mint trouvée",
+      no_backups_hint:
+        "Assurez-vous que la sauvegarde de la liste des mints Nostr est activée dans les paramètres pour sauvegarder automatiquement votre liste de mints.",
+      invalid_mnemonic: "Veuillez entrer une phrase de départ valide avant de rechercher.",
+      search_error: "Échec de la recherche des sauvegardes de mints.",
+      add_error: "Échec de l'ajout des mints sélectionnées.",
     },
   },
   MintSettings: {

@@ -28,23 +28,6 @@ export default {
       update: { label: "Aggiorna" },
     },
     inputs: { mint_url: { label: "URL Mint" } },
-    process: 'Processo',
-    Warning: 'Avviso',
-    Note: 'Nota',
-  },
-  NostrBackup: {
-    nostr_mints: 'Mint Nostr',
-    search_button: 'Cerca',
-    backed_up: 'Salvato',
-    add_selected: 'Aggiungi selezionati',
-    no_backups_found: 'Nessun backup trovato',
-    no_backups_hint: 'Prova a cambiare relay o aumentare il timeout',
-    invalid_mnemonic: 'Mnemonica non valida',
-    search_error: 'Errore di ricerca',
-    add_error: 'Errore di aggiunta',
-    select_all: 'Seleziona tutto',
-    deselect_all: 'Deseleziona tutto',
-    restore_selected_mints: 'Ripristina mint selezionati',
   },
 
 
@@ -84,6 +67,7 @@ export default {
         could_not_get_info: "Impossibile ottenere informazioni sul mint",
         could_not_get_keys: "Impossibile ottenere le chiavi del mint",
         could_not_get_keysets: "Impossibile ottenere i keysets del mint",
+        mint_validation_error: "Errore di validazione del mint",
         removed: "Mint rimosso",
         error: "Errore mint",
       },
@@ -214,6 +198,10 @@ export default {
         toggle: "Richiedi automaticamente",
         description: "Ricevi pagamenti in entrata automaticamente.",
       },
+      npc_v2: {
+        choose_mint_title: "Scegli mint per npub.cash v2",
+        choose_mint_placeholder: "Seleziona un mint...",
+      },
     },
     nostr_keys: {
       title: "Le tue chiavi nostr",
@@ -239,23 +227,6 @@ export default {
         not_found: "Nessuna estensione di firma NIP-07 trovata",
       },
     },
-    nostr: {
-      title: "NOSTR",
-      relays: {
-        expand_label: "Clicca per modificare i relay",
-        add: {
-          title: "Aggiungi relay",
-          description:
-            "Il tuo portafoglio utilizza questi relay per le operazioni nostr come richieste di pagamento, nostr wallet connect e backup.",
-        },
-        list: {
-          title: "Relay",
-          description: "Il tuo portafoglio si connetterà a questi relay.",
-          copy_tooltip: "Copia relay",
-          remove_tooltip: "Rimuovi relay",
-        },
-      },
-    },
     payment_requests: {
       title: "Richieste di pagamento",
       description:
@@ -277,20 +248,6 @@ export default {
         copy_tooltip: "Copia stringa di connessione",
         qr_tooltip: "Mostra codice QR",
         allowance_label: "Limite rimasto (sat)",
-      },
-      relays: {
-        expand_label: "Clicca per modificare i relay",
-        add: {
-          title: "Aggiungi relay",
-          description:
-            "Nostr Wallet Connect usa relay nostr per connettere il tuo portafoglio ad altre applicazioni.",
-        },
-        list: {
-          title: "Relay",
-          description: "Il tuo portafoglio si connetterà a questi relay.",
-          copy_tooltip: "Copia relay",
-          remove_tooltip: "Rimuovi relay",
-        },
       },
     },
     hardware_features: {
@@ -393,6 +350,21 @@ export default {
         url_label: "URL Revisore",
         api_url_label: "URL API Revisore",
       },
+      multinut: {
+        toggle: "Abilita Multinut",
+        description:
+          "Se abilitato, il portafoglio userà Multinut per pagare le fatture da più mint contemporaneamente.",
+      },
+      nostr_mint_backup: {
+        toggle: "Backup lista mint su Nostr",
+        description:
+          "Se abilitato, la tua lista mint verrà automaticamente sottoposta a backup sui relay Nostr usando le tue chiavi Nostr configurate. Questo ti permette di ripristinare la tua lista mint su tutti i dispositivi.",
+        notifications: {
+          enabled: "Backup mint Nostr abilitato",
+          disabled: "Backup mint Nostr disabilitato",
+          failed: "Impossibile abilitare il backup mint Nostr",
+        },
+      },
     },
     appearance: {
       keyboard: {
@@ -417,6 +389,29 @@ export default {
           flamingo: "flamingo",
         },
       },
+      bip177: {
+        title: "Simbolo Bitcoin",
+        description: "Usa il simbolo ₿ invece di sats.",
+        toggle: "Usa il simbolo ₿",
+      },
+    },
+    web_of_trust: {
+      title: "Web of trust",
+      known_pubkeys: "Chiavi pubbliche conosciute: {wotCount}",
+      continue_crawl: "Continua scansione",
+      crawl_odell: "Scansiona WEB OF TRUST DI ODELL",
+      crawl_wot: "Scansiona web of trust",
+      pause: "Pausa",
+      reset: "Reset",
+      progress: "{crawlProcessed} / {crawlTotal}",
+    },
+    npub_cash: {
+      use_npubx: "Usa npubx.cash",
+      copy_lightning_address: "Copia indirizzo Lightning",
+      v2_mint: "npub.cash v2 mint",
+    },
+    multinut: {
+      use_multinut: "Usa Multinut",
     },
     advanced: {
       title: "Avanzato",
@@ -451,6 +446,7 @@ export default {
           title: "Incrementa contatori keyset",
           description:
             "Clicca l'ID del keyset per incrementare i contatori del percorso di derivazione per i keyset nel tuo portafoglio. Questo è utile se vedi l'errore \"le uscite sono già state firmate\".",
+          counter: "contatore: {count}",
         },
         unset_reserved: {
           button: "Annulla prenotazione tutti i token riservati",
@@ -748,6 +744,12 @@ export default {
       validate: {
         error: "Il mnemonico dovrebbe essere di almeno 12 parole.",
       },
+      select_all: {
+        label: "Seleziona tutto",
+      },
+      deselect_all: {
+        label: "Deseleziona tutto",
+      },
       restore: {
         label: "Ripristina",
         in_progress: "Ripristino mint in corso…",
@@ -759,6 +761,29 @@ export default {
         success: "Ripristino completato con successo",
         error: "Errore nel ripristino dei mints: { error }",
       },
+      restore_selected_mints: {
+        label: "Ripristina Mints selezionati ({count})",
+        in_progress: "Ripristino mint { index } di { length }…",
+        success: "{count} mint(s) ripristinati con successo",
+        error: "Errore nel ripristino dei mints selezionati: { error }",
+      },
+    },
+    nostr_mints: {
+      label: "Ripristina Mints da Nostr",
+      caption:
+        "Cerca i backup dei mints memorizzati sui relay Nostr usando la tua frase seed. Questo ti aiuterà a scoprire i mints che hai usato in precedenza.",
+      search_button: "Cerca backup Mint",
+      select_all: "Seleziona tutto",
+      deselect_all: "Deseleziona tutto",
+      backed_up: "Backup effettuato",
+      already_added: "Già aggiunto",
+      add_selected: "Aggiungi selezionati ({count})",
+      no_backups_found: "Nessun backup mint trovato",
+      no_backups_hint:
+        "Assicurati che il backup mint Nostr sia abilitato nelle impostazioni per eseguire automaticamente il backup della tua lista mint.",
+      invalid_mnemonic: "Inserisci una frase seed valida prima di cercare.",
+      search_error: "Impossibile cercare i backup dei mints.",
+      add_error: "Impossibile aggiungere i mints selezionati.",
     },
   },
   MintSettings: {

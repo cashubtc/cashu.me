@@ -56,9 +56,6 @@ export default {
         label: "عنوان URL للـ Mint",
       },
     },
-    process: "معالجة",
-    Warning: "تحذير",
-    Note: "ملاحظة",
   },
   wallet: {
     notifications: {
@@ -173,7 +170,23 @@ export default {
       backup_restore: "النسخ الاحتياطي والاستعادة",
       lightning_address: "عنوان LIGHTNING",
       nostr_keys: "مفاتيح NOSTR",
-      nostr: "NOSTR",
+      nostr: {
+        title: "NOSTR",
+        relays: {
+          expand_label: "انقر لتعديل المرحلات",
+          add: {
+            title: "إضافة مُرحِل",
+            description:
+              "تستخدم محفظتك هذه المُرحِلات لعمليات nostr مثل طلبات الدفع وربط محفظة nostr والنسخ الاحتياطية.",
+          },
+          list: {
+            title: "المُرحِلات",
+            description: "ستتصل محفظتك بهذه المُرحِلات.",
+            copy_tooltip: "نسخ المُرحِل",
+            remove_tooltip: "إزالة المُرحِل",
+          },
+        },
+      },
       payment_requests: "طلبات الدفع",
       nostr_wallet_connect: "اتصال محفظة NOSTR",
       hardware_features: "ميزات الأجهزة",
@@ -239,23 +252,6 @@ export default {
         not_found: "لم يتم العثور على ملحق التوقيع NIP-07",
       },
     },
-    nostr: {
-      title: "NOSTR",
-      relays: {
-        expand_label: "انقر لتعديل المرحلات",
-        add: {
-          title: "إضافة مُرحِل",
-          description:
-            "تستخدم محفظتك هذه المُرحِلات لعمليات nostr مثل طلبات الدفع وربط محفظة nostr والنسخ الاحتياطية.",
-        },
-        list: {
-          title: "المُرحِلات",
-          description: "ستتصل محفظتك بهذه المُرحِلات.",
-          copy_tooltip: "نسخ المُرحِل",
-          remove_tooltip: "إزالة المُرحِل",
-        },
-      },
-    },
     payment_requests: {
       title: "طلبات الدفع",
       description:
@@ -276,20 +272,6 @@ export default {
         copy_tooltip: "نسخ سلسلة الاتصال",
         qr_tooltip: "إظهار رمز QR",
         allowance_label: "المسموح به المتبقي (سات)",
-      },
-      relays: {
-        expand_label: "انقر لتعديل المرحلات",
-        add: {
-          title: "إضافة مرحل",
-          description:
-            "يستخدم Nostr Wallet Connect مرحلات nostr لربط محفظتك بتطبيقات أخرى.",
-        },
-        list: {
-          title: "مرحلات",
-          description: "ستتصل محفظتك بهذه المرحلات.",
-          copy_tooltip: "نسخ المرحل",
-          remove_tooltip: "إزالة المرحل",
-        },
       },
     },
     hardware_features: {
@@ -433,6 +415,24 @@ export default {
         description: "استخدم رمز ₿ بدلاً من sats.",
         toggle: "استخدام رمز ₿",
       },
+    },
+    web_of_trust: {
+      title: "شبكة الثقة",
+      known_pubkeys: "المفاتيح العامة المعروفة: {wotCount}",
+      continue_crawl: "متابعة الزحف",
+      crawl_odell: "الزحف إلى شبكة ثقة ODELL",
+      crawl_wot: "الزحف إلى شبكة الثقة",
+      pause: "إيقاف مؤقت",
+      reset: "إعادة تعيين",
+      progress: "{crawlProcessed} / {crawlTotal}",
+    },
+    npub_cash: {
+      use_npubx: "استخدام npubx.cash",
+      copy_lightning_address: "نسخ عنوان Lightning",
+      v2_mint: "npub.cash v2 mint",
+    },
+    multinut: {
+      use_multinut: "استخدام Multinut",
     },
     advanced: {
       title: "متقدم",

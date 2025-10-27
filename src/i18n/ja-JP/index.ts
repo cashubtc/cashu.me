@@ -8,24 +8,7 @@ export default {
     failed: '処理に失敗しました: {error}',
     paid: 'Lightningで{amount}を支払いました',
   },
-  NostrBackup: {
-    select_all: 'すべて選択',
-    deselect_all: 'すべて解除',
-    restore_selected_mints: '選択したミントを復元',
-    nostr_mints: 'Nostr ミント',
-    search_button: '検索',
-    backed_up: 'バックアップ済み',
-    add_selected: '選択を追加',
-    no_backups_found: 'バックアップが見つかりません',
-    no_backups_hint: 'リレーを変更するかタイムアウトを延長してください',
-    invalid_mnemonic: '無効なニーモニック',
-    search_error: '検索エラー',
-    add_error: '追加エラー',
-  },
   global: {
-    process: '処理',
-    Warning: '警告',
-    Note: '注記',
     copy_to_clipboard: {
       success: "クリップボードにコピーしました！",
     },
@@ -88,7 +71,6 @@ export default {
       received_lightning: "Lightningで{amount}を受け取りました",
       lightning_payment_failed: "Lightning支払いに失敗しました",
       failed_to_decode_invoice: "請求書をデコードできませんでした",
-      mint_validation_error: "ミントの検証エラー",
       invalid_lnurl: "無効なLNURL",
       lnurl_error: "LNURLエラー",
       no_amount: "金額がありません",
@@ -110,6 +92,7 @@ export default {
         could_not_get_info: "ミント情報を取得できませんでした",
         could_not_get_keys: "ミントキーを取得できませんでした",
         could_not_get_keysets: "ミントキーセットを取得できませんでした",
+        mint_validation_error: "ミントの検証エラー",
         removed: "ミントが削除されました",
         error: "ミントエラー",
       },
@@ -179,34 +162,6 @@ export default {
     },
   },
   Settings: {
-    nostr_mint_backup: {
-      title: 'Nostr mint yedeği',
-      enabled: 'Etkin',
-      disabled: 'Devre dışı',
-    },
-    web_of_trust: {
-      title: 'Web of trust',
-      known_pubkeys: 'Bilinen pubkeyler: {wotCount}',
-      pubkeys: 'Pubkeys',
-      continue_crawl: 'Taramaya devam et',
-      crawl_odell: "ODELL'İN WEB OF TRUST'unu tara",
-      crawl_wot: 'Web of trust tara',
-      pause: 'Duraklat',
-      reset: 'Sıfırla',
-      progress: '{crawlProcessed} / {crawlTotal}',
-    },
-    npub_cash: {
-      use_npubx: 'npubx.cash kullan',
-      copy_lightning_address: 'Lightning adresini kopyala',
-      v2_mint: 'npub.cash v2 mint',
-      npc_v2: {
-        choose_mint_title: 'npub.cash v2 için mint seçin',
-        choose_mint_placeholder: 'Bir mint seçin…',
-      },
-    },
-    multinut: {
-      use_multinut: 'Multinut kullan',
-    },
     language: {
       title: "言語",
       description: "以下のリストから希望の言語を選択してください。",
@@ -215,7 +170,23 @@ export default {
       backup_restore: "バックアップと復元",
       lightning_address: "ライトニングアドレス",
       nostr_keys: "ノストルキー",
-      nostr: "NOSTR",
+      nostr: {
+        title: "NOSTR",
+        relays: {
+          expand_label: "クリックしてリレーを編集",
+          add: {
+            title: "リレーを追加",
+            description:
+              "あなたのウォレットは、支払い要求、nostr wallet connect、バックアップなどのnostr操作にこれらのリレーを使用します。",
+          },
+          list: {
+            title: "リレー",
+            description: "あなたのウォレットはこれらのリレーに接続します。",
+            copy_tooltip: "リレーをコピー",
+            remove_tooltip: "リレーを削除",
+          },
+        },
+      },
       payment_requests: "支払いリクエスト",
       nostr_wallet_connect: "ノストルウォレットコネクト",
       hardware_features: "ハードウェア機能",
@@ -252,6 +223,10 @@ export default {
         toggle: "自動的に請求",
         description: "着信支払いを自動的に受け取ります。",
       },
+      npc_v2: {
+        choose_mint_title: "npub.cash v2のミントを選択",
+        choose_mint_placeholder: "ミントを選択...",
+      },
     },
     nostr_keys: {
       title: "あなたのnostrキー",
@@ -277,23 +252,6 @@ export default {
         not_found: "NIP-07署名拡張機能が見つかりません",
       },
     },
-    nostr: {
-      title: "NOSTR",
-      relays: {
-        expand_label: "クリックしてリレーを編集",
-        add: {
-          title: "リレーを追加",
-          description:
-            "あなたのウォレットは、支払い要求、nostr wallet connect、バックアップなどのnostr操作にこれらのリレーを使用します。",
-        },
-        list: {
-          title: "リレー",
-          description: "あなたのウォレットはこれらのリレーに接続します。",
-          copy_tooltip: "リレーをコピー",
-          remove_tooltip: "リレーを削除",
-        },
-      },
-    },
     payment_requests: {
       title: "支払いリクエスト",
       description:
@@ -315,20 +273,6 @@ export default {
         copy_tooltip: "接続文字列をコピー",
         qr_tooltip: "QRコードを表示",
         allowance_label: "残りアローワンス (sat)",
-      },
-      relays: {
-        expand_label: "リレーを編集するにはクリック",
-        add: {
-          title: "リレーを追加",
-          description:
-            "Nostrウォレットコネクトは、ウォレットを他のアプリケーションに接続するためにnostrリレーを使用します。",
-        },
-        list: {
-          title: "リレー",
-          description: "ウォレットはこれらのリレーに接続します。",
-          copy_tooltip: "リレーをコピー",
-          remove_tooltip: "リレーを削除",
-        },
       },
     },
     hardware_features: {
@@ -430,6 +374,21 @@ export default {
         url_label: "監査人URL",
         api_url_label: "監査人API URL",
       },
+      multinut: {
+        toggle: "マルチナットを有効にする",
+        description:
+          "有効にすると、ウォレットはマルチナットを使用して複数のミントから一度に請求書を支払います。",
+      },
+      nostr_mint_backup: {
+        toggle: "Nostrでミントリストをバックアップ",
+        description:
+          "有効にすると、設定されたNostrキーを使用して、ミントリストがNostrリレーに自動的にバックアップされます。これにより、デバイス間でミントリストを復元できます。",
+        notifications: {
+          enabled: "Nostrミントのバックアップが有効になりました",
+          disabled: "Nostrミントのバックアップが無効になりました",
+          failed: "Nostrミントのバックアップを有効にできませんでした",
+        },
+      },
     },
     appearance: {
       keyboard: {
@@ -454,6 +413,29 @@ export default {
           flamingo: "フラミンゴ",
         },
       },
+      bip177: {
+        title: "ビットコインシンボル",
+        description: "satsの代わりに₿シンボルを使用します。",
+        toggle: "₿シンボルを使用",
+      },
+    },
+    web_of_trust: {
+      title: "信頼のウェブ",
+      known_pubkeys: "既知の公開鍵: {wotCount}",
+      continue_crawl: "クロールを続行",
+      crawl_odell: "ODELLの信頼のウェブをクロール",
+      crawl_wot: "信頼のウェブをクロール",
+      pause: "一時停止",
+      reset: "リセット",
+      progress: "{crawlProcessed} / {crawlTotal}",
+    },
+    npub_cash: {
+      use_npubx: "npubx.cashを使用",
+      copy_lightning_address: "Lightningアドレスをコピー",
+      v2_mint: "npub.cash v2ミント",
+    },
+    multinut: {
+      use_multinut: "マルチナットを使用",
     },
     advanced: {
       title: "高度な設定",
@@ -487,6 +469,7 @@ export default {
           title: "キーセットカウンターをインクリメント",
           description:
             "キーセットIDをクリックして、ウォレット内のキーセットの導出パスカウンターをインクリメントします。「出力はすでに署名されています」というエラーが表示される場合に便利です。",
+          counter: "カウンター: {count}",
         },
         unset_reserved: {
           button: "すべての予約済みトークンを解除",
@@ -782,19 +765,48 @@ export default {
       validate: {
         error: "ニーモニックは少なくとも12単語である必要があります。",
       },
+      select_all: {
+        label: "すべて選択",
+      },
+      deselect_all: {
+        label: "すべて解除",
+      },
       restore: {
         label: "復元",
         in_progress: "ミントを復元中…",
         error: "ミントの復元エラー: { error }",
       },
-      restore_all_mints: {
-        label: "すべてのミントを復元",
-        in_progress: "{ length }個のミントのうち{ index }個目を復元中…",
-        success: "復元が正常に完了しました",
-        error: "ミントの復元エラー: { error }",
-      },
-    },
-  },
+            restore_all_mints: {
+              label: "すべてのミントを復元",
+              in_progress: "{ length }個のミントのうち{ index }個目を復元中…",
+              success: "復元が正常に完了しました",
+              error: "ミントの復元エラー: { error }",
+            },
+            restore_selected_mints: {
+              label: "選択したミントを復元 ({count})",
+              in_progress: "{length}個のミントのうち{index}個を復元しています…",
+              success: "{count}個のミントを正常に復元しました",
+              error: "選択したミントの復元中にエラーが発生しました: {error}",
+            },
+          },
+          nostr_mints: {
+            label: "Nostrからミントを復元",
+            caption:
+              "シードフレーズを使用してNostrリレーに保存されているミントのバックアップを検索します。これにより、以前使用したミントを発見できます。",
+            search_button: "ミントのバックアップを検索",
+            select_all: "すべて選択",
+            deselect_all: "すべて選択解除",
+            backed_up: "バックアップ済み",
+            already_added: "既に追加済み",
+            add_selected: "選択したものを追加 ({count})",
+            no_backups_found: "ミントのバックアップが見つかりません",
+            no_backups_hint:
+              "ミントリストを自動的にバックアップするには、設定でNostrミントのバックアップが有効になっていることを確認してください。",
+            invalid_mnemonic: "検索する前に有効なシードフレーズを入力してください。",
+            search_error: "ミントのバックアップの検索に失敗しました。",
+            add_error: "選択したミントの追加に失敗しました。",
+          },
+        },
   MintSettings: {
     add: {
       title: "ミントを追加",

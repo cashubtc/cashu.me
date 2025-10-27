@@ -55,9 +55,6 @@ export default {
         label: "URL Mint",
       },
     },
-    process: "Επεξεργασία",
-    Warning: "Προειδοποίηση",
-    Note: "Σημείωση",
   },
   wallet: {
     notifications: {
@@ -174,7 +171,23 @@ export default {
       backup_restore: "ΑΝΤΙΓΡΑΦΟ ΑΣΦΑΛΕΙΑΣ & ΕΠΑΝΑΦΟΡΑ",
       lightning_address: "ΔΙΕΥΘΥΝΣΗ LIGHTNING",
       nostr_keys: "ΚΛΕΙΔΙΑ NOSTR",
-      nostr: "NOSTR",
+      nostr: {
+        title: "NOSTR",
+        relays: {
+          expand_label: "Κάντε κλικ για να επεξεργαστείτε τα relays",
+          add: {
+            title: "Προσθήκη relay",
+            description:
+              "Το πορτοφόλι σας χρησιμοποιεί αυτά τα relays για λειτουργίες nostr όπως αιτήματα πληρωμής, nostr wallet connect και αντίγραφα ασφαλείας.",
+          },
+          list: {
+            title: "Relays",
+            description: "Το πορτοφόλι σας θα συνδεθεί σε αυτά τα relays.",
+            copy_tooltip: "Αντιγραφή relay",
+            remove_tooltip: "Κατάργηση relay",
+          },
+        },
+      },
       payment_requests: "ΑΙΤΗΜΑΤΑ ΠΛΗΡΩΜΗΣ",
       nostr_wallet_connect: "NOSTR WALLET CONNECT",
       hardware_features: "ΧΑΡΑΚΤΗΡΙΣΤΙΚΑ ΥΛΙΚΟΥ",
@@ -241,23 +254,6 @@ export default {
         not_found: "Δεν βρέθηκε επέκταση υπογραφής NIP-07",
       },
     },
-    nostr: {
-      title: "NOSTR",
-      relays: {
-        expand_label: "Κάντε κλικ για να επεξεργαστείτε τα relays",
-        add: {
-          title: "Προσθήκη relay",
-          description:
-            "Το πορτοφόλι σας χρησιμοποιεί αυτά τα relays για λειτουργίες nostr όπως αιτήματα πληρωμής, nostr wallet connect και αντίγραφα ασφαλείας.",
-        },
-        list: {
-          title: "Relays",
-          description: "Το πορτοφόλι σας θα συνδεθεί σε αυτά τα relays.",
-          copy_tooltip: "Αντιγραφή relay",
-          remove_tooltip: "Κατάργηση relay",
-        },
-      },
-    },
     payment_requests: {
       title: "Αιτήματα πληρωμής",
       description:
@@ -279,20 +275,6 @@ export default {
         copy_tooltip: "Αντιγραφή συμβολοσειράς σύνδεσης",
         qr_tooltip: "Εμφάνιση κωδικού QR",
         allowance_label: "Υπολειπόμενο όριο (sat)",
-      },
-      relays: {
-        expand_label: "Κάντε κλικ για επεξεργασία relays",
-        add: {
-          title: "Προσθήκη relay",
-          description:
-            "Το Nostr Wallet Connect χρησιμοποιεί relays nostr για να συνδέσει το πορτοφόλι σας με άλλες εφαρμογές.",
-        },
-        list: {
-          title: "Relays",
-          description: "Το πορτοφόλι σας θα συνδεθεί σε αυτά τα relays.",
-          copy_tooltip: "Αντιγραφή relay",
-          remove_tooltip: "Αφαίρεση relay",
-        },
       },
     },
     hardware_features: {
@@ -439,6 +421,24 @@ export default {
         toggle: "Χρήση συμβόλου ₿",
       },
     },
+    web_of_trust: {
+      title: "Web of trust",
+      known_pubkeys: "Γνωστά pubkeys: {wotCount}",
+      continue_crawl: "Συνέχιση ανίχνευσης",
+      crawl_odell: "Ανίχνευση ODELL'S WEB OF TRUST",
+      crawl_wot: "Ανίχνευση web of trust",
+      pause: "Παύση",
+      reset: "Επαναφορά",
+      progress: "{crawlProcessed} / {crawlTotal}",
+    },
+    npub_cash: {
+      use_npubx: "Χρήση npubx.cash",
+      copy_lightning_address: "Αντιγραφή διεύθυνσης Lightning",
+      v2_mint: "npub.cash v2 mint",
+    },
+    multinut: {
+      use_multinut: "Χρήση Multinut",
+    },
     advanced: {
       title: "Για προχωρημένους",
       developer: {
@@ -473,6 +473,7 @@ export default {
           title: "Αύξηση μετρητών keyset",
           description:
             'Κάντε κλικ στο ID του keyset για να αυξήσετε τους μετρητές διαδρομής παραγωγής για τα keysets στο πορτοφόλι σας. Αυτό είναι χρήσιμο εάν βλέπετε το σφάλμα "οι εξόδοι έχουν ήδη υπογραφεί".',
+          counter: "μετρητής: {count}",
         },
         unset_reserved: {
           button: "Κατάργηση δέσμευσης όλων των δεσμευμένων token",

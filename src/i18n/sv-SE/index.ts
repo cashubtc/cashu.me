@@ -8,33 +8,9 @@ export default {
     failed: 'Misslyckades att behandla: {error}',
     paid: 'Betalat {amount} via Lightning',
   },
-  // merge advanced into Settings below if needed
-  advanced: {
-    developer: {
-      keyset_counters: {
-        counter: 'räknare: {count}',
-      },
-    },
-  },
-  // merge global keys
-  NostrBackup: {
-    nostr_mints: 'Nostr-mints',
-    search_button: 'Sök',
-    backed_up: 'Säkerhetskopierad',
-    add_selected: 'Lägg till valda',
-    no_backups_found: 'Inga säkerhetskopior hittades',
-    no_backups_hint: 'Prova att byta relä eller öka timeout',
-    invalid_mnemonic: 'Ogiltig mnemonic',
-    search_error: 'Sökfel',
-    add_error: 'Tilläggsfel',
-    select_all: 'Markera alla',
-    deselect_all: 'Avmarkera alla',
-    restore_selected_mints: 'Återställ valda mints',
-  },
+
+
   global: {
-    process: 'Process',
-    Warning: 'Varning',
-    Note: 'Notis',
     copy_to_clipboard: {
       success: "Kopierat till urklipp!",
     },
@@ -96,7 +72,6 @@ export default {
       received_lightning: "Mottaget {amount} via Lightning",
       lightning_payment_failed: "Lightning-betalning misslyckades",
       failed_to_decode_invoice: "Kunde inte avkoda fakturan",
-      mint_validation_error: "Mint-valideringsfel",
       invalid_lnurl: "Ogiltig LNURL",
       lnurl_error: "LNURL-fel",
       no_amount: "Inget belopp",
@@ -118,6 +93,7 @@ export default {
         could_not_get_info: "Kunde inte hämta mint-information",
         could_not_get_keys: "Kunde inte hämta mint-nycklar",
         could_not_get_keysets: "Kunde inte hämta mint-nyckeluppsättningar",
+        mint_validation_error: "Mint-valideringsfel",
         removed: "Mint borttagen",
         error: "Mint-fel",
       },
@@ -187,11 +163,6 @@ export default {
     },
   },
   Settings: {
-    nostr_mint_backup: {
-      title: 'Nostr-mintbackup',
-      enabled: 'Aktiverad',
-      disabled: 'Inaktiverad',
-    },
     web_of_trust: {
       title: 'Web of trust',
       known_pubkeys: 'Kända pubkeys: {wotCount}',
@@ -206,10 +177,6 @@ export default {
       use_npubx: 'Använd npubx.cash',
       copy_lightning_address: 'Kopiera Lightning-adress',
       v2_mint: 'npub.cash v2 mint',
-      npc_v2: {
-        choose_mint_title: 'Välj mint för npub.cash v2',
-        choose_mint_placeholder: 'Välj en mint…',
-      },
     },
     multinut: {
       use_multinut: 'Använd Multinut',
@@ -222,7 +189,23 @@ export default {
       backup_restore: "SÄKERHETSKOPIERING & ÅTERSTÄLLNING",
       lightning_address: "LIGHTNING ADRESS",
       nostr_keys: "NOSTR NYCKLAR",
-      nostr: "NOSTR",
+      nostr: {
+        title: "NOSTR",
+        relays: {
+          expand_label: "Klicka för att redigera reläer",
+          add: {
+            title: "Lägg till relä",
+            description:
+              "Din plånbok använder dessa reläer för nostr-operationer som betalningsförfrågningar, nostr wallet connect och säkerhetskopior.",
+          },
+          list: {
+            title: "Reläer",
+            description: "Din plånbok kommer att ansluta till dessa reläer.",
+            copy_tooltip: "Kopiera relä",
+            remove_tooltip: "Ta bort relä",
+          },
+        },
+      },
       payment_requests: "BETALNINGSFÖRFRÅGNINGAR",
       nostr_wallet_connect: "NOSTR PLÅNBOKSANSLUTNING",
       hardware_features: "MASKINVARA FUNKTIONER",
@@ -259,14 +242,17 @@ export default {
         toggle: "Hämta automatiskt",
         description: "Ta emot inkommande betalningar automatiskt.",
       },
+      npc_v2: {
+        choose_mint_title: "Välj mint för npub.cash v2",
+        choose_mint_placeholder: "Välj en mint...",
+      },
     },
     nostr_keys: {
       title: "Dina nostr-nycklar",
       description: "Ställ in nostr-nycklarna för din Lightning-adress.",
       wallet_seed: {
         title: "Plånbokens återställningsfras",
-        description:
-          "Generera nostr nyckelpar från plånbokens återställningsfras",
+        description: "Generera nostr nyckelpar från plånbokens återställningsfras",
         copy_nsec: "Kopiera nsec",
       },
       nsec_bunker: {
@@ -283,23 +269,6 @@ export default {
         title: "Signeringsutökning",
         description: "Använd en NIP-07 signeringsutökning",
         not_found: "Ingen NIP-07 signeringsutökning hittades",
-      },
-    },
-    nostr: {
-      title: "NOSTR",
-      relays: {
-        expand_label: "Klicka för att redigera reläer",
-        add: {
-          title: "Lägg till relä",
-          description:
-            "Din plånbok använder dessa reläer för nostr-operationer som betalningsförfrågningar, nostr wallet connect och säkerhetskopior.",
-        },
-        list: {
-          title: "Reläer",
-          description: "Din plånbok kommer att ansluta till dessa reläer.",
-          copy_tooltip: "Kopiera relä",
-          remove_tooltip: "Ta bort relä",
-        },
       },
     },
     payment_requests: {
@@ -323,20 +292,6 @@ export default {
         copy_tooltip: "Kopiera anslutningssträng",
         qr_tooltip: "Visa QR-kod",
         allowance_label: "Tillåtelse kvar (sat)",
-      },
-      relays: {
-        expand_label: "Klicka för att redigera reläer",
-        add: {
-          title: "Lägg till relä",
-          description:
-            "Nostr Plånboksanslutning använder nostr-reläer för att ansluta din plånbok till andra applikationer.",
-        },
-        list: {
-          title: "Reläer",
-          description: "Din plånbok kommer att ansluta till dessa reläer.",
-          copy_tooltip: "Kopiera relä",
-          remove_tooltip: "Ta bort relä",
-        },
       },
     },
     hardware_features: {
@@ -438,6 +393,21 @@ export default {
         url_label: "Revisor URL",
         api_url_label: "Revisor API URL",
       },
+      multinut: {
+        toggle: "Aktivera Multinut",
+        description:
+          "Om aktiverat kommer plånboken att använda Multinut för att betala fakturor från flera mints samtidigt.",
+      },
+      nostr_mint_backup: {
+        toggle: "Säkerhetskopiera mintlista på Nostr",
+        description:
+          "Om aktiverat kommer din mintlista automatiskt att säkerhetskopieras till Nostr-reläer med dina konfigurerade Nostr-nycklar. Detta gör att du kan återställa din mintlista över enheter.",
+        notifications: {
+          enabled: "Nostr mint-säkerhetskopiering aktiverad",
+          disabled: "Nostr mint-säkerhetskopiering inaktiverad",
+          failed: "Misslyckades att aktivera Nostr mint-säkerhetskopiering",
+        },
+      },
     },
     appearance: {
       keyboard: {
@@ -461,6 +431,11 @@ export default {
           blu: "blå",
           flamingo: "flamingo",
         },
+      },
+      bip177: {
+        title: "Bitcoin-symbol",
+        description: "Använd ₿-symbolen istället för sats.",
+        toggle: "Använd ₿-symbolen",
       },
     },
     advanced: {
@@ -496,6 +471,7 @@ export default {
           title: "Öka keyset-räknare",
           description:
             'Klicka på keyset-ID för att öka härledningsvägsräknarna för keysets i din plånbok. Detta är användbart om du ser felet "outputs have already been signed".',
+          counter: "räknare: {count}",
         },
         unset_reserved: {
           button: "Avboka alla reserverade tokens",
@@ -793,6 +769,12 @@ export default {
       validate: {
         error: "Mnemoniska frasen bör vara minst 12 ord.",
       },
+      select_all: {
+        label: "Välj alla",
+      },
+      deselect_all: {
+        label: "Avmarkera alla",
+      },
       restore: {
         label: "Återställ",
         in_progress: "Återställer mint…",
@@ -804,6 +786,29 @@ export default {
         success: "Återställning slutfördes framgångsrikt",
         error: "Fel vid återställning av mints: { error }",
       },
+      restore_selected_mints: {
+        label: "Återställ valda mints ({count})",
+        in_progress: "Återställer mint {index} av {length} ...",
+        success: "Lyckades återställa {count} mint(s)",
+        error: "Fel vid återställning av valda mints: {error}",
+      },
+    },
+    nostr_mints: {
+      label: "Återställ Mints från Nostr",
+      caption:
+        "Sök efter mint-säkerhetskopior lagrade på Nostr-reläer med din återställningsfras. Detta hjälper dig att upptäcka mints du tidigare använt.",
+      search_button: "Sök efter Mint-säkerhetskopior",
+      select_all: "Välj alla",
+      deselect_all: "Avmarkera alla",
+      backed_up: "Säkerhetskopierad",
+      already_added: "Redan tillagd",
+      add_selected: "Lägg till valda ({count})",
+      no_backups_found: "Inga mint-säkerhetskopior hittades",
+      no_backups_hint:
+        "Se till att Nostr mint-säkerhetskopiering är aktiverat i inställningarna för att automatiskt säkerhetskopiera din mintlista.",
+      invalid_mnemonic: "Ange en giltig återställningsfras innan du söker.",
+      search_error: "Misslyckades att söka efter mint-säkerhetskopior.",
+      add_error: "Misslyckades att lägga till valda mints.",
     },
   },
   MintSettings: {
