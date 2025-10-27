@@ -6,6 +6,7 @@
   "author": "cashu.me",
   "private": true,
   "scripts": {
+    "i18n:check": "node scripts/check-i18n.js",
     "dev": "quasar dev",
     "build": "quasar build",
     "build:pwa": "quasar build -m pwa",

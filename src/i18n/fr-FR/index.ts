@@ -166,6 +166,35 @@ export default {
     },
   },
   Settings: {
+    sections: {
+      backup_restore: "SAUVEGARDE & RESTAURATION",
+      lightning_address: "ADRESSE LIGHTNING",
+      nostr_keys: "CLÉS NOSTR",
+      nostr: {
+        title: "NOSTR",
+        relays: {
+          expand_label: "Cliquer pour modifier les relais",
+          add: {
+            title: "Ajouter un relais",
+            description:
+              "Votre portefeuille utilise ces relais pour les opérations Nostr comme les demandes de paiement, NWC et les sauvegardes.",
+          },
+          list: {
+            title: "Relais",
+            description: "Votre portefeuille se connectera à ces relais.",
+            copy_tooltip: "Copier le relais",
+            remove_tooltip: "Supprimer le relais",
+          },
+        },
+      },
+      payment_requests: "DEMANDES DE PAIEMENT",
+      nostr_wallet_connect: "NOSTR WALLET CONNECT",
+      hardware_features: "FONCTIONNALITÉS MATÉRIELLES",
+      p2pk_features: "FONCTIONNALITÉS P2PK",
+      privacy: "CONFIDENTIALITÉ",
+      experimental: "EXPÉRIMENTAL",
+      appearance: "APPARENCE",
+    },
     language: {
       title: "Langue",
       description:
@@ -442,12 +471,12 @@ export default {
     web_of_trust: {
       title: "Réseau de confiance",
       known_pubkeys: "Clés publiques connues: {wotCount}",
-      pubkeys: "Clés publiques",
       continue_crawl: "Poursuivre l'exploration",
       crawl_odell: "EXPLORER LE RÉSEAU DE CONFIANCE D'ODELL",
       crawl_wot: "Explorer le réseau de confiance",
       pause: "Pause",
       reset: "Réinitialiser",
+      progress: "{crawlProcessed} / {crawlTotal}",
     },
     npub_cash: {
       use_npubx: "Utiliser npubx.cash",
@@ -463,6 +492,9 @@ export default {
         title: "Paramètres développeur",
         description:
           "Les paramètres suivants sont pour le développement et le débogage.",
+        keyset_counters: {
+          counter: "compteur : {count}",
+        },
         new_seed: {
           button: "Générer une nouvelle phrase de départ",
           description:
@@ -516,17 +548,6 @@ export default {
             "Téléchargez un dump de votre portefeuille. Vous pouvez restaurer votre portefeuille à partir de ce fichier sur l'écran d'accueil d'un nouveau portefeuille. Ce fichier sera désynchronisé si vous continuez à utiliser votre portefeuille après l'exportation.",
         },
       },
-    },
-    // duplicate settings subsections removed (web_of_trust/npub_cash/multinut)
-    web_of_trust: {
-      title: "Web of trust",
-      known_pubkeys: "Pubkeys connus : {wotCount}",
-      continue_crawl: "Continuer l'exploration",
-      crawl_odell: "Explorer le WEB OF TRUST d'ODELL",
-      crawl_wot: "Explorer le web of trust",
-      pause: "Pause",
-      reset: "Réinitialiser",
-      progress: "{crawlProcessed} / {crawlTotal}",
     },
     npub_cash: {
       use_npubx: "Utiliser npubx.cash",

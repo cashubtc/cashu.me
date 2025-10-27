@@ -9,6 +9,28 @@ export default {
     paid: 'تم دفع {amount} عبر Lightning',
   },
   Settings: {
+    sections: {
+      nostr: {
+        title: "نوستر",
+        relays: {
+          expand_label: "انقر لتحرير المرحلات",
+          add: {
+            title: "إضافة مرحل",
+            description:
+              "تستخدم محفظتك هذه المرحلات لعمليات نوستر مثل طلبات الدفع وNWC والنسخ الاحتياطي.",
+          },
+          list: {
+            title: "المرحلات",
+            description: "ستتصل محفظتك بهذه المرحلات.",
+            copy_tooltip: "نسخ المرحل",
+            remove_tooltip: "إزالة المرحل",
+          },
+        },
+      },
+    },
+    // remove legacy flat keys if present
+    nostr: undefined,
+    nostr_wallet_connect: { title: "Nostr Wallet Connect (NWC)", description: "", enable_toggle: "", payments_note: "", connection: { copy_tooltip: "", qr_tooltip: "", allowance_label: "" } },
     web_of_trust: {
       title: "شبكة الثقة",
       known_pubkeys: "المفاتيح العامة المعروفة: {wotCount}",
@@ -21,7 +43,7 @@ export default {
       progress: "{crawlProcessed} / {crawlTotal}",
     },
     npub_cash: {
-      use_npubx: "استخدم npubx.cash",
+      use_npubx: "استخدام npubx.cash",
       copy_lightning_address: "نسخ عنوان Lightning",
       v2_mint: "mint لـ npub.cash v2",
     },

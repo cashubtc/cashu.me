@@ -8,27 +8,7 @@ export default {
     failed: 'Verarbeitung fehlgeschlagen: {error}',
     paid: '{amount} über Lightning bezahlt',
   },
-  Settings: {
-    web_of_trust: {
-      title: "Web of Trust",
-      known_pubkeys: "Bekannte Pubkeys: {wotCount}",
-      pubkeys: "Pubkeys",
-      continue_crawl: "Crawl fortsetzen",
-      crawl_odell: "ODELL'S WEB OF TRUST crawlen",
-      crawl_wot: "Web of Trust crawlen",
-      pause: "Pausieren",
-      reset: "Zurücksetzen",
-      progress: "{crawlProcessed} / {crawlTotal}",
-    },
-    npub_cash: {
-      use_npubx: "npubx.cash verwenden",
-      copy_lightning_address: "Lightning-Adresse kopieren",
-      v2_mint: "npub.cash v2 Mint",
-    },
-    multinut: {
-      use_multinut: "Multinut verwenden",
-    },
-  },
+  
   global: {
     copy_to_clipboard: {
       success: "In die Zwischenablage kopiert!",
@@ -195,7 +175,23 @@ export default {
       backup_restore: "SICHERUNG & WIEDERHERSTELLUNG",
       lightning_address: "LIGHTNING ADRESSE",
       nostr_keys: "NOSTR SCHLÜSSEL",
-      nostr: "NOSTR",
+      nostr: {
+        title: "NOSTR",
+        relays: {
+          expand_label: "Klicken, um Relays zu bearbeiten",
+          add: {
+            title: "Relay hinzufügen",
+            description:
+              "Ihre Wallet verwendet diese Relays für Nostr‑Operationen wie Zahlungsanforderungen, Nostr Wallet Connect und Backups.",
+          },
+          list: {
+            title: "Relays",
+            description: "Ihre Wallet verbindet sich mit diesen Relays.",
+            copy_tooltip: "Relay kopieren",
+            remove_tooltip: "Relay entfernen",
+          },
+        },
+      },
       payment_requests: "ZAHLUNGSANFORDERUNGEN",
       nostr_wallet_connect: "NOSTR WALLET CONNECT",
       hardware_features: "HARDWARE FUNKTIONEN",
@@ -237,6 +233,24 @@ export default {
         choose_mint_placeholder: "Wählen Sie eine Mint...",
       },
     },
+    web_of_trust: {
+      title: "Web of Trust",
+      known_pubkeys: "Bekannte Pubkeys: {wotCount}",
+      continue_crawl: "Crawl fortsetzen",
+      crawl_odell: "ODELL'S WEB OF TRUST crawlen",
+      crawl_wot: "Web of Trust crawlen",
+      pause: "Pausieren",
+      reset: "Zurücksetzen",
+      progress: "{crawlProcessed} / {crawlTotal}",
+    },
+    npub_cash: {
+      use_npubx: "npubx.cash verwenden",
+      copy_lightning_address: "Lightning-Adresse kopieren",
+      v2_mint: "npub.cash v2 Mint",
+    },
+    multinut: {
+      use_multinut: "Multinut verwenden",
+    },
     nostr_keys: {
       title: "Ihre Nostr-Schlüssel",
       description:
@@ -262,23 +276,6 @@ export default {
         not_found: "Keine NIP-07 Signaturerweiterung gefunden",
       },
     },
-    nostr: {
-      title: "NOSTR",
-      relays: {
-        expand_label: "Klicken, um Relays zu bearbeiten",
-        add: {
-          title: "Relay hinzufügen",
-          description:
-            "Ihre Wallet verwendet diese Relays für Nostr-Operationen wie Zahlungsanforderungen, Nostr Wallet Connect und Backups.",
-        },
-        list: {
-          title: "Relays",
-          description: "Ihre Wallet wird sich mit diesen Relays verbinden.",
-          copy_tooltip: "Relay kopieren",
-          remove_tooltip: "Relay entfernen",
-        },
-      },
-    },
     payment_requests: {
       title: "Zahlungsanforderungen",
       description:
@@ -300,20 +297,6 @@ export default {
         copy_tooltip: "Verbindungsstring kopieren",
         qr_tooltip: "QR-Code anzeigen",
         allowance_label: "Restliches Guthaben (sat)",
-      },
-      relays: {
-        expand_label: "Klicken, um Relays zu bearbeiten",
-        add: {
-          title: "Relay hinzufügen",
-          description:
-            "Nostr Wallet Connect verwendet Nostr-Relays, um Ihre Wallet mit anderen Anwendungen zu verbinden.",
-        },
-        list: {
-          title: "Relays",
-          description: "Ihre Wallet wird sich mit diesen Relays verbinden.",
-          copy_tooltip: "Relay kopieren",
-          remove_tooltip: "Relay entfernen",
-        },
       },
     },
     hardware_features: {

@@ -208,6 +208,25 @@ export default {
     },
   },
   Settings: {
+    sections: {
+      nostr: {
+        title: "NOSTR",
+        relays: {
+          expand_label: "Haga clic para editar relays",
+          add: {
+            title: "Añadir relay",
+            description:
+              "Su billetera usa estos relays para operaciones de nostr como solicitudes de pago, NWC y copias de seguridad.",
+          },
+          list: {
+            title: "Relays",
+            description: "Su billetera se conectará a estos relays.",
+            copy_tooltip: "Copiar relay",
+            remove_tooltip: "Eliminar relay",
+          },
+        },
+      },
+    },
     language: {
       title: "Idioma",
       description: "Por favor, elige tu idioma preferido de la lista de abajo.",
@@ -483,12 +502,12 @@ export default {
     web_of_trust: {
       title: "Red de confianza",
       known_pubkeys: "Claves públicas conocidas: {wotCount}",
-      pubkeys: "Claves públicas",
       continue_crawl: "Continuar rastreo",
       crawl_odell: "RASTREAR LA RED DE CONFIANZA DE ODELL",
       crawl_wot: "Rastrear red de confianza",
       pause: "Pausa",
       reset: "Reiniciar",
+      progress: "{crawlProcessed} / {crawlTotal}",
     },
     npub_cash: {
       use_npubx: "Utilice npubx.cash",
@@ -504,6 +523,9 @@ export default {
         title: "Configuración de desarrollador",
         description:
           "Las siguientes configuraciones son para desarrollo y depuración.",
+        keyset_counters: {
+          counter: "contador: {count}",
+        },
         new_seed: {
           button: "Generar nueva frase semilla",
           description:
