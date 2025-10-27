@@ -51,10 +51,12 @@ function main() {
   const ref = flatMaps.find((l) => l.code === 'en-US') || flatMaps[0];
 
   let hadError = false;
+  const diffs = {};
   for (const { code, flat } of flatMaps) {
     const missing = Object.keys(ref.flat).filter((k) => !(k in flat));
     const extra = Object.keys(flat).filter((k) => !(k in ref.flat));
     if (missing.length || extra.length) {
+      diffs[code] = { missing: missing.length, extra: extra.length };
       hadError = true;
       console.log(`Locale ${code}:`);
       if (missing.length) {
@@ -72,6 +74,10 @@ function main() {
 
   if (hadError) {
     console.log('\nDifferences found.');
+    console.log('Number of differences per file:');
+    for (const [code, { missing, extra }] of Object.entries(diffs)) {
+      console.log(`  ${code}: missing ${missing}, extra ${extra}`);
+    }
     process.exit(2);
   } else {
     console.log('All locale keys are consistent.');
