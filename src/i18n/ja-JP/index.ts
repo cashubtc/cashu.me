@@ -8,57 +8,6 @@ export default {
     failed: '処理に失敗しました: {error}',
     paid: 'Lightningで{amount}を支払いました',
   },
-  Settings: {
-    nostr_mint_backup: {
-      title: 'Nostr ミントのバックアップ',
-      enabled: '有効',
-      disabled: '無効',
-    },
-    web_of_trust: {
-      title: 'Web of trust',
-      known_pubkeys: '既知のpubkey: {wotCount}',
-      pubkeys: 'Pubkeys',
-      continue_crawl: 'クロールを続行',
-      crawl_odell: "ODELLのWEB OF TRUSTをクロール",
-      crawl_wot: 'Web of trust をクロール',
-      pause: '一時停止',
-      reset: 'リセット',
-      progress: '{crawlProcessed} / {crawlTotal}',
-    },
-    npub_cash: {
-      use_npubx: 'npubx.cash を使う',
-      copy_lightning_address: 'Lightningアドレスをコピー',
-      v2_mint: 'npub.cash v2 ミント',
-      npc_v2: {
-        choose_mint_title: 'npub.cash v2 用のミントを選択',
-        choose_mint_placeholder: 'ミントを選択…',
-      },
-    },
-    multinut: {
-      use_multinut: 'Multinut を使う',
-    },
-    appearance: {
-      bip177: {
-        title: 'ビットコイン記号',
-        description: 'sats の代わりに ₿ 記号を使う。',
-        toggle: '₿ 記号を使う',
-      },
-    },
-  },
-  Settings: {
-    advanced: {
-      developer: {
-        keyset_counters: {
-          counter: 'カウンター: {count}',
-        },
-      },
-    },
-  },
-  global: {
-    process: '処理',
-    Warning: '警告',
-    Note: '注記',
-  },
   NostrBackup: {
     select_all: 'すべて選択',
     deselect_all: 'すべて解除',
@@ -73,18 +22,10 @@ export default {
     search_error: '検索エラー',
     add_error: '追加エラー',
   },
-  NostrBackup: {
-    nostr_mints: 'Nostr ミント',
-    search_button: '検索',
-    backed_up: 'バックアップ済み',
-    add_selected: '選択を追加',
-    no_backups_found: 'バックアップが見つかりません',
-    no_backups_hint: 'リレーを変更するかタイムアウトを延長してみてください',
-    invalid_mnemonic: '無効なニーモニック',
-    search_error: '検索エラー',
-    add_error: '追加エラー',
-  },
   global: {
+    process: '処理',
+    Warning: '警告',
+    Note: '注記',
     copy_to_clipboard: {
       success: "クリップボードにコピーしました！",
     },
@@ -238,6 +179,34 @@ export default {
     },
   },
   Settings: {
+    nostr_mint_backup: {
+      title: 'Nostr mint yedeği',
+      enabled: 'Etkin',
+      disabled: 'Devre dışı',
+    },
+    web_of_trust: {
+      title: 'Web of trust',
+      known_pubkeys: 'Bilinen pubkeyler: {wotCount}',
+      pubkeys: 'Pubkeys',
+      continue_crawl: 'Taramaya devam et',
+      crawl_odell: "ODELL'İN WEB OF TRUST'unu tara",
+      crawl_wot: 'Web of trust tara',
+      pause: 'Duraklat',
+      reset: 'Sıfırla',
+      progress: '{crawlProcessed} / {crawlTotal}',
+    },
+    npub_cash: {
+      use_npubx: 'npubx.cash kullan',
+      copy_lightning_address: 'Lightning adresini kopyala',
+      v2_mint: 'npub.cash v2 mint',
+      npc_v2: {
+        choose_mint_title: 'npub.cash v2 için mint seçin',
+        choose_mint_placeholder: 'Bir mint seçin…',
+      },
+    },
+    multinut: {
+      use_multinut: 'Multinut kullan',
+    },
     language: {
       title: "言語",
       description: "以下のリストから希望の言語を選択してください。",

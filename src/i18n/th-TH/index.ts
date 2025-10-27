@@ -8,36 +8,6 @@ export default {
     failed: 'ไม่สามารถประมวลผล: {error}',
     paid: 'จ่าย {amount} ผ่าน Lightning',
   },
-  Settings: {
-    nostr_mint_backup: {
-      title: 'สำรองข้อมูล Nostr mint',
-      enabled: 'เปิดใช้งาน',
-      disabled: 'ปิดใช้งาน',
-    },
-    web_of_trust: {
-      title: 'Web of trust',
-      known_pubkeys: 'Pubkey ที่รู้จัก: {wotCount}',
-      pubkeys: 'Pubkeys',
-      continue_crawl: 'ดำเนินการสำรวจต่อ',
-      crawl_odell: "สำรวจ ODELL'S WEB OF TRUST",
-      crawl_wot: 'สำรวจ web of trust',
-      pause: 'หยุดชั่วคราว',
-      reset: 'รีเซ็ต',
-      progress: '{crawlProcessed} / {crawlTotal}',
-    },
-    npub_cash: {
-      use_npubx: 'ใช้ npubx.cash',
-      copy_lightning_address: 'คัดลอกที่อยู่ Lightning',
-      v2_mint: 'npub.cash v2 mint',
-      npc_v2: {
-        choose_mint_title: 'เลือก mint สำหรับ npub.cash v2',
-        choose_mint_placeholder: 'เลือก mint...',
-      },
-    },
-    multinut: {
-      use_multinut: 'ใช้ Multinut',
-    },
-  },
   // merged into the single Settings block above
   advanced: {
     developer: {
@@ -45,14 +15,6 @@ export default {
         counter: 'ตัวนับ: {count}',
       },
     },
-  },
-  global: {
-    process: 'ประมวลผล',
-    Warning: 'คำเตือน',
-    Note: 'บันทึก',
-  },
-  NostrBackup: {
-    share: 'แชร์',
   },
   NostrBackup: {
     nostr_mints: 'Nostr mints',
@@ -222,6 +184,34 @@ export default {
     },
   },
   Settings: {
+    nostr_mint_backup: {
+      title: 'สำรองข้อมูล Nostr mint',
+      enabled: 'เปิดใช้งาน',
+      disabled: 'ปิดใช้งาน',
+    },
+    web_of_trust: {
+      title: 'Web of trust',
+      known_pubkeys: 'Pubkey ที่รู้จัก: {wotCount}',
+      pubkeys: 'Pubkeys',
+      continue_crawl: 'ดำเนินการสำรวจต่อ',
+      crawl_odell: "สำรวจ ODELL'S WEB OF TRUST",
+      crawl_wot: 'สำรวจ web of trust',
+      pause: 'หยุดชั่วคราว',
+      reset: 'รีเซ็ต',
+      progress: '{crawlProcessed} / {crawlTotal}',
+    },
+    npub_cash: {
+      use_npubx: 'ใช้ npubx.cash',
+      copy_lightning_address: 'คัดลอกที่อยู่ Lightning',
+      v2_mint: 'npub.cash v2 mint',
+      npc_v2: {
+        choose_mint_title: 'เลือก mint สำหรับ npub.cash v2',
+        choose_mint_placeholder: 'เลือก mint...',
+      },
+    },
+    multinut: {
+      use_multinut: 'ใช้ Multinut',
+    },
     language: {
       title: "ภาษา",
       description: "โปรดเลือกภาษาที่คุณต้องการจากรายการด้านล่าง",
@@ -419,16 +409,9 @@ export default {
         currency: {
           title: "สกุลเงินเฟียต",
           description: "เลือกสกุลเงินเฟียตสำหรับการแสดงราคา Bitcoin",
-    },
-    },
-    appearance: {
-      bip177: {
-        title: 'สัญลักษณ์ Bitcoin',
-        description: 'ใช้สัญลักษณ์ ₿ แทน sats',
-        toggle: 'ใช้สัญลักษณ์ ₿',
+        },
       },
     },
-  },
     experimental: {
       title: "ทดลอง",
       description: "คุณสมบัติเหล่านี้เป็นคุณสมบัติทดลอง",

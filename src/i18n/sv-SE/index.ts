@@ -8,35 +8,6 @@ export default {
     failed: 'Misslyckades att behandla: {error}',
     paid: 'Betalat {amount} via Lightning',
   },
-  Settings: {
-    nostr_mint_backup: {
-      title: 'Nostr-mintbackup',
-      enabled: 'Aktiverad',
-      disabled: 'Inaktiverad',
-    },
-    web_of_trust: {
-      title: 'Web of trust',
-      known_pubkeys: 'Kända pubkeys: {wotCount}',
-      continue_crawl: 'Fortsätt genomsökning',
-      crawl_odell: "Genomsök ODELL'S WEB OF TRUST",
-      crawl_wot: 'Genomsök web of trust',
-      pause: 'Pausa',
-      reset: 'Återställ',
-      progress: '{crawlProcessed} / {crawlTotal}',
-    },
-    npub_cash: {
-      use_npubx: 'Använd npubx.cash',
-      copy_lightning_address: 'Kopiera Lightning-adress',
-      v2_mint: 'npub.cash v2 mint',
-      npc_v2: {
-        choose_mint_title: 'Välj mint för npub.cash v2',
-        choose_mint_placeholder: 'Välj en mint…',
-      },
-    },
-    multinut: {
-      use_multinut: 'Använd Multinut',
-    },
-  },
   // merge advanced into Settings below if needed
   advanced: {
     developer: {
@@ -45,21 +16,7 @@ export default {
       },
     },
   },
-  Settings: {
-    appearance: {
-      bip177: {
-        title: 'Bitcoin-symbol',
-        description: 'Använd ₿-symbol istället för sats.',
-        toggle: 'Använd ₿-symbol',
-      },
-    },
-  },
   // merge global keys
-  global: {
-    process: 'Process',
-    Warning: 'Varning',
-    Note: 'Notis',
-  },
   NostrBackup: {
     nostr_mints: 'Nostr-mints',
     search_button: 'Sök',
@@ -75,6 +32,9 @@ export default {
     restore_selected_mints: 'Återställ valda mints',
   },
   global: {
+    process: 'Process',
+    Warning: 'Varning',
+    Note: 'Notis',
     copy_to_clipboard: {
       success: "Kopierat till urklipp!",
     },
@@ -227,6 +187,33 @@ export default {
     },
   },
   Settings: {
+    nostr_mint_backup: {
+      title: 'Nostr-mintbackup',
+      enabled: 'Aktiverad',
+      disabled: 'Inaktiverad',
+    },
+    web_of_trust: {
+      title: 'Web of trust',
+      known_pubkeys: 'Kända pubkeys: {wotCount}',
+      continue_crawl: 'Fortsätt genomsökning',
+      crawl_odell: "Genomsök ODELL'S WEB OF TRUST",
+      crawl_wot: 'Genomsök web of trust',
+      pause: 'Pausa',
+      reset: 'Återställ',
+      progress: '{crawlProcessed} / {crawlTotal}',
+    },
+    npub_cash: {
+      use_npubx: 'Använd npubx.cash',
+      copy_lightning_address: 'Kopiera Lightning-adress',
+      v2_mint: 'npub.cash v2 mint',
+      npc_v2: {
+        choose_mint_title: 'Välj mint för npub.cash v2',
+        choose_mint_placeholder: 'Välj en mint…',
+      },
+    },
+    multinut: {
+      use_multinut: 'Använd Multinut',
+    },
     language: {
       title: "Språk",
       description: "Välj önskat språk från listan nedan.",

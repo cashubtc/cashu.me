@@ -8,57 +8,6 @@ export default {
     failed: '处理失败：{error}',
     paid: '通过闪电网络支付了 {amount}',
   },
-  Settings: {
-    nostr_mint_backup: {
-      title: 'Nostr 铸币备份',
-      enabled: '已启用',
-      disabled: '已禁用',
-    },
-    web_of_trust: {
-      title: '信任网络',
-      known_pubkeys: '已知公钥：{wotCount}',
-      pubkeys: '公钥',
-      continue_crawl: '继续抓取',
-      crawl_odell: '抓取 ODELL 的信任网络',
-      crawl_wot: '抓取信任网络',
-      pause: '暂停',
-      reset: '重置',
-      progress: '{crawlProcessed} / {crawlTotal}',
-    },
-    npub_cash: {
-      use_npubx: '使用 npubx.cash',
-      copy_lightning_address: '复制闪电地址',
-      v2_mint: 'npub.cash v2 铸币厂',
-      npc_v2: {
-        choose_mint_title: '为 npub.cash v2 选择铸币厂',
-        choose_mint_placeholder: '选择一个铸币厂…',
-      },
-    },
-    multinut: {
-      use_multinut: '使用 Multinut',
-    },
-  },
-  Settings: {
-    advanced: {
-      developer: {
-        keyset_counters: {
-          counter: '计数器: {count}',
-        },
-      },
-    },
-    appearance: {
-      bip177: {
-        title: '比特币符号',
-        description: '使用 ₿ 符号代替 sats。',
-        toggle: '使用 ₿ 符号',
-      },
-    },
-  },
-  global: {
-    process: '处理',
-    Warning: '警告',
-    Note: '备注',
-  },
   NostrBackup: {
     nostr_mints: 'Nostr 铸币厂',
     search_button: '搜索',
@@ -226,6 +175,34 @@ export default {
     },
   },
   Settings: {
+    nostr_mint_backup: {
+      title: 'Nostr 铸币备份',
+      enabled: '已启用',
+      disabled: '已禁用',
+    },
+    web_of_trust: {
+      title: '信任网络',
+      known_pubkeys: '已知公钥：{wotCount}',
+      pubkeys: '公钥',
+      continue_crawl: '继续抓取',
+      crawl_odell: '抓取 ODELL 的信任网络',
+      crawl_wot: '抓取信任网络',
+      pause: '暂停',
+      reset: '重置',
+      progress: '{crawlProcessed} / {crawlTotal}',
+    },
+    npub_cash: {
+      use_npubx: '使用 npubx.cash',
+      copy_lightning_address: '复制闪电地址',
+      v2_mint: 'npub.cash v2 铸币厂',
+      npc_v2: {
+        choose_mint_title: '为 npub.cash v2 选择铸币厂',
+        choose_mint_placeholder: '选择一个铸币厂…',
+      },
+    },
+    multinut: {
+      use_multinut: '使用 Multinut',
+    },
     language: {
       title: "语言",
       description: "请从下方列表中选择您的首选语言。",

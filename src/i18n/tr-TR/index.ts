@@ -8,43 +8,6 @@ export default {
     failed: 'İşlenemedi: {error}',
     paid: 'Lightning ile {amount} ödendi',
   },
-  Settings: {
-    nostr_mint_backup: {
-      title: 'Nostr mint yedeği',
-      enabled: 'Etkin',
-      disabled: 'Devre dışı',
-    },
-    web_of_trust: {
-      title: 'Web of trust',
-      known_pubkeys: 'Bilinen pubkeyler: {wotCount}',
-      pubkeys: 'Pubkeys',
-      continue_crawl: 'Taramaya devam et',
-      crawl_odell: "ODELL'İN WEB OF TRUST'unu tara",
-      crawl_wot: 'Web of trust tara',
-      pause: 'Duraklat',
-      reset: 'Sıfırla',
-      progress: '{crawlProcessed} / {crawlTotal}',
-    },
-    npub_cash: {
-      use_npubx: 'npubx.cash kullan',
-      copy_lightning_address: 'Lightning adresini kopyala',
-      v2_mint: 'npub.cash v2 mint',
-      npc_v2: {
-        choose_mint_title: 'npub.cash v2 için mint seçin',
-        choose_mint_placeholder: 'Bir mint seçin…',
-      },
-    },
-    multinut: {
-      use_multinut: 'Multinut kullan',
-    },
-    appearance: {
-      bip177: {
-        title: 'Bitcoin sembolü',
-        description: 'sats yerine ₿ sembolünü kullan.',
-        toggle: '₿ sembolünü kullan',
-      },
-    },
-  },
   // merged into single Settings block above
   advanced: {
     developer: {
@@ -450,6 +413,11 @@ export default {
       },
     },
     appearance: {
+      bip177: {
+        title: 'Bitcoin sembolü',
+        description: 'sats yerine ₿ sembolünü kullan.',
+        toggle: '₿ sembolünü kullan',
+      },
       keyboard: {
         title: "Ekran klavyesi",
         description: "Miktarları girmek için sayısal klavyeyi kullanın.",
@@ -532,6 +500,34 @@ export default {
         },
       },
     },
+    nostr_mint_backup: {
+      title: 'Nostr mint yedeği',
+      enabled: 'Etkin',
+      disabled: 'Devre dışı',
+    },
+    web_of_trust: {
+      title: 'Web of trust',
+      known_pubkeys: 'Bilinen pubkeyler: {wotCount}',
+      pubkeys: 'Pubkeys',
+      continue_crawl: 'Taramaya devam et',
+      crawl_odell: "ODELL'İN WEB OF TRUST'unu tara",
+      crawl_wot: 'Web of trust tara',
+      pause: 'Duraklat',
+      reset: 'Sıfırla',
+      progress: '{crawlProcessed} / {crawlTotal}',
+    },
+    npub_cash: {
+      use_npubx: 'npubx.cash kullan',
+      copy_lightning_address: 'Lightning adresini kopyala',
+      v2_mint: 'npub.cash v2 mint',
+      npc_v2: {
+        choose_mint_title: 'npub.cash v2 için mint seçin',
+        choose_mint_placeholder: 'Bir mint seçin…',
+      },
+    },
+    multinut: {
+      use_multinut: 'Multinut kullan',
+    }
   },
   NoMintWarnBanner: {
     title: "Bir nane'ye katılın",

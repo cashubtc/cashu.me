@@ -511,16 +511,13 @@ export default {
       copy_lightning_address: "Copiar dirección Lightning",
       v2_mint: "npub.cash v2 mint",
     },
-    multinut: {
-      use_multinut: "Utilice Multinut",
-    },
     advanced: {
       title: "Avanzado",
       developer: {
         title: "Configuración de desarrollador",
         description:
           "Las siguientes configuraciones son para desarrollo y depuración.",
-        
+
         new_seed: {
           button: "Generar nueva frase semilla",
           description:

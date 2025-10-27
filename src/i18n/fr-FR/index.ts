@@ -200,19 +200,6 @@ export default {
       description:
         "Veuillez choisir votre langue préférée dans la liste ci-dessous.",
     },
-    sections: {
-      backup_restore: "SAUVEGARDE & RESTAURATION",
-      lightning_address: "ADRESSE LIGHTNING",
-      nostr_keys: "CLÉS NOSTR",
-      nostr: "NOSTR",
-      payment_requests: "DEMANDES DE PAIEMENT",
-      nostr_wallet_connect: "NOSTR WALLET CONNECT",
-      hardware_features: "FONCTIONNALITÉS MATÉRIELLES",
-      p2pk_features: "FONCTIONNALITÉS P2PK",
-      privacy: "CONFIDENTIALITÉ",
-      experimental: "EXPÉRIMENTAL",
-      appearance: "APPARENCE",
-    },
     backup_restore: {
       backup_seed: {
         title: "Sauvegarder la phrase de départ",
@@ -483,9 +470,6 @@ export default {
       copy_lightning_address: "Copier l'adresse Lightning",
       v2_mint: "npub.cash v2 mint",
     },
-    multinut: {
-      use_multinut: "Utiliser Multinut",
-    },
     advanced: {
       title: "Avancé",
       developer: {
@@ -519,11 +503,6 @@ export default {
           description:
             "Copiez votre solde entier de la mint active en tant que jeton Cashu dans votre presse-papiers. Cela n'exportera que les jetons de la mint et de l'unité sélectionnées. Pour un export complet, sélectionnez une mint et une unité différentes et exportez à nouveau.",
         },
-        keyset_counters: {
-          title: "Incrémenter les compteurs de keyset",
-          description:
-            "Cliquez sur l'ID du keyset pour incrémenter les compteurs du chemin de dérivation pour les keysets de votre portefeuille. Ceci est utile si vous voyez l'erreur \"les sorties ont déjà été signées\".",
-        },
         unset_reserved: {
           button: "Annuler la réservation de tous les jetons réservés",
           description:
@@ -548,14 +527,6 @@ export default {
             "Téléchargez un dump de votre portefeuille. Vous pouvez restaurer votre portefeuille à partir de ce fichier sur l'écran d'accueil d'un nouveau portefeuille. Ce fichier sera désynchronisé si vous continuez à utiliser votre portefeuille après l'exportation.",
         },
       },
-    },
-    npub_cash: {
-      use_npubx: "Utiliser npubx.cash",
-      copy_lightning_address: "Copier l'adresse Lightning",
-      v2_mint: "Mint npub.cash v2",
-    },
-    multinut: {
-      use_multinut: "Utiliser Multinut",
     },
   },
   NostrBackup: {

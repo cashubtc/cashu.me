@@ -56,9 +56,7 @@ export default {
         label: "Mint URL",
       },
     },
-    process: "Prozess",
-    Warning: "Warnung",
-    Note: "Hinweis",
+    
   },
   wallet: {
     notifications: {

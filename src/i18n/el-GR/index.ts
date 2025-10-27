@@ -8,52 +8,6 @@ export default {
     failed: 'Η επεξεργασία απέτυχε: {error}',
     paid: 'Πληρώθηκε {amount} μέσω Lightning',
   },
-  Settings: {
-    sections: {
-      nostr: {
-        title: "NOSTR",
-        relays: {
-          expand_label: "Κάντε κλικ για επεξεργασία relays",
-          add: {
-            title: "Προσθήκη relay",
-            description:
-              "Το πορτοφόλι σας χρησιμοποιεί αυτά τα relays για λειτουργίες nostr όπως αιτήματα πληρωμών, NWC και αντίγραφα ασφαλείας.",
-          },
-          list: {
-            title: "Relays",
-            description: "Το πορτοφόλι σας θα συνδεθεί σε αυτά τα relays.",
-            copy_tooltip: "Αντιγραφή relay",
-            remove_tooltip: "Αφαίρεση relay",
-          },
-        },
-      },
-    },
-    web_of_trust: {
-      title: "Δίκτυο εμπιστοσύνης",
-      known_pubkeys: "Γνωστά pubkeys: {wotCount}",
-      continue_crawl: "Συνέχιση ανίχνευσης",
-      crawl_odell: "Ανίχνευση του WEB OF TRUST του ODELL",
-      crawl_wot: "Ανίχνευση δικτύου εμπιστοσύνης",
-      pause: "Παύση",
-      reset: "Επαναφορά",
-      progress: "{crawlProcessed} / {crawlTotal}",
-    },
-    advanced: {
-      developer: {
-        keyset_counters: {
-          counter: "μετρητής: {count}",
-        },
-      },
-    },
-    npub_cash: {
-      use_npubx: "Χρήση npubx.cash",
-      copy_lightning_address: "Αντιγραφή διεύθυνσης Lightning",
-      v2_mint: "npub.cash v2 mint",
-    },
-    multinut: {
-      use_multinut: "Χρήση Multinut",
-    },
-  },
   global: {
     copy_to_clipboard: {
       success: "Αντιγράφηκε στο πρόχειρο!",
