@@ -1,4 +1,16 @@
 export default {
+  MultinutPicker: {
+    payment: "Multinut-Zahlung",
+    selectMints:
+      "Wählen Sie eine oder mehrere Mints aus, um eine Zahlung auszuführen.",
+    totalSelectedBalance: "Gesamtes ausgewähltes Guthaben",
+    multiMintPay: "Multi-Mint-Zahlung",
+    balanceNotEnough:
+      "Das Multi-Mint-Guthaben reicht nicht aus, um diese Rechnung zu begleichen",
+    failed: "Verarbeitung fehlgeschlagen: {error}",
+    paid: "{amount} über Lightning bezahlt",
+  },
+
   global: {
     copy_to_clipboard: {
       success: "In die Zwischenablage kopiert!",
@@ -83,6 +95,7 @@ export default {
         could_not_get_info: "Mint-Information konnte nicht abgerufen werden",
         could_not_get_keys: "Mint-Schlüssel konnten nicht abgerufen werden",
         could_not_get_keysets: "Mint-Keysets konnten nicht abgerufen werden",
+        mint_validation_error: "Mint-Validierungsfehler",
         removed: "Mint entfernt",
         error: "Mint-Fehler",
       },
@@ -161,7 +174,23 @@ export default {
       backup_restore: "SICHERUNG & WIEDERHERSTELLUNG",
       lightning_address: "LIGHTNING ADRESSE",
       nostr_keys: "NOSTR SCHLÜSSEL",
-      nostr: "NOSTR",
+      nostr: {
+        title: "NOSTR",
+        relays: {
+          expand_label: "Klicken, um Relays zu bearbeiten",
+          add: {
+            title: "Relay hinzufügen",
+            description:
+              "Ihre Wallet verwendet diese Relays für Nostr‑Operationen wie Zahlungsanforderungen, Nostr Wallet Connect und Backups.",
+          },
+          list: {
+            title: "Relays",
+            description: "Ihre Wallet verbindet sich mit diesen Relays.",
+            copy_tooltip: "Relay kopieren",
+            remove_tooltip: "Relay entfernen",
+          },
+        },
+      },
       payment_requests: "ZAHLUNGSANFORDERUNGEN",
       nostr_wallet_connect: "NOSTR WALLET CONNECT",
       hardware_features: "HARDWARE FUNKTIONEN",
@@ -198,6 +227,28 @@ export default {
         toggle: "Automatisch beanspruchen",
         description: "Eingehende Zahlungen automatisch empfangen.",
       },
+      npc_v2: {
+        choose_mint_title: "Wählen Sie eine Mint für npub.cash v2",
+        choose_mint_placeholder: "Wählen Sie eine Mint...",
+      },
+    },
+    web_of_trust: {
+      title: "Web of Trust",
+      known_pubkeys: "Bekannte Pubkeys: {wotCount}",
+      continue_crawl: "Crawl fortsetzen",
+      crawl_odell: "ODELL'S WEB OF TRUST crawlen",
+      crawl_wot: "Web of Trust crawlen",
+      pause: "Pausieren",
+      reset: "Zurücksetzen",
+      progress: "{crawlProcessed} / {crawlTotal}",
+    },
+    npub_cash: {
+      use_npubx: "npubx.cash verwenden",
+      copy_lightning_address: "Lightning-Adresse kopieren",
+      v2_mint: "npub.cash v2 Mint",
+    },
+    multinut: {
+      use_multinut: "Multinut verwenden",
     },
     nostr_keys: {
       title: "Ihre Nostr-Schlüssel",
@@ -224,23 +275,6 @@ export default {
         not_found: "Keine NIP-07 Signaturerweiterung gefunden",
       },
     },
-    nostr: {
-      title: "NOSTR",
-      relays: {
-        expand_label: "Klicken, um Relays zu bearbeiten",
-        add: {
-          title: "Relay hinzufügen",
-          description:
-            "Ihre Wallet verwendet diese Relays für Nostr-Operationen wie Zahlungsanforderungen, Nostr Wallet Connect und Backups.",
-        },
-        list: {
-          title: "Relays",
-          description: "Ihre Wallet wird sich mit diesen Relays verbinden.",
-          copy_tooltip: "Relay kopieren",
-          remove_tooltip: "Relay entfernen",
-        },
-      },
-    },
     payment_requests: {
       title: "Zahlungsanforderungen",
       description:
@@ -262,20 +296,6 @@ export default {
         copy_tooltip: "Verbindungsstring kopieren",
         qr_tooltip: "QR-Code anzeigen",
         allowance_label: "Restliches Guthaben (sat)",
-      },
-      relays: {
-        expand_label: "Klicken, um Relays zu bearbeiten",
-        add: {
-          title: "Relay hinzufügen",
-          description:
-            "Nostr Wallet Connect verwendet Nostr-Relays, um Ihre Wallet mit anderen Anwendungen zu verbinden.",
-        },
-        list: {
-          title: "Relays",
-          description: "Ihre Wallet wird sich mit diesen Relays verbinden.",
-          copy_tooltip: "Relay kopieren",
-          remove_tooltip: "Relay entfernen",
-        },
       },
     },
     hardware_features: {
@@ -379,6 +399,21 @@ export default {
         url_label: "Auditor URL",
         api_url_label: "Auditor API URL",
       },
+      multinut: {
+        toggle: "Multinut aktivieren",
+        description:
+          "Wenn aktiviert, verwendet die Wallet Multinut, um Rechnungen von mehreren Mints gleichzeitig zu bezahlen.",
+      },
+      nostr_mint_backup: {
+        toggle: "Mint-Liste auf Nostr sichern",
+        description:
+          "Wenn aktiviert, wird Ihre Mint-Liste automatisch auf Nostr-Relays mit Ihren konfigurierten Nostr-Schlüsseln gesichert. Dies ermöglicht es Ihnen, Ihre Mint-Liste auf verschiedenen Geräten wiederherzustellen.",
+        notifications: {
+          enabled: "Nostr-Mint-Backup aktiviert",
+          disabled: "Nostr-Mint-Backup deaktiviert",
+          failed: "Fehler beim Aktivieren des Nostr-Mint-Backups",
+        },
+      },
     },
     appearance: {
       keyboard: {
@@ -403,6 +438,11 @@ export default {
           blu: "blu",
           flamingo: "flamingo",
         },
+      },
+      bip177: {
+        title: "Bitcoin-Symbol",
+        description: "Verwenden Sie das ₿-Symbol anstelle von sats.",
+        toggle: "₿-Symbol verwenden",
       },
     },
     advanced: {
@@ -439,6 +479,7 @@ export default {
           title: "Keyset-Zähler erhöhen",
           description:
             'Klicken Sie auf die Keyset-ID, um die Ableitungspfad-Zähler für die Keysets in Ihrer Wallet zu erhöhen. Dies ist nützlich, wenn Sie die Fehlermeldung "outputs have already been signed" sehen.',
+          counter: "Zähler: {count}",
         },
         unset_reserved: {
           button: "Alle reservierten Token freigeben",
@@ -573,6 +614,8 @@ export default {
   },
   WelcomeSlide2: {
     title: "PWA installieren",
+    alt: { pwa_example: "PWA Installationsbeispiel" },
+    installing: "Installiere…",
     instruction: {
       intro: {
         text: "Für die beste Erfahrung verwenden Sie diese Wallet mit dem nativen Webbrowser Ihres Geräts, um sie als Progressive Web App zu installieren. Machen Sie dies jetzt.",
@@ -609,6 +652,8 @@ export default {
       success: {
         title: "Erfolg!",
         text: "Sie verwenden Cashu als PWA. Schließen Sie alle anderen geöffneten Browserfenster und verwenden Sie die App von Ihrem Startbildschirm aus.",
+        nextSteps:
+          "Sie können nun diesen Tab schließen und die App vom Startbildschirm öffnen.",
       },
     },
   },
@@ -646,6 +691,59 @@ export default {
       },
     },
   },
+  WelcomeSlideChoice: {
+    title: "Richten Sie Ihre Wallet ein",
+    text: "Möchten Sie aus einer Seed-Phrase wiederherstellen oder eine neue Wallet erstellen?",
+    options: {
+      new: {
+        title: "Neue Wallet erstellen",
+        subtitle: "Neue Seed erzeugen und Mints hinzufügen.",
+      },
+      recover: {
+        title: "Wallet wiederherstellen",
+        subtitle: "Seed-Phrase eingeben, Mints und Ecash wiederherstellen.",
+      },
+    },
+  },
+  WelcomeMintSetup: {
+    title: "Mints hinzufügen",
+    text: "Mints sind Server, die beim Senden und Empfangen von Ecash helfen. Wählen Sie eine gefundene Mint oder fügen Sie manuell eine hinzu. Sie können dies auch später tun.",
+    sections: { your_mints: "Ihre Mints" },
+    restoring: "Mints werden wiederhergestellt…",
+    placeholder: { mint_url: "https://" },
+  },
+  WelcomeRecoverSeed: {
+    title: "Seed-Phrase eingeben",
+    text: "Fügen Sie Ihre 12 Wörter ein oder tippen Sie sie ein, um wiederherzustellen.",
+    inputs: { word: "Wort { index }" },
+    actions: { paste_all: "Alle einfügen" },
+    disclaimer:
+      "Ihre Seed-Phrase wird nur lokal verwendet, um Ihre Wallet-Schlüssel abzuleiten.",
+  },
+  WelcomeRestoreEcash: {
+    title: "Ihr Ecash wiederherstellen",
+    text: "Scannen Sie nach nicht ausgegebenen Nachweisen auf Ihren konfigurierten Mints und fügen Sie sie Ihrer Wallet hinzu.",
+  },
+  MintRatings: {
+    title: "Mint-Bewertungen",
+    reviews: "Bewertungen",
+    no_reviews: "Keine Bewertungen gefunden",
+    no_reviews_to_display: "Keine Bewertungen anzuzeigen.",
+    no_rating: "Keine Bewertung",
+    rows: "Zeilen",
+    actions: { write_review: "Bewertung schreiben" },
+  },
+  CreateMintReview: {
+    title: "Mint bewerten",
+    publishing_as: "Veröffentlichen als",
+    inputs: {
+      rating: { label: "Bewertung" },
+      review: { label: "Rezension (optional)" },
+    },
+    actions: {
+      publish: { label: "Veröffentlichen", in_progress: "Veröffentlichen…" },
+    },
+  },
   RestoreView: {
     seed_phrase: {
       label: "Aus Seed-Phrase wiederherstellen",
@@ -675,6 +773,12 @@ export default {
       validate: {
         error: "Mnemonisch muss mindestens 12 Wörter enthalten.",
       },
+      select_all: {
+        label: "Alle auswählen",
+      },
+      deselect_all: {
+        label: "Alle abwählen",
+      },
       restore: {
         label: "Wiederherstellen",
         in_progress: "Mint wird wiederhergestellt…",
@@ -686,6 +790,30 @@ export default {
         success: "Wiederherstellung erfolgreich abgeschlossen",
         error: "Fehler beim Wiederherstellen der Mints: { error }",
       },
+      restore_selected_mints: {
+        label: "Ausgewählte Mints wiederherstellen ({count})",
+        in_progress: "Mint { index } von { length } wird wiederhergestellt…",
+        success: "{count} Mint(s) erfolgreich wiederhergestellt",
+        error: "Fehler beim Wiederherstellen ausgewählter Mints: { error }",
+      },
+    },
+    nostr_mints: {
+      label: "Mints von Nostr wiederherstellen",
+      caption:
+        "Suchen Sie nach Mint-Backups, die auf Nostr-Relays mit Ihrer Seed-Phrase gespeichert sind. Dies hilft Ihnen, Mints zu entdecken, die Sie zuvor verwendet haben.",
+      search_button: "Nach Mint-Backups suchen",
+      select_all: "Alle auswählen",
+      deselect_all: "Alle abwählen",
+      backed_up: "Gesichert",
+      already_added: "Bereits hinzugefügt",
+      add_selected: "Ausgewählte hinzufügen ({count})",
+      no_backups_found: "Keine Mint-Backups gefunden",
+      no_backups_hint:
+        "Stellen Sie sicher, dass das Nostr-Mint-Backup in den Einstellungen aktiviert ist, um Ihre Mint-Liste automatisch zu sichern.",
+      invalid_mnemonic:
+        "Bitte geben Sie eine gültige Seed-Phrase ein, bevor Sie suchen.",
+      search_error: "Fehler bei der Suche nach Mint-Backups.",
+      add_error: "Fehler beim Hinzufügen ausgewählter Mints.",
     },
   },
   MintSettings: {
@@ -724,7 +852,7 @@ export default {
       recommendations: {
         overline: "{ length } Mints gefunden",
         caption:
-          "Diese Mints wurden von anderen Nostr-Benutzern empfohlen. Lesen Sie Bewertungen unter { link }. Seien Sie vorsichtig und recherchieren Sie selbst, bevor Sie eine Mint verwenden.",
+          "Diese Mints wurden von anderen Nostr-Benutzern empfohlen. Seien Sie vorsichtig und recherchieren Sie selbst, bevor Sie eine Mint verwenden.",
         actions: {
           browse: {
             label: "Klicken, um Mints zu durchsuchen",
@@ -755,6 +883,10 @@ export default {
         },
       },
     },
+    error_badge: "Fehler",
+    reviews_text: "Bewertungen",
+    no_reviews_yet: "Noch keine Bewertungen",
+    discover_mints_button: "Mints entdecken",
   },
   QrcodeReader: {
     progress: {

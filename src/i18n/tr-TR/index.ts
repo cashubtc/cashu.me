@@ -1,4 +1,18 @@
 export default {
+  MultinutPicker: {
+    payment: "Multinut ödeme",
+    selectMints: "Ödeme yapmak için bir veya birden fazla mint seçin.",
+    totalSelectedBalance: "Seçilen Toplam Bakiye",
+    multiMintPay: "Çoklu-Mint Ödeme",
+    balanceNotEnough: "Çoklu mint bakiyesi bu faturayı karşılamaya yetmiyor",
+    failed: "İşlenemedi: {error}",
+    paid: "Lightning ile {amount} ödendi",
+  },
+  // merged into single Settings block above
+  advanced: {
+    developer: {},
+  },
+
   global: {
     copy_to_clipboard: {
       success: "Panoya kopyalandı!",
@@ -62,6 +76,7 @@ export default {
       received_lightning: "Lightning üzerinden {amount} alındı",
       lightning_payment_failed: "Lightning ödemesi başarısız oldu",
       failed_to_decode_invoice: "Fatura çözülemedi",
+
       invalid_lnurl: "Geçersiz LNURL",
       lnurl_error: "LNURL hatası",
       no_amount: "Tutar yok",
@@ -85,6 +100,7 @@ export default {
         could_not_get_keysets: "Nane anahtar setleri alınamadı",
         removed: "Nane kaldırıldı",
         error: "Nane hatası",
+        mint_validation_error: "Mint doğrulama hatası",
       },
     },
   },
@@ -160,7 +176,24 @@ export default {
       backup_restore: "YEDEKLE & GERİ YÜKLE",
       lightning_address: "LIGHTNING ADRESİ",
       nostr_keys: "NOSTR ANAHTARLARI",
-      nostr: "NOSTR",
+      nostr: {
+        title: "NOSTR",
+        relays: {
+          expand_label: "Röleleri düzenlemek için tıklayın",
+          add: {
+            title: "Röle ekle",
+            description:
+              "Cüzdanınız ödeme istekleri, nostr cüzdan bağlantısı ve yedeklemeler gibi nostr işlemleri için bu röleleri kullanır.",
+          },
+          list: {
+            title: "Röleler",
+            description: "Cüzdanınız bu rölelere bağlanacak.",
+            copy_tooltip: "Röleyi kopyala",
+            remove_tooltip: "Röleyi kaldır",
+          },
+        },
+      },
+
       payment_requests: "ÖDEME TALEPLERİ",
       nostr_wallet_connect: "NOSTR CÜZDAN BAĞLANTISI",
       hardware_features: "DONANIM ÖZELLİKLERİ",
@@ -197,6 +230,10 @@ export default {
         toggle: "Otomatik olarak talep et",
         description: "Gelen ödemeleri otomatik olarak alın.",
       },
+      npc_v2: {
+        choose_mint_title: "npub.cash v2 için mint seçin",
+        choose_mint_placeholder: "Bir mint seçin…",
+      },
     },
     nostr_keys: {
       title: "Nostr anahtarlarınız",
@@ -223,23 +260,7 @@ export default {
         not_found: "NIP-07 imzalama uzantısı bulunamadı",
       },
     },
-    nostr: {
-      title: "NOSTR",
-      relays: {
-        expand_label: "Röleleri düzenlemek için tıklayın",
-        add: {
-          title: "Röle ekle",
-          description:
-            "Cüzdanınız ödeme istekleri, nostr cüzdan bağlantısı ve yedeklemeler gibi nostr işlemleri için bu röleleri kullanır.",
-        },
-        list: {
-          title: "Röleler",
-          description: "Cüzdanınız bu rölelere bağlanacak.",
-          copy_tooltip: "Röleyi kopyala",
-          remove_tooltip: "Röleyi kaldır",
-        },
-      },
-    },
+
     payment_requests: {
       title: "Ödeme talepleri",
       description:
@@ -261,20 +282,6 @@ export default {
         copy_tooltip: "Bağlantı dizesini kopyala",
         qr_tooltip: "QR kodunu göster",
         allowance_label: "Kalan ödenek (sat)",
-      },
-      relays: {
-        expand_label: "Röleleri düzenlemek için tıklayın",
-        add: {
-          title: "Röle ekle",
-          description:
-            "Nostr Cüzdan Bağlantısı, cüzdanınızı diğer uygulamalara bağlamak için nostr rölelerini kullanır.",
-        },
-        list: {
-          title: "Röleler",
-          description: "Cüzdanınız bu rölelere bağlanacaktır.",
-          copy_tooltip: "Röleyi kopyala",
-          remove_tooltip: "Röleyi kaldır",
-        },
       },
     },
     hardware_features: {
@@ -376,8 +383,28 @@ export default {
         url_label: "Denetleyici URL'si",
         api_url_label: "Denetleyici API URL'si",
       },
+      multinut: {
+        toggle: "Multinut'u Etkinleştir",
+        description:
+          "Etkinleştirilirse, cüzdan faturaları aynı anda birden fazla nane'den ödemek için Multinut'u kullanacaktır.",
+      },
+      nostr_mint_backup: {
+        toggle: "Nostr'da nane listesini yedekle",
+        description:
+          "Etkinleştirilirse, nane listeniz yapılandırılmış Nostr anahtarlarınız kullanılarak otomatik olarak Nostr rölelerine yedeklenecektir. Bu, nane listenizi cihazlar arasında geri yüklemenizi sağlar.",
+        notifications: {
+          enabled: "Nostr nane yedeği etkinleştirildi",
+          disabled: "Nostr nane yedeği devre dışı bırakıldı",
+          failed: "Nostr nane yedeği etkinleştirilemedi",
+        },
+      },
     },
     appearance: {
+      bip177: {
+        title: "Bitcoin sembolü",
+        description: "sats yerine ₿ sembolünü kullan.",
+        toggle: "₿ sembolünü kullan",
+      },
       keyboard: {
         title: "Ekran klavyesi",
         description: "Miktarları girmek için sayısal klavyeyi kullanın.",
@@ -434,7 +461,9 @@ export default {
           title: "Anahtar kümesi sayaçlarını artır",
           description:
             'Cüzdanınızdaki anahtar kümeleri için türetme yolu sayaçlarını artırmak için anahtar kümesi kimliğine tıklayın. Bu, "çıktılar zaten imzalandı" hatasını görüyorsanız yararlıdır.',
+          counter: "sayaç: {count}",
         },
+
         unset_reserved: {
           button: "Tüm ayrılmış token'ları kaldır",
           description:
@@ -459,6 +488,26 @@ export default {
             "Cüzdanınızın bir dökümünü indirin. Yeni bir cüzdanın karşılama ekranından bu dosyadan cüzdanınızı geri yükleyebilirsiniz. Bu dosya, dışa aktardıktan sonra cüzdanınızı kullanmaya devam ederseniz senkronize olmayacaktır.",
         },
       },
+    },
+
+    web_of_trust: {
+      title: "Web of trust",
+      known_pubkeys: "Bilinen pubkeyler: {wotCount}",
+
+      continue_crawl: "Taramaya devam et",
+      crawl_odell: "ODELL'İN WEB OF TRUST'unu tara",
+      crawl_wot: "Web of trust tara",
+      pause: "Duraklat",
+      reset: "Sıfırla",
+      progress: "{crawlProcessed} / {crawlTotal}",
+    },
+    npub_cash: {
+      use_npubx: "npubx.cash kullan",
+      copy_lightning_address: "Lightning adresini kopyala",
+      v2_mint: "npub.cash v2 mint",
+    },
+    multinut: {
+      use_multinut: "Multinut kullan",
     },
   },
   NoMintWarnBanner: {
@@ -568,6 +617,8 @@ export default {
   },
   WelcomeSlide2: {
     title: "PWA Yükle",
+    alt: { pwa_example: "PWA kurulum örneği" },
+    installing: "Yükleniyor…",
     instruction: {
       intro: {
         text: "En iyi deneyim için, cihazınızın yerel web tarayıcısını kullanarak bu cüzdanı Aşamalı Web Uygulaması olarak yükleyin. Bunu hemen yapın.",
@@ -604,6 +655,8 @@ export default {
       success: {
         title: "Başarılı!",
         text: "Cashu'yu PWA olarak kullanıyorsunuz. Diğer açık tarayıcı pencerelerini kapatın ve uygulamayı ana ekranınızdan kullanın.",
+        nextSteps:
+          "Artık bu sekmeyi kapatıp uygulamayı ana ekranınızdan açabilirsiniz.",
       },
     },
   },
@@ -641,6 +694,59 @@ export default {
       },
     },
   },
+  WelcomeSlideChoice: {
+    title: "Cüzdanınızı ayarlayın",
+    text: "Bir seed ifadesinden mi kurtarmak istersiniz yoksa yeni bir cüzdan mı oluşturmak istersiniz?",
+    options: {
+      new: {
+        title: "Yeni cüzdan oluştur",
+        subtitle: "Yeni bir seed oluşturun ve mint ekleyin.",
+      },
+      recover: {
+        title: "Cüzdanı kurtar",
+        subtitle: "Seed ifadenizi girin, mintleri ve ecash'i geri yükleyin.",
+      },
+    },
+  },
+  WelcomeMintSetup: {
+    title: "Mint ekle",
+    text: "Mintler ecash göndermenize ve almanıza yardımcı olan sunuculardır. Keşfedilen bir minti seçin veya manuel ekleyin. Daha sonra da ekleyebilirsiniz.",
+    sections: { your_mints: "Mintleriniz" },
+    restoring: "Mintler geri yükleniyor…",
+    placeholder: { mint_url: "https://" },
+  },
+  WelcomeRecoverSeed: {
+    title: "Seed ifadenizi girin",
+    text: "Kurtarmak için 12 kelimelik seed ifadenizi yapıştırın veya yazın.",
+    inputs: { word: "Kelime { index }" },
+    actions: { paste_all: "Tümünü yapıştır" },
+    disclaimer:
+      "Seed ifadeniz yalnızca yerelde cüzdan anahtarlarını türetmek için kullanılır.",
+  },
+  WelcomeRestoreEcash: {
+    title: "Ecash'inizi geri yükleyin",
+    text: "Yapılandırılmış mintlerinizde harcanmamış kanıtları tarayın ve cüzdanınıza ekleyin.",
+  },
+  MintRatings: {
+    title: "Mint yorumları",
+    reviews: "yorum",
+    no_reviews: "Hiç yorum bulunamadı",
+    no_reviews_to_display: "Gösterilecek yorum yok.",
+    no_rating: "Puan yok",
+    rows: "Satır",
+    actions: { write_review: "Yorum yaz" },
+  },
+  CreateMintReview: {
+    title: "Mint yorumu",
+    publishing_as: "Şu kişi olarak yayımlanıyor",
+    inputs: {
+      rating: { label: "Puan" },
+      review: { label: "Yorum (isteğe bağlı)" },
+    },
+    actions: {
+      publish: { label: "Yayımla", in_progress: "Yayımlanıyor…" },
+    },
+  },
   RestoreView: {
     seed_phrase: {
       label: "Kurtarma Kelimelerinden Geri Yükle",
@@ -663,12 +769,35 @@ export default {
       caption:
         "Geri yüklenecek nane'yi seçin. Ana ekranda 'Naneler' altında daha fazla nane ekleyebilir ve buradan geri yükleyebilirsiniz.",
     },
+    nostr_mints: {
+      label: "Nostr'dan Naneleri Geri Yükle",
+      caption:
+        "Seed ifadenizi kullanarak Nostr rölelerinde depolanan nane yedeklerini arayın. Bu, daha önce kullandığınız naneleri keşfetmenize yardımcı olacaktır.",
+      search_button: "Nane Yedeklerini Ara",
+      select_all: "Tümünü Seç",
+      deselect_all: "Tüm Seçimi Kaldır",
+      backed_up: "Yedeklendi",
+      already_added: "Zaten Eklendi",
+      add_selected: "Seçileni Ekle ({count})",
+      no_backups_found: "Nane yedeği bulunamadı",
+      no_backups_hint:
+        "Nane listenizi otomatik olarak yedeklemek için ayarlarda Nostr nane yedeğinin etkinleştirildiğinden emin olun.",
+      invalid_mnemonic: "Lütfen aramadan önce geçerli bir seed ifadesi girin.",
+      search_error: "Nane yedekleri aranırken hata oluştu.",
+      add_error: "Seçilen naneler eklenirken hata oluştu.",
+    },
     actions: {
       paste: {
         error: "Pano içeriği okunamadı.",
       },
       validate: {
         error: "Anımsatıcı en az 12 kelime olmalıdır.",
+      },
+      select_all: {
+        label: "Tümünü Seç",
+      },
+      deselect_all: {
+        label: "Tüm Seçimi Kaldır",
       },
       restore: {
         label: "Geri Yükle",
@@ -680,6 +809,12 @@ export default {
         in_progress: "{ length } nane'den { index } geri yükleniyor…",
         success: "Geri yükleme başarıyla tamamlandı",
         error: "Nane'leri geri yükleme hatası: { error }",
+      },
+      restore_selected_mints: {
+        label: "Seçili Naneleri Geri Yükle ({count})",
+        in_progress: "{ length } nane'den { index } geri yükleniyor…",
+        success: "{count} nane başarıyla geri yüklendi",
+        error: "Seçili naneleri geri yükleme hatası: { error }",
       },
     },
   },
@@ -718,7 +853,7 @@ export default {
       recommendations: {
         overline: "{ length } nane bulundu",
         caption:
-          "Bu nane'ler diğer Nostr kullanıcıları tarafından önerildi. { link } adresinde yorumları okuyun. Dikkatli olun ve bir nane kullanmadan önce kendi araştırmanızı yapın.",
+          "Bu nane'ler diğer Nostr kullanıcıları tarafından önerildi. Dikkatli olun ve bir nane kullanmadan önce kendi araştırmanızı yapın.",
         actions: {
           browse: {
             label: "Nane'lere göz atmak için tıklayın",
@@ -749,6 +884,10 @@ export default {
         },
       },
     },
+    error_badge: "Hata",
+    reviews_text: "yorumlar",
+    no_reviews_yet: "Henüz yorum yok",
+    discover_mints_button: "Naneleri keşfet",
   },
   QrcodeReader: {
     progress: {

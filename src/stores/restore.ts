@@ -83,9 +83,15 @@ export const useRestoreStore = defineStore("restore", {
 
         while (emptyBatchCount < MAX_GAP) {
           console.log(`Restoring proofs ${start} to ${start + BATCH_SIZE}`);
-          const proofs = (
-            await wallet.restore(start, BATCH_SIZE, { keysetId: keyset.id })
-          ).proofs;
+          let proofs: Proof[] = [];
+          try {
+            proofs = (
+              await wallet.restore(start, BATCH_SIZE, { keysetId: keyset.id })
+            ).proofs;
+          } catch (error) {
+            console.error(`Error restoring proofs: ${error}`);
+            proofs = [];
+          }
           if (proofs.length === 0) {
             console.log(`No proofs found for keyset ${keyset.id}`);
             emptyBatchCount++;

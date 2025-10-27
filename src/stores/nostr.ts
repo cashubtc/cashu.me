@@ -38,11 +38,6 @@ import { usePRStore } from "./payment-request";
 import token from "../js/token";
 import { HistoryToken } from "./tokens";
 
-type MintRecommendation = {
-  url: string;
-  count: number;
-};
-
 type NostrEventLog = {
   id: string;
   created_at: number;
@@ -87,10 +82,6 @@ export const useNostrStore = defineStore("nostr", {
     seedSignerPrivateKeyNsec: "",
     privateKeySigner: {} as NDKPrivateKeySigner,
     signer: {} as NDKSigner,
-    mintRecommendations: useLocalStorage<MintRecommendation[]>(
-      "cashu.ndk.mintRecommendations",
-      []
-    ),
     initialized: false,
     lastEventTimestamp: useLocalStorage<number>(
       "cashu.ndk.lastEventTimestamp",
@@ -258,32 +249,7 @@ export const useNostrStore = defineStore("nostr", {
       const filter: NDKFilter = { kinds: [1], authors: [this.pubkey] };
       return await this.ndk.fetchEvents(filter);
     },
-    fetchMints: async function () {
-      const filter: NDKFilter = { kinds: [38000 as NDKKind], limit: 2000 };
-      const events = await this.ndk.fetchEvents(filter);
-      let mintUrls: string[] = [];
-      events.forEach((event) => {
-        if (event.tagValue("k") == "38172" && event.tagValue("u")) {
-          const mintUrl = event.tagValue("u");
-          if (
-            typeof mintUrl === "string" &&
-            mintUrl.length > 0 &&
-            mintUrl.startsWith("https://")
-          ) {
-            mintUrls.push(mintUrl);
-          }
-        }
-      });
-      // Count the number of times each mint URL appears
-      const mintUrlsSet = new Set(mintUrls);
-      const mintUrlsArray = Array.from(mintUrlsSet);
-      const mintUrlsCounted = mintUrlsArray.map((url) => {
-        return { url: url, count: mintUrls.filter((u) => u === url).length };
-      });
-      mintUrlsCounted.sort((a, b) => b.count - a.count);
-      this.mintRecommendations = mintUrlsCounted;
-      return mintUrlsCounted;
-    },
+
     sendNip04DirectMessage: async function (
       recipient: string,
       message: string

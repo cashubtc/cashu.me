@@ -73,16 +73,16 @@
 /* Loading spinner positioning */
 .mint-loading-spinner {
   position: absolute;
-  top: 18px;
-  right: 24px;
+  top: 12px;
+  right: 30px;
   z-index: 10;
 }
 
 /* Error badge positioning */
 .error-badge {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 4px;
+  right: 30px;
   z-index: 10;
 }
 

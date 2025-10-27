@@ -19,6 +19,13 @@ const routes = [
     ],
   },
   {
+    path: "/discoverMints",
+    component: () => import("layouts/FullscreenLayout.vue"),
+    children: [
+      { path: "", component: () => import("src/pages/MintDiscoveryPage.vue") },
+    ],
+  },
+  {
     path: "/restore",
     component: () => import("layouts/FullscreenLayout.vue"),
     children: [{ path: "", component: () => import("src/pages/Restore.vue") }],

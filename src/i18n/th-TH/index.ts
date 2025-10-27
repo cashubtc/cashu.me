@@ -1,4 +1,14 @@
 export default {
+  MultinutPicker: {
+    payment: "การชำระเงิน Multinut",
+    selectMints: "เลือกหนึ่งหรือหลาย mint เพื่อทำการชำระเงิน",
+    totalSelectedBalance: "ยอดคงเหลือที่เลือกทั้งหมด",
+    multiMintPay: "จ่ายแบบหลาย Mint",
+    balanceNotEnough: "ยอดหลาย mint ไม่เพียงพอสำหรับใบแจ้งหนี้นี้",
+    failed: "ไม่สามารถประมวลผล: {error}",
+    paid: "จ่าย {amount} ผ่าน Lightning",
+  },
+
   global: {
     copy_to_clipboard: {
       success: "คัดลอกไปยังคลิปบอร์ดแล้ว!",
@@ -83,6 +93,7 @@ export default {
         could_not_get_info: "ไม่สามารถดึงข้อมูล Mint ได้",
         could_not_get_keys: "ไม่สามารถดึงคีย์ Mint ได้",
         could_not_get_keysets: "ไม่สามารถดึงชุดคีย์ Mint ได้",
+        mint_validation_error: "ข้อผิดพลาดในการตรวจสอบ mint",
         removed: "ลบ Mint แล้ว",
         error: "ข้อผิดพลาด Mint",
       },
@@ -152,6 +163,24 @@ export default {
     },
   },
   Settings: {
+    web_of_trust: {
+      title: "Web of trust",
+      known_pubkeys: "Pubkey ที่รู้จัก: {wotCount}",
+      continue_crawl: "ดำเนินการสำรวจต่อ",
+      crawl_odell: "สำรวจ ODELL'S WEB OF TRUST",
+      crawl_wot: "สำรวจ web of trust",
+      pause: "หยุดชั่วคราว",
+      reset: "รีเซ็ต",
+      progress: "{crawlProcessed} / {crawlTotal}",
+    },
+    npub_cash: {
+      use_npubx: "ใช้ npubx.cash",
+      copy_lightning_address: "คัดลอกที่อยู่ Lightning",
+      v2_mint: "npub.cash v2 mint",
+    },
+    multinut: {
+      use_multinut: "ใช้ Multinut",
+    },
     language: {
       title: "ภาษา",
       description: "โปรดเลือกภาษาที่คุณต้องการจากรายการด้านล่าง",
@@ -160,7 +189,23 @@ export default {
       backup_restore: "สำรองข้อมูล & กู้คืน",
       lightning_address: "ที่อยู่ LIGHTNING",
       nostr_keys: "คีย์ NOSTR",
-      nostr: "NOSTR",
+      nostr: {
+        title: "NOSTR",
+        relays: {
+          expand_label: "คลิกเพื่อแก้ไขรีเลย์",
+          add: {
+            title: "เพิ่มรีเลย์",
+            description:
+              "กระเป๋าเงินของคุณใช้รีเลย์เหล่านี้สำหรับการดำเนินงาน nostr เช่น คำขอชำระเงิน nostr wallet connect และการสำรองข้อมูล",
+          },
+          list: {
+            title: "รีเลย์",
+            description: "กระเป๋าเงินของคุณจะเชื่อมต่อกับรีเลย์เหล่านี้",
+            copy_tooltip: "คัดลอกรีเลย์",
+            remove_tooltip: "ลบรีเลย์",
+          },
+        },
+      },
       payment_requests: "คำขอชำระเงิน",
       nostr_wallet_connect: "NOSTR WALLET CONNECT",
       hardware_features: "คุณสมบัติฮาร์ดแวร์",
@@ -197,6 +242,10 @@ export default {
         toggle: "รับอัตโนมัติ",
         description: "รับการชำระเงินขาเข้าโดยอัตโนมัติ",
       },
+      npc_v2: {
+        choose_mint_title: "เลือก mint สำหรับ npub.cash v2",
+        choose_mint_placeholder: "เลือก mint...",
+      },
     },
     nostr_keys: {
       title: "คีย์ Nostr ของคุณ",
@@ -222,23 +271,6 @@ export default {
         not_found: "ไม่พบส่วนขยายการลงนาม NIP-07",
       },
     },
-    nostr: {
-      title: "NOSTR",
-      relays: {
-        expand_label: "คลิกเพื่อแก้ไขรีเลย์",
-        add: {
-          title: "เพิ่มรีเลย์",
-          description:
-            "กระเป๋าเงินของคุณใช้รีเลย์เหล่านี้สำหรับการดำเนินงาน nostr เช่น คำขอชำระเงิน nostr wallet connect และการสำรองข้อมูล",
-        },
-        list: {
-          title: "รีเลย์",
-          description: "กระเป๋าเงินของคุณจะเชื่อมต่อกับรีเลย์เหล่านี้",
-          copy_tooltip: "คัดลอกรีเลย์",
-          remove_tooltip: "ลบรีเลย์",
-        },
-      },
-    },
     payment_requests: {
       title: "คำขอชำระเงิน",
       description:
@@ -259,20 +291,6 @@ export default {
         copy_tooltip: "คัดลอกสตริงการเชื่อมต่อ",
         qr_tooltip: "แสดงรหัส QR",
         allowance_label: "ยอดคงเหลือที่เหลือ (sat)",
-      },
-      relays: {
-        expand_label: "คลิกเพื่อแก้ไข relays",
-        add: {
-          title: "เพิ่ม relay",
-          description:
-            "Nostr Wallet Connect ใช้ Nostr relays เพื่อเชื่อมต่อ Wallet ของคุณกับแอปพลิเคชันอื่น",
-        },
-        list: {
-          title: "Relays",
-          description: "Wallet ของคุณจะเชื่อมต่อกับ relays เหล่านี้",
-          copy_tooltip: "คัดลอก relay",
-          remove_tooltip: "ลบ relay",
-        },
       },
     },
     hardware_features: {
@@ -374,6 +392,21 @@ export default {
         url_label: "URL ผู้ตรวจสอบ",
         api_url_label: "URL API ผู้ตรวจสอบ",
       },
+      multinut: {
+        toggle: "เปิดใช้งาน Multinut",
+        description:
+          "หากเปิดใช้งาน Wallet จะใช้ Multinut เพื่อชำระค่าใบแจ้งหนี้จากหลาย mints พร้อมกัน",
+      },
+      nostr_mint_backup: {
+        toggle: "สำรองข้อมูล Mint list บน Nostr",
+        description:
+          "หากเปิดใช้งาน รายการ Mint ของคุณจะถูกสำรองข้อมูลไปยัง Nostr relays โดยอัตโนมัติโดยใช้คีย์ Nostr ที่กำหนดค่าไว้ สิ่งนี้ช่วยให้คุณสามารถกู้คืนรายการ Mint ของคุณในอุปกรณ์ต่างๆ ได้",
+        notifications: {
+          enabled: "เปิดใช้งานการสำรองข้อมูล Nostr mint แล้ว",
+          disabled: "ปิดใช้งานการสำรองข้อมูล Nostr mint แล้ว",
+          failed: "ไม่สามารถเปิดใช้งานการสำรองข้อมูล Nostr mint ได้",
+        },
+      },
     },
     appearance: {
       keyboard: {
@@ -397,6 +430,11 @@ export default {
           blu: "blu",
           flamingo: "flamingo",
         },
+      },
+      bip177: {
+        title: "สัญลักษณ์ Bitcoin",
+        description: "ใช้สัญลักษณ์ ₿ แทน sats",
+        toggle: "ใช้สัญลักษณ์ ₿",
       },
     },
     advanced: {
@@ -432,6 +470,7 @@ export default {
           title: "เพิ่มเคาน์เตอร์ keyset",
           description:
             'คลิกที่ Keyset ID เพื่อเพิ่มเคาน์เตอร์ derivation path สำหรับ keysets ใน Wallet ของคุณ สิ่งนี้มีประโยชน์หากคุณเห็นข้อผิดพลาด "outputs have already been signed"',
+          counter: "ตัวนับ: {count}",
         },
         unset_reserved: {
           button: "ยกเลิกการสำรองโทเค็นทั้งหมด",
@@ -565,6 +604,8 @@ export default {
   },
   WelcomeSlide2: {
     title: "ติดตั้ง PWA",
+    alt: { pwa_example: "ตัวอย่างการติดตั้ง PWA" },
+    installing: "กำลังติดตั้ง…",
     instruction: {
       intro: {
         text: "เพื่อประสบการณ์ที่ดีที่สุด ใช้ Wallet นี้กับเว็บเบราว์เซอร์พื้นฐานของอุปกรณ์ของคุณเพื่อติดตั้งเป็น Progressive Web App ทำสิ่งนี้ทันที",
@@ -601,6 +642,7 @@ export default {
       success: {
         title: "สำเร็จ!",
         text: "คุณกำลังใช้ Cashu เป็น PWA ปิดหน้าต่างเบราว์เซอร์อื่นที่เปิดอยู่และใช้แอปจากหน้าจอหลักของคุณ",
+        nextSteps: "ตอนนี้คุณสามารถปิดแท็บนี้และเปิดแอปจากหน้าจอหลักได้",
       },
     },
   },
@@ -638,6 +680,59 @@ export default {
       },
     },
   },
+  WelcomeSlideChoice: {
+    title: "ตั้งค่ากระเป๋าเงินของคุณ",
+    text: "คุณต้องการกู้คืนจากวลีสำหรับกู้คืนหรือสร้างกระเป๋าเงินใหม่?",
+    options: {
+      new: {
+        title: "สร้างกระเป๋าเงินใหม่",
+        subtitle: "สร้างวลีสำหรับกู้คืนใหม่และเพิ่ม Mint",
+      },
+      recover: {
+        title: "กู้คืนกระเป๋าเงิน",
+        subtitle: "ป้อนวลีสำหรับกู้คืนของคุณ กู้คืน Mint และ ecash",
+      },
+    },
+  },
+  WelcomeMintSetup: {
+    title: "เพิ่ม Mint",
+    text: "Mint คือเซิร์ฟเวอร์ที่ช่วยให้คุณส่งและรับ ecash เลือก Mint ที่ค้นพบหรือเพิ่มด้วยตนเอง คุณสามารถข้ามและเพิ่มในภายหลังได้",
+    sections: { your_mints: "Mint ของคุณ" },
+    restoring: "กำลังกู้คืน Mint…",
+    placeholder: { mint_url: "https://" },
+  },
+  WelcomeRecoverSeed: {
+    title: "ป้อนวลีสำหรับกู้คืนของคุณ",
+    text: "วางหรือพิมพ์วลี 12 คำเพื่อกู้คืน",
+    inputs: { word: "คำ { index }" },
+    actions: { paste_all: "วางทั้งหมด" },
+    disclaimer:
+      "วลีสำหรับกู้คืนใช้เฉพาะในเครื่องเพื่อสร้างคีย์กระเป๋าเงินของคุณ",
+  },
+  WelcomeRestoreEcash: {
+    title: "กู้คืน ecash ของคุณ",
+    text: "สแกนหา proof ที่ยังไม่ถูกใช้บน Mint ที่กำหนดค่าไว้และเพิ่มลงในกระเป๋าเงินของคุณ",
+  },
+  MintRatings: {
+    title: "รีวิว Mint",
+    reviews: "รีวิว",
+    no_reviews: "ไม่พบบทรีวิว",
+    no_reviews_to_display: "ไม่มีรีวิวที่จะแสดง",
+    no_rating: "ไม่มีคะแนน",
+    rows: "แถว",
+    actions: { write_review: "เขียนรีวิว" },
+  },
+  CreateMintReview: {
+    title: "รีวิว Mint",
+    publishing_as: "เผยแพร่เป็น",
+    inputs: {
+      rating: { label: "คะแนน" },
+      review: { label: "รีวิว (ไม่บังคับ)" },
+    },
+    actions: {
+      publish: { label: "เผยแพร่", in_progress: "กำลังเผยแพร่…" },
+    },
+  },
   RestoreView: {
     seed_phrase: {
       label: "กู้คืนจากวลีสำหรับกู้คืน",
@@ -667,6 +762,12 @@ export default {
       validate: {
         error: "Mnemonic ควรมีอย่างน้อย 12 คำ",
       },
+      select_all: {
+        label: "เลือกทั้งหมด",
+      },
+      deselect_all: {
+        label: "ไม่เลือกทั้งหมด",
+      },
       restore: {
         label: "กู้คืน",
         in_progress: "กำลังกู้คืน Mint…",
@@ -678,6 +779,29 @@ export default {
         success: "กู้คืนสำเร็จ",
         error: "ข้อผิดพลาดในการกู้คืน Mints: { error }",
       },
+      restore_selected_mints: {
+        label: "กู้คืน Mint ที่เลือก ({count})",
+        in_progress: "กำลังกู้คืน Mint {index} จาก {length} ...",
+        success: "กู้คืน {count} Mint(s) สำเร็จ",
+        error: "ข้อผิดพลาดในการกู้คืน Mint ที่เลือก: {error}",
+      },
+    },
+    nostr_mints: {
+      label: "กู้คืน Mint จาก Nostr",
+      caption:
+        "ค้นหาการสำรองข้อมูล Mint ที่เก็บไว้ใน Nostr relays โดยใช้วลีสำหรับกู้คืนของคุณ สิ่งนี้จะช่วยให้คุณค้นพบ Mint ที่คุณเคยใช้มาก่อน",
+      search_button: "ค้นหาการสำรองข้อมูล Mint",
+      select_all: "เลือกทั้งหมด",
+      deselect_all: "ไม่เลือกทั้งหมด",
+      backed_up: "สำรองแล้ว",
+      already_added: "เพิ่มแล้ว",
+      add_selected: "เพิ่มที่เลือก ({count})",
+      no_backups_found: "ไม่พบการสำรองข้อมูล Mint",
+      no_backups_hint:
+        "ตรวจสอบให้แน่ใจว่าได้เปิดใช้งานการสำรองข้อมูล Nostr mint ในการตั้งค่าเพื่อสำรองข้อมูลรายการ Mint ของคุณโดยอัตโนมัติ",
+      invalid_mnemonic: "โปรดป้อนวลีสำหรับกู้คืนที่ถูกต้องก่อนค้นหา",
+      search_error: "ไม่สามารถค้นหาการสำรองข้อมูล Mint ได้",
+      add_error: "ไม่สามารถเพิ่ม Mint ที่เลือกได้",
     },
   },
   MintSettings: {
@@ -715,7 +839,7 @@ export default {
       recommendations: {
         overline: "พบ { length } Mints",
         caption:
-          "Mints เหล่านี้ถูกแนะนำโดยผู้ใช้ Nostr คนอื่น ๆ อ่านรีวิวได้ที่ { link } โปรดใช้ความระมัดระวังและทำการวิจัยของคุณเองก่อนใช้ Mint",
+          "Mints เหล่านี้ถูกแนะนำโดยผู้ใช้ Nostr คนอื่น ๆ โปรดใช้ความระมัดระวังและทำการวิจัยของคุณเองก่อนใช้ Mint",
         actions: {
           browse: {
             label: "คลิกเพื่อเรียกดู Mints",
@@ -746,6 +870,10 @@ export default {
         },
       },
     },
+    error_badge: "ข้อผิดพลาด",
+    reviews_text: "รีวิว",
+    no_reviews_yet: "ยังไม่มีรีวิว",
+    discover_mints_button: "สำรวจ Mints",
   },
   QrcodeReader: {
     progress: {
@@ -835,6 +963,9 @@ export default {
       },
       copy_link: {
         tooltip_text: "คัดลอกลิงก์",
+      },
+      share: {
+        tooltip_text: "แชร์ ecash",
       },
       lock: {
         label: "@:global.actions.lock.label",

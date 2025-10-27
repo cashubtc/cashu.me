@@ -1,4 +1,13 @@
 export default {
+  MultinutPicker: {
+    payment: "マルチナット支払い",
+    selectMints: "支払いに使用するミントを一つ以上選択してください。",
+    totalSelectedBalance: "選択した合計残高",
+    multiMintPay: "マルチミント支払い",
+    balanceNotEnough: "複数ミントの残高がこの請求書を満たすには不十分です",
+    failed: "処理に失敗しました: {error}",
+    paid: "Lightningで{amount}を支払いました",
+  },
   global: {
     copy_to_clipboard: {
       success: "クリップボードにコピーしました！",
@@ -83,6 +92,7 @@ export default {
         could_not_get_info: "ミント情報を取得できませんでした",
         could_not_get_keys: "ミントキーを取得できませんでした",
         could_not_get_keysets: "ミントキーセットを取得できませんでした",
+        mint_validation_error: "ミントの検証エラー",
         removed: "ミントが削除されました",
         error: "ミントエラー",
       },
@@ -160,7 +170,23 @@ export default {
       backup_restore: "バックアップと復元",
       lightning_address: "ライトニングアドレス",
       nostr_keys: "ノストルキー",
-      nostr: "NOSTR",
+      nostr: {
+        title: "NOSTR",
+        relays: {
+          expand_label: "クリックしてリレーを編集",
+          add: {
+            title: "リレーを追加",
+            description:
+              "あなたのウォレットは、支払い要求、nostr wallet connect、バックアップなどのnostr操作にこれらのリレーを使用します。",
+          },
+          list: {
+            title: "リレー",
+            description: "あなたのウォレットはこれらのリレーに接続します。",
+            copy_tooltip: "リレーをコピー",
+            remove_tooltip: "リレーを削除",
+          },
+        },
+      },
       payment_requests: "支払いリクエスト",
       nostr_wallet_connect: "ノストルウォレットコネクト",
       hardware_features: "ハードウェア機能",
@@ -197,6 +223,10 @@ export default {
         toggle: "自動的に請求",
         description: "着信支払いを自動的に受け取ります。",
       },
+      npc_v2: {
+        choose_mint_title: "npub.cash v2のミントを選択",
+        choose_mint_placeholder: "ミントを選択...",
+      },
     },
     nostr_keys: {
       title: "あなたのnostrキー",
@@ -222,23 +252,6 @@ export default {
         not_found: "NIP-07署名拡張機能が見つかりません",
       },
     },
-    nostr: {
-      title: "NOSTR",
-      relays: {
-        expand_label: "クリックしてリレーを編集",
-        add: {
-          title: "リレーを追加",
-          description:
-            "あなたのウォレットは、支払い要求、nostr wallet connect、バックアップなどのnostr操作にこれらのリレーを使用します。",
-        },
-        list: {
-          title: "リレー",
-          description: "あなたのウォレットはこれらのリレーに接続します。",
-          copy_tooltip: "リレーをコピー",
-          remove_tooltip: "リレーを削除",
-        },
-      },
-    },
     payment_requests: {
       title: "支払いリクエスト",
       description:
@@ -260,20 +273,6 @@ export default {
         copy_tooltip: "接続文字列をコピー",
         qr_tooltip: "QRコードを表示",
         allowance_label: "残りアローワンス (sat)",
-      },
-      relays: {
-        expand_label: "リレーを編集するにはクリック",
-        add: {
-          title: "リレーを追加",
-          description:
-            "Nostrウォレットコネクトは、ウォレットを他のアプリケーションに接続するためにnostrリレーを使用します。",
-        },
-        list: {
-          title: "リレー",
-          description: "ウォレットはこれらのリレーに接続します。",
-          copy_tooltip: "リレーをコピー",
-          remove_tooltip: "リレーを削除",
-        },
       },
     },
     hardware_features: {
@@ -375,6 +374,21 @@ export default {
         url_label: "監査人URL",
         api_url_label: "監査人API URL",
       },
+      multinut: {
+        toggle: "マルチナットを有効にする",
+        description:
+          "有効にすると、ウォレットはマルチナットを使用して複数のミントから一度に請求書を支払います。",
+      },
+      nostr_mint_backup: {
+        toggle: "Nostrでミントリストをバックアップ",
+        description:
+          "有効にすると、設定されたNostrキーを使用して、ミントリストがNostrリレーに自動的にバックアップされます。これにより、デバイス間でミントリストを復元できます。",
+        notifications: {
+          enabled: "Nostrミントのバックアップが有効になりました",
+          disabled: "Nostrミントのバックアップが無効になりました",
+          failed: "Nostrミントのバックアップを有効にできませんでした",
+        },
+      },
     },
     appearance: {
       keyboard: {
@@ -399,6 +413,29 @@ export default {
           flamingo: "フラミンゴ",
         },
       },
+      bip177: {
+        title: "ビットコインシンボル",
+        description: "satsの代わりに₿シンボルを使用します。",
+        toggle: "₿シンボルを使用",
+      },
+    },
+    web_of_trust: {
+      title: "信頼のウェブ",
+      known_pubkeys: "既知の公開鍵: {wotCount}",
+      continue_crawl: "クロールを続行",
+      crawl_odell: "ODELLの信頼のウェブをクロール",
+      crawl_wot: "信頼のウェブをクロール",
+      pause: "一時停止",
+      reset: "リセット",
+      progress: "{crawlProcessed} / {crawlTotal}",
+    },
+    npub_cash: {
+      use_npubx: "npubx.cashを使用",
+      copy_lightning_address: "Lightningアドレスをコピー",
+      v2_mint: "npub.cash v2ミント",
+    },
+    multinut: {
+      use_multinut: "マルチナットを使用",
     },
     advanced: {
       title: "高度な設定",
@@ -432,6 +469,7 @@ export default {
           title: "キーセットカウンターをインクリメント",
           description:
             "キーセットIDをクリックして、ウォレット内のキーセットの導出パスカウンターをインクリメントします。「出力はすでに署名されています」というエラーが表示される場合に便利です。",
+          counter: "カウンター: {count}",
         },
         unset_reserved: {
           button: "すべての予約済みトークンを解除",
@@ -565,6 +603,8 @@ export default {
   },
   WelcomeSlide2: {
     title: "PWAをインストール",
+    alt: { pwa_example: "PWA インストール例" },
+    installing: "インストール中…",
     instruction: {
       intro: {
         text: "最高の体験のため、このウォレットをデバイスのネイティブWebブラウザでProgressive Web Appとしてインストールしてください。今すぐこれを行ってください。",
@@ -601,6 +641,7 @@ export default {
       success: {
         title: "成功！",
         text: "CashuをPWAとして使用しています。他の開いているブラウザウィンドウをすべて閉じ、ホーム画面からアプリを使用してください。",
+        nextSteps: "このブラウザタブを閉じて、ホーム画面からアプリを開けます。",
       },
     },
   },
@@ -638,6 +679,59 @@ export default {
       },
     },
   },
+  WelcomeSlideChoice: {
+    title: "ウォレットをセットアップ",
+    text: "シードフレーズから復元しますか？ それとも新しいウォレットを作成しますか？",
+    options: {
+      new: {
+        title: "新しいウォレットを作成",
+        subtitle: "新しいシードを生成してミントを追加します。",
+      },
+      recover: {
+        title: "ウォレットを復元",
+        subtitle: "シードフレーズを入力し、ミントとecashを復元します。",
+      },
+    },
+  },
+  WelcomeMintSetup: {
+    title: "ミントを追加",
+    text: "ミントはecashの送受信を助けるサーバーです。検出されたミントを選ぶか、手動で追加できます。後で追加することもできます。",
+    sections: { your_mints: "あなたのミント" },
+    restoring: "ミントを復元中…",
+    placeholder: { mint_url: "https://" },
+  },
+  WelcomeRecoverSeed: {
+    title: "シードフレーズを入力",
+    text: "復元のために12語のシードフレーズを貼り付けるか入力してください。",
+    inputs: { word: "単語 { index }" },
+    actions: { paste_all: "すべて貼り付け" },
+    disclaimer:
+      "シードフレーズはローカルでのみ使用され、ウォレットの鍵を導出します。",
+  },
+  WelcomeRestoreEcash: {
+    title: "ecash を復元",
+    text: "設定済みミントで未使用のproofをスキャンし、ウォレットに追加します。",
+  },
+  MintRatings: {
+    title: "ミントのレビュー",
+    reviews: "レビュー",
+    no_reviews: "レビューが見つかりません",
+    no_reviews_to_display: "表示するレビューはありません。",
+    no_rating: "評価なし",
+    rows: "行数",
+    actions: { write_review: "レビューを書く" },
+  },
+  CreateMintReview: {
+    title: "ミントをレビュー",
+    publishing_as: "次として公開",
+    inputs: {
+      rating: { label: "評価" },
+      review: { label: "レビュー（任意）" },
+    },
+    actions: {
+      publish: { label: "公開", in_progress: "公開中…" },
+    },
+  },
   RestoreView: {
     seed_phrase: {
       label: "シードフレーズから復元",
@@ -667,6 +761,12 @@ export default {
       validate: {
         error: "ニーモニックは少なくとも12単語である必要があります。",
       },
+      select_all: {
+        label: "すべて選択",
+      },
+      deselect_all: {
+        label: "すべて解除",
+      },
       restore: {
         label: "復元",
         in_progress: "ミントを復元中…",
@@ -678,6 +778,29 @@ export default {
         success: "復元が正常に完了しました",
         error: "ミントの復元エラー: { error }",
       },
+      restore_selected_mints: {
+        label: "選択したミントを復元 ({count})",
+        in_progress: "{length}個のミントのうち{index}個を復元しています…",
+        success: "{count}個のミントを正常に復元しました",
+        error: "選択したミントの復元中にエラーが発生しました: {error}",
+      },
+    },
+    nostr_mints: {
+      label: "Nostrからミントを復元",
+      caption:
+        "シードフレーズを使用してNostrリレーに保存されているミントのバックアップを検索します。これにより、以前使用したミントを発見できます。",
+      search_button: "ミントのバックアップを検索",
+      select_all: "すべて選択",
+      deselect_all: "すべて選択解除",
+      backed_up: "バックアップ済み",
+      already_added: "既に追加済み",
+      add_selected: "選択したものを追加 ({count})",
+      no_backups_found: "ミントのバックアップが見つかりません",
+      no_backups_hint:
+        "ミントリストを自動的にバックアップするには、設定でNostrミントのバックアップが有効になっていることを確認してください。",
+      invalid_mnemonic: "検索する前に有効なシードフレーズを入力してください。",
+      search_error: "ミントのバックアップの検索に失敗しました。",
+      add_error: "選択したミントの追加に失敗しました。",
     },
   },
   MintSettings: {
@@ -715,7 +838,7 @@ export default {
       recommendations: {
         overline: "{ length }個のミントが見つかりました",
         caption:
-          "これらのミントは他のNostrユーザーによって推奨されました。{ link }でレビューを読んでください。ミントを使用する前に注意し、ご自身の調査を行ってください。",
+          "これらのミントは他のNostrユーザーによって推奨されました。ミントを使用する前に注意し、ご自身の調査を行ってください。",
         actions: {
           browse: {
             label: "ミントをブラウズするにはクリック",
@@ -746,6 +869,10 @@ export default {
         },
       },
     },
+    error_badge: "エラー",
+    reviews_text: "レビュー",
+    no_reviews_yet: "まだレビューはありません",
+    discover_mints_button: "ミントを発見",
   },
   QrcodeReader: {
     progress: {

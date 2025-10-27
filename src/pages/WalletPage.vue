@@ -693,8 +693,16 @@ export default {
     // PWA install hook
     this.registerPWAEventHook();
 
-    // generate new mnemonic
-    this.initializeMnemonic();
+    // generate mnemonic only if onboarding is finished or path is 'new'
+    try {
+      const welcome = useWelcomeStore();
+      if (!welcome.showWelcome || welcome.onboardingPath === "new") {
+        this.initializeMnemonic();
+      }
+    } catch (e) {
+      // fallback safe
+      this.initializeMnemonic();
+    }
 
     this.initSigner();
 

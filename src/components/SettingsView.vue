@@ -422,6 +422,72 @@
           </q-item-section>
         </q-item>
       </q-expansion-item>
+      <!-- Web of trust actions -->
+      <q-item>
+        <q-item-section>
+          <q-item-label overline>
+            {{ $t("Settings.web_of_trust.title") }}
+          </q-item-label>
+          <q-item-label caption>
+            {{
+              $t("Settings.web_of_trust.known_pubkeys", { wotCount: wotCount })
+            }}
+          </q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item>
+        <q-item-section>
+          <div class="row justify-end">
+            <q-btn flat dense :loading="wotLoading" @click="crawlWebOfTrust(2)">
+              {{
+                hasCrawlCheckpoint && !wotLoading
+                  ? $t("Settings.web_of_trust.continue_crawl")
+                  : signerType === "SEED"
+                  ? $t("Settings.web_of_trust.crawl_odell")
+                  : $t("Settings.web_of_trust.crawl_wot")
+              }}
+            </q-btn>
+            <q-btn
+              v-if="wotLoading"
+              flat
+              dense
+              class="q-ml-sm"
+              color="negative"
+              @click="cancelCrawl"
+            >
+              {{ $t("Settings.web_of_trust.pause") }}
+            </q-btn>
+            <q-btn
+              v-if="!wotLoading"
+              flat
+              dense
+              class="q-ml-sm"
+              :disable="wotLoading"
+              @click="resetWebOfTrust"
+            >
+              {{ $t("Settings.web_of_trust.reset") }}
+            </q-btn>
+          </div>
+        </q-item-section>
+      </q-item>
+      <q-item v-if="wotLoading || crawlTotal > 0">
+        <q-item-section>
+          <q-linear-progress
+            rounded
+            size="10px"
+            color="primary"
+            :value="crawlTotal > 0 ? crawlProcessed / crawlTotal : 0"
+          />
+          <div class="text-caption q-mt-xs">
+            {{
+              $t("Settings.web_of_trust.progress", {
+                crawlProcessed: crawlProcessed,
+                crawlTotal: crawlTotal,
+              })
+            }}
+          </div>
+        </q-item-section>
+      </q-item>
     </div>
 
     <!-- PAYMENT REQUESTS SECTION -->
@@ -840,6 +906,22 @@
           </q-item-section>
         </q-item>
         <div>
+          <!-- nostr mint backup settings -->
+          <q-item>
+            <q-toggle
+              v-model="nostrMintBackupEnabled"
+              :label="$t('Settings.experimental.nostr_mint_backup.toggle')"
+              color="primary"
+              @update:model-value="onNostrMintBackupToggle"
+            >
+            </q-toggle>
+          </q-item>
+          <q-item class="q-pt-none">
+            <q-item-label caption>
+              {{ $t("Settings.experimental.nostr_mint_backup.description") }}
+            </q-item-label>
+          </q-item>
+
           <!-- periodically check incoming invoices -->
           <q-item>
             <q-toggle
@@ -1074,7 +1156,7 @@
             <div class="row q-pt-md">
               <q-toggle
                 v-model="npcV2Enabled"
-                label="Use npubx.cash"
+                :label="$t('Settings.npub_cash.use_npubx')"
                 color="primary"
               >
                 <q-badge
@@ -1098,7 +1180,9 @@
                     color="grey"
                     class="q-mr-sm cursor-pointer"
                   >
-                    <q-tooltip>Copy Lightning address</q-tooltip>
+                    <q-tooltip>{{
+                      $t("Settings.npub_cash.copy_lightning_address")
+                    }}</q-tooltip>
                   </q-icon>
                 </template>
               </q-input>
@@ -1106,7 +1190,9 @@
           </div>
           <div class="row q-mx-md">
             <div class="col-12 q-pt-md">
-              <q-item-label caption>npub.cash v2 mint</q-item-label>
+              <q-item-label caption>{{
+                $t("Settings.npub_cash.v2_mint")
+              }}</q-item-label>
               <q-input
                 outlined
                 v-model="npcV2Mint"
@@ -1156,7 +1242,7 @@
             <div class="row q-pt-md">
               <q-toggle
                 v-model="multinutEnabled"
-                label="Use Multinut"
+                :label="$t('Settings.multinut.use_multinut')"
                 color="primary"
               >
                 <q-badge
@@ -1169,29 +1255,6 @@
                 </q-item-label>
               </q-toggle>
             </div>
-          </div>
-        </div>
-
-        <!-- nostr mint backup settings -->
-        <div class="row q-mx-md q-mt-md">
-          <div class="col-12">
-            <div class="row q-pt-md">
-              <q-toggle
-                v-model="nostrMintBackupEnabled"
-                :label="$t('Settings.experimental.nostr_mint_backup.toggle')"
-                color="primary"
-                @update:model-value="onNostrMintBackupToggle"
-              >
-                <q-badge
-                  color="primary"
-                  :label="$t('Settings.experimental.receive_swaps.badge')"
-                  class="q-mx-sm"
-                ></q-badge>
-              </q-toggle>
-            </div>
-            <q-item-label caption class="q-px-md">
-              {{ $t("Settings.experimental.nostr_mint_backup.description") }}
-            </q-item-label>
           </div>
         </div>
 
@@ -1597,7 +1660,13 @@
                         flat
                         click
                         @click="increaseKeysetCounter(counter.id, 1)"
-                        >{{ counter.id }} - counter: {{ counter.counter }}
+                        >{{ counter.id }} -
+                        {{
+                          $t(
+                            "Settings.advanced.developer.keyset_counters.counter",
+                            { count: counter.counter }
+                          )
+                        }}
                       </q-btn>
                     </row>
                   </row>
@@ -1764,6 +1833,7 @@ import { useNPCV2Store } from "src/stores/npcv2";
 import { useNostrMintBackupStore } from "src/stores/nostrMintBackup";
 import { usePriceStore } from "src/stores/price";
 import { useI18n } from "vue-i18n";
+import { useNostrUserStore } from "src/stores/nostrUser";
 
 export default defineComponent({
   name: "SettingsView",
@@ -1877,9 +1947,15 @@ export default defineComponent({
     ...mapState(useNPCStore, ["npcLoading"]),
     ...mapState(useNostrStore, [
       "pubkey",
-      "mintRecommendations",
       "signerType",
       "seedSignerPrivateKeyNsec",
+    ]),
+    ...mapState(useNostrUserStore, [
+      "wotCount",
+      "wotLoading",
+      "crawlProcessed",
+      "crawlTotal",
+      "hasCrawlCheckpoint",
     ]),
     ...mapState(useWalletStore, ["mnemonic"]),
     ...mapState(useUiStore, ["ndefSupported"]),
@@ -1938,6 +2014,16 @@ export default defineComponent({
     },
   },
   watch: {
+    pubkey: {
+      immediate: true,
+      handler(newPk) {
+        const nostrUser = useNostrUserStore();
+        if (newPk) {
+          nostrUser.setPubkey(newPk);
+          nostrUser.updateUserProfile(true);
+        }
+      },
+    },
     enableNwc: function () {
       if (this.enableNwc) {
         this.listenToNWCCommands();
@@ -2012,6 +2098,13 @@ export default defineComponent({
       "fetchBitcoinPrice",
       "updateBitcoinPriceForCurrentCurrency",
     ]),
+    ...mapActions(useNostrUserStore, [
+      "setPubkey",
+      "updateUserProfile",
+      "crawlWebOfTrust",
+      "cancelCrawl",
+      "resetWebOfTrust",
+    ]),
     generateNewMnemonic: async function () {
       this.newMnemonic();
       await this.initSigner();
@@ -2076,21 +2169,37 @@ export default defineComponent({
       await this.initWalletSeedPrivateKeySigner();
       await this.generateNPCConnection();
       await this.generateNPCV2Connection();
+      const nostr = useNostrStore();
+      const nostrUser = useNostrUserStore();
+      nostrUser.setPubkey(nostr.pubkey);
+      await nostrUser.updateUserProfile(true);
     },
     handleExtensionClick: async function () {
       await this.initNip07Signer();
       await this.generateNPCConnection();
       await this.generateNPCV2Connection();
+      const nostr = useNostrStore();
+      const nostrUser = useNostrUserStore();
+      nostrUser.setPubkey(nostr.pubkey);
+      await nostrUser.updateUserProfile(true);
     },
     handleBunkerClick: async function () {
       await this.initNip46Signer();
       await this.generateNPCConnection();
       await this.generateNPCV2Connection();
+      const nostr = useNostrStore();
+      const nostrUser = useNostrUserStore();
+      nostrUser.setPubkey(nostr.pubkey);
+      await nostrUser.updateUserProfile(true);
     },
     handleNsecClick: async function () {
       await this.initPrivateKeySigner();
       await this.generateNPCConnection();
       await this.generateNPCV2Connection();
+      const nostr = useNostrStore();
+      const nostrUser = useNostrUserStore();
+      nostrUser.setPubkey(nostr.pubkey);
+      await nostrUser.updateUserProfile(true);
     },
     handleResetPrivateKeySigner: async function () {
       await this.resetPrivateKeySigner();
@@ -2112,6 +2221,15 @@ export default defineComponent({
       await this.exportWalletState();
       // clear dexie tables
       this.deleteAllTables();
+      // clear nostr user databases
+      useNostrUserStore().clearAllDatabases();
+      // clear mint reviews database
+      try {
+        const { useMintRecommendationsStore } = await import(
+          "src/stores/mintRecommendations"
+        );
+        await useMintRecommendationsStore().clearAllDatabases();
+      } catch {}
       localStorage.clear();
       window.location.href = "/";
     },
