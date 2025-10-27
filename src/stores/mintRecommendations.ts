@@ -173,6 +173,13 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       );
       subInfos.on("event", async (ev: NDKEvent) => {
         await this.handleMintInfoEvent(ev);
+        try {
+          const u = ev.tags.find((t) => t[0] === "u" && (t[2] === "cashu" || t.length >= 2))?.[1];
+          if (typeof u === "string" && u.startsWith("http")) {
+            // Kick off HTTP info fetch (concurrency-limited via scheduler)
+            void this.scheduleHttpInfoFetches([u], 20, 100, this.infoTimeoutMs);
+          }
+        } catch { }
         void this.rebuildAggregates();
       });
       const subReviews = this.ndk.subscribe(
@@ -211,7 +218,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
                 url,
                 info: existing?.info ?? null,
                 fetchedAt: existing?.fetchedAt ?? 0,
-                error: true,
+                error: false,
               };
               await (this.db as MintReviewsDB).httpInfo.put(row);
               void this.rebuildAggregates();
@@ -272,6 +279,8 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
           if (typeof u !== "string" || !u.startsWith("http")) continue;
           if (seen.has(u)) continue;
           seen.add(u);
+          // Skip if a fetch is already in-flight for this URL
+          if (this.inflightInfo.has(u)) continue;
           const existing = await (this.db as MintReviewsDB).httpInfo.get(u);
           const fresh = !!existing && !!existing.info && !!existing.fetchedAt && (nowSec - existing.fetchedAt) < interval;
           if (!fresh) toFetch.push(u);
@@ -405,7 +414,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
             averageRating: avg,
             reviews: [],
             info: http?.info ?? undefined,
-            error: !!http?.error,
+            error: !!http?.error || false,
             lastHttpInfoFetchAt: http?.fetchedAt ?? undefined,
           });
         }
