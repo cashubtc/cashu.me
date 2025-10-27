@@ -69,19 +69,11 @@
 
     <q-card-section style="max-height: 60vh; overflow-y: auto">
       <div v-if="!hasAnyReviews" class="text-grey-6">
-        <div class="row items-center justify-between">
+        <div class="row items-center justify-center">
           <div>{{ $t("MintRatings.no_reviews_to_display") }}</div>
-          <q-btn
-            v-if="allowCreateReview"
-            color="primary"
-            rounded
-            class="q-ml-sm"
-            @click="showCreateReviewDialog = true"
-            >{{ $t("MintRatings.actions.write_review") }}</q-btn
-          >
         </div>
       </div>
-      <div v-else class="column q-gutter-md">
+      <div v-if="hasAnyReviews" class="column q-gutter-md">
         <div
           v-for="r in paged"
           :key="r.eventId"

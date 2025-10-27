@@ -136,13 +136,14 @@
                   </template>
                   <template v-else>
                     <span
-                      >No reviews yet ·
+                      >No
                       <span
                         class="text-primary cursor-pointer"
                         style="text-decoration: underline"
-                        @click.stop="openCreateReview(mint)"
-                        >write a review</span
+                        @click.stop="openReviews(mint.url, mint)"
+                        >reviews</span
                       >
+                      yet
                     </span>
                   </template>
                 </div>
@@ -654,9 +655,8 @@ export default defineComponent({
     },
     openReviews(url, mint) {
       const rec = this.recommendations.find((r) => r.url === url);
-      if (!rec) return;
       this.selectedRatingsUrl = url;
-      this.selectedReviews = rec.reviews;
+      this.selectedReviews = rec ? rec.reviews : [];
       this.selectedMintInfo = mint.info || null;
       this.showRatingsDialog = true;
     },
