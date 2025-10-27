@@ -472,13 +472,6 @@ export default defineComponent({
         this.swapBlocking = false;
       }
     },
-    recommendations: {
-      handler() {
-        this.fetchMintInfoForDiscoverList();
-      },
-      deep: true,
-      immediate: true,
-    },
   },
   methods: {
     ...mapActions(useNostrStore, [

@@ -184,17 +184,17 @@ export default defineComponent({
         : fetchingMintInfo.value.has(url);
     };
 
-    const fetchMintInfoForDiscovered = () => {
-      discoverList.value.forEach((rec) => {
-        if (!fetchingMintInfo.value.has(rec.url)) {
-          fetchingMintInfo.value.add(rec.url);
-          // ask store to fetch/persist with timeout logic
-          recsStore.requestMintHttpInfo(
-            rec.url,
-            (defineComponent as any).props?.infoTimeoutMs?.default ?? 5000
-          );
-        }
-      });
+    const fetchMintInfoForDiscovered = async () => {
+      const targets = discoverList.value
+        .filter((rec) => !fetchingMintInfo.value.has(rec.url))
+        .map((rec) => rec.url);
+      targets.forEach((u) => fetchingMintInfo.value.add(u));
+      await recsStore.scheduleHttpInfoFetches(
+        targets,
+        10,
+        100,
+        (defineComponent as any).props?.infoTimeoutMs?.default ?? 5000
+      );
     };
     watch(discoverList, () => fetchMintInfoForDiscovered(), {
       immediate: true,

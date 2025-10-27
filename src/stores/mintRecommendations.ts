@@ -46,7 +46,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
     httpInfoByUrl: new Map() as Map<string, any>,
     infoTimers: new Map() as Map<string, any>,
     inflightInfo: new Set() as Set<string>,
-    infoTimeoutMs: 5000,
+    infoTimeoutMs: 10000,
     httpInfoFetchIntervalSeconds: 60 * 60 * 24, // 24 hours
     // Aggregated list by URL (persisted)
     recommendations: useLocalStorage<MintRecommendation[]>(
@@ -102,6 +102,8 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
         }
         this.dbHydrated = true;
         await this.rebuildAggregates();
+        // After hydration, opportunistically refetch stale HTTP info within interval
+        void this.refetchStaleHttpInfoForKnownMints();
       } catch { }
     },
     fetchMintInfos: async function () {
@@ -197,10 +199,13 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
         if (this.inflightInfo.has(url)) return;
         this.inflightInfo.add(url);
         const ms = timeoutMs ?? this.infoTimeoutMs;
+        const tempMint = { url, keys: [], keysets: [] } as any;
+        const mod = await import("src/stores/mints");
+        console.log("Fetching HTTP info for mint", url);
+        // Start timeout timer only when we actually fire the HTTP request
         if (!this.infoTimers.has(url)) {
           const id = setTimeout(async () => {
             try {
-              // Timeout: mark error but DO NOT delete existing info if any
               const existing = await (this.db as MintReviewsDB).httpInfo.get(url);
               const row: HttpInfoRow = {
                 url,
@@ -209,18 +214,16 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
                 error: true,
               };
               await (this.db as MintReviewsDB).httpInfo.put(row);
-              // Reflect error state via Dexie; localStorage recommendations will be rebuilt from Dexie
               void this.rebuildAggregates();
             } catch { }
             this.infoTimers.delete(url);
           }, ms);
           this.infoTimers.set(url, id);
         }
-        const tempMint = { url, keys: [], keysets: [] } as any;
-        const mod = await import("src/stores/mints");
-        console.log("Fetching HTTP info for mint", url);
         const info = await new (mod as any).MintClass(tempMint).api.getInfo();
+        console.log("HTTP info for mint", url, info.name);
         const row: HttpInfoRow = { url, info, fetchedAt: Math.floor(Date.now() / 1000), error: false };
+        // unset error in localstore too:
         await (this.db as MintReviewsDB).httpInfo.put(row);
         // Update in-memory cache only; do not persist info to localStorage
         this.httpInfoByUrl.set(url, info);
@@ -231,6 +234,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
         this.infoTimers.delete(url);
         // done
       } catch {
+        console.log("Error fetching HTTP info for mint", url);
         // Immediately persist error state (do not wait for timer)
         try {
           const existing = await (this.db as MintReviewsDB).httpInfo.get(url);
@@ -251,6 +255,51 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       } finally {
         this.inflightInfo.delete(url);
       }
+    },
+    scheduleHttpInfoFetches: async function (
+      urls: string[],
+      concurrency: number = 20,
+      delayMs: number = 100,
+      timeoutMs?: number
+    ) {
+      try {
+        await this.ensureDbInitialized();
+        const nowSec = Math.floor(Date.now() / 1000);
+        const interval = this.httpInfoFetchIntervalSeconds || 0;
+        const seen = new Set<string>();
+        const toFetch: string[] = [];
+        for (const u of urls) {
+          if (typeof u !== "string" || !u.startsWith("http")) continue;
+          if (seen.has(u)) continue;
+          seen.add(u);
+          const existing = await (this.db as MintReviewsDB).httpInfo.get(u);
+          const fresh = !!existing && !!existing.info && !!existing.fetchedAt && (nowSec - existing.fetchedAt) < interval;
+          if (!fresh) toFetch.push(u);
+        }
+        if (!toFetch.length) return;
+        let idx = 0;
+        const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+        const worker = async () => {
+          while (true) {
+            const i = idx++;
+            if (i >= toFetch.length) break;
+            const u = toFetch[i];
+            try {
+              await this.requestMintHttpInfo(u, timeoutMs);
+            } catch { }
+            await delay(delayMs);
+          }
+        };
+        const workers = Array.from({ length: Math.min(concurrency, toFetch.length) }, () => worker());
+        await Promise.all(workers);
+      } catch { }
+    },
+    refetchStaleHttpInfoForKnownMints: async function () {
+      try {
+        await this.ensureDbInitialized();
+        const urls = this.recommendations.map((r) => r.url);
+        await this.scheduleHttpInfoFetches(urls, 10, 100);
+      } catch { }
     },
     // Expose getters for HTTP info from in-memory cache
     getHttpInfoForUrl: function (url: string): any | undefined {
