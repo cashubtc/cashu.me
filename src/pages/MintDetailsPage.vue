@@ -492,7 +492,7 @@ export default defineComponent({
       try {
         console.log("Refreshing mint info for:", this.mintData.url);
         const newMintInfo = await this.fetchMintInfo(this.mintData);
-        this.triggerMintInfoMotdChanged(newMintInfo, this.mintData);
+        this.triggerMintInfoMotdChanged(newMintInfo, this.mintData, false);
         const mintsStore = useMintsStore();
         const target = mintsStore.mints.find(
           (m) => m.url === this.mintData.url

@@ -462,7 +462,7 @@ export const useMintsStore = defineStore("mints", {
       }
       return false;
     },
-    triggerMintInfoMotdChanged(newMintInfo: GetInfoResponse, mint: Mint) {
+    triggerMintInfoMotdChanged(newMintInfo: GetInfoResponse, mint: Mint, navigate = true) {
       if (!this.checkMintInfoMotdChanged(newMintInfo, mint)) {
         return;
       }
@@ -470,9 +470,11 @@ export const useMintsStore = defineStore("mints", {
       this.mints.filter((m) => m.url === mint.url)[0].motdDismissed = false;
 
       // Navigate to mint details page with mint URL as query parameter
-      window.location.href = `/mintdetails?mintUrl=${encodeURIComponent(
-        mint.url
-      )}`;
+      if (navigate) {
+        window.location.href = `/mintdetails?mintUrl=${encodeURIComponent(
+          mint.url
+        )}`;
+      }
     },
     fetchMintInfo: async function (mint: Mint) {
       try {
@@ -483,7 +485,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_info"));
-        } catch {}
+        } catch { }
         throw error;
       }
     },
@@ -559,7 +561,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_keys"));
-        } catch {}
+        } catch { }
         throw error;
       }
     },
@@ -573,7 +575,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_keysets"));
-        } catch {}
+        } catch { }
         throw error;
       }
     },
