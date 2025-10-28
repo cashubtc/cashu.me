@@ -55,6 +55,7 @@
           >
             <q-item
               class="mint-card"
+              :class="{ dimmed: isFetchingMintInfo(rec.url) }"
               :style="{
                 'border-radius': '10px',
                 border: '1px solid rgba(128,128,128,0.2)',
@@ -63,6 +64,11 @@
               }"
             >
               <div class="full-width" style="position: relative">
+                <!-- Centered spinner overlay -->
+                <div v-if="isFetchingMintInfo(rec.url)" class="spinner-overlay">
+                  <q-spinner-dots size="34px" color="grey-5" />
+                </div>
+
                 <div class="row items-center q-pa-md">
                   <div class="col">
                     <div class="row items-center">
@@ -70,15 +76,6 @@
                         :iconUrl="getMintIconUrlUrl(rec.url) || undefined"
                         :name="getMintDisplayName(rec.url)"
                         :url="rec.url"
-                      />
-                      <q-spinner-dots
-                        v-if="
-                          isFetchingMintInfo(rec.url) &&
-                          !getMintIconUrlUrl(rec.url)
-                        "
-                        size="34px"
-                        color="grey-5"
-                        class="q-ml-sm"
                       />
                     </div>
                     <div class="row">
@@ -109,7 +106,9 @@
                       flat
                       icon="add"
                       @click="addDiscovered(rec.url)"
-                      :disable="isExistingMint(rec.url)"
+                      :disable="
+                        isFetchingMintInfo(rec.url) || isExistingMint(rec.url)
+                      "
                     />
                   </div>
                 </div>
@@ -163,10 +162,7 @@ export default defineComponent({
     const isExistingMint = (url: string) =>
       mints.mints.some((m) => m.url === url);
     const discoverList = computed(() =>
-      recommendations.value.filter(
-        (r) =>
-          !isExistingMint(r.url) && !r.error && recsStore.hasHttpInfo(r.url)
-      )
+      recommendations.value.filter((r) => !isExistingMint(r.url) && !r.error)
     );
 
     // Use store-managed HTTP info (Dexie + in-memory), persist only error in localStorage
@@ -303,5 +299,20 @@ export default defineComponent({
 .mint-card {
   border: 1px solid rgba(128, 128, 128, 0.2);
   border-radius: 10px;
+}
+
+.mint-card.dimmed {
+  opacity: 0.5;
+}
+
+.spinner-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>
