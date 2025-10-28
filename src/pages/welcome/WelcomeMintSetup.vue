@@ -222,6 +222,8 @@ export default {
   align-items: center;
   text-align: left;
   flex: 1;
+  width: 100%;
+  max-width: 500px;
 }
 
 .header-icon {
@@ -249,7 +251,6 @@ export default {
   line-height: 1.2;
   text-align: left;
   width: 100%;
-  max-width: 500px; /* unified */
 }
 
 .description {
@@ -258,14 +259,12 @@ export default {
   color: rgba(255, 255, 255, 0.8);
   margin: 0 0 32px 0;
   text-align: left;
-  max-width: 500px; /* unified */
   width: 100%;
 }
 
 .mints-section,
 .add-mint-section {
   width: 100%;
-  max-width: 500px; /* unified */
   margin-bottom: 24px;
 }
 
@@ -384,7 +383,7 @@ export default {
 
   .mints-section,
   .add-mint-section {
-    max-width: 100%;
+    width: 100%;
   }
 
   .section-title {
