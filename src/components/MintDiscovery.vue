@@ -162,7 +162,19 @@ export default defineComponent({
     const isExistingMint = (url: string) =>
       mints.mints.some((m) => m.url === url);
     const discoverList = computed(() =>
-      recommendations.value.filter((r) => !isExistingMint(r.url) && !r.error)
+      recommendations.value
+        .filter((r) => !isExistingMint(r.url) && !r.error)
+        .sort((a, b) => {
+          const aFetching = isFetchingMintInfo(a.url);
+          const bFetching = isFetchingMintInfo(b.url);
+
+          // If one is fetching and the other isn't, put the fetching one at the bottom
+          if (aFetching && !bFetching) return 1;
+          if (!aFetching && bFetching) return -1;
+
+          // If both are in the same state, maintain original order
+          return 0;
+        })
     );
 
     // Use store-managed HTTP info (Dexie + in-memory), persist only error in localStorage
