@@ -610,18 +610,6 @@ export default defineComponent({
       }
     },
     showMintInfo: async function (mint) {
-      // Fetch fresh mint info before navigating
-      this.activatingMintUrl = mint.url;
-      try {
-        const newMintInfo = await this.fetchMintInfo(mint);
-        this.triggerMintInfoMotdChanged(newMintInfo, mint);
-        this.mints.filter((m) => m.url === mint.url)[0].info = newMintInfo;
-      } catch (error) {
-        console.log("Failed to fetch mint info:", error);
-      } finally {
-        this.activatingMintUrl = "";
-      }
-
       // Navigate to mint details page with mint URL as query parameter
       this.$router.push({
         path: "/mintdetails",
