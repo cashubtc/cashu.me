@@ -47,7 +47,7 @@
             </q-item-label>
           </q-item-section>
         </q-item>
-        <div class="q-pt-sm">
+        <TransitionGroup name="mint" tag="div" class="q-pt-sm">
           <div
             v-for="rec in discoverList"
             :key="rec.url"
@@ -115,7 +115,7 @@
               </div>
             </q-item>
           </div>
-        </div>
+        </TransitionGroup>
       </q-list>
     </div>
 
@@ -326,5 +326,24 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Smooth list animations for discovered mints */
+.mint-move {
+  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease;
+}
+.mint-enter-active,
+.mint-leave-active {
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease;
+}
+.mint-enter-from,
+.mint-leave-to {
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+}
+/* Prevent layout jump during leave */
+.mint-leave-active {
+  position: absolute;
+  width: 100%;
 }
 </style>
