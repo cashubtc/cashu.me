@@ -47,7 +47,7 @@
             </q-item-label>
           </q-item-section>
         </q-item>
-        <div class="q-pt-sm">
+        <TransitionGroup name="mint" tag="div" class="q-pt-sm">
           <div
             v-for="rec in discoverList"
             :key="rec.url"
@@ -55,6 +55,7 @@
           >
             <q-item
               class="mint-card"
+              :class="{ dimmed: isFetchingMintInfo(rec.url) }"
               :style="{
                 'border-radius': '10px',
                 border: '1px solid rgba(128,128,128,0.2)',
@@ -63,6 +64,11 @@
               }"
             >
               <div class="full-width" style="position: relative">
+                <!-- Centered spinner overlay -->
+                <div v-if="isFetchingMintInfo(rec.url)" class="spinner-overlay">
+                  <q-spinner-dots size="34px" color="grey-5" />
+                </div>
+
                 <div class="row items-center q-pa-md">
                   <div class="col">
                     <div class="row items-center">
@@ -70,15 +76,6 @@
                         :iconUrl="getMintIconUrlUrl(rec.url) || undefined"
                         :name="getMintDisplayName(rec.url)"
                         :url="rec.url"
-                      />
-                      <q-spinner-dots
-                        v-if="
-                          isFetchingMintInfo(rec.url) &&
-                          !getMintIconUrlUrl(rec.url)
-                        "
-                        size="34px"
-                        color="grey-5"
-                        class="q-ml-sm"
                       />
                     </div>
                     <div class="row">
@@ -109,14 +106,16 @@
                       flat
                       icon="add"
                       @click="addDiscovered(rec.url)"
-                      :disable="isExistingMint(rec.url)"
+                      :disable="
+                        isFetchingMintInfo(rec.url) || isExistingMint(rec.url)
+                      "
                     />
                   </div>
                 </div>
               </div>
             </q-item>
           </div>
-        </div>
+        </TransitionGroup>
       </q-list>
     </div>
 
@@ -163,10 +162,19 @@ export default defineComponent({
     const isExistingMint = (url: string) =>
       mints.mints.some((m) => m.url === url);
     const discoverList = computed(() =>
-      recommendations.value.filter(
-        (r) =>
-          !isExistingMint(r.url) && !r.error && recsStore.hasHttpInfo(r.url)
-      )
+      recommendations.value
+        .filter((r) => !isExistingMint(r.url) && !r.error)
+        .sort((a, b) => {
+          const aFetching = isFetchingMintInfo(a.url);
+          const bFetching = isFetchingMintInfo(b.url);
+
+          // If one is fetching and the other isn't, put the fetching one at the bottom
+          if (aFetching && !bFetching) return 1;
+          if (!aFetching && bFetching) return -1;
+
+          // If both are in the same state, maintain original order
+          return 0;
+        })
     );
 
     // Use store-managed HTTP info (Dexie + in-memory), persist only error in localStorage
@@ -303,5 +311,39 @@ export default defineComponent({
 .mint-card {
   border: 1px solid rgba(128, 128, 128, 0.2);
   border-radius: 10px;
+}
+
+.mint-card.dimmed {
+  opacity: 0.5;
+}
+
+.spinner-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Smooth list animations for discovered mints */
+.mint-move {
+  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease;
+}
+.mint-enter-active,
+.mint-leave-active {
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease;
+}
+.mint-enter-from,
+.mint-leave-to {
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+}
+/* Prevent layout jump during leave */
+.mint-leave-active {
+  position: absolute;
+  width: 100%;
 }
 </style>

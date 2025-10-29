@@ -18,7 +18,6 @@ export type MintRecommendation = {
   url: string;
   reviewsCount: number;
   averageRating: number | null;
-  reviews: MintReview[];
   info?: any;
   error?: boolean;
   lastHttpInfoFetchAt?: number; // unix seconds

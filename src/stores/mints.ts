@@ -462,7 +462,11 @@ export const useMintsStore = defineStore("mints", {
       }
       return false;
     },
-    triggerMintInfoMotdChanged(newMintInfo: GetInfoResponse, mint: Mint) {
+    triggerMintInfoMotdChanged(
+      newMintInfo: GetInfoResponse,
+      mint: Mint,
+      navigate = true
+    ) {
       if (!this.checkMintInfoMotdChanged(newMintInfo, mint)) {
         return;
       }
@@ -470,9 +474,11 @@ export const useMintsStore = defineStore("mints", {
       this.mints.filter((m) => m.url === mint.url)[0].motdDismissed = false;
 
       // Navigate to mint details page with mint URL as query parameter
-      window.location.href = `/mintdetails?mintUrl=${encodeURIComponent(
-        mint.url
-      )}`;
+      if (navigate) {
+        window.location.href = `/mintdetails?mintUrl=${encodeURIComponent(
+          mint.url
+        )}`;
+      }
     },
     fetchMintInfo: async function (mint: Mint) {
       try {
