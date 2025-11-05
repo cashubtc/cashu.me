@@ -93,21 +93,28 @@
         >
           {{ $t("MintRatings.actions.write_review") }}
         </q-btn>
-        <q-space />
-        <q-select
-          dense
-          color="primary"
-          v-model="sortMode"
-          :options="sortOptions"
-          emit-value
-          map-options
-          borderless
-          style="min-width: 120px"
-        />
       </div>
     </q-card-section>
 
     <q-separator />
+
+    <!-- Sort Section -->
+    <q-card-section v-if="hasAnyReviews" class="q-py-sm">
+      <div
+        class="sort-trigger row items-center justify-between"
+        @click="showSortSheet = true"
+      >
+        <div class="row items-center" style="gap: 8px">
+          <span class="text-body2" style="font-weight: 600">{{
+            $t("MintRatings.sort")
+          }}</span>
+          <span class="text-body2 text-grey-5">{{ currentSortLabel }}</span>
+        </div>
+        <q-icon name="keyboard_arrow_down" size="20px" class="text-grey-5" />
+      </div>
+    </q-card-section>
+
+    <q-separator v-if="hasAnyReviews" />
 
     <q-card-section style="max-height: 60vh; overflow-y: auto">
       <div v-if="!hasAnyReviews" class="text-grey-6">
@@ -227,6 +234,28 @@
       </div>
     </q-card-section>
   </q-card>
+
+  <!-- Sort Bottom Sheet -->
+  <div v-if="showSortSheet" class="sort-sheet-overlay" @click="closeSortSheet">
+    <div class="sort-sheet" @click.stop>
+      <div class="sort-sheet-header">
+        <h3>{{ $t("MintRatings.sort") }}</h3>
+        <q-btn flat round icon="close" @click="closeSortSheet" class="close-btn" />
+      </div>
+      <div class="sort-options">
+        <div
+          v-for="option in sortOptions"
+          :key="option.value"
+          class="sort-option"
+          :class="{ active: sortMode === option.value }"
+          @click="selectSort(option.value)"
+        >
+          {{ option.label }}
+        </div>
+      </div>
+    </div>
+  </div>
+
   <q-dialog v-model="showCreateReviewDialog" persistent>
     <CreateMintReview
       :mintUrl="url"
@@ -376,15 +405,22 @@ export default defineComponent({
         }
       });
     },
+    closeSortSheet() {
+      this.showSortSheet = false;
+    },
+    selectSort(value: string) {
+      this.sortMode = value as "newest" | "oldest" | "highest" | "lowest";
+      this.closeSortSheet();
+    },
   },
   data() {
     return {
-      sortMode: "newest" as "newest" | "oldest" | "best" | "worst",
+      sortMode: "newest" as "newest" | "oldest" | "highest" | "lowest",
       sortOptions: [
-        { label: "Newest", value: "newest" },
-        { label: "Oldest", value: "oldest" },
-        { label: "Best rating", value: "best" },
-        { label: "Worst rating", value: "worst" },
+        { label: this.$t("MintRatings.sort_options.newest"), value: "newest" },
+        { label: this.$t("MintRatings.sort_options.oldest"), value: "oldest" },
+        { label: this.$t("MintRatings.sort_options.highest"), value: "highest" },
+        { label: this.$t("MintRatings.sort_options.lowest"), value: "lowest" },
       ],
       onlyWithComment: false,
       rowsPerPage: 10,
@@ -396,6 +432,7 @@ export default defineComponent({
       profiles: {} as Record<string, { name?: string; picture?: string }>,
       loadingProfiles: new Set<string>(),
       showCreateReviewDialog: false,
+      showSortSheet: false,
     };
   },
   computed: {
@@ -446,6 +483,10 @@ export default defineComponent({
     averageDisplay(): string {
       return this.average !== null ? this.average.toFixed(1) : "n/a";
     },
+    currentSortLabel(): string {
+      const option = this.sortOptions.find((opt) => opt.value === this.sortMode);
+      return option ? option.label : "";
+    },
     // Rating distribution for star bars (count of each rating 1-5)
     ratingDistribution(): Record<number, number> {
       const dist: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
@@ -477,9 +518,9 @@ export default defineComponent({
         switch (this.sortMode) {
           case "oldest":
             return (a.created_at || 0) - (b.created_at || 0);
-          case "best":
+          case "highest":
             return (b.rating || 0) - (a.rating || 0);
-          case "worst":
+          case "lowest":
             return (a.rating || 0) - (b.rating || 0);
           default:
             return (b.created_at || 0) - (a.created_at || 0);
@@ -607,5 +648,112 @@ export default defineComponent({
 .monospace {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     "Liberation Mono", "Courier New", monospace;
+}
+
+/* Sort trigger */
+.sort-trigger {
+  cursor: pointer;
+  transition: background 0.2s ease;
+  padding: 8px 0;
+}
+
+.sort-trigger:hover {
+  opacity: 0.8;
+}
+
+/* Sort bottom sheet */
+.sort-sheet-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: flex-end;
+  animation: fadeIn 0.3s ease;
+}
+
+.sort-sheet {
+  width: 100%;
+  background: rgba(20, 20, 20, 0.98);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px 20px 0 0;
+  max-height: 50vh;
+  overflow: hidden;
+  animation: slideUp 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.sort-sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 16px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sort-sheet-header h3 {
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.close-btn {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.sort-options {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.sort-option {
+  padding: 16px 24px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  text-align: center;
+}
+
+.sort-option:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+}
+
+.sort-option.active {
+  background: rgba(var(--q-primary-rgb), 0.2);
+  color: var(--q-primary);
+}
+
+.sort-option:last-child {
+  border-bottom: none;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 </style>

@@ -733,6 +733,13 @@ export default {
     no_rating: "No rating",
     out_of: "out of",
     rows: "Rows",
+    sort: "Sort",
+    sort_options: {
+      newest: "Newest",
+      oldest: "Oldest",
+      highest: "Highest",
+      lowest: "Lowest",
+    },
     actions: {
       write_review: "Write a review",
     },
