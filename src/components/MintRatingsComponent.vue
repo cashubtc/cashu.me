@@ -8,60 +8,102 @@
     </q-card-section>
     <q-separator />
 
-    <q-card-section>
-      <div class="row items-center justify-between">
-        <!-- Mint identity and average rating -->
-        <div
-          class="row items-center"
-          style="width: 100%; flex-wrap: wrap; gap: 8px"
-        >
-          <div class="row items-center" style="flex: 1; min-width: 200px">
-            <MintInfoContainer
-              :iconUrl="mintInfo?.icon_url"
-              :name="mintInfo?.name"
-              :url="url"
-            />
+    <q-card-section class="q-pb-md">
+      <!-- Mint Info -->
+      <div class="row items-center q-mb-lg">
+        <MintInfoContainer
+          :iconUrl="mintInfo?.icon_url"
+          :name="mintInfo?.name"
+          :url="url"
+        />
+      </div>
+
+      <!-- Rating Summary Section - Apple Podcasts Style -->
+      <div v-if="hasAnyReviews" class="q-mb-lg">
+        <div class="row items-start q-mb-md" style="gap: 24px">
+          <!-- Large Rating Display on Left -->
+          <div class="column items-center" style="min-width: 100px">
+            <div class="text-h2" style="font-weight: 600; line-height: 1">
+              {{ averageDisplay }}
+            </div>
+            <div
+              class="text-caption text-grey-5"
+              style="font-weight: 400; margin-top: 4px"
+            >
+              {{ $t("MintRatings.out_of") }} 5
+            </div>
           </div>
-          <div
-            class="text-body1 q-ml-xs"
-            style="min-width: 200px; flex-shrink: 0"
-          >
-            <span v-if="hasAnyReviews">
-              ⭐ {{ averageDisplay }} · {{ totalReviews }}
-              {{ $t("MintRatings.reviews") }}
-            </span>
-            <span v-else class="text-grey-6">{{
-              $t("MintRatings.no_reviews")
-            }}</span>
+
+          <!-- Star Distribution Bars on Right -->
+          <div class="col column justify-center" style="gap: 6px">
+            <div
+              v-for="star in [5, 4, 3, 2, 1]"
+              :key="star"
+              class="row items-center no-wrap"
+              style="gap: 8px"
+            >
+              <!-- Star Icon -->
+              <q-icon name="star" size="14px" class="text-grey-6" />
+              <!-- Distribution Bar -->
+              <div
+                class="col"
+                style="
+                  height: 4px;
+                  background: rgba(128, 128, 128, 0.2);
+                  border-radius: 2px;
+                  overflow: hidden;
+                "
+              >
+                <div
+                  :style="{
+                    width: ratingPercentage(star) + '%',
+                    height: '100%',
+                    background: 'var(--q-primary)',
+                    transition: 'width 0.3s ease',
+                  }"
+                />
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Write a review button and sort options -->
-        <div class="row items-center q-mt-sm" style="width: 100%">
-          <q-btn
-            v-if="allowCreateReview"
-            color="primary"
-            rounded
-            dense
-            class="q-px-md"
-            @click="showCreateReviewDialog = true"
-          >
-            {{ $t("MintRatings.actions.write_review") }}
-          </q-btn>
-          <q-space />
-          <div class="row items-center" style="margin-left: auto">
-            <q-select
-              dense
-              color="primary"
-              v-model="sortMode"
-              :options="sortOptions"
-              emit-value
-              map-options
-              borderless
-              style="width: 120px"
-            />
-          </div>
+        <!-- Total Ratings Count -->
+        <div class="text-body2 text-grey-5" style="font-weight: 500">
+          {{ totalReviews }} {{ $t("MintRatings.ratings") }}
         </div>
+      </div>
+
+      <!-- No Reviews State -->
+      <div v-else class="q-mb-lg">
+        <div class="text-h4 text-grey-6" style="font-weight: 500">
+          {{ $t("MintRatings.no_reviews") }}
+        </div>
+      </div>
+
+      <!-- Action Buttons Row -->
+      <div class="row items-center q-mt-md" style="gap: 12px">
+        <q-btn
+          v-if="allowCreateReview"
+          color="primary"
+          unelevated
+          rounded
+          class="q-px-lg"
+          style="font-weight: 500"
+          @click="showCreateReviewDialog = true"
+        >
+          {{ $t("MintRatings.actions.write_review") }}
+        </q-btn>
+        <q-space />
+        <q-select
+          dense
+          color="primary"
+          v-model="sortMode"
+          :options="sortOptions"
+          emit-value
+          map-options
+          borderless
+          style="min-width: 120px"
+        />
       </div>
     </q-card-section>
 
@@ -73,75 +115,86 @@
           <div>{{ $t("MintRatings.no_reviews_to_display") }}</div>
         </div>
       </div>
-      <div v-if="hasAnyReviews" class="column q-gutter-md">
+      <div v-if="hasAnyReviews" class="column" style="gap: 16px">
         <div
           v-for="r in paged"
           :key="r.eventId"
           :class="[
             'q-pa-md',
-            'review',
+            'review-card',
             { 'own-review': r.pubkey === myPubkey },
           ]"
         >
-          <div class="row items-center justify-between q-mb-xs">
-            <div class="row items-center">
-              <q-avatar size="28px" class="q-mr-sm">
+          <!-- Header: Avatar, Name, and Date -->
+          <div class="row items-center justify-between q-mb-sm">
+            <div class="row items-center" style="gap: 10px">
+              <q-avatar size="32px">
                 <q-img
                   v-if="profiles[r.pubkey]?.picture"
                   :src="profiles[r.pubkey].picture"
                   spinner-color="white"
                   spinner-size="xs"
                 />
-                <q-icon v-else name="account_circle" />
+                <q-icon v-else name="account_circle" size="32px" />
               </q-avatar>
-              <div class="text-caption row items-center">
-                <template v-if="hasProfileName(r.pubkey)">
-                  <span class="text-grey-2">{{ displayName(r.pubkey) }}</span>
-                  <span class="monospace text-grey-7 q-ml-xs"
-                    >({{ shortNpub(r.pubkey) }})</span
+              <div class="column" style="gap: 2px">
+                <div class="row items-center" style="gap: 6px">
+                  <span
+                    v-if="hasProfileName(r.pubkey)"
+                    class="text-body2"
+                    style="font-weight: 500"
+                    >{{ displayName(r.pubkey) }}</span
                   >
-                </template>
-                <template v-else>
-                  <span class="monospace text-grey-2">{{
+                  <span v-else class="text-body2 monospace" style="font-weight: 500">{{
                     shortNpub(r.pubkey)
                   }}</span>
-                </template>
-                <q-icon
-                  name="content_copy"
-                  size="14px"
-                  class="q-ml-xs cursor-pointer text-grey-7"
-                  @click="copyNpub(r.pubkey)"
-                />
-                <q-icon
-                  v-if="wotHop(r.pubkey)"
-                  name="verified"
-                  size="14px"
-                  :color="wotColor(wotHop(r.pubkey))"
-                  class="q-ml-xs"
-                >
-                  <q-tooltip
-                    >In your web of trust (hop
-                    {{ wotHop(r.pubkey) }})</q-tooltip
+                  <q-icon
+                    v-if="wotHop(r.pubkey)"
+                    name="verified"
+                    size="14px"
+                    :color="wotColor(wotHop(r.pubkey))"
                   >
-                </q-icon>
+                    <q-tooltip
+                      >In your web of trust (hop
+                      {{ wotHop(r.pubkey) }})</q-tooltip
+                    >
+                  </q-icon>
+                </div>
+                <div class="text-caption text-grey-6">
+                  {{ formatDate(r.created_at) }}
+                </div>
               </div>
             </div>
-            <div class="text-caption text-grey-6">
-              {{ formatDate(r.created_at) }}
-            </div>
+            <q-icon
+              name="content_copy"
+              size="16px"
+              class="cursor-pointer text-grey-7"
+              @click="copyNpub(r.pubkey)"
+            >
+              <q-tooltip>Copy npub</q-tooltip>
+            </q-icon>
           </div>
-          <div class="q-mt-sm">
-            <span v-if="r.rating !== null">⭐ {{ r.rating }}/5</span>
-            <span v-else class="text-grey-6">{{
+
+          <!-- Rating -->
+          <div class="q-mb-xs">
+            <span
+              v-if="r.rating !== null"
+              class="text-body2"
+              style="font-weight: 500"
+              >⭐ {{ r.rating }}/5</span
+            >
+            <span v-else class="text-body2 text-grey-6">{{
               $t("MintRatings.no_rating")
             }}</span>
           </div>
+
+          <!-- Comment -->
           <div
             v-if="r.comment"
-            class="text-body2 q-mt-sm"
-            style="white-space: pre-wrap"
+            class="text-body2"
+            style="white-space: pre-wrap; line-height: 1.5"
           >
-            {{ r.comment || "\u00A0" }}
+            {{ r.comment }}
           </div>
         </div>
 
@@ -201,6 +254,13 @@ export default defineComponent({
   emits: ["close"],
   components: { CreateMintReview, MintInfoContainer },
   methods: {
+    // Calculate percentage for star rating bars
+    ratingPercentage(star: number): number {
+      const total = this.ratingsOnly.length;
+      if (total === 0) return 0;
+      const count = this.ratingDistribution[star] || 0;
+      return (count / total) * 100;
+    },
     formatDate(ts: number) {
       try {
         return new Date(ts * 1000).toLocaleString();
@@ -368,7 +428,18 @@ export default defineComponent({
       return sum / rs.length;
     },
     averageDisplay(): string {
-      return this.average !== null ? this.average.toFixed(2) : "n/a";
+      return this.average !== null ? this.average.toFixed(1) : "n/a";
+    },
+    // Rating distribution for star bars (count of each rating 1-5)
+    ratingDistribution(): Record<number, number> {
+      const dist: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+      this.ratingsOnly.forEach((r: any) => {
+        const rating = Math.floor(r.rating || 0);
+        if (rating >= 1 && rating <= 5) {
+          dist[rating]++;
+        }
+      });
+      return dist;
     },
     filtered(): any[] {
       let list = (this.allReviews || []) as any[];
@@ -492,14 +563,27 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.review {
-  border: 1px solid rgba(128, 128, 128, 0.2);
-  border-radius: 8px;
+.review-card {
+  border: 1px solid rgba(128, 128, 128, 0.15);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
-.own-review {
+
+.review-card:hover {
   background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(128, 128, 128, 0.35);
 }
+
+.own-review {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--q-primary);
+  border-width: 1.5px;
+}
+
+.own-review:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
 .monospace {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     "Liberation Mono", "Courier New", monospace;
