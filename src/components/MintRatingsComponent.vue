@@ -35,7 +35,7 @@
           </div>
 
           <!-- Star Distribution Bars on Right -->
-          <div class="col column justify-center" style="gap: 6px">
+          <div class="col column" style="gap: 6px">
             <div
               v-for="star in [5, 4, 3, 2, 1]"
               :key="star"
@@ -72,12 +72,11 @@
                 />
               </div>
             </div>
+            <!-- Total Ratings Count -->
+            <div class="text-body2 text-grey-5" style="font-weight: 500; text-align: right; margin-top: 4px">
+              {{ totalReviews }} {{ $t("MintRatings.ratings") }}
+            </div>
           </div>
-        </div>
-
-        <!-- Total Ratings Count -->
-        <div class="text-body2 text-grey-5" style="font-weight: 500">
-          {{ totalReviews }} {{ $t("MintRatings.ratings") }}
         </div>
       </div>
 
@@ -244,27 +243,6 @@
     </q-card-section>
   </q-card>
 
-  <!-- Sort Bottom Sheet -->
-  <div v-if="showSortSheet" class="sort-sheet-overlay" @click="closeSortSheet">
-    <div class="sort-sheet" @click.stop>
-      <div class="sort-sheet-header">
-        <h3>{{ $t("MintRatings.sort") }}</h3>
-        <q-btn flat round icon="close" @click="closeSortSheet" class="close-btn" />
-      </div>
-      <div class="sort-options">
-        <div
-          v-for="option in sortOptions"
-          :key="option.value"
-          class="sort-option"
-          :class="{ active: sortMode === option.value }"
-          @click="selectSort(option.value)"
-        >
-          {{ option.label }}
-        </div>
-      </div>
-    </div>
-  </div>
-
   <q-dialog v-model="showCreateReviewDialog" persistent>
     <CreateMintReview
       :mintUrl="url"
@@ -273,6 +251,29 @@
       @close="showCreateReviewDialog = false"
     />
   </q-dialog>
+
+  <!-- Sort Bottom Sheet - Outside card, positioned to viewport -->
+  <teleport to="body">
+    <div v-if="showSortSheet" class="sort-sheet-overlay" @click="closeSortSheet">
+      <div class="sort-sheet" @click.stop>
+        <div class="sort-sheet-header">
+          <h3>{{ $t("MintRatings.sort") }}</h3>
+          <q-btn flat round icon="close" @click="closeSortSheet" class="close-btn" />
+        </div>
+        <div class="sort-options">
+          <div
+            v-for="option in sortOptions"
+            :key="option.value"
+            class="sort-option"
+            :class="{ active: sortMode === option.value }"
+            @click="selectSort(option.value)"
+          >
+            {{ option.label }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </teleport>
 </template>
 
 <script lang="ts">
