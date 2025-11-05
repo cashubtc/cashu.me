@@ -115,86 +115,90 @@
           <div>{{ $t("MintRatings.no_reviews_to_display") }}</div>
         </div>
       </div>
-      <div v-if="hasAnyReviews" class="column" style="gap: 16px">
+      <div v-if="hasAnyReviews" class="column">
         <div
           v-for="r in paged"
           :key="r.eventId"
-          :class="[
-            'q-pa-md',
-            'review-card',
-            { 'own-review': r.pubkey === myPubkey },
-          ]"
+          :class="['review-item', { 'own-review': r.pubkey === myPubkey }]"
         >
-          <!-- Header: Avatar, Name, and Date -->
-          <div class="row items-center justify-between q-mb-sm">
-            <div class="row items-center" style="gap: 10px">
-              <q-avatar size="32px">
-                <q-img
-                  v-if="profiles[r.pubkey]?.picture"
-                  :src="profiles[r.pubkey].picture"
-                  spinner-color="white"
-                  spinner-size="xs"
+          <div class="row items-start" style="gap: 12px">
+            <!-- Avatar on the left -->
+            <q-avatar size="40px" class="review-avatar">
+              <q-img
+                v-if="profiles[r.pubkey]?.picture"
+                :src="profiles[r.pubkey].picture"
+                spinner-color="white"
+                spinner-size="xs"
+              />
+              <q-icon v-else name="account_circle" size="40px" />
+            </q-avatar>
+
+            <!-- Content on the right -->
+            <div class="col">
+              <!-- Name and verified badge -->
+              <div class="row items-center" style="gap: 6px; margin-bottom: 2px">
+                <span
+                  v-if="hasProfileName(r.pubkey)"
+                  class="text-body1"
+                  style="font-weight: 600"
+                  >{{ displayName(r.pubkey) }}</span
+                >
+                <span
+                  v-else
+                  class="text-body1 monospace"
+                  style="font-weight: 600"
+                  >{{ shortNpub(r.pubkey) }}</span
+                >
+                <q-icon
+                  v-if="wotHop(r.pubkey)"
+                  name="verified"
+                  size="14px"
+                  :color="wotColor(wotHop(r.pubkey))"
+                >
+                  <q-tooltip
+                    >In your web of trust (hop {{ wotHop(r.pubkey) }})</q-tooltip
+                  >
+                </q-icon>
+                <q-icon
+                  name="content_copy"
+                  size="14px"
+                  class="cursor-pointer text-grey-7"
+                  @click="copyNpub(r.pubkey)"
+                  style="margin-left: 4px"
+                >
+                  <q-tooltip>Copy npub</q-tooltip>
+                </q-icon>
+              </div>
+
+              <!-- Date and Star Rating on same line -->
+              <div class="row items-center" style="gap: 8px; margin-bottom: 8px">
+                <span class="text-caption text-grey-6">
+                  {{ formatDateOnly(r.created_at) }}
+                </span>
+                <q-rating
+                  v-if="r.rating !== null"
+                  :model-value="r.rating"
+                  readonly
+                  size="12px"
+                  color="amber"
+                  icon="star"
+                  icon-selected="star"
+                  icon-half="star_half"
                 />
-                <q-icon v-else name="account_circle" size="32px" />
-              </q-avatar>
-              <div class="column" style="gap: 2px">
-                <div class="row items-center" style="gap: 6px">
-                  <span
-                    v-if="hasProfileName(r.pubkey)"
-                    class="text-body2"
-                    style="font-weight: 500"
-                    >{{ displayName(r.pubkey) }}</span
-                  >
-                  <span v-else class="text-body2 monospace" style="font-weight: 500">{{
-                    shortNpub(r.pubkey)
-                  }}</span>
-                  <q-icon
-                    v-if="wotHop(r.pubkey)"
-                    name="verified"
-                    size="14px"
-                    :color="wotColor(wotHop(r.pubkey))"
-                  >
-                    <q-tooltip
-                      >In your web of trust (hop
-                      {{ wotHop(r.pubkey) }})</q-tooltip
-                    >
-                  </q-icon>
-                </div>
-                <div class="text-caption text-grey-6">
-                  {{ formatDate(r.created_at) }}
-                </div>
+                <span v-else class="text-caption text-grey-6">{{
+                  $t("MintRatings.no_rating")
+                }}</span>
+              </div>
+
+              <!-- Review Comment -->
+              <div
+                v-if="r.comment"
+                class="text-body2"
+                style="white-space: pre-wrap; line-height: 1.5; color: rgba(255, 255, 255, 0.87)"
+              >
+                {{ r.comment }}
               </div>
             </div>
-            <q-icon
-              name="content_copy"
-              size="16px"
-              class="cursor-pointer text-grey-7"
-              @click="copyNpub(r.pubkey)"
-            >
-              <q-tooltip>Copy npub</q-tooltip>
-            </q-icon>
-          </div>
-
-          <!-- Rating -->
-          <div class="q-mb-xs">
-            <span
-              v-if="r.rating !== null"
-              class="text-body2"
-              style="font-weight: 500"
-              >⭐ {{ r.rating }}/5</span
-            >
-            <span v-else class="text-body2 text-grey-6">{{
-              $t("MintRatings.no_rating")
-            }}</span>
-          </div>
-
-          <!-- Comment -->
-          <div
-            v-if="r.comment"
-            class="text-body2"
-            style="white-space: pre-wrap; line-height: 1.5"
-          >
-            {{ r.comment }}
           </div>
         </div>
 
@@ -264,6 +268,18 @@ export default defineComponent({
     formatDate(ts: number) {
       try {
         return new Date(ts * 1000).toLocaleString();
+      } catch {
+        return "";
+      }
+    },
+    formatDateOnly(ts: number) {
+      try {
+        const date = new Date(ts * 1000);
+        return date.toLocaleDateString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        });
       } catch {
         return "";
       }
@@ -563,25 +579,29 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.review-card {
-  border: 1px solid rgba(128, 128, 128, 0.15);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.02);
-  transition: background 0.2s ease, border-color 0.2s ease;
+.review-item {
+  padding: 20px 0;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.1);
 }
 
-.review-card:hover {
-  background: rgba(255, 255, 255, 0.04);
+.review-item:last-child {
+  border-bottom: none;
+}
+
+.review-item:first-child {
+  padding-top: 0;
 }
 
 .own-review {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: var(--q-primary);
-  border-width: 1.5px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 20px 16px;
+  margin: 0 -16px;
+  border-radius: 8px;
+  border-bottom: none;
 }
 
-.own-review:hover {
-  background: rgba(255, 255, 255, 0.06);
+.review-avatar {
+  flex-shrink: 0;
 }
 
 .monospace {
