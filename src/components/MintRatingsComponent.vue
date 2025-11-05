@@ -42,8 +42,16 @@
               class="row items-center no-wrap"
               style="gap: 8px"
             >
-              <!-- Star Icon -->
-              <q-icon name="star" size="14px" class="text-grey-6" />
+              <!-- Star Icons (show only the number of stars for this rating level) -->
+              <div class="row items-center" style="gap: 1px">
+                <q-icon
+                  v-for="i in star"
+                  :key="i"
+                  name="star"
+                  size="12px"
+                  class="text-grey-6"
+                />
+              </div>
               <!-- Distribution Bar -->
               <div
                 class="col"
@@ -105,6 +113,7 @@
         @click="showSortSheet = true"
       >
         <div class="row items-center" style="gap: 8px">
+          <q-icon name="sort" size="14px" class="text-grey-7" />
           <span class="text-body2" style="font-weight: 600">{{
             $t("MintRatings.sort")
           }}</span>
