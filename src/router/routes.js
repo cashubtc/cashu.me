@@ -33,6 +33,16 @@ const routes = [
     ],
   },
   {
+    path: "/createreview",
+    component: () => import("layouts/FullscreenLayout.vue"),
+    children: [
+      {
+        path: "",
+        component: () => import("src/pages/CreateMintReviewPage.vue"),
+      },
+    ],
+  },
+  {
     path: "/restore",
     component: () => import("layouts/FullscreenLayout.vue"),
     children: [{ path: "", component: () => import("src/pages/Restore.vue") }],

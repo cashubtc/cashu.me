@@ -315,14 +315,6 @@
       </div>
     </div>
   </div>
-  <q-dialog v-model="showCreateReviewDialog" persistent>
-    <CreateMintReview
-      :mintUrl="mintData.url"
-      :mintInfo="mintData.info"
-      @published="onReviewPublished"
-      @close="showCreateReviewDialog = false"
-    />
-  </q-dialog>
 </template>
 
 <script lang="ts">
@@ -335,7 +327,6 @@ import EditMintDialog from "src/components/EditMintDialog.vue";
 import RemoveMintDialog from "src/components/RemoveMintDialog.vue";
 import MintMotdMessage from "src/components/MintMotdMessage.vue";
 import MintAuditInfo from "src/components/MintAuditInfo.vue";
-import CreateMintReview from "src/components/CreateMintReview.vue";
 import {
   QrCode as QrCodeIcon,
   Link as LinkIcon,
@@ -370,7 +361,6 @@ export default defineComponent({
     RemoveMintDialog,
     MintMotdMessage,
     MintAuditInfo,
-    CreateMintReview,
   },
   data: function () {
     return {
@@ -406,7 +396,6 @@ export default defineComponent({
       mintData: {},
       mintToEdit: {},
       mintToRemove: {},
-      showCreateReviewDialog: false,
     };
   },
   computed: {
@@ -474,14 +463,12 @@ export default defineComponent({
       this.showRemoveMintDialog = true;
     },
     openCreateReviewDialog() {
-      this.showCreateReviewDialog = true;
-    },
-    onReviewPublished() {
-      this.$q.notify({
-        message: "Review published",
-        color: "positive",
-        position: "top",
-        timeout: 1000,
+      // Navigate to create review page
+      this.$router.push({
+        path: "/createreview",
+        query: {
+          mintUrl: this.mintData.url,
+        },
       });
     },
     dismissMotd() {

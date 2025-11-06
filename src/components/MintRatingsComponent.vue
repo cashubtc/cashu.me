@@ -105,7 +105,7 @@
           rounded
           class="q-px-lg"
           style="font-weight: 500"
-          @click="showCreateReviewDialog = true"
+          @click="openCreateReview"
         >
           {{ $t("MintRatings.actions.write_review") }}
         </q-btn>
@@ -263,15 +263,6 @@
     </q-card-section>
   </q-card>
 
-  <q-dialog v-model="showCreateReviewDialog" persistent>
-    <CreateMintReview
-      :mintUrl="url"
-      :mintInfo="mintInfo"
-      @published="showCreateReviewDialog = false"
-      @close="showCreateReviewDialog = false"
-    />
-  </q-dialog>
-
   <!-- Sort Bottom Sheet - Outside card, positioned to viewport -->
   <teleport to="body">
     <div
@@ -311,7 +302,6 @@ import { defineComponent } from "vue";
 import { useNostrStore } from "src/stores/nostr";
 import NDK from "@nostr-dev-kit/ndk";
 import { nip19 } from "nostr-tools";
-import CreateMintReview from "./CreateMintReview.vue";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
 import { useNostrUserStore } from "src/stores/nostrUser";
 
@@ -324,7 +314,7 @@ export default defineComponent({
     mintInfo: { type: Object, required: false },
   },
   emits: ["close"],
-  components: { CreateMintReview },
+  components: {},
   methods: {
     // Calculate percentage for star rating bars
     ratingPercentage(star: number): number {
@@ -451,6 +441,15 @@ export default defineComponent({
       this.sortMode = value as "newest" | "oldest" | "highest" | "lowest";
       this.closeSortSheet();
     },
+    openCreateReview() {
+      // Navigate to create review page
+      this.$router.push({
+        path: "/createreview",
+        query: {
+          mintUrl: this.url,
+        },
+      });
+    },
   },
   data() {
     return {
@@ -473,7 +472,6 @@ export default defineComponent({
       page: 1,
       profiles: {} as Record<string, { name?: string; picture?: string }>,
       loadingProfiles: new Set<string>(),
-      showCreateReviewDialog: false,
       showSortSheet: false,
     };
   },
@@ -670,7 +668,7 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   width: 100%;
-  margin-top: 20px;
+  margin-top: 50px;
 }
 
 .mint-header {

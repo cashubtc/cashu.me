@@ -752,7 +752,7 @@ export default {
       review: { label: "Review (optional)" },
     },
     actions: {
-      publish: { label: "Publish", in_progress: "Publishing…" },
+      publish: { label: "Submit Review", in_progress: "Submitting…" },
     },
   },
   RestoreView: {

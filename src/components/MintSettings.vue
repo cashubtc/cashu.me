@@ -338,15 +338,6 @@
       </q-list>
     </div>
   </div>
-  <q-dialog v-model="showCreateReviewDialog" persistent>
-    <CreateMintReview
-      :key="selectedRatingsUrl"
-      :mintUrl="selectedRatingsUrl"
-      :mintInfo="selectedMintInfo"
-      @published="showCreateReviewDialog = false"
-      @close="showCreateReviewDialog = false"
-    />
-  </q-dialog>
 </template>
 <script lang="ts">
 import { ref, defineComponent, onMounted, onBeforeUnmount } from "vue";
@@ -367,7 +358,6 @@ import { notifyError, notifyWarning } from "src/js/notify";
 import { EventBus } from "../js/eventBus";
 import AddMintDialog from "src/components/AddMintDialog.vue";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
-import CreateMintReview from "./CreateMintReview.vue";
 import MintInfoContainer from "./MintInfoContainer.vue";
 
 // Mints that should not show reviews
@@ -381,7 +371,6 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     AddMintDialog,
-    CreateMintReview,
     MintInfoContainer,
   },
   props: {},
@@ -429,9 +418,6 @@ export default defineComponent({
       activatingMintUrl: "",
       mintInfoCache: new Map(),
       fetchingMintInfo: new Set(),
-      selectedRatingsUrl: "",
-      showCreateReviewDialog: false,
-      selectedMintInfo: null,
     };
   },
   computed: {
@@ -633,11 +619,6 @@ export default defineComponent({
           allowCreateReview: "true",
         },
       });
-    },
-    openCreateReview(mint) {
-      this.selectedMintInfo = mint.info || null;
-      this.selectedRatingsUrl = mint.url;
-      this.showCreateReviewDialog = true;
     },
     getMintInfoFromCache(url) {
       return this.mintInfoCache.get(url);
