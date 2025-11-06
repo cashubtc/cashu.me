@@ -78,12 +78,28 @@
                 />
               </div>
             </div>
-            <!-- Total Ratings Count -->
+            <!-- WoT Filter and Total Ratings Count -->
             <div
-              class="text-body2 text-grey-5"
-              style="font-weight: 500; text-align: right; margin-top: 4px"
+              class="row items-center justify-end"
+              style="gap: 12px; margin-top: 4px"
             >
-              {{ totalReviews }} {{ $t("MintRatings.ratings") }}
+              <div class="row items-center" style="gap: 6px">
+                <span
+                  class="text-caption text-grey-6"
+                  style="font-size: 0.7rem"
+                >
+                  Web of trust
+                </span>
+                <q-toggle
+                  v-model="filterByWoT"
+                  size="xs"
+                  color="primary"
+                  dense
+                />
+              </div>
+              <div class="text-body2 text-grey-5" style="font-weight: 500">
+                {{ totalReviews }} {{ $t("MintRatings.ratings") }}
+              </div>
             </div>
           </div>
         </div>
@@ -464,6 +480,7 @@ export default defineComponent({
         { label: this.$t("MintRatings.sort_options.lowest"), value: "lowest" },
       ],
       onlyWithComment: false,
+      filterByWoT: true, // Default: only show Web of Trust reviews
       rowsPerPage: 10,
       rowsPerPageOptions: [5, 10, 20, 50].map((v) => ({
         label: String(v),
@@ -507,10 +524,12 @@ export default defineComponent({
       return Array.isArray(this.allReviews) && this.allReviews.length > 0;
     },
     totalReviews(): number {
-      return this.allReviews?.length || 0;
+      // Show count based on current filter state
+      return this.filtered?.length || 0;
     },
     ratingsOnly(): any[] {
-      return (this.allReviews || []).filter(
+      // Use filtered reviews instead of all reviews
+      return (this.filtered || []).filter(
         (r: any) => typeof r.rating === "number"
       );
     },
@@ -544,6 +563,16 @@ export default defineComponent({
       let list = (this.allReviews || []) as any[];
       if (this.onlyWithComment)
         list = list.filter((r) => (r.comment || "").trim().length > 0);
+      // Filter by Web of Trust if enabled
+      if (this.filterByWoT) {
+        list = list.filter((r) => {
+          // Always include the user's own review
+          if (r.pubkey === this.myPubkey) return true;
+          // Include if in Web of Trust
+          const hop = this.wotHop(r.pubkey);
+          return typeof hop === "number";
+        });
+      }
       return list;
     },
     sorted(): any[] {
@@ -619,6 +648,10 @@ export default defineComponent({
   },
 
   watch: {
+    filterByWoT() {
+      // Reset to first page when filter changes
+      this.page = 1;
+    },
     paged: {
       handler() {
         // Load profiles when pagination changes (new page, different reviews shown)
