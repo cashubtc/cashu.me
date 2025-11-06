@@ -26,6 +26,13 @@ const routes = [
     ],
   },
   {
+    path: "/mintratings",
+    component: () => import("layouts/FullscreenLayout.vue"),
+    children: [
+      { path: "", component: () => import("src/pages/MintRatingsPage.vue") },
+    ],
+  },
+  {
     path: "/restore",
     component: () => import("layouts/FullscreenLayout.vue"),
     children: [{ path: "", component: () => import("src/pages/Restore.vue") }],

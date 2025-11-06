@@ -1,10 +1,12 @@
 <template>
-  <q-card style="min-width: 360px; max-width: 820px; width: 100%">
+  <q-card
+    class="bg-dark"
+    style="min-width: 360px; max-width: 820px; width: 100%"
+  >
     <q-card-section class="row items-center justify-between">
       <div class="row items-center">
         <div class="text-h6">{{ $t("MintRatings.title") }}</div>
       </div>
-      <q-btn flat round dense icon="close" @click="$emit('close')" />
     </q-card-section>
     <q-separator />
 

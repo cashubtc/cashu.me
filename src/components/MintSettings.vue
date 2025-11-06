@@ -338,16 +338,6 @@
       </q-list>
     </div>
   </div>
-  <q-dialog v-model="showRatingsDialog" persistent>
-    <MintRatingsComponent
-      :key="selectedRatingsUrl"
-      :url="selectedRatingsUrl"
-      :reviews="selectedReviews"
-      :allowCreateReview="true"
-      :mintInfo="selectedMintInfo"
-      @close="showRatingsDialog = false"
-    />
-  </q-dialog>
   <q-dialog v-model="showCreateReviewDialog" persistent>
     <CreateMintReview
       :key="selectedRatingsUrl"
@@ -377,7 +367,6 @@ import { notifyError, notifyWarning } from "src/js/notify";
 import { EventBus } from "../js/eventBus";
 import AddMintDialog from "src/components/AddMintDialog.vue";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
-import MintRatingsComponent from "./MintRatingsComponent.vue";
 import CreateMintReview from "./CreateMintReview.vue";
 import MintInfoContainer from "./MintInfoContainer.vue";
 
@@ -392,7 +381,6 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     AddMintDialog,
-    MintRatingsComponent,
     CreateMintReview,
     MintInfoContainer,
   },
@@ -441,9 +429,7 @@ export default defineComponent({
       activatingMintUrl: "",
       mintInfoCache: new Map(),
       fetchingMintInfo: new Set(),
-      showRatingsDialog: false,
       selectedRatingsUrl: "",
-      selectedReviews: [],
       showCreateReviewDialog: false,
       selectedMintInfo: null,
     };
@@ -639,11 +625,14 @@ export default defineComponent({
       }
     },
     openReviews(url, mint) {
-      const rec = this.recommendations.find((r) => r.url === url);
-      this.selectedRatingsUrl = url;
-      this.selectedReviews = rec ? rec.reviews : [];
-      this.selectedMintInfo = mint.info || null;
-      this.showRatingsDialog = true;
+      // Navigate to ratings page
+      this.$router.push({
+        path: "/mintratings",
+        query: {
+          mintUrl: url,
+          allowCreateReview: "true",
+        },
+      });
     },
     openCreateReview(mint) {
       this.selectedMintInfo = mint.info || null;

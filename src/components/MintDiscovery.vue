@@ -120,45 +120,31 @@
         </TransitionGroup>
       </q-list>
     </div>
-
-    <q-dialog v-model="showRatingsDialog" persistent>
-      <MintRatingsComponent
-        :key="selectedRatingsUrl"
-        :url="selectedRatingsUrl"
-        :reviews="selectedReviews"
-        :allowCreateReview="allowCreateReview"
-        :mintInfo="selectedMintInfo"
-        @close="showRatingsDialog = false"
-      />
-    </q-dialog>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, computed, watch, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
 import { useMintsStore, MintClass } from "src/stores/mints";
-import MintRatingsComponent from "../components/MintRatingsComponent.vue";
 import MintInfoContainer from "./MintInfoContainer.vue";
 import { notifyError, notifySuccess } from "src/js/notify";
 
 export default defineComponent({
   name: "MintDiscovery",
-  components: { MintRatingsComponent, MintInfoContainer },
+  components: { MintInfoContainer },
   props: {
     infoTimeoutMs: { type: Number, default: 5000 },
     autoDiscover: { type: Boolean, default: false },
     allowCreateReview: { type: Boolean, default: true },
   },
   setup(props) {
+    const router = useRouter();
     const recsStore = useMintRecommendationsStore();
     const mints = useMintsStore();
 
     const discovering = ref(false);
-    const showRatingsDialog = ref(false);
-    const selectedRatingsUrl = ref("");
-    const selectedReviews = ref<any[]>([]);
-    const selectedMintInfo = ref<any | null>(null);
 
     const recommendations = computed(() => recsStore.recommendations);
     const isExistingMint = (url: string) =>
@@ -238,13 +224,14 @@ export default defineComponent({
       await mints.addMint({ url }, true);
     };
     const openReviews = (url: string) => {
-      const rec = recommendations.value.find((r) => r.url === url);
-      if (!rec) return;
-      selectedRatingsUrl.value = url;
-      // Reviews are loaded from IndexedDB via store inside the dialog
-      selectedReviews.value = [];
-      selectedMintInfo.value = recsStore.getHttpInfoForUrl(url) || null;
-      showRatingsDialog.value = true;
+      // Navigate to ratings page
+      router.push({
+        path: "/mintratings",
+        query: {
+          mintUrl: url,
+          allowCreateReview: "true",
+        },
+      });
     };
 
     return {
@@ -259,10 +246,6 @@ export default defineComponent({
       isExistingMint,
       addDiscovered,
       openReviews,
-      showRatingsDialog,
-      selectedRatingsUrl,
-      selectedReviews,
-      selectedMintInfo,
     };
   },
 });
