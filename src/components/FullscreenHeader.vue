@@ -1,5 +1,5 @@
 <template>
-  <q-header class="bg-marginal-bg" reveal>
+  <q-header class="bg-dark">
     <q-toolbar>
       <q-btn
         flat
@@ -14,7 +14,6 @@
           {{ $t("FullscreenHeader.actions.back.label") }}
         </span>
       </q-btn>
-      <!-- <q-toolbar-title> </q-toolbar-title> -->
     </q-toolbar>
   </q-header>
 </template>

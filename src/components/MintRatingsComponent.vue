@@ -3,21 +3,25 @@
     class="bg-dark"
     style="min-width: 360px; max-width: 820px; width: 100%"
   >
-    <q-card-section class="row items-center justify-between">
-      <div class="row items-center">
-        <div class="text-h6">{{ $t("MintRatings.title") }}</div>
-      </div>
-    </q-card-section>
-    <q-separator />
-
-    <q-card-section class="q-pb-md">
-      <!-- Mint Info -->
-      <div class="row items-center q-mb-lg">
-        <MintInfoContainer
-          :iconUrl="mintInfo?.icon_url"
-          :name="mintInfo?.name"
-          :url="url"
-        />
+    <q-card-section class="q-pt-md q-pb-md">
+      <!-- Mint Header - Matching MintDetailsPage style -->
+      <div class="mint-header-container q-mb-lg">
+        <div class="mint-header q-pa-md">
+          <q-avatar size="56px" class="q-mb-sm">
+            <img
+              v-if="mintInfo?.icon_url"
+              :src="mintInfo.icon_url"
+              alt="Mint Profile"
+            />
+            <q-icon v-else name="account_balance" size="36px" color="grey-7" />
+          </q-avatar>
+          <div class="mint-name q-mb-xs">
+            {{ mintInfo?.name || "Mint" }}
+          </div>
+          <div class="mint-url text-grey-6">
+            {{ url }}
+          </div>
+        </div>
       </div>
 
       <!-- Rating Summary Section - Apple Podcasts Style -->
@@ -309,7 +313,6 @@ import NDK from "@nostr-dev-kit/ndk";
 import { nip19 } from "nostr-tools";
 import CreateMintReview from "./CreateMintReview.vue";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
-import MintInfoContainer from "./MintInfoContainer.vue";
 import { useNostrUserStore } from "src/stores/nostrUser";
 
 export default defineComponent({
@@ -321,7 +324,7 @@ export default defineComponent({
     mintInfo: { type: Object, required: false },
   },
   emits: ["close"],
-  components: { CreateMintReview, MintInfoContainer },
+  components: { CreateMintReview },
   methods: {
     // Calculate percentage for star rating bars
     ratingPercentage(star: number): number {
@@ -661,6 +664,39 @@ export default defineComponent({
 </script>
 
 <style scoped>
+/* Mint Header - Matching MintDetailsPage style */
+.mint-header-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.mint-header {
+  width: 100%;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.mint-name {
+  font-size: 24px;
+  font-weight: 600;
+  text-align: center;
+  color: white;
+}
+
+.mint-url {
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  word-break: break-all;
+}
+
 .review-item {
   padding: 20px 0;
   border-bottom: 1px solid rgba(128, 128, 128, 0.1);
