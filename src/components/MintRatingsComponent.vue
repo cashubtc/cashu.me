@@ -73,7 +73,10 @@
               </div>
             </div>
             <!-- Total Ratings Count -->
-            <div class="text-body2 text-grey-5" style="font-weight: 500; text-align: right; margin-top: 4px">
+            <div
+              class="text-body2 text-grey-5"
+              style="font-weight: 500; text-align: right; margin-top: 4px"
+            >
               {{ totalReviews }} {{ $t("MintRatings.ratings") }}
             </div>
           </div>
@@ -151,7 +154,10 @@
             <!-- Content on the right -->
             <div class="col">
               <!-- Name and verified badge -->
-              <div class="row items-center" style="gap: 6px; margin-bottom: 2px">
+              <div
+                class="row items-center"
+                style="gap: 6px; margin-bottom: 2px"
+              >
                 <span
                   v-if="hasProfileName(r.pubkey)"
                   class="text-body1"
@@ -171,7 +177,8 @@
                   :color="wotColor(wotHop(r.pubkey))"
                 >
                   <q-tooltip
-                    >In your web of trust (hop {{ wotHop(r.pubkey) }})</q-tooltip
+                    >In your web of trust (hop
+                    {{ wotHop(r.pubkey) }})</q-tooltip
                   >
                 </q-icon>
                 <q-icon
@@ -186,7 +193,10 @@
               </div>
 
               <!-- Date and Star Rating on same line -->
-              <div class="row items-center" style="gap: 8px; margin-bottom: 8px">
+              <div
+                class="row items-center"
+                style="gap: 8px; margin-bottom: 8px"
+              >
                 <span class="text-caption text-grey-6">
                   {{ formatDateOnly(r.created_at) }}
                 </span>
@@ -209,7 +219,11 @@
               <div
                 v-if="r.comment"
                 class="text-body2"
-                style="white-space: pre-wrap; line-height: 1.5; color: rgba(255, 255, 255, 0.87)"
+                style="
+                  white-space: pre-wrap;
+                  line-height: 1.5;
+                  color: rgba(255, 255, 255, 0.87);
+                "
               >
                 {{ r.comment }}
               </div>
@@ -254,11 +268,21 @@
 
   <!-- Sort Bottom Sheet - Outside card, positioned to viewport -->
   <teleport to="body">
-    <div v-if="showSortSheet" class="sort-sheet-overlay" @click="closeSortSheet">
+    <div
+      v-if="showSortSheet"
+      class="sort-sheet-overlay"
+      @click="closeSortSheet"
+    >
       <div class="sort-sheet" @click.stop>
         <div class="sort-sheet-header">
           <h3>{{ $t("MintRatings.sort") }}</h3>
-          <q-btn flat round icon="close" @click="closeSortSheet" class="close-btn" />
+          <q-btn
+            flat
+            round
+            icon="close"
+            @click="closeSortSheet"
+            class="close-btn"
+          />
         </div>
         <div class="sort-options">
           <div
@@ -429,7 +453,10 @@ export default defineComponent({
       sortOptions: [
         { label: this.$t("MintRatings.sort_options.newest"), value: "newest" },
         { label: this.$t("MintRatings.sort_options.oldest"), value: "oldest" },
-        { label: this.$t("MintRatings.sort_options.highest"), value: "highest" },
+        {
+          label: this.$t("MintRatings.sort_options.highest"),
+          value: "highest",
+        },
         { label: this.$t("MintRatings.sort_options.lowest"), value: "lowest" },
       ],
       onlyWithComment: false,
@@ -494,7 +521,9 @@ export default defineComponent({
       return this.average !== null ? this.average.toFixed(1) : "n/a";
     },
     currentSortLabel(): string {
-      const option = this.sortOptions.find((opt) => opt.value === this.sortMode);
+      const option = this.sortOptions.find(
+        (opt) => opt.value === this.sortMode
+      );
       return option ? option.label : "";
     },
     // Rating distribution for star bars (count of each rating 1-5)

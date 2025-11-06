@@ -114,6 +114,7 @@
                 <div
                   class="text-grey-5"
                   v-if="!isMintExcludedFromReviews(mint.url)"
+                  style="line-height: 1.2; text-align: right"
                 >
                   <template
                     v-if="
@@ -121,23 +122,22 @@
                       getRecommendation(mint.url).averageRating !== null
                     "
                   >
-                    <span>
+                    <div style="font-weight: 400">
                       ⭐
                       {{ getRecommendation(mint.url).averageRating.toFixed(2) }}
-                      ·
+                    </div>
+                    <div style="font-weight: 400; font-size: 0.9em">
                       {{ getRecommendation(mint.url).reviewsCount }}
                       <span
-                        class="text-primary cursor-pointer"
-                        style="text-decoration: underline"
+                        class="text-grey-5 cursor-pointer"
                         @click.stop="openReviews(mint.url, mint)"
                         >{{ $t("MintSettings.reviews_text") }}</span
                       >
-                    </span>
+                    </div>
                   </template>
                   <template v-else>
                     <span
-                      class="text-primary cursor-pointer"
-                      style="text-decoration: underline"
+                      class="text-grey-5 cursor-pointer"
                       @click.stop="openReviews(mint.url, mint)"
                     >
                       {{ $t("MintSettings.no_reviews_yet") }}

@@ -78,21 +78,23 @@
                         :url="rec.url"
                       />
                     </div>
-                    <div class="row">
+                    <div class="column" style="align-items: flex-end">
                       <div
                         class="text-grey-5 q-mt-xs"
                         v-if="avgFor(rec.url) !== null && countFor(rec.url) > 0"
+                        style="line-height: 1.2; text-align: right"
                       >
-                        <span>
-                          ⭐ {{ (avgFor(rec.url) ?? 0).toFixed(2) }} ·
+                        <div style="font-weight: 400">
+                          ⭐ {{ (avgFor(rec.url) ?? 0).toFixed(2) }}
+                        </div>
+                        <div style="font-weight: 400; font-size: 0.9em">
                           {{ countFor(rec.url) }}
                           <span
-                            class="text-primary cursor-pointer"
-                            style="text-decoration: underline"
+                            class="text-grey-5 cursor-pointer"
                             @click.stop="openReviews(rec.url)"
                             >{{ $t("MintSettings.reviews_text") }}</span
                           >
-                        </span>
+                        </div>
                       </div>
                       <div class="text-grey-7 q-mt-xs" v-else>
                         <span>{{ $t("MintRatings.no_reviews") }}</span>
