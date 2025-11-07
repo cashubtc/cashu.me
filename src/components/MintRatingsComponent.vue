@@ -149,7 +149,7 @@
 
     <q-separator v-if="hasAnyReviews" />
 
-    <q-card-section style="max-height: 60vh; overflow-y: auto">
+    <q-card-section>
       <div v-if="!hasAnyReviews" class="text-grey-6">
         <div class="row items-center justify-center">
           <div>{{ $t("MintRatings.no_reviews_to_display") }}</div>

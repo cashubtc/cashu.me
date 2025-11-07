@@ -732,7 +732,7 @@ export default {
     no_reviews_to_display: "No reviews to display.",
     no_rating: "No rating",
     out_of: "out of",
-    rows: "Rows",
+    rows: "Reviews",
     sort: "Sort",
     sort_options: {
       newest: "Newest",
