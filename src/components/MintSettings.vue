@@ -122,22 +122,35 @@
                       getRecommendation(mint.url).averageRating !== null
                     "
                   >
-                    <div style="font-weight: 400">
-                      ⭐
-                      {{ getRecommendation(mint.url).averageRating.toFixed(2) }}
-                    </div>
-                    <div style="font-weight: 400; font-size: 0.9em">
-                      {{ getRecommendation(mint.url).reviewsCount }}
+                    <!-- Star rating and review count - clickable, underline only on count -->
+                    <div
+                      style="
+                        font-weight: 400;
+                        display: flex;
+                        align-items: center;
+                        justify-content: flex-end;
+                        gap: 6px;
+                        cursor: pointer;
+                      "
+                      @click.stop="openReviews(mint.url, mint)"
+                    >
+                      <span>
+                        ⭐
+                        {{
+                          getRecommendation(mint.url).averageRating.toFixed(2)
+                        }}
+                      </span>
                       <span
-                        class="text-grey-5 cursor-pointer"
-                        @click.stop="openReviews(mint.url, mint)"
-                        >{{ $t("MintSettings.reviews_text") }}</span
+                        style="font-size: 0.9em; text-decoration: underline"
                       >
+                        ({{ getRecommendation(mint.url).reviewsCount }})
+                      </span>
                     </div>
                   </template>
                   <template v-else>
                     <span
                       class="text-grey-5 cursor-pointer"
+                      style="text-decoration: underline"
                       @click.stop="openReviews(mint.url, mint)"
                     >
                       {{ $t("MintSettings.no_reviews_yet") }}
