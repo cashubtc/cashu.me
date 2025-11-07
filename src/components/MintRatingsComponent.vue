@@ -480,7 +480,7 @@ export default defineComponent({
         { label: this.$t("MintRatings.sort_options.lowest"), value: "lowest" },
       ],
       onlyWithComment: false,
-      filterByWoT: true, // Default: only show Web of Trust reviews
+      filterByWoT: false, // Default: show all reviews
       rowsPerPage: 10,
       rowsPerPageOptions: [5, 10, 20, 50].map((v) => ({
         label: String(v),
@@ -577,15 +577,8 @@ export default defineComponent({
     },
     sorted(): any[] {
       const list = [...this.filtered];
-      // Sort: by hop distance (1 before 2, etc.; non-WOT last), then by selected mode
-      const hopValue = (pk: string) => {
-        const hop = this.wotHop(pk);
-        return typeof hop === "number" ? hop : Number.POSITIVE_INFINITY;
-      };
+      // Sort based on selected sort mode only
       list.sort((a, b) => {
-        const ah = hopValue(a.pubkey);
-        const bh = hopValue(b.pubkey);
-        if (ah !== bh) return ah - bh; // closer hops first; non-WOT last
         switch (this.sortMode) {
           case "oldest":
             return (a.created_at || 0) - (b.created_at || 0);
@@ -593,7 +586,7 @@ export default defineComponent({
             return (b.rating || 0) - (a.rating || 0);
           case "lowest":
             return (a.rating || 0) - (b.rating || 0);
-          default:
+          default: // "newest"
             return (b.created_at || 0) - (a.created_at || 0);
         }
       });
