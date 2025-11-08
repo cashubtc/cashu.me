@@ -1,5 +1,8 @@
 <template>
-  <div :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'">
+  <div
+    :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
+    class="display-token-fullscreen"
+  >
     <!-- Header -->
     <div class="row items-center q-pa-md" style="position: relative">
       <q-btn
@@ -28,120 +31,93 @@
         >
       </div>
     </div>
-    <q-card-section class="q-pa-none">
-      <div v-if="qrCodeFragment" class="row justify-center q-mb-md">
-        <div class="col-12 col-sm-11 col-md-8 q-px-md">
-          <q-responsive :ratio="1" class="q-mx-none">
-            <vue-qrcode
-              :value="qrCodeFragment"
-              :options="{ width: 400 }"
-              class="rounded-borders"
-              style="width: 100%"
-              @click="copyText(sendData.tokensBase64)"
-            >
-            </vue-qrcode>
-          </q-responsive>
-          <div style="height: 2px">
-            <q-linear-progress
-              v-if="runnerActive"
-              indeterminate
-              color="primary"
-            />
-          </div>
-        </div>
-      </div>
-      <div class="q-pb-xs q-ba-none q-gutter-sm">
-        <q-btn
-          v-if="showAnimatedQR"
-          flat
-          style="font-size: 10px"
-          color="grey"
-          class="q-ma-none"
-          @click="changeSpeed"
-        >
-          <q-icon name="speed" style="margin-right: 8px"></q-icon>
-          Speed: {{ fragmentSpeedLabel }}
-        </q-btn>
-        <q-badge
-          :color="!isV4Token ? 'primary' : 'grey'"
-          :label="isV4Token ? 'V4' : 'V3'"
-          class="q-my-sm q-mx-md cursor-pointer"
-          @click="toggleTokenEncoding"
-          :outline="isV4Token"
-        />
-        <q-btn
-          v-if="showAnimatedQR"
-          flat
-          style="font-size: 10px"
-          class="q-ma-none"
-          color="grey"
-          @click="changeSize"
-        >
-          <q-icon name="zoom_in" style="margin-right: 8px"></q-icon>
-          Size: {{ fragmentLengthLabel }}
-        </q-btn>
-      </div>
-      <q-card-section class="q-pa-sm">
-        <div class="row justify-center q-pt-sm">
-          <q-item-label style="font-size: 30px" class="text-weight-bold">
-            <q-icon
-              :name="
-                sendData.historyToken.amount >= 0
-                  ? 'call_received'
-                  : 'call_made'
-              "
-              :color="
-                sendData.historyToken.status === 'paid'
-                  ? sendData.historyToken.amount >= 0
-                    ? 'green'
-                    : 'red'
-                  : ''
-              "
-              class="q-mr-xs q-mb-xs"
-              size="sm"
-            />
-            <strong>{{ displayUnit }}</strong></q-item-label
+    <!-- Content area -->
+    <div class="content-area">
+      <q-card-section class="q-pa-none">
+        <div v-if="qrCodeFragment" class="row justify-center q-mb-md">
+          <div
+            class="col-12 col-sm-11 col-md-8 q-px-md"
+            style="max-width: 600px"
           >
-        </div>
-        <div v-if="paidFees" class="row justify-center q-pt-sm">
-          <q-item-label class="text-weight-bold">
-            Fee: {{ formatCurrency(paidFees, tokenUnit) }}
-          </q-item-label>
-        </div>
-        <div class="row justify-center q-pt-md">
-          <TokenInformation
-            :encodedToken="sendData.tokensBase64"
-            :showAmount="false"
-            :showP2PKCheck="false"
-          />
-        </div>
-        <!-- Full-width primary copy button -->
-        <div class="row justify-center q-pb-md q-pt-sm">
-          <div class="col-12 col-sm-11 col-md-8 q-px-md">
-            <q-btn
-              class="full-width"
-              unelevated
-              size="lg"
-              color="primary"
-              rounded
-              @click="copyText(sendData.tokensBase64)"
-            >
-              {{ $t("SendTokenDialog.actions.copy_tokens.label") }}
-            </q-btn>
+            <q-responsive :ratio="1" class="q-mx-none">
+              <vue-qrcode
+                :value="qrCodeFragment"
+                :options="{ width: 400 }"
+                class="rounded-borders"
+                style="width: 100%"
+                @click="copyTokens"
+              >
+              </vue-qrcode>
+            </q-responsive>
+            <div style="height: 2px">
+              <q-linear-progress
+                v-if="runnerActive"
+                indeterminate
+                color="primary"
+              />
+            </div>
           </div>
         </div>
-        <div
-          v-if="
-            sendData.paymentRequest &&
-            sendData.historyToken.amount < 0 &&
-            sendData.historyToken.status === 'pending'
-          "
-          class="row justify-center q-pt-sm"
-        >
-          <SendPaymentRequest />
+        <div class="q-pb-xs q-ba-none q-gutter-sm">
+          <q-btn
+            v-if="showAnimatedQR"
+            flat
+            style="font-size: 10px"
+            color="grey"
+            class="q-ma-none"
+            @click="changeSpeed"
+          >
+            <q-icon name="speed" style="margin-right: 8px"></q-icon>
+            Speed: {{ fragmentSpeedLabel }}
+          </q-btn>
+          <q-badge
+            :color="!isV4Token ? 'primary' : 'grey'"
+            :label="isV4Token ? 'V4' : 'V3'"
+            class="q-my-sm q-mx-md cursor-pointer"
+            @click="toggleTokenEncoding"
+            :outline="isV4Token"
+          />
+          <q-btn
+            v-if="showAnimatedQR"
+            flat
+            style="font-size: 10px"
+            class="q-ma-none"
+            color="grey"
+            @click="changeSize"
+          >
+            <q-icon name="zoom_in" style="margin-right: 8px"></q-icon>
+            Size: {{ fragmentLengthLabel }}
+          </q-btn>
         </div>
-        <div class="row items-center justify-between q-mt-lg">
-          <div class="row items-center">
+        <q-card-section class="q-pa-sm">
+          <div class="row justify-center q-pt-sm">
+            <q-item-label style="font-size: 30px" class="text-weight-bold">
+              <strong>{{ displayUnit }}</strong></q-item-label
+            >
+          </div>
+          <div v-if="paidFees" class="row justify-center q-pt-sm">
+            <q-item-label class="text-weight-bold">
+              Fee: {{ formatCurrency(paidFees, tokenUnit) }}
+            </q-item-label>
+          </div>
+          <div class="row justify-center q-pt-md">
+            <TokenInformation
+              :encodedToken="sendData.tokensBase64"
+              :showAmount="false"
+              :showP2PKCheck="false"
+            />
+          </div>
+          <div
+            v-if="
+              sendData.paymentRequest &&
+              sendData.historyToken.amount < 0 &&
+              sendData.historyToken.status === 'pending'
+            "
+            class="row justify-center q-pt-sm"
+          >
+            <SendPaymentRequest />
+          </div>
+          <div class="row items-center justify-center q-pt-md">
             <q-btn
               class="q-mx-none"
               size="md"
@@ -153,8 +129,7 @@
                 :name="showExpandedButtons ? 'chevron_left' : 'chevron_right'"
               />
             </q-btn>
-
-            <div v-if="showExpandedButtons" class="row q-gutter-sm">
+            <div v-if="showExpandedButtons" class="row q-gutter-sm q-ml-sm">
               <q-btn
                 class="q-mr-xs"
                 size="md"
@@ -253,9 +228,26 @@
               </q-btn>
             </div>
           </div>
-        </div>
+        </q-card-section>
       </q-card-section>
-    </q-card-section>
+    </div>
+    <!-- Fixed bottom panel with copy button -->
+    <div class="bottom-panel">
+      <div class="row justify-center q-pb-md q-pt-sm">
+        <div class="col-12 col-sm-11 col-md-8 q-px-md">
+          <q-btn
+            class="full-width"
+            unelevated
+            size="lg"
+            color="primary"
+            rounded
+            @click="copyTokens"
+          >
+            {{ copyButtonLabel }}
+          </q-btn>
+        </div>
+      </div>
+    </div>
   </div>
   <!-- popup dialog to confirm deletion -->
   <q-dialog v-model="showDeleteDialog">
@@ -315,6 +307,7 @@ import {
 } from "@cashu/cashu-ts";
 import token from "src/js/token";
 import { notifyError, notifySuccess } from "src/js/notify";
+import { copyToClipboard } from "quasar";
 import {
   Scan as ScanIcon,
   Nfc as NfcIcon,
@@ -353,6 +346,8 @@ export default defineComponent({
       scanningCard: false,
       showExpandedButtons: false,
       showDeleteDialog: false,
+      copyButtonCopied: false,
+      copyButtonTimeout: null as any,
     };
   },
   computed: {
@@ -379,6 +374,12 @@ export default defineComponent({
     },
     runnerActive: function () {
       return this.tokenWorkerRunning;
+    },
+    copyButtonLabel: function () {
+      if (this.copyButtonCopied) {
+        return "Copied";
+      }
+      return this.$t("SendTokenDialog.actions.copy_tokens.label");
     },
   },
   watch: {
@@ -623,21 +624,56 @@ export default defineComponent({
       this.showDeleteDialog = false;
       this.clearAllWorkers();
     },
+    copyTokens: async function () {
+      try {
+        await copyToClipboard(this.sendData.tokensBase64);
+        this.copyButtonCopied = true;
+        // Clear any existing timeout
+        if (this.copyButtonTimeout) {
+          clearTimeout(this.copyButtonTimeout);
+        }
+        // Reset button label after 3 seconds
+        this.copyButtonTimeout = setTimeout(() => {
+          this.copyButtonCopied = false;
+        }, 3000);
+      } catch (error) {
+        console.error("Failed to copy to clipboard:", error);
+      }
+    },
   },
   mounted() {
     this.initQr();
   },
   beforeUnmount() {
     clearInterval(this.qrInterval);
+    if (this.copyButtonTimeout) {
+      clearTimeout(this.copyButtonTimeout);
+    }
   },
 });
 </script>
 <style scoped>
+.display-token-fullscreen {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.content-area {
+  flex: 1;
+  overflow-y: auto;
+}
 .floating-close-btn {
   position: absolute;
   left: 16px;
   top: 50%;
   transform: translateY(-50%);
   z-index: 1;
+}
+.bottom-panel {
+  margin-top: auto;
+  background: var(--q-color-grey-1);
+  box-shadow: 0 -8px 16px rgba(0, 0, 0, 0.05);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 </style>

@@ -176,7 +176,7 @@
       </div>
 
       <!-- show ecash details -->
-      <div v-else class="text-center q-mb-xs">
+      <div v-else class="text-center">
         <DisplayTokenComponent />
       </div>
     </q-card>
