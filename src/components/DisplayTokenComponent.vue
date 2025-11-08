@@ -14,21 +14,23 @@
         class="floating-close-btn"
         @click="closeCardScanner"
       />
-      <div class="col text-center" v-if="!showExpandedButtons">
-        <q-item-label
-          overline
-          class="q-mt-sm text-white"
-          style="font-size: 1rem"
-        >
-          {{
-            sendData.historyToken.amount && sendData.historyToken.amount < 0
-              ? sendData.historyToken.status === "paid"
-                ? "Sent"
-                : "Pending"
-              : "Received"
-          }}
-          Ecash</q-item-label
-        >
+      <div class="col text-center fixed-title-height">
+        <div v-show="!showExpandedButtons">
+          <q-item-label
+            overline
+            class="q-mt-sm text-white"
+            style="font-size: 1rem"
+          >
+            {{
+              sendData.historyToken.amount && sendData.historyToken.amount < 0
+                ? sendData.historyToken.status === "paid"
+                  ? "Sent"
+                  : "Pending"
+                : "Received"
+            }}
+            Ecash</q-item-label
+          >
+        </div>
       </div>
       <!-- Floating actions (expandable) -->
       <div class="floating-actions">
@@ -38,8 +40,8 @@
             class="row no-wrap items-center q-gutter-xs justify-end q-mr-sm"
           >
             <q-btn
-              class="q-mx-none"
-              size="sm"
+              class="q-mx-xs"
+              size="md"
               flat
               dense
               @click="copyText(encodeToPeanut(sendData.tokensBase64))"
@@ -51,7 +53,7 @@
             <q-btn
               class="q-mx-none"
               color="grey"
-              size="sm"
+              size="md"
               dense
               icon="link"
               flat
@@ -62,9 +64,9 @@
             >
             <q-btn
               v-if="webShareSupported"
-              class="q-mx-none"
+              class="q-mx-xs"
               color="grey"
-              size="sm"
+              size="md"
               dense
               flat
               @click="shareToken"
@@ -77,8 +79,8 @@
             <q-btn
               unelevated
               dense
-              size="sm"
-              class="q-mx-none"
+              size="md"
+              class="q-mx-xs"
               v-if="
                 hasCamera &&
                 !sendData.paymentRequest &&
@@ -98,8 +100,8 @@
               "
               :disabled="scanningCard"
               :loading="scanningCard"
-              class="q-mx-none"
-              size="sm"
+              class="q-mx-xs"
+              size="md"
               @click="writeTokensToCard"
               flat
             >
@@ -187,13 +189,7 @@
             <q-icon name="speed" style="margin-right: 8px"></q-icon>
             Speed: {{ fragmentSpeedLabel }}
           </q-btn>
-          <q-badge
-            :color="!isV4Token ? 'primary' : 'grey'"
-            :label="isV4Token ? 'V4' : 'V3'"
-            class="q-my-sm q-mx-md cursor-pointer"
-            @click="toggleTokenEncoding"
-            :outline="isV4Token"
-          />
+
           <q-btn
             v-if="showAnimatedQR"
             flat
@@ -683,6 +679,12 @@ export default defineComponent({
   top: 50%;
   transform: translateY(-50%);
   z-index: 2;
+}
+.fixed-title-height {
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .bottom-panel {
   margin-top: auto;
