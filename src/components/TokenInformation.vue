@@ -1,59 +1,64 @@
 <template>
-  <div class="row text-left q-py-none q-my-none">
-    <div class="col-12 q-px-none">
-      <div class="row justify-center q-pt-md">
-        <q-item-label style="font-size: 30px" class="text-weight-bold">
-          <strong>{{ displayUnit }}</strong>
-        </q-item-label>
+  <div class="token-information-container q-px-md">
+    <!-- Amount Header -->
+    <div class="token-header-container">
+      <div class="token-amount">
+        {{ displayUnit }}
       </div>
-      <div v-if="receiveFee > 0" class="row justify-center q-pt-sm">
-        <q-item-label class="text-weight-bold">
-          {{ $t("common.fee") || "Fee" }}:
-          {{ formatCurrency(receiveFee, tokenUnit) }}
-        </q-item-label>
+    </div>
+
+    <!-- Token Details Section -->
+    <div class="token-details-section q-mt-md q-mb-lg">
+      <!-- Fee (if applicable) -->
+      <div v-if="receiveFee > 0" class="detail-item q-mb-md">
+        <div class="detail-label">
+          <arrow-down-up-icon size="20" color="#9E9E9E" class="detail-icon" />
+          <div class="detail-name">Fee</div>
+        </div>
+        <div class="detail-value">{{ formatCurrency(receiveFee, tokenUnit) }}</div>
       </div>
-      <q-chip outline class="q-pa-md" style="border-width: 2px">
-        <q-icon name="toll" size="xs" class="q-mr-sm" />
-        <strong>{{ displayUnit }} </strong>
-      </q-chip>
-      <q-chip
-        v-if="receiveFee > 0"
-        outline
-        class="q-pa-md"
-        style="height: 36px; font-family: monospace"
-      >
-        <q-icon name="price_change" size="xs" class="q-mr-xs" />
-        {{ $t("common.fee") || "Fee" }}:
-        {{ formatCurrency(receiveFee, tokenUnit) }}
-      </q-chip>
-      <q-chip
-        outline
-        class="q-pa-md"
-        style="height: 36px; font-family: monospace"
-      >
-        <q-icon name="account_balance" size="xs" class="q-mr-xs" />
-        {{ tokenMintUrl }}
-        <q-spinner-hourglass v-if="addMintBlocking" size="sm" class="q-ml-sm" />
-        <q-icon
-          v-if="mintKnownToUs(proofsToShow) && !addMintBlocking"
-          name="check"
-          size="sm"
-          color="green"
-          class="q-ml-xs"
-        />
-      </q-chip>
-      <q-chip v-if="isLocked(proofsToShow)" outline icon="lock" class="q-pa-md">
-        P2PK
-        <q-icon
-          :name="isLockedToUs(proofsToShow) ? 'check' : 'close'"
-          size="sm"
-          :color="isLockedToUs(proofsToShow) ? 'green' : 'red'"
-          class="q-ml-xs"
-        />
-      </q-chip>
-      <div v-if="displayMemo" class="q-my-md">
-        <q-icon name="chat" size="xs" color="grey" class="q-mr-sm" />
-        <span>{{ displayMemo }}</span>
+
+      <!-- Mint URL -->
+      <div class="detail-item q-mb-md">
+        <div class="detail-label">
+          <building-icon size="20" color="#9E9E9E" class="detail-icon" />
+          <div class="detail-name">Mint</div>
+        </div>
+        <div class="detail-value">
+          {{ tokenMintUrl }}
+          <q-spinner-hourglass v-if="addMintBlocking" size="sm" class="q-ml-xs" />
+        </div>
+      </div>
+
+      <!-- P2PK Lock Status (if locked) -->
+      <div v-if="isLocked(proofsToShow)" class="detail-item q-mb-md">
+        <div class="detail-label">
+          <lock-icon size="20" color="#9E9E9E" class="detail-icon" />
+          <div class="detail-name">P2PK</div>
+        </div>
+        <div class="detail-value">
+          {{ isLockedToUs(proofsToShow) ? 'Locked to you' : 'Locked to someone else' }}
+        </div>
+      </div>
+
+      <!-- Unit -->
+      <div class="detail-item q-mb-md">
+        <div class="detail-label">
+          <banknote-icon size="20" color="#9E9E9E" class="detail-icon" />
+          <div class="detail-name">Unit</div>
+        </div>
+        <div class="detail-value">{{ tokenUnit.toUpperCase() }}</div>
+      </div>
+
+      <!-- Memo (if available) -->
+      <div v-if="displayMemo" class="detail-item">
+        <div class="detail-label">
+          <message-circle-icon size="20" color="#9E9E9E" class="detail-icon" />
+          <div class="detail-name">Memo</div>
+        </div>
+        <div class="detail-value" style="max-width: 60%; word-break: break-word; white-space: normal;">
+          {{ displayMemo }}
+        </div>
       </div>
     </div>
   </div>
@@ -66,10 +71,26 @@ import { useMintsStore } from "stores/mints";
 import { useWalletStore } from "stores/wallet";
 import { useP2PKStore } from "src/stores/p2pk";
 import token from "src/js/token";
+import {
+  ArrowDownUp as ArrowDownUpIcon,
+  Building as BuildingIcon,
+  Lock as LockIcon,
+  Banknote as BanknoteIcon,
+  MessageCircle as MessageCircleIcon,
+  Share as ShareIcon,
+} from "lucide-vue-next";
 
 export default defineComponent({
   name: "TokenInformation",
   mixins: [windowMixin],
+  components: {
+    ArrowDownUpIcon,
+    BuildingIcon,
+    LockIcon,
+    BanknoteIcon,
+    MessageCircleIcon,
+    ShareIcon,
+  },
   props: {
     encodedToken: String,
   },
@@ -151,6 +172,97 @@ export default defineComponent({
         ).length > 0
       );
     },
+    shareToken: async function () {
+      if (navigator.share) {
+        const shareData = {
+          text: this.encodedToken,
+        };
+        try {
+          await navigator.share(shareData);
+        } catch (error: any) {
+          if (error?.name !== "AbortError") {
+            console.error("Error sharing token:", error);
+          }
+        }
+      }
+    },
+    copyToken: async function () {
+      try {
+        await navigator.clipboard.writeText(this.encodedToken);
+        this.$q.notify({
+          message: "Token copied to clipboard",
+          color: "positive",
+          position: "top",
+          timeout: 1000,
+        });
+      } catch (error) {
+        console.error("Failed to copy to clipboard:", error);
+      }
+    },
   },
 });
 </script>
+
+<style scoped>
+.token-information-container {
+  width: 100%;
+  color: white;
+}
+
+/* Token Header - matches mint-header-container from MintDetailsPage */
+.token-header-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.token-amount {
+  font-size: 30px;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Action Buttons Section */
+.action-buttons-section {
+  width: 100%;
+}
+
+/* Token Details Section - exact match from MintDetailsPage */
+.token-details-section {
+  width: 100%;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.detail-label {
+  display: flex;
+  align-items: center;
+}
+
+.detail-icon {
+  margin-right: 10px;
+}
+
+.detail-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #9e9e9e;
+}
+
+.detail-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  text-align: right;
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+</style>
