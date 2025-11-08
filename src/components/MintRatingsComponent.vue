@@ -402,7 +402,7 @@ export default defineComponent({
     shortNpub(pk: string) {
       const v = this.npub(pk);
       if (!v) return "";
-      return `${v.slice(0, 12)}…`;
+      return `${v.slice(0, 6)}…${v.slice(-6)}`;
     },
     copyNpub(pk: string) {
       try {
