@@ -140,7 +140,7 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: var(--q-color-grey-1);
+  background: inherit;
   width: 100%;
   max-width: 650px;
 }

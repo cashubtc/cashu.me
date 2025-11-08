@@ -9,7 +9,11 @@
   >
     <q-card class="q-pa-none q-pt-none qcard">
       <!--  enter send data (full-screen) -->
-      <div v-if="!sendData.tokens" class="column fit send-fullscreen">
+      <div
+        v-if="!sendData.tokens"
+        class="column fit send-fullscreen"
+        :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
+      >
         <!-- Header -->
         <div class="row items-center justify-between q-pa-md">
           <q-btn v-close-popup flat round icon="close" color="grey" />
@@ -36,22 +40,40 @@
           </div>
         </div>
 
+        <!-- Mint selection -->
+        <div class="q-px-lg q-mb-sm" style="width: 100%">
+          <ChooseMint />
+        </div>
+
         <!-- Amount display -->
         <div class="col column items-center justify-center q-px-lg amount-area">
-          <div
-            class="amount-display text-weight-bold text-center"
-            :class="{ 'text-grey-6': insufficientFunds }"
-          >
-            {{ formattedAmountDisplay }}
+          <div class="amount-container">
+            <div
+              class="amount-display text-weight-bold text-center"
+              :class="{ 'text-grey-6': insufficientFunds }"
+            >
+              {{ formattedAmountDisplay }}
+            </div>
+            <q-badge
+              v-if="insufficientFunds && sendData.amount"
+              outline
+              rounded
+              color="grey"
+              size="md"
+              class="amount-warning-badge"
+            >
+              <span class="text-caption text-weight-medium">
+                {{
+                  $t("PayInvoiceDialog.invoice.balance_too_low_warning_text")
+                }}
+              </span>
+            </q-badge>
           </div>
           <div
             v-if="secondaryFiatDisplay"
             class="fiat-display text-grey-6 q-mt-xs"
           >
             {{ secondaryFiatDisplay }}
-          </div>
-          <div class="q-mt-lg" style="width: 100%">
-            <ChooseMint />
           </div>
           <transition
             appear
@@ -259,16 +281,6 @@ export default defineComponent({
         this.sendData.amount * this.activeUnitCurrencyMultiplyer + feesToAdd
       );
     },
-    formattedAmountDisplay: function () {
-      const amount = this.sendData.amount || 0;
-      if (!amount) {
-        return `0 ${this.activeUnit}`;
-      }
-      return this.formatCurrency(
-        amount * this.activeUnitCurrencyMultiplyer,
-        this.activeUnit
-      );
-    },
     secondaryFiatDisplay: function () {
       if (
         !this.sendData.amount ||
@@ -285,6 +297,13 @@ export default defineComponent({
         true
       );
       return `(${fiat})`;
+    },
+    formattedAmountDisplay: function () {
+      const amount = this.sendData.amount || 0;
+      return this.formatCurrency(
+        amount * this.activeUnitCurrencyMultiplyer,
+        this.activeUnit
+      );
     },
   },
   watch: {
@@ -472,12 +491,24 @@ export default defineComponent({
 .amount-area {
   flex: 1;
 }
+.amount-container {
+  position: relative;
+  display: inline-block;
+}
 .amount-display {
-  font-size: clamp(48px, 10vw, 72px);
+  font-size: clamp(56px, 11vw, 80px);
   line-height: 1.1;
 }
 .fiat-display {
   font-size: 14px;
+}
+.amount-warning-badge {
+  position: absolute;
+  top: calc(100% + 16px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  pointer-events: none;
 }
 .bottom-panel {
   margin-top: auto;
