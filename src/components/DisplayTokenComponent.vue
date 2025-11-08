@@ -52,6 +52,21 @@
                 $t("SendTokenDialog.actions.copy_emoji.tooltip_text")
               }}</q-tooltip>
             </q-btn>
+
+            <q-btn
+              v-if="webShareSupported"
+              class="q-mx-xs q-pb-sm"
+              size="md"
+              dense
+              flat
+              @click="shareToken"
+            >
+              <ShareIcon size="16" />
+              <q-tooltip>{{
+                $t("SendTokenDialog.actions.share.tooltip_text")
+              }}</q-tooltip>
+            </q-btn>
+
             <q-btn
               class="q-mx-none"
               size="md"
@@ -195,22 +210,6 @@
                   Size: {{ fragmentLengthLabel }}
                 </q-btn>
               </div>
-            </div>
-            <div
-              v-if="webShareSupported"
-              style="
-                position: absolute;
-                right: 24px;
-                top: 10%;
-                transform: translateY(-50%);
-              "
-            >
-              <q-btn color="grey" size="md" dense flat @click="shareToken">
-                <ShareIcon size="16" />
-                <q-tooltip>{{
-                  $t("SendTokenDialog.actions.share.tooltip_text")
-                }}</q-tooltip>
-              </q-btn>
             </div>
           </div>
         </div>

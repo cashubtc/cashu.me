@@ -59,7 +59,7 @@
             enter-active-class="animated fadeIn"
             leave-active-class="animated fadeOut"
           >
-            <div v-if="showLockInput" class="p2pk-overlay">
+            <div v-if="showLockInput && !isLocked" class="p2pk-overlay">
               <div class="row justify-center">
                 <div class="col-12 q-px-lg" style="max-width: 600px">
                   <div class="row items-center">
@@ -67,8 +67,7 @@
                       <q-input
                         v-model="sendData.p2pkPubkey"
                         :label="
-                          sendData.p2pkPubkey &&
-                          !isValidPubkey(sendData.p2pkPubkey)
+                          sendData.p2pkPubkey && !isLocked
                             ? $t(
                                 'SendTokenDialog.inputs.p2pk_pubkey.label_invalid'
                               )
@@ -76,12 +75,7 @@
                         "
                         outlined
                         clearable
-                        :color="
-                          sendData.p2pkPubkey &&
-                          !isValidPubkey(sendData.p2pkPubkey)
-                            ? 'red'
-                            : ''
-                        "
+                        :color="sendData.p2pkPubkey && !isLocked ? 'red' : ''"
                         @keyup.enter="lockTokens"
                       />
                     </div>
@@ -115,7 +109,7 @@
             </div>
           </transition>
           <AmountInputComponent
-            v-if="!showLockInput"
+            v-if="!showLockInput || isLocked"
             v-model="sendData.amount"
             :muted="insufficientFunds"
             :enabled="!sendData.tokens"
@@ -123,7 +117,7 @@
           >
             <template #overlay>
               <q-badge
-                v-if="isLocked && !showLockInput"
+                v-if="isLocked"
                 rounded
                 color="positive"
                 class="locked-badge"

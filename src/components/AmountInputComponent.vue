@@ -68,7 +68,8 @@ export default defineComponent({
       const amount = this.modelValue || 0;
       return this.formatCurrency(
         amount * this.activeUnitCurrencyMultiplyer,
-        this.activeUnit
+        this.activeUnit,
+        true
       );
     },
     secondaryFiatDisplay(): string {
