@@ -227,7 +227,7 @@ export default defineComponent({
         path: "/mintratings",
         query: {
           mintUrl: url,
-          allowCreateReview: "true",
+          allowCreateReview: "false",
         },
       });
     };
