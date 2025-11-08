@@ -435,6 +435,12 @@ export default defineComponent({
       if (allowDecimal) {
         buf = buf.replace(/,/g, ".");
         buf = buf.replace(/[^\d.]/g, "").replace(/^(\d*\.\d*).*$/, "$1");
+        // limit to two decimal places
+        if (buf.includes(".")) {
+          const parts = buf.split(".");
+          const decimals = parts[1] ?? "";
+          buf = parts[0] + "." + decimals.slice(0, 2);
+        }
       } else {
         buf = buf.replace(/[^\d]/g, "");
       }
