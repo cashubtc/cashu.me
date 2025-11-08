@@ -14,7 +14,7 @@
         class="floating-close-btn"
         @click="closeCardScanner"
       />
-      <div class="col text-center">
+      <div class="col text-center" v-if="!showExpandedButtons">
         <q-item-label
           overline
           class="q-mt-sm text-white"
@@ -29,6 +29,123 @@
           }}
           Ecash</q-item-label
         >
+      </div>
+      <!-- Floating actions (expandable) -->
+      <div class="floating-actions">
+        <div class="row no-wrap items-center">
+          <div
+            v-if="showExpandedButtons"
+            class="row no-wrap items-center q-gutter-xs justify-end q-mr-sm"
+          >
+            <q-btn
+              class="q-mx-none"
+              size="sm"
+              flat
+              dense
+              @click="copyText(encodeToPeanut(sendData.tokensBase64))"
+              >{{ $t("SendTokenDialog.actions.copy_emoji.label") }}
+              <q-tooltip>{{
+                $t("SendTokenDialog.actions.copy_emoji.tooltip_text")
+              }}</q-tooltip>
+            </q-btn>
+            <q-btn
+              class="q-mx-none"
+              color="grey"
+              size="sm"
+              dense
+              icon="link"
+              flat
+              @click="copyText(baseURL + '#token=' + sendData.tokensBase64)"
+              ><q-tooltip>{{
+                $t("SendTokenDialog.actions.copy_link.tooltip_text")
+              }}</q-tooltip></q-btn
+            >
+            <q-btn
+              v-if="webShareSupported"
+              class="q-mx-none"
+              color="grey"
+              size="sm"
+              dense
+              flat
+              @click="shareToken"
+            >
+              <ShareIcon size="16" />
+              <q-tooltip>{{
+                $t("SendTokenDialog.actions.share.tooltip_text")
+              }}</q-tooltip>
+            </q-btn>
+            <q-btn
+              unelevated
+              dense
+              size="sm"
+              class="q-mx-none"
+              v-if="
+                hasCamera &&
+                !sendData.paymentRequest &&
+                sendData.historyAmount < 0
+              "
+              @click="showCamera"
+            >
+              <ScanIcon size="16" />
+            </q-btn>
+            <q-btn
+              unelevated
+              dense
+              v-if="
+                ndefSupported &&
+                !sendData.paymentRequest &&
+                sendData.historyAmount < 0
+              "
+              :disabled="scanningCard"
+              :loading="scanningCard"
+              class="q-mx-none"
+              size="sm"
+              @click="writeTokensToCard"
+              flat
+            >
+              <NfcIcon size="16" />
+              <q-tooltip>{{
+                ndefSupported
+                  ? $t(
+                      "SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_supported_text"
+                    )
+                  : $t(
+                      "SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_unsupported_text"
+                    )
+              }}</q-tooltip>
+              <template v-slot:loading>
+                <q-spinner @click="closeCardScanner" />
+              </template>
+            </q-btn>
+            <q-btn
+              class="q-mx-none"
+              color="grey"
+              dense
+              icon="delete"
+              size="sm"
+              @click="
+                showDeleteDialog = true;
+                closeCardScanner();
+              "
+              flat
+            >
+              <q-tooltip>{{
+                $t("SendTokenDialog.actions.delete.tooltip_text")
+              }}</q-tooltip>
+            </q-btn>
+          </div>
+          <q-btn
+            class="q-mx-none"
+            size="md"
+            flat
+            dense
+            @click="toggleExpandButtons"
+          >
+            <q-icon
+              :name="showExpandedButtons ? 'chevron_right' : 'chevron_left'"
+            />
+          </q-btn>
+        </div>
       </div>
     </div>
     <!-- Content area -->
@@ -116,117 +233,6 @@
             class="row justify-center q-pt-sm"
           >
             <SendPaymentRequest />
-          </div>
-          <div class="row items-center justify-center q-pt-md">
-            <q-btn
-              class="q-mx-none"
-              size="md"
-              flat
-              dense
-              @click="toggleExpandButtons"
-            >
-              <q-icon
-                :name="showExpandedButtons ? 'chevron_left' : 'chevron_right'"
-              />
-            </q-btn>
-            <div v-if="showExpandedButtons" class="row q-gutter-sm q-ml-sm">
-              <q-btn
-                class="q-mr-xs"
-                size="md"
-                flat
-                dense
-                @click="copyText(encodeToPeanut(sendData.tokensBase64))"
-                >{{ $t("SendTokenDialog.actions.copy_emoji.label") }}
-                <q-tooltip>{{
-                  $t("SendTokenDialog.actions.copy_emoji.tooltip_text")
-                }}</q-tooltip>
-              </q-btn>
-              <q-btn
-                class="q-mx-none"
-                color="grey"
-                size="md"
-                dense
-                icon="link"
-                flat
-                @click="copyText(baseURL + '#token=' + sendData.tokensBase64)"
-                ><q-tooltip>{{
-                  $t("SendTokenDialog.actions.copy_link.tooltip_text")
-                }}</q-tooltip></q-btn
-              >
-              <q-btn
-                v-if="webShareSupported"
-                class="q-mx-none"
-                color="grey"
-                size="md"
-                dense
-                flat
-                @click="shareToken"
-              >
-                <ShareIcon size="18" />
-                <q-tooltip>{{
-                  $t("SendTokenDialog.actions.share.tooltip_text")
-                }}</q-tooltip>
-              </q-btn>
-              <q-btn
-                unelevated
-                dense
-                size="sm"
-                class="q-mx-none"
-                v-if="
-                  hasCamera &&
-                  !sendData.paymentRequest &&
-                  sendData.historyAmount < 0
-                "
-                @click="showCamera"
-              >
-                <ScanIcon />
-              </q-btn>
-              <q-btn
-                unelevated
-                dense
-                v-if="
-                  ndefSupported &&
-                  !sendData.paymentRequest &&
-                  sendData.historyAmount < 0
-                "
-                :disabled="scanningCard"
-                :loading="scanningCard"
-                class="q-mx-none"
-                size="sm"
-                @click="writeTokensToCard"
-                flat
-              >
-                <NfcIcon />
-                <q-tooltip>{{
-                  ndefSupported
-                    ? $t(
-                        "SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_supported_text"
-                      )
-                    : $t(
-                        "SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_unsupported_text"
-                      )
-                }}</q-tooltip>
-                <template v-slot:loading>
-                  <q-spinner @click="closeCardScanner" />
-                </template>
-              </q-btn>
-              <q-btn
-                class="q-mx-none"
-                color="grey"
-                dense
-                icon="delete"
-                size="md"
-                @click="
-                  showDeleteDialog = true;
-                  closeCardScanner();
-                "
-                flat
-              >
-                <q-tooltip>{{
-                  $t("SendTokenDialog.actions.delete.tooltip_text")
-                }}</q-tooltip>
-              </q-btn>
-            </div>
           </div>
         </q-card-section>
       </q-card-section>
@@ -654,7 +660,8 @@ export default defineComponent({
 </script>
 <style scoped>
 .display-token-fullscreen {
-  height: 100vh;
+  height: 100vh; /* fallback */
+  height: 100dvh; /* account for mobile browser UI */
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -670,10 +677,20 @@ export default defineComponent({
   transform: translateY(-50%);
   z-index: 1;
 }
+.floating-actions {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+}
 .bottom-panel {
   margin-top: auto;
   background: var(--q-color-grey-1);
   box-shadow: 0 -8px 16px rgba(0, 0, 0, 0.05);
   padding-bottom: env(safe-area-inset-bottom, 0px);
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
 }
 </style>
