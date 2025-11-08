@@ -50,6 +50,7 @@ import { defineComponent } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState } from "pinia";
 import { useMintsStore } from "stores/mints";
+import { useWalletStore } from "stores/wallet";
 import { useP2PKStore } from "src/stores/p2pk";
 import token from "src/js/token";
 
@@ -98,6 +99,10 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(useP2PKStore, ["isLocked", "isLockedToUs"]),
+    ...mapActions(useWalletStore, ["getFeesForProofs"]),
+    getFeesForProofs: function (proofs: Proof[]) {
+      return this.getFeesForProofs(proofs);
+    },
     getProofsMint: function (proofs) {
       // unique keyset IDs of proofs
       let uniqueIds = [...new Set(proofs.map((p) => p.id))];

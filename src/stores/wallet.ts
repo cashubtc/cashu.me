@@ -340,7 +340,7 @@ export const useWalletStore = defineStore("wallet", {
       });
       return selectedWalletProofs;
     },
-    spendableProofs: function (proofs: WalletProof[], amount: number) {
+    spendableProofs: function (proofs: WalletProof[], amount: number): WalletProof[] {
       const uIStore = useUiStore();
       const proofsStore = useProofsStore();
       const mintStore = useMintsStore();

@@ -40,19 +40,20 @@
             class="row no-wrap items-center q-gutter-xs justify-end q-mr-sm"
           >
             <q-btn
-              class="q-mx-xs"
+              class="q-mx-xs q-pb-sm"
               size="md"
               flat
               dense
               @click="copyText(encodeToPeanut(sendData.tokensBase64))"
-              >{{ $t("SendTokenDialog.actions.copy_emoji.label") }}
+            >
+              <NutIcon size="16" />
+
               <q-tooltip>{{
                 $t("SendTokenDialog.actions.copy_emoji.tooltip_text")
               }}</q-tooltip>
             </q-btn>
             <q-btn
               class="q-mx-none"
-              color="grey"
               size="md"
               dense
               icon="link"
@@ -62,20 +63,6 @@
                 $t("SendTokenDialog.actions.copy_link.tooltip_text")
               }}</q-tooltip></q-btn
             >
-            <q-btn
-              v-if="webShareSupported"
-              class="q-mx-xs"
-              color="grey"
-              size="md"
-              dense
-              flat
-              @click="shareToken"
-            >
-              <ShareIcon size="16" />
-              <q-tooltip>{{
-                $t("SendTokenDialog.actions.share.tooltip_text")
-              }}</q-tooltip>
-            </q-btn>
             <q-btn
               unelevated
               dense
@@ -121,8 +108,8 @@
             </q-btn>
             <q-btn
               class="q-mx-none"
-              color="grey"
               dense
+              color="negative"
               icon="delete"
               size="sm"
               @click="
@@ -143,7 +130,10 @@
             dense
             @click="toggleExpandButtons"
           >
-            <q-icon name="more_horiz" />
+            <q-icon
+              name="more_horiz"
+              :color="showExpandedButtons ? 'primary' : 'grey'"
+            />
           </q-btn>
         </div>
       </div>
@@ -175,30 +165,54 @@
             </div>
           </div>
         </div>
-        <div class="q-pb-xs q-ba-none q-gutter-sm">
-          <q-btn
-            v-if="showAnimatedQR"
-            flat
-            style="font-size: 10px"
-            color="grey"
-            class="q-ma-none"
-            @click="changeSpeed"
+        <div class="row justify-center q-pb-xs q-ba-none">
+          <div
+            class="col-12 col-sm-11 col-md-8 q-px-md"
+            style="max-width: 600px; position: relative"
           >
-            <q-icon name="speed" style="margin-right: 8px"></q-icon>
-            Speed: {{ fragmentSpeedLabel }}
-          </q-btn>
-
-          <q-btn
-            v-if="showAnimatedQR"
-            flat
-            style="font-size: 10px"
-            class="q-ma-none"
-            color="grey"
-            @click="changeSize"
-          >
-            <q-icon name="zoom_in" style="margin-right: 8px"></q-icon>
-            Size: {{ fragmentLengthLabel }}
-          </q-btn>
+            <div class="row justify-center items-center no-wrap">
+              <div class="q-gutter-sm">
+                <q-btn
+                  v-if="showAnimatedQR"
+                  flat
+                  style="font-size: 10px"
+                  color="grey"
+                  class="q-ma-none"
+                  @click="changeSpeed"
+                >
+                  <q-icon name="speed" style="margin-right: 8px"></q-icon>
+                  Speed: {{ fragmentSpeedLabel }}
+                </q-btn>
+                <q-btn
+                  v-if="showAnimatedQR"
+                  flat
+                  style="font-size: 10px"
+                  class="q-ma-none"
+                  color="grey"
+                  @click="changeSize"
+                >
+                  <q-icon name="zoom_in" style="margin-right: 8px"></q-icon>
+                  Size: {{ fragmentLengthLabel }}
+                </q-btn>
+              </div>
+            </div>
+            <div
+              v-if="webShareSupported"
+              style="
+                position: absolute;
+                right: 24px;
+                top: 10%;
+                transform: translateY(-50%);
+              "
+            >
+              <q-btn color="grey" size="md" dense flat @click="shareToken">
+                <ShareIcon size="16" />
+                <q-tooltip>{{
+                  $t("SendTokenDialog.actions.share.tooltip_text")
+                }}</q-tooltip>
+              </q-btn>
+            </div>
+          </div>
         </div>
         <q-card-section class="q-pa-sm">
           <div class="row justify-center q-pt-md">
@@ -312,6 +326,7 @@ import {
   Scan as ScanIcon,
   Nfc as NfcIcon,
   Share as ShareIcon,
+  Nut as NutIcon,
 } from "lucide-vue-next";
 
 export default defineComponent({
@@ -323,6 +338,7 @@ export default defineComponent({
     ScanIcon,
     NfcIcon,
     ShareIcon,
+    NutIcon,
   },
   data: function () {
     return {
