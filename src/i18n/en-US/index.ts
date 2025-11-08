@@ -1228,6 +1228,9 @@ export default {
   },
   ChooseMint: {
     title: "Select a mint",
+    placeholder: "Select a mint",
+    available_text: "available",
+    sheet_title: "Select Mint",
     badge_mint_error_text: "Error",
     badge_option_mint_error_text: "@:ChooseMint.badge_mint_error_text",
   },

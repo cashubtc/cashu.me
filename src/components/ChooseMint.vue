@@ -1,82 +1,157 @@
 <template>
   <div class="q-pb-md">
-    <!-- title that says choose a mint -->
-    <div class="row q-mb-none" v-if="title.length"></div>
+    <!-- Main mint selector button -->
     <div
       class="row q-mt-xs q-mb-none"
       v-if="activeMintUrl || !requireActiveMint"
     >
-      <div class="col-12 cursor-pointer">
-        <q-select
-          flat
-          class="q-px-none"
-          color="white"
-          v-model="chosenMint"
-          :options="chooseMintOptions()"
-          option-value="url"
-          option-label="nickname"
-          :rounded="rounded"
+      <div class="col-12">
+        <div
+          class="mint-selector-btn"
+          :class="{ 'mint-selector-dense': dense }"
           :style="style"
-          :dense="dense"
-          :placeholder="placeholder"
+          @click="showMintSheet = true"
         >
-          <template v-slot:option="scope">
-            <q-item v-bind="scope.itemProps">
-              <q-item-section>
-                <MintInfoContainer
-                  :iconUrl="scope.opt.iconUrl || undefined"
-                  :name="scope.opt.nickname || scope.opt.shorturl"
-                  :url="scope.opt.url"
-                />
-                <div v-if="showBalances">
-                  <q-badge
-                    v-for="unit in scope.opt.units"
-                    :key="unit"
-                    color="primary"
-                    :label="formatCurrency(scope.opt.balances[unit], unit)"
-                    class="q-mr-xs q-mb-xs"
-                  />
-                  <div v-if="scope.opt.errored" class="error-badge">
-                    <q-badge
-                      color="red"
-                      class="q-mr-xs q-mt-sm text-weight-bold"
-                      >{{ $t("ChooseMint.badge_option_mint_error_text") }}
-                      <q-icon name="error" class="q-ml-xs" />
-                    </q-badge>
-                  </div>
-                </div>
-              </q-item-section>
-            </q-item>
-            <q-separator />
-          </template>
-          <template v-slot:prepend>
-            <q-icon
-              name="account_balance"
-              size="1.2rem"
-              color="grey"
-              class="q-mr-none q-mb-none"
-            />
-          </template>
-          <template v-slot:append v-if="showBalances">
-            <div class="row items-center">
-              <q-badge
-                v-if="chosenMint?.errored"
-                color="red"
-                class="q-mr-xs text-weight-bold"
+          <div class="row items-center full-width no-wrap">
+            <!-- Mint Icon -->
+            <q-avatar
+              :size="dense ? '40px' : '48px'"
+              class="q-mr-md mint-icon-avatar"
+            >
+              <q-img
+                v-if="chosenMint?.iconUrl"
+                :src="chosenMint.iconUrl"
+                spinner-color="white"
+                spinner-size="xs"
               >
-                {{ $t("ChooseMint.badge_mint_error_text") }}
-                <q-icon name="error" class="q-ml-xs" />
-              </q-badge>
-              <q-badge
-                color="primary"
-                :label="formatCurrency(getBalance, activeUnit)"
-                class="q-ma-xs q-pa-sm text-weight-bold"
+                <template v-slot:error>
+                  <div class="row items-center justify-center full-height">
+                    <q-icon name="account_balance" color="grey-7" size="24px" />
+                  </div>
+                </template>
+              </q-img>
+              <q-icon
+                v-else
+                name="account_balance"
+                color="grey-7"
+                size="24px"
               />
+            </q-avatar>
+
+            <!-- Mint Info -->
+            <div class="col text-left mint-info-section">
+              <div class="mint-name-label">
+                {{
+                  chosenMint?.nickname ||
+                  chosenMint?.shorturl ||
+                  placeholder ||
+                  $t("ChooseMint.placeholder")
+                }}
+              </div>
+              <div v-if="showBalances && chosenMint" class="mint-balance-label">
+                <span v-if="!chosenMint.errored" class="text-grey-6">
+                  {{ formatCurrency(getBalance, activeUnit) }}
+                  {{ $t("ChooseMint.available_text") }}
+                </span>
+                <span v-else class="text-red">
+                  {{ $t("ChooseMint.badge_mint_error_text") }}
+                </span>
+              </div>
             </div>
-          </template>
-        </q-select>
+
+            <!-- Chevron -->
+            <q-icon name="expand_more" color="grey-6" size="20px" />
+          </div>
+        </div>
       </div>
     </div>
+
+    <!-- Bottom Sheet for Mint Selection -->
+    <teleport to="body">
+      <div
+        v-if="showMintSheet"
+        class="mint-sheet-overlay"
+        @click="showMintSheet = false"
+      >
+        <div class="mint-sheet" @click.stop>
+          <!-- Header -->
+          <div class="mint-sheet-header">
+            <h3>{{ $t("ChooseMint.sheet_title") }}</h3>
+            <q-btn
+              flat
+              round
+              icon="close"
+              @click="showMintSheet = false"
+              class="close-btn"
+            />
+          </div>
+
+          <!-- Mint List -->
+          <div class="mint-options">
+            <div
+              v-for="mint in chooseMintOptions()"
+              :key="mint.url"
+              class="mint-option"
+              :class="{ active: chosenMint?.url === mint.url }"
+              @click="selectMint(mint)"
+            >
+              <div class="row items-center full-width no-wrap">
+                <!-- Mint Icon -->
+                <q-avatar size="48px" class="q-mr-md">
+                  <q-img
+                    v-if="mint.iconUrl"
+                    :src="mint.iconUrl"
+                    spinner-color="white"
+                    spinner-size="xs"
+                  >
+                    <template v-slot:error>
+                      <div class="row items-center justify-center full-height">
+                        <q-icon
+                          name="account_balance"
+                          color="grey-7"
+                          size="24px"
+                        />
+                      </div>
+                    </template>
+                  </q-img>
+                  <q-icon
+                    v-else
+                    name="account_balance"
+                    color="grey-7"
+                    size="24px"
+                  />
+                </q-avatar>
+
+                <!-- Mint Info -->
+                <div class="col text-left">
+                  <div class="mint-option-name">
+                    {{ mint.nickname || mint.shorturl }}
+                  </div>
+                  <div v-if="showBalances" class="mint-option-balance">
+                    <span v-if="!mint.errored" class="text-grey-6">
+                      <span v-for="unit in mint.units" :key="unit" class="q-mr-sm">
+                        {{ formatCurrency(mint.balances[unit], unit) }}
+                      </span>
+                    </span>
+                    <span v-else class="text-red">
+                      {{ $t("ChooseMint.badge_mint_error_text") }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Selection Indicator -->
+                <q-icon
+                  v-if="chosenMint?.url === mint.url"
+                  name="check_circle"
+                  color="primary"
+                  size="24px"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </teleport>
   </div>
 </template>
 
@@ -87,12 +162,10 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "stores/mints";
 import { MintClass } from "stores/mints";
 import { i18n } from "../boot/i18n";
-import MintInfoContainer from "./MintInfoContainer.vue";
 
 export default defineComponent({
   name: "ChooseMint",
   mixins: [windowMixin],
-  components: { MintInfoContainer },
   props: {
     rounded: {
       type: Boolean,
@@ -132,6 +205,7 @@ export default defineComponent({
   data: function () {
     return {
       chosenMint: null,
+      showMintSheet: false,
     };
   },
   mounted() {
@@ -188,10 +262,21 @@ export default defineComponent({
             url: targetUrl,
             nickname: mint.mint.nickname || mint.mint.info?.name,
             shorturl: getShortUrl(targetUrl),
+            iconUrl: mint.mint.info?.icon_url,
             errored: mint.mint.errored,
           };
         }
       }
+    },
+    selectMint(mint: any) {
+      this.chosenMint = {
+        url: mint.url,
+        nickname: mint.nickname,
+        shorturl: mint.shorturl,
+        iconUrl: mint.iconUrl,
+        errored: mint.errored,
+      };
+      this.showMintSheet = false;
     },
     chooseMintOptions: function () {
       let options = [];
@@ -214,3 +299,150 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.mint-selector-btn {
+  width: 100%;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  &.mint-selector-dense {
+    padding: 12px;
+  }
+}
+
+.mint-icon-avatar {
+  flex-shrink: 0;
+}
+
+.mint-info-section {
+  min-width: 0;
+}
+
+.mint-name-label {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: white;
+}
+
+.mint-balance-label {
+  font-size: 14px;
+  line-height: 1.3;
+  margin-top: 4px;
+}
+
+/* Bottom sheet overlay */
+.mint-sheet-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: flex-end;
+  animation: fadeIn 0.3s ease;
+}
+
+/* Bottom sheet */
+.mint-sheet {
+  width: 100%;
+  background: rgba(20, 20, 20, 0.98);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px 20px 0 0;
+  max-height: 70vh;
+  overflow: hidden;
+  animation: slideUp 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.mint-sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 16px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mint-sheet-header h3 {
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.close-btn {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.mint-options {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.mint-option {
+  padding: 16px 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  &.active {
+    background: rgba(var(--q-primary-rgb), 0.2);
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.mint-option-name {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: white;
+}
+
+.mint-option-balance {
+  font-size: 14px;
+  line-height: 1.3;
+  margin-top: 4px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+</style>
