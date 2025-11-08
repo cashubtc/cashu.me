@@ -107,15 +107,42 @@
 
       <!-- No Reviews State -->
       <div v-else class="q-mb-lg">
-        <div class="text-h4 text-grey-6" style="font-weight: 500">
-          {{ $t("MintRatings.no_reviews") }}
+        <div
+          class="empty-state section-card q-pa-xl column items-center text-center"
+        >
+          <q-icon
+            name="chat_bubble_outline"
+            size="26px"
+            class="empty-icon q-mb-sm"
+          />
+          <div class="empty-title q-mb-sm">
+            {{ $t("MintRatings.no_reviews") }}
+          </div>
+          <div class="empty-subtitle q-mb-lg">
+            Help by leaving a review. Share your experience with this mint and
+            help others by leaving a review.
+          </div>
+          <q-btn
+            v-if="allowCreateReview"
+            color="primary"
+            unelevated
+            rounded
+            class="q-px-xl q-mt-md"
+            style="font-weight: 600"
+            @click="openCreateReview"
+          >
+            {{ $t("MintRatings.actions.write_review") }}
+          </q-btn>
         </div>
       </div>
 
       <!-- Action Buttons Row -->
-      <div class="row items-center q-mt-md" style="gap: 12px">
+      <div
+        v-if="allowCreateReview && hasAnyReviews"
+        class="row items-center q-mt-md"
+        style="gap: 12px"
+      >
         <q-btn
-          v-if="allowCreateReview"
           color="primary"
           unelevated
           rounded
@@ -128,7 +155,7 @@
       </div>
     </q-card-section>
 
-    <q-separator />
+    <q-separator v-if="hasAnyReviews" />
 
     <!-- Sort Section -->
     <q-card-section v-if="hasAnyReviews" class="q-py-sm">
@@ -149,13 +176,8 @@
 
     <q-separator v-if="hasAnyReviews" />
 
-    <q-card-section>
-      <div v-if="!hasAnyReviews" class="text-grey-6">
-        <div class="row items-center justify-center">
-          <div>{{ $t("MintRatings.no_reviews_to_display") }}</div>
-        </div>
-      </div>
-      <div v-if="hasAnyReviews" class="column">
+    <q-card-section v-if="hasAnyReviews">
+      <div class="column">
         <div
           v-for="r in paged"
           :key="r.eventId"
@@ -727,6 +749,34 @@ export default defineComponent({
   font-weight: 500;
   text-align: center;
   word-break: break-all;
+}
+
+.section-card {
+  background-color: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.empty-state {
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.25);
+}
+
+.empty-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: white;
+}
+
+.empty-subtitle {
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.7);
+  max-width: 320px;
+}
+
+.empty-icon {
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .review-item {
