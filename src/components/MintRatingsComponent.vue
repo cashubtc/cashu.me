@@ -402,7 +402,7 @@ export default defineComponent({
     shortNpub(pk: string) {
       const v = this.npub(pk);
       if (!v) return "";
-      return `${v.slice(0, 12)}…${v.slice(-6)}`;
+      return `${v.slice(0, 12)}…`;
     },
     copyNpub(pk: string) {
       try {
@@ -934,7 +934,7 @@ export default defineComponent({
 
 .own-review-badge {
   position: absolute;
-  top: 8px;
+  top: -2px;
   right: 12px;
   z-index: 1;
 }
