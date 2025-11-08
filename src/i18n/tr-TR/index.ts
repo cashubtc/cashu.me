@@ -745,6 +745,8 @@ export default {
       lowest: "En düşük",
     },
     actions: { write_review: "Yorum yaz" },
+    empty_state_subtitle:
+      "Bir yorum bırakarak yardımcı olun. Bu mint ile ilgili deneyiminizi paylaşın ve bir yorum bırakarak başkalarına yardımcı olun.",
   },
   CreateMintReview: {
     title: "Mint yorumu",

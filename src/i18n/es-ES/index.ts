@@ -739,6 +739,8 @@ export default {
       lowest: "Más bajas",
     },
     actions: { write_review: "Escribir una reseña" },
+    empty_state_subtitle:
+      "Ayuda dejando una reseña. Comparte tu experiencia con este mint y ayuda a otros dejando una reseña.",
   },
   CreateMintReview: {
     title: "Reseñar mint",

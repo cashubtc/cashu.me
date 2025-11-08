@@ -740,6 +740,8 @@ export default {
       lowest: "Χαμηλότερες",
     },
     actions: { write_review: "Γράψτε κριτική" },
+    empty_state_subtitle:
+      "Βοηθήστε αφήνοντας μια κριτική. Μοιραστείτε την εμπειρία σας με αυτό το mint και βοηθήστε άλλους αφήνοντας μια κριτική.",
   },
   CreateMintReview: {
     title: "Κριτική mint",

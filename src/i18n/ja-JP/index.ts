@@ -730,6 +730,8 @@ export default {
       lowest: "低い順",
     },
     actions: { write_review: "レビューを書く" },
+    empty_state_subtitle:
+      "レビューを残して助けてください。このミントでの経験を共有し、レビューを残して他の人を助けてください。",
   },
   CreateMintReview: {
     title: "ミントをレビュー",

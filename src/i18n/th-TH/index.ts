@@ -731,6 +731,8 @@ export default {
       lowest: "ต่ำที่สุด",
     },
     actions: { write_review: "เขียนรีวิว" },
+    empty_state_subtitle:
+      "ช่วยเหลือโดยการเขียนรีวิว แบ่งปันประสบการณ์ของคุณกับ Mint นี้และช่วยเหลือผู้อื่นโดยการเขียนรีวิว",
   },
   CreateMintReview: {
     title: "รีวิว Mint",

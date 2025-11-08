@@ -744,6 +744,8 @@ export default {
     actions: {
       write_review: "Write a review",
     },
+    empty_state_subtitle:
+      "Help by leaving a review. Share your experience with this mint and help others by leaving a review.",
   },
   CreateMintReview: {
     title: "Review Mint",

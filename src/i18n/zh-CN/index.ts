@@ -728,6 +728,8 @@ export default {
       lowest: "最低",
     },
     actions: { write_review: "撰写评价" },
+    empty_state_subtitle:
+      "通过留下评价来帮助他人。分享您对此 Mint 的体验，通过留下评价来帮助他人。",
   },
   CreateMintReview: {
     title: "评价 Mint",
