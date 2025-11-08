@@ -127,7 +127,7 @@
       <!-- Action Buttons Row -->
       <div
         v-if="allowCreateReview && hasAnyReviews"
-        class="row items-center q-mt-md"
+        class="row q-mt-md justify-center"
         style="gap: 12px"
       >
         <q-btn
@@ -135,7 +135,7 @@
           unelevated
           rounded
           class="q-px-lg"
-          style="font-weight: 500"
+          style="font-weight: 500; width: 100%"
           @click="openCreateReview"
         >
           {{ $t("MintRatings.actions.write_review") }}
