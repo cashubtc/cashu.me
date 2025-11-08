@@ -10,8 +10,13 @@
         {{ formattedAmountDisplay }}
       </div>
     </div>
-    <div v-if="secondaryFiatDisplay" class="fiat-display text-grey-6 q-mt-xs">
-      {{ secondaryFiatDisplay }}
+    <div class="fiat-container q-mt-xs">
+      <div
+        class="fiat-display text-grey-6"
+        :class="{ invisible: !secondaryFiatDisplay }"
+      >
+        {{ secondaryFiatDisplay || " " }}
+      </div>
     </div>
   </div>
   <!-- amount-input-root keeps structure minimal so parents can place it within their layout -->
@@ -216,6 +221,10 @@ export default defineComponent({
   position: relative;
   display: inline-block;
   max-width: 90vw;
+  height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .amount-display {
   font-size: clamp(56px, 11vw, 80px);
@@ -223,7 +232,13 @@ export default defineComponent({
   white-space: nowrap;
   max-width: 100%;
 }
+.fiat-container {
+  height: 18px;
+}
 .fiat-display {
   font-size: 14px;
+}
+.invisible {
+  visibility: hidden;
 }
 </style>
