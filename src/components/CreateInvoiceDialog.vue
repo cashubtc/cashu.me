@@ -28,8 +28,10 @@
         </div>
 
         <!-- Mint selection -->
-        <div class="q-px-lg q-mb-sm" style="width: 100%">
-          <ChooseMint />
+        <div class="row justify-center">
+          <div class="col-12 col-sm-11 col-md-8 q-px-lg q-mb-sm">
+            <ChooseMint />
+          </div>
         </div>
 
         <!-- Amount display -->
@@ -56,30 +58,32 @@
               :hide-enter="true"
               :hide-comma="activeUnit === 'sat' || activeUnit === 'msat'"
               :model-value="String(invoiceData.amount ?? 0)"
-              @update:modelValue="(val) => (invoiceData.amount = Number(val))"
+              @update:modelValue="(val: string | number) => (invoiceData.amount = Number(val))"
               @done="requestMintButton"
             />
           </div>
           <!-- Create action below keyboard -->
-          <div class="q-px-md q-pb-md q-pt-sm">
-            <q-btn
-              class="full-width"
-              unelevated
-              size="lg"
-              :disable="
-                invoiceData.amount == null || Number(invoiceData.amount) <= 0
-              "
-              @click="requestMintButton"
-              color="primary"
-              rounded
-              type="submit"
-              :loading="globalMutexLock || createInvoiceButtonBlocked"
-            >
-              {{ $t("InvoiceDetailDialog.actions.create.label") }}
-              <template v-slot:loading>
-                <q-spinner-hourglass />
-              </template>
-            </q-btn>
+          <div class="row justify-center q-pb-md q-pt-sm">
+            <div class="col-12 col-sm-11 col-md-8 q-px-md">
+              <q-btn
+                class="full-width"
+                unelevated
+                size="lg"
+                :disable="
+                  invoiceData.amount == null || Number(invoiceData.amount) <= 0
+                "
+                @click="requestMintButton"
+                color="primary"
+                rounded
+                type="submit"
+                :loading="globalMutexLock || createInvoiceButtonBlocked"
+              >
+                {{ $t("InvoiceDetailDialog.actions.create.label") }}
+                <template v-slot:loading>
+                  <q-spinner-hourglass />
+                </template>
+              </q-btn>
+            </div>
           </div>
         </div>
       </div>
@@ -294,5 +298,10 @@ export default defineComponent({
   background: var(--q-color-grey-1);
   box-shadow: 0 -8px 16px rgba(0, 0, 0, 0.05);
   padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.keypad-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 </style>

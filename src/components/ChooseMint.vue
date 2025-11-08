@@ -1,18 +1,14 @@
 <template>
   <div class="q-pb-md">
     <!-- title that says choose a mint -->
-    <div class="row q-mb-none" v-if="title.length">
-      <div class="col-12">
-        <span class="text-caption">{{ title }}</span>
-      </div>
-    </div>
+    <div class="row q-mb-none" v-if="title.length"></div>
     <div
       class="row q-mt-xs q-mb-none"
       v-if="activeMintUrl || !requireActiveMint"
     >
       <div class="col-12 cursor-pointer">
         <q-select
-          outlined
+          flat
           class="q-px-none"
           color="white"
           v-model="chosenMint"

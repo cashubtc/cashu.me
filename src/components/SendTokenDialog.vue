@@ -41,8 +41,10 @@
         </div>
 
         <!-- Mint selection -->
-        <div class="q-px-lg q-mb-sm" style="width: 100%">
-          <ChooseMint />
+        <div class="row justify-center">
+          <div class="col-12 col-sm-11 col-md-8 q-px-lg q-mb-sm">
+            <ChooseMint />
+          </div>
         </div>
 
         <!-- Amount display -->
@@ -139,34 +141,36 @@
               :hide-enter="true"
               :hide-comma="activeUnit === 'sat' || activeUnit === 'msat'"
               :model-value="String(sendData.amount ?? 0)"
-              @update:modelValue="(val) => (sendData.amount = Number(val))"
+              @update:modelValue="(val: string | number) => (sendData.amount = Number(val))"
               @done="sendTokens"
             />
           </div>
           <!-- Send action below keyboard -->
-          <div class="q-px-md q-pb-md q-pt-sm">
-            <q-btn
-              class="full-width"
-              unelevated
-              size="lg"
-              :disable="
-                sendData.amount == null ||
-                sendData.amount <= 0 ||
-                insufficientFunds ||
-                (sendData.p2pkPubkey != '' &&
-                  !isValidPubkey(sendData.p2pkPubkey))
-              "
-              @click="sendTokens"
-              color="primary"
-              rounded
-              type="submit"
-              :loading="globalMutexLock"
-            >
-              {{ $t("SendTokenDialog.actions.send.label") }}
-              <template v-slot:loading>
-                <q-spinner-hourglass />
-              </template>
-            </q-btn>
+          <div class="row justify-center q-pb-md q-pt-sm">
+            <div class="col-12 col-sm-11 col-md-8 q-px-md">
+              <q-btn
+                class="full-width"
+                unelevated
+                size="lg"
+                :disable="
+                  sendData.amount == null ||
+                  sendData.amount <= 0 ||
+                  insufficientFunds ||
+                  (sendData.p2pkPubkey != '' &&
+                    !isValidPubkey(sendData.p2pkPubkey))
+                "
+                @click="sendTokens"
+                color="primary"
+                rounded
+                type="submit"
+                :loading="globalMutexLock"
+              >
+                {{ $t("SendTokenDialog.actions.send.label") }}
+                <template v-slot:loading>
+                  <q-spinner-hourglass />
+                </template>
+              </q-btn>
+            </div>
           </div>
         </div>
       </div>
@@ -277,7 +281,7 @@ export default defineComponent({
         : 0;
       const sumSelectedProofs = selectedProofs
         .flat()
-        .reduce((sum, el) => (sum += el.amount), 0);
+        .reduce((sum: number, el: any) => (sum += el.amount), 0);
       return (
         sumSelectedProofs ==
         this.sendData.amount * this.activeUnitCurrencyMultiplyer + feesToAdd
@@ -378,7 +382,7 @@ export default defineComponent({
     ...mapActions(useP2PKStore, ["isValidPubkey", "maybeConvertNpub"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
-    onGlobalAmountKeydown: function (e) {
+    onGlobalAmountKeydown: function (e: KeyboardEvent) {
       // only handle when amount entry screen is shown
       if (this.sendData.tokens) return;
       // ignore if an input/textarea/contenteditable is focused
@@ -392,10 +396,10 @@ export default defineComponent({
         return;
       }
       // modifier keys: ignore
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if ((e as any).metaKey || (e as any).ctrlKey || (e as any).altKey) return;
       const allowDecimal =
         this.activeUnit !== "sat" && this.activeUnit !== "msat";
-      const key = e.key;
+      const key = (e as KeyboardEvent).key;
       let buf =
         this.amountEditBuffer ||
         (this.sendData.amount == null ? "0" : String(this.sendData.amount));
@@ -429,7 +433,7 @@ export default defineComponent({
       }
 
       if (!handled) return;
-      e.preventDefault();
+      (e as Event).preventDefault();
 
       // sanitize buffer
       if (allowDecimal) {
@@ -484,7 +488,7 @@ export default defineComponent({
         if (!this.g.offline) {
           this.onTokenPaid(historyToken);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error(error);
       }
     },
@@ -537,7 +541,7 @@ export default defineComponent({
         if (!this.g.offline) {
           this.onTokenPaid(historyToken);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error(error);
       }
     },
@@ -559,8 +563,8 @@ export default defineComponent({
       try {
         await navigator.share(shareData);
         console.log("Token shared successfully");
-      } catch (error) {
-        if (error.name !== "AbortError") {
+      } catch (error: any) {
+        if ((error as any).name !== "AbortError") {
           console.error("Error sharing token:", error);
         }
       }
@@ -602,5 +606,10 @@ export default defineComponent({
   background: var(--q-color-grey-1);
   box-shadow: 0 -8px 16px rgba(0, 0, 0, 0.05);
   padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.keypad-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 </style>
