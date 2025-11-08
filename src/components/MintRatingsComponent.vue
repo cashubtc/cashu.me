@@ -26,7 +26,7 @@
 
       <!-- Rating Summary Section - Apple Podcasts Style -->
       <div v-if="hasAnyReviews" class="q-mb-lg">
-        <div class="row items-start q-mb-md" style="gap: 24px">
+        <div class="row items-start q-mb-sm" style="gap: 24px">
           <!-- Large Rating Display on Left -->
           <div class="column items-center" style="min-width: 100px">
             <div class="text-h2" style="font-weight: 600; line-height: 1">
@@ -79,17 +79,17 @@
               </div>
             </div>
           </div>
-          <!-- WoT Filter and Total Ratings Count -->
-          <div class="col-12 row items-center justify-end" style="gap: 6px">
-            <div class="row items-center" style="gap: 6px">
-              <span class="text-caption text-grey-6" style="font-size: 0.7rem">
-                {{ $t("Settings.web_of_trust.title") }}
-              </span>
-              <q-toggle v-model="filterByWoT" size="xs" color="primary" dense />
-            </div>
-            <div class="text-body2 text-grey-5" style="font-weight: 500">
-              {{ totalReviews }} {{ $t("MintRatings.ratings") }}
-            </div>
+        </div>
+        <!-- WoT Filter and Total Ratings Count -->
+        <div class="col-12 row items-center justify-end" style="gap: 6px">
+          <div class="row items-center" style="gap: 6px">
+            <span class="text-caption text-grey-6" style="font-size: 0.7rem">
+              {{ $t("Settings.web_of_trust.title") }}
+            </span>
+            <q-toggle v-model="filterByWoT" size="xs" color="primary" dense />
+          </div>
+          <div class="text-body2 text-grey-5" style="font-weight: 500">
+            {{ totalReviews }} {{ $t("MintRatings.ratings") }}
           </div>
         </div>
       </div>
