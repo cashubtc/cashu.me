@@ -203,7 +203,7 @@
           </q-btn>
         </div>
         <q-card-section class="q-pa-sm">
-          <div class="row justify-center q-pt-sm">
+          <div class="row justify-center q-pt-md">
             <q-item-label style="font-size: 30px" class="text-weight-bold">
               <strong>{{ displayUnit }}</strong></q-item-label
             >
@@ -213,7 +213,7 @@
               Fee: {{ formatCurrency(paidFees, tokenUnit) }}
             </q-item-label>
           </div>
-          <div class="row justify-center q-pt-md">
+          <div class="row justify-center q-pt-lg">
             <TokenInformation
               :encodedToken="sendData.tokensBase64"
               :showAmount="false"
@@ -236,7 +236,7 @@
     <!-- Fixed bottom panel with copy button -->
     <div class="bottom-panel">
       <div class="row justify-center q-pb-md q-pt-sm">
-        <div class="col-12 col-sm-11 col-md-8 q-px-md">
+        <div class="col-12 col-sm-11 col-md-8 q-px-md" style="max-width: 600px">
           <q-btn
             class="full-width"
             unelevated

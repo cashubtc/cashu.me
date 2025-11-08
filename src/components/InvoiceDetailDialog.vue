@@ -1,99 +1,128 @@
 <template>
   <q-dialog
     v-model="showInvoiceDetails"
-    position="top"
-    :maximized="$q.screen.lt.sm"
-    :full-width="$q.screen.lt.sm"
-    :full-height="$q.screen.lt.sm"
+    maximized
     backdrop-filter="blur(2px) brightness(60%)"
     transition-show="fade"
     transition-hide="fade"
     no-backdrop-dismiss
   >
-    <q-card class="q-pa-lg q-px-sm qcard q-card-top">
-      <div v-if="invoiceData.bolt11" class="text-center q-mt-none q-pt-none">
-        <a class="text-secondary" :href="'lightning:' + invoiceData.bolt11">
-          <q-responsive :ratio="1" class="q-ma-none q-ma-none">
-            <vue-qrcode
-              :value="'lightning:' + invoiceData.bolt11.toUpperCase()"
-              :options="{ width: 340 }"
-              class="rounded-borders"
+    <q-card class="q-pa-none qcard">
+      <div
+        :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
+        class="display-token-fullscreen"
+      >
+        <!-- Header -->
+        <div class="row items-center q-pa-md" style="position: relative">
+          <q-btn
+            v-close-popup
+            flat
+            round
+            icon="close"
+            color="grey"
+            class="floating-close-btn"
+          />
+          <div class="col text-center fixed-title-height">
+            <q-item-label
+              overline
+              class="q-mt-sm text-white"
+              style="font-size: 1rem"
             >
-            </vue-qrcode>
-          </q-responsive>
-        </a>
-        <div class="row justify-center">
-          <q-card-section class="q-pa-sm">
-            <div class="row justify-center">
-              <q-item-label
-                overline
-                class="q-mb-sm q-pt-md text-white"
-                style="font-size: 1rem"
-                >{{ $t("InvoiceDetailDialog.invoice.caption") }}</q-item-label
-              >
-            </div>
-            <div class="row justify-center q-py-md">
-              <q-item-label style="font-size: 28px" class="text-weight-bold">
-                <q-icon
-                  :name="
-                    invoiceData.amount >= 0 ? 'call_received' : 'call_made'
-                  "
-                  :color="
-                    invoiceData.status === 'paid'
-                      ? invoiceData.amount >= 0
-                        ? 'green'
-                        : 'red'
-                      : ''
-                  "
-                  class="q-mr-sm"
-                  size="sm"
-                />
+              {{ $t("InvoiceDetailDialog.invoice.caption") }}
+            </q-item-label>
+          </div>
+        </div>
 
-                <strong>{{ displayUnit }}</strong></q-item-label
+        <!-- Content -->
+        <div class="content-area">
+          <q-card-section class="q-pa-none">
+            <div v-if="invoiceData.bolt11" class="row justify-center q-mb-md">
+              <div
+                class="col-12 col-sm-11 col-md-8 q-px-md"
+                style="max-width: 600px"
               >
+                <a
+                  class="text-secondary"
+                  :href="'lightning:' + invoiceData.bolt11"
+                >
+                  <q-responsive :ratio="1" class="q-mx-none">
+                    <vue-qrcode
+                      :value="'lightning:' + invoiceData.bolt11.toUpperCase()"
+                      :options="{ width: 400 }"
+                      class="rounded-borders"
+                      style="width: 100%"
+                    >
+                    </vue-qrcode>
+                  </q-responsive>
+                </a>
+                <div style="height: 2px">
+                  <q-linear-progress
+                    v-if="runnerActive"
+                    indeterminate
+                    color="primary"
+                  />
+                </div>
+              </div>
             </div>
-            <div
-              v-if="invoiceData && invoiceData.mint != undefined"
-              class="row justify-center q-pt-sm"
-            >
-              <q-chip
-                outline
-                class="q-pa-md"
-                style="height: 36px; font-family: monospace"
+
+            <q-card-section class="q-pa-sm">
+              <div class="row justify-center q-pt-md">
+                <q-item-label style="font-size: 28px" class="text-weight-bold">
+                  <strong>{{ displayUnit }}</strong>
+                </q-item-label>
+              </div>
+              <div
+                v-if="invoiceData && invoiceData.mint != undefined"
+                class="row justify-center q-pt-lg"
               >
-                <q-icon name="account_balance" size="xs" class="q-mr-sm" />
-                {{ shortUrl }}
-              </q-chip>
-            </div>
-            <div
-              v-if="invoiceData.amount > 0 && invoiceData.status === 'paid'"
-              class="row justify-center"
-            >
-              <transition appear enter-active-class="animated tada">
-                <span class="q-mt-lg text-h6">
-                  <q-icon
-                    name="check_circle"
-                    size="1.5rem"
-                    color="positive"
-                    class="q-mr-sm q-mb-xs"
-                  />{{ $t("InvoiceDetailDialog.invoice.status_paid_text") }}
-                </span>
-              </transition>
-            </div>
+                <q-chip
+                  outline
+                  class="q-pa-md"
+                  style="height: 36px; font-family: monospace"
+                >
+                  <q-icon name="account_balance" size="xs" class="q-mr-sm" />
+                  {{ shortUrl }}
+                </q-chip>
+              </div>
+              <div
+                v-if="invoiceData.amount > 0 && invoiceData.status === 'paid'"
+                class="row justify-center"
+              >
+                <transition appear enter-active-class="animated tada">
+                  <span class="q-mt-xl text-bold" style="font-size: 28px">
+                    <q-icon
+                      name="check_circle"
+                      size="2rem"
+                      color="positive"
+                      class="q-mr-sm q-mb-xs"
+                    />{{ $t("InvoiceDetailDialog.invoice.status_paid_text") }}
+                  </span>
+                </transition>
+              </div>
+            </q-card-section>
           </q-card-section>
         </div>
-        <div class="row q-mt-lg">
-          <q-btn
-            v-if="invoiceData.bolt11"
-            class="q-mx-xs"
-            size="md"
-            flat
-            @click="onCopyBolt11"
-            >{{ $t("InvoiceDetailDialog.invoice.actions.copy.label") }}</q-btn
-          >
-          <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
-            $t("InvoiceDetailDialog.invoice.actions.close.label")
-          }}</q-btn>
+
+        <!-- Bottom panel action -->
+        <div class="bottom-panel">
+          <div class="row justify-center q-pb-md q-pt-sm">
+            <div
+              class="col-12 col-sm-11 col-md-8 q-px-md"
+              style="max-width: 600px"
+            >
+              <q-btn
+                v-if="invoiceData.bolt11"
+                class="full-width"
+                unelevated
+                size="lg"
+                color="primary"
+                rounded
+                @click="onCopyBolt11"
+              >
+                {{ $t("InvoiceDetailDialog.invoice.actions.copy.label") }}
+              </q-btn>
+            </div>
+          </div>
         </div>
       </div>
     </q-card>
@@ -154,6 +183,39 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.display-token-fullscreen {
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.content-area {
+  flex: 1;
+  overflow-y: auto;
+}
+.floating-close-btn {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+.fixed-title-height {
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bottom-panel {
+  margin-top: auto;
+  background: var(--q-color-grey-1);
+  box-shadow: 0 -8px 16px rgba(0, 0, 0, 0.05);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+}
 .qcard {
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
