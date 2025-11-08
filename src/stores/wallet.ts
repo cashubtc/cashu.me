@@ -1429,7 +1429,6 @@ export const useWalletStore = defineStore("wallet", {
       const sendTokenStore = useSendTokensStore();
       sendTokenStore.sendData.p2pkPubkey = req;
       sendTokenStore.showSendTokens = true;
-      sendTokenStore.showLockInput = true;
     },
     handlePaymentRequest: async function (req: string) {
       const prStore = usePRStore();

@@ -128,7 +128,7 @@
           </transition>
           <div class="amount-container">
             <q-badge
-              v-if="isLocked"
+              v-if="isLocked && !showLockInput"
               rounded
               color="positive"
               class="locked-badge"
@@ -146,6 +146,7 @@
             <div
               class="amount-display text-weight-bold text-center"
               :class="{ 'text-grey-6': insufficientFunds }"
+              v-if="!showLockInput"
             >
               {{ formattedAmountDisplay }}
             </div>
