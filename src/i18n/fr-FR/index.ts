@@ -740,6 +740,8 @@ export default {
       lowest: "Plus basses",
     },
     actions: { write_review: "Rédiger un avis" },
+    empty_state_subtitle:
+      "Aidez en laissant un avis. Partagez votre expérience avec ce mint et aidez les autres en laissant un avis.",
   },
   CreateMintReview: {
     title: "Évaluer le mint",

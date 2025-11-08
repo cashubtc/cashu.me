@@ -734,6 +734,8 @@ export default {
       lowest: "Lägsta",
     },
     actions: { write_review: "Skriv en recension" },
+    empty_state_subtitle:
+      "Hjälp genom att lämna en recension. Dela din upplevelse med denna mint och hjälp andra genom att lämna en recension.",
   },
   CreateMintReview: {
     title: "Recensera mint",

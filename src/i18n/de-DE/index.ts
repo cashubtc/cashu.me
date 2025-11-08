@@ -742,6 +742,8 @@ export default {
       lowest: "Niedrigste",
     },
     actions: { write_review: "Bewertung schreiben" },
+    empty_state_subtitle:
+      "Helfen Sie, indem Sie eine Bewertung hinterlassen. Teilen Sie Ihre Erfahrungen mit diesem Mint und helfen Sie anderen, indem Sie eine Bewertung hinterlassen.",
   },
   CreateMintReview: {
     title: "Mint bewerten",

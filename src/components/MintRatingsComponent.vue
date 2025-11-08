@@ -26,7 +26,7 @@
 
       <!-- Rating Summary Section - Apple Podcasts Style -->
       <div v-if="hasAnyReviews" class="q-mb-lg">
-        <div class="row items-start q-mb-md" style="gap: 24px">
+        <div class="row items-start q-mb-sm" style="gap: 24px">
           <!-- Large Rating Display on Left -->
           <div class="column items-center" style="min-width: 100px">
             <div class="text-h2" style="font-weight: 600; line-height: 1">
@@ -78,29 +78,18 @@
                 />
               </div>
             </div>
-            <!-- WoT Filter and Total Ratings Count -->
-            <div
-              class="row items-center justify-end"
-              style="gap: 12px; margin-top: 4px"
-            >
-              <div class="row items-center" style="gap: 6px">
-                <span
-                  class="text-caption text-grey-6"
-                  style="font-size: 0.7rem"
-                >
-                  {{ $t("Settings.web_of_trust.title") }}
-                </span>
-                <q-toggle
-                  v-model="filterByWoT"
-                  size="xs"
-                  color="primary"
-                  dense
-                />
-              </div>
-              <div class="text-body2 text-grey-5" style="font-weight: 500">
-                {{ totalReviews }} {{ $t("MintRatings.ratings") }}
-              </div>
-            </div>
+          </div>
+        </div>
+        <!-- WoT Filter and Total Ratings Count -->
+        <div class="col-12 row items-center justify-end" style="gap: 6px">
+          <div class="row items-center" style="gap: 6px">
+            <span class="text-caption text-grey-6" style="font-size: 0.7rem">
+              {{ $t("Settings.web_of_trust.title") }}
+            </span>
+            <q-toggle v-model="filterByWoT" size="xs" color="primary" dense />
+          </div>
+          <div class="text-body2 text-grey-5" style="font-weight: 500">
+            {{ totalReviews }} {{ $t("MintRatings.ratings") }}
           </div>
         </div>
       </div>
@@ -119,8 +108,7 @@
             {{ $t("MintRatings.no_reviews") }}
           </div>
           <div class="empty-subtitle q-mb-lg">
-            Help by leaving a review. Share your experience with this mint and
-            help others by leaving a review.
+            {{ $t("MintRatings.empty_state_subtitle") }}
           </div>
           <q-btn
             v-if="allowCreateReview"
@@ -139,7 +127,7 @@
       <!-- Action Buttons Row -->
       <div
         v-if="allowCreateReview && hasAnyReviews"
-        class="row items-center q-mt-md"
+        class="row q-mt-md justify-center"
         style="gap: 12px"
       >
         <q-btn
@@ -147,7 +135,7 @@
           unelevated
           rounded
           class="q-px-lg"
-          style="font-weight: 500"
+          style="font-weight: 500; width: 100%"
           @click="openCreateReview"
         >
           {{ $t("MintRatings.actions.write_review") }}

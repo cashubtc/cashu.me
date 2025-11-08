@@ -729,6 +729,8 @@ export default {
       lowest: "الأقل",
     },
     actions: { write_review: "اكتب مراجعة" },
+    empty_state_subtitle:
+      "ساعد من خلال ترك مراجعة. شارك تجربتك مع هذا المِنْت وساعد الآخرين من خلال ترك مراجعة.",
   },
   CreateMintReview: {
     title: "مراجعة المِنْت",
