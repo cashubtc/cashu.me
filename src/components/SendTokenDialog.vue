@@ -638,7 +638,6 @@ export default defineComponent({
   position: relative;
   display: inline-block;
   max-width: 90vw;
-  overflow: hidden;
 }
 .amount-display {
   font-size: clamp(56px, 11vw, 80px);
