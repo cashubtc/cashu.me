@@ -24,6 +24,8 @@ import { useSettingsStore } from "src/stores/settings";
 import { usePriceStore } from "src/stores/price";
 declare const windowMixin: any;
 
+const MAX_AMOUNT = 999_999_999;
+
 export default defineComponent({
   name: "AmountInputComponent",
   mixins: [windowMixin],
@@ -81,6 +83,13 @@ export default defineComponent({
   watch: {
     formattedAmountDisplay() {
       this.$nextTick(() => this.adjustAmountFontSize());
+    },
+    modelValue(newVal: number | null) {
+      if (newVal == null) return;
+      if (newVal > MAX_AMOUNT) {
+        this.$emit("update:modelValue", MAX_AMOUNT);
+        this.amountEditBuffer = String(MAX_AMOUNT);
+      }
     },
     enabled(val: boolean) {
       if (val) {
@@ -189,7 +198,14 @@ export default defineComponent({
         this.$emit("update:modelValue", null);
       } else {
         const num = Number(buf);
-        this.$emit("update:modelValue", isNaN(num) ? null : num);
+        if (isNaN(num)) {
+          this.$emit("update:modelValue", null);
+        } else if (num > MAX_AMOUNT) {
+          this.amountEditBuffer = String(MAX_AMOUNT);
+          this.$emit("update:modelValue", MAX_AMOUNT);
+        } else {
+          this.$emit("update:modelValue", num);
+        }
       }
     },
   },
@@ -200,13 +216,11 @@ export default defineComponent({
   position: relative;
   display: inline-block;
   max-width: 90vw;
-  overflow: hidden;
 }
 .amount-display {
   font-size: clamp(56px, 11vw, 80px);
   line-height: 1.1;
-  overflow-wrap: break-word;
-  word-break: break-all;
+  white-space: nowrap;
   max-width: 100%;
 }
 .fiat-display {

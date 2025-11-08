@@ -18,18 +18,6 @@
         <div class="row items-center justify-between q-pa-md">
           <q-btn v-close-popup flat round icon="close" color="grey" />
           <div class="row items-center q-gutter-sm">
-            <q-badge
-              v-if="canSpendOffline && !sendData.p2pkPubkey && !showLockInput"
-              outline
-              rounded
-              color="grey"
-              size="md"
-            >
-              <q-icon name="check" color="primary" size="xs" class="q-mr-xs" />
-              <span class="text-caption text-weight-medium">{{
-                $t("SendTokenDialog.badge_offline_text")
-              }}</span>
-            </q-badge>
             <q-btn
               flat
               dense
@@ -300,38 +288,49 @@ export default defineComponent({
     ]),
     ...mapState(useSettingsStore, ["bitcoinPriceCurrency"]),
     ...mapState(useWorkersStore, ["tokenWorkerRunning"]),
-    insufficientFunds: function () {
+    insufficientFunds: function (): boolean {
       if (this.sendData.amount == null) return false;
-      return this.activeBalance < this.sendData.amount;
-    },
-    canSpendOffline: function () {
-      if (!this.sendData.amount) {
-        return false;
-      }
-      // check if entered amount is the same as the result of coinSelect(spendableProofs(activeProofs), amount)
-      let spendableProofs = this.spendableProofs(this.activeProofs);
-      const mintWallet = useWalletStore().wallet;
-      let selectedProofs = this.coinSelect(
-        spendableProofs,
-        mintWallet,
-        this.sendData.amount * this.activeUnitCurrencyMultiplyer,
-        this.includeFeesInSendAmount
-      );
-      const feesToAdd = this.includeFeesInSendAmount
-        ? this.getFeesForProofs(selectedProofs)
-        : 0;
-      const sumSelectedProofs = selectedProofs
-        .flat()
-        .reduce((sum: number, el: any) => (sum += el.amount), 0);
       return (
-        sumSelectedProofs ==
-        this.sendData.amount * this.activeUnitCurrencyMultiplyer + feesToAdd
+        this.activeBalance <
+        this.sendData.amount * this.activeUnitCurrencyMultiplyer
       );
     },
-    isLocked: function () {
-      return (
+    // canSpendOffline: function (): boolean {
+    //   if (!this.sendData.amount) {
+    //     return false;
+    //   }
+    //   // check if entered amount is the same as the result of coinSelect(spendableProofs(activeProofs), amount)
+    //   try {
+    //     let spendableProofs = this.spendableProofs(
+    //       this.activeProofs,
+    //       this.sendData.amount * this.activeUnitCurrencyMultiplyer
+    //     );
+    //     const mintWallet = useWalletStore().wallet;
+    //     let selectedProofs = this.coinSelect(
+    //       spendableProofs,
+    //       mintWallet,
+    //       this.sendData.amount * this.activeUnitCurrencyMultiplyer,
+    //       this.includeFeesInSendAmount
+    //     );
+    //     const feesToAdd = this.includeFeesInSendAmount
+    //       ? this.getFeesForProofs(selectedProofs)
+    //       : 0;
+    //     const sumSelectedProofs = selectedProofs
+    //       .flat()
+    //       .reduce((sum: number, el: any) => (sum += el.amount), 0);
+    //     return (
+    //       sumSelectedProofs ==
+    //       this.sendData.amount * this.activeUnitCurrencyMultiplyer + feesToAdd
+    //     );
+    //   } catch (error: any) {
+    //     console.error(error);
+    //     return false;
+    //   }
+    // },
+    isLocked: function (): boolean {
+      return Boolean(
         this.sendData.p2pkPubkey != "" &&
-        this.isValidPubkey(this.sendData.p2pkPubkey)
+          this.isValidPubkey(this.sendData.p2pkPubkey)
       );
     },
   },
@@ -398,6 +397,9 @@ export default defineComponent({
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
     lockTokens: async function () {
+      if (!this.sendData.amount) {
+        throw new Error("Amount is required");
+      }
       let sendAmount = Math.floor(
         this.sendData.amount * this.activeUnitCurrencyMultiplyer
       );
