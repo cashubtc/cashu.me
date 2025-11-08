@@ -43,7 +43,10 @@
 
         <!-- Mint selection -->
         <div class="row justify-center">
-          <div class="col-12 col-sm-11 col-md-8 q-px-lg q-mb-sm">
+          <div
+            class="col-12 col-sm-11 col-md-8 q-px-lg q-mb-sm"
+            style="max-width: 600px"
+          >
             <ChooseMint />
           </div>
         </div>
@@ -148,7 +151,10 @@
           </div>
           <!-- Send action below keyboard -->
           <div class="row justify-center q-pb-md q-pt-sm">
-            <div class="col-12 col-sm-11 col-md-8 q-px-md">
+            <div
+              class="col-12 col-sm-11 col-md-8 q-px-md"
+              style="max-width: 600px"
+            >
               <q-btn
                 class="full-width"
                 unelevated
