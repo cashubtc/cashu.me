@@ -1,55 +1,20 @@
 <template>
-  <q-card-section class="q-pa-none q-pt-md">
-    <div class="text-center q-mb-md" v-if="qrCodeFragment">
-      <q-responsive :ratio="1" class="q-mx-none">
-        <vue-qrcode
-          :value="qrCodeFragment"
-          :options="{ width: 400 }"
-          class="rounded-borders"
-          @click="copyText(sendData.tokensBase64)"
-        >
-        </vue-qrcode>
-      </q-responsive>
-      <div style="height: 2px">
-        <q-linear-progress v-if="runnerActive" indeterminate color="primary" />
-      </div>
-    </div>
-    <div class="q-pb-xs q-ba-none q-gutter-sm">
+  <div :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'">
+    <!-- Header -->
+    <div class="row items-center q-pa-md" style="position: relative">
       <q-btn
-        v-if="showAnimatedQR"
+        v-close-popup
         flat
-        style="font-size: 10px"
+        round
+        icon="close"
         color="grey"
-        class="q-ma-none"
-        @click="changeSpeed"
-      >
-        <q-icon name="speed" style="margin-right: 8px"></q-icon>
-        Speed: {{ fragmentSpeedLabel }}
-      </q-btn>
-      <q-badge
-        :color="!isV4Token ? 'primary' : 'grey'"
-        :label="isV4Token ? 'V4' : 'V3'"
-        class="q-my-sm q-mx-md cursor-pointer"
-        @click="toggleTokenEncoding"
-        :outline="isV4Token"
+        class="floating-close-btn"
+        @click="closeCardScanner"
       />
-      <q-btn
-        v-if="showAnimatedQR"
-        flat
-        style="font-size: 10px"
-        class="q-ma-none"
-        color="grey"
-        @click="changeSize"
-      >
-        <q-icon name="zoom_in" style="margin-right: 8px"></q-icon>
-        Size: {{ fragmentLengthLabel }}
-      </q-btn>
-    </div>
-    <q-card-section class="q-pa-sm">
-      <div class="row justify-center">
+      <div class="col text-center">
         <q-item-label
           overline
-          class="q-mb-sm text-white"
+          class="q-mt-sm text-white"
           style="font-size: 1rem"
         >
           {{
@@ -62,179 +27,236 @@
           Ecash</q-item-label
         >
       </div>
-      <div class="row justify-center q-pt-sm">
-        <q-item-label style="font-size: 30px" class="text-weight-bold">
-          <q-icon
-            :name="
-              sendData.historyToken.amount >= 0 ? 'call_received' : 'call_made'
-            "
-            :color="
-              sendData.historyToken.status === 'paid'
-                ? sendData.historyToken.amount >= 0
-                  ? 'green'
-                  : 'red'
-                : ''
-            "
-            class="q-mr-xs q-mb-xs"
-            size="sm"
-          />
-          <strong>{{ displayUnit }}</strong></q-item-label
-        >
-      </div>
-      <div v-if="paidFees" class="row justify-center q-pt-sm">
-        <q-item-label class="text-weight-bold">
-          Fee: {{ formatCurrency(paidFees, tokenUnit) }}
-        </q-item-label>
-      </div>
-      <div class="row justify-center q-pt-md">
-        <TokenInformation
-          :encodedToken="sendData.tokensBase64"
-          :showAmount="false"
-          :showP2PKCheck="false"
-        />
-      </div>
-      <div
-        v-if="
-          sendData.paymentRequest &&
-          sendData.historyToken.amount < 0 &&
-          sendData.historyToken.status === 'pending'
-        "
-        class="row justify-center q-pt-sm"
-      >
-        <SendPaymentRequest />
-      </div>
-      <div class="row items-center justify-between q-mt-lg">
-        <div class="row items-center">
-          <q-btn
-            class="q-ml-md"
-            size="md"
-            flat
-            dense
-            @click="copyText(sendData.tokensBase64)"
-            >{{ $t("SendTokenDialog.actions.copy_tokens.label") }}</q-btn
-          >
-          <q-btn
-            class="q-mx-none"
-            size="md"
-            flat
-            dense
-            @click="toggleExpandButtons"
-          >
-            <q-icon
-              :name="showExpandedButtons ? 'chevron_left' : 'chevron_right'"
+    </div>
+    <q-card-section class="q-pa-none">
+      <div v-if="qrCodeFragment" class="row justify-center q-mb-md">
+        <div class="col-12 col-sm-11 col-md-8 q-px-md">
+          <q-responsive :ratio="1" class="q-mx-none">
+            <vue-qrcode
+              :value="qrCodeFragment"
+              :options="{ width: 400 }"
+              class="rounded-borders"
+              style="width: 100%"
+              @click="copyText(sendData.tokensBase64)"
+            >
+            </vue-qrcode>
+          </q-responsive>
+          <div style="height: 2px">
+            <q-linear-progress
+              v-if="runnerActive"
+              indeterminate
+              color="primary"
             />
-          </q-btn>
-
-          <div v-if="showExpandedButtons" class="row q-gutter-sm">
-            <q-btn
-              class="q-mr-xs"
-              size="md"
-              flat
-              dense
-              @click="copyText(encodeToPeanut(sendData.tokensBase64))"
-              >{{ $t("SendTokenDialog.actions.copy_emoji.label") }}
-              <q-tooltip>{{
-                $t("SendTokenDialog.actions.copy_emoji.tooltip_text")
-              }}</q-tooltip>
-            </q-btn>
-            <q-btn
-              class="q-mx-none"
-              color="grey"
-              size="md"
-              dense
-              icon="link"
-              flat
-              @click="copyText(baseURL + '#token=' + sendData.tokensBase64)"
-              ><q-tooltip>{{
-                $t("SendTokenDialog.actions.copy_link.tooltip_text")
-              }}</q-tooltip></q-btn
-            >
-            <q-btn
-              v-if="webShareSupported"
-              class="q-mx-none"
-              color="grey"
-              size="md"
-              dense
-              flat
-              @click="shareToken"
-            >
-              <ShareIcon size="18" />
-              <q-tooltip>{{
-                $t("SendTokenDialog.actions.share.tooltip_text")
-              }}</q-tooltip>
-            </q-btn>
-            <q-btn
-              unelevated
-              dense
+          </div>
+        </div>
+      </div>
+      <div class="q-pb-xs q-ba-none q-gutter-sm">
+        <q-btn
+          v-if="showAnimatedQR"
+          flat
+          style="font-size: 10px"
+          color="grey"
+          class="q-ma-none"
+          @click="changeSpeed"
+        >
+          <q-icon name="speed" style="margin-right: 8px"></q-icon>
+          Speed: {{ fragmentSpeedLabel }}
+        </q-btn>
+        <q-badge
+          :color="!isV4Token ? 'primary' : 'grey'"
+          :label="isV4Token ? 'V4' : 'V3'"
+          class="q-my-sm q-mx-md cursor-pointer"
+          @click="toggleTokenEncoding"
+          :outline="isV4Token"
+        />
+        <q-btn
+          v-if="showAnimatedQR"
+          flat
+          style="font-size: 10px"
+          class="q-ma-none"
+          color="grey"
+          @click="changeSize"
+        >
+          <q-icon name="zoom_in" style="margin-right: 8px"></q-icon>
+          Size: {{ fragmentLengthLabel }}
+        </q-btn>
+      </div>
+      <q-card-section class="q-pa-sm">
+        <div class="row justify-center q-pt-sm">
+          <q-item-label style="font-size: 30px" class="text-weight-bold">
+            <q-icon
+              :name="
+                sendData.historyToken.amount >= 0
+                  ? 'call_received'
+                  : 'call_made'
+              "
+              :color="
+                sendData.historyToken.status === 'paid'
+                  ? sendData.historyToken.amount >= 0
+                    ? 'green'
+                    : 'red'
+                  : ''
+              "
+              class="q-mr-xs q-mb-xs"
               size="sm"
-              class="q-mx-none"
-              v-if="
-                hasCamera &&
-                !sendData.paymentRequest &&
-                sendData.historyAmount < 0
-              "
-              @click="showCamera"
-            >
-              <ScanIcon />
-            </q-btn>
+            />
+            <strong>{{ displayUnit }}</strong></q-item-label
+          >
+        </div>
+        <div v-if="paidFees" class="row justify-center q-pt-sm">
+          <q-item-label class="text-weight-bold">
+            Fee: {{ formatCurrency(paidFees, tokenUnit) }}
+          </q-item-label>
+        </div>
+        <div class="row justify-center q-pt-md">
+          <TokenInformation
+            :encodedToken="sendData.tokensBase64"
+            :showAmount="false"
+            :showP2PKCheck="false"
+          />
+        </div>
+        <!-- Full-width primary copy button -->
+        <div class="row justify-center q-pb-md q-pt-sm">
+          <div class="col-12 col-sm-11 col-md-8 q-px-md">
             <q-btn
+              class="full-width"
               unelevated
-              dense
-              v-if="
-                ndefSupported &&
-                !sendData.paymentRequest &&
-                sendData.historyAmount < 0
-              "
-              :disabled="scanningCard"
-              :loading="scanningCard"
-              class="q-mx-none"
-              size="sm"
-              @click="writeTokensToCard"
-              flat
+              size="lg"
+              color="primary"
+              rounded
+              @click="copyText(sendData.tokensBase64)"
             >
-              <NfcIcon />
-              <q-tooltip>{{
-                ndefSupported
-                  ? $t(
-                      "SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_supported_text"
-                    )
-                  : $t(
-                      "SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_unsupported_text"
-                    )
-              }}</q-tooltip>
-              <template v-slot:loading>
-                <q-spinner @click="closeCardScanner" />
-              </template>
-            </q-btn>
-            <q-btn
-              class="q-mx-none"
-              color="grey"
-              dense
-              icon="delete"
-              size="md"
-              @click="
-                showDeleteDialog = true;
-                closeCardScanner();
-              "
-              flat
-            >
-              <q-tooltip>{{
-                $t("SendTokenDialog.actions.delete.tooltip_text")
-              }}</q-tooltip>
+              {{ $t("SendTokenDialog.actions.copy_tokens.label") }}
             </q-btn>
           </div>
         </div>
-        <q-btn
-          v-close-popup
-          @click="closeCardScanner"
-          flat
-          color="grey"
-          class="q-ml-auto q-mr-md"
-          >{{ $t("SendTokenDialog.actions.close_card_scanner.label") }}</q-btn
+        <div
+          v-if="
+            sendData.paymentRequest &&
+            sendData.historyToken.amount < 0 &&
+            sendData.historyToken.status === 'pending'
+          "
+          class="row justify-center q-pt-sm"
         >
-      </div>
+          <SendPaymentRequest />
+        </div>
+        <div class="row items-center justify-between q-mt-lg">
+          <div class="row items-center">
+            <q-btn
+              class="q-mx-none"
+              size="md"
+              flat
+              dense
+              @click="toggleExpandButtons"
+            >
+              <q-icon
+                :name="showExpandedButtons ? 'chevron_left' : 'chevron_right'"
+              />
+            </q-btn>
+
+            <div v-if="showExpandedButtons" class="row q-gutter-sm">
+              <q-btn
+                class="q-mr-xs"
+                size="md"
+                flat
+                dense
+                @click="copyText(encodeToPeanut(sendData.tokensBase64))"
+                >{{ $t("SendTokenDialog.actions.copy_emoji.label") }}
+                <q-tooltip>{{
+                  $t("SendTokenDialog.actions.copy_emoji.tooltip_text")
+                }}</q-tooltip>
+              </q-btn>
+              <q-btn
+                class="q-mx-none"
+                color="grey"
+                size="md"
+                dense
+                icon="link"
+                flat
+                @click="copyText(baseURL + '#token=' + sendData.tokensBase64)"
+                ><q-tooltip>{{
+                  $t("SendTokenDialog.actions.copy_link.tooltip_text")
+                }}</q-tooltip></q-btn
+              >
+              <q-btn
+                v-if="webShareSupported"
+                class="q-mx-none"
+                color="grey"
+                size="md"
+                dense
+                flat
+                @click="shareToken"
+              >
+                <ShareIcon size="18" />
+                <q-tooltip>{{
+                  $t("SendTokenDialog.actions.share.tooltip_text")
+                }}</q-tooltip>
+              </q-btn>
+              <q-btn
+                unelevated
+                dense
+                size="sm"
+                class="q-mx-none"
+                v-if="
+                  hasCamera &&
+                  !sendData.paymentRequest &&
+                  sendData.historyAmount < 0
+                "
+                @click="showCamera"
+              >
+                <ScanIcon />
+              </q-btn>
+              <q-btn
+                unelevated
+                dense
+                v-if="
+                  ndefSupported &&
+                  !sendData.paymentRequest &&
+                  sendData.historyAmount < 0
+                "
+                :disabled="scanningCard"
+                :loading="scanningCard"
+                class="q-mx-none"
+                size="sm"
+                @click="writeTokensToCard"
+                flat
+              >
+                <NfcIcon />
+                <q-tooltip>{{
+                  ndefSupported
+                    ? $t(
+                        "SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_supported_text"
+                      )
+                    : $t(
+                        "SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_unsupported_text"
+                      )
+                }}</q-tooltip>
+                <template v-slot:loading>
+                  <q-spinner @click="closeCardScanner" />
+                </template>
+              </q-btn>
+              <q-btn
+                class="q-mx-none"
+                color="grey"
+                dense
+                icon="delete"
+                size="md"
+                @click="
+                  showDeleteDialog = true;
+                  closeCardScanner();
+                "
+                flat
+              >
+                <q-tooltip>{{
+                  $t("SendTokenDialog.actions.delete.tooltip_text")
+                }}</q-tooltip>
+              </q-btn>
+            </div>
+          </div>
+        </div>
+      </q-card-section>
     </q-card-section>
-  </q-card-section>
+  </div>
   <!-- popup dialog to confirm deletion -->
   <q-dialog v-model="showDeleteDialog">
     <q-card class="q-pa-lg q-pt-md qcard">
@@ -292,7 +314,7 @@ import {
   getEncodedTokenV4,
 } from "@cashu/cashu-ts";
 import token from "src/js/token";
-import { notifyError, notifySuccess } from "src/js/notify.ts";
+import { notifyError, notifySuccess } from "src/js/notify";
 import {
   Scan as ScanIcon,
   Nfc as NfcIcon,
@@ -610,4 +632,12 @@ export default defineComponent({
   },
 });
 </script>
-<style scoped></style>
+<style scoped>
+.floating-close-btn {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+</style>
