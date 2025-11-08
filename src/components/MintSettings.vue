@@ -114,7 +114,6 @@
                 <div
                   class="text-grey-5"
                   v-if="!isMintExcludedFromReviews(mint.url)"
-                  style="line-height: 1.2; text-align: right"
                 >
                   <template
                     v-if="
@@ -122,34 +121,22 @@
                       getRecommendation(mint.url).averageRating !== null
                     "
                   >
-                    <!-- Star rating and review count - clickable, underline only on count -->
-                    <div
-                      style="
-                        font-weight: 400;
-                        display: flex;
-                        align-items: center;
-                        justify-content: flex-end;
-                        gap: 6px;
-                        cursor: pointer;
-                      "
-                      @click.stop="openReviews(mint.url, mint)"
-                    >
-                      <span>
-                        ⭐
-                        {{
-                          getRecommendation(mint.url).averageRating.toFixed(2)
-                        }}
-                      </span>
+                    <span>
+                      ⭐
+                      {{ getRecommendation(mint.url).averageRating.toFixed(1) }}
+                      ·
+                      {{ getRecommendation(mint.url).reviewsCount }}
                       <span
-                        style="font-size: 0.9em; text-decoration: underline"
+                        class="text-primary cursor-pointer"
+                        style="text-decoration: underline"
+                        @click.stop="openReviews(mint.url, mint)"
+                        >{{ $t("MintSettings.reviews_text") }}</span
                       >
-                        ({{ getRecommendation(mint.url).reviewsCount }})
-                      </span>
-                    </div>
+                    </span>
                   </template>
                   <template v-else>
                     <span
-                      class="text-grey-5 cursor-pointer"
+                      class="text-primary cursor-pointer"
                       style="text-decoration: underline"
                       @click.stop="openReviews(mint.url, mint)"
                     >
