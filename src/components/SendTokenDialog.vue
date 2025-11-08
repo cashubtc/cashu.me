@@ -59,7 +59,7 @@
             enter-active-class="animated fadeIn"
             leave-active-class="animated fadeOut"
           >
-            <div v-if="showLockInput && !isLocked" class="p2pk-overlay">
+            <div v-if="showLockInput" class="p2pk-overlay">
               <div class="row justify-center">
                 <div class="col-12 q-px-lg" style="max-width: 600px">
                   <div class="row items-center">
@@ -109,7 +109,7 @@
             </div>
           </transition>
           <AmountInputComponent
-            v-if="!showLockInput || isLocked"
+            v-if="!showLockInput"
             v-model="sendData.amount"
             :muted="insufficientFunds"
             :enabled="!sendData.tokens"
@@ -117,7 +117,7 @@
           >
             <template #overlay>
               <q-badge
-                v-if="isLocked"
+                v-if="isLocked && !showLockInput"
                 rounded
                 color="positive"
                 class="locked-badge"

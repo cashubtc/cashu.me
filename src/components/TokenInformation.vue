@@ -15,29 +15,8 @@
           <arrow-down-up-icon size="20" color="#9E9E9E" class="detail-icon" />
           <div class="detail-name">Fee</div>
         </div>
-        <div class="detail-value">{{ formatCurrency(receiveFee, tokenUnit) }}</div>
-      </div>
-
-      <!-- Mint URL -->
-      <div class="detail-item q-mb-md">
-        <div class="detail-label">
-          <building-icon size="20" color="#9E9E9E" class="detail-icon" />
-          <div class="detail-name">Mint</div>
-        </div>
         <div class="detail-value">
-          {{ tokenMintUrl }}
-          <q-spinner-hourglass v-if="addMintBlocking" size="sm" class="q-ml-xs" />
-        </div>
-      </div>
-
-      <!-- P2PK Lock Status (if locked) -->
-      <div v-if="isLocked(proofsToShow)" class="detail-item q-mb-md">
-        <div class="detail-label">
-          <lock-icon size="20" color="#9E9E9E" class="detail-icon" />
-          <div class="detail-name">P2PK</div>
-        </div>
-        <div class="detail-value">
-          {{ isLockedToUs(proofsToShow) ? 'Locked to you' : 'Locked to someone else' }}
+          {{ formatCurrency(receiveFee, tokenUnit) }}
         </div>
       </div>
 
@@ -50,13 +29,63 @@
         <div class="detail-value">{{ tokenUnit.toUpperCase() }}</div>
       </div>
 
+      <!-- Fiat -->
+      <div v-if="showFiat" class="detail-item q-mb-md">
+        <div class="detail-label">
+          <banknote-icon size="20" color="#9E9E9E" class="detail-icon" />
+          <div class="detail-name">Fiat</div>
+        </div>
+        <div class="detail-value">
+          {{ formatCurrency(fiatAmount, bitcoinPriceCurrency, true) }}
+        </div>
+      </div>
+
+      <!-- P2PK Lock Status (if locked) -->
+      <div v-if="isLocked(proofsToShow)" class="detail-item q-mb-md">
+        <div class="detail-label">
+          <lock-icon size="20" color="#9E9E9E" class="detail-icon" />
+          <div class="detail-name">P2PK</div>
+        </div>
+        <div
+          class="detail-value"
+          :class="{
+            'p2pk-locked-me': isLockedToUs(proofsToShow),
+          }"
+        >
+          {{
+            isLockedToUs(proofsToShow)
+              ? "Locked to you"
+              : "Locked to someone else"
+          }}
+        </div>
+      </div>
+
+      <!-- Mint URL -->
+      <div class="detail-item q-mb-md">
+        <div class="detail-label">
+          <building-icon size="20" color="#9E9E9E" class="detail-icon" />
+          <div class="detail-name">Mint</div>
+        </div>
+        <div class="detail-value">
+          {{ tokenMintUrl }}
+          <q-spinner-hourglass
+            v-if="addMintBlocking"
+            size="sm"
+            class="q-ml-xs"
+          />
+        </div>
+      </div>
+
       <!-- Memo (if available) -->
       <div v-if="displayMemo" class="detail-item">
         <div class="detail-label">
           <message-circle-icon size="20" color="#9E9E9E" class="detail-icon" />
           <div class="detail-name">Memo</div>
         </div>
-        <div class="detail-value" style="max-width: 60%; word-break: break-word; white-space: normal;">
+        <div
+          class="detail-value"
+          style="max-width: 60%; word-break: break-word; white-space: normal"
+        >
           {{ displayMemo }}
         </div>
       </div>
@@ -70,6 +99,8 @@ import { mapActions, mapState } from "pinia";
 import { useMintsStore } from "stores/mints";
 import { useWalletStore } from "stores/wallet";
 import { useP2PKStore } from "src/stores/p2pk";
+import { usePriceStore } from "src/stores/price";
+import { useSettingsStore } from "src/stores/settings";
 import token from "src/js/token";
 import {
   ArrowDownUp as ArrowDownUpIcon,
@@ -77,7 +108,6 @@ import {
   Lock as LockIcon,
   Banknote as BanknoteIcon,
   MessageCircle as MessageCircleIcon,
-  Share as ShareIcon,
 } from "lucide-vue-next";
 
 export default defineComponent({
@@ -89,7 +119,6 @@ export default defineComponent({
     LockIcon,
     BanknoteIcon,
     MessageCircleIcon,
-    ShareIcon,
   },
   props: {
     encodedToken: String,
@@ -106,6 +135,8 @@ export default defineComponent({
       "activeUnit",
       "addMintBlocking",
     ]),
+    ...mapState(usePriceStore, ["bitcoinPrice", "currentCurrencyPrice"]),
+    ...mapState(useSettingsStore, ["bitcoinPriceCurrency"]),
     proofsToShow: function () {
       return token.getProofs(token.decode(this.encodedToken));
     },
@@ -126,6 +157,14 @@ export default defineComponent({
     },
     displayMemo: function () {
       return token.getMemo(token.decode(this.encodedToken));
+    },
+    showFiat: function () {
+      return this.tokenUnit === "sat" && !!this.bitcoinPrice;
+    },
+    fiatAmount: function () {
+      if (!this.showFiat) return 0;
+      // sumProofs is in sats, currentCurrencyPrice is fiat per BTC
+      return (this.currentCurrencyPrice / 100000000) * this.sumProofs;
     },
     receiveFee: function () {
       try {
@@ -218,7 +257,7 @@ export default defineComponent({
 }
 
 .token-amount {
-  font-size: 30px;
+  font-size: 36px;
   font-weight: 700;
   text-align: center;
 }
@@ -264,5 +303,31 @@ export default defineComponent({
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Golden shine for P2PK locked-to-you */
+.p2pk-locked-me {
+  color: #ffd700;
+  background: linear-gradient(
+    90deg,
+    #b8860b 0%,
+    #ffd700 40%,
+    #fff6b7 50%,
+    #ffd700 60%,
+    #b8860b 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 2.5s linear infinite;
+  text-shadow: 0 0 6px rgba(255, 215, 0, 0.35);
+}
+
+@keyframes shine {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: 200px 0;
+  }
 }
 </style>
