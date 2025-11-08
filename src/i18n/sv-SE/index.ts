@@ -163,7 +163,7 @@ export default {
   },
   Settings: {
     web_of_trust: {
-      title: "Web of trust",
+      title: "Förtroendenätverk",
       known_pubkeys: "Kända pubkeys: {wotCount}",
       continue_crawl: "Fortsätt genomsökning",
       crawl_odell: "Genomsök ODELL'S WEB OF TRUST",
@@ -719,10 +719,20 @@ export default {
   MintRatings: {
     title: "Mint-recensioner",
     reviews: "recensioner",
+    ratings: "Betyg",
     no_reviews: "Inga recensioner hittades",
+    your_review: "Din recension",
     no_reviews_to_display: "Inga recensioner att visa.",
     no_rating: "Ingen betygsättning",
-    rows: "Rader",
+    out_of: "av",
+    rows: "Reviews",
+    sort: "Sortera",
+    sort_options: {
+      newest: "Nyaste",
+      oldest: "Äldsta",
+      highest: "Högsta",
+      lowest: "Lägsta",
+    },
     actions: { write_review: "Skriv en recension" },
   },
   CreateMintReview: {

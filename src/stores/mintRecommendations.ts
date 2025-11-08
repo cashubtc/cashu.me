@@ -108,7 +108,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
         this.dbHydrated = true;
         await this.rebuildAggregates();
         // After hydration, opportunistically refetch stale HTTP info within interval
-        void this.refetchStaleHttpInfoForKnownMints();
+        //void this.refetchStaleHttpInfoForKnownMints();
       } catch {}
     },
     fetchMintInfos: async function () {

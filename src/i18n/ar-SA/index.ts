@@ -714,10 +714,20 @@ export default {
   MintRatings: {
     title: "مراجعات المِنْت",
     reviews: "مراجعات",
+    ratings: "التقييمات",
     no_reviews: "لا توجد مراجعات",
+    your_review: "مراجعتك",
     no_reviews_to_display: "لا توجد مراجعات للعرض.",
     no_rating: "لا يوجد تقييم",
-    rows: "صفوف",
+    out_of: "من",
+    rows: "Reviews",
+    sort: "ترتيب",
+    sort_options: {
+      newest: "الأحدث",
+      oldest: "الأقدم",
+      highest: "الأعلى",
+      lowest: "الأقل",
+    },
     actions: { write_review: "اكتب مراجعة" },
   },
   CreateMintReview: {

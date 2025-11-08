@@ -123,7 +123,7 @@
                   >
                     <span>
                       ⭐
-                      {{ getRecommendation(mint.url).averageRating.toFixed(2) }}
+                      {{ getRecommendation(mint.url).averageRating.toFixed(1) }}
                       ·
                       {{ getRecommendation(mint.url).reviewsCount }}
                       <span
@@ -338,25 +338,6 @@
       </q-list>
     </div>
   </div>
-  <q-dialog v-model="showRatingsDialog" persistent>
-    <MintRatingsComponent
-      :key="selectedRatingsUrl"
-      :url="selectedRatingsUrl"
-      :reviews="selectedReviews"
-      :allowCreateReview="true"
-      :mintInfo="selectedMintInfo"
-      @close="showRatingsDialog = false"
-    />
-  </q-dialog>
-  <q-dialog v-model="showCreateReviewDialog" persistent>
-    <CreateMintReview
-      :key="selectedRatingsUrl"
-      :mintUrl="selectedRatingsUrl"
-      :mintInfo="selectedMintInfo"
-      @published="showCreateReviewDialog = false"
-      @close="showCreateReviewDialog = false"
-    />
-  </q-dialog>
 </template>
 <script lang="ts">
 import { ref, defineComponent, onMounted, onBeforeUnmount } from "vue";
@@ -377,8 +358,6 @@ import { notifyError, notifyWarning } from "src/js/notify";
 import { EventBus } from "../js/eventBus";
 import AddMintDialog from "src/components/AddMintDialog.vue";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
-import MintRatingsComponent from "./MintRatingsComponent.vue";
-import CreateMintReview from "./CreateMintReview.vue";
 import MintInfoContainer from "./MintInfoContainer.vue";
 
 // Mints that should not show reviews
@@ -392,8 +371,6 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     AddMintDialog,
-    MintRatingsComponent,
-    CreateMintReview,
     MintInfoContainer,
   },
   props: {},
@@ -441,11 +418,6 @@ export default defineComponent({
       activatingMintUrl: "",
       mintInfoCache: new Map(),
       fetchingMintInfo: new Set(),
-      showRatingsDialog: false,
-      selectedRatingsUrl: "",
-      selectedReviews: [],
-      showCreateReviewDialog: false,
-      selectedMintInfo: null,
     };
   },
   computed: {
@@ -639,16 +611,14 @@ export default defineComponent({
       }
     },
     openReviews(url, mint) {
-      const rec = this.recommendations.find((r) => r.url === url);
-      this.selectedRatingsUrl = url;
-      this.selectedReviews = rec ? rec.reviews : [];
-      this.selectedMintInfo = mint.info || null;
-      this.showRatingsDialog = true;
-    },
-    openCreateReview(mint) {
-      this.selectedMintInfo = mint.info || null;
-      this.selectedRatingsUrl = mint.url;
-      this.showCreateReviewDialog = true;
+      // Navigate to ratings page
+      this.$router.push({
+        path: "/mintratings",
+        query: {
+          mintUrl: url,
+          allowCreateReview: "true",
+        },
+      });
     },
     getMintInfoFromCache(url) {
       return this.mintInfoCache.get(url);

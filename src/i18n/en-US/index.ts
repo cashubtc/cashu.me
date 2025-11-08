@@ -727,10 +727,20 @@ export default {
   MintRatings: {
     title: "Mint Reviews",
     reviews: "reviews",
+    ratings: "Ratings",
     no_reviews: "No reviews found",
+    your_review: "Your review",
     no_reviews_to_display: "No reviews to display.",
     no_rating: "No rating",
-    rows: "Rows",
+    out_of: "out of",
+    rows: "Reviews",
+    sort: "Sort",
+    sort_options: {
+      newest: "Newest",
+      oldest: "Oldest",
+      highest: "Highest",
+      lowest: "Lowest",
+    },
     actions: {
       write_review: "Write a review",
     },
@@ -743,7 +753,7 @@ export default {
       review: { label: "Review (optional)" },
     },
     actions: {
-      publish: { label: "Publish", in_progress: "Publishing…" },
+      publish: { label: "Submit Review", in_progress: "Submitting…" },
     },
   },
   RestoreView: {

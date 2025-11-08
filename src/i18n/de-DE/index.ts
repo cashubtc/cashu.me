@@ -233,7 +233,7 @@ export default {
       },
     },
     web_of_trust: {
-      title: "Web of Trust",
+      title: "Vertrauensnetzwerk",
       known_pubkeys: "Bekannte Pubkeys: {wotCount}",
       continue_crawl: "Crawl fortsetzen",
       crawl_odell: "ODELL'S WEB OF TRUST crawlen",
@@ -727,10 +727,20 @@ export default {
   MintRatings: {
     title: "Mint-Bewertungen",
     reviews: "Bewertungen",
+    ratings: "Bewertungen",
     no_reviews: "Keine Bewertungen gefunden",
+    your_review: "Ihre Bewertung",
     no_reviews_to_display: "Keine Bewertungen anzuzeigen.",
     no_rating: "Keine Bewertung",
-    rows: "Zeilen",
+    out_of: "von",
+    rows: "Reviews",
+    sort: "Sortieren",
+    sort_options: {
+      newest: "Neueste",
+      oldest: "Älteste",
+      highest: "Höchste",
+      lowest: "Niedrigste",
+    },
     actions: { write_review: "Bewertung schreiben" },
   },
   CreateMintReview: {

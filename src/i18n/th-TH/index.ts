@@ -164,7 +164,7 @@ export default {
   },
   Settings: {
     web_of_trust: {
-      title: "Web of trust",
+      title: "เครือข่ายที่เชื่อถือได้",
       known_pubkeys: "Pubkey ที่รู้จัก: {wotCount}",
       continue_crawl: "ดำเนินการสำรวจต่อ",
       crawl_odell: "สำรวจ ODELL'S WEB OF TRUST",
@@ -716,10 +716,20 @@ export default {
   MintRatings: {
     title: "รีวิว Mint",
     reviews: "รีวิว",
+    ratings: "คะแนน",
     no_reviews: "ไม่พบบทรีวิว",
+    your_review: "รีวิวของคุณ",
     no_reviews_to_display: "ไม่มีรีวิวที่จะแสดง",
     no_rating: "ไม่มีคะแนน",
-    rows: "แถว",
+    out_of: "จาก",
+    rows: "Reviews",
+    sort: "เรียงลำดับ",
+    sort_options: {
+      newest: "ใหม่ที่สุด",
+      oldest: "เก่าที่สุด",
+      highest: "สูงที่สุด",
+      lowest: "ต่ำที่สุด",
+    },
     actions: { write_review: "เขียนรีวิว" },
   },
   CreateMintReview: {

@@ -426,7 +426,7 @@ export default {
       },
     },
     web_of_trust: {
-      title: "Web of trust",
+      title: "Δίκτυο εμπιστοσύνης",
       known_pubkeys: "Γνωστά pubkeys: {wotCount}",
       continue_crawl: "Συνέχιση ανίχνευσης",
       crawl_odell: "Ανίχνευση ODELL'S WEB OF TRUST",
@@ -725,10 +725,20 @@ export default {
   MintRatings: {
     title: "Κριτικές mint",
     reviews: "κριτικές",
+    ratings: "Βαθμολογίες",
     no_reviews: "Δεν βρέθηκαν κριτικές",
+    your_review: "Η κριτική σας",
     no_reviews_to_display: "Καμία κριτική προς εμφάνιση.",
     no_rating: "Χωρίς βαθμολογία",
-    rows: "Γραμμές",
+    out_of: "από",
+    rows: "Reviews",
+    sort: "Ταξινόμηση",
+    sort_options: {
+      newest: "Νεότερες",
+      oldest: "Παλαιότερες",
+      highest: "Υψηλότερες",
+      lowest: "Χαμηλότερες",
+    },
     actions: { write_review: "Γράψτε κριτική" },
   },
   CreateMintReview: {

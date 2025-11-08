@@ -724,10 +724,20 @@ export default {
   MintRatings: {
     title: "Reseñas del mint",
     reviews: "reseñas",
+    ratings: "Calificaciones",
     no_reviews: "No se encontraron reseñas",
+    your_review: "Tu reseña",
     no_reviews_to_display: "No hay reseñas para mostrar.",
     no_rating: "Sin calificación",
-    rows: "Filas",
+    out_of: "de",
+    rows: "Reviews",
+    sort: "Ordenar",
+    sort_options: {
+      newest: "Más recientes",
+      oldest: "Más antiguas",
+      highest: "Más altas",
+      lowest: "Más bajas",
+    },
     actions: { write_review: "Escribir una reseña" },
   },
   CreateMintReview: {
