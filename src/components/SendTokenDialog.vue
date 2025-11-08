@@ -38,7 +38,10 @@
 
         <!-- Amount display -->
         <div class="col column items-center justify-center q-px-lg amount-area">
-          <div class="amount-display text-weight-bold text-center">
+          <div
+            class="amount-display text-weight-bold text-center"
+            :class="{ 'text-grey-6': insufficientFunds }"
+          >
             {{ formattedAmountDisplay }}
           </div>
           <div
@@ -105,19 +108,29 @@
           </transition>
         </div>
 
-        <!-- Primary actions -->
-        <div class="q-px-md q-pb-sm">
-          <div
-            v-if="activeBalance >= (sendData.amount || 0)"
-            class="row items-center"
-          >
+        <!-- Numeric keypad -->
+        <div class="bottom-panel">
+          <div class="keypad-wrapper">
+            <NumericKeyboard
+              :force-visible="true"
+              :hide-close="true"
+              :hide-enter="true"
+              :hide-comma="activeUnit === 'sat' || activeUnit === 'msat'"
+              :model-value="String(sendData.amount ?? 0)"
+              @update:modelValue="(val) => (sendData.amount = Number(val))"
+              @done="sendTokens"
+            />
+          </div>
+          <!-- Send action below keyboard -->
+          <div class="q-px-md q-pb-md q-pt-sm">
             <q-btn
-              class="col"
+              class="full-width"
               unelevated
               size="lg"
               :disable="
                 sendData.amount == null ||
                 sendData.amount <= 0 ||
+                insufficientFunds ||
                 (sendData.p2pkPubkey != '' &&
                   !isValidPubkey(sendData.p2pkPubkey))
               "
@@ -132,46 +145,7 @@
                 <q-spinner-hourglass />
               </template>
             </q-btn>
-            <q-btn
-              v-if="
-                sendData.amount > 0 &&
-                !showLockInput &&
-                activeBalance >= sendData.amount
-              "
-              :disable="sendData.p2pkPubkey == null || sendData.amount <= 0"
-              color="primary"
-              class="q-ml-sm"
-              rounded
-              flat
-              @click="showLockInput = true"
-            >
-              {{ $t("SendTokenDialog.actions.lock.label") }}
-            </q-btn>
           </div>
-          <div v-else class="row items-center">
-            <q-btn
-              class="col"
-              unelevated
-              rounded
-              disabled
-              color="yellow"
-              text-color="black"
-            >
-              {{
-                $t("SendTokenDialog.inputs.amount.invalid_too_much_error_text")
-              }}
-            </q-btn>
-          </div>
-        </div>
-
-        <!-- Numeric keypad -->
-        <div class="keypad-wrapper">
-          <NumericKeyboard
-            v-if="showNumericKeyboard && useNumericKeyboard"
-            :model-value="sendData.amount"
-            @update:modelValue="(val) => (sendData.amount = val)"
-            @done="sendTokens"
-          />
         </div>
       </div>
 
@@ -257,6 +231,10 @@ export default defineComponent({
     ]),
     ...mapState(useSettingsStore, ["bitcoinPriceCurrency"]),
     ...mapState(useWorkersStore, ["tokenWorkerRunning"]),
+    insufficientFunds: function () {
+      if (this.sendData.amount == null) return false;
+      return this.activeBalance < this.sendData.amount;
+    },
     canSpendOffline: function () {
       if (!this.sendData.amount) {
         return false;
@@ -408,7 +386,6 @@ export default defineComponent({
       /*
       calls send, displays token and kicks off the spendableWorker
       */
-      this.showNumericKeyboard = false;
       this.sendData.p2pkPubkey = this.maybeConvertNpub(
         this.sendData.p2pkPubkey
       );
@@ -487,9 +464,10 @@ export default defineComponent({
 </script>
 <style scoped>
 .send-fullscreen {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 .amount-area {
   flex: 1;
@@ -501,7 +479,10 @@ export default defineComponent({
 .fiat-display {
   font-size: 14px;
 }
-.keypad-wrapper {
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+.bottom-panel {
+  margin-top: auto;
+  background: var(--q-color-grey-1);
+  box-shadow: 0 -8px 16px rgba(0, 0, 0, 0.05);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 </style>

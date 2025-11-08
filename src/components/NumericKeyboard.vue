@@ -1,45 +1,67 @@
 <!-- NumericKeyboard.vue -->
 <template>
   <transition name="slide-up-fade">
-    <q-card
-      class="numeric-keyboard q-pa-md q-pb-xl q-pt-lg"
-      style="
-        position: fixed;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 100%;
-        max-width: 650px;
-      "
-      v-if="showNumericKeyboard"
+    <div
+      class="numeric-keyboard q-pa-md q-pb-lg q-pt-lg"
+      v-if="forceVisible || showNumericKeyboard"
     >
       <div class="keyboard-grid">
-        <q-btn flat dense class="text-h5" @click="addDigit('1')">1</q-btn>
-        <q-btn flat dense class="text-h5" @click="addDigit('2')">2</q-btn>
-        <q-btn flat dense class="text-h5" @click="addDigit('3')">3</q-btn>
+        <q-btn flat :ripple="false" class="text-h5" @click="addDigit('1')"
+          >1</q-btn
+        >
+        <q-btn flat :ripple="false" class="text-h5" @click="addDigit('2')"
+          >2</q-btn
+        >
+        <q-btn flat :ripple="false" class="text-h5" @click="addDigit('3')"
+          >3</q-btn
+        >
 
-        <q-btn flat dense class="text-h5" @click="addDigit('4')">4</q-btn>
-        <q-btn flat dense class="text-h5" @click="addDigit('5')">5</q-btn>
-        <q-btn flat dense class="text-h5" @click="addDigit('6')">6</q-btn>
+        <q-btn flat :ripple="false" class="text-h5" @click="addDigit('4')"
+          >4</q-btn
+        >
+        <q-btn flat :ripple="false" class="text-h5" @click="addDigit('5')"
+          >5</q-btn
+        >
+        <q-btn flat :ripple="false" class="text-h5" @click="addDigit('6')"
+          >6</q-btn
+        >
 
-        <q-btn flat dense class="text-h5" @click="addDigit('7')">7</q-btn>
-        <q-btn flat dense class="text-h5" @click="addDigit('8')">8</q-btn>
-        <q-btn flat dense class="text-h5" @click="addDigit('9')">9</q-btn>
+        <q-btn flat :ripple="false" class="text-h5" @click="addDigit('7')"
+          >7</q-btn
+        >
+        <q-btn flat :ripple="false" class="text-h5" @click="addDigit('8')"
+          >8</q-btn
+        >
+        <q-btn flat :ripple="false" class="text-h5" @click="addDigit('9')"
+          >9</q-btn
+        >
 
-        <q-btn flat dense class="text-h5" @click="addComma">.</q-btn>
-        <q-btn flat dense class="text-h5" @click="addDigit('0')">0</q-btn>
-        <q-btn flat dense class="text-h5" @click="backspace">
-          <q-icon name="backspace" size="sm" />
+        <q-btn
+          v-if="!hideComma"
+          flat
+          :ripple="false"
+          class="text-h5"
+          @click="addComma"
+          >.</q-btn
+        >
+        <q-btn v-else flat :ripple="false" class="text-h5 invisible" disable
+          >•</q-btn
+        >
+        <q-btn flat :ripple="false" class="text-h5" @click="addDigit('0')"
+          >0</q-btn
+        >
+        <q-btn flat :ripple="false" class="text-h5" @click="backspace">
+          <q-icon name="backspace" size="md" />
         </q-btn>
-        <q-btn flat dense @click="closeKeyboard">{{
+        <q-btn v-if="!hideClose" flat :ripple="false" @click="closeKeyboard">{{
           $t("NumericKeyboard.actions.close.label")
         }}</q-btn>
-        <br />
-        <q-btn flat dense @click="emitDone">{{
+        <br v-if="!hideClose || !hideEnter" />
+        <q-btn v-if="!hideEnter" flat :ripple="false" @click="emitDone">{{
           $t("NumericKeyboard.actions.enter.label")
         }}</q-btn>
       </div>
-    </q-card>
+    </div>
   </transition>
 </template>
 
@@ -56,6 +78,22 @@ export default defineComponent({
     modelValue: {
       type: String,
       default: "0",
+    },
+    forceVisible: {
+      type: Boolean,
+      default: false,
+    },
+    hideClose: {
+      type: Boolean,
+      default: false,
+    },
+    hideEnter: {
+      type: Boolean,
+      default: false,
+    },
+    hideComma: {
+      type: Boolean,
+      default: false,
     },
   },
   emits: ["update:modelValue", "done"],
@@ -121,7 +159,7 @@ export default defineComponent({
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
   width: 100%;
-  max-width: 300px;
+  max-width: 360px;
   margin: 0 auto;
 }
 
@@ -129,9 +167,11 @@ export default defineComponent({
   border-radius: 8px;
   font-weight: 600;
   text-transform: capitalize;
-  transition: background-color 0.3s, transform 0.2s;
+  transition: none;
   background-color: var(--q-color-grey-2);
   color: var(--q-color-grey-10);
+  min-height: 56px;
+  padding: 12px 0;
 }
 
 // on not tall screens, make the keyboard smaller
@@ -156,12 +196,12 @@ export default defineComponent({
 
 .q-btn:hover {
   background-color: var(--q-color-grey-3);
-  transform: translateY(-2px);
 }
 
-.q-btn:active {
-  transform: translateY(0); /* Reset position on click */
-  box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.2); /* Pressed effect */
+/* Remove click animations */
+
+.invisible {
+  visibility: hidden;
 }
 
 /* Transition styles */
