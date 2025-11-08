@@ -61,7 +61,7 @@
             />
           </div>
           <!-- Create action below keyboard -->
-          <div class="row justify-center q-pb-md q-pt-sm">
+          <div class="row justify-center q-pb-lg q-pt-sm">
             <div
               class="col-12 col-sm-11 col-md-8 q-px-md"
               style="max-width: 600px"
