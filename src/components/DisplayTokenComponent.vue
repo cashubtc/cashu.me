@@ -215,22 +215,8 @@
           </div>
         </div>
         <q-card-section class="q-pa-sm">
-          <div class="row justify-center q-pt-md">
-            <q-item-label style="font-size: 30px" class="text-weight-bold">
-              <strong>{{ displayUnit }}</strong></q-item-label
-            >
-          </div>
-          <div v-if="paidFees" class="row justify-center q-pt-sm">
-            <q-item-label class="text-weight-bold">
-              Fee: {{ formatCurrency(paidFees, tokenUnit) }}
-            </q-item-label>
-          </div>
           <div class="row justify-center q-pt-lg">
-            <TokenInformation
-              :encodedToken="sendData.tokensBase64"
-              :showAmount="false"
-              :showP2PKCheck="false"
-            />
+            <TokenInformation :encodedToken="sendData.tokensBase64" />
           </div>
           <div
             v-if="

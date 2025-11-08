@@ -132,12 +132,7 @@
         <!-- VALID TOKEN -->
         <div v-if="tokenDecodesCorrectly" class="q-mr-xl">
           <div class="row">
-            <TokenInformation
-              :encodedToken="receiveData.tokensBase64"
-              :showAmount="true"
-              :showMintCheck="true"
-              :showP2PKCheck="true"
-            />
+            <TokenInformation :encodedToken="receiveData.tokensBase64" />
           </div>
           <div class="row q-pt-md" v-if="!swapSelected">
             <q-btn

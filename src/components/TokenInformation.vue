@@ -1,12 +1,18 @@
 <template>
   <div class="row text-left q-py-none q-my-none">
     <div class="col-12 q-px-none">
-      <q-chip
-        v-if="showAmount"
-        outline
-        class="q-pa-md"
-        style="border-width: 2px"
-      >
+      <div class="row justify-center q-pt-md">
+        <q-item-label style="font-size: 30px" class="text-weight-bold">
+          <strong>{{ displayUnit }}</strong>
+        </q-item-label>
+      </div>
+      <div v-if="receiveFee > 0" class="row justify-center q-pt-sm">
+        <q-item-label class="text-weight-bold">
+          {{ $t("common.fee") || "Fee" }}:
+          {{ formatCurrency(receiveFee, tokenUnit) }}
+        </q-item-label>
+      </div>
+      <q-chip outline class="q-pa-md" style="border-width: 2px">
         <q-icon name="toll" size="xs" class="q-mr-sm" />
         <strong>{{ displayUnit }} </strong>
       </q-chip>
@@ -29,9 +35,7 @@
         {{ tokenMintUrl }}
         <q-spinner-hourglass v-if="addMintBlocking" size="sm" class="q-ml-sm" />
         <q-icon
-          v-if="
-            showMintCheck && mintKnownToUs(proofsToShow) && !addMintBlocking
-          "
+          v-if="mintKnownToUs(proofsToShow) && !addMintBlocking"
           name="check"
           size="sm"
           color="green"
@@ -41,7 +45,6 @@
       <q-chip v-if="isLocked(proofsToShow)" outline icon="lock" class="q-pa-md">
         P2PK
         <q-icon
-          v-if="showP2PKCheck || isLockedToUs(proofsToShow)"
           :name="isLockedToUs(proofsToShow) ? 'check' : 'close'"
           size="sm"
           :color="isLockedToUs(proofsToShow) ? 'green' : 'red'"
@@ -69,9 +72,6 @@ export default defineComponent({
   mixins: [windowMixin],
   props: {
     encodedToken: String,
-    showAmount: Boolean,
-    showMintCheck: Boolean,
-    showP2PKCheck: Boolean,
   },
   data: function () {
     return {};
