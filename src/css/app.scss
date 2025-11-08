@@ -16,6 +16,11 @@ body {
   overscroll-behavior: none;
 }
 
+// Map CSS env() safe area to our custom variable for PWA iOS
+:root {
+  --safe-area-inset-top: env(safe-area-inset-top);
+}
+
 // margin for top elements for ios safe area
 body,
 .q-drawer,
