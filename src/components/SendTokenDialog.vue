@@ -126,51 +126,46 @@
               </div>
             </div>
           </transition>
-          <div class="amount-container">
-            <q-badge
-              v-if="isLocked && !showLockInput"
-              rounded
-              color="positive"
-              class="locked-badge"
-            >
-              <LockIcon
-                size="1.3em"
-                style="margin-right: 6px; margin-bottom: 4px"
-              />
-              <span
-                class="text-caption text-weight-medium"
-                style="font-size: 14px"
-                >locked</span
-              >
-            </q-badge>
-            <div
-              class="amount-display text-weight-bold text-center"
-              :class="{ 'text-grey-6': insufficientFunds }"
-              v-if="!showLockInput"
-            >
-              {{ formattedAmountDisplay }}
-            </div>
-            <q-badge
-              v-if="insufficientFunds && sendData.amount"
-              outline
-              rounded
-              color="grey"
-              size="md"
-              class="amount-warning-badge"
-            >
-              <span class="text-caption text-weight-medium">
-                {{
-                  $t("PayInvoiceDialog.invoice.balance_too_low_warning_text")
-                }}
-              </span>
-            </q-badge>
-          </div>
-          <div
-            v-if="secondaryFiatDisplay"
-            class="fiat-display text-grey-6 q-mt-xs"
+          <AmountInputComponent
+            v-if="!showLockInput"
+            v-model="sendData.amount"
+            :muted="insufficientFunds"
+            :enabled="!sendData.tokens"
+            @enter="sendTokens"
           >
-            {{ secondaryFiatDisplay }}
-          </div>
+            <template #overlay>
+              <q-badge
+                v-if="isLocked && !showLockInput"
+                rounded
+                color="positive"
+                class="locked-badge"
+              >
+                <LockIcon
+                  size="1.3em"
+                  style="margin-right: 6px; margin-bottom: 4px"
+                />
+                <span
+                  class="text-caption text-weight-medium"
+                  style="font-size: 14px"
+                  >locked</span
+                >
+              </q-badge>
+              <q-badge
+                v-if="insufficientFunds && sendData.amount"
+                outline
+                rounded
+                color="grey"
+                size="md"
+                class="amount-warning-badge"
+              >
+                <span class="text-caption text-weight-medium">
+                  {{
+                    $t("PayInvoiceDialog.invoice.balance_too_low_warning_text")
+                  }}
+                </span>
+              </q-badge>
+            </template>
+          </AmountInputComponent>
         </div>
 
         <!-- Numeric keypad -->
@@ -244,6 +239,7 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
 import NumericKeyboard from "components/NumericKeyboard.vue";
 import DisplayTokenComponent from "components/DisplayTokenComponent.vue";
+import AmountInputComponent from "components/AmountInputComponent.vue";
 import {
   ChevronLeft as ChevronLeftIcon,
   Clipboard as ClipboardIcon,
@@ -251,6 +247,7 @@ import {
   Lock as LockIcon,
   Scan as ScanIcon,
 } from "lucide-vue-next";
+declare const windowMixin: any;
 export default defineComponent({
   name: "SendTokenDialog",
   mixins: [windowMixin],
@@ -258,14 +255,13 @@ export default defineComponent({
     ChooseMint,
     NumericKeyboard,
     DisplayTokenComponent,
+    AmountInputComponent,
     ScanIcon,
     LockIcon,
   },
   props: {},
   data: function () {
-    return {
-      amountEditBuffer: "",
-    };
+    return {};
   },
   computed: {
     ...mapWritableState(useSendTokensStore, [
@@ -338,30 +334,6 @@ export default defineComponent({
         this.isValidPubkey(this.sendData.p2pkPubkey)
       );
     },
-    secondaryFiatDisplay: function () {
-      if (
-        !this.sendData.amount ||
-        !this.bitcoinPrice ||
-        this.activeUnit !== "sat"
-      ) {
-        return "";
-      }
-      const fiat = this.formatCurrency(
-        (this.currentCurrencyPrice / 100000000) *
-          this.sendData.amount *
-          this.activeUnitCurrencyMultiplyer,
-        this.bitcoinPriceCurrency,
-        true
-      );
-      return `(${fiat})`;
-    },
-    formattedAmountDisplay: function () {
-      const amount = this.sendData.amount || 0;
-      return this.formatCurrency(
-        amount * this.activeUnitCurrencyMultiplyer,
-        this.activeUnit
-      );
-    },
   },
   watch: {
     showSendTokens: function (val) {
@@ -373,11 +345,6 @@ export default defineComponent({
           } else {
             this.showNumericKeyboard = false;
           }
-          // initialize keyboard editing buffer from current amount
-          this.amountEditBuffer =
-            this.sendData.amount == null ? "0" : String(this.sendData.amount);
-          // attach keyboard listener for desktop editing
-          window.addEventListener("keydown", this.onGlobalAmountKeydown);
         });
 
         // if we open the dialog from the history, let's check the
@@ -406,9 +373,6 @@ export default defineComponent({
         this.sendData.tokensBase64 = "";
         this.sendData.historyToken = null;
         this.sendData.paymentRequest = null;
-        // detach keyboard listener
-        window.removeEventListener("keydown", this.onGlobalAmountKeydown);
-        this.amountEditBuffer = "";
       }
     },
   },
@@ -433,83 +397,6 @@ export default defineComponent({
     ...mapActions(useP2PKStore, ["isValidPubkey", "maybeConvertNpub"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
-    onGlobalAmountKeydown: function (e: KeyboardEvent) {
-      // only handle when amount entry screen is shown
-      if (this.sendData.tokens) return;
-      // ignore if an input/textarea/contenteditable is focused
-      const ae = document.activeElement;
-      if (
-        ae &&
-        (ae.tagName === "INPUT" ||
-          ae.tagName === "TEXTAREA" ||
-          ae.getAttribute("contenteditable") === "true")
-      ) {
-        return;
-      }
-      // modifier keys: ignore
-      if ((e as any).metaKey || (e as any).ctrlKey || (e as any).altKey) return;
-      const allowDecimal =
-        this.activeUnit !== "sat" && this.activeUnit !== "msat";
-      const key = (e as KeyboardEvent).key;
-      let buf =
-        this.amountEditBuffer ||
-        (this.sendData.amount == null ? "0" : String(this.sendData.amount));
-      let handled = false;
-
-      if (/^[0-9]$/.test(key)) {
-        buf = buf === "0" ? key : buf + key;
-        handled = true;
-      } else if (key === "Backspace" || key === "Delete") {
-        buf = buf.length > 1 ? buf.slice(0, -1) : "0";
-        handled = true;
-      } else if ((key === "." || key === ",") && allowDecimal) {
-        if (!buf.includes(".")) {
-          buf = buf + ".";
-        }
-        handled = true;
-      } else if (key === "Enter") {
-        // attempt to send if valid
-        if (
-          this.sendData.amount != null &&
-          this.sendData.amount > 0 &&
-          !this.insufficientFunds &&
-          !(
-            this.sendData.p2pkPubkey != "" &&
-            !this.isValidPubkey(this.sendData.p2pkPubkey)
-          )
-        ) {
-          this.sendTokens();
-        }
-        handled = true;
-      }
-
-      if (!handled) return;
-      (e as Event).preventDefault();
-
-      // sanitize buffer
-      if (allowDecimal) {
-        buf = buf.replace(/,/g, ".");
-        buf = buf.replace(/[^\d.]/g, "").replace(/^(\d*\.\d*).*$/, "$1");
-        // limit to two decimal places
-        if (buf.includes(".")) {
-          const parts = buf.split(".");
-          const decimals = parts[1] ?? "";
-          buf = parts[0] + "." + decimals.slice(0, 2);
-        }
-      } else {
-        buf = buf.replace(/[^\d]/g, "");
-      }
-      if (buf.startsWith("0") && buf.length > 1 && buf[1] !== ".") {
-        buf = String(parseInt(buf, 10) || 0);
-      }
-      this.amountEditBuffer = buf;
-      if (buf === "" || buf === ".") {
-        this.sendData.amount = null;
-      } else {
-        const num = Number(buf);
-        this.sendData.amount = isNaN(num) ? null : num;
-      }
-    },
     lockTokens: async function () {
       let sendAmount = Math.floor(
         this.sendData.amount * this.activeUnitCurrencyMultiplyer
@@ -642,8 +529,7 @@ export default defineComponent({
 .amount-display {
   font-size: clamp(56px, 11vw, 80px);
   line-height: 1.1;
-  overflow-wrap: break-word;
-  word-break: break-all;
+  white-space: nowrap;
   max-width: 100%;
 }
 .fiat-display {
