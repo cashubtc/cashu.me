@@ -716,6 +716,7 @@ export default {
   MintRatings: {
     title: "รีวิว Mint",
     reviews: "รีวิว",
+    your_review: "รีวิวของคุณ",
     no_reviews: "ไม่พบบทรีวิว",
     no_reviews_to_display: "ไม่มีรีวิวที่จะแสดง",
     no_rating: "ไม่มีคะแนน",

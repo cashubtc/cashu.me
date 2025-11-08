@@ -713,6 +713,7 @@ export default {
   MintRatings: {
     title: "Mint 评价",
     reviews: "条评价",
+    your_review: "您的评价",
     no_reviews: "未找到评价",
     no_reviews_to_display: "暂无可显示的评价。",
     no_rating: "暂无评分",

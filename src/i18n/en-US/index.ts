@@ -729,6 +729,7 @@ export default {
     reviews: "reviews",
     ratings: "Ratings",
     no_reviews: "No reviews found",
+    your_review: "Your review",
     no_reviews_to_display: "No reviews to display.",
     no_rating: "No rating",
     out_of: "out of",

@@ -725,6 +725,7 @@ export default {
   MintRatings: {
     title: "Avis sur le mint",
     reviews: "avis",
+    your_review: "Votre avis",
     no_reviews: "Aucun avis trouvé",
     no_reviews_to_display: "Aucun avis à afficher.",
     no_rating: "Aucune note",

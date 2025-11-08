@@ -715,6 +715,7 @@ export default {
   MintRatings: {
     title: "ミントのレビュー",
     reviews: "レビュー",
+    your_review: "あなたのレビュー",
     no_reviews: "レビューが見つかりません",
     no_reviews_to_display: "表示するレビューはありません。",
     no_rating: "評価なし",

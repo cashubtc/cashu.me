@@ -719,6 +719,7 @@ export default {
   MintRatings: {
     title: "Mint-recensioner",
     reviews: "recensioner",
+    your_review: "Din recension",
     no_reviews: "Inga recensioner hittades",
     no_reviews_to_display: "Inga recensioner att visa.",
     no_rating: "Ingen betygsättning",

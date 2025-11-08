@@ -727,6 +727,7 @@ export default {
   MintRatings: {
     title: "Mint-Bewertungen",
     reviews: "Bewertungen",
+    your_review: "Ihre Bewertung",
     no_reviews: "Keine Bewertungen gefunden",
     no_reviews_to_display: "Keine Bewertungen anzuzeigen.",
     no_rating: "Keine Bewertung",

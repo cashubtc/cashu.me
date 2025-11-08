@@ -714,6 +714,7 @@ export default {
   MintRatings: {
     title: "مراجعات المِنْت",
     reviews: "مراجعات",
+    your_review: "مراجعتك",
     no_reviews: "لا توجد مراجعات",
     no_reviews_to_display: "لا توجد مراجعات للعرض.",
     no_rating: "لا يوجد تقييم",

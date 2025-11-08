@@ -724,6 +724,7 @@ export default {
   MintRatings: {
     title: "Reseñas del mint",
     reviews: "reseñas",
+    your_review: "Tu reseña",
     no_reviews: "No se encontraron reseñas",
     no_reviews_to_display: "No hay reseñas para mostrar.",
     no_rating: "Sin calificación",

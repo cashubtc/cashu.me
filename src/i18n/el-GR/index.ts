@@ -725,6 +725,7 @@ export default {
   MintRatings: {
     title: "Κριτικές mint",
     reviews: "κριτικές",
+    your_review: "Η κριτική σας",
     no_reviews: "Δεν βρέθηκαν κριτικές",
     no_reviews_to_display: "Καμία κριτική προς εμφάνιση.",
     no_rating: "Χωρίς βαθμολογία",

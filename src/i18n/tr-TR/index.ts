@@ -730,6 +730,7 @@ export default {
   MintRatings: {
     title: "Mint yorumları",
     reviews: "yorum",
+    your_review: "Yorumunuz",
     no_reviews: "Hiç yorum bulunamadı",
     no_reviews_to_display: "Gösterilecek yorum yok.",
     no_rating: "Puan yok",

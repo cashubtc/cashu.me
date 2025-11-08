@@ -165,7 +165,9 @@
             v-if="r.pubkey === myPubkey"
             class="own-review-badge currency-unit-badge"
           >
-            <span class="currency-unit-text">Your review</span>
+            <span class="currency-unit-text">{{
+              $t("MintRatings.your_review")
+            }}</span>
           </div>
           <div class="row items-start" style="gap: 12px">
             <!-- Avatar on the left -->
