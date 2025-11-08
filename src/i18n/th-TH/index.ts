@@ -164,7 +164,7 @@ export default {
   },
   Settings: {
     web_of_trust: {
-      title: "Web of trust",
+      title: "เครือข่ายที่เชื่อถือได้",
       known_pubkeys: "Pubkey ที่รู้จัก: {wotCount}",
       continue_crawl: "ดำเนินการสำรวจต่อ",
       crawl_odell: "สำรวจ ODELL'S WEB OF TRUST",

@@ -396,7 +396,7 @@ export default {
       },
     },
     web_of_trust: {
-      title: "Web of trust",
+      title: "Rete di fiducia",
       known_pubkeys: "Chiavi pubbliche conosciute: {wotCount}",
       continue_crawl: "Continua scansione",
       crawl_odell: "Scansiona WEB OF TRUST DI ODELL",

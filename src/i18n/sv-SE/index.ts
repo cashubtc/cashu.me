@@ -163,7 +163,7 @@ export default {
   },
   Settings: {
     web_of_trust: {
-      title: "Web of trust",
+      title: "Förtroendenätverk",
       known_pubkeys: "Kända pubkeys: {wotCount}",
       continue_crawl: "Fortsätt genomsökning",
       crawl_odell: "Genomsök ODELL'S WEB OF TRUST",

@@ -233,7 +233,7 @@ export default {
       },
     },
     web_of_trust: {
-      title: "Web of Trust",
+      title: "Vertrauensnetzwerk",
       known_pubkeys: "Bekannte Pubkeys: {wotCount}",
       continue_crawl: "Crawl fortsetzen",
       crawl_odell: "ODELL'S WEB OF TRUST crawlen",

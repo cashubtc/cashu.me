@@ -88,7 +88,7 @@
                   class="text-caption text-grey-6"
                   style="font-size: 0.7rem"
                 >
-                  Web of trust
+                  {{ $t("Settings.web_of_trust.title") }}
                 </span>
                 <q-toggle
                   v-model="filterByWoT"

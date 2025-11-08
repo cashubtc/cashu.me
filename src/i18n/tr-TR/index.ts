@@ -491,7 +491,7 @@ export default {
     },
 
     web_of_trust: {
-      title: "Web of trust",
+      title: "Güven ağı",
       known_pubkeys: "Bilinen pubkeyler: {wotCount}",
 
       continue_crawl: "Taramaya devam et",

@@ -426,7 +426,7 @@ export default {
       },
     },
     web_of_trust: {
-      title: "Web of trust",
+      title: "Δίκτυο εμπιστοσύνης",
       known_pubkeys: "Γνωστά pubkeys: {wotCount}",
       continue_crawl: "Συνέχιση ανίχνευσης",
       crawl_odell: "Ανίχνευση ODELL'S WEB OF TRUST",
