@@ -725,11 +725,20 @@ export default {
   MintRatings: {
     title: "Κριτικές mint",
     reviews: "κριτικές",
-    your_review: "Η κριτική σας",
+    ratings: "Βαθμολογίες",
     no_reviews: "Δεν βρέθηκαν κριτικές",
+    your_review: "Η κριτική σας",
     no_reviews_to_display: "Καμία κριτική προς εμφάνιση.",
     no_rating: "Χωρίς βαθμολογία",
-    rows: "Γραμμές",
+    out_of: "από",
+    rows: "Reviews",
+    sort: "Ταξινόμηση",
+    sort_options: {
+      newest: "Νεότερες",
+      oldest: "Παλαιότερες",
+      highest: "Υψηλότερες",
+      lowest: "Χαμηλότερες",
+    },
     actions: { write_review: "Γράψτε κριτική" },
   },
   CreateMintReview: {

@@ -730,11 +730,20 @@ export default {
   MintRatings: {
     title: "Mint yorumları",
     reviews: "yorum",
-    your_review: "Yorumunuz",
+    ratings: "Değerlendirmeler",
     no_reviews: "Hiç yorum bulunamadı",
+    your_review: "Yorumunuz",
     no_reviews_to_display: "Gösterilecek yorum yok.",
     no_rating: "Puan yok",
-    rows: "Satır",
+    out_of: "üzerinden",
+    rows: "Reviews",
+    sort: "Sırala",
+    sort_options: {
+      newest: "En yeni",
+      oldest: "En eski",
+      highest: "En yüksek",
+      lowest: "En düşük",
+    },
     actions: { write_review: "Yorum yaz" },
   },
   CreateMintReview: {

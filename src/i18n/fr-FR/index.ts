@@ -725,11 +725,20 @@ export default {
   MintRatings: {
     title: "Avis sur le mint",
     reviews: "avis",
-    your_review: "Votre avis",
+    ratings: "Notes",
     no_reviews: "Aucun avis trouvé",
+    your_review: "Votre avis",
     no_reviews_to_display: "Aucun avis à afficher.",
     no_rating: "Aucune note",
-    rows: "Lignes",
+    out_of: "sur",
+    rows: "Reviews",
+    sort: "Trier",
+    sort_options: {
+      newest: "Plus récents",
+      oldest: "Plus anciens",
+      highest: "Plus élevées",
+      lowest: "Plus basses",
+    },
     actions: { write_review: "Rédiger un avis" },
   },
   CreateMintReview: {

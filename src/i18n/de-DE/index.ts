@@ -727,11 +727,20 @@ export default {
   MintRatings: {
     title: "Mint-Bewertungen",
     reviews: "Bewertungen",
-    your_review: "Ihre Bewertung",
+    ratings: "Bewertungen",
     no_reviews: "Keine Bewertungen gefunden",
+    your_review: "Ihre Bewertung",
     no_reviews_to_display: "Keine Bewertungen anzuzeigen.",
     no_rating: "Keine Bewertung",
-    rows: "Zeilen",
+    out_of: "von",
+    rows: "Reviews",
+    sort: "Sortieren",
+    sort_options: {
+      newest: "Neueste",
+      oldest: "Älteste",
+      highest: "Höchste",
+      lowest: "Niedrigste",
+    },
     actions: { write_review: "Bewertung schreiben" },
   },
   CreateMintReview: {

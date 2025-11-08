@@ -715,11 +715,20 @@ export default {
   MintRatings: {
     title: "ミントのレビュー",
     reviews: "レビュー",
-    your_review: "あなたのレビュー",
+    ratings: "評価",
     no_reviews: "レビューが見つかりません",
+    your_review: "あなたのレビュー",
     no_reviews_to_display: "表示するレビューはありません。",
     no_rating: "評価なし",
-    rows: "行数",
+    out_of: "のうち",
+    rows: "Reviews",
+    sort: "並び替え",
+    sort_options: {
+      newest: "新しい順",
+      oldest: "古い順",
+      highest: "高い順",
+      lowest: "低い順",
+    },
     actions: { write_review: "レビューを書く" },
   },
   CreateMintReview: {

@@ -713,11 +713,20 @@ export default {
   MintRatings: {
     title: "Mint 评价",
     reviews: "条评价",
-    your_review: "您的评价",
+    ratings: "评分",
     no_reviews: "未找到评价",
+    your_review: "您的评价",
     no_reviews_to_display: "暂无可显示的评价。",
     no_rating: "暂无评分",
-    rows: "行",
+    out_of: "共",
+    rows: "Reviews",
+    sort: "排序",
+    sort_options: {
+      newest: "最新",
+      oldest: "最旧",
+      highest: "最高",
+      lowest: "最低",
+    },
     actions: { write_review: "撰写评价" },
   },
   CreateMintReview: {
