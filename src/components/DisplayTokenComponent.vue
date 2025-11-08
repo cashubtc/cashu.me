@@ -143,9 +143,7 @@
             dense
             @click="toggleExpandButtons"
           >
-            <q-icon
-              :name="showExpandedButtons ? 'chevron_right' : 'chevron_left'"
-            />
+            <q-icon name="more_horiz" />
           </q-btn>
         </div>
       </div>
