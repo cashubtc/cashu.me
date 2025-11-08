@@ -81,7 +81,7 @@ export const useSettingsStore = defineStore("settings", {
       ),
       bip177BitcoinSymbol: useLocalStorage<boolean>(
         "cashu.settings.bip177",
-        false
+        true
       ),
       multinutEnabled: useLocalStorage<boolean>(
         "cashu.settings.multinutEnabled",
