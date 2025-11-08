@@ -161,6 +161,12 @@
           :key="r.eventId"
           :class="['review-item', { 'own-review': r.pubkey === myPubkey }]"
         >
+          <div
+            v-if="r.pubkey === myPubkey"
+            class="own-review-badge currency-unit-badge"
+          >
+            <span class="currency-unit-text">Your review</span>
+          </div>
           <div class="row items-start" style="gap: 12px">
             <!-- Avatar on the left -->
             <q-avatar size="40px" class="review-avatar">
@@ -740,6 +746,7 @@ export default defineComponent({
   margin: 0 -16px;
   border-radius: 8px;
   border-bottom: none;
+  position: relative;
 }
 
 .review-avatar {
@@ -856,5 +863,27 @@ export default defineComponent({
   to {
     transform: translateY(0);
   }
+}
+
+/* Match balance badges style from MintSettings.vue */
+.currency-unit-badge {
+  border-radius: 4px;
+  background-color: #1d1d1d;
+  display: inline-block;
+  padding: 4px 8px;
+  margin: 4px 4px 4px 0;
+}
+
+.currency-unit-text {
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.own-review-badge {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  z-index: 1;
 }
 </style>
