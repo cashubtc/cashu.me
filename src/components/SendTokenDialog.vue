@@ -33,6 +33,18 @@
             <q-btn
               flat
               dense
+              color="primary"
+              round
+              @click="showLockInput = !showLockInput"
+            >
+              <LockIcon size="1.2em" />
+              <q-tooltip>{{
+                $t("SendTokenDialog.actions.lock.label")
+              }}</q-tooltip>
+            </q-btn>
+            <q-btn
+              flat
+              dense
               size="lg"
               color="primary"
               @click="toggleUnit()"
@@ -53,7 +65,84 @@
 
         <!-- Amount display -->
         <div class="col column items-center justify-center q-px-lg amount-area">
+          <!-- Floating P2PK input overlay -->
+          <transition
+            appear
+            enter-active-class="animated fadeIn"
+            leave-active-class="animated fadeOut"
+          >
+            <div v-if="showLockInput" class="p2pk-overlay">
+              <div class="row justify-center">
+                <div class="col-12 q-px-lg" style="max-width: 600px">
+                  <div class="row items-center">
+                    <div :class="!sendData.p2pkPubkey ? 'col-8' : 'col-12'">
+                      <q-input
+                        v-model="sendData.p2pkPubkey"
+                        :label="
+                          sendData.p2pkPubkey &&
+                          !isValidPubkey(sendData.p2pkPubkey)
+                            ? $t(
+                                'SendTokenDialog.inputs.p2pk_pubkey.label_invalid'
+                              )
+                            : $t('SendTokenDialog.inputs.p2pk_pubkey.label')
+                        "
+                        outlined
+                        clearable
+                        :color="
+                          sendData.p2pkPubkey &&
+                          !isValidPubkey(sendData.p2pkPubkey)
+                            ? 'red'
+                            : ''
+                        "
+                        @keyup.enter="lockTokens"
+                      />
+                    </div>
+                    <div class="col-4 q-pl-sm" v-if="!sendData.p2pkPubkey">
+                      <q-btn
+                        unelevated
+                        v-if="canPasteFromClipboard"
+                        icon="content_paste"
+                        @click="pasteToP2PKField"
+                      >
+                        <q-tooltip>{{
+                          $t(
+                            "SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text"
+                          )
+                        }}</q-tooltip>
+                      </q-btn>
+                      <q-btn
+                        align="center"
+                        flat
+                        outline
+                        color="primary"
+                        round
+                        @click="showCamera"
+                      >
+                        <ScanIcon size="1.5em" />
+                      </q-btn>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </transition>
           <div class="amount-container">
+            <q-badge
+              v-if="isLocked"
+              rounded
+              color="positive"
+              class="locked-badge"
+            >
+              <LockIcon
+                size="1.3em"
+                style="margin-right: 6px; margin-bottom: 4px"
+              />
+              <span
+                class="text-caption text-weight-medium"
+                style="font-size: 14px"
+                >locked</span
+              >
+            </q-badge>
             <div
               class="amount-display text-weight-bold text-center"
               :class="{ 'text-grey-6': insufficientFunds }"
@@ -81,59 +170,6 @@
           >
             {{ secondaryFiatDisplay }}
           </div>
-          <transition
-            appear
-            enter-active-class="animated fadeIn"
-            leave-active-class="animated fadeOut"
-          >
-            <div
-              v-if="showLockInput"
-              class="row items-center q-mt-md"
-              style="width: 100%"
-            >
-              <div :class="!sendData.p2pkPubkey ? 'col-8' : 'col-12'">
-                <q-input
-                  v-model="sendData.p2pkPubkey"
-                  :label="
-                    sendData.p2pkPubkey && !isValidPubkey(sendData.p2pkPubkey)
-                      ? $t('SendTokenDialog.inputs.p2pk_pubkey.label_invalid')
-                      : $t('SendTokenDialog.inputs.p2pk_pubkey.label')
-                  "
-                  outlined
-                  clearable
-                  :color="
-                    sendData.p2pkPubkey && !isValidPubkey(sendData.p2pkPubkey)
-                      ? 'red'
-                      : ''
-                  "
-                  @keyup.enter="lockTokens"
-                />
-              </div>
-              <div class="col-4 q-pl-sm">
-                <q-btn
-                  unelevated
-                  v-if="canPasteFromClipboard && !sendData.p2pkPubkey"
-                  icon="content_paste"
-                  @click="pasteToP2PKField"
-                >
-                  <q-tooltip>{{
-                    $t("SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text")
-                  }}</q-tooltip>
-                </q-btn>
-                <q-btn
-                  align="center"
-                  v-if="!sendData.p2pkPubkey"
-                  flat
-                  outline
-                  color="primary"
-                  round
-                  @click="showCamera"
-                >
-                  <ScanIcon size="1.5em" />
-                </q-btn>
-              </div>
-            </div>
-          </transition>
         </div>
 
         <!-- Numeric keypad -->
@@ -222,6 +258,7 @@ export default defineComponent({
     NumericKeyboard,
     DisplayTokenComponent,
     ScanIcon,
+    LockIcon,
   },
   props: {},
   data: function () {
@@ -292,6 +329,12 @@ export default defineComponent({
       return (
         sumSelectedProofs ==
         this.sendData.amount * this.activeUnitCurrencyMultiplyer + feesToAdd
+      );
+    },
+    isLocked: function () {
+      return (
+        this.sendData.p2pkPubkey != "" &&
+        this.isValidPubkey(this.sendData.p2pkPubkey)
       );
     },
     secondaryFiatDisplay: function () {
@@ -588,6 +631,7 @@ export default defineComponent({
 }
 .amount-area {
   flex: 1;
+  position: relative;
 }
 .amount-container {
   position: relative;
@@ -599,6 +643,20 @@ export default defineComponent({
 }
 .fiat-display {
   font-size: 14px;
+}
+.p2pk-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 3;
+}
+.locked-badge {
+  position: absolute;
+  top: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
 }
 .amount-warning-badge {
   position: absolute;
