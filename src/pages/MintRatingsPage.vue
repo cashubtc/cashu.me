@@ -65,8 +65,7 @@ export default defineComponent({
     // Get data from route query params
     if (this.$route.query.mintUrl) {
       this.mintUrl = this.$route.query.mintUrl as string;
-      this.allowCreateReview =
-        this.$route.query.allowCreateReview !== "false";
+      this.allowCreateReview = this.$route.query.allowCreateReview !== "false";
 
       // Load mint info from store
       this.loadMintInfo();
@@ -99,4 +98,3 @@ export default defineComponent({
   position: relative;
 }
 </style>
-
