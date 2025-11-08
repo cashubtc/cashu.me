@@ -25,7 +25,7 @@ export const usePRStore = defineStore("payment-request", {
   state: () => ({
     showPRDialog: false,
     showPRKData: "" as string,
-    enablePaymentRequest: useLocalStorage<boolean>("cashu.pr.enable", false),
+    enablePaymentRequest: useLocalStorage<boolean>("cashu.pr.enable", true),
     receivePaymentRequestsAutomatically: useLocalStorage<boolean>(
       "cashu.pr.receive",
       false
