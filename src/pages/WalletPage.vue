@@ -16,7 +16,6 @@
             @click="showReceiveDialog = true"
           >
             <div class="button-content">
-              <q-icon name="south_west" size="1.2rem" class="q-mr-xs" />
               <span>{{ $t("WalletPage.actions.receive.label") }}</span>
             </div>
           </q-btn>
@@ -40,7 +39,6 @@
             @click="showSendDialog = true"
           >
             <div class="button-content">
-              <q-icon name="north_east" size="1.2rem" class="q-mr-xs" />
               <span>{{ $t("WalletPage.actions.send.label") }}</span>
             </div>
           </q-btn>
