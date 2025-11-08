@@ -144,6 +144,7 @@
     />
 
     <!-- INVOICE DETAILS  -->
+    <CreateInvoiceDialog v-model="showCreateInvoiceDialog" />
     <InvoiceDetailDialog v-model="showInvoiceDetails" />
 
     <!-- SEND TOKENS DIALOG  -->
@@ -213,6 +214,7 @@ import WelcomeDialog from "components/WelcomeDialog.vue";
 import SendTokenDialog from "components/SendTokenDialog.vue";
 import PayInvoiceDialog from "components/PayInvoiceDialog.vue";
 import InvoiceDetailDialog from "components/InvoiceDetailDialog.vue";
+import CreateInvoiceDialog from "components/CreateInvoiceDialog.vue";
 import SendDialog from "components/SendDialog.vue";
 import ReceiveDialog from "components/ReceiveDialog.vue";
 import QrcodeReader from "components/QrcodeReader.vue";
@@ -266,6 +268,7 @@ export default {
     ReceiveTokenDialog,
     PayInvoiceDialog,
     InvoiceDetailDialog,
+    CreateInvoiceDialog,
     QrcodeReader,
     SendDialog,
     ReceiveDialog,
@@ -313,6 +316,7 @@ export default {
     ...mapState(useUiStore, ["tickerShort"]),
     ...mapWritableState(useUiStore, [
       "showInvoiceDetails",
+      "showCreateInvoiceDialog",
       "tab",
       "showSendDialog",
       "showReceiveDialog",
@@ -486,7 +490,7 @@ export default {
       this.invoiceData.bolt11 = "";
       this.invoiceData.hash = "";
       this.invoiceData.memo = "";
-      this.showInvoiceDetails = true;
+      this.showCreateInvoiceDialog = true;
     },
     showSendTokensDialog: function () {
       console.log("##### showSendTokensDialog");

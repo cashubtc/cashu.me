@@ -214,7 +214,9 @@ export default defineComponent({
   },
   props: {},
   data: function () {
-    return {};
+    return {
+      amountEditBuffer: "",
+    };
   },
   computed: {
     ...mapWritableState(useSendTokensStore, [
@@ -316,6 +318,11 @@ export default defineComponent({
           } else {
             this.showNumericKeyboard = false;
           }
+          // initialize keyboard editing buffer from current amount
+          this.amountEditBuffer =
+            this.sendData.amount == null ? "0" : String(this.sendData.amount);
+          // attach keyboard listener for desktop editing
+          window.addEventListener("keydown", this.onGlobalAmountKeydown);
         });
 
         // if we open the dialog from the history, let's check the
@@ -344,6 +351,9 @@ export default defineComponent({
         this.sendData.tokensBase64 = "";
         this.sendData.historyToken = null;
         this.sendData.paymentRequest = null;
+        // detach keyboard listener
+        window.removeEventListener("keydown", this.onGlobalAmountKeydown);
+        this.amountEditBuffer = "";
       }
     },
   },
@@ -368,6 +378,77 @@ export default defineComponent({
     ...mapActions(useP2PKStore, ["isValidPubkey", "maybeConvertNpub"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
+    onGlobalAmountKeydown: function (e) {
+      // only handle when amount entry screen is shown
+      if (this.sendData.tokens) return;
+      // ignore if an input/textarea/contenteditable is focused
+      const ae = document.activeElement;
+      if (
+        ae &&
+        (ae.tagName === "INPUT" ||
+          ae.tagName === "TEXTAREA" ||
+          ae.getAttribute("contenteditable") === "true")
+      ) {
+        return;
+      }
+      // modifier keys: ignore
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const allowDecimal =
+        this.activeUnit !== "sat" && this.activeUnit !== "msat";
+      const key = e.key;
+      let buf =
+        this.amountEditBuffer ||
+        (this.sendData.amount == null ? "0" : String(this.sendData.amount));
+      let handled = false;
+
+      if (/^[0-9]$/.test(key)) {
+        buf = buf === "0" ? key : buf + key;
+        handled = true;
+      } else if (key === "Backspace" || key === "Delete") {
+        buf = buf.length > 1 ? buf.slice(0, -1) : "0";
+        handled = true;
+      } else if ((key === "." || key === ",") && allowDecimal) {
+        if (!buf.includes(".")) {
+          buf = buf + ".";
+        }
+        handled = true;
+      } else if (key === "Enter") {
+        // attempt to send if valid
+        if (
+          this.sendData.amount != null &&
+          this.sendData.amount > 0 &&
+          !this.insufficientFunds &&
+          !(
+            this.sendData.p2pkPubkey != "" &&
+            !this.isValidPubkey(this.sendData.p2pkPubkey)
+          )
+        ) {
+          this.sendTokens();
+        }
+        handled = true;
+      }
+
+      if (!handled) return;
+      e.preventDefault();
+
+      // sanitize buffer
+      if (allowDecimal) {
+        buf = buf.replace(/,/g, ".");
+        buf = buf.replace(/[^\d.]/g, "").replace(/^(\d*\.\d*).*$/, "$1");
+      } else {
+        buf = buf.replace(/[^\d]/g, "");
+      }
+      if (buf.startsWith("0") && buf.length > 1 && buf[1] !== ".") {
+        buf = String(parseInt(buf, 10) || 0);
+      }
+      this.amountEditBuffer = buf;
+      if (buf === "" || buf === ".") {
+        this.sendData.amount = null;
+      } else {
+        const num = Number(buf);
+        this.sendData.amount = isNaN(num) ? null : num;
+      }
+    },
     lockTokens: async function () {
       let sendAmount = Math.floor(
         this.sendData.amount * this.activeUnitCurrencyMultiplyer

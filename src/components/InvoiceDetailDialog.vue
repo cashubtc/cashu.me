@@ -11,89 +11,7 @@
     no-backdrop-dismiss
   >
     <q-card class="q-pa-lg q-px-sm qcard q-card-top">
-      <NumericKeyboard
-        v-if="showNumericKeyboard && useNumericKeyboard"
-        :model-value="invoiceData.amount"
-        @update:modelValue="(val) => (invoiceData.amount = val)"
-        @done="requestMintButton"
-      />
-      <!-- invoice is not entered -->
-      <div v-if="!invoiceData.bolt11">
-        <div class="row items-center no-wrap q-mb-sm q-pr-md q-py-lg">
-          <div class="col-10">
-            <span class="text-h6">{{ $t("InvoiceDetailDialog.title") }}</span>
-            <span
-              v-if="invoiceData.amount && bitcoinPrice && activeUnit == 'sat'"
-              class="q-ml-xs text-subtitle2 text-grey-6"
-            >
-              ({{
-                formatCurrency(
-                  (currentCurrencyPrice / 100000000) *
-                    invoiceData.amount *
-                    activeUnitCurrencyMultiplyer,
-                  bitcoinPriceCurrency,
-                  true
-                )
-              }})
-            </span>
-          </div>
-        </div>
-        <div class="row items-center no-wrap q-my-sm q-py-none">
-          <div class="col-12">
-            <ChooseMint />
-          </div>
-        </div>
-        <q-input
-          round
-          outlined
-          type="number"
-          v-model.number="invoiceData.amount"
-          :label="
-            $t('InvoiceDetailDialog.inputs.amount.label', {
-              ticker: tickerShort,
-            })
-          "
-          mask="#"
-          fill-mask="0"
-          reverse-fill-mask
-          autofocus
-          class="q-mb-lg"
-          @keyup.enter="requestMintButton"
-        >
-          <q-btn
-            flat
-            color="primary"
-            @click="toggleUnit()"
-            :label="activeUnitLabel"
-          />
-        </q-input>
-        <div class="row items-center no-wrap q-my-sm q-py-none">
-          <q-btn
-            color="primary"
-            rounded
-            @click="requestMintButton"
-            :disable="!(invoiceData.amount > 0) || createInvoiceButtonBlocked"
-            :label="
-              createInvoiceButtonBlocked
-                ? $t('InvoiceDetailDialog.actions.create.label_blocked')
-                : $t('InvoiceDetailDialog.actions.create.label')
-            "
-            :loading="globalMutexLock"
-          >
-            <template v-slot:loading>
-              <q-spinner-hourglass />
-              {{ $t("InvoiceDetailDialog.actions.create.in_progress") }}
-            </template>
-          </q-btn>
-          <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto">{{
-            $t("InvoiceDetailDialog.actions.close.label")
-          }}</q-btn>
-        </div>
-      </div>
-
-      <!-- invoice is entered -->
-
-      <div v-else class="text-center q-mt-none q-pt-none">
+      <div v-if="invoiceData.bolt11" class="text-center q-mt-none q-pt-none">
         <a class="text-secondary" :href="'lightning:' + invoiceData.bolt11">
           <q-responsive :ratio="1" class="q-ma-none q-ma-none">
             <vue-qrcode
@@ -135,7 +53,7 @@
               >
             </div>
             <div
-              v-if="this.invoiceData.mint != undefined"
+              v-if="invoiceData && invoiceData.mint != undefined"
               class="row justify-center q-pt-sm"
             >
               <q-chip
@@ -170,7 +88,7 @@
             class="q-mx-xs"
             size="md"
             flat
-            @click="copyText(invoiceData.bolt11)"
+            @click="onCopyBolt11"
             >{{ $t("InvoiceDetailDialog.invoice.actions.copy.label") }}</q-btn
           >
           <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
@@ -187,63 +105,28 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import VueQrcode from "@chenfengyuan/vue-qrcode";
 
 import { useWalletStore } from "src/stores/wallet";
-import ChooseMint from "src/components/ChooseMint.vue";
 import { useUiStore } from "src/stores/ui";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useWorkersStore } from "src/stores/workers";
-import { useMintsStore } from "src/stores/mints";
-import { useSettingsStore } from "../stores/settings";
-import { usePriceStore } from "src/stores/price";
-import NumericKeyboard from "components/NumericKeyboard.vue";
+// type hint for global mixin
+declare const windowMixin: any;
 
 export default defineComponent({
   name: "InvoiceDetailDialog",
   mixins: [windowMixin],
   components: {
-    ChooseMint,
     VueQrcode,
-    NumericKeyboard,
   },
   props: {},
   data: function () {
-    return {
-      createInvoiceButtonBlocked: false,
-    };
-  },
-  watch: {
-    showInvoiceDetails: function (val) {
-      if (val) {
-        this.$nextTick(() => {
-          if (!this.invoiceData.amount) {
-            this.showNumericKeyboard = true;
-          } else {
-            this.showNumericKeyboard = false;
-          }
-        });
-      }
-    },
+    return {};
   },
   computed: {
     ...mapState(useWalletStore, ["invoiceData"]),
-    ...mapState(useMintsStore, [
-      "activeUnit",
-      "activeUnitLabel",
-      "activeUnitCurrencyMultiplyer",
-    ]),
     ...mapState(useWorkersStore, ["invoiceWorkerRunning"]),
-    ...mapWritableState(useUiStore, [
-      "showInvoiceDetails",
-      "tickerShort",
-      "globalMutexLock",
-      "showNumericKeyboard",
-    ]),
-    ...mapState(useSettingsStore, [
-      "useNumericKeyboard",
-      "bitcoinPriceCurrency",
-    ]),
-    ...mapState(usePriceStore, ["bitcoinPrice", "currentCurrencyPrice"]),
+    ...mapWritableState(useUiStore, ["showInvoiceDetails"]),
     displayUnit: function () {
-      let display = this.formatCurrency(
+      let display = (this as any).formatCurrency(
         this.invoiceData.amount,
         this.invoiceData.unit,
         true
@@ -261,34 +144,9 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useWalletStore, [
-      "requestMint",
-      "lnurlPaySecond",
-      "mintOnPaid",
-    ]),
-    ...mapActions(useMintsStore, ["toggleUnit"]),
-    requestMintButton: async function () {
-      if (!this.invoiceData.amount) {
-        return;
-      }
-      try {
-        this.showNumericKeyboard = false;
-        const mintStore = useMintsStore();
-        this.invoiceData.amount *= this.activeUnitCurrencyMultiplyer;
-        this.createInvoiceButtonBlocked = true;
-        const mintWallet = useWalletStore().mintWallet(
-          mintStore.activeMintUrl,
-          mintStore.activeUnit
-        );
-        const mintQuote = await this.requestMint(
-          this.invoiceData.amount,
-          mintWallet
-        );
-        await this.mintOnPaid(mintQuote.quote);
-      } catch (e) {
-        console.log("#### requestMintButton", e);
-      } finally {
-        this.createInvoiceButtonBlocked = false;
+    onCopyBolt11: function () {
+      if (this.invoiceData?.bolt11) {
+        (this as any).copyText(this.invoiceData.bolt11);
       }
     },
   },

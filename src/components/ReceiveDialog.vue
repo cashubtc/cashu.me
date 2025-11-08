@@ -108,6 +108,7 @@ export default defineComponent({
       "showInvoiceDetails",
       "showReceiveDialog",
       "showReceiveEcashDrawer",
+      "showCreateInvoiceDialog",
     ]),
     ...mapWritableState(useReceiveTokensStore, [
       "showReceiveTokens",
@@ -147,7 +148,7 @@ export default defineComponent({
       this.invoiceData.bolt11 = "";
       this.invoiceData.hash = "";
       this.invoiceData.memo = "";
-      this.showInvoiceDetails = true;
+      this.showCreateInvoiceDialog = true;
       this.showReceiveDialog = false;
     },
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
