@@ -47,6 +47,9 @@ export default {
       },
     },
   },
+  common: {
+    fee: "Fee",
+  },
   MultinutPicker: {
     payment: "Multinut payment",
     selectMints: "Select one or multiple mints to execute a payment from.",

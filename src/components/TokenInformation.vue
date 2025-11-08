@@ -11,6 +11,16 @@
         <strong>{{ displayUnit }} </strong>
       </q-chip>
       <q-chip
+        v-if="receiveFee > 0"
+        outline
+        class="q-pa-md"
+        style="height: 36px; font-family: monospace"
+      >
+        <q-icon name="price_change" size="xs" class="q-mr-xs" />
+        {{ $t("common.fee") || "Fee" }}:
+        {{ formatCurrency(receiveFee, tokenUnit) }}
+      </q-chip>
+      <q-chip
         outline
         class="q-pa-md"
         style="height: 36px; font-family: monospace"
@@ -96,13 +106,26 @@ export default defineComponent({
     displayMemo: function () {
       return token.getMemo(token.decode(this.encodedToken));
     },
+    receiveFee: function () {
+      try {
+        const tokenJson = token.decode(this.encodedToken);
+        const proofs = token.getProofs(tokenJson);
+        if (!proofs?.length) {
+          return 0;
+        }
+        const mintUrl = token.getMint(tokenJson);
+        const unit = token.getUnit(tokenJson);
+        const walletStore = useWalletStore();
+        const wallet = walletStore.mintWallet(mintUrl, unit);
+        const fee = wallet.getFeesForProofs(proofs);
+        return fee || 0;
+      } catch (e) {
+        return 0;
+      }
+    },
   },
   methods: {
     ...mapActions(useP2PKStore, ["isLocked", "isLockedToUs"]),
-    ...mapActions(useWalletStore, ["getFeesForProofs"]),
-    getFeesForProofs: function (proofs: Proof[]) {
-      return this.getFeesForProofs(proofs);
-    },
     getProofsMint: function (proofs) {
       // unique keyset IDs of proofs
       let uniqueIds = [...new Set(proofs.map((p) => p.id))];
