@@ -54,18 +54,8 @@
             </div>
 
             <q-card-section class="q-pa-sm">
-              <div class="row justify-center q-pt-md">
-                <q-item-label
-                  caption
-                  class="text-weight-light text-white"
-                  style="font-size: 14px"
-                >
-                  {{ $t("PaymentRequestDialog.payment_request.description") }}
-                </q-item-label>
-              </div>
-
               <!-- Amount display/edit -->
-              <div class="row justify-center q-pt-lg">
+              <div class="row justify-center q-pt-md">
                 <div v-if="!isEditingAmount">
                   <q-btn
                     color="primary"
@@ -92,7 +82,7 @@
               </div>
 
               <!-- Mint selection and unit toggle -->
-              <div class="row justify-center q-pt-lg">
+              <div class="row justify-center q-pt-md">
                 <div class="row no-wrap items-center q-gutter-sm">
                   <q-chip
                     outline
