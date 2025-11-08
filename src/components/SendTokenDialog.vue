@@ -637,10 +637,15 @@ export default defineComponent({
 .amount-container {
   position: relative;
   display: inline-block;
+  max-width: 90vw;
+  overflow: hidden;
 }
 .amount-display {
   font-size: clamp(56px, 11vw, 80px);
   line-height: 1.1;
+  overflow-wrap: break-word;
+  word-break: break-all;
+  max-width: 100%;
 }
 .fiat-display {
   font-size: 14px;
