@@ -33,6 +33,7 @@
             <q-btn
               flat
               dense
+              size="lg"
               color="primary"
               @click="toggleUnit()"
               :label="activeUnitLabel"
