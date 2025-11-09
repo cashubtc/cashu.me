@@ -919,7 +919,8 @@ export default {
     },
   },
   InvoiceDetailDialog: {
-    title: "Create Invoice",
+    title: "Receive Lightning",
+    create_invoice_title: "Create Invoice",
     inputs: {
       amount: {
         label: "Amount ({ ticker }) *",
@@ -962,7 +963,7 @@ export default {
     },
   },
   SendTokenDialog: {
-    title: "Send { value }",
+    title: "Send Ecash",
     title_ecash_text: "Ecash",
     badge_offline_text: "Offline",
     inputs: {
@@ -1051,7 +1052,7 @@ export default {
     },
   },
   ReceiveTokenDialog: {
-    title: "Receive { value }",
+    title: "Receive Ecash",
     title_ecash_text: "Ecash",
     inputs: {
       tokens_base64: {

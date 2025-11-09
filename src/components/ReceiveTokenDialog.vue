@@ -14,8 +14,25 @@
         :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
       >
         <!-- Header -->
-        <div class="row items-center justify-between q-pa-md">
-          <q-btn v-close-popup flat round icon="close" color="grey" />
+        <div class="row items-center q-pa-md" style="position: relative">
+          <q-btn
+            v-close-popup
+            flat
+            round
+            icon="close"
+            color="grey"
+            class="floating-close-btn"
+          />
+          <div class="col text-center fixed-title-height">
+            <q-item-label
+              overline
+              class="q-mt-sm"
+              :class="$q.dark.isActive ? 'text-white' : 'text-black'"
+              style="font-size: 1rem"
+            >
+              {{ $t("ReceiveTokenDialog.title") }}
+            </q-item-label>
+          </div>
         </div>
 
         <!-- Content area -->
@@ -655,6 +672,19 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+.floating-close-btn {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+.fixed-title-height {
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .bottom-panel {
