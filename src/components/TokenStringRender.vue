@@ -1,17 +1,14 @@
 <template>
   <q-card class="token-card">
+    <!-- Token string as background filling entire card -->
+    <div class="token-background">
+      {{ displayedToken }}
+    </div>
+
     <q-card-section class="q-pa-md token-content">
-      <!-- Top Row: Token Info -->
-      <div class="token-label q-mb-md">
-        {{ displayedToken }}
-      </div>
-
-      <!-- Middle: Empty space placeholder -->
-      <div class="token-space q-mb-md"></div>
-
       <!-- Bottom Row: Mint Name + Amount -->
-      <div class="row items-end justify-between">
-        <div class="mint-name text-body2">{{ mintName }}</div>
+      <div class="row items-end justify-between bottom-info">
+        <div class="mint-name">{{ mintName }}</div>
         <div class="token-amount text-h4">{{ displayAmount }}</div>
       </div>
     </q-card-section>
@@ -91,10 +88,8 @@ export default defineComponent({
       if (!props.tokenString) {
         return "";
       }
-      // Show first 12 chars, ellipses, then last 12 chars (total ~27 with ...)
-      const firstPart = props.tokenString.slice(0, 12);
-      const lastPart = props.tokenString.slice(-12);
-      return `${firstPart}...\n${lastPart}`;
+      // Show the full token string, it will be wrapped and fill the card
+      return props.tokenString;
     });
 
     const displayAmount = computed(() => {
@@ -204,7 +199,8 @@ export default defineComponent({
   backdrop-filter: blur(10px);
   position: relative;
   overflow: hidden;
-  min-height: 180px;
+  min-height: 200px;
+  height: 200px;
 
   &::before {
     content: '';
@@ -239,25 +235,47 @@ export default defineComponent({
   }
 }
 
-.token-content {
-  position: relative;
-  z-index: 2;
-}
-
-.token-label {
+.token-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 16px;
   font-size: 0.75rem;
   font-weight: 400;
   color: #9e9e9e;
   word-break: break-all;
-  text-align: left;
-  white-space: pre-line;
   line-height: 1.4;
-  min-height: 2.8rem;
-  width: 100%;
+  overflow: hidden;
+  z-index: 1;
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 1) 40%,
+    rgba(0, 0, 0, 0.2) 65%,
+    rgba(0, 0, 0, 0) 75%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 1) 40%,
+    rgba(0, 0, 0, 0.2) 65%,
+    rgba(0, 0, 0, 0) 75%
+  );
 }
 
-.token-space {
-  min-height: 40px;
+.token-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+}
+
+.bottom-info {
+  width: 100%;
 }
 
 .mint-name {
