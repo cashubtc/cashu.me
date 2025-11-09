@@ -832,6 +832,8 @@ export const useWalletStore = defineStore("wallet", {
           throw error;
         } finally {
           if (releaseMutex) await uIStore.lockMutex();
+          // store melt quote in invoice history
+          this.updateOutgoingInvoiceInHistory(data.quote as MeltQuoteResponse);
         }
 
         if (data.quote.state != MeltQuoteState.PAID) {
@@ -878,10 +880,13 @@ export const useWalletStore = defineStore("wallet", {
           throw error;
         }
         // get quote and check state
-        const mintQuote = await mintWallet.mint.checkMeltQuote(quote.quote);
+        const meltQuote = await mintWallet.mint.checkMeltQuote(quote.quote);
+        // store melt quote in invoice history
+        this.updateOutgoingInvoiceInHistory(meltQuote as MeltQuoteResponse);
+
         if (
-          mintQuote.state == MeltQuoteState.PAID ||
-          mintQuote.state == MeltQuoteState.PENDING
+          meltQuote.state == MeltQuoteState.PAID ||
+          meltQuote.state == MeltQuoteState.PENDING
         ) {
           console.log(
             "### melt: error, but quote is paid or pending. not rolling back."
@@ -890,6 +895,7 @@ export const useWalletStore = defineStore("wallet", {
           notify(this.t("wallet.notifications.payment_pending_refresh"));
           throw error;
         }
+
         // roll back proof management and keyset counter
         await proofsStore.setReserved(sendProofs, false);
         this.increaseKeysetCounter(keysetId, -keysetCounterIncrease);
