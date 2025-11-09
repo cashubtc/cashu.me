@@ -153,20 +153,22 @@
                   >locked</span
                 >
               </q-badge>
-              <q-badge
+              <div
                 v-if="insufficientFunds && sendData.amount"
                 outline
                 rounded
-                color="grey"
                 size="md"
-                class="amount-warning-badge"
+                class="q-pt-xl amount-warning-badge"
               >
-                <span class="text-caption text-weight-medium">
+                <span
+                  class="text-caption text-weight-medium text-grey-6"
+                  style="font-size: 16px"
+                >
                   {{
                     $t("PayInvoiceDialog.invoice.balance_too_low_warning_text")
                   }}
                 </span>
-              </q-badge>
+              </div>
             </template>
           </AmountInputComponent>
         </div>
@@ -586,6 +588,8 @@ export default defineComponent({
   transform: translateX(-50%);
   z-index: 2;
   pointer-events: none;
+  font-size: 16px;
+  white-space: nowrap;
 }
 .bottom-panel {
   margin-top: auto;

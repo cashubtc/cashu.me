@@ -12,7 +12,7 @@
     </div>
     <div class="fiat-container q-mt-xs">
       <div
-        class="fiat-display text-grey-6"
+        class="fiat-display text-grey-6 q-mt-lg"
         :class="{ invisible: !secondaryFiatDisplay }"
       >
         {{ secondaryFiatDisplay || " " }}
@@ -83,7 +83,7 @@ export default defineComponent({
         this.bitcoinPriceCurrency,
         true
       );
-      return `(${fiat})`;
+      return fiat;
     },
   },
   watch: {
@@ -218,9 +218,14 @@ export default defineComponent({
 });
 </script>
 <style scoped>
+.amount-input-root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
 .amount-container {
   position: relative;
-  display: inline-block;
   max-width: 90vw;
   height: 88px;
   display: flex;
@@ -235,9 +240,14 @@ export default defineComponent({
 }
 .fiat-container {
   height: 18px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .fiat-display {
-  font-size: 14px;
+  font-size: 16px;
+  text-align: center;
 }
 .invisible {
   visibility: hidden;
