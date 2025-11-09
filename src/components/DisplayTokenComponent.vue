@@ -159,16 +159,13 @@
     <div class="content-area">
       <q-card-section class="q-pa-none">
         <div v-if="qrCodeFragment" class="row justify-center q-mb-md">
-          <div
-            class="col-12 col-sm-11 col-md-8 q-px-md"
-            style="max-width: 600px"
-          >
+          <div class="col-12 col-sm-11 col-md-8 q-px-md">
             <q-responsive :ratio="1" class="q-mx-none">
               <vue-qrcode
                 :value="qrCodeFragment"
-                :options="{ width: 400 }"
+                :options="{ width: 600, height: 600 }"
                 class="rounded-borders"
-                style="width: 100%"
+                style="width: 100%; height: 100%"
                 @click="copyTokens"
               >
               </vue-qrcode>
@@ -690,6 +687,9 @@ export default defineComponent({
 .content-area {
   flex: 1;
   overflow-y: auto;
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto;
 }
 .floating-close-btn {
   position: absolute;
