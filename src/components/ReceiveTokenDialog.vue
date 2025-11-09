@@ -191,6 +191,7 @@
                   <div class="col-12">
                     <TokenInformation
                       :encodedToken="receiveData.tokensBase64"
+                      :hide-amount="true"
                     />
                   </div>
                 </div>

@@ -123,7 +123,7 @@ export default defineComponent({
       }
 
       const targetLength = tokenStr.length;
-      const duration = Math.max(600, Math.min(1200, targetLength * 12));
+      const duration = Math.max(2500, Math.min(1200, targetLength * 12));
       const start = performance.now();
 
       const step = (now: number) => {
@@ -203,7 +203,7 @@ export default defineComponent({
   height: 200px;
 
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
@@ -219,7 +219,7 @@ export default defineComponent({
   }
 
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     top: -50%;
     left: -50%;
@@ -244,8 +244,9 @@ export default defineComponent({
   padding: 16px;
   font-size: 0.75rem;
   font-weight: 400;
-  color: #9e9e9e;
+  color: rgba(158, 158, 158, 0.817);
   word-break: break-all;
+  font-family: monospace;
   line-height: 1.4;
   overflow: hidden;
   z-index: 1;
@@ -280,7 +281,7 @@ export default defineComponent({
 
 .mint-name {
   font-weight: 400;
-  color: #9e9e9e;
+  color: white;
   font-size: 14px;
 }
 

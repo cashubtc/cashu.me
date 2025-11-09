@@ -1,7 +1,7 @@
 <template>
   <div class="token-information-container q-px-md">
     <!-- Amount Header -->
-    <div class="token-header-container">
+    <div v-if="!hideAmount" class="token-header-container">
       <div class="token-amount">
         {{ displayUnit }}
       </div>
@@ -120,6 +120,10 @@ export default defineComponent({
   },
   props: {
     encodedToken: String,
+    hideAmount: {
+      type: Boolean,
+      default: false,
+    },
   },
   data: function () {
     return {};
