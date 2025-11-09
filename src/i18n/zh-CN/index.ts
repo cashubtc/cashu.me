@@ -899,7 +899,8 @@ export default {
     },
   },
   InvoiceDetailDialog: {
-    title: "创建发票",
+    title: "接收 Lightning",
+    create_invoice_title: "创建发票",
     inputs: {
       amount: {
         label: "金额 ({ ticker }) *",
@@ -942,7 +943,7 @@ export default {
     },
   },
   SendTokenDialog: {
-    title: "发送 { value }",
+    title: "发送 Ecash",
     title_ecash_text: "Ecash",
     badge_offline_text: "离线",
     inputs: {
@@ -1030,7 +1031,7 @@ export default {
     },
   },
   ReceiveTokenDialog: {
-    title: "接收 { value }",
+    title: "接收 Ecash",
     title_ecash_text: "Ecash",
     inputs: {
       tokens_base64: {

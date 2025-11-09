@@ -901,7 +901,8 @@ export default {
     },
   },
   InvoiceDetailDialog: {
-    title: "إنشاء فاتورة",
+    title: "استلام Lightning",
+    create_invoice_title: "إنشاء فاتورة",
     inputs: {
       amount: {
         label: "المبلغ ({ ticker }) *",
@@ -944,7 +945,7 @@ export default {
     },
   },
   SendTokenDialog: {
-    title: "إرسال { value }",
+    title: "إرسال Ecash",
     title_ecash_text: "Ecash",
     badge_offline_text: "غير متصل",
     inputs: {
@@ -1032,7 +1033,7 @@ export default {
     },
   },
   ReceiveTokenDialog: {
-    title: "استلام { value }",
+    title: "استلام Ecash",
     title_ecash_text: "Ecash",
     inputs: {
       tokens_base64: {

@@ -881,7 +881,8 @@ export default {
     },
   },
   InvoiceDetailDialog: {
-    title: "Crea Fattura",
+    title: "Ricevi Lightning",
+    create_invoice_title: "Crea Fattura",
     inputs: {
       amount: {
         label: "Importo ({ ticker }) *",
@@ -924,7 +925,7 @@ export default {
     },
   },
   SendTokenDialog: {
-    title: "Invia { value }",
+    title: "Invia Ecash",
     title_ecash_text: "Ecash",
     badge_offline_text: "Offline",
     inputs: {
@@ -1012,7 +1013,7 @@ export default {
     },
   },
   ReceiveTokenDialog: {
-    title: "Ricevi { value }",
+    title: "Ricevi Ecash",
     title_ecash_text: "Ecash",
     inputs: {
       tokens_base64: {

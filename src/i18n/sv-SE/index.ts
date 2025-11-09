@@ -906,7 +906,8 @@ export default {
     },
   },
   InvoiceDetailDialog: {
-    title: "Skapa faktura",
+    title: "Ta emot Lightning",
+    create_invoice_title: "Skapa faktura",
     inputs: {
       amount: {
         label: "Belopp ({ ticker }) *",
@@ -949,7 +950,7 @@ export default {
     },
   },
   SendTokenDialog: {
-    title: "Skicka { value }",
+    title: "Skicka Ecash",
     title_ecash_text: "Ecash",
     badge_offline_text: "Offline",
     inputs: {
@@ -1038,7 +1039,7 @@ export default {
     },
   },
   ReceiveTokenDialog: {
-    title: "Ta emot { value }",
+    title: "Ta emot Ecash",
     title_ecash_text: "Ecash",
     inputs: {
       tokens_base64: {

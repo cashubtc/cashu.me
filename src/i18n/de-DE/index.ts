@@ -916,7 +916,8 @@ export default {
     },
   },
   InvoiceDetailDialog: {
-    title: "Rechnung erstellen",
+    title: "Lightning empfangen",
+    create_invoice_title: "Rechnung erstellen",
     inputs: {
       amount: {
         label: "Betrag ({ ticker }) *",
@@ -959,7 +960,7 @@ export default {
     },
   },
   SendTokenDialog: {
-    title: "Senden { value }",
+    title: "Ecash senden",
     title_ecash_text: "Ecash",
     badge_offline_text: "Offline",
     inputs: {
@@ -1048,7 +1049,7 @@ export default {
     },
   },
   ReceiveTokenDialog: {
-    title: "Empfangen { value }",
+    title: "Ecash empfangen",
     title_ecash_text: "Ecash",
     inputs: {
       tokens_base64: {

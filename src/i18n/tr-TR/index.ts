@@ -917,7 +917,8 @@ export default {
     },
   },
   InvoiceDetailDialog: {
-    title: "Fatura Oluştur",
+    title: "Lightning Al",
+    create_invoice_title: "Fatura Oluştur",
     inputs: {
       amount: {
         label: "Miktar ({ ticker }) *",
@@ -960,7 +961,7 @@ export default {
     },
   },
   SendTokenDialog: {
-    title: "{ value } gönder",
+    title: "Ecash Gönder",
     title_ecash_text: "Ecash",
     badge_offline_text: "Çevrimdışı",
     inputs: {
@@ -1049,7 +1050,7 @@ export default {
     },
   },
   ReceiveTokenDialog: {
-    title: "{ value } al",
+    title: "Ecash Al",
     title_ecash_text: "Ecash",
     inputs: {
       tokens_base64: {

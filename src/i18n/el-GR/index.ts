@@ -913,7 +913,8 @@ export default {
     },
   },
   InvoiceDetailDialog: {
-    title: "Δημιουργία Τιμολογίου",
+    title: "Λήψη Lightning",
+    create_invoice_title: "Δημιουργία Τιμολογίου",
     inputs: {
       amount: {
         label: "Ποσό ({ ticker }) *",
@@ -956,7 +957,7 @@ export default {
     },
   },
   SendTokenDialog: {
-    title: "Αποστολή { value }",
+    title: "Αποστολή Ecash",
     title_ecash_text: "Ecash",
     badge_offline_text: "Εκτός σύνδεσης",
     inputs: {
@@ -1045,7 +1046,7 @@ export default {
     },
   },
   ReceiveTokenDialog: {
-    title: "Λήψη { value }",
+    title: "Λήψη Ecash",
     title_ecash_text: "Ecash",
     inputs: {
       tokens_base64: {

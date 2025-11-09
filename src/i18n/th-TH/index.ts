@@ -903,7 +903,8 @@ export default {
     },
   },
   InvoiceDetailDialog: {
-    title: "สร้างใบแจ้งหนี้",
+    title: "รับ Lightning",
+    create_invoice_title: "สร้างใบแจ้งหนี้",
     inputs: {
       amount: {
         label: "จำนวน ({ ticker }) *",
@@ -946,7 +947,7 @@ export default {
     },
   },
   SendTokenDialog: {
-    title: "ส่ง { value }",
+    title: "ส่ง Ecash",
     title_ecash_text: "Ecash",
     badge_offline_text: "ออฟไลน์",
     inputs: {
@@ -1034,7 +1035,7 @@ export default {
     },
   },
   ReceiveTokenDialog: {
-    title: "รับ { value }",
+    title: "รับ Ecash",
     title_ecash_text: "Ecash",
     inputs: {
       tokens_base64: {

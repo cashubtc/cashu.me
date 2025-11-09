@@ -902,7 +902,8 @@ export default {
     },
   },
   InvoiceDetailDialog: {
-    title: "請求書の作成",
+    title: "Lightningを受け取る",
+    create_invoice_title: "請求書の作成",
     inputs: {
       amount: {
         label: "金額 ({ ticker }) *",
@@ -945,7 +946,7 @@ export default {
     },
   },
   SendTokenDialog: {
-    title: "{ value }を送る",
+    title: "Ecashを送る",
     title_ecash_text: "Ecash",
     badge_offline_text: "オフライン",
     inputs: {
@@ -1034,7 +1035,7 @@ export default {
     },
   },
   ReceiveTokenDialog: {
-    title: "{ value }を受け取る",
+    title: "Ecashを受け取る",
     title_ecash_text: "Ecash",
     inputs: {
       tokens_base64: {
