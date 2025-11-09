@@ -39,7 +39,7 @@
         <div class="col column items-center justify-start q-px-lg">
           <div class="row justify-center full-width">
             <div
-              class="col-12 col-sm-11 col-md-8 q-px-lg q-mb-sm"
+              class="col-12 col-sm-11 col-md-8 q-px-sm q-mb-sm"
               style="max-width: 600px"
             >
               <!-- <div class="row items-center no-wrap q-pb-sm">
