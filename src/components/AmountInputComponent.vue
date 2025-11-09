@@ -1,32 +1,39 @@
 <template>
   <div class="amount-input-root">
     <slot name="overlay" />
-    <div
-      ref="amountDisplayRef"
-      class="amount-display text-weight-bold text-center"
-      :class="{ 'text-grey-6': muted }"
-    >
-      {{ primaryAmountDisplay }}
-    </div>
+    <transition name="swap-primary">
+      <div
+        :key="`primary-${fiatMode}`"
+        ref="amountDisplayRef"
+        class="amount-display text-weight-bold text-center"
+        :class="{ 'text-grey-6': muted }"
+      >
+        {{ primaryAmountDisplay }}
+      </div>
+    </transition>
     <div v-if="showFiatConversion" class="fiat-container">
       <div class="fiat-wrapper">
-        <div
-          class="fiat-display text-grey-6"
-          :class="{ invisible: !secondaryDisplay }"
-          @click="toggleFiatMode"
-        >
-          {{ secondaryDisplay || " " }}
-        </div>
-        <q-icon
-          v-if="showSwap"
-          name="swap_vert"
-          size="24px"
-          class="fiat-icon text-grey-6 cursor-pointer"
-          @click="toggleFiatMode"
-          aria-label="Swap amount/fiat input mode"
-          :aria-pressed="fiatMode ? 'true' : 'false'"
-          role="button"
-        />
+        <transition name="swap-secondary">
+          <div :key="`secondary-${fiatMode}`" class="fiat-wrapper-content">
+            <div
+              class="fiat-display text-grey-6"
+              :class="{ invisible: !secondaryDisplay }"
+              @click="toggleFiatMode"
+            >
+              {{ secondaryDisplay || " " }}
+            </div>
+            <q-icon
+              v-if="showSwap"
+              name="swap_vert"
+              size="24px"
+              class="fiat-icon text-grey-6 cursor-pointer"
+              @click="toggleFiatMode"
+              aria-label="Swap amount/fiat input mode"
+              :aria-pressed="fiatMode ? 'true' : 'false'"
+              role="button"
+            />
+          </div>
+        </transition>
       </div>
     </div>
   </div>
@@ -375,6 +382,16 @@ export default defineComponent({
   position: relative;
   display: inline-flex;
   align-items: center;
+  width: 100%;
+  justify-content: center;
+  min-height: 18px;
+}
+.fiat-wrapper-content {
+  position: absolute;
+  left: 50%;
+  display: inline-flex;
+  align-items: center;
+  transform: translateX(-50%);
 }
 .fiat-display {
   font-size: 20px;
@@ -387,5 +404,49 @@ export default defineComponent({
 }
 .invisible {
   visibility: hidden;
+}
+/* Primary amount swap animation (top position) - Apple-like */
+.swap-primary-enter-active {
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform-origin: center;
+}
+.swap-primary-leave-active {
+  transition: all 0.25s cubic-bezier(0.55, 0.06, 0.68, 0.19);
+  transform-origin: center;
+}
+.swap-primary-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) translateY(40px) scale(0.85);
+}
+.swap-primary-enter-from {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-40px) scale(0.85);
+}
+.swap-primary-enter-to,
+.swap-primary-leave-from {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+/* Secondary amount swap animation (bottom position) - Apple-like */
+.swap-secondary-enter-active {
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform-origin: center;
+}
+.swap-secondary-leave-active {
+  transition: all 0.25s cubic-bezier(0.55, 0.06, 0.68, 0.19);
+  transform-origin: center;
+}
+.swap-secondary-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-40px) scale(0.85);
+}
+.swap-secondary-enter-from {
+  opacity: 0;
+  transform: translateX(-50%) translateY(40px) scale(0.85);
+}
+.swap-secondary-enter-to,
+.swap-secondary-leave-from {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1);
 }
 </style>
