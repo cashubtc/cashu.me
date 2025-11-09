@@ -108,6 +108,12 @@
                       )
                     }}
                   </div>
+                  <MeltQuoteInformation
+                    v-if="showMeltQuoteInformation"
+                    class="q-mt-sm"
+                    :melt-quote="payInvoiceData.meltQuote.response"
+                    :mint-url="activeMintUrl"
+                  />
                 </div>
                 <div v-else-if="payInvoiceData.meltQuote.error != ''">
                   <div class="text-h6 q-my-none">
@@ -386,12 +392,12 @@ import { usePriceStore } from "src/stores/price";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
 import MultinutPaymentDialog from "./MultinutPaymentDialog.vue";
+import MeltQuoteInformation from "components/MeltQuoteInformation.vue";
 
 import * as _ from "underscore";
 import { Scan as ScanIcon } from "lucide-vue-next";
 
 declare const windowMixin: any;
-declare const formatCurrency: any;
 
 export default defineComponent({
   name: "PayInvoiceDialog",
@@ -400,6 +406,7 @@ export default defineComponent({
     ChooseMint,
     MultinutPaymentDialog,
     ScanIcon,
+    MeltQuoteInformation,
   },
   props: {},
   data: function () {
@@ -455,6 +462,32 @@ export default defineComponent({
     hasCameraAvailable: function (): boolean {
       return Boolean((useCameraStore() as any).hasCamera);
     },
+    showMeltQuoteInformation: function (): boolean {
+      const quote = this.payInvoiceData?.meltQuote?.response;
+      if (!quote) {
+        return false;
+      }
+      if (!quote.quote) {
+        return false;
+      }
+      const hasAmount = typeof quote.amount === "number" && quote.amount > 0;
+      const hasFeeReserve =
+        typeof quote.fee_reserve === "number" && quote.fee_reserve > 0;
+      const feePaidRaw = (quote as any).fee_paid;
+      const hasFeePaid =
+        (typeof feePaidRaw === "number" && Number.isFinite(feePaidRaw)) ||
+        (typeof feePaidRaw === "string" && feePaidRaw.trim() !== "");
+      const paidRaw =
+        (quote as any).paid_at ??
+        (quote as any).paid_timestamp ??
+        (quote as any).paid_time ??
+        (quote as any).paid;
+      const hasPaidTimestamp =
+        paidRaw !== undefined &&
+        paidRaw !== null &&
+        typeof paidRaw !== "boolean";
+      return hasAmount || hasFeeReserve || hasFeePaid || hasPaidTimestamp;
+    },
     canPasteFromClipboard: function () {
       return (
         window.isSecureContext &&
@@ -493,6 +526,9 @@ export default defineComponent({
     ]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+    formatCurrency(value: number, currency: string, showBalance = false) {
+      return useUiStore().formatCurrency(value, currency, showBalance);
+    },
     canPay: function () {
       if (!this.payInvoiceData.invoice) return false;
       return (
