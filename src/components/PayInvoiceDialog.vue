@@ -60,7 +60,7 @@
         <!-- Mint selection (match SendTokenDialog layout) -->
         <div class="row justify-center">
           <div
-            class="col-12 col-sm-11 col-md-8 q-px-lg q-mb-sm"
+            class="col-12 col-sm-11 col-md-8 q-px-sm q-mb-sm"
             style="max-width: 600px"
           >
             <ChooseMint />
@@ -68,10 +68,12 @@
         </div>
 
         <!-- Content area -->
-        <div class="col column items-center justify-start q-px-lg">
+        <div
+          class="col column items-center justify-start q-px-lg scroll-container"
+        >
           <div class="row justify-center full-width">
             <div
-              class="col-12 col-sm-11 col-md-8 q-px-lg q-mb-sm"
+              class="col-12 col-sm-11 col-md-8 q-px-sm q-mb-sm"
               style="max-width: 600px"
             >
               <!-- INVOICE CONTENT -->
@@ -245,37 +247,34 @@
 
               <!-- INPUT CONTENT -->
               <div v-else>
-                <div class="row items-center no-wrap q-mb-xl"></div>
-                <q-form
-                  v-if="!camera.show"
-                  class="q-gutter-md relative-container"
-                >
-                  <q-input
-                    ref="parseDialogInput"
-                    round
-                    outlined
-                    class="request-input"
-                    spellcheck="false"
-                    v-model.trim="payInvoiceData.input.request"
-                    type="textarea"
-                    :label="
-                      $t(
-                        'PayInvoiceDialog.input_data.inputs.invoice_data.label'
-                      )
-                    "
-                    autofocus
-                    @update:model-value="
-                      decodeAndQuote(payInvoiceData.input.request)
-                    "
-                  >
-                    <q-icon
-                      v-if="payInvoiceData.input.request"
-                      color="dark"
-                      name="close"
-                      class="floating-button cursor-pointer"
-                      @click="payInvoiceData.input.request = ''"
-                    />
-                  </q-input>
+                <q-form v-if="!camera.show" class="q-gutter-md">
+                  <div class="relative-container">
+                    <q-input
+                      ref="parseDialogInput"
+                      round
+                      class="q-mb-lg q-mt-md q-mx-xs cashub-nowrap token-input"
+                      spellcheck="false"
+                      v-model.trim="payInvoiceData.input.request"
+                      type="textarea"
+                      :label="
+                        $t(
+                          'PayInvoiceDialog.input_data.inputs.invoice_data.label'
+                        )
+                      "
+                      autofocus
+                      @update:model-value="
+                        decodeAndQuote(payInvoiceData.input.request)
+                      "
+                    >
+                      <q-icon
+                        v-if="payInvoiceData.input.request"
+                        color="dark"
+                        name="close"
+                        class="floating-button cursor-pointer"
+                        @click="payInvoiceData.input.request = ''"
+                      />
+                    </q-input>
+                  </div>
                   <div
                     class="column q-mt-sm"
                     v-if="!payInvoiceData.input.request"
@@ -609,13 +608,49 @@ export default defineComponent({
   border-top-right-radius: 20px;
 }
 
-.request-input {
+.cashub-nowrap {
   word-break: break-all;
   -webkit-hyphens: none;
   -moz-hyphens: none;
   hyphens: none;
   font-size: 0.9em;
   font-family: monospace;
+}
+
+.token-input {
+  // rounded input border
+  height: 180px;
+  border-radius: 10px;
+  border: 1px solid $grey-2;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-family: monospace;
+  background-color: var(--q-background);
+  color: var(--q-text);
+  text-decoration: none !important;
+  &:focus {
+    border-color: $primary;
+  }
+  // hide inner border from q-input
+  &::before {
+    display: none;
+  }
+  &::after {
+    display: none;
+  }
+  &:disabled {
+    background-color: var(--q-background-disabled);
+    color: var(--q-text-disabled);
+  }
+  &:hover {
+    background-color: var(--q-background-hover);
+    color: var(--q-text-hover);
+  }
+}
+
+.scroll-container {
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .relative-container {
