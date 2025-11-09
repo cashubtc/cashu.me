@@ -16,7 +16,7 @@
           <div class="detail-name">Fee</div>
         </div>
         <div class="detail-value">
-          {{ formatCurrency(receiveFee, tokenUnit) }}
+          {{ formatCurrency(receiveFee, tokenUnit, true) }}
         </div>
       </div>
 
@@ -147,7 +147,7 @@ export default defineComponent({
       return proofs.flat().reduce((sum, el) => (sum += el.amount), 0);
     },
     displayUnit: function () {
-      let display = this.formatCurrency(this.sumProofs, this.tokenUnit);
+      let display = this.formatCurrency(this.sumProofs, this.tokenUnit, true);
       return display;
     },
     tokenUnit: function () {

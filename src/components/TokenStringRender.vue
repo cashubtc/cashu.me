@@ -94,7 +94,7 @@ export default defineComponent({
 
     const displayAmount = computed(() => {
       if (!tokenAmount.value || !tokenUnit.value) return "";
-      return uiStore.formatCurrency(tokenAmount.value, tokenUnit.value);
+      return uiStore.formatCurrency(tokenAmount.value, tokenUnit.value, true);
     });
 
     // Animation for truncated token string
