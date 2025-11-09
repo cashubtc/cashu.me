@@ -52,11 +52,7 @@
             'p2pk-locked-me': isLockedToUs(proofsToShow),
           }"
         >
-          {{
-            isLockedToUs(proofsToShow)
-              ? "Locked to you"
-              : "Locked to someone else"
-          }}
+          {{ isLockedToUs(proofsToShow) ? "Locked to you" : "Locked" }}
         </div>
       </div>
 

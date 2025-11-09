@@ -493,13 +493,6 @@ export default defineComponent({
     ]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
-    formatCurrency: function (...args: any[]) {
-      try {
-        return (formatCurrency as any)(...args);
-      } catch {
-        return args?.[0];
-      }
-    },
     canPay: function () {
       if (!this.payInvoiceData.invoice) return false;
       return (
