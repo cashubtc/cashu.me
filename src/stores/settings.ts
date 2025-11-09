@@ -13,7 +13,7 @@ export const useSettingsStore = defineStore("settings", {
     return {
       getBitcoinPrice: useLocalStorage<boolean>(
         "cashu.settings.getBitcoinPrice",
-        false
+        true
       ),
       bitcoinPriceCurrency: useLocalStorage<string>(
         "cashu.settings.bitcoinPriceCurrency",
