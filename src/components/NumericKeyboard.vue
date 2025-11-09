@@ -51,7 +51,7 @@
           >0</q-btn
         >
         <q-btn flat :ripple="false" class="text-h5" @click="backspace">
-          <q-icon name="backspace" size="md" />
+          <q-icon name="chevron_left" size="md" />
         </q-btn>
         <q-btn v-if="!hideClose" flat :ripple="false" @click="closeKeyboard">{{
           $t("NumericKeyboard.actions.close.label")
@@ -252,7 +252,7 @@ export default defineComponent({
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
   width: 100%;
-  max-width: 360px;
+  max-width: 420px;
   margin: 0 auto;
 }
 
