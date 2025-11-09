@@ -72,266 +72,276 @@
                 </div>
               </div> -->
 
-              <!-- Token input (when not yet decodable) -->
-              <div
-                class="relative-container"
-                v-if="!decodeToken(receiveData.tokensBase64)"
-              >
-                <q-input
-                  round
-                  outlined
-                  spellcheck="false"
-                  v-model="receiveData.tokensBase64"
-                  :label="$t('ReceiveTokenDialog.inputs.tokens_base64.label')"
-                  type="textarea"
-                  autofocus
-                  class="q-mb-lg cashub-nowrap"
-                  @keyup.enter="receiveIfDecodes"
-                >
-                  <q-icon
-                    v-if="receiveData.tokensBase64"
-                    color="dark"
-                    name="close"
-                    class="floating-button cursor-pointer"
-                    @click="receiveData.tokensBase64 = ''"
-                  />
-                </q-input>
-              </div>
+              <transition appear enter-active-class="animated fadeIn">
+                <div v-if="tokenDecodesCorrectly" key="token-valid">
+                  <!-- VALID TOKEN content -->
+                  <!-- print token in fixed width font -->
+                  <div class="row q-pt-md">
+                    <div class="col-12">
+                      <TokenStringRender
+                        :token-string="receiveData.tokensBase64"
+                        :max-length="maxLengthForTokenString"
+                      />
+                    </div>
+                  </div>
 
-              <!-- if !tokenDecodesCorrectly, display error -->
-              <q-btn
-                v-if="receiveData.tokensBase64.length && !tokenDecodesCorrectly"
-                disabled
-                color="yellow"
-                text-color="black"
-                rounded
-                unelevated
-                class="q-ml-xs q-mr-sm"
-                :label="$t('ReceiveTokenDialog.errors.invalid_token.label')"
-              ></q-btn>
+                  <div class="row q-pt-md">
+                    <div class="col-12">
+                      <TokenInformation
+                        :encodedToken="receiveData.tokensBase64"
+                        :hide-amount="true"
+                      />
+                    </div>
+                  </div>
 
-              <!-- EMPTY INPUT helper actions -->
-              <div
-                v-if="!receiveData.tokensBase64.length"
-                class="column q-mt-sm"
-              >
-                <div class="row q-gutter-sm">
-                  <div class="col">
-                    <q-btn
-                      v-if="canPasteFromClipboard"
-                      outline
-                      rounded
-                      size="lg"
-                      class="full-width"
-                      @click="pasteToParseDialog(true)"
+                  <!-- swap mint selection -->
+                  <div
+                    class="row q-pl-md q-pt-sm justify-center"
+                    v-if="swapSelected"
+                  >
+                    <div class="col-6 q-px-lg q-mb-sm">
+                      <q-icon
+                        name="arrow_downward"
+                        class="q-mr-xs"
+                        color="positive"
+                      />
+                      <i18n-t
+                        keypath="ReceiveTokenDialog.actions.swap.caption"
+                        tag="span"
+                      >
+                        <template v-slot:value>
+                          <strong>{{
+                            formatCurrency(swapToMintAmount, tokenUnit)
+                          }}</strong>
+                        </template>
+                      </i18n-t>
+                    </div>
+                    <div class="col-6 q-px-lg q-mb-sm">
+                      <q-btn
+                        class="full-width"
+                        color="grey"
+                        flat
+                        @click="swapSelected = false"
+                        :disable="swapBlocking"
+                      >
+                        <q-icon name="close" class="q-pr-sm" />
+                        {{ $t("ReceiveTokenDialog.actions.cancel_swap.label") }}
+                        <q-tooltip>{{
+                          $t(
+                            "ReceiveTokenDialog.actions.cancel_swap.tooltip_text"
+                          )
+                        }}</q-tooltip>
+                      </q-btn>
+                    </div>
+                  </div>
+                  <div class="row q-pt-xs justify-center" v-if="swapSelected">
+                    <div
+                      class="col-12 q-px-lg q-mb-sm"
+                      style="max-width: 600px"
+                    >
+                      <ChooseMint />
+                    </div>
+                  </div>
+                </div>
+                <div v-else key="token-empty" class="column">
+                  <!-- Token input (when not yet decodable) -->
+                  <div class="relative-container">
+                    <q-input
+                      round
+                      spellcheck="false"
+                      v-model="receiveData.tokensBase64"
+                      :label="
+                        $t('ReceiveTokenDialog.inputs.tokens_base64.label')
+                      "
+                      type="textarea"
+                      autofocus
+                      class="q-mb-lg q-mt-md q-mx-xs cashub-nowrap token-input"
+                      @keyup.enter="receiveIfDecodes"
                     >
                       <q-icon
-                        name="content_paste"
-                        size="1.2em"
-                        class="q-pr-sm"
+                        v-if="receiveData.tokensBase64"
+                        color="dark"
+                        name="close"
+                        class="floating-button cursor-pointer"
+                        @click="receiveData.tokensBase64 = ''"
                       />
-                      {{ $t("ReceiveTokenDialog.actions.paste.label") }}
-                    </q-btn>
+                    </q-input>
                   </div>
-                  <div class="col">
+
+                  <!-- Display error for invalid token -->
+                  <q-btn
+                    v-if="
+                      receiveData.tokensBase64.length && !tokenDecodesCorrectly
+                    "
+                    disabled
+                    color="yellow"
+                    text-color="black"
+                    rounded
+                    unelevated
+                    class="q-ml-xs q-mr-sm"
+                    :label="$t('ReceiveTokenDialog.errors.invalid_token.label')"
+                  ></q-btn>
+
+                  <!-- EMPTY INPUT helper actions -->
+                  <div
+                    v-if="!receiveData.tokensBase64.length"
+                    class="column q-mt-sm"
+                  >
+                    <div class="row q-gutter-sm">
+                      <div class="col">
+                        <q-btn
+                          v-if="canPasteFromClipboard"
+                          outline
+                          rounded
+                          size="lg"
+                          class="full-width"
+                          @click="pasteToParseDialog(true)"
+                        >
+                          <q-icon
+                            name="content_paste"
+                            size="1.2em"
+                            class="q-pr-sm"
+                          />
+                          {{ $t("ReceiveTokenDialog.actions.paste.label") }}
+                        </q-btn>
+                      </div>
+                      <div class="col">
+                        <q-btn
+                          v-if="hasCamera"
+                          rounded
+                          outline
+                          size="lg"
+                          class="full-width"
+                          @click="showCamera"
+                        >
+                          <ScanIcon size="1.2em" />
+                          <span class="q-pl-sm">{{
+                            $t("ReceiveTokenDialog.actions.scan.label")
+                          }}</span>
+                        </q-btn>
+                      </div>
+                    </div>
                     <q-btn
-                      v-if="hasCamera"
-                      rounded
-                      outline
-                      size="lg"
-                      class="full-width"
-                      @click="showCamera"
+                      unelevated
+                      dense
+                      class="q-mx-sm"
+                      v-if="ndefSupported"
+                      :loading="scanningCard"
+                      :disabled="scanningCard"
+                      @click="toggleScanner"
                     >
-                      <ScanIcon size="1.2em" />
-                      <span class="q-pl-sm">{{
-                        $t("ReceiveTokenDialog.actions.scan.label")
-                      }}</span>
-                    </q-btn>
-                  </div>
-                </div>
-                <q-btn
-                  unelevated
-                  dense
-                  class="q-mx-sm"
-                  v-if="ndefSupported"
-                  :loading="scanningCard"
-                  :disabled="scanningCard"
-                  @click="toggleScanner"
-                >
-                  <NfcIcon class="q-pr-xs" />
-                  <q-tooltip>{{
-                    ndefSupported
-                      ? $t(
-                          "ReceiveTokenDialog.actions.nfc.tooltips.ndef_supported_text"
-                        )
-                      : $t(
-                          "ReceiveTokenDialog.actions.nfc.tooltips.ndef_unsupported_text"
-                        )
-                  }}</q-tooltip>
-                  <template v-slot:loading>
-                    <q-spinner @click="toggleScanner"> </q-spinner>
-                  </template>
-                  {{ $t("ReceiveTokenDialog.actions.nfc.label") }}
-                </q-btn>
-              </div>
-
-              <!-- VALID TOKEN content -->
-              <div v-if="tokenDecodesCorrectly">
-                <!-- print token in fixed width font -->
-                <div class="row q-pt-md">
-                  <div class="col-12">
-                    <TokenStringRender
-                      :token-string="receiveData.tokensBase64"
-                      :max-length="maxLengthForTokenString"
-                    />
-                  </div>
-                </div>
-
-                <div class="row q-pt-md">
-                  <div class="col-12">
-                    <TokenInformation
-                      :encodedToken="receiveData.tokensBase64"
-                      :hide-amount="true"
-                    />
-                  </div>
-                </div>
-
-                <!-- swap mint selection -->
-                <div
-                  class="row q-pl-md q-pt-sm justify-center"
-                  v-if="swapSelected"
-                >
-                  <div class="col-6 q-px-lg q-mb-sm">
-                    <q-icon
-                      name="arrow_downward"
-                      class="q-mr-xs"
-                      color="positive"
-                    />
-                    <i18n-t
-                      keypath="ReceiveTokenDialog.actions.swap.caption"
-                      tag="span"
-                    >
-                      <template v-slot:value>
-                        <strong>{{
-                          formatCurrency(swapToMintAmount, tokenUnit)
-                        }}</strong>
-                      </template>
-                    </i18n-t>
-                  </div>
-                  <div class="col-6 q-px-lg q-mb-sm">
-                    <q-btn
-                      class="full-width"
-                      color="grey"
-                      flat
-                      @click="swapSelected = false"
-                      :disable="swapBlocking"
-                    >
-                      <q-icon name="close" class="q-pr-sm" />
-                      {{ $t("ReceiveTokenDialog.actions.cancel_swap.label") }}
+                      <NfcIcon class="q-pr-xs" />
                       <q-tooltip>{{
-                        $t(
-                          "ReceiveTokenDialog.actions.cancel_swap.tooltip_text"
-                        )
+                        ndefSupported
+                          ? $t(
+                              "ReceiveTokenDialog.actions.nfc.tooltips.ndef_supported_text"
+                            )
+                          : $t(
+                              "ReceiveTokenDialog.actions.nfc.tooltips.ndef_unsupported_text"
+                            )
                       }}</q-tooltip>
+                      <template v-slot:loading>
+                        <q-spinner @click="toggleScanner"> </q-spinner>
+                      </template>
+                      {{ $t("ReceiveTokenDialog.actions.nfc.label") }}
                     </q-btn>
                   </div>
                 </div>
-                <div class="row q-pt-xs justify-center" v-if="swapSelected">
-                  <div class="col-12 q-px-lg q-mb-sm" style="max-width: 600px">
-                    <ChooseMint />
-                  </div>
-                </div>
-              </div>
+              </transition>
             </div>
           </div>
         </div>
 
         <!-- Bottom fixed receive action -->
-        <div class="bottom-panel" v-if="tokenDecodesCorrectly">
-          <div class="row justify-center q-pb-lg q-pt-sm">
-            <div
-              class="col-12 col-sm-11 col-md-8 q-px-md"
-              style="max-width: 600px"
-            >
-              <template v-if="swapSelected">
-                <q-btn
-                  class="full-width"
-                  unelevated
-                  size="lg"
-                  @click="handleSwapToTrustedMint"
-                  color="primary"
-                  rounded
-                  :loading="swapBlocking"
-                  :disabled="activeMintUrl == tokenMint"
-                >
-                  <q-icon name="swap_horiz" class="q-pr-sm" />
-                  {{ $t("ReceiveTokenDialog.actions.confirm_swap.label") }}
-                  <template v-slot:loading>
-                    <q-spinner-hourglass size="xs" />
+        <transition appear enter-active-class="animated fadeIn">
+          <div class="bottom-panel" v-if="tokenDecodesCorrectly">
+            <div class="row justify-center q-pb-lg q-pt-sm">
+              <div
+                class="col-12 col-sm-11 col-md-8 q-px-md"
+                style="max-width: 600px"
+              >
+                <template v-if="swapSelected">
+                  <q-btn
+                    class="full-width"
+                    unelevated
+                    size="lg"
+                    @click="handleSwapToTrustedMint"
+                    color="primary"
+                    rounded
+                    :loading="swapBlocking"
+                    :disabled="activeMintUrl == tokenMint"
+                  >
+                    <q-icon name="swap_horiz" class="q-pr-sm" />
+                    {{ $t("ReceiveTokenDialog.actions.confirm_swap.label") }}
+                    <template v-slot:loading>
+                      <q-spinner-hourglass size="xs" />
+                      {{
+                        $t(
+                          "ReceiveTokenDialog.actions.confirm_swap.in_progress"
+                        )
+                      }}
+                    </template>
+                    <q-tooltip>{{
+                      $t("ReceiveTokenDialog.actions.confirm_swap.tooltip_text")
+                    }}</q-tooltip>
+                  </q-btn>
+                </template>
+                <template v-else>
+                  <q-btn
+                    @click="addPendingTokenToHistory(receiveData.tokensBase64)"
+                    color="primary"
+                    rounded
+                    outline
+                    class="full-width q-mb-md"
+                  >
+                    {{ $t("ReceiveTokenDialog.actions.later.label") }}
+                    <q-tooltip>{{
+                      $t("ReceiveTokenDialog.actions.later.tooltip_text")
+                    }}</q-tooltip>
+                  </q-btn>
+                  <q-btn
+                    v-if="enableReceiveSwaps && activeMintUrl && mints.length"
+                    @click="swapSelected = true"
+                    color="primary"
+                    rounded
+                    outline
+                    class="full-width q-mb-md"
+                  >
+                    {{ $t("ReceiveTokenDialog.actions.swap.label") }}
+                    <q-tooltip>{{
+                      $t("ReceiveTokenDialog.actions.swap.tooltip_text")
+                    }}</q-tooltip>
+                  </q-btn>
+                  <q-btn
+                    class="full-width"
+                    unelevated
+                    size="lg"
+                    @click="receiveIfDecodes"
+                    color="primary"
+                    rounded
+                    :disabled="addMintBlocking"
+                    :loading="swapBlocking"
+                  >
                     {{
-                      $t("ReceiveTokenDialog.actions.confirm_swap.in_progress")
+                      knowThisMint
+                        ? addMintBlocking
+                          ? $t(
+                              "ReceiveTokenDialog.actions.receive.label_adding_mint"
+                            )
+                          : $t(
+                              "ReceiveTokenDialog.actions.receive.label_known_mint"
+                            )
+                        : $t("ReceiveTokenDialog.actions.receive.label")
                     }}
-                  </template>
-                  <q-tooltip>{{
-                    $t("ReceiveTokenDialog.actions.confirm_swap.tooltip_text")
-                  }}</q-tooltip>
-                </q-btn>
-              </template>
-              <template v-else>
-                <q-btn
-                  @click="addPendingTokenToHistory(receiveData.tokensBase64)"
-                  color="primary"
-                  rounded
-                  outline
-                  class="full-width q-mb-md"
-                >
-                  {{ $t("ReceiveTokenDialog.actions.later.label") }}
-                  <q-tooltip>{{
-                    $t("ReceiveTokenDialog.actions.later.tooltip_text")
-                  }}</q-tooltip>
-                </q-btn>
-                <q-btn
-                  v-if="enableReceiveSwaps && activeMintUrl && mints.length"
-                  @click="swapSelected = true"
-                  color="primary"
-                  rounded
-                  outline
-                  class="full-width q-mb-md"
-                >
-                  {{ $t("ReceiveTokenDialog.actions.swap.label") }}
-                  <q-tooltip>{{
-                    $t("ReceiveTokenDialog.actions.swap.tooltip_text")
-                  }}</q-tooltip>
-                </q-btn>
-                <q-btn
-                  class="full-width"
-                  unelevated
-                  size="lg"
-                  @click="receiveIfDecodes"
-                  color="primary"
-                  rounded
-                  :disabled="addMintBlocking"
-                  :loading="swapBlocking"
-                >
-                  {{
-                    knowThisMint
-                      ? addMintBlocking
-                        ? $t(
-                            "ReceiveTokenDialog.actions.receive.label_adding_mint"
-                          )
-                        : $t(
-                            "ReceiveTokenDialog.actions.receive.label_known_mint"
-                          )
-                      : $t("ReceiveTokenDialog.actions.receive.label")
-                  }}
-                  <template v-slot:loading>
-                    <q-spinner-hourglass />
-                  </template>
-                </q-btn>
-              </template>
+                    <template v-slot:loading>
+                      <q-spinner-hourglass />
+                    </template>
+                  </q-btn>
+                </template>
+              </div>
             </div>
           </div>
-        </div>
+        </transition>
       </div>
     </q-card>
   </q-dialog>
@@ -709,5 +719,36 @@ export default defineComponent({
   background: var(--q-color-grey-1);
   box-shadow: 0 -8px 16px rgba(0, 0, 0, 0.05);
   padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.token-input {
+  // rounded input border
+  height: 180px;
+  border-radius: 10px;
+  border: 1px solid $grey-2;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-family: monospace;
+  background-color: var(--q-background);
+  color: var(--q-text);
+  text-decoration: none !important;
+  &:focus {
+    border-color: $primary;
+  }
+  // hide inner border from q-input
+  &::before {
+    display: none;
+  }
+  &::after {
+    display: none;
+  }
+  &:disabled {
+    background-color: var(--q-background-disabled);
+    color: var(--q-text-disabled);
+  }
+  &:hover {
+    background-color: var(--q-background-hover);
+    color: var(--q-text-hover);
+  }
 }
 </style>

@@ -35,7 +35,7 @@ export default {
         label: "Send",
       },
       swap: {
-        label: "Receive to trusted mint",
+        label: "Swap",
       },
       update: {
         label: "Update",
@@ -878,6 +878,11 @@ export default {
     swap: {
       title: "Swap",
       overline: "Multimint Swaps",
+      actions: {
+        receove_to_trusted_mint: {
+          label: "Receive to trusted mint",
+        },
+      },
       caption:
         "Swap funds between mints via Lightning. Note: Leave room for potential Lightning fees. If the incoming payment does not succeed, check the invoice manually.",
       inputs: {
@@ -1080,7 +1085,7 @@ export default {
         label_adding_mint: "Adding mint…",
       },
       swap: {
-        label: "@:global.actions.swap.label",
+        label: "Receive to trusted mint",
         tooltip_text: "Swap to a trusted mint",
         caption: "Swap { value }",
       },
