@@ -2,306 +2,332 @@
   <q-dialog
     v-model="payInvoiceData.show"
     @hide="closeParseDialog"
-    position="top"
     v-if="!camera.show"
-    :maximized="$q.screen.lt.sm"
+    maximized
     backdrop-filter="blur(2px) brightness(60%)"
     transition-show="fade"
     transition-hide="fade"
     no-backdrop-dismiss
-    full-height
   >
-    <q-card class="q-pa-lg q-pt-xl qcard">
-      <div v-if="payInvoiceData.invoice">
-        <div class="row items-center no-wrap q-mb-sm">
-          <div class="col-10">
+    <q-card class="q-pa-none q-pt-none qcard">
+      <div
+        class="column fit pay-fullscreen"
+        :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
+      >
+        <!-- Header -->
+        <div class="row items-center justify-between q-pa-md">
+          <q-btn v-close-popup flat round icon="close" color="grey" />
+          <div class="row items-center q-gutter-sm">
+            <q-btn
+              flat
+              dense
+              size="lg"
+              color="primary"
+              @click="toggleUnit()"
+              :label="activeUnitLabel"
+            />
+          </div>
+        </div>
+
+        <!-- Content area -->
+        <div class="col column items-center justify-start q-px-lg">
+          <div class="row justify-center full-width">
             <div
-              v-if="
-                payInvoiceData.meltQuote.response &&
-                payInvoiceData.meltQuote.response.amount > 0
-              "
+              class="col-12 col-sm-11 col-md-8 q-px-lg q-mb-sm"
+              style="max-width: 600px"
             >
-              <h6 class="q-my-none inline-block">
-                <i18n-t keypath="PayInvoiceDialog.invoice.title">
-                  <template v-slot:value>
+              <!-- Mint selection -->
+              <div class="q-mb-md">
+                <ChooseMint />
+              </div>
+
+              <!-- INVOICE CONTENT -->
+              <div v-if="payInvoiceData.invoice">
+                <div
+                  v-if="
+                    payInvoiceData.meltQuote.response &&
+                    payInvoiceData.meltQuote.response.amount > 0
+                  "
+                  class="q-mt-sm q-mb-md"
+                >
+                  <div class="text-h4 text-weight-bold q-mt-xs q-mb-xs">
+                    <i18n-t keypath="PayInvoiceDialog.invoice.title">
+                      <template v-slot:value>
+                        {{
+                          formatCurrency(
+                            payInvoiceData.meltQuote.response.amount,
+                            activeUnit,
+                            true
+                          )
+                        }}
+                      </template>
+                    </i18n-t>
+                  </div>
+                  <div
+                    v-if="bitcoinPrice && activeUnit == 'sat'"
+                    class="text-subtitle2 text-grey-6 q-ml-xs"
+                  >
                     {{
                       formatCurrency(
-                        payInvoiceData.meltQuote.response.amount,
-                        activeUnit,
+                        (currentCurrencyPrice / 100000000) *
+                          payInvoiceData.meltQuote.response.amount,
+                        bitcoinPriceCurrency,
                         true
                       )
                     }}
-                  </template>
-                </i18n-t>
-              </h6>
-              <span
-                v-if="bitcoinPrice && activeUnit == 'sat'"
-                class="q-ml-xs text-subtitle2 text-grey-6"
-              >
-                ({{
-                  formatCurrency(
-                    (currentCurrencyPrice / 100000000) *
-                      payInvoiceData.meltQuote.response.amount,
-                    bitcoinPriceCurrency,
-                    true
-                  )
-                }})
-              </span>
+                  </div>
+                </div>
+                <div v-else-if="payInvoiceData.meltQuote.error != ''">
+                  <div class="text-h6 q-my-none">
+                    {{ payInvoiceData.meltQuote.error }}
+                  </div>
+                </div>
+                <div v-else>
+                  <div class="text-h6 q-my-none">
+                    {{ $t("PayInvoiceDialog.invoice.processing_info_text") }}
+                  </div>
+                </div>
+                <p class="text-wrap q-mt-md">
+                  <strong v-if="payInvoiceData.invoice.description"
+                    >{{ $t("PayInvoiceDialog.invoice.memo.label") }}:</strong
+                  >
+                  {{ payInvoiceData.invoice.description }}<br />
+                </p>
+              </div>
+
+              <!-- LNURL PAY CONTENT -->
+              <div v-else-if="payInvoiceData.lnurlpay" class="q-pt-sm">
+                <q-form @submit="lnurlPaySecond" class="q-gutter-md">
+                  <p
+                    v-if="
+                      payInvoiceData.lnurlpay.maxSendable ==
+                      payInvoiceData.lnurlpay.minSendable
+                    "
+                    class="q-my-none text-h6 text-center"
+                  >
+                    <i18n-t
+                      keypath="PayInvoiceDialog.lnurlpay.amount_exact_label"
+                    >
+                      <template v-slot:payee>
+                        <b>{{ payInvoiceData.lnurlpay.domain }}</b>
+                      </template>
+                      <template v-slot:value>
+                        {{ payInvoiceData.lnurlpay.maxSendable / 1000 }}
+                      </template>
+                      <template v-slot:ticker>
+                        {{ tickerShort }}
+                      </template>
+                    </i18n-t>
+                  </p>
+                  <p v-else class="q-my-none text-h6 text-center">
+                    <i18n-t
+                      keypath="PayInvoiceDialog.lnurlpay.amount_range_label"
+                    >
+                      <template v-slot:payee>
+                        <b>{{
+                          payInvoiceData.lnurlpay.targetUser ||
+                          payInvoiceData.lnurlpay.domain
+                        }}</b>
+                      </template>
+                      <template v-slot:br>
+                        <br />
+                      </template>
+                      <template v-slot:min>
+                        <b>{{ payInvoiceData.lnurlpay.minSendable / 1000 }}</b>
+                      </template>
+                      <template v-slot:max>
+                        <b>{{ payInvoiceData.lnurlpay.maxSendable / 1000 }}</b>
+                      </template>
+                      <template v-slot:ticker>
+                        {{ tickerShort }}
+                      </template>
+                    </i18n-t>
+                  </p>
+                  <q-separator class="q-my-sm"></q-separator>
+                  <div class="row" v-if="payInvoiceData.lnurlpay.description">
+                    <p class="col text-justify text-italic">
+                      {{ payInvoiceData.lnurlpay.description }}
+                    </p>
+                    <p
+                      class="col-4 q-pl-md"
+                      v-if="payInvoiceData.lnurlpay.image"
+                    >
+                      <q-img :src="payInvoiceData.lnurlpay.image" />
+                    </p>
+                  </div>
+                  <div class="row">
+                    <div class="col">
+                      <q-input
+                        filled
+                        dense
+                        autofocus
+                        v-model.number="payInvoiceData.input.amount"
+                        type="number"
+                        :label="
+                          $t('PayInvoiceDialog.lnurlpay.inputs.amount.label', {
+                            ticker: tickerShort,
+                          })
+                        "
+                        :min="payInvoiceData.lnurlpay.minSendable / 1000"
+                        :max="payInvoiceData.lnurlpay.maxSendable / 1000"
+                        :readonly="
+                          payInvoiceData.lnurlpay.maxSendable ==
+                          payInvoiceData.lnurlpay.minSendable
+                        "
+                      >
+                      </q-input>
+                    </div>
+                    <div
+                      class="col-8 q-pl-md"
+                      v-if="payInvoiceData.lnurlpay.commentAllowed > 0"
+                    >
+                      <q-input
+                        filled
+                        dense
+                        v-model="payInvoiceData.input.comment"
+                        _type="payInvoiceData.lnurlpay.commentAllowed > 64 ? 'textarea' : 'text'"
+                        :label="
+                          $t('PayInvoiceDialog.lnurlpay.inputs.comment.label')
+                        "
+                        :maxlength="payInvoiceData.lnurlpay.commentAllowed"
+                      ></q-input>
+                    </div>
+                  </div>
+                  <div class="row q-mt-lg">
+                    <q-btn unelevated color="primary" type="submit">{{
+                      $t("PayInvoiceDialog.lnurlpay.actions.send.label")
+                    }}</q-btn>
+                    <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
+                      $t("PayInvoiceDialog.lnurlpay.actions.close.label")
+                    }}</q-btn>
+                  </div>
+                </q-form>
+              </div>
+
+              <!-- INPUT CONTENT -->
+              <div v-else>
+                <div class="row items-center no-wrap q-mb-xl">
+                  <div class="col-10">
+                    <span class="text-h6">{{
+                      $t("PayInvoiceDialog.input_data.title")
+                    }}</span>
+                  </div>
+                </div>
+                <q-form
+                  v-if="!camera.show"
+                  @submit="decodeAndQuote(payInvoiceData.input.request)"
+                  class="q-gutter-md relative-container"
+                >
+                  <q-input
+                    ref="parseDialogInput"
+                    round
+                    outlined
+                    class="request-input"
+                    spellcheck="false"
+                    v-model.trim="payInvoiceData.input.request"
+                    type="textarea"
+                    :label="
+                      $t(
+                        'PayInvoiceDialog.input_data.inputs.invoice_data.label'
+                      )
+                    "
+                    autofocus
+                    @keyup.enter="decodeAndQuote(payInvoiceData.input.request)"
+                  >
+                    <q-icon
+                      name="close"
+                      color="dark"
+                      v-if="payInvoiceData.input.request"
+                      class="cursor-pointer floating-button"
+                      @click="payInvoiceData.input.request = ''"
+                    />
+                  </q-input>
+                  <div class="row q-mt-lg">
+                    <q-btn
+                      rounded
+                      color="primary"
+                      class="q-mr-sm"
+                      v-if="payInvoiceData.input.request != ''"
+                      type="submit"
+                      >{{
+                        $t("PayInvoiceDialog.input_data.actions.enter.label")
+                      }}</q-btn
+                    >
+                    <q-btn
+                      unelevated
+                      dense
+                      v-if="
+                        canPasteFromClipboard &&
+                        payInvoiceData.input.request == ''
+                      "
+                      @click="pasteToParseDialog"
+                      ><q-icon name="content_paste" class="q-pr-sm" />{{
+                        $t("PayInvoiceDialog.input_data.actions.paste.label")
+                      }}</q-btn
+                    >
+                    <q-btn
+                      unelevated
+                      class="q-mx-0"
+                      v-if="hasCamera && payInvoiceData.input.request == ''"
+                      @click="showCamera"
+                    >
+                      <ScanIcon />
+                      <span class="q-pl-sm">{{
+                        $t("PayInvoiceDialog.input_data.actions.scan.label")
+                      }}</span>
+                    </q-btn>
+                    <q-btn
+                      v-close-popup
+                      flat
+                      rounded
+                      color="grey"
+                      class="q-ml-auto"
+                      >{{
+                        $t("PayInvoiceDialog.input_data.actions.close.label")
+                      }}</q-btn
+                    >
+                  </div>
+                </q-form>
+              </div>
             </div>
-            <h6
-              v-else-if="payInvoiceData.meltQuote.error != ''"
-              class="q-my-none"
-            >
-              {{ payInvoiceData.meltQuote.error }}
-            </h6>
-            <h6 v-else class="q-my-none">
-              {{ $t("PayInvoiceDialog.invoice.processing_info_text") }}
-            </h6>
-          </div>
-          <div class="col-2">
-            <ToggleUnit class="q-mt-md" />
           </div>
         </div>
-        <p class="text-wrap">
-          <strong v-if="payInvoiceData.invoice.description"
-            >{{ $t("PayInvoiceDialog.invoice.memo.label") }}:</strong
-          >
-          {{ payInvoiceData.invoice.description }}<br />
-        </p>
-        <div class="col-12">
-          <ChooseMint />
-        </div>
-        <div
-          v-if="
-            enoughtotalUnitBalance ||
-            (hasMultinutSupport && multinutEnabled) ||
-            globalMutexLock
-          "
-          class="row q-mt-lg"
-        >
-          <q-btn
-            unelevated
-            rounded
-            color="primary"
-            :disabled="
-              payInvoiceData.blocking ||
-              !enoughtotalUnitBalance ||
-              payInvoiceData.meltQuote.error != ''
-            "
-            @click="handleMeltButton"
-            :label="
-              payInvoiceData.meltQuote.error != ''
-                ? $t('PayInvoiceDialog.invoice.actions.pay.error')
-                : !payInvoiceData.blocking
-                ? $t('PayInvoiceDialog.invoice.actions.pay.label')
-                : $t('PayInvoiceDialog.invoice.actions.pay.in_progress')
-            "
-            :loading="globalMutexLock && !payInvoiceData.blocking"
-            class="q-px-lg"
-          >
-            <template v-slot:loading>
-              <q-spinner-hourglass />
-            </template>
-          </q-btn>
-          <q-btn
-            v-if="
-              !payInvoiceData.blocking && hasMultinutSupport && multinutEnabled
-            "
-            unelevated
-            rounded
-            outline
-            :disabled="!hasMultinutSupport"
-            @click="openMultinutDialog"
-            label="Multi"
-            class="q-px-lg q-ml-sm"
-          />
-          <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
-            $t("PayInvoiceDialog.invoice.actions.close.label")
-          }}</q-btn>
-        </div>
-        <div v-else class="row q-mt-lg">
-          <q-btn
-            unelevated
-            rounded
-            disabled
-            color="yellow"
-            text-color="black"
-            >{{
-              $t("PayInvoiceDialog.invoice.balance_too_low_warning_text")
-            }}</q-btn
-          >
-          <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
-            $t("PayInvoiceDialog.invoice.actions.close.label")
-          }}</q-btn>
-        </div>
-      </div>
-      <div v-else-if="payInvoiceData.lnurlpay">
-        <q-form @submit="lnurlPaySecond" class="q-gutter-md">
-          <p
-            v-if="
-              payInvoiceData.lnurlpay.maxSendable ==
-              payInvoiceData.lnurlpay.minSendable
-            "
-            class="q-my-none text-h6 text-center"
-          >
-            <i18n-t keypath="PayInvoiceDialog.lnurlpay.amount_exact_label">
-              <template v-slot:payee>
-                <b>{{ payInvoiceData.lnurlpay.domain }}</b>
-              </template>
-              <template v-slot:value>
-                {{ payInvoiceData.lnurlpay.maxSendable / 1000 }}
-              </template>
-              <template v-slot:ticker>
-                {{ tickerShort }}
-              </template>
-            </i18n-t>
-          </p>
-          <p v-else class="q-my-none text-h6 text-center">
-            <i18n-t keypath="PayInvoiceDialog.lnurlpay.amount_range_label">
-              <template v-slot:payee>
-                <b>{{
-                  payInvoiceData.lnurlpay.targetUser ||
-                  payInvoiceData.lnurlpay.domain
-                }}</b>
-              </template>
-              <template v-slot:br>
-                <br />
-              </template>
-              <template v-slot:min>
-                <b>{{ payInvoiceData.lnurlpay.minSendable / 1000 }}</b>
-              </template>
-              <template v-slot:max>
-                <b>{{ payInvoiceData.lnurlpay.maxSendable / 1000 }}</b>
-              </template>
-              <template v-slot:ticker>
-                {{ tickerShort }}
-              </template>
-            </i18n-t>
-          </p>
-          <q-separator class="q-my-sm"></q-separator>
-          <div class="row" v-if="payInvoiceData.lnurlpay.description">
-            <p class="col text-justify text-italic">
-              {{ payInvoiceData.lnurlpay.description }}
-            </p>
-            <p class="col-4 q-pl-md" v-if="payInvoiceData.lnurlpay.image">
-              <q-img :src="payInvoiceData.lnurlpay.image" />
-            </p>
-          </div>
-          <div class="row">
-            <div class="col">
-              <q-input
-                filled
-                dense
-                autofocus
-                v-model.number="payInvoiceData.input.amount"
-                type="number"
-                :label="
-                  $t('PayInvoiceDialog.lnurlpay.inputs.amount.label', {
-                    ticker: tickerShort,
-                  })
-                "
-                :min="payInvoiceData.lnurlpay.minSendable / 1000"
-                :max="payInvoiceData.lnurlpay.maxSendable / 1000"
-                :readonly="
-                  payInvoiceData.lnurlpay.maxSendable ==
-                  payInvoiceData.lnurlpay.minSendable
-                "
-              >
-              </q-input>
-            </div>
+
+        <!-- Bottom fixed pay action -->
+        <div class="bottom-panel" v-if="payInvoiceData.invoice">
+          <div class="row justify-center q-pb-lg q-pt-sm">
             <div
-              class="col-8 q-pl-md"
-              v-if="payInvoiceData.lnurlpay.commentAllowed > 0"
+              class="col-12 col-sm-11 col-md-8 q-px-md"
+              style="max-width: 600px"
             >
-              <q-input
-                filled
-                dense
-                v-model="payInvoiceData.input.comment"
-                _type="payInvoiceData.lnurlpay.commentAllowed > 64 ? 'textarea' : 'text'"
-                :label="$t('PayInvoiceDialog.lnurlpay.inputs.comment.label')"
-                :maxlength="payInvoiceData.lnurlpay.commentAllowed"
-              ></q-input>
+              <q-btn
+                class="full-width"
+                unelevated
+                size="lg"
+                color="primary"
+                rounded
+                :disabled="
+                  payInvoiceData.blocking ||
+                  !enoughtotalUnitBalance ||
+                  payInvoiceData.meltQuote.error != ''
+                "
+                @click="handleMeltButton"
+                :label="
+                  payInvoiceData.meltQuote.error != ''
+                    ? $t('PayInvoiceDialog.invoice.actions.pay.error')
+                    : !payInvoiceData.blocking
+                    ? $t('PayInvoiceDialog.invoice.actions.pay.label')
+                    : $t('PayInvoiceDialog.invoice.actions.pay.in_progress')
+                "
+                :loading="globalMutexLock && !payInvoiceData.blocking"
+              >
+                <template v-slot:loading>
+                  <q-spinner-hourglass />
+                </template>
+              </q-btn>
             </div>
           </div>
-          <div class="row q-mt-lg">
-            <q-btn unelevated color="primary" type="submit">{{
-              $t("PayInvoiceDialog.lnurlpay.actions.send.label")
-            }}</q-btn>
-            <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
-              $t("PayInvoiceDialog.lnurlpay.actions.close.label")
-            }}</q-btn>
-          </div>
-        </q-form>
-      </div>
-      <div v-else>
-        <div class="row items-center no-wrap q-mb-xl">
-          <div class="col-10">
-            <span class="text-h6">{{
-              $t("PayInvoiceDialog.input_data.title")
-            }}</span>
-          </div>
         </div>
-        <q-form
-          v-if="!camera.show"
-          @submit="decodeAndQuote(payInvoiceData.input.request)"
-          class="q-gutter-md relative-container"
-        >
-          <q-input
-            ref="parseDialogInput"
-            round
-            outlined
-            class="request-input"
-            spellcheck="false"
-            v-model.trim="payInvoiceData.input.request"
-            type="textarea"
-            :label="$t('PayInvoiceDialog.input_data.inputs.invoice_data.label')"
-            autofocus
-            @keyup.enter="decodeAndQuote(payInvoiceData.input.request)"
-          >
-            <q-icon
-              name="close"
-              color="dark"
-              v-if="payInvoiceData.input.request"
-              class="cursor-pointer floating-button"
-              @click="payInvoiceData.input.request = ''"
-            />
-          </q-input>
-          <div class="row q-mt-lg">
-            <q-btn
-              rounded
-              color="primary"
-              class="q-mr-sm"
-              v-if="payInvoiceData.input.request != ''"
-              type="submit"
-              >{{
-                $t("PayInvoiceDialog.input_data.actions.enter.label")
-              }}</q-btn
-            >
-            <q-btn
-              unelevated
-              dense
-              v-if="canPasteFromClipboard && payInvoiceData.input.request == ''"
-              @click="pasteToParseDialog"
-              ><q-icon name="content_paste" class="q-pr-sm" />{{
-                $t("PayInvoiceDialog.input_data.actions.paste.label")
-              }}</q-btn
-            >
-            <q-btn
-              unelevated
-              class="q-mx-0"
-              v-if="hasCamera && payInvoiceData.input.request == ''"
-              @click="showCamera"
-            >
-              <ScanIcon />
-              <span class="q-pl-sm">{{
-                $t("PayInvoiceDialog.input_data.actions.scan.label")
-              }}</span>
-            </q-btn>
-            <q-btn v-close-popup flat rounded color="grey" class="q-ml-auto">{{
-              $t("PayInvoiceDialog.input_data.actions.close.label")
-            }}</q-btn>
-          </div>
-        </q-form>
       </div>
     </q-card>
   </q-dialog>
@@ -322,7 +348,6 @@ import { useSettingsStore } from "src/stores/settings";
 import { usePriceStore } from "src/stores/price";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
-import ToggleUnit from "components/ToggleUnit.vue";
 import MultinutPaymentDialog from "./MultinutPaymentDialog.vue";
 
 import * as _ from "underscore";
@@ -333,7 +358,6 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     ChooseMint,
-    ToggleUnit,
     MultinutPaymentDialog,
     ScanIcon,
   },
@@ -363,6 +387,7 @@ export default defineComponent({
       "activeProofs",
       "mints",
       "activeUnit",
+      "activeUnitLabel",
       "totalUnitBalance",
       "activeBalance",
       "multiMints",
@@ -404,6 +429,7 @@ export default defineComponent({
       "decodeRequest",
       "lnurlPaySecond",
     ]),
+    ...mapActions(useMintsStore, ["toggleUnit"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     canPay: function () {
       if (!this.payInvoiceData.invoice) return false;
@@ -444,6 +470,20 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+.pay-fullscreen {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.bottom-panel {
+  margin-top: auto;
+  background: var(--q-color-grey-1);
+  box-shadow: 0 -8px 16px rgba(0, 0, 0, 0.05);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
 .q-dialog__inner > div {
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;

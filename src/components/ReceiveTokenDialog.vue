@@ -94,30 +94,44 @@
               ></q-btn>
 
               <!-- EMPTY INPUT helper actions -->
-              <div v-if="!receiveData.tokensBase64.length">
-                <q-btn
-                  unelevated
-                  dense
-                  class="q-mr-sm"
-                  v-if="canPasteFromClipboard"
-                  @click="pasteToParseDialog(true)"
-                >
-                  <q-icon name="content_paste" class="q-pr-sm" />{{
-                    $t("ReceiveTokenDialog.actions.paste.label")
-                  }}</q-btn
-                >
-                <q-btn
-                  unelevated
-                  dense
-                  class="q-mx-sm"
-                  v-if="hasCamera"
-                  @click="showCamera"
-                >
-                  <ScanIcon size="1.5em" />
-                  <span class="q-pl-sm">{{
-                    $t("ReceiveTokenDialog.actions.scan.label")
-                  }}</span>
-                </q-btn>
+              <div
+                v-if="!receiveData.tokensBase64.length"
+                class="column q-mt-sm"
+              >
+                <div class="row q-gutter-sm">
+                  <div class="col">
+                    <q-btn
+                      v-if="canPasteFromClipboard"
+                      outline
+                      rounded
+                      size="lg"
+                      class="full-width"
+                      @click="pasteToParseDialog(true)"
+                    >
+                      <q-icon
+                        name="content_paste"
+                        size="1.2em"
+                        class="q-pr-sm"
+                      />
+                      {{ $t("ReceiveTokenDialog.actions.paste.label") }}
+                    </q-btn>
+                  </div>
+                  <div class="col">
+                    <q-btn
+                      v-if="hasCamera"
+                      rounded
+                      outline
+                      size="lg"
+                      class="full-width"
+                      @click="showCamera"
+                    >
+                      <ScanIcon size="1.2em" />
+                      <span class="q-pl-sm">{{
+                        $t("ReceiveTokenDialog.actions.scan.label")
+                      }}</span>
+                    </q-btn>
+                  </div>
+                </div>
                 <q-btn
                   unelevated
                   dense
