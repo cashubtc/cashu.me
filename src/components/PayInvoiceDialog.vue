@@ -14,10 +14,37 @@
         class="column fit pay-fullscreen"
         :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
       >
-        <!-- Header -->
-        <div class="row items-center justify-between q-pa-md">
-          <q-btn v-close-popup flat round icon="close" color="grey" />
-          <div class="row items-center q-gutter-sm">
+        <!-- Header with centered title and unit toggle on right -->
+        <div class="row items-center q-pa-md" style="position: relative">
+          <q-btn
+            v-close-popup
+            flat
+            round
+            icon="close"
+            color="grey"
+            class="floating-close-btn"
+          />
+          <div class="col text-center fixed-title-height">
+            <div>
+              <q-item-label
+                overline
+                class="q-mt-sm"
+                :class="$q.dark.isActive ? 'text-white' : 'text-black'"
+                style="
+                  font-size: 1rem;
+                  display: inline-block;
+                  white-space: normal;
+                  word-break: break-word;
+                "
+              >
+                {{ $t("PayInvoiceDialog.input_data.title") || "Pay Lightning" }}
+              </q-item-label>
+            </div>
+          </div>
+          <div
+            class="row items-center q-gutter-sm"
+            style="position: absolute; right: 16px"
+          >
             <q-btn
               flat
               dense
@@ -29,6 +56,16 @@
           </div>
         </div>
 
+        <!-- Mint selection (match SendTokenDialog layout) -->
+        <div class="row justify-center">
+          <div
+            class="col-12 col-sm-11 col-md-8 q-px-lg q-mb-sm"
+            style="max-width: 600px"
+          >
+            <ChooseMint />
+          </div>
+        </div>
+
         <!-- Content area -->
         <div class="col column items-center justify-start q-px-lg">
           <div class="row justify-center full-width">
@@ -36,11 +73,6 @@
               class="col-12 col-sm-11 col-md-8 q-px-lg q-mb-sm"
               style="max-width: 600px"
             >
-              <!-- Mint selection -->
-              <div class="q-mb-md">
-                <ChooseMint />
-              </div>
-
               <!-- INVOICE CONTENT -->
               <div v-if="payInvoiceData.invoice">
                 <div
@@ -197,25 +229,15 @@
                     <q-btn unelevated color="primary" type="submit">{{
                       $t("PayInvoiceDialog.lnurlpay.actions.send.label")
                     }}</q-btn>
-                    <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
-                      $t("PayInvoiceDialog.lnurlpay.actions.close.label")
-                    }}</q-btn>
                   </div>
                 </q-form>
               </div>
 
               <!-- INPUT CONTENT -->
               <div v-else>
-                <div class="row items-center no-wrap q-mb-xl">
-                  <div class="col-10">
-                    <span class="text-h6">{{
-                      $t("PayInvoiceDialog.input_data.title")
-                    }}</span>
-                  </div>
-                </div>
+                <div class="row items-center no-wrap q-mb-xl"></div>
                 <q-form
                   v-if="!camera.show"
-                  @submit="decodeAndQuote(payInvoiceData.input.request)"
                   class="q-gutter-md relative-container"
                 >
                   <q-input
@@ -232,60 +254,53 @@
                       )
                     "
                     autofocus
-                    @keyup.enter="decodeAndQuote(payInvoiceData.input.request)"
+                    @update:model-value="
+                      decodeAndQuote(payInvoiceData.input.request)
+                    "
                   >
-                    <q-icon
-                      name="close"
-                      color="dark"
-                      v-if="payInvoiceData.input.request"
-                      class="cursor-pointer floating-button"
-                      @click="payInvoiceData.input.request = ''"
-                    />
                   </q-input>
-                  <div class="row q-mt-lg">
-                    <q-btn
-                      rounded
-                      color="primary"
-                      class="q-mr-sm"
-                      v-if="payInvoiceData.input.request != ''"
-                      type="submit"
-                      >{{
-                        $t("PayInvoiceDialog.input_data.actions.enter.label")
-                      }}</q-btn
-                    >
-                    <q-btn
-                      unelevated
-                      dense
-                      v-if="
-                        canPasteFromClipboard &&
-                        payInvoiceData.input.request == ''
-                      "
-                      @click="pasteToParseDialog"
-                      ><q-icon name="content_paste" class="q-pr-sm" />{{
-                        $t("PayInvoiceDialog.input_data.actions.paste.label")
-                      }}</q-btn
-                    >
-                    <q-btn
-                      unelevated
-                      class="q-mx-0"
-                      v-if="hasCamera && payInvoiceData.input.request == ''"
-                      @click="showCamera"
-                    >
-                      <ScanIcon />
-                      <span class="q-pl-sm">{{
-                        $t("PayInvoiceDialog.input_data.actions.scan.label")
-                      }}</span>
-                    </q-btn>
-                    <q-btn
-                      v-close-popup
-                      flat
-                      rounded
-                      color="grey"
-                      class="q-ml-auto"
-                      >{{
-                        $t("PayInvoiceDialog.input_data.actions.close.label")
-                      }}</q-btn
-                    >
+                  <div
+                    class="column q-mt-sm"
+                    v-if="!payInvoiceData.input.request"
+                  >
+                    <div class="row q-gutter-sm q-pt-lg">
+                      <div class="col">
+                        <q-btn
+                          v-if="canPasteFromClipboard"
+                          outline
+                          rounded
+                          size="lg"
+                          class="full-width"
+                          @click="pasteToParseDialog"
+                        >
+                          <q-icon
+                            name="content_paste"
+                            size="1.2em"
+                            class="q-pr-sm"
+                          />
+                          {{
+                            $t(
+                              "PayInvoiceDialog.input_data.actions.paste.label"
+                            )
+                          }}
+                        </q-btn>
+                      </div>
+                      <div class="col">
+                        <q-btn
+                          v-if="hasCameraAvailable"
+                          rounded
+                          outline
+                          size="lg"
+                          class="full-width"
+                          @click="showCamera"
+                        >
+                          <ScanIcon :size="18" />
+                          <span class="q-pl-sm">{{
+                            $t("PayInvoiceDialog.input_data.actions.scan.label")
+                          }}</span>
+                        </q-btn>
+                      </div>
+                    </div>
                   </div>
                 </q-form>
               </div>
@@ -300,31 +315,53 @@
               class="col-12 col-sm-11 col-md-8 q-px-md"
               style="max-width: 600px"
             >
-              <q-btn
-                class="full-width"
-                unelevated
-                size="lg"
-                color="primary"
-                rounded
-                :disabled="
-                  payInvoiceData.blocking ||
-                  !enoughtotalUnitBalance ||
-                  payInvoiceData.meltQuote.error != ''
+              <template
+                v-if="
+                  enoughtotalUnitBalance ||
+                  (hasMultinutSupport && multinutEnabled) ||
+                  globalMutexLock
                 "
-                @click="handleMeltButton"
-                :label="
-                  payInvoiceData.meltQuote.error != ''
-                    ? $t('PayInvoiceDialog.invoice.actions.pay.error')
-                    : !payInvoiceData.blocking
-                    ? $t('PayInvoiceDialog.invoice.actions.pay.label')
-                    : $t('PayInvoiceDialog.invoice.actions.pay.in_progress')
-                "
-                :loading="globalMutexLock && !payInvoiceData.blocking"
               >
-                <template v-slot:loading>
-                  <q-spinner-hourglass />
-                </template>
-              </q-btn>
+                <q-btn
+                  class="full-width"
+                  unelevated
+                  size="lg"
+                  color="primary"
+                  rounded
+                  :disabled="
+                    payInvoiceData.blocking ||
+                    payInvoiceData.meltQuote.error != ''
+                  "
+                  @click="handleMeltButton"
+                  :label="
+                    payInvoiceData.meltQuote.error != ''
+                      ? $t('PayInvoiceDialog.invoice.actions.pay.error')
+                      : !payInvoiceData.blocking
+                      ? $t('PayInvoiceDialog.invoice.actions.pay.label')
+                      : $t('PayInvoiceDialog.invoice.actions.pay.in_progress')
+                  "
+                  :loading="globalMutexLock && !payInvoiceData.blocking"
+                >
+                  <template v-slot:loading>
+                    <q-spinner-hourglass />
+                  </template>
+                </q-btn>
+              </template>
+              <template v-else>
+                <q-btn
+                  class="full-width"
+                  unelevated
+                  size="lg"
+                  color="yellow"
+                  text-color="black"
+                  rounded
+                  disabled
+                >
+                  {{
+                    $t("PayInvoiceDialog.invoice.balance_too_low_warning_text")
+                  }}
+                </q-btn>
+              </template>
             </div>
           </div>
         </div>
@@ -353,6 +390,9 @@ import MultinutPaymentDialog from "./MultinutPaymentDialog.vue";
 import * as _ from "underscore";
 import { Scan as ScanIcon } from "lucide-vue-next";
 
+declare const windowMixin: any;
+declare const formatCurrency: any;
+
 export default defineComponent({
   name: "PayInvoiceDialog",
   mixins: [windowMixin],
@@ -367,12 +407,12 @@ export default defineComponent({
   },
   watch: {
     activeMintUrl: async function () {
-      if (this.payInvoiceData.show) {
+      if (this.payInvoiceData.show && this.payInvoiceData.invoice) {
         await this.meltQuoteInvoiceData();
       }
     },
     activeUnit: async function () {
-      if (this.payInvoiceData.show) {
+      if (this.payInvoiceData.show && this.payInvoiceData.invoice) {
         await this.meltQuoteInvoiceData();
       }
     },
@@ -381,23 +421,40 @@ export default defineComponent({
     ...mapState(useUiStore, ["tickerShort", "globalMutexLock"]),
     ...mapState(useSettingsStore, ["multinutEnabled"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
-    ...mapState(useWalletStore, ["payInvoiceData"]),
-    ...mapState(useMintsStore, [
-      "activeMintUrl",
-      "activeProofs",
-      "mints",
-      "activeUnit",
-      "activeUnitLabel",
-      "totalUnitBalance",
-      "activeBalance",
-      "multiMints",
-    ]),
+    // mints store via direct getters to avoid strict typing issues
+    activeMintUrl: function (): any {
+      return (useMintsStore() as any).activeMintUrl;
+    },
+    activeProofs: function (): any {
+      return (useMintsStore() as any).activeProofs;
+    },
+    mints: function (): any {
+      return (useMintsStore() as any).mints;
+    },
+    activeUnit: function (): any {
+      return (useMintsStore() as any).activeUnit;
+    },
+    totalUnitBalance: function (): any {
+      return (useMintsStore() as any).totalUnitBalance;
+    },
+    activeBalance: function (): any {
+      return (useMintsStore() as any).activeBalance;
+    },
+    multiMints: function (): any {
+      return (useMintsStore() as any).multiMints;
+    },
     ...mapState(usePriceStore, [
       "bitcoinPrice",
       "bitcoinPrices",
       "currentCurrencyPrice",
     ]),
     ...mapState(useSettingsStore, ["bitcoinPriceCurrency"]),
+    payInvoiceData: function (): any {
+      return (useWalletStore() as any).payInvoiceData;
+    },
+    hasCameraAvailable: function (): boolean {
+      return Boolean((useCameraStore() as any).hasCamera);
+    },
     canPasteFromClipboard: function () {
       return (
         window.isSecureContext &&
@@ -410,9 +467,10 @@ export default defineComponent({
         this.activeBalance >= this.payInvoiceData.meltQuote.response.amount
       );
     },
-    hasMultinutSupport: function () {
+    hasMultinutSupport: function (): boolean {
       const totalMultinutBalance = this.multiMints.reduce(
-        (acc, mint) => acc + new MintClass(mint).unitBalance(this.activeUnit),
+        (acc: number, mint: any) =>
+          acc + new MintClass(mint).unitBalance(this.activeUnit),
         0
       );
       return (
@@ -420,6 +478,10 @@ export default defineComponent({
         this.payInvoiceData.meltQuote.response.amount > 0 &&
         totalMultinutBalance >= this.payInvoiceData.meltQuote.response.amount
       );
+    },
+    activeUnitLabel: function (): string {
+      // Access directly from store to avoid typing friction in mapState
+      return (useMintsStore() as any).activeUnitLabel;
     },
   },
   methods: {
@@ -431,6 +493,13 @@ export default defineComponent({
     ]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+    formatCurrency: function (...args: any[]) {
+      try {
+        return (formatCurrency as any)(...args);
+      } catch {
+        return args?.[0];
+      }
+    },
     canPay: function () {
       if (!this.payInvoiceData.invoice) return false;
       return (
@@ -440,7 +509,7 @@ export default defineComponent({
       );
     },
     closeParseDialog: function () {},
-    decodeAndQuote: async function (request) {
+    decodeAndQuote: async function (request: string) {
       await this.decodeRequest(request);
     },
     pasteToParseDialog: async function () {
@@ -459,7 +528,7 @@ export default defineComponent({
     },
     openMultinutDialog: function () {
       this.payInvoiceData.show = false;
-      this.$refs.multinutDialog.openMultinutDialog();
+      (this.$refs as any).multinutDialog.openMultinutDialog();
     },
     handleReturnToPayDialog: function () {
       this.payInvoiceData.show = true;
@@ -470,6 +539,12 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+.fixed-title-height {
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .pay-fullscreen {
   height: 100vh;
   display: flex;
@@ -516,5 +591,13 @@ export default defineComponent({
   background-color: var(--q-primary);
   border-radius: 50%;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.floating-close-btn {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
 }
 </style>
