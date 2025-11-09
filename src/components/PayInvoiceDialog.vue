@@ -125,7 +125,10 @@
                     {{ $t("PayInvoiceDialog.invoice.processing_info_text") }}
                   </div>
                 </div>
-                <p class="text-wrap q-mt-md">
+                <p
+                  class="text-wrap q-mt-xl text-center"
+                  style="max-width: 600px; font-size: 1.1rem"
+                >
                   <strong v-if="payInvoiceData.invoice.description"
                     >{{ $t("PayInvoiceDialog.invoice.memo.label") }}:</strong
                   >
@@ -264,6 +267,13 @@
                       decodeAndQuote(payInvoiceData.input.request)
                     "
                   >
+                    <q-icon
+                      v-if="payInvoiceData.input.request"
+                      color="dark"
+                      name="close"
+                      class="floating-button cursor-pointer"
+                      @click="payInvoiceData.input.request = ''"
+                    />
                   </q-input>
                   <div
                     class="column q-mt-sm"
