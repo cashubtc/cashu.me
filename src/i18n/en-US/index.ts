@@ -1067,6 +1067,11 @@ export default {
         label: "Invalid token",
       },
     },
+    swap_section: {
+      title: "Swap",
+      destination_label: "To",
+      fee_info: "This swap will incur Lightning network fees.",
+    },
     actions: {
       paste: {
         label: "@:global.actions.paste.label",
@@ -1095,6 +1100,9 @@ export default {
         label: "@:ReceiveTokenDialog.actions.swap.label",
         tooltip_text: "@:ReceiveTokenDialog.actions.swap.tooltip_text",
         in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
+      },
+      receive_to_selected_mint: {
+        label: "Receive token to selected mint",
       },
       later: {
         label: "Receive offline",

@@ -95,37 +95,21 @@
                   </div>
 
                   <!-- swap mint selection -->
-                  <div
-                    class="row q-pl-md q-pt-sm justify-center"
-                    v-if="swapSelected"
-                  >
-                    <div class="col-6 q-px-lg q-mb-sm">
-                      <q-icon
-                        name="arrow_downward"
-                        class="q-mr-xs"
-                        color="positive"
-                      />
-                      <i18n-t
-                        keypath="ReceiveTokenDialog.actions.swap.caption"
-                        tag="span"
-                      >
-                        <template v-slot:value>
-                          <strong>{{
-                            formatCurrency(swapToMintAmount, tokenUnit)
-                          }}</strong>
-                        </template>
-                      </i18n-t>
-                    </div>
-                    <div class="col-6 q-px-lg q-mb-sm">
+                  <div v-if="swapSelected" class="swap-section q-mt-md">
+                    <!-- Header with cancel button -->
+                    <div class="row items-center q-mb-md">
+                      <div class="col text-h6" style="font-size: 18px">
+                        {{ $t("ReceiveTokenDialog.swap_section.title") }}
+                      </div>
                       <q-btn
-                        class="full-width"
-                        color="grey"
                         flat
+                        round
+                        dense
+                        icon="close"
                         @click="swapSelected = false"
                         :disable="swapBlocking"
+                        color="grey-6"
                       >
-                        <q-icon name="close" class="q-pr-sm" />
-                        {{ $t("ReceiveTokenDialog.actions.cancel_swap.label") }}
                         <q-tooltip>{{
                           $t(
                             "ReceiveTokenDialog.actions.cancel_swap.tooltip_text"
@@ -133,13 +117,74 @@
                         }}</q-tooltip>
                       </q-btn>
                     </div>
-                  </div>
-                  <div class="row q-pt-xs justify-center" v-if="swapSelected">
-                    <div
-                      class="col-12 q-px-lg q-mb-sm"
-                      style="max-width: 600px"
-                    >
+
+                    <!-- Source Mint (Token Origin) -->
+                    <div class="swap-mint-info">
+                      <div class="row items-center no-wrap">
+                        <!-- Mint Icon -->
+                        <q-avatar size="48px" class="q-mr-md">
+                          <q-img
+                            v-if="sourceMintInfo?.iconUrl"
+                            :src="sourceMintInfo.iconUrl"
+                            spinner-color="white"
+                            spinner-size="xs"
+                          >
+                            <template v-slot:error>
+                              <div
+                                class="row items-center justify-center full-height"
+                              >
+                                <q-icon
+                                  name="account_balance"
+                                  color="grey-7"
+                                  size="24px"
+                                />
+                              </div>
+                            </template>
+                          </q-img>
+                          <q-icon
+                            v-else
+                            name="account_balance"
+                            color="grey-7"
+                            size="24px"
+                          />
+                        </q-avatar>
+
+                        <!-- Mint Info -->
+                        <div class="col text-left">
+                          <div class="swap-mint-name">
+                            {{ sourceMintInfo?.nickname || sourceMintInfo?.shorturl }}
+                          </div>
+                          <div class="swap-mint-url text-grey-6">
+                            {{ sourceMintInfo?.shorturl }}
+                          </div>
+                        </div>
+
+                        <!-- Amount -->
+                        <div class="swap-amount">
+                          {{ formatCurrency(tokenAmount, tokenUnit) }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Arrow Indicator -->
+                    <div class="row justify-center q-my-sm">
+                      <ArrowDownIcon class="swap-arrow-icon" />
+                    </div>
+
+                    <!-- Destination Mint Selector -->
+                    <div class="swap-destination-section">
+                      <div class="swap-section-label q-mb-sm">
+                        {{ $t("ReceiveTokenDialog.swap_section.destination_label") }}
+                      </div>
                       <ChooseMint />
+                    </div>
+
+                    <!-- Info Tip about fees -->
+                    <div class="swap-info-tip q-mt-md">
+                      <q-icon name="info" size="16px" class="q-mr-xs" />
+                      <span class="swap-info-text">
+                        {{ $t("ReceiveTokenDialog.swap_section.fee_info") }}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -271,8 +316,7 @@
                     :loading="swapBlocking"
                     :disabled="activeMintUrl == tokenMint"
                   >
-                    <q-icon name="swap_horiz" class="q-pr-sm" />
-                    {{ $t("ReceiveTokenDialog.actions.confirm_swap.label") }}
+                    {{ $t("ReceiveTokenDialog.actions.receive_to_selected_mint.label") }}
                     <template v-slot:loading>
                       <q-spinner-hourglass size="xs" />
                       {{
@@ -374,6 +418,7 @@ import {
   Lock as LockIcon,
   Scan as ScanIcon,
   Nfc as NfcIcon,
+  ArrowDown as ArrowDownIcon,
 } from "lucide-vue-next";
 
 import { map } from "underscore";
@@ -394,6 +439,7 @@ export default defineComponent({
     ScanIcon,
     ChooseMint,
     TokenStringRender,
+    ArrowDownIcon,
   },
   data: function () {
     return {
@@ -500,6 +546,24 @@ export default defineComponent({
     maxLengthForTokenString: function () {
       return Math.floor(this.$q.screen.height / 3.5);
     },
+    sourceMintInfo: function () {
+      if (!this.tokenMint) {
+        return null;
+      }
+      const mint = this.mints.find((m) => m.url === this.tokenMint);
+      if (!mint) {
+        return {
+          nickname: null,
+          shorturl: this.getShortUrl(this.tokenMint),
+          iconUrl: null,
+        };
+      }
+      return {
+        nickname: mint.nickname || mint.info?.name,
+        shorturl: this.getShortUrl(mint.url),
+        iconUrl: mint.info?.icon_url,
+      };
+    },
   },
   methods: {
     ...mapActions(useWalletStore, ["redeem", "getFeesForProofs"]),
@@ -518,6 +582,14 @@ export default defineComponent({
       "toggleScanner",
       "pasteToParseDialog",
     ]),
+    getShortUrl: function (url: string) {
+      try {
+        const urlObj = new URL(url);
+        return urlObj.hostname;
+      } catch {
+        return url;
+      }
+    },
     // TOKEN METHODS
     decodePeanut: function (peanut) {
       try {
@@ -750,5 +822,71 @@ export default defineComponent({
     background-color: var(--q-background-hover);
     color: var(--q-text-hover);
   }
+}
+
+/* Swap Section Styles */
+.swap-section {
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.swap-mint-info {
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.swap-mint-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: white;
+  line-height: 1.3;
+}
+
+.swap-mint-url {
+  font-size: 14px;
+  line-height: 1.3;
+  margin-top: 2px;
+}
+
+.swap-amount {
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  white-space: nowrap;
+}
+
+.swap-arrow-icon {
+  width: 24px;
+  height: 24px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.swap-destination-section {
+  margin-top: 8px;
+}
+
+.swap-section-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.swap-info-tip {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  background: rgba(33, 150, 243, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(33, 150, 243, 0.2);
+}
+
+.swap-info-text {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.4;
 }
 </style>
