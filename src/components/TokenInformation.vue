@@ -10,7 +10,7 @@
     <!-- Token Details Section -->
     <div class="token-details-section q-mt-md q-mb-lg">
       <!-- Fee (if applicable) -->
-      <div v-if="receiveFee > 0" class="detail-item q-mb-md">
+      <div v-if="receiveFee > 0 && !hideFee" class="detail-item q-mb-md">
         <div class="detail-label">
           <arrow-down-up-icon size="20" color="#9E9E9E" class="detail-icon" />
           <div class="detail-name">Fee</div>
@@ -21,7 +21,7 @@
       </div>
 
       <!-- Unit -->
-      <div class="detail-item q-mb-md">
+      <div v-if="!hideUnit" class="detail-item q-mb-md">
         <div class="detail-label">
           <banknote-icon size="20" color="#9E9E9E" class="detail-icon" />
           <div class="detail-name">Unit</div>
@@ -30,7 +30,7 @@
       </div>
 
       <!-- Fiat -->
-      <div v-if="showFiat" class="detail-item q-mb-md">
+      <div v-if="showFiat && !hideFiat" class="detail-item q-mb-md">
         <div class="detail-label">
           <banknote-icon size="20" color="#9E9E9E" class="detail-icon" />
           <div class="detail-name">Fiat</div>
@@ -41,7 +41,10 @@
       </div>
 
       <!-- P2PK Lock Status (if locked) -->
-      <div v-if="isLocked(proofsToShow)" class="detail-item q-mb-md">
+      <div
+        v-if="isLocked(proofsToShow) && !hideP2PK"
+        class="detail-item q-mb-md"
+      >
         <div class="detail-label">
           <lock-icon size="20" color="#9E9E9E" class="detail-icon" />
           <div class="detail-name">P2PK</div>
@@ -59,7 +62,7 @@
       </div>
 
       <!-- Mint URL -->
-      <div class="detail-item q-mb-md">
+      <div v-if="!hideMint" class="detail-item q-mb-md">
         <div class="detail-label">
           <building-icon size="20" color="#9E9E9E" class="detail-icon" />
           <div class="detail-name">Mint</div>
@@ -75,7 +78,7 @@
       </div>
 
       <!-- Memo (if available) -->
-      <div v-if="displayMemo" class="detail-item">
+      <div v-if="displayMemo && !hideMemo" class="detail-item">
         <div class="detail-label">
           <message-circle-icon size="20" color="#9E9E9E" class="detail-icon" />
           <div class="detail-name">Memo</div>
@@ -121,6 +124,30 @@ export default defineComponent({
   props: {
     encodedToken: String,
     hideAmount: {
+      type: Boolean,
+      default: false,
+    },
+    hideUnit: {
+      type: Boolean,
+      default: false,
+    },
+    hideFiat: {
+      type: Boolean,
+      default: false,
+    },
+    hideMemo: {
+      type: Boolean,
+      default: false,
+    },
+    hideP2PK: {
+      type: Boolean,
+      default: false,
+    },
+    hideMint: {
+      type: Boolean,
+      default: false,
+    },
+    hideFee: {
       type: Boolean,
       default: false,
     },

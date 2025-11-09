@@ -1,33 +1,33 @@
 <template>
   <div class="amount-input-root">
-    <div class="amount-container">
-      <slot name="overlay" />
-      <div
-        ref="amountDisplayRef"
-        class="amount-display text-weight-bold text-center"
-        :class="{ 'text-grey-6': muted }"
-      >
-        {{ primaryAmountDisplay }}
-      </div>
+    <slot name="overlay" />
+    <div
+      ref="amountDisplayRef"
+      class="amount-display text-weight-bold text-center"
+      :class="{ 'text-grey-6': muted }"
+    >
+      {{ primaryAmountDisplay }}
     </div>
-    <div class="fiat-container q-mt-xs">
-      <div
-        class="fiat-display text-grey-6 q-mt-lg"
-        :class="{ invisible: !secondaryDisplay }"
-        @click="toggleFiatMode"
-      >
-        {{ secondaryDisplay || " " }}
+    <div v-if="showFiatConversion" class="fiat-container">
+      <div class="fiat-wrapper">
+        <div
+          class="fiat-display text-grey-6"
+          :class="{ invisible: !secondaryDisplay }"
+          @click="toggleFiatMode"
+        >
+          {{ secondaryDisplay || " " }}
+        </div>
+        <q-icon
+          v-if="showSwap"
+          name="swap_vert"
+          size="24px"
+          class="fiat-icon text-grey-6 cursor-pointer"
+          @click="toggleFiatMode"
+          aria-label="Swap amount/fiat input mode"
+          :aria-pressed="fiatMode ? 'true' : 'false'"
+          role="button"
+        />
       </div>
-      <q-icon
-        v-if="showSwap"
-        name="swap_vert"
-        size="24px"
-        class="text-grey-6 q-ml-xs cursor-pointer q-mt-lg"
-        @click="toggleFiatMode"
-        aria-label="Swap amount/fiat input mode"
-        :aria-pressed="fiatMode ? 'true' : 'false'"
-        role="button"
-      />
     </div>
   </div>
   <!-- amount-input-root keeps structure minimal so parents can place it within their layout -->
@@ -57,6 +57,10 @@ export default defineComponent({
     },
     // whether the component should react to global keyboard input
     enabled: {
+      type: Boolean,
+      default: true,
+    },
+    showFiatConversion: {
       type: Boolean,
       default: true,
     },
@@ -343,35 +347,43 @@ export default defineComponent({
 </script>
 <style scoped>
 .amount-input-root {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-.amount-container {
   position: relative;
-  max-width: 90vw;
-  height: 88px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 100%;
+  min-height: 120px; /* Ensure enough space for both displays */
 }
 .amount-display {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: clamp(56px, 11vw, 80px);
   line-height: 1.1;
   white-space: nowrap;
-  max-width: 100%;
+  max-width: 90vw;
 }
 .fiat-container {
-  height: 18px;
-  width: 100%;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
   display: flex;
   justify-content: center;
+  align-items: center;
+  height: 18px;
+}
+.fiat-wrapper {
+  position: relative;
+  display: inline-flex;
   align-items: center;
 }
 .fiat-display {
   font-size: 20px;
   text-align: center;
+}
+.fiat-icon {
+  position: absolute;
+  left: 100%;
+  margin-left: 4px;
 }
 .invisible {
   visibility: hidden;

@@ -37,7 +37,9 @@
         </div>
 
         <!-- Content area -->
-        <div class="col column items-center justify-start q-px-lg scroll-container">
+        <div
+          class="col column items-center justify-start q-px-lg scroll-container"
+        >
           <div class="row justify-center full-width">
             <div
               class="col-12 col-sm-11 col-md-8 q-px-sm q-mb-sm"
@@ -91,6 +93,7 @@
                       <TokenInformation
                         :encodedToken="receiveData.tokensBase64"
                         :hide-amount="true"
+                        :hide-unit="true"
                       />
                     </div>
                   </div>
@@ -153,7 +156,10 @@
                         <!-- Mint Info -->
                         <div class="col text-left">
                           <div class="swap-mint-name">
-                            {{ sourceMintInfo?.nickname || sourceMintInfo?.shorturl }}
+                            {{
+                              sourceMintInfo?.nickname ||
+                              sourceMintInfo?.shorturl
+                            }}
                           </div>
                           <div class="swap-mint-url text-grey-6">
                             {{ sourceMintInfo?.shorturl }}
@@ -175,7 +181,11 @@
                     <!-- Destination Mint Selector -->
                     <div class="swap-destination-section">
                       <div class="swap-section-label q-mb-sm">
-                        {{ $t("ReceiveTokenDialog.swap_section.destination_label") }}
+                        {{
+                          $t(
+                            "ReceiveTokenDialog.swap_section.destination_label"
+                          )
+                        }}
                       </div>
                       <ChooseMint />
                     </div>
@@ -317,7 +327,11 @@
                     :loading="swapBlocking"
                     :disabled="activeMintUrl == tokenMint"
                   >
-                    {{ $t("ReceiveTokenDialog.actions.receive_to_selected_mint.label") }}
+                    {{
+                      $t(
+                        "ReceiveTokenDialog.actions.receive_to_selected_mint.label"
+                      )
+                    }}
                     <template v-slot:loading>
                       <q-spinner-hourglass size="xs" />
                       {{

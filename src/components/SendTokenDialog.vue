@@ -134,6 +134,7 @@
             v-model="sendData.amount"
             :muted="insufficientFunds"
             :enabled="!sendData.tokens"
+            :show-fiat-conversion="!insufficientFunds"
             @enter="sendTokens"
           >
             <template #overlay>
@@ -158,7 +159,7 @@
                 outline
                 rounded
                 size="md"
-                class="q-pt-xl amount-warning-badge"
+                class="amount-warning-badge"
               >
                 <transition name="wobble" mode="out-in" appear>
                   <span
@@ -620,7 +621,7 @@ export default defineComponent({
 }
 .amount-warning-badge {
   position: absolute;
-  top: calc(100% + 16px);
+  top: calc(100% - 20px);
   left: 50%;
   transform: translateX(-50%);
   z-index: 2;
