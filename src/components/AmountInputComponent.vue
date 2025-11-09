@@ -163,6 +163,14 @@ export default defineComponent({
           const fiat = this.fiatFromSats(MAX_AMOUNT);
           this.fiatEditBuffer = this.numberToFiatBuffer(fiat);
         }
+        return;
+      }
+      // Sync buffers when modelValue changes externally (e.g., from NumericKeyboard)
+      if (this.fiatMode) {
+        const fiat = this.fiatFromSats(newVal);
+        this.fiatEditBuffer = this.numberToFiatBuffer(fiat);
+      } else {
+        this.amountEditBuffer = String(newVal);
       }
     },
     enabled(val: boolean) {

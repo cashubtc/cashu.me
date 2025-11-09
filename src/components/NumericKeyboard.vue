@@ -112,115 +112,30 @@ export default defineComponent({
     },
   },
   methods: {
+    sendKey(key: string) {
+      // Delegate input handling to the global keyboard listener in AmountInputComponent
+      window.dispatchEvent(new KeyboardEvent("keydown", { key }));
+    },
     addDigit(digit: string) {
-      if (this.isIntegerCurrency) {
-        // sat/msat behavior unchanged: append digits to an integer string
-        const current = this.modelValue || "0";
-        const newVal = current === "0" ? digit : current + digit;
-        this.$emit("update:modelValue", newVal);
-        return;
-      }
-
-      // Fiat-style behavior: edit using cents internally, emit dollars as decimal
-      const currentCents = this.parseCents(this.modelValue) || 0;
-      const dollars = Math.floor(currentCents / 100);
-
-      if (!this.hasDecimal) {
-        // Append digit to whole dollars (implicit .00)
-        const newDollars = dollars * 10 + Number(digit);
-        const newCents = newDollars * 100;
-        this.$emit("update:modelValue", String(newCents / 100));
-        return;
-      }
-
-      // We are in decimal mode, allow up to 2 decimal digits
-      if (this.decimalDigits >= 2) {
-        // ignore extra digits beyond 2 decimals
-        return;
-      }
-
-      const fractional = currentCents % 100;
-      const base = dollars * 100;
-      if (this.decimalDigits === 0) {
-        // first decimal digit goes to tens-of-cents
-        const newCents = base + Number(digit) * 10;
-        this.decimalDigits = 1;
-        this.$emit("update:modelValue", String(newCents / 100));
-        return;
-      }
-      // this.decimalDigits === 1
-      const tens = Math.floor(fractional / 10); // existing tens-of-cents
-      const newCents = base + tens * 10 + Number(digit);
-      this.decimalDigits = 2;
-      this.$emit("update:modelValue", String(newCents / 100));
+      this.sendKey(digit);
     },
     backspace() {
-      if (this.isIntegerCurrency) {
-        // Original integer behavior
-        const current = this.modelValue || "0";
-        const newVal = current.length > 1 ? current.slice(0, -1) : "0";
-        this.$emit("update:modelValue", newVal);
-        return;
-      }
-
-      // Fiat-style deletion
-      const currentCents = this.parseCents(this.modelValue) || 0;
-      const dollars = Math.floor(currentCents / 100);
-      const fractional = currentCents % 100;
-
-      if (this.hasDecimal) {
-        if (this.decimalDigits === 2) {
-          // Drop ones-of-cents -> keep tens-of-cents
-          const newCents = dollars * 100 + Math.floor(fractional / 10) * 10;
-          this.decimalDigits = 1;
-          this.$emit("update:modelValue", String(newCents / 100));
-          return;
-        }
-        if (this.decimalDigits === 1) {
-          // Drop tens-of-cents -> no fractional digits remain
-          const newCents = dollars * 100;
-          this.decimalDigits = 0;
-          this.hasDecimal = false; // back to 100x input mode
-          this.$emit("update:modelValue", String(newCents / 100));
-          return;
-        }
-        // decimalDigits === 0 -> treat as non-decimal mode
-        this.hasDecimal = false;
-      }
-
-      // Non-decimal mode: drop last dollars digit
-      const newDollars = Math.floor(dollars / 10);
-      const newCents = newDollars * 100;
-      this.$emit("update:modelValue", String(newCents / 100));
+      this.sendKey("Backspace");
     },
     addComma() {
-      if (this.isIntegerCurrency) {
-        // No-op for integer currencies
-        return;
-      }
-      if (this.hasDecimal) {
-        return;
-      }
-      // Enter decimal mode without changing the numeric value
-      this.hasDecimal = true;
-      this.decimalDigits = 0;
+      if (this.isIntegerCurrency) return;
+      this.sendKey(".");
     },
     closeKeyboard() {
-      this.useNumericKeyboard = false;
-      this.showNumericKeyboard = false;
+      (this as any).useNumericKeyboard = false;
+      (this as any).showNumericKeyboard = false;
       notify(
-        this.$i18n.t("NumericKeyboard.actions.close.closed_info_text"),
+        this.$t("NumericKeyboard.actions.close.closed_info_text") as any,
         "bottom"
       );
     },
     emitDone() {
-      this.$emit("done");
-    },
-    parseCents(value: string | null | undefined): number {
-      if (!value) return 0;
-      const n = Number(value);
-      if (isNaN(n)) return 0;
-      return Math.max(0, Math.round(n * 100));
+      this.sendKey("Enter");
     },
   },
 });
