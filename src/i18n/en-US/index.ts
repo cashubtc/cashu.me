@@ -882,6 +882,10 @@ export default {
         receove_to_trusted_mint: {
           label: "Receive to trusted mint",
         },
+        swap: {
+          label: "@:global.actions.swap.label",
+          in_progress: "@:MintSettings.swap.actions.swap.label",
+        },
       },
       caption:
         "Swap funds between mints via Lightning. Note: Leave room for potential Lightning fees. If the incoming payment does not succeed, check the invoice manually.",
@@ -894,12 +898,6 @@ export default {
         },
         amount: {
           label: "Amount ({ ticker })",
-        },
-      },
-      actions: {
-        swap: {
-          label: "@:global.actions.swap.label",
-          in_progress: "@:MintSettings.swap.actions.swap.label",
         },
       },
     },
