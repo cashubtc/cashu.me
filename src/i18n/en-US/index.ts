@@ -35,7 +35,7 @@ export default {
         label: "Send",
       },
       swap: {
-        label: "Swap",
+        label: "Receive to trusted mint",
       },
       update: {
         label: "Update",
@@ -1094,7 +1094,7 @@ export default {
         in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
       later: {
-        label: "Later",
+        label: "Receive offline",
         tooltip_text: "Add to history to receive later",
         already_in_history_success_text: "Ecash already in History",
         added_to_history_success_text: "Ecash added to History",

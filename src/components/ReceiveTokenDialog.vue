@@ -178,17 +178,17 @@
               <!-- VALID TOKEN content -->
               <div v-if="tokenDecodesCorrectly">
                 <!-- print token in fixed width font -->
-                <div class="row q-pt-xl">
+                <div class="row q-pt-md">
                   <div class="col-12">
                     <TokenStringRender
                       :token-string="receiveData.tokensBase64"
-                      :max-length="300"
-                      style="height: 200px"
+                      :max-length="maxLengthForTokenString"
+                      style="height: 20vh"
                     />
                   </div>
                 </div>
 
-                <div class="row">
+                <div class="row q-pt-md">
                   <div class="col-12">
                     <TokenInformation
                       :encodedToken="receiveData.tokensBase64"
@@ -196,39 +196,12 @@
                   </div>
                 </div>
 
-                <!-- Top content actions (Later and Swap). Receive moved to bottom panel -->
-                <div class="row q-pt-md" v-if="!swapSelected">
-                  <!-- swap to trusted mint -->
-                  <q-btn
-                    v-if="enableReceiveSwaps && activeMintUrl && mints.length"
-                    @click="swapSelected = true"
-                    color="primary"
-                    rounded
-                    flat
-                    class="q-mr-sm"
-                  >
-                    <q-icon name="swap_horiz" class="q-pr-sm" />
-                    {{ $t("ReceiveTokenDialog.actions.swap.label") }}
-                    <q-tooltip>{{
-                      $t("ReceiveTokenDialog.actions.swap.tooltip_text")
-                    }}</q-tooltip>
-                  </q-btn>
-                  <q-btn
-                    @click="addPendingTokenToHistory(receiveData.tokensBase64)"
-                    color="primary"
-                    rounded
-                    outline
-                    class="q-mr-none full-width"
-                    >{{ $t("ReceiveTokenDialog.actions.later.label") }}
-                    <q-tooltip>{{
-                      $t("ReceiveTokenDialog.actions.later.tooltip_text")
-                    }}</q-tooltip>
-                  </q-btn>
-                </div>
-
                 <!-- swap mint selection -->
-                <div class="row q-pl-md q-pt-sm" v-if="swapSelected">
-                  <div>
+                <div
+                  class="row q-pl-md q-pt-sm justify-center"
+                  v-if="swapSelected"
+                >
+                  <div class="col-6 q-px-lg q-mb-sm">
                     <q-icon
                       name="arrow_downward"
                       class="q-mr-xs"
@@ -245,51 +218,28 @@
                       </template>
                     </i18n-t>
                   </div>
-                </div>
-                <div class="row q-pt-xs" v-if="swapSelected">
-                  <ChooseMint
-                    :rounded="true"
-                    :title="``"
-                    :style="`font-family: monospace; font-size: 12px;`"
-                  />
-                </div>
-                <div class="row q-pt-sm" v-if="swapSelected">
-                  <q-btn
-                    @click="handleSwapToTrustedMint"
-                    color="primary"
-                    rounded
-                    class="q-pr-md"
-                    :loading="swapBlocking"
-                    :disabled="activeMintUrl == tokenMint"
-                  >
-                    <q-icon name="swap_horiz" class="q-pr-sm" />
-                    {{ $t("ReceiveTokenDialog.actions.confirm_swap.label") }}
-                    <template v-slot:loading>
-                      <q-spinner-hourglass size="xs" />
-                      {{
+                  <div class="col-6 q-px-lg q-mb-sm">
+                    <q-btn
+                      class="full-width"
+                      color="grey"
+                      flat
+                      @click="swapSelected = false"
+                      :disable="swapBlocking"
+                    >
+                      <q-icon name="close" class="q-pr-sm" />
+                      {{ $t("ReceiveTokenDialog.actions.cancel_swap.label") }}
+                      <q-tooltip>{{
                         $t(
-                          "ReceiveTokenDialog.actions.confirm_swap.in_progress"
+                          "ReceiveTokenDialog.actions.cancel_swap.tooltip_text"
                         )
-                      }}
-                    </template>
-                    <q-tooltip>{{
-                      $t("ReceiveTokenDialog.actions.confirm_swap.tooltip_text")
-                    }}</q-tooltip>
-                  </q-btn>
-                  <q-btn
-                    @click="swapSelected = false"
-                    color="grey"
-                    rounded
-                    flat
-                    class="q-mr-none q-pr-sm"
-                    v-if="!swapBlocking"
-                  >
-                    <q-icon name="close" class="q-pr-sm" />
-                    {{ $t("ReceiveTokenDialog.actions.cancel_swap.label") }}
-                    <q-tooltip>{{
-                      $t("ReceiveTokenDialog.actions.cancel_swap.tooltip_text")
-                    }}</q-tooltip>
-                  </q-btn>
+                      }}</q-tooltip>
+                    </q-btn>
+                  </div>
+                </div>
+                <div class="row q-pt-xs justify-center" v-if="swapSelected">
+                  <div class="col-12 q-px-lg q-mb-sm" style="max-width: 600px">
+                    <ChooseMint />
+                  </div>
                 </div>
               </div>
             </div>
@@ -297,37 +247,88 @@
         </div>
 
         <!-- Bottom fixed receive action -->
-        <div class="bottom-panel" v-if="tokenDecodesCorrectly && !swapSelected">
+        <div class="bottom-panel" v-if="tokenDecodesCorrectly">
           <div class="row justify-center q-pb-lg q-pt-sm">
             <div
               class="col-12 col-sm-11 col-md-8 q-px-md"
               style="max-width: 600px"
             >
-              <q-btn
-                class="full-width"
-                unelevated
-                size="lg"
-                @click="receiveIfDecodes"
-                color="primary"
-                rounded
-                :disabled="addMintBlocking"
-                :loading="swapBlocking"
-              >
-                {{
-                  knowThisMint
-                    ? addMintBlocking
-                      ? $t(
-                          "ReceiveTokenDialog.actions.receive.label_adding_mint"
-                        )
-                      : $t(
-                          "ReceiveTokenDialog.actions.receive.label_known_mint"
-                        )
-                    : $t("ReceiveTokenDialog.actions.receive.label")
-                }}
-                <template v-slot:loading>
-                  <q-spinner-hourglass />
-                </template>
-              </q-btn>
+              <template v-if="swapSelected">
+                <q-btn
+                  class="full-width"
+                  unelevated
+                  size="lg"
+                  @click="handleSwapToTrustedMint"
+                  color="primary"
+                  rounded
+                  :loading="swapBlocking"
+                  :disabled="activeMintUrl == tokenMint"
+                >
+                  <q-icon name="swap_horiz" class="q-pr-sm" />
+                  {{ $t("ReceiveTokenDialog.actions.confirm_swap.label") }}
+                  <template v-slot:loading>
+                    <q-spinner-hourglass size="xs" />
+                    {{
+                      $t("ReceiveTokenDialog.actions.confirm_swap.in_progress")
+                    }}
+                  </template>
+                  <q-tooltip>{{
+                    $t("ReceiveTokenDialog.actions.confirm_swap.tooltip_text")
+                  }}</q-tooltip>
+                </q-btn>
+              </template>
+              <template v-else>
+                <q-btn
+                  @click="addPendingTokenToHistory(receiveData.tokensBase64)"
+                  color="primary"
+                  rounded
+                  outline
+                  class="full-width q-mb-md"
+                >
+                  {{ $t("ReceiveTokenDialog.actions.later.label") }}
+                  <q-tooltip>{{
+                    $t("ReceiveTokenDialog.actions.later.tooltip_text")
+                  }}</q-tooltip>
+                </q-btn>
+                <q-btn
+                  v-if="enableReceiveSwaps && activeMintUrl && mints.length"
+                  @click="swapSelected = true"
+                  color="primary"
+                  rounded
+                  outline
+                  class="full-width q-mb-md"
+                >
+                  {{ $t("ReceiveTokenDialog.actions.swap.label") }}
+                  <q-tooltip>{{
+                    $t("ReceiveTokenDialog.actions.swap.tooltip_text")
+                  }}</q-tooltip>
+                </q-btn>
+                <q-btn
+                  class="full-width"
+                  unelevated
+                  size="lg"
+                  @click="receiveIfDecodes"
+                  color="primary"
+                  rounded
+                  :disabled="addMintBlocking"
+                  :loading="swapBlocking"
+                >
+                  {{
+                    knowThisMint
+                      ? addMintBlocking
+                        ? $t(
+                            "ReceiveTokenDialog.actions.receive.label_adding_mint"
+                          )
+                        : $t(
+                            "ReceiveTokenDialog.actions.receive.label_known_mint"
+                          )
+                      : $t("ReceiveTokenDialog.actions.receive.label")
+                  }}
+                  <template v-slot:loading>
+                    <q-spinner-hourglass />
+                  </template>
+                </q-btn>
+              </template>
             </div>
           </div>
         </div>
@@ -485,6 +486,9 @@ export default defineComponent({
     swapToMintAmount: function () {
       const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
       return this.tokenAmount - useSwapStore().meltToMintFees(decodedToken);
+    },
+    maxLengthForTokenString: function () {
+      return Math.floor(this.$q.screen.height / 3.5);
     },
   },
   methods: {

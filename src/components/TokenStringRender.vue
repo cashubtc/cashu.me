@@ -55,7 +55,7 @@ export default defineComponent({
       }
 
       const targetLength = token.length;
-      const duration = Math.max(400, Math.min(1200, targetLength * 12));
+      const duration = Math.max(600, Math.min(1200, targetLength * 12));
       const start = performance.now();
 
       const step = (now: number) => {
