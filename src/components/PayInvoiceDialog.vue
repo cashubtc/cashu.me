@@ -140,15 +140,15 @@
               </div>
 
               <!-- LNURL PAY CONTENT -->
-              <div v-else-if="payInvoiceData.lnurlpay" class="q-pt-sm">
-                <q-form @submit="lnurlPaySecond" class="q-gutter-md">
-                  <p
-                    v-if="
-                      payInvoiceData.lnurlpay.maxSendable ==
-                      payInvoiceData.lnurlpay.minSendable
-                    "
-                    class="q-my-none text-h6 text-center"
-                  >
+              <div v-else-if="payInvoiceData.lnurlpay">
+                <!-- Fixed amount display (when maxSendable == minSendable) -->
+                <div
+                  v-if="
+                    payInvoiceData.lnurlpay.maxSendable ==
+                    payInvoiceData.lnurlpay.minSendable
+                  "
+                >
+                  <p class="q-my-none text-h6 text-center">
                     <i18n-t
                       keypath="PayInvoiceDialog.lnurlpay.amount_exact_label"
                     >
@@ -163,7 +163,48 @@
                       </template>
                     </i18n-t>
                   </p>
-                  <p v-else class="q-my-none text-h6 text-center">
+                  <q-separator class="q-my-sm"></q-separator>
+                  <div class="row" v-if="payInvoiceData.lnurlpay.description">
+                    <p class="col text-justify text-italic">
+                      {{ payInvoiceData.lnurlpay.description }}
+                    </p>
+                    <p
+                      class="col-4 q-pl-md"
+                      v-if="payInvoiceData.lnurlpay.image"
+                    >
+                      <q-img :src="payInvoiceData.lnurlpay.image" />
+                    </p>
+                  </div>
+                  <!-- Comment input for fixed amount -->
+                  <div
+                    class="row justify-center q-mt-md"
+                    v-if="payInvoiceData.lnurlpay.commentAllowed > 0"
+                  >
+                    <div
+                      class="col-12 col-sm-11 col-md-8 q-px-sm"
+                      style="max-width: 600px"
+                    >
+                      <q-input
+                        round
+                        outlined
+                        v-model="payInvoiceData.input.comment"
+                        :type="
+                          payInvoiceData.lnurlpay.commentAllowed > 64
+                            ? 'textarea'
+                            : 'text'
+                        "
+                        :label="
+                          $t('PayInvoiceDialog.lnurlpay.inputs.comment.label')
+                        "
+                        :maxlength="payInvoiceData.lnurlpay.commentAllowed"
+                      ></q-input>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Variable amount with AmountInputComponent -->
+                <div v-else>
+                  <p class="q-my-none text-h6 text-center">
                     <i18n-t
                       keypath="PayInvoiceDialog.lnurlpay.amount_range_label"
                     >
@@ -199,37 +240,37 @@
                       <q-img :src="payInvoiceData.lnurlpay.image" />
                     </p>
                   </div>
-                  <div class="row">
-                    <div class="col">
-                      <q-input
-                        filled
-                        dense
-                        autofocus
-                        v-model.number="payInvoiceData.input.amount"
-                        type="number"
-                        :label="
-                          $t('PayInvoiceDialog.lnurlpay.inputs.amount.label', {
-                            ticker: tickerShort,
-                          })
-                        "
-                        :min="payInvoiceData.lnurlpay.minSendable / 1000"
-                        :max="payInvoiceData.lnurlpay.maxSendable / 1000"
-                        :readonly="
-                          payInvoiceData.lnurlpay.maxSendable ==
-                          payInvoiceData.lnurlpay.minSendable
-                        "
-                      >
-                      </q-input>
-                    </div>
+
+                  <!-- Amount display area -->
+                  <div
+                    class="column items-center justify-center q-px-lg amount-area"
+                  >
+                    <AmountInputComponent
+                      v-model="payInvoiceData.input.amount"
+                      :enabled="true"
+                      @enter="lnurlPaySecond"
+                      @fiat-mode-changed="fiatKeyboardMode = $event"
+                    />
+                  </div>
+
+                  <!-- Comment input below amount -->
+                  <div
+                    class="row justify-center q-mt-md"
+                    v-if="payInvoiceData.lnurlpay.commentAllowed > 0"
+                  >
                     <div
-                      class="col-8 q-pl-md"
-                      v-if="payInvoiceData.lnurlpay.commentAllowed > 0"
+                      class="col-12 col-sm-11 col-md-8 q-px-sm"
+                      style="max-width: 600px"
                     >
                       <q-input
-                        filled
-                        dense
+                        round
+                        outlined
                         v-model="payInvoiceData.input.comment"
-                        _type="payInvoiceData.lnurlpay.commentAllowed > 64 ? 'textarea' : 'text'"
+                        :type="
+                          payInvoiceData.lnurlpay.commentAllowed > 64
+                            ? 'textarea'
+                            : 'text'
+                        "
                         :label="
                           $t('PayInvoiceDialog.lnurlpay.inputs.comment.label')
                         "
@@ -237,12 +278,7 @@
                       ></q-input>
                     </div>
                   </div>
-                  <div class="row q-mt-lg">
-                    <q-btn unelevated color="primary" type="submit">{{
-                      $t("PayInvoiceDialog.lnurlpay.actions.send.label")
-                    }}</q-btn>
-                  </div>
-                </q-form>
+                </div>
               </div>
 
               <!-- INPUT CONTENT -->
@@ -381,6 +417,106 @@
             </div>
           </div>
         </div>
+
+        <!-- Bottom fixed LNURL pay action -->
+        <div
+          class="bottom-panel"
+          v-if="
+            payInvoiceData.lnurlpay &&
+            payInvoiceData.lnurlpay.maxSendable !=
+              payInvoiceData.lnurlpay.minSendable
+          "
+        >
+          <div class="keypad-wrapper">
+            <NumericKeyboard
+              :force-visible="true"
+              :hide-close="true"
+              :hide-enter="true"
+              :hide-comma="
+                (activeUnit === 'sat' || activeUnit === 'msat') &&
+                !fiatKeyboardMode
+              "
+              :model-value="String(payInvoiceData.input.amount ?? 0)"
+              @update:modelValue="
+                (val: string | number) =>
+                  (payInvoiceData.input.amount = Number(val))
+              "
+              @done="lnurlPaySecond"
+            />
+          </div>
+          <!-- LNURL pay action below keyboard -->
+          <div class="row justify-center q-pb-lg q-pt-sm">
+            <div
+              class="col-12 col-sm-11 col-md-8 q-px-md"
+              style="max-width: 600px"
+            >
+              <q-btn
+                class="full-width"
+                unelevated
+                size="lg"
+                color="primary"
+                rounded
+                @click="lnurlPaySecond"
+                :disabled="
+                  payInvoiceData.blocking ||
+                  payInvoiceData.input.amount == null ||
+                  payInvoiceData.input.amount <= 0 ||
+                  payInvoiceData.input.amount <
+                    payInvoiceData.lnurlpay.minSendable / 1000 ||
+                  payInvoiceData.input.amount >
+                    payInvoiceData.lnurlpay.maxSendable / 1000
+                "
+                :loading="payInvoiceData.blocking"
+              >
+                {{
+                  payInvoiceData.blocking
+                    ? $t("PayInvoiceDialog.lnurlpay.actions.send.in_progress")
+                    : $t("PayInvoiceDialog.lnurlpay.actions.send.label")
+                }}
+                <template v-slot:loading>
+                  <q-spinner-hourglass />
+                </template>
+              </q-btn>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom fixed LNURL pay action (fixed amount, no keyboard) -->
+        <div
+          class="bottom-panel"
+          v-if="
+            payInvoiceData.lnurlpay &&
+            payInvoiceData.lnurlpay.maxSendable ==
+              payInvoiceData.lnurlpay.minSendable
+          "
+        >
+          <div class="row justify-center q-pb-lg q-pt-sm">
+            <div
+              class="col-12 col-sm-11 col-md-8 q-px-md"
+              style="max-width: 600px"
+            >
+              <q-btn
+                class="full-width"
+                unelevated
+                size="lg"
+                color="primary"
+                rounded
+                @click="lnurlPaySecond"
+                :disabled="payInvoiceData.blocking"
+                :loading="payInvoiceData.blocking"
+              >
+                {{
+                  payInvoiceData.blocking
+                    ? $t("PayInvoiceDialog.lnurlpay.actions.send.in_progress")
+                    : $t("PayInvoiceDialog.lnurlpay.actions.send.label")
+                }}
+                <template v-slot:loading>
+                  <q-spinner-hourglass />
+                </template>
+              </q-btn>
+            </div>
+          </div>
+        </div>
       </div>
     </q-card>
   </q-dialog>
@@ -403,6 +539,8 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
 import MultinutPaymentDialog from "./MultinutPaymentDialog.vue";
 import MeltQuoteInformation from "components/MeltQuoteInformation.vue";
+import NumericKeyboard from "components/NumericKeyboard.vue";
+import AmountInputComponent from "components/AmountInputComponent.vue";
 
 import * as _ from "underscore";
 import { Scan as ScanIcon } from "lucide-vue-next";
@@ -417,10 +555,14 @@ export default defineComponent({
     MultinutPaymentDialog,
     ScanIcon,
     MeltQuoteInformation,
+    NumericKeyboard,
+    AmountInputComponent,
   },
   props: {},
   data: function () {
-    return {};
+    return {
+      fiatKeyboardMode: false as boolean,
+    };
   },
   watch: {
     activeMintUrl: async function () {
@@ -432,6 +574,23 @@ export default defineComponent({
       if (this.payInvoiceData.show && this.payInvoiceData.invoice) {
         await this.meltQuoteInvoiceData();
       }
+    },
+    "payInvoiceData.lnurlpay": {
+      handler: function (newVal) {
+        if (newVal && newVal.maxSendable != newVal.minSendable) {
+          // Initialize amount to minSendable if not set
+          if (
+            this.payInvoiceData.input.amount == null ||
+            this.payInvoiceData.input.amount === 0
+          ) {
+            this.payInvoiceData.input.amount = newVal.minSendable / 1000;
+          }
+        } else if (newVal && newVal.maxSendable == newVal.minSendable) {
+          // Set fixed amount
+          this.payInvoiceData.input.amount = newVal.minSendable / 1000;
+        }
+      },
+      immediate: true,
     },
   },
   computed: {
@@ -674,5 +833,16 @@ export default defineComponent({
   top: 50%;
   transform: translateY(-50%);
   z-index: 1;
+}
+
+.amount-area {
+  flex: 1;
+  position: relative;
+}
+
+.keypad-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 </style>
