@@ -7,16 +7,26 @@
         class="amount-display text-weight-bold text-center"
         :class="{ 'text-grey-6': muted }"
       >
-        {{ formattedAmountDisplay }}
+        {{ primaryAmountDisplay }}
       </div>
     </div>
     <div class="fiat-container q-mt-xs">
       <div
         class="fiat-display text-grey-6 q-mt-lg"
-        :class="{ invisible: !secondaryFiatDisplay }"
+        :class="{ invisible: !secondaryDisplay }"
       >
-        {{ secondaryFiatDisplay || " " }}
+        {{ secondaryDisplay || " " }}
       </div>
+      <q-icon
+        v-if="showSwap"
+        name="swap_horiz"
+        size="24px"
+        class="text-grey-6 q-ml-xs cursor-pointer q-mt-lg"
+        @click="toggleFiatMode"
+        aria-label="Swap amount/fiat input mode"
+        :aria-pressed="fiatMode ? 'true' : 'false'"
+        role="button"
+      />
     </div>
   </div>
   <!-- amount-input-root keeps structure minimal so parents can place it within their layout -->
@@ -54,6 +64,8 @@ export default defineComponent({
   data() {
     return {
       amountEditBuffer: "" as string,
+      fiatEditBuffer: "" as string,
+      fiatMode: false as boolean,
     };
   },
   computed: {
@@ -72,6 +84,17 @@ export default defineComponent({
         true
       );
     },
+    primaryAmountDisplay(): string {
+      if (this.fiatMode) {
+        const fiat = this.getFiatBufferNumber();
+        return (this as any).formatCurrency(
+          fiat,
+          this.bitcoinPriceCurrency,
+          true
+        );
+      }
+      return this.formattedAmountDisplay;
+    },
     secondaryFiatDisplay(): string {
       if (!this.modelValue || !this.bitcoinPrice || this.activeUnit !== "sat") {
         return "";
@@ -85,6 +108,31 @@ export default defineComponent({
       );
       return fiat;
     },
+    secondaryDisplay(): string {
+      if (this.fiatMode) {
+        // show converted sats (actual emitted amount)
+        const sats = this.derivedSatsFromFiatBuffer;
+        if (!sats) return "";
+        return (this as any).formatCurrency(
+          sats * this.activeUnitCurrencyMultiplyer,
+          this.activeUnit,
+          true
+        );
+      }
+      return this.secondaryFiatDisplay;
+    },
+    showSwap(): boolean {
+      // Show when the fiat display would be visible OR when currently in fiat mode (so user can switch back)
+      return this.fiatMode || !!this.secondaryFiatDisplay;
+    },
+    derivedSatsFromFiatBuffer(): number {
+      if (!this.bitcoinPrice || !this.currentCurrencyPrice) return 0;
+      const fiat = this.getFiatBufferNumber();
+      if (!isFinite(fiat) || fiat <= 0) return 0;
+      // sats = fiat * 100_000_000 / price_per_BTC
+      const sats = Math.round((fiat * 100000000) / this.currentCurrencyPrice);
+      return Math.max(0, Math.min(sats, MAX_AMOUNT));
+    },
   },
   watch: {
     formattedAmountDisplay() {
@@ -95,6 +143,11 @@ export default defineComponent({
       if (newVal > MAX_AMOUNT) {
         this.$emit("update:modelValue", MAX_AMOUNT);
         this.amountEditBuffer = String(MAX_AMOUNT);
+        if (this.fiatMode) {
+          // keep fiat buffer in sync with clamped sat value
+          const fiat = this.fiatFromSats(MAX_AMOUNT);
+          this.fiatEditBuffer = this.numberToFiatBuffer(fiat);
+        }
       }
     },
     enabled(val: boolean) {
@@ -132,10 +185,51 @@ export default defineComponent({
         element.style.fontSize = `${newFontSize}px`;
       }
     },
+    toggleFiatMode(): void {
+      // Only allow switching when price data is available and activeUnit is sat
+      if (!this.currentCurrencyPrice || this.activeUnit !== "sat") return;
+      this.fiatMode = !this.fiatMode;
+      if (this.fiatMode) {
+        // initialize fiat buffer from current model value
+        const sats = this.modelValue == null ? 0 : this.modelValue;
+        const fiat = this.fiatFromSats(sats);
+        this.fiatEditBuffer = this.numberToFiatBuffer(fiat);
+      } else {
+        // initialize sats buffer from current model value
+        this.amountEditBuffer =
+          this.modelValue == null ? "0" : String(this.modelValue);
+      }
+      this.$nextTick(() => this.adjustAmountFontSize());
+    },
+    fiatFromSats(sats: number): number {
+      // fiat = sats * price_per_BTC / 100_000_000
+      return (sats * this.currentCurrencyPrice) / 100000000;
+    },
+    satsFromFiat(fiat: number): number {
+      if (!this.currentCurrencyPrice) return 0;
+      const sats = Math.round((fiat * 100000000) / this.currentCurrencyPrice);
+      return Math.max(0, Math.min(sats, MAX_AMOUNT));
+    },
+    getFiatBufferNumber(): number {
+      const buf = this.fiatEditBuffer;
+      if (!buf || buf === ".") return 0;
+      const num = Number(buf.replace(/,/g, "."));
+      return isNaN(num) ? 0 : num;
+    },
+    numberToFiatBuffer(num: number): string {
+      // keep at most 2 decimals for fiat buffer
+      return (Math.round(num * 100) / 100).toFixed(2).replace(/\.00$/, "");
+    },
     initializeKeyHandling(): void {
       // initialize buffer from current value
       this.amountEditBuffer =
         this.modelValue == null ? "0" : String(this.modelValue);
+      if (this.currentCurrencyPrice && this.activeUnit === "sat") {
+        const fiat = this.fiatFromSats(this.modelValue || 0);
+        this.fiatEditBuffer = this.numberToFiatBuffer(fiat);
+      } else {
+        this.fiatEditBuffer = "";
+      }
       window.addEventListener("keydown", this.onGlobalAmountKeydown);
       window.addEventListener("resize", this.adjustAmountFontSize);
     },
@@ -143,6 +237,7 @@ export default defineComponent({
       window.removeEventListener("keydown", this.onGlobalAmountKeydown);
       window.removeEventListener("resize", this.adjustAmountFontSize);
       this.amountEditBuffer = "";
+      this.fiatEditBuffer = "";
     },
     onGlobalAmountKeydown(e: KeyboardEvent): void {
       // ignore if an input/textarea/contenteditable is focused
@@ -156,12 +251,15 @@ export default defineComponent({
         return;
       }
       if ((e as any).metaKey || (e as any).ctrlKey || (e as any).altKey) return;
-      const allowDecimal =
-        this.activeUnit !== "sat" && this.activeUnit !== "msat";
+      const allowDecimal = this.fiatMode
+        ? true
+        : this.activeUnit !== "sat" && this.activeUnit !== "msat";
       const key = (e as KeyboardEvent).key;
-      let buf =
-        this.amountEditBuffer ||
-        (this.modelValue == null ? "0" : String(this.modelValue));
+      let buf = this.fiatMode
+        ? this.fiatEditBuffer ||
+          this.numberToFiatBuffer(this.fiatFromSats(this.modelValue || 0))
+        : this.amountEditBuffer ||
+          (this.modelValue == null ? "0" : String(this.modelValue));
       let handled = false;
 
       if (/^[0-9]$/.test(key)) {
@@ -199,18 +297,40 @@ export default defineComponent({
       if (buf.startsWith("0") && buf.length > 1 && buf[1] !== ".") {
         buf = String(parseInt(buf, 10) || 0);
       }
-      this.amountEditBuffer = buf;
-      if (buf === "" || buf === ".") {
-        this.$emit("update:modelValue", null);
-      } else {
-        const num = Number(buf);
-        if (isNaN(num)) {
+      if (this.fiatMode) {
+        this.fiatEditBuffer = buf;
+        if (buf === "" || buf === ".") {
           this.$emit("update:modelValue", null);
-        } else if (num > MAX_AMOUNT) {
-          this.amountEditBuffer = String(MAX_AMOUNT);
-          this.$emit("update:modelValue", MAX_AMOUNT);
         } else {
-          this.$emit("update:modelValue", num);
+          const fiatNum = Number(buf);
+          if (isNaN(fiatNum)) {
+            this.$emit("update:modelValue", null);
+          } else {
+            let sats = this.satsFromFiat(fiatNum);
+            if (sats >= MAX_AMOUNT) {
+              sats = MAX_AMOUNT;
+              // reflect clamp back into fiat buffer
+              this.fiatEditBuffer = this.numberToFiatBuffer(
+                this.fiatFromSats(MAX_AMOUNT)
+              );
+            }
+            this.$emit("update:modelValue", sats);
+          }
+        }
+      } else {
+        this.amountEditBuffer = buf;
+        if (buf === "" || buf === ".") {
+          this.$emit("update:modelValue", null);
+        } else {
+          const num = Number(buf);
+          if (isNaN(num)) {
+            this.$emit("update:modelValue", null);
+          } else if (num > MAX_AMOUNT) {
+            this.amountEditBuffer = String(MAX_AMOUNT);
+            this.$emit("update:modelValue", MAX_AMOUNT);
+          } else {
+            this.$emit("update:modelValue", num);
+          }
         }
       }
     },
@@ -246,7 +366,7 @@ export default defineComponent({
   align-items: center;
 }
 .fiat-display {
-  font-size: 16px;
+  font-size: 20px;
   text-align: center;
 }
 .invisible {
