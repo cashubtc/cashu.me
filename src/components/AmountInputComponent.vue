@@ -72,12 +72,13 @@ export default defineComponent({
       default: true,
     },
   },
-  emits: ["update:modelValue", "enter"],
+  emits: ["update:modelValue", "enter", "fiat-mode-changed"],
   data() {
     return {
       amountEditBuffer: "" as string,
       fiatEditBuffer: "" as string,
       fiatMode: false as boolean,
+      isFiatTyping: false as boolean,
     };
   },
   computed: {
@@ -167,6 +168,8 @@ export default defineComponent({
       }
       // Sync buffers when modelValue changes externally (e.g., from NumericKeyboard)
       if (this.fiatMode) {
+        // Do not override user's fiat typing buffer during input
+        if (this.isFiatTyping) return;
         const fiat = this.fiatFromSats(newVal);
         this.fiatEditBuffer = this.numberToFiatBuffer(fiat);
       } else {
@@ -223,6 +226,7 @@ export default defineComponent({
           this.modelValue == null ? "0" : String(this.modelValue);
       }
       this.$nextTick(() => this.adjustAmountFontSize());
+      this.$emit("fiat-mode-changed", this.fiatMode);
     },
     fiatFromSats(sats: number): number {
       // fiat = sats * price_per_BTC / 100_000_000
@@ -337,7 +341,11 @@ export default defineComponent({
                 this.fiatFromSats(MAX_AMOUNT)
               );
             }
+            this.isFiatTyping = true;
             this.$emit("update:modelValue", sats);
+            this.$nextTick(() => {
+              this.isFiatTyping = false;
+            });
           }
         }
       } else {

@@ -136,6 +136,7 @@
             :enabled="!sendData.tokens"
             :show-fiat-conversion="!insufficientFunds"
             @enter="sendTokens"
+            @fiat-mode-changed="fiatKeyboardMode = $event"
           >
             <template #overlay>
               <q-badge
@@ -187,7 +188,10 @@
               :force-visible="true"
               :hide-close="true"
               :hide-enter="true"
-              :hide-comma="activeUnit === 'sat' || activeUnit === 'msat'"
+              :hide-comma="
+                (activeUnit === 'sat' || activeUnit === 'msat') &&
+                !fiatKeyboardMode
+              "
               :model-value="String(sendData.amount ?? 0)"
               @update:modelValue="(val: string | number) => (sendData.amount = Number(val))"
               @done="sendTokens"
@@ -273,7 +277,9 @@ export default defineComponent({
   },
   props: {},
   data: function () {
-    return {};
+    return {
+      fiatKeyboardMode: false as boolean,
+    };
   },
   computed: {
     ...mapWritableState(useSendTokensStore, [
