@@ -178,11 +178,12 @@
               <!-- VALID TOKEN content -->
               <div v-if="tokenDecodesCorrectly">
                 <!-- print token in fixed width font -->
-                <div class="row q-py-xl">
+                <div class="row q-pt-xl">
                   <div class="col-12">
                     <TokenStringRender
                       :token-string="receiveData.tokensBase64"
                       :max-length="300"
+                      style="height: 200px"
                     />
                   </div>
                 </div>
