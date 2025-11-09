@@ -65,6 +65,7 @@
             v-model="invoiceData.amount"
             :enabled="true"
             @enter="requestMintButton"
+            @fiat-mode-changed="fiatKeyboardMode = $event"
           />
         </div>
 
@@ -75,7 +76,10 @@
               :force-visible="true"
               :hide-close="true"
               :hide-enter="true"
-              :hide-comma="activeUnit === 'sat' || activeUnit === 'msat'"
+              :hide-comma="
+                (activeUnit === 'sat' || activeUnit === 'msat') &&
+                !fiatKeyboardMode
+              "
               :model-value="String(invoiceData.amount ?? 0)"
               @update:modelValue="(val: string | number) => (invoiceData.amount = Number(val))"
               @done="requestMintButton"
@@ -137,6 +141,7 @@ export default defineComponent({
   data: function () {
     return {
       createInvoiceButtonBlocked: false,
+      fiatKeyboardMode: false as boolean,
     };
   },
   computed: {
