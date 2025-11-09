@@ -8,6 +8,7 @@
     transition-show="fade"
     transition-hide="fade"
     no-backdrop-dismiss
+    @keydown.esc="payInvoiceData.show = false"
   >
     <q-card class="q-pa-none q-pt-none qcard">
       <div

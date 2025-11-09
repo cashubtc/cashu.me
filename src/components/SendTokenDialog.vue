@@ -6,6 +6,7 @@
     transition-show="fade"
     transition-hide="fade"
     no-backdrop-dismiss
+    @keydown.esc="showSendTokens = false"
   >
     <q-card class="q-pa-none q-pt-none qcard">
       <!--  enter send data (full-screen) -->
@@ -152,20 +153,28 @@
                   >locked</span
                 >
               </q-badge>
-              <q-badge
+              <div
                 v-if="insufficientFunds && sendData.amount"
                 outline
                 rounded
-                color="grey"
                 size="md"
-                class="amount-warning-badge"
+                class="q-pt-xl amount-warning-badge"
               >
-                <span class="text-caption text-weight-medium">
-                  {{
-                    $t("PayInvoiceDialog.invoice.balance_too_low_warning_text")
-                  }}
-                </span>
-              </q-badge>
+                <transition name="wobble" mode="out-in" appear>
+                  <span
+                    v-if="insufficientFunds && sendData.amount"
+                    :key="'warn-text-' + String(sendData.amount ?? '')"
+                    class="text-caption text-weight-medium text-grey-6"
+                    style="font-size: 16px; display: inline-block"
+                  >
+                    {{
+                      $t(
+                        "PayInvoiceDialog.invoice.balance_too_low_warning_text"
+                      )
+                    }}
+                  </span>
+                </transition>
+              </div>
             </template>
           </AmountInputComponent>
         </div>
@@ -527,6 +536,37 @@ export default defineComponent({
 });
 </script>
 <style scoped>
+.wobble-enter-active {
+  animation: wobble-keyframes 600ms ease-out;
+  transform-origin: center;
+  will-change: transform;
+}
+.wobble-leave-active {
+  animation: none !important;
+}
+@keyframes wobble-keyframes {
+  0% {
+    transform: translateX(0) rotate(0deg);
+  }
+  15% {
+    transform: translateX(-8px) rotate(-3deg);
+  }
+  30% {
+    transform: translateX(8px) rotate(3deg);
+  }
+  45% {
+    transform: translateX(-6px) rotate(-2deg);
+  }
+  60% {
+    transform: translateX(6px) rotate(2deg);
+  }
+  75% {
+    transform: translateX(-3px) rotate(-1deg);
+  }
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+}
 .send-fullscreen {
   height: 100vh;
   display: flex;
@@ -585,6 +625,8 @@ export default defineComponent({
   transform: translateX(-50%);
   z-index: 2;
   pointer-events: none;
+  font-size: 16px;
+  white-space: nowrap;
 }
 .bottom-panel {
   margin-top: auto;
