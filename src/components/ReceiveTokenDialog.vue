@@ -105,7 +105,43 @@
                       <div class="col text-h6" style="font-size: 18px">
                         {{ $t("ReceiveTokenDialog.swap_section.title") }}
                       </div>
+                      <!-- Processing/Error status -->
+                      <div v-if="swapProcessing || swapError" class="row items-center no-wrap">
+                        <span
+                          class="q-mr-sm text-subtitle2"
+                          :class="swapError ? 'text-red' : ''"
+                          style="font-size: 0.875rem"
+                        >
+                          {{
+                            swapError
+                              ? $t("ReceiveTokenDialog.actions.swap.failed")
+                              : $t("ReceiveTokenDialog.actions.swap.processing")
+                          }}
+                        </span>
+                        <q-spinner
+                          v-if="swapProcessing"
+                          color="primary"
+                          size="20px"
+                        />
+                        <q-btn
+                          v-if="swapError"
+                          flat
+                          round
+                          dense
+                          icon="close"
+                          @click="swapSelected = false"
+                          color="grey-6"
+                        >
+                          <q-tooltip>{{
+                            $t(
+                              "ReceiveTokenDialog.actions.cancel_swap.tooltip_text"
+                            )
+                          }}</q-tooltip>
+                        </q-btn>
+                      </div>
+                      <!-- Normal close button (hidden during processing) -->
                       <q-btn
+                        v-else
                         flat
                         round
                         dense
@@ -123,52 +159,52 @@
                     </div>
 
                     <!-- Source Mint (Token Origin) -->
-                    <div class="swap-mint-info">
-                      <div class="row items-center no-wrap">
-                        <!-- Mint Icon -->
-                        <q-avatar size="48px" class="q-mr-md">
-                          <q-img
-                            v-if="sourceMintInfo?.iconUrl"
-                            :src="sourceMintInfo.iconUrl"
-                            spinner-color="white"
-                            spinner-size="xs"
-                          >
-                            <template v-slot:error>
-                              <div
-                                class="row items-center justify-center full-height"
-                              >
-                                <q-icon
-                                  name="account_balance"
-                                  color="grey-7"
-                                  size="24px"
-                                />
-                              </div>
-                            </template>
-                          </q-img>
-                          <q-icon
-                            v-else
-                            name="account_balance"
-                            color="grey-7"
-                            size="24px"
-                          />
-                        </q-avatar>
+                    <div class="swap-source-section">
+                      <div class="swap-section-label q-mb-sm">
+                        {{ $t("ReceiveTokenDialog.swap_section.source_label") }}
+                      </div>
+                      <div class="swap-mint-info">
+                        <div class="row items-center no-wrap">
+                          <!-- Mint Icon -->
+                          <q-avatar size="48px" class="q-mr-md">
+                            <q-img
+                              v-if="sourceMintInfo?.iconUrl"
+                              :src="sourceMintInfo.iconUrl"
+                              spinner-color="white"
+                              spinner-size="xs"
+                            >
+                              <template v-slot:error>
+                                <div
+                                  class="row items-center justify-center full-height"
+                                >
+                                  <q-icon
+                                    name="account_balance"
+                                    color="grey-7"
+                                    size="24px"
+                                  />
+                                </div>
+                              </template>
+                            </q-img>
+                            <q-icon
+                              v-else
+                              name="account_balance"
+                              color="grey-7"
+                              size="24px"
+                            />
+                          </q-avatar>
 
-                        <!-- Mint Info -->
-                        <div class="col text-left">
-                          <div class="swap-mint-name">
-                            {{
-                              sourceMintInfo?.nickname ||
-                              sourceMintInfo?.shorturl
-                            }}
+                          <!-- Mint Info -->
+                          <div class="col text-left">
+                            <div class="swap-mint-name">
+                              {{
+                                sourceMintInfo?.nickname ||
+                                sourceMintInfo?.shorturl
+                              }}
+                            </div>
+                            <div class="swap-mint-url text-grey-6">
+                              {{ sourceMintInfo?.shorturl }}
+                            </div>
                           </div>
-                          <div class="swap-mint-url text-grey-6">
-                            {{ sourceMintInfo?.shorturl }}
-                          </div>
-                        </div>
-
-                        <!-- Amount -->
-                        <div class="swap-amount">
-                          {{ formatCurrency(tokenAmount, tokenUnit) }}
                         </div>
                       </div>
                     </div>
@@ -462,6 +498,8 @@ export default defineComponent({
       showP2PKDialog: false,
       swapSelected: false,
       untrustedMintInfo: null,
+      swapProcessing: false,
+      swapError: false,
     };
   },
   watch: {
@@ -711,12 +749,21 @@ export default defineComponent({
       );
     },
     handleSwapToTrustedMint: async function () {
-      const mint = useMintsStore().activeMint().mint;
-      await useReceiveTokensStore().meltTokenToMint(
-        this.receiveData.tokensBase64,
-        mint
-      );
-      this.swapSelected = false;
+      try {
+        this.swapProcessing = true;
+        this.swapError = false;
+        const mint = useMintsStore().activeMint().mint;
+        await useReceiveTokensStore().meltTokenToMint(
+          this.receiveData.tokensBase64,
+          mint
+        );
+        this.swapSelected = false;
+        this.swapProcessing = false;
+      } catch (error) {
+        console.error("Swap failed:", error);
+        this.swapProcessing = false;
+        this.swapError = true;
+      }
     },
     fetchUntrustedMintInfo: async function (mintUrl: string) {
       try {
@@ -892,13 +939,6 @@ export default defineComponent({
   font-size: 14px;
   line-height: 1.3;
   margin-top: 2px;
-}
-
-.swap-amount {
-  font-size: 16px;
-  font-weight: 600;
-  color: white;
-  white-space: nowrap;
 }
 
 .swap-arrow-icon {

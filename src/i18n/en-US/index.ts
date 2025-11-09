@@ -1069,6 +1069,7 @@ export default {
     },
     swap_section: {
       title: "Swap",
+      source_label: "From",
       destination_label: "To",
       fee_info: "This swap will incur Lightning network fees.",
     },
@@ -1091,6 +1092,8 @@ export default {
         label: "Receive to trusted mint",
         tooltip_text: "Swap to a trusted mint",
         caption: "Swap { value }",
+        processing: "Processing swap...",
+        failed: "Swap failed",
       },
       cancel_swap: {
         label: "@:global.actions.cancel.label",
