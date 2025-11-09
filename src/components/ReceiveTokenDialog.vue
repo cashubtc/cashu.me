@@ -177,6 +177,15 @@
 
               <!-- VALID TOKEN content -->
               <div v-if="tokenDecodesCorrectly">
+                <!-- print token in fixed width font -->
+                <div class="row q-py-xl">
+                  <div class="col-12">
+                    <TokenStringRender
+                      :token-string="receiveData.tokensBase64"
+                    />
+                  </div>
+                </div>
+
                 <div class="row">
                   <div class="col-12">
                     <TokenInformation
@@ -342,6 +351,7 @@ import token from "src/js/token";
 
 import ChooseMint from "src/components/ChooseMint.vue";
 import TokenInformation from "components/TokenInformation.vue";
+import TokenStringRender from "components/TokenStringRender.vue";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import {
@@ -370,6 +380,7 @@ export default defineComponent({
     NfcIcon,
     ScanIcon,
     ChooseMint,
+    TokenStringRender,
   },
   data: function () {
     return {
