@@ -6,6 +6,7 @@
     transition-show="fade"
     transition-hide="fade"
     no-backdrop-dismiss
+    @keydown.esc="showSendTokens = false"
   >
     <q-card class="q-pa-none q-pt-none qcard">
       <!--  enter send data (full-screen) -->

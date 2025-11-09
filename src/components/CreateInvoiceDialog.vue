@@ -6,6 +6,7 @@
     transition-show="fade"
     transition-hide="fade"
     no-backdrop-dismiss
+    @keydown.esc="showCreateInvoiceDialog = false"
   >
     <q-card class="q-pa-none q-pt-none qcard">
       <!-- enter invoice amount (full-screen) -->

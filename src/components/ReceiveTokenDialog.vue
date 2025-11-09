@@ -6,6 +6,7 @@
     transition-show="fade"
     transition-hide="fade"
     no-backdrop-dismiss
+    @keydown.esc="showReceiveTokens = false"
   >
     <q-card class="q-pa-none q-pt-none qcard">
       <!-- full-screen receive flow -->
