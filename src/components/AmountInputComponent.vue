@@ -290,7 +290,15 @@ export default defineComponent({
       let handled = false;
 
       if (/^[0-9]$/.test(key)) {
-        buf = buf === "0" ? key : buf + key;
+        // If buffer represents zero (0, 0.0, 0.00, etc.), reset completely
+        const bufNum = allowDecimal
+          ? Number(buf.replace(/,/g, "."))
+          : Number(buf);
+        if (bufNum === 0 || isNaN(bufNum)) {
+          buf = key;
+        } else {
+          buf = buf + key;
+        }
         handled = true;
       } else if (key === "Backspace" || key === "Delete") {
         buf = buf.length > 1 ? buf.slice(0, -1) : "0";
