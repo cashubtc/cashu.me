@@ -63,7 +63,7 @@
                   />
                 </strong>
               </h3>
-              <div v-if="bitcoinPrice">
+              <div v-if="bitcoinPrice" class="q-mt-sm">
                 <strong v-if="this.activeUnit == 'sat'">
                   <AnimatedNumber
                     :value="
