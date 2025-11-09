@@ -182,6 +182,7 @@
                   <div class="col-12">
                     <TokenStringRender
                       :token-string="receiveData.tokensBase64"
+                      :max-length="300"
                     />
                   </div>
                 </div>
