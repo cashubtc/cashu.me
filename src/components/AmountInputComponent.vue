@@ -380,18 +380,16 @@ export default defineComponent({
 }
 .fiat-wrapper {
   position: relative;
-  display: inline-flex;
-  align-items: center;
   width: 100%;
-  justify-content: center;
-  min-height: 18px;
+  height: 18px;
 }
 .fiat-wrapper-content {
   position: absolute;
   left: 50%;
+  top: 50%;
   display: inline-flex;
   align-items: center;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
 }
 .fiat-display {
   font-size: 20px;
@@ -438,15 +436,15 @@ export default defineComponent({
 }
 .swap-secondary-leave-to {
   opacity: 0;
-  transform: translateX(-50%) translateY(-40px) scale(0.85);
+  transform: translate(-50%, calc(-50% - 40px)) scale(0.85);
 }
 .swap-secondary-enter-from {
   opacity: 0;
-  transform: translateX(-50%) translateY(40px) scale(0.85);
+  transform: translate(-50%, calc(-50% + 40px)) scale(0.85);
 }
 .swap-secondary-enter-to,
 .swap-secondary-leave-from {
   opacity: 1;
-  transform: translateX(-50%) translateY(0) scale(1);
+  transform: translate(-50%, -50%) scale(1);
 }
 </style>
