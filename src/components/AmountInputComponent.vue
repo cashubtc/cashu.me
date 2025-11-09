@@ -14,12 +14,13 @@
       <div
         class="fiat-display text-grey-6 q-mt-lg"
         :class="{ invisible: !secondaryDisplay }"
+        @click="toggleFiatMode"
       >
         {{ secondaryDisplay || " " }}
       </div>
       <q-icon
         v-if="showSwap"
-        name="swap_horiz"
+        name="swap_vert"
         size="24px"
         class="text-grey-6 q-ml-xs cursor-pointer q-mt-lg"
         @click="toggleFiatMode"
@@ -69,16 +70,15 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapState(useMintsStore, [
-      "activeUnit",
-      "activeUnitLabel",
-      "activeUnitCurrencyMultiplyer",
-    ]),
+    ...mapState(
+      useMintsStore as any,
+      ["activeUnit", "activeUnitLabel", "activeUnitCurrencyMultiplyer"] as any
+    ),
     ...mapState(useSettingsStore, ["bitcoinPriceCurrency"]),
     ...mapState(usePriceStore, ["bitcoinPrice", "currentCurrencyPrice"]),
     formattedAmountDisplay(): string {
       const amount = this.modelValue || 0;
-      return this.formatCurrency(
+      return (this as any).formatCurrency(
         amount * this.activeUnitCurrencyMultiplyer,
         this.activeUnit,
         true
@@ -96,12 +96,13 @@ export default defineComponent({
       return this.formattedAmountDisplay;
     },
     secondaryFiatDisplay(): string {
-      if (!this.modelValue || !this.bitcoinPrice || this.activeUnit !== "sat") {
+      if (!this.bitcoinPrice || this.activeUnit !== "sat") {
         return "";
       }
-      const fiat = this.formatCurrency(
+      const baseAmount = this.modelValue ?? 0;
+      const fiat = (this as any).formatCurrency(
         (this.currentCurrencyPrice / 100000000) *
-          this.modelValue *
+          baseAmount *
           this.activeUnitCurrencyMultiplyer,
         this.bitcoinPriceCurrency,
         true
@@ -111,8 +112,8 @@ export default defineComponent({
     secondaryDisplay(): string {
       if (this.fiatMode) {
         // show converted sats (actual emitted amount)
+        if (!this.currentCurrencyPrice || this.activeUnit !== "sat") return "";
         const sats = this.derivedSatsFromFiatBuffer;
-        if (!sats) return "";
         return (this as any).formatCurrency(
           sats * this.activeUnitCurrencyMultiplyer,
           this.activeUnit,
@@ -122,8 +123,11 @@ export default defineComponent({
       return this.secondaryFiatDisplay;
     },
     showSwap(): boolean {
-      // Show when the fiat display would be visible OR when currently in fiat mode (so user can switch back)
-      return this.fiatMode || !!this.secondaryFiatDisplay;
+      // Show when fiat pricing is available and unit is sats (or currently in fiat mode)
+      return (
+        (this.activeUnit === "sat" && !!this.currentCurrencyPrice) ||
+        this.fiatMode
+      );
     },
     derivedSatsFromFiatBuffer(): number {
       if (!this.bitcoinPrice || !this.currentCurrencyPrice) return 0;
