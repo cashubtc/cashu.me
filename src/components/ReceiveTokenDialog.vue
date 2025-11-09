@@ -183,7 +183,6 @@
                     <TokenStringRender
                       :token-string="receiveData.tokensBase64"
                       :max-length="maxLengthForTokenString"
-                      style="height: 20vh"
                     />
                   </div>
                 </div>

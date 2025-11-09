@@ -1,11 +1,29 @@
 <template>
-  <div class="token-string-render">
-    {{ displayedToken }}
-  </div>
+  <q-card class="token-card">
+    <q-card-section class="q-pa-md token-content">
+      <!-- Top Row: Token Info -->
+      <div class="token-label q-mb-md">
+        {{ displayedToken }}
+      </div>
+
+      <!-- Middle: Empty space placeholder -->
+      <div class="token-space q-mb-md"></div>
+
+      <!-- Bottom Row: Mint Name + Amount -->
+      <div class="row items-end justify-between">
+        <div class="mint-name text-body2">{{ mintName }}</div>
+        <div class="token-amount text-h4">{{ displayAmount }}</div>
+      </div>
+    </q-card-section>
+  </q-card>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, onBeforeUnmount, ref, watch } from "vue";
+import token from "src/js/token";
+import { getShortUrl } from "src/js/wallet-helpers";
+import { useMintsStore } from "src/stores/mints";
+import { useUiStore } from "src/stores/ui";
 
 export default defineComponent({
   name: "TokenStringRender",
@@ -21,15 +39,70 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const mintsStore = useMintsStore();
+    const uiStore = useUiStore();
     const displayedToken = ref("");
-    const truncatedToken = computed(() => {
+
+    // Decode token and extract data
+    const decodedToken = computed(() => {
+      if (!props.tokenString) return null;
+      try {
+        return token.decode(props.tokenString);
+      } catch {
+        return null;
+      }
+    });
+
+    const tokenAmount = computed(() => {
+      if (!decodedToken.value) return 0;
+      try {
+        const proofs = token.getProofs(decodedToken.value);
+        return proofs.reduce((sum, el) => sum + el.amount, 0);
+      } catch {
+        return 0;
+      }
+    });
+
+    const tokenUnit = computed(() => {
+      if (!decodedToken.value) return "";
+      try {
+        return token.getUnit(decodedToken.value);
+      } catch {
+        return "";
+      }
+    });
+
+    const mintUrl = computed(() => {
+      if (!decodedToken.value) return "";
+      try {
+        return token.getMint(decodedToken.value);
+      } catch {
+        return "";
+      }
+    });
+
+    const mintName = computed(() => {
+      if (!mintUrl.value) return "";
+      const mint = mintsStore.mints.find((m) => m.url === mintUrl.value);
+      return mint?.info?.name || getShortUrl(mintUrl.value);
+    });
+
+    const truncatedTokenString = computed(() => {
       if (!props.tokenString) {
         return "";
       }
-      return props.tokenString.length > props.maxLength
-        ? `${props.tokenString.slice(0, props.maxLength)}...`
-        : props.tokenString;
+      // Show first 12 chars, ellipses, then last 12 chars (total ~27 with ...)
+      const firstPart = props.tokenString.slice(0, 12);
+      const lastPart = props.tokenString.slice(-12);
+      return `${firstPart}...\n${lastPart}`;
     });
+
+    const displayAmount = computed(() => {
+      if (!tokenAmount.value || !tokenUnit.value) return "";
+      return uiStore.formatCurrency(tokenAmount.value, tokenUnit.value);
+    });
+
+    // Animation for truncated token string
     const scrambleChars =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+[]{}<>?/\\|~";
     let animationFrameId: number | null = null;
@@ -41,20 +114,20 @@ export default defineComponent({
       }
     };
 
-    const animateToken = (token: string) => {
+    const animateToken = (tokenStr: string) => {
       stopAnimation();
 
-      if (!token) {
+      if (!tokenStr) {
         displayedToken.value = "";
         return;
       }
 
       if (typeof window === "undefined") {
-        displayedToken.value = token;
+        displayedToken.value = tokenStr;
         return;
       }
 
-      const targetLength = token.length;
+      const targetLength = tokenStr.length;
       const duration = Math.max(600, Math.min(1200, targetLength * 12));
       const start = performance.now();
 
@@ -73,7 +146,7 @@ export default defineComponent({
 
         for (let i = 0; i < currentLength; i += 1) {
           if (i < revealCount) {
-            result += token[i];
+            result += tokenStr[i];
           } else {
             const randomIndex = Math.floor(
               Math.random() * scrambleChars.length
@@ -87,7 +160,7 @@ export default defineComponent({
         if (progress < 1) {
           animationFrameId = requestAnimationFrame(step);
         } else {
-          displayedToken.value = token;
+          displayedToken.value = tokenStr;
           animationFrameId = null;
         }
       };
@@ -96,7 +169,7 @@ export default defineComponent({
     };
 
     watch(
-      truncatedToken,
+      truncatedTokenString,
       (newValue) => {
         animateToken(newValue);
       },
@@ -109,21 +182,93 @@ export default defineComponent({
 
     return {
       displayedToken,
+      truncatedTokenString,
+      mintName,
+      displayAmount,
     };
   },
 });
 </script>
 
 <style lang="scss" scoped>
-.token-string-render {
-  display: block;
-  background-color: var(--q-color-grey-2);
-  color: var(--q-color-grey-9);
-  font-family: monospace;
-  font-size: 0.9em;
-  padding: 12px;
-  border-radius: 8px;
+.token-card {
+  background: linear-gradient(
+    135deg,
+    rgba(var(--q-primary-rgb), 0.18) 0%,
+    rgba(var(--q-primary-rgb), 0.08) 40%,
+    rgba(0, 0, 0, 0.15) 100%
+  ) !important;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+  min-height: 180px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.3) 50%,
+      transparent 100%
+    );
+    z-index: 1;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+      circle at 30% 30%,
+      rgba(255, 255, 255, 0.08) 0%,
+      transparent 50%
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+}
+
+.token-content {
+  position: relative;
+  z-index: 2;
+}
+
+.token-label {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #9e9e9e;
   word-break: break-all;
-  white-space: pre-wrap;
+  text-align: left;
+  white-space: pre-line;
+  line-height: 1.4;
+  min-height: 2.8rem;
+  width: 100%;
+}
+
+.token-space {
+  min-height: 40px;
+}
+
+.mint-name {
+  font-weight: 400;
+  color: #9e9e9e;
+  font-size: 14px;
+}
+
+.token-amount {
+  font-weight: 700;
+  color: white;
+  line-height: 1.2;
 }
 </style>
