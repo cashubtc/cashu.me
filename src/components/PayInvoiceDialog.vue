@@ -243,12 +243,20 @@
 
                   <!-- Amount display area -->
                   <div
-                    class="column items-center justify-center q-px-lg amount-area"
+                    class="column items-center justify-center q-px-lg q-py-lg amount-area"
                   >
                     <AmountInputComponent
                       v-model="payInvoiceData.input.amount"
                       :enabled="true"
-                      @enter="lnurlPaySecond"
+                      :muted="insufficientFunds"
+                      :min-amount="payInvoiceData.lnurlpay.minSendable / 1000"
+                      :max-amount="
+                        Math.min(
+                          payInvoiceData.lnurlpay.maxSendable / 1000,
+                          maxAmountFromBalance
+                        )
+                      "
+                      @enter="handleLnurlPaySecond"
                       @fiat-mode-changed="fiatKeyboardMode = $event"
                     />
                   </div>
@@ -423,11 +431,12 @@
           class="bottom-panel"
           v-if="
             payInvoiceData.lnurlpay &&
+            !payInvoiceData.invoice &&
             payInvoiceData.lnurlpay.maxSendable !=
               payInvoiceData.lnurlpay.minSendable
           "
         >
-          <div class="keypad-wrapper">
+          <div class="keypad-wrapper" v-if="showNumericKeyboard">
             <NumericKeyboard
               :force-visible="true"
               :hide-close="true"
@@ -441,7 +450,7 @@
                 (val: string | number) =>
                   (payInvoiceData.input.amount = Number(val))
               "
-              @done="lnurlPaySecond"
+              @done="handleLnurlPaySecond"
             />
           </div>
           <!-- LNURL pay action below keyboard -->
@@ -456,7 +465,7 @@
                 size="lg"
                 color="primary"
                 rounded
-                @click="lnurlPaySecond"
+                @click="handleLnurlPaySecond"
                 :disabled="
                   payInvoiceData.blocking ||
                   payInvoiceData.input.amount == null ||
@@ -464,7 +473,8 @@
                   payInvoiceData.input.amount <
                     payInvoiceData.lnurlpay.minSendable / 1000 ||
                   payInvoiceData.input.amount >
-                    payInvoiceData.lnurlpay.maxSendable / 1000
+                    payInvoiceData.lnurlpay.maxSendable / 1000 ||
+                  insufficientFunds
                 "
                 :loading="payInvoiceData.blocking"
               >
@@ -486,6 +496,7 @@
           class="bottom-panel"
           v-if="
             payInvoiceData.lnurlpay &&
+            !payInvoiceData.invoice &&
             payInvoiceData.lnurlpay.maxSendable ==
               payInvoiceData.lnurlpay.minSendable
           "
@@ -501,7 +512,7 @@
                 size="lg"
                 color="primary"
                 rounded
-                @click="lnurlPaySecond"
+                @click="handleLnurlPaySecond"
                 :disabled="payInvoiceData.blocking"
                 :loading="payInvoiceData.blocking"
               >
@@ -585,18 +596,34 @@ export default defineComponent({
           ) {
             this.payInvoiceData.input.amount = newVal.minSendable / 1000;
           }
+          // Show keyboard for variable amount LNURL
+          this.showNumericKeyboard = true;
         } else if (newVal && newVal.maxSendable == newVal.minSendable) {
           // Set fixed amount
           this.payInvoiceData.input.amount = newVal.minSendable / 1000;
+          // Hide keyboard for fixed amount LNURL
+          this.showNumericKeyboard = false;
+        } else if (!newVal) {
+          // Hide keyboard when LNURL is cleared
+          this.showNumericKeyboard = false;
         }
       },
       immediate: true,
+    },
+    "payInvoiceData.show": {
+      handler: function (val) {
+        if (!val) {
+          // Hide keyboard when dialog is closed
+          this.showNumericKeyboard = false;
+        }
+      },
     },
   },
   computed: {
     ...mapState(useUiStore, ["tickerShort", "globalMutexLock"]),
     ...mapState(useSettingsStore, ["multinutEnabled"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
+    ...mapWritableState(useUiStore, ["showNumericKeyboard"]),
     // mints store via direct getters to avoid strict typing issues
     activeMintUrl: function (): any {
       return (useMintsStore() as any).activeMintUrl;
@@ -609,6 +636,9 @@ export default defineComponent({
     },
     activeUnit: function (): any {
       return (useMintsStore() as any).activeUnit;
+    },
+    activeUnitCurrencyMultiplyer: function (): any {
+      return (useMintsStore() as any).activeUnitCurrencyMultiplyer;
     },
     totalUnitBalance: function (): any {
       return (useMintsStore() as any).totalUnitBalance;
@@ -685,6 +715,25 @@ export default defineComponent({
       // Access directly from store to avoid typing friction in mapState
       return (useMintsStore() as any).activeUnitLabel;
     },
+    insufficientFunds: function (): boolean {
+      if (
+        !this.payInvoiceData.lnurlpay ||
+        this.payInvoiceData.input.amount == null
+      ) {
+        return false;
+      }
+      return (
+        this.activeBalance <
+        this.payInvoiceData.input.amount * this.activeUnitCurrencyMultiplyer
+      );
+    },
+    maxAmountFromBalance: function (): number {
+      if (!this.payInvoiceData.lnurlpay) return Infinity;
+      // Convert balance to the unit being displayed (e.g., sats -> BTC)
+      const balanceInDisplayUnit =
+        this.activeBalance / this.activeUnitCurrencyMultiplyer;
+      return balanceInDisplayUnit;
+    },
   },
   methods: {
     ...mapActions(useWalletStore, [
@@ -730,6 +779,11 @@ export default defineComponent({
     },
     handleReturnToPayDialog: function () {
       this.payInvoiceData.show = true;
+    },
+    handleLnurlPaySecond: async function () {
+      // Hide keyboard before sending payment
+      this.showNumericKeyboard = false;
+      await this.lnurlPaySecond();
     },
   },
   created: function () {},

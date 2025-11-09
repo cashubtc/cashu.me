@@ -71,6 +71,16 @@ export default defineComponent({
       type: Boolean,
       default: true,
     },
+    // maximum allowed amount (in base units, before currency multiplier)
+    maxAmount: {
+      type: Number,
+      default: null,
+    },
+    // minimum allowed amount (in base units, before currency multiplier)
+    minAmount: {
+      type: Number,
+      default: null,
+    },
   },
   emits: ["update:modelValue", "enter", "fiat-mode-changed"],
   data() {
@@ -146,8 +156,15 @@ export default defineComponent({
       const fiat = this.getFiatBufferNumber();
       if (!isFinite(fiat) || fiat <= 0) return 0;
       // sats = fiat * 100_000_000 / price_per_BTC
-      const sats = Math.round((fiat * 100000000) / this.currentCurrencyPrice);
-      return Math.max(0, Math.min(sats, MAX_AMOUNT));
+      let sats = Math.round((fiat * 100000000) / this.currentCurrencyPrice);
+      sats = Math.max(0, Math.min(sats, MAX_AMOUNT));
+      // Apply min/max constraints
+      if (this.minAmount != null && sats < this.minAmount) {
+        sats = this.minAmount;
+      } else if (this.maxAmount != null && sats > this.maxAmount) {
+        sats = this.maxAmount;
+      }
+      return sats;
     },
   },
   watch: {
@@ -156,12 +173,21 @@ export default defineComponent({
     },
     modelValue(newVal: number | null) {
       if (newVal == null) return;
-      if (newVal > MAX_AMOUNT) {
-        this.$emit("update:modelValue", MAX_AMOUNT);
-        this.amountEditBuffer = String(MAX_AMOUNT);
+      // Apply min/max constraints
+      let clampedVal = newVal;
+      if (this.minAmount != null && clampedVal < this.minAmount) {
+        clampedVal = this.minAmount;
+      } else if (this.maxAmount != null && clampedVal > this.maxAmount) {
+        clampedVal = this.maxAmount;
+      } else if (clampedVal > MAX_AMOUNT) {
+        clampedVal = MAX_AMOUNT;
+      }
+      if (clampedVal !== newVal) {
+        this.$emit("update:modelValue", clampedVal);
+        this.amountEditBuffer = String(clampedVal);
         if (this.fiatMode) {
           // keep fiat buffer in sync with clamped sat value
-          const fiat = this.fiatFromSats(MAX_AMOUNT);
+          const fiat = this.fiatFromSats(clampedVal);
           this.fiatEditBuffer = this.numberToFiatBuffer(fiat);
         }
         return;
@@ -349,6 +375,18 @@ export default defineComponent({
                 this.fiatFromSats(MAX_AMOUNT)
               );
             }
+            // Apply min/max constraints
+            if (this.minAmount != null && sats < this.minAmount) {
+              sats = this.minAmount;
+              this.fiatEditBuffer = this.numberToFiatBuffer(
+                this.fiatFromSats(this.minAmount)
+              );
+            } else if (this.maxAmount != null && sats > this.maxAmount) {
+              sats = this.maxAmount;
+              this.fiatEditBuffer = this.numberToFiatBuffer(
+                this.fiatFromSats(this.maxAmount)
+              );
+            }
             this.isFiatTyping = true;
             this.$emit("update:modelValue", sats);
             this.$nextTick(() => {
@@ -361,13 +399,21 @@ export default defineComponent({
         if (buf === "" || buf === ".") {
           this.$emit("update:modelValue", null);
         } else {
-          const num = Number(buf);
+          let num = Number(buf);
           if (isNaN(num)) {
             this.$emit("update:modelValue", null);
-          } else if (num > MAX_AMOUNT) {
-            this.amountEditBuffer = String(MAX_AMOUNT);
-            this.$emit("update:modelValue", MAX_AMOUNT);
           } else {
+            // Apply min/max constraints
+            if (this.minAmount != null && num < this.minAmount) {
+              num = this.minAmount;
+              this.amountEditBuffer = String(this.minAmount);
+            } else if (this.maxAmount != null && num > this.maxAmount) {
+              num = this.maxAmount;
+              this.amountEditBuffer = String(this.maxAmount);
+            } else if (num > MAX_AMOUNT) {
+              num = MAX_AMOUNT;
+              this.amountEditBuffer = String(MAX_AMOUNT);
+            }
             this.$emit("update:modelValue", num);
           }
         }
