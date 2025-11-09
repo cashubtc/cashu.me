@@ -98,7 +98,7 @@
                     :mint-quote="invoiceData.mintQuote"
                     :invoice="invoiceData"
                     :mint-url="invoiceData.mint"
-                    :show-amount="true"
+                    :show-amount="false"
                   />
                 </div>
               </div>
@@ -139,7 +139,7 @@
                 rounded
                 @click="onCopyBolt11"
               >
-                {{ $t("InvoiceDetailDialog.invoice.actions.copy.label") }}
+                {{ copyButtonLabel }}
               </q-btn>
             </div>
           </div>
@@ -152,6 +152,7 @@
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import VueQrcode from "@chenfengyuan/vue-qrcode";
+import { copyToClipboard } from "quasar";
 
 import { useWalletStore } from "../stores/wallet";
 import { useUiStore } from "../stores/ui";
@@ -171,7 +172,10 @@ export default defineComponent({
   },
   props: {},
   data: function () {
-    return {};
+    return {
+      copyButtonCopied: false,
+      copyButtonTimeout: null as any,
+    };
   },
   computed: {
     ...mapState(useWalletStore, ["invoiceData"]),
@@ -191,13 +195,37 @@ export default defineComponent({
     isSmallScreen() {
       return this.$q.screen.lt.sm;
     },
+    copyButtonLabel: function () {
+      if (this.copyButtonCopied) {
+        return "Copied";
+      }
+      return this.$t("InvoiceDetailDialog.invoice.actions.copy.label");
+    },
   },
   methods: {
-    onCopyBolt11: function () {
+    onCopyBolt11: async function () {
       if (this.invoiceData?.bolt11) {
-        (this as any).copyText(this.invoiceData.bolt11);
+        try {
+          await copyToClipboard(this.invoiceData.bolt11);
+          this.copyButtonCopied = true;
+          // Clear any existing timeout
+          if (this.copyButtonTimeout) {
+            clearTimeout(this.copyButtonTimeout);
+          }
+          // Reset button label after 3 seconds
+          this.copyButtonTimeout = setTimeout(() => {
+            this.copyButtonCopied = false;
+          }, 3000);
+        } catch (error) {
+          console.error("Failed to copy to clipboard:", error);
+        }
       }
     },
+  },
+  beforeUnmount() {
+    if (this.copyButtonTimeout) {
+      clearTimeout(this.copyButtonTimeout);
+    }
   },
 });
 </script>
