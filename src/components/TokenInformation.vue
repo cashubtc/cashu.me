@@ -50,6 +50,8 @@
           class="detail-value"
           :class="{
             'p2pk-locked-me': isLockedToUs(proofsToShow),
+            'p2pk-locked-warning':
+              isLocked(proofsToShow) && !isLockedToUs(proofsToShow),
           }"
         >
           {{ isLockedToUs(proofsToShow) ? "Locked to you" : "Locked" }}
@@ -316,6 +318,12 @@ export default defineComponent({
   -webkit-text-fill-color: transparent;
   animation: shine 2.5s linear infinite;
   text-shadow: 0 0 6px rgba(255, 215, 0, 0.35);
+}
+
+/* Warning colors for P2PK locked (not to us) */
+.p2pk-locked-warning {
+  color: #ff9800;
+  text-shadow: 0 0 6px rgba(255, 152, 0, 0.4);
 }
 
 @keyframes shine {
