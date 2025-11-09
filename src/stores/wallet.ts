@@ -79,6 +79,7 @@ export type InvoiceHistory = Invoice & {
   meltQuote?: MeltQuoteResponse;
   label?: string; // Add label field for custom naming
   privKey?: string; // Private key, if the quote is locked
+  paidDate?: string;
 };
 
 type KeysetCounter = {
@@ -158,7 +159,7 @@ export const useWalletStore = defineStore("wallet", {
   },
   getters: {
     wallet() {
-      const mints = useMintsStore();
+      const mints = useMintsStore() as any;
       const mint = new CashuMint(mints.activeMintUrl);
       if (this.mnemonic == "") {
         this.mnemonic = generateMnemonic(wordlist);
@@ -186,8 +187,8 @@ export const useWalletStore = defineStore("wallet", {
       // short-lived wallet for mint operations
       // note: the unit of the wallet will be activeUnit by default,
       // overwrite wallet.unit if needed
-      const mints = useMintsStore();
-      const storedMint = mints.mints.find((m) => m.url === url);
+      const mints = useMintsStore() as any;
+      const storedMint = mints.mints.find((m: any) => m.url === url);
       if (!storedMint) {
         throw new Error("mint not found");
       }
@@ -287,6 +288,7 @@ export const useWalletStore = defineStore("wallet", {
       const invoice = this.invoiceHistory.find((i) => i.quote === quoteId);
       if (!invoice) return;
       invoice.status = "paid";
+      invoice.paidDate = currentDateStr();
     },
     splitAmount: function (value: number) {
       // returns optimal 2^n split
@@ -663,7 +665,7 @@ export const useWalletStore = defineStore("wallet", {
             keysetId,
             counter,
             proofsWeHave: mintStore.mintUnitProofs(mint, invoice.unit),
-            privateKey: invoice.privKey,
+            privateKey: invoice.privKey as string,
           }
         );
         this.increaseKeysetCounter(keysetId, proofs.length);
@@ -1342,6 +1344,9 @@ export const useWalletStore = defineStore("wallet", {
           if (options) {
             if (options.status) {
               i.status = options.status;
+              if (options.status === "paid") {
+                i.paidDate = currentDateStr();
+              }
             }
             if (options.amount) {
               i.amount = options.amount;
@@ -1523,7 +1528,7 @@ export const useWalletStore = defineStore("wallet", {
         this.payInvoiceData.invoice = null;
         this.payInvoiceData.input = {
           request: "",
-          amount: null,
+          amount: undefined,
           comment: "",
           quote: "",
         };

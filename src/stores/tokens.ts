@@ -1,7 +1,7 @@
 import { useLocalStorage } from "@vueuse/core";
 import { date } from "quasar";
 import { defineStore } from "pinia";
-import { PaymentRequest, Proof, Token } from "@cashu/cashu-ts";
+import { PaymentRequest, Proof, Token, MeltQuoteResponse } from "@cashu/cashu-ts";
 import token from "src/js/token";
 
 /**
@@ -18,6 +18,8 @@ export type HistoryToken = {
   paymentRequest?: PaymentRequest;
   fee?: number;
   label?: string; // Add label field for custom naming
+  meltQuote?: MeltQuoteResponse;
+  paidDate?: string;
 };
 
 export const useTokensStore = defineStore("tokens", {

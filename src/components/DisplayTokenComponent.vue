@@ -44,9 +44,9 @@
               size="md"
               flat
               dense
-              @click="copyText(encodeToPeanut(sendData.tokensBase64))"
+              @click="copyUsingMixin(encodeToPeanut(sendData.tokensBase64))"
             >
-              <NutIcon size="16" />
+              <NutIcon :size="16" />
 
               <q-tooltip>{{
                 $t("SendTokenDialog.actions.copy_emoji.tooltip_text")
@@ -61,7 +61,7 @@
               flat
               @click="shareToken"
             >
-              <ShareIcon size="16" />
+              <ShareIcon :size="16" />
               <q-tooltip>{{
                 $t("SendTokenDialog.actions.share.tooltip_text")
               }}</q-tooltip>
@@ -73,7 +73,9 @@
               dense
               icon="link"
               flat
-              @click="copyText(baseURL + '#token=' + sendData.tokensBase64)"
+              @click="
+                copyUsingMixin(baseURL + '#token=' + sendData.tokensBase64)
+              "
               ><q-tooltip>{{
                 $t("SendTokenDialog.actions.copy_link.tooltip_text")
               }}</q-tooltip></q-btn
@@ -90,7 +92,7 @@
               "
               @click="showCamera"
             >
-              <ScanIcon size="16" />
+              <ScanIcon :size="16" />
             </q-btn>
             <q-btn
               unelevated
@@ -107,7 +109,7 @@
               @click="writeTokensToCard"
               flat
             >
-              <NfcIcon size="16" />
+              <NfcIcon :size="16" />
               <q-tooltip>{{
                 ndefSupported
                   ? $t(
@@ -218,6 +220,23 @@
             <TokenInformation :encodedToken="sendData.tokensBase64" />
           </div>
           <div
+            v-if="sendData.historyToken?.meltQuote"
+            class="row justify-center q-pt-md"
+          >
+            <div
+              class="col-12 col-sm-11 col-md-8 q-px-md"
+              style="max-width: 600px"
+            >
+              <MeltQuoteInformation
+                :melt-quote="sendData.historyToken.meltQuote"
+                :invoice="sendData.historyToken"
+                :mint-url="sendData.historyToken.mint"
+                :history-paid-at="sendData.historyToken.paidDate"
+                :show-amount="false"
+              />
+            </div>
+          </div>
+          <div
             v-if="
               sendData.paymentRequest &&
               sendData.historyToken.amount < 0 &&
@@ -297,6 +316,7 @@ import { useCameraStore } from "src/stores/camera";
 import { useSettingsStore } from "src/stores/settings";
 import { useTokensStore } from "src/stores/tokens";
 import TokenInformation from "components/TokenInformation.vue";
+import MeltQuoteInformation from "components/MeltQuoteInformation.vue";
 import SendPaymentRequest from "./SendPaymentRequest.vue";
 import {
   getDecodedToken,
@@ -314,11 +334,14 @@ import {
   Nut as NutIcon,
 } from "lucide-vue-next";
 
+declare const windowMixin: any;
+
 export default defineComponent({
   name: "DisplayTokenComponent",
   mixins: [windowMixin],
   components: {
     TokenInformation,
+    MeltQuoteInformation,
     SendPaymentRequest,
     ScanIcon,
     NfcIcon,
@@ -407,6 +430,9 @@ export default defineComponent({
     ...mapActions(useWorkersStore, ["clearAllWorkers"]),
     ...mapActions(useTokensStore, ["deleteToken"]),
     ...mapActions(useCameraStore, ["showCamera"]),
+    copyUsingMixin(text: string) {
+      (this as any).copyText(text);
+    },
     toggleExpandButtons() {
       this.showExpandedButtons = !this.showExpandedButtons;
     },

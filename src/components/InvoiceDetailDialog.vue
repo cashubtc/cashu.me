@@ -72,32 +72,52 @@
                 </q-item-label>
               </div>
               <div
-                v-if="invoiceData && invoiceData.mint != undefined"
-                class="row justify-center q-pt-lg"
-              >
-                <q-chip
-                  outline
-                  class="q-pa-md"
-                  style="height: 36px; font-family: monospace"
-                >
-                  <q-icon name="account_balance" size="xs" class="q-mr-sm" />
-                  {{ shortUrl }}
-                </q-chip>
-              </div>
-              <div
                 v-if="invoiceData.amount > 0 && invoiceData.status === 'paid'"
                 class="row justify-center"
               >
                 <transition appear enter-active-class="animated tada">
-                  <span class="q-mt-xl text-bold" style="font-size: 28px">
+                  <span class="q-mt-md text-bold" style="font-size: 28px">
                     <q-icon
                       name="check_circle"
-                      size="2rem"
+                      size="1.8rem"
                       color="positive"
                       class="q-mr-sm q-mb-xs"
                     />{{ $t("InvoiceDetailDialog.invoice.status_paid_text") }}
                   </span>
                 </transition>
+              </div>
+              <div
+                v-if="invoiceData?.mintQuote"
+                class="row justify-center q-pt-lg"
+              >
+                <div
+                  class="col-12 col-sm-11 col-md-8 q-px-md"
+                  style="max-width: 600px"
+                >
+                  <MintQuoteInformation
+                    :mint-quote="invoiceData.mintQuote"
+                    :invoice="invoiceData"
+                    :mint-url="invoiceData.mint"
+                    :show-amount="true"
+                  />
+                </div>
+              </div>
+              <div
+                v-else-if="invoiceData?.meltQuote"
+                class="row justify-center q-pt-lg"
+              >
+                <div
+                  class="col-12 col-sm-11 col-md-8 q-px-md"
+                  style="max-width: 600px"
+                >
+                  <MeltQuoteInformation
+                    :melt-quote="invoiceData.meltQuote"
+                    :invoice="invoiceData"
+                    :mint-url="invoiceData.mint"
+                    :history-paid-at="invoiceData.paidDate"
+                    :show-amount="true"
+                  />
+                </div>
               </div>
             </q-card-section>
           </q-card-section>
@@ -133,10 +153,11 @@ import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import VueQrcode from "@chenfengyuan/vue-qrcode";
 
-import { useWalletStore } from "src/stores/wallet";
-import { useUiStore } from "src/stores/ui";
-import { getShortUrl } from "src/js/wallet-helpers";
-import { useWorkersStore } from "src/stores/workers";
+import { useWalletStore } from "../stores/wallet";
+import { useUiStore } from "../stores/ui";
+import { useWorkersStore } from "../stores/workers";
+import MeltQuoteInformation from "./MeltQuoteInformation.vue";
+import MintQuoteInformation from "./MintQuoteInformation.vue";
 // type hint for global mixin
 declare const windowMixin: any;
 
@@ -145,6 +166,8 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     VueQrcode,
+    MeltQuoteInformation,
+    MintQuoteInformation,
   },
   props: {},
   data: function () {
@@ -161,9 +184,6 @@ export default defineComponent({
         true
       );
       return display;
-    },
-    shortUrl: function () {
-      return getShortUrl(this.invoiceData.mint);
     },
     runnerActive: function () {
       return this.invoiceWorkerRunning;
