@@ -1102,7 +1102,7 @@ export default {
         in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
       receive_to_selected_mint: {
-        label: "Receive token to selected mint",
+        label: "Receive to selected mint",
       },
       later: {
         label: "Receive offline",

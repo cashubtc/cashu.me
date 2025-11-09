@@ -36,7 +36,7 @@
         </div>
 
         <!-- Content area -->
-        <div class="col column items-center justify-start q-px-lg">
+        <div class="col column items-center justify-start q-px-lg scroll-container">
           <div class="row justify-center full-width">
             <div
               class="col-12 col-sm-11 col-md-8 q-px-sm q-mb-sm"
@@ -405,6 +405,7 @@ import { usePriceStore } from "src/stores/price";
 import { useSwapStore } from "src/stores/swap";
 import { useSettingsStore } from "src/stores/settings";
 import token from "src/js/token";
+import { CashuMint } from "@cashu/cashu-ts";
 
 import ChooseMint from "src/components/ChooseMint.vue";
 import TokenInformation from "components/TokenInformation.vue";
@@ -445,6 +446,7 @@ export default defineComponent({
     return {
       showP2PKDialog: false,
       swapSelected: false,
+      untrustedMintInfo: null,
     };
   },
   watch: {
@@ -455,6 +457,15 @@ export default defineComponent({
           this.watchClipboardPaste = false;
         });
       }
+    },
+    tokenMint: {
+      async handler(newMintUrl) {
+        if (newMintUrl && !this.mints.find((m: any) => m.url === newMintUrl)) {
+          // This is an untrusted mint, try to fetch its info
+          await this.fetchUntrustedMintInfo(newMintUrl);
+        }
+      },
+      immediate: true,
     },
   },
   computed: {
@@ -550,12 +561,13 @@ export default defineComponent({
       if (!this.tokenMint) {
         return null;
       }
-      const mint = this.mints.find((m) => m.url === this.tokenMint);
+      const mint = this.mints.find((m: any) => m.url === this.tokenMint);
       if (!mint) {
+        // Use untrusted mint info if available
         return {
-          nickname: null,
+          nickname: this.untrustedMintInfo?.name || null,
           shorturl: this.getShortUrl(this.tokenMint),
-          iconUrl: null,
+          iconUrl: this.untrustedMintInfo?.icon_url || null,
         };
       }
       return {
@@ -691,6 +703,16 @@ export default defineComponent({
       );
       this.swapSelected = false;
     },
+    fetchUntrustedMintInfo: async function (mintUrl: string) {
+      try {
+        const mint = new CashuMint(mintUrl);
+        const info = await mint.getInfo();
+        this.untrustedMintInfo = info;
+      } catch (error) {
+        console.log("Could not fetch untrusted mint info:", error);
+        this.untrustedMintInfo = null;
+      }
+    },
   },
 });
 </script>
@@ -771,6 +793,11 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+.scroll-container {
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 .floating-close-btn {
   position: absolute;
