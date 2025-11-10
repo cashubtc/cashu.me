@@ -1067,6 +1067,8 @@ export default {
         label: "Invalid token",
       },
     },
+    unknown_mint_info_text:
+      "Unknown mint. It will be added after you receive this token.",
     swap_section: {
       title: "Swap",
       source_label: "From",

@@ -97,6 +97,13 @@
                       />
                     </div>
                   </div>
+                  <div class="row q-pt-sm" v-if="!knowThisMint">
+                    <div class="col-12">
+                      <ToolTipInfo
+                        :text="$t('ReceiveTokenDialog.unknown_mint_info_text')"
+                      />
+                    </div>
+                  </div>
 
                   <!-- swap mint selection -->
                   <SwapIncomingTokenToKnownMint
@@ -335,6 +342,7 @@ import { Token } from "@cashu/cashu-ts";
 import TokenInformation from "components/TokenInformation.vue";
 import TokenStringRender from "components/TokenStringRender.vue";
 import SwapIncomingTokenToKnownMint from "src/components/SwapIncomingTokenToKnownMint.vue";
+import ToolTipInfo from "src/components/ToolTipInfo.vue";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import {
@@ -364,6 +372,7 @@ export default defineComponent({
     ScanIcon,
     TokenStringRender,
     SwapIncomingTokenToKnownMint,
+    ToolTipInfo,
   },
   data: function () {
     return {

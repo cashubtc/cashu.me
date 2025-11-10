@@ -101,12 +101,10 @@
     </div>
 
     <!-- Info Tip about fees -->
-    <div class="swap-info-tip q-mt-md">
-      <q-icon name="info" size="16px" class="q-mr-xs" />
-      <span class="swap-info-text">
-        {{ $t("ReceiveTokenDialog.swap_section.fee_info") }}
-      </span>
-    </div>
+    <ToolTipInfo
+      class="q-mt-md"
+      :text="$t('ReceiveTokenDialog.swap_section.fee_info')"
+    />
   </div>
 </template>
 
@@ -114,12 +112,14 @@
 import { defineComponent, PropType } from "vue";
 import ChooseMint from "src/components/ChooseMint.vue";
 import { ArrowDown as ArrowDownIcon } from "lucide-vue-next";
+import ToolTipInfo from "src/components/ToolTipInfo.vue";
 
 export default defineComponent({
   name: "SwapIncomingTokenToKnownMint",
   components: {
     ChooseMint,
     ArrowDownIcon,
+    ToolTipInfo,
   },
   props: {
     swapProcessing: {
