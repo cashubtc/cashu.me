@@ -29,78 +29,78 @@
 
       <q-card-section class="q-pa-md">
         <div class="q-gutter-y-md">
-          <q-btn class="full-width custom-btn" @click="handlePasteBtn">
-            <div class="row items-center full-width">
-              <div class="icon-background q-mr-md">
-                <ClipboardIcon />
+          <div class="action-row" @click="handlePasteBtn">
+            <div class="row items-center no-wrap">
+              <div class="icon-circle">
+                <ClipboardIcon :size="24" />
               </div>
-              <div class="text-left">
-                <div class="text-weight-bold custom-btn-text">
+              <div class="col q-ml-md">
+                <div class="text-body1 text-weight-medium">
                   {{ $t("ReceiveEcashDrawer.actions.paste.label") }}
                 </div>
               </div>
             </div>
-          </q-btn>
+          </div>
 
-          <q-btn class="full-width custom-btn" @click="showCamera">
-            <div class="row items-center full-width">
-              <div class="icon-background q-mr-md">
-                <ScanIcon />
+          <div class="action-row" @click="showCamera">
+            <div class="row items-center no-wrap">
+              <div class="icon-circle">
+                <ScanIcon :size="24" />
               </div>
-              <div class="text-left">
-                <div class="text-weight-bold custom-btn-text">
+              <div class="col q-ml-md">
+                <div class="text-body1 text-weight-medium">
                   {{ $t("ReceiveEcashDrawer.actions.scan.label") }}
                 </div>
               </div>
             </div>
-          </q-btn>
+          </div>
 
-          <q-btn
+          <div
             v-if="enablePaymentRequest"
-            class="full-width custom-btn"
+            class="action-row"
             @click="handlePaymentRequestBtn"
           >
-            <div class="row items-center full-width">
-              <div class="icon-background q-mr-md">
-                <FileTextIcon />
+            <div class="row items-center no-wrap">
+              <div class="icon-circle">
+                <FileTextIcon :size="24" />
               </div>
-              <div class="text-left">
-                <div class="text-weight-bold custom-btn-text">
+              <div class="col q-ml-md">
+                <div class="text-body1 text-weight-medium">
                   {{ $t("ReceiveEcashDrawer.actions.request.label") }}
                 </div>
               </div>
             </div>
-          </q-btn>
+          </div>
 
-          <q-btn
+          <div
             v-if="showP2PkButtonInDrawer"
-            class="full-width custom-btn"
+            class="action-row"
             @click="handleLockBtn"
           >
-            <div class="row items-center full-width">
-              <div class="icon-background q-mr-md">
-                <LockIcon />
+            <div class="row items-center no-wrap">
+              <div class="icon-circle">
+                <LockIcon :size="24" />
               </div>
-              <div class="text-left">
-                <div class="text-weight-bold custom-btn-text">
+              <div class="col q-ml-md">
+                <div class="text-body1 text-weight-medium">
                   {{ $t("ReceiveEcashDrawer.actions.lock.label") }}
                 </div>
               </div>
             </div>
-          </q-btn>
+          </div>
 
-          <q-btn
+          <div
             v-if="ndefSupported && showNfcButtonInDrawer"
-            class="full-width custom-btn"
+            class="action-row"
             @click="handleNFCBtn"
           >
-            <div class="row items-center full-width">
-              <div class="icon-background q-mr-md">
-                <q-spinner v-if="scanningCard" size="sm" />
-                <NfcIcon v-else />
+            <div class="row items-center no-wrap">
+              <div class="icon-circle">
+                <q-spinner v-if="scanningCard" size="sm" color="white" />
+                <NfcIcon v-else :size="24" />
               </div>
-              <div class="text-left">
-                <div class="text-weight-bold custom-btn-text">
+              <div class="col q-ml-md">
+                <div class="text-body1 text-weight-medium">
                   {{ $t("ReceiveEcashDrawer.actions.nfc.label") }}
                   {{
                     scanningCard
@@ -110,7 +110,7 @@
                 </div>
               </div>
             </div>
-          </q-btn>
+          </div>
         </div>
       </q-card-section>
     </q-card>
@@ -270,17 +270,32 @@ export default defineComponent({
   border-bottom-right-radius: 0px !important;
 }
 
-.icon-background {
-  background-color: $grey-10;
-  border-radius: 8px;
-  padding: 8px;
+.action-row {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:active {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.icon-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .lucide {
   width: 24px;
   height: 24px;
+  color: white;
 }
 </style>

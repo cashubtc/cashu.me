@@ -29,31 +29,31 @@
 
       <q-card-section class="q-pa-md">
         <div class="q-gutter-y-md">
-          <q-btn class="full-width custom-btn" @click="showSendTokensDialog">
-            <div class="row items-center full-width">
-              <div class="icon-background q-mr-md">
-                <CoinsIcon />
+          <div class="action-row" @click="showSendTokensDialog">
+            <div class="row items-center no-wrap">
+              <div class="icon-circle">
+                <CoinsIcon :size="24" />
               </div>
-              <div class="text-left">
-                <div class="text-weight-bold custom-btn-text">
+              <div class="col q-ml-md">
+                <div class="text-body1 text-weight-medium">
                   {{ $t("SendDialog.actions.ecash.label") }}
                 </div>
               </div>
             </div>
-          </q-btn>
+          </div>
 
-          <q-btn class="full-width custom-btn" @click="showParseDialog">
-            <div class="row items-center full-width">
-              <div class="icon-background q-mr-md">
-                <ZapIcon />
+          <div class="action-row" @click="showParseDialog">
+            <div class="row items-center no-wrap">
+              <div class="icon-circle">
+                <ZapIcon :size="24" />
               </div>
-              <div class="text-left">
-                <div class="text-weight-bold custom-btn-text">
+              <div class="col q-ml-md">
+                <div class="text-body1 text-weight-medium">
                   {{ $t("SendDialog.actions.lightning.label") }}
                 </div>
               </div>
             </div>
-          </q-btn>
+          </div>
         </div>
       </q-card-section>
     </q-card>
@@ -172,17 +172,32 @@ export default defineComponent({
   border-bottom-right-radius: 0px !important;
 }
 
-.icon-background {
-  background-color: $grey-10;
-  border-radius: 8px;
-  padding: 8px;
+.action-row {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:active {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.icon-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .lucide {
   width: 24px;
   height: 24px;
+  color: white;
 }
 </style>
