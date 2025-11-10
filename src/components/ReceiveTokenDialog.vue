@@ -330,6 +330,7 @@ import { useSwapStore } from "src/stores/swap";
 import { useSettingsStore } from "src/stores/settings";
 import token from "src/js/token";
 import { CashuMint } from "@cashu/cashu-ts";
+import { Token } from "@cashu/cashu-ts";
 
 import TokenInformation from "components/TokenInformation.vue";
 import TokenStringRender from "components/TokenStringRender.vue";
@@ -572,20 +573,20 @@ export default defineComponent({
         return undefined;
       }
     },
-    getProofs: function (decoded_token) {
+    getProofs: function (decoded_token: Token) {
       return token.getProofs(decoded_token);
     },
-    getMint: function (decoded_token) {
+    getMint: function (decoded_token: Token) {
       return token.getMint(decoded_token);
     },
-    tokenAlreadyInHistory: function (tokenStr) {
+    tokenAlreadyInHistory: function (tokenStr: string) {
       const tokensStore = useTokensStore();
       return (
         tokensStore.historyTokens.find((t) => t.token === tokenStr) !==
         undefined
       );
     },
-    addPendingTokenToHistory: function (tokenStr) {
+    addPendingTokenToHistory: function (tokenStr: string) {
       if (this.tokenAlreadyInHistory(tokenStr)) {
         this.notifySuccess(
           this.$i18n.t(
