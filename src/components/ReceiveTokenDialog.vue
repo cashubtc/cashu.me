@@ -220,7 +220,7 @@
                   </q-btn>
                   <q-btn
                     v-if="
-                      enableReceiveSwaps && activeMintUrl && mints.length > 1
+                      enableReceiveSwaps && activeMintUrl && mints.length > 0
                     "
                     @click="openSwap"
                     color="primary"
