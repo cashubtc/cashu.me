@@ -6,7 +6,10 @@
         ref="inputRef"
         filled
         borderless
-        class="parse-input"
+        :class="[
+          'parse-input',
+          { 'has-paste-button': canPasteFromClipboard && !modelValue },
+        ]"
         spellcheck="false"
         autocorrect="off"
         autocapitalize="off"
@@ -28,22 +31,14 @@
     </div>
 
     <!-- QR Scanner row -->
-    <div
-      v-if="hasCamera"
-      class="qr-scanner-row q-mt-md"
-      @click="$emit('scan')"
-    >
+    <div v-if="hasCamera" class="qr-scanner-row q-mt-md" @click="$emit('scan')">
       <div class="row items-center no-wrap">
         <div class="qr-icon-circle">
           <ScanIcon :size="24" />
         </div>
         <div class="col q-ml-md">
-          <div class="text-body1 text-weight-medium">
-            Scan QR Code
-          </div>
-          <div class="text-caption text-grey-6">
-            Tap to scan an address
-          </div>
+          <div class="text-body1 text-weight-medium">Scan QR Code</div>
+          <div class="text-caption text-grey-6">Tap to scan an address</div>
         </div>
       </div>
     </div>
@@ -137,16 +132,21 @@ export default defineComponent({
     min-height: 120px;
     padding: 16px;
 
-    &:before, &:after {
+    &:before,
+    &:after {
       border: none !important;
     }
   }
 
   ::v-deep .q-field__native {
-    padding: 0 70px 0 0;
+    padding: 0;
     font-size: 16px;
     color: white;
     min-height: 88px;
+  }
+
+  &.has-paste-button ::v-deep .q-field__native {
+    padding: 0 70px 0 0;
   }
 
   ::v-deep .q-placeholder {

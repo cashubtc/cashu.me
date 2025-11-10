@@ -695,7 +695,7 @@ export default defineComponent({
       const text = await useUiStore().pasteFromClipboard();
       if (text) {
         this.payInvoiceData.input.request = text.trim();
-        // await this.decodeAndQuote(text.trim());
+        await this.decodeAndQuote(text.trim());
       }
     },
     handleMeltButton: function () {
