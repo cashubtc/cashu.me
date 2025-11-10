@@ -1297,6 +1297,20 @@ export default {
       },
     },
   },
+  ParseInputComponent: {
+    placeholder: {
+      default: "Cashu Token oder Lightning-Adresse",
+      receive: "Cashu Token",
+      pay: "Lightning-Adresse oder Rechnung",
+    },
+    qr_scanner: {
+      title: "QR-Code scannen",
+      description: "Tippen Sie, um eine Adresse zu scannen",
+    },
+    paste_button: {
+      label: "@:global.actions.paste.label",
+    },
+  },
   PayInvoiceDialog: {
     input_data: {
       title: "Lightning bezahlen",

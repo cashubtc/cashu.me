@@ -1281,6 +1281,20 @@ export default {
       },
     },
   },
+  ParseInputComponent: {
+    placeholder: {
+      default: "رمز Cashu أو عنوان Lightning",
+      receive: "رمز Cashu",
+      pay: "عنوان Lightning أو فاتورة",
+    },
+    qr_scanner: {
+      title: "مسح رمز QR",
+      description: "اضغط للمسح عنوان",
+    },
+    paste_button: {
+      label: "@:global.actions.paste.label",
+    },
+  },
   PayInvoiceDialog: {
     input_data: {
       title: "دفع Lightning",

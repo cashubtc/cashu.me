@@ -1278,6 +1278,20 @@ export default {
       },
     },
   },
+  ParseInputComponent: {
+    placeholder: {
+      default: "Cashu token 或闪电地址",
+      receive: "Cashu token",
+      pay: "闪电地址或发票",
+    },
+    qr_scanner: {
+      title: "扫描二维码",
+      description: "点击扫描地址",
+    },
+    paste_button: {
+      label: "@:global.actions.paste.label",
+    },
+  },
   PayInvoiceDialog: {
     input_data: {
       title: "支付 Lightning",

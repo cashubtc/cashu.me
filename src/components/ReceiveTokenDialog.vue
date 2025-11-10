@@ -119,7 +119,7 @@
                   v-else
                   key="token-empty"
                   v-model="receiveData.tokensBase64"
-                  placeholder="Cashu token or Lightning address"
+                  :placeholder="$t('ParseInputComponent.placeholder.receive')"
                   :has-camera="hasCamera"
                   :ndef-supported="ndefSupported"
                   :scanning-card="scanningCard"

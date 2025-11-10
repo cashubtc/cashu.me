@@ -1298,6 +1298,20 @@ export default {
       },
     },
   },
+  ParseInputComponent: {
+    placeholder: {
+      default: "Cashu token veya Lightning adresi",
+      receive: "Cashu token",
+      pay: "Lightning adresi veya faturası",
+    },
+    qr_scanner: {
+      title: "QR Kodu Tara",
+      description: "Bir adresi taramak için dokunun",
+    },
+    paste_button: {
+      label: "@:global.actions.paste.label",
+    },
+  },
   PayInvoiceDialog: {
     input_data: {
       title: "Lightning öde",

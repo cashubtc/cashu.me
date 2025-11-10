@@ -294,7 +294,7 @@
                 <ParseInputComponent
                   v-if="!camera.show"
                   v-model="payInvoiceData.input.request"
-                  placeholder="Lightning address or invoice"
+                  :placeholder="$t('ParseInputComponent.placeholder.pay')"
                   :has-camera="hasCameraAvailable"
                   :ndef-supported="false"
                   @update:model-value="decodeAndQuote($event)"

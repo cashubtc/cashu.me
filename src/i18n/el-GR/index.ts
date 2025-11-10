@@ -1294,6 +1294,20 @@ export default {
       },
     },
   },
+  ParseInputComponent: {
+    placeholder: {
+      default: "Token Cashu ή διεύθυνση Lightning",
+      receive: "Token Cashu",
+      pay: "Διεύθυνση Lightning ή τιμολόγιο",
+    },
+    qr_scanner: {
+      title: "Σάρωση Κωδικού QR",
+      description: "Πατήστε για σάρωση διεύθυνσης",
+    },
+    paste_button: {
+      label: "@:global.actions.paste.label",
+    },
+  },
   PayInvoiceDialog: {
     input_data: {
       title: "Πληρωμή με Lightning",

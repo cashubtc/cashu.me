@@ -1287,6 +1287,20 @@ export default {
       },
     },
   },
+  ParseInputComponent: {
+    placeholder: {
+      default: "Cashu token eller Lightning-adress",
+      receive: "Cashu token",
+      pay: "Lightning-adress eller faktura",
+    },
+    qr_scanner: {
+      title: "Skanna QR-kod",
+      description: "Tryck för att skanna en adress",
+    },
+    paste_button: {
+      label: "@:global.actions.paste.label",
+    },
+  },
   PayInvoiceDialog: {
     input_data: {
       title: "Betala Lightning",

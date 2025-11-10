@@ -1283,6 +1283,20 @@ export default {
       },
     },
   },
+  ParseInputComponent: {
+    placeholder: {
+      default: "CashuトークンまたはLightningアドレス",
+      receive: "Cashuトークン",
+      pay: "Lightningアドレスまたは請求書",
+    },
+    qr_scanner: {
+      title: "QRコードをスキャン",
+      description: "タップしてアドレスをスキャン",
+    },
+    paste_button: {
+      label: "@:global.actions.paste.label",
+    },
+  },
   PayInvoiceDialog: {
     input_data: {
       title: "Lightningで支払う",

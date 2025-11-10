@@ -17,7 +17,7 @@
         @update:model-value="$emit('update:modelValue', $event)"
         type="textarea"
         autogrow
-        :placeholder="placeholder"
+        :placeholder="computedPlaceholder"
         :autofocus="autofocus"
         @keyup.enter="$emit('enter')"
       />
@@ -26,7 +26,7 @@
         class="paste-text-btn"
         @click="$emit('paste')"
       >
-        Paste
+        {{ $t("ParseInputComponent.paste_button.label") }}
       </div>
     </div>
 
@@ -37,8 +37,12 @@
           <ScanIcon :size="24" />
         </div>
         <div class="col q-ml-md">
-          <div class="text-body1 text-weight-medium">Scan QR Code</div>
-          <div class="text-caption text-grey-6">Tap to scan an address</div>
+          <div class="text-body1 text-weight-medium">
+            {{ $t("ParseInputComponent.qr_scanner.title") }}
+          </div>
+          <div class="text-caption text-grey-6">
+            {{ $t("ParseInputComponent.qr_scanner.description") }}
+          </div>
         </div>
       </div>
     </div>
@@ -79,7 +83,7 @@ export default defineComponent({
     },
     placeholder: {
       type: String,
-      default: "Cashu token or Lightning address",
+      default: "",
     },
     autofocus: {
       type: Boolean,
@@ -113,6 +117,11 @@ export default defineComponent({
         window.isSecureContext &&
         navigator.clipboard &&
         navigator.clipboard.readText
+      );
+    },
+    computedPlaceholder() {
+      return (
+        this.placeholder || this.$t("ParseInputComponent.placeholder.default")
       );
     },
   },

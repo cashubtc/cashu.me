@@ -1283,6 +1283,20 @@ export default {
       },
     },
   },
+  ParseInputComponent: {
+    placeholder: {
+      default: "Cashu token หรือที่อยู่ Lightning",
+      receive: "Cashu token",
+      pay: "ที่อยู่ Lightning หรือใบแจ้งหนี้",
+    },
+    qr_scanner: {
+      title: "สแกนรหัส QR",
+      description: "แตะเพื่อสแกนที่อยู่",
+    },
+    paste_button: {
+      label: "@:global.actions.paste.label",
+    },
+  },
   PayInvoiceDialog: {
     input_data: {
       title: "ชำระเงิน Lightning",
