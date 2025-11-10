@@ -71,7 +71,7 @@ export const usePRStore = defineStore("payment-request", {
       console.log("decodePaymentRequest", pr);
       const request: PaymentRequest = decodePaymentRequest(pr);
       console.log("decodePaymentRequest", request);
-      const mintsStore = useMintsStore();
+      const mintsStore = useMintsStore() as any;
       // activate the mint in the payment request
       if (request.mints && request.mints.length > 0) {
         let foundMint = false;
@@ -119,31 +119,41 @@ export const usePRStore = defineStore("payment-request", {
         sendTokenStore.showSendTokens = true;
       }
     },
-    async parseAndPayPaymentRequest(request: PaymentRequest, tokenStr: string) {
-      const transports: PaymentRequestTransport[] = request.transport;
+    async parseAndPayPaymentRequest(
+      request: PaymentRequest,
+      tokenStr: string
+    ): Promise<boolean> {
+      const transports: PaymentRequestTransport[] = request.transport ?? [];
       for (const transport of transports) {
         if (transport.type == PaymentRequestTransportType.NOSTR) {
-          await this.payNostrPaymentRequest(request, transport, tokenStr);
-          return;
+          return await this.payNostrPaymentRequest(
+            request,
+            transport,
+            tokenStr
+          );
         }
         if (transport.type == PaymentRequestTransportType.POST) {
-          await this.payPostPaymentRequest(request, transport, tokenStr);
-          return;
+          return await this.payPostPaymentRequest(
+            request,
+            transport,
+            tokenStr
+          );
         }
       }
+      throw new Error("Unsupported payment request transport.");
     },
     async payNostrPaymentRequest(
       request: PaymentRequest,
       transport: PaymentRequestTransport,
       tokenStr: string
-    ) {
+    ): Promise<boolean> {
       console.log("payNostrPaymentRequest", request, tokenStr);
       console.log("transport", transport);
       const nostrStore = useNostrStore();
       const decodedToken = token.decode(tokenStr);
       if (!decodedToken) {
         console.error("could not decode token");
-        return;
+        throw new Error("Could not decode ecash token.");
       }
       const proofs = token.getProofs(decodedToken);
       const mint = token.getMint(decodedToken);
@@ -161,21 +171,22 @@ export const usePRStore = defineStore("payment-request", {
         );
       } catch (error) {
         console.error("Error paying payment request:", error);
-        notifyError(`${error.message}`, "Could not pay request");
+        throw error;
       }
       notifySuccess("Payment sent");
+      return true;
     },
     async payPostPaymentRequest(
       request: PaymentRequest,
       transport: PaymentRequestTransport,
       tokenStr: string
-    ) {
+    ): Promise<boolean> {
       console.log("payPostPaymentRequest", request, tokenStr);
       // get the endpoint from the transport target and make an HTTP POST request with the paymentPayload as the body
       const decodedToken = token.decode(tokenStr);
       if (!decodedToken) {
         console.error("could not decode token");
-        return;
+        throw new Error("Could not decode ecash token.");
       }
       const proofs = token.getProofs(decodedToken);
       const unit = token.getUnit(decodedToken);
@@ -197,14 +208,14 @@ export const usePRStore = defineStore("payment-request", {
         });
         if (!response.ok) {
           console.error("Error paying payment request:", response.statusText);
-          notifyError(`${response.statusText}`, "Could not pay request");
-          return;
+          throw new Error(response.statusText);
         }
         notifySuccess("Payment sent");
       } catch (error) {
         console.error("Error paying payment request:", error);
-        notifyError(`${error.message}`, "Could not pay request");
+        throw error;
       }
+      return true;
     },
   },
 });

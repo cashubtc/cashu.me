@@ -34,6 +34,9 @@ export default {
       send: {
         label: "Send",
       },
+      pay: {
+        label: "Pay",
+      },
       swap: {
         label: "Swap",
       },
@@ -1005,6 +1008,9 @@ export default {
       paste_p2pk_pubkey: {
         tooltip_text: "@:global.actions.paste.label",
       },
+      pay: {
+        label: "@:global.actions.pay.label",
+      },
       send: {
         label: "@:global.actions.send.label",
       },
@@ -1018,6 +1024,31 @@ export default {
         },
       },
     },
+    errors: {
+      amount_required: "Enter an amount first.",
+      serialization_failed: "Could not prepare ecash token.",
+    },
+  },
+  SendPaymentRequest: {
+    actions: {
+      pay: {
+        label: "Pay",
+      },
+      pay_via: {
+        label: "Pay via {transport}",
+      },
+    },
+    info: {
+      pay_to: "Pay to {target}",
+      invalid_url: "Invalid URL",
+    },
+  },
+  PaymentRequestInfo: {
+    title_with_transport: "Payment request via {transport}",
+    title: "Payment request",
+    subtitle: "Pay to {target}",
+    subtitle_fallback: "Payment request",
+    invalid_url: "Invalid URL",
   },
   ReceiveDialog: {
     title: "Receive",

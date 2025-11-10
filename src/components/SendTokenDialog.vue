@@ -72,6 +72,16 @@
           </div>
         </div>
 
+        <!-- Payment request info -->
+        <div v-if="sendData.paymentRequest" class="row justify-center q-pt-sm">
+          <div
+            class="col-12 col-sm-11 col-md-8 q-px-md"
+            style="max-width: 600px"
+          >
+            <PaymentRequestInfo :request="sendData.paymentRequest" />
+          </div>
+        </div>
+
         <!-- Amount display -->
         <div class="col column items-center justify-center q-px-lg amount-area">
           <!-- Floating P2PK input overlay -->
@@ -203,7 +213,17 @@
               class="col-12 col-sm-11 col-md-8 q-px-md"
               style="max-width: 600px"
             >
+              <SendPaymentRequest
+                v-if="sendData.paymentRequest"
+                :button-label="$t('SendTokenDialog.actions.pay.label')"
+                :disable="paymentRequestButtonDisabled"
+                :show-details="false"
+                :full-width="true"
+                :prepare-token="preparePaymentRequestTokens"
+                @success="handlePaymentRequestSuccess"
+              />
               <q-btn
+                v-else
                 class="full-width"
                 unelevated
                 size="lg"
@@ -256,6 +276,8 @@ import ChooseMint from "components/ChooseMint.vue";
 import NumericKeyboard from "components/NumericKeyboard.vue";
 import DisplayTokenComponent from "components/DisplayTokenComponent.vue";
 import AmountInputComponent from "components/AmountInputComponent.vue";
+import SendPaymentRequest from "components/SendPaymentRequest.vue";
+import PaymentRequestInfo from "components/PaymentRequestInfo.vue";
 import {
   ChevronLeft as ChevronLeftIcon,
   Clipboard as ClipboardIcon,
@@ -272,6 +294,8 @@ export default defineComponent({
     NumericKeyboard,
     DisplayTokenComponent,
     AmountInputComponent,
+    SendPaymentRequest,
+    PaymentRequestInfo,
     ScanIcon,
     LockIcon,
   },
@@ -363,6 +387,22 @@ export default defineComponent({
           this.isValidPubkey(this.sendData.p2pkPubkey)
       );
     },
+    paymentRequestButtonDisabled(): boolean {
+      if (!this.sendData.paymentRequest) {
+        return true;
+      }
+      if (
+        this.sendData.amount == null ||
+        this.sendData.amount <= 0 ||
+        this.insufficientFunds
+      ) {
+        return true;
+      }
+      if (this.globalMutexLock) {
+        return true;
+      }
+      return false;
+    },
   },
   watch: {
     showSendTokens: function (val) {
@@ -426,6 +466,65 @@ export default defineComponent({
     ...mapActions(useP2PKStore, ["isValidPubkey", "maybeConvertNpub"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
+    handlePaymentRequestSuccess: function () {
+      this.showSendTokens = false;
+    },
+    preparePaymentRequestTokens: async function () {
+      if (!this.sendData.paymentRequest) {
+        return undefined;
+      }
+      if (this.sendData.tokensBase64) {
+        return this.sendData.tokensBase64;
+      }
+      if (this.sendData.amount == null || this.sendData.amount <= 0) {
+        throw new Error(
+          this.$t("SendTokenDialog.errors.amount_required") as string
+        );
+      }
+      if (this.insufficientFunds) {
+        throw new Error(
+          this.$t(
+            "PayInvoiceDialog.invoice.balance_too_low_warning_text"
+          ) as string
+        );
+      }
+      const sendAmount = Math.floor(
+        this.sendData.amount * this.activeUnitCurrencyMultiplyer
+      );
+      const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
+      const { sendProofs } = await this.send(
+        this.activeProofs,
+        mintWallet,
+        sendAmount,
+        true,
+        this.includeFeesInSendAmount
+      );
+      const serialized = this.serializeProofs(sendProofs);
+      if (!serialized) {
+        throw new Error(
+          this.$t("SendTokenDialog.errors.serialization_failed") as string
+        );
+      }
+      this.sendData.tokens = "";
+      this.sendData.tokensBase64 = serialized;
+      this.sendData.historyAmount = -sendAmount;
+      const historyToken = {
+        amount: -sendAmount,
+        token: serialized,
+        unit: this.activeUnit,
+        mint: this.activeMintUrl,
+        paymentRequest: this.sendData.paymentRequest,
+        status: "pending",
+      };
+      if (!this.sendData.historyToken) {
+        this.addPendingToken(historyToken);
+        if (!this.g.offline) {
+          this.onTokenPaid(historyToken);
+        }
+      }
+      this.sendData.historyToken = historyToken;
+      return serialized;
+    },
     lockTokens: async function () {
       if (!this.sendData.amount) {
         throw new Error("Amount is required");

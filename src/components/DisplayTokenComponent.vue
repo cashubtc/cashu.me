@@ -217,6 +217,17 @@
             <TokenInformation :encodedToken="sendData.tokensBase64" />
           </div>
           <div
+            v-if="sendData.paymentRequest"
+            class="row justify-center q-pt-md"
+          >
+            <div
+              class="col-12 col-sm-11 col-md-8 q-px-md"
+              style="max-width: 600px"
+            >
+              <PaymentRequestInfo :request="sendData.paymentRequest" />
+            </div>
+          </div>
+          <div
             v-if="sendData.historyToken?.meltQuote"
             class="row justify-center q-pt-md"
           >
@@ -236,6 +247,7 @@
           <div
             v-if="
               sendData.paymentRequest &&
+              sendData.historyToken &&
               sendData.historyToken.amount < 0 &&
               sendData.historyToken.status === 'pending'
             "
@@ -315,6 +327,7 @@ import { useTokensStore } from "src/stores/tokens";
 import TokenInformation from "components/TokenInformation.vue";
 import MeltQuoteInformation from "components/MeltQuoteInformation.vue";
 import SendPaymentRequest from "./SendPaymentRequest.vue";
+import PaymentRequestInfo from "./PaymentRequestInfo.vue";
 import {
   getDecodedToken,
   getEncodedTokenBinary,
@@ -340,6 +353,7 @@ export default defineComponent({
     TokenInformation,
     MeltQuoteInformation,
     SendPaymentRequest,
+    PaymentRequestInfo,
     ScanIcon,
     NfcIcon,
     ShareIcon,
