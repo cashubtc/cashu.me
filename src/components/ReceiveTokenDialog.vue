@@ -219,7 +219,9 @@
                     }}</q-tooltip>
                   </q-btn>
                   <q-btn
-                    v-if="enableReceiveSwaps && activeMintUrl && mints.length > 1"
+                    v-if="
+                      enableReceiveSwaps && activeMintUrl && mints.length > 1
+                    "
                     @click="openSwap"
                     color="primary"
                     rounded
@@ -282,6 +284,7 @@ import { useSettingsStore } from "src/stores/settings";
 import token from "src/js/token";
 import { CashuMint } from "@cashu/cashu-ts";
 import { Token } from "@cashu/cashu-ts";
+import type { Mint } from "src/stores/mints";
 
 import TokenInformation from "components/TokenInformation.vue";
 import TokenStringRender from "components/TokenStringRender.vue";
@@ -446,7 +449,7 @@ export default defineComponent({
       if (!this.tokenMint) {
         return null;
       }
-      const mint = this.mints.find((m: any) => m.url === this.tokenMint);
+      const mint = (this.mints as Mint[]).find((m) => m.url === this.tokenMint);
       if (!mint) {
         // Use untrusted mint info if available
         return {
@@ -466,7 +469,9 @@ export default defineComponent({
         return null;
       }
       return (
-        this.mints.find((m: any) => m.url === this.selectedSwapMintUrl) || null
+        (this.mints as Mint[]).find(
+          (m) => m.url === this.selectedSwapMintUrl
+        ) || null
       );
     },
     canConfirmSwap: function (): boolean {
@@ -671,9 +676,12 @@ export default defineComponent({
     handleSwapClose() {
       this.swapSelected = false;
     },
-    getAvailableSwapMints() {
-      return this.mints.filter(
-        (mint: any) => mint.url && mint.url !== this.tokenMint
+    getAvailableSwapMints(): Mint[] {
+      const availableMints = Array.isArray(this.mints)
+        ? (this.mints as Mint[])
+        : [];
+      return availableMints.filter(
+        (mint) => mint.url && mint.url !== this.tokenMint
       );
     },
     syncSwapTargetWithDefaults() {

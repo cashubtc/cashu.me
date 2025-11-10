@@ -50,7 +50,7 @@
               </div>
               <div v-if="showBalances && chosenMint" class="mint-balance-label">
                 <span v-if="!chosenMint.errored" class="text-grey-6">
-                  {{ formatCurrency(getBalance, activeUnit) }}
+                  {{ formatCurrency(selectedMintBalance, activeUnit) }}
                   {{ $t("ChooseMint.available_text") }}
                 </span>
                 <span v-else class="text-red">
@@ -169,7 +169,21 @@ import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "stores/mints";
 import { MintClass } from "stores/mints";
+import type { Mint } from "stores/mints";
+import { useUiStore } from "stores/ui";
 import { i18n } from "../boot/i18n";
+
+declare const windowMixin: any;
+
+type MintOption = {
+  nickname?: string | null;
+  url: string;
+  shorturl: string | null;
+  iconUrl?: string | null;
+  balances: Record<string, number>;
+  errored?: boolean;
+  units: string[];
+};
 
 export default defineComponent({
   name: "ChooseMint",
@@ -220,7 +234,7 @@ export default defineComponent({
   emits: ["update:modelValue"],
   data: function () {
     return {
-      chosenMint: null,
+      chosenMint: null as MintOption | null,
       showMintSheet: false,
     };
   },
@@ -235,7 +249,7 @@ export default defineComponent({
       }
       if (this.modelValue === null && !this.dryRun) {
         // Use the original behavior when not using v-model
-        this.activeMintUrl = selectedUrl;
+        (this.activeMintUrl as unknown as string) = selectedUrl;
       }
     },
     modelValue: {
@@ -256,32 +270,31 @@ export default defineComponent({
     },
   },
   computed: {
-    ...mapState(useMintsStore, [
-      "activeMintUrl",
-      "activeProofs",
-      "mints",
-      "activeUnit",
-    ]),
+    ...mapState(useMintsStore, ["activeProofs", "mints", "activeUnit"]),
     ...mapWritableState(useMintsStore, ["activeMintUrl"]),
-    getBalance: function () {
-      return this.activeProofs
-        .flat()
-        .reduce((sum, el) => (sum += el.amount), 0);
+    selectedMintBalance(): number {
+      const unit = this.activeUnit;
+      if (!this.chosenMint || !unit) {
+        return 0;
+      }
+      const balance = this.chosenMint.balances?.[unit];
+      return typeof balance === "number" ? balance : 0;
     },
   },
   methods: {
     ...mapActions(useMintsStore, ["activateMintUrl"]),
-    applyChosenMint(option: any) {
+    formatCurrency(value: number, currency: string) {
+      return useUiStore().formatCurrency(value, currency);
+    },
+    applyChosenMint(option: MintOption | null) {
       if (!option) {
         this.chosenMint = null;
         return;
       }
       this.chosenMint = {
-        url: option.url,
-        nickname: option.nickname,
-        shorturl: option.shorturl,
-        iconUrl: option.iconUrl,
-        errored: option.errored,
+        ...option,
+        balances: { ...option.balances },
+        units: [...option.units],
       };
     },
     initializeChosenMint() {
@@ -298,7 +311,9 @@ export default defineComponent({
         targetUrl = "";
       }
       if (targetUrl) {
-        const matched = options.find((option) => option.url === targetUrl);
+        const matched = options.find(
+          (option: MintOption) => option.url === targetUrl
+        );
         if (matched) {
           this.applyChosenMint(matched);
           return;
@@ -310,7 +325,7 @@ export default defineComponent({
         this.applyChosenMint(null);
       }
     },
-    selectMint(mint: any) {
+    selectMint(mint: MintOption) {
       if (this.excludeMint && mint.url === this.excludeMint) {
         return;
       }
@@ -318,16 +333,19 @@ export default defineComponent({
       this.showMintSheet = false;
     },
     chooseMintOptions: function () {
-      let options = [];
-      for (const [i, m] of Object.entries(this.mints)) {
-        const all_units = m.keysets.map((r) => r.unit);
+      const options: MintOption[] = [];
+      const availableMints = Array.isArray(this.mints)
+        ? (this.mints as Mint[])
+        : [];
+      for (const mintData of availableMints) {
+        const all_units = mintData.keysets.map((r) => r.unit);
         const units = [...new Set(all_units)];
-        const mint = new MintClass(m);
+        const mint = new MintClass(mintData);
         if (!this.excludeMint || mint.mint.url !== this.excludeMint) {
           options.push({
             nickname: mint.mint.nickname || mint.mint.info?.name,
             url: mint.mint.url,
-            shorturl: getShortUrl(m.url),
+            shorturl: getShortUrl(mintData.url),
             iconUrl: mint.mint.info?.icon_url,
             balances: mint.allBalances,
             errored: mint.mint.errored,
