@@ -60,7 +60,7 @@
         <!-- Mint selection (match SendTokenDialog layout) -->
         <div class="row justify-center">
           <div
-            class="col-12 col-sm-11 col-md-8 q-px-sm q-mb-sm"
+            class="col-12 col-sm-11 col-md-8 q-px-lg q-mb-sm"
             style="max-width: 600px"
           >
             <ChooseMint />
@@ -291,78 +291,16 @@
 
               <!-- INPUT CONTENT -->
               <div v-else>
-                <q-form v-if="!camera.show" class="q-gutter-md">
-                  <div class="relative-container">
-                    <q-input
-                      ref="parseDialogInput"
-                      round
-                      class="q-mb-lg q-mt-md q-mx-xs cashub-nowrap token-input"
-                      spellcheck="false"
-                      v-model.trim="payInvoiceData.input.request"
-                      type="textarea"
-                      :label="
-                        $t(
-                          'PayInvoiceDialog.input_data.inputs.invoice_data.label'
-                        )
-                      "
-                      autofocus
-                      @update:model-value="
-                        decodeAndQuote(payInvoiceData.input.request)
-                      "
-                    >
-                      <q-icon
-                        v-if="payInvoiceData.input.request"
-                        color="dark"
-                        name="close"
-                        class="floating-button cursor-pointer"
-                        @click="payInvoiceData.input.request = ''"
-                      />
-                    </q-input>
-                  </div>
-                  <div
-                    class="column q-mt-sm"
-                    v-if="!payInvoiceData.input.request"
-                  >
-                    <div class="row q-gutter-sm q-pt-lg">
-                      <div class="col">
-                        <q-btn
-                          v-if="canPasteFromClipboard"
-                          outline
-                          rounded
-                          size="lg"
-                          class="full-width"
-                          @click="pasteToParseDialog"
-                        >
-                          <q-icon
-                            name="content_paste"
-                            size="1.2em"
-                            class="q-pr-sm"
-                          />
-                          {{
-                            $t(
-                              "PayInvoiceDialog.input_data.actions.paste.label"
-                            )
-                          }}
-                        </q-btn>
-                      </div>
-                      <div class="col">
-                        <q-btn
-                          v-if="hasCameraAvailable"
-                          rounded
-                          outline
-                          size="lg"
-                          class="full-width"
-                          @click="showCamera"
-                        >
-                          <ScanIcon :size="18" />
-                          <span class="q-pl-sm">{{
-                            $t("PayInvoiceDialog.input_data.actions.scan.label")
-                          }}</span>
-                        </q-btn>
-                      </div>
-                    </div>
-                  </div>
-                </q-form>
+                <ParseInputComponent
+                  v-if="!camera.show"
+                  v-model="payInvoiceData.input.request"
+                  placeholder="Lightning address or invoice"
+                  :has-camera="hasCameraAvailable"
+                  :ndef-supported="false"
+                  @update:model-value="decodeAndQuote($event)"
+                  @paste="pasteToParseDialog"
+                  @scan="showCamera"
+                />
               </div>
             </div>
           </div>
@@ -552,9 +490,9 @@ import MultinutPaymentDialog from "./MultinutPaymentDialog.vue";
 import MeltQuoteInformation from "components/MeltQuoteInformation.vue";
 import NumericKeyboard from "components/NumericKeyboard.vue";
 import AmountInputComponent from "components/AmountInputComponent.vue";
+import ParseInputComponent from "components/ParseInputComponent.vue";
 
 import * as _ from "underscore";
-import { Scan as ScanIcon } from "lucide-vue-next";
 
 declare const windowMixin: any;
 
@@ -564,10 +502,10 @@ export default defineComponent({
   components: {
     ChooseMint,
     MultinutPaymentDialog,
-    ScanIcon,
     MeltQuoteInformation,
     NumericKeyboard,
     AmountInputComponent,
+    ParseInputComponent,
   },
   props: {},
   data: function () {
@@ -686,13 +624,6 @@ export default defineComponent({
         paidRaw !== null &&
         typeof paidRaw !== "boolean";
       return hasAmount || hasFeeReserve || hasFeePaid || hasPaidTimestamp;
-    },
-    canPasteFromClipboard: function () {
-      return (
-        window.isSecureContext &&
-        navigator.clipboard &&
-        navigator.clipboard.readText
-      );
     },
     enoughtotalUnitBalance: function () {
       return (
@@ -899,4 +830,5 @@ export default defineComponent({
   display: flex;
   justify-content: center;
 }
+
 </style>

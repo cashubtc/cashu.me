@@ -115,110 +115,25 @@
                     @close="swapSelected = false"
                   />
                 </div>
-                <div v-else key="token-empty" class="column">
-                  <!-- Token input (when not yet decodable) -->
-                  <div class="relative-container">
-                    <q-input
-                      round
-                      spellcheck="false"
-                      v-model="receiveData.tokensBase64"
-                      :label="
-                        $t('ReceiveTokenDialog.inputs.tokens_base64.label')
-                      "
-                      type="textarea"
-                      autofocus
-                      class="q-mb-lg q-mt-md q-mx-xs cashub-nowrap token-input"
-                      @keyup.enter="receiveIfDecodes"
-                    >
-                      <q-icon
-                        v-if="receiveData.tokensBase64"
-                        color="dark"
-                        name="close"
-                        class="floating-button cursor-pointer"
-                        @click="receiveData.tokensBase64 = ''"
-                      />
-                    </q-input>
-                  </div>
-
-                  <!-- Display error for invalid token -->
-                  <q-btn
-                    v-if="
-                      receiveData.tokensBase64.length && !tokenDecodesCorrectly
-                    "
-                    disabled
-                    color="yellow"
-                    text-color="black"
-                    rounded
-                    unelevated
-                    class="q-ml-xs q-mr-sm"
-                    :label="$t('ReceiveTokenDialog.errors.invalid_token.label')"
-                  ></q-btn>
-
-                  <!-- EMPTY INPUT helper actions -->
-                  <div
-                    v-if="!receiveData.tokensBase64.length"
-                    class="column q-mt-sm"
-                  >
-                    <div class="row q-gutter-sm">
-                      <div class="col">
-                        <q-btn
-                          v-if="canPasteFromClipboard"
-                          outline
-                          rounded
-                          size="lg"
-                          class="full-width"
-                          @click="pasteToParseDialog(true)"
-                        >
-                          <q-icon
-                            name="content_paste"
-                            size="1.2em"
-                            class="q-pr-sm"
-                          />
-                          {{ $t("ReceiveTokenDialog.actions.paste.label") }}
-                        </q-btn>
-                      </div>
-                      <div class="col">
-                        <q-btn
-                          v-if="hasCamera"
-                          rounded
-                          outline
-                          size="lg"
-                          class="full-width"
-                          @click="showCamera"
-                        >
-                          <ScanIcon size="1.2em" />
-                          <span class="q-pl-sm">{{
-                            $t("ReceiveTokenDialog.actions.scan.label")
-                          }}</span>
-                        </q-btn>
-                      </div>
-                    </div>
-                    <q-btn
-                      unelevated
-                      dense
-                      class="q-mx-sm"
-                      v-if="ndefSupported"
-                      :loading="scanningCard"
-                      :disabled="scanningCard"
-                      @click="toggleScanner"
-                    >
-                      <NfcIcon class="q-pr-xs" />
-                      <q-tooltip>{{
-                        ndefSupported
-                          ? $t(
-                              "ReceiveTokenDialog.actions.nfc.tooltips.ndef_supported_text"
-                            )
-                          : $t(
-                              "ReceiveTokenDialog.actions.nfc.tooltips.ndef_unsupported_text"
-                            )
-                      }}</q-tooltip>
-                      <template v-slot:loading>
-                        <q-spinner @click="toggleScanner"> </q-spinner>
-                      </template>
-                      {{ $t("ReceiveTokenDialog.actions.nfc.label") }}
-                    </q-btn>
-                  </div>
-                </div>
+                <ParseInputComponent
+                  v-else
+                  key="token-empty"
+                  v-model="receiveData.tokensBase64"
+                  placeholder="Cashu token or Lightning address"
+                  :has-camera="hasCamera"
+                  :ndef-supported="ndefSupported"
+                  :scanning-card="scanningCard"
+                  :nfc-label="$t('ReceiveTokenDialog.actions.nfc.label')"
+                  :nfc-tooltip="
+                    $t(
+                      'ReceiveTokenDialog.actions.nfc.tooltips.ndef_supported_text'
+                    )
+                  "
+                  @enter="receiveIfDecodes"
+                  @paste="pasteToParseDialog(true)"
+                  @scan="showCamera"
+                  @nfc="toggleScanner"
+                />
               </transition>
             </div>
           </div>
@@ -343,36 +258,19 @@ import TokenInformation from "components/TokenInformation.vue";
 import TokenStringRender from "components/TokenStringRender.vue";
 import SwapIncomingTokenToKnownMint from "src/components/SwapIncomingTokenToKnownMint.vue";
 import ToolTipInfo from "src/components/ToolTipInfo.vue";
+import ParseInputComponent from "components/ParseInputComponent.vue";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
-import {
-  ChevronLeft as ChevronLeftIcon,
-  Clipboard as ClipboardIcon,
-  FileText as FileTextIcon,
-  Lock as LockIcon,
-  Scan as ScanIcon,
-  Nfc as NfcIcon,
-} from "lucide-vue-next";
-
-import { map } from "underscore";
-import {
-  notifyError,
-  notifySuccess,
-  notifyWarning,
-  notify,
-} from "../js/notify";
-import MintSettings from "./MintSettings.vue";
 
 export default defineComponent({
   name: "ReceiveTokenDialog",
   mixins: [windowMixin],
   components: {
     TokenInformation,
-    NfcIcon,
-    ScanIcon,
     TokenStringRender,
     SwapIncomingTokenToKnownMint,
     ToolTipInfo,
+    ParseInputComponent,
   },
   data: function () {
     return {
@@ -431,14 +329,6 @@ export default defineComponent({
     ...mapState(usePRStore, ["enablePaymentRequest"]),
     ...mapState(useSwapStore, ["swapBlocking"]),
     ...mapWritableState(useUiStore, ["showReceiveDialog"]),
-    ...mapState(useCameraStore, ["lastScannedResult"]),
-    canPasteFromClipboard: function () {
-      return (
-        window.isSecureContext &&
-        navigator.clipboard &&
-        navigator.clipboard.readText
-      );
-    },
     tokenDecodesCorrectly: function () {
       // Try decoding token directly
       if (this.decodeToken(this.receiveData.tokensBase64) !== undefined) {
