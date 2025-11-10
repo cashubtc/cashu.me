@@ -211,7 +211,7 @@
           <div class="row justify-center q-pb-lg q-pt-sm">
             <div
               class="col-12 col-sm-11 col-md-8 q-px-md"
-              style="max-width: 600px"
+              style="max-width: 600px; max-height: 60px"
             >
               <SendPaymentRequest
                 v-if="sendData.paymentRequest"
