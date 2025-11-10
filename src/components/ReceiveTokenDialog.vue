@@ -282,7 +282,7 @@ import { usePriceStore } from "src/stores/price";
 import { useSwapStore } from "src/stores/swap";
 import { useSettingsStore } from "src/stores/settings";
 import token from "src/js/token";
-import { CashuMint } from "@cashu/cashu-ts";
+import { CashuMint, GetInfoResponse } from "@cashu/cashu-ts";
 import { Token } from "@cashu/cashu-ts";
 import type { Mint } from "src/stores/mints";
 
@@ -310,7 +310,7 @@ export default defineComponent({
     return {
       showP2PKDialog: false,
       swapSelected: false,
-      untrustedMintInfo: null,
+      untrustedMintInfo: null as GetInfoResponse | null,
       swapProcessing: false,
       swapError: false,
       isReceiving: false as boolean,
@@ -458,10 +458,13 @@ export default defineComponent({
           iconUrl: this.untrustedMintInfo?.icon_url || null,
         };
       }
+      // If mint exists but doesn't have complete info yet, fall back to untrustedMintInfo
+      const mintNickname = mint.nickname || mint.info?.name;
+      const mintIconUrl = mint.info?.icon_url;
       return {
-        nickname: mint.nickname || mint.info?.name,
+        nickname: mintNickname || this.untrustedMintInfo?.name || null,
         shorturl: this.getShortUrl(mint.url),
-        iconUrl: mint.info?.icon_url,
+        iconUrl: mintIconUrl || this.untrustedMintInfo?.icon_url || null,
       };
     },
     swapTargetMint: function () {
