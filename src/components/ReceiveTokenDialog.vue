@@ -99,141 +99,14 @@
                   </div>
 
                   <!-- swap mint selection -->
-                  <div v-if="swapSelected" class="swap-section q-mt-md">
-                    <!-- Header with cancel button -->
-                    <div class="row items-center q-mb-md">
-                      <div class="col text-h6" style="font-size: 18px">
-                        {{ $t("ReceiveTokenDialog.swap_section.title") }}
-                      </div>
-                      <!-- Processing/Error status -->
-                      <div v-if="swapProcessing || swapError" class="row items-center no-wrap">
-                        <span
-                          class="q-mr-sm text-subtitle2"
-                          :class="swapError ? 'text-red' : ''"
-                          style="font-size: 0.875rem"
-                        >
-                          {{
-                            swapError
-                              ? $t("ReceiveTokenDialog.actions.swap.failed")
-                              : $t("ReceiveTokenDialog.actions.swap.processing")
-                          }}
-                        </span>
-                        <q-spinner
-                          v-if="swapProcessing"
-                          color="primary"
-                          size="20px"
-                        />
-                        <q-btn
-                          v-if="swapError"
-                          flat
-                          round
-                          dense
-                          icon="close"
-                          @click="swapSelected = false"
-                          color="grey-6"
-                        >
-                          <q-tooltip>{{
-                            $t(
-                              "ReceiveTokenDialog.actions.cancel_swap.tooltip_text"
-                            )
-                          }}</q-tooltip>
-                        </q-btn>
-                      </div>
-                      <!-- Normal close button (hidden during processing) -->
-                      <q-btn
-                        v-else
-                        flat
-                        round
-                        dense
-                        icon="close"
-                        @click="swapSelected = false"
-                        :disable="swapBlocking"
-                        color="grey-6"
-                      >
-                        <q-tooltip>{{
-                          $t(
-                            "ReceiveTokenDialog.actions.cancel_swap.tooltip_text"
-                          )
-                        }}</q-tooltip>
-                      </q-btn>
-                    </div>
-
-                    <!-- Source Mint (Token Origin) -->
-                    <div class="swap-source-section">
-                      <div class="swap-section-label q-mb-sm">
-                        {{ $t("ReceiveTokenDialog.swap_section.source_label") }}
-                      </div>
-                      <div class="swap-mint-info">
-                        <div class="row items-center no-wrap">
-                          <!-- Mint Icon -->
-                          <q-avatar size="48px" class="q-mr-md">
-                            <q-img
-                              v-if="sourceMintInfo?.iconUrl"
-                              :src="sourceMintInfo.iconUrl"
-                              spinner-color="white"
-                              spinner-size="xs"
-                            >
-                              <template v-slot:error>
-                                <div
-                                  class="row items-center justify-center full-height"
-                                >
-                                  <q-icon
-                                    name="account_balance"
-                                    color="grey-7"
-                                    size="24px"
-                                  />
-                                </div>
-                              </template>
-                            </q-img>
-                            <q-icon
-                              v-else
-                              name="account_balance"
-                              color="grey-7"
-                              size="24px"
-                            />
-                          </q-avatar>
-
-                          <!-- Mint Info -->
-                          <div class="col text-left">
-                            <div class="swap-mint-name">
-                              {{
-                                sourceMintInfo?.nickname ||
-                                sourceMintInfo?.shorturl
-                              }}
-                            </div>
-                            <div class="swap-mint-url text-grey-6">
-                              {{ sourceMintInfo?.shorturl }}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Arrow Indicator -->
-                    <div class="row justify-center q-my-sm">
-                      <ArrowDownIcon class="swap-arrow-icon" />
-                    </div>
-
-                    <!-- Destination Mint Selector -->
-                    <div class="swap-destination-section">
-                      <div class="swap-section-label q-mb-sm">
-                        {{
-                          $t(
-                            "ReceiveTokenDialog.swap_section.destination_label"
-                          )
-                        }}
-                      </div>
-                      <ChooseMint />
-                    </div>
-
-                    <!-- Info Tip about fees -->
-                    <div class="swap-info-tip q-mt-md">
-                      <q-icon name="info" size="16px" class="q-mr-xs" />
-                      <span class="swap-info-text">
-                        {{ $t("ReceiveTokenDialog.swap_section.fee_info") }}
-                      </span>
-                    </div>
-                  </div>
+                  <SwapIncomingTokenToKnownMint
+                    v-if="swapSelected"
+                    :swap-processing="swapProcessing"
+                    :swap-error="swapError"
+                    :swap-blocking="swapBlocking"
+                    :source-mint-info="sourceMintInfo"
+                    @close="swapSelected = false"
+                  />
                 </div>
                 <div v-else key="token-empty" class="column">
                   <!-- Token input (when not yet decodable) -->
@@ -458,9 +331,9 @@ import { useSettingsStore } from "src/stores/settings";
 import token from "src/js/token";
 import { CashuMint } from "@cashu/cashu-ts";
 
-import ChooseMint from "src/components/ChooseMint.vue";
 import TokenInformation from "components/TokenInformation.vue";
 import TokenStringRender from "components/TokenStringRender.vue";
+import SwapIncomingTokenToKnownMint from "src/components/SwapIncomingTokenToKnownMint.vue";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import {
@@ -470,7 +343,6 @@ import {
   Lock as LockIcon,
   Scan as ScanIcon,
   Nfc as NfcIcon,
-  ArrowDown as ArrowDownIcon,
 } from "lucide-vue-next";
 
 import { map } from "underscore";
@@ -489,9 +361,8 @@ export default defineComponent({
     TokenInformation,
     NfcIcon,
     ScanIcon,
-    ChooseMint,
     TokenStringRender,
-    ArrowDownIcon,
+    SwapIncomingTokenToKnownMint,
   },
   data: function () {
     return {
