@@ -62,6 +62,16 @@
           </div>
         </div>
 
+        <!-- Payment request info -->
+        <div v-if="sendData.paymentRequest" class="row justify-center q-pt-sm">
+          <div
+            class="col-12 col-sm-11 col-md-8 q-px-lg"
+            style="max-width: 600px"
+          >
+            <PaymentRequestInfo :request="sendData.paymentRequest" />
+          </div>
+        </div>
+
         <!-- Mint selection -->
         <div class="row justify-center">
           <div
@@ -69,16 +79,6 @@
             style="max-width: 600px"
           >
             <ChooseMint />
-          </div>
-        </div>
-
-        <!-- Payment request info -->
-        <div v-if="sendData.paymentRequest" class="row justify-center q-pt-sm">
-          <div
-            class="col-12 col-sm-11 col-md-8 q-px-md"
-            style="max-width: 600px"
-          >
-            <PaymentRequestInfo :request="sendData.paymentRequest" />
           </div>
         </div>
 
@@ -219,6 +219,12 @@
                 :disable="paymentRequestButtonDisabled"
                 :show-details="false"
                 :full-width="true"
+                :button-rounded="true"
+                :button-dense="false"
+                :button-unelevated="true"
+                button-size="lg"
+                button-color="primary"
+                :button-class="[]"
                 :prepare-token="preparePaymentRequestTokens"
                 @success="handlePaymentRequestSuccess"
               />

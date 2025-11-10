@@ -2,10 +2,12 @@
   <div v-if="sendData.paymentRequest" class="q-pa-none q-ma-none q-mt-sm">
     <div class="q-mb-md text-center">
       <q-btn
-        rounded
-        dense
-        color="primary"
-        :class="['q-px-md', fullWidth ? 'full-width' : '']"
+        :rounded="buttonRounded"
+        :dense="buttonDense"
+        :unelevated="buttonUnelevated"
+        :size="buttonSize"
+        :color="buttonColor"
+        :class="computedButtonClasses"
         :disable="disable || !sendData.paymentRequest"
         :loading="isLoading"
         @click="clickPaymentRequest"
@@ -69,6 +71,32 @@ export default defineComponent({
       type: Function as PropType<() => Promise<string | undefined>>,
       default: null,
     },
+    buttonClass: {
+      type: [String, Array, Object] as PropType<
+        string | string[] | Record<string, boolean>
+      >,
+      default: () => [],
+    },
+    buttonColor: {
+      type: String,
+      default: "primary",
+    },
+    buttonRounded: {
+      type: Boolean,
+      default: true,
+    },
+    buttonDense: {
+      type: Boolean,
+      default: true,
+    },
+    buttonUnelevated: {
+      type: Boolean,
+      default: false,
+    },
+    buttonSize: {
+      type: String,
+      default: "md",
+    },
   },
   emits: ["success"],
   data: function () {
@@ -109,6 +137,25 @@ export default defineComponent({
       return this.$t("SendPaymentRequest.info.pay_to", {
         target,
       }) as string;
+    },
+    computedButtonClasses():
+      | string
+      | string[]
+      | Record<string, boolean>
+      | Array<string | Record<string, boolean>> {
+      const classes: Array<string | Record<string, boolean>> = [];
+      if (this.fullWidth) {
+        classes.push("full-width");
+      }
+      const extra = this.buttonClass;
+      if (Array.isArray(extra)) {
+        classes.push(...extra);
+      } else if (typeof extra === "string" && extra.trim().length > 0) {
+        classes.push(extra);
+      } else if (extra && typeof extra === "object") {
+        classes.push(extra);
+      }
+      return classes;
     },
   },
   methods: {
