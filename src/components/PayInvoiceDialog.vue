@@ -291,56 +291,16 @@
 
               <!-- INPUT CONTENT -->
               <div v-else>
-                <q-form v-if="!camera.show" class="q-gutter-md q-mt-md">
-                  <!-- Input field with paste button -->
-                  <div class="input-with-paste-wrapper">
-                    <q-input
-                      ref="parseDialogInput"
-                      filled
-                      borderless
-                      class="pay-address-input"
-                      spellcheck="false"
-                      autocorrect="off"
-                      autocapitalize="off"
-                      v-model.trim="payInvoiceData.input.request"
-                      type="textarea"
-                      autogrow
-                      placeholder="Lightning address or invoice"
-                      autofocus
-                      @update:model-value="
-                        decodeAndQuote(payInvoiceData.input.request)
-                      "
-                    />
-                    <div
-                      v-if="canPasteFromClipboard && !payInvoiceData.input.request"
-                      class="paste-text-btn"
-                      @click="pasteToParseDialog"
-                    >
-                      Paste
-                    </div>
-                  </div>
-
-                  <!-- QR Scanner row -->
-                  <div
-                    v-if="hasCameraAvailable"
-                    class="qr-scanner-row"
-                    @click="showCamera"
-                  >
-                    <div class="row items-center no-wrap">
-                      <div class="qr-icon-circle">
-                        <ScanIcon :size="24" />
-                      </div>
-                      <div class="col q-ml-md">
-                        <div class="text-body1 text-weight-medium">
-                          Scan QR Code
-                        </div>
-                        <div class="text-caption text-grey-6">
-                          Tap to scan an address
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </q-form>
+                <ParseInputComponent
+                  v-if="!camera.show"
+                  v-model="payInvoiceData.input.request"
+                  placeholder="Lightning address or invoice"
+                  :has-camera="hasCameraAvailable"
+                  :ndef-supported="false"
+                  @update:model-value="decodeAndQuote($event)"
+                  @paste="pasteToParseDialog"
+                  @scan="showCamera"
+                />
               </div>
             </div>
           </div>
@@ -530,9 +490,9 @@ import MultinutPaymentDialog from "./MultinutPaymentDialog.vue";
 import MeltQuoteInformation from "components/MeltQuoteInformation.vue";
 import NumericKeyboard from "components/NumericKeyboard.vue";
 import AmountInputComponent from "components/AmountInputComponent.vue";
+import ParseInputComponent from "components/ParseInputComponent.vue";
 
 import * as _ from "underscore";
-import { Scan as ScanIcon } from "lucide-vue-next";
 
 declare const windowMixin: any;
 
@@ -542,10 +502,10 @@ export default defineComponent({
   components: {
     ChooseMint,
     MultinutPaymentDialog,
-    ScanIcon,
     MeltQuoteInformation,
     NumericKeyboard,
     AmountInputComponent,
+    ParseInputComponent,
   },
   props: {},
   data: function () {
@@ -664,13 +624,6 @@ export default defineComponent({
         paidRaw !== null &&
         typeof paidRaw !== "boolean";
       return hasAmount || hasFeeReserve || hasFeePaid || hasPaidTimestamp;
-    },
-    canPasteFromClipboard: function () {
-      return (
-        window.isSecureContext &&
-        navigator.clipboard &&
-        navigator.clipboard.readText
-      );
     },
     enoughtotalUnitBalance: function () {
       return (
@@ -878,81 +831,4 @@ export default defineComponent({
   justify-content: center;
 }
 
-/* New input area styles - matching screenshot */
-.input-with-paste-wrapper {
-  position: relative;
-}
-
-.pay-address-input {
-  ::v-deep .q-field__control {
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.06);
-    min-height: 120px;
-    padding: 16px;
-
-    &:before, &:after {
-      border: none !important;
-    }
-  }
-
-  ::v-deep .q-field__native {
-    padding: 0 70px 0 0;
-    font-size: 16px;
-    color: white;
-    min-height: 88px;
-  }
-
-  ::v-deep .q-placeholder {
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 16px;
-  }
-
-  ::v-deep .q-field__control:before,
-  ::v-deep .q-field__control:after {
-    border: none !important;
-  }
-
-  ::v-deep .q-field__bottom {
-    display: none;
-  }
-}
-
-.paste-text-btn {
-  position: absolute;
-  right: 20px;
-  top: 16px;
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--q-primary);
-  cursor: pointer;
-  user-select: none;
-  line-height: 1.5;
-
-  &:active {
-    opacity: 0.7;
-  }
-}
-
-.qr-scanner-row {
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
-  padding: 12px 16px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-
-  &:active {
-    background: rgba(255, 255, 255, 0.1);
-  }
-}
-
-.qr-icon-circle {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
 </style>

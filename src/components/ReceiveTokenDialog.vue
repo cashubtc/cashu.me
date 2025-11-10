@@ -235,75 +235,21 @@
                     </div>
                   </div>
                 </div>
-                <div v-else key="token-empty" class="column q-mt-md">
-                  <!-- Input field with paste button -->
-                  <div class="input-with-paste-wrapper">
-                    <q-input
-                      ref="tokenInput"
-                      filled
-                      borderless
-                      class="receive-address-input"
-                      spellcheck="false"
-                      autocorrect="off"
-                      autocapitalize="off"
-                      v-model="receiveData.tokensBase64"
-                      type="textarea"
-                      autogrow
-                      placeholder="Cashu token or Lightning address"
-                      autofocus
-                      @keyup.enter="receiveIfDecodes"
-                    />
-                    <div
-                      v-if="canPasteFromClipboard && !receiveData.tokensBase64"
-                      class="paste-text-btn"
-                      @click="pasteToParseDialog(true)"
-                    >
-                      Paste
-                    </div>
-                  </div>
-
-                  <!-- QR Scanner row -->
-                  <div
-                    v-if="hasCamera"
-                    class="qr-scanner-row q-mt-md"
-                    @click="showCamera"
-                  >
-                    <div class="row items-center no-wrap">
-                      <div class="qr-icon-circle">
-                        <ScanIcon :size="24" />
-                      </div>
-                      <div class="col q-ml-md">
-                        <div class="text-body1 text-weight-medium">
-                          Scan QR Code
-                        </div>
-                        <div class="text-caption text-grey-6">
-                          Tap to scan an address
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- NFC button (if supported) -->
-                  <q-btn
-                    v-if="ndefSupported"
-                    flat
-                    class="q-mt-md"
-                    :loading="scanningCard"
-                    :disabled="scanningCard"
-                    @click="toggleScanner"
-                  >
-                    <NfcIcon class="q-mr-sm" :size="20" />
-                    {{ $t("ReceiveTokenDialog.actions.nfc.label") }}
-                    <q-tooltip>{{
-                      $t(
-                        "ReceiveTokenDialog.actions.nfc.tooltips.ndef_supported_text"
-                      )
-                    }}</q-tooltip>
-                    <template v-slot:loading>
-                      <q-spinner />
-                    </template>
-                  </q-btn>
-                </div>
+                <ParseInputComponent
+                  v-else
+                  key="token-empty"
+                  v-model="receiveData.tokensBase64"
+                  placeholder="Cashu token or Lightning address"
+                  :has-camera="hasCamera"
+                  :ndef-supported="ndefSupported"
+                  :scanning-card="scanningCard"
+                  :nfc-label="$t('ReceiveTokenDialog.actions.nfc.label')"
+                  :nfc-tooltip="$t('ReceiveTokenDialog.actions.nfc.tooltips.ndef_supported_text')"
+                  @enter="receiveIfDecodes"
+                  @paste="pasteToParseDialog(true)"
+                  @scan="showCamera"
+                  @nfc="toggleScanner"
+                />
               </transition>
             </div>
           </div>
@@ -426,6 +372,7 @@ import { CashuMint } from "@cashu/cashu-ts";
 import ChooseMint from "src/components/ChooseMint.vue";
 import TokenInformation from "components/TokenInformation.vue";
 import TokenStringRender from "components/TokenStringRender.vue";
+import ParseInputComponent from "components/ParseInputComponent.vue";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import {
@@ -433,8 +380,6 @@ import {
   Clipboard as ClipboardIcon,
   FileText as FileTextIcon,
   Lock as LockIcon,
-  Scan as ScanIcon,
-  Nfc as NfcIcon,
   ArrowDown as ArrowDownIcon,
 } from "lucide-vue-next";
 
@@ -452,11 +397,10 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     TokenInformation,
-    NfcIcon,
-    ScanIcon,
     ChooseMint,
     TokenStringRender,
     ArrowDownIcon,
+    ParseInputComponent,
   },
   data: function () {
     return {
@@ -515,14 +459,6 @@ export default defineComponent({
     ...mapState(usePRStore, ["enablePaymentRequest"]),
     ...mapState(useSwapStore, ["swapBlocking"]),
     ...mapWritableState(useUiStore, ["showReceiveDialog"]),
-    ...mapState(useCameraStore, ["lastScannedResult"]),
-    canPasteFromClipboard: function () {
-      return (
-        window.isSecureContext &&
-        navigator.clipboard &&
-        navigator.clipboard.readText
-      );
-    },
     tokenDecodesCorrectly: function () {
       // Try decoding token directly
       if (this.decodeToken(this.receiveData.tokensBase64) !== undefined) {
@@ -937,81 +873,4 @@ export default defineComponent({
   line-height: 1.4;
 }
 
-/* New input area styles - matching screenshot */
-.input-with-paste-wrapper {
-  position: relative;
-}
-
-.receive-address-input {
-  ::v-deep .q-field__control {
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.06);
-    min-height: 120px;
-    padding: 16px;
-
-    &:before, &:after {
-      border: none !important;
-    }
-  }
-
-  ::v-deep .q-field__native {
-    padding: 0 70px 0 0;
-    font-size: 16px;
-    color: white;
-    min-height: 88px;
-  }
-
-  ::v-deep .q-placeholder {
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 16px;
-  }
-
-  ::v-deep .q-field__control:before,
-  ::v-deep .q-field__control:after {
-    border: none !important;
-  }
-
-  ::v-deep .q-field__bottom {
-    display: none;
-  }
-}
-
-.paste-text-btn {
-  position: absolute;
-  right: 20px;
-  top: 16px;
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--q-primary);
-  cursor: pointer;
-  user-select: none;
-  line-height: 1.5;
-
-  &:active {
-    opacity: 0.7;
-  }
-}
-
-.qr-scanner-row {
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
-  padding: 12px 16px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-
-  &:active {
-    background: rgba(255, 255, 255, 0.1);
-  }
-}
-
-.qr-icon-circle {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
 </style>
