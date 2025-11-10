@@ -5,9 +5,8 @@
     :maximized="$q.screen.lt.sm"
     transition-show="slide-up"
     transition-hide="slide-down"
-    backdrop-filter="blur(2px) brightness(60%)"
   >
-    <q-card class="bg-grey-10 text-white full-width-card q-pb-lg">
+    <q-card class="drawer-card text-white full-width-card q-pb-lg">
       <q-card-section class="row items-center q-pb-sm">
         <q-btn flat round dense v-close-popup class="q-ml-sm" color="primary">
           <XIcon />
@@ -165,11 +164,20 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+::v-deep .q-dialog__backdrop {
+  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.4) !important;
+}
+
 .q-dialog__inner > div {
   border-top-left-radius: 20px !important;
   border-top-right-radius: 20px !important;
   border-bottom-left-radius: 0px !important;
   border-bottom-right-radius: 0px !important;
+}
+
+.drawer-card {
+  background: #1a1a1a;
 }
 
 .action-row {
