@@ -81,10 +81,7 @@
                 <div class="invoice-state-container">
                   <transition name="fade">
                     <div :key="invoiceStateKey" class="invoice-state-content">
-                      <div
-                        v-if="payInvoiceData.blocking"
-                        class="q-mt-sm q-mb-md"
-                      >
+                      <div v-if="isPaying" class="q-mt-sm q-mb-md">
                         <div class="row">
                           <div
                             class="col-12 text-h4 text-weight-bold q-mt-xs q-mb-xs"
@@ -555,6 +552,7 @@ export default defineComponent({
   data: function () {
     return {
       fiatKeyboardMode: false as boolean,
+      isPaying: false as boolean,
     };
   },
   watch: {
@@ -597,6 +595,24 @@ export default defineComponent({
         if (!val) {
           // Hide keyboard when dialog is closed
           this.showNumericKeyboard = false;
+          // Reset payment state when dialog closes
+          this.isPaying = false;
+        }
+      },
+    },
+    "payInvoiceData.blocking": {
+      handler: function (newVal, oldVal) {
+        // When blocking changes from true to false, payment is complete
+        if (oldVal === true && newVal === false) {
+          this.isPaying = false;
+        }
+      },
+    },
+    "payInvoiceData.invoice": {
+      handler: function (newVal) {
+        // Reset payment state when invoice changes
+        if (!newVal) {
+          this.isPaying = false;
         }
       },
     },
@@ -710,7 +726,7 @@ export default defineComponent({
       return balanceInDisplayUnit;
     },
     invoiceStateKey: function (): string {
-      if (this.payInvoiceData.blocking) {
+      if (this.isPaying) {
         return "paying";
       } else if (
         this.payInvoiceData.meltQuote.response &&
@@ -756,11 +772,18 @@ export default defineComponent({
         await this.decodeAndQuote(text.trim());
       }
     },
-    handleMeltButton: function () {
+    handleMeltButton: async function () {
       if (this.payInvoiceData.blocking) {
         throw new Error("already processing an invoice.");
       }
-      this.meltInvoiceData();
+      this.isPaying = true;
+      try {
+        await this.meltInvoiceData();
+      } catch (error) {
+        // Error handling is done in the store, but we ensure isPaying is reset
+        // The watcher will also reset it when blocking becomes false
+        console.error("Payment error:", error);
+      }
     },
     openMultinutDialog: function () {
       this.payInvoiceData.show = false;
