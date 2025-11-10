@@ -95,7 +95,7 @@
                                   )
                                 : ""
                             }}
-                            <q-spinner-hourglass />
+                            <q-spinner />
                           </div>
                         </div>
                       </div>
@@ -167,7 +167,7 @@
                                 "PayInvoiceDialog.invoice.processing_info_text"
                               )
                             }}
-                            <q-spinner-hourglass />
+                            <q-spinner />
                           </div>
                         </div>
                       </div>
@@ -378,7 +378,7 @@
                   :loading="globalMutexLock && !payInvoiceData.blocking"
                 >
                   <template v-slot:loading>
-                    <q-spinner-hourglass />
+                    <q-spinner />
                   </template>
                 </q-btn>
               </template>
@@ -459,7 +459,7 @@
                     : $t("PayInvoiceDialog.lnurlpay.actions.send.label")
                 }}
                 <template v-slot:loading>
-                  <q-spinner-hourglass />
+                  <q-spinner />
                 </template>
               </q-btn>
             </div>
@@ -497,7 +497,7 @@
                     : $t("PayInvoiceDialog.lnurlpay.actions.send.label")
                 }}
                 <template v-slot:loading>
-                  <q-spinner-hourglass />
+                  <q-spinner />
                 </template>
               </q-btn>
             </div>

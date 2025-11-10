@@ -474,8 +474,7 @@ export const useWalletStore = defineStore("wallet", {
       const uIStore = useUiStore();
       const mintStore = useMintsStore();
       const p2pkStore = useP2PKStore();
-
-      receiveStore.showReceiveTokens = false;
+      const wasReceiveDialogVisible = receiveStore.showReceiveTokens;
 
       if (receiveStore.receiveData.tokensBase64.length == 0) {
         throw new Error("no tokens provided.");
@@ -567,6 +566,10 @@ export const useWalletStore = defineStore("wallet", {
           });
         }
         notifySuccess(message);
+        if (wasReceiveDialogVisible) {
+          receiveStore.showReceiveTokens = false;
+          uIStore.closeDialogs();
+        }
       } catch (error: any) {
         console.error(error);
         notifyApiError(error);
@@ -828,12 +831,12 @@ export const useWalletStore = defineStore("wallet", {
             keysetId,
             counter,
           });
+          // store melt quote in invoice history
+          this.updateOutgoingInvoiceInHistory(data.quote as MeltQuoteResponse);
         } catch (error) {
           throw error;
         } finally {
           if (releaseMutex) await uIStore.lockMutex();
-          // store melt quote in invoice history
-          this.updateOutgoingInvoiceInHistory(data.quote as MeltQuoteResponse);
         }
 
         if (data.quote.state != MeltQuoteState.PAID) {

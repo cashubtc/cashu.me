@@ -78,33 +78,6 @@
               <transition appear enter-active-class="animated fadeIn">
                 <div v-if="tokenDecodesCorrectly" key="token-valid">
                   <!-- VALID TOKEN content -->
-                  <transition name="fade">
-                    <div v-if="isReceiving" class="receiving-state q-mb-md">
-                      <div class="row items-center no-wrap">
-                        <div class="col-auto text-h5 text-weight-bold">
-                          Receiving
-                          {{
-                            formatCurrency(
-                              Math.max(tokenAmount - receiveFee, 0),
-                              tokenUnit,
-                              true
-                            )
-                          }}
-                        </div>
-                        <div class="col-auto">
-                          <q-spinner-hourglass size="sm" />
-                        </div>
-                      </div>
-                    </div>
-                  </transition>
-                  <transition name="fade">
-                    <div
-                      v-if="receiveError && !isReceiving"
-                      class="receive-error text-negative q-mb-md text-subtitle2"
-                    >
-                      {{ receiveError }}
-                    </div>
-                  </transition>
                   <!-- print token in fixed width font -->
                   <div class="row q-pt-md">
                     <div class="col-12">
@@ -131,6 +104,33 @@
                       />
                     </div>
                   </div>
+                  <transition name="fade">
+                    <div v-if="isReceiving" class="receiving-state q-mb-md">
+                      <div class="row items-center no-wrap">
+                        <div class="col-auto text-h5 text-weight-bold">
+                          Receiving
+                          {{
+                            formatCurrency(
+                              Math.max(tokenAmount - receiveFee, 0),
+                              tokenUnit,
+                              true
+                            )
+                          }}
+                        </div>
+                        <div class="col-auto">
+                          <q-spinner size="sm" class="q-ml-sm" />
+                        </div>
+                      </div>
+                    </div>
+                  </transition>
+                  <transition name="fade">
+                    <div
+                      v-if="receiveError && !isReceiving"
+                      class="receive-error text-negative q-mb-md q-mt-xl text-subtitle2"
+                    >
+                      {{ receiveError }}
+                    </div>
+                  </transition>
 
                   <!-- swap mint selection -->
                   <SwapIncomingTokenToKnownMint
@@ -191,7 +191,7 @@
                       )
                     }}
                     <template v-slot:loading>
-                      <q-spinner-hourglass size="xs" />
+                      <q-spinner size="xs" />
                       {{
                         $t(
                           "ReceiveTokenDialog.actions.confirm_swap.in_progress"
@@ -251,7 +251,7 @@
                         : $t("ReceiveTokenDialog.actions.receive.label")
                     }}
                     <template v-slot:loading>
-                      <q-spinner-hourglass />
+                      <q-spinner />
                     </template>
                   </q-btn>
                 </template>
