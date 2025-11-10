@@ -297,6 +297,7 @@
                     <q-input
                       ref="parseDialogInput"
                       filled
+                      borderless
                       class="pay-address-input"
                       spellcheck="false"
                       autocorrect="off"
@@ -919,12 +920,13 @@ export default defineComponent({
 .paste-text-btn {
   position: absolute;
   right: 20px;
-  top: 20px;
+  top: 16px;
   font-size: 16px;
   font-weight: 500;
   color: var(--q-primary);
   cursor: pointer;
   user-select: none;
+  line-height: 1.5;
 
   &:active {
     opacity: 0.7;
