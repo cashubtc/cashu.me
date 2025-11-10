@@ -60,7 +60,7 @@
         <!-- Mint selection (match SendTokenDialog layout) -->
         <div class="row justify-center">
           <div
-            class="col-12 col-sm-11 col-md-8 q-px-sm q-mb-sm"
+            class="col-12 col-sm-11 col-md-8 q-px-lg q-mb-sm"
             style="max-width: 600px"
           >
             <ChooseMint />
@@ -298,7 +298,7 @@
                   </div>
 
                   <!-- Input field with paste button -->
-                  <div class="relative-container">
+                  <div class="input-with-paste-wrapper">
                     <q-input
                       ref="parseDialogInput"
                       filled
@@ -307,25 +307,21 @@
                       autocorrect="off"
                       autocapitalize="off"
                       v-model.trim="payInvoiceData.input.request"
-                      type="text"
+                      type="textarea"
+                      autogrow
                       placeholder="Lightning address or invoice"
                       autofocus
                       @update:model-value="
                         decodeAndQuote(payInvoiceData.input.request)
                       "
+                    />
+                    <div
+                      v-if="canPasteFromClipboard && !payInvoiceData.input.request"
+                      class="paste-text-btn"
+                      @click="pasteToParseDialog"
                     >
-                      <template v-slot:append v-if="canPasteFromClipboard && !payInvoiceData.input.request">
-                        <q-btn
-                          flat
-                          dense
-                          no-caps
-                          color="primary"
-                          label="Paste"
-                          @click="pasteToParseDialog"
-                          class="paste-inline-btn"
-                        />
-                      </template>
-                    </q-input>
+                      Paste
+                    </div>
                   </div>
 
                   <!-- QR Scanner row -->
@@ -887,12 +883,16 @@ export default defineComponent({
 }
 
 /* New input area styles - matching screenshot */
+.input-with-paste-wrapper {
+  position: relative;
+}
+
 .pay-address-input {
   ::v-deep .q-field__control {
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.06);
-    min-height: 56px;
-    padding: 0 16px;
+    min-height: 120px;
+    padding: 16px;
 
     &:before, &:after {
       border: none !important;
@@ -900,9 +900,10 @@ export default defineComponent({
   }
 
   ::v-deep .q-field__native {
-    padding: 16px 0;
+    padding: 0;
     font-size: 16px;
     color: white;
+    min-height: 88px;
   }
 
   ::v-deep .q-placeholder {
@@ -911,9 +912,19 @@ export default defineComponent({
   }
 }
 
-.paste-inline-btn {
+.paste-text-btn {
+  position: absolute;
+  right: 20px;
+  top: 20px;
   font-size: 16px;
   font-weight: 500;
+  color: var(--q-primary);
+  cursor: pointer;
+  user-select: none;
+
+  &:active {
+    opacity: 0.7;
+  }
 }
 
 .qr-scanner-row {

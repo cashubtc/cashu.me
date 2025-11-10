@@ -242,7 +242,7 @@
                   </div>
 
                   <!-- Input field with paste button -->
-                  <div class="relative-container">
+                  <div class="input-with-paste-wrapper">
                     <q-input
                       ref="tokenInput"
                       filled
@@ -251,23 +251,19 @@
                       autocorrect="off"
                       autocapitalize="off"
                       v-model="receiveData.tokensBase64"
-                      type="text"
+                      type="textarea"
+                      autogrow
                       placeholder="Cashu token or Lightning address"
                       autofocus
                       @keyup.enter="receiveIfDecodes"
+                    />
+                    <div
+                      v-if="canPasteFromClipboard && !receiveData.tokensBase64"
+                      class="paste-text-btn"
+                      @click="pasteToParseDialog(true)"
                     >
-                      <template v-slot:append v-if="canPasteFromClipboard && !receiveData.tokensBase64">
-                        <q-btn
-                          flat
-                          dense
-                          no-caps
-                          color="primary"
-                          label="Paste"
-                          @click="pasteToParseDialog(true)"
-                          class="paste-inline-btn"
-                        />
-                      </template>
-                    </q-input>
+                      Paste
+                    </div>
                   </div>
 
                   <!-- QR Scanner row -->
@@ -946,12 +942,16 @@ export default defineComponent({
 }
 
 /* New input area styles - matching screenshot */
+.input-with-paste-wrapper {
+  position: relative;
+}
+
 .receive-address-input {
   ::v-deep .q-field__control {
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.06);
-    min-height: 56px;
-    padding: 0 16px;
+    min-height: 120px;
+    padding: 16px;
 
     &:before, &:after {
       border: none !important;
@@ -959,9 +959,10 @@ export default defineComponent({
   }
 
   ::v-deep .q-field__native {
-    padding: 16px 0;
+    padding: 0;
     font-size: 16px;
     color: white;
+    min-height: 88px;
   }
 
   ::v-deep .q-placeholder {
@@ -970,9 +971,19 @@ export default defineComponent({
   }
 }
 
-.paste-inline-btn {
+.paste-text-btn {
+  position: absolute;
+  right: 20px;
+  top: 20px;
   font-size: 16px;
   font-weight: 500;
+  color: var(--q-primary);
+  cursor: pointer;
+  user-select: none;
+
+  &:active {
+    opacity: 0.7;
+  }
 }
 
 .qr-scanner-row {
