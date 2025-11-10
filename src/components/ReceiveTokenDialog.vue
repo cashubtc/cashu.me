@@ -955,7 +955,7 @@ export default defineComponent({
   }
 
   ::v-deep .q-field__native {
-    padding: 0;
+    padding: 0 70px 0 0;
     font-size: 16px;
     color: white;
     min-height: 88px;
