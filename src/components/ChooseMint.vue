@@ -203,6 +203,14 @@ export default defineComponent({
       type: Boolean,
       default: true,
     },
+    dryRun: {
+      type: Boolean,
+      default: false,
+    },
+    excludeMint: {
+      type: String,
+      default: null,
+    },
     // When provided, this will be used instead of activeMintUrl
     modelValue: {
       type: String,
@@ -221,12 +229,13 @@ export default defineComponent({
   },
   watch: {
     chosenMint: async function () {
-      if (this.modelValue !== null) {
-        // Emit the selected mint URL when using v-model
-        this.$emit("update:modelValue", this.chosenMint?.url || "");
-      } else {
+      const selectedUrl = this.chosenMint?.url || "";
+      if (this.dryRun || this.modelValue !== null) {
+        this.$emit("update:modelValue", selectedUrl);
+      }
+      if (this.modelValue === null && !this.dryRun) {
         // Use the original behavior when not using v-model
-        this.activeMintUrl = this.chosenMint?.url || "";
+        this.activeMintUrl = selectedUrl;
       }
     },
     modelValue: {
@@ -241,6 +250,9 @@ export default defineComponent({
           this.initializeChosenMint();
         }
       },
+    },
+    excludeMint() {
+      this.initializeChosenMint();
     },
   },
   computed: {
@@ -259,31 +271,50 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(useMintsStore, ["activateMintUrl"]),
+    applyChosenMint(option: any) {
+      if (!option) {
+        this.chosenMint = null;
+        return;
+      }
+      this.chosenMint = {
+        url: option.url,
+        nickname: option.nickname,
+        shorturl: option.shorturl,
+        iconUrl: option.iconUrl,
+        errored: option.errored,
+      };
+    },
     initializeChosenMint() {
-      const targetUrl =
-        this.modelValue !== null ? this.modelValue : this.activeMintUrl;
+      const options = this.chooseMintOptions();
+      const fallbackUrl =
+        this.chosenMint?.url && this.chosenMint.url !== this.excludeMint
+          ? this.chosenMint.url
+          : "";
+      let targetUrl =
+        this.modelValue !== null
+          ? this.modelValue
+          : fallbackUrl || this.activeMintUrl;
+      if (targetUrl && targetUrl === this.excludeMint) {
+        targetUrl = "";
+      }
       if (targetUrl) {
-        const m = this.mints.find((m) => m.url === targetUrl);
-        if (m) {
-          const mint = new MintClass(m);
-          this.chosenMint = {
-            url: targetUrl,
-            nickname: mint.mint.nickname || mint.mint.info?.name,
-            shorturl: getShortUrl(targetUrl),
-            iconUrl: mint.mint.info?.icon_url,
-            errored: mint.mint.errored,
-          };
+        const matched = options.find((option) => option.url === targetUrl);
+        if (matched) {
+          this.applyChosenMint(matched);
+          return;
         }
+      }
+      if (options.length) {
+        this.applyChosenMint(options[0]);
+      } else {
+        this.applyChosenMint(null);
       }
     },
     selectMint(mint: any) {
-      this.chosenMint = {
-        url: mint.url,
-        nickname: mint.nickname,
-        shorturl: mint.shorturl,
-        iconUrl: mint.iconUrl,
-        errored: mint.errored,
-      };
+      if (this.excludeMint && mint.url === this.excludeMint) {
+        return;
+      }
+      this.applyChosenMint(mint);
       this.showMintSheet = false;
     },
     chooseMintOptions: function () {
@@ -292,15 +323,17 @@ export default defineComponent({
         const all_units = m.keysets.map((r) => r.unit);
         const units = [...new Set(all_units)];
         const mint = new MintClass(m);
-        options.push({
-          nickname: mint.mint.nickname || mint.mint.info?.name,
-          url: mint.mint.url,
-          shorturl: getShortUrl(m.url),
-          iconUrl: mint.mint.info?.icon_url,
-          balances: mint.allBalances,
-          errored: mint.mint.errored,
-          units: units,
-        });
+        if (!this.excludeMint || mint.mint.url !== this.excludeMint) {
+          options.push({
+            nickname: mint.mint.nickname || mint.mint.info?.name,
+            url: mint.mint.url,
+            shorturl: getShortUrl(m.url),
+            iconUrl: mint.mint.info?.icon_url,
+            balances: mint.allBalances,
+            errored: mint.mint.errored,
+            units: units,
+          });
+        }
       }
       return options;
     },

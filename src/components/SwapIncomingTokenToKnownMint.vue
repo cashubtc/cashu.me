@@ -97,7 +97,11 @@
       <div class="swap-section-label q-mb-sm">
         {{ $t("ReceiveTokenDialog.swap_section.destination_label") }}
       </div>
-      <ChooseMint />
+      <ChooseMint
+        v-model="selectedMintUrl"
+        :dry-run="true"
+        :exclude-mint="sourceMint"
+      />
     </div>
 
     <!-- Info Tip about fees -->
@@ -113,6 +117,7 @@ import { defineComponent, PropType } from "vue";
 import ChooseMint from "src/components/ChooseMint.vue";
 import { ArrowDown as ArrowDownIcon } from "lucide-vue-next";
 import ToolTipInfo from "src/components/ToolTipInfo.vue";
+import { useMintsStore } from "stores/mints";
 
 export default defineComponent({
   name: "SwapIncomingTokenToKnownMint",
@@ -143,8 +148,61 @@ export default defineComponent({
       required: false,
       default: null,
     },
+    sourceMint: {
+      type: String,
+      required: false,
+      default: "",
+    },
+    targetMint: {
+      type: String,
+      required: false,
+      default: "",
+    },
   },
-  emits: ["close"],
+  emits: ["close", "update:targetMint"],
+  data: function () {
+    return {
+      selectedMintUrl: this.targetMint || "",
+    };
+  },
+  created() {
+    const mintsStore = useMintsStore();
+    const activeMintCandidate = mintsStore.activeMintUrl as unknown;
+    let initialTarget = "";
+    if (typeof activeMintCandidate === "string") {
+      initialTarget = activeMintCandidate;
+    } else if (
+      activeMintCandidate &&
+      typeof activeMintCandidate === "object" &&
+      "value" in activeMintCandidate
+    ) {
+      const candidateValue = (activeMintCandidate as { value?: string }).value;
+      if (typeof candidateValue === "string") {
+        initialTarget = candidateValue;
+      }
+    }
+    if (!this.selectedMintUrl && initialTarget) {
+      this.selectedMintUrl = initialTarget;
+    }
+  },
+  watch: {
+    targetMint: {
+      handler(newVal: string) {
+        if (newVal !== this.selectedMintUrl) {
+          this.selectedMintUrl = newVal || "";
+        }
+      },
+      immediate: true,
+    },
+    selectedMintUrl(newVal: string) {
+      this.$emit("update:targetMint", newVal);
+    },
+    sourceMint(newVal: string) {
+      if (newVal && newVal === this.selectedMintUrl) {
+        this.selectedMintUrl = "";
+      }
+    },
+  },
 });
 </script>
 

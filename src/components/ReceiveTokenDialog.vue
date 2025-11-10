@@ -135,11 +135,13 @@
                   <!-- swap mint selection -->
                   <SwapIncomingTokenToKnownMint
                     v-if="swapSelected"
+                    v-model:target-mint="selectedSwapMintUrl"
                     :swap-processing="swapProcessing"
                     :swap-error="swapError"
                     :swap-blocking="swapBlocking"
                     :source-mint-info="sourceMintInfo"
-                    @close="swapSelected = false"
+                    :source-mint="tokenMint"
+                    @close="handleSwapClose"
                   />
                 </div>
                 <ParseInputComponent
@@ -182,8 +184,8 @@
                     @click="handleSwapToTrustedMint"
                     color="primary"
                     rounded
-                    :loading="swapBlocking"
-                    :disabled="activeMintUrl == tokenMint"
+                    :loading="swapProcessing || swapBlocking"
+                    :disabled="!canConfirmSwap"
                   >
                     {{
                       $t(
@@ -217,8 +219,8 @@
                     }}</q-tooltip>
                   </q-btn>
                   <q-btn
-                    v-if="enableReceiveSwaps && activeMintUrl && mints.length"
-                    @click="swapSelected = true"
+                    v-if="enableReceiveSwaps && activeMintUrl && mints.length > 1"
+                    @click="openSwap"
                     color="primary"
                     rounded
                     outline
@@ -310,6 +312,7 @@ export default defineComponent({
       swapError: false,
       isReceiving: false as boolean,
       receiveError: "" as string,
+      selectedSwapMintUrl: "",
     };
   },
   watch: {
@@ -327,6 +330,7 @@ export default defineComponent({
           // This is an untrusted mint, try to fetch its info
           await this.fetchUntrustedMintInfo(newMintUrl);
         }
+        this.syncSwapTargetWithDefaults();
       },
       immediate: true,
     },
@@ -334,12 +338,27 @@ export default defineComponent({
       if (!val) {
         this.isReceiving = false;
         this.receiveError = "";
+        this.swapSelected = false;
+        this.swapProcessing = false;
+        this.swapError = false;
+        this.selectedSwapMintUrl = "";
       }
     },
     "receiveData.tokensBase64"(newVal: string) {
       if (newVal !== undefined) {
         this.receiveError = "";
       }
+    },
+    swapSelected(newVal: boolean) {
+      if (newVal) {
+        this.syncSwapTargetWithDefaults();
+      }
+    },
+    mints: {
+      handler() {
+        this.syncSwapTargetWithDefaults();
+      },
+      deep: true,
     },
   },
   computed: {
@@ -441,6 +460,22 @@ export default defineComponent({
         shorturl: this.getShortUrl(mint.url),
         iconUrl: mint.info?.icon_url,
       };
+    },
+    swapTargetMint: function () {
+      if (!this.selectedSwapMintUrl) {
+        return null;
+      }
+      return (
+        this.mints.find((m: any) => m.url === this.selectedSwapMintUrl) || null
+      );
+    },
+    canConfirmSwap: function (): boolean {
+      return (
+        !!this.swapTargetMint &&
+        this.selectedSwapMintUrl !== this.tokenMint &&
+        !this.swapProcessing &&
+        !this.swapBlocking
+      );
     },
   },
   methods: {
@@ -604,12 +639,18 @@ export default defineComponent({
     },
     handleSwapToTrustedMint: async function () {
       try {
+        if (!this.canConfirmSwap) {
+          return;
+        }
         this.swapProcessing = true;
         this.swapError = false;
-        const mint = useMintsStore().activeMint().mint;
+        const targetMint = this.swapTargetMint;
+        if (!targetMint) {
+          throw new Error("No target mint selected");
+        }
         await useReceiveTokensStore().meltTokenToMint(
           this.receiveData.tokensBase64,
-          mint
+          targetMint
         );
         this.swapSelected = false;
         this.swapProcessing = false;
@@ -618,6 +659,61 @@ export default defineComponent({
         this.swapProcessing = false;
         this.swapError = true;
       }
+    },
+    openSwap() {
+      if (!this.getAvailableSwapMints().length) {
+        return;
+      }
+      this.syncSwapTargetWithDefaults();
+      this.swapSelected = true;
+      this.swapError = false;
+    },
+    handleSwapClose() {
+      this.swapSelected = false;
+    },
+    getAvailableSwapMints() {
+      return this.mints.filter(
+        (mint: any) => mint.url && mint.url !== this.tokenMint
+      );
+    },
+    syncSwapTargetWithDefaults() {
+      const eligible = this.getAvailableSwapMints();
+      if (!eligible.length) {
+        if (this.selectedSwapMintUrl) {
+          this.selectedSwapMintUrl = "";
+        }
+        return;
+      }
+      if (
+        this.selectedSwapMintUrl &&
+        eligible.some((mint: any) => mint.url === this.selectedSwapMintUrl)
+      ) {
+        return;
+      }
+      const mintsStore = useMintsStore();
+      const activeCandidateRaw = mintsStore.activeMintUrl as unknown;
+      let activeCandidate = "";
+      if (typeof activeCandidateRaw === "string") {
+        activeCandidate = activeCandidateRaw;
+      } else if (
+        activeCandidateRaw &&
+        typeof activeCandidateRaw === "object" &&
+        "value" in activeCandidateRaw
+      ) {
+        const candidateValue = (activeCandidateRaw as { value?: string }).value;
+        if (typeof candidateValue === "string") {
+          activeCandidate = candidateValue;
+        }
+      }
+      if (
+        activeCandidate &&
+        activeCandidate !== this.tokenMint &&
+        eligible.some((mint: any) => mint.url === activeCandidate)
+      ) {
+        this.selectedSwapMintUrl = activeCandidate;
+        return;
+      }
+      this.selectedSwapMintUrl = eligible[0].url;
     },
     fetchUntrustedMintInfo: async function (mintUrl: string) {
       try {
