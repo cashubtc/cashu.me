@@ -236,11 +236,6 @@
                   </div>
                 </div>
                 <div v-else key="token-empty" class="column q-mt-md">
-                  <!-- To label -->
-                  <div class="text-subtitle1 text-weight-medium q-mb-sm q-ml-xs">
-                    To
-                  </div>
-
                   <!-- Input field with paste button -->
                   <div class="input-with-paste-wrapper">
                     <q-input
@@ -968,6 +963,15 @@ export default defineComponent({
   ::v-deep .q-placeholder {
     color: rgba(255, 255, 255, 0.5);
     font-size: 16px;
+  }
+
+  ::v-deep .q-field__control:before,
+  ::v-deep .q-field__control:after {
+    border: none !important;
+  }
+
+  ::v-deep .q-field__bottom {
+    display: none;
   }
 }
 
