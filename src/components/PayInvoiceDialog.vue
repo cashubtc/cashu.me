@@ -117,26 +117,35 @@
                     :melt-quote="payInvoiceData.meltQuote.response"
                     :mint-url="activeMintUrl"
                   />
+                  <p
+                    class="text-wrap q-mt-xl"
+                    style="max-width: 600px; font-size: 1.1rem"
+                    v-if="
+                      payInvoiceData.invoice.description &&
+                      payInvoiceData.meltQuote.response
+                    "
+                  >
+                    <strong
+                      >{{ $t("PayInvoiceDialog.invoice.memo.label") }}:</strong
+                    >
+                    {{ payInvoiceData.invoice.description }}<br />
+                  </p>
                 </div>
                 <div v-else-if="payInvoiceData.meltQuote.error != ''">
                   <div class="text-h6 q-my-none">
-                    {{ payInvoiceData.meltQuote.error }}
+                    Error: {{ payInvoiceData.meltQuote.error }}
                   </div>
                 </div>
                 <div v-else>
-                  <div class="text-h6 q-my-none">
-                    {{ $t("PayInvoiceDialog.invoice.processing_info_text") }}
+                  <div class="row">
+                    <div
+                      class="col-12 text-h4 text-weight-bold q-mt-xs q-mb-xs"
+                    >
+                      {{ $t("PayInvoiceDialog.invoice.processing_info_text") }}
+                      <q-spinner-hourglass />
+                    </div>
                   </div>
                 </div>
-                <p
-                  class="text-wrap q-mt-xl text-center"
-                  style="max-width: 600px; font-size: 1.1rem"
-                >
-                  <strong v-if="payInvoiceData.invoice.description"
-                    >{{ $t("PayInvoiceDialog.invoice.memo.label") }}:</strong
-                  >
-                  {{ payInvoiceData.invoice.description }}<br />
-                </p>
               </div>
 
               <!-- LNURL PAY CONTENT -->
