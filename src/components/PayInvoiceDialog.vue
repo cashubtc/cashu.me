@@ -81,11 +81,9 @@
                 <div class="invoice-state-container">
                   <transition name="fade">
                     <div :key="invoiceStateKey" class="invoice-state-content">
-                      <div v-if="isPaying" class="q-mt-sm q-mb-md">
+                      <div v-if="isPaying" class="q-mb-md">
                         <div class="row">
-                          <div
-                            class="col-12 text-h4 text-weight-bold q-mt-xs q-mb-xs"
-                          >
+                          <div class="col-12 text-h4 text-weight-bold q-mb-xs">
                             Paying
                             {{
                               payInvoiceData.meltQuote.response &&
@@ -106,9 +104,9 @@
                           payInvoiceData.meltQuote.response &&
                           payInvoiceData.meltQuote.response.amount > 0
                         "
-                        class="q-mt-sm q-mb-md"
+                        class="q-mb-md"
                       >
-                        <div class="text-h4 text-weight-bold q-mt-xs q-mb-xs">
+                        <div class="text-h4 text-weight-bold q-mb-xs">
                           <i18n-t keypath="PayInvoiceDialog.invoice.title">
                             <template v-slot:value>
                               {{
@@ -163,9 +161,7 @@
                       </div>
                       <div v-else>
                         <div class="row">
-                          <div
-                            class="col-12 text-h4 text-weight-bold q-mt-xs q-mb-xs"
-                          >
+                          <div class="col-12 text-h4 text-weight-bold q-mb-xs">
                             {{
                               $t(
                                 "PayInvoiceDialog.invoice.processing_info_text"
@@ -783,6 +779,8 @@ export default defineComponent({
         // Error handling is done in the store, but we ensure isPaying is reset
         // The watcher will also reset it when blocking becomes false
         console.error("Payment error:", error);
+      } finally {
+        this.isPaying = false;
       }
     },
     openMultinutDialog: function () {
