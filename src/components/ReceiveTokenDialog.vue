@@ -78,6 +78,33 @@
               <transition appear enter-active-class="animated fadeIn">
                 <div v-if="tokenDecodesCorrectly" key="token-valid">
                   <!-- VALID TOKEN content -->
+                  <transition name="fade">
+                    <div v-if="isReceiving" class="receiving-state q-mb-md">
+                      <div class="row items-center no-wrap">
+                        <div class="col-auto text-h5 text-weight-bold">
+                          Receiving
+                          {{
+                            formatCurrency(
+                              Math.max(tokenAmount - receiveFee, 0),
+                              tokenUnit,
+                              true
+                            )
+                          }}
+                        </div>
+                        <div class="col-auto">
+                          <q-spinner-hourglass size="sm" />
+                        </div>
+                      </div>
+                    </div>
+                  </transition>
+                  <transition name="fade">
+                    <div
+                      v-if="receiveError && !isReceiving"
+                      class="receive-error text-negative q-mb-md text-subtitle2"
+                    >
+                      {{ receiveError }}
+                    </div>
+                  </transition>
                   <!-- print token in fixed width font -->
                   <div class="row q-pt-md">
                     <div class="col-12">
@@ -129,7 +156,7 @@
                       'ReceiveTokenDialog.actions.nfc.tooltips.ndef_supported_text'
                     )
                   "
-                  @enter="receiveIfDecodes"
+                  @enter="handleReceive"
                   @paste="pasteToParseDialog(true)"
                   @scan="showCamera"
                   @nfc="toggleScanner"
@@ -206,11 +233,11 @@
                     class="full-width"
                     unelevated
                     size="lg"
-                    @click="receiveIfDecodes"
+                    @click="handleReceive"
                     color="primary"
                     rounded
-                    :disabled="addMintBlocking"
-                    :loading="swapBlocking"
+                    :disabled="addMintBlocking || isReceiving"
+                    :loading="swapBlocking || isReceiving"
                   >
                     {{
                       knowThisMint
@@ -262,6 +289,8 @@ import ParseInputComponent from "components/ParseInputComponent.vue";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 
+declare const windowMixin: any;
+
 export default defineComponent({
   name: "ReceiveTokenDialog",
   mixins: [windowMixin],
@@ -279,6 +308,8 @@ export default defineComponent({
       untrustedMintInfo: null,
       swapProcessing: false,
       swapError: false,
+      isReceiving: false as boolean,
+      receiveError: "" as string,
     };
   },
   watch: {
@@ -298,6 +329,17 @@ export default defineComponent({
         }
       },
       immediate: true,
+    },
+    showReceiveTokens(val: boolean) {
+      if (!val) {
+        this.isReceiving = false;
+        this.receiveError = "";
+      }
+    },
+    "receiveData.tokensBase64"(newVal: string) {
+      if (newVal !== undefined) {
+        this.receiveError = "";
+      }
     },
   },
   computed: {
@@ -412,12 +454,53 @@ export default defineComponent({
     ]),
     ...mapActions(useMintsStore, ["addMint"]),
     ...mapActions(useReceiveTokensStore, [
-      "receiveIfDecodes",
       "decodeToken",
       "knowThisMintOfTokenJson",
       "toggleScanner",
       "pasteToParseDialog",
+      "receiveToken",
     ]),
+    formatCurrency(value: number, currency: string, showBalance = false) {
+      return useUiStore().formatCurrency(value, currency, showBalance);
+    },
+    handleReceive: async function () {
+      if (this.isReceiving) {
+        return;
+      }
+      this.receiveError = "";
+      if (!this.tokenDecodesCorrectly) {
+        this.receiveError = this.$t(
+          "ReceiveTokenDialog.errors.invalid_token.label"
+        ) as string;
+        return;
+      }
+      this.isReceiving = true;
+      try {
+        await this.receiveToken(this.receiveData.tokensBase64);
+      } catch (error: any) {
+        console.error("Receive token error:", error);
+        const rawMessage =
+          error && typeof error === "object" && "message" in error
+            ? (error as Error).message
+            : String(error ?? "");
+        if (
+          rawMessage.toLowerCase &&
+          rawMessage.toLowerCase().includes("no tokens provided")
+        ) {
+          this.receiveError = this.$t(
+            "ReceiveTokenDialog.errors.invalid_token.label"
+          ) as string;
+        } else {
+          this.receiveError =
+            rawMessage ||
+            (this.$t(
+              "ReceiveTokenDialog.errors.invalid_token.label"
+            ) as string);
+        }
+      } finally {
+        this.isReceiving = false;
+      }
+    },
     getShortUrl: function (url: string) {
       try {
         const urlObj = new URL(url);
@@ -741,5 +824,25 @@ export default defineComponent({
   font-size: 13px;
   color: rgba(255, 255, 255, 0.8);
   line-height: 1.4;
+}
+
+.receiving-state {
+  position: relative;
+}
+
+.receive-error {
+  padding: 12px;
+  border-radius: 8px;
+  background-color: rgba(244, 67, 54, 0.1);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
