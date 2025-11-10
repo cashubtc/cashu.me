@@ -291,74 +291,60 @@
 
               <!-- INPUT CONTENT -->
               <div v-else>
-                <q-form v-if="!camera.show" class="q-gutter-md">
+                <q-form v-if="!camera.show" class="q-gutter-md q-mt-md">
+                  <!-- To label -->
+                  <div class="text-subtitle1 text-weight-medium q-mb-sm q-ml-xs">
+                    To
+                  </div>
+
+                  <!-- Input field with paste button -->
                   <div class="relative-container">
                     <q-input
                       ref="parseDialogInput"
-                      round
-                      class="q-mb-lg q-mt-md q-mx-xs cashub-nowrap token-input"
+                      filled
+                      class="pay-address-input"
                       spellcheck="false"
+                      autocorrect="off"
+                      autocapitalize="off"
                       v-model.trim="payInvoiceData.input.request"
-                      type="textarea"
-                      :label="
-                        $t(
-                          'PayInvoiceDialog.input_data.inputs.invoice_data.label'
-                        )
-                      "
+                      type="text"
+                      placeholder="Lightning address or invoice"
                       autofocus
                       @update:model-value="
                         decodeAndQuote(payInvoiceData.input.request)
                       "
                     >
-                      <q-icon
-                        v-if="payInvoiceData.input.request"
-                        color="dark"
-                        name="close"
-                        class="floating-button cursor-pointer"
-                        @click="payInvoiceData.input.request = ''"
-                      />
+                      <template v-slot:append v-if="canPasteFromClipboard && !payInvoiceData.input.request">
+                        <q-btn
+                          flat
+                          dense
+                          no-caps
+                          color="primary"
+                          label="Paste"
+                          @click="pasteToParseDialog"
+                          class="paste-inline-btn"
+                        />
+                      </template>
                     </q-input>
                   </div>
+
+                  <!-- QR Scanner row -->
                   <div
-                    class="column q-mt-sm"
-                    v-if="!payInvoiceData.input.request"
+                    v-if="hasCameraAvailable"
+                    class="qr-scanner-row"
+                    @click="showCamera"
                   >
-                    <div class="row q-gutter-sm q-pt-lg">
-                      <div class="col">
-                        <q-btn
-                          v-if="canPasteFromClipboard"
-                          outline
-                          rounded
-                          size="lg"
-                          class="full-width"
-                          @click="pasteToParseDialog"
-                        >
-                          <q-icon
-                            name="content_paste"
-                            size="1.2em"
-                            class="q-pr-sm"
-                          />
-                          {{
-                            $t(
-                              "PayInvoiceDialog.input_data.actions.paste.label"
-                            )
-                          }}
-                        </q-btn>
+                    <div class="row items-center no-wrap">
+                      <div class="qr-icon-circle">
+                        <ScanIcon :size="24" />
                       </div>
-                      <div class="col">
-                        <q-btn
-                          v-if="hasCameraAvailable"
-                          rounded
-                          outline
-                          size="lg"
-                          class="full-width"
-                          @click="showCamera"
-                        >
-                          <ScanIcon :size="18" />
-                          <span class="q-pl-sm">{{
-                            $t("PayInvoiceDialog.input_data.actions.scan.label")
-                          }}</span>
-                        </q-btn>
+                      <div class="col q-ml-md">
+                        <div class="text-body1 text-weight-medium">
+                          Scan QR Code
+                        </div>
+                        <div class="text-caption text-grey-6">
+                          Tap to scan an address
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -898,5 +884,58 @@ export default defineComponent({
   width: 100%;
   display: flex;
   justify-content: center;
+}
+
+/* New input area styles - matching screenshot */
+.pay-address-input {
+  ::v-deep .q-field__control {
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.06);
+    min-height: 56px;
+    padding: 0 16px;
+
+    &:before, &:after {
+      border: none !important;
+    }
+  }
+
+  ::v-deep .q-field__native {
+    padding: 16px 0;
+    font-size: 16px;
+    color: white;
+  }
+
+  ::v-deep .q-placeholder {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 16px;
+  }
+}
+
+.paste-inline-btn {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.qr-scanner-row {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:active {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.qr-icon-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 </style>

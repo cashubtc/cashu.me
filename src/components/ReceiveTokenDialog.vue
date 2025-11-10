@@ -235,109 +235,82 @@
                     </div>
                   </div>
                 </div>
-                <div v-else key="token-empty" class="column">
-                  <!-- Token input (when not yet decodable) -->
+                <div v-else key="token-empty" class="column q-mt-md">
+                  <!-- To label -->
+                  <div class="text-subtitle1 text-weight-medium q-mb-sm q-ml-xs">
+                    To
+                  </div>
+
+                  <!-- Input field with paste button -->
                   <div class="relative-container">
                     <q-input
-                      round
+                      ref="tokenInput"
+                      filled
+                      class="receive-address-input"
                       spellcheck="false"
+                      autocorrect="off"
+                      autocapitalize="off"
                       v-model="receiveData.tokensBase64"
-                      :label="
-                        $t('ReceiveTokenDialog.inputs.tokens_base64.label')
-                      "
-                      type="textarea"
+                      type="text"
+                      placeholder="Cashu token or Lightning address"
                       autofocus
-                      class="q-mb-lg q-mt-md q-mx-xs cashub-nowrap token-input"
                       @keyup.enter="receiveIfDecodes"
                     >
-                      <q-icon
-                        v-if="receiveData.tokensBase64"
-                        color="dark"
-                        name="close"
-                        class="floating-button cursor-pointer"
-                        @click="receiveData.tokensBase64 = ''"
-                      />
+                      <template v-slot:append v-if="canPasteFromClipboard && !receiveData.tokensBase64">
+                        <q-btn
+                          flat
+                          dense
+                          no-caps
+                          color="primary"
+                          label="Paste"
+                          @click="pasteToParseDialog(true)"
+                          class="paste-inline-btn"
+                        />
+                      </template>
                     </q-input>
                   </div>
 
-                  <!-- Display error for invalid token -->
-                  <q-btn
-                    v-if="
-                      receiveData.tokensBase64.length && !tokenDecodesCorrectly
-                    "
-                    disabled
-                    color="yellow"
-                    text-color="black"
-                    rounded
-                    unelevated
-                    class="q-ml-xs q-mr-sm"
-                    :label="$t('ReceiveTokenDialog.errors.invalid_token.label')"
-                  ></q-btn>
-
-                  <!-- EMPTY INPUT helper actions -->
+                  <!-- QR Scanner row -->
                   <div
-                    v-if="!receiveData.tokensBase64.length"
-                    class="column q-mt-sm"
+                    v-if="hasCamera"
+                    class="qr-scanner-row q-mt-md"
+                    @click="showCamera"
                   >
-                    <div class="row q-gutter-sm">
-                      <div class="col">
-                        <q-btn
-                          v-if="canPasteFromClipboard"
-                          outline
-                          rounded
-                          size="lg"
-                          class="full-width"
-                          @click="pasteToParseDialog(true)"
-                        >
-                          <q-icon
-                            name="content_paste"
-                            size="1.2em"
-                            class="q-pr-sm"
-                          />
-                          {{ $t("ReceiveTokenDialog.actions.paste.label") }}
-                        </q-btn>
+                    <div class="row items-center no-wrap">
+                      <div class="qr-icon-circle">
+                        <ScanIcon :size="24" />
                       </div>
-                      <div class="col">
-                        <q-btn
-                          v-if="hasCamera"
-                          rounded
-                          outline
-                          size="lg"
-                          class="full-width"
-                          @click="showCamera"
-                        >
-                          <ScanIcon size="1.2em" />
-                          <span class="q-pl-sm">{{
-                            $t("ReceiveTokenDialog.actions.scan.label")
-                          }}</span>
-                        </q-btn>
+                      <div class="col q-ml-md">
+                        <div class="text-body1 text-weight-medium">
+                          Scan QR Code
+                        </div>
+                        <div class="text-caption text-grey-6">
+                          Tap to scan an address
+                        </div>
                       </div>
                     </div>
-                    <q-btn
-                      unelevated
-                      dense
-                      class="q-mx-sm"
-                      v-if="ndefSupported"
-                      :loading="scanningCard"
-                      :disabled="scanningCard"
-                      @click="toggleScanner"
-                    >
-                      <NfcIcon class="q-pr-xs" />
-                      <q-tooltip>{{
-                        ndefSupported
-                          ? $t(
-                              "ReceiveTokenDialog.actions.nfc.tooltips.ndef_supported_text"
-                            )
-                          : $t(
-                              "ReceiveTokenDialog.actions.nfc.tooltips.ndef_unsupported_text"
-                            )
-                      }}</q-tooltip>
-                      <template v-slot:loading>
-                        <q-spinner @click="toggleScanner"> </q-spinner>
-                      </template>
-                      {{ $t("ReceiveTokenDialog.actions.nfc.label") }}
-                    </q-btn>
                   </div>
+
+                  <!-- NFC button (if supported) -->
+                  <q-btn
+                    v-if="ndefSupported"
+                    flat
+                    class="q-mt-md"
+                    :loading="scanningCard"
+                    :disabled="scanningCard"
+                    @click="toggleScanner"
+                  >
+                    <NfcIcon class="q-mr-sm" :size="20" />
+                    {{ $t("ReceiveTokenDialog.actions.nfc.label") }}
+                    <q-tooltip>{{
+                      $t(
+                        "ReceiveTokenDialog.actions.nfc.tooltips.ndef_supported_text"
+                      )
+                    }}</q-tooltip>
+                    <template v-slot:loading>
+                      <q-spinner />
+                    </template>
+                  </q-btn>
                 </div>
               </transition>
             </div>
@@ -970,5 +943,58 @@ export default defineComponent({
   font-size: 13px;
   color: rgba(255, 255, 255, 0.8);
   line-height: 1.4;
+}
+
+/* New input area styles - matching screenshot */
+.receive-address-input {
+  ::v-deep .q-field__control {
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.06);
+    min-height: 56px;
+    padding: 0 16px;
+
+    &:before, &:after {
+      border: none !important;
+    }
+  }
+
+  ::v-deep .q-field__native {
+    padding: 16px 0;
+    font-size: 16px;
+    color: white;
+  }
+
+  ::v-deep .q-placeholder {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 16px;
+  }
+}
+
+.paste-inline-btn {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.qr-scanner-row {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:active {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.qr-icon-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 </style>
