@@ -78,73 +78,108 @@
             >
               <!-- INVOICE CONTENT -->
               <div v-if="payInvoiceData.invoice">
-                <div
-                  v-if="
-                    payInvoiceData.meltQuote.response &&
-                    payInvoiceData.meltQuote.response.amount > 0
-                  "
-                  class="q-mt-sm q-mb-md"
-                >
-                  <div class="text-h4 text-weight-bold q-mt-xs q-mb-xs">
-                    <i18n-t keypath="PayInvoiceDialog.invoice.title">
-                      <template v-slot:value>
-                        {{
-                          formatCurrency(
-                            payInvoiceData.meltQuote.response.amount,
-                            activeUnit,
-                            true
-                          )
-                        }}
-                      </template>
-                    </i18n-t>
-                  </div>
-                  <div
-                    v-if="bitcoinPrice && activeUnit == 'sat'"
-                    class="text-subtitle2 text-grey-6 q-ml-xs"
-                  >
-                    {{
-                      formatCurrency(
-                        (currentCurrencyPrice / 100000000) *
-                          payInvoiceData.meltQuote.response.amount,
-                        bitcoinPriceCurrency,
-                        true
-                      )
-                    }}
-                  </div>
-                  <MeltQuoteInformation
-                    v-if="showMeltQuoteInformation"
-                    class="q-mt-sm"
-                    :melt-quote="payInvoiceData.meltQuote.response"
-                    :mint-url="activeMintUrl"
-                  />
-                  <p
-                    class="text-wrap q-mt-xl"
-                    style="max-width: 600px; font-size: 1.1rem"
-                    v-if="
-                      payInvoiceData.invoice.description &&
-                      payInvoiceData.meltQuote.response
-                    "
-                  >
-                    <strong
-                      >{{ $t("PayInvoiceDialog.invoice.memo.label") }}:</strong
-                    >
-                    {{ payInvoiceData.invoice.description }}<br />
-                  </p>
-                </div>
-                <div v-else-if="payInvoiceData.meltQuote.error != ''">
-                  <div class="text-h6 q-my-none">
-                    Error: {{ payInvoiceData.meltQuote.error }}
-                  </div>
-                </div>
-                <div v-else>
-                  <div class="row">
-                    <div
-                      class="col-12 text-h4 text-weight-bold q-mt-xs q-mb-xs"
-                    >
-                      {{ $t("PayInvoiceDialog.invoice.processing_info_text") }}
-                      <q-spinner-hourglass />
+                <div class="invoice-state-container">
+                  <transition name="fade">
+                    <div :key="invoiceStateKey" class="invoice-state-content">
+                      <div
+                        v-if="payInvoiceData.blocking"
+                        class="q-mt-sm q-mb-md"
+                      >
+                        <div class="row">
+                          <div
+                            class="col-12 text-h4 text-weight-bold q-mt-xs q-mb-xs"
+                          >
+                            Paying
+                            {{
+                              payInvoiceData.meltQuote.response &&
+                              payInvoiceData.meltQuote.response.amount > 0
+                                ? formatCurrency(
+                                    payInvoiceData.meltQuote.response.amount,
+                                    activeUnit,
+                                    true
+                                  )
+                                : ""
+                            }}
+                            <q-spinner-hourglass />
+                          </div>
+                        </div>
+                      </div>
+                      <div
+                        v-else-if="
+                          payInvoiceData.meltQuote.response &&
+                          payInvoiceData.meltQuote.response.amount > 0
+                        "
+                        class="q-mt-sm q-mb-md"
+                      >
+                        <div class="text-h4 text-weight-bold q-mt-xs q-mb-xs">
+                          <i18n-t keypath="PayInvoiceDialog.invoice.title">
+                            <template v-slot:value>
+                              {{
+                                formatCurrency(
+                                  payInvoiceData.meltQuote.response.amount,
+                                  activeUnit,
+                                  true
+                                )
+                              }}
+                            </template>
+                          </i18n-t>
+                        </div>
+                        <div
+                          v-if="bitcoinPrice && activeUnit == 'sat'"
+                          class="text-subtitle2 text-grey-6 q-ml-xs"
+                        >
+                          {{
+                            formatCurrency(
+                              (currentCurrencyPrice / 100000000) *
+                                payInvoiceData.meltQuote.response.amount,
+                              bitcoinPriceCurrency,
+                              true
+                            )
+                          }}
+                        </div>
+                        <MeltQuoteInformation
+                          v-if="showMeltQuoteInformation"
+                          class="q-mt-sm"
+                          :melt-quote="payInvoiceData.meltQuote.response"
+                          :mint-url="activeMintUrl"
+                        />
+                        <p
+                          class="text-wrap q-mt-xl"
+                          style="max-width: 600px; font-size: 1.1rem"
+                          v-if="
+                            payInvoiceData.invoice.description &&
+                            payInvoiceData.meltQuote.response
+                          "
+                        >
+                          <strong
+                            >{{
+                              $t("PayInvoiceDialog.invoice.memo.label")
+                            }}:</strong
+                          >
+                          {{ payInvoiceData.invoice.description }}<br />
+                        </p>
+                      </div>
+                      <div v-else-if="payInvoiceData.meltQuote.error != ''">
+                        <div class="text-h6 q-my-none">
+                          Error: {{ payInvoiceData.meltQuote.error }}
+                        </div>
+                      </div>
+                      <div v-else>
+                        <div class="row">
+                          <div
+                            class="col-12 text-h4 text-weight-bold q-mt-xs q-mb-xs"
+                          >
+                            {{
+                              $t(
+                                "PayInvoiceDialog.invoice.processing_info_text"
+                              )
+                            }}
+                            <q-spinner-hourglass />
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  </transition>
                 </div>
               </div>
 
@@ -674,6 +709,20 @@ export default defineComponent({
         this.activeBalance / this.activeUnitCurrencyMultiplyer;
       return balanceInDisplayUnit;
     },
+    invoiceStateKey: function (): string {
+      if (this.payInvoiceData.blocking) {
+        return "paying";
+      } else if (
+        this.payInvoiceData.meltQuote.response &&
+        this.payInvoiceData.meltQuote.response.amount > 0
+      ) {
+        return "success";
+      } else if (this.payInvoiceData.meltQuote.error != "") {
+        return "error";
+      } else {
+        return "processing";
+      }
+    },
   },
   methods: {
     ...mapActions(useWalletStore, [
@@ -837,5 +886,36 @@ export default defineComponent({
   width: 100%;
   display: flex;
   justify-content: center;
+}
+
+.invoice-state-container {
+  position: relative;
+  min-height: 100px;
+}
+
+.invoice-state-content {
+  width: 100%;
+}
+
+.fade-enter-active {
+  transition: opacity 0.3s ease;
+  z-index: 2;
+}
+
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+}
+
+.fade-enter-from {
+  opacity: 0;
+}
+
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
