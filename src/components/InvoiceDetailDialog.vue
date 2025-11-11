@@ -1,181 +1,148 @@
 <template>
   <q-dialog
     v-model="showInvoiceDetails"
-    position="top"
-    :maximized="$q.screen.lt.sm"
-    :full-width="$q.screen.lt.sm"
-    :full-height="$q.screen.lt.sm"
+    maximized
     backdrop-filter="blur(2px) brightness(60%)"
     transition-show="fade"
     transition-hide="fade"
     no-backdrop-dismiss
   >
-    <q-card class="q-pa-lg q-px-sm qcard q-card-top">
-      <NumericKeyboard
-        v-if="showNumericKeyboard && useNumericKeyboard"
-        :model-value="invoiceData.amount"
-        @update:modelValue="(val) => (invoiceData.amount = val)"
-        @done="requestMintButton"
-      />
-      <!-- invoice is not entered -->
-      <div v-if="!invoiceData.bolt11">
-        <div class="row items-center no-wrap q-mb-sm q-pr-md q-py-lg">
-          <div class="col-10">
-            <span class="text-h6">{{ $t("InvoiceDetailDialog.title") }}</span>
-            <span
-              v-if="invoiceData.amount && bitcoinPrice && activeUnit == 'sat'"
-              class="q-ml-xs text-subtitle2 text-grey-6"
-            >
-              ({{
-                formatCurrency(
-                  (currentCurrencyPrice / 100000000) *
-                    invoiceData.amount *
-                    activeUnitCurrencyMultiplyer,
-                  bitcoinPriceCurrency,
-                  true
-                )
-              }})
-            </span>
-          </div>
-        </div>
-        <div class="row items-center no-wrap q-my-sm q-py-none">
-          <div class="col-12">
-            <ChooseMint />
-          </div>
-        </div>
-        <q-input
-          round
-          outlined
-          type="number"
-          v-model.number="invoiceData.amount"
-          :label="
-            $t('InvoiceDetailDialog.inputs.amount.label', {
-              ticker: tickerShort,
-            })
-          "
-          mask="#"
-          fill-mask="0"
-          reverse-fill-mask
-          autofocus
-          class="q-mb-lg"
-          @keyup.enter="requestMintButton"
-        >
+    <q-card class="q-pa-none qcard">
+      <div
+        :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
+        class="display-token-fullscreen"
+      >
+        <!-- Header -->
+        <div class="row items-center q-pa-md" style="position: relative">
           <q-btn
+            v-close-popup
             flat
-            color="primary"
-            @click="toggleUnit()"
-            :label="activeUnitLabel"
+            round
+            icon="close"
+            color="grey"
+            class="floating-close-btn"
           />
-        </q-input>
-        <div class="row items-center no-wrap q-my-sm q-py-none">
-          <q-btn
-            color="primary"
-            rounded
-            @click="requestMintButton"
-            :disable="!(invoiceData.amount > 0) || createInvoiceButtonBlocked"
-            :label="
-              createInvoiceButtonBlocked
-                ? $t('InvoiceDetailDialog.actions.create.label_blocked')
-                : $t('InvoiceDetailDialog.actions.create.label')
-            "
-            :loading="globalMutexLock"
-          >
-            <template v-slot:loading>
-              <q-spinner-hourglass />
-              {{ $t("InvoiceDetailDialog.actions.create.in_progress") }}
-            </template>
-          </q-btn>
-          <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto">{{
-            $t("InvoiceDetailDialog.actions.close.label")
-          }}</q-btn>
+          <div class="col text-center fixed-title-height">
+            <q-item-label
+              overline
+              class="q-mt-sm text-white"
+              style="font-size: 1rem"
+            >
+              {{ $t("InvoiceDetailDialog.invoice.caption") }}
+            </q-item-label>
+          </div>
         </div>
-      </div>
 
-      <!-- invoice is entered -->
+        <!-- Content -->
+        <div class="content-area">
+          <q-card-section class="q-pa-none">
+            <div v-if="invoiceData.bolt11" class="row justify-center q-mb-md">
+              <div
+                class="col-12 col-sm-11 col-md-8 q-px-md"
+                style="max-width: 600px"
+              >
+                <a
+                  class="text-secondary"
+                  :href="'lightning:' + invoiceData.bolt11"
+                >
+                  <q-responsive :ratio="1" class="q-mx-none">
+                    <vue-qrcode
+                      :value="'lightning:' + invoiceData.bolt11.toUpperCase()"
+                      :options="{ width: 400 }"
+                      class="rounded-borders"
+                      style="width: 100%"
+                    >
+                    </vue-qrcode>
+                  </q-responsive>
+                </a>
+                <div style="height: 2px">
+                  <q-linear-progress
+                    v-if="runnerActive"
+                    indeterminate
+                    color="primary"
+                  />
+                </div>
+              </div>
+            </div>
 
-      <div v-else class="text-center q-mt-none q-pt-none">
-        <a class="text-secondary" :href="'lightning:' + invoiceData.bolt11">
-          <q-responsive :ratio="1" class="q-ma-none q-ma-none">
-            <vue-qrcode
-              :value="'lightning:' + invoiceData.bolt11.toUpperCase()"
-              :options="{ width: 340 }"
-              class="rounded-borders"
-            >
-            </vue-qrcode>
-          </q-responsive>
-        </a>
-        <div class="row justify-center">
-          <q-card-section class="q-pa-sm">
-            <div class="row justify-center">
-              <q-item-label
-                overline
-                class="q-mb-sm q-pt-md text-white"
-                style="font-size: 1rem"
-                >{{ $t("InvoiceDetailDialog.invoice.caption") }}</q-item-label
+            <q-card-section class="q-pa-sm">
+              <div class="row justify-center q-pt-md">
+                <q-item-label style="font-size: 28px" class="text-weight-bold">
+                  <strong>{{ displayUnit }}</strong>
+                </q-item-label>
+              </div>
+              <div
+                v-if="invoiceData.amount > 0 && invoiceData.status === 'paid'"
+                class="row justify-center"
               >
-            </div>
-            <div class="row justify-center q-py-md">
-              <q-item-label style="font-size: 28px" class="text-weight-bold">
-                <q-icon
-                  :name="
-                    invoiceData.amount >= 0 ? 'call_received' : 'call_made'
-                  "
-                  :color="
-                    invoiceData.status === 'paid'
-                      ? invoiceData.amount >= 0
-                        ? 'green'
-                        : 'red'
-                      : ''
-                  "
-                  class="q-mr-sm"
-                  size="sm"
-                />
-
-                <strong>{{ displayUnit }}</strong></q-item-label
+                <transition appear enter-active-class="animated tada">
+                  <span class="q-mt-md text-bold" style="font-size: 28px">
+                    <q-icon
+                      name="check_circle"
+                      size="1.8rem"
+                      color="positive"
+                      class="q-mr-sm q-mb-xs"
+                    />{{ $t("InvoiceDetailDialog.invoice.status_paid_text") }}
+                  </span>
+                </transition>
+              </div>
+              <div
+                v-if="invoiceData?.mintQuote"
+                class="row justify-center q-pt-lg"
               >
-            </div>
-            <div
-              v-if="this.invoiceData.mint != undefined"
-              class="row justify-center q-pt-sm"
-            >
-              <q-chip
-                outline
-                class="q-pa-md"
-                style="height: 36px; font-family: monospace"
+                <div
+                  class="col-12 col-sm-11 col-md-8 q-px-md"
+                  style="max-width: 600px"
+                >
+                  <MintQuoteInformation
+                    :mint-quote="invoiceData.mintQuote"
+                    :invoice="invoiceData"
+                    :mint-url="invoiceData.mint"
+                    :show-amount="false"
+                  />
+                </div>
+              </div>
+              <div
+                v-else-if="invoiceData?.meltQuote"
+                class="row justify-center q-pt-lg"
               >
-                <q-icon name="account_balance" size="xs" class="q-mr-sm" />
-                {{ shortUrl }}
-              </q-chip>
-            </div>
-            <div
-              v-if="invoiceData.amount > 0 && invoiceData.status === 'paid'"
-              class="row justify-center"
-            >
-              <transition appear enter-active-class="animated tada">
-                <span class="q-mt-lg text-h6">
-                  <q-icon
-                    name="check_circle"
-                    size="1.5rem"
-                    color="positive"
-                    class="q-mr-sm q-mb-xs"
-                  />{{ $t("InvoiceDetailDialog.invoice.status_paid_text") }}
-                </span>
-              </transition>
-            </div>
+                <div
+                  class="col-12 col-sm-11 col-md-8 q-px-md"
+                  style="max-width: 600px"
+                >
+                  <MeltQuoteInformation
+                    :melt-quote="invoiceData.meltQuote"
+                    :invoice="invoiceData"
+                    :mint-url="invoiceData.mint"
+                    :history-paid-at="invoiceData.paidDate"
+                    :show-amount="true"
+                  />
+                </div>
+              </div>
+            </q-card-section>
           </q-card-section>
         </div>
-        <div class="row q-mt-lg">
-          <q-btn
-            v-if="invoiceData.bolt11"
-            class="q-mx-xs"
-            size="md"
-            flat
-            @click="copyText(invoiceData.bolt11)"
-            >{{ $t("InvoiceDetailDialog.invoice.actions.copy.label") }}</q-btn
-          >
-          <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
-            $t("InvoiceDetailDialog.invoice.actions.close.label")
-          }}</q-btn>
+
+        <!-- Bottom panel action -->
+        <div class="bottom-panel">
+          <div class="row justify-center q-pb-lg q-pt-sm">
+            <div
+              class="col-12 col-sm-11 col-md-8 q-px-md"
+              style="max-width: 600px"
+            >
+              <q-btn
+                v-if="invoiceData.bolt11"
+                class="full-width"
+                unelevated
+                size="lg"
+                color="primary"
+                rounded
+                @click="onCopyBolt11"
+              >
+                {{ copyButtonLabel }}
+              </q-btn>
+            </div>
+          </div>
         </div>
       </div>
     </q-card>
@@ -185,73 +152,42 @@
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import VueQrcode from "@chenfengyuan/vue-qrcode";
+import { copyToClipboard } from "quasar";
 
-import { useWalletStore } from "src/stores/wallet";
-import ChooseMint from "src/components/ChooseMint.vue";
-import { useUiStore } from "src/stores/ui";
-import { getShortUrl } from "src/js/wallet-helpers";
-import { useWorkersStore } from "src/stores/workers";
-import { useMintsStore } from "src/stores/mints";
-import { useSettingsStore } from "../stores/settings";
-import { usePriceStore } from "src/stores/price";
-import NumericKeyboard from "components/NumericKeyboard.vue";
+import { useWalletStore } from "../stores/wallet";
+import { useUiStore } from "../stores/ui";
+import { useWorkersStore } from "../stores/workers";
+import MeltQuoteInformation from "./MeltQuoteInformation.vue";
+import MintQuoteInformation from "./MintQuoteInformation.vue";
+// type hint for global mixin
+declare const windowMixin: any;
 
 export default defineComponent({
   name: "InvoiceDetailDialog",
   mixins: [windowMixin],
   components: {
-    ChooseMint,
     VueQrcode,
-    NumericKeyboard,
+    MeltQuoteInformation,
+    MintQuoteInformation,
   },
   props: {},
   data: function () {
     return {
-      createInvoiceButtonBlocked: false,
+      copyButtonCopied: false,
+      copyButtonTimeout: null as any,
     };
-  },
-  watch: {
-    showInvoiceDetails: function (val) {
-      if (val) {
-        this.$nextTick(() => {
-          if (!this.invoiceData.amount) {
-            this.showNumericKeyboard = true;
-          } else {
-            this.showNumericKeyboard = false;
-          }
-        });
-      }
-    },
   },
   computed: {
     ...mapState(useWalletStore, ["invoiceData"]),
-    ...mapState(useMintsStore, [
-      "activeUnit",
-      "activeUnitLabel",
-      "activeUnitCurrencyMultiplyer",
-    ]),
     ...mapState(useWorkersStore, ["invoiceWorkerRunning"]),
-    ...mapWritableState(useUiStore, [
-      "showInvoiceDetails",
-      "tickerShort",
-      "globalMutexLock",
-      "showNumericKeyboard",
-    ]),
-    ...mapState(useSettingsStore, [
-      "useNumericKeyboard",
-      "bitcoinPriceCurrency",
-    ]),
-    ...mapState(usePriceStore, ["bitcoinPrice", "currentCurrencyPrice"]),
+    ...mapWritableState(useUiStore, ["showInvoiceDetails"]),
     displayUnit: function () {
-      let display = this.formatCurrency(
+      let display = (this as any).formatCurrency(
         this.invoiceData.amount,
         this.invoiceData.unit,
         true
       );
       return display;
-    },
-    shortUrl: function () {
-      return getShortUrl(this.invoiceData.mint);
     },
     runnerActive: function () {
       return this.invoiceWorkerRunning;
@@ -259,43 +195,75 @@ export default defineComponent({
     isSmallScreen() {
       return this.$q.screen.lt.sm;
     },
+    copyButtonLabel: function () {
+      if (this.copyButtonCopied) {
+        return "Copied";
+      }
+      return this.$t("InvoiceDetailDialog.invoice.actions.copy.label");
+    },
   },
   methods: {
-    ...mapActions(useWalletStore, [
-      "requestMint",
-      "lnurlPaySecond",
-      "mintOnPaid",
-    ]),
-    ...mapActions(useMintsStore, ["toggleUnit"]),
-    requestMintButton: async function () {
-      if (!this.invoiceData.amount) {
-        return;
-      }
-      try {
-        this.showNumericKeyboard = false;
-        const mintStore = useMintsStore();
-        this.invoiceData.amount *= this.activeUnitCurrencyMultiplyer;
-        this.createInvoiceButtonBlocked = true;
-        const mintWallet = useWalletStore().mintWallet(
-          mintStore.activeMintUrl,
-          mintStore.activeUnit
-        );
-        const mintQuote = await this.requestMint(
-          this.invoiceData.amount,
-          mintWallet
-        );
-        await this.mintOnPaid(mintQuote.quote);
-      } catch (e) {
-        console.log("#### requestMintButton", e);
-      } finally {
-        this.createInvoiceButtonBlocked = false;
+    onCopyBolt11: async function () {
+      if (this.invoiceData?.bolt11) {
+        try {
+          await copyToClipboard(this.invoiceData.bolt11);
+          this.copyButtonCopied = true;
+          // Clear any existing timeout
+          if (this.copyButtonTimeout) {
+            clearTimeout(this.copyButtonTimeout);
+          }
+          // Reset button label after 3 seconds
+          this.copyButtonTimeout = setTimeout(() => {
+            this.copyButtonCopied = false;
+          }, 3000);
+        } catch (error) {
+          console.error("Failed to copy to clipboard:", error);
+        }
       }
     },
+  },
+  beforeUnmount() {
+    if (this.copyButtonTimeout) {
+      clearTimeout(this.copyButtonTimeout);
+    }
   },
 });
 </script>
 
 <style scoped>
+.display-token-fullscreen {
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.content-area {
+  flex: 1;
+  overflow-y: auto;
+}
+.floating-close-btn {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+.fixed-title-height {
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bottom-panel {
+  margin-top: auto;
+  background: var(--q-color-grey-1);
+  box-shadow: 0 -8px 16px rgba(0, 0, 0, 0.05);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+}
 .qcard {
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;

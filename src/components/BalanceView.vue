@@ -9,11 +9,7 @@
           enter-active-class="animated pulse"
           leave-active-class="animated fadeOut"
         >
-          <q-spinner-hourglass
-            class="q-mt-lg q-mb-none"
-            size="lg"
-            color="primary"
-          />
+          <q-spinner class="q-mt-lg q-mb-none" size="lg" color="primary" />
         </transition>
       </div>
       <div v-else>
@@ -63,7 +59,7 @@
                   />
                 </strong>
               </h3>
-              <div v-if="bitcoinPrice">
+              <div v-if="bitcoinPrice" class="q-mt-sm">
                 <strong v-if="this.activeUnit == 'sat'">
                   <AnimatedNumber
                     :value="

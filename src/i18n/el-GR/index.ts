@@ -913,7 +913,8 @@ export default {
     },
   },
   InvoiceDetailDialog: {
-    title: "Δημιουργία Τιμολογίου",
+    title: "Λήψη Lightning",
+    create_invoice_title: "Δημιουργία Τιμολογίου",
     inputs: {
       amount: {
         label: "Ποσό ({ ticker }) *",
@@ -956,7 +957,7 @@ export default {
     },
   },
   SendTokenDialog: {
-    title: "Αποστολή { value }",
+    title: "Αποστολή Ecash",
     title_ecash_text: "Ecash",
     badge_offline_text: "Εκτός σύνδεσης",
     inputs: {
@@ -1045,7 +1046,7 @@ export default {
     },
   },
   ReceiveTokenDialog: {
-    title: "Λήψη { value }",
+    title: "Λήψη Ecash",
     title_ecash_text: "Ecash",
     inputs: {
       tokens_base64: {
@@ -1055,6 +1056,9 @@ export default {
     errors: {
       invalid_token: {
         label: "Μη έγκυρο token",
+      },
+      p2pk_lock_mismatch: {
+        label: "Δεν είναι δυνατή η λήψη. Το κλείδωμα P2PK αυτού του token δεν ταιριάζει με το δημόσιο κλειδί σας.",
       },
     },
     actions: {
@@ -1087,7 +1091,7 @@ export default {
         in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
       later: {
-        label: "Αργότερα",
+        label: "Λήψη αργότερα",
         tooltip_text: "Προσθήκη στο ιστορικό για λήψη αργότερα",
         already_in_history_success_text: "Το Ecash είναι ήδη στο Ιστορικό",
         added_to_history_success_text: "Το Ecash προστέθηκε στο Ιστορικό",
@@ -1293,6 +1297,20 @@ export default {
       },
     },
   },
+  ParseInputComponent: {
+    placeholder: {
+      default: "Token Cashu ή διεύθυνση Lightning",
+      receive: "Token Cashu",
+      pay: "Διεύθυνση Lightning ή τιμολόγιο",
+    },
+    qr_scanner: {
+      title: "Σάρωση Κωδικού QR",
+      description: "Πατήστε για σάρωση διεύθυνσης",
+    },
+    paste_button: {
+      label: "@:global.actions.paste.label",
+    },
+  },
   PayInvoiceDialog: {
     input_data: {
       title: "Πληρωμή με Lightning",
@@ -1320,6 +1338,7 @@ export default {
       amount_exact_label: "Ο { payee } ζητά { value } { ticker }",
       amount_range_label:
         "Ο { payee } ζητά{br}μεταξύ { min } και { max } { ticker }",
+      sending_to_lightning_address: "Αποστολή σε { address }",
       inputs: {
         amount: {
           label: "Ποσό ({ ticker }) *",
@@ -1409,5 +1428,18 @@ export default {
     in_progress_warning_text: "Η ανταλλαγή βρίσκεται σε εξέλιξη",
     invalid_swap_data_error_text: "Μη έγκυρα δεδομένα ανταλλαγής",
     swap_error_text: "Σφάλμα κατά την ανταλλαγή",
+  },
+  TokenInformation: {
+    fee: "Χρέωση",
+    unit: "Μονάδα",
+    fiat: "Fiat",
+    p2pk: "P2PK",
+    locked: "Κλειδωμένο",
+    locked_to_you: "Κλειδωμένο για εσάς",
+    mint: "Νομισματοκοπείο",
+    memo: "Σημείωση",
+    payment_request: "Αίτημα πληρωμής",
+    nostr: "Nostr",
+    token_copied: "Το token αντιγράφηκε στο πρόχειρο",
   },
 };

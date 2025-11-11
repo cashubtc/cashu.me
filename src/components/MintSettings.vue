@@ -38,7 +38,7 @@
               leave-active-class="animated fadeOut"
               name="fade"
             >
-              <q-spinner-hourglass
+              <q-spinner
                 v-if="mint.url == activatingMintUrl"
                 color="white"
                 size="1.3rem"
@@ -330,7 +330,7 @@
             <q-icon size="xs" name="swap_horiz" class="q-pr-xs" />
             {{ $t("MintSettings.swap.actions.swap.label") }}
             <template v-slot:loading>
-              <q-spinner-hourglass size="xs" />
+              <q-spinner size="xs" />
               {{ $t("MintSettings.swap.actions.swap.in_progress") }}
             </template>
           </q-btn>

@@ -917,7 +917,8 @@ export default {
     },
   },
   InvoiceDetailDialog: {
-    title: "Fatura Oluştur",
+    title: "Lightning Al",
+    create_invoice_title: "Fatura Oluştur",
     inputs: {
       amount: {
         label: "Miktar ({ ticker }) *",
@@ -960,7 +961,7 @@ export default {
     },
   },
   SendTokenDialog: {
-    title: "{ value } gönder",
+    title: "Ecash Gönder",
     title_ecash_text: "Ecash",
     badge_offline_text: "Çevrimdışı",
     inputs: {
@@ -1049,7 +1050,7 @@ export default {
     },
   },
   ReceiveTokenDialog: {
-    title: "{ value } al",
+    title: "Ecash Al",
     title_ecash_text: "Ecash",
     inputs: {
       tokens_base64: {
@@ -1059,6 +1060,9 @@ export default {
     errors: {
       invalid_token: {
         label: "Geçersiz token",
+      },
+      p2pk_lock_mismatch: {
+        label: "Alınamıyor. Bu token'ın P2PK kilidi genel anahtarınızla eşleşmiyor.",
       },
     },
     actions: {
@@ -1091,7 +1095,7 @@ export default {
         in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
       later: {
-        label: "Daha sonra",
+        label: "Daha sonra al",
         tooltip_text: "Daha sonra almak için geçmişe ekle",
         already_in_history_success_text: "Ecash zaten Geçmişte",
         added_to_history_success_text: "Ecash Geçmişe eklendi",
@@ -1297,6 +1301,20 @@ export default {
       },
     },
   },
+  ParseInputComponent: {
+    placeholder: {
+      default: "Cashu token veya Lightning adresi",
+      receive: "Cashu token",
+      pay: "Lightning adresi veya faturası",
+    },
+    qr_scanner: {
+      title: "QR Kodu Tara",
+      description: "Bir adresi taramak için dokunun",
+    },
+    paste_button: {
+      label: "@:global.actions.paste.label",
+    },
+  },
   PayInvoiceDialog: {
     input_data: {
       title: "Lightning öde",
@@ -1324,6 +1342,7 @@ export default {
       amount_exact_label: "{ payee }, { value } { ticker } talep ediyor",
       amount_range_label:
         "{ payee }{br} { min } ile { max } { ticker } arasında talep ediyor",
+      sending_to_lightning_address: "{ address } adresine gönderiliyor",
       inputs: {
         amount: {
           label: "Miktar ({ ticker }) *",
@@ -1413,5 +1432,18 @@ export default {
     in_progress_warning_text: "Takas devam ediyor",
     invalid_swap_data_error_text: "Geçersiz takas verisi",
     swap_error_text: "Takas hatası",
+  },
+  TokenInformation: {
+    fee: "Ücret",
+    unit: "Birim",
+    fiat: "Fiat",
+    p2pk: "P2PK",
+    locked: "Kilitli",
+    locked_to_you: "Size kilitli",
+    mint: "Darphane",
+    memo: "Not",
+    payment_request: "Ödeme talebi",
+    nostr: "Nostr",
+    token_copied: "Token panoya kopyalandı",
   },
 };

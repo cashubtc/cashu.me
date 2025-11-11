@@ -495,10 +495,22 @@ export const useNostrStore = defineStore("nostr", {
             console.log("### incoming token already in history");
             return;
           }
-          await this.addPendingTokenToHistory(tokenStr, false);
+          const historyId = await this.addPendingTokenToHistory(
+            tokenStr,
+            false,
+            payload.id
+          );
+          try {
+            if (historyId) {
+              prStore.registerIncomingPaymentForRequest(payload.id ?? "", historyId);
+            }
+          } catch (e) {
+            console.error("Failed to register incoming payment to PR:", e);
+          }
           receiveStore.receiveData.tokensBase64 = tokenStr;
           sendTokensStore.showSendTokens = false;
-          if (prStore.receivePaymentRequestsAutomatically) {
+          const knowThisMint = receiveStore.knowThisMintOfTokenJson(token);
+          if (prStore.receivePaymentRequestsAutomatically && knowThisMint) {
             const success = await receiveStore.receiveIfDecodes();
             if (success) {
               prStore.showPRDialog = false;
@@ -528,13 +540,17 @@ export const useNostrStore = defineStore("nostr", {
         await this.addPendingTokenToHistory(tokenStr);
       }
     },
-    addPendingTokenToHistory: function (tokenStr: string, verbose = true) {
+    addPendingTokenToHistory: function (
+      tokenStr: string,
+      verbose = true,
+      paymentRequestId?: string
+    ): string | undefined {
       const receiveStore = useReceiveTokensStore();
       const tokensStore = useTokensStore();
       if (tokensStore.tokenAlreadyInHistory(tokenStr)) {
         notifySuccess("Ecash already in history");
         receiveStore.showReceiveTokens = false;
-        return;
+        return undefined;
       }
       const decodedToken = token.decode(tokenStr);
       if (decodedToken == undefined) {
@@ -545,17 +561,19 @@ export const useNostrStore = defineStore("nostr", {
         .getProofs(decodedToken)
         .reduce((sum, el) => (sum += el.amount), 0);
 
-      tokensStore.addPendingToken({
+      const id = tokensStore.addPendingToken({
         amount: amount,
         token: tokenStr,
         mint: token.getMint(decodedToken),
         unit: token.getUnit(decodedToken),
+        paymentRequestId,
       });
       receiveStore.showReceiveTokens = false;
       // show success notification
       if (verbose) {
         notifySuccess("Ecash added to history.");
       }
+      return id;
     },
   },
 });

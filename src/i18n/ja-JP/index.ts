@@ -902,7 +902,8 @@ export default {
     },
   },
   InvoiceDetailDialog: {
-    title: "請求書の作成",
+    title: "Lightningを受け取る",
+    create_invoice_title: "請求書の作成",
     inputs: {
       amount: {
         label: "金額 ({ ticker }) *",
@@ -945,7 +946,7 @@ export default {
     },
   },
   SendTokenDialog: {
-    title: "{ value }を送る",
+    title: "Ecashを送る",
     title_ecash_text: "Ecash",
     badge_offline_text: "オフライン",
     inputs: {
@@ -1034,7 +1035,7 @@ export default {
     },
   },
   ReceiveTokenDialog: {
-    title: "{ value }を受け取る",
+    title: "Ecashを受け取る",
     title_ecash_text: "Ecash",
     inputs: {
       tokens_base64: {
@@ -1044,6 +1045,9 @@ export default {
     errors: {
       invalid_token: {
         label: "無効なトークン",
+      },
+      p2pk_lock_mismatch: {
+        label: "受信できません。このトークンのP2PKロックがあなたの公開鍵と一致しません。",
       },
     },
     actions: {
@@ -1076,7 +1080,7 @@ export default {
         in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
       later: {
-        label: "後で",
+        label: "後で受け取る",
         tooltip_text: "後で受け取るために履歴に追加",
         already_in_history_success_text: "Ecashはすでに履歴にあります",
         added_to_history_success_text: "Ecashを履歴に追加しました",
@@ -1282,6 +1286,20 @@ export default {
       },
     },
   },
+  ParseInputComponent: {
+    placeholder: {
+      default: "CashuトークンまたはLightningアドレス",
+      receive: "Cashuトークン",
+      pay: "Lightningアドレスまたは請求書",
+    },
+    qr_scanner: {
+      title: "QRコードをスキャン",
+      description: "タップしてアドレスをスキャン",
+    },
+    paste_button: {
+      label: "@:global.actions.paste.label",
+    },
+  },
   PayInvoiceDialog: {
     input_data: {
       title: "Lightningで支払う",
@@ -1310,6 +1328,7 @@ export default {
         "{ payee }が{ value } { ticker }をリクエストしています",
       amount_range_label:
         "{ payee }が{ min }から{ max } { ticker }の間をリクエストしています",
+      sending_to_lightning_address: "{ address }に送信中",
       inputs: {
         amount: {
           label: "金額 ({ ticker }) *",
@@ -1399,5 +1418,18 @@ export default {
     in_progress_warning_text: "スワップ進行中",
     invalid_swap_data_error_text: "無効なスワップデータ",
     swap_error_text: "スワップエラー",
+  },
+  TokenInformation: {
+    fee: "手数料",
+    unit: "単位",
+    fiat: "フィアット",
+    p2pk: "P2PK",
+    locked: "ロック済み",
+    locked_to_you: "あなたにロック済み",
+    mint: "ミント",
+    memo: "メモ",
+    payment_request: "支払いリクエスト",
+    nostr: "Nostr",
+    token_copied: "トークンをクリップボードにコピーしました",
   },
 };

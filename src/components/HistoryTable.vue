@@ -342,7 +342,13 @@ export default defineComponent({
 
     checkTransactionStatus(transaction) {
       if (transaction.type === "ecash") {
-        this.checkTokenSpendable(transaction);
+        // If it's an incoming ecash transaction, open receive dialog
+        if (transaction.amount > 0) {
+          this.receiveToken(transaction.token);
+        } else {
+          // For outgoing ecash transactions, check spendable status
+          this.checkTokenSpendable(transaction);
+        }
       } else if (transaction.type === "lightning") {
         if (transaction.amount > 0) {
           this.checkInvoice(transaction.quote, true);
@@ -354,7 +360,12 @@ export default defineComponent({
 
     showTransactionDialog(transaction) {
       if (transaction.type === "ecash") {
-        this.showTokenDialog(transaction);
+        // For pending incoming tokens, open receive dialog instead
+        if (transaction.status === "pending" && transaction.amount > 0) {
+          this.receiveToken(transaction.token);
+        } else {
+          this.showTokenDialog(transaction);
+        }
       } else if (transaction.type === "lightning") {
         this.showInvoiceDialog(transaction);
       }
@@ -401,7 +412,7 @@ export default defineComponent({
         transactions.push({
           ...token,
           type: "ecash",
-          id: `token-${token.token}`,
+          id: token.id,
           label: token.label,
         });
       });

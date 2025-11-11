@@ -910,7 +910,8 @@ export default {
     },
   },
   InvoiceDetailDialog: {
-    title: "Crear Factura",
+    title: "Recibir Lightning",
+    create_invoice_title: "Crear Factura",
     inputs: {
       amount: {
         label: "Cantidad ({ ticker }) *",
@@ -953,7 +954,7 @@ export default {
     },
   },
   SendTokenDialog: {
-    title: "Enviar { value }",
+    title: "Enviar Ecash",
     title_ecash_text: "Ecash",
     badge_offline_text: "Sin conexión",
     inputs: {
@@ -1042,7 +1043,7 @@ export default {
     },
   },
   ReceiveTokenDialog: {
-    title: "Recibir { value }",
+    title: "Recibir Ecash",
     title_ecash_text: "Ecash",
     inputs: {
       tokens_base64: {
@@ -1052,6 +1053,9 @@ export default {
     errors: {
       invalid_token: {
         label: "Token inválido",
+      },
+      p2pk_lock_mismatch: {
+        label: "No se puede recibir. El bloqueo P2PK de este token no coincide con su clave pública.",
       },
     },
     actions: {
@@ -1084,7 +1088,7 @@ export default {
         in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
       later: {
-        label: "Más tarde",
+        label: "Recibir más tarde",
         tooltip_text: "Añadir al historial para recibir más tarde",
         already_in_history_success_text: "Ecash ya está en el Historial",
         added_to_history_success_text: "Ecash añadido al Historial",
@@ -1290,6 +1294,20 @@ export default {
       },
     },
   },
+  ParseInputComponent: {
+    placeholder: {
+      default: "Token Cashu o dirección Lightning",
+      receive: "Token Cashu",
+      pay: "Dirección Lightning o factura",
+    },
+    qr_scanner: {
+      title: "Escanear Código QR",
+      description: "Toca para escanear una dirección",
+    },
+    paste_button: {
+      label: "@:global.actions.paste.label",
+    },
+  },
   PayInvoiceDialog: {
     input_data: {
       title: "Pagar con Lightning",
@@ -1317,6 +1335,7 @@ export default {
       amount_exact_label: "{ payee } está solicitando { value } { ticker }",
       amount_range_label:
         "{ payee } está solicitando{br}entre { min } y { max } { ticker }",
+      sending_to_lightning_address: "Enviando a { address }",
       inputs: {
         amount: {
           label: "Cantidad ({ ticker }) *",
@@ -1406,5 +1425,18 @@ export default {
     in_progress_warning_text: "Intercambio en progreso",
     invalid_swap_data_error_text: "Datos de intercambio inválidos",
     swap_error_text: "Error al intercambiar",
+  },
+  TokenInformation: {
+    fee: "Tarifa",
+    unit: "Unidad",
+    fiat: "Fiat",
+    p2pk: "P2PK",
+    locked: "Bloqueado",
+    locked_to_you: "Bloqueado para ti",
+    mint: "Casa de moneda",
+    memo: "Memo",
+    payment_request: "Solicitud de pago",
+    nostr: "Nostr",
+    token_copied: "Token copiado al portapapeles",
   },
 };

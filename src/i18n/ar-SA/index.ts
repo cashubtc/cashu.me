@@ -901,7 +901,8 @@ export default {
     },
   },
   InvoiceDetailDialog: {
-    title: "إنشاء فاتورة",
+    title: "استلام Lightning",
+    create_invoice_title: "إنشاء فاتورة",
     inputs: {
       amount: {
         label: "المبلغ ({ ticker }) *",
@@ -944,7 +945,7 @@ export default {
     },
   },
   SendTokenDialog: {
-    title: "إرسال { value }",
+    title: "إرسال Ecash",
     title_ecash_text: "Ecash",
     badge_offline_text: "غير متصل",
     inputs: {
@@ -1032,7 +1033,7 @@ export default {
     },
   },
   ReceiveTokenDialog: {
-    title: "استلام { value }",
+    title: "استلام Ecash",
     title_ecash_text: "Ecash",
     inputs: {
       tokens_base64: {
@@ -1042,6 +1043,9 @@ export default {
     errors: {
       invalid_token: {
         label: "رمز غير صالح",
+      },
+      p2pk_lock_mismatch: {
+        label: "غير قادر على الاستلام. قفل P2PK لهذا الرمز لا يطابق المفتاح العام الخاص بك.",
       },
     },
     actions: {
@@ -1074,7 +1078,7 @@ export default {
         in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
       later: {
-        label: "لاحقًا",
+        label: "استلام لاحقًا",
         tooltip_text: "أضف إلى السجل للاستلام لاحقًا",
         already_in_history_success_text: "Ecash موجود بالفعل في السجل",
         added_to_history_success_text: "تمت إضافة Ecash إلى السجل",
@@ -1280,6 +1284,20 @@ export default {
       },
     },
   },
+  ParseInputComponent: {
+    placeholder: {
+      default: "رمز Cashu أو عنوان Lightning",
+      receive: "رمز Cashu",
+      pay: "عنوان Lightning أو فاتورة",
+    },
+    qr_scanner: {
+      title: "مسح رمز QR",
+      description: "اضغط للمسح عنوان",
+    },
+    paste_button: {
+      label: "@:global.actions.paste.label",
+    },
+  },
   PayInvoiceDialog: {
     input_data: {
       title: "دفع Lightning",
@@ -1306,6 +1324,7 @@ export default {
     lnurlpay: {
       amount_exact_label: "{ payee } يطلب { value } { ticker }",
       amount_range_label: "{ payee } يطلب{br}بين { min } و { max } { ticker }",
+      sending_to_lightning_address: "إرسال إلى { address }",
       inputs: {
         amount: {
           label: "المبلغ ({ ticker }) *",
@@ -1395,5 +1414,18 @@ export default {
     in_progress_warning_text: "التبديل قيد التقدم",
     invalid_swap_data_error_text: "بيانات تبديل غير صالحة",
     swap_error_text: "خطأ في التبديل",
+  },
+  TokenInformation: {
+    fee: "الرسوم",
+    unit: "الوحدة",
+    fiat: "العملة الورقية",
+    p2pk: "P2PK",
+    locked: "مقفل",
+    locked_to_you: "مقفل لك",
+    mint: "دار السك",
+    memo: "مذكرة",
+    payment_request: "طلب دفع",
+    nostr: "Nostr",
+    token_copied: "تم نسخ الرمز المميز إلى الحافظة",
   },
 };

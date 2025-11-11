@@ -34,6 +34,9 @@ export default {
       send: {
         label: "Send",
       },
+      pay: {
+        label: "Pay",
+      },
       swap: {
         label: "Swap",
       },
@@ -46,6 +49,9 @@ export default {
         label: "Mint URL",
       },
     },
+  },
+  common: {
+    fee: "Fee",
   },
   MultinutPicker: {
     payment: "Multinut payment",
@@ -875,6 +881,15 @@ export default {
     swap: {
       title: "Swap",
       overline: "Multimint Swaps",
+      actions: {
+        receove_to_trusted_mint: {
+          label: "Receive to trusted mint",
+        },
+        swap: {
+          label: "@:global.actions.swap.label",
+          in_progress: "@:MintSettings.swap.actions.swap.label",
+        },
+      },
       caption:
         "Swap funds between mints via Lightning. Note: Leave room for potential Lightning fees. If the incoming payment does not succeed, check the invoice manually.",
       inputs: {
@@ -886,12 +901,6 @@ export default {
         },
         amount: {
           label: "Amount ({ ticker })",
-        },
-      },
-      actions: {
-        swap: {
-          label: "@:global.actions.swap.label",
-          in_progress: "@:MintSettings.swap.actions.swap.label",
         },
       },
     },
@@ -916,7 +925,8 @@ export default {
     },
   },
   InvoiceDetailDialog: {
-    title: "Create Invoice",
+    title: "Receive Lightning",
+    create_invoice_title: "Create Invoice",
     inputs: {
       amount: {
         label: "Amount ({ ticker }) *",
@@ -959,7 +969,7 @@ export default {
     },
   },
   SendTokenDialog: {
-    title: "Send { value }",
+    title: "Send Ecash",
     title_ecash_text: "Ecash",
     badge_offline_text: "Offline",
     inputs: {
@@ -998,6 +1008,9 @@ export default {
       paste_p2pk_pubkey: {
         tooltip_text: "@:global.actions.paste.label",
       },
+      pay: {
+        label: "@:global.actions.pay.label",
+      },
       send: {
         label: "@:global.actions.send.label",
       },
@@ -1011,6 +1024,31 @@ export default {
         },
       },
     },
+    errors: {
+      amount_required: "Enter an amount first.",
+      serialization_failed: "Could not prepare ecash token.",
+    },
+  },
+  SendPaymentRequest: {
+    actions: {
+      pay: {
+        label: "Pay",
+      },
+      pay_via: {
+        label: "Pay via {transport}",
+      },
+    },
+    info: {
+      pay_to: "Pay to {target}",
+      invalid_url: "Invalid URL",
+    },
+  },
+  PaymentRequestInfo: {
+    title_with_transport: "Payment request via {transport}",
+    title: "Payment request",
+    subtitle: "Pay to {target}",
+    subtitle_fallback: "Payment request",
+    invalid_url: "Invalid URL",
   },
   ReceiveDialog: {
     title: "Receive",
@@ -1048,7 +1086,7 @@ export default {
     },
   },
   ReceiveTokenDialog: {
-    title: "Receive { value }",
+    title: "Receive Ecash",
     title_ecash_text: "Ecash",
     inputs: {
       tokens_base64: {
@@ -1059,6 +1097,17 @@ export default {
       invalid_token: {
         label: "Invalid token",
       },
+      p2pk_lock_mismatch: {
+        label: "Unable to receive. This token's P2PK lock doesn't match your public key.",
+      },
+    },
+    unknown_mint_info_text:
+      "Unknown mint. It will be added after you receive this token.",
+    swap_section: {
+      title: "Swap",
+      source_label: "From",
+      destination_label: "To",
+      fee_info: "This swap will incur Lightning network fees.",
     },
     actions: {
       paste: {
@@ -1076,9 +1125,11 @@ export default {
         label_adding_mint: "Adding mint…",
       },
       swap: {
-        label: "@:global.actions.swap.label",
+        label: "Receive to trusted mint",
         tooltip_text: "Swap to a trusted mint",
         caption: "Swap { value }",
+        processing: "Processing swap...",
+        failed: "Swap failed",
       },
       cancel_swap: {
         label: "@:global.actions.cancel.label",
@@ -1089,8 +1140,11 @@ export default {
         tooltip_text: "@:ReceiveTokenDialog.actions.swap.tooltip_text",
         in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
+      receive_to_selected_mint: {
+        label: "Receive to selected mint",
+      },
       later: {
-        label: "Later",
+        label: "Receive later",
         tooltip_text: "Add to history to receive later",
         already_in_history_success_text: "Ecash already in History",
         added_to_history_success_text: "Ecash added to History",
@@ -1128,6 +1182,8 @@ export default {
       caption: "Payment Request",
       description: "Receive payments via Nostr",
     },
+    received_total: "Received total",
+    no_payments_yet: "No payments yet",
     actions: {
       copy: {
         label: "@:global.actions.copy.label",
@@ -1228,6 +1284,9 @@ export default {
   },
   ChooseMint: {
     title: "Select a mint",
+    placeholder: "Select a mint",
+    available_text: "available",
+    sheet_title: "Select Mint",
     badge_mint_error_text: "Error",
     badge_option_mint_error_text: "@:ChooseMint.badge_mint_error_text",
   },
@@ -1296,6 +1355,20 @@ export default {
       },
     },
   },
+  ParseInputComponent: {
+    placeholder: {
+      default: "Cashu token or Lightning address",
+      receive: "Cashu token",
+      pay: "Lightning address or invoice",
+    },
+    qr_scanner: {
+      title: "Scan QR Code",
+      description: "Tap to scan an address",
+    },
+    paste_button: {
+      label: "@:global.actions.paste.label",
+    },
+  },
   PayInvoiceDialog: {
     input_data: {
       title: "Pay Lightning",
@@ -1323,6 +1396,7 @@ export default {
       amount_exact_label: "{ payee } is requesting { value } { ticker }",
       amount_range_label:
         "{ payee } is requesting{br}between { min } and { max } { ticker }",
+      sending_to_lightning_address: "Sending to { address }",
       inputs: {
         amount: {
           label: "Amount ({ ticker }) *",
@@ -1412,5 +1486,18 @@ export default {
     in_progress_warning_text: "Swap in progress",
     invalid_swap_data_error_text: "Invalid swap data",
     swap_error_text: "Error swapping",
+  },
+  TokenInformation: {
+    fee: "Fee",
+    unit: "Unit",
+    fiat: "Fiat",
+    p2pk: "P2PK",
+    locked: "Locked",
+    locked_to_you: "Locked to you",
+    mint: "Mint",
+    memo: "Memo",
+    payment_request: "Payment request",
+    nostr: "Nostr",
+    token_copied: "Token copied to clipboard",
   },
 };

@@ -13,7 +13,7 @@ export const useSettingsStore = defineStore("settings", {
     return {
       getBitcoinPrice: useLocalStorage<boolean>(
         "cashu.settings.getBitcoinPrice",
-        false
+        true
       ),
       bitcoinPriceCurrency: useLocalStorage<string>(
         "cashu.settings.bitcoinPriceCurrency",
@@ -57,7 +57,7 @@ export const useSettingsStore = defineStore("settings", {
       ),
       enableReceiveSwaps: useLocalStorage<boolean>(
         "cashu.settings.enableReceiveSwaps",
-        false
+        true
       ),
       showNfcButtonInDrawer: useLocalStorage(
         "cashu.ui.showNfcButtonInDrawer",
@@ -69,7 +69,7 @@ export const useSettingsStore = defineStore("settings", {
       ),
       auditorEnabled: useLocalStorage<boolean>(
         "cashu.settings.auditorEnabled",
-        false
+        true
       ),
       auditorUrl: useLocalStorage<string>(
         "cashu.settings.auditorUrl",

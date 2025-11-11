@@ -903,7 +903,8 @@ export default {
     },
   },
   InvoiceDetailDialog: {
-    title: "สร้างใบแจ้งหนี้",
+    title: "รับ Lightning",
+    create_invoice_title: "สร้างใบแจ้งหนี้",
     inputs: {
       amount: {
         label: "จำนวน ({ ticker }) *",
@@ -946,7 +947,7 @@ export default {
     },
   },
   SendTokenDialog: {
-    title: "ส่ง { value }",
+    title: "ส่ง Ecash",
     title_ecash_text: "Ecash",
     badge_offline_text: "ออฟไลน์",
     inputs: {
@@ -1034,7 +1035,7 @@ export default {
     },
   },
   ReceiveTokenDialog: {
-    title: "รับ { value }",
+    title: "รับ Ecash",
     title_ecash_text: "Ecash",
     inputs: {
       tokens_base64: {
@@ -1044,6 +1045,9 @@ export default {
     errors: {
       invalid_token: {
         label: "โทเค็นไม่ถูกต้อง",
+      },
+      p2pk_lock_mismatch: {
+        label: "ไม่สามารถรับได้ คีย์ล็อก P2PK ของโทเค็นนี้ไม่ตรงกับคีย์สาธารณะของคุณ",
       },
     },
     actions: {
@@ -1076,7 +1080,7 @@ export default {
         in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
       later: {
-        label: "ภายหลัง",
+        label: "รับภายหลัง",
         tooltip_text: "เพิ่มไปยังประวัติเพื่อรับภายหลัง",
         already_in_history_success_text: "Ecash อยู่ในประวัติแล้ว",
         added_to_history_success_text: "เพิ่ม Ecash ในประวัติแล้ว",
@@ -1282,6 +1286,20 @@ export default {
       },
     },
   },
+  ParseInputComponent: {
+    placeholder: {
+      default: "Cashu token หรือที่อยู่ Lightning",
+      receive: "Cashu token",
+      pay: "ที่อยู่ Lightning หรือใบแจ้งหนี้",
+    },
+    qr_scanner: {
+      title: "สแกนรหัส QR",
+      description: "แตะเพื่อสแกนที่อยู่",
+    },
+    paste_button: {
+      label: "@:global.actions.paste.label",
+    },
+  },
   PayInvoiceDialog: {
     input_data: {
       title: "ชำระเงิน Lightning",
@@ -1309,6 +1327,7 @@ export default {
       amount_exact_label: "{ payee } กำลังขอ { value } { ticker }",
       amount_range_label:
         "{ payee } กำลังขอ{br}ระหว่าง { min } และ { max } { ticker }",
+      sending_to_lightning_address: "กำลังส่งไปยัง { address }",
       inputs: {
         amount: {
           label: "จำนวน ({ ticker }) *",
@@ -1398,5 +1417,18 @@ export default {
     in_progress_warning_text: "กำลังดำเนินการแลกเปลี่ยน",
     invalid_swap_data_error_text: "ข้อมูลการแลกเปลี่ยนไม่ถูกต้อง",
     swap_error_text: "ข้อผิดพลาดในการแลกเปลี่ยน",
+  },
+  TokenInformation: {
+    fee: "ค่าธรรมเนียม",
+    unit: "หน่วย",
+    fiat: "สกุลเงิน",
+    p2pk: "P2PK",
+    locked: "ล็อค",
+    locked_to_you: "ล็อคให้คุณ",
+    mint: "โรงกษาปณ์",
+    memo: "บันทึก",
+    payment_request: "คำขอชำระเงิน",
+    nostr: "Nostr",
+    token_copied: "คัดลอกโทเค็นไปยังคลิปบอร์ดแล้ว",
   },
 };

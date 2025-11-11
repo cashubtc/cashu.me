@@ -899,7 +899,8 @@ export default {
     },
   },
   InvoiceDetailDialog: {
-    title: "创建发票",
+    title: "接收 Lightning",
+    create_invoice_title: "创建发票",
     inputs: {
       amount: {
         label: "金额 ({ ticker }) *",
@@ -942,7 +943,7 @@ export default {
     },
   },
   SendTokenDialog: {
-    title: "发送 { value }",
+    title: "发送 Ecash",
     title_ecash_text: "Ecash",
     badge_offline_text: "离线",
     inputs: {
@@ -1030,7 +1031,7 @@ export default {
     },
   },
   ReceiveTokenDialog: {
-    title: "接收 { value }",
+    title: "接收 Ecash",
     title_ecash_text: "Ecash",
     inputs: {
       tokens_base64: {
@@ -1040,6 +1041,9 @@ export default {
     errors: {
       invalid_token: {
         label: "无效的 token",
+      },
+      p2pk_lock_mismatch: {
+        label: "无法接收。此令牌的P2PK锁定与您的公钥不匹配。",
       },
     },
     actions: {
@@ -1072,7 +1076,7 @@ export default {
         in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
       later: {
-        label: "稍后",
+        label: "稍后接收",
         tooltip_text: "添加到历史记录，稍后接收",
         already_in_history_success_text: "Ecash 已在历史记录中",
         added_to_history_success_text: "Ecash 已添加到历史记录",
@@ -1277,6 +1281,20 @@ export default {
       },
     },
   },
+  ParseInputComponent: {
+    placeholder: {
+      default: "Cashu token 或闪电地址",
+      receive: "Cashu token",
+      pay: "闪电地址或发票",
+    },
+    qr_scanner: {
+      title: "扫描二维码",
+      description: "点击扫描地址",
+    },
+    paste_button: {
+      label: "@:global.actions.paste.label",
+    },
+  },
   PayInvoiceDialog: {
     input_data: {
       title: "支付 Lightning",
@@ -1304,6 +1322,7 @@ export default {
       amount_exact_label: "{ payee } 请求 { value } { ticker }",
       amount_range_label:
         "{ payee } 请求{br}介于 { min } 和 { max } { ticker } 之间",
+      sending_to_lightning_address: "发送至 { address }",
       inputs: {
         amount: {
           label: "金额 ({ ticker }) *",
@@ -1393,5 +1412,18 @@ export default {
     in_progress_warning_text: "兑换进行中",
     invalid_swap_data_error_text: "无效的兑换数据",
     swap_error_text: "兑换错误",
+  },
+  TokenInformation: {
+    fee: "费用",
+    unit: "单位",
+    fiat: "法币",
+    p2pk: "P2PK",
+    locked: "已锁定",
+    locked_to_you: "已锁定给您",
+    mint: "铸币厂",
+    memo: "备注",
+    payment_request: "支付请求",
+    nostr: "Nostr",
+    token_copied: "令牌已复制到剪贴板",
   },
 };

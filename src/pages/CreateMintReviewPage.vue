@@ -107,7 +107,7 @@
           >
             <span>{{ $t("CreateMintReview.actions.publish.label") }}</span>
             <template v-slot:loading>
-              <q-spinner-hourglass class="on-left" />
+              <q-spinner class="on-left" />
               <span>{{
                 $t("CreateMintReview.actions.publish.in_progress")
               }}</span>
@@ -117,7 +117,7 @@
       </div>
 
       <q-inner-loading :showing="prefilling">
-        <q-spinner-hourglass size="32px" color="primary" />
+        <q-spinner size="32px" color="primary" />
       </q-inner-loading>
     </div>
   </div>

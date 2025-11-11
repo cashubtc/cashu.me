@@ -88,7 +88,7 @@
         >
           {{ $t("AddMintDialog.actions.add_mint.label") }}
           <template v-slot:loading>
-            <q-spinner-hourglass />
+            <q-spinner />
             {{ $t("AddMintDialog.actions.add_mint.in_progress") }}
           </template>
         </q-btn>

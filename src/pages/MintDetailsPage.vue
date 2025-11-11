@@ -132,6 +132,15 @@
                 class="contact-icon"
                 alt=""
               />
+              <img
+                v-else-if="contactInfo.method === 'telegram'"
+                src="/telegram-icon.svg"
+                class="contact-icon"
+                alt=""
+              />
+              <div v-else class="contact-text q-ml-xs">
+                {{ contactInfo.method }}
+              </div>
             </div>
             <div class="contact-text">{{ contactInfo.info }}</div>
             <copy-icon

@@ -906,7 +906,8 @@ export default {
     },
   },
   InvoiceDetailDialog: {
-    title: "Skapa faktura",
+    title: "Ta emot Lightning",
+    create_invoice_title: "Skapa faktura",
     inputs: {
       amount: {
         label: "Belopp ({ ticker }) *",
@@ -949,7 +950,7 @@ export default {
     },
   },
   SendTokenDialog: {
-    title: "Skicka { value }",
+    title: "Skicka Ecash",
     title_ecash_text: "Ecash",
     badge_offline_text: "Offline",
     inputs: {
@@ -1038,7 +1039,7 @@ export default {
     },
   },
   ReceiveTokenDialog: {
-    title: "Ta emot { value }",
+    title: "Ta emot Ecash",
     title_ecash_text: "Ecash",
     inputs: {
       tokens_base64: {
@@ -1048,6 +1049,9 @@ export default {
     errors: {
       invalid_token: {
         label: "Ogiltig token",
+      },
+      p2pk_lock_mismatch: {
+        label: "Kan inte ta emot. Denna tokens P2PK-lås matchar inte din publika nyckel.",
       },
     },
     actions: {
@@ -1080,7 +1084,7 @@ export default {
         in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
       later: {
-        label: "Senare",
+        label: "Ta emot senare",
         tooltip_text: "Lägg till i historik för att ta emot senare",
         already_in_history_success_text: "Ecash redan i historik",
         added_to_history_success_text: "Ecash lades till i historik",
@@ -1286,6 +1290,20 @@ export default {
       },
     },
   },
+  ParseInputComponent: {
+    placeholder: {
+      default: "Cashu token eller Lightning-adress",
+      receive: "Cashu token",
+      pay: "Lightning-adress eller faktura",
+    },
+    qr_scanner: {
+      title: "Skanna QR-kod",
+      description: "Tryck för att skanna en adress",
+    },
+    paste_button: {
+      label: "@:global.actions.paste.label",
+    },
+  },
   PayInvoiceDialog: {
     input_data: {
       title: "Betala Lightning",
@@ -1313,6 +1331,7 @@ export default {
       amount_exact_label: "{ payee } begär { value } { ticker }",
       amount_range_label:
         "{ payee } begär{br}mellan { min } och { max } { ticker }",
+      sending_to_lightning_address: "Skickar till { address }",
       inputs: {
         amount: {
           label: "Belopp ({ ticker }) *",
@@ -1402,5 +1421,18 @@ export default {
     in_progress_warning_text: "Byte pågår",
     invalid_swap_data_error_text: "Ogiltig bytesdata",
     swap_error_text: "Fel vid byte",
+  },
+  TokenInformation: {
+    fee: "Avgift",
+    unit: "Enhet",
+    fiat: "Fiat",
+    p2pk: "P2PK",
+    locked: "Låst",
+    locked_to_you: "Låst till dig",
+    mint: "Myntverk",
+    memo: "Memo",
+    payment_request: "Betalningsförfrågan",
+    nostr: "Nostr",
+    token_copied: "Token kopierad till urklipp",
   },
 };
