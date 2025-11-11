@@ -73,11 +73,7 @@
         </div>
         <div class="detail-value">
           {{ tokenMintUrl }}
-          <q-spinner-hourglass
-            v-if="addMintBlocking"
-            size="sm"
-            class="q-ml-xs"
-          />
+          <q-spinner v-if="addMintBlocking" size="sm" class="q-ml-xs" />
         </div>
       </div>
 

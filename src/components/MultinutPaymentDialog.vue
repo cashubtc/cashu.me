@@ -283,7 +283,7 @@
             size="lg"
           >
             <template v-slot:loading>
-              <q-spinner-hourglass />
+              <q-spinner />
             </template>
             Pay Invoice
           </q-btn>

@@ -126,7 +126,7 @@
             <div class="col-12">
               <q-input outlined v-model="npcAddress" dense rounded readonly>
                 <template v-slot:append>
-                  <q-spinner-hourglass size="sm" v-if="npcLoading" />
+                  <q-spinner size="sm" v-if="npcLoading" />
                   <q-icon
                     name="content_copy"
                     @click="copyText(npcAddress)"

@@ -24,7 +24,7 @@
           <q-icon name="search" size="20px" class="q-mr-sm" />
           <span>{{ $t("MintSettings.discover.actions.discover.label") }}</span>
           <template v-slot:loading>
-            <q-spinner-hourglass class="on-left" />
+            <q-spinner class="on-left" />
             {{ $t("MintSettings.discover.actions.discover.in_progress") }}
           </template>
         </q-btn>

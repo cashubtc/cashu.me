@@ -248,7 +248,7 @@
               >
                 {{ $t("SendTokenDialog.actions.send.label") }}
                 <template v-slot:loading>
-                  <q-spinner-hourglass />
+                  <q-spinner />
                 </template>
               </q-btn>
             </div>

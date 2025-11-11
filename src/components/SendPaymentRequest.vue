@@ -17,7 +17,7 @@
       @click="clickPaymentRequest"
     >
       <q-icon v-if="!isLoading" name="send" class="q-pr-xs" />
-      <q-spinner-hourglass v-else size="1em" class="q-mr-md" />
+      <q-spinner v-else size="1em" class="q-mr-md" />
       {{ resolvedLabel }}
     </q-btn>
   </div>
