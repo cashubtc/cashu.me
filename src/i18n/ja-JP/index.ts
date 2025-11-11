@@ -1046,6 +1046,9 @@ export default {
       invalid_token: {
         label: "無効なトークン",
       },
+      p2pk_lock_mismatch: {
+        label: "受信できません。このトークンのP2PKロックがあなたの公開鍵と一致しません。",
+      },
     },
     actions: {
       paste: {

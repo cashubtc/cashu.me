@@ -1054,6 +1054,9 @@ export default {
       invalid_token: {
         label: "Token inválido",
       },
+      p2pk_lock_mismatch: {
+        label: "No se puede recibir. El bloqueo P2PK de este token no coincide con su clave pública.",
+      },
     },
     actions: {
       paste: {

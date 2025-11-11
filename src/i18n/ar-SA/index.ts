@@ -1044,6 +1044,9 @@ export default {
       invalid_token: {
         label: "رمز غير صالح",
       },
+      p2pk_lock_mismatch: {
+        label: "غير قادر على الاستلام. قفل P2PK لهذا الرمز لا يطابق المفتاح العام الخاص بك.",
+      },
     },
     actions: {
       paste: {

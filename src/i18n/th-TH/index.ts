@@ -1046,6 +1046,9 @@ export default {
       invalid_token: {
         label: "โทเค็นไม่ถูกต้อง",
       },
+      p2pk_lock_mismatch: {
+        label: "ไม่สามารถรับได้ คีย์ล็อก P2PK ของโทเค็นนี้ไม่ตรงกับคีย์สาธารณะของคุณ",
+      },
     },
     actions: {
       paste: {

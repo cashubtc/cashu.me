@@ -1057,6 +1057,9 @@ export default {
       invalid_token: {
         label: "Μη έγκυρο token",
       },
+      p2pk_lock_mismatch: {
+        label: "Δεν είναι δυνατή η λήψη. Το κλείδωμα P2PK αυτού του token δεν ταιριάζει με το δημόσιο κλειδί σας.",
+      },
     },
     actions: {
       paste: {

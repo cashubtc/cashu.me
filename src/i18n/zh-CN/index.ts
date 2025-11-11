@@ -1042,6 +1042,9 @@ export default {
       invalid_token: {
         label: "无效的 token",
       },
+      p2pk_lock_mismatch: {
+        label: "无法接收。此令牌的P2PK锁定与您的公钥不匹配。",
+      },
     },
     actions: {
       paste: {

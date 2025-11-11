@@ -1061,6 +1061,9 @@ export default {
       invalid_token: {
         label: "Geçersiz token",
       },
+      p2pk_lock_mismatch: {
+        label: "Alınamıyor. Bu token'ın P2PK kilidi genel anahtarınızla eşleşmiyor.",
+      },
     },
     actions: {
       paste: {
