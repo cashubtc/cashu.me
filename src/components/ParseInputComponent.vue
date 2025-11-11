@@ -165,7 +165,7 @@ export default defineComponent({
 
   ::v-deep .q-field__control:before,
   ::v-deep .q-field__control:after {
-    border: none !important;
+    display: none !important;
   }
 
   ::v-deep .q-field__bottom {
