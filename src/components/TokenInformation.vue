@@ -168,10 +168,25 @@ export default defineComponent({
       default: false,
     },
   },
+  emits: ["notLockedToUs"],
   data: function () {
     return {};
   },
-  watch: {},
+  watch: {
+    proofsToShow: {
+      handler(newProofs) {
+        if (newProofs && newProofs.length > 0) {
+          const locked = this.isLocked(newProofs);
+          const lockedToUs = this.isLockedToUs(newProofs);
+          // Emit true if locked but not locked to us, false otherwise
+          this.$emit("notLockedToUs", locked && !lockedToUs);
+        } else {
+          this.$emit("notLockedToUs", false);
+        }
+      },
+      immediate: true,
+    },
+  },
   computed: {
     ...mapState(useMintsStore, [
       "activeMintUrl",

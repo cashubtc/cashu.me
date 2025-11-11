@@ -94,6 +94,7 @@
                         :encodedToken="receiveData.tokensBase64"
                         :hide-amount="true"
                         :hide-unit="true"
+                        @notLockedToUs="handleNotLockedToUs"
                       />
                     </div>
                   </div>
@@ -176,7 +177,16 @@
                 class="col-12 col-sm-11 col-md-8 q-px-md"
                 style="max-width: 600px"
               >
-                <template v-if="swapSelected">
+                <template v-if="isNotLockedToUs">
+                  <div
+                    class="receive-error text-negative text-subtitle2 text-left"
+                  >
+                    {{
+                      $t("ReceiveTokenDialog.errors.p2pk_lock_mismatch.label")
+                    }}
+                  </div>
+                </template>
+                <template v-else-if="swapSelected">
                   <q-btn
                     class="full-width"
                     unelevated
@@ -318,6 +328,7 @@ export default defineComponent({
       isReceiving: false as boolean,
       receiveError: "" as string,
       selectedSwapMintUrl: "",
+      isNotLockedToUs: false as boolean,
     };
   },
   watch: {
@@ -347,11 +358,13 @@ export default defineComponent({
         this.swapProcessing = false;
         this.swapError = false;
         this.selectedSwapMintUrl = "";
+        this.isNotLockedToUs = false;
       }
     },
     "receiveData.tokensBase64"(newVal: string) {
       if (newVal !== undefined) {
         this.receiveError = "";
+        this.isNotLockedToUs = false;
       }
     },
     swapSelected(newVal: boolean) {
@@ -737,6 +750,9 @@ export default defineComponent({
         console.log("Could not fetch untrusted mint info:", error);
         this.untrustedMintInfo = null;
       }
+    },
+    handleNotLockedToUs: function (value: boolean) {
+      this.isNotLockedToUs = value;
     },
   },
 });
