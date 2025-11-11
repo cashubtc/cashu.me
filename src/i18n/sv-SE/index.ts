@@ -1418,4 +1418,17 @@ export default {
     invalid_swap_data_error_text: "Ogiltig bytesdata",
     swap_error_text: "Fel vid byte",
   },
+  TokenInformation: {
+    fee: "Avgift",
+    unit: "Enhet",
+    fiat: "Fiat",
+    p2pk: "P2PK",
+    locked: "Låst",
+    locked_to_you: "Låst till dig",
+    mint: "Myntverk",
+    memo: "Memo",
+    payment_request: "Betalningsförfrågan",
+    nostr: "Nostr",
+    token_copied: "Token kopierad till urklipp",
+  },
 };

@@ -1415,4 +1415,17 @@ export default {
     invalid_swap_data_error_text: "無効なスワップデータ",
     swap_error_text: "スワップエラー",
   },
+  TokenInformation: {
+    fee: "手数料",
+    unit: "単位",
+    fiat: "フィアット",
+    p2pk: "P2PK",
+    locked: "ロック済み",
+    locked_to_you: "あなたにロック済み",
+    mint: "ミント",
+    memo: "メモ",
+    payment_request: "支払いリクエスト",
+    nostr: "Nostr",
+    token_copied: "トークンをクリップボードにコピーしました",
+  },
 };

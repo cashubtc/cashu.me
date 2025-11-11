@@ -1411,4 +1411,17 @@ export default {
     invalid_swap_data_error_text: "بيانات تبديل غير صالحة",
     swap_error_text: "خطأ في التبديل",
   },
+  TokenInformation: {
+    fee: "الرسوم",
+    unit: "الوحدة",
+    fiat: "العملة الورقية",
+    p2pk: "P2PK",
+    locked: "مقفل",
+    locked_to_you: "مقفل لك",
+    mint: "دار السك",
+    memo: "مذكرة",
+    payment_request: "طلب دفع",
+    nostr: "Nostr",
+    token_copied: "تم نسخ الرمز المميز إلى الحافظة",
+  },
 };

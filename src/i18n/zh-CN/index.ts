@@ -1409,4 +1409,17 @@ export default {
     invalid_swap_data_error_text: "无效的兑换数据",
     swap_error_text: "兑换错误",
   },
+  TokenInformation: {
+    fee: "费用",
+    unit: "单位",
+    fiat: "法币",
+    p2pk: "P2PK",
+    locked: "已锁定",
+    locked_to_you: "已锁定给您",
+    mint: "铸币厂",
+    memo: "备注",
+    payment_request: "支付请求",
+    nostr: "Nostr",
+    token_copied: "令牌已复制到剪贴板",
+  },
 };

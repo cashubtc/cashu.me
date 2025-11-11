@@ -1429,4 +1429,17 @@ export default {
     invalid_swap_data_error_text: "Données d'échange invalides",
     swap_error_text: "Erreur lors de l'échange",
   },
+  TokenInformation: {
+    fee: "Frais",
+    unit: "Unité",
+    fiat: "Fiat",
+    p2pk: "P2PK",
+    locked: "Verrouillé",
+    locked_to_you: "Verrouillé pour vous",
+    mint: "Monnaie",
+    memo: "Mémo",
+    payment_request: "Demande de paiement",
+    nostr: "Nostr",
+    token_copied: "Token copié dans le presse-papiers",
+  },
 };

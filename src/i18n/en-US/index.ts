@@ -1483,4 +1483,17 @@ export default {
     invalid_swap_data_error_text: "Invalid swap data",
     swap_error_text: "Error swapping",
   },
+  TokenInformation: {
+    fee: "Fee",
+    unit: "Unit",
+    fiat: "Fiat",
+    p2pk: "P2PK",
+    locked: "Locked",
+    locked_to_you: "Locked to you",
+    mint: "Mint",
+    memo: "Memo",
+    payment_request: "Payment request",
+    nostr: "Nostr",
+    token_copied: "Token copied to clipboard",
+  },
 };

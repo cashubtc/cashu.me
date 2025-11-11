@@ -1414,4 +1414,17 @@ export default {
     invalid_swap_data_error_text: "ข้อมูลการแลกเปลี่ยนไม่ถูกต้อง",
     swap_error_text: "ข้อผิดพลาดในการแลกเปลี่ยน",
   },
+  TokenInformation: {
+    fee: "ค่าธรรมเนียม",
+    unit: "หน่วย",
+    fiat: "สกุลเงิน",
+    p2pk: "P2PK",
+    locked: "ล็อค",
+    locked_to_you: "ล็อคให้คุณ",
+    mint: "โรงกษาปณ์",
+    memo: "บันทึก",
+    payment_request: "คำขอชำระเงิน",
+    nostr: "Nostr",
+    token_copied: "คัดลอกโทเค็นไปยังคลิปบอร์ดแล้ว",
+  },
 };

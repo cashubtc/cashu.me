@@ -1429,4 +1429,17 @@ export default {
     invalid_swap_data_error_text: "Geçersiz takas verisi",
     swap_error_text: "Takas hatası",
   },
+  TokenInformation: {
+    fee: "Ücret",
+    unit: "Birim",
+    fiat: "Fiat",
+    p2pk: "P2PK",
+    locked: "Kilitli",
+    locked_to_you: "Size kilitli",
+    mint: "Darphane",
+    memo: "Not",
+    payment_request: "Ödeme talebi",
+    nostr: "Nostr",
+    token_copied: "Token panoya kopyalandı",
+  },
 };

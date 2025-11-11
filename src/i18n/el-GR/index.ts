@@ -1425,4 +1425,17 @@ export default {
     invalid_swap_data_error_text: "Μη έγκυρα δεδομένα ανταλλαγής",
     swap_error_text: "Σφάλμα κατά την ανταλλαγή",
   },
+  TokenInformation: {
+    fee: "Χρέωση",
+    unit: "Μονάδα",
+    fiat: "Fiat",
+    p2pk: "P2PK",
+    locked: "Κλειδωμένο",
+    locked_to_you: "Κλειδωμένο για εσάς",
+    mint: "Νομισματοκοπείο",
+    memo: "Σημείωση",
+    payment_request: "Αίτημα πληρωμής",
+    nostr: "Nostr",
+    token_copied: "Το token αντιγράφηκε στο πρόχειρο",
+  },
 };

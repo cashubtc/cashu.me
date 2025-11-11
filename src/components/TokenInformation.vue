@@ -13,7 +13,7 @@
       <div v-if="receiveFee > 0 && !hideFee" class="detail-item q-mb-md">
         <div class="detail-label">
           <arrow-down-up-icon size="20" color="#9E9E9E" class="detail-icon" />
-          <div class="detail-name">Fee</div>
+          <div class="detail-name">{{ $t("TokenInformation.fee") }}</div>
         </div>
         <div class="detail-value">
           {{ formatCurrency(receiveFee, tokenUnit, true) }}
@@ -24,7 +24,7 @@
       <div v-if="!hideUnit" class="detail-item q-mb-md">
         <div class="detail-label">
           <banknote-icon size="20" color="#9E9E9E" class="detail-icon" />
-          <div class="detail-name">Unit</div>
+          <div class="detail-name">{{ $t("TokenInformation.unit") }}</div>
         </div>
         <div class="detail-value">{{ tokenUnit.toUpperCase() }}</div>
       </div>
@@ -33,7 +33,7 @@
       <div v-if="showFiat && !hideFiat" class="detail-item q-mb-md">
         <div class="detail-label">
           <banknote-icon size="20" color="#9E9E9E" class="detail-icon" />
-          <div class="detail-name">Fiat</div>
+          <div class="detail-name">{{ $t("TokenInformation.fiat") }}</div>
         </div>
         <div class="detail-value">
           {{ formatCurrency(fiatAmount, bitcoinPriceCurrency, true) }}
@@ -47,7 +47,7 @@
       >
         <div class="detail-label">
           <lock-icon size="20" color="#9E9E9E" class="detail-icon" />
-          <div class="detail-name">P2PK</div>
+          <div class="detail-name">{{ $t("TokenInformation.p2pk") }}</div>
         </div>
         <div
           class="detail-value"
@@ -57,7 +57,11 @@
               isLocked(proofsToShow) && !isLockedToUs(proofsToShow),
           }"
         >
-          {{ isLockedToUs(proofsToShow) ? "Locked to you" : "Locked" }}
+          {{
+            isLockedToUs(proofsToShow)
+              ? $t("TokenInformation.locked_to_you")
+              : $t("TokenInformation.locked")
+          }}
         </div>
       </div>
 
@@ -65,7 +69,7 @@
       <div v-if="!hideMint" class="detail-item q-mb-md">
         <div class="detail-label">
           <building-icon size="20" color="#9E9E9E" class="detail-icon" />
-          <div class="detail-name">Mint</div>
+          <div class="detail-name">{{ $t("TokenInformation.mint") }}</div>
         </div>
         <div class="detail-value">
           {{ tokenMintUrl }}
@@ -81,7 +85,7 @@
       <div v-if="displayMemo && !hideMemo" class="detail-item q-mb-md">
         <div class="detail-label">
           <message-circle-icon size="20" color="#9E9E9E" class="detail-icon" />
-          <div class="detail-name">Memo</div>
+          <div class="detail-name">{{ $t("TokenInformation.memo") }}</div>
         </div>
         <div
           class="detail-value"
@@ -95,9 +99,11 @@
       <div v-if="paymentRequestId" class="detail-item">
         <div class="detail-label">
           <banknote-icon size="20" color="#9E9E9E" class="detail-icon" />
-          <div class="detail-name">Payment request</div>
+          <div class="detail-name">
+            {{ $t("TokenInformation.payment_request") }}
+          </div>
         </div>
-        <div class="detail-value">Nostr</div>
+        <div class="detail-value">{{ $t("TokenInformation.nostr") }}</div>
       </div>
     </div>
   </div>
@@ -272,7 +278,7 @@ export default defineComponent({
       try {
         await navigator.clipboard.writeText(this.encodedToken);
         this.$q.notify({
-          message: "Token copied to clipboard",
+          message: this.$t("TokenInformation.token_copied"),
           color: "positive",
           position: "top",
           timeout: 1000,

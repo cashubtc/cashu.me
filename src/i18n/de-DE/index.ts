@@ -1428,4 +1428,17 @@ export default {
     invalid_swap_data_error_text: "Ungültige Swap-Daten",
     swap_error_text: "Fehler beim Tauschen",
   },
+  TokenInformation: {
+    fee: "Gebühr",
+    unit: "Einheit",
+    fiat: "Fiat",
+    p2pk: "P2PK",
+    locked: "Gesperrt",
+    locked_to_you: "An dich gesperrt",
+    mint: "Münzstätte",
+    memo: "Notiz",
+    payment_request: "Zahlungsanforderung",
+    nostr: "Nostr",
+    token_copied: "Token in Zwischenablage kopiert",
+  },
 };

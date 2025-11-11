@@ -1422,4 +1422,17 @@ export default {
     invalid_swap_data_error_text: "Datos de intercambio inválidos",
     swap_error_text: "Error al intercambiar",
   },
+  TokenInformation: {
+    fee: "Tarifa",
+    unit: "Unidad",
+    fiat: "Fiat",
+    p2pk: "P2PK",
+    locked: "Bloqueado",
+    locked_to_you: "Bloqueado para ti",
+    mint: "Casa de moneda",
+    memo: "Memo",
+    payment_request: "Solicitud de pago",
+    nostr: "Nostr",
+    token_copied: "Token copiado al portapapeles",
+  },
 };

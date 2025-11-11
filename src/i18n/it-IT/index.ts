@@ -1392,4 +1392,17 @@ export default {
     invalid_swap_data_error_text: "Dati di scambio non validi",
     swap_error_text: "Errore durante lo scambio",
   },
+  TokenInformation: {
+    fee: "Commissione",
+    unit: "Unità",
+    fiat: "Fiat",
+    p2pk: "P2PK",
+    locked: "Bloccato",
+    locked_to_you: "Bloccato per te",
+    mint: "Zecca",
+    memo: "Memo",
+    payment_request: "Richiesta di pagamento",
+    nostr: "Nostr",
+    token_copied: "Token copiato negli appunti",
+  },
 };
