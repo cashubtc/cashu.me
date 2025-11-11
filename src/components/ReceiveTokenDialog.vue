@@ -98,7 +98,10 @@
                       />
                     </div>
                   </div>
-                  <div class="row q-pt-sm" v-if="!knowThisMint">
+                  <div
+                    class="row q-pt-sm"
+                    v-if="!knowThisMint && !isNotLockedToUs"
+                  >
                     <div class="col-12">
                       <ToolTipInfo
                         :text="$t('ReceiveTokenDialog.unknown_mint_info_text')"
