@@ -287,7 +287,8 @@ export default defineComponent({
       this.newPaymentRequest(
         this.paymentRequestAmount,
         this.memo,
-        this.chosenMintUrl
+        this.chosenMintUrl,
+        true
       );
     },
     getShortUrl(url: string | undefined) {

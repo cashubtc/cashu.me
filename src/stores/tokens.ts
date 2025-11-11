@@ -22,6 +22,7 @@ export type HistoryToken = {
   label?: string; // Add label field for custom naming
   meltQuote?: MeltQuoteResponse;
   paidDate?: string;
+  paymentRequestId?: string; // If created in response to a payment request
 };
 
 export const useTokensStore = defineStore("tokens", {
@@ -40,6 +41,7 @@ export const useTokensStore = defineStore("tokens", {
       fee,
       paymentRequest,
       label,
+      paymentRequestId,
     }: {
       amount: number;
       token: string;
@@ -48,6 +50,7 @@ export const useTokensStore = defineStore("tokens", {
       fee?: number;
       paymentRequest?: PaymentRequest;
       label?: string;
+      paymentRequestId?: string;
     }): string {
       const id = uuidv4();
       this.historyTokens.push({
@@ -61,6 +64,7 @@ export const useTokensStore = defineStore("tokens", {
         fee,
         paymentRequest,
         label,
+        paymentRequestId,
       } as HistoryToken);
       return id;
     },
@@ -72,6 +76,7 @@ export const useTokensStore = defineStore("tokens", {
       fee,
       paymentRequest,
       label,
+      paymentRequestId,
     }: {
       amount: number;
       token: string;
@@ -80,6 +85,7 @@ export const useTokensStore = defineStore("tokens", {
       fee?: number;
       paymentRequest?: PaymentRequest;
       label?: string;
+      paymentRequestId?: string;
     }): string {
       const id = uuidv4();
       this.historyTokens.push({
@@ -93,6 +99,7 @@ export const useTokensStore = defineStore("tokens", {
         fee,
         paymentRequest,
         label,
+        paymentRequestId,
       });
       return id;
     },

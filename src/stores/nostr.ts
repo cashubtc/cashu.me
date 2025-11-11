@@ -495,7 +495,11 @@ export const useNostrStore = defineStore("nostr", {
             console.log("### incoming token already in history");
             return;
           }
-          const historyId = await this.addPendingTokenToHistory(tokenStr, false);
+          const historyId = await this.addPendingTokenToHistory(
+            tokenStr,
+            false,
+            payload.id
+          );
           try {
             if (historyId) {
               prStore.registerIncomingPaymentForRequest(payload.id, historyId);
@@ -535,7 +539,11 @@ export const useNostrStore = defineStore("nostr", {
         await this.addPendingTokenToHistory(tokenStr);
       }
     },
-    addPendingTokenToHistory: function (tokenStr: string, verbose = true): string | undefined {
+    addPendingTokenToHistory: function (
+      tokenStr: string,
+      verbose = true,
+      paymentRequestId?: string
+    ): string | undefined {
       const receiveStore = useReceiveTokensStore();
       const tokensStore = useTokensStore();
       if (tokensStore.tokenAlreadyInHistory(tokenStr)) {
@@ -557,6 +565,7 @@ export const useNostrStore = defineStore("nostr", {
         token: tokenStr,
         mint: token.getMint(decodedToken),
         unit: token.getUnit(decodedToken),
+        paymentRequestId,
       });
       receiveStore.showReceiveTokens = false;
       // show success notification

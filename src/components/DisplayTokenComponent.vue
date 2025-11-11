@@ -214,7 +214,10 @@
         </div>
         <q-card-section class="q-pa-sm">
           <div class="row justify-center q-pt-lg">
-            <TokenInformation :encodedToken="sendData.tokensBase64" />
+            <TokenInformation
+              :encodedToken="sendData.tokensBase64"
+              :payment-request-id="sendData.historyToken?.paymentRequestId"
+            />
           </div>
           <div
             v-if="sendData.paymentRequest"

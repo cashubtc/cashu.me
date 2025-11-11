@@ -58,8 +58,20 @@ export const usePRStore = defineStore("payment-request", {
     },
   },
   actions: {
-    newPaymentRequest(amount?: number, memo?: string, mintUrl?: string) {
+    newPaymentRequest(
+      amount?: number,
+      memo?: string,
+      mintUrl?: string,
+      forceNew: boolean = false
+    ) {
       const walletStore = useWalletStore();
+      // If not forcing a new request and we already have at least one,
+      // do not auto-create a new one; just show the currently selected.
+      if (!forceNew && this.ourPaymentRequests.length > 0) {
+        const current = this.currentPaymentRequest || this.ourPaymentRequests[0];
+        this.showPRKData = current.encoded;
+        return;
+      }
       this.showPRKData = this.createPaymentRequest(amount, memo, mintUrl);
     },
     createPaymentRequest: function (

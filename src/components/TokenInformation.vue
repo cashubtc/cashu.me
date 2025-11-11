@@ -9,6 +9,14 @@
 
     <!-- Token Details Section -->
     <div class="token-details-section q-mt-md q-mb-lg">
+      <!-- Payment Request (if applicable) -->
+      <div v-if="paymentRequestId" class="detail-item q-mb-md">
+        <div class="detail-label">
+          <banknote-icon size="20" color="#9E9E9E" class="detail-icon" />
+          <div class="detail-name">Payment request</div>
+        </div>
+        <div class="detail-value">Nostr</div>
+      </div>
       <!-- Fee (if applicable) -->
       <div v-if="receiveFee > 0 && !hideFee" class="detail-item q-mb-md">
         <div class="detail-label">
@@ -123,6 +131,11 @@ export default defineComponent({
   },
   props: {
     encodedToken: String,
+    paymentRequestId: {
+      type: String,
+      required: false,
+      default: undefined,
+    },
     hideAmount: {
       type: Boolean,
       default: false,
