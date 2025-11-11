@@ -16,7 +16,6 @@
         :model-value="modelValue"
         @update:model-value="$emit('update:modelValue', $event)"
         type="textarea"
-        autogrow
         :placeholder="computedPlaceholder"
         :autofocus="autofocus"
         @keyup.enter="$emit('enter')"
@@ -139,6 +138,7 @@ export default defineComponent({
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.06);
     min-height: 120px;
+    max-height: 120px;
     padding: 16px;
 
     &:before,
