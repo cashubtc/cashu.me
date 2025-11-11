@@ -1,38 +1,25 @@
 <template>
-  <div v-if="sendData.paymentRequest" class="q-pa-none q-ma-none q-mt-sm">
-    <div class="q-mb-md text-center">
-      <q-btn
-        :rounded="buttonRounded"
-        :dense="buttonDense"
-        :unelevated="buttonUnelevated"
-        :size="buttonSize"
-        :color="buttonColor"
-        :class="computedButtonClasses"
-        :disable="disable || !sendData.paymentRequest"
-        :loading="isLoading"
-        @click="clickPaymentRequest"
-      >
-        <q-icon v-if="!isLoading" name="send" class="q-pr-xs" />
-        <q-spinner-hourglass v-else size="1em" class="q-mr-md" />
-        {{ resolvedLabel }}
-      </q-btn>
-    </div>
-    <div v-if="showDetails && detailText" class="text-center">
-      <span
-        class="q-mt-md q-mb-md text-center"
-        style="
-          display: block;
-          font-family: monospace;
-          white-space: pre-wrap;
-          word-wrap: break-word;
-          max-width: 350px;
-          margin: 0 auto;
-          font-size: 13px;
-        "
-      >
-        {{ detailText }}
-      </span>
-    </div>
+  <div
+    v-if="sendData.paymentRequest"
+    class="col-12 col-sm-11 col-md-8 q-px-md"
+    style="max-width: 600px"
+  >
+    <q-btn
+      class="full-width"
+      :rounded="buttonRounded"
+      :dense="buttonDense"
+      :unelevated="buttonUnelevated"
+      :size="buttonSize"
+      :color="buttonColor"
+      :class="computedButtonClasses"
+      :disable="disable || !sendData.paymentRequest"
+      :loading="isLoading"
+      @click="clickPaymentRequest"
+    >
+      <q-icon v-if="!isLoading" name="send" class="q-pr-xs" />
+      <q-spinner-hourglass v-else size="1em" class="q-mr-md" />
+      {{ resolvedLabel }}
+    </q-btn>
   </div>
 </template>
 
