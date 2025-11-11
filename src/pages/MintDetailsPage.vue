@@ -138,6 +138,7 @@
                 class="contact-icon"
                 alt=""
               />
+              <div v-else class="contact-text">{{ contactInfo.method }}</div>
             </div>
             <div class="contact-text">{{ contactInfo.info }}</div>
             <copy-icon
