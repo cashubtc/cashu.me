@@ -1335,6 +1335,7 @@ export default {
       amount_exact_label: "Ο { payee } ζητά { value } { ticker }",
       amount_range_label:
         "Ο { payee } ζητά{br}μεταξύ { min } και { max } { ticker }",
+      sending_to_lightning_address: "Αποστολή σε { address }",
       inputs: {
         amount: {
           label: "Ποσό ({ ticker }) *",

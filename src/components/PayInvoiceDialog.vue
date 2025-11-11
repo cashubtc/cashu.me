@@ -185,7 +185,19 @@
                     payInvoiceData.lnurlpay.minSendable
                   "
                 >
-                  <p class="q-my-none text-h6 text-center">
+                  <p
+                    v-if="payInvoiceData.lnurlpay.lightningAddress"
+                    class="q-my-none text-h6 text-center"
+                  >
+                    <i18n-t
+                      keypath="PayInvoiceDialog.lnurlpay.sending_to_lightning_address"
+                    >
+                      <template v-slot:address>
+                        <b>{{ payInvoiceData.lnurlpay.lightningAddress }}</b>
+                      </template>
+                    </i18n-t>
+                  </p>
+                  <p v-else class="q-my-none text-h6 text-center">
                     <i18n-t
                       keypath="PayInvoiceDialog.lnurlpay.amount_exact_label"
                     >
@@ -241,7 +253,19 @@
 
                 <!-- Variable amount with AmountInputComponent -->
                 <div v-else>
-                  <p class="q-my-none text-h6 text-center">
+                  <p
+                    v-if="payInvoiceData.lnurlpay.lightningAddress"
+                    class="q-my-none text-h6 text-center"
+                  >
+                    <i18n-t
+                      keypath="PayInvoiceDialog.lnurlpay.sending_to_lightning_address"
+                    >
+                      <template v-slot:address>
+                        <b>{{ payInvoiceData.lnurlpay.lightningAddress }}</b>
+                      </template>
+                    </i18n-t>
+                  </p>
+                  <p v-else class="q-my-none text-h6 text-center">
                     <i18n-t
                       keypath="PayInvoiceDialog.lnurlpay.amount_range_label"
                     >
@@ -265,7 +289,7 @@
                       </template>
                     </i18n-t>
                   </p>
-                  <q-separator class="q-my-sm"></q-separator>
+
                   <div class="row" v-if="payInvoiceData.lnurlpay.description">
                     <p class="col text-justify text-italic">
                       {{ payInvoiceData.lnurlpay.description }}
@@ -311,11 +335,7 @@
                         round
                         outlined
                         v-model="payInvoiceData.input.comment"
-                        :type="
-                          payInvoiceData.lnurlpay.commentAllowed > 64
-                            ? 'textarea'
-                            : 'text'
-                        "
+                        type="text"
                         :label="
                           $t('PayInvoiceDialog.lnurlpay.inputs.comment.label')
                         "

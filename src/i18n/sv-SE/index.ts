@@ -1328,6 +1328,7 @@ export default {
       amount_exact_label: "{ payee } begär { value } { ticker }",
       amount_range_label:
         "{ payee } begär{br}mellan { min } och { max } { ticker }",
+      sending_to_lightning_address: "Skickar till { address }",
       inputs: {
         amount: {
           label: "Belopp ({ ticker }) *",

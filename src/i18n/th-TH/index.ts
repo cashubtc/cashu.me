@@ -1324,6 +1324,7 @@ export default {
       amount_exact_label: "{ payee } กำลังขอ { value } { ticker }",
       amount_range_label:
         "{ payee } กำลังขอ{br}ระหว่าง { min } และ { max } { ticker }",
+      sending_to_lightning_address: "กำลังส่งไปยัง { address }",
       inputs: {
         amount: {
           label: "จำนวน ({ ticker }) *",

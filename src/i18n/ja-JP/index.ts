@@ -1325,6 +1325,7 @@ export default {
         "{ payee }が{ value } { ticker }をリクエストしています",
       amount_range_label:
         "{ payee }が{ min }から{ max } { ticker }の間をリクエストしています",
+      sending_to_lightning_address: "{ address }に送信中",
       inputs: {
         amount: {
           label: "金額 ({ ticker }) *",

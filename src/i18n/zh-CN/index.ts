@@ -1319,6 +1319,7 @@ export default {
       amount_exact_label: "{ payee } 请求 { value } { ticker }",
       amount_range_label:
         "{ payee } 请求{br}介于 { min } 和 { max } { ticker } 之间",
+      sending_to_lightning_address: "发送至 { address }",
       inputs: {
         amount: {
           label: "金额 ({ ticker }) *",

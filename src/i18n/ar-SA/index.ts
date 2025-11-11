@@ -1321,6 +1321,7 @@ export default {
     lnurlpay: {
       amount_exact_label: "{ payee } يطلب { value } { ticker }",
       amount_range_label: "{ payee } يطلب{br}بين { min } و { max } { ticker }",
+      sending_to_lightning_address: "إرسال إلى { address }",
       inputs: {
         amount: {
           label: "المبلغ ({ ticker }) *",

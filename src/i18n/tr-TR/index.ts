@@ -1339,6 +1339,7 @@ export default {
       amount_exact_label: "{ payee }, { value } { ticker } talep ediyor",
       amount_range_label:
         "{ payee }{br} { min } ile { max } { ticker } arasında talep ediyor",
+      sending_to_lightning_address: "{ address } adresine gönderiliyor",
       inputs: {
         amount: {
           label: "Miktar ({ ticker }) *",

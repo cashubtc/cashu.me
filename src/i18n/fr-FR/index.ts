@@ -1338,6 +1338,7 @@ export default {
       amount_exact_label: "{ payee } demande { value } { ticker }",
       amount_range_label:
         "{ payee } demande{br}entre { min } et { max } { ticker }",
+      sending_to_lightning_address: "Envoi à { address }",
       inputs: {
         amount: {
           label: "Montant ({ ticker }) *",

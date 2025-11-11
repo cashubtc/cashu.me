@@ -141,6 +141,7 @@ export const useWalletStore = defineStore("wallet", {
           successAction: {},
           routes: [],
           tag: "",
+          lightningAddress: "",
         },
         lnurlauth: {},
         input: {
@@ -1527,6 +1528,12 @@ export const useWalletStore = defineStore("wallet", {
         this.payInvoiceData.lnurlpay.domain = host
           .split("https://")[1]
           .split("/")[0];
+        // Store lightning address if it was a lightning address (not a LNURL)
+        if (address.split("@").length == 2) {
+          this.payInvoiceData.lnurlpay.lightningAddress = address;
+        } else {
+          this.payInvoiceData.lnurlpay.lightningAddress = "";
+        }
         if (
           this.payInvoiceData.lnurlpay.maxSendable ==
           this.payInvoiceData.lnurlpay.minSendable
