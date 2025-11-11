@@ -1088,7 +1088,7 @@ export default {
         in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
       later: {
-        label: "Αργότερα",
+        label: "Λήψη αργότερα",
         tooltip_text: "Προσθήκη στο ιστορικό για λήψη αργότερα",
         already_in_history_success_text: "Το Ecash είναι ήδη στο Ιστορικό",
         added_to_history_success_text: "Το Ecash προστέθηκε στο Ιστορικό",

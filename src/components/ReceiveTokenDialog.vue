@@ -194,11 +194,6 @@
                     }}
                     <template v-slot:loading>
                       <q-spinner size="xs" />
-                      {{
-                        $t(
-                          "ReceiveTokenDialog.actions.confirm_swap.in_progress"
-                        )
-                      }}
                     </template>
                     <q-tooltip>{{
                       $t("ReceiveTokenDialog.actions.confirm_swap.tooltip_text")
@@ -210,7 +205,7 @@
                     @click="addPendingTokenToHistory(receiveData.tokensBase64)"
                     color="primary"
                     rounded
-                    outline
+                    flat
                     class="full-width q-mb-md"
                   >
                     {{ $t("ReceiveTokenDialog.actions.later.label") }}
@@ -220,7 +215,14 @@
                   </q-btn>
                   <q-btn
                     v-if="
-                      enableReceiveSwaps && activeMintUrl && mints.length > 0
+                      enableReceiveSwaps &&
+                      activeMintUrl &&
+                      mints.length > 0 &&
+                      !(
+                        mints.length === 1 &&
+                        tokenMint &&
+                        mints[0]?.url === tokenMint
+                      )
                     "
                     @click="openSwap"
                     color="primary"

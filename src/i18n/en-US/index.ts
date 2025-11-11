@@ -1141,7 +1141,7 @@ export default {
         label: "Receive to selected mint",
       },
       later: {
-        label: "Receive offline",
+        label: "Receive later",
         tooltip_text: "Add to history to receive later",
         already_in_history_success_text: "Ecash already in History",
         added_to_history_success_text: "Ecash added to History",

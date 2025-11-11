@@ -1077,7 +1077,7 @@ export default {
         in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
       later: {
-        label: "後で",
+        label: "後で受け取る",
         tooltip_text: "後で受け取るために履歴に追加",
         already_in_history_success_text: "Ecashはすでに履歴にあります",
         added_to_history_success_text: "Ecashを履歴に追加しました",

@@ -1091,7 +1091,7 @@ export default {
         in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
       later: {
-        label: "Später",
+        label: "Später empfangen",
         tooltip_text: "Zum Verlauf hinzufügen, um später zu empfangen",
         already_in_history_success_text: "Ecash bereits im Verlauf",
         added_to_history_success_text: "Ecash zum Verlauf hinzugefügt",

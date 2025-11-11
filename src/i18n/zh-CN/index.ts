@@ -1073,7 +1073,7 @@ export default {
         in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
       later: {
-        label: "稍后",
+        label: "稍后接收",
         tooltip_text: "添加到历史记录，稍后接收",
         already_in_history_success_text: "Ecash 已在历史记录中",
         added_to_history_success_text: "Ecash 已添加到历史记录",

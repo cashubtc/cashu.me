@@ -1075,7 +1075,7 @@ export default {
         in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
       later: {
-        label: "لاحقًا",
+        label: "استلام لاحقًا",
         tooltip_text: "أضف إلى السجل للاستلام لاحقًا",
         already_in_history_success_text: "Ecash موجود بالفعل في السجل",
         added_to_history_success_text: "تمت إضافة Ecash إلى السجل",

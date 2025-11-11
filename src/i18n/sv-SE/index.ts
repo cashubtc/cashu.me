@@ -1081,7 +1081,7 @@ export default {
         in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
       later: {
-        label: "Senare",
+        label: "Ta emot senare",
         tooltip_text: "Lägg till i historik för att ta emot senare",
         already_in_history_success_text: "Ecash redan i historik",
         added_to_history_success_text: "Ecash lades till i historik",

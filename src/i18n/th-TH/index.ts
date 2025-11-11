@@ -1077,7 +1077,7 @@ export default {
         in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
       later: {
-        label: "ภายหลัง",
+        label: "รับภายหลัง",
         tooltip_text: "เพิ่มไปยังประวัติเพื่อรับภายหลัง",
         already_in_history_success_text: "Ecash อยู่ในประวัติแล้ว",
         added_to_history_success_text: "เพิ่ม Ecash ในประวัติแล้ว",
