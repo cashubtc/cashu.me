@@ -3,12 +3,14 @@ import { date } from "quasar";
 import { defineStore } from "pinia";
 import { PaymentRequest, Proof, Token, MeltQuoteResponse } from "@cashu/cashu-ts";
 import token from "src/js/token";
+import { v4 as uuidv4 } from "uuid";
 
 /**
  * The tokens store handles everything related to tokens and proofs
  */
 
 export type HistoryToken = {
+  id: string;
   status: "paid" | "pending";
   amount: number;
   date: string;
@@ -46,8 +48,10 @@ export const useTokensStore = defineStore("tokens", {
       fee?: number;
       paymentRequest?: PaymentRequest;
       label?: string;
-    }) {
+    }): string {
+      const id = uuidv4();
       this.historyTokens.push({
+        id,
         status: "paid",
         amount,
         date: currentDateStr(),
@@ -58,6 +62,7 @@ export const useTokensStore = defineStore("tokens", {
         paymentRequest,
         label,
       } as HistoryToken);
+      return id;
     },
     addPendingToken({
       amount,
@@ -75,8 +80,10 @@ export const useTokensStore = defineStore("tokens", {
       fee?: number;
       paymentRequest?: PaymentRequest;
       label?: string;
-    }) {
+    }): string {
+      const id = uuidv4();
       this.historyTokens.push({
+        id,
         status: "pending",
         amount,
         date: currentDateStr(),
@@ -87,6 +94,7 @@ export const useTokensStore = defineStore("tokens", {
         paymentRequest,
         label,
       });
+      return id;
     },
     editHistoryToken(
       tokenToEdit: string,

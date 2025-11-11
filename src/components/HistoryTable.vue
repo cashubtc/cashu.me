@@ -401,7 +401,7 @@ export default defineComponent({
         transactions.push({
           ...token,
           type: "ecash",
-          id: `token-${token.token}`,
+          id: token.id,
           label: token.label,
         });
       });

@@ -523,12 +523,13 @@ export default defineComponent({
         status: "pending",
       };
       if (!this.sendData.historyToken) {
-        this.addPendingToken(historyToken);
+        const _id = this.addPendingToken(historyToken);
+        (historyToken as any).id = _id;
         if (!this.g.offline) {
           this.onTokenPaid(historyToken);
         }
       }
-      this.sendData.historyToken = historyToken;
+      this.sendData.historyToken = historyToken as any;
       return serialized;
     },
     lockTokens: async function () {
@@ -557,8 +558,9 @@ export default defineComponent({
           unit: this.activeUnit,
           mint: this.activeMintUrl,
         };
-        this.addPendingToken(historyToken);
-        this.sendData.historyToken = historyToken;
+        const _id = this.addPendingToken(historyToken as any);
+        (historyToken as any).id = _id;
+        this.sendData.historyToken = historyToken as any;
 
         if (!this.g.offline) {
           this.onTokenPaid(historyToken);
@@ -610,8 +612,9 @@ export default defineComponent({
           paymentRequest: this.sendData.paymentRequest,
           status: "pending",
         };
-        this.addPendingToken(historyToken);
-        this.sendData.historyToken = historyToken;
+        const _id = this.addPendingToken(historyToken as any);
+        (historyToken as any).id = _id;
+        this.sendData.historyToken = historyToken as any;
 
         if (!this.g.offline) {
           this.onTokenPaid(historyToken);

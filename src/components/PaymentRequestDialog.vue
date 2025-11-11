@@ -31,6 +31,32 @@
               {{ $t("PaymentRequestDialog.payment_request.caption") }}
             </q-item-label>
           </div>
+          <div
+            class="row items-center no-wrap"
+            style="position: absolute; right: 12px"
+          >
+            <q-btn
+              flat
+              dense
+              round
+              icon="chevron_left"
+              color="grey"
+              @click="selectPrevRequest"
+              :disable="ourPaymentRequests.length <= 1"
+            />
+            <div class="q-mx-sm text-caption text-grey-6">
+              {{ currentIndexDisplay }}
+            </div>
+            <q-btn
+              flat
+              dense
+              round
+              icon="chevron_right"
+              color="grey"
+              @click="selectNextRequest"
+              :disable="ourPaymentRequests.length <= 1"
+            />
+          </div>
         </div>
 
         <!-- Content -->
@@ -104,6 +130,37 @@
                 </div>
               </div>
 
+              <!-- Received payments summary and list -->
+              <div
+                class="row justify-center q-pt-md q-pb-md"
+                v-if="currentPaymentRequest"
+              >
+                <div
+                  class="col-12 col-sm-11 col-md-8 q-px-md"
+                  style="max-width: 600px"
+                >
+                  <div class="row q-gutter-sm items-center q-mb-sm">
+                    <q-chip
+                      outline
+                      v-for="(total, unit) in totalsByUnit"
+                      :key="unit"
+                      color="primary"
+                      text-color="primary"
+                    >
+                      {{ $t("PaymentRequestDialog.received_total") }}:
+                      <span class="q-ml-xs text-weight-medium">{{
+                        total
+                      }}</span>
+                      <span class="q-ml-xs">{{ unit }}</span>
+                    </q-chip>
+                  </div>
+                  <PaymentRequestPayments
+                    :payments="currentPayments"
+                    :page-size="3"
+                  />
+                </div>
+              </div>
+
               <!-- New request button -->
               <div class="row justify-center q-pt-lg q-pb-md">
                 <q-btn flat size="md" rounded @click="newRequest">
@@ -150,6 +207,7 @@ import { useMintsStore } from "../stores/mints";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useUiStore } from "../stores/ui";
 import ToggleUnit from "./ToggleUnit.vue";
+import PaymentRequestPayments from "./PaymentRequestPayments.vue";
 // type hint for global mixin
 declare const windowMixin: any;
 
@@ -159,6 +217,7 @@ export default defineComponent({
   components: {
     VueQrcode,
     ToggleUnit,
+    PaymentRequestPayments,
   },
   data() {
     const amountLabelDefault = (this as any).$i18n.t(
@@ -178,15 +237,43 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapState(usePRStore, ["showPRKData"]),
+    ...mapState(usePRStore, [
+      "showPRKData",
+      "ourPaymentRequests",
+      "selectedPRIndex",
+      "currentPaymentRequest",
+    ]),
     ...mapState(useMintsStore, ["activeMintUrl", "activeUnit"]),
     activeUnitCurrencyMultiplyer() {
       return (useMintsStore() as any).activeUnitCurrencyMultiplyer;
     },
     ...mapWritableState(usePRStore, ["showPRDialog"]),
+    currentIndexDisplay(): string {
+      const total = this.ourPaymentRequests.length || 0;
+      if (!total) return "0/0";
+      return `${(this.selectedPRIndex as number) + 1}/${total}`;
+    },
+    currentPayments(): any[] {
+      const prStore = usePRStore();
+      if (!this.currentPaymentRequest) return [];
+      return prStore.getPaymentsForRequest(this.currentPaymentRequest.id);
+    },
+    totalsByUnit(): Record<string, number> {
+      const totals: Record<string, number> = {};
+      for (const p of this.currentPayments) {
+        if (p.amount > 0) {
+          totals[p.unit] = (totals[p.unit] ?? 0) + p.amount;
+        }
+      }
+      return totals;
+    },
   },
   methods: {
-    ...mapActions(usePRStore, ["newPaymentRequest"]),
+    ...mapActions(usePRStore, [
+      "newPaymentRequest",
+      "selectPrevRequest",
+      "selectNextRequest",
+    ]),
     toggleUnit() {
       this.paymentRequestAmount = undefined;
       this.amountLabel = this.amountLabelDefault;

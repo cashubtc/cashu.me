@@ -495,7 +495,14 @@ export const useNostrStore = defineStore("nostr", {
             console.log("### incoming token already in history");
             return;
           }
-          await this.addPendingTokenToHistory(tokenStr, false);
+          const historyId = await this.addPendingTokenToHistory(tokenStr, false);
+          try {
+            if (historyId) {
+              prStore.registerIncomingPaymentForRequest(payload.id, historyId);
+            }
+          } catch (e) {
+            console.error("Failed to register incoming payment to PR:", e);
+          }
           receiveStore.receiveData.tokensBase64 = tokenStr;
           sendTokensStore.showSendTokens = false;
           if (prStore.receivePaymentRequestsAutomatically) {
@@ -528,13 +535,13 @@ export const useNostrStore = defineStore("nostr", {
         await this.addPendingTokenToHistory(tokenStr);
       }
     },
-    addPendingTokenToHistory: function (tokenStr: string, verbose = true) {
+    addPendingTokenToHistory: function (tokenStr: string, verbose = true): string | undefined {
       const receiveStore = useReceiveTokensStore();
       const tokensStore = useTokensStore();
       if (tokensStore.tokenAlreadyInHistory(tokenStr)) {
         notifySuccess("Ecash already in history");
         receiveStore.showReceiveTokens = false;
-        return;
+        return undefined;
       }
       const decodedToken = token.decode(tokenStr);
       if (decodedToken == undefined) {
@@ -545,7 +552,7 @@ export const useNostrStore = defineStore("nostr", {
         .getProofs(decodedToken)
         .reduce((sum, el) => (sum += el.amount), 0);
 
-      tokensStore.addPendingToken({
+      const id = tokensStore.addPendingToken({
         amount: amount,
         token: tokenStr,
         mint: token.getMint(decodedToken),
@@ -556,6 +563,7 @@ export const useNostrStore = defineStore("nostr", {
       if (verbose) {
         notifySuccess("Ecash added to history.");
       }
+      return id;
     },
   },
 });
