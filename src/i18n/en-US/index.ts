@@ -1180,6 +1180,7 @@ export default {
       description: "Receive payments via Nostr",
     },
     received_total: "Received total",
+    no_payments_yet: "No payments yet",
     actions: {
       copy: {
         label: "@:global.actions.copy.label",

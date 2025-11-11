@@ -9,14 +9,6 @@
 
     <!-- Token Details Section -->
     <div class="token-details-section q-mt-md q-mb-lg">
-      <!-- Payment Request (if applicable) -->
-      <div v-if="paymentRequestId" class="detail-item q-mb-md">
-        <div class="detail-label">
-          <banknote-icon size="20" color="#9E9E9E" class="detail-icon" />
-          <div class="detail-name">Payment request</div>
-        </div>
-        <div class="detail-value">Nostr</div>
-      </div>
       <!-- Fee (if applicable) -->
       <div v-if="receiveFee > 0 && !hideFee" class="detail-item q-mb-md">
         <div class="detail-label">
@@ -86,7 +78,7 @@
       </div>
 
       <!-- Memo (if available) -->
-      <div v-if="displayMemo && !hideMemo" class="detail-item">
+      <div v-if="displayMemo && !hideMemo" class="detail-item q-mb-md">
         <div class="detail-label">
           <message-circle-icon size="20" color="#9E9E9E" class="detail-icon" />
           <div class="detail-name">Memo</div>
@@ -97,6 +89,15 @@
         >
           {{ displayMemo }}
         </div>
+      </div>
+
+      <!-- Payment Request (if applicable) -->
+      <div v-if="paymentRequestId" class="detail-item">
+        <div class="detail-label">
+          <banknote-icon size="20" color="#9E9E9E" class="detail-icon" />
+          <div class="detail-name">Payment request</div>
+        </div>
+        <div class="detail-value">Nostr</div>
       </div>
     </div>
   </div>
