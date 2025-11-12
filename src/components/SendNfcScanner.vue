@@ -3,17 +3,17 @@
     <div class="nfc-scanner-container">
       <div class="nfc-scanner-content">
         <div class="nfc-card-outline">
-          <q-icon name="nfc" size="48px" class="nfc-icon" color="primary" />
+          <NfcIcon size="48px" />
         </div>
-        
+
         <div class="nfc-scanner-text q-mt-md">
           {{ $t("SendNfcScanner.prompt_text") }}
         </div>
-        
-        <q-btn 
-          flat 
-          rounded 
-          color="negative" 
+
+        <q-btn
+          flat
+          rounded
+          color="negative"
           class="q-mt-md"
           @click="closeScanner"
         >
@@ -28,14 +28,19 @@
 import { defineComponent } from "vue";
 import { mapState } from "pinia";
 import { useWebNfcStore } from "src/stores/WebNfcStore";
+import { Nfc as NfcIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "SendNfcScanner",
-  
-  computed: {
-    ...mapState(useWebNfcStore, ["scanningCard"])
+
+  components: {
+    NfcIcon,
   },
-  
+
+  computed: {
+    ...mapState(useWebNfcStore, ["scanningCard"]),
+  },
+
   mounted() {
     // Start scanning when component is mounted
     const webNfcStore = useWebNfcStore();
@@ -43,7 +48,7 @@ export default defineComponent({
       webNfcStore.toggleScanner("payment-request");
     }
   },
-  
+
   beforeUnmount() {
     // Make sure scanning is stopped when component is unmounted
     const webNfcStore = useWebNfcStore();
@@ -51,14 +56,14 @@ export default defineComponent({
       webNfcStore.stopScanning();
     }
   },
-  
+
   methods: {
     closeScanner() {
       // Stop scanning and reset UI state
       const webNfcStore = useWebNfcStore();
       webNfcStore.stopPaymentRequestScanner();
-    }
-  }
+    },
+  },
 });
 </script>
 
