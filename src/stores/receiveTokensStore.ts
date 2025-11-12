@@ -11,9 +11,9 @@ import {
   notify,
   notifyWarning,
 } from "../js/notify";
-import { getDecodedTokenBinary, getEncodedToken, Token } from "@cashu/cashu-ts";
+import { Token } from "@cashu/cashu-ts";
 import { useSwapStore } from "./swap";
-import { Clipboard } from "@capacitor/clipboard";
+import { useWebNfcStore } from "./WebNfcStore";
 
 export const useReceiveTokensStore = defineStore("receiveTokensStore", {
   state: () => ({
@@ -23,7 +23,6 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       tokensBase64: "",
       p2pkPrivateKey: "",
     },
-    scanningCard: false,
   }),
   actions: {
     decodeToken: function (encodedToken: string) {
@@ -123,102 +122,9 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       }
     },
     toggleScanner: function () {
-      const receiveStore = useReceiveTokensStore();
-      const tokenStore = useTokensStore();
-      const uiStore = useUiStore();
-      if (this.scanningCard === false) {
-        try {
-          this.ndef = new window.NDEFReader();
-          this.controller = new AbortController();
-          const signal = this.controller.signal;
-          this.ndef
-            .scan({ signal })
-            .then(() => {
-              console.log("> Scan started");
-
-              this.ndef.addEventListener("readingerror", () => {
-                console.error("Cannot read data from the NFC tag.");
-                notifyError("Cannot read data from the NFC tag.");
-                this.controller.abort();
-                this.scanningCard = false;
-              });
-
-              this.ndef.addEventListener(
-                "reading",
-                ({ message, serialNumber }) => {
-                  try {
-                    const record = message.records[0];
-                    const recordType = record.recordType;
-                    let tokenStr = "";
-                    switch (recordType) {
-                      case "text": {
-                        const text = new TextDecoder().decode(record.data);
-                        if (!text.startsWith("cashu")) {
-                          throw new Error(
-                            "text does not contain a cashu token"
-                          );
-                        }
-                        tokenStr = text;
-                        break;
-                      }
-                      case "url": {
-                        const url = new TextDecoder().decode(record.data);
-                        const i = url.indexOf("#token=cashu");
-                        if (i === -1) {
-                          throw new Error("URL does not contain a cashu token");
-                        }
-                        tokenStr = url.substring(i + 7);
-                        break;
-                      }
-                      case "mime": {
-                        if (record.mediaType !== "application/octet-stream") {
-                          throw new Error("binary data expected");
-                        }
-                        const data = new Uint8Array(record.data.buffer);
-                        const prefix = String.fromCharCode(...data.slice(0, 4));
-                        if (prefix !== "craw") {
-                          throw new Error(
-                            "binary data does not contain a cashu token"
-                          );
-                        }
-                        const token = getDecodedTokenBinary(data);
-                        tokenStr = getEncodedToken(token);
-                        break;
-                      }
-                      default:
-                        throw new Error(`unsupported recordType ${recordType}`);
-                    }
-                    const historyToken =
-                      tokenStore.tokenAlreadyInHistory(tokenStr);
-                    if (!historyToken || historyToken.status === "pending") {
-                      receiveStore.receiveData.tokensBase64 = tokenStr;
-                      receiveStore.showReceiveTokens = true;
-                      uiStore.closeDialogs();
-                    } else {
-                      notify("Token already in history.");
-                    }
-                  } catch (err) {
-                    console.error(`Something went wrong! ${err}`);
-                    notifyError(`Something went wrong! ${err}`);
-                  }
-                  this.controller.abort();
-                  this.scanningCard = false;
-                }
-              );
-              this.scanningCard = true;
-            })
-            .catch((error) => {
-              console.error(`Scan error: ${error.message}`);
-              notifyError(`Scan error: ${error.message}`);
-            });
-        } catch (error) {
-          console.error(`NFC error: ${error.message}`);
-          notifyError(`NFC error: ${error.message}`);
-        }
-      } else {
-        this.controller.abort();
-        this.scanningCard = false;
-      }
+      // Use the centralized WebNfcStore to handle NFC scanning
+      const webNfcStore = useWebNfcStore();
+      webNfcStore.toggleScanner("token");
     },
   },
 });

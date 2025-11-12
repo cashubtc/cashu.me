@@ -159,11 +159,23 @@
 
               <!-- New request button -->
               <div class="row justify-center q-pt-lg q-pb-md">
-                <q-btn flat size="md" rounded @click="newRequest">
-                  <q-icon name="refresh" class="q-pr-sm" size="xs" />
-                  {{ $t("PaymentRequestDialog.actions.new_request.label") }}
-                </q-btn>
-              </div>
+            <div class="row justify-center q-gutter-md">
+              <q-btn flat size="md" rounded @click="newRequest">
+                <q-icon name="refresh" class="q-pr-sm" size="xs" />
+                {{ $t("PaymentRequestDialog.actions.new_request.label") }}
+              </q-btn>
+              
+              <q-btn flat size="md" rounded @click="toggleNfcScanner" :color="scanningCard ? 'negative' : ''" >
+                <q-icon :name="scanningCard ? 'close' : 'nfc'" class="q-pr-sm" size="xs" />
+                {{ scanningCard ? $t("Settings.hardware_features.webnfc.quick_access.scanning_text") : $t("ReceiveEcashDrawer.actions.nfc.label") }}
+              </q-btn>
+              
+              <q-btn flat size="md" rounded @click="writeToNfcTag">
+                <q-icon name="wifi" class="q-pr-sm" size="xs" />
+                {{ $t("Settings.hardware_features.webnfc.text.title") }}
+              </q-btn>
+            </div>
+          </div>
             </q-card-section>
           </q-card-section>
         </div>
@@ -202,6 +214,7 @@ import { usePRStore } from "src/stores/payment-request";
 import { useMintsStore } from "../stores/mints";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useUiStore } from "../stores/ui";
+import { useWebNfcStore } from "../stores/WebNfcStore";
 import ToggleUnit from "./ToggleUnit.vue";
 import PaymentRequestPayments from "./PaymentRequestPayments.vue";
 // type hint for global mixin
@@ -240,6 +253,9 @@ export default defineComponent({
       "currentPaymentRequest",
     ]),
     ...mapState(useMintsStore, ["activeMintUrl", "activeUnit"]),
+    scanningCard() {
+      return useWebNfcStore().scanningCard;
+    },
     activeUnitCurrencyMultiplyer() {
       return (useMintsStore() as any).activeUnitCurrencyMultiplyer;
     },
@@ -337,6 +353,17 @@ export default defineComponent({
       );
       this.isEditingAmount = false;
       this.amountInputValue = "";
+    },
+    
+    // NFC Methods
+    toggleNfcScanner() {
+      const prStore = usePRStore();
+      prStore.toggleScanner();
+    },
+    
+    writeToNfcTag() {
+      const prStore = usePRStore();
+      prStore.writeToNfcTag();
     },
   },
 });

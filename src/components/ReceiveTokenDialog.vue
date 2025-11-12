@@ -284,6 +284,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
+import { useWebNfcStore } from "src/stores/WebNfcStore";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 import { useMintsStore } from "src/stores/mints";
@@ -385,8 +386,10 @@ export default defineComponent({
       "showReceiveTokens",
       "watchClipboardPaste",
       "receiveData",
-      "scanningCard",
     ]),
+    scanningCard() {
+      return useWebNfcStore().scanningCard;
+    },
     ...mapState(useUiStore, ["tickerShort", "ndefSupported"]),
     ...mapState(usePriceStore, [
       "bitcoinPrice",

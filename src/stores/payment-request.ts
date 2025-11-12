@@ -21,6 +21,7 @@ import {
 } from "src/js/notify";
 import { useLocalStorage } from "@vueuse/core";
 import { v4 as uuidv4 } from "uuid";
+import { useWebNfcStore } from "./WebNfcStore";
 
 export type OurPaymentRequest = {
   id: string; // UUID from PaymentRequest
@@ -330,6 +331,24 @@ export const usePRStore = defineStore("payment-request", {
         throw error;
       }
       return true;
+    },
+    
+    // Method to toggle NFC scanner for payment requests
+    toggleScanner: function() {
+      // Use the centralized WebNfcStore to handle NFC scanning
+      const webNfcStore = useWebNfcStore();
+      webNfcStore.toggleScanner("payment-request");
+    },
+    
+    // Method to write a payment request to an NFC tag
+    async writeToNfcTag(): Promise<boolean> {
+      if (!this.showPRKData) {
+        notifyWarning("No payment request to write");
+        return false;
+      }
+      
+      const webNfcStore = useWebNfcStore();
+      return await webNfcStore.writePaymentRequestToTag(this.showPRKData);
     },
   },
 });
