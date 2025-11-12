@@ -75,7 +75,7 @@ export default defineComponent({
       if (!request.transport || request.transport.length === 0) {
         return "";
       }
-      
+
       for (const transport of request.transport) {
         if (transport.type === PaymentRequestTransportType.NOSTR) {
           if (!transport.target) {

@@ -106,13 +106,17 @@ export default defineComponent({
       if (this.buttonLabel) {
         return this.buttonLabel;
       }
-      
+
       // For payment requests with no transport, it's in-band NFC payment
-      if (!this.sendData.paymentRequest?.transport || 
-          this.sendData.paymentRequest?.transport.length === 0) {
-        return this.$t("SendPaymentRequest.actions.pay_via_nfc.label") as string;
+      if (
+        !this.sendData.paymentRequest?.transport ||
+        this.sendData.paymentRequest?.transport.length === 0
+      ) {
+        return this.$t(
+          "SendPaymentRequest.actions.pay_via_nfc.label"
+        ) as string;
       }
-      
+
       const transport = this.getPaymentRequestTransportType(
         this.sendData.paymentRequest
       );

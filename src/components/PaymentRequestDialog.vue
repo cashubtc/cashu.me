@@ -159,23 +159,39 @@
 
               <!-- New request button -->
               <div class="row justify-center q-pt-lg q-pb-md">
-            <div class="row justify-center q-gutter-md">
-              <q-btn flat size="md" rounded @click="newRequest">
-                <q-icon name="refresh" class="q-pr-sm" size="xs" />
-                {{ $t("PaymentRequestDialog.actions.new_request.label") }}
-              </q-btn>
-              
-              <q-btn flat size="md" rounded @click="toggleNfcScanner" :color="scanningCard ? 'negative' : ''" >
-                <q-icon :name="scanningCard ? 'close' : 'nfc'" class="q-pr-sm" size="xs" />
-                {{ scanningCard ? $t("Settings.hardware_features.webnfc.quick_access.scanning_text") : $t("ReceiveEcashDrawer.actions.nfc.label") }}
-              </q-btn>
-              
-              <q-btn flat size="md" rounded @click="writeToNfcTag">
-                <q-icon name="wifi" class="q-pr-sm" size="xs" />
-                {{ $t("Settings.hardware_features.webnfc.text.title") }}
-              </q-btn>
-            </div>
-          </div>
+                <div class="row justify-center q-gutter-md">
+                  <q-btn flat size="md" rounded @click="newRequest">
+                    <q-icon name="refresh" class="q-pr-sm" size="xs" />
+                    {{ $t("PaymentRequestDialog.actions.new_request.label") }}
+                  </q-btn>
+
+                  <q-btn
+                    flat
+                    size="md"
+                    rounded
+                    @click="toggleNfcScanner"
+                    :color="scanningCard ? 'negative' : ''"
+                  >
+                    <q-icon
+                      :name="scanningCard ? 'close' : 'nfc'"
+                      class="q-pr-sm"
+                      size="xs"
+                    />
+                    {{
+                      scanningCard
+                        ? $t(
+                            "Settings.hardware_features.webnfc.quick_access.scanning_text"
+                          )
+                        : $t("ReceiveEcashDrawer.actions.nfc.label")
+                    }}
+                  </q-btn>
+
+                  <q-btn flat size="md" rounded @click="writeToNfcTag">
+                    <q-icon name="wifi" class="q-pr-sm" size="xs" />
+                    {{ $t("Settings.hardware_features.webnfc.text.title") }}
+                  </q-btn>
+                </div>
+              </div>
             </q-card-section>
           </q-card-section>
         </div>
@@ -354,13 +370,13 @@ export default defineComponent({
       this.isEditingAmount = false;
       this.amountInputValue = "";
     },
-    
+
     // NFC Methods
     toggleNfcScanner() {
       const prStore = usePRStore();
       prStore.toggleScanner();
     },
-    
+
     writeToNfcTag() {
       const prStore = usePRStore();
       prStore.writeToNfcTag();

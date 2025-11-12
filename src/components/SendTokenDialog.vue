@@ -33,7 +33,10 @@
               {{ $t("SendTokenDialog.title") }}
             </q-item-label>
           </div>
-          <div class="row items-center q-gutter-sm" style="position: absolute; right: 16px">
+          <div
+            class="row items-center q-gutter-sm"
+            style="position: absolute; right: 16px"
+          >
             <q-btn
               v-if="ndefSupported"
               flat
@@ -267,7 +270,7 @@
         <DisplayTokenComponent />
       </div>
     </q-card>
-    
+
     <!-- NFC Scanner Overlay -->
     <SendNfcScanner v-if="webNfcStore.isScanningPaymentRequest" />
   </q-dialog>
@@ -664,7 +667,7 @@ export default defineComponent({
         }
       }
     },
-    
+
     // NFC methods
     startNfcScanner() {
       if (this.ndefSupported) {

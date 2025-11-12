@@ -275,7 +275,9 @@ export const usePRStore = defineStore("payment-request", {
 
       try {
         // Show a message to the user to prompt them to tap their device to the NFC tag
-        notify("Please tap your device to the NFC tag to complete payment (will try up to 3 times)");
+        notify(
+          "Please tap your device to the NFC tag to complete payment (will try up to 3 times)"
+        );
 
         // Try to write the token to the NFC tag with retry mechanism
         const result = await webNfcStore.writeTokenToTag(tokenStr, encoding);
@@ -284,7 +286,9 @@ export const usePRStore = defineStore("payment-request", {
           notifySuccess("Payment token written to NFC tag successfully");
           return true;
         } else {
-          throw new Error("Failed to write payment token to NFC tag after multiple attempts");
+          throw new Error(
+            "Failed to write payment token to NFC tag after multiple attempts"
+          );
         }
       } catch (error) {
         console.error("Error writing token to NFC tag:", error);
@@ -382,7 +386,9 @@ export const usePRStore = defineStore("payment-request", {
         return false;
       }
 
-      notify("Please tap your device to the NFC tag to write payment request (will try up to 3 times)");
+      notify(
+        "Please tap your device to the NFC tag to write payment request (will try up to 3 times)"
+      );
       const webNfcStore = useWebNfcStore();
       return await webNfcStore.writePaymentRequestToTag(this.showPRKData);
     },
