@@ -1450,4 +1450,8 @@ export default {
     nostr: "Nostr",
     token_copied: "Token copié dans le presse-papiers",
   },
+  SendNfcScanner: {
+    prompt_text: "Approchez votre appareil du terminal pour payer",
+    cancel_button: "Annuler",
+  },
 };

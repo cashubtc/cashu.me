@@ -1443,4 +1443,8 @@ export default {
     nostr: "Nostr",
     token_copied: "Token copiado al portapapeles",
   },
+  SendNfcScanner: {
+    prompt_text: "Acerque el dispositivo al terminal para pagar",
+    cancel_button: "Cancelar",
+  },
 };

@@ -71,6 +71,11 @@ export default defineComponent({
   },
   methods: {
     getPaymentRequestTarget(request: PaymentRequest): string {
+      // Handle case where transport is undefined or empty
+      if (!request.transport || request.transport.length === 0) {
+        return "";
+      }
+      
       for (const transport of request.transport) {
         if (transport.type === PaymentRequestTransportType.NOSTR) {
           if (!transport.target) {

@@ -26,47 +26,37 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapActions, mapState } from "pinia";
+import { mapState } from "pinia";
 import { useWebNfcStore } from "src/stores/WebNfcStore";
-import { useSendTokensStore } from "src/stores/sendTokensStore";
-import { usePRStore } from "src/stores/payment-request";
 
 export default defineComponent({
   name: "SendNfcScanner",
-  emits: ["close"],
   
   computed: {
     ...mapState(useWebNfcStore, ["scanningCard"])
   },
   
   mounted() {
-    // Start scanning for payment requests when component is mounted
-    this.startScanner();
+    // Start scanning when component is mounted
+    const webNfcStore = useWebNfcStore();
+    if (!webNfcStore.scanningCard) {
+      webNfcStore.toggleScanner("payment-request");
+    }
   },
   
   beforeUnmount() {
-    // Make sure to stop scanning when component is unmounted
-    if (this.scanningCard) {
-      this.stopScanner();
+    // Make sure scanning is stopped when component is unmounted
+    const webNfcStore = useWebNfcStore();
+    if (webNfcStore.scanningCard) {
+      webNfcStore.stopScanning();
     }
   },
   
   methods: {
-    startScanner() {
-      const webNfcStore = useWebNfcStore();
-      webNfcStore.toggleScanner("payment-request");
-    },
-    
-    stopScanner() {
-      const webNfcStore = useWebNfcStore();
-      if (webNfcStore.scanningCard) {
-        webNfcStore.toggleScanner(); // Will stop the current scan
-      }
-    },
-    
     closeScanner() {
-      this.stopScanner();
-      this.$emit("close");
+      // Stop scanning and reset UI state
+      const webNfcStore = useWebNfcStore();
+      webNfcStore.stopPaymentRequestScanner();
     }
   }
 });

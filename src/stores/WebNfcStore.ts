@@ -16,6 +16,7 @@ export const useWebNfcStore = defineStore("webNfcStore", {
     ndef: null as any,
     controller: null as AbortController | null,
     nfcMode: "token" as "token" | "payment-request", // Default to token mode
+    isScanningPaymentRequest: false, // Flag for UI to show payment request scanner
   }),
   actions: {
     /**
@@ -24,13 +25,20 @@ export const useWebNfcStore = defineStore("webNfcStore", {
      */
     toggleScanner(mode: "token" | "payment-request" = "token") {
       this.nfcMode = mode;
-      
+
+      console.log(
+        "toggleScanner called, current state:",
+        this.scanningCard,
+        "requested mode:",
+        mode
+      );
+
       if (this.scanningCard === false) {
         try {
           this.ndef = new window.NDEFReader();
           this.controller = new AbortController();
           const signal = this.controller.signal;
-          
+
           this.ndef
             .scan({ signal })
             .then(() => {
@@ -50,7 +58,7 @@ export const useWebNfcStore = defineStore("webNfcStore", {
                     const record = message.records[0];
                     const recordType = record.recordType;
                     let dataStr = "";
-                    
+
                     switch (recordType) {
                       case "text":
                         const text = new TextDecoder().decode(record.data);
@@ -88,9 +96,11 @@ export const useWebNfcStore = defineStore("webNfcStore", {
                   } catch (err) {
                     console.error(`Something went wrong! ${err}`);
                     notifyError(`Something went wrong! ${err}`);
+                  } finally {
+                    // Always abort the controller and reset scanning state after processing
+                    this.controller?.abort();
+                    this.scanningCard = false;
                   }
-                  this.controller?.abort();
-                  this.scanningCard = false;
                 }
               );
               this.scanningCard = true;
@@ -104,8 +114,10 @@ export const useWebNfcStore = defineStore("webNfcStore", {
           notifyError(`NFC error: ${error.message}`);
         }
       } else {
+        console.log("Turning OFF scanner, aborting controller");
         this.controller?.abort();
         this.scanningCard = false;
+        console.log("Scanner state after abort:", this.scanningCard);
       }
     },
 
@@ -134,17 +146,55 @@ export const useWebNfcStore = defineStore("webNfcStore", {
     },
 
     /**
+     * Stop scanning
+     */
+    stopScanning() {
+      if (this.scanningCard) {
+        this.controller?.abort();
+        this.scanningCard = false;
+      }
+
+      // Also reset the UI state flags
+      if (this.nfcMode === "payment-request") {
+        this.isScanningPaymentRequest = false;
+      }
+    },
+
+    /**
+     * Start scanning for payment requests
+     */
+    startPaymentRequestScanner() {
+      // Set UI flag first
+      this.isScanningPaymentRequest = true;
+
+      // Then start the actual scanner
+      this.toggleScanner("payment-request");
+    },
+
+    /**
+     * Stop scanning for payment requests
+     */
+    stopPaymentRequestScanner() {
+      // Stop the scanner
+      this.stopScanning();
+
+      // And reset the UI flag
+      this.isScanningPaymentRequest = false;
+    },
+
+    /**
      * Process payment request data read from NFC tag
      * @param dataStr - The data string read from the tag
+     * @returns {boolean} - Whether the processing was successful
      */
-    processPaymentRequestData(dataStr: string) {
+    processPaymentRequestData(dataStr: string): boolean {
       const prStore = usePRStore();
       const uiStore = useUiStore();
       const sendTokensStore = useSendTokensStore();
 
       if (!dataStr.startsWith("creq")) {
         notifyError("NFC tag does not contain a cashu payment request");
-        return;
+        return false;
       }
 
       try {
@@ -152,60 +202,90 @@ export const useWebNfcStore = defineStore("webNfcStore", {
         if (!sendTokensStore.showSendTokens) {
           sendTokensStore.showSendTokens = true;
         }
-        
+
         // Decode the payment request - this will update the send dialog
         prStore.decodePaymentRequest(dataStr);
+
+        // Stop the scanner and update the UI flag
+        this.stopPaymentRequestScanner();
+
+        return true;
       } catch (error) {
         console.error("Failed to decode payment request:", error);
         notifyError(`Failed to decode payment request: ${error}`);
+        return false;
       }
     },
 
     /**
-     * Write token data to an NFC tag
+     * Write token data to an NFC tag with retry mechanism
      * @param tokenData - The token data to write
      * @param encoding - The encoding to use ('text', 'url', or 'binary')
+     * @param maxAttempts - Maximum number of attempts to try writing (default: 3)
      */
-    async writeTokenToTag(tokenData: string, encoding: string) {
+    async writeTokenToTag(tokenData: string, encoding: string, maxAttempts: number = 3) {
       if (!tokenData) {
         notifyError("No token data to write");
         return false;
       }
 
-      try {
-        this.ndef = new window.NDEFReader();
-        
-        if (encoding === "text") {
-          await this.ndef.write({
-            records: [{ recordType: "text", data: tokenData }]
-          });
-        } else if (encoding === "url") {
-          const tokenUrl = `https://wallet.cashu.me/#token=${tokenData}`;
-          await this.ndef.write({
-            records: [{ recordType: "url", data: tokenUrl }]
-          });
-        } else if (encoding === "binary") {
-          // Implementation for binary format would go here
-          notifyError("Binary encoding not implemented yet");
-          return false;
-        } else {
-          notifyError("Unknown encoding type");
-          return false;
+      let attemptCount = 0;
+      let lastError = null;
+
+      while (attemptCount < maxAttempts) {
+        attemptCount++;
+        try {
+          this.ndef = new window.NDEFReader();
+          
+          if (encoding === "text") {
+            await this.ndef.write({
+              records: [{ recordType: "text", data: tokenData }],
+            });
+          } else if (encoding === "weburl") {
+            const tokenUrl = `https://wallet.cashu.me/#token=${tokenData}`;
+            await this.ndef.write({
+              records: [{ recordType: "url", data: tokenUrl }],
+            });
+          } else if (encoding === "binary") {
+            // Implementation for binary format would go here
+            notifyError("Binary encoding not implemented yet");
+            return false;
+          } else {
+            notifyError("Unknown encoding type");
+            return false;
+          }
+
+          // If we reach here, writing was successful
+          if (attemptCount > 1) {
+            // If we succeeded after retries, notify the user
+            notify(`Successfully wrote to NFC tag after ${attemptCount} attempts`);
+          }
+          return true;
+        } catch (error) {
+          lastError = error;
+          console.error(`Error writing to NFC tag (attempt ${attemptCount}/${maxAttempts}):`, error);
+          
+          if (attemptCount < maxAttempts) {
+            // Only show intermediate errors as notifications if we're not on the last attempt
+            notify(`Attempt ${attemptCount}/${maxAttempts} failed. Please keep your device near the tag...`);
+            
+            // Wait a short time before retrying
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
         }
-        
-        return true;
-      } catch (error) {
-        console.error("Error writing to NFC tag:", error);
-        notifyError(`Error writing to NFC tag: ${error.message}`);
-        return false;
       }
+
+      // If we get here, all attempts failed
+      notifyError(`Failed to write to NFC tag after ${maxAttempts} attempts: ${lastError?.message}`);
+      return false;
     },
 
     /**
-     * Write a payment request to an NFC tag
+     * Write a payment request to an NFC tag with retry mechanism
      * @param prData - The payment request data to write
+     * @param maxAttempts - Maximum number of attempts to try writing (default: 3)
      */
-    async writePaymentRequestToTag(prData: string) {
+    async writePaymentRequestToTag(prData: string, maxAttempts: number = 3) {
       if (!prData) {
         notifyError("No payment request data to write");
         return false;
@@ -216,17 +296,40 @@ export const useWebNfcStore = defineStore("webNfcStore", {
         return false;
       }
 
-      try {
-        this.ndef = new window.NDEFReader();
-        await this.ndef.write({
-          records: [{ recordType: "text", data: prData }]
-        });
-        return true;
-      } catch (error) {
-        console.error("Error writing payment request to NFC tag:", error);
-        notifyError(`Error writing to NFC tag: ${error.message}`);
-        return false;
+      let attemptCount = 0;
+      let lastError = null;
+
+      while (attemptCount < maxAttempts) {
+        attemptCount++;
+        try {
+          this.ndef = new window.NDEFReader();
+          await this.ndef.write({
+            records: [{ recordType: "text", data: prData }],
+          });
+
+          // If we reach here, writing was successful
+          if (attemptCount > 1) {
+            // If we succeeded after retries, notify the user
+            notify(`Successfully wrote payment request to NFC tag after ${attemptCount} attempts`);
+          }
+          return true;
+        } catch (error) {
+          lastError = error;
+          console.error(`Error writing payment request to NFC tag (attempt ${attemptCount}/${maxAttempts}):`, error);
+          
+          if (attemptCount < maxAttempts) {
+            // Only show intermediate errors as notifications if we're not on the last attempt
+            notify(`Attempt ${attemptCount}/${maxAttempts} failed. Please keep your device near the tag...`);
+            
+            // Wait a short time before retrying
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+        }
       }
-    }
-  }
+
+      // If we get here, all attempts failed
+      notifyError(`Failed to write payment request to NFC tag after ${maxAttempts} attempts: ${lastError?.message}`);
+      return false;
+    },
+  },
 });
