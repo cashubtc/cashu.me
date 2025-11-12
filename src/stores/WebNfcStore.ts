@@ -3,6 +3,7 @@ import { useTokensStore } from "./tokens";
 import { useReceiveTokensStore } from "./receiveTokensStore";
 import { usePRStore } from "./payment-request";
 import { useUiStore } from "./ui";
+import { useSendTokensStore } from "./sendTokensStore";
 import { getDecodedTokenBinary, getEncodedToken } from "@cashu/cashu-ts";
 import { notifyError, notify } from "../js/notify";
 
@@ -139,6 +140,7 @@ export const useWebNfcStore = defineStore("webNfcStore", {
     processPaymentRequestData(dataStr: string) {
       const prStore = usePRStore();
       const uiStore = useUiStore();
+      const sendTokensStore = useSendTokensStore();
 
       if (!dataStr.startsWith("creq")) {
         notifyError("NFC tag does not contain a cashu payment request");
@@ -146,6 +148,12 @@ export const useWebNfcStore = defineStore("webNfcStore", {
       }
 
       try {
+        // If we're in the send flow, set the payment request and show the send dialog
+        if (!sendTokensStore.showSendTokens) {
+          sendTokensStore.showSendTokens = true;
+        }
+        
+        // Decode the payment request - this will update the send dialog
         prStore.decodePaymentRequest(dataStr);
       } catch (error) {
         console.error("Failed to decode payment request:", error);

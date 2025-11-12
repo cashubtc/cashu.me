@@ -33,10 +33,18 @@
               {{ $t("SendTokenDialog.title") }}
             </q-item-label>
           </div>
-          <div
-            class="row items-center q-gutter-sm"
-            style="position: absolute; right: 16px"
-          >
+          <div class="row items-center q-gutter-sm" style="position: absolute; right: 16px">
+            <q-btn
+              v-if="ndefSupported"
+              flat
+              dense
+              color="primary"
+              round
+              @click="startNfcScanner"
+            >
+              <q-icon name="nfc" size="1.2em" />
+              <q-tooltip>Scan NFC payment request</q-tooltip>
+            </q-btn>
             <q-btn
               flat
               dense
@@ -259,6 +267,9 @@
         <DisplayTokenComponent />
       </div>
     </q-card>
+    
+    <!-- NFC Scanner Overlay -->
+    <SendNfcScanner v-if="showNfcScanner" @close="closeNfcScanner" />
   </q-dialog>
 </template>
 <script lang="ts">
@@ -275,12 +286,14 @@ import { useWorkersStore } from "src/stores/workers";
 import { usePriceStore } from "src/stores/price";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
+import { useWebNfcStore } from "src/stores/WebNfcStore";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
 import NumericKeyboard from "components/NumericKeyboard.vue";
 import DisplayTokenComponent from "components/DisplayTokenComponent.vue";
 import AmountInputComponent from "components/AmountInputComponent.vue";
 import SendPaymentRequest from "components/SendPaymentRequest.vue";
+import SendNfcScanner from "components/SendNfcScanner.vue";
 import PaymentRequestInfo from "components/PaymentRequestInfo.vue";
 import {
   ChevronLeft as ChevronLeftIcon,
@@ -300,6 +313,7 @@ export default defineComponent({
     AmountInputComponent,
     SendPaymentRequest,
     PaymentRequestInfo,
+    SendNfcScanner,
     ScanIcon,
     LockIcon,
   },
@@ -307,6 +321,7 @@ export default defineComponent({
   data: function () {
     return {
       fiatKeyboardMode: false as boolean,
+      showNfcScanner: false as boolean,
     };
   },
   computed: {
@@ -644,6 +659,17 @@ export default defineComponent({
           console.error("Error sharing token:", error);
         }
       }
+    },
+    
+    // NFC methods
+    startNfcScanner() {
+      if (this.ndefSupported) {
+        this.showNfcScanner = true;
+      }
+    },
+    
+    closeNfcScanner() {
+      this.showNfcScanner = false;
     },
   },
 });
