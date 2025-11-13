@@ -247,9 +247,16 @@ export const useWebNfcStore = defineStore("webNfcStore", {
             records: [{ recordType: "url", data: tokenUrl }],
           });
         } else if (encoding === "binary") {
-          // Implementation for binary format would go here
-          notifyError("Binary encoding not implemented yet");
-          return false;
+          const tokenBinary = getEncodedTokenBinary(tokenData);
+          await this.ndef.write({
+            records: [
+              {
+                recordType: "mime",
+                mediaType: "application/octet-stream",
+                data: tokenBinary,
+              },
+            ],
+          });
         } else {
           notifyError("Unknown encoding type");
           return false;
