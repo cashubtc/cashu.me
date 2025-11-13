@@ -26,10 +26,8 @@
           />
           <div class="col text-center fixed-title-height">
             <q-item-label
-              overline
-              class="q-mt-sm"
+              class="dialog-header q-mt-sm"
               :class="$q.dark.isActive ? 'text-white' : 'text-black'"
-              style="font-size: 1rem"
             >
               {{ $t("InvoiceDetailDialog.title") }}
             </q-item-label>
