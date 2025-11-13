@@ -21,7 +21,7 @@ import {
 } from "src/js/notify";
 import { useLocalStorage } from "@vueuse/core";
 import { v4 as uuidv4 } from "uuid";
-import { useWebNfcStore } from "./WebNfcStore";
+import { useWebNfcStore } from "./webNfcStore";
 import { useSettingsStore } from "./settings";
 
 export type OurPaymentRequest = {

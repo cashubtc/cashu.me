@@ -27,7 +27,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapState } from "pinia";
-import { useWebNfcStore } from "src/stores/WebNfcStore";
+import { useWebNfcStore } from "src/stores/webNfcStore";
 import { Nfc as NfcIcon } from "lucide-vue-next";
 
 export default defineComponent({

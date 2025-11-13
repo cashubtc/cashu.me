@@ -289,7 +289,7 @@ import { useWorkersStore } from "src/stores/workers";
 import { usePriceStore } from "src/stores/price";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
-import { useWebNfcStore } from "src/stores/WebNfcStore";
+import { useWebNfcStore } from "src/stores/webNfcStore";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
 import NumericKeyboard from "components/NumericKeyboard.vue";

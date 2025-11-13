@@ -284,7 +284,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
-import { useWebNfcStore } from "src/stores/WebNfcStore";
+import { useWebNfcStore } from "src/stores/webNfcStore";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 import { useMintsStore } from "src/stores/mints";

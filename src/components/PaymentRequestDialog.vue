@@ -230,7 +230,7 @@ import { usePRStore } from "src/stores/payment-request";
 import { useMintsStore } from "../stores/mints";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useUiStore } from "../stores/ui";
-import { useWebNfcStore } from "../stores/WebNfcStore";
+import { useWebNfcStore } from "../stores/webNfcStore";
 import ToggleUnit from "./ToggleUnit.vue";
 import PaymentRequestPayments from "./PaymentRequestPayments.vue";
 // type hint for global mixin

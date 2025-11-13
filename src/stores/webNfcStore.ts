@@ -4,8 +4,12 @@ import { useReceiveTokensStore } from "./receiveTokensStore";
 import { usePRStore } from "./payment-request";
 import { useUiStore } from "./ui";
 import { useSendTokensStore } from "./sendTokensStore";
-import { getDecodedTokenBinary, getEncodedToken } from "@cashu/cashu-ts";
-import { notifyError, notify } from "../js/notify";
+import {
+  getDecodedTokenBinary,
+  getEncodedToken,
+  getEncodedTokenBinary,
+} from "@cashu/cashu-ts";
+import { notifyError, notify, notifySuccess } from "../js/notify";
 
 /**
  * WebNfcStore: Centralizes all NFC tag reading/writing functionality
@@ -221,82 +225,50 @@ export const useWebNfcStore = defineStore("webNfcStore", {
      * Write token data to an NFC tag with retry mechanism
      * @param tokenData - The token data to write
      * @param encoding - The encoding to use ('text', 'url', or 'binary')
-     * @param maxAttempts - Maximum number of attempts to try writing (default: 3)
      */
-    async writeTokenToTag(
-      tokenData: string,
-      encoding: string,
-      maxAttempts: number = 3
-    ) {
+    async writeTokenToTag(tokenData: string, encoding: string, s) {
       if (!tokenData) {
         notifyError("No token data to write");
         return false;
       }
 
-      let attemptCount = 0;
       let lastError = null;
 
-      while (attemptCount < maxAttempts) {
-        attemptCount++;
-        try {
-          this.ndef = new window.NDEFReader();
+      try {
+        this.ndef = new window.NDEFReader();
 
-          if (encoding === "text") {
-            await this.ndef.write({
-              records: [{ recordType: "text", data: tokenData }],
-            });
-          } else if (encoding === "weburl") {
-            const tokenUrl = `https://wallet.cashu.me/#token=${tokenData}`;
-            await this.ndef.write({
-              records: [{ recordType: "url", data: tokenUrl }],
-            });
-          } else if (encoding === "binary") {
-            // Implementation for binary format would go here
-            notifyError("Binary encoding not implemented yet");
-            return false;
-          } else {
-            notifyError("Unknown encoding type");
-            return false;
-          }
-
-          // If we reach here, writing was successful
-          if (attemptCount > 1) {
-            // If we succeeded after retries, notify the user
-            notify(
-              `Successfully wrote to NFC tag after ${attemptCount} attempts`
-            );
-          }
-          return true;
-        } catch (error) {
-          lastError = error;
-          console.error(
-            `Error writing to NFC tag (attempt ${attemptCount}/${maxAttempts}):`,
-            error
-          );
-
-          if (attemptCount < maxAttempts) {
-            // Only show intermediate errors as notifications if we're not on the last attempt
-            notify(
-              `Attempt ${attemptCount}/${maxAttempts} failed. Please keep your device near the tag...`
-            );
-
-            // Wait a short time before retrying
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-          }
+        if (encoding === "text") {
+          await this.ndef.write({
+            records: [{ recordType: "text", data: tokenData }],
+          });
+        } else if (encoding === "weburl") {
+          const tokenUrl = `https://wallet.cashu.me/#token=${tokenData}`;
+          await this.ndef.write({
+            records: [{ recordType: "url", data: tokenUrl }],
+          });
+        } else if (encoding === "binary") {
+          // Implementation for binary format would go here
+          notifyError("Binary encoding not implemented yet");
+          return false;
+        } else {
+          notifyError("Unknown encoding type");
+          return false;
         }
+
+        // If we reach here, writing was successful
+        return true;
+      } catch (error) {
+        lastError = error;
+        console.error(`Error writing to NFC tag: `, error);
       }
 
       // If we get here, all attempts failed
-      notifyError(
-        `Failed to write to NFC tag after ${maxAttempts} attempts: ${lastError?.message}`
-      );
       return false;
     },
 
     /**
      * Write a payment request to an NFC tag with retry mechanism
      * @param prData - The payment request data to write
-     * @param maxAttempts - Maximum number of attempts to try writing (default: 3)
      */
     async writePaymentRequestToTag(prData: string, maxAttempts: number = 3) {
       if (!prData) {

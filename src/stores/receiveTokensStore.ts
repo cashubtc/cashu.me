@@ -5,15 +5,10 @@ import { useP2PKStore } from "./p2pk";
 import { useWalletStore } from "./wallet";
 import token from "src/js/token";
 import { useTokensStore } from "./tokens";
-import {
-  notifyError,
-  notifySuccess,
-  notify,
-  notifyWarning,
-} from "../js/notify";
+import { notify } from "../js/notify";
 import { Token } from "@cashu/cashu-ts";
 import { useSwapStore } from "./swap";
-import { useWebNfcStore } from "./WebNfcStore";
+import { useWebNfcStore } from "./webNfcStore";
 
 export const useReceiveTokensStore = defineStore("receiveTokensStore", {
   state: () => ({
