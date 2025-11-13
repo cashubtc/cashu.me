@@ -10,6 +10,17 @@ body {
     sans-serif;
 }
 
+// Dialog header typography
+// This class provides proper letter-spacing for dialog titles
+// The default Quasar 'overline' class has excessive letter-spacing for headers
+.dialog-header {
+  font-size: 1.2rem; // 16px
+  font-weight: 500; // Medium weight for headers
+  letter-spacing: -0.01em; // Tight letter spacing for better readability on headers
+  text-transform: none; // No uppercase transformation
+  line-height: 1.5; // Good line height for readability
+}
+
 // prevent pull to refresh
 html,
 body {
