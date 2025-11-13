@@ -23,6 +23,7 @@ import { useLocalStorage } from "@vueuse/core";
 import { v4 as uuidv4 } from "uuid";
 import { useWebNfcStore } from "./webNfcStore";
 import { useSettingsStore } from "./settings";
+import { useUiStore } from "./ui";
 
 export type OurPaymentRequest = {
   id: string; // UUID from PaymentRequest
@@ -233,6 +234,13 @@ export const usePRStore = defineStore("payment-request", {
       } catch (e) {
         // noop
       }
+
+      // Payment request locking conditions
+      if (request.nut10?.kind === "P2PK") {
+        sendTokenStore.showLockInput = true;
+        sendTokenStore.sendData.p2pkPubkey = request.nut10?.data;
+      }
+
       sendTokenStore.sendData.paymentRequest = request;
       if (!sendTokenStore.showSendTokens) {
         // show the send dialog
@@ -272,6 +280,13 @@ export const usePRStore = defineStore("payment-request", {
       const webNfcStore = useWebNfcStore();
       const settingsStore = useSettingsStore();
       const encoding = settingsStore.nfcEncoding || "text/plain";
+      const uiStore = useUiStore();
+
+      if (!uiStore.ndefSupported) {
+        throw new Error(
+          "WebNFC not supported: can't pay in-band payment request"
+        );
+      }
 
       try {
         // Show a message to the user to prompt them to tap their device to the NFC tag
