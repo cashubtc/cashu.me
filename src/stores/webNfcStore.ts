@@ -274,10 +274,10 @@ export const useWebNfcStore = defineStore("webNfcStore", {
     },
 
     /**
-     * Write a payment request to an NFC tag with retry mechanism
+     * Write a payment request to an NFC tag
      * @param prData - The payment request data to write
      */
-    async writePaymentRequestToTag(prData: string, maxAttempts: number = 3) {
+    async writePaymentRequestToTag(prData: string) {
       if (!prData) {
         notifyError("No payment request data to write");
         return false;
@@ -288,49 +288,12 @@ export const useWebNfcStore = defineStore("webNfcStore", {
         return false;
       }
 
-      let attemptCount = 0;
-      let lastError = null;
+      this.ndef = new window.NDEFReader();
+      await this.ndef.write({
+        records: [{ recordType: "text", data: prData }],
+      });
 
-      while (attemptCount < maxAttempts) {
-        attemptCount++;
-        try {
-          this.ndef = new window.NDEFReader();
-          await this.ndef.write({
-            records: [{ recordType: "text", data: prData }],
-          });
-
-          // If we reach here, writing was successful
-          if (attemptCount > 1) {
-            // If we succeeded after retries, notify the user
-            notify(
-              `Successfully wrote payment request to NFC tag after ${attemptCount} attempts`
-            );
-          }
-          return true;
-        } catch (error) {
-          lastError = error;
-          console.error(
-            `Error writing payment request to NFC tag (attempt ${attemptCount}/${maxAttempts}):`,
-            error
-          );
-
-          if (attemptCount < maxAttempts) {
-            // Only show intermediate errors as notifications if we're not on the last attempt
-            notify(
-              `Attempt ${attemptCount}/${maxAttempts} failed. Please keep your device near the tag...`
-            );
-
-            // Wait a short time before retrying
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-          }
-        }
-      }
-
-      // If we get here, all attempts failed
-      notifyError(
-        `Failed to write payment request to NFC tag after ${maxAttempts} attempts: ${lastError?.message}`
-      );
-      return false;
+      return true;
     },
   },
 });
