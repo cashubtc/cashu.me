@@ -471,73 +471,77 @@ export const useNostrStore = defineStore("nostr", {
       }
     },
     parseMessageForEcash: async function (message: string) {
-      // first check if the message can be converted to a json and then to a PaymentRequestPayload
-      try {
-        const payload = JSON.parse(message) as PaymentRequestPayload;
-        if (payload) {
-          const receiveStore = useReceiveTokensStore();
-          const prStore = usePRStore();
-          const sendTokensStore = useSendTokensStore();
-          const tokensStore = useTokensStore();
-          const proofs = payload.proofs;
-          const mint = payload.mint;
-          const unit = payload.unit;
-          const token = {
-            proofs: proofs,
-            mint: mint,
-            unit: unit,
-          } as Token;
-
-          const tokenStr = getEncodedTokenV4(token);
-
-          const tokenInHistory = tokensStore.tokenAlreadyInHistory(tokenStr);
-          if (tokenInHistory && tokenInHistory.amount > 0) {
-            console.log("### incoming token already in history");
-            return;
-          }
-          const historyId = await this.addPendingTokenToHistory(
-            tokenStr,
-            false,
-            payload.id
-          );
+      const receiveStore = useReceiveTokensStore();
+      const prStore = usePRStore();
+      const sendTokensStore = useSendTokensStore();
+      const tokensStore = useTokensStore();
+      
+      // Helper function to process and optionally auto-receive a token
+      const processToken = async (tokenStr: string, paymentRequestId?: string) => {
+        const tokenInHistory = tokensStore.tokenAlreadyInHistory(tokenStr);
+        if (tokenInHistory && tokenInHistory.amount > 0) {
+          console.log("### incoming token already in history");
+          return;
+        }
+        
+        const historyId = await this.addPendingTokenToHistory(tokenStr, false, paymentRequestId);
+        if (historyId && paymentRequestId) {
           try {
-            if (historyId) {
-              prStore.registerIncomingPaymentForRequest(payload.id ?? "", historyId);
-            }
+            prStore.registerIncomingPaymentForRequest(paymentRequestId, historyId);
           } catch (e) {
             console.error("Failed to register incoming payment to PR:", e);
           }
-          receiveStore.receiveData.tokensBase64 = tokenStr;
-          sendTokensStore.showSendTokens = false;
-          const knowThisMint = receiveStore.knowThisMintOfTokenJson(token);
+        }
+        
+        receiveStore.receiveData.tokensBase64 = tokenStr;
+        sendTokensStore.showSendTokens = false;
+        
+        try {
+          const decodedToken = token.decode(tokenStr);
+          const knowThisMint = receiveStore.knowThisMintOfTokenJson(decodedToken);
           if (prStore.receivePaymentRequestsAutomatically && knowThisMint) {
             const success = await receiveStore.receiveIfDecodes();
             if (success) {
               prStore.showPRDialog = false;
             } else {
               notifyWarning("Could not receive incoming payment");
+              receiveStore.showReceiveTokens = true;
             }
           } else {
             prStore.showPRDialog = false;
             receiveStore.showReceiveTokens = true;
           }
+        } catch (e) {
+          console.error("Error processing token:", e);
+          receiveStore.showReceiveTokens = true;
+        }
+      };
+      
+      // Try to parse as JSON PaymentRequestPayload first
+      try {
+        const payload = JSON.parse(message) as PaymentRequestPayload;
+        if (payload && payload.proofs && payload.mint) {
+          const token = {
+            proofs: payload.proofs,
+            mint: payload.mint,
+            unit: payload.unit,
+          } as Token;
+          const tokenStr = getEncodedTokenV4(token);
+          await processToken(tokenStr, payload.id);
           return;
         }
       } catch (e) {
-        // console.log("### parsing message for ecash failed");
-        return;
+        // Not JSON, try parsing as serialized token below
       }
 
+      // Fallback: parse as serialized token (cashuA/cashuB)
       console.log("### parsing message for ecash", message);
-      const receiveStore = useReceiveTokensStore();
       const words = message.split(" ");
       const tokens = words.filter((word) => {
         return word.startsWith("cashuA") || word.startsWith("cashuB");
       });
       for (const tokenStr of tokens) {
-        receiveStore.receiveData.tokensBase64 = tokenStr;
-        receiveStore.showReceiveTokens = true;
-        await this.addPendingTokenToHistory(tokenStr);
+        await processToken(tokenStr);
       }
     },
     addPendingTokenToHistory: function (
