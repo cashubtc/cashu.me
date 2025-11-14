@@ -1051,7 +1051,8 @@ export default {
         label: "Ogiltig token",
       },
       p2pk_lock_mismatch: {
-        label: "Kan inte ta emot. Denna tokens P2PK-lås matchar inte din publika nyckel.",
+        label:
+          "Kan inte ta emot. Denna tokens P2PK-lås matchar inte din publika nyckel.",
       },
     },
     actions: {

@@ -1037,6 +1037,9 @@ export default {
       pay_via: {
         label: "Pay via {transport}",
       },
+      pay_via_nfc: {
+        label: "Pay via NFC",
+      },
     },
     info: {
       pay_to: "Pay to {target}",
@@ -1098,7 +1101,8 @@ export default {
         label: "Invalid token",
       },
       p2pk_lock_mismatch: {
-        label: "Unable to receive. This token's P2PK lock doesn't match your public key.",
+        label:
+          "Unable to receive. This token's P2PK lock doesn't match your public key.",
       },
     },
     unknown_mint_info_text:
@@ -1499,5 +1503,9 @@ export default {
     payment_request: "Payment request",
     nostr: "Nostr",
     token_copied: "Token copied to clipboard",
+  },
+  SendNfcScanner: {
+    prompt_text: "Approach the terminal to pay",
+    cancel_button: "Cancel",
   },
 };

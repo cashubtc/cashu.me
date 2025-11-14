@@ -1061,7 +1061,8 @@ export default {
         label: "Ungültiger Token",
       },
       p2pk_lock_mismatch: {
-        label: "Kann nicht empfangen werden. Die P2PK-Sperre dieses Tokens stimmt nicht mit Ihrem öffentlichen Schlüssel überein.",
+        label:
+          "Kann nicht empfangen werden. Die P2PK-Sperre dieses Tokens stimmt nicht mit Ihrem öffentlichen Schlüssel überein.",
       },
     },
     actions: {
@@ -1444,5 +1445,9 @@ export default {
     payment_request: "Zahlungsanforderung",
     nostr: "Nostr",
     token_copied: "Token in Zwischenablage kopiert",
+  },
+  SendNfcScanner: {
+    prompt_text: "Nähern Sie sich dem Terminal zum Bezahlen",
+    cancel_button: "Abbrechen",
   },
 };

@@ -1055,7 +1055,8 @@ export default {
         label: "Token inválido",
       },
       p2pk_lock_mismatch: {
-        label: "No se puede recibir. El bloqueo P2PK de este token no coincide con su clave pública.",
+        label:
+          "No se puede recibir. El bloqueo P2PK de este token no coincide con su clave pública.",
       },
     },
     actions: {
@@ -1438,5 +1439,9 @@ export default {
     payment_request: "Solicitud de pago",
     nostr: "Nostr",
     token_copied: "Token copiado al portapapeles",
+  },
+  SendNfcScanner: {
+    prompt_text: "Acerque el dispositivo al terminal para pagar",
+    cancel_button: "Cancelar",
   },
 };

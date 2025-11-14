@@ -40,6 +40,17 @@
             style="position: absolute; right: 16px"
           >
             <q-btn
+              v-if="ndefSupported"
+              flat
+              dense
+              color="primary"
+              round
+              @click="startNfcScanner"
+            >
+              <NfcIcon size="1.2em" />
+              <q-tooltip>Scan NFC payment request</q-tooltip>
+            </q-btn>
+            <q-btn
               flat
               dense
               color="primary"
@@ -261,6 +272,9 @@
         <DisplayTokenComponent />
       </div>
     </q-card>
+
+    <!-- NFC Scanner Overlay -->
+    <SendNfcScanner v-if="webNfcStore.isScanningPaymentRequest" />
   </q-dialog>
 </template>
 <script lang="ts">
@@ -277,12 +291,14 @@ import { useWorkersStore } from "src/stores/workers";
 import { usePriceStore } from "src/stores/price";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
+import { useWebNfcStore } from "src/stores/webNfcStore";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
 import NumericKeyboard from "components/NumericKeyboard.vue";
 import DisplayTokenComponent from "components/DisplayTokenComponent.vue";
 import AmountInputComponent from "components/AmountInputComponent.vue";
 import SendPaymentRequest from "components/SendPaymentRequest.vue";
+import SendNfcScanner from "components/SendNfcScanner.vue";
 import PaymentRequestInfo from "components/PaymentRequestInfo.vue";
 import {
   ChevronLeft as ChevronLeftIcon,
@@ -290,6 +306,7 @@ import {
   FileText as FileTextIcon,
   Lock as LockIcon,
   Scan as ScanIcon,
+  Nfc as NfcIcon,
 } from "lucide-vue-next";
 declare const windowMixin: any;
 export default defineComponent({
@@ -302,8 +319,10 @@ export default defineComponent({
     AmountInputComponent,
     SendPaymentRequest,
     PaymentRequestInfo,
+    SendNfcScanner,
     ScanIcon,
     LockIcon,
+    NfcIcon,
   },
   props: {},
   data: function () {
@@ -348,6 +367,9 @@ export default defineComponent({
     ]),
     ...mapState(useSettingsStore, ["bitcoinPriceCurrency"]),
     ...mapState(useWorkersStore, ["tokenWorkerRunning"]),
+    webNfcStore() {
+      return useWebNfcStore();
+    },
     insufficientFunds: function (): boolean {
       if (this.sendData.amount == null) return false;
       return (
@@ -645,6 +667,14 @@ export default defineComponent({
         if ((error as any).name !== "AbortError") {
           console.error("Error sharing token:", error);
         }
+      }
+    },
+
+    // NFC methods
+    startNfcScanner() {
+      if (this.ndefSupported) {
+        // Use the WebNfcStore to start scanning
+        this.webNfcStore.startPaymentRequestScanner();
       }
     },
   },

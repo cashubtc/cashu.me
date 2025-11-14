@@ -1,7 +1,12 @@
 import { useLocalStorage } from "@vueuse/core";
 import { date } from "quasar";
 import { defineStore } from "pinia";
-import { PaymentRequest, Proof, Token, MeltQuoteResponse } from "@cashu/cashu-ts";
+import {
+  PaymentRequest,
+  Proof,
+  Token,
+  MeltQuoteResponse,
+} from "@cashu/cashu-ts";
 import token from "src/js/token";
 import { v4 as uuidv4 } from "uuid";
 

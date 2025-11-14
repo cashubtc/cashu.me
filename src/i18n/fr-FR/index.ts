@@ -1061,7 +1061,8 @@ export default {
         label: "Jeton invalide",
       },
       p2pk_lock_mismatch: {
-        label: "Impossible de recevoir. Le verrouillage P2PK de ce jeton ne correspond pas à votre clé publique.",
+        label:
+          "Impossible de recevoir. Le verrouillage P2PK de ce jeton ne correspond pas à votre clé publique.",
       },
     },
     actions: {
@@ -1445,5 +1446,9 @@ export default {
     payment_request: "Demande de paiement",
     nostr: "Nostr",
     token_copied: "Token copié dans le presse-papiers",
+  },
+  SendNfcScanner: {
+    prompt_text: "Approchez votre appareil du terminal pour payer",
+    cancel_button: "Annuler",
   },
 };
