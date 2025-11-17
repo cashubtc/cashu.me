@@ -35,13 +35,24 @@
           </div>
         </div>
 
-        <!-- Paste button below inputs -->
-        <q-btn
-          flat
-          :label="$t('WelcomeRecoverSeed.actions.paste_all')"
-          @click="paste"
-          class="paste-btn"
-        />
+        <div class="button-row flex justify-between q-mt-md">
+          <!-- Paste button aligned left -->
+          <q-btn
+            flat
+            :label="$t('WelcomeRecoverSeed.actions.paste_all')"
+            @click="paste"
+            class="paste-btn"
+            style="margin-right: auto"
+          />
+          <!-- Fill from browser password manager aligned right -->
+          <q-btn
+            flat
+            label="Use password manager"
+            @click="fillFromPasswordManager"
+            class="paste-btn"
+            style="margin-left: auto"
+          />
+        </div>
 
         <!-- Error message -->
         <p v-if="errorMsg" class="error-msg">{{ errorMsg }}</p>
@@ -173,6 +184,91 @@ export default {
       } catch {}
     };
 
+    // Fill from browser password manager (best-effort)
+    const fillFromPasswordManager = async () => {
+      try {
+        if (
+          typeof window === "undefined" ||
+          typeof navigator === "undefined" ||
+          typeof document === "undefined"
+        ) {
+          return;
+        }
+
+        // First, try Credential Management API
+        const anyNavigator = navigator as any;
+        if (
+          anyNavigator.credentials &&
+          typeof anyNavigator.credentials.get === "function"
+        ) {
+          try {
+            const cred = (await anyNavigator.credentials.get({
+              password: true,
+              mediation: "optional",
+            } as any)) as any;
+
+            if (cred && typeof cred.password === "string") {
+              const pwd = cred.password as string;
+              const pwdWords = pwd.trim().split(/\s+/);
+              for (let i = 0; i < 12; i++) {
+                words.value[i] = pwdWords[i] || "";
+              }
+              return;
+            }
+          } catch {
+            // ignore and fall back
+          }
+        }
+
+        // Fallback: hidden form to trigger browser password autofill UI
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = window.location.href;
+        form.style.position = "fixed";
+        form.style.opacity = "0";
+        form.style.pointerEvents = "none";
+        form.style.top = "-1000px";
+        form.style.left = "-1000px";
+
+        const userInput = document.createElement("input");
+        userInput.type = "text";
+        userInput.name = "username";
+        userInput.autocomplete = "username";
+
+        const passInput = document.createElement("input");
+        passInput.type = "password";
+        passInput.name = "password";
+        passInput.autocomplete = "current-password";
+
+        form.appendChild(userInput);
+        form.appendChild(passInput);
+        document.body.appendChild(form);
+
+        // Focus password field to encourage autofill
+        passInput.focus();
+
+        // Give the browser a moment for the user to select a stored password
+        setTimeout(() => {
+          try {
+            const pwd = passInput.value || "";
+            const pwdWords = pwd.trim().split(/\s+/);
+            for (let i = 0; i < 12; i++) {
+              words.value[i] = pwdWords[i] || "";
+            }
+          } catch {}
+
+          try {
+            document.body.removeChild(form);
+          } catch {}
+        }, 2000);
+      } catch (e) {
+        console.warn(
+          "Could not read seed phrase from browser password manager",
+          e
+        );
+      }
+    };
+
     return {
       welcome,
       restore,
@@ -183,6 +279,7 @@ export default {
       handlePaste,
       handleInput,
       setInputRef,
+      fillFromPasswordManager,
     };
   },
 };
