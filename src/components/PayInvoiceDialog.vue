@@ -28,11 +28,9 @@
           <div class="col text-center fixed-title-height">
             <div>
               <q-item-label
-                overline
-                class="q-mt-sm"
+                class="dialog-header q-mt-sm"
                 :class="$q.dark.isActive ? 'text-white' : 'text-black'"
                 style="
-                  font-size: 1rem;
                   display: inline-block;
                   white-space: normal;
                   word-break: break-word;
