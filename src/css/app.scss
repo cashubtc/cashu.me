@@ -24,6 +24,7 @@ body {
 // prevent pull to refresh
 html,
 body {
+  overscroll-behavior-y: contain;
   overscroll-behavior: none;
 }
 
