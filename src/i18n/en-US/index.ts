@@ -1098,7 +1098,8 @@ export default {
         label: "Invalid token",
       },
       p2pk_lock_mismatch: {
-        label: "Unable to receive. This token's P2PK lock doesn't match your public key.",
+        label:
+          "Unable to receive. This token's P2PK lock doesn't match your public key.",
       },
     },
     unknown_mint_info_text:
