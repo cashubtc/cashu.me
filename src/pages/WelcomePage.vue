@@ -86,7 +86,7 @@
           icon="arrow_right"
           :label="$t('WelcomePage.actions.next.label')"
           :disable="!welcomeStore.canProceed"
-          @click="welcomeStore.goToNextSlide"
+          @click="handleNextClick"
           v-if="
             welcomeStore.currentSlide > 0 && welcomeStore.currentSlide !== 2
           "
@@ -100,6 +100,7 @@
 import { onMounted, ref } from "vue";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useStorageStore } from "src/stores/storage";
+import { useWalletStore } from "src/stores/wallet";
 import WelcomeSlide1 from "./welcome/WelcomeSlide1.vue";
 import WelcomeSlide2 from "./welcome/WelcomeSlide2.vue";
 import WelcomeSlide3 from "./welcome/WelcomeSlide3.vue";
@@ -157,11 +158,104 @@ export default {
   setup() {
     const welcomeStore = useWelcomeStore();
     const storageStore = useStorageStore();
+    const walletStore = useWalletStore();
     const fileUpload = ref(null);
 
     const onChangeFileUpload = () => {
       const file = fileUpload.value.files[0];
       if (file) readFile(file);
+    };
+
+    const storeSeedInPasswordManager = async () => {
+      try {
+        if (
+          typeof window === "undefined" ||
+          typeof navigator === "undefined" ||
+          typeof document === "undefined"
+        ) {
+          return;
+        }
+
+        // Ensure we have a mnemonic
+        const mnemonic =
+          walletStore.mnemonic || (await walletStore.initializeMnemonic());
+        if (!mnemonic) return;
+
+        const now = new Date();
+        const label = `cashu.me wallet ${now.toLocaleString()}`;
+
+        // Prefer Credential Management API when available
+        const anyWindow = window as any;
+        const PasswordCredentialCtor = anyWindow.PasswordCredential;
+
+        if (navigator.credentials && PasswordCredentialCtor) {
+          const cred = new PasswordCredentialCtor({
+            id: label,
+            name: label,
+            password: mnemonic,
+          });
+          await navigator.credentials.store(cred);
+          return;
+        }
+
+        // Fallback: try a hidden form to hint password managers
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = window.location.href;
+        form.style.position = "fixed";
+        form.style.opacity = "0";
+        form.style.pointerEvents = "none";
+
+        const iframe = document.createElement("iframe");
+        iframe.name = "password-manager-sink";
+        iframe.style.display = "none";
+        document.body.appendChild(iframe);
+        form.target = iframe.name;
+
+        const userInput = document.createElement("input");
+        userInput.type = "text";
+        userInput.name = "username";
+        userInput.autocomplete = "username";
+        userInput.value = label;
+
+        const passInput = document.createElement("input");
+        passInput.type = "password";
+        passInput.name = "password";
+        passInput.autocomplete = "new-password";
+        passInput.value = mnemonic;
+
+        form.appendChild(userInput);
+        form.appendChild(passInput);
+        document.body.appendChild(form);
+
+        form.submit();
+
+        // Clean up shortly after submission
+        setTimeout(() => {
+          try {
+            document.body.removeChild(form);
+          } catch {}
+          try {
+            document.body.removeChild(iframe);
+          } catch {}
+        }, 1000);
+      } catch (e) {
+        // Best-effort only; ignore failures and continue onboarding
+        console.warn("Could not store seed phrase in password manager", e);
+      }
+    };
+
+    const handleNextClick = async () => {
+      // When leaving the seed-phrase slide in the "new" flow,
+      // attempt to store the seed phrase in the browser's password manager.
+      if (
+        welcomeStore.currentSlide === 3 &&
+        welcomeStore.onboardingPath === "new"
+      ) {
+        await storeSeedInPasswordManager();
+      }
+
+      welcomeStore.goToNextSlide();
     };
 
     const readFile = (file) => {
@@ -187,6 +281,7 @@ export default {
       fileUpload,
       onChangeFileUpload,
       dragFile,
+      handleNextClick,
     };
   },
 };
