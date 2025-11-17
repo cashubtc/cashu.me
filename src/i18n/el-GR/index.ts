@@ -1359,6 +1359,9 @@ export default {
     },
     invoice: {
       title: "Πληρωμή { value }",
+      paying: "Πληρώνεται",
+      paid: "Πληρώθηκε",
+      fee: "Χρέωση",
       memo: {
         label: "Σημείωμα",
       },

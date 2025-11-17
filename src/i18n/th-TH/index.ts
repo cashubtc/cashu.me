@@ -1348,6 +1348,9 @@ export default {
     },
     invoice: {
       title: "ชำระเงิน { value }",
+      paying: "กำลังชำระเงิน",
+      paid: "ชำระแล้ว",
+      fee: "ค่าธรรมเนียม",
       memo: {
         label: "บันทึก",
       },

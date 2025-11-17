@@ -1363,6 +1363,9 @@ export default {
     },
     invoice: {
       title: "{ value } öde",
+      paying: "Ödeniyor",
+      paid: "Ödendi",
+      fee: "Ücret",
       memo: {
         label: "Memo",
       },
