@@ -1326,6 +1326,9 @@ export default {
     },
     invoice: {
       title: "Paga { value }",
+      paying: "Pagamento in corso",
+      paid: "Pagato",
+      fee: "Commissione",
       memo: {
         label: "Memo",
       },

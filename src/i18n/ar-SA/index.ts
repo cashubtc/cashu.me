@@ -1345,6 +1345,9 @@ export default {
     },
     invoice: {
       title: "دفع { value }",
+      paying: "جاري الدفع",
+      paid: "تم الدفع",
+      fee: "الرسوم",
       memo: {
         label: "مذكرة",
       },

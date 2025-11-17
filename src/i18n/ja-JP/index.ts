@@ -1349,6 +1349,9 @@ export default {
     },
     invoice: {
       title: "{ value }を支払う",
+      paying: "支払い中",
+      paid: "支払い済み",
+      fee: "手数料",
       memo: {
         label: "メモ",
       },
