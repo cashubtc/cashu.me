@@ -6,58 +6,33 @@
       v-if="forceVisible || showNumericKeyboard"
     >
       <div class="keyboard-grid">
-        <q-btn flat :ripple="false" class="text-h5" @click="addDigit('1')"
-          >1</q-btn
-        >
-        <q-btn flat :ripple="false" class="text-h5" @click="addDigit('2')"
-          >2</q-btn
-        >
-        <q-btn flat :ripple="false" class="text-h5" @click="addDigit('3')"
-          >3</q-btn
-        >
+        <q-btn flat class="text-h5" @click="addDigit('1')">1</q-btn>
+        <q-btn flat class="text-h5" @click="addDigit('2')">2</q-btn>
+        <q-btn flat class="text-h5" @click="addDigit('3')">3</q-btn>
 
-        <q-btn flat :ripple="false" class="text-h5" @click="addDigit('4')"
+        <q-btn flat :ripple="true" class="text-h5" @click="addDigit('4')"
           >4</q-btn
         >
-        <q-btn flat :ripple="false" class="text-h5" @click="addDigit('5')"
-          >5</q-btn
-        >
-        <q-btn flat :ripple="false" class="text-h5" @click="addDigit('6')"
-          >6</q-btn
-        >
+        <q-btn flat class="text-h5" @click="addDigit('5')">5</q-btn>
+        <q-btn flat class="text-h5" @click="addDigit('6')">6</q-btn>
 
-        <q-btn flat :ripple="false" class="text-h5" @click="addDigit('7')"
-          >7</q-btn
-        >
-        <q-btn flat :ripple="false" class="text-h5" @click="addDigit('8')"
-          >8</q-btn
-        >
-        <q-btn flat :ripple="false" class="text-h5" @click="addDigit('9')"
-          >9</q-btn
-        >
+        <q-btn flat class="text-h5" @click="addDigit('7')">7</q-btn>
+        <q-btn flat class="text-h5" @click="addDigit('8')">8</q-btn>
+        <q-btn flat class="text-h5" @click="addDigit('9')">9</q-btn>
 
-        <q-btn
-          v-if="!hideComma"
-          flat
-          :ripple="false"
-          class="text-h5"
-          @click="addComma"
+        <q-btn v-if="!hideComma" flat class="text-h5" @click="addComma"
           >.</q-btn
         >
-        <q-btn v-else flat :ripple="false" class="text-h5 invisible" disable
-          >•</q-btn
-        >
-        <q-btn flat :ripple="false" class="text-h5" @click="addDigit('0')"
-          >0</q-btn
-        >
-        <q-btn flat :ripple="false" class="text-h5" @click="backspace">
+        <q-btn v-else flat class="text-h5 invisible" disable>•</q-btn>
+        <q-btn flat class="text-h5" @click="addDigit('0')">0</q-btn>
+        <q-btn flat class="text-h5" @click="backspace">
           <q-icon name="chevron_left" size="md" />
         </q-btn>
-        <q-btn v-if="!hideClose" flat :ripple="false" @click="closeKeyboard">{{
+        <q-btn v-if="!hideClose" flat @click="closeKeyboard">{{
           $t("NumericKeyboard.actions.close.label")
         }}</q-btn>
         <br v-if="!hideClose || !hideEnter" />
-        <q-btn v-if="!hideEnter" flat :ripple="false" @click="emitDone">{{
+        <q-btn v-if="!hideEnter" flat @click="emitDone">{{
           $t("NumericKeyboard.actions.enter.label")
         }}</q-btn>
       </div>
