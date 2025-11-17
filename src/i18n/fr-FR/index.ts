@@ -1061,7 +1061,8 @@ export default {
         label: "Jeton invalide",
       },
       p2pk_lock_mismatch: {
-        label: "Impossible de recevoir. Le verrouillage P2PK de ce jeton ne correspond pas à votre clé publique.",
+        label:
+          "Impossible de recevoir. Le verrouillage P2PK de ce jeton ne correspond pas à votre clé publique.",
       },
     },
     actions: {

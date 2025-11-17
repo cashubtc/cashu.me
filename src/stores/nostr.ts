@@ -502,7 +502,10 @@ export const useNostrStore = defineStore("nostr", {
           );
           try {
             if (historyId) {
-              prStore.registerIncomingPaymentForRequest(payload.id ?? "", historyId);
+              prStore.registerIncomingPaymentForRequest(
+                payload.id ?? "",
+                historyId
+              );
             }
           } catch (e) {
             console.error("Failed to register incoming payment to PR:", e);

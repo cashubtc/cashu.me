@@ -1025,7 +1025,8 @@ export default {
         label: "Token non valido",
       },
       p2pk_lock_mismatch: {
-        label: "Impossibile ricevere. Il blocco P2PK di questo token non corrisponde alla tua chiave pubblica.",
+        label:
+          "Impossibile ricevere. Il blocco P2PK di questo token non corrisponde alla tua chiave pubblica.",
       },
     },
     actions: {

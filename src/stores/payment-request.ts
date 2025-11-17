@@ -68,7 +68,8 @@ export const usePRStore = defineStore("payment-request", {
       // If not forcing a new request and we already have at least one,
       // do not auto-create a new one; just show the currently selected.
       if (!forceNew && this.ourPaymentRequests.length > 0) {
-        const current = this.currentPaymentRequest || this.ourPaymentRequests[0];
+        const current =
+          this.currentPaymentRequest || this.ourPaymentRequests[0];
         this.showPRKData = current.encoded;
         return;
       }
@@ -250,11 +251,7 @@ export const usePRStore = defineStore("payment-request", {
           );
         }
         if (transport.type == PaymentRequestTransportType.POST) {
-          return await this.payPostPaymentRequest(
-            request,
-            transport,
-            tokenStr
-          );
+          return await this.payPostPaymentRequest(request, transport, tokenStr);
         }
       }
       throw new Error("Unsupported payment request transport.");
