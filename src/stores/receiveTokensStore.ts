@@ -30,7 +30,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       let decodedToken = undefined;
       try {
         decodedToken = token.decode(encodedToken);
-      } catch (error) {}
+      } catch (error) { }
       return decodedToken;
     },
     knowThisMintOfTokenJson: function (tokenJson: Token) {
@@ -53,11 +53,11 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
 
       // get the private key for the token we want to receive if it is locked with P2PK
       receiveStore.receiveData.p2pkPrivateKey =
-        useP2PKStore().getPrivateKeyForP2PKEncodedToken(
+        await useP2PKStore().getPrivateKeyForP2PKEncodedToken(
           receiveStore.receiveData.tokensBase64
         );
 
-      const tokenJson = token.decode(receiveStore.receiveData.tokensBase64);
+      const tokenJson = await token.decodeFull(receiveStore.receiveData.tokensBase64);
       if (tokenJson == undefined) {
         throw new Error("no tokens provided.");
       }
@@ -87,7 +87,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       const receiveStore = useReceiveTokensStore();
       const mintStore = useMintsStore();
       const uiStore = useUiStore();
-      const tokenJson = token.decode(encodedToken);
+      const tokenJson = await token.decodeFull(encodedToken);
       if (tokenJson == undefined) {
         throw new Error("no tokens provided.");
       }

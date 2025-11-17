@@ -1,14 +1,30 @@
-import { type Token, getDecodedToken } from "@cashu/cashu-ts";
+import { type Token, getDecodedToken, getTokenMetadata, CashuMint, TokenMetadata } from "@cashu/cashu-ts";
 import { useMintsStore, WalletProof } from "src/stores/mints";
 import { useProofsStore } from "src/stores/proofs";
-export default { decode, getProofs, getMint, getUnit, getMemo };
+export default { decode, decodeFull, getProofs, getMint, getUnit, getMemo };
 
 /**
- * Decodes an encoded cashu token
+ * Decodes an encoded cashu token metadata
  */
-function decode(encoded_token: string) {
+function decode(encoded_token: string): TokenMetadata {
   if (!encoded_token || encoded_token === "") return;
-  return getDecodedToken(encoded_token);
+  const metadata = getTokenMetadata(encoded_token);
+  metadata.proofs = metadata.incompleteProofs;
+  return metadata;
+}
+
+/**
+ * Decodes an encoded cashu token with full proofs
+ */
+async function decodeFull(encoded_token: string): Promise<Token> {
+  if (!encoded_token || encoded_token === "") return;
+  try {
+    return getDecodedToken(encoded_token, useMintsStore().allMintKeysets);
+  } catch (error) {
+    const tokenMint = getTokenMetadata(encoded_token).mint;
+    const fetchKeysets = await new CashuMint(tokenMint).getKeySets();
+    return getDecodedToken(encoded_token, fetchKeysets.keysets);
+  }
 }
 
 /**
