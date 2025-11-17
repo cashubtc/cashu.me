@@ -592,6 +592,9 @@ export default defineComponent({
         if (newVal && newVal.maxSendable == newVal.minSendable) {
           // Set fixed amount
           this.payInvoiceData.input.amount = newVal.minSendable / 1000;
+          this.showNumericKeyboard = false;
+        } else {
+          this.showNumericKeyboard = true;
         }
       },
       immediate: true,
