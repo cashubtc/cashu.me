@@ -29,7 +29,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       let decodedToken = undefined;
       try {
         decodedToken = token.decode(encodedToken);
-      } catch (error) { }
+      } catch (error) {}
       return decodedToken;
     },
     knowThisMintOfTokenJson: function (tokenJson: Token) {
