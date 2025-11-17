@@ -23,11 +23,7 @@
             class="floating-close-btn"
           />
           <div class="col text-center fixed-title-height">
-            <q-item-label
-              overline
-              class="q-mt-sm text-white"
-              style="font-size: 1rem"
-            >
+            <q-item-label class="dialog-header q-mt-sm text-white">
               {{ $t("PaymentRequestDialog.payment_request.caption") }}
             </q-item-label>
           </div>

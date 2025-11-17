@@ -28,11 +28,9 @@
           <div class="col text-center fixed-title-height">
             <div>
               <q-item-label
-                overline
-                class="q-mt-sm"
+                class="dialog-header q-mt-sm"
                 :class="$q.dark.isActive ? 'text-white' : 'text-black'"
                 style="
-                  font-size: 1rem;
                   display: inline-block;
                   white-space: normal;
                   word-break: break-word;
@@ -309,8 +307,15 @@
                     <AmountInputComponent
                       v-model="payInvoiceData.input.amount"
                       :enabled="true"
-                      :muted="insufficientFunds"
-                      :min-amount="payInvoiceData.lnurlpay.minSendable / 1000"
+                      :muted="
+                        insufficientFunds ||
+                        (payInvoiceData.lnurlpay.minSendable &&
+                          payInvoiceData.input.amount <
+                            payInvoiceData.lnurlpay.minSendable / 1000) ||
+                        (payInvoiceData.lnurlpay.maxSendable &&
+                          payInvoiceData.input.amount >
+                            payInvoiceData.lnurlpay.maxSendable / 1000)
+                      "
                       :max-amount="
                         Math.min(
                           payInvoiceData.lnurlpay.maxSendable / 1000,
@@ -584,24 +589,9 @@ export default defineComponent({
     },
     "payInvoiceData.lnurlpay": {
       handler: function (newVal) {
-        if (newVal && newVal.maxSendable != newVal.minSendable) {
-          // Initialize amount to minSendable if not set
-          if (
-            this.payInvoiceData.input.amount == null ||
-            this.payInvoiceData.input.amount === 0
-          ) {
-            this.payInvoiceData.input.amount = newVal.minSendable / 1000;
-          }
-          // Show keyboard for variable amount LNURL
-          this.showNumericKeyboard = true;
-        } else if (newVal && newVal.maxSendable == newVal.minSendable) {
+        if (newVal && newVal.maxSendable == newVal.minSendable) {
           // Set fixed amount
           this.payInvoiceData.input.amount = newVal.minSendable / 1000;
-          // Hide keyboard for fixed amount LNURL
-          this.showNumericKeyboard = false;
-        } else if (!newVal) {
-          // Hide keyboard when LNURL is cleared
-          this.showNumericKeyboard = false;
         }
       },
       immediate: true,

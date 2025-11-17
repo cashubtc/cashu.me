@@ -1061,7 +1061,8 @@ export default {
         label: "Ungültiger Token",
       },
       p2pk_lock_mismatch: {
-        label: "Kann nicht empfangen werden. Die P2PK-Sperre dieses Tokens stimmt nicht mit Ihrem öffentlichen Schlüssel überein.",
+        label:
+          "Kann nicht empfangen werden. Die P2PK-Sperre dieses Tokens stimmt nicht mit Ihrem öffentlichen Schlüssel überein.",
       },
     },
     actions: {
