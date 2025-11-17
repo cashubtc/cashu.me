@@ -1352,6 +1352,9 @@ export default {
     },
     invoice: {
       title: "Betala { value }",
+      paying: "Betalar",
+      paid: "Betald",
+      fee: "Avgift",
       memo: {
         label: "Memo",
       },

@@ -1342,6 +1342,9 @@ export default {
     },
     invoice: {
       title: "支付 { value }",
+      paying: "支付中",
+      paid: "已支付",
+      fee: "费用",
       memo: {
         label: "备忘录",
       },

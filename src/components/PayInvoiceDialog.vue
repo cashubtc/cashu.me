@@ -82,7 +82,7 @@
                       <div v-if="isPaid" class="q-mb-md">
                         <div class="row">
                           <div class="col-12 text-h4 text-weight-bold">
-                            Paid
+                            {{ $t("PayInvoiceDialog.invoice.paid") }}
                             {{
                               payInvoiceData.meltQuote.response &&
                               payInvoiceData.meltQuote.response.amount > 0
@@ -103,9 +103,9 @@
                         </div>
                         <div
                           v-if="payInvoiceData.fee_paid != null"
-                          class="text-subtitle2 text-grey-2"
+                          class="text-subtitle2 text-grey-6"
                         >
-                          Fee:
+                          {{ $t("PayInvoiceDialog.invoice.fee") }}:
                           {{
                             formatCurrency(
                               payInvoiceData.fee_paid,
@@ -118,7 +118,7 @@
                       <div v-else-if="isPaying" class="q-mb-md">
                         <div class="row">
                           <div class="col-12 text-h4 text-weight-bold q-mb-xs">
-                            Paying
+                            {{ $t("PayInvoiceDialog.invoice.paying") }}
                             {{
                               payInvoiceData.meltQuote.response &&
                               payInvoiceData.meltQuote.response.amount > 0
