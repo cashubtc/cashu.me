@@ -81,7 +81,7 @@
                     <div :key="invoiceStateKey" class="invoice-state-content">
                       <div v-if="isPaid" class="q-mb-md">
                         <div class="row">
-                          <div class="col-12 text-h4 text-weight-bold q-mb-xs">
+                          <div class="col-12 text-h4 text-weight-bold">
                             Paid
                             {{
                               payInvoiceData.meltQuote.response &&
@@ -100,6 +100,19 @@
                               class="q-mb-sm"
                             />
                           </div>
+                        </div>
+                        <div
+                          v-if="payInvoiceData.fee_paid != null"
+                          class="text-subtitle2 text-grey-2"
+                        >
+                          Fee:
+                          {{
+                            formatCurrency(
+                              payInvoiceData.fee_paid,
+                              activeUnit,
+                              true
+                            )
+                          }}
                         </div>
                       </div>
                       <div v-else-if="isPaying" class="q-mb-md">
@@ -578,6 +591,7 @@ import AmountInputComponent from "components/AmountInputComponent.vue";
 import ParseInputComponent from "components/ParseInputComponent.vue";
 
 import * as _ from "underscore";
+import { Proof } from "@cashu/cashu-ts";
 
 declare const windowMixin: any;
 
