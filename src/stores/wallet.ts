@@ -115,6 +115,7 @@ export const useWalletStore = defineStore("wallet", {
         blocking: false,
         bolt11: "",
         show: false,
+        fee_paid: 0,
         meltQuote: {
           payload: {
             unit: "",
@@ -746,7 +747,7 @@ export const useWalletStore = defineStore("wallet", {
       mintStore.assertMintError(data);
       return data;
     },
-    meltInvoiceData: async function () {
+    meltInvoiceData: async function (silent?: boolean) {
       if (this.payInvoiceData.invoice == null) {
         throw new Error("no invoice provided.");
       }
@@ -769,7 +770,7 @@ export const useWalletStore = defineStore("wallet", {
         mintStore.activeMintUrl,
         mintStore.activeUnit
       );
-      return await this.melt(mintStore.activeProofs, quote, mintWallet);
+      return await this.melt(mintStore.activeProofs, quote, mintWallet, silent);
     },
     melt: async function (
       proofs: WalletProof[],
