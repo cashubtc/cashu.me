@@ -343,7 +343,10 @@ export const useWalletStore = defineStore("wallet", {
       });
       return selectedWalletProofs;
     },
-    spendableProofs: function (proofs: WalletProof[], amount: number): WalletProof[] {
+    spendableProofs: function (
+      proofs: WalletProof[],
+      amount: number
+    ): WalletProof[] {
       const uIStore = useUiStore();
       const proofsStore = useProofsStore();
       const mintStore = useMintsStore();
@@ -480,7 +483,9 @@ export const useWalletStore = defineStore("wallet", {
       if (receiveStore.receiveData.tokensBase64.length == 0) {
         throw new Error("no tokens provided.");
       }
-      const tokenJson = await token.decodeFull(receiveStore.receiveData.tokensBase64);
+      const tokenJson = await token.decodeFull(
+        receiveStore.receiveData.tokensBase64
+      );
       if (tokenJson == undefined) {
         throw new Error("no tokens provided.");
       }

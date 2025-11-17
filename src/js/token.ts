@@ -1,4 +1,10 @@
-import { type Token, getDecodedToken, getTokenMetadata, CashuMint, TokenMetadata } from "@cashu/cashu-ts";
+import {
+  type Token,
+  getDecodedToken,
+  getTokenMetadata,
+  CashuMint,
+  TokenMetadata,
+} from "@cashu/cashu-ts";
 import { useMintsStore, WalletProof } from "src/stores/mints";
 import { useProofsStore } from "src/stores/proofs";
 export default { decode, decodeFull, getProofs, getMint, getUnit, getMemo };

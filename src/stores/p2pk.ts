@@ -137,7 +137,7 @@ export const useP2PKStore = defineStore("p2pk", {
           return refundKeys[0]; // First refund key (shows locked state)
         }
         console.log("p2pk token - lock has expired");
-      } catch { }
+      } catch {}
       return ""; // Token is not locked / secret is not P2PK
     },
     isLocked: function (proofs: WalletProof[]) {
@@ -147,7 +147,7 @@ export const useP2PKStore = defineStore("p2pk", {
           if (this.getSecretP2PKPubkey(secret)) {
             return true;
           }
-        } catch { }
+        } catch {}
       }
       return false;
     },
@@ -160,7 +160,9 @@ export const useP2PKStore = defineStore("p2pk", {
         }
       }
     },
-    getPrivateKeyForP2PKEncodedToken: async function (encodedToken: string): Promise<string> {
+    getPrivateKeyForP2PKEncodedToken: async function (
+      encodedToken: string
+    ): Promise<string> {
       const decodedToken = await token.decodeFull(encodedToken);
       if (!decodedToken) {
         return "";

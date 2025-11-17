@@ -30,7 +30,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       let decodedToken = undefined;
       try {
         decodedToken = token.decode(encodedToken);
-      } catch (error) { }
+      } catch (error) {}
       return decodedToken;
     },
     knowThisMintOfTokenJson: function (tokenJson: Token) {
@@ -57,7 +57,9 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
           receiveStore.receiveData.tokensBase64
         );
 
-      const tokenJson = await token.decodeFull(receiveStore.receiveData.tokensBase64);
+      const tokenJson = await token.decodeFull(
+        receiveStore.receiveData.tokensBase64
+      );
       if (tokenJson == undefined) {
         throw new Error("no tokens provided.");
       }
