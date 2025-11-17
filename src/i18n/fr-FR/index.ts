@@ -714,7 +714,10 @@ export default {
     title: "Saisissez votre phrase de récupération",
     text: "Collez ou saisissez votre phrase de 12 mots pour restaurer.",
     inputs: { word: "Mot { index }" },
-    actions: { paste_all: "Tout coller" },
+    actions: {
+      paste_all: "Tout coller",
+      use_password_manager: "Utiliser le gestionnaire de mots de passe",
+    },
     disclaimer:
       "Votre phrase de récupération est uniquement utilisée localement pour dériver les clés de votre portefeuille.",
   },

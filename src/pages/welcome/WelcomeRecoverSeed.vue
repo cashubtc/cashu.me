@@ -47,7 +47,7 @@
           <!-- Fill from browser password manager aligned right -->
           <q-btn
             flat
-            label="Use password manager"
+            :label="$t('WelcomeRecoverSeed.actions.use_password_manager')"
             @click="fillFromPasswordManager"
             class="paste-btn"
             style="margin-left: auto"

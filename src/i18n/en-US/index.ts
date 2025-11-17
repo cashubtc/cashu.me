@@ -722,6 +722,7 @@ export default {
     },
     actions: {
       paste_all: "Paste all",
+      use_password_manager: "Use password manager",
     },
     disclaimer:
       "Your seed phrase is only used locally to derive your wallet keys.",

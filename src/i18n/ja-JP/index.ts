@@ -704,7 +704,10 @@ export default {
     title: "シードフレーズを入力",
     text: "復元のために12語のシードフレーズを貼り付けるか入力してください。",
     inputs: { word: "単語 { index }" },
-    actions: { paste_all: "すべて貼り付け" },
+    actions: {
+      paste_all: "すべて貼り付け",
+      use_password_manager: "パスワードマネージャーを使用",
+    },
     disclaimer:
       "シードフレーズはローカルでのみ使用され、ウォレットの鍵を導出します。",
   },
