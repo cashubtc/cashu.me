@@ -48,3 +48,6 @@ yarn-error.log*
 
 # Android build files
 /android/app/build.gradle
+
+# Generated manifest files
+/public/manifest.webmanifest
