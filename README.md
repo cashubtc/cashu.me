@@ -65,9 +65,9 @@ npx cap sync
 npx cap open android / ios
 ```
 
-Regenerate assets:
+**Important:** Regenerate assets before running `npx cap open android` for the first time:
 
-```
+```bash
 npx capacitor-assets generate
 ```
 
