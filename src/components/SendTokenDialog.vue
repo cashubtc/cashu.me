@@ -277,7 +277,9 @@
     </q-card>
 
     <!-- NFC Scanner Overlay - Show when writing tokens, not when scanning payment request -->
-    <SendNfcScanner v-if="webNfcStore.isWritingToken" />
+    <transition name="fade" appear>
+      <SendNfcScanner v-if="webNfcStore.isWritingToken" />
+    </transition>
   </q-dialog>
 </template>
 <script lang="ts">
@@ -785,5 +787,19 @@ export default defineComponent({
   width: 100%;
   display: flex;
   justify-content: center;
+}
+
+/* Fade transition for NFC scanner */
+.fade-enter-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-leave-active {
+  transition: opacity 0.25s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

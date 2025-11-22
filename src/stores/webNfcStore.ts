@@ -19,6 +19,7 @@ export const useWebNfcStore = defineStore("webNfcStore", {
     scanningCard: false,
     ndef: null as any,
     controller: null as AbortController | null,
+    writeController: null as AbortController | null, // Controller for write operations
     nfcMode: "token" as "token" | "payment-request", // Default to token mode
     isScanningPaymentRequest: false, // Flag for UI to show payment request scanner
     isWritingToken: false, // Flag for UI to show token writing scanner
