@@ -346,7 +346,6 @@ import {
   Share as ShareIcon,
   Nut as NutIcon,
 } from "lucide-vue-next";
-import { useWebNfcStore } from "src/stores/webNfcStore";
 
 declare const windowMixin: any;
 

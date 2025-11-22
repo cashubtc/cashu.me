@@ -387,10 +387,8 @@ export default defineComponent({
       "watchClipboardPaste",
       "receiveData",
     ]),
-    scanningCard() {
-      return useWebNfcStore().scanningCard;
-    },
     ...mapState(useUiStore, ["tickerShort", "ndefSupported"]),
+    ...mapState(useWebNfcStore, ["scanningCard"]),
     ...mapState(usePriceStore, [
       "bitcoinPrice",
       "bitcoinPrices",
