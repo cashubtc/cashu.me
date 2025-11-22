@@ -107,7 +107,7 @@ export const useSwapStore = defineStore("swap", {
         const fromWallet = walletStore.mintWallet(fromMintUrl, unit);
         const proofs = token.getProofs(tokenJson);
         meltAmount -= fromWallet.getFeesForProofs(proofs);
-      } catch (e) { }
+      } catch (e) {}
       return tokenAmount - meltAmount;
     },
     meltProofsToMint: async function (tokenJson: Token, mint: Mint) {
@@ -121,7 +121,8 @@ export const useSwapStore = defineStore("swap", {
       this.swapBlocking = true;
       try {
         const tokenAmount = proofsStore.sumProofs(token.getProofs(tokenJson));
-        let meltAmount = tokenAmount - Math.max(2, Math.ceil(tokenAmount * 0.02));
+        let meltAmount =
+          tokenAmount - Math.max(2, Math.ceil(tokenAmount * 0.02));
         const unit = token.getUnit(tokenJson);
         const fromMintUrl = token.getMint(tokenJson);
         const fromWallet = walletStore.mintWallet(fromMintUrl, unit);
