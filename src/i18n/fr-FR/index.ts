@@ -1452,6 +1452,7 @@ export default {
   },
   SendNfcScanner: {
     prompt_text: "Approchez votre appareil du terminal pour payer",
+    write_prompt_text: "Touchez votre appareil sur la puce NFC pour écrire le jeton de paiement",
     cancel_button: "Annuler",
   },
 };

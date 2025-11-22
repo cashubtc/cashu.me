@@ -1518,6 +1518,7 @@ export default {
   },
   SendNfcScanner: {
     prompt_text: "Approach the terminal to pay",
+    write_prompt_text: "Tap your device to the NFC tag to write payment token",
     cancel_button: "Cancel",
   },
 };

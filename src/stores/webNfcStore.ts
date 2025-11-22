@@ -21,6 +21,7 @@ export const useWebNfcStore = defineStore("webNfcStore", {
     controller: null as AbortController | null,
     nfcMode: "token" as "token" | "payment-request", // Default to token mode
     isScanningPaymentRequest: false, // Flag for UI to show payment request scanner
+    isWritingToken: false, // Flag for UI to show token writing scanner
   }),
   actions: {
     /**
@@ -187,6 +188,13 @@ export const useWebNfcStore = defineStore("webNfcStore", {
     },
 
     /**
+     * Stop writing tokens
+     */
+    stopWritingToken() {
+      this.isWritingToken = false;
+    },
+
+    /**
      * Process payment request data read from NFC tag
      * @param dataStr - The data string read from the tag
      * @returns {boolean} - Whether the processing was successful
@@ -226,11 +234,14 @@ export const useWebNfcStore = defineStore("webNfcStore", {
      * @param tokenData - The token data to write
      * @param encoding - The encoding to use ('text', 'url', or 'binary')
      */
-    async writeTokenToTag(tokenData: string, encoding: string, s) {
+    async writeTokenToTag(tokenData: string, encoding: string) {
       if (!tokenData) {
         notifyError("No token data to write");
         return false;
       }
+
+      // Set writing flag to show scanner UI
+      this.isWritingToken = true;
 
       let lastError = null;
 
@@ -259,14 +270,17 @@ export const useWebNfcStore = defineStore("webNfcStore", {
           });
         } else {
           notifyError("Unknown encoding type");
+          this.isWritingToken = false;
           return false;
         }
 
         // If we reach here, writing was successful
+        this.isWritingToken = false;
         return true;
       } catch (error) {
         lastError = error;
         console.error(`Error writing to NFC tag: `, error);
+        this.isWritingToken = false;
       }
 
       // If we get here, all attempts failed

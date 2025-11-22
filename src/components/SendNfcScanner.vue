@@ -7,7 +7,11 @@
         </div>
 
         <div class="nfc-scanner-text q-mt-md">
-          {{ $t("SendNfcScanner.prompt_text") }}
+          {{
+            webNfcStore.isWritingToken
+              ? $t("SendNfcScanner.write_prompt_text")
+              : $t("SendNfcScanner.prompt_text")
+          }}
         </div>
 
         <q-btn
@@ -38,30 +42,43 @@ export default defineComponent({
   },
 
   computed: {
-    ...mapState(useWebNfcStore, ["scanningCard"]),
+    ...mapState(useWebNfcStore, [
+      "scanningCard",
+      "isScanningPaymentRequest",
+      "isWritingToken",
+    ]),
+    webNfcStore() {
+      return useWebNfcStore();
+    },
   },
 
   mounted() {
-    // Start scanning when component is mounted
+    // Only start scanning if we're scanning for payment request (not writing)
     const webNfcStore = useWebNfcStore();
-    if (!webNfcStore.scanningCard) {
+    if (webNfcStore.isScanningPaymentRequest && !webNfcStore.scanningCard) {
       webNfcStore.toggleScanner("payment-request");
     }
+    // If writing, we don't need to start scanning - the write operation handles it
   },
 
   beforeUnmount() {
-    // Make sure scanning is stopped when component is unmounted
+    // Make sure scanning is stopped when component is unmounted (only if scanning)
     const webNfcStore = useWebNfcStore();
-    if (webNfcStore.scanningCard) {
+    if (webNfcStore.scanningCard && webNfcStore.isScanningPaymentRequest) {
       webNfcStore.stopScanning();
     }
   },
 
   methods: {
     closeScanner() {
-      // Stop scanning and reset UI state
       const webNfcStore = useWebNfcStore();
-      webNfcStore.stopPaymentRequestScanner();
+      if (webNfcStore.isScanningPaymentRequest) {
+        // Stop scanning and reset UI state
+        webNfcStore.stopPaymentRequestScanner();
+      } else if (webNfcStore.isWritingToken) {
+        // Stop writing
+        webNfcStore.stopWritingToken();
+      }
     },
   },
 });

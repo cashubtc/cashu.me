@@ -38,7 +38,7 @@
             style="position: absolute; right: 16px"
           >
             <q-btn
-              v-if="ndefSupported"
+              v-if="ndefSupported && !webNfcStore.isScanningPaymentRequest"
               flat
               dense
               color="primary"
@@ -48,6 +48,11 @@
               <NfcIcon size="1.2em" />
               <q-tooltip>Scan NFC payment request</q-tooltip>
             </q-btn>
+            <q-spinner
+              v-if="ndefSupported && webNfcStore.isScanningPaymentRequest"
+              color="primary"
+              size="sm"
+            />
             <q-btn
               flat
               dense
@@ -271,8 +276,8 @@
       </div>
     </q-card>
 
-    <!-- NFC Scanner Overlay -->
-    <SendNfcScanner v-if="webNfcStore.isScanningPaymentRequest" />
+    <!-- NFC Scanner Overlay - Show when writing tokens, not when scanning payment request -->
+    <SendNfcScanner v-if="webNfcStore.isWritingToken" />
   </q-dialog>
 </template>
 <script lang="ts">
