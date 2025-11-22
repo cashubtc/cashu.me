@@ -72,11 +72,13 @@ export default defineComponent({
   methods: {
     closeScanner() {
       const webNfcStore = useWebNfcStore();
+      // Stop any ongoing operations
       if (webNfcStore.isScanningPaymentRequest) {
         // Stop scanning and reset UI state
         webNfcStore.stopPaymentRequestScanner();
-      } else if (webNfcStore.isWritingToken) {
-        // Stop writing
+      }
+      if (webNfcStore.isWritingToken) {
+        // Stop writing and abort any ongoing write operations
         webNfcStore.stopWritingToken();
       }
     },

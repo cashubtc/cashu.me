@@ -101,7 +101,7 @@ export const useWebNfcStore = defineStore("webNfcStore", {
                     }
                   } catch (err) {
                     console.error(`Something went wrong! ${err}`);
-                    notifyError(`Something went wrong! ${err}`);
+                    // notifyError(`Something went wrong! ${err}`);
                   } finally {
                     // Always abort the controller and reset scanning state after processing
                     this.controller?.abort();
@@ -113,11 +113,11 @@ export const useWebNfcStore = defineStore("webNfcStore", {
             })
             .catch((error) => {
               console.error(`Scan error: ${error.message}`);
-              notifyError(`Scan error: ${error.message}`);
+              // notifyError(`Scan error: ${error.message}`);
             });
         } catch (error) {
           console.error(`NFC error: ${error.message}`);
-          notifyError(`NFC error: ${error.message}`);
+          // notifyError(`NFC error: ${error.message}`);
         }
       } else {
         console.log("Turning OFF scanner, aborting controller");
@@ -192,6 +192,11 @@ export const useWebNfcStore = defineStore("webNfcStore", {
      * Stop writing tokens
      */
     stopWritingToken() {
+      // Abort any ongoing write operation
+      if (this.writeController) {
+        this.writeController.abort();
+        this.writeController = null;
+      }
       this.isWritingToken = false;
     },
 
@@ -243,11 +248,20 @@ export const useWebNfcStore = defineStore("webNfcStore", {
 
       // Set writing flag to show scanner UI
       this.isWritingToken = true;
+      this.writeController = new AbortController();
+      const wasCancelled = () => this.writeController?.signal.aborted || !this.isWritingToken;
 
       let lastError = null;
 
       try {
         this.ndef = new window.NDEFReader();
+
+        // Check if cancelled before starting write
+        if (wasCancelled()) {
+          this.isWritingToken = false;
+          this.writeController = null;
+          return false;
+        }
 
         if (encoding === "text") {
           await this.ndef.write({
@@ -272,16 +286,34 @@ export const useWebNfcStore = defineStore("webNfcStore", {
         } else {
           notifyError("Unknown encoding type");
           this.isWritingToken = false;
+          this.writeController = null;
+          return false;
+        }
+
+        // Check if cancelled after write completes
+        if (wasCancelled()) {
+          console.log("NFC write operation was cancelled");
+          this.isWritingToken = false;
+          this.writeController = null;
           return false;
         }
 
         // If we reach here, writing was successful
         this.isWritingToken = false;
+        this.writeController = null;
         return true;
-      } catch (error) {
+      } catch (error: any) {
+        // Check if error is due to cancellation
+        if (wasCancelled()) {
+          console.log("NFC write operation was cancelled");
+          this.isWritingToken = false;
+          this.writeController = null;
+          return false;
+        }
         lastError = error;
         console.error(`Error writing to NFC tag: `, error);
         this.isWritingToken = false;
+        this.writeController = null;
       }
 
       // If we get here, all attempts failed

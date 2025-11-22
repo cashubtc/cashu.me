@@ -38,21 +38,21 @@
             style="position: absolute; right: 16px"
           >
             <q-btn
-              v-if="ndefSupported && !webNfcStore.isScanningPaymentRequest"
+              v-if="ndefSupported"
               flat
               dense
               color="primary"
               round
-              @click="startNfcScanner"
+              @click="toggleNfcScanner"
             >
-              <NfcIcon size="1.2em" />
+              <NfcIcon
+                v-if="!webNfcStore.isScanningPaymentRequest"
+                size="1.2em"
+              />
+              <q-spinner v-else color="primary" size="sm" />
               <q-tooltip>Scan NFC payment request</q-tooltip>
             </q-btn>
-            <q-spinner
-              v-if="ndefSupported && webNfcStore.isScanningPaymentRequest"
-              color="primary"
-              size="sm"
-            />
+
             <q-btn
               flat
               dense
@@ -676,10 +676,15 @@ export default defineComponent({
     },
 
     // NFC methods
-    startNfcScanner() {
+    toggleNfcScanner() {
       if (this.ndefSupported) {
-        // Use the WebNfcStore to start scanning
-        this.webNfcStore.startPaymentRequestScanner();
+        // If already scanning, cancel it (toggle behavior)
+        if (this.webNfcStore.isScanningPaymentRequest) {
+          this.webNfcStore.stopPaymentRequestScanner();
+        } else {
+          // Use the WebNfcStore to start scanning
+          this.webNfcStore.startPaymentRequestScanner();
+        }
       }
     },
   },
