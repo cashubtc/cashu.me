@@ -101,7 +101,7 @@ export const useSwapStore = defineStore("swap", {
       const fromMintUrl = token.getMint(tokenJson);
       const unit = token.getUnit(tokenJson);
       const tokenAmount = proofsStore.sumProofs(token.getProofs(tokenJson));
-      let meltAmount = tokenAmount - Math.max(2, tokenAmount * 0.02);
+      let meltAmount = tokenAmount - Math.max(2, Math.ceil(tokenAmount * 0.02));
       try {
         // walletStore.mintWallet(fromMintUrl, unit); will fail if we don't have fromMintUrl yet
         const fromWallet = walletStore.mintWallet(fromMintUrl, unit);
@@ -121,7 +121,8 @@ export const useSwapStore = defineStore("swap", {
       this.swapBlocking = true;
       try {
         const tokenAmount = proofsStore.sumProofs(token.getProofs(tokenJson));
-        let meltAmount = tokenAmount - Math.max(2, tokenAmount * 0.02);
+        let meltAmount =
+          tokenAmount - Math.max(2, Math.ceil(tokenAmount * 0.02));
         const unit = token.getUnit(tokenJson);
         const fromMintUrl = token.getMint(tokenJson);
         const fromWallet = walletStore.mintWallet(fromMintUrl, unit);
