@@ -297,6 +297,7 @@ import { usePriceStore } from "src/stores/price";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useWebNfcStore } from "src/stores/webNfcStore";
+import { usePRStore } from "src/stores/payment-request";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
 import NumericKeyboard from "components/NumericKeyboard.vue";
@@ -313,7 +314,37 @@ import {
   Scan as ScanIcon,
   Nfc as NfcIcon,
 } from "lucide-vue-next";
+import { PaymentRequest } from "@cashu/cashu-ts";
 declare const windowMixin: any;
+
+/**
+ * Convert payment request amount to sats for comparison
+ * @param request - The payment request
+ * @returns Amount in sats, or null if amount is not set
+ */
+function convertPaymentRequestAmountToSats(
+  request: PaymentRequest | undefined
+): number | null {
+  if (!request || request.amount == null) {
+    return null;
+  }
+
+  const unit = request.unit || "sat";
+  const amount = request.amount;
+
+  // Convert to sats based on unit
+  switch (unit) {
+    case "sat":
+      return amount;
+    case "msat":
+      return Math.floor(amount / 1000);
+    case "btc":
+      return Math.floor(amount * 100000000);
+    default:
+      // For unknown units, assume sat
+      return amount;
+  }
+}
 export default defineComponent({
   name: "SendTokenDialog",
   mixins: [windowMixin],
@@ -364,6 +395,7 @@ export default defineComponent({
       "includeFeesInSendAmount",
       "nfcEncoding",
       "useNumericKeyboard",
+      "maximumNfcAutoPayAmount",
     ]),
     ...mapState(usePriceStore, [
       "bitcoinPrice",
@@ -372,6 +404,7 @@ export default defineComponent({
     ]),
     ...mapState(useSettingsStore, ["bitcoinPriceCurrency"]),
     ...mapState(useWorkersStore, ["tokenWorkerRunning"]),
+    ...mapState(useSendTokensStore, ["paymentRequestScannedViaNfc"]),
     webNfcStore() {
       return useWebNfcStore();
     },
@@ -474,10 +507,9 @@ export default defineComponent({
         }
       } else {
         clearInterval(this.qrInterval);
-        this.sendData.data = "";
         this.sendData.tokensBase64 = "";
-        this.sendData.historyToken = null;
-        this.sendData.paymentRequest = null;
+        this.sendData.historyToken = undefined;
+        this.sendData.paymentRequest = undefined;
       }
     },
     "webNfcStore.writeSuccess": function (success) {
@@ -487,6 +519,58 @@ export default defineComponent({
           this.handlePaymentRequestSuccess();
         }, 2000); // Wait for tada animation + delay
       }
+    },
+    // Watch for payment request changes to trigger auto-pay for NFC-scanned requests
+    "sendData.paymentRequest": {
+      handler: function (newRequest: PaymentRequest | undefined) {
+        if (!newRequest) {
+          return;
+        }
+
+        // Only auto-pay if:
+        // 1. Payment request was scanned via NFC
+        // 2. Payment request has an amount
+        // 3. Amount (in sats) is below the threshold
+        if (!this.paymentRequestScannedViaNfc) {
+          return;
+        }
+
+        const amountInSats = convertPaymentRequestAmountToSats(newRequest);
+        if (amountInSats == null || amountInSats <= 0) {
+          return;
+        }
+
+        if (amountInSats > this.maximumNfcAutoPayAmount) {
+          // Amount exceeds threshold, don't auto-pay
+          return;
+        }
+
+        // Check if we have sufficient funds before auto-paying
+        if (this.insufficientFunds) {
+          // Don't auto-pay if insufficient funds
+          return;
+        }
+
+        // Check if payment is already in progress or tokens are already prepared
+        if (this.globalMutexLock || this.sendData.tokensBase64) {
+          return;
+        }
+
+        // Check if payment request requires P2PK locking (don't auto-pay locked tokens)
+        if (newRequest.nut10?.kind === "P2PK") {
+          // Don't auto-pay locked payment requests
+          return;
+        }
+
+        // All conditions met - trigger auto-pay
+        console.log(
+          `Auto-paying NFC-scanned payment request: ${amountInSats} sats (below threshold of ${this.maximumNfcAutoPayAmount} sats)`
+        );
+        this.$nextTick(() => {
+          this.autoPayPaymentRequest();
+        });
+      },
+      immediate: false,
     },
   },
   methods: {
@@ -696,6 +780,37 @@ export default defineComponent({
           // Use the WebNfcStore to start scanning
           this.webNfcStore.startPaymentRequestScanner();
         }
+      }
+    },
+    // Auto-pay payment request (for NFC-scanned requests below threshold)
+    async autoPayPaymentRequest() {
+      if (!this.sendData.paymentRequest) {
+        return;
+      }
+
+      try {
+        // Prepare tokens first
+        const tokenStr = await this.preparePaymentRequestTokens();
+        if (!tokenStr) {
+          console.error("Failed to prepare tokens for auto-pay");
+          return;
+        }
+
+        // Pay the payment request
+        const prStore = usePRStore();
+        const success = await prStore.parseAndPayPaymentRequest(
+          this.sendData.paymentRequest,
+          tokenStr
+        );
+
+        if (success) {
+          // Payment successful - handle success
+          this.handlePaymentRequestSuccess();
+        }
+      } catch (error: any) {
+        console.error("Error in auto-pay:", error);
+        // Don't show error notification for auto-pay failures
+        // User can still manually pay if auto-pay fails
       }
     },
   },

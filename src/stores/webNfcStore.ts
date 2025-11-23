@@ -225,6 +225,9 @@ export const useWebNfcStore = defineStore("webNfcStore", {
           sendTokensStore.showSendTokens = true;
         }
 
+        // Mark that this payment request was scanned via NFC
+        sendTokensStore.paymentRequestScannedViaNfc = true;
+
         // Decode the payment request - this will update the send dialog
         prStore.decodePaymentRequest(dataStr);
 
