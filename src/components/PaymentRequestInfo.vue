@@ -73,7 +73,7 @@ export default defineComponent({
     getPaymentRequestTarget(request: PaymentRequest): string {
       // Handle case where transport is undefined or empty
       if (!request.transport || request.transport.length === 0) {
-        return "";
+        return "NFC";
       }
 
       for (const transport of request.transport) {

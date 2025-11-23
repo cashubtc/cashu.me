@@ -440,6 +440,9 @@ export default defineComponent({
   watch: {
     showSendTokens: function (val) {
       if (val) {
+        // Start NFC scanner automatically when dialog opens
+        this.toggleNfcScanner();
+
         this.$nextTick(() => {
           // if we're entering the amount etc, show the keyboard
           if (!this.sendData.tokensBase64.length) {

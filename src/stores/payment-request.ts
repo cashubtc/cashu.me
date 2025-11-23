@@ -294,13 +294,13 @@ export const usePRStore = defineStore("payment-request", {
         if (result) {
           return true;
         } else {
-          throw new Error(
-            "Failed to write payment token to NFC tag after multiple attempts"
-          );
+          // throw new Error(
+          //   "Failed to write payment token to NFC tag after multiple attempts"
+          // );
         }
       } catch (error) {
         console.error("Error writing token to NFC tag:", error);
-        notifyError("NFC payment failed");
+        // notifyError("NFC payment failed");
         throw error;
       }
     },
