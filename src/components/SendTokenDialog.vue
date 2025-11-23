@@ -480,6 +480,14 @@ export default defineComponent({
         this.sendData.paymentRequest = null;
       }
     },
+    "webNfcStore.writeSuccess": function (success) {
+      // Close dialog after success animation completes (for NFC payments)
+      if (success && this.sendData.paymentRequest) {
+        setTimeout(() => {
+          this.handlePaymentRequestSuccess();
+        }, 2000); // Wait for tada animation + delay
+      }
+    },
   },
   methods: {
     ...mapActions(useWorkersStore, ["clearAllWorkers"]),

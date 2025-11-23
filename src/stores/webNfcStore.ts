@@ -23,6 +23,8 @@ export const useWebNfcStore = defineStore("webNfcStore", {
     nfcMode: "token" as "token" | "payment-request", // Default to token mode
     isScanningPaymentRequest: false, // Flag for UI to show payment request scanner
     isWritingToken: false, // Flag for UI to show token writing scanner
+    writeProgress: 0, // Progress of write operation (0-100)
+    writeSuccess: false, // Whether write completed successfully
   }),
   actions: {
     /**
@@ -198,6 +200,8 @@ export const useWebNfcStore = defineStore("webNfcStore", {
         this.writeController = null;
       }
       this.isWritingToken = false;
+      this.writeProgress = 0;
+      this.writeSuccess = false;
     },
 
     /**
@@ -248,8 +252,25 @@ export const useWebNfcStore = defineStore("webNfcStore", {
 
       // Set writing flag to show scanner UI
       this.isWritingToken = true;
+      this.writeProgress = 0;
+      this.writeSuccess = false;
       this.writeController = new AbortController();
       const wasCancelled = () => this.writeController?.signal.aborted || !this.isWritingToken;
+
+      // Start progress animation (minimum 1 second)
+      const progressStartTime = Date.now();
+      const minDuration = 5000; // 5 second minimum
+      const progressInterval = setInterval(() => {
+        if (wasCancelled()) {
+          clearInterval(progressInterval);
+          return;
+        }
+        const elapsed = Date.now() - progressStartTime;
+        // Progress smoothly from 0 to 90% over minimum duration
+        // The actual write will complete it to 100%
+        const progress = Math.min(75, (elapsed / minDuration) * 90);
+        this.writeProgress = progress;
+      }, 16); // ~60fps updates
 
       let lastError = null;
 
@@ -258,23 +279,27 @@ export const useWebNfcStore = defineStore("webNfcStore", {
 
         // Check if cancelled before starting write
         if (wasCancelled()) {
+          clearInterval(progressInterval);
           this.isWritingToken = false;
+          this.writeProgress = 0;
+          this.writeSuccess = false;
           this.writeController = null;
           return false;
         }
 
+        let writePromise;
         if (encoding === "text") {
-          await this.ndef.write({
+          writePromise = this.ndef.write({
             records: [{ recordType: "text", data: tokenData }],
           });
         } else if (encoding === "weburl") {
           const tokenUrl = `https://wallet.cashu.me/#token=${tokenData}`;
-          await this.ndef.write({
+          writePromise = this.ndef.write({
             records: [{ recordType: "url", data: tokenUrl }],
           });
         } else if (encoding === "binary") {
           const tokenBinary = getEncodedTokenBinary(tokenData);
-          await this.ndef.write({
+          writePromise = this.ndef.write({
             records: [
               {
                 recordType: "mime",
@@ -284,35 +309,65 @@ export const useWebNfcStore = defineStore("webNfcStore", {
             ],
           });
         } else {
+          clearInterval(progressInterval);
           notifyError("Unknown encoding type");
           this.isWritingToken = false;
+          this.writeProgress = 0;
+          this.writeSuccess = false;
           this.writeController = null;
           return false;
+        }
+
+        // Wait for write to complete
+        await writePromise;
+
+        // Ensure minimum duration has passed
+        const elapsed = Date.now() - progressStartTime;
+        if (elapsed < minDuration) {
+          await new Promise((resolve) => setTimeout(resolve, minDuration - elapsed));
         }
 
         // Check if cancelled after write completes
         if (wasCancelled()) {
+          clearInterval(progressInterval);
           console.log("NFC write operation was cancelled");
           this.isWritingToken = false;
+          this.writeProgress = 0;
+          this.writeSuccess = false;
           this.writeController = null;
           return false;
         }
 
-        // If we reach here, writing was successful
-        this.isWritingToken = false;
-        this.writeController = null;
+        // Complete the progress to 100% and mark as successful
+        clearInterval(progressInterval);
+        this.writeProgress = 100;
+        this.writeSuccess = true;
+
+        // Keep success state for animation, then reset
+        setTimeout(() => {
+          this.isWritingToken = false;
+          this.writeProgress = 0;
+          this.writeSuccess = false;
+          this.writeController = null;
+        }, 1500); // Give time for success animation
+
         return true;
       } catch (error: any) {
+        clearInterval(progressInterval);
         // Check if error is due to cancellation
         if (wasCancelled()) {
           console.log("NFC write operation was cancelled");
           this.isWritingToken = false;
+          this.writeProgress = 0;
+          this.writeSuccess = false;
           this.writeController = null;
           return false;
         }
         lastError = error;
         console.error(`Error writing to NFC tag: `, error);
         this.isWritingToken = false;
+        this.writeProgress = 0;
+        this.writeSuccess = false;
         this.writeController = null;
       }
 
