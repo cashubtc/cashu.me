@@ -190,6 +190,7 @@ export default defineComponent({
           mintStore.activeMintUrl,
           mintStore.activeUnit
         );
+        await wallet.loadMint();
         const mintQuote = await this.requestMint(amount, wallet);
         // Switch to QR display dialog
         this.showCreateInvoiceDialog = false;
