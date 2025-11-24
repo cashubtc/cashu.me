@@ -38,11 +38,6 @@ import { usePRStore } from "./payment-request";
 import token from "../js/token";
 import { HistoryToken } from "./tokens";
 
-type MintRecommendation = {
-  url: string;
-  count: number;
-};
-
 type NostrEventLog = {
   id: string;
   created_at: number;
@@ -59,7 +54,10 @@ export const useNostrStore = defineStore("nostr", {
   state: () => ({
     connected: false,
     pubkey: useLocalStorage<string>("cashu.ndk.pubkey", ""),
-    relays: useSettingsStore().defaultNostrRelays,
+    relays: useLocalStorage<string[]>(
+      "cashu.nostr.relays",
+      useSettingsStore().defaultNostrRelays
+    ),
     ndk: {} as NDK,
     signerType: useLocalStorage<SignerType>(
       "cashu.ndk.signerType",
@@ -84,10 +82,6 @@ export const useNostrStore = defineStore("nostr", {
     seedSignerPrivateKeyNsec: "",
     privateKeySigner: {} as NDKPrivateKeySigner,
     signer: {} as NDKSigner,
-    mintRecommendations: useLocalStorage<MintRecommendation[]>(
-      "cashu.ndk.mintRecommendations",
-      []
-    ),
     initialized: false,
     lastEventTimestamp: useLocalStorage<number>(
       "cashu.ndk.lastEventTimestamp",
@@ -141,7 +135,7 @@ export const useNostrStore = defineStore("nostr", {
       }
       this.initialized = true;
     },
-    setSigner: async function (signer: NDKSigner) {
+    setSigner: function (signer: NDKSigner) {
       this.signer = signer;
       this.ndk = new NDK({ signer: signer, explicitRelayUrls: this.relays });
     },
@@ -170,21 +164,10 @@ export const useNostrStore = defineStore("nostr", {
     },
     initNip07Signer: async function () {
       const signer = new NDKNip07Signer();
-      signer.user().then(async (user) => {
-        if (!!user.npub) {
-          console.log(
-            "Permission granted to read their public key:",
-            user.npub
-          );
-          const me = this.ndk.getUser({
-            npub: user.npub,
-          });
-          this.signerType = SignerType.NIP07;
-          await this.setSigner(signer);
-          this.setPubkey(user.pubkey);
-        }
-      });
-      await signer.blockUntilReady();
+      const user = await signer.blockUntilReady();
+      this.signerType = SignerType.NIP07;
+      this.setSigner(signer);
+      this.setPubkey(user.pubkey);
     },
     initNip46Signer: async function (nip46Token?: string) {
       const ndk = new NDK({ explicitRelayUrls: this.relays });
@@ -203,7 +186,7 @@ export const useNostrStore = defineStore("nostr", {
       }
       const signer = new NDKNip46Signer(ndk, this.nip46Token);
       this.signerType = SignerType.NIP46;
-      await this.setSigner(signer);
+      this.setSigner(signer);
       // If the backend sends an auth_url event, open that URL as a popup so the user can authorize the app
       signer.on("authUrl", (url) => {
         window.open(url, "auth", "width=600,height=600");
@@ -237,7 +220,7 @@ export const useNostrStore = defineStore("nostr", {
       );
       this.privateKeySignerPrivateKey = bytesToHex(privateKeyBytes);
       this.signerType = SignerType.PRIVATEKEY;
-      await this.setSigner(this.privateKeySigner);
+      this.setSigner(this.privateKeySigner);
       const publicKeyHex = getPublicKey(privateKeyBytes);
       this.setPubkey(publicKeyHex);
     },
@@ -266,32 +249,7 @@ export const useNostrStore = defineStore("nostr", {
       const filter: NDKFilter = { kinds: [1], authors: [this.pubkey] };
       return await this.ndk.fetchEvents(filter);
     },
-    fetchMints: async function () {
-      const filter: NDKFilter = { kinds: [38000 as NDKKind], limit: 2000 };
-      const events = await this.ndk.fetchEvents(filter);
-      let mintUrls: string[] = [];
-      events.forEach((event) => {
-        if (event.tagValue("k") == "38172" && event.tagValue("u")) {
-          const mintUrl = event.tagValue("u");
-          if (
-            typeof mintUrl === "string" &&
-            mintUrl.length > 0 &&
-            mintUrl.startsWith("https://")
-          ) {
-            mintUrls.push(mintUrl);
-          }
-        }
-      });
-      // Count the number of times each mint URL appears
-      const mintUrlsSet = new Set(mintUrls);
-      const mintUrlsArray = Array.from(mintUrlsSet);
-      const mintUrlsCounted = mintUrlsArray.map((url) => {
-        return { url: url, count: mintUrls.filter((u) => u === url).length };
-      });
-      mintUrlsCounted.sort((a, b) => b.count - a.count);
-      this.mintRecommendations = mintUrlsCounted;
-      return mintUrlsCounted;
-    },
+
     sendNip04DirectMessage: async function (
       recipient: string,
       message: string
@@ -537,10 +495,25 @@ export const useNostrStore = defineStore("nostr", {
             console.log("### incoming token already in history");
             return;
           }
-          await this.addPendingTokenToHistory(tokenStr, false);
+          const historyId = await this.addPendingTokenToHistory(
+            tokenStr,
+            false,
+            payload.id
+          );
+          try {
+            if (historyId) {
+              prStore.registerIncomingPaymentForRequest(
+                payload.id ?? "",
+                historyId
+              );
+            }
+          } catch (e) {
+            console.error("Failed to register incoming payment to PR:", e);
+          }
           receiveStore.receiveData.tokensBase64 = tokenStr;
           sendTokensStore.showSendTokens = false;
-          if (prStore.receivePaymentRequestsAutomatically) {
+          const knowThisMint = receiveStore.knowThisMintOfTokenJson(token);
+          if (prStore.receivePaymentRequestsAutomatically && knowThisMint) {
             const success = await receiveStore.receiveIfDecodes();
             if (success) {
               prStore.showPRDialog = false;
@@ -570,13 +543,17 @@ export const useNostrStore = defineStore("nostr", {
         await this.addPendingTokenToHistory(tokenStr);
       }
     },
-    addPendingTokenToHistory: function (tokenStr: string, verbose = true) {
+    addPendingTokenToHistory: function (
+      tokenStr: string,
+      verbose = true,
+      paymentRequestId?: string
+    ): string | undefined {
       const receiveStore = useReceiveTokensStore();
       const tokensStore = useTokensStore();
       if (tokensStore.tokenAlreadyInHistory(tokenStr)) {
         notifySuccess("Ecash already in history");
         receiveStore.showReceiveTokens = false;
-        return;
+        return undefined;
       }
       const decodedToken = token.decode(tokenStr);
       if (decodedToken == undefined) {
@@ -587,17 +564,19 @@ export const useNostrStore = defineStore("nostr", {
         .getProofs(decodedToken)
         .reduce((sum, el) => (sum += el.amount), 0);
 
-      tokensStore.addPendingToken({
+      const id = tokensStore.addPendingToken({
         amount: amount,
         token: tokenStr,
         mint: token.getMint(decodedToken),
         unit: token.getUnit(decodedToken),
+        paymentRequestId,
       });
       receiveStore.showReceiveTokens = false;
       // show success notification
       if (verbose) {
         notifySuccess("Ecash added to history.");
       }
+      return id;
     },
   },
 });

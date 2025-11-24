@@ -5,50 +5,43 @@
       <NoMintWarnBanner v-if="mints.length == 0" />
       <BalanceView v-else :set-tab="setTab" />
       <div
-        class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-lg q-pb-md"
+        class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-lg q-pb-md position-relative"
       >
-        <div class="col-5 q-mb-md">
+        <div class="col-6 q-mb-md flex justify-center items-center">
           <q-btn
             rounded
             dense
-            class="q-px-md"
+            class="q-px-md q-mr-md wallet-action-btn"
             color="primary"
-            style="width: 140px"
             @click="showReceiveDialog = true"
-            size="1.2rem"
           >
-            <q-icon name="south_west" size="1.2rem" class="q-mr-xs" />
-            Receive</q-btn
-          >
+            <div class="button-content">
+              <span>{{ $t("WalletPage.actions.receive.label") }}</span>
+            </div>
+          </q-btn>
         </div>
+
         <transition appear enter-active-class="animated pulse">
-          <div class="col-2 q-mb-md q-mx-none">
-            <q-btn
-              align="center"
-              size="lg"
-              outline
-              color="primary"
-              flat
-              @click="showCamera"
-            >
+          <div class="scan-button-container">
+            <q-btn size="lg" outline color="primary" flat @click="showCamera">
               <ScanIcon size="2em" />
             </q-btn>
           </div>
         </transition>
+
         <!-- button to showSendDialog -->
-        <div class="col-5 q-mb-md">
+        <div class="col-6 q-mb-md flex justify-center items-center">
           <q-btn
             rounded
             dense
-            class="q-px-md"
-            style="width: 140px"
+            class="q-px-md q-ml-md wallet-action-btn"
             color="primary"
             @click="showSendDialog = true"
-            size="1.2rem"
           >
-            <q-icon name="north_east" size="1.2rem" class="q-mr-xs" />
-            Send</q-btn
-          >
+            <div class="button-content">
+              <span>{{ $t("WalletPage.actions.send.label") }}</span>
+            </div>
+          </q-btn>
         </div>
         <ReceiveDialog v-model="showReceiveDialog" />
         <SendDialog v-model="showSendDialog" />
@@ -71,14 +64,17 @@
           no-caps
           :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
         >
-          <q-tab name="history" class="text-secondary" label="History"></q-tab>
           <q-tab
-            name="invoices"
+            name="history"
             class="text-secondary"
-            label="Invoices"
+            :label="$t('WalletPage.tabs.history.label')"
           ></q-tab>
           <!-- <q-tab name="tokens" label="Tokens"></q-tab> -->
-          <q-tab name="mints" class="text-secondary" label="Mints"></q-tab>
+          <q-tab
+            name="mints"
+            class="text-secondary"
+            :label="$t('WalletPage.tabs.mints.label')"
+          ></q-tab>
         </q-tabs>
 
         <q-tab-panels
@@ -86,16 +82,10 @@
           v-model="tab"
           animated
         >
-          <!-- ////////////////// HISTORY LIST ///////////////// -->
+          <!-- ////////////////// UNIFIED HISTORY LIST ///////////////// -->
 
           <q-tab-panel name="history">
             <HistoryTable />
-          </q-tab-panel>
-
-          <!-- ////////////////// INVOICE LIST ///////////////// -->
-
-          <q-tab-panel name="invoices">
-            <InvoicesTable />
           </q-tab-panel>
 
           <!-- ////////////////////// SETTINGS ////////////////// -->
@@ -119,7 +109,10 @@
               "
               color="primary"
               @click="triggerPwaInstall()"
-              ><b>Install</b><q-tooltip>Install Cashu</q-tooltip></q-btn
+              ><b>{{ $t("WalletPage.install.text") }}</b
+              ><q-tooltip>{{
+                $t("WalletPage.install.tooltip")
+              }}</q-tooltip></q-btn
             >
           </div>
         </div>
@@ -151,6 +144,7 @@
     />
 
     <!-- INVOICE DETAILS  -->
+    <CreateInvoiceDialog v-model="showCreateInvoiceDialog" />
     <InvoiceDetailDialog v-model="showInvoiceDetails" />
 
     <!-- SEND TOKENS DIALOG  -->
@@ -179,8 +173,33 @@
 .keypad .btn-confirm {
   grid-area: 1 / 4 / 5 / 4;
 }
+
+.wallet-action-btn {
+  min-width: 140px;
+  width: auto;
+  white-space: nowrap;
+  font-size: 1.2rem;
+}
+
+.button-content {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+/* Apply equal widths to wallet action buttons after render */
+.equal-width-buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.scan-button-container {
+  position: absolute;
+  z-index: 1;
+  padding-bottom: 15px;
+}
 </style>
-<script>
+<script lang="ts">
 import { date } from "quasar";
 import * as _ from "underscore";
 import { shortenString } from "src/js/string-utils";
@@ -189,13 +208,13 @@ import token from "src/js/token";
 // Vue components
 import BalanceView from "components/BalanceView.vue";
 import MintSettings from "components/MintSettings.vue";
-import InvoicesTable from "components/InvoicesTable.vue";
 import HistoryTable from "components/HistoryTable.vue";
 import NoMintWarnBanner from "components/NoMintWarnBanner.vue";
 import WelcomeDialog from "components/WelcomeDialog.vue";
 import SendTokenDialog from "components/SendTokenDialog.vue";
 import PayInvoiceDialog from "components/PayInvoiceDialog.vue";
 import InvoiceDetailDialog from "components/InvoiceDetailDialog.vue";
+import CreateInvoiceDialog from "components/CreateInvoiceDialog.vue";
 import SendDialog from "components/SendDialog.vue";
 import ReceiveDialog from "components/ReceiveDialog.vue";
 import QrcodeReader from "components/QrcodeReader.vue";
@@ -217,6 +236,7 @@ import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useNWCStore } from "src/stores/nwc";
 import { useNPCStore } from "src/stores/npubcash";
+import { useNPCV2Store } from "src/stores/npcv2";
 import { useNostrStore } from "src/stores/nostr";
 import { usePRStore } from "src/stores/payment-request";
 import { useDexieStore } from "src/stores/dexie";
@@ -241,7 +261,6 @@ export default {
   components: {
     BalanceView,
     MintSettings,
-    InvoicesTable,
     HistoryTable,
     NoMintWarnBanner,
     WelcomeDialog,
@@ -249,6 +268,7 @@ export default {
     ReceiveTokenDialog,
     PayInvoiceDialog,
     InvoiceDetailDialog,
+    CreateInvoiceDialog,
     QrcodeReader,
     SendDialog,
     ReceiveDialog,
@@ -274,7 +294,6 @@ export default {
           amount: 0,
           comment: "",
         },
-        paymentChecker: null,
         camera: {
           show: false,
           camera: "auto",
@@ -297,6 +316,7 @@ export default {
     ...mapState(useUiStore, ["tickerShort"]),
     ...mapWritableState(useUiStore, [
       "showInvoiceDetails",
+      "showCreateInvoiceDialog",
       "tab",
       "showSendDialog",
       "showReceiveDialog",
@@ -370,6 +390,10 @@ export default {
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useNWCStore, ["listenToNWCCommands"]),
     ...mapActions(useNPCStore, ["generateNPCConnection", "claimAllTokens"]),
+    ...mapActions(useNPCV2Store, [
+      "generateNPCV2Connection",
+      "getLatestQuotes",
+    ]),
     ...mapActions(useNostrStore, [
       "sendNip04DirectMessage",
       "sendNip17DirectMessage",
@@ -438,7 +462,6 @@ export default {
       this.payInvoiceData.lnurlauth = null;
       this.payInvoiceData.input.request = "";
       this.payInvoiceData.input.comment = "";
-      this.payInvoiceData.input.paymentChecker = null;
       this.camera.show = false;
       this.focusInput("parseDialogInput");
     },
@@ -467,7 +490,7 @@ export default {
       this.invoiceData.bolt11 = "";
       this.invoiceData.hash = "";
       this.invoiceData.memo = "";
-      this.showInvoiceDetails = true;
+      this.showCreateInvoiceDialog = true;
     },
     showSendTokensDialog: function () {
       console.log("##### showSendTokensDialog");
@@ -554,6 +577,28 @@ export default {
         }
       };
     },
+    equalizeButtonWidths: function () {
+      this.$nextTick(() => {
+        const actionBtns = document.querySelectorAll(".wallet-action-btn");
+        if (actionBtns.length >= 2) {
+          // Reset widths first
+          actionBtns.forEach((btn) => {
+            btn.style.width = "auto";
+          });
+
+          // Get the maximum width
+          let maxWidth = 0;
+          actionBtns.forEach((btn) => {
+            maxWidth = Math.max(maxWidth, btn.offsetWidth);
+          });
+
+          // Apply the maximum width to all buttons
+          actionBtns.forEach((btn) => {
+            btn.style.width = `${maxWidth}px`;
+          });
+        }
+      });
+    },
   },
   watch: {},
 
@@ -561,9 +606,22 @@ export default {
     // generate NPC connection
     this.generateNPCConnection();
     this.claimAllTokens();
+    this.generateNPCV2Connection();
+    this.getLatestQuotes();
+    // Ensure wallet action buttons have equal width
+    this.$nextTick(this.equalizeButtonWidths);
+    // Add window resize listener to handle responsive layouts
+    window.addEventListener("resize", this.equalizeButtonWidths);
+  },
+
+  beforeUnmount: function () {
+    // Remove event listener when component is destroyed
+    window.removeEventListener("resize", this.equalizeButtonWidths);
   },
 
   created: async function () {
+    console.log(`Git commit: ${GIT_COMMIT}`);
+
     // Initialize and run migrations
     const migrationsStore = useMigrationsStore();
     migrationsStore.initMigrations();
@@ -621,7 +679,7 @@ export default {
       window.location.href.split("?")[0].split("#")[0]
     );
     */
-    console.log(`hash: ${window.location.hash}`);
+    console.log(`location.hash: ${window.location.hash}`);
 
     // startup tasks
 
@@ -637,8 +695,16 @@ export default {
     // PWA install hook
     this.registerPWAEventHook();
 
-    // generate new mnemonic
-    this.initializeMnemonic();
+    // generate mnemonic only if onboarding is finished or path is 'new'
+    try {
+      const welcome = useWelcomeStore();
+      if (!welcome.showWelcome || welcome.onboardingPath === "new") {
+        this.initializeMnemonic();
+      }
+    } catch (e) {
+      // fallback safe
+      this.initializeMnemonic();
+    }
 
     this.initSigner();
 

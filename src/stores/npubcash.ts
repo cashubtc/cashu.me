@@ -1,21 +1,11 @@
 import { defineStore } from "pinia";
-import NDK, { NDKEvent, NDKPrivateKeySigner } from "@nostr-dev-kit/ndk";
+import NDK, { NDKEvent } from "@nostr-dev-kit/ndk";
 import { useLocalStorage } from "@vueuse/core";
-import { bytesToHex } from "@noble/hashes/utils"; // already an installed dependency
-import { generateSecretKey, getPublicKey } from "nostr-tools";
 import { nip19 } from "nostr-tools";
 import { useWalletStore } from "./wallet";
 import { useReceiveTokensStore } from "./receiveTokensStore";
-import {
-  notifyApiError,
-  notifyError,
-  notifySuccess,
-  notifyWarning,
-  notify,
-} from "../js/notify";
-import { Proof } from "@cashu/cashu-ts";
+import { notifyApiError, notifyError, notifySuccess } from "../js/notify";
 import token from "../js/token";
-import { WalletProof, useMintsStore } from "./mints";
 import { useTokensStore } from "../stores/tokens";
 import { useNostrStore } from "../stores/nostr";
 // type NPCConnection = {
@@ -41,6 +31,7 @@ type NPCClaim = {
     token: string;
   };
 };
+
 type NPCWithdrawl = {
   id: number;
   claim_ids: number[];
@@ -62,6 +53,7 @@ const NIP98Kind = 27235;
 export const useNPCStore = defineStore("npc", {
   state: () => ({
     npcEnabled: useLocalStorage<boolean>("cashu.npc.enabled", false),
+    npcLastCheck: useLocalStorage<number>("cashu.npc.lastCheck", null),
     automaticClaim: useLocalStorage<boolean>("cashu.npc.automaticClaim", true),
     // npcConnections: useLocalStorage<NPCConnection[]>("cashu.npc.connections", []),
     npcAddress: useLocalStorage<string>("cashu.npc.address", ""),
@@ -213,6 +205,7 @@ export const useNPCStore = defineStore("npc", {
       const mintUrl = token.getMint(decodedToken);
       const unit = token.getUnit(decodedToken);
       tokensStore.addPendingToken({
+        label: "Zaps",
         amount: amount,
         token: tokenStr,
         mint: mintUrl,

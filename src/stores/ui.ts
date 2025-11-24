@@ -12,6 +12,7 @@ import { Clipboard } from "@capacitor/clipboard";
 import { Haptics, ImpactStyle } from "@capacitor/haptics";
 
 import ts from "typescript";
+import { useSettingsStore } from "./settings";
 
 const unitTickerShortMap = {
   sat: "sats",
@@ -25,6 +26,7 @@ export const useUiStore = defineStore("ui", {
     hideBalance: useLocalStorage<boolean>("cashu.ui.hideBalance", false),
     tickerLong: "Satoshis",
     showInvoiceDetails: false,
+    showCreateInvoiceDialog: false,
     showSendDialog: false,
     showReceiveDialog: false,
     showReceiveEcashDrawer: false,
@@ -35,10 +37,15 @@ export const useUiStore = defineStore("ui", {
     globalMutexLock: false,
     showDebugConsole: useLocalStorage("cashu.ui.showDebugConsole", false),
     lastBalanceCached: useLocalStorage("cashu.ui.lastBalanceCached", 0),
+    multinutExperimentalWarningDismissed: useLocalStorage(
+      "cashu.ui.multinutExperimentalWarningDismissed",
+      false
+    ),
   }),
   actions: {
     closeDialogs() {
       this.showInvoiceDetails = false;
+      this.showCreateInvoiceDialog = false;
       this.showSendDialog = false;
       this.showReceiveDialog = false;
       this.showReceiveEcashDrawer = false;
@@ -70,6 +77,16 @@ export const useUiStore = defineStore("ui", {
     },
     formatSat: function (value: number) {
       // convert value to integer
+      if (useSettingsStore().bip177BitcoinSymbol) {
+        if (value >= 0) {
+          return "₿" + new Intl.NumberFormat(navigator.language).format(value);
+        } else {
+          return (
+            "-₿" +
+            new Intl.NumberFormat(navigator.language).format(Math.abs(value))
+          );
+        }
+      }
       return new Intl.NumberFormat(navigator.language).format(value) + " sat";
     },
     fromMsat: function (value: number) {
@@ -146,7 +163,11 @@ export const useUiStore = defineStore("ui", {
   getters: {
     tickerShort() {
       const unit = useMintsStore().activeUnit;
-      return unitTickerShortMap[unit as keyof typeof unitTickerShortMap];
+      if (unit == "sat" && useSettingsStore().bip177BitcoinSymbol) {
+        return "₿";
+      } else {
+        return unitTickerShortMap[unit as keyof typeof unitTickerShortMap];
+      }
     },
     ndefSupported(): boolean {
       //console.log(`window.Capacitor.getPlatform() = ${window.Capacitor.getPlatform()}`)
@@ -162,6 +183,9 @@ export const useUiStore = defineStore("ui", {
         navigator.clipboard &&
         navigator.clipboard.readText
       );
+    },
+    webShareSupported(): boolean {
+      return "share" in navigator;
     },
   },
 });

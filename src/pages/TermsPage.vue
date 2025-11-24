@@ -7,7 +7,7 @@
   </q-dialog>
 </template>
 
-<script>
+<script lang="ts">
 import { onMounted, ref } from "vue";
 import WelcomeSlide4 from "./welcome/WelcomeSlide4.vue";
 

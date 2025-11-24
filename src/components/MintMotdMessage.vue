@@ -4,7 +4,7 @@
       <info-icon size="24" class="motd-icon" />
       <div class="motd-text-container">
         <div class="motd-header">
-          <div class="motd-title">Mint Message</div>
+          <div class="motd-title">{{ $t("MintMotdMessage.title") }}</div>
           <x-icon
             size="18"
             class="motd-close-icon cursor-pointer"
@@ -17,16 +17,16 @@
   </div>
   <div class="motd-dismissed q-mt-md" v-else-if="message && dismissed">
     <div class="motd-dismissed-message">
-      <info-icon size="24" class="motd-dismissed-icon q-mr-md" />
+      <info-icon size="24" class="motd-dismissed-icon" />
       <div class="motd-text-container">
-        <div class="motd-title">Mint Message</div>
+        <div class="motd-title">{{ $t("MintMotdMessage.title") }}</div>
         <div class="motd-message">{{ message }}</div>
       </div>
     </div>
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
 import { X as XIcon, Info as InfoIcon } from "lucide-vue-next";
 import { useMintsStore } from "src/stores/mints";
@@ -56,7 +56,8 @@ export default defineComponent({
     const mintsStore = useMintsStore();
 
     const dismissMessage = () => {
-      mintsStore.setMintMotdViewed(props.mintUrl);
+      mintsStore.mints.filter((m) => m.url === props.mintUrl)[0].motdDismissed =
+        true;
       emit("dismiss");
     };
 

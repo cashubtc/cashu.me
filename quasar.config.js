@@ -9,6 +9,21 @@
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
 
 const { configure } = require("quasar/wrappers");
+const { execSync } = require("child_process");
+
+function resolveGitCommit() {
+  try {
+    return execSync("git describe --always --dirty", {
+      cwd: __dirname,
+      stdio: "pipe",
+    })
+      .toString()
+      .trim();
+  } catch (err) {
+    console.warn("Unable to resolve git commit via `git describe`");
+    return "unknown";
+  }
+}
 
 module.exports = configure(function (/* ctx */) {
   return {
@@ -27,7 +42,7 @@ module.exports = configure(function (/* ctx */) {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli/boot-files
-    boot: ["base", "global-components", "cashu"],
+    boot: ["base", "global-components", "cashu", "i18n"],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
     css: ["app.scss", "base.scss"],
@@ -70,7 +85,10 @@ module.exports = configure(function (/* ctx */) {
       // polyfillModulePreload: true,
       // distDir
 
-      // extendViteConf (viteConf) {},
+      extendViteConf(viteConf) {
+        viteConf.define = viteConf.define || {};
+        viteConf.define.GIT_COMMIT = JSON.stringify(resolveGitCommit());
+      },
       // viteVuePluginOptions: {},
 
       // vitePlugins: [
@@ -186,6 +204,17 @@ module.exports = configure(function (/* ctx */) {
         // protocol: 'myapp://path',
         // Windows only
         // win32metadata: { ... }
+        asar: true,
+        prune: true,
+        ignore: [
+          /(^|[\\/])node_modules([\\/]|$)/,
+          /(^|[\\/])screenshots([\\/]|$)/,
+          /(^|[\\/])package-lock\.json$/,
+          /(^|[\\/])yarn\.lock$/,
+          /(^|[\\/])pnpm-lock\.yaml$/,
+          /(^|[\\/])vitest\.config\.js$/,
+          /(^|[\\/])test([\\/]|$)/,
+        ],
       },
 
       builder: {

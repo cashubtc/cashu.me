@@ -3,6 +3,8 @@ import { useLocalStorage } from "@vueuse/core";
 import { useMintsStore } from "./mints";
 import { notifySuccess } from "../js/notify";
 import { useUiStore } from "./ui";
+import { useSettingsStore } from "./settings";
+import { useNostrMintBackupStore } from "./nostrMintBackup";
 
 // Define the migration version type
 export type Migration = {
@@ -92,6 +94,61 @@ export const useMigrationsStore = defineStore("migrations", {
       }
     },
 
+    // Migration v2: add "wss://relay.primal.net " relay, enable nostrMintBackup, clear mint recs cache
+    async migrateAddPrimalRelayAndEnableBackupAndClearMintRecs() {
+      const settings = useSettingsStore();
+
+      // 1) Add relay string with leading '@' and trailing space if not present
+      const relayToAdd = "wss://relay.primal.net ";
+      try {
+        const relays = Array.isArray(settings.defaultNostrRelays)
+          ? settings.defaultNostrRelays
+          : [];
+        if (!relays.includes(relayToAdd)) {
+          relays.push(relayToAdd);
+          settings.defaultNostrRelays = relays;
+          console.log(`Added relay to defaultNostrRelays: ${relayToAdd}`);
+        } else {
+          console.log(
+            `Relay already present in defaultNostrRelays: ${relayToAdd}`
+          );
+        }
+      } catch (e) {
+        console.error(
+          "Failed to update defaultNostrRelays during migration v2",
+          e
+        );
+      }
+
+      // 2) Ensure nostrMintBackupEnabled is true
+      try {
+        if (!settings.nostrMintBackupEnabled) {
+          settings.nostrMintBackupEnabled = true;
+          console.log("Enabled nostrMintBackupEnabled setting");
+          // kick off a backup
+          useNostrMintBackupStore().forceBackup();
+        } else {
+          console.log("nostrMintBackupEnabled already true");
+        }
+      } catch (e) {
+        console.error(
+          "Failed to enable nostrMintBackupEnabled during migration v2",
+          e
+        );
+      }
+
+      // 3) Clear cached mint recommendations
+      try {
+        localStorage.removeItem("cashu.ndk.mintRecommendations");
+        console.log("Cleared localStorage key: cashu.ndk.mintRecommendations");
+      } catch (e) {
+        console.error(
+          "Failed to clear cashu.ndk.mintRecommendations during migration v2",
+          e
+        );
+      }
+    },
+
     // Initialize migrations
     initMigrations() {
       // Register the first migration
@@ -101,6 +158,16 @@ export const useMigrationsStore = defineStore("migrations", {
         description:
           "Updates mint URL from https://stablenut.umint.cash to https://stablenut.cashu.network",
         execute: async () => await this.migrateStablenutsToCash(),
+      });
+
+      // Register migration v2
+      this.registerMigration({
+        version: 2,
+        name: "Add wss://relay.primal.net relay; enable mint backup; clear recs",
+        description:
+          "Adds 'wss://relay.primal.net ' to defaultNostrRelays, enables nostrMintBackupEnabled, clears cashu.ndk.mintRecommendations",
+        execute: async () =>
+          await this.migrateAddPrimalRelayAndEnableBackupAndClearMintRecs(),
       });
 
       // Add more migrations here in the future

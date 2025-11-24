@@ -1,9 +1,9 @@
-name: Check format
+name: Format
 
 on: [push, pull_request]
 
 jobs:
-  format-check:
+  format:
     runs-on: ubuntu-latest
 
     steps:
@@ -13,11 +13,11 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "npm"
+          node-version: 24
+          cache: npm
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Run format check
+      - name: Run checkformat
         run: npm run checkformat

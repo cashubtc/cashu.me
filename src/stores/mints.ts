@@ -17,6 +17,11 @@ import { cashuDb } from "src/stores/dexie";
 import { liveQuery } from "dexie";
 import { ref, computed, watch } from "vue";
 import { useProofsStore } from "./proofs";
+import { useI18n } from "vue-i18n";
+import { i18n } from "src/boot/i18n";
+import { useSettingsStore } from "./settings";
+import { useNostrMintBackupStore } from "./nostrMintBackup";
+import { bytesToHex } from "@noble/hashes/utils"; // already an installed dependency
 
 export type Mint = {
   url: string;
@@ -25,7 +30,8 @@ export type Mint = {
   nickname?: string;
   info?: GetInfoResponse;
   errored?: boolean;
-  motd_viewed?: boolean;
+  motdDismissed?: boolean;
+  multinutSelected?: boolean;
   // initialize api: new CashuMint(url) on activation
 };
 
@@ -97,8 +103,7 @@ type BlindSignatureAudit = {
 
 export const useMintsStore = defineStore("mints", {
   state: () => {
-    // State variables
-    // const proofs = ref<WalletProof[]>([]);
+    const t = i18n.global.t;
     const activeProofs = ref<WalletProof[]>([]);
     const activeUnit = useLocalStorage<string>("cashu.activeUnit", "sat");
     const activeMintUrl = useLocalStorage<string>("cashu.activeMintUrl", "");
@@ -111,10 +116,10 @@ export const useMintsStore = defineStore("mints", {
     const addMintBlocking = ref(false);
     const showRemoveMintDialog = ref(false);
     const showMintInfoDialog = ref(false);
-    const showMintInfoData = ref({} as Mint);
     const showEditMintDialog = ref(false);
 
     const uiStoreGlobal: any = useUiStore();
+    const settingsStoreGlobal: any = useSettingsStore();
 
     // Watch for changes in activeMintUrl and activeUnit
     watch([activeMintUrl, activeUnit], async () => {
@@ -126,6 +131,7 @@ export const useMintsStore = defineStore("mints", {
     });
 
     return {
+      t,
       activeProofs,
       activeUnit,
       activeMintUrl,
@@ -135,12 +141,36 @@ export const useMintsStore = defineStore("mints", {
       addMintBlocking,
       showRemoveMintDialog,
       showMintInfoDialog,
-      showMintInfoData,
       showEditMintDialog,
       uiStoreGlobal,
+      settingsStoreGlobal,
     };
   },
   getters: {
+    multiMints({ activeUnit }) {
+      return this.mints.filter((m) => {
+        try {
+          const version = m.info?.version;
+          if (!version) return false;
+
+          const regex = /^(Nutshell)\/(\d+)\.(\d+)\.(\d+)/; // Regex to match "Nutshell/version"
+          const match = version.match(regex);
+          if (!match || match[1] !== "Nutshell") return false;
+          if (parseInt(match[2]) === 0 && parseInt(match[3]) < 17) return false; // If < 0.17.* then not viable
+
+          const nut15 = m.info?.nuts[15];
+          const viableMint = nut15?.methods.find(
+            (m) => m.method === "bolt11" && m.unit === activeUnit
+          );
+          const balance = new MintClass(m).unitBalance(activeUnit);
+          if (nut15 && viableMint && balance > 0) return true;
+          else return false;
+        } catch (e) {
+          console.error(`${e}`);
+          return false;
+        }
+      });
+    },
     totalUnitBalance({ activeUnit }): number {
       const proofsStore = useProofsStore();
       const allUnitKeysets = this.mints
@@ -185,7 +215,11 @@ export const useMintsStore = defineStore("mints", {
     },
     activeUnitLabel({ activeUnit }): string {
       if (activeUnit == "sat") {
-        return "SAT";
+        if (this.settingsStoreGlobal.bip177BitcoinSymbol) {
+          return "₿";
+        } else {
+          return "SAT";
+        }
       } else if (activeUnit == "usd") {
         return "USD";
       } else if (activeUnit == "eur") {
@@ -252,6 +286,12 @@ export const useMintsStore = defineStore("mints", {
       const index = this.mints.findIndex((m) => m.url === oldMint.url);
       this.mints[index] = newMint;
     },
+    updateMintMultinutSelection(mintUrl: string, selected: boolean) {
+      const mint = this.mints.find((m) => m.url === mintUrl);
+      if (mint) {
+        mint.multinutSelected = selected;
+      }
+    },
     getKeysForKeyset: async function (keyset_id: string): Promise<MintKeys> {
       const mint = this.mints.find((m) => m.url === this.activeMintUrl);
       if (mint) {
@@ -300,14 +340,18 @@ export const useMintsStore = defineStore("mints", {
         } else {
           // we already have this mint
           if (verbose) {
-            notifySuccess("Mint already added");
+            notifySuccess(this.t("wallet.mint.notifications.already_added"));
           }
           return mintToAdd;
         }
         await this.activateMint(mintToAdd, false, true);
         if (verbose) {
-          await notifySuccess("Mint added");
+          await notifySuccess(this.t("wallet.mint.notifications.added"));
         }
+
+        // Trigger Nostr backup if enabled
+        this.triggerNostrBackup();
+
         return mintToAdd;
       } catch (error) {
         // activation failed, we remove the mint again from local storage
@@ -331,7 +375,10 @@ export const useMintsStore = defineStore("mints", {
           await this.activateUnit(unit, verbose);
         }
       } else {
-        notifyError("Mint not found", "Mint activation failed");
+        notifyError(
+          this.t("wallet.mint.notifications.not_found"),
+          this.t("wallet.mint.notifications.activation_failed")
+        );
       }
     },
     activateUnit: async function (unit: string, verbose = false) {
@@ -342,14 +389,20 @@ export const useMintsStore = defineStore("mints", {
       await uIStore.lockMutex();
       const mint = this.mints.find((m) => m.url === this.activeMintUrl);
       if (!mint) {
-        notifyError("No active mint", "Unit activation failed");
+        notifyError(
+          this.t("wallet.mint.notifications.no_active_mint"),
+          this.t("wallet.mint.notifications.unit_activation_failed")
+        );
         return;
       }
       const mintClass = new MintClass(mint);
       if (mintClass.units.includes(unit)) {
         this.activeUnit = unit;
       } else {
-        notifyError("Unit not supported by mint", "Unit activation failed");
+        notifyError(
+          this.t("wallet.mint.notifications.unit_not_supported"),
+          this.t("wallet.mint.notifications.unit_activation_failed")
+        );
       }
       await uIStore.unlockMutex();
       const worker = useWorkersStore();
@@ -377,18 +430,21 @@ export const useMintsStore = defineStore("mints", {
         mint = await this.fetchMintKeys(mint);
         this.toggleActiveUnitForMint(mint);
         if (verbose) {
-          await notifySuccess("Mint activated.");
+          await notifySuccess(this.t("wallet.mint.notifications.activated"));
         }
         this.mints.filter((m) => m.url === mint.url)[0].errored = false;
         console.log("### activateMint: Mint activated: ", this.activeMintUrl);
       } catch (error: any) {
         // restore previous values because the activation errored
         // this.activeMintUrl = previousUrl;
-        let err_msg = "Could not connect to mint.";
+        let err_msg = this.t("wallet.mint.notifications.could_not_connect");
         if (error.message.length) {
           err_msg = err_msg + ` ${error.message}.`;
         }
-        await notifyError(err_msg, "Mint activation failed");
+        await notifyError(
+          err_msg,
+          this.t("wallet.mint.notifications.activation_failed")
+        );
         this.mints.filter((m) => m.url === mint.url)[0].errored = true;
         throw error;
       } finally {
@@ -406,16 +462,23 @@ export const useMintsStore = defineStore("mints", {
       }
       return false;
     },
-    triggerMintInfoMotdChanged(newMintInfo: GetInfoResponse, mint: Mint) {
+    triggerMintInfoMotdChanged(
+      newMintInfo: GetInfoResponse,
+      mint: Mint,
+      navigate = true
+    ) {
       if (!this.checkMintInfoMotdChanged(newMintInfo, mint)) {
         return;
       }
       // set motd_viewed to false
-      this.mints.filter((m) => m.url === mint.url)[0].motd_viewed = false;
-      // set the mintinfo data
-      this.showMintInfoData = mint;
-      // open mint info dialog
-      this.showMintInfoDialog = true;
+      this.mints.filter((m) => m.url === mint.url)[0].motdDismissed = false;
+
+      // Navigate to mint details page with mint URL as query parameter
+      if (navigate) {
+        window.location.href = `/mintdetails?mintUrl=${encodeURIComponent(
+          mint.url
+        )}`;
+      }
     },
     fetchMintInfo: async function (mint: Mint) {
       try {
@@ -425,16 +488,52 @@ export const useMintsStore = defineStore("mints", {
       } catch (error: any) {
         console.error(error);
         try {
-          // notifyApiError(error, "Could not get mint info");
+          // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_info"));
         } catch {}
         throw error;
       }
+    },
+    checkForMintKeysetIdCollisions: async function (
+      mintToAdd: Mint,
+      keysets: MintKeyset[]
+    ) {
+      // check if there are any keysets with the same id in another mint
+      const allKeysets = this.mints
+        .filter((m) => m.url !== mintToAdd.url) // exclude the mint we are adding
+        .map((m) => m.keysets)
+        .flat();
+      const collisions = keysets.filter((k) =>
+        allKeysets.map((k) => k.id).includes(k.id)
+      );
+      // perform the same check for the integer representation of the keyset id
+      function keysetIdToBigInt(id: string): bigint {
+        if (/^[0-9a-fA-F]+$/.test(id)) {
+          return BigInt(`0x${id}`) % BigInt(2 ** 31 - 1);
+        } else {
+          const bin = atob(id);
+          const hex = bytesToHex(Uint8Array.from(bin, (c) => c.charCodeAt(0)));
+          return BigInt(`0x${hex}`) % BigInt(2 ** 31 - 1);
+        }
+      }
+      const allKeysetsIdsBigInt = allKeysets.map((k) => keysetIdToBigInt(k.id));
+      const hasCollisions = keysets.some((k) =>
+        allKeysetsIdsBigInt.includes(keysetIdToBigInt(k.id))
+      );
+      if (hasCollisions) {
+        const errorMessage = this.t(
+          "wallet.mint.notifications.mint_validation_error"
+        );
+        throw new Error(errorMessage);
+      }
+      return true;
     },
     fetchMintKeys: async function (mint: Mint): Promise<Mint> {
       try {
         const mintClass = new MintClass(mint);
         const keysets = await this.fetchMintKeysets(mint);
         if (keysets.length > 0) {
+          // check for keyset id collisions with other mints
+          await this.checkForMintKeysetIdCollisions(mint, keysets);
           // store keysets in mint and update local storage
           // TODO: do not overwrite anykeyset, but append new keysets and update existing ones
           this.mints.filter((m) => m.url === mint.url)[0].keysets = keysets;
@@ -465,7 +564,7 @@ export const useMintsStore = defineStore("mints", {
       } catch (error: any) {
         console.error(error);
         try {
-          // notifyApiError(error, "Could not get mint keys");
+          // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_keys"));
         } catch {}
         throw error;
       }
@@ -479,7 +578,7 @@ export const useMintsStore = defineStore("mints", {
       } catch (error: any) {
         console.error(error);
         try {
-          // notifyApiError(error, "Could not get mint keysets");
+          // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_keysets"));
         } catch {}
         throw error;
       }
@@ -493,20 +592,39 @@ export const useMintsStore = defineStore("mints", {
       if (this.mints.length > 0) {
         await this.activateMint(this.mints[0], false);
       }
-      notifySuccess("Mint removed");
+      notifySuccess(this.t("wallet.mint.notifications.removed"));
+
+      // Trigger Nostr backup if enabled
+      this.triggerNostrBackup();
     },
     assertMintError: function (response: { error?: any }, verbose = true) {
       if (response.error != null) {
         if (verbose) {
-          notifyError(response.error, "Mint error");
+          notifyError(
+            response.error,
+            this.t("wallet.mint.notifications.error")
+          );
         }
         throw new Error(`Mint error: ${response.error}`);
       }
     },
-    setMintMotdViewed(mintUrl: string) {
-      const mintIndex = this.mints.findIndex((mint) => mint.url === mintUrl);
-      if (mintIndex !== -1) {
-        this.mints[mintIndex].motd_viewed = true;
+
+    // Trigger Nostr backup when mints change
+    triggerNostrBackup: async function () {
+      try {
+        const nostrMintBackupStore = useNostrMintBackupStore();
+
+        if (nostrMintBackupStore.enabled && nostrMintBackupStore.needsBackup) {
+          setTimeout(async () => {
+            try {
+              await nostrMintBackupStore.backupMintsToNostr();
+            } catch (error) {
+              console.error("Failed to backup mints to Nostr:", error);
+            }
+          }, 1000);
+        }
+      } catch (error) {
+        console.error("Failed to trigger Nostr backup:", error);
       }
     },
   },

@@ -1,75 +1,59 @@
 <template>
-  <EditMintDialog
-    :mint="mintToEdit"
-    :showEditMintDialog="showEditMintDialog"
-    @update:showEditMintDialog="showEditMintDialog = $event"
-  />
-  <RemoveMintDialog
-    :mintToRemove="mintToRemove"
-    :showRemoveMintDialog="showRemoveMintDialog"
-    @update:showRemoveMintDialog="showRemoveMintDialog = $event"
-    @remove="removeMint"
-  />
-  <q-dialog
-    v-model="showMintInfoDialog"
-    position="top"
-    :maximized="true"
-    transition-show="fade"
-    transition-hide="fade"
-    full-width
-    full-height
-    seamless
-    @keyup.esc="showMintInfoDialog = false"
-  >
-    <div class="fullscreen bg-dark">
-      <div class="mint-content-container q-pa-md">
-        <!-- Top Icons -->
-        <div class="top-icons q-pt-md q-mb-lg">
-          <close-icon
-            size="24"
-            class="close-icon cursor-pointer text-white"
-            v-close-popup
-          />
-          <qr-code-icon
-            size="24"
-            class="qr-icon cursor-pointer text-white"
-            @click="showQrCode = !showQrCode"
-          />
-        </div>
+  <div class="bg-dark text-white q-pa-md flex flex-center">
+    <div class="mint-details-page-content">
+      <EditMintDialog
+        :mint="mintToEdit"
+        :showEditMintDialog="showEditMintDialog"
+        @update:showEditMintDialog="showEditMintDialog = $event"
+      />
+      <RemoveMintDialog
+        :mintToRemove="mintToRemove"
+        :showRemoveMintDialog="showRemoveMintDialog"
+        @update:showRemoveMintDialog="showRemoveMintDialog = $event"
+        @remove="removeMint"
+      />
 
-        <!-- QR Code Section (toggleable) -->
-        <div class="qr-code-container">
-          <transition appear name="smooth-slide">
-            <div
-              v-if="showQrCode"
-              class="qr-code-section q-mb-md"
-              key="qr-code"
-            >
-              <vue-qrcode
-                :value="showMintInfoData.url"
-                :options="{ width: 300 }"
-                class="rounded-borders"
-              />
-            </div>
-          </transition>
-        </div>
-
+      <div class="mint-content-container q-px-md">
         <!-- Mint Header Profile Name Section -->
         <div class="mint-header-container q-mb-lg">
-          <div class="mint-header q-pa-md q-py-lg">
+          <div class="mint-header q-pa-md">
+            <!-- Mint Profile Name Section -->
             <q-avatar size="56px" class="mint-profile-icon q-mb-sm">
               <img
-                v-if="showMintInfoData.info.icon_url"
-                :src="showMintInfoData.info.icon_url"
+                v-if="mintData.info?.icon_url"
+                :src="mintData.info.icon_url"
                 alt="Mint Profile"
               />
               <building-icon v-else size="36" />
             </q-avatar>
             <div class="mint-name q-mb-xs">
-              {{ showMintInfoData.info.name || "Mint" }}
+              {{ mintData.info?.name || "Mint" }}
             </div>
-            <div class="mint-balance" v-if="showMintInfoData.info.balance">
-              {{ showMintInfoData.info.balance }}
+
+            <!-- QR Code Icon -->
+            <div class="top-icons">
+              <qr-code-icon
+                size="24"
+                class="qr-icon cursor-pointer text-white"
+                @click="showQrCode = !showQrCode"
+              />
+            </div>
+
+            <!-- QR Code Section (toggleable) -->
+            <div class="qr-code-container">
+              <transition appear name="smooth-slide">
+                <div
+                  v-if="showQrCode"
+                  class="qr-code-section q-my-md"
+                  key="qr-code"
+                >
+                  <vue-qrcode
+                    :value="mintData.url"
+                    :options="{ width: 300 }"
+                    class="rounded-borders"
+                  />
+                </div>
+              </transition>
             </div>
           </div>
 
@@ -81,35 +65,30 @@
               name="smooth-slide"
             >
               <mint-motd-message
-                v-if="
-                  showMintInfoData.info.motd && !showMintInfoData.motd_viewed
-                "
-                :message="showMintInfoData.info.motd"
-                :mint-url="showMintInfoData.url"
-                :dismissed="showMintInfoData.motd_viewed"
+                v-if="mintData.info?.motd && !mintData.motdDismissed"
+                :message="mintData.info.motd"
+                :mint-url="mintData.url"
+                :dismissed="mintData.motdDismissed"
                 @dismiss="motdDismissed = true"
               />
             </transition>
 
-            <div
-              class="mint-description"
-              v-if="showMintInfoData.info.description"
-            >
-              {{ showMintInfoData.info.description }}
+            <div class="mint-description" v-if="mintData.info?.description">
+              {{ mintData.info.description }}
             </div>
             <div
               class="mint-description-long q-mt-md"
-              v-if="showMintInfoData.info.description_long"
+              v-if="mintData.info?.description_long"
             >
-              {{ showMintInfoData.info.description_long }}
+              {{ mintData.info.description_long }}
             </div>
           </div>
           <transition name="smooth-slide">
             <MintMotdMessage
-              v-if="showMintInfoData.info.motd && showMintInfoData.motd_viewed"
-              :message="showMintInfoData.info.motd"
-              :mintUrl="showMintInfoData.url"
-              :dismissed="showMintInfoData.motd_viewed"
+              v-if="mintData.info?.motd && mintData.motdDismissed"
+              :message="mintData.info.motd"
+              :mintUrl="mintData.url"
+              :dismissed="mintData.motdDismissed"
               @dismiss="dismissMotd"
             />
           </transition>
@@ -118,17 +97,19 @@
         <!-- Section Divider -->
         <div
           class="section-divider q-mb-md"
-          v-if="showMintInfoData.info.contact?.length > 0"
+          v-if="mintData.info?.contact?.length > 0"
         >
           <div class="divider-line"></div>
-          <div class="divider-text">CONTACT</div>
+          <div class="divider-text">
+            {{ $t("MintDetailsDialog.contact.title") }}
+          </div>
           <div class="divider-line"></div>
         </div>
 
         <!-- Contact Info Section -->
         <div class="contact-section q-mb-lg">
           <div
-            v-for="contactInfo in showMintInfoData.info.contact"
+            v-for="contactInfo in mintData.info?.contact"
             :key="contactInfo.method"
             class="contact-item q-mb-md"
           >
@@ -151,6 +132,15 @@
                 class="contact-icon"
                 alt=""
               />
+              <img
+                v-else-if="contactInfo.method === 'telegram'"
+                src="/telegram-icon.svg"
+                class="contact-icon"
+                alt=""
+              />
+              <div v-else class="contact-text q-ml-xs">
+                {{ contactInfo.method }}
+              </div>
             </div>
             <div class="contact-text">{{ contactInfo.info }}</div>
             <copy-icon
@@ -165,7 +155,9 @@
         <!-- Section Divider -->
         <div class="section-divider q-mb-md">
           <div class="divider-line"></div>
-          <div class="divider-text">MINT DETAILS</div>
+          <div class="divider-text">
+            {{ $t("MintDetailsDialog.details.title") }}
+          </div>
           <div class="divider-line"></div>
         </div>
 
@@ -175,38 +167,42 @@
           <div class="detail-item q-mb-md">
             <div class="detail-label">
               <link-icon size="20" color="#9E9E9E" class="detail-icon" />
-              <div class="detail-name">URL</div>
+              <div class="detail-name">
+                {{ $t("MintDetailsDialog.details.url.label") }}
+              </div>
             </div>
             <div
               class="detail-value items-center"
-              @click="copyText(showMintInfoData.url)"
+              @click="copyText(mintData.url)"
             >
-              {{ showMintInfoData.url }}
+              {{ mintData.url }}
             </div>
           </div>
 
           <!-- Nuts -->
-          <div class="detail-item q-mb-md" v-if="showMintInfoData.info.nuts">
+          <div class="detail-item q-mb-md" v-if="mintData.info?.nuts">
             <div class="detail-label">
               <nut-icon size="20" color="#9E9E9E" class="detail-icon" />
-              <div class="detail-name">Nuts</div>
+              <div class="detail-name">
+                {{ $t("MintDetailsDialog.details.nuts.label") }}
+              </div>
             </div>
             <div
               class="detail-value"
               v-if="!showAllNuts"
               @click="showAllNuts = true"
             >
-              View all
+              {{ $t("MintDetailsDialog.details.nuts.actions.show.label") }}
             </div>
             <div class="detail-value" v-else @click="showAllNuts = false">
-              Hide
+              {{ $t("MintDetailsDialog.details.nuts.actions.hide.label") }}
             </div>
           </div>
 
           <!-- Expanded Nuts Section (when showAllNuts is true) -->
           <div
             class="nuts-expanded-section"
-            v-if="showAllNuts && showMintInfoData.info.nuts"
+            v-if="showAllNuts && mintData.info?.nuts"
           >
             <div class="nuts-grid">
               <div
@@ -222,17 +218,14 @@
           </div>
 
           <!-- Currency (if available) -->
-          <div
-            class="detail-item q-mb-md"
-            v-if="showMintInfoData.info.currencies"
-          >
+          <div class="detail-item q-mb-md" v-if="mintData.info?.currencies">
             <div class="detail-label">
               <currency-icon size="20" color="#9E9E9E" class="detail-icon" />
-              <div class="detail-name">Currency</div>
+              <div class="detail-name">
+                {{ $t("MintDetailsDialog.details.currency.label") }}
+              </div>
             </div>
-            <div class="detail-value">
-              {{ showMintInfoData.info.currencies }}
-            </div>
+            <div class="detail-value">{{ mintData.info.currencies }}</div>
           </div>
 
           <!-- Currency Units (if available) -->
@@ -242,7 +235,9 @@
           >
             <div class="detail-label">
               <banknote-icon size="20" color="#9E9E9E" class="detail-icon" />
-              <div class="detail-name">Currency</div>
+              <div class="detail-name">
+                {{ $t("MintDetailsDialog.details.currencies.label") }}
+              </div>
             </div>
             <div class="detail-value">
               {{ mintUnits.map((unit) => unit.toUpperCase()).join(", ") }}
@@ -250,14 +245,14 @@
           </div>
 
           <!-- Version -->
-          <div class="detail-item" v-if="showMintInfoData.info.version">
+          <div class="detail-item" v-if="mintData.info?.version">
             <div class="detail-label">
               <info-icon size="20" color="#9E9E9E" class="detail-icon" />
-              <div class="detail-name">Version</div>
+              <div class="detail-name">
+                {{ $t("MintDetailsDialog.details.version.label") }}
+              </div>
             </div>
-            <div class="detail-value">
-              {{ showMintInfoData.info.version }}
-            </div>
+            <div class="detail-value">{{ mintData.info.version }}</div>
           </div>
         </div>
 
@@ -270,15 +265,17 @@
 
         <!-- Mint Audit Info Section -->
         <MintAuditInfo
-          v-if="settings.auditorEnabled && showMintInfoData.url"
-          :mintUrl="showMintInfoData.url"
-          @close="showMintInfoDialog = false"
+          v-if="settings.auditorEnabled && mintData.url"
+          :mintUrl="mintData.url"
+          @close="() => {}"
         />
 
         <!-- Section Divider -->
         <div class="section-divider q-mb-md">
           <div class="divider-line"></div>
-          <div class="divider-text">ACTIONS</div>
+          <div class="divider-text">
+            {{ $t("MintDetailsDialog.actions.title") }}
+          </div>
           <div class="divider-line"></div>
         </div>
 
@@ -290,15 +287,27 @@
               @click="openEditMintDialog"
             >
               <pencil-icon size="20" color="#9E9E9E" class="action-icon" />
-              <div class="action-label">Edit mint</div>
+              <div class="action-label">
+                {{ $t("MintDetailsDialog.actions.edit.label") }}
+              </div>
             </div>
 
             <div
               class="action-button cursor-pointer"
-              @click="copyText(showMintInfoData.url)"
+              @click="copyText(mintData.url)"
             >
               <copy-icon size="20" color="#9E9E9E" class="action-icon" />
-              <div class="action-label">Copy mint URL</div>
+              <div class="action-label">
+                {{ $t("MintDetailsDialog.actions.copy_mint_url.label") }}
+              </div>
+            </div>
+
+            <div
+              class="action-button cursor-pointer"
+              @click="openCreateReviewDialog"
+            >
+              <q-icon name="rate_review" size="20px" class="action-icon" />
+              <div class="action-label">Review Mint</div>
             </div>
 
             <div
@@ -306,16 +315,18 @@
               @click="openRemoveMintDialog"
             >
               <trash-icon size="20" color="#FF453A" class="action-icon" />
-              <div class="action-label">Delete mint</div>
+              <div class="action-label">
+                {{ $t("MintDetailsDialog.actions.delete.label") }}
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </q-dialog>
+  </div>
 </template>
 
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import VueQrcode from "@chenfengyuan/vue-qrcode";
@@ -326,7 +337,6 @@ import RemoveMintDialog from "src/components/RemoveMintDialog.vue";
 import MintMotdMessage from "src/components/MintMotdMessage.vue";
 import MintAuditInfo from "src/components/MintAuditInfo.vue";
 import {
-  X as CloseIcon,
   QrCode as QrCodeIcon,
   Link as LinkIcon,
   Nut as NutIcon,
@@ -341,10 +351,10 @@ import {
 } from "lucide-vue-next";
 
 export default defineComponent({
-  name: "MintInfoDialog",
+  name: "MintDetailsPage",
+  mixins: [windowMixin],
   components: {
     VueQrcode,
-    CloseIcon,
     QrCodeIcon,
     LinkIcon,
     NutIcon,
@@ -392,12 +402,13 @@ export default defineComponent({
       },
       motdDismissed: false,
       settings: useSettingsStore(),
+      mintData: {},
+      mintToEdit: {},
+      mintToRemove: {},
     };
   },
   computed: {
-    ...mapState(useMintsStore, ["showMintInfoData"]),
     ...mapWritableState(useMintsStore, [
-      "showMintInfoDialog",
       "showEditMintDialog",
       "showRemoveMintDialog",
     ]),
@@ -414,13 +425,9 @@ export default defineComponent({
     visibleNuts() {
       // Return only the nuts that are both in our filtered list and supported by the mint
       const result = {};
-      if (
-        this.showMintInfoData &&
-        this.showMintInfoData.info &&
-        this.showMintInfoData.info.nuts
-      ) {
+      if (this.mintData && this.mintData.info && this.mintData.info.nuts) {
         Object.keys(this.filteredNutNames).forEach((nutNumber) => {
-          if (this.showMintInfoData.info.nuts[nutNumber]) {
+          if (this.mintData.info.nuts[nutNumber]) {
             result[nutNumber] = this.filteredNutNames[nutNumber];
           }
         });
@@ -428,15 +435,19 @@ export default defineComponent({
       return result;
     },
     mintUnits() {
-      if (this.showMintInfoData) {
-        const mintClassInstance = new MintClass(this.showMintInfoData);
+      if (this.mintData) {
+        const mintClassInstance = new MintClass(this.mintData);
         return mintClassInstance.units;
       }
       return [];
     },
   },
   methods: {
-    ...mapActions(useMintsStore, ["removeMint"]),
+    ...mapActions(useMintsStore, [
+      "removeMint",
+      "fetchMintInfo",
+      "triggerMintInfoMotdChanged",
+    ]),
     shortenText: function (text, maxLength) {
       if (text.length > maxLength) {
         return text.substring(0, maxLength) + "...";
@@ -446,33 +457,85 @@ export default defineComponent({
     copyText(text) {
       navigator.clipboard.writeText(text);
       this.$q.notify({
-        message: "Copied to clipboard",
+        message: this.$i18n.t("global.copy_to_clipboard.success"),
         color: "positive",
         position: "top",
         timeout: 1000,
       });
     },
     openEditMintDialog() {
-      this.mintToEdit = Object.assign({}, this.showMintInfoData);
-      this.editMintData = Object.assign({}, this.showMintInfoData);
+      this.mintToEdit = Object.assign({}, this.mintData);
       this.showEditMintDialog = true;
     },
     openRemoveMintDialog() {
-      this.mintToRemove = Object.assign({}, this.showMintInfoData);
+      this.mintToRemove = Object.assign({}, this.mintData);
       this.showRemoveMintDialog = true;
     },
+    openCreateReviewDialog() {
+      // Navigate to create review page
+      this.$router.push({
+        path: "/createreview",
+        query: {
+          mintUrl: this.mintData.url,
+        },
+      });
+    },
+    dismissMotd() {
+      // Handle MOTD dismissal
+      this.motdDismissed = true;
+    },
+    async refreshMintInfo() {
+      try {
+        console.log("Refreshing mint info for:", this.mintData.url);
+        const newMintInfo = await this.fetchMintInfo(this.mintData);
+        this.triggerMintInfoMotdChanged(newMintInfo, this.mintData, false);
+        const mintsStore = useMintsStore();
+        const target = mintsStore.mints.find(
+          (m) => m.url === this.mintData.url
+        );
+        if (target) {
+          target.info = newMintInfo;
+        }
+        if (this.mintData) {
+          this.mintData.info = newMintInfo;
+        }
+      } catch (error) {
+        console.log("Failed to fetch mint info:", error);
+      }
+    },
+  },
+  created() {
+    // Get mint data from query params or store
+    if (this.$route.query.mintUrl) {
+      const mintsStore = useMintsStore();
+      const mint = mintsStore.mints.find(
+        (m) => m.url === this.$route.query.mintUrl
+      );
+      if (mint) {
+        this.mintData = mint;
+        this.refreshMintInfo();
+      } else {
+        // Mint not found, redirect back
+        this.$router.push("/");
+      }
+    } else {
+      // No mint URL provided, redirect back
+      this.$router.push("/");
+    }
   },
 });
 </script>
 
-<style>
-.fullscreen {
-  position: fixed;
+<style scoped>
+.mint-details-page-content {
+  max-width: 600px;
+  margin: 0 auto;
+  color: white;
+  height: 100%;
+  overflow-y: auto;
+  position: absolute;
   top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 6000;
+  width: 100%;
 }
 
 .mint-content-container {
@@ -486,11 +549,11 @@ export default defineComponent({
 
 /* Top Icons */
 .top-icons {
+  padding-top: 10px;
+  position: relative;
   width: 100%;
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
+  justify-content: center;
 }
 
 /* Mint Header */
@@ -499,6 +562,7 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   width: 100%;
+  margin-top: 50px;
 }
 
 .mint-header {
@@ -565,6 +629,7 @@ export default defineComponent({
   font-size: 14px;
   font-weight: 600;
   color: #ffffff;
+  text-transform: uppercase;
 }
 
 /* Contact Section */
@@ -698,14 +763,6 @@ export default defineComponent({
 
 .delete-button {
   color: #ff453a;
-}
-
-/* Remove old action button styles that are no longer needed */
-.edit-mint-button,
-.delete-mint-button,
-.action-buttons,
-.action-buttons-row {
-  display: none;
 }
 
 /* QR Code Container and Animation */

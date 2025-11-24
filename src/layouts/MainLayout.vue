@@ -7,7 +7,7 @@
   </q-layout>
 </template>
 
-<script>
+<script lang="ts">
 import { defineComponent, ref } from "vue";
 import MainHeader from "components/MainHeader.vue";
 

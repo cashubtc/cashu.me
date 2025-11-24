@@ -9,11 +9,7 @@
           enter-active-class="animated pulse"
           leave-active-class="animated fadeOut"
         >
-          <q-spinner-hourglass
-            class="q-mt-lg q-mb-none"
-            size="lg"
-            color="primary"
-          />
+          <q-spinner class="q-mt-lg q-mb-none" size="lg" color="primary" />
         </transition>
       </div>
       <div v-else>
@@ -22,7 +18,7 @@
           enter-active-class="animated pulse"
           leave-active-class="animated fadeOut"
         >
-          <ToggleUnit class="q-mt-lg q-mb-none" :balanceView="true" />
+          <ToggleUnit class="q-mt-lg q-mb-none" />
         </transition>
       </div>
     </div>
@@ -63,25 +59,31 @@
                   />
                 </strong>
               </h3>
-              <div v-if="bitcoinPrice">
+              <div v-if="bitcoinPrice" class="q-mt-sm">
                 <strong v-if="this.activeUnit == 'sat'">
                   <AnimatedNumber
-                    :value="(bitcoinPrice / 100000000) * getTotalBalance"
-                    :format="(val) => formatCurrency(val, 'USD')"
+                    :value="
+                      (currentCurrencyPrice / 100000000) * getTotalBalance
+                    "
+                    :format="(val) => formatCurrency(val, bitcoinPriceCurrency)"
                   />
                 </strong>
                 <strong
                   v-if="this.activeUnit == 'usd' || this.activeUnit == 'eur'"
                 >
                   <AnimatedNumber
-                    :value="(getTotalBalance / 100 / bitcoinPrice) * 100000000"
+                    :value="
+                      (getTotalBalance / 100 / currentCurrencyPrice) * 100000000
+                    "
                     :format="(val) => formatCurrency(val, 'sat')"
                   />
                 </strong>
                 <q-tooltip>
-                  {{ formatCurrency(bitcoinPrice, "USD").slice(1) }}
-                  USD/BTC</q-tooltip
-                >
+                  1 BTC =
+                  {{
+                    formatCurrency(currentCurrencyPrice, bitcoinPriceCurrency)
+                  }}
+                </q-tooltip>
               </div>
             </div>
           </div>
@@ -94,7 +96,7 @@
     >
       <div class="col-12">
         <q-badge outline color="red" class="q-mr-xs q-mt-sm text-weight-bold">
-          Mint error
+          {{ $t("BalanceView.mintError.label") }}
           <q-icon name="error" class="q-ml-xs" />
         </q-badge>
       </div>
@@ -103,7 +105,7 @@
     <div class="row q-mt-md q-mb-none text-secondary" v-if="activeMintUrl">
       <div class="col-12 cursor-pointer">
         <span class="text-weight-light" @click="setTab('mints')">
-          Mint: <b>{{ activeMintLabel }}</b>
+          {{ $t("BalanceView.mintUrl.label") }}: <b>{{ activeMintLabel }}</b>
         </span>
       </div>
     </div>
@@ -111,7 +113,7 @@
     <div class="row q-mb-none text-secondary" v-if="mints.length > 1">
       <div class="col-12">
         <span class="q-my-none q-py-none text-weight-regular">
-          Balance:
+          {{ $t("BalanceView.mintBalance.label") }}:
           <b>
             <AnimatedNumber
               :value="getActiveBalance"
@@ -135,16 +137,17 @@
         outline
         class="q-mx-none q-mt-xs q-pr-sm cursor-pointer"
         @click="checkPendingTokens()"
-        ><q-icon name="history" size="1rem" class="q-mx-xs" /> Pending:
+        ><q-icon name="history" size="1rem" class="q-mx-xs" />
+        {{ $t("BalanceView.pending.label") }}:
         {{ formatCurrency(pendingBalance, this.activeUnit) }}
-        <q-tooltip>Check all pending tokens</q-tooltip>
+        <q-tooltip>{{ $t("BalanceView.pending.tooltip") }}</q-tooltip>
       </q-btn>
     </div>
   </div>
   <!-- </q-card-section>
   </q-card> -->
 </template>
-<script>
+<script lang="ts">
 import { defineComponent, ref } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapState, mapWritableState, mapActions } from "pinia";
@@ -181,7 +184,12 @@ export default defineComponent({
     ]),
     ...mapState(useTokensStore, ["historyTokens"]),
     ...mapState(useUiStore, ["globalMutexLock"]),
-    ...mapState(usePriceStore, ["bitcoinPrice"]),
+    ...mapState(usePriceStore, [
+      "bitcoinPrice",
+      "bitcoinPrices",
+      "currentCurrencyPrice",
+    ]),
+    ...mapState(useSettingsStore, ["bitcoinPriceCurrency"]),
     ...mapWritableState(useMintsStore, ["activeUnit"]),
     ...mapWritableState(useUiStore, ["hideBalance", "lastBalanceCached"]),
     pendingBalance: function () {
@@ -228,11 +236,11 @@ export default defineComponent({
     };
   },
   mounted() {
-    this.fetchBitcoinPriceUSD();
+    this.fetchBitcoinPrice();
   },
   methods: {
     ...mapActions(useWalletStore, ["checkPendingTokens"]),
-    ...mapActions(usePriceStore, ["fetchBitcoinPriceUSD"]),
+    ...mapActions(usePriceStore, ["fetchBitcoinPrice"]),
     toggleUnit: function () {
       const units = this.activeMint().units;
       this.activeUnit =

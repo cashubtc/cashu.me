@@ -11,6 +11,7 @@ import { useMintsStore } from "./mints";
 import { useSendTokensStore } from "./sendTokensStore";
 import { useNostrStore } from "./nostr";
 import { useTokensStore } from "./tokens";
+import type { HistoryToken } from "./tokens";
 import token from "src/js/token";
 import {
   notify,
@@ -21,20 +22,57 @@ import {
 import { useLocalStorage } from "@vueuse/core";
 import { v4 as uuidv4 } from "uuid";
 
+export type OurPaymentRequest = {
+  id: string; // UUID from PaymentRequest
+  encoded: string;
+  unit?: string;
+  mints?: string[];
+  memo?: string;
+  createdAt: string;
+  receivedPaymentIds: string[]; // HistoryToken ids mapped to this PR
+};
+
 export const usePRStore = defineStore("payment-request", {
   state: () => ({
     showPRDialog: false,
     showPRKData: "" as string,
-    enablePaymentRequest: useLocalStorage<boolean>("cashu.pr.enable", false),
+    enablePaymentRequest: useLocalStorage<boolean>("cashu.pr.enable", true),
     receivePaymentRequestsAutomatically: useLocalStorage<boolean>(
       "cashu.pr.receive",
       false
     ),
+    ourPaymentRequests: useLocalStorage<OurPaymentRequest[]>(
+      "cashu.pr.ours",
+      []
+    ),
+    selectedPRIndex: useLocalStorage<number>("cashu.pr.selected_index", 0),
   }),
-  getters: {},
+  getters: {
+    currentPaymentRequest(state): OurPaymentRequest | undefined {
+      if (!state.ourPaymentRequests.length) return undefined;
+      const idx = Math.min(
+        Math.max(0, state.selectedPRIndex ?? 0),
+        state.ourPaymentRequests.length - 1
+      );
+      return state.ourPaymentRequests[idx];
+    },
+  },
   actions: {
-    newPaymentRequest(amount?: number, memo?: string, mintUrl?: string) {
+    newPaymentRequest(
+      amount?: number,
+      memo?: string,
+      mintUrl?: string,
+      forceNew: boolean = false
+    ) {
       const walletStore = useWalletStore();
+      // If not forcing a new request and we already have at least one,
+      // do not auto-create a new one; just show the currently selected.
+      if (!forceNew && this.ourPaymentRequests.length > 0) {
+        const current =
+          this.currentPaymentRequest || this.ourPaymentRequests[0];
+        this.showPRKData = current.encoded;
+        return;
+      }
       this.showPRKData = this.createPaymentRequest(amount, memo, mintUrl);
     },
     createPaymentRequest: function (
@@ -65,13 +103,85 @@ export const usePRStore = defineStore("payment-request", {
           : undefined,
         memo
       );
-      return paymentRequest.toEncodedRequest();
+      const encoded = paymentRequest.toEncodedRequest();
+      this.ensureStoredRequest(paymentRequest, encoded, memo);
+      this.showPRKData = encoded;
+      return encoded;
+    },
+    ensureStoredRequest(
+      request: PaymentRequest,
+      encoded: string,
+      memo?: string
+    ) {
+      const existIdx = this.ourPaymentRequests.findIndex(
+        (r) => r.id === request.id
+      );
+      const entry: OurPaymentRequest = {
+        id: request.id,
+        encoded,
+        unit: request.unit,
+        mints: request.mints,
+        memo,
+        createdAt: new Date().toISOString(),
+        receivedPaymentIds: [],
+      };
+      if (existIdx >= 0) {
+        // Update encoded/memo/unit/mints in case changed
+        this.ourPaymentRequests[existIdx] = {
+          ...this.ourPaymentRequests[existIdx],
+          ...entry,
+        };
+        this.selectedPRIndex = existIdx;
+      } else {
+        this.ourPaymentRequests.push(entry);
+        this.selectedPRIndex = this.ourPaymentRequests.length - 1;
+      }
+    },
+    selectPrevRequest() {
+      if (!this.ourPaymentRequests.length) return;
+      this.selectedPRIndex =
+        (this.selectedPRIndex - 1 + this.ourPaymentRequests.length) %
+        this.ourPaymentRequests.length;
+      this.showPRKData = this.ourPaymentRequests[this.selectedPRIndex].encoded;
+    },
+    selectNextRequest() {
+      if (!this.ourPaymentRequests.length) return;
+      this.selectedPRIndex =
+        (this.selectedPRIndex + 1) % this.ourPaymentRequests.length;
+      this.showPRKData = this.ourPaymentRequests[this.selectedPRIndex].encoded;
+    },
+    selectRequestByIndex(index: number) {
+      if (!this.ourPaymentRequests.length) return;
+      const idx = Math.min(
+        Math.max(0, index),
+        this.ourPaymentRequests.length - 1
+      );
+      this.selectedPRIndex = idx;
+      this.showPRKData = this.ourPaymentRequests[idx].encoded;
+    },
+    registerIncomingPaymentForRequest(
+      requestId: string,
+      historyTokenId: string
+    ) {
+      const pr = this.ourPaymentRequests.find((r) => r.id === requestId);
+      if (!pr) return;
+      if (!pr.receivedPaymentIds.includes(historyTokenId)) {
+        pr.receivedPaymentIds.push(historyTokenId);
+      }
+    },
+    getPaymentsForRequest(requestId: string) {
+      const tokensStore = useTokensStore();
+      const pr = this.ourPaymentRequests.find((r) => r.id === requestId);
+      if (!pr) return [];
+      return pr.receivedPaymentIds
+        .map((id) => tokensStore.historyTokens.find((t) => t.id === id))
+        .filter((t): t is HistoryToken => !!t);
     },
     async decodePaymentRequest(pr: string) {
       console.log("decodePaymentRequest", pr);
       const request: PaymentRequest = decodePaymentRequest(pr);
       console.log("decodePaymentRequest", request);
-      const mintsStore = useMintsStore();
+      const mintsStore = useMintsStore() as any;
       // activate the mint in the payment request
       if (request.mints && request.mints.length > 0) {
         let foundMint = false;
@@ -84,9 +194,9 @@ export const usePRStore = defineStore("payment-request", {
           }
         }
         if (!foundMint) {
-          notifyError("We do not know the mint in the payment request");
+          notifyError(`This payment requires using the mint: ${request.mints}`);
           throw new Error(
-            `We do not know the mint in the payment request: ${request.mints}`
+            `This payment requires using the mint: ${request.mints}`
           );
         }
       }
@@ -113,37 +223,51 @@ export const usePRStore = defineStore("payment-request", {
         sendTokenStore.sendData.amount =
           request.amount / mintsStore.activeUnitCurrencyMultiplyer;
       }
+      // Also make sure this decoded request gets stored (e.g., if user pasted an older one)
+      try {
+        const encoded = pr;
+        this.ensureStoredRequest(request, encoded);
+        this.showPRKData = encoded;
+      } catch (e) {
+        // noop
+      }
       sendTokenStore.sendData.paymentRequest = request;
       if (!sendTokenStore.showSendTokens) {
         // show the send dialog
         sendTokenStore.showSendTokens = true;
       }
     },
-    async parseAndPayPaymentRequest(request: PaymentRequest, tokenStr: string) {
-      const transports: PaymentRequestTransport[] = request.transport;
+    async parseAndPayPaymentRequest(
+      request: PaymentRequest,
+      tokenStr: string
+    ): Promise<boolean> {
+      const transports: PaymentRequestTransport[] = request.transport ?? [];
       for (const transport of transports) {
         if (transport.type == PaymentRequestTransportType.NOSTR) {
-          await this.payNostrPaymentRequest(request, transport, tokenStr);
-          return;
+          return await this.payNostrPaymentRequest(
+            request,
+            transport,
+            tokenStr
+          );
         }
         if (transport.type == PaymentRequestTransportType.POST) {
-          await this.payPostPaymentRequest(request, transport, tokenStr);
-          return;
+          return await this.payPostPaymentRequest(request, transport, tokenStr);
         }
       }
+      throw new Error("Unsupported payment request transport.");
     },
     async payNostrPaymentRequest(
       request: PaymentRequest,
       transport: PaymentRequestTransport,
       tokenStr: string
-    ) {
+    ): Promise<boolean> {
       console.log("payNostrPaymentRequest", request, tokenStr);
       console.log("transport", transport);
       const nostrStore = useNostrStore();
       const decodedToken = token.decode(tokenStr);
       if (!decodedToken) {
         console.error("could not decode token");
-        return;
+        throw new Error("Could not decode ecash token.");
       }
       const proofs = token.getProofs(decodedToken);
       const mint = token.getMint(decodedToken);
@@ -161,21 +285,22 @@ export const usePRStore = defineStore("payment-request", {
         );
       } catch (error) {
         console.error("Error paying payment request:", error);
-        notifyError("Could not pay request");
+        throw error;
       }
       notifySuccess("Payment sent");
+      return true;
     },
     async payPostPaymentRequest(
       request: PaymentRequest,
       transport: PaymentRequestTransport,
       tokenStr: string
-    ) {
+    ): Promise<boolean> {
       console.log("payPostPaymentRequest", request, tokenStr);
       // get the endpoint from the transport target and make an HTTP POST request with the paymentPayload as the body
       const decodedToken = token.decode(tokenStr);
       if (!decodedToken) {
         console.error("could not decode token");
-        return;
+        throw new Error("Could not decode ecash token.");
       }
       const proofs = token.getProofs(decodedToken);
       const unit = token.getUnit(decodedToken);
@@ -197,14 +322,14 @@ export const usePRStore = defineStore("payment-request", {
         });
         if (!response.ok) {
           console.error("Error paying payment request:", response.statusText);
-          notifyError("Could not pay request");
-          return;
+          throw new Error(response.statusText);
         }
         notifySuccess("Payment sent");
       } catch (error) {
         console.error("Error paying payment request:", error);
-        notifyError("Could not pay request");
+        throw error;
       }
+      return true;
     },
   },
 });

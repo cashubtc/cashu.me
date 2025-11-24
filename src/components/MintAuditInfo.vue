@@ -1,7 +1,7 @@
 <template>
   <div class="q-mt-lg q-mb-lg">
     <div class="text-caption q-mx-sm" v-if="loading">
-      <q-spinner-hourglass color="grey" size="20px" class="q-mr-sm" />
+      <q-spinner color="grey" size="20px" class="q-mr-sm" />
       Loading audit info...
     </div>
     <div v-else-if="mintNotAudited" class="q-mx-sm">
