@@ -1,8 +1,6 @@
 import { defineStore } from "pinia";
 import NDK, {
   NDKEvent,
-  NDKNip07Signer,
-  NDKNip46Signer,
   NDKFilter,
   NDKPrivateKeySigner,
   NDKKind,
@@ -14,8 +12,7 @@ import { nip04, generateSecretKey, getPublicKey } from "nostr-tools";
 import { useMintsStore } from "./mints";
 import { useWalletStore, InvoiceHistory } from "./wallet";
 import { useProofsStore } from "./proofs";
-import { notify, notifyError, notifyWarning } from "../js/notify";
-import { useSettingsStore } from "./settings";
+import { notifyWarning } from "../js/notify";
 import { useNostrStore } from "./nostr";
 import { decode as decodeBolt11 } from "light-bolt11-decoder";
 
@@ -105,7 +102,7 @@ export const useNWCStore = defineStore("nwc", {
       };
     },
     handleGetBalance: async function (nwcCommand: NWCCommand) {
-      const mintsStore = useMintsStore();
+      const mintsStore = useMintsStore() as any;
       console.log("### get_balance", nwcCommand.method);
       return {
         result_type: "get_balance",
@@ -189,10 +186,8 @@ export const useNWCStore = defineStore("nwc", {
       console.log("### expiry", expiry); // seconds
       // make invoice
       const walletStore = useWalletStore();
-      const quote = await walletStore.requestMint(
-        amount / 1000,
-        walletStore.wallet
-      );
+      const wallet = await walletStore.activeWallet();
+      const quote = await walletStore.requestMint(amount / 1000, wallet);
       if (!quote) {
         // requesting mint invoice can fail if no mint was selected yet
         // the error will have been shown as a notification
@@ -441,7 +436,7 @@ export const useNWCStore = defineStore("nwc", {
       });
       this.ndk.connect();
 
-      const nip47InfoEvent = new NDKEvent(this.ndk);
+      const nip47InfoEvent = new NDKEvent(this.ndk as NDK);
       nip47InfoEvent.kind = NWCKind.NWCInfo;
       nip47InfoEvent.content = this.supportedMethods.join(" ");
       try {

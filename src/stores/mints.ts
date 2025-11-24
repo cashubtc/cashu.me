@@ -1,29 +1,24 @@
-import { defineStore, StoreDefinition } from "pinia";
+import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { useWorkersStore } from "./workers";
-import { notifyApiError, notifyError, notifySuccess } from "src/js/notify";
+import { notifyError, notifySuccess } from "src/js/notify";
 import {
-  CashuMint,
+  Mint,
   MintKeys,
-  MintAllKeysets,
-  MintActiveKeys,
   Proof,
   SerializedBlindedSignature,
   MintKeyset,
   GetInfoResponse,
 } from "@cashu/cashu-ts";
 import { useUiStore } from "./ui";
-import { cashuDb } from "src/stores/dexie";
-import { liveQuery } from "dexie";
-import { ref, computed, watch } from "vue";
+import { ref, watch } from "vue";
 import { useProofsStore } from "./proofs";
-import { useI18n } from "vue-i18n";
 import { i18n } from "src/boot/i18n";
 import { useSettingsStore } from "./settings";
 import { useNostrMintBackupStore } from "./nostrMintBackup";
 import { bytesToHex } from "@noble/hashes/utils"; // already an installed dependency
 
-export type Mint = {
+export type StoredMint = {
   url: string;
   keys: MintKeys[];
   keysets: MintKeyset[];
@@ -34,16 +29,16 @@ export type Mint = {
   multinutSelected?: boolean;
   lastInfoUpdated?: string;
   lastKeysetsUpdated?: string;
-  // initialize api: new CashuMint(url) on activation
+  // initialize api: new Mint(url) on activation
 };
 
 export class MintClass {
-  mint: Mint;
-  constructor(mint: Mint) {
+  mint: StoredMint;
+  constructor(mint: StoredMint) {
     this.mint = mint;
   }
   get api() {
-    return new CashuMint(this.mint.url);
+    return new Mint(this.mint.url);
   }
   get proofs() {
     const proofsStore = useProofsStore();
@@ -113,7 +108,7 @@ export const useMintsStore = defineStore("mints", {
       url: "",
       nickname: "",
     });
-    const mints = useLocalStorage("cashu.mints", [] as Mint[]);
+    const mints = useLocalStorage("cashu.mints", [] as StoredMint[]);
     const showAddMintDialog = ref(false);
     const addMintBlocking = ref(false);
     const showRemoveMintDialog = ref(false);
@@ -258,14 +253,14 @@ export const useMintsStore = defineStore("mints", {
         throw new Error("No active mint");
       }
     },
-    mintUnitProofs(mint: Mint, unit: string): WalletProof[] {
+    mintUnitProofs(mint: StoredMint, unit: string): WalletProof[] {
       const proofsStore = useProofsStore();
       const unitKeysets = mint.keysets.filter((k) => k.unit === unit);
       return proofsStore.proofs.filter(
         (p) => unitKeysets.map((k) => k.id).includes(p.id) && !p.reserved
       );
     },
-    mintUnitKeysets(mint: Mint, unit: string): MintKeyset[] {
+    mintUnitKeysets(mint: StoredMint, unit: string): MintKeyset[] {
       return mint.keysets.filter((k) => k.unit === unit);
     },
     toggleUnit: function () {
@@ -274,7 +269,7 @@ export const useMintsStore = defineStore("mints", {
         units[(units.indexOf(this.activeUnit) + 1) % units.length];
       return this.activeUnit;
     },
-    toggleActiveUnitForMint(mint: Mint) {
+    toggleActiveUnitForMint(mint: StoredMint) {
       // method to set the active unit to one that is supported by `mint`
       const mintClass = new MintClass(mint);
       if (
@@ -284,7 +279,7 @@ export const useMintsStore = defineStore("mints", {
         this.activeUnit = mintClass.units[0];
       }
     },
-    updateMint(oldMint: Mint, newMint: Mint) {
+    updateMint(oldMint: StoredMint, newMint: StoredMint) {
       const index = this.mints.findIndex((m) => m.url === oldMint.url);
       this.mints[index] = newMint;
     },
@@ -310,7 +305,7 @@ export const useMintsStore = defineStore("mints", {
     addMint: async function (
       addMintData: { url: string; nickname?: string },
       verbose = false
-    ): Promise<Mint> {
+    ): Promise<StoredMint> {
       let url = addMintData.url;
       this.addMintBlocking = true;
       try {
@@ -325,7 +320,7 @@ export const useMintsStore = defineStore("mints", {
         };
         url = sanitizeUrl(url);
 
-        const mintToAdd: Mint = {
+        const mintToAdd: StoredMint = {
           url: url,
           keys: [],
           keysets: [],
@@ -410,7 +405,7 @@ export const useMintsStore = defineStore("mints", {
       const worker = useWorkersStore();
       worker.clearAllWorkers();
     },
-    updateMintInfoAndKeys: async function (mint: Mint) {
+    updateMintInfoAndKeys: async function (mint: StoredMint) {
       const newMintInfo = await this.fetchMintInfo(mint);
       this.triggerMintInfoMotdChanged(newMintInfo, mint);
       mint = await this.fetchMintKeys(mint);
@@ -419,7 +414,11 @@ export const useMintsStore = defineStore("mints", {
       mintToUpdate.errored = false;
       return mint;
     },
-    activateMint: async function (mint: Mint, verbose = false, force = false) {
+    activateMint: async function (
+      mint: StoredMint,
+      verbose = false,
+      force = false
+    ) {
       if (mint.url === this.activeMintUrl && !force) {
         return;
       }
@@ -456,7 +455,7 @@ export const useMintsStore = defineStore("mints", {
         await uIStore.unlockMutex();
       }
     },
-    checkMintInfoMotdChanged(newMintInfo: GetInfoResponse, mint: Mint) {
+    checkMintInfoMotdChanged(newMintInfo: GetInfoResponse, mint: StoredMint) {
       // if mint doesn't have info yet, we don't need to trigger the motd change
       if (!this.mints.find((m) => m.url === mint.url)?.info) {
         return false;
@@ -469,7 +468,7 @@ export const useMintsStore = defineStore("mints", {
     },
     triggerMintInfoMotdChanged(
       newMintInfo: GetInfoResponse,
-      mint: Mint,
+      mint: StoredMint,
       navigate = true
     ) {
       if (!this.checkMintInfoMotdChanged(newMintInfo, mint)) {
@@ -485,7 +484,7 @@ export const useMintsStore = defineStore("mints", {
         )}`;
       }
     },
-    fetchMintInfo: async function (mint: Mint) {
+    fetchMintInfo: async function (mint: StoredMint) {
       try {
         const mintClass = new MintClass(mint);
         const data = await mintClass.api.getInfo();
@@ -506,7 +505,7 @@ export const useMintsStore = defineStore("mints", {
       }
     },
     checkForMintKeysetIdCollisions: async function (
-      mintToAdd: Mint,
+      mintToAdd: StoredMint,
       keysets: MintKeyset[]
     ) {
       // check if there are any keysets with the same id in another mint
@@ -539,7 +538,7 @@ export const useMintsStore = defineStore("mints", {
       }
       return true;
     },
-    fetchMintKeys: async function (mint: Mint): Promise<Mint> {
+    fetchMintKeys: async function (mint: StoredMint): Promise<StoredMint> {
       try {
         const mintClass = new MintClass(mint);
         const keysets = await this.fetchMintKeysets(mint);
@@ -575,7 +574,7 @@ export const useMintsStore = defineStore("mints", {
         throw error;
       }
     },
-    fetchMintKeysets: async function (mint: Mint) {
+    fetchMintKeysets: async function (mint: StoredMint) {
       // fetches and stores keysets for a mint
       try {
         const mintClass = new MintClass(mint);

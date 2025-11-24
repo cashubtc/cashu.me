@@ -1,13 +1,10 @@
-import { useLocalStorage } from "@vueuse/core";
-import { date } from "quasar";
 import { defineStore } from "pinia";
 import {
   PaymentRequest,
-  Proof,
   Token,
-  MeltQuoteResponse,
+  MeltQuoteBolt11Response,
 } from "@cashu/cashu-ts";
-import { Mint, useMintsStore } from "./mints";
+import { StoredMint, useMintsStore } from "./mints";
 import { useWalletStore } from "./wallet";
 import { useProofsStore } from "./proofs";
 import { notifyError, notifyWarning } from "../js/notify";
@@ -33,7 +30,7 @@ export type HistoryToken = {
   unit: string;
   paymentRequest?: PaymentRequest;
   fee?: number;
-  meltQuote?: MeltQuoteResponse;
+  meltQuote?: MeltQuoteBolt11Response;
   paidDate?: string;
 };
 
@@ -112,7 +109,7 @@ export const useSwapStore = defineStore("swap", {
       } catch (e) {}
       return tokenAmount - meltAmount;
     },
-    meltProofsToMint: async function (tokenJson: Token, mint: Mint) {
+    meltProofsToMint: async function (tokenJson: Token, mint: StoredMint) {
       const proofsStore = useProofsStore();
       const walletStore = useWalletStore();
       if (this.swapBlocking) {
