@@ -2131,6 +2131,7 @@ export default defineComponent({
         this.activeMintUrl,
         this.activeUnit
       );
+      await wallet.loadMint();
       let proofs = this.activeProofs.flat();
       console.log("Checking proofs", proofs);
       let allSpentProofs = [];

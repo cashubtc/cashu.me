@@ -913,6 +913,7 @@ export default defineComponent({
               mint.url,
               useMintsStore().activeUnit
             );
+            await mintWallet.loadMint();
             try {
               this.setMintState(mint.url, "requesting");
               const quote = await this.meltQuote(
@@ -943,6 +944,7 @@ export default defineComponent({
                 mint.url,
                 activeUnit
               );
+              await mintWallet.loadMint();
               const mintClass = new MintClass(mint);
               const proofs = mintClass.unitProofs(activeUnit);
               const result = await this.melt(
