@@ -504,7 +504,8 @@ export default {
           button: "Import wallet backup",
           description:
             "Restore your wallet from a previously exported backup file. This will replace your current wallet data with the backup.",
-          confirm_question: "Are you sure you want to restore your wallet data?",
+          confirm_question:
+            "Are you sure you want to restore your wallet data?",
           cancel: "Cancel",
           confirm: "IMPORT WALLET BACKUP",
         },
