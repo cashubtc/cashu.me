@@ -1775,6 +1775,70 @@
               <q-item>
                 <q-item-section>
                   <row>
+                    <q-btn
+                      v-if="!confirmImport"
+                      dense
+                      flat
+                      outline
+                      click
+                      @click="confirmImport = !confirmImport"
+                    >
+                      {{
+                        $t("Settings.advanced.developer.import_wallet.button")
+                      }}
+                    </q-btn>
+                  </row>
+                  <row v-if="!confirmImport">
+                    <q-item-label class="q-px-sm" caption
+                      >{{
+                        $t(
+                          "Settings.advanced.developer.import_wallet.description"
+                        )
+                      }}
+                    </q-item-label>
+                  </row>
+                  <row v-if="confirmImport">
+                    <span>{{
+                      $t(
+                        "Settings.advanced.developer.import_wallet.confirm_question"
+                      )
+                    }}</span>
+                    <q-btn
+                      flat
+                      dense
+                      class="q-ml-sm"
+                      color="primary"
+                      @click="confirmImport = false"
+                      >{{
+                        $t("Settings.advanced.developer.import_wallet.cancel")
+                      }}</q-btn
+                    >
+                    <q-btn
+                      flat
+                      dense
+                      class="q-ml-sm"
+                      color="warning"
+                      @click="
+                        confirmImport = false;
+                        browseBackupFile();
+                      "
+                      >{{
+                        $t("Settings.advanced.developer.import_wallet.confirm")
+                      }}</q-btn
+                    >
+                  </row>
+                  <input
+                    type="file"
+                    ref="fileUpload"
+                    accept=".json"
+                    style="display: none"
+                    @change="onChangeFileUpload"
+                  />
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>
+                  <row>
                     <q-btn dense flat outline click @click="exportWalletState">
                       {{
                         $t("Settings.advanced.developer.export_wallet.button")
@@ -1905,6 +1969,7 @@ export default defineComponent({
       hideMnemonic: true,
       confirmMnemonic: false,
       confirmNuke: false,
+      confirmImport: false,
       nip46Token: "",
       nip07SignerAvailable: false,
       newRelay: "",
@@ -2232,6 +2297,32 @@ export default defineComponent({
       } catch {}
       localStorage.clear();
       window.location.href = "/";
+    },
+    browseBackupFile: function () {
+      this.$refs.fileUpload.click();
+    },
+    onChangeFileUpload: function () {
+      const file = this.$refs.fileUpload.files[0];
+      if (file) {
+        this.readBackupFile(file);
+      }
+    },
+    readBackupFile: function (file) {
+      const reader = new FileReader();
+      reader.onload = (f) => {
+        try {
+          const content = f.target.result;
+          const backup = JSON.parse(content);
+          this.restoreFromBackup(backup);
+        } catch (error) {
+          console.error("Error reading backup file:", error);
+          this.notifyError("Invalid backup file format");
+        }
+      };
+      reader.onerror = () => {
+        this.notifyError("Error reading file");
+      };
+      reader.readAsText(file);
     },
     addRelay: function () {
       if (this.newRelay) {
