@@ -42,7 +42,7 @@ module.exports = configure(function (/* ctx */) {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli/boot-files
-    boot: ["base", "global-components", "cashu", "i18n"],
+    boot: ["base", "global-components", "cashu", "i18n", "bugstr"],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
     css: ["app.scss", "base.scss"],
@@ -78,7 +78,10 @@ module.exports = configure(function (/* ctx */) {
 
       // publicPath: '/',
       // analyze: true,
-      // env: {},
+      env: {
+        BUGSTR_NPUB: process.env.BUGSTR_NPUB || "",
+        BUGSTR_RELAYS: process.env.BUGSTR_RELAYS || "",
+      },
       // rawDefine: {}
       // ignorePublicFolder: true,
       // minify: false,
