@@ -240,6 +240,7 @@ import { useNPCV2Store } from "src/stores/npcv2";
 import { useNostrStore } from "src/stores/nostr";
 import { usePRStore } from "src/stores/payment-request";
 import { useDexieStore } from "src/stores/dexie";
+import { useWebNfcStore } from "src/stores/webNfcStore";
 
 import { useStorageStore } from "src/stores/storage";
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
@@ -313,7 +314,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(useUiStore, ["tickerShort"]),
+    ...mapState(useUiStore, ["tickerShort", "ndefSupported"]),
     ...mapWritableState(useUiStore, [
       "showInvoiceDetails",
       "showCreateInvoiceDialog",
@@ -348,6 +349,9 @@ export default {
     ...mapState(usePRStore, ["enablePaymentRequest"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     ...mapWritableState(useP2PKStore, ["showP2PKDialog"]),
+    webNfcStore() {
+      return useWebNfcStore();
+    },
     ...mapWritableState(useNWCStore, ["showNWCDialog", "nwcEnabled"]),
     pendingPaymentsExist: function () {
       return this.payments.findIndex((payment) => payment.pending) !== -1;
@@ -600,7 +604,17 @@ export default {
       });
     },
   },
-  watch: {},
+  watch: {
+    // Restart NFC scanner when send dialog closes (if NFC is supported)
+    showSendTokens: function (val) {
+      if (!val && this.ndefSupported) {
+        // Dialog closed - restart the scanner if not already scanning
+        if (!this.webNfcStore.isScanningPaymentRequest) {
+          this.webNfcStore.startPaymentRequestScanner();
+        }
+      }
+    },
+  },
 
   mounted: function () {
     // generate NPC connection
@@ -725,6 +739,17 @@ export default {
 
     // reconnect all websockets
     this.checkPendingInvoices();
+
+    // Start NFC payment request scanner if supported
+    if (this.ndefSupported) {
+      this.webNfcStore.startPaymentRequestScanner();
+    }
+  },
+  beforeUnmount: function () {
+    // Stop NFC scanner when component is destroyed
+    if (this.webNfcStore.isScanningPaymentRequest) {
+      this.webNfcStore.stopPaymentRequestScanner();
+    }
   },
 };
 </script>

@@ -473,8 +473,11 @@ export default defineComponent({
   watch: {
     showSendTokens: function (val) {
       if (val) {
-        // Start NFC scanner automatically when dialog opens
-        this.toggleNfcScanner();
+        // Start NFC scanner automatically when dialog opens (if not already scanning)
+        // WalletPage may already have started scanning, so check first
+        if (!this.webNfcStore.isScanningPaymentRequest) {
+          this.toggleNfcScanner();
+        }
 
         this.$nextTick(() => {
           // if we're entering the amount etc, show the keyboard
