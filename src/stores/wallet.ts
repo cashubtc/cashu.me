@@ -1424,7 +1424,7 @@ export const useWalletStore = defineStore("wallet", {
           } else if (tag.name === "timestamp") {
             cleanInvoice.timestamp = tag.value;
           } else if (tag.name === "expiry") {
-            var expireDate = new Date(
+            const expireDate = new Date(
               (cleanInvoice.timestamp + tag.value) * 1000
             );
             cleanInvoice.expireDate = date.formatDate(
@@ -1504,8 +1504,8 @@ export const useWalletStore = defineStore("wallet", {
       uiStore.closeDialogs();
     },
     lnurlPayFirst: async function (address: string) {
-      var host;
-      var data;
+      let host;
+      let data;
       if (address.split("@").length == 2) {
         let [user, lnaddresshost] = address.split("@");
         host = `https://${lnaddresshost}/.well-known/lnurlp/${user}`;
@@ -1592,7 +1592,7 @@ export const useWalletStore = defineStore("wallet", {
         }
         const callback = this.payInvoiceData.lnurlpay.callback;
         const separator = callback.includes("?") ? "&" : "?";
-        var { data } = await axios.get(
+        const { data } = await axios.get(
           `${callback}${separator}amount=${amount * 1000}`
         );
         // check http error

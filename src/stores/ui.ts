@@ -127,7 +127,7 @@ export const useUiStore = defineStore("ui", {
         return;
       }
       // enable debug terminal
-      var script = document.createElement("script");
+      let script = document.createElement("script");
       script.src = "//cdn.jsdelivr.net/npm/eruda";
       document.body.appendChild(script);
       script.onload = function () {

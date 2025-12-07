@@ -11,22 +11,21 @@ function escapeBase64Url(str) {
 const uint8ToBase64 = (function (exports) {
   "use strict";
 
-  var fromCharCode = String.fromCharCode;
-  var encode = function encode(uint8array) {
-    var output = [];
+  const encode = function encode(uint8array) {
+    let output = [];
 
-    for (var i = 0, length = uint8array.length; i < length; i++) {
-      output.push(fromCharCode(uint8array[i]));
+    for (let i = 0; i < uint8array.length; i++) {
+      output.push(String.fromCharCode(uint8array[i]));
     }
 
     return btoa(output.join(""));
   };
 
-  var asCharCode = function asCharCode(c) {
+  const asCharCode = function asCharCode(c) {
     return c.charCodeAt(0);
   };
 
-  var decode = function decode(chars) {
+  const decode = function decode(chars) {
     return Uint8Array.from(atob(chars), asCharCode);
   };
 

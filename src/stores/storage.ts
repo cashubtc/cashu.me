@@ -35,27 +35,27 @@ export const useStorageStore = defineStore("storage", {
       }
     },
     exportWalletState: async function () {
-      var jsonToSave: any = {};
-      for (var i = 0; i < localStorage.length; i++) {
-        var k = localStorage.key(i);
+      let jsonToSave: any = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
         if (!k) {
           continue;
         }
-        var v = localStorage.getItem(k);
+        const v = localStorage.getItem(k);
         jsonToSave[k] = v;
       }
       // proofs table *magic*
       const proofs = await useProofsStore().getProofs();
       jsonToSave["cashu.dexie.db.proofs"] = JSON.stringify(proofs);
 
-      var textToSave = JSON.stringify(jsonToSave);
-      var textToSaveAsBlob = new Blob([textToSave], {
+      const textToSave = JSON.stringify(jsonToSave);
+      const textToSaveAsBlob = new Blob([textToSave], {
         type: "text/plain",
       });
-      var textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
+      const textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
 
       const fileName = `cashu_me_backup_${currentDateStr()}.json`;
-      var downloadLink = document.createElement("a");
+      let downloadLink = document.createElement("a");
       downloadLink.download = fileName;
       downloadLink.innerHTML = "Download File";
       downloadLink.href = textToSaveAsURL;
@@ -145,7 +145,7 @@ export const useStorageStore = defineStore("storage", {
           0,
           sortedTokens.length - max_history
         );
-        for (var i = 0; i < deleteTokens.length; i++) {
+        for (let i = 0; i < deleteTokens.length; i++) {
           deleteTokens[i].token = undefined;
         }
       }

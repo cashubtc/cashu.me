@@ -175,7 +175,7 @@ window.windowMixin = {
       return new Intl.NumberFormat(window.LOCALE).format(value) + " msat";
     },
     notifyApiError: function (error) {
-      var types = {
+      const types = {
         400: "warning",
         401: "warning",
         500: "negative",
@@ -304,7 +304,7 @@ window.windowMixin = {
 
     // addEventListener("beforeunload", (event) => {
     //   event.preventDefault();
-    //   var dialogText = "Are you sure about this?";
+    //   const dialogText = "Are you sure about this?";
     //   event.returnValue = dialogText;
     //   return dialogText;
     // });

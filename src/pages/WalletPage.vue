@@ -652,8 +652,8 @@ export default {
       let tokenBase64 = params.get("token") || hash.split("token=")[1];
       // make sure to react only to tokens not in the users history
       let seen = false;
-      for (var i = 0; i < this.historyTokens.length; i++) {
-        var thisToken = this.historyTokens[i].token;
+      for (let i = 0; i < this.historyTokens.length; i++) {
+        const thisToken = this.historyTokens[i].token;
         if (thisToken == tokenBase64 && this.historyTokens[i].amount > 0) {
           seen = true;
         }
