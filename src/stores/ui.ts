@@ -107,12 +107,21 @@ export const useUiStore = defineStore("ui", {
       if (currency == "msat") return this.fromMsat(value);
       if (currency == "usd") value = value / 100;
       if (currency == "eur") value = value / 100;
-      return new Intl.NumberFormat(navigator.language, {
-        style: "currency",
-        currency: currency,
-      }).format(value);
-      // + " " +
-      // currency.toUpperCase()
+
+      if (currency.length !== 3) {
+        return (
+          new Intl.NumberFormat(navigator.language).format(value) +
+          " " +
+          currency.toUpperCase()
+        );
+      } else {
+        return new Intl.NumberFormat(navigator.language, {
+          style: "currency",
+          currency: currency,
+        }).format(value);
+        // + " " +
+        // currency.toUpperCase()
+      }
     },
     toggleDebugConsole() {
       this.showDebugConsole = !this.showDebugConsole;
