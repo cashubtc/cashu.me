@@ -353,7 +353,7 @@ export default defineComponent({
         this.sendData.amount * this.activeUnitCurrencyMultiplyer
       );
     },
-    // canSpendOffline: function (): boolean {
+    // canSpendOffline: async function (): boolean {
     //   if (!this.sendData.amount) {
     //     return false;
     //   }
@@ -364,6 +364,7 @@ export default defineComponent({
     //       this.sendData.amount * this.activeUnitCurrencyMultiplyer
     //     );
     //     const mintWallet = useWalletStore().wallet;
+    //     await mintWallet.loadMint();
     //     let selectedProofs = this.coinSelect(
     //       spendableProofs,
     //       mintWallet,
@@ -496,6 +497,7 @@ export default defineComponent({
         this.sendData.amount * this.activeUnitCurrencyMultiplyer
       );
       const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
+      await mintWallet.loadMint();
       const { sendProofs } = await this.send(
         this.activeProofs,
         mintWallet,
@@ -540,6 +542,7 @@ export default defineComponent({
       try {
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
         const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
+        await mintWallet.loadMint();
         let { _, sendProofs } = await this.sendToLock(
           this.activeProofs,
           mintWallet,
@@ -587,6 +590,7 @@ export default defineComponent({
           this.sendData.amount * this.activeUnitCurrencyMultiplyer
         );
         const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
+        await mintWallet.loadMint();
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
         let { _, sendProofs } = await this.send(
           this.activeProofs,
