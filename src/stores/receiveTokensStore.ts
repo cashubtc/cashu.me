@@ -35,7 +35,9 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
     },
     knowThisMintOfTokenJson: function (tokenJson: Token) {
       const mintStore = useMintsStore();
-      let uniqueIds = [...new Set(token.getProofs(tokenJson).map((p) => p.id))];
+      const uniqueIds = [
+        ...new Set(token.getProofs(tokenJson).map((p) => p.id)),
+      ];
       return mintStore.mints
         .map((m) => m.url)
         .includes(token.getMint(tokenJson));

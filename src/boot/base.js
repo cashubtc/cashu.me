@@ -116,8 +116,8 @@ window.windowMixin = {
       updateStatusBarMeta();
     },
     copyText: function (text, message, position) {
-      let notify = this.$q.notify;
-      let i18n = this.$i18n;
+      const notify = this.$q.notify;
+      const i18n = this.$i18n;
       copyToClipboard(text).then(function () {
         notify({
           message:

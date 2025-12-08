@@ -534,13 +534,13 @@ export default defineComponent({
       if (!this.sendData.amount) {
         throw new Error("Amount is required");
       }
-      let sendAmount = Math.floor(
+      const sendAmount = Math.floor(
         this.sendData.amount * this.activeUnitCurrencyMultiplyer
       );
       try {
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
         const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
-        let { _, sendProofs } = await this.sendToLock(
+        const { _, sendProofs } = await this.sendToLock(
           this.activeProofs,
           mintWallet,
           sendAmount,
@@ -583,12 +583,12 @@ export default defineComponent({
       }
 
       try {
-        let sendAmount = Math.floor(
+        const sendAmount = Math.floor(
           this.sendData.amount * this.activeUnitCurrencyMultiplyer
         );
         const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
-        let { _, sendProofs } = await this.send(
+        const { _, sendProofs } = await this.send(
           this.activeProofs,
           mintWallet,
           sendAmount,

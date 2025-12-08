@@ -630,12 +630,12 @@ export default {
     // check if another tab is open
     this.registerBroadcastChannel();
 
-    let params = new URL(document.location).searchParams;
-    let hash = new URL(document.location).hash;
+    const params = new URL(document.location).searchParams;
+    const hash = new URL(document.location).hash;
 
     // mint url
     if (params.get("mint")) {
-      let addMintUrl = params.get("mint");
+      const addMintUrl = params.get("mint");
       await this.setTab("mints");
       this.showAddMintDialog = true;
       this.addMintData = { url: addMintUrl };
@@ -649,7 +649,7 @@ export default {
 
     // get token to receive tokens from a link
     if (params.get("token") || hash.includes("token")) {
-      let tokenBase64 = params.get("token") || hash.split("token=")[1];
+      const tokenBase64 = params.get("token") || hash.split("token=")[1];
       // make sure to react only to tokens not in the users history
       let seen = false;
       for (let i = 0; i < this.historyTokens.length; i++) {

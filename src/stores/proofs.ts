@@ -118,23 +118,23 @@ export const useProofsStore = defineStore("proofs", {
     serializeProofs: function (proofs: Proof[]): string {
       const mintStore = useMintsStore();
       // unique keyset IDs of proofs
-      let uniqueIds = [...new Set(proofs.map((p) => p.id))];
+      const uniqueIds = [...new Set(proofs.map((p) => p.id))];
       // keysets with these uniqueIds
-      let keysets = mintStore.mints.flatMap((m) =>
+      const keysets = mintStore.mints.flatMap((m) =>
         m.keysets.filter((k) => uniqueIds.includes(k.id))
       );
       if (keysets.length === 0) {
         throw new Error("No keysets found for proofs");
       }
       // mints that have any of the keyset.id
-      let mints = mintStore.mints.filter((m) =>
+      const mints = mintStore.mints.filter((m) =>
         m.keysets.some((k) => uniqueIds.includes(k.id))
       );
       if (mints.length === 0) {
         throw new Error("No mints found for proofs");
       }
       // unit of keysets
-      let unit = keysets[0].unit;
+      const unit = keysets[0].unit;
       const token = {
         mint: mints[0].url,
         proofs: proofs,
@@ -158,13 +158,15 @@ export const useProofsStore = defineStore("proofs", {
     getProofsMint: function (proofs: WalletProof[]) {
       const mintStore = useMintsStore();
       // unique keyset IDs of proofs
-      let uniqueIds = [...new Set(proofs.map((p) => p.id))];
+      const uniqueIds = [...new Set(proofs.map((p) => p.id))];
       // mints that have any of the keyset IDs
-      let mints_keysets = mintStore.mints.filter((m) =>
+      const mints_keysets = mintStore.mints.filter((m) =>
         m.keysets.some((k) => uniqueIds.includes(k.id))
       );
       // what we put into the JSON
-      let mints = mints_keysets.map((m) => [{ url: m.url, ids: m.keysets }][0]);
+      const mints = mints_keysets.map(
+        (m) => [{ url: m.url, ids: m.keysets }][0]
+      );
       return mints[0];
     },
   },

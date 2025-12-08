@@ -12,7 +12,7 @@ const uint8ToBase64 = (function (exports) {
   "use strict";
 
   const encode = function encode(uint8array) {
-    let output = [];
+    const output = [];
 
     for (let i = 0; i < uint8array.length; i++) {
       output.push(String.fromCharCode(uint8array[i]));
