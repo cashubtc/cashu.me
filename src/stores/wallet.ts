@@ -1590,8 +1590,10 @@ export const useWalletStore = defineStore("wallet", {
           const usdAmount = amount;
           amount = Math.floor(usdAmount * satPrice);
         }
+        const callback = this.payInvoiceData.lnurlpay.callback;
+        const separator = callback.includes("?") ? "&" : "?";
         var { data } = await axios.get(
-          `${this.payInvoiceData.lnurlpay.callback}?amount=${amount * 1000}`
+          `${callback}${separator}amount=${amount * 1000}`
         );
         // check http error
         if (data.status == "ERROR") {
