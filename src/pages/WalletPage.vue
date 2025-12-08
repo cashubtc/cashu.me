@@ -410,13 +410,6 @@ export default {
       "checkPendingInvoices",
     ]),
     // TOKEN METHODS
-    decodeToken: function (encoded_token) {
-      try {
-        return token.decode(encoded_token);
-      } catch (e) {
-        return null;
-      }
-    },
     getProofs: function (decoded_token) {
       return token.getProofs(decoded_token);
     },

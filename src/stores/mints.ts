@@ -239,6 +239,9 @@ export const useMintsStore = defineStore("mints", {
         return 1;
       }
     },
+    allMintKeysets: function () {
+      return [].concat(...this.mints.map((m) => m.keysets));
+    },
   },
   actions: {
     activeMint() {
