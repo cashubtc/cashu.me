@@ -151,7 +151,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
                     const recordType = record.recordType;
                     let tokenStr = "";
                     switch (recordType) {
-                      case "text":
+                      case "text": {
                         const text = new TextDecoder().decode(record.data);
                         if (!text.startsWith("cashu")) {
                           throw new Error(
@@ -160,7 +160,8 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
                         }
                         tokenStr = text;
                         break;
-                      case "url":
+                      }
+                      case "url": {
                         const url = new TextDecoder().decode(record.data);
                         const i = url.indexOf("#token=cashu");
                         if (i === -1) {
@@ -168,7 +169,8 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
                         }
                         tokenStr = url.substring(i + 7);
                         break;
-                      case "mime":
+                      }
+                      case "mime": {
                         if (record.mediaType !== "application/octet-stream") {
                           throw new Error("binary data expected");
                         }
@@ -182,6 +184,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
                         const token = getDecodedTokenBinary(data);
                         tokenStr = getEncodedToken(token);
                         break;
+                      }
                       default:
                         throw new Error(`unsupported recordType ${recordType}`);
                     }

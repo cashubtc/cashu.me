@@ -78,7 +78,6 @@ module.exports = {
     "no-undef": "off",
     "no-empty": "off",
     "no-useless-catch": "off",
-    "no-case-declarations": "off",
     "no-constant-condition": "off",
   },
   overrides: [

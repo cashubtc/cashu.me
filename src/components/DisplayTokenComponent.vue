@@ -602,7 +602,7 @@ export default defineComponent({
                         },
                       ];
                       break;
-                    case "binary":
+                    case "binary": {
                       const decoded = getDecodedToken(
                         this.sendData.tokensBase64
                       );
@@ -615,6 +615,7 @@ export default defineComponent({
                         },
                       ];
                       break;
+                    }
                     default:
                       throw new Error(
                         `Unknown NFC encoding: ${this.nfcEncoding}`
