@@ -1,5 +1,5 @@
 # Stage 1: Build Phase
-FROM node:20.10.0-bullseye AS builder
+FROM node:24-bullseye AS builder
 
 WORKDIR /app
 
