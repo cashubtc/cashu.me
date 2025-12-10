@@ -732,7 +732,7 @@ export default defineComponent({
           if (partialAmounts[largestMint.url] > mintBalance) {
             // If the largest mint can't handle the adjustment, distribute the difference
             partialAmounts[largestMint.url] = mintBalance;
-            const remainingDifference =
+            let remainingDifference =
               difference - (mintBalance - largestAmount);
 
             // Find other mints that can handle the remaining difference
@@ -863,8 +863,7 @@ export default defineComponent({
       this.multiMeltButtonLoading = true;
 
       let mintsToQuotes = [];
-      let mintsToAmounts = [];
-      let remainder = 0.0;
+      const mintsToAmounts = [];
       let data;
 
       try {

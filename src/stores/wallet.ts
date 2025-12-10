@@ -311,7 +311,7 @@ export const useWalletStore = defineStore("wallet", {
       if (base64Proofs.length > 0) {
         base64Proofs.sort((a, b) => b.amount - a.amount);
         let sum = 0;
-        let selectedProofs: WalletProof[] = [];
+        const selectedProofs: WalletProof[] = [];
         for (let i = 0; i < base64Proofs.length; i++) {
           const proof = base64Proofs[i];
           sum += proof.amount;
@@ -488,14 +488,14 @@ export const useWalletStore = defineStore("wallet", {
       if (tokenJson == undefined) {
         throw new Error("no tokens provided.");
       }
-      let proofs = token.getProofs(tokenJson);
+      const proofs = token.getProofs(tokenJson);
       if (proofs.length == 0) {
         throw new Error("no proofs found.");
       }
       const inputAmount = proofs.reduce((s, t) => (s += t.amount), 0);
       let fee = 0;
-      let mintInToken = token.getMint(tokenJson);
-      let unitInToken = token.getUnit(tokenJson);
+      const mintInToken = token.getMint(tokenJson);
+      const unitInToken = token.getUnit(tokenJson);
 
       const historyToken = {
         amount: inputAmount,
@@ -860,7 +860,7 @@ export const useWalletStore = defineStore("wallet", {
         // delete spent tokens from db
         await proofsStore.removeProofs(sendProofs);
 
-        let amount_paid = amount - proofsStore.sumProofs(data.change);
+        const amount_paid = amount - proofsStore.sumProofs(data.change);
         useUiStore().vibrate();
         if (!silent) {
           notifySuccess(
@@ -1399,7 +1399,7 @@ export const useWalletStore = defineStore("wallet", {
         this.payInvoiceData.show = false;
         throw error;
       }
-      let cleanInvoice = {
+      const cleanInvoice = {
         bolt11: invoice.paymentRequest,
         memo: "",
         msat: 0,
@@ -1424,7 +1424,7 @@ export const useWalletStore = defineStore("wallet", {
           } else if (tag.name === "timestamp") {
             cleanInvoice.timestamp = tag.value;
           } else if (tag.name === "expiry") {
-            var expireDate = new Date(
+            const expireDate = new Date(
               (cleanInvoice.timestamp + tag.value) * 1000
             );
             cleanInvoice.expireDate = date.formatDate(
@@ -1504,15 +1504,15 @@ export const useWalletStore = defineStore("wallet", {
       uiStore.closeDialogs();
     },
     lnurlPayFirst: async function (address: string) {
-      var host;
-      var data;
+      let host;
+      let data;
       if (address.split("@").length == 2) {
-        let [user, lnaddresshost] = address.split("@");
+        const [user, lnaddresshost] = address.split("@");
         host = `https://${lnaddresshost}/.well-known/lnurlp/${user}`;
         const resp = await axios.get(host); // Moved it here: we don't want 2 potential calls
         data = resp.data;
       } else if (address.toLowerCase().slice(0, 6) === "lnurl1") {
-        let decoded = bech32.decode(address, 20000);
+        const decoded = bech32.decode(address, 20000);
         const words = bech32.fromWords(decoded.words);
         const uint8Array = new Uint8Array(words);
         host = new TextDecoder().decode(uint8Array);
@@ -1592,7 +1592,7 @@ export const useWalletStore = defineStore("wallet", {
         }
         const callback = this.payInvoiceData.lnurlpay.callback;
         const separator = callback.includes("?") ? "&" : "?";
-        var { data } = await axios.get(
+        const { data } = await axios.get(
           `${callback}${separator}amount=${amount * 1000}`
         );
         // check http error
