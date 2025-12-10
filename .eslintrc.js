@@ -17,7 +17,7 @@ module.exports = {
   // Rules order is important, please avoid shuffling them
   extends: [
     // Base ESLint recommended rules
-    // 'eslint:recommended',
+    "eslint:recommended",
 
     // Uncomment any of the lines below to choose desired strictness,
     // but leave only one uncommented!
@@ -70,6 +70,16 @@ module.exports = {
         ignoreReadBeforeAssign: false,
       },
     ],
+
+    // remove some warnings/errors from eslint:recommended for now
+    // which are quite common in the current codebase
+    // we will deal with them later on
+    "no-unused-vars": "off",
+    "no-undef": "off",
+    "no-empty": "off",
+    "no-useless-catch": "off",
+    "no-case-declarations": "off",
+    "no-constant-condition": "off",
   },
   overrides: [
     {
