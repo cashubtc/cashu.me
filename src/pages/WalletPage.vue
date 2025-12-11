@@ -631,6 +631,11 @@ export default {
   beforeUnmount: function () {
     // Remove event listener when component is destroyed
     window.removeEventListener("resize", this.equalizeButtonWidths);
+
+    // Stop NFC scanner when component is destroyed
+    if (this.webNfcStore.isScanningPaymentRequest) {
+      this.webNfcStore.stopPaymentRequestScanner();
+    }
   },
 
   created: async function () {
@@ -743,12 +748,6 @@ export default {
     // Start NFC payment request scanner if supported
     if (this.ndefSupported) {
       this.webNfcStore.startPaymentRequestScanner();
-    }
-  },
-  beforeUnmount: function () {
-    // Stop NFC scanner when component is destroyed
-    if (this.webNfcStore.isScanningPaymentRequest) {
-      this.webNfcStore.stopPaymentRequestScanner();
     }
   },
 };
