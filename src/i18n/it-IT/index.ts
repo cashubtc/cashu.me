@@ -683,7 +683,10 @@ export default {
     title: "Inserisci la tua frase seed",
     text: "Incolla o digita la tua frase seed di 12 parole per recuperare.",
     inputs: { word: "Parola { index }" },
-    actions: { paste_all: "Incolla tutto" },
+    actions: {
+      paste_all: "Incolla tutto",
+      use_password_manager: "Usa gestore password",
+    },
     disclaimer:
       "La tua frase seed è usata solo localmente per derivare le chiavi del portafoglio.",
   },

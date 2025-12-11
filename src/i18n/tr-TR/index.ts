@@ -719,7 +719,10 @@ export default {
     title: "Seed ifadenizi girin",
     text: "Kurtarmak için 12 kelimelik seed ifadenizi yapıştırın veya yazın.",
     inputs: { word: "Kelime { index }" },
-    actions: { paste_all: "Tümünü yapıştır" },
+    actions: {
+      paste_all: "Tümünü yapıştır",
+      use_password_manager: "Parola yöneticisini kullan",
+    },
     disclaimer:
       "Seed ifadeniz yalnızca yerelde cüzdan anahtarlarını türetmek için kullanılır.",
   },

@@ -713,7 +713,10 @@ export default {
     title: "Ingresa tu frase semilla",
     text: "Pega o escribe tu frase semilla de 12 palabras para recuperar.",
     inputs: { word: "Palabra { index }" },
-    actions: { paste_all: "Pegar todo" },
+    actions: {
+      paste_all: "Pegar todo",
+      use_password_manager: "Usar gestor de contraseñas",
+    },
     disclaimer:
       "Tu frase semilla solo se usa localmente para derivar las claves de tu billetera.",
   },
