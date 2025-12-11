@@ -6,6 +6,7 @@ export const useSendTokensStore = defineStore("sendTokensStore", {
   state: () => ({
     showSendTokens: false,
     showLockInput: false,
+    paymentRequestScannedViaNfc: false, // Flag to track if payment request was scanned via NFC
     sendData: {
       amount: null,
       historyAmount: null,
@@ -36,6 +37,7 @@ export const useSendTokensStore = defineStore("sendTokensStore", {
       this.sendData.p2pkPubkey = "";
       this.sendData.paymentRequest = undefined;
       this.sendData.historyToken = undefined;
+      this.paymentRequestScannedViaNfc = false;
     },
   },
 });

@@ -1449,4 +1449,10 @@ export default {
     nostr: "Nostr",
     token_copied: "Token in Zwischenablage kopiert",
   },
+  SendNfcScanner: {
+    prompt_text: "Nähern Sie sich dem Terminal zum Bezahlen",
+    write_prompt_text:
+      "Halten Sie Ihr Gerät an den NFC-Tag, um das Zahlungstoken zu schreiben",
+    cancel_button: "Abbrechen",
+  },
 };
