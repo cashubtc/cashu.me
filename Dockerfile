@@ -1,5 +1,5 @@
 # Stage 1: Build Phase
-FROM node:24-bullseye AS builder
+FROM node:24 AS builder
 
 WORKDIR /app
 
@@ -23,4 +23,3 @@ COPY --from=builder /app/dist/pwa /usr/share/nginx/html
 
 # Expose the port your app will run on
 EXPOSE 80
-
