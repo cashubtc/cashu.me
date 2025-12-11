@@ -258,7 +258,8 @@ export const useWebNfcStore = defineStore("webNfcStore", {
       this.writeProgress = 0;
       this.writeSuccess = false;
       this.writeController = new AbortController();
-      const wasCancelled = () => this.writeController?.signal.aborted || !this.isWritingToken;
+      const wasCancelled = () =>
+        this.writeController?.signal.aborted || !this.isWritingToken;
 
       // Start progress animation (minimum 1 second)
       const progressStartTime = Date.now();
@@ -327,7 +328,9 @@ export const useWebNfcStore = defineStore("webNfcStore", {
         // Ensure minimum duration has passed
         const elapsed = Date.now() - progressStartTime;
         if (elapsed < minDuration) {
-          await new Promise((resolve) => setTimeout(resolve, minDuration - elapsed));
+          await new Promise((resolve) =>
+            setTimeout(resolve, minDuration - elapsed)
+          );
         }
 
         // Check if cancelled after write completes

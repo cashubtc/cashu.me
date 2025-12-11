@@ -1451,7 +1451,8 @@ export default {
   },
   SendNfcScanner: {
     prompt_text: "Nähern Sie sich dem Terminal zum Bezahlen",
-    write_prompt_text: "Halten Sie Ihr Gerät an den NFC-Tag, um das Zahlungstoken zu schreiben",
+    write_prompt_text:
+      "Halten Sie Ihr Gerät an den NFC-Tag, um das Zahlungstoken zu schreiben",
     cancel_button: "Abbrechen",
   },
 };
