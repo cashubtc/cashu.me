@@ -2192,7 +2192,7 @@ export default defineComponent({
     },
     checkActiveProofsSpendable: async function () {
       // iterate over this.activeProofs in batches of 50 and check if they are spendable
-      let wallet = await useWalletStore().mintWallet(
+      const wallet = await useWalletStore().mintWallet(
         this.activeMintUrl,
         this.activeUnit
       );
