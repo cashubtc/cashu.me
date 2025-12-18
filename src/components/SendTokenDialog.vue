@@ -353,7 +353,7 @@ export default defineComponent({
         this.sendData.amount * this.activeUnitCurrencyMultiplyer
       );
     },
-    // canSpendOffline: async function (): boolean {
+    // canSpendOffline: function (): boolean {
     //   if (!this.sendData.amount) {
     //     return false;
     //   }
@@ -363,7 +363,11 @@ export default defineComponent({
     //       this.activeProofs,
     //       this.sendData.amount * this.activeUnitCurrencyMultiplyer
     //     );
-    //     const mintWallet = await useWalletStore().activeWallet();
+    //     const mints = useMintsStore() as any;
+    //     const mintWallet = this.cachedMintWallet(
+    //       mints.activeMintUrl,
+    //       mints.activeUnit
+    //     );
     //     let selectedProofs = this.coinSelect(
     //       spendableProofs,
     //       mintWallet,

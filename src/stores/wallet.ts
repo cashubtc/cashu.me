@@ -194,8 +194,8 @@ export const useWalletStore = defineStore("wallet", {
       if (this.mnemonic === "") {
         this.mnemonic = generateMnemonic(wordlist);
       }
-      const bip39Seed = mnemonicToSeedSync(this.mnemonic);
-      const wallet = new Wallet(url, { unit });
+      const bip39seed = mnemonicToSeedSync(this.mnemonic);
+      const wallet = new Wallet(url, { unit, bip39seed });
       // Load the caches
       const keychainCache = KeyChain.mintToCacheDTO(
         unit,
