@@ -363,8 +363,7 @@ export default defineComponent({
     //       this.activeProofs,
     //       this.sendData.amount * this.activeUnitCurrencyMultiplyer
     //     );
-    //     const mintWallet = useWalletStore().wallet;
-    //     await mintWallet.loadMint();
+    //     const mintWallet = await useWalletStore().activeWallet();
     //     let selectedProofs = this.coinSelect(
     //       spendableProofs,
     //       mintWallet,
@@ -496,8 +495,10 @@ export default defineComponent({
       const sendAmount = Math.floor(
         this.sendData.amount * this.activeUnitCurrencyMultiplyer
       );
-      const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
-      await mintWallet.loadMint();
+      const mintWallet = await this.mintWallet(
+        this.activeMintUrl,
+        this.activeUnit
+      );
       const { sendProofs } = await this.send(
         this.activeProofs,
         mintWallet,
@@ -541,8 +542,10 @@ export default defineComponent({
       );
       try {
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
-        const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
-        await mintWallet.loadMint();
+        const mintWallet = await this.mintWallet(
+          this.activeMintUrl,
+          this.activeUnit
+        );
         const { _, sendProofs } = await this.sendToLock(
           this.activeProofs,
           mintWallet,
@@ -589,8 +592,10 @@ export default defineComponent({
         const sendAmount = Math.floor(
           this.sendData.amount * this.activeUnitCurrencyMultiplyer
         );
-        const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
-        await mintWallet.loadMint();
+        const mintWallet = await this.mintWallet(
+          this.activeMintUrl,
+          this.activeUnit
+        );
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
         const { _, sendProofs } = await this.send(
           this.activeProofs,

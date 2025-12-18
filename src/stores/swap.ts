@@ -1,12 +1,5 @@
-import { useLocalStorage } from "@vueuse/core";
-import { date } from "quasar";
 import { defineStore } from "pinia";
-import {
-  PaymentRequest,
-  Proof,
-  Token,
-  MeltQuoteResponse,
-} from "@cashu/cashu-ts";
+import { PaymentRequest, Token, MeltQuoteResponse } from "@cashu/cashu-ts";
 import { StoredMint, useMintsStore } from "./mints";
 import { useWalletStore } from "./wallet";
 import { useProofsStore } from "./proofs";
@@ -59,22 +52,20 @@ export const useSwapStore = defineStore("swap", {
       try {
         // get invoice
         // await mintStore.activateMintUrl(swapAmountData.toUrl);
-        const toWallet = walletStore.mintWallet(
+        const toWallet = await walletStore.mintWallet(
           swapAmountData.toUrl,
           mintStore.activeUnit
         );
-        await toWallet.loadMint();
         const mintQuote = await walletStore.requestMint(
           swapAmountData.amount,
           toWallet
         );
 
         // pay invoice
-        const fromWallet = walletStore.mintWallet(
+        const fromWallet = await walletStore.mintWallet(
           swapAmountData.fromUrl,
           mintStore.activeUnit
         );
-        await fromWallet.loadMint();
         const meltQuote = await walletStore.meltQuote(
           fromWallet,
           mintQuote.request
@@ -106,8 +97,7 @@ export const useSwapStore = defineStore("swap", {
       let meltAmount = tokenAmount - Math.max(2, Math.ceil(tokenAmount * 0.02));
       try {
         // walletStore.mintWallet(fromMintUrl, unit); will fail if we don't have fromMintUrl yet
-        const fromWallet = walletStore.mintWallet(fromMintUrl, unit);
-        await fromWallet.loadMint();
+        const fromWallet = await walletStore.mintWallet(fromMintUrl, unit);
         const proofs = token.getProofs(tokenJson);
         meltAmount -= fromWallet.getFeesForProofs(proofs);
       } catch (e) {}
@@ -128,10 +118,8 @@ export const useSwapStore = defineStore("swap", {
           tokenAmount - Math.max(2, Math.ceil(tokenAmount * 0.02));
         const unit = token.getUnit(tokenJson);
         const fromMintUrl = token.getMint(tokenJson);
-        const fromWallet = walletStore.mintWallet(fromMintUrl, unit);
-        await fromWallet.loadMint();
-        const toWallet = walletStore.mintWallet(mint.url, unit);
-        await toWallet.loadMint();
+        const fromWallet = await walletStore.mintWallet(fromMintUrl, unit);
+        const toWallet = await walletStore.mintWallet(mint.url, unit);
         const proofs = token.getProofs(tokenJson);
         meltAmount -= fromWallet.getFeesForProofs(proofs);
 
