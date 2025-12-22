@@ -3,6 +3,7 @@ import esES from "./es-ES";
 import itIT from "./it-IT";
 import deDE from "./de-DE";
 import frFR from "./fr-FR";
+import csCZ from "./cs-CZ";
 import svSE from "./sv-SE";
 import elGR from "./el-GR";
 import trTR from "./tr-TR";
@@ -17,6 +18,7 @@ export default {
   "it-IT": itIT,
   "de-DE": deDE,
   "fr-FR": frFR,
+  "cs-CZ": csCZ,
   "sv-SE": svSE,
   "el-GR": elGR,
   "tr-TR": trTR,
