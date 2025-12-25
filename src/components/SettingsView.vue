@@ -888,6 +888,57 @@
           </q-item>
         </div>
 
+        <!-- SECURITY SECTION -->
+        <div class="section-divider q-my-md">
+          <div class="divider-line"></div>
+          <div class="divider-text">{{ $t("Settings.sections.security") }}</div>
+          <div class="divider-line"></div>
+        </div>
+
+        <q-item>
+          <q-item-section>
+            <q-item-label overline class="text-weight-bold q-pt-sm">{{
+              $t("Settings.security.title")
+            }}</q-item-label>
+            <q-item-label caption>
+              {{ $t("Settings.security.description") }}
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <div>
+          <!-- Enable biometric/PIN authentication -->
+          <q-item>
+            <q-toggle
+              :model-value="authEnabled"
+              :label="$t('Settings.security.enable_auth.toggle')"
+              color="primary"
+              @update:model-value="toggleAuth"
+            >
+            </q-toggle>
+          </q-item>
+          <q-item class="q-pt-none">
+            <q-item-label caption>
+              {{ $t("Settings.security.enable_auth.description") }}
+            </q-item-label>
+          </q-item>
+
+          <!-- Require auth on resume -->
+          <q-item v-if="authEnabled">
+            <q-toggle
+              v-model="requireAuthOnResume"
+              :label="$t('Settings.security.require_on_resume.toggle')"
+              color="primary"
+            >
+            </q-toggle>
+          </q-item>
+          <q-item class="q-pt-none" v-if="authEnabled">
+            <q-item-label caption>
+              {{ $t("Settings.security.require_on_resume.description") }}
+            </q-item-label>
+          </q-item>
+        </div>
+
         <!-- PRIVACY SECTION -->
         <div class="section-divider q-my-md">
           <div class="divider-line"></div>
@@ -1898,6 +1949,7 @@ import { useNostrMintBackupStore } from "src/stores/nostrMintBackup";
 import { usePriceStore } from "src/stores/price";
 import { useI18n } from "vue-i18n";
 import { useNostrUserStore } from "src/stores/nostrUser";
+import { useAuthStore } from "src/stores/auth";
 
 export default defineComponent({
   name: "SettingsView",
@@ -1974,6 +2026,7 @@ export default defineComponent({
       nip46Token: "",
       nip07SignerAvailable: false,
       newRelay: "",
+      authStore: useAuthStore(),
     };
   },
   computed: {
@@ -2047,6 +2100,7 @@ export default defineComponent({
       "enablePaymentRequest",
       "receivePaymentRequestsAutomatically",
     ]),
+    ...mapWritableState(useAuthStore, ["authEnabled", "requireAuthOnResume"]),
 
     keysetCountersByMint() {
       const mints = this.mints;
@@ -2171,6 +2225,16 @@ export default defineComponent({
       "cancelCrawl",
       "resetWebOfTrust",
     ]),
+    toggleAuth: async function () {
+      const authStore = useAuthStore();
+      if (authStore.authEnabled) {
+        // Disabling auth
+        authStore.disableAuth();
+      } else {
+        // Enabling auth - will prompt for authentication
+        await authStore.enableAuth();
+      }
+    },
     generateNewMnemonic: async function () {
       this.newMnemonic();
       await this.initSigner();
