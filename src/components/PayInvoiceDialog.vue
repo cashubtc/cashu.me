@@ -670,7 +670,7 @@ export default defineComponent({
               this.payInvoiceData.show = false;
             }
             this.autoCloseTimeout = null;
-          }, 2000);
+          }, 10000);
         } else if (!val) {
           // Normal close - reset states and clear any pending timeout
           if (this.autoCloseTimeout) {
