@@ -704,7 +704,10 @@ export default {
     title: "أدخل عبارة الاستعادة",
     text: "الصق أو اكتب عبارة من 12 كلمة للاستعادة.",
     inputs: { word: "الكلمة { index }" },
-    actions: { paste_all: "لصق الكل" },
+    actions: {
+      paste_all: "لصق الكل",
+      use_password_manager: "استخدام مدير كلمات المرور",
+    },
     disclaimer: "تُستخدم عبارة الاستعادة محليًا فقط لاشتقاق مفاتيح محفظتك.",
   },
   WelcomeRestoreEcash: {
