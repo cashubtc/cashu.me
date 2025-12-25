@@ -224,7 +224,7 @@ export default defineComponent({
       );
     },
     getBalance: function () {
-      var balance = this.activeProofs
+      const balance = this.activeProofs
         .flat()
         .reduce((sum, el) => (sum += el.amount), 0);
       return balance;

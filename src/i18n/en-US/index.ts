@@ -500,6 +500,15 @@ export default {
           description:
             "Download a dump of your wallet. You can restore your wallet from this file in the welcome screen of a new wallet. This file will be out of sync if you keep using your wallet after exporting it.",
         },
+        import_wallet: {
+          button: "Import wallet backup",
+          description:
+            "Restore your wallet from a previously exported backup file. This will replace your current wallet data with the backup.",
+          confirm_question:
+            "Are you sure you want to restore your wallet data?",
+          cancel: "Cancel",
+          confirm: "IMPORT WALLET BACKUP",
+        },
       },
     },
   },

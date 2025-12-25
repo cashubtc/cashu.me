@@ -596,7 +596,7 @@ export default defineComponent({
         };
         // Check all input chars for peanut data
         for (const char of chars) {
-          let byte = fromVariationSelector(char);
+          const byte = fromVariationSelector(char);
           if (byte === null && decoded.length > 0) {
             break;
           } else if (byte === null) {

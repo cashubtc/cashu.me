@@ -1788,6 +1788,70 @@
               <q-item>
                 <q-item-section>
                   <row>
+                    <q-btn
+                      v-if="!confirmImport"
+                      dense
+                      flat
+                      outline
+                      click
+                      @click="confirmImport = !confirmImport"
+                    >
+                      {{
+                        $t("Settings.advanced.developer.import_wallet.button")
+                      }}
+                    </q-btn>
+                  </row>
+                  <row v-if="!confirmImport">
+                    <q-item-label class="q-px-sm" caption
+                      >{{
+                        $t(
+                          "Settings.advanced.developer.import_wallet.description"
+                        )
+                      }}
+                    </q-item-label>
+                  </row>
+                  <row v-if="confirmImport">
+                    <span>{{
+                      $t(
+                        "Settings.advanced.developer.import_wallet.confirm_question"
+                      )
+                    }}</span>
+                    <q-btn
+                      flat
+                      dense
+                      class="q-ml-sm"
+                      color="primary"
+                      @click="confirmImport = false"
+                      >{{
+                        $t("Settings.advanced.developer.import_wallet.cancel")
+                      }}</q-btn
+                    >
+                    <q-btn
+                      flat
+                      dense
+                      class="q-ml-sm"
+                      color="warning"
+                      @click="
+                        confirmImport = false;
+                        browseBackupFile();
+                      "
+                      >{{
+                        $t("Settings.advanced.developer.import_wallet.confirm")
+                      }}</q-btn
+                    >
+                  </row>
+                  <input
+                    type="file"
+                    ref="fileUpload"
+                    accept=".json"
+                    style="display: none"
+                    @change="onChangeFileUpload"
+                  />
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>
+                  <row>
                     <q-btn dense flat outline click @click="exportWalletState">
                       {{
                         $t("Settings.advanced.developer.export_wallet.button")
@@ -1877,6 +1941,7 @@ export default defineComponent({
         { label: "Italiano", value: "it-IT" },
         { label: "Deutsch", value: "de-DE" },
         { label: "Français", value: "fr-FR" },
+        { label: "Čeština", value: "cs-CZ" },
         { label: "Svenska", value: "sv-SE" },
         { label: "Ελληνικά", value: "el-GR" },
         { label: "Türkçe", value: "tr-TR" },
@@ -1918,6 +1983,7 @@ export default defineComponent({
       hideMnemonic: true,
       confirmMnemonic: false,
       confirmNuke: false,
+      confirmImport: false,
       nip46Token: "",
       nip07SignerAvailable: false,
       newRelay: "",
@@ -1998,7 +2064,7 @@ export default defineComponent({
     keysetCountersByMint() {
       const mints = this.mints;
       const keysetCountersByMint = {}; // {mintUrl: [keysetCounter: {id: string, count: number}, ...]}
-      for (let mint of mints) {
+      for (const mint of mints) {
         const mintIds = mint.keysets.map((keyset) => keyset.id);
         const keysetCounterThisMint = this.keysetCounters.filter((entry) =>
           mintIds.includes(entry.id)
@@ -2140,21 +2206,21 @@ export default defineComponent({
     },
     checkActiveProofsSpendable: async function () {
       // iterate over this.activeProofs in batches of 50 and check if they are spendable
-      let wallet = useWalletStore().mintWallet(
+      const wallet = useWalletStore().mintWallet(
         this.activeMintUrl,
         this.activeUnit
       );
-      let proofs = this.activeProofs.flat();
+      const proofs = this.activeProofs.flat();
       console.log("Checking proofs", proofs);
-      let allSpentProofs = [];
-      let batch_size = 50;
+      const allSpentProofs = [];
+      const batch_size = 50;
       for (let i = 0; i < proofs.length; i += batch_size) {
         console.log("Checking proofs", i, i + batch_size);
-        let batch = proofs.slice(i, i + batch_size);
-        let spent = await this.checkProofsSpendable(batch, wallet, true);
+        const batch = proofs.slice(i, i + batch_size);
+        const spent = await this.checkProofsSpendable(batch, wallet, true);
         allSpentProofs.push(spent);
       }
-      let spentProofs = allSpentProofs.flat();
+      const spentProofs = allSpentProofs.flat();
       if (spentProofs.length > 0) {
         console.log("Spent proofs", spentProofs);
         this.notifySuccess("Removed " + spentProofs.length + " spent proofs");
@@ -2245,6 +2311,32 @@ export default defineComponent({
       } catch {}
       localStorage.clear();
       window.location.href = "/";
+    },
+    browseBackupFile: function () {
+      this.$refs.fileUpload.click();
+    },
+    onChangeFileUpload: function () {
+      const file = this.$refs.fileUpload.files[0];
+      if (file) {
+        this.readBackupFile(file);
+      }
+    },
+    readBackupFile: function (file) {
+      const reader = new FileReader();
+      reader.onload = (f) => {
+        try {
+          const content = f.target.result;
+          const backup = JSON.parse(content);
+          this.restoreFromBackup(backup);
+        } catch (error) {
+          console.error("Error reading backup file:", error);
+          this.notifyError("Invalid backup file format");
+        }
+      };
+      reader.onerror = () => {
+        this.notifyError("Error reading file");
+      };
+      reader.readAsText(file);
     },
     addRelay: function () {
       if (this.newRelay) {

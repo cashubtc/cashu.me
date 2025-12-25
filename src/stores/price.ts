@@ -45,7 +45,7 @@ export const usePriceStore = defineStore("price", {
         return;
       }
       try {
-        var { data } = await axios.get(
+        const { data } = await axios.get(
           "https://api.coinbase.com/v2/exchange-rates?currency=BTC"
         );
         this.bitcoinPrices = data.data.rates;
