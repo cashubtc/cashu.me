@@ -4,27 +4,27 @@
       <div class="nfc-scanner-content">
         <div
           class="nfc-card-outline"
-          :class="{ 'writing-active': webNfcStore.isWritingToken }"
+          :class="{ 'writing-active': isWritingToken }"
         >
           <!-- Liquid fill container -->
           <div
-            v-if="webNfcStore.isWritingToken"
+            v-if="isWritingToken"
             class="liquid-fill"
-            :style="{ height: `${webNfcStore.writeProgress}%` }"
-            :class="{ 'fill-complete': webNfcStore.writeSuccess }"
+            :style="{ height: `${writeProgress}%` }"
+            :class="{ 'fill-complete': writeSuccess }"
           >
             <div class="liquid-wave"></div>
           </div>
           <!-- Success icon overlay -->
           <transition name="tada">
-            <div v-if="webNfcStore.writeSuccess" class="success-overlay">
+            <div v-if="writeSuccess" class="success-overlay">
               <q-icon name="check_circle" size="64px" color="white" />
             </div>
           </transition>
           <!-- NFC icon (shown when not writing or before success) -->
           <transition name="fade-icon">
             <NfcIcon
-              v-if="!webNfcStore.isWritingToken || !webNfcStore.writeSuccess"
+              v-if="!isWritingToken || !writeSuccess"
               :size="48"
               class="nfc-icon-content"
             />
@@ -33,9 +33,9 @@
 
         <div class="nfc-scanner-text q-mt-md">
           {{
-            webNfcStore.writeSuccess
+            writeSuccess
               ? "Payment successful!"
-              : webNfcStore.isWritingToken
+              : isWritingToken
               ? $t("SendNfcScanner.write_prompt_text")
               : $t("SendNfcScanner.prompt_text")
           }}

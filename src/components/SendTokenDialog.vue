@@ -45,10 +45,7 @@
               round
               @click="toggleNfcScanner"
             >
-              <NfcIcon
-                v-if="!webNfcStore.isScanningPaymentRequest"
-                size="1.2em"
-              />
+              <NfcIcon v-if="!scanningCard" size="1.2em" />
               <q-spinner v-else color="primary" size="sm" />
               <q-tooltip>Scan NFC payment request</q-tooltip>
             </q-btn>
@@ -278,7 +275,7 @@
 
     <!-- NFC Scanner Overlay - Show when writing tokens, not when scanning payment request -->
     <transition name="fade" appear>
-      <SendNfcScanner v-if="webNfcStore.isWritingToken" />
+      <SendNfcScanner v-if="isWritingToken" />
     </transition>
   </q-dialog>
 </template>
@@ -405,9 +402,7 @@ export default defineComponent({
     ...mapState(useSettingsStore, ["bitcoinPriceCurrency"]),
     ...mapState(useWorkersStore, ["tokenWorkerRunning"]),
     ...mapState(useSendTokensStore, ["paymentRequestScannedViaNfc"]),
-    webNfcStore() {
-      return useWebNfcStore();
-    },
+    ...mapState(useWebNfcStore, ["scanningCard", "isWritingToken"]),
     insufficientFunds: function (): boolean {
       if (this.sendData.amount == null) return false;
       return (
@@ -475,7 +470,7 @@ export default defineComponent({
       if (val) {
         // Start NFC scanner automatically when dialog opens (if not already scanning)
         // WalletPage may already have started scanning, so check first
-        if (!this.webNfcStore.isScanningPaymentRequest) {
+        if (!this.scanningCard) {
           this.toggleNfcScanner();
         }
 
@@ -597,6 +592,10 @@ export default defineComponent({
     ...mapActions(useP2PKStore, ["isValidPubkey", "maybeConvertNpub"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
+    ...mapActions(useWebNfcStore, [
+      "startPaymentRequestScanner",
+      "stopPaymentRequestScanner",
+    ]),
     handlePaymentRequestSuccess: function () {
       this.showSendTokens = false;
     },
@@ -777,11 +776,11 @@ export default defineComponent({
     toggleNfcScanner() {
       if (this.ndefSupported) {
         // If already scanning, cancel it (toggle behavior)
-        if (this.webNfcStore.isScanningPaymentRequest) {
-          this.webNfcStore.stopPaymentRequestScanner();
+        if (this.scanningCard) {
+          this.stopPaymentRequestScanner();
         } else {
           // Use the WebNfcStore to start scanning
-          this.webNfcStore.startPaymentRequestScanner();
+          this.startPaymentRequestScanner();
         }
       }
     },
