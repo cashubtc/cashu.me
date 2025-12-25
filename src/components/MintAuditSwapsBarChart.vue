@@ -357,7 +357,7 @@ export default defineComponent({
     };
 
     const formatDate = (dateStr: string) => {
-      const hasTimezone = /([Zz]|[+\-]\d{2}:\d{2})$/.test(dateStr);
+      const hasTimezone = /([Zz]|[+-]\d{2}:\d{2})$/.test(dateStr);
       let utcDateStr = dateStr;
 
       if (!hasTimezone) {

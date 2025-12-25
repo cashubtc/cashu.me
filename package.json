@@ -12,7 +12,7 @@
     "build:pwa": "quasar build -m pwa",
     "build:electron": "quasar build -m electron",
     "quasar": "quasar",
-    "lint": "eslint --ext .js,.vue ./",
+    "lint": "eslint --ext .js,.vue,.ts ./",
     "format": "prettier --write .",
     "checkformat": "prettier --check .",
     "test": "vitest",

@@ -1928,6 +1928,7 @@ export default defineComponent({
         { label: "Italiano", value: "it-IT" },
         { label: "Deutsch", value: "de-DE" },
         { label: "Français", value: "fr-FR" },
+        { label: "Čeština", value: "cs-CZ" },
         { label: "Svenska", value: "sv-SE" },
         { label: "Ελληνικά", value: "el-GR" },
         { label: "Türkçe", value: "tr-TR" },
@@ -2050,7 +2051,7 @@ export default defineComponent({
     keysetCountersByMint() {
       const mints = this.mints;
       const keysetCountersByMint = {}; // {mintUrl: [keysetCounter: {id: string, count: number}, ...]}
-      for (let mint of mints) {
+      for (const mint of mints) {
         const mintIds = mint.keysets.map((keyset) => keyset.id);
         const keysetCounterThisMint = this.keysetCounters.filter((entry) =>
           mintIds.includes(entry.id)
@@ -2192,21 +2193,21 @@ export default defineComponent({
     },
     checkActiveProofsSpendable: async function () {
       // iterate over this.activeProofs in batches of 50 and check if they are spendable
-      let wallet = useWalletStore().mintWallet(
+      const wallet = useWalletStore().mintWallet(
         this.activeMintUrl,
         this.activeUnit
       );
-      let proofs = this.activeProofs.flat();
+      const proofs = this.activeProofs.flat();
       console.log("Checking proofs", proofs);
-      let allSpentProofs = [];
-      let batch_size = 50;
+      const allSpentProofs = [];
+      const batch_size = 50;
       for (let i = 0; i < proofs.length; i += batch_size) {
         console.log("Checking proofs", i, i + batch_size);
-        let batch = proofs.slice(i, i + batch_size);
-        let spent = await this.checkProofsSpendable(batch, wallet, true);
+        const batch = proofs.slice(i, i + batch_size);
+        const spent = await this.checkProofsSpendable(batch, wallet, true);
         allSpentProofs.push(spent);
       }
-      let spentProofs = allSpentProofs.flat();
+      const spentProofs = allSpentProofs.flat();
       if (spentProofs.length > 0) {
         console.log("Spent proofs", spentProofs);
         this.notifySuccess("Removed " + spentProofs.length + " spent proofs");

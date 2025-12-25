@@ -418,7 +418,7 @@ export const useMintsStore = defineStore("mints", {
       workers.clearAllWorkers();
 
       // create new mint.api instance because we can't store it in local storage
-      let previousUrl = this.activeMintUrl;
+      const previousUrl = this.activeMintUrl;
       await uIStore.lockMutex();
       try {
         this.activeMintUrl = mint.url;

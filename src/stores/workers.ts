@@ -77,7 +77,10 @@ export const useWorkersStore = defineStore("workers", {
             this.clearAllWorkers();
           }
           console.log("### checkTokenSpendableWorker setInterval", nInterval);
-          let paid = await walletStore.checkTokenSpendable(historyToken, false);
+          const paid = await walletStore.checkTokenSpendable(
+            historyToken,
+            false
+          );
           if (paid) {
             console.log("### stopping token check worker");
             this.clearAllWorkers();

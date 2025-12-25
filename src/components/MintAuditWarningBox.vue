@@ -112,7 +112,7 @@ export default defineComponent({
         const baseMessage = "The last swap attempt has failed.";
 
         if (recentSwaps.length > 0) {
-          let successMessage = `${successfulRecentSwaps.length} of ${recentSwaps.length} swaps in the last ${props.recentDaysThreshold} days succeeded.`;
+          const successMessage = `${successfulRecentSwaps.length} of ${recentSwaps.length} swaps in the last ${props.recentDaysThreshold} days succeeded.`;
 
           // Add "However, " prefix if success rate is above threshold
           if (recentSuccessRate >= props.successRateThreshold) {
