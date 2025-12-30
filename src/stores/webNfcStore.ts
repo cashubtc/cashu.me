@@ -5,6 +5,7 @@ import { usePRStore } from "./payment-request";
 import { useUiStore } from "./ui";
 import { useSendTokensStore } from "./sendTokensStore";
 import {
+  getDecodedToken,
   getDecodedTokenBinary,
   getEncodedToken,
   getEncodedTokenBinary,
@@ -296,16 +297,20 @@ export const useWebNfcStore = defineStore("webNfcStore", {
 
         let writePromise;
         if (encoding === "text") {
+          console.log("Writing TEXT NDEF record to tag...");
           writePromise = this.ndef.write({
             records: [{ recordType: "text", data: tokenData }],
           });
         } else if (encoding === "weburl") {
+          console.log("Writing URI NDEF record to tag...");
           const tokenUrl = `https://wallet.cashu.me/#token=${tokenData}`;
           writePromise = this.ndef.write({
             records: [{ recordType: "url", data: tokenUrl }],
           });
         } else if (encoding === "binary") {
-          const tokenBinary = getEncodedTokenBinary(tokenData);
+          console.log("Writing MIME NDEF record to tag...");
+          console.log(`tokenData = ${tokenData}`);
+          const tokenBinary = getEncodedTokenBinary(getDecodedToken(tokenData));
           writePromise = this.ndef.write({
             records: [
               {
