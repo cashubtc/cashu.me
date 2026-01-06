@@ -62,7 +62,7 @@ import { useRestoreStore } from "src/stores/restore";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 import { validateMnemonic } from "@scure/bip39";
-import { wordlist } from '@scure/bip39/wordlists/english';
+import { wordlist } from "@scure/bip39/wordlists/english";
 import { i18n } from "../../boot/i18n";
 
 export default {

@@ -273,7 +273,7 @@ import { useUiStore } from "src/stores/ui";
 import { notifyError, notifySuccess } from "src/js/notify";
 import NostrMintRestore from "./NostrMintRestore.vue";
 import { validateMnemonic } from "@scure/bip39";
-import { wordlist } from '@scure/bip39/wordlists/english';
+import { wordlist } from "@scure/bip39/wordlists/english";
 
 export default defineComponent({
   name: "RestoreView",
