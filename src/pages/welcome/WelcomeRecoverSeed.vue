@@ -61,6 +61,9 @@ import { useWelcomeStore } from "src/stores/welcome";
 import { useRestoreStore } from "src/stores/restore";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
+import { validateMnemonic } from "@scure/bip39";
+import { wordlist } from '@scure/bip39/wordlists/english';
+import { i18n } from "../../boot/i18n";
 
 export default {
   name: "WelcomeRecoverSeed",
@@ -84,13 +87,17 @@ export default {
       return words.value
         .filter((w) => w.trim())
         .join(" ")
-        .trim();
+        .trim()
+        .toLowerCase();
     });
 
     const errorMsg = computed(() => {
       const filledWords = words.value.filter((w) => w.trim()).length;
       if (filledWords === 0) return "";
       if (filledWords < 12) return `${filledWords}/12 words entered`;
+      if (!validateMnemonic(mnemonic.value, wordlist)) {
+        return i18n.global.t("RestoreView.actions.validate.error");
+      }
       return "";
     });
 

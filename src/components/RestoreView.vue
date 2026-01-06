@@ -272,6 +272,8 @@ import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 import { notifyError, notifySuccess } from "src/js/notify";
 import NostrMintRestore from "./NostrMintRestore.vue";
+import { validateMnemonic } from "@scure/bip39";
+import { wordlist } from '@scure/bip39/wordlists/english';
 
 export default defineComponent({
   name: "RestoreView",
@@ -304,11 +306,7 @@ export default defineComponent({
       "restoreStatus",
     ]),
     isMnemonicValid() {
-      if (!this.mnemonicToRestore) {
-        return false;
-      }
-      const words = this.mnemonicToRestore.trim().split(/\s+/);
-      return words.length >= 12;
+      return this.validateMnemonic();
     },
     allSelected() {
       return (
@@ -422,13 +420,14 @@ export default defineComponent({
       }
     },
     validateMnemonic() {
-      // Simple validation: check if mnemonicToRestore has at least 12 words
-      const words = this.mnemonicToRestore.trim().split(/\s+/);
-      if (words.length < 12) {
+      // use @scure/bip39 validation
+      const words = this.mnemonicToRestore.trim().toLowerCase();
+      if (!validateMnemonic(words, wordlist)) {
         this.mnemonicError = this.$i18n.t("RestoreView.actions.validate.error");
         return false;
       }
       this.mnemonicError = "";
+      this.mnemonicToRestore = words; // normalize
       return true;
     },
     async restoreMintForMint(mintUrl) {
@@ -456,7 +455,7 @@ export default defineComponent({
     async pasteMnemonic() {
       try {
         const text = await this.pasteFromClipboard();
-        this.mnemonicToRestore = text.trim();
+        this.mnemonicToRestore = text.trim().toLowerCase();
       } catch (error) {
         notifyError(this.$i18n.t("RestoreView.actions.paste.error"));
       }
