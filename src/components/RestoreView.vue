@@ -15,7 +15,7 @@
               <div class="col-12">
                 <q-input
                   outlined
-                  v-model="mnemonicToRestore"
+                  v-model="mnemonicInput"
                   :label="
                     $t('RestoreView.seed_phrase.inputs.seed_phrase.label')
                   "
@@ -257,7 +257,7 @@
     <!-- Nostr Mint Restore Component -->
     <NostrMintRestore
       v-if="!onboarding"
-      :mnemonic="mnemonicToRestore"
+      :mnemonic="normalisedMnemonic"
       :is-mnemonic-valid="isMnemonicValid"
     />
   </div>
@@ -272,7 +272,7 @@ import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 import { notifyError, notifySuccess } from "src/js/notify";
 import NostrMintRestore from "./NostrMintRestore.vue";
-import { validateMnemonic } from "@scure/bip39";
+import { validateMnemonic as validateBip39Mnemonic } from "@scure/bip39";
 import { wordlist } from "@scure/bip39/wordlists/english";
 
 export default defineComponent({
@@ -286,7 +286,6 @@ export default defineComponent({
   },
   data() {
     return {
-      mnemonicError: "",
       restoreAllMintsText: this.$i18n.t(
         "RestoreView.actions.restore_all_mints.label"
       ),
@@ -305,8 +304,46 @@ export default defineComponent({
       "restoringMint",
       "restoreStatus",
     ]),
-    isMnemonicValid() {
-      return this.validateMnemonic();
+
+    mnemonicInput: {
+      get(): string {
+        return this.mnemonicToRestore || "";
+      },
+      set(v: string) {
+        // lowercase live, keep spacing as typed to avoid cursor jumps
+        this.mnemonicToRestore = (v || "").toLowerCase();
+      },
+    },
+    normalisedMnemonic(): string {
+      return (this.mnemonicToRestore || "")
+        .trim()
+        .toLowerCase()
+        .split(/\s+/)
+        .filter(Boolean)
+        .join(" ");
+    },
+    mnemonicWordCount(): number {
+      return this.normalisedMnemonic
+        ? this.normalisedMnemonic.split(" ").length
+        : 0;
+    },
+    isMnemonicValid(): boolean {
+      if (this.onboarding) return true;
+      if (this.mnemonicWordCount < 12) return false;
+      return validateBip39Mnemonic(this.normalisedMnemonic, wordlist);
+    },
+    mnemonicError(): string {
+      if (this.onboarding) return "";
+
+      const count = this.mnemonicWordCount;
+      if (count === 0) return "";
+      if (count < 12) return `${count}/12 words entered`;
+
+      if (!validateBip39Mnemonic(this.normalisedMnemonic, wordlist)) {
+        return this.$i18n.t("RestoreView.actions.validate.error");
+      }
+
+      return "";
     },
     allSelected() {
       return (
@@ -381,8 +418,9 @@ export default defineComponent({
         return;
       }
 
-      if (!this.onboarding && !this.validateMnemonic()) {
-        return;
+      if (!this.onboarding) {
+        if (!this.isMnemonicValid) return;
+        this.mnemonicToRestore = this.normalisedMnemonic;
       }
 
       const selectedMintUrls = Array.from(this.selectedMints);
@@ -419,21 +457,12 @@ export default defineComponent({
         );
       }
     },
-    validateMnemonic() {
-      // use @scure/bip39 validation
-      const words = this.mnemonicToRestore.trim().toLowerCase();
-      if (!validateMnemonic(words, wordlist)) {
-        this.mnemonicError = this.$i18n.t("RestoreView.actions.validate.error");
-        return false;
-      }
-      this.mnemonicError = "";
-      this.mnemonicToRestore = words; // normalize
-      return true;
-    },
     async restoreMintForMint(mintUrl) {
-      if (!this.onboarding && !this.validateMnemonic()) {
-        return;
+      if (!this.onboarding) {
+        if (!this.isMnemonicValid) return;
+        this.mnemonicToRestore = this.normalisedMnemonic;
       }
+
       try {
         this.restoreAllMintsText = this.$i18n.t(
           "RestoreView.actions.restore.in_progress"
@@ -455,15 +484,20 @@ export default defineComponent({
     async pasteMnemonic() {
       try {
         const text = await this.pasteFromClipboard();
-        this.mnemonicToRestore = text.trim().toLowerCase();
+        this.mnemonicToRestore = (text || "")
+          .trim()
+          .split(/\s+/)
+          .filter(Boolean)
+          .join(" ");
       } catch (error) {
         notifyError(this.$i18n.t("RestoreView.actions.paste.error"));
       }
     },
     async restoreAllMints() {
       let i = 0;
-      if (!this.validateMnemonic()) {
-        return;
+      if (!this.onboarding) {
+        if (!this.isMnemonicValid) return;
+        this.mnemonicToRestore = this.normalisedMnemonic;
       }
       try {
         for (const mint of this.mints) {
