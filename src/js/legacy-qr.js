@@ -70,11 +70,8 @@ export function convertMerchantQRToLightningAddress(qrContent, network = null) {
 
 /**
  * Checks if a string looks like a legacy retail QR code
- * Legacy retail QR codes are typically:
- * - EMV QR codes (starting with "000201") - used by South African retailers like PicknPay
- * - Numeric codes (6-20 digits) - simple legacy codes
- * - Alphanumeric codes (8-30 characters) - other legacy formats
- * - Not starting with known Lightning prefixes
+ * Legacy retail QR codes are EMV QR codes (starting with "000201")
+ * used by South African retailers like PicknPay
  *
  * @param {string} code - The QR code string to check
  * @returns {boolean} - True if it looks like a legacy retail QR code
@@ -86,53 +83,9 @@ export function isLegacyRetailQR(code) {
 
   const trimmed = code.trim();
 
-  // Skip if it's already a known Lightning format
-  if (
-    trimmed.toLowerCase().startsWith("lnbc") ||
-    trimmed.toLowerCase().startsWith("lightning:") ||
-    trimmed.toLowerCase().startsWith("lnurl") ||
-    trimmed.toLowerCase().startsWith("lnurl1") ||
-    trimmed.startsWith("bitcoin:") ||
-    trimmed.startsWith("cashuA") ||
-    trimmed.startsWith("cashuB") ||
-    trimmed.startsWith("creqA") ||
-    trimmed.startsWith("http://") ||
-    trimmed.startsWith("https://")
-  ) {
-    return false;
-  }
-
   // EMV QR Code format (used by PicknPay and other South African retailers)
   // These start with "000201" which is the EMV QR Code payload format indicator
-  if (trimmed.startsWith("000201")) {
-    return true;
-  }
-
-  // Legacy retail QR codes can also be:
-  // - Pure numeric (6-20 digits) - simple legacy codes
-  // - Alphanumeric codes (8-30 characters) without special characters
-  // - Not containing @ symbol (which would be a lightning address)
-  
-  // Check length for non-EMV codes
-  if (trimmed.length > 30) {
-    return false;
-  }
-
-  const numericPattern = /^\d{6,20}$/;
-  const alphanumericPattern = /^[A-Za-z0-9]{8,30}$/;
-
-  // Check if it's purely numeric first (6-20 digits)
-  if (numericPattern.test(trimmed)) {
-    return true;
-  }
-
-  // Check if it matches alphanumeric pattern (8-30 chars) and doesn't contain @
-  // Note: This won't match pure numeric strings as they're handled above
-  if (alphanumericPattern.test(trimmed) && !trimmed.includes("@") && !/^\d+$/.test(trimmed)) {
-    return true;
-  }
-
-  return false;
+  return trimmed.startsWith("000201");
 }
 
 /**
@@ -150,19 +103,14 @@ export function translateLegacyQRToLightningAddress(qrCode, network = null) {
 
   const trimmedCode = qrCode.trim();
   
-  // For EMV QR codes, try to convert to Lightning Address
-  if (trimmedCode.startsWith("000201")) {
-    const lightningAddress = convertMerchantQRToLightningAddress(trimmedCode, network);
-    if (lightningAddress) {
-      console.log("Converted merchant QR code to Lightning Address:", {
-        original: trimmedCode.substring(0, 50) + "...",
-        lightningAddress,
-      });
-      return lightningAddress;
-    }
+  const lightningAddress = convertMerchantQRToLightningAddress(trimmedCode, network);
+  if (lightningAddress) {
+    console.log("Converted merchant QR code to Lightning Address:", {
+      original: trimmedCode,
+      lightningAddress,
+    });
+    return lightningAddress;
   }
 
-  // For other legacy QR codes, we don't have a conversion method yet
-  // They would need to be handled differently or via an API
   return null;
 }
