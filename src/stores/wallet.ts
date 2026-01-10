@@ -200,12 +200,11 @@ export const useWalletStore = defineStore("wallet", {
       }
       // if updateKeysets is true and keysetsLastFetched is older than 1 hour, fetch the keysets for the mint
       const ONE_HOUR = 60 * 60 * 1000;
-      const TEN_SECONDS = 10 * 1000;
       const lastUpdated = storedMint.lastKeysetsUpdated
         ? new Date(storedMint.lastKeysetsUpdated).getTime()
         : 0;
       const mintNeedsUpdate =
-        updateKeysets && lastUpdated < Date.now() - TEN_SECONDS;
+        updateKeysets && lastUpdated < Date.now() - ONE_HOUR;
       if (mintNeedsUpdate) {
         console.log("updating mint info and keys for mint", storedMint.url);
         try {
