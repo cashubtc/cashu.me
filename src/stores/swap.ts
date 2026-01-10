@@ -127,7 +127,11 @@ export const useSwapStore = defineStore("swap", {
           tokenAmount - Math.max(2, Math.ceil(tokenAmount * 0.02));
         const unit = token.getUnit(tokenJson);
         const fromMintUrl = token.getMint(tokenJson);
-        const fromWallet = await walletStore.mintWallet(fromMintUrl, unit, true);
+        const fromWallet = await walletStore.mintWallet(
+          fromMintUrl,
+          unit,
+          true
+        );
         const toWallet = await walletStore.mintWallet(mint.url, unit, true);
         const proofs = token.getProofs(tokenJson);
         meltAmount -= fromWallet.getFeesForProofs(proofs);

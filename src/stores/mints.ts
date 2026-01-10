@@ -501,7 +501,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_info"));
-        } catch { }
+        } catch {}
         throw error;
       }
     },
@@ -563,14 +563,15 @@ export const useMintsStore = defineStore("mints", {
           }
         }
 
-        this.mints.filter((m) => m.url === mint.url)[0].lastKeysetsUpdated = new Date().toISOString();
+        this.mints.filter((m) => m.url === mint.url)[0].lastKeysetsUpdated =
+          new Date().toISOString();
         // return the mint with keys set
         return this.mints.filter((m) => m.url === mint.url)[0];
       } catch (error: any) {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_keys"));
-        } catch { }
+        } catch {}
         throw error;
       }
     },
