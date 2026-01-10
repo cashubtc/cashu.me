@@ -495,7 +495,7 @@ export default defineComponent({
       const sendAmount = Math.floor(
         this.sendData.amount * this.activeUnitCurrencyMultiplyer
       );
-      const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
+      const mintWallet = await this.mintWallet(this.activeMintUrl, this.activeUnit, true);
       const { sendProofs } = await this.send(
         this.activeProofs,
         mintWallet,
@@ -539,7 +539,7 @@ export default defineComponent({
       );
       try {
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
-        const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
+        const mintWallet = await this.mintWallet(this.activeMintUrl, this.activeUnit, true);
         const { _, sendProofs } = await this.sendToLock(
           this.activeProofs,
           mintWallet,
@@ -586,7 +586,7 @@ export default defineComponent({
         const sendAmount = Math.floor(
           this.sendData.amount * this.activeUnitCurrencyMultiplyer
         );
-        const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
+        const mintWallet = await this.mintWallet(this.activeMintUrl, this.activeUnit, true);
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
         const { _, sendProofs } = await this.send(
           this.activeProofs,

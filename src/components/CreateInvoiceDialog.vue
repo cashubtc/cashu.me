@@ -186,9 +186,10 @@ export default defineComponent({
           this.invoiceData.amount * this.activeUnitCurrencyMultiplyer
         );
         this.createInvoiceButtonBlocked = true;
-        const wallet = this.mintWallet(
+        const wallet = await this.mintWallet(
           mintStore.activeMintUrl,
-          mintStore.activeUnit
+          mintStore.activeUnit,
+          true
         );
         const mintQuote = await this.requestMint(amount, wallet);
         // Switch to QR display dialog

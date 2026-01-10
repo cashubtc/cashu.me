@@ -59,9 +59,10 @@ export const useSwapStore = defineStore("swap", {
       try {
         // get invoice
         // await mintStore.activateMintUrl(swapAmountData.toUrl);
-        const toWallet = walletStore.mintWallet(
+        const toWallet = await walletStore.mintWallet(
           swapAmountData.toUrl,
-          mintStore.activeUnit
+          mintStore.activeUnit,
+          true
         );
         const mintQuote = await walletStore.requestMint(
           swapAmountData.amount,
@@ -69,9 +70,10 @@ export const useSwapStore = defineStore("swap", {
         );
 
         // pay invoice
-        const fromWallet = walletStore.mintWallet(
+        const fromWallet = await walletStore.mintWallet(
           swapAmountData.fromUrl,
-          mintStore.activeUnit
+          mintStore.activeUnit,
+          true
         );
         const meltQuote = await walletStore.meltQuote(
           fromWallet,
@@ -95,7 +97,7 @@ export const useSwapStore = defineStore("swap", {
         this.swapBlocking = false;
       }
     },
-    meltToMintFees: function (tokenJson: Token) {
+    meltToMintFees: async function (tokenJson: Token) {
       const proofsStore = useProofsStore();
       const walletStore = useWalletStore();
       const fromMintUrl = token.getMint(tokenJson);
@@ -104,7 +106,7 @@ export const useSwapStore = defineStore("swap", {
       let meltAmount = tokenAmount - Math.max(2, Math.ceil(tokenAmount * 0.02));
       try {
         // walletStore.mintWallet(fromMintUrl, unit); will fail if we don't have fromMintUrl yet
-        const fromWallet = walletStore.mintWallet(fromMintUrl, unit);
+        const fromWallet = await walletStore.mintWallet(fromMintUrl, unit);
         const proofs = token.getProofs(tokenJson);
         meltAmount -= fromWallet.getFeesForProofs(proofs);
       } catch (e) {}
@@ -125,8 +127,8 @@ export const useSwapStore = defineStore("swap", {
           tokenAmount - Math.max(2, Math.ceil(tokenAmount * 0.02));
         const unit = token.getUnit(tokenJson);
         const fromMintUrl = token.getMint(tokenJson);
-        const fromWallet = walletStore.mintWallet(fromMintUrl, unit);
-        const toWallet = walletStore.mintWallet(mint.url, unit);
+        const fromWallet = await walletStore.mintWallet(fromMintUrl, unit, true);
+        const toWallet = await walletStore.mintWallet(mint.url, unit, true);
         const proofs = token.getProofs(tokenJson);
         meltAmount -= fromWallet.getFeesForProofs(proofs);
 

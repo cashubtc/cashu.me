@@ -185,15 +185,45 @@ export const useWalletStore = defineStore("wallet", {
     setMnemonicFromUser: function (mnemonic: string) {
       this.mnemonic = mnemonic;
     },
-    mintWallet(url: string, unit: string): CashuWallet {
+    async mintWallet(url: string, unit: string, updateKeysets: boolean = false): Promise<CashuWallet> {
       // short-lived wallet for mint operations
       // note: the unit of the wallet will be activeUnit by default,
       // overwrite wallet.unit if needed
+      const mints = useMintsStore() as any;
+      let storedMint = mints.mints.find((m: any) => m.url === url);
+      if (!storedMint) {
+        throw new Error("mint not found");
+      }
+      // if updateKeysets is true and keysetsLastFetched is older than 1 hour, fetch the keysets for the mint
+      const ONE_HOUR = 60 * 60 * 1000;
+      const lastUpdated = storedMint.lastKeysetsUpdated
+        ? new Date(storedMint.lastKeysetsUpdated).getTime()
+        : 0;
+      const mintNeedsUpdate = updateKeysets && (lastUpdated < Date.now() - ONE_HOUR);
+      if (mintNeedsUpdate) {
+        console.log("updating mint info and keys for mint", storedMint.url);
+        try {
+          await mints.updateMintInfoAndKeys(storedMint);
+          // Re-fetch mint after update to get fresh keysets
+          storedMint = mints.mints.find((m: any) => m.url === url);
+        } catch (error: any) {
+          console.error("Failed to update mint info/keys:", error);
+          // Continue with potentially stale keysets rather than failing
+        }
+      }
+      return this.createWalletInstance(storedMint, url, unit, mints);
+    },
+    // Synchronous wallet creation for non-critical operations (e.g., fee calculation display)
+    // Use mintWallet() with updateKeysets=true for critical operations
+    mintWalletSync(url: string, unit: string): CashuWallet {
       const mints = useMintsStore() as any;
       const storedMint = mints.mints.find((m: any) => m.url === url);
       if (!storedMint) {
         throw new Error("mint not found");
       }
+      return this.createWalletInstance(storedMint, url, unit, mints);
+    },
+    createWalletInstance(storedMint: any, url: string, unit: string, mints: any): CashuWallet {
       const unitKeysets = mints.mintUnitKeysets(storedMint, unit);
       const mint = new CashuMint(url);
       if (this.mnemonic == "") {
@@ -504,7 +534,7 @@ export const useWalletStore = defineStore("wallet", {
         mint: mintInToken,
         fee: fee,
       };
-      const mintWallet = this.mintWallet(historyToken.mint, historyToken.unit);
+      const mintWallet = await this.mintWallet(historyToken.mint, historyToken.unit, true);
       const mint = mintStore.mints.find((m) => m.url === historyToken.mint);
       if (!mint) {
         throw new Error("mint not found");
@@ -639,7 +669,7 @@ export const useWalletStore = defineStore("wallet", {
       const mintStore = useMintsStore();
       const uIStore = useUiStore();
       const keysetId = this.getKeyset(invoice.mint, invoice.unit);
-      const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
+      const mintWallet = await this.mintWallet(invoice.mint, invoice.unit, true);
       const mint = mintStore.mints.find((m) => m.url === invoice.mint);
       if (!mint) {
         throw new Error("mint not found");
@@ -766,9 +796,10 @@ export const useWalletStore = defineStore("wallet", {
       }
 
       const mintStore = useMintsStore();
-      const mintWallet = this.mintWallet(
+      const mintWallet = await this.mintWallet(
         mintStore.activeMintUrl,
-        mintStore.activeUnit
+        mintStore.activeUnit,
+        true
       );
       return await this.melt(mintStore.activeProofs, quote, mintWallet, silent);
     },
@@ -988,7 +1019,7 @@ export const useWalletStore = defineStore("wallet", {
         throw new Error("no tokens provided.");
       }
       const proofs = token.getProofs(tokenJson);
-      const mintWallet = this.mintWallet(historyToken.mint, historyToken.unit);
+      const mintWallet = await this.mintWallet(historyToken.mint, historyToken.unit);
 
       const mint = mintStore.mints.find((m) => m.url === historyToken.mint);
       if (!mint) {
@@ -1066,7 +1097,7 @@ export const useWalletStore = defineStore("wallet", {
       if (!invoice) {
         throw new Error("invoice not found");
       }
-      const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
+      const mintWallet = await this.mintWallet(invoice.mint, invoice.unit);
       const mint = mintStore.mints.find((m) => m.url === invoice.mint);
       if (!mint) {
         throw new Error("mint not found");
@@ -1111,7 +1142,7 @@ export const useWalletStore = defineStore("wallet", {
       if (!invoice) {
         throw new Error("invoice not found");
       }
-      const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
+      const mintWallet = await this.mintWallet(invoice.mint, invoice.unit);
       const mint = mintStore.mints.find((m) => m.url === invoice.mint);
       if (!mint) {
         throw new Error("mint not found");
@@ -1250,7 +1281,7 @@ export const useWalletStore = defineStore("wallet", {
       if (!invoice) {
         throw new Error("invoice not found");
       }
-      const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
+      const mintWallet = await this.mintWallet(invoice.mint, invoice.unit);
       const mint = mintStore.mints.find((m) => m.url === invoice.mint);
 
       if (!mint) {
