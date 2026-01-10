@@ -586,7 +586,7 @@ export default defineComponent({
         const sendAmount = Math.floor(
           this.sendData.amount * this.activeUnitCurrencyMultiplyer
         );
-        const mintWallet = await this.mintWallet(this.activeMintUrl, this.activeUnit, true);
+        const mintWallet = await this.mintWallet(this.activeMintUrl, this.activeUnit, false);
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
         const { _, sendProofs } = await this.send(
           this.activeProofs,

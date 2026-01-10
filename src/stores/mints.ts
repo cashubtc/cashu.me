@@ -413,11 +413,10 @@ export const useMintsStore = defineStore("mints", {
     updateMintInfoAndKeys: async function (mint: Mint) {
       const newMintInfo = await this.fetchMintInfo(mint);
       this.triggerMintInfoMotdChanged(newMintInfo, mint);
-      const mintToUpdate = this.mints.filter((m) => m.url === mint.url)[0];
-      mintToUpdate.info = newMintInfo;
-      mintToUpdate.errored = false;
-      mintToUpdate.lastInfoUpdated = new Date().toISOString();
       mint = await this.fetchMintKeys(mint);
+
+      const mintToUpdate = this.mints.filter((m) => m.url === mint.url)[0];
+      mintToUpdate.errored = false;
       return mint;
     },
     activateMint: async function (mint: Mint, verbose = false, force = false) {
@@ -490,6 +489,13 @@ export const useMintsStore = defineStore("mints", {
       try {
         const mintClass = new MintClass(mint);
         const data = await mintClass.api.getInfo();
+
+        // if we have this mint in localstorage, update it
+        const storedMint = this.mints.find((m) => m.url === mint.url);
+        if (storedMint) {
+          storedMint.info = data;
+          storedMint.lastInfoUpdated = new Date().toISOString();
+        }
         return data;
       } catch (error: any) {
         console.error(error);

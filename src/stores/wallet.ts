@@ -196,10 +196,11 @@ export const useWalletStore = defineStore("wallet", {
       }
       // if updateKeysets is true and keysetsLastFetched is older than 1 hour, fetch the keysets for the mint
       const ONE_HOUR = 60 * 60 * 1000;
+      const TEN_SECONDS = 10 * 1000;
       const lastUpdated = storedMint.lastKeysetsUpdated
         ? new Date(storedMint.lastKeysetsUpdated).getTime()
         : 0;
-      const mintNeedsUpdate = updateKeysets && (lastUpdated < Date.now() - ONE_HOUR);
+      const mintNeedsUpdate = updateKeysets && (lastUpdated < Date.now() - TEN_SECONDS);
       if (mintNeedsUpdate) {
         console.log("updating mint info and keys for mint", storedMint.url);
         try {
@@ -451,14 +452,17 @@ export const useWalletStore = defineStore("wallet", {
         let sendProofs: Proof[] = [];
 
         if (totalAmount != targetAmount) {
+          // we need to swap!
+          // get a new wallet with potentially updated keysets / info
+          const swapWallet = await this.mintWallet(wallet.mint.mintUrl, wallet.unit, true);
           const counter = this.keysetCounter(keysetId);
           proofsToSend = this.coinSelect(
             spendableProofs,
-            wallet,
+            swapWallet,
             targetAmount,
             true
           );
-          ({ keep: keepProofs, send: sendProofs } = await wallet.send(
+          ({ keep: keepProofs, send: sendProofs } = await swapWallet.send(
             targetAmount,
             proofsToSend,
             { counter, keysetId, proofsWeHave: spendableProofs }
