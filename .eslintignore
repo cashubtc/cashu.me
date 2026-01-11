@@ -1,4 +1,6 @@
 /dist
+/android
+/ios
 /src-bex/www
 /src-capacitor
 /src-cordova
