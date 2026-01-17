@@ -196,10 +196,7 @@
               :force-visible="true"
               :hide-close="true"
               :hide-enter="true"
-              :hide-comma="
-                (activeUnit === 'sat' || activeUnit === 'msat') &&
-                !fiatKeyboardMode
-              "
+              :hide-comma="shouldHideDecimal"
               :model-value="String(sendData.amount ?? 0)"
               @update:modelValue="(val: string | number) => (sendData.amount = Number(val))"
               @done="sendTokens"
@@ -315,6 +312,14 @@ export default defineComponent({
       "showLockInput",
       "sendData",
     ]),
+    shouldHideDecimal(): boolean {
+      // Allow decimals for:
+      // 1. Fiat units (USD, EUR, etc.)
+      // 2. When in fiat keyboard mode (converting to fiat for SAT unit)
+      // Hide decimals only for SAT/mSAT when not in fiat mode
+      const isFiatUnit = this.activeUnit !== 'sat' && this.activeUnit !== 'msat';
+      return !isFiatUnit && !this.fiatKeyboardMode;
+    },
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     ...mapState(useUiStore, [
       "tickerShort",
