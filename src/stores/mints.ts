@@ -585,8 +585,26 @@ export const useMintsStore = defineStore("mints", {
           // check for keyset id collisions with other mints
           await this.checkForMintKeysetIdCollisions(mint, keysets);
           // store keysets in mint and update local storage
-          // TODO: do not overwrite anykeyset, but append new keysets and update existing ones
-          this.mints.filter((m) => m.url === mint.url)[0].keysets = keysets;
+          // merge new keysets with existing ones instead of overwriting
+          const storedMint = this.mints.find((m) => m.url === mint.url);
+          if (storedMint) {
+            const existingKeysets = storedMint.keysets || [];
+            const mergedKeysets = [...existingKeysets];
+            
+            // Add or update keysets
+            for (const newKeyset of keysets) {
+              const existingIndex = mergedKeysets.findIndex((k) => k.id === newKeyset.id);
+              if (existingIndex !== -1) {
+                // Update existing keyset
+                mergedKeysets[existingIndex] = newKeyset;
+              } else {
+                // Add new keyset
+                mergedKeysets.push(newKeyset);
+              }
+            }
+            
+            storedMint.keysets = mergedKeysets;
+          }
         }
         return keysets;
       } catch (error: any) {
