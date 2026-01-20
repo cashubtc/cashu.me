@@ -1,116 +1,23 @@
-/**
- * Utility functions for handling legacy retail QR codes
- * These are traditional retail QR codes (like those used in South Africa)
- * that need to be converted to Lightning Address format (like cryptoqr.net)
- * 
- * Based on the implementation from Blink wallet
- */
+// Converts South African retail EMV QR codes to Lightning Address format via cryptoqr.net
 
-/**
- * Merchant configuration for supported retailers
- */
-const merchants = [
-  {
-    id: "picknpay",
-    identifierRegex: /(?<identifier>.*za\.co\.electrum\.picknpay.*)/iu,
-    defaultDomain: "cryptoqr.net",
-    domains: {
-      mainnet: "cryptoqr.net",
-      signet: "staging.cryptoqr.net",
-      regtest: "staging.cryptoqr.net",
-    },
-  },
-  {
-    id: "ecentric",
-    identifierRegex: /(?<identifier>.*za\.co\.ecentric.*)/iu,
-    defaultDomain: "cryptoqr.net",
-    domains: {
-      mainnet: "cryptoqr.net",
-      signet: "staging.cryptoqr.net",
-      regtest: "staging.cryptoqr.net",
-    },
-  },
+const MERCHANT_PATTERNS = [
+  /(?<identifier>.*za\.co\.electrum\.picknpay.*)/iu,
+  /(?<identifier>.*za\.co\.ecentric.*)/iu,
 ];
 
-/**
- * Determines the network type (defaults to mainnet)
- * TODO: This could be made configurable based on wallet settings
- */
-function getNetwork() {
-  // For now, default to mainnet
-  // In the future, this could check wallet settings or mint configuration
-  return "mainnet";
+export function isLegacyRetailQR(code) {
+  return typeof code === "string" && code.trim().startsWith("000201");
 }
 
-/**
- * Converts a merchant EMV QR code to Lightning Address format
- * 
- * @param {string} qrContent - The EMV QR code content
- * @param {string} network - Network type: "mainnet", "signet", or "regtest"
- * @returns {string|null} - Lightning Address format (e.g., "encodedQR@cryptoqr.net") or null if not a supported merchant
- */
-export function convertMerchantQRToLightningAddress(qrContent, network = null) {
-  if (!qrContent) {
-    return null;
-  }
+export function translateLegacyQRToLightningAddress(qrCode) {
+  if (!isLegacyRetailQR(qrCode)) return null;
 
-  const networkType = network || getNetwork();
-
-  for (const merchant of merchants) {
-    const match = qrContent.match(merchant.identifierRegex);
+  const trimmed = qrCode.trim();
+  for (const pattern of MERCHANT_PATTERNS) {
+    const match = trimmed.match(pattern);
     if (match?.groups?.identifier) {
-      const domain = merchant.domains[networkType] || merchant.defaultDomain;
-      const encodedIdentifier = encodeURIComponent(match.groups.identifier);
-      return `${encodedIdentifier}@${domain}`;
+      return `${encodeURIComponent(match.groups.identifier)}@cryptoqr.net`;
     }
   }
-
-  return null;
-}
-
-/**
- * Checks if a string looks like a legacy retail QR code
- * Legacy retail QR codes are EMV QR codes (starting with "000201")
- * used by South African retailers like PicknPay
- *
- * @param {string} code - The QR code string to check
- * @returns {boolean} - True if it looks like a legacy retail QR code
- */
-export function isLegacyRetailQR(code) {
-  if (!code || typeof code !== "string") {
-    return false;
-  }
-
-  const trimmed = code.trim();
-
-  // EMV QR Code format (used by PicknPay and other South African retailers)
-  // These start with "000201" which is the EMV QR Code payload format indicator
-  return trimmed.startsWith("000201");
-}
-
-/**
- * Translates a legacy retail QR code to a Lightning Address
- * For EMV QR codes from supported merchants, converts to Lightning Address format
- * 
- * @param {string} qrCode - The legacy retail QR code
- * @param {string} network - Optional network type (defaults to mainnet)
- * @returns {string|null} - Lightning Address format or null if not supported
- */
-export function translateLegacyQRToLightningAddress(qrCode, network = null) {
-  if (!isLegacyRetailQR(qrCode)) {
-    return null;
-  }
-
-  const trimmedCode = qrCode.trim();
-  
-  const lightningAddress = convertMerchantQRToLightningAddress(trimmedCode, network);
-  if (lightningAddress) {
-    console.log("Converted merchant QR code to Lightning Address:", {
-      original: trimmedCode,
-      lightningAddress,
-    });
-    return lightningAddress;
-  }
-
   return null;
 }
