@@ -91,6 +91,8 @@ export async function checkOfferAndMintBolt12(
 
     const keysetId = this.getKeyset(invoice.mint, invoice.unit);
     const counter = this.keysetCounter(keysetId);
+    const mint = mintStore.mints.find((m: any) => m.url === invoice.mint);
+    if (!mint) throw new Error("mint not found");
     const proofs = await mintWallet.mintProofsBolt12(
       delta,
       updated,
@@ -99,7 +101,7 @@ export async function checkOfferAndMintBolt12(
         keysetId,
         counter,
         proofsWeHave: mintStore.mintUnitProofs(
-          mintStore.mints.find((m: any) => m.url === invoice.mint),
+          mint,
           invoice.unit
         ),
       }

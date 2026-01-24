@@ -149,7 +149,7 @@
     </div>
   </div>
 </template>
-<script>
+<script lang="ts">
 import * as _ from "underscore";
 import { defineComponent } from "vue";
 import { shortenString } from "src/js/string-utils";
@@ -343,7 +343,13 @@ export default defineComponent({
 
     checkTransactionStatus(transaction) {
       if (transaction.type === "ecash") {
-        this.checkTokenSpendable(transaction);
+        // If it's an incoming ecash transaction, open receive dialog
+        if (transaction.amount > 0) {
+          this.receiveToken(transaction.token);
+        } else {
+          // For outgoing ecash transactions, check spendable status
+          this.checkTokenSpendable(transaction);
+        }
       } else if (transaction.type === "lightning") {
         // Heuristic: BOLT12 mint quote objects have amount_paid/amount_issued
         const isBolt12 = transaction?.mintQuote &&
@@ -360,7 +366,12 @@ export default defineComponent({
 
     showTransactionDialog(transaction) {
       if (transaction.type === "ecash") {
-        this.showTokenDialog(transaction);
+        // For pending incoming tokens, open receive dialog instead
+        if (transaction.status === "pending" && transaction.amount > 0) {
+          this.receiveToken(transaction.token);
+        } else {
+          this.showTokenDialog(transaction);
+        }
       } else if (transaction.type === "lightning") {
         this.showInvoiceDialog(transaction);
       }
@@ -407,7 +418,7 @@ export default defineComponent({
         transactions.push({
           ...token,
           type: "ecash",
-          id: `token-${token.token}`,
+          id: token.id,
           label: token.label,
         });
       });

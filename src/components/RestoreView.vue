@@ -1,7 +1,7 @@
 <template>
   <div style="max-width: 800px; margin: 0 auto">
     <!-- Mnemonic seed phrase input -->
-    <div class="q-px-xs text-left" on-left>
+    <div v-if="!onboarding" class="q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
@@ -42,7 +42,7 @@
     </div>
 
     <!-- Information about restoring mints -->
-    <div class="q-px-xs text-left" on-left>
+    <div v-if="!onboarding" class="q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
@@ -58,7 +58,7 @@
     </div>
 
     <!-- Information about adding mints -->
-    <div class="q-px-xs text-left q-mt-md" on-left>
+    <div v-if="!onboarding" class="q-px-xs text-left q-mt-md" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
@@ -76,20 +76,19 @@
     <!-- List of mints with restore buttons and balance badges -->
     <div class="q-pb-md q-px-xs text-left" on-left>
       <!-- Restore Selected Mints Button (Primary Action) -->
-      <div
-        v-if="mints.length > 0"
-        class="primary-action-section q-px-sm q-pb-md"
-      >
+      <div v-if="mints.length > 0" class="primary-action-section q-pb-md">
         <q-btn
           color="primary"
           size="md"
           rounded
           @click="restoreSelectedMints"
           :disabled="
-            !isMnemonicValid || restoringState || selectedMintsCount === 0
+            (onboarding ? false : !isMnemonicValid) ||
+            restoringState ||
+            selectedMintsCount === 0
           "
           :loading="restoringState"
-          class="q-px-lg"
+          class="q-px-md"
         >
           <q-icon name="restore" class="q-mr-sm" />
           {{
@@ -101,7 +100,10 @@
       </div>
 
       <!-- Select All/Deselect All Buttons -->
-      <div v-if="mints.length > 0" class="selection-buttons q-px-sm q-pb-md">
+      <div
+        v-if="mints.length > 0 && !onboarding"
+        class="selection-buttons q-px-sm q-pb-md"
+      >
         <q-btn
           flat
           dense
@@ -128,7 +130,7 @@
 
       <!-- Mints List with Card Design -->
       <div class="q-pt-md">
-        <div v-for="mint in mints" :key="mint.url" class="q-px-md q-mb-md">
+        <div v-for="mint in mints" :key="mint.url" class="q-mb-md">
           <q-item
             clickable
             @click="toggleMintSelection(mint.url)"
@@ -144,7 +146,7 @@
                 ? 'rgba(var(--q-primary-rgb), 0.1)'
                 : 'transparent',
             }"
-            :disable="!isMnemonicValid || restoringState"
+            :disable="(onboarding ? false : !isMnemonicValid) || restoringState"
           >
             <div class="full-width" style="position: relative">
               <div class="row items-center q-pa-md">
@@ -227,7 +229,7 @@
                   </div>
                 </div>
 
-                <div class="col-auto">
+                <div v-if="!onboarding" class="col-auto">
                   <q-btn
                     color="secondary"
                     size="sm"
@@ -254,13 +256,14 @@
 
     <!-- Nostr Mint Restore Component -->
     <NostrMintRestore
+      v-if="!onboarding"
       :mnemonic="mnemonicToRestore"
       :is-mnemonic-valid="isMnemonicValid"
     />
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore, MintClass } from "src/stores/mints";
@@ -275,6 +278,9 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     NostrMintRestore,
+  },
+  props: {
+    onboarding: { type: Boolean, default: false },
   },
   data() {
     return {
@@ -317,6 +323,26 @@ export default defineComponent({
       return this.selectedMints.size;
     },
   },
+  mounted() {
+    if (this.onboarding) {
+      this.selectAllMints();
+    }
+  },
+  watch: {
+    mints: {
+      handler() {
+        if (this.onboarding) {
+          this.selectAllMints();
+        }
+      },
+      deep: true,
+    },
+    onboarding(newVal) {
+      if (newVal) {
+        this.selectAllMints();
+      }
+    },
+  },
   methods: {
     ...mapActions(useRestoreStore, ["restoreMint"]),
     ...mapActions(useUiStore, ["pasteFromClipboard"]),
@@ -357,7 +383,7 @@ export default defineComponent({
         return;
       }
 
-      if (!this.validateMnemonic()) {
+      if (!this.onboarding && !this.validateMnemonic()) {
         return;
       }
 
@@ -406,7 +432,7 @@ export default defineComponent({
       return true;
     },
     async restoreMintForMint(mintUrl) {
-      if (!this.validateMnemonic()) {
+      if (!this.onboarding && !this.validateMnemonic()) {
         return;
       }
       try {
@@ -485,6 +511,6 @@ export default defineComponent({
 .primary-action-section {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
 }
 </style>

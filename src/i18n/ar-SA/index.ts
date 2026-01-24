@@ -1,4 +1,14 @@
 export default {
+  MultinutPicker: {
+    payment: "دفع متعدد الجوز",
+    selectMints: "حدد واحدًا أو أكثر من mints لتنفيذ الدفع منه.",
+    totalSelectedBalance: "إجمالي الرصيد المحدد",
+    multiMintPay: "دفع متعدد Mint",
+    balanceNotEnough: "رصيد متعدد mints غير كافٍ لتلبية هذه الفاتورة",
+    failed: "فشل في المعالجة: {error}",
+    paid: "تم دفع {amount} عبر Lightning",
+  },
+
   global: {
     copy_to_clipboard: {
       success: "تم النسخ إلى الحافظة!",
@@ -82,6 +92,7 @@ export default {
         could_not_get_info: "تعذر الحصول على معلومات الـ Mint",
         could_not_get_keys: "تعذر الحصول على مفاتيح الـ Mint",
         could_not_get_keysets: "تعذر الحصول على مجموعات مفاتيح الـ Mint",
+        mint_validation_error: "خطأ في التحقق من صحة mint",
         removed: "تمت إزالة الـ Mint",
         error: "خطأ في الـ Mint",
       },
@@ -159,7 +170,23 @@ export default {
       backup_restore: "النسخ الاحتياطي والاستعادة",
       lightning_address: "عنوان LIGHTNING",
       nostr_keys: "مفاتيح NOSTR",
-      nostr: "NOSTR",
+      nostr: {
+        title: "NOSTR",
+        relays: {
+          expand_label: "انقر لتعديل المرحلات",
+          add: {
+            title: "إضافة مُرحِل",
+            description:
+              "تستخدم محفظتك هذه المُرحِلات لعمليات nostr مثل طلبات الدفع وربط محفظة nostr والنسخ الاحتياطية.",
+          },
+          list: {
+            title: "المُرحِلات",
+            description: "ستتصل محفظتك بهذه المُرحِلات.",
+            copy_tooltip: "نسخ المُرحِل",
+            remove_tooltip: "إزالة المُرحِل",
+          },
+        },
+      },
       payment_requests: "طلبات الدفع",
       nostr_wallet_connect: "اتصال محفظة NOSTR",
       hardware_features: "ميزات الأجهزة",
@@ -196,6 +223,10 @@ export default {
         toggle: "المطالبة تلقائيًا",
         description: "استلام المدفوعات الواردة تلقائيًا.",
       },
+      npc_v2: {
+        choose_mint_title: "اختر mint لـ npub.cash v2",
+        choose_mint_placeholder: "حدد mint...",
+      },
     },
     nostr_keys: {
       title: "مفاتيح nostr الخاصة بك",
@@ -221,23 +252,6 @@ export default {
         not_found: "لم يتم العثور على ملحق التوقيع NIP-07",
       },
     },
-    nostr: {
-      title: "NOSTR",
-      relays: {
-        expand_label: "انقر لتعديل المرحلات",
-        add: {
-          title: "إضافة مُرحِل",
-          description:
-            "تستخدم محفظتك هذه المُرحِلات لعمليات nostr مثل طلبات الدفع وربط محفظة nostr والنسخ الاحتياطية.",
-        },
-        list: {
-          title: "المُرحِلات",
-          description: "ستتصل محفظتك بهذه المُرحِلات.",
-          copy_tooltip: "نسخ المُرحِل",
-          remove_tooltip: "إزالة المُرحِل",
-        },
-      },
-    },
     payment_requests: {
       title: "طلبات الدفع",
       description:
@@ -259,20 +273,6 @@ export default {
         qr_tooltip: "إظهار رمز QR",
         allowance_label: "المسموح به المتبقي (سات)",
       },
-      relays: {
-        expand_label: "انقر لتعديل المرحلات",
-        add: {
-          title: "إضافة مرحل",
-          description:
-            "يستخدم Nostr Wallet Connect مرحلات nostr لربط محفظتك بتطبيقات أخرى.",
-        },
-        list: {
-          title: "مرحلات",
-          description: "ستتصل محفظتك بهذه المرحلات.",
-          copy_tooltip: "نسخ المرحل",
-          remove_tooltip: "إزالة المرحل",
-        },
-      },
     },
     hardware_features: {
       webnfc: {
@@ -287,9 +287,8 @@ export default {
           description: "تخزين URL لهذه المحفظة مع الرمز",
         },
         binary: {
-          title: "ثنائي خام",
-          description:
-            "بايتات خام بدلاً من Base64. يجعل الرموز أقصر بحوالي 33%.",
+          title: "ثنائي",
+          description: "تخزين الرموز كبيانات ثنائية",
         },
         quick_access: {
           toggle: "وصول سريع إلى NFC",
@@ -374,6 +373,21 @@ export default {
         url_label: "عنوان URL للمدقق",
         api_url_label: "عنوان URL لواجهة برمجة تطبيقات المدقق",
       },
+      multinut: {
+        toggle: "تمكين Multinut",
+        description:
+          "إذا تم تمكينه، ستستخدم المحفظة Multinut لدفع الفواتير من عدة mints في وقت واحد.",
+      },
+      nostr_mint_backup: {
+        toggle: "النسخ الاحتياطي لقائمة mint على Nostr",
+        description:
+          "إذا تم تمكينه، سيتم نسخ قائمة mint الخاصة بك احتياطيًا تلقائيًا إلى مرحلات Nostr باستخدام مفاتيح Nostr التي تم تكوينها. يتيح لك هذا استعادة قائمة mint الخاصة بك عبر الأجهزة.",
+        notifications: {
+          enabled: "تمكين النسخ الاحتياطي لـ Nostr mint",
+          disabled: "تعطيل النسخ الاحتياطي لـ Nostr mint",
+          failed: "فشل تمكين النسخ الاحتياطي لـ Nostr mint",
+        },
+      },
     },
     appearance: {
       keyboard: {
@@ -398,6 +412,29 @@ export default {
           flamingo: "فلامينجو",
         },
       },
+      bip177: {
+        title: "رمز البيتكوين",
+        description: "استخدم رمز ₿ بدلاً من sats.",
+        toggle: "استخدام رمز ₿",
+      },
+    },
+    web_of_trust: {
+      title: "شبكة الثقة",
+      known_pubkeys: "المفاتيح العامة المعروفة: {wotCount}",
+      continue_crawl: "متابعة الزحف",
+      crawl_odell: "الزحف إلى شبكة ثقة ODELL",
+      crawl_wot: "الزحف إلى شبكة الثقة",
+      pause: "إيقاف مؤقت",
+      reset: "إعادة تعيين",
+      progress: "{crawlProcessed} / {crawlTotal}",
+    },
+    npub_cash: {
+      use_npubx: "استخدام npubx.cash",
+      copy_lightning_address: "نسخ عنوان Lightning",
+      v2_mint: "npub.cash v2 mint",
+    },
+    multinut: {
+      use_multinut: "استخدام Multinut",
     },
     advanced: {
       title: "متقدم",
@@ -431,6 +468,7 @@ export default {
           title: "زيادة عدادات مجموعة المفاتيح",
           description:
             'انقر على معرّف مجموعة المفاتيح لزيادة عدادات مسار الاشتقاق لمجموعات المفاتيح في محفظتك. هذا مفيد إذا رأيت خطأ "النواتج تم توقيعها بالفعل".',
+          counter: "العداد: {count}",
         },
         unset_reserved: {
           button: "إلغاء تعيين جميع الرموز المحجوزة",
@@ -564,6 +602,8 @@ export default {
   },
   WelcomeSlide2: {
     title: "تثبيت PWA",
+    alt: { pwa_example: "مثال تثبيت PWA" },
+    installing: "جارٍ التثبيت…",
     instruction: {
       intro: {
         text: "للحصول على أفضل تجربة، استخدم هذه المحفظة مع متصفح الويب الأصلي لجهازك لتثبيتها كتطبيق ويب تقدمي. افعل هذا الآن.",
@@ -600,6 +640,8 @@ export default {
       success: {
         title: "نجاح!",
         text: "أنت تستخدم Cashu كتطبيق PWA. أغلق أي نوافذ متصفح أخرى مفتوحة واستخدم التطبيق من شاشتك الرئيسية.",
+        nextSteps:
+          "يمكنك الآن إغلاق هذا اللسان وفتح التطبيق من الشاشة الرئيسية.",
       },
     },
   },
@@ -637,6 +679,70 @@ export default {
       },
     },
   },
+  WelcomeSlideChoice: {
+    title: "إعداد محفظتك",
+    text: "هل تريد الاستعادة من عبارة الاستعادة أم إنشاء محفظة جديدة؟",
+    options: {
+      new: {
+        title: "إنشاء محفظة جديدة",
+        subtitle: "توليد عبارة استعادة جديدة وإضافة mints.",
+      },
+      recover: {
+        title: "استعادة المحفظة",
+        subtitle: "أدخل عبارة الاستعادة، واستعد المِنْت و ecash.",
+      },
+    },
+  },
+  WelcomeMintSetup: {
+    title: "إضافة mints",
+    text: "المِنْت خوادم تساعدك على إرسال واستلام ecash. اختر mint مكتشفًا أو أضِف واحدًا يدويًا. يمكنك التخطي والإضافة لاحقًا.",
+    sections: { your_mints: "المِنْت الخاصة بك" },
+    restoring: "جارٍ استعادة المِنْت…",
+    placeholder: { mint_url: "https://" },
+  },
+  WelcomeRecoverSeed: {
+    title: "أدخل عبارة الاستعادة",
+    text: "الصق أو اكتب عبارة من 12 كلمة للاستعادة.",
+    inputs: { word: "الكلمة { index }" },
+    actions: { paste_all: "لصق الكل" },
+    disclaimer: "تُستخدم عبارة الاستعادة محليًا فقط لاشتقاق مفاتيح محفظتك.",
+  },
+  WelcomeRestoreEcash: {
+    title: "استعد ecash الخاصة بك",
+    text: "ابحث عن البراهين غير المصروفة على المِنْت المُكوَّنة لديك وأضِفها إلى محفظتك.",
+  },
+  MintRatings: {
+    title: "مراجعات المِنْت",
+    reviews: "مراجعات",
+    ratings: "التقييمات",
+    no_reviews: "لا توجد مراجعات",
+    your_review: "مراجعتك",
+    no_reviews_to_display: "لا توجد مراجعات للعرض.",
+    no_rating: "لا يوجد تقييم",
+    out_of: "من",
+    rows: "Reviews",
+    sort: "ترتيب",
+    sort_options: {
+      newest: "الأحدث",
+      oldest: "الأقدم",
+      highest: "الأعلى",
+      lowest: "الأقل",
+    },
+    actions: { write_review: "اكتب مراجعة" },
+    empty_state_subtitle:
+      "ساعد من خلال ترك مراجعة. شارك تجربتك مع هذا المِنْت وساعد الآخرين من خلال ترك مراجعة.",
+  },
+  CreateMintReview: {
+    title: "مراجعة المِنْت",
+    publishing_as: "النشر باسم",
+    inputs: {
+      rating: { label: "التقييم" },
+      review: { label: "مراجعة (اختياري)" },
+    },
+    actions: {
+      publish: { label: "نشر", in_progress: "جارٍ النشر…" },
+    },
+  },
   RestoreView: {
     seed_phrase: {
       label: "استعادة من عبارة الاستعادة",
@@ -666,6 +772,12 @@ export default {
       validate: {
         error: "يجب أن تكون الكلمة التذكيرية 12 كلمة على الأقل.",
       },
+      select_all: {
+        label: "تحديد الكل",
+      },
+      deselect_all: {
+        label: "إلغاء تحديد الكل",
+      },
       restore: {
         label: "استعادة",
         in_progress: "استعادة mint…",
@@ -677,6 +789,29 @@ export default {
         success: "تمت الاستعادة بنجاح",
         error: "خطأ في استعادة mints: { error }",
       },
+      restore_selected_mints: {
+        label: "استعادة المِنْتات المحددة ({count})",
+        in_progress: "استعادة mint { index } من { length } …",
+        success: "تمت استعادة {count} mint(s) بنجاح",
+        error: "خطأ في استعادة mints المحددة: { error }",
+      },
+    },
+    nostr_mints: {
+      label: "استعادة Mints من Nostr",
+      caption:
+        "ابحث عن نسخ احتياطية لـ mint مخزنة على مرحلات Nostr باستخدام عبارة الاستعادة الخاصة بك. سيساعدك هذا على اكتشاف mints التي استخدمتها سابقًا.",
+      search_button: "البحث عن نسخ احتياطية لـ Mint",
+      select_all: "تحديد الكل",
+      deselect_all: "إلغاء تحديد الكل",
+      backed_up: "تم النسخ الاحتياطي",
+      already_added: "تمت الإضافة بالفعل",
+      add_selected: "إضافة المحدد ({count})",
+      no_backups_found: "لم يتم العثور على نسخ احتياطية لـ mint",
+      no_backups_hint:
+        "تأكد من تمكين النسخ الاحتياطي لـ Nostr mint في الإعدادات لنسخ قائمة mint الخاصة بك احتياطيًا تلقائيًا.",
+      invalid_mnemonic: "الرجاء إدخال عبارة استعادة صالحة قبل البحث.",
+      search_error: "فشل البحث عن نسخ احتياطية لـ mint.",
+      add_error: "فشل إضافة mints المحددة.",
     },
   },
   MintSettings: {
@@ -714,7 +849,7 @@ export default {
       recommendations: {
         overline: "تم العثور على { length } mints",
         caption:
-          "تمت التوصية بهذه mints من قبل مستخدمي Nostr الآخرين. اقرأ المراجعات على { link }. كن حذرًا وقم ببحثك الخاص قبل استخدام أي mint.",
+          "تمت التوصية بهذه mints من قبل مستخدمي Nostr الآخرين. كن حذرًا وقم ببحثك الخاص قبل استخدام أي mint.",
         actions: {
           browse: {
             label: "انقر لاستعراض mints",
@@ -735,7 +870,7 @@ export default {
           label: "إلى",
         },
         amount: {
-          label: "المبلغ ({ ticker }))",
+          label: "المبلغ ({ ticker })",
         },
       },
       actions: {
@@ -745,6 +880,10 @@ export default {
         },
       },
     },
+    error_badge: "خطأ",
+    reviews_text: "مراجعات",
+    no_reviews_yet: "لا توجد مراجعات بعد",
+    discover_mints_button: "اكتشف mints",
   },
   QrcodeReader: {
     progress: {
@@ -762,7 +901,8 @@ export default {
     },
   },
   InvoiceDetailDialog: {
-    title: "إنشاء فاتورة",
+    title: "استلام Lightning",
+    create_invoice_title: "إنشاء فاتورة",
     inputs: {
       amount: {
         label: "المبلغ ({ ticker }) *",
@@ -805,7 +945,7 @@ export default {
     },
   },
   SendTokenDialog: {
-    title: "إرسال { value }",
+    title: "إرسال Ecash",
     title_ecash_text: "Ecash",
     badge_offline_text: "غير متصل",
     inputs: {
@@ -834,6 +974,9 @@ export default {
       },
       copy_link: {
         tooltip_text: "نسخ الرابط",
+      },
+      share: {
+        tooltip_text: "مشاركة ecash",
       },
       lock: {
         label: "@:global.actions.lock.label",
@@ -890,7 +1033,7 @@ export default {
     },
   },
   ReceiveTokenDialog: {
-    title: "استلام { value }",
+    title: "استلام Ecash",
     title_ecash_text: "Ecash",
     inputs: {
       tokens_base64: {
@@ -900,6 +1043,10 @@ export default {
     errors: {
       invalid_token: {
         label: "رمز غير صالح",
+      },
+      p2pk_lock_mismatch: {
+        label:
+          "غير قادر على الاستلام. قفل P2PK لهذا الرمز لا يطابق المفتاح العام الخاص بك.",
       },
     },
     actions: {
@@ -932,7 +1079,7 @@ export default {
         in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
       later: {
-        label: "لاحقًا",
+        label: "استلام لاحقًا",
         tooltip_text: "أضف إلى السجل للاستلام لاحقًا",
         already_in_history_success_text: "Ecash موجود بالفعل في السجل",
         added_to_history_success_text: "تمت إضافة Ecash إلى السجل",
@@ -1138,6 +1285,20 @@ export default {
       },
     },
   },
+  ParseInputComponent: {
+    placeholder: {
+      default: "رمز Cashu أو عنوان Lightning",
+      receive: "رمز Cashu",
+      pay: "عنوان Lightning أو فاتورة",
+    },
+    qr_scanner: {
+      title: "مسح رمز QR",
+      description: "اضغط للمسح عنوان",
+    },
+    paste_button: {
+      label: "@:global.actions.paste.label",
+    },
+  },
   PayInvoiceDialog: {
     input_data: {
       title: "دفع Lightning",
@@ -1164,6 +1325,7 @@ export default {
     lnurlpay: {
       amount_exact_label: "{ payee } يطلب { value } { ticker }",
       amount_range_label: "{ payee } يطلب{br}بين { min } و { max } { ticker }",
+      sending_to_lightning_address: "إرسال إلى { address }",
       inputs: {
         amount: {
           label: "المبلغ ({ ticker }) *",
@@ -1183,6 +1345,9 @@ export default {
     },
     invoice: {
       title: "دفع { value }",
+      paying: "جاري الدفع",
+      paid: "تم الدفع",
+      fee: "الرسوم",
       memo: {
         label: "مذكرة",
       },
@@ -1253,5 +1418,18 @@ export default {
     in_progress_warning_text: "التبديل قيد التقدم",
     invalid_swap_data_error_text: "بيانات تبديل غير صالحة",
     swap_error_text: "خطأ في التبديل",
+  },
+  TokenInformation: {
+    fee: "الرسوم",
+    unit: "الوحدة",
+    fiat: "العملة الورقية",
+    p2pk: "P2PK",
+    locked: "مقفل",
+    locked_to_you: "مقفل لك",
+    mint: "دار السك",
+    memo: "مذكرة",
+    payment_request: "طلب دفع",
+    nostr: "Nostr",
+    token_copied: "تم نسخ الرمز المميز إلى الحافظة",
   },
 };

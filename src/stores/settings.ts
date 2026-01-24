@@ -5,6 +5,7 @@ const defaultNostrRelays = [
   "wss://relay.damus.io",
   "wss://relay.8333.space/",
   "wss://nos.lol",
+  "wss://relay.primal.net",
 ];
 
 export const useSettingsStore = defineStore("settings", {
@@ -12,7 +13,7 @@ export const useSettingsStore = defineStore("settings", {
     return {
       getBitcoinPrice: useLocalStorage<boolean>(
         "cashu.settings.getBitcoinPrice",
-        false
+        true
       ),
       bitcoinPriceCurrency: useLocalStorage<string>(
         "cashu.settings.bitcoinPriceCurrency",
@@ -56,7 +57,7 @@ export const useSettingsStore = defineStore("settings", {
       ),
       enableReceiveSwaps: useLocalStorage<boolean>(
         "cashu.settings.enableReceiveSwaps",
-        false
+        true
       ),
       showNfcButtonInDrawer: useLocalStorage(
         "cashu.ui.showNfcButtonInDrawer",
@@ -68,7 +69,7 @@ export const useSettingsStore = defineStore("settings", {
       ),
       auditorEnabled: useLocalStorage<boolean>(
         "cashu.settings.auditorEnabled",
-        false
+        true
       ),
       auditorUrl: useLocalStorage<string>(
         "cashu.settings.auditorUrl",
@@ -80,7 +81,7 @@ export const useSettingsStore = defineStore("settings", {
       ),
       bip177BitcoinSymbol: useLocalStorage<boolean>(
         "cashu.settings.bip177",
-        false
+        true
       ),
       multinutEnabled: useLocalStorage<boolean>(
         "cashu.settings.multinutEnabled",
@@ -88,7 +89,7 @@ export const useSettingsStore = defineStore("settings", {
       ),
       nostrMintBackupEnabled: useLocalStorage<boolean>(
         "cashu.settings.nostrMintBackupEnabled",
-        false
+        true
       ),
     };
   },

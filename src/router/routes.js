@@ -19,6 +19,30 @@ const routes = [
     ],
   },
   {
+    path: "/discoverMints",
+    component: () => import("layouts/FullscreenLayout.vue"),
+    children: [
+      { path: "", component: () => import("src/pages/MintDiscoveryPage.vue") },
+    ],
+  },
+  {
+    path: "/mintratings",
+    component: () => import("layouts/FullscreenLayout.vue"),
+    children: [
+      { path: "", component: () => import("src/pages/MintRatingsPage.vue") },
+    ],
+  },
+  {
+    path: "/createreview",
+    component: () => import("layouts/FullscreenLayout.vue"),
+    children: [
+      {
+        path: "",
+        component: () => import("src/pages/CreateMintReviewPage.vue"),
+      },
+    ],
+  },
+  {
     path: "/restore",
     component: () => import("layouts/FullscreenLayout.vue"),
     children: [{ path: "", component: () => import("src/pages/Restore.vue") }],

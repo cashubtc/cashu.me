@@ -16,7 +16,6 @@
             @click="showReceiveDialog = true"
           >
             <div class="button-content">
-              <q-icon name="south_west" size="1.2rem" class="q-mr-xs" />
               <span>{{ $t("WalletPage.actions.receive.label") }}</span>
             </div>
           </q-btn>
@@ -40,7 +39,6 @@
             @click="showSendDialog = true"
           >
             <div class="button-content">
-              <q-icon name="north_east" size="1.2rem" class="q-mr-xs" />
               <span>{{ $t("WalletPage.actions.send.label") }}</span>
             </div>
           </q-btn>
@@ -146,6 +144,7 @@
     />
 
     <!-- INVOICE DETAILS  -->
+    <CreateInvoiceDialog v-model="showCreateInvoiceDialog" />
     <InvoiceDetailDialog v-model="showInvoiceDetails" />
     <!-- BOLT12 OFFER DETAILS -->
     <Bolt12OfferDetailsDialog v-model="showBolt12OfferDetails" />
@@ -202,7 +201,7 @@
   padding-bottom: 15px;
 }
 </style>
-<script>
+<script lang="ts">
 import { date } from "quasar";
 import * as _ from "underscore";
 import { shortenString } from "src/js/string-utils";
@@ -218,6 +217,7 @@ import SendTokenDialog from "components/SendTokenDialog.vue";
 import PayInvoiceDialog from "components/PayInvoiceDialog.vue";
 import InvoiceDetailDialog from "components/InvoiceDetailDialog.vue";
 import Bolt12OfferDetailsDialog from "components/Bolt12OfferDetailsDialog.vue";
+import CreateInvoiceDialog from "components/CreateInvoiceDialog.vue";
 import SendDialog from "components/SendDialog.vue";
 import ReceiveDialog from "components/ReceiveDialog.vue";
 import QrcodeReader from "components/QrcodeReader.vue";
@@ -238,6 +238,7 @@ import { useProofsStore } from "src/stores/proofs";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useNWCStore } from "src/stores/nwc";
+// @ts-ignore
 import { useNPCStore } from "src/stores/npubcash";
 import { useNPCV2Store } from "src/stores/npcv2";
 import { useNostrStore } from "src/stores/nostr";
@@ -259,6 +260,9 @@ import {
 
 import { useMigrationsStore } from "src/stores/migrations";
 
+declare const windowMixin: any;
+declare const GIT_COMMIT: string;
+
 export default {
   mixins: [windowMixin],
   components: {
@@ -272,6 +276,7 @@ export default {
     PayInvoiceDialog,
     InvoiceDetailDialog,
     Bolt12OfferDetailsDialog,
+    CreateInvoiceDialog,
     QrcodeReader,
     SendDialog,
     ReceiveDialog,
@@ -285,24 +290,9 @@ export default {
       name: "",
       mintId: "",
       mintName: "",
-      deferredPWAInstallPrompt: null,
+      deferredPWAInstallPrompt: null as any,
       action: "main",
-      parse: {
-        show: false,
-        invoice: null,
-        lnurlpay: null,
-        lnurlauth: null,
-        data: {
-          request: "",
-          amount: 0,
-          comment: "",
-        },
-        camera: {
-          show: false,
-          camera: "auto",
-        },
-      },
-      payments: [],
+      payments: [] as any[],
       paymentsChart: {
         show: false,
       },
@@ -320,6 +310,7 @@ export default {
     ...mapWritableState(useUiStore, [
       "showInvoiceDetails",
       "showBolt12OfferDetails",
+      "showCreateInvoiceDialog",
       "tab",
       "showSendDialog",
       "showReceiveDialog",
@@ -363,7 +354,6 @@ export default {
         .reduce((sum, el) => (sum += el.amount), 0);
     },
   },
-  filters: {},
   methods: {
     ...mapActions(useProofsStore, [
       "serializeProofs",
@@ -432,7 +422,7 @@ export default {
     },
     getTokenList: function () {
       const amounts = this.activeProofs.map((t) => t.amount);
-      const counts = {};
+      const counts = {} as any;
 
       for (const num of amounts) {
         counts[num] = counts[num] ? counts[num] + 1 : 1;
@@ -440,7 +430,7 @@ export default {
       return Object.keys(counts).map((k) => ({
         value: parseInt(k),
         count: parseInt(counts[k]),
-        sum: k * counts[k],
+        sum: Number(k) * counts[k],
       }));
     },
 
@@ -450,7 +440,7 @@ export default {
     showChart: function () {
       this.paymentsChart.show = true;
       this.$nextTick(() => {
-        generateChart(this.$refs.canvas, this.payments);
+        // generateChart(this.$refs.canvas, this.payments);
       });
     },
     focusInput(el) {
@@ -493,7 +483,7 @@ export default {
       this.invoiceData.bolt11 = "";
       this.invoiceData.hash = "";
       this.invoiceData.memo = "";
-      this.showInvoiceDetails = true;
+      this.showCreateInvoiceDialog = true;
     },
     showSendTokensDialog: function () {
       console.log("##### showSendTokensDialog");
@@ -535,9 +525,10 @@ export default {
       const isStandalone = window.matchMedia(
         "(display-mode: standalone)"
       ).matches;
+      // @ts-ignore
       if (document.referrer.startsWith("android-app://")) {
         return "twa";
-      } else if (navigator.standalone || isStandalone) {
+      } else if ((navigator as any).standalone || isStandalone) {
         return "standalone";
       }
       return "browser";
@@ -550,6 +541,7 @@ export default {
       this.deferredPWAInstallPrompt.userChoice.then((choiceResult) => {
         if (choiceResult.outcome === "accepted") {
           console.log("User accepted the install prompt");
+          // @ts-ignore
           this.setWelcomeDialogSeen();
         } else {
           console.log("User dismissed the install prompt");
@@ -586,18 +578,18 @@ export default {
         if (actionBtns.length >= 2) {
           // Reset widths first
           actionBtns.forEach((btn) => {
-            btn.style.width = "auto";
+            (btn as HTMLElement).style.width = "auto";
           });
 
           // Get the maximum width
           let maxWidth = 0;
           actionBtns.forEach((btn) => {
-            maxWidth = Math.max(maxWidth, btn.offsetWidth);
+            maxWidth = Math.max(maxWidth, (btn as HTMLElement).offsetWidth);
           });
 
           // Apply the maximum width to all buttons
           actionBtns.forEach((btn) => {
-            btn.style.width = `${maxWidth}px`;
+            (btn as HTMLElement).style.width = `${maxWidth}px`;
           });
         }
       });
@@ -623,6 +615,11 @@ export default {
   },
 
   created: async function () {
+    // @ts-ignore
+    if (typeof GIT_COMMIT !== "undefined") {
+      console.log(`Git commit: ${GIT_COMMIT}`);
+    }
+
     // Initialize and run migrations
     const migrationsStore = useMigrationsStore();
     migrationsStore.initMigrations();
@@ -631,12 +628,12 @@ export default {
     // check if another tab is open
     this.registerBroadcastChannel();
 
-    let params = new URL(document.location).searchParams;
-    let hash = new URL(document.location).hash;
+    const params = new URL(document.location as any).searchParams;
+    const hash = new URL(document.location as any).hash;
 
     // mint url
     if (params.get("mint")) {
-      let addMintUrl = params.get("mint");
+      const addMintUrl = params.get("mint") as string;
       await this.setTab("mints");
       this.showAddMintDialog = true;
       this.addMintData = { url: addMintUrl };
@@ -650,11 +647,11 @@ export default {
 
     // get token to receive tokens from a link
     if (params.get("token") || hash.includes("token")) {
-      let tokenBase64 = params.get("token") || hash.split("token=")[1];
+      const tokenBase64 = (params.get("token") || hash.split("token=")[1]) as string;
       // make sure to react only to tokens not in the users history
       let seen = false;
-      for (var i = 0; i < this.historyTokens.length; i++) {
-        var thisToken = this.historyTokens[i].token;
+      for (let i = 0; i < this.historyTokens.length; i++) {
+        const thisToken = this.historyTokens[i].token;
         if (thisToken == tokenBase64 && this.historyTokens[i].amount > 0) {
           seen = true;
         }
@@ -669,7 +666,7 @@ export default {
     // get lightning invoice from a link
     if (params.get("lightning")) {
       this.showParseDialog();
-      this.payInvoiceData.input.request = params.get("lightning");
+      this.payInvoiceData.input.request = params.get("lightning") as string;
     }
 
     // Clear all parameters from URL without refreshing the page
@@ -680,7 +677,7 @@ export default {
       window.location.href.split("?")[0].split("#")[0]
     );
     */
-    console.log(`hash: ${window.location.hash}`);
+    console.log(`location.hash: ${window.location.hash}`);
 
     // startup tasks
 
@@ -696,8 +693,16 @@ export default {
     // PWA install hook
     this.registerPWAEventHook();
 
-    // generate new mnemonic
-    this.initializeMnemonic();
+    // generate mnemonic only if onboarding is finished or path is 'new'
+    try {
+      const welcome = useWelcomeStore();
+      if (!welcome.showWelcome || welcome.onboardingPath === "new") {
+        this.initializeMnemonic();
+      }
+    } catch (e) {
+      // fallback safe
+      this.initializeMnemonic();
+    }
 
     this.initSigner();
 

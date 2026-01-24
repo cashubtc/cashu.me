@@ -126,7 +126,7 @@
             <div class="col-12">
               <q-input outlined v-model="npcAddress" dense rounded readonly>
                 <template v-slot:append>
-                  <q-spinner-hourglass size="sm" v-if="npcLoading" />
+                  <q-spinner size="sm" v-if="npcLoading" />
                   <q-icon
                     name="content_copy"
                     @click="copyText(npcAddress)"
@@ -422,6 +422,72 @@
           </q-item-section>
         </q-item>
       </q-expansion-item>
+      <!-- Web of trust actions -->
+      <q-item>
+        <q-item-section>
+          <q-item-label overline>
+            {{ $t("Settings.web_of_trust.title") }}
+          </q-item-label>
+          <q-item-label caption>
+            {{
+              $t("Settings.web_of_trust.known_pubkeys", { wotCount: wotCount })
+            }}
+          </q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item>
+        <q-item-section>
+          <div class="row justify-end">
+            <q-btn flat dense :loading="wotLoading" @click="crawlWebOfTrust(2)">
+              {{
+                hasCrawlCheckpoint && !wotLoading
+                  ? $t("Settings.web_of_trust.continue_crawl")
+                  : signerType === "SEED"
+                  ? $t("Settings.web_of_trust.crawl_odell")
+                  : $t("Settings.web_of_trust.crawl_wot")
+              }}
+            </q-btn>
+            <q-btn
+              v-if="wotLoading"
+              flat
+              dense
+              class="q-ml-sm"
+              color="negative"
+              @click="cancelCrawl"
+            >
+              {{ $t("Settings.web_of_trust.pause") }}
+            </q-btn>
+            <q-btn
+              v-if="!wotLoading"
+              flat
+              dense
+              class="q-ml-sm"
+              :disable="wotLoading"
+              @click="resetWebOfTrust"
+            >
+              {{ $t("Settings.web_of_trust.reset") }}
+            </q-btn>
+          </div>
+        </q-item-section>
+      </q-item>
+      <q-item v-if="wotLoading || crawlTotal > 0">
+        <q-item-section>
+          <q-linear-progress
+            rounded
+            size="10px"
+            color="primary"
+            :value="crawlTotal > 0 ? crawlProcessed / crawlTotal : 0"
+          />
+          <div class="text-caption q-mt-xs">
+            {{
+              $t("Settings.web_of_trust.progress", {
+                crawlProcessed: crawlProcessed,
+                crawlTotal: crawlTotal,
+              })
+            }}
+          </div>
+        </q-item-section>
+      </q-item>
     </div>
 
     <!-- PAYMENT REQUESTS SECTION -->
@@ -661,11 +727,6 @@
                 </q-item-label>
               </q-item-section>
             </q-item>
-            <!--
-              disable binary for now
-              TODO: re-enable once we can decode
-            -->
-            <!--
             <q-item clickable @click="nfcEncoding = 'binary'">
               <q-item-section avatar>
                 <q-icon
@@ -679,13 +740,16 @@
                 />
               </q-item-section>
               <q-item-section>
-                <q-item-label title>{{ $t("Settings.hardware_features.webnfc.binary.title") }}</q-item-label>
+                <q-item-label title>{{
+                  $t("Settings.hardware_features.webnfc.binary.title")
+                }}</q-item-label>
                 <q-item-label caption>
-                  {{ $t("Settings.hardware_features.webnfc.binary.description") }}
+                  {{
+                    $t("Settings.hardware_features.webnfc.binary.description")
+                  }}
                 </q-item-label>
               </q-item-section>
             </q-item>
-            -->
             <q-item>
               <q-toggle
                 v-model="showNfcButtonInDrawer"
@@ -842,6 +906,22 @@
           </q-item-section>
         </q-item>
         <div>
+          <!-- nostr mint backup settings -->
+          <q-item>
+            <q-toggle
+              v-model="nostrMintBackupEnabled"
+              :label="$t('Settings.experimental.nostr_mint_backup.toggle')"
+              color="primary"
+              @update:model-value="onNostrMintBackupToggle"
+            >
+            </q-toggle>
+          </q-item>
+          <q-item class="q-pt-none">
+            <q-item-label caption>
+              {{ $t("Settings.experimental.nostr_mint_backup.description") }}
+            </q-item-label>
+          </q-item>
+
           <!-- periodically check incoming invoices -->
           <q-item>
             <q-toggle
@@ -1076,7 +1156,7 @@
             <div class="row q-pt-md">
               <q-toggle
                 v-model="npcV2Enabled"
-                label="Use npubx.cash"
+                :label="$t('Settings.npub_cash.use_npubx')"
                 color="primary"
               >
                 <q-badge
@@ -1100,7 +1180,9 @@
                     color="grey"
                     class="q-mr-sm cursor-pointer"
                   >
-                    <q-tooltip>Copy Lightning address</q-tooltip>
+                    <q-tooltip>{{
+                      $t("Settings.npub_cash.copy_lightning_address")
+                    }}</q-tooltip>
                   </q-icon>
                 </template>
               </q-input>
@@ -1108,7 +1190,9 @@
           </div>
           <div class="row q-mx-md">
             <div class="col-12 q-pt-md">
-              <q-item-label caption>npub.cash v2 mint</q-item-label>
+              <q-item-label caption>{{
+                $t("Settings.npub_cash.v2_mint")
+              }}</q-item-label>
               <q-input
                 outlined
                 v-model="npcV2Mint"
@@ -1158,7 +1242,7 @@
             <div class="row q-pt-md">
               <q-toggle
                 v-model="multinutEnabled"
-                label="Use Multinut"
+                :label="$t('Settings.multinut.use_multinut')"
                 color="primary"
               >
                 <q-badge
@@ -1171,29 +1255,6 @@
                 </q-item-label>
               </q-toggle>
             </div>
-          </div>
-        </div>
-
-        <!-- nostr mint backup settings -->
-        <div class="row q-mx-md q-mt-md">
-          <div class="col-12">
-            <div class="row q-pt-md">
-              <q-toggle
-                v-model="nostrMintBackupEnabled"
-                :label="$t('Settings.experimental.nostr_mint_backup.toggle')"
-                color="primary"
-                @update:model-value="onNostrMintBackupToggle"
-              >
-                <q-badge
-                  color="primary"
-                  :label="$t('Settings.experimental.receive_swaps.badge')"
-                  class="q-mx-sm"
-                ></q-badge>
-              </q-toggle>
-            </div>
-            <q-item-label caption class="q-px-md">
-              {{ $t("Settings.experimental.nostr_mint_backup.description") }}
-            </q-item-label>
           </div>
         </div>
 
@@ -1599,7 +1660,13 @@
                         flat
                         click
                         @click="increaseKeysetCounter(counter.id, 1)"
-                        >{{ counter.id }} - counter: {{ counter.counter }}
+                        >{{ counter.id }} -
+                        {{
+                          $t(
+                            "Settings.advanced.developer.keyset_counters.counter",
+                            { count: counter.counter }
+                          )
+                        }}
                       </q-btn>
                     </row>
                   </row>
@@ -1708,6 +1775,70 @@
               <q-item>
                 <q-item-section>
                   <row>
+                    <q-btn
+                      v-if="!confirmImport"
+                      dense
+                      flat
+                      outline
+                      click
+                      @click="confirmImport = !confirmImport"
+                    >
+                      {{
+                        $t("Settings.advanced.developer.import_wallet.button")
+                      }}
+                    </q-btn>
+                  </row>
+                  <row v-if="!confirmImport">
+                    <q-item-label class="q-px-sm" caption
+                      >{{
+                        $t(
+                          "Settings.advanced.developer.import_wallet.description"
+                        )
+                      }}
+                    </q-item-label>
+                  </row>
+                  <row v-if="confirmImport">
+                    <span>{{
+                      $t(
+                        "Settings.advanced.developer.import_wallet.confirm_question"
+                      )
+                    }}</span>
+                    <q-btn
+                      flat
+                      dense
+                      class="q-ml-sm"
+                      color="primary"
+                      @click="confirmImport = false"
+                      >{{
+                        $t("Settings.advanced.developer.import_wallet.cancel")
+                      }}</q-btn
+                    >
+                    <q-btn
+                      flat
+                      dense
+                      class="q-ml-sm"
+                      color="warning"
+                      @click="
+                        confirmImport = false;
+                        browseBackupFile();
+                      "
+                      >{{
+                        $t("Settings.advanced.developer.import_wallet.confirm")
+                      }}</q-btn
+                    >
+                  </row>
+                  <input
+                    type="file"
+                    ref="fileUpload"
+                    accept=".json"
+                    style="display: none"
+                    @change="onChangeFileUpload"
+                  />
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>
+                  <row>
                     <q-btn dense flat outline click @click="exportWalletState">
                       {{
                         $t("Settings.advanced.developer.export_wallet.button")
@@ -1737,7 +1868,7 @@
   <!-- NWC DIALOG -->
   <NWCDialog v-model="showNWCDialog" />
 </template>
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
 import P2PKDialog from "./P2PKDialog.vue";
 import NWCDialog from "./NWCDialog.vue";
@@ -1766,6 +1897,7 @@ import { useNPCV2Store } from "src/stores/npcv2";
 import { useNostrMintBackupStore } from "src/stores/nostrMintBackup";
 import { usePriceStore } from "src/stores/price";
 import { useI18n } from "vue-i18n";
+import { useNostrUserStore } from "src/stores/nostrUser";
 
 export default defineComponent({
   name: "SettingsView",
@@ -1796,6 +1928,7 @@ export default defineComponent({
         { label: "Italiano", value: "it-IT" },
         { label: "Deutsch", value: "de-DE" },
         { label: "Français", value: "fr-FR" },
+        { label: "Čeština", value: "cs-CZ" },
         { label: "Svenska", value: "sv-SE" },
         { label: "Ελληνικά", value: "el-GR" },
         { label: "Türkçe", value: "tr-TR" },
@@ -1837,6 +1970,7 @@ export default defineComponent({
       hideMnemonic: true,
       confirmMnemonic: false,
       confirmNuke: false,
+      confirmImport: false,
       nip46Token: "",
       nip07SignerAvailable: false,
       newRelay: "",
@@ -1879,9 +2013,15 @@ export default defineComponent({
     ...mapState(useNPCStore, ["npcLoading"]),
     ...mapState(useNostrStore, [
       "pubkey",
-      "mintRecommendations",
       "signerType",
       "seedSignerPrivateKeyNsec",
+    ]),
+    ...mapState(useNostrUserStore, [
+      "wotCount",
+      "wotLoading",
+      "crawlProcessed",
+      "crawlTotal",
+      "hasCrawlCheckpoint",
     ]),
     ...mapState(useWalletStore, ["mnemonic"]),
     ...mapState(useUiStore, ["ndefSupported"]),
@@ -1911,7 +2051,7 @@ export default defineComponent({
     keysetCountersByMint() {
       const mints = this.mints;
       const keysetCountersByMint = {}; // {mintUrl: [keysetCounter: {id: string, count: number}, ...]}
-      for (let mint of mints) {
+      for (const mint of mints) {
         const mintIds = mint.keysets.map((keyset) => keyset.id);
         const keysetCounterThisMint = this.keysetCounters.filter((entry) =>
           mintIds.includes(entry.id)
@@ -1940,6 +2080,16 @@ export default defineComponent({
     },
   },
   watch: {
+    pubkey: {
+      immediate: true,
+      handler(newPk) {
+        const nostrUser = useNostrUserStore();
+        if (newPk) {
+          nostrUser.setPubkey(newPk);
+          nostrUser.updateUserProfile(true);
+        }
+      },
+    },
     enableNwc: function () {
       if (this.enableNwc) {
         this.listenToNWCCommands();
@@ -2014,6 +2164,13 @@ export default defineComponent({
       "fetchBitcoinPrice",
       "updateBitcoinPriceForCurrentCurrency",
     ]),
+    ...mapActions(useNostrUserStore, [
+      "setPubkey",
+      "updateUserProfile",
+      "crawlWebOfTrust",
+      "cancelCrawl",
+      "resetWebOfTrust",
+    ]),
     generateNewMnemonic: async function () {
       this.newMnemonic();
       await this.initSigner();
@@ -2036,21 +2193,21 @@ export default defineComponent({
     },
     checkActiveProofsSpendable: async function () {
       // iterate over this.activeProofs in batches of 50 and check if they are spendable
-      let wallet = useWalletStore().mintWallet(
+      const wallet = await useWalletStore().mintWallet(
         this.activeMintUrl,
         this.activeUnit
       );
-      let proofs = this.activeProofs.flat();
+      const proofs = this.activeProofs.flat();
       console.log("Checking proofs", proofs);
-      let allSpentProofs = [];
-      let batch_size = 50;
+      const allSpentProofs = [];
+      const batch_size = 50;
       for (let i = 0; i < proofs.length; i += batch_size) {
         console.log("Checking proofs", i, i + batch_size);
-        let batch = proofs.slice(i, i + batch_size);
-        let spent = await this.checkProofsSpendable(batch, wallet, true);
+        const batch = proofs.slice(i, i + batch_size);
+        const spent = await this.checkProofsSpendable(batch, wallet, true);
         allSpentProofs.push(spent);
       }
-      let spentProofs = allSpentProofs.flat();
+      const spentProofs = allSpentProofs.flat();
       if (spentProofs.length > 0) {
         console.log("Spent proofs", spentProofs);
         this.notifySuccess("Removed " + spentProofs.length + " spent proofs");
@@ -2078,21 +2235,37 @@ export default defineComponent({
       await this.initWalletSeedPrivateKeySigner();
       await this.generateNPCConnection();
       await this.generateNPCV2Connection();
+      const nostr = useNostrStore();
+      const nostrUser = useNostrUserStore();
+      nostrUser.setPubkey(nostr.pubkey);
+      await nostrUser.updateUserProfile(true);
     },
     handleExtensionClick: async function () {
       await this.initNip07Signer();
       await this.generateNPCConnection();
       await this.generateNPCV2Connection();
+      const nostr = useNostrStore();
+      const nostrUser = useNostrUserStore();
+      nostrUser.setPubkey(nostr.pubkey);
+      await nostrUser.updateUserProfile(true);
     },
     handleBunkerClick: async function () {
       await this.initNip46Signer();
       await this.generateNPCConnection();
       await this.generateNPCV2Connection();
+      const nostr = useNostrStore();
+      const nostrUser = useNostrUserStore();
+      nostrUser.setPubkey(nostr.pubkey);
+      await nostrUser.updateUserProfile(true);
     },
     handleNsecClick: async function () {
       await this.initPrivateKeySigner();
       await this.generateNPCConnection();
       await this.generateNPCV2Connection();
+      const nostr = useNostrStore();
+      const nostrUser = useNostrUserStore();
+      nostrUser.setPubkey(nostr.pubkey);
+      await nostrUser.updateUserProfile(true);
     },
     handleResetPrivateKeySigner: async function () {
       await this.resetPrivateKeySigner();
@@ -2114,8 +2287,43 @@ export default defineComponent({
       await this.exportWalletState();
       // clear dexie tables
       this.deleteAllTables();
+      // clear nostr user databases
+      useNostrUserStore().clearAllDatabases();
+      // clear mint reviews database
+      try {
+        const { useMintRecommendationsStore } = await import(
+          "src/stores/mintRecommendations"
+        );
+        await useMintRecommendationsStore().clearAllDatabases();
+      } catch {}
       localStorage.clear();
       window.location.href = "/";
+    },
+    browseBackupFile: function () {
+      this.$refs.fileUpload.click();
+    },
+    onChangeFileUpload: function () {
+      const file = this.$refs.fileUpload.files[0];
+      if (file) {
+        this.readBackupFile(file);
+      }
+    },
+    readBackupFile: function (file) {
+      const reader = new FileReader();
+      reader.onload = (f) => {
+        try {
+          const content = f.target.result;
+          const backup = JSON.parse(content);
+          this.restoreFromBackup(backup);
+        } catch (error) {
+          console.error("Error reading backup file:", error);
+          this.notifyError("Invalid backup file format");
+        }
+      };
+      reader.onerror = () => {
+        this.notifyError("Error reading file");
+      };
+      reader.readAsText(file);
     },
     addRelay: function () {
       if (this.newRelay) {

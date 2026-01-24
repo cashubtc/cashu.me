@@ -17,7 +17,7 @@ module.exports = {
   // Rules order is important, please avoid shuffling them
   extends: [
     // Base ESLint recommended rules
-    // 'eslint:recommended',
+    "eslint:recommended",
 
     // Uncomment any of the lines below to choose desired strictness,
     // but leave only one uncommented!
@@ -60,6 +60,25 @@ module.exports = {
 
     // allow debugger during development only
     "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
+
+    "no-var": "error",
+    "no-const-assign": "error",
+    "prefer-const": [
+      "error",
+      {
+        destructuring: "any",
+        ignoreReadBeforeAssign: false,
+      },
+    ],
+
+    // remove some warnings/errors from eslint:recommended for now
+    // which are quite common in the current codebase
+    // we will deal with them later on
+    "no-unused-vars": "off",
+    "no-undef": "off",
+    "no-empty": "off",
+    "no-useless-catch": "off",
+    "no-constant-condition": "off",
   },
   overrides: [
     {
@@ -70,6 +89,17 @@ module.exports = {
       // as it's not able to detect their usage into the template
       // We disable this rule and only keep it for Vue files
       rules: { "vue/no-unused-properties": "off" },
+    },
+    {
+      files: ["*.vue"],
+      parser: "vue-eslint-parser",
+      parserOptions: {
+        parser: "@typescript-eslint/parser",
+      },
+      rules: {
+        // Disallow <script> blocks without lang="ts"
+        "vue/block-lang": ["error", { script: { lang: "ts" } }],
+      },
     },
   ],
 };

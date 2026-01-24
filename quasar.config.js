@@ -9,6 +9,21 @@
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
 
 const { configure } = require("quasar/wrappers");
+const { execSync } = require("child_process");
+
+function resolveGitCommit() {
+  try {
+    return execSync("git describe --always --dirty", {
+      cwd: __dirname,
+      stdio: "pipe",
+    })
+      .toString()
+      .trim();
+  } catch (err) {
+    console.warn("Unable to resolve git commit via `git describe`");
+    return "unknown";
+  }
+}
 
 module.exports = configure(function (/* ctx */) {
   return {
@@ -44,7 +59,6 @@ module.exports = configure(function (/* ctx */) {
 
       "roboto-font", // optional, you are not bound to it
       "material-icons", // optional, you are not bound to it
-      ,
     ],
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#build
@@ -70,7 +84,10 @@ module.exports = configure(function (/* ctx */) {
       // polyfillModulePreload: true,
       // distDir
 
-      // extendViteConf (viteConf) {},
+      extendViteConf(viteConf) {
+        viteConf.define = viteConf.define || {};
+        viteConf.define.GIT_COMMIT = JSON.stringify(resolveGitCommit());
+      },
       // viteVuePluginOptions: {},
 
       // vitePlugins: [
@@ -186,6 +203,17 @@ module.exports = configure(function (/* ctx */) {
         // protocol: 'myapp://path',
         // Windows only
         // win32metadata: { ... }
+        asar: true,
+        prune: true,
+        ignore: [
+          /(^|[\\/])node_modules([\\/]|$)/,
+          /(^|[\\/])screenshots([\\/]|$)/,
+          /(^|[\\/])package-lock\.json$/,
+          /(^|[\\/])yarn\.lock$/,
+          /(^|[\\/])pnpm-lock\.yaml$/,
+          /(^|[\\/])vitest\.config\.js$/,
+          /(^|[\\/])test([\\/]|$)/,
+        ],
       },
 
       builder: {

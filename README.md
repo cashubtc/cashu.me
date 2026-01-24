@@ -5,7 +5,7 @@ Cashu Wallet
 ## One-liner build & run
 
 ```
-docker-compose up -d
+docker compose up -d
 ```
 
 access at http://localhost:3000 or serve it behind a reverse proxy.
@@ -38,6 +38,14 @@ npm run lint
 
 ```bash
 npm run format
+```
+
+### Check translations
+
+Use this to verify non-English translations are in sync with the English source:
+
+```bash
+npm run i18n:check
 ```
 
 ### Build the app for production

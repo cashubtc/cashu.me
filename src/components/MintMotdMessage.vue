@@ -26,7 +26,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
 import { X as XIcon, Info as InfoIcon } from "lucide-vue-next";
 import { useMintsStore } from "src/stores/mints";
@@ -56,9 +56,8 @@ export default defineComponent({
     const mintsStore = useMintsStore();
 
     const dismissMessage = () => {
-      mintsStore.mints.filter(
-        (m) => m.url === props.mintUrl
-      )[0].motdDismissed = true;
+      mintsStore.mints.filter((m) => m.url === props.mintUrl)[0].motdDismissed =
+        true;
       emit("dismiss");
     };
 

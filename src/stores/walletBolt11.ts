@@ -95,7 +95,7 @@ export async function mintBolt11(
   const mintStore = useMintsStore();
   const uIStore = useUiStore();
   const keysetId = this.getKeyset(invoice.mint, invoice.unit);
-  const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
+  const mintWallet = await this.mintWallet(invoice.mint, invoice.unit, true);
   const mint = mintStore.mints.find((m: any) => m.url === invoice.mint);
   if (!mint) {
     throw new Error("mint not found");
@@ -129,7 +129,7 @@ export async function mintBolt11(
         keysetId,
         counter,
         proofsWeHave: mintStore.mintUnitProofs(mint, invoice.unit),
-        privateKey: invoice.privKey,
+        privateKey: invoice.privKey as string,
       }
     );
     this.increaseKeysetCounter(keysetId, proofs.length);
@@ -301,6 +301,8 @@ export async function meltBolt11(
         keysetId,
         counter,
       });
+      // store melt quote in invoice history
+      this.updateOutgoingInvoiceInHistoryBolt11(data.quote as MeltQuoteResponse);
     } catch (error) {
       throw error;
     } finally {
@@ -347,10 +349,13 @@ export async function meltBolt11(
       throw error;
     }
     // get quote and check state
-    const mintQuote = await mintWallet.mint.checkMeltQuote(quote.quote);
+    const meltQuote = await mintWallet.mint.checkMeltQuote(quote.quote);
+    // store melt quote in invoice history
+    this.updateOutgoingInvoiceInHistoryBolt11(meltQuote as MeltQuoteResponse);
+
     if (
-      mintQuote.state == MeltQuoteState.PAID ||
-      mintQuote.state == MeltQuoteState.PENDING
+      meltQuote.state == MeltQuoteState.PAID ||
+      meltQuote.state == MeltQuoteState.PENDING
     ) {
       console.log(
         "### meltBolt11: error, but quote is paid or pending. not rolling back."
@@ -627,6 +632,9 @@ export function updateOutgoingInvoiceInHistoryBolt11(
       if (options) {
         if (options.status) {
           i.status = options.status;
+          if (options.status === "paid") {
+            i.paidDate = currentDateStr();
+          }
         }
         if (options.amount) {
           i.amount = options.amount;

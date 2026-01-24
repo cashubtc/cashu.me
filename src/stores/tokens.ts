@@ -1,14 +1,21 @@
 import { useLocalStorage } from "@vueuse/core";
 import { date } from "quasar";
 import { defineStore } from "pinia";
-import { PaymentRequest, Proof, Token } from "@cashu/cashu-ts";
+import {
+  PaymentRequest,
+  Proof,
+  Token,
+  MeltQuoteResponse,
+} from "@cashu/cashu-ts";
 import token from "src/js/token";
+import { v4 as uuidv4 } from "uuid";
 
 /**
  * The tokens store handles everything related to tokens and proofs
  */
 
 export type HistoryToken = {
+  id: string;
   status: "paid" | "pending";
   amount: number;
   date: string;
@@ -18,6 +25,9 @@ export type HistoryToken = {
   paymentRequest?: PaymentRequest;
   fee?: number;
   label?: string; // Add label field for custom naming
+  meltQuote?: MeltQuoteResponse;
+  paidDate?: string;
+  paymentRequestId?: string; // If created in response to a payment request
 };
 
 export const useTokensStore = defineStore("tokens", {
@@ -36,6 +46,7 @@ export const useTokensStore = defineStore("tokens", {
       fee,
       paymentRequest,
       label,
+      paymentRequestId,
     }: {
       amount: number;
       token: string;
@@ -44,8 +55,11 @@ export const useTokensStore = defineStore("tokens", {
       fee?: number;
       paymentRequest?: PaymentRequest;
       label?: string;
-    }) {
+      paymentRequestId?: string;
+    }): string {
+      const id = uuidv4();
       this.historyTokens.push({
+        id,
         status: "paid",
         amount,
         date: currentDateStr(),
@@ -55,7 +69,9 @@ export const useTokensStore = defineStore("tokens", {
         fee,
         paymentRequest,
         label,
+        paymentRequestId,
       } as HistoryToken);
+      return id;
     },
     addPendingToken({
       amount,
@@ -65,6 +81,7 @@ export const useTokensStore = defineStore("tokens", {
       fee,
       paymentRequest,
       label,
+      paymentRequestId,
     }: {
       amount: number;
       token: string;
@@ -73,8 +90,11 @@ export const useTokensStore = defineStore("tokens", {
       fee?: number;
       paymentRequest?: PaymentRequest;
       label?: string;
-    }) {
+      paymentRequestId?: string;
+    }): string {
+      const id = uuidv4();
       this.historyTokens.push({
+        id,
         status: "pending",
         amount,
         date: currentDateStr(),
@@ -84,7 +104,9 @@ export const useTokensStore = defineStore("tokens", {
         fee,
         paymentRequest,
         label,
+        paymentRequestId,
       });
+      return id;
     },
     editHistoryToken(
       tokenToEdit: string,

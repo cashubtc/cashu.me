@@ -32,6 +32,8 @@ export type Mint = {
   errored?: boolean;
   motdDismissed?: boolean;
   multinutSelected?: boolean;
+  lastInfoUpdated?: string;
+  lastKeysetsUpdated?: string;
   // initialize api: new CashuMint(url) on activation
 };
 
@@ -408,6 +410,15 @@ export const useMintsStore = defineStore("mints", {
       const worker = useWorkersStore();
       worker.clearAllWorkers();
     },
+    updateMintInfoAndKeys: async function (mint: Mint) {
+      const newMintInfo = await this.fetchMintInfo(mint);
+      this.triggerMintInfoMotdChanged(newMintInfo, mint);
+      mint = await this.fetchMintKeys(mint);
+
+      const mintToUpdate = this.mints.filter((m) => m.url === mint.url)[0];
+      mintToUpdate.errored = false;
+      return mint;
+    },
     activateMint: async function (mint: Mint, verbose = false, force = false) {
       if (mint.url === this.activeMintUrl && !force) {
         return;
@@ -418,21 +429,15 @@ export const useMintsStore = defineStore("mints", {
       workers.clearAllWorkers();
 
       // create new mint.api instance because we can't store it in local storage
-      let previousUrl = this.activeMintUrl;
+      const previousUrl = this.activeMintUrl;
       await uIStore.lockMutex();
       try {
-        this.activeMintUrl = mint.url;
-        console.log("### this.activeMintUrl", this.activeMintUrl);
-        const newMintInfo = await this.fetchMintInfo(mint);
-        this.triggerMintInfoMotdChanged(newMintInfo, mint);
-        mint.info = newMintInfo;
-        console.log("### activateMint: Mint info: ", mint.info);
-        mint = await this.fetchMintKeys(mint);
+        mint = await this.updateMintInfoAndKeys(mint);
         this.toggleActiveUnitForMint(mint);
         if (verbose) {
           await notifySuccess(this.t("wallet.mint.notifications.activated"));
         }
-        this.mints.filter((m) => m.url === mint.url)[0].errored = false;
+        this.activeMintUrl = mint.url;
         console.log("### activateMint: Mint activated: ", this.activeMintUrl);
       } catch (error: any) {
         // restore previous values because the activation errored
@@ -462,7 +467,11 @@ export const useMintsStore = defineStore("mints", {
       }
       return false;
     },
-    triggerMintInfoMotdChanged(newMintInfo: GetInfoResponse, mint: Mint) {
+    triggerMintInfoMotdChanged(
+      newMintInfo: GetInfoResponse,
+      mint: Mint,
+      navigate = true
+    ) {
       if (!this.checkMintInfoMotdChanged(newMintInfo, mint)) {
         return;
       }
@@ -470,14 +479,23 @@ export const useMintsStore = defineStore("mints", {
       this.mints.filter((m) => m.url === mint.url)[0].motdDismissed = false;
 
       // Navigate to mint details page with mint URL as query parameter
-      window.location.href = `/mintdetails?mintUrl=${encodeURIComponent(
-        mint.url
-      )}`;
+      if (navigate) {
+        window.location.href = `/mintdetails?mintUrl=${encodeURIComponent(
+          mint.url
+        )}`;
+      }
     },
     fetchMintInfo: async function (mint: Mint) {
       try {
         const mintClass = new MintClass(mint);
         const data = await mintClass.api.getInfo();
+
+        // if we have this mint in localstorage, update it
+        const storedMint = this.mints.find((m) => m.url === mint.url);
+        if (storedMint) {
+          storedMint.info = data;
+          storedMint.lastInfoUpdated = new Date().toISOString();
+        }
         return data;
       } catch (error: any) {
         console.error(error);
@@ -525,14 +543,6 @@ export const useMintsStore = defineStore("mints", {
       try {
         const mintClass = new MintClass(mint);
         const keysets = await this.fetchMintKeysets(mint);
-        if (keysets.length > 0) {
-          // check for keyset id collisions with other mints
-          await this.checkForMintKeysetIdCollisions(mint, keysets);
-          // store keysets in mint and update local storage
-          // TODO: do not overwrite anykeyset, but append new keysets and update existing ones
-          this.mints.filter((m) => m.url === mint.url)[0].keysets = keysets;
-        }
-
         // if we do not have any keys yet, fetch them
         if (mint.keys.length === 0 || mint.keys.length == undefined) {
           const keys = await mintClass.api.getKeys();
@@ -553,6 +563,8 @@ export const useMintsStore = defineStore("mints", {
           }
         }
 
+        this.mints.filter((m) => m.url === mint.url)[0].lastKeysetsUpdated =
+          new Date().toISOString();
         // return the mint with keys set
         return this.mints.filter((m) => m.url === mint.url)[0];
       } catch (error: any) {
@@ -564,16 +576,39 @@ export const useMintsStore = defineStore("mints", {
       }
     },
     fetchMintKeysets: async function (mint: Mint) {
-      // attention: this function overwrites this.keysets
+      // fetches and stores keysets for a mint
       try {
         const mintClass = new MintClass(mint);
         const data = await mintClass.api.getKeySets();
-        return data.keysets;
+        const keysets = data.keysets;
+        if (keysets.length > 0) {
+          // check for keyset id collisions with other mints
+          await this.checkForMintKeysetIdCollisions(mint, keysets);
+          // store keysets in mint and update local storage
+          // merge new keysets with existing ones instead of overwriting
+          const storedMint = this.mints.find((m) => m.url === mint.url);
+          if (storedMint) {
+            const existingKeysets = storedMint.keysets || [];
+            const mergedKeysets = [...existingKeysets];
+            
+            // Add or update keysets
+            for (const newKeyset of keysets) {
+              const existingIndex = mergedKeysets.findIndex((k) => k.id === newKeyset.id);
+              if (existingIndex !== -1) {
+                // Update existing keyset
+                mergedKeysets[existingIndex] = newKeyset;
+              } else {
+                // Add new keyset
+                mergedKeysets.push(newKeyset);
+              }
+            }
+            
+            storedMint.keysets = mergedKeysets;
+          }
+        }
+        return keysets;
       } catch (error: any) {
         console.error(error);
-        try {
-          // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_keysets"));
-        } catch {}
         throw error;
       }
     },

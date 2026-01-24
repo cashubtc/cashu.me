@@ -88,7 +88,7 @@
         >
           {{ $t("AddMintDialog.actions.add_mint.label") }}
           <template v-slot:loading>
-            <q-spinner-hourglass />
+            <q-spinner />
             {{ $t("AddMintDialog.actions.add_mint.in_progress") }}
           </template>
         </q-btn>
@@ -97,7 +97,7 @@
   </q-dialog>
 </template>
 
-<script>
+<script lang="ts">
 import { defineComponent, computed, ref } from "vue";
 import { useSettingsStore } from "src/stores/settings";
 import MintAuditInfo from "./MintAuditInfo.vue";

@@ -19,7 +19,7 @@
     </div>
   </div>
 </template>
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
 import { mapState, mapWritableState } from "pinia";
 import { useUiStore } from "stores/ui";

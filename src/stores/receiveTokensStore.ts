@@ -11,7 +11,7 @@ import {
   notify,
   notifyWarning,
 } from "../js/notify";
-import { Token } from "@cashu/cashu-ts";
+import { getDecodedTokenBinary, getEncodedToken, Token } from "@cashu/cashu-ts";
 import { useSwapStore } from "./swap";
 import { Clipboard } from "@capacitor/clipboard";
 
@@ -35,7 +35,9 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
     },
     knowThisMintOfTokenJson: function (tokenJson: Token) {
       const mintStore = useMintsStore();
-      let uniqueIds = [...new Set(token.getProofs(tokenJson).map((p) => p.id))];
+      const uniqueIds = [
+        ...new Set(token.getProofs(tokenJson).map((p) => p.id)),
+      ];
       return mintStore.mints
         .map((m) => m.url)
         .includes(token.getMint(tokenJson));
@@ -149,7 +151,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
                     const recordType = record.recordType;
                     let tokenStr = "";
                     switch (recordType) {
-                      case "text":
+                      case "text": {
                         const text = new TextDecoder().decode(record.data);
                         if (!text.startsWith("cashu")) {
                           throw new Error(
@@ -158,7 +160,8 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
                         }
                         tokenStr = text;
                         break;
-                      case "url":
+                      }
+                      case "url": {
                         const url = new TextDecoder().decode(record.data);
                         const i = url.indexOf("#token=cashu");
                         if (i === -1) {
@@ -166,7 +169,8 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
                         }
                         tokenStr = url.substring(i + 7);
                         break;
-                      case "mime":
+                      }
+                      case "mime": {
                         if (record.mediaType !== "application/octet-stream") {
                           throw new Error("binary data expected");
                         }
@@ -177,11 +181,10 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
                             "binary data does not contain a cashu token"
                           );
                         }
-                        // TODO: decode the binary token from data
-                        throw new Error(
-                          "binary token parsing not implemented yet"
-                        );
+                        const token = getDecodedTokenBinary(data);
+                        tokenStr = getEncodedToken(token);
                         break;
+                      }
                       default:
                         throw new Error(`unsupported recordType ${recordType}`);
                     }

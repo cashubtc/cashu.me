@@ -1,4 +1,15 @@
 export default {
+  MultinutPicker: {
+    payment: "Πληρωμή Multinut",
+    selectMints:
+      "Επιλέξτε ένα ή περισσότερα mints για να εκτελέσετε μια πληρωμή.",
+    totalSelectedBalance: "Συνολικό επιλεγμένο υπόλοιπο",
+    multiMintPay: "Πληρωμή Multi-Mint",
+    balanceNotEnough:
+      "Το υπόλοιπο πολλών νομισματοκοπείων δεν επαρκεί για την κάλυψη αυτού του τιμολογίου",
+    failed: "Η επεξεργασία απέτυχε: {error}",
+    paid: "Πληρώθηκε {amount} μέσω Lightning",
+  },
   global: {
     copy_to_clipboard: {
       success: "Αντιγράφηκε στο πρόχειρο!",
@@ -83,6 +94,7 @@ export default {
         could_not_get_info: "Δεν ήταν δυνατή η λήψη πληροφοριών mint",
         could_not_get_keys: "Δεν ήταν δυνατή η λήψη κλειδιών mint",
         could_not_get_keysets: "Δεν ήταν δυνατή η λήψη συνόλων κλειδιών mint",
+        mint_validation_error: "Σφάλμα επικύρωσης Mint",
         removed: "Το mint αφαιρέθηκε",
         error: "Σφάλμα mint",
       },
@@ -161,7 +173,23 @@ export default {
       backup_restore: "ΑΝΤΙΓΡΑΦΟ ΑΣΦΑΛΕΙΑΣ & ΕΠΑΝΑΦΟΡΑ",
       lightning_address: "ΔΙΕΥΘΥΝΣΗ LIGHTNING",
       nostr_keys: "ΚΛΕΙΔΙΑ NOSTR",
-      nostr: "NOSTR",
+      nostr: {
+        title: "NOSTR",
+        relays: {
+          expand_label: "Κάντε κλικ για να επεξεργαστείτε τα relays",
+          add: {
+            title: "Προσθήκη relay",
+            description:
+              "Το πορτοφόλι σας χρησιμοποιεί αυτά τα relays για λειτουργίες nostr όπως αιτήματα πληρωμής, nostr wallet connect και αντίγραφα ασφαλείας.",
+          },
+          list: {
+            title: "Relays",
+            description: "Το πορτοφόλι σας θα συνδεθεί σε αυτά τα relays.",
+            copy_tooltip: "Αντιγραφή relay",
+            remove_tooltip: "Κατάργηση relay",
+          },
+        },
+      },
       payment_requests: "ΑΙΤΗΜΑΤΑ ΠΛΗΡΩΜΗΣ",
       nostr_wallet_connect: "NOSTR WALLET CONNECT",
       hardware_features: "ΧΑΡΑΚΤΗΡΙΣΤΙΚΑ ΥΛΙΚΟΥ",
@@ -198,6 +226,10 @@ export default {
         toggle: "Αυτόματη διεκδίκηση",
         description: "Λήψη εισερχόμενων πληρωμών αυτόματα.",
       },
+      npc_v2: {
+        choose_mint_title: "Επιλέξτε mint για npub.cash v2",
+        choose_mint_placeholder: "Επιλέξτε ένα mint...",
+      },
     },
     nostr_keys: {
       title: "Τα κλειδιά σας nostr",
@@ -224,23 +256,6 @@ export default {
         not_found: "Δεν βρέθηκε επέκταση υπογραφής NIP-07",
       },
     },
-    nostr: {
-      title: "NOSTR",
-      relays: {
-        expand_label: "Κάντε κλικ για να επεξεργαστείτε τα relays",
-        add: {
-          title: "Προσθήκη relay",
-          description:
-            "Το πορτοφόλι σας χρησιμοποιεί αυτά τα relays για λειτουργίες nostr όπως αιτήματα πληρωμής, nostr wallet connect και αντίγραφα ασφαλείας.",
-        },
-        list: {
-          title: "Relays",
-          description: "Το πορτοφόλι σας θα συνδεθεί σε αυτά τα relays.",
-          copy_tooltip: "Αντιγραφή relay",
-          remove_tooltip: "Κατάργηση relay",
-        },
-      },
-    },
     payment_requests: {
       title: "Αιτήματα πληρωμής",
       description:
@@ -263,20 +278,6 @@ export default {
         qr_tooltip: "Εμφάνιση κωδικού QR",
         allowance_label: "Υπολειπόμενο όριο (sat)",
       },
-      relays: {
-        expand_label: "Κάντε κλικ για επεξεργασία relays",
-        add: {
-          title: "Προσθήκη relay",
-          description:
-            "Το Nostr Wallet Connect χρησιμοποιεί relays nostr για να συνδέσει το πορτοφόλι σας με άλλες εφαρμογές.",
-        },
-        list: {
-          title: "Relays",
-          description: "Το πορτοφόλι σας θα συνδεθεί σε αυτά τα relays.",
-          copy_tooltip: "Αντιγραφή relay",
-          remove_tooltip: "Αφαίρεση relay",
-        },
-      },
     },
     hardware_features: {
       webnfc: {
@@ -291,9 +292,8 @@ export default {
           description: "Αποθήκευση URL σε αυτό το πορτοφόλι με token",
         },
         binary: {
-          title: "Ακατέργαστο Δυαδικό",
-          description:
-            "Ακατέργαστα bytes αντί για Base64. Κάνει τα token ~33% μικρότερα.",
+          title: "Δυαδικό",
+          description: "Αποθήκευση tokens ως δυαδικά δεδομένα",
         },
         quick_access: {
           toggle: "Γρήγορη πρόσβαση σε NFC",
@@ -379,6 +379,21 @@ export default {
         url_label: "URL Ελεγκτή",
         api_url_label: "URL API Ελεγκτή",
       },
+      multinut: {
+        toggle: "Ενεργοποίηση Multinut",
+        description:
+          "Εάν είναι ενεργοποιημένο, το πορτοφόλι θα χρησιμοποιεί το Multinut για την πληρωμή τιμολογίων από πολλαπλά mints ταυτόχρονα.",
+      },
+      nostr_mint_backup: {
+        toggle: "Δημιουργία αντιγράφων ασφαλείας της λίστας mint στο Nostr",
+        description:
+          "Εάν είναι ενεργοποιημένο, η λίστα mint σας θα δημιουργείται αυτόματα αντίγραφα ασφαλείας στα ρελέ Nostr χρησιμοποιώντας τα διαμορφωμένα κλειδιά Nostr. Αυτό σας επιτρέπει να επαναφέρετε τη λίστα mint σας σε όλες τις συσκευές.",
+        notifications: {
+          enabled: "Ενεργοποιήθηκε το αντίγραφο ασφαλείας Nostr mint",
+          disabled: "Απενεργοποιήθηκε το αντίγραφο ασφαλείας Nostr mint",
+          failed: "Αποτυχία ενεργοποίησης του αντιγράφου ασφαλείας Nostr mint",
+        },
+      },
     },
     appearance: {
       keyboard: {
@@ -404,6 +419,29 @@ export default {
           flamingo: "flamingo",
         },
       },
+      bip177: {
+        title: "Σύμβολο Bitcoin",
+        description: "Χρησιμοποιήστε το σύμβολο ₿ αντί για sats.",
+        toggle: "Χρήση συμβόλου ₿",
+      },
+    },
+    web_of_trust: {
+      title: "Δίκτυο εμπιστοσύνης",
+      known_pubkeys: "Γνωστά pubkeys: {wotCount}",
+      continue_crawl: "Συνέχιση ανίχνευσης",
+      crawl_odell: "Ανίχνευση ODELL'S WEB OF TRUST",
+      crawl_wot: "Ανίχνευση web of trust",
+      pause: "Παύση",
+      reset: "Επαναφορά",
+      progress: "{crawlProcessed} / {crawlTotal}",
+    },
+    npub_cash: {
+      use_npubx: "Χρήση npubx.cash",
+      copy_lightning_address: "Αντιγραφή διεύθυνσης Lightning",
+      v2_mint: "npub.cash v2 mint",
+    },
+    multinut: {
+      use_multinut: "Χρήση Multinut",
     },
     advanced: {
       title: "Για προχωρημένους",
@@ -439,6 +477,7 @@ export default {
           title: "Αύξηση μετρητών keyset",
           description:
             'Κάντε κλικ στο ID του keyset για να αυξήσετε τους μετρητές διαδρομής παραγωγής για τα keysets στο πορτοφόλι σας. Αυτό είναι χρήσιμο εάν βλέπετε το σφάλμα "οι εξόδοι έχουν ήδη υπογραφεί".',
+          counter: "μετρητής: {count}",
         },
         unset_reserved: {
           button: "Κατάργηση δέσμευσης όλων των δεσμευμένων token",
@@ -573,6 +612,8 @@ export default {
   },
   WelcomeSlide2: {
     title: "Εγκατάσταση PWA",
+    alt: { pwa_example: "Παράδειγμα εγκατάστασης PWA" },
+    installing: "Γίνεται εγκατάσταση…",
     instruction: {
       intro: {
         text: "Για την καλύτερη εμπειρία, χρησιμοποιήστε αυτό το πορτοφόλι με το εγγενές πρόγραμμα περιήγησης ιστού της συσκευής σας για να το εγκαταστήσετε ως Προοδευτική Εφαρμογή Ιστού. Κάντε το αυτό τώρα.",
@@ -609,6 +650,8 @@ export default {
       success: {
         title: "Επιτυχία!",
         text: "Χρησιμοποιείτε το Cashu ως PWA. Κλείστε τυχόν άλλα ανοιχτά παράθυρα προγράμματος περιήγησης και χρησιμοποιήστε την εφαρμογή από την αρχική σας οθόνη.",
+        nextSteps:
+          "Τώρα μπορείτε να κλείσετε αυτήν την καρτέλα και να ανοίξετε την εφαρμογή από την αρχική οθόνη.",
       },
     },
   },
@@ -646,6 +689,71 @@ export default {
       },
     },
   },
+  WelcomeSlideChoice: {
+    title: "Ρύθμιση πορτοφολιού",
+    text: "Θέλετε να επαναφέρετε από φράση seed ή να δημιουργήσετε νέο πορτοφόλι;",
+    options: {
+      new: {
+        title: "Δημιουργία νέου πορτοφολιού",
+        subtitle: "Δημιουργήστε νέα seed και προσθέστε mints.",
+      },
+      recover: {
+        title: "Επαναφορά πορτοφολιού",
+        subtitle: "Εισαγάγετε τη φράση seed, επαναφέρετε mints και ecash.",
+      },
+    },
+  },
+  WelcomeMintSetup: {
+    title: "Προσθήκη mints",
+    text: "Τα mints είναι διακομιστές που βοηθούν στην αποστολή και λήψη ecash. Επιλέξτε ένα εντοπισμένο mint ή προσθέστε ένα χειροκίνητα. Μπορείτε να παραλείψετε και να προσθέσετε αργότερα.",
+    sections: { your_mints: "Τα mints σας" },
+    restoring: "Επαναφορά mints…",
+    placeholder: { mint_url: "https://" },
+  },
+  WelcomeRecoverSeed: {
+    title: "Εισαγάγετε τη φράση seed",
+    text: "Επικολλήστε ή πληκτρολογήστε τη φράση 12 λέξεων για επαναφορά.",
+    inputs: { word: "Λέξη { index }" },
+    actions: { paste_all: "Επικόλληση όλων" },
+    disclaimer:
+      "Η φράση seed χρησιμοποιείται μόνο τοπικά για παραγωγή κλειδιών πορτοφολιού.",
+  },
+  WelcomeRestoreEcash: {
+    title: "Επαναφορά ecash",
+    text: "Σαρώστε για μη δαπανημένες αποδείξεις (proofs) στα ρυθμισμένα mints και προσθέστε τες στο πορτοφόλι σας.",
+  },
+  MintRatings: {
+    title: "Κριτικές mint",
+    reviews: "κριτικές",
+    ratings: "Βαθμολογίες",
+    no_reviews: "Δεν βρέθηκαν κριτικές",
+    your_review: "Η κριτική σας",
+    no_reviews_to_display: "Καμία κριτική προς εμφάνιση.",
+    no_rating: "Χωρίς βαθμολογία",
+    out_of: "από",
+    rows: "Reviews",
+    sort: "Ταξινόμηση",
+    sort_options: {
+      newest: "Νεότερες",
+      oldest: "Παλαιότερες",
+      highest: "Υψηλότερες",
+      lowest: "Χαμηλότερες",
+    },
+    actions: { write_review: "Γράψτε κριτική" },
+    empty_state_subtitle:
+      "Βοηθήστε αφήνοντας μια κριτική. Μοιραστείτε την εμπειρία σας με αυτό το mint και βοηθήστε άλλους αφήνοντας μια κριτική.",
+  },
+  CreateMintReview: {
+    title: "Κριτική mint",
+    publishing_as: "Δημοσίευση ως",
+    inputs: {
+      rating: { label: "Βαθμολογία" },
+      review: { label: "Κριτική (προαιρετικά)" },
+    },
+    actions: {
+      publish: { label: "Δημοσίευση", in_progress: "Γίνεται δημοσίευση…" },
+    },
+  },
   RestoreView: {
     seed_phrase: {
       label: "Επαναφορά από Φράση Seed",
@@ -675,6 +783,12 @@ export default {
       validate: {
         error: "Το μνημονικό πρέπει να είναι τουλάχιστον 12 λέξεις.",
       },
+      select_all: {
+        label: "Επιλογή όλων",
+      },
+      deselect_all: {
+        label: "Αποεπιλογή όλων",
+      },
       restore: {
         label: "Επαναφορά",
         in_progress: "Επαναφορά mint…",
@@ -686,6 +800,30 @@ export default {
         success: "Η επαναφορά ολοκληρώθηκε με επιτυχία",
         error: "Σφάλμα κατά την επαναφορά των mints: { error }",
       },
+      restore_selected_mints: {
+        label: "Επαναφορά επιλεγμένων Mints ({count})",
+        in_progress: "Επαναφορά mint { index } από { length }…",
+        success: "Επιτυχής επαναφορά {count} mint(s)",
+        error: "Σφάλμα κατά την επαναφορά των mints: { error }",
+      },
+    },
+    nostr_mints: {
+      label: "Επαναφορά Mints από το Nostr",
+      caption:
+        "Αναζητήστε αντίγραφα ασφαλείας mint που είναι αποθηκευμένα σε ρελέ Nostr χρησιμοποιώντας τη φράση-κλειδί σας. Αυτό θα σας βοηθήσει να ανακαλύψετε νομισματοκοπεία που χρησιμοποιήσατε προηγουμένως.",
+      search_button: "Αναζήτηση για αντίγραφα ασφαλείας Mint",
+      select_all: "Επιλογή όλων",
+      deselect_all: "Αποεπιλογή όλων",
+      backed_up: "Δημιουργήθηκαν αντίγραφα ασφαλείας",
+      already_added: "Έχει ήδη προστεθεί",
+      add_selected: "Προσθήκη επιλεγμένων ({count})",
+      no_backups_found: "Δεν βρέθηκαν αντίγραφα ασφαλείας mint",
+      no_backups_hint:
+        "Βεβαιωθείτε ότι η δημιουργία αντιγράφων ασφαλείας του Nostr mint είναι ενεργοποιημένη στις ρυθμίσεις για την αυτόματη δημιουργία αντιγράφων ασφαλείας της λίστας mint σας.",
+      invalid_mnemonic:
+        "Εισαγάγετε μια έγκυρη φράση-κλειδί πριν από την αναζήτηση.",
+      search_error: "Αποτυχία αναζήτησης αντιγράφων ασφαλείας mint.",
+      add_error: "Αποτυχία προσθήκης επιλεγμένων mints.",
     },
   },
   MintSettings: {
@@ -723,7 +861,7 @@ export default {
       recommendations: {
         overline: "Βρέθηκαν { length } mints",
         caption:
-          "Αυτά τα mints προτάθηκαν από άλλους χρήστες Nostr. Διαβάστε κριτικές στο { link }. Να είστε προσεκτικοί και κάντε τη δική σας έρευνα πριν χρησιμοποιήσετε ένα mint.",
+          "Αυτά τα mints προτάθηκαν από άλλους χρήστες Nostr. Να είστε προσεκτικοί και κάντε τη δική σας έρευνα πριν χρησιμοποιήσετε ένα mint.",
         actions: {
           browse: {
             label: "Κάντε κλικ για περιήγηση στα mints",
@@ -744,7 +882,7 @@ export default {
           label: "Προς",
         },
         amount: {
-          label: "Ποσό ({ ticker }))",
+          label: "Ποσό ({ ticker })",
         },
       },
       actions: {
@@ -754,6 +892,10 @@ export default {
         },
       },
     },
+    error_badge: "Σφάλμα",
+    reviews_text: "κριτικές",
+    no_reviews_yet: "Δεν υπάρχουν κριτικές ακόμα",
+    discover_mints_button: "Ανακαλύψτε mints",
   },
   QrcodeReader: {
     progress: {
@@ -771,7 +913,8 @@ export default {
     },
   },
   InvoiceDetailDialog: {
-    title: "Δημιουργία Τιμολογίου",
+    title: "Λήψη Lightning",
+    create_invoice_title: "Δημιουργία Τιμολογίου",
     inputs: {
       amount: {
         label: "Ποσό ({ ticker }) *",
@@ -814,7 +957,7 @@ export default {
     },
   },
   SendTokenDialog: {
-    title: "Αποστολή { value }",
+    title: "Αποστολή Ecash",
     title_ecash_text: "Ecash",
     badge_offline_text: "Εκτός σύνδεσης",
     inputs: {
@@ -903,7 +1046,7 @@ export default {
     },
   },
   ReceiveTokenDialog: {
-    title: "Λήψη { value }",
+    title: "Λήψη Ecash",
     title_ecash_text: "Ecash",
     inputs: {
       tokens_base64: {
@@ -913,6 +1056,10 @@ export default {
     errors: {
       invalid_token: {
         label: "Μη έγκυρο token",
+      },
+      p2pk_lock_mismatch: {
+        label:
+          "Δεν είναι δυνατή η λήψη. Το κλείδωμα P2PK αυτού του token δεν ταιριάζει με το δημόσιο κλειδί σας.",
       },
     },
     actions: {
@@ -945,7 +1092,7 @@ export default {
         in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
       later: {
-        label: "Αργότερα",
+        label: "Λήψη αργότερα",
         tooltip_text: "Προσθήκη στο ιστορικό για λήψη αργότερα",
         already_in_history_success_text: "Το Ecash είναι ήδη στο Ιστορικό",
         added_to_history_success_text: "Το Ecash προστέθηκε στο Ιστορικό",
@@ -1151,6 +1298,20 @@ export default {
       },
     },
   },
+  ParseInputComponent: {
+    placeholder: {
+      default: "Token Cashu ή διεύθυνση Lightning",
+      receive: "Token Cashu",
+      pay: "Διεύθυνση Lightning ή τιμολόγιο",
+    },
+    qr_scanner: {
+      title: "Σάρωση Κωδικού QR",
+      description: "Πατήστε για σάρωση διεύθυνσης",
+    },
+    paste_button: {
+      label: "@:global.actions.paste.label",
+    },
+  },
   PayInvoiceDialog: {
     input_data: {
       title: "Πληρωμή με Lightning",
@@ -1178,6 +1339,7 @@ export default {
       amount_exact_label: "Ο { payee } ζητά { value } { ticker }",
       amount_range_label:
         "Ο { payee } ζητά{br}μεταξύ { min } και { max } { ticker }",
+      sending_to_lightning_address: "Αποστολή σε { address }",
       inputs: {
         amount: {
           label: "Ποσό ({ ticker }) *",
@@ -1197,6 +1359,9 @@ export default {
     },
     invoice: {
       title: "Πληρωμή { value }",
+      paying: "Πληρώνεται",
+      paid: "Πληρώθηκε",
+      fee: "Χρέωση",
       memo: {
         label: "Σημείωμα",
       },
@@ -1267,5 +1432,18 @@ export default {
     in_progress_warning_text: "Η ανταλλαγή βρίσκεται σε εξέλιξη",
     invalid_swap_data_error_text: "Μη έγκυρα δεδομένα ανταλλαγής",
     swap_error_text: "Σφάλμα κατά την ανταλλαγή",
+  },
+  TokenInformation: {
+    fee: "Χρέωση",
+    unit: "Μονάδα",
+    fiat: "Fiat",
+    p2pk: "P2PK",
+    locked: "Κλειδωμένο",
+    locked_to_you: "Κλειδωμένο για εσάς",
+    mint: "Νομισματοκοπείο",
+    memo: "Σημείωση",
+    payment_request: "Αίτημα πληρωμής",
+    nostr: "Nostr",
+    token_copied: "Το token αντιγράφηκε στο πρόχειρο",
   },
 };

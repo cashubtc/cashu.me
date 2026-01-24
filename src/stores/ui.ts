@@ -27,6 +27,7 @@ export const useUiStore = defineStore("ui", {
     tickerLong: "Satoshis",
     showInvoiceDetails: false,
     showBolt12OfferDetails: false,
+    showCreateInvoiceDialog: false,
     showSendDialog: false,
     showReceiveDialog: false,
     showReceiveEcashDrawer: false,
@@ -45,6 +46,8 @@ export const useUiStore = defineStore("ui", {
   actions: {
     closeDialogs() {
       this.showInvoiceDetails = false;
+      this.showCreateInvoiceDialog = false;
+      this.showBolt12OfferDetails = false;
       this.showSendDialog = false;
       this.showReceiveDialog = false;
       this.showReceiveEcashDrawer = false;
@@ -126,7 +129,7 @@ export const useUiStore = defineStore("ui", {
         return;
       }
       // enable debug terminal
-      var script = document.createElement("script");
+      const script = document.createElement("script");
       script.src = "//cdn.jsdelivr.net/npm/eruda";
       document.body.appendChild(script);
       script.onload = function () {

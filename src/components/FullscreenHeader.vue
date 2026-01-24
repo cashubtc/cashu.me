@@ -1,33 +1,35 @@
 <template>
-  <q-header class="bg-marginal-bg" reveal>
+  <q-header class="bg-dark">
     <q-toolbar>
       <q-btn
         flat
         dense
-        rounded
+        round
         icon="arrow_back_ios_new"
-        to="/"
+        @click="goBack"
         color="primary"
-        aria-label="Menu"
-        no-caps
-        ><span class="q-mx-md text-weight-bold">
-          {{ $t("FullscreenHeader.actions.back.label") }}
-        </span>
-      </q-btn>
-      <!-- <q-toolbar-title> </q-toolbar-title> -->
+        aria-label="Back"
+      />
     </q-toolbar>
   </q-header>
 </template>
-<script>
-import { defineComponent, ref } from "vue";
+<script lang="ts">
+import { defineComponent } from "vue";
+import { useRouter } from "vue-router";
 
 export default defineComponent({
   name: "FullscreenHeader",
   mixins: [windowMixin],
-  props: {},
-  components: {},
   setup() {
-    return {};
+    const router = useRouter();
+
+    const goBack = () => {
+      router.back();
+    };
+
+    return {
+      goBack,
+    };
   },
 });
 </script>

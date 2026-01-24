@@ -94,6 +94,7 @@ export default {
         could_not_get_info: "No se pudo obtener información del mint",
         could_not_get_keys: "No se pudieron obtener las claves del mint",
         could_not_get_keysets: "No se pudieron obtener los keysets del mint",
+        mint_validation_error: "Error de validación de Mint",
         removed: "Mint eliminado",
         error: "Error del mint",
       },
@@ -171,7 +172,23 @@ export default {
       backup_restore: "COPIA DE SEGURIDAD Y RESTAURACIÓN",
       lightning_address: "DIRECCIÓN LIGHTNING",
       nostr_keys: "CLAVES NOSTR",
-      nostr: "NOSTR",
+      nostr: {
+        title: "NOSTR",
+        relays: {
+          expand_label: "Haga clic para editar relays",
+          add: {
+            title: "Añadir relay",
+            description:
+              "Su billetera usa estos relays para operaciones de nostr como solicitudes de pago, NWC y copias de seguridad.",
+          },
+          list: {
+            title: "Relays",
+            description: "Su billetera se conectará a estos relays.",
+            copy_tooltip: "Copiar relay",
+            remove_tooltip: "Eliminar relay",
+          },
+        },
+      },
       payment_requests: "SOLICITUDES DE PAGO",
       nostr_wallet_connect: "NOSTR WALLET CONNECT",
       hardware_features: "CARACTERÍSTICAS DE HARDWARE",
@@ -238,23 +255,6 @@ export default {
         not_found: "No se encontró ninguna extensión de firma NIP-07",
       },
     },
-    nostr: {
-      title: "NOSTR",
-      relays: {
-        expand_label: "Haga clic para editar relays",
-        add: {
-          title: "Agregar relay",
-          description:
-            "Su billetera usa estos relays para operaciones de nostr como solicitudes de pago, nostr wallet connect y respaldos.",
-        },
-        list: {
-          title: "Relays",
-          description: "Su billetera se conectará a estos relays.",
-          copy_tooltip: "Copiar relay",
-          remove_tooltip: "Eliminar relay",
-        },
-      },
-    },
     payment_requests: {
       title: "Solicitudes de pago",
       description:
@@ -277,20 +277,6 @@ export default {
         qr_tooltip: "Mostrar código QR",
         allowance_label: "Límite restante (sat)",
       },
-      relays: {
-        expand_label: "Haz clic para editar relays",
-        add: {
-          title: "Añadir relay",
-          description:
-            "Nostr Wallet Connect usa relays nostr para conectar tu billetera a otras aplicaciones.",
-        },
-        list: {
-          title: "Relays",
-          description: "Tu billetera se conectará a estos relays.",
-          copy_tooltip: "Copiar relay",
-          remove_tooltip: "Eliminar relay",
-        },
-      },
     },
     hardware_features: {
       webnfc: {
@@ -305,9 +291,8 @@ export default {
           description: "Almacenar URL a esta billetera con el token",
         },
         binary: {
-          title: "Binario crudo",
-          description:
-            "Bytes crudos en lugar de Base64. Hace los tokens ~33% más cortos.",
+          title: "Binario",
+          description: "Almacenar tokens como datos binarios",
         },
         quick_access: {
           toggle: "Acceso rápido a NFC",
@@ -393,6 +378,21 @@ export default {
         url_label: "URL del Auditor",
         api_url_label: "URL API del Auditor",
       },
+      multinut: {
+        toggle: "Habilitar Multinut",
+        description:
+          "Si está habilitado, el monedero utilizará Multinut para pagar facturas de varias cecas a la vez.",
+      },
+      nostr_mint_backup: {
+        toggle: "Copia de seguridad de la lista de cecas en Nostr",
+        description:
+          "Si está activada, se realizará una copia de seguridad automática de su lista de cecas en los relés de Nostr utilizando sus claves de Nostr configuradas. Esto le permite restaurar su lista de cecas en todos los dispositivos.",
+        notifications: {
+          enabled: "Copia de seguridad de la ceca de Nostr activada",
+          disabled: "Copia de seguridad de la ceca de Nostr desactivada",
+          failed: "Error al activar la copia de seguridad de la ceca de Nostr",
+        },
+      },
     },
     appearance: {
       keyboard: {
@@ -417,6 +417,29 @@ export default {
           flamingo: "flamenco",
         },
       },
+      bip177: {
+        title: "Símbolo de Bitcoin",
+        description: "Utilice el símbolo ₿ en lugar de sats.",
+        toggle: "Utilice el símbolo ₿",
+      },
+    },
+    web_of_trust: {
+      title: "Red de confianza",
+      known_pubkeys: "Claves públicas conocidas: {wotCount}",
+      continue_crawl: "Continuar rastreo",
+      crawl_odell: "RASTREAR LA RED DE CONFIANZA DE ODELL",
+      crawl_wot: "Rastrear red de confianza",
+      pause: "Pausa",
+      reset: "Reiniciar",
+      progress: "{crawlProcessed} / {crawlTotal}",
+    },
+    npub_cash: {
+      use_npubx: "Utilice npubx.cash",
+      copy_lightning_address: "Copiar dirección Lightning",
+      v2_mint: "npub.cash v2 mint",
+    },
+    multinut: {
+      use_multinut: "Usar Multinut",
     },
     advanced: {
       title: "Avanzado",
@@ -424,6 +447,7 @@ export default {
         title: "Configuración de desarrollador",
         description:
           "Las siguientes configuraciones son para desarrollo y depuración.",
+
         new_seed: {
           button: "Generar nueva frase semilla",
           description:
@@ -452,6 +476,7 @@ export default {
           title: "Incrementar contadores de keyset",
           description:
             'Haz clic en el ID del keyset para incrementar los contadores de la ruta de derivación para los keysets en tu billetera. Esto es útil si ves el error "las salidas ya han sido firmadas".',
+          counter: "contador: {count}",
         },
         unset_reserved: {
           button: "Desmarcar todos los tokens reservados",
@@ -586,6 +611,8 @@ export default {
   },
   WelcomeSlide2: {
     title: "Instalar PWA",
+    alt: { pwa_example: "Ejemplo de instalación PWA" },
+    installing: "Instalando…",
     instruction: {
       intro: {
         text: "Para la mejor experiencia, usa esta billetera con el navegador web nativo de tu dispositivo para instalarla como una Aplicación Web Progresiva. Haz esto ahora mismo.",
@@ -622,6 +649,8 @@ export default {
       success: {
         title: "¡Éxito!",
         text: "Estás usando Cashu como una PWA. Cierra cualquier otra ventana del navegador abierta y usa la aplicación desde tu pantalla de inicio.",
+        nextSteps:
+          "Ahora puedes cerrar esta pestaña del navegador y abrir la app desde tu pantalla de inicio.",
       },
     },
   },
@@ -659,6 +688,69 @@ export default {
       },
     },
   },
+  WelcomeSlideChoice: {
+    title: "Configura tu billetera",
+    text: "¿Quieres recuperar desde una frase semilla o crear una billetera nueva?",
+    options: {
+      new: {
+        title: "Crear billetera nueva",
+        subtitle: "Genera una semilla nueva y añade mints.",
+      },
+      recover: {
+        title: "Recuperar billetera",
+        subtitle: "Ingresa tu frase semilla, restaura mints y ecash.",
+      },
+    },
+  },
+  WelcomeMintSetup: {
+    title: "Añadir mints",
+    text: "Los mints son servidores que te ayudan a enviar y recibir ecash. Elige un mint descubierto o añade uno manualmente. Puedes hacerlo más tarde.",
+    sections: { your_mints: "Tus mints" },
+    restoring: "Restaurando mints…",
+    placeholder: { mint_url: "https://" },
+  },
+  WelcomeRecoverSeed: {
+    title: "Ingresa tu frase semilla",
+    text: "Pega o escribe tu frase semilla de 12 palabras para recuperar.",
+    inputs: { word: "Palabra { index }" },
+    actions: { paste_all: "Pegar todo" },
+    disclaimer:
+      "Tu frase semilla solo se usa localmente para derivar las claves de tu billetera.",
+  },
+  WelcomeRestoreEcash: {
+    title: "Restaura tu ecash",
+    text: "Busca comprobantes no gastados en tus mints configurados y agrégalos a tu billetera.",
+  },
+  MintRatings: {
+    title: "Reseñas del mint",
+    reviews: "reseñas",
+    ratings: "Calificaciones",
+    no_reviews: "No se encontraron reseñas",
+    your_review: "Tu reseña",
+    no_reviews_to_display: "No hay reseñas para mostrar.",
+    no_rating: "Sin calificación",
+    out_of: "de",
+    rows: "Reviews",
+    sort: "Ordenar",
+    sort_options: {
+      newest: "Más recientes",
+      oldest: "Más antiguas",
+      highest: "Más altas",
+      lowest: "Más bajas",
+    },
+    actions: { write_review: "Escribir una reseña" },
+    empty_state_subtitle:
+      "Ayuda dejando una reseña. Comparte tu experiencia con este mint y ayuda a otros dejando una reseña.",
+  },
+  CreateMintReview: {
+    title: "Reseñar mint",
+    publishing_as: "Publicando como",
+    inputs: {
+      rating: { label: "Calificación" },
+      review: { label: "Reseña (opcional)" },
+    },
+    actions: { publish: { label: "Publicar", in_progress: "Publicando…" } },
+  },
   RestoreView: {
     seed_phrase: {
       label: "Restaurar desde Frase Semilla",
@@ -681,12 +773,36 @@ export default {
       caption:
         'Selecciona el mint para restaurar. Puedes añadir más mints en la pantalla principal bajo "Mints" y restaurarlos aquí.',
     },
+    nostr_mints: {
+      label: "Restaurar Mints de Nostr",
+      caption:
+        "Busque copias de seguridad de mints almacenadas en relés de Nostr utilizando su frase semilla. Esto le ayudará a descubrir mints que utilizó anteriormente.",
+      search_button: "Buscar copias de seguridad de Mint",
+      select_all: "Seleccionar todo",
+      deselect_all: "Deseleccionar todo",
+      backed_up: "Copia de seguridad realizada",
+      already_added: "Ya añadido",
+      add_selected: "Añadir seleccionados ({count})",
+      no_backups_found: "No se han encontrado copias de seguridad de mints",
+      no_backups_hint:
+        "Asegúrese de que la copia de seguridad de Nostr mint está activada en los ajustes para hacer una copia de seguridad automática de su lista de mints.",
+      invalid_mnemonic:
+        "Por favor, introduzca una frase semilla válida antes de buscar.",
+      search_error: "Error al buscar copias de seguridad de mints.",
+      add_error: "Error al añadir los mints seleccionados.",
+    },
     actions: {
       paste: {
         error: "Error al leer el contenido del portapapeles.",
       },
       validate: {
         error: "El mnemónico debe tener al menos 12 palabras.",
+      },
+      select_all: {
+        label: "Seleccionar todo",
+      },
+      deselect_all: {
+        label: "Deseleccionar todo",
       },
       restore: {
         label: "Restaurar",
@@ -698,6 +814,12 @@ export default {
         in_progress: "Restaurando mint { index } de { length }…",
         success: "Restauración finalizada con éxito",
         error: "Error restaurando mints: { error }",
+      },
+      restore_selected_mints: {
+        label: "Restaurar Mints seleccionados ({count})",
+        in_progress: "Restaurando mint { index } de { length }…",
+        success: "Se han restaurado correctamente {count} mint(s)",
+        error: "Error al restaurar los mints seleccionados: { error }",
       },
     },
   },
@@ -736,7 +858,7 @@ export default {
       recommendations: {
         overline: "Encontrados { length } mints",
         caption:
-          "Estos mints fueron recomendados por otros usuarios de Nostr. Lee reseñas en { link }. Ten cuidado y haz tu propia investigación antes de usar un mint.",
+          "Estos mints fueron recomendados por otros usuarios de Nostr. Ten cuidado y haz tu propia investigación antes de usar un mint.",
         actions: {
           browse: {
             label: "Haz clic para explorar mints",
@@ -757,7 +879,7 @@ export default {
           label: "Hasta",
         },
         amount: {
-          label: "Cantidad ({ ticker }))",
+          label: "Cantidad ({ ticker })",
         },
       },
       actions: {
@@ -767,6 +889,10 @@ export default {
         },
       },
     },
+    error_badge: "Error",
+    reviews_text: "reseñas",
+    no_reviews_yet: "Aún no hay reseñas",
+    discover_mints_button: "Descubrir mints",
   },
   QrcodeReader: {
     progress: {
@@ -784,7 +910,8 @@ export default {
     },
   },
   InvoiceDetailDialog: {
-    title: "Crear Factura",
+    title: "Recibir Lightning",
+    create_invoice_title: "Crear Factura",
     inputs: {
       amount: {
         label: "Cantidad ({ ticker }) *",
@@ -827,7 +954,7 @@ export default {
     },
   },
   SendTokenDialog: {
-    title: "Enviar { value }",
+    title: "Enviar Ecash",
     title_ecash_text: "Ecash",
     badge_offline_text: "Sin conexión",
     inputs: {
@@ -916,7 +1043,7 @@ export default {
     },
   },
   ReceiveTokenDialog: {
-    title: "Recibir { value }",
+    title: "Recibir Ecash",
     title_ecash_text: "Ecash",
     inputs: {
       tokens_base64: {
@@ -926,6 +1053,10 @@ export default {
     errors: {
       invalid_token: {
         label: "Token inválido",
+      },
+      p2pk_lock_mismatch: {
+        label:
+          "No se puede recibir. El bloqueo P2PK de este token no coincide con su clave pública.",
       },
     },
     actions: {
@@ -958,7 +1089,7 @@ export default {
         in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
       later: {
-        label: "Más tarde",
+        label: "Recibir más tarde",
         tooltip_text: "Añadir al historial para recibir más tarde",
         already_in_history_success_text: "Ecash ya está en el Historial",
         added_to_history_success_text: "Ecash añadido al Historial",
@@ -1164,6 +1295,20 @@ export default {
       },
     },
   },
+  ParseInputComponent: {
+    placeholder: {
+      default: "Token Cashu o dirección Lightning",
+      receive: "Token Cashu",
+      pay: "Dirección Lightning o factura",
+    },
+    qr_scanner: {
+      title: "Escanear Código QR",
+      description: "Toca para escanear una dirección",
+    },
+    paste_button: {
+      label: "@:global.actions.paste.label",
+    },
+  },
   PayInvoiceDialog: {
     input_data: {
       title: "Pagar con Lightning",
@@ -1191,6 +1336,7 @@ export default {
       amount_exact_label: "{ payee } está solicitando { value } { ticker }",
       amount_range_label:
         "{ payee } está solicitando{br}entre { min } y { max } { ticker }",
+      sending_to_lightning_address: "Enviando a { address }",
       inputs: {
         amount: {
           label: "Cantidad ({ ticker }) *",
@@ -1210,6 +1356,9 @@ export default {
     },
     invoice: {
       title: "Pagar { value }",
+      paying: "Pagando",
+      paid: "Pagado",
+      fee: "Tarifa",
       memo: {
         label: "Memo",
       },
@@ -1280,5 +1429,18 @@ export default {
     in_progress_warning_text: "Intercambio en progreso",
     invalid_swap_data_error_text: "Datos de intercambio inválidos",
     swap_error_text: "Error al intercambiar",
+  },
+  TokenInformation: {
+    fee: "Tarifa",
+    unit: "Unidad",
+    fiat: "Fiat",
+    p2pk: "P2PK",
+    locked: "Bloqueado",
+    locked_to_you: "Bloqueado para ti",
+    mint: "Casa de moneda",
+    memo: "Memo",
+    payment_request: "Solicitud de pago",
+    nostr: "Nostr",
+    token_copied: "Token copiado al portapapeles",
   },
 };

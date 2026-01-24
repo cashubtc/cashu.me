@@ -39,7 +39,7 @@
     </q-card-section>
   </q-card>
 </template>
-<script>
+<script lang="ts">
 import { defineComponent, ref } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useUiStore } from "src/stores/ui";
@@ -77,7 +77,7 @@ export default defineComponent({
       return getShortUrl(this.activeMintUrl);
     },
     getBalance: function () {
-      var balance = this.activeProofs
+      const balance = this.activeProofs
         .map((t) => t)
         .flat()
         .reduce((sum, el) => (sum += el.amount), 0);

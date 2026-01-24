@@ -96,7 +96,7 @@
   display: none;
 }
 </style>
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
 import { mapActions, mapState } from "pinia";
 import { useWalletStore } from "src/stores/wallet";
@@ -122,10 +122,10 @@ export default defineComponent({
   methods: {
     ...mapActions(useStorageStore, ["restoreFromBackup"]),
     readFile(file) {
-      let reader = new FileReader();
+      const reader = new FileReader();
       reader.onload = (f) => {
-        let content = f.target.result;
-        let backup = JSON.parse(content);
+        const content = f.target.result;
+        const backup = JSON.parse(content);
 
         this.restoreFromBackup(backup);
       };
@@ -134,8 +134,8 @@ export default defineComponent({
     dragFile(ev) {
       ev.preventDefault();
 
-      let files = ev.dataTransfer.files;
-      let file = files[0];
+      const files = ev.dataTransfer.files;
+      const file = files[0];
 
       this.readFile(file);
     },
@@ -143,7 +143,7 @@ export default defineComponent({
       ev.preventDefault();
     },
     onChangeFileUpload() {
-      let file = this.$refs.fileUpload.files[0];
+      const file = this.$refs.fileUpload.files[0];
 
       this.readFile(file);
     },

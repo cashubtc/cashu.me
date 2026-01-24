@@ -1,9 +1,9 @@
-name: Check build
+name: Build
 
 on: [push, pull_request]
 
 jobs:
-  build-check:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -13,13 +13,13 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "npm"
+          node-version: 25
+          cache: npm
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Run build check
+      - name: Run build
         run: |
           npm run build
           npm run build:pwa

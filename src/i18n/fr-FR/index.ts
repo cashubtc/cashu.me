@@ -1,4 +1,15 @@
 export default {
+  MultinutPicker: {
+    payment: "Paiement Multinut",
+    selectMints:
+      "Sélectionnez une ou plusieurs mints pour exécuter un paiement.",
+    totalSelectedBalance: "Solde total sélectionné",
+    multiMintPay: "Paiement Multi-Mint",
+    balanceNotEnough:
+      "Le solde multi-mint n’est pas suffisant pour satisfaire cette facture",
+    failed: "Échec du traitement: {error}",
+    paid: "Payé {amount} via Lightning",
+  },
   global: {
     copy_to_clipboard: {
       success: "Copié dans le presse-papiers !",
@@ -83,6 +94,7 @@ export default {
         could_not_get_info: "Impossible d'obtenir les informations de la mint",
         could_not_get_keys: "Impossible d'obtenir les clés de la mint",
         could_not_get_keysets: "Impossible d'obtenir les keysets de la mint",
+        mint_validation_error: "Erreur de validation de la menthe",
         removed: "Mint supprimée",
         error: "Erreur de la mint",
       },
@@ -152,16 +164,27 @@ export default {
     },
   },
   Settings: {
-    language: {
-      title: "Langue",
-      description:
-        "Veuillez choisir votre langue préférée dans la liste ci-dessous.",
-    },
     sections: {
       backup_restore: "SAUVEGARDE & RESTAURATION",
       lightning_address: "ADRESSE LIGHTNING",
       nostr_keys: "CLÉS NOSTR",
-      nostr: "NOSTR",
+      nostr: {
+        title: "NOSTR",
+        relays: {
+          expand_label: "Cliquer pour modifier les relais",
+          add: {
+            title: "Ajouter un relais",
+            description:
+              "Votre portefeuille utilise ces relais pour les opérations Nostr comme les demandes de paiement, NWC et les sauvegardes.",
+          },
+          list: {
+            title: "Relais",
+            description: "Votre portefeuille se connectera à ces relais.",
+            copy_tooltip: "Copier le relais",
+            remove_tooltip: "Supprimer le relais",
+          },
+        },
+      },
       payment_requests: "DEMANDES DE PAIEMENT",
       nostr_wallet_connect: "NOSTR WALLET CONNECT",
       hardware_features: "FONCTIONNALITÉS MATÉRIELLES",
@@ -169,6 +192,11 @@ export default {
       privacy: "CONFIDENTIALITÉ",
       experimental: "EXPÉRIMENTAL",
       appearance: "APPARENCE",
+    },
+    language: {
+      title: "Langue",
+      description:
+        "Veuillez choisir votre langue préférée dans la liste ci-dessous.",
     },
     backup_restore: {
       backup_seed: {
@@ -198,6 +226,10 @@ export default {
         toggle: "Réclamer automatiquement",
         description: "Recevez les paiements entrants automatiquement.",
       },
+      npc_v2: {
+        choose_mint_title: "Choisissez une menthe pour npub.cash v2",
+        choose_mint_placeholder: "Sélectionnez une menthe...",
+      },
     },
     nostr_keys: {
       title: "Vos clés Nostr",
@@ -224,23 +256,6 @@ export default {
         not_found: "Aucune extension de signature NIP-07 trouvée",
       },
     },
-    nostr: {
-      title: "NOSTR",
-      relays: {
-        expand_label: "Cliquez pour modifier les relais",
-        add: {
-          title: "Ajouter un relais",
-          description:
-            "Votre portefeuille utilise ces relais pour les opérations nostr telles que les demandes de paiement, nostr wallet connect et les sauvegardes.",
-        },
-        list: {
-          title: "Relais",
-          description: "Votre portefeuille se connectera à ces relais.",
-          copy_tooltip: "Copier le relais",
-          remove_tooltip: "Supprimer le relais",
-        },
-      },
-    },
     payment_requests: {
       title: "Demandes de paiement",
       description:
@@ -263,20 +278,6 @@ export default {
         qr_tooltip: "Afficher le code QR",
         allowance_label: "Montant restant (sat)",
       },
-      relays: {
-        expand_label: "Cliquez pour modifier les relais",
-        add: {
-          title: "Ajouter un relais",
-          description:
-            "Nostr Wallet Connect utilise les relais nostr pour connecter votre portefeuille à d'autres applications.",
-        },
-        list: {
-          title: "Relais",
-          description: "Votre portefeuille se connectera à ces relais.",
-          copy_tooltip: "Copier le relais",
-          remove_tooltip: "Supprimer le relais",
-        },
-      },
     },
     hardware_features: {
       webnfc: {
@@ -291,9 +292,8 @@ export default {
           description: "Stocker l'URL de ce portefeuille avec le jeton",
         },
         binary: {
-          title: "Binaire brut",
-          description:
-            "Octets bruts au lieu de Base64. Rend les jetons ~33% plus courts.",
+          title: "Binaire",
+          description: "Stocker les jetons comme données binaires",
         },
         quick_access: {
           toggle: "Accès rapide à la NFC",
@@ -379,6 +379,24 @@ export default {
         url_label: "URL de l'auditeur",
         api_url_label: "URL de l'API de l'auditeur",
       },
+      multinut: {
+        toggle: "Activer Multinut",
+        description:
+          "Si cette option est activée, le portefeuille utilisera Multinut pour payer les factures de plusieurs टकसाल à la fois.",
+      },
+      nostr_mint_backup: {
+        toggle: "Sauvegarder la liste des टकसाल sur Nostr",
+        description:
+          "Si cette option est activée, votre liste de टकसाल sera automatiquement sauvegardée sur les relais Nostr à l'aide de vos clés Nostr configurées. Cela vous permet de restaurer votre liste de टकसाल sur plusieurs appareils.",
+        notifications: {
+          enabled: "Sauvegarde de la टकसाल Nostr activée",
+          disabled: "Sauvegarde de la टकसाल Nostr désactivée",
+          failed: "Échec de l'activation de la sauvegarde de la टकसाल Nostr",
+        },
+      },
+    },
+    multinut: {
+      use_multinut: "Utiliser Multinut",
     },
     appearance: {
       keyboard: {
@@ -403,6 +421,26 @@ export default {
           flamingo: "flamingo",
         },
       },
+      bip177: {
+        title: "Symbole Bitcoin",
+        description: "Utilisez le symbole ₿ au lieu de sats.",
+        toggle: "Utiliser le symbole ₿",
+      },
+    },
+    web_of_trust: {
+      title: "Réseau de confiance",
+      known_pubkeys: "Clés publiques connues: {wotCount}",
+      continue_crawl: "Poursuivre l'exploration",
+      crawl_odell: "EXPLORER LE RÉSEAU DE CONFIANCE D'ODELL",
+      crawl_wot: "Explorer le réseau de confiance",
+      pause: "Pause",
+      reset: "Réinitialiser",
+      progress: "{crawlProcessed} / {crawlTotal}",
+    },
+    npub_cash: {
+      use_npubx: "Utiliser npubx.cash",
+      copy_lightning_address: "Copier l'adresse Lightning",
+      v2_mint: "npub.cash v2 mint",
     },
     advanced: {
       title: "Avancé",
@@ -410,6 +448,12 @@ export default {
         title: "Paramètres développeur",
         description:
           "Les paramètres suivants sont pour le développement et le débogage.",
+        keyset_counters: {
+          title: "Incrémenter les compteurs de keyset",
+          description:
+            "Cliquez sur l'ID du keyset pour incrémenter les compteurs de chemin de dérivation pour les keysets de votre portefeuille. Ceci est utile si vous voyez l'erreur \"les sorties ont déjà été signées\".",
+          counter: "compteur : {count}",
+        },
         new_seed: {
           button: "Générer une nouvelle phrase de départ",
           description:
@@ -433,11 +477,6 @@ export default {
           button: "Exporter les preuves actives",
           description:
             "Copiez votre solde entier de la mint active en tant que jeton Cashu dans votre presse-papiers. Cela n'exportera que les jetons de la mint et de l'unité sélectionnées. Pour un export complet, sélectionnez une mint et une unité différentes et exportez à nouveau.",
-        },
-        keyset_counters: {
-          title: "Incrémenter les compteurs de keyset",
-          description:
-            "Cliquez sur l'ID du keyset pour incrémenter les compteurs du chemin de dérivation pour les keysets de votre portefeuille. Ceci est utile si vous voyez l'erreur \"les sorties ont déjà été signées\".",
         },
         unset_reserved: {
           button: "Annuler la réservation de tous les jetons réservés",
@@ -572,6 +611,8 @@ export default {
   },
   WelcomeSlide2: {
     title: "Installer la PWA",
+    alt: { pwa_example: "Exemple d’installation PWA" },
+    installing: "Installation…",
     instruction: {
       intro: {
         text: "Pour la meilleure expérience, utilisez ce portefeuille avec le navigateur web natif de votre appareil pour l'installer en tant que Progressive Web App. Faites-le maintenant.",
@@ -608,6 +649,8 @@ export default {
       success: {
         title: "Succès !",
         text: "Vous utilisez Cashu comme PWA. Fermez les autres fenêtres de navigateur ouvertes et utilisez l'application depuis votre écran d'accueil.",
+        nextSteps:
+          "Vous pouvez maintenant fermer cet onglet et ouvrir l’application depuis votre écran d’accueil.",
       },
     },
   },
@@ -645,6 +688,72 @@ export default {
       },
     },
   },
+  WelcomeSlideChoice: {
+    title: "Configurez votre portefeuille",
+    text: "Souhaitez-vous restaurer à partir d’une phrase de récupération ou créer un nouveau portefeuille ?",
+    options: {
+      new: {
+        title: "Créer un nouveau portefeuille",
+        subtitle: "Générez une nouvelle seed et ajoutez des mints.",
+      },
+      recover: {
+        title: "Restaurer le portefeuille",
+        subtitle:
+          "Saisissez votre phrase de récupération, restaurez les mints et l’ecash.",
+      },
+    },
+  },
+  WelcomeMintSetup: {
+    title: "Ajouter des mints",
+    text: "Les mints sont des serveurs qui vous aident à envoyer et recevoir de l’ecash. Choisissez un mint découvert ou ajoutez-en un manuellement. Vous pouvez passer pour ajouter des mints plus tard.",
+    sections: { your_mints: "Vos mints" },
+    restoring: "Restauration des mints…",
+    placeholder: { mint_url: "https://" },
+  },
+  WelcomeRecoverSeed: {
+    title: "Saisissez votre phrase de récupération",
+    text: "Collez ou saisissez votre phrase de 12 mots pour restaurer.",
+    inputs: { word: "Mot { index }" },
+    actions: { paste_all: "Tout coller" },
+    disclaimer:
+      "Votre phrase de récupération est uniquement utilisée localement pour dériver les clés de votre portefeuille.",
+  },
+  WelcomeRestoreEcash: {
+    title: "Restaurez votre ecash",
+    text: "Recherchez les preuves non dépensées sur vos mints configurés et ajoutez-les à votre portefeuille.",
+  },
+  MintRatings: {
+    title: "Avis sur le mint",
+    reviews: "avis",
+    ratings: "Notes",
+    no_reviews: "Aucun avis trouvé",
+    your_review: "Votre avis",
+    no_reviews_to_display: "Aucun avis à afficher.",
+    no_rating: "Aucune note",
+    out_of: "sur",
+    rows: "Reviews",
+    sort: "Trier",
+    sort_options: {
+      newest: "Plus récents",
+      oldest: "Plus anciens",
+      highest: "Plus élevées",
+      lowest: "Plus basses",
+    },
+    actions: { write_review: "Rédiger un avis" },
+    empty_state_subtitle:
+      "Aidez en laissant un avis. Partagez votre expérience avec ce mint et aidez les autres en laissant un avis.",
+  },
+  CreateMintReview: {
+    title: "Évaluer le mint",
+    publishing_as: "Publier en tant que",
+    inputs: {
+      rating: { label: "Note" },
+      review: { label: "Avis (facultatif)" },
+    },
+    actions: {
+      publish: { label: "Publier", in_progress: "Publication…" },
+    },
+  },
   RestoreView: {
     seed_phrase: {
       label: "Restaurer à partir de la Phrase de Départ",
@@ -675,6 +784,12 @@ export default {
       validate: {
         error: "Le mnémonique doit comporter au moins 12 mots.",
       },
+      select_all: {
+        label: "Tout sélectionner",
+      },
+      deselect_all: {
+        label: "Tout désélectionner",
+      },
       restore: {
         label: "Restaurer",
         in_progress: "Restauration de la mint…",
@@ -686,6 +801,31 @@ export default {
         success: "Restauration terminée avec succès",
         error: "Erreur lors de la restauration des mints : { error }",
       },
+      restore_selected_mints: {
+        label: "Restaurer les Mints sélectionnées ({count})",
+        in_progress: "Restauration de la menthe {index} de {length}…",
+        success: "{count} mint(s) restaurée(s) avec succès",
+        error:
+          "Erreur lors de la restauration des mints sélectionnées: {error}",
+      },
+    },
+    nostr_mints: {
+      label: "Restaurer les Mints de Nostr",
+      caption:
+        "Recherchez les sauvegardes de mints stockées sur les relais Nostr en utilisant votre phrase de départ. Cela vous aidera à découvrir les mints que vous avez précédemment utilisées.",
+      search_button: "Rechercher les sauvegardes de Mint",
+      select_all: "Tout sélectionner",
+      deselect_all: "Tout désélectionner",
+      backed_up: "Sauvegardé",
+      already_added: "Déjà ajouté",
+      add_selected: "Ajouter la sélection ({count})",
+      no_backups_found: "Aucune sauvegarde de mint trouvée",
+      no_backups_hint:
+        "Assurez-vous que la sauvegarde de la liste des mints Nostr est activée dans les paramètres pour sauvegarder automatiquement votre liste de mints.",
+      invalid_mnemonic:
+        "Veuillez entrer une phrase de départ valide avant de rechercher.",
+      search_error: "Échec de la recherche des sauvegardes de mints.",
+      add_error: "Échec de l'ajout des mints sélectionnées.",
     },
   },
   MintSettings: {
@@ -724,7 +864,7 @@ export default {
       recommendations: {
         overline: "{ length } mints trouvées",
         caption:
-          "Ces mints ont été recommandées par d'autres utilisateurs Nostr. Lisez les avis sur { link }. Soyez prudent et faites vos propres recherches avant d'utiliser une mint.",
+          "Ces mints ont été recommandées par d'autres utilisateurs Nostr. Soyez prudent et faites vos propres recherches avant d'utiliser une mint.",
         actions: {
           browse: {
             label: "Cliquez pour parcourir les mints",
@@ -755,6 +895,10 @@ export default {
         },
       },
     },
+    error_badge: "Erreur",
+    reviews_text: "avis",
+    no_reviews_yet: "Aucun avis pour l'instant",
+    discover_mints_button: "Découvrir les mints",
   },
   QrcodeReader: {
     progress: {
@@ -772,7 +916,8 @@ export default {
     },
   },
   InvoiceDetailDialog: {
-    title: "Créer une Facture",
+    title: "Recevoir Lightning",
+    create_invoice_title: "Créer une Facture",
     inputs: {
       amount: {
         label: "Montant ({ ticker }) *",
@@ -815,7 +960,7 @@ export default {
     },
   },
   SendTokenDialog: {
-    title: "Envoyer { value }",
+    title: "Envoyer Ecash",
     title_ecash_text: "Ecash",
     badge_offline_text: "Hors ligne",
     inputs: {
@@ -904,7 +1049,7 @@ export default {
     },
   },
   ReceiveTokenDialog: {
-    title: "Recevoir { value }",
+    title: "Recevoir Ecash",
     title_ecash_text: "Ecash",
     inputs: {
       tokens_base64: {
@@ -914,6 +1059,10 @@ export default {
     errors: {
       invalid_token: {
         label: "Jeton invalide",
+      },
+      p2pk_lock_mismatch: {
+        label:
+          "Impossible de recevoir. Le verrouillage P2PK de ce jeton ne correspond pas à votre clé publique.",
       },
     },
     actions: {
@@ -946,7 +1095,7 @@ export default {
         in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
       later: {
-        label: "Plus tard",
+        label: "Recevoir plus tard",
         tooltip_text: "Ajouter à l'historique pour recevoir plus tard",
         already_in_history_success_text: "Ecash déjà dans l'historique",
         added_to_history_success_text: "Ecash ajouté à l'historique",
@@ -1152,6 +1301,20 @@ export default {
       },
     },
   },
+  ParseInputComponent: {
+    placeholder: {
+      default: "Token Cashu ou adresse Lightning",
+      receive: "Token Cashu",
+      pay: "Adresse Lightning ou facture",
+    },
+    qr_scanner: {
+      title: "Scanner le Code QR",
+      description: "Appuyez pour scanner une adresse",
+    },
+    paste_button: {
+      label: "@:global.actions.paste.label",
+    },
+  },
   PayInvoiceDialog: {
     input_data: {
       title: "Payer Lightning",
@@ -1179,6 +1342,7 @@ export default {
       amount_exact_label: "{ payee } demande { value } { ticker }",
       amount_range_label:
         "{ payee } demande{br}entre { min } et { max } { ticker }",
+      sending_to_lightning_address: "Envoi à { address }",
       inputs: {
         amount: {
           label: "Montant ({ ticker }) *",
@@ -1198,6 +1362,9 @@ export default {
     },
     invoice: {
       title: "Payer { value }",
+      paying: "Paiement en cours",
+      paid: "Payé",
+      fee: "Frais",
       memo: {
         label: "Mémo",
       },
@@ -1269,5 +1436,18 @@ export default {
     in_progress_warning_text: "Échange en cours",
     invalid_swap_data_error_text: "Données d'échange invalides",
     swap_error_text: "Erreur lors de l'échange",
+  },
+  TokenInformation: {
+    fee: "Frais",
+    unit: "Unité",
+    fiat: "Fiat",
+    p2pk: "P2PK",
+    locked: "Verrouillé",
+    locked_to_you: "Verrouillé pour vous",
+    mint: "Monnaie",
+    memo: "Mémo",
+    payment_request: "Demande de paiement",
+    nostr: "Nostr",
+    token_copied: "Token copié dans le presse-papiers",
   },
 };
