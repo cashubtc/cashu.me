@@ -49,7 +49,7 @@ describe("Workers Stores", () => {
       await store.invoiceCheckWorker("quote1");
 
       // Advance to first tick
-      await vi.advanceTimersByTimeAsync(5000);
+      await vi.advanceTimersByTimeAsync(5100);
       expect(store.invoiceWorkerRunning).toBe(true);
 
       // Fast forward 11 more intervals (total 12)

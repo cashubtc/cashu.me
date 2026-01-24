@@ -87,6 +87,9 @@ describe("useNostrStore", () => {
     walletStore.mnemonic =
       "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about";
 
+    // Verify it was set
+    expect(walletStore.mnemonic).toBeTruthy();
+
     await store.initWalletSeedPrivateKeySigner();
 
     expect(store.signerType).toBe(SignerType.SEED);
