@@ -269,7 +269,7 @@ export async function meltBolt11(
 
   await uIStore.lockMutex();
   try {
-    await this.addOutgoingPendingInvoiceToHistoryBolt11(
+    await this.addOutgoingPendingInvoiceToHistory(
       quote,
       mintWallet.mint.mintUrl,
       mintWallet.unit
@@ -301,9 +301,7 @@ export async function meltBolt11(
         counter,
       });
       // store melt quote in invoice history
-      this.updateOutgoingInvoiceInHistoryBolt11(
-        data.quote as MeltQuoteResponse
-      );
+      this.updateOutgoingInvoiceInHistory(data.quote as MeltQuoteResponse);
     } catch (error) {
       throw error;
     } finally {
@@ -335,7 +333,7 @@ export async function meltBolt11(
     }
     console.log(`#### pay lightning: ${amount_paid} ${mintWallet.unit} paid`);
 
-    this.updateOutgoingInvoiceInHistoryBolt11(quote, {
+    this.updateOutgoingInvoiceInHistory(quote, {
       status: "paid",
       amount: -amount_paid,
     });
@@ -352,7 +350,7 @@ export async function meltBolt11(
     // get quote and check state
     const meltQuote = await mintWallet.mint.checkMeltQuote(quote.quote);
     // store melt quote in invoice history
-    this.updateOutgoingInvoiceInHistoryBolt11(meltQuote as MeltQuoteResponse);
+    this.updateOutgoingInvoiceInHistory(meltQuote as MeltQuoteResponse);
 
     if (
       meltQuote.state == MeltQuoteState.PAID ||
@@ -368,7 +366,7 @@ export async function meltBolt11(
     // roll back proof management and keyset counter
     await proofsStore.setReserved(sendProofs, false);
     this.increaseKeysetCounter(keysetId, -keysetCounterIncrease);
-    this.removeOutgoingInvoiceFromHistoryBolt11(quote.quote);
+    this.removeOutgoingInvoiceFromHistory(quote.quote);
 
     console.error(error);
     this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error);
@@ -454,7 +452,7 @@ export async function checkOutgoingInvoiceBolt11(
   try {
     // this is an outgoing invoice, we first do a getMintQuote to check if the invoice is paid
     const meltQuote = await mintWallet.mint.checkMeltQuote(quote);
-    this.updateOutgoingInvoiceInHistoryBolt11(meltQuote as MeltQuoteResponse);
+    this.updateOutgoingInvoiceInHistory(meltQuote as MeltQuoteResponse);
     if (meltQuote.state == MeltQuoteState.PENDING) {
       console.log("### mintQuote not paid yet");
       if (verbose) {
@@ -464,7 +462,7 @@ export async function checkOutgoingInvoiceBolt11(
     } else if (meltQuote.state == MeltQuoteState.UNPAID) {
       // we assume that the payment failed and we unset the proofs as reserved
       await useProofsStore().setReserved(proofs, false);
-      this.removeOutgoingInvoiceFromHistoryBolt11(quote);
+      this.removeOutgoingInvoiceFromHistory(quote);
       notifyWarning(this.t("wallet.notifications.lightning_payment_failed"));
     } else if (meltQuote.state == MeltQuoteState.PAID) {
       // if the invoice is paid, we check if all proofs are spent and if so, we invalidate them and set the invoice state in the history to "paid"
@@ -589,60 +587,6 @@ export async function mintOnPaidBolt11(
   } finally {
     this.activeWebsocketConnections--;
   }
-}
-
-export async function addOutgoingPendingInvoiceToHistoryBolt11(
-  this: any,
-  quote: MeltQuoteResponse,
-  mint: string,
-  unit: string
-) {
-  this.invoiceHistory.push({
-    amount: -(quote.amount + quote.fee_reserve),
-    bolt11: this.payInvoiceData.input.request,
-    quote: quote.quote,
-    memo: "Outgoing invoice",
-    date: currentDateStr(),
-    status: "pending",
-    mint: mint,
-    unit: unit,
-    meltQuote: quote,
-  });
-}
-
-export function removeOutgoingInvoiceFromHistoryBolt11(
-  this: any,
-  quote: string
-) {
-  const index = this.invoiceHistory.findIndex(
-    (i: InvoiceHistory) => i.quote === quote
-  );
-  if (index >= 0) {
-    this.invoiceHistory.splice(index, 1);
-  }
-}
-
-export function updateOutgoingInvoiceInHistoryBolt11(
-  this: any,
-  quote: MeltQuoteResponse,
-  options?: { status?: "pending" | "paid"; amount?: number }
-) {
-  this.invoiceHistory
-    .filter((i: InvoiceHistory) => i.quote === quote.quote)
-    .forEach((i: InvoiceHistory) => {
-      if (options) {
-        if (options.status) {
-          i.status = options.status;
-          if (options.status === "paid") {
-            i.paidDate = currentDateStr();
-          }
-        }
-        if (options.amount) {
-          i.amount = options.amount;
-        }
-        i.meltQuote = quote;
-      }
-    });
 }
 
 export async function handleBolt11InvoiceBolt11(this: any) {

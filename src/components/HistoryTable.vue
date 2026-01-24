@@ -351,9 +351,12 @@ export default defineComponent({
           this.checkTokenSpendable(transaction);
         }
       } else if (transaction.type === "lightning") {
-        // Heuristic: BOLT12 mint quote objects have amount_paid/amount_issued
-        const isBolt12 = transaction?.mintQuote &&
-          typeof transaction.mintQuote.amount_paid !== "undefined";
+        // Prefer explicit type check, fallback to heuristic for old history
+        const isBolt12 =
+          transaction.protocol === "bolt12" ||
+          (transaction?.mintQuote &&
+            typeof transaction.mintQuote.amount_paid !== "undefined");
+
         if (isBolt12) {
           this.checkOfferAndMintBolt12(transaction.quote, true);
         } else if (transaction.amount > 0) {
@@ -428,6 +431,7 @@ export default defineComponent({
         transactions.push({
           ...invoice,
           type: "lightning",
+          protocol: invoice.type || "bolt11", // Preserve original type (bolt11/bolt12), default to bolt11
           id: `invoice-${invoice.quote}`,
           label: invoice.label,
         });

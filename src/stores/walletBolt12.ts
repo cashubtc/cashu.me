@@ -205,7 +205,7 @@ export async function meltBolt12(
 
   await uIStore.lockMutex();
   try {
-    await this.addOutgoingPendingInvoiceToHistoryBolt11(
+    await this.addOutgoingPendingInvoiceToHistory(
       quote,
       mintWallet.mint.mintUrl,
       mintWallet.unit
@@ -256,7 +256,7 @@ export async function meltBolt12(
       );
     }
 
-    this.updateOutgoingInvoiceInHistoryBolt11(quote, {
+    this.updateOutgoingInvoiceInHistory(quote, {
       status: "paid",
       amount: -amount_paid,
     });
@@ -277,7 +277,7 @@ export async function meltBolt12(
     }
     await proofsStore.setReserved(sendProofs, false);
     this.increaseKeysetCounter(keysetId, -keysetCounterIncrease);
-    this.removeOutgoingInvoiceFromHistoryBolt11(quote.quote);
+    this.removeOutgoingInvoiceFromHistory(quote.quote);
     console.error(error);
     this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error);
     if (!silent) notifyApiError(error, "Payment failed");

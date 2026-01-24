@@ -22,9 +22,6 @@ import {
   checkInvoiceBolt11,
   checkOutgoingInvoiceBolt11,
   mintOnPaidBolt11,
-  addOutgoingPendingInvoiceToHistoryBolt11,
-  removeOutgoingInvoiceFromHistoryBolt11,
-  updateOutgoingInvoiceInHistoryBolt11,
   handleBolt11InvoiceBolt11,
 } from "./walletBolt11";
 import {
@@ -58,8 +55,8 @@ import {
   PaymentRequestTransportType,
   PaymentRequestTransport,
   decodePaymentRequest,
-  MintQuoteResponse,
   ProofState,
+  MintQuoteResponse,
 } from "@cashu/cashu-ts";
 import { hashToCurve } from "@cashu/crypto/modules/common";
 // @ts-ignore
@@ -76,6 +73,7 @@ import { wordlist } from "@scure/bip39/wordlists/english";
 import { useSettingsStore } from "./settings";
 import { usePriceStore } from "./price";
 import { useI18n } from "vue-i18n";
+import BOLT12Decoder from "bolt12-decoder";
 // HACK: this is a workaround so that the catch block in the melt function does not throw an error when the user exits the app
 // before the payment is completed. This is necessary because the catch block in the melt function would otherwise remove all
 // quotes from the invoiceHistory and the user would not be able to pay the invoice again after reopening the app.
@@ -942,26 +940,22 @@ export const useWalletStore = defineStore("wallet", {
       );
     },
     ////////////// UI HELPERS //////////////
-    addOutgoingPendingInvoiceToHistoryBolt11: async function (
+    addOutgoingPendingInvoiceToHistory: async function (
       quote: MeltQuoteResponse,
       mint: string,
       unit: string
     ) {
-      return await addOutgoingPendingInvoiceToHistoryBolt11.call(
-        this,
-        quote,
-        mint,
-        unit
-      );
-    },
-    removeOutgoingInvoiceFromHistoryBolt11: function (quote: string) {
-      return removeOutgoingInvoiceFromHistoryBolt11.call(this, quote);
-    },
-    updateOutgoingInvoiceInHistoryBolt11: function (
-      quote: MeltQuoteResponse,
-      options?: { status?: "pending" | "paid"; amount?: number }
-    ) {
-      return updateOutgoingInvoiceInHistoryBolt11.call(this, quote, options);
+      this.invoiceHistory.push({
+        amount: -(quote.amount + quote.fee_reserve),
+        bolt11: this.payInvoiceData.input.request,
+        quote: quote.quote,
+        memo: "Outgoing invoice",
+        date: currentDateStr(),
+        status: "pending",
+        mint: mint,
+        unit: unit,
+        meltQuote: quote,
+      });
     },
     removeOutgoingInvoiceFromHistory: function (quote: string) {
       const index = this.invoiceHistory.findIndex((i) => i.quote === quote);
@@ -1024,19 +1018,40 @@ export const useWalletStore = defineStore("wallet", {
     },
     handleBolt12Offer: async function (offer: string) {
       this.payInvoiceData.show = true;
+      let decoded;
+      try {
+        decoded = BOLT12Decoder.decode(offer);
+      } catch (e) {
+        console.error("Failed to decode BOLT12 offer", e);
+        notifyWarning(
+          this.t("wallet.notifications.failed_to_decode_invoice"),
+          undefined,
+          3000
+        );
+        this.payInvoiceData.show = false;
+        throw e;
+      }
+
+      const amountMsat = decoded.amount ? parseInt(decoded.amount) : 0;
+
       const cleanOffer = {
         bolt12: offer,
-        memo: "",
-        msat: 0,
-        sat: 0,
-        fsat: 0,
-        description: "",
+        memo: decoded.description || "",
+        msat: amountMsat,
+        sat: Math.floor(amountMsat / 1000),
+        fsat: amountMsat / 1000,
+        description: decoded.description || "",
       } as any;
       this.payInvoiceData.invoice = Object.freeze(cleanOffer);
       if (
-        this.payInvoiceData.input.amount &&
-        this.payInvoiceData.input.amount > 0
+        cleanOffer.sat > 0 ||
+        (this.payInvoiceData.input.amount &&
+          this.payInvoiceData.input.amount > 0)
       ) {
+        // If offer has fixed amount, force it
+        if (cleanOffer.sat > 0) {
+          this.payInvoiceData.input.amount = cleanOffer.sat;
+        }
         await this.meltQuoteInvoiceData();
       }
     },
