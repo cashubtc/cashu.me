@@ -54,6 +54,11 @@ vi.mock("vue-i18n", () => ({
     t: (key: string) => key,
     d: (key: string) => key,
   }),
+  createI18n: () => ({
+    global: {
+      t: (key: string) => key,
+    },
+  }),
 }));
 
 vi.mock("src/boot/i18n", () => ({
