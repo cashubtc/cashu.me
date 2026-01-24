@@ -57,6 +57,14 @@ vi.mock("src/js/notify", () => ({
   notify: vi.fn(),
 }));
 
+vi.mock("@capacitor/haptics", () => ({
+  Haptics: {
+    vibrate: vi.fn(),
+    impact: vi.fn(),
+  },
+  ImpactStyle: {},
+}));
+
 describe("useWalletStore Melt Logic", () => {
   beforeEach(() => {
     setActivePinia(createPinia());

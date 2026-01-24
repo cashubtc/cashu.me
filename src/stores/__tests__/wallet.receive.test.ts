@@ -41,6 +41,14 @@ vi.mock("src/js/notify", () => ({
   notifyApiError: vi.fn(),
 }));
 
+vi.mock("@capacitor/haptics", () => ({
+  Haptics: {
+    vibrate: vi.fn(),
+    impact: vi.fn(),
+  },
+  ImpactStyle: {},
+}));
+
 // vi.mock("src/js/token", () => ({
 //   default: {
 //     decode: vi.fn(),

@@ -874,6 +874,7 @@ export const useWalletStore = defineStore("wallet", {
         // this way, in case the user exits the app before meltProofs is completed, the returned change outputs won't cause a "outputs already signed" error
         // if the payment fails, we decrease the counter again
         this.increaseKeysetCounter(keysetId, sendProofs.length);
+        keysetCounterIncrease += sendProofs.length;
         if (quote.fee_reserve > 0) {
           countChangeOutputs = Math.ceil(Math.log2(quote.fee_reserve)) || 1;
           this.increaseKeysetCounter(keysetId, countChangeOutputs);
