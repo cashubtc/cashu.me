@@ -202,19 +202,19 @@ The heart of the application. Handles all Cashu protocol interactions.
 
 ### Phase 1: Core (The Foundation)
 
-- [ ] Setup `fake-indexeddb` in `test/vitest/setup-file.js`
-- [ ] Implement `src/stores/__tests__/proofs.test.ts`
-- [ ] Implement `src/stores/__tests__/mints.test.ts`
-- [ ] Implement `src/stores/__tests__/wallet.selection.test.ts` (splitAmount, coinSelect)
-- [ ] Implement `src/stores/__tests__/wallet.send.test.ts` (Mocked CashuWallet)
-- [ ] Implement `src/stores/__tests__/wallet.receive.test.ts`
-- [ ] Implement `src/stores/__tests__/wallet.melt.test.ts`
-- [ ] Implement `src/stores/__tests__/p2pk.test.ts`
+- [x] Setup `fake-indexeddb` in `test/vitest/setup-file.js`
+- [x] Implement `src/stores/__tests__/proofs.test.ts`
+- [x] Implement `src/stores/__tests__/mints.test.ts`
+- [x] Implement `src/stores/__tests__/wallet.selection.test.ts` (splitAmount, coinSelect)
+- [x] Implement `src/stores/__tests__/wallet.send.test.ts` (Mocked CashuWallet)
+- [x] Implement `src/stores/__tests__/wallet.receive.test.ts`
+- [x] Implement `src/stores/__tests__/wallet.melt.test.ts`
+- [x] Implement `src/stores/__tests__/p2pk.test.ts`
 - [ ] Implement `src/stores/__tests__/nwc.test.ts`
-- [ ] Implement `src/stores/__tests__/nostr.test.ts`
-- [ ] Implement `src/stores/__tests__/restore.test.ts`
-- [ ] Implement `src/stores/__tests__/swap.test.ts`
-- [ ] Implement `src/stores/__tests__/workers.test.ts`
+- [x] Implement `src/stores/__tests__/nostr.test.ts`
+- [x] Implement `src/stores/__tests__/restore.test.ts`
+- [x] Implement `src/stores/__tests__/swap.test.ts`
+- [x] Implement `src/stores/__tests__/workers.test.ts`
 
 ### Phase 2: Helpers & History
 
