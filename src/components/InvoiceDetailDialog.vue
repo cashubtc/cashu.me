@@ -28,7 +28,11 @@
               class="q-mt-sm text-white"
               style="font-size: 1rem"
             >
-              {{ $t("InvoiceDetailDialog.invoice.caption") }}
+              {{
+                isBolt12
+                  ? "BOLT12 Offer"
+                  : $t("InvoiceDetailDialog.invoice.caption")
+              }}
             </q-item-label>
           </div>
         </div>
@@ -68,6 +72,12 @@
             <q-card-section class="q-pa-sm">
               <div class="row justify-center q-pt-md">
                 <q-item-label style="font-size: 28px" class="text-weight-bold">
+                  <q-icon
+                    v-if="isBolt12"
+                    name="call_received"
+                    class="q-mr-sm"
+                    size="sm"
+                  />
                   <strong>{{ displayUnit }}</strong>
                 </q-item-label>
               </div>
@@ -200,6 +210,9 @@ export default defineComponent({
         return "Copied";
       }
       return this.$t("InvoiceDetailDialog.invoice.actions.copy.label");
+    },
+    isBolt12(): boolean {
+      return this.invoiceData.type === "bolt12";
     },
   },
   methods: {

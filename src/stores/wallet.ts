@@ -91,6 +91,7 @@ type Invoice = {
   bolt11: string;
   quote: string;
   memo: string;
+  type?: "bolt11" | "bolt12";
 };
 
 export type InvoiceHistory = Invoice & {

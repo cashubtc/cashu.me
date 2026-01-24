@@ -146,8 +146,6 @@
     <!-- INVOICE DETAILS  -->
     <CreateInvoiceDialog v-model="showCreateInvoiceDialog" />
     <InvoiceDetailDialog v-model="showInvoiceDetails" />
-    <!-- BOLT12 OFFER DETAILS -->
-    <Bolt12OfferDetailsDialog v-model="showBolt12OfferDetails" />
 
     <!-- SEND TOKENS DIALOG  -->
     <SendTokenDialog v-model="showSendTokens" />
@@ -216,7 +214,6 @@ import WelcomeDialog from "components/WelcomeDialog.vue";
 import SendTokenDialog from "components/SendTokenDialog.vue";
 import PayInvoiceDialog from "components/PayInvoiceDialog.vue";
 import InvoiceDetailDialog from "components/InvoiceDetailDialog.vue";
-import Bolt12OfferDetailsDialog from "components/Bolt12OfferDetailsDialog.vue";
 import CreateInvoiceDialog from "components/CreateInvoiceDialog.vue";
 import SendDialog from "components/SendDialog.vue";
 import ReceiveDialog from "components/ReceiveDialog.vue";
@@ -275,7 +272,6 @@ export default {
     ReceiveTokenDialog,
     PayInvoiceDialog,
     InvoiceDetailDialog,
-    Bolt12OfferDetailsDialog,
     CreateInvoiceDialog,
     QrcodeReader,
     SendDialog,
@@ -647,7 +643,8 @@ export default {
 
     // get token to receive tokens from a link
     if (params.get("token") || hash.includes("token")) {
-      const tokenBase64 = (params.get("token") || hash.split("token=")[1]) as string;
+      const tokenBase64 = (params.get("token") ||
+        hash.split("token=")[1]) as string;
       // make sure to react only to tokens not in the users history
       let seen = false;
       for (let i = 0; i < this.historyTokens.length; i++) {

@@ -161,6 +161,7 @@ export default defineComponent({
       this.invoiceData.bolt11 = "";
       this.invoiceData.hash = "";
       this.invoiceData.memo = "";
+      this.invoiceData.type = "bolt11";
       this.showCreateInvoiceDialog = true;
       this.showReceiveDialog = false;
     },
@@ -176,8 +177,9 @@ export default defineComponent({
       this.invoiceData.bolt11 = "";
       this.invoiceData.hash = "";
       this.invoiceData.memo = "";
+      this.invoiceData.type = "bolt12";
       console.log("### showBolt12OfferCreateDialog");
-      this.showBolt12OfferDetails = true;
+      this.showCreateInvoiceDialog = true;
       this.showReceiveDialog = false;
     },
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),

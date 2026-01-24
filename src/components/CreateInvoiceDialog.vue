@@ -29,7 +29,7 @@
               class="dialog-header q-mt-sm"
               :class="$q.dark.isActive ? 'text-white' : 'text-black'"
             >
-              {{ $t("InvoiceDetailDialog.title") }}
+              {{ isBolt12 ? "Create Offer" : $t("InvoiceDetailDialog.title") }}
             </q-item-label>
           </div>
           <div
@@ -79,7 +79,9 @@
                 !fiatKeyboardMode
               "
               :model-value="String(invoiceData.amount ?? 0)"
-              @update:modelValue="(val: string | number) => (invoiceData.amount = Number(val))"
+              @update:modelValue="
+                (val: string | number) => (invoiceData.amount = Number(val))
+              "
               @done="requestMintButton"
             />
           </div>
@@ -93,16 +95,18 @@
                 class="full-width"
                 unelevated
                 size="lg"
-                :disable="
-                  invoiceData.amount == null || Number(invoiceData.amount) <= 0
-                "
+                :disable="!canCreate"
                 @click="requestMintButton"
                 color="primary"
                 rounded
                 type="submit"
                 :loading="globalMutexLock || createInvoiceButtonBlocked"
               >
-                {{ $t("InvoiceDetailDialog.actions.create.label") }}
+                {{
+                  isBolt12
+                    ? "Create Offer"
+                    : $t("InvoiceDetailDialog.actions.create.label")
+                }}
                 <template v-slot:loading>
                   <q-spinner />
                 </template>
@@ -125,6 +129,8 @@ import { useUiStore } from "src/stores/ui";
 import { useMintsStore } from "src/stores/mints";
 import { useSettingsStore } from "src/stores/settings";
 import { usePriceStore } from "src/stores/price";
+import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
+
 declare const windowMixin: any;
 
 export default defineComponent({
@@ -161,11 +167,24 @@ export default defineComponent({
       "useNumericKeyboard",
     ]),
     ...mapState(usePriceStore, ["bitcoinPrice", "currentCurrencyPrice"]),
+    isBolt12(): boolean {
+      return this.invoiceData.type === "bolt12";
+    },
+    canCreate(): boolean {
+      // Bolt11 requires amount > 0
+      // Bolt12 allows 0 amount (amountless offer)
+      if (this.isBolt12) return true;
+      return (
+        this.invoiceData.amount != null && Number(this.invoiceData.amount) > 0
+      );
+    },
   },
   watch: {
     showCreateInvoiceDialog: function (val) {
       if (val) {
         this.$nextTick(() => {
+          // If editing a BOLT12 offer with existing amount, don't auto-show keyboard if amount exists?
+          // Actually user likely wants to edit.
           this.showNumericKeyboard = true;
         });
       } else {
@@ -173,29 +192,48 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useWalletStore, ["requestMint", "mintOnPaid", "mintWallet"]),
+    ...mapActions(useWalletStore, [
+      "requestMint",
+      "mintOnPaid",
+      "mintWallet",
+      "requestMintBolt12",
+    ]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
     requestMintButton: async function () {
-      if (!this.invoiceData.amount) {
+      if (!this.canCreate) {
         return;
       }
       try {
         this.showNumericKeyboard = false;
         const mintStore = useMintsStore();
-        const amount = Math.floor(
-          this.invoiceData.amount * this.activeUnitCurrencyMultiplyer
-        );
         this.createInvoiceButtonBlocked = true;
+
+        // Get wallet instance
         const wallet = await this.mintWallet(
           mintStore.activeMintUrl,
           mintStore.activeUnit,
           true
         );
-        const mintQuote = await this.requestMint(amount, wallet);
-        // Switch to QR display dialog
-        this.showCreateInvoiceDialog = false;
-        this.showInvoiceDetails = true;
-        await this.mintOnPaid(mintQuote.quote);
+
+        const amount = Math.floor(
+          (this.invoiceData.amount || 0) * this.activeUnitCurrencyMultiplyer
+        );
+
+        if (this.isBolt12) {
+          // BOLT12 Flow
+          const mintQuote = await this.requestMintBolt12(amount, wallet);
+          useInvoicesWorkerStore().addBolt12OfferToChecker(mintQuote.quote);
+
+          this.showCreateInvoiceDialog = false;
+          this.showInvoiceDetails = true;
+        } else {
+          // BOLT11 Flow
+          const mintQuote = await this.requestMint(amount, wallet);
+
+          this.showCreateInvoiceDialog = false;
+          this.showInvoiceDetails = true;
+          await this.mintOnPaid(mintQuote.quote);
+        }
       } catch (e) {
         console.log("#### requestMintButton", e);
       } finally {
