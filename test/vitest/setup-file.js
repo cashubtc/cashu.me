@@ -1,5 +1,6 @@
 // This file will be run before each test file
 import { createPinia, setActivePinia } from "pinia";
+import "fake-indexeddb/auto";
 
 // Initialize Pinia globally at module load time
 console.log("Vitest setup file is running");
