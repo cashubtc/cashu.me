@@ -29,7 +29,6 @@ import * as _ from "underscore";
 import { date } from "quasar";
 import { notifyWarning } from "src/js/notify";
 
-
 let isUnloading = false;
 if (typeof window !== "undefined") {
   window.addEventListener("beforeunload", () => {
@@ -302,7 +301,9 @@ export async function meltBolt11(
         counter,
       });
       // store melt quote in invoice history
-      this.updateOutgoingInvoiceInHistoryBolt11(data.quote as MeltQuoteResponse);
+      this.updateOutgoingInvoiceInHistoryBolt11(
+        data.quote as MeltQuoteResponse
+      );
     } catch (error) {
       throw error;
     } finally {
@@ -323,7 +324,7 @@ export async function meltBolt11(
     // delete spent tokens from db
     await proofsStore.removeProofs(sendProofs);
 
-    let amount_paid = amount - proofsStore.sumProofs(data.change);
+    const amount_paid = amount - proofsStore.sumProofs(data.change);
     useUiStore().vibrate();
     if (!silent) {
       notifySuccess(
@@ -658,7 +659,7 @@ export async function handleBolt11InvoiceBolt11(this: any) {
     this.payInvoiceData.show = false;
     throw error;
   }
-  let cleanInvoice = {
+  const cleanInvoice = {
     bolt11: invoice.paymentRequest,
     memo: "",
     msat: 0,
@@ -683,7 +684,9 @@ export async function handleBolt11InvoiceBolt11(this: any) {
       } else if (tag.name === "timestamp") {
         cleanInvoice.timestamp = tag.value;
       } else if (tag.name === "expiry") {
-        var expireDate = new Date((cleanInvoice.timestamp + tag.value) * 1000);
+        const expireDate = new Date(
+          (cleanInvoice.timestamp + tag.value) * 1000
+        );
         cleanInvoice.expireDate = date.formatDate(
           expireDate,
           "YYYY-MM-DDTHH:mm:ss.SSSZ"

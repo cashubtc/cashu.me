@@ -105,7 +105,7 @@
     </q-card>
   </q-dialog>
 </template>
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import VueQrcode from "@chenfengyuan/vue-qrcode";
@@ -175,7 +175,7 @@ export default defineComponent({
           (this.invoiceData.amount || 0) * this.activeUnitCurrencyMultiplyer ||
           undefined;
         this.createOfferButtonBlocked = true;
-        const mintWallet = useWalletStore().mintWallet(
+        const mintWallet = await useWalletStore().mintWallet(
           mintStore.activeMintUrl,
           mintStore.activeUnit
         );

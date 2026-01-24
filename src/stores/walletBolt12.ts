@@ -3,11 +3,7 @@ import { useMintsStore, WalletProof } from "./mints";
 import { useProofsStore } from "./proofs";
 import { useUiStore } from "src/stores/ui";
 import { useWorkersStore } from "./workers";
-import {
-  CashuWallet,
-  Proof,
-  MeltQuoteResponse,
-} from "@cashu/cashu-ts";
+import { CashuWallet, Proof, MeltQuoteResponse } from "@cashu/cashu-ts";
 import * as nobleSecp256k1 from "@noble/secp256k1";
 import { bytesToHex } from "@noble/hashes/utils";
 import {
@@ -58,7 +54,10 @@ export async function requestMintBolt12(
     return data;
   } catch (error: any) {
     console.error(error);
-    notifyApiError(error, this.t("wallet.notifications.could_not_request_mint"));
+    notifyApiError(
+      error,
+      this.t("wallet.notifications.could_not_request_mint")
+    );
     throw error;
   }
 }
@@ -71,10 +70,12 @@ export async function checkOfferAndMintBolt12(
   const uIStore = useUiStore();
   const proofsStore = useProofsStore();
   const mintStore = useMintsStore();
-  const invoice = this.invoiceHistory.find((i: InvoiceHistory) => i.quote === quoteId);
+  const invoice = this.invoiceHistory.find(
+    (i: InvoiceHistory) => i.quote === quoteId
+  );
   if (!invoice) throw new Error("offer not found");
 
-  const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
+  const mintWallet = await this.mintWallet(invoice.mint, invoice.unit);
 
   try {
     uIStore.triggerActivityOrb();
@@ -100,10 +101,7 @@ export async function checkOfferAndMintBolt12(
       {
         keysetId,
         counter,
-        proofsWeHave: mintStore.mintUnitProofs(
-          mint,
-          invoice.unit
-        ),
+        proofsWeHave: mintStore.mintUnitProofs(mint, invoice.unit),
       }
     );
     this.increaseKeysetCounter(keysetId, proofs.length);
@@ -131,7 +129,8 @@ export async function checkOfferAndMintBolt12(
 export async function meltQuoteInvoiceDataBolt12(this: any) {
   // choose active wallet with active mint and unit
   const mintWallet: CashuWallet = this.wallet;
-  if (this.payInvoiceData.blocking) throw new Error("already processing an melt quote.");
+  if (this.payInvoiceData.blocking)
+    throw new Error("already processing an melt quote.");
   this.payInvoiceData.blocking = true;
   this.payInvoiceData.meltQuote.error = "";
   try {
@@ -140,7 +139,8 @@ export async function meltQuoteInvoiceDataBolt12(this: any) {
     if (!offer) throw new Error("no offer provided.");
 
     // amount msat for BOLT12
-    let amountSat: number | undefined = this.payInvoiceData.invoice?.sat || this.payInvoiceData.input.amount;
+    const amountSat: number | undefined =
+      this.payInvoiceData.invoice?.sat || this.payInvoiceData.input.amount;
     if (!amountSat || amountSat <= 0) {
       throw new Error("no amount provided");
     }
@@ -164,7 +164,11 @@ export async function meltInvoiceDataBolt12(this: any) {
   if (!this.payInvoiceData.invoice) throw new Error("no invoice provided.");
   const quote: MeltQuoteResponse = this.payInvoiceData.meltQuote.response;
   if (!quote) throw new Error("no quote found.");
-  return await this.meltBolt12(useMintsStore().activeProofs, quote, this.wallet);
+  return await this.meltBolt12(
+    useMintsStore().activeProofs,
+    quote,
+    this.wallet
+  );
 }
 
 export async function meltBolt12(
@@ -242,7 +246,7 @@ export async function meltBolt12(
 
     await proofsStore.removeProofs(sendProofs);
 
-    let amount_paid = amount - proofsStore.sumProofs(data.change);
+    const amount_paid = amount - proofsStore.sumProofs(data.change);
     useUiStore().vibrate();
     if (!silent) {
       notifySuccess(
@@ -263,7 +267,10 @@ export async function meltBolt12(
   } catch (error: any) {
     // rollback on failure if not paid/pending
     const mintQuote = await mintWallet.mint.checkMeltQuote(quote.quote);
-    if ((mintQuote.state as any) === "PAID" || (mintQuote.state as any) === "PENDING") {
+    if (
+      (mintQuote.state as any) === "PAID" ||
+      (mintQuote.state as any) === "PENDING"
+    ) {
       notify(this.t("wallet.notifications.payment_pending_refresh"));
       this.payInvoiceData.show = false;
       throw error;
@@ -280,4 +287,3 @@ export async function meltBolt12(
     uIStore.unlockMutex();
   }
 }
-
