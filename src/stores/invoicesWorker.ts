@@ -162,7 +162,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
             await walletStore.checkOfferAndMintBolt12(q.quote, false);
             // Keep in queue for future payments as offers are reusable, but back off checks
             q.lastChecked = now;
-            q.checkCount += 1;
+            q.checkCount = 0;
           } catch (error) {
             q.lastChecked = now;
             q.checkCount += 1;

@@ -49,6 +49,7 @@ export async function requestMintBolt12(
     this.invoiceHistory.push({
       ...this.invoiceData,
       label: "Lightning Bolt12",
+      type: "bolt12",
     });
 
     return data;
