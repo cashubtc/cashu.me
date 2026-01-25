@@ -82,7 +82,9 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       }
     },
     addBolt12OfferToChecker(quote: string) {
-      const existingIndex = this.bolt12Quotes.findIndex((q) => q.quote === quote);
+      const existingIndex = this.bolt12Quotes.findIndex(
+        (q) => q.quote === quote
+      );
       if (existingIndex !== -1) {
         this.bolt12Quotes.splice(existingIndex, 1);
       }
@@ -192,7 +194,11 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       for (const q of quotesToCheck) {
         try {
           console.log(`Checking quote ${q.quote}`);
-          walletStore.mintOnPaidBolt11(q.quote, false, false);
+          if (q.type === "bolt12") {
+            this.addBolt12OfferToChecker(q.quote);
+          } else {
+            walletStore.mintOnPaidBolt11(q.quote, false, false);
+          }
         } catch (error) {
           console.error(error);
         }

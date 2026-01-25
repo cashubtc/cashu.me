@@ -925,6 +925,7 @@ export const useWalletStore = defineStore("wallet", {
         this.activeWebsocketConnections--;
       }
     },
+    mintOnPaid: mintOnPaidBolt11,
     mintOnPaidBolt11: async function (
       quote: string,
       verbose = true,
