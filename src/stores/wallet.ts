@@ -89,7 +89,7 @@ type Invoice = {
   bolt11: string;
   quote: string;
   memo: string;
-  type?: "bolt11" | "bolt12";
+  type?: "bolt11" | "bolt12" | "bolt12-subpayment";
 };
 
 export type InvoiceHistory = Invoice & {

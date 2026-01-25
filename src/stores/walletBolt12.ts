@@ -109,8 +109,25 @@ export async function checkOfferAndMintBolt12(
     this.increaseKeysetCounter(keysetId, proofs.length);
     await proofsStore.addProofs(proofs);
 
-    // Update entry to show latest minted amount as positive income
-    this.setInvoicePaid(invoice.quote, { amount: delta, mintQuote: updated });
+    if (invoice.status === "paid") {
+      // If already paid, this is a reusable offer sub-payment.
+      // Create a NEW history entry for this specific payment event.
+      this.invoiceHistory.push({
+        ...invoice,
+        amount: delta,
+        quote: `${invoice.quote}_${Date.now()}`, // Unique ID for this event
+        date: currentDateStr(),
+        status: "paid",
+        mintQuote: updated,
+        label: "Bolt12 Subpayment",
+        type: "bolt12-subpayment",
+      });
+      // Update the original offer with the latest mint state so next check uses correct baseline
+      invoice.mintQuote = updated;
+    } else {
+      // First payment: update the original offer entry
+      this.setInvoicePaid(invoice.quote, { amount: delta, mintQuote: updated });
+    }
 
     if (hideInvoiceDetailsOnMint) {
       uIStore.showInvoiceDetails = false;
