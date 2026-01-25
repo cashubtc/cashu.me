@@ -55,20 +55,6 @@
               </div>
             </div>
           </div>
-
-          <!-- Lightning BOLT12 Offer Option -->
-          <div class="action-row" @click="showBolt12OfferCreateDialog">
-            <div class="row items-center no-wrap">
-              <div class="icon-circle">
-                <ZapIcon :size="24" />
-              </div>
-              <div class="col q-ml-md">
-                <div class="text-body1 text-weight-medium">
-                  Lightning Offer (BOLT12)
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </q-card-section>
     </q-card>
@@ -162,23 +148,6 @@ export default defineComponent({
       this.invoiceData.hash = "";
       this.invoiceData.memo = "";
       this.invoiceData.type = "bolt11";
-      this.showCreateInvoiceDialog = true;
-      this.showReceiveDialog = false;
-    },
-    showBolt12OfferCreateDialog: async function () {
-      if (!this.canReceivePayments) {
-        notifyWarning(
-          this.$i18n.t("ReceiveDialog.actions.lightning.error_no_mints")
-        );
-        this.showReceiveDialog = false;
-        return;
-      }
-      this.invoiceData.amount = "";
-      this.invoiceData.bolt11 = "";
-      this.invoiceData.hash = "";
-      this.invoiceData.memo = "";
-      this.invoiceData.type = "bolt12";
-      console.log("### showBolt12OfferCreateDialog");
       this.showCreateInvoiceDialog = true;
       this.showReceiveDialog = false;
     },

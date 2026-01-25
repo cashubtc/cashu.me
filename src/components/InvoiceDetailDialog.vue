@@ -30,7 +30,7 @@
             >
               {{
                 isBolt12
-                  ? "BOLT12 Offer"
+                  ? "Lightning Bolt12"
                   : $t("InvoiceDetailDialog.invoice.caption")
               }}
             </q-item-label>

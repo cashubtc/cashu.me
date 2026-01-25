@@ -37,6 +37,15 @@
             style="position: absolute; right: 16px"
           >
             <q-btn
+              v-if="bolt12Supported"
+              flat
+              dense
+              size="lg"
+              color="primary"
+              @click="toggleInvoiceType"
+              :label="isBolt12 ? 'B12' : 'B11'"
+            />
+            <q-btn
               flat
               dense
               size="lg"
@@ -59,6 +68,9 @@
 
         <!-- Amount display -->
         <div class="col column items-center justify-center q-px-lg amount-area">
+          <div v-if="isBolt12" class="text-grey-6 text-subtitle1 q-mb-sm">
+            Bolt12
+          </div>
           <AmountInputComponent
             v-model="invoiceData.amount"
             :enabled="true"
@@ -161,6 +173,7 @@ export default defineComponent({
       "activeUnitLabel",
       "activeUnitCurrencyMultiplyer",
       "activeMintUrl",
+      "mints",
     ]),
     ...mapState(useSettingsStore, [
       "bitcoinPriceCurrency",
@@ -169,6 +182,21 @@ export default defineComponent({
     ...mapState(usePriceStore, ["bitcoinPrice", "currentCurrencyPrice"]),
     isBolt12(): boolean {
       return this.invoiceData.type === "bolt12";
+    },
+    bolt12Supported(): boolean {
+      const mintStore = useMintsStore();
+      const mint = mintStore.mints.find(
+        (m) => m.url === mintStore.activeMintUrl
+      );
+      if (!mint) return false;
+      // Check for NUT-20 support
+      // The implementation of nuts support check depends on how it is stored in mint info
+      // Usually mint.info.nuts[20].supported
+      return (
+        mint.info?.nuts?.[20]?.supported ||
+        mint.info?.nuts?.["20"]?.supported ||
+        false
+      );
     },
     canCreate(): boolean {
       // Bolt11 requires amount > 0
@@ -199,6 +227,9 @@ export default defineComponent({
       "requestMintBolt12",
     ]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
+    toggleInvoiceType() {
+      this.invoiceData.type = this.isBolt12 ? "bolt11" : "bolt12";
+    },
     requestMintButton: async function () {
       if (!this.canCreate) {
         return;

@@ -222,7 +222,7 @@ export async function meltInvoiceDataBolt11(this: any) {
   }
 
   const mintStore = useMintsStore();
-  const mintWallet = this.mintWallet(
+  const mintWallet = await this.mintWallet(
     mintStore.activeMintUrl,
     mintStore.activeUnit
   );
@@ -394,7 +394,7 @@ export async function checkInvoiceBolt11(
   if (!invoice) {
     throw new Error("invoice not found");
   }
-  const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
+  const mintWallet = await this.mintWallet(invoice.mint, invoice.unit);
   const mint = mintStore.mints.find((m: any) => m.url === invoice.mint);
   if (!mint) {
     throw new Error("mint not found");
@@ -443,7 +443,7 @@ export async function checkOutgoingInvoiceBolt11(
   if (!invoice) {
     throw new Error("invoice not found");
   }
-  const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
+  const mintWallet = await this.mintWallet(invoice.mint, invoice.unit);
   const mint = mintStore.mints.find((m: any) => m.url === invoice.mint);
   if (!mint) {
     throw new Error("mint not found");
@@ -515,7 +515,7 @@ export async function mintOnPaidBolt11(
   if (!invoice) {
     throw new Error("invoice not found");
   }
-  const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
+  const mintWallet = await this.mintWallet(invoice.mint, invoice.unit);
   const mint = mintStore.mints.find((m: any) => m.url === invoice.mint);
 
   if (!mint) {

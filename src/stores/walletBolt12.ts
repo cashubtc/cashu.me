@@ -48,7 +48,7 @@ export async function requestMintBolt12(
 
     this.invoiceHistory.push({
       ...this.invoiceData,
-      label: "BOLT12 Offer",
+      label: "Lightning Bolt12",
     });
 
     return data;
@@ -110,6 +110,7 @@ export async function checkOfferAndMintBolt12(
     // Update entry to show latest minted amount as positive income
     invoice.amount = delta;
     invoice.status = "paid";
+    invoice.paidDate = currentDateStr();
     invoice.mintQuote = updated as any;
 
     useUiStore().vibrate();
