@@ -222,6 +222,7 @@
                   <p
                     v-if="payInvoiceData.lnurlpay.lightningAddress"
                     class="q-my-none text-h6 text-center"
+                    style="word-break: break-all"
                   >
                     <i18n-t
                       keypath="PayInvoiceDialog.lnurlpay.sending_to_lightning_address"
@@ -231,7 +232,11 @@
                       </template>
                     </i18n-t>
                   </p>
-                  <p v-else class="q-my-none text-h6 text-center">
+                  <p
+                    v-else
+                    class="q-my-none text-h6 text-center"
+                    style="word-break: break-all"
+                  >
                     <i18n-t
                       keypath="PayInvoiceDialog.lnurlpay.amount_exact_label"
                     >
@@ -290,6 +295,7 @@
                   <p
                     v-if="payInvoiceData.lnurlpay.lightningAddress"
                     class="q-my-none text-h6 text-center"
+                    style="word-break: break-all"
                   >
                     <i18n-t
                       keypath="PayInvoiceDialog.lnurlpay.sending_to_lightning_address"
@@ -299,7 +305,11 @@
                       </template>
                     </i18n-t>
                   </p>
-                  <p v-else class="q-my-none text-h6 text-center">
+                  <p
+                    v-else
+                    class="q-my-none text-h6 text-center"
+                    style="word-break: break-all"
+                  >
                     <i18n-t
                       keypath="PayInvoiceDialog.lnurlpay.amount_range_label"
                     >
