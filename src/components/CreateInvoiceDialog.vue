@@ -29,7 +29,9 @@
               class="dialog-header q-mt-sm"
               :class="$q.dark.isActive ? 'text-white' : 'text-black'"
             >
-              {{ isBolt12 ? "Create Offer" : $t("InvoiceDetailDialog.title") }}
+              {{
+                isBolt12 ? "Receive Bolt12" : $t("InvoiceDetailDialog.title")
+              }}
             </q-item-label>
           </div>
           <div
@@ -37,7 +39,7 @@
             style="position: absolute; right: 16px"
           >
             <q-btn
-              v-if="bolt12Supported"
+              v-if="bolt11Supported && bolt12Supported"
               flat
               dense
               size="lg"
@@ -68,9 +70,6 @@
 
         <!-- Amount display -->
         <div class="col column items-center justify-center q-px-lg amount-area">
-          <div v-if="isBolt12" class="text-grey-6 text-subtitle1 q-mb-sm">
-            Bolt12
-          </div>
           <AmountInputComponent
             v-model="invoiceData.amount"
             :enabled="true"
@@ -116,7 +115,7 @@
               >
                 {{
                   isBolt12
-                    ? "Create Offer"
+                    ? "Receive Bolt12"
                     : $t("InvoiceDetailDialog.actions.create.label")
                 }}
                 <template v-slot:loading>
@@ -165,10 +164,10 @@ export default defineComponent({
       "showNumericKeyboard",
       "showInvoiceDetails",
     ]),
-    ...mapWritableState(useUiStore, ["tickerShort", "globalMutexLock"]),
+    ...mapWritableState(useUiStore, ["globalMutexLock"]),
     ...mapWritableState(useUiStore, ["showCreateInvoiceDialog"]),
     ...mapWritableState(useWalletStore, ["invoiceData"]),
-    ...mapState(useMintsStore, [
+    ...mapWritableState(useMintsStore, [
       "activeUnit",
       "activeUnitLabel",
       "activeUnitCurrencyMultiplyer",
@@ -183,20 +182,35 @@ export default defineComponent({
     isBolt12(): boolean {
       return this.invoiceData.type === "bolt12";
     },
+    bolt11Supported(): boolean {
+      const mintStore = useMintsStore();
+      const mint = mintStore.mints.find(
+        (m) => m.url === mintStore.activeMintUrl
+      );
+      if (!mint) return false;
+      // Check for NUT-4 support (Mint Tokens)
+      const nut4 =
+        mint.info?.nuts?.[4] || mint.info?.nuts?.["4"] || ({} as any);
+      if (nut4.supported === false) return false;
+      // If methods are specified, check for bolt11
+      // If methods are not specified, assume bolt11 is supported
+      if (nut4.methods) {
+        return nut4.methods.some((m: any) => m.method === "bolt11");
+      }
+      return true;
+    },
     bolt12Supported(): boolean {
       const mintStore = useMintsStore();
       const mint = mintStore.mints.find(
         (m) => m.url === mintStore.activeMintUrl
       );
       if (!mint) return false;
-      // Check for NUT-20 support
-      // The implementation of nuts support check depends on how it is stored in mint info
-      // Usually mint.info.nuts[20].supported
-      return (
-        mint.info?.nuts?.[20]?.supported ||
-        mint.info?.nuts?.["20"]?.supported ||
-        false
-      );
+      const nut4 = mint.info?.nuts?.[4] || mint.info?.nuts?.["4"] || ({} as any);
+      if (nut4.supported === false) return false;
+      if (nut4.methods) {
+        return nut4.methods.some((m: any) => m.method === "bolt12");
+      }
+      return true;
     },
     canCreate(): boolean {
       // Bolt11 requires amount > 0
@@ -217,6 +231,16 @@ export default defineComponent({
         });
       } else {
       }
+    },
+    activeMintUrl: {
+      handler: function () {
+        if (this.bolt11Supported && !this.bolt12Supported) {
+          this.invoiceData.type = "bolt11";
+        } else if (!this.bolt11Supported && this.bolt12Supported) {
+          this.invoiceData.type = "bolt12";
+        }
+      },
+      immediate: true,
     },
   },
   methods: {
