@@ -65,7 +65,8 @@ export async function requestMintBolt12(
 export async function checkOfferAndMintBolt12(
   this: any,
   quoteId: string,
-  verbose = true
+  verbose = true,
+  hideInvoiceDetailsOnMint = true
 ) {
   const uIStore = useUiStore();
   const proofsStore = useProofsStore();
@@ -109,6 +110,10 @@ export async function checkOfferAndMintBolt12(
 
     // Update entry to show latest minted amount as positive income
     this.setInvoicePaid(invoice.quote, { amount: delta, mintQuote: updated });
+
+    if (hideInvoiceDetailsOnMint) {
+      uIStore.showInvoiceDetails = false;
+    }
 
     useUiStore().vibrate();
     notifySuccess(

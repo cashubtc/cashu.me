@@ -867,8 +867,17 @@ export const useWalletStore = defineStore("wallet", {
     checkOutgoingInvoiceBolt11: async function (quote: string, verbose = true) {
       return await checkOutgoingInvoiceBolt11.call(this, quote, verbose);
     },
-    checkOfferAndMintBolt12: async function (quote: string, verbose = true) {
-      return await checkOfferAndMintBolt12.call(this, quote, verbose);
+    checkOfferAndMintBolt12: async function (
+      quote: string,
+      verbose = true,
+      hideInvoiceDetailsOnMint = true
+    ) {
+      return await checkOfferAndMintBolt12.call(
+        this,
+        quote,
+        verbose,
+        hideInvoiceDetailsOnMint
+      );
     },
     onTokenPaid: async function (historyToken: HistoryToken) {
       const sendTokensStore = useSendTokensStore();
