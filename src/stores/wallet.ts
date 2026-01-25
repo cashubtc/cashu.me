@@ -349,12 +349,26 @@ export const useWalletStore = defineStore("wallet", {
     /**
      * Sets an invoice status to paid
      */
-    setInvoicePaid(quoteId: string) {
+    setInvoicePaid(
+      quoteId: string,
+      updates?: { amount?: number; mintQuote?: any }
+    ) {
       const invoice = this.invoiceHistory.find((i) => i.quote === quoteId);
       if (!invoice) return;
       invoice.status = "paid";
       invoice.paidDate = currentDateStr();
+      if (updates?.amount) invoice.amount = updates.amount;
+      if (updates?.mintQuote) invoice.mintQuote = updates.mintQuote;
+
+      // Update invoiceData if it matches the paid invoice
+      if (this.invoiceData.quote === quoteId) {
+        this.invoiceData.status = "paid";
+        this.invoiceData.paidDate = invoice.paidDate;
+        if (updates?.amount) this.invoiceData.amount = updates.amount;
+        if (updates?.mintQuote) this.invoiceData.mintQuote = updates.mintQuote;
+      }
     },
+
     splitAmount: function (value: number) {
       // returns optimal 2^n split
       const chunks: Array<number> = [];

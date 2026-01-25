@@ -108,10 +108,7 @@ export async function checkOfferAndMintBolt12(
     await proofsStore.addProofs(proofs);
 
     // Update entry to show latest minted amount as positive income
-    invoice.amount = delta;
-    invoice.status = "paid";
-    invoice.paidDate = currentDateStr();
-    invoice.mintQuote = updated as any;
+    this.setInvoicePaid(invoice.quote, { amount: delta, mintQuote: updated });
 
     useUiStore().vibrate();
     notifySuccess(
