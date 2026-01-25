@@ -590,10 +590,12 @@ export const useMintsStore = defineStore("mints", {
           if (storedMint) {
             const existingKeysets = storedMint.keysets || [];
             const mergedKeysets = [...existingKeysets];
-            
+
             // Add or update keysets
             for (const newKeyset of keysets) {
-              const existingIndex = mergedKeysets.findIndex((k) => k.id === newKeyset.id);
+              const existingIndex = mergedKeysets.findIndex(
+                (k) => k.id === newKeyset.id
+              );
               if (existingIndex !== -1) {
                 // Update existing keyset
                 mergedKeysets[existingIndex] = newKeyset;
@@ -602,7 +604,7 @@ export const useMintsStore = defineStore("mints", {
                 mergedKeysets.push(newKeyset);
               }
             }
-            
+
             storedMint.keysets = mergedKeysets;
           }
         }
