@@ -180,12 +180,18 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       )
         return;
       const walletStore = useWalletStore();
-      const quotesToCheck = walletStore.invoiceHistory.filter(
-        (q) =>
+      const quotesToCheck = walletStore.invoiceHistory.filter((q) => {
+        // Bolt12: check if < 14 days old (maxAge), regardless of status
+        if (q.type === "bolt12") {
+          return Date.now() - Date.parse(q.date) < this.maxAge;
+        }
+        // Bolt11: check if pending and < 1 day old
+        return (
           q.status === "pending" &&
           q.amount > 0 &&
           Date.now() - Date.parse(q.date) < this.oneDay
-      );
+        );
+      });
       if (quotesToCheck.length > this.maxQuotesToCheckOnStartup) {
         quotesToCheck.splice(this.maxQuotesToCheckOnStartup);
       }
