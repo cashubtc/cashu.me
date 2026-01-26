@@ -353,7 +353,8 @@ export default defineComponent({
       } else if (transaction.type === "lightning") {
         // Prefer explicit type check, fallback to heuristic for old history
         const isBolt12 =
-          transaction.protocol === "bolt12" ||
+          transaction.method === "bolt12" ||
+          transaction.method === "bolt12-subpayment" ||
           (transaction?.mintQuote &&
             typeof transaction.mintQuote.amount_paid !== "undefined");
 
@@ -400,7 +401,15 @@ export default defineComponent({
       this.invoiceData = invoice;
       this.showInvoiceDetails = true;
       if (invoice.status === "pending") {
-        if (invoice.amount > 0) {
+        const isBolt12 =
+          invoice.method === "bolt12" ||
+          invoice.method === "bolt12-subpayment" ||
+          (invoice?.mintQuote &&
+            typeof invoice.mintQuote.amount_paid !== "undefined");
+
+        if (isBolt12) {
+          this.checkOfferAndMintBolt12(invoice.quote, false, false);
+        } else if (invoice.amount > 0) {
           try {
             await this.checkInvoiceBolt11(invoice.quote, false, false);
           } catch (e) {
@@ -431,7 +440,7 @@ export default defineComponent({
         transactions.push({
           ...invoice,
           type: "lightning",
-          protocol: invoice.type || "bolt11", // Preserve original type (bolt11/bolt12), default to bolt11
+          method: invoice.type || "bolt11", // Preserve original type (bolt11/bolt12), default to bolt11
           id: `invoice-${invoice.quote}`,
           label: invoice.label,
         });

@@ -112,6 +112,9 @@
                     :invoice="invoiceData"
                     :mint-url="invoiceData.mint"
                     :show-amount="false"
+                    :method="
+                      invoiceData.method || invoiceData.protocol || 'bolt11'
+                    "
                   />
                 </div>
               </div>
@@ -215,7 +218,12 @@ export default defineComponent({
       return this.$t("InvoiceDetailDialog.invoice.actions.copy.label");
     },
     isBolt12(): boolean {
-      return this.invoiceData.type === "bolt12";
+      return (
+        this.invoiceData.type === "bolt12" ||
+        this.invoiceData.type === "bolt12-subpayment" ||
+        (this.invoiceData as any).method === "bolt12" ||
+        (this.invoiceData as any).method === "bolt12-subpayment"
+      );
     },
   },
   methods: {

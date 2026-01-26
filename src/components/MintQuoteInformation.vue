@@ -30,6 +30,14 @@
       </div>
     </div>
 
+    <div class="detail-item q-mb-md">
+      <div class="detail-label">
+        <QrCodeIcon :size="20" :color="iconColor" class="detail-icon" />
+        <div class="detail-name">Method</div>
+      </div>
+      <div class="detail-value">{{ methodDisplay }}</div>
+    </div>
+
     <div v-if="paidAtDisplay" class="detail-item q-mb-md">
       <div class="detail-label">
         <ClockIcon :size="20" :color="iconColor" class="detail-icon" />
@@ -59,6 +67,7 @@ import {
   Info as InfoIcon,
   Clock as ClockIcon,
   Building as BuildingIcon,
+  QrCode as QrCodeIcon,
 } from "lucide-vue-next";
 
 declare const windowMixin: any;
@@ -82,6 +91,7 @@ export default defineComponent({
     InfoIcon,
     ClockIcon,
     BuildingIcon,
+    QrCodeIcon,
   },
   props: {
     mintQuote: {
@@ -99,6 +109,10 @@ export default defineComponent({
     showAmount: {
       type: Boolean,
       default: true,
+    },
+    method: {
+      type: String,
+      default: "bolt11",
     },
   },
   computed: {
@@ -138,6 +152,13 @@ export default defineComponent({
     isPaidState(): boolean {
       const state = (this.invoice?.status as string) || this.mintQuote?.state;
       return state?.toLowerCase() === "paid";
+    },
+    methodDisplay(): string {
+      const method = this.method || "bolt11";
+      if (method === "bolt12" || method === "bolt12-subpayment") {
+        return "Bolt12";
+      }
+      return "Bolt11";
     },
     paidAtTimestamp(): number | null {
       if (this.invoice?.paidDate) {
