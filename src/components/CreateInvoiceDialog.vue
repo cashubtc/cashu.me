@@ -70,6 +70,46 @@
 
         <!-- Amount display -->
         <div class="col column items-center justify-center q-px-lg amount-area">
+          <div
+            v-if="showReusableOffer"
+            class="column items-center justify-center full-width"
+            style="max-width: 400px"
+          >
+            <div
+              v-if="reusableBolt12Offer"
+              @click="onCopyReusableOffer"
+              class="full-width cursor-pointer"
+            >
+              <q-responsive :ratio="1" class="q-mx-none full-width">
+                <vue-qrcode
+                  :value="
+                    'lightning:' + reusableBolt12Offer.bolt11.toUpperCase()
+                  "
+                  :options="{ width: 400 }"
+                  class="rounded-borders"
+                  style="width: 100%"
+                >
+                </vue-qrcode>
+              </q-responsive>
+            </div>
+            <div
+              v-if="reusableBolt12Offer"
+              class="q-mt-sm text-center text-grey-7"
+              @click="onCopyReusableOffer"
+            >
+              <q-icon
+                :name="copyButtonCopied ? 'check' : 'content_copy'"
+                size="xs"
+                class="q-mr-xs"
+              />
+              {{
+                copyButtonCopied
+                  ? $t("global.copy_to_clipboard.success")
+                  : "Copy Offer"
+              }}
+            </div>
+          </div>
+
           <AmountInputComponent
             v-if="showAmountInput"
             v-model="invoiceData.amount"
@@ -153,6 +193,8 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
+import { copyToClipboard } from "quasar";
+import VueQrcode from "@chenfengyuan/vue-qrcode";
 import ChooseMint from "components/ChooseMint.vue";
 import NumericKeyboard from "components/NumericKeyboard.vue";
 import AmountInputComponent from "components/AmountInputComponent.vue";
@@ -162,6 +204,7 @@ import { useMintsStore } from "src/stores/mints";
 import { useSettingsStore } from "src/stores/settings";
 import { usePriceStore } from "src/stores/price";
 import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
+import type { InvoiceHistory } from "src/stores/wallet";
 
 declare const windowMixin: any;
 
@@ -172,6 +215,7 @@ export default defineComponent({
     ChooseMint,
     NumericKeyboard,
     AmountInputComponent,
+    VueQrcode,
   },
   props: {},
   data: function () {
@@ -179,6 +223,8 @@ export default defineComponent({
       createInvoiceButtonBlocked: false,
       fiatKeyboardMode: false as boolean,
       bolt12AddAmount: false as boolean,
+      copyButtonCopied: false,
+      copyButtonTimeout: null as any,
     };
   },
   computed: {
@@ -245,6 +291,53 @@ export default defineComponent({
       if (this.isBolt12) return true;
       return (
         this.invoiceData.amount != null && Number(this.invoiceData.amount) > 0
+      );
+    },
+    /**
+     * Find a reusable Bolt12 offer from invoice history.
+     * Reusable means: amountless (amount=0), not expired, matches current mint and unit.
+     */
+    reusableBolt12Offer(): InvoiceHistory | null {
+      const walletStore = useWalletStore();
+      const mintStore = useMintsStore();
+      const now = Date.now();
+
+      // Find offers that are:
+      // 1. Type is bolt12
+      // 2. Amount is 0 (amountless offer)
+      // 3. Not expired (expiry is 0 or in the future)
+      // 4. Matches current active mint and unit
+      const reusableOffers = walletStore.invoiceHistory.filter(
+        (invoice: InvoiceHistory) => {
+          if (invoice.type !== "bolt12") return false;
+          // Must be amountless
+          const quote = invoice.mintQuote as any;
+          if (quote?.amount && quote.amount > 0) return false;
+          // Check expiry: 0 means no expiry, otherwise check if in the future
+          if (quote?.expiry && quote.expiry > 0) {
+            const expiryTime = quote.expiry * 1000; // expiry is in seconds
+            if (expiryTime < now) return false;
+          }
+          // Must match current mint and unit
+          if (invoice.mint !== mintStore.activeMintUrl) return false;
+          if (invoice.unit !== mintStore.activeUnit) return false;
+          // Must have a bolt11 (offer string) to display
+          if (!invoice.bolt11) return false;
+          return true;
+        }
+      );
+
+      // Return the most recent one (last in array, as they're pushed chronologically)
+      if (reusableOffers.length > 0) {
+        return reusableOffers[reusableOffers.length - 1];
+      }
+      return null;
+    },
+    showReusableOffer(): boolean {
+      return (
+        this.isBolt12 &&
+        !this.showAmountInput &&
+        this.reusableBolt12Offer !== null
       );
     },
   },
@@ -331,6 +424,28 @@ export default defineComponent({
         this.createInvoiceButtonBlocked = false;
       }
     },
+    async onCopyReusableOffer() {
+      const offer = this.reusableBolt12Offer;
+      if (offer?.bolt11) {
+        try {
+          await copyToClipboard(offer.bolt11);
+          this.copyButtonCopied = true;
+          if (this.copyButtonTimeout) {
+            clearTimeout(this.copyButtonTimeout);
+          }
+          this.copyButtonTimeout = setTimeout(() => {
+            this.copyButtonCopied = false;
+          }, 3000);
+        } catch (error) {
+          console.error("Failed to copy to clipboard:", error);
+        }
+      }
+    },
+  },
+  beforeUnmount() {
+    if (this.copyButtonTimeout) {
+      clearTimeout(this.copyButtonTimeout);
+    }
   },
 });
 </script>
