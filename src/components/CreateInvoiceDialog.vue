@@ -71,6 +71,7 @@
         <!-- Amount display -->
         <div class="col column items-center justify-center q-px-lg amount-area">
           <AmountInputComponent
+            v-if="showAmountInput"
             v-model="invoiceData.amount"
             :enabled="true"
             @enter="requestMintButton"
@@ -80,7 +81,7 @@
 
         <!-- Numeric keypad -->
         <div class="bottom-panel">
-          <div class="keypad-wrapper">
+          <div class="keypad-wrapper" v-if="showAmountInput">
             <NumericKeyboard
               :force-visible="true"
               :hide-close="true"
@@ -102,6 +103,16 @@
               class="col-12 col-sm-11 col-md-8 q-px-md"
               style="max-width: 600px"
             >
+              <q-btn
+                v-if="isBolt12 && !showAmountInput"
+                class="full-width q-mb-sm"
+                outline
+                rounded
+                color="primary"
+                size="lg"
+                @click="bolt12AddAmount = true"
+                label="Add amount"
+              />
               <q-btn
                 class="full-width"
                 unelevated
@@ -157,6 +168,7 @@ export default defineComponent({
     return {
       createInvoiceButtonBlocked: false,
       fiatKeyboardMode: false as boolean,
+      bolt12AddAmount: false as boolean,
     };
   },
   computed: {
@@ -181,6 +193,10 @@ export default defineComponent({
     ...mapState(usePriceStore, ["bitcoinPrice", "currentCurrencyPrice"]),
     isBolt12(): boolean {
       return this.invoiceData.type === "bolt12";
+    },
+    showAmountInput(): boolean {
+      if (!this.isBolt12) return true;
+      return this.bolt12AddAmount;
     },
     bolt11Supported(): boolean {
       const mintStore = useMintsStore();
@@ -254,7 +270,13 @@ export default defineComponent({
     ]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
     toggleInvoiceType() {
-      this.invoiceData.type = this.isBolt12 ? "bolt11" : "bolt12";
+      if (this.isBolt12) {
+        this.invoiceData.type = "bolt11";
+      } else {
+        this.invoiceData.type = "bolt12";
+        this.bolt12AddAmount = false;
+        this.invoiceData.amount = 0;
+      }
     },
     requestMintButton: async function () {
       if (!this.canCreate) {
