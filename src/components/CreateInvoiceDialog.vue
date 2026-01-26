@@ -70,43 +70,41 @@
 
         <!-- Amount display -->
         <div class="col column items-center justify-center q-px-lg amount-area">
-          <div
-            v-if="showReusableOffer"
-            class="column items-center justify-center full-width"
-            style="max-width: 400px"
-          >
-            <div
-              v-if="reusableBolt12Offer"
-              @click="onCopyReusableOffer"
-              class="full-width cursor-pointer"
-            >
-              <q-responsive :ratio="1" class="q-mx-none full-width">
-                <vue-qrcode
-                  :value="
-                    'lightning:' + reusableBolt12Offer.bolt11.toUpperCase()
-                  "
-                  :options="{ width: 400 }"
-                  class="rounded-borders"
-                  style="width: 100%"
-                >
-                </vue-qrcode>
-              </q-responsive>
-            </div>
-            <div
-              v-if="reusableBolt12Offer"
-              class="q-mt-sm text-center text-grey-7"
-              @click="onCopyReusableOffer"
-            >
-              <q-icon
-                :name="copyButtonCopied ? 'check' : 'content_copy'"
-                size="xs"
-                class="q-mr-xs"
-              />
-              {{
-                copyButtonCopied
-                  ? $t("global.copy_to_clipboard.success")
-                  : "Copy Offer"
-              }}
+          <div v-if="showReusableOffer" class="row justify-center full-width">
+            <div class="col-12" style="max-width: 400px">
+              <div
+                v-if="reusableBolt12Offer"
+                @click="onCopyReusableOffer"
+                class="cursor-pointer"
+              >
+                <q-responsive :ratio="1" class="q-mx-none">
+                  <vue-qrcode
+                    :value="
+                      'lightning:' + reusableBolt12Offer.bolt11.toUpperCase()
+                    "
+                    :options="{ width: 400 }"
+                    class="rounded-borders"
+                    style="width: 100%"
+                  >
+                  </vue-qrcode>
+                </q-responsive>
+              </div>
+              <div
+                v-if="reusableBolt12Offer"
+                class="q-mt-sm text-center text-grey-7"
+                @click="onCopyReusableOffer"
+              >
+                <q-icon
+                  :name="copyButtonCopied ? 'check' : 'content_copy'"
+                  size="xs"
+                  class="q-mr-xs"
+                />
+                {{
+                  copyButtonCopied
+                    ? $t("global.copy_to_clipboard.success")
+                    : "Copy Offer"
+                }}
+              </div>
             </div>
           </div>
 
