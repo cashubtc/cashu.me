@@ -80,7 +80,8 @@
         </div>
 
         <!-- Numeric keypad -->
-        <div class="bottom-panel">
+        <!-- Numeric keypad and Secondary Actions -->
+        <div class="bottom-panel column justify-end">
           <div class="keypad-wrapper" v-if="showAmountInput">
             <NumericKeyboard
               :force-visible="true"
@@ -97,15 +98,15 @@
               @done="requestMintButton"
             />
           </div>
-          <!-- Create action below keyboard -->
-          <div class="row justify-center q-pb-lg q-pt-sm">
+
+          <!-- Secondary Actions Container (Add Amount) -->
+          <div class="row justify-center" v-if="isBolt12 && !showAmountInput">
             <div
               class="col-12 col-sm-11 col-md-8 q-px-md"
               style="max-width: 600px"
             >
               <q-btn
-                v-if="isBolt12 && !showAmountInput"
-                class="full-width q-mb-sm"
+                class="full-width"
                 outline
                 rounded
                 color="primary"
@@ -113,6 +114,15 @@
                 @click="bolt12AddAmount = true"
                 label="Add amount"
               />
+            </div>
+          </div>
+
+          <!-- Create action (Fixed position relative to bottom) -->
+          <div class="row justify-center q-pb-lg q-pt-sm">
+            <div
+              class="col-12 col-sm-11 col-md-8 q-px-md"
+              style="max-width: 600px"
+            >
               <q-btn
                 class="full-width"
                 unelevated
@@ -126,7 +136,7 @@
               >
                 {{
                   isBolt12
-                    ? "Receive Bolt12"
+                    ? "Create Offer"
                     : $t("InvoiceDetailDialog.actions.create.label")
                 }}
                 <template v-slot:loading>
