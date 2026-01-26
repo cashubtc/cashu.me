@@ -4,7 +4,7 @@
     class="mint-quote-information q-mt-md"
     :class="containerTextClass"
   >
-    <div v-if="showAmount" class="detail-item q-mb-md">
+    <div v-if="showAmount && hasValidAmount" class="detail-item q-mb-md">
       <div class="detail-label">
         <ZapIcon :size="20" :color="iconColor" class="detail-icon" />
         <div class="detail-name">Amount</div>
@@ -133,6 +133,14 @@ export default defineComponent({
     },
     unitDisplay(): string {
       return this.unit?.toUpperCase?.() || "";
+    },
+    hasValidAmount(): boolean {
+      const amount =
+        (this.mintQuote?.amount as number | undefined) ??
+        (typeof this.invoice?.amount === "number"
+          ? Math.abs(this.invoice.amount)
+          : undefined);
+      return typeof amount === "number" && amount > 0;
     },
     amountDisplay(): string {
       const amount =
