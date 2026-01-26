@@ -70,7 +70,10 @@
             </div>
 
             <q-card-section class="q-pa-sm">
-              <div class="row justify-center q-pt-md">
+              <div
+                v-if="invoiceData.amount > 0"
+                class="row justify-center q-pt-md"
+              >
                 <q-item-label style="font-size: 28px" class="text-weight-bold">
                   <q-icon
                     v-if="isBolt12"
