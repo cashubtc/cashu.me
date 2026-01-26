@@ -30,6 +30,7 @@ import {
   meltQuoteInvoiceDataBolt12,
   meltInvoiceDataBolt12,
   meltBolt12,
+  mintOnPaidBolt12,
 } from "./walletBolt12";
 
 import * as _ from "underscore";
@@ -712,6 +713,7 @@ export const useWalletStore = defineStore("wallet", {
     meltQuoteInvoiceDataBolt12: meltQuoteInvoiceDataBolt12,
     meltInvoiceDataBolt12: meltInvoiceDataBolt12,
     meltBolt12: meltBolt12,
+    mintOnPaidBolt12: mintOnPaidBolt12,
     // /check
     checkProofsSpendable: async function (
       proofs: Proof[],

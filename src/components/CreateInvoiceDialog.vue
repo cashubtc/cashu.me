@@ -205,7 +205,8 @@ export default defineComponent({
         (m) => m.url === mintStore.activeMintUrl
       );
       if (!mint) return false;
-      const nut4 = mint.info?.nuts?.[4] || mint.info?.nuts?.["4"] || ({} as any);
+      const nut4 =
+        mint.info?.nuts?.[4] || mint.info?.nuts?.["4"] || ({} as any);
       if (nut4.supported === false) return false;
       if (nut4.methods) {
         return nut4.methods.some((m: any) => m.method === "bolt12");
@@ -249,6 +250,7 @@ export default defineComponent({
       "mintOnPaid",
       "mintWallet",
       "requestMintBolt12",
+      "mintOnPaidBolt12",
     ]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
     toggleInvoiceType() {
@@ -277,10 +279,12 @@ export default defineComponent({
         if (this.isBolt12) {
           // BOLT12 Flow
           const mintQuote = await this.requestMintBolt12(amount, wallet);
-          useInvoicesWorkerStore().addBolt12OfferToChecker(mintQuote.quote);
 
           this.showCreateInvoiceDialog = false;
           this.showInvoiceDetails = true;
+
+          // Start listening for payment
+          await this.mintOnPaidBolt12(mintQuote.quote);
         } else {
           // BOLT11 Flow
           const mintQuote = await this.requestMint(amount, wallet);

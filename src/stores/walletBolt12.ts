@@ -14,6 +14,7 @@ import {
 } from "src/js/notify";
 import type { InvoiceHistory } from "./wallet";
 import { useInvoicesWorkerStore } from "./invoicesWorker";
+import { mintOnPaidGeneric } from "./walletWebsocket";
 
 // BOLT12: reusable offers
 
@@ -63,6 +64,21 @@ export async function requestMintBolt12(
   }
 }
 
+export async function mintOnPaidBolt12(
+  this: any,
+  quote: string,
+  verbose = true,
+  kickOffInvoiceChecker = true,
+  hideInvoiceDetailsOnMint = true
+) {
+  return await mintOnPaidGeneric.call(this, quote, {
+    type: "bolt12",
+    verbose,
+    kickOffInvoiceChecker,
+    hideInvoiceDetailsOnMint,
+  });
+}
+
 export async function checkOfferAndMintBolt12(
   this: any,
   quoteId: string,
@@ -109,6 +125,10 @@ export async function checkOfferAndMintBolt12(
     this.increaseKeysetCounter(keysetId, proofs.length);
     await proofsStore.addProofs(proofs);
 
+    // Get the melt quote again with the mint so we can persist the updated state
+    const meltQuoteAfterMint = await mintWallet.checkMintQuoteBolt12(quoteId);
+    invoice.mintQuote = meltQuoteAfterMint;
+
     if (invoice.status === "paid") {
       // If already paid, this is a reusable offer sub-payment.
       // Create a NEW history entry for this specific payment event.
@@ -118,15 +138,14 @@ export async function checkOfferAndMintBolt12(
         quote: `${invoice.quote}_${Date.now()}`, // Unique ID for this event
         date: currentDateStr(),
         status: "paid",
-        mintQuote: updated,
+        mintQuote: meltQuoteAfterMint,
         label: "Bolt12 Subpayment",
         type: "bolt12-subpayment",
       });
-      // Update the original offer with the latest mint state so next check uses correct baseline
-      invoice.mintQuote = updated;
+
     } else {
       // First payment: update the original offer entry
-      this.setInvoicePaid(invoice.quote, { amount: delta, mintQuote: updated });
+      this.setInvoicePaid(invoice.quote, { amount: delta, mintQuote: meltQuoteAfterMint });
     }
 
     if (hideInvoiceDetailsOnMint) {
@@ -287,7 +306,7 @@ export async function meltBolt12(
     return data;
   } catch (error: any) {
     // rollback on failure if not paid/pending
-    const mintQuote = await mintWallet.mint.checkMeltQuote(quote.quote);
+    const mintQuote = await mintWallet.mint.checkMeltQuoteBolt12(quote.quote);
     if (
       (mintQuote.state as any) === "PAID" ||
       (mintQuote.state as any) === "PENDING"

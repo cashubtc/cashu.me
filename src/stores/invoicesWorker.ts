@@ -112,13 +112,39 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
           q.lastChecked +
           Math.min(
             this.checkInterval *
-              Math.pow(2, q.checkCount - this.keepIntervalConstantForNChecks),
+            Math.pow(2, q.checkCount - this.keepIntervalConstantForNChecks),
             this.maxInterval
           )
         );
       } else {
         return q.lastChecked + this.checkInterval;
       }
+    },
+    shouldCheckInvoice(invoice: any) {
+      if (!invoice) return false;
+      const now = Date.now();
+      // Bolt12
+      if (invoice.type === "bolt12") {
+        const isOlderThanMaxAge = now - Date.parse(invoice.date) > this.maxAge;
+        if (isOlderThanMaxAge) return false;
+
+        // If fixed amount offer and fully issued, stop checking
+        const quote = invoice.mintQuote as any;
+        if (
+          quote?.amount &&
+          quote.amount > 0 &&
+          quote.amount_issued >= quote.amount
+        ) {
+          return false;
+        }
+        return true;
+      }
+      // Bolt11
+      return (
+        invoice.status === "pending" &&
+        invoice.amount > 0 &&
+        now - Date.parse(invoice.date) < this.oneDay
+      );
     },
     async processQuotes() {
       const now = Date.now();
@@ -134,12 +160,22 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         return;
       }
 
+      const walletStore = useWalletStore();
+
       // First process one bolt11 quote if any
       for (let i = this.quotes.length - 1; i >= 0; i--) {
         const q = this.quotes[i];
+        // Check if invoice is still valid/needed
+        const invoice = walletStore.invoiceHistory.find(
+          (inv) => inv.quote === q.quote
+        );
+        if (!this.shouldCheckInvoice(invoice)) {
+          this.quotes.splice(i, 1);
+          continue;
+        }
+
         const dueTime = this.dueTime(q);
         if (now > dueTime) {
-          const walletStore = useWalletStore();
           try {
             await walletStore.checkInvoiceBolt11(q.quote, false);
             this.quotes.splice(i, 1);
@@ -155,9 +191,17 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       // Then process one bolt12 offer if any
       for (let i = this.bolt12Quotes.length - 1; i >= 0; i--) {
         const q = this.bolt12Quotes[i];
+        // Check if offer is still valid/needed
+        const invoice = walletStore.invoiceHistory.find(
+          (inv) => inv.quote === q.quote
+        );
+        if (!this.shouldCheckInvoice(invoice)) {
+          this.bolt12Quotes.splice(i, 1);
+          continue;
+        }
+
         const dueTime = this.dueTime(q);
         if (now > dueTime) {
-          const walletStore = useWalletStore();
           try {
             await walletStore.checkOfferAndMintBolt12(q.quote, false);
             // Keep in queue for future payments as offers are reusable, but back off checks
@@ -180,18 +224,9 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       )
         return;
       const walletStore = useWalletStore();
-      const quotesToCheck = walletStore.invoiceHistory.filter((q) => {
-        // Bolt12: check if < 14 days old (maxAge), regardless of status
-        if (q.type === "bolt12") {
-          return Date.now() - Date.parse(q.date) < this.maxAge;
-        }
-        // Bolt11: check if pending and < 1 day old
-        return (
-          q.status === "pending" &&
-          q.amount > 0 &&
-          Date.now() - Date.parse(q.date) < this.oneDay
-        );
-      });
+      const quotesToCheck = walletStore.invoiceHistory.filter((q) =>
+        this.shouldCheckInvoice(q)
+      );
       if (quotesToCheck.length > this.maxQuotesToCheckOnStartup) {
         quotesToCheck.splice(this.maxQuotesToCheckOnStartup);
       }

@@ -40,6 +40,8 @@ if (typeof window !== "undefined") {
 // when attached to the Pinia store (wallet.ts assigns them to actions).
 // Do not convert to arrow functions or `this` will be lost.
 
+import { mintOnPaidGeneric } from "./walletWebsocket";
+
 export async function requestMintBolt11(
   this: any,
   amount: number,
@@ -501,92 +503,12 @@ export async function mintOnPaidBolt11(
   kickOffInvoiceChecker = true,
   hideInvoiceDetailsOnMint = true
 ) {
-  const mintStore = useMintsStore();
-  const settingsStore = useSettingsStore();
-  if (!settingsStore.checkIncomingInvoices) {
-    console.log(
-      "settingsStore.checkIncomingInvoices is disabled, skipping invoice check"
-    );
-    return;
-  }
-  const invoice = this.invoiceHistory.find(
-    (i: InvoiceHistory) => i.quote === quote
-  );
-  if (!invoice) {
-    throw new Error("invoice not found");
-  }
-  const mintWallet = await this.mintWallet(invoice.mint, invoice.unit);
-  const mint = mintStore.mints.find((m: any) => m.url === invoice.mint);
-
-  if (!mint) {
-    throw new Error("mint not found");
-  }
-  // add to checker before we try a websocket
-  if (kickOffInvoiceChecker) {
-    if (useSettingsStore().periodicallyCheckIncomingInvoices) {
-      console.log(`Adding quote ${quote} to long-polling checker.`);
-      useInvoicesWorkerStore().addInvoiceToChecker(quote);
-    } else if (useSettingsStore().checkIncomingInvoices) {
-      console.log(`Adding quote ${quote} to old worker checker.`);
-      useWorkersStore().invoiceCheckWorker(quote);
-    }
-  }
-
-  if (
-    !settingsStore.useWebsockets ||
-    !mint.info?.nuts[17]?.supported ||
-    !mint.info?.nuts[17]?.supported.find(
-      (s: any) =>
-        s.method == "bolt11" &&
-        s.unit == invoice.unit &&
-        s.commands.indexOf("bolt11_mint_quote") != -1
-    )
-  ) {
-    console.log("Websockets not supported.");
-    return;
-  }
-  const uIStore = useUiStore();
-  try {
-    this.activeWebsocketConnections++;
-    uIStore.triggerActivityOrb();
-    const unsub = await mintWallet.onMintQuotePaid(
-      quote,
-      async (mintQuoteResponse: MintQuoteResponse) => {
-        console.log("Websocket: mint quote paid.");
-        let proofs;
-        try {
-          proofs = await this.mintBolt11(invoice, false);
-        } catch (error: any) {
-          console.error(error);
-          // notifyApiError(error);
-          throw error;
-        }
-
-        if (hideInvoiceDetailsOnMint) {
-          uIStore.showInvoiceDetails = false;
-        }
-        useUiStore().vibrate();
-        notifySuccess(
-          this.t("wallet.notifications.received_lightning", {
-            amount: uIStore.formatCurrency(invoice.amount, invoice.unit),
-          })
-        );
-        unsub();
-        return proofs;
-      },
-      async (error: any) => {
-        if (verbose) {
-          notifyApiError(error);
-        }
-        console.log("Invoice still pending", invoice.quote);
-        throw error;
-      }
-    );
-  } catch (error) {
-    console.log("Error in websocket subscription", error);
-  } finally {
-    this.activeWebsocketConnections--;
-  }
+  return await mintOnPaidGeneric.call(this, quote, {
+    type: "bolt11",
+    verbose,
+    kickOffInvoiceChecker,
+    hideInvoiceDetailsOnMint,
+  });
 }
 
 export async function handleBolt11InvoiceBolt11(this: any) {
