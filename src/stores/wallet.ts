@@ -55,6 +55,10 @@ import { wordlist } from "@scure/bip39/wordlists/english";
 import { useSettingsStore } from "./settings";
 import { usePriceStore } from "./price";
 import { useI18n } from "vue-i18n";
+import {
+  isLegacyRetailQR,
+  translateLegacyQRToLightningAddress,
+} from "src/js/legacy-qr";
 // HACK: this is a workaround so that the catch block in the melt function does not throw an error when the user exits the app
 // before the payment is completed. This is necessary because the catch block in the melt function would otherwise remove all
 // quotes from the invoiceHistory and the user would not be able to pay the invoice again after reopening the app.
@@ -1558,6 +1562,20 @@ export const useWalletStore = defineStore("wallet", {
         mintStore.addMintData = { url: req, nickname: "" };
       } else if (req.startsWith("creqA")) {
         await this.handlePaymentRequest(req);
+      } else if (isLegacyRetailQR(req)) {
+        // Try to convert legacy retail QR code (EMV format) to Lightning Address
+        const lightningAddress = translateLegacyQRToLightningAddress(req);
+        if (lightningAddress) {
+          // Process as Lightning Address (LNURL)
+          this.payInvoiceData.input.request = lightningAddress;
+          await this.lnurlPayFirst(lightningAddress);
+        } else {
+          // Not a supported merchant QR code
+          notifyWarning(
+            this.t("wallet.notifications.unsupported_legacy_qr"),
+            this.t("wallet.notifications.legacy_qr_not_supported")
+          );
+        }
       }
       const uiStore = useUiStore();
       uiStore.closeDialogs();

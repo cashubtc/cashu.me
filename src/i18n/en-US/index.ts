@@ -76,6 +76,9 @@ export default {
       received_lightning: "Received {amount} via Lightning",
       lightning_payment_failed: "Lightning payment failed",
       failed_to_decode_invoice: "Failed to decode invoice",
+      unsupported_legacy_qr: "Unsupported Legacy QR code",
+      legacy_qr_not_supported:
+        "This Legacy QR code is not from a supported merchant",
       invalid_lnurl: "Invalid LNURL",
       lnurl_error: "LNURL Error",
       no_amount: "No amount",
