@@ -1313,16 +1313,6 @@ export const useWalletStore = defineStore("wallet", {
       if (!mint) {
         throw new Error("mint not found");
       }
-      // add to checker before we try a websocket
-      if (kickOffInvoiceChecker) {
-        if (useSettingsStore().periodicallyCheckIncomingInvoices) {
-          console.log(`Adding quote ${quote} to long-polling checker.`);
-          useInvoicesWorkerStore().addInvoiceToChecker(quote);
-        } else if (useSettingsStore().checkIncomingInvoices) {
-          console.log(`Adding quote ${quote} to old worker checker.`);
-          useWorkersStore().invoiceCheckWorker(quote);
-        }
-      }
 
       if (
         !settingsStore.useWebsockets ||
@@ -1334,11 +1324,22 @@ export const useWalletStore = defineStore("wallet", {
             s.commands.indexOf("bolt11_mint_quote") != -1
         )
       ) {
-        console.log("Websockets not supported.");
+        console.log("Websockets not supported, kicking off invoice checker.");
+        if (kickOffInvoiceChecker) {
+          if (useSettingsStore().periodicallyCheckIncomingInvoices) {
+            console.log(`Adding quote ${quote} to long-polling checker.`);
+            useInvoicesWorkerStore().addInvoiceToChecker(quote);
+          } else if (useSettingsStore().checkIncomingInvoices) {
+            console.log(`Adding quote ${quote} to old worker checker.`);
+            useWorkersStore().invoiceCheckWorker(quote);
+          }
+        }
         return;
       }
+
       const uIStore = useUiStore();
       try {
+        console.log("mintOnPaid kicking off websocket");
         this.activeWebsocketConnections++;
         uIStore.triggerActivityOrb();
         const unsub = await mintWallet.on.mintQuotePaid(
@@ -1375,7 +1376,17 @@ export const useWalletStore = defineStore("wallet", {
           }
         );
       } catch (error) {
-        console.log("Error in websocket subscription", error);
+        console.error(
+          "Error in websocket subscription. Starting invoice checker.",
+          error
+        );
+        if (kickOffInvoiceChecker) {
+          if (useSettingsStore().periodicallyCheckIncomingInvoices) {
+            useInvoicesWorkerStore().addInvoiceToChecker(quote);
+          } else if (useSettingsStore().checkIncomingInvoices) {
+            useWorkersStore().invoiceCheckWorker(quote);
+          }
+        }
       } finally {
         this.activeWebsocketConnections--;
       }
