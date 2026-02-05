@@ -91,6 +91,10 @@ export const useSettingsStore = defineStore("settings", {
         "cashu.settings.nostrMintBackupEnabled",
         true
       ),
+      maximumNfcAutoPayAmount: useLocalStorage<number>(
+        "cashu.settings.maximumNfcAutoPayAmount",
+        50000
+      ),
     };
   },
 });
