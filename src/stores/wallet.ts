@@ -187,7 +187,7 @@ export const useWalletStore = defineStore("wallet", {
   },
   actions: {
     setMnemonicFromUser: function (mnemonic: string) {
-      this.mnemonic = mnemonic;
+      this.mnemonic = mnemonic.trim().toLowerCase(); // normalize
     },
     async mintWallet(
       url: string,

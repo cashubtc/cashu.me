@@ -803,7 +803,7 @@ export default {
         error: "Failed to read clipboard contents.",
       },
       validate: {
-        error: "Mnemonic should be at least 12 words.",
+        error: "Mnemonic is not a valid BIP39 seed phrase.",
       },
       select_all: {
         label: "Select All",
