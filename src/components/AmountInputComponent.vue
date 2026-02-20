@@ -270,8 +270,8 @@ export default defineComponent({
       return isNaN(num) ? 0 : num;
     },
     numberToFiatBuffer(num: number): string {
-      // keep at most 2 decimals for fiat buffer
-      return (Math.round(num * 100) / 100).toFixed(2).replace(/\.00$/, "");
+      // keep exactly 2 decimals for fiat buffer
+      return (Math.round(num * 100) / 100).toFixed(2);
     },
     initializeKeyHandling(): void {
       // initialize buffer from current value
@@ -316,22 +316,45 @@ export default defineComponent({
       let handled = false;
 
       if (/^[0-9]$/.test(key)) {
-        // If buffer represents zero (0, 0.0, 0.00, etc.), reset completely
-        const bufNum = allowDecimal
-          ? Number(buf.replace(/,/g, "."))
-          : Number(buf);
-        if (bufNum === 0 || isNaN(bufNum)) {
-          buf = key;
+        if (this.fiatMode) {
+          const num = Number(buf.replace(/,/g, "."));
+          const cents = isNaN(num) ? 0 : Math.round(num * 100);
+          let centsStr = cents.toString();
+          if (centsStr === "0") centsStr = "";
+          centsStr += key;
+          const parsed = parseInt(centsStr, 10);
+          const newCents = isNaN(parsed) ? 0 : parsed;
+          buf = (newCents / 100).toFixed(2);
         } else {
-          buf = buf + key;
+          // If buffer represents zero (0, 0.0, 0.00, etc.), reset completely
+          const bufNum = allowDecimal
+            ? Number(buf.replace(/,/g, "."))
+            : Number(buf);
+          if (bufNum === 0 || isNaN(bufNum)) {
+            buf = key;
+          } else {
+            buf = buf + key;
+          }
         }
         handled = true;
       } else if (key === "Backspace" || key === "Delete") {
-        buf = buf.length > 1 ? buf.slice(0, -1) : "0";
+        if (this.fiatMode) {
+          const num = Number(buf.replace(/,/g, "."));
+          const cents = isNaN(num) ? 0 : Math.round(num * 100);
+          let centsStr = cents.toString();
+          centsStr = centsStr.length > 1 ? centsStr.slice(0, -1) : "0";
+          const parsed = parseInt(centsStr, 10);
+          const newCents = isNaN(parsed) ? 0 : parsed;
+          buf = (newCents / 100).toFixed(2);
+        } else {
+          buf = buf.length > 1 ? buf.slice(0, -1) : "0";
+        }
         handled = true;
       } else if ((key === "." || key === ",") && allowDecimal) {
-        if (!buf.includes(".")) {
-          buf = buf + ".";
+        if (!this.fiatMode) {
+          if (!buf.includes(".")) {
+            buf = buf + ".";
+          }
         }
         handled = true;
       } else if (key === "Enter") {
@@ -345,17 +368,24 @@ export default defineComponent({
 
       // sanitize buffer
       if (allowDecimal) {
-        buf = buf.replace(/,/g, ".");
-        buf = buf.replace(/[^\d.]/g, "").replace(/^(\d*\.\d*).*$/, "$1");
-        if (buf.includes(".")) {
-          const parts = buf.split(".");
-          const decimals = parts[1] ?? "";
-          buf = parts[0] + "." + decimals.slice(0, 2);
+        if (!this.fiatMode) {
+          buf = buf.replace(/,/g, ".");
+          buf = buf.replace(/[^\d.]/g, "").replace(/^(\d*\.\d*).*$/, "$1");
+          if (buf.includes(".")) {
+            const parts = buf.split(".");
+            const decimals = parts[1] ?? "";
+            buf = parts[0] + "." + decimals.slice(0, 2);
+          }
         }
       } else {
         buf = buf.replace(/[^\d]/g, "");
       }
-      if (buf.startsWith("0") && buf.length > 1 && buf[1] !== ".") {
+      if (
+        !this.fiatMode &&
+        buf.startsWith("0") &&
+        buf.length > 1 &&
+        buf[1] !== "."
+      ) {
         buf = String(parseInt(buf, 10) || 0);
       }
       if (this.fiatMode) {
