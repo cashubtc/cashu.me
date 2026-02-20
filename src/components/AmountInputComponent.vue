@@ -187,7 +187,7 @@ export default defineComponent({
         const isFiatInput =
           this.fiatMode || this.activeUnitCurrencyMultiplyer === 100;
         this.amountEditBuffer = isFiatInput
-          ? clampedVal.toFixed(2)
+          ? Number(clampedVal).toFixed(2)
           : String(clampedVal);
         if (this.fiatMode) {
           // keep fiat buffer in sync with clamped sat value
@@ -206,7 +206,7 @@ export default defineComponent({
         const isFiatInput =
           this.fiatMode || this.activeUnitCurrencyMultiplyer === 100;
         this.amountEditBuffer = isFiatInput
-          ? newVal.toFixed(2)
+          ? Number(newVal).toFixed(2)
           : String(newVal);
       }
     },
@@ -289,7 +289,7 @@ export default defineComponent({
         this.amountEditBuffer = isFiatInput ? "0.00" : "0";
       } else {
         this.amountEditBuffer = isFiatInput
-          ? this.modelValue.toFixed(2)
+          ? Number(this.modelValue).toFixed(2)
           : String(this.modelValue);
       }
       if (this.currentCurrencyPrice && this.activeUnit === "sat") {
