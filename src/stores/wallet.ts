@@ -1344,6 +1344,22 @@ export const useWalletStore = defineStore("wallet", {
       }
 
       const uIStore = useUiStore();
+      const receivedViaWebsocket = { current: false };
+      const WEBSOCKET_FALLBACK_DELAY_MS = 45000;
+
+      const fallbackTimer = setTimeout(() => {
+        if (receivedViaWebsocket.current) return;
+        if (!kickOffInvoiceChecker) return;
+        console.log(
+          `Websocket fallback: no update after ${WEBSOCKET_FALLBACK_DELAY_MS / 1000}s, adding quote to polling.`
+        );
+        if (useSettingsStore().periodicallyCheckIncomingInvoices) {
+          useInvoicesWorkerStore().addInvoiceToChecker(quote);
+        } else if (useSettingsStore().checkIncomingInvoices) {
+          useWorkersStore().invoiceCheckWorker(quote);
+        }
+      }, WEBSOCKET_FALLBACK_DELAY_MS);
+
       try {
         console.log("mintOnPaid kicking off websocket");
         this.activeWebsocketConnections++;
@@ -1351,6 +1367,8 @@ export const useWalletStore = defineStore("wallet", {
         const unsub = await mintWallet.onMintQuotePaid(
           quote,
           async (mintQuoteResponse: MintQuoteResponse) => {
+            receivedViaWebsocket.current = true;
+            clearTimeout(fallbackTimer);
             console.log("Websocket: mint quote paid.");
             let proofs;
             try {
@@ -1382,6 +1400,7 @@ export const useWalletStore = defineStore("wallet", {
           }
         );
       } catch (error) {
+        clearTimeout(fallbackTimer);
         console.error(
           "Error in websocket subscription. Starting invoice checker.",
           error
