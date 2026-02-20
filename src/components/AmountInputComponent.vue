@@ -184,7 +184,11 @@ export default defineComponent({
       }
       if (clampedVal !== newVal) {
         this.$emit("update:modelValue", clampedVal);
-        this.amountEditBuffer = String(clampedVal);
+        const isFiatInput =
+          this.fiatMode || this.activeUnitCurrencyMultiplyer === 100;
+        this.amountEditBuffer = isFiatInput
+          ? clampedVal.toFixed(2)
+          : String(clampedVal);
         if (this.fiatMode) {
           // keep fiat buffer in sync with clamped sat value
           const fiat = this.fiatFromSats(clampedVal);
@@ -199,7 +203,11 @@ export default defineComponent({
         const fiat = this.fiatFromSats(newVal);
         this.fiatEditBuffer = this.numberToFiatBuffer(fiat);
       } else {
-        this.amountEditBuffer = String(newVal);
+        const isFiatInput =
+          this.fiatMode || this.activeUnitCurrencyMultiplyer === 100;
+        this.amountEditBuffer = isFiatInput
+          ? newVal.toFixed(2)
+          : String(newVal);
       }
     },
     enabled(val: boolean) {
@@ -274,9 +282,16 @@ export default defineComponent({
       return (Math.round(num * 100) / 100).toFixed(2);
     },
     initializeKeyHandling(): void {
+      const isFiatInput =
+        this.fiatMode || this.activeUnitCurrencyMultiplyer === 100;
       // initialize buffer from current value
-      this.amountEditBuffer =
-        this.modelValue == null ? "0" : String(this.modelValue);
+      if (this.modelValue == null) {
+        this.amountEditBuffer = isFiatInput ? "0.00" : "0";
+      } else {
+        this.amountEditBuffer = isFiatInput
+          ? this.modelValue.toFixed(2)
+          : String(this.modelValue);
+      }
       if (this.currentCurrencyPrice && this.activeUnit === "sat") {
         const fiat = this.fiatFromSats(this.modelValue || 0);
         this.fiatEditBuffer = this.numberToFiatBuffer(fiat);
@@ -307,6 +322,8 @@ export default defineComponent({
       const allowDecimal = this.fiatMode
         ? true
         : this.activeUnit !== "sat" && this.activeUnit !== "msat";
+      const isFiatInput =
+        this.fiatMode || this.activeUnitCurrencyMultiplyer === 100;
       const key = (e as KeyboardEvent).key;
       let buf = this.fiatMode
         ? this.fiatEditBuffer ||
@@ -316,7 +333,7 @@ export default defineComponent({
       let handled = false;
 
       if (/^[0-9]$/.test(key)) {
-        if (this.fiatMode) {
+        if (isFiatInput) {
           const num = Number(buf.replace(/,/g, "."));
           const cents = isNaN(num) ? 0 : Math.round(num * 100);
           let centsStr = cents.toString();
@@ -338,7 +355,7 @@ export default defineComponent({
         }
         handled = true;
       } else if (key === "Backspace" || key === "Delete") {
-        if (this.fiatMode) {
+        if (isFiatInput) {
           const num = Number(buf.replace(/,/g, "."));
           const cents = isNaN(num) ? 0 : Math.round(num * 100);
           let centsStr = cents.toString();
@@ -351,7 +368,7 @@ export default defineComponent({
         }
         handled = true;
       } else if ((key === "." || key === ",") && allowDecimal) {
-        if (!this.fiatMode) {
+        if (!isFiatInput) {
           if (!buf.includes(".")) {
             buf = buf + ".";
           }
@@ -368,7 +385,7 @@ export default defineComponent({
 
       // sanitize buffer
       if (allowDecimal) {
-        if (!this.fiatMode) {
+        if (!isFiatInput) {
           buf = buf.replace(/,/g, ".");
           buf = buf.replace(/[^\d.]/g, "").replace(/^(\d*\.\d*).*$/, "$1");
           if (buf.includes(".")) {
@@ -381,7 +398,7 @@ export default defineComponent({
         buf = buf.replace(/[^\d]/g, "");
       }
       if (
-        !this.fiatMode &&
+        !isFiatInput &&
         buf.startsWith("0") &&
         buf.length > 1 &&
         buf[1] !== "."
@@ -436,13 +453,19 @@ export default defineComponent({
             // Apply min/max constraints
             if (this.minAmount != null && num < this.minAmount) {
               num = this.minAmount;
-              this.amountEditBuffer = String(this.minAmount);
+              this.amountEditBuffer = isFiatInput
+                ? num.toFixed(2)
+                : String(this.minAmount);
             } else if (this.maxAmount != null && num > this.maxAmount) {
               num = this.maxAmount;
-              this.amountEditBuffer = String(this.maxAmount);
+              this.amountEditBuffer = isFiatInput
+                ? num.toFixed(2)
+                : String(this.maxAmount);
             } else if (num > MAX_AMOUNT) {
               num = MAX_AMOUNT;
-              this.amountEditBuffer = String(MAX_AMOUNT);
+              this.amountEditBuffer = isFiatInput
+                ? num.toFixed(2)
+                : String(MAX_AMOUNT);
             }
             this.$emit("update:modelValue", num);
           }
