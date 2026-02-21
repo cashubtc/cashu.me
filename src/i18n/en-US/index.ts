@@ -799,7 +799,11 @@ export default {
         'Select the mint to restore. You can add more mints in the main screen under "Mints" and restore them here.',
     },
     actions: {
+      scan_all: {
+        label: "Scan all mints for Ecash",
+      },
       paste: {
+        label: "Paste",
         error: "Failed to read clipboard contents.",
       },
       validate: {
@@ -829,11 +833,27 @@ export default {
         error: "Error restoring selected mints: { error }",
       },
     },
+    mints_to_scan: {
+      label: "Mints to Scan",
+      description:
+        "We'll automatically scan all your connected mints for ecash linked to this seed phrase.",
+    },
+    connected_mints: {
+      label: "Connected Mints",
+    },
+    empty_state: {
+      description:
+        "Use Nostr discovery above to find your mints automatically, or add a mint manually if you know the URL.",
+      add_by_url: "Add mint by URL",
+    },
     nostr_mints: {
       label: "Restore Mints from Nostr",
       caption:
         "Search for mint backups stored on Nostr relays using your seed phrase. This will help you discover mints you previously used.",
       search_button: "Search for Mint Backups",
+      find_title: "Find Mints via Nostr",
+      find_subtitle:
+        "Don't remember which mints you used? We can search Nostr relays to find them automatically.",
       select_all: "Select All",
       deselect_all: "Deselect All",
       backed_up: "Backed up",

@@ -1,61 +1,83 @@
 <template>
-  <div v-if="!autoAdd" class="nostr-mint-restore">
-    <!-- Header -->
-    <div class="q-px-xs text-left q-mt-lg">
-      <q-list padding>
-        <q-item>
-          <q-item-section>
-            <q-item-label
-              overline
-              class="text-weight-bold"
-              style="
-                font-size: 15.2px;
-                font-family: Inter, -apple-system, 'system-ui', 'Segoe UI',
-                  Roboto, 'Helvetica Neue', Arial, sans-serif;
-                font-weight: 600;
-                color: #ffffff;
-                text-transform: none;
-                margin-bottom: 8px;
-              "
-            >
-              {{ $t("RestoreView.nostr_mints.label") }}
-            </q-item-label>
-            <q-item-label
-              caption
-              style="
-                font-size: 0.9rem;
-                color: rgba(255, 255, 255, 0.8);
-                line-height: 1.4;
-              "
-            >
-              {{ $t("RestoreView.nostr_mints.caption") }}
-            </q-item-label>
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </div>
-
-    <!-- Search Button -->
-    <div class="q-pb-lg q-pt-md q-px-xs text-left">
-      <q-btn
-        class="full-width"
-        color="primary"
-        size="lg"
-        rounded
-        @click="searchForMints"
-        :disabled="!isMnemonicValid || searchInProgress"
-        :loading="searchInProgress"
-        style="
-          min-height: 48px;
-          font-weight: 500;
-          text-transform: none;
-          font-size: 0.95rem;
-        "
+  <div v-if="!autoAdd" :class="{ 'nostr-mint-restore': !inlineMode }">
+    <!-- Inline mode: compact card -->
+    <template v-if="inlineMode">
+      <div
+        class="nostr-find-card"
+        :class="{ 'nostr-find-card--loading': searchInProgress }"
+        @click="!searchInProgress && isMnemonicValid && searchForMints()"
+        :style="{ opacity: !isMnemonicValid ? 0.5 : 1, cursor: !isMnemonicValid ? 'default' : 'pointer' }"
       >
-        <q-icon name="search" size="20px" class="q-mr-sm" />
-        {{ $t("RestoreView.nostr_mints.search_button") }}
-      </q-btn>
-    </div>
+        <div class="nostr-find-content">
+          <q-icon v-if="!searchInProgress" name="search" size="20px" color="white" class="q-mr-sm" style="margin-top: 2px; flex-shrink: 0;" />
+          <q-spinner v-else size="20px" color="white" class="q-mr-sm" style="margin-top: 2px; flex-shrink: 0;" />
+          <div>
+            <div class="nostr-find-title">{{ $t("RestoreView.nostr_mints.find_title") }}</div>
+            <div class="nostr-find-subtitle">{{ $t("RestoreView.nostr_mints.find_subtitle") }}</div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- Standard mode: full header + search button -->
+    <template v-else>
+      <!-- Header -->
+      <div class="q-px-xs text-left q-mt-lg">
+        <q-list padding>
+          <q-item>
+            <q-item-section>
+              <q-item-label
+                overline
+                class="text-weight-bold"
+                style="
+                  font-size: 15.2px;
+                  font-family: Inter, -apple-system, 'system-ui', 'Segoe UI',
+                    Roboto, 'Helvetica Neue', Arial, sans-serif;
+                  font-weight: 600;
+                  color: #ffffff;
+                  text-transform: none;
+                  margin-bottom: 8px;
+                "
+              >
+                {{ $t("RestoreView.nostr_mints.label") }}
+              </q-item-label>
+              <q-item-label
+                caption
+                style="
+                  font-size: 0.9rem;
+                  color: rgba(255, 255, 255, 0.8);
+                  line-height: 1.4;
+                "
+              >
+                {{ $t("RestoreView.nostr_mints.caption") }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </div>
+
+      <!-- Search Button -->
+      <div class="q-pb-lg q-pt-md q-px-xs text-left">
+        <q-btn
+          class="full-width"
+          color="primary"
+          size="lg"
+          rounded
+          @click="searchForMints"
+          :disabled="!isMnemonicValid || searchInProgress"
+          :loading="searchInProgress"
+          style="
+            min-height: 48px;
+            font-weight: 500;
+            text-transform: none;
+            font-size: 0.95rem;
+          "
+        >
+          <q-icon name="search" size="20px" class="q-mr-sm" />
+          {{ $t("RestoreView.nostr_mints.search_button") }}
+        </q-btn>
+      </div>
+    </template>
 
     <!-- Discovered Mints List -->
     <div v-if="availableMints.length > 0" class="q-px-xs">
@@ -252,6 +274,11 @@ export default defineComponent({
     // If true, component renders no UI, starts searching immediately
     // and auto-adds discovered mints to the wallet.
     autoAdd: {
+      type: Boolean,
+      default: false,
+    },
+    // If true, renders as a compact inline card instead of a full section.
+    inlineMode: {
       type: Boolean,
       default: false,
     },
@@ -522,5 +549,42 @@ export default defineComponent({
 /* Ensure all text aligns to the left */
 .text-left {
   text-align: left !important;
+}
+
+/* Inline mode: compact card */
+.nostr-find-card {
+  border: 1px solid var(--q-primary);
+  border-radius: 8px;
+  padding: 19px 21px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.nostr-find-card:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.nostr-find-card--loading {
+  opacity: 0.8;
+  cursor: wait;
+}
+
+.nostr-find-content {
+  display: flex;
+  align-items: flex-start;
+}
+
+.nostr-find-title {
+  color: white;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.3;
+}
+
+.nostr-find-subtitle {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+  line-height: 21px;
+  margin-top: 4px;
 }
 </style>
