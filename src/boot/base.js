@@ -1,6 +1,7 @@
 import { copyToClipboard } from "quasar";
 import { useUiStore } from "stores/ui";
 import { Clipboard } from "@capacitor/clipboard";
+import { StatusBar, Style } from "@capacitor/status-bar";
 import { SafeArea } from "capacitor-plugin-safe-area";
 import { useSettingsStore } from "stores/settings";
 window.LOCALE = "en";
@@ -342,6 +343,15 @@ window.windowMixin = {
     const language = this.$q.localStorage.getItem("cashu.language");
     if (language) {
       this.$i18n.locale = language;
+    }
+
+    // Hide status bar for native Capacitor apps (Android & iOS)
+    if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+      try {
+        StatusBar.hide();
+      } catch (error) {
+        console.log("StatusBar.hide() not available:", error);
+      }
     }
 
     // only for iOS
