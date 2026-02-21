@@ -3,7 +3,7 @@ import { useLocalStorage } from "@vueuse/core";
 import { generateSecretKey, getPublicKey } from "nostr-tools";
 import { bytesToHex } from "@noble/hashes/utils"; // already an installed dependency
 import { useWalletStore } from "./wallet";
-import { CashuMint, CashuWallet, CheckStateEnum, Proof } from "@cashu/cashu-ts";
+import { Mint, Wallet, CheckStateEnum, Proof } from "@cashu/cashu-ts";
 import { useMintsStore } from "./mints";
 import { notify, notifyError, notifySuccess } from "src/js/notify";
 import { useUiStore } from "./ui";
@@ -62,7 +62,7 @@ export const useRestoreStore = defineStore("restore", {
 
       const mnemonic = this.mnemonicToRestore;
       this.restoreStatus = i18n.global.t("restore.prepare_info_text");
-      const mint = new CashuMint(url);
+      const mint = new Mint(url);
       const keysets = (await mint.getKeySets()).keysets;
       let restoredSomething = false;
 
@@ -73,10 +73,11 @@ export const useRestoreStore = defineStore("restore", {
       for (const keyset of keysets) {
         console.log(`Restoring keyset ${keyset.id} with unit ${keyset.unit}`);
         const bip39Seed = walletStore.mnemonicToSeedSync(mnemonic);
-        const wallet = new CashuWallet(mint, {
+        const wallet = new Wallet(mint, {
           bip39seed: bip39Seed,
           unit: keyset.unit,
         });
+        await wallet.loadMint();
         let start = 0;
         let emptyBatchCount = 0;
         let restoreProofs: Proof[] = [];

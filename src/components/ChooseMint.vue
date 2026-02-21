@@ -169,7 +169,7 @@ import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "stores/mints";
 import { MintClass } from "stores/mints";
-import type { Mint } from "stores/mints";
+import type { StoredMint } from "stores/mints";
 import { useUiStore } from "stores/ui";
 import { i18n } from "../boot/i18n";
 
@@ -335,7 +335,7 @@ export default defineComponent({
     chooseMintOptions: function () {
       const options: MintOption[] = [];
       const availableMints = Array.isArray(this.mints)
-        ? (this.mints as Mint[])
+        ? (this.mints as StoredMint[])
         : [];
       for (const mintData of availableMints) {
         const all_units = mintData.keysets.map((r) => r.unit);

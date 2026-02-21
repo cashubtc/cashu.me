@@ -363,7 +363,11 @@ export default defineComponent({
     //       this.activeProofs,
     //       this.sendData.amount * this.activeUnitCurrencyMultiplyer
     //     );
-    //     const mintWallet = useWalletStore().wallet;
+    //     const mints = useMintsStore() as any;
+    //     const mintWallet = this.mintWalletSync(
+    //       mints.activeMintUrl,
+    //       mints.activeUnit
+    //     );
     //     let selectedProofs = this.coinSelect(
     //       spendableProofs,
     //       mintWallet,

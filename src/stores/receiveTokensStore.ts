@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { Mint, useMintsStore } from "./mints";
+import { StoredMint, useMintsStore } from "./mints";
 import { useUiStore } from "./ui";
 import { useP2PKStore } from "./p2pk";
 import { useWalletStore } from "./wallet";
@@ -85,7 +85,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
         return false;
       }
     },
-    meltTokenToMint: async function (encodedToken: string, mint: Mint) {
+    meltTokenToMint: async function (encodedToken: string, mint: StoredMint) {
       const receiveStore = useReceiveTokensStore();
       const mintStore = useMintsStore();
       const uiStore = useUiStore();
