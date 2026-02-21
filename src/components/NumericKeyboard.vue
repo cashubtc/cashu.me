@@ -20,10 +20,7 @@
         <q-btn flat class="text-h5" @click="addDigit('8')">8</q-btn>
         <q-btn flat class="text-h5" @click="addDigit('9')">9</q-btn>
 
-        <q-btn v-if="!hideComma" flat class="text-h5" @click="addComma"
-          >.</q-btn
-        >
-        <q-btn v-else flat class="text-h5 invisible" disable>•</q-btn>
+        <q-btn flat class="text-h5 invisible" disable>•</q-btn>
         <q-btn flat class="text-h5" @click="addDigit('0')">0</q-btn>
         <q-btn flat class="text-h5" @click="backspace">
           <q-icon name="chevron_left" size="md" />
@@ -66,25 +63,16 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    hideComma: {
-      type: Boolean,
-      default: false,
-    },
   },
   emits: ["update:modelValue", "done"],
   data() {
     return {
-      // Decimal handling for fiat-style input (when hideComma === false)
-      hasDecimal: false as boolean,
-      decimalDigits: 0 as number, // 0..2
+      // Decimal handling for fiat-style input
     };
   },
   computed: {
     ...mapWritableState(useUiStore, ["showNumericKeyboard"]),
     ...mapWritableState(useSettingsStore, ["useNumericKeyboard"]),
-    isIntegerCurrency(): boolean {
-      return this.hideComma;
-    },
   },
   methods: {
     sendKey(key: string) {
@@ -96,10 +84,6 @@ export default defineComponent({
     },
     backspace() {
       this.sendKey("Backspace");
-    },
-    addComma() {
-      if (this.isIntegerCurrency) return;
-      this.sendKey(".");
     },
     closeKeyboard() {
       (this as any).useNumericKeyboard = false;
