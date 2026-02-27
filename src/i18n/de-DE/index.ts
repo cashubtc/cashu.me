@@ -716,7 +716,10 @@ export default {
     title: "Seed-Phrase eingeben",
     text: "Fügen Sie Ihre 12 Wörter ein oder tippen Sie sie ein, um wiederherzustellen.",
     inputs: { word: "Wort { index }" },
-    actions: { paste_all: "Alle einfügen" },
+    actions: {
+      paste_all: "Alle einfügen",
+      use_password_manager: "Passwort-Manager verwenden",
+    },
     disclaimer:
       "Ihre Seed-Phrase wird nur lokal verwendet, um Ihre Wallet-Schlüssel abzuleiten.",
   },
