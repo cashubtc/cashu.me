@@ -832,7 +832,7 @@ export default {
     nostr_mints: {
       label: "Restaurar Mints do Nostr",
       caption:
-        "Busque backups de mints armazenados nos relays Nostr usando sua frase de recuperação. Isso ajudará você a descobrir mints que usou anteriormente.",
+        "Busque backups de mints armazenados nos relays Nostr usando sua frase de recuperação. Isso ajudará você a buscar os mints que usou anteriormente.",
       search_button: "Buscar Backups de Mints",
       select_all: "Selecionar Todos",
       deselect_all: "Desselecionar Todos",
@@ -868,12 +868,12 @@ export default {
       },
     },
     discover: {
-      title: "Descobrir mints",
-      overline: "Descobrir",
+      title: "Buscar mints",
+      overline: "Buscar",
       caption: "Descubra mints que outros usuários recomendaram no Nostr.",
       actions: {
         discover: {
-          label: "Descobrir mints",
+          label: "Buscar mints",
           in_progress: "Carregando…",
           error_no_mints: "Nenhum mint encontrado",
           success: "Encontrado(s) { length } mint(s)",
@@ -919,7 +919,7 @@ export default {
     error_badge: "Erro",
     reviews_text: "avaliações",
     no_reviews_yet: "Ainda sem avaliações",
-    discover_mints_button: "Descobrir mints",
+    discover_mints_button: "Buscar mints",
   },
   QrcodeReader: {
     progress: {
