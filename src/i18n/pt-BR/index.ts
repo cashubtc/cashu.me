@@ -38,7 +38,7 @@ export default {
         label: "Pagar",
       },
       swap: {
-        label: "Trocar",
+        label: "Swap",
       },
       update: {
         label: "Atualizar",
@@ -364,10 +364,10 @@ export default {
       title: "Experimental",
       description: "Estes recursos são experimentais.",
       receive_swaps: {
-        toggle: "Receber trocas",
+        toggle: "Receber swaps",
         badge: "Beta",
         description:
-          "Opção para trocar ecash recebido para o seu mint ativo no diálogo Receber Ecash.",
+          "Opção para fazer swap do ecash recebido para o seu mint ativo no diálogo Receber Ecash.",
       },
       auto_paste: {
         toggle: "Colar ecash automaticamente",
@@ -891,8 +891,8 @@ export default {
       },
     },
     swap: {
-      title: "Trocar",
-      overline: "Trocas Multi-mint",
+      title: "Swap",
+      overline: "Swap Multi-mint",
       actions: {
         receove_to_trusted_mint: {
           label: "Receber para mint confiável",
@@ -903,7 +903,7 @@ export default {
         },
       },
       caption:
-        "Troque fundos entre mints via Lightning. Nota: Deixe margem para possíveis taxas Lightning. Se o pagamento recebido não for bem-sucedido, verifique a fatura manualmente.",
+        "Faça swap de fundos entre mints via Lightning. Nota: Deixe margem para possíveis taxas Lightning. Se o pagamento recebido não for bem-sucedido, verifique a fatura manualmente.",
       inputs: {
         from: {
           label: "De",
@@ -1117,10 +1117,10 @@ export default {
     unknown_mint_info_text:
       "Mint desconhecido. Será adicionado após você receber este token.",
     swap_section: {
-      title: "Trocar",
+      title: "Swap",
       source_label: "De",
       destination_label: "Para",
-      fee_info: "Esta troca incorrerá em taxas da rede Lightning.",
+      fee_info: "Este swap incorrerá em taxas da rede Lightning.",
     },
     actions: {
       paste: {
@@ -1139,14 +1139,14 @@ export default {
       },
       swap: {
         label: "Receber para mint confiável",
-        tooltip_text: "Trocar para um mint confiável",
-        caption: "Trocar { value }",
-        processing: "Processando troca...",
-        failed: "Troca falhou",
+        tooltip_text: "Swap para um mint confiável",
+        caption: "Swap { value }",
+        processing: "Processando swap...",
+        failed: "Swap falhou",
       },
       cancel_swap: {
         label: "@:global.actions.cancel.label",
-        tooltip_text: "Cancelar troca",
+        tooltip_text: "Cancelar swap",
       },
       confirm_swap: {
         label: "@:ReceiveTokenDialog.actions.swap.label",
@@ -1499,9 +1499,9 @@ export default {
     restored_amount_success_text: "Restaurado { amount }",
   },
   swap: {
-    in_progress_warning_text: "Troca em andamento",
-    invalid_swap_data_error_text: "Dados de troca inválidos",
-    swap_error_text: "Erro na troca",
+    in_progress_warning_text: "Swap em andamento",
+    invalid_swap_data_error_text: "Dados de swap inválidos",
+    swap_error_text: "Erro no swap",
   },
   TokenInformation: {
     fee: "Taxa",
