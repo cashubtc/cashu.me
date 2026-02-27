@@ -428,7 +428,7 @@ export default {
       },
     },
     web_of_trust: {
-      title: "Teia de confiança",
+      title: "Rede de confiança",
       known_pubkeys: "Chaves públicas conhecidas: {wotCount}",
       continue_crawl: "Continuar varredura",
       crawl_odell: "Varrer a TEIA DE CONFIANÇA DO ODELL",
