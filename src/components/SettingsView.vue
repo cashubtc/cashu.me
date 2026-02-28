@@ -1929,6 +1929,7 @@ export default defineComponent({
         { label: "Deutsch", value: "de-DE" },
         { label: "Français", value: "fr-FR" },
         { label: "Čeština", value: "cs-CZ" },
+        { label: "Português (Brasil)", value: "pt-BR" },
         { label: "Svenska", value: "sv-SE" },
         { label: "Ελληνικά", value: "el-GR" },
         { label: "Türkçe", value: "tr-TR" },
