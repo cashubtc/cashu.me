@@ -499,7 +499,7 @@ export default {
         export_wallet: {
           button: "Exportar datos de la billetera",
           description:
-            "Descarga un volcado de tu billetera. Puedes restaurar tu billetera desde este archivo en la pantalla de bienvenida de una nueva billetera. Este archivo estará desactualizado si sigues usando tu billetera después de exportarlo.",
+            "Descarga un volcado de tu billetera. Puedes restaurar tu billetera arrastrando y soltando este archivo en la pantalla de bienvenida de una nueva billetera. Este archivo estará desactualizado si sigues usando tu billetera después de exportarlo.",
         },
       },
     },

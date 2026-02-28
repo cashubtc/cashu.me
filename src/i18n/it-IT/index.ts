@@ -469,7 +469,7 @@ export default {
         export_wallet: {
           button: "Esporta dati portafoglio",
           description:
-            "Scarica un dump del tuo portafoglio. Puoi ripristinare il tuo portafoglio da questo file nella schermata di benvenuto di un nuovo portafoglio. Questo file non sarà sincronizzato se continui a usare il tuo portafoglio dopo averlo esportato.",
+            "Scarica un dump del tuo portafoglio. Puoi ripristinare il tuo portafoglio trascinando e rilasciando questo file nella schermata di benvenuto di un nuovo portafoglio. Questo file non sarà sincronizzato se continui a usare il tuo portafoglio dopo averlo esportato.",
         },
       },
     },

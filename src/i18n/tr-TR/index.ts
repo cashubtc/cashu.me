@@ -485,7 +485,7 @@ export default {
         export_wallet: {
           button: "Cüzdan verilerini dışa aktar",
           description:
-            "Cüzdanınızın bir dökümünü indirin. Yeni bir cüzdanın karşılama ekranından bu dosyadan cüzdanınızı geri yükleyebilirsiniz. Bu dosya, dışa aktardıktan sonra cüzdanınızı kullanmaya devam ederseniz senkronize olmayacaktır.",
+            "Cüzdanınızın bir dökümünü indirin. Bu dosyayı yeni bir cüzdanın karşılama ekranına sürükleyip bırakarak cüzdanınızı geri yükleyebilirsiniz. Bu dosya, dışa aktardıktan sonra cüzdanınızı kullanmaya devam ederseniz senkronize olmayacaktır.",
         },
       },
     },
