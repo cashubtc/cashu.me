@@ -91,10 +91,6 @@ type KeysetCounter = {
   counter: number;
 };
 
-const receiveStore = useReceiveTokensStore();
-const tokenStore = useTokensStore();
-const proofsStore = useProofsStore();
-
 export const useWalletStore = defineStore("wallet", {
   state: () => {
     const { t } = useI18n();
@@ -530,6 +526,7 @@ export const useWalletStore = defineStore("wallet", {
       const uIStore = useUiStore();
       const mintStore = useMintsStore();
       const p2pkStore = useP2PKStore();
+      const receiveStore = useReceiveTokensStore();
       const wasReceiveDialogVisible = receiveStore.showReceiveTokens;
 
       if (receiveStore.receiveData.tokensBase64.length == 0) {
@@ -567,6 +564,8 @@ export const useWalletStore = defineStore("wallet", {
       await uIStore.lockMutex();
       try {
         // redeem
+        const proofsStore = useProofsStore();
+        const tokenStore = useTokensStore();
         const keysetId = this.getKeyset(historyToken.mint, historyToken.unit);
         const counter = this.keysetCounter(keysetId);
         const privkey = receiveStore.receiveData.p2pkPrivateKey;
@@ -879,6 +878,7 @@ export const useWalletStore = defineStore("wallet", {
         // this way, in case the user exits the app before meltProofs is completed, the returned change outputs won't cause a "outputs already signed" error
         // if the payment fails, we decrease the counter again
         this.increaseKeysetCounter(keysetId, sendProofs.length);
+        keysetCounterIncrease += sendProofs.length;
         if (quote.fee_reserve > 0) {
           countChangeOutputs = Math.ceil(Math.log2(quote.fee_reserve)) || 1;
           this.increaseKeysetCounter(keysetId, countChangeOutputs);
@@ -1179,6 +1179,7 @@ export const useWalletStore = defineStore("wallet", {
       if (!mint) {
         throw new Error("mint not found");
       }
+      const proofsStore = useProofsStore();
       const proofs: Proof[] = await proofsStore.getProofsForQuote(quote);
       try {
         // this is an outgoing invoice, we first do a getMintQuote to check if the invoice is paid
@@ -1504,6 +1505,7 @@ export const useWalletStore = defineStore("wallet", {
       await this.meltQuoteInvoiceData();
     },
     handleCashuToken: function () {
+      const receiveStore = useReceiveTokensStore();
       this.payInvoiceData.show = false;
       receiveStore.showReceiveTokens = true;
     },
@@ -1548,10 +1550,12 @@ export const useWalletStore = defineStore("wallet", {
         await this.lnurlPayFirst(this.payInvoiceData.input.request);
       } else if (req.startsWith("cashuA") || req.startsWith("cashuB")) {
         // parse cashu tokens from a pasted token
+        const receiveStore = useReceiveTokensStore();
         receiveStore.receiveData.tokensBase64 = req;
         this.handleCashuToken();
       } else if (req.indexOf("token=cashu") !== -1) {
         // parse cashu tokens from a URL like https://example.com#token=cashu...
+        const receiveStore = useReceiveTokensStore();
         const token = req.slice(req.indexOf("token=cashu") + 6);
         receiveStore.receiveData.tokensBase64 = token;
         this.handleCashuToken();
