@@ -3,6 +3,7 @@ import { useUiStore } from "stores/ui";
 import { Clipboard } from "@capacitor/clipboard";
 import { SafeArea } from "capacitor-plugin-safe-area";
 import { useSettingsStore } from "stores/settings";
+import { getCurrencyExponent } from "stores/iso4217";
 window.LOCALE = "en";
 // window.EventHub = new Vue();
 
@@ -147,8 +148,10 @@ window.windowMixin = {
       }
       if (currency == "sat") return this.formatSat(value);
       if (currency == "msat") return this.fromMsat(value);
-      if (currency == "usd") value = value / 100;
-      if (currency == "eur") value = value / 100;
+      const exponent = getCurrencyExponent(currency);
+      if (exponent !== undefined) {
+        value = value / Math.pow(10, exponent);
+      }
       return new Intl.NumberFormat(window.LOCALE, {
         style: "currency",
         currency: currency,
