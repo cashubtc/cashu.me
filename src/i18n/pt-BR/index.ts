@@ -70,7 +70,8 @@ export default {
       could_not_request_mint: "Não foi possível solicitar ao mint",
       invoice_still_pending: "Fatura ainda pendente",
       paid_lightning: "Pago {amount} via Lightning",
-      payment_pending_refresh: "Pagamento pendente. Atualize a fatura manualmente.",
+      payment_pending_refresh:
+        "Pagamento pendente. Atualize a fatura manualmente.",
       sent: "Enviado {amount}",
       token_still_pending: "Token ainda pendente",
       received_lightning: "Recebido {amount} via Lightning",
@@ -172,7 +173,8 @@ export default {
   Settings: {
     language: {
       title: "Idioma",
-      description: "Por favor, escolha o idioma de sua preferência na lista abaixo.",
+      description:
+        "Por favor, escolha o idioma de sua preferência na lista abaixo.",
     },
     sections: {
       backup_restore: "BACKUP E RESTAURAÇÃO",
@@ -242,7 +244,8 @@ export default {
         "Suas chaves Nostr serão usadas para determinar seu endereço Lightning.",
       wallet_seed: {
         title: "Frase de recuperação da carteira",
-        description: "Gerar par de chaves Nostr a partir da frase de recuperação",
+        description:
+          "Gerar par de chaves Nostr a partir da frase de recuperação",
         copy_nsec: "Copiar nsec",
       },
       nsec_bunker: {
@@ -273,7 +276,8 @@ export default {
     },
     nostr_wallet_connect: {
       title: "Nostr Wallet Connect (NWC)",
-      description: "Use NWC para controlar sua carteira a partir de qualquer outro aplicativo.",
+      description:
+        "Use NWC para controlar sua carteira a partir de qualquer outro aplicativo.",
       enable_toggle: "Ativar NWC",
       payments_note:
         "Você só pode usar NWC para pagamentos do seu saldo em Bitcoin. Os pagamentos serão feitos a partir do seu mint ativo.",
@@ -356,7 +360,8 @@ export default {
           "Se ativado, a taxa de câmbio atual do Bitcoin será obtida de coinbase.com e seu saldo convertido será exibido.",
         currency: {
           title: "Moeda Fiduciária",
-          description: "Escolha a moeda fiduciária para exibição do preço do Bitcoin.",
+          description:
+            "Escolha a moeda fiduciária para exibição do preço do Bitcoin.",
         },
       },
     },
@@ -494,7 +499,8 @@ export default {
           button: "Redefinir dados da carteira",
           description:
             "Redefina os dados da sua carteira. Aviso: Isso apagará tudo! Certifique-se de criar um backup primeiro.",
-          confirm_question: "Tem certeza de que deseja excluir os dados da sua carteira?",
+          confirm_question:
+            "Tem certeza de que deseja excluir os dados da sua carteira?",
           cancel: "Cancelar",
           confirm: "Excluir carteira",
         },
@@ -842,7 +848,8 @@ export default {
       no_backups_found: "Nenhum backup de mint encontrado",
       no_backups_hint:
         "Certifique-se de que o backup de mints no Nostr está ativado nas configurações para fazer backup automático da sua lista de mints.",
-      invalid_mnemonic: "Por favor, insira uma frase de recuperação válida antes de buscar.",
+      invalid_mnemonic:
+        "Por favor, insira uma frase de recuperação válida antes de buscar.",
       search_error: "Falha ao buscar backups de mints.",
       add_error: "Falha ao adicionar os mints selecionados.",
     },
