@@ -89,7 +89,7 @@
           </div>
 
           <div
-            v-if="ndefSupported && showNfcButtonInDrawer"
+            v-if="(ndefSupported && showNfcButtonInDrawer) || 1"
             class="action-row"
             @click="handleNFCBtn"
           >
@@ -129,6 +129,7 @@ import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { usePRStore } from "src/stores/payment-request";
 import { useSettingsStore } from "../stores/settings";
+import { useWebNfcStore } from "src/stores/webNfcStore";
 import token from "src/js/token";
 import P2PKDialog from "./P2PKDialog.vue";
 import PRDialog from "./PaymentRequestDialog.vue";
@@ -169,7 +170,6 @@ export default defineComponent({
     ...mapWritableState(useReceiveTokensStore, [
       "showReceiveTokens",
       "receiveData",
-      "scanningCard",
       "watchClipboardPaste",
     ]),
     ...mapState(useUiStore, ["tickerShort", "ndefSupported"]),
@@ -188,6 +188,7 @@ export default defineComponent({
     ...mapState(useCameraStore, ["hasCamera"]),
     ...mapState(useP2PKStore, ["p2pkKeys", "showP2PkButtonInDrawer"]),
     ...mapState(usePRStore, ["enablePaymentRequest"]),
+    ...mapState(useWebNfcStore, ["scanningCard"]),
     ...mapWritableState(useUiStore, ["showReceiveDialog"]),
     ...mapState(useCameraStore, ["lastScannedResult"]),
   },
@@ -205,19 +206,22 @@ export default defineComponent({
       "receiveIfDecodes",
       "decodeToken",
       "knowThisMintOfTokenJson",
-      "toggleScanner",
       "pasteToParseDialog",
     ]),
     ...mapWritableState(useReceiveTokensStore, [
       "showReceiveTokens",
       "receiveData",
     ]),
+
     isiOsSafari() {
       const userAgent = window.navigator.userAgent.toLowerCase();
       const match =
         /iphone|ipad|ipod/.test(userAgent) && /safari/.test(userAgent);
       console.log(`User agent: ${userAgent}, is iOS Safari: ${match}`);
       return match;
+    },
+    toggleScanner() {
+      useWebNfcStore().toggleScanner("token");
     },
     handlePasteBtn: function () {
       this.receiveData.tokensBase64 = "";

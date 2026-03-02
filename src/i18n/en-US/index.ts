@@ -1049,6 +1049,9 @@ export default {
       pay_via: {
         label: "Pay via {transport}",
       },
+      pay_via_nfc: {
+        label: "Pay via NFC",
+      },
     },
     info: {
       pay_to: "Pay to {target}",
@@ -1515,5 +1518,10 @@ export default {
     payment_request: "Payment request",
     nostr: "Nostr",
     token_copied: "Token copied to clipboard",
+  },
+  SendNfcScanner: {
+    prompt_text: "Approach the terminal to pay",
+    write_prompt_text: "Tap your device to the NFC tag to write payment token",
+    cancel_button: "Cancel",
   },
 };

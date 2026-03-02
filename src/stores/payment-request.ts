@@ -21,6 +21,9 @@ import {
 } from "src/js/notify";
 import { useLocalStorage } from "@vueuse/core";
 import { v4 as uuidv4 } from "uuid";
+import { useWebNfcStore } from "./webNfcStore";
+import { useSettingsStore } from "./settings";
+import { useUiStore } from "./ui";
 
 export type OurPaymentRequest = {
   id: string; // UUID from PaymentRequest
@@ -231,6 +234,13 @@ export const usePRStore = defineStore("payment-request", {
       } catch (e) {
         // noop
       }
+
+      // Payment request locking conditions
+      if (request.nut10?.kind === "P2PK") {
+        sendTokenStore.showLockInput = true;
+        sendTokenStore.sendData.p2pkPubkey = request.nut10?.data;
+      }
+
       sendTokenStore.sendData.paymentRequest = request;
       if (!sendTokenStore.showSendTokens) {
         // show the send dialog
@@ -241,6 +251,13 @@ export const usePRStore = defineStore("payment-request", {
       request: PaymentRequest,
       tokenStr: string
     ): Promise<boolean> {
+      // If there's no transport defined, this is an in-band payment
+      // using NFC, so write the token to the NFC tag
+      if (!request.transport || request.transport.length === 0) {
+        return await this.payInBandNfcPaymentRequest(tokenStr);
+      }
+
+      // Otherwise try supported transport methods
       const transports: PaymentRequestTransport[] = request.transport ?? [];
       for (const transport of transports) {
         if (transport.type == PaymentRequestTransportType.NOSTR) {
@@ -255,6 +272,37 @@ export const usePRStore = defineStore("payment-request", {
         }
       }
       throw new Error("Unsupported payment request transport.");
+    },
+
+    async payInBandNfcPaymentRequest(tokenStr: string): Promise<boolean> {
+      console.log("payInBandNfcPaymentRequest - Writing token to NFC tag");
+
+      const webNfcStore = useWebNfcStore();
+      const settingsStore = useSettingsStore();
+      const encoding = settingsStore.nfcEncoding || "text/plain";
+      const uiStore = useUiStore();
+
+      if (!uiStore.ndefSupported) {
+        throw new Error(
+          "WebNFC not supported: can't pay in-band payment request"
+        );
+      }
+
+      try {
+        // Try to write the token to the NFC tag with retry mechanism
+        const result = await webNfcStore.writeTokenToTag(tokenStr, encoding);
+        if (result) {
+          return true;
+        } else {
+          // throw new Error(
+          //   "Failed to write payment token to NFC tag after multiple attempts"
+          // );
+        }
+      } catch (error) {
+        console.error("Error writing token to NFC tag:", error);
+        // notifyError("NFC payment failed");
+        throw error;
+      }
     },
     async payNostrPaymentRequest(
       request: PaymentRequest,
@@ -330,6 +378,27 @@ export const usePRStore = defineStore("payment-request", {
         throw error;
       }
       return true;
+    },
+
+    // Method to toggle NFC scanner for payment requests
+    toggleScanner: function () {
+      // Use the centralized WebNfcStore to handle NFC scanning
+      const webNfcStore = useWebNfcStore();
+      webNfcStore.toggleScanner("payment-request");
+    },
+
+    // Method to write a payment request to an NFC tag
+    async writeToNfcTag(): Promise<boolean> {
+      if (!this.showPRKData) {
+        notifyWarning("No payment request to write");
+        return false;
+      }
+
+      notify(
+        "Please tap your device to the NFC tag to write payment request (will try up to 3 times)"
+      );
+      const webNfcStore = useWebNfcStore();
+      return await webNfcStore.writePaymentRequestToTag(this.showPRKData);
     },
   },
 });
