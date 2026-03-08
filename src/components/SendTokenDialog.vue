@@ -505,9 +505,11 @@ export default defineComponent({
         }
       } else {
         clearInterval(this.qrInterval);
+        this.stopPaymentRequestScanner();
         this.sendData.tokensBase64 = "";
         this.sendData.historyToken = undefined;
         this.sendData.paymentRequest = undefined;
+        useSendTokensStore().paymentRequestScannedViaNfc = false;
       }
     },
     "webNfcStore.writeSuccess": function (success) {

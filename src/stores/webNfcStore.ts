@@ -48,6 +48,10 @@ export const useWebNfcStore = defineStore("webNfcStore", {
           this.controller = new AbortController();
           const signal = this.controller.signal;
 
+          // Set scanning flag synchronously to prevent race conditions
+          // (e.g. dialog watcher re-entering toggleScanner before .scan() resolves)
+          this.scanningCard = true;
+
           this.ndef
             .scan({ signal })
             .then(() => {
@@ -107,7 +111,7 @@ export const useWebNfcStore = defineStore("webNfcStore", {
                     }
                   } catch (err) {
                     console.error(`Something went wrong! ${err}`);
-                    // notifyError(`Something went wrong! ${err}`);
+                    notifyError(`NFC read error: ${err}`);
                   } finally {
                     // Always abort the controller and reset scanning state after processing
                     this.controller?.abort();
@@ -115,15 +119,16 @@ export const useWebNfcStore = defineStore("webNfcStore", {
                   }
                 }
               );
-              this.scanningCard = true;
             })
             .catch((error) => {
               console.error(`Scan error: ${error.message}`);
-              // notifyError(`Scan error: ${error.message}`);
+              notifyError(`NFC scan failed: ${error.message}`);
+              this.scanningCard = false;
             });
         } catch (error) {
           console.error(`NFC error: ${error.message}`);
-          // notifyError(`NFC error: ${error.message}`);
+          notifyError(`NFC not available: ${error.message}`);
+          this.scanningCard = false;
         }
       } else {
         console.log("Turning OFF scanner, aborting controller");

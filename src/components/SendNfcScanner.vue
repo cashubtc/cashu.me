@@ -80,31 +80,20 @@ export default defineComponent({
       return useWebNfcStore();
     },
   },
-  watch: {
-    "webNfcStore.writeSuccess"(newVal) {
-      if (newVal) {
-        // After success animation completes, close the scanner
-        setTimeout(() => {
-          this.closeScanner();
-        }, 2000); // Wait for tada animation + delay
-      }
-    },
-  },
-
   mounted() {
-    // Only start scanning if we're scanning for payment request (not writing)
     const webNfcStore = useWebNfcStore();
     if (webNfcStore.isScanningPaymentRequest && !webNfcStore.scanningCard) {
       webNfcStore.toggleScanner("payment-request");
     }
-    // If writing, we don't need to start scanning - the write operation handles it
   },
 
   beforeUnmount() {
-    // Make sure scanning is stopped when component is unmounted (only if scanning)
     const webNfcStore = useWebNfcStore();
     if (webNfcStore.scanningCard && webNfcStore.isScanningPaymentRequest) {
       webNfcStore.stopScanning();
+    }
+    if (webNfcStore.isWritingToken) {
+      webNfcStore.stopWritingToken();
     }
   },
 

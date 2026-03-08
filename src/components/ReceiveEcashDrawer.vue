@@ -89,7 +89,7 @@
           </div>
 
           <div
-            v-if="(ndefSupported && showNfcButtonInDrawer) || 1"
+            v-if="ndefSupported && showNfcButtonInDrawer"
             class="action-row"
             @click="handleNFCBtn"
           >

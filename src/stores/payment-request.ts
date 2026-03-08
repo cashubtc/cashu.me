@@ -279,7 +279,7 @@ export const usePRStore = defineStore("payment-request", {
 
       const webNfcStore = useWebNfcStore();
       const settingsStore = useSettingsStore();
-      const encoding = settingsStore.nfcEncoding || "text/plain";
+      const encoding = settingsStore.nfcEncoding || "text";
       const uiStore = useUiStore();
 
       if (!uiStore.ndefSupported) {
@@ -289,18 +289,16 @@ export const usePRStore = defineStore("payment-request", {
       }
 
       try {
-        // Try to write the token to the NFC tag with retry mechanism
         const result = await webNfcStore.writeTokenToTag(tokenStr, encoding);
         if (result) {
           return true;
         } else {
-          // throw new Error(
-          //   "Failed to write payment token to NFC tag after multiple attempts"
-          // );
+          notifyError("Failed to write payment token to NFC tag");
+          return false;
         }
       } catch (error) {
         console.error("Error writing token to NFC tag:", error);
-        // notifyError("NFC payment failed");
+        notifyError("NFC payment failed");
         throw error;
       }
     },
@@ -394,9 +392,7 @@ export const usePRStore = defineStore("payment-request", {
         return false;
       }
 
-      notify(
-        "Please tap your device to the NFC tag to write payment request (will try up to 3 times)"
-      );
+      notify("Please tap your device to the NFC tag to write payment request");
       const webNfcStore = useWebNfcStore();
       return await webNfcStore.writePaymentRequestToTag(this.showPRKData);
     },
