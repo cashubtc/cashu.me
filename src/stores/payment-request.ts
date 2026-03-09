@@ -7,6 +7,7 @@ import {
   PaymentRequestTransport,
   PaymentRequestTransportType,
 } from "@cashu/cashu-ts";
+import { bech32m } from "bech32";
 import { useMintsStore } from "./mints";
 import { useSendTokensStore } from "./sendTokensStore";
 import { useNostrStore } from "./nostr";
@@ -21,6 +22,168 @@ import {
 } from "src/js/notify";
 import { useLocalStorage } from "@vueuse/core";
 import { v4 as uuidv4 } from "uuid";
+
+const NUT26_HRP = "creqb";
+
+const NUT26_TAG = {
+  ID: 0x01,
+  AMOUNT: 0x02,
+  UNIT: 0x03,
+  SINGLE_USE: 0x04,
+  MINT: 0x05,
+  DESCRIPTION: 0x06,
+  TRANSPORT: 0x07,
+} as const;
+
+const NUT26_TRANSPORT_KIND = {
+  NOSTR: 0x00,
+  HTTP_POST: 0x01,
+} as const;
+
+const NUT26_TRANSPORT_TAG = {
+  KIND: 0x01,
+  TARGET: 0x02,
+  TAG_TUPLE: 0x03,
+} as const;
+
+function readU64BE(bytes: Uint8Array, offset: number): number {
+  let val = 0;
+  for (let i = 0; i < 8; i++) {
+    val = val * 256 + (bytes[offset + i] ?? 0);
+  }
+  return val;
+}
+
+function parseTlvEntries(
+  bytes: Uint8Array
+): Array<{ type: number; value: Uint8Array }> {
+  const entries: Array<{ type: number; value: Uint8Array }> = [];
+  let i = 0;
+  while (i < bytes.length) {
+    const type = bytes[i++];
+    if (i + 2 > bytes.length) break;
+    const len = (bytes[i] << 8) | bytes[i + 1];
+    i += 2;
+    if (i + len > bytes.length) break;
+    entries.push({ type, value: bytes.slice(i, i + len) });
+    i += len;
+  }
+  return entries;
+}
+
+function parseTransportTlv(bytes: Uint8Array): PaymentRequestTransport | null {
+  const entries = parseTlvEntries(bytes);
+  let kind: number | undefined;
+  let target = "";
+  const tags: string[][] = [];
+
+  for (const entry of entries) {
+    if (entry.type === NUT26_TRANSPORT_TAG.KIND) {
+      kind = entry.value[0];
+    } else if (entry.type === NUT26_TRANSPORT_TAG.TARGET) {
+      target = new TextDecoder().decode(entry.value);
+    } else if (entry.type === NUT26_TRANSPORT_TAG.TAG_TUPLE) {
+      const tagBytes = entry.value;
+      let pos = 0;
+      const tuple: string[] = [];
+      while (pos < tagBytes.length) {
+        const sLen = tagBytes[pos++];
+        tuple.push(new TextDecoder().decode(tagBytes.slice(pos, pos + sLen)));
+        pos += sLen;
+      }
+      if (tuple.length > 0) tags.push(tuple);
+    }
+  }
+
+  if (kind === undefined) return null;
+
+  if (kind === NUT26_TRANSPORT_KIND.NOSTR) {
+    return {
+      type: PaymentRequestTransportType.NOSTR,
+      target,
+      tags: tags.length ? tags : undefined,
+    } as PaymentRequestTransport;
+  }
+  if (kind === NUT26_TRANSPORT_KIND.HTTP_POST) {
+    return {
+      type: PaymentRequestTransportType.POST,
+      target,
+      tags: tags.length ? tags : undefined,
+    } as PaymentRequestTransport;
+  }
+  return null;
+}
+
+export function decodeNut26PaymentRequest(encoded: string): PaymentRequest {
+  const decoded = bech32m.decode(encoded.toLowerCase(), 8192);
+  if (decoded.prefix !== NUT26_HRP) {
+    throw new Error(
+      `Invalid NUT-26 payment request: expected HRP "${NUT26_HRP}", got "${decoded.prefix}"`
+    );
+  }
+
+  const bytes = new Uint8Array(bech32m.fromWords(decoded.words));
+  const entries = parseTlvEntries(bytes);
+  const decoder = new TextDecoder();
+
+  let id: string | undefined;
+  let amount: number | undefined;
+  let unit: string | undefined;
+  let singleUse = false;
+  const mints: string[] = [];
+  let description: string | undefined;
+  const transports: PaymentRequestTransport[] = [];
+
+  for (const entry of entries) {
+    switch (entry.type) {
+      case NUT26_TAG.ID:
+        id = decoder.decode(entry.value);
+        break;
+      case NUT26_TAG.AMOUNT: {
+        const padded = new Uint8Array(8);
+        padded.set(entry.value, 8 - entry.value.length);
+        amount = readU64BE(padded, 0);
+        break;
+      }
+      case NUT26_TAG.UNIT:
+        unit =
+          entry.value.length === 1 && entry.value[0] === 0x00
+            ? "sat"
+            : decoder.decode(entry.value);
+        break;
+      case NUT26_TAG.SINGLE_USE:
+        singleUse = entry.value[0] === 0x01;
+        break;
+      case NUT26_TAG.MINT:
+        mints.push(decoder.decode(entry.value));
+        break;
+      case NUT26_TAG.DESCRIPTION:
+        description = decoder.decode(entry.value);
+        break;
+      case NUT26_TAG.TRANSPORT: {
+        const transport = parseTransportTlv(entry.value);
+        if (transport) transports.push(transport);
+        break;
+      }
+      default:
+        break;
+    }
+  }
+
+  return new PaymentRequest(
+    transports.length ? transports : undefined,
+    id,
+    amount,
+    unit,
+    mints.length ? mints : undefined,
+    description,
+    singleUse
+  );
+}
+
+export function isNut26PaymentRequest(req: string): boolean {
+  return req.toLowerCase().startsWith(NUT26_HRP + "1");
+}
 
 export type OurPaymentRequest = {
   id: string; // UUID from PaymentRequest
@@ -179,7 +342,9 @@ export const usePRStore = defineStore("payment-request", {
     },
     async decodePaymentRequest(pr: string) {
       console.log("decodePaymentRequest", pr);
-      const request: PaymentRequest = decodePaymentRequest(pr);
+      const request: PaymentRequest = isNut26PaymentRequest(pr)
+        ? decodeNut26PaymentRequest(pr)
+        : decodePaymentRequest(pr);
       console.log("decodePaymentRequest", request);
       const mintsStore = useMintsStore() as any;
       // activate the mint in the payment request
