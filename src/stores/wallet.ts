@@ -1526,11 +1526,26 @@ export const useWalletStore = defineStore("wallet", {
       } else if (req.toLowerCase().startsWith("lightning:")) {
         this.payInvoiceData.input.request = req.slice(10);
         await this.handleBolt11Invoice();
-      } else if (req.startsWith("bitcoin:")) {
-        const lightningInvoice = req.match(/lightning=([^&]+)/);
-        if (lightningInvoice) {
-          this.payInvoiceData.input.request = lightningInvoice[1];
-          await this.handleBolt11Invoice();
+      } else if (req.toLowerCase().startsWith("bitcoin:")) {
+        try {
+          const url = new URL(
+            req.replace(/^bitcoin:/i, "bitcoin://placeholder/")
+          );
+          const lightning = url.searchParams.get("lightning");
+          if (lightning) {
+            this.payInvoiceData.input.request = lightning;
+            if (lightning.toLowerCase().startsWith("lnurl1")) {
+              await this.lnurlPayFirst(lightning);
+            } else {
+              await this.handleBolt11Invoice();
+            }
+          }
+        } catch {
+          const lightningMatch = req.match(/[?&]lightning=([^&]+)/i);
+          if (lightningMatch) {
+            this.payInvoiceData.input.request = lightningMatch[1];
+            await this.handleBolt11Invoice();
+          }
         }
       } else if (req.toLowerCase().startsWith("lnurl:")) {
         this.payInvoiceData.input.request = req.slice(6);
