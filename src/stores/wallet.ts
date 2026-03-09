@@ -911,7 +911,7 @@ export const useWalletStore = defineStore("wallet", {
         // delete spent tokens from db
         await proofsStore.removeProofs(sendProofs);
 
-        const amount_paid = amount - proofsStore.sumProofs(data.change);
+        const amount_paid = amount - proofsStore.sumProofs(data.change ?? []);
         useUiStore().vibrate();
         if (!silent) {
           notifySuccess(
