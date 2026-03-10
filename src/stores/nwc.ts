@@ -163,7 +163,7 @@ export const useNWCStore = defineStore("nwc", {
         const paidAmount =
           walletStore.payInvoiceData.meltQuote.response.amount +
           walletStore.payInvoiceData.meltQuote.response.fee_reserve -
-          proofsStore.sumProofs(meltData.change);
+          proofsStore.sumProofs(meltData.change ?? []);
         this.connections[0].allowanceLeft -= paidAmount;
         return {
           result_type: nwcCommand.method,
