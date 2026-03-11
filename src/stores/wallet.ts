@@ -1523,6 +1523,7 @@ export const useWalletStore = defineStore("wallet", {
             req.replace(/^bitcoin:/i, "bitcoin://placeholder/")
           );
           const lightning = url.searchParams.get("lightning");
+          const creq = url.searchParams.get("creq");
           if (lightning) {
             this.payInvoiceData.input.request = lightning;
             if (lightning.toLowerCase().startsWith("lnurl1")) {
@@ -1530,6 +1531,8 @@ export const useWalletStore = defineStore("wallet", {
             } else {
               await this.handleBolt11Invoice();
             }
+          } else if (creq) {
+            await this.handlePaymentRequest(creq);
           }
         } catch {
           const lightningMatch = req.match(/[?&]lightning=([^&]+)/i);
@@ -1566,7 +1569,9 @@ export const useWalletStore = defineStore("wallet", {
       } else if (req.startsWith("http")) {
         const mintStore = useMintsStore();
         mintStore.addMintData = { url: req, nickname: "" };
-      } else if (req.startsWith("creqA")) {
+      } else if (req.toLowerCase().startsWith("creqa")) {
+        await this.handlePaymentRequest(req);
+      } else if (req.toLowerCase().startsWith("creqb1")) {
         await this.handlePaymentRequest(req);
       } else if (isLegacyRetailQR(req)) {
         // Try to convert legacy retail QR code (EMV format) to Lightning Address
