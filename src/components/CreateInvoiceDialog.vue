@@ -173,7 +173,11 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useWalletStore, ["requestMint", "mintOnPaid", "mintWallet"]),
+    ...mapActions(useWalletStore, [
+      "requestMint",
+      "mintOnPaid",
+      "activeWallet",
+    ]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
     requestMintButton: async function () {
       if (!this.invoiceData.amount) {
@@ -181,16 +185,11 @@ export default defineComponent({
       }
       try {
         this.showNumericKeyboard = false;
-        const mintStore = useMintsStore();
         const amount = Math.floor(
           this.invoiceData.amount * this.activeUnitCurrencyMultiplyer
         );
         this.createInvoiceButtonBlocked = true;
-        const wallet = await this.mintWallet(
-          mintStore.activeMintUrl,
-          mintStore.activeUnit,
-          true
-        );
+        const wallet = await this.activeWallet(true);
         const mintQuote = await this.requestMint(amount, wallet);
         // Switch to QR display dialog
         this.showCreateInvoiceDialog = false;
