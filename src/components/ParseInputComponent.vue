@@ -46,22 +46,24 @@
       </div>
     </div>
 
-    <!-- NFC button (if supported) -->
-    <q-btn
+    <!-- NFC Scanner row -->
+    <div
       v-if="ndefSupported"
-      flat
-      class="q-mt-md"
-      :loading="scanningCard"
-      :disabled="scanningCard"
+      class="nfc-scanner-row q-mt-md"
       @click="$emit('nfc')"
     >
-      <NfcIcon class="q-mr-sm" :size="20" />
-      {{ nfcLabel }}
-      <q-tooltip>{{ nfcTooltip }}</q-tooltip>
-      <template v-slot:loading>
-        <q-spinner />
-      </template>
-    </q-btn>
+      <div class="row items-center no-wrap">
+        <div class="nfc-icon-circle">
+          <q-spinner v-if="scanningCard" size="sm" color="white" />
+          <NfcIcon v-else :size="24" />
+        </div>
+        <div class="col q-ml-md">
+          <div class="text-body1 text-weight-medium">
+            {{ nfcLabel }}
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -202,6 +204,29 @@ export default defineComponent({
 }
 
 .qr-icon-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.nfc-scanner-row {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:active {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.nfc-icon-circle {
   width: 48px;
   height: 48px;
   border-radius: 50%;
