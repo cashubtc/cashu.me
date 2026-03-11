@@ -908,9 +908,10 @@ export default defineComponent({
               return null;
             }
             console.log(`Quoting mint: ${mint.url}`);
-            const mintWallet = useWalletStore().mintWallet(
+            const mintWallet = await useWalletStore().mintWallet(
               mint.url,
-              useMintsStore().activeUnit
+              useMintsStore().activeUnit,
+              true
             );
             try {
               this.setMintState(mint.url, "requesting");
@@ -938,9 +939,10 @@ export default defineComponent({
             try {
               // Move to paying state
               this.setMintState(mint.url, "paying");
-              const mintWallet = useWalletStore().mintWallet(
+              const mintWallet = await useWalletStore().mintWallet(
                 mint.url,
-                activeUnit
+                activeUnit,
+                true
               );
               const mintClass = new MintClass(mint);
               const proofs = mintClass.unitProofs(activeUnit);

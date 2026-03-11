@@ -236,7 +236,7 @@ export default defineComponent({
         const mintUrl = token.getMint(tokenJson);
         const unit = token.getUnit(tokenJson);
         const walletStore = useWalletStore();
-        const wallet = walletStore.mintWallet(mintUrl, unit);
+        const wallet = walletStore.mintWalletSync(mintUrl, unit);
         const fee = wallet.getFeesForProofs(proofs);
         return fee || 0;
       } catch (e) {

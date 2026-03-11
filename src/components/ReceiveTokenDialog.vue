@@ -296,9 +296,9 @@ import { usePriceStore } from "src/stores/price";
 import { useSwapStore } from "src/stores/swap";
 import { useSettingsStore } from "src/stores/settings";
 import token from "src/js/token";
-import { CashuMint, GetInfoResponse } from "@cashu/cashu-ts";
+import { Mint, GetInfoResponse } from "@cashu/cashu-ts";
 import { Token } from "@cashu/cashu-ts";
-import type { Mint } from "src/stores/mints";
+import type { StoredMint } from "src/stores/mints";
 
 import TokenInformation from "components/TokenInformation.vue";
 import TokenStringRender from "components/TokenStringRender.vue";
@@ -455,10 +455,6 @@ export default defineComponent({
       const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
       return this.getMint(decodedToken);
     },
-    swapToMintAmount: function () {
-      const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
-      return this.tokenAmount - useSwapStore().meltToMintFees(decodedToken);
-    },
     maxLengthForTokenString: function () {
       return Math.floor(this.$q.screen.height / 3.5);
     },
@@ -466,7 +462,9 @@ export default defineComponent({
       if (!this.tokenMint) {
         return null;
       }
-      const mint = (this.mints as Mint[]).find((m) => m.url === this.tokenMint);
+      const mint = (this.mints as StoredMint[]).find(
+        (m) => m.url === this.tokenMint
+      );
       if (!mint) {
         // Use untrusted mint info if available
         return {
@@ -489,7 +487,7 @@ export default defineComponent({
         return null;
       }
       return (
-        (this.mints as Mint[]).find(
+        (this.mints as StoredMint[]).find(
           (m) => m.url === this.selectedSwapMintUrl
         ) || null
       );
@@ -696,9 +694,9 @@ export default defineComponent({
     handleSwapClose() {
       this.swapSelected = false;
     },
-    getAvailableSwapMints(): Mint[] {
+    getAvailableSwapMints(): StoredMint[] {
       const availableMints = Array.isArray(this.mints)
-        ? (this.mints as Mint[])
+        ? (this.mints as StoredMint[])
         : [];
       return availableMints.filter(
         (mint) => mint.url && mint.url !== this.tokenMint
@@ -745,7 +743,7 @@ export default defineComponent({
     },
     fetchUntrustedMintInfo: async function (mintUrl: string) {
       try {
-        const mint = new CashuMint(mintUrl);
+        const mint = new Mint(mintUrl);
         const info = await mint.getInfo();
         this.untrustedMintInfo = info;
       } catch (error) {

@@ -222,6 +222,7 @@
                   <p
                     v-if="payInvoiceData.lnurlpay.lightningAddress"
                     class="q-my-none text-h6 text-center"
+                    style="word-break: break-all"
                   >
                     <i18n-t
                       keypath="PayInvoiceDialog.lnurlpay.sending_to_lightning_address"
@@ -231,7 +232,11 @@
                       </template>
                     </i18n-t>
                   </p>
-                  <p v-else class="q-my-none text-h6 text-center">
+                  <p
+                    v-else
+                    class="q-my-none text-h6 text-center"
+                    style="word-break: break-all"
+                  >
                     <i18n-t
                       keypath="PayInvoiceDialog.lnurlpay.amount_exact_label"
                     >
@@ -290,6 +295,7 @@
                   <p
                     v-if="payInvoiceData.lnurlpay.lightningAddress"
                     class="q-my-none text-h6 text-center"
+                    style="word-break: break-all"
                   >
                     <i18n-t
                       keypath="PayInvoiceDialog.lnurlpay.sending_to_lightning_address"
@@ -299,7 +305,11 @@
                       </template>
                     </i18n-t>
                   </p>
-                  <p v-else class="q-my-none text-h6 text-center">
+                  <p
+                    v-else
+                    class="q-my-none text-h6 text-center"
+                    style="word-break: break-all"
+                  >
                     <i18n-t
                       keypath="PayInvoiceDialog.lnurlpay.amount_range_label"
                     >
@@ -411,8 +421,21 @@
               class="col-12 col-sm-11 col-md-8 q-px-md"
               style="max-width: 600px"
             >
+              <!-- Close button when paid or error -->
+              <template v-if="isPaid || payInvoiceData.meltQuote.error != ''">
+                <q-btn
+                  class="full-width"
+                  unelevated
+                  size="lg"
+                  color="primary"
+                  rounded
+                  @click="closeDialog"
+                  :label="$t('PayInvoiceDialog.invoice.actions.close.label')"
+                />
+              </template>
+              <!-- Pay button when ready to pay -->
               <template
-                v-if="
+                v-else-if="
                   enoughtotalUnitBalance ||
                   (hasMultinutSupport && multinutEnabled) ||
                   globalMutexLock
@@ -424,15 +447,10 @@
                   size="lg"
                   color="primary"
                   rounded
-                  :disabled="
-                    payInvoiceData.blocking ||
-                    payInvoiceData.meltQuote.error != ''
-                  "
+                  :disabled="payInvoiceData.blocking"
                   @click="handleMeltButton"
                   :label="
-                    payInvoiceData.meltQuote.error != ''
-                      ? $t('PayInvoiceDialog.invoice.actions.pay.error')
-                      : !payInvoiceData.blocking
+                    !payInvoiceData.blocking
                       ? $t('PayInvoiceDialog.invoice.actions.pay.label')
                       : $t('PayInvoiceDialog.invoice.actions.pay.in_progress')
                   "
@@ -442,7 +460,18 @@
                     <q-spinner />
                   </template>
                 </q-btn>
+                <q-btn
+                  v-if="hasMultinutSupport && multinutEnabled"
+                  class="full-width q-mt-sm"
+                  flat
+                  size="md"
+                  color="primary"
+                  rounded
+                  @click="openMultinutDialog"
+                  label="Pay with multiple mints"
+                />
               </template>
+              <!-- Balance too low -->
               <template v-else>
                 <q-btn
                   class="full-width"
@@ -612,6 +641,7 @@ export default defineComponent({
       fiatKeyboardMode: false as boolean,
       isPaying: false as boolean,
       isPaid: false as boolean,
+      autoCloseTimeout: null as ReturnType<typeof setTimeout> | null,
     };
   },
   watch: {
@@ -653,11 +683,20 @@ export default defineComponent({
           this.payInvoiceData.show = true; // Prevent close
 
           // Wait 2 seconds then allow close
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-          this.isPaid = false;
-          this.payInvoiceData.show = false;
+          this.autoCloseTimeout = setTimeout(() => {
+            if (this.isPaid) {
+              // Only auto-close if still in paid state (user hasn't manually closed)
+              this.isPaid = false;
+              this.payInvoiceData.show = false;
+            }
+            this.autoCloseTimeout = null;
+          }, 10000);
         } else if (!val) {
-          // Normal close - reset states
+          // Normal close - reset states and clear any pending timeout
+          if (this.autoCloseTimeout) {
+            clearTimeout(this.autoCloseTimeout);
+            this.autoCloseTimeout = null;
+          }
           this.showNumericKeyboard = false;
           this.isPaying = false;
           this.isPaid = false;
@@ -811,6 +850,16 @@ export default defineComponent({
       );
     },
     closeParseDialog: function () {},
+    closeDialog: function () {
+      // Clear any pending auto-close timeout
+      if (this.autoCloseTimeout) {
+        clearTimeout(this.autoCloseTimeout);
+        this.autoCloseTimeout = null;
+      }
+      this.payInvoiceData.show = false;
+      this.isPaying = false;
+      this.isPaid = false;
+    },
     decodeAndQuote: async function (request: string) {
       await this.decodeRequest(request);
     },
@@ -825,6 +874,14 @@ export default defineComponent({
     handleMeltButton: async function () {
       if (this.payInvoiceData.blocking) {
         throw new Error("already processing an invoice.");
+      }
+      if (
+        !this.enoughtotalUnitBalance &&
+        this.hasMultinutSupport &&
+        this.multinutEnabled
+      ) {
+        this.openMultinutDialog();
+        return;
       }
       this.isPaying = true;
       try {
