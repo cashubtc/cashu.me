@@ -732,7 +732,7 @@ export default defineComponent({
           if (partialAmounts[largestMint.url] > mintBalance) {
             // If the largest mint can't handle the adjustment, distribute the difference
             partialAmounts[largestMint.url] = mintBalance;
-            const remainingDifference =
+            let remainingDifference =
               difference - (mintBalance - largestAmount);
 
             // Find other mints that can handle the remaining difference
@@ -863,8 +863,7 @@ export default defineComponent({
       this.multiMeltButtonLoading = true;
 
       let mintsToQuotes = [];
-      let mintsToAmounts = [];
-      let remainder = 0.0;
+      const mintsToAmounts = [];
       let data;
 
       try {
@@ -909,9 +908,10 @@ export default defineComponent({
               return null;
             }
             console.log(`Quoting mint: ${mint.url}`);
-            const mintWallet = useWalletStore().mintWallet(
+            const mintWallet = await useWalletStore().mintWallet(
               mint.url,
-              useMintsStore().activeUnit
+              useMintsStore().activeUnit,
+              true
             );
             try {
               this.setMintState(mint.url, "requesting");
@@ -939,9 +939,10 @@ export default defineComponent({
             try {
               // Move to paying state
               this.setMintState(mint.url, "paying");
-              const mintWallet = useWalletStore().mintWallet(
+              const mintWallet = await useWalletStore().mintWallet(
                 mint.url,
-                activeUnit
+                activeUnit,
+                true
               );
               const mintClass = new MintClass(mint);
               const proofs = mintClass.unitProofs(activeUnit);

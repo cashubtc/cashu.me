@@ -76,6 +76,9 @@ export default {
       received_lightning: "Received {amount} via Lightning",
       lightning_payment_failed: "Lightning payment failed",
       failed_to_decode_invoice: "Failed to decode invoice",
+      unsupported_legacy_qr: "Unsupported Legacy QR code",
+      legacy_qr_not_supported:
+        "This Legacy QR code is not from a supported merchant",
       invalid_lnurl: "Invalid LNURL",
       lnurl_error: "LNURL Error",
       no_amount: "No amount",
@@ -500,6 +503,15 @@ export default {
           description:
             "Download a dump of your wallet. You can restore your wallet from this file in the welcome screen of a new wallet. This file will be out of sync if you keep using your wallet after exporting it.",
         },
+        import_wallet: {
+          button: "Import wallet backup",
+          description:
+            "Restore your wallet from a previously exported backup file. This will replace your current wallet data with the backup.",
+          confirm_question:
+            "Are you sure you want to restore your wallet data?",
+          cancel: "Cancel",
+          confirm: "IMPORT WALLET BACKUP",
+        },
       },
     },
   },
@@ -791,7 +803,7 @@ export default {
         error: "Failed to read clipboard contents.",
       },
       validate: {
-        error: "Mnemonic should be at least 12 words.",
+        error: "Mnemonic is not a valid BIP39 seed phrase.",
       },
       select_all: {
         label: "Select All",

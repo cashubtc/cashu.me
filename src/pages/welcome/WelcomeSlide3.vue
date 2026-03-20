@@ -82,7 +82,7 @@ export default {
     const welcomeStore = useWelcomeStore();
     const walletStore = useWalletStore();
     const $q = useQuasar();
-    let hideMnemonic = ref(true);
+    const hideMnemonic = ref(true);
 
     onMounted(() => {
       // Ensure mnemonic is generated for new-wallet flow only

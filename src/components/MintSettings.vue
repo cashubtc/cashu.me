@@ -515,7 +515,7 @@ export default defineComponent({
         );
         return;
       }
-      let urlObj = new URL(this.addMintData.url);
+      const urlObj = new URL(this.addMintData.url);
       urlObj.hostname = urlObj.hostname.toLowerCase();
       this.addMintData.url = urlObj.toString();
       this.addMintData.url = this.addMintData.url.replace(/\/$/, "");
@@ -534,7 +534,7 @@ export default defineComponent({
       return new MintClass(mint);
     },
     swapAmountDataOptions: function () {
-      let options = [];
+      const options = [];
       for (const [i, m] of Object.entries(this.mints)) {
         const unitStr = "sat";
         const unitBalance = this.mintClass(m).unitBalance(unitStr);

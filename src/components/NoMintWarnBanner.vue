@@ -77,7 +77,7 @@ export default defineComponent({
       return getShortUrl(this.activeMintUrl);
     },
     getBalance: function () {
-      var balance = this.activeProofs
+      const balance = this.activeProofs
         .map((t) => t)
         .flat()
         .reduce((sum, el) => (sum += el.amount), 0);

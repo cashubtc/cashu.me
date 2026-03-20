@@ -182,7 +182,7 @@ export default defineComponent({
     ...mapState(useWorkersStore, ["invoiceWorkerRunning"]),
     ...mapWritableState(useUiStore, ["showInvoiceDetails"]),
     displayUnit: function () {
-      let display = (this as any).formatCurrency(
+      const display = (this as any).formatCurrency(
         this.invoiceData.amount,
         this.invoiceData.unit,
         true

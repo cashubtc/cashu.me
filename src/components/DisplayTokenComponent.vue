@@ -396,15 +396,15 @@ export default defineComponent({
     ...mapState(useSettingsStore, ["nfcEncoding"]),
     // display helpers
     sumProofs: function () {
-      let proofs = token.getProofs(token.decode(this.sendData.tokensBase64));
+      const proofs = token.getProofs(token.decode(this.sendData.tokensBase64));
       return proofs.flat().reduce((sum, el) => (sum += el.amount), 0);
     },
     displayUnit: function () {
-      let display = this.formatCurrency(this.sumProofs, this.tokenUnit);
+      const display = this.formatCurrency(this.sumProofs, this.tokenUnit);
       return display;
     },
     tokenUnit: function () {
-      let unit = token.getUnit(token.decode(this.sendData.tokensBase64));
+      const unit = token.getUnit(token.decode(this.sendData.tokensBase64));
       return unit;
     },
     paidFees: function () {
@@ -602,8 +602,10 @@ export default defineComponent({
                         },
                       ];
                       break;
-                    case "binary":
-                      const decoded = token.decode(this.sendData.tokensBase64);
+                    case "binary": {
+                      const decoded = getDecodedToken(
+                        this.sendData.tokensBase64
+                      );
                       const data = getEncodedTokenBinary(decoded);
                       records = [
                         {
@@ -613,6 +615,7 @@ export default defineComponent({
                         },
                       ];
                       break;
+                    }
                     default:
                       throw new Error(
                         `Unknown NFC encoding: ${this.nfcEncoding}`

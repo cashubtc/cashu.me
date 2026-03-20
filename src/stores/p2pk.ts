@@ -69,9 +69,9 @@ export const useP2PKStore = defineStore("p2pk", {
         console.log("input was not an nsec");
         return;
       }
-      let sk = nip19.decode(nsec).data as Uint8Array; // `sk` is a Uint8Array
-      let pk = "02" + getPublicKey(sk); // `pk` is a hex string
-      let skHex = bytesToHex(sk);
+      const sk = nip19.decode(nsec).data as Uint8Array; // `sk` is a Uint8Array
+      const pk = "02" + getPublicKey(sk); // `pk` is a hex string
+      const skHex = bytesToHex(sk);
       if (this.haveThisKey(pk)) {
         console.log("nsec already exists in p2pk keystore");
         return;
@@ -85,9 +85,9 @@ export const useP2PKStore = defineStore("p2pk", {
       this.p2pkKeys = this.p2pkKeys.concat(keyPair);
     },
     generateKeypair: function () {
-      let sk = generateSecretKey(); // `sk` is a Uint8Array
-      let pk = "02" + getPublicKey(sk); // `pk` is a hex string
-      let skHex = bytesToHex(sk);
+      const sk = generateSecretKey(); // `sk` is a Uint8Array
+      const pk = "02" + getPublicKey(sk); // `pk` is a hex string
+      const skHex = bytesToHex(sk);
       const keyPair: P2PKKey = {
         publicKey: pk,
         privateKey: skHex,
@@ -98,7 +98,7 @@ export const useP2PKStore = defineStore("p2pk", {
     },
     getSecretP2PKPubkey: function (secret: string): string {
       try {
-        let secretObject = JSON.parse(secret);
+        const secretObject = JSON.parse(secret);
         if (secretObject[0] != "P2PK" || secretObject[1]["data"] == undefined) {
           console.log("not p2pk locked");
           return ""; // not p2pk locked

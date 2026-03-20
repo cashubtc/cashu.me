@@ -363,7 +363,11 @@ export default defineComponent({
     //       this.activeProofs,
     //       this.sendData.amount * this.activeUnitCurrencyMultiplyer
     //     );
-    //     const mintWallet = useWalletStore().wallet;
+    //     const mints = useMintsStore() as any;
+    //     const mintWallet = this.mintWalletSync(
+    //       mints.activeMintUrl,
+    //       mints.activeUnit
+    //     );
     //     let selectedProofs = this.coinSelect(
     //       spendableProofs,
     //       mintWallet,
@@ -495,7 +499,11 @@ export default defineComponent({
       const sendAmount = Math.floor(
         this.sendData.amount * this.activeUnitCurrencyMultiplyer
       );
-      const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
+      const mintWallet = await this.mintWallet(
+        this.activeMintUrl,
+        this.activeUnit,
+        true
+      );
       const { sendProofs } = await this.send(
         this.activeProofs,
         mintWallet,
@@ -534,13 +542,17 @@ export default defineComponent({
       if (!this.sendData.amount) {
         throw new Error("Amount is required");
       }
-      let sendAmount = Math.floor(
+      const sendAmount = Math.floor(
         this.sendData.amount * this.activeUnitCurrencyMultiplyer
       );
       try {
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
-        const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
-        let { _, sendProofs } = await this.sendToLock(
+        const mintWallet = await this.mintWallet(
+          this.activeMintUrl,
+          this.activeUnit,
+          true
+        );
+        const { _, sendProofs } = await this.sendToLock(
           this.activeProofs,
           mintWallet,
           sendAmount,
@@ -583,12 +595,16 @@ export default defineComponent({
       }
 
       try {
-        let sendAmount = Math.floor(
+        const sendAmount = Math.floor(
           this.sendData.amount * this.activeUnitCurrencyMultiplyer
         );
-        const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
+        const mintWallet = await this.mintWallet(
+          this.activeMintUrl,
+          this.activeUnit,
+          false
+        );
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
-        let { _, sendProofs } = await this.send(
+        const { _, sendProofs } = await this.send(
           this.activeProofs,
           mintWallet,
           sendAmount,

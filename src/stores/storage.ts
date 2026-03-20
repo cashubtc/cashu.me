@@ -35,27 +35,27 @@ export const useStorageStore = defineStore("storage", {
       }
     },
     exportWalletState: async function () {
-      var jsonToSave: any = {};
-      for (var i = 0; i < localStorage.length; i++) {
-        var k = localStorage.key(i);
+      const jsonToSave: any = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
         if (!k) {
           continue;
         }
-        var v = localStorage.getItem(k);
+        const v = localStorage.getItem(k);
         jsonToSave[k] = v;
       }
       // proofs table *magic*
       const proofs = await useProofsStore().getProofs();
       jsonToSave["cashu.dexie.db.proofs"] = JSON.stringify(proofs);
 
-      var textToSave = JSON.stringify(jsonToSave);
-      var textToSaveAsBlob = new Blob([textToSave], {
+      const textToSave = JSON.stringify(jsonToSave);
+      const textToSaveAsBlob = new Blob([textToSave], {
         type: "text/plain",
       });
-      var textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
+      const textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
 
       const fileName = `cashu_me_backup_${currentDateStr()}.json`;
-      var downloadLink = document.createElement("a");
+      const downloadLink = document.createElement("a");
       downloadLink.download = fileName;
       downloadLink.innerHTML = "Download File";
       downloadLink.href = textToSaveAsURL;
@@ -80,7 +80,7 @@ export const useStorageStore = defineStore("storage", {
       // store 10kb of data in local storage to check if it fails
       const localStorageSize = JSON.stringify(localStorage).length;
       console.log(`Local storage size: ${localStorageSize} bytes`);
-      let data = new Array(10240).join("x");
+      const data = new Array(10240).join("x");
       try {
         localStorage.setItem("cashu.test", data);
         localStorage.removeItem("cashu.test");
@@ -95,7 +95,7 @@ export const useStorageStore = defineStore("storage", {
     },
     cleanUpLocalStorageScheduler: function () {
       const cleanUpInterval = 1000 * 60 * 60 * 24 * 7; // 7 day
-      let lastCleanUp = this.lastLocalStorageCleanUp;
+      const lastCleanUp = this.lastLocalStorageCleanUp;
       if (
         !lastCleanUp ||
         isNaN(new Date(lastCleanUp).getTime()) ||
@@ -115,12 +115,12 @@ export const useStorageStore = defineStore("storage", {
 
       // from all paid invoices in this.invoiceHistory, delete the oldest so that only max 100 remain
       const max_history = 200;
-      let paidInvoices = walletStore.invoiceHistory.filter(
+      const paidInvoices = walletStore.invoiceHistory.filter(
         (i) => i.status == "paid"
       );
 
       if (paidInvoices.length > max_history) {
-        let sortedInvoices = paidInvoices.sort((a, b) => {
+        const sortedInvoices = paidInvoices.sort((a, b) => {
           return new Date(a.date).getTime() - new Date(b.date).getTime();
         });
         const deleteInvoices = sortedInvoices.slice(
@@ -133,19 +133,19 @@ export const useStorageStore = defineStore("storage", {
       }
 
       // walk through the oldest paid tokenStore.historyTokens and delete the token
-      let paidTokens = tokenStore.historyTokens.filter(
+      const paidTokens = tokenStore.historyTokens.filter(
         (t) => t.status == "paid"
       );
 
       if (paidTokens.length > max_history) {
-        let sortedTokens = paidTokens.sort((a, b) => {
+        const sortedTokens = paidTokens.sort((a, b) => {
           return new Date(a.date).getTime() - new Date(b.date).getTime();
         });
         const deleteTokens = sortedTokens.slice(
           0,
           sortedTokens.length - max_history
         );
-        for (var i = 0; i < deleteTokens.length; i++) {
+        for (let i = 0; i < deleteTokens.length; i++) {
           deleteTokens[i].token = undefined;
         }
       }

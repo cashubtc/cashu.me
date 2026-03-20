@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { currentDateStr } from "src/js/utils";
-import { useMintsStore, WalletProof, MintClass, Mint } from "./mints";
+import { useMintsStore, WalletProof, MintClass } from "./mints";
 import { useLocalStorage } from "@vueuse/core";
 import { useProofsStore } from "./proofs";
 import { HistoryToken, useTokensStore } from "./tokens";
@@ -14,7 +14,7 @@ import { useInvoicesWorkerStore } from "./invoicesWorker";
 import * as nobleSecp256k1 from "@noble/secp256k1";
 import { bytesToHex } from "@noble/hashes/utils";
 
-import * as _ from "underscore";
+import _ from "underscore";
 import token from "src/js/token";
 import {
   notifyApiError,
@@ -24,23 +24,19 @@ import {
   notify,
 } from "src/js/notify";
 import {
-  CashuMint,
-  CashuWallet,
+  Wallet,
   Proof,
-  MintQuotePayload,
-  MeltQuotePayload,
-  MeltQuoteResponse,
+  MintQuoteBolt11Request,
+  MeltQuoteBolt11Request,
+  MintQuoteBolt11Response,
+  MeltQuoteBolt11Response,
   CheckStateEnum,
   MeltQuoteState,
   MintQuoteState,
-  PaymentRequest,
-  PaymentRequestTransportType,
-  PaymentRequestTransport,
-  decodePaymentRequest,
-  MintQuoteResponse,
   ProofState,
+  KeyChain,
+  // ConsoleLogger,
 } from "@cashu/cashu-ts";
-import { hashToCurve } from "@cashu/crypto/modules/common";
 // @ts-ignore
 import * as bolt11Decoder from "light-bolt11-decoder";
 import { bech32 } from "bech32";
@@ -55,6 +51,10 @@ import { wordlist } from "@scure/bip39/wordlists/english";
 import { useSettingsStore } from "./settings";
 import { usePriceStore } from "./price";
 import { useI18n } from "vue-i18n";
+import {
+  isLegacyRetailQR,
+  translateLegacyQRToLightningAddress,
+} from "src/js/legacy-qr";
 // HACK: this is a workaround so that the catch block in the melt function does not throw an error when the user exits the app
 // before the payment is completed. This is necessary because the catch block in the melt function would otherwise remove all
 // quotes from the invoiceHistory and the user would not be able to pay the invoice again after reopening the app.
@@ -75,8 +75,8 @@ export type InvoiceHistory = Invoice & {
   status: "pending" | "paid";
   mint: string;
   unit: string;
-  mintQuote?: MintQuoteResponse;
-  meltQuote?: MeltQuoteResponse;
+  mintQuote?: MintQuoteBolt11Response;
+  meltQuote?: MeltQuoteBolt11Response;
   label?: string; // Add label field for custom naming
   privKey?: string; // Private key, if the quote is locked
   paidDate?: string;
@@ -120,12 +120,12 @@ export const useWalletStore = defineStore("wallet", {
           payload: {
             unit: "",
             request: "",
-          } as MeltQuotePayload,
+          } as MeltQuoteBolt11Request,
           response: {
             quote: "",
             amount: 0,
             fee_reserve: 0,
-          } as MeltQuoteResponse,
+          } as MeltQuoteBolt11Response,
           error: "",
         },
         invoice: {
@@ -160,54 +160,97 @@ export const useWalletStore = defineStore("wallet", {
     };
   },
   getters: {
-    wallet() {
-      const mints = useMintsStore() as any;
-      const mint = new CashuMint(mints.activeMintUrl);
-      if (this.mnemonic == "") {
-        this.mnemonic = generateMnemonic(wordlist);
-      }
-      const mnemonic: string = this.mnemonic;
-      const bip39Seed = mnemonicToSeedSync(mnemonic);
-      const wallet = new CashuWallet(mint, {
-        keys: mints.activeKeys,
-        keysets: mints.activeKeysets,
-        mintInfo: mints.activeInfo,
-        bip39seed: bip39Seed,
-        unit: mints.activeUnit,
-      });
-      return wallet;
-    },
     seed(): Uint8Array {
       return mnemonicToSeedSync(this.mnemonic);
     },
   },
   actions: {
     setMnemonicFromUser: function (mnemonic: string) {
-      this.mnemonic = mnemonic;
+      this.mnemonic = mnemonic.trim().toLowerCase(); // normalize
     },
-    mintWallet(url: string, unit: string): CashuWallet {
+    /**
+     * Returns a fully initialised Wallet for the active mint.
+     * Calls loadMint internally, so is safe for all wallet operations.
+     */
+    async activeWallet(updateKeysets: boolean = false): Promise<Wallet> {
+      const mints = useMintsStore() as any;
+      return this.mintWallet(
+        mints.activeMintUrl,
+        mints.activeUnit,
+        updateKeysets
+      );
+    },
+    async mintWallet(
+      url: string,
+      unit: string,
+      updateKeysets: boolean = false
+    ): Promise<Wallet> {
       // short-lived wallet for mint operations
       // note: the unit of the wallet will be activeUnit by default,
       // overwrite wallet.unit if needed
+      const mints = useMintsStore() as any;
+      let storedMint = mints.mints.find((m: any) => m.url === url);
+      if (!storedMint) {
+        throw new Error("mint not found");
+      }
+      // if updateKeysets is true and keysetsLastFetched is older than 1 hour, fetch the keysets for the mint
+      const ONE_HOUR = 60 * 60 * 1000;
+      const lastUpdated = storedMint.lastKeysetsUpdated
+        ? new Date(storedMint.lastKeysetsUpdated).getTime()
+        : 0;
+      const mintNeedsUpdate =
+        updateKeysets && lastUpdated < Date.now() - ONE_HOUR;
+      if (mintNeedsUpdate) {
+        console.log("updating mint info and keys for mint", storedMint.url);
+        try {
+          await mints.updateMintInfoAndKeys(storedMint);
+          // Re-fetch mint after update to get fresh keysets
+          storedMint = mints.mints.find((m: any) => m.url === url);
+        } catch (error: any) {
+          console.error("Failed to update mint info/keys:", error);
+          // Continue with potentially stale keysets rather than failing
+        }
+      }
+      return this.createWalletInstance(storedMint, url, unit, mints);
+    },
+    // Synchronous wallet creation for non-critical operations (e.g., fee calculation display)
+    // Use mintWallet() with updateKeysets=true for critical operations
+    mintWalletSync(url: string, unit: string): Wallet {
       const mints = useMintsStore() as any;
       const storedMint = mints.mints.find((m: any) => m.url === url);
       if (!storedMint) {
         throw new Error("mint not found");
       }
-      const unitKeysets = mints.mintUnitKeysets(storedMint, unit);
-      const mint = new CashuMint(url);
+      return this.createWalletInstance(storedMint, url, unit, mints);
+    },
+    createWalletInstance(
+      storedMint: any,
+      url: string,
+      unit: string,
+      mints: any
+    ): Wallet {
       if (this.mnemonic == "") {
         this.mnemonic = generateMnemonic(wordlist);
       }
-      const mnemonic: string = this.mnemonic;
-      const bip39Seed = mnemonicToSeedSync(mnemonic);
-      const wallet = new CashuWallet(mint, {
-        keys: storedMint.keys,
-        keysets: unitKeysets,
-        mintInfo: storedMint.info,
-        bip39seed: bip39Seed,
-        unit: unit,
+      const bip39seed = mnemonicToSeedSync(this.mnemonic);
+      const counterInit = Object.fromEntries(
+        this.keysetCounters.map(({ id, counter }) => [id, counter])
+      );
+      const wallet = new Wallet(url, {
+        unit,
+        bip39seed,
+        counterInit,
+        // logger: new ConsoleLogger("debug"),
       });
+      // Load the caches
+      const unitKeysets = mints.mintUnitKeysets(storedMint, unit);
+      const keychainCache = KeyChain.mintToCacheDTO(
+        unit,
+        url,
+        unitKeysets,
+        storedMint.keys
+      );
+      wallet.loadMintFromCache(storedMint.info, keychainCache);
       return wallet;
     },
     mnemonicToSeedSync: function (mnemonic: string): Uint8Array {
@@ -276,12 +319,7 @@ export const useWalletStore = defineStore("wallet", {
         console.error("no active keysets found for unit", unit);
         throw new Error("no active keysets found for unit");
       }
-      const keyset_id = sortedKeysets[0].id;
-      // const keys = mint.keys.find((k) => k.id === keyset_id);
-      // if (keys) {
-      //   this.wallet.keys = keys;
-      // }
-      return keyset_id;
+      return sortedKeysets[0].id;
     },
     /**
      * Sets an invoice status to paid
@@ -311,7 +349,7 @@ export const useWalletStore = defineStore("wallet", {
       if (base64Proofs.length > 0) {
         base64Proofs.sort((a, b) => b.amount - a.amount);
         let sum = 0;
-        let selectedProofs: WalletProof[] = [];
+        const selectedProofs: WalletProof[] = [];
         for (let i = 0; i < base64Proofs.length; i++) {
           const proof = base64Proofs[i];
           sum += proof.amount;
@@ -326,7 +364,7 @@ export const useWalletStore = defineStore("wallet", {
     },
     coinSelect: function (
       proofs: WalletProof[],
-      wallet: CashuWallet,
+      wallet: Wallet,
       amount: number,
       includeFees: boolean = false
     ): WalletProof[] {
@@ -348,9 +386,7 @@ export const useWalletStore = defineStore("wallet", {
       proofs: WalletProof[],
       amount: number
     ): WalletProof[] {
-      const uIStore = useUiStore();
       const proofsStore = useProofsStore();
-      const mintStore = useMintsStore();
       const spendableProofs = proofsStore.getUnreservedProofs(proofs);
       if (proofsStore.sumProofs(spendableProofs) < amount) {
         throw Error(this.t("wallet.notifications.balance_too_low"));
@@ -358,11 +394,13 @@ export const useWalletStore = defineStore("wallet", {
       return spendableProofs;
     },
     getFeesForProofs: function (proofs: Proof[]): number {
-      return this.wallet.getFeesForProofs(proofs);
+      const mints = useMintsStore() as any;
+      const wallet = this.mintWalletSync(mints.activeMintUrl, mints.activeUnit);
+      return wallet.getFeesForProofs(proofs);
     },
     sendToLock: async function (
       proofs: WalletProof[],
-      wallet: CashuWallet,
+      wallet: Wallet,
       amount: number,
       receiverPubkey: string
     ) {
@@ -374,11 +412,11 @@ export const useWalletStore = defineStore("wallet", {
         true
       );
       const keysetId = this.getKeyset(wallet.mint.mintUrl, wallet.unit);
-      const { keep: keepProofs, send: sendProofs } = await wallet.send(
-        amount,
-        proofsToSend,
-        { keysetId, pubkey: receiverPubkey }
-      );
+      const { keep: keepProofs, send: sendProofs } = await wallet.ops
+        .send(amount, proofsToSend)
+        .keyset(keysetId)
+        .asP2PK({ pubkey: receiverPubkey })
+        .run();
       const proofsStore = useProofsStore();
       await proofsStore.removeProofs(proofsToSend);
       // note: we do not store sendProofs in the proofs store but
@@ -388,7 +426,7 @@ export const useWalletStore = defineStore("wallet", {
     },
     send: async function (
       proofs: WalletProof[],
-      wallet: CashuWallet,
+      wallet: Wallet,
       amount: number,
       invalidate: boolean = false,
       includeFees: boolean = false
@@ -421,18 +459,26 @@ export const useWalletStore = defineStore("wallet", {
         let sendProofs: Proof[] = [];
 
         if (totalAmount != targetAmount) {
+          // we need to swap!
+          // get a new wallet with potentially updated keysets / info
+          const swapWallet = await this.mintWallet(
+            wallet.mint.mintUrl,
+            wallet.unit,
+            true
+          );
           const counter = this.keysetCounter(keysetId);
           proofsToSend = this.coinSelect(
             spendableProofs,
-            wallet,
+            swapWallet,
             targetAmount,
             true
           );
-          ({ keep: keepProofs, send: sendProofs } = await wallet.send(
-            targetAmount,
-            proofsToSend,
-            { counter, keysetId, proofsWeHave: spendableProofs }
-          ));
+          ({ keep: keepProofs, send: sendProofs } = await swapWallet.ops
+            .send(targetAmount, proofsToSend)
+            .asDeterministic(counter)
+            .keyset(keysetId)
+            .proofsWeHave(spendableProofs)
+            .run());
           this.increaseKeysetCounter(
             keysetId,
             keepProofs.length + sendProofs.length
@@ -467,11 +513,6 @@ export const useWalletStore = defineStore("wallet", {
         uIStore.unlockMutex();
       }
     },
-    /**
-     *
-     *
-     * @param {array} proofs
-     */
     redeem: async function () {
       /*
       Receives a token that is prepared in the receiveToken – it is not yet in the history
@@ -490,14 +531,14 @@ export const useWalletStore = defineStore("wallet", {
       if (tokenJson == undefined) {
         throw new Error("no tokens provided.");
       }
-      let proofs = token.getProofs(tokenJson);
+      const proofs = token.getProofs(tokenJson);
       if (proofs.length == 0) {
         throw new Error("no proofs found.");
       }
       const inputAmount = proofs.reduce((s, t) => (s += t.amount), 0);
       let fee = 0;
-      let mintInToken = token.getMint(tokenJson);
-      let unitInToken = token.getUnit(tokenJson);
+      const mintInToken = token.getMint(tokenJson);
+      const unitInToken = token.getUnit(tokenJson);
 
       const historyToken = {
         amount: inputAmount,
@@ -506,7 +547,11 @@ export const useWalletStore = defineStore("wallet", {
         mint: mintInToken,
         fee: fee,
       };
-      const mintWallet = this.mintWallet(historyToken.mint, historyToken.unit);
+      const mintWallet = await this.mintWallet(
+        historyToken.mint,
+        historyToken.unit,
+        true
+      );
       const mint = mintStore.mints.find((m) => m.url === historyToken.mint);
       if (!mint) {
         throw new Error("mint not found");
@@ -519,14 +564,12 @@ export const useWalletStore = defineStore("wallet", {
         const privkey = receiveStore.receiveData.p2pkPrivateKey;
         let proofs: Proof[];
         try {
-          proofs = await mintWallet.receive(
-            receiveStore.receiveData.tokensBase64,
-            {
-              counter,
-              privkey,
-              proofsWeHave: mintStore.mintUnitProofs(mint, historyToken.unit),
-            }
-          );
+          proofs = await mintWallet.ops
+            .receive(receiveStore.receiveData.tokensBase64)
+            .asDeterministic(counter)
+            .privkey(privkey)
+            .proofsWeHave(mintStore.mintUnitProofs(mint, historyToken.unit))
+            .run();
           await proofsStore.addProofs(proofs);
           this.increaseKeysetCounter(keysetId, proofs.length);
         } catch (error: any) {
@@ -561,7 +604,7 @@ export const useWalletStore = defineStore("wallet", {
           fee = inputAmount - outputAmount;
           historyToken.fee = fee;
           historyToken.amount = outputAmount;
-          const _historyId = tokenStore.addPaidToken(historyToken as any);
+          tokenStore.addPaidToken(historyToken as any);
         }
         useUiStore().vibrate();
         let message = this.t("wallet.notifications.received", {
@@ -595,24 +638,25 @@ export const useWalletStore = defineStore("wallet", {
      */
     requestMint: async function (
       amount: number,
-      mintWallet: CashuWallet
-    ): Promise<MintQuoteResponse> {
+      mintWallet: Wallet
+    ): Promise<MintQuoteBolt11Response> {
       try {
-        const { supported: nut20supported } = (
-          await mintWallet.lazyGetMintInfo()
-        ).isSupported(20);
+        await mintWallet.loadMint(); // defensive
+        const { supported: nut20supported } = mintWallet
+          .getMintInfo()
+          .isSupported(20);
         const privkey = nut20supported
           ? bytesToHex(nobleSecp256k1.utils.randomPrivateKey())
           : undefined;
         const pubkey = nut20supported
           ? bytesToHex(nobleSecp256k1.getPublicKey(privkey!!, true))
           : undefined;
-        const payload: MintQuotePayload = {
+        const payload: MintQuoteBolt11Request = {
           amount: amount,
           unit: mintWallet.unit,
           pubkey: pubkey,
         };
-        const data = await mintWallet.mint.createMintQuote(payload);
+        const data = await mintWallet.mint.createMintQuoteBolt11(payload);
         this.invoiceData.amount = amount;
         this.invoiceData.bolt11 = data.request;
         this.invoiceData.quote = data.quote;
@@ -620,12 +664,12 @@ export const useWalletStore = defineStore("wallet", {
         this.invoiceData.status = "pending";
         this.invoiceData.mint = mintWallet.mint.mintUrl;
         this.invoiceData.unit = mintWallet.unit;
-        this.invoiceData.mintQuote = data as MintQuoteResponse;
+        this.invoiceData.mintQuote = data as MintQuoteBolt11Response;
         this.invoiceData.privKey = privkey;
         this.invoiceHistory.push({
           ...this.invoiceData,
         });
-        return data as MintQuoteResponse;
+        return data as MintQuoteBolt11Response;
       } catch (error: any) {
         console.error(error);
         notifyApiError(
@@ -641,7 +685,11 @@ export const useWalletStore = defineStore("wallet", {
       const mintStore = useMintsStore();
       const uIStore = useUiStore();
       const keysetId = this.getKeyset(invoice.mint, invoice.unit);
-      const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
+      const mintWallet = await this.mintWallet(
+        invoice.mint,
+        invoice.unit,
+        true
+      );
       const mint = mintStore.mints.find((m) => m.url === invoice.mint);
       if (!mint) {
         throw new Error("mint not found");
@@ -650,8 +698,8 @@ export const useWalletStore = defineStore("wallet", {
       await uIStore.lockMutex();
       try {
         // first we check if the mint quote is paid
-        const mintQuote = await mintWallet.checkMintQuote(invoice.quote);
-        invoice.mintQuote = mintQuote as MintQuoteResponse;
+        const mintQuote = await mintWallet.checkMintQuoteBolt11(invoice.quote);
+        invoice.mintQuote = mintQuote as MintQuoteBolt11Response;
         console.log("### mint(): mintQuote", mintQuote);
         switch (mintQuote.state) {
           case MintQuoteState.PAID:
@@ -668,16 +716,13 @@ export const useWalletStore = defineStore("wallet", {
         }
         // MintQuoteState must be PAID
         const counter = this.keysetCounter(keysetId);
-        const proofs = await mintWallet.mintProofs(
-          invoice.amount,
-          invoice.mintQuote!!,
-          {
-            keysetId,
-            counter,
-            proofsWeHave: mintStore.mintUnitProofs(mint, invoice.unit),
-            privateKey: invoice.privKey as string,
-          }
-        );
+        const proofs = await mintWallet.ops
+          .mintBolt11(invoice.amount, invoice.mintQuote!!)
+          .keyset(keysetId)
+          .asDeterministic(counter)
+          .proofsWeHave(mintStore.mintUnitProofs(mint, invoice.unit))
+          .privkey(invoice.privKey as string)
+          .run();
         this.increaseKeysetCounter(keysetId, proofs.length);
         await proofsStore.addProofs(proofs);
 
@@ -700,7 +745,7 @@ export const useWalletStore = defineStore("wallet", {
     // get a melt quote for the current invoice data
     meltQuoteInvoiceData: async function () {
       // choose active wallet with active mint and unit
-      const mintWallet = this.wallet;
+      const mintWallet = await this.activeWallet();
       // throw an error if this.payInvoiceData.blocking is true
       if (this.payInvoiceData.blocking) {
         throw new Error("already processing an melt quote.");
@@ -712,13 +757,13 @@ export const useWalletStore = defineStore("wallet", {
         if (this.payInvoiceData.input.request == "") {
           throw new Error("no invoice provided.");
         }
-        const payload: MeltQuotePayload = {
+        const payload: MeltQuoteBolt11Request = {
           unit: mintStore.activeUnit,
           request: this.payInvoiceData.input.request,
         };
         this.payInvoiceData.meltQuote.payload = payload;
         const data = await this.meltQuote(mintWallet, payload.request);
-        mintStore.assertMintError(data);
+        mintStore.assertMintError(data as any);
         this.payInvoiceData.meltQuote.response = data;
         return data;
       } catch (error: any) {
@@ -731,10 +776,10 @@ export const useWalletStore = defineStore("wallet", {
       }
     },
     meltQuote: async function (
-      wallet: CashuWallet,
+      wallet: Wallet,
       request: string,
       mpp_amount: number | undefined = undefined
-    ): Promise<MeltQuoteResponse> {
+    ): Promise<MeltQuoteBolt11Response> {
       const mintStore = useMintsStore();
       let data;
       if (mpp_amount) {
@@ -743,10 +788,10 @@ export const useWalletStore = defineStore("wallet", {
           mpp_amount * 1000
         );
       } else {
-        data = await wallet.createMeltQuote(request);
+        data = await wallet.createMeltQuoteBolt11(request);
       }
 
-      mintStore.assertMintError(data);
+      mintStore.assertMintError(data as any);
       return data;
     },
     meltInvoiceData: async function (silent?: boolean) {
@@ -767,17 +812,19 @@ export const useWalletStore = defineStore("wallet", {
         throw new Error("invoice already paid.");
       }
 
+      // Construct active wallet manually as we need mintStore anyway.
       const mintStore = useMintsStore();
-      const mintWallet = this.mintWallet(
+      const mintWallet = await this.mintWallet(
         mintStore.activeMintUrl,
-        mintStore.activeUnit
+        mintStore.activeUnit,
+        true
       );
       return await this.melt(mintStore.activeProofs, quote, mintWallet, silent);
     },
     melt: async function (
       proofs: WalletProof[],
-      quote: MeltQuoteResponse,
-      mintWallet: CashuWallet,
+      quote: MeltQuoteBolt11Response,
+      mintWallet: Wallet,
       silent?: boolean,
       releaseMutex?: boolean
     ) {
@@ -793,8 +840,13 @@ export const useWalletStore = defineStore("wallet", {
       // start melt
       let sendProofs: Proof[] = [];
       try {
-        const { keepProofs: keepProofs, sendProofs: _sendProofs } =
-          await this.send(proofs, mintWallet, amount, false, true);
+        const { sendProofs: _sendProofs } = await this.send(
+          proofs,
+          mintWallet,
+          amount,
+          false,
+          true
+        );
         sendProofs = _sendProofs;
         if (sendProofs.length == 0) {
           throw new Error("could not split proofs.");
@@ -834,12 +886,15 @@ export const useWalletStore = defineStore("wallet", {
         if (releaseMutex) uIStore.unlockMutex(); // Momentarely release the mutex (needed for concurrent melts)
         let data;
         try {
-          data = await mintWallet.meltProofs(quote, sendProofs, {
-            keysetId,
-            counter,
-          });
+          data = await mintWallet.ops
+            .meltBolt11(quote, sendProofs)
+            .keyset(keysetId)
+            .asDeterministic(counter)
+            .run();
           // store melt quote in invoice history
-          this.updateOutgoingInvoiceInHistory(data.quote as MeltQuoteResponse);
+          this.updateOutgoingInvoiceInHistory(
+            data.quote as MeltQuoteBolt11Response
+          );
         } catch (error) {
           throw error;
         } finally {
@@ -862,7 +917,7 @@ export const useWalletStore = defineStore("wallet", {
         // delete spent tokens from db
         await proofsStore.removeProofs(sendProofs);
 
-        let amount_paid = amount - proofsStore.sumProofs(data.change);
+        const amount_paid = amount - proofsStore.sumProofs(data.change ?? []);
         useUiStore().vibrate();
         if (!silent) {
           notifySuccess(
@@ -890,9 +945,13 @@ export const useWalletStore = defineStore("wallet", {
           throw error;
         }
         // get quote and check state
-        const meltQuote = await mintWallet.mint.checkMeltQuote(quote.quote);
+        const meltQuote = await mintWallet.mint.checkMeltQuoteBolt11(
+          quote.quote
+        );
         // store melt quote in invoice history
-        this.updateOutgoingInvoiceInHistory(meltQuote as MeltQuoteResponse);
+        this.updateOutgoingInvoiceInHistory(
+          meltQuote as MeltQuoteBolt11Response
+        );
 
         if (
           meltQuote.state == MeltQuoteState.PAID ||
@@ -922,32 +981,22 @@ export const useWalletStore = defineStore("wallet", {
     // /check
     checkProofsSpendable: async function (
       proofs: Proof[],
-      wallet: CashuWallet,
+      wallet: Wallet,
       update_history = false
     ) {
       /*
       checks with the mint whether an array of proofs is still
       spendable or already invalidated
       */
-      const mintStore = useMintsStore();
       const uIStore = useUiStore();
       const proofsStore = useProofsStore();
       const tokenStore = useTokensStore();
       if (proofs.length == 0) {
         return;
       }
-      const enc = new TextEncoder();
       try {
         uIStore.triggerActivityOrb();
-        const proofStates = await wallet.checkProofsStates(proofs);
-        const spentProofsStates = proofStates.filter(
-          (p) => p.state == CheckStateEnum.SPENT
-        );
-        const spentProofs = proofs.filter((p) =>
-          spentProofsStates.find(
-            (s) => s.Y == hashToCurve(enc.encode(p.secret)).toHex(true)
-          )
-        );
+        const { spent: spentProofs } = await wallet.groupProofsByState(proofs);
         if (spentProofs.length) {
           await proofsStore.removeProofs(spentProofs);
           // update UI
@@ -956,7 +1005,7 @@ export const useWalletStore = defineStore("wallet", {
             throw new Error("could not serialize proofs.");
           }
           if (update_history) {
-            const _historyId = tokenStore.addPaidToken({
+            tokenStore.addPaidToken({
               amount: -proofsStore.sumProofs(spentProofs),
               token: serializedProofs,
               unit: wallet.unit,
@@ -990,7 +1039,10 @@ export const useWalletStore = defineStore("wallet", {
         throw new Error("no tokens provided.");
       }
       const proofs = token.getProofs(tokenJson);
-      const mintWallet = this.mintWallet(historyToken.mint, historyToken.unit);
+      const mintWallet = await this.mintWallet(
+        historyToken.mint,
+        historyToken.unit
+      );
 
       const mint = mintStore.mints.find((m) => m.url === historyToken.mint);
       if (!mint) {
@@ -1068,14 +1120,14 @@ export const useWalletStore = defineStore("wallet", {
       if (!invoice) {
         throw new Error("invoice not found");
       }
-      const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
+      const mintWallet = await this.mintWallet(invoice.mint, invoice.unit);
       const mint = mintStore.mints.find((m) => m.url === invoice.mint);
       if (!mint) {
         throw new Error("mint not found");
       }
       try {
         // check the state first
-        const state = (await mintWallet.checkMintQuote(quote)).state;
+        const state = (await mintWallet.checkMintQuoteBolt11(quote)).state;
         if (state == MintQuoteState.ISSUED) {
           this.setInvoicePaid(quote);
           return;
@@ -1113,7 +1165,7 @@ export const useWalletStore = defineStore("wallet", {
       if (!invoice) {
         throw new Error("invoice not found");
       }
-      const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
+      const mintWallet = await this.mintWallet(invoice.mint, invoice.unit);
       const mint = mintStore.mints.find((m) => m.url === invoice.mint);
       if (!mint) {
         throw new Error("mint not found");
@@ -1121,8 +1173,10 @@ export const useWalletStore = defineStore("wallet", {
       const proofs: Proof[] = await proofsStore.getProofsForQuote(quote);
       try {
         // this is an outgoing invoice, we first do a getMintQuote to check if the invoice is paid
-        const meltQuote = await mintWallet.mint.checkMeltQuote(quote);
-        this.updateOutgoingInvoiceInHistory(meltQuote as MeltQuoteResponse);
+        const meltQuote = await mintWallet.mint.checkMeltQuoteBolt11(quote);
+        this.updateOutgoingInvoiceInHistory(
+          meltQuote as MeltQuoteBolt11Response
+        );
         if (meltQuote.state == MeltQuoteState.PENDING) {
           console.log("### mintQuote not paid yet");
           if (verbose) {
@@ -1206,7 +1260,8 @@ export const useWalletStore = defineStore("wallet", {
         const oneProof = [proofs[0]];
         this.activeWebsocketConnections++;
         uIStore.triggerActivityOrb();
-        const unsub = await this.wallet.onProofStateUpdates(
+        const wallet = await this.activeWallet();
+        const unsub = await wallet.on.proofStateUpdates(
           oneProof,
           async (proofState: ProofState) => {
             console.log(`Websocket: proof state updated: ${proofState.state}`);
@@ -1252,7 +1307,7 @@ export const useWalletStore = defineStore("wallet", {
       if (!invoice) {
         throw new Error("invoice not found");
       }
-      const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
+      const mintWallet = await this.mintWallet(invoice.mint, invoice.unit);
       const mint = mintStore.mints.find((m) => m.url === invoice.mint);
 
       if (!mint) {
@@ -1286,9 +1341,9 @@ export const useWalletStore = defineStore("wallet", {
       try {
         this.activeWebsocketConnections++;
         uIStore.triggerActivityOrb();
-        const unsub = await mintWallet.onMintQuotePaid(
+        const unsub = await mintWallet.on.mintQuotePaid(
           quote,
-          async (mintQuoteResponse: MintQuoteResponse) => {
+          async (_mintQuoteResponse: MintQuoteBolt11Response) => {
             console.log("Websocket: mint quote paid.");
             let proofs;
             try {
@@ -1327,11 +1382,10 @@ export const useWalletStore = defineStore("wallet", {
     },
     ////////////// UI HELPERS //////////////
     addOutgoingPendingInvoiceToHistory: async function (
-      quote: MeltQuoteResponse,
+      quote: MeltQuoteBolt11Response,
       mint: string,
       unit: string
     ) {
-      const mintStore = useMintsStore();
       this.invoiceHistory.push({
         amount: -(quote.amount + quote.fee_reserve),
         bolt11: this.payInvoiceData.input.request,
@@ -1351,7 +1405,7 @@ export const useWalletStore = defineStore("wallet", {
       }
     },
     updateOutgoingInvoiceInHistory: function (
-      quote: MeltQuoteResponse,
+      quote: MeltQuoteBolt11Response,
       options?: { status?: "pending" | "paid"; amount?: number }
     ) {
       this.invoiceHistory
@@ -1401,7 +1455,7 @@ export const useWalletStore = defineStore("wallet", {
         this.payInvoiceData.show = false;
         throw error;
       }
-      let cleanInvoice = {
+      const cleanInvoice = {
         bolt11: invoice.paymentRequest,
         memo: "",
         msat: 0,
@@ -1426,7 +1480,7 @@ export const useWalletStore = defineStore("wallet", {
           } else if (tag.name === "timestamp") {
             cleanInvoice.timestamp = tag.value;
           } else if (tag.name === "expiry") {
-            var expireDate = new Date(
+            const expireDate = new Date(
               (cleanInvoice.timestamp + tag.value) * 1000
             );
             cleanInvoice.expireDate = date.formatDate(
@@ -1465,11 +1519,26 @@ export const useWalletStore = defineStore("wallet", {
       } else if (req.toLowerCase().startsWith("lightning:")) {
         this.payInvoiceData.input.request = req.slice(10);
         await this.handleBolt11Invoice();
-      } else if (req.startsWith("bitcoin:")) {
-        const lightningInvoice = req.match(/lightning=([^&]+)/);
-        if (lightningInvoice) {
-          this.payInvoiceData.input.request = lightningInvoice[1];
-          await this.handleBolt11Invoice();
+      } else if (req.toLowerCase().startsWith("bitcoin:")) {
+        try {
+          const url = new URL(
+            req.replace(/^bitcoin:/i, "bitcoin://placeholder/")
+          );
+          const lightning = url.searchParams.get("lightning");
+          if (lightning) {
+            this.payInvoiceData.input.request = lightning;
+            if (lightning.toLowerCase().startsWith("lnurl1")) {
+              await this.lnurlPayFirst(lightning);
+            } else {
+              await this.handleBolt11Invoice();
+            }
+          }
+        } catch {
+          const lightningMatch = req.match(/[?&]lightning=([^&]+)/i);
+          if (lightningMatch) {
+            this.payInvoiceData.input.request = lightningMatch[1];
+            await this.handleBolt11Invoice();
+          }
         }
       } else if (req.toLowerCase().startsWith("lnurl:")) {
         this.payInvoiceData.input.request = req.slice(6);
@@ -1501,20 +1570,34 @@ export const useWalletStore = defineStore("wallet", {
         mintStore.addMintData = { url: req, nickname: "" };
       } else if (req.startsWith("creqA")) {
         await this.handlePaymentRequest(req);
+      } else if (isLegacyRetailQR(req)) {
+        // Try to convert legacy retail QR code (EMV format) to Lightning Address
+        const lightningAddress = translateLegacyQRToLightningAddress(req);
+        if (lightningAddress) {
+          // Process as Lightning Address (LNURL)
+          this.payInvoiceData.input.request = lightningAddress;
+          await this.lnurlPayFirst(lightningAddress);
+        } else {
+          // Not a supported merchant QR code
+          notifyWarning(
+            this.t("wallet.notifications.unsupported_legacy_qr"),
+            this.t("wallet.notifications.legacy_qr_not_supported")
+          );
+        }
       }
       const uiStore = useUiStore();
       uiStore.closeDialogs();
     },
     lnurlPayFirst: async function (address: string) {
-      var host;
-      var data;
+      let host;
+      let data;
       if (address.split("@").length == 2) {
-        let [user, lnaddresshost] = address.split("@");
+        const [user, lnaddresshost] = address.split("@");
         host = `https://${lnaddresshost}/.well-known/lnurlp/${user}`;
         const resp = await axios.get(host); // Moved it here: we don't want 2 potential calls
         data = resp.data;
       } else if (address.toLowerCase().slice(0, 6) === "lnurl1") {
-        let decoded = bech32.decode(address, 20000);
+        const decoded = bech32.decode(address, 20000);
         const words = bech32.fromWords(decoded.words);
         const uint8Array = new Uint8Array(words);
         host = new TextDecoder().decode(uint8Array);
@@ -1592,8 +1675,10 @@ export const useWalletStore = defineStore("wallet", {
           const usdAmount = amount;
           amount = Math.floor(usdAmount * satPrice);
         }
-        var { data } = await axios.get(
-          `${this.payInvoiceData.lnurlpay.callback}?amount=${amount * 1000}`
+        const callback = this.payInvoiceData.lnurlpay.callback;
+        const separator = callback.includes("?") ? "&" : "?";
+        const { data } = await axios.get(
+          `${callback}${separator}amount=${amount * 1000}`
         );
         // check http error
         if (data.status == "ERROR") {
