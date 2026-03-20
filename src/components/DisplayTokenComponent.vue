@@ -514,7 +514,7 @@ export default defineComponent({
       this.startQrCodeLoop();
     },
     toggleTokenEncoding: function () {
-      const decodedToken = getDecodedToken(this.sendData.tokensBase64);
+      const decodedToken = token.decode(this.sendData.tokensBase64);
       if (this.sendData.tokensBase64.startsWith("cashuA")) {
         try {
           this.sendData.tokensBase64 = getEncodedTokenV4(decodedToken);

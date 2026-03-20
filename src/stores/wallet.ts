@@ -525,7 +525,9 @@ export const useWalletStore = defineStore("wallet", {
       if (receiveStore.receiveData.tokensBase64.length == 0) {
         throw new Error("no tokens provided.");
       }
-      const tokenJson = token.decode(receiveStore.receiveData.tokensBase64);
+      const tokenJson = await token.decodeFull(
+        receiveStore.receiveData.tokensBase64
+      );
       if (tokenJson == undefined) {
         throw new Error("no tokens provided.");
       }
@@ -1032,7 +1034,7 @@ export const useWalletStore = defineStore("wallet", {
       const tokenStore = useTokensStore();
       const proofsStore = useProofsStore();
 
-      const tokenJson = token.decode(historyToken.token);
+      const tokenJson = await token.decodeFull(historyToken.token);
       if (tokenJson == undefined) {
         throw new Error("no tokens provided.");
       }
@@ -1220,7 +1222,7 @@ export const useWalletStore = defineStore("wallet", {
     onTokenPaid: async function (historyToken: HistoryToken) {
       const sendTokensStore = useSendTokensStore();
       const uIStore = useUiStore();
-      const tokenJson = token.decode(historyToken.token);
+      const tokenJson = await token.decodeFull(historyToken.token);
       const mintStore = useMintsStore();
       const settingsStore = useSettingsStore();
       if (!settingsStore.checkSentTokens) {
