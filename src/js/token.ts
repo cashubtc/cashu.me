@@ -2,7 +2,7 @@ import {
   type Token,
   getDecodedToken,
   getTokenMetadata,
-  CashuMint,
+  Mint,
   TokenMetadata,
 } from "@cashu/cashu-ts";
 import { useMintsStore, WalletProof } from "src/stores/mints";
@@ -28,7 +28,7 @@ async function decodeFull(encoded_token: string): Promise<Token> {
     return getDecodedToken(encoded_token, useMintsStore().allMintKeysets);
   } catch (error) {
     const tokenMint = getTokenMetadata(encoded_token).mint;
-    const fetchKeysets = await new CashuMint(tokenMint).getKeySets();
+    const fetchKeysets = await new Mint(tokenMint).getKeySets();
     return getDecodedToken(encoded_token, fetchKeysets.keysets);
   }
 }
