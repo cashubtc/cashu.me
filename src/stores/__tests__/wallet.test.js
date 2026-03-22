@@ -384,6 +384,9 @@ describe("wallet store", () => {
     await wallet.decodeRequest(
       "bitcoin:bc1qxyz?lightning=lnbcfrombitcoin&amount=1"
     );
+    await wallet.decodeRequest(
+      "bitcoin:bc1qxyz?creq=creqb1cashurequest&lightning=lnbcfrombitcoin&amount=1"
+    );
     await wallet.decodeRequest("lnurl:lnurl1example");
     await wallet.decodeRequest("cashuAabcdef");
 
@@ -391,11 +394,16 @@ describe("wallet store", () => {
     await wallet.decodeRequest("02abcdef");
     await wallet.decodeRequest("https://mint-b.example");
     await wallet.decodeRequest("creqA123");
+    await wallet.decodeRequest("creqb1xyz");
 
     expect(h.receiveTokensStore.receiveData.tokensBase64).toBe("cashuAabcdef");
     expect(h.sendTokensStore.sendData.p2pkPubkey).toBe("02abcdef");
     expect(h.mintsStore.addMintData.url).toBe("https://mint-b.example");
     expect(wallet.handlePaymentRequest).toHaveBeenCalledWith("creqA123");
+    expect(wallet.handlePaymentRequest).toHaveBeenCalledWith("creqb1xyz");
+    expect(wallet.handlePaymentRequest).toHaveBeenCalledWith(
+      "creqb1cashurequest"
+    );
     expect(h.uiStore.closeDialogs).toHaveBeenCalled();
   });
 });
