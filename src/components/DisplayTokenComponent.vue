@@ -327,6 +327,7 @@ import { useUiStore } from "src/stores/ui";
 import { useCameraStore } from "src/stores/camera";
 import { useSettingsStore } from "src/stores/settings";
 import { useTokensStore } from "src/stores/tokens";
+import { useMintsStore } from "src/stores/mints";
 import TokenInformation from "components/TokenInformation.vue";
 import MeltQuoteInformation from "components/MeltQuoteInformation.vue";
 import SendPaymentRequest from "./SendPaymentRequest.vue";
@@ -514,7 +515,7 @@ export default defineComponent({
       this.startQrCodeLoop();
     },
     toggleTokenEncoding: function () {
-      const decodedToken = getDecodedToken(this.sendData.tokensBase64);
+      const decodedToken = token.decode(this.sendData.tokensBase64);
       if (this.sendData.tokensBase64.startsWith("cashuA")) {
         try {
           this.sendData.tokensBase64 = getEncodedTokenV4(decodedToken);
@@ -604,7 +605,8 @@ export default defineComponent({
                       break;
                     case "binary": {
                       const decoded = getDecodedToken(
-                        this.sendData.tokensBase64
+                        this.sendData.tokensBase64,
+                        useMintsStore().allMintKeysets
                       );
                       const data = getEncodedTokenBinary(decoded);
                       records = [

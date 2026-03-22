@@ -365,7 +365,7 @@ export default defineComponent({
     ...mapActions(useWalletStore, [
       "requestMint",
       "mintOnPaid",
-      "mintWallet",
+      "activeWallet",
       "requestMintBolt12",
       "mintOnPaidBolt12",
     ]),
@@ -385,19 +385,13 @@ export default defineComponent({
       }
       try {
         this.showNumericKeyboard = false;
-        const mintStore = useMintsStore();
-        this.createInvoiceButtonBlocked = true;
-
-        // Get wallet instance
-        const wallet = await this.mintWallet(
-          mintStore.activeMintUrl,
-          mintStore.activeUnit,
-          true
-        );
-
         const amount = Math.floor(
           (this.invoiceData.amount || 0) * this.activeUnitCurrencyMultiplyer
         );
+        this.createInvoiceButtonBlocked = true;
+
+        // Get wallet instance
+        const wallet = await this.activeWallet(true);
 
         if (this.isBolt12) {
           // BOLT12 Flow

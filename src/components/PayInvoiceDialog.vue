@@ -262,6 +262,7 @@
                   <p
                     v-if="payInvoiceData.lnurlpay.lightningAddress"
                     class="q-my-none text-h6 text-center"
+                    style="word-break: break-all"
                   >
                     <i18n-t
                       keypath="PayInvoiceDialog.lnurlpay.sending_to_lightning_address"
@@ -271,7 +272,11 @@
                       </template>
                     </i18n-t>
                   </p>
-                  <p v-else class="q-my-none text-h6 text-center">
+                  <p
+                    v-else
+                    class="q-my-none text-h6 text-center"
+                    style="word-break: break-all"
+                  >
                     <i18n-t
                       keypath="PayInvoiceDialog.lnurlpay.amount_exact_label"
                     >
@@ -330,6 +335,7 @@
                   <p
                     v-if="payInvoiceData.lnurlpay.lightningAddress"
                     class="q-my-none text-h6 text-center"
+                    style="word-break: break-all"
                   >
                     <i18n-t
                       keypath="PayInvoiceDialog.lnurlpay.sending_to_lightning_address"
@@ -339,7 +345,11 @@
                       </template>
                     </i18n-t>
                   </p>
-                  <p v-else class="q-my-none text-h6 text-center">
+                  <p
+                    v-else
+                    class="q-my-none text-h6 text-center"
+                    style="word-break: break-all"
+                  >
                     <i18n-t
                       keypath="PayInvoiceDialog.lnurlpay.amount_range_label"
                     >
@@ -490,6 +500,16 @@
                     <q-spinner />
                   </template>
                 </q-btn>
+                <q-btn
+                  v-if="hasMultinutSupport && multinutEnabled"
+                  class="full-width q-mt-sm"
+                  flat
+                  size="md"
+                  color="primary"
+                  rounded
+                  @click="openMultinutDialog"
+                  label="Pay with multiple mints"
+                />
               </template>
               <!-- Balance too low -->
               <template v-else>
@@ -894,6 +914,14 @@ export default defineComponent({
     handleMeltButton: async function () {
       if (this.payInvoiceData.blocking) {
         throw new Error("already processing an invoice.");
+      }
+      if (
+        !this.enoughtotalUnitBalance &&
+        this.hasMultinutSupport &&
+        this.multinutEnabled
+      ) {
+        this.openMultinutDialog();
+        return;
       }
       this.isPaying = true;
       try {

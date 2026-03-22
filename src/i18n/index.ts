@@ -11,6 +11,7 @@ import thTH from "./th-TH";
 import arSA from "./ar-SA";
 import zhCN from "./zh-CN";
 import jaJP from "./ja-JP";
+import ptBR from "./pt-BR";
 
 export default {
   "en-US": enUS,
@@ -26,4 +27,5 @@ export default {
   "ar-SA": arSA,
   "zh-CN": zhCN,
   "ja-JP": jaJP,
+  "pt-BR": ptBR,
 };

@@ -4,7 +4,7 @@ import { useLocalStorage } from "@vueuse/core";
 import { nip19 } from "nostr-tools";
 import { useWalletStore } from "./wallet";
 import { notifyApiError, notifyError, notifySuccess } from "../js/notify";
-import { MintQuoteState, Proof } from "@cashu/cashu-ts";
+import { MintQuoteState } from "@cashu/cashu-ts";
 import { useNostrStore } from "../stores/nostr";
 import { date } from "quasar";
 import { useMintsStore } from "./mints";
@@ -211,7 +211,7 @@ export const useNPCV2Store = defineStore("npcV2", {
           if (!latestQuoteTime || latestQuoteTime < quote.createdAt) {
             latestQuoteTime = quote.createdAt;
           }
-          await walletStore.invoiceHistory.push({
+          walletStore.invoiceHistory.push({
             label: "Zap",
             mint: quote.mintUrl,
             memo: "",

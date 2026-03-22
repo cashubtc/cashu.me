@@ -264,7 +264,7 @@ export const usePRStore = defineStore("payment-request", {
       console.log("payNostrPaymentRequest", request, tokenStr);
       console.log("transport", transport);
       const nostrStore = useNostrStore();
-      const decodedToken = token.decode(tokenStr);
+      const decodedToken = await token.decodeFull(tokenStr);
       if (!decodedToken) {
         console.error("could not decode token");
         throw new Error("Could not decode ecash token.");
@@ -297,7 +297,7 @@ export const usePRStore = defineStore("payment-request", {
     ): Promise<boolean> {
       console.log("payPostPaymentRequest", request, tokenStr);
       // get the endpoint from the transport target and make an HTTP POST request with the paymentPayload as the body
-      const decodedToken = token.decode(tokenStr);
+      const decodedToken = await token.decodeFull(tokenStr);
       if (!decodedToken) {
         console.error("could not decode token");
         throw new Error("Could not decode ecash token.");

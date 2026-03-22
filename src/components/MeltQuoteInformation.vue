@@ -79,7 +79,7 @@ import { defineComponent, PropType } from "vue";
 import { mapState } from "pinia";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useMintsStore } from "stores/mints";
-import { MeltQuoteResponse } from "@cashu/cashu-ts";
+import { MeltQuoteBolt11Response } from "@cashu/cashu-ts";
 import {
   Zap as ZapIcon,
   ArrowDownUp as ArrowDownUpIcon,
@@ -94,7 +94,7 @@ import {
 declare const windowMixin: any;
 declare const formatCurrency: any;
 
-type ExtendedMeltQuote = MeltQuoteResponse & {
+type ExtendedMeltQuote = MeltQuoteBolt11Response & {
   fee_paid?: number | null;
   paid?: number | string | boolean | null;
   paid_at?: number | string | null;

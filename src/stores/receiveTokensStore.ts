@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { Mint, useMintsStore } from "./mints";
+import { StoredMint, useMintsStore } from "./mints";
 import { useUiStore } from "./ui";
 import { useP2PKStore } from "./p2pk";
 import { useWalletStore } from "./wallet";
@@ -13,7 +13,6 @@ import {
 } from "../js/notify";
 import { getDecodedTokenBinary, getEncodedToken, Token } from "@cashu/cashu-ts";
 import { useSwapStore } from "./swap";
-import { Clipboard } from "@capacitor/clipboard";
 
 export const useReceiveTokensStore = defineStore("receiveTokensStore", {
   state: () => ({
@@ -55,11 +54,13 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
 
       // get the private key for the token we want to receive if it is locked with P2PK
       receiveStore.receiveData.p2pkPrivateKey =
-        useP2PKStore().getPrivateKeyForP2PKEncodedToken(
+        await useP2PKStore().getPrivateKeyForP2PKEncodedToken(
           receiveStore.receiveData.tokensBase64
         );
 
-      const tokenJson = token.decode(receiveStore.receiveData.tokensBase64);
+      const tokenJson = await token.decodeFull(
+        receiveStore.receiveData.tokensBase64
+      );
       if (tokenJson == undefined) {
         throw new Error("no tokens provided.");
       }
@@ -85,11 +86,11 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
         return false;
       }
     },
-    meltTokenToMint: async function (encodedToken: string, mint: Mint) {
+    meltTokenToMint: async function (encodedToken: string, mint: StoredMint) {
       const receiveStore = useReceiveTokensStore();
       const mintStore = useMintsStore();
       const uiStore = useUiStore();
-      const tokenJson = token.decode(encodedToken);
+      const tokenJson = await token.decodeFull(encodedToken);
       if (tokenJson == undefined) {
         throw new Error("no tokens provided.");
       }
