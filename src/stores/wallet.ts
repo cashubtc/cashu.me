@@ -1524,8 +1524,12 @@ export const useWalletStore = defineStore("wallet", {
           const url = new URL(
             req.replace(/^bitcoin:/i, "bitcoin://placeholder/")
           );
+          const creq = url.searchParams.get("creq");
           const lightning = url.searchParams.get("lightning");
-          if (lightning) {
+          if (creq) {
+            this.payInvoiceData.input.request = creq;
+            await this.handlePaymentRequest(creq);
+          } else if (lightning) {
             this.payInvoiceData.input.request = lightning;
             if (lightning.toLowerCase().startsWith("lnurl1")) {
               await this.lnurlPayFirst(lightning);
@@ -1534,8 +1538,12 @@ export const useWalletStore = defineStore("wallet", {
             }
           }
         } catch {
+          const creqMatch = req.match(/[?&]creq=([^&]+)/i);
           const lightningMatch = req.match(/[?&]lightning=([^&]+)/i);
-          if (lightningMatch) {
+          if (creqMatch) {
+            this.payInvoiceData.input.request = creqMatch[1];
+            await this.handlePaymentRequest(creqMatch[1]);
+          } else if (lightningMatch) {
             this.payInvoiceData.input.request = lightningMatch[1];
             await this.handleBolt11Invoice();
           }
@@ -1568,7 +1576,10 @@ export const useWalletStore = defineStore("wallet", {
       } else if (req.startsWith("http")) {
         const mintStore = useMintsStore();
         mintStore.addMintData = { url: req, nickname: "" };
-      } else if (req.startsWith("creqA")) {
+      } else if (
+        req.toLowerCase().startsWith("creqa") ||
+        req.toLowerCase().startsWith("creqb")
+      ) {
         await this.handlePaymentRequest(req);
       } else if (isLegacyRetailQR(req)) {
         // Try to convert legacy retail QR code (EMV format) to Lightning Address
