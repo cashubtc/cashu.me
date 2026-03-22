@@ -13,6 +13,7 @@ import { Haptics, ImpactStyle } from "@capacitor/haptics";
 
 import ts from "typescript";
 import { useSettingsStore } from "./settings";
+import { getCurrencyExponent } from "./iso4217";
 
 const unitTickerShortMap = {
   sat: "sats",
@@ -105,8 +106,10 @@ export const useUiStore = defineStore("ui", {
       }
       if (currency == "sat") return this.formatSat(value);
       if (currency == "msat") return this.fromMsat(value);
-      if (currency == "usd") value = value / 100;
-      if (currency == "eur") value = value / 100;
+      const exponent = getCurrencyExponent(currency);
+      if (exponent !== undefined) {
+        value = value / Math.pow(10, exponent);
+      }
       return new Intl.NumberFormat(navigator.language, {
         style: "currency",
         currency: currency,

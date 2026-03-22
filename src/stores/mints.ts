@@ -17,6 +17,7 @@ import { i18n } from "src/boot/i18n";
 import { useSettingsStore } from "./settings";
 import { useNostrMintBackupStore } from "./nostrMintBackup";
 import { bytesToHex } from "@noble/hashes/utils"; // already an installed dependency
+import { getCurrencyExponent } from "./iso4217";
 
 export type StoredMint = {
   url: string;
@@ -228,13 +229,11 @@ export const useMintsStore = defineStore("mints", {
       }
     },
     activeUnitCurrencyMultiplyer({ activeUnit }): number {
-      if (activeUnit == "usd") {
-        return 100;
-      } else if (activeUnit == "eur") {
-        return 100;
-      } else {
-        return 1;
+      const exponent = getCurrencyExponent(activeUnit);
+      if (exponent !== undefined) {
+        return Math.pow(10, exponent);
       }
+      return 1;
     },
     allMintKeysets: function () {
       return [].concat(...this.mints.map((m) => m.keysets));
