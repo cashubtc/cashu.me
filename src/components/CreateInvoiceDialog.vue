@@ -80,7 +80,7 @@
                 <q-responsive :ratio="1" class="q-mx-none">
                   <vue-qrcode
                     :value="
-                      'lightning:' + reusableBolt12Offer.bolt11.toUpperCase()
+                      'lightning:' + reusableBolt12Offer.request.toUpperCase()
                     "
                     :options="{ width: 400 }"
                     class="rounded-borders"
@@ -319,8 +319,7 @@ export default defineComponent({
           // Must match current mint and unit
           if (invoice.mint !== mintStore.activeMintUrl) return false;
           if (invoice.unit !== mintStore.activeUnit) return false;
-          // Must have a bolt11 (offer string) to display
-          if (!invoice.bolt11) return false;
+          if (!invoice.request) return false;
           return true;
         }
       );
@@ -418,9 +417,10 @@ export default defineComponent({
     },
     async onCopyReusableOffer() {
       const offer = this.reusableBolt12Offer;
-      if (offer?.bolt11) {
+      const request = offer?.request;
+      if (request) {
         try {
-          await copyToClipboard(offer.bolt11);
+          await copyToClipboard(request);
           this.copyButtonCopied = true;
           if (this.copyButtonTimeout) {
             clearTimeout(this.copyButtonTimeout);

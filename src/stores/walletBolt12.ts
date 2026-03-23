@@ -36,8 +36,7 @@ export async function requestMintBolt12(
 
     // Store minimal invoice-like record for history and dialog usage
     this.invoiceData.amount = amount || 0;
-    // Store the offer string in bolt11 field for backward-compatible rendering where needed
-    this.invoiceData.bolt11 = data.request;
+    this.invoiceData.request = data.request;
     this.invoiceData.quote = data.quote;
     this.invoiceData.date = currentDateStr();
     this.invoiceData.status = "pending";
@@ -142,10 +141,12 @@ export async function checkOfferAndMintBolt12(
         label: "Bolt12 Subpayment",
         type: "bolt12-subpayment",
       });
-
     } else {
       // First payment: update the original offer entry
-      this.setInvoicePaid(invoice.quote, { amount: delta, mintQuote: meltQuoteAfterMint });
+      this.setInvoicePaid(invoice.quote, {
+        amount: delta,
+        mintQuote: meltQuoteAfterMint,
+      });
     }
 
     if (hideInvoiceDetailsOnMint) {
@@ -301,7 +302,7 @@ export async function meltBolt12(
       amount: -amount_paid,
     });
 
-    this.payInvoiceData.invoice = { sat: 0, memo: "", bolt11: "" };
+    this.payInvoiceData.invoice = { sat: 0, memo: "", request: "" };
     this.payInvoiceData.show = false;
     return data;
   } catch (error: any) {

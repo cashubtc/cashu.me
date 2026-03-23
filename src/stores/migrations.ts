@@ -5,6 +5,7 @@ import { notifySuccess } from "../js/notify";
 import { useUiStore } from "./ui";
 import { useSettingsStore } from "./settings";
 import { useNostrMintBackupStore } from "./nostrMintBackup";
+import { useWalletStore } from "./wallet";
 
 // Define the migration version type
 export type Migration = {
@@ -149,6 +150,33 @@ export const useMigrationsStore = defineStore("migrations", {
       }
     },
 
+    async migrateInvoiceHistoryRequestField() {
+      const walletStore = useWalletStore();
+      let updated = false;
+
+      walletStore.invoiceHistory = walletStore.invoiceHistory.map((invoice) => {
+        const request = invoice.request || invoice.bolt11;
+        if (!request) {
+          return invoice;
+        }
+        if (invoice.request === request && !invoice.bolt11) {
+          return invoice;
+        }
+        updated = true;
+        const { bolt11, ...rest } = invoice as any;
+        return {
+          ...rest,
+          request,
+        };
+      });
+
+      if (updated) {
+        console.log("Migrated invoiceHistory to request field");
+      } else {
+        console.log("No invoiceHistory entries needed request migration");
+      }
+    },
+
     // Initialize migrations
     initMigrations() {
       // Register the first migration
@@ -168,6 +196,14 @@ export const useMigrationsStore = defineStore("migrations", {
           "Adds 'wss://relay.primal.net ' to defaultNostrRelays, enables nostrMintBackupEnabled, clears cashu.ndk.mintRecommendations",
         execute: async () =>
           await this.migrateAddPrimalRelayAndEnableBackupAndClearMintRecs(),
+      });
+
+      this.registerMigration({
+        version: 3,
+        name: "Migrate invoiceHistory bolt11 field to request",
+        description:
+          "Moves invoiceHistory entries from bolt11 to request for bolt11 and bolt12 records",
+        execute: async () => await this.migrateInvoiceHistoryRequestField(),
       });
 
       // Add more migrations here in the future

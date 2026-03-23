@@ -144,7 +144,7 @@ export default defineComponent({
       }
       console.log("##### showInvoiceCreateDialog");
       this.invoiceData.amount = "";
-      this.invoiceData.bolt11 = "";
+      this.invoiceData.request = "";
       this.invoiceData.hash = "";
       this.invoiceData.memo = "";
       this.invoiceData.type = "bolt11";

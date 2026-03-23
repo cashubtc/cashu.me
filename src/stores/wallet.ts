@@ -92,7 +92,7 @@ if (typeof window !== "undefined") {
 
 type Invoice = {
   amount: number;
-  bolt11: string;
+  request: string;
   quote: string;
   memo: string;
   type?: "bolt11" | "bolt12" | "bolt12-subpayment";
@@ -142,7 +142,7 @@ export const useWalletStore = defineStore("wallet", {
       payInvoiceData: {
         blocking: false,
         paying: false,
-        bolt11: "",
+        request: "",
         show: false,
         fee_paid: 0,
         meltQuote: {
@@ -160,8 +160,13 @@ export const useWalletStore = defineStore("wallet", {
         invoice: {
           sat: 0,
           memo: "",
-          bolt11: "",
-        } as { sat: number; memo: string; bolt11: string } | null,
+          request: "",
+        } as {
+          sat: number;
+          memo: string;
+          request: string;
+          bolt12?: string;
+        } | null,
         lnurlpay: {
           domain: "",
           callback: "",
@@ -963,7 +968,7 @@ export const useWalletStore = defineStore("wallet", {
     ) {
       this.invoiceHistory.push({
         amount: -(quote.amount + quote.fee_reserve),
-        bolt11: this.payInvoiceData.input.request,
+        request: this.payInvoiceData.input.request,
         quote: quote.quote,
         memo: "Outgoing invoice",
         date: currentDateStr(),
@@ -1051,6 +1056,7 @@ export const useWalletStore = defineStore("wallet", {
       const amountMsat = decoded.amount ? parseInt(decoded.amount) : 0;
 
       const cleanOffer = {
+        request: offer,
         bolt12: offer,
         memo: decoded.description || "",
         msat: amountMsat,

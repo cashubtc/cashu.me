@@ -40,7 +40,7 @@
         <!-- Content -->
         <div class="content-area">
           <q-card-section class="q-pa-none">
-            <div v-if="invoiceData.bolt11" class="row justify-center q-mb-md">
+            <div v-if="invoiceData.request" class="row justify-center q-mb-md">
               <div
                 class="col-12 col-sm-11 col-md-8 q-px-md"
                 style="max-width: 600px"
@@ -48,11 +48,13 @@
                 <div class="qr-container">
                   <a
                     class="text-secondary"
-                    :href="'lightning:' + invoiceData.bolt11"
+                    :href="'lightning:' + invoiceData.request"
                   >
                     <q-responsive :ratio="1" class="q-mx-none">
                       <vue-qrcode
-                        :value="'lightning:' + invoiceData.bolt11.toUpperCase()"
+                        :value="
+                          'lightning:' + invoiceData.request.toUpperCase()
+                        "
                         :options="{ width: 400 }"
                         class="rounded-borders"
                         style="width: 100%"
@@ -134,7 +136,7 @@
               style="max-width: 600px"
             >
               <q-btn
-                v-if="invoiceData.bolt11"
+                v-if="invoiceData.request"
                 class="full-width"
                 unelevated
                 size="lg"
@@ -215,9 +217,10 @@ export default defineComponent({
   },
   methods: {
     onCopyBolt11: async function () {
-      if (this.invoiceData?.bolt11) {
+      const request = this.invoiceData?.request;
+      if (request) {
         try {
-          await copyToClipboard(this.invoiceData.bolt11);
+          await copyToClipboard(request);
           this.copyButtonCopied = true;
           // Clear any existing timeout
           if (this.copyButtonTimeout) {

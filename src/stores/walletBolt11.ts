@@ -64,7 +64,7 @@ export async function requestMintBolt11(
     };
     const data = await mintWallet.mint.createMintQuote(payload);
     this.invoiceData.amount = amount;
-    this.invoiceData.bolt11 = data.request;
+    this.invoiceData.request = data.request;
     this.invoiceData.quote = data.quote;
     this.invoiceData.date = currentDateStr();
     this.invoiceData.status = "pending";
@@ -212,11 +212,11 @@ export async function meltInvoiceDataBolt11(this: any) {
   if (quote == null) {
     throw new Error("no quote found.");
   }
-  const request = this.payInvoiceData.invoice.bolt11;
+  const request = this.payInvoiceData.invoice.request;
   if (
     this.invoiceHistory.find(
       (i: InvoiceHistory) =>
-        i.bolt11 === request && i.amount < 0 && i.status === "paid"
+        i.request === request && i.amount < 0 && i.status === "paid"
     )
   ) {
     notifyError("Invoice already paid.");
@@ -340,7 +340,7 @@ export async function meltBolt11(
       amount: -amount_paid,
     });
 
-    this.payInvoiceData.invoice = { sat: 0, memo: "", bolt11: "" };
+    this.payInvoiceData.invoice = { sat: 0, memo: "", request: "" };
     this.payInvoiceData.show = false;
     return data;
   } catch (error: any) {
@@ -526,7 +526,7 @@ export async function handleBolt11InvoiceBolt11(this: any) {
     throw error;
   }
   const cleanInvoice = {
-    bolt11: invoice.paymentRequest,
+    request: invoice.paymentRequest,
     memo: "",
     msat: 0,
     sat: 0,

@@ -295,7 +295,7 @@ describe("wallet store", () => {
       {
         quote: "q-1",
         amount: 1,
-        bolt11: "lnbc",
+        request: "lnbc",
         memo: "memo",
         date: "old",
         status: "pending",

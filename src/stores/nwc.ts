@@ -316,7 +316,7 @@ export const useNWCStore = defineStore("nwc", {
           : null;
       return {
         type: type,
-        invoice: invoice.bolt11,
+        invoice: invoice.request,
         description: invoice.memo,
         amount: amount,
         fees_paid: 0,

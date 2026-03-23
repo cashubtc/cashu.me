@@ -469,7 +469,7 @@ export default {
     showInvoiceCreateDialog: async function () {
       console.log("##### showInvoiceCreateDialog");
       this.invoiceData.amount = "";
-      this.invoiceData.bolt11 = "";
+      this.invoiceData.request = "";
       this.invoiceData.hash = "";
       this.invoiceData.memo = "";
       this.showCreateInvoiceDialog = true;
