@@ -112,7 +112,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
           q.lastChecked +
           Math.min(
             this.checkInterval *
-            Math.pow(2, q.checkCount - this.keepIntervalConstantForNChecks),
+              Math.pow(2, q.checkCount - this.keepIntervalConstantForNChecks),
             this.maxInterval
           )
         );

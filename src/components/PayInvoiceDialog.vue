@@ -193,7 +193,10 @@
                           Error: {{ payInvoiceData.meltQuote.error }}
                         </div>
                         <!-- BOLT12 amount entry if offer has no amount and errored -->
-                        <div v-if="payInvoiceData.invoice.bolt12" class="q-mt-md">
+                        <div
+                          v-if="payInvoiceData.invoice.bolt12"
+                          class="q-mt-md"
+                        >
                           <q-input
                             filled
                             dense
@@ -225,7 +228,10 @@
                           </div>
                         </div>
                         <!-- BOLT12 amount entry if offer has no amount -->
-                        <div v-if="payInvoiceData.invoice.bolt12" class="q-mt-md">
+                        <div
+                          v-if="payInvoiceData.invoice.bolt12"
+                          class="q-mt-md"
+                        >
                           <q-input
                             filled
                             dense
