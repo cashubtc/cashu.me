@@ -9,9 +9,6 @@ import { useMintsStore, WalletProof } from "src/stores/mints";
 import { useProofsStore } from "src/stores/proofs";
 export default { decode, decodeFull, getProofs, getMint, getUnit, getMemo };
 
-/**
- * Decodes an encoded cashu token metadata
- */
 function decode(encoded_token: string): TokenMetadata {
   if (!encoded_token || encoded_token === "") return;
   const metadata = getTokenMetadata(encoded_token);
@@ -19,9 +16,6 @@ function decode(encoded_token: string): TokenMetadata {
   return metadata;
 }
 
-/**
- * Decodes an encoded cashu token with full proofs
- */
 async function decodeFull(encoded_token: string): Promise<Token> {
   if (!encoded_token || encoded_token === "") return;
   try {
