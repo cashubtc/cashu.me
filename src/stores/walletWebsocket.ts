@@ -4,7 +4,7 @@ import { useWorkersStore } from "./workers";
 import { useUiStore } from "src/stores/ui";
 import { useMintsStore } from "src/stores/mints";
 import { notifySuccess, notifyApiError } from "src/js/notify";
-import { MintQuoteResponse, Bolt12MintQuoteResponse } from "@cashu/cashu-ts";
+import { MintQuoteBolt11Response } from "@cashu/cashu-ts";
 
 export async function mintOnPaidGeneric(
   this: any,
@@ -89,14 +89,7 @@ export async function mintOnPaidGeneric(
     this.activeWebsocketConnections++;
     uIStore.triggerActivityOrb();
 
-    // Variable to hold the unsubscribe function
-    // It will be assigned once the subscription is established
-    let unsub: () => void = () => {};
-
-    const onPaidCallback = async (
-      response: MintQuoteResponse | Bolt12MintQuoteResponse
-    ) => {
-      console.log(`Websocket: ${type} quote paid.`);
+    const onPaidCallback = async (_response: MintQuoteBolt11Response) => {
       let proofs;
       try {
         if (type === "bolt11") {
@@ -106,7 +99,6 @@ export async function mintOnPaidGeneric(
         }
       } catch (error: any) {
         console.error(error);
-        // notifyApiError(error);
         throw error;
       }
 
@@ -115,13 +107,10 @@ export async function mintOnPaidGeneric(
       }
       useUiStore().vibrate();
 
-      // For Bolt12, checkOfferAndMintBolt12 might return proofs.
-      // If it does, we can sum them to get the amount paid.
-      // If not (e.g. no new funds), we might fall back to invoice.amount.
-      let amount = invoice.amount;
-      if (type === "bolt12" && proofs) {
-        amount = proofs.reduce((acc: number, p: any) => acc + p.amount, 0);
-      }
+      const amount =
+        type === "bolt12" && proofs
+          ? proofs.reduce((acc: number, p: any) => acc + p.amount, 0)
+          : invoice.amount;
 
       notifySuccess(
         this.t("wallet.notifications.received_lightning", {
@@ -129,54 +118,15 @@ export async function mintOnPaidGeneric(
         })
       );
 
-      // Unsubscribe after payment for Bolt11
-      if (unsub) {
-        unsub();
-      }
-
       return proofs;
     };
 
     const onErrorCallback = async (error: any) => {
-      if (verbose) {
-        notifyApiError(error);
-      }
-      console.log("Invoice still pending", invoice.quote);
+      if (verbose) notifyApiError(error);
       throw error;
     };
 
-    if (type === "bolt11") {
-      unsub = await mintWallet.onMintQuotePaid(
-        quoteId,
-        onPaidCallback as (payload: MintQuoteResponse) => void,
-        onErrorCallback
-      );
-    } else {
-      // Manual subscription for Bolt12
-      // Ensure websocket connection exists
-      if (!mintWallet.mint.webSocketConnection) {
-        await mintWallet.mint.connectWebSocket();
-      }
-
-      const ws = mintWallet.mint.webSocketConnection;
-      if (!ws) {
-        console.error("Could not connect to websocket for Bolt12");
-        return;
-      }
-
-      // Create subscription manually
-      // params: { kind: ..., filters: ... }
-      // NUT-17: subscription params for bolt12_mint_quote: [quoteId]
-      const subId = ws.createSubscription(
-        { kind: command, filters: [quoteId] } as any,
-        onPaidCallback,
-        onErrorCallback
-      );
-
-      unsub = () => {
-        ws.cancelSubscription(subId, onPaidCallback);
-      };
-    }
+    await mintWallet.on.mintQuotePaid(quoteId, onPaidCallback, onErrorCallback);
   } catch (error) {
     console.log("Error in websocket subscription", error);
   } finally {
