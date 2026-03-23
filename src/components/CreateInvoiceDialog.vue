@@ -362,7 +362,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(useWalletStore, [
-      "requestMint",
+      "requestMintBolt11",
       "mintOnPaid",
       "activeWallet",
       "requestMintBolt12",
@@ -403,7 +403,7 @@ export default defineComponent({
           await this.mintOnPaidBolt12(mintQuote.quote);
         } else {
           // BOLT11 Flow
-          const mintQuote = await this.requestMint(amount, wallet);
+          const mintQuote = await this.requestMintBolt11(amount, wallet);
 
           this.showCreateInvoiceDialog = false;
           this.showInvoiceDetails = true;

@@ -187,11 +187,11 @@ export const useNWCStore = defineStore("nwc", {
       // make invoice
       const walletStore = useWalletStore();
       const wallet = await walletStore.activeWallet();
-      const quote = await walletStore.requestMint(amount / 1000, wallet);
+      const quote = await walletStore.requestMintBolt11(amount / 1000, wallet);
       if (!quote) {
         // requesting mint invoice can fail if no mint was selected yet
         // the error will have been shown as a notification
-        // TODO: make requestMint throw and return useful message
+        // TODO: make requestMintBolt11 throw and return useful message
         return {
           result_type: nwcCommand.method,
           error: {

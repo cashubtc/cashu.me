@@ -2,16 +2,15 @@ import { currentDateStr } from "src/js/utils";
 import { useMintsStore, WalletProof } from "./mints";
 import { useProofsStore } from "./proofs";
 import { useUiStore } from "src/stores/ui";
-import { useWorkersStore } from "./workers";
-import { CashuWallet, Proof, MeltQuoteResponse } from "@cashu/cashu-ts";
+import {
+  CashuWallet,
+  MeltQuoteResponse,
+  MintQuoteBolt12Response,
+} from "@cashu/cashu-ts";
+import { meltGeneric } from "./walletBolt11";
 import * as nobleSecp256k1 from "@noble/secp256k1";
 import { bytesToHex } from "@noble/hashes/utils";
-import {
-  notifyApiError,
-  notify,
-  notifySuccess,
-  notifyError,
-} from "src/js/notify";
+import { notifyApiError, notify, notifySuccess } from "src/js/notify";
 import type { InvoiceHistory } from "./wallet";
 import { useInvoicesWorkerStore } from "./invoicesWorker";
 import { mintOnPaidGeneric } from "./walletWebsocket";
@@ -43,7 +42,7 @@ export async function requestMintBolt12(
     this.invoiceData.mint = mintWallet.mint.mintUrl;
     this.invoiceData.unit = mintWallet.unit;
     // Keep the raw response and privkey on the history entry
-    this.invoiceData.mintQuote = data as any;
+    this.invoiceData.mintQuote = data as MintQuoteBolt12Response;
     this.invoiceData.privKey = privkey;
 
     this.invoiceHistory.push({
@@ -219,112 +218,13 @@ export async function meltBolt12(
   mintWallet: CashuWallet,
   silent?: boolean
 ) {
-  const uIStore = useUiStore();
-  this.payInvoiceData.paying = true;
-  const proofsStore = useProofsStore();
-  const amount = quote.amount + quote.fee_reserve;
-  let countChangeOutputs = 0;
-  const keysetId = this.getKeyset(mintWallet.mint.mintUrl, mintWallet.unit);
-  let keysetCounterIncrease = 0;
-
-  let sendProofs: Proof[] = [];
-  try {
-    const { keepProofs: keepProofs, sendProofs: _sendProofs } = await this.send(
-      proofs,
-      mintWallet,
-      amount,
-      false,
-      true
-    );
-    sendProofs = _sendProofs;
-    if (sendProofs.length == 0) throw new Error("could not split proofs.");
-  } catch (error: any) {
-    console.error(error);
-    if (!silent) notifyApiError(error, "Payment failed");
-    throw error;
-  }
-
-  await uIStore.lockMutex();
-  try {
-    await this.addOutgoingPendingInvoiceToHistory(
-      quote,
-      mintWallet.mint.mintUrl,
-      mintWallet.unit
-    );
-    await proofsStore.setReserved(sendProofs, true, quote.quote);
-
-    const counter = this.keysetCounter(keysetId);
-    this.increaseKeysetCounter(keysetId, sendProofs.length);
-    if (quote.fee_reserve > 0) {
-      countChangeOutputs = Math.ceil(Math.log2(quote.fee_reserve)) || 1;
-      this.increaseKeysetCounter(keysetId, countChangeOutputs);
-      keysetCounterIncrease += countChangeOutputs;
-    }
-
-    uIStore.triggerActivityOrb();
-
-    uIStore.unlockMutex();
-    let data;
-    try {
-      data = await mintWallet.meltProofsBolt12(quote as any, sendProofs, {
-        keysetId,
-        counter,
-      });
-    } catch (error) {
-      throw error;
-    } finally {
-      await uIStore.lockMutex();
-    }
-
-    if (data.quote.state != ("PAID" as any)) {
-      throw new Error("Invoice not paid.");
-    }
-
-    if (data.change != null) {
-      const changeProofs = data.change;
-      await proofsStore.addProofs(changeProofs);
-    }
-
-    await proofsStore.removeProofs(sendProofs);
-
-    const amount_paid = amount - proofsStore.sumProofs(data.change);
-    useUiStore().vibrate();
-    if (!silent) {
-      notifySuccess(
-        this.t("wallet.notifications.paid_lightning", {
-          amount: uIStore.formatCurrency(amount_paid, mintWallet.unit),
-        })
-      );
-    }
-
-    this.updateOutgoingInvoiceInHistory(quote, {
-      status: "paid",
-      amount: -amount_paid,
-    });
-
-    this.payInvoiceData.invoice = { sat: 0, memo: "", request: "" };
-    this.payInvoiceData.show = false;
-    return data;
-  } catch (error: any) {
-    // rollback on failure if not paid/pending
-    const mintQuote = await mintWallet.mint.checkMeltQuoteBolt12(quote.quote);
-    if (
-      (mintQuote.state as any) === "PAID" ||
-      (mintQuote.state as any) === "PENDING"
-    ) {
-      notify(this.t("wallet.notifications.payment_pending_refresh"));
-      this.payInvoiceData.show = false;
-      throw error;
-    }
-    await proofsStore.setReserved(sendProofs, false);
-    this.increaseKeysetCounter(keysetId, -keysetCounterIncrease);
-    this.removeOutgoingInvoiceFromHistory(quote.quote);
-    console.error(error);
-    this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error);
-    if (!silent) notifyApiError(error, "Payment failed");
-    throw error;
-  } finally {
-    this.payInvoiceData.paying = false;
-    uIStore.unlockMutex();
-  }
+  return meltGeneric.call(
+    this,
+    proofs,
+    quote,
+    mintWallet,
+    silent,
+    (q, sp, opts) => mintWallet.meltProofsBolt12(q as any, sp, opts),
+    (id) => mintWallet.mint.checkMeltQuoteBolt12(id)
+  );
 }

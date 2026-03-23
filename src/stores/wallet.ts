@@ -48,7 +48,9 @@ import {
   MintQuoteBolt11Request,
   MeltQuoteBolt11Request,
   MintQuoteBolt11Response,
+  MintQuoteBolt12Response,
   MeltQuoteBolt11Response,
+  MeltQuoteBolt12Response,
   CheckStateEnum,
   MeltQuoteState,
   MintQuoteState,
@@ -103,8 +105,8 @@ export type InvoiceHistory = Invoice & {
   status: "pending" | "paid";
   mint: string;
   unit: string;
-  mintQuote?: MintQuoteBolt11Response;
-  meltQuote?: MeltQuoteBolt11Response;
+  mintQuote?: MintQuoteBolt11Response | MintQuoteBolt12Response;
+  meltQuote?: MeltQuoteBolt11Response | MeltQuoteBolt12Response;
   label?: string; // Add label field for custom naming
   privKey?: string; // Private key, if the quote is locked
   paidDate?: string;
@@ -679,7 +681,6 @@ export const useWalletStore = defineStore("wallet", {
     },
 
     // Minting and melting
-    requestMint: requestMintBolt11,
     mint: mintBolt11,
     // Dispatch to Bolt11 or Bolt12 depending on parsed input
     meltQuoteInvoiceData: async function () {
