@@ -3,7 +3,7 @@
     <div class="col-12 q-px-none"></div>
   </div>
 </template>
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState } from "pinia";
@@ -34,18 +34,18 @@ export default defineComponent({
       return token.getProofs(token.decode(this.encodedToken));
     },
     sumProofs: function () {
-      let proofs = token.getProofs(token.decode(this.encodedToken));
+      const proofs = token.getProofs(token.decode(this.encodedToken));
       return proofs.flat().reduce((sum, el) => (sum += el.amount), 0);
     },
     displayUnit: function () {
-      let display = this.formatCurrency(this.sumProofs, this.tokenUnit);
+      const display = this.formatCurrency(this.sumProofs, this.tokenUnit);
       return display;
     },
     tokenUnit: function () {
       return token.getUnit(token.decode(this.encodedToken));
     },
     tokenMintUrl: function () {
-      let mint = token.getMint(token.decode(this.encodedToken));
+      const mint = token.getMint(token.decode(this.encodedToken));
       return getShortUrl(mint);
     },
     displayMemo: function () {
@@ -56,13 +56,15 @@ export default defineComponent({
     ...mapActions(useP2PKStore, ["isLocked", "isLockedToUs"]),
     getProofsMint: function (proofs) {
       // unique keyset IDs of proofs
-      let uniqueIds = [...new Set(proofs.map((p) => p.id))];
+      const uniqueIds = [...new Set(proofs.map((p) => p.id))];
       // mints that have any of the keyset IDs
-      let mints_keysets = this.mints.filter((m) =>
+      const mints_keysets = this.mints.filter((m) =>
         m.keysets.some((r) => uniqueIds.indexOf(r) >= 0)
       );
       // what we put into the JSON
-      let mints = mints_keysets.map((m) => [{ url: m.url, ids: m.keysets }][0]);
+      const mints = mints_keysets.map(
+        (m) => [{ url: m.url, ids: m.keysets }][0]
+      );
       if (mints.length == 0) {
         return "";
       } else {
@@ -71,7 +73,7 @@ export default defineComponent({
     },
     mintKnownToUs: function (proofs) {
       // unique keyset IDs of proofs
-      let uniqueIds = [...new Set(proofs.map((p) => p.id))];
+      const uniqueIds = [...new Set(proofs.map((p) => p.id))];
       // mints that have any of the keyset IDs
       return (
         this.mints.filter((m) =>

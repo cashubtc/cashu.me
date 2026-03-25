@@ -52,7 +52,7 @@ export function MarshalJSON(m: Message): string {
 
 export function UnmarshalJSON(data: string): Message | null {
   try {
-    let jsonData = JSON.parse(data);
+    const jsonData = JSON.parse(data);
     return new Message([WithUUID(jsonData.Key), WithData(jsonData.Data)]);
   } catch (e) {
     console.error(e);
