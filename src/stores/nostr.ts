@@ -79,7 +79,7 @@ export const useNostrStore = defineStore("nostr", {
       ""
     ),
     seedSigner: {} as NDKPrivateKeySigner,
-    seedSignerPrivateKeyNsec: "",
+    // seedSignerPrivateKeyNsec: "",
     privateKeySigner: {} as NDKPrivateKeySigner,
     signer: {} as NDKSigner,
     initialized: false,
