@@ -1495,7 +1495,7 @@
           icon="code"
           :label="$t('Settings.advanced.title')"
         >
-          <div>
+          <div style="max-width: 100%; overflow: hidden">
             <q-item class="q-pt-lg">
               <q-item-section>
                 <q-item-label overline>{{
@@ -1628,7 +1628,7 @@
                 </q-item-section>
               </q-item>
               <q-item>
-                <q-item-section>
+                <q-item-section style="max-width: 100%; overflow: hidden">
                   <row>
                     <!-- add a caption, not a button here -->
                     <q-item-label class="q-pb-sm">{{
@@ -1644,13 +1644,21 @@
                       }}
                     </q-item-label>
                   </row>
-                  <row class="q-pa-sm">
+                  <row
+                    class="q-pa-sm"
+                    style="max-width: 100%; overflow: hidden"
+                  >
                     <row
                       class="q-px-sm"
+                      style="max-width: 100%; flex-wrap: wrap"
                       v-for="(mintCounter, mintUrl) in keysetCountersByMint"
                       :key="mintUrl"
                     >
-                      <q-item-label class="q-px-xs" caption>
+                      <q-item-label
+                        class="q-px-xs"
+                        caption
+                        style="min-width: 0; word-break: break-word"
+                      >
                         {{ shortUrl(mintUrl) }}
                       </q-item-label>
                       <q-btn
@@ -1659,6 +1667,11 @@
                         :key="id"
                         flat
                         click
+                        style="
+                          max-width: 100%;
+                          word-break: break-word;
+                          white-space: normal;
+                        "
                         @click="increaseKeysetCounter(counter.id, 1)"
                         >{{ counter.id }} -
                         {{

@@ -708,7 +708,10 @@ export default {
     title: "Ange din återställningsfras",
     text: "Klistra in eller skriv din 12 ord långa fras för att återställa.",
     inputs: { word: "Ord { index }" },
-    actions: { paste_all: "Klistra in alla" },
+    actions: {
+      paste_all: "Klistra in alla",
+      use_password_manager: "Använd lösenordshanterare",
+    },
     disclaimer:
       "Din fras används endast lokalt för att härleda dina plånboksnycklar.",
   },
