@@ -199,9 +199,25 @@ export default {
       nostr_wallet_connect: "NOSTR WALLET CONNECT",
       hardware_features: "HARDWARE FEATURES",
       p2pk_features: "P2PK FEATURES",
+      security: "SECURITY",
       privacy: "PRIVACY",
       experimental: "EXPERIMENTAL",
       appearance: "APPEARANCE",
+    },
+    security: {
+      title: "Security",
+      description:
+        "Protect your wallet with biometric authentication or device PIN.",
+      enable_auth: {
+        toggle: "Enable authentication",
+        description:
+          "Require biometric authentication (fingerprint, face ID) or device PIN when opening the wallet.",
+      },
+      require_on_resume: {
+        toggle: "Lock when app backgrounds",
+        description:
+          "Require authentication when returning to the app from background.",
+      },
     },
     backup_restore: {
       backup_seed: {
