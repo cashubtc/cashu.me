@@ -168,7 +168,7 @@ export async function checkOfferAndMintBolt12(
 
 export async function meltQuoteInvoiceDataBolt12(this: any) {
   // choose active wallet with active mint and unit
-  const mintWallet: CashuWallet = this.wallet;
+  const mintWallet: CashuWallet = await this.activeWallet();
   if (this.payInvoiceData.blocking)
     throw new Error("already processing an melt quote.");
   this.payInvoiceData.blocking = true;
@@ -204,11 +204,13 @@ export async function meltInvoiceDataBolt12(this: any) {
   if (!this.payInvoiceData.invoice) throw new Error("no invoice provided.");
   const quote: MeltQuoteResponse = this.payInvoiceData.meltQuote.response;
   if (!quote) throw new Error("no quote found.");
-  return await this.meltBolt12(
-    useMintsStore().activeProofs,
-    quote,
-    this.wallet
+  const mintStore = useMintsStore();
+  const mintWallet = await this.mintWallet(
+    mintStore.activeMintUrl,
+    mintStore.activeUnit,
+    true
   );
+  return await this.meltBolt12(mintStore.activeProofs, quote, mintWallet);
 }
 
 export async function meltBolt12(

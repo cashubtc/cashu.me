@@ -155,7 +155,7 @@ export async function mintBolt11(
 
 export async function meltQuoteInvoiceDataBolt11(this: any) {
   // choose active wallet with active mint and unit
-  const mintWallet: CashuWallet = this.wallet;
+  const mintWallet: CashuWallet = await this.activeWallet();
   // throw an error if this.payInvoiceData.blocking is true
   if (this.payInvoiceData.blocking) {
     throw new Error("already processing an melt quote.");
@@ -226,7 +226,8 @@ export async function meltInvoiceDataBolt11(this: any) {
   const mintStore = useMintsStore();
   const mintWallet = await this.mintWallet(
     mintStore.activeMintUrl,
-    mintStore.activeUnit
+    mintStore.activeUnit,
+    true
   );
   return await this.meltBolt11(mintStore.activeProofs, quote, mintWallet);
 }
