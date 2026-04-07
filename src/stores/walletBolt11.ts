@@ -130,7 +130,7 @@ export async function mintBolt11(
         keysetId,
         counter,
         proofsWeHave: mintStore.mintUnitProofs(mint, invoice.unit),
-        privateKey: invoice.privKey as string,
+        privkey: invoice.privKey as string,
       }
     );
     this.increaseKeysetCounter(keysetId, proofs.length);
