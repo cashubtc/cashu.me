@@ -4,7 +4,7 @@
     class="mint-quote-information q-mt-md"
     :class="containerTextClass"
   >
-    <div v-if="showAmount" class="detail-item q-mb-md">
+    <div v-if="showAmount && hasValidAmount" class="detail-item q-mb-md">
       <div class="detail-label">
         <ZapIcon :size="20" :color="iconColor" class="detail-icon" />
         <div class="detail-name">Amount</div>
@@ -28,6 +28,14 @@
       <div class="detail-value" :class="{ 'text-positive': isPaidState }">
         {{ stateDisplay }}
       </div>
+    </div>
+
+    <div class="detail-item q-mb-md">
+      <div class="detail-label">
+        <QrCodeIcon :size="20" :color="iconColor" class="detail-icon" />
+        <div class="detail-name">Method</div>
+      </div>
+      <div class="detail-value">{{ methodDisplay }}</div>
     </div>
 
     <div v-if="paidAtDisplay" class="detail-item q-mb-md">
@@ -59,6 +67,7 @@ import {
   Info as InfoIcon,
   Clock as ClockIcon,
   Building as BuildingIcon,
+  QrCode as QrCodeIcon,
 } from "lucide-vue-next";
 
 declare const windowMixin: any;
@@ -82,6 +91,7 @@ export default defineComponent({
     InfoIcon,
     ClockIcon,
     BuildingIcon,
+    QrCodeIcon,
   },
   props: {
     mintQuote: {
@@ -99,6 +109,10 @@ export default defineComponent({
     showAmount: {
       type: Boolean,
       default: true,
+    },
+    method: {
+      type: String,
+      default: "bolt11",
     },
   },
   computed: {
@@ -120,6 +134,14 @@ export default defineComponent({
     unitDisplay(): string {
       return this.unit?.toUpperCase?.() || "";
     },
+    hasValidAmount(): boolean {
+      const amount =
+        (this.mintQuote?.amount as number | undefined) ??
+        (typeof this.invoice?.amount === "number"
+          ? Math.abs(this.invoice.amount)
+          : undefined);
+      return typeof amount === "number" && amount > 0;
+    },
     amountDisplay(): string {
       const amount =
         (this.mintQuote?.amount as number | undefined) ??
@@ -138,6 +160,13 @@ export default defineComponent({
     isPaidState(): boolean {
       const state = (this.invoice?.status as string) || this.mintQuote?.state;
       return state?.toLowerCase() === "paid";
+    },
+    methodDisplay(): string {
+      const method = this.method || "bolt11";
+      if (method === "bolt12" || method === "bolt12-subpayment") {
+        return "Bolt12";
+      }
+      return "Bolt11";
     },
     paidAtTimestamp(): number | null {
       if (this.invoice?.paidDate) {

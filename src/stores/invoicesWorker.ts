@@ -27,6 +27,11 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         "cashu.worker.invoices.quotesQueue",
         []
       ),
+      // BOLT12 offers queue
+      bolt12Quotes: useLocalStorage<InvoiceQuote[]>(
+        "cashu.worker.invoices.bolt12QuotesQueue",
+        []
+      ),
       lastInvoiceCheckTime: 0,
       maxQuotesToCheckOnStartup: 10,
       lastPendingInvoiceCheck: useLocalStorage<number>(
@@ -76,6 +81,31 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         this.quotes.splice(index, 1);
       }
     },
+    addBolt12OfferToChecker(quote: string) {
+      const existingIndex = this.bolt12Quotes.findIndex(
+        (q) => q.quote === quote
+      );
+      if (existingIndex !== -1) {
+        this.bolt12Quotes.splice(existingIndex, 1);
+      }
+
+      if (this.bolt12Quotes.length >= this.maxLength) {
+        this.bolt12Quotes.shift();
+      }
+      this.bolt12Quotes.push({
+        quote,
+        addedAt: Date.now(),
+        lastChecked: 0,
+        checkCount: 0,
+      });
+      this.startInvoiceCheckerWorker();
+    },
+    removeBolt12OfferFromChecker(quote: string) {
+      const index = this.bolt12Quotes.findIndex((q) => q.quote === quote);
+      if (index !== -1) {
+        this.bolt12Quotes.splice(index, 1);
+      }
+    },
     dueTime(q: InvoiceQuote) {
       if (q.checkCount > this.keepIntervalConstantForNChecks) {
         return (
@@ -90,25 +120,93 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         return q.lastChecked + this.checkInterval;
       }
     },
+    shouldCheckInvoice(invoice: any) {
+      if (!invoice) return false;
+      const now = Date.now();
+      // Bolt12
+      if (invoice.type === "bolt12") {
+        const isOlderThanMaxAge = now - Date.parse(invoice.date) > this.maxAge;
+        if (isOlderThanMaxAge) return false;
+
+        // If fixed amount offer and fully issued, stop checking
+        const quote = invoice.mintQuote as any;
+        if (
+          quote?.amount &&
+          quote.amount > 0 &&
+          quote.amount_issued >= quote.amount
+        ) {
+          return false;
+        }
+        return true;
+      }
+      // Bolt11
+      return (
+        invoice.status === "pending" &&
+        invoice.amount > 0 &&
+        now - Date.parse(invoice.date) < this.oneDay
+      );
+    },
     async processQuotes() {
       const now = Date.now();
       this.quotes = this.quotes.filter((q) => now - q.addedAt < this.maxAge);
+      this.bolt12Quotes = this.bolt12Quotes.filter(
+        (q) => now - q.addedAt < this.maxAge
+      );
 
-      if (this.quotes.length === 0) return;
+      if (this.quotes.length === 0 && this.bolt12Quotes.length === 0) return;
 
       // Global rate limit
       if (now - this.lastInvoiceCheckTime < this.checkInterval) {
         return;
       }
 
+      const walletStore = useWalletStore();
+
+      // First process one bolt11 quote if any
       for (let i = this.quotes.length - 1; i >= 0; i--) {
         const q = this.quotes[i];
+        // Check if invoice is still valid/needed
+        const invoice = walletStore.invoiceHistory.find(
+          (inv) => inv.quote === q.quote
+        );
+        if (!this.shouldCheckInvoice(invoice)) {
+          this.quotes.splice(i, 1);
+          continue;
+        }
+
         const dueTime = this.dueTime(q);
         if (now > dueTime) {
-          const walletStore = useWalletStore();
           try {
-            await walletStore.checkInvoice(q.quote, false);
+            await walletStore.checkInvoiceBolt11(q.quote, false);
             this.quotes.splice(i, 1);
+          } catch (error) {
+            q.lastChecked = now;
+            q.checkCount += 1;
+          }
+          this.lastInvoiceCheckTime = now;
+          break;
+        }
+      }
+
+      // Then process one bolt12 offer if any
+      for (let i = this.bolt12Quotes.length - 1; i >= 0; i--) {
+        const q = this.bolt12Quotes[i];
+        // Check if offer is still valid/needed
+        const invoice = walletStore.invoiceHistory.find(
+          (inv) => inv.quote === q.quote
+        );
+        if (!this.shouldCheckInvoice(invoice)) {
+          this.bolt12Quotes.splice(i, 1);
+          continue;
+        }
+
+        const dueTime = this.dueTime(q);
+        if (now > dueTime) {
+          try {
+            await walletStore.checkOfferAndMintBolt12(q.quote, false);
+            // Keep in queue for future payments as offers are reusable, but back off checks
+            q.lastChecked = now;
+            q.checkCount = 0;
           } catch (error) {
             q.lastChecked = now;
             q.checkCount += 1;
@@ -126,11 +224,8 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       )
         return;
       const walletStore = useWalletStore();
-      const quotesToCheck = walletStore.invoiceHistory.filter(
-        (q) =>
-          q.status === "pending" &&
-          q.amount > 0 &&
-          Date.now() - Date.parse(q.date) < this.oneDay
+      const quotesToCheck = walletStore.invoiceHistory.filter((q) =>
+        this.shouldCheckInvoice(q)
       );
       if (quotesToCheck.length > this.maxQuotesToCheckOnStartup) {
         quotesToCheck.splice(this.maxQuotesToCheckOnStartup);
@@ -140,7 +235,11 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       for (const q of quotesToCheck) {
         try {
           console.log(`Checking quote ${q.quote}`);
-          walletStore.mintOnPaid(q.quote, false, false);
+          if (q.type === "bolt12") {
+            this.addBolt12OfferToChecker(q.quote);
+          } else {
+            walletStore.mintOnPaidBolt11(q.quote, false, false);
+          }
         } catch (error) {
           console.error(error);
         }

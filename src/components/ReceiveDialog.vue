@@ -28,6 +28,7 @@
 
       <q-card-section class="q-pa-md">
         <div class="q-gutter-y-md">
+          <!-- Ecash Option -->
           <div class="action-row" @click="toggleReceiveEcashDrawer">
             <div class="row items-center no-wrap">
               <div class="icon-circle">
@@ -41,6 +42,7 @@
             </div>
           </div>
 
+          <!-- Lightning Invoice Option -->
           <div class="action-row" @click="showInvoiceCreateDialog">
             <div class="row items-center no-wrap">
               <div class="icon-circle">
@@ -102,6 +104,7 @@ export default defineComponent({
   computed: {
     ...mapWritableState(useUiStore, [
       "showInvoiceDetails",
+      "showBolt12OfferDetails",
       "showReceiveDialog",
       "showReceiveEcashDrawer",
       "showCreateInvoiceDialog",
@@ -141,9 +144,10 @@ export default defineComponent({
       }
       console.log("##### showInvoiceCreateDialog");
       this.invoiceData.amount = "";
-      this.invoiceData.bolt11 = "";
+      this.invoiceData.request = "";
       this.invoiceData.hash = "";
       this.invoiceData.memo = "";
+      this.invoiceData.type = "bolt11";
       this.showCreateInvoiceDialog = true;
       this.showReceiveDialog = false;
     },

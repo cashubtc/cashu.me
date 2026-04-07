@@ -215,7 +215,7 @@ export const useNPCV2Store = defineStore("npcV2", {
             label: "Zap",
             mint: quote.mintUrl,
             memo: "",
-            bolt11: quote.request,
+            request: quote.request,
             amount: quote.amount,
             quote: quote.quoteId,
             date: date.formatDate(
@@ -234,7 +234,7 @@ export const useNPCV2Store = defineStore("npcV2", {
             },
           });
           if (this.npcV2ClaimAutomatically) {
-            await walletStore.mintOnPaid(quote.quoteId);
+            await walletStore.mintOnPaidBolt11(quote.quoteId);
           }
         });
         if (latestQuoteTime) {

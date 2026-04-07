@@ -44,7 +44,7 @@ export const useWorkersStore = defineStore("workers", {
           console.log("### invoiceCheckWorker setInterval", nInterval);
 
           // this will throw an error if the invoice is pending
-          await walletStore.checkInvoice(quote, false);
+          await walletStore.checkInvoiceBolt11(quote, false);
 
           // only without error (invoice paid) will we reach here
           console.log("### stopping invoice check worker");

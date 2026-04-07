@@ -29,13 +29,24 @@
               class="dialog-header q-mt-sm"
               :class="$q.dark.isActive ? 'text-white' : 'text-black'"
             >
-              {{ $t("InvoiceDetailDialog.title") }}
+              {{
+                isBolt12 ? "Receive Bolt12" : $t("InvoiceDetailDialog.title")
+              }}
             </q-item-label>
           </div>
           <div
             class="row items-center q-gutter-sm"
             style="position: absolute; right: 16px"
           >
+            <q-btn
+              v-if="bolt11Supported && bolt12Supported"
+              flat
+              dense
+              size="lg"
+              color="primary"
+              @click="toggleInvoiceType"
+              :label="isBolt12 ? 'B12' : 'B11'"
+            />
             <q-btn
               flat
               dense
@@ -59,7 +70,46 @@
 
         <!-- Amount display -->
         <div class="col column items-center justify-center q-px-lg amount-area">
+          <div v-if="showReusableOffer" class="row justify-center full-width">
+            <div class="col-12" style="max-width: 400px">
+              <div
+                v-if="reusableBolt12Offer"
+                @click="onCopyReusableOffer"
+                class="cursor-pointer"
+              >
+                <q-responsive :ratio="1" class="q-mx-none">
+                  <vue-qrcode
+                    :value="
+                      'lightning:' + reusableBolt12Offer.request.toUpperCase()
+                    "
+                    :options="{ width: 400 }"
+                    class="rounded-borders"
+                    style="width: 100%"
+                  >
+                  </vue-qrcode>
+                </q-responsive>
+              </div>
+              <div
+                v-if="reusableBolt12Offer"
+                class="q-mt-sm text-center text-grey-7"
+                @click="onCopyReusableOffer"
+              >
+                <q-icon
+                  :name="copyButtonCopied ? 'check' : 'content_copy'"
+                  size="xs"
+                  class="q-mr-xs"
+                />
+                {{
+                  copyButtonCopied
+                    ? $t("global.copy_to_clipboard.success")
+                    : "Copy Offer"
+                }}
+              </div>
+            </div>
+          </div>
+
           <AmountInputComponent
+            v-if="showAmountInput"
             v-model="invoiceData.amount"
             :enabled="true"
             @enter="requestMintButton"
@@ -68,8 +118,9 @@
         </div>
 
         <!-- Numeric keypad -->
-        <div class="bottom-panel">
-          <div class="keypad-wrapper">
+        <!-- Numeric keypad and Secondary Actions -->
+        <div class="bottom-panel column justify-end">
+          <div class="keypad-wrapper" v-if="showAmountInput">
             <NumericKeyboard
               :force-visible="true"
               :hide-close="true"
@@ -79,11 +130,32 @@
                 !fiatKeyboardMode
               "
               :model-value="String(invoiceData.amount ?? 0)"
-              @update:modelValue="(val: string | number) => (invoiceData.amount = Number(val))"
+              @update:modelValue="
+                (val: string | number) => (invoiceData.amount = Number(val))
+              "
               @done="requestMintButton"
             />
           </div>
-          <!-- Create action below keyboard -->
+
+          <!-- Secondary Actions Container (Add Amount) -->
+          <div class="row justify-center" v-if="isBolt12 && !showAmountInput">
+            <div
+              class="col-12 col-sm-11 col-md-8 q-px-md"
+              style="max-width: 600px"
+            >
+              <q-btn
+                class="full-width"
+                outline
+                rounded
+                color="primary"
+                size="lg"
+                @click="bolt12AddAmount = true"
+                label="Add amount"
+              />
+            </div>
+          </div>
+
+          <!-- Create action (Fixed position relative to bottom) -->
           <div class="row justify-center q-pb-lg q-pt-sm">
             <div
               class="col-12 col-sm-11 col-md-8 q-px-md"
@@ -93,16 +165,18 @@
                 class="full-width"
                 unelevated
                 size="lg"
-                :disable="
-                  invoiceData.amount == null || Number(invoiceData.amount) <= 0
-                "
+                :disable="!canCreate"
                 @click="requestMintButton"
                 color="primary"
                 rounded
                 type="submit"
                 :loading="globalMutexLock || createInvoiceButtonBlocked"
               >
-                {{ $t("InvoiceDetailDialog.actions.create.label") }}
+                {{
+                  isBolt12
+                    ? "Create Offer"
+                    : $t("InvoiceDetailDialog.actions.create.label")
+                }}
                 <template v-slot:loading>
                   <q-spinner />
                 </template>
@@ -117,6 +191,8 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
+import { copyToClipboard } from "quasar";
+import VueQrcode from "@chenfengyuan/vue-qrcode";
 import ChooseMint from "components/ChooseMint.vue";
 import NumericKeyboard from "components/NumericKeyboard.vue";
 import AmountInputComponent from "components/AmountInputComponent.vue";
@@ -125,6 +201,9 @@ import { useUiStore } from "src/stores/ui";
 import { useMintsStore } from "src/stores/mints";
 import { useSettingsStore } from "src/stores/settings";
 import { usePriceStore } from "src/stores/price";
+import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
+import type { InvoiceHistory } from "src/stores/wallet";
+
 declare const windowMixin: any;
 
 export default defineComponent({
@@ -134,12 +213,16 @@ export default defineComponent({
     ChooseMint,
     NumericKeyboard,
     AmountInputComponent,
+    VueQrcode,
   },
   props: {},
   data: function () {
     return {
       createInvoiceButtonBlocked: false,
       fiatKeyboardMode: false as boolean,
+      bolt12AddAmount: false as boolean,
+      copyButtonCopied: false,
+      copyButtonTimeout: null as any,
     };
   },
   computed: {
@@ -147,60 +230,214 @@ export default defineComponent({
       "showNumericKeyboard",
       "showInvoiceDetails",
     ]),
-    ...mapWritableState(useUiStore, ["tickerShort", "globalMutexLock"]),
+    ...mapWritableState(useUiStore, ["globalMutexLock"]),
     ...mapWritableState(useUiStore, ["showCreateInvoiceDialog"]),
     ...mapWritableState(useWalletStore, ["invoiceData"]),
-    ...mapState(useMintsStore, [
+    ...mapWritableState(useMintsStore, [
       "activeUnit",
       "activeUnitLabel",
       "activeUnitCurrencyMultiplyer",
       "activeMintUrl",
+      "mints",
     ]),
     ...mapState(useSettingsStore, [
       "bitcoinPriceCurrency",
       "useNumericKeyboard",
     ]),
     ...mapState(usePriceStore, ["bitcoinPrice", "currentCurrencyPrice"]),
+    isBolt12(): boolean {
+      return this.invoiceData.type === "bolt12";
+    },
+    showAmountInput(): boolean {
+      if (!this.isBolt12) return true;
+      return this.bolt12AddAmount;
+    },
+    bolt11Supported(): boolean {
+      const mintStore = useMintsStore();
+      const mint = mintStore.mints.find(
+        (m) => m.url === mintStore.activeMintUrl
+      );
+      if (!mint) return false;
+      // Check for NUT-4 support (Mint Tokens)
+      const nut4 =
+        mint.info?.nuts?.[4] || mint.info?.nuts?.["4"] || ({} as any);
+      if (nut4.supported === false) return false;
+      // If methods are specified, check for bolt11
+      // If methods are not specified, assume bolt11 is supported
+      if (nut4.methods) {
+        return nut4.methods.some((m: any) => m.method === "bolt11");
+      }
+      return true;
+    },
+    bolt12Supported(): boolean {
+      const mintStore = useMintsStore();
+      const mint = mintStore.mints.find(
+        (m) => m.url === mintStore.activeMintUrl
+      );
+      if (!mint) return false;
+      const nut4 =
+        mint.info?.nuts?.[4] || mint.info?.nuts?.["4"] || ({} as any);
+      if (nut4.supported === false) return false;
+      if (nut4.methods) {
+        return nut4.methods.some((m: any) => m.method === "bolt12");
+      }
+      return true;
+    },
+    canCreate(): boolean {
+      // Bolt11 requires amount > 0
+      // Bolt12 allows 0 amount (amountless offer)
+      if (this.isBolt12) return true;
+      return (
+        this.invoiceData.amount != null && Number(this.invoiceData.amount) > 0
+      );
+    },
+    /**
+     * Find a reusable Bolt12 offer from invoice history.
+     * Reusable means: amountless (amount=0), not expired, matches current mint and unit.
+     */
+    reusableBolt12Offer(): InvoiceHistory | null {
+      const walletStore = useWalletStore();
+      const mintStore = useMintsStore();
+      const now = Date.now();
+
+      // Find offers that are:
+      // 1. Type is bolt12
+      // 2. Amount is 0 (amountless offer)
+      // 3. Not expired (expiry is 0 or in the future)
+      // 4. Matches current active mint and unit
+      const reusableOffers = walletStore.invoiceHistory.filter(
+        (invoice: InvoiceHistory) => {
+          if (invoice.type !== "bolt12") return false;
+          // Must be amountless
+          const quote = invoice.mintQuote as any;
+          if (quote?.amount && quote.amount > 0) return false;
+          // Check expiry: 0 means no expiry, otherwise check if in the future
+          if (quote?.expiry && quote.expiry > 0) {
+            const expiryTime = quote.expiry * 1000; // expiry is in seconds
+            if (expiryTime < now) return false;
+          }
+          // Must match current mint and unit
+          if (invoice.mint !== mintStore.activeMintUrl) return false;
+          if (invoice.unit !== mintStore.activeUnit) return false;
+          if (!invoice.request) return false;
+          return true;
+        }
+      );
+
+      // Return the most recent one (last in array, as they're pushed chronologically)
+      if (reusableOffers.length > 0) {
+        return reusableOffers[reusableOffers.length - 1];
+      }
+      return null;
+    },
+    showReusableOffer(): boolean {
+      return (
+        this.isBolt12 &&
+        !this.showAmountInput &&
+        this.reusableBolt12Offer !== null
+      );
+    },
   },
   watch: {
     showCreateInvoiceDialog: function (val) {
       if (val) {
         this.$nextTick(() => {
+          // If editing a BOLT12 offer with existing amount, don't auto-show keyboard if amount exists?
+          // Actually user likely wants to edit.
           this.showNumericKeyboard = true;
         });
       } else {
       }
     },
+    activeMintUrl: {
+      handler: function () {
+        if (this.bolt11Supported && !this.bolt12Supported) {
+          this.invoiceData.type = "bolt11";
+        } else if (!this.bolt11Supported && this.bolt12Supported) {
+          this.invoiceData.type = "bolt12";
+        }
+      },
+      immediate: true,
+    },
   },
   methods: {
     ...mapActions(useWalletStore, [
-      "requestMint",
+      "requestMintBolt11",
       "mintOnPaid",
       "activeWallet",
+      "requestMintBolt12",
+      "mintOnPaidBolt12",
     ]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
+    toggleInvoiceType() {
+      if (this.isBolt12) {
+        this.invoiceData.type = "bolt11";
+      } else {
+        this.invoiceData.type = "bolt12";
+        this.bolt12AddAmount = false;
+        this.invoiceData.amount = 0;
+      }
+    },
     requestMintButton: async function () {
-      if (!this.invoiceData.amount) {
+      if (!this.canCreate) {
         return;
       }
       try {
         this.showNumericKeyboard = false;
         const amount = Math.floor(
-          this.invoiceData.amount * this.activeUnitCurrencyMultiplyer
+          (this.invoiceData.amount || 0) * this.activeUnitCurrencyMultiplyer
         );
         this.createInvoiceButtonBlocked = true;
+
+        // Get wallet instance
         const wallet = await this.activeWallet(true);
-        const mintQuote = await this.requestMint(amount, wallet);
-        // Switch to QR display dialog
-        this.showCreateInvoiceDialog = false;
-        this.showInvoiceDetails = true;
-        await this.mintOnPaid(mintQuote.quote);
+
+        if (this.isBolt12) {
+          // BOLT12 Flow
+          const mintQuote = await this.requestMintBolt12(amount, wallet);
+
+          this.showCreateInvoiceDialog = false;
+          this.showInvoiceDetails = true;
+
+          // Start listening for payment
+          await this.mintOnPaidBolt12(mintQuote.quote);
+        } else {
+          // BOLT11 Flow
+          const mintQuote = await this.requestMintBolt11(amount, wallet);
+
+          this.showCreateInvoiceDialog = false;
+          this.showInvoiceDetails = true;
+          await this.mintOnPaid(mintQuote.quote);
+        }
       } catch (e) {
         console.log("#### requestMintButton", e);
       } finally {
         this.createInvoiceButtonBlocked = false;
       }
     },
+    async onCopyReusableOffer() {
+      const offer = this.reusableBolt12Offer;
+      const request = offer?.request;
+      if (request) {
+        try {
+          await copyToClipboard(request);
+          this.copyButtonCopied = true;
+          if (this.copyButtonTimeout) {
+            clearTimeout(this.copyButtonTimeout);
+          }
+          this.copyButtonTimeout = setTimeout(() => {
+            this.copyButtonCopied = false;
+          }, 3000);
+        } catch (error) {
+          console.error("Failed to copy to clipboard:", error);
+        }
+      }
+    },
+  },
+  beforeUnmount() {
+    if (this.copyButtonTimeout) {
+      clearTimeout(this.copyButtonTimeout);
+    }
   },
 });
 </script>

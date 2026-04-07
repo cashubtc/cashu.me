@@ -258,8 +258,9 @@ export default defineComponent({
   methods: {
     ...mapActions(useWalletStore, [
       "checkTokenSpendable",
-      "checkInvoice",
-      "checkOutgoingInvoice",
+      "checkInvoiceBolt11",
+      "checkOutgoingInvoiceBolt11",
+      "checkOfferAndMintBolt12",
     ]),
 
     handleLongPress(transaction) {
@@ -350,10 +351,19 @@ export default defineComponent({
           this.checkTokenSpendable(transaction);
         }
       } else if (transaction.type === "lightning") {
-        if (transaction.amount > 0) {
-          this.checkInvoice(transaction.quote, true);
+        // Prefer explicit type check, fallback to heuristic for old history
+        const isBolt12 =
+          transaction.method === "bolt12" ||
+          transaction.method === "bolt12-subpayment" ||
+          (transaction?.mintQuote &&
+            typeof transaction.mintQuote.amount_paid !== "undefined");
+
+        if (isBolt12) {
+          this.checkOfferAndMintBolt12(transaction.quote, true);
+        } else if (transaction.amount > 0) {
+          this.checkInvoiceBolt11(transaction.quote, true);
         } else {
-          this.checkOutgoingInvoice(transaction.quote, true);
+          this.checkOutgoingInvoiceBolt11(transaction.quote, true);
         }
       }
     },
@@ -391,14 +401,22 @@ export default defineComponent({
       this.invoiceData = invoice;
       this.showInvoiceDetails = true;
       if (invoice.status === "pending") {
-        if (invoice.amount > 0) {
+        const isBolt12 =
+          invoice.method === "bolt12" ||
+          invoice.method === "bolt12-subpayment" ||
+          (invoice?.mintQuote &&
+            typeof invoice.mintQuote.amount_paid !== "undefined");
+
+        if (isBolt12) {
+          this.checkOfferAndMintBolt12(invoice.quote, false, false);
+        } else if (invoice.amount > 0) {
           try {
-            await this.checkInvoice(invoice.quote, false, false);
+            await this.checkInvoiceBolt11(invoice.quote, false, false);
           } catch (e) {
             // Handle error
           }
         } else {
-          this.checkOutgoingInvoice(invoice.quote, true);
+          this.checkOutgoingInvoiceBolt11(invoice.quote, true);
         }
       }
     },
@@ -422,6 +440,7 @@ export default defineComponent({
         transactions.push({
           ...invoice,
           type: "lightning",
+          method: invoice.type || "bolt11", // Preserve original type (bolt11/bolt12), default to bolt11
           id: `invoice-${invoice.quote}`,
           label: invoice.label,
         });

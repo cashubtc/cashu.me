@@ -295,7 +295,7 @@ describe("wallet store", () => {
       {
         quote: "q-1",
         amount: 1,
-        bolt11: "lnbc",
+        request: "lnbc",
         memo: "memo",
         date: "old",
         status: "pending",
@@ -376,7 +376,7 @@ describe("wallet store", () => {
 
   it("routes decodeRequest branches", async () => {
     const wallet = useWalletStore();
-    vi.spyOn(wallet, "handleBolt11Invoice").mockResolvedValue(undefined);
+    vi.spyOn(wallet, "handleBolt11InvoiceBolt11").mockResolvedValue(undefined);
     vi.spyOn(wallet, "lnurlPayFirst").mockResolvedValue(undefined);
     vi.spyOn(wallet, "handlePaymentRequest").mockResolvedValue(undefined);
 

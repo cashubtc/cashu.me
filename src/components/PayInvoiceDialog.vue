@@ -55,7 +55,7 @@
           </div>
         </div>
 
-        <!-- Mint selection (match SendTokenDialog layout) -->
+        <!-- Mint selection -->
         <div class="row justify-center">
           <div
             class="col-12 col-sm-11 col-md-8 q-px-lg q-mb-sm"
@@ -192,6 +192,29 @@
                         <div class="text-h6 q-my-none">
                           Error: {{ payInvoiceData.meltQuote.error }}
                         </div>
+                        <!-- BOLT12 amount entry if offer has no amount and errored -->
+                        <div
+                          v-if="payInvoiceData.invoice.bolt12"
+                          class="q-mt-md"
+                        >
+                          <q-input
+                            filled
+                            dense
+                            v-model.number="payInvoiceData.input.amount"
+                            type="number"
+                            :label="`Amount (${tickerShort})`"
+                            @keyup.enter="meltQuoteInvoiceData"
+                          />
+                          <div class="row q-mt-sm">
+                            <q-btn
+                              unelevated
+                              color="primary"
+                              :disabled="!payInvoiceData.input.amount"
+                              @click="meltQuoteInvoiceData"
+                              >Quote</q-btn
+                            >
+                          </div>
+                        </div>
                       </div>
                       <div v-else>
                         <div class="row">
@@ -202,6 +225,29 @@
                               )
                             }}
                             <q-spinner />
+                          </div>
+                        </div>
+                        <!-- BOLT12 amount entry if offer has no amount -->
+                        <div
+                          v-if="payInvoiceData.invoice.bolt12"
+                          class="q-mt-md"
+                        >
+                          <q-input
+                            filled
+                            dense
+                            v-model.number="payInvoiceData.input.amount"
+                            type="number"
+                            :label="`Amount (${tickerShort})`"
+                            @keyup.enter="meltQuoteInvoiceData"
+                          />
+                          <div class="row q-mt-sm">
+                            <q-btn
+                              unelevated
+                              color="primary"
+                              :disabled="!payInvoiceData.input.amount"
+                              @click="meltQuoteInvoiceData"
+                              >Quote</q-btn
+                            >
                           </div>
                         </div>
                       </div>
