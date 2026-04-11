@@ -17,6 +17,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, onBeforeUnmount, ref, watch } from "vue";
+import { sumProofAmounts } from "src/js/proofs";
 import token from "src/js/token";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useMintsStore } from "src/stores/mints";
@@ -53,8 +54,7 @@ export default defineComponent({
     const tokenAmount = computed(() => {
       if (!decodedToken.value) return 0;
       try {
-        const proofs = token.getProofs(decodedToken.value);
-        return proofs.reduce((sum, el) => sum + el.amount, 0);
+        return sumProofAmounts(token.getProofs(decodedToken.value));
       } catch {
         return 0;
       }

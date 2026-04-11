@@ -620,7 +620,6 @@ import AmountInputComponent from "components/AmountInputComponent.vue";
 import ParseInputComponent from "components/ParseInputComponent.vue";
 
 import * as _ from "underscore";
-import { Proof } from "@cashu/cashu-ts";
 
 declare const windowMixin: any;
 
@@ -886,10 +885,7 @@ export default defineComponent({
       this.isPaying = true;
       try {
         const result = await this.meltInvoiceData(true);
-        const returnedChange = result.change.reduce(
-          (acc: number, p: Proof) => acc + p.amount,
-          0
-        );
+        const returnedChange = useProofsStore().sumProofs(result.change);
         this.payInvoiceData.fee_paid =
           this.payInvoiceData.meltQuote.response.fee_reserve - returnedChange;
         console.log("### fee_paid", this.payInvoiceData.fee_paid);

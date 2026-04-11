@@ -106,6 +106,7 @@
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
+import { Amount } from "@cashu/cashu-ts";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState } from "pinia";
 import { useMintsStore } from "stores/mints";
@@ -113,6 +114,7 @@ import { useWalletStore } from "stores/wallet";
 import { useP2PKStore } from "src/stores/p2pk";
 import { usePriceStore } from "src/stores/price";
 import { useSettingsStore } from "src/stores/settings";
+import { sumProofAmounts } from "src/js/proofs";
 import token from "src/js/token";
 import {
   ArrowDownUp as ArrowDownUpIcon,
@@ -202,7 +204,7 @@ export default defineComponent({
     },
     sumProofs: function () {
       const proofs = token.getProofs(token.decode(this.encodedToken));
-      return proofs.flat().reduce((sum, el) => (sum += el.amount), 0);
+      return sumProofAmounts(proofs.flat());
     },
     displayUnit: function () {
       const display = this.formatCurrency(this.sumProofs, this.tokenUnit, true);
@@ -236,9 +238,7 @@ export default defineComponent({
         const mintUrl = token.getMint(tokenJson);
         const unit = token.getUnit(tokenJson);
         const walletStore = useWalletStore();
-        const wallet = walletStore.mintWalletSync(mintUrl, unit);
-        const fee = wallet.getFeesForProofs(proofs);
-        return fee || 0;
+        return walletStore.getFeesForProofs(proofs, mintUrl, unit);
       } catch (e) {
         return 0;
       }

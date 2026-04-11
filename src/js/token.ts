@@ -1,4 +1,5 @@
 import {
+  Amount,
   type Token,
   getDecodedToken,
   getTokenMetadata,
@@ -9,14 +10,26 @@ import { useMintsStore, WalletProof } from "src/stores/mints";
 import { useProofsStore } from "src/stores/proofs";
 export default { decode, decodeFull, getProofs, getMint, getUnit, getMemo };
 
+type DecodedTokenMetadata = TokenMetadata & {
+  amount: number;
+  proofs: WalletProof[];
+};
+
 /**
  * Decodes an encoded cashu token metadata
  */
-function decode(encoded_token: string): TokenMetadata {
+function decode(encoded_token: string): DecodedTokenMetadata {
   if (!encoded_token || encoded_token === "") return;
   const metadata = getTokenMetadata(encoded_token);
-  metadata.proofs = metadata.incompleteProofs;
-  return metadata;
+  return {
+    ...metadata,
+    amount: Amount.from(metadata.amount).toNumber(),
+    proofs:
+      metadata.incompleteProofs?.map((proof) => ({
+        ...proof,
+        amount: Amount.from(proof.amount).toNumber(),
+      })) ?? [],
+  };
 }
 
 /**
@@ -25,11 +38,17 @@ function decode(encoded_token: string): TokenMetadata {
 async function decodeFull(encoded_token: string): Promise<Token> {
   if (!encoded_token || encoded_token === "") return;
   try {
-    return getDecodedToken(encoded_token, useMintsStore().allMintKeysets);
+    return getDecodedToken(
+      encoded_token,
+      useMintsStore().allMintKeysets.map((k) => k.id)
+    );
   } catch (error) {
     const tokenMint = getTokenMetadata(encoded_token).mint;
     const fetchKeysets = await new Mint(tokenMint).getKeySets();
-    return getDecodedToken(encoded_token, fetchKeysets.keysets);
+    return getDecodedToken(
+      encoded_token,
+      fetchKeysets.keysets.map((k: { id: string }) => k.id)
+    );
   }
 }
 

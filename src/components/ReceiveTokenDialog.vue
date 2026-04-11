@@ -436,8 +436,11 @@ export default defineComponent({
       );
     },
     receiveFee: function () {
+      const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
       return this.getFeesForProofs(
-        this.getProofs(this.decodeToken(this.receiveData.tokensBase64))
+        this.getProofs(decodedToken),
+        this.getMint(decodedToken),
+        token.getUnit(decodedToken)
       );
     },
     tokenUnit: function () {

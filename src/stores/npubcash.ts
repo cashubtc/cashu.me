@@ -8,6 +8,7 @@ import { notifyApiError, notifyError, notifySuccess } from "../js/notify";
 import token from "../js/token";
 import { useTokensStore } from "../stores/tokens";
 import { useNostrStore } from "../stores/nostr";
+import { sumProofAmounts } from "src/js/proofs";
 // type NPCConnection = {
 //   walletPublicKey: string,
 //   walletPrivateKey: string,
@@ -198,9 +199,7 @@ export const useNPCStore = defineStore("npc", {
         throw Error("could not decode token");
       }
       // get amount from decodedToken.token.proofs[..].amount
-      const amount = token
-        .getProofs(decodedToken)
-        .reduce((sum, el) => (sum += el.amount), 0);
+      const amount = sumProofAmounts(token.getProofs(decodedToken));
 
       const mintUrl = token.getMint(decodedToken);
       const unit = token.getUnit(decodedToken);

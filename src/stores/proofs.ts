@@ -3,12 +3,24 @@ import { defineStore } from "pinia";
 import { useMintsStore, WalletProof } from "./mints";
 import { cashuDb, CashuDexie, useDexieStore } from "./dexie";
 import {
+  Amount,
   Proof,
+  type ProofLike,
   getEncodedToken,
-  getEncodedTokenV4,
+  normalizeProofAmounts,
   Token,
 } from "@cashu/cashu-ts";
 import { liveQuery } from "dexie";
+import { sumProofAmounts } from "src/js/proofs";
+
+function coerceWalletProofs(raw: ProofLike[]): WalletProof[] {
+  return normalizeProofAmounts(raw).map((proof, index) => ({
+    ...proof,
+    amount: Amount.from(proof.amount).toNumber(),
+    reserved: "reserved" in raw[index] ? Boolean(raw[index].reserved) : false,
+    quote: "quote" in raw[index] ? raw[index].quote : undefined,
+  }));
+}
 
 export const useProofsStore = defineStore("proofs", {
   state: () => {
@@ -16,7 +28,7 @@ export const useProofsStore = defineStore("proofs", {
 
     liveQuery(() => cashuDb.proofs.toArray()).subscribe({
       next: (newProofs) => {
-        proofs.value = newProofs;
+        proofs.value = coerceWalletProofs(newProofs);
         updateActiveProofs();
       },
       error: (err) => {
@@ -49,7 +61,7 @@ export const useProofsStore = defineStore("proofs", {
         .anyOf(keysetIds)
         .toArray()
         .then((proofs) => {
-          return proofs.filter((p) => !p.reserved);
+          return coerceWalletProofs(proofs).filter((p) => !p.reserved);
         });
       mintStore.activeProofs = activeProofs;
     };
@@ -60,11 +72,11 @@ export const useProofsStore = defineStore("proofs", {
     };
   },
   actions: {
-    sumProofs: function (proofs: Proof[]) {
-      return proofs.reduce((s, t) => (s += t.amount), 0);
+    sumProofs: function (proofs: Array<Pick<ProofLike, "amount">>) {
+      return sumProofAmounts(proofs);
     },
     getProofs: async function (): Promise<WalletProof[]> {
-      return await cashuDb.proofs.toArray();
+      return coerceWalletProofs(await cashuDb.proofs.toArray());
     },
     setReserved: async function (
       proofs: Proof[],
@@ -85,7 +97,7 @@ export const useProofsStore = defineStore("proofs", {
       });
     },
     proofsToWalletProofs(proofs: Proof[], quote?: string): WalletProof[] {
-      return proofs.map((p) => {
+      return coerceWalletProofs(proofs as unknown as WalletProof[]).map((p) => {
         return {
           ...p,
           reserved: false,
@@ -110,7 +122,9 @@ export const useProofsStore = defineStore("proofs", {
       });
     },
     async getProofsForQuote(quote: string): Promise<WalletProof[]> {
-      return await cashuDb.proofs.where("quote").equals(quote).toArray();
+      return coerceWalletProofs(
+        await cashuDb.proofs.where("quote").equals(quote).toArray()
+      );
     },
     getUnreservedProofs: function (proofs: WalletProof[]) {
       return proofs.filter((p) => !p.reserved);
@@ -137,15 +151,10 @@ export const useProofsStore = defineStore("proofs", {
       const unit = keysets[0].unit;
       const token = {
         mint: mints[0].url,
-        proofs: proofs,
+        proofs: normalizeProofAmounts(proofs),
         unit: unit,
       } as Token;
-      try {
-        return getEncodedTokenV4(token);
-      } catch (e) {
-        console.log("Could not encode TokenV4, defaulting to TokenV3", e);
-        return getEncodedToken(token);
-      }
+      return getEncodedToken(token);
 
       // // what we put into the JSON
       // let mintsJson = mints.map((m) => [{ url: m.url, ids: m.keysets }][0]);

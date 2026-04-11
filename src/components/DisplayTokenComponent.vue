@@ -335,9 +335,8 @@ import PaymentRequestInfo from "./PaymentRequestInfo.vue";
 import {
   getDecodedToken,
   getEncodedTokenBinary,
-  getEncodedToken,
-  getEncodedTokenV4,
 } from "@cashu/cashu-ts";
+import { sumProofAmounts } from "src/js/proofs";
 import token from "src/js/token";
 import { notifyError, notifySuccess } from "src/js/notify";
 import { copyToClipboard } from "quasar";
@@ -381,7 +380,6 @@ export default defineComponent({
       fragmentIntervalFast: 150,
       framentInervalSlow: 500,
       fragmentSpeedLabel: "F",
-      isV4Token: false,
       scanningCard: false,
       showExpandedButtons: false,
       showDeleteDialog: false,
@@ -398,7 +396,7 @@ export default defineComponent({
     // display helpers
     sumProofs: function () {
       const proofs = token.getProofs(token.decode(this.sendData.tokensBase64));
-      return proofs.flat().reduce((sum, el) => (sum += el.amount), 0);
+      return sumProofAmounts(proofs.flat());
     },
     displayUnit: function () {
       const display = this.formatCurrency(this.sumProofs, this.tokenUnit);
@@ -438,7 +436,6 @@ export default defineComponent({
         this.qrCodeFragment = "";
         this.startQrCodeLoop();
       }
-      this.isV4Token = val.startsWith("cashuB");
     },
   },
   methods: {
@@ -470,7 +467,6 @@ export default defineComponent({
         this.qrCodeFragment = "";
         this.startQrCodeLoop();
       }
-      this.isV4Token = val.startsWith("cashuB");
     },
     startQrCodeLoop: async function () {
       if (this.sendData.tokensBase64.length == 0) {
@@ -513,22 +509,6 @@ export default defineComponent({
         this.fragmentLengthLabel = "M";
       }
       this.startQrCodeLoop();
-    },
-    toggleTokenEncoding: function () {
-      const decodedToken = token.decode(this.sendData.tokensBase64);
-      if (this.sendData.tokensBase64.startsWith("cashuA")) {
-        try {
-          this.sendData.tokensBase64 = getEncodedTokenV4(decodedToken);
-        } catch {
-          this.sendData.tokensBase64 = getEncodedToken(decodedToken, {
-            version: 3,
-          });
-        }
-      } else {
-        this.sendData.tokensBase64 = getEncodedToken(decodedToken, {
-          version: 3,
-        });
-      }
     },
     encodeToPeanut: function (tokenStr: string) {
       return (

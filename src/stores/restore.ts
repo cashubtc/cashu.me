@@ -97,11 +97,9 @@ export const useRestoreStore = defineStore("restore", {
             console.log(`No proofs found for keyset ${keyset.id}`);
             emptyBatchCount++;
           } else {
+            const restoredBatchAmount = proofsStore.sumProofs(proofs);
             console.log(
-              `> Restored ${proofs.length} proofs with sum ${proofs.reduce(
-                (s, p) => s + p.amount,
-                0
-              )}`
+              `> Restored ${proofs.length} proofs with sum ${restoredBatchAmount}`
             );
             restoreProofs = restoreProofs.concat(proofs);
             emptyBatchCount = 0;
@@ -143,13 +141,9 @@ export const useRestoreStore = defineStore("restore", {
             (p) => !spentProofsSecrets.includes(p.secret)
           );
           if (unspentProofs.length > 0) {
+            const unspentAmount = proofsStore.sumProofs(unspentProofs);
             console.log(
-              `Found ${
-                unspentProofs.length
-              } unspent proofs with sum ${unspentProofs.reduce(
-                (s, p) => s + p.amount,
-                0
-              )}`
+              `Found ${unspentProofs.length} unspent proofs with sum ${unspentAmount}`
             );
           }
           const newProofs = unspentProofs.filter(
@@ -160,7 +154,7 @@ export const useRestoreStore = defineStore("restore", {
           currentStep++;
           this.restoreProgress = currentStep / totalSteps;
         }
-        const restoredAmount = restoredProofs.reduce((s, p) => s + p.amount, 0);
+        const restoredAmount = proofsStore.sumProofs(restoredProofs);
         const restoredAmountStr = useUiStore().formatCurrency(
           restoredAmount,
           keyset.unit

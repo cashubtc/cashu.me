@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { useWalletStore } from "./wallet";
 import {
+  Amount,
   decodePaymentRequest,
   PaymentRequest,
   PaymentRequestPayload,
@@ -181,7 +182,7 @@ export const usePRStore = defineStore("payment-request", {
       console.log("decodePaymentRequest", pr);
       const request: PaymentRequest = decodePaymentRequest(pr);
       console.log("decodePaymentRequest", request);
-      const mintsStore = useMintsStore() as any;
+      const mintsStore = useMintsStore();
       // activate the mint in the payment request
       if (request.mints && request.mints.length > 0) {
         let foundMint = false;
@@ -221,7 +222,8 @@ export const usePRStore = defineStore("payment-request", {
       // if the payment request has an amount, set it
       if (request.amount) {
         sendTokenStore.sendData.amount =
-          request.amount / mintsStore.activeUnitCurrencyMultiplyer;
+          Amount.from(request.amount).toNumber() /
+          mintsStore.activeUnitCurrencyMultiplyer;
       }
       // Also make sure this decoded request gets stored (e.g., if user pasted an older one)
       try {

@@ -6,6 +6,7 @@ import { notifyError, notifySuccess } from "../js/notify";
 import { useTokensStore } from "./tokens";
 import { currentDateStr } from "src/js/utils";
 import { useProofsStore } from "./proofs";
+import { deserializeProofs, JSONInt } from "@cashu/cashu-ts";
 
 export const useStorageStore = defineStore("storage", {
   state: () => ({
@@ -24,7 +25,7 @@ export const useStorageStore = defineStore("storage", {
         for (const key of keys) {
           // we treat some keys differently *magic*
           if (key === "cashu.dexie.db.proofs") {
-            const proofs = JSON.parse(backup[key]);
+            const proofs = deserializeProofs(backup[key]);
             await proofsStore.addProofs(proofs);
           } else {
             localStorage.setItem(key, backup[key]);
@@ -46,7 +47,7 @@ export const useStorageStore = defineStore("storage", {
       }
       // proofs table *magic*
       const proofs = await useProofsStore().getProofs();
-      jsonToSave["cashu.dexie.db.proofs"] = JSON.stringify(proofs);
+      jsonToSave["cashu.dexie.db.proofs"] = JSONInt.stringify(proofs);
 
       const textToSave = JSON.stringify(jsonToSave);
       const textToSaveAsBlob = new Blob([textToSave], {

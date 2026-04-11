@@ -57,6 +57,12 @@ const h = vi.hoisted(() => {
   const walletLoadMintFromCache = vi.fn();
   const walletGetFeesForProofs = vi.fn(() => 7);
   const keychainMintToCacheDTO = vi.fn(() => ({ cache: "dto" }));
+  const tokenModule = {
+    decodeFull: vi.fn(),
+    getProofs: vi.fn(),
+    getMint: vi.fn(),
+    getUnit: vi.fn(),
+  };
 
   class WalletMock {
     constructor(url, options) {
@@ -100,6 +106,7 @@ const h = vi.hoisted(() => {
     walletLoadMintFromCache,
     walletGetFeesForProofs,
     keychainMintToCacheDTO,
+    tokenModule,
     WalletMock,
   };
 });
@@ -134,6 +141,15 @@ vi.mock("light-bolt11-decoder", () => ({
 }));
 
 vi.mock("@cashu/cashu-ts", () => ({
+  Amount: {
+    from: (value) => ({
+      toNumber: () => Number(value),
+    }),
+  },
+  sumProofs: (proofs) => ({
+    toNumber: () =>
+      proofs.reduce((sum, proof) => sum + Number(proof.amount), 0),
+  }),
   Wallet: h.WalletMock,
   KeyChain: {
     mintToCacheDTO: (...args) => h.keychainMintToCacheDTO(...args),
@@ -189,6 +205,10 @@ vi.mock("src/stores/mints", async () => {
     useMintsStore: () => h.mintsStore,
   };
 });
+
+vi.mock("src/js/token", () => ({
+  default: h.tokenModule,
+}));
 
 import { useWalletStore } from "src/stores/wallet";
 
@@ -343,6 +363,25 @@ describe("wallet store", () => {
     );
   });
 
+  it("gets fees using the provided mint context instead of the active mint", () => {
+    const wallet = useWalletStore();
+    h.mintsStore.mints.push({
+      url: "https://mint-b.example",
+      keys: [{ id: "00bb" }],
+      keysets: [{ id: "00bb", unit: "sat", active: true }],
+      info: { name: "mint-b" },
+    });
+
+    wallet.getFeesForProofs([{ id: "00bb" }], "https://mint-b.example", "sat");
+
+    expect(h.keychainMintToCacheDTO).toHaveBeenLastCalledWith(
+      "https://mint-b.example",
+      [{ id: "00bb", unit: "sat", active: true }],
+      [{ id: "00bb" }]
+    );
+    expect(h.walletGetFeesForProofs).toHaveBeenCalledWith([{ id: "00bb" }]);
+  });
+
   it("refreshes stale keysets when requested", async () => {
     const wallet = useWalletStore();
     h.mintsStore.mints = [
@@ -359,6 +398,46 @@ describe("wallet store", () => {
     expect(h.mintsStore.updateMintInfoAndKeys).toHaveBeenCalledTimes(1);
   });
 
+  it("uses the wallet mint context when calculating send fees", async () => {
+    const wallet = useWalletStore();
+    const proofs = [{ id: "00bb", amount: 10, reserved: false, secret: "s1" }];
+    const foreignWallet = {
+      mint: { mintUrl: "https://mint-b.example" },
+      unit: "sat",
+      selectProofsToSend: vi.fn(() => ({ send: proofs, keep: [] })),
+      ops: {
+        send: vi.fn(() => ({
+          asDeterministic: vi.fn(() => ({
+            keyset: vi.fn(() => ({
+              proofsWeHave: vi.fn(() => ({
+                run: vi.fn(async () => ({ keep: [], send: [] })),
+              })),
+            })),
+          })),
+        })),
+      },
+    };
+
+    h.mintsStore.mints.push({
+      url: "https://mint-b.example",
+      keys: [{ id: "00bb" }],
+      keysets: [{ id: "00bb", unit: "sat", active: true }],
+      info: { name: "mint-b" },
+    });
+
+    const feeSpy = vi.spyOn(wallet, "getFeesForProofs");
+    vi.spyOn(wallet, "getKeyset").mockReturnValue("00bb");
+    h.walletGetFeesForProofs.mockReturnValue(0);
+
+    await wallet.send(proofs, foreignWallet, 10, false, true);
+
+    expect(feeSpy).toHaveBeenCalledWith(
+      proofs,
+      "https://mint-b.example",
+      "sat"
+    );
+  });
+
   it("accounts for signed-output errors", () => {
     const wallet = useWalletStore();
     wallet.keysetCounters = [{ id: "00aa", counter: 1 }];
@@ -369,9 +448,7 @@ describe("wallet store", () => {
 
     expect(handled).toBe(true);
     expect(wallet.keysetCounter("00aa")).toBe(11);
-    expect(h.notify).toHaveBeenCalledWith(
-      "wallet.notifications.please_try_again"
-    );
+    expect(h.notify).not.toHaveBeenCalled();
   });
 
   it("routes decodeRequest branches", async () => {
@@ -405,5 +482,52 @@ describe("wallet store", () => {
       "creqb1cashurequest"
     );
     expect(h.uiStore.closeDialogs).toHaveBeenCalled();
+  });
+
+  it("redeem shows the normalized received amount for v4 proofs", async () => {
+    const wallet = useWalletStore();
+    h.receiveTokensStore.receiveData.tokensBase64 = "cashuB500";
+
+    const decodedToken = { mint: "https://mint-a.example", unit: "sat" };
+    const inputProofs = [{ id: "00aa", amount: 500, secret: "s-in" }];
+    const receivedProofs = [
+      { id: "00aa", amount: { weird: "amount-shape" }, secret: "s-out" },
+    ];
+
+    h.tokenModule.decodeFull.mockResolvedValue(decodedToken);
+    h.tokenModule.getProofs.mockReturnValue(inputProofs);
+    h.tokenModule.getMint.mockReturnValue("https://mint-a.example");
+    h.tokenModule.getUnit.mockReturnValue("sat");
+
+    h.proofsStore.sumProofs.mockImplementation((proofs) => {
+      if (proofs === receivedProofs) return 500;
+      return proofs.reduce((sum, p) => sum + p.amount, 0);
+    });
+
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue({
+      ops: {
+        receive: vi.fn(() => ({
+          asDeterministic: vi.fn(() => ({
+            privkey: vi.fn(() => ({
+              onCountersReserved: vi.fn(() => ({
+                proofsWeHave: vi.fn(() => ({
+                  run: vi.fn(async () => receivedProofs),
+                })),
+              })),
+            })),
+          })),
+        })),
+      },
+    });
+
+    await wallet.redeem();
+
+    expect(h.notifySuccess).toHaveBeenCalledWith(
+      "wallet.notifications.received"
+    );
+    expect(h.uiStore.formatCurrency).toHaveBeenCalledWith(500, "sat");
+    expect(h.tokensStore.addPaidToken).toHaveBeenCalledWith(
+      expect.objectContaining({ amount: 500, fee: 0, unit: "sat" })
+    );
   });
 });
