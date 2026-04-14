@@ -14,12 +14,16 @@ import { liveQuery } from "dexie";
 import { sumProofAmounts } from "src/js/proofs";
 
 function coerceWalletProofs(raw: ProofLike[]): WalletProof[] {
-  return normalizeProofAmounts(raw).map((proof, index) => ({
-    ...proof,
-    amount: Amount.from(proof.amount).toNumber(),
-    reserved: "reserved" in raw[index] ? Boolean(raw[index].reserved) : false,
-    quote: "quote" in raw[index] ? raw[index].quote : undefined,
-  }));
+  return raw.map((proof) => {
+    const { amount, ...rest } = proof;
+    const rec = proof as Record<string, unknown>;
+    return {
+      ...rest,
+      amount: Amount.from(amount).toNumber(),
+      reserved: "reserved" in rec ? Boolean(rec.reserved) : false,
+      quote: "quote" in rec ? (rec.quote as string | undefined) : undefined,
+    };
+  });
 }
 
 export const useProofsStore = defineStore("proofs", {
@@ -79,7 +83,7 @@ export const useProofsStore = defineStore("proofs", {
       return coerceWalletProofs(await cashuDb.proofs.toArray());
     },
     setReserved: async function (
-      proofs: Proof[],
+      proofs: Array<Pick<Proof, "secret">>,
       reserved: boolean = true,
       quote?: string
     ) {
@@ -96,16 +100,16 @@ export const useProofsStore = defineStore("proofs", {
         }
       });
     },
-    proofsToWalletProofs(proofs: Proof[], quote?: string): WalletProof[] {
-      return coerceWalletProofs(proofs as unknown as WalletProof[]).map((p) => {
+    proofsToWalletProofs(proofs: ProofLike[], quote?: string): WalletProof[] {
+      return coerceWalletProofs(proofs).map((p) => {
         return {
           ...p,
           reserved: false,
           quote: quote,
-        } as WalletProof;
+        };
       });
     },
-    async addProofs(proofs: Proof[], quote?: string) {
+    async addProofs(proofs: ProofLike[], quote?: string) {
       const walletProofs = this.proofsToWalletProofs(proofs);
       await cashuDb.transaction("rw", cashuDb.proofs, async () => {
         walletProofs.forEach(async (p) => {
@@ -113,7 +117,7 @@ export const useProofsStore = defineStore("proofs", {
         });
       });
     },
-    async removeProofs(proofs: Proof[]) {
+    async removeProofs(proofs: ProofLike[]) {
       const walletProofs = this.proofsToWalletProofs(proofs);
       await cashuDb.transaction("rw", cashuDb.proofs, async () => {
         walletProofs.forEach(async (p) => {
@@ -129,7 +133,7 @@ export const useProofsStore = defineStore("proofs", {
     getUnreservedProofs: function (proofs: WalletProof[]) {
       return proofs.filter((p) => !p.reserved);
     },
-    serializeProofs: function (proofs: Proof[]): string {
+    serializeProofs: function (proofs: ProofLike[]): string {
       const mintStore = useMintsStore();
       // unique keyset IDs of proofs
       const uniqueIds = [...new Set(proofs.map((p) => p.id))];

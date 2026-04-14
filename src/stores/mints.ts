@@ -84,8 +84,13 @@ export class MintClass {
   }
 }
 
-// type that extends type Proof with reserved boolean
-export type WalletProof = Proof & { reserved: boolean; quote?: string };
+// App-local proof type with number amount (strategy b) and wallet metadata.
+// Uses Omit to override Proof.amount (Amount) with number.
+export type WalletProof = Omit<Proof, "amount"> & {
+  amount: number;
+  reserved: boolean;
+  quote?: string;
+};
 
 export type Balances = {
   [unit: string]: number;
@@ -235,8 +240,8 @@ export const useMintsStore = defineStore("mints", {
         return 1;
       }
     },
-    allMintKeysets: function () {
-      return [].concat(...this.mints.map((m) => m.keysets));
+    allMintKeysets(): MintKeyset[] {
+      return this.mints.flatMap((m: StoredMint) => m.keysets);
     },
   },
   actions: {
@@ -629,11 +634,11 @@ export const useMintsStore = defineStore("mints", {
       // Trigger Nostr backup if enabled
       this.triggerNostrBackup();
     },
-    assertMintError: function (response: { error?: any }, verbose = true) {
+    assertMintError: function (response: Record<string, unknown>, verbose = true) {
       if (response.error != null) {
         if (verbose) {
           notifyError(
-            response.error,
+            String(response.error),
             this.t("wallet.mint.notifications.error")
           );
         }

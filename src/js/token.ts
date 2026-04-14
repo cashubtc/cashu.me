@@ -1,6 +1,7 @@
 import {
   Amount,
   type Token,
+  type Proof,
   getDecodedToken,
   getTokenMetadata,
   Mint,
@@ -10,15 +11,20 @@ import { useMintsStore, WalletProof } from "src/stores/mints";
 import { useProofsStore } from "src/stores/proofs";
 export default { decode, decodeFull, getProofs, getMint, getUnit, getMemo };
 
-type DecodedTokenMetadata = TokenMetadata & {
+// Incomplete proofs from getTokenMetadata lack `id` (keyset ID).
+type IncompleteWalletProof = Omit<Proof, "amount" | "id"> & {
   amount: number;
-  proofs: WalletProof[];
+};
+
+type DecodedTokenMetadata = Omit<TokenMetadata, "amount" | "incompleteProofs"> & {
+  amount: number;
+  proofs: IncompleteWalletProof[];
 };
 
 /**
  * Decodes an encoded cashu token metadata
  */
-function decode(encoded_token: string): DecodedTokenMetadata {
+function decode(encoded_token: string): DecodedTokenMetadata | undefined {
   if (!encoded_token || encoded_token === "") return;
   const metadata = getTokenMetadata(encoded_token);
   return {
@@ -35,7 +41,7 @@ function decode(encoded_token: string): DecodedTokenMetadata {
 /**
  * Decodes an encoded cashu token with full proofs
  */
-async function decodeFull(encoded_token: string): Promise<Token> {
+async function decodeFull(encoded_token: string): Promise<Token | undefined> {
   if (!encoded_token || encoded_token === "") return;
   try {
     return getDecodedToken(
