@@ -26,12 +26,12 @@ type DecodedTokenMetadata = Omit<TokenMetadata, "amount" | "incompleteProofs"> &
  */
 function decode(encoded_token: string): DecodedTokenMetadata | undefined {
   if (!encoded_token || encoded_token === "") return;
-  const metadata = getTokenMetadata(encoded_token);
+  const { incompleteProofs, amount, ...rest } = getTokenMetadata(encoded_token);
   return {
-    ...metadata,
-    amount: Amount.from(metadata.amount).toNumber(),
+    ...rest,
+    amount: Amount.from(amount).toNumber(),
     proofs:
-      metadata.incompleteProofs?.map((proof) => ({
+      incompleteProofs?.map((proof) => ({
         ...proof,
         amount: Amount.from(proof.amount).toNumber(),
       })) ?? [],

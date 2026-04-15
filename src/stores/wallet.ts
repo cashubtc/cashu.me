@@ -37,6 +37,7 @@ import {
   MeltQuoteState,
   MintQuoteState,
   ProofState,
+  type SerializedBlindedSignature,
   KeyChain,
   type AmountLike,
   // ConsoleLogger,
@@ -86,7 +87,7 @@ type AppMeltQuote = {
   expiry: number;
   request: string;
   payment_preimage: string | null;
-  change?: unknown[];
+  change?: SerializedBlindedSignature[];
 };
 
 export type InvoiceHistory = Invoice & {
@@ -132,12 +133,10 @@ function normalizeMeltQuote(quote: MeltQuoteBolt11Response): AppMeltQuote {
 
 /** Re-wrap number amounts back to Amount for passing to cashu-ts APIs */
 function toMeltQuote(quote: AppMeltQuote): MeltQuoteBolt11Response {
-  const { change, ...rest } = quote;
   return {
-    ...rest,
+    ...quote,
     amount: Amount.from(quote.amount),
     fee_reserve: Amount.from(quote.fee_reserve),
-    ...(change ? { change: change as MeltQuoteBolt11Response["change"] } : {}),
   };
 }
 
@@ -1366,7 +1365,7 @@ export const useWalletStore = defineStore("wallet", {
         const wallet = await this.activeWallet();
         const unsub = await wallet.on.proofStateUpdates(
           toProofs(oneProof),
-          async (proofState: ProofState) => {
+          async (proofState: ProofState & { proof: Proof }) => {
             console.log(`Websocket: proof state updated: ${proofState.state}`);
             if (proofState.state == CheckStateEnum.SPENT) {
               const tokenSpent = await this.checkTokenSpendable(historyToken);
