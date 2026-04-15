@@ -54,10 +54,11 @@ async function decodeFull(encoded_token: string): Promise<Token | undefined> {
     );
   } catch (error) {
     const tokenMint = getTokenMetadata(encoded_token).mint;
-    const knownMint = mintStore.mints.find((m) => m.url === tokenMint);
-    if (!knownMint) {
-      throw new Error(`Token mint is not trusted: ${tokenMint}`);
-    }
+    // TODO: Should tokens from unknown mints "call home" for keysets automatically?
+    // const knownMint = mintStore.mints.find((m) => m.url === tokenMint);
+    // if (!knownMint) {
+    //   throw new Error(`Token is from a mint you have not trusted: ${tokenMint}`);
+    // }
     const fetchKeysets = await new Mint(tokenMint).getKeySets();
     return getDecodedToken(
       encoded_token,
