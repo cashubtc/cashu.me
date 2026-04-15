@@ -332,10 +332,7 @@ import TokenInformation from "components/TokenInformation.vue";
 import MeltQuoteInformation from "components/MeltQuoteInformation.vue";
 import SendPaymentRequest from "./SendPaymentRequest.vue";
 import PaymentRequestInfo from "./PaymentRequestInfo.vue";
-import {
-  getDecodedToken,
-  getEncodedTokenBinary,
-} from "@cashu/cashu-ts";
+import { getDecodedToken, getEncodedTokenBinary } from "@cashu/cashu-ts";
 import { sumProofAmounts } from "src/js/proofs";
 import token from "src/js/token";
 import { notifyError, notifySuccess } from "src/js/notify";

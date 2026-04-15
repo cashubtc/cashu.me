@@ -76,7 +76,9 @@ type Invoice = {
 
 // The app uses number-typed amounts (strategy b). These types represent
 // cashu-ts quote responses with top-level Amount fields converted to number.
-type AppMintQuote = Omit<MintQuoteBolt11Response, "amount"> & { amount: number };
+type AppMintQuote = Omit<MintQuoteBolt11Response, "amount"> & {
+  amount: number;
+};
 type AppMeltQuote = {
   quote: string;
   amount: number;
@@ -581,18 +583,21 @@ export const useWalletStore = defineStore("wallet", {
             targetAmount,
             true
           );
-          ({
-            keep: keepProofs,
-            send: sendProofs,
-          } = await this.retryOnceOnSignedOutputs(keysetId, async () =>
-            swapWallet.ops
-              .send(targetAmount, proofsToSend)
-              .asDeterministic()
-              .keyset(keysetId)
-              .onCountersReserved((info) => this.applyReservedCounters(info))
-              .proofsWeHave(spendableProofs)
-              .run()
-          , swapWallet));
+          ({ keep: keepProofs, send: sendProofs } =
+            await this.retryOnceOnSignedOutputs(
+              keysetId,
+              async () =>
+                swapWallet.ops
+                  .send(targetAmount, proofsToSend)
+                  .asDeterministic()
+                  .keyset(keysetId)
+                  .onCountersReserved((info) =>
+                    this.applyReservedCounters(info)
+                  )
+                  .proofsWeHave(spendableProofs)
+                  .run(),
+              swapWallet
+            ));
           await proofsStore.addProofs(keepProofs);
           await proofsStore.addProofs(sendProofs);
 
@@ -673,15 +678,18 @@ export const useWalletStore = defineStore("wallet", {
         const privkey = receiveStore.receiveData.p2pkPrivateKey;
         let proofs: Proof[];
         try {
-          proofs = await this.retryOnceOnSignedOutputs(keysetId, async () =>
-            mintWallet.ops
-              .receive(receiveStore.receiveData.tokensBase64)
-              .asDeterministic()
-              .privkey(privkey)
-              .onCountersReserved((info) => this.applyReservedCounters(info))
-              .proofsWeHave(mintStore.mintUnitProofs(mint, historyToken.unit))
-              .run()
-          , mintWallet);
+          proofs = await this.retryOnceOnSignedOutputs(
+            keysetId,
+            async () =>
+              mintWallet.ops
+                .receive(receiveStore.receiveData.tokensBase64)
+                .asDeterministic()
+                .privkey(privkey)
+                .onCountersReserved((info) => this.applyReservedCounters(info))
+                .proofsWeHave(mintStore.mintUnitProofs(mint, historyToken.unit))
+                .run(),
+            mintWallet
+          );
           await proofsStore.addProofs(proofs);
         } catch (error: any) {
           console.error(error);
@@ -987,18 +995,19 @@ export const useWalletStore = defineStore("wallet", {
         if (releaseMutex) uIStore.unlockMutex(); // Momentarely release the mutex (needed for concurrent melts)
         let data;
         try {
-          data = await this.retryOnceOnSignedOutputs(keysetId, async () =>
-            mintWallet.ops
-              .meltBolt11(toMeltQuote(quote), sendProofs)
-              .keyset(keysetId)
-              .asDeterministic()
-              .onCountersReserved((info) => this.applyReservedCounters(info))
-              .run()
-          , mintWallet);
-          // store melt quote in invoice history
-          this.updateOutgoingInvoiceInHistory(
-            normalizeMeltQuote(data.quote)
+          data = await this.retryOnceOnSignedOutputs(
+            keysetId,
+            async () =>
+              mintWallet.ops
+                .meltBolt11(toMeltQuote(quote), sendProofs)
+                .keyset(keysetId)
+                .asDeterministic()
+                .onCountersReserved((info) => this.applyReservedCounters(info))
+                .run(),
+            mintWallet
           );
+          // store melt quote in invoice history
+          this.updateOutgoingInvoiceInHistory(normalizeMeltQuote(data.quote));
         } catch (error) {
           throw error;
         } finally {
@@ -1097,7 +1106,9 @@ export const useWalletStore = defineStore("wallet", {
       }
       try {
         uIStore.triggerActivityOrb();
-        const { spent: spentProofs } = await wallet.groupProofsByState(toProofs(proofs));
+        const { spent: spentProofs } = await wallet.groupProofsByState(
+          toProofs(proofs)
+        );
         if (spentProofs.length) {
           await proofsStore.removeProofs(spentProofs);
           // update UI
@@ -1277,8 +1288,7 @@ export const useWalletStore = defineStore("wallet", {
         const meltQuote = normalizeMeltQuote(
           await mintWallet.mint.checkMeltQuoteBolt11(quote)
         );
-        this.updateOutgoingInvoiceInHistory(meltQuote
-        );
+        this.updateOutgoingInvoiceInHistory(meltQuote);
         if (meltQuote.state == MeltQuoteState.PENDING) {
           console.log("### mintQuote not paid yet");
           if (verbose) {

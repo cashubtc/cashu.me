@@ -984,8 +984,7 @@ export default defineComponent({
         mintsToQuotes.reduce(
           (acc, q) => acc + q[1].amount + q[1].fee_reserve,
           0
-        ) -
-        data.reduce((acc, d) => acc + sumProofAmounts(d.change), 0);
+        ) - data.reduce((acc, d) => acc + sumProofAmounts(d.change), 0);
 
       notifySuccess(
         "Paid " +

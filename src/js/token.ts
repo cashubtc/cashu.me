@@ -16,7 +16,10 @@ type IncompleteWalletProof = Omit<Proof, "amount" | "id"> & {
   amount: number;
 };
 
-type DecodedTokenMetadata = Omit<TokenMetadata, "amount" | "incompleteProofs"> & {
+type DecodedTokenMetadata = Omit<
+  TokenMetadata,
+  "amount" | "incompleteProofs"
+> & {
   amount: number;
   proofs: IncompleteWalletProof[];
 };
@@ -82,7 +85,11 @@ function getMint(decoded_token: { mint: string; proofs: unknown[] }) {
   }
 }
 
-function getUnit(decoded_token: { mint: string; proofs: unknown[]; unit?: string }) {
+function getUnit(decoded_token: {
+  mint: string;
+  proofs: unknown[];
+  unit?: string;
+}) {
   if (decoded_token.unit != null) {
     return decoded_token.unit;
   } else {

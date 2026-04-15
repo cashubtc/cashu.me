@@ -32,7 +32,10 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       } catch (error) {}
       return decodedToken;
     },
-    knowThisMintOfTokenJson: function (tokenJson: { mint: string; proofs: unknown[] }) {
+    knowThisMintOfTokenJson: function (tokenJson: {
+      mint: string;
+      proofs: unknown[];
+    }) {
       const mintStore = useMintsStore();
       return mintStore.mints
         .map((m) => m.url)

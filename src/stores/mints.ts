@@ -634,7 +634,10 @@ export const useMintsStore = defineStore("mints", {
       // Trigger Nostr backup if enabled
       this.triggerNostrBackup();
     },
-    assertMintError: function (response: Record<string, unknown>, verbose = true) {
+    assertMintError: function (
+      response: Record<string, unknown>,
+      verbose = true
+    ) {
       if (response.error != null) {
         if (verbose) {
           notifyError(

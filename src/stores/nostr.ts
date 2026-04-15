@@ -39,7 +39,6 @@ import { usePRStore } from "./payment-request";
 import token from "../js/token";
 import { HistoryToken } from "./tokens";
 
-
 type NostrEventLog = {
   id: string;
   created_at: number;
