@@ -69,10 +69,7 @@ function getProofs(decoded_token: Token): WalletProof[] {
   return useProofsStore().proofsToWalletProofs(proofs);
 }
 
-function getMint(decoded_token: Token) {
-  /*
-      Returns first mint of a token (very rough way).
-      */
+function getMint(decoded_token: Pick<Token, "mint" | "proofs">) {
   if (decoded_token.proofs.length > 0) {
     return decoded_token.mint;
   } else {
@@ -80,7 +77,7 @@ function getMint(decoded_token: Token) {
   }
 }
 
-function getUnit(decoded_token: Token) {
+function getUnit(decoded_token: Pick<Token, "mint" | "proofs"> & { unit?: string }) {
   if (decoded_token.unit != null) {
     return decoded_token.unit;
   } else {
@@ -97,7 +94,7 @@ function getUnit(decoded_token: Token) {
   }
 }
 
-function getMemo(decoded_token: Token) {
+function getMemo(decoded_token: Pick<Token, "mint"> & { memo?: string }) {
   if (decoded_token.memo != null) {
     return decoded_token.memo;
   } else {

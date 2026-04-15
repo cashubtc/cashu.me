@@ -3,6 +3,7 @@ import { useWalletStore } from "./wallet";
 import {
   Amount,
   decodePaymentRequest,
+  normalizeProofAmounts,
   PaymentRequest,
   PaymentRequestPayload,
   PaymentRequestTransport,
@@ -277,7 +278,7 @@ export const usePRStore = defineStore("payment-request", {
         id: request.id,
         mint: mint,
         unit: request.unit || "",
-        proofs: proofs,
+        proofs: normalizeProofAmounts(proofs),
       };
       const paymentPayloadString = JSON.stringify(paymentPayload);
       try {
@@ -311,7 +312,7 @@ export const usePRStore = defineStore("payment-request", {
         id: request.id,
         mint: mint,
         unit: unit,
-        proofs: proofs,
+        proofs: normalizeProofAmounts(proofs),
       };
       const paymentPayloadString = JSON.stringify(paymentPayload);
       try {

@@ -586,7 +586,7 @@ export default defineComponent({
                     case "binary": {
                       const decoded = getDecodedToken(
                         this.sendData.tokensBase64,
-                        useMintsStore().allMintKeysets
+                        useMintsStore().allMintKeysets.map((k) => k.id)
                       );
                       const data = getEncodedTokenBinary(decoded);
                       records = [

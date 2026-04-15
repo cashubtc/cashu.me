@@ -150,7 +150,7 @@ export const useMintsStore = defineStore("mints", {
     };
   },
   getters: {
-    multiMints({ activeUnit }) {
+    multiMints({ activeUnit }): StoredMint[] {
       return this.mints.filter((m) => {
         try {
           const version = m.info?.version;
