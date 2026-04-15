@@ -29,25 +29,9 @@ module.exports = configure(function (/* ctx */) {
   return {
     eslint: {
       // fix: true,
-      include: [
-        "src/**/*.js",
-        "src/**/*.ts",
-        "src/**/*.vue",
-        "src-*/**/*.js",
-        "src-*/**/*.ts",
-        "src-*/**/*.vue",
-        "test/**/*.js",
-        "test/**/*.ts",
-        "*.js",
-      ],
-      exclude: [/\/cashu-ts\//, /\/cashu-ts\/lib\//],
-      rawOptions: {
-        overrideConfig: {
-          ignorePatterns: [
-            "**/cashu-ts/**",
-          ],
-        },
-      },
+      // include: [],
+      // exclude: [],
+      // rawOptions: {},
       warnings: true,
       errors: true,
     },
@@ -103,8 +87,6 @@ module.exports = configure(function (/* ctx */) {
       extendViteConf(viteConf) {
         viteConf.define = viteConf.define || {};
         viteConf.define.GIT_COMMIT = JSON.stringify(resolveGitCommit());
-        viteConf.resolve = viteConf.resolve || {};
-        viteConf.resolve.preserveSymlinks = true;
         viteConf.optimizeDeps = viteConf.optimizeDeps || {};
         viteConf.optimizeDeps.exclude = [
           ...(viteConf.optimizeDeps.exclude || []),
