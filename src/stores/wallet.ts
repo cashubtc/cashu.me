@@ -37,7 +37,6 @@ import {
   MeltQuoteState,
   MintQuoteState,
   ProofState,
-  type SerializedBlindedSignature,
   KeyChain,
   type AmountLike,
   // ConsoleLogger,
@@ -87,7 +86,6 @@ type AppMeltQuote = {
   expiry: number;
   request: string;
   payment_preimage: string | null;
-  change?: SerializedBlindedSignature[];
 };
 
 export type InvoiceHistory = Invoice & {
@@ -124,8 +122,10 @@ function normalizeMintQuote(quote: MintQuoteBolt11Response): AppMintQuote {
   return { ...quote, amount: amountToNumber(quote.amount) };
 }
 function normalizeMeltQuote(quote: MeltQuoteBolt11Response): AppMeltQuote {
+  const { change, ...rest } = quote;
+  void change; // change proofs are stored, not raw sigs
   return {
-    ...quote,
+    ...rest,
     amount: amountToNumber(quote.amount),
     fee_reserve: amountToNumber(quote.fee_reserve),
   };
