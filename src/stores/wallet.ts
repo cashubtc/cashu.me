@@ -274,7 +274,7 @@ export const useWalletStore = defineStore("wallet", {
           // Continue with potentially stale keysets rather than failing
         }
       }
-      return this.createWalletInstance(storedMint, url, unit, mints);
+      return this.createWalletInstance(storedMint, url, unit);
     },
     // Synchronous wallet creation for non-critical operations (e.g., fee calculation display)
     // Use mintWallet() with updateKeysets=true for critical operations
@@ -284,7 +284,7 @@ export const useWalletStore = defineStore("wallet", {
       if (!storedMint) {
         throw new Error("mint not found");
       }
-      return this.createWalletInstance(storedMint, url, unit, mints);
+      return this.createWalletInstance(storedMint, url, unit);
     },
     getOrCreateCounterSource(): CounterSource {
       if (!this.sharedCounterSource) {
@@ -315,8 +315,7 @@ export const useWalletStore = defineStore("wallet", {
     createWalletInstance(
       storedMint: StoredMint,
       url: string,
-      unit: string,
-      _mints?: ReturnType<typeof useMintsStore>
+      unit: string
     ): Wallet {
       if (this.mnemonic == "") {
         this.mnemonic = generateMnemonic(wordlist);
@@ -1805,9 +1804,13 @@ export const useWalletStore = defineStore("wallet", {
       error: any
     ) {
       if (error.message.includes("outputs have already been signed")) {
+        console.warn(
+          `[wallet] outputs already signed for keyset ${keysetId}, advancing counter and trying again`
+        );
         const next = this.keysetCounter(keysetId) + 10;
         this.getOrCreateCounterSource().advanceToAtLeast(keysetId, next);
         this.syncCounterToStorage(keysetId, next);
+        notify(this.t("wallet.notifications.trying_again"));
         return true;
       }
       return false;

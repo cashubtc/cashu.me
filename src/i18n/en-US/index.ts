@@ -84,7 +84,7 @@ export default {
       no_amount: "No amount",
       no_lnurl_data: "No LNURL data",
       no_price_data: "No price data.",
-      please_try_again: "Please try again.",
+      trying_again: "Trying again...",
     },
     mint: {
       notifications: {
