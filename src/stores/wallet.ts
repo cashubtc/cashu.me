@@ -39,6 +39,9 @@ import {
   ProofState,
   KeyChain,
   type AmountLike,
+  type CounterSource,
+  type OperationCounters,
+  createEphemeralCounterSource,
   // ConsoleLogger,
 } from "@cashu/cashu-ts";
 // @ts-ignore
@@ -107,10 +110,6 @@ type KeysetCounter = {
   counter: number;
 };
 
-type ReservedCountersInfo = {
-  keysetId: string;
-  next: number;
-};
 
 const receiveStore = useReceiveTokensStore();
 const tokenStore = useTokensStore();
@@ -172,6 +171,7 @@ export const useWalletStore = defineStore("wallet", {
         "cashu.oldMnemonicCounters",
         [] as { mnemonic: string; keysetCounters: KeysetCounter[] }[]
       ),
+      sharedCounterSource: null as CounterSource | null,
       invoiceData: {} as InvoiceHistory,
       activeWebsocketConnections: 0,
       payInvoiceData: {
@@ -286,6 +286,31 @@ export const useWalletStore = defineStore("wallet", {
       }
       return this.createWalletInstance(storedMint, url, unit, mints);
     },
+    getOrCreateCounterSource(): CounterSource {
+      if (!this.sharedCounterSource) {
+        const initial = Object.fromEntries(
+          this.keysetCounters.map(({ id, counter }) => [id, counter])
+        );
+        this.sharedCounterSource = createEphemeralCounterSource(initial);
+      }
+      return this.sharedCounterSource;
+    },
+    syncCounterToStorage(keysetId: string, next: number) {
+      const entry = this.keysetCounters.find((c) => c.id === keysetId);
+      if (entry) {
+        entry.counter = Math.max(entry.counter, next);
+      } else {
+        this.keysetCounters.push({ id: keysetId, counter: next });
+      }
+    },
+    increaseKeysetCounter(id: string, by: number) {
+      const current =
+        this.keysetCounters.find((c) => c.id === id)?.counter ?? 0;
+      const next = current + by;
+      const src = this.getOrCreateCounterSource();
+      src.advanceToAtLeast(id, next);
+      this.syncCounterToStorage(id, next);
+    },
     createWalletInstance(
       storedMint: StoredMint,
       url: string,
@@ -296,14 +321,14 @@ export const useWalletStore = defineStore("wallet", {
         this.mnemonic = generateMnemonic(wordlist);
       }
       const bip39seed = mnemonicToSeedSync(this.mnemonic);
-      const counterInit = Object.fromEntries(
-        this.keysetCounters.map(({ id, counter }) => [id, counter])
-      );
       const wallet = new Wallet(url, {
         unit,
         bip39seed,
-        counterInit,
+        counterSource: this.getOrCreateCounterSource(),
         // logger: new ConsoleLogger("debug"),
+      });
+      wallet.on.countersReserved(({ keysetId, next }) => {
+        this.syncCounterToStorage(keysetId, next);
       });
       // Load the caches
       const keychainCache = KeyChain.mintToCacheDTO(
@@ -325,38 +350,12 @@ export const useWalletStore = defineStore("wallet", {
       const keysetCounters = this.keysetCounters;
       oldMnemonicCounters.push({ mnemonic: this.mnemonic, keysetCounters });
       this.keysetCounters = [];
+      this.sharedCounterSource = null; // force re-creation on next wallet init
       this.mnemonic = generateMnemonic(wordlist);
-    },
-    keysetCounter: function (id: string) {
-      const keysetCounter = this.keysetCounters.find((c) => c.id === id);
-      if (keysetCounter) {
-        return keysetCounter.counter;
-      } else {
-        this.keysetCounters.push({ id, counter: 1 });
-        return 1;
-      }
-    },
-    increaseKeysetCounter: function (id: string, by: number) {
-      const keysetCounter = this.keysetCounters.find((c) => c.id === id);
-      if (keysetCounter) {
-        keysetCounter.counter += by;
-      } else {
-        const newCounter = { id, counter: by } as KeysetCounter;
-        this.keysetCounters.push(newCounter);
-      }
-    },
-    applyReservedCounters: function ({ keysetId, next }: ReservedCountersInfo) {
-      const keysetCounter = this.keysetCounters.find((c) => c.id === keysetId);
-      if (keysetCounter) {
-        keysetCounter.counter = Math.max(keysetCounter.counter, next);
-      } else {
-        this.keysetCounters.push({ id: keysetId, counter: next });
-      }
     },
     retryOnceOnSignedOutputs: async function <T>(
       keysetId: string,
       operation: () => Promise<T>,
-      wallet?: Wallet
     ): Promise<T> {
       try {
         return await operation();
@@ -368,11 +367,8 @@ export const useWalletStore = defineStore("wallet", {
         if (!handled) {
           throw error;
         }
-        const nextCounter =
-          this.keysetCounters.find((c) => c.id === keysetId)?.counter ?? 0;
-        if (wallet) {
-          await wallet.counters.advanceToAtLeast(keysetId, nextCounter);
-        }
+        // Counter source is shared — the bump from handleOutputsHaveAlreadyBeenSignedError
+        // is already visible to the wallet, so just retry.
         return await operation();
       }
     },
@@ -591,12 +587,8 @@ export const useWalletStore = defineStore("wallet", {
                   .send(targetAmount, proofsToSend)
                   .asDeterministic()
                   .keyset(keysetId)
-                  .onCountersReserved((info) =>
-                    this.applyReservedCounters(info)
-                  )
                   .proofsWeHave(spendableProofs)
                   .run(),
-              swapWallet
             ));
           await proofsStore.addProofs(keepProofs);
           await proofsStore.addProofs(sendProofs);
@@ -685,10 +677,8 @@ export const useWalletStore = defineStore("wallet", {
                 .receive(receiveStore.receiveData.tokensBase64)
                 .asDeterministic()
                 .privkey(privkey)
-                .onCountersReserved((info) => this.applyReservedCounters(info))
                 .proofsWeHave(mintStore.mintUnitProofs(mint, historyToken.unit))
                 .run(),
-            mintWallet
           );
           await proofsStore.addProofs(proofs);
         } catch (error: any) {
@@ -842,11 +832,9 @@ export const useWalletStore = defineStore("wallet", {
               .mintBolt11(invoice.amount, invoice.mintQuote!!.quote)
               .keyset(keysetId)
               .asDeterministic()
-              .onCountersReserved((info) => this.applyReservedCounters(info))
               .proofsWeHave(mintStore.mintUnitProofs(mint, invoice.unit))
               .privkey(invoice.privKey as string)
               .run(),
-          mintWallet
         );
         await proofsStore.addProofs(proofs);
 
@@ -1002,9 +990,7 @@ export const useWalletStore = defineStore("wallet", {
                 .meltBolt11(toMeltQuote(quote), sendProofs)
                 .keyset(keysetId)
                 .asDeterministic()
-                .onCountersReserved((info) => this.applyReservedCounters(info))
                 .run(),
-            mintWallet
           );
           // store melt quote in invoice history
           this.updateOutgoingInvoiceInHistory(normalizeMeltQuote(data.quote));
@@ -1822,7 +1808,11 @@ export const useWalletStore = defineStore("wallet", {
       error: any
     ) {
       if (error.message.includes("outputs have already been signed")) {
-        this.increaseKeysetCounter(keysetId, 10);
+        const src = this.getOrCreateCounterSource();
+        const current =
+          this.keysetCounters.find((c) => c.id === keysetId)?.counter ?? 0;
+        src.advanceToAtLeast(keysetId, current + 10);
+        this.syncCounterToStorage(keysetId, current + 10);
         return true;
       }
       return false;

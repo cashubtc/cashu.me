@@ -71,6 +71,9 @@ const h = vi.hoisted(() => {
       this.options = options;
       this.loadMintFromCache = walletLoadMintFromCache;
       this.getFeesForProofs = walletGetFeesForProofs;
+      this.on = {
+        countersReserved: vi.fn(() => () => {}),
+      };
     }
 
     selectProofsToSend(proofs, amount) {
@@ -157,6 +160,22 @@ vi.mock("@cashu/cashu-ts", () => ({
   CheckStateEnum: { SPENT: "SPENT" },
   MeltQuoteState: { PAID: "PAID", PENDING: "PENDING" },
   MintQuoteState: { PAID: "PAID", ISSUED: "ISSUED", PENDING: "PENDING" },
+  createEphemeralCounterSource: (initial) => {
+    const counters = new Map(Object.entries(initial ?? {}));
+    return {
+      reserve: async (id, n) => {
+        const cur = counters.get(id) ?? 0;
+        if (n > 0) counters.set(id, cur + n);
+        return { start: cur, count: n };
+      },
+      advanceToAtLeast: async (id, min) => {
+        const cur = counters.get(id) ?? 0;
+        if (min > cur) counters.set(id, min);
+      },
+      snapshot: async () => Object.fromEntries(counters),
+      setNext: async (id, next) => counters.set(id, next),
+    };
+  },
 }));
 
 vi.mock("src/stores/receiveTokensStore", () => ({
@@ -247,11 +266,10 @@ describe("wallet store", () => {
 
   it("manages keyset counters", () => {
     const wallet = useWalletStore();
-    expect(wallet.keysetCounter("k1")).toBe(1);
     wallet.increaseKeysetCounter("k1", 4);
-    expect(wallet.keysetCounter("k1")).toBe(5);
+    expect(wallet.keysetCounters.find((c) => c.id === "k1")?.counter).toBe(4);
     wallet.increaseKeysetCounter("k2", 3);
-    expect(wallet.keysetCounter("k2")).toBe(3);
+    expect(wallet.keysetCounters.find((c) => c.id === "k2")?.counter).toBe(3);
   });
 
   it("creates a new mnemonic and archives previous counters", () => {
@@ -447,7 +465,7 @@ describe("wallet store", () => {
     });
 
     expect(handled).toBe(true);
-    expect(wallet.keysetCounter("00aa")).toBe(11);
+    expect(wallet.keysetCounters.find((c) => c.id === "00aa")?.counter).toBe(11);
     expect(h.notify).not.toHaveBeenCalled();
   });
 
@@ -509,10 +527,8 @@ describe("wallet store", () => {
         receive: vi.fn(() => ({
           asDeterministic: vi.fn(() => ({
             privkey: vi.fn(() => ({
-              onCountersReserved: vi.fn(() => ({
-                proofsWeHave: vi.fn(() => ({
-                  run: vi.fn(async () => receivedProofs),
-                })),
+              proofsWeHave: vi.fn(() => ({
+                run: vi.fn(async () => receivedProofs),
               })),
             })),
           })),
