@@ -555,11 +555,7 @@ export const useWalletStore = defineStore("wallet", {
         );
         const totalAmount = sumProofAmounts(proofsToSend);
         const fees = includeFees
-          ? this.getFeesForProofs(
-              proofsToSend,
-              wallet.mint.mintUrl,
-              wallet.unit
-            )
+          ? wallet.getFeesForProofs(proofsToSend).toNumber()
           : 0;
         const targetAmount = amount + fees;
 

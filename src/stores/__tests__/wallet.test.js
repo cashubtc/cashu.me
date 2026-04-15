@@ -417,13 +417,15 @@ describe("wallet store", () => {
     expect(h.mintsStore.updateMintInfoAndKeys).toHaveBeenCalledTimes(1);
   });
 
-  it("uses the wallet mint context when calculating send fees", async () => {
+  it("uses the wallet instance directly for fee calculation in send", async () => {
     const wallet = useWalletStore();
     const proofs = [{ id: "00bb", amount: 10, reserved: false, secret: "s1" }];
+    const getFeesForProofs = vi.fn(() => ({ toNumber: () => 0 }));
     const foreignWallet = {
       mint: { mintUrl: "https://mint-b.example" },
       unit: "sat",
       selectProofsToSend: vi.fn(() => ({ send: proofs, keep: [] })),
+      getFeesForProofs,
       ops: {
         send: vi.fn(() => ({
           asDeterministic: vi.fn(() => ({
@@ -444,17 +446,11 @@ describe("wallet store", () => {
       info: { name: "mint-b" },
     });
 
-    const feeSpy = vi.spyOn(wallet, "getFeesForProofs");
     vi.spyOn(wallet, "getKeyset").mockReturnValue("00bb");
-    h.walletGetFeesForProofs.mockReturnValue(0);
 
     await wallet.send(proofs, foreignWallet, 10, false, true);
 
-    expect(feeSpy).toHaveBeenCalledWith(
-      proofs,
-      "https://mint-b.example",
-      "sat"
-    );
+    expect(getFeesForProofs).toHaveBeenCalledWith(proofs);
   });
 
   it("accounts for signed-output errors", () => {
