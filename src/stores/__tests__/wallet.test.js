@@ -266,10 +266,11 @@ describe("wallet store", () => {
 
   it("manages keyset counters", () => {
     const wallet = useWalletStore();
+    expect(wallet.keysetCounter("k1")).toBe(0);
     wallet.increaseKeysetCounter("k1", 4);
-    expect(wallet.keysetCounters.find((c) => c.id === "k1")?.counter).toBe(4);
+    expect(wallet.keysetCounter("k1")).toBe(4);
     wallet.increaseKeysetCounter("k2", 3);
-    expect(wallet.keysetCounters.find((c) => c.id === "k2")?.counter).toBe(3);
+    expect(wallet.keysetCounter("k2")).toBe(3);
   });
 
   it("creates a new mnemonic and archives previous counters", () => {
@@ -465,7 +466,7 @@ describe("wallet store", () => {
     });
 
     expect(handled).toBe(true);
-    expect(wallet.keysetCounters.find((c) => c.id === "00aa")?.counter).toBe(11);
+    expect(wallet.keysetCounter("00aa")).toBe(11);
     expect(h.notify).not.toHaveBeenCalled();
   });
 

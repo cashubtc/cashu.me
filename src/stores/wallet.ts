@@ -303,10 +303,11 @@ export const useWalletStore = defineStore("wallet", {
         this.keysetCounters.push({ id: keysetId, counter: next });
       }
     },
+    keysetCounter(id: string): number {
+      return this.keysetCounters.find((c) => c.id === id)?.counter ?? 0;
+    },
     increaseKeysetCounter(id: string, by: number) {
-      const current =
-        this.keysetCounters.find((c) => c.id === id)?.counter ?? 0;
-      const next = current + by;
+      const next = this.keysetCounter(id) + by;
       const src = this.getOrCreateCounterSource();
       src.advanceToAtLeast(id, next);
       this.syncCounterToStorage(id, next);
@@ -1808,11 +1809,9 @@ export const useWalletStore = defineStore("wallet", {
       error: any
     ) {
       if (error.message.includes("outputs have already been signed")) {
-        const src = this.getOrCreateCounterSource();
-        const current =
-          this.keysetCounters.find((c) => c.id === keysetId)?.counter ?? 0;
-        src.advanceToAtLeast(keysetId, current + 10);
-        this.syncCounterToStorage(keysetId, current + 10);
+        const next = this.keysetCounter(keysetId) + 10;
+        this.getOrCreateCounterSource().advanceToAtLeast(keysetId, next);
+        this.syncCounterToStorage(keysetId, next);
         return true;
       }
       return false;
