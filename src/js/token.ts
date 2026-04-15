@@ -43,13 +43,18 @@ function decode(encoded_token: string): DecodedTokenMetadata | undefined {
  */
 async function decodeFull(encoded_token: string): Promise<Token | undefined> {
   if (!encoded_token || encoded_token === "") return;
+  const mintStore = useMintsStore();
   try {
     return getDecodedToken(
       encoded_token,
-      useMintsStore().allMintKeysets.map((k) => k.id)
+      mintStore.allMintKeysets.map((k) => k.id)
     );
   } catch (error) {
     const tokenMint = getTokenMetadata(encoded_token).mint;
+    const knownMint = mintStore.mints.find((m) => m.url === tokenMint);
+    if (!knownMint) {
+      throw new Error(`Token mint is not trusted: ${tokenMint}`);
+    }
     const fetchKeysets = await new Mint(tokenMint).getKeySets();
     return getDecodedToken(
       encoded_token,
