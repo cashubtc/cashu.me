@@ -241,7 +241,7 @@ export const useMintsStore = defineStore("mints", {
       }
     },
     allMintKeysets(): MintKeyset[] {
-      return this.mints.flatMap((m: StoredMint) => m.keysets);
+      return this.mints.flatMap((m: StoredMint) => m.keysets ?? []);
     },
   },
   actions: {

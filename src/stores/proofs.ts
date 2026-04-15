@@ -112,17 +112,17 @@ export const useProofsStore = defineStore("proofs", {
     async addProofs(proofs: ProofLike[], quote?: string) {
       const walletProofs = this.proofsToWalletProofs(proofs);
       await cashuDb.transaction("rw", cashuDb.proofs, async () => {
-        walletProofs.forEach(async (p) => {
+        for (const p of walletProofs) {
           await cashuDb.proofs.add(p);
-        });
+        }
       });
     },
     async removeProofs(proofs: ProofLike[]) {
       const walletProofs = this.proofsToWalletProofs(proofs);
       await cashuDb.transaction("rw", cashuDb.proofs, async () => {
-        walletProofs.forEach(async (p) => {
+        for (const p of walletProofs) {
           await cashuDb.proofs.delete(p.secret);
-        });
+        }
       });
     },
     async getProofsForQuote(quote: string): Promise<WalletProof[]> {
