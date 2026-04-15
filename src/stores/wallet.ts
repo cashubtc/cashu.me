@@ -142,15 +142,15 @@ function toMeltQuote(quote: AppMeltQuote): MeltQuoteBolt11Response {
 }
 
 /**
- * Convert proofs with number amounts to Proof[] with Amount for cashu-ts
- * APIs that require Proof[] (e.g. selectProofsToSend). Not needed for
- * builder/ops methods which accept ProofLike[].
+ * Convert WalletProofs to Proof[] with Amount for cashu-ts APIs that
+ * require Proof[] (e.g. selectProofsToSend). Strips app-local fields
+ * (`reserved`, `quote`) so the result is a clean Proof.
  */
 function toProofs(proofs: WalletProof[]): Proof[] {
-  return proofs.map((p) => ({
-    ...p,
-    amount: Amount.from(p.amount),
-  })) as Proof[];
+  return proofs.map(({ reserved, quote, amount, ...rest }) => ({
+    ...rest,
+    amount: Amount.from(amount),
+  }));
 }
 
 export const useWalletStore = defineStore("wallet", {

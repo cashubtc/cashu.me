@@ -11,17 +11,16 @@ import { useMintsStore, WalletProof } from "src/stores/mints";
 import { useProofsStore } from "src/stores/proofs";
 export default { decode, decodeFull, getProofs, getMint, getUnit, getMemo };
 
-// Incomplete proofs from getTokenMetadata lack `id` (keyset ID).
-type IncompleteWalletProof = Omit<Proof, "amount" | "id"> & {
-  amount: number;
-};
+// getTokenMetadata returns proofs without `id` (keyset ID) and with Amount.
+// This type narrows that to number amounts for the rest of the app.
+type MetadataProof = Omit<Proof, "amount" | "id"> & { amount: number };
 
 type DecodedTokenMetadata = Omit<
   TokenMetadata,
   "amount" | "incompleteProofs"
 > & {
   amount: number;
-  proofs: IncompleteWalletProof[];
+  proofs: MetadataProof[];
 };
 
 /**

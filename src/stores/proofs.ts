@@ -13,17 +13,16 @@ import {
 import { liveQuery } from "dexie";
 import { sumProofAmounts } from "src/js/proofs";
 
-function coerceWalletProofs(raw: ProofLike[]): WalletProof[] {
-  return raw.map((proof) => {
-    const { amount, ...rest } = proof;
-    const rec = proof as Record<string, unknown>;
-    return {
-      ...rest,
-      amount: Amount.from(amount).toNumber(),
-      reserved: "reserved" in rec ? Boolean(rec.reserved) : false,
-      quote: "quote" in rec ? (rec.quote as string | undefined) : undefined,
-    };
-  });
+// Shape of a proof row as stored in Dexie (amount may be number or Amount).
+type DexieProofRow = ProofLike & { reserved?: boolean; quote?: string };
+
+function coerceWalletProofs(raw: DexieProofRow[]): WalletProof[] {
+  return raw.map(({ amount, reserved, quote, ...rest }) => ({
+    ...rest,
+    amount: Amount.from(amount).toNumber(),
+    reserved: Boolean(reserved),
+    quote,
+  }));
 }
 
 export const useProofsStore = defineStore("proofs", {
