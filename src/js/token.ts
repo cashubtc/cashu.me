@@ -69,7 +69,7 @@ function getProofs(decoded_token: Token): WalletProof[] {
   return useProofsStore().proofsToWalletProofs(proofs);
 }
 
-function getMint(decoded_token: Pick<Token, "mint" | "proofs">) {
+function getMint(decoded_token: { mint: string; proofs: unknown[] }) {
   if (decoded_token.proofs.length > 0) {
     return decoded_token.mint;
   } else {
@@ -77,7 +77,7 @@ function getMint(decoded_token: Pick<Token, "mint" | "proofs">) {
   }
 }
 
-function getUnit(decoded_token: Pick<Token, "mint" | "proofs"> & { unit?: string }) {
+function getUnit(decoded_token: { mint: string; proofs: unknown[]; unit?: string }) {
   if (decoded_token.unit != null) {
     return decoded_token.unit;
   } else {
@@ -94,7 +94,7 @@ function getUnit(decoded_token: Pick<Token, "mint" | "proofs"> & { unit?: string
   }
 }
 
-function getMemo(decoded_token: Pick<Token, "mint"> & { memo?: string }) {
+function getMemo(decoded_token: { mint: string; memo?: string }) {
   if (decoded_token.memo != null) {
     return decoded_token.memo;
   } else {

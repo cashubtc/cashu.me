@@ -611,6 +611,7 @@ import { useCameraStore } from "src/stores/camera";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import { useSettingsStore } from "src/stores/settings";
 import { usePriceStore } from "src/stores/price";
+import { useProofsStore } from "src/stores/proofs";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
 import MultinutPaymentDialog from "./MultinutPaymentDialog.vue";

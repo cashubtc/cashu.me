@@ -330,6 +330,7 @@ export default defineComponent({
       receiveError: "" as string,
       selectedSwapMintUrl: "",
       isNotLockedToUs: false as boolean,
+      fullToken: null as Token | null,
     };
   },
   watch: {
@@ -362,10 +363,19 @@ export default defineComponent({
         this.isNotLockedToUs = false;
       }
     },
-    "receiveData.tokensBase64"(newVal: string) {
+    async "receiveData.tokensBase64"(newVal: string) {
       if (newVal !== undefined) {
         this.receiveError = "";
         this.isNotLockedToUs = false;
+      }
+      if (!newVal) {
+        this.fullToken = null;
+        return;
+      }
+      try {
+        this.fullToken = (await token.decodeFull(newVal)) ?? null;
+      } catch {
+        this.fullToken = null;
       }
     },
     swapSelected(newVal: boolean) {
@@ -429,33 +439,35 @@ export default defineComponent({
       if (!this.tokenDecodesCorrectly) {
         return 0;
       }
-      const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
-      return this.getProofs(decodedToken).reduce(
-        (sum, el) => (sum += el.amount),
-        0
-      );
+      return this.decodeToken(this.receiveData.tokensBase64)?.amount ?? 0;
     },
     receiveFee: function () {
-      const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
-      return this.getFeesForProofs(
-        this.getProofs(decodedToken),
-        this.getMint(decodedToken),
-        token.getUnit(decodedToken)
-      );
+      if (!this.fullToken) return 0;
+      try {
+        const proofs = this.getProofs(this.fullToken);
+        if (!proofs?.length) return 0;
+        return this.getFeesForProofs(
+          proofs,
+          this.getMint(this.fullToken),
+          token.getUnit(this.fullToken)
+        );
+      } catch {
+        return 0;
+      }
     },
     tokenUnit: function () {
       if (!this.tokenDecodesCorrectly) {
         return "";
       }
       const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
-      return token.getUnit(decodedToken);
+      return decodedToken ? token.getUnit(decodedToken) : "";
     },
     tokenMint: function () {
       if (!this.tokenDecodesCorrectly) {
         return "";
       }
       const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
-      return this.getMint(decodedToken);
+      return decodedToken ? this.getMint(decodedToken) : "";
     },
     maxLengthForTokenString: function () {
       return Math.floor(this.$q.screen.height / 3.5);
@@ -618,7 +630,7 @@ export default defineComponent({
     getProofs: function (decoded_token: Token) {
       return token.getProofs(decoded_token);
     },
-    getMint: function (decoded_token: Token) {
+    getMint: function (decoded_token: { mint: string; proofs: unknown[] }) {
       return token.getMint(decoded_token);
     },
     tokenAlreadyInHistory: function (tokenStr: string) {
@@ -640,19 +652,13 @@ export default defineComponent({
       }
       const tokensStore = useTokensStore();
       const decodedToken = this.decodeToken(tokenStr);
-      const mintInToken = this.getMint(decodedToken);
-      const unitInToken = token.getUnit(decodedToken);
-      // get amount from decodedToken.token.proofs[..].amount
-      const amount = this.getProofs(decodedToken).reduce(
-        (sum, el) => (sum += el.amount),
-        0
-      );
+      if (!decodedToken) return;
 
       tokensStore.addPendingToken({
-        amount: amount,
+        amount: decodedToken.amount,
         token: tokenStr,
-        mintInToken: mintInToken,
-        unitInToken: unitInToken,
+        mint: token.getMint(decodedToken),
+        unit: token.getUnit(decodedToken),
       });
       this.showReceiveTokens = false;
       // show success notification

@@ -395,19 +395,18 @@ export default defineComponent({
     ...mapState(useSettingsStore, ["nfcEncoding"]),
     // display helpers
     sumProofs: function () {
-      const proofs = token.getProofs(token.decode(this.sendData.tokensBase64));
-      return sumProofAmounts(proofs.flat());
+      return token.decode(this.sendData.tokensBase64)?.amount ?? 0;
     },
     displayUnit: function () {
       const display = this.formatCurrency(this.sumProofs, this.tokenUnit);
       return display;
     },
     tokenUnit: function () {
-      const unit = token.getUnit(token.decode(this.sendData.tokensBase64));
-      return unit;
+      const decoded = token.decode(this.sendData.tokensBase64);
+      return decoded ? token.getUnit(decoded) : "";
     },
     paidFees: function () {
-      return this.sumProofs - Math.abs(this.sendData.historyAmount);
+      return this.sumProofs - Math.abs(this.sendData.historyAmount ?? 0);
     },
     runnerActive: function () {
       return this.tokenWorkerRunning;

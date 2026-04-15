@@ -106,7 +106,7 @@
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
-import { Amount } from "@cashu/cashu-ts";
+import { type Token } from "@cashu/cashu-ts";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState } from "pinia";
 import { useMintsStore } from "stores/mints";
@@ -114,7 +114,6 @@ import { useWalletStore } from "stores/wallet";
 import { useP2PKStore } from "src/stores/p2pk";
 import { usePriceStore } from "src/stores/price";
 import { useSettingsStore } from "src/stores/settings";
-import { sumProofAmounts } from "src/js/proofs";
 import token from "src/js/token";
 import {
   ArrowDownUp as ArrowDownUpIcon,
@@ -172,9 +171,25 @@ export default defineComponent({
   },
   emits: ["notLockedToUs"],
   data: function () {
-    return {};
+    return {
+      fullToken: null as Token | null,
+    };
   },
   watch: {
+    encodedToken: {
+      async handler(encoded: string) {
+        if (!encoded) {
+          this.fullToken = null;
+          return;
+        }
+        try {
+          this.fullToken = (await token.decodeFull(encoded)) ?? null;
+        } catch {
+          this.fullToken = null;
+        }
+      },
+      immediate: true,
+    },
     proofsToShow: {
       handler(newProofs) {
         if (newProofs && newProofs.length > 0) {
@@ -200,25 +215,27 @@ export default defineComponent({
     ...mapState(usePriceStore, ["bitcoinPrice", "currentCurrencyPrice"]),
     ...mapState(useSettingsStore, ["bitcoinPriceCurrency"]),
     proofsToShow: function () {
-      return token.getProofs(token.decode(this.encodedToken));
+      if (!this.fullToken) return [];
+      return token.getProofs(this.fullToken);
     },
     sumProofs: function () {
-      const proofs = token.getProofs(token.decode(this.encodedToken));
-      return sumProofAmounts(proofs.flat());
+      return token.decode(this.encodedToken)?.amount ?? 0;
     },
     displayUnit: function () {
       const display = this.formatCurrency(this.sumProofs, this.tokenUnit, true);
       return display;
     },
     tokenUnit: function () {
-      return token.getUnit(token.decode(this.encodedToken));
+      const decoded = token.decode(this.encodedToken);
+      return decoded ? token.getUnit(decoded) : "";
     },
     tokenMintUrl: function () {
-      const mint = token.getMint(token.decode(this.encodedToken));
-      return getShortUrl(mint);
+      const decoded = token.decode(this.encodedToken);
+      return decoded ? getShortUrl(token.getMint(decoded)) : "";
     },
     displayMemo: function () {
-      return token.getMemo(token.decode(this.encodedToken));
+      const decoded = token.decode(this.encodedToken);
+      return decoded ? token.getMemo(decoded) : "";
     },
     showFiat: function () {
       return this.tokenUnit === "sat" && !!this.bitcoinPrice;
@@ -229,14 +246,12 @@ export default defineComponent({
       return (this.currentCurrencyPrice / 100000000) * this.sumProofs;
     },
     receiveFee: function () {
+      if (!this.fullToken) return 0;
       try {
-        const tokenJson = token.decode(this.encodedToken);
-        const proofs = token.getProofs(tokenJson);
-        if (!proofs?.length) {
-          return 0;
-        }
-        const mintUrl = token.getMint(tokenJson);
-        const unit = token.getUnit(tokenJson);
+        const proofs = token.getProofs(this.fullToken);
+        if (!proofs?.length) return 0;
+        const mintUrl = token.getMint(this.fullToken);
+        const unit = token.getUnit(this.fullToken);
         const walletStore = useWalletStore();
         return walletStore.getFeesForProofs(proofs, mintUrl, unit);
       } catch (e) {

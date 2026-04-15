@@ -38,7 +38,7 @@ import { useSendTokensStore } from "./sendTokensStore";
 import { usePRStore } from "./payment-request";
 import token from "../js/token";
 import { HistoryToken } from "./tokens";
-import { sumProofAmounts } from "src/js/proofs";
+
 
 type NostrEventLog = {
   id: string;
@@ -561,11 +561,8 @@ export const useNostrStore = defineStore("nostr", {
       if (decodedToken == undefined) {
         throw Error("could not decode token");
       }
-      // get amount from decodedToken.token.proofs[..].amount
-      const amount = sumProofAmounts(token.getProofs(decodedToken));
-
       const id = tokensStore.addPendingToken({
-        amount: amount,
+        amount: decodedToken.amount,
         token: tokenStr,
         mint: token.getMint(decodedToken),
         unit: token.getUnit(decodedToken),

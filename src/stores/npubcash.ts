@@ -8,7 +8,6 @@ import { notifyApiError, notifyError, notifySuccess } from "../js/notify";
 import token from "../js/token";
 import { useTokensStore } from "../stores/tokens";
 import { useNostrStore } from "../stores/nostr";
-import { sumProofAmounts } from "src/js/proofs";
 // type NPCConnection = {
 //   walletPublicKey: string,
 //   walletPrivateKey: string,
@@ -198,14 +197,11 @@ export const useNPCStore = defineStore("npc", {
       if (decodedToken == undefined) {
         throw Error("could not decode token");
       }
-      // get amount from decodedToken.token.proofs[..].amount
-      const amount = sumProofAmounts(token.getProofs(decodedToken));
-
       const mintUrl = token.getMint(decodedToken);
       const unit = token.getUnit(decodedToken);
       tokensStore.addPendingToken({
         label: "Zaps",
-        amount: amount,
+        amount: decodedToken.amount,
         token: tokenStr,
         mint: mintUrl,
         unit: unit,
