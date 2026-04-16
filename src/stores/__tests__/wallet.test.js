@@ -463,9 +463,7 @@ describe("wallet store", () => {
 
     expect(handled).toBe(true);
     expect(wallet.keysetCounter("00aa")).toBe(11);
-    expect(h.notify).toHaveBeenCalledWith(
-      "wallet.notifications.trying_again"
-    );
+    expect(h.notify).toHaveBeenCalledWith("wallet.notifications.trying_again");
   });
 
   it("routes decodeRequest branches", async () => {

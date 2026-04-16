@@ -110,7 +110,6 @@ type KeysetCounter = {
   counter: number;
 };
 
-
 const receiveStore = useReceiveTokensStore();
 const tokenStore = useTokensStore();
 const proofsStore = useProofsStore();
@@ -355,7 +354,7 @@ export const useWalletStore = defineStore("wallet", {
     },
     retryOnceOnSignedOutputs: async function <T>(
       keysetId: string,
-      operation: () => Promise<T>,
+      operation: () => Promise<T>
     ): Promise<T> {
       try {
         return await operation();
@@ -576,15 +575,13 @@ export const useWalletStore = defineStore("wallet", {
             true
           );
           ({ keep: keepProofs, send: sendProofs } =
-            await this.retryOnceOnSignedOutputs(
-              keysetId,
-              async () =>
-                swapWallet.ops
-                  .send(targetAmount, proofsToSend)
-                  .asDeterministic()
-                  .keyset(keysetId)
-                  .proofsWeHave(spendableProofs)
-                  .run(),
+            await this.retryOnceOnSignedOutputs(keysetId, async () =>
+              swapWallet.ops
+                .send(targetAmount, proofsToSend)
+                .asDeterministic()
+                .keyset(keysetId)
+                .proofsWeHave(spendableProofs)
+                .run()
             ));
           await proofsStore.addProofs(keepProofs);
           await proofsStore.addProofs(sendProofs);
@@ -666,15 +663,13 @@ export const useWalletStore = defineStore("wallet", {
         const privkey = receiveStore.receiveData.p2pkPrivateKey;
         let proofs: Proof[];
         try {
-          proofs = await this.retryOnceOnSignedOutputs(
-            keysetId,
-            async () =>
-              mintWallet.ops
-                .receive(receiveStore.receiveData.tokensBase64)
-                .asDeterministic()
-                .privkey(privkey)
-                .proofsWeHave(mintStore.mintUnitProofs(mint, historyToken.unit))
-                .run(),
+          proofs = await this.retryOnceOnSignedOutputs(keysetId, async () =>
+            mintWallet.ops
+              .receive(receiveStore.receiveData.tokensBase64)
+              .asDeterministic()
+              .privkey(privkey)
+              .proofsWeHave(mintStore.mintUnitProofs(mint, historyToken.unit))
+              .run()
           );
           await proofsStore.addProofs(proofs);
         } catch (error: any) {
@@ -821,16 +816,14 @@ export const useWalletStore = defineStore("wallet", {
             throw new Error("unknown state.");
         }
         // MintQuoteState must be PAID
-        const proofs = await this.retryOnceOnSignedOutputs(
-          keysetId,
-          async () =>
-            mintWallet.ops
-              .mintBolt11(invoice.amount, invoice.mintQuote!!.quote)
-              .keyset(keysetId)
-              .asDeterministic()
-              .proofsWeHave(mintStore.mintUnitProofs(mint, invoice.unit))
-              .privkey(invoice.privKey as string)
-              .run(),
+        const proofs = await this.retryOnceOnSignedOutputs(keysetId, async () =>
+          mintWallet.ops
+            .mintBolt11(invoice.amount, invoice.mintQuote!!.quote)
+            .keyset(keysetId)
+            .asDeterministic()
+            .proofsWeHave(mintStore.mintUnitProofs(mint, invoice.unit))
+            .privkey(invoice.privKey as string)
+            .run()
         );
         await proofsStore.addProofs(proofs);
 
@@ -979,14 +972,12 @@ export const useWalletStore = defineStore("wallet", {
         if (releaseMutex) uIStore.unlockMutex(); // Momentarely release the mutex (needed for concurrent melts)
         let data;
         try {
-          data = await this.retryOnceOnSignedOutputs(
-            keysetId,
-            async () =>
-              mintWallet.ops
-                .meltBolt11(toMeltQuote(quote), sendProofs)
-                .keyset(keysetId)
-                .asDeterministic()
-                .run(),
+          data = await this.retryOnceOnSignedOutputs(keysetId, async () =>
+            mintWallet.ops
+              .meltBolt11(toMeltQuote(quote), sendProofs)
+              .keyset(keysetId)
+              .asDeterministic()
+              .run()
           );
           // store melt quote in invoice history
           this.updateOutgoingInvoiceInHistory(normalizeMeltQuote(data.quote));
