@@ -28,7 +28,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
     decodeToken: function (encodedToken: string) {
       let decodedToken = undefined;
       try {
-        decodedToken = token.decode(encodedToken);
+        decodedToken = token.decodeMeta(encodedToken);
       } catch (error) {}
       return decodedToken;
     },

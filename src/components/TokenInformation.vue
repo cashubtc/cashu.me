@@ -219,22 +219,22 @@ export default defineComponent({
       return token.getProofs(this.fullToken);
     },
     sumProofs: function () {
-      return token.decode(this.encodedToken)?.amount ?? 0;
+      return token.decodeMeta(this.encodedToken)?.amount ?? 0;
     },
     displayUnit: function () {
       const display = this.formatCurrency(this.sumProofs, this.tokenUnit, true);
       return display;
     },
     tokenUnit: function () {
-      const decoded = token.decode(this.encodedToken);
+      const decoded = token.decodeMeta(this.encodedToken);
       return decoded ? token.getUnit(decoded) : "";
     },
     tokenMintUrl: function () {
-      const decoded = token.decode(this.encodedToken);
+      const decoded = token.decodeMeta(this.encodedToken);
       return decoded ? getShortUrl(token.getMint(decoded)) : "";
     },
     displayMemo: function () {
-      const decoded = token.decode(this.encodedToken);
+      const decoded = token.decodeMeta(this.encodedToken);
       return decoded ? token.getMemo(decoded) : "";
     },
     showFiat: function () {

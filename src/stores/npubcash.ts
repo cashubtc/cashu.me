@@ -193,7 +193,7 @@ export const useNPCStore = defineStore("npc", {
         return;
       }
       const tokensStore = useTokensStore();
-      const decodedToken = token.decode(tokenStr);
+      const decodedToken = token.decodeMeta(tokenStr);
       if (decodedToken == undefined) {
         throw Error("could not decode token");
       }

@@ -392,14 +392,14 @@ export default defineComponent({
     ...mapState(useSettingsStore, ["nfcEncoding"]),
     // display helpers
     sumProofs: function () {
-      return token.decode(this.sendData.tokensBase64)?.amount ?? 0;
+      return token.decodeMeta(this.sendData.tokensBase64)?.amount ?? 0;
     },
     displayUnit: function () {
       const display = this.formatCurrency(this.sumProofs, this.tokenUnit);
       return display;
     },
     tokenUnit: function () {
-      const decoded = token.decode(this.sendData.tokensBase64);
+      const decoded = token.decodeMeta(this.sendData.tokensBase64);
       return decoded ? token.getUnit(decoded) : "";
     },
     paidFees: function () {
@@ -421,7 +421,7 @@ export default defineComponent({
       if (!val?.length) {
         return;
       }
-      const tokenObj = token.decode(val);
+      const tokenObj = token.decodeMeta(val);
       const proofs = tokenObj.proofs || [];
       if (!proofs.length) {
         return;
@@ -451,7 +451,7 @@ export default defineComponent({
         this.qrCodeFragment = "";
         return;
       }
-      const tokenObj = token.decode(val);
+      const tokenObj = token.decodeMeta(val);
       const proofs = tokenObj.proofs || [];
       if (!proofs.length) {
         this.qrCodeFragment = "";

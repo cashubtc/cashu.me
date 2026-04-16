@@ -556,7 +556,7 @@ export const useNostrStore = defineStore("nostr", {
         receiveStore.showReceiveTokens = false;
         return undefined;
       }
-      const decodedToken = token.decode(tokenStr);
+      const decodedToken = token.decodeMeta(tokenStr);
       if (decodedToken == undefined) {
         throw Error("could not decode token");
       }

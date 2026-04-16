@@ -45,7 +45,7 @@ export default defineComponent({
     const decodedToken = computed(() => {
       if (!props.tokenString) return null;
       try {
-        return token.decode(props.tokenString);
+        return token.decodeMeta(props.tokenString);
       } catch {
         return null;
       }
