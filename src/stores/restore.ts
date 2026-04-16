@@ -80,6 +80,7 @@ export const useRestoreStore = defineStore("restore", {
         await wallet.loadMint();
         let start = 0;
         let emptyBatchCount = 0;
+        let keysetProofCount = 0;
         let restoreProofs: Proof[] = [];
 
         while (emptyBatchCount < MAX_GAP) {
@@ -103,6 +104,7 @@ export const useRestoreStore = defineStore("restore", {
             );
             restoreProofs = restoreProofs.concat(proofs);
             emptyBatchCount = 0;
+            keysetProofCount += proofs.length;
             this.restoreCounter += proofs.length;
             totalSteps += 1;
           }
@@ -117,6 +119,14 @@ export const useRestoreStore = defineStore("restore", {
 
           currentStep++;
           this.restoreProgress = currentStep / totalSteps;
+        }
+
+        // Advance the keyset counter past all restored proof indices so the
+        // next deterministic operation doesn't collide with already-signed outputs.
+        const nextCounter = keysetProofCount + 1;
+        if (nextCounter > walletStore.keysetCounter(keyset.id)) {
+          walletStore.getOrCreateCounterSource().advanceToAtLeast(keyset.id, nextCounter);
+          walletStore.syncCounterToStorage(keyset.id, nextCounter);
         }
 
         let restoredProofs: Proof[] = [];
