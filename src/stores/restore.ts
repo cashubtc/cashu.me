@@ -125,7 +125,9 @@ export const useRestoreStore = defineStore("restore", {
         // next deterministic operation doesn't collide with already-signed outputs.
         const nextCounter = keysetProofCount + 1;
         if (nextCounter > walletStore.keysetCounter(keyset.id)) {
-          walletStore.getOrCreateCounterSource().advanceToAtLeast(keyset.id, nextCounter);
+          walletStore
+            .getOrCreateCounterSource()
+            .advanceToAtLeast(keyset.id, nextCounter);
           walletStore.syncCounterToStorage(keyset.id, nextCounter);
         }
 
