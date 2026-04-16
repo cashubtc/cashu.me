@@ -442,14 +442,15 @@ export default defineComponent({
       return this.decodeToken(this.receiveData.tokensBase64)?.amount ?? 0;
     },
     receiveFee: function () {
-      if (!this.fullToken) return 0;
+      const ft = this.fullToken as Token | null;
+      if (!ft) return 0;
       try {
-        const proofs = this.getProofs(this.fullToken);
+        const proofs = this.getProofs(ft);
         if (!proofs?.length) return 0;
         return this.getFeesForProofs(
           proofs,
-          this.getMint(this.fullToken),
-          token.getUnit(this.fullToken)
+          this.getMint(ft),
+          token.getUnit(ft)
         );
       } catch {
         return 0;
