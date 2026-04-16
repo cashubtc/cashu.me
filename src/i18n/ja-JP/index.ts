@@ -77,6 +77,7 @@ export default {
       no_lnurl_data: "LNURLデータがありません",
       no_price_data: "価格データがありません。",
       please_try_again: "もう一度お試しください。",
+      trying_again: "再試行中...",
     },
     mint: {
       notifications: {
