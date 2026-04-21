@@ -156,6 +156,7 @@ import { shortenString } from "src/js/string-utils";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { useTokensStore } from "src/stores/tokens";
 import { mapState, mapWritableState, mapActions } from "pinia";
+import { useCocoStore } from "src/stores/coco";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { useWalletStore } from "src/stores/wallet";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
@@ -192,12 +193,10 @@ export default defineComponent({
     filterPendingEcash: function () {
       this.currentPage = 1;
     },
-    // Watch for any changes in historyTokens (additions, updates, deletions)
-    historyTokens: {
+    cocoEvents: {
       handler: function () {
         this.updateUnifiedTransactions();
       },
-      deep: true,
       immediate: true,
     },
     // Watch for any changes in invoiceHistory (additions, updates, deletions)

@@ -5,6 +5,7 @@ import { useWalletStore } from "./wallet";
 import { mnemonicToSeedSync } from "@scure/bip39";
 import { migrateToCoco } from "../js/migrate-to-coco";
 import { markRaw } from "vue";
+import { useProofsStore } from "./proofs";
 
 export const useCocoStore = defineStore("coco", {
   state: () => ({
@@ -17,6 +18,7 @@ export const useCocoStore = defineStore("coco", {
       reserved: 0
     } as any,
     balancesByMint: {} as any,
+    lastEvent: 0,
   }),
   actions: {
     async initialize() {
@@ -63,12 +65,24 @@ export const useCocoStore = defineStore("coco", {
       this.manager.on('proofs:released', () => this.updateBalances());
       this.manager.on('proofs:state-changed', () => this.updateBalances());
       this.manager.on('mint:added', () => this.updateBalances());
+      this.manager.on('history:updated', () => this.lastEvent++);
+      this.manager.on('mint-op:finalized', () => this.lastEvent++);
+      this.manager.on('melt-op:finalized', () => this.lastEvent++);
+      this.manager.on('send:finalized', () => this.lastEvent++);
+      this.manager.on('receive-op:finalized', () => this.lastEvent++);
     },
     
     async updateBalances() {
       if (!this.manager) return;
       this.balances = await this.manager.wallet.balances.total();
       this.balancesByMint = await this.manager.wallet.balances.byMint();
+      try {
+        const proofsStore = useProofsStore();
+        await proofsStore.updateActiveProofs();
+      } catch (e) {
+        console.error("Failed to update legacy activeProofs", e);
+      }
+      this.lastEvent++;
     }
   }
 });
