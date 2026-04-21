@@ -1,3 +1,4 @@
+import { getEncodedTokenV4, getEncodedToken } from "@cashu/cashu-ts";
 import { defineStore } from "pinia";
 import {
   PaymentRequest,
@@ -42,6 +43,21 @@ export const useSwapStore = defineStore("swap", {
   actions: {
     //
     mintAmountSwap: async function (swapAmountData: SwapAmountData) {
+      if (this.swapBlocking) {
+        notifyWarning(i18n.global.t("swap.in_progress_warning_text"));
+        return;
+      }
+      this.swapBlocking = true;
+      try {
+        const { executeMintAmountSwap } = await import("../js/patch_swap");
+        await executeMintAmountSwap(swapAmountData);
+      } catch (e) {
+        notifyError(i18n.global.t("swap.swap_error_text"));
+      } finally {
+        this.swapBlocking = false;
+      }
+    },
+    oldMintAmountSwap: async function (swapAmountData: SwapAmountData) {
       const walletStore = useWalletStore();
       const mintStore = useMintsStore();
       if (this.swapBlocking) {
@@ -110,6 +126,22 @@ export const useSwapStore = defineStore("swap", {
       return tokenAmount - meltAmount;
     },
     meltProofsToMint: async function (tokenJson: Token, mint: StoredMint) {
+      if (this.swapBlocking) {
+        notifyWarning(i18n.global.t("swap.in_progress_warning_text"));
+        return;
+      }
+      this.swapBlocking = true;
+      try {
+        const { executeMeltProofsToMint } = await import("../js/patch_swap");
+        const tokenStr = getEncodedTokenV4(tokenJson) || getEncodedToken(tokenJson);
+        await executeMeltProofsToMint(tokenStr, mint.url);
+      } catch (e) {
+        notifyError(i18n.global.t("swap.swap_error_text"));
+      } finally {
+        this.swapBlocking = false;
+      }
+    },
+    oldMeltProofsToMint: async function (tokenJson: Token, mint: StoredMint) {
       const proofsStore = useProofsStore();
       const walletStore = useWalletStore();
       if (this.swapBlocking) {

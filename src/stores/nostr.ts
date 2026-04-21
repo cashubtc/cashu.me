@@ -230,9 +230,11 @@ export const useNostrStore = defineStore("nostr", {
     },
     walletSeedGenerateKeyPair: async function () {
       const walletStore = useWalletStore();
-      const sk = walletStore.seed.slice(0, 32);
-      const walletPublicKeyHex = getPublicKey(sk); // `pk` is a hex string
-      const walletPrivateKeyHex = bytesToHex(sk);
+      const sk = walletStore.seed;
+
+      const skHex = sk.slice(0, 32);
+      const walletPublicKeyHex = getPublicKey(skHex); // `pk` is a hex string
+      const walletPrivateKeyHex = bytesToHex(skHex);
       this.seedSignerPrivateKey = walletPrivateKeyHex;
       this.seedSignerPublicKey = walletPublicKeyHex;
       this.seedSigner = new NDKPrivateKeySigner(this.seedSignerPrivateKey);
@@ -555,7 +557,7 @@ export const useNostrStore = defineStore("nostr", {
         receiveStore.showReceiveTokens = false;
         return undefined;
       }
-      const decodedToken = token.decode(tokenStr);
+      const decodedToken = token.decode(tokenStr) as any;
       if (decodedToken == undefined) {
         throw Error("could not decode token");
       }

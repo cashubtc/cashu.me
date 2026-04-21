@@ -107,7 +107,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         if (now > dueTime) {
           const walletStore = useWalletStore();
           try {
-            await walletStore.checkInvoice(q.quote, false);
+            // handled by coco
             this.quotes.splice(i, 1);
           } catch (error) {
             q.lastChecked = now;

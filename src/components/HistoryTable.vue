@@ -404,33 +404,11 @@ export default defineComponent({
     },
 
     // Efficiently update and sort unified transactions only when needed
-    updateUnifiedTransactions() {
-      const transactions = [];
-
-      // Add token transactions (ecash)
-      this.historyTokens.forEach((token) => {
-        transactions.push({
-          ...token,
-          type: "ecash",
-          id: token.id,
-          label: token.label,
-        });
-      });
-
-      // Add invoice transactions (lightning)
-      this.invoiceHistory.forEach((invoice) => {
-        transactions.push({
-          ...invoice,
-          type: "lightning",
-          id: `invoice-${invoice.quote}`,
-          label: invoice.label,
-        });
-      });
-
-      // Sort by date (newest first) and cache the result
-      this.cachedUnifiedTransactions = transactions.sort(
-        (a, b) => new Date(b.date) - new Date(a.date)
-      );
+    async updateUnifiedTransactions() {
+      const { fetchCocoHistory } = await import("../js/patch_history");
+      const cocoHistory = await fetchCocoHistory();
+      this.cachedUnifiedTransactions = cocoHistory;
+      return;
     },
   },
   created: function () {},
@@ -439,27 +417,46 @@ export default defineComponent({
 
 <style scoped>
 .transaction-label {
-  border-radius: 4px;
-  font-size: 1rem;
-  transition: background-color 0.2s ease;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.wallet-list-item {
+  min-height: 40px !important;
+  max-height: 40px !important;
 }
 
-.transaction-label:hover {
-  background-color: rgba(0, 0, 0, 0.04);
+body.body--dark .text-positive {
+  color: #4caf50 !important;
 }
 
-.transaction-icon {
-  width: 20px;
-  height: 20px;
-  color: var(--q-primary);
+body.body--dark .text-negative {
+  color: #f44336 !important;
 }
 
-.amount-text {
-  font-size: 1rem;
-  line-height: 1.2;
+.text-positive {
+  color: #388e3c !important; /* Darker green for light theme */
 }
 
-.text-amount-positive {
-  color: hsl(120, 88%, 58%);
+.text-negative {
+  color: #d32f2f !important; /* Darker red for light theme */
+}
+
+.clickable-row {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.clickable-row:hover {
+  background-color: rgba(0, 0, 0, 0.03); /* Light hover effect for light mode */
+}
+
+body.body--dark .clickable-row:hover {
+  background-color: rgba(255, 255, 255, 0.05); /* Light hover effect for dark mode */
+}
+
+.label-input .q-field__native {
+  font-size: 0.9em;
+  padding: 0;
 }
 </style>

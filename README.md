@@ -120,3 +120,18 @@ host.com {
     file_server
 }
 ```
+
+## Coco Wallet Migration (WIP)
+
+This project has been migrated to use \`@cashu/coco-core\` and \`@cashu/coco-indexeddb\` for wallet state management.
+
+- **Initialization**: \`src/boot/coco.ts\` initializes the manager and background watchers.
+- **Store**: \`src/stores/coco.ts\` serves as the bridge to UI reactivity.
+- **Migration**: \`src/js/migrate-to-coco.ts\` migrates existing Dexie proofs and localStorage mints into Coco automatically.
+- **Actions**:
+  - Minting, Melting, Swapping, Sending, and Receiving are now patched to call \`cocoStore.manager.ops.*\` directly.
+  - See \`src/js/patch_*\` for the implementations that intercept the legacy \`wallet.ts\` UI bindings.
+
+Things left to fully deprecate/cleanup in the UI:
+- Removing legacy \`cashu.historyTokens\` and \`cashu.invoiceHistory\` entirely from the UI components. History is read from \`manager.history.getPaginatedHistory()\` (see \`src/js/patch_history.ts\`).
+- Strip out unused methods from \`src/stores/wallet.ts\` (e.g., \`melt\`, \`send\`, \`receive\`, legacy proofs tracking).

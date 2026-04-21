@@ -117,6 +117,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
+import { useCocoStore } from "src/stores/coco";
 import ChooseMint from "components/ChooseMint.vue";
 import NumericKeyboard from "components/NumericKeyboard.vue";
 import AmountInputComponent from "components/AmountInputComponent.vue";
@@ -190,11 +191,20 @@ export default defineComponent({
         );
         this.createInvoiceButtonBlocked = true;
         const wallet = await this.activeWallet(true);
-        const mintQuote = await this.requestMint(amount, wallet);
+        const cocoStore = useCocoStore();
+        const pendingMint = await cocoStore.manager.ops.mint.prepare({ mintUrl: wallet.mint.mintUrl, amount: amount, method: "bolt11", methodData: {} });
+        this.invoiceData = { amount: amount, bolt11: pendingMint.request, quote: pendingMint.quoteId, status: "pending", mint: wallet.mint.mintUrl, unit: wallet.unit, mintQuote: { quote: pendingMint.quoteId, request: pendingMint.request, state: "UNPAID" } };
+        const mintQuote = { quote: pendingMint.quoteId, request: pendingMint.request, state: "UNPAID" };
         // Switch to QR display dialog
         this.showCreateInvoiceDialog = false;
         this.showInvoiceDetails = true;
-        await this.mintOnPaid(mintQuote.quote);
+        // Wait for payment and execute via Coco
+        const cocoStore2 = useCocoStore();
+        await cocoStore2.manager.subscription.awaitMintQuotePaid(wallet.mint.mintUrl, pendingMint.quoteId);
+        await cocoStore2.manager.ops.mint.execute(pendingMint.id);
+        this.showInvoiceDetails = false;
+        this.invoiceData = {};
+        useUiStore().closeDialogs();
       } catch (e) {
         console.log("#### requestMintButton", e);
       } finally {

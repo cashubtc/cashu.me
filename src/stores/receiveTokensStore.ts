@@ -42,6 +42,10 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
         .includes(token.getMint(tokenJson));
     },
     receiveToken: async function (encodedToken: string) {
+      const { executeReceiveToken } = await import("../js/patch_receiveTokens");
+      return await executeReceiveToken(encodedToken);
+    },
+    oldReceiveToken: async function (encodedToken: string) {
       const mintStore = useMintsStore();
       const walletStore = useWalletStore();
       const receiveStore = useReceiveTokensStore();

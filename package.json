@@ -23,6 +23,8 @@
     "@capacitor/core": "^6.2.0",
     "@capacitor/haptics": "^6.0.2",
     "@cashu/cashu-ts": "^3.5.0",
+    "@cashu/coco-core": "^1.0.0-rc.4",
+    "@cashu/coco-indexeddb": "^1.0.0-rc.4",
     "@chenfengyuan/vue-qrcode": "^2.0.0",
     "@gandlaf21/bc-ur": "^1.1.12",
     "@nostr-dev-kit/ndk": "^2.8.1",
