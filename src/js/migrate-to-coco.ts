@@ -3,6 +3,33 @@ import { IndexedDbRepositories } from "@cashu/coco-indexeddb";
 import { cashuDb } from "../stores/dexie";
 import { StoredMint } from "../stores/mints";
 
+async function triggerBackup() {
+  const jsonToSave: any = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (!k) continue;
+    jsonToSave[k] = localStorage.getItem(k);
+  }
+  const proofs = await cashuDb.proofs.toArray();
+  if (proofs.length > 0) {
+    jsonToSave["cashu.dexie.db.proofs"] = JSON.stringify(proofs);
+  }
+
+  const textToSave = JSON.stringify(jsonToSave);
+  const textToSaveAsBlob = new Blob([textToSave], { type: "text/plain" });
+  const textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
+
+  const fileName = `cashu_me_pre_coco_migration_backup_${new Date().toISOString().split('T')[0]}.json`;
+  const downloadLink = document.createElement("a");
+  downloadLink.download = fileName;
+  downloadLink.innerHTML = "Download File";
+  downloadLink.href = textToSaveAsURL;
+  downloadLink.style.display = "none";
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  setTimeout(() => document.body.removeChild(downloadLink), 100);
+}
+
 export async function migrateToCoco(manager: Manager, repos: IndexedDbRepositories) {
   const isMigrated = localStorage.getItem("cashu.coco.migrated");
   if (isMigrated === "true") {
@@ -11,6 +38,8 @@ export async function migrateToCoco(manager: Manager, repos: IndexedDbRepositori
   
   console.log("Starting migration to Coco...");
   try {
+    await triggerBackup();
+
     // 1. Migrate Mints
     const mintsStr = localStorage.getItem("cashu.mints");
     const keysetToMintUrl = new Map<string, string>();

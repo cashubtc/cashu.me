@@ -504,14 +504,8 @@ export default defineComponent({
         this.activeUnit,
         true
       );
-      const { sendProofs } = await this.send(
-        this.activeProofs,
-        mintWallet,
-        sendAmount,
-        true,
-        this.includeFeesInSendAmount
-      );
-      const serialized = this.serializeProofs(sendProofs);
+      const { executeSendToken } = await import("../js/patch_sendTokens");
+      const serialized = (await executeSendToken(this.activeMintUrl, sendAmount, this.sendData.memo)).serialized;
       if (!serialized) {
         throw new Error(
           this.$t("SendTokenDialog.errors.serialization_failed") as string
@@ -552,19 +546,11 @@ export default defineComponent({
           this.activeUnit,
           true
         );
-        const { _, sendProofs } = await this.sendToLock(
-          this.activeProofs,
-          mintWallet,
-          sendAmount,
-          this.sendData.p2pkPubkey
-        );
-        // update UI
-        this.sendData.tokens = sendProofs;
-
-        this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
+        const { executeSendToken } = await import("../js/patch_sendTokens");
+        const serialized = (await executeSendToken(this.activeMintUrl, sendAmount, this.sendData.memo, this.sendData.p2pkPubkey)).serialized;
         const historyToken = {
           amount: -this.sendData.amount,
-          token: this.sendData.tokensBase64,
+          token: serialized,
           unit: this.activeUnit,
           mint: this.activeMintUrl,
         };
@@ -604,23 +590,14 @@ export default defineComponent({
           false
         );
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
-        const { _, sendProofs } = await this.send(
-          this.activeProofs,
-          mintWallet,
-          sendAmount,
-          true,
-          this.includeFeesInSendAmount
-        );
-
-        // update UI
-        this.sendData.tokens = sendProofs;
-        this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
+        const { executeSendToken } = await import("../js/patch_sendTokens");
+        const serialized = (await executeSendToken(this.activeMintUrl, sendAmount, this.sendData.memo)).serialized;
         this.sendData.historyAmount =
           -this.sendData.amount * this.activeUnitCurrencyMultiplyer;
 
         const historyToken = {
           amount: -sendAmount,
-          token: this.sendData.tokensBase64,
+          token: serialized,
           unit: this.activeUnit,
           mint: this.activeMintUrl,
           paymentRequest: this.sendData.paymentRequest,

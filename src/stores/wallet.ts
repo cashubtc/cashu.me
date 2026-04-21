@@ -720,7 +720,11 @@ export const useWalletStore = defineStore("wallet", {
         throw error;
       }
     },
-    checkTokenSpendable: async function (
+    checkTokenSpendable: async function (historyToken: any, verbose: boolean = true) {
+      const { executeCheckTokenSpendable } = await import("../js/patch_checkToken");
+      await executeCheckTokenSpendable(historyToken.id);
+    },
+    oldCheckTokenSpendable: async function (
       historyToken: HistoryToken,
       verbose: boolean = true
     ) {
@@ -807,7 +811,11 @@ export const useWalletStore = defineStore("wallet", {
       }
       return true;
     },
-    checkInvoice: async function (
+    checkInvoice: async function (quote: string, verbose = true, hideInvoiceDetailsOnMint = true) {
+      const { executeCheckInvoice } = await import("../js/patch_checkInvoice");
+      await executeCheckInvoice(quote);
+    },
+    oldCheckInvoice: async function (
       quote: string,
       verbose = true,
       hideInvoiceDetailsOnMint = true

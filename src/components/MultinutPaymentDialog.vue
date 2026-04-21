@@ -915,11 +915,16 @@ export default defineComponent({
             );
             try {
               this.setMintState(mint.url, "requesting");
-              const quote = await this.meltQuote(
-                mintWallet,
-                this.payInvoiceData.input.request,
-                partialAmount
-              );
+              const { useCocoStore } = await import("../stores/coco");
+              const preparedMelt = await useCocoStore().manager.ops.melt.prepare({
+                mintUrl: mint.url,
+                method: "bolt11",
+                methodData: {
+                  invoice: this.payInvoiceData.input.request,
+                  amountSats: partialAmount
+                }
+              });
+              const quote = preparedMelt; // Keep the variable name for mapping
               console.log(quote);
               return [mint, quote];
             } catch (error) {
@@ -946,13 +951,9 @@ export default defineComponent({
               );
               const mintClass = new MintClass(mint);
               const proofs = mintClass.unitProofs(activeUnit);
-              const result = await this.melt(
-                proofs,
-                quote,
-                mintWallet,
-                true,
-                true // ! RELEASE THE MUTEX !
-              );
+              const { useCocoStore } = await import("../stores/coco");
+              const res = await useCocoStore().manager.ops.melt.execute(quote.id);
+              const result = { isPaid: true, preimage: res.finalizedData?.preimage || res.proof };
 
               // Mark as success
               this.setMintState(mint.url, "success");
