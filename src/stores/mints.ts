@@ -144,8 +144,9 @@ export const useMintsStore = defineStore("mints", {
     };
   },
   getters: {
-    multiMints({ activeUnit }) {
-      return this.mints.filter((m) => {
+    multiMints(state: any) {
+      const activeUnit = state.activeUnit;
+      return state.mints.filter((m) => {
         try {
           const version = m.info?.version;
           if (!version) return false;
@@ -312,16 +313,18 @@ export const useMintsStore = defineStore("mints", {
       let url = addMintData.url;
       this.addMintBlocking = true;
       try {
-        // sanitize url
         const sanitizeUrl = (url: string): string => {
           let cleanedUrl = url.trim().replace(/\/+$/, "");
           if (!/^[a-z]+:\/\//.test(cleanedUrl)) {
-            // Check for any protocol followed by "://"
             cleanedUrl = "https://" + cleanedUrl;
           }
           return cleanedUrl;
         };
         url = sanitizeUrl(url);
+
+        const { executeAddMint } = await import("../js/patch_mints");
+        await executeAddMint(url);
+
 
         const mintToAdd: StoredMint = {
           url: url,
@@ -422,6 +425,12 @@ export const useMintsStore = defineStore("mints", {
       verbose = false,
       force = false
     ) {
+      const { useCocoStore } = await import("../stores/coco");
+      if (useCocoStore().manager) {
+        try {
+          await useCocoStore().manager!.mint.addMint(mint.url, { trusted: true });
+        } catch (e) {}
+      }
       if (mint.url === this.activeMintUrl && !force) {
         return;
       }
@@ -568,7 +577,7 @@ export const useMintsStore = defineStore("mints", {
         this.mints.filter((m) => m.url === mint.url)[0].lastKeysetsUpdated =
           new Date().toISOString();
         // return the mint with keys set
-        return this.mints.filter((m) => m.url === mint.url)[0];
+        return state.mints.filter((m) => m.url === mint.url)[0];
       } catch (error: any) {
         console.error(error);
         try {
@@ -617,6 +626,8 @@ export const useMintsStore = defineStore("mints", {
       }
     },
     removeMint: async function (url: string) {
+      const { executeRemoveMint } = await import("../js/patch_mints");
+      await executeRemoveMint(url);
       this.mints = this.mints.filter((m) => m.url !== url);
       if (url === this.activeMintUrl) {
         this.activeMintUrl = "";

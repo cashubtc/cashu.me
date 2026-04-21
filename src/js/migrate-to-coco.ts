@@ -51,7 +51,7 @@ export async function migrateToCoco(manager: Manager, repos: IndexedDbRepositori
         if (!mintUrls.has(mint.url)) {
           mintUrls.add(mint.url);
           try {
-            await manager.mint.addMint(mint.url);
+            await manager.mint.addMint(mint.url, { trusted: true });
           } catch (e) {
             console.warn(`Could not add mint ${mint.url} to Coco`, e);
           }
