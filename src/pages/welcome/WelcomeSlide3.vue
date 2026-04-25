@@ -1,22 +1,16 @@
-<!-- src/components/WelcomeSlide3.vue -->
 <template>
   <div class="seed-phrase-slide">
-    <!-- Main content area -->
     <div class="content">
-      <!-- Header Icon -->
       <div class="header-icon">
         <div class="icon-circle">
           <q-icon name="vpn_key" size="2.5em" color="white" />
         </div>
       </div>
 
-      <!-- Title -->
       <h1 class="title">{{ $t("WelcomeSlide3.title") }}</h1>
 
-      <!-- Description -->
       <p class="description">{{ $t("WelcomeSlide3.text") }}</p>
 
-      <!-- Seed Phrase Section -->
       <div class="seed-section">
         <div class="seed-label">
           {{ $t("WelcomeSlide3.inputs.seed_phrase.label") }}
@@ -55,13 +49,13 @@
         </p>
       </div>
 
-      <!-- Checkbox -->
       <div class="checkbox-section">
         <q-checkbox
           v-model="welcomeStore.seedPhraseValidated"
           :label="$t('WelcomeSlide3.inputs.checkbox.label')"
           color="primary"
           class="validation-checkbox"
+          :disable="hideMnemonic"
         />
       </div>
     </div>
@@ -85,10 +79,10 @@ export default {
     const hideMnemonic = ref(true);
 
     onMounted(() => {
-      // Ensure mnemonic is generated for new-wallet flow only
       if (welcomeStore.onboardingPath === "new" && !walletStore.mnemonic) {
         walletStore.initializeMnemonic();
       }
+      welcomeStore.seedPhraseValidated = false;
     });
 
     const hiddenMnemonic = computed(() => {
@@ -193,7 +187,6 @@ export default {
   margin-bottom: 24px;
 }
 
-/* Unified content width */
 .seed-section,
 .checkbox-section {
   max-width: 500px;
@@ -229,7 +222,7 @@ export default {
   line-height: 1.8;
   color: white;
   word-wrap: break-word;
-  padding-right: 80px; /* Space for action buttons */
+  padding-right: 80px;
 }
 
 .seed-actions {
@@ -277,7 +270,6 @@ export default {
   line-height: 1.4;
 }
 
-/* Mobile adjustments */
 @media (max-width: 600px) {
   .seed-phrase-slide {
     padding: 30px 15px 15px 15px;
