@@ -459,6 +459,11 @@ export default {
       this.focusInput("parseDialogInput");
     },
     showWelcomePage: function () {
+      const hasMnemonic = !!localStorage.getItem("cashu.mnemonic");
+      if (hasMnemonic) {
+        useWelcomeStore().showWelcome = false;
+        return;
+      }
       if (!useWelcomeStore().termsAccepted) {
         useWelcomeStore().showWelcome = true;
       }
