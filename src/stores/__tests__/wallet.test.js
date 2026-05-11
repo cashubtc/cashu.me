@@ -28,6 +28,7 @@ const h = vi.hoisted(() => {
     removeProofs: vi.fn(),
     addProofs: vi.fn(),
     setReserved: vi.fn(),
+    getProofsForQuote: vi.fn(),
   };
   const uiStore = {
     lockMutex: vi.fn(async () => {}),
@@ -148,7 +149,7 @@ vi.mock("@cashu/cashu-ts", () => ({
     mintToCacheDTO: (...args) => h.keychainMintToCacheDTO(...args),
   },
   CheckStateEnum: { SPENT: "SPENT" },
-  MeltQuoteState: { PAID: "PAID", PENDING: "PENDING" },
+  MeltQuoteState: { PAID: "PAID", PENDING: "PENDING", UNPAID: "UNPAID" },
   MintQuoteState: { PAID: "PAID", ISSUED: "ISSUED", PENDING: "PENDING" },
 }));
 
@@ -200,6 +201,7 @@ vi.mock("src/stores/mints", async () => {
 });
 
 import { useWalletStore } from "src/stores/wallet";
+import { LightningMethod } from "src/stores/walletTypes";
 
 describe("wallet store", () => {
   beforeEach(() => {
@@ -231,6 +233,7 @@ describe("wallet store", () => {
     h.proofsStore.sumProofs.mockImplementation((proofs) =>
       proofs.reduce((sum, p) => sum + p.amount, 0)
     );
+    h.proofsStore.getProofsForQuote.mockResolvedValue([]);
     h.p2pkStore.isValidPubkey.mockReturnValue(false);
     h.bolt12Decode.mockReturnValue({ amount: "0", description: "" });
   });
@@ -338,6 +341,27 @@ describe("wallet store", () => {
     expect(wallet.invoiceHistory).toEqual([]);
   });
 
+  it("records Bolt12 outgoing invoice type for recovery", async () => {
+    const wallet = useWalletStore();
+    wallet.payInvoiceData.input.request = "lno1offer";
+    const quote = { quote: "bolt12-melt-q", amount: 101, fee_reserve: 4 };
+
+    await wallet.addOutgoingPendingInvoiceToHistory(
+      quote,
+      "https://mint-a.example",
+      "sat",
+      LightningMethod.Bolt12
+    );
+
+    expect(wallet.invoiceHistory[0]).toMatchObject({
+      quote: "bolt12-melt-q",
+      request: "lno1offer",
+      type: LightningMethod.Bolt12,
+      amount: -105,
+      status: "pending",
+    });
+  });
+
   it("creates active wallet and loads cache", async () => {
     const wallet = useWalletStore();
     wallet.mnemonic = "";
@@ -397,7 +421,7 @@ describe("wallet store", () => {
         mint: "https://mint-a.example",
         unit: "sat",
         privKey: "privkey",
-        type: "bolt12",
+        type: LightningMethod.Bolt12,
       },
     ];
     wallet.keysetCounters = [{ id: "00aa", counter: 1 }];
@@ -466,6 +490,50 @@ describe("wallet store", () => {
     });
     expect(wallet.payInvoiceData.invoice.bolt12).toBe("lno1amountless");
     expect(quoteSpy).not.toHaveBeenCalled();
+  });
+
+  it("checks pending Bolt12 outgoing invoices with Bolt12 melt quotes", async () => {
+    const wallet = useWalletStore();
+    const proofs = [{ id: "00aa", amount: 105, secret: "s1" }];
+    const checkMeltQuoteBolt12 = vi.fn(async () => ({
+      quote: "bolt12-melt-q",
+      amount: 101,
+      fee_reserve: 4,
+      state: "PAID",
+    }));
+    wallet.invoiceHistory = [
+      {
+        quote: "bolt12-melt-q",
+        amount: -105,
+        request: "lno1offer",
+        memo: "Outgoing invoice",
+        date: "old",
+        status: "pending",
+        mint: "https://mint-a.example",
+        unit: "sat",
+        type: LightningMethod.Bolt12,
+      },
+    ];
+    h.proofsStore.getProofsForQuote.mockResolvedValue(proofs);
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue({
+      mint: { checkMeltQuoteBolt12 },
+      unit: "sat",
+    });
+    vi.spyOn(wallet, "checkProofsSpendable").mockResolvedValue(proofs);
+
+    await wallet.checkOutgoingInvoice("bolt12-melt-q", false);
+
+    expect(checkMeltQuoteBolt12).toHaveBeenCalledWith("bolt12-melt-q");
+    expect(wallet.checkProofsSpendable).toHaveBeenCalledWith(
+      proofs,
+      expect.objectContaining({ mint: { checkMeltQuoteBolt12 } }),
+      true
+    );
+    expect(wallet.invoiceHistory[0].status).toBe("paid");
+    expect(wallet.invoiceHistory[0].meltQuote).toMatchObject({
+      quote: "bolt12-melt-q",
+      state: "PAID",
+    });
   });
 
   it("routes decodeRequest branches", async () => {

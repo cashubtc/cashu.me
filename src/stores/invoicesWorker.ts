@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { useWalletStore } from "./wallet";
 import { useLocalStorage } from "@vueuse/core";
 import { useSettingsStore } from "./settings";
+import { LightningMethod } from "src/stores/walletTypes";
 interface InvoiceQuote {
   quote: string;
   addedAt: number;
@@ -124,7 +125,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       if (!invoice) return false;
       const now = Date.now();
       // Bolt12
-      if (invoice.type === "bolt12") {
+      if (invoice.type === LightningMethod.Bolt12) {
         const isOlderThanMaxAge = now - Date.parse(invoice.date) > this.maxAge;
         if (isOlderThanMaxAge) return false;
 
@@ -235,7 +236,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       for (const q of quotesToCheck) {
         try {
           console.log(`Checking quote ${q.quote}`);
-          if (q.type === "bolt12") {
+          if (q.type === LightningMethod.Bolt12) {
             this.addBolt12OfferToChecker(q.quote);
           } else {
             walletStore.mintOnPaidBolt11(q.quote, false, false);

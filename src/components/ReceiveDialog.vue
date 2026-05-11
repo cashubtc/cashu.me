@@ -83,6 +83,7 @@ import {
   Zap as ZapIcon,
   Scan as ScanIcon,
 } from "lucide-vue-next";
+import { LightningMethod } from "src/stores/walletTypes";
 
 export default defineComponent({
   name: "ReceiveDialog",
@@ -147,7 +148,7 @@ export default defineComponent({
       this.invoiceData.request = "";
       this.invoiceData.hash = "";
       this.invoiceData.memo = "";
-      this.invoiceData.type = "bolt11";
+      this.invoiceData.type = LightningMethod.Bolt11;
       this.showCreateInvoiceDialog = true;
       this.showReceiveDialog = false;
     },

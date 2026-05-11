@@ -163,6 +163,10 @@ import { useUiStore } from "src/stores/ui";
 import token from "../js/token";
 import { notify } from "src/js/notify";
 import { Coins as CoinsIcon, Zap as ZapIcon } from "lucide-vue-next";
+import {
+  LightningMethod,
+  UnifiedTransactionType,
+} from "src/stores/walletTypes";
 
 export default defineComponent({
   name: "HistoryTable",
@@ -234,7 +238,8 @@ export default defineComponent({
       if (this.filterPendingEcash) {
         return this.unifiedTransactions.filter(
           (transaction) =>
-            transaction.status === "pending" && transaction.type === "ecash"
+            transaction.status === "pending" &&
+            transaction.type === UnifiedTransactionType.Ecash
         );
       }
       if (this.filterPending) {
@@ -259,7 +264,7 @@ export default defineComponent({
     ...mapActions(useWalletStore, [
       "checkTokenSpendable",
       "checkInvoiceBolt11",
-      "checkOutgoingInvoiceBolt11",
+      "checkOutgoingInvoice",
       "checkOfferAndMintBolt12",
     ]),
 
@@ -316,25 +321,29 @@ export default defineComponent({
     },
 
     isEcashTransaction(transaction) {
-      return transaction.type === "ecash";
+      return transaction.type === UnifiedTransactionType.Ecash;
     },
 
     isLightningTransaction(transaction) {
-      return transaction.type === "lightning";
+      return transaction.type === UnifiedTransactionType.Lightning;
     },
 
     getTransactionIcon(transaction) {
-      return transaction.type === "lightning"
+      return transaction.type === UnifiedTransactionType.Lightning
         ? "flash_on"
         : "account_balance_wallet";
     },
 
     getTransactionIconColor(transaction) {
-      return transaction.type === "lightning" ? "orange" : "blue";
+      return transaction.type === UnifiedTransactionType.Lightning
+        ? "orange"
+        : "blue";
     },
 
     getDefaultLabel(transaction) {
-      return transaction.type === "lightning" ? "Lightning" : "Ecash";
+      return transaction.type === UnifiedTransactionType.Lightning
+        ? "Lightning"
+        : "Ecash";
     },
 
     getTransactionLabel(transaction) {
@@ -342,7 +351,7 @@ export default defineComponent({
     },
 
     checkTransactionStatus(transaction) {
-      if (transaction.type === "ecash") {
+      if (transaction.type === UnifiedTransactionType.Ecash) {
         // If it's an incoming ecash transaction, open receive dialog
         if (transaction.amount > 0) {
           this.receiveToken(transaction.token);
@@ -350,33 +359,33 @@ export default defineComponent({
           // For outgoing ecash transactions, check spendable status
           this.checkTokenSpendable(transaction);
         }
-      } else if (transaction.type === "lightning") {
+      } else if (transaction.type === UnifiedTransactionType.Lightning) {
         // Prefer explicit type check, fallback to heuristic for old history
         const isBolt12 =
-          transaction.method === "bolt12" ||
-          transaction.method === "bolt12-subpayment" ||
+          transaction.method === LightningMethod.Bolt12 ||
+          transaction.method === LightningMethod.Bolt12Subpayment ||
           (transaction?.mintQuote &&
             typeof transaction.mintQuote.amount_paid !== "undefined");
 
-        if (isBolt12) {
+        if (transaction.amount < 0) {
+          this.checkOutgoingInvoice(transaction.quote, true);
+        } else if (isBolt12) {
           this.checkOfferAndMintBolt12(transaction.quote, true);
         } else if (transaction.amount > 0) {
           this.checkInvoiceBolt11(transaction.quote, true);
-        } else {
-          this.checkOutgoingInvoiceBolt11(transaction.quote, true);
         }
       }
     },
 
     showTransactionDialog(transaction) {
-      if (transaction.type === "ecash") {
+      if (transaction.type === UnifiedTransactionType.Ecash) {
         // For pending incoming tokens, open receive dialog instead
         if (transaction.status === "pending" && transaction.amount > 0) {
           this.receiveToken(transaction.token);
         } else {
           this.showTokenDialog(transaction);
         }
-      } else if (transaction.type === "lightning") {
+      } else if (transaction.type === UnifiedTransactionType.Lightning) {
         this.showInvoiceDialog(transaction);
       }
     },
@@ -402,12 +411,14 @@ export default defineComponent({
       this.showInvoiceDetails = true;
       if (invoice.status === "pending") {
         const isBolt12 =
-          invoice.method === "bolt12" ||
-          invoice.method === "bolt12-subpayment" ||
+          invoice.method === LightningMethod.Bolt12 ||
+          invoice.method === LightningMethod.Bolt12Subpayment ||
           (invoice?.mintQuote &&
             typeof invoice.mintQuote.amount_paid !== "undefined");
 
-        if (isBolt12) {
+        if (invoice.amount < 0) {
+          this.checkOutgoingInvoice(invoice.quote, true);
+        } else if (isBolt12) {
           this.checkOfferAndMintBolt12(invoice.quote, false, false);
         } else if (invoice.amount > 0) {
           try {
@@ -415,8 +426,6 @@ export default defineComponent({
           } catch (e) {
             // Handle error
           }
-        } else {
-          this.checkOutgoingInvoiceBolt11(invoice.quote, true);
         }
       }
     },
@@ -429,7 +438,7 @@ export default defineComponent({
       this.historyTokens.forEach((token) => {
         transactions.push({
           ...token,
-          type: "ecash",
+          type: UnifiedTransactionType.Ecash,
           id: token.id,
           label: token.label,
         });
@@ -439,8 +448,8 @@ export default defineComponent({
       this.invoiceHistory.forEach((invoice) => {
         transactions.push({
           ...invoice,
-          type: "lightning",
-          method: invoice.type || "bolt11", // Preserve original type (bolt11/bolt12), default to bolt11
+          type: UnifiedTransactionType.Lightning,
+          method: invoice.type || LightningMethod.Bolt11,
           id: `invoice-${invoice.quote}`,
           label: invoice.label,
         });

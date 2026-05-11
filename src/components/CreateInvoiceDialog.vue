@@ -203,6 +203,7 @@ import { useSettingsStore } from "src/stores/settings";
 import { usePriceStore } from "src/stores/price";
 import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
 import type { InvoiceHistory } from "src/stores/wallet";
+import { LightningMethod } from "src/stores/walletTypes";
 
 declare const windowMixin: any;
 
@@ -246,7 +247,7 @@ export default defineComponent({
     ]),
     ...mapState(usePriceStore, ["bitcoinPrice", "currentCurrencyPrice"]),
     isBolt12(): boolean {
-      return this.invoiceData.type === "bolt12";
+      return this.invoiceData.type === LightningMethod.Bolt12;
     },
     showAmountInput(): boolean {
       if (!this.isBolt12) return true;
@@ -265,7 +266,7 @@ export default defineComponent({
       // If methods are specified, check for bolt11
       // If methods are not specified, assume bolt11 is supported
       if (nut4.methods) {
-        return nut4.methods.some((m: any) => m.method === "bolt11");
+        return nut4.methods.some((m: any) => m.method === LightningMethod.Bolt11);
       }
       return true;
     },
@@ -279,7 +280,7 @@ export default defineComponent({
         mint.info?.nuts?.[4] || mint.info?.nuts?.["4"] || ({} as any);
       if (nut4.supported === false) return false;
       if (nut4.methods) {
-        return nut4.methods.some((m: any) => m.method === "bolt12");
+        return nut4.methods.some((m: any) => m.method === LightningMethod.Bolt12);
       }
       return true;
     },
@@ -307,7 +308,7 @@ export default defineComponent({
       // 4. Matches current active mint and unit
       const reusableOffers = walletStore.invoiceHistory.filter(
         (invoice: InvoiceHistory) => {
-          if (invoice.type !== "bolt12") return false;
+          if (invoice.type !== LightningMethod.Bolt12) return false;
           // Must be amountless
           const quote = invoice.mintQuote as any;
           if (quote?.amount && quote.amount > 0) return false;
@@ -352,9 +353,9 @@ export default defineComponent({
     activeMintUrl: {
       handler: function () {
         if (this.bolt11Supported && !this.bolt12Supported) {
-          this.invoiceData.type = "bolt11";
+          this.invoiceData.type = LightningMethod.Bolt11;
         } else if (!this.bolt11Supported && this.bolt12Supported) {
-          this.invoiceData.type = "bolt12";
+          this.invoiceData.type = LightningMethod.Bolt12;
         }
       },
       immediate: true,
@@ -371,9 +372,9 @@ export default defineComponent({
     ...mapActions(useMintsStore, ["toggleUnit"]),
     toggleInvoiceType() {
       if (this.isBolt12) {
-        this.invoiceData.type = "bolt11";
+        this.invoiceData.type = LightningMethod.Bolt11;
       } else {
-        this.invoiceData.type = "bolt12";
+        this.invoiceData.type = LightningMethod.Bolt12;
         this.bolt12AddAmount = false;
         this.invoiceData.amount = 0;
       }

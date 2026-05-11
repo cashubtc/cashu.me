@@ -5,6 +5,7 @@ import { useUiStore } from "src/stores/ui";
 import { useMintsStore } from "src/stores/mints";
 import { notifySuccess, notifyApiError } from "src/js/notify";
 import { MintQuoteBolt11Response } from "@cashu/cashu-ts";
+import { LightningMethod } from "src/stores/walletTypes";
 
 export async function mintOnPaidGeneric(
   this: any,
@@ -15,7 +16,7 @@ export async function mintOnPaidGeneric(
     kickOffInvoiceChecker = true,
     hideInvoiceDetailsOnMint = true,
   }: {
-    type: "bolt11" | "bolt12";
+    type: LightningMethod.Bolt11 | LightningMethod.Bolt12;
     verbose?: boolean;
     kickOffInvoiceChecker?: boolean;
     hideInvoiceDetailsOnMint?: boolean;
@@ -50,7 +51,7 @@ export async function mintOnPaidGeneric(
   if (kickOffInvoiceChecker) {
     if (useSettingsStore().periodicallyCheckIncomingInvoices) {
       console.log(`Adding quote ${quoteId} to long-polling checker.`);
-      if (type === "bolt12") {
+      if (type === LightningMethod.Bolt12) {
         useInvoicesWorkerStore().addBolt12OfferToChecker(quoteId);
       } else {
         useInvoicesWorkerStore().addInvoiceToChecker(quoteId);
@@ -58,7 +59,7 @@ export async function mintOnPaidGeneric(
     } else if (useSettingsStore().checkIncomingInvoices) {
       // Legacy worker support
       console.log(`Adding quote ${quoteId} to old worker checker.`);
-      if (type === "bolt11") {
+      if (type === LightningMethod.Bolt11) {
         useWorkersStore().invoiceCheckWorker(quoteId);
       }
       // Bolt12 not supported in legacy worker
@@ -66,15 +67,18 @@ export async function mintOnPaidGeneric(
   }
 
   // 5. Check Websocket Capability (NUT-17)
-  const method = type === "bolt11" ? "bolt11" : "bolt12";
-  const command = type === "bolt11" ? "bolt11_mint_quote" : "bolt12_mint_quote";
+  const method = type;
+  const command =
+    type === LightningMethod.Bolt11
+      ? "bolt11_mint_quote"
+      : "bolt12_mint_quote";
 
   if (
     !settingsStore.useWebsockets ||
     !mint.info?.nuts[17]?.supported ||
     !mint.info?.nuts[17]?.supported.find(
       (s: any) =>
-        s.method == method &&
+        s.method === method &&
         s.unit == invoice.unit &&
         s.commands.indexOf(command) != -1
     )
@@ -92,7 +96,7 @@ export async function mintOnPaidGeneric(
     const onPaidCallback = async (_response: MintQuoteBolt11Response) => {
       let proofs;
       try {
-        if (type === "bolt11") {
+        if (type === LightningMethod.Bolt11) {
           proofs = await this.mintBolt11(invoice, false);
         } else {
           proofs = await this.checkOfferAndMintBolt12(quoteId, false);
@@ -108,7 +112,7 @@ export async function mintOnPaidGeneric(
       useUiStore().vibrate();
 
       const amount =
-        type === "bolt12" && proofs
+        type === LightningMethod.Bolt12 && proofs
           ? proofs.reduce((acc: number, p: any) => acc + p.amount, 0)
           : invoice.amount;
 

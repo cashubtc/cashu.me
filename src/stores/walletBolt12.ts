@@ -7,13 +7,13 @@ import {
   MeltQuoteResponse,
   MintQuoteBolt12Response,
 } from "@cashu/cashu-ts";
-import { meltGeneric } from "./walletBolt11";
 import * as nobleSecp256k1 from "@noble/secp256k1";
 import { bytesToHex } from "@noble/hashes/utils";
 import { notifyApiError, notify, notifySuccess } from "src/js/notify";
 import type { InvoiceHistory } from "./wallet";
 import { useInvoicesWorkerStore } from "./invoicesWorker";
 import { mintOnPaidGeneric } from "./walletWebsocket";
+import { LightningMethod } from "src/stores/walletTypes";
 
 // BOLT12: reusable offers
 
@@ -48,7 +48,7 @@ export async function requestMintBolt12(
     this.invoiceHistory.push({
       ...this.invoiceData,
       label: "Lightning Bolt12",
-      type: "bolt12",
+      type: LightningMethod.Bolt12,
     });
 
     return data;
@@ -70,7 +70,7 @@ export async function mintOnPaidBolt12(
   hideInvoiceDetailsOnMint = true
 ) {
   return await mintOnPaidGeneric.call(this, quote, {
-    type: "bolt12",
+    type: LightningMethod.Bolt12,
     verbose,
     kickOffInvoiceChecker,
     hideInvoiceDetailsOnMint,
@@ -139,7 +139,7 @@ export async function checkOfferAndMintBolt12(
         status: "paid",
         mintQuote: meltQuoteAfterMint,
         label: "Bolt12 Subpayment",
-        type: "bolt12-subpayment",
+        type: LightningMethod.Bolt12Subpayment,
       });
     } else {
       // First payment: update the original offer entry
@@ -229,13 +229,26 @@ export async function meltBolt12(
   mintWallet: CashuWallet,
   silent?: boolean
 ) {
-  return meltGeneric.call(
-    this,
+  return this.meltGeneric(
     proofs,
     quote,
     mintWallet,
     silent,
     (q, sp, opts) => mintWallet.meltProofsBolt12(q as any, sp, opts),
-    (id) => mintWallet.mint.checkMeltQuoteBolt12(id)
+    (id) => mintWallet.mint.checkMeltQuoteBolt12(id),
+    LightningMethod.Bolt12
+  );
+}
+
+export async function checkOutgoingInvoiceBolt12(
+  this: any,
+  quote: string,
+  verbose = true
+) {
+  return this.checkOutgoingInvoiceGeneric(
+    quote,
+    verbose,
+    (wallet: CashuWallet, quoteId: string) =>
+      wallet.mint.checkMeltQuoteBolt12(quoteId)
   );
 }

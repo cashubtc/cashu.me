@@ -17,6 +17,7 @@ import { i18n } from "src/boot/i18n";
 import { useSettingsStore } from "./settings";
 import { useNostrMintBackupStore } from "./nostrMintBackup";
 import { bytesToHex } from "@noble/hashes/utils"; // already an installed dependency
+import { LightningMethod } from "src/stores/walletTypes";
 
 export type StoredMint = {
   url: string;
@@ -157,7 +158,7 @@ export const useMintsStore = defineStore("mints", {
 
           const nut15 = m.info?.nuts[15];
           const viableMint = nut15?.methods.find(
-            (m) => m.method === "bolt11" && m.unit === activeUnit
+            (m) => m.method === LightningMethod.Bolt11 && m.unit === activeUnit
           );
           const balance = new MintClass(m).unitBalance(activeUnit);
           if (nut15 && viableMint && balance > 0) return true;

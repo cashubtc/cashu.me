@@ -69,6 +69,7 @@ import {
   Building as BuildingIcon,
   QrCode as QrCodeIcon,
 } from "lucide-vue-next";
+import { LightningMethod } from "src/stores/walletTypes";
 
 declare const windowMixin: any;
 declare const formatCurrency: any;
@@ -112,7 +113,7 @@ export default defineComponent({
     },
     method: {
       type: String,
-      default: "bolt11",
+      default: LightningMethod.Bolt11,
     },
   },
   computed: {
@@ -162,8 +163,11 @@ export default defineComponent({
       return state?.toLowerCase() === "paid";
     },
     methodDisplay(): string {
-      const method = this.method || "bolt11";
-      if (method === "bolt12" || method === "bolt12-subpayment") {
+      const method = this.method || LightningMethod.Bolt11;
+      if (
+        method === LightningMethod.Bolt12 ||
+        method === LightningMethod.Bolt12Subpayment
+      ) {
         return "Bolt12";
       }
       return "Bolt11";

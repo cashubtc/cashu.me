@@ -101,9 +101,7 @@
                     :invoice="invoiceData"
                     :mint-url="invoiceData.mint"
                     :show-amount="true"
-                    :method="
-                      invoiceData.method || invoiceData.protocol || 'bolt11'
-                    "
+                    :method="invoiceMethod"
                   />
                 </div>
               </div>
@@ -164,6 +162,7 @@ import { useUiStore } from "../stores/ui";
 import { useWorkersStore } from "../stores/workers";
 import MeltQuoteInformation from "./MeltQuoteInformation.vue";
 import MintQuoteInformation from "./MintQuoteInformation.vue";
+import { LightningMethod } from "src/stores/walletTypes";
 // type hint for global mixin
 declare const windowMixin: any;
 
@@ -200,6 +199,14 @@ export default defineComponent({
     isSmallScreen() {
       return this.$q.screen.lt.sm;
     },
+    invoiceMethod(): LightningMethod {
+      return (
+        this.invoiceData.type ||
+        (this.invoiceData as any).method ||
+        (this.invoiceData as any).protocol ||
+        LightningMethod.Bolt11
+      );
+    },
     copyButtonLabel: function () {
       if (this.copyButtonCopied) {
         return "Copied";
@@ -208,10 +215,10 @@ export default defineComponent({
     },
     isBolt12(): boolean {
       return (
-        this.invoiceData.type === "bolt12" ||
-        this.invoiceData.type === "bolt12-subpayment" ||
-        (this.invoiceData as any).method === "bolt12" ||
-        (this.invoiceData as any).method === "bolt12-subpayment"
+        this.invoiceData.type === LightningMethod.Bolt12 ||
+        this.invoiceData.type === LightningMethod.Bolt12Subpayment ||
+        (this.invoiceData as any).method === LightningMethod.Bolt12 ||
+        (this.invoiceData as any).method === LightningMethod.Bolt12Subpayment
       );
     },
   },
