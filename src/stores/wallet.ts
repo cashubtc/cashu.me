@@ -1040,6 +1040,14 @@ export const useWalletStore = defineStore("wallet", {
     },
     handleBolt12Offer: async function (offer: string) {
       this.payInvoiceData.show = true;
+      this.payInvoiceData.input.amount = undefined;
+      this.payInvoiceData.input.quote = "";
+      this.payInvoiceData.meltQuote.error = "";
+      this.payInvoiceData.meltQuote.response = {
+        quote: "",
+        amount: 0,
+        fee_reserve: 0,
+      };
       let decoded;
       try {
         decoded = BOLT12Decoder.decode(offer);
@@ -1066,15 +1074,9 @@ export const useWalletStore = defineStore("wallet", {
         description: decoded.description || "",
       } as any;
       this.payInvoiceData.invoice = Object.freeze(cleanOffer);
-      if (
-        cleanOffer.sat > 0 ||
-        (this.payInvoiceData.input.amount &&
-          this.payInvoiceData.input.amount > 0)
-      ) {
+      if (cleanOffer.sat > 0) {
         // If offer has fixed amount, force it
-        if (cleanOffer.sat > 0) {
-          this.payInvoiceData.input.amount = cleanOffer.sat;
-        }
+        this.payInvoiceData.input.amount = cleanOffer.sat;
         await this.meltQuoteInvoiceData();
       }
     },
@@ -1292,7 +1294,7 @@ export const useWalletStore = defineStore("wallet", {
       keysetId: string,
       error: any
     ) {
-      if (error.message.includes("outputs have already been signed")) {
+      if (error?.message?.includes("outputs have already been signed")) {
         this.increaseKeysetCounter(keysetId, 10);
         notify(this.t("wallet.notifications.please_try_again"));
         return true;

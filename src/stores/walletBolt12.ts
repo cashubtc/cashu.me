@@ -92,7 +92,11 @@ export async function checkOfferAndMintBolt12(
   if (!invoice) throw new Error("offer not found");
 
   const mintWallet = await this.mintWallet(invoice.mint, invoice.unit);
+  const keysetId = this.getKeyset(invoice.mint, invoice.unit);
+  const mint = mintStore.mints.find((m: any) => m.url === invoice.mint);
+  if (!mint) throw new Error("mint not found");
 
+  await uIStore.lockMutex();
   try {
     uIStore.triggerActivityOrb();
     const updated = await mintWallet.checkMintQuoteBolt12(quoteId);
@@ -106,10 +110,7 @@ export async function checkOfferAndMintBolt12(
       throw new Error("no new funds to mint");
     }
 
-    const keysetId = this.getKeyset(invoice.mint, invoice.unit);
     const counter = this.keysetCounter(keysetId);
-    const mint = mintStore.mints.find((m: any) => m.url === invoice.mint);
-    if (!mint) throw new Error("mint not found");
     const proofs = await mintWallet.mintProofsBolt12(
       delta,
       updated,
@@ -162,7 +163,10 @@ export async function checkOfferAndMintBolt12(
   } catch (error: any) {
     console.error(error);
     if (verbose) notifyApiError(error);
+    this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error);
     throw error;
+  } finally {
+    uIStore.unlockMutex();
   }
 }
 
@@ -173,6 +177,11 @@ export async function meltQuoteInvoiceDataBolt12(this: any) {
     throw new Error("already processing an melt quote.");
   this.payInvoiceData.blocking = true;
   this.payInvoiceData.meltQuote.error = "";
+  this.payInvoiceData.meltQuote.response = {
+    quote: "",
+    amount: 0,
+    fee_reserve: 0,
+  };
   try {
     const mintStore = useMintsStore();
     const offer = this.payInvoiceData.invoice?.bolt12;

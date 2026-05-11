@@ -216,6 +216,27 @@
                           </div>
                         </div>
                       </div>
+                      <div v-else-if="needsBolt12Amount" class="q-mt-md">
+                        <div class="text-h6 q-my-none">Enter amount</div>
+                        <q-input
+                          class="q-mt-md"
+                          filled
+                          dense
+                          v-model.number="payInvoiceData.input.amount"
+                          type="number"
+                          :label="`Amount (${tickerShort})`"
+                          @keyup.enter="meltQuoteInvoiceData"
+                        />
+                        <div class="row q-mt-sm">
+                          <q-btn
+                            unelevated
+                            color="primary"
+                            :disabled="!payInvoiceData.input.amount"
+                            @click="meltQuoteInvoiceData"
+                            >Quote</q-btn
+                          >
+                        </div>
+                      </div>
                       <div v-else>
                         <div class="row">
                           <div class="col-12 text-h4 text-weight-bold q-mb-xs">
@@ -225,29 +246,6 @@
                               )
                             }}
                             <q-spinner />
-                          </div>
-                        </div>
-                        <!-- BOLT12 amount entry if offer has no amount -->
-                        <div
-                          v-if="payInvoiceData.invoice.bolt12"
-                          class="q-mt-md"
-                        >
-                          <q-input
-                            filled
-                            dense
-                            v-model.number="payInvoiceData.input.amount"
-                            type="number"
-                            :label="`Amount (${tickerShort})`"
-                            @keyup.enter="meltQuoteInvoiceData"
-                          />
-                          <div class="row q-mt-sm">
-                            <q-btn
-                              unelevated
-                              color="primary"
-                              :disabled="!payInvoiceData.input.amount"
-                              @click="meltQuoteInvoiceData"
-                              >Quote</q-btn
-                            >
                           </div>
                         </div>
                       </div>
@@ -461,7 +459,13 @@
         </div>
 
         <!-- Bottom fixed pay action -->
-        <div class="bottom-panel" v-if="payInvoiceData.invoice">
+        <div
+          class="bottom-panel"
+          v-if="
+            payInvoiceData.invoice &&
+            (hasMeltQuote || payInvoiceData.meltQuote.error != '')
+          "
+        >
           <div class="row justify-center q-pb-lg q-pt-sm">
             <div
               class="col-12 col-sm-11 col-md-8 q-px-md"
@@ -818,8 +822,21 @@ export default defineComponent({
         typeof paidRaw !== "boolean";
       return hasAmount || hasFeeReserve || hasFeePaid || hasPaidTimestamp;
     },
+    hasMeltQuote: function (): boolean {
+      const quote = this.payInvoiceData?.meltQuote?.response;
+      return Boolean(quote?.quote) && quote.amount > 0;
+    },
+    needsBolt12Amount: function (): boolean {
+      return (
+        Boolean(this.payInvoiceData?.invoice?.bolt12) &&
+        !this.payInvoiceData.blocking &&
+        !this.hasMeltQuote &&
+        this.payInvoiceData.meltQuote.error == ""
+      );
+    },
     enoughtotalUnitBalance: function () {
       return (
+        this.hasMeltQuote &&
         this.activeBalance >= this.payInvoiceData.meltQuote.response.amount
       );
     },
@@ -863,13 +880,12 @@ export default defineComponent({
         return "paid";
       } else if (this.isPaying) {
         return "paying";
-      } else if (
-        this.payInvoiceData.meltQuote.response &&
-        this.payInvoiceData.meltQuote.response.amount > 0
-      ) {
+      } else if (this.hasMeltQuote) {
         return "success";
       } else if (this.payInvoiceData.meltQuote.error != "") {
         return "error";
+      } else if (this.needsBolt12Amount) {
+        return "amount";
       } else {
         return "processing";
       }
