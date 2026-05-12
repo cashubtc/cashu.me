@@ -40,7 +40,6 @@ import {
   KeyChain,
   type AmountLike,
   type CounterSource,
-  type OperationCounters,
   createEphemeralCounterSource,
   // ConsoleLogger,
 } from "@cashu/cashu-ts";
