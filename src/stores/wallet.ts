@@ -513,7 +513,7 @@ export const useWalletStore = defineStore("wallet", {
       );
       const keysetId = this.getKeyset(wallet.mint.mintUrl, wallet.unit);
       const { keep: keepProofs, send: sendProofs } = await wallet.ops
-        .send(amount, proofsToSend)
+        .send(amount, toProofs(proofsToSend))
         .keyset(keysetId)
         .asP2PK({ pubkey: receiverPubkey })
         .run();
@@ -577,7 +577,7 @@ export const useWalletStore = defineStore("wallet", {
           ({ keep: keepProofs, send: sendProofs } =
             await this.retryOnceOnSignedOutputs(keysetId, async () =>
               swapWallet.ops
-                .send(targetAmount, proofsToSend)
+                .send(targetAmount, toProofs(proofsToSend))
                 .asDeterministic()
                 .keyset(keysetId)
                 .proofsWeHave(spendableProofs)
