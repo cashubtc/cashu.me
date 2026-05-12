@@ -373,8 +373,11 @@ export default defineComponent({
         return;
       }
       try {
-        this.fullToken = (await token.decodeFull(newVal)) ?? null;
+        const decoded = (await token.decodeFull(newVal)) ?? null;
+        if (this.receiveData.tokensBase64 !== newVal) return;
+        this.fullToken = decoded;
       } catch {
+        if (this.receiveData.tokensBase64 !== newVal) return;
         this.fullToken = null;
       }
     },
