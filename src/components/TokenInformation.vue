@@ -183,8 +183,11 @@ export default defineComponent({
           return;
         }
         try {
-          this.fullToken = (await token.decodeFull(encoded)) ?? null;
+          const decoded = (await token.decodeFull(encoded)) ?? null;
+          if (this.encodedToken !== encoded) return;
+          this.fullToken = decoded;
         } catch {
+          if (this.encodedToken !== encoded) return;
           this.fullToken = null;
         }
       },
