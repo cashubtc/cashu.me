@@ -1,8 +1,8 @@
 import { defineStore } from "pinia";
-import { useWalletStore } from "./wallet";
 import {
   Amount,
   decodePaymentRequest,
+  JSONInt,
   normalizeProofAmounts,
   PaymentRequest,
   PaymentRequestPayload,
@@ -15,12 +15,7 @@ import { useNostrStore } from "./nostr";
 import { useTokensStore } from "./tokens";
 import type { HistoryToken } from "./tokens";
 import token from "src/js/token";
-import {
-  notify,
-  notifyError,
-  notifySuccess,
-  notifyWarning,
-} from "src/js/notify";
+import { notifyError, notifySuccess, notifyWarning } from "src/js/notify";
 import { useLocalStorage } from "@vueuse/core";
 import { v4 as uuidv4 } from "uuid";
 
@@ -66,7 +61,6 @@ export const usePRStore = defineStore("payment-request", {
       mintUrl?: string,
       forceNew: boolean = false
     ) {
-      const walletStore = useWalletStore();
       // If not forcing a new request and we already have at least one,
       // do not auto-create a new one; just show the currently selected.
       if (!forceNew && this.ourPaymentRequests.length > 0) {
@@ -115,6 +109,9 @@ export const usePRStore = defineStore("payment-request", {
       encoded: string,
       memo?: string
     ) {
+      // PaymentRequest.id is optional in v4; we key OurPaymentRequest by id,
+      // so a request without one can't be tracked.
+      if (!request.id) return;
       const existIdx = this.ourPaymentRequests.findIndex(
         (r) => r.id === request.id
       );
@@ -280,7 +277,7 @@ export const usePRStore = defineStore("payment-request", {
         unit: request.unit || "",
         proofs: normalizeProofAmounts(proofs),
       };
-      const paymentPayloadString = JSON.stringify(paymentPayload);
+      const paymentPayloadString = JSONInt.stringify(paymentPayload)!;
       try {
         await nostrStore.sendNip17DirectMessageToNprofile(
           transport.target,
@@ -314,7 +311,7 @@ export const usePRStore = defineStore("payment-request", {
         unit: unit,
         proofs: normalizeProofAmounts(proofs),
       };
-      const paymentPayloadString = JSON.stringify(paymentPayload);
+      const paymentPayloadString = JSONInt.stringify(paymentPayload)!;
       try {
         const response = await fetch(transport.target, {
           headers: {
