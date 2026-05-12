@@ -80,16 +80,19 @@ export const useRestoreStore = defineStore("restore", {
         await wallet.loadMint();
         let start = 0;
         let emptyBatchCount = 0;
-        let keysetProofCount = 0;
+        let maxLastCounterWithSignature = -1;
         let restoreProofs: Proof[] = [];
 
         while (emptyBatchCount < MAX_GAP) {
           console.log(`Restoring proofs ${start} to ${start + BATCH_SIZE}`);
           let proofs: Proof[] = [];
+          let lastCounterWithSignature: number | undefined;
           try {
-            proofs = (
-              await wallet.restore(start, BATCH_SIZE, { keysetId: keyset.id })
-            ).proofs;
+            ({ proofs, lastCounterWithSignature } = await wallet.restore(
+              start,
+              BATCH_SIZE,
+              { keysetId: keyset.id }
+            ));
           } catch (error) {
             console.error(`Error restoring proofs: ${error}`);
             proofs = [];
@@ -104,7 +107,12 @@ export const useRestoreStore = defineStore("restore", {
             );
             restoreProofs = restoreProofs.concat(proofs);
             emptyBatchCount = 0;
-            keysetProofCount += proofs.length;
+            if (
+              lastCounterWithSignature !== undefined &&
+              lastCounterWithSignature > maxLastCounterWithSignature
+            ) {
+              maxLastCounterWithSignature = lastCounterWithSignature;
+            }
             this.restoreCounter += proofs.length;
             totalSteps += 1;
           }
@@ -121,14 +129,17 @@ export const useRestoreStore = defineStore("restore", {
           this.restoreProgress = currentStep / totalSteps;
         }
 
-        // Advance the keyset counter past all restored proof indices so the
-        // next deterministic operation doesn't collide with already-signed outputs.
-        const nextCounter = keysetProofCount + 1;
-        if (nextCounter > walletStore.keysetCounter(keyset.id)) {
-          walletStore
-            .getOrCreateCounterSource()
-            .advanceToAtLeast(keyset.id, nextCounter);
-          walletStore.syncCounterToStorage(keyset.id, nextCounter);
+        // Advance the keyset counter past the highest index that returned a
+        // signature so a subsequent deterministic op cannot collide with an
+        // already-signed output, even when restored proofs are sparse.
+        if (maxLastCounterWithSignature >= 0) {
+          const nextCounter = maxLastCounterWithSignature + 1;
+          if (nextCounter > walletStore.keysetCounter(keyset.id)) {
+            walletStore
+              .getOrCreateCounterSource()
+              .advanceToAtLeast(keyset.id, nextCounter);
+            walletStore.syncCounterToStorage(keyset.id, nextCounter);
+          }
         }
 
         let restoredProofs: Proof[] = [];

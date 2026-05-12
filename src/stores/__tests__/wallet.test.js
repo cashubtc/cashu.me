@@ -164,8 +164,10 @@ vi.mock("@cashu/cashu-ts", () => ({
     const counters = new Map(Object.entries(initial ?? {}));
     return {
       reserve: async (id, n) => {
+        if (n < 0) throw new Error("reserve called with negative count");
         const cur = counters.get(id) ?? 0;
-        if (n > 0) counters.set(id, cur + n);
+        if (n === 0) return { start: cur, count: 0 };
+        counters.set(id, cur + n);
         return { start: cur, count: n };
       },
       advanceToAtLeast: async (id, min) => {
@@ -173,7 +175,10 @@ vi.mock("@cashu/cashu-ts", () => ({
         if (min > cur) counters.set(id, min);
       },
       snapshot: async () => Object.fromEntries(counters),
-      setNext: async (id, next) => counters.set(id, next),
+      setNext: async (id, next) => {
+        if (next < 0) throw new Error("setNext: negative next not allowed");
+        counters.set(id, next);
+      },
     };
   },
 }));

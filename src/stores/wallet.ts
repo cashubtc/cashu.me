@@ -607,7 +607,6 @@ export const useWalletStore = defineStore("wallet", {
         await proofsStore.setReserved(proofsToSend, false);
         console.error(error);
         notifyApiError(error);
-        this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error);
         throw error;
       } finally {
         uIStore.unlockMutex();
@@ -837,7 +836,6 @@ export const useWalletStore = defineStore("wallet", {
         if (verbose) {
           notifyApiError(error);
         }
-        this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error);
         throw error;
       } finally {
         uIStore.unlockMutex();
@@ -1054,7 +1052,6 @@ export const useWalletStore = defineStore("wallet", {
         this.removeOutgoingInvoiceFromHistory(quote.quote);
 
         console.error(error);
-        this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error);
         if (!silent) notifyApiError(error, "Payment failed");
         throw error;
       } finally {
@@ -1503,7 +1500,7 @@ export const useWalletStore = defineStore("wallet", {
                 i.paidDate = currentDateStr();
               }
             }
-            if (options.amount) {
+            if (options.amount !== undefined) {
               i.amount = options.amount;
             }
             i.meltQuote = quote;
