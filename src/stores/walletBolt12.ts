@@ -3,8 +3,9 @@ import { useMintsStore, WalletProof } from "./mints";
 import { useProofsStore } from "./proofs";
 import { useUiStore } from "src/stores/ui";
 import {
-  CashuWallet,
-  MeltQuoteResponse,
+  Amount,
+  Wallet,
+  MeltQuoteBolt12Response,
   MintQuoteBolt12Response,
 } from "@cashu/cashu-ts";
 import * as nobleSecp256k1 from "@noble/secp256k1";
@@ -17,10 +18,59 @@ import { LightningMethod } from "src/stores/walletTypes";
 
 // BOLT12: reusable offers
 
+type AppMeltQuote = Omit<
+  MeltQuoteBolt12Response,
+  "amount" | "fee_reserve" | "change"
+> & {
+  amount: number;
+  fee_reserve: number;
+};
+
+type AppMintQuote = Omit<
+  MintQuoteBolt12Response,
+  "amount" | "amount_paid" | "amount_issued"
+> & {
+  amount: number | null;
+  amount_paid: number;
+  amount_issued: number;
+};
+
+function amountToNumber(value: any): number {
+  return Amount.from(value).toNumber();
+}
+
+function normalizeMintQuote(quote: MintQuoteBolt12Response): AppMintQuote {
+  const { amount, amount_paid, amount_issued, ...rest } = quote;
+  return {
+    ...rest,
+    amount: amount === null ? null : amountToNumber(amount),
+    amount_paid: amountToNumber(amount_paid),
+    amount_issued: amountToNumber(amount_issued),
+  };
+}
+
+function normalizeMeltQuote(quote: MeltQuoteBolt12Response): AppMeltQuote {
+  const { change, ...rest } = quote;
+  void change;
+  return {
+    ...rest,
+    amount: amountToNumber(quote.amount),
+    fee_reserve: amountToNumber(quote.fee_reserve),
+  };
+}
+
+function toMeltQuote(quote: AppMeltQuote): MeltQuoteBolt12Response {
+  return {
+    ...quote,
+    amount: Amount.from(quote.amount),
+    fee_reserve: Amount.from(quote.fee_reserve),
+  };
+}
+
 export async function requestMintBolt12(
   this: any,
   amount: number | undefined,
-  mintWallet: CashuWallet,
+  mintWallet: Wallet,
   description?: string
 ) {
   try {
@@ -41,8 +91,7 @@ export async function requestMintBolt12(
     this.invoiceData.status = "pending";
     this.invoiceData.mint = mintWallet.mint.mintUrl;
     this.invoiceData.unit = mintWallet.unit;
-    // Keep the raw response and privkey on the history entry
-    this.invoiceData.mintQuote = data as MintQuoteBolt12Response;
+    this.invoiceData.mintQuote = normalizeMintQuote(data);
     this.invoiceData.privKey = privkey;
 
     this.invoiceHistory.push({
@@ -101,8 +150,8 @@ export async function checkOfferAndMintBolt12(
     uIStore.triggerActivityOrb();
     const updated = await mintWallet.checkMintQuoteBolt12(quoteId);
 
-    const paid = updated.amount_paid || 0;
-    const issued = updated.amount_issued || 0;
+    const paid = amountToNumber(updated.amount_paid);
+    const issued = amountToNumber(updated.amount_issued);
     const delta = paid - issued;
     // Nothing new to mint
     if (delta <= 0) {
@@ -110,23 +159,21 @@ export async function checkOfferAndMintBolt12(
       throw new Error("no new funds to mint");
     }
 
-    const counter = this.keysetCounter(keysetId);
-    const proofs = await mintWallet.mintProofsBolt12(
-      delta,
-      updated,
-      invoice.privKey,
-      {
-        keysetId,
-        counter,
-        proofsWeHave: mintStore.mintUnitProofs(mint, invoice.unit),
-      }
+    const proofs = await this.retryOnceOnSignedOutputs(keysetId, async () =>
+      mintWallet.ops
+        .mintBolt12(delta, updated)
+        .keyset(keysetId)
+        .asDeterministic()
+        .proofsWeHave(mintStore.mintUnitProofs(mint, invoice.unit))
+        .privkey(invoice.privKey)
+        .run()
     );
-    this.increaseKeysetCounter(keysetId, proofs.length);
     await proofsStore.addProofs(proofs);
 
     // Get the melt quote again with the mint so we can persist the updated state
     const meltQuoteAfterMint = await mintWallet.checkMintQuoteBolt12(quoteId);
-    invoice.mintQuote = meltQuoteAfterMint;
+    const normalizedMintQuote = normalizeMintQuote(meltQuoteAfterMint);
+    invoice.mintQuote = normalizedMintQuote;
 
     if (invoice.status === "paid") {
       // If already paid, this is a reusable offer sub-payment.
@@ -137,7 +184,7 @@ export async function checkOfferAndMintBolt12(
         quote: `${invoice.quote}_${Date.now()}`, // Unique ID for this event
         date: currentDateStr(),
         status: "paid",
-        mintQuote: meltQuoteAfterMint,
+        mintQuote: normalizedMintQuote,
         label: "Bolt12 Subpayment",
         type: LightningMethod.Bolt12Subpayment,
       });
@@ -145,7 +192,7 @@ export async function checkOfferAndMintBolt12(
       // First payment: update the original offer entry
       this.setInvoicePaid(invoice.quote, {
         amount: delta,
-        mintQuote: meltQuoteAfterMint,
+        mintQuote: normalizedMintQuote,
       });
     }
 
@@ -172,7 +219,7 @@ export async function checkOfferAndMintBolt12(
 
 export async function meltQuoteInvoiceDataBolt12(this: any) {
   // choose active wallet with active mint and unit
-  const mintWallet: CashuWallet = await this.activeWallet();
+  const mintWallet: Wallet = await this.activeWallet();
   if (this.payInvoiceData.blocking)
     throw new Error("already processing an melt quote.");
   this.payInvoiceData.blocking = true;
@@ -197,8 +244,9 @@ export async function meltQuoteInvoiceDataBolt12(this: any) {
 
     const data = await mintWallet.createMeltQuoteBolt12(offer, msat);
     mintStore.assertMintError(data);
-    this.payInvoiceData.meltQuote.response = data as MeltQuoteResponse;
-    return data as MeltQuoteResponse;
+    const quote = normalizeMeltQuote(data);
+    this.payInvoiceData.meltQuote.response = quote;
+    return quote;
   } catch (error: any) {
     this.payInvoiceData.meltQuote.error = String(error?.message || error);
     console.error(error);
@@ -211,7 +259,7 @@ export async function meltQuoteInvoiceDataBolt12(this: any) {
 
 export async function meltInvoiceDataBolt12(this: any) {
   if (!this.payInvoiceData.invoice) throw new Error("no invoice provided.");
-  const quote: MeltQuoteResponse = this.payInvoiceData.meltQuote.response;
+  const quote: AppMeltQuote = this.payInvoiceData.meltQuote.response;
   if (!quote) throw new Error("no quote found.");
   const mintStore = useMintsStore();
   const mintWallet = await this.mintWallet(
@@ -225,8 +273,8 @@ export async function meltInvoiceDataBolt12(this: any) {
 export async function meltBolt12(
   this: any,
   proofs: WalletProof[],
-  quote: MeltQuoteResponse,
-  mintWallet: CashuWallet,
+  quote: AppMeltQuote,
+  mintWallet: Wallet,
   silent?: boolean
 ) {
   return this.meltGeneric(
@@ -234,7 +282,12 @@ export async function meltBolt12(
     quote,
     mintWallet,
     silent,
-    (q, sp, opts) => mintWallet.meltProofsBolt12(q as any, sp, opts),
+    (q, sp, opts) =>
+      mintWallet.ops
+        .meltBolt12(toMeltQuote(q), sp)
+        .keyset(opts.keysetId)
+        .asDeterministic()
+        .run(),
     (id) => mintWallet.mint.checkMeltQuoteBolt12(id),
     LightningMethod.Bolt12
   );
@@ -248,7 +301,7 @@ export async function checkOutgoingInvoiceBolt12(
   return this.checkOutgoingInvoiceGeneric(
     quote,
     verbose,
-    (wallet: CashuWallet, quoteId: string) =>
+    (wallet: Wallet, quoteId: string) =>
       wallet.mint.checkMeltQuoteBolt12(quoteId)
   );
 }

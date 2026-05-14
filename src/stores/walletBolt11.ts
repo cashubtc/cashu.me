@@ -3,12 +3,13 @@ import { useMintsStore, WalletProof } from "./mints";
 import { useProofsStore } from "./proofs";
 import { useUiStore } from "src/stores/ui";
 import {
-  CashuWallet,
-  MintQuotePayload,
-  MeltQuotePayload,
-  MeltQuoteResponse,
-  MintQuoteResponse,
+  Amount,
+  Wallet,
+  MeltQuoteBolt11Request,
+  MeltQuoteBolt11Response,
+  MintQuoteBolt11Response,
   MintQuoteState,
+  type ProofLike,
 } from "@cashu/cashu-ts";
 import * as nobleSecp256k1 from "@noble/secp256k1";
 import { bytesToHex } from "@noble/hashes/utils";
@@ -32,27 +33,63 @@ import { LightningMethod } from "src/stores/walletTypes";
 
 import { mintOnPaidGeneric } from "./walletWebsocket";
 
+type AppMintQuote = Omit<MintQuoteBolt11Response, "amount"> & {
+  amount: number;
+};
+
+type AppMeltQuote = Omit<
+  MeltQuoteBolt11Response,
+  "amount" | "fee_reserve" | "change"
+> & {
+  amount: number;
+  fee_reserve: number;
+};
+
+function amountToNumber(value: any): number {
+  return Amount.from(value).toNumber();
+}
+
+function normalizeMintQuote(quote: MintQuoteBolt11Response): AppMintQuote {
+  return { ...quote, amount: amountToNumber(quote.amount) };
+}
+
+function normalizeMeltQuote(quote: MeltQuoteBolt11Response): AppMeltQuote {
+  const { change, ...rest } = quote;
+  void change;
+  return {
+    ...rest,
+    amount: amountToNumber(quote.amount),
+    fee_reserve: amountToNumber(quote.fee_reserve),
+  };
+}
+
+function toMeltQuote(quote: AppMeltQuote): MeltQuoteBolt11Response {
+  return {
+    ...quote,
+    amount: Amount.from(quote.amount),
+    fee_reserve: Amount.from(quote.fee_reserve),
+  };
+}
+
 export async function requestMintBolt11(
   this: any,
   amount: number,
-  mintWallet: CashuWallet
-): Promise<MintQuoteResponse> {
+  mintWallet: Wallet
+): Promise<MintQuoteBolt11Response> {
   try {
-    const { supported: nut20supported } = (
-      await mintWallet.lazyGetMintInfo()
-    ).isSupported(20);
+    await mintWallet.loadMint();
+    const { supported: nut20supported } = mintWallet
+      .getMintInfo()
+      .isSupported(20);
     const privkey = nut20supported
       ? bytesToHex(nobleSecp256k1.utils.randomPrivateKey())
       : undefined;
     const pubkey = nut20supported
       ? bytesToHex(nobleSecp256k1.getPublicKey(privkey!!, true))
       : undefined;
-    const payload: MintQuotePayload = {
-      amount: amount,
-      unit: mintWallet.unit,
-      pubkey: pubkey,
-    };
-    const data = await mintWallet.mint.createMintQuote(payload);
+    const data = pubkey
+      ? await mintWallet.createLockedMintQuote(amount, pubkey)
+      : await mintWallet.createMintQuoteBolt11(amount);
     this.invoiceData.amount = amount;
     this.invoiceData.request = data.request;
     this.invoiceData.quote = data.quote;
@@ -60,12 +97,12 @@ export async function requestMintBolt11(
     this.invoiceData.status = "pending";
     this.invoiceData.mint = mintWallet.mint.mintUrl;
     this.invoiceData.unit = mintWallet.unit;
-    this.invoiceData.mintQuote = data as MintQuoteResponse;
+    this.invoiceData.mintQuote = normalizeMintQuote(data);
     this.invoiceData.privKey = privkey;
     this.invoiceHistory.push({
       ...this.invoiceData,
     });
-    return data as MintQuoteResponse;
+    return data;
   } catch (error: any) {
     console.error(error);
     notifyApiError(
@@ -95,8 +132,8 @@ export async function mintBolt11(
   await uIStore.lockMutex();
   try {
     // first we check if the mint quote is paid
-    const mintQuote = await mintWallet.checkMintQuote(invoice.quote);
-    invoice.mintQuote = mintQuote as MintQuoteResponse;
+    const mintQuote = await mintWallet.checkMintQuoteBolt11(invoice.quote);
+    invoice.mintQuote = normalizeMintQuote(mintQuote);
     console.log("### mintBolt11(): mintQuote", mintQuote);
     switch (mintQuote.state) {
       case MintQuoteState.PAID:
@@ -112,18 +149,15 @@ export async function mintBolt11(
         throw new Error("unknown state.");
     }
     // MintQuoteState must be PAID
-    const counter = this.keysetCounter(keysetId);
-    const proofs = await mintWallet.mintProofs(
-      invoice.amount,
-      invoice.mintQuote!!,
-      {
-        keysetId,
-        counter,
-        proofsWeHave: mintStore.mintUnitProofs(mint, invoice.unit),
-        privkey: invoice.privKey as string,
-      }
+    const proofs = await this.retryOnceOnSignedOutputs(keysetId, async () =>
+      mintWallet.ops
+        .mintBolt11(invoice.amount, invoice.quote)
+        .keyset(keysetId)
+        .asDeterministic()
+        .proofsWeHave(mintStore.mintUnitProofs(mint, invoice.unit))
+        .privkey(invoice.privKey as string)
+        .run()
     );
-    this.increaseKeysetCounter(keysetId, proofs.length);
     await proofsStore.addProofs(proofs);
 
     // update UI
@@ -136,7 +170,6 @@ export async function mintBolt11(
     if (verbose) {
       notifyApiError(error);
     }
-    this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error);
     throw error;
   } finally {
     uIStore.unlockMutex();
@@ -145,7 +178,7 @@ export async function mintBolt11(
 
 export async function meltQuoteInvoiceDataBolt11(this: any) {
   // choose active wallet with active mint and unit
-  const mintWallet: CashuWallet = await this.activeWallet();
+  const mintWallet: Wallet = await this.activeWallet();
   // throw an error if this.payInvoiceData.blocking is true
   if (this.payInvoiceData.blocking) {
     throw new Error("already processing an melt quote.");
@@ -157,7 +190,7 @@ export async function meltQuoteInvoiceDataBolt11(this: any) {
     if (this.payInvoiceData.input.request == "") {
       throw new Error("no invoice provided.");
     }
-    const payload: MeltQuotePayload = {
+    const payload: MeltQuoteBolt11Request = {
       unit: mintStore.activeUnit,
       request: this.payInvoiceData.input.request,
     };
@@ -178,27 +211,27 @@ export async function meltQuoteInvoiceDataBolt11(this: any) {
 
 export async function meltQuoteBolt11(
   this: any,
-  wallet: CashuWallet,
+  wallet: Wallet,
   request: string,
   mpp_amount: number | undefined = undefined
-): Promise<MeltQuoteResponse> {
+): Promise<AppMeltQuote> {
   const mintStore = useMintsStore();
   let data;
   if (mpp_amount) {
     data = await wallet.createMultiPathMeltQuote(request, mpp_amount * 1000);
   } else {
-    data = await wallet.createMeltQuote(request);
+    data = await wallet.createMeltQuoteBolt11(request);
   }
 
   mintStore.assertMintError(data);
-  return data;
+  return normalizeMeltQuote(data);
 }
 
 export async function meltInvoiceDataBolt11(this: any) {
   if (this.payInvoiceData.invoice == null) {
     throw new Error("no invoice provided.");
   }
-  const quote: MeltQuoteResponse = this.payInvoiceData.meltQuote.response;
+  const quote: AppMeltQuote = this.payInvoiceData.meltQuote.response;
   if (quote == null) {
     throw new Error("no quote found.");
   }
@@ -225,8 +258,8 @@ export async function meltInvoiceDataBolt11(this: any) {
 export async function meltBolt11(
   this: any,
   proofs: WalletProof[],
-  quote: MeltQuoteResponse,
-  mintWallet: CashuWallet,
+  quote: AppMeltQuote,
+  mintWallet: Wallet,
   silent?: boolean
 ) {
   return this.meltGeneric(
@@ -234,8 +267,13 @@ export async function meltBolt11(
     quote,
     mintWallet,
     silent,
-    (q, sp, opts) => mintWallet.meltProofs(q, sp, opts),
-    (id) => mintWallet.mint.checkMeltQuote(id),
+    (q, sp, opts) =>
+      mintWallet.ops
+        .meltBolt11(toMeltQuote(q), sp)
+        .keyset(opts.keysetId)
+        .asDeterministic()
+        .run(),
+    (id) => mintWallet.mint.checkMeltQuoteBolt11(id),
     LightningMethod.Bolt11
   );
 }
@@ -262,7 +300,7 @@ export async function checkInvoiceBolt11(
   }
   try {
     // check the state first
-    const state = (await mintWallet.checkMintQuote(quote)).state;
+    const state = (await mintWallet.checkMintQuoteBolt11(quote)).state;
     if (state == MintQuoteState.ISSUED) {
       this.setInvoicePaid(quote);
       return;
@@ -299,7 +337,7 @@ export async function checkOutgoingInvoiceBolt11(
   return this.checkOutgoingInvoiceGeneric(
     quote,
     verbose,
-    (wallet: CashuWallet, quoteId: string) => wallet.mint.checkMeltQuote(quoteId)
+    (wallet: Wallet, quoteId: string) => wallet.mint.checkMeltQuoteBolt11(quoteId)
   );
 }
 

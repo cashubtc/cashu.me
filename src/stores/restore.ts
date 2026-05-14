@@ -80,15 +80,19 @@ export const useRestoreStore = defineStore("restore", {
         await wallet.loadMint();
         let start = 0;
         let emptyBatchCount = 0;
+        let maxLastCounterWithSignature = -1;
         let restoreProofs: Proof[] = [];
 
         while (emptyBatchCount < MAX_GAP) {
           console.log(`Restoring proofs ${start} to ${start + BATCH_SIZE}`);
           let proofs: Proof[] = [];
+          let lastCounterWithSignature: number | undefined;
           try {
-            proofs = (
-              await wallet.restore(start, BATCH_SIZE, { keysetId: keyset.id })
-            ).proofs;
+            ({ proofs, lastCounterWithSignature } = await wallet.restore(
+              start,
+              BATCH_SIZE,
+              { keysetId: keyset.id }
+            ));
           } catch (error) {
             console.error(`Error restoring proofs: ${error}`);
             proofs = [];
@@ -97,14 +101,18 @@ export const useRestoreStore = defineStore("restore", {
             console.log(`No proofs found for keyset ${keyset.id}`);
             emptyBatchCount++;
           } else {
+            const restoredBatchAmount = proofsStore.sumProofs(proofs);
             console.log(
-              `> Restored ${proofs.length} proofs with sum ${proofs.reduce(
-                (s, p) => s + p.amount,
-                0
-              )}`
+              `> Restored ${proofs.length} proofs with sum ${restoredBatchAmount}`
             );
             restoreProofs = restoreProofs.concat(proofs);
             emptyBatchCount = 0;
+            if (
+              lastCounterWithSignature !== undefined &&
+              lastCounterWithSignature > maxLastCounterWithSignature
+            ) {
+              maxLastCounterWithSignature = lastCounterWithSignature;
+            }
             this.restoreCounter += proofs.length;
             totalSteps += 1;
           }
@@ -119,6 +127,19 @@ export const useRestoreStore = defineStore("restore", {
 
           currentStep++;
           this.restoreProgress = currentStep / totalSteps;
+        }
+
+        // Advance the keyset counter past the highest index that returned a
+        // signature so a subsequent deterministic op cannot collide with an
+        // already-signed output, even when restored proofs are sparse.
+        if (maxLastCounterWithSignature >= 0) {
+          const nextCounter = maxLastCounterWithSignature + 1;
+          if (nextCounter > walletStore.keysetCounter(keyset.id)) {
+            walletStore
+              .getOrCreateCounterSource()
+              .advanceToAtLeast(keyset.id, nextCounter);
+            walletStore.syncCounterToStorage(keyset.id, nextCounter);
+          }
         }
 
         let restoredProofs: Proof[] = [];
@@ -143,13 +164,9 @@ export const useRestoreStore = defineStore("restore", {
             (p) => !spentProofsSecrets.includes(p.secret)
           );
           if (unspentProofs.length > 0) {
+            const unspentAmount = proofsStore.sumProofs(unspentProofs);
             console.log(
-              `Found ${
-                unspentProofs.length
-              } unspent proofs with sum ${unspentProofs.reduce(
-                (s, p) => s + p.amount,
-                0
-              )}`
+              `Found ${unspentProofs.length} unspent proofs with sum ${unspentAmount}`
             );
           }
           const newProofs = unspentProofs.filter(
@@ -160,7 +177,7 @@ export const useRestoreStore = defineStore("restore", {
           currentStep++;
           this.restoreProgress = currentStep / totalSteps;
         }
-        const restoredAmount = restoredProofs.reduce((s, p) => s + p.amount, 0);
+        const restoredAmount = proofsStore.sumProofs(restoredProofs);
         const restoredAmountStr = useUiStore().formatCurrency(
           restoredAmount,
           keyset.unit
