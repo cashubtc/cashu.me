@@ -11,7 +11,7 @@ import {
   notify,
   notifyWarning,
 } from "../js/notify";
-import { getDecodedTokenBinary, getEncodedToken, Token } from "@cashu/cashu-ts";
+import { getDecodedTokenBinary, getEncodedToken } from "@cashu/cashu-ts";
 import { useSwapStore } from "./swap";
 
 export const useReceiveTokensStore = defineStore("receiveTokensStore", {
@@ -28,15 +28,15 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
     decodeToken: function (encodedToken: string) {
       let decodedToken = undefined;
       try {
-        decodedToken = token.decode(encodedToken);
+        decodedToken = token.decodeMeta(encodedToken);
       } catch (error) {}
       return decodedToken;
     },
-    knowThisMintOfTokenJson: function (tokenJson: Token) {
+    knowThisMintOfTokenJson: function (tokenJson: {
+      mint: string;
+      proofs: unknown[];
+    }) {
       const mintStore = useMintsStore();
-      const uniqueIds = [
-        ...new Set(token.getProofs(tokenJson).map((p) => p.id)),
-      ];
       return mintStore.mints
         .map((m) => m.url)
         .includes(token.getMint(tokenJson));

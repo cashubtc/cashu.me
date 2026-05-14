@@ -611,6 +611,7 @@ import { useCameraStore } from "src/stores/camera";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import { useSettingsStore } from "src/stores/settings";
 import { usePriceStore } from "src/stores/price";
+import { useProofsStore } from "src/stores/proofs";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
 import MultinutPaymentDialog from "./MultinutPaymentDialog.vue";
@@ -620,7 +621,6 @@ import AmountInputComponent from "components/AmountInputComponent.vue";
 import ParseInputComponent from "components/ParseInputComponent.vue";
 
 import * as _ from "underscore";
-import { Proof } from "@cashu/cashu-ts";
 
 declare const windowMixin: any;
 
@@ -886,10 +886,7 @@ export default defineComponent({
       this.isPaying = true;
       try {
         const result = await this.meltInvoiceData(true);
-        const returnedChange = result.change.reduce(
-          (acc: number, p: Proof) => acc + p.amount,
-          0
-        );
+        const returnedChange = useProofsStore().sumProofs(result.change);
         this.payInvoiceData.fee_paid =
           this.payInvoiceData.meltQuote.response.fee_reserve - returnedChange;
         console.log("### fee_paid", this.payInvoiceData.fee_paid);

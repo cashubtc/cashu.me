@@ -193,20 +193,15 @@ export const useNPCStore = defineStore("npc", {
         return;
       }
       const tokensStore = useTokensStore();
-      const decodedToken = token.decode(tokenStr);
+      const decodedToken = token.decodeMeta(tokenStr);
       if (decodedToken == undefined) {
         throw Error("could not decode token");
       }
-      // get amount from decodedToken.token.proofs[..].amount
-      const amount = token
-        .getProofs(decodedToken)
-        .reduce((sum, el) => (sum += el.amount), 0);
-
       const mintUrl = token.getMint(decodedToken);
       const unit = token.getUnit(decodedToken);
       tokensStore.addPendingToken({
         label: "Zaps",
-        amount: amount,
+        amount: decodedToken.amount,
         token: tokenStr,
         mint: mintUrl,
         unit: unit,

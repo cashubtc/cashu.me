@@ -11,27 +11,27 @@ const VALID_V2_TOKEN =
 describe("token", () => {
   describe("decode", () => {
     it("should properly decode a V4 token", () => {
-      const decoded = token.decode(VALID_V4_TOKEN);
+      const decoded = token.decodeMeta(VALID_V4_TOKEN);
       expect(decoded.proofs.length).toEqual(1);
       expect(decoded.mint).toEqual("https://mint.minibits.cash/Bitcoin");
       expect(decoded.proofs.length).toEqual(1);
     });
 
     it("should properly decode a V3 token", () => {
-      const decoded = token.decode(VALID_V3_TOKEN);
+      const decoded = token.decodeMeta(VALID_V3_TOKEN);
       expect(decoded.proofs.length).toEqual(1);
       expect(decoded.mint).toEqual("https://8333.space:3338");
       expect(decoded.proofs.length).toEqual(1);
     });
 
     it("should throw unsupported token error for a V2 token", () => {
-      expect(() => token.decode(VALID_V2_TOKEN)).toThrow(
+      expect(() => token.decodeMeta(VALID_V2_TOKEN)).toThrow(
         "Token version is not supported"
       );
     });
   });
 
   it("should throw if the token is invalid or V2", () => {
-    expect(() => token.decode("invalid")).toThrow();
+    expect(() => token.decodeMeta("invalid")).toThrow();
   });
 });
