@@ -163,7 +163,7 @@ export default defineComponent({
     font-size: 16px;
   }
 
-  :deep(.q-field__control:befor)e,
+  :deep(.q-field__control:before),
   :deep(.q-field__control:after) {
     display: none !important;
   }
