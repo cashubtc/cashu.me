@@ -690,6 +690,7 @@ export const useWalletStore = defineStore("wallet", {
             );
             receiveStore.receiveData.tokensBase64 = getEncodedToken({
               mint: mintInToken,
+              unit: unitInToken,
               proofs: toProofs(unspent),
             });
           }
