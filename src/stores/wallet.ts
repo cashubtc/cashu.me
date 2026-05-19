@@ -1343,7 +1343,7 @@ export const useWalletStore = defineStore("wallet", {
         const wallet = await this.activeWallet();
         let isChecking = false;
         const unsub = await wallet.on.proofStateUpdates(
-          proofs,
+          toProofs(proofs),
           async (proofState: ProofState) => {
             console.log(`Websocket: proof state updated: ${proofState.state}`);
             if (proofState.state == CheckStateEnum.SPENT && !isChecking) {
