@@ -1338,13 +1338,12 @@ export const useWalletStore = defineStore("wallet", {
           throw new Error("no tokens provided.");
         }
         const proofs = token.getProofs(tokenJson);
-        const oneProof = [proofs[0]];
         this.activeWebsocketConnections++;
         uIStore.triggerActivityOrb();
         const wallet = await this.activeWallet();
         const unsub = await wallet.on.proofStateUpdates(
-          toProofs(oneProof),
-          async (proofState: ProofState & { proof: Proof }) => {
+          proofs,
+          async (proofState: ProofState) => {
             console.log(`Websocket: proof state updated: ${proofState.state}`);
             if (proofState.state == CheckStateEnum.SPENT) {
               const tokenSpent = await this.checkTokenSpendable(historyToken);
