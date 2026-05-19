@@ -37,6 +37,7 @@ import {
   MeltQuoteState,
   MintQuoteState,
   ProofState,
+  getEncodedToken,
   KeyChain,
   type AmountLike,
   type CounterSource,
@@ -629,11 +630,11 @@ export const useWalletStore = defineStore("wallet", {
       if (tokenJson == undefined) {
         throw new Error("no tokens provided.");
       }
-      const proofs = token.getProofs(tokenJson);
-      if (proofs.length == 0) {
+      const tokenProofs = token.getProofs(tokenJson);
+      if (tokenProofs.length == 0) {
         throw new Error("no proofs found.");
       }
-      const inputAmount = sumProofAmounts(proofs);
+      let inputAmount = sumProofAmounts(tokenProofs);
       let fee = 0;
       const mintInToken = token.getMint(tokenJson);
       const unitInToken = token.getUnit(tokenJson);
@@ -660,8 +661,8 @@ export const useWalletStore = defineStore("wallet", {
         const keysetId = this.getKeyset(historyToken.mint, historyToken.unit);
         const privkey = receiveStore.receiveData.p2pkPrivateKey;
         let proofs: Proof[];
-        try {
-          proofs = await this.retryOnceOnSignedOutputs(keysetId, async () =>
+        const runReceive = () =>
+          this.retryOnceOnSignedOutputs(keysetId, async () =>
             mintWallet.ops
               .receive(receiveStore.receiveData.tokensBase64)
               .asDeterministic()
@@ -669,10 +670,32 @@ export const useWalletStore = defineStore("wallet", {
               .proofsWeHave(mintStore.mintUnitProofs(mint, historyToken.unit))
               .run()
           );
+        try {
+          proofs = await runReceive();
           await proofsStore.addProofs(proofs);
         } catch (error: any) {
           console.error(error);
-          throw new Error("Error receiving tokens: " + error);
+          if (!error.message?.includes("Token already spent")) {
+            throw new Error("Error receiving tokens: " + error);
+          }
+          // Mint says spent — check whether the token is only partially spent
+          // and retry with just the unspent proofs if so.
+          const { unspent } = await mintWallet.groupProofsByState(tokenProofs);
+          if (!unspent.length) {
+            throw error;
+          }
+          if (unspent.length !== tokenProofs.length) {
+            notifyWarning(
+              "Partially spent token detected — receiving unspent portion"
+            );
+            receiveStore.receiveData.tokensBase64 = getEncodedToken({
+              mint: mintInToken,
+              proofs: toProofs(unspent),
+            });
+          }
+          inputAmount = sumProofAmounts(unspent);
+          proofs = await runReceive();
+          await proofsStore.addProofs(proofs);
         }
 
         p2pkStore.setPrivateKeyUsed(privkey);
