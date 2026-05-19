@@ -1187,7 +1187,7 @@ export const useWalletStore = defineStore("wallet", {
         }
         return false;
       }
-      return true;
+      return spentProofs != undefined && spentProofs.length == proofs.length;
     },
     checkInvoice: async function (
       quote: string,
