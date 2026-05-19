@@ -1341,16 +1341,19 @@ export const useWalletStore = defineStore("wallet", {
         this.activeWebsocketConnections++;
         uIStore.triggerActivityOrb();
         const wallet = await this.activeWallet();
+        let isChecking = false;
         const unsub = await wallet.on.proofStateUpdates(
           proofs,
           async (proofState: ProofState) => {
             console.log(`Websocket: proof state updated: ${proofState.state}`);
-            if (proofState.state == CheckStateEnum.SPENT) {
+            if (proofState.state == CheckStateEnum.SPENT && !isChecking) {
+              isChecking = true;
               const tokenSpent = await this.checkTokenSpendable(historyToken);
               if (tokenSpent) {
                 sendTokensStore.showSendTokens = false;
                 unsub();
               }
+              isChecking = false;
             }
           },
           async (error: any) => {
