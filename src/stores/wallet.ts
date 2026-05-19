@@ -1348,12 +1348,15 @@ export const useWalletStore = defineStore("wallet", {
             console.log(`Websocket: proof state updated: ${proofState.state}`);
             if (proofState.state == CheckStateEnum.SPENT && !isChecking) {
               isChecking = true;
-              const tokenSpent = await this.checkTokenSpendable(historyToken);
-              if (tokenSpent) {
-                sendTokensStore.showSendTokens = false;
-                unsub();
+              try {
+                const tokenSpent = await this.checkTokenSpendable(historyToken);
+                if (tokenSpent) {
+                  sendTokensStore.showSendTokens = false;
+                  unsub();
+                }
+              } finally {
+                isChecking = false;
               }
-              isChecking = false;
             }
           },
           async (error: any) => {
