@@ -661,17 +661,17 @@ export const useWalletStore = defineStore("wallet", {
         const keysetId = this.getKeyset(historyToken.mint, historyToken.unit);
         const privkey = receiveStore.receiveData.p2pkPrivateKey;
         let proofs: Proof[];
-        const runReceive = () =>
+        const runReceive = (tokenStr: string) =>
           this.retryOnceOnSignedOutputs(keysetId, async () =>
             mintWallet.ops
-              .receive(receiveStore.receiveData.tokensBase64)
+              .receive(tokenStr)
               .asDeterministic()
               .privkey(privkey)
               .proofsWeHave(mintStore.mintUnitProofs(mint, historyToken.unit))
               .run()
           );
         try {
-          proofs = await runReceive();
+          proofs = await runReceive(receiveStore.receiveData.tokensBase64);
           await proofsStore.addProofs(proofs);
         } catch (error: any) {
           console.error(error);
@@ -684,18 +684,19 @@ export const useWalletStore = defineStore("wallet", {
           if (!unspent.length) {
             throw error;
           }
+          let retryToken = receiveStore.receiveData.tokensBase64;
           if (unspent.length !== tokenProofs.length) {
             notifyWarning(
               "Partially spent token detected — receiving unspent portion"
             );
-            receiveStore.receiveData.tokensBase64 = getEncodedToken({
+            retryToken = getEncodedToken({
               mint: mintInToken,
               unit: unitInToken,
               proofs: toProofs(unspent),
             });
           }
           inputAmount = sumProofAmounts(unspent);
-          proofs = await runReceive();
+          proofs = await runReceive(retryToken);
           await proofsStore.addProofs(proofs);
         }
 
