@@ -154,9 +154,11 @@ type MeltExecuteFn = (
   change?: Proof[];
 }>;
 
-type CheckMeltQuoteFn = (quoteId: string) => Promise<{
-  state: MeltQuoteState;
-} & (MeltQuoteBolt11Response | MeltQuoteBolt12Response)>;
+type CheckMeltQuoteFn = (quoteId: string) => Promise<
+  {
+    state: MeltQuoteState;
+  } & (MeltQuoteBolt11Response | MeltQuoteBolt12Response)
+>;
 
 type CheckOutgoingMeltQuoteFn = (
   wallet: Wallet,
@@ -181,7 +183,9 @@ function normalizeMintQuote(
     amount_paid:
       "amount_paid" in quote ? amountToNumber(quote.amount_paid) : undefined,
     amount_issued:
-      "amount_issued" in quote ? amountToNumber(quote.amount_issued) : undefined,
+      "amount_issued" in quote
+        ? amountToNumber(quote.amount_issued)
+        : undefined,
   };
 }
 function normalizeMeltQuote(
@@ -1148,7 +1152,9 @@ export const useWalletStore = defineStore("wallet", {
         } else if (meltQuote.state == MeltQuoteState.UNPAID) {
           await useProofsStore().setReserved(proofs, false);
           this.removeOutgoingInvoiceFromHistory(quote);
-          notifyWarning(this.t("wallet.notifications.lightning_payment_failed"));
+          notifyWarning(
+            this.t("wallet.notifications.lightning_payment_failed")
+          );
         } else if (meltQuote.state == MeltQuoteState.PAID) {
           const spentProofs = await this.checkProofsSpendable(
             proofs,

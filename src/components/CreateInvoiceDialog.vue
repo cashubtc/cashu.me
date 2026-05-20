@@ -266,7 +266,9 @@ export default defineComponent({
       // If methods are specified, check for bolt11
       // If methods are not specified, assume bolt11 is supported
       if (nut4.methods) {
-        return nut4.methods.some((m: any) => m.method === LightningMethod.Bolt11);
+        return nut4.methods.some(
+          (m: any) => m.method === LightningMethod.Bolt11
+        );
       }
       return true;
     },
@@ -280,7 +282,9 @@ export default defineComponent({
         mint.info?.nuts?.[4] || mint.info?.nuts?.["4"] || ({} as any);
       if (nut4.supported === false) return false;
       if (nut4.methods) {
-        return nut4.methods.some((m: any) => m.method === LightningMethod.Bolt12);
+        return nut4.methods.some(
+          (m: any) => m.method === LightningMethod.Bolt12
+        );
       }
       return true;
     },

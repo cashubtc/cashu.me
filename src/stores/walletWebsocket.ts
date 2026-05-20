@@ -69,9 +69,7 @@ export async function mintOnPaidGeneric(
   // 5. Check Websocket Capability (NUT-17)
   const method = type;
   const command =
-    type === LightningMethod.Bolt11
-      ? "bolt11_mint_quote"
-      : "bolt12_mint_quote";
+    type === LightningMethod.Bolt11 ? "bolt11_mint_quote" : "bolt12_mint_quote";
 
   if (
     !settingsStore.useWebsockets ||

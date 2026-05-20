@@ -337,7 +337,8 @@ export async function checkOutgoingInvoiceBolt11(
   return this.checkOutgoingInvoiceGeneric(
     quote,
     verbose,
-    (wallet: Wallet, quoteId: string) => wallet.mint.checkMeltQuoteBolt11(quoteId)
+    (wallet: Wallet, quoteId: string) =>
+      wallet.mint.checkMeltQuoteBolt11(quoteId)
   );
 }
 
