@@ -160,8 +160,10 @@ export const useP2PKStore = defineStore("p2pk", {
         }
       }
     },
-    getPrivateKeyForP2PKEncodedToken: function (encodedToken: string): string {
-      const decodedToken = token.decode(encodedToken);
+    getPrivateKeyForP2PKEncodedToken: async function (
+      encodedToken: string
+    ): Promise<string> {
+      const decodedToken = await token.decodeFull(encodedToken);
       if (!decodedToken) {
         return "";
       }

@@ -203,6 +203,7 @@
 import { date } from "quasar";
 import * as _ from "underscore";
 import { shortenString } from "src/js/string-utils";
+import { sumProofAmounts } from "src/js/proofs";
 import token from "src/js/token";
 
 // Vue components
@@ -354,10 +355,7 @@ export default {
     },
 
     balance: function () {
-      return this.activeProofs
-        .map((t) => t)
-        .flat()
-        .reduce((sum, el) => (sum += el.amount), 0);
+      return sumProofAmounts(this.activeProofs.flat());
     },
   },
   filters: {},
@@ -410,13 +408,6 @@ export default {
       "checkPendingInvoices",
     ]),
     // TOKEN METHODS
-    decodeToken: function (encoded_token) {
-      try {
-        return token.decode(encoded_token);
-      } catch (e) {
-        return null;
-      }
-    },
     getProofs: function (decoded_token) {
       return token.getProofs(decoded_token);
     },

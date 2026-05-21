@@ -146,6 +146,19 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
         const settingsStore = useSettingsStore();
         const mintsStore = useMintsStore();
 
+        // Check if relays are configured
+        if (
+          !settingsStore.defaultNostrRelays ||
+          settingsStore.defaultNostrRelays.length === 0
+        ) {
+          const errorMsg = "No Nostr relays configured";
+          console.error(errorMsg);
+          if (verbose) {
+            notifyError(`Failed to backup mint list to Nostr: ${errorMsg}`);
+          }
+          throw new Error(errorMsg);
+        }
+
         const currentMints = mintsStore.mints.map((mint) => mint.url);
 
         if (currentMints.length === 0) {
@@ -200,9 +213,13 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
         console.log("Mint backup published to Nostr:", event.id);
       } catch (error) {
         console.error("Failed to backup mints to Nostr:", error);
-        notifyError(
-          "Failed to backup mint list to Nostr: " + (error as Error).message
-        );
+        // Only show error notification if verbose is true
+        // This prevents showing errors for automatic backups that fail silently
+        if (verbose) {
+          notifyError(
+            "Failed to backup mint list to Nostr: " + (error as Error).message
+          );
+        }
         throw error;
       } finally {
         this.backupInProgress = false;

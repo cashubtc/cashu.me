@@ -5,7 +5,7 @@ import {
   PaymentRequest,
   Proof,
   Token,
-  MeltQuoteResponse,
+  MeltQuoteBolt11Response,
 } from "@cashu/cashu-ts";
 import token from "src/js/token";
 import { v4 as uuidv4 } from "uuid";
@@ -25,7 +25,7 @@ export type HistoryToken = {
   paymentRequest?: PaymentRequest;
   fee?: number;
   label?: string; // Add label field for custom naming
-  meltQuote?: MeltQuoteResponse;
+  meltQuote?: MeltQuoteBolt11Response;
   paidDate?: string;
   paymentRequestId?: string; // If created in response to a payment request
 };

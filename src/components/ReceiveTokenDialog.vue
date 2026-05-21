@@ -295,9 +295,9 @@ import { usePriceStore } from "src/stores/price";
 import { useSwapStore } from "src/stores/swap";
 import { useSettingsStore } from "src/stores/settings";
 import token from "src/js/token";
-import { CashuMint, GetInfoResponse } from "@cashu/cashu-ts";
+import { Mint, GetInfoResponse } from "@cashu/cashu-ts";
 import { Token } from "@cashu/cashu-ts";
-import type { Mint } from "src/stores/mints";
+import type { StoredMint } from "src/stores/mints";
 
 import TokenInformation from "components/TokenInformation.vue";
 import TokenStringRender from "components/TokenStringRender.vue";
@@ -330,6 +330,7 @@ export default defineComponent({
       receiveError: "" as string,
       selectedSwapMintUrl: "",
       isNotLockedToUs: false as boolean,
+      fullToken: null as Token | null,
     };
   },
   watch: {
@@ -362,10 +363,22 @@ export default defineComponent({
         this.isNotLockedToUs = false;
       }
     },
-    "receiveData.tokensBase64"(newVal: string) {
+    async "receiveData.tokensBase64"(newVal: string) {
       if (newVal !== undefined) {
         this.receiveError = "";
         this.isNotLockedToUs = false;
+      }
+      if (!newVal) {
+        this.fullToken = null;
+        return;
+      }
+      try {
+        const decoded = (await token.decodeFull(newVal)) ?? null;
+        if (this.receiveData.tokensBase64 !== newVal) return;
+        this.fullToken = decoded;
+      } catch {
+        if (this.receiveData.tokensBase64 !== newVal) return;
+        this.fullToken = null;
       }
     },
     swapSelected(newVal: boolean) {
@@ -429,34 +442,36 @@ export default defineComponent({
       if (!this.tokenDecodesCorrectly) {
         return 0;
       }
-      const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
-      return this.getProofs(decodedToken).reduce(
-        (sum, el) => (sum += el.amount),
-        0
-      );
+      return this.decodeToken(this.receiveData.tokensBase64)?.amount ?? 0;
     },
     receiveFee: function () {
-      return this.getFeesForProofs(
-        this.getProofs(this.decodeToken(this.receiveData.tokensBase64))
-      );
+      const ft = this.fullToken as Token | null;
+      if (!ft) return 0;
+      try {
+        const proofs = this.getProofs(ft);
+        if (!proofs?.length) return 0;
+        return this.getFeesForProofs(
+          proofs,
+          this.getMint(ft),
+          token.getUnit(ft)
+        );
+      } catch {
+        return 0;
+      }
     },
     tokenUnit: function () {
       if (!this.tokenDecodesCorrectly) {
         return "";
       }
       const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
-      return token.getUnit(decodedToken);
+      return decodedToken ? token.getUnit(decodedToken) : "";
     },
     tokenMint: function () {
       if (!this.tokenDecodesCorrectly) {
         return "";
       }
       const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
-      return this.getMint(decodedToken);
-    },
-    swapToMintAmount: function () {
-      const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
-      return this.tokenAmount - useSwapStore().meltToMintFees(decodedToken);
+      return decodedToken ? this.getMint(decodedToken) : "";
     },
     maxLengthForTokenString: function () {
       return Math.floor(this.$q.screen.height / 3.5);
@@ -465,7 +480,9 @@ export default defineComponent({
       if (!this.tokenMint) {
         return null;
       }
-      const mint = (this.mints as Mint[]).find((m) => m.url === this.tokenMint);
+      const mint = (this.mints as StoredMint[]).find(
+        (m) => m.url === this.tokenMint
+      );
       if (!mint) {
         // Use untrusted mint info if available
         return {
@@ -488,7 +505,7 @@ export default defineComponent({
         return null;
       }
       return (
-        (this.mints as Mint[]).find(
+        (this.mints as StoredMint[]).find(
           (m) => m.url === this.selectedSwapMintUrl
         ) || null
       );
@@ -617,7 +634,7 @@ export default defineComponent({
     getProofs: function (decoded_token: Token) {
       return token.getProofs(decoded_token);
     },
-    getMint: function (decoded_token: Token) {
+    getMint: function (decoded_token: { mint: string; proofs: unknown[] }) {
       return token.getMint(decoded_token);
     },
     tokenAlreadyInHistory: function (tokenStr: string) {
@@ -639,19 +656,13 @@ export default defineComponent({
       }
       const tokensStore = useTokensStore();
       const decodedToken = this.decodeToken(tokenStr);
-      const mintInToken = this.getMint(decodedToken);
-      const unitInToken = token.getUnit(decodedToken);
-      // get amount from decodedToken.token.proofs[..].amount
-      const amount = this.getProofs(decodedToken).reduce(
-        (sum, el) => (sum += el.amount),
-        0
-      );
+      if (!decodedToken) return;
 
       tokensStore.addPendingToken({
-        amount: amount,
+        amount: decodedToken.amount,
         token: tokenStr,
-        mintInToken: mintInToken,
-        unitInToken: unitInToken,
+        mint: token.getMint(decodedToken),
+        unit: token.getUnit(decodedToken),
       });
       this.showReceiveTokens = false;
       // show success notification
@@ -695,9 +706,9 @@ export default defineComponent({
     handleSwapClose() {
       this.swapSelected = false;
     },
-    getAvailableSwapMints(): Mint[] {
+    getAvailableSwapMints(): StoredMint[] {
       const availableMints = Array.isArray(this.mints)
-        ? (this.mints as Mint[])
+        ? (this.mints as StoredMint[])
         : [];
       return availableMints.filter(
         (mint) => mint.url && mint.url !== this.tokenMint
@@ -744,7 +755,7 @@ export default defineComponent({
     },
     fetchUntrustedMintInfo: async function (mintUrl: string) {
       try {
-        const mint = new CashuMint(mintUrl);
+        const mint = new Mint(mintUrl);
         const info = await mint.getInfo();
         this.untrustedMintInfo = info;
       } catch (error) {

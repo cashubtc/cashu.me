@@ -77,6 +77,7 @@ export default {
       no_lnurl_data: "لا توجد بيانات LNURL",
       no_price_data: "لا توجد بيانات سعرية.",
       please_try_again: "يرجى المحاولة مرة أخرى.",
+      trying_again: "جارٍ إعادة المحاولة...",
     },
     mint: {
       notifications: {

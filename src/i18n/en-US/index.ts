@@ -76,12 +76,16 @@ export default {
       received_lightning: "Received {amount} via Lightning",
       lightning_payment_failed: "Lightning payment failed",
       failed_to_decode_invoice: "Failed to decode invoice",
+      unsupported_legacy_qr: "Unsupported Legacy QR code",
+      legacy_qr_not_supported:
+        "This Legacy QR code is not from a supported merchant",
       invalid_lnurl: "Invalid LNURL",
       lnurl_error: "LNURL Error",
       no_amount: "No amount",
       no_lnurl_data: "No LNURL data",
       no_price_data: "No price data.",
       please_try_again: "Please try again.",
+      trying_again: "Trying again...",
     },
     mint: {
       notifications: {
@@ -816,7 +820,7 @@ export default {
         error: "Failed to read clipboard contents.",
       },
       validate: {
-        error: "Mnemonic should be at least 12 words.",
+        error: "Mnemonic is not a valid BIP39 seed phrase.",
       },
       select_all: {
         label: "Select All",

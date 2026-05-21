@@ -23,14 +23,20 @@
           <div v-for="index in 12" :key="index" class="word-input-wrapper">
             <span class="word-number">{{ index }}</span>
             <q-input
-              v-model="words[index - 1]"
+              :model-value="words[index - 1]"
+              @update:model-value="updateWord($event, index - 1)"
               outlined
               dense
               :ref="(el) => setInputRef(el, index - 1)"
               @paste="handlePaste($event, index - 1)"
-              @input="handleInput(index - 1)"
               class="word-input"
               :placeholder="$t('WelcomeRecoverSeed.inputs.word', { index })"
+              :input-attrs="{
+                autocapitalize: 'none',
+                autocorrect: 'off',
+                autocomplete: 'off',
+                spellcheck: 'false',
+              }"
             />
           </div>
         </div>
@@ -61,6 +67,9 @@ import { useWelcomeStore } from "src/stores/welcome";
 import { useRestoreStore } from "src/stores/restore";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
+import { validateMnemonic as validateBip39Mnemonic } from "@scure/bip39";
+import { wordlist } from "@scure/bip39/wordlists/english";
+import { i18n } from "../../boot/i18n";
 
 export default {
   name: "WelcomeRecoverSeed",
@@ -79,32 +88,72 @@ export default {
       }
     };
 
+    type QInputModel = string | number | null;
+
+    const updateWord = (val: QInputModel, index: number) => {
+      const lower = String(val ?? "").toLowerCase();
+
+      // Multi word (paste or user typed spaces)
+      if (/\s/.test(lower.trim()) && lower.trim().split(/\s+/).length > 1) {
+        const splitWords = lower.trim().split(/\s+/);
+        splitWords.forEach((w, i) => {
+          if (index + i < 12) {
+            words.value[index + i] = w;
+          }
+        });
+        const nextIndex = Math.min(index + splitWords.length, 11);
+        setTimeout(() => {
+          inputRefs.value[nextIndex]?.focus();
+        }, 50);
+
+        return;
+      }
+
+      // Space to advance, store trimmed
+      if (lower.endsWith(" ") && index < 11) {
+        words.value[index] = lower.trim();
+        setTimeout(() => {
+          inputRefs.value[index + 1]?.focus();
+        }, 50);
+        return;
+      }
+
+      // Normal typing
+      words.value[index] = lower;
+    };
+
     // Combine individual words into mnemonic
     const mnemonic = computed(() => {
       return words.value
         .filter((w) => w.trim())
         .join(" ")
-        .trim();
+        .trim()
+        .toLowerCase();
     });
 
+    // Count of words filled
+    const filledWords = computed(
+      () => words.value.filter((w) => w.trim()).length
+    );
+
+    // Message to show
     const errorMsg = computed(() => {
-      const filledWords = words.value.filter((w) => w.trim()).length;
-      if (filledWords === 0) return "";
-      if (filledWords < 12) return `${filledWords}/12 words entered`;
+      if (filledWords.value === 0) return "";
+      if (filledWords.value < 12)
+        return `${filledWords.value}/12 words entered`;
+      if (!validateBip39Mnemonic(mnemonic.value, wordlist)) {
+        return i18n.global.t("RestoreView.actions.validate.error");
+      }
       return "";
     });
 
     // Watch mnemonic and update store
     watch(mnemonic, (val) => {
       restore.mnemonicToRestore = val;
-      const wordCount = val
-        .trim()
-        .split(/\s+/)
-        .filter((w) => w).length;
-      const valid = wordCount === 12;
+      const valid = validateBip39Mnemonic(val, wordlist);
       welcome.seedEnteredValid = valid;
       if (valid) {
-        wallet.setMnemonicFromUser(val.trim());
+        wallet.setMnemonicFromUser(val);
       }
     });
 
@@ -112,64 +161,14 @@ export default {
     const handlePaste = (event: ClipboardEvent, index: number) => {
       event.preventDefault();
       const pastedText = event.clipboardData?.getData("text") || "";
-      const pastedWords = pastedText.trim().split(/\s+/);
-
-      // If pasting multiple words, distribute them
-      if (pastedWords.length > 1) {
-        pastedWords.forEach((word, i) => {
-          if (index + i < 12) {
-            words.value[index + i] = word.trim();
-          }
-        });
-        // Focus next empty field or last field
-        const nextIndex = Math.min(index + pastedWords.length, 11);
-        setTimeout(() => {
-          inputRefs.value[nextIndex]?.focus();
-        }, 50);
-      } else {
-        // Single word paste
-        words.value[index] = pastedText.trim();
-        // Move to next field
-        if (index < 11) {
-          setTimeout(() => {
-            inputRefs.value[index + 1]?.focus();
-          }, 50);
-        }
-      }
-    };
-
-    // Handle input and auto-move to next field
-    const handleInput = (index: number) => {
-      const word = words.value[index];
-      // If word contains space, it might be multiple words pasted
-      if (word.includes(" ")) {
-        const splitWords = word.trim().split(/\s+/);
-        splitWords.forEach((w, i) => {
-          if (index + i < 12) {
-            words.value[index + i] = w.trim();
-          }
-        });
-      } else if (word.trim() && index < 11) {
-        // Auto-advance on space
-        if (word.endsWith(" ")) {
-          words.value[index] = word.trim();
-          setTimeout(() => {
-            inputRefs.value[index + 1]?.focus();
-          }, 50);
-        }
-      }
+      updateWord(pastedText, index);
     };
 
     // Paste all from clipboard
     const paste = async () => {
       try {
         const text = await ui.pasteFromClipboard();
-        const pastedWords = (text || "").trim().split(/\s+/);
-        pastedWords.forEach((word, i) => {
-          if (i < 12) {
-            words.value[i] = word.trim();
-          }
-        });
+        updateWord(text, 0);
       } catch {}
     };
 
@@ -181,7 +180,7 @@ export default {
       errorMsg,
       paste,
       handlePaste,
-      handleInput,
+      updateWord,
       setInputRef,
     };
   },

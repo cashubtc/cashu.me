@@ -21,7 +21,8 @@ import { useLocalStorage } from "@vueuse/core";
 import { useSettingsStore } from "./settings";
 import { useReceiveTokensStore } from "./receiveTokensStore";
 import {
-  getEncodedTokenV4,
+  getEncodedToken,
+  normalizeProofAmounts,
   PaymentRequestPayload,
   Token,
 } from "@cashu/cashu-ts";
@@ -483,12 +484,12 @@ export const useNostrStore = defineStore("nostr", {
           const mint = payload.mint;
           const unit = payload.unit;
           const token = {
-            proofs: proofs,
+            proofs: normalizeProofAmounts(proofs),
             mint: mint,
             unit: unit,
           } as Token;
 
-          const tokenStr = getEncodedTokenV4(token);
+          const tokenStr = getEncodedToken(token);
 
           const tokenInHistory = tokensStore.tokenAlreadyInHistory(tokenStr);
           if (tokenInHistory && tokenInHistory.amount > 0) {
@@ -555,17 +556,12 @@ export const useNostrStore = defineStore("nostr", {
         receiveStore.showReceiveTokens = false;
         return undefined;
       }
-      const decodedToken = token.decode(tokenStr);
+      const decodedToken = token.decodeMeta(tokenStr);
       if (decodedToken == undefined) {
         throw Error("could not decode token");
       }
-      // get amount from decodedToken.token.proofs[..].amount
-      const amount = token
-        .getProofs(decodedToken)
-        .reduce((sum, el) => (sum += el.amount), 0);
-
       const id = tokensStore.addPendingToken({
-        amount: amount,
+        amount: decodedToken.amount,
         token: tokenStr,
         mint: token.getMint(decodedToken),
         unit: token.getUnit(decodedToken),

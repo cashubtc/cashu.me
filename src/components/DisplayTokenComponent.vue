@@ -327,16 +327,13 @@ import { useUiStore } from "src/stores/ui";
 import { useCameraStore } from "src/stores/camera";
 import { useSettingsStore } from "src/stores/settings";
 import { useTokensStore } from "src/stores/tokens";
+import { useMintsStore } from "src/stores/mints";
 import TokenInformation from "components/TokenInformation.vue";
 import MeltQuoteInformation from "components/MeltQuoteInformation.vue";
 import SendPaymentRequest from "./SendPaymentRequest.vue";
 import PaymentRequestInfo from "./PaymentRequestInfo.vue";
-import {
-  getDecodedToken,
-  getEncodedTokenBinary,
-  getEncodedToken,
-  getEncodedTokenV4,
-} from "@cashu/cashu-ts";
+import { getDecodedToken, getEncodedTokenBinary } from "@cashu/cashu-ts";
+import { sumProofAmounts } from "src/js/proofs";
 import token from "src/js/token";
 import { notifyError, notifySuccess } from "src/js/notify";
 import { copyToClipboard } from "quasar";
@@ -380,7 +377,6 @@ export default defineComponent({
       fragmentIntervalFast: 150,
       framentInervalSlow: 500,
       fragmentSpeedLabel: "F",
-      isV4Token: false,
       scanningCard: false,
       showExpandedButtons: false,
       showDeleteDialog: false,
@@ -396,19 +392,18 @@ export default defineComponent({
     ...mapState(useSettingsStore, ["nfcEncoding"]),
     // display helpers
     sumProofs: function () {
-      const proofs = token.getProofs(token.decode(this.sendData.tokensBase64));
-      return proofs.flat().reduce((sum, el) => (sum += el.amount), 0);
+      return token.decodeMeta(this.sendData.tokensBase64)?.amount ?? 0;
     },
     displayUnit: function () {
       const display = this.formatCurrency(this.sumProofs, this.tokenUnit);
       return display;
     },
     tokenUnit: function () {
-      const unit = token.getUnit(token.decode(this.sendData.tokensBase64));
-      return unit;
+      const decoded = token.decodeMeta(this.sendData.tokensBase64);
+      return decoded ? token.getUnit(decoded) : "";
     },
     paidFees: function () {
-      return this.sumProofs - Math.abs(this.sendData.historyAmount);
+      return this.sumProofs - Math.abs(this.sendData.historyAmount ?? 0);
     },
     runnerActive: function () {
       return this.tokenWorkerRunning;
@@ -426,7 +421,7 @@ export default defineComponent({
       if (!val?.length) {
         return;
       }
-      const tokenObj = token.decode(val);
+      const tokenObj = token.decodeMeta(val);
       const proofs = tokenObj.proofs || [];
       if (!proofs.length) {
         return;
@@ -437,7 +432,6 @@ export default defineComponent({
         this.qrCodeFragment = "";
         this.startQrCodeLoop();
       }
-      this.isV4Token = val.startsWith("cashuB");
     },
   },
   methods: {
@@ -457,7 +451,7 @@ export default defineComponent({
         this.qrCodeFragment = "";
         return;
       }
-      const tokenObj = token.decode(val);
+      const tokenObj = token.decodeMeta(val);
       const proofs = tokenObj.proofs || [];
       if (!proofs.length) {
         this.qrCodeFragment = "";
@@ -469,7 +463,6 @@ export default defineComponent({
         this.qrCodeFragment = "";
         this.startQrCodeLoop();
       }
-      this.isV4Token = val.startsWith("cashuB");
     },
     startQrCodeLoop: async function () {
       if (this.sendData.tokensBase64.length == 0) {
@@ -512,22 +505,6 @@ export default defineComponent({
         this.fragmentLengthLabel = "M";
       }
       this.startQrCodeLoop();
-    },
-    toggleTokenEncoding: function () {
-      const decodedToken = getDecodedToken(this.sendData.tokensBase64);
-      if (this.sendData.tokensBase64.startsWith("cashuA")) {
-        try {
-          this.sendData.tokensBase64 = getEncodedTokenV4(decodedToken);
-        } catch {
-          this.sendData.tokensBase64 = getEncodedToken(decodedToken, {
-            version: 3,
-          });
-        }
-      } else {
-        this.sendData.tokensBase64 = getEncodedToken(decodedToken, {
-          version: 3,
-        });
-      }
     },
     encodeToPeanut: function (tokenStr: string) {
       return (
@@ -604,7 +581,8 @@ export default defineComponent({
                       break;
                     case "binary": {
                       const decoded = getDecodedToken(
-                        this.sendData.tokensBase64
+                        this.sendData.tokensBase64,
+                        useMintsStore().allMintKeysets.map((k) => k.id)
                       );
                       const data = getEncodedTokenBinary(decoded);
                       records = [
