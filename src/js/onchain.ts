@@ -9,12 +9,25 @@ export type MempoolTxMetadata = {
   url: string;
 };
 
+export type OnchainNetwork = "bitcoin" | "mutinynet";
+
+export function onchainNetwork(address: string): OnchainNetwork {
+  return address.toLowerCase().startsWith("tb1") ? "mutinynet" : "bitcoin";
+}
+
+export function onchainNetworkDisplay(network?: string): string {
+  return network === "mutinynet" ? "Mutinynet" : "Bitcoin";
+}
+
 function mempoolBaseForAddress(value: string): string | null {
   const lower = value.toLowerCase();
   if (lower.startsWith("bc1") || /^[13]/.test(value)) {
     return "https://mempool.space/api";
   }
-  if (lower.startsWith("tb1") || /^[mn2]/.test(value)) {
+  if (lower.startsWith("tb1")) {
+    return "https://mutinynet.com/api";
+  }
+  if (/^[mn2]/.test(value)) {
     return "https://mempool.space/testnet/api";
   }
   return null;

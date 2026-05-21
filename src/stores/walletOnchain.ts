@@ -17,6 +17,7 @@ import type { InvoiceHistory } from "./wallet";
 import { LightningMethod } from "src/stores/walletTypes";
 import { mintOnPaidGeneric } from "./walletWebsocket";
 import { useInvoicesWorkerStore } from "./invoicesWorker";
+import { onchainNetwork } from "src/js/onchain";
 
 type AppMintQuote = Omit<
   MintQuoteOnchainResponse,
@@ -111,11 +112,13 @@ export async function requestMintOnchain(this: any, mintWallet: Wallet) {
     this.invoiceData.mintQuote = normalizeMintQuote(data);
     this.invoiceData.privKey = privkey;
     this.invoiceData.type = LightningMethod.Onchain;
+    this.invoiceData.network = onchainNetwork(data.request);
 
     this.invoiceHistory.push({
       ...this.invoiceData,
       label: "On-chain",
       type: LightningMethod.Onchain,
+      network: onchainNetwork(data.request),
     });
 
     return data;
@@ -164,6 +167,9 @@ export async function checkOnchainAndMint(
   const keysetId = this.getKeyset(invoice.mint, invoice.unit);
   const mint = mintStore.mints.find((m: any) => m.url === invoice.mint);
   if (!mint) throw new Error("mint not found");
+  if (!invoice.network) {
+    invoice.network = onchainNetwork(invoice.request);
+  }
 
   await uIStore.lockMutex();
   try {

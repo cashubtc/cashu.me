@@ -46,6 +46,14 @@
       </div>
     </div>
 
+    <div v-if="networkDisplay" class="detail-item q-mb-md">
+      <div class="detail-label">
+        <InfoIcon :size="20" :color="iconColor" class="detail-icon" />
+        <div class="detail-name">Network</div>
+      </div>
+      <div class="detail-value">{{ networkDisplay }}</div>
+    </div>
+
     <div v-if="hasTxid" class="detail-item q-mb-md">
       <div class="detail-label">
         <HashIcon :size="20" :color="iconColor" class="detail-icon" />
@@ -113,7 +121,12 @@ import { useMintsStore } from "stores/mints";
 import { MeltQuoteBolt11Response } from "@cashu/cashu-ts";
 import { copyToClipboard } from "quasar";
 import { LightningMethod } from "src/stores/walletTypes";
-import { fetchTxMetadata, type MempoolTxMetadata } from "src/js/onchain";
+import {
+  fetchTxMetadata,
+  onchainNetwork,
+  onchainNetworkDisplay,
+  type MempoolTxMetadata,
+} from "src/js/onchain";
 import {
   Zap as ZapIcon,
   ArrowDownUp as ArrowDownUpIcon,
@@ -340,8 +353,18 @@ export default defineComponent({
     onchainTxUrl(): string {
       return (
         this.onchainMetadata?.url ||
-        `https://mempool.space/tx/${this.txidValue}`
+        `${
+          this.isMutinynet ? "https://mutinynet.com" : "https://mempool.space"
+        }/tx/${this.txidValue}`
       );
+    },
+    isMutinynet(): boolean {
+      const request = this.meltQuote?.request || this.invoice?.request || "";
+      return (this.invoice?.network || onchainNetwork(request)) === "mutinynet";
+    },
+    networkDisplay(): string {
+      if (!this.isMutinynet) return "";
+      return onchainNetworkDisplay("mutinynet");
     },
     onchainStatusDisplay(): string {
       if (!this.onchainMetadata) return "";

@@ -101,6 +101,7 @@ import {
   isLegacyRetailQR,
   translateLegacyQRToLightningAddress,
 } from "src/js/legacy-qr";
+import { onchainNetwork } from "src/js/onchain";
 import { LightningMethod } from "src/stores/walletTypes";
 // HACK: this is a workaround so that the catch block in the melt function does not throw an error when the user exits the app
 // before the payment is completed. This is necessary because the catch block in the melt function would otherwise remove all
@@ -161,6 +162,7 @@ export type InvoiceHistory = Invoice & {
   privKey?: string;
   paidDate?: string;
   meltOutputData?: any[];
+  network?: string;
 };
 
 type KeysetCounter = {
@@ -1415,6 +1417,10 @@ export const useWalletStore = defineStore("wallet", {
         unit: unit,
         meltQuote: quote,
         type: method,
+        network:
+          method === LightningMethod.Onchain
+            ? onchainNetwork(this.payInvoiceData.input.request || quote.request)
+            : undefined,
       });
     },
     removeOutgoingInvoiceFromHistory: function (quote: string) {
@@ -1442,6 +1448,9 @@ export const useWalletStore = defineStore("wallet", {
             }
           }
           i.meltQuote = quote;
+          if (i.type === LightningMethod.Onchain && !i.network) {
+            i.network = onchainNetwork(i.request || quote.request);
+          }
         });
     },
     setMeltOutputData: function (quote: string, outputData: any[]) {
@@ -1565,6 +1574,7 @@ export const useWalletStore = defineStore("wallet", {
       const cleanAddress = {
         request: address,
         onchain: address,
+        network: onchainNetwork(address),
         memo: "",
         msat: 0,
         sat: 0,

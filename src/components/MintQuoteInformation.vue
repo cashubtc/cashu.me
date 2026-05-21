@@ -38,6 +38,14 @@
       <div class="detail-value">{{ methodDisplay }}</div>
     </div>
 
+    <div v-if="networkDisplay" class="detail-item q-mb-md">
+      <div class="detail-label">
+        <InfoIcon :size="20" :color="iconColor" class="detail-icon" />
+        <div class="detail-name">Network</div>
+      </div>
+      <div class="detail-value">{{ networkDisplay }}</div>
+    </div>
+
     <div v-if="isOnchain && onchainMetadata" class="detail-item q-mb-md">
       <div class="detail-label">
         <InfoIcon :size="20" :color="iconColor" class="detail-icon" />
@@ -94,7 +102,12 @@ import {
   Hash as HashIcon,
 } from "lucide-vue-next";
 import { LightningMethod } from "src/stores/walletTypes";
-import { fetchAddressTxMetadata, type MempoolTxMetadata } from "src/js/onchain";
+import {
+  fetchAddressTxMetadata,
+  onchainNetwork,
+  onchainNetworkDisplay,
+  type MempoolTxMetadata,
+} from "src/js/onchain";
 
 declare const windowMixin: any;
 declare const formatCurrency: any;
@@ -203,6 +216,12 @@ export default defineComponent({
     },
     isOnchain(): boolean {
       return this.method === LightningMethod.Onchain;
+    },
+    networkDisplay(): string {
+      if (!this.isOnchain || !this.invoice?.request) return "";
+      const network =
+        this.invoice.network || onchainNetwork(this.invoice.request);
+      return network === "mutinynet" ? onchainNetworkDisplay(network) : "";
     },
     onchainStatusDisplay(): string {
       if (!this.onchainMetadata) return "";
