@@ -103,6 +103,7 @@
                     :mint-url="invoiceData.mint"
                     :show-amount="true"
                     :method="invoiceMethod"
+                    :refresh-trigger="metadataRefreshTrigger"
                   />
                 </div>
               </div>
@@ -120,6 +121,7 @@
                     :mint-url="invoiceData.mint"
                     :history-paid-at="invoiceData.paidDate"
                     :show-amount="true"
+                    :refresh-trigger="metadataRefreshTrigger"
                   />
                 </div>
               </div>
@@ -180,6 +182,7 @@ export default defineComponent({
     return {
       copyButtonCopied: false,
       copyButtonTimeout: null as any,
+      metadataRefreshTrigger: 0,
     };
   },
   computed: {
@@ -230,6 +233,13 @@ export default defineComponent({
         return "bitcoin:" + this.invoiceData.request;
       }
       return "lightning:" + this.invoiceData.request;
+    },
+  },
+  watch: {
+    showInvoiceDetails(val: boolean) {
+      if (val) {
+        this.metadataRefreshTrigger += 1;
+      }
     },
   },
   methods: {

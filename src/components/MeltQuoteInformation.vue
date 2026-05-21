@@ -72,16 +72,31 @@
       </div>
     </div>
 
-    <div v-if="onchainMetadata" class="detail-item q-mb-md">
+    <div
+      v-if="hasTxid && (onchainMetadata || loadingOnchainMetadata)"
+      class="detail-item q-mb-md"
+    >
       <div class="detail-label">
         <InfoIcon :size="20" :color="iconColor" class="detail-icon" />
         <div class="detail-name">Chain Status</div>
       </div>
-      <div
-        class="detail-value"
-        :class="{ 'text-positive': onchainMetadata.confirmed }"
-      >
-        {{ onchainStatusDisplay }}
+      <div class="detail-value detail-value-with-spinner">
+        <q-spinner
+          v-if="loadingOnchainMetadata"
+          size="14px"
+          color="grey-6"
+          class="q-mr-xs"
+        />
+        <transition name="chain-status-fade" mode="out-in">
+          <span
+            v-if="onchainMetadata"
+            :key="onchainStatusDisplay"
+            :class="{ 'text-positive': onchainMetadata.confirmed }"
+          >
+            {{ onchainStatusDisplay }}
+          </span>
+          <span v-else key="loading" class="text-grey-6">Fetching</span>
+        </transition>
       </div>
     </div>
 
@@ -167,6 +182,7 @@ export default defineComponent({
   data: function () {
     return {
       onchainMetadata: null as MempoolTxMetadata | null,
+      loadingOnchainMetadata: false,
       txidCopied: false,
       txidCopiedTimeout: null as any,
     };
@@ -197,6 +213,10 @@ export default defineComponent({
         string | number | Date | null | undefined
       >,
       default: null,
+    },
+    refreshTrigger: {
+      type: Number,
+      default: 0,
     },
   },
   computed: {
@@ -389,14 +409,21 @@ export default defineComponent({
     },
     async loadOnchainMetadata() {
       if (!this.hasTxid) return;
+      this.loadingOnchainMetadata = true;
+      this.onchainMetadata = null;
       try {
+        const addressHint =
+          this.meltQuote?.request ||
+          (this.invoice?.network === "mutinynet" ? "tb1" : "bc1");
         this.onchainMetadata = await fetchTxMetadata(
           this.txidValue,
           this.onchainConfirmations(),
-          this.meltQuote?.request
+          addressHint
         );
       } catch (error) {
         console.error("Could not fetch on-chain metadata", error);
+      } finally {
+        this.loadingOnchainMetadata = false;
       }
     },
     async copyTxid() {
@@ -473,6 +500,9 @@ export default defineComponent({
     txidValue: function () {
       this.loadOnchainMetadata();
     },
+    refreshTrigger: function () {
+      this.loadOnchainMetadata();
+    },
   },
   mounted() {
     this.loadOnchainMetadata();
@@ -519,5 +549,21 @@ export default defineComponent({
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.detail-value-with-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.chain-status-fade-enter-active,
+.chain-status-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.chain-status-fade-enter-from,
+.chain-status-fade-leave-to {
+  opacity: 0;
 }
 </style>

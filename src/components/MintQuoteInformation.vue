@@ -48,25 +48,40 @@
 
     <div v-if="isOnchain && onchainMetadata" class="detail-item q-mb-md">
       <div class="detail-label">
-        <InfoIcon :size="20" :color="iconColor" class="detail-icon" />
-        <div class="detail-name">Chain Status</div>
-      </div>
-      <div
-        class="detail-value"
-        :class="{ 'text-positive': onchainMetadata.confirmed }"
-      >
-        {{ onchainStatusDisplay }}
-      </div>
-    </div>
-
-    <div v-if="isOnchain && onchainMetadata" class="detail-item q-mb-md">
-      <div class="detail-label">
         <HashIcon :size="20" :color="iconColor" class="detail-icon" />
         <div class="detail-name">Transaction ID</div>
       </div>
       <a class="detail-value" :href="onchainMetadata.url" target="_blank">
         {{ shortTxid(onchainMetadata.txid) }}
       </a>
+    </div>
+
+    <div
+      v-if="isOnchain && (onchainMetadata || loadingOnchainMetadata)"
+      class="detail-item q-mb-md"
+    >
+      <div class="detail-label">
+        <InfoIcon :size="20" :color="iconColor" class="detail-icon" />
+        <div class="detail-name">Chain Status</div>
+      </div>
+      <div class="detail-value detail-value-with-spinner">
+        <q-spinner
+          v-if="loadingOnchainMetadata"
+          size="14px"
+          color="grey-6"
+          class="q-mr-xs"
+        />
+        <transition name="chain-status-fade" mode="out-in">
+          <span
+            v-if="onchainMetadata"
+            :key="onchainStatusDisplay"
+            :class="{ 'text-positive': onchainMetadata.confirmed }"
+          >
+            {{ onchainStatusDisplay }}
+          </span>
+          <span v-else key="loading" class="text-grey-6">Fetching</span>
+        </transition>
+      </div>
     </div>
 
     <div v-if="paidAtDisplay" class="detail-item q-mb-md">
@@ -153,6 +168,10 @@ export default defineComponent({
     method: {
       type: String,
       default: LightningMethod.Bolt11,
+    },
+    refreshTrigger: {
+      type: Number,
+      default: 0,
     },
   },
   computed: {
@@ -262,6 +281,8 @@ export default defineComponent({
     },
     async loadOnchainMetadata() {
       if (!this.isOnchain || !this.invoice?.request) return;
+      this.loadingOnchainMetadata = true;
+      this.onchainMetadata = null;
       try {
         this.onchainMetadata = await fetchAddressTxMetadata(
           this.invoice.request,
@@ -269,6 +290,8 @@ export default defineComponent({
         );
       } catch (error) {
         console.error("Could not fetch on-chain metadata", error);
+      } finally {
+        this.loadingOnchainMetadata = false;
       }
     },
     normalizeToTimestamp(value: string | number | Date | null | undefined) {
@@ -292,6 +315,7 @@ export default defineComponent({
   data: function () {
     return {
       onchainMetadata: null as MempoolTxMetadata | null,
+      loadingOnchainMetadata: false,
     };
   },
   watch: {
@@ -299,6 +323,9 @@ export default defineComponent({
       this.loadOnchainMetadata();
     },
     method: function () {
+      this.loadOnchainMetadata();
+    },
+    refreshTrigger: function () {
       this.loadOnchainMetadata();
     },
   },
@@ -344,5 +371,21 @@ export default defineComponent({
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.detail-value-with-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.chain-status-fade-enter-active,
+.chain-status-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.chain-status-fade-enter-from,
+.chain-status-fade-leave-to {
+  opacity: 0;
 }
 </style>
