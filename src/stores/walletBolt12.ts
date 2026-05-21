@@ -15,6 +15,7 @@ import type { InvoiceHistory } from "./wallet";
 import { useInvoicesWorkerStore } from "./invoicesWorker";
 import { mintOnPaidGeneric } from "./walletWebsocket";
 import { LightningMethod } from "src/stores/walletTypes";
+import { usePriceStore } from "./price";
 
 // BOLT12: reusable offers
 
@@ -234,15 +235,32 @@ export async function meltQuoteInvoiceDataBolt12(this: any) {
     const offer = this.payInvoiceData.invoice?.bolt12;
     if (!offer) throw new Error("no offer provided.");
 
-    // amount msat for BOLT12
-    const amountSat: number | undefined =
-      this.payInvoiceData.invoice?.sat || this.payInvoiceData.input.amount;
-    if (!amountSat || amountSat <= 0) {
-      throw new Error("no amount provided");
+    let amountMsat: number | undefined;
+    if (this.payInvoiceData.invoice?.msat > 0) {
+      // Fixed-amount offer: let mint read amount from offer (same as Bolt11).
+      amountMsat = undefined;
+    } else {
+      const inputAmount = this.payInvoiceData.input.amount;
+      if (!inputAmount || inputAmount <= 0) {
+        throw new Error("no amount provided");
+      }
+      const unit = mintStore.activeUnit;
+      if (unit === "msat") {
+        amountMsat = inputAmount;
+      } else if (unit === "sat") {
+        amountMsat = inputAmount * 1000;
+      } else {
+        const price =
+          usePriceStore().bitcoinPrices[unit] ?? usePriceStore().bitcoinPrice;
+        if (!price) {
+          throw new Error("no price data");
+        }
+        const satPrice = 1 / (price / 1e8);
+        amountMsat = Math.floor(inputAmount * satPrice) * 1000;
+      }
     }
-    const msat = amountSat * 1000;
 
-    const data = await mintWallet.createMeltQuoteBolt12(offer, msat);
+    const data = await mintWallet.createMeltQuoteBolt12(offer, amountMsat);
     mintStore.assertMintError(data);
     const quote = normalizeMeltQuote(data);
     this.payInvoiceData.meltQuote.response = quote;

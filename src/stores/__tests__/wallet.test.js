@@ -48,6 +48,7 @@ const h = vi.hoisted(() => {
   const mintsStore = {
     activeMintUrl: "https://mint-a.example",
     activeUnit: "sat",
+    assertMintError: vi.fn(),
     addMintData: { url: "", nickname: "" },
     mints: [],
     mintUnitKeysets: vi.fn((mint, unit) =>
@@ -55,6 +56,10 @@ const h = vi.hoisted(() => {
     ),
     mintUnitProofs: vi.fn(() => []),
     updateMintInfoAndKeys: vi.fn(async () => {}),
+  };
+  const priceStore = {
+    bitcoinPrice: 100_000,
+    bitcoinPrices: { usd: 100_000 },
   };
 
   const walletLoadMintFromCache = vi.fn();
@@ -109,6 +114,7 @@ const h = vi.hoisted(() => {
     p2pkStore,
     prStore,
     mintsStore,
+    priceStore,
     walletLoadMintFromCache,
     walletGetFeesForProofs,
     keychainMintToCacheDTO,
@@ -239,6 +245,10 @@ vi.mock("src/stores/mints", async () => {
     useMintsStore: () => h.mintsStore,
   };
 });
+
+vi.mock("src/stores/price", () => ({
+  usePriceStore: () => h.priceStore,
+}));
 
 vi.mock("src/js/token", () => ({
   default: h.tokenModule,
@@ -571,6 +581,27 @@ describe("wallet store", () => {
     expect(wallet.keysetCounter("00aa")).toBe(3);
     expect(h.uiStore.lockMutex).toHaveBeenCalledTimes(2);
     expect(h.uiStore.unlockMutex).toHaveBeenCalledTimes(2);
+  });
+
+  it("converts fiat input to msat for amountless Bolt12 melt quotes", async () => {
+    const wallet = useWalletStore();
+    h.mintsStore.activeUnit = "usd";
+    const createMeltQuoteBolt12 = vi.fn(async () => ({
+      quote: "q",
+      amount: 500,
+      fee_reserve: 0,
+    }));
+    vi.spyOn(wallet, "activeWallet").mockResolvedValue({ createMeltQuoteBolt12 });
+    wallet.payInvoiceData.invoice = {
+      bolt12: "lno1offer",
+      msat: 0,
+      sat: 0,
+    };
+    wallet.payInvoiceData.input.amount = 5;
+
+    await wallet.meltQuoteInvoiceDataBolt12();
+
+    expect(createMeltQuoteBolt12).toHaveBeenCalledWith("lno1offer", 5_000_000);
   });
 
   it("resets stale Bolt12 amount and quote state for amountless offers", async () => {
