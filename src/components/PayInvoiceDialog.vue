@@ -36,7 +36,7 @@
                   word-break: break-word;
                 "
               >
-                {{ $t("PayInvoiceDialog.input_data.title") || "Pay Lightning" }}
+                {{ dialogTitle }}
               </q-item-label>
             </div>
           </div>
@@ -61,22 +61,30 @@
             class="col-12 col-sm-11 col-md-8 q-px-lg q-mb-sm"
             style="max-width: 600px"
           >
-            <ChooseMint />
+            <ChooseMint
+              v-if="!showNoMintForMethodError"
+              :filter-lightning-method="payLightningMethod"
+            />
           </div>
         </div>
 
         <!-- Content area -->
         <div
-          class="col column items-center justify-start q-px-lg scroll-container"
+          class="col column items-center q-px-lg scroll-container invoice-scroll-area"
         >
-          <div class="row justify-center full-width">
+          <div class="row justify-center full-width invoice-main-area">
             <div
-              class="col-12 col-sm-11 col-md-8 q-px-sm q-mb-sm"
+              class="col-12 col-sm-11 col-md-8 q-px-sm q-mb-sm invoice-main-column"
               style="max-width: 600px"
             >
               <!-- INVOICE CONTENT -->
-              <div v-if="payInvoiceData.invoice">
-                <div class="invoice-state-container">
+              <div v-if="payInvoiceData.invoice" class="invoice-content-fill">
+                <div
+                  class="invoice-state-container"
+                  :class="{
+                    'invoice-state-container--centered': showInvoiceErrorState,
+                  }"
+                >
                   <transition name="slide-down">
                     <div :key="invoiceStateKey" class="invoice-state-content">
                       <div v-if="isPaid" class="q-mb-md">
@@ -188,13 +196,15 @@
                           {{ payInvoiceData.invoice.description }}<br />
                         </p>
                       </div>
-                      <div v-else-if="showBolt12AmountEntry">
-                        <div
-                          v-if="payInvoiceData.meltQuote.error != ''"
-                          class="text-h6 q-my-none q-mb-md"
-                        >
-                          Error: {{ payInvoiceData.meltQuote.error }}
+                      <div
+                        v-else-if="showInvoiceErrorState"
+                        class="invoice-error-state"
+                      >
+                        <div class="text-h6 q-my-none">
+                          {{ payInvoiceData.meltQuote.error }}
                         </div>
+                      </div>
+                      <div v-else-if="showLightningAmountEntry">
                         <p
                           v-if="payInvoiceData.invoice.description"
                           class="text-wrap q-mb-md"
@@ -208,14 +218,14 @@
                           {{ payInvoiceData.invoice.description }}
                         </p>
                         <div
-                          v-if="showBolt12AmountKeyboard"
+                          v-if="showLightningAmountKeyboard"
                           class="column items-center justify-center q-px-lg q-py-lg amount-area"
                         >
                           <AmountInputComponent
                             v-model="payInvoiceData.input.amount"
                             :enabled="true"
-                            :muted="insufficientFundsForBolt12Amount"
-                            :max-amount="bolt12MaxAmountFromBalance"
+                            :muted="insufficientFundsForLightningAmount"
+                            :max-amount="lightningMaxAmountFromBalance"
                             @enter="handleBolt12Quote"
                             @fiat-mode-changed="fiatKeyboardMode = $event"
                           />
@@ -525,10 +535,10 @@
           </div>
         </div>
 
-        <!-- Bottom fixed Bolt12 amountless quote action -->
+        <!-- Bottom fixed amountless Lightning quote action -->
         <div
           class="bottom-panel"
-          v-if="showBolt12AmountKeyboard && payInvoiceData.invoice"
+          v-if="showLightningAmountKeyboard && payInvoiceData.invoice"
         >
           <div class="keypad-wrapper">
             <NumericKeyboard
@@ -563,7 +573,7 @@
                   payInvoiceData.blocking ||
                   payInvoiceData.input.amount == null ||
                   payInvoiceData.input.amount <= 0 ||
-                  insufficientFundsForBolt12Amount
+                  insufficientFundsForLightningAmount
                 "
                 :loading="payInvoiceData.blocking"
               >
@@ -694,6 +704,7 @@ import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 import { useCameraStore } from "src/stores/camera";
 import { useMintsStore, MintClass } from "src/stores/mints";
+import type { StoredMint } from "src/stores/mints";
 import { useSettingsStore } from "src/stores/settings";
 import { usePriceStore } from "src/stores/price";
 import { useProofsStore } from "src/stores/proofs";
@@ -704,6 +715,8 @@ import MeltQuoteInformation from "components/MeltQuoteInformation.vue";
 import NumericKeyboard from "components/NumericKeyboard.vue";
 import AmountInputComponent from "components/AmountInputComponent.vue";
 import ParseInputComponent from "components/ParseInputComponent.vue";
+import { mintsSupportingLightningMethod } from "src/js/mint-lightning";
+import { LightningMethod } from "src/stores/walletTypes";
 
 import * as _ from "underscore";
 
@@ -734,7 +747,7 @@ export default defineComponent({
       if (
         this.payInvoiceData.show &&
         this.payInvoiceData.invoice &&
-        !this.showBolt12AmountEntry
+        !this.showLightningAmountEntry
       ) {
         await this.meltQuoteInvoiceData();
       }
@@ -743,12 +756,12 @@ export default defineComponent({
       if (
         this.payInvoiceData.show &&
         this.payInvoiceData.invoice &&
-        !this.showBolt12AmountEntry
+        !this.showLightningAmountEntry
       ) {
         await this.meltQuoteInvoiceData();
       }
     },
-    showBolt12AmountEntry: {
+    showLightningAmountEntry: {
       handler: function (val) {
         if (val && this.payInvoiceData.meltQuote.error == "") {
           this.showNumericKeyboard = true;
@@ -757,7 +770,7 @@ export default defineComponent({
       immediate: true,
     },
     "payInvoiceData.meltQuote.error": function (val) {
-      if (val && this.showBolt12AmountEntry) {
+      if (val && this.showLightningAmountEntry) {
         this.showNumericKeyboard = false;
       }
     },
@@ -882,18 +895,59 @@ export default defineComponent({
       const quote = this.payInvoiceData?.meltQuote?.response;
       return Boolean(quote?.quote) && quote.amount > 0;
     },
-    showBolt12AmountEntry: function (): boolean {
+    payLightningMethod: function (): LightningMethod | null {
+      if (!this.payInvoiceData?.invoice) return null;
+      if (this.payInvoiceData.invoice.bolt12) {
+        return LightningMethod.Bolt12;
+      }
+      return LightningMethod.Bolt11;
+    },
+    dialogTitle: function (): string {
+      if (this.payLightningMethod === LightningMethod.Bolt12) {
+        return this.$t("PayInvoiceDialog.input_data.title_bolt12");
+      }
+      return this.$t("PayInvoiceDialog.input_data.title");
+    },
+    hasMintForPayMethod: function (): boolean {
+      if (!this.payLightningMethod) return true;
       return (
-        Boolean(this.payInvoiceData?.invoice?.bolt12) &&
+        mintsSupportingLightningMethod(
+          this.mints as StoredMint[],
+          this.payLightningMethod
+        ).length > 0
+      );
+    },
+    showNoMintForMethodError: function (): boolean {
+      return this.payLightningMethod != null && !this.hasMintForPayMethod;
+    },
+    isBolt12Pay: function (): boolean {
+      return this.payLightningMethod === LightningMethod.Bolt12;
+    },
+    showLightningAmountEntry: function (): boolean {
+      return (
+        this.isBolt12Pay &&
+        this.hasMintForPayMethod &&
         !this.hasMeltQuote &&
         !this.payInvoiceData.blocking &&
         !this.isPaid &&
-        !this.isPaying
+        !this.isPaying &&
+        this.payInvoiceData.meltQuote.error == ""
       );
     },
-    showBolt12AmountKeyboard: function (): boolean {
+    showInvoiceErrorState: function (): boolean {
+      if (
+        !this.payInvoiceData.invoice ||
+        this.isPaid ||
+        this.isPaying ||
+        this.hasMeltQuote
+      ) {
+        return false;
+      }
+      return this.payInvoiceData.meltQuote.error != "";
+    },
+    showLightningAmountKeyboard: function (): boolean {
       return (
-        this.showBolt12AmountEntry &&
+        this.showLightningAmountEntry &&
         this.payInvoiceData.meltQuote.error == ""
       );
     },
@@ -919,9 +973,9 @@ export default defineComponent({
       // Access directly from store to avoid typing friction in mapState
       return (useMintsStore() as any).activeUnitLabel;
     },
-    insufficientFundsForBolt12Amount: function (): boolean {
+    insufficientFundsForLightningAmount: function (): boolean {
       if (
-        !this.showBolt12AmountEntry ||
+        !this.showLightningAmountEntry ||
         this.payInvoiceData.input.amount == null
       ) {
         return false;
@@ -931,7 +985,7 @@ export default defineComponent({
         this.payInvoiceData.input.amount * this.activeUnitCurrencyMultiplyer
       );
     },
-    bolt12MaxAmountFromBalance: function (): number {
+    lightningMaxAmountFromBalance: function (): number {
       return this.activeBalance / this.activeUnitCurrencyMultiplyer;
     },
     insufficientFunds: function (): boolean {
@@ -960,10 +1014,10 @@ export default defineComponent({
         return "paying";
       } else if (this.hasMeltQuote) {
         return "success";
-      } else if (this.payInvoiceData.meltQuote.error != "") {
+      } else if (this.showInvoiceErrorState) {
         return "error";
-      } else if (this.showBolt12AmountEntry) {
-        return this.payInvoiceData.meltQuote.error != "" ? "error" : "amount";
+      } else if (this.showLightningAmountEntry) {
+        return "amount";
       } else {
         return "processing";
       }
@@ -1054,15 +1108,12 @@ export default defineComponent({
         this.payInvoiceData.blocking ||
         this.payInvoiceData.input.amount == null ||
         this.payInvoiceData.input.amount <= 0 ||
-        this.insufficientFundsForBolt12Amount
+        this.insufficientFundsForLightningAmount
       ) {
         return;
       }
       await this.meltQuoteInvoiceData();
-      if (
-        this.hasMeltQuote ||
-        this.payInvoiceData.meltQuote.error != ""
-      ) {
+      if (this.hasMeltQuote || this.payInvoiceData.meltQuote.error != "") {
         this.showNumericKeyboard = false;
       }
     },
@@ -1146,6 +1197,38 @@ export default defineComponent({
   overflow-x: hidden;
 }
 
+.invoice-scroll-area {
+  flex: 1;
+  min-height: 0;
+}
+
+.invoice-main-area {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  align-items: stretch;
+}
+
+.invoice-main-column {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.invoice-content-fill {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.invoice-error-state {
+  text-align: center;
+  padding: 0 16px;
+  width: 100%;
+}
+
 .relative-container {
   position: relative;
 }
@@ -1183,6 +1266,13 @@ export default defineComponent({
 .invoice-state-container {
   position: relative;
   min-height: 100px;
+
+  &--centered {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
 }
 
 .invoice-state-content {

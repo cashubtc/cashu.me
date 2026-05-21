@@ -26,6 +26,7 @@ import * as _ from "underscore";
 import { date } from "quasar";
 import { notifyWarning } from "src/js/notify";
 import { LightningMethod } from "src/stores/walletTypes";
+import { ensureLightningMintActive } from "src/js/mint-lightning";
 
 // These actions are implemented as regular functions that rely on dynamic `this`
 // when attached to the Pinia store (wallet.ts assigns them to actions).
@@ -358,7 +359,14 @@ export async function mintOnPaidBolt11(
 }
 
 export async function handleBolt11InvoiceBolt11(this: any) {
+  const mintStore = useMintsStore();
   this.payInvoiceData.show = true;
+  this.payInvoiceData.meltQuote.error = "";
+  this.payInvoiceData.meltQuote.response = {
+    quote: "",
+    amount: 0,
+    fee_reserve: 0,
+  };
   let invoice;
   try {
     invoice = bolt11Decoder.decode(this.payInvoiceData.input.request);
@@ -407,6 +415,18 @@ export async function handleBolt11InvoiceBolt11(this: any) {
       }
     }
   });
+
+  const mintResult = await ensureLightningMintActive(
+    mintStore.mints,
+    mintStore.activeMintUrl,
+    mintStore.activateMintUrl.bind(mintStore),
+    LightningMethod.Bolt11
+  );
+  if (!mintResult.ok) {
+    this.payInvoiceData.meltQuote.error = this.t(mintResult.errorKey);
+    this.payInvoiceData.invoice = Object.freeze(cleanInvoice);
+    return;
+  }
 
   this.payInvoiceData.invoice = Object.freeze(cleanInvoice);
   // get quote for this request

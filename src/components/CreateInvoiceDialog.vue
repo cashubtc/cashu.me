@@ -204,6 +204,7 @@ import { usePriceStore } from "src/stores/price";
 import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
 import type { InvoiceHistory } from "src/stores/wallet";
 import { LightningMethod } from "src/stores/walletTypes";
+import { mintSupportsLightningMethod } from "src/js/mint-lightning";
 
 declare const windowMixin: any;
 
@@ -278,15 +279,7 @@ export default defineComponent({
         (m) => m.url === mintStore.activeMintUrl
       );
       if (!mint) return false;
-      const nut4 =
-        mint.info?.nuts?.[4] || mint.info?.nuts?.["4"] || ({} as any);
-      if (nut4.supported === false) return false;
-      if (nut4.methods) {
-        return nut4.methods.some(
-          (m: any) => m.method === LightningMethod.Bolt12
-        );
-      }
-      return true;
+      return mintSupportsLightningMethod(mint, LightningMethod.Bolt12);
     },
     canCreate(): boolean {
       // Bolt11 requires amount > 0

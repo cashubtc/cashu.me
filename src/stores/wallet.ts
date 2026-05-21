@@ -84,6 +84,7 @@ import { useSettingsStore } from "./settings";
 import { usePriceStore } from "./price";
 import { useI18n } from "vue-i18n";
 import BOLT12Decoder from "bolt12-decoder";
+import { ensureLightningMintActive } from "src/js/mint-lightning";
 import {
   isLegacyRetailQR,
   translateLegacyQRToLightningAddress,
@@ -1375,6 +1376,7 @@ export const useWalletStore = defineStore("wallet", {
       await prStore.decodePaymentRequest(req);
     },
     handleBolt12Offer: async function (offer: string) {
+      const mintStore = useMintsStore();
       this.payInvoiceData.show = true;
       this.payInvoiceData.input.amount = undefined;
       this.payInvoiceData.input.quote = "";
@@ -1409,6 +1411,19 @@ export const useWalletStore = defineStore("wallet", {
         fsat: amountMsat / 1000,
         description: decoded.description || "",
       } as any;
+
+      const mintResult = await ensureLightningMintActive(
+        mintStore.mints,
+        mintStore.activeMintUrl,
+        mintStore.activateMintUrl.bind(mintStore),
+        LightningMethod.Bolt12
+      );
+      if (!mintResult.ok) {
+        this.payInvoiceData.meltQuote.error = this.t(mintResult.errorKey);
+        this.payInvoiceData.invoice = Object.freeze(cleanOffer);
+        return;
+      }
+
       this.payInvoiceData.invoice = Object.freeze(cleanOffer);
       if (cleanOffer.sat > 0) {
         // If offer has fixed amount, force it

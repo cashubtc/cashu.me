@@ -49,6 +49,9 @@ const h = vi.hoisted(() => {
     activeMintUrl: "https://mint-a.example",
     activeUnit: "sat",
     assertMintError: vi.fn(),
+    activateMintUrl: vi.fn(async (url) => {
+      h.mintsStore.activeMintUrl = url;
+    }),
     addMintData: { url: "", nickname: "" },
     mints: [],
     mintUnitKeysets: vi.fn((mint, unit) =>
@@ -591,7 +594,9 @@ describe("wallet store", () => {
       amount: 500,
       fee_reserve: 0,
     }));
-    vi.spyOn(wallet, "activeWallet").mockResolvedValue({ createMeltQuoteBolt12 });
+    vi.spyOn(wallet, "activeWallet").mockResolvedValue({
+      createMeltQuoteBolt12,
+    });
     wallet.payInvoiceData.invoice = {
       bolt12: "lno1offer",
       msat: 0,
@@ -602,6 +607,117 @@ describe("wallet store", () => {
     await wallet.meltQuoteInvoiceDataBolt12();
 
     expect(createMeltQuoteBolt12).toHaveBeenCalledWith("lno1offer", 5_000_000);
+  });
+
+  it("shows an error when no mint supports Bolt12 offers", async () => {
+    const wallet = useWalletStore();
+    h.mintsStore.mints = [
+      {
+        url: "https://mint-a.example",
+        keys: [{ id: "00aa" }],
+        keysets: [{ id: "00aa", unit: "sat", active: true }],
+        info: {
+          nuts: { 4: { methods: [{ method: "bolt11" }] } },
+        },
+      },
+    ];
+
+    await wallet.handleBolt12Offer("lno1amountless");
+
+    expect(wallet.payInvoiceData.meltQuote.error).toBe(
+      "wallet.notifications.no_bolt12_mint"
+    );
+    expect(h.mintsStore.activateMintUrl).not.toHaveBeenCalled();
+  });
+
+  it("switches to a Bolt12-enabled mint when paying an offer", async () => {
+    const wallet = useWalletStore();
+    h.mintsStore.activeMintUrl = "https://mint-a.example";
+    h.mintsStore.mints = [
+      {
+        url: "https://mint-a.example",
+        keys: [{ id: "00aa" }],
+        keysets: [{ id: "00aa", unit: "sat", active: true }],
+        info: {
+          nuts: { 4: { methods: [{ method: "bolt11" }] } },
+        },
+      },
+      {
+        url: "https://mint-b.example",
+        keys: [{ id: "00bb" }],
+        keysets: [{ id: "00bb", unit: "sat", active: true }],
+        info: {
+          nuts: { 4: { methods: [{ method: "bolt12" }] } },
+        },
+      },
+    ];
+
+    await wallet.handleBolt12Offer("lno1amountless");
+
+    expect(h.mintsStore.activateMintUrl).toHaveBeenCalledWith(
+      "https://mint-b.example",
+      false,
+      true
+    );
+    expect(wallet.payInvoiceData.meltQuote.error).toBe("");
+  });
+
+  it("shows an error when no mint supports Bolt11 invoices", async () => {
+    const wallet = useWalletStore();
+    h.mintsStore.mints = [
+      {
+        url: "https://mint-a.example",
+        keys: [{ id: "00aa" }],
+        keysets: [{ id: "00aa", unit: "sat", active: true }],
+        info: {
+          nuts: { 4: { methods: [{ method: "bolt12" }] } },
+        },
+      },
+    ];
+    wallet.payInvoiceData.input.request = "lnbc123";
+
+    await wallet.handleBolt11InvoiceBolt11();
+
+    expect(wallet.payInvoiceData.meltQuote.error).toBe(
+      "wallet.notifications.no_bolt11_mint"
+    );
+    expect(h.mintsStore.activateMintUrl).not.toHaveBeenCalled();
+  });
+
+  it("switches to a Bolt11-enabled mint when paying an invoice", async () => {
+    const wallet = useWalletStore();
+    h.mintsStore.activeMintUrl = "https://mint-b.example";
+    h.mintsStore.mints = [
+      {
+        url: "https://mint-a.example",
+        keys: [{ id: "00aa" }],
+        keysets: [{ id: "00aa", unit: "sat", active: true }],
+        info: {
+          nuts: { 4: { methods: [{ method: "bolt11" }] } },
+        },
+      },
+      {
+        url: "https://mint-b.example",
+        keys: [{ id: "00bb" }],
+        keysets: [{ id: "00bb", unit: "sat", active: true }],
+        info: {
+          nuts: { 4: { methods: [{ method: "bolt12" }] } },
+        },
+      },
+    ];
+    wallet.payInvoiceData.input.request = "lnbc123";
+    const quoteSpy = vi
+      .spyOn(wallet, "meltQuoteInvoiceDataBolt11")
+      .mockResolvedValue(undefined);
+
+    await wallet.handleBolt11InvoiceBolt11();
+
+    expect(h.mintsStore.activateMintUrl).toHaveBeenCalledWith(
+      "https://mint-a.example",
+      false,
+      true
+    );
+    expect(quoteSpy).toHaveBeenCalled();
   });
 
   it("resets stale Bolt12 amount and quote state for amountless offers", async () => {

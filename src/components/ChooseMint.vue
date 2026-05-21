@@ -172,6 +172,8 @@ import { MintClass } from "stores/mints";
 import type { StoredMint } from "stores/mints";
 import { useUiStore } from "stores/ui";
 import { i18n } from "../boot/i18n";
+import { mintSupportsLightningMethod } from "src/js/mint-lightning";
+import { LightningMethod } from "src/stores/walletTypes";
 
 declare const windowMixin: any;
 
@@ -230,6 +232,10 @@ export default defineComponent({
       type: String,
       default: null,
     },
+    filterLightningMethod: {
+      type: String as () => LightningMethod | null,
+      default: null,
+    },
   },
   emits: ["update:modelValue"],
   data: function () {
@@ -266,6 +272,9 @@ export default defineComponent({
       },
     },
     excludeMint() {
+      this.initializeChosenMint();
+    },
+    filterLightningMethod() {
       this.initializeChosenMint();
     },
   },
@@ -338,6 +347,12 @@ export default defineComponent({
         ? (this.mints as StoredMint[])
         : [];
       for (const mintData of availableMints) {
+        if (
+          this.filterLightningMethod &&
+          !mintSupportsLightningMethod(mintData, this.filterLightningMethod)
+        ) {
+          continue;
+        }
         const all_units = mintData.keysets.map((r) => r.unit);
         const units = [...new Set(all_units)];
         const mint = new MintClass(mintData);
