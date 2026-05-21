@@ -236,6 +236,10 @@ export default defineComponent({
       type: String as () => LightningMethod | null,
       default: null,
     },
+    filterMintOperation: {
+      type: String as () => "mint" | "melt",
+      default: "mint",
+    },
   },
   emits: ["update:modelValue"],
   data: function () {
@@ -275,6 +279,9 @@ export default defineComponent({
       this.initializeChosenMint();
     },
     filterLightningMethod() {
+      this.initializeChosenMint();
+    },
+    filterMintOperation() {
       this.initializeChosenMint();
     },
   },
@@ -349,7 +356,11 @@ export default defineComponent({
       for (const mintData of availableMints) {
         if (
           this.filterLightningMethod &&
-          !mintSupportsLightningMethod(mintData, this.filterLightningMethod)
+          !mintSupportsLightningMethod(
+            mintData,
+            this.filterLightningMethod,
+            this.filterMintOperation
+          )
         ) {
           continue;
         }

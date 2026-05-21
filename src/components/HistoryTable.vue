@@ -15,6 +15,10 @@
               v-if="isEcashTransaction(transaction)"
               class="transaction-icon"
             />
+            <BitcoinIcon
+              v-else-if="isOnchainTransaction(transaction)"
+              class="transaction-icon"
+            />
             <ZapIcon v-else class="transaction-icon" />
           </q-avatar>
         </q-item-section>
@@ -162,7 +166,11 @@ import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { useUiStore } from "src/stores/ui";
 import token from "../js/token";
 import { notify } from "src/js/notify";
-import { Coins as CoinsIcon, Zap as ZapIcon } from "lucide-vue-next";
+import {
+  Bitcoin as BitcoinIcon,
+  Coins as CoinsIcon,
+  Zap as ZapIcon,
+} from "lucide-vue-next";
 import {
   LightningMethod,
   UnifiedTransactionType,
@@ -172,6 +180,7 @@ export default defineComponent({
   name: "HistoryTable",
   components: {
     CoinsIcon,
+    BitcoinIcon,
     ZapIcon,
   },
   mixins: [windowMixin],
@@ -266,6 +275,7 @@ export default defineComponent({
       "checkInvoiceBolt11",
       "checkOutgoingInvoice",
       "checkOfferAndMintBolt12",
+      "checkOnchainAndMint",
     ]),
 
     handleLongPress(transaction) {
@@ -328,6 +338,10 @@ export default defineComponent({
       return transaction.type === UnifiedTransactionType.Lightning;
     },
 
+    isOnchainTransaction(transaction) {
+      return transaction.type === UnifiedTransactionType.Onchain;
+    },
+
     getTransactionIcon(transaction) {
       return transaction.type === UnifiedTransactionType.Lightning
         ? "flash_on"
@@ -341,6 +355,9 @@ export default defineComponent({
     },
 
     getDefaultLabel(transaction) {
+      if (transaction.type === UnifiedTransactionType.Onchain) {
+        return "On-chain";
+      }
       return transaction.type === UnifiedTransactionType.Lightning
         ? "Lightning"
         : "Ecash";
@@ -358,6 +375,12 @@ export default defineComponent({
         } else {
           // For outgoing ecash transactions, check spendable status
           this.checkTokenSpendable(transaction);
+        }
+      } else if (transaction.type === UnifiedTransactionType.Onchain) {
+        if (transaction.amount < 0) {
+          this.checkOutgoingInvoice(transaction.quote, true);
+        } else {
+          this.checkOnchainAndMint(transaction.quote, true);
         }
       } else if (transaction.type === UnifiedTransactionType.Lightning) {
         // Prefer explicit type check, fallback to heuristic for old history
@@ -385,7 +408,10 @@ export default defineComponent({
         } else {
           this.showTokenDialog(transaction);
         }
-      } else if (transaction.type === UnifiedTransactionType.Lightning) {
+      } else if (
+        transaction.type === UnifiedTransactionType.Lightning ||
+        transaction.type === UnifiedTransactionType.Onchain
+      ) {
         this.showInvoiceDialog(transaction);
       }
     },
@@ -410,6 +436,14 @@ export default defineComponent({
       this.invoiceData = invoice;
       this.showInvoiceDetails = true;
       if (invoice.status === "pending") {
+        if (invoice.method === LightningMethod.Onchain) {
+          if (invoice.amount < 0) {
+            this.checkOutgoingInvoice(invoice.quote, false);
+          } else {
+            this.checkOnchainAndMint(invoice.quote, false, false);
+          }
+          return;
+        }
         const isBolt12 =
           invoice.method === LightningMethod.Bolt12 ||
           invoice.method === LightningMethod.Bolt12Subpayment ||
@@ -448,7 +482,10 @@ export default defineComponent({
       this.invoiceHistory.forEach((invoice) => {
         transactions.push({
           ...invoice,
-          type: UnifiedTransactionType.Lightning,
+          type:
+            invoice.type === LightningMethod.Onchain
+              ? UnifiedTransactionType.Onchain
+              : UnifiedTransactionType.Lightning,
           method: invoice.type || LightningMethod.Bolt11,
           id: `invoice-${invoice.quote}`,
           label: invoice.label,

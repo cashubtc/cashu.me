@@ -30,7 +30,11 @@
               :class="$q.dark.isActive ? 'text-white' : 'text-black'"
             >
               {{
-                isBolt12 ? "Receive Bolt12" : $t("InvoiceDetailDialog.title")
+                isOnchain
+                  ? "Receive On-chain"
+                  : isBolt12
+                  ? "Receive Bolt12"
+                  : $t("InvoiceDetailDialog.title")
               }}
             </q-item-label>
           </div>
@@ -39,7 +43,7 @@
             style="position: absolute; right: 16px"
           >
             <q-btn
-              v-if="bolt11Supported && bolt12Supported"
+              v-if="!isOnchain && bolt11Supported && bolt12Supported"
               flat
               dense
               size="lg"
@@ -64,24 +68,25 @@
             class="col-12 col-sm-11 col-md-8 q-px-lg q-mb-sm"
             style="max-width: 600px"
           >
-            <ChooseMint />
+            <ChooseMint
+              :filter-lightning-method="mintFilterMethod"
+              filter-mint-operation="mint"
+            />
           </div>
         </div>
 
         <!-- Amount display -->
         <div class="col column items-center justify-center q-px-lg amount-area">
-          <div v-if="showReusableOffer" class="row justify-center full-width">
+          <div v-if="showReusableQuote" class="row justify-center full-width">
             <div class="col-12" style="max-width: 400px">
               <div
-                v-if="reusableBolt12Offer"
+                v-if="reusableReceiveQuote"
                 @click="onCopyReusableOffer"
                 class="cursor-pointer"
               >
                 <q-responsive :ratio="1" class="q-mx-none">
                   <vue-qrcode
-                    :value="
-                      'lightning:' + reusableBolt12Offer.request.toUpperCase()
-                    "
+                    :value="reusableQrValue"
                     :options="{ width: 400 }"
                     class="rounded-borders"
                     style="width: 100%"
@@ -90,7 +95,7 @@
                 </q-responsive>
               </div>
               <div
-                v-if="reusableBolt12Offer"
+                v-if="reusableReceiveQuote"
                 class="q-mt-sm text-center text-grey-7"
                 @click="onCopyReusableOffer"
               >
@@ -102,6 +107,8 @@
                 {{
                   copyButtonCopied
                     ? $t("global.copy_to_clipboard.success")
+                    : isOnchain
+                    ? "Copy Address"
                     : "Copy Offer"
                 }}
               </div>
@@ -175,6 +182,8 @@
                 {{
                   isBolt12
                     ? "Create Offer"
+                    : isOnchain
+                    ? "Create Address"
                     : $t("InvoiceDetailDialog.actions.create.label")
                 }}
                 <template v-slot:loading>
@@ -250,9 +259,16 @@ export default defineComponent({
     isBolt12(): boolean {
       return this.invoiceData.type === LightningMethod.Bolt12;
     },
+    isOnchain(): boolean {
+      return this.invoiceData.type === LightningMethod.Onchain;
+    },
     showAmountInput(): boolean {
+      if (this.isOnchain) return false;
       if (!this.isBolt12) return true;
       return this.bolt12AddAmount;
+    },
+    mintFilterMethod(): LightningMethod | null {
+      return this.isOnchain ? LightningMethod.Onchain : null;
     },
     bolt11Supported(): boolean {
       const mintStore = useMintsStore();
@@ -281,10 +297,18 @@ export default defineComponent({
       if (!mint) return false;
       return mintSupportsLightningMethod(mint, LightningMethod.Bolt12);
     },
+    onchainSupported(): boolean {
+      const mintStore = useMintsStore();
+      const mint = mintStore.mints.find(
+        (m) => m.url === mintStore.activeMintUrl
+      );
+      if (!mint) return false;
+      return mintSupportsLightningMethod(mint, LightningMethod.Onchain);
+    },
     canCreate(): boolean {
       // Bolt11 requires amount > 0
-      // Bolt12 allows 0 amount (amountless offer)
-      if (this.isBolt12) return true;
+      // Bolt12 and on-chain allow 0 amount (amountless request)
+      if (this.isBolt12 || this.isOnchain) return true;
       return (
         this.invoiceData.amount != null && Number(this.invoiceData.amount) > 0
       );
@@ -328,11 +352,43 @@ export default defineComponent({
       }
       return null;
     },
-    showReusableOffer(): boolean {
+    reusableOnchainQuote(): InvoiceHistory | null {
+      const walletStore = useWalletStore();
+      const mintStore = useMintsStore();
+      const now = Date.now();
+      const reusableQuotes = walletStore.invoiceHistory.filter(
+        (invoice: InvoiceHistory) => {
+          if (invoice.type !== LightningMethod.Onchain) return false;
+          const quote = invoice.mintQuote as any;
+          if (quote?.expiry && quote.expiry > 0 && quote.expiry * 1000 < now) {
+            return false;
+          }
+          if (invoice.mint !== mintStore.activeMintUrl) return false;
+          if (invoice.unit !== mintStore.activeUnit) return false;
+          if (!invoice.request) return false;
+          return true;
+        }
+      );
+      if (reusableQuotes.length > 0) {
+        return reusableQuotes[reusableQuotes.length - 1];
+      }
+      return null;
+    },
+    reusableReceiveQuote(): InvoiceHistory | null {
+      return this.isOnchain
+        ? this.reusableOnchainQuote
+        : this.reusableBolt12Offer;
+    },
+    reusableQrValue(): string {
+      const request = this.reusableReceiveQuote?.request || "";
+      if (this.isOnchain) return `bitcoin:${request}`;
+      return `lightning:${request.toUpperCase()}`;
+    },
+    showReusableQuote(): boolean {
       return (
-        this.isBolt12 &&
+        (this.isBolt12 || this.isOnchain) &&
         !this.showAmountInput &&
-        this.reusableBolt12Offer !== null
+        this.reusableReceiveQuote !== null
       );
     },
   },
@@ -349,6 +405,12 @@ export default defineComponent({
     },
     activeMintUrl: {
       handler: function () {
+        if (this.invoiceData.type === LightningMethod.Onchain) {
+          if (!this.onchainSupported && this.bolt11Supported) {
+            this.invoiceData.type = LightningMethod.Bolt11;
+          }
+          return;
+        }
         if (this.bolt11Supported && !this.bolt12Supported) {
           this.invoiceData.type = LightningMethod.Bolt11;
         } else if (!this.bolt11Supported && this.bolt12Supported) {
@@ -365,6 +427,7 @@ export default defineComponent({
       "activeWallet",
       "requestMintBolt12",
       "mintOnPaidBolt12",
+      "requestMintOnchain",
     ]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
     toggleInvoiceType() {
@@ -390,7 +453,12 @@ export default defineComponent({
         // Get wallet instance
         const wallet = await this.activeWallet(true);
 
-        if (this.isBolt12) {
+        if (this.isOnchain) {
+          await this.requestMintOnchain(wallet);
+
+          this.showCreateInvoiceDialog = false;
+          this.showInvoiceDetails = true;
+        } else if (this.isBolt12) {
           // BOLT12 Flow
           const mintQuote = await this.requestMintBolt12(amount, wallet);
 
@@ -414,7 +482,7 @@ export default defineComponent({
       }
     },
     async onCopyReusableOffer() {
-      const offer = this.reusableBolt12Offer;
+      const offer = this.reusableReceiveQuote;
       const request = offer?.request;
       if (request) {
         try {

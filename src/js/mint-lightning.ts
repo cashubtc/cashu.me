@@ -8,21 +8,28 @@ function nut4Config(info?: GetInfoResponse) {
 
 export function mintSupportsLightningMethod(
   mint: StoredMint,
-  method: LightningMethod
+  method: LightningMethod,
+  operation: "mint" | "melt" = "mint"
 ): boolean {
-  const nut4 = nut4Config(mint.info);
-  if (nut4.supported === false) return false;
-  if (nut4.methods) {
-    return nut4.methods.some((m: { method: string }) => m.method === method);
+  const nut =
+    operation === "melt"
+      ? mint.info?.nuts?.[5] || mint.info?.nuts?.["5"] || ({} as any)
+      : nut4Config(mint.info);
+  if (nut.supported === false) return false;
+  if (nut.methods) {
+    return nut.methods.some((m: { method: string }) => m.method === method);
   }
   return true;
 }
 
 export function mintsSupportingLightningMethod(
   mints: StoredMint[],
-  method: LightningMethod
+  method: LightningMethod,
+  operation: "mint" | "melt" = "mint"
 ): StoredMint[] {
-  return mints.filter((mint) => mintSupportsLightningMethod(mint, method));
+  return mints.filter((mint) =>
+    mintSupportsLightningMethod(mint, method, operation)
+  );
 }
 
 export function lightningMethodNoMintErrorKey(method: LightningMethod): string {
@@ -39,15 +46,23 @@ export async function ensureLightningMintActive(
     verbose?: boolean,
     force?: boolean
   ) => Promise<void>,
-  method: LightningMethod
+  method: LightningMethod,
+  operation: "mint" | "melt" = "mint"
 ): Promise<{ ok: true } | { ok: false; errorKey: string }> {
-  const supportingMints = mintsSupportingLightningMethod(mints, method);
+  const supportingMints = mintsSupportingLightningMethod(
+    mints,
+    method,
+    operation
+  );
   if (supportingMints.length === 0) {
     return { ok: false, errorKey: lightningMethodNoMintErrorKey(method) };
   }
 
   const activeMint = mints.find((mint) => mint.url === activeMintUrl);
-  if (!activeMint || !mintSupportsLightningMethod(activeMint, method)) {
+  if (
+    !activeMint ||
+    !mintSupportsLightningMethod(activeMint, method, operation)
+  ) {
     await activateMintUrl(supportingMints[0].url, false, true);
   }
 

@@ -64,6 +64,7 @@
             <ChooseMint
               v-if="!showNoMintForMethodError"
               :filter-lightning-method="payLightningMethod"
+              :filter-mint-operation="payMintOperation"
             />
           </div>
         </div>
@@ -226,7 +227,7 @@
                             :enabled="true"
                             :muted="insufficientFundsForLightningAmount"
                             :max-amount="lightningMaxAmountFromBalance"
-                            @enter="handleBolt12Quote"
+                            @enter="handleAmountlessQuote"
                             @fiat-mode-changed="fiatKeyboardMode = $event"
                           />
                         </div>
@@ -554,7 +555,7 @@
                 (val: string | number) =>
                   (payInvoiceData.input.amount = Number(val))
               "
-              @done="handleBolt12Quote"
+              @done="handleAmountlessQuote"
             />
           </div>
           <div class="row justify-center q-pb-lg q-pt-sm">
@@ -568,7 +569,7 @@
                 size="lg"
                 color="primary"
                 rounded
-                @click="handleBolt12Quote"
+                @click="handleAmountlessQuote"
                 :disabled="
                   payInvoiceData.blocking ||
                   payInvoiceData.input.amount == null ||
@@ -897,23 +898,36 @@ export default defineComponent({
     },
     payLightningMethod: function (): LightningMethod | null {
       if (!this.payInvoiceData?.invoice) return null;
+      if (this.payInvoiceData.invoice.onchain) {
+        return LightningMethod.Onchain;
+      }
       if (this.payInvoiceData.invoice.bolt12) {
         return LightningMethod.Bolt12;
       }
       return LightningMethod.Bolt11;
     },
     dialogTitle: function (): string {
+      if (
+        this.payLightningMethod === LightningMethod.Onchain ||
+        this.payInvoiceData.paymentMethod === LightningMethod.Onchain
+      ) {
+        return "Pay On-chain";
+      }
       if (this.payLightningMethod === LightningMethod.Bolt12) {
         return this.$t("PayInvoiceDialog.input_data.title_bolt12");
       }
       return this.$t("PayInvoiceDialog.input_data.title");
+    },
+    payMintOperation: function (): "mint" | "melt" {
+      return "melt";
     },
     hasMintForPayMethod: function (): boolean {
       if (!this.payLightningMethod) return true;
       return (
         mintsSupportingLightningMethod(
           this.mints as StoredMint[],
-          this.payLightningMethod
+          this.payLightningMethod,
+          this.payMintOperation
         ).length > 0
       );
     },
@@ -923,9 +937,12 @@ export default defineComponent({
     isBolt12Pay: function (): boolean {
       return this.payLightningMethod === LightningMethod.Bolt12;
     },
+    isOnchainPay: function (): boolean {
+      return this.payLightningMethod === LightningMethod.Onchain;
+    },
     showLightningAmountEntry: function (): boolean {
       return (
-        this.isBolt12Pay &&
+        (this.isBolt12Pay || this.isOnchainPay) &&
         this.hasMintForPayMethod &&
         !this.hasMeltQuote &&
         !this.payInvoiceData.blocking &&
@@ -954,7 +971,9 @@ export default defineComponent({
     enoughtotalUnitBalance: function () {
       return (
         this.hasMeltQuote &&
-        this.activeBalance >= this.payInvoiceData.meltQuote.response.amount
+        this.activeBalance >=
+          this.payInvoiceData.meltQuote.response.amount +
+            this.payInvoiceData.meltQuote.response.fee_reserve
       );
     },
     hasMultinutSupport: function (): boolean {
@@ -1103,7 +1122,7 @@ export default defineComponent({
       this.showNumericKeyboard = false;
       await this.lnurlPaySecond();
     },
-    handleBolt12Quote: async function () {
+    handleAmountlessQuote: async function () {
       if (
         this.payInvoiceData.blocking ||
         this.payInvoiceData.input.amount == null ||

@@ -53,6 +53,17 @@
               </div>
             </div>
           </div>
+
+          <div class="action-row" @click="showOnchainPayDialog">
+            <div class="row items-center no-wrap">
+              <div class="icon-circle">
+                <BitcoinIcon :size="24" />
+              </div>
+              <div class="col q-ml-md">
+                <div class="text-body1 text-weight-medium">On-chain</div>
+              </div>
+            </div>
+          </div>
         </div>
       </q-card-section>
     </q-card>
@@ -71,11 +82,12 @@ import { useSettingsStore } from "../stores/settings";
 import { useMintsStore } from "src/stores/mints";
 import {
   X as XIcon,
-  Banknote as BanknoteIcon,
   Zap as ZapIcon,
   Scan as ScanIcon,
   Coins as CoinsIcon,
+  Bitcoin as BitcoinIcon,
 } from "lucide-vue-next";
+import { LightningMethod } from "src/stores/walletTypes";
 import { notifyWarning } from "src/js/notify";
 
 export default defineComponent({
@@ -85,6 +97,7 @@ export default defineComponent({
     CoinsIcon,
     ZapIcon,
     ScanIcon,
+    BitcoinIcon,
   },
   mixins: [windowMixin],
   props: {},
@@ -136,7 +149,26 @@ export default defineComponent({
       this.payInvoiceData.lnurlpay = null;
       this.payInvoiceData.domain = "";
       this.payInvoiceData.lnurlauth = null;
+      this.payInvoiceData.paymentMethod = LightningMethod.Bolt11;
       this.payInvoiceData.input.request = "";
+      this.payInvoiceData.input.comment = "";
+      this.camera.show = false;
+      this.showSendDialog = false;
+    },
+    showOnchainPayDialog: function () {
+      if (!this.canMakePayments) {
+        notifyWarning("No mints available");
+        this.showSendDialog = false;
+        return;
+      }
+      this.payInvoiceData.show = true;
+      this.payInvoiceData.invoice = null;
+      this.payInvoiceData.lnurlpay = null;
+      this.payInvoiceData.domain = "";
+      this.payInvoiceData.lnurlauth = null;
+      this.payInvoiceData.paymentMethod = LightningMethod.Onchain;
+      this.payInvoiceData.input.request = "";
+      this.payInvoiceData.input.amount = undefined;
       this.payInvoiceData.input.comment = "";
       this.camera.show = false;
       this.showSendDialog = false;

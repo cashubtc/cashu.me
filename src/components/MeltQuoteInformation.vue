@@ -46,6 +46,37 @@
       </div>
     </div>
 
+    <div v-if="hasTxid" class="detail-item q-mb-md">
+      <div class="detail-label">
+        <HashIcon :size="20" :color="iconColor" class="detail-icon" />
+        <div class="detail-name">Transaction ID</div>
+      </div>
+      <div class="detail-value detail-value-with-action">
+        <a :href="onchainTxUrl" target="_blank">{{ shortTxid(txidValue) }}</a>
+        <q-btn
+          flat
+          dense
+          round
+          size="sm"
+          :icon="txidCopied ? 'check' : 'content_copy'"
+          @click="copyTxid"
+        />
+      </div>
+    </div>
+
+    <div v-if="onchainMetadata" class="detail-item q-mb-md">
+      <div class="detail-label">
+        <InfoIcon :size="20" :color="iconColor" class="detail-icon" />
+        <div class="detail-name">Chain Status</div>
+      </div>
+      <div
+        class="detail-value"
+        :class="{ 'text-positive': onchainMetadata.confirmed }"
+      >
+        {{ onchainStatusDisplay }}
+      </div>
+    </div>
+
     <div v-if="paidAtDisplay" class="detail-item q-mb-md">
       <div class="detail-label">
         <ClockIcon :size="20" :color="iconColor" class="detail-icon" />
@@ -80,6 +111,9 @@ import { mapState } from "pinia";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useMintsStore } from "stores/mints";
 import { MeltQuoteBolt11Response } from "@cashu/cashu-ts";
+import { copyToClipboard } from "quasar";
+import { LightningMethod } from "src/stores/walletTypes";
+import { fetchTxMetadata, type MempoolTxMetadata } from "src/js/onchain";
 import {
   Zap as ZapIcon,
   ArrowDownUp as ArrowDownUpIcon,
@@ -89,6 +123,7 @@ import {
   Banknote as BanknoteIcon,
   Info as InfoIcon,
   Fingerprint as FingerprintIcon,
+  Hash as HashIcon,
 } from "lucide-vue-next";
 
 declare const windowMixin: any;
@@ -114,6 +149,14 @@ export default defineComponent({
     BanknoteIcon,
     InfoIcon,
     FingerprintIcon,
+    HashIcon,
+  },
+  data: function () {
+    return {
+      onchainMetadata: null as MempoolTxMetadata | null,
+      txidCopied: false,
+      txidCopiedTimeout: null as any,
+    };
   },
   props: {
     meltQuote: {
@@ -286,8 +329,66 @@ export default defineComponent({
     preimageValue(): string {
       return ((this.meltQuote as any)?.payment_preimage as string) || "";
     },
+    txidValue(): string {
+      const outpoint = (this.meltQuote as any)?.outpoint;
+      if (typeof outpoint !== "string" || !outpoint) return "";
+      return outpoint.split(":")[0];
+    },
+    hasTxid(): boolean {
+      return this.txidValue.length > 0;
+    },
+    onchainTxUrl(): string {
+      return (
+        this.onchainMetadata?.url ||
+        `https://mempool.space/tx/${this.txidValue}`
+      );
+    },
+    onchainStatusDisplay(): string {
+      if (!this.onchainMetadata) return "";
+      const status = this.onchainMetadata.confirmed ? "Confirmed" : "Pending";
+      return `${status} (${this.onchainMetadata.confirmations}/${this.onchainMetadata.confirmationThreshold})`;
+    },
   },
   methods: {
+    shortTxid(txid: string): string {
+      return `${txid.slice(0, 8)}...${txid.slice(-8)}`;
+    },
+    onchainConfirmations(): number {
+      const mintStore = useMintsStore();
+      const mint = mintStore.mints.find((m: any) => m.url === this.mintUrl);
+      const methods =
+        mint?.info?.nuts?.[5]?.methods || mint?.info?.nuts?.["5"]?.methods;
+      const method = methods?.find(
+        (m: any) =>
+          m.method === LightningMethod.Onchain && m.unit === this.quoteUnit
+      );
+      return Number(method?.options?.confirmations || 1);
+    },
+    async loadOnchainMetadata() {
+      if (!this.hasTxid) return;
+      try {
+        this.onchainMetadata = await fetchTxMetadata(
+          this.txidValue,
+          this.onchainConfirmations(),
+          this.meltQuote?.request
+        );
+      } catch (error) {
+        console.error("Could not fetch on-chain metadata", error);
+      }
+    },
+    async copyTxid() {
+      if (!this.txidValue) return;
+      try {
+        await copyToClipboard(this.txidValue);
+        this.txidCopied = true;
+        if (this.txidCopiedTimeout) clearTimeout(this.txidCopiedTimeout);
+        this.txidCopiedTimeout = setTimeout(() => {
+          this.txidCopied = false;
+        }, 2000);
+      } catch (e) {
+        console.error("Failed to copy txid", e);
+      }
+    },
     async copyPreimage() {
       const pre = this.preimageValue;
       if (!pre) return;
@@ -344,6 +445,17 @@ export default defineComponent({
       }
       return null;
     },
+  },
+  watch: {
+    txidValue: function () {
+      this.loadOnchainMetadata();
+    },
+  },
+  mounted() {
+    this.loadOnchainMetadata();
+  },
+  beforeUnmount() {
+    if (this.txidCopiedTimeout) clearTimeout(this.txidCopiedTimeout);
   },
 });
 </script>

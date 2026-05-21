@@ -31,6 +31,8 @@
               {{
                 isBolt12
                   ? "Lightning Bolt12"
+                  : isOnchain
+                  ? "On-chain"
                   : $t("InvoiceDetailDialog.invoice.caption")
               }}
             </q-item-label>
@@ -46,14 +48,13 @@
                 style="max-width: 600px"
               >
                 <div class="qr-container">
-                  <a
-                    class="text-secondary"
-                    :href="'lightning:' + invoiceData.request"
-                  >
+                  <a class="text-secondary" :href="qrLink">
                     <q-responsive :ratio="1" class="q-mx-none">
                       <vue-qrcode
                         :value="
-                          'lightning:' + invoiceData.request.toUpperCase()
+                          isOnchain
+                            ? 'bitcoin:' + invoiceData.request
+                            : 'lightning:' + invoiceData.request.toUpperCase()
                         "
                         :options="{ width: 400 }"
                         class="rounded-borders"
@@ -220,6 +221,15 @@ export default defineComponent({
         (this.invoiceData as any).method === LightningMethod.Bolt12 ||
         (this.invoiceData as any).method === LightningMethod.Bolt12Subpayment
       );
+    },
+    isOnchain(): boolean {
+      return this.invoiceData.type === LightningMethod.Onchain;
+    },
+    qrLink(): string {
+      if (this.isOnchain) {
+        return "bitcoin:" + this.invoiceData.request;
+      }
+      return "lightning:" + this.invoiceData.request;
     },
   },
   methods: {

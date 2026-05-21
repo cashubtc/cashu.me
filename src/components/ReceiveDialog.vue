@@ -55,6 +55,18 @@
               </div>
             </div>
           </div>
+
+          <!-- On-chain Option -->
+          <div class="action-row" @click="showOnchainCreateDialog">
+            <div class="row items-center no-wrap">
+              <div class="icon-circle">
+                <BitcoinIcon :size="24" />
+              </div>
+              <div class="col q-ml-md">
+                <div class="text-body1 text-weight-medium">On-chain</div>
+              </div>
+            </div>
+          </div>
         </div>
       </q-card-section>
     </q-card>
@@ -82,6 +94,7 @@ import {
   Coins as CoinsIcon,
   Zap as ZapIcon,
   Scan as ScanIcon,
+  Bitcoin as BitcoinIcon,
 } from "lucide-vue-next";
 import { LightningMethod } from "src/stores/walletTypes";
 
@@ -92,6 +105,7 @@ export default defineComponent({
     CoinsIcon,
     ZapIcon,
     ScanIcon,
+    BitcoinIcon,
     ReceiveEcashDrawer,
   },
   mixins: [windowMixin],
@@ -149,6 +163,20 @@ export default defineComponent({
       this.invoiceData.hash = "";
       this.invoiceData.memo = "";
       this.invoiceData.type = LightningMethod.Bolt11;
+      this.showCreateInvoiceDialog = true;
+      this.showReceiveDialog = false;
+    },
+    showOnchainCreateDialog: async function () {
+      if (!this.canReceivePayments) {
+        notifyWarning("No mints available");
+        this.showReceiveDialog = false;
+        return;
+      }
+      this.invoiceData.amount = 0;
+      this.invoiceData.request = "";
+      this.invoiceData.hash = "";
+      this.invoiceData.memo = "";
+      this.invoiceData.type = LightningMethod.Onchain;
       this.showCreateInvoiceDialog = true;
       this.showReceiveDialog = false;
     },
