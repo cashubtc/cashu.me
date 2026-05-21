@@ -36,7 +36,7 @@
                   word-break: break-word;
                 "
               >
-                {{ $t("PayInvoiceDialog.input_data.title") || "Pay Lightning" }}
+                {{ dialogTitle }}
               </q-item-label>
             </div>
           </div>
@@ -55,28 +55,36 @@
           </div>
         </div>
 
-        <!-- Mint selection (match SendTokenDialog layout) -->
+        <!-- Mint selection -->
         <div class="row justify-center">
           <div
             class="col-12 col-sm-11 col-md-8 q-px-lg q-mb-sm"
             style="max-width: 600px"
           >
-            <ChooseMint />
+            <ChooseMint
+              v-if="!showNoMintForMethodError"
+              :filter-lightning-method="payLightningMethod"
+            />
           </div>
         </div>
 
         <!-- Content area -->
         <div
-          class="col column items-center justify-start q-px-lg scroll-container"
+          class="col column items-center q-px-lg scroll-container invoice-scroll-area"
         >
-          <div class="row justify-center full-width">
+          <div class="row justify-center full-width invoice-main-area">
             <div
-              class="col-12 col-sm-11 col-md-8 q-px-sm q-mb-sm"
+              class="col-12 col-sm-11 col-md-8 q-px-sm q-mb-sm invoice-main-column"
               style="max-width: 600px"
             >
               <!-- INVOICE CONTENT -->
-              <div v-if="payInvoiceData.invoice">
-                <div class="invoice-state-container">
+              <div v-if="payInvoiceData.invoice" class="invoice-content-fill">
+                <div
+                  class="invoice-state-container"
+                  :class="{
+                    'invoice-state-container--centered': showInvoiceErrorState,
+                  }"
+                >
                   <transition name="slide-down">
                     <div :key="invoiceStateKey" class="invoice-state-content">
                       <div v-if="isPaid" class="q-mb-md">
@@ -188,9 +196,39 @@
                           {{ payInvoiceData.invoice.description }}<br />
                         </p>
                       </div>
-                      <div v-else-if="payInvoiceData.meltQuote.error != ''">
+                      <div
+                        v-else-if="showInvoiceErrorState"
+                        class="invoice-error-state"
+                      >
                         <div class="text-h6 q-my-none">
-                          Error: {{ payInvoiceData.meltQuote.error }}
+                          {{ payInvoiceData.meltQuote.error }}
+                        </div>
+                      </div>
+                      <div v-else-if="showLightningAmountEntry">
+                        <p
+                          v-if="payInvoiceData.invoice.description"
+                          class="text-wrap q-mb-md"
+                          style="max-width: 600px; font-size: 1.1rem"
+                        >
+                          <strong
+                            >{{
+                              $t("PayInvoiceDialog.invoice.memo.label")
+                            }}:</strong
+                          >
+                          {{ payInvoiceData.invoice.description }}
+                        </p>
+                        <div
+                          v-if="showLightningAmountKeyboard"
+                          class="column items-center justify-center q-px-lg q-py-lg amount-area"
+                        >
+                          <AmountInputComponent
+                            v-model="payInvoiceData.input.amount"
+                            :enabled="true"
+                            :muted="insufficientFundsForLightningAmount"
+                            :max-amount="lightningMaxAmountFromBalance"
+                            @enter="handleBolt12Quote"
+                            @fiat-mode-changed="fiatKeyboardMode = $event"
+                          />
                         </div>
                       </div>
                       <div v-else>
@@ -415,7 +453,13 @@
         </div>
 
         <!-- Bottom fixed pay action -->
-        <div class="bottom-panel" v-if="payInvoiceData.invoice">
+        <div
+          class="bottom-panel"
+          v-if="
+            payInvoiceData.invoice &&
+            (hasMeltQuote || payInvoiceData.meltQuote.error != '')
+          "
+        >
           <div class="row justify-center q-pb-lg q-pt-sm">
             <div
               class="col-12 col-sm-11 col-md-8 q-px-md"
@@ -487,6 +531,57 @@
                   }}
                 </q-btn>
               </template>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom fixed amountless Lightning quote action -->
+        <div
+          class="bottom-panel"
+          v-if="showLightningAmountKeyboard && payInvoiceData.invoice"
+        >
+          <div class="keypad-wrapper">
+            <NumericKeyboard
+              :force-visible="true"
+              :hide-close="true"
+              :hide-enter="true"
+              :hide-comma="
+                (activeUnit === 'sat' || activeUnit === 'msat') &&
+                !fiatKeyboardMode
+              "
+              :model-value="String(payInvoiceData.input.amount ?? 0)"
+              @update:modelValue="
+                (val: string | number) =>
+                  (payInvoiceData.input.amount = Number(val))
+              "
+              @done="handleBolt12Quote"
+            />
+          </div>
+          <div class="row justify-center q-pb-lg q-pt-sm">
+            <div
+              class="col-12 col-sm-11 col-md-8 q-px-md"
+              style="max-width: 600px"
+            >
+              <q-btn
+                class="full-width"
+                unelevated
+                size="lg"
+                color="primary"
+                rounded
+                @click="handleBolt12Quote"
+                :disabled="
+                  payInvoiceData.blocking ||
+                  payInvoiceData.input.amount == null ||
+                  payInvoiceData.input.amount <= 0 ||
+                  insufficientFundsForLightningAmount
+                "
+                :loading="payInvoiceData.blocking"
+              >
+                Quote
+                <template v-slot:loading>
+                  <q-spinner />
+                </template>
+              </q-btn>
             </div>
           </div>
         </div>
@@ -609,6 +704,7 @@ import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 import { useCameraStore } from "src/stores/camera";
 import { useMintsStore, MintClass } from "src/stores/mints";
+import type { StoredMint } from "src/stores/mints";
 import { useSettingsStore } from "src/stores/settings";
 import { usePriceStore } from "src/stores/price";
 import { useProofsStore } from "src/stores/proofs";
@@ -619,6 +715,8 @@ import MeltQuoteInformation from "components/MeltQuoteInformation.vue";
 import NumericKeyboard from "components/NumericKeyboard.vue";
 import AmountInputComponent from "components/AmountInputComponent.vue";
 import ParseInputComponent from "components/ParseInputComponent.vue";
+import { mintsSupportingLightningMethod } from "src/js/mint-lightning";
+import { LightningMethod } from "src/stores/walletTypes";
 
 import * as _ from "underscore";
 
@@ -646,13 +744,34 @@ export default defineComponent({
   },
   watch: {
     activeMintUrl: async function () {
-      if (this.payInvoiceData.show && this.payInvoiceData.invoice) {
+      if (
+        this.payInvoiceData.show &&
+        this.payInvoiceData.invoice &&
+        !this.showLightningAmountEntry
+      ) {
         await this.meltQuoteInvoiceData();
       }
     },
     activeUnit: async function () {
-      if (this.payInvoiceData.show && this.payInvoiceData.invoice) {
+      if (
+        this.payInvoiceData.show &&
+        this.payInvoiceData.invoice &&
+        !this.showLightningAmountEntry
+      ) {
         await this.meltQuoteInvoiceData();
+      }
+    },
+    showLightningAmountEntry: {
+      handler: function (val) {
+        if (val && this.payInvoiceData.meltQuote.error == "") {
+          this.showNumericKeyboard = true;
+        }
+      },
+      immediate: true,
+    },
+    "payInvoiceData.meltQuote.error": function (val) {
+      if (val && this.showLightningAmountEntry) {
+        this.showNumericKeyboard = false;
       }
     },
     "payInvoiceData.lnurlpay": {
@@ -772,8 +891,69 @@ export default defineComponent({
         typeof paidRaw !== "boolean";
       return hasAmount || hasFeeReserve || hasFeePaid || hasPaidTimestamp;
     },
+    hasMeltQuote: function (): boolean {
+      const quote = this.payInvoiceData?.meltQuote?.response;
+      return Boolean(quote?.quote) && quote.amount > 0;
+    },
+    payLightningMethod: function (): LightningMethod | null {
+      if (!this.payInvoiceData?.invoice) return null;
+      if (this.payInvoiceData.invoice.bolt12) {
+        return LightningMethod.Bolt12;
+      }
+      return LightningMethod.Bolt11;
+    },
+    dialogTitle: function (): string {
+      if (this.payLightningMethod === LightningMethod.Bolt12) {
+        return this.$t("PayInvoiceDialog.input_data.title_bolt12");
+      }
+      return this.$t("PayInvoiceDialog.input_data.title");
+    },
+    hasMintForPayMethod: function (): boolean {
+      if (!this.payLightningMethod) return true;
+      return (
+        mintsSupportingLightningMethod(
+          this.mints as StoredMint[],
+          this.payLightningMethod
+        ).length > 0
+      );
+    },
+    showNoMintForMethodError: function (): boolean {
+      return this.payLightningMethod != null && !this.hasMintForPayMethod;
+    },
+    isBolt12Pay: function (): boolean {
+      return this.payLightningMethod === LightningMethod.Bolt12;
+    },
+    showLightningAmountEntry: function (): boolean {
+      return (
+        this.isBolt12Pay &&
+        this.hasMintForPayMethod &&
+        !this.hasMeltQuote &&
+        !this.payInvoiceData.blocking &&
+        !this.isPaid &&
+        !this.isPaying &&
+        this.payInvoiceData.meltQuote.error == ""
+      );
+    },
+    showInvoiceErrorState: function (): boolean {
+      if (
+        !this.payInvoiceData.invoice ||
+        this.isPaid ||
+        this.isPaying ||
+        this.hasMeltQuote
+      ) {
+        return false;
+      }
+      return this.payInvoiceData.meltQuote.error != "";
+    },
+    showLightningAmountKeyboard: function (): boolean {
+      return (
+        this.showLightningAmountEntry &&
+        this.payInvoiceData.meltQuote.error == ""
+      );
+    },
     enoughtotalUnitBalance: function () {
       return (
+        this.hasMeltQuote &&
         this.activeBalance >= this.payInvoiceData.meltQuote.response.amount
       );
     },
@@ -792,6 +972,21 @@ export default defineComponent({
     activeUnitLabel: function (): string {
       // Access directly from store to avoid typing friction in mapState
       return (useMintsStore() as any).activeUnitLabel;
+    },
+    insufficientFundsForLightningAmount: function (): boolean {
+      if (
+        !this.showLightningAmountEntry ||
+        this.payInvoiceData.input.amount == null
+      ) {
+        return false;
+      }
+      return (
+        this.activeBalance <
+        this.payInvoiceData.input.amount * this.activeUnitCurrencyMultiplyer
+      );
+    },
+    lightningMaxAmountFromBalance: function (): number {
+      return this.activeBalance / this.activeUnitCurrencyMultiplyer;
     },
     insufficientFunds: function (): boolean {
       if (
@@ -817,13 +1012,12 @@ export default defineComponent({
         return "paid";
       } else if (this.isPaying) {
         return "paying";
-      } else if (
-        this.payInvoiceData.meltQuote.response &&
-        this.payInvoiceData.meltQuote.response.amount > 0
-      ) {
+      } else if (this.hasMeltQuote) {
         return "success";
-      } else if (this.payInvoiceData.meltQuote.error != "") {
+      } else if (this.showInvoiceErrorState) {
         return "error";
+      } else if (this.showLightningAmountEntry) {
+        return "amount";
       } else {
         return "processing";
       }
@@ -909,6 +1103,20 @@ export default defineComponent({
       this.showNumericKeyboard = false;
       await this.lnurlPaySecond();
     },
+    handleBolt12Quote: async function () {
+      if (
+        this.payInvoiceData.blocking ||
+        this.payInvoiceData.input.amount == null ||
+        this.payInvoiceData.input.amount <= 0 ||
+        this.insufficientFundsForLightningAmount
+      ) {
+        return;
+      }
+      await this.meltQuoteInvoiceData();
+      if (this.hasMeltQuote || this.payInvoiceData.meltQuote.error != "") {
+        this.showNumericKeyboard = false;
+      }
+    },
   },
   created: function () {},
 });
@@ -989,6 +1197,38 @@ export default defineComponent({
   overflow-x: hidden;
 }
 
+.invoice-scroll-area {
+  flex: 1;
+  min-height: 0;
+}
+
+.invoice-main-area {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  align-items: stretch;
+}
+
+.invoice-main-column {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.invoice-content-fill {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.invoice-error-state {
+  text-align: center;
+  padding: 0 16px;
+  width: 100%;
+}
+
 .relative-container {
   position: relative;
 }
@@ -1026,6 +1266,13 @@ export default defineComponent({
 .invoice-state-container {
   position: relative;
   min-height: 100px;
+
+  &--centered {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
 }
 
 .invoice-state-content {

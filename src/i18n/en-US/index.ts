@@ -86,6 +86,8 @@ export default {
       no_price_data: "No price data.",
       please_try_again: "Please try again.",
       trying_again: "Trying again...",
+      no_bolt12_mint: "None of your mints support BOLT12 offers",
+      no_bolt11_mint: "None of your mints support BOLT11 invoices",
     },
     mint: {
       notifications: {
@@ -1386,6 +1388,7 @@ export default {
   PayInvoiceDialog: {
     input_data: {
       title: "Pay Lightning",
+      title_bolt12: "Pay Lightning Bolt12",
       inputs: {
         invoice_data: {
           label: "Lightning invoice or address",

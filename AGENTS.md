@@ -1,6 +1,6 @@
 # Cashu.me Developer Guide for Agents
 
-This document provides a comprehensive overview of the **Cashu.me** codebase. It is designed to help coding agents understand the architecture, tech stack, conventions, and patterns used in this project.
+This document provides a comprehensive overview of the **Cashu.me** codebase for coding agents.
 
 ## 1. Tech Stack
 
@@ -66,115 +66,100 @@ This document provides a comprehensive overview of the **Cashu.me** codebase. It
 
 The application logic is heavily centralized in Pinia stores found in `src/stores/`.
 
-### Critical Stores
-
-- **`wallet.ts` (`useWalletStore`):** The **primary controller** for the wallet. It handles:
-  - Sending, receiving, melting (paying invoices), and minting tokens.
-  - interacting with the `cashu-ts` library (`CashuWallet`, `CashuMint`).
-  - managing invoice history.
-- **`mints.ts` (`useMintsStore`):** Manages the list of connected mints, their keysets, and URLs.
-- **`proofs.ts` (`useProofsStore`):** Manages the collection of proofs (ecash tokens). Handles CRUD operations for proofs in memory and syncs with storage.
-- **`tokens.ts` (`useTokensStore`):** Manages token history (spent/received tokens log).
-- **`dexie.ts` (`useDexieStore`):** Wrapper around Dexie.js for persistent storage of proofs.
-- **`ui.ts` (`useUiStore`):** Manages UI state (loaders, dialog visibility, tab selection).
+- **`wallet.ts` (`useWalletStore`):** **Primary controller**. Handles sending, receiving, melting, minting.
+- **`mints.ts` (`useMintsStore`):** Manages connected mints, keysets, and URLs.
+- **`proofs.ts` (`useProofsStore`):** Manages proofs (ecash tokens). CRUD + sync with storage.
+- **`tokens.ts` (`useTokensStore`):** Manages token history (spent/received logs).
+- **`dexie.ts` (`useDexieStore`):** Wrapper around Dexie.js for persistent storage.
+- **`ui.ts` (`useUiStore`):** Manages UI state (loaders, dialogs, tabs).
 
 ### Database Schema (Dexie)
 
-The `proofs` table in Dexie stores the actual ecash tokens:
-
-- `secret` (string, PK)
-- `amount` (number)
-- `C` (string, curve point)
-- `id` (string, keyset ID)
-- `reserved` (boolean, locked for pending operations)
-- `quote` (string, optional)
+The `proofs` table stores tokens: `secret` (PK), `amount`, `C` (curve point), `id` (keyset ID), `reserved` (locked boolean), `quote`.
 
 ---
 
 ## 4. Coding Conventions
 
+### Imports & File Paths
+
+- **Alias:** ALWAYS use the `src/` alias for imports within the source directory.
+  - Good: `import { useWalletStore } from "src/stores/wallet";`
+  - Bad: `import { useWalletStore } from "../../stores/wallet";`
+- **Extensions:** Omit extensions for `.ts` and `.js` imports. Include `.vue` extension for components.
+
 ### Component Style
 
-The project predominantly uses the **Options API** with **Pinia mappers** within `.vue` files, even though it is a Vue 3 project.
+- **API:** Use **Options API** with **Pinia mappers** (`mapState`, `mapActions`) in `.vue` files.
+- **Structure:**
 
-**Pattern:**
+  ```typescript
+  import { defineComponent } from "vue";
+  import { mapState, mapActions } from "pinia";
+  import { useWalletStore } from "src/stores/wallet";
 
-```typescript
-import { defineComponent } from "vue";
-import { mapState, mapActions, mapWritableState } from "pinia";
-import { useWalletStore } from "src/stores/wallet";
+  export default defineComponent({
+    name: "MyComponent",
+    mixins: [windowMixin], // Common mixin
+    computed: {
+      ...mapState(useWalletStore, ["someState"]),
+    },
+    methods: {
+      ...mapActions(useWalletStore, ["someAction"]),
+    },
+  });
+  ```
 
-export default defineComponent({
-  name: "MyComponent",
-  mixins: [windowMixin], // Common mixin used for global window props
-  components: { ... },
-  data() {
-    return { ... };
-  },
-  computed: {
-    ...mapState(useWalletStore, ["someState"]),
-    ...mapWritableState(useWalletStore, ["someWritableState"]),
-  },
-  methods: {
-    ...mapActions(useWalletStore, ["someAction"]),
-    myMethod() {
-      // Logic here
-    }
-  }
-});
-```
-
-**Note:** While `<script setup>` is the modern Vue 3 standard, this codebase relies heavily on the Options API + Pinia mappers. **Respect this convention when modifying existing components.** For new simple components, `<script setup>` may be acceptable, but consistency is preferred.
+- **Note:** Do NOT use `<script setup>` for existing components unless refactoring the entire file. Maintain consistency.
 
 ### Styling
 
-- Use **Quasar Utility Classes** (e.g., `q-pa-md`, `text-center`, `row`, `col-12`) whenever possible.
-- Scoped CSS (`<style scoped>`) is used for component-specific overrides.
-- Global variables are in `src/css/quasar.variables.scss`.
+- **Utility Classes:** Use **Quasar Utility Classes** (e.g., `q-pa-md`, `text-center`, `row`, `col-12`).
+- **Scoped:** Use `<style scoped>` for component-specific overrides.
+- **Variables:** `src/css/quasar.variables.scss`.
+
+### Error Handling & Notifications
+
+- **Notify:** Use `src/js/notify.ts` helpers.
+  - `notifySuccess(message: string)`
+  - `notifyError(message: string)`
+  - `notifyApiError(error: any)` (for handling API/library errors)
+- **Catching:** In stores, wrap async operations in `try/catch` blocks and use `notifyError` or `notifyApiError` to inform the user.
+- **Mutex:** Critical wallet ops (mint/melt/swap) MUST use the global mutex (`ui.ts` -> `lockMutex`). ALWAYS release in `finally`.
 
 ### Naming
 
-- **Files:** PascalCase for components (`BalanceView.vue`), camelCase for logic files (`wallet.ts`).
+- **Files:** PascalCase for components (`BalanceView.vue`), camelCase for logic (`wallet.ts`).
 - **Stores:** `use[Name]Store` (e.g., `useWalletStore`).
+- **Types:** Define types locally if specific, or in `src/js/types.ts` (if exists) or top of file. PascalCase for interfaces/types.
 
 ---
 
-## 5. Common Patterns & Gotchas
+## 5. Development Workflow
 
-### Wallet Operations
+### Commands
 
-Most heavy lifting happens in `wallet.ts`. If you need to implement a new feature involving Cashu logic (e.g., "swap tokens", "pay lnurl"), look there first.
+- **Run Dev Server:** `npm run dev`
+- **Lint Code:** `npm run lint`
+- **Format Code:** `npm run format`
+- **Run All Tests:** `npm test`
 
-### Mutex Locking
+### Running a Single Test
 
-The app uses a global mutex (in `ui.ts` -> `lockMutex`) during critical wallet operations (minting, melting, swapping) to prevent race conditions with the database or network.
-**Always** ensure mutexes are released in a `finally` block.
+To run a specific test file, use `npx vitest` followed by the path or pattern:
 
-### Notifications
+```bash
+npx vitest src/path/to/test.ts
+# or
+npm test -- src/path/to/test.ts
+```
 
-Use the helper in `src/js/notify.ts`:
+### Adding Dependencies
 
-- `notifySuccess(message)`
-- `notifyError(message)`
-- `notifyWarning(message)`
+- Use `npm install` (not yarn or pnpm).
 
-### Platform Detection
+### Common Gotchas
 
-The app runs on Web, Android, and iOS.
-
-- Use `this.getPwaDisplayMode()` (mixin/helper) to detect if running as PWA or browser.
-- Capacitor plugins are often wrapped or used directly in stores/components.
-
-### Assets & Icons
-
-- Icons are typically from `lucide-vue-next` or Quasar's internal Material Icons.
-- Imports: `import { X as XIcon } from "lucide-vue-next";`
-
-## 6. Development Workflow
-
-- **Run Dev Server:** `npm run dev` (Starts Vite + Quasar)
-- **Lint:** `npm run lint`
-- **Format:** `npm run format`
-- **Test:** `npm test` (Vitest)
-
-When adding dependencies, prefer `npm install`.
+- **Platform:** Use `this.getPwaDisplayMode()` to detect environment (Web vs PWA vs App).
+- **Assets:** Import icons from `lucide-vue-next` as `XIcon` (e.g., `import { Home as HomeIcon } from "lucide-vue-next"`).
+- **Reactivity:** Be careful with deep reactivity in Pinia state; use `storeToRefs` if destructuring in Composition API (though Options API is preferred here).

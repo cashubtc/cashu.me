@@ -236,6 +236,7 @@ import { useProofsStore } from "src/stores/proofs";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useNWCStore } from "src/stores/nwc";
+// @ts-ignore
 import { useNPCStore } from "src/stores/npubcash";
 import { useNPCV2Store } from "src/stores/npcv2";
 import { useNostrStore } from "src/stores/nostr";
@@ -256,6 +257,9 @@ import {
 } from "lucide-vue-next";
 
 import { useMigrationsStore } from "src/stores/migrations";
+
+declare const windowMixin: any;
+declare const GIT_COMMIT: string;
 
 export default {
   mixins: [windowMixin],
@@ -283,24 +287,9 @@ export default {
       name: "",
       mintId: "",
       mintName: "",
-      deferredPWAInstallPrompt: null,
+      deferredPWAInstallPrompt: null as any,
       action: "main",
-      parse: {
-        show: false,
-        invoice: null,
-        lnurlpay: null,
-        lnurlauth: null,
-        data: {
-          request: "",
-          amount: 0,
-          comment: "",
-        },
-        camera: {
-          show: false,
-          camera: "auto",
-        },
-      },
-      payments: [],
+      payments: [] as any[],
       paymentsChart: {
         show: false,
       },
@@ -317,6 +306,7 @@ export default {
     ...mapState(useUiStore, ["tickerShort"]),
     ...mapWritableState(useUiStore, [
       "showInvoiceDetails",
+      "showBolt12OfferDetails",
       "showCreateInvoiceDialog",
       "tab",
       "showSendDialog",
@@ -358,7 +348,6 @@ export default {
       return sumProofAmounts(this.activeProofs.flat());
     },
   },
-  filters: {},
   methods: {
     ...mapActions(useProofsStore, [
       "serializeProofs",
@@ -420,7 +409,7 @@ export default {
     },
     getTokenList: function () {
       const amounts = this.activeProofs.map((t) => t.amount);
-      const counts = {};
+      const counts = {} as any;
 
       for (const num of amounts) {
         counts[num] = counts[num] ? counts[num] + 1 : 1;
@@ -428,7 +417,7 @@ export default {
       return Object.keys(counts).map((k) => ({
         value: parseInt(k),
         count: parseInt(counts[k]),
-        sum: k * counts[k],
+        sum: Number(k) * counts[k],
       }));
     },
 
@@ -438,7 +427,7 @@ export default {
     showChart: function () {
       this.paymentsChart.show = true;
       this.$nextTick(() => {
-        generateChart(this.$refs.canvas, this.payments);
+        // generateChart(this.$refs.canvas, this.payments);
       });
     },
     focusInput(el) {
@@ -478,7 +467,7 @@ export default {
     showInvoiceCreateDialog: async function () {
       console.log("##### showInvoiceCreateDialog");
       this.invoiceData.amount = "";
-      this.invoiceData.bolt11 = "";
+      this.invoiceData.request = "";
       this.invoiceData.hash = "";
       this.invoiceData.memo = "";
       this.showCreateInvoiceDialog = true;
@@ -523,9 +512,10 @@ export default {
       const isStandalone = window.matchMedia(
         "(display-mode: standalone)"
       ).matches;
+      // @ts-ignore
       if (document.referrer.startsWith("android-app://")) {
         return "twa";
-      } else if (navigator.standalone || isStandalone) {
+      } else if ((navigator as any).standalone || isStandalone) {
         return "standalone";
       }
       return "browser";
@@ -538,6 +528,7 @@ export default {
       this.deferredPWAInstallPrompt.userChoice.then((choiceResult) => {
         if (choiceResult.outcome === "accepted") {
           console.log("User accepted the install prompt");
+          // @ts-ignore
           this.setWelcomeDialogSeen();
         } else {
           console.log("User dismissed the install prompt");
@@ -574,18 +565,18 @@ export default {
         if (actionBtns.length >= 2) {
           // Reset widths first
           actionBtns.forEach((btn) => {
-            btn.style.width = "auto";
+            (btn as HTMLElement).style.width = "auto";
           });
 
           // Get the maximum width
           let maxWidth = 0;
           actionBtns.forEach((btn) => {
-            maxWidth = Math.max(maxWidth, btn.offsetWidth);
+            maxWidth = Math.max(maxWidth, (btn as HTMLElement).offsetWidth);
           });
 
           // Apply the maximum width to all buttons
           actionBtns.forEach((btn) => {
-            btn.style.width = `${maxWidth}px`;
+            (btn as HTMLElement).style.width = `${maxWidth}px`;
           });
         }
       });
@@ -611,7 +602,10 @@ export default {
   },
 
   created: async function () {
-    console.log(`Git commit: ${GIT_COMMIT}`);
+    // @ts-ignore
+    if (typeof GIT_COMMIT !== "undefined") {
+      console.log(`Git commit: ${GIT_COMMIT}`);
+    }
 
     // Initialize and run migrations
     const migrationsStore = useMigrationsStore();
@@ -621,12 +615,12 @@ export default {
     // check if another tab is open
     this.registerBroadcastChannel();
 
-    const params = new URL(document.location).searchParams;
-    const hash = new URL(document.location).hash;
+    const params = new URL(document.location as any).searchParams;
+    const hash = new URL(document.location as any).hash;
 
     // mint url
     if (params.get("mint")) {
-      const addMintUrl = params.get("mint");
+      const addMintUrl = params.get("mint") as string;
       await this.setTab("mints");
       this.showAddMintDialog = true;
       this.addMintData = { url: addMintUrl };
@@ -640,7 +634,8 @@ export default {
 
     // get token to receive tokens from a link
     if (params.get("token") || hash.includes("token")) {
-      const tokenBase64 = params.get("token") || hash.split("token=")[1];
+      const tokenBase64 = (params.get("token") ||
+        hash.split("token=")[1]) as string;
       // make sure to react only to tokens not in the users history
       let seen = false;
       for (let i = 0; i < this.historyTokens.length; i++) {
@@ -659,7 +654,7 @@ export default {
     // get lightning invoice from a link
     if (params.get("lightning")) {
       this.showParseDialog();
-      this.payInvoiceData.input.request = params.get("lightning");
+      this.payInvoiceData.input.request = params.get("lightning") as string;
     }
 
     // Clear all parameters from URL without refreshing the page

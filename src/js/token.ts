@@ -9,7 +9,15 @@ import {
 } from "@cashu/cashu-ts";
 import { useMintsStore, WalletProof } from "src/stores/mints";
 import { useProofsStore } from "src/stores/proofs";
-export default { decodeMeta, decodeFull, getProofs, getMint, getUnit, getMemo };
+export default {
+  decode: decodeMeta,
+  decodeMeta,
+  decodeFull,
+  getProofs,
+  getMint,
+  getUnit,
+  getMemo,
+};
 
 // getTokenMetadata returns proofs without `id` (keyset ID) and with Amount.
 // This type narrows that to number amounts for the rest of the app.
