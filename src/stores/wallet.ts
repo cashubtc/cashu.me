@@ -1594,7 +1594,12 @@ export const useWalletStore = defineStore("wallet", {
       const p2pkStore = useP2PKStore();
       req = req.trim();
       this.payInvoiceData.input.request = req;
-      if (req.toLowerCase().startsWith("lnbc")) {
+      if (
+        req.toLowerCase().startsWith("lnbc") ||
+        req.toLowerCase().startsWith("lntb") ||
+        req.toLowerCase().startsWith("lntbs") ||
+        req.toLowerCase().startsWith("lnbcrt")
+      ) {
         this.payInvoiceData.input.request = req;
         await this.handleBolt11Invoice();
       } else if (req.toLowerCase().startsWith("lightning:")) {
