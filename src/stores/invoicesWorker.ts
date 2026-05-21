@@ -3,8 +3,17 @@ import { useWalletStore } from "./wallet";
 import { useLocalStorage } from "@vueuse/core";
 import { useSettingsStore } from "./settings";
 import { LightningMethod } from "src/stores/walletTypes";
+import { useTokensStore } from "./tokens";
 interface InvoiceQuote {
   quote: string;
+  addedAt: number;
+  lastChecked: number;
+  checkCount: number;
+}
+
+interface OutgoingPaymentCheck {
+  id: string;
+  type: "invoice" | "token";
   addedAt: number;
   lastChecked: number;
   checkCount: number;
@@ -37,7 +46,12 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         "cashu.worker.invoices.onchainQuotesQueue",
         []
       ),
+      outgoingPayments: useLocalStorage<OutgoingPaymentCheck[]>(
+        "cashu.worker.outgoing.queue",
+        []
+      ),
       lastInvoiceCheckTime: 0,
+      lastOutgoingCheckTime: 0,
       maxQuotesToCheckOnStartup: 10,
       lastPendingInvoiceCheck: useLocalStorage<number>(
         "cashu.worker.invoices.lastPendingInvoiceCheck",
@@ -137,6 +151,51 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         this.onchainQuotes.splice(index, 1);
       }
     },
+    addOutgoingInvoiceToChecker(quote: string, forceStart = false) {
+      this.addOutgoingPaymentToChecker("invoice", quote, forceStart);
+    },
+    removeOutgoingInvoiceFromChecker(quote: string) {
+      this.removeOutgoingPaymentFromChecker("invoice", quote);
+    },
+    addOutgoingTokenToChecker(token: string, forceStart = false) {
+      this.addOutgoingPaymentToChecker("token", token, forceStart);
+    },
+    removeOutgoingTokenFromChecker(token: string) {
+      this.removeOutgoingPaymentFromChecker("token", token);
+    },
+    addOutgoingPaymentToChecker(
+      type: "invoice" | "token",
+      id: string,
+      forceStart = false
+    ) {
+      if (!id) return;
+      const existingIndex = this.outgoingPayments.findIndex(
+        (q) => q.type === type && q.id === id
+      );
+      if (existingIndex !== -1) {
+        this.outgoingPayments.splice(existingIndex, 1);
+      }
+
+      if (this.outgoingPayments.length >= this.maxLength) {
+        this.outgoingPayments.shift();
+      }
+      this.outgoingPayments.push({
+        id,
+        type,
+        addedAt: Date.now(),
+        lastChecked: 0,
+        checkCount: 0,
+      });
+      this.startInvoiceCheckerWorker(forceStart);
+    },
+    removeOutgoingPaymentFromChecker(type: "invoice" | "token", id: string) {
+      const index = this.outgoingPayments.findIndex(
+        (q) => q.type === type && q.id === id
+      );
+      if (index !== -1) {
+        this.outgoingPayments.splice(index, 1);
+      }
+    },
     dueTime(q: InvoiceQuote) {
       if (q.checkCount > this.keepIntervalConstantForNChecks) {
         return (
@@ -184,8 +243,29 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         now - Date.parse(invoice.date) < this.oneDay
       );
     },
+    shouldCheckOutgoingInvoice(invoice: any) {
+      if (!invoice) return false;
+      return (
+        invoice.status === "pending" &&
+        invoice.amount < 0 &&
+        Date.now() - Date.parse(invoice.date) < this.maxAge
+      );
+    },
+    shouldCheckOutgoingToken(historyToken: any) {
+      if (!historyToken) return false;
+      return (
+        historyToken.status === "pending" &&
+        historyToken.amount < 0 &&
+        Date.now() - Date.parse(historyToken.date) < this.maxAge
+      );
+    },
     async processQuotes() {
       const now = Date.now();
+      const walletStore = useWalletStore();
+      await this.processIncomingQueues(now, walletStore);
+      await this.processOutgoingQueue(now, walletStore);
+    },
+    async processIncomingQueues(now: number, walletStore: any) {
       this.quotes = this.quotes.filter((q) => now - q.addedAt < this.maxAge);
       this.bolt12Quotes = this.bolt12Quotes.filter(
         (q) => now - q.addedAt < this.maxAge
@@ -205,8 +285,6 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       if (now - this.lastInvoiceCheckTime < this.checkInterval) {
         return;
       }
-
-      const walletStore = useWalletStore();
 
       // First process one bolt11 quote if any
       for (let i = this.quotes.length - 1; i >= 0; i--) {
@@ -287,6 +365,58 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         }
       }
     },
+    async processOutgoingQueue(now: number, walletStore: any) {
+      if (!useSettingsStore().checkSentTokens) return;
+      this.outgoingPayments = this.outgoingPayments.filter(
+        (q) => now - q.addedAt < this.maxAge
+      );
+      if (this.outgoingPayments.length === 0) return;
+      if (now - this.lastOutgoingCheckTime < this.checkInterval) return;
+
+      const tokenStore = useTokensStore();
+      for (let i = this.outgoingPayments.length - 1; i >= 0; i--) {
+        const q = this.outgoingPayments[i];
+        const dueTime = this.dueTime(q);
+        if (now <= dueTime) continue;
+
+        try {
+          if (q.type === "invoice") {
+            const invoice = walletStore.invoiceHistory.find(
+              (inv: any) => inv.quote === q.id
+            );
+            if (!this.shouldCheckOutgoingInvoice(invoice)) {
+              this.outgoingPayments.splice(i, 1);
+              continue;
+            }
+            await walletStore.checkOutgoingInvoice(q.id, false);
+            this.outgoingPayments.splice(i, 1);
+          } else {
+            const historyToken = tokenStore.historyTokens.find(
+              (t) => t.token === q.id
+            );
+            if (!this.shouldCheckOutgoingToken(historyToken)) {
+              this.outgoingPayments.splice(i, 1);
+              continue;
+            }
+            const paid = await walletStore.checkTokenSpendable(
+              historyToken,
+              false
+            );
+            if (paid) {
+              this.outgoingPayments.splice(i, 1);
+            } else {
+              q.lastChecked = now;
+              q.checkCount += 1;
+            }
+          }
+        } catch (error) {
+          q.lastChecked = now;
+          q.checkCount += 1;
+        }
+        this.lastOutgoingCheckTime = now;
+        break;
+      }
+    },
     async checkPendingInvoices() {
       if (!useSettingsStore().checkInvoicesOnStartup) return;
       if (
@@ -295,7 +425,11 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       )
         return;
       const walletStore = useWalletStore();
-      const quotesToCheck = walletStore.invoiceHistory.filter((q) =>
+      this.queuePendingIncomingPayments(walletStore);
+      this.queuePendingOutgoingPayments(walletStore);
+    },
+    queuePendingIncomingPayments(walletStore: any) {
+      const quotesToCheck = walletStore.invoiceHistory.filter((q: any) =>
         this.shouldCheckInvoice(q)
       );
       if (quotesToCheck.length > this.maxQuotesToCheckOnStartup) {
@@ -318,6 +452,29 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
           console.error(error);
         }
       }
+    },
+    queuePendingOutgoingPayments(walletStore: any) {
+      if (!useSettingsStore().checkSentTokens) return;
+      const tokenStore = useTokensStore();
+      const outgoingInvoices = walletStore.invoiceHistory.filter((q: any) =>
+        this.shouldCheckOutgoingInvoice(q)
+      );
+      const outgoingTokens = tokenStore.historyTokens.filter((t) =>
+        this.shouldCheckOutgoingToken(t)
+      );
+      const maxInvoices = this.maxQuotesToCheckOnStartup;
+      outgoingInvoices.slice(0, maxInvoices).forEach((q: any) => {
+        this.addOutgoingInvoiceToChecker(q.quote, true);
+      });
+      const remaining = Math.max(
+        0,
+        this.maxQuotesToCheckOnStartup - maxInvoices
+      );
+      outgoingTokens
+        .slice(0, remaining || this.maxQuotesToCheckOnStartup)
+        .forEach((t) => {
+          this.addOutgoingTokenToChecker(t.token, true);
+        });
     },
   },
 });

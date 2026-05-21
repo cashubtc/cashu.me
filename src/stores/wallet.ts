@@ -1238,6 +1238,7 @@ export const useWalletStore = defineStore("wallet", {
         } else if (meltQuote.state == MeltQuoteState.UNPAID) {
           await useProofsStore().setReserved(proofs, false);
           this.removeOutgoingInvoiceFromHistory(quote);
+          useInvoicesWorkerStore().removeOutgoingInvoiceFromChecker?.(quote);
           notifyWarning(
             this.t("wallet.notifications.lightning_payment_failed")
           );
@@ -1259,6 +1260,7 @@ export const useWalletStore = defineStore("wallet", {
             );
           }
           this.setInvoicePaid(quote);
+          useInvoicesWorkerStore().removeOutgoingInvoiceFromChecker?.(quote);
         }
       } catch (error: any) {
         if (verbose) {
@@ -1326,6 +1328,10 @@ export const useWalletStore = defineStore("wallet", {
         );
         return;
       }
+      useInvoicesWorkerStore().addOutgoingTokenToChecker?.(
+        historyToken.token,
+        true
+      );
       const mint = mintStore.mints.find((m) => m.url === historyToken.mint);
       if (!mint) {
         throw new Error("mint not found");
@@ -1422,6 +1428,7 @@ export const useWalletStore = defineStore("wallet", {
             ? onchainNetwork(this.payInvoiceData.input.request || quote.request)
             : undefined,
       });
+      useInvoicesWorkerStore().addOutgoingInvoiceToChecker?.(quote.quote, true);
     },
     removeOutgoingInvoiceFromHistory: function (quote: string) {
       const index = this.invoiceHistory.findIndex((i) => i.quote === quote);

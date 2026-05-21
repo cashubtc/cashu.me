@@ -334,13 +334,14 @@ export async function checkOutgoingOnchain(
     this.updateOutgoingInvoiceInHistory(meltQuote);
 
     if (meltQuote.state === MeltQuoteState.PENDING) {
-      if (verbose) notify(this.t("wallet.notifications.invoice_still_pending"));
-      throw new Error("on-chain payment pending.");
+      if (verbose) notify("Payment pending");
+      throw new Error("Payment pending");
     }
 
     if (meltQuote.state === MeltQuoteState.UNPAID) {
       await proofsStore.setReserved(proofs, false);
       this.removeOutgoingInvoiceFromHistory(quote);
+      useInvoicesWorkerStore().removeOutgoingInvoiceFromChecker?.(quote);
       throw new Error("on-chain payment was not broadcast.");
     }
 
@@ -377,9 +378,10 @@ export async function checkOutgoingOnchain(
           ),
         })
       );
+      useInvoicesWorkerStore().removeOutgoingInvoiceFromChecker?.(quote);
     }
   } catch (error: any) {
-    if (verbose) {
+    if (verbose && error?.message !== "Payment pending") {
       notifyApiError(error);
     }
     console.log("Could not check on-chain quote", invoice.quote, error);
