@@ -10,7 +10,6 @@ on:
 jobs:
   build-and-push:
     # run only when secrets are set
-    needs: check-secrets
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
