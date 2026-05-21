@@ -300,6 +300,7 @@ import { useMintsStore, MintClass } from "src/stores/mints";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 import { notifyError, notifySuccess } from "src/js/notify";
+import { sumProofAmounts } from "src/js/proofs";
 import { getShortUrl } from "src/js/wallet-helpers";
 
 export default defineComponent({
@@ -983,11 +984,7 @@ export default defineComponent({
         mintsToQuotes.reduce(
           (acc, q) => acc + q[1].amount + q[1].fee_reserve,
           0
-        ) -
-        data.reduce(
-          (acc, d) => acc + d.change.reduce((acc1, p) => acc1 + p.amount, 0),
-          0
-        );
+        ) - data.reduce((acc, d) => acc + sumProofAmounts(d.change), 0);
 
       notifySuccess(
         "Paid " +

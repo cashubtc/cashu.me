@@ -114,7 +114,7 @@ export default defineComponent({
         return;
       }
       const tokensBase64 = historyToken.token;
-      const tokenObj = token.decode(tokensBase64);
+      const tokenObj = token.decodeMeta(tokensBase64);
       this.sendData.tokens = token.getProofs(tokenObj) as any;
       this.sendData.tokensBase64 = tokensBase64;
       this.sendData.paymentRequest = historyToken.paymentRequest;

@@ -83,6 +83,7 @@ export default {
       no_lnurl_data: "Žádná LNURL data",
       no_price_data: "Žádná cenová data.",
       please_try_again: "Zkuste to prosím znovu.",
+      trying_again: "Zkouší se znovu...",
     },
     mint: {
       notifications: {

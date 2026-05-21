@@ -46,6 +46,7 @@ import { useUiStore } from "src/stores/ui";
 import { mapWritableState } from "pinia";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { EventBus } from "../js/eventBus";
+import { sumProofAmounts } from "src/js/proofs";
 
 export default defineComponent({
   name: "NoMintWarnBanner",
@@ -68,20 +69,13 @@ export default defineComponent({
       "receiveData",
     ]),
     balance: function () {
-      return this.activeProofs
-        .map((t) => t)
-        .flat()
-        .reduce((sum, el) => (sum += el.amount), 0);
+      return sumProofAmounts(this.activeProofs.flat());
     },
     getActiveMintUrlShort: function () {
       return getShortUrl(this.activeMintUrl);
     },
     getBalance: function () {
-      const balance = this.activeProofs
-        .map((t) => t)
-        .flat()
-        .reduce((sum, el) => (sum += el.amount), 0);
-      return balance;
+      return sumProofAmounts(this.activeProofs.flat());
     },
   },
   methods: {

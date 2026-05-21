@@ -17,6 +17,7 @@ import { i18n } from "src/boot/i18n";
 import { useSettingsStore } from "./settings";
 import { useNostrMintBackupStore } from "./nostrMintBackup";
 import { bytesToHex } from "@noble/hashes/utils"; // already an installed dependency
+import { sumProofAmounts } from "src/js/proofs";
 
 export type StoredMint = {
   url: string;
@@ -79,12 +80,17 @@ export class MintClass {
 
   unitBalance(unit: string) {
     const proofs = this.unitProofs(unit);
-    return proofs.reduce((sum, p) => sum + p.amount, 0);
+    return sumProofAmounts(proofs);
   }
 }
 
-// type that extends type Proof with reserved boolean
-export type WalletProof = Proof & { reserved: boolean; quote?: string };
+// App-local proof type with number amount (strategy b) and wallet metadata.
+// Uses Omit to override Proof.amount (Amount) with number.
+export type WalletProof = Omit<Proof, "amount"> & {
+  amount: number;
+  reserved: boolean;
+  quote?: string;
+};
 
 export type Balances = {
   [unit: string]: number;
@@ -144,7 +150,7 @@ export const useMintsStore = defineStore("mints", {
     };
   },
   getters: {
-    multiMints({ activeUnit }) {
+    multiMints({ activeUnit }): StoredMint[] {
       return this.mints.filter((m) => {
         try {
           const version = m.info?.version;
@@ -174,17 +180,15 @@ export const useMintsStore = defineStore("mints", {
         .map((m) => m.keysets)
         .flat()
         .filter((k) => k.unit === activeUnit);
-      const balance = proofsStore.proofs
+      const proofs = proofsStore.proofs
         .filter((p) => allUnitKeysets.map((k) => k.id).includes(p.id))
-        .filter((p) => !p.reserved)
-        .reduce((sum, p) => sum + p.amount, 0);
+        .filter((p) => !p.reserved);
+      const balance = sumProofAmounts(proofs);
       this.uiStoreGlobal.lastBalanceCached = balance;
       return balance;
     },
     activeBalance(): number {
-      return this.activeProofs
-        .flat()
-        .reduce((sum, el) => (sum += el.amount), 0);
+      return sumProofAmounts(this.activeProofs.flat());
     },
     activeKeysets({ activeMintUrl, activeUnit }): MintKeyset[] {
       const unitKeysets = this.mints
@@ -236,8 +240,8 @@ export const useMintsStore = defineStore("mints", {
         return 1;
       }
     },
-    allMintKeysets: function () {
-      return [].concat(...this.mints.map((m) => m.keysets));
+    allMintKeysets(): MintKeyset[] {
+      return this.mints.flatMap((m: StoredMint) => m.keysets ?? []);
     },
   },
   actions: {
@@ -630,11 +634,14 @@ export const useMintsStore = defineStore("mints", {
       // Trigger Nostr backup if enabled
       this.triggerNostrBackup();
     },
-    assertMintError: function (response: { error?: any }, verbose = true) {
+    assertMintError: function (
+      response: Record<string, unknown>,
+      verbose = true
+    ) {
       if (response.error != null) {
         if (verbose) {
           notifyError(
-            response.error,
+            String(response.error),
             this.t("wallet.mint.notifications.error")
           );
         }

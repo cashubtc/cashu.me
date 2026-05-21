@@ -105,7 +105,7 @@ export const useSwapStore = defineStore("swap", {
         // walletStore.mintWallet(fromMintUrl, unit); will fail if we don't have fromMintUrl yet
         const fromWallet = await walletStore.mintWallet(fromMintUrl, unit);
         const proofs = token.getProofs(tokenJson);
-        meltAmount -= fromWallet.getFeesForProofs(proofs);
+        meltAmount -= fromWallet.getFeesForProofs(proofs).toNumber();
       } catch (e) {}
       return tokenAmount - meltAmount;
     },
@@ -131,7 +131,7 @@ export const useSwapStore = defineStore("swap", {
         );
         const toWallet = await walletStore.mintWallet(mint.url, unit, true);
         const proofs = token.getProofs(tokenJson);
-        meltAmount -= fromWallet.getFeesForProofs(proofs);
+        meltAmount -= fromWallet.getFeesForProofs(proofs).toNumber();
 
         const mintQuote = await walletStore.requestMint(meltAmount, toWallet);
         const meltQuote = await walletStore.meltQuote(
