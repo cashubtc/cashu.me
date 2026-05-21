@@ -188,53 +188,37 @@
                           {{ payInvoiceData.invoice.description }}<br />
                         </p>
                       </div>
-                      <div v-else-if="payInvoiceData.meltQuote.error != ''">
-                        <div class="text-h6 q-my-none">
+                      <div v-else-if="showBolt12AmountEntry">
+                        <div
+                          v-if="payInvoiceData.meltQuote.error != ''"
+                          class="text-h6 q-my-none q-mb-md"
+                        >
                           Error: {{ payInvoiceData.meltQuote.error }}
                         </div>
-                        <!-- BOLT12 amount entry if offer has no amount and errored -->
-                        <div
-                          v-if="payInvoiceData.invoice.bolt12"
-                          class="q-mt-md"
+                        <p
+                          v-if="payInvoiceData.invoice.description"
+                          class="text-wrap q-mb-md"
+                          style="max-width: 600px; font-size: 1.1rem"
                         >
-                          <q-input
-                            filled
-                            dense
-                            v-model.number="payInvoiceData.input.amount"
-                            type="number"
-                            :label="`Amount (${tickerShort})`"
-                            @keyup.enter="meltQuoteInvoiceData"
-                          />
-                          <div class="row q-mt-sm">
-                            <q-btn
-                              unelevated
-                              color="primary"
-                              :disabled="!payInvoiceData.input.amount"
-                              @click="meltQuoteInvoiceData"
-                              >Quote</q-btn
-                            >
-                          </div>
-                        </div>
-                      </div>
-                      <div v-else-if="needsBolt12Amount" class="q-mt-md">
-                        <div class="text-h6 q-my-none">Enter amount</div>
-                        <q-input
-                          class="q-mt-md"
-                          filled
-                          dense
-                          v-model.number="payInvoiceData.input.amount"
-                          type="number"
-                          :label="`Amount (${tickerShort})`"
-                          @keyup.enter="meltQuoteInvoiceData"
-                        />
-                        <div class="row q-mt-sm">
-                          <q-btn
-                            unelevated
-                            color="primary"
-                            :disabled="!payInvoiceData.input.amount"
-                            @click="meltQuoteInvoiceData"
-                            >Quote</q-btn
+                          <strong
+                            >{{
+                              $t("PayInvoiceDialog.invoice.memo.label")
+                            }}:</strong
                           >
+                          {{ payInvoiceData.invoice.description }}
+                        </p>
+                        <div
+                          v-if="showBolt12AmountKeyboard"
+                          class="column items-center justify-center q-px-lg q-py-lg amount-area"
+                        >
+                          <AmountInputComponent
+                            v-model="payInvoiceData.input.amount"
+                            :enabled="true"
+                            :muted="insufficientFundsForBolt12Amount"
+                            :max-amount="bolt12MaxAmountFromBalance"
+                            @enter="handleBolt12Quote"
+                            @fiat-mode-changed="fiatKeyboardMode = $event"
+                          />
                         </div>
                       </div>
                       <div v-else>
@@ -541,6 +525,57 @@
           </div>
         </div>
 
+        <!-- Bottom fixed Bolt12 amountless quote action -->
+        <div
+          class="bottom-panel"
+          v-if="showBolt12AmountKeyboard && payInvoiceData.invoice"
+        >
+          <div class="keypad-wrapper">
+            <NumericKeyboard
+              :force-visible="true"
+              :hide-close="true"
+              :hide-enter="true"
+              :hide-comma="
+                (activeUnit === 'sat' || activeUnit === 'msat') &&
+                !fiatKeyboardMode
+              "
+              :model-value="String(payInvoiceData.input.amount ?? 0)"
+              @update:modelValue="
+                (val: string | number) =>
+                  (payInvoiceData.input.amount = Number(val))
+              "
+              @done="handleBolt12Quote"
+            />
+          </div>
+          <div class="row justify-center q-pb-lg q-pt-sm">
+            <div
+              class="col-12 col-sm-11 col-md-8 q-px-md"
+              style="max-width: 600px"
+            >
+              <q-btn
+                class="full-width"
+                unelevated
+                size="lg"
+                color="primary"
+                rounded
+                @click="handleBolt12Quote"
+                :disabled="
+                  payInvoiceData.blocking ||
+                  payInvoiceData.input.amount == null ||
+                  payInvoiceData.input.amount <= 0 ||
+                  insufficientFundsForBolt12Amount
+                "
+                :loading="payInvoiceData.blocking"
+              >
+                Quote
+                <template v-slot:loading>
+                  <q-spinner />
+                </template>
+              </q-btn>
+            </div>
+          </div>
+        </div>
+
         <!-- Bottom fixed LNURL pay action -->
         <div
           class="bottom-panel"
@@ -696,13 +731,34 @@ export default defineComponent({
   },
   watch: {
     activeMintUrl: async function () {
-      if (this.payInvoiceData.show && this.payInvoiceData.invoice) {
+      if (
+        this.payInvoiceData.show &&
+        this.payInvoiceData.invoice &&
+        !this.showBolt12AmountEntry
+      ) {
         await this.meltQuoteInvoiceData();
       }
     },
     activeUnit: async function () {
-      if (this.payInvoiceData.show && this.payInvoiceData.invoice) {
+      if (
+        this.payInvoiceData.show &&
+        this.payInvoiceData.invoice &&
+        !this.showBolt12AmountEntry
+      ) {
         await this.meltQuoteInvoiceData();
+      }
+    },
+    showBolt12AmountEntry: {
+      handler: function (val) {
+        if (val && this.payInvoiceData.meltQuote.error == "") {
+          this.showNumericKeyboard = true;
+        }
+      },
+      immediate: true,
+    },
+    "payInvoiceData.meltQuote.error": function (val) {
+      if (val && this.showBolt12AmountEntry) {
+        this.showNumericKeyboard = false;
       }
     },
     "payInvoiceData.lnurlpay": {
@@ -826,11 +882,18 @@ export default defineComponent({
       const quote = this.payInvoiceData?.meltQuote?.response;
       return Boolean(quote?.quote) && quote.amount > 0;
     },
-    needsBolt12Amount: function (): boolean {
+    showBolt12AmountEntry: function (): boolean {
       return (
         Boolean(this.payInvoiceData?.invoice?.bolt12) &&
-        !this.payInvoiceData.blocking &&
         !this.hasMeltQuote &&
+        !this.payInvoiceData.blocking &&
+        !this.isPaid &&
+        !this.isPaying
+      );
+    },
+    showBolt12AmountKeyboard: function (): boolean {
+      return (
+        this.showBolt12AmountEntry &&
         this.payInvoiceData.meltQuote.error == ""
       );
     },
@@ -855,6 +918,21 @@ export default defineComponent({
     activeUnitLabel: function (): string {
       // Access directly from store to avoid typing friction in mapState
       return (useMintsStore() as any).activeUnitLabel;
+    },
+    insufficientFundsForBolt12Amount: function (): boolean {
+      if (
+        !this.showBolt12AmountEntry ||
+        this.payInvoiceData.input.amount == null
+      ) {
+        return false;
+      }
+      return (
+        this.activeBalance <
+        this.payInvoiceData.input.amount * this.activeUnitCurrencyMultiplyer
+      );
+    },
+    bolt12MaxAmountFromBalance: function (): number {
+      return this.activeBalance / this.activeUnitCurrencyMultiplyer;
     },
     insufficientFunds: function (): boolean {
       if (
@@ -884,8 +962,8 @@ export default defineComponent({
         return "success";
       } else if (this.payInvoiceData.meltQuote.error != "") {
         return "error";
-      } else if (this.needsBolt12Amount) {
-        return "amount";
+      } else if (this.showBolt12AmountEntry) {
+        return this.payInvoiceData.meltQuote.error != "" ? "error" : "amount";
       } else {
         return "processing";
       }
@@ -970,6 +1048,23 @@ export default defineComponent({
       // Hide keyboard before sending payment
       this.showNumericKeyboard = false;
       await this.lnurlPaySecond();
+    },
+    handleBolt12Quote: async function () {
+      if (
+        this.payInvoiceData.blocking ||
+        this.payInvoiceData.input.amount == null ||
+        this.payInvoiceData.input.amount <= 0 ||
+        this.insufficientFundsForBolt12Amount
+      ) {
+        return;
+      }
+      await this.meltQuoteInvoiceData();
+      if (
+        this.hasMeltQuote ||
+        this.payInvoiceData.meltQuote.error != ""
+      ) {
+        this.showNumericKeyboard = false;
+      }
     },
   },
   created: function () {},
