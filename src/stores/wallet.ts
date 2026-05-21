@@ -40,6 +40,7 @@ import {
   meltQuoteInvoiceDataOnchain,
   meltInvoiceDataOnchain,
   meltOnchain,
+  mintOnPaidOnchain,
 } from "./walletOnchain";
 
 import _ from "underscore";
@@ -1058,6 +1059,7 @@ export const useWalletStore = defineStore("wallet", {
     meltQuoteInvoiceDataOnchain: meltQuoteInvoiceDataOnchain,
     meltInvoiceDataOnchain: meltInvoiceDataOnchain,
     meltOnchain: meltOnchain,
+    mintOnPaidOnchain: mintOnPaidOnchain,
     // /check
     checkProofsSpendable: async function (
       proofs: WalletProof[],

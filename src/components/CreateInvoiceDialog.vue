@@ -77,7 +77,20 @@
 
         <!-- Amount display -->
         <div class="col column items-center justify-center q-px-lg amount-area">
-          <div v-if="showReusableQuote" class="row justify-center full-width">
+          <transition name="fade" mode="out-in">
+            <div
+              v-if="isOnchain && checkingReusableOnchainQuote"
+              key="checking-onchain"
+              class="column items-center justify-center q-pa-xl"
+            >
+              <q-spinner size="48px" color="primary" />
+              <div class="text-grey-6 q-mt-md">Checking address...</div>
+            </div>
+          </transition>
+          <div
+            v-if="!checkingReusableOnchainQuote && showReusableQuote"
+            class="row justify-center full-width"
+          >
             <div class="col-12" style="max-width: 400px">
               <div
                 v-if="reusableReceiveQuote"
@@ -234,6 +247,8 @@ export default defineComponent({
       bolt12AddAmount: false as boolean,
       copyButtonCopied: false,
       copyButtonTimeout: null as any,
+      checkingReusableOnchainQuote: false,
+      checkedReusableOnchainQuote: null as InvoiceHistory | null,
     };
   },
   computed: {
@@ -353,26 +368,7 @@ export default defineComponent({
       return null;
     },
     reusableOnchainQuote(): InvoiceHistory | null {
-      const walletStore = useWalletStore();
-      const mintStore = useMintsStore();
-      const now = Date.now();
-      const reusableQuotes = walletStore.invoiceHistory.filter(
-        (invoice: InvoiceHistory) => {
-          if (invoice.type !== LightningMethod.Onchain) return false;
-          const quote = invoice.mintQuote as any;
-          if (quote?.expiry && quote.expiry > 0 && quote.expiry * 1000 < now) {
-            return false;
-          }
-          if (invoice.mint !== mintStore.activeMintUrl) return false;
-          if (invoice.unit !== mintStore.activeUnit) return false;
-          if (!invoice.request) return false;
-          return true;
-        }
-      );
-      if (reusableQuotes.length > 0) {
-        return reusableQuotes[reusableQuotes.length - 1];
-      }
-      return null;
+      return this.checkedReusableOnchainQuote;
     },
     reusableReceiveQuote(): InvoiceHistory | null {
       return this.isOnchain
@@ -400,7 +396,9 @@ export default defineComponent({
           // Actually user likely wants to edit.
           this.showNumericKeyboard = true;
         });
+        this.refreshReusableOnchainQuote();
       } else {
+        this.checkedReusableOnchainQuote = null;
       }
     },
     activeMintUrl: {
@@ -409,6 +407,7 @@ export default defineComponent({
           if (!this.onchainSupported && this.bolt11Supported) {
             this.invoiceData.type = LightningMethod.Bolt11;
           }
+          this.refreshReusableOnchainQuote();
           return;
         }
         if (this.bolt11Supported && !this.bolt12Supported) {
@@ -419,6 +418,9 @@ export default defineComponent({
       },
       immediate: true,
     },
+    activeUnit: function () {
+      this.refreshReusableOnchainQuote();
+    },
   },
   methods: {
     ...mapActions(useWalletStore, [
@@ -428,6 +430,8 @@ export default defineComponent({
       "requestMintBolt12",
       "mintOnPaidBolt12",
       "requestMintOnchain",
+      "mintOnPaidOnchain",
+      "checkOnchainAndMint",
     ]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
     toggleInvoiceType() {
@@ -454,10 +458,11 @@ export default defineComponent({
         const wallet = await this.activeWallet(true);
 
         if (this.isOnchain) {
-          await this.requestMintOnchain(wallet);
+          const mintQuote = await this.requestMintOnchain(wallet);
 
           this.showCreateInvoiceDialog = false;
           this.showInvoiceDetails = true;
+          await this.mintOnPaidOnchain(mintQuote.quote);
         } else if (this.isBolt12) {
           // BOLT12 Flow
           const mintQuote = await this.requestMintBolt12(amount, wallet);
@@ -497,6 +502,48 @@ export default defineComponent({
         } catch (error) {
           console.error("Failed to copy to clipboard:", error);
         }
+      }
+    },
+    findReusableOnchainQuotes(): InvoiceHistory[] {
+      const walletStore = useWalletStore();
+      const mintStore = useMintsStore();
+      const now = Date.now();
+      return walletStore.invoiceHistory
+        .filter((invoice: InvoiceHistory) => {
+          if (invoice.type !== LightningMethod.Onchain) return false;
+          if (invoice.status !== "pending") return false;
+          const quote = invoice.mintQuote as any;
+          if (quote?.expiry && quote.expiry > 0 && quote.expiry * 1000 < now) {
+            return false;
+          }
+          if (invoice.mint !== mintStore.activeMintUrl) return false;
+          if (invoice.unit !== mintStore.activeUnit) return false;
+          if (!invoice.request) return false;
+          return true;
+        })
+        .reverse();
+    },
+    async refreshReusableOnchainQuote() {
+      if (!this.showCreateInvoiceDialog || !this.isOnchain) return;
+      this.checkingReusableOnchainQuote = true;
+      this.checkedReusableOnchainQuote = null;
+      try {
+        for (const quote of this.findReusableOnchainQuotes()) {
+          try {
+            await this.checkOnchainAndMint(quote.quote, false, false);
+          } catch (error: any) {
+            if (error?.message === "Address not paid") {
+              this.checkedReusableOnchainQuote = quote;
+              await this.mintOnPaidOnchain(quote.quote, false, true, false);
+              return;
+            }
+            throw error;
+          }
+        }
+      } catch (error) {
+        console.error("Could not check reusable on-chain address", error);
+      } finally {
+        this.checkingReusableOnchainQuote = false;
       }
     },
   },

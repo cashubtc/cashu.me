@@ -33,6 +33,10 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         "cashu.worker.invoices.bolt12QuotesQueue",
         []
       ),
+      onchainQuotes: useLocalStorage<InvoiceQuote[]>(
+        "cashu.worker.invoices.onchainQuotesQueue",
+        []
+      ),
       lastInvoiceCheckTime: 0,
       maxQuotesToCheckOnStartup: 10,
       lastPendingInvoiceCheck: useLocalStorage<number>(
@@ -43,8 +47,9 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
     };
   },
   actions: {
-    startInvoiceCheckerWorker() {
-      if (!useSettingsStore().periodicallyCheckIncomingInvoices) return;
+    startInvoiceCheckerWorker(force = false) {
+      if (!force && !useSettingsStore().periodicallyCheckIncomingInvoices)
+        return;
       if (this.invoiceCheckListener) return;
       this.invoiceWorkerRunning = true;
       this.invoiceCheckListener = setInterval(() => {
@@ -107,6 +112,31 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         this.bolt12Quotes.splice(index, 1);
       }
     },
+    addOnchainQuoteToChecker(quote: string, forceStart = false) {
+      const existingIndex = this.onchainQuotes.findIndex(
+        (q) => q.quote === quote
+      );
+      if (existingIndex !== -1) {
+        this.onchainQuotes.splice(existingIndex, 1);
+      }
+
+      if (this.onchainQuotes.length >= this.maxLength) {
+        this.onchainQuotes.shift();
+      }
+      this.onchainQuotes.push({
+        quote,
+        addedAt: Date.now(),
+        lastChecked: 0,
+        checkCount: 0,
+      });
+      this.startInvoiceCheckerWorker(forceStart);
+    },
+    removeOnchainQuoteFromChecker(quote: string) {
+      const index = this.onchainQuotes.findIndex((q) => q.quote === quote);
+      if (index !== -1) {
+        this.onchainQuotes.splice(index, 1);
+      }
+    },
     dueTime(q: InvoiceQuote) {
       if (q.checkCount > this.keepIntervalConstantForNChecks) {
         return (
@@ -140,6 +170,13 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         }
         return true;
       }
+      if (invoice.type === LightningMethod.Onchain) {
+        return (
+          invoice.status === "pending" &&
+          invoice.amount >= 0 &&
+          now - Date.parse(invoice.date) < this.maxAge
+        );
+      }
       // Bolt11
       return (
         invoice.status === "pending" &&
@@ -153,8 +190,16 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       this.bolt12Quotes = this.bolt12Quotes.filter(
         (q) => now - q.addedAt < this.maxAge
       );
+      this.onchainQuotes = this.onchainQuotes.filter(
+        (q) => now - q.addedAt < this.maxAge
+      );
 
-      if (this.quotes.length === 0 && this.bolt12Quotes.length === 0) return;
+      if (
+        this.quotes.length === 0 &&
+        this.bolt12Quotes.length === 0 &&
+        this.onchainQuotes.length === 0
+      )
+        return;
 
       // Global rate limit
       if (now - this.lastInvoiceCheckTime < this.checkInterval) {
@@ -216,6 +261,31 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
           break;
         }
       }
+
+      // Then process one on-chain address if any
+      for (let i = this.onchainQuotes.length - 1; i >= 0; i--) {
+        const q = this.onchainQuotes[i];
+        const invoice = walletStore.invoiceHistory.find(
+          (inv) => inv.quote === q.quote
+        );
+        if (!this.shouldCheckInvoice(invoice)) {
+          this.onchainQuotes.splice(i, 1);
+          continue;
+        }
+
+        const dueTime = this.dueTime(q);
+        if (now > dueTime) {
+          try {
+            await walletStore.checkOnchainAndMint(q.quote, false);
+            this.onchainQuotes.splice(i, 1);
+          } catch (error) {
+            q.lastChecked = now;
+            q.checkCount += 1;
+          }
+          this.lastInvoiceCheckTime = now;
+          break;
+        }
+      }
     },
     async checkPendingInvoices() {
       if (!useSettingsStore().checkInvoicesOnStartup) return;
@@ -238,6 +308,9 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
           console.log(`Checking quote ${q.quote}`);
           if (q.type === LightningMethod.Bolt12) {
             this.addBolt12OfferToChecker(q.quote);
+          } else if (q.type === LightningMethod.Onchain) {
+            this.addOnchainQuoteToChecker(q.quote, true);
+            walletStore.mintOnPaidOnchain(q.quote, false, false);
           } else {
             walletStore.mintOnPaidBolt11(q.quote, false, false);
           }

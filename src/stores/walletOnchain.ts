@@ -15,6 +15,8 @@ import { bytesToHex } from "@noble/hashes/utils";
 import { notifyApiError, notify, notifySuccess } from "src/js/notify";
 import type { InvoiceHistory } from "./wallet";
 import { LightningMethod } from "src/stores/walletTypes";
+import { mintOnPaidGeneric } from "./walletWebsocket";
+import { useInvoicesWorkerStore } from "./invoicesWorker";
 
 type AppMintQuote = Omit<
   MintQuoteOnchainResponse,
@@ -38,6 +40,7 @@ type AppMeltQuote = Omit<
 > & {
   amount: number;
   fee_reserve: number;
+  fee_paid?: number;
   fee_options: AppOnchainFeeOption[];
   payment_preimage: null;
   change?: any[];
@@ -117,13 +120,30 @@ export async function requestMintOnchain(this: any, mintWallet: Wallet) {
 
     return data;
   } catch (error: any) {
-    console.error(error);
+    if (error?.message !== "Address not paid") {
+      console.error(error);
+    }
     notifyApiError(
       error,
       this.t("wallet.notifications.could_not_request_mint")
     );
     throw error;
   }
+}
+
+export async function mintOnPaidOnchain(
+  this: any,
+  quote: string,
+  verbose = true,
+  kickOffInvoiceChecker = true,
+  hideInvoiceDetailsOnMint = true
+) {
+  return await mintOnPaidGeneric.call(this, quote, {
+    type: LightningMethod.Onchain,
+    verbose,
+    kickOffInvoiceChecker,
+    hideInvoiceDetailsOnMint,
+  });
 }
 
 export async function checkOnchainAndMint(
@@ -159,8 +179,7 @@ export async function checkOnchainAndMint(
     }
 
     if (delta <= 0) {
-      if (verbose) notify(this.t("wallet.notifications.invoice_still_pending"));
-      throw new Error("no new funds to mint");
+      throw new Error("Address not paid");
     }
 
     const proofs = await this.retryOnceOnSignedOutputs(keysetId, async () =>
@@ -180,6 +199,7 @@ export async function checkOnchainAndMint(
       amount: delta,
       mintQuote: normalizedMintQuote,
     });
+    useInvoicesWorkerStore().removeOnchainQuoteFromChecker(invoice.quote);
 
     if (hideInvoiceDetailsOnMint) {
       uIStore.showInvoiceDetails = false;
@@ -194,7 +214,13 @@ export async function checkOnchainAndMint(
     return proofs;
   } catch (error: any) {
     console.error(error);
-    if (verbose) notifyApiError(error);
+    if (verbose) {
+      if (error?.message === "Address not paid") {
+        notify("Address not paid");
+      } else {
+        notifyApiError(error);
+      }
+    }
     this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error);
     throw error;
   } finally {
@@ -313,6 +339,7 @@ export async function checkOutgoingOnchain(
     }
 
     if (meltQuote.state === MeltQuoteState.PAID) {
+      let returnedChange = 0;
       if (invoice.meltOutputData?.length && meltQuote.change?.length) {
         const outputData = invoice.meltOutputData.map((output: any) =>
           OutputData.deserialize(output)
@@ -323,21 +350,27 @@ export async function checkOutgoingOnchain(
         );
         if (changeProofs.length) {
           await proofsStore.addProofs(changeProofs);
+          returnedChange = proofsStore.sumProofs(changeProofs);
         }
         invoice.meltOutputData = [];
       }
 
-      await this.checkProofsSpendable(proofs, mintWallet, true);
+      await proofsStore.removeProofs(proofs);
+      const actualFee = Math.max(0, meltQuote.fee_reserve - returnedChange);
+      meltQuote.fee_paid = actualFee;
+      this.updateOutgoingInvoiceInHistory(meltQuote, {
+        status: "paid",
+        amount: -(meltQuote.amount + actualFee),
+      });
       useUiStore().vibrate();
       notifySuccess(
         this.t("wallet.notifications.sent", {
           amount: uIStore.formatCurrency(
-            proofsStore.sumProofs(proofs),
+            meltQuote.amount + actualFee,
             invoice.unit
           ),
         })
       );
-      this.setInvoicePaid(quote);
     }
   } catch (error: any) {
     if (verbose) {

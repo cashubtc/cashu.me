@@ -16,7 +16,10 @@ export async function mintOnPaidGeneric(
     kickOffInvoiceChecker = true,
     hideInvoiceDetailsOnMint = true,
   }: {
-    type: LightningMethod.Bolt11 | LightningMethod.Bolt12;
+    type:
+      | LightningMethod.Bolt11
+      | LightningMethod.Bolt12
+      | LightningMethod.Onchain;
     verbose?: boolean;
     kickOffInvoiceChecker?: boolean;
     hideInvoiceDetailsOnMint?: boolean;
@@ -53,6 +56,8 @@ export async function mintOnPaidGeneric(
       console.log(`Adding quote ${quoteId} to long-polling checker.`);
       if (type === LightningMethod.Bolt12) {
         useInvoicesWorkerStore().addBolt12OfferToChecker(quoteId);
+      } else if (type === LightningMethod.Onchain) {
+        useInvoicesWorkerStore().addOnchainQuoteToChecker(quoteId, true);
       } else {
         useInvoicesWorkerStore().addInvoiceToChecker(quoteId);
       }
@@ -68,8 +73,7 @@ export async function mintOnPaidGeneric(
 
   // 5. Check Websocket Capability (NUT-17)
   const method = type;
-  const command =
-    type === LightningMethod.Bolt11 ? "bolt11_mint_quote" : "bolt12_mint_quote";
+  const command = `${type}_mint_quote`;
 
   if (
     !settingsStore.useWebsockets ||
@@ -96,6 +100,8 @@ export async function mintOnPaidGeneric(
       try {
         if (type === LightningMethod.Bolt11) {
           proofs = await this.mintBolt11(invoice, false);
+        } else if (type === LightningMethod.Onchain) {
+          proofs = await this.checkOnchainAndMint(quoteId, false);
         } else {
           proofs = await this.checkOfferAndMintBolt12(quoteId, false);
         }
@@ -110,14 +116,20 @@ export async function mintOnPaidGeneric(
       useUiStore().vibrate();
 
       const amount =
-        type === LightningMethod.Bolt12 && proofs
+        (type === LightningMethod.Bolt12 || type === LightningMethod.Onchain) &&
+        proofs
           ? proofs.reduce((acc: number, p: any) => acc + p.amount, 0)
           : invoice.amount;
 
       notifySuccess(
-        this.t("wallet.notifications.received_lightning", {
-          amount: uIStore.formatCurrency(amount, invoice.unit),
-        })
+        this.t(
+          type === LightningMethod.Onchain
+            ? "wallet.notifications.received"
+            : "wallet.notifications.received_lightning",
+          {
+            amount: uIStore.formatCurrency(amount, invoice.unit),
+          }
+        )
       );
 
       return proofs;
