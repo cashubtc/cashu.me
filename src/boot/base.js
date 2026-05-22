@@ -149,12 +149,21 @@ window.windowMixin = {
       if (currency == "msat") return this.fromMsat(value);
       if (currency == "usd") value = value / 100;
       if (currency == "eur") value = value / 100;
-      return new Intl.NumberFormat(window.LOCALE, {
-        style: "currency",
-        currency: currency,
-      }).format(value);
-      // + " " +
-      // currency.toUpperCase()
+
+      if (currency.length !== 3) {
+        return (
+          new Intl.NumberFormat(window.LOCALE).format(value) +
+          " " +
+          currency.toUpperCase()
+        );
+      } else {
+        return new Intl.NumberFormat(window.LOCALE, {
+          style: "currency",
+          currency: currency,
+        }).format(value);
+        // + " " +
+        // currency.toUpperCase()
+      }
     },
     formatSat: function (value) {
       // convert value to integer
