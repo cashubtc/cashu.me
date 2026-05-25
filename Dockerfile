@@ -18,6 +18,9 @@ RUN npm run build:pwa
 # Stage 2: Runtime Phase
 FROM nginx
 
+# Copy custom nginx config for SPA routing
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 # Copy the built PWA files from the builder stage
 COPY --from=builder /app/dist/pwa /usr/share/nginx/html
 

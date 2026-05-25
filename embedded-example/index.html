@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cashu Pay — Example</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      max-width: 480px;
+      width: 100%;
+      padding: 2rem;
+    }
+    h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    p.subtitle { color: #888; margin-bottom: 2rem; font-size: 0.9rem; }
+    .card {
+      background: #16213e;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    label { display: block; color: #aaa; font-size: 0.8rem; margin-bottom: 0.3rem; }
+    input, select {
+      width: 100%;
+      padding: 0.6rem 0.8rem;
+      border: 1px solid #444;
+      border-radius: 8px;
+      background: #0f3460;
+      color: #eee;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      outline: none;
+    }
+    input:focus, select:focus { border-color: #e94560; }
+    button {
+      width: 100%;
+      padding: 0.8rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    button:hover { opacity: 0.85; }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-pay { background: #e94560; color: #fff; }
+    .result {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      word-break: break-all;
+      display: none;
+    }
+    .result.success { background: #1b4332; border: 1px solid #2d6a4f; display: block; }
+    .result.error { background: #3d0000; border: 1px solid #6b0000; display: block; }
+    .result-label { font-weight: 600; margin-bottom: 0.3rem; }
+    .token-box {
+      background: #000;
+      padding: 0.5rem;
+      border-radius: 4px;
+      margin-top: 0.5rem;
+      max-height: 120px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.75rem;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Cashu Pay Example</h1>
+    <p class="subtitle">Test the embeddable payment SDK</p>
+
+    <div class="card">
+      <label for="amount">Amount</label>
+      <input type="number" id="amount" value="21" min="1">
+
+      <label for="unit">Unit</label>
+      <select id="unit">
+        <option value="sat" selected>sat</option>
+        <option value="usd">usd</option>
+        <option value="eur">eur</option>
+      </select>
+
+      <label for="description">Description</label>
+      <input type="text" id="description" value="Test payment from example page" placeholder="What is this payment for?">
+
+      <label for="memo">Memo (optional)</label>
+      <input type="text" id="memo" placeholder="Short note">
+
+      <label for="mint">Mint URL (optional)</label>
+      <input type="text" id="mint" placeholder="Leave empty for user's default mint">
+
+      <button class="btn-pay" id="payBtn" onclick="pay()">Pay with Cashu</button>
+    </div>
+
+    <div class="result" id="result">
+      <div class="result-label" id="resultLabel"></div>
+      <div id="resultMessage"></div>
+      <div class="token-box" id="tokenBox" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- Load embed.js from cashu.me -->
+  <script src="http://localhost:3000/embed.js"></script>
+  <script>
+    var cashu = new CashuPay({ origin: 'http://localhost:3000' });
+
+    async function pay() {
+      var btn = document.getElementById('payBtn');
+      var resultEl = document.getElementById('result');
+      var resultLabel = document.getElementById('resultLabel');
+      var resultMessage = document.getElementById('resultMessage');
+      var tokenBox = document.getElementById('tokenBox');
+
+      btn.disabled = true;
+      btn.textContent = 'Waiting for confirmation…';
+      resultEl.className = 'result';
+      tokenBox.style.display = 'none';
+
+      var params = {
+        amount: Number(document.getElementById('amount').value),
+        unit: document.getElementById('unit').value,
+        description: document.getElementById('description').value || undefined,
+        memo: document.getElementById('memo').value || undefined,
+        mint: document.getElementById('mint').value || undefined,
+      };
+
+      try {
+        var result = await cashu.requestPayment(params);
+        resultLabel.textContent = 'Payment successful';
+        resultMessage.textContent = 'Received cashu token:';
+        tokenBox.textContent = result.token;
+        tokenBox.style.display = 'block';
+        resultEl.className = 'result success';
+      } catch (e) {
+        resultLabel.textContent = 'Payment failed';
+        resultMessage.textContent = e.message;
+        resultEl.className = 'result error';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Pay with Cashu';
+      }
+    }
+  </script>
+</body>
+</html>
