@@ -12,7 +12,10 @@ RUN npm install
 # Copy the application code to the container
 COPY . .
 
-# Build the PWA (replace 'npm run build' with your actual build command)
+# Build embed.js SDK (outputs to public/ before PWA build copies it)
+RUN npm run build:embed
+
+# Build the PWA
 RUN npm run build:pwa
 
 # Stage 2: Runtime Phase
