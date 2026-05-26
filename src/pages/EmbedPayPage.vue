@@ -82,10 +82,12 @@ import { ref, onMounted } from "vue";
 import { useWalletStore } from "src/stores/wallet";
 import { useMintsStore } from "src/stores/mints";
 import { useProofsStore } from "src/stores/proofs";
+import { useTokensStore } from "src/stores/tokens";
 
 const walletStore = useWalletStore();
 const mintsStore = useMintsStore();
 const proofsStore = useProofsStore();
+const tokensStore = useTokensStore();
 
 const amount = ref(0);
 const unit = ref("sat");
@@ -174,6 +176,18 @@ async function confirmPayment() {
       true
     );
     const token = proofsStore.serializeProofs(sendProofs);
+
+    // Record in transaction history
+    const label = description.value
+      ? `${callerHostname.value}: ${description.value}`
+      : `Payment to ${callerHostname.value}`;
+    tokensStore.addPaidToken({
+      amount: -amount.value,
+      token,
+      mint: mint.value,
+      unit: unit.value,
+      label,
+    });
 
     sendResult({
       type: "cashu:payment-result",
