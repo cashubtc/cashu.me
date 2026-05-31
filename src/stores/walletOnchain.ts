@@ -342,7 +342,9 @@ export async function checkOutgoingOnchain(
       await proofsStore.setReserved(proofs, false);
       this.removeOutgoingInvoiceFromHistory(quote);
       useInvoicesWorkerStore().removeOutgoingInvoiceFromChecker?.(quote);
-      throw new Error("on-chain payment was not broadcast.");
+      notifyWarning(
+        this.t("wallet.notifications.lightning_payment_failed")
+      );
     }
 
     if (meltQuote.state === MeltQuoteState.PAID) {
