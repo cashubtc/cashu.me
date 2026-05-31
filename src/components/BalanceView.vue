@@ -161,6 +161,7 @@ import ToggleUnit from "components/ToggleUnit.vue";
 import AnimatedNumber from "components/AnimatedNumber.vue";
 import axios from "axios";
 import { map } from "underscore";
+import { sumProofAmounts } from "src/js/proofs";
 
 export default defineComponent({
   name: "BalanceView",
@@ -224,10 +225,7 @@ export default defineComponent({
       );
     },
     getBalance: function () {
-      const balance = this.activeProofs
-        .flat()
-        .reduce((sum, el) => (sum += el.amount), 0);
-      return balance;
+      return sumProofAmounts(this.activeProofs.flat());
     },
   },
   data() {

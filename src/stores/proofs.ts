@@ -3,12 +3,27 @@ import { defineStore } from "pinia";
 import { useMintsStore, WalletProof } from "./mints";
 import { cashuDb, CashuDexie, useDexieStore } from "./dexie";
 import {
+  Amount,
   Proof,
+  type ProofLike,
   getEncodedToken,
-  getEncodedTokenV4,
+  normalizeProofAmounts,
   Token,
 } from "@cashu/cashu-ts";
 import { liveQuery } from "dexie";
+import { sumProofAmounts } from "src/js/proofs";
+
+// Shape of a proof row as stored in Dexie (amount may be number or Amount).
+type DexieProofRow = ProofLike & { reserved?: boolean; quote?: string };
+
+function coerceWalletProofs(raw: DexieProofRow[]): WalletProof[] {
+  return raw.map(({ amount, reserved, quote, ...rest }) => ({
+    ...rest,
+    amount: Amount.from(amount).toNumber(),
+    reserved: Boolean(reserved),
+    quote,
+  }));
+}
 
 export const useProofsStore = defineStore("proofs", {
   state: () => {
@@ -16,7 +31,7 @@ export const useProofsStore = defineStore("proofs", {
 
     liveQuery(() => cashuDb.proofs.toArray()).subscribe({
       next: (newProofs) => {
-        proofs.value = newProofs;
+        proofs.value = coerceWalletProofs(newProofs);
         updateActiveProofs();
       },
       error: (err) => {
@@ -49,7 +64,7 @@ export const useProofsStore = defineStore("proofs", {
         .anyOf(keysetIds)
         .toArray()
         .then((proofs) => {
-          return proofs.filter((p) => !p.reserved);
+          return coerceWalletProofs(proofs).filter((p) => !p.reserved);
         });
       mintStore.activeProofs = activeProofs;
     };
@@ -60,14 +75,14 @@ export const useProofsStore = defineStore("proofs", {
     };
   },
   actions: {
-    sumProofs: function (proofs: Proof[]) {
-      return proofs.reduce((s, t) => (s += t.amount), 0);
+    sumProofs: function (proofs: Array<Pick<ProofLike, "amount">>) {
+      return sumProofAmounts(proofs);
     },
     getProofs: async function (): Promise<WalletProof[]> {
-      return await cashuDb.proofs.toArray();
+      return coerceWalletProofs(await cashuDb.proofs.toArray());
     },
     setReserved: async function (
-      proofs: Proof[],
+      proofs: Array<Pick<Proof, "secret">>,
       reserved: boolean = true,
       quote?: string
     ) {
@@ -84,38 +99,40 @@ export const useProofsStore = defineStore("proofs", {
         }
       });
     },
-    proofsToWalletProofs(proofs: Proof[], quote?: string): WalletProof[] {
-      return proofs.map((p) => {
+    proofsToWalletProofs(proofs: ProofLike[], quote?: string): WalletProof[] {
+      return coerceWalletProofs(proofs).map((p) => {
         return {
           ...p,
           reserved: false,
           quote: quote,
-        } as WalletProof;
+        };
       });
     },
-    async addProofs(proofs: Proof[], quote?: string) {
+    async addProofs(proofs: ProofLike[], quote?: string) {
       const walletProofs = this.proofsToWalletProofs(proofs);
       await cashuDb.transaction("rw", cashuDb.proofs, async () => {
-        walletProofs.forEach(async (p) => {
+        for (const p of walletProofs) {
           await cashuDb.proofs.add(p);
-        });
+        }
       });
     },
-    async removeProofs(proofs: Proof[]) {
+    async removeProofs(proofs: ProofLike[]) {
       const walletProofs = this.proofsToWalletProofs(proofs);
       await cashuDb.transaction("rw", cashuDb.proofs, async () => {
-        walletProofs.forEach(async (p) => {
+        for (const p of walletProofs) {
           await cashuDb.proofs.delete(p.secret);
-        });
+        }
       });
     },
     async getProofsForQuote(quote: string): Promise<WalletProof[]> {
-      return await cashuDb.proofs.where("quote").equals(quote).toArray();
+      return coerceWalletProofs(
+        await cashuDb.proofs.where("quote").equals(quote).toArray()
+      );
     },
     getUnreservedProofs: function (proofs: WalletProof[]) {
       return proofs.filter((p) => !p.reserved);
     },
-    serializeProofs: function (proofs: Proof[]): string {
+    serializeProofs: function (proofs: ProofLike[]): string {
       const mintStore = useMintsStore();
       // unique keyset IDs of proofs
       const uniqueIds = [...new Set(proofs.map((p) => p.id))];
@@ -137,15 +154,10 @@ export const useProofsStore = defineStore("proofs", {
       const unit = keysets[0].unit;
       const token = {
         mint: mints[0].url,
-        proofs: proofs,
+        proofs: normalizeProofAmounts(proofs),
         unit: unit,
       } as Token;
-      try {
-        return getEncodedTokenV4(token);
-      } catch (e) {
-        console.log("Could not encode TokenV4, defaulting to TokenV3", e);
-        return getEncodedToken(token);
-      }
+      return getEncodedToken(token);
 
       // // what we put into the JSON
       // let mintsJson = mints.map((m) => [{ url: m.url, ids: m.keysets }][0]);

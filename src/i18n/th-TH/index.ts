@@ -78,6 +78,7 @@ export default {
       no_lnurl_data: "ไม่มีข้อมูล LNURL",
       no_price_data: "ไม่มีข้อมูลราคา",
       please_try_again: "โปรดลองอีกครั้ง",
+      trying_again: "กำลังลองอีกครั้ง...",
     },
     mint: {
       notifications: {

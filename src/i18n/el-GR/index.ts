@@ -79,6 +79,7 @@ export default {
       no_lnurl_data: "Δεν υπάρχουν δεδομένα LNURL",
       no_price_data: "Δεν υπάρχουν δεδομένα τιμής.",
       please_try_again: "Παρακαλώ προσπαθήστε ξανά.",
+      trying_again: "Γίνεται νέα προσπάθεια...",
     },
     mint: {
       notifications: {
