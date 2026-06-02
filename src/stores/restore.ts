@@ -135,7 +135,7 @@ export const useRestoreStore = defineStore("restore", {
         if (maxLastCounterWithSignature >= 0) {
           const nextCounter = maxLastCounterWithSignature + 1;
           if (nextCounter > walletStore.keysetCounter(keyset.id)) {
-            walletStore
+            await walletStore
               .getOrCreateCounterSource()
               .advanceToAtLeast(keyset.id, nextCounter);
             walletStore.syncCounterToStorage(keyset.id, nextCounter);

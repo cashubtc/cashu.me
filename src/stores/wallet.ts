@@ -304,10 +304,10 @@ export const useWalletStore = defineStore("wallet", {
     keysetCounter(id: string): number {
       return this.keysetCounters.find((c) => c.id === id)?.counter ?? 0;
     },
-    increaseKeysetCounter(id: string, by: number) {
+    async increaseKeysetCounter(id: string, by: number) {
       const next = this.keysetCounter(id) + by;
       const src = this.getOrCreateCounterSource();
-      src.advanceToAtLeast(id, next);
+      await src.advanceToAtLeast(id, next);
       this.syncCounterToStorage(id, next);
     },
     createWalletInstance(
@@ -358,7 +358,7 @@ export const useWalletStore = defineStore("wallet", {
       try {
         return await operation();
       } catch (error: any) {
-        const handled = this.handleOutputsHaveAlreadyBeenSignedError(
+        const handled = await this.handleOutputsHaveAlreadyBeenSignedError(
           keysetId,
           error
         );
@@ -1786,7 +1786,7 @@ export const useWalletStore = defineStore("wallet", {
       }
       return this.mnemonic;
     },
-    handleOutputsHaveAlreadyBeenSignedError: function (
+    async handleOutputsHaveAlreadyBeenSignedError(
       keysetId: string,
       error: any
     ) {
@@ -1795,7 +1795,7 @@ export const useWalletStore = defineStore("wallet", {
           `[wallet] outputs already signed for keyset ${keysetId}, advancing counter and trying again`
         );
         const next = this.keysetCounter(keysetId) + 10;
-        this.getOrCreateCounterSource().advanceToAtLeast(keysetId, next);
+        await this.getOrCreateCounterSource().advanceToAtLeast(keysetId, next);
         this.syncCounterToStorage(keysetId, next);
         notify(this.t("wallet.notifications.trying_again"));
         return true;
