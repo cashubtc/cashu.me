@@ -342,9 +342,7 @@ export async function checkOutgoingOnchain(
       await proofsStore.setReserved(proofs, false);
       this.removeOutgoingInvoiceFromHistory(quote);
       useInvoicesWorkerStore().removeOutgoingInvoiceFromChecker?.(quote);
-      notifyWarning(
-        this.t("wallet.notifications.lightning_payment_failed")
-      );
+      notifyWarning(this.t("wallet.notifications.lightning_payment_failed"));
     }
 
     if (meltQuote.state === MeltQuoteState.PAID) {
