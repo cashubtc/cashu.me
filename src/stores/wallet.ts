@@ -539,7 +539,9 @@ export const useWalletStore = defineStore("wallet", {
       const keysetId = this.getKeyset(wallet.mint.mintUrl, wallet.unit);
       await uIStore.lockMutex();
       try {
-        const spendableProofs: Proof[] = toProofs(this.spendableProofs(proofs, amount));
+        const spendableProofs: Proof[] = toProofs(
+          this.spendableProofs(proofs, amount)
+        );
 
         let keepProofs: ProofLike[] = [];
         let sendProofs: ProofLike[] = [];
