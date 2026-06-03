@@ -477,15 +477,9 @@ describe("wallet store", () => {
     // amount + fees(sendProofs) — exactly what melt validation requires.
     const wallet = useWalletStore();
     const proofs = [{ id: "00bb", amount: 128, reserved: false, secret: "s1" }];
-
-    // Throw only when the (new) exact-match flag is set, so the fixed code
-    // falls through to the swap. Non-exact calls (the old code's pre-coinSelect
-    // path) return the input proofs as-is so the swap branch is still reached
-    // via the legacy totalAmount != targetAmount check — letting the
-    // assertions catch the regression cleanly.
     const selectProofsToSend = vi.fn(
       (proofs, _amount, _includeFees, exactMatch) => {
-        if (exactMatch) throw new Error("no exact match");
+        if (exactMatch) return { send: [], keep: proofs };
         return { send: proofs, keep: [] };
       }
     );

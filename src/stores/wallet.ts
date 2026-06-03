@@ -546,17 +546,23 @@ export const useWalletStore = defineStore("wallet", {
         let keepProofs: ProofLike[] = [];
         let sendProofs: ProofLike[] = [];
 
-        // Try to avoid a swap by selecting an exact match.
-        // selectProofsToSend throws if no exact match found.
+        // Try to avoid a swap by selecting an exact match. selectProofsToSend
+        // returns { send: [] } when no subset is found and throws if exact-match
+        // search exceeds MAX_TIMEMS. Fall through to swap in either case.
+        let exactMatch: ProofLike[] = [];
         try {
-          const { send } = wallet.selectProofsToSend(
+          exactMatch = wallet.selectProofsToSend(
             spendableProofs,
             amount,
             includeFees,
             true // exact match
-          );
-          sendProofs = send;
+          ).send;
         } catch {
+          // exact-match search timed out; the swap will handle it
+        }
+        if (exactMatch.length > 0) {
+          sendProofs = exactMatch;
+        } else {
           // we need to swap!
           // get a new wallet with potentially updated keysets / info
           const swapWallet = await this.mintWallet(
