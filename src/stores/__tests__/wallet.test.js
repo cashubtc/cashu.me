@@ -478,10 +478,20 @@ describe("wallet store", () => {
     const wallet = useWalletStore();
     const proofs = [{ id: "00bb", amount: 128, reserved: false, secret: "s1" }];
 
-    // Force the exact-match path to fail so the swap fallback runs.
-    const selectProofsToSend = vi.fn(() => {
-      throw new Error("no exact match");
-    });
+    // Throw only when the (new) exact-match flag is set, so the fixed code
+    // falls through to the swap. Non-exact calls (the old code's pre-coinSelect
+    // path) return the input proofs as-is so the swap branch is still reached
+    // via the legacy totalAmount != targetAmount check — letting the
+    // assertions catch the regression cleanly.
+    const selectProofsToSend = vi.fn(
+      (proofs, _amount, _includeFees, exactMatch) => {
+        if (exactMatch) throw new Error("no exact match");
+        return { send: proofs, keep: [] };
+      }
+    );
+    // Old code calls wallet.getFeesForProofs(selected).toNumber() to compute
+    // targetAmount. Mock a small input fee so it reaches the swap branch.
+    const getFeesForProofs = vi.fn(() => ({ toNumber: () => 1 }));
 
     // Capture each step in the swap builder chain.
     const includeFeesSpy = vi.fn();
@@ -511,6 +521,7 @@ describe("wallet store", () => {
       mint: { mintUrl: "https://mint-b.example" },
       unit: "sat",
       selectProofsToSend,
+      getFeesForProofs,
       ops: {
         send: sendSpy.mockReturnValue(builder),
       },
