@@ -64,6 +64,7 @@
             <ChooseMint
               v-if="!showNoMintForMethodError"
               :filter-lightning-method="payLightningMethod"
+              :filter-mint-operation="payMintOperation"
             />
           </div>
         </div>
@@ -174,6 +175,64 @@
                             )
                           }}
                         </div>
+                        <div
+                          v-if="showOnchainFeeOptions"
+                          class="onchain-fee-options q-mt-lg"
+                        >
+                          <div class="text-subtitle2 text-grey-6 q-mb-sm">
+                            Choose confirmation speed
+                          </div>
+                          <div class="q-gutter-y-sm">
+                            <div
+                              v-for="option in onchainFeeOptions"
+                              :key="option.fee_index"
+                              class="fee-option-row"
+                              :class="{
+                                'fee-option-row--selected':
+                                  option.fee_index === selectedOnchainFeeIndex,
+                              }"
+                              @click="selectOnchainFeeOption(option)"
+                            >
+                              <div class="row items-center no-wrap">
+                                <div class="col text-left">
+                                  <div class="text-weight-medium">
+                                    {{ option.estimated_blocks }}
+                                    {{
+                                      option.estimated_blocks === 1
+                                        ? "block"
+                                        : "blocks"
+                                    }}
+                                  </div>
+                                  <div class="text-caption text-grey-6">
+                                    Estimated confirmation
+                                  </div>
+                                </div>
+                                <div class="text-right q-mr-sm">
+                                  <div class="text-weight-bold">
+                                    {{
+                                      formatCurrency(
+                                        option.fee_reserve,
+                                        activeUnit,
+                                        true
+                                      )
+                                    }}
+                                  </div>
+                                  <div class="text-caption text-grey-6">
+                                    fee reserve
+                                  </div>
+                                </div>
+                                <q-icon
+                                  :name="
+                                    option.fee_index === selectedOnchainFeeIndex
+                                      ? 'radio_button_checked'
+                                      : 'radio_button_unchecked'
+                                  "
+                                  color="primary"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                         <MeltQuoteInformation
                           v-if="showMeltQuoteInformation"
                           class="q-mt-sm"
@@ -226,7 +285,7 @@
                             :enabled="true"
                             :muted="insufficientFundsForLightningAmount"
                             :max-amount="lightningMaxAmountFromBalance"
-                            @enter="handleBolt12Quote"
+                            @enter="handleAmountlessQuote"
                             @fiat-mode-changed="fiatKeyboardMode = $event"
                           />
                         </div>
@@ -440,7 +499,7 @@
                 <ParseInputComponent
                   v-if="!camera.show"
                   v-model="payInvoiceData.input.request"
-                  :placeholder="$t('ParseInputComponent.placeholder.pay')"
+                  :placeholder="parseInputPlaceholder"
                   :has-camera="hasCameraAvailable"
                   :ndef-supported="false"
                   @update:model-value="decodeAndQuote($event)"
@@ -554,7 +613,7 @@
                 (val: string | number) =>
                   (payInvoiceData.input.amount = Number(val))
               "
-              @done="handleBolt12Quote"
+              @done="handleAmountlessQuote"
             />
           </div>
           <div class="row justify-center q-pb-lg q-pt-sm">
@@ -568,7 +627,7 @@
                 size="lg"
                 color="primary"
                 rounded
-                @click="handleBolt12Quote"
+                @click="handleAmountlessQuote"
                 :disabled="
                   payInvoiceData.blocking ||
                   payInvoiceData.input.amount == null ||
@@ -891,29 +950,63 @@ export default defineComponent({
         typeof paidRaw !== "boolean";
       return hasAmount || hasFeeReserve || hasFeePaid || hasPaidTimestamp;
     },
+    showOnchainFeeOptions: function (): boolean {
+      return this.isOnchainPay && this.onchainFeeOptions.length > 0;
+    },
+    onchainFeeOptions: function (): any[] {
+      const options = this.payInvoiceData?.meltQuote?.response?.fee_options;
+      return Array.isArray(options) ? options : [];
+    },
+    selectedOnchainFeeIndex: function (): number | null {
+      const quote = this.payInvoiceData?.meltQuote?.response;
+      return (
+        quote?.selected_fee_index ??
+        this.onchainFeeOptions[0]?.fee_index ??
+        null
+      );
+    },
     hasMeltQuote: function (): boolean {
       const quote = this.payInvoiceData?.meltQuote?.response;
       return Boolean(quote?.quote) && quote.amount > 0;
     },
     payLightningMethod: function (): LightningMethod | null {
       if (!this.payInvoiceData?.invoice) return null;
+      if (this.payInvoiceData.invoice.onchain) {
+        return LightningMethod.Onchain;
+      }
       if (this.payInvoiceData.invoice.bolt12) {
         return LightningMethod.Bolt12;
       }
       return LightningMethod.Bolt11;
     },
     dialogTitle: function (): string {
+      if (
+        this.payLightningMethod === LightningMethod.Onchain ||
+        this.payInvoiceData.paymentMethod === LightningMethod.Onchain
+      ) {
+        return "Pay On-chain";
+      }
       if (this.payLightningMethod === LightningMethod.Bolt12) {
         return this.$t("PayInvoiceDialog.input_data.title_bolt12");
       }
       return this.$t("PayInvoiceDialog.input_data.title");
+    },
+    parseInputPlaceholder: function (): string {
+      if (this.payInvoiceData.paymentMethod === LightningMethod.Onchain) {
+        return "Bitcoin address";
+      }
+      return this.$t("ParseInputComponent.placeholder.pay");
+    },
+    payMintOperation: function (): "mint" | "melt" {
+      return "melt";
     },
     hasMintForPayMethod: function (): boolean {
       if (!this.payLightningMethod) return true;
       return (
         mintsSupportingLightningMethod(
           this.mints as StoredMint[],
-          this.payLightningMethod
+          this.payLightningMethod,
+          this.payMintOperation
         ).length > 0
       );
     },
@@ -923,9 +1016,12 @@ export default defineComponent({
     isBolt12Pay: function (): boolean {
       return this.payLightningMethod === LightningMethod.Bolt12;
     },
+    isOnchainPay: function (): boolean {
+      return this.payLightningMethod === LightningMethod.Onchain;
+    },
     showLightningAmountEntry: function (): boolean {
       return (
-        this.isBolt12Pay &&
+        (this.isBolt12Pay || this.isOnchainPay) &&
         this.hasMintForPayMethod &&
         !this.hasMeltQuote &&
         !this.payInvoiceData.blocking &&
@@ -954,7 +1050,9 @@ export default defineComponent({
     enoughtotalUnitBalance: function () {
       return (
         this.hasMeltQuote &&
-        this.activeBalance >= this.payInvoiceData.meltQuote.response.amount
+        this.activeBalance >=
+          this.payInvoiceData.meltQuote.response.amount +
+            this.payInvoiceData.meltQuote.response.fee_reserve
       );
     },
     hasMultinutSupport: function (): boolean {
@@ -1103,7 +1201,7 @@ export default defineComponent({
       this.showNumericKeyboard = false;
       await this.lnurlPaySecond();
     },
-    handleBolt12Quote: async function () {
+    handleAmountlessQuote: async function () {
       if (
         this.payInvoiceData.blocking ||
         this.payInvoiceData.input.amount == null ||
@@ -1113,9 +1211,18 @@ export default defineComponent({
         return;
       }
       await this.meltQuoteInvoiceData();
+      if (this.isOnchainPay && this.onchainFeeOptions.length) {
+        this.selectOnchainFeeOption(this.onchainFeeOptions[0]);
+      }
       if (this.hasMeltQuote || this.payInvoiceData.meltQuote.error != "") {
         this.showNumericKeyboard = false;
       }
+    },
+    selectOnchainFeeOption: function (option: any) {
+      const quote = this.payInvoiceData?.meltQuote?.response;
+      if (!quote || option == null) return;
+      quote.selected_fee_index = option.fee_index;
+      quote.fee_reserve = option.fee_reserve;
     },
   },
   created: function () {},
@@ -1277,6 +1384,23 @@ export default defineComponent({
 
 .invoice-state-content {
   width: 100%;
+}
+
+.onchain-fee-options {
+  width: 100%;
+}
+
+.fee-option-row {
+  border: 1px solid rgba(128, 128, 128, 0.25);
+  border-radius: 14px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.fee-option-row--selected {
+  border-color: var(--q-primary);
+  background: rgba(var(--q-primary-rgb), 0.12);
 }
 
 .slide-down-enter-active {

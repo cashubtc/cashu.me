@@ -33,6 +33,15 @@ import {
   meltBolt12,
   mintOnPaidBolt12,
 } from "./walletBolt12";
+import {
+  requestMintOnchain,
+  checkOnchainAndMint,
+  checkOutgoingOnchain,
+  meltQuoteInvoiceDataOnchain,
+  meltInvoiceDataOnchain,
+  meltOnchain,
+  mintOnPaidOnchain,
+} from "./walletOnchain";
 
 import _ from "underscore";
 import token from "src/js/token";
@@ -53,8 +62,10 @@ import {
   MeltQuoteBolt11Request,
   MintQuoteBolt11Response,
   MintQuoteBolt12Response,
+  MintQuoteOnchainResponse,
   MeltQuoteBolt11Response,
   MeltQuoteBolt12Response,
+  MeltQuoteOnchainResponse,
   CheckStateEnum,
   MeltQuoteState,
   MintQuoteState,
@@ -67,6 +78,7 @@ import {
   type AmountLike,
   type CounterSource,
   createEphemeralCounterSource,
+  OutputData,
   // ConsoleLogger,
 } from "@cashu/cashu-ts";
 // @ts-ignore
@@ -89,6 +101,7 @@ import {
   isLegacyRetailQR,
   translateLegacyQRToLightningAddress,
 } from "src/js/legacy-qr";
+import { onchainNetwork } from "src/js/onchain";
 import { LightningMethod } from "src/stores/walletTypes";
 // HACK: this is a workaround so that the catch block in the melt function does not throw an error when the user exits the app
 // before the payment is completed. This is necessary because the catch block in the melt function would otherwise remove all
@@ -111,12 +124,17 @@ type Invoice = {
 // The app uses number-typed amounts (strategy b). These types represent
 // cashu-ts quote responses with top-level Amount fields converted to number.
 type AppMintQuote = Omit<
-  MintQuoteBolt11Response | MintQuoteBolt12Response,
+  MintQuoteBolt11Response | MintQuoteBolt12Response | MintQuoteOnchainResponse,
   "amount" | "amount_paid" | "amount_issued"
 > & {
   amount: number | null;
   amount_paid?: number;
   amount_issued?: number;
+};
+type AppOnchainFeeOption = {
+  fee_index: number;
+  fee_reserve: number;
+  estimated_blocks: number;
 };
 type AppMeltQuote = {
   quote: string;
@@ -127,6 +145,10 @@ type AppMeltQuote = {
   expiry: number;
   request: string;
   payment_preimage: string | null;
+  fee_options?: AppOnchainFeeOption[];
+  selected_fee_index?: number | null;
+  outpoint?: string | null;
+  change?: any[];
 };
 
 export type InvoiceHistory = Invoice & {
@@ -139,6 +161,8 @@ export type InvoiceHistory = Invoice & {
   label?: string;
   privKey?: string;
   paidDate?: string;
+  meltOutputData?: any[];
+  network?: string;
 };
 
 type KeysetCounter = {
@@ -151,20 +175,30 @@ type MeltExecuteFn = (
   sendProofs: ProofLike[],
   opts: { keysetId: string }
 ) => Promise<{
-  quote: MeltQuoteBolt11Response | MeltQuoteBolt12Response;
+  quote:
+    | MeltQuoteBolt11Response
+    | MeltQuoteBolt12Response
+    | MeltQuoteOnchainResponse;
   change?: Proof[];
+  outputData?: any[];
 }>;
 
 type CheckMeltQuoteFn = (quoteId: string) => Promise<
   {
     state: MeltQuoteState;
-  } & (MeltQuoteBolt11Response | MeltQuoteBolt12Response)
+  } & (
+    | MeltQuoteBolt11Response
+    | MeltQuoteBolt12Response
+    | MeltQuoteOnchainResponse
+  )
 >;
 
 type CheckOutgoingMeltQuoteFn = (
   wallet: Wallet,
   quoteId: string
-) => Promise<MeltQuoteBolt11Response | MeltQuoteBolt12Response>;
+) => Promise<
+  MeltQuoteBolt11Response | MeltQuoteBolt12Response | MeltQuoteOnchainResponse
+>;
 
 const receiveStore = useReceiveTokensStore();
 const tokenStore = useTokensStore();
@@ -175,9 +209,14 @@ function amountToNumber(value: AmountLike | undefined): number {
   return Amount.from(value).toNumber();
 }
 function normalizeMintQuote(
-  quote: MintQuoteBolt11Response | MintQuoteBolt12Response
+  quote:
+    | MintQuoteBolt11Response
+    | MintQuoteBolt12Response
+    | MintQuoteOnchainResponse
 ): AppMintQuote {
-  const { amount, ...rest } = quote;
+  const amount = "amount" in quote ? quote.amount : null;
+  const rest = { ...quote } as any;
+  delete rest.amount;
   return {
     ...rest,
     amount: amount === null ? null : amountToNumber(amount),
@@ -190,15 +229,36 @@ function normalizeMintQuote(
   };
 }
 function normalizeMeltQuote(
-  quote: MeltQuoteBolt11Response | MeltQuoteBolt12Response
+  quote:
+    | MeltQuoteBolt11Response
+    | MeltQuoteBolt12Response
+    | MeltQuoteOnchainResponse
 ): AppMeltQuote {
   const { change, ...rest } = quote;
-  void change; // change proofs are stored, not raw sigs
-  return {
+  const normalized: AppMeltQuote = {
     ...rest,
     amount: amountToNumber(quote.amount),
-    fee_reserve: amountToNumber(quote.fee_reserve),
+    fee_reserve:
+      "fee_reserve" in quote
+        ? amountToNumber(quote.fee_reserve)
+        : amountToNumber(
+            quote.fee_options.find(
+              (option) => option.fee_index === quote.selected_fee_index
+            )?.fee_reserve ?? quote.fee_options[0]?.fee_reserve
+          ),
+    payment_preimage:
+      "payment_preimage" in quote ? quote.payment_preimage : null,
   };
+  if (change) normalized.change = change;
+  if ("fee_options" in quote) {
+    normalized.fee_options = quote.fee_options.map((option) => ({
+      ...option,
+      fee_reserve: amountToNumber(option.fee_reserve),
+    }));
+    normalized.selected_fee_index = quote.selected_fee_index;
+    normalized.outpoint = quote.outpoint;
+  }
+  return normalized;
 }
 
 /** Re-wrap number amounts back to Amount for passing to cashu-ts APIs */
@@ -296,6 +356,7 @@ export const useWalletStore = defineStore("wallet", {
           comment: string;
           quote: string;
         },
+        paymentMethod: null as LightningMethod | null,
       },
     };
   },
@@ -827,6 +888,11 @@ export const useWalletStore = defineStore("wallet", {
     meltQuoteInvoiceData: async function () {
       if (
         this.payInvoiceData?.invoice &&
+        (this.payInvoiceData.invoice as any).onchain
+      ) {
+        return await meltQuoteInvoiceDataOnchain.call(this);
+      } else if (
+        this.payInvoiceData?.invoice &&
         (this.payInvoiceData.invoice as any).bolt12
       ) {
         return await meltQuoteInvoiceDataBolt12.call(this);
@@ -837,6 +903,11 @@ export const useWalletStore = defineStore("wallet", {
     meltQuote: meltQuoteBolt11,
     meltInvoiceData: async function () {
       if (
+        this.payInvoiceData?.invoice &&
+        (this.payInvoiceData.invoice as any).onchain
+      ) {
+        return await meltInvoiceDataOnchain.call(this);
+      } else if (
         this.payInvoiceData?.invoice &&
         (this.payInvoiceData.invoice as any).bolt12
       ) {
@@ -900,6 +971,9 @@ export const useWalletStore = defineStore("wallet", {
           );
           // store melt quote in invoice history
           this.updateOutgoingInvoiceInHistory(normalizeMeltQuote(data.quote));
+          if (data.outputData?.length) {
+            this.setMeltOutputData(quote.quote, data.outputData);
+          }
         } catch (error) {
           throw error;
         } finally {
@@ -947,6 +1021,11 @@ export const useWalletStore = defineStore("wallet", {
           meltQuote.state == MeltQuoteState.PAID ||
           meltQuote.state == MeltQuoteState.PENDING
         ) {
+          if (meltQuote.state == MeltQuoteState.PENDING) {
+            this.payInvoiceData.meltQuote.error = this.t(
+              "wallet.notifications.payment_pending_refresh"
+            );
+          }
           this.payInvoiceData.show = false;
           notify(this.t("wallet.notifications.payment_pending_refresh"));
           throw error;
@@ -977,6 +1056,12 @@ export const useWalletStore = defineStore("wallet", {
     meltInvoiceDataBolt12: meltInvoiceDataBolt12,
     meltBolt12: meltBolt12,
     mintOnPaidBolt12: mintOnPaidBolt12,
+    // On-chain explicit aliases
+    requestMintOnchain: requestMintOnchain,
+    meltQuoteInvoiceDataOnchain: meltQuoteInvoiceDataOnchain,
+    meltInvoiceDataOnchain: meltInvoiceDataOnchain,
+    meltOnchain: meltOnchain,
+    mintOnPaidOnchain: mintOnPaidOnchain,
     // /check
     checkProofsSpendable: async function (
       proofs: WalletProof[],
@@ -1153,6 +1238,7 @@ export const useWalletStore = defineStore("wallet", {
         } else if (meltQuote.state == MeltQuoteState.UNPAID) {
           await useProofsStore().setReserved(proofs, false);
           this.removeOutgoingInvoiceFromHistory(quote);
+          useInvoicesWorkerStore().removeOutgoingInvoiceFromChecker?.(quote);
           notifyWarning(
             this.t("wallet.notifications.lightning_payment_failed")
           );
@@ -1174,6 +1260,7 @@ export const useWalletStore = defineStore("wallet", {
             );
           }
           this.setInvoicePaid(quote);
+          useInvoicesWorkerStore().removeOutgoingInvoiceFromChecker?.(quote);
         }
       } catch (error: any) {
         if (verbose) {
@@ -1189,10 +1276,16 @@ export const useWalletStore = defineStore("wallet", {
     checkOutgoingInvoiceBolt12: async function (quote: string, verbose = true) {
       return await checkOutgoingInvoiceBolt12.call(this, quote, verbose);
     },
+    checkOutgoingOnchain: async function (quote: string, verbose = true) {
+      return await checkOutgoingOnchain.call(this, quote, verbose);
+    },
     checkOutgoingInvoice: async function (quote: string, verbose = true) {
       const invoice = this.invoiceHistory.find((i) => i.quote === quote);
       if (!invoice) {
         throw new Error("invoice not found");
+      }
+      if (invoice.type === LightningMethod.Onchain) {
+        return await this.checkOutgoingOnchain(quote, verbose);
       }
       if (invoice.type === LightningMethod.Bolt12) {
         return await this.checkOutgoingInvoiceBolt12(quote, verbose);
@@ -1211,6 +1304,18 @@ export const useWalletStore = defineStore("wallet", {
         hideInvoiceDetailsOnMint
       );
     },
+    checkOnchainAndMint: async function (
+      quote: string,
+      verbose = true,
+      hideInvoiceDetailsOnMint = true
+    ) {
+      return await checkOnchainAndMint.call(
+        this,
+        quote,
+        verbose,
+        hideInvoiceDetailsOnMint
+      );
+    },
     onTokenPaid: async function (historyToken: HistoryToken) {
       const sendTokensStore = useSendTokensStore();
       const uIStore = useUiStore();
@@ -1223,6 +1328,10 @@ export const useWalletStore = defineStore("wallet", {
         );
         return;
       }
+      useInvoicesWorkerStore().addOutgoingTokenToChecker?.(
+        historyToken.token,
+        true
+      );
       const mint = mintStore.mints.find((m) => m.url === historyToken.mint);
       if (!mint) {
         throw new Error("mint not found");
@@ -1314,7 +1423,12 @@ export const useWalletStore = defineStore("wallet", {
         unit: unit,
         meltQuote: quote,
         type: method,
+        network:
+          method === LightningMethod.Onchain
+            ? onchainNetwork(this.payInvoiceData.input.request || quote.request)
+            : undefined,
       });
+      useInvoicesWorkerStore().addOutgoingInvoiceToChecker?.(quote.quote, true);
     },
     removeOutgoingInvoiceFromHistory: function (quote: string) {
       const index = this.invoiceHistory.findIndex((i) => i.quote === quote);
@@ -1341,6 +1455,19 @@ export const useWalletStore = defineStore("wallet", {
             }
           }
           i.meltQuote = quote;
+          if (i.type === LightningMethod.Onchain && !i.network) {
+            i.network = onchainNetwork(i.request || quote.request);
+          }
+        });
+    },
+    setMeltOutputData: function (quote: string, outputData: any[]) {
+      const serialized = outputData.map((output) =>
+        OutputData.serialize(output)
+      );
+      this.invoiceHistory
+        .filter((i) => i.quote === quote)
+        .forEach((i) => {
+          i.meltOutputData = serialized;
         });
     },
     checkPendingTokens: async function (verbose: boolean = true) {
@@ -1431,6 +1558,53 @@ export const useWalletStore = defineStore("wallet", {
         await this.meltQuoteInvoiceData();
       }
     },
+    isBitcoinAddress: function (value: string): boolean {
+      const v = value.trim();
+      return (
+        /^(bc1|tb1|bcrt1)[a-z0-9]{20,90}$/i.test(v) ||
+        /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(v) ||
+        /^[mn2][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(v)
+      );
+    },
+    handleOnchainAddress: async function (address: string) {
+      const mintStore = useMintsStore();
+      this.payInvoiceData.show = true;
+      this.payInvoiceData.input.amount = undefined;
+      this.payInvoiceData.input.quote = "";
+      this.payInvoiceData.meltQuote.error = "";
+      this.payInvoiceData.meltQuote.response = {
+        quote: "",
+        amount: 0,
+        fee_reserve: 0,
+      };
+
+      const cleanAddress = {
+        request: address,
+        onchain: address,
+        network: onchainNetwork(address),
+        memo: "",
+        msat: 0,
+        sat: 0,
+        fsat: 0,
+        description: "",
+      } as any;
+
+      const mintResult = await ensureLightningMintActive(
+        mintStore.mints,
+        mintStore.activeMintUrl,
+        mintStore.activateMintUrl.bind(mintStore),
+        LightningMethod.Onchain,
+        "melt"
+      );
+      if (!mintResult.ok) {
+        this.payInvoiceData.meltQuote.error =
+          "None of your mints support on-chain payments";
+        this.payInvoiceData.invoice = Object.freeze(cleanAddress);
+        return;
+      }
+
+      this.payInvoiceData.invoice = Object.freeze(cleanAddress);
+    },
     decodeRequest: async function (req: string) {
       const p2pkStore = useP2PKStore();
       req = req.trim();
@@ -1456,6 +1630,7 @@ export const useWalletStore = defineStore("wallet", {
           const url = new URL(
             req.replace(/^bitcoin:/i, "bitcoin://placeholder/")
           );
+          const address = url.pathname.replace(/^\//, "");
           const creq = url.searchParams.get("creq");
           const lightning = url.searchParams.get("lightning");
           if (creq) {
@@ -1470,8 +1645,12 @@ export const useWalletStore = defineStore("wallet", {
             } else {
               await this.handleBolt11InvoiceBolt11();
             }
+          } else if (address && this.isBitcoinAddress(address)) {
+            this.payInvoiceData.input.request = address;
+            await this.handleOnchainAddress(address);
           }
         } catch {
+          const addressMatch = req.match(/^bitcoin:([^?]+)/i);
           const creqMatch = req.match(/[?&]creq=([^&]+)/i);
           const lightningMatch = req.match(/[?&]lightning=([^&]+)/i);
           if (creqMatch) {
@@ -1485,8 +1664,13 @@ export const useWalletStore = defineStore("wallet", {
             } else {
               await this.handleBolt11InvoiceBolt11();
             }
+          } else if (addressMatch && this.isBitcoinAddress(addressMatch[1])) {
+            this.payInvoiceData.input.request = addressMatch[1];
+            await this.handleOnchainAddress(addressMatch[1]);
           }
         }
+      } else if (this.isBitcoinAddress(req)) {
+        await this.handleOnchainAddress(req);
       } else if (req.toLowerCase().startsWith("lno1")) {
         await this.handleBolt12Offer(req);
       } else if (req.toLowerCase().startsWith("lnurl:")) {

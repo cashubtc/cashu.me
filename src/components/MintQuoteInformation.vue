@@ -38,6 +38,52 @@
       <div class="detail-value">{{ methodDisplay }}</div>
     </div>
 
+    <div v-if="networkDisplay" class="detail-item q-mb-md">
+      <div class="detail-label">
+        <InfoIcon :size="20" :color="iconColor" class="detail-icon" />
+        <div class="detail-name">Network</div>
+      </div>
+      <div class="detail-value">{{ networkDisplay }}</div>
+    </div>
+
+    <div v-if="isOnchain && onchainMetadata" class="detail-item q-mb-md">
+      <div class="detail-label">
+        <HashIcon :size="20" :color="iconColor" class="detail-icon" />
+        <div class="detail-name">Transaction ID</div>
+      </div>
+      <a class="detail-value" :href="onchainMetadata.url" target="_blank">
+        {{ shortTxid(onchainMetadata.txid) }}
+      </a>
+    </div>
+
+    <div
+      v-if="isOnchain && (onchainMetadata || loadingOnchainMetadata)"
+      class="detail-item q-mb-md"
+    >
+      <div class="detail-label">
+        <InfoIcon :size="20" :color="iconColor" class="detail-icon" />
+        <div class="detail-name">Chain Status</div>
+      </div>
+      <div class="detail-value detail-value-with-spinner">
+        <q-spinner
+          v-if="loadingOnchainMetadata"
+          size="14px"
+          color="grey-6"
+          class="q-mr-xs"
+        />
+        <transition name="chain-status-fade" mode="out-in">
+          <span
+            v-if="onchainMetadata"
+            :key="onchainStatusDisplay"
+            :class="{ 'text-positive': onchainMetadata.confirmed }"
+          >
+            {{ onchainStatusDisplay }}
+          </span>
+          <span v-else key="loading" class="text-grey-6">Fetching</span>
+        </transition>
+      </div>
+    </div>
+
     <div v-if="paidAtDisplay" class="detail-item q-mb-md">
       <div class="detail-label">
         <ClockIcon :size="20" :color="iconColor" class="detail-icon" />
@@ -68,8 +114,15 @@ import {
   Clock as ClockIcon,
   Building as BuildingIcon,
   QrCode as QrCodeIcon,
+  Hash as HashIcon,
 } from "lucide-vue-next";
 import { LightningMethod } from "src/stores/walletTypes";
+import {
+  fetchAddressTxMetadata,
+  onchainNetwork,
+  onchainNetworkDisplay,
+  type MempoolTxMetadata,
+} from "src/js/onchain";
 
 declare const windowMixin: any;
 declare const formatCurrency: any;
@@ -93,6 +146,7 @@ export default defineComponent({
     ClockIcon,
     BuildingIcon,
     QrCodeIcon,
+    HashIcon,
   },
   props: {
     mintQuote: {
@@ -114,6 +168,10 @@ export default defineComponent({
     method: {
       type: String,
       default: LightningMethod.Bolt11,
+    },
+    refreshTrigger: {
+      type: Number,
+      default: 0,
     },
   },
   computed: {
@@ -164,6 +222,9 @@ export default defineComponent({
     },
     methodDisplay(): string {
       const method = this.method || LightningMethod.Bolt11;
+      if (method === LightningMethod.Onchain) {
+        return "On-chain";
+      }
       if (
         method === LightningMethod.Bolt12 ||
         method === LightningMethod.Bolt12Subpayment
@@ -171,6 +232,20 @@ export default defineComponent({
         return "Bolt12";
       }
       return "Bolt11";
+    },
+    isOnchain(): boolean {
+      return this.method === LightningMethod.Onchain;
+    },
+    networkDisplay(): string {
+      if (!this.isOnchain || !this.invoice?.request) return "";
+      const network =
+        this.invoice.network || onchainNetwork(this.invoice.request);
+      return network === "mutinynet" ? onchainNetworkDisplay(network) : "";
+    },
+    onchainStatusDisplay(): string {
+      if (!this.onchainMetadata) return "";
+      const status = this.onchainMetadata.confirmed ? "Confirmed" : "Pending";
+      return `${status} (${this.onchainMetadata.confirmations}/${this.onchainMetadata.confirmationThreshold})`;
     },
     paidAtTimestamp(): number | null {
       if (this.invoice?.paidDate) {
@@ -191,6 +266,34 @@ export default defineComponent({
     },
   },
   methods: {
+    shortTxid(txid: string): string {
+      return `${txid.slice(0, 8)}...${txid.slice(-8)}`;
+    },
+    mintConfirmations(): number {
+      const mintStore = useMintsStore();
+      const mint = mintStore.mints.find((m: any) => m.url === this.mintUrl);
+      const methods =
+        mint?.info?.nuts?.[4]?.methods || mint?.info?.nuts?.["4"]?.methods;
+      const method = methods?.find(
+        (m: any) => m.method === LightningMethod.Onchain && m.unit === this.unit
+      );
+      return Number(method?.options?.confirmations || 1);
+    },
+    async loadOnchainMetadata() {
+      if (!this.isOnchain || !this.invoice?.request) return;
+      this.loadingOnchainMetadata = true;
+      this.onchainMetadata = null;
+      try {
+        this.onchainMetadata = await fetchAddressTxMetadata(
+          this.invoice.request,
+          this.mintConfirmations()
+        );
+      } catch (error) {
+        console.error("Could not fetch on-chain metadata", error);
+      } finally {
+        this.loadingOnchainMetadata = false;
+      }
+    },
     normalizeToTimestamp(value: string | number | Date | null | undefined) {
       if (value === null || value === undefined) return null;
       if (typeof value === "number") {
@@ -208,6 +311,26 @@ export default defineComponent({
       if (value instanceof Date) return value.getTime();
       return null;
     },
+  },
+  data: function () {
+    return {
+      onchainMetadata: null as MempoolTxMetadata | null,
+      loadingOnchainMetadata: false,
+    };
+  },
+  watch: {
+    "invoice.request": function () {
+      this.loadOnchainMetadata();
+    },
+    method: function () {
+      this.loadOnchainMetadata();
+    },
+    refreshTrigger: function () {
+      this.loadOnchainMetadata();
+    },
+  },
+  mounted() {
+    this.loadOnchainMetadata();
   },
 });
 </script>
@@ -248,5 +371,21 @@ export default defineComponent({
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.detail-value-with-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.chain-status-fade-enter-active,
+.chain-status-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.chain-status-fade-enter-from,
+.chain-status-fade-leave-to {
+  opacity: 0;
 }
 </style>

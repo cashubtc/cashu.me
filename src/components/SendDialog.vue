@@ -41,7 +41,11 @@
             </div>
           </div>
 
-          <div class="action-row" @click="showParseDialog">
+          <div
+            v-if="canSendLightning"
+            class="action-row"
+            @click="showParseDialog"
+          >
             <div class="row items-center no-wrap">
               <div class="icon-circle">
                 <ZapIcon :size="24" />
@@ -50,6 +54,21 @@
                 <div class="text-body1 text-weight-medium">
                   {{ $t("SendDialog.actions.lightning.label") }}
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            v-if="canSendOnchain"
+            class="action-row"
+            @click="showOnchainPayDialog"
+          >
+            <div class="row items-center no-wrap">
+              <div class="icon-circle">
+                <BitcoinIcon :size="24" />
+              </div>
+              <div class="col q-ml-md">
+                <div class="text-body1 text-weight-medium">On-chain</div>
               </div>
             </div>
           </div>
@@ -71,12 +90,17 @@ import { useSettingsStore } from "../stores/settings";
 import { useMintsStore } from "src/stores/mints";
 import {
   X as XIcon,
-  Banknote as BanknoteIcon,
   Zap as ZapIcon,
   Scan as ScanIcon,
   Coins as CoinsIcon,
+  Bitcoin as BitcoinIcon,
 } from "lucide-vue-next";
+import { LightningMethod } from "src/stores/walletTypes";
 import { notifyWarning } from "src/js/notify";
+import {
+  ensurePaymentMintActive,
+  firstMintSupportingPaymentMethods,
+} from "src/js/mint-lightning";
 
 export default defineComponent({
   name: "SendDialog",
@@ -85,6 +109,7 @@ export default defineComponent({
     CoinsIcon,
     ZapIcon,
     ScanIcon,
+    BitcoinIcon,
   },
   mixins: [windowMixin],
   props: {},
@@ -95,7 +120,7 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapState(useMintsStore, ["mints"]),
+    ...mapState(useMintsStore, ["mints", "activeMintUrl"]),
     ...mapWritableState(useUiStore, [
       "showInvoiceDetails",
       "tab",
@@ -120,11 +145,39 @@ export default defineComponent({
         return true;
       }
     },
+    canSendLightning: function (): boolean {
+      return Boolean(
+        firstMintSupportingPaymentMethods(
+          this.mints as any,
+          this.activeMintUrl as string,
+          [LightningMethod.Bolt11, LightningMethod.Bolt12],
+          "melt"
+        )
+      );
+    },
+    canSendOnchain: function (): boolean {
+      return Boolean(
+        firstMintSupportingPaymentMethods(
+          this.mints as any,
+          this.activeMintUrl as string,
+          [LightningMethod.Onchain],
+          "melt"
+        )
+      );
+    },
   },
   methods: {
+    ...mapActions(useMintsStore, ["activateMintUrl"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
-    showParseDialog: function () {
-      if (!this.canMakePayments) {
+    showParseDialog: async function () {
+      const mintResult = await ensurePaymentMintActive(
+        this.mints as any,
+        this.activeMintUrl as string,
+        this.activateMintUrl,
+        [LightningMethod.Bolt11, LightningMethod.Bolt12],
+        "melt"
+      );
+      if (!mintResult.ok) {
         notifyWarning(
           this.$i18n.t("SendDialog.actions.lightning.error_no_mints")
         );
@@ -136,7 +189,33 @@ export default defineComponent({
       this.payInvoiceData.lnurlpay = null;
       this.payInvoiceData.domain = "";
       this.payInvoiceData.lnurlauth = null;
+      this.payInvoiceData.paymentMethod = mintResult.method;
       this.payInvoiceData.input.request = "";
+      this.payInvoiceData.input.comment = "";
+      this.camera.show = false;
+      this.showSendDialog = false;
+    },
+    showOnchainPayDialog: async function () {
+      const mintResult = await ensurePaymentMintActive(
+        this.mints as any,
+        this.activeMintUrl as string,
+        this.activateMintUrl,
+        [LightningMethod.Onchain],
+        "melt"
+      );
+      if (!mintResult.ok) {
+        notifyWarning("No mints available");
+        this.showSendDialog = false;
+        return;
+      }
+      this.payInvoiceData.show = true;
+      this.payInvoiceData.invoice = null;
+      this.payInvoiceData.lnurlpay = null;
+      this.payInvoiceData.domain = "";
+      this.payInvoiceData.lnurlauth = null;
+      this.payInvoiceData.paymentMethod = LightningMethod.Onchain;
+      this.payInvoiceData.input.request = "";
+      this.payInvoiceData.input.amount = undefined;
       this.payInvoiceData.input.comment = "";
       this.camera.show = false;
       this.showSendDialog = false;
