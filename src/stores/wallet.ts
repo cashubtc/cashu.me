@@ -1192,7 +1192,7 @@ export const useWalletStore = defineStore("wallet", {
         }
         return false;
       }
-      return true;
+      return spentProofs != undefined && spentProofs.length == proofs.length;
     },
     checkInvoiceBolt11: async function (
       quote: string,
@@ -1358,19 +1358,24 @@ export const useWalletStore = defineStore("wallet", {
           throw new Error("no tokens provided.");
         }
         const proofs = token.getProofs(tokenJson);
-        const oneProof = [proofs[0]];
         this.activeWebsocketConnections++;
         uIStore.triggerActivityOrb();
         const wallet = await this.activeWallet();
+        let isChecking = false;
         const unsub = await wallet.on.proofStateUpdates(
-          toProofs(oneProof),
-          async (proofState: ProofState & { proof: Proof }) => {
+          toProofs(proofs),
+          async (proofState: ProofState) => {
             console.log(`Websocket: proof state updated: ${proofState.state}`);
-            if (proofState.state == CheckStateEnum.SPENT) {
-              const tokenSpent = await this.checkTokenSpendable(historyToken);
-              if (tokenSpent) {
-                sendTokensStore.showSendTokens = false;
-                unsub();
+            if (proofState.state == CheckStateEnum.SPENT && !isChecking) {
+              isChecking = true;
+              try {
+                const tokenSpent = await this.checkTokenSpendable(historyToken);
+                if (tokenSpent) {
+                  sendTokensStore.showSendTokens = false;
+                  unsub();
+                }
+              } finally {
+                isChecking = false;
               }
             }
           },
