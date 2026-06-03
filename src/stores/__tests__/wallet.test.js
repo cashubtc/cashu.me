@@ -295,12 +295,12 @@ describe("wallet store", () => {
     h.bolt12Decode.mockReturnValue({ amount: "0", description: "" });
   });
 
-  it("manages keyset counters", () => {
+  it("manages keyset counters", async () => {
     const wallet = useWalletStore();
     expect(wallet.keysetCounter("k1")).toBe(0);
-    wallet.increaseKeysetCounter("k1", 4);
+    await wallet.increaseKeysetCounter("k1", 4);
     expect(wallet.keysetCounter("k1")).toBe(4);
-    wallet.increaseKeysetCounter("k2", 3);
+    await wallet.increaseKeysetCounter("k2", 3);
     expect(wallet.keysetCounter("k2")).toBe(3);
   });
 
@@ -505,13 +505,16 @@ describe("wallet store", () => {
     expect(getFeesForProofs).toHaveBeenCalledWith(proofs);
   });
 
-  it("accounts for signed-output errors", () => {
+  it("accounts for signed-output errors", async () => {
     const wallet = useWalletStore();
     wallet.keysetCounters = [{ id: "00aa", counter: 1 }];
 
-    const handled = wallet.handleOutputsHaveAlreadyBeenSignedError("00aa", {
-      message: "outputs have already been signed",
-    });
+    const handled = await wallet.handleOutputsHaveAlreadyBeenSignedError(
+      "00aa",
+      {
+        message: "outputs have already been signed",
+      }
+    );
 
     expect(handled).toBe(true);
     expect(wallet.keysetCounter("00aa")).toBe(11);
