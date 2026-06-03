@@ -422,21 +422,22 @@ describe("wallet store", () => {
     expect(h.mintsStore.updateMintInfoAndKeys).toHaveBeenCalledTimes(1);
   });
 
-  it("uses the wallet instance directly for fee calculation in send", async () => {
+  it("uses the wallet instance directly for proof selection in send", async () => {
     const wallet = useWalletStore();
     const proofs = [{ id: "00bb", amount: 10, reserved: false, secret: "s1" }];
-    const getFeesForProofs = vi.fn(() => ({ toNumber: () => 0 }));
+    const selectProofsToSend = vi.fn(() => ({ send: proofs, keep: [] }));
     const foreignWallet = {
       mint: { mintUrl: "https://mint-b.example" },
       unit: "sat",
-      selectProofsToSend: vi.fn(() => ({ send: proofs, keep: [] })),
-      getFeesForProofs,
+      selectProofsToSend,
       ops: {
         send: vi.fn(() => ({
           asDeterministic: vi.fn(() => ({
             keyset: vi.fn(() => ({
               proofsWeHave: vi.fn(() => ({
-                run: vi.fn(async () => ({ keep: [], send: [] })),
+                includeFees: vi.fn(() => ({
+                  run: vi.fn(async () => ({ keep: [], send: [] })),
+                })),
               })),
             })),
           })),
@@ -455,7 +456,84 @@ describe("wallet store", () => {
 
     await wallet.send(proofs, foreignWallet, 10, false, true);
 
-    expect(getFeesForProofs).toHaveBeenCalledWith(proofs);
+    // exact-match no-swap shortcut goes through the foreign wallet
+    expect(selectProofsToSend).toHaveBeenCalledWith(
+      expect.any(Array),
+      10,
+      true,
+      true
+    );
+  });
+
+  it("forwards includeFees and raw amount to the swap when no exact match exists", async () => {
+    // Regression test for the "Provided: 103, needed: 104" off-by-input-fees
+    // melt bug. The pre-fix code computed `targetAmount = amount + fees(selected)`
+    // and passed it to the swap WITHOUT `.includeFees(true)`. That made
+    // sendProofs sum to targetAmount, but the mint then charged input fees on
+    // those sendProofs (a different proof count), so the inputs fell short.
+    //
+    // The fix: pass the raw `amount` to the swap and chain `.includeFees(true)`.
+    // cashu-ts then inflates the send outputs so sendProofs sum to
+    // amount + fees(sendProofs) — exactly what melt validation requires.
+    const wallet = useWalletStore();
+    const proofs = [{ id: "00bb", amount: 128, reserved: false, secret: "s1" }];
+
+    // Force the exact-match path to fail so the swap fallback runs.
+    const selectProofsToSend = vi.fn(() => {
+      throw new Error("no exact match");
+    });
+
+    // Capture each step in the swap builder chain.
+    const includeFeesSpy = vi.fn();
+    const sendSpy = vi.fn();
+    const builder = {
+      asDeterministic: vi.fn(),
+      keyset: vi.fn(),
+      proofsWeHave: vi.fn(),
+      includeFees: vi.fn(),
+      run: vi.fn(async () => ({
+        keep: [{ id: "00bb", amount: 23, secret: "keep1" }],
+        send: [
+          { id: "00bb", amount: 64, secret: "send1" },
+          { id: "00bb", amount: 32, secret: "send2" },
+          { id: "00bb", amount: 4, secret: "send3" },
+          { id: "00bb", amount: 4, secret: "send4" },
+        ],
+      })),
+    };
+    // Make every method return the builder for chaining; spy the two we assert on.
+    builder.asDeterministic.mockReturnValue(builder);
+    builder.keyset.mockReturnValue(builder);
+    builder.proofsWeHave.mockReturnValue(builder);
+    builder.includeFees = includeFeesSpy.mockReturnValue(builder);
+
+    const swapWallet = {
+      mint: { mintUrl: "https://mint-b.example" },
+      unit: "sat",
+      selectProofsToSend,
+      ops: {
+        send: sendSpy.mockReturnValue(builder),
+      },
+    };
+
+    h.mintsStore.mints.push({
+      url: "https://mint-b.example",
+      keys: [{ id: "00bb" }],
+      keysets: [{ id: "00bb", unit: "sat", active: true }],
+      info: { name: "mint-b" },
+    });
+
+    vi.spyOn(wallet, "getKeyset").mockReturnValue("00bb");
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue(swapWallet);
+
+    await wallet.send(proofs, swapWallet, 100, false, true);
+
+    // The swap is called with the raw invoice amount, NOT a precomputed
+    // `amount + fees(selectedProofs)` target.
+    expect(sendSpy).toHaveBeenCalledWith(100, expect.any(Array));
+    // .includeFees(true) must be chained so cashu-ts inflates the send
+    // outputs to cover their own input fees.
+    expect(includeFeesSpy).toHaveBeenCalledWith(true);
   });
 
   it("accounts for signed-output errors", () => {
