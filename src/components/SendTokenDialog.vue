@@ -408,13 +408,13 @@ export default defineComponent({
     // spec change at https://github.com/cashubtc/nuts/pull/381 lands we can
     // also return `{ kind: "preferred", allowed }` without touching callers:
     // the button disable + warning logic just keys off `kind`.
-    paymentRequestMintConstraint():
-      | { kind: "mandatory"; allowed: string[] }
-      | null {
+    paymentRequestMintConstraint(): {
+      kind: "mandatory";
+      allowed: string[];
+    } | null {
       const allowed =
-        this.sendData.paymentRequest?.mints?.filter(
-          (m): m is string => !!m
-        ) ?? [];
+        this.sendData.paymentRequest?.mints?.filter((m): m is string => !!m) ??
+        [];
       if (allowed.length === 0) return null;
       return { kind: "mandatory", allowed };
     },
@@ -450,11 +450,7 @@ export default defineComponent({
         return true;
       }
       const c = this.paymentRequestMintConstraint;
-      if (
-        c &&
-        c.kind === "mandatory" &&
-        this.selectedMintViolatesRequest
-      ) {
+      if (c && c.kind === "mandatory" && this.selectedMintViolatesRequest) {
         return true;
       }
       return false;
