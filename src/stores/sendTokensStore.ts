@@ -37,5 +37,18 @@ export const useSendTokensStore = defineStore("sendTokensStore", {
       this.sendData.paymentRequest = undefined;
       this.sendData.historyToken = undefined;
     },
+    // Drops any token/proofs that were prepared for the current PaymentRequest
+    // so the next pay attempt rebuilds them from the currently-active mint.
+    // No-op when no PR is active (regular send flows keep their tokensBase64
+    // until the dialog closes).
+    invalidatePreparedPaymentRequestToken(): boolean {
+      if (!this.sendData.paymentRequest) return false;
+      if (!this.sendData.tokensBase64) return false;
+      this.sendData.tokens = "";
+      this.sendData.tokensBase64 = "";
+      this.sendData.historyToken = undefined;
+      this.sendData.historyAmount = null;
+      return true;
+    },
   },
 });

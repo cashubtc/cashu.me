@@ -77,6 +77,14 @@
             style="max-width: 600px"
           >
             <ChooseMint />
+            <q-banner
+              v-if="paymentRequestMintWarning"
+              dense
+              rounded
+              class="bg-red-1 text-red-9 q-mt-sm"
+            >
+              {{ paymentRequestMintWarning }}
+            </q-banner>
           </div>
         </div>
 
@@ -395,6 +403,38 @@ export default defineComponent({
           this.isValidPubkey(this.sendData.p2pkPubkey)
       );
     },
+    // NUT-18's `m` field is mandatory today (cashu-ts `PaymentRequest.mints`
+    // is a plain `string[]`). This constraint helper wraps that so when the
+    // spec change at https://github.com/cashubtc/nuts/pull/381 lands we can
+    // also return `{ kind: "preferred", allowed }` without touching callers:
+    // the button disable + warning logic just keys off `kind`.
+    paymentRequestMintConstraint():
+      | { kind: "mandatory"; allowed: string[] }
+      | null {
+      const allowed =
+        this.sendData.paymentRequest?.mints?.filter(
+          (m): m is string => !!m
+        ) ?? [];
+      if (allowed.length === 0) return null;
+      return { kind: "mandatory", allowed };
+    },
+    selectedMintViolatesRequest(): boolean {
+      const c = this.paymentRequestMintConstraint;
+      if (!c) return false;
+      if (!this.activeMintUrl) return true;
+      return !c.allowed.includes(this.activeMintUrl);
+    },
+    paymentRequestMintWarning(): string {
+      // Only block (and warn) for mandatory constraints. Preferred-mint
+      // copy can be added later as a separate i18n key without reshaping
+      // this method.
+      const c = this.paymentRequestMintConstraint;
+      if (!c || c.kind !== "mandatory") return "";
+      if (!this.selectedMintViolatesRequest) return "";
+      return this.$t(
+        "SendTokenDialog.errors.mint_not_allowed_by_request"
+      ) as string;
+    },
     paymentRequestButtonDisabled(): boolean {
       if (!this.sendData.paymentRequest) {
         return true;
@@ -409,10 +449,28 @@ export default defineComponent({
       if (this.globalMutexLock) {
         return true;
       }
+      const c = this.paymentRequestMintConstraint;
+      if (
+        c &&
+        c.kind === "mandatory" &&
+        this.selectedMintViolatesRequest
+      ) {
+        return true;
+      }
       return false;
     },
   },
   watch: {
+    activeMintUrl: function (newUrl, oldUrl) {
+      // When the user switches mint inside the Pay-PaymentRequest sheet, any
+      // proofs we already prepared belong to the previous mint (and embed
+      // that mint URL in the serialized token). Drop them so the next pay
+      // attempt rebuilds from the newly-selected mint.
+      if (!this.showSendTokens) return;
+      if (!this.sendData.paymentRequest) return;
+      if (!newUrl || !oldUrl || newUrl === oldUrl) return;
+      useSendTokensStore().invalidatePreparedPaymentRequestToken();
+    },
     showSendTokens: function (val) {
       if (val) {
         this.$nextTick(() => {

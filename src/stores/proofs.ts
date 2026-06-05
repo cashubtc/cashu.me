@@ -39,8 +39,13 @@ export const useProofsStore = defineStore("proofs", {
       },
     });
 
-    // Function to update activeProofs
-    const updateActiveProofs = async () => {
+    // Filter the live in-memory proofs ref instead of re-querying cashuDb.
+    // The liveQuery above keeps `proofs.value` in sync with the table, so
+    // doing this synchronously lets activeProofs update in the same tick
+    // as activeMintUrl/activeUnit — otherwise downstream getters like
+    // activeBalance briefly read the old mint's proofs and the UI flashes
+    // an "insufficient balance" warning before the async fetch resolves.
+    const updateActiveProofs = () => {
       const mintStore = useMintsStore();
       const currentMint = mintStore.mints.find(
         (m) => m.url === mintStore.activeMintUrl
@@ -58,15 +63,10 @@ export const useProofsStore = defineStore("proofs", {
         return;
       }
 
-      const keysetIds = unitKeysets.map((k) => k.id);
-      const activeProofs = await cashuDb.proofs
-        .where("id")
-        .anyOf(keysetIds)
-        .toArray()
-        .then((proofs) => {
-          return coerceWalletProofs(proofs).filter((p) => !p.reserved);
-        });
-      mintStore.activeProofs = activeProofs;
+      const keysetIds = new Set(unitKeysets.map((k) => k.id));
+      mintStore.activeProofs = proofs.value.filter(
+        (p) => keysetIds.has(p.id) && !p.reserved
+      );
     };
 
     return {

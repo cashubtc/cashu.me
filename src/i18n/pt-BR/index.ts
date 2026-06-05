@@ -1047,6 +1047,8 @@ export default {
     errors: {
       amount_required: "Insira um valor primeiro.",
       serialization_failed: "Não foi possível preparar o token ecash.",
+      mint_not_allowed_by_request:
+        "O mint selecionado não é aceito por esta solicitação de pagamento.",
     },
   },
   SendPaymentRequest: {

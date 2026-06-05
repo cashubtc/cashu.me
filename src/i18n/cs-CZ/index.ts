@@ -1050,6 +1050,8 @@ export default {
     errors: {
       amount_required: "Nejprve zadejte částku.",
       serialization_failed: "Nepodařilo se připravit ecash token.",
+      mint_not_allowed_by_request:
+        "Vybraný mint není tímto platebním požadavkem přijímán.",
     },
   },
 
