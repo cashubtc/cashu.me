@@ -103,7 +103,7 @@ module.exports = configure(function (/* ctx */) {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
     devServer: {
-      https: true,
+      https: false, // http so the local http page can reach the local http Hyperborea Mint (no mixed-content)
       open: true, // opens browser window automatically
       port: 8080,
     },

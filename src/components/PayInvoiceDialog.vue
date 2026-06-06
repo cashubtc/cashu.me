@@ -280,11 +280,25 @@
                           v-if="showLightningAmountKeyboard"
                           class="column items-center justify-center q-px-lg q-py-lg amount-area"
                         >
+                          <div class="row justify-end full-width q-mb-xs">
+                            <q-btn
+                              flat
+                              dense
+                              size="sm"
+                              color="primary"
+                              no-caps
+                              label="Max"
+                              @click="
+                                payInvoiceData.input.amount =
+                                  maxSpendableForActivePayment
+                              "
+                            />
+                          </div>
                           <AmountInputComponent
                             v-model="payInvoiceData.input.amount"
                             :enabled="true"
                             :muted="insufficientFundsForLightningAmount"
-                            :max-amount="lightningMaxAmountFromBalance"
+                            :max-amount="maxSpendableForActivePayment"
                             @enter="handleAmountlessQuote"
                             @fiat-mode-changed="fiatKeyboardMode = $event"
                           />
@@ -1085,6 +1099,22 @@ export default defineComponent({
     },
     lightningMaxAmountFromBalance: function (): number {
       return this.activeBalance / this.activeUnitCurrencyMultiplyer;
+    },
+    // Max amount the user can actually send for the active payment method, in display units.
+    // For on-chain melts we reserve the offboard fee so a full-balance send doesn't fail
+    // "funds too low" — prefer the live quote's fee_reserve, else a conservative buffer (cashu
+    // refunds any unused fee as change). Lightning/bolt12 keep the full balance.
+    maxSpendableForActivePayment: function (): number {
+      const mult = this.activeUnitCurrencyMultiplyer || 1;
+      if (this.isOnchainPay) {
+        const opts: any[] = this.onchainFeeOptions || [];
+        const feeReserve =
+          opts.length && opts[0] && opts[0].fee_reserve
+            ? opts[0].fee_reserve
+            : Math.max(1500, Math.ceil(this.activeBalance * 0.005));
+        return Math.max(0, this.activeBalance - feeReserve) / mult;
+      }
+      return this.activeBalance / mult;
     },
     insufficientFunds: function (): boolean {
       if (

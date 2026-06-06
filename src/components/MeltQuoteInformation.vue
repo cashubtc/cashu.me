@@ -72,6 +72,19 @@
       </div>
     </div>
 
+    <!-- outbound on-chain offboard: view on block explorer (mirrors inbound) -->
+    <div v-if="hasTxid" class="row justify-center q-mb-md">
+      <a
+        :href="onchainTxUrl"
+        target="_blank"
+        rel="noopener"
+        class="view-on-explorer"
+      >
+        view on block explorer
+        <q-icon name="open_in_new" size="xs" class="q-ml-xs" />
+      </a>
+    </div>
+
     <div
       v-if="hasTxid && (onchainMetadata || loadingOnchainMetadata)"
       class="detail-item q-mb-md"
@@ -555,6 +568,15 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: flex-end;
+}
+
+.view-on-explorer {
+  display: inline-flex;
+  align-items: center;
+  color: var(--q-primary);
+  text-decoration: underline;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .chain-status-fade-enter-active,

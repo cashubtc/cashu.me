@@ -42,7 +42,10 @@
         <!-- Content -->
         <div class="content-area">
           <q-card-section class="q-pa-none">
-            <div v-if="invoiceData.request" class="row justify-center q-mb-md">
+            <div
+              v-if="invoiceData.request && !pjInProgress && !pjMinted"
+              class="row justify-center q-mb-md"
+            >
               <div
                 class="col-12 col-sm-11 col-md-8 q-px-md"
                 style="max-width: 600px"
@@ -84,6 +87,64 @@
                     indeterminate
                     color="primary"
                   />
+                </div>
+              </div>
+            </div>
+
+            <!-- payjoin-board: incoming tx detected (custom on-ramp progress) -->
+            <div v-else-if="pjInProgress" class="row justify-center q-mb-md">
+              <div
+                class="col-12 col-sm-11 col-md-8 q-px-md"
+                style="max-width: 600px"
+              >
+                <div class="payjoin-progress column items-center justify-center">
+                  <div
+                    class="row items-center justify-center text-weight-bold"
+                    style="color: #ec4899; font-size: 1.15rem"
+                  >
+                    <span>Detected incoming payjoin tx</span>
+                    <q-spinner-dots size="30px" color="pink-4" class="q-ml-sm" />
+                  </div>
+                  <a
+                    :href="pjMeta.url"
+                    target="_blank"
+                    rel="noopener"
+                    class="q-mt-md"
+                    style="color: #ec4899; text-decoration: underline"
+                  >
+                    view on block explorer
+                    <q-icon name="open_in_new" size="xs" class="q-ml-xs" />
+                  </a>
+                  <div class="text-grey-6 q-mt-sm" style="font-size: 0.8rem">
+                    {{ pjStatusText }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- payjoin-board: ecash issued -->
+            <div v-else-if="pjMinted" class="row justify-center q-mb-md">
+              <div
+                class="col-12 col-sm-11 col-md-8 q-px-md"
+                style="max-width: 600px"
+              >
+                <div class="payjoin-progress column items-center justify-center">
+                  <transition appear enter-active-class="animated tada">
+                    <q-icon
+                      name="check_circle"
+                      color="positive"
+                      style="font-size: 96px"
+                    />
+                  </transition>
+                  <div
+                    class="text-positive text-weight-bold q-mt-sm"
+                    style="font-size: 1.15rem"
+                  >
+                    Ecash received
+                  </div>
+                  <div class="text-grey-6 q-mt-xs">
+                    boarded into Ark via payjoin
+                  </div>
                 </div>
               </div>
             </div>
@@ -137,7 +198,7 @@
               style="max-width: 600px"
             >
               <q-btn
-                v-if="invoiceData.request"
+                v-if="invoiceData.request && !pjInProgress && !pjMinted"
                 class="full-width"
                 unelevated
                 size="lg"
@@ -166,6 +227,11 @@ import { useWorkersStore } from "../stores/workers";
 import MeltQuoteInformation from "./MeltQuoteInformation.vue";
 import MintQuoteInformation from "./MintQuoteInformation.vue";
 import { LightningMethod } from "src/stores/walletTypes";
+import {
+  fetchAddressTxMetadata,
+  onchainNetwork,
+  type MempoolTxMetadata,
+} from "src/js/onchain";
 // type hint for global mixin
 declare const windowMixin: any;
 
@@ -183,6 +249,8 @@ export default defineComponent({
       copyButtonCopied: false,
       copyButtonTimeout: null as any,
       metadataRefreshTrigger: 0,
+      pjMeta: null as MempoolTxMetadata | null,
+      pjPollTimer: null as any,
     };
   },
   computed: {
@@ -234,15 +302,76 @@ export default defineComponent({
       }
       return "lightning:" + this.invoiceData.request;
     },
+    // ── payjoin-board on-ramp progress (custom) ──────────────────────────
+    isPayjoin(): boolean {
+      return this.isOnchain && (this.invoiceData.request || "").includes("pj=");
+    },
+    pjAddress(): string {
+      const r = (this.invoiceData.request || "").replace(/^bitcoin:/i, "");
+      return r.split("?")[0];
+    },
+    pjMinted(): boolean {
+      return this.isPayjoin && this.invoiceData.status === "paid";
+    },
+    pjInProgress(): boolean {
+      return (
+        this.isPayjoin && !!this.pjMeta && this.invoiceData.status !== "paid"
+      );
+    },
+    pjExplorerName(): string {
+      return onchainNetwork(this.pjAddress) === "mutinynet"
+        ? "mutinynet.com"
+        : "mempool.space";
+    },
+    pjStatusText(): string {
+      const c = this.pjMeta?.confirmations ?? 0;
+      const t = this.pjMeta?.confirmationThreshold ?? 1;
+      if (c >= t)
+        return `Confirmed ${c}/${t} — boarding into Ark, issuing your ecash…`;
+      if (c >= 1)
+        return `Confirming ${c}/${t} block${t === 1 ? "" : "s"}…`;
+      return "Seen in mempool — waiting for the first confirmation…";
+    },
   },
   watch: {
     showInvoiceDetails(val: boolean) {
       if (val) {
         this.metadataRefreshTrigger += 1;
+        this.pjMeta = null;
+        this.startPjPoll();
+      } else {
+        this.stopPjPoll();
       }
+    },
+    "invoiceData.status"(val: string) {
+      if (val === "paid") this.stopPjPoll();
     },
   },
   methods: {
+    startPjPoll() {
+      this.stopPjPoll();
+      if (!this.isPayjoin) return;
+      this.pollPjOnce();
+      this.pjPollTimer = setInterval(() => this.pollPjOnce(), 4000);
+    },
+    stopPjPoll() {
+      if (this.pjPollTimer) {
+        clearInterval(this.pjPollTimer);
+        this.pjPollTimer = null;
+      }
+    },
+    async pollPjOnce() {
+      if (!this.isPayjoin || this.invoiceData.status === "paid") {
+        this.stopPjPoll();
+        return;
+      }
+      try {
+        const meta = await fetchAddressTxMetadata(this.pjAddress, 1);
+        if (meta) this.pjMeta = meta;
+      } catch (e) {
+        // transient mempool fetch error — keep polling
+      }
+    },
     onCopyBolt11: async function () {
       const request = this.invoiceData?.request;
       if (request) {
@@ -264,6 +393,7 @@ export default defineComponent({
     },
   },
   beforeUnmount() {
+    this.stopPjPoll();
     if (this.copyButtonTimeout) {
       clearTimeout(this.copyButtonTimeout);
     }
@@ -337,5 +467,12 @@ export default defineComponent({
 
 .checkmark-icon {
   font-size: clamp(100px, 35vw, 200px);
+}
+
+/* payjoin-board on-ramp progress panel */
+.payjoin-progress {
+  min-height: 320px;
+  padding: 24px;
+  text-align: center;
 }
 </style>
