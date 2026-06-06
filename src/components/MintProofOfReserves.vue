@@ -151,12 +151,10 @@
               <span class="text-bold">lower bound on assets</span> attested as of
               block {{ bundle.as_of_block.height }}.
             </p>
-            <p class="q-mb-none">
-              Get the verifier:
-              <a :href="verifierRepoUrl" target="_blank" rel="noopener">
-                {{ verifierRepoUrl }}
-                <q-icon name="open_in_new" size="xs" class="q-ml-xs" />
-              </a>
+            <p class="q-mb-none text-grey">
+              The independent verifier (bark-audit) is distributed separately —
+              you run it yourself. This wallet never asks the mint to verify
+              its own reserves.
             </p>
           </div>
         </q-expansion-item>
@@ -231,7 +229,7 @@ export default defineComponent({
       error: null as string | null,
       bundle: null as AttestationBundle | null,
       currentHeight: null as number | null,
-      verifierRepoUrl: "https://github.com/second-tech/bark-audit",
+      verifierRepoUrl: "",
     };
   },
   computed: {
@@ -368,10 +366,12 @@ export default defineComponent({
       }
     },
     async loadChainTip() {
-      // Mutinynet signet tip; best-effort and never blocks rendering.
+      // Bitcoin MAINNET tip from an independent explorer (not the mint's own esplora),
+      // so freshness is judged against the real chain the attestation block lives on.
+      // Best-effort and never blocks rendering.
       try {
         const res = await fetch(
-          "https://mutinynet.com/api/blocks/tip/height",
+          "https://mempool.space/api/blocks/tip/height",
           { cache: "no-store" }
         );
         if (!res.ok) return;
