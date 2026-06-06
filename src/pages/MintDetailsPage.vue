@@ -270,6 +270,16 @@
           @close="() => {}"
         />
 
+        <!-- Section Divider for Proof of Reserves -->
+        <div v-if="mintData.url" class="section-divider q-mb-md">
+          <div class="divider-line"></div>
+          <div class="divider-text">PROOF OF RESERVES</div>
+          <div class="divider-line"></div>
+        </div>
+
+        <!-- Mint Proof of Reserves Section -->
+        <MintProofOfReserves v-if="mintData.url" />
+
         <!-- Section Divider -->
         <div class="section-divider q-mb-md">
           <div class="divider-line"></div>
@@ -336,6 +346,7 @@ import EditMintDialog from "src/components/EditMintDialog.vue";
 import RemoveMintDialog from "src/components/RemoveMintDialog.vue";
 import MintMotdMessage from "src/components/MintMotdMessage.vue";
 import MintAuditInfo from "src/components/MintAuditInfo.vue";
+import MintProofOfReserves from "src/components/MintProofOfReserves.vue";
 import {
   QrCode as QrCodeIcon,
   Link as LinkIcon,
@@ -370,6 +381,7 @@ export default defineComponent({
     RemoveMintDialog,
     MintMotdMessage,
     MintAuditInfo,
+    MintProofOfReserves,
   },
   data: function () {
     return {
