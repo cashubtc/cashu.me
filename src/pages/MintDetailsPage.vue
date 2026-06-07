@@ -256,6 +256,16 @@
           </div>
         </div>
 
+        <!-- Section Divider for Proof of Reserves -->
+        <div v-if="mintData.url" class="section-divider q-mb-md">
+          <div class="divider-line"></div>
+          <div class="divider-text">PROOF OF RESERVES</div>
+          <div class="divider-line"></div>
+        </div>
+
+        <!-- Mint Proof of Reserves Section -->
+        <MintProofOfReserves v-if="mintData.url" />
+
         <!-- Section Divider for Audit Info -->
         <div v-if="settings.auditorEnabled" class="section-divider q-mb-md">
           <div class="divider-line"></div>
@@ -269,16 +279,6 @@
           :mintUrl="mintData.url"
           @close="() => {}"
         />
-
-        <!-- Section Divider for Proof of Reserves -->
-        <div v-if="mintData.url" class="section-divider q-mb-md">
-          <div class="divider-line"></div>
-          <div class="divider-text">PROOF OF RESERVES</div>
-          <div class="divider-line"></div>
-        </div>
-
-        <!-- Mint Proof of Reserves Section -->
-        <MintProofOfReserves v-if="mintData.url" />
 
         <!-- Section Divider -->
         <div class="section-divider q-mb-md">
