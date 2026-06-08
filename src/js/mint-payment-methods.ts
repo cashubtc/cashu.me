@@ -11,7 +11,8 @@ type MintOperation = "mint" | "melt";
 export function mintSupportsPaymentMethod(
   mint: StoredMint,
   method: PaymentMethod,
-  operation: MintOperation = "mint"
+  operation: MintOperation = "mint",
+  unit?: string
 ): boolean {
   const nut =
     operation === "melt"
@@ -19,7 +20,10 @@ export function mintSupportsPaymentMethod(
       : nut4Config(mint.info);
   if (nut.supported === false) return false;
   if (nut.methods) {
-    return nut.methods.some((m: { method: string }) => m.method === method);
+    return nut.methods.some(
+      (m: { method: string; unit?: string }) =>
+        m.method === method && (!unit || !m.unit || m.unit === unit)
+    );
   }
   // Old mints without method declarations predate explicit method lists.
   // Keep legacy Lightning behavior, but require explicit support for on-chain.
@@ -29,31 +33,34 @@ export function mintSupportsPaymentMethod(
 export function mintsSupportingPaymentMethod(
   mints: StoredMint[],
   method: PaymentMethod,
-  operation: MintOperation = "mint"
+  operation: MintOperation = "mint",
+  unit?: string
 ): StoredMint[] {
   return mints.filter((mint) =>
-    mintSupportsPaymentMethod(mint, method, operation)
+    mintSupportsPaymentMethod(mint, method, operation, unit)
   );
 }
 
 export function mintSupportsAnyPaymentMethod(
   mint: StoredMint,
   methods: PaymentMethod[],
-  operation: MintOperation = "mint"
+  operation: MintOperation = "mint",
+  unit?: string
 ): boolean {
   return methods.some((method) =>
-    mintSupportsPaymentMethod(mint, method, operation)
+    mintSupportsPaymentMethod(mint, method, operation, unit)
   );
 }
 
 export function firstSupportedPaymentMethod(
   mint: StoredMint,
   methods: PaymentMethod[],
-  operation: MintOperation = "mint"
+  operation: MintOperation = "mint",
+  unit?: string
 ): PaymentMethod | null {
   return (
     methods.find((method) =>
-      mintSupportsPaymentMethod(mint, method, operation)
+      mintSupportsPaymentMethod(mint, method, operation, unit)
     ) || null
   );
 }
@@ -62,18 +69,19 @@ export function firstMintSupportingPaymentMethods(
   mints: StoredMint[],
   activeMintUrl: string,
   methods: PaymentMethod[],
-  operation: MintOperation = "mint"
+  operation: MintOperation = "mint",
+  unit?: string
 ): StoredMint | null {
   const activeMint = mints.find((mint) => mint.url === activeMintUrl);
   if (
     activeMint &&
-    mintSupportsAnyPaymentMethod(activeMint, methods, operation)
+    mintSupportsAnyPaymentMethod(activeMint, methods, operation, unit)
   ) {
     return activeMint;
   }
   return (
     mints.find((mint) =>
-      mintSupportsAnyPaymentMethod(mint, methods, operation)
+      mintSupportsAnyPaymentMethod(mint, methods, operation, unit)
     ) || null
   );
 }
@@ -83,7 +91,8 @@ export async function ensurePaymentMintActive(
   activeMintUrl: string,
   selectMintUrl: (url: string) => void | Promise<void>,
   methods: PaymentMethod[],
-  operation: MintOperation = "mint"
+  operation: MintOperation = "mint",
+  unit?: string
 ): Promise<
   | { ok: true; mint: StoredMint; method: PaymentMethod }
   | { ok: false; errorKey: string }
@@ -92,7 +101,8 @@ export async function ensurePaymentMintActive(
     mints,
     activeMintUrl,
     methods,
-    operation
+    operation,
+    unit
   );
   if (!mint) {
     return { ok: false, errorKey: paymentMethodNoMintErrorKey(methods[0]) };
@@ -100,7 +110,7 @@ export async function ensurePaymentMintActive(
   if (mint.url !== activeMintUrl) {
     await selectMintUrl(mint.url);
   }
-  const method = firstSupportedPaymentMethod(mint, methods, operation);
+  const method = firstSupportedPaymentMethod(mint, methods, operation, unit);
   if (!method) {
     return { ok: false, errorKey: paymentMethodNoMintErrorKey(methods[0]) };
   }
@@ -118,12 +128,14 @@ export async function ensurePaymentMethodMintActive(
   activeMintUrl: string,
   selectMintUrl: (url: string) => void | Promise<void>,
   method: PaymentMethod,
-  operation: MintOperation = "mint"
+  operation: MintOperation = "mint",
+  unit?: string
 ): Promise<{ ok: true } | { ok: false; errorKey: string }> {
   const supportingMints = mintsSupportingPaymentMethod(
     mints,
     method,
-    operation
+    operation,
+    unit
   );
   if (supportingMints.length === 0) {
     return { ok: false, errorKey: paymentMethodNoMintErrorKey(method) };
@@ -132,7 +144,7 @@ export async function ensurePaymentMethodMintActive(
   const activeMint = mints.find((mint) => mint.url === activeMintUrl);
   if (
     !activeMint ||
-    !mintSupportsPaymentMethod(activeMint, method, operation)
+    !mintSupportsPaymentMethod(activeMint, method, operation, unit)
   ) {
     await selectMintUrl(supportingMints[0].url);
   }

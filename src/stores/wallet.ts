@@ -1257,7 +1257,9 @@ export const useWalletStore = defineStore("wallet", {
         mintStore.mints,
         mintStore.activeMintUrl,
         mintStore.selectMintUrl.bind(mintStore),
-        PaymentMethod.Bolt12
+        PaymentMethod.Bolt12,
+        "mint",
+        mintStore.activeUnit
       );
       if (!mintResult.ok) {
         this.payInvoiceData.meltQuote.error = this.t(mintResult.errorKey);
@@ -1308,7 +1310,8 @@ export const useWalletStore = defineStore("wallet", {
         mintStore.activeMintUrl,
         mintStore.selectMintUrl.bind(mintStore),
         PaymentMethod.Onchain,
-        "melt"
+        "melt",
+        mintStore.activeUnit
       );
       if (!mintResult.ok) {
         this.payInvoiceData.meltQuote.error =

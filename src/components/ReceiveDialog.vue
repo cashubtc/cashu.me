@@ -136,7 +136,7 @@ export default defineComponent({
       "receiveData",
     ]),
     ...mapWritableState(useWalletStore, ["invoiceData"]),
-    ...mapState(useMintsStore, ["mints", "activeMintUrl"]),
+    ...mapState(useMintsStore, ["mints", "activeMintUrl", "activeUnit"]),
     canReceivePayments: function () {
       if (!this.mints.length) {
         return false;
@@ -150,7 +150,8 @@ export default defineComponent({
           this.mints as any,
           this.activeMintUrl as string,
           [PaymentMethod.Bolt11, PaymentMethod.Bolt12],
-          "mint"
+          "mint",
+          this.activeUnit as string
         )
       );
     },
@@ -160,7 +161,8 @@ export default defineComponent({
           this.mints as any,
           this.activeMintUrl as string,
           [PaymentMethod.Onchain],
-          "mint"
+          "mint",
+          this.activeUnit as string
         )
       );
     },
@@ -183,7 +185,8 @@ export default defineComponent({
         this.activeMintUrl as string,
         this.selectMintUrl,
         [PaymentMethod.Bolt11, PaymentMethod.Bolt12],
-        "mint"
+        "mint",
+        this.activeUnit as string
       );
       if (!mintResult.ok) {
         notifyWarning(
@@ -207,7 +210,8 @@ export default defineComponent({
         this.activeMintUrl as string,
         this.selectMintUrl,
         [PaymentMethod.Onchain],
-        "mint"
+        "mint",
+        this.activeUnit as string
       );
       if (!mintResult.ok) {
         notifyWarning("No mints available");

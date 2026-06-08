@@ -120,7 +120,7 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapState(useMintsStore, ["mints", "activeMintUrl"]),
+    ...mapState(useMintsStore, ["mints", "activeMintUrl", "activeUnit"]),
     ...mapWritableState(useUiStore, [
       "showInvoiceDetails",
       "tab",
@@ -151,7 +151,8 @@ export default defineComponent({
           this.mints as any,
           this.activeMintUrl as string,
           [PaymentMethod.Bolt11, PaymentMethod.Bolt12],
-          "melt"
+          "melt",
+          this.activeUnit as string
         )
       );
     },
@@ -161,7 +162,8 @@ export default defineComponent({
           this.mints as any,
           this.activeMintUrl as string,
           [PaymentMethod.Onchain],
-          "melt"
+          "melt",
+          this.activeUnit as string
         )
       );
     },
@@ -175,7 +177,8 @@ export default defineComponent({
         this.activeMintUrl as string,
         this.selectMintUrl,
         [PaymentMethod.Bolt11, PaymentMethod.Bolt12],
-        "melt"
+        "melt",
+        this.activeUnit as string
       );
       if (!mintResult.ok) {
         notifyWarning(
@@ -201,7 +204,8 @@ export default defineComponent({
         this.activeMintUrl as string,
         this.selectMintUrl,
         [PaymentMethod.Onchain],
-        "melt"
+        "melt",
+        this.activeUnit as string
       );
       if (!mintResult.ok) {
         notifyWarning("No mints available");

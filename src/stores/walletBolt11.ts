@@ -392,7 +392,9 @@ export async function handleBolt11InvoiceBolt11(this: any) {
     mintStore.mints,
     mintStore.activeMintUrl,
     mintStore.selectMintUrl.bind(mintStore),
-    PaymentMethod.Bolt11
+    PaymentMethod.Bolt11,
+    "mint",
+    mintStore.activeUnit
   );
   if (!mintResult.ok) {
     this.payInvoiceData.meltQuote.error = this.t(mintResult.errorKey);

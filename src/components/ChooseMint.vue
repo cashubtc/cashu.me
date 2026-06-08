@@ -362,7 +362,8 @@ export default defineComponent({
           !mintSupportsPaymentMethod(
             mintData,
             this.filterPaymentMethod,
-            this.filterMintOperation
+            this.filterMintOperation,
+            this.activeUnit
           )
         ) {
           continue;

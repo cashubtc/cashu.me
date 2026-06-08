@@ -1006,7 +1006,8 @@ export default defineComponent({
         mintsSupportingPaymentMethod(
           this.mints as StoredMint[],
           this.payPaymentMethod,
-          this.payMintOperation
+          this.payMintOperation,
+          this.activeUnit
         ).length > 0
       );
     },

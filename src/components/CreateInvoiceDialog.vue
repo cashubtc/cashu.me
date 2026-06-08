@@ -93,7 +93,28 @@
           >
             <div class="col-12" style="max-width: 400px">
               <div
-                v-if="reusableReceiveQuote"
+                v-if="activeMintErrored"
+                class="mint-error-warning column items-center text-center q-pa-lg"
+              >
+                <q-icon name="warning" size="42px" color="warning" />
+                <div class="mint-error-title q-mt-md">Mint unreachable</div>
+                <div class="mint-error-text q-mt-sm">
+                  Reconnect to the mint to receive payments.
+                </div>
+                <q-btn
+                  flat
+                  dense
+                  no-caps
+                  color="primary"
+                  icon="refresh"
+                  class="q-mt-md"
+                  label="Reconnect mint"
+                  :loading="refreshingMint"
+                  @click="refreshActiveMint"
+                />
+              </div>
+              <div
+                v-else-if="reusableReceiveQuote"
                 @click="onCopyReusableOffer"
                 class="cursor-pointer"
               >
@@ -108,7 +129,7 @@
                 </q-responsive>
               </div>
               <div
-                v-if="reusableReceiveQuote"
+                v-if="reusableReceiveQuote && !activeMintErrored"
                 class="q-mt-sm text-center text-grey-7"
                 @click="onCopyReusableOffer"
               >
@@ -247,6 +268,7 @@ export default defineComponent({
       bolt12AddAmount: false as boolean,
       copyButtonCopied: false,
       copyButtonTimeout: null as any,
+      refreshingMint: false,
       checkingReusableOnchainQuote: false,
       checkedReusableOnchainQuote: null as InvoiceHistory | null,
     };
@@ -299,7 +321,9 @@ export default defineComponent({
       // If methods are not specified, assume bolt11 is supported
       if (nut4.methods) {
         return nut4.methods.some(
-          (m: any) => m.method === PaymentMethod.Bolt11
+          (m: any) =>
+            m.method === PaymentMethod.Bolt11 &&
+            (!m.unit || m.unit === mintStore.activeUnit)
         );
       }
       return true;
@@ -310,7 +334,12 @@ export default defineComponent({
         (m) => m.url === mintStore.activeMintUrl
       );
       if (!mint) return false;
-      return mintSupportsPaymentMethod(mint, PaymentMethod.Bolt12);
+      return mintSupportsPaymentMethod(
+        mint,
+        PaymentMethod.Bolt12,
+        "mint",
+        mintStore.activeUnit
+      );
     },
     onchainSupported(): boolean {
       const mintStore = useMintsStore();
@@ -318,9 +347,21 @@ export default defineComponent({
         (m) => m.url === mintStore.activeMintUrl
       );
       if (!mint) return false;
-      return mintSupportsPaymentMethod(mint, PaymentMethod.Onchain);
+      return mintSupportsPaymentMethod(
+        mint,
+        PaymentMethod.Onchain,
+        "mint",
+        mintStore.activeUnit
+      );
+    },
+    activeMint(): any {
+      return this.mints.find((mint: any) => mint.url === this.activeMintUrl);
+    },
+    activeMintErrored(): boolean {
+      return Boolean(this.activeMint?.errored);
     },
     canCreate(): boolean {
+      if (this.activeMintErrored) return false;
       // Bolt11 requires amount > 0
       // Bolt12 and on-chain allow 0 amount (amountless request)
       if (this.isBolt12 || this.isOnchain) return true;
@@ -432,7 +473,7 @@ export default defineComponent({
       "requestMintOnchain",
       "mintOnPaidOnchain",
     ]),
-    ...mapActions(useMintsStore, ["toggleUnit"]),
+    ...mapActions(useMintsStore, ["activateMintUrl", "toggleUnit"]),
     toggleInvoiceType() {
       if (this.isBolt12) {
         this.invoiceData.type = PaymentMethod.Bolt11;
@@ -486,6 +527,9 @@ export default defineComponent({
       }
     },
     async onCopyReusableOffer() {
+      if (this.activeMintErrored) {
+        return;
+      }
       const offer = this.reusableReceiveQuote;
       const request = offer?.request;
       if (request) {
@@ -501,6 +545,20 @@ export default defineComponent({
         } catch (error) {
           console.error("Failed to copy to clipboard:", error);
         }
+      }
+    },
+    async refreshActiveMint() {
+      if (!this.activeMintUrl || this.refreshingMint) {
+        return;
+      }
+      this.refreshingMint = true;
+      try {
+        await this.activateMintUrl(this.activeMintUrl, false, true);
+        this.refreshReusableOnchainQuote();
+      } catch (error) {
+        console.error("Could not refresh mint", error);
+      } finally {
+        this.refreshingMint = false;
       }
     },
     findReusableOnchainQuotes(): InvoiceHistory[] {
@@ -576,6 +634,24 @@ export default defineComponent({
 }
 .fiat-display {
   font-size: 14px;
+}
+.mint-error-warning {
+  border: 1px solid rgba(255, 193, 7, 0.28);
+  border-radius: 12px;
+  background: rgba(255, 193, 7, 0.08);
+  color: inherit;
+  min-height: 260px;
+  justify-content: center;
+}
+.mint-error-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+.mint-error-text {
+  opacity: 0.68;
+  font-size: 14px;
+  line-height: 1.45;
+  max-width: 300px;
 }
 .bottom-panel {
   margin-top: auto;
