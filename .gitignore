@@ -34,3 +34,4 @@ yarn-error.log*
 
 # AI Agent directories
 .claude
+Makefile
