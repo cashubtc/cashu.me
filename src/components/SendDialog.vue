@@ -167,13 +167,13 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useMintsStore, ["activateMintUrl"]),
+    ...mapActions(useMintsStore, ["selectMintUrl"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     showParseDialog: async function () {
       const mintResult = await ensurePaymentMintActive(
         this.mints as any,
         this.activeMintUrl as string,
-        this.activateMintUrl,
+        this.selectMintUrl,
         [PaymentMethod.Bolt11, PaymentMethod.Bolt12],
         "melt"
       );
@@ -199,7 +199,7 @@ export default defineComponent({
       const mintResult = await ensurePaymentMintActive(
         this.mints as any,
         this.activeMintUrl as string,
-        this.activateMintUrl,
+        this.selectMintUrl,
         [PaymentMethod.Onchain],
         "melt"
       );

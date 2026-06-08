@@ -386,6 +386,23 @@ export const useMintsStore = defineStore("mints", {
         );
       }
     },
+    selectMintUrl: function (url: string, unit: string | undefined = undefined) {
+      const mint = this.mints.find((m) => m.url === url);
+      if (!mint) {
+        return false;
+      }
+      this.activeMintUrl = mint.url;
+      if (unit) {
+        const mintClass = new MintClass(mint);
+        if (mintClass.units.includes(unit)) {
+          this.activeUnit = unit;
+        }
+      } else {
+        this.toggleActiveUnitForMint(mint);
+      }
+      useWorkersStore().clearAllWorkers();
+      return true;
+    },
     activateUnit: async function (unit: string, verbose = false) {
       if (unit === this.activeUnit) {
         return;

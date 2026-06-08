@@ -431,7 +431,6 @@ export default defineComponent({
       "mintOnPaidBolt12",
       "requestMintOnchain",
       "mintOnPaidOnchain",
-      "checkOnchainAndMint",
     ]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
     toggleInvoiceType() {
@@ -525,31 +524,11 @@ export default defineComponent({
         })
         .reverse();
     },
-    async refreshReusableOnchainQuote() {
+    refreshReusableOnchainQuote() {
       if (!this.showCreateInvoiceDialog || !this.isOnchain) return;
-      this.checkingReusableOnchainQuote = true;
-      this.checkedReusableOnchainQuote = null;
-      try {
-        for (const quote of this.findReusableOnchainQuotes()) {
-          try {
-            await this.checkOnchainAndMint(quote.quote, false, false);
-            this.checkedReusableOnchainQuote = quote;
-            await this.mintOnPaidOnchain(quote.quote, false, true, false);
-            return;
-          } catch (error: any) {
-            if (error?.message === "Address not paid") {
-              this.checkedReusableOnchainQuote = quote;
-              await this.mintOnPaidOnchain(quote.quote, false, true, false);
-              return;
-            }
-            throw error;
-          }
-        }
-      } catch (error) {
-        console.error("Could not check reusable on-chain address", error);
-      } finally {
-        this.checkingReusableOnchainQuote = false;
-      }
+      this.checkingReusableOnchainQuote = false;
+      this.checkedReusableOnchainQuote =
+        this.findReusableOnchainQuotes()[0] || null;
     },
   },
   beforeUnmount() {

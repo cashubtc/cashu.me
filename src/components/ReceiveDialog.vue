@@ -166,7 +166,7 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useMintsStore, ["activateMintUrl"]),
+    ...mapActions(useMintsStore, ["selectMintUrl"]),
     toggleReceiveEcashDrawer: function () {
       this.showReceiveDialog = false;
       this.showReceiveTokens = false;
@@ -181,7 +181,7 @@ export default defineComponent({
       const mintResult = await ensurePaymentMintActive(
         this.mints as any,
         this.activeMintUrl as string,
-        this.activateMintUrl,
+        this.selectMintUrl,
         [PaymentMethod.Bolt11, PaymentMethod.Bolt12],
         "mint"
       );
@@ -205,7 +205,7 @@ export default defineComponent({
       const mintResult = await ensurePaymentMintActive(
         this.mints as any,
         this.activeMintUrl as string,
-        this.activateMintUrl,
+        this.selectMintUrl,
         [PaymentMethod.Onchain],
         "mint"
       );

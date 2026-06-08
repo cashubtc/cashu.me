@@ -391,7 +391,7 @@ export async function handleBolt11InvoiceBolt11(this: any) {
   const mintResult = await ensurePaymentMethodMintActive(
     mintStore.mints,
     mintStore.activeMintUrl,
-    mintStore.activateMintUrl.bind(mintStore),
+    mintStore.selectMintUrl.bind(mintStore),
     PaymentMethod.Bolt11
   );
   if (!mintResult.ok) {

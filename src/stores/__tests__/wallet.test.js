@@ -53,6 +53,9 @@ const h = vi.hoisted(() => {
     activateMintUrl: vi.fn(async (url) => {
       h.mintsStore.activeMintUrl = url;
     }),
+    selectMintUrl: vi.fn((url) => {
+      h.mintsStore.activeMintUrl = url;
+    }),
     addMintData: { url: "", nickname: "" },
     mints: [],
     mintUnitKeysets: vi.fn((mint, unit) =>
@@ -733,6 +736,7 @@ describe("wallet store", () => {
       "wallet.notifications.no_bolt12_mint"
     );
     expect(h.mintsStore.activateMintUrl).not.toHaveBeenCalled();
+    expect(h.mintsStore.selectMintUrl).not.toHaveBeenCalled();
   });
 
   it("switches to a Bolt12-enabled mint when paying an offer", async () => {
@@ -759,11 +763,10 @@ describe("wallet store", () => {
 
     await wallet.handleBolt12Offer("lno1amountless");
 
-    expect(h.mintsStore.activateMintUrl).toHaveBeenCalledWith(
-      "https://mint-b.example",
-      false,
-      true
+    expect(h.mintsStore.selectMintUrl).toHaveBeenCalledWith(
+      "https://mint-b.example"
     );
+    expect(h.mintsStore.activateMintUrl).not.toHaveBeenCalled();
     expect(wallet.payInvoiceData.meltQuote.error).toBe("");
   });
 
@@ -787,6 +790,7 @@ describe("wallet store", () => {
       "wallet.notifications.no_bolt11_mint"
     );
     expect(h.mintsStore.activateMintUrl).not.toHaveBeenCalled();
+    expect(h.mintsStore.selectMintUrl).not.toHaveBeenCalled();
   });
 
   it("switches to a Bolt11-enabled mint when paying an invoice", async () => {
@@ -817,11 +821,10 @@ describe("wallet store", () => {
 
     await wallet.handleBolt11InvoiceBolt11();
 
-    expect(h.mintsStore.activateMintUrl).toHaveBeenCalledWith(
-      "https://mint-a.example",
-      false,
-      true
+    expect(h.mintsStore.selectMintUrl).toHaveBeenCalledWith(
+      "https://mint-a.example"
     );
+    expect(h.mintsStore.activateMintUrl).not.toHaveBeenCalled();
     expect(quoteSpy).toHaveBeenCalled();
   });
 

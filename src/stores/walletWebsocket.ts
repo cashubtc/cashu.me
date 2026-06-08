@@ -106,7 +106,9 @@ export async function mintOnPaidGeneric(
           proofs = await this.checkOfferAndMintBolt12(quoteId, false);
         }
       } catch (error: any) {
-        console.error(error);
+        if (verbose) {
+          console.error(error);
+        }
         throw error;
       }
 
@@ -121,16 +123,18 @@ export async function mintOnPaidGeneric(
           ? proofs.reduce((acc: number, p: any) => acc + p.amount, 0)
           : invoice.amount;
 
-      notifySuccess(
-        this.t(
-          type === PaymentMethod.Onchain
-            ? "wallet.notifications.received"
-            : "wallet.notifications.received_lightning",
-          {
-            amount: uIStore.formatCurrency(amount, invoice.unit),
-          }
-        )
-      );
+      if (verbose) {
+        notifySuccess(
+          this.t(
+            type === PaymentMethod.Onchain
+              ? "wallet.notifications.received"
+              : "wallet.notifications.received_lightning",
+            {
+              amount: uIStore.formatCurrency(amount, invoice.unit),
+            }
+          )
+        );
+      }
 
       return proofs;
     };
@@ -142,7 +146,9 @@ export async function mintOnPaidGeneric(
 
     await mintWallet.on.mintQuotePaid(quoteId, onPaidCallback, onErrorCallback);
   } catch (error) {
-    console.log("Error in websocket subscription", error);
+    if (verbose) {
+      console.log("Error in websocket subscription", error);
+    }
   } finally {
     this.activeWebsocketConnections--;
   }

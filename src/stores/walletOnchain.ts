@@ -139,14 +139,17 @@ export async function checkOnchainAndMint(
       throw new Error("Address not paid");
     }
 
-    const proofs = await this.retryOnceOnSignedOutputs(keysetId, async () =>
-      mintWallet.ops
-        .mintOnchain(delta, updated)
-        .keyset(keysetId)
-        .asDeterministic()
-        .proofsWeHave(mintStore.mintUnitProofs(mint, invoice.unit))
-        .privkey(invoice.privKey)
-        .run()
+    const proofs = await this.retryOnceOnSignedOutputs(
+      keysetId,
+      async () =>
+        mintWallet.ops
+          .mintOnchain(delta, updated)
+          .keyset(keysetId)
+          .asDeterministic()
+          .proofsWeHave(mintStore.mintUnitProofs(mint, invoice.unit))
+          .privkey(invoice.privKey)
+          .run(),
+      verbose
     );
     await proofsStore.addProofs(proofs);
 
@@ -179,14 +182,18 @@ export async function checkOnchainAndMint(
     }
 
     useUiStore().vibrate();
-    notifySuccess(
-      this.t("wallet.notifications.received", {
-        amount: uIStore.formatCurrency(delta, invoice.unit),
-      })
-    );
+    if (verbose) {
+      notifySuccess(
+        this.t("wallet.notifications.received", {
+          amount: uIStore.formatCurrency(delta, invoice.unit),
+        })
+      );
+    }
     return proofs;
   } catch (error: any) {
-    console.error(error);
+    if (verbose) {
+      console.error(error);
+    }
     if (verbose) {
       if (error?.message === "Address not paid") {
         notify("Address not paid");
@@ -194,7 +201,7 @@ export async function checkOnchainAndMint(
         notifyApiError(error);
       }
     }
-    this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error);
+    this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error, verbose);
     throw error;
   } finally {
     uIStore.unlockMutex();

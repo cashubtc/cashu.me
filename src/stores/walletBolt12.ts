@@ -131,14 +131,17 @@ export async function checkOfferAndMintBolt12(
       throw new Error("no new funds to mint");
     }
 
-    const proofs = await this.retryOnceOnSignedOutputs(keysetId, async () =>
-      mintWallet.ops
-        .mintBolt12(delta, updated)
-        .keyset(keysetId)
-        .asDeterministic()
-        .proofsWeHave(mintStore.mintUnitProofs(mint, invoice.unit))
-        .privkey(invoice.privKey)
-        .run()
+    const proofs = await this.retryOnceOnSignedOutputs(
+      keysetId,
+      async () =>
+        mintWallet.ops
+          .mintBolt12(delta, updated)
+          .keyset(keysetId)
+          .asDeterministic()
+          .proofsWeHave(mintStore.mintUnitProofs(mint, invoice.unit))
+          .privkey(invoice.privKey)
+          .run(),
+      verbose
     );
     await proofsStore.addProofs(proofs);
 
@@ -174,16 +177,20 @@ export async function checkOfferAndMintBolt12(
     }
 
     useUiStore().vibrate();
-    notifySuccess(
-      this.t("wallet.notifications.received_lightning", {
-        amount: uIStore.formatCurrency(delta, invoice.unit),
-      })
-    );
+    if (verbose) {
+      notifySuccess(
+        this.t("wallet.notifications.received_lightning", {
+          amount: uIStore.formatCurrency(delta, invoice.unit),
+        })
+      );
+    }
     return proofs;
   } catch (error: any) {
-    console.error(error);
+    if (verbose) {
+      console.error(error);
+    }
     if (verbose) notifyApiError(error);
-    this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error);
+    this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error, verbose);
     throw error;
   } finally {
     uIStore.unlockMutex();

@@ -397,14 +397,16 @@ export const useWalletStore = defineStore("wallet", {
     },
     retryOnceOnSignedOutputs: async function <T>(
       keysetId: string,
-      operation: () => Promise<T>
+      operation: () => Promise<T>,
+      notifyUser = true
     ): Promise<T> {
       try {
         return await operation();
       } catch (error: any) {
         const handled = this.handleOutputsHaveAlreadyBeenSignedError(
           keysetId,
-          error
+          error,
+          notifyUser
         );
         if (!handled) {
           throw error;
@@ -1254,7 +1256,7 @@ export const useWalletStore = defineStore("wallet", {
       const mintResult = await ensurePaymentMethodMintActive(
         mintStore.mints,
         mintStore.activeMintUrl,
-        mintStore.activateMintUrl.bind(mintStore),
+        mintStore.selectMintUrl.bind(mintStore),
         PaymentMethod.Bolt12
       );
       if (!mintResult.ok) {
@@ -1304,7 +1306,7 @@ export const useWalletStore = defineStore("wallet", {
       const mintResult = await ensurePaymentMethodMintActive(
         mintStore.mints,
         mintStore.activeMintUrl,
-        mintStore.activateMintUrl.bind(mintStore),
+        mintStore.selectMintUrl.bind(mintStore),
         PaymentMethod.Onchain,
         "melt"
       );
@@ -1544,16 +1546,21 @@ export const useWalletStore = defineStore("wallet", {
     },
     handleOutputsHaveAlreadyBeenSignedError: function (
       keysetId: string,
-      error: any
+      error: any,
+      notifyUser = true
     ) {
       if (error?.message?.includes("outputs have already been signed")) {
-        console.warn(
-          `[wallet] outputs already signed for keyset ${keysetId}, advancing counter and trying again`
-        );
+        if (notifyUser) {
+          console.warn(
+            `[wallet] outputs already signed for keyset ${keysetId}, advancing counter and trying again`
+          );
+        }
         const next = this.keysetCounter(keysetId) + 10;
         this.getOrCreateCounterSource().advanceToAtLeast(keysetId, next);
         this.syncCounterToStorage(keysetId, next);
-        notify(this.t("wallet.notifications.trying_again"));
+        if (notifyUser) {
+          notify(this.t("wallet.notifications.trying_again"));
+        }
         return true;
       }
       return false;

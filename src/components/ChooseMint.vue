@@ -259,7 +259,7 @@ export default defineComponent({
       }
       if (this.modelValue === null && !this.dryRun) {
         if (selectedUrl && selectedUrl !== this.activeMintUrl) {
-          await this.activateMintUrl(selectedUrl, false, true);
+          this.selectMintUrl(selectedUrl);
         }
       }
     },
@@ -299,7 +299,7 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useMintsStore, ["activateMintUrl"]),
+    ...mapActions(useMintsStore, ["selectMintUrl"]),
     formatCurrency(value: number, currency: string) {
       return useUiStore().formatCurrency(value, currency);
     },
