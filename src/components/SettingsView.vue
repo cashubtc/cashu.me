@@ -1,5 +1,5 @@
 <template>
-  <div style="max-width: 800px; margin: 0 auto">
+  <div class="settings-view" style="max-width: 800px; margin: 0 auto">
     <!-- BACKUP & RESTORE SECTION -->
     <div class="section-divider q-my-md">
       <div class="divider-line"></div>
@@ -1644,32 +1644,40 @@
                       }}
                     </q-item-label>
                   </row>
-                  <row class="q-pa-sm">
-                    <row
-                      class="q-px-sm"
+                  <div class="keyset-counters q-pa-sm">
+                    <div
+                      class="keyset-counter-group q-px-sm"
                       v-for="(mintCounter, mintUrl) in keysetCountersByMint"
                       :key="mintUrl"
                     >
-                      <q-item-label class="q-px-xs" caption>
+                      <q-item-label class="keyset-mint-label q-px-xs" caption>
                         {{ shortUrl(mintUrl) }}
                       </q-item-label>
                       <q-btn
+                        class="keyset-counter-btn"
                         dense
                         v-for="(counter, id) in mintCounter"
                         :key="id"
                         flat
                         click
+                        :title="counter.id"
                         @click="increaseKeysetCounter(counter.id, 1)"
-                        >{{ counter.id }} -
-                        {{
-                          $t(
-                            "Settings.advanced.developer.keyset_counters.counter",
-                            { count: counter.counter }
-                          )
-                        }}
+                      >
+                        <span class="keyset-id">{{
+                          abbreviateKeysetId(counter.id)
+                        }}</span>
+                        <span class="keyset-counter-separator">-</span>
+                        <span class="keyset-counter-text">
+                          {{
+                            $t(
+                              "Settings.advanced.developer.keyset_counters.counter",
+                              { count: counter.counter }
+                            )
+                          }}
+                        </span>
                       </q-btn>
-                    </row>
-                  </row>
+                    </div>
+                  </div>
                 </q-item-section>
               </q-item>
               <q-item>
@@ -2180,6 +2188,13 @@ export default defineComponent({
     shortUrl: function (url) {
       return getShortUrl(url);
     },
+    abbreviateKeysetId: function (id) {
+      const value = String(id || "");
+      if (value.length <= 24) {
+        return value;
+      }
+      return `${value.slice(0, 8)}...${value.slice(-8)}`;
+    },
     toggleMnemonicVisibility: function () {
       this.hideMnemonic = !this.hideMnemonic;
     },
@@ -2408,6 +2423,72 @@ export default defineComponent({
 });
 </script>
 <style>
+.settings-view {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.settings-view,
+.settings-view * {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.settings-view .q-item,
+.settings-view .q-item__section,
+.settings-view .q-field,
+.settings-view .q-btn,
+.settings-view .q-btn__content {
+  max-width: 100%;
+}
+
+.settings-view .q-item__label,
+.settings-view .q-field__native,
+.settings-view .q-field__input,
+.settings-view .q-btn__content {
+  overflow-wrap: anywhere;
+}
+
+.settings-view .q-btn__content {
+  white-space: normal;
+}
+
+.keyset-counters {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.keyset-counter-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.keyset-mint-label {
+  flex: 0 1 100%;
+}
+
+.keyset-counter-btn {
+  min-height: 28px;
+}
+
+.keyset-id {
+  font-family: monospace;
+  overflow-wrap: normal;
+}
+
+.keyset-counter-separator {
+  margin: 0 4px;
+}
+
+.keyset-counter-text {
+  min-width: 0;
+}
+
 /* Section Divider */
 .section-divider {
   display: flex;
