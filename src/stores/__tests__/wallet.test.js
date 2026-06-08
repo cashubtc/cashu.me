@@ -388,21 +388,6 @@ describe("wallet store", () => {
     expect(wallet.splitAmount(13)).toEqual([1, 4, 8]);
   });
 
-  it("selects base64 proofs by descending amount", () => {
-    const wallet = useWalletStore();
-    const proofs = [
-      { id: "base64-1", amount: 2, reserved: false },
-      { id: "00aa", amount: 32, reserved: false },
-      { id: "base64-2", amount: 8, reserved: false },
-      { id: "base64-3", amount: 4, reserved: false },
-    ];
-    expect(wallet.coinSelectSpendBase64(proofs, 10)).toEqual([
-      { id: "base64-2", amount: 8, reserved: false },
-      { id: "base64-3", amount: 4, reserved: false },
-    ]);
-    expect(wallet.coinSelectSpendBase64(proofs, 20)).toEqual([]);
-  });
-
   it("returns spendable proofs and throws on insufficient amount", () => {
     const wallet = useWalletStore();
     const proofs = [
@@ -981,7 +966,7 @@ describe("wallet store", () => {
         keys: [{ id: "00aa" }],
         keysets: [{ id: "00aa", unit: "sat", active: true }],
         info: {
-          nuts: { 4: { methods: [{ method: "bolt12" }] } },
+          nuts: { 5: { methods: [{ method: "bolt12" }] } },
         },
       },
     ];
@@ -996,7 +981,7 @@ describe("wallet store", () => {
     expect(h.mintsStore.selectMintUrl).not.toHaveBeenCalled();
   });
 
-  it("switches to a Bolt11-enabled mint when paying an invoice", async () => {
+  it("switches to a Bolt11 melt-enabled mint when paying an invoice", async () => {
     const wallet = useWalletStore();
     h.mintsStore.activeMintUrl = "https://mint-b.example";
     h.mintsStore.mints = [
@@ -1005,7 +990,7 @@ describe("wallet store", () => {
         keys: [{ id: "00aa" }],
         keysets: [{ id: "00aa", unit: "sat", active: true }],
         info: {
-          nuts: { 4: { methods: [{ method: "bolt11" }] } },
+          nuts: { 5: { methods: [{ method: "bolt11" }] } },
         },
       },
       {
@@ -1013,7 +998,7 @@ describe("wallet store", () => {
         keys: [{ id: "00bb" }],
         keysets: [{ id: "00bb", unit: "sat", active: true }],
         info: {
-          nuts: { 4: { methods: [{ method: "bolt12" }] } },
+          nuts: { 5: { methods: [{ method: "bolt12" }] } },
         },
       },
     ];
@@ -1028,6 +1013,40 @@ describe("wallet store", () => {
       "https://mint-a.example"
     );
     expect(h.mintsStore.activateMintUrl).not.toHaveBeenCalled();
+    expect(quoteSpy).toHaveBeenCalled();
+  });
+
+  it("does not treat Bolt11 mint support as sufficient for paying an invoice", async () => {
+    const wallet = useWalletStore();
+    h.mintsStore.activeMintUrl = "https://mint-a.example";
+    h.mintsStore.mints = [
+      {
+        url: "https://mint-a.example",
+        keys: [{ id: "00aa" }],
+        keysets: [{ id: "00aa", unit: "sat", active: true }],
+        info: {
+          nuts: { 4: { methods: [{ method: "bolt11" }] } },
+        },
+      },
+      {
+        url: "https://mint-b.example",
+        keys: [{ id: "00bb" }],
+        keysets: [{ id: "00bb", unit: "sat", active: true }],
+        info: {
+          nuts: { 5: { methods: [{ method: "bolt11" }] } },
+        },
+      },
+    ];
+    wallet.payInvoiceData.input.request = "lnbc123";
+    const quoteSpy = vi
+      .spyOn(wallet, "meltQuoteInvoiceDataBolt11")
+      .mockResolvedValue(undefined);
+
+    await wallet.handleBolt11InvoiceBolt11();
+
+    expect(h.mintsStore.selectMintUrl).toHaveBeenCalledWith(
+      "https://mint-b.example"
+    );
     expect(quoteSpy).toHaveBeenCalled();
   });
 

@@ -401,7 +401,7 @@ export async function handleBolt11InvoiceBolt11(this: any) {
     mintStore.activeMintUrl,
     mintStore.selectMintUrl.bind(mintStore),
     PaymentMethod.Bolt11,
-    "mint",
+    "melt",
     mintStore.activeUnit
   );
   if (!mintResult.ok) {

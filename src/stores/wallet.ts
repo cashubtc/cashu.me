@@ -491,27 +491,6 @@ export const useWalletStore = defineStore("wallet", {
       }
       return chunks;
     },
-    coinSelectSpendBase64: function (
-      proofs: WalletProof[],
-      amount: number
-    ): WalletProof[] {
-      const base64Proofs = proofs.filter((p) => !p.id.startsWith("00"));
-      if (base64Proofs.length > 0) {
-        base64Proofs.sort((a, b) => b.amount - a.amount);
-        let sum = 0;
-        const selectedProofs: WalletProof[] = [];
-        for (let i = 0; i < base64Proofs.length; i++) {
-          const proof = base64Proofs[i];
-          sum += proof.amount;
-          selectedProofs.push(proof);
-          if (sum >= amount) {
-            return selectedProofs;
-          }
-        }
-        return [];
-      }
-      return [];
-    },
     coinSelect: function (
       proofs: WalletProof[],
       wallet: Wallet,
