@@ -95,10 +95,10 @@
       class="row q-mt-md q-mb-none text-secondary"
     >
       <div class="col-12">
-        <q-badge outline color="red" class="q-mr-xs q-mt-sm text-weight-bold">
+        <span class="text-red text-weight-bold">
           {{ $t("BalanceView.mintError.label") }}
-          <q-icon name="error" class="q-ml-xs" />
-        </q-badge>
+          <q-icon name="error" class="q-ml-xs" size="xs" />
+        </span>
       </div>
     </div>
     <!-- mint url -->

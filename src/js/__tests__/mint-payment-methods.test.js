@@ -40,6 +40,29 @@ describe("mint payment method helpers", () => {
     ).toBeNull();
   });
 
+  it("requires explicit method declarations", () => {
+    const legacyMint = {
+      ...onchainOnlyMint,
+      url: "https://legacy.example",
+      info: {
+        nuts: {
+          4: {
+            disabled: false,
+          },
+        },
+      },
+    };
+
+    expect(
+      mintSupportsPaymentMethod(
+        legacyMint,
+        PaymentMethod.Bolt11,
+        "mint",
+        "sat"
+      )
+    ).toBe(false);
+  });
+
   it("matches payment methods by unit when methods advertise units", () => {
     const usdLightningMint = {
       ...onchainOnlyMint,

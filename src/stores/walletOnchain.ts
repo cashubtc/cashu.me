@@ -246,7 +246,7 @@ export async function meltQuoteInvoiceDataOnchain(this: any) {
   }
 }
 
-export async function meltInvoiceDataOnchain(this: any) {
+export async function meltInvoiceDataOnchain(this: any, silent?: boolean) {
   if (!this.payInvoiceData.invoice) throw new Error("no address provided.");
   const quote: AppMeltQuote = this.payInvoiceData.meltQuote.response;
   if (!quote) throw new Error("no quote found.");
@@ -256,7 +256,12 @@ export async function meltInvoiceDataOnchain(this: any) {
     mintStore.activeUnit,
     true
   );
-  return await this.meltOnchain(mintStore.activeProofs, quote, mintWallet);
+  return await this.meltOnchain(
+    mintStore.activeProofs,
+    quote,
+    mintWallet,
+    silent
+  );
 }
 
 export async function meltOnchain(

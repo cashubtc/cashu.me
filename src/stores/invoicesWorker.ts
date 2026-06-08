@@ -517,6 +517,9 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
           if (q.type === PaymentMethod.Bolt12) {
             if (this.reusableMintInCooldown(q.mint, now)) continue;
             this.addBolt12OfferToChecker(q.quote);
+            walletStore.mintOnPaidBolt12(q.quote, false, false).catch(() => {
+              // Background websocket setup is best-effort; long-polling handles retries.
+            });
           } else if (q.type === PaymentMethod.Onchain) {
             if (this.reusableMintInCooldown(q.mint, now)) continue;
             this.addOnchainQuoteToChecker(q.quote, true);

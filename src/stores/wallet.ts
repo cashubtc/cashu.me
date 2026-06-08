@@ -809,19 +809,19 @@ export const useWalletStore = defineStore("wallet", {
       }
     },
     meltQuote: meltQuoteBolt11,
-    meltInvoiceData: async function () {
+    meltInvoiceData: async function (silent?: boolean) {
       if (
         this.payInvoiceData?.invoice &&
         (this.payInvoiceData.invoice as any).onchain
       ) {
-        return await meltInvoiceDataOnchain.call(this);
+        return await meltInvoiceDataOnchain.call(this, silent);
       } else if (
         this.payInvoiceData?.invoice &&
         (this.payInvoiceData.invoice as any).bolt12
       ) {
-        return await meltInvoiceDataBolt12.call(this);
+        return await meltInvoiceDataBolt12.call(this, silent);
       } else {
-        return await meltInvoiceDataBolt11.call(this);
+        return await meltInvoiceDataBolt11.call(this, silent);
       }
     },
     meltGeneric: meltGeneric,

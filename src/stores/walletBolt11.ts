@@ -206,7 +206,7 @@ export async function meltQuoteBolt11(
   return normalizeMeltQuote(data);
 }
 
-export async function meltInvoiceDataBolt11(this: any) {
+export async function meltInvoiceDataBolt11(this: any, silent?: boolean) {
   if (this.payInvoiceData.invoice == null) {
     throw new Error("no invoice provided.");
   }
@@ -231,7 +231,12 @@ export async function meltInvoiceDataBolt11(this: any) {
     mintStore.activeUnit,
     true
   );
-  return await this.meltBolt11(mintStore.activeProofs, quote, mintWallet);
+  return await this.meltBolt11(
+    mintStore.activeProofs,
+    quote,
+    mintWallet,
+    silent
+  );
 }
 
 export async function meltBolt11(
@@ -239,7 +244,8 @@ export async function meltBolt11(
   proofs: WalletProof[],
   quote: AppMeltQuote,
   mintWallet: Wallet,
-  silent?: boolean
+  silent?: boolean,
+  releaseMutex = false
 ) {
   return this.meltGeneric(
     proofs,
@@ -247,7 +253,9 @@ export async function meltBolt11(
     mintWallet,
     silent,
     (id: string) => mintWallet.mint.checkMeltQuoteBolt11(id),
-    PaymentMethod.Bolt11
+    PaymentMethod.Bolt11,
+    undefined,
+    releaseMutex
   );
 }
 

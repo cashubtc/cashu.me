@@ -254,7 +254,7 @@ export async function meltQuoteInvoiceDataBolt12(this: any) {
   }
 }
 
-export async function meltInvoiceDataBolt12(this: any) {
+export async function meltInvoiceDataBolt12(this: any, silent?: boolean) {
   if (!this.payInvoiceData.invoice) throw new Error("no invoice provided.");
   const quote: AppMeltQuote = this.payInvoiceData.meltQuote.response;
   if (!quote) throw new Error("no quote found.");
@@ -264,7 +264,12 @@ export async function meltInvoiceDataBolt12(this: any) {
     mintStore.activeUnit,
     true
   );
-  return await this.meltBolt12(mintStore.activeProofs, quote, mintWallet);
+  return await this.meltBolt12(
+    mintStore.activeProofs,
+    quote,
+    mintWallet,
+    silent
+  );
 }
 
 export async function meltBolt12(

@@ -139,4 +139,31 @@ describe("invoices worker", () => {
     expect(worker.onchainQuotes[0].checkCount).toBe(1);
     expect(worker.reusableMintCooldowns).toEqual({});
   });
+
+  it("starts websocket listeners for pending Bolt12 offers on startup", () => {
+    const worker = useInvoicesWorkerStore();
+    const walletStore = {
+      invoiceHistory: [
+        {
+          quote: "bolt12-q",
+          amount: 0,
+          date: new Date().toISOString(),
+          status: "paid",
+          mint: "https://mint.example",
+          unit: "sat",
+          type: PaymentMethod.Bolt12,
+        },
+      ],
+      mintOnPaidBolt12: vi.fn(async () => {}),
+    };
+
+    worker.queuePendingIncomingPayments(walletStore);
+
+    expect(worker.bolt12Quotes.map((q) => q.quote)).toContain("bolt12-q");
+    expect(walletStore.mintOnPaidBolt12).toHaveBeenCalledWith(
+      "bolt12-q",
+      false,
+      false
+    );
+  });
 });

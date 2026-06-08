@@ -141,7 +141,8 @@ export async function meltGeneric(
   silent: boolean | undefined,
   checkQuote: CheckMeltQuoteFn,
   method: PaymentMethod = PaymentMethod.Bolt11,
-  completeMeltOptions?: CompleteMeltOptions
+  completeMeltOptions?: CompleteMeltOptions,
+  releaseMutex = false
 ) {
   const uIStore = useUiStore();
   this.payInvoiceData.paying = true;
@@ -179,8 +180,11 @@ export async function meltGeneric(
 
     uIStore.triggerActivityOrb();
 
-    uIStore.unlockMutex();
+    if (releaseMutex) {
+      uIStore.unlockMutex();
+    }
     let data;
+    let paidMeltQuote: AppMeltQuote | null = null;
     try {
       data = await this.retryOnceOnSignedOutputs(keysetId, async () => {
         const preparedQuote = toMeltQuote(quote);
@@ -197,14 +201,17 @@ export async function meltGeneric(
           completeMeltOptions
         );
       });
-      this.updateOutgoingInvoiceInHistory(normalizeMeltQuote(data.quote));
+      paidMeltQuote = normalizeMeltQuote(data.quote);
+      this.updateOutgoingInvoiceInHistory(paidMeltQuote);
       if (data.outputData?.length) {
         this.setMeltChangeOutputData(quote.quote, data.outputData);
       }
     } catch (error) {
       throw error;
     } finally {
-      await uIStore.lockMutex();
+      if (releaseMutex) {
+        await uIStore.lockMutex();
+      }
     }
 
     if (data.quote.state != MeltQuoteState.PAID) {
@@ -227,7 +234,9 @@ export async function meltGeneric(
       );
     }
 
-    this.updateOutgoingInvoiceInHistory(quote, {
+    const finalMeltQuote = paidMeltQuote || quote;
+    finalMeltQuote.fee_paid = Math.max(0, amount_paid - finalMeltQuote.amount);
+    this.updateOutgoingInvoiceInHistory(finalMeltQuote, {
       status: "paid",
       amount: -amount_paid,
     });

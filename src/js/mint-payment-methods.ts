@@ -18,16 +18,15 @@ export function mintSupportsPaymentMethod(
     operation === "melt"
       ? mint.info?.nuts?.[5] || mint.info?.nuts?.["5"] || ({} as any)
       : nut4Config(mint.info);
+  if (nut.disabled === true) return false;
   if (nut.supported === false) return false;
-  if (nut.methods) {
-    return nut.methods.some(
-      (m: { method: string; unit?: string }) =>
-        m.method === method && (!unit || !m.unit || m.unit === unit)
-    );
-  }
-  // Old mints without method declarations predate explicit method lists.
-  // Keep legacy Lightning behavior, but require explicit support for on-chain.
-  return method !== PaymentMethod.Onchain;
+  if (!Array.isArray(nut.methods)) return false;
+  return nut.methods.some(
+    (m: { method: string; unit?: string; disabled?: boolean }) =>
+      m.disabled !== true &&
+      m.method === method &&
+      (!unit || !m.unit || m.unit === unit)
+  );
 }
 
 export function mintsSupportingPaymentMethod(
