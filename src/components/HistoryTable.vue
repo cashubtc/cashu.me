@@ -175,6 +175,7 @@ import {
   LightningMethod,
   UnifiedTransactionType,
 } from "src/stores/walletTypes";
+import { mintQuoteForHistoryInvoice } from "src/js/invoice-history";
 
 export default defineComponent({
   name: "HistoryTable",
@@ -380,9 +381,10 @@ export default defineComponent({
         if (transaction.amount < 0) {
           this.checkOutgoingInvoice(transaction.quote, true);
         } else if (transaction.method === LightningMethod.OnchainSubpayment) {
-          // For subpayments, extract parent quote and check that
-          const parentQuote = transaction.quote.split("_")[0];
-          this.checkOnchainAndMint(parentQuote, true);
+          this.checkOnchainAndMint(
+            mintQuoteForHistoryInvoice(transaction),
+            true
+          );
         } else {
           this.checkOnchainAndMint(transaction.quote, true);
         }
@@ -397,7 +399,10 @@ export default defineComponent({
         if (transaction.amount < 0) {
           this.checkOutgoingInvoice(transaction.quote, true);
         } else if (isBolt12) {
-          this.checkOfferAndMintBolt12(transaction.quote, true);
+          this.checkOfferAndMintBolt12(
+            mintQuoteForHistoryInvoice(transaction),
+            true
+          );
         } else if (transaction.amount > 0) {
           this.checkInvoiceBolt11(transaction.quote, true);
         }
@@ -447,8 +452,11 @@ export default defineComponent({
           if (invoice.amount < 0) {
             this.checkOutgoingInvoice(invoice.quote, false);
           } else if (invoice.method === LightningMethod.OnchainSubpayment) {
-            const parentQuote = invoice.quote.split("_")[0];
-            this.checkOnchainAndMint(parentQuote, false, false);
+            this.checkOnchainAndMint(
+              mintQuoteForHistoryInvoice(invoice),
+              false,
+              false
+            );
           } else {
             this.checkOnchainAndMint(invoice.quote, false, false);
           }
@@ -463,7 +471,11 @@ export default defineComponent({
         if (invoice.amount < 0) {
           this.checkOutgoingInvoice(invoice.quote, true);
         } else if (isBolt12) {
-          this.checkOfferAndMintBolt12(invoice.quote, false, false);
+          this.checkOfferAndMintBolt12(
+            mintQuoteForHistoryInvoice(invoice),
+            false,
+            false
+          );
         } else if (invoice.amount > 0) {
           try {
             await this.checkInvoiceBolt11(invoice.quote, false, false);

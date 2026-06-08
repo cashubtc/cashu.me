@@ -140,6 +140,7 @@ export type InvoiceHistory = Invoice & {
   // Legacy persisted name; keep readable until old pending melts have cleared.
   meltOutputData?: any[];
   network?: string;
+  parentQuote?: string;
 };
 
 type KeysetCounter = {

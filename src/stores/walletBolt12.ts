@@ -12,6 +12,7 @@ import { mintOnPaidGeneric } from "./walletWebsocket";
 import { LightningMethod } from "src/stores/walletTypes";
 import { usePriceStore } from "./price";
 import { type AppMeltQuote, normalizeMeltQuote } from "./walletMelt";
+import { createSubpaymentHistoryQuote } from "src/js/invoice-history";
 
 // BOLT12: reusable offers
 
@@ -152,7 +153,8 @@ export async function checkOfferAndMintBolt12(
       this.invoiceHistory.push({
         ...invoice,
         amount: delta,
-        quote: `${invoice.quote}_${Date.now()}`, // Unique ID for this event
+        quote: createSubpaymentHistoryQuote(),
+        parentQuote: invoice.quote,
         date: currentDateStr(),
         status: "paid",
         mintQuote: normalizedMintQuote,

@@ -212,7 +212,7 @@ export async function meltGeneric(
     }
 
     if (data.change != null) {
-      await proofsStore.addProofs(data.change);
+      await proofsStore.addMissingProofs(data.change);
     }
 
     await proofsStore.removeProofs(sendProofs);
@@ -355,7 +355,7 @@ export async function finalizePaidMeltInvoice(
       meltQuote.change
     );
     if (changeProofs.length) {
-      await proofsStore.addProofs(changeProofs);
+      await proofsStore.addMissingProofs(changeProofs);
       returnedChange = proofsStore.sumProofs(changeProofs);
     }
   }

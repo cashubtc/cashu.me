@@ -27,6 +27,7 @@ const h = vi.hoisted(() => {
     sumProofs: vi.fn((proofs) => proofs.reduce((sum, p) => sum + p.amount, 0)),
     removeProofs: vi.fn(),
     addProofs: vi.fn(),
+    addMissingProofs: vi.fn(),
     setReserved: vi.fn(),
     getProofsForQuote: vi.fn(),
   };
@@ -619,10 +620,75 @@ describe("wallet store", () => {
       wallet.checkOfferAndMintBolt12("offer-q", false, false),
     ]);
 
+    const subpayment = wallet.invoiceHistory.find(
+      (invoice) => invoice.type === LightningMethod.Bolt12Subpayment
+    );
     expect(counters).toEqual([1, 2]);
     expect(wallet.keysetCounter("00aa")).toBe(3);
+    expect(subpayment).toMatchObject({
+      amount: 100,
+      parentQuote: "offer-q",
+      type: LightningMethod.Bolt12Subpayment,
+    });
+    expect(subpayment.quote).toMatch(/^subpayment:/);
+    expect(subpayment.quote).not.toContain("offer-q");
     expect(h.uiStore.lockMutex).toHaveBeenCalledTimes(2);
     expect(h.uiStore.unlockMutex).toHaveBeenCalledTimes(2);
+  });
+
+  it("records on-chain subpayments with an explicit parent quote", async () => {
+    const wallet = useWalletStore();
+    const parentQuote = "onchain_quote_with_underscores";
+    wallet.invoiceHistory = [
+      {
+        quote: parentQuote,
+        amount: 100,
+        request: "bc1qexample",
+        memo: "memo",
+        date: "old",
+        paidDate: "old",
+        status: "paid",
+        mint: "https://mint-a.example",
+        unit: "sat",
+        privKey: "privkey",
+        type: LightningMethod.Onchain,
+      },
+    ];
+    wallet.keysetCounters = [{ id: "00aa", counter: 1 }];
+
+    const quoteStates = [
+      { quote: parentQuote, amount_paid: 175, amount_issued: 100 },
+      { quote: parentQuote, amount_paid: 175, amount_issued: 175 },
+    ];
+    const mintOnchain = vi.fn((amount) => {
+      const builder = {
+        keyset: vi.fn(() => builder),
+        asDeterministic: vi.fn(() => builder),
+        proofsWeHave: vi.fn(() => builder),
+        privkey: vi.fn(() => builder),
+        run: vi.fn(async () => [{ id: "00aa", amount, secret: "secret-1" }]),
+      };
+      return builder;
+    });
+    const mintWallet = {
+      checkMintQuoteOnchain: vi.fn(async () => quoteStates.shift()),
+      ops: { mintOnchain },
+    };
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue(mintWallet);
+
+    await wallet.checkOnchainAndMint(parentQuote, false, false);
+
+    const subpayment = wallet.invoiceHistory.find(
+      (invoice) => invoice.type === LightningMethod.OnchainSubpayment
+    );
+    expect(subpayment).toMatchObject({
+      amount: 75,
+      parentQuote,
+      type: LightningMethod.OnchainSubpayment,
+    });
+    expect(subpayment.quote).toMatch(/^subpayment:/);
+    expect(subpayment.quote).not.toContain(parentQuote);
+    expect(mintWallet.checkMintQuoteOnchain).toHaveBeenCalledWith(parentQuote);
   });
 
   it("converts fiat input to msat for amountless Bolt12 melt quotes", async () => {
@@ -853,7 +919,7 @@ describe("wallet store", () => {
     const prepareMelt = vi.fn(async () => preview);
     const completeMelt = vi.fn(async () => ({
       quote: { ...quote, state: "PAID" },
-      change: [],
+      change: [{ id: "00aa", amount: 2, secret: "change" }],
       outputData: [],
     }));
     const mintWallet = {
@@ -884,6 +950,9 @@ describe("wallet store", () => {
     );
     expect(h.outputDataSerialize).toHaveBeenCalledWith({ id: "change-output" });
     expect(completeMelt).toHaveBeenCalledWith(preview, undefined, undefined);
+    expect(h.proofsStore.addMissingProofs).toHaveBeenCalledWith([
+      { id: "00aa", amount: 2, secret: "change" },
+    ]);
     expect(wallet.invoiceHistory[0].meltChangeOutputData).toEqual([]);
     expect(wallet.invoiceHistory[0].meltOutputData).toEqual([]);
   });
@@ -988,7 +1057,7 @@ describe("wallet store", () => {
       [{ deserialized: { serialized: "change-output" } }],
       changeSigs
     );
-    expect(h.proofsStore.addProofs).toHaveBeenCalledWith(changeProofs);
+    expect(h.proofsStore.addMissingProofs).toHaveBeenCalledWith(changeProofs);
     expect(wallet.invoiceHistory[0]).toMatchObject({
       status: "paid",
       amount: -102,

@@ -22,6 +22,7 @@ import { mintOnPaidGeneric } from "./walletWebsocket";
 import { useInvoicesWorkerStore } from "./invoicesWorker";
 import { onchainNetwork } from "src/js/onchain";
 import { type AppMeltQuote, normalizeMeltQuote } from "./walletMelt";
+import { createSubpaymentHistoryQuote } from "src/js/invoice-history";
 
 type AppMintQuote = Omit<
   MintQuoteOnchainResponse,
@@ -157,7 +158,8 @@ export async function checkOnchainAndMint(
       this.invoiceHistory.push({
         ...invoice,
         amount: delta,
-        quote: `${invoice.quote}_${Date.now()}`,
+        quote: createSubpaymentHistoryQuote(),
+        parentQuote: invoice.quote,
         date: currentDateStr(),
         paidDate: currentDateStr(),
         status: "paid",
