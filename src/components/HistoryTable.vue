@@ -172,7 +172,7 @@ import {
   Zap as ZapIcon,
 } from "lucide-vue-next";
 import {
-  LightningMethod,
+  PaymentMethod,
   UnifiedTransactionType,
 } from "src/stores/walletTypes";
 import { mintQuoteForHistoryInvoice } from "src/js/invoice-history";
@@ -380,7 +380,7 @@ export default defineComponent({
       } else if (transaction.type === UnifiedTransactionType.Onchain) {
         if (transaction.amount < 0) {
           this.checkOutgoingInvoice(transaction.quote, true);
-        } else if (transaction.method === LightningMethod.OnchainSubpayment) {
+        } else if (transaction.method === PaymentMethod.OnchainSubpayment) {
           this.checkOnchainAndMint(
             mintQuoteForHistoryInvoice(transaction),
             true
@@ -391,8 +391,8 @@ export default defineComponent({
       } else if (transaction.type === UnifiedTransactionType.Lightning) {
         // Prefer explicit type check, fallback to heuristic for old history
         const isBolt12 =
-          transaction.method === LightningMethod.Bolt12 ||
-          transaction.method === LightningMethod.Bolt12Subpayment ||
+          transaction.method === PaymentMethod.Bolt12 ||
+          transaction.method === PaymentMethod.Bolt12Subpayment ||
           (transaction?.mintQuote &&
             typeof transaction.mintQuote.amount_paid !== "undefined");
 
@@ -446,12 +446,12 @@ export default defineComponent({
       this.showInvoiceDetails = true;
       if (invoice.status === "pending") {
         if (
-          invoice.method === LightningMethod.Onchain ||
-          invoice.method === LightningMethod.OnchainSubpayment
+          invoice.method === PaymentMethod.Onchain ||
+          invoice.method === PaymentMethod.OnchainSubpayment
         ) {
           if (invoice.amount < 0) {
             this.checkOutgoingInvoice(invoice.quote, false);
-          } else if (invoice.method === LightningMethod.OnchainSubpayment) {
+          } else if (invoice.method === PaymentMethod.OnchainSubpayment) {
             this.checkOnchainAndMint(
               mintQuoteForHistoryInvoice(invoice),
               false,
@@ -463,8 +463,8 @@ export default defineComponent({
           return;
         }
         const isBolt12 =
-          invoice.method === LightningMethod.Bolt12 ||
-          invoice.method === LightningMethod.Bolt12Subpayment ||
+          invoice.method === PaymentMethod.Bolt12 ||
+          invoice.method === PaymentMethod.Bolt12Subpayment ||
           (invoice?.mintQuote &&
             typeof invoice.mintQuote.amount_paid !== "undefined");
 
@@ -505,11 +505,11 @@ export default defineComponent({
         transactions.push({
           ...invoice,
           type:
-            invoice.type === LightningMethod.Onchain ||
-            invoice.type === LightningMethod.OnchainSubpayment
+            invoice.type === PaymentMethod.Onchain ||
+            invoice.type === PaymentMethod.OnchainSubpayment
               ? UnifiedTransactionType.Onchain
               : UnifiedTransactionType.Lightning,
-          method: invoice.type || LightningMethod.Bolt11,
+          method: invoice.type || PaymentMethod.Bolt11,
           id: `invoice-${invoice.quote}`,
           label: invoice.label,
         });

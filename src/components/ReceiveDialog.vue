@@ -99,11 +99,11 @@ import {
   Scan as ScanIcon,
   Bitcoin as BitcoinIcon,
 } from "lucide-vue-next";
-import { LightningMethod } from "src/stores/walletTypes";
+import { PaymentMethod } from "src/stores/walletTypes";
 import {
   ensurePaymentMintActive,
   firstMintSupportingPaymentMethods,
-} from "src/js/mint-lightning";
+} from "src/js/mint-payment-methods";
 
 export default defineComponent({
   name: "ReceiveDialog",
@@ -149,7 +149,7 @@ export default defineComponent({
         firstMintSupportingPaymentMethods(
           this.mints as any,
           this.activeMintUrl as string,
-          [LightningMethod.Bolt11, LightningMethod.Bolt12],
+          [PaymentMethod.Bolt11, PaymentMethod.Bolt12],
           "mint"
         )
       );
@@ -159,7 +159,7 @@ export default defineComponent({
         firstMintSupportingPaymentMethods(
           this.mints as any,
           this.activeMintUrl as string,
-          [LightningMethod.Onchain],
+          [PaymentMethod.Onchain],
           "mint"
         )
       );
@@ -182,7 +182,7 @@ export default defineComponent({
         this.mints as any,
         this.activeMintUrl as string,
         this.activateMintUrl,
-        [LightningMethod.Bolt11, LightningMethod.Bolt12],
+        [PaymentMethod.Bolt11, PaymentMethod.Bolt12],
         "mint"
       );
       if (!mintResult.ok) {
@@ -206,7 +206,7 @@ export default defineComponent({
         this.mints as any,
         this.activeMintUrl as string,
         this.activateMintUrl,
-        [LightningMethod.Onchain],
+        [PaymentMethod.Onchain],
         "mint"
       );
       if (!mintResult.ok) {
@@ -218,7 +218,7 @@ export default defineComponent({
       this.invoiceData.request = "";
       this.invoiceData.hash = "";
       this.invoiceData.memo = "";
-      this.invoiceData.type = LightningMethod.Onchain;
+      this.invoiceData.type = PaymentMethod.Onchain;
       this.showCreateInvoiceDialog = true;
       this.showReceiveDialog = false;
     },

@@ -17,7 +17,7 @@ import {
   notifyWarning,
 } from "src/js/notify";
 import type { InvoiceHistory } from "./wallet";
-import { LightningMethod } from "src/stores/walletTypes";
+import { PaymentMethod } from "src/stores/walletTypes";
 import { mintOnPaidGeneric } from "./walletWebsocket";
 import { useInvoicesWorkerStore } from "./invoicesWorker";
 import { onchainNetwork } from "src/js/onchain";
@@ -62,13 +62,13 @@ export async function requestMintOnchain(this: any, mintWallet: Wallet) {
     this.invoiceData.unit = mintWallet.unit;
     this.invoiceData.mintQuote = normalizeMintQuote(data);
     this.invoiceData.privKey = privkey;
-    this.invoiceData.type = LightningMethod.Onchain;
+    this.invoiceData.type = PaymentMethod.Onchain;
     this.invoiceData.network = onchainNetwork(data.request);
 
     this.invoiceHistory.push({
       ...this.invoiceData,
       label: "On-chain",
-      type: LightningMethod.Onchain,
+      type: PaymentMethod.Onchain,
       network: onchainNetwork(data.request),
     });
 
@@ -93,7 +93,7 @@ export async function mintOnPaidOnchain(
   hideInvoiceDetailsOnMint = true
 ) {
   return await mintOnPaidGeneric.call(this, quote, {
-    type: LightningMethod.Onchain,
+    type: PaymentMethod.Onchain,
     verbose,
     kickOffInvoiceChecker,
     hideInvoiceDetailsOnMint,
@@ -165,7 +165,7 @@ export async function checkOnchainAndMint(
         status: "paid",
         mintQuote: normalizedMintQuote,
         label: "On-chain Subpayment",
-        type: LightningMethod.OnchainSubpayment,
+        type: PaymentMethod.OnchainSubpayment,
       });
     } else {
       this.setInvoicePaid(invoice.quote, {
@@ -270,7 +270,7 @@ export async function meltOnchain(
     mintWallet,
     silent,
     (id: string) => mintWallet.mint.checkMeltQuoteOnchain(id),
-    LightningMethod.Onchain,
+    PaymentMethod.Onchain,
     { extraPayload: { fee_index: feeIndex } }
   );
 }

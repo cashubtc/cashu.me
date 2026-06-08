@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { useWalletStore } from "./wallet";
 import { useLocalStorage } from "@vueuse/core";
 import { useSettingsStore } from "./settings";
-import { LightningMethod } from "src/stores/walletTypes";
+import { PaymentMethod } from "src/stores/walletTypes";
 import { useTokensStore } from "./tokens";
 interface InvoiceQuote {
   quote: string;
@@ -214,7 +214,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       if (!invoice) return false;
       const now = Date.now();
       // Bolt12
-      if (invoice.type === LightningMethod.Bolt12) {
+      if (invoice.type === PaymentMethod.Bolt12) {
         const isOlderThanMaxAge = now - Date.parse(invoice.date) > this.maxAge;
         if (isOlderThanMaxAge) return false;
 
@@ -229,12 +229,12 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         }
         return true;
       }
-      if (invoice.type === LightningMethod.Onchain) {
+      if (invoice.type === PaymentMethod.Onchain) {
         const isOlderThanMaxAge = now - Date.parse(invoice.date) > this.maxAge;
         if (isOlderThanMaxAge) return false;
         return invoice.amount >= 0;
       }
-      if (invoice.type === LightningMethod.OnchainSubpayment) {
+      if (invoice.type === PaymentMethod.OnchainSubpayment) {
         return false;
       }
       // Bolt11
@@ -442,9 +442,9 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       for (const q of quotesToCheck) {
         try {
           console.log(`Checking quote ${q.quote}`);
-          if (q.type === LightningMethod.Bolt12) {
+          if (q.type === PaymentMethod.Bolt12) {
             this.addBolt12OfferToChecker(q.quote);
-          } else if (q.type === LightningMethod.Onchain) {
+          } else if (q.type === PaymentMethod.Onchain) {
             this.addOnchainQuoteToChecker(q.quote, true);
             walletStore.mintOnPaidOnchain(q.quote, false, false);
           } else {

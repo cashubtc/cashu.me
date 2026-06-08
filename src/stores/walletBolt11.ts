@@ -23,8 +23,8 @@ import * as bolt11Decoder from "light-bolt11-decoder";
 import * as _ from "underscore";
 import { date } from "quasar";
 import { notifyWarning } from "src/js/notify";
-import { LightningMethod } from "src/stores/walletTypes";
-import { ensureLightningMintActive } from "src/js/mint-lightning";
+import { PaymentMethod } from "src/stores/walletTypes";
+import { ensurePaymentMethodMintActive } from "src/js/mint-payment-methods";
 import { type AppMeltQuote, normalizeMeltQuote } from "./walletMelt";
 
 // These actions are implemented as regular functions that rely on dynamic `this`
@@ -159,6 +159,11 @@ export async function meltQuoteInvoiceDataBolt11(this: any) {
   }
   this.payInvoiceData.blocking = true;
   this.payInvoiceData.meltQuote.error = "";
+  this.payInvoiceData.meltQuote.response = {
+    quote: "",
+    amount: 0,
+    fee_reserve: 0,
+  };
   try {
     const mintStore = useMintsStore();
     if (this.payInvoiceData.input.request == "") {
@@ -242,7 +247,7 @@ export async function meltBolt11(
     mintWallet,
     silent,
     (id: string) => mintWallet.mint.checkMeltQuoteBolt11(id),
-    LightningMethod.Bolt11
+    PaymentMethod.Bolt11
   );
 }
 
@@ -318,7 +323,7 @@ export async function mintOnPaidBolt11(
   hideInvoiceDetailsOnMint = true
 ) {
   return await mintOnPaidGeneric.call(this, quote, {
-    type: LightningMethod.Bolt11,
+    type: PaymentMethod.Bolt11,
     verbose,
     kickOffInvoiceChecker,
     hideInvoiceDetailsOnMint,
@@ -383,11 +388,11 @@ export async function handleBolt11InvoiceBolt11(this: any) {
     }
   });
 
-  const mintResult = await ensureLightningMintActive(
+  const mintResult = await ensurePaymentMethodMintActive(
     mintStore.mints,
     mintStore.activeMintUrl,
     mintStore.activateMintUrl.bind(mintStore),
-    LightningMethod.Bolt11
+    PaymentMethod.Bolt11
   );
   if (!mintResult.ok) {
     this.payInvoiceData.meltQuote.error = this.t(mintResult.errorKey);

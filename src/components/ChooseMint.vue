@@ -172,8 +172,8 @@ import { MintClass } from "stores/mints";
 import type { StoredMint } from "stores/mints";
 import { useUiStore } from "stores/ui";
 import { i18n } from "../boot/i18n";
-import { mintSupportsLightningMethod } from "src/js/mint-lightning";
-import { LightningMethod } from "src/stores/walletTypes";
+import { mintSupportsPaymentMethod } from "src/js/mint-payment-methods";
+import { PaymentMethod } from "src/stores/walletTypes";
 
 declare const windowMixin: any;
 
@@ -232,8 +232,8 @@ export default defineComponent({
       type: String,
       default: null,
     },
-    filterLightningMethod: {
-      type: String as () => LightningMethod | null,
+    filterPaymentMethod: {
+      type: String as () => PaymentMethod | null,
       default: null,
     },
     filterMintOperation: {
@@ -258,8 +258,9 @@ export default defineComponent({
         this.$emit("update:modelValue", selectedUrl);
       }
       if (this.modelValue === null && !this.dryRun) {
-        // Use the original behavior when not using v-model
-        (this.activeMintUrl as unknown as string) = selectedUrl;
+        if (selectedUrl && selectedUrl !== this.activeMintUrl) {
+          await this.activateMintUrl(selectedUrl, false, true);
+        }
       }
     },
     modelValue: {
@@ -271,14 +272,14 @@ export default defineComponent({
     activeMintUrl: {
       handler() {
         if (this.modelValue === null) {
-          this.initializeChosenMint();
+          this.initializeChosenMint(true);
         }
       },
     },
     excludeMint() {
       this.initializeChosenMint();
     },
-    filterLightningMethod() {
+    filterPaymentMethod() {
       this.initializeChosenMint();
     },
     filterMintOperation() {
@@ -313,7 +314,7 @@ export default defineComponent({
         units: [...option.units],
       };
     },
-    initializeChosenMint() {
+    initializeChosenMint(preferActiveMint = false) {
       const options = this.chooseMintOptions();
       const fallbackUrl =
         this.chosenMint?.url && this.chosenMint.url !== this.excludeMint
@@ -322,7 +323,9 @@ export default defineComponent({
       let targetUrl =
         this.modelValue !== null
           ? this.modelValue
-          : fallbackUrl || this.activeMintUrl;
+          : preferActiveMint
+            ? this.activeMintUrl || fallbackUrl
+            : fallbackUrl || this.activeMintUrl;
       if (targetUrl && targetUrl === this.excludeMint) {
         targetUrl = "";
       }
@@ -355,10 +358,10 @@ export default defineComponent({
         : [];
       for (const mintData of availableMints) {
         if (
-          this.filterLightningMethod &&
-          !mintSupportsLightningMethod(
+          this.filterPaymentMethod &&
+          !mintSupportsPaymentMethod(
             mintData,
-            this.filterLightningMethod,
+            this.filterPaymentMethod,
             this.filterMintOperation
           )
         ) {

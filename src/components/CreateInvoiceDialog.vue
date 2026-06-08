@@ -69,7 +69,7 @@
             style="max-width: 600px"
           >
             <ChooseMint
-              :filter-lightning-method="mintFilterMethod"
+              :filter-payment-method="mintFilterMethod"
               filter-mint-operation="mint"
             />
           </div>
@@ -225,8 +225,8 @@ import { useSettingsStore } from "src/stores/settings";
 import { usePriceStore } from "src/stores/price";
 import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
 import type { InvoiceHistory } from "src/stores/wallet";
-import { LightningMethod } from "src/stores/walletTypes";
-import { mintSupportsLightningMethod } from "src/js/mint-lightning";
+import { PaymentMethod } from "src/stores/walletTypes";
+import { mintSupportsPaymentMethod } from "src/js/mint-payment-methods";
 
 declare const windowMixin: any;
 
@@ -272,18 +272,18 @@ export default defineComponent({
     ]),
     ...mapState(usePriceStore, ["bitcoinPrice", "currentCurrencyPrice"]),
     isBolt12(): boolean {
-      return this.invoiceData.type === LightningMethod.Bolt12;
+      return this.invoiceData.type === PaymentMethod.Bolt12;
     },
     isOnchain(): boolean {
-      return this.invoiceData.type === LightningMethod.Onchain;
+      return this.invoiceData.type === PaymentMethod.Onchain;
     },
     showAmountInput(): boolean {
       if (this.isOnchain) return false;
       if (!this.isBolt12) return true;
       return this.bolt12AddAmount;
     },
-    mintFilterMethod(): LightningMethod | null {
-      return this.isOnchain ? LightningMethod.Onchain : null;
+    mintFilterMethod(): PaymentMethod | null {
+      return this.isOnchain ? PaymentMethod.Onchain : null;
     },
     bolt11Supported(): boolean {
       const mintStore = useMintsStore();
@@ -299,7 +299,7 @@ export default defineComponent({
       // If methods are not specified, assume bolt11 is supported
       if (nut4.methods) {
         return nut4.methods.some(
-          (m: any) => m.method === LightningMethod.Bolt11
+          (m: any) => m.method === PaymentMethod.Bolt11
         );
       }
       return true;
@@ -310,7 +310,7 @@ export default defineComponent({
         (m) => m.url === mintStore.activeMintUrl
       );
       if (!mint) return false;
-      return mintSupportsLightningMethod(mint, LightningMethod.Bolt12);
+      return mintSupportsPaymentMethod(mint, PaymentMethod.Bolt12);
     },
     onchainSupported(): boolean {
       const mintStore = useMintsStore();
@@ -318,7 +318,7 @@ export default defineComponent({
         (m) => m.url === mintStore.activeMintUrl
       );
       if (!mint) return false;
-      return mintSupportsLightningMethod(mint, LightningMethod.Onchain);
+      return mintSupportsPaymentMethod(mint, PaymentMethod.Onchain);
     },
     canCreate(): boolean {
       // Bolt11 requires amount > 0
@@ -344,7 +344,7 @@ export default defineComponent({
       // 4. Matches current active mint and unit
       const reusableOffers = walletStore.invoiceHistory.filter(
         (invoice: InvoiceHistory) => {
-          if (invoice.type !== LightningMethod.Bolt12) return false;
+          if (invoice.type !== PaymentMethod.Bolt12) return false;
           // Must be amountless
           const quote = invoice.mintQuote as any;
           if (quote?.amount && quote.amount > 0) return false;
@@ -403,17 +403,17 @@ export default defineComponent({
     },
     activeMintUrl: {
       handler: function () {
-        if (this.invoiceData.type === LightningMethod.Onchain) {
+        if (this.invoiceData.type === PaymentMethod.Onchain) {
           if (!this.onchainSupported && this.bolt11Supported) {
-            this.invoiceData.type = LightningMethod.Bolt11;
+            this.invoiceData.type = PaymentMethod.Bolt11;
           }
           this.refreshReusableOnchainQuote();
           return;
         }
         if (this.bolt11Supported && !this.bolt12Supported) {
-          this.invoiceData.type = LightningMethod.Bolt11;
+          this.invoiceData.type = PaymentMethod.Bolt11;
         } else if (!this.bolt11Supported && this.bolt12Supported) {
-          this.invoiceData.type = LightningMethod.Bolt12;
+          this.invoiceData.type = PaymentMethod.Bolt12;
         }
       },
       immediate: true,
@@ -436,9 +436,9 @@ export default defineComponent({
     ...mapActions(useMintsStore, ["toggleUnit"]),
     toggleInvoiceType() {
       if (this.isBolt12) {
-        this.invoiceData.type = LightningMethod.Bolt11;
+        this.invoiceData.type = PaymentMethod.Bolt11;
       } else {
-        this.invoiceData.type = LightningMethod.Bolt12;
+        this.invoiceData.type = PaymentMethod.Bolt12;
         this.bolt12AddAmount = false;
         this.invoiceData.amount = 0;
       }
@@ -510,7 +510,7 @@ export default defineComponent({
       const now = Date.now();
       return walletStore.invoiceHistory
         .filter((invoice: InvoiceHistory) => {
-          if (invoice.type !== LightningMethod.Onchain) return false;
+          if (invoice.type !== PaymentMethod.Onchain) return false;
           if (invoice.amount < 0) return false;
           if (invoice.status !== "pending" && invoice.status !== "paid")
             return false;

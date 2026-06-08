@@ -267,7 +267,7 @@ vi.mock("src/js/token", () => ({
 }));
 
 import { useWalletStore } from "src/stores/wallet";
-import { LightningMethod } from "src/stores/walletTypes";
+import { PaymentMethod } from "src/stores/walletTypes";
 
 describe("wallet store", () => {
   beforeEach(() => {
@@ -447,13 +447,13 @@ describe("wallet store", () => {
       quote,
       "https://mint-a.example",
       "sat",
-      LightningMethod.Bolt12
+      PaymentMethod.Bolt12
     );
 
     expect(wallet.invoiceHistory[0]).toMatchObject({
       quote: "bolt12-melt-q",
       request: "lno1offer",
-      type: LightningMethod.Bolt12,
+      type: PaymentMethod.Bolt12,
       amount: -105,
       status: "pending",
     });
@@ -571,7 +571,7 @@ describe("wallet store", () => {
         mint: "https://mint-a.example",
         unit: "sat",
         privKey: "privkey",
-        type: LightningMethod.Bolt12,
+        type: PaymentMethod.Bolt12,
       },
     ];
     wallet.keysetCounters = [{ id: "00aa", counter: 1 }];
@@ -621,14 +621,14 @@ describe("wallet store", () => {
     ]);
 
     const subpayment = wallet.invoiceHistory.find(
-      (invoice) => invoice.type === LightningMethod.Bolt12Subpayment
+      (invoice) => invoice.type === PaymentMethod.Bolt12Subpayment
     );
     expect(counters).toEqual([1, 2]);
     expect(wallet.keysetCounter("00aa")).toBe(3);
     expect(subpayment).toMatchObject({
       amount: 100,
       parentQuote: "offer-q",
-      type: LightningMethod.Bolt12Subpayment,
+      type: PaymentMethod.Bolt12Subpayment,
     });
     expect(subpayment.quote).toMatch(/^subpayment:/);
     expect(subpayment.quote).not.toContain("offer-q");
@@ -651,7 +651,7 @@ describe("wallet store", () => {
         mint: "https://mint-a.example",
         unit: "sat",
         privKey: "privkey",
-        type: LightningMethod.Onchain,
+        type: PaymentMethod.Onchain,
       },
     ];
     wallet.keysetCounters = [{ id: "00aa", counter: 1 }];
@@ -679,12 +679,12 @@ describe("wallet store", () => {
     await wallet.checkOnchainAndMint(parentQuote, false, false);
 
     const subpayment = wallet.invoiceHistory.find(
-      (invoice) => invoice.type === LightningMethod.OnchainSubpayment
+      (invoice) => invoice.type === PaymentMethod.OnchainSubpayment
     );
     expect(subpayment).toMatchObject({
       amount: 75,
       parentQuote,
-      type: LightningMethod.OnchainSubpayment,
+      type: PaymentMethod.OnchainSubpayment,
     });
     expect(subpayment.quote).toMatch(/^subpayment:/);
     expect(subpayment.quote).not.toContain(parentQuote);
@@ -825,6 +825,30 @@ describe("wallet store", () => {
     expect(quoteSpy).toHaveBeenCalled();
   });
 
+  it("clears stale Bolt11 melt quotes before requesting a replacement quote", async () => {
+    const wallet = useWalletStore();
+    wallet.payInvoiceData.input.request = "lnbc123";
+    wallet.payInvoiceData.meltQuote.response = {
+      quote: "old-quote-from-previous-mint",
+      amount: 100,
+      fee_reserve: 5,
+    };
+    vi.spyOn(wallet, "activeWallet").mockResolvedValue({});
+    vi.spyOn(wallet, "meltQuoteBolt11").mockRejectedValue(
+      new Error("quote failed")
+    );
+
+    await expect(wallet.meltQuoteInvoiceDataBolt11()).rejects.toThrow(
+      "quote failed"
+    );
+
+    expect(wallet.payInvoiceData.meltQuote.response).toEqual({
+      quote: "",
+      amount: 0,
+      fee_reserve: 0,
+    });
+  });
+
   it("resets stale Bolt12 amount and quote state for amountless offers", async () => {
     const wallet = useWalletStore();
     wallet.payInvoiceData.input.amount = 42;
@@ -872,7 +896,7 @@ describe("wallet store", () => {
         status: "pending",
         mint: "https://mint-a.example",
         unit: "sat",
-        type: LightningMethod.Bolt12,
+        type: PaymentMethod.Bolt12,
       },
     ];
     h.proofsStore.getProofsForQuote.mockResolvedValue(proofs);
@@ -939,11 +963,11 @@ describe("wallet store", () => {
       mintWallet,
       true,
       vi.fn(),
-      LightningMethod.Bolt11
+      PaymentMethod.Bolt11
     );
 
     expect(prepareMelt).toHaveBeenCalledWith(
-      LightningMethod.Bolt11,
+      PaymentMethod.Bolt11,
       expect.objectContaining({ quote: "bolt11-melt-q" }),
       proofs,
       { keysetId: "00aa" }
@@ -977,7 +1001,7 @@ describe("wallet store", () => {
       ],
     };
     const preview = {
-      method: LightningMethod.Onchain,
+      method: PaymentMethod.Onchain,
       inputs: proofs,
       outputData: [{ id: "change-output" }],
       keysetId: "00aa",
@@ -1003,7 +1027,7 @@ describe("wallet store", () => {
     await wallet.meltOnchain(proofs, quote, mintWallet, true);
 
     expect(prepareMelt).toHaveBeenCalledWith(
-      LightningMethod.Onchain,
+      PaymentMethod.Onchain,
       expect.objectContaining({ quote: "onchain-melt-q" }),
       proofs,
       { keysetId: "00aa" }
@@ -1036,7 +1060,7 @@ describe("wallet store", () => {
         status: "pending",
         mint: "https://mint-a.example",
         unit: "sat",
-        type: LightningMethod.Bolt12,
+        type: PaymentMethod.Bolt12,
         meltChangeOutputData: [{ serialized: "change-output" }],
       },
     ];
@@ -1084,7 +1108,7 @@ describe("wallet store", () => {
         status: "pending",
         mint: "https://mint-a.example",
         unit: "sat",
-        type: LightningMethod.Bolt11,
+        type: PaymentMethod.Bolt11,
         meltOutputData: [{ serialized: "legacy-change-output" }],
       },
     ];

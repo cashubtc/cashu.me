@@ -99,20 +99,20 @@ import { useSettingsStore } from "./settings";
 import { usePriceStore } from "./price";
 import { useI18n } from "vue-i18n";
 import BOLT12Decoder from "bolt12-decoder";
-import { ensureLightningMintActive } from "src/js/mint-lightning";
+import { ensurePaymentMethodMintActive } from "src/js/mint-payment-methods";
 import {
   isLegacyRetailQR,
   translateLegacyQRToLightningAddress,
 } from "src/js/legacy-qr";
 import { onchainNetwork } from "src/js/onchain";
-import { LightningMethod } from "src/stores/walletTypes";
+import { PaymentMethod } from "src/stores/walletTypes";
 
 type Invoice = {
   amount: number;
   request: string;
   quote: string;
   memo: string;
-  type?: LightningMethod;
+  type?: PaymentMethod;
 };
 
 // The app uses number-typed amounts (strategy b). These types represent
@@ -260,7 +260,7 @@ export const useWalletStore = defineStore("wallet", {
           comment: string;
           quote: string;
         },
-        paymentMethod: null as LightningMethod | null,
+        paymentMethod: null as PaymentMethod | null,
       },
     };
   },
@@ -1004,10 +1004,10 @@ export const useWalletStore = defineStore("wallet", {
       if (!invoice) {
         throw new Error("invoice not found");
       }
-      if (invoice.type === LightningMethod.Onchain) {
+      if (invoice.type === PaymentMethod.Onchain) {
         return await this.checkOutgoingOnchain(quote, verbose);
       }
-      if (invoice.type === LightningMethod.Bolt12) {
+      if (invoice.type === PaymentMethod.Bolt12) {
         return await this.checkOutgoingInvoiceBolt12(quote, verbose);
       }
       return await this.checkOutgoingInvoiceBolt11(quote, verbose);
@@ -1061,7 +1061,7 @@ export const useWalletStore = defineStore("wallet", {
         !mint.info?.nuts[17]?.supported ||
         !mint.info?.nuts[17]?.supported.find(
           (s) =>
-            s.method === LightningMethod.Bolt11 &&
+            s.method === PaymentMethod.Bolt11 &&
             s.unit == historyToken.unit &&
             s.commands.indexOf("proof_state") != -1
         )
@@ -1130,7 +1130,7 @@ export const useWalletStore = defineStore("wallet", {
       quote: AppMeltQuote,
       mint: string,
       unit: string,
-      method: LightningMethod = LightningMethod.Bolt11
+      method: PaymentMethod = PaymentMethod.Bolt11
     ) {
       this.invoiceHistory.push({
         amount: -(quote.amount + quote.fee_reserve),
@@ -1144,7 +1144,7 @@ export const useWalletStore = defineStore("wallet", {
         meltQuote: quote,
         type: method,
         network:
-          method === LightningMethod.Onchain
+          method === PaymentMethod.Onchain
             ? onchainNetwork(this.payInvoiceData.input.request || quote.request)
             : undefined,
       });
@@ -1175,7 +1175,7 @@ export const useWalletStore = defineStore("wallet", {
             }
           }
           i.meltQuote = quote;
-          if (i.type === LightningMethod.Onchain && !i.network) {
+          if (i.type === PaymentMethod.Onchain && !i.network) {
             i.network = onchainNetwork(i.request || quote.request);
           }
         });
@@ -1251,11 +1251,11 @@ export const useWalletStore = defineStore("wallet", {
         description: decoded.description || "",
       } as any;
 
-      const mintResult = await ensureLightningMintActive(
+      const mintResult = await ensurePaymentMethodMintActive(
         mintStore.mints,
         mintStore.activeMintUrl,
         mintStore.activateMintUrl.bind(mintStore),
-        LightningMethod.Bolt12
+        PaymentMethod.Bolt12
       );
       if (!mintResult.ok) {
         this.payInvoiceData.meltQuote.error = this.t(mintResult.errorKey);
@@ -1301,11 +1301,11 @@ export const useWalletStore = defineStore("wallet", {
         description: "",
       } as any;
 
-      const mintResult = await ensureLightningMintActive(
+      const mintResult = await ensurePaymentMethodMintActive(
         mintStore.mints,
         mintStore.activeMintUrl,
         mintStore.activateMintUrl.bind(mintStore),
-        LightningMethod.Onchain,
+        PaymentMethod.Onchain,
         "melt"
       );
       if (!mintResult.ok) {

@@ -165,7 +165,7 @@ import { useUiStore } from "../stores/ui";
 import { useWorkersStore } from "../stores/workers";
 import MeltQuoteInformation from "./MeltQuoteInformation.vue";
 import MintQuoteInformation from "./MintQuoteInformation.vue";
-import { LightningMethod } from "src/stores/walletTypes";
+import { PaymentMethod } from "src/stores/walletTypes";
 // type hint for global mixin
 declare const windowMixin: any;
 
@@ -203,12 +203,12 @@ export default defineComponent({
     isSmallScreen() {
       return this.$q.screen.lt.sm;
     },
-    invoiceMethod(): LightningMethod {
+    invoiceMethod(): PaymentMethod {
       return (
         this.invoiceData.type ||
         (this.invoiceData as any).method ||
         (this.invoiceData as any).protocol ||
-        LightningMethod.Bolt11
+        PaymentMethod.Bolt11
       );
     },
     copyButtonLabel: function () {
@@ -219,16 +219,16 @@ export default defineComponent({
     },
     isBolt12(): boolean {
       return (
-        this.invoiceData.type === LightningMethod.Bolt12 ||
-        this.invoiceData.type === LightningMethod.Bolt12Subpayment ||
-        (this.invoiceData as any).method === LightningMethod.Bolt12 ||
-        (this.invoiceData as any).method === LightningMethod.Bolt12Subpayment
+        this.invoiceData.type === PaymentMethod.Bolt12 ||
+        this.invoiceData.type === PaymentMethod.Bolt12Subpayment ||
+        (this.invoiceData as any).method === PaymentMethod.Bolt12 ||
+        (this.invoiceData as any).method === PaymentMethod.Bolt12Subpayment
       );
     },
     isOnchain(): boolean {
       return (
-        this.invoiceData.type === LightningMethod.Onchain ||
-        this.invoiceData.type === LightningMethod.OnchainSubpayment
+        this.invoiceData.type === PaymentMethod.Onchain ||
+        this.invoiceData.type === PaymentMethod.OnchainSubpayment
       );
     },
     qrLink(): string {

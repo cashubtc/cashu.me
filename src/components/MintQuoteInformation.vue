@@ -116,7 +116,7 @@ import {
   QrCode as QrCodeIcon,
   Hash as HashIcon,
 } from "lucide-vue-next";
-import { LightningMethod } from "src/stores/walletTypes";
+import { PaymentMethod } from "src/stores/walletTypes";
 import {
   fetchAddressTxMetadata,
   onchainNetwork,
@@ -167,7 +167,7 @@ export default defineComponent({
     },
     method: {
       type: String,
-      default: LightningMethod.Bolt11,
+      default: PaymentMethod.Bolt11,
     },
     refreshTrigger: {
       type: Number,
@@ -221,16 +221,16 @@ export default defineComponent({
       return state?.toLowerCase() === "paid";
     },
     methodDisplay(): string {
-      const method = this.method || LightningMethod.Bolt11;
+      const method = this.method || PaymentMethod.Bolt11;
       if (
-        method === LightningMethod.Onchain ||
-        method === LightningMethod.OnchainSubpayment
+        method === PaymentMethod.Onchain ||
+        method === PaymentMethod.OnchainSubpayment
       ) {
         return "On-chain";
       }
       if (
-        method === LightningMethod.Bolt12 ||
-        method === LightningMethod.Bolt12Subpayment
+        method === PaymentMethod.Bolt12 ||
+        method === PaymentMethod.Bolt12Subpayment
       ) {
         return "Bolt12";
       }
@@ -238,8 +238,8 @@ export default defineComponent({
     },
     isOnchain(): boolean {
       return (
-        this.method === LightningMethod.Onchain ||
-        this.method === LightningMethod.OnchainSubpayment
+        this.method === PaymentMethod.Onchain ||
+        this.method === PaymentMethod.OnchainSubpayment
       );
     },
     networkDisplay(): string {
@@ -281,7 +281,7 @@ export default defineComponent({
       const methods =
         mint?.info?.nuts?.[4]?.methods || mint?.info?.nuts?.["4"]?.methods;
       const method = methods?.find(
-        (m: any) => m.method === LightningMethod.Onchain && m.unit === this.unit
+        (m: any) => m.method === PaymentMethod.Onchain && m.unit === this.unit
       );
       return Number(method?.options?.confirmations || 1);
     },

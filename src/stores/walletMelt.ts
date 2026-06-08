@@ -17,7 +17,7 @@ import {
   notifyWarning,
 } from "src/js/notify";
 import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
-import { LightningMethod } from "src/stores/walletTypes";
+import { PaymentMethod } from "src/stores/walletTypes";
 import { useMintsStore, WalletProof } from "./mints";
 import { useProofsStore } from "./proofs";
 import { useUiStore } from "src/stores/ui";
@@ -140,7 +140,7 @@ export async function meltGeneric(
   mintWallet: Wallet,
   silent: boolean | undefined,
   checkQuote: CheckMeltQuoteFn,
-  method: LightningMethod = LightningMethod.Bolt11,
+  method: PaymentMethod = PaymentMethod.Bolt11,
   completeMeltOptions?: CompleteMeltOptions
 ) {
   const uIStore = useUiStore();

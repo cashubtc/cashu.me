@@ -5,7 +5,7 @@ import { useUiStore } from "src/stores/ui";
 import { useMintsStore } from "src/stores/mints";
 import { notifySuccess, notifyApiError } from "src/js/notify";
 import { MintQuoteBolt11Response } from "@cashu/cashu-ts";
-import { LightningMethod } from "src/stores/walletTypes";
+import { PaymentMethod } from "src/stores/walletTypes";
 
 export async function mintOnPaidGeneric(
   this: any,
@@ -17,9 +17,9 @@ export async function mintOnPaidGeneric(
     hideInvoiceDetailsOnMint = true,
   }: {
     type:
-      | LightningMethod.Bolt11
-      | LightningMethod.Bolt12
-      | LightningMethod.Onchain;
+      | PaymentMethod.Bolt11
+      | PaymentMethod.Bolt12
+      | PaymentMethod.Onchain;
     verbose?: boolean;
     kickOffInvoiceChecker?: boolean;
     hideInvoiceDetailsOnMint?: boolean;
@@ -54,9 +54,9 @@ export async function mintOnPaidGeneric(
   if (kickOffInvoiceChecker) {
     if (useSettingsStore().periodicallyCheckIncomingInvoices) {
       console.log(`Adding quote ${quoteId} to long-polling checker.`);
-      if (type === LightningMethod.Bolt12) {
+      if (type === PaymentMethod.Bolt12) {
         useInvoicesWorkerStore().addBolt12OfferToChecker(quoteId);
-      } else if (type === LightningMethod.Onchain) {
+      } else if (type === PaymentMethod.Onchain) {
         useInvoicesWorkerStore().addOnchainQuoteToChecker(quoteId, true);
       } else {
         useInvoicesWorkerStore().addInvoiceToChecker(quoteId);
@@ -64,7 +64,7 @@ export async function mintOnPaidGeneric(
     } else if (useSettingsStore().checkIncomingInvoices) {
       // Legacy worker support
       console.log(`Adding quote ${quoteId} to old worker checker.`);
-      if (type === LightningMethod.Bolt11) {
+      if (type === PaymentMethod.Bolt11) {
         useWorkersStore().invoiceCheckWorker(quoteId);
       }
       // Bolt12 not supported in legacy worker
@@ -98,9 +98,9 @@ export async function mintOnPaidGeneric(
     const onPaidCallback = async (_response: MintQuoteBolt11Response) => {
       let proofs;
       try {
-        if (type === LightningMethod.Bolt11) {
+        if (type === PaymentMethod.Bolt11) {
           proofs = await this.mintBolt11(invoice, false);
-        } else if (type === LightningMethod.Onchain) {
+        } else if (type === PaymentMethod.Onchain) {
           proofs = await this.checkOnchainAndMint(quoteId, false);
         } else {
           proofs = await this.checkOfferAndMintBolt12(quoteId, false);
@@ -116,14 +116,14 @@ export async function mintOnPaidGeneric(
       useUiStore().vibrate();
 
       const amount =
-        (type === LightningMethod.Bolt12 || type === LightningMethod.Onchain) &&
+        (type === PaymentMethod.Bolt12 || type === PaymentMethod.Onchain) &&
         proofs
           ? proofs.reduce((acc: number, p: any) => acc + p.amount, 0)
           : invoice.amount;
 
       notifySuccess(
         this.t(
-          type === LightningMethod.Onchain
+          type === PaymentMethod.Onchain
             ? "wallet.notifications.received"
             : "wallet.notifications.received_lightning",
           {

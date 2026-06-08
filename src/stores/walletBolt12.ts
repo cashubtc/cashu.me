@@ -9,7 +9,7 @@ import { notifyApiError, notify, notifySuccess } from "src/js/notify";
 import type { InvoiceHistory } from "./wallet";
 import { useInvoicesWorkerStore } from "./invoicesWorker";
 import { mintOnPaidGeneric } from "./walletWebsocket";
-import { LightningMethod } from "src/stores/walletTypes";
+import { PaymentMethod } from "src/stores/walletTypes";
 import { usePriceStore } from "./price";
 import { type AppMeltQuote, normalizeMeltQuote } from "./walletMelt";
 import { createSubpaymentHistoryQuote } from "src/js/invoice-history";
@@ -69,7 +69,7 @@ export async function requestMintBolt12(
     this.invoiceHistory.push({
       ...this.invoiceData,
       label: "Lightning Bolt12",
-      type: LightningMethod.Bolt12,
+      type: PaymentMethod.Bolt12,
     });
 
     return data;
@@ -91,7 +91,7 @@ export async function mintOnPaidBolt12(
   hideInvoiceDetailsOnMint = true
 ) {
   return await mintOnPaidGeneric.call(this, quote, {
-    type: LightningMethod.Bolt12,
+    type: PaymentMethod.Bolt12,
     verbose,
     kickOffInvoiceChecker,
     hideInvoiceDetailsOnMint,
@@ -159,7 +159,7 @@ export async function checkOfferAndMintBolt12(
         status: "paid",
         mintQuote: normalizedMintQuote,
         label: "Bolt12 Subpayment",
-        type: LightningMethod.Bolt12Subpayment,
+        type: PaymentMethod.Bolt12Subpayment,
       });
     } else {
       // First payment: update the original offer entry
@@ -273,7 +273,7 @@ export async function meltBolt12(
     mintWallet,
     silent,
     (id: string) => mintWallet.mint.checkMeltQuoteBolt12(id),
-    LightningMethod.Bolt12
+    PaymentMethod.Bolt12
   );
 }
 
