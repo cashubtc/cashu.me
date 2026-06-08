@@ -5,19 +5,23 @@ import { useUiStore } from "src/stores/ui";
 import {
   Amount,
   Wallet,
-  MeltQuoteOnchainResponse,
   MintQuoteOnchainResponse,
   MeltQuoteState,
-  OutputData,
 } from "@cashu/cashu-ts";
 import * as nobleSecp256k1 from "@noble/secp256k1";
 import { bytesToHex } from "@noble/hashes/utils";
-import { notifyApiError, notify, notifySuccess } from "src/js/notify";
+import {
+  notifyApiError,
+  notify,
+  notifySuccess,
+  notifyWarning,
+} from "src/js/notify";
 import type { InvoiceHistory } from "./wallet";
 import { LightningMethod } from "src/stores/walletTypes";
 import { mintOnPaidGeneric } from "./walletWebsocket";
 import { useInvoicesWorkerStore } from "./invoicesWorker";
 import { onchainNetwork } from "src/js/onchain";
+import { type AppMeltQuote, normalizeMeltQuote } from "./walletMelt";
 
 type AppMintQuote = Omit<
   MintQuoteOnchainResponse,
@@ -26,25 +30,6 @@ type AppMintQuote = Omit<
   amount: null;
   amount_paid: number;
   amount_issued: number;
-};
-
-type AppOnchainFeeOption = Omit<
-  MeltQuoteOnchainResponse["fee_options"][number],
-  "fee_reserve"
-> & {
-  fee_reserve: number;
-};
-
-type AppMeltQuote = Omit<
-  MeltQuoteOnchainResponse,
-  "amount" | "change" | "fee_options"
-> & {
-  amount: number;
-  fee_reserve: number;
-  fee_paid?: number;
-  fee_options: AppOnchainFeeOption[];
-  payment_preimage: null;
-  change?: any[];
 };
 
 function amountToNumber(value: any): number {
@@ -58,41 +43,6 @@ function normalizeMintQuote(quote: MintQuoteOnchainResponse): AppMintQuote {
     amount: null,
     amount_paid: amountToNumber(amount_paid),
     amount_issued: amountToNumber(amount_issued),
-  };
-}
-
-function normalizeMeltQuote(quote: MeltQuoteOnchainResponse): AppMeltQuote {
-  const { change, ...rest } = quote;
-  const feeOptions = quote.fee_options.map((option) => ({
-    ...option,
-    fee_reserve: amountToNumber(option.fee_reserve),
-  }));
-  const selectedFeeOption =
-    feeOptions.find(
-      (option) => option.fee_index === quote.selected_fee_index
-    ) || feeOptions[0];
-  const normalized: AppMeltQuote = {
-    ...rest,
-    amount: amountToNumber(quote.amount),
-    fee_reserve: selectedFeeOption?.fee_reserve || 0,
-    fee_options: feeOptions,
-    payment_preimage: null,
-  };
-  if (change) normalized.change = change;
-  return normalized;
-}
-
-function toMeltQuote(quote: AppMeltQuote): MeltQuoteOnchainResponse {
-  const { fee_reserve, payment_preimage, ...rest } = quote;
-  void fee_reserve;
-  void payment_preimage;
-  return {
-    ...rest,
-    amount: Amount.from(quote.amount),
-    fee_options: quote.fee_options.map((option) => ({
-      ...option,
-      fee_reserve: Amount.from(option.fee_reserve),
-    })),
   };
 }
 
@@ -201,11 +151,26 @@ export async function checkOnchainAndMint(
 
     const mintQuoteAfterMint = await mintWallet.checkMintQuoteOnchain(quoteId);
     const normalizedMintQuote = normalizeMintQuote(mintQuoteAfterMint);
-    this.setInvoicePaid(invoice.quote, {
-      amount: delta,
-      mintQuote: normalizedMintQuote,
-    });
-    useInvoicesWorkerStore().removeOnchainQuoteFromChecker(invoice.quote);
+    invoice.mintQuote = normalizedMintQuote;
+
+    if (invoice.status === "paid") {
+      this.invoiceHistory.push({
+        ...invoice,
+        amount: delta,
+        quote: `${invoice.quote}_${Date.now()}`,
+        date: currentDateStr(),
+        paidDate: currentDateStr(),
+        status: "paid",
+        mintQuote: normalizedMintQuote,
+        label: "On-chain Subpayment",
+        type: LightningMethod.OnchainSubpayment,
+      });
+    } else {
+      this.setInvoicePaid(invoice.quote, {
+        amount: delta,
+        mintQuote: normalizedMintQuote,
+      });
+    }
 
     if (hideInvoiceDetailsOnMint) {
       uIStore.showInvoiceDetails = false;
@@ -292,7 +257,8 @@ export async function meltOnchain(
   mintWallet: Wallet,
   silent?: boolean
 ) {
-  const feeIndex = quote.selected_fee_index ?? quote.fee_options[0]?.fee_index;
+  const feeIndex =
+    quote.selected_fee_index ?? quote.fee_options?.[0]?.fee_index;
   if (feeIndex == null) {
     throw new Error("no on-chain fee option found");
   }
@@ -301,14 +267,9 @@ export async function meltOnchain(
     quote,
     mintWallet,
     silent,
-    (q, sp, opts) =>
-      mintWallet.ops
-        .meltOnchain(toMeltQuote(q as AppMeltQuote), sp)
-        .keyset(opts.keysetId)
-        .feeIndex(feeIndex)
-        .run(),
-    (id) => mintWallet.mint.checkMeltQuoteOnchain(id),
-    LightningMethod.Onchain
+    (id: string) => mintWallet.mint.checkMeltQuoteOnchain(id),
+    LightningMethod.Onchain,
+    { extraPayload: { fee_index: feeIndex } }
   );
 }
 
@@ -346,36 +307,17 @@ export async function checkOutgoingOnchain(
     }
 
     if (meltQuote.state === MeltQuoteState.PAID) {
-      let returnedChange = 0;
-      if (invoice.meltOutputData?.length && meltQuote.change?.length) {
-        const outputData = invoice.meltOutputData.map((output: any) =>
-          OutputData.deserialize(output)
-        );
-        const changeProofs = mintWallet.createMeltChangeProofs(
-          outputData,
-          meltQuote.change
-        );
-        if (changeProofs.length) {
-          await proofsStore.addProofs(changeProofs);
-          returnedChange = proofsStore.sumProofs(changeProofs);
-        }
-        invoice.meltOutputData = [];
-      }
-
-      await proofsStore.removeProofs(proofs);
-      const actualFee = Math.max(0, meltQuote.fee_reserve - returnedChange);
-      meltQuote.fee_paid = actualFee;
-      this.updateOutgoingInvoiceInHistory(meltQuote, {
-        status: "paid",
-        amount: -(meltQuote.amount + actualFee),
-      });
+      const finalizeData = await this.finalizePaidMeltInvoice(
+        quote,
+        mintWallet,
+        meltQuote,
+        proofs,
+        false
+      );
       useUiStore().vibrate();
       notifySuccess(
         this.t("wallet.notifications.sent", {
-          amount: uIStore.formatCurrency(
-            meltQuote.amount + actualFee,
-            invoice.unit
-          ),
+          amount: uIStore.formatCurrency(finalizeData.amountPaid, invoice.unit),
         })
       );
       useInvoicesWorkerStore().removeOutgoingInvoiceFromChecker?.(quote);

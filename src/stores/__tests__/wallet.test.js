@@ -68,6 +68,8 @@ const h = vi.hoisted(() => {
   const walletLoadMintFromCache = vi.fn();
   const walletGetFeesForProofs = vi.fn(() => 7);
   const keychainMintToCacheDTO = vi.fn(() => ({ cache: "dto" }));
+  const outputDataSerialize = vi.fn((output) => ({ serialized: output.id }));
+  const outputDataDeserialize = vi.fn((output) => ({ deserialized: output }));
   const tokenModule = {
     decodeFull: vi.fn(),
     getProofs: vi.fn(),
@@ -121,6 +123,8 @@ const h = vi.hoisted(() => {
     walletLoadMintFromCache,
     walletGetFeesForProofs,
     keychainMintToCacheDTO,
+    outputDataSerialize,
+    outputDataDeserialize,
     bolt12Decode,
     tokenModule,
     WalletMock,
@@ -173,6 +177,10 @@ vi.mock("@cashu/cashu-ts", () => ({
       proofs.reduce((sum, proof) => sum + Number(proof.amount), 0),
   }),
   Wallet: h.WalletMock,
+  OutputData: {
+    serialize: (...args) => h.outputDataSerialize(...args),
+    deserialize: (...args) => h.outputDataDeserialize(...args),
+  },
   KeyChain: {
     mintToCacheDTO: (...args) => h.keychainMintToCacheDTO(...args),
   },
@@ -377,6 +385,37 @@ describe("wallet store", () => {
     wallet.setInvoicePaid("q-1");
     expect(wallet.invoiceHistory[0].status).toBe("paid");
     expect(wallet.invoiceHistory[0].paidDate).toBe("2026-03-10T12:00:00.000Z");
+  });
+
+  it("allows paid invoice amount updates to zero", () => {
+    const wallet = useWalletStore();
+    wallet.invoiceData = {
+      quote: "q-zero",
+      amount: 10,
+      request: "lnbc",
+      memo: "memo",
+      date: "old",
+      status: "pending",
+      mint: "https://mint-a.example",
+      unit: "sat",
+    };
+    wallet.invoiceHistory = [
+      {
+        quote: "q-zero",
+        amount: 10,
+        request: "lnbc",
+        memo: "memo",
+        date: "old",
+        status: "pending",
+        mint: "https://mint-a.example",
+        unit: "sat",
+      },
+    ];
+
+    wallet.setInvoicePaid("q-zero", { amount: 0 });
+
+    expect(wallet.invoiceHistory[0].amount).toBe(0);
+    expect(wallet.invoiceData.amount).toBe(0);
   });
 
   it("adds, updates and removes outgoing invoices", async () => {
@@ -789,6 +828,224 @@ describe("wallet store", () => {
     expect(wallet.invoiceHistory[0].meltQuote).toMatchObject({
       quote: "bolt12-melt-q",
       state: "PAID",
+    });
+  });
+
+  it("persists melt change output data before completing a melt", async () => {
+    const wallet = useWalletStore();
+    const proofs = [{ id: "00aa", amount: 105, secret: "s1" }];
+    const quote = {
+      quote: "bolt11-melt-q",
+      amount: 100,
+      fee_reserve: 5,
+      state: "PENDING",
+      expiry: 0,
+      request: "lnbc123",
+      payment_preimage: null,
+    };
+    const preview = {
+      method: "bolt11",
+      inputs: proofs,
+      outputData: [{ id: "change-output" }],
+      keysetId: "00aa",
+      quote,
+    };
+    const prepareMelt = vi.fn(async () => preview);
+    const completeMelt = vi.fn(async () => ({
+      quote: { ...quote, state: "PAID" },
+      change: [],
+      outputData: [],
+    }));
+    const mintWallet = {
+      mint: { mintUrl: "https://mint-a.example" },
+      unit: "sat",
+      prepareMelt,
+      completeMelt,
+    };
+    vi.spyOn(wallet, "send").mockResolvedValue({
+      keepProofs: [],
+      sendProofs: proofs,
+    });
+
+    await wallet.meltGeneric(
+      proofs,
+      quote,
+      mintWallet,
+      true,
+      vi.fn(),
+      LightningMethod.Bolt11
+    );
+
+    expect(prepareMelt).toHaveBeenCalledWith(
+      LightningMethod.Bolt11,
+      expect.objectContaining({ quote: "bolt11-melt-q" }),
+      proofs,
+      { keysetId: "00aa" }
+    );
+    expect(h.outputDataSerialize).toHaveBeenCalledWith({ id: "change-output" });
+    expect(completeMelt).toHaveBeenCalledWith(preview, undefined, undefined);
+    expect(wallet.invoiceHistory[0].meltChangeOutputData).toEqual([]);
+    expect(wallet.invoiceHistory[0].meltOutputData).toEqual([]);
+  });
+
+  it("passes selected on-chain fee index through recoverable melt completion", async () => {
+    const wallet = useWalletStore();
+    wallet.payInvoiceData.input.request = "bitcoin:bc1qabc?amount=0.00000100";
+    const proofs = [{ id: "00aa", amount: 112, secret: "s1" }];
+    const quote = {
+      quote: "onchain-melt-q",
+      amount: 100,
+      fee_reserve: 12,
+      unit: "sat",
+      state: "PENDING",
+      expiry: 0,
+      request: "bitcoin:bc1qabc?amount=0.00000100",
+      payment_preimage: null,
+      selected_fee_index: 7,
+      fee_options: [
+        { fee_index: 3, fee_reserve: 20, estimated_blocks: 6 },
+        { fee_index: 7, fee_reserve: 12, estimated_blocks: 12 },
+      ],
+    };
+    const preview = {
+      method: LightningMethod.Onchain,
+      inputs: proofs,
+      outputData: [{ id: "change-output" }],
+      keysetId: "00aa",
+      quote,
+    };
+    const prepareMelt = vi.fn(async () => preview);
+    const completeMelt = vi.fn(async () => ({
+      quote: { ...quote, state: "PAID" },
+      change: [],
+      outputData: [],
+    }));
+    const mintWallet = {
+      mint: { mintUrl: "https://mint-a.example" },
+      unit: "sat",
+      prepareMelt,
+      completeMelt,
+    };
+    vi.spyOn(wallet, "send").mockResolvedValue({
+      keepProofs: [],
+      sendProofs: proofs,
+    });
+
+    await wallet.meltOnchain(proofs, quote, mintWallet, true);
+
+    expect(prepareMelt).toHaveBeenCalledWith(
+      LightningMethod.Onchain,
+      expect.objectContaining({ quote: "onchain-melt-q" }),
+      proofs,
+      { keysetId: "00aa" }
+    );
+    expect(completeMelt).toHaveBeenCalledWith(preview, undefined, {
+      extraPayload: { fee_index: 7 },
+    });
+  });
+
+  it("recovers deferred melt change before finalizing pending payments", async () => {
+    const wallet = useWalletStore();
+    const proofs = [{ id: "00aa", amount: 105, secret: "s1" }];
+    const changeProofs = [{ id: "00aa", amount: 3, secret: "change" }];
+    const changeSigs = [{ id: "00aa", amount: 3, C_: "sig" }];
+    const checkMeltQuoteBolt12 = vi.fn(async () => ({
+      quote: "bolt12-melt-q",
+      amount: 100,
+      fee_reserve: 5,
+      state: "PAID",
+      change: changeSigs,
+    }));
+    const createMeltChangeProofs = vi.fn(() => changeProofs);
+    wallet.invoiceHistory = [
+      {
+        quote: "bolt12-melt-q",
+        amount: -105,
+        request: "lno1offer",
+        memo: "Outgoing invoice",
+        date: "old",
+        status: "pending",
+        mint: "https://mint-a.example",
+        unit: "sat",
+        type: LightningMethod.Bolt12,
+        meltChangeOutputData: [{ serialized: "change-output" }],
+      },
+    ];
+    h.proofsStore.getProofsForQuote.mockResolvedValue(proofs);
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue({
+      mint: { checkMeltQuoteBolt12 },
+      unit: "sat",
+      createMeltChangeProofs,
+    });
+    vi.spyOn(wallet, "checkProofsSpendable").mockResolvedValue(proofs);
+
+    await wallet.checkOutgoingInvoice("bolt12-melt-q", false);
+
+    expect(h.outputDataDeserialize).toHaveBeenCalledWith({
+      serialized: "change-output",
+    });
+    expect(createMeltChangeProofs).toHaveBeenCalledWith(
+      [{ deserialized: { serialized: "change-output" } }],
+      changeSigs
+    );
+    expect(h.proofsStore.addProofs).toHaveBeenCalledWith(changeProofs);
+    expect(wallet.invoiceHistory[0]).toMatchObject({
+      status: "paid",
+      amount: -102,
+      meltChangeOutputData: [],
+    });
+    expect(wallet.invoiceHistory[0].meltQuote).toMatchObject({
+      fee_paid: 2,
+    });
+  });
+
+  it("recovers deferred melt change from legacy output data records", async () => {
+    const wallet = useWalletStore();
+    const proofs = [{ id: "00aa", amount: 105, secret: "s1" }];
+    const changeProofs = [{ id: "00aa", amount: 3, secret: "change" }];
+    const changeSigs = [{ id: "00aa", amount: 3, C_: "sig" }];
+    const createMeltChangeProofs = vi.fn(() => changeProofs);
+    wallet.invoiceHistory = [
+      {
+        quote: "legacy-melt-q",
+        amount: -105,
+        request: "lnbc",
+        memo: "Outgoing invoice",
+        date: "old",
+        status: "pending",
+        mint: "https://mint-a.example",
+        unit: "sat",
+        type: LightningMethod.Bolt11,
+        meltOutputData: [{ serialized: "legacy-change-output" }],
+      },
+    ];
+
+    await wallet.finalizePaidMeltInvoice(
+      "legacy-melt-q",
+      { createMeltChangeProofs },
+      {
+        quote: "legacy-melt-q",
+        amount: 100,
+        fee_reserve: 5,
+        state: "PAID",
+        change: changeSigs,
+      },
+      proofs,
+      false
+    );
+
+    expect(h.outputDataDeserialize).toHaveBeenCalledWith({
+      serialized: "legacy-change-output",
+    });
+    expect(createMeltChangeProofs).toHaveBeenCalledWith(
+      [{ deserialized: { serialized: "legacy-change-output" } }],
+      changeSigs
+    );
+    expect(wallet.invoiceHistory[0]).toMatchObject({
+      status: "paid",
+      amount: -102,
+      meltChangeOutputData: [],
+      meltOutputData: [],
     });
   });
 

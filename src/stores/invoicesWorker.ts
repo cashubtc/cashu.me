@@ -230,11 +230,12 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         return true;
       }
       if (invoice.type === LightningMethod.Onchain) {
-        return (
-          invoice.status === "pending" &&
-          invoice.amount >= 0 &&
-          now - Date.parse(invoice.date) < this.maxAge
-        );
+        const isOlderThanMaxAge = now - Date.parse(invoice.date) > this.maxAge;
+        if (isOlderThanMaxAge) return false;
+        return invoice.amount >= 0;
+      }
+      if (invoice.type === LightningMethod.OnchainSubpayment) {
+        return false;
       }
       // Bolt11
       return (
@@ -355,7 +356,8 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         if (now > dueTime) {
           try {
             await walletStore.checkOnchainAndMint(q.quote, false);
-            this.onchainQuotes.splice(i, 1);
+            q.lastChecked = now;
+            q.checkCount = 0;
           } catch (error) {
             q.lastChecked = now;
             q.checkCount += 1;

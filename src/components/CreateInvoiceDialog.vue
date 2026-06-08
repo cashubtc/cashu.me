@@ -511,7 +511,9 @@ export default defineComponent({
       return walletStore.invoiceHistory
         .filter((invoice: InvoiceHistory) => {
           if (invoice.type !== LightningMethod.Onchain) return false;
-          if (invoice.status !== "pending") return false;
+          if (invoice.amount < 0) return false;
+          if (invoice.status !== "pending" && invoice.status !== "paid")
+            return false;
           const quote = invoice.mintQuote as any;
           if (quote?.expiry && quote.expiry > 0 && quote.expiry * 1000 < now) {
             return false;
@@ -531,6 +533,9 @@ export default defineComponent({
         for (const quote of this.findReusableOnchainQuotes()) {
           try {
             await this.checkOnchainAndMint(quote.quote, false, false);
+            this.checkedReusableOnchainQuote = quote;
+            await this.mintOnPaidOnchain(quote.quote, false, true, false);
+            return;
           } catch (error: any) {
             if (error?.message === "Address not paid") {
               this.checkedReusableOnchainQuote = quote;

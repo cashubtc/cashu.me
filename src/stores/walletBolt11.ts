@@ -6,10 +6,8 @@ import {
   Amount,
   Wallet,
   MeltQuoteBolt11Request,
-  MeltQuoteBolt11Response,
   MintQuoteBolt11Response,
   MintQuoteState,
-  type ProofLike,
 } from "@cashu/cashu-ts";
 import * as nobleSecp256k1 from "@noble/secp256k1";
 import { bytesToHex } from "@noble/hashes/utils";
@@ -27,6 +25,7 @@ import { date } from "quasar";
 import { notifyWarning } from "src/js/notify";
 import { LightningMethod } from "src/stores/walletTypes";
 import { ensureLightningMintActive } from "src/js/mint-lightning";
+import { type AppMeltQuote, normalizeMeltQuote } from "./walletMelt";
 
 // These actions are implemented as regular functions that rely on dynamic `this`
 // when attached to the Pinia store (wallet.ts assigns them to actions).
@@ -38,38 +37,12 @@ type AppMintQuote = Omit<MintQuoteBolt11Response, "amount"> & {
   amount: number;
 };
 
-type AppMeltQuote = Omit<
-  MeltQuoteBolt11Response,
-  "amount" | "fee_reserve" | "change"
-> & {
-  amount: number;
-  fee_reserve: number;
-};
-
 function amountToNumber(value: any): number {
   return Amount.from(value).toNumber();
 }
 
 function normalizeMintQuote(quote: MintQuoteBolt11Response): AppMintQuote {
   return { ...quote, amount: amountToNumber(quote.amount) };
-}
-
-function normalizeMeltQuote(quote: MeltQuoteBolt11Response): AppMeltQuote {
-  const { change, ...rest } = quote;
-  void change;
-  return {
-    ...rest,
-    amount: amountToNumber(quote.amount),
-    fee_reserve: amountToNumber(quote.fee_reserve),
-  };
-}
-
-function toMeltQuote(quote: AppMeltQuote): MeltQuoteBolt11Response {
-  return {
-    ...quote,
-    amount: Amount.from(quote.amount),
-    fee_reserve: Amount.from(quote.fee_reserve),
-  };
 }
 
 export async function requestMintBolt11(
@@ -268,13 +241,7 @@ export async function meltBolt11(
     quote,
     mintWallet,
     silent,
-    (q, sp, opts) =>
-      mintWallet.ops
-        .meltBolt11(toMeltQuote(q), sp)
-        .keyset(opts.keysetId)
-        .asDeterministic()
-        .run(),
-    (id) => mintWallet.mint.checkMeltQuoteBolt11(id),
+    (id: string) => mintWallet.mint.checkMeltQuoteBolt11(id),
     LightningMethod.Bolt11
   );
 }

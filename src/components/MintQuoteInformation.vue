@@ -222,7 +222,10 @@ export default defineComponent({
     },
     methodDisplay(): string {
       const method = this.method || LightningMethod.Bolt11;
-      if (method === LightningMethod.Onchain) {
+      if (
+        method === LightningMethod.Onchain ||
+        method === LightningMethod.OnchainSubpayment
+      ) {
         return "On-chain";
       }
       if (
@@ -234,7 +237,10 @@ export default defineComponent({
       return "Bolt11";
     },
     isOnchain(): boolean {
-      return this.method === LightningMethod.Onchain;
+      return (
+        this.method === LightningMethod.Onchain ||
+        this.method === LightningMethod.OnchainSubpayment
+      );
     },
     networkDisplay(): string {
       if (!this.isOnchain || !this.invoice?.request) return "";

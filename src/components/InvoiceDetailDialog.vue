@@ -226,7 +226,10 @@ export default defineComponent({
       );
     },
     isOnchain(): boolean {
-      return this.invoiceData.type === LightningMethod.Onchain;
+      return (
+        this.invoiceData.type === LightningMethod.Onchain ||
+        this.invoiceData.type === LightningMethod.OnchainSubpayment
+      );
     },
     qrLink(): string {
       if (this.isOnchain) {

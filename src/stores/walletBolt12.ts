@@ -2,12 +2,7 @@ import { currentDateStr } from "src/js/utils";
 import { useMintsStore, WalletProof } from "./mints";
 import { useProofsStore } from "./proofs";
 import { useUiStore } from "src/stores/ui";
-import {
-  Amount,
-  Wallet,
-  MeltQuoteBolt12Response,
-  MintQuoteBolt12Response,
-} from "@cashu/cashu-ts";
+import { Amount, Wallet, MintQuoteBolt12Response } from "@cashu/cashu-ts";
 import * as nobleSecp256k1 from "@noble/secp256k1";
 import { bytesToHex } from "@noble/hashes/utils";
 import { notifyApiError, notify, notifySuccess } from "src/js/notify";
@@ -16,16 +11,9 @@ import { useInvoicesWorkerStore } from "./invoicesWorker";
 import { mintOnPaidGeneric } from "./walletWebsocket";
 import { LightningMethod } from "src/stores/walletTypes";
 import { usePriceStore } from "./price";
+import { type AppMeltQuote, normalizeMeltQuote } from "./walletMelt";
 
 // BOLT12: reusable offers
-
-type AppMeltQuote = Omit<
-  MeltQuoteBolt12Response,
-  "amount" | "fee_reserve" | "change"
-> & {
-  amount: number;
-  fee_reserve: number;
-};
 
 type AppMintQuote = Omit<
   MintQuoteBolt12Response,
@@ -47,24 +35,6 @@ function normalizeMintQuote(quote: MintQuoteBolt12Response): AppMintQuote {
     amount: amount === null ? null : amountToNumber(amount),
     amount_paid: amountToNumber(amount_paid),
     amount_issued: amountToNumber(amount_issued),
-  };
-}
-
-function normalizeMeltQuote(quote: MeltQuoteBolt12Response): AppMeltQuote {
-  const { change, ...rest } = quote;
-  void change;
-  return {
-    ...rest,
-    amount: amountToNumber(quote.amount),
-    fee_reserve: amountToNumber(quote.fee_reserve),
-  };
-}
-
-function toMeltQuote(quote: AppMeltQuote): MeltQuoteBolt12Response {
-  return {
-    ...quote,
-    amount: Amount.from(quote.amount),
-    fee_reserve: Amount.from(quote.fee_reserve),
   };
 }
 
@@ -300,13 +270,7 @@ export async function meltBolt12(
     quote,
     mintWallet,
     silent,
-    (q, sp, opts) =>
-      mintWallet.ops
-        .meltBolt12(toMeltQuote(q), sp)
-        .keyset(opts.keysetId)
-        .asDeterministic()
-        .run(),
-    (id) => mintWallet.mint.checkMeltQuoteBolt12(id),
+    (id: string) => mintWallet.mint.checkMeltQuoteBolt12(id),
     LightningMethod.Bolt12
   );
 }

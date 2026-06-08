@@ -379,6 +379,10 @@ export default defineComponent({
       } else if (transaction.type === UnifiedTransactionType.Onchain) {
         if (transaction.amount < 0) {
           this.checkOutgoingInvoice(transaction.quote, true);
+        } else if (transaction.method === LightningMethod.OnchainSubpayment) {
+          // For subpayments, extract parent quote and check that
+          const parentQuote = transaction.quote.split("_")[0];
+          this.checkOnchainAndMint(parentQuote, true);
         } else {
           this.checkOnchainAndMint(transaction.quote, true);
         }
@@ -436,9 +440,15 @@ export default defineComponent({
       this.invoiceData = invoice;
       this.showInvoiceDetails = true;
       if (invoice.status === "pending") {
-        if (invoice.method === LightningMethod.Onchain) {
+        if (
+          invoice.method === LightningMethod.Onchain ||
+          invoice.method === LightningMethod.OnchainSubpayment
+        ) {
           if (invoice.amount < 0) {
             this.checkOutgoingInvoice(invoice.quote, false);
+          } else if (invoice.method === LightningMethod.OnchainSubpayment) {
+            const parentQuote = invoice.quote.split("_")[0];
+            this.checkOnchainAndMint(parentQuote, false, false);
           } else {
             this.checkOnchainAndMint(invoice.quote, false, false);
           }
@@ -483,7 +493,8 @@ export default defineComponent({
         transactions.push({
           ...invoice,
           type:
-            invoice.type === LightningMethod.Onchain
+            invoice.type === LightningMethod.Onchain ||
+            invoice.type === LightningMethod.OnchainSubpayment
               ? UnifiedTransactionType.Onchain
               : UnifiedTransactionType.Lightning,
           method: invoice.type || LightningMethod.Bolt11,
