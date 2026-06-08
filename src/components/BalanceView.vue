@@ -125,25 +125,6 @@
       </div>
     </div>
   </div>
-  <!-- pending -->
-  <div class="row q-mt-xs q-mb-none" v-if="pendingBalance > 0">
-    <div class="col-12">
-      <q-btn
-        name="history"
-        size="sm"
-        align="between"
-        color="secondary"
-        dense
-        outline
-        class="q-mx-none q-mt-xs q-pr-sm cursor-pointer"
-        @click="checkPendingTokens()"
-        ><q-icon name="history" size="1rem" class="q-mx-xs" />
-        {{ $t("BalanceView.pending.label") }}:
-        {{ formatCurrency(pendingBalance, this.activeUnit) }}
-        <q-tooltip>{{ $t("BalanceView.pending.tooltip") }}</q-tooltip>
-      </q-btn>
-    </div>
-  </div>
   <!-- </q-card-section>
   </q-card> -->
 </template>
