@@ -88,7 +88,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         this.invoiceWorkerRunning = false;
       }
     },
-    addInvoiceToChecker(quote: string) {
+    addInvoiceToChecker(quote: string, forceStart = false) {
       const existingIndex = this.quotes.findIndex((q) => q.quote === quote);
       if (existingIndex !== -1) {
         this.quotes.splice(existingIndex, 1);
@@ -104,7 +104,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         lastChecked: 0,
         checkCount: 0,
       });
-      this.startInvoiceCheckerWorker();
+      this.startInvoiceCheckerWorker(forceStart);
     },
     removeInvoiceFromChecker(quote: string) {
       const index = this.quotes.findIndex((q) => q.quote === quote);
@@ -112,12 +112,12 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         this.quotes.splice(index, 1);
       }
     },
-    addBolt12OfferToChecker(quote: string) {
+    addBolt12OfferToChecker(quote: string, forceStart = false) {
       const existingIndex = this.bolt12Quotes.findIndex(
         (q) => q.quote === quote
       );
       if (existingIndex !== -1) {
-        this.startInvoiceCheckerWorker();
+        this.startInvoiceCheckerWorker(forceStart);
         return;
       }
 
@@ -130,7 +130,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         lastChecked: 0,
         checkCount: 0,
       });
-      this.startInvoiceCheckerWorker();
+      this.startInvoiceCheckerWorker(forceStart);
     },
     removeBolt12OfferFromChecker(quote: string) {
       const index = this.bolt12Quotes.findIndex((q) => q.quote === quote);

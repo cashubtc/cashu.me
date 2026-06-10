@@ -38,6 +38,20 @@ describe("invoices worker", () => {
     ]);
   });
 
+  it("can force-start incoming check queues when a dialog is opened", () => {
+    const worker = useInvoicesWorkerStore();
+    const startSpy = vi
+      .spyOn(worker, "startInvoiceCheckerWorker")
+      .mockImplementation(() => {});
+
+    worker.addInvoiceToChecker("bolt11-q", true);
+    worker.addBolt12OfferToChecker("bolt12-q", true);
+
+    expect(startSpy).toHaveBeenCalledWith(true);
+    expect(worker.quotes.map((q) => q.quote)).toContain("bolt11-q");
+    expect(worker.bolt12Quotes.map((q) => q.quote)).toContain("bolt12-q");
+  });
+
   it("skips reusable quote checks while the quote mint is in cooldown", async () => {
     const worker = useInvoicesWorkerStore();
     const now = Date.now();

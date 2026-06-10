@@ -272,6 +272,7 @@ import { useTokensStore } from "src/stores/tokens";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useSettingsStore } from "src/stores/settings";
 import { useWorkersStore } from "src/stores/workers";
+import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
 import { usePriceStore } from "src/stores/price";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
@@ -436,13 +437,13 @@ export default defineComponent({
             );
             return;
           }
-          const unspent = this.checkTokenSpendable(
-            this.sendData.historyToken,
-            false
+          this.addOutgoingTokenToChecker(
+            this.sendData.historyToken.token,
+            true
           );
-          if (!unspent) {
-            this.sendData.historyToken.status = "paid";
-          }
+          this.onTokenPaid(this.sendData.historyToken).catch((error: any) => {
+            console.error("Could not start token status checker", error);
+          });
         }
       } else {
         clearInterval(this.qrInterval);
@@ -455,6 +456,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(useWorkersStore, ["clearAllWorkers"]),
+    ...mapActions(useInvoicesWorkerStore, ["addOutgoingTokenToChecker"]),
     ...mapActions(useWalletStore, [
       "send",
       "sendToLock",

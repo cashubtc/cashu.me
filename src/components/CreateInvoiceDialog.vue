@@ -304,8 +304,10 @@ export default defineComponent({
       if (!this.isBolt12) return true;
       return this.bolt12AddAmount;
     },
-    mintFilterMethod(): PaymentMethod | null {
-      return this.isOnchain ? PaymentMethod.Onchain : null;
+    mintFilterMethod(): PaymentMethod | PaymentMethod[] {
+      return this.isOnchain
+        ? PaymentMethod.Onchain
+        : [PaymentMethod.Bolt11, PaymentMethod.Bolt12];
     },
     bolt11Supported(): boolean {
       const mintStore = useMintsStore();
@@ -313,20 +315,12 @@ export default defineComponent({
         (m) => m.url === mintStore.activeMintUrl
       );
       if (!mint) return false;
-      // Check for NUT-4 support (Mint Tokens)
-      const nut4 =
-        mint.info?.nuts?.[4] || mint.info?.nuts?.["4"] || ({} as any);
-      if (nut4.supported === false) return false;
-      // If methods are specified, check for bolt11
-      // If methods are not specified, assume bolt11 is supported
-      if (nut4.methods) {
-        return nut4.methods.some(
-          (m: any) =>
-            m.method === PaymentMethod.Bolt11 &&
-            (!m.unit || m.unit === mintStore.activeUnit)
-        );
-      }
-      return true;
+      return mintSupportsPaymentMethod(
+        mint,
+        PaymentMethod.Bolt11,
+        "mint",
+        mintStore.activeUnit
+      );
     },
     bolt12Supported(): boolean {
       const mintStore = useMintsStore();
@@ -444,22 +438,12 @@ export default defineComponent({
     },
     activeMintUrl: {
       handler: function () {
-        if (this.invoiceData.type === PaymentMethod.Onchain) {
-          if (!this.onchainSupported && this.bolt11Supported) {
-            this.invoiceData.type = PaymentMethod.Bolt11;
-          }
-          this.refreshReusableOnchainQuote();
-          return;
-        }
-        if (this.bolt11Supported && !this.bolt12Supported) {
-          this.invoiceData.type = PaymentMethod.Bolt11;
-        } else if (!this.bolt11Supported && this.bolt12Supported) {
-          this.invoiceData.type = PaymentMethod.Bolt12;
-        }
+        this.syncInvoiceTypeWithActiveMint();
       },
       immediate: true,
     },
     activeUnit: function () {
+      this.syncInvoiceTypeWithActiveMint();
       this.refreshReusableOnchainQuote();
     },
   },
@@ -481,6 +465,22 @@ export default defineComponent({
         this.invoiceData.type = PaymentMethod.Bolt12;
         this.bolt12AddAmount = false;
         this.invoiceData.amount = 0;
+      }
+    },
+    syncInvoiceTypeWithActiveMint() {
+      if (this.invoiceData.type === PaymentMethod.Onchain) {
+        if (!this.onchainSupported && this.bolt11Supported) {
+          this.invoiceData.type = PaymentMethod.Bolt11;
+        } else if (!this.onchainSupported && this.bolt12Supported) {
+          this.invoiceData.type = PaymentMethod.Bolt12;
+        }
+        this.refreshReusableOnchainQuote();
+        return;
+      }
+      if (this.bolt11Supported && !this.bolt12Supported) {
+        this.invoiceData.type = PaymentMethod.Bolt11;
+      } else if (!this.bolt11Supported && this.bolt12Supported) {
+        this.invoiceData.type = PaymentMethod.Bolt12;
       }
     },
     requestMintButton: async function () {

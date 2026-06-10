@@ -1062,7 +1062,10 @@ export const useWalletStore = defineStore("wallet", {
         const oneProof = [proofs[0]];
         this.activeWebsocketConnections++;
         uIStore.triggerActivityOrb();
-        const wallet = await this.activeWallet();
+        const wallet = await this.mintWallet(
+          historyToken.mint,
+          historyToken.unit
+        );
         const unsub = await wallet.on.proofStateUpdates(
           toProofs(oneProof),
           async (proofState: ProofState & { proof: Proof }) => {
@@ -1237,7 +1240,7 @@ export const useWalletStore = defineStore("wallet", {
         mintStore.activeMintUrl,
         mintStore.selectMintUrl.bind(mintStore),
         PaymentMethod.Bolt12,
-        "mint",
+        "melt",
         mintStore.activeUnit
       );
       if (!mintResult.ok) {

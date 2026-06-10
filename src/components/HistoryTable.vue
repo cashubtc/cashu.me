@@ -164,6 +164,7 @@ import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { useWalletStore } from "src/stores/wallet";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { useUiStore } from "src/stores/ui";
+import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
 import token from "../js/token";
 import { notify } from "src/js/notify";
 import {
@@ -277,6 +278,12 @@ export default defineComponent({
       "checkOutgoingInvoice",
       "checkOfferAndMintBolt12",
       "checkOnchainAndMint",
+    ]),
+    ...mapActions(useInvoicesWorkerStore, [
+      "addInvoiceToChecker",
+      "addBolt12OfferToChecker",
+      "addOutgoingInvoiceToChecker",
+      "addOutgoingTokenToChecker",
     ]),
 
     handleLongPress(transaction) {
@@ -438,6 +445,9 @@ export default defineComponent({
       this.sendData.paymentRequest = historyToken.paymentRequest;
       this.sendData.historyAmount = historyToken.amount;
       this.sendData.historyToken = historyToken;
+      if (historyToken.status === "pending" && historyToken.amount < 0) {
+        this.addOutgoingTokenToChecker(tokensBase64, true);
+      }
       this.showSendTokens = true;
     },
 
@@ -469,14 +479,20 @@ export default defineComponent({
             typeof invoice.mintQuote.amount_paid !== "undefined");
 
         if (invoice.amount < 0) {
+          this.addOutgoingInvoiceToChecker(invoice.quote, true);
           this.checkOutgoingInvoice(invoice.quote, true);
         } else if (isBolt12) {
+          this.addBolt12OfferToChecker(
+            mintQuoteForHistoryInvoice(invoice),
+            true
+          );
           this.checkOfferAndMintBolt12(
             mintQuoteForHistoryInvoice(invoice),
             false,
             false
           );
         } else if (invoice.amount > 0) {
+          this.addInvoiceToChecker(invoice.quote, true);
           try {
             await this.checkInvoiceBolt11(invoice.quote, false, false);
           } catch (e) {

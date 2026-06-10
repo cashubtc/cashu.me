@@ -164,7 +164,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, type PropType } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "stores/mints";
@@ -233,7 +233,7 @@ export default defineComponent({
       default: null,
     },
     filterPaymentMethod: {
-      type: String as () => PaymentMethod | null,
+      type: [String, Array] as PropType<PaymentMethod | PaymentMethod[] | null>,
       default: null,
     },
     filterMintOperation: {
@@ -285,6 +285,9 @@ export default defineComponent({
     filterMintOperation() {
       this.initializeChosenMint();
     },
+    activeUnit() {
+      this.initializeChosenMint(true);
+    },
   },
   computed: {
     ...mapState(useMintsStore, ["activeProofs", "mints", "activeUnit"]),
@@ -296,6 +299,14 @@ export default defineComponent({
       }
       const balance = this.chosenMint.balances?.[unit];
       return typeof balance === "number" ? balance : 0;
+    },
+    filterPaymentMethods(): PaymentMethod[] {
+      if (!this.filterPaymentMethod) {
+        return [];
+      }
+      return Array.isArray(this.filterPaymentMethod)
+        ? this.filterPaymentMethod
+        : [this.filterPaymentMethod];
     },
   },
   methods: {
@@ -358,12 +369,14 @@ export default defineComponent({
         : [];
       for (const mintData of availableMints) {
         if (
-          this.filterPaymentMethod &&
-          !mintSupportsPaymentMethod(
-            mintData,
-            this.filterPaymentMethod,
-            this.filterMintOperation,
-            this.activeUnit
+          this.filterPaymentMethods.length &&
+          !this.filterPaymentMethods.some((method) =>
+            mintSupportsPaymentMethod(
+              mintData,
+              method,
+              this.filterMintOperation,
+              this.activeUnit
+            )
           )
         ) {
           continue;

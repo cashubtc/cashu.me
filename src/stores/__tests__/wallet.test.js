@@ -47,6 +47,7 @@ const h = vi.hoisted(() => {
     decodePaymentRequest: vi.fn(async () => {}),
   };
   const settingsStore = {
+    checkSentTokens: true,
     checkIncomingInvoices: true,
     periodicallyCheckIncomingInvoices: true,
     useWebsockets: true,
@@ -58,6 +59,7 @@ const h = vi.hoisted(() => {
     removeInvoiceFromChecker: vi.fn(),
     addBolt12OfferToChecker: vi.fn(),
     addOnchainQuoteToChecker: vi.fn(),
+    addOutgoingTokenToChecker: vi.fn(),
   };
   const workersStore = {
     checkTokenSpendableWorker: vi.fn(),
@@ -353,7 +355,12 @@ describe("wallet store", () => {
     h.proofsStore.getProofsForQuote.mockResolvedValue([]);
     h.p2pkStore.isValidPubkey.mockReturnValue(false);
     h.bolt12Decode.mockReturnValue({ amount: "0", description: "" });
+    h.tokenModule.decodeFull.mockReset();
+    h.tokenModule.getProofs.mockReset();
+    h.tokenModule.getMint.mockReset();
+    h.tokenModule.getUnit.mockReset();
     h.settingsStore.checkIncomingInvoices = true;
+    h.settingsStore.checkSentTokens = true;
     h.settingsStore.periodicallyCheckIncomingInvoices = true;
     h.settingsStore.useWebsockets = true;
   });
@@ -749,6 +756,75 @@ describe("wallet store", () => {
     expect(websocket.connection.cancelSubscription).not.toHaveBeenCalled();
   });
 
+  it("subscribes sent-token proof-state websocket on the token mint", async () => {
+    const wallet = useWalletStore();
+    h.mintsStore.activeMintUrl = "https://mint-a.example";
+    h.mintsStore.mints = [
+      {
+        url: "https://mint-a.example",
+        keys: [{ id: "00aa" }],
+        keysets: [{ id: "00aa", unit: "sat", active: true }],
+        info: { name: "mint-a" },
+      },
+      {
+        url: "https://mint-b.example",
+        keys: [{ id: "00bb" }],
+        keysets: [{ id: "00bb", unit: "sat", active: true }],
+        info: {
+          nuts: {
+            17: {
+              supported: [
+                {
+                  method: PaymentMethod.Bolt11,
+                  unit: "sat",
+                  commands: ["proof_state"],
+                },
+              ],
+            },
+          },
+        },
+      },
+    ];
+    const tokenWallet = {
+      on: {
+        proofStateUpdates: vi.fn(async () => vi.fn()),
+      },
+    };
+    h.tokenModule.decodeFull.mockResolvedValue({ proofs: [] });
+    h.tokenModule.getProofs.mockReturnValue([
+      { id: "00bb", amount: 1, secret: "s1" },
+    ]);
+    const mintWalletSpy = vi
+      .spyOn(wallet, "mintWallet")
+      .mockResolvedValue(tokenWallet);
+    vi.spyOn(wallet, "activeWallet");
+
+    await wallet.onTokenPaid({
+      token: "cashu-token",
+      amount: -1,
+      mint: "https://mint-b.example",
+      unit: "sat",
+      status: "pending",
+    });
+
+    expect(h.invoicesWorkerStore.addOutgoingTokenToChecker).toHaveBeenCalledWith(
+      "cashu-token",
+      true
+    );
+    expect(mintWalletSpy).toHaveBeenCalledWith("https://mint-b.example", "sat");
+    expect(wallet.activeWallet).not.toHaveBeenCalled();
+    expect(tokenWallet.on.proofStateUpdates).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          id: "00bb",
+          secret: "s1",
+        }),
+      ],
+      expect.any(Function),
+      expect.any(Function)
+    );
+  });
+
   it("serializes Bolt12 minting so concurrent checks use distinct counters", async () => {
     const wallet = useWalletStore();
     wallet.invoiceHistory = [
@@ -913,7 +989,7 @@ describe("wallet store", () => {
         keys: [{ id: "00aa" }],
         keysets: [{ id: "00aa", unit: "sat", active: true }],
         info: {
-          nuts: { 4: { methods: [{ method: "bolt11" }] } },
+          nuts: { 5: { methods: [{ method: "bolt11" }] } },
         },
       },
     ];
@@ -936,7 +1012,7 @@ describe("wallet store", () => {
         keys: [{ id: "00aa" }],
         keysets: [{ id: "00aa", unit: "sat", active: true }],
         info: {
-          nuts: { 4: { methods: [{ method: "bolt11" }] } },
+          nuts: { 5: { methods: [{ method: "bolt11" }] } },
         },
       },
       {
@@ -944,7 +1020,38 @@ describe("wallet store", () => {
         keys: [{ id: "00bb" }],
         keysets: [{ id: "00bb", unit: "sat", active: true }],
         info: {
+          nuts: { 5: { methods: [{ method: "bolt12" }] } },
+        },
+      },
+    ];
+
+    await wallet.handleBolt12Offer("lno1amountless");
+
+    expect(h.mintsStore.selectMintUrl).toHaveBeenCalledWith(
+      "https://mint-b.example"
+    );
+    expect(h.mintsStore.activateMintUrl).not.toHaveBeenCalled();
+    expect(wallet.payInvoiceData.meltQuote.error).toBe("");
+  });
+
+  it("does not treat Bolt12 mint support as sufficient for paying an offer", async () => {
+    const wallet = useWalletStore();
+    h.mintsStore.activeMintUrl = "https://mint-a.example";
+    h.mintsStore.mints = [
+      {
+        url: "https://mint-a.example",
+        keys: [{ id: "00aa" }],
+        keysets: [{ id: "00aa", unit: "sat", active: true }],
+        info: {
           nuts: { 4: { methods: [{ method: "bolt12" }] } },
+        },
+      },
+      {
+        url: "https://mint-b.example",
+        keys: [{ id: "00bb" }],
+        keysets: [{ id: "00bb", unit: "sat", active: true }],
+        info: {
+          nuts: { 5: { methods: [{ method: "bolt12" }] } },
         },
       },
     ];
@@ -1078,7 +1185,7 @@ describe("wallet store", () => {
     const wallet = useWalletStore();
     h.mintsStore.mints[0].info = {
       nuts: {
-        4: {
+        5: {
           methods: [{ method: PaymentMethod.Bolt12, unit: "sat" }],
         },
       },
