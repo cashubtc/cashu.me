@@ -523,7 +523,7 @@ export default defineComponent({
               ? UnifiedTransactionType.Onchain
               : UnifiedTransactionType.Lightning,
           method: invoice.type || PaymentMethod.Bolt11,
-          id: `invoice-${invoice.quote}`,
+          id: invoice.id ? `payment-${invoice.id}` : `invoice-${invoice.quote}`,
           label: invoice.label,
         });
       });

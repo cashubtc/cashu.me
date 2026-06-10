@@ -17,11 +17,31 @@ import { notifyError, notifySuccess } from "../js/notify";
 
 export class CashuDexie extends Dexie {
   proofs!: Table<WalletProof>;
+  paymentHistory!: Table<any>;
+  mintQuotes!: Table<any>;
+  meltQuotes!: Table<any>;
+  ecashHistory!: Table<any>;
 
   constructor() {
     super("db");
     this.version(1).stores({
       proofs: "secret, id, C, amount, reserved, quote",
+    });
+    this.version(2).stores({
+      proofs: "secret, id, C, amount, reserved, quote",
+      paymentHistory:
+        "id, direction, quote, parentQuote, method, status, mint, unit, date, paidDate, [direction+quote], [direction+status], [method+status]",
+      mintQuotes: "quote, method, request, unit, state, expiry, pubkey",
+      meltQuotes: "quote, method, request, unit, state, expiry",
+    });
+    this.version(3).stores({
+      proofs: "secret, id, C, amount, reserved, quote",
+      paymentHistory:
+        "id, direction, quote, parentQuote, method, status, mint, unit, date, paidDate, [direction+quote], [direction+status], [method+status]",
+      mintQuotes: "quote, method, request, unit, state, expiry, pubkey",
+      meltQuotes: "quote, method, request, unit, state, expiry",
+      ecashHistory:
+        "id, status, token, mint, unit, date, paidDate, paymentRequestId, [status+date], [mint+unit]",
     });
   }
 }
@@ -74,6 +94,10 @@ export const useDexieStore = defineStore("dexie", {
     },
     deleteAllTables: function () {
       cashuDb.proofs.clear();
+      cashuDb.paymentHistory.clear();
+      cashuDb.mintQuotes.clear();
+      cashuDb.meltQuotes.clear();
+      cashuDb.ecashHistory.clear();
     },
   },
 });

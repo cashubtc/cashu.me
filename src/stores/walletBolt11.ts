@@ -26,6 +26,7 @@ import { notifyWarning } from "src/js/notify";
 import { PaymentMethod } from "src/stores/walletTypes";
 import { ensurePaymentMethodMintActive } from "src/js/mint-payment-methods";
 import { type AppMeltQuote, normalizeMeltQuote } from "./walletMelt";
+import { usePaymentHistoryStore } from "./paymentHistory";
 
 // These actions are implemented as regular functions that rely on dynamic `this`
 // when attached to the Pinia store (wallet.ts assigns them to actions).
@@ -73,7 +74,7 @@ export async function requestMintBolt11(
     this.invoiceData.unit = mintWallet.unit;
     this.invoiceData.mintQuote = normalizeMintQuote(data);
     this.invoiceData.privKey = privkey;
-    this.invoiceHistory.push({
+    await this.addPaymentHistory({
       ...this.invoiceData,
     });
     return data;
@@ -108,6 +109,16 @@ export async function mintBolt11(
     // first we check if the mint quote is paid
     const mintQuote = await mintWallet.checkMintQuoteBolt11(invoice.quote);
     invoice.mintQuote = normalizeMintQuote(mintQuote);
+    const paymentHistoryStore = usePaymentHistoryStore();
+    await paymentHistoryStore.upsertMintQuote(
+      invoice.mintQuote,
+      PaymentMethod.Bolt11
+    );
+    if (
+      paymentHistoryStore.paymentHistory.some((p) => p.quote === invoice.quote)
+    ) {
+      this.syncPaymentHistoryCache?.();
+    }
     console.log("### mintBolt11(): mintQuote", mintQuote);
     switch (mintQuote.state) {
       case MintQuoteState.PAID:
@@ -135,7 +146,7 @@ export async function mintBolt11(
     await proofsStore.addProofs(proofs);
 
     // update UI
-    this.setInvoicePaid(invoice.quote);
+    await this.setInvoicePaid(invoice.quote);
     useInvoicesWorkerStore().removeInvoiceFromChecker(invoice.quote);
 
     return proofs;
@@ -283,7 +294,7 @@ export async function checkInvoiceBolt11(
     // check the state first
     const state = (await mintWallet.checkMintQuoteBolt11(quote)).state;
     if (state == MintQuoteState.ISSUED) {
-      this.setInvoicePaid(quote);
+      await this.setInvoicePaid(quote);
       return;
     }
     if (state != MintQuoteState.PAID) {

@@ -896,11 +896,12 @@ describe("wallet store", () => {
     expect(wallet.keysetCounter("00aa")).toBe(3);
     expect(subpayment).toMatchObject({
       amount: 100,
+      quote: "offer-q",
       parentQuote: "offer-q",
       type: PaymentMethod.Bolt12Subpayment,
     });
-    expect(subpayment.quote).toMatch(/^subpayment:/);
-    expect(subpayment.quote).not.toContain("offer-q");
+    expect(subpayment.id).toMatch(/^subpayment:/);
+    expect(subpayment.id).not.toContain("offer-q");
     expect(h.uiStore.lockMutex).toHaveBeenCalledTimes(2);
     expect(h.uiStore.unlockMutex).toHaveBeenCalledTimes(2);
   });
@@ -952,11 +953,12 @@ describe("wallet store", () => {
     );
     expect(subpayment).toMatchObject({
       amount: 75,
+      quote: parentQuote,
       parentQuote,
       type: PaymentMethod.OnchainSubpayment,
     });
-    expect(subpayment.quote).toMatch(/^subpayment:/);
-    expect(subpayment.quote).not.toContain(parentQuote);
+    expect(subpayment.id).toMatch(/^subpayment:/);
+    expect(subpayment.id).not.toContain(parentQuote);
     expect(mintWallet.checkMintQuoteOnchain).toHaveBeenCalledWith(parentQuote);
   });
 

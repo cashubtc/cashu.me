@@ -211,7 +211,7 @@ export const useNPCV2Store = defineStore("npcV2", {
           if (!latestQuoteTime || latestQuoteTime < quote.createdAt) {
             latestQuoteTime = quote.createdAt;
           }
-          walletStore.invoiceHistory.push({
+          await walletStore.addPaymentHistory({
             label: "Zap",
             mint: quote.mintUrl,
             memo: "",

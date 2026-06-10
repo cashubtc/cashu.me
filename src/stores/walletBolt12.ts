@@ -13,6 +13,7 @@ import { PaymentMethod } from "src/stores/walletTypes";
 import { usePriceStore } from "./price";
 import { type AppMeltQuote, normalizeMeltQuote } from "./walletMelt";
 import { createSubpaymentHistoryQuote } from "src/js/invoice-history";
+import { usePaymentHistoryStore } from "./paymentHistory";
 
 // BOLT12: reusable offers
 
@@ -66,7 +67,7 @@ export async function requestMintBolt12(
     this.invoiceData.mintQuote = normalizeMintQuote(data);
     this.invoiceData.privKey = privkey;
 
-    this.invoiceHistory.push({
+    await this.addPaymentHistory({
       ...this.invoiceData,
       label: "Lightning Bolt12",
       type: PaymentMethod.Bolt12,
@@ -149,14 +150,25 @@ export async function checkOfferAndMintBolt12(
     const meltQuoteAfterMint = await mintWallet.checkMintQuoteBolt12(quoteId);
     const normalizedMintQuote = normalizeMintQuote(meltQuoteAfterMint);
     invoice.mintQuote = normalizedMintQuote;
+    const paymentHistoryStore = usePaymentHistoryStore();
+    await paymentHistoryStore.upsertMintQuote(
+      normalizedMintQuote,
+      PaymentMethod.Bolt12
+    );
+    if (
+      paymentHistoryStore.paymentHistory.some((p) => p.quote === invoice.quote)
+    ) {
+      this.syncPaymentHistoryCache?.();
+    }
 
     if (invoice.status === "paid") {
       // If already paid, this is a reusable offer sub-payment.
       // Create a NEW history entry for this specific payment event.
-      this.invoiceHistory.push({
+      await this.addPaymentHistory({
         ...invoice,
+        id: createSubpaymentHistoryQuote(),
         amount: delta,
-        quote: createSubpaymentHistoryQuote(),
+        quote: invoice.quote,
         parentQuote: invoice.quote,
         date: currentDateStr(),
         status: "paid",
@@ -166,7 +178,7 @@ export async function checkOfferAndMintBolt12(
       });
     } else {
       // First payment: update the original offer entry
-      this.setInvoicePaid(invoice.quote, {
+      await this.setInvoicePaid(invoice.quote, {
         amount: delta,
         mintQuote: normalizedMintQuote,
       });

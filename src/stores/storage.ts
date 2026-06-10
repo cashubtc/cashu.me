@@ -3,9 +3,15 @@ import { useWalletStore } from "./wallet";
 import { useMintsStore } from "./mints";
 import { useLocalStorage } from "@vueuse/core";
 import { notifyError, notifySuccess } from "../js/notify";
-import { useTokensStore } from "./tokens";
+import { HistoryToken, useTokensStore } from "./tokens";
 import { currentDateStr } from "src/js/utils";
 import { useProofsStore } from "./proofs";
+import {
+  buildPaymentRowsFromLegacyInvoice,
+  LegacyInvoiceHistory,
+  usePaymentHistoryStore,
+} from "./paymentHistory";
+import { cashuDb } from "./dexie";
 import { deserializeProofs, JSONInt } from "@cashu/cashu-ts";
 
 export const useStorageStore = defineStore("storage", {
@@ -27,6 +33,45 @@ export const useStorageStore = defineStore("storage", {
           if (key === "cashu.dexie.db.proofs") {
             const proofs = deserializeProofs(backup[key]);
             await proofsStore.addProofs(proofs);
+          } else if (key === "cashu.dexie.db.paymentHistory") {
+            await cashuDb.paymentHistory.bulkPut(JSON.parse(backup[key]));
+          } else if (key === "cashu.dexie.db.mintQuotes") {
+            await cashuDb.mintQuotes.bulkPut(JSON.parse(backup[key]));
+          } else if (key === "cashu.dexie.db.meltQuotes") {
+            await cashuDb.meltQuotes.bulkPut(JSON.parse(backup[key]));
+          } else if (key === "cashu.dexie.db.ecashHistory") {
+            await cashuDb.ecashHistory.bulkPut(JSON.parse(backup[key]));
+          } else if (key === "cashu.invoiceHistory") {
+            const rows = (
+              JSON.parse(backup[key]) as LegacyInvoiceHistory[]
+            ).map((invoice) => buildPaymentRowsFromLegacyInvoice(invoice));
+            await cashuDb.transaction(
+              "rw",
+              cashuDb.paymentHistory,
+              cashuDb.mintQuotes,
+              cashuDb.meltQuotes,
+              async () => {
+                for (const row of rows) {
+                  if (row.mintQuote)
+                    await cashuDb.mintQuotes.put(row.mintQuote);
+                  if (row.meltQuote)
+                    await cashuDb.meltQuotes.put(row.meltQuote);
+                  await cashuDb.paymentHistory.put(row.payment);
+                }
+              }
+            );
+          } else if (key === "cashu.historyTokens") {
+            const historyTokens = (
+              JSON.parse(backup[key]) as HistoryToken[]
+            ).map((historyToken) => ({
+              ...historyToken,
+              id:
+                historyToken.id ||
+                (globalThis.crypto?.randomUUID
+                  ? globalThis.crypto.randomUUID()
+                  : `${Date.now()}-${Math.random()}`),
+            }));
+            await cashuDb.ecashHistory.bulkPut(historyTokens);
           } else {
             localStorage.setItem(key, backup[key]);
           }
@@ -48,6 +93,18 @@ export const useStorageStore = defineStore("storage", {
       // proofs table *magic*
       const proofs = await useProofsStore().getProofs();
       jsonToSave["cashu.dexie.db.proofs"] = JSONInt.stringify(proofs);
+      jsonToSave["cashu.dexie.db.paymentHistory"] = JSON.stringify(
+        await cashuDb.paymentHistory.toArray()
+      );
+      jsonToSave["cashu.dexie.db.mintQuotes"] = JSON.stringify(
+        await cashuDb.mintQuotes.toArray()
+      );
+      jsonToSave["cashu.dexie.db.meltQuotes"] = JSON.stringify(
+        await cashuDb.meltQuotes.toArray()
+      );
+      jsonToSave["cashu.dexie.db.ecashHistory"] = JSON.stringify(
+        await cashuDb.ecashHistory.toArray()
+      );
 
       const textToSave = JSON.stringify(jsonToSave);
       const textToSaveAsBlob = new Blob([textToSave], {
@@ -71,9 +128,9 @@ export const useStorageStore = defineStore("storage", {
     checkLocalStorage: async function () {
       const needsCleanup = this.checkLocalStorageQuota();
       if (needsCleanup) {
-        this.cleanUpLocalStorage(true);
+        await this.cleanUpLocalStorage(true);
       } else {
-        this.cleanUpLocalStorageScheduler();
+        await this.cleanUpLocalStorageScheduler();
       }
     },
     checkLocalStorageQuota: function (): boolean {
@@ -94,7 +151,7 @@ export const useStorageStore = defineStore("storage", {
         return true;
       }
     },
-    cleanUpLocalStorageScheduler: function () {
+    cleanUpLocalStorageScheduler: async function () {
       const cleanUpInterval = 1000 * 60 * 60 * 24 * 7; // 7 day
       const lastCleanUp = this.lastLocalStorageCleanUp;
       if (
@@ -103,10 +160,10 @@ export const useStorageStore = defineStore("storage", {
         new Date().getTime() - new Date(lastCleanUp).getTime() > cleanUpInterval
       ) {
         console.log(`Last clean up: ${lastCleanUp}, cleaning up local storage`);
-        this.cleanUpLocalStorage();
+        await this.cleanUpLocalStorage();
       }
     },
-    cleanUpLocalStorage: function (verbose = false) {
+    cleanUpLocalStorage: async function (verbose = false) {
       const walletStore = useWalletStore();
       const tokenStore = useTokensStore();
       const localStorageSizeBefore = JSON.stringify(localStorage).length;
@@ -116,40 +173,11 @@ export const useStorageStore = defineStore("storage", {
 
       // from all paid invoices in this.invoiceHistory, delete the oldest so that only max 100 remain
       const max_history = 200;
-      const paidInvoices = walletStore.invoiceHistory.filter(
-        (i) => i.status == "paid"
-      );
-
-      if (paidInvoices.length > max_history) {
-        const sortedInvoices = paidInvoices.sort((a, b) => {
-          return new Date(a.date).getTime() - new Date(b.date).getTime();
-        });
-        const deleteInvoices = sortedInvoices.slice(
-          0,
-          sortedInvoices.length - max_history
-        );
-        walletStore.invoiceHistory = walletStore.invoiceHistory.filter(
-          (i) => !deleteInvoices.includes(i)
-        );
-      }
+      await usePaymentHistoryStore().deleteOldPaidPayments(max_history);
+      walletStore.syncPaymentHistoryCache?.();
 
       // walk through the oldest paid tokenStore.historyTokens and delete the token
-      const paidTokens = tokenStore.historyTokens.filter(
-        (t) => t.status == "paid"
-      );
-
-      if (paidTokens.length > max_history) {
-        const sortedTokens = paidTokens.sort((a, b) => {
-          return new Date(a.date).getTime() - new Date(b.date).getTime();
-        });
-        const deleteTokens = sortedTokens.slice(
-          0,
-          sortedTokens.length - max_history
-        );
-        for (let i = 0; i < deleteTokens.length; i++) {
-          deleteTokens[i].token = undefined;
-        }
-      }
+      await tokenStore.redactOldPaidTokens(max_history);
 
       const localStorageSizeAfter = JSON.stringify(localStorage).length;
       const localStorageSizeDiff =

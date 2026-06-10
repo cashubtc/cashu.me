@@ -1,6 +1,7 @@
-import { useLocalStorage } from "@vueuse/core";
 import { date } from "quasar";
 import { defineStore } from "pinia";
+import { liveQuery } from "dexie";
+import { cashuDb } from "./dexie";
 import {
   PaymentRequest,
   Proof,
@@ -19,7 +20,7 @@ export type HistoryToken = {
   status: "paid" | "pending";
   amount: number;
   date: string;
-  token: string;
+  token?: string;
   mint: string;
   unit: string;
   paymentRequest?: PaymentRequest;
@@ -30,11 +31,74 @@ export type HistoryToken = {
   paymentRequestId?: string; // If created in response to a payment request
 };
 
+function hasIndexedDb() {
+  return typeof indexedDB !== "undefined";
+}
+
+function sortHistoryTokens(tokens: HistoryToken[]) {
+  return tokens.slice().sort((a, b) => {
+    const aTime = new Date(a.date).getTime();
+    const bTime = new Date(b.date).getTime();
+    if (aTime !== bTime) return aTime - bTime;
+    return a.id.localeCompare(b.id);
+  });
+}
+
 export const useTokensStore = defineStore("tokens", {
   state: () => ({
-    historyTokens: useLocalStorage("cashu.historyTokens", [] as HistoryToken[]),
+    historyTokens: [] as HistoryToken[],
+    ecashHistorySubscription: null as any,
   }),
   actions: {
+    async initEcashHistory() {
+      if (!hasIndexedDb()) return;
+      if (!this.ecashHistorySubscription) {
+        this.ecashHistorySubscription = liveQuery(() =>
+          cashuDb.ecashHistory.toArray()
+        ).subscribe({
+          next: (historyTokens) => {
+            this.historyTokens = sortHistoryTokens(
+              historyTokens as HistoryToken[]
+            );
+          },
+          error: (error) => console.error(error),
+        });
+      }
+      await this.refreshEcashHistory();
+    },
+    async refreshEcashHistory() {
+      if (!hasIndexedDb()) return;
+      this.historyTokens = sortHistoryTokens(
+        (await cashuDb.ecashHistory.toArray()) as HistoryToken[]
+      );
+    },
+    persistHistoryToken(historyToken: HistoryToken) {
+      if (!hasIndexedDb()) return;
+      cashuDb.ecashHistory.put({ ...historyToken }).catch((error) => {
+        console.error("Could not persist ecash history token", error);
+      });
+    },
+    async migrateHistoryTokensFromLocalStorage() {
+      const raw = localStorage.getItem("cashu.historyTokens");
+      if (!raw) {
+        await this.refreshEcashHistory();
+        return;
+      }
+      const historyTokens = (JSON.parse(raw) as HistoryToken[]).map(
+        (historyToken) => ({
+          ...historyToken,
+          id: historyToken.id || uuidv4(),
+        })
+      );
+      if (!hasIndexedDb()) {
+        this.historyTokens = sortHistoryTokens(historyTokens);
+        localStorage.removeItem("cashu.historyTokens");
+        return;
+      }
+      await cashuDb.ecashHistory.bulkPut(historyTokens);
+      localStorage.removeItem("cashu.historyTokens");
+      await this.refreshEcashHistory();
+    },
     /**
      * @param {{amount: number, token: string, mint: string, unit: string}} param0
      */
@@ -58,7 +122,7 @@ export const useTokensStore = defineStore("tokens", {
       paymentRequestId?: string;
     }): string {
       const id = uuidv4();
-      this.historyTokens.push({
+      const historyToken = {
         id,
         status: "paid",
         amount,
@@ -70,7 +134,9 @@ export const useTokensStore = defineStore("tokens", {
         paymentRequest,
         label,
         paymentRequestId,
-      } as HistoryToken);
+      } as HistoryToken;
+      this.historyTokens.push(historyToken);
+      this.persistHistoryToken(historyToken);
       return id;
     },
     addPendingToken({
@@ -93,7 +159,7 @@ export const useTokensStore = defineStore("tokens", {
       paymentRequestId?: string;
     }): string {
       const id = uuidv4();
-      this.historyTokens.push({
+      const historyToken = {
         id,
         status: "pending",
         amount,
@@ -105,7 +171,9 @@ export const useTokensStore = defineStore("tokens", {
         paymentRequest,
         label,
         paymentRequestId,
-      });
+      };
+      this.historyTokens.push(historyToken);
+      this.persistHistoryToken(historyToken);
       return id;
     },
     editHistoryToken(
@@ -145,6 +213,7 @@ export const useTokensStore = defineStore("tokens", {
           }
         }
 
+        this.persistHistoryToken(this.historyTokens[index]);
         return this.historyTokens[index];
       }
 
@@ -156,16 +225,46 @@ export const useTokensStore = defineStore("tokens", {
       );
       if (index >= 0) {
         this.historyTokens[index].status = "paid";
+        this.historyTokens[index].paidDate = currentDateStr();
+        this.persistHistoryToken(this.historyTokens[index]);
       }
     },
     deleteToken(token: string) {
       const index = this.historyTokens.findIndex((t) => t.token === token);
       if (index >= 0) {
+        const id = this.historyTokens[index].id;
         this.historyTokens.splice(index, 1);
+        if (hasIndexedDb()) {
+          cashuDb.ecashHistory.delete(id).catch((error) => {
+            console.error("Could not delete ecash history token", error);
+          });
+        }
       }
     },
     tokenAlreadyInHistory(tokenStr: string): HistoryToken | undefined {
       return this.historyTokens.find((t) => t.token === tokenStr);
+    },
+    async redactOldPaidTokens(maxHistory = 200) {
+      const paidTokens = this.historyTokens
+        .filter((t) => t.status == "paid")
+        .sort((a, b) => {
+          return new Date(a.date).getTime() - new Date(b.date).getTime();
+        });
+      if (paidTokens.length <= maxHistory) return;
+      const redactTokens = paidTokens.slice(0, paidTokens.length - maxHistory);
+      const redactIds = new Set(redactTokens.map((token) => token.id));
+      this.historyTokens
+        .filter((token) => redactIds.has(token.id))
+        .forEach((token) => {
+          token.token = undefined;
+        });
+      if (!hasIndexedDb()) return;
+      await cashuDb.transaction("rw", cashuDb.ecashHistory, async () => {
+        for (const token of redactTokens) {
+          await cashuDb.ecashHistory.update(token.id, { token: undefined });
+        }
+      });
+      await this.refreshEcashHistory();
     },
   },
 });

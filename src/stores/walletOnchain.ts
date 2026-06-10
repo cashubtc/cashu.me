@@ -23,6 +23,7 @@ import { useInvoicesWorkerStore } from "./invoicesWorker";
 import { onchainNetwork } from "src/js/onchain";
 import { type AppMeltQuote, normalizeMeltQuote } from "./walletMelt";
 import { createSubpaymentHistoryQuote } from "src/js/invoice-history";
+import { usePaymentHistoryStore } from "./paymentHistory";
 
 type AppMintQuote = Omit<
   MintQuoteOnchainResponse,
@@ -65,7 +66,7 @@ export async function requestMintOnchain(this: any, mintWallet: Wallet) {
     this.invoiceData.type = PaymentMethod.Onchain;
     this.invoiceData.network = onchainNetwork(data.request);
 
-    this.invoiceHistory.push({
+    await this.addPaymentHistory({
       ...this.invoiceData,
       label: "On-chain",
       type: PaymentMethod.Onchain,
@@ -120,6 +121,15 @@ export async function checkOnchainAndMint(
   if (!mint) throw new Error("mint not found");
   if (!invoice.network) {
     invoice.network = onchainNetwork(invoice.request);
+    const networkUpdated = await usePaymentHistoryStore().updatePayment(
+      invoice.quote,
+      {
+        network: invoice.network,
+      }
+    );
+    if (networkUpdated) {
+      this.syncPaymentHistoryCache?.();
+    }
   }
 
   await uIStore.lockMutex();
@@ -131,6 +141,16 @@ export async function checkOnchainAndMint(
     const delta = paid - issued;
 
     invoice.mintQuote = normalizeMintQuote(updated);
+    const paymentHistoryStore = usePaymentHistoryStore();
+    await paymentHistoryStore.upsertMintQuote(
+      invoice.mintQuote,
+      PaymentMethod.Onchain
+    );
+    if (
+      paymentHistoryStore.paymentHistory.some((p) => p.quote === invoice.quote)
+    ) {
+      this.syncPaymentHistoryCache?.();
+    }
     if (this.invoiceData.quote === invoice.quote) {
       this.invoiceData.mintQuote = invoice.mintQuote;
     }
@@ -156,12 +176,22 @@ export async function checkOnchainAndMint(
     const mintQuoteAfterMint = await mintWallet.checkMintQuoteOnchain(quoteId);
     const normalizedMintQuote = normalizeMintQuote(mintQuoteAfterMint);
     invoice.mintQuote = normalizedMintQuote;
+    await paymentHistoryStore.upsertMintQuote(
+      normalizedMintQuote,
+      PaymentMethod.Onchain
+    );
+    if (
+      paymentHistoryStore.paymentHistory.some((p) => p.quote === invoice.quote)
+    ) {
+      this.syncPaymentHistoryCache?.();
+    }
 
     if (invoice.status === "paid") {
-      this.invoiceHistory.push({
+      await this.addPaymentHistory({
         ...invoice,
+        id: createSubpaymentHistoryQuote(),
         amount: delta,
-        quote: createSubpaymentHistoryQuote(),
+        quote: invoice.quote,
         parentQuote: invoice.quote,
         date: currentDateStr(),
         paidDate: currentDateStr(),
@@ -171,7 +201,7 @@ export async function checkOnchainAndMint(
         type: PaymentMethod.OnchainSubpayment,
       });
     } else {
-      this.setInvoicePaid(invoice.quote, {
+      await this.setInvoicePaid(invoice.quote, {
         amount: delta,
         mintQuote: normalizedMintQuote,
       });
@@ -306,7 +336,7 @@ export async function checkOutgoingOnchain(
     const meltQuote = normalizeMeltQuote(
       await mintWallet.mint.checkMeltQuoteOnchain(quote)
     );
-    this.updateOutgoingInvoiceInHistory(meltQuote);
+    await this.updateOutgoingInvoiceInHistory(meltQuote);
 
     if (meltQuote.state === MeltQuoteState.PENDING) {
       if (verbose) notify("Payment pending");
@@ -315,7 +345,7 @@ export async function checkOutgoingOnchain(
 
     if (meltQuote.state === MeltQuoteState.UNPAID) {
       await proofsStore.setReserved(proofs, false);
-      this.removeOutgoingInvoiceFromHistory(quote);
+      await this.removeOutgoingInvoiceFromHistory(quote);
       useInvoicesWorkerStore().removeOutgoingInvoiceFromChecker?.(quote);
       notifyWarning(this.t("wallet.notifications.lightning_payment_failed"));
     }

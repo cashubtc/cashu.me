@@ -6,6 +6,8 @@ import { useUiStore } from "./ui";
 import { useSettingsStore } from "./settings";
 import { useNostrMintBackupStore } from "./nostrMintBackup";
 import { useWalletStore } from "./wallet";
+import { usePaymentHistoryStore } from "./paymentHistory";
+import { useTokensStore } from "./tokens";
 
 // Define the migration version type
 export type Migration = {
@@ -151,10 +153,15 @@ export const useMigrationsStore = defineStore("migrations", {
     },
 
     async migrateInvoiceHistoryRequestField() {
-      const walletStore = useWalletStore();
+      const raw = localStorage.getItem("cashu.invoiceHistory");
+      if (!raw) {
+        console.log("No invoiceHistory localStorage key to migrate");
+        return;
+      }
       let updated = false;
 
-      walletStore.invoiceHistory = walletStore.invoiceHistory.map((invoice) => {
+      const invoiceHistory = JSON.parse(raw);
+      const migrated = invoiceHistory.map((invoice) => {
         const request = invoice.request || invoice.bolt11;
         if (!request) {
           return invoice;
@@ -171,10 +178,22 @@ export const useMigrationsStore = defineStore("migrations", {
       });
 
       if (updated) {
+        localStorage.setItem("cashu.invoiceHistory", JSON.stringify(migrated));
         console.log("Migrated invoiceHistory to request field");
       } else {
         console.log("No invoiceHistory entries needed request migration");
       }
+    },
+    async migrateInvoiceHistoryToPaymentHistory() {
+      const paymentHistoryStore = usePaymentHistoryStore();
+      await paymentHistoryStore.migrateLegacyInvoiceHistoryFromLocalStorage();
+      useWalletStore().syncPaymentHistoryCache();
+      console.log("Migrated invoiceHistory to Dexie paymentHistory");
+    },
+    async migrateHistoryTokensToEcashHistory() {
+      const tokensStore = useTokensStore();
+      await tokensStore.migrateHistoryTokensFromLocalStorage();
+      console.log("Migrated historyTokens to Dexie ecashHistory");
     },
 
     // Initialize migrations
@@ -204,6 +223,21 @@ export const useMigrationsStore = defineStore("migrations", {
         description:
           "Moves invoiceHistory entries from bolt11 to request for bolt11 and bolt12 records",
         execute: async () => await this.migrateInvoiceHistoryRequestField(),
+      });
+
+      this.registerMigration({
+        version: 4,
+        name: "Migrate invoiceHistory to Dexie paymentHistory",
+        description:
+          "Moves payment history to Dexie paymentHistory, mintQuotes, and meltQuotes tables",
+        execute: async () => await this.migrateInvoiceHistoryToPaymentHistory(),
+      });
+
+      this.registerMigration({
+        version: 5,
+        name: "Migrate historyTokens to Dexie ecashHistory",
+        description: "Moves ecash history from localStorage to Dexie",
+        execute: async () => await this.migrateHistoryTokensToEcashHistory(),
       });
 
       // Add more migrations here in the future
