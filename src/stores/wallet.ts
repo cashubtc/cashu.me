@@ -99,7 +99,7 @@ import { useSettingsStore } from "./settings";
 import { usePriceStore } from "./price";
 import { usePaymentHistoryStore } from "./paymentHistory";
 import { useI18n } from "vue-i18n";
-import BOLT12Decoder from "bolt12-decoder";
+import { decodeBolt12Offer } from "src/js/bolt12";
 import { ensurePaymentMethodMintActive } from "src/js/mint-payment-methods";
 import {
   isLegacyRetailQR,
@@ -601,80 +601,86 @@ export const useWalletStore = defineStore("wallet", {
       invalidate: boolean = false,
       includeFees: boolean = false
     ): Promise<{ keepProofs: ProofLike[]; sendProofs: ProofLike[] }> {
-      /*
-      splits proofs so the user can keep firstProofs, send scndProofs.
-      then sets scndProofs as reserved.
-
-      if invalidate, scndProofs (the one to send) are invalidated
-      */
+      // Returns sendProofs summing to `amount` (plus input fees when
+      // includeFees=true). Tries an offline exact-match first; otherwise
+      // swaps via the mint. Reserves sendProofs in proofsStore on success,
+      // or removes them if `invalidate` is true (caller takes ownership).
       const proofsStore = useProofsStore();
       const uIStore = useUiStore();
-      let proofsToSend: WalletProof[] = [];
       const keysetId = this.getKeyset(wallet.mint.mintUrl, wallet.unit);
       await uIStore.lockMutex();
       try {
-        const spendableProofs = this.spendableProofs(proofs, amount);
-
-        proofsToSend = this.coinSelect(
-          spendableProofs,
-          wallet,
-          amount,
-          includeFees
+        const spendableProofs: Proof[] = toProofs(
+          this.spendableProofs(proofs, amount)
         );
-        const totalAmount = sumProofAmounts(proofsToSend);
-        const fees = includeFees
-          ? wallet.getFeesForProofs(proofsToSend).toNumber()
-          : 0;
-        const targetAmount = amount + fees;
 
         let keepProofs: ProofLike[] = [];
         let sendProofs: ProofLike[] = [];
 
-        if (totalAmount != targetAmount) {
+        // Try to avoid a swap by selecting an exact match. selectProofsToSend
+        // returns { send: [] } when no subset is found and throws if exact-match
+        // search exceeds MAX_TIMEMS. Fall through to swap in either case.
+        let exactMatch: ProofLike[] = [];
+        try {
+          exactMatch = wallet.selectProofsToSend(
+            spendableProofs,
+            amount,
+            includeFees,
+            true // exact match
+          ).send;
+        } catch {
+          // exact-match search timed out; the swap will handle it
+        }
+        if (exactMatch.length > 0) {
+          sendProofs = exactMatch;
+        } else {
           // we need to swap!
           // get a new wallet with potentially updated keysets / info
           const swapWallet = await this.mintWallet(
             wallet.mint.mintUrl,
             wallet.unit,
-            true
+            true // update keysets
           );
-          proofsToSend = this.coinSelect(
-            spendableProofs,
-            swapWallet,
-            targetAmount,
-            true
-          );
-          ({ keep: keepProofs, send: sendProofs } =
-            await this.retryOnceOnSignedOutputs(keysetId, async () =>
+          // includeFees=true inflates send outputs so sendProofs sum to
+          // amount + fees(sendProofs): required for melt and includeFees sends.
+          const swapResult = await this.retryOnceOnSignedOutputs(
+            keysetId,
+            async () =>
               swapWallet.ops
-                .send(targetAmount, toProofs(proofsToSend))
+                .send(amount, spendableProofs)
                 .asDeterministic()
                 .keyset(keysetId)
                 .proofsWeHave(spendableProofs)
+                .includeFees(includeFees)
                 .run()
-            ));
+          );
+          // swapResult.keep mixes fresh proofs (new secrets) with any
+          // un-selected passthrough proofs (already in spendableProofs).
+          const spendableSecrets = new Set(
+            spendableProofs.map((p) => p.secret)
+          );
+          const returnedKeepSecrets = new Set(
+            swapResult.keep.map((k) => k.secret)
+          );
+          sendProofs = swapResult.send;
+          keepProofs = swapResult.keep.filter(
+            (k) => !spendableSecrets.has(k.secret)
+          );
+          const swappedProofs = spendableProofs.filter(
+            (p) => !returnedKeepSecrets.has(p.secret)
+          );
           await proofsStore.addProofs(keepProofs);
           await proofsStore.addProofs(sendProofs);
-
-          // make sure we don't delete any proofs that were returned
-          const proofsToSendNotReturned = proofsToSend
-            .filter((p) => !sendProofs.find((s) => s.secret === p.secret))
-            .filter((p) => !keepProofs.find((k) => k.secret === p.secret));
-          await proofsStore.removeProofs(proofsToSendNotReturned);
-        } else if (totalAmount == targetAmount) {
-          keepProofs = [];
-          sendProofs = proofsToSend;
-        } else {
-          throw new Error("could not split proofs.");
+          await proofsStore.removeProofs(swappedProofs);
         }
-
-        await proofsStore.setReserved(sendProofs, true);
+        // Proofs are being sent externally, remove from store
         if (invalidate) {
           await proofsStore.removeProofs(sendProofs);
         }
+        // Finally, reserve sendProofs as nothing above threw.
+        await proofsStore.setReserved(sendProofs, true);
         return { keepProofs, sendProofs };
       } catch (error: any) {
-        await proofsStore.setReserved(proofsToSend, false);
         console.error(error);
         notifyApiError(error);
         throw error;
@@ -1281,7 +1287,7 @@ export const useWalletStore = defineStore("wallet", {
       };
       let decoded;
       try {
-        decoded = BOLT12Decoder.decode(offer);
+        decoded = decodeBolt12Offer(offer);
       } catch (e) {
         console.error("Failed to decode BOLT12 offer", e);
         notifyWarning(
