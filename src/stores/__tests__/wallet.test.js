@@ -1643,9 +1643,7 @@ describe("wallet store", () => {
       "BITCOIN:?LIGHTNING=LNBCUPPER&CREQ=CREQB1UPPERCASE"
     );
 
-    expect(wallet.handlePaymentRequest).toHaveBeenCalledWith(
-      "CREQB1UPPERCASE"
-    );
+    expect(wallet.handlePaymentRequest).toHaveBeenCalledWith("CREQB1UPPERCASE");
   });
 
   it("redeem shows the normalized received amount for v4 proofs", async () => {
