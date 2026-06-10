@@ -177,14 +177,17 @@ export default defineComponent({
 }
 
 /* Completely remove all input animations */
-:deep(.mint-input) {
-  /* Disable all transitions on the input and its children except for background-color */
-  * {
-    transition: none !important;
-    animation: none !important;
-  }
+:deep(.mint-input),
+:deep(.mint-input *) {
+  animation: none !important;
+}
 
-  /* Add a smooth transition just for the background-color */
+:deep(.mint-input *) {
+  transition: none !important;
+}
+
+/* Add a smooth transition just for the input background-color */
+:deep(.mint-input) {
   transition: background-color 0.2s ease-in-out !important;
 }
 
