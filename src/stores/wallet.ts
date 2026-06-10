@@ -98,7 +98,7 @@ import { wordlist } from "@scure/bip39/wordlists/english";
 import { useSettingsStore } from "./settings";
 import { usePriceStore } from "./price";
 import { useI18n } from "vue-i18n";
-import BOLT12Decoder from "bolt12-decoder";
+import { decodeBolt12Offer } from "src/js/bolt12";
 import { ensurePaymentMethodMintActive } from "src/js/mint-payment-methods";
 import {
   isLegacyRetailQR,
@@ -1217,7 +1217,7 @@ export const useWalletStore = defineStore("wallet", {
       };
       let decoded;
       try {
-        decoded = BOLT12Decoder.decode(offer);
+        decoded = decodeBolt12Offer(offer);
       } catch (e) {
         console.error("Failed to decode BOLT12 offer", e);
         notifyWarning(

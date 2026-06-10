@@ -186,10 +186,8 @@ vi.mock("light-bolt11-decoder", () => ({
   decode: vi.fn(() => ({ paymentRequest: "lnbc123", sections: [] })),
 }));
 
-vi.mock("bolt12-decoder", () => ({
-  default: {
-    decode: (...args) => h.bolt12Decode(...args),
-  },
+vi.mock("src/js/bolt12", () => ({
+  decodeBolt12Offer: (...args) => h.bolt12Decode(...args),
 }));
 
 vi.mock("@cashu/cashu-ts", () => ({
