@@ -63,7 +63,7 @@
           >
             <ChooseMint
               v-if="!showNoMintForMethodError"
-              :filter-lightning-method="payLightningMethod"
+              :filter-payment-method="payPaymentMethod"
               :filter-mint-operation="payMintOperation"
             />
           </div>
@@ -263,7 +263,7 @@
                           {{ payInvoiceData.meltQuote.error }}
                         </div>
                       </div>
-                      <div v-else-if="showLightningAmountEntry">
+                      <div v-else-if="showAmountlessPaymentAmountEntry">
                         <p
                           v-if="payInvoiceData.invoice.description"
                           class="text-wrap q-mb-md"
@@ -277,14 +277,14 @@
                           {{ payInvoiceData.invoice.description }}
                         </p>
                         <div
-                          v-if="showLightningAmountKeyboard"
+                          v-if="showAmountlessPaymentAmountKeyboard"
                           class="column items-center justify-center q-px-lg q-py-lg amount-area"
                         >
                           <AmountInputComponent
                             v-model="payInvoiceData.input.amount"
                             :enabled="true"
-                            :muted="insufficientFundsForLightningAmount"
-                            :max-amount="lightningMaxAmountFromBalance"
+                            :muted="insufficientFundsForAmountlessPayment"
+                            :max-amount="amountlessPaymentMaxAmountFromBalance"
                             @enter="handleAmountlessQuote"
                             @fiat-mode-changed="fiatKeyboardMode = $event"
                           />
@@ -594,10 +594,10 @@
           </div>
         </div>
 
-        <!-- Bottom fixed amountless Lightning quote action -->
+        <!-- Bottom fixed amountless payment quote action -->
         <div
           class="bottom-panel"
-          v-if="showLightningAmountKeyboard && payInvoiceData.invoice"
+          v-if="showAmountlessPaymentAmountKeyboard && payInvoiceData.invoice"
         >
           <div class="keypad-wrapper">
             <NumericKeyboard
@@ -632,7 +632,7 @@
                   payInvoiceData.blocking ||
                   payInvoiceData.input.amount == null ||
                   payInvoiceData.input.amount <= 0 ||
-                  insufficientFundsForLightningAmount
+                  insufficientFundsForAmountlessPayment
                 "
                 :loading="payInvoiceData.blocking"
               >
@@ -774,8 +774,8 @@ import MeltQuoteInformation from "components/MeltQuoteInformation.vue";
 import NumericKeyboard from "components/NumericKeyboard.vue";
 import AmountInputComponent from "components/AmountInputComponent.vue";
 import ParseInputComponent from "components/ParseInputComponent.vue";
-import { mintsSupportingLightningMethod } from "src/js/mint-lightning";
-import { LightningMethod } from "src/stores/walletTypes";
+import { mintsSupportingPaymentMethod } from "src/js/mint-payment-methods";
+import { PaymentMethod } from "src/stores/walletTypes";
 
 import * as _ from "underscore";
 
@@ -806,7 +806,7 @@ export default defineComponent({
       if (
         this.payInvoiceData.show &&
         this.payInvoiceData.invoice &&
-        !this.showLightningAmountEntry
+        !this.showAmountlessPaymentAmountEntry
       ) {
         await this.meltQuoteInvoiceData();
       }
@@ -815,12 +815,12 @@ export default defineComponent({
       if (
         this.payInvoiceData.show &&
         this.payInvoiceData.invoice &&
-        !this.showLightningAmountEntry
+        !this.showAmountlessPaymentAmountEntry
       ) {
         await this.meltQuoteInvoiceData();
       }
     },
-    showLightningAmountEntry: {
+    showAmountlessPaymentAmountEntry: {
       handler: function (val) {
         if (val && this.payInvoiceData.meltQuote.error == "") {
           this.showNumericKeyboard = true;
@@ -829,7 +829,7 @@ export default defineComponent({
       immediate: true,
     },
     "payInvoiceData.meltQuote.error": function (val) {
-      if (val && this.showLightningAmountEntry) {
+      if (val && this.showAmountlessPaymentAmountEntry) {
         this.showNumericKeyboard = false;
       }
     },
@@ -969,30 +969,30 @@ export default defineComponent({
       const quote = this.payInvoiceData?.meltQuote?.response;
       return Boolean(quote?.quote) && quote.amount > 0;
     },
-    payLightningMethod: function (): LightningMethod | null {
+    payPaymentMethod: function (): PaymentMethod | null {
       if (!this.payInvoiceData?.invoice) return null;
       if (this.payInvoiceData.invoice.onchain) {
-        return LightningMethod.Onchain;
+        return PaymentMethod.Onchain;
       }
       if (this.payInvoiceData.invoice.bolt12) {
-        return LightningMethod.Bolt12;
+        return PaymentMethod.Bolt12;
       }
-      return LightningMethod.Bolt11;
+      return PaymentMethod.Bolt11;
     },
     dialogTitle: function (): string {
       if (
-        this.payLightningMethod === LightningMethod.Onchain ||
-        this.payInvoiceData.paymentMethod === LightningMethod.Onchain
+        this.payPaymentMethod === PaymentMethod.Onchain ||
+        this.payInvoiceData.paymentMethod === PaymentMethod.Onchain
       ) {
         return "Pay On-chain";
       }
-      if (this.payLightningMethod === LightningMethod.Bolt12) {
+      if (this.payPaymentMethod === PaymentMethod.Bolt12) {
         return this.$t("PayInvoiceDialog.input_data.title_bolt12");
       }
       return this.$t("PayInvoiceDialog.input_data.title");
     },
     parseInputPlaceholder: function (): string {
-      if (this.payInvoiceData.paymentMethod === LightningMethod.Onchain) {
+      if (this.payInvoiceData.paymentMethod === PaymentMethod.Onchain) {
         return "Bitcoin address";
       }
       return this.$t("ParseInputComponent.placeholder.pay");
@@ -1001,25 +1001,26 @@ export default defineComponent({
       return "melt";
     },
     hasMintForPayMethod: function (): boolean {
-      if (!this.payLightningMethod) return true;
+      if (!this.payPaymentMethod) return true;
       return (
-        mintsSupportingLightningMethod(
+        mintsSupportingPaymentMethod(
           this.mints as StoredMint[],
-          this.payLightningMethod,
-          this.payMintOperation
+          this.payPaymentMethod,
+          this.payMintOperation,
+          this.activeUnit
         ).length > 0
       );
     },
     showNoMintForMethodError: function (): boolean {
-      return this.payLightningMethod != null && !this.hasMintForPayMethod;
+      return this.payPaymentMethod != null && !this.hasMintForPayMethod;
     },
     isBolt12Pay: function (): boolean {
-      return this.payLightningMethod === LightningMethod.Bolt12;
+      return this.payPaymentMethod === PaymentMethod.Bolt12;
     },
     isOnchainPay: function (): boolean {
-      return this.payLightningMethod === LightningMethod.Onchain;
+      return this.payPaymentMethod === PaymentMethod.Onchain;
     },
-    showLightningAmountEntry: function (): boolean {
+    showAmountlessPaymentAmountEntry: function (): boolean {
       return (
         (this.isBolt12Pay || this.isOnchainPay) &&
         this.hasMintForPayMethod &&
@@ -1041,9 +1042,9 @@ export default defineComponent({
       }
       return this.payInvoiceData.meltQuote.error != "";
     },
-    showLightningAmountKeyboard: function (): boolean {
+    showAmountlessPaymentAmountKeyboard: function (): boolean {
       return (
-        this.showLightningAmountEntry &&
+        this.showAmountlessPaymentAmountEntry &&
         this.payInvoiceData.meltQuote.error == ""
       );
     },
@@ -1071,9 +1072,9 @@ export default defineComponent({
       // Access directly from store to avoid typing friction in mapState
       return (useMintsStore() as any).activeUnitLabel;
     },
-    insufficientFundsForLightningAmount: function (): boolean {
+    insufficientFundsForAmountlessPayment: function (): boolean {
       if (
-        !this.showLightningAmountEntry ||
+        !this.showAmountlessPaymentAmountEntry ||
         this.payInvoiceData.input.amount == null
       ) {
         return false;
@@ -1083,7 +1084,7 @@ export default defineComponent({
         this.payInvoiceData.input.amount * this.activeUnitCurrencyMultiplyer
       );
     },
-    lightningMaxAmountFromBalance: function (): number {
+    amountlessPaymentMaxAmountFromBalance: function (): number {
       return this.activeBalance / this.activeUnitCurrencyMultiplyer;
     },
     insufficientFunds: function (): boolean {
@@ -1114,7 +1115,7 @@ export default defineComponent({
         return "success";
       } else if (this.showInvoiceErrorState) {
         return "error";
-      } else if (this.showLightningAmountEntry) {
+      } else if (this.showAmountlessPaymentAmountEntry) {
         return "amount";
       } else {
         return "processing";
@@ -1206,7 +1207,7 @@ export default defineComponent({
         this.payInvoiceData.blocking ||
         this.payInvoiceData.input.amount == null ||
         this.payInvoiceData.input.amount <= 0 ||
-        this.insufficientFundsForLightningAmount
+        this.insufficientFundsForAmountlessPayment
       ) {
         return;
       }

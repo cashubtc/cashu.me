@@ -2,13 +2,20 @@ import { defineStore } from "pinia";
 import { useWalletStore } from "./wallet";
 import { useLocalStorage } from "@vueuse/core";
 import { useSettingsStore } from "./settings";
-import { LightningMethod } from "src/stores/walletTypes";
+import { PaymentMethod } from "src/stores/walletTypes";
 import { useTokensStore } from "./tokens";
 interface InvoiceQuote {
   quote: string;
   addedAt: number;
   lastChecked: number;
   checkCount: number;
+}
+
+interface ReusableMintCooldown {
+  failedAt: number;
+  failureCount: number;
+  nextRetryAt: number;
+  lastError?: string;
 }
 
 interface OutgoingPaymentCheck {
@@ -28,6 +35,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       maxAge: 1000 * 60 * 60 * 24 * 14,
       oneDay: 1000 * 60 * 60 * 24,
       oneHour: 1000 * 60 * 60,
+      reusableMintCooldownBaseInterval: 1000 * 60,
       // Once per day
       maxInterval: 1000 * 60 * 60 * 24,
       keepIntervalConstantForNChecks: 5,
@@ -46,6 +54,9 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         "cashu.worker.invoices.onchainQuotesQueue",
         []
       ),
+      reusableMintCooldowns: useLocalStorage<
+        Record<string, ReusableMintCooldown>
+      >("cashu.worker.invoices.reusableMintCooldowns", {}),
       outgoingPayments: useLocalStorage<OutgoingPaymentCheck[]>(
         "cashu.worker.outgoing.queue",
         []
@@ -77,7 +88,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         this.invoiceWorkerRunning = false;
       }
     },
-    addInvoiceToChecker(quote: string) {
+    addInvoiceToChecker(quote: string, forceStart = false) {
       const existingIndex = this.quotes.findIndex((q) => q.quote === quote);
       if (existingIndex !== -1) {
         this.quotes.splice(existingIndex, 1);
@@ -93,7 +104,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         lastChecked: 0,
         checkCount: 0,
       });
-      this.startInvoiceCheckerWorker();
+      this.startInvoiceCheckerWorker(forceStart);
     },
     removeInvoiceFromChecker(quote: string) {
       const index = this.quotes.findIndex((q) => q.quote === quote);
@@ -101,12 +112,13 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         this.quotes.splice(index, 1);
       }
     },
-    addBolt12OfferToChecker(quote: string) {
+    addBolt12OfferToChecker(quote: string, forceStart = false) {
       const existingIndex = this.bolt12Quotes.findIndex(
         (q) => q.quote === quote
       );
       if (existingIndex !== -1) {
-        this.bolt12Quotes.splice(existingIndex, 1);
+        this.startInvoiceCheckerWorker(forceStart);
+        return;
       }
 
       if (this.bolt12Quotes.length >= this.maxLength) {
@@ -118,7 +130,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         lastChecked: 0,
         checkCount: 0,
       });
-      this.startInvoiceCheckerWorker();
+      this.startInvoiceCheckerWorker(forceStart);
     },
     removeBolt12OfferFromChecker(quote: string) {
       const index = this.bolt12Quotes.findIndex((q) => q.quote === quote);
@@ -131,7 +143,8 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         (q) => q.quote === quote
       );
       if (existingIndex !== -1) {
-        this.onchainQuotes.splice(existingIndex, 1);
+        this.startInvoiceCheckerWorker(forceStart);
+        return;
       }
 
       if (this.onchainQuotes.length >= this.maxLength) {
@@ -210,11 +223,61 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         return q.lastChecked + this.checkInterval;
       }
     },
+    reusableMintInCooldown(mintUrl: string, now: number) {
+      const cooldown = this.reusableMintCooldowns[mintUrl];
+      return Boolean(cooldown && cooldown.nextRetryAt > now);
+    },
+    clearReusableMintCooldown(mintUrl: string) {
+      if (this.reusableMintCooldowns[mintUrl]) {
+        delete this.reusableMintCooldowns[mintUrl];
+      }
+    },
+    recordReusableMintFailure(mintUrl: string, error: any, now: number) {
+      if (!this.isNetworkFailure(error)) {
+        return;
+      }
+      const previous = this.reusableMintCooldowns[mintUrl];
+      const failureCount = (previous?.failureCount ?? 0) + 1;
+      const retryDelay = Math.min(
+        this.reusableMintCooldownBaseInterval *
+          Math.pow(2, Math.max(0, failureCount - 1)),
+        this.oneHour
+      );
+      this.reusableMintCooldowns[mintUrl] = {
+        failedAt: now,
+        failureCount,
+        nextRetryAt: now + retryDelay,
+        lastError: this.errorMessage(error),
+      };
+    },
+    errorMessage(error: any) {
+      return String(
+        error?.message || error?.cause?.message || error?.name || error || ""
+      );
+    },
+    isNetworkFailure(error: any) {
+      const message = `${this.errorMessage(error)} ${
+        error?.cause ? this.errorMessage(error.cause) : ""
+      }`.toLowerCase();
+      return (
+        message.includes("failed to fetch") ||
+        message.includes("network") ||
+        message.includes("connection") ||
+        message.includes("websocket") ||
+        message.includes("timeout") ||
+        message.includes("econn") ||
+        message.includes("err_connection") ||
+        message.includes(" 500") ||
+        message.includes(" 502") ||
+        message.includes(" 503") ||
+        message.includes(" 504")
+      );
+    },
     shouldCheckInvoice(invoice: any) {
       if (!invoice) return false;
       const now = Date.now();
       // Bolt12
-      if (invoice.type === LightningMethod.Bolt12) {
+      if (invoice.type === PaymentMethod.Bolt12) {
         const isOlderThanMaxAge = now - Date.parse(invoice.date) > this.maxAge;
         if (isOlderThanMaxAge) return false;
 
@@ -229,12 +292,13 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         }
         return true;
       }
-      if (invoice.type === LightningMethod.Onchain) {
-        return (
-          invoice.status === "pending" &&
-          invoice.amount >= 0 &&
-          now - Date.parse(invoice.date) < this.maxAge
-        );
+      if (invoice.type === PaymentMethod.Onchain) {
+        const isOlderThanMaxAge = now - Date.parse(invoice.date) > this.maxAge;
+        if (isOlderThanMaxAge) return false;
+        return invoice.amount >= 0;
+      }
+      if (invoice.type === PaymentMethod.OnchainSubpayment) {
+        return false;
       }
       // Bolt11
       return (
@@ -323,6 +387,9 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
           this.bolt12Quotes.splice(i, 1);
           continue;
         }
+        if (this.reusableMintInCooldown(invoice.mint, now)) {
+          continue;
+        }
 
         const dueTime = this.dueTime(q);
         if (now > dueTime) {
@@ -331,9 +398,11 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
             // Keep in queue for future payments as offers are reusable, but back off checks
             q.lastChecked = now;
             q.checkCount = 0;
+            this.clearReusableMintCooldown(invoice.mint);
           } catch (error) {
             q.lastChecked = now;
             q.checkCount += 1;
+            this.recordReusableMintFailure(invoice.mint, error, now);
           }
           this.lastInvoiceCheckTime = now;
           break;
@@ -350,15 +419,21 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
           this.onchainQuotes.splice(i, 1);
           continue;
         }
+        if (this.reusableMintInCooldown(invoice.mint, now)) {
+          continue;
+        }
 
         const dueTime = this.dueTime(q);
         if (now > dueTime) {
           try {
             await walletStore.checkOnchainAndMint(q.quote, false);
-            this.onchainQuotes.splice(i, 1);
+            q.lastChecked = now;
+            q.checkCount = 0;
+            this.clearReusableMintCooldown(invoice.mint);
           } catch (error) {
             q.lastChecked = now;
             q.checkCount += 1;
+            this.recordReusableMintFailure(invoice.mint, error, now);
           }
           this.lastInvoiceCheckTime = now;
           break;
@@ -435,21 +510,29 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       if (quotesToCheck.length > this.maxQuotesToCheckOnStartup) {
         quotesToCheck.splice(this.maxQuotesToCheckOnStartup);
       }
-      this.lastPendingInvoiceCheck = Date.now();
-      console.log(`Checking ${quotesToCheck.length} quotes`);
+      const now = Date.now();
+      this.lastPendingInvoiceCheck = now;
       for (const q of quotesToCheck) {
         try {
-          console.log(`Checking quote ${q.quote}`);
-          if (q.type === LightningMethod.Bolt12) {
+          if (q.type === PaymentMethod.Bolt12) {
+            if (this.reusableMintInCooldown(q.mint, now)) continue;
             this.addBolt12OfferToChecker(q.quote);
-          } else if (q.type === LightningMethod.Onchain) {
+            walletStore.mintOnPaidBolt12(q.quote, false, false).catch(() => {
+              // Background websocket setup is best-effort; long-polling handles retries.
+            });
+          } else if (q.type === PaymentMethod.Onchain) {
+            if (this.reusableMintInCooldown(q.mint, now)) continue;
             this.addOnchainQuoteToChecker(q.quote, true);
-            walletStore.mintOnPaidOnchain(q.quote, false, false);
+            walletStore.mintOnPaidOnchain(q.quote, false, false).catch(() => {
+              // Background websocket setup is best-effort; long-polling handles retries.
+            });
           } else {
-            walletStore.mintOnPaidBolt11(q.quote, false, false);
+            walletStore.mintOnPaidBolt11(q.quote, false, false).catch(() => {
+              // Background websocket setup is best-effort; long-polling handles retries.
+            });
           }
         } catch (error) {
-          console.error(error);
+          // Background invoice checks stay silent; manual checks surface errors.
         }
       }
     },

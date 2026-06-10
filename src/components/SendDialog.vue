@@ -95,12 +95,12 @@ import {
   Coins as CoinsIcon,
   Bitcoin as BitcoinIcon,
 } from "lucide-vue-next";
-import { LightningMethod } from "src/stores/walletTypes";
+import { PaymentMethod } from "src/stores/walletTypes";
 import { notifyWarning } from "src/js/notify";
 import {
   ensurePaymentMintActive,
   firstMintSupportingPaymentMethods,
-} from "src/js/mint-lightning";
+} from "src/js/mint-payment-methods";
 
 export default defineComponent({
   name: "SendDialog",
@@ -120,7 +120,7 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapState(useMintsStore, ["mints", "activeMintUrl"]),
+    ...mapState(useMintsStore, ["mints", "activeMintUrl", "activeUnit"]),
     ...mapWritableState(useUiStore, [
       "showInvoiceDetails",
       "tab",
@@ -150,8 +150,9 @@ export default defineComponent({
         firstMintSupportingPaymentMethods(
           this.mints as any,
           this.activeMintUrl as string,
-          [LightningMethod.Bolt11, LightningMethod.Bolt12],
-          "melt"
+          [PaymentMethod.Bolt11, PaymentMethod.Bolt12],
+          "melt",
+          this.activeUnit as string
         )
       );
     },
@@ -160,22 +161,24 @@ export default defineComponent({
         firstMintSupportingPaymentMethods(
           this.mints as any,
           this.activeMintUrl as string,
-          [LightningMethod.Onchain],
-          "melt"
+          [PaymentMethod.Onchain],
+          "melt",
+          this.activeUnit as string
         )
       );
     },
   },
   methods: {
-    ...mapActions(useMintsStore, ["activateMintUrl"]),
+    ...mapActions(useMintsStore, ["selectMintUrl"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     showParseDialog: async function () {
       const mintResult = await ensurePaymentMintActive(
         this.mints as any,
         this.activeMintUrl as string,
-        this.activateMintUrl,
-        [LightningMethod.Bolt11, LightningMethod.Bolt12],
-        "melt"
+        this.selectMintUrl,
+        [PaymentMethod.Bolt11, PaymentMethod.Bolt12],
+        "melt",
+        this.activeUnit as string
       );
       if (!mintResult.ok) {
         notifyWarning(
@@ -199,9 +202,10 @@ export default defineComponent({
       const mintResult = await ensurePaymentMintActive(
         this.mints as any,
         this.activeMintUrl as string,
-        this.activateMintUrl,
-        [LightningMethod.Onchain],
-        "melt"
+        this.selectMintUrl,
+        [PaymentMethod.Onchain],
+        "melt",
+        this.activeUnit as string
       );
       if (!mintResult.ok) {
         notifyWarning("No mints available");
@@ -213,7 +217,7 @@ export default defineComponent({
       this.payInvoiceData.lnurlpay = null;
       this.payInvoiceData.domain = "";
       this.payInvoiceData.lnurlauth = null;
-      this.payInvoiceData.paymentMethod = LightningMethod.Onchain;
+      this.payInvoiceData.paymentMethod = PaymentMethod.Onchain;
       this.payInvoiceData.input.request = "";
       this.payInvoiceData.input.amount = undefined;
       this.payInvoiceData.input.comment = "";

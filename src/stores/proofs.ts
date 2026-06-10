@@ -109,10 +109,33 @@ export const useProofsStore = defineStore("proofs", {
       });
     },
     async addProofs(proofs: ProofLike[], quote?: string) {
-      const walletProofs = this.proofsToWalletProofs(proofs);
+      const walletProofs = this.proofsToWalletProofs(proofs, quote);
       await cashuDb.transaction("rw", cashuDb.proofs, async () => {
         for (const p of walletProofs) {
           await cashuDb.proofs.add(p);
+        }
+      });
+    },
+    async addMissingProofs(proofs: ProofLike[], quote?: string) {
+      const walletProofs = this.proofsToWalletProofs(proofs, quote);
+      await cashuDb.transaction("rw", cashuDb.proofs, async () => {
+        const existing = await cashuDb.proofs.bulkGet(
+          walletProofs.map((p) => p.secret)
+        );
+        const existingSecrets = new Set(
+          existing.filter(Boolean).map((p) => p!.secret)
+        );
+        for (const p of walletProofs) {
+          if (!existingSecrets.has(p.secret)) {
+            try {
+              await cashuDb.proofs.add(p);
+              existingSecrets.add(p.secret);
+            } catch (error: any) {
+              if (error?.name !== "ConstraintError") {
+                throw error;
+              }
+            }
+          }
         }
       });
     },

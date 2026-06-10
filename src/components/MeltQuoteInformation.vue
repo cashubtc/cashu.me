@@ -135,7 +135,7 @@ import { getShortUrl } from "src/js/wallet-helpers";
 import { useMintsStore } from "stores/mints";
 import { MeltQuoteBolt11Response } from "@cashu/cashu-ts";
 import { copyToClipboard } from "quasar";
-import { LightningMethod } from "src/stores/walletTypes";
+import { PaymentMethod } from "src/stores/walletTypes";
 import {
   fetchTxMetadata,
   onchainNetwork,
@@ -403,7 +403,7 @@ export default defineComponent({
         mint?.info?.nuts?.[5]?.methods || mint?.info?.nuts?.["5"]?.methods;
       const method = methods?.find(
         (m: any) =>
-          m.method === LightningMethod.Onchain && m.unit === this.quoteUnit
+          m.method === PaymentMethod.Onchain && m.unit === this.quoteUnit
       );
       return Number(method?.options?.confirmations || 1);
     },

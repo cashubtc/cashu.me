@@ -6,10 +6,8 @@ import {
   Amount,
   Wallet,
   MeltQuoteBolt11Request,
-  MeltQuoteBolt11Response,
   MintQuoteBolt11Response,
   MintQuoteState,
-  type ProofLike,
 } from "@cashu/cashu-ts";
 import * as nobleSecp256k1 from "@noble/secp256k1";
 import { bytesToHex } from "@noble/hashes/utils";
@@ -25,8 +23,9 @@ import * as bolt11Decoder from "light-bolt11-decoder";
 import * as _ from "underscore";
 import { date } from "quasar";
 import { notifyWarning } from "src/js/notify";
-import { LightningMethod } from "src/stores/walletTypes";
-import { ensureLightningMintActive } from "src/js/mint-lightning";
+import { PaymentMethod } from "src/stores/walletTypes";
+import { ensurePaymentMethodMintActive } from "src/js/mint-payment-methods";
+import { type AppMeltQuote, normalizeMeltQuote } from "./walletMelt";
 
 // These actions are implemented as regular functions that rely on dynamic `this`
 // when attached to the Pinia store (wallet.ts assigns them to actions).
@@ -38,38 +37,12 @@ type AppMintQuote = Omit<MintQuoteBolt11Response, "amount"> & {
   amount: number;
 };
 
-type AppMeltQuote = Omit<
-  MeltQuoteBolt11Response,
-  "amount" | "fee_reserve" | "change"
-> & {
-  amount: number;
-  fee_reserve: number;
-};
-
 function amountToNumber(value: any): number {
   return Amount.from(value).toNumber();
 }
 
 function normalizeMintQuote(quote: MintQuoteBolt11Response): AppMintQuote {
   return { ...quote, amount: amountToNumber(quote.amount) };
-}
-
-function normalizeMeltQuote(quote: MeltQuoteBolt11Response): AppMeltQuote {
-  const { change, ...rest } = quote;
-  void change;
-  return {
-    ...rest,
-    amount: amountToNumber(quote.amount),
-    fee_reserve: amountToNumber(quote.fee_reserve),
-  };
-}
-
-function toMeltQuote(quote: AppMeltQuote): MeltQuoteBolt11Response {
-  return {
-    ...quote,
-    amount: Amount.from(quote.amount),
-    fee_reserve: Amount.from(quote.fee_reserve),
-  };
 }
 
 export async function requestMintBolt11(
@@ -186,6 +159,11 @@ export async function meltQuoteInvoiceDataBolt11(this: any) {
   }
   this.payInvoiceData.blocking = true;
   this.payInvoiceData.meltQuote.error = "";
+  this.payInvoiceData.meltQuote.response = {
+    quote: "",
+    amount: 0,
+    fee_reserve: 0,
+  };
   try {
     const mintStore = useMintsStore();
     if (this.payInvoiceData.input.request == "") {
@@ -228,7 +206,7 @@ export async function meltQuoteBolt11(
   return normalizeMeltQuote(data);
 }
 
-export async function meltInvoiceDataBolt11(this: any) {
+export async function meltInvoiceDataBolt11(this: any, silent?: boolean) {
   if (this.payInvoiceData.invoice == null) {
     throw new Error("no invoice provided.");
   }
@@ -253,7 +231,12 @@ export async function meltInvoiceDataBolt11(this: any) {
     mintStore.activeUnit,
     true
   );
-  return await this.meltBolt11(mintStore.activeProofs, quote, mintWallet);
+  return await this.meltBolt11(
+    mintStore.activeProofs,
+    quote,
+    mintWallet,
+    silent
+  );
 }
 
 export async function meltBolt11(
@@ -261,21 +244,18 @@ export async function meltBolt11(
   proofs: WalletProof[],
   quote: AppMeltQuote,
   mintWallet: Wallet,
-  silent?: boolean
+  silent?: boolean,
+  releaseMutex = false
 ) {
   return this.meltGeneric(
     proofs,
     quote,
     mintWallet,
     silent,
-    (q, sp, opts) =>
-      mintWallet.ops
-        .meltBolt11(toMeltQuote(q), sp)
-        .keyset(opts.keysetId)
-        .asDeterministic()
-        .run(),
-    (id) => mintWallet.mint.checkMeltQuoteBolt11(id),
-    LightningMethod.Bolt11
+    (id: string) => mintWallet.mint.checkMeltQuoteBolt11(id),
+    PaymentMethod.Bolt11,
+    undefined,
+    releaseMutex
   );
 }
 
@@ -351,7 +331,7 @@ export async function mintOnPaidBolt11(
   hideInvoiceDetailsOnMint = true
 ) {
   return await mintOnPaidGeneric.call(this, quote, {
-    type: LightningMethod.Bolt11,
+    type: PaymentMethod.Bolt11,
     verbose,
     kickOffInvoiceChecker,
     hideInvoiceDetailsOnMint,
@@ -416,11 +396,13 @@ export async function handleBolt11InvoiceBolt11(this: any) {
     }
   });
 
-  const mintResult = await ensureLightningMintActive(
+  const mintResult = await ensurePaymentMethodMintActive(
     mintStore.mints,
     mintStore.activeMintUrl,
-    mintStore.activateMintUrl.bind(mintStore),
-    LightningMethod.Bolt11
+    mintStore.selectMintUrl.bind(mintStore),
+    PaymentMethod.Bolt11,
+    "melt",
+    mintStore.activeUnit
   );
   if (!mintResult.ok) {
     this.payInvoiceData.meltQuote.error = this.t(mintResult.errorKey);

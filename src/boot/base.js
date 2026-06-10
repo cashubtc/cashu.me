@@ -149,10 +149,18 @@ window.windowMixin = {
       if (currency == "msat") return this.fromMsat(value);
       if (currency == "usd") value = value / 100;
       if (currency == "eur") value = value / 100;
-      return new Intl.NumberFormat(window.LOCALE, {
-        style: "currency",
-        currency: currency,
-      }).format(value);
+      try {
+        return new Intl.NumberFormat(window.LOCALE, {
+          style: "currency",
+          currency: currency,
+        }).format(value);
+      } catch {
+        return (
+          new Intl.NumberFormat(window.LOCALE).format(value) +
+          " " +
+          String(currency)
+        );
+      }
       // + " " +
       // currency.toUpperCase()
     },

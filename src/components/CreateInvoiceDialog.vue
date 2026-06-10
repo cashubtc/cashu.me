@@ -69,7 +69,7 @@
             style="max-width: 600px"
           >
             <ChooseMint
-              :filter-lightning-method="mintFilterMethod"
+              :filter-payment-method="mintFilterMethod"
               filter-mint-operation="mint"
             />
           </div>
@@ -93,7 +93,28 @@
           >
             <div class="col-12" style="max-width: 400px">
               <div
-                v-if="reusableReceiveQuote"
+                v-if="activeMintErrored"
+                class="mint-error-warning column items-center text-center q-pa-lg"
+              >
+                <q-icon name="warning" size="42px" color="warning" />
+                <div class="mint-error-title q-mt-md">Mint unreachable</div>
+                <div class="mint-error-text q-mt-sm">
+                  Reconnect to the mint to receive payments.
+                </div>
+                <q-btn
+                  flat
+                  dense
+                  no-caps
+                  color="primary"
+                  icon="refresh"
+                  class="q-mt-md"
+                  label="Reconnect mint"
+                  :loading="refreshingMint"
+                  @click="refreshActiveMint"
+                />
+              </div>
+              <div
+                v-else-if="reusableReceiveQuote"
                 @click="onCopyReusableOffer"
                 class="cursor-pointer"
               >
@@ -108,7 +129,7 @@
                 </q-responsive>
               </div>
               <div
-                v-if="reusableReceiveQuote"
+                v-if="reusableReceiveQuote && !activeMintErrored"
                 class="q-mt-sm text-center text-grey-7"
                 @click="onCopyReusableOffer"
               >
@@ -225,8 +246,8 @@ import { useSettingsStore } from "src/stores/settings";
 import { usePriceStore } from "src/stores/price";
 import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
 import type { InvoiceHistory } from "src/stores/wallet";
-import { LightningMethod } from "src/stores/walletTypes";
-import { mintSupportsLightningMethod } from "src/js/mint-lightning";
+import { PaymentMethod } from "src/stores/walletTypes";
+import { mintSupportsPaymentMethod } from "src/js/mint-payment-methods";
 
 declare const windowMixin: any;
 
@@ -247,6 +268,7 @@ export default defineComponent({
       bolt12AddAmount: false as boolean,
       copyButtonCopied: false,
       copyButtonTimeout: null as any,
+      refreshingMint: false,
       checkingReusableOnchainQuote: false,
       checkedReusableOnchainQuote: null as InvoiceHistory | null,
     };
@@ -272,18 +294,20 @@ export default defineComponent({
     ]),
     ...mapState(usePriceStore, ["bitcoinPrice", "currentCurrencyPrice"]),
     isBolt12(): boolean {
-      return this.invoiceData.type === LightningMethod.Bolt12;
+      return this.invoiceData.type === PaymentMethod.Bolt12;
     },
     isOnchain(): boolean {
-      return this.invoiceData.type === LightningMethod.Onchain;
+      return this.invoiceData.type === PaymentMethod.Onchain;
     },
     showAmountInput(): boolean {
       if (this.isOnchain) return false;
       if (!this.isBolt12) return true;
       return this.bolt12AddAmount;
     },
-    mintFilterMethod(): LightningMethod | null {
-      return this.isOnchain ? LightningMethod.Onchain : null;
+    mintFilterMethod(): PaymentMethod | PaymentMethod[] {
+      return this.isOnchain
+        ? PaymentMethod.Onchain
+        : [PaymentMethod.Bolt11, PaymentMethod.Bolt12];
     },
     bolt11Supported(): boolean {
       const mintStore = useMintsStore();
@@ -291,18 +315,12 @@ export default defineComponent({
         (m) => m.url === mintStore.activeMintUrl
       );
       if (!mint) return false;
-      // Check for NUT-4 support (Mint Tokens)
-      const nut4 =
-        mint.info?.nuts?.[4] || mint.info?.nuts?.["4"] || ({} as any);
-      if (nut4.supported === false) return false;
-      // If methods are specified, check for bolt11
-      // If methods are not specified, assume bolt11 is supported
-      if (nut4.methods) {
-        return nut4.methods.some(
-          (m: any) => m.method === LightningMethod.Bolt11
-        );
-      }
-      return true;
+      return mintSupportsPaymentMethod(
+        mint,
+        PaymentMethod.Bolt11,
+        "mint",
+        mintStore.activeUnit
+      );
     },
     bolt12Supported(): boolean {
       const mintStore = useMintsStore();
@@ -310,7 +328,12 @@ export default defineComponent({
         (m) => m.url === mintStore.activeMintUrl
       );
       if (!mint) return false;
-      return mintSupportsLightningMethod(mint, LightningMethod.Bolt12);
+      return mintSupportsPaymentMethod(
+        mint,
+        PaymentMethod.Bolt12,
+        "mint",
+        mintStore.activeUnit
+      );
     },
     onchainSupported(): boolean {
       const mintStore = useMintsStore();
@@ -318,9 +341,21 @@ export default defineComponent({
         (m) => m.url === mintStore.activeMintUrl
       );
       if (!mint) return false;
-      return mintSupportsLightningMethod(mint, LightningMethod.Onchain);
+      return mintSupportsPaymentMethod(
+        mint,
+        PaymentMethod.Onchain,
+        "mint",
+        mintStore.activeUnit
+      );
+    },
+    activeMint(): any {
+      return this.mints.find((mint: any) => mint.url === this.activeMintUrl);
+    },
+    activeMintErrored(): boolean {
+      return Boolean(this.activeMint?.errored);
     },
     canCreate(): boolean {
+      if (this.activeMintErrored) return false;
       // Bolt11 requires amount > 0
       // Bolt12 and on-chain allow 0 amount (amountless request)
       if (this.isBolt12 || this.isOnchain) return true;
@@ -344,7 +379,7 @@ export default defineComponent({
       // 4. Matches current active mint and unit
       const reusableOffers = walletStore.invoiceHistory.filter(
         (invoice: InvoiceHistory) => {
-          if (invoice.type !== LightningMethod.Bolt12) return false;
+          if (invoice.type !== PaymentMethod.Bolt12) return false;
           // Must be amountless
           const quote = invoice.mintQuote as any;
           if (quote?.amount && quote.amount > 0) return false;
@@ -403,22 +438,12 @@ export default defineComponent({
     },
     activeMintUrl: {
       handler: function () {
-        if (this.invoiceData.type === LightningMethod.Onchain) {
-          if (!this.onchainSupported && this.bolt11Supported) {
-            this.invoiceData.type = LightningMethod.Bolt11;
-          }
-          this.refreshReusableOnchainQuote();
-          return;
-        }
-        if (this.bolt11Supported && !this.bolt12Supported) {
-          this.invoiceData.type = LightningMethod.Bolt11;
-        } else if (!this.bolt11Supported && this.bolt12Supported) {
-          this.invoiceData.type = LightningMethod.Bolt12;
-        }
+        this.syncInvoiceTypeWithActiveMint();
       },
       immediate: true,
     },
     activeUnit: function () {
+      this.syncInvoiceTypeWithActiveMint();
       this.refreshReusableOnchainQuote();
     },
   },
@@ -431,16 +456,31 @@ export default defineComponent({
       "mintOnPaidBolt12",
       "requestMintOnchain",
       "mintOnPaidOnchain",
-      "checkOnchainAndMint",
     ]),
-    ...mapActions(useMintsStore, ["toggleUnit"]),
+    ...mapActions(useMintsStore, ["activateMintUrl", "toggleUnit"]),
     toggleInvoiceType() {
       if (this.isBolt12) {
-        this.invoiceData.type = LightningMethod.Bolt11;
+        this.invoiceData.type = PaymentMethod.Bolt11;
       } else {
-        this.invoiceData.type = LightningMethod.Bolt12;
+        this.invoiceData.type = PaymentMethod.Bolt12;
         this.bolt12AddAmount = false;
         this.invoiceData.amount = 0;
+      }
+    },
+    syncInvoiceTypeWithActiveMint() {
+      if (this.invoiceData.type === PaymentMethod.Onchain) {
+        if (!this.onchainSupported && this.bolt11Supported) {
+          this.invoiceData.type = PaymentMethod.Bolt11;
+        } else if (!this.onchainSupported && this.bolt12Supported) {
+          this.invoiceData.type = PaymentMethod.Bolt12;
+        }
+        this.refreshReusableOnchainQuote();
+        return;
+      }
+      if (this.bolt11Supported && !this.bolt12Supported) {
+        this.invoiceData.type = PaymentMethod.Bolt11;
+      } else if (!this.bolt11Supported && this.bolt12Supported) {
+        this.invoiceData.type = PaymentMethod.Bolt12;
       }
     },
     requestMintButton: async function () {
@@ -487,6 +527,9 @@ export default defineComponent({
       }
     },
     async onCopyReusableOffer() {
+      if (this.activeMintErrored) {
+        return;
+      }
       const offer = this.reusableReceiveQuote;
       const request = offer?.request;
       if (request) {
@@ -504,14 +547,30 @@ export default defineComponent({
         }
       }
     },
+    async refreshActiveMint() {
+      if (!this.activeMintUrl || this.refreshingMint) {
+        return;
+      }
+      this.refreshingMint = true;
+      try {
+        await this.activateMintUrl(this.activeMintUrl, false, true);
+        this.refreshReusableOnchainQuote();
+      } catch (error) {
+        console.error("Could not refresh mint", error);
+      } finally {
+        this.refreshingMint = false;
+      }
+    },
     findReusableOnchainQuotes(): InvoiceHistory[] {
       const walletStore = useWalletStore();
       const mintStore = useMintsStore();
       const now = Date.now();
       return walletStore.invoiceHistory
         .filter((invoice: InvoiceHistory) => {
-          if (invoice.type !== LightningMethod.Onchain) return false;
-          if (invoice.status !== "pending") return false;
+          if (invoice.type !== PaymentMethod.Onchain) return false;
+          if (invoice.amount < 0) return false;
+          if (invoice.status !== "pending" && invoice.status !== "paid")
+            return false;
           const quote = invoice.mintQuote as any;
           if (quote?.expiry && quote.expiry > 0 && quote.expiry * 1000 < now) {
             return false;
@@ -523,28 +582,11 @@ export default defineComponent({
         })
         .reverse();
     },
-    async refreshReusableOnchainQuote() {
+    refreshReusableOnchainQuote() {
       if (!this.showCreateInvoiceDialog || !this.isOnchain) return;
-      this.checkingReusableOnchainQuote = true;
-      this.checkedReusableOnchainQuote = null;
-      try {
-        for (const quote of this.findReusableOnchainQuotes()) {
-          try {
-            await this.checkOnchainAndMint(quote.quote, false, false);
-          } catch (error: any) {
-            if (error?.message === "Address not paid") {
-              this.checkedReusableOnchainQuote = quote;
-              await this.mintOnPaidOnchain(quote.quote, false, true, false);
-              return;
-            }
-            throw error;
-          }
-        }
-      } catch (error) {
-        console.error("Could not check reusable on-chain address", error);
-      } finally {
-        this.checkingReusableOnchainQuote = false;
-      }
+      this.checkingReusableOnchainQuote = false;
+      this.checkedReusableOnchainQuote =
+        this.findReusableOnchainQuotes()[0] || null;
     },
   },
   beforeUnmount() {
@@ -592,6 +634,24 @@ export default defineComponent({
 }
 .fiat-display {
   font-size: 14px;
+}
+.mint-error-warning {
+  border: 1px solid rgba(255, 193, 7, 0.28);
+  border-radius: 12px;
+  background: rgba(255, 193, 7, 0.08);
+  color: inherit;
+  min-height: 260px;
+  justify-content: center;
+}
+.mint-error-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+.mint-error-text {
+  opacity: 0.68;
+  font-size: 14px;
+  line-height: 1.45;
+  max-width: 300px;
 }
 .bottom-panel {
   margin-top: auto;
