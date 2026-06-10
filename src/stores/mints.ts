@@ -386,7 +386,10 @@ export const useMintsStore = defineStore("mints", {
         );
       }
     },
-    selectMintUrl: function (url: string, unit: string | undefined = undefined) {
+    selectMintUrl: function (
+      url: string,
+      unit: string | undefined = undefined
+    ) {
       const mint = this.mints.find((m) => m.url === url);
       if (!mint) {
         return false;

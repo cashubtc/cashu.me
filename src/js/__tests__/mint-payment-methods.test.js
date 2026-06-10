@@ -54,12 +54,7 @@ describe("mint payment method helpers", () => {
     };
 
     expect(
-      mintSupportsPaymentMethod(
-        legacyMint,
-        PaymentMethod.Bolt11,
-        "mint",
-        "sat"
-      )
+      mintSupportsPaymentMethod(legacyMint, PaymentMethod.Bolt11, "mint", "sat")
     ).toBe(false);
   });
 

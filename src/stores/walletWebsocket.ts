@@ -189,7 +189,10 @@ export async function mintOnPaidGeneric(
   }
 
   // 4. Check Websocket Capability (NUT-17)
-  if (!settingsStore.useWebsockets || !nut17Supported(mint, type, invoice.unit)) {
+  if (
+    !settingsStore.useWebsockets ||
+    !nut17Supported(mint, type, invoice.unit)
+  ) {
     console.log(`Websockets not supported for ${type}.`);
     return;
   }

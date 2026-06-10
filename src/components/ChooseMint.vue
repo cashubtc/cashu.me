@@ -335,8 +335,8 @@ export default defineComponent({
         this.modelValue !== null
           ? this.modelValue
           : preferActiveMint
-            ? this.activeMintUrl || fallbackUrl
-            : fallbackUrl || this.activeMintUrl;
+          ? this.activeMintUrl || fallbackUrl
+          : fallbackUrl || this.activeMintUrl;
       if (targetUrl && targetUrl === this.excludeMint) {
         targetUrl = "";
       }

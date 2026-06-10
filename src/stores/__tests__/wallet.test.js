@@ -807,10 +807,9 @@ describe("wallet store", () => {
       status: "pending",
     });
 
-    expect(h.invoicesWorkerStore.addOutgoingTokenToChecker).toHaveBeenCalledWith(
-      "cashu-token",
-      true
-    );
+    expect(
+      h.invoicesWorkerStore.addOutgoingTokenToChecker
+    ).toHaveBeenCalledWith("cashu-token", true);
     expect(mintWalletSpy).toHaveBeenCalledWith("https://mint-b.example", "sat");
     expect(wallet.activeWallet).not.toHaveBeenCalled();
     expect(tokenWallet.on.proofStateUpdates).toHaveBeenCalledWith(
@@ -1435,12 +1434,7 @@ describe("wallet store", () => {
 
     await wallet.meltInvoiceData(true);
 
-    expect(meltBolt11).toHaveBeenCalledWith(
-      proofs,
-      quote,
-      mintWallet,
-      true
-    );
+    expect(meltBolt11).toHaveBeenCalledWith(proofs, quote, mintWallet, true);
   });
 
   it("passes selected on-chain fee index through recoverable melt completion", async () => {

@@ -172,10 +172,7 @@ import {
   Coins as CoinsIcon,
   Zap as ZapIcon,
 } from "lucide-vue-next";
-import {
-  PaymentMethod,
-  UnifiedTransactionType,
-} from "src/stores/walletTypes";
+import { PaymentMethod, UnifiedTransactionType } from "src/stores/walletTypes";
 import { mintQuoteForHistoryInvoice } from "src/js/invoice-history";
 
 export default defineComponent({
