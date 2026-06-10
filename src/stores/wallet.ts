@@ -1330,8 +1330,17 @@ export const useWalletStore = defineStore("wallet", {
             req.replace(/^bitcoin:/i, "bitcoin://placeholder/")
           );
           const address = url.pathname.replace(/^\//, "");
-          const creq = url.searchParams.get("creq");
-          const lightning = url.searchParams.get("lightning");
+          // BIP-321 query keys are case-insensitive (per RFC 3986 / BIP-21).
+          // Encoders may emit fully uppercase URIs to enable QR alphanumeric
+          // mode for denser codes (e.g. CDK, cashu-for-woocommerce).
+          const getParamCI = (name: string): string | null => {
+            for (const [k, v] of url.searchParams) {
+              if (k.toLowerCase() === name) return v;
+            }
+            return null;
+          };
+          const creq = getParamCI("creq");
+          const lightning = getParamCI("lightning");
           if (creq) {
             this.payInvoiceData.input.request = creq;
             await this.handlePaymentRequest(creq);

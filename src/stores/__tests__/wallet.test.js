@@ -1634,6 +1634,20 @@ describe("wallet store", () => {
     expect(h.uiStore.closeDialogs).toHaveBeenCalled();
   });
 
+  it("decodes BIP-321 bitcoin: URIs with uppercase query keys", async () => {
+    const wallet = useWalletStore();
+    vi.spyOn(wallet, "handleBolt11InvoiceBolt11").mockResolvedValue(undefined);
+    vi.spyOn(wallet, "handlePaymentRequest").mockResolvedValue(undefined);
+
+    await wallet.decodeRequest(
+      "BITCOIN:?LIGHTNING=LNBCUPPER&CREQ=CREQB1UPPERCASE"
+    );
+
+    expect(wallet.handlePaymentRequest).toHaveBeenCalledWith(
+      "CREQB1UPPERCASE"
+    );
+  });
+
   it("redeem shows the normalized received amount for v4 proofs", async () => {
     const wallet = useWalletStore();
     h.receiveTokensStore.receiveData.tokensBase64 = "cashuB500";
