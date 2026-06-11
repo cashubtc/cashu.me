@@ -19,6 +19,8 @@
     "test:ci": "vitest run"
   },
   "dependencies": {
+    "@aparajita/capacitor-biometric-auth": "^9.1.2",
+    "@capacitor/app": "^6.0.3",
     "@capacitor/clipboard": "^6.0.2",
     "@capacitor/core": "^6.2.0",
     "@capacitor/haptics": "^6.0.2",
