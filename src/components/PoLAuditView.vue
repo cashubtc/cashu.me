@@ -247,6 +247,14 @@
                     Secret: {{ vt.secret }}<br />
                     Y: {{ vt.y }}<br />
                     B': {{ vt.bPrime || 'Not Reconstructible' }}
+                    <div v-if="vt.receiptStatus" class="q-mt-xs row items-center q-gutter-xs" style="font-style: normal;">
+                      <q-icon v-if="vt.receiptStatus === 'valid'" name="verified" color="positive" size="14px" />
+                      <q-icon v-else-if="vt.receiptStatus === 'missing'" name="warning" color="warning" size="14px" />
+                      <q-icon v-else name="cancel" color="negative" size="14px" />
+                      <span class="text-caption" :class="vt.receiptStatus === 'valid' ? 'text-positive' : (vt.receiptStatus === 'missing' ? 'text-warning' : 'text-negative')" style="font-size: 10px; font-weight: bold;">
+                        {{ vt.receiptStatus === 'valid' ? `✓ Epoch ${vt.receiptEpoch} Receipt Verified` : (vt.receiptStatus === 'missing' ? '⚠ Missing Transaction Receipt (Vulnerable if mint cheats)' : '❌ Invalid Transaction Receipt (Mint fraud detected!)') }}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -275,6 +283,7 @@ import {
   deriveBlindingFactor,
   deriveSecret,
   verifyOtsAnchoring,
+  verifyPolReceipt,
   bytesToHex,
   hexToBytes,
   sha256,
@@ -288,6 +297,8 @@ interface VerifiedTokenInfo {
   y: string;
   bPrime: string | null;
   status: "Unspent" | "Spent";
+  receiptStatus?: "valid" | "missing" | "invalid";
+  receiptEpoch?: number;
 }
 
 export default defineComponent({
@@ -340,6 +351,35 @@ export default defineComponent({
       if (status === "failed") return "text-negative";
       if (status === "running") return "text-primary";
       return "text-grey-6";
+    },
+    async getReceiptStatus(proof: any, y: string, bPrime: string | null, storedMint: any): Promise<{ receiptStatus: "valid" | "missing" | "invalid", receiptEpoch?: number }> {
+      const polReceipt = proof.polReceipt || proof.pol_receipt;
+      if (!polReceipt) {
+        return { receiptStatus: "missing" };
+      }
+
+      let pubKeyHex = null;
+      const mintKeyset = storedMint.keys.find((k: any) => k.id === proof.id);
+      if (mintKeyset && mintKeyset.keys) {
+        pubKeyHex = mintKeyset.keys[proof.amount];
+      }
+
+      if (!pubKeyHex) {
+        return { receiptStatus: "missing" };
+      }
+
+      const isValid = await verifyPolReceipt(
+        polReceipt.signature,
+        polReceipt.target_epoch,
+        pubKeyHex,
+        y,
+        bPrime || ""
+      );
+
+      return {
+        receiptStatus: isValid ? "valid" : "invalid",
+        receiptEpoch: polReceipt.target_epoch
+      };
     },
     async startAudit() {
       this.state = "auditing";
@@ -603,12 +643,30 @@ export default defineComponent({
                   error: "Active coin sibling path failed Spent Tree Merkle-Sum verification"
                 });
               } else {
+                const { receiptStatus, receiptEpoch } = await this.getReceiptStatus(proof, y, proof.bPrime, storedMint);
+                if (receiptStatus === "invalid") {
+                  const polReceipt = proof.polReceipt || proof.pol_receipt;
+                  this.challenges.push({
+                    keyset_id: activeKeysetId,
+                    epoch_index: polReceipt.target_epoch,
+                    item_type: "spent_non_inclusion_path",
+                    item: proof.secret,
+                    index: item.index,
+                    value: 0,
+                    signature: polReceipt.signature,
+                    amount: proof.amount,
+                    pol_receipt: polReceipt,
+                    error: `MINT SECURITY BREACH: The transaction pol_receipt signature provided by the mint is INVALID for epoch ${polReceipt.target_epoch}!`
+                  });
+                }
                 this.verifiedTokens.push({
                   secret: proof.secret,
                   amount: proof.amount,
                   y: y,
                   bPrime: proof.bPrime,
-                  status: "Unspent"
+                  status: "Unspent",
+                  receiptStatus,
+                  receiptEpoch
                 });
               }
             }
@@ -706,12 +764,30 @@ export default defineComponent({
                   error: "Issued coin sibling path failed Issued Tree Merkle-Sum verification"
                 });
               } else if (proof.status === "Spent") {
+                const { receiptStatus, receiptEpoch } = await this.getReceiptStatus(proof, proof.y, proof.bPrime, storedMint);
+                if (receiptStatus === "invalid") {
+                  const polReceipt = proof.polReceipt || proof.pol_receipt;
+                  this.challenges.push({
+                    keyset_id: activeKeysetId,
+                    epoch_index: polReceipt.target_epoch,
+                    item_type: "issued_inclusion_path",
+                    item: proof.secret,
+                    index: item.index,
+                    value: proof.amount,
+                    signature: polReceipt.signature,
+                    amount: proof.amount,
+                    pol_receipt: polReceipt,
+                    error: `MINT SECURITY BREACH: The transaction pol_receipt signature provided by the mint is INVALID for epoch ${polReceipt.target_epoch}!`
+                  });
+                }
                 this.verifiedTokens.push({
                   secret: proof.secret,
                   amount: proof.amount,
                   y: proof.y,
                   bPrime: proof.bPrime,
-                  status: "Spent"
+                  status: "Spent",
+                  receiptStatus,
+                  receiptEpoch
                 });
               }
             }

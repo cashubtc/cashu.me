@@ -175,6 +175,30 @@ export async function calculateBPrime(secret: string, rHex: string): Promise<str
   return B_.toHex(true);
 }
 
+export async function verifyPolReceipt(
+  signatureHex: string,
+  targetEpoch: number,
+  pubKeyHex: string,
+  yHex: string,
+  bHex: string
+): Promise<boolean> {
+  try {
+    const msgY = `${yHex}:${targetEpoch}`;
+    const msgB = `${bHex}:${targetEpoch}`;
+
+    const hashY = await sha256(new TextEncoder().encode(msgY));
+    const hashB = await sha256(new TextEncoder().encode(msgB));
+
+    const isValidY = nobleSecp256k1.verify(signatureHex, hashY, pubKeyHex);
+    const isValidB = nobleSecp256k1.verify(signatureHex, hashB, pubKeyHex);
+
+    return isValidY || isValidB;
+  } catch (err) {
+    console.error("Pol receipt signature verification failed:", err);
+    return false;
+  }
+}
+
 export { deriveBlindingFactor, deriveSecret };
 
 export function findSubarrayIndex(arr: Uint8Array, sub: Uint8Array): number {
