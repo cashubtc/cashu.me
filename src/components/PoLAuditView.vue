@@ -431,6 +431,14 @@ export default defineComponent({
 
         const manifest = resp.data;
         this.manifest = manifest;
+
+        // Register this mint as a known PoL-supporting mint
+        const polMints = JSON.parse(localStorage.getItem("cashu.polMints") || "[]");
+        if (!polMints.includes(this.mintUrl)) {
+          polMints.push(this.mintUrl);
+          localStorage.setItem("cashu.polMints", JSON.stringify(polMints));
+        }
+        (window as any).KNOWN_POL_MINTS = polMints;
         const epochIdx = manifest.epoch_index;
         const rootIssuedHash = manifest.root_issued.hash;
         const rootIssuedSum = manifest.root_issued.sum;

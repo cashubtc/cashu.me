@@ -12,6 +12,7 @@ window.LOCALE = "en";
 if (typeof window !== "undefined") {
   const originalFetch = window.fetch;
   window.POL_RECEIPT_CACHE = {};
+  window.KNOWN_POL_MINTS = JSON.parse(localStorage.getItem("cashu.polMints") || "[]");
 
   window.fetch = async function (input, init) {
     const url = typeof input === "string" ? input : (input instanceof URL ? input.toString() : (input && input.url ? input.url : ""));
@@ -43,20 +44,33 @@ if (typeof window !== "undefined") {
         const data = await clone.json();
         const signatures = data.signatures || data.promises || data.change || [];
 
-        // Check if mint supports PoL (NUT-20)
+        // Check if mint supports PoL (Proof of Liabilities)
         let supportsPol = false;
         try {
           const mintsStore = useMintsStore();
           const matchedMint = mintsStore.mints.find(m => url.startsWith(m.url));
-          if (matchedMint && matchedMint.info && matchedMint.info.nuts) {
-            supportsPol = '20' in matchedMint.info.nuts || 20 in matchedMint.info.nuts;
+          const matchedMintUrl = matchedMint ? matchedMint.url : url;
+
+          const hasReceipts = signatures.length > 0 && signatures[0].pol_receipt;
+          if (hasReceipts) {
+            supportsPol = true;
+            // Dynamically register the mint as PoL-supporting
+            const polMints = JSON.parse(localStorage.getItem("cashu.polMints") || "[]");
+            if (!polMints.includes(matchedMintUrl)) {
+              polMints.push(matchedMintUrl);
+              localStorage.setItem("cashu.polMints", JSON.stringify(polMints));
+            }
+            window.KNOWN_POL_MINTS = polMints;
+          } else {
+            // Fallback to active/proactive discovery registry
+            supportsPol = window.KNOWN_POL_MINTS && window.KNOWN_POL_MINTS.includes(matchedMintUrl);
           }
         } catch (err) {}
 
         if (supportsPol && signatures.length > 0) {
           const missingReceipt = signatures.some(s => !s.pol_receipt);
           if (missingReceipt) {
-            throw new Error("Mint Protocol Violation: The mint advertised Proof of Liabilities (NUT-20) support, but failed to return a signed transaction receipt (pol_receipt) on the transaction outputs! Transaction aborted for safety.");
+            throw new Error("Mint Protocol Violation: The mint is a known Proof of Liabilities (PoL) supporting mint, but failed to return a signed transaction receipt (pol_receipt) on the transaction outputs! Transaction aborted for safety.");
           }
 
           // Build B_ to secret hex map via deterministic KDF walk
