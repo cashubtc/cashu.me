@@ -1,5 +1,6 @@
 import { hashToCurve, deriveBlindingFactor, deriveSecret } from "@cashu/cashu-ts";
 import * as nobleSecp256k1 from "@noble/secp256k1";
+import { schnorr } from "@noble/curves/secp256k1";
 
 export const { bytesToHex, hexToBytes } = nobleSecp256k1.etc;
 
@@ -175,47 +176,6 @@ export async function calculateBPrime(secret: string, rHex: string): Promise<str
   return B_.toHex(true);
 }
 
-export function derToCompact(der: Uint8Array): Uint8Array {
-  if (der[0] !== 0x30) {
-    throw new Error("Invalid DER signature: expected sequence marker 0x30");
-  }
-  let offset = 2;
-
-  // Parse R integer
-  if (der[offset] !== 0x02) {
-    throw new Error("Invalid DER signature: expected integer marker 0x02 for R");
-  }
-  const rLen = der[offset + 1];
-  let rBytes = der.subarray(offset + 2, offset + 2 + rLen);
-  offset += 2 + rLen;
-
-  // Parse S integer
-  if (der[offset] !== 0x02) {
-    throw new Error("Invalid DER signature: expected integer marker 0x02 for S");
-  }
-  const sLen = der[offset + 1];
-  let sBytes = der.subarray(offset + 2, offset + 2 + sLen);
-
-  // Normalize R to exactly 32 bytes
-  if (rBytes[0] === 0x00 && rBytes.length > 32) {
-    rBytes = rBytes.subarray(1);
-  }
-  const rNorm = new Uint8Array(32);
-  rNorm.set(rBytes, 32 - rBytes.length);
-
-  // Normalize S to exactly 32 bytes
-  if (sBytes[0] === 0x00 && sBytes.length > 32) {
-    sBytes = sBytes.subarray(1);
-  }
-  const sNorm = new Uint8Array(32);
-  sNorm.set(sBytes, 32 - sBytes.length);
-
-  const compact = new Uint8Array(64);
-  compact.set(rNorm, 0);
-  compact.set(sNorm, 32);
-  return compact;
-}
-
 export async function verifyPolReceipt(
   signatureHex: string,
   targetEpoch: number,
@@ -230,16 +190,11 @@ export async function verifyPolReceipt(
     const hashY = await sha256(new TextEncoder().encode(msgY));
     const hashB = await sha256(new TextEncoder().encode(msgB));
 
-    let compactSig: Uint8Array;
-    const rawSig = hexToBytes(signatureHex);
-    if (rawSig[0] === 0x30) {
-      compactSig = derToCompact(rawSig);
-    } else {
-      compactSig = rawSig;
-    }
+    // For BIP-340 Schnorr, public key is 32 bytes (x-only)
+    const xOnlyPubKey = pubKeyHex.length === 66 ? pubKeyHex.slice(2) : pubKeyHex;
 
-    const isValidY = nobleSecp256k1.verify(compactSig, hashY, pubKeyHex);
-    const isValidB = nobleSecp256k1.verify(compactSig, hashB, pubKeyHex);
+    const isValidY = schnorr.verify(signatureHex, hashY, xOnlyPubKey);
+    const isValidB = schnorr.verify(signatureHex, hashB, xOnlyPubKey);
 
     return isValidY || isValidB;
   } catch (err) {
