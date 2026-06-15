@@ -112,6 +112,9 @@ export const useProofsStore = defineStore("proofs", {
       const walletProofs = this.proofsToWalletProofs(proofs, quote);
       await cashuDb.transaction("rw", cashuDb.proofs, async () => {
         for (const p of walletProofs) {
+          if ((window as any).POL_RECEIPT_CACHE && (window as any).POL_RECEIPT_CACHE[p.secret]) {
+            (p as any).polReceipt = (window as any).POL_RECEIPT_CACHE[p.secret];
+          }
           await cashuDb.proofs.add(p);
         }
       });
@@ -128,6 +131,9 @@ export const useProofsStore = defineStore("proofs", {
         for (const p of walletProofs) {
           if (!existingSecrets.has(p.secret)) {
             try {
+              if ((window as any).POL_RECEIPT_CACHE && (window as any).POL_RECEIPT_CACHE[p.secret]) {
+                (p as any).polReceipt = (window as any).POL_RECEIPT_CACHE[p.secret];
+              }
               await cashuDb.proofs.add(p);
               existingSecrets.add(p.secret);
             } catch (error: any) {
