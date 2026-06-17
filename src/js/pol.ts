@@ -91,6 +91,13 @@ export async function verifyMerkleProof(
   rootSum: number,
   defaultNodes: DefaultNode[]
 ): Promise<boolean> {
+  const cleanProofIdx = proofItem.index.startsWith("0x") ? proofItem.index.slice(2) : proofItem.index;
+  const expectedIndexBytes = await sha256(new TextEncoder().encode(proofItem.item));
+  const expectedIndexHex = bytesToHex(expectedIndexBytes);
+  if (cleanProofIdx.toLowerCase() !== expectedIndexHex.toLowerCase()) {
+    throw new Error(`Leaf index integrity check failed: index ${cleanProofIdx} does not match SHA256(item) of ${proofItem.item} (expected ${expectedIndexHex})`);
+  }
+
   const cleanMask = proofItem.compact_mask.startsWith("0x")
     ? proofItem.compact_mask
     : "0x" + proofItem.compact_mask;
@@ -199,6 +206,38 @@ export async function verifyPolReceipt(
     return isValidY || isValidB;
   } catch (err) {
     console.error("Pol receipt signature verification failed:", err);
+    return false;
+  }
+}
+
+export async function verifyManifestSignature(
+  manifest: any,
+  signingPubkeyHex: string
+): Promise<boolean> {
+  try {
+    const msg = [
+      manifest.keyset_id,
+      manifest.epoch_index,
+      manifest.timestamp,
+      manifest.root_issued.hash,
+      manifest.root_issued.sum,
+      manifest.root_spent.hash,
+      manifest.root_spent.sum,
+      manifest.outstanding_balance,
+      manifest.ots_receipt,
+    ].join(":");
+
+    const msgHash = await sha256(new TextEncoder().encode(msg));
+    const xOnlyPubKey = signingPubkeyHex.length === 66 ? signingPubkeyHex.slice(2) : signingPubkeyHex;
+    const signatureHex = manifest.mint_signature || manifest.signature;
+
+    if (!signatureHex) {
+      return false;
+    }
+
+    return schnorr.verify(signatureHex, msgHash, xOnlyPubKey);
+  } catch (err) {
+    console.error("Manifest signature verification failed:", err);
     return false;
   }
 }

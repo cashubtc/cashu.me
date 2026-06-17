@@ -11,7 +11,8 @@ window.LOCALE = "en";
 // Global fetch interceptor to enforce Proof of Liabilities (PoL) transaction receipts (NUT-20)
 if (typeof window !== "undefined") {
   const originalFetch = window.fetch;
-  window.POL_RECEIPT_CACHE = {};
+  const storedReceipts = localStorage.getItem("cashu.polReceipts");
+  window.POL_RECEIPT_CACHE = storedReceipts ? JSON.parse(storedReceipts) : {};
   window.KNOWN_POL_MINTS = JSON.parse(localStorage.getItem("cashu.polMints") || "[]");
 
   window.fetch = async function (input, init) {
@@ -21,6 +22,7 @@ if (typeof window !== "undefined") {
 
     if (isPost && isMintOrSwap) {
       let outputs = [];
+      let inputs = [];
       try {
         if (init.body) {
           const bodyStr = typeof init.body === "string" ? init.body : new TextDecoder().decode(init.body);
@@ -29,6 +31,7 @@ if (typeof window !== "undefined") {
           if (bodyJson.outputs == null && bodyJson.change && bodyJson.change.outputs) {
             outputs = bodyJson.change.outputs;
           }
+          inputs = bodyJson.inputs || [];
         }
       } catch (e) {
         // Ignore parsing errors
@@ -43,6 +46,7 @@ if (typeof window !== "undefined") {
       try {
         const data = await clone.json();
         const signatures = data.signatures || data.promises || data.change || [];
+        const spentReceipts = data.spent_receipts || [];
 
         // Check if mint supports PoL (Proof of Liabilities)
         let supportsPol = false;
@@ -51,7 +55,7 @@ if (typeof window !== "undefined") {
           const matchedMint = mintsStore.mints.find(m => url.startsWith(m.url));
           const matchedMintUrl = matchedMint ? matchedMint.url : url;
 
-          const hasReceipts = signatures.length > 0 && signatures[0].pol_receipt;
+          const hasReceipts = (signatures.length > 0 && signatures[0].pol_receipt) || spentReceipts.length > 0;
           if (hasReceipts) {
             supportsPol = true;
             // Dynamically register the mint as PoL-supporting
@@ -67,63 +71,88 @@ if (typeof window !== "undefined") {
           }
         } catch (err) {}
 
-        if (supportsPol && signatures.length > 0) {
-          const missingReceipt = signatures.some(s => !s.pol_receipt);
-          if (missingReceipt) {
-            throw new Error("Mint Protocol Violation: The mint is a known Proof of Liabilities (PoL) supporting mint, but failed to return a signed transaction receipt (pol_receipt) on the transaction outputs! Transaction aborted for safety.");
+        if (supportsPol) {
+          let updated = false;
+
+          // Symmetrically map spent receipts for spent inputs
+          if (spentReceipts.length > 0 && inputs.length > 0) {
+            for (let i = 0; i < spentReceipts.length; i++) {
+              const receipt = spentReceipts[i];
+              const inputProof = inputs[i];
+              if (receipt && inputProof && inputProof.secret) {
+                window.POL_RECEIPT_CACHE[inputProof.secret] = receipt;
+                updated = true;
+              }
+            }
           }
 
-          // Build B_ to secret hex map via deterministic KDF walk
-          const bHexToSecret = {};
-          try {
-            const walletStore = useWalletStore();
-            const mintsStore = useMintsStore();
-            const matchedMint = mintsStore.mints.find(m => url.startsWith(m.url));
-            const keysetIds = matchedMint ? (matchedMint.keysets || []).map(k => k.id) : [];
+          if (signatures.length > 0) {
+            const missingReceipt = signatures.some(s => !s.pol_receipt);
+            if (missingReceipt) {
+              throw new Error("Mint Protocol Violation: The mint is a known Proof of Liabilities (PoL) supporting mint, but failed to return a signed transaction receipt (pol_receipt) on the transaction outputs! Transaction aborted for safety.");
+            }
 
-            if (walletStore.mnemonic && keysetIds.length > 0) {
-              const seed = walletStore.mnemonicToSeedSync(walletStore.mnemonic);
-              const { deriveSecret, deriveBlindingFactor, calculateBPrime } = await import("src/js/pol");
+            // Build B_ to secret hex map via deterministic KDF walk
+            const bHexToSecret = {};
+            try {
+              const walletStore = useWalletStore();
+              const mintsStore = useMintsStore();
+              const matchedMint = mintsStore.mints.find(m => url.startsWith(m.url));
+              const keysetIds = matchedMint ? (matchedMint.keysets || []).map(k => k.id) : [];
 
-              for (const kid of keysetIds) {
-                const maxCounter = walletStore.keysetCounter(kid) || 0;
-                for (let counter = 0; counter <= maxCounter + 100; counter++) {
-                  try {
-                    const secretBytes = deriveSecret(seed, kid, counter);
-                    const rBytes = deriveBlindingFactor(seed, kid, counter);
+              if (walletStore.mnemonic && keysetIds.length > 0) {
+                const seed = walletStore.mnemonicToSeedSync(walletStore.mnemonic);
+                const { deriveSecret, deriveBlindingFactor, calculateBPrime } = await import("src/js/pol");
 
-                    const secretHex = Array.from(secretBytes).map(b => b.toString(16).padStart(2, '0')).join('');
-                    const rHex = Array.from(rBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+                for (const kid of keysetIds) {
+                  const maxCounter = walletStore.keysetCounter(kid) || 0;
+                  // Optimization: only scan a narrow window of active counters to prevent UI thread freezing
+                  const startCounter = Math.max(0, maxCounter - signatures.length - 50);
+                  const endCounter = maxCounter + 100;
 
-                    const bPrime = await calculateBPrime(secretHex, rHex);
-                    bHexToSecret[bPrime] = secretHex;
-
+                  for (let counter = startCounter; counter <= endCounter; counter++) {
                     try {
-                      const secretStr = new TextDecoder().decode(secretBytes);
-                      bHexToSecret[bPrime] = secretStr;
+                      const secretBytes = deriveSecret(seed, kid, counter);
+                      const rBytes = deriveBlindingFactor(seed, kid, counter);
+
+                      const secretHex = Array.from(secretBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+                      const rHex = Array.from(rBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+
+                      const bPrime = await calculateBPrime(secretHex, rHex);
+                      bHexToSecret[bPrime] = secretHex;
+
+                      try {
+                        const secretStr = new TextDecoder().decode(secretBytes);
+                        bHexToSecret[bPrime] = secretStr;
+                      } catch (e) {}
                     } catch (e) {}
-                  } catch (e) {}
+                  }
+                }
+              }
+            } catch (err) {
+              console.error("Failed to build B_ to secret map for receipts:", err);
+            }
+
+            // Symmetrically map receipts from signatures to secrets
+            for (let i = 0; i < signatures.length; i++) {
+              const sig = signatures[i];
+              const receipt = sig.pol_receipt;
+              if (receipt) {
+                const output = outputs[i];
+                const bHex = output ? output.B_ : null;
+                if (bHex) {
+                  const secret = bHexToSecret[bHex];
+                  if (secret) {
+                    window.POL_RECEIPT_CACHE[secret] = receipt;
+                    updated = true;
+                  }
                 }
               }
             }
-          } catch (err) {
-            console.error("Failed to build B_ to secret map for receipts:", err);
           }
 
-          // Symmetrically map receipts from signatures to secrets
-          for (let i = 0; i < signatures.length; i++) {
-            const sig = signatures[i];
-            const receipt = sig.pol_receipt;
-            if (receipt) {
-              const output = outputs[i];
-              const bHex = output ? output.B_ : null;
-              if (bHex) {
-                const secret = bHexToSecret[bHex];
-                if (secret) {
-                  window.POL_RECEIPT_CACHE[secret] = receipt;
-                }
-              }
-            }
+          if (updated) {
+            localStorage.setItem("cashu.polReceipts", JSON.stringify(window.POL_RECEIPT_CACHE));
           }
         }
       } catch (err) {

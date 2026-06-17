@@ -284,6 +284,7 @@ import {
   deriveSecret,
   verifyOtsAnchoring,
   verifyPolReceipt,
+  verifyManifestSignature,
   bytesToHex,
   hexToBytes,
   sha256,
@@ -353,7 +354,7 @@ export default defineComponent({
       return "text-grey-6";
     },
     async getReceiptStatus(proof: any, y: string, bPrime: string | null, storedMint: any): Promise<{ receiptStatus: "valid" | "missing" | "invalid", receiptEpoch?: number }> {
-      const polReceipt = proof.polReceipt || proof.pol_receipt;
+      const polReceipt = proof.polReceipt || proof.pol_receipt || (window as any).POL_RECEIPT_CACHE?.[proof.secret];
       if (!polReceipt) {
         return { receiptStatus: "missing" };
       }
@@ -413,24 +414,42 @@ export default defineComponent({
         // 3. Precompute default empty Merkle nodes
         const defaultNodes = await precomputeDefaultNodes();
 
-        // 4. Step 1: Manifest check (Fetch manifest of the active keyset ID)
-        const activeKeysetId = keysetIds[0];
-        const manifestUrl = `${this.mintUrl}/v1/pol/${activeKeysetId}/manifest`;
-        
-        let resp;
-        try {
-          resp = await axios.get(manifestUrl);
-        } catch (e: any) {
-          if (e.response && e.response.status === 404) {
-            this.state = "completed";
-            this.steps.manifest = { status: "failed", message: "Verification not supported by this mint." };
-            return;
+        // 4. Step 1: Manifest check (Fetch manifest for all keysets of this mint)
+        const manifestPromises = keysetIds.map(async (kid: string) => {
+          try {
+            const mUrl = `${this.mintUrl}/v1/pol/${kid}/manifest`;
+            const r = await axios.get(mUrl);
+            return { kid, manifest: r.data };
+          } catch (e) {
+            console.warn(`Failed to fetch manifest for keyset ${kid}:`, e);
+            return null;
           }
-          throw new Error(`Failed to contact solvency endpoint: ${e.message}`);
+        });
+
+        const manifestResults = await Promise.all(manifestPromises);
+        const activeManifests = manifestResults.filter(r => r !== null) as { kid: string, manifest: any }[];
+
+        if (activeManifests.length === 0) {
+          this.state = "completed";
+          this.steps.manifest = { status: "failed", message: "Verification not supported by this mint (no manifests found)." };
+          return;
         }
 
-        const manifest = resp.data;
+        // Use the first available manifest as the primary manifest for UI and OTS verification
+        const manifest = activeManifests[0].manifest;
+        const activeKeysetId = activeManifests[0].kid;
         this.manifest = manifest;
+
+        // Verify the manifest signature
+        const signingPubkey = storedMint.info?.pubkey || manifest.signing_pubkey;
+        if (!signingPubkey) {
+          throw new Error("Mint master public key not found for signature verification.");
+        }
+
+        const isSignatureValid = await verifyManifestSignature(manifest, signingPubkey);
+        if (!isSignatureValid) {
+          throw new Error("CRITICAL SECURITY VIOLATION: Keyset manifest signature verification failed! The manifest may have been spoofed or altered.");
+        }
 
         // Register this mint as a known PoL-supporting mint
         const polMints = JSON.parse(localStorage.getItem("cashu.polMints") || "[]");
@@ -468,12 +487,32 @@ export default defineComponent({
         this.steps.anchor = { status: "running", message: "Validating OpenTimestamps (OTS) anchor..." };
         const otsReceiptHex = manifest.ots_receipt;
 
-        // Compute deterministic global digest hash to verify OTS authenticity
-        const commitmentDataInput = new Uint8Array(activeKeysetId.length + 32 + 32);
+        // Sort active manifests alphabetically by keyset_id
+        activeManifests.sort((a, b) => a.kid.localeCompare(b.kid));
+
+        // Reconstruct the global commitment data using all sorted active manifests
         const encoder = new TextEncoder();
-        commitmentDataInput.set(encoder.encode(activeKeysetId), 0);
-        commitmentDataInput.set(hexToBytes(rootIssuedHash), activeKeysetId.length);
-        commitmentDataInput.set(hexToBytes(rootSpentHash), activeKeysetId.length + 32);
+        let totalLength = 0;
+        const encodedKids = activeManifests.map(m => {
+          const encoded = encoder.encode(m.kid);
+          totalLength += encoded.length + 32 + 32;
+          return encoded;
+        });
+
+        const commitmentDataInput = new Uint8Array(totalLength);
+        let offset = 0;
+        for (let i = 0; i < activeManifests.length; i++) {
+          const m = activeManifests[i];
+          const encodedKid = encodedKids[i];
+          commitmentDataInput.set(encodedKid, offset);
+          offset += encodedKid.length;
+
+          commitmentDataInput.set(hexToBytes(m.manifest.root_issued.hash), offset);
+          offset += 32;
+
+          commitmentDataInput.set(hexToBytes(m.manifest.root_spent.hash), offset);
+          offset += 32;
+        }
 
         const computedGlobalDigest = await sha256(commitmentDataInput);
         const computedGlobalDigestHex = bytesToHex(computedGlobalDigest);
