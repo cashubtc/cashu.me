@@ -141,6 +141,24 @@
                             <q-spinner class="q-mb-sm" />
                           </div>
                         </div>
+                        <!-- Show the fee up-front so the headline amount never
+                             understates what actually leaves the wallet. -->
+                        <div
+                          v-if="
+                            payInvoiceData.meltQuote.response &&
+                            payInvoiceData.meltQuote.response.fee_reserve > 0
+                          "
+                          class="text-subtitle2 text-grey-6"
+                        >
+                          {{ $t("PayInvoiceDialog.invoice.fee") }}:
+                          {{
+                            formatCurrency(
+                              payInvoiceData.meltQuote.response.fee_reserve,
+                              activeUnit,
+                              true
+                            )
+                          }}
+                        </div>
                       </div>
                       <div
                         v-else-if="
@@ -1208,10 +1226,19 @@ export default defineComponent({
       this.isPaying = true;
       try {
         const result = await this.meltInvoiceData(true);
-        const returnedChange = useProofsStore().sumProofs(result.change);
-        this.payInvoiceData.fee_paid =
-          this.payInvoiceData.meltQuote.response.fee_reserve - returnedChange;
-        console.log("### fee_paid", this.payInvoiceData.fee_paid);
+        // For on-chain melts the fee isn't known until the tx confirms and any
+        // change is reconciled (checkOutgoingOnchain) — computing it here from a
+        // still-pending quote would display the full fee_reserve and overstate the
+        // actual fee. Only set fee_paid eagerly for lightning (synchronous) melts.
+        const isOnchainMelt = Array.isArray(
+          this.payInvoiceData.meltQuote.response?.fee_options
+        );
+        if (!isOnchainMelt) {
+          const returnedChange = useProofsStore().sumProofs(result.change);
+          this.payInvoiceData.fee_paid =
+            this.payInvoiceData.meltQuote.response.fee_reserve - returnedChange;
+          console.log("### fee_paid", this.payInvoiceData.fee_paid);
+        }
         // Success state and closing is handled by the watcher on payInvoiceData.show
       } catch (error) {
         // Error handling is done in the store, but we ensure isPaying is reset

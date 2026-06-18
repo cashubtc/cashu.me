@@ -414,10 +414,14 @@ export default defineComponent({
       const mint = mintStore.mints.find((m: any) => m.url === this.mintUrl);
       const methods =
         mint?.info?.nuts?.[5]?.methods || mint?.info?.nuts?.["5"]?.methods;
-      const method = methods?.find(
-        (m: any) =>
-          m.method === LightningMethod.Onchain && m.unit === this.quoteUnit
-      );
+      // Prefer the exact unit match; fall back to any on-chain method so a unit
+      // mismatch can't silently collapse the denominator. Melt is the mint's own
+      // outgoing tx (settles at 1 conf), so 1 is the correct fallback here.
+      const method =
+        methods?.find(
+          (m: any) =>
+            m.method === LightningMethod.Onchain && m.unit === this.quoteUnit
+        ) || methods?.find((m: any) => m.method === LightningMethod.Onchain);
       return Number(method?.options?.confirmations || 1);
     },
     async loadOnchainMetadata() {

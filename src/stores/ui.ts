@@ -35,6 +35,7 @@ export const useUiStore = defineStore("ui", {
     tab: useLocalStorage("cashu.ui.tab", "history" as string),
     expandHistory: useLocalStorage("cashu.ui.expandHistory", true as boolean),
     globalMutexLock: false,
+    globalMutexLockedAt: 0,
     showDebugConsole: useLocalStorage("cashu.ui.showDebugConsole", false),
     lastBalanceCached: useLocalStorage("cashu.ui.lastBalanceCached", 0),
     multinutExperimentalWarningDismissed: useLocalStorage(
@@ -53,9 +54,19 @@ export const useUiStore = defineStore("ui", {
     async lockMutex() {
       const nRetries = 10;
       const retryInterval = 500;
+      // A lock held longer than this is treated as stale — a previous holder that
+      // threw without unlocking — and stolen, so a stuck lock self-heals instead of
+      // popping "Please try again." on every subsequent operation until reload.
+      const maxHoldMs = 30000;
       let retries = 0;
 
       while (this.globalMutexLock) {
+        if (
+          this.globalMutexLockedAt &&
+          Date.now() - this.globalMutexLockedAt > maxHoldMs
+        ) {
+          break; // steal the stale lock
+        }
         if (retries >= nRetries) {
           notify("Please try again.");
           throw new Error("Failed to acquire global mutex lock");
@@ -65,9 +76,11 @@ export const useUiStore = defineStore("ui", {
       }
 
       this.globalMutexLock = true;
+      this.globalMutexLockedAt = Date.now();
     },
     unlockMutex() {
       this.globalMutexLock = false;
+      this.globalMutexLockedAt = 0;
     },
     triggerActivityOrb() {
       this.activityOrb = true;

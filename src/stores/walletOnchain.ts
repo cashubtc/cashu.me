@@ -12,7 +12,7 @@ import {
 } from "@cashu/cashu-ts";
 import * as nobleSecp256k1 from "@noble/secp256k1";
 import { bytesToHex } from "@noble/hashes/utils";
-import { notifyApiError, notify, notifySuccess } from "src/js/notify";
+import { notifyApiError, notify, notifySuccess, notifyWarning } from "src/js/notify";
 import type { InvoiceHistory } from "./wallet";
 import { LightningMethod } from "src/stores/walletTypes";
 import { mintOnPaidGeneric } from "./walletWebsocket";
@@ -171,9 +171,12 @@ export async function checkOnchainAndMint(
     invoice.network = onchainNetwork(invoice.request);
   }
 
-  await uIStore.lockMutex();
+  // Check the quote WITHOUT holding the global mutex. The background checker polls
+  // every pending on-chain quote (including abandoned/unpaid ones); if each poll
+  // grabbed the one global lock they would contend and time out as "Please try
+  // again." The lock is only needed for the actual mint (proof mutation), below.
+  uIStore.triggerActivityOrb();
   try {
-    uIStore.triggerActivityOrb();
     const updated = await mintWallet.checkMintQuoteOnchain(quoteId);
     const paid = amountToNumber(updated.amount_paid);
     const issued = amountToNumber(updated.amount_issued);
@@ -187,10 +190,38 @@ export async function checkOnchainAndMint(
     if (delta <= 0) {
       throw new Error("Address not paid");
     }
+  } catch (error: any) {
+    if (verbose) {
+      if (error?.message === "Address not paid") {
+        notify("Address not paid");
+      } else {
+        notifyApiError(error);
+      }
+    }
+    throw error;
+  }
+
+  // Paid — mint under the global mutex (serializes proof mutation).
+  await uIStore.lockMutex();
+  try {
+    // Re-check under the lock: a concurrent poll or websocket event may have
+    // already minted this quote while we waited, so we never mint it twice.
+    const recheck = await mintWallet.checkMintQuoteOnchain(quoteId);
+    const delta =
+      amountToNumber(recheck.amount_paid) -
+      amountToNumber(recheck.amount_issued);
+    if (delta <= 0) {
+      this.setInvoicePaid(invoice.quote, {
+        amount: amountToNumber(recheck.amount_issued),
+        mintQuote: normalizeMintQuote(recheck),
+      });
+      useInvoicesWorkerStore().removeOnchainQuoteFromChecker(invoice.quote);
+      return [];
+    }
 
     const proofs = await this.retryOnceOnSignedOutputs(keysetId, async () =>
       mintWallet.ops
-        .mintOnchain(delta, updated)
+        .mintOnchain(delta, recheck)
         .keyset(keysetId)
         .asDeterministic()
         .proofsWeHave(mintStore.mintUnitProofs(mint, invoice.unit))
@@ -220,13 +251,7 @@ export async function checkOnchainAndMint(
     return proofs;
   } catch (error: any) {
     console.error(error);
-    if (verbose) {
-      if (error?.message === "Address not paid") {
-        notify("Address not paid");
-      } else {
-        notifyApiError(error);
-      }
-    }
+    if (verbose) notifyApiError(error);
     this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error);
     throw error;
   } finally {

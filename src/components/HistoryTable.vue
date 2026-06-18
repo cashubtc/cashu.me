@@ -35,7 +35,17 @@
 
             <!-- Amount -->
             <div class="text-right">
+              <!-- Amountless pending receive (e.g. an on-chain board still
+                   confirming): the net isn't known to the wallet until the mint
+                   credits it, so don't render a misleading "+0" — show progress. -->
               <div
+                v-if="transaction.status === 'pending' && !transaction.amount"
+                class="amount-text text-weight-bold text-grey-6"
+              >
+                {{ isOnchainTransaction(transaction) ? "Confirming…" : "—" }}
+              </div>
+              <div
+                v-else
                 class="amount-text text-weight-bold"
                 :class="{
                   'text-amount-positive':

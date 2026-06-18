@@ -274,10 +274,15 @@ export default defineComponent({
       const mint = mintStore.mints.find((m: any) => m.url === this.mintUrl);
       const methods =
         mint?.info?.nuts?.[4]?.methods || mint?.info?.nuts?.["4"]?.methods;
-      const method = methods?.find(
-        (m: any) => m.method === LightningMethod.Onchain && m.unit === this.unit
-      );
-      return Number(method?.options?.confirmations || 1);
+      // Prefer the exact unit match; fall back to any on-chain method so a unit
+      // mismatch can't silently collapse the denominator. Default 6 (real board
+      // maturation depth), never 1 — boards credit only once the VTXO is Spendable.
+      const method =
+        methods?.find(
+          (m: any) =>
+            m.method === LightningMethod.Onchain && m.unit === this.unit
+        ) || methods?.find((m: any) => m.method === LightningMethod.Onchain);
+      return Number(method?.options?.confirmations || 6);
     },
     async loadOnchainMetadata() {
       if (!this.isOnchain || !this.invoice?.request) return;

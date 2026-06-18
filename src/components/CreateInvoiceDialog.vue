@@ -381,8 +381,13 @@ export default defineComponent({
       return `lightning:${request.toUpperCase()}`;
     },
     showReusableQuote(): boolean {
+      // On-chain previously showed a "reusable" prior address here, but "Create
+      // Address" always mints a NEW one — so the user saw two different QR codes for
+      // a single deposit. The reuse display was never wired into the create button,
+      // so drop it for on-chain: go straight to the single created-address page
+      // (the proper deposit page with the copy button). Bolt12 offers still reuse.
       return (
-        (this.isBolt12 || this.isOnchain) &&
+        this.isBolt12 &&
         !this.showAmountInput &&
         this.reusableReceiveQuote !== null
       );

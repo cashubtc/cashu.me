@@ -245,17 +245,20 @@ export default defineComponent({
         : 0;
     },
     totalDisplay(): string {
-      const total = this.bundle?.total_reserve_sat ?? 0;
+      // A real attestation always has a positive, checked reserve sum; treat a
+      // missing / zero / non-finite value as suspect ("unknown") rather than
+      // rendering a confident "0 sat" lower bound.
+      const total = this.bundle?.total_reserve_sat;
+      if (typeof total !== "number" || !Number.isFinite(total) || total <= 0) {
+        return "unknown";
+      }
       return `${this.formatNumber(total)} sat`;
     },
-    // Reference height: chain tip if known, else highest anchor height.
+    // Reference height for freshness: ONLY an independent chain tip. Falling back
+    // to the bundle's own anchor / as_of heights would let a stale bundle
+    // self-report as fresh, so without an independent tip freshness is unknown.
     referenceHeight(): number | null {
-      if (typeof this.currentHeight === "number") return this.currentHeight;
-      const anchors = (this.bundle?.reserve ?? [])
-        .map((r) => r.anchor?.block_height)
-        .filter((h): h is number => typeof h === "number");
-      if (anchors.length === 0) return null;
-      return Math.max(...anchors, this.bundle?.as_of_block?.height ?? 0);
+      return typeof this.currentHeight === "number" ? this.currentHeight : null;
     },
     blocksAgo(): number | null {
       const ref = this.referenceHeight;
