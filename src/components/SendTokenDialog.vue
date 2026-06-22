@@ -560,13 +560,25 @@ export default defineComponent({
         this.activeUnit,
         true
       );
-      const { sendProofs } = await this.send(
-        this.activeProofs,
-        mintWallet,
-        sendAmount,
-        true,
-        this.includeFeesInSendAmount
-      );
+      // NUT-18 payment requests may require the proofs to be locked with a
+      // NUT-10 spending condition. PaymentRequest.toP2PKOptions() builds the
+      // P2PK/HTLC lock cashu-ts can honour, or returns undefined for any other
+      // kind, in which case we fall back to a normal unlocked send.
+      const lockOptions = this.sendData.paymentRequest.toP2PKOptions();
+      const { sendProofs } = lockOptions
+        ? await this.sendToLock(
+            this.activeProofs,
+            mintWallet,
+            sendAmount,
+            lockOptions
+          )
+        : await this.send(
+            this.activeProofs,
+            mintWallet,
+            sendAmount,
+            true,
+            this.includeFeesInSendAmount
+          );
       const serialized = this.serializeProofs(sendProofs);
       if (!serialized) {
         throw new Error(
