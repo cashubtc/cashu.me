@@ -501,10 +501,9 @@ export default defineComponent({
         }
       } else {
         clearInterval(this.qrInterval);
-        this.sendData.data = "";
         this.sendData.tokensBase64 = "";
-        this.sendData.historyToken = null;
-        this.sendData.paymentRequest = null;
+        this.sendData.historyToken = undefined;
+        this.sendData.paymentRequest = undefined;
       }
     },
   },
@@ -620,7 +619,7 @@ export default defineComponent({
           this.activeUnit,
           true
         );
-        const { _, sendProofs } = await this.sendToLock(
+        const { sendProofs } = await this.sendToLock(
           this.activeProofs,
           mintWallet,
           sendAmount,
@@ -672,7 +671,7 @@ export default defineComponent({
           false
         );
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
-        const { _, sendProofs } = await this.send(
+        const { sendProofs } = await this.send(
           this.activeProofs,
           mintWallet,
           sendAmount,
