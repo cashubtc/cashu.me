@@ -62,6 +62,9 @@ const NWCKind = {
   NWCResponse: 23195,
 };
 
+const NWC_SUBSCRIPTION_WINDOW_SECONDS = 86400; // 24 hours
+const NWC_MAX_TRACKED_REQUEST_IDS = 1000;
+
 export const useNWCStore = defineStore("nwc", {
   state: () => ({
     nwcEnabled: useLocalStorage<boolean>("cashu.nwc.enabled", false),
@@ -468,7 +471,7 @@ export const useNWCStore = defineStore("nwc", {
       const conn = this.connections[0];
 
       const currentUnitTime = Math.floor(Date.now() / 1000);
-      const subscribeSince = currentUnitTime - 86400; // 24 hours
+      const subscribeSince = currentUnitTime - NWC_SUBSCRIPTION_WINDOW_SECONDS; // 24 hours
       const filter = {
         kinds: [NWCKind.NWCRequest as NDKKind],
         since: subscribeSince,
@@ -500,7 +503,10 @@ export const useNWCStore = defineStore("nwc", {
           console.log("### Received NWC command but NWC is disabled");
           return;
         }
-        if (event.created_at < currentUnitTime - 86400) {
+        if (
+          event.created_at <
+          currentUnitTime - NWC_SUBSCRIPTION_WINDOW_SECONDS
+        ) {
           return; // ignore events older than 24 hours
         }
 
@@ -516,7 +522,7 @@ export const useNWCStore = defineStore("nwc", {
 
         // Track the processed request ID
         conn.processedRequestIds.push(event.id);
-        if (conn.processedRequestIds.length > 1000) {
+        if (conn.processedRequestIds.length > NWC_MAX_TRACKED_REQUEST_IDS) {
           conn.processedRequestIds.shift();
         }
         // Re-assign to trigger Vue/Pinia LocalStorage watch
