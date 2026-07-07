@@ -1,13 +1,5 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
-import { useMintsStore } from "./mints";
-import { notifySuccess } from "../js/notify";
-import { useUiStore } from "./ui";
-import { useSettingsStore } from "./settings";
-import { useNostrMintBackupStore } from "./nostrMintBackup";
-import { useWalletStore } from "./wallet";
-import { usePaymentHistoryStore } from "./paymentHistory";
-import { useTokensStore } from "./tokens";
 
 // Define the migration version type
 export type Migration = {
@@ -46,6 +38,7 @@ export const useMigrationsStore = defineStore("migrations", {
       console.log(`Running ${pendingMigrations.length} migrations...`);
 
       // Run each migration in order
+      const { useUiStore } = await import("./ui");
       const uIStore = useUiStore();
       await uIStore.lockMutex();
       try {
@@ -73,6 +66,7 @@ export const useMigrationsStore = defineStore("migrations", {
 
     // First migration: Update mint URL from stablenuts.cash to umint.cash
     async migrateStablenutsToCash() {
+      const { useMintsStore } = await import("./mints");
       const mintStore = useMintsStore();
       let updated = false;
 
@@ -99,6 +93,7 @@ export const useMigrationsStore = defineStore("migrations", {
 
     // Migration v2: add "wss://relay.primal.net " relay, enable nostrMintBackup, clear mint recs cache
     async migrateAddPrimalRelayAndEnableBackupAndClearMintRecs() {
+      const { useSettingsStore } = await import("./settings");
       const settings = useSettingsStore();
 
       // 1) Add relay string with leading '@' and trailing space if not present
@@ -129,6 +124,7 @@ export const useMigrationsStore = defineStore("migrations", {
           settings.nostrMintBackupEnabled = true;
           console.log("Enabled nostrMintBackupEnabled setting");
           // kick off a backup
+          const { useNostrMintBackupStore } = await import("./nostrMintBackup");
           useNostrMintBackupStore().forceBackup();
         } else {
           console.log("nostrMintBackupEnabled already true");
@@ -185,12 +181,15 @@ export const useMigrationsStore = defineStore("migrations", {
       }
     },
     async migrateInvoiceHistoryToPaymentHistory() {
+      const { usePaymentHistoryStore } = await import("./paymentHistory");
       const paymentHistoryStore = usePaymentHistoryStore();
       await paymentHistoryStore.migrateLegacyInvoiceHistoryFromLocalStorage();
+      const { useWalletStore } = await import("./wallet");
       useWalletStore().syncPaymentHistoryCache();
       console.log("Migrated invoiceHistory to Dexie paymentHistory");
     },
     async migrateHistoryTokensToEcashHistory() {
+      const { useTokensStore } = await import("./tokens");
       const tokensStore = useTokensStore();
       await tokensStore.migrateHistoryTokensFromLocalStorage();
       console.log("Migrated historyTokens to Dexie ecashHistory");
