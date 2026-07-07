@@ -204,12 +204,14 @@ export default defineComponent({
       return this.$q.screen.lt.sm;
     },
     invoiceMethod(): PaymentMethod {
-      return (
-        this.invoiceData.type ||
+      const method =
         (this.invoiceData as any).method ||
+        (this.invoiceData as any).paymentType ||
         (this.invoiceData as any).protocol ||
-        PaymentMethod.Bolt11
-      );
+        this.invoiceData.type;
+      return Object.values(PaymentMethod).includes(method)
+        ? method
+        : PaymentMethod.Bolt11;
     },
     copyButtonLabel: function () {
       if (this.copyButtonCopied) {

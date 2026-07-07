@@ -199,6 +199,7 @@ export const useWalletStore = defineStore("wallet", {
       t: t,
       mnemonic: useLocalStorage("cashu.mnemonic", ""),
       invoiceHistory: [] as InvoiceHistory[],
+      paymentHistoryUnsubscribe: null as null | (() => void),
       keysetCounters: useLocalStorage(
         "cashu.keysetCounters",
         [] as KeysetCounter[]
@@ -274,8 +275,15 @@ export const useWalletStore = defineStore("wallet", {
     async initPaymentHistory() {
       const paymentHistoryStore = usePaymentHistoryStore();
       await paymentHistoryStore.init();
-      this.invoiceHistory =
-        paymentHistoryStore.invoiceHistory as InvoiceHistory[];
+      if (!this.paymentHistoryUnsubscribe) {
+        this.paymentHistoryUnsubscribe = paymentHistoryStore.$subscribe(
+          (_mutation, state) => {
+            this.invoiceHistory = state.invoiceHistory as InvoiceHistory[];
+          },
+          { detached: true }
+        );
+      }
+      this.syncPaymentHistoryCache();
     },
     syncPaymentHistoryCache() {
       const paymentHistoryStore = usePaymentHistoryStore();

@@ -1,7 +1,17 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { nextTick } from "vue";
 import { cashuDb } from "src/stores/dexie";
 import { usePaymentHistoryStore } from "src/stores/paymentHistory";
+import { useWalletStore } from "src/stores/wallet";
 import { PaymentMethod } from "src/stores/walletTypes";
+
+vi.mock("vue-i18n", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("vue-i18n")>();
+  return {
+    ...actual,
+    useI18n: () => ({ t: (key: string) => key }),
+  };
+});
 
 describe("payment history store", () => {
   beforeEach(async () => {
@@ -168,5 +178,42 @@ describe("payment history store", () => {
     expect(store.paymentHistory).toHaveLength(4);
     expect(store.mintQuotes).toHaveLength(2);
     expect(store.meltQuotes).toHaveLength(1);
+  });
+
+  it("keeps the wallet invoiceHistory mirror synced with payment history changes", async () => {
+    const walletStore = useWalletStore();
+    const paymentHistoryStore = usePaymentHistoryStore();
+
+    await walletStore.initPaymentHistory();
+    await paymentHistoryStore.addPayment({
+      quote: "mirror-q",
+      amount: 21,
+      request: "lnbc21",
+      memo: "",
+      date: "2026-03-10T12:00:00.000Z",
+      status: "pending",
+      mint: "https://mint.example",
+      unit: "sat",
+      type: PaymentMethod.Bolt11,
+    });
+    await nextTick();
+
+    expect(walletStore.invoiceHistory).toHaveLength(1);
+    expect(walletStore.invoiceHistory[0]).toEqual(
+      expect.objectContaining({
+        quote: "mirror-q",
+        status: "pending",
+      })
+    );
+
+    await paymentHistoryStore.setPaymentPaid("mirror-q", { amount: 21 });
+    await nextTick();
+
+    expect(walletStore.invoiceHistory[0]).toEqual(
+      expect.objectContaining({
+        quote: "mirror-q",
+        status: "paid",
+      })
+    );
   });
 });

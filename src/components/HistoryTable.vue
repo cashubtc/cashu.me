@@ -515,14 +515,19 @@ export default defineComponent({
 
       // Add invoice transactions (lightning)
       this.invoiceHistory.forEach((invoice) => {
+        const paymentMethod =
+          invoice.method ||
+          invoice.paymentType ||
+          invoice.type ||
+          PaymentMethod.Bolt11;
         transactions.push({
           ...invoice,
           type:
-            invoice.type === PaymentMethod.Onchain ||
-            invoice.type === PaymentMethod.OnchainSubpayment
+            paymentMethod === PaymentMethod.Onchain ||
+            paymentMethod === PaymentMethod.OnchainSubpayment
               ? UnifiedTransactionType.Onchain
               : UnifiedTransactionType.Lightning,
-          method: invoice.type || PaymentMethod.Bolt11,
+          method: paymentMethod,
           id: invoice.id ? `payment-${invoice.id}` : `invoice-${invoice.quote}`,
           label: invoice.label,
         });
