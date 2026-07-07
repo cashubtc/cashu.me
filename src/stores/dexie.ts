@@ -1,10 +1,7 @@
 import { defineStore } from "pinia";
 import Dexie, { Table } from "dexie";
 import { useLocalStorage } from "@vueuse/core";
-import { WalletProof } from "./mints";
-import { useStorageStore } from "./storage";
-import { useProofsStore } from "./proofs";
-import { notifyError, notifySuccess } from "../js/notify";
+import type { WalletProof } from "./mints";
 
 // export interface Proof {
 //   id: string
@@ -55,6 +52,7 @@ export const useDexieStore = defineStore("dexie", {
   getters: {},
   actions: {
     migrateToDexie: async function () {
+      const { useProofsStore } = await import("./proofs");
       const proofsStore = useProofsStore();
       if (this.migratedToDexie) {
         return;
@@ -74,6 +72,7 @@ export const useDexieStore = defineStore("dexie", {
         return;
       }
       // start migration
+      const { useStorageStore } = await import("./storage");
       await useStorageStore().exportWalletState();
       parsedProofs.forEach((proof) => {
         cashuDb.proofs.add(proof);

@@ -1,3 +1,4 @@
+import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const h = vi.hoisted(() => {
@@ -291,6 +292,7 @@ vi.mock("src/js/token", () => ({
 }));
 
 import { useWalletStore } from "src/stores/wallet";
+import { cashuDb } from "src/stores/dexie";
 import { PaymentMethod } from "src/stores/walletTypes";
 
 function mockMintWebsocket(unit = "sat") {
@@ -321,8 +323,11 @@ function mockMintWebsocket(unit = "sat") {
 }
 
 describe("wallet store", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    await cashuDb.paymentHistory.clear();
+    await cashuDb.mintQuotes.clear();
+    await cashuDb.meltQuotes.clear();
 
     h.receiveTokensStore.showReceiveTokens = false;
     h.receiveTokensStore.receiveData.tokensBase64 = "";

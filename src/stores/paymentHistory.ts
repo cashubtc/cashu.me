@@ -303,23 +303,6 @@ function sortPayments(payments: PaymentHistoryRow[]) {
   });
 }
 
-function hasIndexedDb() {
-  return typeof indexedDB !== "undefined";
-}
-
-function upsertByKey<T extends Record<string, any>>(
-  rows: T[],
-  key: string,
-  row: T
-) {
-  const index = rows.findIndex((existing) => existing[key] === row[key]);
-  if (index >= 0) {
-    rows.splice(index, 1, row);
-  } else {
-    rows.push(row);
-  }
-}
-
 function buildLegacyInvoice(
   payment: PaymentHistoryRow,
   quote?: MintQuoteRow | MeltQuoteRow
@@ -354,10 +337,6 @@ export const usePaymentHistoryStore = defineStore("paymentHistory", {
   }),
   actions: {
     async init() {
-      if (!hasIndexedDb()) {
-        this.rebuildInvoiceHistory();
-        return;
-      }
       if (!this.subscription) {
         this.subscription = liveQuery(async () => {
           const [payments, mintQuotes, meltQuotes] = await Promise.all([
@@ -398,10 +377,6 @@ export const usePaymentHistoryStore = defineStore("paymentHistory", {
       );
     },
     async refreshFromDexie() {
-      if (!hasIndexedDb()) {
-        this.rebuildInvoiceHistory();
-        return;
-      }
       const [payments, mintQuotes, meltQuotes] = await Promise.all([
         cashuDb.paymentHistory.toArray(),
         cashuDb.mintQuotes.toArray(),
@@ -422,14 +397,6 @@ export const usePaymentHistoryStore = defineStore("paymentHistory", {
     async addPayment(invoice: LegacyInvoiceHistory) {
       const { payment, mintQuote, meltQuote } =
         buildPaymentRowsFromLegacyInvoice(invoice);
-      if (!hasIndexedDb()) {
-        if (mintQuote) upsertByKey(this.mintQuotes, "quote", mintQuote);
-        if (meltQuote) upsertByKey(this.meltQuotes, "quote", meltQuote);
-        upsertByKey(this.paymentHistory, "id", payment);
-        this.paymentHistory = sortPayments(this.paymentHistory);
-        this.rebuildInvoiceHistory();
-        return payment;
-      }
       await cashuDb.transaction(
         "rw",
         cashuDb.paymentHistory,
@@ -451,32 +418,6 @@ export const usePaymentHistoryStore = defineStore("paymentHistory", {
         meltQuote?: Record<string, any>;
       }
     ) {
-      if (!hasIndexedDb()) {
-        const payments = this.paymentHistory.filter(
-          (payment) => payment.quote === quote
-        );
-        if (payments.length === 0) return false;
-        const { mintQuote, meltQuote, ...paymentUpdates } = updates;
-        for (const payment of payments) {
-          Object.assign(payment, compactRecord(paymentUpdates));
-          if (mintQuote) {
-            upsertByKey(
-              this.mintQuotes,
-              "quote",
-              normalizeMintQuote(mintQuote, payment.method)
-            );
-          }
-          if (meltQuote) {
-            upsertByKey(
-              this.meltQuotes,
-              "quote",
-              normalizeMeltQuote(meltQuote, payment.method)
-            );
-          }
-        }
-        this.rebuildInvoiceHistory();
-        return true;
-      }
       const payments = await cashuDb.paymentHistory
         .where("quote")
         .equals(quote)
@@ -510,14 +451,6 @@ export const usePaymentHistoryStore = defineStore("paymentHistory", {
       return true;
     },
     async removePaymentByQuote(quote: string) {
-      if (!hasIndexedDb()) {
-        const before = this.paymentHistory.length;
-        this.paymentHistory = this.paymentHistory.filter(
-          (payment) => payment.quote !== quote
-        );
-        this.rebuildInvoiceHistory();
-        return this.paymentHistory.length !== before;
-      }
       const rows = await cashuDb.paymentHistory
         .where("quote")
         .equals(quote)
@@ -537,33 +470,6 @@ export const usePaymentHistoryStore = defineStore("paymentHistory", {
       quote: string,
       updates?: { amount?: number; mintQuote?: any; meltQuote?: any }
     ) {
-      if (!hasIndexedDb()) {
-        const row =
-          this.paymentHistory.find(
-            (payment) => payment.quote === quote && !payment.parentQuote
-          ) || this.paymentHistory.find((payment) => payment.quote === quote);
-        if (!row) return;
-        const paidDate = currentDateStr();
-        row.status = "paid";
-        row.paidDate = paidDate;
-        if (updates?.amount !== undefined) row.amount = updates.amount;
-        if (updates?.mintQuote) {
-          upsertByKey(
-            this.mintQuotes,
-            "quote",
-            normalizeMintQuote(updates.mintQuote, row.method)
-          );
-        }
-        if (updates?.meltQuote) {
-          upsertByKey(
-            this.meltQuotes,
-            "quote",
-            normalizeMeltQuote(updates.meltQuote, row.method)
-          );
-        }
-        this.rebuildInvoiceHistory();
-        return paidDate;
-      }
       const rows = await cashuDb.paymentHistory
         .where("quote")
         .equals(quote)
@@ -601,28 +507,10 @@ export const usePaymentHistoryStore = defineStore("paymentHistory", {
       return paidDate;
     },
     async upsertMintQuote(quote: Record<string, any>, method: QuoteMethod) {
-      if (!hasIndexedDb()) {
-        upsertByKey(
-          this.mintQuotes,
-          "quote",
-          normalizeMintQuote(quote, method)
-        );
-        this.rebuildInvoiceHistory();
-        return;
-      }
       await cashuDb.mintQuotes.put(normalizeMintQuote(quote, method));
       await this.refreshFromDexie();
     },
     async upsertMeltQuote(quote: Record<string, any>, method: QuoteMethod) {
-      if (!hasIndexedDb()) {
-        upsertByKey(
-          this.meltQuotes,
-          "quote",
-          normalizeMeltQuote(quote, method)
-        );
-        this.rebuildInvoiceHistory();
-        return;
-      }
       await cashuDb.meltQuotes.put(normalizeMeltQuote(quote, method));
       await this.refreshFromDexie();
     },
@@ -637,14 +525,6 @@ export const usePaymentHistoryStore = defineStore("paymentHistory", {
         );
       if (paid.length <= maxHistory) return;
       const deleteRows = paid.slice(0, paid.length - maxHistory);
-      if (!hasIndexedDb()) {
-        const deleteIds = new Set(deleteRows.map((row) => row.id));
-        this.paymentHistory = this.paymentHistory.filter(
-          (row) => !deleteIds.has(row.id)
-        );
-        this.rebuildInvoiceHistory();
-        return;
-      }
       await cashuDb.transaction("rw", cashuDb.paymentHistory, async () => {
         for (const row of deleteRows) {
           await cashuDb.paymentHistory.delete(row.id);
@@ -663,19 +543,6 @@ export const usePaymentHistoryStore = defineStore("paymentHistory", {
         buildPaymentRowsFromLegacyInvoice(invoice)
       );
 
-      if (!hasIndexedDb()) {
-        for (const row of builtRows) {
-          if (row.mintQuote)
-            upsertByKey(this.mintQuotes, "quote", row.mintQuote);
-          if (row.meltQuote)
-            upsertByKey(this.meltQuotes, "quote", row.meltQuote);
-          upsertByKey(this.paymentHistory, "id", row.payment);
-        }
-        this.paymentHistory = sortPayments(this.paymentHistory);
-        this.rebuildInvoiceHistory();
-        localStorage.removeItem("cashu.invoiceHistory");
-        return;
-      }
       await cashuDb.transaction(
         "rw",
         cashuDb.paymentHistory,

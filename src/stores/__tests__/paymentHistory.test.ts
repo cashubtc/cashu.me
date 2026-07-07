@@ -1,3 +1,4 @@
+import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { nextTick } from "vue";
 import { cashuDb } from "src/stores/dexie";
@@ -16,11 +17,9 @@ vi.mock("vue-i18n", async (importOriginal) => {
 describe("payment history store", () => {
   beforeEach(async () => {
     localStorage.clear();
-    if (typeof indexedDB !== "undefined") {
-      await cashuDb.paymentHistory.clear();
-      await cashuDb.mintQuotes.clear();
-      await cashuDb.meltQuotes.clear();
-    }
+    await cashuDb.paymentHistory.clear();
+    await cashuDb.mintQuotes.clear();
+    await cashuDb.meltQuotes.clear();
   });
 
   it("migrates legacy invoiceHistory into payment and quote tables", async () => {
@@ -120,18 +119,9 @@ describe("payment history store", () => {
 
     expect(localStorage.getItem("cashu.invoiceHistory")).toBeNull();
 
-    const payments =
-      typeof indexedDB !== "undefined"
-        ? await cashuDb.paymentHistory.toArray()
-        : store.paymentHistory;
-    const mintQuotes =
-      typeof indexedDB !== "undefined"
-        ? await cashuDb.mintQuotes.toArray()
-        : store.mintQuotes;
-    const meltQuotes =
-      typeof indexedDB !== "undefined"
-        ? await cashuDb.meltQuotes.toArray()
-        : store.meltQuotes;
+    const payments = await cashuDb.paymentHistory.toArray();
+    const mintQuotes = await cashuDb.mintQuotes.toArray();
+    const meltQuotes = await cashuDb.meltQuotes.toArray();
 
     expect(payments).toHaveLength(4);
     expect(mintQuotes).toHaveLength(2);

@@ -31,10 +31,6 @@ export type HistoryToken = {
   paymentRequestId?: string; // If created in response to a payment request
 };
 
-function hasIndexedDb() {
-  return typeof indexedDB !== "undefined";
-}
-
 function sortHistoryTokens(tokens: HistoryToken[]) {
   return tokens.slice().sort((a, b) => {
     const aTime = new Date(a.date).getTime();
@@ -51,7 +47,6 @@ export const useTokensStore = defineStore("tokens", {
   }),
   actions: {
     async initEcashHistory() {
-      if (!hasIndexedDb()) return;
       if (!this.ecashHistorySubscription) {
         this.ecashHistorySubscription = liveQuery(() =>
           cashuDb.ecashHistory.toArray()
@@ -67,13 +62,11 @@ export const useTokensStore = defineStore("tokens", {
       await this.refreshEcashHistory();
     },
     async refreshEcashHistory() {
-      if (!hasIndexedDb()) return;
       this.historyTokens = sortHistoryTokens(
         (await cashuDb.ecashHistory.toArray()) as HistoryToken[]
       );
     },
     persistHistoryToken(historyToken: HistoryToken) {
-      if (!hasIndexedDb()) return;
       cashuDb.ecashHistory.put({ ...historyToken }).catch((error) => {
         console.error("Could not persist ecash history token", error);
       });
@@ -90,11 +83,6 @@ export const useTokensStore = defineStore("tokens", {
           id: historyToken.id || uuidv4(),
         })
       );
-      if (!hasIndexedDb()) {
-        this.historyTokens = sortHistoryTokens(historyTokens);
-        localStorage.removeItem("cashu.historyTokens");
-        return;
-      }
       await cashuDb.ecashHistory.bulkPut(historyTokens);
       localStorage.removeItem("cashu.historyTokens");
       await this.refreshEcashHistory();
@@ -234,11 +222,9 @@ export const useTokensStore = defineStore("tokens", {
       if (index >= 0) {
         const id = this.historyTokens[index].id;
         this.historyTokens.splice(index, 1);
-        if (hasIndexedDb()) {
-          cashuDb.ecashHistory.delete(id).catch((error) => {
-            console.error("Could not delete ecash history token", error);
-          });
-        }
+        cashuDb.ecashHistory.delete(id).catch((error) => {
+          console.error("Could not delete ecash history token", error);
+        });
       }
     },
     tokenAlreadyInHistory(tokenStr: string): HistoryToken | undefined {
@@ -258,7 +244,6 @@ export const useTokensStore = defineStore("tokens", {
         .forEach((token) => {
           token.token = undefined;
         });
-      if (!hasIndexedDb()) return;
       await cashuDb.transaction("rw", cashuDb.ecashHistory, async () => {
         for (const token of redactTokens) {
           await cashuDb.ecashHistory.update(token.id, { token: undefined });

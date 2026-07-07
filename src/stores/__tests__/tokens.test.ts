@@ -1,20 +1,16 @@
+import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, it } from "vitest";
 import { cashuDb } from "src/stores/dexie";
 import { HistoryToken, useTokensStore } from "src/stores/tokens";
 
-async function readEcashHistory(store: ReturnType<typeof useTokensStore>) {
-  if (typeof indexedDB !== "undefined") {
-    return (await cashuDb.ecashHistory.toArray()) as HistoryToken[];
-  }
-  return store.historyTokens;
+async function readEcashHistory() {
+  return (await cashuDb.ecashHistory.toArray()) as HistoryToken[];
 }
 
 describe("tokens store", () => {
   beforeEach(async () => {
     localStorage.clear();
-    if (typeof indexedDB !== "undefined") {
-      await cashuDb.ecashHistory.clear();
-    }
+    await cashuDb.ecashHistory.clear();
   });
 
   it("migrates legacy historyTokens into ecashHistory", async () => {
@@ -48,9 +44,9 @@ describe("tokens store", () => {
 
     expect(localStorage.getItem("cashu.historyTokens")).toBeNull();
 
-    const ecashHistory = await readEcashHistory(store);
+    const ecashHistory = await readEcashHistory();
     expect(ecashHistory).toHaveLength(2);
-    expect(ecashHistory[0]).toEqual(
+    expect(ecashHistory.find((row) => row.id === "paid-token")).toEqual(
       expect.objectContaining({
         id: "paid-token",
         status: "paid",
@@ -58,17 +54,18 @@ describe("tokens store", () => {
         fee: 1,
       })
     );
-    expect(ecashHistory[1]).toEqual(
+    const pendingToken = ecashHistory.find((row) => row.status === "pending");
+    expect(pendingToken).toEqual(
       expect.objectContaining({
         status: "pending",
         token: "cashuB",
         paymentRequestId: "request-id",
       })
     );
-    expect(ecashHistory[1].id).toEqual(expect.any(String));
+    expect(pendingToken?.id).toEqual(expect.any(String));
 
     await store.migrateHistoryTokensFromLocalStorage();
-    expect(await readEcashHistory(store)).toHaveLength(2);
+    expect(await readEcashHistory()).toHaveLength(2);
   });
 
   it("keeps existing token history actions compatible with the cache", () => {
@@ -149,7 +146,7 @@ describe("tokens store", () => {
     await store.migrateHistoryTokensFromLocalStorage();
     await store.redactOldPaidTokens(1);
 
-    const ecashHistory = await readEcashHistory(store);
+    const ecashHistory = await readEcashHistory();
     expect(ecashHistory.find((token) => token.id === "old-paid")?.token).toBe(
       undefined
     );
