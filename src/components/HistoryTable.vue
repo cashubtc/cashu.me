@@ -393,12 +393,9 @@ export default defineComponent({
           this.checkOnchainAndMint(transaction.quote, true);
         }
       } else if (transaction.type === UnifiedTransactionType.Lightning) {
-        // Prefer explicit type check, fallback to heuristic for old history
         const isBolt12 =
           transaction.method === PaymentMethod.Bolt12 ||
-          transaction.method === PaymentMethod.Bolt12Subpayment ||
-          (transaction?.mintQuote &&
-            typeof transaction.mintQuote.amount_paid !== "undefined");
+          transaction.method === PaymentMethod.Bolt12Subpayment;
 
         if (transaction.amount < 0) {
           this.checkOutgoingInvoice(transaction.quote, true);
@@ -471,9 +468,7 @@ export default defineComponent({
         }
         const isBolt12 =
           invoice.method === PaymentMethod.Bolt12 ||
-          invoice.method === PaymentMethod.Bolt12Subpayment ||
-          (invoice?.mintQuote &&
-            typeof invoice.mintQuote.amount_paid !== "undefined");
+          invoice.method === PaymentMethod.Bolt12Subpayment;
 
         if (invoice.amount < 0) {
           this.addOutgoingInvoiceToChecker(invoice.quote, true);
