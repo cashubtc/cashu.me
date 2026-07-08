@@ -1,82 +1,61 @@
 <template>
-  <div style="max-width: 800px; margin: 0 auto">
+  <div class="restore-view text-left">
     <!-- Mnemonic seed phrase input -->
-    <div v-if="!onboarding" class="q-px-xs text-left" on-left>
-      <q-list padding>
-        <q-item>
-          <q-item-section>
-            <q-item-label overline class="text-weight-bold">
-              {{ $t("RestoreView.seed_phrase.label") }}
-            </q-item-label>
-            <q-item-label caption>
-              {{ $t("RestoreView.seed_phrase.caption") }}
-            </q-item-label>
-            <div class="row q-pt-md">
-              <div class="col-12">
-                <q-input
-                  outlined
-                  v-model="mnemonicInput"
-                  :label="
-                    $t('RestoreView.seed_phrase.inputs.seed_phrase.label')
-                  "
-                  autogrow
-                  type="textarea"
-                  :error="mnemonicError !== ''"
-                  :error-message="mnemonicError"
-                >
-                  <template v-slot:append>
-                    <q-btn
-                      flat
-                      dense
-                      icon="content_paste"
-                      @click="pasteMnemonic"
-                      class="cursor-pointer q-mt-md"
-                    ></q-btn>
-                  </template>
-                </q-input>
-              </div>
-            </div>
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </div>
+    <SettingsSection
+      v-if="!onboarding"
+      :title="$t('RestoreView.seed_phrase.label')"
+      :caption="$t('RestoreView.seed_phrase.caption')"
+    >
+      <q-item class="settings-control-item q-pt-md">
+        <q-item-section>
+          <q-input
+            outlined
+            v-model="mnemonicInput"
+            :label="$t('RestoreView.seed_phrase.inputs.seed_phrase.label')"
+            autogrow
+            type="textarea"
+            :error="mnemonicError !== ''"
+            :error-message="mnemonicError"
+          >
+            <template v-slot:append>
+              <q-btn
+                flat
+                dense
+                round
+                icon="content_paste"
+                @click="pasteMnemonic"
+              ></q-btn>
+            </template>
+          </q-input>
+        </q-item-section>
+      </q-item>
+    </SettingsSection>
 
     <!-- Information about restoring mints -->
-    <div v-if="!onboarding" class="q-px-xs text-left" on-left>
-      <q-list padding>
-        <q-item>
-          <q-item-section>
-            <q-item-label overline class="text-weight-bold">
-              {{ $t("RestoreView.information.label") }}
-            </q-item-label>
-            <q-item-label caption>
-              {{ $t("RestoreView.information.caption") }}
-            </q-item-label>
-          </q-item-section>
-        </q-item>
-      </q-list>
+    <div v-if="!onboarding" class="settings-section">
+      <div class="settings-section-header">
+        <div class="settings-section-title">
+          {{ $t("RestoreView.information.label") }}
+        </div>
+        <div class="settings-section-caption">
+          {{ $t("RestoreView.information.caption") }}
+        </div>
+      </div>
     </div>
 
-    <!-- Information about adding mints -->
-    <div v-if="!onboarding" class="q-px-xs text-left q-mt-md" on-left>
-      <q-list padding>
-        <q-item>
-          <q-item-section>
-            <q-item-label overline class="text-weight-bold">
-              {{ $t("RestoreView.restore_mints.label") }}
-            </q-item-label>
-            <q-item-label caption>
-              {{ $t("RestoreView.restore_mints.caption") }}
-            </q-item-label>
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </div>
+    <!-- Mints to restore -->
+    <div class="settings-section">
+      <div v-if="!onboarding" class="settings-section-header">
+        <div class="settings-section-title">
+          {{ $t("RestoreView.restore_mints.label") }}
+        </div>
+        <div class="settings-section-caption">
+          {{ $t("RestoreView.restore_mints.caption") }}
+        </div>
+      </div>
 
-    <!-- List of mints with restore buttons and balance badges -->
-    <div class="q-pb-md q-px-xs text-left" on-left>
       <!-- Restore Selected Mints Button (Primary Action) -->
-      <div v-if="mints.length > 0" class="primary-action-section q-pb-md">
+      <div v-if="mints.length > 0" class="primary-action-section q-mb-md">
         <q-btn
           color="primary"
           size="md"
@@ -102,34 +81,34 @@
       <!-- Select All/Deselect All Buttons -->
       <div
         v-if="mints.length > 0 && !onboarding"
-        class="selection-buttons q-px-sm q-pb-md"
+        class="row items-center q-gutter-sm q-mb-md"
       >
         <q-btn
-          flat
-          dense
-          size="md"
+          size="sm"
+          rounded
+          outline
           color="primary"
+          class="q-px-md"
           @click="selectAllMints"
           :disabled="allSelected"
-          class="q-mr-md q-px-md"
         >
           {{ $t("RestoreView.actions.select_all.label") }}
         </q-btn>
         <q-btn
-          flat
-          dense
-          size="md"
+          size="sm"
+          rounded
+          outline
           color="grey"
+          class="q-px-md"
           @click="deselectAllMints"
           :disabled="!anySelected"
-          class="q-px-md"
         >
           {{ $t("RestoreView.actions.deselect_all.label") }}
         </q-btn>
       </div>
 
       <!-- Mints List with Card Design -->
-      <div class="q-pt-md">
+      <div>
         <div v-for="mint in mints" :key="mint.url" class="q-mb-md">
           <q-item
             clickable
@@ -272,6 +251,7 @@ import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 import { notifyError, notifySuccess } from "src/js/notify";
 import NostrMintRestore from "./NostrMintRestore.vue";
+import SettingsSection from "src/pages/settings/SettingsSection.vue";
 import { validateMnemonic as validateBip39Mnemonic } from "@scure/bip39";
 import { wordlist } from "@scure/bip39/wordlists/english";
 
@@ -280,6 +260,7 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     NostrMintRestore,
+    SettingsSection,
   },
   props: {
     onboarding: { type: Boolean, default: false },

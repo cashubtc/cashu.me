@@ -163,6 +163,61 @@ export default {
     },
   },
   Settings: {
+    menu: {
+      title: "Inställningar",
+      backup: {
+        title: "Säkerhetskopiering och återställning",
+        caption: "Seed-fras och återställning av ecash",
+      },
+      lightning_address: {
+        title: "Lightning-adress",
+        caption: "Ta emot betalningar till din Lightning-adress",
+      },
+      nostr: {
+        title: "Nostr",
+        caption: "Nycklar, reläer och Web of Trust",
+      },
+      payment_requests: {
+        title: "Betalningsförfrågningar",
+        caption: "Ta emot ecash-betalningar via nostr",
+      },
+      nwc: {
+        title: "Nostr Wallet Connect",
+        caption: "Använd din plånbok från andra appar",
+      },
+      hardware: {
+        title: "Hårdvara",
+        caption: "NFC-inställningar",
+      },
+      p2pk: {
+        title: "P2PK",
+        caption: "Ta emot ecash låst till dina nycklar",
+      },
+      privacy: {
+        title: "Integritet",
+        caption: "Nätverkskontroller och Bitcoin-pris",
+      },
+      experimental: {
+        title: "Experimentellt",
+        caption: "Prova nya funktioner tidigt",
+      },
+      appearance: {
+        title: "Utseende",
+        caption: "Tema, tangentbord och Bitcoin-symbol",
+      },
+      language: {
+        title: "Språk",
+        caption: "Välj ditt språk",
+      },
+      advanced: {
+        title: "Avancerat",
+        caption: "Utvecklarverktyg och plånboksåterställning",
+      },
+      about: {
+        title: "Om",
+        caption: "Villkor och länkar",
+      },
+    },
     web_of_trust: {
       title: "Förtroendenätverk",
       known_pubkeys: "Kända pubkeys: {wotCount}",

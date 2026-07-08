@@ -9,7 +9,66 @@ const routes = [
   {
     path: "/settings",
     component: () => import("layouts/FullscreenLayout.vue"),
-    children: [{ path: "", component: () => import("src/pages/Settings.vue") }],
+    children: [
+      {
+        path: "",
+        component: () => import("src/pages/settings/SettingsPage.vue"),
+      },
+      {
+        path: "backup",
+        component: () => import("src/pages/settings/BackupRestoreSettings.vue"),
+      },
+      {
+        path: "lightning-address",
+        component: () =>
+          import("src/pages/settings/LightningAddressSettings.vue"),
+      },
+      {
+        path: "nostr",
+        component: () => import("src/pages/settings/NostrSettings.vue"),
+      },
+      {
+        path: "payment-requests",
+        component: () =>
+          import("src/pages/settings/PaymentRequestsSettings.vue"),
+      },
+      {
+        path: "nwc",
+        component: () => import("src/pages/settings/NwcSettings.vue"),
+      },
+      {
+        path: "hardware",
+        component: () => import("src/pages/settings/HardwareSettings.vue"),
+      },
+      {
+        path: "p2pk",
+        component: () => import("src/pages/settings/P2PKSettings.vue"),
+      },
+      {
+        path: "privacy",
+        component: () => import("src/pages/settings/PrivacySettings.vue"),
+      },
+      {
+        path: "experimental",
+        component: () => import("src/pages/settings/ExperimentalSettings.vue"),
+      },
+      {
+        path: "appearance",
+        component: () => import("src/pages/settings/AppearanceSettings.vue"),
+      },
+      {
+        path: "language",
+        component: () => import("src/pages/settings/LanguageSettings.vue"),
+      },
+      {
+        path: "advanced",
+        component: () => import("src/pages/settings/AdvancedSettings.vue"),
+      },
+      {
+        path: "about",
+        component: () => import("src/pages/settings/AboutSettings.vue"),
+      },
+    ],
   },
   {
     path: "/mintdetails",

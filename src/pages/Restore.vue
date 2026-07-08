@@ -1,17 +1,22 @@
 <template>
-  <div class="bg-dark text-white text-center q-pa-md flex flex-center">
+  <SettingsPageShell
+    :title="$t('Settings.backup_restore.restore_ecash.title')"
+    :caption="$t('Settings.backup_restore.restore_ecash.description')"
+  >
     <RestoreView />
-  </div>
+  </SettingsPageShell>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import RestoreView from "components/RestoreView.vue";
+import SettingsPageShell from "src/pages/settings/SettingsPageShell.vue";
 
 export default defineComponent({
-  name: "ErrorNotFound",
+  name: "RestorePage",
   components: {
     RestoreView,
+    SettingsPageShell,
   },
 });
 </script>
