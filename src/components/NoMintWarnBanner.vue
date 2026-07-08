@@ -47,7 +47,7 @@ import { mapWritableState } from "pinia";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { EventBus } from "../js/eventBus";
 import { sumProofAmounts } from "src/js/proofs";
-import { getWalletOverlayLocation } from "src/js/overlays";
+import { openWalletOverlay, WalletOverlay } from "src/js/overlays";
 
 export default defineComponent({
   name: "NoMintWarnBanner",
@@ -85,7 +85,7 @@ export default defineComponent({
     //   this.showReceiveTokens = true;
     // },
     handleReceiveEcash: function () {
-      this.$router.push(getWalletOverlayLocation("receiveEcashDrawer"));
+      openWalletOverlay(this.$router, WalletOverlay.ReceiveEcash);
     },
     handleAddMintClick: function () {
       this.expandHistory = true;

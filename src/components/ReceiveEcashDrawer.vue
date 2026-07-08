@@ -149,7 +149,7 @@ import {
 import TokenInformation from "components/TokenInformation.vue";
 import { map } from "underscore";
 import { notifyError, notifySuccess, notify } from "../js/notify";
-import { getWalletOverlayLocation } from "src/js/overlays";
+import { openWalletOverlay, WalletOverlay } from "src/js/overlays";
 
 export default defineComponent({
   name: "ReceiveTokenDialog",
@@ -220,7 +220,7 @@ export default defineComponent({
     },
     handlePasteBtn: function () {
       this.receiveData.tokensBase64 = "";
-      this.$router.push(getWalletOverlayLocation("receiveTokens"));
+      openWalletOverlay(this.$router, WalletOverlay.ReceiveTokens);
       // if (!this.isiOsSafari()
       if (this.autoPasteEcashReceive) {
         this.watchClipboardPaste = true;
@@ -231,12 +231,12 @@ export default defineComponent({
         this.generateKeypair();
       }
       this.showLastKey();
-      this.$router.push(getWalletOverlayLocation("p2pkDialog"));
+      openWalletOverlay(this.$router, WalletOverlay.P2PK);
     },
     handlePaymentRequestBtn: function () {
       const prStore = usePRStore();
       prStore.newPaymentRequest();
-      this.$router.push(getWalletOverlayLocation("prDialog"));
+      openWalletOverlay(this.$router, WalletOverlay.PaymentRequest);
     },
     handleNFCBtn: function () {
       this.toggleScanner();
@@ -248,7 +248,7 @@ export default defineComponent({
       // You might want to process the result here
     },
     goBack: function () {
-      this.$router.push(getWalletOverlayLocation("receiveDialog"));
+      openWalletOverlay(this.$router, WalletOverlay.Receive);
     },
   },
 });

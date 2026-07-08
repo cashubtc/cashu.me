@@ -174,7 +174,7 @@ import {
 } from "lucide-vue-next";
 import { PaymentMethod, UnifiedTransactionType } from "src/stores/walletTypes";
 import { mintQuoteForHistoryInvoice } from "src/js/invoice-history";
-import { getWalletOverlayLocation } from "src/js/overlays";
+import { openWalletOverlay, WalletOverlay } from "src/js/overlays";
 
 export default defineComponent({
   name: "HistoryTable",
@@ -329,7 +329,7 @@ export default defineComponent({
 
     receiveToken(tokenStr) {
       this.receiveData.tokensBase64 = tokenStr;
-      this.$router.push(getWalletOverlayLocation("receiveTokens"));
+      openWalletOverlay(this.$router, WalletOverlay.ReceiveTokens);
     },
 
     getTransactionKey(transaction) {
@@ -443,12 +443,12 @@ export default defineComponent({
       if (historyToken.status === "pending" && historyToken.amount < 0) {
         this.addOutgoingTokenToChecker(tokensBase64, true);
       }
-      this.$router.push(getWalletOverlayLocation("sendTokens"));
+      openWalletOverlay(this.$router, WalletOverlay.SendTokens);
     },
 
     showInvoiceDialog: async function (invoice) {
       this.invoiceData = invoice;
-      this.$router.push(getWalletOverlayLocation("invoiceDetails"));
+      openWalletOverlay(this.$router, WalletOverlay.InvoiceDetails);
       if (invoice.status === "pending") {
         if (
           invoice.method === PaymentMethod.Onchain ||

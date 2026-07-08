@@ -110,7 +110,7 @@ import {
   ensurePaymentMintActive,
   firstMintSupportingPaymentMethods,
 } from "src/js/mint-payment-methods";
-import { getWalletOverlayLocation } from "src/js/overlays";
+import { openWalletOverlay, WalletOverlay } from "src/js/overlays";
 
 export default defineComponent({
   name: "ReceiveDialog",
@@ -177,11 +177,11 @@ export default defineComponent({
   methods: {
     ...mapActions(useMintsStore, ["selectMintUrl"]),
     toggleReceiveEcashDrawer: function () {
-      this.$router.push(getWalletOverlayLocation("receiveEcashDrawer"));
+      openWalletOverlay(this.$router, WalletOverlay.ReceiveEcash);
     },
     showReceiveTokensDialog: function () {
       this.receiveData.tokensBase64 = "";
-      this.$router.push(getWalletOverlayLocation("receiveTokens"));
+      openWalletOverlay(this.$router, WalletOverlay.ReceiveTokens);
     },
     showInvoiceCreateDialog: async function () {
       const mintResult = await ensurePaymentMintActive(
@@ -205,7 +205,7 @@ export default defineComponent({
       this.invoiceData.hash = "";
       this.invoiceData.memo = "";
       this.invoiceData.type = mintResult.method;
-      this.$router.push(getWalletOverlayLocation("createInvoice"));
+      openWalletOverlay(this.$router, WalletOverlay.CreateInvoice);
     },
     showOnchainCreateDialog: async function () {
       const mintResult = await ensurePaymentMintActive(
@@ -226,7 +226,7 @@ export default defineComponent({
       this.invoiceData.hash = "";
       this.invoiceData.memo = "";
       this.invoiceData.type = PaymentMethod.Onchain;
-      this.$router.push(getWalletOverlayLocation("createInvoice"));
+      openWalletOverlay(this.$router, WalletOverlay.CreateInvoice);
     },
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
   },

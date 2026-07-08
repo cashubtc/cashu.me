@@ -4,25 +4,30 @@ import {
   getWalletOverlayFromRoute,
   getWalletOverlayPath,
   isWalletHomePath,
+  WalletOverlay,
 } from "src/js/overlays";
 
 describe("wallet overlay routes", () => {
   it("maps overlay ids to stable wallet paths", () => {
-    expect(getWalletOverlayPath("sendDialog")).toBe("/wallet/send");
-    expect(getWalletOverlayPath("receiveDialog")).toBe("/wallet/receive");
-    expect(getWalletOverlayPath("payInvoice")).toBe("/wallet/pay-invoice");
-    expect(getWalletOverlayPath("multinutPayment")).toBe(
+    expect(getWalletOverlayPath(WalletOverlay.Send)).toBe("/wallet/send");
+    expect(getWalletOverlayPath(WalletOverlay.Receive)).toBe("/wallet/receive");
+    expect(getWalletOverlayPath(WalletOverlay.PayInvoice)).toBe(
+      "/wallet/pay-invoice"
+    );
+    expect(getWalletOverlayPath(WalletOverlay.MultinutPayment)).toBe(
       "/wallet/multinut-payment"
     );
   });
 
   it("parses overlay ids from browser paths", () => {
-    expect(getWalletOverlayFromPath("/wallet/send-token")).toBe("sendTokens");
+    expect(getWalletOverlayFromPath("/wallet/send-token")).toBe(
+      WalletOverlay.SendTokens
+    );
     expect(getWalletOverlayFromPath("/wallet/receive-token?foo=bar")).toBe(
-      "receiveTokens"
+      WalletOverlay.ReceiveTokens
     );
     expect(getWalletOverlayFromPath("#/wallet/create-invoice")).toBe(
-      "createInvoice"
+      WalletOverlay.CreateInvoice
     );
   });
 
@@ -32,7 +37,7 @@ describe("wallet overlay routes", () => {
         path: "/wallet/send",
         params: { walletOverlay: "send" },
       })
-    ).toBe("sendDialog");
+    ).toBe(WalletOverlay.Send);
   });
 
   it("recognizes the wallet home path", () => {

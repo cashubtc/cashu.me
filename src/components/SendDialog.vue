@@ -107,7 +107,7 @@ import {
   ensurePaymentMintActive,
   firstMintSupportingPaymentMethods,
 } from "src/js/mint-payment-methods";
-import { getWalletOverlayLocation } from "src/js/overlays";
+import { openWalletOverlay, WalletOverlay } from "src/js/overlays";
 
 export default defineComponent({
   name: "SendDialog",
@@ -202,7 +202,7 @@ export default defineComponent({
       this.payInvoiceData.input.request = "";
       this.payInvoiceData.input.comment = "";
       this.camera.show = false;
-      this.$router.push(getWalletOverlayLocation("payInvoice"));
+      openWalletOverlay(this.$router, WalletOverlay.PayInvoice);
     },
     showOnchainPayDialog: async function () {
       const mintResult = await ensurePaymentMintActive(
@@ -227,7 +227,7 @@ export default defineComponent({
       this.payInvoiceData.input.amount = undefined;
       this.payInvoiceData.input.comment = "";
       this.camera.show = false;
-      this.$router.push(getWalletOverlayLocation("payInvoice"));
+      openWalletOverlay(this.$router, WalletOverlay.PayInvoice);
     },
     showSendTokensDialog: function () {
       console.log("##### showSendTokensDialog");
@@ -243,7 +243,7 @@ export default defineComponent({
       this.sendData.p2pkPubkey = "";
       this.sendData.paymentRequest = undefined;
       this.showLockInput = false;
-      this.$router.push(getWalletOverlayLocation("sendTokens"));
+      openWalletOverlay(this.$router, WalletOverlay.SendTokens);
     },
   },
   created: function () {},
