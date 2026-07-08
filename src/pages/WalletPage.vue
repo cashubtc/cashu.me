@@ -366,13 +366,14 @@ export default {
       "getKeysForKeyset",
     ]),
     ...mapActions(useWorkersStore, ["clearAllWorkers", "invoiceCheckWorker"]),
-    ...mapActions(useTokensStore, ["setTokenPaid"]),
+    ...mapActions(useTokensStore, ["setTokenPaid", "initEcashHistory"]),
     ...mapActions(useWalletStore, [
       "setInvoicePaid",
       "mint",
       "checkPendingTokens",
       "decodeRequest",
       "initializeMnemonic",
+      "initPaymentHistory",
     ]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useNWCStore, ["listenToNWCCommands"]),
@@ -611,6 +612,8 @@ export default {
     const migrationsStore = useMigrationsStore();
     migrationsStore.initMigrations();
     await migrationsStore.runMigrations();
+    await this.initPaymentHistory();
+    await this.initEcashHistory();
 
     // check if another tab is open
     this.registerBroadcastChannel();

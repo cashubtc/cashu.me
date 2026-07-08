@@ -19,6 +19,7 @@ import {
 import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
 import { PaymentMethod } from "src/stores/walletTypes";
 import { useMintsStore, WalletProof } from "./mints";
+import { usePaymentHistoryStore } from "./paymentHistory";
 import { useProofsStore } from "./proofs";
 import { useUiStore } from "src/stores/ui";
 
@@ -194,7 +195,7 @@ export async function meltGeneric(
           sendProofs,
           { keysetId }
         );
-        this.setMeltChangeOutputData(quote.quote, preview.outputData);
+        await this.setMeltChangeOutputData(quote.quote, preview.outputData);
         return await mintWallet.completeMelt(
           preview,
           undefined,
@@ -202,9 +203,9 @@ export async function meltGeneric(
         );
       });
       paidMeltQuote = normalizeMeltQuote(data.quote);
-      this.updateOutgoingInvoiceInHistory(paidMeltQuote);
+      await this.updateOutgoingInvoiceInHistory(paidMeltQuote);
       if (data.outputData?.length) {
-        this.setMeltChangeOutputData(quote.quote, data.outputData);
+        await this.setMeltChangeOutputData(quote.quote, data.outputData);
       }
     } catch (error) {
       throw error;
@@ -236,11 +237,11 @@ export async function meltGeneric(
 
     const finalMeltQuote = paidMeltQuote || quote;
     finalMeltQuote.fee_paid = Math.max(0, amount_paid - finalMeltQuote.amount);
-    this.updateOutgoingInvoiceInHistory(finalMeltQuote, {
+    await this.updateOutgoingInvoiceInHistory(finalMeltQuote, {
       status: "paid",
       amount: -amount_paid,
     });
-    this.clearMeltChangeOutputData(quote.quote);
+    await this.clearMeltChangeOutputData(quote.quote);
 
     this.payInvoiceData.invoice = { sat: 0, memo: "", request: "" };
     this.payInvoiceData.show = false;
@@ -250,7 +251,7 @@ export async function meltGeneric(
       throw error;
     }
     const meltQuote = normalizeMeltQuote(await checkQuote(quote.quote));
-    this.updateOutgoingInvoiceInHistory(meltQuote);
+    await this.updateOutgoingInvoiceInHistory(meltQuote);
 
     if (
       meltQuote.state == MeltQuoteState.PAID ||
@@ -266,7 +267,7 @@ export async function meltGeneric(
       throw error;
     }
     await proofsStore.setReserved(sendProofs, false);
-    this.removeOutgoingInvoiceFromHistory(quote.quote);
+    await this.removeOutgoingInvoiceFromHistory(quote.quote);
     console.error(error);
     if (!silent) notifyApiError(error, "Payment failed");
     throw error;
@@ -296,7 +297,7 @@ export async function checkOutgoingInvoiceGeneric(
   const proofs = await proofsStore.getProofsForQuote(quote);
   try {
     const meltQuote = normalizeMeltQuote(await checkQuote(mintWallet, quote));
-    this.updateOutgoingInvoiceInHistory(meltQuote);
+    await this.updateOutgoingInvoiceInHistory(meltQuote);
     if (meltQuote.state == MeltQuoteState.PENDING) {
       console.log("### mintQuote not paid yet");
       if (verbose) {
@@ -305,7 +306,7 @@ export async function checkOutgoingInvoiceGeneric(
       throw new Error("invoice not paid yet.");
     } else if (meltQuote.state == MeltQuoteState.UNPAID) {
       await useProofsStore().setReserved(proofs, false);
-      this.removeOutgoingInvoiceFromHistory(quote);
+      await this.removeOutgoingInvoiceFromHistory(quote);
       useInvoicesWorkerStore().removeOutgoingInvoiceFromChecker?.(quote);
       notifyWarning(this.t("wallet.notifications.lightning_payment_failed"));
     } else if (meltQuote.state == MeltQuoteState.PAID) {
@@ -380,15 +381,15 @@ export async function finalizePaidMeltInvoice(
   const actualFee = Math.max(0, meltQuote.fee_reserve - returnedChange);
   meltQuote.fee_paid = actualFee;
   const amountPaid = meltQuote.amount + actualFee;
-  this.updateOutgoingInvoiceInHistory(meltQuote, {
+  await this.updateOutgoingInvoiceInHistory(meltQuote, {
     status: "paid",
     amount: -amountPaid,
   });
-  this.clearMeltChangeOutputData(quote);
+  await this.clearMeltChangeOutputData(quote);
   return { amountPaid, returnedChange, spentProofs };
 }
 
-export function setMeltChangeOutputData(
+export async function setMeltChangeOutputData(
   this: any,
   quote: string,
   outputData: any[]
@@ -400,13 +401,27 @@ export function setMeltChangeOutputData(
       i.meltChangeOutputData = serialized;
       i.meltOutputData = [];
     });
+  const updated = await usePaymentHistoryStore().updatePayment(quote, {
+    meltChangeOutputData: serialized,
+    meltOutputData: [],
+  });
+  if (updated) {
+    this.syncPaymentHistoryCache?.();
+  }
 }
 
-export function clearMeltChangeOutputData(this: any, quote: string) {
+export async function clearMeltChangeOutputData(this: any, quote: string) {
   this.invoiceHistory
     .filter((i: any) => i.quote === quote)
     .forEach((i: any) => {
       i.meltChangeOutputData = [];
       i.meltOutputData = [];
     });
+  const updated = await usePaymentHistoryStore().updatePayment(quote, {
+    meltChangeOutputData: [],
+    meltOutputData: [],
+  });
+  if (updated) {
+    this.syncPaymentHistoryCache?.();
+  }
 }

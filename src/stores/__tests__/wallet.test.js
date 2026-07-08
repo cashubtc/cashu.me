@@ -1,3 +1,4 @@
+import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const h = vi.hoisted(() => {
@@ -291,6 +292,7 @@ vi.mock("src/js/token", () => ({
 }));
 
 import { useWalletStore } from "src/stores/wallet";
+import { cashuDb } from "src/stores/dexie";
 import { PaymentMethod } from "src/stores/walletTypes";
 
 function mockMintWebsocket(unit = "sat") {
@@ -321,8 +323,11 @@ function mockMintWebsocket(unit = "sat") {
 }
 
 describe("wallet store", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    await cashuDb.paymentHistory.clear();
+    await cashuDb.mintQuotes.clear();
+    await cashuDb.meltQuotes.clear();
 
     h.receiveTokensStore.showReceiveTokens = false;
     h.receiveTokensStore.receiveData.tokensBase64 = "";
@@ -977,11 +982,12 @@ describe("wallet store", () => {
     expect(wallet.keysetCounter("00aa")).toBe(3);
     expect(subpayment).toMatchObject({
       amount: 100,
+      quote: "offer-q",
       parentQuote: "offer-q",
       type: PaymentMethod.Bolt12Subpayment,
     });
-    expect(subpayment.quote).toMatch(/^subpayment:/);
-    expect(subpayment.quote).not.toContain("offer-q");
+    expect(subpayment.id).toMatch(/^subpayment:/);
+    expect(subpayment.id).not.toContain("offer-q");
     expect(h.uiStore.lockMutex).toHaveBeenCalledTimes(2);
     expect(h.uiStore.unlockMutex).toHaveBeenCalledTimes(2);
   });
@@ -1033,11 +1039,12 @@ describe("wallet store", () => {
     );
     expect(subpayment).toMatchObject({
       amount: 75,
+      quote: parentQuote,
       parentQuote,
       type: PaymentMethod.OnchainSubpayment,
     });
-    expect(subpayment.quote).toMatch(/^subpayment:/);
-    expect(subpayment.quote).not.toContain(parentQuote);
+    expect(subpayment.id).toMatch(/^subpayment:/);
+    expect(subpayment.id).not.toContain(parentQuote);
     expect(mintWallet.checkMintQuoteOnchain).toHaveBeenCalledWith(parentQuote);
   });
 

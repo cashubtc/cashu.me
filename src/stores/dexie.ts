@@ -1,10 +1,7 @@
 import { defineStore } from "pinia";
 import Dexie, { Table } from "dexie";
 import { useLocalStorage } from "@vueuse/core";
-import { WalletProof } from "./mints";
-import { useStorageStore } from "./storage";
-import { useProofsStore } from "./proofs";
-import { notifyError, notifySuccess } from "../js/notify";
+import type { WalletProof } from "./mints";
 
 // export interface Proof {
 //   id: string
@@ -17,11 +14,31 @@ import { notifyError, notifySuccess } from "../js/notify";
 
 export class CashuDexie extends Dexie {
   proofs!: Table<WalletProof>;
+  paymentHistory!: Table<any>;
+  mintQuotes!: Table<any>;
+  meltQuotes!: Table<any>;
+  ecashHistory!: Table<any>;
 
   constructor() {
     super("db");
     this.version(1).stores({
       proofs: "secret, id, C, amount, reserved, quote",
+    });
+    this.version(2).stores({
+      proofs: "secret, id, C, amount, reserved, quote",
+      paymentHistory:
+        "id, direction, quote, parentQuote, method, status, mint, unit, date, paidDate, [direction+quote], [direction+status], [method+status]",
+      mintQuotes: "quote, method, request, unit, state, expiry, pubkey",
+      meltQuotes: "quote, method, request, unit, state, expiry",
+    });
+    this.version(3).stores({
+      proofs: "secret, id, C, amount, reserved, quote",
+      paymentHistory:
+        "id, direction, quote, parentQuote, method, status, mint, unit, date, paidDate, [direction+quote], [direction+status], [method+status]",
+      mintQuotes: "quote, method, request, unit, state, expiry, pubkey",
+      meltQuotes: "quote, method, request, unit, state, expiry",
+      ecashHistory:
+        "id, status, token, mint, unit, date, paidDate, paymentRequestId, [status+date], [mint+unit]",
     });
   }
 }
@@ -35,6 +52,7 @@ export const useDexieStore = defineStore("dexie", {
   getters: {},
   actions: {
     migrateToDexie: async function () {
+      const { useProofsStore } = await import("./proofs");
       const proofsStore = useProofsStore();
       if (this.migratedToDexie) {
         return;
@@ -54,6 +72,7 @@ export const useDexieStore = defineStore("dexie", {
         return;
       }
       // start migration
+      const { useStorageStore } = await import("./storage");
       await useStorageStore().exportWalletState();
       parsedProofs.forEach((proof) => {
         cashuDb.proofs.add(proof);
@@ -74,6 +93,10 @@ export const useDexieStore = defineStore("dexie", {
     },
     deleteAllTables: function () {
       cashuDb.proofs.clear();
+      cashuDb.paymentHistory.clear();
+      cashuDb.mintQuotes.clear();
+      cashuDb.meltQuotes.clear();
+      cashuDb.ecashHistory.clear();
     },
   },
 });

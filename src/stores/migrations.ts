@@ -1,11 +1,5 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
-import { useMintsStore } from "./mints";
-import { notifySuccess } from "../js/notify";
-import { useUiStore } from "./ui";
-import { useSettingsStore } from "./settings";
-import { useNostrMintBackupStore } from "./nostrMintBackup";
-import { useWalletStore } from "./wallet";
 
 // Define the migration version type
 export type Migration = {
@@ -44,6 +38,7 @@ export const useMigrationsStore = defineStore("migrations", {
       console.log(`Running ${pendingMigrations.length} migrations...`);
 
       // Run each migration in order
+      const { useUiStore } = await import("./ui");
       const uIStore = useUiStore();
       await uIStore.lockMutex();
       try {
@@ -71,6 +66,7 @@ export const useMigrationsStore = defineStore("migrations", {
 
     // First migration: Update mint URL from stablenuts.cash to umint.cash
     async migrateStablenutsToCash() {
+      const { useMintsStore } = await import("./mints");
       const mintStore = useMintsStore();
       let updated = false;
 
@@ -97,6 +93,7 @@ export const useMigrationsStore = defineStore("migrations", {
 
     // Migration v2: add "wss://relay.primal.net " relay, enable nostrMintBackup, clear mint recs cache
     async migrateAddPrimalRelayAndEnableBackupAndClearMintRecs() {
+      const { useSettingsStore } = await import("./settings");
       const settings = useSettingsStore();
 
       // 1) Add relay string with leading '@' and trailing space if not present
@@ -127,6 +124,7 @@ export const useMigrationsStore = defineStore("migrations", {
           settings.nostrMintBackupEnabled = true;
           console.log("Enabled nostrMintBackupEnabled setting");
           // kick off a backup
+          const { useNostrMintBackupStore } = await import("./nostrMintBackup");
           useNostrMintBackupStore().forceBackup();
         } else {
           console.log("nostrMintBackupEnabled already true");
@@ -151,10 +149,15 @@ export const useMigrationsStore = defineStore("migrations", {
     },
 
     async migrateInvoiceHistoryRequestField() {
-      const walletStore = useWalletStore();
+      const raw = localStorage.getItem("cashu.invoiceHistory");
+      if (!raw) {
+        console.log("No invoiceHistory localStorage key to migrate");
+        return;
+      }
       let updated = false;
 
-      walletStore.invoiceHistory = walletStore.invoiceHistory.map((invoice) => {
+      const invoiceHistory = JSON.parse(raw);
+      const migrated = invoiceHistory.map((invoice) => {
         const request = invoice.request || invoice.bolt11;
         if (!request) {
           return invoice;
@@ -171,10 +174,25 @@ export const useMigrationsStore = defineStore("migrations", {
       });
 
       if (updated) {
+        localStorage.setItem("cashu.invoiceHistory", JSON.stringify(migrated));
         console.log("Migrated invoiceHistory to request field");
       } else {
         console.log("No invoiceHistory entries needed request migration");
       }
+    },
+    async migrateInvoiceHistoryToPaymentHistory() {
+      const { usePaymentHistoryStore } = await import("./paymentHistory");
+      const paymentHistoryStore = usePaymentHistoryStore();
+      await paymentHistoryStore.migrateLegacyInvoiceHistoryFromLocalStorage();
+      const { useWalletStore } = await import("./wallet");
+      useWalletStore().syncPaymentHistoryCache();
+      console.log("Migrated invoiceHistory to Dexie paymentHistory");
+    },
+    async migrateHistoryTokensToEcashHistory() {
+      const { useTokensStore } = await import("./tokens");
+      const tokensStore = useTokensStore();
+      await tokensStore.migrateHistoryTokensFromLocalStorage();
+      console.log("Migrated historyTokens to Dexie ecashHistory");
     },
 
     // Initialize migrations
@@ -204,6 +222,21 @@ export const useMigrationsStore = defineStore("migrations", {
         description:
           "Moves invoiceHistory entries from bolt11 to request for bolt11 and bolt12 records",
         execute: async () => await this.migrateInvoiceHistoryRequestField(),
+      });
+
+      this.registerMigration({
+        version: 4,
+        name: "Migrate invoiceHistory to Dexie paymentHistory",
+        description:
+          "Moves payment history to Dexie paymentHistory, mintQuotes, and meltQuotes tables",
+        execute: async () => await this.migrateInvoiceHistoryToPaymentHistory(),
+      });
+
+      this.registerMigration({
+        version: 5,
+        name: "Migrate historyTokens to Dexie ecashHistory",
+        description: "Moves ecash history from localStorage to Dexie",
+        execute: async () => await this.migrateHistoryTokensToEcashHistory(),
       });
 
       // Add more migrations here in the future

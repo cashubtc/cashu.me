@@ -97,6 +97,7 @@ import { generateMnemonic, mnemonicToSeedSync } from "@scure/bip39";
 import { wordlist } from "@scure/bip39/wordlists/english";
 import { useSettingsStore } from "./settings";
 import { usePriceStore } from "./price";
+import { usePaymentHistoryStore } from "./paymentHistory";
 import { useI18n } from "vue-i18n";
 import { decodeBolt12Offer } from "src/js/bolt12";
 import { ensurePaymentMethodMintActive } from "src/js/mint-payment-methods";
@@ -127,6 +128,7 @@ type AppMintQuote = Omit<
 };
 
 export type InvoiceHistory = Invoice & {
+  id?: string;
   date: string;
   status: "pending" | "paid";
   mint: string;
@@ -141,6 +143,8 @@ export type InvoiceHistory = Invoice & {
   meltOutputData?: any[];
   network?: string;
   parentQuote?: string;
+  method?: PaymentMethod;
+  direction?: "mint" | "melt";
 };
 
 type KeysetCounter = {
@@ -194,10 +198,8 @@ export const useWalletStore = defineStore("wallet", {
     return {
       t: t,
       mnemonic: useLocalStorage("cashu.mnemonic", ""),
-      invoiceHistory: useLocalStorage(
-        "cashu.invoiceHistory",
-        [] as InvoiceHistory[]
-      ),
+      invoiceHistory: [] as InvoiceHistory[],
+      paymentHistoryUnsubscribe: null as null | (() => void),
       keysetCounters: useLocalStorage(
         "cashu.keysetCounters",
         [] as KeysetCounter[]
@@ -270,6 +272,30 @@ export const useWalletStore = defineStore("wallet", {
     },
   },
   actions: {
+    async initPaymentHistory() {
+      const paymentHistoryStore = usePaymentHistoryStore();
+      await paymentHistoryStore.init();
+      if (!this.paymentHistoryUnsubscribe) {
+        this.paymentHistoryUnsubscribe = paymentHistoryStore.$subscribe(
+          (_mutation, state) => {
+            this.invoiceHistory = state.invoiceHistory as InvoiceHistory[];
+          },
+          { detached: true }
+        );
+      }
+      this.syncPaymentHistoryCache();
+    },
+    syncPaymentHistoryCache() {
+      const paymentHistoryStore = usePaymentHistoryStore();
+      this.invoiceHistory =
+        paymentHistoryStore.invoiceHistory as InvoiceHistory[];
+    },
+    async addPaymentHistory(invoice: InvoiceHistory) {
+      const paymentHistoryStore = usePaymentHistoryStore();
+      this.invoiceHistory.push(invoice);
+      await paymentHistoryStore.addPayment(invoice);
+      this.syncPaymentHistoryCache();
+    },
     setMnemonicFromUser: function (mnemonic: string) {
       this.mnemonic = mnemonic.trim().toLowerCase(); // normalize
     },
@@ -458,7 +484,7 @@ export const useWalletStore = defineStore("wallet", {
     /**
      * Sets an invoice status to paid
      */
-    setInvoicePaid(
+    async setInvoicePaid(
       quoteId: string,
       updates?: { amount?: number; mintQuote?: any }
     ) {
@@ -477,6 +503,18 @@ export const useWalletStore = defineStore("wallet", {
           this.invoiceData.amount = updates.amount;
         }
         if (updates?.mintQuote) this.invoiceData.mintQuote = updates.mintQuote;
+      }
+      try {
+        const paymentHistoryStore = usePaymentHistoryStore();
+        const paidDate = await paymentHistoryStore.setPaymentPaid(
+          quoteId,
+          updates
+        );
+        if (paidDate) {
+          this.syncPaymentHistoryCache();
+        }
+      } catch (error) {
+        console.error("Could not persist paid payment history", error);
       }
     },
 
@@ -1122,7 +1160,7 @@ export const useWalletStore = defineStore("wallet", {
       unit: string,
       method: PaymentMethod = PaymentMethod.Bolt11
     ) {
-      this.invoiceHistory.push({
+      const invoice = {
         amount: -(quote.amount + quote.fee_reserve),
         request: this.payInvoiceData.input.request,
         quote: quote.quote,
@@ -1137,16 +1175,33 @@ export const useWalletStore = defineStore("wallet", {
           method === PaymentMethod.Onchain
             ? onchainNetwork(this.payInvoiceData.input.request || quote.request)
             : undefined,
-      });
+      };
+      this.invoiceHistory.push(invoice);
+      try {
+        await usePaymentHistoryStore().addPayment(invoice);
+        this.syncPaymentHistoryCache();
+      } catch (error) {
+        console.error("Could not persist outgoing payment history", error);
+      }
       useInvoicesWorkerStore().addOutgoingInvoiceToChecker?.(quote.quote, true);
     },
-    removeOutgoingInvoiceFromHistory: function (quote: string) {
+    removeOutgoingInvoiceFromHistory: async function (quote: string) {
       const index = this.invoiceHistory.findIndex((i) => i.quote === quote);
       if (index >= 0) {
         this.invoiceHistory.splice(index, 1);
       }
+      try {
+        const updated = await usePaymentHistoryStore().removePaymentByQuote(
+          quote
+        );
+        if (updated) {
+          this.syncPaymentHistoryCache();
+        }
+      } catch (error) {
+        console.error("Could not remove payment history", error);
+      }
     },
-    updateOutgoingInvoiceInHistory: function (
+    updateOutgoingInvoiceInHistory: async function (
       quote: AppMeltQuote,
       options?: { status?: "pending" | "paid"; amount?: number }
     ) {
@@ -1169,6 +1224,29 @@ export const useWalletStore = defineStore("wallet", {
             i.network = onchainNetwork(i.request || quote.request);
           }
         });
+      try {
+        const updates: any = {
+          meltQuote: quote,
+        };
+        if (options?.status) {
+          updates.status = options.status;
+          if (options.status === "paid") {
+            updates.paidDate = currentDateStr();
+          }
+        }
+        if (options?.amount !== undefined) {
+          updates.amount = options.amount;
+        }
+        const updated = await usePaymentHistoryStore().updatePayment(
+          quote.quote,
+          updates
+        );
+        if (updated) {
+          this.syncPaymentHistoryCache();
+        }
+      } catch (error) {
+        console.error("Could not update payment history", error);
+      }
     },
     setMeltChangeOutputData: setMeltChangeOutputData,
     clearMeltChangeOutputData: clearMeltChangeOutputData,
