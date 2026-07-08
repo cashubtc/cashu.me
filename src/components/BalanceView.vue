@@ -383,7 +383,6 @@ export default defineComponent({
 .balance-unit-dots {
   align-items: center;
   display: flex;
-  gap: 0.45rem;
   height: 18px;
   justify-content: center;
   min-height: 18px;
