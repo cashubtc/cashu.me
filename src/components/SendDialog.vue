@@ -28,7 +28,11 @@
 
       <q-card-section class="q-pa-md">
         <div class="q-gutter-y-md">
-          <div class="action-row" @click="showSendTokensDialog">
+          <button
+            type="button"
+            class="action-row"
+            @click="showSendTokensDialog"
+          >
             <div class="row items-center no-wrap">
               <div class="icon-circle">
                 <CoinsIcon :size="24" />
@@ -39,10 +43,11 @@
                 </div>
               </div>
             </div>
-          </div>
+          </button>
 
-          <div
+          <button
             v-if="canSendLightning"
+            type="button"
             class="action-row"
             @click="showParseDialog"
           >
@@ -56,10 +61,11 @@
                 </div>
               </div>
             </div>
-          </div>
+          </button>
 
-          <div
+          <button
             v-if="canSendOnchain"
+            type="button"
             class="action-row"
             @click="showOnchainPayDialog"
           >
@@ -71,7 +77,7 @@
                 <div class="text-body1 text-weight-medium">On-chain</div>
               </div>
             </div>
-          </div>
+          </button>
         </div>
       </q-card-section>
     </q-card>
@@ -101,6 +107,7 @@ import {
   ensurePaymentMintActive,
   firstMintSupportingPaymentMethods,
 } from "src/js/mint-payment-methods";
+import { getWalletOverlayLocation } from "src/js/overlays";
 
 export default defineComponent({
   name: "SendDialog",
@@ -187,7 +194,6 @@ export default defineComponent({
         this.showSendDialog = false;
         return;
       }
-      this.payInvoiceData.show = true;
       this.payInvoiceData.invoice = null;
       this.payInvoiceData.lnurlpay = null;
       this.payInvoiceData.domain = "";
@@ -196,7 +202,7 @@ export default defineComponent({
       this.payInvoiceData.input.request = "";
       this.payInvoiceData.input.comment = "";
       this.camera.show = false;
-      this.showSendDialog = false;
+      this.$router.push(getWalletOverlayLocation("payInvoice"));
     },
     showOnchainPayDialog: async function () {
       const mintResult = await ensurePaymentMintActive(
@@ -212,7 +218,6 @@ export default defineComponent({
         this.showSendDialog = false;
         return;
       }
-      this.payInvoiceData.show = true;
       this.payInvoiceData.invoice = null;
       this.payInvoiceData.lnurlpay = null;
       this.payInvoiceData.domain = "";
@@ -222,7 +227,7 @@ export default defineComponent({
       this.payInvoiceData.input.amount = undefined;
       this.payInvoiceData.input.comment = "";
       this.camera.show = false;
-      this.showSendDialog = false;
+      this.$router.push(getWalletOverlayLocation("payInvoice"));
     },
     showSendTokensDialog: function () {
       console.log("##### showSendTokensDialog");
@@ -237,9 +242,8 @@ export default defineComponent({
       this.sendData.memo = "";
       this.sendData.p2pkPubkey = "";
       this.sendData.paymentRequest = undefined;
-      this.showSendDialog = false;
-      this.showSendTokens = true;
       this.showLockInput = false;
+      this.$router.push(getWalletOverlayLocation("sendTokens"));
     },
   },
   created: function () {},
@@ -264,9 +268,15 @@ export default defineComponent({
 }
 
 .action-row {
+  border: 0;
   background: rgba(255, 255, 255, 0.06);
   border-radius: 12px;
+  color: inherit;
+  display: block;
+  font: inherit;
   padding: 12px 16px;
+  text-align: left;
+  width: 100%;
   cursor: pointer;
   transition: background 0.2s ease;
 

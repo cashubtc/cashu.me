@@ -29,7 +29,11 @@
       <q-card-section class="q-pa-md">
         <div class="q-gutter-y-md">
           <!-- Ecash Option -->
-          <div class="action-row" @click="toggleReceiveEcashDrawer">
+          <button
+            type="button"
+            class="action-row"
+            @click="toggleReceiveEcashDrawer"
+          >
             <div class="row items-center no-wrap">
               <div class="icon-circle">
                 <CoinsIcon :size="24" />
@@ -40,11 +44,12 @@
                 </div>
               </div>
             </div>
-          </div>
+          </button>
 
           <!-- Lightning Invoice Option -->
-          <div
+          <button
             v-if="canReceiveLightning"
+            type="button"
             class="action-row"
             @click="showInvoiceCreateDialog"
           >
@@ -58,11 +63,12 @@
                 </div>
               </div>
             </div>
-          </div>
+          </button>
 
           <!-- On-chain Option -->
-          <div
+          <button
             v-if="canReceiveOnchain"
+            type="button"
             class="action-row"
             @click="showOnchainCreateDialog"
           >
@@ -74,7 +80,7 @@
                 <div class="text-body1 text-weight-medium">On-chain</div>
               </div>
             </div>
-          </div>
+          </button>
         </div>
       </q-card-section>
     </q-card>
@@ -104,6 +110,7 @@ import {
   ensurePaymentMintActive,
   firstMintSupportingPaymentMethods,
 } from "src/js/mint-payment-methods";
+import { getWalletOverlayLocation } from "src/js/overlays";
 
 export default defineComponent({
   name: "ReceiveDialog",
@@ -170,14 +177,11 @@ export default defineComponent({
   methods: {
     ...mapActions(useMintsStore, ["selectMintUrl"]),
     toggleReceiveEcashDrawer: function () {
-      this.showReceiveDialog = false;
-      this.showReceiveTokens = false;
-      this.showReceiveEcashDrawer = true;
+      this.$router.push(getWalletOverlayLocation("receiveEcashDrawer"));
     },
     showReceiveTokensDialog: function () {
       this.receiveData.tokensBase64 = "";
-      this.showReceiveTokens = true;
-      this.showReceiveDialog = false;
+      this.$router.push(getWalletOverlayLocation("receiveTokens"));
     },
     showInvoiceCreateDialog: async function () {
       const mintResult = await ensurePaymentMintActive(
@@ -201,8 +205,7 @@ export default defineComponent({
       this.invoiceData.hash = "";
       this.invoiceData.memo = "";
       this.invoiceData.type = mintResult.method;
-      this.showCreateInvoiceDialog = true;
-      this.showReceiveDialog = false;
+      this.$router.push(getWalletOverlayLocation("createInvoice"));
     },
     showOnchainCreateDialog: async function () {
       const mintResult = await ensurePaymentMintActive(
@@ -223,8 +226,7 @@ export default defineComponent({
       this.invoiceData.hash = "";
       this.invoiceData.memo = "";
       this.invoiceData.type = PaymentMethod.Onchain;
-      this.showCreateInvoiceDialog = true;
-      this.showReceiveDialog = false;
+      this.$router.push(getWalletOverlayLocation("createInvoice"));
     },
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
   },
@@ -250,9 +252,15 @@ export default defineComponent({
 }
 
 .action-row {
+  border: 0;
   background: rgba(255, 255, 255, 0.06);
   border-radius: 12px;
+  color: inherit;
+  display: block;
+  font: inherit;
   padding: 12px 16px;
+  text-align: left;
+  width: 100%;
   cursor: pointer;
   transition: background 0.2s ease;
 

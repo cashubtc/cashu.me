@@ -57,6 +57,7 @@ import { formatDistanceToNow, parseISO } from "date-fns";
 import token from "src/js/token";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { Coins as CoinsIcon } from "lucide-vue-next";
+import { getWalletOverlayLocation } from "src/js/overlays";
 
 export default defineComponent({
   name: "PaymentRequestPayments",
@@ -120,7 +121,7 @@ export default defineComponent({
       this.sendData.paymentRequest = historyToken.paymentRequest;
       this.sendData.historyAmount = historyToken.amount;
       this.sendData.historyToken = historyToken as any;
-      this.showSendTokens = true;
+      this.$router.push(getWalletOverlayLocation("sendTokens"));
     },
   },
 });

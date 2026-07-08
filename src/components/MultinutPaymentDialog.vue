@@ -311,7 +311,6 @@ export default defineComponent({
     return {
       multiMeltButtonLoading: false,
       selectedMints: [],
-      showMultinutPaymentDialog: false,
       // State tracking for each mint during payment
       mintStates: {}, // { mintUrl: 'requesting' | 'paying' | 'success' | 'error' }
       isPaymentInProgress: false,
@@ -321,7 +320,10 @@ export default defineComponent({
   },
   computed: {
     ...mapWritableState(useWalletStore, ["payInvoiceData"]),
-    ...mapWritableState(useUiStore, ["multinutExperimentalWarningDismissed"]),
+    ...mapWritableState(useUiStore, [
+      "multinutExperimentalWarningDismissed",
+      "showMultinutPaymentDialog",
+    ]),
     ...mapState(useMintsStore, ["mints", "activeUnit", "multiMints"]),
     totalSelectedBalance() {
       return this.selectedMints.reduce((total, mint) => {

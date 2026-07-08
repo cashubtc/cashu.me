@@ -248,6 +248,7 @@ import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
 import type { InvoiceHistory } from "src/stores/wallet";
 import { PaymentMethod } from "src/stores/walletTypes";
 import { mintSupportsPaymentMethod } from "src/js/mint-payment-methods";
+import { getWalletOverlayLocation } from "src/js/overlays";
 
 declare const windowMixin: any;
 
@@ -500,15 +501,13 @@ export default defineComponent({
         if (this.isOnchain) {
           const mintQuote = await this.requestMintOnchain(wallet);
 
-          this.showCreateInvoiceDialog = false;
-          this.showInvoiceDetails = true;
+          this.$router.push(getWalletOverlayLocation("invoiceDetails"));
           await this.mintOnPaidOnchain(mintQuote.quote);
         } else if (this.isBolt12) {
           // BOLT12 Flow
           const mintQuote = await this.requestMintBolt12(amount, wallet);
 
-          this.showCreateInvoiceDialog = false;
-          this.showInvoiceDetails = true;
+          this.$router.push(getWalletOverlayLocation("invoiceDetails"));
 
           // Start listening for payment
           await this.mintOnPaidBolt12(mintQuote.quote);
@@ -516,8 +515,7 @@ export default defineComponent({
           // BOLT11 Flow
           const mintQuote = await this.requestMintBolt11(amount, wallet);
 
-          this.showCreateInvoiceDialog = false;
-          this.showInvoiceDetails = true;
+          this.$router.push(getWalletOverlayLocation("invoiceDetails"));
           await this.mintOnPaid(mintQuote.quote);
         }
       } catch (e) {
