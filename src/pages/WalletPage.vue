@@ -591,7 +591,25 @@ export default {
       });
     },
   },
-  watch: {},
+  watch: {
+    tab: {
+      handler() {
+        // Capture scroll position before the panel swap reflows the page,
+        // then restore it after the DOM has updated so switching tabs does
+        // not yank the user back to the top.
+        const savedScrollY = window.scrollY;
+        const restore = () => {
+          const maxScroll =
+            document.documentElement.scrollHeight - window.innerHeight;
+          window.scrollTo(0, Math.min(savedScrollY, Math.max(0, maxScroll)));
+        };
+        this.$nextTick(() => {
+          restore();
+          requestAnimationFrame(restore);
+        });
+      },
+    },
+  },
 
   mounted: function () {
     // generate NPC connection
