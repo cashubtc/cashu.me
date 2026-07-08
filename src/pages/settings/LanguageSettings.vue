@@ -3,46 +3,39 @@
     :title="$t('Settings.menu.language.title')"
     :caption="$t('Settings.menu.language.caption')"
   >
-    <div class="q-py-sm q-px-xs text-left" on-left>
-      <q-list padding>
-        <q-item>
-          <q-item-section>
-            <q-item-label overline class="text-weight-bold">{{
-              $t("Settings.language.title")
-            }}</q-item-label>
-            <q-item-label caption>{{
-              $t("Settings.language.description")
-            }}</q-item-label>
-          </q-item-section>
-        </q-item>
-        <q-item>
-          <q-item-section>
-            <q-select
-              v-model="selectedLanguage"
-              :options="languageOptions"
-              rounded
-              outlined
-              dense
-              emit-value
-              map-options
-              @update:model-value="changeLanguage"
-            />
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </div>
+    <SettingsSection
+      :title="$t('Settings.language.title')"
+      :caption="$t('Settings.language.description')"
+    >
+      <q-item class="settings-control-item q-pt-md">
+        <q-item-section>
+          <q-select
+            v-model="selectedLanguage"
+            :options="languageOptions"
+            rounded
+            outlined
+            dense
+            emit-value
+            map-options
+            @update:model-value="changeLanguage"
+          />
+        </q-item-section>
+      </q-item>
+    </SettingsSection>
   </SettingsPageShell>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import SettingsPageShell from "./SettingsPageShell.vue";
+import SettingsSection from "./SettingsSection.vue";
 
 export default defineComponent({
   name: "LanguageSettings",
   mixins: [windowMixin],
   components: {
     SettingsPageShell,
+    SettingsSection,
   },
   data: function () {
     return {

@@ -3,43 +3,37 @@
     :title="$t('Settings.menu.payment_requests.title')"
     :caption="$t('Settings.menu.payment_requests.caption')"
   >
-    <div class="q-py-sm q-px-xs text-left" on-left>
-      <q-item class="q-pt-lg">
+    <SettingsSection
+      :title="$t('Settings.payment_requests.title')"
+      :caption="$t('Settings.payment_requests.description')"
+    >
+      <q-item tag="label">
         <q-item-section>
-          <q-item-label overline class="text-weight-bold">{{
-            $t("Settings.payment_requests.title")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.payment_requests.description")
+          <q-item-label>{{
+            $t("Settings.payment_requests.enable_toggle")
           }}</q-item-label>
         </q-item-section>
+        <q-item-section side>
+          <q-toggle v-model="enablePaymentRequest" color="primary" />
+        </q-item-section>
       </q-item>
-      <q-item>
-        <q-toggle
-          v-model="enablePaymentRequest"
-          :label="$t('Settings.payment_requests.enable_toggle')"
-          color="primary"
-        />
-      </q-item>
-    </div>
-    <div v-if="enablePaymentRequest" class="q-pb-sm q-px-xs text-left" on-left>
-      <q-item>
-        <q-toggle
-          v-model="receivePaymentRequestsAutomatically"
-          color="primary"
-        />
+      <q-item tag="label" v-if="enablePaymentRequest">
         <q-item-section>
-          <q-item-label title>{{
+          <q-item-label>{{
             $t("Settings.payment_requests.claim_automatically.toggle")
           }}</q-item-label>
-          <q-item-label caption
-            >{{
-              $t("Settings.payment_requests.claim_automatically.description")
-            }}
-          </q-item-label>
+          <q-item-label caption>{{
+            $t("Settings.payment_requests.claim_automatically.description")
+          }}</q-item-label>
+        </q-item-section>
+        <q-item-section side>
+          <q-toggle
+            v-model="receivePaymentRequestsAutomatically"
+            color="primary"
+          />
         </q-item-section>
       </q-item>
-    </div>
+    </SettingsSection>
   </SettingsPageShell>
 </template>
 
@@ -48,12 +42,14 @@ import { defineComponent } from "vue";
 import { mapWritableState } from "pinia";
 import { usePRStore } from "src/stores/payment-request";
 import SettingsPageShell from "./SettingsPageShell.vue";
+import SettingsSection from "./SettingsSection.vue";
 
 export default defineComponent({
   name: "PaymentRequestsSettings",
   mixins: [windowMixin],
   components: {
     SettingsPageShell,
+    SettingsSection,
   },
   computed: {
     ...mapWritableState(usePRStore, [

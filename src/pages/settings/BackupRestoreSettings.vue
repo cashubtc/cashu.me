@@ -3,70 +3,57 @@
     :title="$t('Settings.menu.backup.title')"
     :caption="$t('Settings.menu.backup.caption')"
   >
-    <div class="q-py-sm q-px-xs text-left" on-left>
-      <q-list padding>
-        <q-item>
-          <q-item-section>
-            <q-item-label overline class="text-weight-bold">{{
-              $t("Settings.backup_restore.backup_seed.title")
-            }}</q-item-label>
-            <q-item-label caption
-              >{{ $t("Settings.backup_restore.backup_seed.description") }}
-            </q-item-label>
-            <div class="row q-pt-md">
-              <div class="col-12">
-                <q-input
-                  outlined
-                  readonly
-                  v-model="hiddenMnemonic"
-                  :label="
-                    $t('Settings.backup_restore.backup_seed.seed_phrase_label')
-                  "
-                  class="seed-phrase"
-                  autogrow
-                >
-                  <template v-slot:append>
-                    <q-btn
-                      flat
-                      dense
-                      icon="visibility"
-                      color="primary"
-                      class="cursor-pointer q-mt-md"
-                      @click="toggleMnemonicVisibility"
-                    ></q-btn>
-                    <q-btn
-                      flat
-                      dense
-                      icon="content_copy"
-                      color="primary"
-                      class="cursor-pointer q-mt-md"
-                      @click="copyText(mnemonic)"
-                    ></q-btn>
-                  </template>
-                </q-input>
-              </div>
-            </div>
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </div>
+    <!-- seed phrase -->
+    <SettingsSection
+      :title="$t('Settings.backup_restore.backup_seed.title')"
+      :caption="$t('Settings.backup_restore.backup_seed.description')"
+    >
+      <q-item class="settings-control-item">
+        <q-item-section>
+          <q-input
+            outlined
+            readonly
+            v-model="hiddenMnemonic"
+            :label="$t('Settings.backup_restore.backup_seed.seed_phrase_label')"
+            autogrow
+          >
+            <template v-slot:append>
+              <q-btn
+                flat
+                dense
+                round
+                icon="visibility"
+                color="primary"
+                @click="toggleMnemonicVisibility"
+              ></q-btn>
+              <q-btn
+                flat
+                dense
+                round
+                icon="content_copy"
+                color="primary"
+                @click="copyText(mnemonic)"
+              ></q-btn>
+            </template>
+          </q-input>
+        </q-item-section>
+      </q-item>
+    </SettingsSection>
 
     <!-- restore -->
-    <div class="q-py-sm q-px-xs text-left" on-left>
-      <q-list padding>
-        <q-item>
-          <q-item-section>
-            <q-item-label overline class="text-weight-bold">{{
-              $t("Settings.backup_restore.restore_ecash.title")
-            }}</q-item-label>
-            <q-item-label caption>
-              {{ $t("Settings.backup_restore.restore_ecash.description") }}
-            </q-item-label>
-          </q-item-section>
-        </q-item>
-        <q-item>
+    <SettingsSection
+      :title="$t('Settings.backup_restore.restore_ecash.title')"
+      :caption="$t('Settings.backup_restore.restore_ecash.description')"
+    >
+      <q-item>
+        <q-item-section>
+          <q-item-label>{{
+            $t("Settings.backup_restore.restore_ecash.title")
+          }}</q-item-label>
+        </q-item-section>
+        <q-item-section side>
           <q-btn
-            class="q-ml-sm q-px-md"
+            class="q-px-md"
             color="primary"
             size="sm"
             rounded
@@ -74,9 +61,9 @@
             to="/restore"
             >{{ $t("Settings.backup_restore.restore_ecash.button") }}</q-btn
           >
-        </q-item>
-      </q-list>
-    </div>
+        </q-item-section>
+      </q-item>
+    </SettingsSection>
   </SettingsPageShell>
 </template>
 
@@ -85,12 +72,14 @@ import { defineComponent } from "vue";
 import { mapState } from "pinia";
 import { useWalletStore } from "src/stores/wallet";
 import SettingsPageShell from "./SettingsPageShell.vue";
+import SettingsSection from "./SettingsSection.vue";
 
 export default defineComponent({
   name: "BackupRestoreSettings",
   mixins: [windowMixin],
   components: {
     SettingsPageShell,
+    SettingsSection,
   },
   data: function () {
     return {

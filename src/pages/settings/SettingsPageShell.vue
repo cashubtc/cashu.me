@@ -67,13 +67,56 @@ export default defineComponent({
   white-space: normal;
 }
 
-/* Shared card-style navigation lists (settings menu, about page) */
+/* --- Shared settings design system --- */
+
+/* A logical section: header + card */
+.settings-section {
+  margin-bottom: 24px;
+}
+
+.settings-section-header {
+  padding: 0 6px;
+  margin-bottom: 10px;
+}
+
+.settings-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.settings-section-caption {
+  font-size: 12px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.45);
+  margin-top: 4px;
+}
+
+/* Card-style groups (settings menu, about page, section content) */
+.settings-card,
 .settings-menu-group {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 14px;
   padding: 4px 0;
   overflow: hidden;
+}
+
+.settings-card .q-item {
+  min-height: 56px;
+  padding: 12px 16px;
+}
+
+.settings-card .q-item__label + .q-item__label {
+  margin-top: 4px;
+}
+
+/* Rows that only hold a form control (input, select, picker) */
+.settings-card .settings-control-item {
+  padding-top: 8px;
+  padding-bottom: 16px;
 }
 
 .settings-menu-item {

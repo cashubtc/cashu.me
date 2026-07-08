@@ -4,7 +4,7 @@
     :caption="$t('Settings.menu.about.caption')"
   >
     <!-- terms -->
-    <q-list class="settings-menu-group q-mb-md">
+    <q-list class="settings-menu-group q-mb-lg">
       <q-item clickable v-ripple to="/terms" class="settings-menu-item">
         <q-item-section avatar>
           <div class="settings-menu-icon">

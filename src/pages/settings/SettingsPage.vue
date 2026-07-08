@@ -3,7 +3,7 @@
     <q-list
       v-for="group in visibleGroups"
       :key="group.name"
-      class="settings-menu-group q-mb-md"
+      class="settings-menu-group q-mb-lg"
     >
       <q-item
         v-for="entry in group.entries"

@@ -3,342 +3,273 @@
     :title="$t('Settings.menu.advanced.title')"
     :caption="$t('Settings.menu.advanced.caption')"
   >
-    <div class="q-py-sm q-px-xs text-left" on-left>
-      <q-list padding>
-        <q-item class="q-pt-sm">
-          <q-item-section>
-            <q-item-label overline>{{
-              $t("Settings.advanced.developer.title")
-            }}</q-item-label>
-            <q-item-label caption>{{
-              $t("Settings.advanced.developer.description")
-            }}</q-item-label>
-          </q-item-section>
-        </q-item>
-        <div>
-          <!-- check proofs spendable setting -->
-          <q-item>
-            <q-item-section>
-              <div class="row q-pt-md">
-                <div class="col-12" v-if="!confirmMnemonic">
-                  <q-btn
-                    flat
-                    dense
-                    @click="confirmMnemonic = !confirmMnemonic"
-                    >{{
-                      $t("Settings.advanced.developer.new_seed.button")
-                    }}</q-btn
-                  >
-                  <row>
-                    <q-item-label class="q-px-sm" caption
-                      >{{
-                        $t("Settings.advanced.developer.new_seed.description")
-                      }}
-                    </q-item-label>
-                  </row>
-                </div>
-                <div class="col-12" v-if="confirmMnemonic">
-                  <span
-                    >{{
-                      $t(
-                        "Settings.advanced.developer.new_seed.confirm_question"
-                      )
-                    }}
-                  </span>
-                  <q-btn
-                    flat
-                    dense
-                    class="q-ml-sm"
-                    color="warning"
-                    @click="confirmMnemonic = false"
-                    >{{
-                      $t("Settings.advanced.developer.new_seed.cancel")
-                    }}</q-btn
-                  >
-                  <q-btn
-                    flat
-                    dense
-                    class="q-ml-sm"
-                    color="secondary"
-                    @click="
-                      confirmMnemonic = false;
-                      generateNewMnemonic();
-                    "
-                    >{{
-                      $t("Settings.advanced.developer.new_seed.confirm")
-                    }}</q-btn
-                  >
-                </div>
-              </div>
-            </q-item-section>
-          </q-item>
-          <q-item>
-            <q-item-section>
-              <row>
-                <q-btn
-                  dense
-                  flat
-                  outline
-                  click
-                  @click="checkActiveProofsSpendable"
-                  >{{
-                    $t("Settings.advanced.developer.remove_spent.button")
-                  }}</q-btn
-                ></row
-              ><row>
-                <q-item-label class="q-px-sm" caption
-                  >{{
-                    $t("Settings.advanced.developer.remove_spent.description")
-                  }}
-                </q-item-label>
-              </row>
-            </q-item-section>
-          </q-item>
-          <q-item>
-            <q-item-section>
-              <row>
-                <q-btn dense flat outline click @click="toggleTerminal">
-                  {{ $t("Settings.advanced.developer.debug_console.button") }}
-                </q-btn></row
-              ><row>
-                <q-item-label class="q-px-sm" caption
-                  >{{
-                    $t("Settings.advanced.developer.debug_console.description")
-                  }}
-                </q-item-label>
-              </row>
-            </q-item-section>
-          </q-item>
-          <q-item>
-            <q-item-section>
-              <row>
-                <q-btn dense flat outline click @click="exportActiveProofs">
-                  {{ $t("Settings.advanced.developer.export_proofs.button") }}
-                </q-btn></row
-              ><row>
-                <q-item-label class="q-px-sm" caption
-                  >{{
-                    $t("Settings.advanced.developer.export_proofs.description")
-                  }}
-                </q-item-label>
-              </row>
-            </q-item-section>
-          </q-item>
-          <q-item>
-            <q-item-section>
-              <row>
-                <!-- add a caption, not a button here -->
-                <q-item-label class="q-pb-sm">{{
-                  $t("Settings.advanced.developer.keyset_counters.title")
-                }}</q-item-label></row
+    <SettingsSection
+      :title="$t('Settings.advanced.developer.title')"
+      :caption="$t('Settings.advanced.developer.description')"
+    >
+      <!-- new seed -->
+      <q-item
+        clickable
+        v-ripple
+        @click="confirmMnemonic = true"
+        :disable="confirmMnemonic"
+      >
+        <q-item-section>
+          <q-item-label>{{
+            $t("Settings.advanced.developer.new_seed.button")
+          }}</q-item-label>
+          <q-item-label caption v-if="!confirmMnemonic">{{
+            $t("Settings.advanced.developer.new_seed.description")
+          }}</q-item-label>
+          <div v-if="confirmMnemonic" class="q-mt-xs">
+            <span class="text-caption">{{
+              $t("Settings.advanced.developer.new_seed.confirm_question")
+            }}</span>
+            <div class="row items-center q-gutter-sm q-mt-xs">
+              <q-btn
+                size="sm"
+                rounded
+                outline
+                class="q-px-md"
+                @click.stop="confirmMnemonic = false"
+                >{{ $t("Settings.advanced.developer.new_seed.cancel") }}</q-btn
               >
-              <row>
-                <q-item-label class="q-px-sm" caption
-                  >{{
-                    $t(
-                      "Settings.advanced.developer.keyset_counters.description"
-                    )
-                  }}
-                </q-item-label>
-              </row>
-              <div class="keyset-counters q-pa-sm">
-                <div
-                  class="keyset-counter-group q-px-sm"
-                  v-for="(mintCounter, mintUrl) in keysetCountersByMint"
-                  :key="mintUrl"
-                >
-                  <q-item-label class="keyset-mint-label q-px-xs" caption>
-                    {{ shortUrl(mintUrl) }}
-                  </q-item-label>
-                  <q-btn
-                    class="keyset-counter-btn"
-                    dense
-                    v-for="(counter, id) in mintCounter"
-                    :key="id"
-                    flat
-                    click
-                    :title="counter.id"
-                    @click="increaseKeysetCounter(counter.id, 1)"
-                  >
-                    <span class="keyset-id">{{
-                      abbreviateKeysetId(counter.id)
-                    }}</span>
-                    <span class="keyset-counter-separator">-</span>
-                    <span class="keyset-counter-text">
-                      {{
-                        $t(
-                          "Settings.advanced.developer.keyset_counters.counter",
-                          { count: counter.counter }
-                        )
-                      }}
-                    </span>
-                  </q-btn>
-                </div>
-              </div>
-            </q-item-section>
-          </q-item>
-          <q-item>
-            <q-item-section>
-              <row>
-                <q-btn dense flat outline click @click="unsetAllReservedProofs">
-                  {{ $t("Settings.advanced.developer.unset_reserved.button") }}
-                </q-btn></row
-              ><row>
-                <q-item-label class="q-px-sm" caption
-                  >{{
-                    $t("Settings.advanced.developer.unset_reserved.description")
-                  }}
-                </q-item-label>
-              </row>
-            </q-item-section>
-          </q-item>
-          <q-item>
-            <q-item-section>
-              <row>
-                <q-btn dense flat outline click @click="showOnboarding">
-                  {{ $t("Settings.advanced.developer.show_onboarding.button") }}
-                </q-btn></row
-              ><row>
-                <q-item-label class="q-px-sm" caption
-                  >{{
-                    $t(
-                      "Settings.advanced.developer.show_onboarding.description"
-                    )
-                  }}
-                </q-item-label>
-              </row>
-            </q-item-section>
-          </q-item>
-          <q-item>
-            <q-item-section>
-              <row>
-                <q-btn
-                  v-if="!confirmNuke"
-                  dense
-                  flat
-                  outline
-                  click
-                  @click="confirmNuke = !confirmNuke"
-                >
-                  {{ $t("Settings.advanced.developer.reset_wallet.button") }}
-                </q-btn></row
-              ><row v-if="!confirmNuke">
-                <q-item-label class="q-px-sm" caption
-                  >{{
-                    $t("Settings.advanced.developer.reset_wallet.description")
-                  }}
-                </q-item-label>
-              </row>
-              <row v-if="confirmNuke">
-                <span>{{
-                  $t(
-                    "Settings.advanced.developer.reset_wallet.confirm_question"
-                  )
+              <q-btn
+                size="sm"
+                rounded
+                outline
+                class="q-px-md"
+                color="negative"
+                @click.stop="
+                  confirmMnemonic = false;
+                  generateNewMnemonic();
+                "
+                >{{ $t("Settings.advanced.developer.new_seed.confirm") }}</q-btn
+              >
+            </div>
+          </div>
+        </q-item-section>
+      </q-item>
+
+      <!-- remove spent proofs -->
+      <q-item clickable v-ripple @click="checkActiveProofsSpendable">
+        <q-item-section>
+          <q-item-label>{{
+            $t("Settings.advanced.developer.remove_spent.button")
+          }}</q-item-label>
+          <q-item-label caption>{{
+            $t("Settings.advanced.developer.remove_spent.description")
+          }}</q-item-label>
+        </q-item-section>
+      </q-item>
+
+      <!-- debug console -->
+      <q-item clickable v-ripple @click="toggleTerminal">
+        <q-item-section>
+          <q-item-label>{{
+            $t("Settings.advanced.developer.debug_console.button")
+          }}</q-item-label>
+          <q-item-label caption>{{
+            $t("Settings.advanced.developer.debug_console.description")
+          }}</q-item-label>
+        </q-item-section>
+      </q-item>
+
+      <!-- export proofs -->
+      <q-item clickable v-ripple @click="exportActiveProofs">
+        <q-item-section>
+          <q-item-label>{{
+            $t("Settings.advanced.developer.export_proofs.button")
+          }}</q-item-label>
+          <q-item-label caption>{{
+            $t("Settings.advanced.developer.export_proofs.description")
+          }}</q-item-label>
+        </q-item-section>
+      </q-item>
+
+      <!-- keyset counters -->
+      <q-item>
+        <q-item-section>
+          <q-item-label>{{
+            $t("Settings.advanced.developer.keyset_counters.title")
+          }}</q-item-label>
+          <q-item-label caption>{{
+            $t("Settings.advanced.developer.keyset_counters.description")
+          }}</q-item-label>
+          <div class="keyset-counters q-mt-sm">
+            <div
+              class="keyset-counter-group"
+              v-for="(mintCounter, mintUrl) in keysetCountersByMint"
+              :key="mintUrl"
+            >
+              <q-item-label class="keyset-mint-label" caption>
+                {{ shortUrl(mintUrl) }}
+              </q-item-label>
+              <q-btn
+                class="keyset-counter-btn"
+                dense
+                v-for="(counter, id) in mintCounter"
+                :key="id"
+                flat
+                :title="counter.id"
+                @click="increaseKeysetCounter(counter.id, 1)"
+              >
+                <span class="keyset-id">{{
+                  abbreviateKeysetId(counter.id)
                 }}</span>
-                <q-btn
-                  flat
-                  dense
-                  class="q-ml-sm"
-                  color="primary"
-                  @click="confirmNuke = false"
-                  >{{
-                    $t("Settings.advanced.developer.reset_wallet.cancel")
-                  }}</q-btn
-                >
-                <q-btn
-                  flat
-                  dense
-                  class="q-ml-sm"
-                  color="warning"
-                  @click="
-                    confirmNuke = false;
-                    nukeWallet();
-                  "
-                  >{{
-                    $t("Settings.advanced.developer.reset_wallet.confirm")
-                  }}</q-btn
-                >
-              </row>
-            </q-item-section>
-          </q-item>
-          <q-item>
-            <q-item-section>
-              <row>
-                <q-btn
-                  v-if="!confirmImport"
-                  dense
-                  flat
-                  outline
-                  click
-                  @click="confirmImport = !confirmImport"
-                >
-                  {{ $t("Settings.advanced.developer.import_wallet.button") }}
-                </q-btn>
-              </row>
-              <row v-if="!confirmImport">
-                <q-item-label class="q-px-sm" caption
-                  >{{
-                    $t("Settings.advanced.developer.import_wallet.description")
+                <span class="keyset-counter-separator">-</span>
+                <span class="keyset-counter-text">
+                  {{
+                    $t("Settings.advanced.developer.keyset_counters.counter", {
+                      count: counter.counter,
+                    })
                   }}
-                </q-item-label>
-              </row>
-              <row v-if="confirmImport">
-                <span>{{
-                  $t(
-                    "Settings.advanced.developer.import_wallet.confirm_question"
-                  )
-                }}</span>
-                <q-btn
-                  flat
-                  dense
-                  class="q-ml-sm"
-                  color="primary"
-                  @click="confirmImport = false"
-                  >{{
-                    $t("Settings.advanced.developer.import_wallet.cancel")
-                  }}</q-btn
-                >
-                <q-btn
-                  flat
-                  dense
-                  class="q-ml-sm"
-                  color="warning"
-                  @click="
-                    confirmImport = false;
-                    browseBackupFile();
-                  "
-                  >{{
-                    $t("Settings.advanced.developer.import_wallet.confirm")
-                  }}</q-btn
-                >
-              </row>
-              <input
-                type="file"
-                ref="fileUpload"
-                accept=".json"
-                style="display: none"
-                @change="onChangeFileUpload"
-              />
-            </q-item-section>
-          </q-item>
-          <q-item>
-            <q-item-section>
-              <row>
-                <q-btn dense flat outline click @click="exportWalletState">
-                  {{ $t("Settings.advanced.developer.export_wallet.button") }}
-                </q-btn></row
-              ><row>
-                <q-item-label class="q-px-sm" caption
-                  >{{
-                    $t("Settings.advanced.developer.export_wallet.description")
-                  }}
-                </q-item-label>
-              </row>
-            </q-item-section>
-          </q-item>
-        </div>
-      </q-list>
-    </div>
+                </span>
+              </q-btn>
+            </div>
+          </div>
+        </q-item-section>
+      </q-item>
+
+      <!-- unset reserved proofs -->
+      <q-item clickable v-ripple @click="unsetAllReservedProofs">
+        <q-item-section>
+          <q-item-label>{{
+            $t("Settings.advanced.developer.unset_reserved.button")
+          }}</q-item-label>
+          <q-item-label caption>{{
+            $t("Settings.advanced.developer.unset_reserved.description")
+          }}</q-item-label>
+        </q-item-section>
+      </q-item>
+
+      <!-- show onboarding -->
+      <q-item clickable v-ripple @click="showOnboarding">
+        <q-item-section>
+          <q-item-label>{{
+            $t("Settings.advanced.developer.show_onboarding.button")
+          }}</q-item-label>
+          <q-item-label caption>{{
+            $t("Settings.advanced.developer.show_onboarding.description")
+          }}</q-item-label>
+        </q-item-section>
+      </q-item>
+
+      <!-- export wallet data -->
+      <q-item clickable v-ripple @click="exportWalletState">
+        <q-item-section>
+          <q-item-label>{{
+            $t("Settings.advanced.developer.export_wallet.button")
+          }}</q-item-label>
+          <q-item-label caption>{{
+            $t("Settings.advanced.developer.export_wallet.description")
+          }}</q-item-label>
+        </q-item-section>
+      </q-item>
+
+      <!-- import wallet backup -->
+      <q-item
+        clickable
+        v-ripple
+        @click="confirmImport = true"
+        :disable="confirmImport"
+      >
+        <q-item-section>
+          <q-item-label>{{
+            $t("Settings.advanced.developer.import_wallet.button")
+          }}</q-item-label>
+          <q-item-label caption v-if="!confirmImport">{{
+            $t("Settings.advanced.developer.import_wallet.description")
+          }}</q-item-label>
+          <div v-if="confirmImport" class="q-mt-xs">
+            <span class="text-caption">{{
+              $t("Settings.advanced.developer.import_wallet.confirm_question")
+            }}</span>
+            <div class="row items-center q-gutter-sm q-mt-xs">
+              <q-btn
+                size="sm"
+                rounded
+                outline
+                class="q-px-md"
+                @click.stop="confirmImport = false"
+                >{{
+                  $t("Settings.advanced.developer.import_wallet.cancel")
+                }}</q-btn
+              >
+              <q-btn
+                size="sm"
+                rounded
+                outline
+                class="q-px-md"
+                color="negative"
+                @click.stop="
+                  confirmImport = false;
+                  browseBackupFile();
+                "
+                >{{
+                  $t("Settings.advanced.developer.import_wallet.confirm")
+                }}</q-btn
+              >
+            </div>
+          </div>
+          <input
+            type="file"
+            ref="fileUpload"
+            accept=".json"
+            style="display: none"
+            @change="onChangeFileUpload"
+          />
+        </q-item-section>
+      </q-item>
+
+      <!-- reset wallet -->
+      <q-item
+        clickable
+        v-ripple
+        @click="confirmNuke = true"
+        :disable="confirmNuke"
+      >
+        <q-item-section>
+          <q-item-label class="text-negative">{{
+            $t("Settings.advanced.developer.reset_wallet.button")
+          }}</q-item-label>
+          <q-item-label caption v-if="!confirmNuke">{{
+            $t("Settings.advanced.developer.reset_wallet.description")
+          }}</q-item-label>
+          <div v-if="confirmNuke" class="q-mt-xs">
+            <span class="text-caption">{{
+              $t("Settings.advanced.developer.reset_wallet.confirm_question")
+            }}</span>
+            <div class="row items-center q-gutter-sm q-mt-xs">
+              <q-btn
+                size="sm"
+                rounded
+                outline
+                class="q-px-md"
+                @click.stop="confirmNuke = false"
+                >{{
+                  $t("Settings.advanced.developer.reset_wallet.cancel")
+                }}</q-btn
+              >
+              <q-btn
+                size="sm"
+                rounded
+                outline
+                class="q-px-md"
+                color="negative"
+                @click.stop="
+                  confirmNuke = false;
+                  nukeWallet();
+                "
+                >{{
+                  $t("Settings.advanced.developer.reset_wallet.confirm")
+                }}</q-btn
+              >
+            </div>
+          </div>
+        </q-item-section>
+      </q-item>
+    </SettingsSection>
   </SettingsPageShell>
 </template>
 
@@ -357,12 +288,14 @@ import { useWelcomeStore } from "src/stores/welcome";
 import { useStorageStore } from "src/stores/storage";
 import { useNostrUserStore } from "src/stores/nostrUser";
 import SettingsPageShell from "./SettingsPageShell.vue";
+import SettingsSection from "./SettingsSection.vue";
 
 export default defineComponent({
   name: "AdvancedSettings",
   mixins: [windowMixin],
   components: {
     SettingsPageShell,
+    SettingsSection,
   },
   data: function () {
     return {

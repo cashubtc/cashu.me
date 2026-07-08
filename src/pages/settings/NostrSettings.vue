@@ -3,281 +3,232 @@
     :title="$t('Settings.menu.nostr.title')"
     :caption="$t('Settings.menu.nostr.caption')"
   >
-    <div class="q-py-sm q-px-xs text-left" on-left>
-      <q-list padding>
-        <q-item>
-          <q-item-section>
-            <q-item-label overline>{{
-              $t("Settings.nostr_keys.title")
-            }}</q-item-label>
-            <q-item-label caption>{{
-              $t("Settings.nostr_keys.description")
-            }}</q-item-label>
-          </q-item-section>
-        </q-item>
-        <!-- initWalletSeedPrivateKeySigner -->
-        <q-item
-          :active="signerType === 'SEED'"
-          active-class="text-weight-bold text-primary"
-          clickable
-        >
-          <q-item-section avatar>
-            <q-icon
-              :color="signerType === 'SEED' ? 'primary' : 'grey'"
-              :name="
-                signerType === 'SEED'
-                  ? 'check_circle'
-                  : 'radio_button_unchecked'
-              "
-              @click="handleSeedClick"
-              class="cursor-pointer"
-            />
-          </q-item-section>
-          <q-item-section
-            lines="1"
-            class="cursor-pointer"
-            style="word-break: break-word"
-          >
-            <q-item-label title>{{
-              $t("Settings.nostr_keys.wallet_seed.title")
-            }}</q-item-label>
-            <q-item-label caption
-              >{{ $t("Settings.nostr_keys.wallet_seed.description") }}
-            </q-item-label>
-            <q-item-label
-              caption
-              v-if="signerType === 'SEED' && seedSignerPrivateKeyNsec"
-            >
-              <q-badge
-                class="cursor-pointer q-mt-xs"
-                @click="copyText(seedSignerPrivateKeyNsec)"
-                outline
-                color="grey"
-              >
-                <q-icon
-                  name="content_copy"
-                  size="0.8em"
-                  color="grey"
-                  class="q-mr-xs"
-                ></q-icon
-                >{{ $t("Settings.nostr_keys.wallet_seed.copy_nsec") }}
-              </q-badge>
-            </q-item-label>
-          </q-item-section>
-        </q-item>
-        <!-- Nip46Signer -->
-        <q-item
-          :active="signerType === 'NIP46'"
-          active-class="text-weight-bold text-primary"
-          clickable
-          v-if="false"
-        >
-          <q-item-section avatar>
-            <q-icon
-              :color="signerType === 'NIP46' ? 'primary' : 'grey'"
-              :name="
-                signerType === 'NIP46'
-                  ? 'check_circle'
-                  : 'radio_button_unchecked'
-              "
-              @click="handleBunkerClick"
-              class="cursor-pointer"
-            />
-          </q-item-section>
-          <q-item-section
-            lines="1"
-            class="cursor-pointer"
-            style="word-break: break-word"
-          >
-            <q-item-label title>{{
-              $t("Settings.nostr_keys.nsec_bunker.title")
-            }}</q-item-label>
-            <q-item-label caption
-              >{{ $t("Settings.nostr_keys.nsec_bunker.description") }}
-            </q-item-label>
-          </q-item-section>
-          <q-item-section side v-if="signerType === 'NIP46'">
-            <q-icon
-              name="delete_outline"
-              @click="handleResetNip46Signer"
-              class="cursor-pointer"
-              ><q-tooltip>{{
-                $t("Settings.nostr_keys.nsec_bunker.delete_tooltip")
-              }}</q-tooltip>
-            </q-icon>
-          </q-item-section>
-        </q-item>
-        <q-item
-          :active="signerType === 'PRIVATEKEY'"
-          active-class="text-weight-bold text-primary"
-          clickable
-        >
-          <q-item-section avatar>
-            <q-icon
-              :color="signerType === 'PRIVATEKEY' ? 'primary' : 'grey'"
-              :name="
-                signerType === 'PRIVATEKEY'
-                  ? 'check_circle'
-                  : 'radio_button_unchecked'
-              "
-              @click="handleNsecClick"
-              class="cursor-pointer"
-            />
-          </q-item-section>
-          <q-item-section
-            lines="1"
-            class="cursor-pointer"
-            style="word-break: break-word"
-          >
-            <q-item-label title>{{
-              $t("Settings.nostr_keys.use_nsec.title")
-            }}</q-item-label>
-            <q-item-label caption
-              >{{ $t("Settings.nostr_keys.use_nsec.description") }}
-            </q-item-label>
-          </q-item-section>
-          <q-item-section side v-if="signerType === 'PRIVATEKEY'">
-            <q-icon
-              name="delete_outline"
-              @click="handleResetPrivateKeySigner"
-              class="cursor-pointer"
-              ><q-tooltip>{{
-                $t("Settings.nostr_keys.use_nsec.delete_tooltip")
-              }}</q-tooltip></q-icon
-            >
-          </q-item-section>
-        </q-item>
-        <!-- Nip07Signer -->
-        <q-item
-          :active="signerType === 'NIP07'"
-          active-class="text-weight-bold text-primary"
-          clickable
-          v-if="nip07SignerAvailable"
-        >
-          <q-item-section avatar>
-            <q-icon
-              :color="signerType === 'NIP07' ? 'primary' : 'grey'"
-              :name="
-                signerType === 'NIP07'
-                  ? 'check_circle'
-                  : 'radio_button_unchecked'
-              "
-              @click="handleExtensionClick"
-              class="cursor-pointer"
-            />
-          </q-item-section>
-          <q-item-section
-            lines="1"
-            class="cursor-pointer"
-            style="word-break: break-word"
-          >
-            <q-item-label title>{{
-              $t("Settings.nostr_keys.signing_extension.title")
-            }}</q-item-label>
-            <q-item-label caption v-if="nip07SignerAvailable"
-              >{{ $t("Settings.nostr_keys.signing_extension.description") }}
-            </q-item-label>
-            <q-item-label caption v-else
-              >{{ $t("Settings.nostr_keys.signing_extension.not_found") }}
-            </q-item-label>
-          </q-item-section>
-        </q-item>
-      </q-list>
-      <q-expansion-item
-        dense
-        dense-toggle
-        class="text-left"
-        :label="$t('Settings.sections.nostr.relays.expand_label')"
+    <!-- keys -->
+    <SettingsSection
+      :title="$t('Settings.nostr_keys.title')"
+      :caption="$t('Settings.nostr_keys.description')"
+    >
+      <!-- initWalletSeedPrivateKeySigner -->
+      <q-item
+        :active="signerType === 'SEED'"
+        active-class="text-weight-bold text-primary"
+        clickable
+        @click="handleSeedClick"
       >
-        <q-item>
-          <q-item-section>
-            <q-item-label overline>{{
-              $t("Settings.sections.nostr.relays.add.title")
-            }}</q-item-label>
-            <q-item-label caption
-              >{{ $t("Settings.sections.nostr.relays.add.description") }}
-            </q-item-label>
-          </q-item-section>
-        </q-item>
-        <q-item>
-          <q-item-section>
-            <q-input
-              outlined
-              rounded
-              dense
-              v-model="newRelay"
-              :label="$t('Settings.sections.nostr.relays.list.title')"
-              append
+        <q-item-section avatar>
+          <q-icon
+            :color="signerType === 'SEED' ? 'primary' : 'grey'"
+            :name="
+              signerType === 'SEED' ? 'check_circle' : 'radio_button_unchecked'
+            "
+          />
+        </q-item-section>
+        <q-item-section style="word-break: break-word">
+          <q-item-label>{{
+            $t("Settings.nostr_keys.wallet_seed.title")
+          }}</q-item-label>
+          <q-item-label caption>{{
+            $t("Settings.nostr_keys.wallet_seed.description")
+          }}</q-item-label>
+          <q-item-label
+            caption
+            v-if="signerType === 'SEED' && seedSignerPrivateKeyNsec"
+          >
+            <q-badge
+              class="cursor-pointer q-mt-xs"
+              @click.stop="copyText(seedSignerPrivateKeyNsec)"
+              outline
+              color="grey"
             >
-              <template v-slot:append>
-                <q-btn
-                  flat
-                  dense
-                  icon="add"
-                  color="primary"
-                  @click="addRelay"
-                ></q-btn>
-              </template>
-            </q-input>
-          </q-item-section>
-        </q-item>
-        <q-item>
-          <q-item-section>
-            <q-item-label overline>{{
-              $t("Settings.sections.nostr.relays.list.title")
-            }}</q-item-label>
-            <q-item-label caption
-              >{{ $t("Settings.sections.nostr.relays.list.description") }}
-            </q-item-label>
-          </q-item-section>
-        </q-item>
-        <q-item v-for="relay in relays" :key="relay" clickable>
-          <q-item-section class="q-mx-none q-pl-none" style="max-width: 1.2em">
+              <q-icon
+                name="content_copy"
+                size="0.8em"
+                color="grey"
+                class="q-mr-xs"
+              ></q-icon
+              >{{ $t("Settings.nostr_keys.wallet_seed.copy_nsec") }}
+            </q-badge>
+          </q-item-label>
+        </q-item-section>
+      </q-item>
+      <!-- Nip46Signer -->
+      <q-item
+        :active="signerType === 'NIP46'"
+        active-class="text-weight-bold text-primary"
+        clickable
+        @click="handleBunkerClick"
+        v-if="false"
+      >
+        <q-item-section avatar>
+          <q-icon
+            :color="signerType === 'NIP46' ? 'primary' : 'grey'"
+            :name="
+              signerType === 'NIP46' ? 'check_circle' : 'radio_button_unchecked'
+            "
+          />
+        </q-item-section>
+        <q-item-section style="word-break: break-word">
+          <q-item-label>{{
+            $t("Settings.nostr_keys.nsec_bunker.title")
+          }}</q-item-label>
+          <q-item-label caption>{{
+            $t("Settings.nostr_keys.nsec_bunker.description")
+          }}</q-item-label>
+        </q-item-section>
+        <q-item-section side v-if="signerType === 'NIP46'">
+          <q-icon
+            name="delete_outline"
+            @click.stop="handleResetNip46Signer"
+            class="cursor-pointer"
+            ><q-tooltip>{{
+              $t("Settings.nostr_keys.nsec_bunker.delete_tooltip")
+            }}</q-tooltip>
+          </q-icon>
+        </q-item-section>
+      </q-item>
+      <!-- PrivateKeySigner -->
+      <q-item
+        :active="signerType === 'PRIVATEKEY'"
+        active-class="text-weight-bold text-primary"
+        clickable
+        @click="handleNsecClick"
+      >
+        <q-item-section avatar>
+          <q-icon
+            :color="signerType === 'PRIVATEKEY' ? 'primary' : 'grey'"
+            :name="
+              signerType === 'PRIVATEKEY'
+                ? 'check_circle'
+                : 'radio_button_unchecked'
+            "
+          />
+        </q-item-section>
+        <q-item-section style="word-break: break-word">
+          <q-item-label>{{
+            $t("Settings.nostr_keys.use_nsec.title")
+          }}</q-item-label>
+          <q-item-label caption>{{
+            $t("Settings.nostr_keys.use_nsec.description")
+          }}</q-item-label>
+        </q-item-section>
+        <q-item-section side v-if="signerType === 'PRIVATEKEY'">
+          <q-icon
+            name="delete_outline"
+            @click.stop="handleResetPrivateKeySigner"
+            class="cursor-pointer"
+            ><q-tooltip>{{
+              $t("Settings.nostr_keys.use_nsec.delete_tooltip")
+            }}</q-tooltip></q-icon
+          >
+        </q-item-section>
+      </q-item>
+      <!-- Nip07Signer -->
+      <q-item
+        :active="signerType === 'NIP07'"
+        active-class="text-weight-bold text-primary"
+        clickable
+        @click="handleExtensionClick"
+        v-if="nip07SignerAvailable"
+      >
+        <q-item-section avatar>
+          <q-icon
+            :color="signerType === 'NIP07' ? 'primary' : 'grey'"
+            :name="
+              signerType === 'NIP07' ? 'check_circle' : 'radio_button_unchecked'
+            "
+          />
+        </q-item-section>
+        <q-item-section style="word-break: break-word">
+          <q-item-label>{{
+            $t("Settings.nostr_keys.signing_extension.title")
+          }}</q-item-label>
+          <q-item-label caption v-if="nip07SignerAvailable">{{
+            $t("Settings.nostr_keys.signing_extension.description")
+          }}</q-item-label>
+          <q-item-label caption v-else>{{
+            $t("Settings.nostr_keys.signing_extension.not_found")
+          }}</q-item-label>
+        </q-item-section>
+      </q-item>
+    </SettingsSection>
+
+    <!-- relays -->
+    <SettingsSection
+      :title="$t('Settings.sections.nostr.relays.list.title')"
+      :caption="$t('Settings.sections.nostr.relays.add.description')"
+    >
+      <q-item class="settings-control-item">
+        <q-item-section>
+          <q-input
+            outlined
+            rounded
+            dense
+            v-model="newRelay"
+            :label="$t('Settings.sections.nostr.relays.add.title')"
+          >
+            <template v-slot:append>
+              <q-btn
+                flat
+                dense
+                round
+                icon="add"
+                color="primary"
+                @click="addRelay"
+              ></q-btn>
+            </template>
+          </q-input>
+        </q-item-section>
+      </q-item>
+      <q-item v-for="relay in relays" :key="relay">
+        <q-item-section>
+          <q-item-label caption style="word-break: break-all">{{
+            relay
+          }}</q-item-label>
+        </q-item-section>
+        <q-item-section side>
+          <div class="row items-center no-wrap q-gutter-sm">
             <q-icon
               name="content_copy"
               @click="copyText(relay)"
               size="xs"
               color="grey"
-              class="q-mr-sm cursor-pointer"
+              class="cursor-pointer"
               ><q-tooltip>{{
                 $t("Settings.sections.nostr.relays.list.copy_tooltip")
               }}</q-tooltip></q-icon
             >
-          </q-item-section>
-          <q-item-section class="q-mx-none q-pl-none" style="max-width: 1.5em">
             <q-icon
               name="delete_outline"
               @click="removeRelay(relay)"
-              size="1.3em"
+              size="xs"
               color="grey"
-              class="q-mr-sm cursor-pointer"
+              class="cursor-pointer"
               ><q-tooltip>{{
                 $t("Settings.sections.nostr.relays.list.remove_tooltip")
               }}</q-tooltip></q-icon
             >
-          </q-item-section>
-          <q-item-section style="max-width: 10rem" class="cursor-pointer">
-            <q-item-label caption>{{ relay }} </q-item-label>
-          </q-item-section>
-        </q-item>
-      </q-expansion-item>
-      <!-- Web of trust actions -->
-      <q-item>
-        <q-item-section>
-          <q-item-label overline>
-            {{ $t("Settings.web_of_trust.title") }}
-          </q-item-label>
-          <q-item-label caption>
-            {{
-              $t("Settings.web_of_trust.known_pubkeys", { wotCount: wotCount })
-            }}
-          </q-item-label>
+          </div>
         </q-item-section>
       </q-item>
+    </SettingsSection>
+
+    <!-- web of trust -->
+    <SettingsSection
+      :title="$t('Settings.web_of_trust.title')"
+      :caption="$t('Settings.web_of_trust.known_pubkeys', { wotCount })"
+    >
       <q-item>
         <q-item-section>
-          <div class="row justify-end">
-            <q-btn flat dense :loading="wotLoading" @click="crawlWebOfTrust(2)">
+          <div class="row items-center q-gutter-sm">
+            <q-btn
+              size="sm"
+              rounded
+              outline
+              color="primary"
+              class="q-px-md"
+              :loading="wotLoading"
+              @click="crawlWebOfTrust(2)"
+            >
               {{
                 hasCrawlCheckpoint && !wotLoading
                   ? $t("Settings.web_of_trust.continue_crawl")
@@ -288,9 +239,10 @@
             </q-btn>
             <q-btn
               v-if="wotLoading"
-              flat
-              dense
-              class="q-ml-sm"
+              size="sm"
+              rounded
+              outline
+              class="q-px-md"
               color="negative"
               @click="cancelCrawl"
             >
@@ -298,9 +250,11 @@
             </q-btn>
             <q-btn
               v-if="!wotLoading"
-              flat
-              dense
-              class="q-ml-sm"
+              size="sm"
+              rounded
+              outline
+              class="q-px-md"
+              color="grey"
               :disable="wotLoading"
               @click="resetWebOfTrust"
             >
@@ -309,7 +263,7 @@
           </div>
         </q-item-section>
       </q-item>
-      <q-item v-if="wotLoading || crawlTotal > 0">
+      <q-item v-if="wotLoading || crawlTotal > 0" class="settings-control-item">
         <q-item-section>
           <q-linear-progress
             rounded
@@ -317,7 +271,7 @@
             color="primary"
             :value="crawlTotal > 0 ? crawlProcessed / crawlTotal : 0"
           />
-          <div class="text-caption q-mt-xs">
+          <div class="text-caption text-grey-6 q-mt-xs">
             {{
               $t("Settings.web_of_trust.progress", {
                 crawlProcessed: crawlProcessed,
@@ -327,7 +281,7 @@
           </div>
         </q-item-section>
       </q-item>
-    </div>
+    </SettingsSection>
   </SettingsPageShell>
 </template>
 
@@ -339,12 +293,14 @@ import { useNostrUserStore } from "src/stores/nostrUser";
 import { useNPCStore } from "src/stores/npubcash";
 import { useNPCV2Store } from "src/stores/npcv2";
 import SettingsPageShell from "./SettingsPageShell.vue";
+import SettingsSection from "./SettingsSection.vue";
 
 export default defineComponent({
   name: "NostrSettings",
   mixins: [windowMixin],
   components: {
     SettingsPageShell,
+    SettingsSection,
   },
   data: function () {
     return {

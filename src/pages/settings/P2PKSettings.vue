@@ -3,111 +3,93 @@
     :title="$t('Settings.menu.p2pk.title')"
     :caption="$t('Settings.menu.p2pk.caption')"
   >
-    <div class="q-py-sm q-px-xs text-left" on-left>
-      <q-list padding>
-        <q-item>
-          <q-item-section>
-            <q-item-label overline class="text-weight-bold">{{
-              $t("Settings.p2pk_features.title")
-            }}</q-item-label>
-            <q-item-label caption>{{
-              $t("Settings.p2pk_features.description")
-            }}</q-item-label>
-          </q-item-section>
-        </q-item>
-        <q-item style="display: inline-block">
-          <q-btn
-            class="q-ml-sm q-px-md"
-            color="primary"
-            size="sm"
-            rounded
-            outline
-            @click="generateKeypair"
-            >{{ $t("Settings.p2pk_features.generate_button") }}</q-btn
-          >
-        </q-item>
-        <q-item style="display: inline-block">
-          <q-btn
-            class="q-ml-sm q-px-md"
-            color="primary"
-            size="sm"
-            rounded
-            outline
-            @click="importNsec"
-            >{{ $t("Settings.p2pk_features.import_button") }}</q-btn
-          >
-        </q-item>
-        <q-item>
-          <q-toggle
-            v-model="showP2PkButtonInDrawer"
-            :label="$t('Settings.p2pk_features.quick_access.toggle')"
-            color="primary"
-          /> </q-item
-        ><q-item class="q-pt-none">
-          <q-item-label caption
-            >{{ $t("Settings.p2pk_features.quick_access.description") }}
-          </q-item-label>
-        </q-item>
-      </q-list>
-      <q-item v-if="p2pkKeys.length">
-        <q-expansion-item
-          dense
-          dense-toggle
-          v-if="p2pkKeys.length"
-          class="text-left"
-          :label="
-            $t('Settings.p2pk_features.keys_expansion.label', {
-              count: p2pkKeys.length,
-            })
-          "
-        >
-          <q-item v-for="key in p2pkKeys" :key="key.privakey">
-            <q-item-section
-              class="q-mx-none q-pl-none"
-              style="max-width: 1.05em"
+    <SettingsSection
+      :title="$t('Settings.p2pk_features.title')"
+      :caption="$t('Settings.p2pk_features.description')"
+    >
+      <q-item>
+        <q-item-section>
+          <div class="row items-center q-gutter-sm">
+            <q-btn
+              class="q-px-md"
+              color="primary"
+              size="sm"
+              rounded
+              outline
+              @click="generateKeypair"
+              >{{ $t("Settings.p2pk_features.generate_button") }}</q-btn
             >
-              <q-icon
-                name="content_copy"
-                @click="copyText(key.publicKey)"
-                size="1.2em"
-                color="grey"
-                class="q-mr-xs cursor-pointer"
-              />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label
-                caption
-                clickable
-                style="word-break: break-word; font-size: 0.65rem"
-                class="q-mx-sm"
-                @click="showP2PKKeyEntry(key.publicKey)"
-                >{{ key.publicKey }}</q-item-label
-              >
-            </q-item-section>
-            <q-item-section side>
-              <q-badge
-                v-if="key.used"
-                :label="$t('Settings.p2pk_features.keys_expansion.used_badge')"
-                color="primary"
-                class="q-mr-sm"
-              />
-            </q-item-section>
-            <q-item-section
-              class="q-mx-none q-pl-none"
-              style="max-width: 1.05em"
+            <q-btn
+              class="q-px-md"
+              color="primary"
+              size="sm"
+              rounded
+              outline
+              @click="importNsec"
+              >{{ $t("Settings.p2pk_features.import_button") }}</q-btn
             >
-              <q-icon
-                name="qr_code"
-                @click="showP2PKKeyEntry(key.publicKey)"
-                size="1em"
-                color="grey"
-                class="q-mr-xs cursor-pointer"
-              />
-            </q-item-section>
-          </q-item>
-        </q-expansion-item>
+          </div>
+        </q-item-section>
       </q-item>
-    </div>
+      <q-item tag="label">
+        <q-item-section>
+          <q-item-label>{{
+            $t("Settings.p2pk_features.quick_access.toggle")
+          }}</q-item-label>
+          <q-item-label caption>{{
+            $t("Settings.p2pk_features.quick_access.description")
+          }}</q-item-label>
+        </q-item-section>
+        <q-item-section side>
+          <q-toggle v-model="showP2PkButtonInDrawer" color="primary" />
+        </q-item-section>
+      </q-item>
+    </SettingsSection>
+
+    <!-- keys -->
+    <SettingsSection
+      v-if="p2pkKeys.length"
+      :title="
+        $t('Settings.p2pk_features.keys_expansion.label', {
+          count: p2pkKeys.length,
+        })
+      "
+    >
+      <q-item v-for="key in p2pkKeys" :key="key.publicKey">
+        <q-item-section>
+          <q-item-label
+            caption
+            class="cursor-pointer"
+            style="word-break: break-all"
+            @click="showP2PKKeyEntry(key.publicKey)"
+            >{{ key.publicKey }}</q-item-label
+          >
+        </q-item-section>
+        <q-item-section side>
+          <div class="row items-center no-wrap q-gutter-sm">
+            <q-badge
+              v-if="key.used"
+              :label="$t('Settings.p2pk_features.keys_expansion.used_badge')"
+              color="primary"
+            />
+            <q-icon
+              name="content_copy"
+              @click="copyText(key.publicKey)"
+              size="xs"
+              color="grey"
+              class="cursor-pointer"
+            />
+            <q-icon
+              name="qr_code"
+              @click="showP2PKKeyEntry(key.publicKey)"
+              size="xs"
+              color="grey"
+              class="cursor-pointer"
+            />
+          </div>
+        </q-item-section>
+      </q-item>
+    </SettingsSection>
 
     <!-- P2PK DIALOG -->
     <P2PKDialog v-model="showP2PKDialog" />
@@ -120,12 +102,14 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import { useP2PKStore } from "src/stores/p2pk";
 import P2PKDialog from "src/components/P2PKDialog.vue";
 import SettingsPageShell from "./SettingsPageShell.vue";
+import SettingsSection from "./SettingsSection.vue";
 
 export default defineComponent({
   name: "P2PKSettings",
   mixins: [windowMixin],
   components: {
     SettingsPageShell,
+    SettingsSection,
     P2PKDialog,
   },
   computed: {
