@@ -46,6 +46,7 @@
         <ReceiveDialog v-model="showReceiveDialog" />
         <SendDialog v-model="showSendDialog" />
       </div>
+      <PwaInstallBanner />
       <!-- ///////////////////////////////////////////
       ////////////////// TABLES /////////////////
       /////////////////////////////////////////// -->
@@ -102,34 +103,7 @@
           </q-tab-panel>
         </q-tab-panels>
       </q-expansion-item>
-
-      <div style="margin-bottom: 0rem">
-        <div class="row q-pt-sm">
-          <div class="col-12 q-pt-xs">
-            <q-btn
-              class="q-mx-xs q-px-sm q-my-sm"
-              outline
-              size="0.6rem"
-              v-if="
-                getPwaDisplayMode() == 'browser' &&
-                deferredPWAInstallPrompt != null
-              "
-              color="primary"
-              @click="triggerPwaInstall()"
-              ><b>{{ $t("WalletPage.install.text") }}</b
-              ><q-tooltip>{{
-                $t("WalletPage.install.tooltip")
-              }}</q-tooltip></q-btn
-            >
-          </div>
-        </div>
-      </div>
-
-      <iOSPWAPrompt />
-      <AndroidPWAPrompt />
     </div>
-
-    <!-- BOTTOM LIGHTNING BUTTONS -->
 
     <!-- DIALOGS  -->
 
@@ -140,15 +114,6 @@
     <q-dialog v-model="camera.show" backdrop-filter="blur(2px) brightness(60%)">
       <QrcodeReader @decode="decodeQR" />
     </q-dialog>
-
-    <!-- WELCOME DIALOG  -->
-    <WelcomeDialog
-      :welcome-dialog="welcomeDialog"
-      :trigger-pwa-install="triggerPwaInstall"
-      :set-tab="setTab"
-      :get-pwa-display-mode="getPwaDisplayMode"
-      :set-welcome-dialog-seen="setWelcomeDialogSeen"
-    />
 
     <!-- INVOICE DETAILS  -->
     <CreateInvoiceDialog v-model="showCreateInvoiceDialog" />
@@ -218,7 +183,7 @@ import BalanceView from "components/BalanceView.vue";
 import MintSettings from "components/MintSettings.vue";
 import HistoryTable from "components/HistoryTable.vue";
 import NoMintWarnBanner from "components/NoMintWarnBanner.vue";
-import WelcomeDialog from "components/WelcomeDialog.vue";
+import PwaInstallBanner from "components/PwaInstallBanner.vue";
 import SendTokenDialog from "components/SendTokenDialog.vue";
 import PayInvoiceDialog from "components/PayInvoiceDialog.vue";
 import InvoiceDetailDialog from "components/InvoiceDetailDialog.vue";
@@ -226,9 +191,8 @@ import CreateInvoiceDialog from "components/CreateInvoiceDialog.vue";
 import SendDialog from "components/SendDialog.vue";
 import ReceiveDialog from "components/ReceiveDialog.vue";
 import QrcodeReader from "components/QrcodeReader.vue";
-import iOSPWAPrompt from "components/iOSPWAPrompt.vue";
-import AndroidPWAPrompt from "components/AndroidPWAPrompt.vue";
 import ActivityOrb from "components/ActivityOrb.vue";
+import { usePwaStore } from "src/stores/pwa";
 
 // pinia stores
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -275,7 +239,7 @@ export default {
     MintSettings,
     HistoryTable,
     NoMintWarnBanner,
-    WelcomeDialog,
+    PwaInstallBanner,
     SendTokenDialog,
     ReceiveTokenDialog,
     PayInvoiceDialog,
@@ -284,8 +248,6 @@ export default {
     QrcodeReader,
     SendDialog,
     ReceiveDialog,
-    iOSPWAPrompt,
-    AndroidPWAPrompt,
     ScanIcon,
     ActivityOrb,
   },
@@ -294,16 +256,12 @@ export default {
       name: "",
       mintId: "",
       mintName: "",
-      deferredPWAInstallPrompt: null as any,
       action: "main",
       payments: [] as any[],
       paymentsChart: {
         show: false,
       },
       historyHydrated: false,
-      welcomeDialog: {
-        show: false,
-      },
       baseHost: location.protocol + "//" + location.host,
       baseURL: location.protocol + "//" + location.host + location.pathname,
       credit: 0,
@@ -503,47 +461,6 @@ export default {
 
     ////////////// WORKERS //////////////
 
-    ////////////// UI HELPERS /////////////
-    registerPWAEventHook: function () {
-      // register event listener for PWA install prompt
-      window.addEventListener("beforeinstallprompt", (e) => {
-        // Prevent the mini-infobar from appearing on mobile
-        // e.preventDefault()
-        // Stash the event so it can be triggered later.
-        this.deferredPWAInstallPrompt = e;
-        console.log(
-          `'beforeinstallprompt' event was fired.`,
-          this.getPwaDisplayMode()
-        );
-      });
-    },
-    getPwaDisplayMode: function () {
-      const isStandalone = window.matchMedia(
-        "(display-mode: standalone)"
-      ).matches;
-      // @ts-ignore
-      if (document.referrer.startsWith("android-app://")) {
-        return "twa";
-      } else if ((navigator as any).standalone || isStandalone) {
-        return "standalone";
-      }
-      return "browser";
-    },
-    triggerPwaInstall: function () {
-      // Show the install prompt
-      // Note: this doesn't work with IOS, we do it with iOSPWAPrompt
-      this.deferredPWAInstallPrompt.prompt();
-      // Wait for the user to respond to the prompt
-      this.deferredPWAInstallPrompt.userChoice.then((choiceResult) => {
-        if (choiceResult.outcome === "accepted") {
-          console.log("User accepted the install prompt");
-          // @ts-ignore
-          this.setWelcomeDialogSeen();
-        } else {
-          console.log("User dismissed the install prompt");
-        }
-      });
-    },
     registerBroadcastChannel: async function () {
       // uses session storage to identify the tab so we can ignore incoming messages from the same tab
       if (!sessionStorage.getItem("tabId")) {
@@ -707,8 +624,7 @@ export default {
     // check local storage
     this.checkLocalStorage();
 
-    // PWA install hook
-    this.registerPWAEventHook();
+    usePwaStore().init();
 
     // generate mnemonic only if onboarding is finished or path is 'new'
     try {

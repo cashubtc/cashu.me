@@ -568,6 +568,14 @@ export default {
       tooltip: "Installa Cashu",
     },
   },
+  PwaInstallBanner: {
+    title: "Aggiungi Cashu alla schermata Home",
+    description: {
+      ios: "Tocca l’icona Condividi in Safari, poi Aggiungi a Home.",
+      android: "Apri il menu del browser e scegli Aggiungi a Home.",
+      android_prompt: "Installa Cashu per un accesso più rapido e a schermo intero.",
+    },
+  },
   AlreadyRunning: {
     title: "Nope.",
     text: "Un'altra scheda è già in esecuzione. Chiudi questa scheda e riprova.",

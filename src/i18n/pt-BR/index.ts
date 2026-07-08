@@ -43,6 +43,9 @@ export default {
       update: {
         label: "Atualizar",
       },
+      dismiss: {
+        label: "Dispensar",
+      },
     },
     inputs: {
       mint_url: {
@@ -613,6 +616,14 @@ export default {
     install: {
       text: "Instalar",
       tooltip: "Instalar Cashu",
+    },
+  },
+  PwaInstallBanner: {
+    title: "Adicione o Cashu à tela inicial",
+    description: {
+      ios: "Toque no ícone de compartilhar no Safari e depois em Adicionar à Tela de Início.",
+      android: "Abra o menu do navegador e escolha Adicionar à tela inicial.",
+      android_prompt: "Instale o Cashu para acesso mais rápido e tela cheia.",
     },
   },
   AlreadyRunning: {

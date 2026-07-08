@@ -43,6 +43,9 @@ export default {
       update: {
         label: "Aktualizovat",
       },
+      dismiss: {
+        label: "Zavřít",
+      },
     },
     inputs: {
       mint_url: {
@@ -610,6 +613,14 @@ export default {
     install: {
       text: "Instalovat",
       tooltip: "Nainstalovat Cashu",
+    },
+  },
+  PwaInstallBanner: {
+    title: "Přidejte Cashu na plochu",
+    description: {
+      ios: "V Safari klepněte na ikonu sdílení a pak na Přidat na plochu.",
+      android: "Otevřete nabídku prohlížeče a zvolte Přidat na plochu.",
+      android_prompt: "Nainstalujte Cashu pro rychlejší přístup a celou obrazovku.",
     },
   },
   AlreadyRunning: {
