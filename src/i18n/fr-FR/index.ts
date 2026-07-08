@@ -165,6 +165,57 @@ export default {
     },
   },
   Settings: {
+    menu: {
+      title: "Paramètres",
+      backup: {
+        title: "Sauvegarde et restauration",
+        caption: "Phrase de récupération et restauration d'ecash",
+      },
+      lightning_address: {
+        title: "Adresse Lightning",
+        caption: "Recevez des paiements sur votre adresse Lightning",
+      },
+      nostr: {
+        title: "Nostr",
+        caption: "Clés, relais et Web of Trust",
+      },
+      payment_requests: {
+        title: "Demandes de paiement",
+        caption: "Recevez des paiements ecash via nostr",
+      },
+      nwc: {
+        title: "Nostr Wallet Connect",
+        caption: "Utilisez votre portefeuille depuis d'autres applications",
+      },
+      hardware: {
+        title: "Matériel",
+        caption: "Paramètres NFC",
+      },
+      p2pk: {
+        title: "P2PK",
+        caption: "Recevez de l'ecash verrouillé sur vos clés",
+      },
+      privacy: {
+        title: "Confidentialité",
+        caption: "Vérifications réseau et prix du Bitcoin",
+      },
+      experimental: {
+        title: "Expérimental",
+        caption: "Essayez les nouvelles fonctionnalités en avant-première",
+      },
+      appearance: {
+        title: "Apparence",
+        caption: "Thème, clavier et symbole Bitcoin",
+      },
+      language: {
+        title: "Langue",
+        caption: "Choisissez votre langue",
+      },
+      advanced: {
+        title: "Avancé",
+        caption: "Outils développeur et réinitialisation du portefeuille",
+      },
+    },
     sections: {
       backup_restore: "SAUVEGARDE & RESTAURATION",
       lightning_address: "ADRESSE LIGHTNING",

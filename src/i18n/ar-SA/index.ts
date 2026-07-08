@@ -163,6 +163,57 @@ export default {
     },
   },
   Settings: {
+    menu: {
+      title: "الإعدادات",
+      backup: {
+        title: "النسخ الاحتياطي والاستعادة",
+        caption: "عبارة البذرة واستعادة الإيكاش",
+      },
+      lightning_address: {
+        title: "عنوان Lightning",
+        caption: "استقبل المدفوعات على عنوان Lightning الخاص بك",
+      },
+      nostr: {
+        title: "Nostr",
+        caption: "المفاتيح والمرحّلات وشبكة الثقة",
+      },
+      payment_requests: {
+        title: "طلبات الدفع",
+        caption: "استقبل مدفوعات الإيكاش عبر nostr",
+      },
+      nwc: {
+        title: "اتصال محفظة Nostr",
+        caption: "استخدم محفظتك من تطبيقات أخرى",
+      },
+      hardware: {
+        title: "الأجهزة",
+        caption: "إعدادات NFC",
+      },
+      p2pk: {
+        title: "P2PK",
+        caption: "استقبل إيكاش مقفلًا بمفاتيحك",
+      },
+      privacy: {
+        title: "الخصوصية",
+        caption: "فحوصات الشبكة وسعر البيتكوين",
+      },
+      experimental: {
+        title: "تجريبي",
+        caption: "جرّب الميزات الجديدة مبكرًا",
+      },
+      appearance: {
+        title: "المظهر",
+        caption: "السمة ولوحة المفاتيح ورمز البيتكوين",
+      },
+      language: {
+        title: "اللغة",
+        caption: "اختر لغتك",
+      },
+      advanced: {
+        title: "متقدم",
+        caption: "أدوات المطورين وإعادة تعيين المحفظة",
+      },
+    },
     language: {
       title: "اللغة",
       description: "الرجاء اختيار لغتك المفضلة من القائمة أدناه.",

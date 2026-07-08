@@ -21,9 +21,14 @@
             <q-item-section>
               <div class="row q-pt-md">
                 <div class="col-12" v-if="!confirmMnemonic">
-                  <q-btn flat dense @click="confirmMnemonic = !confirmMnemonic">{{
-                    $t("Settings.advanced.developer.new_seed.button")
-                  }}</q-btn>
+                  <q-btn
+                    flat
+                    dense
+                    @click="confirmMnemonic = !confirmMnemonic"
+                    >{{
+                      $t("Settings.advanced.developer.new_seed.button")
+                    }}</q-btn
+                  >
                   <row>
                     <q-item-label class="q-px-sm" caption
                       >{{

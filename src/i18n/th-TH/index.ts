@@ -164,6 +164,57 @@ export default {
     },
   },
   Settings: {
+    menu: {
+      title: "การตั้งค่า",
+      backup: {
+        title: "สำรองและกู้คืนข้อมูล",
+        caption: "Seed phrase และการกู้คืน ecash",
+      },
+      lightning_address: {
+        title: "Lightning Address",
+        caption: "รับการชำระเงินผ่าน Lightning address ของคุณ",
+      },
+      nostr: {
+        title: "Nostr",
+        caption: "กุญแจ, relay และ Web of Trust",
+      },
+      payment_requests: {
+        title: "คำขอชำระเงิน",
+        caption: "รับการชำระเงิน ecash ผ่าน nostr",
+      },
+      nwc: {
+        title: "Nostr Wallet Connect",
+        caption: "ใช้ Wallet ของคุณจากแอปอื่น",
+      },
+      hardware: {
+        title: "ฮาร์ดแวร์",
+        caption: "การตั้งค่า NFC",
+      },
+      p2pk: {
+        title: "P2PK",
+        caption: "รับ ecash ที่ล็อกไว้กับกุญแจของคุณ",
+      },
+      privacy: {
+        title: "ความเป็นส่วนตัว",
+        caption: "การตรวจสอบเครือข่ายและราคา Bitcoin",
+      },
+      experimental: {
+        title: "ทดลอง",
+        caption: "ลองใช้ฟีเจอร์ใหม่ก่อนใคร",
+      },
+      appearance: {
+        title: "รูปลักษณ์",
+        caption: "ธีม, แป้นพิมพ์ และสัญลักษณ์ Bitcoin",
+      },
+      language: {
+        title: "ภาษา",
+        caption: "เลือกภาษาของคุณ",
+      },
+      advanced: {
+        title: "ขั้นสูง",
+        caption: "เครื่องมือนักพัฒนาและการรีเซ็ต Wallet",
+      },
+    },
     web_of_trust: {
       title: "เครือข่ายที่เชื่อถือได้",
       known_pubkeys: "Pubkey ที่รู้จัก: {wotCount}",

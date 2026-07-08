@@ -169,6 +169,57 @@ export default {
     },
   },
   Settings: {
+    menu: {
+      title: "Nastavení",
+      backup: {
+        title: "Záloha a obnovení",
+        caption: "Seed fráze a obnovení ecash",
+      },
+      lightning_address: {
+        title: "Lightning adresa",
+        caption: "Přijímejte platby na svou Lightning adresu",
+      },
+      nostr: {
+        title: "Nostr",
+        caption: "Klíče, relaye a Web of Trust",
+      },
+      payment_requests: {
+        title: "Platební požadavky",
+        caption: "Přijímejte ecash platby přes nostr",
+      },
+      nwc: {
+        title: "Nostr Wallet Connect",
+        caption: "Používejte peněženku z jiných aplikací",
+      },
+      hardware: {
+        title: "Hardware",
+        caption: "Nastavení NFC",
+      },
+      p2pk: {
+        title: "P2PK",
+        caption: "Přijímejte ecash uzamčený na vaše klíče",
+      },
+      privacy: {
+        title: "Soukromí",
+        caption: "Síťové kontroly a cena Bitcoinu",
+      },
+      experimental: {
+        title: "Experimentální",
+        caption: "Vyzkoušejte nové funkce jako první",
+      },
+      appearance: {
+        title: "Vzhled",
+        caption: "Motiv, klávesnice a symbol Bitcoinu",
+      },
+      language: {
+        title: "Jazyk",
+        caption: "Vyberte si jazyk",
+      },
+      advanced: {
+        title: "Pokročilé",
+        caption: "Vývojářské nástroje a reset peněženky",
+      },
+    },
     language: {
       title: "Jazyk",
       description: "Vyberte si preferovaný jazyk ze seznamu níže.",

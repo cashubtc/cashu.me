@@ -164,6 +164,57 @@ export default {
     },
   },
   Settings: {
+    menu: {
+      title: "设置",
+      backup: {
+        title: "备份与恢复",
+        caption: "助记词与 ecash 恢复",
+      },
+      lightning_address: {
+        title: "闪电地址",
+        caption: "通过您的闪电地址接收付款",
+      },
+      nostr: {
+        title: "Nostr",
+        caption: "密钥、中继和信任网络",
+      },
+      payment_requests: {
+        title: "付款请求",
+        caption: "通过 nostr 接收 ecash 付款",
+      },
+      nwc: {
+        title: "Nostr 钱包连接",
+        caption: "从其他应用程序使用您的钱包",
+      },
+      hardware: {
+        title: "硬件",
+        caption: "NFC 设置",
+      },
+      p2pk: {
+        title: "P2PK",
+        caption: "接收锁定到您密钥的 ecash",
+      },
+      privacy: {
+        title: "隐私",
+        caption: "网络检查与比特币价格",
+      },
+      experimental: {
+        title: "实验性",
+        caption: "抢先体验新功能",
+      },
+      appearance: {
+        title: "外观",
+        caption: "主题、键盘和比特币符号",
+      },
+      language: {
+        title: "语言",
+        caption: "选择您的语言",
+      },
+      advanced: {
+        title: "高级",
+        caption: "开发者工具与钱包重置",
+      },
+    },
     web_of_trust: {
       title: "信任网络",
       known_pubkeys: "已知公钥：{wotCount}",

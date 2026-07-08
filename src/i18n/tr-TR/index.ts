@@ -169,6 +169,57 @@ export default {
     },
   },
   Settings: {
+    menu: {
+      title: "Ayarlar",
+      backup: {
+        title: "Yedekleme ve Geri Yükleme",
+        caption: "Seed kelimeleri ve ecash kurtarma",
+      },
+      lightning_address: {
+        title: "Lightning Adresi",
+        caption: "Lightning adresinize ödeme alın",
+      },
+      nostr: {
+        title: "Nostr",
+        caption: "Anahtarlar, röleler ve Web of Trust",
+      },
+      payment_requests: {
+        title: "Ödeme Talepleri",
+        caption: "Nostr üzerinden ecash ödemeleri alın",
+      },
+      nwc: {
+        title: "Nostr Cüzdan Bağlantısı",
+        caption: "Cüzdanınızı diğer uygulamalardan kullanın",
+      },
+      hardware: {
+        title: "Donanım",
+        caption: "NFC ayarları",
+      },
+      p2pk: {
+        title: "P2PK",
+        caption: "Anahtarlarınıza kilitli ecash alın",
+      },
+      privacy: {
+        title: "Gizlilik",
+        caption: "Ağ kontrolleri ve Bitcoin fiyatı",
+      },
+      experimental: {
+        title: "Deneysel",
+        caption: "Yeni özellikleri erkenden deneyin",
+      },
+      appearance: {
+        title: "Görünüm",
+        caption: "Tema, klavye ve Bitcoin sembolü",
+      },
+      language: {
+        title: "Dil",
+        caption: "Dilinizi seçin",
+      },
+      advanced: {
+        title: "Gelişmiş",
+        caption: "Geliştirici araçları ve cüzdan sıfırlama",
+      },
+    },
     language: {
       title: "Dil",
       description: "Lütfen aşağıdaki listeden tercih ettiğiniz dili seçin.",

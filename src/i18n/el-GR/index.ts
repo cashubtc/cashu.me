@@ -165,6 +165,57 @@ export default {
     },
   },
   Settings: {
+    menu: {
+      title: "Ρυθμίσεις",
+      backup: {
+        title: "Αντίγραφο ασφαλείας & Επαναφορά",
+        caption: "Φράση seed και ανάκτηση ecash",
+      },
+      lightning_address: {
+        title: "Διεύθυνση Lightning",
+        caption: "Λάβετε πληρωμές στη διεύθυνση Lightning σας",
+      },
+      nostr: {
+        title: "Nostr",
+        caption: "Κλειδιά, relays και Web of Trust",
+      },
+      payment_requests: {
+        title: "Αιτήματα πληρωμής",
+        caption: "Λάβετε πληρωμές ecash μέσω nostr",
+      },
+      nwc: {
+        title: "Nostr Wallet Connect",
+        caption: "Χρησιμοποιήστε το πορτοφόλι σας από άλλες εφαρμογές",
+      },
+      hardware: {
+        title: "Υλικό",
+        caption: "Ρυθμίσεις NFC",
+      },
+      p2pk: {
+        title: "P2PK",
+        caption: "Λάβετε ecash κλειδωμένο στα κλειδιά σας",
+      },
+      privacy: {
+        title: "Απόρρητο",
+        caption: "Έλεγχοι δικτύου και τιμή Bitcoin",
+      },
+      experimental: {
+        title: "Πειραματικά",
+        caption: "Δοκιμάστε πρώτοι νέες λειτουργίες",
+      },
+      appearance: {
+        title: "Εμφάνιση",
+        caption: "Θέμα, πληκτρολόγιο και σύμβολο Bitcoin",
+      },
+      language: {
+        title: "Γλώσσα",
+        caption: "Επιλέξτε τη γλώσσα σας",
+      },
+      advanced: {
+        title: "Για προχωρημένους",
+        caption: "Εργαλεία προγραμματιστών και επαναφορά πορτοφολιού",
+      },
+    },
     language: {
       title: "Γλώσσα",
       description:

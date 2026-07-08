@@ -16,8 +16,7 @@ const routes = [
       },
       {
         path: "backup",
-        component: () =>
-          import("src/pages/settings/BackupRestoreSettings.vue"),
+        component: () => import("src/pages/settings/BackupRestoreSettings.vue"),
       },
       {
         path: "lightning-address",

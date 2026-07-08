@@ -163,6 +163,57 @@ export default {
     },
   },
   Settings: {
+    menu: {
+      title: "設定",
+      backup: {
+        title: "バックアップと復元",
+        caption: "シードフレーズとecashの復元",
+      },
+      lightning_address: {
+        title: "ライトニングアドレス",
+        caption: "ライトニングアドレスで支払いを受け取る",
+      },
+      nostr: {
+        title: "Nostr",
+        caption: "鍵、リレー、Web of Trust",
+      },
+      payment_requests: {
+        title: "支払いリクエスト",
+        caption: "nostr経由でecashの支払いを受け取る",
+      },
+      nwc: {
+        title: "Nostrウォレットコネクト",
+        caption: "他のアプリからウォレットを使用する",
+      },
+      hardware: {
+        title: "ハードウェア",
+        caption: "NFC設定",
+      },
+      p2pk: {
+        title: "P2PK",
+        caption: "自分の鍵にロックされたecashを受け取る",
+      },
+      privacy: {
+        title: "プライバシー",
+        caption: "ネットワークチェックとビットコイン価格",
+      },
+      experimental: {
+        title: "実験的機能",
+        caption: "新機能をいち早く試す",
+      },
+      appearance: {
+        title: "外観",
+        caption: "テーマ、キーボード、ビットコイン記号",
+      },
+      language: {
+        title: "言語",
+        caption: "言語を選択",
+      },
+      advanced: {
+        title: "詳細設定",
+        caption: "開発者ツールとウォレットのリセット",
+      },
+    },
     language: {
       title: "言語",
       description: "以下のリストから希望の言語を選択してください。",
