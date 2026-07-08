@@ -219,6 +219,10 @@ export default {
         title: "Pokročilé",
         caption: "Vývojářské nástroje a reset peněženky",
       },
+      about: {
+        title: "O aplikaci",
+        caption: "Podmínky a odkazy",
+      },
     },
     language: {
       title: "Jazyk",

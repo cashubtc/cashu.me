@@ -15,8 +15,10 @@
 import { defineComponent } from "vue";
 import FullscreenHeader from "components/FullscreenHeader.vue";
 
-const pathDepth = (path: string) =>
-  path.split("/").filter((segment) => segment.length > 0).length;
+const historyPosition = () =>
+  typeof window.history.state?.position === "number"
+    ? window.history.state.position
+    : null;
 
 export default defineComponent({
   name: "FullscreenLayout",
@@ -27,19 +29,22 @@ export default defineComponent({
   data() {
     return {
       transitionName: "page-fade",
+      lastHistoryPosition: historyPosition(),
     };
   },
   watch: {
-    $route(to, from) {
-      const toDepth = pathDepth(to.path);
-      const fromDepth = pathDepth(from.path);
-      if (toDepth > fromDepth) {
+    $route() {
+      const position = historyPosition();
+      if (position === null || this.lastHistoryPosition === null) {
+        this.transitionName = "page-fade";
+      } else if (position > this.lastHistoryPosition) {
         this.transitionName = "page-slide-left";
-      } else if (toDepth < fromDepth) {
+      } else if (position < this.lastHistoryPosition) {
         this.transitionName = "page-slide-right";
       } else {
         this.transitionName = "page-fade";
       }
+      this.lastHistoryPosition = position;
     },
   },
 });

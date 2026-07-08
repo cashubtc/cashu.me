@@ -213,6 +213,10 @@ export default {
         title: "Avancerat",
         caption: "Utvecklarverktyg och plånboksåterställning",
       },
+      about: {
+        title: "Om",
+        caption: "Villkor och länkar",
+      },
     },
     web_of_trust: {
       title: "Förtroendenätverk",

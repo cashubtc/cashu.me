@@ -215,6 +215,10 @@ export default {
         title: "Avancé",
         caption: "Outils développeur et réinitialisation du portefeuille",
       },
+      about: {
+        title: "À propos",
+        caption: "Conditions et liens",
+      },
     },
     sections: {
       backup_restore: "SAUVEGARDE & RESTAURATION",

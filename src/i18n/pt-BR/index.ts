@@ -222,6 +222,10 @@ export default {
         title: "Avançado",
         caption: "Ferramentas de desenvolvedor e redefinição da carteira",
       },
+      about: {
+        title: "Sobre",
+        caption: "Termos e links",
+      },
     },
     language: {
       title: "Idioma",

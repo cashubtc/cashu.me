@@ -213,6 +213,10 @@ export default {
         title: "متقدم",
         caption: "أدوات المطورين وإعادة تعيين المحفظة",
       },
+      about: {
+        title: "حول",
+        caption: "الشروط والروابط",
+      },
     },
     language: {
       title: "اللغة",

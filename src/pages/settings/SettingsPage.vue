@@ -52,6 +52,7 @@ import {
   Palette as PaletteIcon,
   Globe as GlobeIcon,
   Terminal as TerminalIcon,
+  Info as InfoIcon,
   ChevronRight as ChevronRightIcon,
 } from "lucide-vue-next";
 
@@ -150,39 +151,19 @@ export default defineComponent({
             },
           ],
         },
+        {
+          name: "about",
+          entries: [
+            {
+              key: "about",
+              path: "/settings/about",
+              icon: markRaw(InfoIcon),
+            },
+          ],
+        },
       ];
       return groups.filter((group) => group.entries.length > 0);
     },
   },
 });
 </script>
-
-<style scoped>
-.settings-menu-group {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 14px;
-  padding: 4px 0;
-  overflow: hidden;
-}
-
-.settings-menu-item {
-  min-height: 60px;
-  padding: 10px 16px;
-}
-
-.settings-menu-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--q-primary);
-}
-
-.settings-menu-chevron {
-  color: rgba(255, 255, 255, 0.35);
-}
-</style>

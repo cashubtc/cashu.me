@@ -214,6 +214,10 @@ export default {
         title: "ขั้นสูง",
         caption: "เครื่องมือนักพัฒนาและการรีเซ็ต Wallet",
       },
+      about: {
+        title: "เกี่ยวกับ",
+        caption: "ข้อกำหนดและลิงก์",
+      },
     },
     web_of_trust: {
       title: "เครือข่ายที่เชื่อถือได้",

@@ -64,6 +64,10 @@ const routes = [
         path: "advanced",
         component: () => import("src/pages/settings/AdvancedSettings.vue"),
       },
+      {
+        path: "about",
+        component: () => import("src/pages/settings/AboutSettings.vue"),
+      },
     ],
   },
   {

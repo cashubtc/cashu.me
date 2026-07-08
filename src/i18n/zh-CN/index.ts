@@ -214,6 +214,10 @@ export default {
         title: "高级",
         caption: "开发者工具与钱包重置",
       },
+      about: {
+        title: "关于",
+        caption: "条款与链接",
+      },
     },
     web_of_trust: {
       title: "信任网络",

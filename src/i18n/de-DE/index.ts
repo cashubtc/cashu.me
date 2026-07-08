@@ -216,6 +216,10 @@ export default {
         title: "Erweitert",
         caption: "Entwicklerwerkzeuge und Wallet-Reset",
       },
+      about: {
+        title: "Über",
+        caption: "Nutzungsbedingungen und Links",
+      },
     },
     language: {
       title: "Sprache",

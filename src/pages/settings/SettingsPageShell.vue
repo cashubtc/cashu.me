@@ -66,4 +66,33 @@ export default defineComponent({
 .settings-view .q-btn__content {
   white-space: normal;
 }
+
+/* Shared card-style navigation lists (settings menu, about page) */
+.settings-menu-group {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 4px 0;
+  overflow: hidden;
+}
+
+.settings-menu-item {
+  min-height: 60px;
+  padding: 10px 16px;
+}
+
+.settings-menu-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--q-primary);
+}
+
+.settings-menu-chevron {
+  color: rgba(255, 255, 255, 0.35);
+}
 </style>

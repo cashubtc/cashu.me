@@ -188,6 +188,10 @@ export default {
         title: "Avanzate",
         caption: "Strumenti per sviluppatori e reset del portafoglio",
       },
+      about: {
+        title: "Informazioni",
+        caption: "Termini e link",
+      },
     },
     language: {
       title: "Lingua",

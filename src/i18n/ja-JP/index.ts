@@ -213,6 +213,10 @@ export default {
         title: "詳細設定",
         caption: "開発者ツールとウォレットのリセット",
       },
+      about: {
+        title: "アプリについて",
+        caption: "利用規約とリンク",
+      },
     },
     language: {
       title: "言語",

@@ -215,6 +215,10 @@ export default {
         title: "Avanzado",
         caption: "Herramientas de desarrollador y reinicio de la billetera",
       },
+      about: {
+        title: "Acerca de",
+        caption: "Términos y enlaces",
+      },
     },
     language: {
       title: "Idioma",

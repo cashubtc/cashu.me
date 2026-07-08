@@ -219,6 +219,10 @@ export default {
         title: "Gelişmiş",
         caption: "Geliştirici araçları ve cüzdan sıfırlama",
       },
+      about: {
+        title: "Hakkında",
+        caption: "Koşullar ve bağlantılar",
+      },
     },
     language: {
       title: "Dil",

@@ -223,6 +223,10 @@ export default {
         title: "Advanced",
         caption: "Developer tools and wallet reset",
       },
+      about: {
+        title: "About",
+        caption: "Terms and links",
+      },
     },
     language: {
       title: "Language",
