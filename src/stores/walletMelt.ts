@@ -257,13 +257,14 @@ export async function meltGeneric(
       meltQuote.state == MeltQuoteState.PAID ||
       meltQuote.state == MeltQuoteState.PENDING
     ) {
-      if (meltQuote.state == MeltQuoteState.PENDING) {
-        this.payInvoiceData.meltQuote.error = this.t(
-          "wallet.notifications.payment_pending_refresh"
-        );
-      }
+      // if (meltQuote.state == MeltQuoteState.PENDING) {
+      //   this.payInvoiceData.meltQuote.error = this.t(
+      //     "wallet.notifications.payment_pending_refresh"
+      //   );
+      // }
       this.payInvoiceData.show = false;
-      notify(this.t("wallet.notifications.payment_pending_refresh"));
+      // comment out "pending" notification now that we have onchain
+      // notify(this.t("wallet.notifications.payment_pending_refresh"));
       throw error;
     }
     await proofsStore.setReserved(sendProofs, false);

@@ -306,7 +306,7 @@ export async function checkInvoiceBolt11(
     }
     const proofs = await this.mintBolt11(invoice, verbose);
     if (hideInvoiceDetailsOnMint) {
-      uIStore.showInvoiceDetails = false;
+      this.hideInvoiceDetailsAfterReceiveSuccess(invoice.quote);
     }
     useUiStore().vibrate();
     notifySuccess(

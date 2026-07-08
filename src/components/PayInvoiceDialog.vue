@@ -124,7 +124,7 @@
                           }}
                         </div>
                       </div>
-                      <div v-else-if="isPaying" class="q-mb-md">
+                      <div v-else-if="paymentInProgress" class="q-mb-md">
                         <div class="row">
                           <div class="col-12 text-h4 text-weight-bold q-mb-xs">
                             {{ $t("PayInvoiceDialog.invoice.paying") }}
@@ -233,12 +233,6 @@
                             </div>
                           </div>
                         </div>
-                        <MeltQuoteInformation
-                          v-if="showMeltQuoteInformation"
-                          class="q-mt-sm"
-                          :melt-quote="payInvoiceData.meltQuote.response"
-                          :mint-url="activeMintUrl"
-                        />
                         <p
                           class="text-wrap q-mt-xl"
                           style="max-width: 600px; font-size: 1.1rem"
@@ -304,6 +298,15 @@
                       </div>
                     </div>
                   </transition>
+                </div>
+                <div
+                  v-if="showBottomMeltQuoteInformation"
+                  class="invoice-details-bottom"
+                >
+                  <MeltQuoteInformation
+                    :melt-quote="payInvoiceData.meltQuote.response"
+                    :mint-url="activeMintUrl"
+                  />
                 </div>
               </div>
 
@@ -541,7 +544,8 @@
                 v-else-if="
                   enoughtotalUnitBalance ||
                   (hasMultinutSupport && multinutEnabled) ||
-                  globalMutexLock
+                  globalMutexLock ||
+                  paymentInProgress
                 "
               >
                 <q-btn
@@ -550,14 +554,21 @@
                   size="lg"
                   color="primary"
                   rounded
-                  :disabled="payInvoiceData.blocking"
+                  :disabled="
+                    payInvoiceData.blocking ||
+                    paymentInProgress ||
+                    globalMutexLock
+                  "
                   @click="handleMeltButton"
                   :label="
-                    !payInvoiceData.blocking
+                    !payInvoiceData.blocking && !paymentInProgress
                       ? $t('PayInvoiceDialog.invoice.actions.pay.label')
                       : $t('PayInvoiceDialog.invoice.actions.pay.in_progress')
                   "
-                  :loading="globalMutexLock && !payInvoiceData.blocking"
+                  :loading="
+                    paymentInProgress ||
+                    (globalMutexLock && !payInvoiceData.blocking)
+                  "
                 >
                   <template v-slot:loading>
                     <q-spinner />
@@ -950,6 +961,14 @@ export default defineComponent({
         typeof paidRaw !== "boolean";
       return hasAmount || hasFeeReserve || hasFeePaid || hasPaidTimestamp;
     },
+    showBottomMeltQuoteInformation: function (): boolean {
+      return (
+        this.showMeltQuoteInformation &&
+        this.hasMeltQuote &&
+        !this.isPaid &&
+        !this.paymentInProgress
+      );
+    },
     showOnchainFeeOptions: function (): boolean {
       return this.isOnchainPay && this.onchainFeeOptions.length > 0;
     },
@@ -1014,6 +1033,9 @@ export default defineComponent({
     showNoMintForMethodError: function (): boolean {
       return this.payPaymentMethod != null && !this.hasMintForPayMethod;
     },
+    paymentInProgress: function (): boolean {
+      return Boolean(this.isPaying || this.payInvoiceData?.paying);
+    },
     isBolt12Pay: function (): boolean {
       return this.payPaymentMethod === PaymentMethod.Bolt12;
     },
@@ -1027,7 +1049,7 @@ export default defineComponent({
         !this.hasMeltQuote &&
         !this.payInvoiceData.blocking &&
         !this.isPaid &&
-        !this.isPaying &&
+        !this.paymentInProgress &&
         this.payInvoiceData.meltQuote.error == ""
       );
     },
@@ -1035,7 +1057,7 @@ export default defineComponent({
       if (
         !this.payInvoiceData.invoice ||
         this.isPaid ||
-        this.isPaying ||
+        this.paymentInProgress ||
         this.hasMeltQuote
       ) {
         return false;
@@ -1109,7 +1131,7 @@ export default defineComponent({
     invoiceStateKey: function (): string {
       if (this.isPaid) {
         return "paid";
-      } else if (this.isPaying) {
+      } else if (this.paymentInProgress) {
         return "paying";
       } else if (this.hasMeltQuote) {
         return "success";
@@ -1179,7 +1201,7 @@ export default defineComponent({
       this.isPaying = true;
       try {
         const result = await this.meltInvoiceData(true);
-        const returnedChange = useProofsStore().sumProofs(result.change);
+        const returnedChange = useProofsStore().sumProofs(result?.change ?? []);
         this.payInvoiceData.fee_paid =
           this.payInvoiceData.meltQuote.response.fee_reserve - returnedChange;
         console.log("### fee_paid", this.payInvoiceData.fee_paid);
@@ -1337,6 +1359,13 @@ export default defineComponent({
   width: 100%;
 }
 
+.invoice-details-bottom {
+  width: 100%;
+  margin-top: auto;
+  padding-top: 16px;
+  padding-bottom: clamp(20px, 4vh, 36px);
+}
+
 .relative-container {
   position: relative;
 }
@@ -1391,6 +1420,10 @@ export default defineComponent({
   width: 100%;
 }
 
+.onchain-fee-options .text-subtitle2 {
+  margin-bottom: 12px;
+}
+
 .fee-option-row {
   border: 1px solid rgba(128, 128, 128, 0.25);
   border-radius: 14px;
@@ -1400,8 +1433,8 @@ export default defineComponent({
 }
 
 .fee-option-row--selected {
-  border-color: var(--q-primary);
   background: rgba(var(--q-primary-rgb), 0.12);
+  color: var(--q-primary);
 }
 
 .slide-down-enter-active {

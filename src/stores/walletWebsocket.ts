@@ -246,7 +246,7 @@ export async function mintOnPaidGeneric(
 
       if (type === PaymentMethod.Bolt11) {
         if (hideInvoiceDetailsOnMint) {
-          uIStore.showInvoiceDetails = false;
+          this.hideInvoiceDetailsAfterReceiveSuccess(quoteId);
         }
         useUiStore().vibrate();
         if (verbose) {

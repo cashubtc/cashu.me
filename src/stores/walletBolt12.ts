@@ -185,7 +185,7 @@ export async function checkOfferAndMintBolt12(
     }
 
     if (hideInvoiceDetailsOnMint) {
-      uIStore.showInvoiceDetails = false;
+      this.hideInvoiceDetailsAfterReceiveSuccess(invoice.quote);
     }
 
     useUiStore().vibrate();
