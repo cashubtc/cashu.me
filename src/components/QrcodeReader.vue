@@ -1,9 +1,14 @@
 <script lang="ts">
-import QrScanner from "qr-scanner";
+import QrScanner, { type ScanResult } from "@agicash/qr-scanner";
 import { URDecoder } from "@gandlaf21/bc-ur";
+import zxingReaderWasmUrl from "zxing-wasm/reader/zxing_reader.wasm?url";
 import { useCameraStore } from "src/stores/camera";
-import { mapActions, mapState, mapWritableState } from "pinia";
+import { mapActions, mapState } from "pinia";
 import { useUiStore } from "src/stores/ui";
+
+QrScanner.configureWasm({
+  locateFile: () => zxingReaderWasmUrl,
+});
 
 export default {
   emits: ["decode"],
@@ -21,11 +26,10 @@ export default {
   mounted() {
     this.qrScanner = new QrScanner(
       this.$refs.cameraEl as HTMLVideoElement,
-      (result: QrScanner.ScanResult) => {
+      (result: ScanResult) => {
         this.handleResult(result);
       },
       {
-        returnDetailedScanResult: true,
         highlightScanRegion: true,
         highlightCodeOutline: true,
         onDecodeError: () => {},
@@ -46,7 +50,7 @@ export default {
   },
   methods: {
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
-    handleResult(result: QrScanner.ScanResult) {
+    handleResult(result: ScanResult) {
       // if this is a multipart-qr code, do not yet emit
       if (result.data.toLowerCase().startsWith("ur:")) {
         this.urDecoder?.receivePart(result.data);
