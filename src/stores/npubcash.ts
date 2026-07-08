@@ -96,7 +96,8 @@ export const useNPCStore = defineStore("npc", {
         if (info.username) {
           const usernameAddress = info.username + "@" + this.npcDomain;
           if (previousAddress !== usernameAddress) {
-            notifySuccess(`Logged in as ${info.username}`);
+            // notifySuccess(`Logged in as ${info.username}`);
+            console.log(`[npub.cash] Logged in as ${info.name}`);
           }
           this.npcAddress = usernameAddress;
         }

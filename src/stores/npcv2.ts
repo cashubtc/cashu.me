@@ -102,7 +102,8 @@ export const useNPCV2Store = defineStore("npcV2", {
         if (info.name) {
           const usernameAddress = info.name + "@" + this.npcV2Domain;
           if (previousAddress !== usernameAddress) {
-            notifySuccess(`Logged in as ${info.name}`);
+            //notifySuccess(`Logged in as ${info.name}`);
+            console.log(`[npubx.cash] Logged in as ${info.name}`);
           }
           this.npcV2Address = usernameAddress;
         }
