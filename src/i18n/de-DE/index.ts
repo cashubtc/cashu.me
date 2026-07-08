@@ -166,6 +166,57 @@ export default {
     },
   },
   Settings: {
+    menu: {
+      title: "Einstellungen",
+      backup: {
+        title: "Backup & Wiederherstellung",
+        caption: "Seed-Phrase und Ecash-Wiederherstellung",
+      },
+      lightning_address: {
+        title: "Lightning-Adresse",
+        caption: "Zahlungen an deine Lightning-Adresse empfangen",
+      },
+      nostr: {
+        title: "Nostr",
+        caption: "Schlüssel, Relays und Web of Trust",
+      },
+      payment_requests: {
+        title: "Zahlungsanfragen",
+        caption: "Ecash-Zahlungen über Nostr empfangen",
+      },
+      nwc: {
+        title: "Nostr Wallet Connect",
+        caption: "Wallet aus anderen Apps verwenden",
+      },
+      hardware: {
+        title: "Hardware",
+        caption: "NFC-Einstellungen",
+      },
+      p2pk: {
+        title: "P2PK",
+        caption: "Ecash empfangen, das an deine Schlüssel gebunden ist",
+      },
+      privacy: {
+        title: "Privatsphäre",
+        caption: "Netzwerkprüfungen und Bitcoin-Preis",
+      },
+      experimental: {
+        title: "Experimentell",
+        caption: "Neue Funktionen früher ausprobieren",
+      },
+      appearance: {
+        title: "Aussehen",
+        caption: "Design, Tastatur und Bitcoin-Symbol",
+      },
+      language: {
+        title: "Sprache",
+        caption: "Wähle deine Sprache",
+      },
+      advanced: {
+        title: "Erweitert",
+        caption: "Entwicklerwerkzeuge und Wallet-Reset",
+      },
+    },
     language: {
       title: "Sprache",
       description:
