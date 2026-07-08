@@ -124,7 +124,7 @@
                           }}
                         </div>
                       </div>
-                      <div v-else-if="isPaying" class="q-mb-md">
+                      <div v-else-if="paymentInProgress" class="q-mb-md">
                         <div class="row">
                           <div class="col-12 text-h4 text-weight-bold q-mb-xs">
                             {{ $t("PayInvoiceDialog.invoice.paying") }}
@@ -541,7 +541,8 @@
                 v-else-if="
                   enoughtotalUnitBalance ||
                   (hasMultinutSupport && multinutEnabled) ||
-                  globalMutexLock
+                  globalMutexLock ||
+                  paymentInProgress
                 "
               >
                 <q-btn
@@ -550,14 +551,21 @@
                   size="lg"
                   color="primary"
                   rounded
-                  :disabled="payInvoiceData.blocking"
+                  :disabled="
+                    payInvoiceData.blocking ||
+                    paymentInProgress ||
+                    globalMutexLock
+                  "
                   @click="handleMeltButton"
                   :label="
-                    !payInvoiceData.blocking
+                    !payInvoiceData.blocking && !paymentInProgress
                       ? $t('PayInvoiceDialog.invoice.actions.pay.label')
                       : $t('PayInvoiceDialog.invoice.actions.pay.in_progress')
                   "
-                  :loading="globalMutexLock && !payInvoiceData.blocking"
+                  :loading="
+                    paymentInProgress ||
+                    (globalMutexLock && !payInvoiceData.blocking)
+                  "
                 >
                   <template v-slot:loading>
                     <q-spinner />
@@ -1014,6 +1022,9 @@ export default defineComponent({
     showNoMintForMethodError: function (): boolean {
       return this.payPaymentMethod != null && !this.hasMintForPayMethod;
     },
+    paymentInProgress: function (): boolean {
+      return Boolean(this.isPaying || this.payInvoiceData?.paying);
+    },
     isBolt12Pay: function (): boolean {
       return this.payPaymentMethod === PaymentMethod.Bolt12;
     },
@@ -1027,7 +1038,7 @@ export default defineComponent({
         !this.hasMeltQuote &&
         !this.payInvoiceData.blocking &&
         !this.isPaid &&
-        !this.isPaying &&
+        !this.paymentInProgress &&
         this.payInvoiceData.meltQuote.error == ""
       );
     },
@@ -1035,7 +1046,7 @@ export default defineComponent({
       if (
         !this.payInvoiceData.invoice ||
         this.isPaid ||
-        this.isPaying ||
+        this.paymentInProgress ||
         this.hasMeltQuote
       ) {
         return false;
@@ -1109,7 +1120,7 @@ export default defineComponent({
     invoiceStateKey: function (): string {
       if (this.isPaid) {
         return "paid";
-      } else if (this.isPaying) {
+      } else if (this.paymentInProgress) {
         return "paying";
       } else if (this.hasMeltQuote) {
         return "success";
@@ -1179,7 +1190,7 @@ export default defineComponent({
       this.isPaying = true;
       try {
         const result = await this.meltInvoiceData(true);
-        const returnedChange = useProofsStore().sumProofs(result.change);
+        const returnedChange = useProofsStore().sumProofs(result?.change ?? []);
         this.payInvoiceData.fee_paid =
           this.payInvoiceData.meltQuote.response.fee_reserve - returnedChange;
         console.log("### fee_paid", this.payInvoiceData.fee_paid);
