@@ -13,11 +13,19 @@ import { useProofsStore } from "src/stores/proofs";
 
 const PUBKEY =
   "02a9acc1e48c25eeeb9289b5031cc57da9fe72f3fe2861d264bdc074209b107ba2";
-const HASH =
-  "e0d21f5a0158ee5eafcd25f31036ff2b9ea23bda56c81b883c5b41d3d9b56b39";
+const HASH = "e0d21f5a0158ee5eafcd25f31036ff2b9ea23bda56c81b883c5b41d3d9b56b39";
 
 const makePr = (nut10?: { kind: string; data: string; tags: string[][] }) =>
-  new PaymentRequest(undefined, "pr1", 21, "sat", undefined, undefined, false, nut10);
+  new PaymentRequest(
+    undefined,
+    "pr1",
+    21,
+    "sat",
+    undefined,
+    undefined,
+    false,
+    nut10
+  );
 
 describe("PaymentRequest.toP2PKOptions (NUT-18 lock contract)", () => {
   // SendTokenDialog.payPaymentRequest branches on this contract: options
@@ -77,7 +85,9 @@ describe("walletStore.sendToLock pubkey normalization", () => {
       unit: "sat",
       mint: { mintUrl: "https://mint.test" },
       ops: {
-        send: vi.fn().mockReturnValue({ keyset: vi.fn().mockReturnValue({ asP2PK }) }),
+        send: vi
+          .fn()
+          .mockReturnValue({ keyset: vi.fn().mockReturnValue({ asP2PK }) }),
       },
     } as any;
     wallet.spendableProofs = vi.fn().mockReturnValue(walletProofs);
