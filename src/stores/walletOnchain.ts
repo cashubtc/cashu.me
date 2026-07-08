@@ -208,7 +208,7 @@ export async function checkOnchainAndMint(
     }
 
     if (hideInvoiceDetailsOnMint) {
-      uIStore.showInvoiceDetails = false;
+      this.hideInvoiceDetailsAfterReceiveSuccess(invoice.quote);
     }
 
     useUiStore().vibrate();

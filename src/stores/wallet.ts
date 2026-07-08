@@ -155,6 +155,7 @@ type KeysetCounter = {
 const receiveStore = useReceiveTokensStore();
 const tokenStore = useTokensStore();
 const proofsStore = useProofsStore();
+const RECEIVE_SUCCESS_HIDE_DELAY_MS = 5000;
 
 function amountToNumber(value: AmountLike | undefined): number {
   if (value === undefined) return 0;
@@ -516,6 +517,17 @@ export const useWalletStore = defineStore("wallet", {
       } catch (error) {
         console.error("Could not persist paid payment history", error);
       }
+    },
+
+    hideInvoiceDetailsAfterReceiveSuccess(
+      quoteId: string,
+      delayMs = RECEIVE_SUCCESS_HIDE_DELAY_MS
+    ) {
+      setTimeout(() => {
+        if (this.invoiceData?.quote === quoteId) {
+          useUiStore().showInvoiceDetails = false;
+        }
+      }, delayMs);
     },
 
     splitAmount: function (value: number) {
