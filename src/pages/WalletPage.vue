@@ -85,7 +85,14 @@
           <!-- ////////////////// UNIFIED HISTORY LIST ///////////////// -->
 
           <q-tab-panel name="history">
-            <HistoryTable />
+            <HistoryTable v-if="historyHydrated" />
+            <q-skeleton
+              v-else
+              type="rect"
+              height="260px"
+              class="q-mx-auto"
+              style="max-width: 500px"
+            />
           </q-tab-panel>
 
           <!-- ////////////////////// SETTINGS ////////////////// -->
@@ -293,6 +300,7 @@ export default {
       paymentsChart: {
         show: false,
       },
+      historyHydrated: false,
       welcomeDialog: {
         show: false,
       },
@@ -612,8 +620,8 @@ export default {
     const migrationsStore = useMigrationsStore();
     migrationsStore.initMigrations();
     await migrationsStore.runMigrations();
-    await this.initPaymentHistory();
-    await this.initEcashHistory();
+    await Promise.all([this.initPaymentHistory(), this.initEcashHistory()]);
+    this.historyHydrated = true;
 
     // check if another tab is open
     this.registerBroadcastChannel();
