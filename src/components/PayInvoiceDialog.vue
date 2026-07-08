@@ -233,12 +233,6 @@
                             </div>
                           </div>
                         </div>
-                        <MeltQuoteInformation
-                          v-if="showMeltQuoteInformation"
-                          class="q-mt-sm"
-                          :melt-quote="payInvoiceData.meltQuote.response"
-                          :mint-url="activeMintUrl"
-                        />
                         <p
                           class="text-wrap q-mt-xl"
                           style="max-width: 600px; font-size: 1.1rem"
@@ -304,6 +298,15 @@
                       </div>
                     </div>
                   </transition>
+                </div>
+                <div
+                  v-if="showBottomMeltQuoteInformation"
+                  class="invoice-details-bottom"
+                >
+                  <MeltQuoteInformation
+                    :melt-quote="payInvoiceData.meltQuote.response"
+                    :mint-url="activeMintUrl"
+                  />
                 </div>
               </div>
 
@@ -958,6 +961,14 @@ export default defineComponent({
         typeof paidRaw !== "boolean";
       return hasAmount || hasFeeReserve || hasFeePaid || hasPaidTimestamp;
     },
+    showBottomMeltQuoteInformation: function (): boolean {
+      return (
+        this.showMeltQuoteInformation &&
+        this.hasMeltQuote &&
+        !this.isPaid &&
+        !this.paymentInProgress
+      );
+    },
     showOnchainFeeOptions: function (): boolean {
       return this.isOnchainPay && this.onchainFeeOptions.length > 0;
     },
@@ -1348,6 +1359,13 @@ export default defineComponent({
   width: 100%;
 }
 
+.invoice-details-bottom {
+  width: 100%;
+  margin-top: auto;
+  padding-top: 16px;
+  padding-bottom: clamp(20px, 4vh, 36px);
+}
+
 .relative-container {
   position: relative;
 }
@@ -1402,6 +1420,10 @@ export default defineComponent({
   width: 100%;
 }
 
+.onchain-fee-options .text-subtitle2 {
+  margin-bottom: 12px;
+}
+
 .fee-option-row {
   border: 1px solid rgba(128, 128, 128, 0.25);
   border-radius: 14px;
@@ -1411,8 +1433,8 @@ export default defineComponent({
 }
 
 .fee-option-row--selected {
-  border-color: var(--q-primary);
   background: rgba(var(--q-primary-rgb), 0.12);
+  color: var(--q-primary);
 }
 
 .slide-down-enter-active {
