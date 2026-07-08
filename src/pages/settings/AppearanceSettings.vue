@@ -45,25 +45,31 @@
       :title="$t('Settings.appearance.theme.title')"
       :caption="$t('Settings.appearance.theme.description')"
     >
-      <q-item>
+      <q-item
+        v-for="theme in visibleThemeOptions"
+        :key="theme.name"
+        clickable
+        @click="selectTheme(theme.name)"
+        :active="activeTheme === theme.name"
+        active-class="text-weight-bold text-primary"
+      >
+        <q-item-section avatar>
+          <q-icon
+            :color="activeTheme === theme.name ? 'primary' : 'grey'"
+            :name="
+              activeTheme === theme.name
+                ? 'check_circle'
+                : 'radio_button_unchecked'
+            "
+          />
+        </q-item-section>
         <q-item-section>
-          <div class="row items-center">
-            <q-btn
-              v-for="theme in themeOptions"
-              :key="theme.name"
-              v-show="themes.includes(theme.name)"
-              dense
-              flat
-              round
-              @click="changeColor(theme.name)"
-              icon="format_color_fill"
-              :color="theme.color"
-              size="md"
-              ><q-tooltip>{{
-                $t(`Settings.appearance.theme.tooltips.${theme.tooltip}`)
-              }}</q-tooltip>
-            </q-btn>
-          </div>
+          <q-item-label>{{
+            $t(`Settings.appearance.theme.tooltips.${theme.tooltip}`)
+          }}</q-item-label>
+        </q-item-section>
+        <q-item-section side>
+          <q-icon name="format_color_fill" :color="theme.color" size="sm" />
         </q-item-section>
       </q-item>
     </SettingsSection>
@@ -86,6 +92,7 @@ export default defineComponent({
   },
   data: function () {
     return {
+      activeTheme: "monochrome",
       themes: [
         "monochrome",
         "classic",
@@ -115,6 +122,21 @@ export default defineComponent({
       "useNumericKeyboard",
       "bip177BitcoinSymbol",
     ]),
+    visibleThemeOptions() {
+      return this.themeOptions.filter((theme) =>
+        this.themes.includes(theme.name)
+      );
+    },
+  },
+  methods: {
+    selectTheme: function (themeName) {
+      this.changeColor(themeName);
+      this.activeTheme = themeName;
+    },
+  },
+  created: function () {
+    this.activeTheme =
+      this.$q.localStorage.getItem("cashu.theme") || "monochrome";
   },
 });
 </script>

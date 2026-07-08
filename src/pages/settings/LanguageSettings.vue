@@ -7,18 +7,26 @@
       :title="$t('Settings.language.title')"
       :caption="$t('Settings.language.description')"
     >
-      <q-item class="settings-control-item q-pt-md">
-        <q-item-section>
-          <q-select
-            v-model="selectedLanguage"
-            :options="languageOptions"
-            rounded
-            outlined
-            dense
-            emit-value
-            map-options
-            @update:model-value="changeLanguage"
+      <q-item
+        v-for="option in languageOptions"
+        :key="option.value"
+        clickable
+        @click="selectLanguage(option.value)"
+        :active="activeLocale === option.value"
+        active-class="text-weight-bold text-primary"
+      >
+        <q-item-section avatar>
+          <q-icon
+            :color="activeLocale === option.value ? 'primary' : 'grey'"
+            :name="
+              activeLocale === option.value
+                ? 'check_circle'
+                : 'radio_button_unchecked'
+            "
           />
+        </q-item-section>
+        <q-item-section>
+          <q-item-label>{{ option.label }}</q-item-label>
         </q-item-section>
       </q-item>
     </SettingsSection>
@@ -39,7 +47,6 @@ export default defineComponent({
   },
   data: function () {
     return {
-      selectedLanguage: navigator.language || "en-US",
       languageOptions: [
         { label: "English", value: "en-US" },
         { label: "Español", value: "es-ES" },
@@ -58,20 +65,19 @@ export default defineComponent({
       ],
     };
   },
+  computed: {
+    activeLocale() {
+      return this.$i18n.locale;
+    },
+  },
   methods: {
-    changeLanguage(locale) {
+    selectLanguage(locale) {
       // Set the i18n locale
       this.$i18n.locale = locale;
 
       // Store the selected language in localStorage
       localStorage.setItem("cashu.language", locale);
     },
-  },
-  created: function () {
-    // Set the initial selected language based on the current locale
-    this.selectedLanguage =
-      this.languageOptions.find((option) => option.value === this.$i18n.locale)
-        ?.label || "Language";
   },
 });
 </script>
