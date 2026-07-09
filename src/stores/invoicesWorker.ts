@@ -9,7 +9,7 @@ import {
   normalizeMintQuote,
   usePaymentHistoryStore,
 } from "src/stores/paymentHistory";
-import { MintQuoteState } from "@cashu/cashu-ts";
+import { MintInfo, MintQuoteState } from "@cashu/cashu-ts";
 import { useProofsStore } from "src/stores/proofs";
 import { useUiStore } from "src/stores/ui";
 import * as nobleSecp256k1 from "@noble/secp256k1";
@@ -321,7 +321,14 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       return !nut29.methods || nut29.methods.includes(PaymentMethod.Bolt11);
     },
     bolt11BatchSizeLimit(mint: Pick<StoredMint, "info"> | undefined) {
-      const maxBatchSize = mint?.info?.nuts?.[29]?.max_batch_size;
+      if (!mint?.info) return undefined;
+      let maxBatchSize: number | undefined;
+      try {
+        maxBatchSize = new MintInfo(mint.info).isSupported(29).params
+          ?.max_batch_size;
+      } catch {
+        return undefined;
+      }
       if (
         typeof maxBatchSize !== "number" ||
         !Number.isFinite(maxBatchSize) ||

@@ -63,6 +63,42 @@ describe("invoices worker", () => {
     expect(worker.mintSupportsBolt11Batch({ info })).toBe(expected);
   });
 
+  it("uses cashu-ts's normalized batch cap when the mint omits one", () => {
+    const worker = useInvoicesWorkerStore();
+
+    expect(worker.bolt11BatchSizeLimit({ info: { nuts: { 29: {} } } })).toBe(
+      100
+    );
+  });
+
+  it("uses the single-quote checker for a mint without NUT-29 support", async () => {
+    const worker = useInvoicesWorkerStore();
+    const mintStore = useMintsStore();
+    const now = Date.now();
+    mintStore.mints = [
+      {
+        url: "https://mint.example",
+        keys: [],
+        keysets: [],
+        info: { nuts: {} },
+      },
+    ];
+    worker.quotes = [queuedQuote("unsupported-q", now - 10_000)];
+    const walletStore = {
+      invoiceHistory: [pendingInvoice("unsupported-q")],
+      mintWallet: vi.fn(),
+      checkInvoiceBolt11: vi.fn(async () => {}),
+    };
+
+    await worker.processIncomingQueues(now, walletStore);
+
+    expect(walletStore.mintWallet).not.toHaveBeenCalled();
+    expect(walletStore.checkInvoiceBolt11).toHaveBeenCalledWith(
+      "unsupported-q",
+      false
+    );
+  });
+
   it("uses the single-quote checker while an advertised batch path is cooling down", async () => {
     const worker = useInvoicesWorkerStore();
     const mintStore = useMintsStore();
