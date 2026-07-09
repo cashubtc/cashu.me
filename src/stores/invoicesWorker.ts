@@ -12,6 +12,8 @@ import {
 import { MintQuoteState } from "@cashu/cashu-ts";
 import { useProofsStore } from "src/stores/proofs";
 import { useUiStore } from "src/stores/ui";
+import * as nobleSecp256k1 from "@noble/secp256k1";
+import { bytesToHex } from "@noble/hashes/utils";
 interface InvoiceQuote {
   quote: string;
   addedAt: number;
@@ -318,6 +320,48 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         }
       });
     },
+    partitionLockedPaidQuotes(paidEntries: PaidBolt11Quote[]) {
+      const availableKeys = Array.from(
+        new Set(
+          paidEntries
+            .map((entry) => entry.invoice.privKey)
+            .filter((privKey): privKey is string => Boolean(privKey))
+        )
+      ).flatMap((privKey) => {
+        try {
+          return [
+            {
+              privKey,
+              pubkey: bytesToHex(
+                nobleSecp256k1.getPublicKey(privKey, true)
+              ).toLowerCase(),
+            },
+          ];
+        } catch {
+          return [];
+        }
+      });
+      const mintable: PaidBolt11Quote[] = [];
+      const missingKey: PaidBolt11Quote[] = [];
+      const signingKeys = new Set<string>();
+      for (const entry of paidEntries) {
+        const quotePubkey = entry.mintQuote.pubkey;
+        if (!quotePubkey) {
+          mintable.push(entry);
+          continue;
+        }
+        const matchingKey = availableKeys.find(
+          ({ pubkey }) => pubkey === String(quotePubkey).toLowerCase()
+        );
+        if (!matchingKey) {
+          missingKey.push(entry);
+          continue;
+        }
+        signingKeys.add(matchingKey.privKey);
+        mintable.push(entry);
+      }
+      return { mintable, missingKey, signingKeys: Array.from(signingKeys) };
+    },
     clearReusableMintCooldown(mintUrl: string) {
       if (this.reusableMintCooldowns[mintUrl]) {
         delete this.reusableMintCooldowns[mintUrl];
@@ -612,14 +656,39 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
           }
         }
         walletStore.syncPaymentHistoryCache?.();
+        let mintedCount = 0;
         if (paidEntries.length > 0) {
-          await this.mintPaidBolt11Batch(paidEntries, mintWallet, walletStore);
+          const { mintable, missingKey, signingKeys } =
+            this.partitionLockedPaidQuotes(paidEntries);
+          if (mintable.length > 0) {
+            for (const entry of missingKey) {
+              entry.queueEntry.lastChecked = now;
+              entry.queueEntry.checkCount += 1;
+            }
+            await this.mintPaidBolt11Batch(
+              mintable,
+              signingKeys,
+              mintWallet,
+              walletStore
+            );
+            mintedCount = mintable.length;
+          } else if (missingKey.length > 0) {
+            for (const entry of missingKey.slice(1)) {
+              entry.queueEntry.lastChecked = now;
+              entry.queueEntry.checkCount += 1;
+            }
+            await this.processSingleBolt11Entry(
+              missingKey[0],
+              now,
+              walletStore
+            );
+          }
         }
         console.log("Bolt11 batch quote check complete", {
           mint: mintUrl,
           attempted: attempted.length,
           paid: paidEntries.length,
-          minted: paidEntries.length,
+          minted: mintedCount,
         });
       } catch (error) {
         for (const entry of attempted) {
@@ -635,6 +704,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
     },
     async mintPaidBolt11Batch(
       paidEntries: PaidBolt11Quote[],
+      signingKeys: string[],
       mintWallet: any,
       walletStore: any
     ) {
@@ -652,16 +722,18 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         proofs = await walletStore.retryOnceOnSignedOutputs(
           keysetId,
           async () => {
+            const config = {
+              keysetId,
+              proofsWeHave: mintStore.mintUnitProofs(mint, unit),
+              ...(signingKeys.length > 0 ? { privkey: signingKeys } : {}),
+            };
             const preview = await mintWallet.prepareBatchMint(
               PaymentMethod.Bolt11,
               paidEntries.map((entry) => ({
                 amount: entry.mintQuote.amount,
                 quote: entry.mintQuote,
               })),
-              {
-                keysetId,
-                proofsWeHave: mintStore.mintUnitProofs(mint, unit),
-              }
+              config
             );
             return await mintWallet.completeBatchMint(preview);
           },
