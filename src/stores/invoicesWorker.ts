@@ -4,6 +4,7 @@ import { useLocalStorage } from "@vueuse/core";
 import { useSettingsStore } from "./settings";
 import { PaymentMethod } from "src/stores/walletTypes";
 import { useTokensStore } from "./tokens";
+import type { StoredMint } from "src/stores/mints";
 interface InvoiceQuote {
   quote: string;
   addedAt: number;
@@ -17,6 +18,8 @@ interface ReusableMintCooldown {
   nextRetryAt: number;
   lastError?: string;
 }
+
+interface BatchPathCooldown extends ReusableMintCooldown {}
 
 interface OutgoingPaymentCheck {
   id: string;
@@ -57,6 +60,10 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       reusableMintCooldowns: useLocalStorage<
         Record<string, ReusableMintCooldown>
       >("cashu.worker.invoices.reusableMintCooldowns", {}),
+      batchPathCooldowns: useLocalStorage<Record<string, BatchPathCooldown>>(
+        "cashu.worker.invoices.batchPathCooldowns",
+        {}
+      ),
       outgoingPayments: useLocalStorage<OutgoingPaymentCheck[]>(
         "cashu.worker.outgoing.queue",
         []
@@ -226,6 +233,24 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
     reusableMintInCooldown(mintUrl: string, now: number) {
       const cooldown = this.reusableMintCooldowns[mintUrl];
       return Boolean(cooldown && cooldown.nextRetryAt > now);
+    },
+    batchPathKey(mintUrl: string, unit: string, method: PaymentMethod) {
+      return `${mintUrl}|${unit}|${method}`;
+    },
+    batchPathInCooldown(
+      mintUrl: string,
+      unit: string,
+      method: PaymentMethod,
+      now: number
+    ) {
+      const cooldown =
+        this.batchPathCooldowns[this.batchPathKey(mintUrl, unit, method)];
+      return Boolean(cooldown && cooldown.nextRetryAt > now);
+    },
+    mintSupportsBolt11Batch(mint: Pick<StoredMint, "info"> | undefined) {
+      const nut29 = mint?.info?.nuts?.[29];
+      if (!nut29) return false;
+      return !nut29.methods || nut29.methods.includes(PaymentMethod.Bolt11);
     },
     clearReusableMintCooldown(mintUrl: string) {
       if (this.reusableMintCooldowns[mintUrl]) {

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
+import { useMintsStore } from "src/stores/mints";
 import { PaymentMethod } from "src/stores/walletTypes";
 
 describe("invoices worker", () => {
@@ -11,8 +12,70 @@ describe("invoices worker", () => {
     worker.onchainQuotes = [];
     worker.outgoingPayments = [];
     worker.reusableMintCooldowns = {};
+    worker.batchPathCooldowns = {};
     worker.lastInvoiceCheckTime = 0;
     worker.lastOutgoingCheckTime = 0;
+  });
+
+  it.each([
+    [{ nuts: { 29: {} } }, true],
+    [{ nuts: { "29": { methods: ["bolt11"] } } }, true],
+    [{ nuts: { 29: { methods: ["bolt12"] } } }, false],
+    [{ nuts: {} }, false],
+  ])("detects advertised Bolt11 batch support", (info, expected) => {
+    const worker = useInvoicesWorkerStore();
+
+    expect(worker.mintSupportsBolt11Batch({ info })).toBe(expected);
+  });
+
+  it("uses the single-quote checker while an advertised batch path is cooling down", async () => {
+    const worker = useInvoicesWorkerStore();
+    const mintStore = useMintsStore();
+    const now = Date.now();
+    mintStore.mints = [
+      {
+        url: "https://mint.example",
+        keys: [],
+        keysets: [],
+        info: { nuts: { 29: { methods: ["bolt11"] } } },
+      },
+    ];
+    worker.quotes = [
+      {
+        quote: "bolt11-q",
+        addedAt: now - 10_000,
+        lastChecked: 0,
+        checkCount: 0,
+      },
+    ];
+    worker.batchPathCooldowns = {
+      "https://mint.example|sat|bolt11": {
+        failedAt: now - 1_000,
+        failureCount: 1,
+        nextRetryAt: now + 60_000,
+      },
+    };
+    const walletStore = {
+      invoiceHistory: [
+        {
+          quote: "bolt11-q",
+          amount: 10,
+          date: new Date(now).toISOString(),
+          status: "pending",
+          mint: "https://mint.example",
+          unit: "sat",
+          type: PaymentMethod.Bolt11,
+        },
+      ],
+      checkInvoiceBolt11: vi.fn(async () => {}),
+    };
+
+    await worker.processIncomingQueues(now, walletStore);
+
+    expect(walletStore.checkInvoiceBolt11).toHaveBeenCalledWith(
+      "bolt11-q",
+      false
+    );
   });
 
   it("does not reset reusable quote backoff when re-queueing an existing quote", () => {
