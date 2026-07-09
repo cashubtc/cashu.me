@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
 import { useMintsStore } from "src/stores/mints";
 import { usePaymentHistoryStore } from "src/stores/paymentHistory";
+import { useProofsStore } from "src/stores/proofs";
+import { useUiStore } from "src/stores/ui";
 import { PaymentMethod } from "src/stores/walletTypes";
 
 function pendingInvoice(quote, overrides = {}) {
@@ -180,6 +182,103 @@ describe("invoices worker", () => {
       })
     );
     expect(walletStore.syncPaymentHistoryCache).toHaveBeenCalled();
+  });
+
+  it("batch-mints only paid responses before marking their invoices paid", async () => {
+    const worker = useInvoicesWorkerStore();
+    const mintStore = useMintsStore();
+    const paymentHistoryStore = usePaymentHistoryStore();
+    const proofsStore = useProofsStore();
+    const uiStore = useUiStore();
+    const now = Date.now();
+    advertiseBatchMint(mintStore, "https://mint.example");
+    mintStore.mints[0].keysets = [{ id: "00aa", unit: "sat", active: true }];
+    worker.quotes = [
+      queuedQuote("paid-q", now - 20_000),
+      queuedQuote("unpaid-q", now - 10_000),
+    ];
+    const invoices = [pendingInvoice("paid-q"), pendingInvoice("unpaid-q")];
+    const paidResponse = {
+      quote: "paid-q",
+      amount: "10",
+      state: "PAID",
+      request: "lnbc-paid",
+      unit: "sat",
+    };
+    const unpaidResponse = {
+      quote: "unpaid-q",
+      amount: "10",
+      state: "UNPAID",
+      request: "lnbc-unpaid",
+      unit: "sat",
+    };
+    const preview = { keysetId: "00aa", quotes: [paidResponse] };
+    const proofs = [{ id: "00aa", amount: 10, secret: "batch-proof" }];
+    const checkMintQuoteBatchBolt11 = vi.fn(async () => [
+      paidResponse,
+      unpaidResponse,
+    ]);
+    const prepareBatchMint = vi.fn(async () => preview);
+    const completeBatchMint = vi.fn(async () => {
+      expect(uiStore.unlockMutex).not.toHaveBeenCalled();
+      return proofs;
+    });
+    vi.spyOn(paymentHistoryStore, "upsertMintQuote").mockResolvedValue();
+    const addProofs = vi.spyOn(proofsStore, "addProofs").mockResolvedValue();
+    vi.spyOn(uiStore, "lockMutex").mockResolvedValue();
+    vi.spyOn(uiStore, "unlockMutex").mockImplementation(() => {});
+    const setInvoicePaid = vi.fn(async (quote) => {
+      expect(addProofs).toHaveBeenCalledWith(proofs);
+      invoices.find((invoice) => invoice.quote === quote).status = "paid";
+    });
+    const retryOnceOnSignedOutputs = vi.fn(
+      async (_keysetId, operation) => await operation()
+    );
+    const walletStore = {
+      invoiceHistory: invoices,
+      mintWallet: vi.fn(async () => ({
+        checkMintQuoteBatchBolt11,
+        prepareBatchMint,
+        completeBatchMint,
+      })),
+      getKeyset: vi.fn(() => "00aa"),
+      retryOnceOnSignedOutputs,
+      checkInvoiceBolt11: vi.fn(),
+      setInvoicePaid,
+      syncPaymentHistoryCache: vi.fn(),
+    };
+
+    await worker.processIncomingQueues(now, walletStore);
+
+    expect(prepareBatchMint).toHaveBeenCalledWith(
+      PaymentMethod.Bolt11,
+      [
+        {
+          amount: 10,
+          quote: expect.objectContaining({ quote: "paid-q", state: "PAID" }),
+        },
+      ],
+      { keysetId: "00aa", proofsWeHave: [] }
+    );
+    expect(completeBatchMint).toHaveBeenCalledWith(preview);
+    expect(retryOnceOnSignedOutputs).toHaveBeenCalledWith(
+      "00aa",
+      expect.any(Function),
+      false
+    );
+    expect(uiStore.lockMutex).toHaveBeenCalledOnce();
+    expect(uiStore.unlockMutex).toHaveBeenCalledOnce();
+    expect(addProofs).toHaveBeenCalledWith(proofs);
+    expect(setInvoicePaid).toHaveBeenCalledTimes(1);
+    expect(setInvoicePaid).toHaveBeenCalledWith(
+      "paid-q",
+      expect.objectContaining({
+        mintQuote: expect.objectContaining({ quote: "paid-q" }),
+      })
+    );
+    expect(worker.quotes).toEqual([
+      expect.objectContaining({ quote: "unpaid-q", checkCount: 1 }),
+    ]);
   });
 
   it("selects the largest due group, capped and ordered by oldest queue entry", async () => {
