@@ -1,9 +1,11 @@
+import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
 import { useMintsStore } from "src/stores/mints";
 import { usePaymentHistoryStore } from "src/stores/paymentHistory";
 import { useProofsStore } from "src/stores/proofs";
 import { useUiStore } from "src/stores/ui";
+import { cashuDb } from "src/stores/dexie";
 import { PaymentMethod } from "src/stores/walletTypes";
 
 function pendingInvoice(quote, overrides = {}) {
@@ -83,9 +85,15 @@ describe("invoices worker", () => {
         info: { nuts: {} },
       },
     ];
-    worker.quotes = [queuedQuote("unsupported-q", now - 10_000)];
+    worker.quotes = [
+      queuedQuote("unsupported-older-q", now - 20_000),
+      queuedQuote("unsupported-newer-q", now - 10_000),
+    ];
     const walletStore = {
-      invoiceHistory: [pendingInvoice("unsupported-q")],
+      invoiceHistory: [
+        pendingInvoice("unsupported-older-q"),
+        pendingInvoice("unsupported-newer-q"),
+      ],
       mintWallet: vi.fn(),
       checkInvoiceBolt11: vi.fn(async () => {}),
     };
@@ -94,7 +102,7 @@ describe("invoices worker", () => {
 
     expect(walletStore.mintWallet).not.toHaveBeenCalled();
     expect(walletStore.checkInvoiceBolt11).toHaveBeenCalledWith(
-      "unsupported-q",
+      "unsupported-newer-q",
       false
     );
   });
@@ -315,6 +323,127 @@ describe("invoices worker", () => {
     expect(worker.quotes).toEqual([
       expect.objectContaining({ quote: "unpaid-q", checkCount: 1 }),
     ]);
+  });
+
+  it("persists batch quote state and mirrors paid history without changing original dates", async () => {
+    await cashuDb.paymentHistory.clear();
+    await cashuDb.mintQuotes.clear();
+    const worker = useInvoicesWorkerStore();
+    const mintStore = useMintsStore();
+    const paymentHistoryStore = usePaymentHistoryStore();
+    const proofsStore = useProofsStore();
+    const uiStore = useUiStore();
+    const now = Date.now();
+    const originalDate = new Date(now - 60_000).toISOString();
+    const invoices = [
+      pendingInvoice("paid-q", {
+        date: originalDate,
+        request: "lnbc-paid",
+        memo: "paid",
+      }),
+      pendingInvoice("unpaid-q", {
+        date: originalDate,
+        request: "lnbc-unpaid",
+        memo: "unpaid",
+      }),
+    ];
+    for (const invoice of invoices) {
+      await paymentHistoryStore.addPayment(invoice);
+    }
+    advertiseBatchMint(mintStore, "https://mint.example");
+    mintStore.mints[0].keysets = [{ id: "00aa", unit: "sat", active: true }];
+    worker.quotes = [
+      queuedQuote("paid-q", now - 20_000),
+      queuedQuote("unpaid-q", now - 10_000),
+    ];
+    const responses = [
+      {
+        quote: "paid-q",
+        amount: "10",
+        state: "PAID",
+        request: "lnbc-paid",
+        unit: "sat",
+      },
+      {
+        quote: "unpaid-q",
+        amount: "10",
+        state: "UNPAID",
+        request: "lnbc-unpaid",
+        unit: "sat",
+      },
+    ];
+    const proofs = [{ id: "00aa", amount: 10, secret: "persisted-proof" }];
+    const addProofs = vi.spyOn(proofsStore, "addProofs").mockResolvedValue();
+    vi.spyOn(uiStore, "lockMutex").mockResolvedValue();
+    vi.spyOn(uiStore, "unlockMutex").mockImplementation(() => {});
+    const syncPaymentHistoryCache = vi.fn(() => {
+      walletStore.invoiceHistory = paymentHistoryStore.invoiceHistory.map(
+        (invoice) => ({ ...invoice })
+      );
+    });
+    const setInvoicePaid = vi.fn(async (quote, { mintQuote }) => {
+      await paymentHistoryStore.setPaymentPaid(quote, { mintQuote });
+      syncPaymentHistoryCache();
+    });
+    const walletStore = {
+      invoiceHistory: paymentHistoryStore.invoiceHistory.map((invoice) => ({
+        ...invoice,
+      })),
+      mintWallet: vi.fn(async () => ({
+        checkMintQuoteBatchBolt11: vi.fn(async () => responses),
+        prepareBatchMint: vi.fn(async () => ({ keysetId: "00aa" })),
+        completeBatchMint: vi.fn(async () => proofs),
+      })),
+      getKeyset: vi.fn(() => "00aa"),
+      retryOnceOnSignedOutputs: vi.fn(
+        async (_keysetId, operation) => await operation()
+      ),
+      checkInvoiceBolt11: vi.fn(),
+      setInvoicePaid,
+      syncPaymentHistoryCache,
+    };
+
+    await worker.processIncomingQueues(now, walletStore);
+
+    expect(addProofs).toHaveBeenCalledWith(proofs);
+    expect(paymentHistoryStore.mintQuotes).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ quote: "paid-q", amount: 10, state: "PAID" }),
+        expect.objectContaining({
+          quote: "unpaid-q",
+          amount: 10,
+          state: "UNPAID",
+        }),
+      ])
+    );
+    expect(
+      paymentHistoryStore.paymentHistory.find(
+        (payment) => payment.quote === "paid-q"
+      )
+    ).toEqual(
+      expect.objectContaining({
+        status: "paid",
+        date: originalDate,
+        paidDate: expect.any(String),
+      })
+    );
+    expect(
+      paymentHistoryStore.paymentHistory.find(
+        (payment) => payment.quote === "unpaid-q"
+      )
+    ).toEqual(
+      expect.objectContaining({ status: "pending", date: originalDate })
+    );
+    expect(walletStore.invoiceHistory).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          quote: "paid-q",
+          status: "paid",
+          date: originalDate,
+          paidDate: expect.any(String),
+        }),
+      ])
+    );
   });
 
   it("batch-mints mixed locked and unlocked quotes with a unique signing key set", async () => {

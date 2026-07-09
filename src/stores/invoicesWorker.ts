@@ -673,17 +673,19 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
             entries[0].queueEntry.lastChecked || entries[0].queueEntry.addedAt,
         };
       });
-      candidates.sort(
+      const batchCandidates = candidates.filter(
+        (candidate) => candidate.canBatch
+      );
+      if (batchCandidates.length === 0) {
+        await this.processSingleBolt11Entry(dueEntries[0], now, walletStore);
+        return;
+      }
+      batchCandidates.sort(
         (left, right) =>
           right.attemptSize - left.attemptSize || left.oldest - right.oldest
       );
-      const selected = candidates[0];
+      const selected = batchCandidates[0];
       const attempted = selected.entries.slice(0, selected.attemptSize);
-
-      if (!selected.canBatch) {
-        await this.processSingleBolt11Entry(attempted[0], now, walletStore);
-        return;
-      }
 
       const { mint: mintUrl, unit } = attempted[0].invoice;
       console.log("Bolt11 batch quote check", {
