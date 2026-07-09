@@ -163,3 +163,17 @@ npm test -- src/path/to/test.ts
 - **Platform:** Use `this.getPwaDisplayMode()` to detect environment (Web vs PWA vs App).
 - **Assets:** Import icons from `lucide-vue-next` as `XIcon` (e.g., `import { Home as HomeIcon } from "lucide-vue-next"`).
 - **Reactivity:** Be careful with deep reactivity in Pinia state; use `storeToRefs` if destructuring in Composition API (though Options API is preferred here).
+
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked as local markdown files under `.scratch/<feature-slug>/`; external PRs are not a triage surface. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The repo uses the default five-label triage vocabulary. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+This repo uses a single-context domain docs layout. See `docs/agents/domain.md`.
