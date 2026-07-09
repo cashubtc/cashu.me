@@ -39,6 +39,13 @@ interface DueBolt11Quote {
   invoice: any;
 }
 
+class MalformedBatchQuoteResponseError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "MalformedBatchQuoteResponseError";
+  }
+}
+
 export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
   state: () => {
     return {
@@ -273,6 +280,38 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       }
       return Math.floor(maxBatchSize);
     },
+    validateBatchQuoteResponses(requestedQuotes: string[], responses: any[]) {
+      if (
+        !Array.isArray(responses) ||
+        responses.length !== requestedQuotes.length
+      ) {
+        throw new MalformedBatchQuoteResponseError(
+          `expected ${requestedQuotes.length} responses, received ${
+            Array.isArray(responses) ? responses.length : "non-array"
+          }`
+        );
+      }
+      const seen = new Set<string>();
+      responses.forEach((response, index) => {
+        const quote = response?.quote;
+        if (typeof quote !== "string" || quote.length === 0) {
+          throw new MalformedBatchQuoteResponseError(
+            `response at index ${index} is missing a quote ID`
+          );
+        }
+        if (seen.has(quote)) {
+          throw new MalformedBatchQuoteResponseError(
+            `response contains duplicate quote ID ${quote}`
+          );
+        }
+        seen.add(quote);
+        if (quote !== requestedQuotes[index]) {
+          throw new MalformedBatchQuoteResponseError(
+            `response quote mismatch at index ${index}: expected ${requestedQuotes[index]}, received ${quote}`
+          );
+        }
+      });
+    },
     clearReusableMintCooldown(mintUrl: string) {
       if (this.reusableMintCooldowns[mintUrl]) {
         delete this.reusableMintCooldowns[mintUrl];
@@ -471,8 +510,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
           (item: any) => item.quote === queueEntry.quote
         );
         const isBolt11 =
-          invoice?.type === undefined ||
-          invoice?.type === PaymentMethod.Bolt11;
+          invoice?.type === undefined || invoice?.type === PaymentMethod.Bolt11;
         if (!isBolt11 || !this.shouldCheckInvoice(invoice)) {
           this.quotes.splice(index, 1);
           continue;
@@ -502,12 +540,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         const mint = mintStore.mints.find((item) => item.url === mintUrl);
         const canBatch =
           this.mintSupportsBolt11Batch(mint) &&
-          !this.batchPathInCooldown(
-            mintUrl,
-            unit,
-            PaymentMethod.Bolt11,
-            now
-          );
+          !this.batchPathInCooldown(mintUrl, unit, PaymentMethod.Bolt11, now);
         const limit = this.bolt11BatchSizeLimit(mint);
         const attemptSize = canBatch
           ? Math.min(entries.length, limit ?? entries.length)
@@ -516,7 +549,8 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
           entries,
           canBatch,
           attemptSize,
-          oldest: entries[0].queueEntry.lastChecked || entries[0].queueEntry.addedAt,
+          oldest:
+            entries[0].queueEntry.lastChecked || entries[0].queueEntry.addedAt,
         };
       });
       candidates.sort(
@@ -539,9 +573,13 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       });
       try {
         const mintWallet = await walletStore.mintWallet(mintUrl, unit);
-        const responses = await mintWallet.checkMintQuoteBatchBolt11(
-          attempted.map((entry) => entry.queueEntry.quote)
+        const requestedQuotes = attempted.map(
+          (entry) => entry.queueEntry.quote
         );
+        const responses = await mintWallet.checkMintQuoteBatchBolt11(
+          requestedQuotes
+        );
+        this.validateBatchQuoteResponses(requestedQuotes, responses);
         const paymentHistoryStore = usePaymentHistoryStore();
         let paidCount = 0;
         for (let index = 0; index < attempted.length; index++) {

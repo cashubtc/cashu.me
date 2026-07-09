@@ -52,7 +52,7 @@ describe("invoices worker", () => {
 
   it.each([
     [{ nuts: { 29: {} } }, true],
-    [{ nuts: { "29": { methods: ["bolt11"] } } }, true],
+    [{ nuts: { 29: { methods: ["bolt11"] } } }, true],
     [{ nuts: { 29: { methods: ["bolt12"] } } }, false],
     [{ nuts: {} }, false],
   ])("detects advertised Bolt11 batch support", (info, expected) => {
@@ -239,6 +239,58 @@ describe("invoices worker", () => {
     expect(worker.quotes.map((entry) => entry.quote)).not.toContain(
       "wrong-method"
     );
+  });
+
+  it.each([
+    ["wrong response length", [{ quote: "first-q", state: "UNPAID" }]],
+    [
+      "out-of-order quote IDs",
+      [
+        { quote: "second-q", state: "UNPAID" },
+        { quote: "first-q", state: "UNPAID" },
+      ],
+    ],
+    [
+      "duplicate quote IDs",
+      [
+        { quote: "first-q", state: "UNPAID" },
+        { quote: "first-q", state: "UNPAID" },
+      ],
+    ],
+    [
+      "missing quote ID",
+      [{ quote: "first-q", state: "UNPAID" }, { state: "UNPAID" }],
+    ],
+  ])("rejects malformed batch success: %s", async (_case, responses) => {
+    const worker = useInvoicesWorkerStore();
+    const mintStore = useMintsStore();
+    const paymentHistoryStore = usePaymentHistoryStore();
+    const now = Date.now();
+    advertiseBatchMint(mintStore, "https://mint.example");
+    worker.quotes = [
+      queuedQuote("first-q", now - 20_000),
+      queuedQuote("second-q", now - 10_000),
+    ];
+    const upsertMintQuote = vi
+      .spyOn(paymentHistoryStore, "upsertMintQuote")
+      .mockResolvedValue();
+    const checkMintQuoteBatchBolt11 = vi.fn(async () => responses);
+    const walletStore = {
+      invoiceHistory: [pendingInvoice("first-q"), pendingInvoice("second-q")],
+      mintWallet: vi.fn(async () => ({ checkMintQuoteBatchBolt11 })),
+      checkInvoiceBolt11: vi.fn(),
+      setInvoicePaid: vi.fn(),
+      syncPaymentHistoryCache: vi.fn(),
+    };
+
+    await worker.processIncomingQueues(now, walletStore);
+
+    expect(upsertMintQuote).not.toHaveBeenCalled();
+    expect(walletStore.setInvoicePaid).not.toHaveBeenCalled();
+    expect(worker.quotes).toEqual([
+      expect.objectContaining({ quote: "first-q", checkCount: 1 }),
+      expect.objectContaining({ quote: "second-q", checkCount: 1 }),
+    ]);
   });
 
   it("does not reset reusable quote backoff when re-queueing an existing quote", () => {
