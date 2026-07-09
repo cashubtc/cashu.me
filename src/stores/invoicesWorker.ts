@@ -54,6 +54,16 @@ class MalformedBatchQuoteResponseError extends Error {
   }
 }
 
+class BatchMintRequestError extends Error {
+  originalError: any;
+
+  constructor(error: any) {
+    super(String(error?.message || error));
+    this.name = "BatchMintRequestError";
+    this.originalError = error;
+  }
+}
+
 export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
   state: () => {
     return {
@@ -64,6 +74,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       oneDay: 1000 * 60 * 60 * 24,
       oneHour: 1000 * 60 * 60,
       reusableMintCooldownBaseInterval: 1000 * 60,
+      batchPathCooldownBaseInterval: 1000 * 60,
       // Once per day
       maxInterval: 1000 * 60 * 60 * 24,
       keepIntervalConstantForNChecks: 5,
@@ -272,6 +283,38 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         this.batchPathCooldowns[this.batchPathKey(mintUrl, unit, method)];
       return Boolean(cooldown && cooldown.nextRetryAt > now);
     },
+    clearBatchPathCooldown(
+      mintUrl: string,
+      unit: string,
+      method: PaymentMethod
+    ) {
+      const key = this.batchPathKey(mintUrl, unit, method);
+      if (this.batchPathCooldowns[key]) {
+        delete this.batchPathCooldowns[key];
+      }
+    },
+    recordBatchPathFailure(
+      mintUrl: string,
+      unit: string,
+      method: PaymentMethod,
+      error: any,
+      now: number
+    ) {
+      const key = this.batchPathKey(mintUrl, unit, method);
+      const previous = this.batchPathCooldowns[key];
+      const failureCount = (previous?.failureCount ?? 0) + 1;
+      const retryDelay = Math.min(
+        this.batchPathCooldownBaseInterval *
+          Math.pow(2, Math.max(0, failureCount - 1)),
+        this.oneHour
+      );
+      this.batchPathCooldowns[key] = {
+        failedAt: now,
+        failureCount,
+        nextRetryAt: now + retryDelay,
+        lastError: this.errorMessage(error),
+      };
+    },
     mintSupportsBolt11Batch(mint: Pick<StoredMint, "info"> | undefined) {
       const nut29 = mint?.info?.nuts?.[29];
       if (!nut29) return false;
@@ -406,6 +449,26 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         message.includes(" 502") ||
         message.includes(" 503") ||
         message.includes(" 504")
+      );
+    },
+    isNetworkOrRateLimitFailure(error: any) {
+      const status = Number(
+        error?.status ??
+          error?.statusCode ??
+          error?.response?.status ??
+          error?.cause?.status ??
+          error?.cause?.response?.status
+      );
+      const message = `${this.errorMessage(error)} ${
+        error?.cause ? this.errorMessage(error.cause) : ""
+      }`.toLowerCase();
+      return (
+        this.isNetworkFailure(error) ||
+        status === 429 ||
+        status >= 500 ||
+        message.includes("429") ||
+        message.includes("rate limit") ||
+        message.includes("too many requests")
       );
     },
     shouldCheckInvoice(invoice: any) {
@@ -621,50 +684,66 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         unit,
         attempted: attempted.length,
       });
+      let mintWallet: any;
+      let responses: any[];
       try {
-        const mintWallet = await walletStore.mintWallet(mintUrl, unit);
+        mintWallet = await walletStore.mintWallet(mintUrl, unit);
         const requestedQuotes = attempted.map(
           (entry) => entry.queueEntry.quote
         );
-        const responses = await mintWallet.checkMintQuoteBatchBolt11(
-          requestedQuotes
-        );
+        responses = await mintWallet.checkMintQuoteBatchBolt11(requestedQuotes);
         this.validateBatchQuoteResponses(requestedQuotes, responses);
-        const paymentHistoryStore = usePaymentHistoryStore();
-        const paidEntries: PaidBolt11Quote[] = [];
-        for (let index = 0; index < attempted.length; index++) {
-          const entry = attempted[index];
-          const response = normalizeMintQuote(
-            responses[index],
-            PaymentMethod.Bolt11
-          );
-          entry.invoice.mintQuote = response;
-          await paymentHistoryStore.upsertMintQuote(
-            response,
-            PaymentMethod.Bolt11
-          );
-          if (response.state === MintQuoteState.UNPAID) {
+      } catch (error) {
+        await this.handleBolt11BatchFailure(
+          attempted,
+          mintUrl,
+          unit,
+          error,
+          now,
+          walletStore,
+          "quote check"
+        );
+        this.lastInvoiceCheckTime = now;
+        return;
+      }
+
+      this.clearBatchPathCooldown(mintUrl, unit, PaymentMethod.Bolt11);
+      const paymentHistoryStore = usePaymentHistoryStore();
+      const paidEntries: PaidBolt11Quote[] = [];
+      for (let index = 0; index < attempted.length; index++) {
+        const entry = attempted[index];
+        const response = normalizeMintQuote(
+          responses[index],
+          PaymentMethod.Bolt11
+        );
+        entry.invoice.mintQuote = response;
+        await paymentHistoryStore.upsertMintQuote(
+          response,
+          PaymentMethod.Bolt11
+        );
+        if (response.state === MintQuoteState.UNPAID) {
+          entry.queueEntry.lastChecked = now;
+          entry.queueEntry.checkCount += 1;
+        } else if (response.state === MintQuoteState.ISSUED) {
+          await walletStore.setInvoicePaid(entry.queueEntry.quote, {
+            mintQuote: response,
+          });
+          this.removeInvoiceFromChecker(entry.queueEntry.quote);
+        } else if (response.state === MintQuoteState.PAID) {
+          paidEntries.push({ ...entry, mintQuote: response });
+        }
+      }
+      walletStore.syncPaymentHistoryCache?.();
+      let mintedCount = 0;
+      if (paidEntries.length > 0) {
+        const { mintable, missingKey, signingKeys } =
+          this.partitionLockedPaidQuotes(paidEntries);
+        if (mintable.length > 0) {
+          for (const entry of missingKey) {
             entry.queueEntry.lastChecked = now;
             entry.queueEntry.checkCount += 1;
-          } else if (response.state === MintQuoteState.ISSUED) {
-            await walletStore.setInvoicePaid(entry.queueEntry.quote, {
-              mintQuote: response,
-            });
-            this.removeInvoiceFromChecker(entry.queueEntry.quote);
-          } else if (response.state === MintQuoteState.PAID) {
-            paidEntries.push({ ...entry, mintQuote: response });
           }
-        }
-        walletStore.syncPaymentHistoryCache?.();
-        let mintedCount = 0;
-        if (paidEntries.length > 0) {
-          const { mintable, missingKey, signingKeys } =
-            this.partitionLockedPaidQuotes(paidEntries);
-          if (mintable.length > 0) {
-            for (const entry of missingKey) {
-              entry.queueEntry.lastChecked = now;
-              entry.queueEntry.checkCount += 1;
-            }
+          try {
             await this.mintPaidBolt11Batch(
               mintable,
               signingKeys,
@@ -672,35 +751,70 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
               walletStore
             );
             mintedCount = mintable.length;
-          } else if (missingKey.length > 0) {
-            for (const entry of missingKey.slice(1)) {
-              entry.queueEntry.lastChecked = now;
-              entry.queueEntry.checkCount += 1;
-            }
-            await this.processSingleBolt11Entry(
-              missingKey[0],
+          } catch (error) {
+            if (!(error instanceof BatchMintRequestError)) throw error;
+            await this.handleBolt11BatchFailure(
+              mintable,
+              mintUrl,
+              unit,
+              error.originalError,
               now,
-              walletStore
+              walletStore,
+              "mint"
             );
+            this.lastInvoiceCheckTime = now;
+            return;
           }
+        } else if (missingKey.length > 0) {
+          for (const entry of missingKey.slice(1)) {
+            entry.queueEntry.lastChecked = now;
+            entry.queueEntry.checkCount += 1;
+          }
+          await this.processSingleBolt11Entry(missingKey[0], now, walletStore);
         }
-        console.log("Bolt11 batch quote check complete", {
-          mint: mintUrl,
-          attempted: attempted.length,
-          paid: paidEntries.length,
-          minted: mintedCount,
-        });
-      } catch (error) {
-        for (const entry of attempted) {
+      }
+      console.log("Bolt11 batch quote check complete", {
+        mint: mintUrl,
+        attempted: attempted.length,
+        paid: paidEntries.length,
+        minted: mintedCount,
+      });
+      this.lastInvoiceCheckTime = now;
+    },
+    async handleBolt11BatchFailure(
+      entries: DueBolt11Quote[],
+      mintUrl: string,
+      unit: string,
+      error: any,
+      now: number,
+      walletStore: any,
+      stage: "quote check" | "mint"
+    ) {
+      this.recordBatchPathFailure(
+        mintUrl,
+        unit,
+        PaymentMethod.Bolt11,
+        error,
+        now
+      );
+      const shouldFallback = !this.isNetworkOrRateLimitFailure(error);
+      if (shouldFallback && entries.length > 0) {
+        for (const entry of entries.slice(1)) {
           entry.queueEntry.lastChecked = now;
           entry.queueEntry.checkCount += 1;
         }
-        console.warn("Bolt11 batch quote check failed", {
-          mint: mintUrl,
-          reason: this.errorMessage(error),
-        });
+        await this.processSingleBolt11Entry(entries[0], now, walletStore);
+      } else {
+        for (const entry of entries) {
+          entry.queueEntry.lastChecked = now;
+          entry.queueEntry.checkCount += 1;
+        }
       }
-      this.lastInvoiceCheckTime = now;
+      console.warn(`Bolt11 batch ${stage} failed`, {
+        mint: mintUrl,
+        fallback: shouldFallback ? "single quote" : "backoff only",
+        reason: this.errorMessage(error),
+      });
     },
     async mintPaidBolt11Batch(
       paidEntries: PaidBolt11Quote[],
@@ -719,26 +833,30 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
 
       await uiStore.lockMutex();
       try {
-        proofs = await walletStore.retryOnceOnSignedOutputs(
-          keysetId,
-          async () => {
-            const config = {
-              keysetId,
-              proofsWeHave: mintStore.mintUnitProofs(mint, unit),
-              ...(signingKeys.length > 0 ? { privkey: signingKeys } : {}),
-            };
-            const preview = await mintWallet.prepareBatchMint(
-              PaymentMethod.Bolt11,
-              paidEntries.map((entry) => ({
-                amount: entry.mintQuote.amount,
-                quote: entry.mintQuote,
-              })),
-              config
-            );
-            return await mintWallet.completeBatchMint(preview);
-          },
-          false
-        );
+        try {
+          proofs = await walletStore.retryOnceOnSignedOutputs(
+            keysetId,
+            async () => {
+              const config = {
+                keysetId,
+                proofsWeHave: mintStore.mintUnitProofs(mint, unit),
+                ...(signingKeys.length > 0 ? { privkey: signingKeys } : {}),
+              };
+              const preview = await mintWallet.prepareBatchMint(
+                PaymentMethod.Bolt11,
+                paidEntries.map((entry) => ({
+                  amount: entry.mintQuote.amount,
+                  quote: entry.mintQuote,
+                })),
+                config
+              );
+              return await mintWallet.completeBatchMint(preview);
+            },
+            false
+          );
+        } catch (error) {
+          throw new BatchMintRequestError(error);
+        }
       } finally {
         uiStore.unlockMutex();
       }
