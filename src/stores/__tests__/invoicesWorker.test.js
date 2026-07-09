@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
+import { useMintsStore } from "src/stores/mints";
 import { PaymentMethod } from "src/stores/walletTypes";
 
 describe("invoices worker", () => {
@@ -11,8 +12,10 @@ describe("invoices worker", () => {
     worker.onchainQuotes = [];
     worker.outgoingPayments = [];
     worker.reusableMintCooldowns = {};
+    worker.bolt11BatchCooldowns = {};
     worker.lastInvoiceCheckTime = 0;
     worker.lastOutgoingCheckTime = 0;
+    useMintsStore().mints = [];
   });
 
   it("does not reset reusable quote backoff when re-queueing an existing quote", () => {
@@ -50,6 +53,222 @@ describe("invoices worker", () => {
     expect(startSpy).toHaveBeenCalledWith(true);
     expect(worker.quotes.map((q) => q.quote)).toContain("bolt11-q");
     expect(worker.bolt12Quotes.map((q) => q.quote)).toContain("bolt12-q");
+  });
+
+  it("detects advertised NUT-29 Bolt11 batch support", () => {
+    const worker = useInvoicesWorkerStore();
+
+    expect(
+      worker.mintSupportsNut29Bolt11Batch({
+        url: "https://mint.example",
+        info: { nuts: { 29: {} } },
+      })
+    ).toBe(true);
+    expect(
+      worker.mintSupportsNut29Bolt11Batch({
+        url: "https://mint.example",
+        info: { nuts: { 29: { methods: ["bolt11"] } } },
+      })
+    ).toBe(true);
+    expect(
+      worker.mintSupportsNut29Bolt11Batch({
+        url: "https://mint.example",
+        info: { nuts: { 29: { methods: [{ method: "bolt11" }] } } },
+      })
+    ).toBe(true);
+    expect(
+      worker.mintSupportsNut29Bolt11Batch({
+        url: "https://mint.example",
+        info: { nuts: { 29: { methods: ["bolt12"] } } },
+      })
+    ).toBe(false);
+    expect(
+      worker.mintSupportsNut29Bolt11Batch({
+        url: "https://mint.example",
+        info: { nuts: {} },
+      })
+    ).toBe(false);
+  });
+
+  it("scopes Bolt11 batch cooldowns by mint, unit, and method", () => {
+    const worker = useInvoicesWorkerStore();
+    const now = Date.now();
+
+    worker.recordBolt11BatchFailure(
+      "https://mint.example",
+      "sat",
+      new Error("batch unavailable"),
+      now
+    );
+
+    expect(
+      worker.bolt11BatchInCooldown("https://mint.example", "sat", now + 1)
+    ).toBe(true);
+    expect(
+      worker.bolt11BatchInCooldown("https://mint.example", "usd", now + 1)
+    ).toBe(false);
+    expect(
+      worker.bolt11BatchCooldowns[
+        worker.bolt11BatchCooldownKey("https://mint.example", "sat", "bolt11")
+      ]
+    ).toEqual(
+      expect.objectContaining({
+        failedAt: now,
+        failureCount: 1,
+        lastError: "batch unavailable",
+      })
+    );
+  });
+
+  it("uses the existing single Bolt11 checker when NUT-29 Bolt11 is not advertised", async () => {
+    const worker = useInvoicesWorkerStore();
+    const mintStore = useMintsStore();
+    const now = Date.now();
+    worker.lastInvoiceCheckTime = 0;
+    worker.quotes = [
+      {
+        quote: "bolt11-q",
+        addedAt: now - 1_000,
+        lastChecked: 0,
+        checkCount: 0,
+      },
+    ];
+    mintStore.mints = [
+      {
+        url: "https://mint.example",
+        info: { nuts: { 29: { methods: ["bolt12"] } } },
+        keysets: [],
+        keys: [],
+      },
+    ];
+
+    const walletStore = {
+      invoiceHistory: [
+        {
+          quote: "bolt11-q",
+          amount: 21,
+          date: new Date(now).toISOString(),
+          status: "pending",
+          mint: "https://mint.example",
+          unit: "sat",
+          type: PaymentMethod.Bolt11,
+        },
+      ],
+      checkInvoiceBolt11: vi.fn(),
+    };
+
+    await worker.processIncomingQueues(now, walletStore);
+
+    expect(
+      worker.canUseBolt11BatchPath(walletStore.invoiceHistory[0], now)
+    ).toBe(false);
+    expect(walletStore.checkInvoiceBolt11).toHaveBeenCalledWith(
+      "bolt11-q",
+      false
+    );
+    expect(worker.quotes).toEqual([]);
+  });
+
+  it("uses the existing single Bolt11 checker while the mint/unit/method batch path is in cooldown", async () => {
+    const worker = useInvoicesWorkerStore();
+    const mintStore = useMintsStore();
+    const now = Date.now();
+    worker.lastInvoiceCheckTime = 0;
+    worker.quotes = [
+      {
+        quote: "bolt11-q",
+        addedAt: now - 1_000,
+        lastChecked: 0,
+        checkCount: 0,
+      },
+    ];
+    mintStore.mints = [
+      {
+        url: "https://mint.example",
+        info: { nuts: { 29: {} } },
+        keysets: [],
+        keys: [],
+      },
+    ];
+    worker.bolt11BatchCooldowns = {
+      [worker.bolt11BatchCooldownKey("https://mint.example", "sat")]: {
+        failedAt: now - 1_000,
+        failureCount: 1,
+        nextRetryAt: now + 60_000,
+      },
+    };
+
+    const walletStore = {
+      invoiceHistory: [
+        {
+          quote: "bolt11-q",
+          amount: 21,
+          date: new Date(now).toISOString(),
+          status: "pending",
+          mint: "https://mint.example",
+          unit: "sat",
+          type: PaymentMethod.Bolt11,
+        },
+      ],
+      checkInvoiceBolt11: vi.fn(),
+    };
+
+    await worker.processIncomingQueues(now, walletStore);
+
+    expect(
+      worker.canUseBolt11BatchPath(walletStore.invoiceHistory[0], now)
+    ).toBe(false);
+    expect(walletStore.checkInvoiceBolt11).toHaveBeenCalledWith(
+      "bolt11-q",
+      false
+    );
+    expect(worker.quotes).toEqual([]);
+  });
+
+  it("preserves existing single Bolt11 checker backoff when a due invoice remains pending", async () => {
+    const worker = useInvoicesWorkerStore();
+    const now = Date.now();
+    worker.lastInvoiceCheckTime = 0;
+    worker.quotes = [
+      {
+        quote: "bolt11-q",
+        addedAt: now - 1_000,
+        lastChecked: 0,
+        checkCount: 0,
+      },
+    ];
+
+    const walletStore = {
+      invoiceHistory: [
+        {
+          quote: "bolt11-q",
+          amount: 21,
+          date: new Date(now).toISOString(),
+          status: "pending",
+          mint: "https://mint.example",
+          unit: "sat",
+          type: PaymentMethod.Bolt11,
+        },
+      ],
+      checkInvoiceBolt11: vi.fn(async () => {
+        throw new Error("invoice state not paid: UNPAID");
+      }),
+    };
+
+    await worker.processIncomingQueues(now, walletStore);
+
+    expect(walletStore.checkInvoiceBolt11).toHaveBeenCalledWith(
+      "bolt11-q",
+      false
+    );
+    expect(worker.quotes).toEqual([
+      {
+        quote: "bolt11-q",
+        addedAt: now - 1_000,
+        lastChecked: now,
+        checkCount: 1,
+      },
+    ]);
   });
 
   it("skips reusable quote checks while the quote mint is in cooldown", async () => {

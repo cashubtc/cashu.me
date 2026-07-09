@@ -4,6 +4,7 @@ import { useLocalStorage } from "@vueuse/core";
 import { useSettingsStore } from "./settings";
 import { PaymentMethod } from "src/stores/walletTypes";
 import { useTokensStore } from "./tokens";
+import { useMintsStore, type StoredMint } from "src/stores/mints";
 interface InvoiceQuote {
   quote: string;
   addedAt: number;
@@ -57,6 +58,9 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       reusableMintCooldowns: useLocalStorage<
         Record<string, ReusableMintCooldown>
       >("cashu.worker.invoices.reusableMintCooldowns", {}),
+      bolt11BatchCooldowns: useLocalStorage<
+        Record<string, ReusableMintCooldown>
+      >("cashu.worker.invoices.bolt11BatchCooldowns", {}),
       outgoingPayments: useLocalStorage<OutgoingPaymentCheck[]>(
         "cashu.worker.outgoing.queue",
         []
@@ -227,6 +231,96 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       const cooldown = this.reusableMintCooldowns[mintUrl];
       return Boolean(cooldown && cooldown.nextRetryAt > now);
     },
+    bolt11BatchCooldownKey(
+      mintUrl: string,
+      unit: string,
+      method = PaymentMethod.Bolt11
+    ) {
+      return `${mintUrl}|${unit}|${method}`;
+    },
+    bolt11BatchInCooldown(
+      mintUrl: string,
+      unit: string,
+      now: number,
+      method = PaymentMethod.Bolt11
+    ) {
+      const cooldown =
+        this.bolt11BatchCooldowns[
+          this.bolt11BatchCooldownKey(mintUrl, unit, method)
+        ];
+      return Boolean(cooldown && cooldown.nextRetryAt > now);
+    },
+    clearBolt11BatchCooldown(
+      mintUrl: string,
+      unit: string,
+      method = PaymentMethod.Bolt11
+    ) {
+      const key = this.bolt11BatchCooldownKey(mintUrl, unit, method);
+      if (this.bolt11BatchCooldowns[key]) {
+        delete this.bolt11BatchCooldowns[key];
+      }
+    },
+    recordBolt11BatchFailure(
+      mintUrl: string,
+      unit: string,
+      error: any,
+      now: number,
+      method = PaymentMethod.Bolt11
+    ) {
+      const key = this.bolt11BatchCooldownKey(mintUrl, unit, method);
+      const previous = this.bolt11BatchCooldowns[key];
+      const failureCount = (previous?.failureCount ?? 0) + 1;
+      const retryDelay = Math.min(
+        this.reusableMintCooldownBaseInterval *
+          Math.pow(2, Math.max(0, failureCount - 1)),
+        this.oneHour
+      );
+      this.bolt11BatchCooldowns[key] = {
+        failedAt: now,
+        failureCount,
+        nextRetryAt: now + retryDelay,
+        lastError: this.errorMessage(error),
+      };
+    },
+    mintSupportsNut29Bolt11Batch(mint: StoredMint | undefined | null) {
+      const nuts = mint?.info?.nuts as Record<string | number, any> | undefined;
+      const nut29 = nuts?.[29] || nuts?.["29"];
+      if (!nut29) return false;
+      if (typeof nut29 !== "object") return false;
+      if (!("methods" in nut29) || nut29.methods == null) return true;
+      if (!Array.isArray(nut29.methods)) return false;
+      return nut29.methods.some((method: any) => {
+        if (typeof method === "string") {
+          return method === PaymentMethod.Bolt11;
+        }
+        return method?.method === PaymentMethod.Bolt11;
+      });
+    },
+    storedMintForInvoice(invoice: any) {
+      return useMintsStore().mints.find((mint) => mint.url === invoice?.mint);
+    },
+    canUseBolt11BatchPath(invoice: any, now: number) {
+      if (!invoice?.mint || !invoice?.unit) return false;
+      const mint = this.storedMintForInvoice(invoice);
+      return (
+        this.mintSupportsNut29Bolt11Batch(mint) &&
+        !this.bolt11BatchInCooldown(invoice.mint, invoice.unit, now)
+      );
+    },
+    async checkSingleBolt11Quote(
+      walletStore: any,
+      q: InvoiceQuote,
+      index: number,
+      now: number
+    ) {
+      try {
+        await walletStore.checkInvoiceBolt11(q.quote, false);
+        this.quotes.splice(index, 1);
+      } catch (error) {
+        q.lastChecked = now;
+        q.checkCount += 1;
+      }
+    },
     clearReusableMintCooldown(mintUrl: string) {
       if (this.reusableMintCooldowns[mintUrl]) {
         delete this.reusableMintCooldowns[mintUrl];
@@ -364,13 +458,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
 
         const dueTime = this.dueTime(q);
         if (now > dueTime) {
-          try {
-            await walletStore.checkInvoiceBolt11(q.quote, false);
-            this.quotes.splice(i, 1);
-          } catch (error) {
-            q.lastChecked = now;
-            q.checkCount += 1;
-          }
+          await this.checkSingleBolt11Quote(walletStore, q, i, now);
           this.lastInvoiceCheckTime = now;
           break;
         }
