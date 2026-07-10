@@ -30,7 +30,12 @@ export default {
         this.handleResult(result);
       },
       {
-        highlightScanRegion: true,
+        calculateScanRegion: (video) => ({
+          x: 0,
+          y: 0,
+          width: video.videoWidth,
+          height: video.videoHeight,
+        }),
         highlightCodeOutline: true,
         onDecodeError: () => {},
       }
