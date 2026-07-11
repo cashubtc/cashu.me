@@ -80,6 +80,7 @@ import {
   ProofState,
   KeyChain,
   type AmountLike,
+  type P2PKOptions,
   type CounterSource,
   createEphemeralCounterSource,
   // ConsoleLogger,
@@ -592,8 +593,16 @@ export const useWalletStore = defineStore("wallet", {
       proofs: WalletProof[],
       wallet: Wallet,
       amount: number,
-      receiverPubkey: string
+      receiverPubkey: string | P2PKOptions
     ) {
+      // Accept a bare pubkey (manual lock flow) or a full P2PKOptions so a
+      // NUT-18 payment request can reproduce its requested NUT-10 condition
+      // (P2PK or HTLC). Going through the `.asP2PK()` builder keeps the
+      // blinding keyset-aware (for upcoming cashu-ts v5).
+      const p2pkOptions: P2PKOptions =
+        typeof receiverPubkey === "string"
+          ? { pubkey: receiverPubkey }
+          : receiverPubkey;
       const spendableProofs = this.spendableProofs(proofs, amount);
       const proofsToSend = this.coinSelect(
         spendableProofs,
@@ -605,7 +614,7 @@ export const useWalletStore = defineStore("wallet", {
       const { keep: keepProofs, send: sendProofs } = await wallet.ops
         .send(amount, toProofs(proofsToSend))
         .keyset(keysetId)
-        .asP2PK({ pubkey: receiverPubkey })
+        .asP2PK(p2pkOptions)
         .run();
       const proofsStore = useProofsStore();
       await proofsStore.removeProofs(proofsToSend);

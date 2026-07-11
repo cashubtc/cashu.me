@@ -91,6 +91,7 @@ module.exports = configure(function (/* ctx */) {
         viteConf.optimizeDeps = viteConf.optimizeDeps || {};
         viteConf.optimizeDeps.exclude = [
           ...(viteConf.optimizeDeps.exclude || []),
+          "@agicash/qr-scanner",
           "@cashu/cashu-ts",
         ];
       },
