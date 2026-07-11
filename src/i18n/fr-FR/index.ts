@@ -598,6 +598,14 @@ export default {
       tooltip: "Installer Cashu",
     },
   },
+  PwaInstallBanner: {
+    title: "Ajouter Cashu à l’écran d’accueil",
+    description: {
+      ios: "Appuyez sur l’icône de partage dans Safari, puis sur Sur l’écran d’accueil.",
+      android: "Ouvrez le menu du navigateur et choisissez Ajouter à l’écran d’accueil.",
+      android_prompt: "Installez Cashu pour un accès plus rapide et un mode plein écran.",
+    },
+  },
   AlreadyRunning: {
     title: "Non.",
     text: "Un autre onglet est déjà en cours d'exécution. Fermez cet onglet et réessayez.",

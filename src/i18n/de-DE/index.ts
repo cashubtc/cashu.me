@@ -601,6 +601,14 @@ export default {
       tooltip: "Cashu installieren",
     },
   },
+  PwaInstallBanner: {
+    title: "Cashu zum Startbildschirm hinzufügen",
+    description: {
+      ios: "Tippe in Safari auf das Teilen-Symbol und dann auf Zum Home-Bildschirm.",
+      android: "Öffne das Browser-Menü und wähle Zum Startbildschirm hinzufügen.",
+      android_prompt: "Installiere Cashu für schnelleren Zugriff und Vollbild.",
+    },
+  },
   AlreadyRunning: {
     title: "Nein.",
     text: "Ein anderer Tab läuft bereits. Schließen Sie diesen Tab und versuchen Sie es erneut.",

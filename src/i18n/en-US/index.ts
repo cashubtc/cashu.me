@@ -43,6 +43,9 @@ export default {
       update: {
         label: "Update",
       },
+      dismiss: {
+        label: "Dismiss",
+      },
     },
     inputs: {
       mint_url: {
@@ -609,6 +612,14 @@ export default {
     install: {
       text: "Install",
       tooltip: "Install Cashu",
+    },
+  },
+  PwaInstallBanner: {
+    title: "Add Cashu to your home screen",
+    description: {
+      ios: "Tap the share icon in Safari's toolbar, then Add to Home Screen.",
+      android: "Open the browser menu and choose Add to Home Screen.",
+      android_prompt: "Install Cashu for quicker access and a full-screen experience.",
     },
   },
   AlreadyRunning: {
