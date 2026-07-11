@@ -305,15 +305,17 @@ export async function checkInvoiceBolt11(
       throw new Error(`invoice state not paid: ${state}`);
     }
     const proofs = await this.mintBolt11(invoice, verbose);
-    if (hideInvoiceDetailsOnMint) {
-      this.hideInvoiceDetailsAfterReceiveSuccess(invoice.quote);
+    if (verbose) {
+      if (hideInvoiceDetailsOnMint) {
+        this.hideInvoiceDetailsAfterReceiveSuccess(invoice.quote);
+      }
+      useUiStore().vibrate();
+      notifySuccess(
+        this.t("wallet.notifications.received_lightning", {
+          amount: uIStore.formatCurrency(invoice.amount, invoice.unit),
+        })
+      );
     }
-    useUiStore().vibrate();
-    notifySuccess(
-      this.t("wallet.notifications.received_lightning", {
-        amount: uIStore.formatCurrency(invoice.amount, invoice.unit),
-      })
-    );
     return proofs;
   } catch (error) {
     console.log("Invoice still pending", invoice.quote);
