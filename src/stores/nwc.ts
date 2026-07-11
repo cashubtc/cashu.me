@@ -22,6 +22,7 @@ type NWCConnection = {
   connectionSecret: string;
   connectionPublicKey: string;
   allowanceLeft: number;
+  processedRequestIds?: string[];
 };
 
 type NWCCommand = {
@@ -60,6 +61,9 @@ const NWCKind = {
   NWCRequest: 23194,
   NWCResponse: 23195,
 };
+
+const NWC_SUBSCRIPTION_WINDOW_SECONDS = 86400; // 24 hours
+const NWC_MAX_TRACKED_REQUEST_IDS = 1000;
 
 export const useNWCStore = defineStore("nwc", {
   state: () => ({
@@ -467,7 +471,7 @@ export const useNWCStore = defineStore("nwc", {
       const conn = this.connections[0];
 
       const currentUnitTime = Math.floor(Date.now() / 1000);
-      const subscribeSince = currentUnitTime - 60; // 1 minute
+      const subscribeSince = currentUnitTime - NWC_SUBSCRIPTION_WINDOW_SECONDS; // 24 hours
       const filter = {
         kinds: [NWCKind.NWCRequest as NDKKind],
         since: subscribeSince,
@@ -499,11 +503,30 @@ export const useNWCStore = defineStore("nwc", {
           console.log("### Received NWC command but NWC is disabled");
           return;
         }
-        // check if the events date is after the last seen command
-        if (event.created_at <= this.seenCommandsUntil) {
+        if (
+          event.created_at <
+          currentUnitTime - NWC_SUBSCRIPTION_WINDOW_SECONDS
+        ) {
+          return; // ignore events older than 24 hours
+        }
+
+        // Initialize processedRequestIds array if not present on connection
+        if (!conn.processedRequestIds) {
+          conn.processedRequestIds = [];
+        }
+
+        // Check if we have already processed this event ID for this connection
+        if (conn.processedRequestIds.includes(event.id)) {
           return;
         }
-        this.seenCommandsUntil = event.created_at;
+
+        // Track the processed request ID
+        conn.processedRequestIds.push(event.id);
+        if (conn.processedRequestIds.length > NWC_MAX_TRACKED_REQUEST_IDS) {
+          conn.processedRequestIds.shift();
+        }
+        // Re-assign to trigger Vue/Pinia LocalStorage watch
+        this.connections = [...this.connections];
 
         console.log("### NWC request!");
         console.log("### event", event);
