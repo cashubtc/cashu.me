@@ -25,6 +25,22 @@
         class="welcome-next-btn"
       />
 
+   <input
+        type="file"
+        ref="backupFileInput"
+        accept=".json"
+        style="display: none"
+        @change="onChangeBackupFile"
+      />
+      <q-btn
+        flat
+        rounded
+        color="white"
+        label="Import Backup"
+        @click="browseBackupFile"
+        class="welcome-import-btn"
+      />
+
       <!-- Terms agreement -->
       <div class="terms-agreement">
         <p class="terms-text">
@@ -412,6 +428,7 @@
 
 <script lang="ts">
 import { useWelcomeStore } from "src/stores/welcome";
+import { useStorageStore } from "src/stores/storage";
 
 export default {
   name: "WelcomeSlide1",
@@ -440,6 +457,25 @@ export default {
     };
   },
   methods: {
+
+    browseBackupFile() {
+      this.$refs.backupFileInput.click();
+    },
+    onChangeBackupFile() {
+      const file = this.$refs.backupFileInput.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (f) => {
+        try {
+          const backup = JSON.parse(f.target.result);
+          useStorageStore().restoreFromBackup(backup);
+        } catch {
+          console.error("Invalid backup file");
+        }
+      };
+      reader.readAsText(file);
+    },
+
     changeLanguage(locale: string) {
       this.$i18n.locale = locale;
       localStorage.setItem("cashu.language", locale);
@@ -558,6 +594,18 @@ export default {
 .welcome-next-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.welcome-import-btn {
+  width: 100%;
+  height: 44px;
+  font-weight: 500;
+  text-transform: none;
+  font-size: 1rem;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  margin-top: 12px;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .terms-agreement {
