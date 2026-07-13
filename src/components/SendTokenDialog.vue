@@ -468,6 +468,15 @@ export default defineComponent({
       if (!newUrl || !oldUrl || newUrl === oldUrl) return;
       useSendTokensStore().invalidatePreparedPaymentRequestToken();
     },
+    activeUnit: function (newUnit, oldUnit) {
+      // When the user switches active unit (e.g. from sat to usd or vice-versa) inside
+      // the Pay-PaymentRequest sheet, any proofs we already prepared belong to the
+      // previous unit. Drop them so the next pay attempt rebuilds with the new unit.
+      if (!this.showSendTokens) return;
+      if (!this.sendData.paymentRequest) return;
+      if (!newUnit || !oldUnit || newUnit === oldUnit) return;
+      useSendTokensStore().invalidatePreparedPaymentRequestToken();
+    },
     showSendTokens: function (val) {
       if (val) {
         this.$nextTick(() => {
@@ -584,12 +593,10 @@ export default defineComponent({
         paymentRequest: this.sendData.paymentRequest,
         status: "pending",
       };
-      if (!this.sendData.historyToken) {
-        const _id = this.addPendingToken(historyToken);
-        (historyToken as any).id = _id;
-        if (!this.g.offline) {
-          this.onTokenPaid(historyToken);
-        }
+      const _id = this.addPendingToken(historyToken);
+      (historyToken as any).id = _id;
+      if (!this.g.offline) {
+        this.onTokenPaid(historyToken);
       }
       this.sendData.historyToken = historyToken as any;
       return serialized;
