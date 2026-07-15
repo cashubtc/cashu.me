@@ -83,6 +83,7 @@ const h = vi.hoisted(() => {
     ),
     mintUnitProofs: vi.fn(() => []),
     updateMintInfoAndKeys: vi.fn(async () => {}),
+    fetchMintKeys: vi.fn(async () => {}),
   };
   const priceStore = {
     bitcoinPrice: 100_000,
@@ -665,7 +666,7 @@ describe("wallet store", () => {
     });
 
     vi.spyOn(wallet, "getKeyset").mockReturnValue("00bb");
-    vi.spyOn(wallet, "mintWallet").mockResolvedValue(swapWallet);
+    vi.spyOn(wallet, "mintWalletSync").mockReturnValue(swapWallet);
 
     await wallet.send(proofs, swapWallet, 100, false, true);
 
@@ -675,6 +676,191 @@ describe("wallet store", () => {
     // .includeFees(true) must be chained so cashu-ts inflates the send
     // outputs to cover their own input fees.
     expect(includeFeesSpy).toHaveBeenCalledWith(true);
+  });
+
+  describe("ensureKeysetsCurrent (the freshness guarantee)", () => {
+    // Make fetchMintKeys rotate the store's active keyset, exactly as a mint
+    // that rotated mid-session would look after a refresh.
+    function rotateOnFetch() {
+      h.mintsStore.fetchMintKeys.mockImplementationOnce(async (mint) => {
+        mint.keysets = [
+          { id: "00aa", unit: "sat", active: false },
+          { id: "00cc", unit: "sat", active: true },
+        ];
+      });
+    }
+
+    it("(a) refreshes the mint's keys before resolving the active keyset", async () => {
+      const wallet = useWalletStore();
+      rotateOnFetch();
+      const getKeysetSpy = vi.spyOn(wallet, "getKeyset");
+
+      await wallet.ensureKeysetsCurrent("https://mint-a.example", "sat");
+
+      expect(h.mintsStore.fetchMintKeys).toHaveBeenCalledTimes(1);
+      expect(
+        h.mintsStore.fetchMintKeys.mock.invocationCallOrder[0]
+      ).toBeLessThan(getKeysetSpy.mock.invocationCallOrder[0]);
+    });
+
+    it("(b) returns the newly-active keyset id and a wallet built after the refresh", async () => {
+      const wallet = useWalletStore();
+      rotateOnFetch();
+      const mintWalletSyncSpy = vi.spyOn(wallet, "mintWalletSync");
+
+      const { wallet: signingWallet, keysetId } =
+        await wallet.ensureKeysetsCurrent("https://mint-a.example", "sat");
+
+      // resolves the keyset that became active during the refresh
+      expect(keysetId).toBe("00cc");
+      // the signing wallet is the one built AFTER the refresh
+      expect(signingWallet).toBe(mintWalletSyncSpy.mock.results[0].value);
+      expect(
+        h.mintsStore.fetchMintKeys.mock.invocationCallOrder[0]
+      ).toBeLessThan(mintWalletSyncSpy.mock.invocationCallOrder[0]);
+    });
+
+    it("(c) never triggers the mint-info / MOTD refresh path", async () => {
+      const wallet = useWalletStore();
+      rotateOnFetch();
+
+      await wallet.ensureKeysetsCurrent("https://mint-a.example", "sat");
+
+      expect(h.mintsStore.updateMintInfoAndKeys).not.toHaveBeenCalled();
+    });
+
+    it("(d) throws when the mint is unknown", async () => {
+      const wallet = useWalletStore();
+
+      await expect(
+        wallet.ensureKeysetsCurrent("https://nope.example", "sat")
+      ).rejects.toThrow("mint not found");
+      expect(h.mintsStore.fetchMintKeys).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("retryOnceOnSignedOutputs (the freshness funnel)", () => {
+    // Make fetchMintKeys rotate the store's active keyset, exactly as a mint
+    // that rotated mid-session would look after a refresh.
+    function rotateOnFetch() {
+      h.mintsStore.fetchMintKeys.mockImplementationOnce(async (mint) => {
+        mint.keysets = [
+          { id: "00aa", unit: "sat", active: false },
+          { id: "00cc", unit: "sat", active: true },
+        ];
+      });
+    }
+
+    it("(e) calls ensureKeysetsCurrent once and hands its wallet/keysetId to the operation", async () => {
+      const wallet = useWalletStore();
+      const sentinelWallet = { sentinel: true };
+      const ensureSpy = vi
+        .spyOn(wallet, "ensureKeysetsCurrent")
+        .mockResolvedValue({ wallet: sentinelWallet, keysetId: "00cc" });
+      const operation = vi.fn(async () => "ok");
+
+      const result = await wallet.retryOnceOnSignedOutputs(
+        "https://mint-a.example",
+        "sat",
+        operation
+      );
+
+      expect(result).toBe("ok");
+      expect(ensureSpy).toHaveBeenCalledTimes(1);
+      expect(ensureSpy).toHaveBeenCalledWith("https://mint-a.example", "sat");
+      expect(operation).toHaveBeenCalledWith(sentinelWallet, "00cc");
+    });
+
+    it("(f) retries once with the SAME keyset after a signed-outputs error, without a second refresh", async () => {
+      const wallet = useWalletStore();
+      wallet.keysetCounters = [{ id: "00aa", counter: 1 }];
+      const ensureSpy = vi.spyOn(wallet, "ensureKeysetsCurrent");
+      const operation = vi
+        .fn()
+        .mockRejectedValueOnce(new Error("outputs have already been signed"))
+        .mockResolvedValueOnce("second-try");
+
+      const result = await wallet.retryOnceOnSignedOutputs(
+        "https://mint-a.example",
+        "sat",
+        operation
+      );
+
+      expect(result).toBe("second-try");
+      // freshness runs exactly once, even though the operation ran twice
+      expect(ensureSpy).toHaveBeenCalledTimes(1);
+      expect(operation).toHaveBeenCalledTimes(2);
+      // same keyset id on both attempts; only the counter was bumped
+      expect(operation.mock.calls[0][1]).toBe("00aa");
+      expect(operation.mock.calls[1][1]).toBe("00aa");
+      expect(wallet.keysetCounter("00aa")).toBe(11);
+    });
+
+    it("(f) rethrows an unrelated error without retrying", async () => {
+      const wallet = useWalletStore();
+      const operation = vi.fn().mockRejectedValue(new Error("mint offline"));
+
+      await expect(
+        wallet.retryOnceOnSignedOutputs(
+          "https://mint-a.example",
+          "sat",
+          operation
+        )
+      ).rejects.toThrow("mint offline");
+      expect(operation).toHaveBeenCalledTimes(1);
+    });
+
+    it("(f) propagates a second signed-outputs failure after the single retry", async () => {
+      const wallet = useWalletStore();
+      const operation = vi
+        .fn()
+        .mockRejectedValue(new Error("outputs have already been signed"));
+
+      await expect(
+        wallet.retryOnceOnSignedOutputs(
+          "https://mint-a.example",
+          "sat",
+          operation
+        )
+      ).rejects.toThrow("outputs have already been signed");
+      expect(operation).toHaveBeenCalledTimes(2);
+    });
+
+    it("routes send()'s swap through the wrapper onto the rotated keyset", async () => {
+      const wallet = useWalletStore();
+      const proofs = [
+        { id: "00aa", amount: 128, reserved: false, secret: "s1" },
+      ];
+      const builder = {
+        asDeterministic: vi.fn(),
+        keyset: vi.fn(),
+        proofsWeHave: vi.fn(),
+        includeFees: vi.fn(),
+        run: vi.fn(async () => ({ keep: [], send: [] })),
+      };
+      builder.asDeterministic.mockReturnValue(builder);
+      builder.keyset.mockReturnValue(builder);
+      builder.proofsWeHave.mockReturnValue(builder);
+      builder.includeFees.mockReturnValue(builder);
+
+      const swapWallet = {
+        mint: { mintUrl: "https://mint-a.example" },
+        unit: "sat",
+        // no exact match -> force the swap branch
+        selectProofsToSend: vi.fn((p, _a, _f, exact) =>
+          exact ? { send: [], keep: p } : { send: p, keep: [] }
+        ),
+        ops: { send: vi.fn(() => builder) },
+      };
+
+      rotateOnFetch();
+      vi.spyOn(wallet, "mintWalletSync").mockReturnValue(swapWallet);
+
+      await wallet.send(proofs, swapWallet, 100, false, true);
+
+      expect(h.mintsStore.fetchMintKeys).toHaveBeenCalledTimes(1);
+      expect(builder.keyset).toHaveBeenCalledWith("00cc");
+    });
   });
 
   it("accounts for signed-output errors", async () => {
@@ -968,7 +1154,7 @@ describe("wallet store", () => {
       checkMintQuoteBolt12: vi.fn(async () => quoteStates.shift()),
       ops: { mintBolt12 },
     };
-    vi.spyOn(wallet, "mintWallet").mockResolvedValue(mintWallet);
+    vi.spyOn(wallet, "mintWalletSync").mockReturnValue(mintWallet);
 
     await Promise.all([
       wallet.checkOfferAndMintBolt12("offer-q", false, false),
@@ -1030,7 +1216,7 @@ describe("wallet store", () => {
       checkMintQuoteOnchain: vi.fn(async () => quoteStates.shift()),
       ops: { mintOnchain },
     };
-    vi.spyOn(wallet, "mintWallet").mockResolvedValue(mintWallet);
+    vi.spyOn(wallet, "mintWalletSync").mockReturnValue(mintWallet);
 
     await wallet.checkOnchainAndMint(parentQuote, false, false);
 
@@ -1381,6 +1567,7 @@ describe("wallet store", () => {
       prepareMelt,
       completeMelt,
     };
+    vi.spyOn(wallet, "mintWalletSync").mockReturnValue(mintWallet);
     vi.spyOn(wallet, "send").mockResolvedValue({
       keepProofs: [],
       sendProofs: proofs,
@@ -1452,6 +1639,8 @@ describe("wallet store", () => {
       prepareMelt,
       completeMelt,
     };
+    // meltGeneric now gets its signing wallet from retryOnceOnSignedOutputs
+    vi.spyOn(wallet, "mintWalletSync").mockReturnValue(mintWallet);
     vi.spyOn(wallet, "send").mockResolvedValue({
       keepProofs: [],
       sendProofs: proofs,
@@ -1566,6 +1755,7 @@ describe("wallet store", () => {
       prepareMelt,
       completeMelt,
     };
+    vi.spyOn(wallet, "mintWalletSync").mockReturnValue(mintWallet);
     vi.spyOn(wallet, "send").mockResolvedValue({
       keepProofs: [],
       sendProofs: proofs,
@@ -1754,7 +1944,7 @@ describe("wallet store", () => {
       return proofs.reduce((sum, p) => sum + p.amount, 0);
     });
 
-    vi.spyOn(wallet, "mintWallet").mockResolvedValue({
+    vi.spyOn(wallet, "mintWalletSync").mockReturnValue({
       ops: {
         receive: vi.fn(() => ({
           asDeterministic: vi.fn(() => ({
@@ -1777,5 +1967,256 @@ describe("wallet store", () => {
     expect(h.tokensStore.addPaidToken).toHaveBeenCalledWith(
       expect.objectContaining({ amount: 500, fee: 0, unit: "sat" })
     );
+  });
+
+  describe("signing paths route through the wrapper (post-rotation)", () => {
+    // Every signing path must build outputs on the keyset that is active
+    // after the refresh, not the one cached before it.
+    function rotateOnFetch() {
+      h.mintsStore.fetchMintKeys.mockImplementationOnce(async (mint) => {
+        mint.keysets = [
+          { id: "00aa", unit: "sat", active: false },
+          { id: "00cc", unit: "sat", active: true },
+        ];
+      });
+    }
+
+    function mintBuilder() {
+      const builder = {
+        keyset: vi.fn(),
+        asDeterministic: vi.fn(),
+        proofsWeHave: vi.fn(),
+        privkey: vi.fn(),
+        run: vi.fn(async () => [{ id: "00cc", amount: 100, secret: "s1" }]),
+      };
+      builder.keyset.mockReturnValue(builder);
+      builder.asDeterministic.mockReturnValue(builder);
+      builder.proofsWeHave.mockReturnValue(builder);
+      builder.privkey.mockReturnValue(builder);
+      return builder;
+    }
+
+    it("redeem receives on a wallet built after the refresh", async () => {
+      const wallet = useWalletStore();
+      h.receiveTokensStore.receiveData.tokensBase64 = "cashuB500";
+      h.tokenModule.decodeFull.mockResolvedValue({});
+      h.tokenModule.getProofs.mockReturnValue([
+        { id: "00aa", amount: 500, secret: "s-in" },
+      ]);
+      h.tokenModule.getMint.mockReturnValue("https://mint-a.example");
+      h.tokenModule.getUnit.mockReturnValue("sat");
+
+      rotateOnFetch();
+      const mintWalletSyncSpy = vi
+        .spyOn(wallet, "mintWalletSync")
+        .mockReturnValue({
+          ops: {
+            receive: vi.fn(() => ({
+              asDeterministic: vi.fn(() => ({
+                privkey: vi.fn(() => ({
+                  proofsWeHave: vi.fn(() => ({
+                    run: vi.fn(async () => [
+                      { id: "00cc", amount: 500, secret: "s-out" },
+                    ]),
+                  })),
+                })),
+              })),
+            })),
+          },
+        });
+
+      await wallet.redeem();
+
+      // the receive wallet is constructed only after the keys refresh, so
+      // cts implicit keyset selection sees the rotated keyset
+      expect(h.mintsStore.fetchMintKeys).toHaveBeenCalledTimes(1);
+      expect(
+        h.mintsStore.fetchMintKeys.mock.invocationCallOrder[0]
+      ).toBeLessThan(mintWalletSyncSpy.mock.invocationCallOrder[0]);
+    });
+
+    it("mintBolt11 mints on the rotated keyset", async () => {
+      const wallet = useWalletStore();
+      const invoice = {
+        quote: "q-1",
+        amount: 100,
+        mint: "https://mint-a.example",
+        unit: "sat",
+        privKey: "privkey",
+      };
+      wallet.invoiceHistory = [invoice];
+      const builder = mintBuilder();
+
+      rotateOnFetch();
+      vi.spyOn(wallet, "mintWalletSync").mockReturnValue({
+        checkMintQuoteBolt11: vi.fn(async () => ({
+          state: "PAID",
+          quote: "q-1",
+          amount: 100,
+        })),
+        ops: { mintBolt11: vi.fn(() => builder) },
+      });
+
+      await wallet.mintBolt11(invoice, false);
+
+      expect(h.mintsStore.fetchMintKeys).toHaveBeenCalledTimes(1);
+      expect(builder.keyset).toHaveBeenCalledWith("00cc");
+    });
+
+    it("checkOfferAndMintBolt12 mints on the rotated keyset", async () => {
+      const wallet = useWalletStore();
+      wallet.invoiceHistory = [
+        {
+          quote: "offer-q",
+          amount: 0,
+          request: "lno1offer",
+          memo: "memo",
+          date: "old",
+          status: "pending",
+          mint: "https://mint-a.example",
+          unit: "sat",
+          privKey: "privkey",
+          type: PaymentMethod.Bolt12,
+        },
+      ];
+      const builder = mintBuilder();
+      const quoteStates = [
+        { quote: "offer-q", amount_paid: 100, amount_issued: 0 },
+        { quote: "offer-q", amount_paid: 100, amount_issued: 100 },
+      ];
+
+      rotateOnFetch();
+      vi.spyOn(wallet, "mintWalletSync").mockReturnValue({
+        checkMintQuoteBolt12: vi.fn(async () => quoteStates.shift()),
+        ops: { mintBolt12: vi.fn(() => builder) },
+      });
+
+      await wallet.checkOfferAndMintBolt12("offer-q", false, false);
+
+      expect(h.mintsStore.fetchMintKeys).toHaveBeenCalledTimes(1);
+      expect(builder.keyset).toHaveBeenCalledWith("00cc");
+    });
+
+    it("checkOnchainAndMint mints on the rotated keyset", async () => {
+      const wallet = useWalletStore();
+      wallet.invoiceHistory = [
+        {
+          quote: "onchain-q",
+          amount: 100,
+          request: "bc1qexample",
+          memo: "memo",
+          date: "old",
+          status: "pending",
+          mint: "https://mint-a.example",
+          unit: "sat",
+          privKey: "privkey",
+          network: "mainnet",
+          type: PaymentMethod.Onchain,
+        },
+      ];
+      const builder = mintBuilder();
+      const quoteStates = [
+        { quote: "onchain-q", amount_paid: 100, amount_issued: 0 },
+        { quote: "onchain-q", amount_paid: 100, amount_issued: 100 },
+      ];
+
+      rotateOnFetch();
+      vi.spyOn(wallet, "mintWalletSync").mockReturnValue({
+        checkMintQuoteOnchain: vi.fn(async () => quoteStates.shift()),
+        ops: { mintOnchain: vi.fn(() => builder) },
+      });
+
+      await wallet.checkOnchainAndMint("onchain-q", false, false);
+
+      expect(h.mintsStore.fetchMintKeys).toHaveBeenCalledTimes(1);
+      expect(builder.keyset).toHaveBeenCalledWith("00cc");
+    });
+
+    it("melt prepares change outputs on the rotated keyset", async () => {
+      const wallet = useWalletStore();
+      wallet.invoiceHistory = [];
+      wallet.payInvoiceData.input.request = "lnbc123";
+      const proofs = [{ id: "00aa", amount: 105, secret: "s1" }];
+      const quote = {
+        quote: "bolt11-melt-q",
+        amount: 100,
+        fee_reserve: 5,
+        state: "PENDING",
+        expiry: 0,
+        request: "lnbc123",
+        payment_preimage: null,
+      };
+      const prepareMelt = vi.fn(async () => ({
+        method: "bolt11",
+        inputs: proofs,
+        outputData: [],
+        keysetId: "00cc",
+        quote,
+      }));
+      const mintWallet = {
+        mint: { mintUrl: "https://mint-a.example" },
+        unit: "sat",
+        prepareMelt,
+        completeMelt: vi.fn(async () => ({
+          quote: { ...quote, state: "PAID" },
+          change: [],
+          outputData: [],
+        })),
+      };
+
+      rotateOnFetch();
+      vi.spyOn(wallet, "mintWalletSync").mockReturnValue(mintWallet);
+      vi.spyOn(wallet, "send").mockResolvedValue({
+        keepProofs: [],
+        sendProofs: proofs,
+      });
+
+      await wallet.meltGeneric(
+        proofs,
+        quote,
+        mintWallet,
+        true,
+        vi.fn(),
+        PaymentMethod.Bolt11
+      );
+
+      expect(h.mintsStore.fetchMintKeys).toHaveBeenCalledTimes(1);
+      expect(prepareMelt).toHaveBeenCalledWith(
+        PaymentMethod.Bolt11,
+        expect.objectContaining({ quote: "bolt11-melt-q" }),
+        proofs,
+        { keysetId: "00cc" }
+      );
+    });
+
+    it("sendToLock locks to the rotated keyset", async () => {
+      const wallet = useWalletStore();
+      const proofs = [
+        { id: "00aa", amount: 10, reserved: false, secret: "s1" },
+      ];
+      const builder = {
+        keyset: vi.fn(),
+        asP2PK: vi.fn(),
+        run: vi.fn(async () => ({ keep: [], send: [] })),
+      };
+      builder.keyset.mockReturnValue(builder);
+      builder.asP2PK.mockReturnValue(builder);
+
+      const lockWallet = {
+        mint: { mintUrl: "https://mint-a.example" },
+        unit: "sat",
+        selectProofsToSend: vi.fn(() => ({ send: proofs, keep: [] })),
+        ops: { send: vi.fn(() => builder) },
+      };
+
+      rotateOnFetch();
+      vi.spyOn(wallet, "mintWalletSync").mockReturnValue(lockWallet);
+
+      await wallet.sendToLock(proofs, lockWallet, 10, "02pubkey");
+
+      expect(h.mintsStore.fetchMintKeys).toHaveBeenCalledTimes(1);
+      expect(builder.keyset).toHaveBeenCalledWith("00cc");
+      expect(builder.asP2PK).toHaveBeenCalledWith({ pubkey: "02pubkey" });
+    });
   });
 });
