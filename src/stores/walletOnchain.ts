@@ -115,8 +115,7 @@ export async function checkOnchainAndMint(
   );
   if (!invoice) throw new Error("on-chain quote not found");
 
-  const mintWallet = await this.mintWallet(invoice.mint, invoice.unit);
-  const keysetId = this.getKeyset(invoice.mint, invoice.unit);
+  const mintWallet = this.mintWalletSync(invoice.mint, invoice.unit);
   const mint = mintStore.mints.find((m: any) => m.url === invoice.mint);
   if (!mint) throw new Error("mint not found");
   if (!invoice.network) {
@@ -160,9 +159,10 @@ export async function checkOnchainAndMint(
     }
 
     const proofs = await this.retryOnceOnSignedOutputs(
-      keysetId,
-      async () =>
-        mintWallet.ops
+      invoice.mint,
+      invoice.unit,
+      async (wallet: Wallet, keysetId: string) =>
+        wallet.ops
           .mintOnchain(delta, updated)
           .keyset(keysetId)
           .asDeterministic()
@@ -231,7 +231,6 @@ export async function checkOnchainAndMint(
         notifyApiError(error);
       }
     }
-    this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error, verbose);
     throw error;
   } finally {
     uIStore.unlockMutex();

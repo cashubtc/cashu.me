@@ -148,7 +148,6 @@ export async function meltGeneric(
   const uIStore = useUiStore();
   this.payInvoiceData.paying = true;
   const amount = quote.amount + quote.fee_reserve;
-  const keysetId = this.getKeyset(mintWallet.mint.mintUrl, mintWallet.unit);
 
   let sendProofs: ProofLike[] = [];
   try {
@@ -187,21 +186,25 @@ export async function meltGeneric(
     let data;
     let paidMeltQuote: AppMeltQuote | null = null;
     try {
-      data = await this.retryOnceOnSignedOutputs(keysetId, async () => {
-        const preparedQuote = toMeltQuote(quote);
-        const preview = await mintWallet.prepareMelt(
-          method,
-          preparedQuote,
-          sendProofs,
-          { keysetId }
-        );
-        await this.setMeltChangeOutputData(quote.quote, preview.outputData);
-        return await mintWallet.completeMelt(
-          preview,
-          undefined,
-          completeMeltOptions
-        );
-      });
+      data = await this.retryOnceOnSignedOutputs(
+        mintWallet.mint.mintUrl,
+        mintWallet.unit,
+        async (wallet: Wallet, keysetId: string) => {
+          const preparedQuote = toMeltQuote(quote);
+          const preview = await wallet.prepareMelt(
+            method,
+            preparedQuote,
+            sendProofs,
+            { keysetId }
+          );
+          await this.setMeltChangeOutputData(quote.quote, preview.outputData);
+          return await wallet.completeMelt(
+            preview,
+            undefined,
+            completeMeltOptions
+          );
+        }
+      );
       paidMeltQuote = normalizeMeltQuote(data.quote);
       await this.updateOutgoingInvoiceInHistory(paidMeltQuote);
       if (data.outputData?.length) {
