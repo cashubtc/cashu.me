@@ -10,6 +10,7 @@ vi.mock("vue-i18n", async (importOriginal) => ({
 
 import { useWalletStore } from "src/stores/wallet";
 import { useProofsStore } from "src/stores/proofs";
+import { useMintsStore } from "src/stores/mints";
 
 const PUBKEY =
   "02a9acc1e48c25eeeb9289b5031cc57da9fe72f3fe2861d264bdc074209b107ba2";
@@ -95,6 +96,13 @@ describe("walletStore.sendToLock pubkey normalization", () => {
     wallet.getKeyset = vi.fn().mockReturnValue("ks1");
     proofs.removeProofs = vi.fn().mockResolvedValue(undefined);
     proofs.addProofs = vi.fn().mockResolvedValue(undefined);
+    // sendToLock routes through retryOnceOnSignedOutputs, which refreshes the
+    // mint's keys and rebuilds the signing wallet from the store. Stub those so
+    // the wrapper resolves to this mockWallet without touching the network.
+    const mints = useMintsStore();
+    mints.mints = [{ url: "https://mint.test", keys: [], keysets: [] }] as any;
+    mints.fetchMintKeys = vi.fn().mockResolvedValue(undefined);
+    wallet.mintWalletSync = vi.fn().mockReturnValue(mockWallet);
     return { wallet, mockWallet, asP2PK, sendProofs, walletProofs };
   };
 
