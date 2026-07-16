@@ -356,6 +356,23 @@ export const useWalletStore = defineStore("wallet", {
       }
       return this.createWalletInstance(storedMint, url, unit);
     },
+    // Refreshes the mint's keysets and resolves the active keyset
+    // after the refresh, so any keyset rotation on the mint is
+    // picked up before outputs are built.
+    ensureKeysetsCurrent: async function (
+      mintUrl: string,
+      unit: string
+    ): Promise<{ wallet: Wallet; keysetId: string }> {
+      const mints = useMintsStore();
+      const storedMint = mints.mints.find((m) => m.url === mintUrl);
+      if (!storedMint) {
+        throw new Error("mint not found");
+      }
+      await mints.fetchMintKeys(storedMint);
+      const wallet = this.mintWalletSync(mintUrl, unit);
+      const keysetId = this.getKeyset(mintUrl, unit);
+      return { wallet, keysetId };
+    },
     getOrCreateCounterSource(): CounterSource {
       if (!this.sharedCounterSource) {
         const initial = Object.fromEntries(
@@ -424,12 +441,17 @@ export const useWalletStore = defineStore("wallet", {
       this.mnemonic = generateMnemonic(wordlist);
     },
     retryOnceOnSignedOutputs: async function <T>(
-      keysetId: string,
-      operation: () => Promise<T>,
+      mintUrl: string,
+      unit: string,
+      operation: (wallet: Wallet, keysetId: string) => Promise<T>,
       notifyUser = true
     ): Promise<T> {
+      const { wallet, keysetId } = await this.ensureKeysetsCurrent(
+        mintUrl,
+        unit
+      );
       try {
-        return await operation();
+        return await operation(wallet, keysetId);
       } catch (error: any) {
         const handled = await this.handleOutputsHaveAlreadyBeenSignedError(
           keysetId,
@@ -441,7 +463,7 @@ export const useWalletStore = defineStore("wallet", {
         }
         // Counter source is shared — the bump from handleOutputsHaveAlreadyBeenSignedError
         // is already visible to the wallet, so just retry.
-        return await operation();
+        return await operation(wallet, keysetId);
       }
     },
     getKeyset(
@@ -610,12 +632,17 @@ export const useWalletStore = defineStore("wallet", {
         amount,
         true
       );
-      const keysetId = this.getKeyset(wallet.mint.mintUrl, wallet.unit);
-      const { keep: keepProofs, send: sendProofs } = await wallet.ops
-        .send(amount, toProofs(proofsToSend))
-        .keyset(keysetId)
-        .asP2PK(p2pkOptions)
-        .run();
+      const { keep: keepProofs, send: sendProofs } =
+        await this.retryOnceOnSignedOutputs(
+          wallet.mint.mintUrl,
+          wallet.unit,
+          async (lockWallet: Wallet, keysetId: string) =>
+            lockWallet.ops
+              .send(amount, toProofs(proofsToSend))
+              .keyset(keysetId)
+              .asP2PK(p2pkOptions)
+              .run()
+        );
       const proofsStore = useProofsStore();
       await proofsStore.removeProofs(proofsToSend);
       // note: we do not store sendProofs in the proofs store but
@@ -636,7 +663,6 @@ export const useWalletStore = defineStore("wallet", {
       // or removes them if `invalidate` is true (caller takes ownership).
       const proofsStore = useProofsStore();
       const uIStore = useUiStore();
-      const keysetId = this.getKeyset(wallet.mint.mintUrl, wallet.unit);
       await uIStore.lockMutex();
       try {
         const spendableProofs: Proof[] = toProofs(
@@ -664,17 +690,12 @@ export const useWalletStore = defineStore("wallet", {
           sendProofs = exactMatch;
         } else {
           // we need to swap!
-          // get a new wallet with potentially updated keysets / info
-          const swapWallet = await this.mintWallet(
-            wallet.mint.mintUrl,
-            wallet.unit,
-            true // update keysets
-          );
           // includeFees=true inflates send outputs so sendProofs sum to
           // amount + fees(sendProofs): required for melt and includeFees sends.
           const swapResult = await this.retryOnceOnSignedOutputs(
-            keysetId,
-            async () =>
+            wallet.mint.mintUrl,
+            wallet.unit,
+            async (swapWallet: Wallet, keysetId: string) =>
               swapWallet.ops
                 .send(amount, spendableProofs)
                 .asDeterministic()
@@ -751,11 +772,6 @@ export const useWalletStore = defineStore("wallet", {
         mint: mintInToken,
         fee: fee,
       };
-      const mintWallet = await this.mintWallet(
-        historyToken.mint,
-        historyToken.unit,
-        true
-      );
       const mint = mintStore.mints.find((m) => m.url === historyToken.mint);
       if (!mint) {
         throw new Error("mint not found");
@@ -763,17 +779,20 @@ export const useWalletStore = defineStore("wallet", {
       await uIStore.lockMutex();
       try {
         // redeem
-        const keysetId = this.getKeyset(historyToken.mint, historyToken.unit);
         const privkey = receiveStore.receiveData.p2pkPrivateKey;
         let proofs: Proof[];
         try {
-          proofs = await this.retryOnceOnSignedOutputs(keysetId, async () =>
-            mintWallet.ops
-              .receive(receiveStore.receiveData.tokensBase64)
-              .asDeterministic()
-              .privkey(privkey)
-              .proofsWeHave(mintStore.mintUnitProofs(mint, historyToken.unit))
-              .run()
+          proofs = await this.retryOnceOnSignedOutputs(
+            historyToken.mint,
+            historyToken.unit,
+
+            async (mintWallet: Wallet) =>
+              mintWallet.ops
+                .receive(receiveStore.receiveData.tokensBase64)
+                .asDeterministic()
+                .privkey(privkey)
+                .proofsWeHave(mintStore.mintUnitProofs(mint, historyToken.unit))
+                .run()
           );
           await proofsStore.addProofs(proofs);
         } catch (error: any) {

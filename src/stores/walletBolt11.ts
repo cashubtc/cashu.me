@@ -97,8 +97,7 @@ export async function mintBolt11(
   const proofsStore = useProofsStore();
   const mintStore = useMintsStore();
   const uIStore = useUiStore();
-  const keysetId = this.getKeyset(invoice.mint, invoice.unit);
-  const mintWallet = await this.mintWallet(invoice.mint, invoice.unit, true);
+  const mintWallet = this.mintWalletSync(invoice.mint, invoice.unit);
   const mint = mintStore.mints.find((m: any) => m.url === invoice.mint);
   if (!mint) {
     throw new Error("mint not found");
@@ -134,14 +133,17 @@ export async function mintBolt11(
         throw new Error("unknown state.");
     }
     // MintQuoteState must be PAID
-    const proofs = await this.retryOnceOnSignedOutputs(keysetId, async () =>
-      mintWallet.ops
-        .mintBolt11(invoice.amount, invoice.quote)
-        .keyset(keysetId)
-        .asDeterministic()
-        .proofsWeHave(mintStore.mintUnitProofs(mint, invoice.unit))
-        .privkey(invoice.privKey as string)
-        .run()
+    const proofs = await this.retryOnceOnSignedOutputs(
+      invoice.mint,
+      invoice.unit,
+      async (wallet: Wallet, keysetId: string) =>
+        wallet.ops
+          .mintBolt11(invoice.amount, invoice.quote)
+          .keyset(keysetId)
+          .asDeterministic()
+          .proofsWeHave(mintStore.mintUnitProofs(mint, invoice.unit))
+          .privkey(invoice.privKey as string)
+          .run()
     );
     await proofsStore.addProofs(proofs);
 
