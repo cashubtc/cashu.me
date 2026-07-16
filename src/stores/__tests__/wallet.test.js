@@ -796,7 +796,7 @@ describe("wallet store", () => {
       expect(wallet.keysetCounter("00aa")).toBe(11);
     });
 
-    it("(f) rethrows an unrelated error without retrying", async () => {
+    it("(g) rethrows an unrelated error without retrying", async () => {
       const wallet = useWalletStore();
       const operation = vi.fn().mockRejectedValue(new Error("mint offline"));
 
@@ -810,7 +810,7 @@ describe("wallet store", () => {
       expect(operation).toHaveBeenCalledTimes(1);
     });
 
-    it("(f) propagates a second signed-outputs failure after the single retry", async () => {
+    it("(h) propagates a second signed-outputs failure after the single retry", async () => {
       const wallet = useWalletStore();
       const operation = vi
         .fn()
