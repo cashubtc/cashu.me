@@ -13,7 +13,7 @@
             dense
             class="q-px-md q-mr-md wallet-action-btn"
             color="primary"
-            @click="showReceiveDialog = true"
+            @click="showReceiveOverlay"
           >
             <div class="button-content">
               <span>{{ $t("WalletPage.actions.receive.label") }}</span>
@@ -36,15 +36,15 @@
             dense
             class="q-px-md q-ml-md wallet-action-btn"
             color="primary"
-            @click="showSendDialog = true"
+            @click="showSendOverlay"
           >
             <div class="button-content">
               <span>{{ $t("WalletPage.actions.send.label") }}</span>
             </div>
           </q-btn>
         </div>
-        <ReceiveDialog v-model="showReceiveDialog" />
-        <SendDialog v-model="showSendDialog" />
+        <ReceiveDialog />
+        <SendDialog />
       </div>
       <!-- ///////////////////////////////////////////
       ////////////////// TABLES /////////////////
@@ -134,7 +134,7 @@
     <!-- DIALOGS  -->
 
     <!-- INPUT PARSER  -->
-    <PayInvoiceDialog v-model="payInvoiceData.show" />
+    <PayInvoiceDialog />
 
     <!-- QR CODE SCANNER  -->
     <q-dialog v-model="camera.show" backdrop-filter="blur(2px) brightness(60%)">
@@ -151,14 +151,14 @@
     />
 
     <!-- INVOICE DETAILS  -->
-    <CreateInvoiceDialog v-model="showCreateInvoiceDialog" />
-    <InvoiceDetailDialog v-model="showInvoiceDetails" />
+    <CreateInvoiceDialog />
+    <InvoiceDetailDialog />
 
     <!-- SEND TOKENS DIALOG  -->
-    <SendTokenDialog v-model="showSendTokens" />
+    <SendTokenDialog />
 
     <!-- RECEIVE TOKENS DIALOG  -->
-    <ReceiveTokenDialog v-model="showReceiveTokens" />
+    <ReceiveTokenDialog />
   </div>
 </template>
 <style>
@@ -255,6 +255,19 @@ import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
 import { useWelcomeStore } from "../stores/welcome";
 import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
 import { notifyError, notify } from "../js/notify";
+import {
+  closeAllOverlays,
+  getOpenOverlays,
+  getWalletOverlayFromPath,
+  getWalletOverlayFromRoute,
+  isWalletHomePath,
+  isWalletRoute,
+  openWalletOverlay,
+  openOnlyOverlay,
+  walletOverlayHistoryState,
+  WalletOverlay,
+} from "src/js/overlays";
+import type { OverlayId } from "src/js/overlays";
 
 import {
   X as XIcon,
@@ -308,6 +321,9 @@ export default {
       baseURL: location.protocol + "//" + location.host + location.pathname,
       credit: 0,
       newName: "",
+      syncingOverlayRoute: false,
+      walletOverlayRouteDepth: 0,
+      closeOverlayFlowDepthOnBack: 0,
     };
   },
   computed: {
@@ -319,6 +335,8 @@ export default {
       "tab",
       "showSendDialog",
       "showReceiveDialog",
+      "showReceiveEcashDrawer",
+      "showMultinutPaymentDialog",
     ]),
     ...mapWritableState(useUiStore, ["expandHistory"]),
     ...mapWritableState(useReceiveTokensStore, [
@@ -338,7 +356,13 @@ export default {
       "invoiceData",
       "payInvoiceData",
     ]),
-    ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
+    ...mapWritableState(useMintsStore, [
+      "addMintData",
+      "showAddMintDialog",
+      "showRemoveMintDialog",
+      "showEditMintDialog",
+      "showMintInfoDialog",
+    ]),
     ...mapWritableState(useWorkersStore, [
       "invoiceCheckListener",
       "tokensCheckSpendableListener",
@@ -348,12 +372,35 @@ export default {
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     ...mapWritableState(useP2PKStore, ["showP2PKDialog"]),
     ...mapWritableState(useNWCStore, ["showNWCDialog", "nwcEnabled"]),
+    ...mapWritableState(usePRStore, ["showPRDialog"]),
     pendingPaymentsExist: function () {
       return this.payments.findIndex((payment) => payment.pending) !== -1;
     },
 
     balance: function () {
       return sumProofAmounts(this.activeProofs.flat());
+    },
+    openOverlayKey: function () {
+      [
+        this.showMultinutPaymentDialog,
+        this.camera.show,
+        this.payInvoiceData.show,
+        this.showSendTokens,
+        this.showReceiveTokens,
+        this.showCreateInvoiceDialog,
+        this.showInvoiceDetails,
+        this.showPRDialog,
+        this.showP2PKDialog,
+        this.showNWCDialog,
+        this.showAddMintDialog,
+        this.showRemoveMintDialog,
+        this.showEditMintDialog,
+        this.showMintInfoDialog,
+        this.showReceiveEcashDrawer,
+        this.showSendDialog,
+        this.showReceiveDialog,
+      ];
+      return getOpenOverlays().join("|");
     },
   },
   methods: {
@@ -443,8 +490,13 @@ export default {
       // TODO: fix this
       // this.$nextTick(() => this.$refs[el].focus());
     },
+    showReceiveOverlay: function () {
+      openWalletOverlay(this.$router, WalletOverlay.Receive);
+    },
+    showSendOverlay: function () {
+      openWalletOverlay(this.$router, WalletOverlay.Send);
+    },
     showParseDialog: function () {
-      this.payInvoiceData.show = true;
       this.payInvoiceData.invoice = null;
       this.payInvoiceData.lnurlpay = null;
       this.payInvoiceData.domain = "";
@@ -452,6 +504,7 @@ export default {
       this.payInvoiceData.input.request = "";
       this.payInvoiceData.input.comment = "";
       this.camera.show = false;
+      openWalletOverlay(this.$router, WalletOverlay.PayInvoice);
       this.focusInput("parseDialogInput");
     },
     showWelcomePage: function () {
@@ -479,7 +532,7 @@ export default {
       this.invoiceData.request = "";
       this.invoiceData.hash = "";
       this.invoiceData.memo = "";
-      this.showCreateInvoiceDialog = true;
+      openWalletOverlay(this.$router, WalletOverlay.CreateInvoice);
     },
     showSendTokensDialog: function () {
       console.log("##### showSendTokensDialog");
@@ -487,14 +540,14 @@ export default {
       this.sendData.tokensBase64 = "";
       this.sendData.amount = null;
       this.sendData.memo = "";
-      this.showSendTokens = true;
+      openWalletOverlay(this.$router, WalletOverlay.SendTokens);
     },
     hideSendTokensDialog: function () {
       this.showSendTokens = false;
     },
     showReceiveTokensDialog: function () {
       this.receiveData.tokensBase64 = "";
-      this.showReceiveTokens = true;
+      openWalletOverlay(this.$router, WalletOverlay.ReceiveTokens);
     },
 
     //////////////////////// MINT //////////////////////////////////////////
@@ -544,6 +597,10 @@ export default {
         }
       });
     },
+    setWelcomeDialogSeen: function () {
+      this.welcomeDialog.show = false;
+      useWelcomeStore().showWelcome = false;
+    },
     registerBroadcastChannel: async function () {
       // uses session storage to identify the tab so we can ignore incoming messages from the same tab
       if (!sessionStorage.getItem("tabId")) {
@@ -590,8 +647,165 @@ export default {
         }
       });
     },
+    getPreviousHistoryPath: function () {
+      const state = window.history.state as { back?: string } | null;
+      return typeof state?.back === "string" ? state.back : "";
+    },
+    getForwardHistoryPath: function () {
+      const state = window.history.state as { forward?: string } | null;
+      return typeof state?.forward === "string" ? state.forward : "";
+    },
+    getOverlayHistoryDepth: function () {
+      return Number(
+        window.history.state?.[walletOverlayHistoryState.depth] ?? 0
+      );
+    },
+    shouldCloseOverlayFlowOnBack: function () {
+      return Boolean(
+        window.history.state?.[
+          walletOverlayHistoryState.closeFlowOnBack
+        ]
+      );
+    },
+    handleOverlayRouteChange: function () {
+      const routeOverlay = getWalletOverlayFromRoute(this.$route);
+
+      // A native/browser Back has already moved from the terminal dialog to
+      // its sheet. Skip the remaining sheet entries and land on the wallet.
+      if (this.closeOverlayFlowDepthOnBack > 0) {
+        const remainingSteps = this.closeOverlayFlowDepthOnBack - 1;
+        this.closeOverlayFlowDepthOnBack = 0;
+        if (routeOverlay && remainingSteps > 0) {
+          this.$router.go(-remainingSteps);
+          return;
+        }
+      }
+
+      this.closeOverlayFlowDepthOnBack = this.shouldCloseOverlayFlowOnBack()
+        ? this.getOverlayHistoryDepth()
+        : 0;
+      this.syncOpenOverlaysWithRoute();
+    },
+    finishOverlayRouteSync: function () {
+      this.$nextTick(() => {
+        this.syncingOverlayRoute = false;
+      });
+    },
+    updateOverlayRouteDepthFromRoute: function () {
+      const routeOverlay = getWalletOverlayFromRoute(this.$route);
+      if (!routeOverlay) {
+        this.walletOverlayRouteDepth = 0;
+        return;
+      }
+
+      const forwardOverlay = getWalletOverlayFromPath(
+        this.getForwardHistoryPath()
+      );
+      if (forwardOverlay && this.walletOverlayRouteDepth > 0) {
+        this.walletOverlayRouteDepth = Math.max(
+          1,
+          this.walletOverlayRouteDepth - 1
+        );
+      }
+    },
+    syncOpenOverlaysWithRoute: function () {
+      if (!isWalletRoute(this.$route)) {
+        return;
+      }
+
+      this.updateOverlayRouteDepthFromRoute();
+
+      const routeOverlay = getWalletOverlayFromRoute(this.$route);
+      const openOverlays = getOpenOverlays();
+
+      if (routeOverlay) {
+        if (openOverlays[0] !== routeOverlay) {
+          this.syncingOverlayRoute = true;
+          openOnlyOverlay(routeOverlay);
+          this.finishOverlayRouteSync();
+        }
+        return;
+      }
+
+      if (openOverlays.length) {
+        this.syncingOverlayRoute = true;
+        closeAllOverlays();
+        this.finishOverlayRouteSync();
+      }
+    },
+    syncRouteWithOpenOverlays: function (newKey: string) {
+      if (this.syncingOverlayRoute || !isWalletRoute(this.$route)) {
+        return;
+      }
+
+      const openOverlays = newKey
+        ? (newKey.split("|") as OverlayId[])
+        : ([] as OverlayId[]);
+      const newTopOverlay = openOverlays[0];
+      const currentRouteOverlay = getWalletOverlayFromRoute(this.$route);
+
+      if (newTopOverlay) {
+        if (newTopOverlay === currentRouteOverlay) {
+          return;
+        }
+
+        const previousRouteOverlay = getWalletOverlayFromPath(
+          this.getPreviousHistoryPath()
+        );
+        if (
+          currentRouteOverlay &&
+          previousRouteOverlay &&
+          newTopOverlay === previousRouteOverlay
+        ) {
+          this.walletOverlayRouteDepth = Math.max(
+            0,
+            this.walletOverlayRouteDepth - 1
+          );
+          this.$router.back();
+          return;
+        }
+
+        this.walletOverlayRouteDepth = currentRouteOverlay
+          ? this.walletOverlayRouteDepth + 1
+          : 1;
+        openWalletOverlay(this.$router, newTopOverlay);
+        return;
+      }
+
+      if (currentRouteOverlay) {
+        if (this.shouldCloseOverlayFlowOnBack()) {
+          const steps = -this.getOverlayHistoryDepth();
+          this.closeOverlayFlowDepthOnBack = 0;
+          this.walletOverlayRouteDepth = 0;
+          this.$router.go(steps);
+          return;
+        }
+
+        const previousPath = this.getPreviousHistoryPath();
+        if (isWalletHomePath(previousPath)) {
+          this.walletOverlayRouteDepth = 0;
+          this.$router.back();
+        } else if (this.walletOverlayRouteDepth > 0) {
+          const steps = -this.walletOverlayRouteDepth;
+          this.walletOverlayRouteDepth = 0;
+          this.$router.go(steps);
+        } else {
+          this.$router.replace({ path: "/" });
+        }
+      }
+    },
   },
-  watch: {},
+  watch: {
+    "$route.fullPath": {
+      immediate: true,
+      handler: function () {
+        this.handleOverlayRouteChange();
+      },
+    },
+    openOverlayKey: function (newKey: string) {
+      this.syncRouteWithOpenOverlays(newKey);
+    },
+  },
 
   mounted: function () {
     // generate NPC connection
@@ -633,8 +847,8 @@ export default {
     if (params.get("mint")) {
       const addMintUrl = params.get("mint") as string;
       await this.setTab("mints");
-      this.showAddMintDialog = true;
       this.addMintData = { url: addMintUrl };
+      openWalletOverlay(this.$router, WalletOverlay.AddMint);
     }
     if (!localStorage.getItem("cashu.activeMintUrl")) {
       this.setTab("mints");
@@ -658,7 +872,7 @@ export default {
       if (!seen) {
         // show receive token dialog
         this.receiveData.tokensBase64 = tokenBase64;
-        this.showReceiveTokens = true;
+        openWalletOverlay(this.$router, WalletOverlay.ReceiveTokens);
       }
     }
 
