@@ -9,7 +9,19 @@ import { useNWCStore } from "src/stores/nwc";
 import { useMintsStore } from "src/stores/mints";
 
 type WalletOverlayRouter = {
-  push(location: { path: string }): Promise<unknown> | unknown;
+  push(location: {
+    path: string;
+    state?: Record<string, unknown>;
+  }): Promise<unknown> | unknown;
+};
+
+export const walletOverlayHistoryState = {
+  depth: "walletOverlayDepth",
+  closeFlowOnBack: "walletOverlayCloseFlowOnBack",
+} as const;
+
+type OpenWalletOverlayOptions = {
+  closeFlowOnBack?: boolean;
 };
 
 /** Overlay ids in close-priority order (deepest / topmost first). */
@@ -93,19 +105,34 @@ export function getWalletOverlayPath(overlay: OverlayId): string {
   return `/wallet/${walletOverlaySlugs[overlay]}`;
 }
 
-export function getWalletOverlayLocation(overlay: OverlayId): {
+export function getWalletOverlayLocation(
+  overlay: OverlayId,
+  options: OpenWalletOverlayOptions = {}
+): {
   path: string;
+  state: Record<string, unknown>;
 } {
+  const currentDepth = Number(
+    window.history.state?.[walletOverlayHistoryState.depth] ?? 0
+  );
+
   return {
     path: getWalletOverlayPath(overlay),
+    state: {
+      [walletOverlayHistoryState.depth]: currentDepth + 1,
+      ...(options.closeFlowOnBack
+        ? { [walletOverlayHistoryState.closeFlowOnBack]: true }
+        : {}),
+    },
   };
 }
 
 export function openWalletOverlay(
   router: WalletOverlayRouter,
-  overlay: OverlayId
+  overlay: OverlayId,
+  options: OpenWalletOverlayOptions = {}
 ): Promise<unknown> | unknown {
-  return router.push(getWalletOverlayLocation(overlay));
+  return router.push(getWalletOverlayLocation(overlay, options));
 }
 
 export function getWalletOverlayFromPath(

@@ -41,7 +41,11 @@
             </div>
           </button>
 
-          <button type="button" class="action-row" @click="showCamera">
+          <button
+            type="button"
+            class="action-row"
+            @click="showCameraFromBottomSheet"
+          >
             <div class="row items-center no-wrap">
               <div class="icon-circle">
                 <ScanIcon :size="24" />
@@ -220,7 +224,9 @@ export default defineComponent({
     },
     handlePasteBtn: function () {
       this.receiveData.tokensBase64 = "";
-      openWalletOverlay(this.$router, WalletOverlay.ReceiveTokens);
+      openWalletOverlay(this.$router, WalletOverlay.ReceiveTokens, {
+        closeFlowOnBack: true,
+      });
       // if (!this.isiOsSafari()
       if (this.autoPasteEcashReceive) {
         this.watchClipboardPaste = true;
@@ -231,12 +237,21 @@ export default defineComponent({
         this.generateKeypair();
       }
       this.showLastKey();
-      openWalletOverlay(this.$router, WalletOverlay.P2PK);
+      openWalletOverlay(this.$router, WalletOverlay.P2PK, {
+        closeFlowOnBack: true,
+      });
     },
     handlePaymentRequestBtn: function () {
       const prStore = usePRStore();
       prStore.newPaymentRequest();
-      openWalletOverlay(this.$router, WalletOverlay.PaymentRequest);
+      openWalletOverlay(this.$router, WalletOverlay.PaymentRequest, {
+        closeFlowOnBack: true,
+      });
+    },
+    showCameraFromBottomSheet: function () {
+      openWalletOverlay(this.$router, WalletOverlay.Camera, {
+        closeFlowOnBack: true,
+      });
     },
     handleNFCBtn: function () {
       this.toggleScanner();

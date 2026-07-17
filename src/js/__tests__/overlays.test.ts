@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
   getWalletOverlayFromPath,
   getWalletOverlayFromRoute,
+  getWalletOverlayLocation,
   getWalletOverlayPath,
   isWalletHomePath,
+  walletOverlayHistoryState,
   WalletOverlay,
 } from "src/js/overlays";
 
@@ -43,5 +45,25 @@ describe("wallet overlay routes", () => {
   it("recognizes the wallet home path", () => {
     expect(isWalletHomePath("/")).toBe(true);
     expect(isWalletHomePath("/wallet/send")).toBe(false);
+  });
+
+  it("marks a terminal overlay to close its complete sheet flow", () => {
+    window.history.replaceState(
+      { [walletOverlayHistoryState.depth]: 2 },
+      "",
+      "/wallet/receive-ecash"
+    );
+
+    expect(
+      getWalletOverlayLocation(WalletOverlay.ReceiveTokens, {
+        closeFlowOnBack: true,
+      })
+    ).toEqual({
+      path: "/wallet/receive-token",
+      state: {
+        [walletOverlayHistoryState.depth]: 3,
+        [walletOverlayHistoryState.closeFlowOnBack]: true,
+      },
+    });
   });
 });

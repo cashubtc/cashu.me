@@ -264,6 +264,7 @@ import {
   isWalletRoute,
   openWalletOverlay,
   openOnlyOverlay,
+  walletOverlayHistoryState,
   WalletOverlay,
 } from "src/js/overlays";
 import type { OverlayId } from "src/js/overlays";
@@ -322,6 +323,7 @@ export default {
       newName: "",
       syncingOverlayRoute: false,
       walletOverlayRouteDepth: 0,
+      closeOverlayFlowDepthOnBack: 0,
     };
   },
   computed: {
@@ -653,6 +655,37 @@ export default {
       const state = window.history.state as { forward?: string } | null;
       return typeof state?.forward === "string" ? state.forward : "";
     },
+    getOverlayHistoryDepth: function () {
+      return Number(
+        window.history.state?.[walletOverlayHistoryState.depth] ?? 0
+      );
+    },
+    shouldCloseOverlayFlowOnBack: function () {
+      return Boolean(
+        window.history.state?.[
+          walletOverlayHistoryState.closeFlowOnBack
+        ]
+      );
+    },
+    handleOverlayRouteChange: function () {
+      const routeOverlay = getWalletOverlayFromRoute(this.$route);
+
+      // A native/browser Back has already moved from the terminal dialog to
+      // its sheet. Skip the remaining sheet entries and land on the wallet.
+      if (this.closeOverlayFlowDepthOnBack > 0) {
+        const remainingSteps = this.closeOverlayFlowDepthOnBack - 1;
+        this.closeOverlayFlowDepthOnBack = 0;
+        if (routeOverlay && remainingSteps > 0) {
+          this.$router.go(-remainingSteps);
+          return;
+        }
+      }
+
+      this.closeOverlayFlowDepthOnBack = this.shouldCloseOverlayFlowOnBack()
+        ? this.getOverlayHistoryDepth()
+        : 0;
+      this.syncOpenOverlaysWithRoute();
+    },
     finishOverlayRouteSync: function () {
       this.$nextTick(() => {
         this.syncingOverlayRoute = false;
@@ -740,6 +773,14 @@ export default {
       }
 
       if (currentRouteOverlay) {
+        if (this.shouldCloseOverlayFlowOnBack()) {
+          const steps = -this.getOverlayHistoryDepth();
+          this.closeOverlayFlowDepthOnBack = 0;
+          this.walletOverlayRouteDepth = 0;
+          this.$router.go(steps);
+          return;
+        }
+
         const previousPath = this.getPreviousHistoryPath();
         if (isWalletHomePath(previousPath)) {
           this.walletOverlayRouteDepth = 0;
@@ -758,7 +799,7 @@ export default {
     "$route.fullPath": {
       immediate: true,
       handler: function () {
-        this.syncOpenOverlaysWithRoute();
+        this.handleOverlayRouteChange();
       },
     },
     openOverlayKey: function (newKey: string) {

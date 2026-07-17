@@ -181,7 +181,9 @@ export default defineComponent({
     },
     showReceiveTokensDialog: function () {
       this.receiveData.tokensBase64 = "";
-      openWalletOverlay(this.$router, WalletOverlay.ReceiveTokens);
+      openWalletOverlay(this.$router, WalletOverlay.ReceiveTokens, {
+        closeFlowOnBack: true,
+      });
     },
     showInvoiceCreateDialog: async function () {
       const mintResult = await ensurePaymentMintActive(
@@ -205,7 +207,9 @@ export default defineComponent({
       this.invoiceData.hash = "";
       this.invoiceData.memo = "";
       this.invoiceData.type = mintResult.method;
-      openWalletOverlay(this.$router, WalletOverlay.CreateInvoice);
+      openWalletOverlay(this.$router, WalletOverlay.CreateInvoice, {
+        closeFlowOnBack: true,
+      });
     },
     showOnchainCreateDialog: async function () {
       const mintResult = await ensurePaymentMintActive(
@@ -226,7 +230,9 @@ export default defineComponent({
       this.invoiceData.hash = "";
       this.invoiceData.memo = "";
       this.invoiceData.type = PaymentMethod.Onchain;
-      openWalletOverlay(this.$router, WalletOverlay.CreateInvoice);
+      openWalletOverlay(this.$router, WalletOverlay.CreateInvoice, {
+        closeFlowOnBack: true,
+      });
     },
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
   },

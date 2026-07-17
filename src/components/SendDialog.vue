@@ -202,7 +202,9 @@ export default defineComponent({
       this.payInvoiceData.input.request = "";
       this.payInvoiceData.input.comment = "";
       this.camera.show = false;
-      openWalletOverlay(this.$router, WalletOverlay.PayInvoice);
+      openWalletOverlay(this.$router, WalletOverlay.PayInvoice, {
+        closeFlowOnBack: true,
+      });
     },
     showOnchainPayDialog: async function () {
       const mintResult = await ensurePaymentMintActive(
@@ -227,7 +229,9 @@ export default defineComponent({
       this.payInvoiceData.input.amount = undefined;
       this.payInvoiceData.input.comment = "";
       this.camera.show = false;
-      openWalletOverlay(this.$router, WalletOverlay.PayInvoice);
+      openWalletOverlay(this.$router, WalletOverlay.PayInvoice, {
+        closeFlowOnBack: true,
+      });
     },
     showSendTokensDialog: function () {
       console.log("##### showSendTokensDialog");
@@ -243,7 +247,9 @@ export default defineComponent({
       this.sendData.p2pkPubkey = "";
       this.sendData.paymentRequest = undefined;
       this.showLockInput = false;
-      openWalletOverlay(this.$router, WalletOverlay.SendTokens);
+      openWalletOverlay(this.$router, WalletOverlay.SendTokens, {
+        closeFlowOnBack: true,
+      });
     },
   },
   created: function () {},
