@@ -23,9 +23,7 @@
         </q-card>
 
         <q-card flat bordered class="bg-grey-9 q-pa-md q-mb-md">
-          <div class="text-h4 q-mb-sm">
-            {{ amount }} {{ unit }}
-          </div>
+          <div class="text-h4 q-mb-sm">{{ amount }} {{ unit }}</div>
           <div v-if="description" class="text-body2 q-mb-sm">
             {{ description }}
           </div>
@@ -77,139 +75,147 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, onMounted } from "vue";
+<script lang="ts">
+import { defineComponent } from "vue";
+import { mapActions, mapState, mapWritableState } from "pinia";
 import { useWalletStore } from "src/stores/wallet";
-import { useMintsStore } from "src/stores/mints";
+import { useMintsStore, MintClass } from "src/stores/mints";
 import { useProofsStore } from "src/stores/proofs";
 import { useTokensStore } from "src/stores/tokens";
 
-const walletStore = useWalletStore();
-const mintsStore = useMintsStore();
-const proofsStore = useProofsStore();
-const tokensStore = useTokensStore();
+export default defineComponent({
+  name: "EmbedPayPage",
+  data() {
+    return {
+      amount: 0,
+      unit: "sat",
+      mint: "",
+      memo: "",
+      description: "",
+      nonce: "",
+      callerHostname: "",
+      callerUrl: "",
+      balance: 0,
+      loading: false,
+      error: "",
+      noOpener: false,
+    };
+  },
+  computed: {
+    ...mapWritableState(useMintsStore, ["activeMintUrl", "activeUnit"]),
+    ...mapState(useMintsStore, ["mints", "activeProofs"]),
+  },
+  async mounted() {
+    if (!window.opener) {
+      this.noOpener = true;
+      return;
+    }
 
-const amount = ref(0);
-const unit = ref("sat");
-const mint = ref("");
-const memo = ref("");
-const description = ref("");
-const nonce = ref("");
-const callerHostname = ref("");
-const callerUrl = ref("");
-const balance = ref(0);
-const loading = ref(false);
-const error = ref("");
-const noOpener = ref(false);
+    const params = new URLSearchParams(window.location.search);
+    this.amount = Number(params.get("amount")) || 0;
+    this.unit = params.get("unit") || "sat";
+    this.mint = params.get("mint") || this.activeMintUrl;
+    this.memo = params.get("memo") || "";
+    this.description = params.get("description") || "";
+    this.nonce = params.get("nonce") || "";
 
-function sendResult(payload: object) {
-  if (window.opener) {
-    window.opener.postMessage(payload, "*");
-  }
-}
+    // Caller identification for scam prevention
+    const rawOrigin = params.get("origin") || "";
+    const rawUrl = params.get("url") || "";
+    try {
+      this.callerHostname = new URL(rawOrigin).hostname;
+    } catch {
+      this.callerHostname = rawOrigin || "Unknown";
+    }
+    this.callerUrl = rawUrl || rawOrigin || "Unknown";
 
-onMounted(async () => {
-  if (!window.opener) {
-    noOpener.value = true;
-    return;
-  }
+    if (this.amount <= 0) {
+      this.error = "Invalid amount";
+      return;
+    }
 
-  const params = new URLSearchParams(window.location.search);
-  amount.value = Number(params.get("amount")) || 0;
-  unit.value = params.get("unit") || "sat";
-  mint.value = params.get("mint") || mintsStore.activeMintUrl;
-  memo.value = params.get("memo") || "";
-  description.value = params.get("description") || "";
-  nonce.value = params.get("nonce") || "";
+    // Activate the requested mint and unit
+    if (this.mint && this.mint !== this.activeMintUrl) {
+      this.activeMintUrl = this.mint;
+    }
+    if (this.unit !== this.activeUnit) {
+      this.activeUnit = this.unit;
+    }
 
-  // Caller identification for scam prevention
-  const rawOrigin = params.get("origin") || "";
-  const rawUrl = params.get("url") || "";
-  try {
-    callerHostname.value = new URL(rawOrigin).hostname;
-  } catch {
-    callerHostname.value = rawOrigin || "Unknown";
-  }
-  callerUrl.value = rawUrl || rawOrigin || "Unknown";
+    // Wait for proofs to update
+    await this.updateActiveProofs();
 
-  if (amount.value <= 0) {
-    error.value = "Invalid amount";
-    return;
-  }
+    // Get balance for the active mint/unit
+    const activeMint = this.mints.find((m) => m.url === this.activeMintUrl);
+    if (activeMint) {
+      this.balance = new MintClass(activeMint).unitBalance(this.unit);
+    } else {
+      this.error = "No wallet configured for this mint";
+    }
+  },
+  methods: {
+    ...mapActions(useProofsStore, ["updateActiveProofs", "serializeProofs"]),
+    ...mapActions(useWalletStore, ["mintWallet", "send"]),
+    ...mapActions(useTokensStore, ["addPaidToken"]),
+    // The opener is an arbitrary page, so we cannot pin a target origin here
+    // and must post with "*". The token returned on success is spendable
+    // ecash, so the SDK-side nonce/origin checks are the only correlation
+    // guarantee: if the opener navigated away, the token could reach an
+    // unintended page. Keep the popup lifetime short and rely on those checks.
+    sendResult(payload: object) {
+      if (window.opener) {
+        window.opener.postMessage(payload, "*");
+      }
+    },
+    async confirmPayment() {
+      this.loading = true;
+      this.error = "";
 
-  // Activate the requested mint and unit
-  if (mint.value && mint.value !== mintsStore.activeMintUrl) {
-    mintsStore.activeMintUrl = mint.value;
-  }
-  if (unit.value !== mintsStore.activeUnit) {
-    mintsStore.activeUnit = unit.value;
-  }
+      try {
+        const wallet = await this.mintWallet(this.mint, this.unit);
+        const proofs = this.activeProofs;
+        const { sendProofs } = await this.send(
+          proofs,
+          wallet,
+          this.amount,
+          true
+        );
+        const token = this.serializeProofs(sendProofs);
 
-  // Wait for proofs to update
-  await proofsStore.updateActiveProofs();
+        // Record in transaction history
+        const label = this.description
+          ? `${this.callerHostname}: ${this.description}`
+          : `Payment to ${this.callerHostname}`;
+        this.addPaidToken({
+          amount: -this.amount,
+          token,
+          mint: this.mint,
+          unit: this.unit,
+          label,
+        });
 
-  // Get balance for the active mint/unit
-  const activeMint = mintsStore.mints.find(
-    (m) => m.url === mintsStore.activeMintUrl
-  );
-  if (activeMint) {
-    const mintClass = new (await import("src/stores/mints")).MintClass(
-      activeMint
-    );
-    balance.value = mintClass.unitBalance(unit.value);
-  } else {
-    error.value = "No wallet configured for this mint";
-  }
+        this.sendResult({
+          type: "cashu:payment-result",
+          nonce: this.nonce,
+          status: "success",
+          token: token,
+        });
+
+        window.close();
+      } catch (e: any) {
+        this.loading = false;
+        this.error = e.message || "Payment failed";
+      }
+    },
+    cancelPayment() {
+      this.sendResult({
+        type: "cashu:payment-result",
+        nonce: this.nonce,
+        status: "error",
+        error: "User cancelled",
+      });
+      window.close();
+    },
+  },
 });
-
-async function confirmPayment() {
-  loading.value = true;
-  error.value = "";
-
-  try {
-    const wallet = await walletStore.mintWallet(mint.value, unit.value);
-    const proofs = mintsStore.activeProofs;
-    const { sendProofs } = await walletStore.send(
-      proofs,
-      wallet,
-      amount.value,
-      true
-    );
-    const token = proofsStore.serializeProofs(sendProofs);
-
-    // Record in transaction history
-    const label = description.value
-      ? `${callerHostname.value}: ${description.value}`
-      : `Payment to ${callerHostname.value}`;
-    tokensStore.addPaidToken({
-      amount: -amount.value,
-      token,
-      mint: mint.value,
-      unit: unit.value,
-      label,
-    });
-
-    sendResult({
-      type: "cashu:payment-result",
-      nonce: nonce.value,
-      status: "success",
-      token: token,
-    });
-
-    window.close();
-  } catch (e: any) {
-    loading.value = false;
-    error.value = e.message || "Payment failed";
-  }
-}
-
-function cancelPayment() {
-  sendResult({
-    type: "cashu:payment-result",
-    nonce: nonce.value,
-    status: "error",
-    error: "User cancelled",
-  });
-  window.close();
-}
 </script>
