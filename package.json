@@ -7,10 +7,11 @@
   "private": true,
   "scripts": {
     "i18n:check": "node scripts/check-i18n.js",
-    "dev": "quasar dev",
-    "build": "quasar build",
-    "build:pwa": "quasar build -m pwa",
-    "build:electron": "quasar build -m electron",
+    "dev": "concurrently -k -n embed,quasar -c blue,magenta \"yarn build:embed --watch\" \"quasar dev\"",
+    "build": "yarn build:embed && quasar build",
+    "build:embed": "vite build --config vite.embed.config.ts",
+    "build:pwa": "yarn build:embed && quasar build -m pwa",
+    "build:electron": "yarn build:embed && quasar build -m electron",
     "quasar": "quasar",
     "lint": "eslint --ext .js,.vue,.ts ./",
     "format": "prettier --write .",
@@ -63,6 +64,7 @@
     "@typescript-eslint/parser": "^5.62.0",
     "@vue/test-utils": "^2.4.6",
     "autoprefixer": "^10.4.19",
+    "concurrently": "^10.0.3",
     "electron": "^38.1.0",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^8.10.0",
@@ -80,6 +82,9 @@
     "workbox-precaching": "^6.6.1",
     "workbox-routing": "^6.6.1",
     "workbox-strategies": "^6.6.1"
+  },
+  "resolutions": {
+    "sass": "^1.89.2"
   },
   "engines": {
     "node": ">=22.4.0",
