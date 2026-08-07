@@ -285,9 +285,10 @@ export default {
         toggle: "Přijímat automaticky",
         description: "Automaticky přijímat příchozí platby.",
       },
-      npc_v2: {
-        choose_mint_title: "Vyberte mint pro npub.cash v2",
-        choose_mint_placeholder: "Vyberte mint…",
+      mint: {
+        label: "mint pro npub.cash",
+        choose_title: "Vyberte mint pro npub.cash",
+        choose_placeholder: "Vyberte mint…",
       },
     },
 
@@ -500,9 +501,7 @@ export default {
       progress: "{crawlProcessed} / {crawlTotal}",
     },
     npub_cash: {
-      use_npubx: "Použít npubx.cash",
       copy_lightning_address: "Kopírovat Lightning adresu",
-      v2_mint: "mint pro npub.cash v2",
     },
     multinut: {
       use_multinut: "Použít Multinut",

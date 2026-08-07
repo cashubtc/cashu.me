@@ -279,9 +279,10 @@ export default {
         toggle: "المطالبة تلقائيًا",
         description: "استلام المدفوعات الواردة تلقائيًا.",
       },
-      npc_v2: {
-        choose_mint_title: "اختر mint لـ npub.cash v2",
-        choose_mint_placeholder: "حدد mint...",
+      mint: {
+        label: "mint لـ npub.cash",
+        choose_title: "اختر mint لـ npub.cash",
+        choose_placeholder: "حدد mint...",
       },
     },
     nostr_keys: {
@@ -485,9 +486,7 @@ export default {
       progress: "{crawlProcessed} / {crawlTotal}",
     },
     npub_cash: {
-      use_npubx: "استخدام npubx.cash",
       copy_lightning_address: "نسخ عنوان Lightning",
-      v2_mint: "npub.cash v2 mint",
     },
     multinut: {
       use_multinut: "استخدام Multinut",

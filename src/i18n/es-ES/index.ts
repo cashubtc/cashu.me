@@ -281,9 +281,10 @@ export default {
         toggle: "Reclamar automáticamente",
         description: "Recibir pagos entrantes automáticamente.",
       },
-      npc_v2: {
-        choose_mint_title: "Elegir mint para npub.cash v2",
-        choose_mint_placeholder: "Seleccionar un mint...",
+      mint: {
+        label: "npub.cash mint",
+        choose_title: "Elegir mint para npub.cash",
+        choose_placeholder: "Seleccionar un mint...",
       },
     },
     nostr_keys: {
@@ -490,9 +491,7 @@ export default {
       progress: "{crawlProcessed} / {crawlTotal}",
     },
     npub_cash: {
-      use_npubx: "Utilice npubx.cash",
       copy_lightning_address: "Copiar dirección Lightning",
-      v2_mint: "npub.cash v2 mint",
     },
     multinut: {
       use_multinut: "Usar Multinut",

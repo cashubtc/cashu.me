@@ -229,9 +229,7 @@ export default {
       progress: "{crawlProcessed} / {crawlTotal}",
     },
     npub_cash: {
-      use_npubx: "Använd npubx.cash",
       copy_lightning_address: "Kopiera Lightning-adress",
-      v2_mint: "npub.cash v2 mint",
     },
     multinut: {
       use_multinut: "Använd Multinut",
@@ -297,9 +295,10 @@ export default {
         toggle: "Hämta automatiskt",
         description: "Ta emot inkommande betalningar automatiskt.",
       },
-      npc_v2: {
-        choose_mint_title: "Välj mint för npub.cash v2",
-        choose_mint_placeholder: "Välj en mint...",
+      mint: {
+        label: "npub.cash mint",
+        choose_title: "Välj mint för npub.cash",
+        choose_placeholder: "Välj en mint...",
       },
     },
     nostr_keys: {

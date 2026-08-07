@@ -3,7 +3,6 @@
     :title="$t('Settings.menu.lightning_address.title')"
     :caption="$t('Settings.menu.lightning_address.caption')"
   >
-    <!-- npub.cash -->
     <SettingsSection
       :title="$t('Settings.lightning_address.title')"
       :caption="$t('Settings.lightning_address.description')"
@@ -18,18 +17,18 @@
           }}</q-item-label>
         </q-item-section>
         <q-item-section side>
-          <q-toggle v-model="npcEnabled" color="primary" />
+          <q-toggle v-model="enabled" color="primary" />
         </q-item-section>
       </q-item>
-      <template v-if="npcEnabled">
+      <template v-if="enabled">
         <q-item class="settings-control-item">
           <q-item-section>
-            <q-input outlined v-model="npcAddress" dense rounded readonly>
+            <q-input outlined v-model="address" dense rounded readonly>
               <template v-slot:append>
-                <q-spinner size="sm" v-if="npcLoading" />
+                <q-spinner size="sm" v-if="loading" />
                 <q-icon
                   name="content_copy"
-                  @click="copyText(npcAddress)"
+                  @click="copyText(address)"
                   size="xs"
                   color="grey"
                   class="cursor-pointer"
@@ -42,83 +41,22 @@
             </q-input>
           </q-item-section>
         </q-item>
-        <q-item tag="label">
-          <q-item-section>
-            <q-item-label>{{
-              $t("Settings.lightning_address.automatic_claim.toggle")
-            }}</q-item-label>
-            <q-item-label caption>{{
-              $t("Settings.lightning_address.automatic_claim.description")
-            }}</q-item-label>
-          </q-item-section>
-          <q-item-section side>
-            <q-toggle v-model="automaticClaim" color="primary" />
-          </q-item-section>
-        </q-item>
-      </template>
-    </SettingsSection>
-
-    <!-- npub.cash v2 -->
-    <SettingsSection :title="$t('Settings.npub_cash.use_npubx')">
-      <template v-slot:badge>
-        <q-badge
-          color="primary"
-          :label="$t('Settings.experimental.receive_swaps.badge')"
-          class="q-ml-sm"
-        ></q-badge>
-      </template>
-      <q-item tag="label">
-        <q-item-section>
-          <q-item-label>{{ $t("Settings.npub_cash.use_npubx") }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-toggle v-model="npcV2Enabled" color="primary" />
-        </q-item-section>
-      </q-item>
-      <template v-if="npcV2Enabled">
-        <q-item class="settings-control-item">
-          <q-item-section>
-            <q-input outlined v-model="npcV2Address" dense rounded readonly>
-              <template v-slot:append>
-                <q-icon
-                  name="content_copy"
-                  @click="copyText(npcV2Address)"
-                  size="xs"
-                  color="grey"
-                  class="cursor-pointer"
-                >
-                  <q-tooltip>{{
-                    $t("Settings.npub_cash.copy_lightning_address")
-                  }}</q-tooltip>
-                </q-icon>
-              </template>
-            </q-input>
-          </q-item-section>
-        </q-item>
         <q-item class="settings-control-item">
           <q-item-section>
             <q-item-label caption class="q-mb-sm">{{
-              $t("Settings.npub_cash.v2_mint")
+              $t("Settings.lightning_address.mint.label")
             }}</q-item-label>
-            <q-input outlined v-model="npcV2Mint" dense rounded readonly>
-            </q-input>
-            <div class="q-mt-sm">
-              <ChooseMint
-                v-model="npcV2Mint"
-                :title="
-                  $t('Settings.lightning_address.npc_v2.choose_mint_title')
-                "
-                :placeholder="
-                  $t(
-                    'Settings.lightning_address.npc_v2.choose_mint_placeholder'
-                  )
-                "
-                :show-balances="false"
-                :dense="true"
-                :rounded="true"
-                :require-active-mint="false"
-              />
-            </div>
+            <ChooseMint
+              v-model="mintUrl"
+              :title="$t('Settings.lightning_address.mint.choose_title')"
+              :placeholder="
+                $t('Settings.lightning_address.mint.choose_placeholder')
+              "
+              :show-balances="false"
+              :dense="true"
+              :rounded="true"
+              :require-active-mint="false"
+            />
           </q-item-section>
         </q-item>
         <q-item tag="label">
@@ -131,7 +69,7 @@
             }}</q-item-label>
           </q-item-section>
           <q-item-section side>
-            <q-toggle v-model="npcV2ClaimAutomatically" color="primary" />
+            <q-toggle v-model="claimAutomatically" color="primary" />
           </q-item-section>
         </q-item>
       </template>
@@ -142,12 +80,11 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
-import { useNostrStore } from "src/stores/nostr";
-import { useNPCStore } from "src/stores/npubcash";
-import { useNPCV2Store } from "src/stores/npcv2";
 import ChooseMint from "src/components/ChooseMint.vue";
-import SettingsPageShell from "./SettingsPageShell.vue";
-import SettingsSection from "./SettingsSection.vue";
+import { useNostrStore } from "src/stores/nostr";
+import { useNpubCashStore } from "src/stores/npubcash";
+import SettingsPageShell from "src/pages/settings/SettingsPageShell.vue";
+import SettingsSection from "src/pages/settings/SettingsSection.vue";
 
 export default defineComponent({
   name: "LightningAddressSettings",
@@ -158,47 +95,35 @@ export default defineComponent({
     ChooseMint,
   },
   computed: {
-    ...mapState(useNPCStore, ["npcLoading"]),
-    ...mapWritableState(useNPCStore, [
-      "npcAddress",
-      "npcEnabled",
-      "automaticClaim",
-    ]),
-    ...mapWritableState(useNPCV2Store, [
-      "npcV2Loading",
-      "npcV2Enabled",
-      "npcV2Address",
-      "npcV2Mint",
-      "npcV2ClaimAutomatically",
+    ...mapState(useNpubCashStore, ["loading"]),
+    ...mapWritableState(useNpubCashStore, [
+      "enabled",
+      "address",
+      "mintUrl",
+      "claimAutomatically",
     ]),
   },
   watch: {
-    npcEnabled: async function () {
-      if (this.npcEnabled) {
+    enabled: async function () {
+      if (this.enabled) {
         await this.initSigner();
-        await this.generateNPCConnection();
+        await this.refreshNpubCashConnection();
       } else {
-        this.npcAddress = "";
+        this.address = "";
       }
     },
-    npcV2Enabled: async function () {
-      if (this.npcV2Enabled) {
-        await this.initSigner();
-        await this.generateNPCV2Connection();
-      } else {
-        this.npcV2Address = "";
-      }
-    },
-    npcV2Mint: async function (newMintUrl, oldMintUrl) {
-      if (this.npcV2Enabled && newMintUrl && newMintUrl !== oldMintUrl) {
+    mintUrl: async function (newMintUrl, oldMintUrl) {
+      if (this.enabled && newMintUrl && newMintUrl !== oldMintUrl) {
         await this.changeMintUrl(newMintUrl);
       }
     },
   },
   methods: {
     ...mapActions(useNostrStore, ["initSigner"]),
-    ...mapActions(useNPCStore, ["generateNPCConnection"]),
-    ...mapActions(useNPCV2Store, ["generateNPCV2Connection", "changeMintUrl"]),
+    ...mapActions(useNpubCashStore, [
+      "refreshNpubCashConnection",
+      "changeMintUrl",
+    ]),
   },
 });
 </script>

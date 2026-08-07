@@ -286,9 +286,10 @@ export default {
         toggle: "Otomatik olarak talep et",
         description: "Gelen ödemeleri otomatik olarak alın.",
       },
-      npc_v2: {
-        choose_mint_title: "npub.cash v2 için mint seçin",
-        choose_mint_placeholder: "Bir mint seçin…",
+      mint: {
+        label: "npub.cash mint",
+        choose_title: "npub.cash için mint seçin",
+        choose_placeholder: "Bir mint seçin…",
       },
     },
     nostr_keys: {
@@ -558,9 +559,7 @@ export default {
       progress: "{crawlProcessed} / {crawlTotal}",
     },
     npub_cash: {
-      use_npubx: "npubx.cash kullan",
       copy_lightning_address: "Lightning adresini kopyala",
-      v2_mint: "npub.cash v2 mint",
     },
     multinut: {
       use_multinut: "Multinut kullan",

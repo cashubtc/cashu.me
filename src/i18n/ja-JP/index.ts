@@ -279,9 +279,10 @@ export default {
         toggle: "自動的に請求",
         description: "着信支払いを自動的に受け取ります。",
       },
-      npc_v2: {
-        choose_mint_title: "npub.cash v2のミントを選択",
-        choose_mint_placeholder: "ミントを選択...",
+      mint: {
+        label: "npub.cashミント",
+        choose_title: "npub.cashのミントを選択",
+        choose_placeholder: "ミントを選択...",
       },
     },
     nostr_keys: {
@@ -486,9 +487,7 @@ export default {
       progress: "{crawlProcessed} / {crawlTotal}",
     },
     npub_cash: {
-      use_npubx: "npubx.cashを使用",
       copy_lightning_address: "Lightningアドレスをコピー",
-      v2_mint: "npub.cash v2ミント",
     },
     multinut: {
       use_multinut: "マルチナットを使用",
