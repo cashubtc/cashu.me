@@ -284,8 +284,8 @@ export default {
       },
       mint: {
         label: "npub.cash mint",
-        choose_title: "Choisissez une menthe pour npub.cash",
-        choose_placeholder: "Sélectionnez une menthe...",
+        choose_title: "Choisissez une mint pour npub.cash",
+        choose_placeholder: "Sélectionnez une mint...",
       },
     },
     nostr_keys: {
