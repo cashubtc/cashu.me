@@ -313,13 +313,13 @@ export const useNpubCashStore = defineStore("npubCash", {
           return;
         }
         let latestQuoteTime: number | undefined;
-        responseData.data.quotes.forEach(async (quote) => {
+        for (const quote of responseData.data.quotes) {
           if (
             walletStore.invoiceHistory.find(
               (invoice) => invoice.quote === quote.quoteId
             )
           ) {
-            return;
+            continue;
           }
           if (!latestQuoteTime || latestQuoteTime < quote.createdAt) {
             latestQuoteTime = quote.createdAt;
@@ -349,7 +349,7 @@ export const useNpubCashStore = defineStore("npubCash", {
           if (this.claimAutomatically) {
             await walletStore.mintOnPaidBolt11(quote.quoteId);
           }
-        });
+        }
         if (latestQuoteTime) {
           this.lastCheck = latestQuoteTime;
         }
