@@ -313,6 +313,9 @@ function mockMintWebsocket(unit = "sat") {
       webSocketConnection: connection,
     },
     unit,
+    checkMintQuoteBatchBolt11: vi.fn(),
+    prepareBatchMint: vi.fn(),
+    completeBatchMint: vi.fn(),
   };
   return {
     connection,
@@ -466,6 +469,77 @@ describe("wallet store", () => {
 
     expect(wallet.invoiceHistory[0].amount).toBe(0);
     expect(wallet.invoiceData.amount).toBe(0);
+  });
+
+  it("keeps manual Bolt11 checks on the single-quote path", async () => {
+    const wallet = useWalletStore();
+    const invoice = {
+      quote: "manual-q",
+      amount: 10,
+      request: "lnbc-manual",
+      memo: "manual",
+      date: "old",
+      status: "pending",
+      mint: "https://mint-a.example",
+      unit: "sat",
+      type: PaymentMethod.Bolt11,
+    };
+    wallet.invoiceHistory = [invoice];
+    const checkMintQuoteBolt11 = vi.fn(async () => ({ state: "PAID" }));
+    const checkMintQuoteBatchBolt11 = vi.fn();
+    const prepareBatchMint = vi.fn();
+    const completeBatchMint = vi.fn();
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue({
+      checkMintQuoteBolt11,
+      checkMintQuoteBatchBolt11,
+      prepareBatchMint,
+      completeBatchMint,
+    });
+    vi.spyOn(wallet, "mintBolt11").mockResolvedValue([
+      { id: "00aa", amount: 10, secret: "manual-proof" },
+    ]);
+
+    await wallet.checkInvoiceBolt11("manual-q");
+
+    expect(checkMintQuoteBolt11).toHaveBeenCalledWith("manual-q");
+    expect(checkMintQuoteBatchBolt11).not.toHaveBeenCalled();
+    expect(prepareBatchMint).not.toHaveBeenCalled();
+    expect(completeBatchMint).not.toHaveBeenCalled();
+    expect(wallet.mintBolt11).toHaveBeenCalledWith(invoice, true);
+    expect(h.notifySuccess).toHaveBeenCalledOnce();
+  });
+
+  it("keeps background single-quote checks silent after successful minting", async () => {
+    const wallet = useWalletStore();
+    wallet.invoiceHistory = [
+      {
+        quote: "background-q",
+        amount: 10,
+        request: "lnbc-background",
+        memo: "background",
+        date: "old",
+        status: "pending",
+        mint: "https://mint-a.example",
+        unit: "sat",
+        type: PaymentMethod.Bolt11,
+      },
+    ];
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue({
+      checkMintQuoteBolt11: vi.fn(async () => ({ state: "PAID" })),
+    });
+    vi.spyOn(wallet, "mintBolt11").mockResolvedValue([
+      { id: "00aa", amount: 10, secret: "background-proof" },
+    ]);
+    const hideInvoiceDetails = vi.spyOn(
+      wallet,
+      "hideInvoiceDetailsAfterReceiveSuccess"
+    );
+
+    await wallet.checkInvoiceBolt11("background-q", false);
+
+    expect(h.notifySuccess).not.toHaveBeenCalled();
+    expect(h.uiStore.vibrate).not.toHaveBeenCalled();
+    expect(hideInvoiceDetails).not.toHaveBeenCalled();
   });
 
   it("adds, updates and removes outgoing invoices", async () => {
@@ -736,6 +810,15 @@ describe("wallet store", () => {
       expect.any(Function)
     );
     expect(websocket.connection.cancelSubscription).toHaveBeenCalledTimes(1);
+    expect(wallet.mintBolt11).toHaveBeenCalledWith(
+      wallet.invoiceHistory[0],
+      false
+    );
+    expect(
+      websocket.mintWallet.checkMintQuoteBatchBolt11
+    ).not.toHaveBeenCalled();
+    expect(websocket.mintWallet.prepareBatchMint).not.toHaveBeenCalled();
+    expect(websocket.mintWallet.completeBatchMint).not.toHaveBeenCalled();
   });
 
   it("subscribes Bolt12 minting to Bolt12 websocket updates", async () => {
