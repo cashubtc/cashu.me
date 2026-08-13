@@ -101,6 +101,61 @@ describe("npub.cash store", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it("initializes the signer before assigning an address", async () => {
+    const signer = new NDKPrivateKeySigner("1".padStart(64, "0"));
+    const nostrStore = useNostrStore();
+    nostrStore.pubkey = "";
+    vi.spyOn(nostrStore, "initSignerIfNotSet").mockImplementation(async () => {
+      if (nostrStore.initialized) {
+        return;
+      }
+      nostrStore.signer = signer;
+      nostrStore.pubkey = (await signer.user()).pubkey;
+      nostrStore.initialized = true;
+    });
+
+    const mintUrl = "https://mint.example";
+    const mintsStore = useMintsStore();
+    mintsStore.mints = [{ url: mintUrl, keys: [], keysets: [] }];
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url === "https://npub.cash/api/v2/user/info") {
+          return new Response(
+            JSON.stringify({
+              error: false,
+              data: {
+                user: {
+                  lockQuote: false,
+                  mintUrl,
+                  pubkey: nostrStore.pubkey,
+                },
+              },
+            })
+          );
+        }
+        if (url === "https://npub.cash/api/v2/wallet/quotes") {
+          return new Response(
+            JSON.stringify({
+              error: false,
+              data: { quotes: [] },
+              metadata: { limit: 100, total: 0 },
+            })
+          );
+        }
+        throw new Error(`Unexpected request: ${url}`);
+      })
+    );
+
+    const store = useNpubCashStore();
+    store.enabled = true;
+    await store.initializeNpubCash();
+
+    expect(store.address).toMatch(/^npub1.+@npub\.cash$/);
+  });
+
   it("initializes only through canonical npub.cash v2 routes", async () => {
     const signer = new NDKPrivateKeySigner("1".padStart(64, "0"));
     const nostrStore = useNostrStore();
