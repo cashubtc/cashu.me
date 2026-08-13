@@ -195,6 +195,8 @@ export const useNpubCashStore = defineStore("npubCash", {
       if (!this.enabled) {
         return;
       }
+      const nostrStore = useNostrStore();
+      await nostrStore.initSignerIfNotSet();
       await Promise.all([
         this.refreshNpubCashConnection(),
         this.synchronizeQuotes(),
