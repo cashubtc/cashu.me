@@ -91,12 +91,14 @@ export const useDexieStore = defineStore("dexie", {
       // remove proofs from localstorage
       localStorage.removeItem("cashu.proofs");
     },
-    deleteAllTables: function () {
-      cashuDb.proofs.clear();
-      cashuDb.paymentHistory.clear();
-      cashuDb.mintQuotes.clear();
-      cashuDb.meltQuotes.clear();
-      cashuDb.ecashHistory.clear();
+    deleteAllTables: async function () {
+      await Promise.all([
+        cashuDb.proofs.clear(),
+        cashuDb.paymentHistory.clear(),
+        cashuDb.mintQuotes.clear(),
+        cashuDb.meltQuotes.clear(),
+        cashuDb.ecashHistory.clear(),
+      ]);
     },
   },
 });
