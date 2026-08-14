@@ -3,7 +3,11 @@ const routes = [
     path: "/",
     component: () => import("layouts/MainLayout.vue"),
     children: [
-      { path: "", component: () => import("src/pages/WalletPage.vue") },
+      {
+        path: "",
+        alias: "wallet/:walletOverlay",
+        component: () => import("src/pages/WalletPage.vue"),
+      },
     ],
   },
   {

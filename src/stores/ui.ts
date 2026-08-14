@@ -30,6 +30,7 @@ export const useUiStore = defineStore("ui", {
     showSendDialog: false,
     showReceiveDialog: false,
     showReceiveEcashDrawer: false,
+    showMultinutPaymentDialog: false,
     showNumericKeyboard: false,
     activityOrb: false,
     tab: useLocalStorage("cashu.ui.tab", "history" as string),
@@ -49,6 +50,7 @@ export const useUiStore = defineStore("ui", {
       this.showSendDialog = false;
       this.showReceiveDialog = false;
       this.showReceiveEcashDrawer = false;
+      this.showMultinutPaymentDialog = false;
     },
     async lockMutex() {
       const nRetries = 10;

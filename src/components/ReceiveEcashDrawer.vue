@@ -28,7 +28,7 @@
 
       <q-card-section class="q-pa-md">
         <div class="q-gutter-y-md">
-          <div class="action-row" @click="handlePasteBtn">
+          <button type="button" class="action-row" @click="handlePasteBtn">
             <div class="row items-center no-wrap">
               <div class="icon-circle">
                 <ClipboardIcon :size="24" />
@@ -39,9 +39,13 @@
                 </div>
               </div>
             </div>
-          </div>
+          </button>
 
-          <div class="action-row" @click="showCamera">
+          <button
+            type="button"
+            class="action-row"
+            @click="showCameraFromBottomSheet"
+          >
             <div class="row items-center no-wrap">
               <div class="icon-circle">
                 <ScanIcon :size="24" />
@@ -52,10 +56,11 @@
                 </div>
               </div>
             </div>
-          </div>
+          </button>
 
-          <div
+          <button
             v-if="enablePaymentRequest"
+            type="button"
             class="action-row"
             @click="handlePaymentRequestBtn"
           >
@@ -69,10 +74,11 @@
                 </div>
               </div>
             </div>
-          </div>
+          </button>
 
-          <div
+          <button
             v-if="showP2PkButtonInDrawer"
+            type="button"
             class="action-row"
             @click="handleLockBtn"
           >
@@ -86,10 +92,11 @@
                 </div>
               </div>
             </div>
-          </div>
+          </button>
 
-          <div
+          <button
             v-if="ndefSupported && showNfcButtonInDrawer"
+            type="button"
             class="action-row"
             @click="handleNFCBtn"
           >
@@ -109,13 +116,13 @@
                 </div>
               </div>
             </div>
-          </div>
+          </button>
         </div>
       </q-card-section>
     </q-card>
   </q-dialog>
-  <P2PKDialog v-model="showP2PKDialog" />
-  <PRDialog v-model="showPRDialog" />
+  <P2PKDialog />
+  <PRDialog />
 </template>
 
 <script lang="ts">
@@ -146,6 +153,7 @@ import {
 import TokenInformation from "components/TokenInformation.vue";
 import { map } from "underscore";
 import { notifyError, notifySuccess, notify } from "../js/notify";
+import { openWalletOverlay, WalletOverlay } from "src/js/overlays";
 
 export default defineComponent({
   name: "ReceiveTokenDialog",
@@ -161,9 +169,7 @@ export default defineComponent({
     NfcIcon,
   },
   data: function () {
-    return {
-      showP2PKDialog: false,
-    };
+    return {};
   },
   computed: {
     ...mapWritableState(useReceiveTokensStore, [
@@ -186,6 +192,7 @@ export default defineComponent({
     ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
     ...mapWritableState(usePRStore, ["showPRDialog"]),
     ...mapState(useCameraStore, ["hasCamera"]),
+    ...mapWritableState(useP2PKStore, ["showP2PKDialog"]),
     ...mapState(useP2PKStore, ["p2pkKeys", "showP2PkButtonInDrawer"]),
     ...mapState(usePRStore, ["enablePaymentRequest"]),
     ...mapWritableState(useUiStore, ["showReceiveDialog"]),
@@ -208,10 +215,6 @@ export default defineComponent({
       "toggleScanner",
       "pasteToParseDialog",
     ]),
-    ...mapWritableState(useReceiveTokensStore, [
-      "showReceiveTokens",
-      "receiveData",
-    ]),
     isiOsSafari() {
       const userAgent = window.navigator.userAgent.toLowerCase();
       const match =
@@ -221,28 +224,34 @@ export default defineComponent({
     },
     handlePasteBtn: function () {
       this.receiveData.tokensBase64 = "";
-      this.showReceiveTokens = true;
-      this.showReceiveEcashDrawer = false;
+      openWalletOverlay(this.$router, WalletOverlay.ReceiveTokens, {
+        closeFlowOnBack: true,
+      });
       // if (!this.isiOsSafari()
       if (this.autoPasteEcashReceive) {
         this.watchClipboardPaste = true;
       }
     },
     handleLockBtn: function () {
-      this.showP2PKDialog = !this.showP2PKDialog;
-      if (!this.p2pkKeys.length || !this.showP2PKDialog) {
+      if (!this.p2pkKeys.length) {
         this.generateKeypair();
       }
       this.showLastKey();
-      this.showReceiveEcashDrawer = false;
+      openWalletOverlay(this.$router, WalletOverlay.P2PK, {
+        closeFlowOnBack: true,
+      });
     },
     handlePaymentRequestBtn: function () {
       const prStore = usePRStore();
-      this.showPRDialog = !this.showPRDialog;
-      if (this.showPRDialog) {
-        prStore.newPaymentRequest();
-      }
-      this.showReceiveEcashDrawer = false;
+      prStore.newPaymentRequest();
+      openWalletOverlay(this.$router, WalletOverlay.PaymentRequest, {
+        closeFlowOnBack: true,
+      });
+    },
+    showCameraFromBottomSheet: function () {
+      openWalletOverlay(this.$router, WalletOverlay.Camera, {
+        closeFlowOnBack: true,
+      });
     },
     handleNFCBtn: function () {
       this.toggleScanner();
@@ -254,8 +263,7 @@ export default defineComponent({
       // You might want to process the result here
     },
     goBack: function () {
-      this.showReceiveEcashDrawer = false;
-      this.showReceiveDialog = true;
+      openWalletOverlay(this.$router, WalletOverlay.Receive);
     },
   },
 });
@@ -279,9 +287,15 @@ export default defineComponent({
 }
 
 .action-row {
+  border: 0;
   background: rgba(255, 255, 255, 0.06);
   border-radius: 12px;
+  color: inherit;
+  display: block;
+  font: inherit;
   padding: 12px 16px;
+  text-align: left;
+  width: 100%;
   cursor: pointer;
   transition: background 0.2s ease;
 
