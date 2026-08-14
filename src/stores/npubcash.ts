@@ -5,8 +5,10 @@ import { defineStore } from "pinia";
 import { date } from "quasar";
 import { nip19 } from "nostr-tools";
 import { notifyApiError, notifyError } from "src/js/notify";
+import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
 import { useMintsStore } from "src/stores/mints";
 import { useNostrStore } from "src/stores/nostr";
+import { useSettingsStore } from "src/stores/settings";
 import { useWalletStore } from "src/stores/wallet";
 
 type NpubCashUser = {
@@ -301,6 +303,8 @@ export const useNpubCashStore = defineStore("npubCash", {
       if (!this.enabled) {
         return;
       }
+      const invoicesWorkerStore = useInvoicesWorkerStore();
+      const settingsStore = useSettingsStore();
       const walletStore = useWalletStore();
       const since = this.lastCheck ? `?since=${this.lastCheck}` : "";
       const quoteUrl = `${NPUB_CASH_BASE_URL}/api/v2/wallet/quotes`;
@@ -349,7 +353,11 @@ export const useNpubCashStore = defineStore("npubCash", {
             },
           });
           if (this.claimAutomatically) {
-            await walletStore.mintOnPaidBolt11(quote.quoteId);
+            if (settingsStore.periodicallyCheckIncomingInvoices) {
+              invoicesWorkerStore.addInvoiceToChecker(quote.quoteId);
+            } else {
+              await walletStore.mintOnPaidBolt11(quote.quoteId);
+            }
           }
         }
         if (latestQuoteTime) {

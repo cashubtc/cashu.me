@@ -2,9 +2,12 @@ import { NDKPrivateKeySigner } from "@nostr-dev-kit/ndk";
 import { createPinia, setActivePinia } from "pinia";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { nextTick } from "vue";
+import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
 import { useMintsStore } from "src/stores/mints";
 import { useNostrStore } from "src/stores/nostr";
 import { useNpubCashStore } from "src/stores/npubcash";
+import { useSettingsStore } from "src/stores/settings";
+import { useWalletStore } from "src/stores/wallet";
 
 vi.mock("vue-i18n", async (importOriginal) => {
   const actual = await importOriginal<typeof import("vue-i18n")>();
@@ -231,5 +234,122 @@ describe("npub.cash store", () => {
       address: "alice@npub.cash",
       mintUrl: "https://mint.example",
     });
+  });
+
+  it("queues restored npub.cash quotes for background reconciliation", async () => {
+    const mintUrl = "https://mint.example";
+    const store = useNpubCashStore();
+    store.enabled = true;
+    store.claimAutomatically = true;
+    const settingsStore = useSettingsStore();
+    settingsStore.periodicallyCheckIncomingInvoices = true;
+    const mintsStore = useMintsStore();
+    mintsStore.mints = [
+      { url: mintUrl, keys: [], keysets: [], info: { nuts: { 29: {} } } },
+    ];
+    const worker = useInvoicesWorkerStore();
+    worker.quotes = [];
+    vi.spyOn(worker, "startInvoiceCheckerWorker").mockImplementation(() => {});
+    const walletStore = useWalletStore();
+    walletStore.invoiceHistory = [];
+    vi.spyOn(walletStore, "addPaymentHistory").mockImplementation(
+      async (invoice) => {
+        walletStore.invoiceHistory.push(invoice);
+      }
+    );
+    const mintOnPaid = vi
+      .spyOn(walletStore, "mintOnPaidBolt11")
+      .mockResolvedValue(undefined);
+    vi.spyOn(store, "sendAuthedRequest").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          error: false,
+          data: {
+            quotes: [
+              {
+                createdAt: 1_700_000_001,
+                paidAt: 1_700_000_002,
+                expiresAt: 1_700_003_600,
+                mintUrl,
+                quoteId: "npub-q-1",
+                request: "lnbc1",
+                amount: 10,
+                state: "PAID",
+                locked: false,
+              },
+              {
+                createdAt: 1_700_000_003,
+                paidAt: 1_700_000_004,
+                expiresAt: 1_700_003_600,
+                mintUrl,
+                quoteId: "npub-q-2",
+                request: "lnbc2",
+                amount: 20,
+                state: "PAID",
+                locked: false,
+              },
+            ],
+          },
+          metadata: { limit: 100, total: 2 },
+        })
+      )
+    );
+
+    await store.synchronizeQuotes();
+
+    expect(mintOnPaid).not.toHaveBeenCalled();
+    expect(worker.quotes.map((quote) => quote.quote)).toEqual([
+      "npub-q-1",
+      "npub-q-2",
+    ]);
+  });
+
+  it("keeps direct npub.cash claiming when periodic checking is disabled", async () => {
+    const mintUrl = "https://mint.example";
+    const store = useNpubCashStore();
+    store.enabled = true;
+    store.claimAutomatically = true;
+    const settingsStore = useSettingsStore();
+    settingsStore.periodicallyCheckIncomingInvoices = false;
+    const worker = useInvoicesWorkerStore();
+    worker.quotes = [];
+    const walletStore = useWalletStore();
+    walletStore.invoiceHistory = [];
+    vi.spyOn(walletStore, "addPaymentHistory").mockImplementation(
+      async (invoice) => {
+        walletStore.invoiceHistory.push(invoice);
+      }
+    );
+    const mintOnPaid = vi
+      .spyOn(walletStore, "mintOnPaidBolt11")
+      .mockResolvedValue(undefined);
+    vi.spyOn(store, "sendAuthedRequest").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          error: false,
+          data: {
+            quotes: [
+              {
+                createdAt: 1_700_000_001,
+                paidAt: 1_700_000_002,
+                expiresAt: 1_700_003_600,
+                mintUrl,
+                quoteId: "npub-q-1",
+                request: "lnbc1",
+                amount: 10,
+                state: "PAID",
+                locked: false,
+              },
+            ],
+          },
+          metadata: { limit: 100, total: 1 },
+        })
+      )
+    );
+
+    await store.synchronizeQuotes();
+
+    expect(worker.quotes).toEqual([]);
+    expect(mintOnPaid).toHaveBeenCalledWith("npub-q-1");
   });
 });
