@@ -3,33 +3,10 @@ import { useUiStore } from "stores/ui";
 import { Clipboard } from "@capacitor/clipboard";
 import { SafeArea } from "capacitor-plugin-safe-area";
 import { useSettingsStore } from "stores/settings";
+// Side-effect import: registers beforeinstallprompt listener as early as possible.
+import "stores/pwa";
 window.LOCALE = "en";
 // window.EventHub = new Vue();
-
-// Ensure we capture the PWA install prompt as early as possible
-if (typeof window !== "undefined") {
-  if (!window.__deferredBeforeInstallPrompt) {
-    window.__deferredBeforeInstallPrompt = null;
-  }
-  window.addEventListener(
-    "beforeinstallprompt",
-    (e) => {
-      // Allow custom install UI by deferring the prompt
-      e.preventDefault();
-      window.__deferredBeforeInstallPrompt = e;
-      // Notify any listeners that install is available
-      try {
-        window.dispatchEvent(new CustomEvent("bip-available"));
-      } catch (err) {
-        // noop
-      }
-    },
-    { once: false }
-  );
-  window.addEventListener("appinstalled", () => {
-    window.__deferredBeforeInstallPrompt = null;
-  });
-}
 
 // ---- PWA status bar color sync helpers ----
 function ensureMetaTag(name, initialContent) {

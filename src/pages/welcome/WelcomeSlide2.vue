@@ -1,4 +1,4 @@
-<!-- src/components/WelcomeSlide2.vue -->
+<!-- src/pages/welcome/WelcomeSlide2.vue -->
 <template>
   <div class="pwa-slide">
     <!-- Main content area -->
@@ -6,10 +6,10 @@
       <!-- Header Image -->
       <div
         class="header-image"
-        :class="{ centered: isInstalling || wasInstalled }"
+        :class="{ centered: isInstalling || isInstalled || wasInstalled }"
       >
         <transition
-          v-if="isPWA()"
+          v-if="isInstalled || wasInstalled"
           appear
           enter-active-class="animated bounceIn"
         >
@@ -35,7 +35,7 @@
 
       <!-- Content based on PWA status -->
       <div
-        v-if="!isPWA()"
+        v-if="!isInstalled && !wasInstalled"
         class="instructions"
         :class="{ 'fade-out': isInstalling }"
       >
@@ -45,15 +45,16 @@
             icon="add_box"
             :label="$t('WalletPage.install.text')"
             rounded
-            @click="promptInstall"
+            :loading="isInstalling"
+            @click="onPromptInstall"
           />
         </div>
-        <p v-if="!wasInstalled" class="intro-text">
+        <p v-if="!isInstalling" class="intro-text">
           {{ $t("WelcomeSlide2.instruction.intro.text") }}
         </p>
 
         <!-- Android Instructions -->
-        <div v-if="!wasInstalled && !isIos" class="platform-section">
+        <div v-if="!isInstalling && !isIos" class="platform-section">
           <h3 class="platform-title">
             {{ $t("WelcomeSlide2.instruction.android.title") }}
           </h3>
@@ -78,7 +79,7 @@
         </div>
 
         <!-- iOS Instructions -->
-        <div v-if="!wasInstalled && !isAndroid" class="platform-section">
+        <div v-if="!isInstalling && !isAndroid" class="platform-section">
           <h3 class="platform-title">
             {{ $t("WelcomeSlide2.instruction.ios.title") }}
           </h3>
@@ -100,19 +101,19 @@
           </div>
         </div>
 
-        <p v-if="!wasInstalled" class="outro-text">
+        <p v-if="!isInstalling" class="outro-text">
           {{ $t("WelcomeSlide2.instruction.outro.text") }}
         </p>
       </div>
 
       <!-- Success message when PWA is installed or installation confirmed -->
-      <div v-if="isPWA() || wasInstalled" class="success-message">
+      <div v-if="isInstalled || wasInstalled" class="success-message">
         <transition appear enter-active-class="animated tada">
           <h3 class="success-title">
             {{ $t("WelcomeSlide2.pwa.success.title") }}
           </h3>
         </transition>
-        <p v-if="isPWA()" class="success-text">
+        <p v-if="isInstalled" class="success-text">
           {{ $t("WelcomeSlide2.pwa.success.text") }}
         </p>
         <p v-else class="success-text">
@@ -123,143 +124,53 @@
 
     <!-- Spacer to match step 1's controls height -->
     <div class="spacer"></div>
-
-    <!-- PWA Prompts -->
-    <iOSPWAPrompt v-if="!isPWA() && !wasInstalled && !isInstalling && isIos" />
-    <AndroidPWAPrompt
-      v-if="
-        !isPWA() &&
-        !wasInstalled &&
-        !isInstalling &&
-        !canPromptInstall &&
-        !isIos
-      "
-    />
   </div>
 </template>
 
 <script lang="ts">
-import { ref, onMounted, onBeforeUnmount, computed } from "vue";
-import iOSPWAPrompt from "components/iOSPWAPrompt.vue";
-import AndroidPWAPrompt from "components/AndroidPWAPrompt.vue";
+import { defineComponent } from "vue";
+import { mapActions, mapState } from "pinia";
+import { usePwaStore } from "src/stores/pwa";
 
-export default {
+export default defineComponent({
   name: "WelcomeSlide2",
-  components: {
-    iOSPWAPrompt,
-    AndroidPWAPrompt,
-  },
-  setup() {
-    const isPWA = () => {
-      return (
-        window.matchMedia("(display-mode: standalone)").matches ||
-        (navigator as any).standalone === true
-      );
-    };
-
-    const deferredPrompt = ref<any | null>(null);
-    const canPromptInstall = ref(false);
-    const isInstalling = ref(false);
-    const wasInstalled = ref(false);
-    const installStartTs = ref<number | null>(null);
-    const minInstallDurationMs = 4000;
-    const isIos = computed(() => {
-      const ua = window.navigator.userAgent.toLowerCase();
-      return /iphone|ipad|ipod/.test(ua);
-    });
-    const isAndroid = computed(() => {
-      const ua = window.navigator.userAgent.toLowerCase();
-      return /android/.test(ua);
-    });
-
-    const handleBeforeInstallPrompt = (e: any) => {
-      // Prevent the mini-infobar on mobile
-      e.preventDefault();
-      deferredPrompt.value = e;
-      canPromptInstall.value = true;
-    };
-
-    const handleAppInstalled = () => {
-      deferredPrompt.value = null;
-      canPromptInstall.value = false;
-      const now = Date.now();
-      const elapsed = installStartTs.value ? now - installStartTs.value : 0;
-      const remaining = Math.max(0, minInstallDurationMs - elapsed);
-      window.setTimeout(() => {
-        wasInstalled.value = true;
-        isInstalling.value = false;
-        installStartTs.value = null;
-      }, remaining);
-    };
-
-    const promptInstall = async () => {
-      if (!deferredPrompt.value) return;
-      deferredPrompt.value.prompt();
-      try {
-        const { outcome } = await deferredPrompt.value.userChoice;
-        if (outcome === "accepted") {
-          // user accepted: show installing state until appinstalled or timeout
-          isInstalling.value = true;
-          installStartTs.value = Date.now();
-          // Fallback timeout to clear installing state if appinstalled doesn't fire
-          window.setTimeout(() => {
-            if (!isPWA()) {
-              isInstalling.value = false;
-              installStartTs.value = null;
-            }
-          }, 15000);
-        }
-      } finally {
-        // Chrome requires nulling after one use
-        deferredPrompt.value = null;
-        canPromptInstall.value = false;
-      }
-    };
-
-    onMounted(() => {
-      window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-      window.addEventListener("appinstalled", handleAppInstalled);
-      // Use globally captured event if it fired before this component mounted
-      const anyWindow = window as any;
-      if (anyWindow.__deferredBeforeInstallPrompt) {
-        deferredPrompt.value = anyWindow.__deferredBeforeInstallPrompt;
-        canPromptInstall.value = true;
-      }
-      const onBipAvailable = () => {
-        const w: any = window;
-        if (w.__deferredBeforeInstallPrompt) {
-          deferredPrompt.value = w.__deferredBeforeInstallPrompt;
-          canPromptInstall.value = true;
-        }
-      };
-      window.addEventListener("bip-available", onBipAvailable);
-      // Keep a reference for cleanup
-      (onMounted as any)._onBipAvailable = onBipAvailable;
-    });
-
-    onBeforeUnmount(() => {
-      window.removeEventListener(
-        "beforeinstallprompt",
-        handleBeforeInstallPrompt
-      );
-      window.removeEventListener("appinstalled", handleAppInstalled);
-      const refHandler = (onMounted as any)._onBipAvailable;
-      if (refHandler) {
-        window.removeEventListener("bip-available", refHandler);
-      }
-    });
-
+  data() {
     return {
-      isPWA,
-      canPromptInstall,
-      promptInstall,
-      isIos,
-      isAndroid,
-      isInstalling,
-      wasInstalled,
+      wasInstalled: false,
     };
   },
-};
+  computed: {
+    ...mapState(usePwaStore, [
+      "canPromptInstall",
+      "isInstalling",
+      "isInstalled",
+      "isIos",
+      "isAndroid",
+    ]),
+  },
+  watch: {
+    isInstalled(installed: boolean) {
+      if (installed) {
+        this.wasInstalled = true;
+      }
+    },
+  },
+  mounted() {
+    usePwaStore().init();
+    if (this.isInstalled) {
+      this.wasInstalled = true;
+    }
+  },
+  methods: {
+    ...mapActions(usePwaStore, ["promptInstall"]),
+    async onPromptInstall() {
+      const outcome = await this.promptInstall();
+      if (outcome === "accepted") {
+        this.wasInstalled = true;
+      }
+    },
+  },
+});
 </script>
 
 <style scoped>
@@ -292,9 +203,6 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.header-image {
   transition: margin-top 0.45s ease-in-out;
 }
 

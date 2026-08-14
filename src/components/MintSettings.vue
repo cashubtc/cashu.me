@@ -521,10 +521,10 @@ export default defineComponent({
       this.addMintData.url = this.addMintData.url.replace(/\/$/, "");
       this.showAddMintDialog = true;
     },
-    addMintInternal: function (mintToAdd, verbose) {
+    addMintInternal: async function (mintToAdd, verbose) {
       this.addingMint = true;
       try {
-        this.addMint(mintToAdd, verbose);
+        await this.addMint(mintToAdd, verbose);
         this.addMintData = { url: "", nickname: "" };
       } finally {
         this.addingMint = false;
