@@ -963,6 +963,8 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         quotesToCheck.splice(this.maxQuotesToCheckOnStartup);
       }
       const now = Date.now();
+      const settingsStore = useSettingsStore();
+      const mintStore = useMintsStore();
       this.lastPendingInvoiceCheck = now;
       for (const q of quotesToCheck) {
         try {
@@ -979,9 +981,17 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
               // Background websocket setup is best-effort; long-polling handles retries.
             });
           } else {
-            walletStore.mintOnPaidBolt11(q.quote, false, false).catch(() => {
-              // Background websocket setup is best-effort; long-polling handles retries.
-            });
+            const mint = mintStore.mints.find((item) => item.url === q.mint);
+            if (
+              settingsStore.periodicallyCheckIncomingInvoices &&
+              this.mintSupportsBolt11Batch(mint)
+            ) {
+              this.addInvoiceToChecker(q.quote);
+            } else {
+              walletStore.mintOnPaidBolt11(q.quote, false, false).catch(() => {
+                // Background websocket setup is best-effort; long-polling handles retries.
+              });
+            }
           }
         } catch (error) {
           // Background invoice checks stay silent; manual checks surface errors.
