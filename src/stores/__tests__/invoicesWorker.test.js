@@ -4,6 +4,7 @@ import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
 import { useMintsStore } from "src/stores/mints";
 import { usePaymentHistoryStore } from "src/stores/paymentHistory";
 import { useProofsStore } from "src/stores/proofs";
+import { useSettingsStore } from "src/stores/settings";
 import { useUiStore } from "src/stores/ui";
 import { cashuDb } from "src/stores/dexie";
 import { PaymentMethod } from "src/stores/walletTypes";
@@ -1086,4 +1087,60 @@ describe("invoices worker", () => {
       false
     );
   });
+
+  it("queues NUT-29 Bolt11 quotes without websocket reconciliation on startup", () => {
+    const worker = useInvoicesWorkerStore();
+    const mintStore = useMintsStore();
+    const settingsStore = useSettingsStore();
+    settingsStore.periodicallyCheckIncomingInvoices = true;
+    mintStore.mints = [];
+    advertiseBatchMint(mintStore, "https://mint.example");
+    vi.spyOn(worker, "startInvoiceCheckerWorker").mockImplementation(() => {});
+    const walletStore = {
+      invoiceHistory: [pendingInvoice("bolt11-q")],
+      mintOnPaidBolt11: vi.fn(async () => {}),
+    };
+
+    worker.queuePendingIncomingPayments(walletStore);
+
+    expect(worker.quotes.map((q) => q.quote)).toContain("bolt11-q");
+    expect(walletStore.mintOnPaidBolt11).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["the mint does not support NUT-29", false, true],
+    ["periodic checking is disabled", true, false],
+  ])(
+    "keeps Bolt11 websocket reconciliation when %s",
+    (_case, supportsNut29, periodicallyCheck) => {
+      const worker = useInvoicesWorkerStore();
+      const mintStore = useMintsStore();
+      const settingsStore = useSettingsStore();
+      settingsStore.periodicallyCheckIncomingInvoices = periodicallyCheck;
+      mintStore.mints = [];
+      if (supportsNut29) {
+        advertiseBatchMint(mintStore, "https://mint.example");
+      } else {
+        mintStore.mints.push({
+          url: "https://mint.example",
+          keys: [],
+          keysets: [],
+          info: { nuts: {} },
+        });
+      }
+      const walletStore = {
+        invoiceHistory: [pendingInvoice("bolt11-q")],
+        mintOnPaidBolt11: vi.fn(async () => {}),
+      };
+
+      worker.queuePendingIncomingPayments(walletStore);
+
+      expect(worker.quotes).toEqual([]);
+      expect(walletStore.mintOnPaidBolt11).toHaveBeenCalledWith(
+        "bolt11-q",
+        false,
+        false
+      );
+    }
+  );
 });
