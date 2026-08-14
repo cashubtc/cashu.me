@@ -8,12 +8,7 @@
       :caption="$t('Settings.advanced.developer.description')"
     >
       <!-- new seed -->
-      <q-item
-        clickable
-        v-ripple
-        @click="confirmMnemonic = true"
-        :disable="confirmMnemonic"
-      >
+      <q-item clickable v-ripple @click="confirmMnemonic = true">
         <q-item-section>
           <q-item-label>{{
             $t("Settings.advanced.developer.new_seed.button")
@@ -168,12 +163,7 @@
       </q-item>
 
       <!-- import wallet backup -->
-      <q-item
-        clickable
-        v-ripple
-        @click="confirmImport = true"
-        :disable="confirmImport"
-      >
+      <q-item clickable v-ripple @click="confirmImport = true">
         <q-item-section>
           <q-item-label>{{
             $t("Settings.advanced.developer.import_wallet.button")
@@ -223,12 +213,7 @@
       </q-item>
 
       <!-- reset wallet -->
-      <q-item
-        clickable
-        v-ripple
-        @click="confirmNuke = true"
-        :disable="confirmNuke"
-      >
+      <q-item clickable v-ripple @click="confirmNuke = true">
         <q-item-section>
           <q-item-label class="text-negative">{{
             $t("Settings.advanced.developer.reset_wallet.button")
@@ -398,9 +383,9 @@ export default defineComponent({
       // create a backup just in case
       await this.exportWalletState();
       // clear dexie tables
-      this.deleteAllTables();
+      await this.deleteAllTables();
       // clear nostr user databases
-      useNostrUserStore().clearAllDatabases();
+      await useNostrUserStore().clearAllDatabases();
       // clear mint reviews database
       try {
         const { useMintRecommendationsStore } = await import(
