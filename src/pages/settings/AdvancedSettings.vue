@@ -280,7 +280,7 @@ import { getShortUrl } from "src/js/wallet-helpers";
 import { useMintsStore } from "src/stores/mints";
 import { useWalletStore } from "src/stores/wallet";
 import { useNostrStore } from "src/stores/nostr";
-import { useNPCStore } from "src/stores/npubcash";
+import { useNpubCashStore } from "src/stores/npubcash";
 import { useUiStore } from "src/stores/ui";
 import { useProofsStore } from "src/stores/proofs";
 import { useDexieStore } from "src/stores/dexie";
@@ -327,7 +327,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(useNostrStore, ["initSigner"]),
-    ...mapActions(useNPCStore, ["generateNPCConnection"]),
+    ...mapActions(useNpubCashStore, ["refreshNpubCashConnection"]),
     ...mapActions(useWalletStore, [
       "newMnemonic",
       "checkProofsSpendable",
@@ -339,7 +339,7 @@ export default defineComponent({
     generateNewMnemonic: async function () {
       this.newMnemonic();
       await this.initSigner();
-      await this.generateNPCConnection();
+      await this.refreshNpubCashConnection();
     },
     shortUrl: function (url) {
       return getShortUrl(url);

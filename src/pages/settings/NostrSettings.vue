@@ -290,8 +290,7 @@ import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useNostrStore } from "src/stores/nostr";
 import { useNostrUserStore } from "src/stores/nostrUser";
-import { useNPCStore } from "src/stores/npubcash";
-import { useNPCV2Store } from "src/stores/npcv2";
+import { useNpubCashStore } from "src/stores/npubcash";
 import SettingsPageShell from "./SettingsPageShell.vue";
 import SettingsSection from "./SettingsSection.vue";
 
@@ -345,8 +344,7 @@ export default defineComponent({
       "resetPrivateKeySigner",
       "resetNip46Signer",
     ]),
-    ...mapActions(useNPCStore, ["generateNPCConnection"]),
-    ...mapActions(useNPCV2Store, ["generateNPCV2Connection"]),
+    ...mapActions(useNpubCashStore, ["refreshNpubCashConnection"]),
     ...mapActions(useNostrUserStore, [
       "crawlWebOfTrust",
       "cancelCrawl",
@@ -354,8 +352,7 @@ export default defineComponent({
     ]),
     handleSeedClick: async function () {
       await this.initWalletSeedPrivateKeySigner();
-      await this.generateNPCConnection();
-      await this.generateNPCV2Connection();
+      await this.refreshNpubCashConnection();
       const nostr = useNostrStore();
       const nostrUser = useNostrUserStore();
       nostrUser.setPubkey(nostr.pubkey);
@@ -363,8 +360,7 @@ export default defineComponent({
     },
     handleExtensionClick: async function () {
       await this.initNip07Signer();
-      await this.generateNPCConnection();
-      await this.generateNPCV2Connection();
+      await this.refreshNpubCashConnection();
       const nostr = useNostrStore();
       const nostrUser = useNostrUserStore();
       nostrUser.setPubkey(nostr.pubkey);
@@ -372,8 +368,7 @@ export default defineComponent({
     },
     handleBunkerClick: async function () {
       await this.initNip46Signer();
-      await this.generateNPCConnection();
-      await this.generateNPCV2Connection();
+      await this.refreshNpubCashConnection();
       const nostr = useNostrStore();
       const nostrUser = useNostrUserStore();
       nostrUser.setPubkey(nostr.pubkey);
@@ -381,8 +376,7 @@ export default defineComponent({
     },
     handleNsecClick: async function () {
       await this.initPrivateKeySigner();
-      await this.generateNPCConnection();
-      await this.generateNPCV2Connection();
+      await this.refreshNpubCashConnection();
       const nostr = useNostrStore();
       const nostrUser = useNostrUserStore();
       nostrUser.setPubkey(nostr.pubkey);
@@ -390,13 +384,11 @@ export default defineComponent({
     },
     handleResetPrivateKeySigner: async function () {
       await this.resetPrivateKeySigner();
-      await this.generateNPCConnection();
-      await this.generateNPCV2Connection();
+      await this.refreshNpubCashConnection();
     },
     handleResetNip46Signer: async function () {
       await this.resetNip46Signer();
-      await this.generateNPCConnection();
-      await this.generateNPCV2Connection();
+      await this.refreshNpubCashConnection();
     },
     addRelay: function () {
       if (this.newRelay) {

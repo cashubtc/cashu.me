@@ -230,9 +230,7 @@ export default {
       progress: "{crawlProcessed} / {crawlTotal}",
     },
     npub_cash: {
-      use_npubx: "ใช้ npubx.cash",
       copy_lightning_address: "คัดลอกที่อยู่ Lightning",
-      v2_mint: "npub.cash v2 mint",
     },
     multinut: {
       use_multinut: "ใช้ Multinut",
@@ -298,9 +296,10 @@ export default {
         toggle: "รับอัตโนมัติ",
         description: "รับการชำระเงินขาเข้าโดยอัตโนมัติ",
       },
-      npc_v2: {
-        choose_mint_title: "เลือก mint สำหรับ npub.cash v2",
-        choose_mint_placeholder: "เลือก mint...",
+      mint: {
+        label: "npub.cash mint",
+        choose_title: "เลือก mint สำหรับ npub.cash",
+        choose_placeholder: "เลือก mint...",
       },
     },
     nostr_keys: {

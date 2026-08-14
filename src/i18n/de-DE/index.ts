@@ -283,9 +283,10 @@ export default {
         toggle: "Automatisch beanspruchen",
         description: "Eingehende Zahlungen automatisch empfangen.",
       },
-      npc_v2: {
-        choose_mint_title: "Wählen Sie eine Mint für npub.cash v2",
-        choose_mint_placeholder: "Wählen Sie eine Mint...",
+      mint: {
+        label: "npub.cash Mint",
+        choose_title: "Wählen Sie eine Mint für npub.cash",
+        choose_placeholder: "Wählen Sie eine Mint...",
       },
     },
     web_of_trust: {
@@ -299,9 +300,7 @@ export default {
       progress: "{crawlProcessed} / {crawlTotal}",
     },
     npub_cash: {
-      use_npubx: "npubx.cash verwenden",
       copy_lightning_address: "Lightning-Adresse kopieren",
-      v2_mint: "npub.cash v2 Mint",
     },
     multinut: {
       use_multinut: "Multinut verwenden",

@@ -282,9 +282,10 @@ export default {
         toggle: "Réclamer automatiquement",
         description: "Recevez les paiements entrants automatiquement.",
       },
-      npc_v2: {
-        choose_mint_title: "Choisissez une menthe pour npub.cash v2",
-        choose_mint_placeholder: "Sélectionnez une menthe...",
+      mint: {
+        label: "npub.cash mint",
+        choose_title: "Choisissez une mint pour npub.cash",
+        choose_placeholder: "Sélectionnez une mint...",
       },
     },
     nostr_keys: {
@@ -494,9 +495,7 @@ export default {
       progress: "{crawlProcessed} / {crawlTotal}",
     },
     npub_cash: {
-      use_npubx: "Utiliser npubx.cash",
       copy_lightning_address: "Copier l'adresse Lightning",
-      v2_mint: "npub.cash v2 mint",
     },
     advanced: {
       title: "Avancé",

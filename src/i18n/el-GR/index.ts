@@ -282,9 +282,10 @@ export default {
         toggle: "Αυτόματη διεκδίκηση",
         description: "Λήψη εισερχόμενων πληρωμών αυτόματα.",
       },
-      npc_v2: {
-        choose_mint_title: "Επιλέξτε mint για npub.cash v2",
-        choose_mint_placeholder: "Επιλέξτε ένα mint...",
+      mint: {
+        label: "npub.cash mint",
+        choose_title: "Επιλέξτε mint για npub.cash",
+        choose_placeholder: "Επιλέξτε ένα mint...",
       },
     },
     nostr_keys: {
@@ -492,9 +493,7 @@ export default {
       progress: "{crawlProcessed} / {crawlTotal}",
     },
     npub_cash: {
-      use_npubx: "Χρήση npubx.cash",
       copy_lightning_address: "Αντιγραφή διεύθυνσης Lightning",
-      v2_mint: "npub.cash v2 mint",
     },
     multinut: {
       use_multinut: "Χρήση Multinut",

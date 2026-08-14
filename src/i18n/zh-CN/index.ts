@@ -231,9 +231,7 @@ export default {
       progress: "{crawlProcessed} / {crawlTotal}",
     },
     npub_cash: {
-      use_npubx: "使用 npubx.cash",
       copy_lightning_address: "复制闪电地址",
-      v2_mint: "npub.cash v2 铸币厂",
     },
     multinut: {
       use_multinut: "使用 Multinut",
@@ -299,9 +297,10 @@ export default {
         toggle: "自动认领",
         description: "自动接收收到的支付。",
       },
-      npc_v2: {
-        choose_mint_title: "为 npub.cash v2 选择铸币厂",
-        choose_mint_placeholder: "选择一个铸币厂…",
+      mint: {
+        label: "npub.cash 铸币厂",
+        choose_title: "为 npub.cash 选择铸币厂",
+        choose_placeholder: "选择一个铸币厂…",
       },
     },
     nostr_keys: {
