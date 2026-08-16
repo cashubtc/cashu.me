@@ -805,4 +805,110 @@ describe("invoices worker", () => {
       false
     );
   });
+
+  it("checks reusable quotes on startup when periodic polling is off", async () => {
+    const worker = useInvoicesWorkerStore();
+    const settingsStore = useSettingsStore();
+    settingsStore.periodicallyCheckIncomingInvoices = false;
+    settingsStore.checkSentTokens = false;
+    const bolt12Check = vi.fn(async () => ({
+      quote: "bolt12-q",
+      amount_paid: 0,
+      amount_issued: 0,
+      state: "UNPAID",
+    }));
+    const onchainCheck = vi.fn(async () => ({
+      quote: "onchain-q",
+      amount_paid: 0,
+      amount_issued: 0,
+      state: "UNPAID",
+    }));
+    vi.spyOn(usePaymentHistoryStore(), "upsertMintQuote").mockResolvedValue();
+    const walletStore = {
+      invoiceHistory: [
+        pendingInvoice("bolt12-q", {
+          amount: 0,
+          status: "paid",
+          mint: "https://bolt12.example",
+          type: PaymentMethod.Bolt12,
+        }),
+        pendingInvoice("onchain-q", {
+          amount: 0,
+          status: "paid",
+          mint: "https://onchain.example",
+          type: PaymentMethod.Onchain,
+        }),
+      ],
+      invoiceData: {},
+      mintOnPaidBolt12: vi.fn(async () => {}),
+      mintOnPaidOnchain: vi.fn(async () => {}),
+      mintWallet: vi.fn(async (mintUrl) =>
+        mintUrl === "https://bolt12.example"
+          ? { checkMintQuoteBolt12: bolt12Check }
+          : { checkMintQuoteOnchain: onchainCheck }
+      ),
+      syncPaymentHistoryCache: vi.fn(),
+    };
+
+    await worker.checkPendingInvoices(walletStore);
+
+    expect(bolt12Check).toHaveBeenCalledWith("bolt12-q");
+    expect(onchainCheck).toHaveBeenCalledWith("onchain-q");
+    expect(worker.bolt12Quotes.map((entry) => entry.quote)).toEqual([
+      "bolt12-q",
+    ]);
+    expect(worker.onchainQuotes.map((entry) => entry.quote)).toEqual([
+      "onchain-q",
+    ]);
+    expect(worker.invoiceCheckListener).toBeNull();
+  });
+
+  it("persists an on-chain probe with no mintable delta", async () => {
+    const worker = useInvoicesWorkerStore();
+    const now = Date.now();
+    const invoice = pendingInvoice("onchain-q", {
+      amount: 0,
+      status: "paid",
+      type: PaymentMethod.Onchain,
+    });
+    worker.onchainQuotes = [queuedQuote("onchain-q", now - 20_000)];
+    const quote = {
+      quote: "onchain-q",
+      amount_paid: 0,
+      amount_issued: 0,
+      state: "PENDING",
+      confirmations: 1,
+    };
+    const upsertMintQuote = vi
+      .spyOn(usePaymentHistoryStore(), "upsertMintQuote")
+      .mockResolvedValue();
+    const checkOnchainAndMint = vi.fn();
+    const walletStore = {
+      invoiceHistory: [invoice],
+      invoiceData: { quote: "onchain-q" },
+      mintWallet: vi.fn(async () => ({
+        checkMintQuoteOnchain: vi.fn(async () => quote),
+      })),
+      checkOnchainAndMint,
+      syncPaymentHistoryCache: vi.fn(),
+    };
+
+    await worker.processIncomingQueues(now, walletStore);
+
+    expect(invoice.mintQuote).toEqual(
+      expect.objectContaining({
+        quote: "onchain-q",
+        state: "PENDING",
+        confirmations: 1,
+        method: PaymentMethod.Onchain,
+      })
+    );
+    expect(upsertMintQuote).toHaveBeenCalledWith(
+      invoice.mintQuote,
+      PaymentMethod.Onchain
+    );
+    expect(walletStore.invoiceData.mintQuote).toBe(invoice.mintQuote);
+    expect(walletStore.syncPaymentHistoryCache).toHaveBeenCalledOnce();
+    expect(checkOnchainAndMint).not.toHaveBeenCalled();
+  });
 });

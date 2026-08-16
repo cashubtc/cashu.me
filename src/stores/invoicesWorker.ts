@@ -740,6 +740,21 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         amountToNumber(quote.amount_paid) - amountToNumber(quote.amount_issued);
 
       if (delta <= 0) {
+        if (job.kind === "onchain") {
+          const normalizedQuote = normalizeMintQuote(
+            quote,
+            PaymentMethod.Onchain
+          );
+          job.invoice.mintQuote = normalizedQuote;
+          await usePaymentHistoryStore().upsertMintQuote(
+            normalizedQuote,
+            PaymentMethod.Onchain
+          );
+          walletStore.syncPaymentHistoryCache?.();
+          if (walletStore.invoiceData?.quote === job.invoice.quote) {
+            walletStore.invoiceData.mintQuote = normalizedQuote;
+          }
+        }
         this.markEntryAttempt(job.entry, now);
         return;
       }
@@ -1207,18 +1222,14 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       for (const invoice of pending) {
         try {
           if (invoice.type === PaymentMethod.Bolt12) {
-            if (periodicChecks) {
-              this.addBolt12OfferToChecker(invoice.quote);
-            }
+            this.addBolt12OfferToChecker(invoice.quote);
             void walletStore
               .mintOnPaidBolt12(invoice.quote, false, false)
               .catch(() => {});
             continue;
           }
           if (invoice.type === PaymentMethod.Onchain) {
-            if (periodicChecks) {
-              this.addOnchainQuoteToChecker(invoice.quote);
-            }
+            this.addOnchainQuoteToChecker(invoice.quote);
             void walletStore
               .mintOnPaidOnchain(invoice.quote, false, false)
               .catch(() => {});
