@@ -6,6 +6,7 @@ import {
   MeltQuoteOnchainResponse,
   MeltQuoteState,
   OutputData,
+  type SerializedBlindedSignature,
   type ProofLike,
   Wallet,
   type AmountLike,
@@ -22,6 +23,7 @@ import { useMintsStore, WalletProof } from "./mints";
 import { usePaymentHistoryStore } from "./paymentHistory";
 import { useProofsStore } from "./proofs";
 import { useUiStore } from "src/stores/ui";
+import { cashuAmountToNumber } from "src/js/cashu-amount";
 
 let isUnloading = false;
 if (typeof window !== "undefined") {
@@ -34,6 +36,10 @@ type AppOnchainFeeOption = {
   fee_index: number;
   fee_reserve: number;
   estimated_blocks: number;
+};
+
+type AppBlindedSignature = Omit<SerializedBlindedSignature, "amount"> & {
+  amount: number;
 };
 
 export type AppMeltQuote = {
@@ -49,7 +55,7 @@ export type AppMeltQuote = {
   fee_options?: AppOnchainFeeOption[];
   selected_fee_index?: number | null;
   outpoint?: string | null;
-  change?: any[];
+  change?: AppBlindedSignature[];
 };
 
 type CheckMeltQuoteFn = (quoteId: string) => Promise<
@@ -73,7 +79,7 @@ const proofsStore = useProofsStore();
 
 function amountToNumber(value: AmountLike | undefined): number {
   if (value === undefined) return 0;
-  return Amount.from(value).toNumber();
+  return cashuAmountToNumber(value);
 }
 
 export function normalizeMeltQuote(
@@ -97,7 +103,12 @@ export function normalizeMeltQuote(
     payment_preimage:
       "payment_preimage" in quote ? quote.payment_preimage : null,
   };
-  if (change) normalized.change = change;
+  if (change) {
+    normalized.change = change.map((signature) => ({
+      ...signature,
+      amount: amountToNumber(signature.amount),
+    }));
+  }
   if ("fee_options" in quote) {
     normalized.fee_options = quote.fee_options.map((option) => ({
       ...option,
@@ -363,7 +374,10 @@ export async function finalizePaidMeltInvoice(
     );
     const changeProofs = mintWallet.createMeltChangeProofs(
       outputData,
-      meltQuote.change
+      meltQuote.change.map((signature) => ({
+        ...signature,
+        amount: Amount.from(signature.amount),
+      }))
     );
     if (changeProofs.length) {
       await proofsStore.addMissingProofs(changeProofs);
