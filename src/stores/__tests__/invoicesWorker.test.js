@@ -65,8 +65,10 @@ describe("invoices worker", () => {
     worker.onchainQuotes = [];
     worker.outgoingPayments = [];
     worker.reusableMintCooldowns = {};
+    worker.batchPathCooldowns = {};
     worker.mintLaneInFlight = {};
     worker.mintLastRequestAt = {};
+    worker.mintQuoteClaims = {};
     worker.lastPendingInvoiceCheck = 0;
 
     useMintsStore().mints = [];
@@ -92,13 +94,12 @@ describe("invoices worker", () => {
     );
   });
 
-  it("uses the normalized batch cap and has an aborting request timeout", () => {
+  it("uses the normalized batch cap", () => {
     const worker = useInvoicesWorkerStore();
 
     expect(worker.bolt11BatchSizeLimit({ info: { nuts: { 29: {} } } })).toBe(
       100
     );
-    expect(worker.mintRequestTimeout).toBe(20_000);
   });
 
   it("keeps old pending Bolt11 invoices eligible", () => {
@@ -328,6 +329,67 @@ describe("invoices worker", () => {
     ).toBe(0);
   });
 
+  it("does not hold the wallet mutex during a mint's batch request", async () => {
+    const worker = useInvoicesWorkerStore();
+    const mintStore = useMintsStore();
+    const now = Date.now();
+    const slowMint = "https://slow.example";
+    const fastMint = "https://fast.example";
+    advertiseBatchMint(mintStore, slowMint);
+    advertiseBatchMint(mintStore, fastMint);
+    mintStore.mints.forEach((mint) => {
+      mint.keysets = [{ id: "00aa", unit: "sat", active: true }];
+    });
+    worker.quotes = [
+      queuedQuote("slow-q", now - 20_000),
+      queuedQuote("fast-q", now - 10_000),
+    ];
+    vi.spyOn(usePaymentHistoryStore(), "upsertMintQuote").mockResolvedValue();
+    vi.spyOn(useProofsStore(), "addProofs").mockResolvedValue();
+
+    let resolveSlowMint;
+    const slowMintPending = new Promise((resolve) => {
+      resolveSlowMint = resolve;
+    });
+    const completeBatchMintByMint = {
+      [slowMint]: vi.fn(() => slowMintPending),
+      [fastMint]: vi.fn(async () => [{ amount: 10, secret: "fast-proof" }]),
+    };
+    const walletStore = {
+      invoiceHistory: [
+        pendingInvoice("slow-q", { mint: slowMint }),
+        pendingInvoice("fast-q", { mint: fastMint }),
+      ],
+      mintWallet: vi.fn(async (mintUrl) => ({
+        checkMintQuoteBatchBolt11: vi.fn(async (quotes) =>
+          quotes.map((quote) => ({
+            ...unpaidResponse(quote),
+            state: "PAID",
+          }))
+        ),
+        prepareBatchMint: vi.fn(async () => ({ preview: true })),
+        completeBatchMint: completeBatchMintByMint[mintUrl],
+      })),
+      getKeyset: vi.fn(() => "00aa"),
+      retryOnceOnSignedOutputs: vi.fn(
+        async (_keysetId, operation) => await operation()
+      ),
+      setInvoicePaid: vi.fn(),
+      syncPaymentHistoryCache: vi.fn(),
+    };
+
+    const processing = worker.processQuotes(walletStore);
+    await vi.waitFor(() =>
+      expect(completeBatchMintByMint[slowMint]).toHaveBeenCalledOnce()
+    );
+    await vi.waitFor(() =>
+      expect(completeBatchMintByMint[fastMint]).toHaveBeenCalledOnce()
+    );
+
+    resolveSlowMint([{ amount: 10, secret: "slow-proof" }]);
+    await processing;
+  });
+
   it("batch-mints paid quotes and retains unpaid quotes", async () => {
     const worker = useInvoicesWorkerStore();
     const mintStore = useMintsStore();
@@ -421,7 +483,7 @@ describe("invoices worker", () => {
     expect(worker.quotes).toEqual([]);
   });
 
-  it("rejects malformed batch responses without falling back to singles", async () => {
+  it("falls back to singles when a mint's batch path is broken", async () => {
     const worker = useInvoicesWorkerStore();
     const mintStore = useMintsStore();
     const now = Date.now();
@@ -430,24 +492,102 @@ describe("invoices worker", () => {
       queuedQuote("first-q", now - 20_000),
       queuedQuote("second-q", now - 10_000),
     ];
+    const checkMintQuoteBatchBolt11 = vi.fn(async () => [
+      unpaidResponse("second-q"),
+      unpaidResponse("first-q"),
+    ]);
     const walletStore = {
       invoiceHistory: [pendingInvoice("first-q"), pendingInvoice("second-q")],
       mintWallet: vi.fn(async () => ({
-        checkMintQuoteBatchBolt11: vi.fn(async () => [
-          unpaidResponse("second-q"),
-          unpaidResponse("first-q"),
-        ]),
+        checkMintQuoteBatchBolt11,
       })),
-      checkInvoiceBolt11: vi.fn(),
+      checkInvoiceBolt11: vi.fn(async () => {
+        throw new Error("invoice pending");
+      }),
     };
 
     await worker.processQuotes(walletStore);
 
     expect(walletStore.checkInvoiceBolt11).not.toHaveBeenCalled();
     expect(worker.quotes.every((entry) => entry.checkCount === 1)).toBe(true);
+    expect(
+      worker.reusableMintCooldowns["https://mint.example"]
+    ).toBeUndefined();
+    expect(
+      worker.batchPathCooldowns[
+        worker.batchPathKey("https://mint.example", "sat")
+      ]
+    ).toEqual(expect.objectContaining({ failureCount: 1 }));
+
+    worker.mintLastRequestAt["https://mint.example"] = 0;
+    worker.quotes.forEach((entry) => {
+      entry.lastChecked = 0;
+    });
+    await worker.processQuotes(walletStore);
+
+    expect(checkMintQuoteBatchBolt11).toHaveBeenCalledOnce();
+    expect(walletStore.checkInvoiceBolt11).toHaveBeenCalledWith(
+      "first-q",
+      false
+    );
+  });
+
+  it("keeps network failures on the mint-wide cooldown", async () => {
+    const worker = useInvoicesWorkerStore();
+    const mintStore = useMintsStore();
+    const now = Date.now();
+    advertiseBatchMint(mintStore, "https://mint.example");
+    worker.quotes = [queuedQuote("first-q", now - 20_000)];
+    const walletStore = {
+      invoiceHistory: [pendingInvoice("first-q")],
+      mintWallet: vi.fn(async () => ({
+        checkMintQuoteBatchBolt11: vi.fn(async () => {
+          throw new Error("NetworkError: request timed out");
+        }),
+      })),
+    };
+
+    await worker.processQuotes(walletStore);
+
     expect(worker.reusableMintCooldowns["https://mint.example"]).toEqual(
       expect.objectContaining({ failureCount: 1 })
     );
+    expect(
+      worker.batchPathCooldowns[
+        worker.batchPathKey("https://mint.example", "sat")
+      ]
+    ).toBeUndefined();
+  });
+
+  it("does not dispatch sent-token checks when the privacy setting is off", async () => {
+    const worker = useInvoicesWorkerStore();
+    const mintStore = useMintsStore();
+    const now = Date.now();
+    useSettingsStore().checkSentTokens = false;
+    mintStore.mints.push({
+      url: "https://mint.example",
+      keys: [],
+      keysets: [],
+      info: { nuts: {} },
+    });
+    worker.outgoingPayments = [
+      {
+        id: "outgoing-q",
+        type: "invoice",
+        addedAt: now - 20_000,
+        lastChecked: 0,
+        checkCount: 0,
+      },
+    ];
+    const walletStore = {
+      invoiceHistory: [pendingInvoice("outgoing-q", { amount: -10 })],
+      checkOutgoingInvoice: vi.fn(),
+    };
+
+    await worker.processQuotes(walletStore);
+    await worker.processOutgoingQueue(now, walletStore);
+
+    expect(walletStore.checkOutgoingInvoice).not.toHaveBeenCalled();
   });
 
   it("backs off only the failing mint", async () => {
@@ -610,6 +750,17 @@ describe("invoices worker", () => {
       worker.reusableMintCooldowns["https://mint-a.example"]
     ).toBeUndefined();
     expect(walletStore.mintWallet).toHaveBeenCalledTimes(2);
+    expect(walletStore.mintOnPaidBolt11).toHaveBeenCalledTimes(2);
+    expect(walletStore.mintOnPaidBolt11).toHaveBeenCalledWith(
+      "a-q",
+      false,
+      false
+    );
+    expect(walletStore.mintOnPaidBolt11).toHaveBeenCalledWith(
+      "b-q",
+      false,
+      false
+    );
   });
 
   it("keeps reusable WebSockets and worker queues active together", () => {

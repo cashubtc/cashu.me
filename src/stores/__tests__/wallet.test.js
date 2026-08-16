@@ -61,6 +61,8 @@ const h = vi.hoisted(() => {
     addBolt12OfferToChecker: vi.fn(),
     addOnchainQuoteToChecker: vi.fn(),
     addOutgoingTokenToChecker: vi.fn(),
+    mintQuoteIsClaimed: vi.fn(() => false),
+    waitForMintQuoteRelease: vi.fn(async () => {}),
   };
   const workersStore = {
     checkTokenSpendableWorker: vi.fn(),

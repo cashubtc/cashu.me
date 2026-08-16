@@ -1,11 +1,6 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
-import {
-  Amount,
-  MintInfo,
-  MintQuoteState,
-  setGlobalRequestOptions,
-} from "@cashu/cashu-ts";
+import { Amount, MintInfo, MintQuoteState } from "@cashu/cashu-ts";
 import * as nobleSecp256k1 from "@noble/secp256k1";
 import { bytesToHex } from "@noble/hashes/utils";
 import { useWalletStore } from "src/stores/wallet";
@@ -19,12 +14,6 @@ import {
 } from "src/stores/paymentHistory";
 import { useProofsStore } from "src/stores/proofs";
 import { useUiStore } from "src/stores/ui";
-
-const MINT_REQUEST_TIMEOUT = 20_000;
-
-// Every lane must eventually settle. This aborts the underlying fetch instead
-// of merely abandoning a promise that could complete later.
-setGlobalRequestOptions({ requestTimeout: MINT_REQUEST_TIMEOUT });
 
 interface InvoiceQuote {
   quote: string;
@@ -98,6 +87,8 @@ class MalformedBatchQuoteResponseError extends Error {
   }
 }
 
+const mintQuoteClaimWaiters = new Map<string, Set<() => void>>();
+
 function queueAge(entry: { lastChecked: number; addedAt: number }) {
   return entry.lastChecked || entry.addedAt;
 }
@@ -112,7 +103,6 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
     // Requests are rate-limited independently for every mint URL.
     checkInterval: 5_000,
     workerTickInterval: 1_000,
-    mintRequestTimeout: MINT_REQUEST_TIMEOUT,
     offlineRetryBaseInterval: 60_000,
     maxInterval: 24 * 60 * 60 * 1_000,
     keepIntervalConstantForNChecks: 5,
@@ -126,6 +116,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
     // Lane state is ephemeral so a restart immediately retries pending work.
     mintLaneInFlight: {} as Record<string, boolean>,
     mintLastRequestAt: {} as Record<string, number>,
+    mintQuoteClaims: {} as Record<string, boolean>,
 
     quotes: useLocalStorage<InvoiceQuote[]>(
       "cashu.worker.invoices.quotesQueue",
@@ -147,6 +138,10 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
     // Keep the existing key so offline-mint backoff survives upgrades.
     reusableMintCooldowns: useLocalStorage<Record<string, MintCooldown>>(
       "cashu.worker.invoices.reusableMintCooldowns",
+      {}
+    ),
+    batchPathCooldowns: useLocalStorage<Record<string, MintCooldown>>(
+      "cashu.worker.invoices.batchPathCooldowns",
       {}
     ),
 
@@ -480,9 +475,18 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
 
     async processQuotes(walletStore?: any, prioritizeBolt11Batch = false) {
       const activeWalletStore = walletStore ?? useWalletStore();
+      const settingsStore = useSettingsStore();
+      const checkIncoming = settingsStore.periodicallyCheckIncomingInvoices;
+      const checkOutgoing = settingsStore.checkSentTokens;
+      if (!checkIncoming && !checkOutgoing) return;
+      const scope: WorkScope = checkIncoming
+        ? checkOutgoing
+          ? "all"
+          : "incoming"
+        : "outgoing";
       return await this.dispatchMintLanes(
         activeWalletStore,
-        "all",
+        scope,
         prioritizeBolt11Batch
       );
     },
@@ -493,6 +497,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
     },
 
     async processOutgoingQueue(_now: number, walletStore: any) {
+      if (!useSettingsStore().checkSentTokens) return;
       return await this.dispatchMintLanes(walletStore, "outgoing", false);
     },
 
@@ -532,12 +537,24 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       try {
         await this.runMintJob(job, walletStore, now);
         this.clearMintCooldown(mintUrl);
+        if (job.kind === "bolt11-batch") {
+          this.clearBatchPathCooldown(job.mintUrl, job.unit);
+        }
       } catch (error) {
         this.markJobAttempt(job, now);
-        if (
-          job.kind === "bolt11-batch" ||
-          this.isNetworkOrRateLimitFailure(error)
-        ) {
+        if (job.kind === "bolt11-batch") {
+          if (this.isNetworkOrRateLimitFailure(error)) {
+            this.recordMintFailure(mintUrl, error, Date.now());
+          } else {
+            this.clearMintCooldown(mintUrl);
+            this.recordBatchPathFailure(
+              job.mintUrl,
+              job.unit,
+              error,
+              Date.now()
+            );
+          }
+        } else if (this.isNetworkOrRateLimitFailure(error)) {
           this.recordMintFailure(mintUrl, error, Date.now());
         } else {
           this.clearMintCooldown(mintUrl);
@@ -578,7 +595,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         const mint = useMintsStore().mints.find(
           (storedMint) => storedMint.url === mintUrl
         );
-        const canBatch = this.mintSupportsBolt11Batch(mint);
+        const mintCanBatch = this.mintSupportsBolt11Batch(mint);
         const groups = new Map<string, DueBolt11Quote[]>();
         for (const entry of bolt11Entries) {
           const group = groups.get(entry.invoice.unit) ?? [];
@@ -586,6 +603,8 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
           groups.set(entry.invoice.unit, group);
         }
         for (const [unit, entries] of groups) {
+          const canBatch =
+            mintCanBatch && !this.batchPathInCooldown(mintUrl, unit, now);
           entries.sort(
             (left, right) =>
               queueAge(left.queueEntry) - queueAge(right.queueEntry)
@@ -814,11 +833,18 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         entry: PaidBolt11Quote;
         quote: Record<string, any>;
       }> = [];
+
+      const quoteIds = paidEntries.map((entry) => entry.queueEntry.quote);
       await uiStore.lockMutex();
       try {
-        // A WebSocket callback may have minted after the first batch check.
-        // Revalidate under the same mutex used by the single-quote mint path.
-        const quoteIds = paidEntries.map((entry) => entry.queueEntry.quote);
+        if (!this.claimMintQuotes(mintUrl, quoteIds)) return;
+      } finally {
+        uiStore.unlockMutex();
+      }
+
+      try {
+        // The claim makes WebSocket callbacks stand down while this status
+        // recheck and mint request run without holding the global wallet mutex.
         const latestResponses = await mintWallet.checkMintQuoteBatchBolt11(
           quoteIds
         );
@@ -845,51 +871,104 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
           proofs = await walletStore.retryOnceOnSignedOutputs(
             keysetId,
             async () => {
-              const preview = await mintWallet.prepareBatchMint(
-                PaymentMethod.Bolt11,
-                entriesToMint.map((entry) => ({
-                  amount: entry.mintQuote.amount,
-                  quote: entry.mintQuote,
-                })),
-                {
-                  keysetId,
-                  proofsWeHave: mintStore.mintUnitProofs(mint, unit),
-                  ...(signingKeys.length > 0 ? { privkey: signingKeys } : {}),
-                }
-              );
+              let preview: any;
+              await uiStore.lockMutex();
+              try {
+                preview = await mintWallet.prepareBatchMint(
+                  PaymentMethod.Bolt11,
+                  entriesToMint.map((entry) => ({
+                    amount: entry.mintQuote.amount,
+                    quote: entry.mintQuote,
+                  })),
+                  {
+                    keysetId,
+                    proofsWeHave: mintStore.mintUnitProofs(mint, unit),
+                    ...(signingKeys.length > 0 ? { privkey: signingKeys } : {}),
+                  }
+                );
+              } finally {
+                uiStore.unlockMutex();
+              }
               return await mintWallet.completeBatchMint(preview);
             },
             false
           );
         }
+
+        const paymentHistoryStore = usePaymentHistoryStore();
+        for (const { quote } of latestQuotes) {
+          await paymentHistoryStore.upsertMintQuote(
+            quote,
+            PaymentMethod.Bolt11
+          );
+        }
+        walletStore.syncPaymentHistoryCache?.();
+
+        for (const entry of issuedEntries) {
+          await walletStore.setInvoicePaid(entry.queueEntry.quote, {
+            mintQuote: entry.mintQuote,
+          });
+          this.removeInvoiceFromChecker(entry.queueEntry.quote);
+        }
+        for (const entry of unpaidEntries) {
+          this.markEntryAttempt(entry.queueEntry, now);
+        }
+        if (proofs.length > 0) {
+          await useProofsStore().addProofs(proofs);
+        }
+        for (const entry of entriesToMint) {
+          await walletStore.setInvoicePaid(entry.queueEntry.quote, {
+            mintQuote: entry.mintQuote,
+          });
+          this.removeInvoiceFromChecker(entry.queueEntry.quote);
+        }
       } finally {
-        uiStore.unlockMutex();
+        this.releaseMintQuotes(mintUrl, quoteIds);
       }
+    },
 
-      const paymentHistoryStore = usePaymentHistoryStore();
-      for (const { quote } of latestQuotes) {
-        await paymentHistoryStore.upsertMintQuote(quote, PaymentMethod.Bolt11);
-      }
-      walletStore.syncPaymentHistoryCache?.();
+    mintQuoteClaimKey(mintUrl: string, quote: string) {
+      return `${mintUrl}|${quote}`;
+    },
 
-      for (const entry of issuedEntries) {
-        await walletStore.setInvoicePaid(entry.queueEntry.quote, {
-          mintQuote: entry.mintQuote,
-        });
-        this.removeInvoiceFromChecker(entry.queueEntry.quote);
+    claimMintQuotes(mintUrl: string, quotes: string[]) {
+      const keys = quotes.map((quote) =>
+        this.mintQuoteClaimKey(mintUrl, quote)
+      );
+      if (keys.some((key) => this.mintQuoteClaims[key])) return false;
+      for (const key of keys) this.mintQuoteClaims[key] = true;
+      return true;
+    },
+
+    releaseMintQuotes(mintUrl: string, quotes: string[]) {
+      for (const quote of quotes) {
+        const key = this.mintQuoteClaimKey(mintUrl, quote);
+        delete this.mintQuoteClaims[key];
+        const waiters = mintQuoteClaimWaiters.get(key);
+        mintQuoteClaimWaiters.delete(key);
+        waiters?.forEach((resolve) => resolve());
       }
-      for (const entry of unpaidEntries) {
-        this.markEntryAttempt(entry.queueEntry, now);
-      }
-      if (proofs.length > 0) {
-        await useProofsStore().addProofs(proofs);
-      }
-      for (const entry of entriesToMint) {
-        await walletStore.setInvoicePaid(entry.queueEntry.quote, {
-          mintQuote: entry.mintQuote,
-        });
-        this.removeInvoiceFromChecker(entry.queueEntry.quote);
-      }
+    },
+
+    mintQuoteIsClaimed(mintUrl: string, quote: string) {
+      return Boolean(
+        this.mintQuoteClaims[this.mintQuoteClaimKey(mintUrl, quote)]
+      );
+    },
+
+    async waitForMintQuoteRelease(mintUrl: string, quote: string) {
+      if (!this.mintQuoteIsClaimed(mintUrl, quote)) return;
+      const key = this.mintQuoteClaimKey(mintUrl, quote);
+      await new Promise<void>((resolve) => {
+        const waiters = mintQuoteClaimWaiters.get(key) ?? new Set();
+        waiters.add(resolve);
+        mintQuoteClaimWaiters.set(key, waiters);
+        if (!this.mintQuoteIsClaimed(mintUrl, quote)) {
+          waiters.delete(resolve);
+          if (waiters.size === 0) mintQuoteClaimWaiters.delete(key);
+          resolve();
+        }
+      });
     },
 
     validateBatchQuoteResponses(requestedQuotes: string[], responses: any[]) {
@@ -1003,6 +1082,44 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       }
     },
 
+    batchPathKey(mintUrl: string, unit: string) {
+      return `${mintUrl}|${unit}|${PaymentMethod.Bolt11}`;
+    },
+
+    batchPathInCooldown(mintUrl: string, unit: string, now: number) {
+      const cooldown =
+        this.batchPathCooldowns[this.batchPathKey(mintUrl, unit)];
+      return Boolean(cooldown && now < cooldown.nextRetryAt);
+    },
+
+    clearBatchPathCooldown(mintUrl: string, unit: string) {
+      const key = this.batchPathKey(mintUrl, unit);
+      if (this.batchPathCooldowns[key]) {
+        delete this.batchPathCooldowns[key];
+      }
+    },
+
+    recordBatchPathFailure(
+      mintUrl: string,
+      unit: string,
+      error: any,
+      now: number
+    ) {
+      const key = this.batchPathKey(mintUrl, unit);
+      const previous = this.batchPathCooldowns[key];
+      const failureCount = (previous?.failureCount ?? 0) + 1;
+      const retryDelay = Math.min(
+        this.offlineRetryBaseInterval * 2 ** Math.max(0, failureCount - 1),
+        this.oneHour
+      );
+      this.batchPathCooldowns[key] = {
+        failedAt: now,
+        failureCount,
+        nextRetryAt: now + retryDelay,
+        lastError: this.errorMessage(error),
+      };
+    },
+
     recordMintFailure(mintUrl: string, error: any, now: number) {
       const previous = this.reusableMintCooldowns[mintUrl];
       const failureCount = (previous?.failureCount ?? 0) + 1;
@@ -1070,7 +1187,11 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
 
       // Every mint gets an immediate startup lane. A slow lane cannot prevent
       // the other mint lanes from starting.
-      await this.processQuotes(activeWalletStore, true);
+      await this.dispatchMintLanes(
+        activeWalletStore,
+        useSettingsStore().checkSentTokens ? "all" : "incoming",
+        true
+      );
     },
 
     queuePendingIncomingPayments(walletStore: any) {
@@ -1110,6 +1231,11 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
           if (this.mintSupportsBolt11Batch(mint)) {
             this.clearMintCooldown(invoice.mint);
             this.addBatchInvoiceToChecker(invoice.quote);
+            if (!periodicChecks) {
+              void walletStore
+                .mintOnPaidBolt11(invoice.quote, false, false)
+                .catch(() => {});
+            }
             continue;
           }
           if (
