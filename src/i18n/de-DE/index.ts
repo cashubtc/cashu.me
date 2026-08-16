@@ -404,7 +404,7 @@ export default {
       check_startup: {
         toggle: "Ausstehende Rechnungen beim Start prüfen",
         description:
-          "Wenn aktiviert, prüft die Wallet beim Start ausstehende Rechnungen der letzten 24 Stunden.",
+          "Wenn aktiviert, prüft die Wallet beim Start ausstehende Rechnungen.",
       },
       check_all: {
         toggle: "Alle Rechnungen prüfen",

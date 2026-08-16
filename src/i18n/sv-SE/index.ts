@@ -399,7 +399,7 @@ export default {
       check_startup: {
         toggle: "Kontrollera väntande fakturor vid start",
         description:
-          "Om aktiverat kommer plånboken att kontrollera väntande fakturor från de senaste 24 timmarna vid start.",
+          "Om aktiverat kommer plånboken att kontrollera väntande fakturor vid start.",
       },
       check_all: {
         toggle: "Kontrollera alla fakturor",

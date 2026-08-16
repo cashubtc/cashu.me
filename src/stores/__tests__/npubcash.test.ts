@@ -302,6 +302,7 @@ describe("npub.cash store", () => {
       "npub-q-1",
       "npub-q-2",
     ]);
+    expect(worker.quotes.every((quote) => quote.usesBatchPath)).toBe(true);
   });
 
   it("keeps direct npub.cash claiming when periodic checking is disabled", async () => {

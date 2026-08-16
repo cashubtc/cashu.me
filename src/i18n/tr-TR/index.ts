@@ -391,7 +391,7 @@ export default {
       check_startup: {
         toggle: "Başlangıçta bekleyen faturaları kontrol et",
         description:
-          "Etkinleştirilirse, cüzdan başlangıçta son 24 saat içindeki bekleyen faturaları kontrol edecektir.",
+          "Etkinleştirilirse, cüzdan başlangıçta bekleyen faturaları kontrol edecektir.",
       },
       check_all: {
         toggle: "Tüm faturaları kontrol et",

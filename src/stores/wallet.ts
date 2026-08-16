@@ -117,6 +117,8 @@ type Invoice = {
   type?: PaymentMethod;
 };
 
+const activeSentTokenSubscriptions = new Set<string>();
+
 // The app uses number-typed amounts (strategy b). These types represent
 // cashu-ts quote responses with top-level Amount fields converted to number.
 type AppMintQuote = Omit<
@@ -1085,7 +1087,6 @@ export const useWalletStore = defineStore("wallet", {
     onTokenPaid: async function (historyToken: HistoryToken) {
       const sendTokensStore = useSendTokensStore();
       const uIStore = useUiStore();
-      const tokenJson = await token.decodeFull(historyToken.token);
       const mintStore = useMintsStore();
       const settingsStore = useSettingsStore();
       if (!settingsStore.checkSentTokens) {
@@ -1118,8 +1119,28 @@ export const useWalletStore = defineStore("wallet", {
         useWorkersStore().checkTokenSpendableWorker(historyToken);
         return;
       }
+
+      const subscriptionKey = historyToken.token;
+      if (activeSentTokenSubscriptions.has(subscriptionKey)) {
+        console.log("Proof-state listener already active for sent token.");
+        return;
+      }
+      activeSentTokenSubscriptions.add(subscriptionKey);
+
+      let unsubscribe: (() => void) | undefined;
+      let cleanupRequested = false;
+      const cleanup = () => {
+        if (unsubscribe) {
+          unsubscribe();
+        } else {
+          cleanupRequested = true;
+        }
+        activeSentTokenSubscriptions.delete(subscriptionKey);
+      };
+
       try {
         console.log("onTokenPaid kicking off websocket");
+        const tokenJson = await token.decodeFull(historyToken.token);
         if (tokenJson == undefined) {
           throw new Error("no tokens provided.");
         }
@@ -1131,25 +1152,39 @@ export const useWalletStore = defineStore("wallet", {
           historyToken.mint,
           historyToken.unit
         );
-        const unsub = await wallet.on.proofStateUpdates(
+        let proofCheckInProgress = false;
+        unsubscribe = await wallet.on.proofStateUpdates(
           toProofs(oneProof),
           async (proofState: ProofState & { proof: Proof }) => {
             console.log(`Websocket: proof state updated: ${proofState.state}`);
-            if (proofState.state == CheckStateEnum.SPENT) {
-              const tokenSpent = await this.checkTokenSpendable(historyToken);
-              if (tokenSpent) {
-                sendTokensStore.showSendTokens = false;
-                unsub();
+            if (
+              proofState.state == CheckStateEnum.SPENT &&
+              !proofCheckInProgress
+            ) {
+              proofCheckInProgress = true;
+              try {
+                const tokenSpent = await this.checkTokenSpendable(historyToken);
+                if (tokenSpent) {
+                  sendTokensStore.showSendTokens = false;
+                  cleanup();
+                }
+              } finally {
+                proofCheckInProgress = false;
               }
             }
           },
           async (error: any) => {
+            cleanup();
             console.error(error);
             notifyApiError(error);
             throw error;
           }
         );
+        if (cleanupRequested) {
+          cleanup();
+        }
       } catch (error) {
+        cleanup();
         console.error(
           "Error in websocket subscription. Starting invoices worker.",
           error

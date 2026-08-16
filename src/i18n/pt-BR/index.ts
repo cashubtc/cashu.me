@@ -394,7 +394,7 @@ export default {
       check_startup: {
         toggle: "Verificar faturas pendentes na inicialização",
         description:
-          "Se ativado, a carteira verificará faturas pendentes das últimas 24 horas na inicialização.",
+          "Se ativado, a carteira verificará faturas pendentes na inicialização.",
       },
       check_all: {
         toggle: "Verificar todas as faturas",
