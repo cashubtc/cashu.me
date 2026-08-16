@@ -13,6 +13,23 @@ import {
 } from "./paymentHistory";
 import { cashuDb } from "./dexie";
 import { deserializeProofs, JSONInt } from "@cashu/cashu-ts";
+import { normalizeCashuQuoteAmounts } from "src/js/cashu-amount";
+
+export function stringifyBackupTable(rows: unknown[]): string {
+  const serialized = JSONInt.stringify(rows);
+  if (serialized === undefined) {
+    throw new Error("Could not serialize wallet backup table");
+  }
+  return serialized;
+}
+
+export function parseBackupTable(value: string): any[] {
+  const parsed = JSONInt.parse(value);
+  if (!Array.isArray(parsed)) {
+    throw new Error("Invalid wallet backup table");
+  }
+  return parsed;
+}
 
 export const useStorageStore = defineStore("storage", {
   state: () => ({
@@ -34,13 +51,17 @@ export const useStorageStore = defineStore("storage", {
             const proofs = deserializeProofs(backup[key]);
             await proofsStore.addProofs(proofs);
           } else if (key === "cashu.dexie.db.paymentHistory") {
-            await cashuDb.paymentHistory.bulkPut(JSON.parse(backup[key]));
+            await cashuDb.paymentHistory.bulkPut(parseBackupTable(backup[key]));
           } else if (key === "cashu.dexie.db.mintQuotes") {
-            await cashuDb.mintQuotes.bulkPut(JSON.parse(backup[key]));
+            await cashuDb.mintQuotes.bulkPut(
+              parseBackupTable(backup[key]).map(normalizeCashuQuoteAmounts)
+            );
           } else if (key === "cashu.dexie.db.meltQuotes") {
-            await cashuDb.meltQuotes.bulkPut(JSON.parse(backup[key]));
+            await cashuDb.meltQuotes.bulkPut(
+              parseBackupTable(backup[key]).map(normalizeCashuQuoteAmounts)
+            );
           } else if (key === "cashu.dexie.db.ecashHistory") {
-            await cashuDb.ecashHistory.bulkPut(JSON.parse(backup[key]));
+            await cashuDb.ecashHistory.bulkPut(parseBackupTable(backup[key]));
           } else if (key === "cashu.invoiceHistory") {
             const rows = (
               JSON.parse(backup[key]) as LegacyInvoiceHistory[]
@@ -93,16 +114,16 @@ export const useStorageStore = defineStore("storage", {
       // proofs table *magic*
       const proofs = await useProofsStore().getProofs();
       jsonToSave["cashu.dexie.db.proofs"] = JSONInt.stringify(proofs);
-      jsonToSave["cashu.dexie.db.paymentHistory"] = JSON.stringify(
+      jsonToSave["cashu.dexie.db.paymentHistory"] = stringifyBackupTable(
         await cashuDb.paymentHistory.toArray()
       );
-      jsonToSave["cashu.dexie.db.mintQuotes"] = JSON.stringify(
+      jsonToSave["cashu.dexie.db.mintQuotes"] = stringifyBackupTable(
         await cashuDb.mintQuotes.toArray()
       );
-      jsonToSave["cashu.dexie.db.meltQuotes"] = JSON.stringify(
+      jsonToSave["cashu.dexie.db.meltQuotes"] = stringifyBackupTable(
         await cashuDb.meltQuotes.toArray()
       );
-      jsonToSave["cashu.dexie.db.ecashHistory"] = JSON.stringify(
+      jsonToSave["cashu.dexie.db.ecashHistory"] = stringifyBackupTable(
         await cashuDb.ecashHistory.toArray()
       );
 

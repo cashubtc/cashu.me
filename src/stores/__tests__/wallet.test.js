@@ -1707,10 +1707,13 @@ describe("wallet store", () => {
     expect(h.outputDataDeserialize).toHaveBeenCalledWith({
       serialized: "change-output",
     });
-    expect(createMeltChangeProofs).toHaveBeenCalledWith(
-      [{ deserialized: { serialized: "change-output" } }],
-      changeSigs
-    );
+    const [restoredOutputs, restoredChangeSigs] =
+      createMeltChangeProofs.mock.calls[0];
+    expect(restoredOutputs).toEqual([
+      { deserialized: { serialized: "change-output" } },
+    ]);
+    expect(restoredChangeSigs[0]).toMatchObject({ id: "00aa", C_: "sig" });
+    expect(restoredChangeSigs[0].amount.toNumber()).toBe(3);
     expect(h.proofsStore.addMissingProofs).toHaveBeenCalledWith(changeProofs);
     expect(wallet.invoiceHistory[0]).toMatchObject({
       status: "paid",
@@ -1760,10 +1763,13 @@ describe("wallet store", () => {
     expect(h.outputDataDeserialize).toHaveBeenCalledWith({
       serialized: "legacy-change-output",
     });
-    expect(createMeltChangeProofs).toHaveBeenCalledWith(
-      [{ deserialized: { serialized: "legacy-change-output" } }],
-      changeSigs
-    );
+    const [restoredOutputs, restoredChangeSigs] =
+      createMeltChangeProofs.mock.calls[0];
+    expect(restoredOutputs).toEqual([
+      { deserialized: { serialized: "legacy-change-output" } },
+    ]);
+    expect(restoredChangeSigs[0]).toMatchObject({ id: "00aa", C_: "sig" });
+    expect(restoredChangeSigs[0].amount.toNumber()).toBe(3);
     expect(wallet.invoiceHistory[0]).toMatchObject({
       status: "paid",
       amount: -102,
