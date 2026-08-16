@@ -1,9 +1,9 @@
 import { defineStore } from "pinia";
-import { Amount } from "@cashu/cashu-ts";
 import { liveQuery } from "dexie";
 import { cashuDb } from "./dexie";
 import { PaymentMethod } from "src/stores/walletTypes";
 import { currentDateStr } from "src/js/utils";
+import { normalizeCashuQuoteAmounts } from "src/js/cashu-amount";
 
 export type PaymentDirection = "mint" | "melt";
 export type PaymentStatus = "pending" | "paid";
@@ -100,38 +100,6 @@ type BuiltRows = {
   mintQuote?: MintQuoteRow;
   meltQuote?: MeltQuoteRow;
 };
-
-function amountToNumber(value: any): number | null | undefined {
-  if (value === undefined || value === null) return value;
-  if (typeof value === "number") return value;
-  try {
-    return Amount.from(value).toNumber();
-  } catch {
-    return Number(value);
-  }
-}
-
-function normalizeAmountFields<T extends Record<string, any>>(quote: T): T {
-  const normalized: Record<string, any> = { ...quote };
-  for (const field of [
-    "amount",
-    "amount_paid",
-    "amount_issued",
-    "fee_reserve",
-    "fee_paid",
-  ]) {
-    if (field in normalized && normalized[field] !== null) {
-      normalized[field] = amountToNumber(normalized[field]);
-    }
-  }
-  if (Array.isArray(normalized.fee_options)) {
-    normalized.fee_options = normalized.fee_options.map((option: any) => ({
-      ...option,
-      fee_reserve: amountToNumber(option.fee_reserve),
-    }));
-  }
-  return normalized as T;
-}
 
 function normalizeMethod(method?: string | PaymentMethod): QuoteMethod {
   if (
@@ -277,7 +245,7 @@ export function normalizeMintQuote(
   method: QuoteMethod
 ): MintQuoteRow {
   return compactRecord({
-    ...normalizeAmountFields(quote),
+    ...normalizeCashuQuoteAmounts(quote),
     quote: quote.quote,
     method,
   }) as MintQuoteRow;
@@ -288,7 +256,7 @@ export function normalizeMeltQuote(
   method: QuoteMethod
 ): MeltQuoteRow {
   return compactRecord({
-    ...normalizeAmountFields(quote),
+    ...normalizeCashuQuoteAmounts(quote),
     quote: quote.quote,
     method,
   }) as MeltQuoteRow;

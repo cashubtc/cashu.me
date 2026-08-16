@@ -2,6 +2,10 @@ import { defineStore } from "pinia";
 import Dexie, { Table } from "dexie";
 import { useLocalStorage } from "@vueuse/core";
 import type { WalletProof } from "./mints";
+import {
+  cashuAmountToNumber,
+  normalizeCashuQuoteAmounts,
+} from "src/js/cashu-amount";
 
 // export interface Proof {
 //   id: string
@@ -19,8 +23,8 @@ export class CashuDexie extends Dexie {
   meltQuotes!: Table<any>;
   ecashHistory!: Table<any>;
 
-  constructor() {
-    super("db");
+  constructor(databaseName = "db") {
+    super(databaseName);
     this.version(1).stores({
       proofs: "secret, id, C, amount, reserved, quote",
     });
@@ -40,6 +44,36 @@ export class CashuDexie extends Dexie {
       ecashHistory:
         "id, status, token, mint, unit, date, paidDate, paymentRequestId, [status+date], [mint+unit]",
     });
+    this.version(4)
+      .stores({
+        proofs: "secret, id, C, amount, reserved, quote",
+        paymentHistory:
+          "id, direction, quote, parentQuote, method, status, mint, unit, date, paidDate, [direction+quote], [direction+status], [method+status]",
+        mintQuotes: "quote, method, request, unit, state, expiry, pubkey",
+        meltQuotes: "quote, method, request, unit, state, expiry",
+        ecashHistory:
+          "id, status, token, mint, unit, date, paidDate, paymentRequestId, [status+date], [mint+unit]",
+      })
+      .upgrade(async (transaction) => {
+        await transaction
+          .table("proofs")
+          .toCollection()
+          .modify((proof) => {
+            proof.amount = cashuAmountToNumber(proof.amount);
+          });
+        await transaction
+          .table("mintQuotes")
+          .toCollection()
+          .modify((quote) => {
+            Object.assign(quote, normalizeCashuQuoteAmounts(quote));
+          });
+        await transaction
+          .table("meltQuotes")
+          .toCollection()
+          .modify((quote) => {
+            Object.assign(quote, normalizeCashuQuoteAmounts(quote));
+          });
+      });
   }
 }
 
