@@ -98,7 +98,7 @@ function amountToNumber(value: any) {
   return Amount.from(value).toNumber();
 }
 
-export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
+export const useTransactionWorkerStore = defineStore("transactionWorker", {
   state: () => ({
     // Requests are rate-limited independently for every mint URL.
     checkInterval: 5_000,
@@ -110,14 +110,16 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
     maxAge: 14 * 24 * 60 * 60 * 1_000,
     oneHour: 60 * 60 * 1_000,
 
-    invoiceCheckListener: null as NodeJS.Timeout | null,
-    invoiceWorkerRunning: false,
+    transactionCheckListener: null as NodeJS.Timeout | null,
+    transactionWorkerRunning: false,
 
     // Lane state is ephemeral so a restart immediately retries pending work.
     mintLaneInFlight: {} as Record<string, boolean>,
     mintLastRequestAt: {} as Record<string, number>,
     mintQuoteClaims: {} as Record<string, boolean>,
 
+    // These keys intentionally retain their old names so existing queues
+    // survive the store rename.
     quotes: useLocalStorage<InvoiceQuote[]>(
       "cashu.worker.invoices.quotesQueue",
       []
@@ -147,34 +149,34 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
 
     maxSingleBolt11QuotesToCheckOnStartup: 10,
     maxOutgoingPaymentsToCheckOnStartup: 10,
-    lastPendingInvoiceCheck: useLocalStorage<number>(
-      "cashu.worker.invoices.lastPendingInvoiceCheck",
-      0
-    ),
-    checkPendingInvoicesInterval: 10_000,
   }),
 
   actions: {
-    startInvoiceCheckerWorker(force = false) {
-      if (!force && !useSettingsStore().periodicallyCheckIncomingInvoices) {
+    startTransactionWorker(force = false) {
+      const settingsStore = useSettingsStore();
+      if (
+        !force &&
+        !settingsStore.periodicallyCheckIncomingInvoices &&
+        !settingsStore.checkSentTokens
+      ) {
         return;
       }
-      if (this.invoiceCheckListener) return;
+      if (this.transactionCheckListener) return;
 
-      this.invoiceWorkerRunning = true;
-      this.invoiceCheckListener = setInterval(() => {
-        void this.processQuotes().catch((error) => {
-          console.error("Invoice worker dispatch failed", error);
+      this.transactionWorkerRunning = true;
+      this.transactionCheckListener = setInterval(() => {
+        void this.processTransactions().catch((error) => {
+          console.error("Transaction worker dispatch failed", error);
         });
       }, this.workerTickInterval);
     },
 
-    stopInvoiceCheckerWorker() {
-      if (this.invoiceCheckListener) {
-        clearInterval(this.invoiceCheckListener);
-        this.invoiceCheckListener = null;
+    stopTransactionWorker() {
+      if (this.transactionCheckListener) {
+        clearInterval(this.transactionCheckListener);
+        this.transactionCheckListener = null;
       }
-      this.invoiceWorkerRunning = false;
+      this.transactionWorkerRunning = false;
     },
 
     addInvoiceToChecker(quote: string, forceStart = false) {
@@ -199,7 +201,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
           existing.lastChecked = 0;
           existing.checkCount = 0;
         }
-        this.startInvoiceCheckerWorker(forceStart);
+        this.startTransactionWorker(forceStart);
         return;
       }
 
@@ -222,7 +224,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         checkCount: 0,
         ...(usesBatchPath ? { usesBatchPath: true } : {}),
       });
-      this.startInvoiceCheckerWorker(forceStart);
+      this.startTransactionWorker(forceStart);
     },
 
     removeInvoiceFromChecker(quote: string) {
@@ -267,7 +269,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
           checkCount: 0,
         });
       }
-      this.startInvoiceCheckerWorker(forceStart);
+      this.startTransactionWorker(forceStart);
     },
 
     addOutgoingInvoiceToChecker(quote: string, forceStart = false) {
@@ -307,7 +309,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
           checkCount: 0,
         });
       }
-      this.startInvoiceCheckerWorker(forceStart);
+      this.startTransactionWorker(forceStart);
     },
 
     removeOutgoingPaymentFromChecker(type: "invoice" | "token", id: string) {
@@ -473,7 +475,10 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       return now >= Math.max(lastRequestAt + this.checkInterval, cooldownUntil);
     },
 
-    async processQuotes(walletStore?: any, prioritizeBolt11Batch = false) {
+    async processTransactions(
+      walletStore?: any,
+      prioritizeBolt11Batch = false
+    ) {
       const activeWalletStore = walletStore ?? useWalletStore();
       const settingsStore = useSettingsStore();
       const checkIncoming = settingsStore.periodicallyCheckIncomingInvoices;
@@ -1193,7 +1198,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       );
     },
 
-    async checkPendingInvoices(walletStore?: any) {
+    async checkPendingTransactions(walletStore?: any) {
       if (!useSettingsStore().checkInvoicesOnStartup) return;
 
       const activeWalletStore = walletStore ?? useWalletStore();
@@ -1217,8 +1222,6 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         this.shouldCheckInvoice(invoice)
       );
       let singleBolt11QuotesQueued = 0;
-      this.lastPendingInvoiceCheck = Date.now();
-
       for (const invoice of pending) {
         try {
           if (invoice.type === PaymentMethod.Bolt12) {

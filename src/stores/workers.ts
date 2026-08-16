@@ -1,18 +1,11 @@
 import { defineStore } from "pinia";
-import { useWalletStore } from "src/stores/wallet"; // invoiceData,
-import { useUiStore } from "src/stores/ui"; // showInvoiceDetails
-import { useSendTokensStore } from "src/stores/sendTokensStore"; // showSendTokens and sendData
-import { useSettingsStore } from "./settings";
-import { HistoryToken, useTokensStore } from "./tokens";
+import { useWalletStore } from "src/stores/wallet";
 export const useWorkersStore = defineStore("workers", {
   state: () => {
     return {
       invoiceCheckListener: null as NodeJS.Timeout | null,
-      tokensCheckSpendableListener: null as NodeJS.Timeout | null,
       invoiceWorkerRunning: false,
-      tokenWorkerRunning: false,
       invoiceWorkerProcessing: false,
-      tokenWorkerProcessing: false,
       checkInterval: 5000,
     };
   },
@@ -24,11 +17,6 @@ export const useWorkersStore = defineStore("workers", {
         clearInterval(this.invoiceCheckListener);
         this.invoiceCheckListener = null;
         this.invoiceWorkerRunning = false;
-      }
-      if (this.tokensCheckSpendableListener) {
-        clearInterval(this.tokensCheckSpendableListener);
-        this.tokensCheckSpendableListener = null;
-        this.tokenWorkerRunning = false;
       }
     },
     invoiceCheckWorker: async function (quote: string) {
@@ -60,49 +48,6 @@ export const useWorkersStore = defineStore("workers", {
           console.log("invoiceCheckWorker: not paid yet");
         } finally {
           this.invoiceWorkerProcessing = false;
-        }
-      }, this.checkInterval);
-    },
-    checkTokenSpendableWorker: async function (historyToken: HistoryToken) {
-      const settingsStore = useSettingsStore();
-      if (!settingsStore.checkSentTokens) {
-        console.log(
-          "settingsStore.checkSentTokens is disabled, not kicking off checkTokenSpendableWorker"
-        );
-        return;
-      }
-      console.log("### kicking off checkTokenSpendableWorker");
-      const walletStore = useWalletStore();
-      const sendTokensStore = useSendTokensStore();
-      let nInterval = 0;
-      this.clearAllWorkers();
-      this.tokenWorkerRunning = true;
-      this.tokensCheckSpendableListener = setInterval(async () => {
-        if (this.tokenWorkerProcessing) return;
-        this.tokenWorkerProcessing = true;
-        try {
-          nInterval += 1;
-          // exit loop after 30s
-          if (nInterval > 10) {
-            console.log("### stopping token check worker");
-            this.clearAllWorkers();
-            return;
-          }
-          console.log("### checkTokenSpendableWorker setInterval", nInterval);
-          const paid = await walletStore.checkTokenSpendable(
-            historyToken,
-            false
-          );
-          if (paid) {
-            console.log("### stopping token check worker");
-            this.clearAllWorkers();
-            sendTokensStore.showSendTokens = false;
-          }
-        } catch (error) {
-          console.log("checkTokenSpendableWorker: some error", error);
-          this.clearAllWorkers();
-        } finally {
-          this.tokenWorkerProcessing = false;
         }
       }, this.checkInterval);
     },

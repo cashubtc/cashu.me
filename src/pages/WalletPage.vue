@@ -235,7 +235,6 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "src/stores/mints";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
-import { useWorkersStore } from "src/stores/workers";
 import { useTokensStore } from "src/stores/tokens";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
@@ -252,7 +251,7 @@ import { useDexieStore } from "src/stores/dexie";
 import { useStorageStore } from "src/stores/storage";
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
 import { useWelcomeStore } from "../stores/welcome";
-import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
+import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import { notifyError, notify } from "../js/notify";
 
 import {
@@ -338,10 +337,6 @@ export default {
       "payInvoiceData",
     ]),
     ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
-    ...mapWritableState(useWorkersStore, [
-      "invoiceCheckListener",
-      "tokensCheckSpendableListener",
-    ]),
     ...mapState(useTokensStore, ["historyTokens"]),
     ...mapState(usePRStore, ["enablePaymentRequest"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
@@ -372,7 +367,6 @@ export default {
       "setProofs",
       "getKeysForKeyset",
     ]),
-    ...mapActions(useWorkersStore, ["clearAllWorkers", "invoiceCheckWorker"]),
     ...mapActions(useTokensStore, ["setTokenPaid", "initEcashHistory"]),
     ...mapActions(useWalletStore, [
       "setInvoicePaid",
@@ -396,9 +390,9 @@ export default {
     ...mapActions(useDexieStore, ["migrateToDexie"]),
     ...mapActions(useStorageStore, ["checkLocalStorage"]),
     ...mapActions(usePRStore, ["createPaymentRequest"]),
-    ...mapActions(useInvoicesWorkerStore, [
-      "startInvoiceCheckerWorker",
-      "checkPendingInvoices",
+    ...mapActions(useTransactionWorkerStore, [
+      "startTransactionWorker",
+      "checkPendingTransactions",
     ]),
     // TOKEN METHODS
     getProofs: function (decoded_token) {
@@ -708,11 +702,11 @@ export default {
       this.subscribeToNip17DirectMessages();
     }
 
-    // start invoice checker worker
-    this.startInvoiceCheckerWorker();
+    // Start background transaction reconciliation.
+    this.startTransactionWorker();
 
     // reconnect all websockets
-    this.checkPendingInvoices();
+    this.checkPendingTransactions();
   },
 };
 </script>

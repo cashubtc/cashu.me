@@ -53,7 +53,7 @@ const h = vi.hoisted(() => {
     periodicallyCheckIncomingInvoices: true,
     useWebsockets: true,
   };
-  const invoicesWorkerStore = {
+  const transactionWorkerStore = {
     addInvoice: vi.fn(),
     removeInvoice: vi.fn(),
     addInvoiceToChecker: vi.fn(),
@@ -65,7 +65,6 @@ const h = vi.hoisted(() => {
     waitForMintQuoteRelease: vi.fn(async () => {}),
   };
   const workersStore = {
-    checkTokenSpendableWorker: vi.fn(),
     invoiceCheckWorker: vi.fn(),
   };
   const mintsStore = {
@@ -145,7 +144,7 @@ const h = vi.hoisted(() => {
     p2pkStore,
     prStore,
     settingsStore,
-    invoicesWorkerStore,
+    transactionWorkerStore,
     workersStore,
     mintsStore,
     priceStore,
@@ -257,8 +256,8 @@ vi.mock("src/stores/workers", () => ({
   useWorkersStore: () => h.workersStore,
 }));
 
-vi.mock("src/stores/invoicesWorker", () => ({
-  useInvoicesWorkerStore: () => h.invoicesWorkerStore,
+vi.mock("src/stores/transactionWorker", () => ({
+  useTransactionWorkerStore: () => h.transactionWorkerStore,
 }));
 
 vi.mock("src/stores/settings", () => ({
@@ -961,9 +960,9 @@ describe("wallet store", () => {
     await wallet.mintOnPaidBolt12("bolt12-q");
     await websocket.onUpdate()({ state: "PAID" });
 
-    expect(h.invoicesWorkerStore.addBolt12OfferToChecker).toHaveBeenCalledWith(
-      "bolt12-q"
-    );
+    expect(
+      h.transactionWorkerStore.addBolt12OfferToChecker
+    ).toHaveBeenCalledWith("bolt12-q");
     expect(websocket.connection.createSubscription).toHaveBeenCalledWith(
       { kind: "bolt12_mint_quote", filters: ["bolt12-q"] },
       expect.any(Function),
@@ -1014,10 +1013,9 @@ describe("wallet store", () => {
     await wallet.mintOnPaidOnchain("onchain-q");
     await websocket.onUpdate()({ state: "PAID" });
 
-    expect(h.invoicesWorkerStore.addOnchainQuoteToChecker).toHaveBeenCalledWith(
-      "onchain-q",
-      true
-    );
+    expect(
+      h.transactionWorkerStore.addOnchainQuoteToChecker
+    ).toHaveBeenCalledWith("onchain-q", true);
     expect(websocket.connection.createSubscription).toHaveBeenCalledWith(
       { kind: "onchain_mint_quote", filters: ["onchain-q"] },
       expect.any(Function),
@@ -1083,7 +1081,7 @@ describe("wallet store", () => {
     });
 
     expect(
-      h.invoicesWorkerStore.addOutgoingTokenToChecker
+      h.transactionWorkerStore.addOutgoingTokenToChecker
     ).toHaveBeenCalledWith("cashu-token", true);
     expect(mintWalletSpy).toHaveBeenCalledWith("https://mint-b.example", "sat");
     expect(wallet.activeWallet).not.toHaveBeenCalled();
@@ -1097,6 +1095,33 @@ describe("wallet store", () => {
       expect.any(Function),
       expect.any(Function)
     );
+  });
+
+  it("uses only the transaction worker when sent-token WebSockets are unavailable", async () => {
+    const wallet = useWalletStore();
+    h.settingsStore.useWebsockets = false;
+    h.mintsStore.mints = [
+      {
+        url: "https://mint-b.example",
+        keys: [{ id: "00bb" }],
+        keysets: [{ id: "00bb", unit: "sat", active: true }],
+        info: { nuts: {} },
+      },
+    ];
+    const mintWalletSpy = vi.spyOn(wallet, "mintWallet");
+
+    await wallet.onTokenPaid({
+      token: "cashu-token-no-websocket",
+      amount: -1,
+      mint: "https://mint-b.example",
+      unit: "sat",
+      status: "pending",
+    });
+
+    expect(
+      h.transactionWorkerStore.addOutgoingTokenToChecker
+    ).toHaveBeenCalledWith("cashu-token-no-websocket", true);
+    expect(mintWalletSpy).not.toHaveBeenCalled();
   });
 
   it("deduplicates sent-token websocket setup and spent checks", async () => {

@@ -5,7 +5,7 @@ import { defineStore } from "pinia";
 import { date } from "quasar";
 import { nip19 } from "nostr-tools";
 import { notifyApiError, notifyError } from "src/js/notify";
-import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
+import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import { useMintsStore } from "src/stores/mints";
 import { useNostrStore } from "src/stores/nostr";
 import { useSettingsStore } from "src/stores/settings";
@@ -303,7 +303,7 @@ export const useNpubCashStore = defineStore("npubCash", {
       if (!this.enabled) {
         return;
       }
-      const invoicesWorkerStore = useInvoicesWorkerStore();
+      const transactionWorkerStore = useTransactionWorkerStore();
       const settingsStore = useSettingsStore();
       const walletStore = useWalletStore();
       const mintsStore = useMintsStore();
@@ -358,10 +358,10 @@ export const useNpubCashStore = defineStore("npubCash", {
               const mint = mintsStore.mints.find(
                 (item) => item.url === quote.mintUrl
               );
-              if (invoicesWorkerStore.mintSupportsBolt11Batch(mint)) {
-                invoicesWorkerStore.addBatchInvoiceToChecker(quote.quoteId);
+              if (transactionWorkerStore.mintSupportsBolt11Batch(mint)) {
+                transactionWorkerStore.addBatchInvoiceToChecker(quote.quoteId);
               } else {
-                invoicesWorkerStore.addInvoiceToChecker(quote.quoteId);
+                transactionWorkerStore.addInvoiceToChecker(quote.quoteId);
               }
             } else {
               await walletStore.mintOnPaidBolt11(quote.quoteId);

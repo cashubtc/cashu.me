@@ -164,7 +164,7 @@ import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { useWalletStore } from "src/stores/wallet";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { useUiStore } from "src/stores/ui";
-import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
+import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import token from "../js/token";
 import { notify } from "src/js/notify";
 import {
@@ -276,7 +276,7 @@ export default defineComponent({
       "checkOfferAndMintBolt12",
       "checkOnchainAndMint",
     ]),
-    ...mapActions(useInvoicesWorkerStore, [
+    ...mapActions(useTransactionWorkerStore, [
       "addInvoiceToChecker",
       "addBolt12OfferToChecker",
       "addOutgoingInvoiceToChecker",
