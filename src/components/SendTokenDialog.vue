@@ -279,8 +279,7 @@ import { useMintsStore } from "src/stores/mints";
 import { useTokensStore } from "src/stores/tokens";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useSettingsStore } from "src/stores/settings";
-import { useWorkersStore } from "src/stores/workers";
-import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
+import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import { usePriceStore } from "src/stores/price";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
@@ -354,7 +353,6 @@ export default defineComponent({
       "currentCurrencyPrice",
     ]),
     ...mapState(useSettingsStore, ["bitcoinPriceCurrency"]),
-    ...mapState(useWorkersStore, ["tokenWorkerRunning"]),
     insufficientFunds: function (): boolean {
       if (this.sendData.amount == null) return false;
       return (
@@ -508,8 +506,7 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useWorkersStore, ["clearAllWorkers"]),
-    ...mapActions(useInvoicesWorkerStore, ["addOutgoingTokenToChecker"]),
+    ...mapActions(useTransactionWorkerStore, ["addOutgoingTokenToChecker"]),
     ...mapActions(useWalletStore, [
       "send",
       "sendToLock",

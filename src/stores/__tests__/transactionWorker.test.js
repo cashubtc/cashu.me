@@ -1,6 +1,6 @@
 import "fake-indexeddb/auto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
+import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import { useMintsStore } from "src/stores/mints";
 import { usePaymentHistoryStore } from "src/stores/paymentHistory";
 import { useProofsStore } from "src/stores/proofs";
@@ -52,14 +52,14 @@ function unpaidResponse(quote) {
   };
 }
 
-describe("invoices worker", () => {
+describe("transaction worker", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     await cashuDb.paymentHistory.clear();
     await cashuDb.mintQuotes.clear();
 
-    const worker = useInvoicesWorkerStore();
-    worker.stopInvoiceCheckerWorker();
+    const worker = useTransactionWorkerStore();
+    worker.stopTransactionWorker();
     worker.quotes = [];
     worker.bolt12Quotes = [];
     worker.onchainQuotes = [];
@@ -69,7 +69,6 @@ describe("invoices worker", () => {
     worker.mintLaneInFlight = {};
     worker.mintLastRequestAt = {};
     worker.mintQuoteClaims = {};
-    worker.lastPendingInvoiceCheck = 0;
 
     useMintsStore().mints = [];
     useTokensStore().historyTokens = [];
@@ -80,7 +79,7 @@ describe("invoices worker", () => {
   });
 
   afterEach(() => {
-    useInvoicesWorkerStore().stopInvoiceCheckerWorker();
+    useTransactionWorkerStore().stopTransactionWorker();
   });
 
   it.each([
@@ -89,13 +88,13 @@ describe("invoices worker", () => {
     [{ nuts: { 29: { methods: ["bolt12"] } } }, false],
     [{ nuts: {} }, false],
   ])("detects advertised Bolt11 batch support", (info, expected) => {
-    expect(useInvoicesWorkerStore().mintSupportsBolt11Batch({ info })).toBe(
+    expect(useTransactionWorkerStore().mintSupportsBolt11Batch({ info })).toBe(
       expected
     );
   });
 
   it("uses the normalized batch cap", () => {
-    const worker = useInvoicesWorkerStore();
+    const worker = useTransactionWorkerStore();
 
     expect(worker.bolt11BatchSizeLimit({ info: { nuts: { 29: {} } } })).toBe(
       100
@@ -107,11 +106,23 @@ describe("invoices worker", () => {
       date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1_000).toISOString(),
     });
 
-    expect(useInvoicesWorkerStore().shouldCheckInvoice(oldInvoice)).toBe(true);
+    expect(useTransactionWorkerStore().shouldCheckInvoice(oldInvoice)).toBe(
+      true
+    );
+  });
+
+  it("starts for sent-token checks when incoming polling is disabled", () => {
+    const worker = useTransactionWorkerStore();
+    useSettingsStore().periodicallyCheckIncomingInvoices = false;
+    useSettingsStore().checkSentTokens = true;
+
+    worker.startTransactionWorker();
+
+    expect(worker.transactionCheckListener).not.toBeNull();
   });
 
   it("continues other mint lanes while one mint is still pending", async () => {
-    const worker = useInvoicesWorkerStore();
+    const worker = useTransactionWorkerStore();
     const mintStore = useMintsStore();
     const now = Date.now();
     advertiseBatchMint(mintStore, "https://slow.example");
@@ -163,7 +174,7 @@ describe("invoices worker", () => {
       syncPaymentHistoryCache: vi.fn(),
     };
 
-    const firstDispatch = worker.processQuotes(walletStore);
+    const firstDispatch = worker.processTransactions(walletStore);
     await vi.waitFor(() =>
       expect(checkOutgoingInvoice).toHaveBeenCalledWith("fast-out-1", false)
     );
@@ -173,7 +184,7 @@ describe("invoices worker", () => {
 
     worker.mintLastRequestAt["https://fast.example"] =
       Date.now() - worker.checkInterval;
-    const secondDispatch = worker.processQuotes(walletStore);
+    const secondDispatch = worker.processTransactions(walletStore);
     await vi.waitFor(() =>
       expect(checkOutgoingInvoice).toHaveBeenCalledWith("fast-out-2", false)
     );
@@ -183,8 +194,76 @@ describe("invoices worker", () => {
     await Promise.all([firstDispatch, secondDispatch]);
   });
 
+  it("processes sent ecash through independent per-mint lanes", async () => {
+    const worker = useTransactionWorkerStore();
+    const now = Date.now();
+    const slowMint = "https://slow.example";
+    const fastMint = "https://fast.example";
+    useTokensStore().historyTokens = [
+      {
+        token: "slow-token",
+        amount: -10,
+        date: new Date(now).toISOString(),
+        status: "pending",
+        mint: slowMint,
+        unit: "sat",
+      },
+      {
+        token: "fast-token",
+        amount: -10,
+        date: new Date(now).toISOString(),
+        status: "pending",
+        mint: fastMint,
+        unit: "sat",
+      },
+    ];
+    worker.outgoingPayments = [
+      {
+        id: "slow-token",
+        type: "token",
+        addedAt: now - 20_000,
+        lastChecked: 0,
+        checkCount: 0,
+      },
+      {
+        id: "fast-token",
+        type: "token",
+        addedAt: now - 10_000,
+        lastChecked: 0,
+        checkCount: 0,
+      },
+    ];
+    let resolveSlowCheck;
+    const slowCheck = new Promise((resolve) => {
+      resolveSlowCheck = resolve;
+    });
+    const checkTokenSpendable = vi.fn((historyToken) =>
+      historyToken.token === "slow-token" ? slowCheck : Promise.resolve(false)
+    );
+    const walletStore = {
+      invoiceHistory: [],
+      checkTokenSpendable,
+    };
+
+    const processing = worker.processTransactions(walletStore);
+    await vi.waitFor(() =>
+      expect(checkTokenSpendable).toHaveBeenCalledWith(
+        expect.objectContaining({ token: "fast-token" }),
+        false
+      )
+    );
+    expect(worker.mintLaneInFlight[slowMint]).toBe(true);
+
+    resolveSlowCheck(false);
+    await processing;
+    expect(checkTokenSpendable).toHaveBeenCalledTimes(2);
+    expect(
+      worker.outgoingPayments.every((entry) => entry.checkCount === 1)
+    ).toBe(true);
+  });
+
   it("never overlaps work within the same mint lane", async () => {
-    const worker = useInvoicesWorkerStore();
+    const worker = useTransactionWorkerStore();
     const mintStore = useMintsStore();
     const now = Date.now();
     mintStore.mints.push({
@@ -210,22 +289,22 @@ describe("invoices worker", () => {
       checkInvoiceBolt11,
     };
 
-    const firstDispatch = worker.processQuotes(walletStore);
+    const firstDispatch = worker.processTransactions(walletStore);
     await vi.waitFor(() => expect(checkInvoiceBolt11).toHaveBeenCalledOnce());
     worker.mintLastRequestAt["https://mint.example"] = 0;
-    await worker.processQuotes(walletStore);
+    await worker.processTransactions(walletStore);
 
     expect(checkInvoiceBolt11).toHaveBeenCalledOnce();
     resolveFirst();
     await firstDispatch;
 
     worker.mintLastRequestAt["https://mint.example"] = 0;
-    await worker.processQuotes(walletStore);
+    await worker.processTransactions(walletStore);
     expect(checkInvoiceBolt11).toHaveBeenCalledTimes(2);
   });
 
   it("rate-limits completed requests per mint, not globally", async () => {
-    const worker = useInvoicesWorkerStore();
+    const worker = useTransactionWorkerStore();
     const mintStore = useMintsStore();
     const now = Date.now();
     mintStore.mints.push({
@@ -246,20 +325,20 @@ describe("invoices worker", () => {
       checkInvoiceBolt11,
     };
 
-    await worker.processQuotes(walletStore);
-    await worker.processQuotes(walletStore);
+    await worker.processTransactions(walletStore);
+    await worker.processTransactions(walletStore);
     expect(checkInvoiceBolt11).toHaveBeenCalledOnce();
 
     worker.mintLastRequestAt["https://mint.example"] =
       Date.now() - worker.checkInterval;
-    await worker.processQuotes(walletStore);
+    await worker.processTransactions(walletStore);
     expect(checkInvoiceBolt11).toHaveBeenCalledTimes(2);
     expect(checkInvoiceBolt11.mock.calls[0][0]).toBe("first-q");
     expect(checkInvoiceBolt11.mock.calls[1][0]).toBe("second-q");
   });
 
   it("batch-checks every due quote for a mint in one request", async () => {
-    const worker = useInvoicesWorkerStore();
+    const worker = useTransactionWorkerStore();
     const mintStore = useMintsStore();
     const now = Date.now();
     advertiseBatchMint(mintStore, "https://mint.example");
@@ -282,7 +361,7 @@ describe("invoices worker", () => {
       syncPaymentHistoryCache: vi.fn(),
     };
 
-    await worker.processQuotes(walletStore);
+    await worker.processTransactions(walletStore);
 
     expect(checkMintQuoteBatchBolt11).toHaveBeenCalledWith([
       "first-q",
@@ -293,7 +372,7 @@ describe("invoices worker", () => {
   });
 
   it("honors the mint's batch cap and selects the oldest quotes", async () => {
-    const worker = useInvoicesWorkerStore();
+    const worker = useTransactionWorkerStore();
     const mintStore = useMintsStore();
     const now = Date.now();
     advertiseBatchMint(mintStore, "https://mint.example", {
@@ -318,7 +397,7 @@ describe("invoices worker", () => {
       syncPaymentHistoryCache: vi.fn(),
     };
 
-    await worker.processQuotes(walletStore);
+    await worker.processTransactions(walletStore);
 
     expect(checkMintQuoteBatchBolt11).toHaveBeenCalledWith([
       "old-q",
@@ -330,7 +409,7 @@ describe("invoices worker", () => {
   });
 
   it("does not hold the wallet mutex during a mint's batch request", async () => {
-    const worker = useInvoicesWorkerStore();
+    const worker = useTransactionWorkerStore();
     const mintStore = useMintsStore();
     const now = Date.now();
     const slowMint = "https://slow.example";
@@ -378,7 +457,7 @@ describe("invoices worker", () => {
       syncPaymentHistoryCache: vi.fn(),
     };
 
-    const processing = worker.processQuotes(walletStore);
+    const processing = worker.processTransactions(walletStore);
     await vi.waitFor(() =>
       expect(completeBatchMintByMint[slowMint]).toHaveBeenCalledOnce()
     );
@@ -391,7 +470,7 @@ describe("invoices worker", () => {
   });
 
   it("batch-mints paid quotes and retains unpaid quotes", async () => {
-    const worker = useInvoicesWorkerStore();
+    const worker = useTransactionWorkerStore();
     const mintStore = useMintsStore();
     const now = Date.now();
     advertiseBatchMint(mintStore, "https://mint.example");
@@ -428,7 +507,7 @@ describe("invoices worker", () => {
       syncPaymentHistoryCache: vi.fn(),
     };
 
-    await worker.processQuotes(walletStore);
+    await worker.processTransactions(walletStore);
 
     expect(mintWallet.prepareBatchMint).toHaveBeenCalledOnce();
     expect(addProofs).toHaveBeenCalledOnce();
@@ -442,7 +521,7 @@ describe("invoices worker", () => {
   });
 
   it("does not batch-mint a quote already issued by its WebSocket callback", async () => {
-    const worker = useInvoicesWorkerStore();
+    const worker = useTransactionWorkerStore();
     const mintStore = useMintsStore();
     const now = Date.now();
     advertiseBatchMint(mintStore, "https://mint.example");
@@ -470,7 +549,7 @@ describe("invoices worker", () => {
       syncPaymentHistoryCache: vi.fn(),
     };
 
-    await worker.processQuotes(walletStore);
+    await worker.processTransactions(walletStore);
 
     expect(checkMintQuoteBatchBolt11).toHaveBeenCalledTimes(2);
     expect(prepareBatchMint).not.toHaveBeenCalled();
@@ -484,7 +563,7 @@ describe("invoices worker", () => {
   });
 
   it("falls back to singles when a mint's batch path is broken", async () => {
-    const worker = useInvoicesWorkerStore();
+    const worker = useTransactionWorkerStore();
     const mintStore = useMintsStore();
     const now = Date.now();
     advertiseBatchMint(mintStore, "https://mint.example");
@@ -506,7 +585,7 @@ describe("invoices worker", () => {
       }),
     };
 
-    await worker.processQuotes(walletStore);
+    await worker.processTransactions(walletStore);
 
     expect(walletStore.checkInvoiceBolt11).not.toHaveBeenCalled();
     expect(worker.quotes.every((entry) => entry.checkCount === 1)).toBe(true);
@@ -523,7 +602,7 @@ describe("invoices worker", () => {
     worker.quotes.forEach((entry) => {
       entry.lastChecked = 0;
     });
-    await worker.processQuotes(walletStore);
+    await worker.processTransactions(walletStore);
 
     expect(checkMintQuoteBatchBolt11).toHaveBeenCalledOnce();
     expect(walletStore.checkInvoiceBolt11).toHaveBeenCalledWith(
@@ -533,7 +612,7 @@ describe("invoices worker", () => {
   });
 
   it("keeps network failures on the mint-wide cooldown", async () => {
-    const worker = useInvoicesWorkerStore();
+    const worker = useTransactionWorkerStore();
     const mintStore = useMintsStore();
     const now = Date.now();
     advertiseBatchMint(mintStore, "https://mint.example");
@@ -547,7 +626,7 @@ describe("invoices worker", () => {
       })),
     };
 
-    await worker.processQuotes(walletStore);
+    await worker.processTransactions(walletStore);
 
     expect(worker.reusableMintCooldowns["https://mint.example"]).toEqual(
       expect.objectContaining({ failureCount: 1 })
@@ -560,7 +639,7 @@ describe("invoices worker", () => {
   });
 
   it("does not dispatch sent-token checks when the privacy setting is off", async () => {
-    const worker = useInvoicesWorkerStore();
+    const worker = useTransactionWorkerStore();
     const mintStore = useMintsStore();
     const now = Date.now();
     useSettingsStore().checkSentTokens = false;
@@ -584,14 +663,14 @@ describe("invoices worker", () => {
       checkOutgoingInvoice: vi.fn(),
     };
 
-    await worker.processQuotes(walletStore);
+    await worker.processTransactions(walletStore);
     await worker.processOutgoingQueue(now, walletStore);
 
     expect(walletStore.checkOutgoingInvoice).not.toHaveBeenCalled();
   });
 
   it("backs off only the failing mint", async () => {
-    const worker = useInvoicesWorkerStore();
+    const worker = useTransactionWorkerStore();
     const mintStore = useMintsStore();
     const now = Date.now();
     advertiseBatchMint(mintStore, "https://offline.example");
@@ -621,7 +700,7 @@ describe("invoices worker", () => {
       checkInvoiceBolt11,
     };
 
-    await worker.processQuotes(walletStore);
+    await worker.processTransactions(walletStore);
 
     expect(worker.reusableMintCooldowns["https://offline.example"]).toEqual(
       expect.objectContaining({ failureCount: 1 })
@@ -633,8 +712,8 @@ describe("invoices worker", () => {
   });
 
   it("preserves queue metadata when WebSockets add the same fallback twice", () => {
-    const worker = useInvoicesWorkerStore();
-    vi.spyOn(worker, "startInvoiceCheckerWorker").mockImplementation(() => {});
+    const worker = useTransactionWorkerStore();
+    vi.spyOn(worker, "startTransactionWorker").mockImplementation(() => {});
     worker.quotes = [
       queuedQuote("bolt11-q", 100, { lastChecked: 200, checkCount: 7 }),
     ];
@@ -654,7 +733,7 @@ describe("invoices worker", () => {
   });
 
   it("queues all startup batches but caps and WebSocket-checks single quotes", () => {
-    const worker = useInvoicesWorkerStore();
+    const worker = useTransactionWorkerStore();
     const mintStore = useMintsStore();
     const settingsStore = useSettingsStore();
     const batchMintUrl = "https://batch.example";
@@ -682,7 +761,7 @@ describe("invoices worker", () => {
       keysets: [],
       info: { nuts: {} },
     });
-    vi.spyOn(worker, "startInvoiceCheckerWorker").mockImplementation(() => {});
+    vi.spyOn(worker, "startTransactionWorker").mockImplementation(() => {});
     const walletStore = {
       invoiceHistory: [...batchInvoices, ...singleInvoices],
       mintOnPaidBolt11: vi.fn(async () => {}),
@@ -703,10 +782,9 @@ describe("invoices worker", () => {
   });
 
   it("immediately starts one startup batch lane for every mint", async () => {
-    const worker = useInvoicesWorkerStore();
+    const worker = useTransactionWorkerStore();
     const mintStore = useMintsStore();
     useSettingsStore().periodicallyCheckIncomingInvoices = false;
-    worker.lastPendingInvoiceCheck = Date.now() + 60_000;
     advertiseBatchMint(mintStore, "https://mint-a.example");
     advertiseBatchMint(mintStore, "https://mint-b.example");
     worker.quotes = [
@@ -721,7 +799,7 @@ describe("invoices worker", () => {
       failureCount: 3,
       nextRetryAt: Date.now() + 60_000,
     };
-    vi.spyOn(worker, "startInvoiceCheckerWorker").mockImplementation(() => {});
+    vi.spyOn(worker, "startTransactionWorker").mockImplementation(() => {});
     vi.spyOn(usePaymentHistoryStore(), "upsertMintQuote").mockResolvedValue();
     const batchChecks = new Map();
     const walletStore = {
@@ -738,7 +816,7 @@ describe("invoices worker", () => {
       syncPaymentHistoryCache: vi.fn(),
     };
 
-    await worker.checkPendingInvoices(walletStore);
+    await worker.checkPendingTransactions(walletStore);
 
     expect(batchChecks.get("https://mint-a.example")).toHaveBeenCalledWith([
       "a-q",
@@ -764,9 +842,9 @@ describe("invoices worker", () => {
   });
 
   it("keeps reusable WebSockets and worker queues active together", () => {
-    const worker = useInvoicesWorkerStore();
+    const worker = useTransactionWorkerStore();
     const now = new Date().toISOString();
-    vi.spyOn(worker, "startInvoiceCheckerWorker").mockImplementation(() => {});
+    vi.spyOn(worker, "startTransactionWorker").mockImplementation(() => {});
     const walletStore = {
       invoiceHistory: [
         pendingInvoice("bolt12-q", {
@@ -807,7 +885,7 @@ describe("invoices worker", () => {
   });
 
   it("checks reusable quotes on startup when periodic polling is off", async () => {
-    const worker = useInvoicesWorkerStore();
+    const worker = useTransactionWorkerStore();
     const settingsStore = useSettingsStore();
     settingsStore.periodicallyCheckIncomingInvoices = false;
     settingsStore.checkSentTokens = false;
@@ -850,7 +928,7 @@ describe("invoices worker", () => {
       syncPaymentHistoryCache: vi.fn(),
     };
 
-    await worker.checkPendingInvoices(walletStore);
+    await worker.checkPendingTransactions(walletStore);
 
     expect(bolt12Check).toHaveBeenCalledWith("bolt12-q");
     expect(onchainCheck).toHaveBeenCalledWith("onchain-q");
@@ -860,11 +938,11 @@ describe("invoices worker", () => {
     expect(worker.onchainQuotes.map((entry) => entry.quote)).toEqual([
       "onchain-q",
     ]);
-    expect(worker.invoiceCheckListener).toBeNull();
+    expect(worker.transactionCheckListener).toBeNull();
   });
 
   it("persists an on-chain probe with no mintable delta", async () => {
-    const worker = useInvoicesWorkerStore();
+    const worker = useTransactionWorkerStore();
     const now = Date.now();
     const invoice = pendingInvoice("onchain-q", {
       amount: 0,

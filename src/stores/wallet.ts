@@ -9,8 +9,7 @@ import { useUiStore } from "src/stores/ui";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { usePRStore } from "./payment-request";
-import { useWorkersStore } from "./workers";
-import { useInvoicesWorkerStore } from "./invoicesWorker";
+import { useTransactionWorkerStore } from "./transactionWorker";
 
 import {
   requestMintBolt11,
@@ -1095,7 +1094,7 @@ export const useWalletStore = defineStore("wallet", {
         );
         return;
       }
-      useInvoicesWorkerStore().addOutgoingTokenToChecker?.(
+      useTransactionWorkerStore().addOutgoingTokenToChecker?.(
         historyToken.token,
         true
       );
@@ -1114,9 +1113,8 @@ export const useWalletStore = defineStore("wallet", {
         )
       ) {
         console.log(
-          "Websockets not supported, kicking off token check worker."
+          "Websockets not supported; the transaction worker will continue checking the token."
         );
-        useWorkersStore().checkTokenSpendableWorker(historyToken);
         return;
       }
 
@@ -1186,10 +1184,9 @@ export const useWalletStore = defineStore("wallet", {
       } catch (error) {
         cleanup();
         console.error(
-          "Error in websocket subscription. Starting invoices worker.",
+          "Error in websocket subscription. The transaction worker remains active.",
           error
         );
-        useWorkersStore().checkTokenSpendableWorker(historyToken);
       } finally {
         this.activeWebsocketConnections--;
       }
@@ -1239,7 +1236,10 @@ export const useWalletStore = defineStore("wallet", {
       } catch (error) {
         console.error("Could not persist outgoing payment history", error);
       }
-      useInvoicesWorkerStore().addOutgoingInvoiceToChecker?.(quote.quote, true);
+      useTransactionWorkerStore().addOutgoingInvoiceToChecker?.(
+        quote.quote,
+        true
+      );
     },
     removeOutgoingInvoiceFromHistory: async function (quote: string) {
       const index = this.invoiceHistory.findIndex((i) => i.quote === quote);

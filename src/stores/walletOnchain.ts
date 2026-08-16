@@ -19,7 +19,7 @@ import {
 import type { InvoiceHistory } from "./wallet";
 import { PaymentMethod } from "src/stores/walletTypes";
 import { mintOnPaidGeneric } from "./walletWebsocket";
-import { useInvoicesWorkerStore } from "./invoicesWorker";
+import { useTransactionWorkerStore } from "./transactionWorker";
 import { onchainNetwork } from "src/js/onchain";
 import { type AppMeltQuote, normalizeMeltQuote } from "./walletMelt";
 import { createSubpaymentHistoryQuote } from "src/js/invoice-history";
@@ -346,7 +346,7 @@ export async function checkOutgoingOnchain(
     if (meltQuote.state === MeltQuoteState.UNPAID) {
       await proofsStore.setReserved(proofs, false);
       await this.removeOutgoingInvoiceFromHistory(quote);
-      useInvoicesWorkerStore().removeOutgoingInvoiceFromChecker?.(quote);
+      useTransactionWorkerStore().removeOutgoingInvoiceFromChecker?.(quote);
       notifyWarning(this.t("wallet.notifications.lightning_payment_failed"));
     }
 
@@ -364,7 +364,7 @@ export async function checkOutgoingOnchain(
           amount: uIStore.formatCurrency(finalizeData.amountPaid, invoice.unit),
         })
       );
-      useInvoicesWorkerStore().removeOutgoingInvoiceFromChecker?.(quote);
+      useTransactionWorkerStore().removeOutgoingInvoiceFromChecker?.(quote);
     }
   } catch (error: any) {
     if (verbose && error?.message !== "Payment pending") {

@@ -18,7 +18,7 @@ import {
   notifyError,
 } from "src/js/notify";
 import type { InvoiceHistory } from "./wallet";
-import { useInvoicesWorkerStore } from "./invoicesWorker";
+import { useTransactionWorkerStore } from "./transactionWorker";
 import * as bolt11Decoder from "light-bolt11-decoder";
 import * as _ from "underscore";
 import { date } from "quasar";
@@ -104,14 +104,16 @@ export async function mintBolt11(
     throw new Error("mint not found");
   }
 
-  const invoicesWorkerStore = useInvoicesWorkerStore();
+  const transactionWorkerStore = useTransactionWorkerStore();
   while (true) {
-    await invoicesWorkerStore.waitForMintQuoteRelease(
+    await transactionWorkerStore.waitForMintQuoteRelease(
       invoice.mint,
       invoice.quote
     );
     await uIStore.lockMutex();
-    if (!invoicesWorkerStore.mintQuoteIsClaimed(invoice.mint, invoice.quote)) {
+    if (
+      !transactionWorkerStore.mintQuoteIsClaimed(invoice.mint, invoice.quote)
+    ) {
       break;
     }
     uIStore.unlockMutex();
@@ -158,7 +160,7 @@ export async function mintBolt11(
 
     // update UI
     await this.setInvoicePaid(invoice.quote);
-    useInvoicesWorkerStore().removeInvoiceFromChecker(invoice.quote);
+    useTransactionWorkerStore().removeInvoiceFromChecker(invoice.quote);
 
     return proofs;
   } catch (error: any) {

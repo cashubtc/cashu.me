@@ -1,4 +1,4 @@
-import { useInvoicesWorkerStore } from "./invoicesWorker";
+import { useTransactionWorkerStore } from "./transactionWorker";
 import { useSettingsStore } from "src/stores/settings";
 import { useWorkersStore } from "./workers";
 import { useUiStore } from "src/stores/ui";
@@ -39,7 +39,7 @@ const mintOnPaidConfigs: Record<IncomingMintMethod, MintOnPaidConfig> = {
     command: "bolt11_mint_quote",
     oneShot: true,
     addToChecker: (quoteId: string) =>
-      useInvoicesWorkerStore().addInvoiceToChecker(quoteId),
+      useTransactionWorkerStore().addInvoiceToChecker(quoteId),
     onPaid: async (walletStore: any, _quoteId, invoice) =>
       walletStore.mintBolt11(invoice, false),
   },
@@ -47,7 +47,7 @@ const mintOnPaidConfigs: Record<IncomingMintMethod, MintOnPaidConfig> = {
     command: "bolt12_mint_quote",
     oneShot: false,
     addToChecker: (quoteId: string) =>
-      useInvoicesWorkerStore().addBolt12OfferToChecker(quoteId),
+      useTransactionWorkerStore().addBolt12OfferToChecker(quoteId),
     onPaid: async (
       walletStore: any,
       quoteId,
@@ -65,7 +65,7 @@ const mintOnPaidConfigs: Record<IncomingMintMethod, MintOnPaidConfig> = {
     command: "onchain_mint_quote",
     oneShot: false,
     addToChecker: (quoteId: string) =>
-      useInvoicesWorkerStore().addOnchainQuoteToChecker(quoteId, true),
+      useTransactionWorkerStore().addOnchainQuoteToChecker(quoteId, true),
     onPaid: async (
       walletStore: any,
       quoteId,

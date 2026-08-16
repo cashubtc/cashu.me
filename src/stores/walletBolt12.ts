@@ -7,7 +7,6 @@ import * as nobleSecp256k1 from "@noble/secp256k1";
 import { bytesToHex } from "@noble/hashes/utils";
 import { notifyApiError, notify, notifySuccess } from "src/js/notify";
 import type { InvoiceHistory } from "./wallet";
-import { useInvoicesWorkerStore } from "./invoicesWorker";
 import { mintOnPaidGeneric } from "./walletWebsocket";
 import { PaymentMethod } from "src/stores/walletTypes";
 import { usePriceStore } from "./price";

@@ -17,7 +17,7 @@ import {
   notifySuccess,
   notifyWarning,
 } from "src/js/notify";
-import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
+import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import { PaymentMethod } from "src/stores/walletTypes";
 import { useMintsStore, WalletProof } from "./mints";
 import { usePaymentHistoryStore } from "./paymentHistory";
@@ -319,7 +319,7 @@ export async function checkOutgoingInvoiceGeneric(
     } else if (meltQuote.state == MeltQuoteState.UNPAID) {
       await useProofsStore().setReserved(proofs, false);
       await this.removeOutgoingInvoiceFromHistory(quote);
-      useInvoicesWorkerStore().removeOutgoingInvoiceFromChecker?.(quote);
+      useTransactionWorkerStore().removeOutgoingInvoiceFromChecker?.(quote);
       notifyWarning(this.t("wallet.notifications.lightning_payment_failed"));
     } else if (meltQuote.state == MeltQuoteState.PAID) {
       const finalizeData = await this.finalizePaidMeltInvoice(
@@ -340,7 +340,7 @@ export async function checkOutgoingInvoiceGeneric(
           })
         );
       }
-      useInvoicesWorkerStore().removeOutgoingInvoiceFromChecker?.(quote);
+      useTransactionWorkerStore().removeOutgoingInvoiceFromChecker?.(quote);
     }
   } catch (error: any) {
     if (verbose) {

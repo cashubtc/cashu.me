@@ -2,7 +2,7 @@ import { NDKPrivateKeySigner } from "@nostr-dev-kit/ndk";
 import { createPinia, setActivePinia } from "pinia";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { nextTick } from "vue";
-import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
+import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import { useMintsStore } from "src/stores/mints";
 import { useNostrStore } from "src/stores/nostr";
 import { useNpubCashStore } from "src/stores/npubcash";
@@ -247,9 +247,9 @@ describe("npub.cash store", () => {
     mintsStore.mints = [
       { url: mintUrl, keys: [], keysets: [], info: { nuts: { 29: {} } } },
     ];
-    const worker = useInvoicesWorkerStore();
+    const worker = useTransactionWorkerStore();
     worker.quotes = [];
-    vi.spyOn(worker, "startInvoiceCheckerWorker").mockImplementation(() => {});
+    vi.spyOn(worker, "startTransactionWorker").mockImplementation(() => {});
     const walletStore = useWalletStore();
     walletStore.invoiceHistory = [];
     vi.spyOn(walletStore, "addPaymentHistory").mockImplementation(
@@ -312,7 +312,7 @@ describe("npub.cash store", () => {
     store.claimAutomatically = true;
     const settingsStore = useSettingsStore();
     settingsStore.periodicallyCheckIncomingInvoices = false;
-    const worker = useInvoicesWorkerStore();
+    const worker = useTransactionWorkerStore();
     worker.quotes = [];
     const walletStore = useWalletStore();
     walletStore.invoiceHistory = [];
