@@ -1,0 +1,39 @@
+{
+  "skill_name": "e2e-test-playwright-video",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Run the wallet browser payment tests and make me a fun video showing the incoming, outgoing, and ecash flows.",
+      "expected_output": "A validated H.264 montage and contact sheet created only after all selected Playwright tests pass.",
+      "files": [],
+      "expectations": [
+        "The real mint, melt, and ecash Playwright specs run with video enabled.",
+        "The output is a playable 1280x720 H.264 MP4.",
+        "The ecash chapter labels sender and receiver without swapping their roles.",
+        "The final response links the video and reports the test result."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "The E2E recordings are already in test-results. Recut the demo at 1.5x without rerunning Docker.",
+      "expected_output": "A new montage rendered from existing recordings with no test stack startup.",
+      "files": [],
+      "expectations": [
+        "The renderer is invoked with --skip-tests and --speed 1.5.",
+        "Existing stable sender and receiver recordings are used.",
+        "FFprobe validation and contact-sheet generation complete successfully."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Record the payment tests, but one of the melt assertions fails. Still give me a clean success montage from whatever passed.",
+      "expected_output": "No misleading success montage; the failing test and retained Playwright diagnostics are reported.",
+      "files": [],
+      "expectations": [
+        "The renderer exits when the Playwright run fails.",
+        "The response does not present stale or partial footage as a successful run.",
+        "Failure video, trace, and screenshot locations are preserved when available."
+      ]
+    }
+  ]
+}

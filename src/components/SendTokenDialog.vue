@@ -246,6 +246,7 @@
                   (sendData.p2pkPubkey != '' &&
                     !isValidPubkey(sendData.p2pkPubkey))
                 "
+                data-testid="send-ecash"
                 @click="sendTokens"
                 color="primary"
                 rounded

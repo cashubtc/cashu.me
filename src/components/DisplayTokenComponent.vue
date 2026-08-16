@@ -271,6 +271,7 @@
             size="lg"
             color="primary"
             rounded
+            data-testid="copy-ecash-token"
             @click="copyTokens"
           >
             {{ copyButtonLabel }}

@@ -104,8 +104,8 @@ module.exports = configure(function (/* ctx */) {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
     devServer: {
-      https: true,
-      open: true, // opens browser window automatically
+      https: process.env.E2E !== "true",
+      open: process.env.E2E !== "true", // keep automated runs headless
       port: 8080,
     },
 

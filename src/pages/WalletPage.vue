@@ -11,6 +11,7 @@
           <q-btn
             rounded
             dense
+            data-testid="wallet-receive"
             class="q-px-md q-mr-md wallet-action-btn"
             color="primary"
             @click="showReceiveDialog = true"
@@ -34,6 +35,7 @@
           <q-btn
             rounded
             dense
+            data-testid="wallet-send"
             class="q-px-md q-ml-md wallet-action-btn"
             color="primary"
             @click="showSendDialog = true"

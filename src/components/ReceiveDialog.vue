@@ -29,7 +29,15 @@
       <q-card-section class="q-pa-md">
         <div class="q-gutter-y-md">
           <!-- Ecash Option -->
-          <div class="action-row" @click="toggleReceiveEcashDrawer">
+          <div
+            class="action-row"
+            role="button"
+            tabindex="0"
+            data-testid="receive-ecash-option"
+            @click="toggleReceiveEcashDrawer"
+            @keydown.enter.prevent="toggleReceiveEcashDrawer"
+            @keydown.space.prevent="toggleReceiveEcashDrawer"
+          >
             <div class="row items-center no-wrap">
               <div class="icon-circle">
                 <CoinsIcon :size="24" />
@@ -46,7 +54,12 @@
           <div
             v-if="canReceiveLightning"
             class="action-row"
+            role="button"
+            tabindex="0"
+            data-testid="receive-lightning-option"
             @click="showInvoiceCreateDialog"
+            @keydown.enter.prevent="showInvoiceCreateDialog"
+            @keydown.space.prevent="showInvoiceCreateDialog"
           >
             <div class="row items-center no-wrap">
               <div class="icon-circle">
@@ -64,7 +77,12 @@
           <div
             v-if="canReceiveOnchain"
             class="action-row"
+            role="button"
+            tabindex="0"
+            data-testid="receive-onchain-option"
             @click="showOnchainCreateDialog"
+            @keydown.enter.prevent="showOnchainCreateDialog"
+            @keydown.space.prevent="showOnchainCreateDialog"
           >
             <div class="row items-center no-wrap">
               <div class="icon-circle">

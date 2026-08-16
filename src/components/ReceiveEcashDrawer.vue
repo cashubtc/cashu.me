@@ -28,7 +28,15 @@
 
       <q-card-section class="q-pa-md">
         <div class="q-gutter-y-md">
-          <div class="action-row" @click="handlePasteBtn">
+          <div
+            class="action-row"
+            role="button"
+            tabindex="0"
+            data-testid="receive-ecash-paste"
+            @click="handlePasteBtn"
+            @keydown.enter.prevent="handlePasteBtn"
+            @keydown.space.prevent="handlePasteBtn"
+          >
             <div class="row items-center no-wrap">
               <div class="icon-circle">
                 <ClipboardIcon :size="24" />

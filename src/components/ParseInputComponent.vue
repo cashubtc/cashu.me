@@ -1,9 +1,10 @@
 <template>
   <div class="column q-mt-md">
     <!-- Input field with paste button -->
-    <div class="input-with-paste-wrapper">
+    <div class="input-with-paste-wrapper" :data-testid="testId">
       <q-input
         ref="inputRef"
+        :aria-label="computedPlaceholder"
         filled
         borderless
         :class="[
@@ -87,6 +88,10 @@ export default defineComponent({
     autofocus: {
       type: Boolean,
       default: true,
+    },
+    testId: {
+      type: String,
+      default: "parse-input",
     },
     hasCamera: {
       type: Boolean,

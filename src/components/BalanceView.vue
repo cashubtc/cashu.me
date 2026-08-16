@@ -47,6 +47,8 @@
               <div class="col-12">
                 <h3
                   class="balance-amount q-my-none q-py-none cursor-pointer"
+                  data-testid="wallet-balance"
+                  :data-unit="unit"
                   @click="toggleHideBalance"
                 >
                   <strong>
