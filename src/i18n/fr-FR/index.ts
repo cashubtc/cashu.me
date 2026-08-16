@@ -386,7 +386,7 @@ export default {
       check_startup: {
         toggle: "Vérifier les factures en attente au démarrage",
         description:
-          "Si activé, le portefeuille vérifiera les factures en attente des dernières 24 heures au démarrage.",
+          "Si activé, le portefeuille vérifiera les factures en attente au démarrage.",
       },
       check_all: {
         toggle: "Vérifier toutes les factures",

@@ -306,6 +306,7 @@ export const useNpubCashStore = defineStore("npubCash", {
       const invoicesWorkerStore = useInvoicesWorkerStore();
       const settingsStore = useSettingsStore();
       const walletStore = useWalletStore();
+      const mintsStore = useMintsStore();
       const since = this.lastCheck ? `?since=${this.lastCheck}` : "";
       const quoteUrl = `${NPUB_CASH_BASE_URL}/api/v2/wallet/quotes`;
       try {
@@ -354,7 +355,14 @@ export const useNpubCashStore = defineStore("npubCash", {
           });
           if (this.claimAutomatically) {
             if (settingsStore.periodicallyCheckIncomingInvoices) {
-              invoicesWorkerStore.addInvoiceToChecker(quote.quoteId);
+              const mint = mintsStore.mints.find(
+                (item) => item.url === quote.mintUrl
+              );
+              if (invoicesWorkerStore.mintSupportsBolt11Batch(mint)) {
+                invoicesWorkerStore.addBatchInvoiceToChecker(quote.quoteId);
+              } else {
+                invoicesWorkerStore.addInvoiceToChecker(quote.quoteId);
+              }
             } else {
               await walletStore.mintOnPaidBolt11(quote.quoteId);
             }

@@ -399,7 +399,7 @@ export default {
       },
       check_startup: {
         toggle: "启动时检查待处理发票",
-        description: "如果启用，钱包会在启动时检查过去 24 小时内待处理的发票。",
+        description: "如果启用，钱包会在启动时检查待处理的发票。",
       },
       check_all: {
         toggle: "检查所有发票",

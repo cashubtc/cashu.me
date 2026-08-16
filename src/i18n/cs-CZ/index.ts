@@ -395,7 +395,7 @@ export default {
       check_startup: {
         toggle: "Kontrolovat čekající faktury při spuštění",
         description:
-          "Pokud je povoleno, peněženka při spuštění zkontroluje čekající faktury z posledních 24 hodin.",
+          "Pokud je povoleno, peněženka při spuštění zkontroluje čekající faktury.",
       },
       check_all: {
         toggle: "Kontrolovat všechny faktury",

@@ -385,7 +385,7 @@ export default {
       check_startup: {
         toggle: "Verificar facturas pendientes al inicio",
         description:
-          "Si está habilitado, la billetera verificará las facturas pendientes de las últimas 24 horas al inicio.",
+          "Si está habilitado, la billetera verificará las facturas pendientes al inicio.",
       },
       check_all: {
         toggle: "Verificar todas las facturas",

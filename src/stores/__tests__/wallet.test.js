@@ -61,6 +61,8 @@ const h = vi.hoisted(() => {
     addBolt12OfferToChecker: vi.fn(),
     addOnchainQuoteToChecker: vi.fn(),
     addOutgoingTokenToChecker: vi.fn(),
+    mintQuoteIsClaimed: vi.fn(() => false),
+    waitForMintQuoteRelease: vi.fn(async () => {}),
   };
   const workersStore = {
     checkTokenSpendableWorker: vi.fn(),
@@ -821,6 +823,107 @@ describe("wallet store", () => {
     expect(websocket.mintWallet.completeBatchMint).not.toHaveBeenCalled();
   });
 
+  it("reserves Bolt11 websocket setup before awaiting the mint wallet", async () => {
+    const wallet = useWalletStore();
+    const websocket = mockMintWebsocket();
+    wallet.invoiceHistory = [
+      {
+        quote: "bolt11-setup-race-q",
+        amount: 100,
+        request: "lnbc123",
+        memo: "memo",
+        date: "old",
+        status: "pending",
+        mint: "https://mint-a.example",
+        unit: "sat",
+        type: PaymentMethod.Bolt11,
+      },
+    ];
+    h.mintsStore.mints[0].info = {
+      nuts: {
+        17: {
+          supported: [
+            {
+              method: PaymentMethod.Bolt11,
+              unit: "sat",
+              commands: ["bolt11_mint_quote"],
+            },
+          ],
+        },
+      },
+    };
+    let resolveMintWallet;
+    const mintWalletPending = new Promise((resolve) => {
+      resolveMintWallet = resolve;
+    });
+    const mintWallet = vi
+      .spyOn(wallet, "mintWallet")
+      .mockReturnValue(mintWalletPending);
+    vi.spyOn(wallet, "mintBolt11").mockResolvedValue([]);
+
+    const firstSetup = wallet.mintOnPaidBolt11("bolt11-setup-race-q");
+    const duplicateSetup = wallet.mintOnPaidBolt11("bolt11-setup-race-q");
+
+    expect(mintWallet).toHaveBeenCalledOnce();
+
+    resolveMintWallet(websocket.mintWallet);
+    await Promise.all([firstSetup, duplicateSetup]);
+
+    expect(websocket.connection.createSubscription).toHaveBeenCalledOnce();
+    await websocket.onUpdate()({ state: "PAID" });
+  });
+
+  it("does not overlap duplicate Bolt11 paid callbacks", async () => {
+    const wallet = useWalletStore();
+    const websocket = mockMintWebsocket();
+    wallet.invoiceHistory = [
+      {
+        quote: "bolt11-paid-race-q",
+        amount: 100,
+        request: "lnbc123",
+        memo: "memo",
+        date: "old",
+        status: "pending",
+        mint: "https://mint-a.example",
+        unit: "sat",
+        type: PaymentMethod.Bolt11,
+      },
+    ];
+    h.mintsStore.mints[0].info = {
+      nuts: {
+        17: {
+          supported: [
+            {
+              method: PaymentMethod.Bolt11,
+              unit: "sat",
+              commands: ["bolt11_mint_quote"],
+            },
+          ],
+        },
+      },
+    };
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue(websocket.mintWallet);
+    let resolveMint;
+    const mintPending = new Promise((resolve) => {
+      resolveMint = resolve;
+    });
+    const mintBolt11 = vi
+      .spyOn(wallet, "mintBolt11")
+      .mockReturnValue(mintPending);
+
+    await wallet.mintOnPaidBolt11("bolt11-paid-race-q");
+    const firstPaidCallback = websocket.onUpdate()({ state: "PAID" });
+    const duplicatePaidCallback = websocket.onUpdate()({ state: "PAID" });
+
+    expect(mintBolt11).toHaveBeenCalledOnce();
+
+    resolveMint([]);
+    await Promise.all([firstPaidCallback, duplicatePaidCallback]);
+
+    expect(mintBolt11).toHaveBeenCalledOnce();
+    expect(websocket.connection.cancelSubscription).toHaveBeenCalledOnce();
+  });
+
   it("subscribes Bolt12 minting to Bolt12 websocket updates", async () => {
     const wallet = useWalletStore();
     const websocket = mockMintWebsocket();
@@ -994,6 +1097,81 @@ describe("wallet store", () => {
       expect.any(Function),
       expect.any(Function)
     );
+  });
+
+  it("deduplicates sent-token websocket setup and spent checks", async () => {
+    const wallet = useWalletStore();
+    h.mintsStore.mints = [
+      {
+        url: "https://mint-b.example",
+        keys: [{ id: "00bb" }],
+        keysets: [{ id: "00bb", unit: "sat", active: true }],
+        info: {
+          nuts: {
+            17: {
+              supported: [
+                {
+                  method: PaymentMethod.Bolt11,
+                  unit: "sat",
+                  commands: ["proof_state"],
+                },
+              ],
+            },
+          },
+        },
+      },
+    ];
+    const historyToken = {
+      token: "cashu-token-concurrency",
+      amount: -1,
+      mint: "https://mint-b.example",
+      unit: "sat",
+      status: "pending",
+    };
+    let resolveDecode;
+    const decodePending = new Promise((resolve) => {
+      resolveDecode = resolve;
+    });
+    h.tokenModule.decodeFull.mockReturnValue(decodePending);
+    h.tokenModule.getProofs.mockReturnValue([
+      { id: "00bb", amount: 1, secret: "s1" },
+    ]);
+    let onProofStateUpdate;
+    const unsubscribe = vi.fn();
+    const tokenWallet = {
+      on: {
+        proofStateUpdates: vi.fn(async (_proofs, callback) => {
+          onProofStateUpdate = callback;
+          return unsubscribe;
+        }),
+      },
+    };
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue(tokenWallet);
+
+    const firstSetup = wallet.onTokenPaid(historyToken);
+    const duplicateSetup = wallet.onTokenPaid(historyToken);
+
+    expect(h.tokenModule.decodeFull).toHaveBeenCalledOnce();
+    resolveDecode({ proofs: [] });
+    await Promise.all([firstSetup, duplicateSetup]);
+    expect(tokenWallet.on.proofStateUpdates).toHaveBeenCalledOnce();
+
+    let resolveSpendabilityCheck;
+    const spendabilityCheckPending = new Promise((resolve) => {
+      resolveSpendabilityCheck = resolve;
+    });
+    const checkTokenSpendable = vi
+      .spyOn(wallet, "checkTokenSpendable")
+      .mockReturnValue(spendabilityCheckPending);
+    const firstUpdate = onProofStateUpdate({ state: "SPENT" });
+    const duplicateUpdate = onProofStateUpdate({ state: "SPENT" });
+
+    expect(checkTokenSpendable).toHaveBeenCalledOnce();
+    resolveSpendabilityCheck(true);
+    await Promise.all([firstUpdate, duplicateUpdate]);
+
+    expect(checkTokenSpendable).toHaveBeenCalledOnce();
+    expect(unsubscribe).toHaveBeenCalledOnce();
   });
 
   it("serializes Bolt12 minting so concurrent checks use distinct counters", async () => {

@@ -357,7 +357,7 @@ export default {
       check_startup: {
         toggle: "Verifica fatture pendenti all'avvio",
         description:
-          "Se abilitato, il portafoglio verificherà le fatture pendenti delle ultime 24 ore all'avvio.",
+          "Se abilitato, il portafoglio verificherà le fatture pendenti all'avvio.",
       },
       check_all: {
         toggle: "Verifica tutte le fatture",

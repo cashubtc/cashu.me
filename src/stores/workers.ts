@@ -11,6 +11,8 @@ export const useWorkersStore = defineStore("workers", {
       tokensCheckSpendableListener: null as NodeJS.Timeout | null,
       invoiceWorkerRunning: false,
       tokenWorkerRunning: false,
+      invoiceWorkerProcessing: false,
+      tokenWorkerProcessing: false,
       checkInterval: 5000,
     };
   },
@@ -20,10 +22,12 @@ export const useWorkersStore = defineStore("workers", {
     clearAllWorkers: function () {
       if (this.invoiceCheckListener) {
         clearInterval(this.invoiceCheckListener);
+        this.invoiceCheckListener = null;
         this.invoiceWorkerRunning = false;
       }
       if (this.tokensCheckSpendableListener) {
         clearInterval(this.tokensCheckSpendableListener);
+        this.tokensCheckSpendableListener = null;
         this.tokenWorkerRunning = false;
       }
     },
@@ -32,6 +36,8 @@ export const useWorkersStore = defineStore("workers", {
       let nInterval = 0;
       this.clearAllWorkers();
       this.invoiceCheckListener = setInterval(async () => {
+        if (this.invoiceWorkerProcessing) return;
+        this.invoiceWorkerProcessing = true;
         try {
           this.invoiceWorkerRunning = true;
           nInterval += 1;
@@ -40,6 +46,7 @@ export const useWorkersStore = defineStore("workers", {
           if (nInterval > 12) {
             console.log("### stopping invoice check worker");
             this.clearAllWorkers();
+            return;
           }
           console.log("### invoiceCheckWorker setInterval", nInterval);
 
@@ -51,6 +58,8 @@ export const useWorkersStore = defineStore("workers", {
           this.clearAllWorkers();
         } catch (error) {
           console.log("invoiceCheckWorker: not paid yet");
+        } finally {
+          this.invoiceWorkerProcessing = false;
         }
       }, this.checkInterval);
     },
@@ -63,18 +72,21 @@ export const useWorkersStore = defineStore("workers", {
         return;
       }
       console.log("### kicking off checkTokenSpendableWorker");
-      this.tokenWorkerRunning = true;
       const walletStore = useWalletStore();
       const sendTokensStore = useSendTokensStore();
       let nInterval = 0;
       this.clearAllWorkers();
+      this.tokenWorkerRunning = true;
       this.tokensCheckSpendableListener = setInterval(async () => {
+        if (this.tokenWorkerProcessing) return;
+        this.tokenWorkerProcessing = true;
         try {
           nInterval += 1;
           // exit loop after 30s
           if (nInterval > 10) {
             console.log("### stopping token check worker");
             this.clearAllWorkers();
+            return;
           }
           console.log("### checkTokenSpendableWorker setInterval", nInterval);
           const paid = await walletStore.checkTokenSpendable(
@@ -89,6 +101,8 @@ export const useWorkersStore = defineStore("workers", {
         } catch (error) {
           console.log("checkTokenSpendableWorker: some error", error);
           this.clearAllWorkers();
+        } finally {
+          this.tokenWorkerProcessing = false;
         }
       }, this.checkInterval);
     },

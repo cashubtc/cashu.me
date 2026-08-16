@@ -392,7 +392,7 @@ export default {
       check_startup: {
         toggle: "Check pending invoices on startup",
         description:
-          "If enabled, the wallet will check pending invoices from the last 24 hours on startup.",
+          "If enabled, the wallet will check pending invoices on startup.",
       },
       check_all: {
         toggle: "Check all invoices",

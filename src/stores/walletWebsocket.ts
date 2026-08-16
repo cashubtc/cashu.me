@@ -203,11 +203,21 @@ export async function mintOnPaidGeneric(
     return;
   }
 
-  const mintWallet = await this.mintWallet(invoice.mint, invoice.unit);
+  const releaseSubscriptionReservation = () =>
+    activeMintQuoteSubscriptions.delete(key);
+  activeMintQuoteSubscriptions.set(key, releaseSubscriptionReservation);
+
+  let mintWallet: any;
+  try {
+    mintWallet = await this.mintWallet(invoice.mint, invoice.unit);
+  } catch (error) {
+    releaseSubscriptionReservation();
+    throw error;
+  }
 
   // 5. Subscribe via Websocket
   const uIStore = useUiStore();
-  let cleanup = () => activeMintQuoteSubscriptions.delete(key);
+  let cleanup = releaseSubscriptionReservation;
   try {
     this.activeWebsocketConnections++;
     uIStore.triggerActivityOrb();
@@ -223,42 +233,45 @@ export async function mintOnPaidGeneric(
     };
     activeMintQuoteSubscriptions.set(key, cleanup);
 
+    let paidCallbackInProgress = false;
     const onPaidCallback = async (_response: MintQuotePaidResponse) => {
-      let proofs;
+      if (paidCallbackInProgress) return;
+      paidCallbackInProgress = true;
       try {
-        proofs = await config.onPaid(
+        const proofs = await config.onPaid(
           this,
           quoteId,
           invoice,
           verbose,
           hideInvoiceDetailsOnMint
         );
+
+        if (type === PaymentMethod.Bolt11) {
+          if (hideInvoiceDetailsOnMint) {
+            this.hideInvoiceDetailsAfterReceiveSuccess(quoteId);
+          }
+          useUiStore().vibrate();
+          if (verbose) {
+            notifySuccess(
+              this.t("wallet.notifications.received_lightning", {
+                amount: uIStore.formatCurrency(invoice.amount, invoice.unit),
+              })
+            );
+          }
+        }
+
+        return proofs;
       } catch (error: any) {
         if (verbose) {
           console.error(error);
         }
         throw error;
       } finally {
+        paidCallbackInProgress = false;
         if (config.oneShot) {
           cleanup();
         }
       }
-
-      if (type === PaymentMethod.Bolt11) {
-        if (hideInvoiceDetailsOnMint) {
-          this.hideInvoiceDetailsAfterReceiveSuccess(quoteId);
-        }
-        useUiStore().vibrate();
-        if (verbose) {
-          notifySuccess(
-            this.t("wallet.notifications.received_lightning", {
-              amount: uIStore.formatCurrency(invoice.amount, invoice.unit),
-            })
-          );
-        }
-      }
-
-      return proofs;
     };
 
     const onErrorCallback = async (error: any) => {

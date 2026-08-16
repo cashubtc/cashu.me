@@ -104,7 +104,18 @@ export async function mintBolt11(
     throw new Error("mint not found");
   }
 
-  await uIStore.lockMutex();
+  const invoicesWorkerStore = useInvoicesWorkerStore();
+  while (true) {
+    await invoicesWorkerStore.waitForMintQuoteRelease(
+      invoice.mint,
+      invoice.quote
+    );
+    await uIStore.lockMutex();
+    if (!invoicesWorkerStore.mintQuoteIsClaimed(invoice.mint, invoice.quote)) {
+      break;
+    }
+    uIStore.unlockMutex();
+  }
   try {
     // first we check if the mint quote is paid
     const mintQuote = await mintWallet.checkMintQuoteBolt11(invoice.quote);
