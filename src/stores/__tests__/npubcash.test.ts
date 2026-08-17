@@ -250,6 +250,9 @@ describe("npub.cash store", () => {
     const worker = useTransactionWorkerStore();
     worker.quotes = [];
     vi.spyOn(worker, "startTransactionWorker").mockImplementation(() => {});
+    const processNow = vi
+      .spyOn(worker, "processIncomingTransactionsNow")
+      .mockResolvedValue();
     const walletStore = useWalletStore();
     walletStore.invoiceHistory = [];
     vi.spyOn(walletStore, "addPaymentHistory").mockImplementation(
@@ -274,7 +277,7 @@ describe("npub.cash store", () => {
                 quoteId: "npub-q-1",
                 request: "lnbc1",
                 amount: 10,
-                state: "PAID",
+                state: "UNPAID",
                 locked: false,
               },
               {
@@ -303,17 +306,26 @@ describe("npub.cash store", () => {
       "npub-q-2",
     ]);
     expect(worker.quotes.every((quote) => quote.usesBatchPath)).toBe(true);
+    expect(walletStore.invoiceHistory[0].mintQuote?.state).toBe("UNPAID");
+    expect(processNow).toHaveBeenCalledOnce();
   });
 
-  it("keeps direct npub.cash claiming when periodic checking is disabled", async () => {
+  it("uses the worker immediately when periodic checking is disabled", async () => {
     const mintUrl = "https://mint.example";
     const store = useNpubCashStore();
     store.enabled = true;
     store.claimAutomatically = true;
     const settingsStore = useSettingsStore();
     settingsStore.periodicallyCheckIncomingInvoices = false;
+    useMintsStore().mints = [
+      { url: mintUrl, keys: [], keysets: [], info: { nuts: { 29: {} } } },
+    ];
     const worker = useTransactionWorkerStore();
     worker.quotes = [];
+    vi.spyOn(worker, "startTransactionWorker").mockImplementation(() => {});
+    const processNow = vi
+      .spyOn(worker, "processIncomingTransactionsNow")
+      .mockResolvedValue();
     const walletStore = useWalletStore();
     walletStore.invoiceHistory = [];
     vi.spyOn(walletStore, "addPaymentHistory").mockImplementation(
@@ -350,7 +362,10 @@ describe("npub.cash store", () => {
 
     await store.synchronizeQuotes();
 
-    expect(worker.quotes).toEqual([]);
-    expect(mintOnPaid).toHaveBeenCalledWith("npub-q-1");
+    expect(worker.quotes).toEqual([
+      expect.objectContaining({ quote: "npub-q-1", usesBatchPath: true }),
+    ]);
+    expect(mintOnPaid).not.toHaveBeenCalled();
+    expect(processNow).toHaveBeenCalledOnce();
   });
 });
