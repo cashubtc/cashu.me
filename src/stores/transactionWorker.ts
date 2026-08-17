@@ -122,6 +122,7 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
     keepIntervalConstantForNChecks: 5,
     maxLength: 50,
     maxAge: 14 * 24 * 60 * 60 * 1_000,
+    maxBatchQuoteAge: 7 * 24 * 60 * 60 * 1_000,
     oneHour: 60 * 60 * 1_000,
 
     transactionCheckListener: null as NodeJS.Timeout | null,
@@ -417,6 +418,13 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
       return invoice.status === "pending" && invoice.amount > 0;
     },
 
+    isMintQuoteBatchEligible(invoice: any, now = Date.now()) {
+      const createdAt = Date.parse(invoice?.date);
+      return (
+        Number.isFinite(createdAt) && now - createdAt < this.maxBatchQuoteAge
+      );
+    },
+
     shouldCheckOutgoingInvoice(invoice: any) {
       if (!invoice) return false;
       return (
@@ -678,32 +686,50 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
             entries.sort((left, right) =>
               compareQueueEntries(left.queueEntry, right.queueEntry)
             );
-            const canBatch =
+            const batchPathAvailable =
               this.mintSupportsBatch(mint, method) &&
               !this.batchPathInCooldown(mintUrl, unit, method, now);
-            const job: MintJob = canBatch
-              ? {
-                  kind: "incoming-batch",
-                  mintUrl,
-                  unit,
-                  method,
-                  entries: entries.slice(
-                    0,
-                    this.batchSizeLimit(mint) ?? entries.length
-                  ),
-                }
-              : {
+            const batchEntries = batchPathAvailable
+              ? entries.filter((entry) =>
+                  this.isMintQuoteBatchEligible(entry.invoice, now)
+                )
+              : [];
+            const singleEntries = batchPathAvailable
+              ? entries.filter(
+                  (entry) => !this.isMintQuoteBatchEligible(entry.invoice, now)
+                )
+              : entries;
+
+            if (batchEntries.length > 0) {
+              const job: MintJob = {
+                kind: "incoming-batch",
+                mintUrl,
+                unit,
+                method,
+                entries: batchEntries.slice(
+                  0,
+                  this.batchSizeLimit(mint) ?? batchEntries.length
+                ),
+              };
+              candidates.push({
+                order: queueOrder(batchEntries[0].queueEntry),
+                batchPriority: prioritizeBatch ? 0 : 1,
+                job,
+              });
+            }
+
+            if (singleEntries.length > 0) {
+              candidates.push({
+                order: queueOrder(singleEntries[0].queueEntry),
+                batchPriority: 1,
+                job: {
                   kind: "incoming-single",
                   mintUrl,
                   method,
-                  entry: entries[0],
-                };
-            candidates.push({
-              order: queueOrder(entries[0].queueEntry),
-              batchPriority:
-                prioritizeBatch && job.kind === "incoming-batch" ? 0 : 1,
-              job,
-            });
+                  entry: singleEntries[0],
+                },
+              });
+            }
           }
         }
       }
@@ -1413,13 +1439,15 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
         (item) => item.url === invoice.mint
       );
       const supportsBatch = this.mintSupportsBatch(mint, method);
-      if (supportsBatch) {
+      const usesBatchPath =
+        supportsBatch && this.isMintQuoteBatchEligible(invoice);
+      if (usesBatchPath) {
         this.clearMintCooldown(invoice.mint);
         this.addBatchMintQuoteToChecker(method, invoice.quote, forceStart);
       } else {
         this.addSingleMintQuoteToChecker(method, invoice.quote, forceStart);
       }
-      return { method, supportsBatch };
+      return { method, supportsBatch, usesBatchPath };
     },
 
     startMintQuoteWebsocket(
@@ -1450,16 +1478,18 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
             (item) => item.url === invoice.mint
           );
           const supportsBatch = this.mintSupportsBatch(mint, method);
+          const usesBatchPath =
+            supportsBatch && this.isMintQuoteBatchEligible(invoice);
 
           if (
             method === PaymentMethod.Bolt11 &&
-            !supportsBatch &&
+            !usesBatchPath &&
             singleBolt11QuotesQueued >=
               this.maxSingleBolt11QuotesToCheckOnStartup
           ) {
             continue;
           }
-          if (method === PaymentMethod.Bolt11 && !supportsBatch) {
+          if (method === PaymentMethod.Bolt11 && !usesBatchPath) {
             singleBolt11QuotesQueued += 1;
           }
 
@@ -1467,7 +1497,7 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
 
           if (
             method !== PaymentMethod.Bolt11 ||
-            !supportsBatch ||
+            !usesBatchPath ||
             !periodicChecks
           ) {
             void this.startMintQuoteWebsocket(

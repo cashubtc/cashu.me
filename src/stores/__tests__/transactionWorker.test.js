@@ -128,6 +128,57 @@ describe("transaction worker", () => {
     );
   });
 
+  it("keeps month-old quotes out of batches and checks them singly", async () => {
+    const worker = useTransactionWorkerStore();
+    const mintStore = useMintsStore();
+    const mintUrl = "https://mint.example";
+    const now = Date.now();
+    advertiseBatchMint(mintStore, mintUrl);
+    vi.spyOn(worker, "startTransactionWorker").mockImplementation(() => {});
+    vi.spyOn(usePaymentHistoryStore(), "upsertMintQuote").mockResolvedValue();
+
+    const oldInvoice = pendingInvoice("old-q", {
+      date: new Date(now - 31 * 24 * 60 * 60 * 1_000).toISOString(),
+    });
+    const recentInvoice = pendingInvoice("recent-q", {
+      date: new Date(now - 24 * 60 * 60 * 1_000).toISOString(),
+    });
+    worker.queueIncomingMintQuote(oldInvoice);
+    worker.queueIncomingMintQuote(recentInvoice);
+
+    expect(
+      worker.quotes.find((entry) => entry.quote === "old-q").usesBatchPath
+    ).toBeUndefined();
+    expect(
+      worker.quotes.find((entry) => entry.quote === "recent-q").usesBatchPath
+    ).toBe(true);
+
+    // Simulate a persisted queue from an older app version that marked every
+    // quote for batching. Job construction must still enforce the age limit.
+    worker.quotes.find((entry) => entry.quote === "old-q").usesBatchPath = true;
+
+    const checkMintQuoteBatchBolt11 = vi.fn(async (quotes) =>
+      quotes.map(unpaidResponse)
+    );
+    const checkInvoiceBolt11 = vi.fn(async () => {});
+    const walletStore = {
+      invoiceHistory: [oldInvoice, recentInvoice],
+      mintWallet: vi.fn(async () => ({ checkMintQuoteBatchBolt11 })),
+      checkInvoiceBolt11,
+      syncPaymentHistoryCache: vi.fn(),
+    };
+
+    await worker.processTransactions(walletStore, true);
+
+    expect(checkMintQuoteBatchBolt11).toHaveBeenCalledWith(["recent-q"]);
+    expect(checkInvoiceBolt11).not.toHaveBeenCalled();
+
+    worker.mintLastRequestAt[mintUrl] = 0;
+    await worker.processTransactions(walletStore);
+
+    expect(checkInvoiceBolt11).toHaveBeenCalledWith("old-q", false);
+  });
+
   it("starts for sent-token checks when incoming polling is disabled", () => {
     const worker = useTransactionWorkerStore();
     useSettingsStore().periodicallyCheckIncomingInvoices = false;
@@ -930,12 +981,15 @@ describe("transaction worker", () => {
     const settingsStore = useSettingsStore();
     const batchMintUrl = "https://batch.example";
     const singleMintUrl = "https://single.example";
+    const recentDate = new Date(
+      Date.now() - 6 * 24 * 60 * 60 * 1_000
+    ).toISOString();
     const oldDate = new Date(
       Date.now() - 30 * 24 * 60 * 60 * 1_000
     ).toISOString();
     const batchInvoices = Array.from({ length: 55 }, (_, index) =>
       pendingInvoice(`batch-q-${index}`, {
-        date: oldDate,
+        date: recentDate,
         mint: batchMintUrl,
       })
     );

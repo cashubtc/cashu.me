@@ -238,6 +238,7 @@ describe("npub.cash store", () => {
 
   it("queues restored npub.cash quotes for background reconciliation", async () => {
     const mintUrl = "https://mint.example";
+    const now = Math.floor(Date.now() / 1_000);
     const store = useNpubCashStore();
     store.enabled = true;
     store.claimAutomatically = true;
@@ -270,9 +271,9 @@ describe("npub.cash store", () => {
           data: {
             quotes: [
               {
-                createdAt: 1_700_000_001,
-                paidAt: 1_700_000_002,
-                expiresAt: 1_700_003_600,
+                createdAt: now - 3,
+                paidAt: now - 2,
+                expiresAt: now + 3_600,
                 mintUrl,
                 quoteId: "npub-q-1",
                 request: "lnbc1",
@@ -281,9 +282,9 @@ describe("npub.cash store", () => {
                 locked: false,
               },
               {
-                createdAt: 1_700_000_003,
-                paidAt: 1_700_000_004,
-                expiresAt: 1_700_003_600,
+                createdAt: now - 1,
+                paidAt: now,
+                expiresAt: now + 3_600,
                 mintUrl,
                 quoteId: "npub-q-2",
                 request: "lnbc2",
@@ -312,6 +313,7 @@ describe("npub.cash store", () => {
 
   it("uses the worker immediately when periodic checking is disabled", async () => {
     const mintUrl = "https://mint.example";
+    const now = Math.floor(Date.now() / 1_000);
     const store = useNpubCashStore();
     store.enabled = true;
     store.claimAutomatically = true;
@@ -343,9 +345,9 @@ describe("npub.cash store", () => {
           data: {
             quotes: [
               {
-                createdAt: 1_700_000_001,
-                paidAt: 1_700_000_002,
-                expiresAt: 1_700_003_600,
+                createdAt: now - 1,
+                paidAt: now,
+                expiresAt: now + 3_600,
                 mintUrl,
                 quoteId: "npub-q-1",
                 request: "lnbc1",
