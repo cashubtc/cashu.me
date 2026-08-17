@@ -1072,9 +1072,12 @@ describe("transaction worker", () => {
     ]);
   });
 
-  it("keeps reusable WebSockets and worker queues active together", () => {
+  it("keeps reusable WebSockets and batch worker queues active together", () => {
     const worker = useTransactionWorkerStore();
     const now = new Date().toISOString();
+    advertiseBatchMint(useMintsStore(), "https://mint.example", {
+      methods: [PaymentMethod.Bolt12, PaymentMethod.Onchain],
+    });
     vi.spyOn(worker, "startTransactionWorker").mockImplementation(() => {});
     const walletStore = {
       invoiceHistory: [
@@ -1100,9 +1103,11 @@ describe("transaction worker", () => {
     expect(worker.bolt12Quotes.map((entry) => entry.quote)).toEqual([
       "bolt12-q",
     ]);
+    expect(worker.bolt12Quotes[0].usesBatchPath).toBe(true);
     expect(worker.onchainQuotes.map((entry) => entry.quote)).toEqual([
       "onchain-q",
     ]);
+    expect(worker.onchainQuotes[0].usesBatchPath).toBe(true);
     expect(walletStore.mintOnPaidBolt12).toHaveBeenCalledWith(
       "bolt12-q",
       false,

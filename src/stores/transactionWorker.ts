@@ -1465,7 +1465,11 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
 
           this.queueIncomingMintQuote(invoice);
 
-          if (!supportsBatch || !periodicChecks) {
+          if (
+            method !== PaymentMethod.Bolt11 ||
+            !supportsBatch ||
+            !periodicChecks
+          ) {
             void this.startMintQuoteWebsocket(
               walletStore,
               method,
