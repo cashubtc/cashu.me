@@ -1,7 +1,7 @@
 import { currentDateStr } from "src/js/utils";
 import { useMintsStore, WalletProof } from "./mints";
 import { useProofsStore } from "./proofs";
-import { useUiStore } from "src/stores/ui";
+import { type MutexPriority, useUiStore } from "src/stores/ui";
 import { Amount, Wallet, MintQuoteBolt12Response } from "@cashu/cashu-ts";
 import * as nobleSecp256k1 from "@noble/secp256k1";
 import { bytesToHex } from "@noble/hashes/utils";
@@ -124,7 +124,7 @@ export async function checkOfferAndMintBolt12(
       invoice.mint,
       invoice.quote
     );
-    await uIStore.lockMutex();
+    await uIStore.lockMutex("background");
     if (
       !transactionWorkerStore.mintQuoteIsClaimed(invoice.mint, invoice.quote)
     ) {
@@ -279,7 +279,11 @@ export async function meltQuoteInvoiceDataBolt12(this: any) {
   }
 }
 
-export async function meltInvoiceDataBolt12(this: any, silent?: boolean) {
+export async function meltInvoiceDataBolt12(
+  this: any,
+  silent?: boolean,
+  mutexPriority: MutexPriority = "normal"
+) {
   if (!this.payInvoiceData.invoice) throw new Error("no invoice provided.");
   const quote: AppMeltQuote = this.payInvoiceData.meltQuote.response;
   if (!quote) throw new Error("no quote found.");
@@ -293,7 +297,8 @@ export async function meltInvoiceDataBolt12(this: any, silent?: boolean) {
     mintStore.activeProofs,
     quote,
     mintWallet,
-    silent
+    silent,
+    mutexPriority
   );
 }
 
@@ -302,7 +307,8 @@ export async function meltBolt12(
   proofs: WalletProof[],
   quote: AppMeltQuote,
   mintWallet: Wallet,
-  silent?: boolean
+  silent?: boolean,
+  mutexPriority: MutexPriority = "normal"
 ) {
   return this.meltGeneric(
     proofs,
@@ -310,7 +316,10 @@ export async function meltBolt12(
     mintWallet,
     silent,
     (id: string) => mintWallet.mint.checkMeltQuoteBolt12(id),
-    PaymentMethod.Bolt12
+    PaymentMethod.Bolt12,
+    undefined,
+    false,
+    mutexPriority
   );
 }
 

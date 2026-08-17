@@ -972,7 +972,7 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
       const notMintableEntries: MintableQuote[] = [];
 
       const quoteIds = paidEntries.map((entry) => entry.queueEntry.quote);
-      await uiStore.lockMutex();
+      await uiStore.lockMutex("background");
       try {
         if (!this.claimMintQuotes(mintUrl, quoteIds)) return;
       } finally {
@@ -1015,7 +1015,7 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
             keysetId,
             async () => {
               let preview: any;
-              await uiStore.lockMutex();
+              await uiStore.lockMutex("background");
               try {
                 preview = await mintWallet.prepareBatchMint(
                   method,

@@ -1,7 +1,7 @@
 import { currentDateStr } from "src/js/utils";
 import { useMintsStore, WalletProof } from "./mints";
 import { useProofsStore } from "./proofs";
-import { useUiStore } from "src/stores/ui";
+import { type MutexPriority, useUiStore } from "src/stores/ui";
 import {
   Amount,
   Wallet,
@@ -138,7 +138,7 @@ export async function checkOnchainAndMint(
       invoice.mint,
       invoice.quote
     );
-    await uIStore.lockMutex();
+    await uIStore.lockMutex("background");
     if (
       !transactionWorkerStore.mintQuoteIsClaimed(invoice.mint, invoice.quote)
     ) {
@@ -289,7 +289,11 @@ export async function meltQuoteInvoiceDataOnchain(this: any) {
   }
 }
 
-export async function meltInvoiceDataOnchain(this: any, silent?: boolean) {
+export async function meltInvoiceDataOnchain(
+  this: any,
+  silent?: boolean,
+  mutexPriority: MutexPriority = "normal"
+) {
   if (!this.payInvoiceData.invoice) throw new Error("no address provided.");
   const quote: AppMeltQuote = this.payInvoiceData.meltQuote.response;
   if (!quote) throw new Error("no quote found.");
@@ -303,7 +307,8 @@ export async function meltInvoiceDataOnchain(this: any, silent?: boolean) {
     mintStore.activeProofs,
     quote,
     mintWallet,
-    silent
+    silent,
+    mutexPriority
   );
 }
 
@@ -312,7 +317,8 @@ export async function meltOnchain(
   proofs: WalletProof[],
   quote: AppMeltQuote,
   mintWallet: Wallet,
-  silent?: boolean
+  silent?: boolean,
+  mutexPriority: MutexPriority = "normal"
 ) {
   const feeIndex =
     quote.selected_fee_index ?? quote.fee_options?.[0]?.fee_index;
@@ -326,7 +332,9 @@ export async function meltOnchain(
     silent,
     (id: string) => mintWallet.mint.checkMeltQuoteOnchain(id),
     PaymentMethod.Onchain,
-    { extraPayload: { fee_index: feeIndex } }
+    { extraPayload: { fee_index: feeIndex } },
+    false,
+    mutexPriority
   );
 }
 

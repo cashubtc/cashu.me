@@ -1419,6 +1419,7 @@ export default {
         pay: {
           label: "支払う",
           in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
+          waiting_for_wallet: "ウォレットを待機中…",
           error: "エラー",
         },
       },
