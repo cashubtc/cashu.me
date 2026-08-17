@@ -150,6 +150,7 @@
                   v-else
                   key="token-empty"
                   v-model="receiveData.tokensBase64"
+                  test-id="receive-token-input"
                   :placeholder="$t('ParseInputComponent.placeholder.receive')"
                   :has-camera="hasCamera"
                   :ndef-supported="ndefSupported"
@@ -250,6 +251,7 @@
                     class="full-width"
                     unelevated
                     size="lg"
+                    data-testid="receive-ecash"
                     @click="handleReceive"
                     color="primary"
                     rounded

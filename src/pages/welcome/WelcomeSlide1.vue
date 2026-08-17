@@ -20,6 +20,7 @@
       <q-btn
         color="primary"
         rounded
+        data-testid="onboarding-start"
         :label="$t('WelcomePage.actions.next.label')"
         @click="goToNext"
         class="welcome-next-btn"

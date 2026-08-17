@@ -20,7 +20,15 @@
       <!-- Options -->
       <div class="options">
         <!-- Create New Option -->
-        <div class="option" @click="choose('new')">
+        <div
+          class="option"
+          role="button"
+          tabindex="0"
+          data-testid="onboarding-create-wallet"
+          @click="choose('new')"
+          @keydown.enter.prevent="choose('new')"
+          @keydown.space.prevent="choose('new')"
+        >
           <q-icon name="auto_awesome" size="2em" color="primary" class="icon" />
           <div class="text">
             <h3 class="title">
@@ -33,7 +41,15 @@
         </div>
 
         <!-- Recover Option -->
-        <div class="option" @click="choose('recover')">
+        <div
+          class="option"
+          role="button"
+          tabindex="0"
+          data-testid="onboarding-recover-wallet"
+          @click="choose('recover')"
+          @keydown.enter.prevent="choose('recover')"
+          @keydown.space.prevent="choose('recover')"
+        >
           <q-icon name="history" size="2em" color="primary" class="icon" />
           <div class="text">
             <h3 class="title">

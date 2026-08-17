@@ -16,7 +16,12 @@
     "format": "prettier --write .",
     "checkformat": "prettier --check .",
     "test": "vitest",
-    "test:ci": "vitest run"
+    "test:ci": "vitest run",
+    "test:e2e": "node test/e2e/run.mjs",
+    "test:e2e:video": "node .agents/skills/e2e-test-playwright-video/scripts/render.mjs",
+    "test:e2e:playwright": "playwright test",
+    "test:e2e:stack:up": "docker compose -f test/e2e/docker-compose.yml up -d --wait",
+    "test:e2e:stack:down": "docker compose -f test/e2e/docker-compose.yml down -v --remove-orphans"
   },
   "dependencies": {
     "@agicash/qr-scanner": "^0.1.2",
@@ -54,6 +59,7 @@
     "@capacitor/cli": "^6.2.0",
     "@capacitor/ios": "^6.0.0",
     "@electron/packager": "^18.4.4",
+    "@playwright/test": "^1.62.1",
     "@quasar/app-vite": "^1.11.0",
     "@quasar/icongenie": "^4.0.0",
     "@types/node": "^20.12.11",

@@ -502,6 +502,7 @@
                 <ParseInputComponent
                   v-if="!camera.show"
                   v-model="payInvoiceData.input.request"
+                  test-id="payment-request-input"
                   :placeholder="parseInputPlaceholder"
                   :has-camera="hasCameraAvailable"
                   :ndef-supported="false"
@@ -554,6 +555,7 @@
                   size="lg"
                   color="primary"
                   rounded
+                  data-testid="pay-payment-request"
                   :disabled="
                     payInvoiceData.blocking ||
                     paymentInProgress ||
@@ -638,6 +640,7 @@
                 size="lg"
                 color="primary"
                 rounded
+                data-testid="quote-payment-request"
                 @click="handleAmountlessQuote"
                 :disabled="
                   payInvoiceData.blocking ||

@@ -205,6 +205,7 @@
               <q-btn
                 class="full-width"
                 unelevated
+                data-testid="create-payment-request"
                 size="lg"
                 :disable="!canCreate"
                 @click="requestMintButton"

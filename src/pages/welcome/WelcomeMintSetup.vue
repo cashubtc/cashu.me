@@ -62,7 +62,7 @@
       <!-- Manual add mint -->
       <div class="add-mint-section">
         <h3 class="section-title">{{ $t("MintSettings.add.title") }}</h3>
-        <div class="add-mint-inputs">
+        <div class="add-mint-inputs" data-testid="onboarding-mint-url">
           <q-input
             rounded
             outlined
@@ -77,6 +77,7 @@
           <q-btn
             flat
             rounded
+            data-testid="onboarding-add-mint"
             :disable="addMintData.url.length === 0"
             @click="
               addMintData.url.length > 0

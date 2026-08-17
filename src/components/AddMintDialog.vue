@@ -81,6 +81,7 @@
         <q-btn
           color="primary"
           class="add-btn"
+          data-testid="confirm-add-mint"
           @click="addMintLocal"
           v-close-popup
           :loading="addMintBlocking"
