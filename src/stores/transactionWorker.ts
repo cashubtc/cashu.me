@@ -130,7 +130,6 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
     // Lane state is ephemeral so a restart immediately retries pending work.
     mintLaneInFlight: {} as Record<string, boolean>,
     mintLastRequestAt: {} as Record<string, number>,
-    incomingMintLaneDrainRequested: {} as Record<string, boolean>,
     mintQuoteClaims: {} as Record<string, boolean>,
 
     // These keys intentionally retain their old names so existing queues
@@ -514,12 +513,11 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
       return Array.from(mintUrls);
     },
 
-    mintLaneReady(mintUrl: string, now: number, bypassInterval = false) {
+    mintLaneReady(mintUrl: string, now: number) {
       if (this.mintLaneInFlight[mintUrl]) return false;
       const cooldownUntil =
         this.reusableMintCooldowns[mintUrl]?.nextRetryAt ?? 0;
       if (now < cooldownUntil) return false;
-      if (bypassInterval) return true;
       const lastRequestAt = this.mintLastRequestAt[mintUrl] ?? 0;
       return now >= lastRequestAt + this.checkInterval;
     },
@@ -538,8 +536,7 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
       return await this.dispatchMintLanes(
         activeWalletStore,
         scope,
-        prioritizeBatch,
-        false
+        prioritizeBatch
       );
     },
 
@@ -547,47 +544,29 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
       return await this.dispatchMintLanes(
         walletStore ?? useWalletStore(),
         "incoming",
-        true,
         true
       );
     },
 
     // Retained as callable helpers for diagnostics and tests.
     async processIncomingQueues(_now: number, walletStore: any) {
-      return await this.dispatchMintLanes(
-        walletStore,
-        "incoming",
-        false,
-        false
-      );
+      return await this.dispatchMintLanes(walletStore, "incoming", false);
     },
 
     async processOutgoingQueue(_now: number, walletStore: any) {
       if (!useSettingsStore().checkSentTokens) return;
-      return await this.dispatchMintLanes(
-        walletStore,
-        "outgoing",
-        false,
-        false
-      );
+      return await this.dispatchMintLanes(walletStore, "outgoing", false);
     },
 
     async dispatchMintLanes(
       walletStore: any,
       scope: WorkScope,
-      prioritizeBatch: boolean,
-      drain: boolean
+      prioritizeBatch: boolean
     ) {
       const now = Date.now();
       this.pruneQueues(now, walletStore);
       const lanes = this.mintUrlsWithWork(walletStore, scope).map((mintUrl) =>
-        this.processMintLane(
-          mintUrl,
-          walletStore,
-          scope,
-          prioritizeBatch,
-          drain
-        )
+        this.processMintLane(mintUrl, walletStore, scope, prioritizeBatch)
       );
       await Promise.allSettled(lanes);
     },
@@ -596,69 +575,49 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
       mintUrl: string,
       walletStore: any,
       scope: WorkScope,
-      prioritizeBatch: boolean,
-      drain: boolean
+      prioritizeBatch: boolean
     ) {
-      if (this.mintLaneInFlight[mintUrl]) {
-        if (drain && scope !== "outgoing") {
-          this.incomingMintLaneDrainRequested[mintUrl] = true;
-        }
-        return;
-      }
-      if (!this.mintLaneReady(mintUrl, Date.now(), drain)) return;
+      if (!this.mintLaneReady(mintUrl, Date.now())) return;
       this.mintLaneInFlight[mintUrl] = true;
-      let shouldDrain = drain;
-      let laneScope = scope;
-      let prioritizeLaneBatch = prioritizeBatch;
       try {
-        do {
-          const now = Date.now();
-          const job = this.nextMintJob(
-            mintUrl,
-            walletStore,
-            now,
-            laneScope,
-            prioritizeLaneBatch
-          );
-          if (!job) return;
+        const now = Date.now();
+        const job = this.nextMintJob(
+          mintUrl,
+          walletStore,
+          now,
+          scope,
+          prioritizeBatch
+        );
+        if (!job) return;
 
-          this.mintLastRequestAt[mintUrl] = now;
-          try {
-            await this.runMintJob(job, walletStore, now);
-            this.clearMintCooldown(mintUrl);
-            if (job.kind === "incoming-batch") {
-              this.clearBatchPathCooldown(job.mintUrl, job.unit, job.method);
-            }
-          } catch (error) {
-            this.markJobAttempt(job, now);
-            if (job.kind === "incoming-batch") {
-              if (this.isNetworkOrRateLimitFailure(error)) {
-                this.recordMintFailure(mintUrl, error, Date.now());
-              } else {
-                this.clearMintCooldown(mintUrl);
-                this.recordBatchPathFailure(
-                  job.mintUrl,
-                  job.unit,
-                  job.method,
-                  error,
-                  Date.now()
-                );
-              }
-            } else if (this.isNetworkOrRateLimitFailure(error)) {
+        this.mintLastRequestAt[mintUrl] = now;
+        try {
+          await this.runMintJob(job, walletStore, now);
+          this.clearMintCooldown(mintUrl);
+          if (job.kind === "incoming-batch") {
+            this.clearBatchPathCooldown(job.mintUrl, job.unit, job.method);
+          }
+        } catch (error) {
+          this.markJobAttempt(job, now);
+          if (job.kind === "incoming-batch") {
+            if (this.isNetworkOrRateLimitFailure(error)) {
               this.recordMintFailure(mintUrl, error, Date.now());
             } else {
               this.clearMintCooldown(mintUrl);
+              this.recordBatchPathFailure(
+                job.mintUrl,
+                job.unit,
+                job.method,
+                error,
+                Date.now()
+              );
             }
+          } else if (this.isNetworkOrRateLimitFailure(error)) {
+            this.recordMintFailure(mintUrl, error, Date.now());
+          } else {
+            this.clearMintCooldown(mintUrl);
           }
-
-          if (this.incomingMintLaneDrainRequested[mintUrl]) {
-            delete this.incomingMintLaneDrainRequested[mintUrl];
-            shouldDrain = true;
-            laneScope = "incoming";
-            prioritizeLaneBatch = true;
-          }
-          if (!shouldDrain || this.reusableMintCooldowns[mintUrl]) return;
-        } while (true);
+        }
       } finally {
         delete this.mintLaneInFlight[mintUrl];
       }
@@ -1432,18 +1391,13 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
 
       const activeWalletStore = walletStore ?? useWalletStore();
       this.queuePendingIncomingPayments(activeWalletStore);
-      // Every mint gets an immediate incoming lane, and that lane keeps using
-      // native worker batches until all currently due quotes have been checked.
-      await this.dispatchMintLanes(activeWalletStore, "incoming", true, true);
+      // Give every mint one immediate startup job. Remaining work stays queued
+      // and is paced by the regular per-mint worker interval.
+      await this.dispatchMintLanes(activeWalletStore, "incoming", true);
 
       this.queuePendingOutgoingPayments(activeWalletStore);
       if (useSettingsStore().checkSentTokens) {
-        await this.dispatchMintLanes(
-          activeWalletStore,
-          "outgoing",
-          false,
-          false
-        );
+        await this.dispatchMintLanes(activeWalletStore, "outgoing", false);
       }
     },
 

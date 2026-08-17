@@ -68,7 +68,6 @@ describe("transaction worker", () => {
     worker.batchPathCooldowns = {};
     worker.mintLaneInFlight = {};
     worker.mintLastRequestAt = {};
-    worker.incomingMintLaneDrainRequested = {};
     worker.mintQuoteClaims = {};
 
     useMintsStore().mints = [];
@@ -321,7 +320,7 @@ describe("transaction worker", () => {
     expect(checkInvoiceBolt11).toHaveBeenCalledTimes(2);
   });
 
-  it("drains newly arrived quotes after the active mint-lane request", async () => {
+  it("leaves newly arrived quotes queued until the mint lane is ready", async () => {
     const worker = useTransactionWorkerStore();
     const mintStore = useMintsStore();
     const now = Date.now();
@@ -353,11 +352,19 @@ describe("transaction worker", () => {
     resolveFirst();
     await activeRequest;
 
+    expect(checkInvoiceBolt11).toHaveBeenCalledOnce();
+    expect(worker.quotes.map((entry) => entry.quote)).toEqual(["new-q"]);
+
+    await worker.processIncomingTransactionsNow(walletStore);
+    expect(checkInvoiceBolt11).toHaveBeenCalledOnce();
+
+    worker.mintLastRequestAt["https://mint.example"] = 0;
+    await worker.processIncomingTransactionsNow(walletStore);
     expect(checkInvoiceBolt11).toHaveBeenCalledTimes(2);
     expect(checkInvoiceBolt11).toHaveBeenLastCalledWith("new-q", false);
   });
 
-  it("switches an active outgoing lane to an immediate incoming drain", async () => {
+  it("paces incoming work that arrives during an outgoing mint job", async () => {
     const worker = useTransactionWorkerStore();
     const now = Date.now();
     useSettingsStore().periodicallyCheckIncomingInvoices = false;
@@ -393,6 +400,10 @@ describe("transaction worker", () => {
     resolveOutgoing();
     await activeRequest;
 
+    expect(checkInvoiceBolt11).not.toHaveBeenCalled();
+
+    worker.mintLastRequestAt["https://mint.example"] = 0;
+    await worker.processIncomingTransactionsNow(walletStore);
     expect(checkInvoiceBolt11).toHaveBeenCalledWith("incoming-q", false);
   });
 
@@ -1022,7 +1033,7 @@ describe("transaction worker", () => {
     );
   });
 
-  it("drains every startup batch through the worker's batch cap", async () => {
+  it("paces startup batches through the worker's batch cap", async () => {
     const worker = useTransactionWorkerStore();
     const mintStore = useMintsStore();
     const mintUrl = "https://mint.example";
@@ -1045,8 +1056,15 @@ describe("transaction worker", () => {
 
     await worker.checkPendingTransactions(walletStore);
 
-    expect(checkMintQuoteBatchBolt11).toHaveBeenCalledTimes(2);
+    expect(checkMintQuoteBatchBolt11).toHaveBeenCalledOnce();
     expect(checkMintQuoteBatchBolt11.mock.calls[0][0]).toHaveLength(2);
+
+    await worker.processTransactions(walletStore, true);
+    expect(checkMintQuoteBatchBolt11).toHaveBeenCalledOnce();
+
+    worker.mintLastRequestAt[mintUrl] = 0;
+    await worker.processTransactions(walletStore, true);
+    expect(checkMintQuoteBatchBolt11).toHaveBeenCalledTimes(2);
     expect(checkMintQuoteBatchBolt11.mock.calls.flat(2).sort()).toEqual([
       "q-1",
       "q-2",
