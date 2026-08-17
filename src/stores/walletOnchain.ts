@@ -132,7 +132,20 @@ export async function checkOnchainAndMint(
     }
   }
 
-  await uIStore.lockMutex();
+  const transactionWorkerStore = useTransactionWorkerStore();
+  while (true) {
+    await transactionWorkerStore.waitForMintQuoteRelease(
+      invoice.mint,
+      invoice.quote
+    );
+    await uIStore.lockMutex();
+    if (
+      !transactionWorkerStore.mintQuoteIsClaimed(invoice.mint, invoice.quote)
+    ) {
+      break;
+    }
+    uIStore.unlockMutex();
+  }
   try {
     uIStore.triggerActivityOrb();
     const updated = await mintWallet.checkMintQuoteOnchain(quoteId);

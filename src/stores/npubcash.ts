@@ -1,5 +1,5 @@
+import type { MintQuoteState } from "@cashu/cashu-ts";
 import NDK, { NDKEvent } from "@nostr-dev-kit/ndk";
-import { MintQuoteState } from "@cashu/cashu-ts";
 import { StorageSerializers, useLocalStorage } from "@vueuse/core";
 import { defineStore } from "pinia";
 import { date } from "quasar";
@@ -8,7 +8,6 @@ import { notifyApiError, notifyError } from "src/js/notify";
 import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import { useMintsStore } from "src/stores/mints";
 import { useNostrStore } from "src/stores/nostr";
-import { useSettingsStore } from "src/stores/settings";
 import { useWalletStore } from "src/stores/wallet";
 
 type NpubCashUser = {
@@ -42,7 +41,7 @@ type NpubCashQuote = {
   quoteId: string;
   request: string;
   amount: number;
-  state: string;
+  state: MintQuoteState;
   locked: boolean;
 };
 
@@ -304,9 +303,7 @@ export const useNpubCashStore = defineStore("npubCash", {
         return;
       }
       const transactionWorkerStore = useTransactionWorkerStore();
-      const settingsStore = useSettingsStore();
       const walletStore = useWalletStore();
-      const mintsStore = useMintsStore();
       const since = this.lastCheck ? `?since=${this.lastCheck}` : "";
       const quoteUrl = `${NPUB_CASH_BASE_URL}/api/v2/wallet/quotes`;
       try {
@@ -320,6 +317,7 @@ export const useNpubCashStore = defineStore("npubCash", {
           return;
         }
         let latestQuoteTime: number | undefined;
+        let queuedQuotes = false;
         for (const quote of responseData.data.quotes) {
           if (
             walletStore.invoiceHistory.find(
@@ -331,7 +329,7 @@ export const useNpubCashStore = defineStore("npubCash", {
           if (!latestQuoteTime || latestQuoteTime < quote.createdAt) {
             latestQuoteTime = quote.createdAt;
           }
-          await walletStore.addPaymentHistory({
+          const invoice = {
             label: "Zap",
             mint: quote.mintUrl,
             memo: "",
@@ -342,34 +340,30 @@ export const useNpubCashStore = defineStore("npubCash", {
               new Date(quote.createdAt * 1000),
               "YYYY-MM-DD HH:mm:ss"
             ),
-            status: "pending",
+            status: "pending" as const,
             unit: "sat",
             mintQuote: {
               request: quote.request,
               quote: quote.quoteId,
-              state: MintQuoteState.PAID,
+              state: quote.state,
               expiry: quote.expiresAt,
               amount: quote.amount,
               unit: "sat",
             },
-          });
+          };
+          await walletStore.addPaymentHistory(invoice);
           if (this.claimAutomatically) {
-            if (settingsStore.periodicallyCheckIncomingInvoices) {
-              const mint = mintsStore.mints.find(
-                (item) => item.url === quote.mintUrl
-              );
-              if (transactionWorkerStore.mintSupportsBolt11Batch(mint)) {
-                transactionWorkerStore.addBatchInvoiceToChecker(quote.quoteId);
-              } else {
-                transactionWorkerStore.addInvoiceToChecker(quote.quoteId);
-              }
-            } else {
-              await walletStore.mintOnPaidBolt11(quote.quoteId);
-            }
+            transactionWorkerStore.queueIncomingMintQuote(invoice);
+            queuedQuotes = true;
           }
         }
         if (latestQuoteTime) {
           this.lastCheck = latestQuoteTime;
+        }
+        if (queuedQuotes) {
+          await transactionWorkerStore.processIncomingTransactionsNow(
+            walletStore
+          );
         }
       } catch (error) {
         console.error(error);

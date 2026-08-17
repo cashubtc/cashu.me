@@ -13,6 +13,7 @@ import { usePriceStore } from "./price";
 import { type AppMeltQuote, normalizeMeltQuote } from "./walletMelt";
 import { createSubpaymentHistoryQuote } from "src/js/invoice-history";
 import { usePaymentHistoryStore } from "./paymentHistory";
+import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 
 // BOLT12: reusable offers
 
@@ -117,7 +118,20 @@ export async function checkOfferAndMintBolt12(
   const mint = mintStore.mints.find((m: any) => m.url === invoice.mint);
   if (!mint) throw new Error("mint not found");
 
-  await uIStore.lockMutex();
+  const transactionWorkerStore = useTransactionWorkerStore();
+  while (true) {
+    await transactionWorkerStore.waitForMintQuoteRelease(
+      invoice.mint,
+      invoice.quote
+    );
+    await uIStore.lockMutex();
+    if (
+      !transactionWorkerStore.mintQuoteIsClaimed(invoice.mint, invoice.quote)
+    ) {
+      break;
+    }
+    uIStore.unlockMutex();
+  }
   try {
     uIStore.triggerActivityOrb();
     const updated = await mintWallet.checkMintQuoteBolt12(quoteId);

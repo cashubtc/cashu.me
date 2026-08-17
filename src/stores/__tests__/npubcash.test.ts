@@ -238,6 +238,7 @@ describe("npub.cash store", () => {
 
   it("queues restored npub.cash quotes for background reconciliation", async () => {
     const mintUrl = "https://mint.example";
+    const now = Math.floor(Date.now() / 1_000);
     const store = useNpubCashStore();
     store.enabled = true;
     store.claimAutomatically = true;
@@ -250,6 +251,9 @@ describe("npub.cash store", () => {
     const worker = useTransactionWorkerStore();
     worker.quotes = [];
     vi.spyOn(worker, "startTransactionWorker").mockImplementation(() => {});
+    const processNow = vi
+      .spyOn(worker, "processIncomingTransactionsNow")
+      .mockResolvedValue();
     const walletStore = useWalletStore();
     walletStore.invoiceHistory = [];
     vi.spyOn(walletStore, "addPaymentHistory").mockImplementation(
@@ -267,20 +271,20 @@ describe("npub.cash store", () => {
           data: {
             quotes: [
               {
-                createdAt: 1_700_000_001,
-                paidAt: 1_700_000_002,
-                expiresAt: 1_700_003_600,
+                createdAt: now - 3,
+                paidAt: now - 2,
+                expiresAt: now + 3_600,
                 mintUrl,
                 quoteId: "npub-q-1",
                 request: "lnbc1",
                 amount: 10,
-                state: "PAID",
+                state: "UNPAID",
                 locked: false,
               },
               {
-                createdAt: 1_700_000_003,
-                paidAt: 1_700_000_004,
-                expiresAt: 1_700_003_600,
+                createdAt: now - 1,
+                paidAt: now,
+                expiresAt: now + 3_600,
                 mintUrl,
                 quoteId: "npub-q-2",
                 request: "lnbc2",
@@ -303,17 +307,27 @@ describe("npub.cash store", () => {
       "npub-q-2",
     ]);
     expect(worker.quotes.every((quote) => quote.usesBatchPath)).toBe(true);
+    expect(walletStore.invoiceHistory[0].mintQuote?.state).toBe("UNPAID");
+    expect(processNow).toHaveBeenCalledOnce();
   });
 
-  it("keeps direct npub.cash claiming when periodic checking is disabled", async () => {
+  it("uses the worker immediately when periodic checking is disabled", async () => {
     const mintUrl = "https://mint.example";
+    const now = Math.floor(Date.now() / 1_000);
     const store = useNpubCashStore();
     store.enabled = true;
     store.claimAutomatically = true;
     const settingsStore = useSettingsStore();
     settingsStore.periodicallyCheckIncomingInvoices = false;
+    useMintsStore().mints = [
+      { url: mintUrl, keys: [], keysets: [], info: { nuts: { 29: {} } } },
+    ];
     const worker = useTransactionWorkerStore();
     worker.quotes = [];
+    vi.spyOn(worker, "startTransactionWorker").mockImplementation(() => {});
+    const processNow = vi
+      .spyOn(worker, "processIncomingTransactionsNow")
+      .mockResolvedValue();
     const walletStore = useWalletStore();
     walletStore.invoiceHistory = [];
     vi.spyOn(walletStore, "addPaymentHistory").mockImplementation(
@@ -331,9 +345,9 @@ describe("npub.cash store", () => {
           data: {
             quotes: [
               {
-                createdAt: 1_700_000_001,
-                paidAt: 1_700_000_002,
-                expiresAt: 1_700_003_600,
+                createdAt: now - 1,
+                paidAt: now,
+                expiresAt: now + 3_600,
                 mintUrl,
                 quoteId: "npub-q-1",
                 request: "lnbc1",
@@ -350,7 +364,10 @@ describe("npub.cash store", () => {
 
     await store.synchronizeQuotes();
 
-    expect(worker.quotes).toEqual([]);
-    expect(mintOnPaid).toHaveBeenCalledWith("npub-q-1");
+    expect(worker.quotes).toEqual([
+      expect.objectContaining({ quote: "npub-q-1", usesBatchPath: true }),
+    ]);
+    expect(mintOnPaid).not.toHaveBeenCalled();
+    expect(processNow).toHaveBeenCalledOnce();
   });
 });
