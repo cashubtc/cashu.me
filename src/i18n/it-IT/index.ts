@@ -252,8 +252,7 @@ export default {
       },
       show_on_receive: {
         toggle: "Mostra durante la ricezione",
-        description:
-          "Mostra il tuo indirizzo Lightning e il codice QR prima di inserire un importo.",
+        description: "Mostra indirizzo e codice QR.",
       },
       automatic_claim: {
         toggle: "Richiedi automaticamente",

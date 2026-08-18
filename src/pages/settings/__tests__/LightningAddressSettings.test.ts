@@ -17,7 +17,7 @@ describe("LightningAddressSettings", () => {
     setActivePinia(createPinia());
   });
 
-  it("keeps hostname and automatic claiming in a collapsed advanced section", () => {
+  it("keeps Lightning address options in a collapsed advanced section", () => {
     const pinia = createPinia();
     setActivePinia(pinia);
     useNpubCashStore().enabled = true;
@@ -57,7 +57,7 @@ describe("LightningAddressSettings", () => {
     expect(advanced.text()).toContain(
       "Settings.lightning_address.automatic_claim.toggle"
     );
-    expect(wrapper.text()).toContain(
+    expect(advanced.text()).toContain(
       "Settings.lightning_address.show_on_receive.toggle"
     );
   });

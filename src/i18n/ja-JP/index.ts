@@ -277,8 +277,7 @@ export default {
       },
       show_on_receive: {
         toggle: "受け取り時に表示",
-        description:
-          "金額を入力する前にLightningアドレスとQRコードを表示します。",
+        description: "アドレスとQRコードを表示",
       },
       automatic_claim: {
         toggle: "自動的に請求",

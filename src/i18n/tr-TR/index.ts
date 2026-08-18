@@ -284,8 +284,7 @@ export default {
       },
       show_on_receive: {
         toggle: "Alırken göster",
-        description:
-          "Tutar girmeden önce Lightning adresinizi ve QR kodunu gösterir.",
+        description: "Adres ve QR kodunu göster.",
       },
       automatic_claim: {
         toggle: "Otomatik olarak talep et",

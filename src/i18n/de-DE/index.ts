@@ -281,8 +281,7 @@ export default {
       },
       show_on_receive: {
         toggle: "Beim Empfangen anzeigen",
-        description:
-          "Zeige deine Lightning-Adresse und den QR-Code, bevor du einen Betrag eingibst.",
+        description: "Adresse und QR-Code anzeigen.",
       },
       automatic_claim: {
         toggle: "Automatisch beanspruchen",

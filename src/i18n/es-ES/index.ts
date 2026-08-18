@@ -279,8 +279,7 @@ export default {
       },
       show_on_receive: {
         toggle: "Mostrar al recibir",
-        description:
-          "Muestra tu dirección Lightning y el código QR antes de introducir un importe.",
+        description: "Mostrar dirección y código QR.",
       },
       automatic_claim: {
         toggle: "Reclamar automáticamente",

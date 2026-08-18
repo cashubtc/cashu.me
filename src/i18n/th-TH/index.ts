@@ -294,7 +294,7 @@ export default {
       },
       show_on_receive: {
         toggle: "แสดงเมื่อรับเงิน",
-        description: "แสดงที่อยู่ Lightning และรหัส QR ก่อนกรอกจำนวนเงิน",
+        description: "แสดงที่อยู่และรหัส QR",
       },
       automatic_claim: {
         toggle: "รับอัตโนมัติ",
