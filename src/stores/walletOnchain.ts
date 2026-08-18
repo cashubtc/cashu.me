@@ -147,7 +147,6 @@ export async function checkOnchainAndMint(
     uIStore.unlockMutex();
   }
   try {
-    uIStore.triggerActivityOrb();
     const updated = await mintWallet.checkMintQuoteOnchain(quoteId);
     const paid = amountToNumber(updated.amount_paid);
     const issued = amountToNumber(updated.amount_issued);

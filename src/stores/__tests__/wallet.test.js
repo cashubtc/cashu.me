@@ -38,7 +38,6 @@ const h = vi.hoisted(() => {
     closeDialogs: vi.fn(),
     formatCurrency: vi.fn((amount, unit) => `${amount} ${unit}`),
     vibrate: vi.fn(),
-    triggerActivityOrb: vi.fn(),
   };
   const p2pkStore = {
     isValidPubkey: vi.fn(() => false),

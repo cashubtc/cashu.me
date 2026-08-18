@@ -912,7 +912,6 @@ export const useWalletStore = defineStore("wallet", {
         return;
       }
       try {
-        uIStore.triggerActivityOrb();
         const { spent: spentProofs } = await wallet.groupProofsByState(
           toProofs(proofs)
         );
@@ -1149,7 +1148,6 @@ export const useWalletStore = defineStore("wallet", {
         const proofs = token.getProofs(tokenJson);
         const oneProof = [proofs[0]];
         this.activeWebsocketConnections++;
-        uIStore.triggerActivityOrb();
         const wallet = await this.mintWallet(
           historyToken.mint,
           historyToken.unit

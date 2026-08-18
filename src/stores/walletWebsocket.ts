@@ -220,7 +220,6 @@ export async function mintOnPaidGeneric(
   let cleanup = releaseSubscriptionReservation;
   try {
     this.activeWebsocketConnections++;
-    uIStore.triggerActivityOrb();
     let unsubscribe: (() => void) | undefined = undefined;
     let cleanupRequested = false;
     cleanup = () => {
