@@ -81,13 +81,13 @@ describe("walletStore.sendToLock pubkey normalization", () => {
     const asP2PK = vi.fn().mockReturnValue({
       run: vi.fn().mockResolvedValue({ keep: [], send: sendProofs }),
     });
+    const keyset = vi.fn().mockReturnValue({ asP2PK });
     const mockWallet = {
       unit: "sat",
+      keysetId: "ks1",
       mint: { mintUrl: "https://mint.test" },
       ops: {
-        send: vi
-          .fn()
-          .mockReturnValue({ keyset: vi.fn().mockReturnValue({ asP2PK }) }),
+        send: vi.fn().mockReturnValue({ keyset }),
       },
     } as any;
     wallet.spendableProofs = vi.fn().mockReturnValue(walletProofs);
@@ -95,12 +95,13 @@ describe("walletStore.sendToLock pubkey normalization", () => {
     wallet.getKeyset = vi.fn().mockReturnValue("ks1");
     proofs.removeProofs = vi.fn().mockResolvedValue(undefined);
     proofs.addProofs = vi.fn().mockResolvedValue(undefined);
-    return { wallet, mockWallet, asP2PK, sendProofs, walletProofs };
+    return { wallet, mockWallet, keyset, asP2PK, sendProofs, walletProofs };
   };
 
   test("wraps a bare pubkey string in P2PKOptions", async () => {
-    const { wallet, mockWallet, asP2PK, sendProofs } = setup();
+    const { wallet, mockWallet, keyset, asP2PK, sendProofs } = setup();
     const result = await wallet.sendToLock([], mockWallet, 21, PUBKEY);
+    expect(keyset).toHaveBeenCalledWith("ks1");
     expect(asP2PK).toHaveBeenCalledWith({ pubkey: PUBKEY });
     expect(result.sendProofs).toEqual(sendProofs);
   });

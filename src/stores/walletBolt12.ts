@@ -114,7 +114,6 @@ export async function checkOfferAndMintBolt12(
   if (!invoice) throw new Error("offer not found");
 
   const mintWallet = await this.mintWallet(invoice.mint, invoice.unit);
-  const keysetId = this.getKeyset(invoice.mint, invoice.unit);
   const mint = mintStore.mints.find((m: any) => m.url === invoice.mint);
   if (!mint) throw new Error("mint not found");
 
@@ -145,11 +144,11 @@ export async function checkOfferAndMintBolt12(
     }
 
     const proofs = await this.retryOnceOnSignedOutputs(
-      keysetId,
+      mintWallet.keysetId,
       async () =>
         mintWallet.ops
           .mintBolt12(delta, updated)
-          .keyset(keysetId)
+          .keyset(mintWallet.keysetId)
           .asDeterministic()
           .proofsWeHave(mintStore.mintUnitProofs(mint, invoice.unit))
           .privkey(invoice.privKey)
@@ -214,7 +213,6 @@ export async function checkOfferAndMintBolt12(
       console.error(error);
     }
     if (verbose) notifyApiError(error);
-    this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error, verbose);
     throw error;
   } finally {
     uIStore.unlockMutex();
