@@ -5,7 +5,10 @@ import { nextTick } from "vue";
 import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import { useMintsStore } from "src/stores/mints";
 import { useNostrStore } from "src/stores/nostr";
-import { useNpubCashStore } from "src/stores/npubcash";
+import {
+  normalizeNpubCashBaseHost,
+  useNpubCashStore,
+} from "src/stores/npubcash";
 import { useSettingsStore } from "src/stores/settings";
 import { useWalletStore } from "src/stores/wallet";
 
@@ -71,9 +74,52 @@ describe("npub.cash store", () => {
       lastCheck: null,
       address: "",
       mintUrl: null,
+      baseHost: "npub.cash",
       loading: false,
     });
     expect(localStorage.getItem("cashu.npubcash.storageVersion")).toBe("1");
+  });
+
+  it.each([
+    ["npub.cash", "npub.cash"],
+    ["  custom.example  ", "custom.example"],
+    ["https://custom.example", "custom.example"],
+    ["https://CUSTOM.example:8443/", "custom.example:8443"],
+  ])("normalizes the npub.cash server host from %s", (input, expected) => {
+    expect(normalizeNpubCashBaseHost(input)).toBe(expected);
+  });
+
+  it.each([
+    "",
+    "http://npub.cash",
+    "https://npub.cash/path",
+    "https://user:secret@npub.cash",
+  ])("rejects invalid npub.cash server input %s", (input) => {
+    expect(() => normalizeNpubCashBaseHost(input)).toThrow(
+      "Enter a valid HTTPS server URL"
+    );
+  });
+
+  it("stores a custom host and reconnects with a fresh quote watermark", async () => {
+    const store = useNpubCashStore();
+    store.enabled = true;
+    store.lastCheck = 123;
+    store.address = "old@npub.cash";
+    const stopUpdates = vi
+      .spyOn(store, "stopQuoteUpdates")
+      .mockImplementation(() => {});
+    const initialize = vi
+      .spyOn(store, "initializeNpubCash")
+      .mockResolvedValue();
+
+    const normalizedUrl = await store.setBaseHost("custom.example");
+
+    expect(normalizedUrl).toBe("https://custom.example");
+    expect(store.baseHost).toBe("custom.example");
+    expect(store.lastCheck).toBeNull();
+    expect(store.address).toBe("");
+    expect(stopUpdates).toHaveBeenCalledOnce();
+    expect(initialize).toHaveBeenCalledOnce();
   });
 
   it("preserves enabled v1 preferences during an in-place upgrade", () => {
@@ -97,6 +143,7 @@ describe("npub.cash store", () => {
     localStorage.setItem("cashu.npc.v2.lastCheck", "1712345678");
     localStorage.setItem("cashu.npc.v2.address", "old@npubx.cash");
     localStorage.setItem("cashu.npc.v2.mint", "https://mint.example");
+    localStorage.setItem("cashu.npc.v2.baseURL", "https://custom.example");
 
     const store = useNpubCashStore();
 
@@ -104,6 +151,7 @@ describe("npub.cash store", () => {
     expect(store.claimAutomatically).toBe(false);
     expect(store.lastCheck).toBe(1712345678);
     expect(store.mintUrl).toBe("https://mint.example");
+    expect(store.baseHost).toBe("custom.example");
     expect(store.address).toBe("");
     expect(localStorage.getItem("cashu.npc.v2.enabled")).toBeNull();
     expect(localStorage.getItem("cashu.npc.v2.mint")).toBeNull();
@@ -477,6 +525,7 @@ describe("npub.cash store", () => {
     const mintUrl = "https://mint.example";
     const store = useNpubCashStore();
     store.enabled = true;
+    store.baseHost = "custom.example";
     store.lastCheck = 100;
     store.claimAutomatically = true;
     useMintsStore().mints = [
@@ -525,8 +574,8 @@ describe("npub.cash store", () => {
     await store.synchronizeQuotes();
 
     expect(requestedUrls).toEqual([
-      "https://npub.cash/api/v2/wallet/quotes?limit=50&offset=0&since=99",
-      "https://npub.cash/api/v2/wallet/quotes?limit=50&offset=1&since=99",
+      "https://custom.example/api/v2/wallet/quotes?limit=50&offset=0&since=99",
+      "https://custom.example/api/v2/wallet/quotes?limit=50&offset=1&since=99",
     ]);
     expect(walletStore.invoiceHistory.map((invoice) => invoice.quote)).toEqual([
       "zap-1",

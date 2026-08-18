@@ -61,16 +61,48 @@ type NpubCashQuoteResponse =
 
 type UsernameQuote = { username: string; creq: string };
 
-const NPUB_CASH_BASE_URL = "npub.cash";
-const NPUB_CASH_HTTP_URL = `https://${NPUB_CASH_BASE_URL}`;
-const NPUB_CASH_QUOTES_URL = `${NPUB_CASH_HTTP_URL}/api/v2/wallet/quotes`;
-const NPUB_CASH_WS_URL = `wss://${NPUB_CASH_BASE_URL}/api/v2/ws/quote`;
+const NPUB_CASH_BASE_HOST = "npub.cash";
 const NPUB_CASH_STORAGE_VERSION = "1";
 const NPUB_CASH_STORAGE_PREFIX = "cashu.npubcash";
 const NIP_98_KIND = 27235;
 const QUOTE_PAGE_SIZE = 50;
 const QUOTE_SYNC_DEBOUNCE_MS = 250;
 const QUOTE_RECONNECT_MAX_MS = 30_000;
+
+export function normalizeNpubCashBaseHost(input: string): string {
+  const trimmed = input.trim();
+  let url: URL;
+  try {
+    url = new URL(
+      /^[a-z][a-z\d+.-]*:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`
+    );
+  } catch {
+    throw new Error("Enter a valid HTTPS server URL");
+  }
+  if (
+    url.protocol !== "https:" ||
+    url.username ||
+    url.password ||
+    (url.pathname !== "/" && url.pathname !== "") ||
+    url.search ||
+    url.hash
+  ) {
+    throw new Error("Enter a valid HTTPS server URL");
+  }
+  return url.host;
+}
+
+function npubCashHttpUrl(host: string): string {
+  return `https://${host}`;
+}
+
+function npubCashQuotesUrl(host: string): string {
+  return `${npubCashHttpUrl(host)}/api/v2/wallet/quotes`;
+}
+
+function npubCashWebSocketUrl(host: string): string {
+  return `wss://${host}/api/v2/ws/quote`;
+}
 
 const legacyStorageKeys = [
   "cashu.npc.enabled",
@@ -162,6 +194,20 @@ function migrateNpubCashStorage() {
     localStorage.setItem(`${NPUB_CASH_STORAGE_PREFIX}.mintUrl`, mintUrl);
   }
 
+  const legacyBaseUrl =
+    readStoredString("cashu.npc.v2.baseURL") ||
+    readStoredString("cashu.npc.baseURL");
+  if (legacyBaseUrl) {
+    try {
+      localStorage.setItem(
+        `${NPUB_CASH_STORAGE_PREFIX}.baseHost`,
+        normalizeNpubCashBaseHost(legacyBaseUrl)
+      );
+    } catch {
+      localStorage.removeItem(`${NPUB_CASH_STORAGE_PREFIX}.baseHost`);
+    }
+  }
+
   localStorage.setItem(
     `${NPUB_CASH_STORAGE_PREFIX}.storageVersion`,
     NPUB_CASH_STORAGE_VERSION
@@ -172,6 +218,15 @@ function migrateNpubCashStorage() {
 export const useNpubCashStore = defineStore("npubCash", {
   state: () => {
     migrateNpubCashStorage();
+    const baseHost = useLocalStorage<string>(
+      `${NPUB_CASH_STORAGE_PREFIX}.baseHost`,
+      NPUB_CASH_BASE_HOST
+    );
+    try {
+      baseHost.value = normalizeNpubCashBaseHost(baseHost.value);
+    } catch {
+      baseHost.value = NPUB_CASH_BASE_HOST;
+    }
     return {
       enabled: useLocalStorage<boolean>(
         `${NPUB_CASH_STORAGE_PREFIX}.enabled`,
@@ -194,6 +249,7 @@ export const useNpubCashStore = defineStore("npubCash", {
         `${NPUB_CASH_STORAGE_PREFIX}.mintUrl`,
         null
       ),
+      baseHost,
       loading: false,
       quoteSocket: null as WebSocket | null,
       quoteSyncPromise: null as Promise<void> | null,
@@ -216,6 +272,18 @@ export const useNpubCashStore = defineStore("npubCash", {
       await this.synchronizeQuotes();
       this.startQuoteUpdates();
     },
+    setBaseHost: async function (input: string): Promise<string> {
+      const baseHost = normalizeNpubCashBaseHost(input);
+      const normalizedUrl = npubCashHttpUrl(baseHost);
+      if (baseHost === this.baseHost) return normalizedUrl;
+
+      this.stopQuoteUpdates();
+      this.baseHost = baseHost;
+      this.lastCheck = null;
+      this.address = "";
+      if (this.enabled) await this.initializeNpubCash();
+      return normalizedUrl;
+    },
     refreshNpubCashConnection: async function () {
       if (!this.enabled) {
         return;
@@ -226,14 +294,14 @@ export const useNpubCashStore = defineStore("npubCash", {
         return;
       }
       const walletPublicKeyHex = nostrStore.pubkey;
-      this.address =
-        nip19.npubEncode(walletPublicKeyHex) + "@" + NPUB_CASH_BASE_URL;
+      const addressHost = new URL(npubCashHttpUrl(this.baseHost)).hostname;
+      this.address = nip19.npubEncode(walletPublicKeyHex) + "@" + addressHost;
       this.loading = true;
       try {
         const previousAddress = this.address;
         const info = await this.getInfo();
         if (info.name) {
-          const usernameAddress = info.name + "@" + NPUB_CASH_BASE_URL;
+          const usernameAddress = info.name + "@" + addressHost;
           if (previousAddress !== usernameAddress) {
             console.log(`[npub.cash] Logged in as ${info.name}`);
           }
@@ -259,7 +327,7 @@ export const useNpubCashStore = defineStore("npubCash", {
     getInfo: async function (): Promise<NpubCashUser> {
       try {
         const response = await this.sendAuthedRequest(
-          `${NPUB_CASH_HTTP_URL}/api/v2/user/info`
+          `${npubCashHttpUrl(this.baseHost)}/api/v2/user/info`
         );
         const info: NpubCashInfoResponse = await response.json();
         if (info.error) {
@@ -288,7 +356,7 @@ export const useNpubCashStore = defineStore("npubCash", {
       }
       try {
         const response = await this.sendAuthedRequest(
-          `${NPUB_CASH_HTTP_URL}/api/v2/user/mint`,
+          `${npubCashHttpUrl(this.baseHost)}/api/v2/user/mint`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -339,6 +407,7 @@ export const useNpubCashStore = defineStore("npubCash", {
       try {
         const quotes: NpubCashQuote[] = [];
         const seenQuotes = new Set<string>();
+        const quotesUrl = npubCashQuotesUrl(this.baseHost);
         let offset = 0;
         let total = 0;
 
@@ -353,9 +422,9 @@ export const useNpubCashStore = defineStore("npubCash", {
             params.set("since", String(Math.max(0, this.lastCheck - 1)));
           }
           const response = await this.sendAuthedRequest(
-            `${NPUB_CASH_QUOTES_URL}?${params.toString()}`,
+            `${quotesUrl}?${params.toString()}`,
             undefined,
-            NPUB_CASH_QUOTES_URL
+            quotesUrl
           );
           if (!response.ok) {
             throw new Error(`npub.cash quote sync failed (${response.status})`);
@@ -473,7 +542,9 @@ export const useNpubCashStore = defineStore("npubCash", {
       }
 
       try {
-        const socket = markRaw(new WebSocket(NPUB_CASH_WS_URL));
+        const socket = markRaw(
+          new WebSocket(npubCashWebSocketUrl(this.baseHost))
+        );
         this.quoteSocket = socket;
         socket.onmessage = (event) => {
           void this.handleQuoteSocketMessage(socket, event.data);
@@ -503,10 +574,11 @@ export const useNpubCashStore = defineStore("npubCash", {
           const payload = message.payload;
           const usesPayloadProtocol =
             payload !== null && typeof payload === "object";
-          const authUrl = usesPayloadProtocol ? payload.url : NPUB_CASH_WS_URL;
+          const websocketUrl = npubCashWebSocketUrl(this.baseHost);
+          const authUrl = usesPayloadProtocol ? payload.url : websocketUrl;
           const method = usesPayloadProtocol ? payload.method : "GET";
           const parsedAuthUrl = new URL(authUrl);
-          const expectedAuthUrl = new URL(NPUB_CASH_WS_URL);
+          const expectedAuthUrl = new URL(websocketUrl);
           if (
             !["https:", "wss:"].includes(parsedAuthUrl.protocol) ||
             parsedAuthUrl.hostname !== expectedAuthUrl.hostname ||
@@ -598,7 +670,7 @@ export const useNpubCashStore = defineStore("npubCash", {
       username: string
     ): Promise<UsernameQuote> {
       const response = await this.sendAuthedRequest(
-        `${NPUB_CASH_HTTP_URL}/api/v2/user/username`,
+        `${npubCashHttpUrl(this.baseHost)}/api/v2/user/username`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -621,7 +693,7 @@ export const useNpubCashStore = defineStore("npubCash", {
     setUsername: async function (username: string, token: string) {
       try {
         const response = await this.sendAuthedRequest(
-          `${NPUB_CASH_HTTP_URL}/api/v2/user/username`,
+          `${npubCashHttpUrl(this.baseHost)}/api/v2/user/username`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json", "X-Cashu": token },
@@ -632,7 +704,8 @@ export const useNpubCashStore = defineStore("npubCash", {
         if (data.error) {
           throw new Error(data.message);
         }
-        this.address = `${data.data.user.name}@${NPUB_CASH_BASE_URL}`;
+        const addressHost = new URL(npubCashHttpUrl(this.baseHost)).hostname;
+        this.address = `${data.data.user.name}@${addressHost}`;
       } catch (error) {
         console.log(error);
         if (error instanceof Error) {
