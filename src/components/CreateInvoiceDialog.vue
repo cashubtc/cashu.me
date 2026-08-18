@@ -689,8 +689,8 @@ export default defineComponent({
         .filter((invoice: InvoiceHistory) => {
           if (invoice.type !== PaymentMethod.Onchain) return false;
           if (invoice.amount < 0) return false;
-          if (invoice.status !== "pending" && invoice.status !== "paid")
-            return false;
+          // A paid address must never be offered again, to avoid address reuse.
+          if (invoice.status !== "pending") return false;
           const quote = invoice.mintQuote as any;
           if (quote?.expiry && quote.expiry > 0 && quote.expiry * 1000 < now) {
             return false;
