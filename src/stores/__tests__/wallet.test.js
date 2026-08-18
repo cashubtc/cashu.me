@@ -36,6 +36,7 @@ const h = vi.hoisted(() => {
     lockMutex: vi.fn(async () => {}),
     unlockMutex: vi.fn(),
     closeDialogs: vi.fn(),
+    setTab: vi.fn(),
     formatCurrency: vi.fn((amount, unit) => `${amount} ${unit}`),
     vibrate: vi.fn(),
   };
@@ -77,6 +78,7 @@ const h = vi.hoisted(() => {
       h.mintsStore.activeMintUrl = url;
     }),
     addMintData: { url: "", nickname: "" },
+    showAddMintDialog: false,
     mints: [],
     mintUnitKeysets: vi.fn((mint, unit) =>
       mint.keysets.filter((k) => k.unit === unit)
@@ -2067,6 +2069,8 @@ describe("wallet store", () => {
     expect(h.receiveTokensStore.receiveData.tokensBase64).toBe("cashuAabcdef");
     expect(h.sendTokensStore.sendData.p2pkPubkey).toBe("02abcdef");
     expect(h.mintsStore.addMintData.url).toBe("https://mint-b.example");
+    expect(h.mintsStore.showAddMintDialog).toBe(true);
+    expect(h.uiStore.setTab).toHaveBeenCalledWith("mints");
     expect(wallet.handlePaymentRequest).toHaveBeenCalledWith("creqA123");
     expect(wallet.handlePaymentRequest).toHaveBeenCalledWith("creqb1xyz");
     expect(wallet.handlePaymentRequest).toHaveBeenCalledWith(

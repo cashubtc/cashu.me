@@ -1588,8 +1588,12 @@ export const useWalletStore = defineStore("wallet", {
       } else if (p2pkStore.isValidPubkey(req)) {
         this.handleP2PK(req);
       } else if (req.startsWith("http")) {
+        // Scanned/pasted mint URL: open the add-mint confirmation sheet on
+        // the mints tab instead of only filling the input box.
         const mintStore = useMintsStore();
         mintStore.addMintData = { url: req, nickname: "" };
+        useUiStore().setTab("mints");
+        mintStore.showAddMintDialog = true;
       } else if (
         req.toLowerCase().startsWith("creqa") ||
         req.toLowerCase().startsWith("creqb")
