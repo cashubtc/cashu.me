@@ -1426,6 +1426,7 @@ export default {
         pay: {
           label: "Pagar",
           in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
+          waiting_for_wallet: "Esperando la billetera…",
           error: "Error",
         },
       },

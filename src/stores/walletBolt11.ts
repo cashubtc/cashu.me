@@ -1,7 +1,7 @@
 import { currentDateStr } from "src/js/utils";
 import { useMintsStore, WalletProof } from "./mints";
 import { useProofsStore } from "./proofs";
-import { useUiStore } from "src/stores/ui";
+import { type MutexPriority, useUiStore } from "src/stores/ui";
 import {
   Amount,
   Wallet,
@@ -110,7 +110,7 @@ export async function mintBolt11(
       invoice.mint,
       invoice.quote
     );
-    await uIStore.lockMutex();
+    await uIStore.lockMutex("background");
     if (
       !transactionWorkerStore.mintQuoteIsClaimed(invoice.mint, invoice.quote)
     ) {
@@ -230,7 +230,11 @@ export async function meltQuoteBolt11(
   return normalizeMeltQuote(data);
 }
 
-export async function meltInvoiceDataBolt11(this: any, silent?: boolean) {
+export async function meltInvoiceDataBolt11(
+  this: any,
+  silent?: boolean,
+  mutexPriority: MutexPriority = "normal"
+) {
   if (this.payInvoiceData.invoice == null) {
     throw new Error("no invoice provided.");
   }
@@ -259,7 +263,9 @@ export async function meltInvoiceDataBolt11(this: any, silent?: boolean) {
     mintStore.activeProofs,
     quote,
     mintWallet,
-    silent
+    silent,
+    false,
+    mutexPriority
   );
 }
 
@@ -269,7 +275,8 @@ export async function meltBolt11(
   quote: AppMeltQuote,
   mintWallet: Wallet,
   silent?: boolean,
-  releaseMutex = false
+  releaseMutex = false,
+  mutexPriority: MutexPriority = "normal"
 ) {
   return this.meltGeneric(
     proofs,
@@ -279,7 +286,8 @@ export async function meltBolt11(
     (id: string) => mintWallet.mint.checkMeltQuoteBolt11(id),
     PaymentMethod.Bolt11,
     undefined,
-    releaseMutex
+    releaseMutex,
+    mutexPriority
   );
 }
 

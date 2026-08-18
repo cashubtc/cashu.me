@@ -22,7 +22,7 @@ import { PaymentMethod } from "src/stores/walletTypes";
 import { useMintsStore, WalletProof } from "./mints";
 import { usePaymentHistoryStore } from "./paymentHistory";
 import { useProofsStore } from "./proofs";
-import { useUiStore } from "src/stores/ui";
+import { type MutexPriority, useUiStore } from "src/stores/ui";
 import { cashuAmountToNumber } from "src/js/cashu-amount";
 
 let isUnloading = false;
@@ -154,10 +154,10 @@ export async function meltGeneric(
   checkQuote: CheckMeltQuoteFn,
   method: PaymentMethod = PaymentMethod.Bolt11,
   completeMeltOptions?: CompleteMeltOptions,
-  releaseMutex = false
+  releaseMutex = false,
+  mutexPriority: MutexPriority = "normal"
 ) {
   const uIStore = useUiStore();
-  this.payInvoiceData.paying = true;
   const amount = quote.amount + quote.fee_reserve;
   const keysetId = this.getKeyset(mintWallet.mint.mintUrl, mintWallet.unit);
 
@@ -168,7 +168,8 @@ export async function meltGeneric(
       mintWallet,
       amount,
       false,
-      true
+      true,
+      mutexPriority
     );
     sendProofs = _sendProofs;
     if (sendProofs.length == 0) {
@@ -180,7 +181,8 @@ export async function meltGeneric(
     throw error;
   }
 
-  await uIStore.lockMutex();
+  this.payInvoiceData.paying = true;
+  await uIStore.lockMutex(mutexPriority);
   try {
     await this.addOutgoingPendingInvoiceToHistory(
       quote,
@@ -222,7 +224,7 @@ export async function meltGeneric(
       throw error;
     } finally {
       if (releaseMutex) {
-        await uIStore.lockMutex();
+        await uIStore.lockMutex(mutexPriority);
       }
     }
 

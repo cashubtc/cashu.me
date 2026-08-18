@@ -5,7 +5,7 @@ import { useLocalStorage } from "@vueuse/core";
 import { useProofsStore } from "./proofs";
 import { HistoryToken, useTokensStore } from "./tokens";
 import { useReceiveTokensStore } from "./receiveTokensStore";
-import { useUiStore } from "src/stores/ui";
+import { type MutexPriority, useUiStore } from "src/stores/ui";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { usePRStore } from "./payment-request";
@@ -629,7 +629,8 @@ export const useWalletStore = defineStore("wallet", {
       wallet: Wallet,
       amount: number,
       invalidate: boolean = false,
-      includeFees: boolean = false
+      includeFees: boolean = false,
+      mutexPriority: MutexPriority = "normal"
     ): Promise<{ keepProofs: ProofLike[]; sendProofs: ProofLike[] }> {
       // Returns sendProofs summing to `amount` (plus input fees when
       // includeFees=true). Tries an offline exact-match first; otherwise
@@ -638,7 +639,7 @@ export const useWalletStore = defineStore("wallet", {
       const proofsStore = useProofsStore();
       const uIStore = useUiStore();
       const keysetId = this.getKeyset(wallet.mint.mintUrl, wallet.unit);
-      await uIStore.lockMutex();
+      await uIStore.lockMutex(mutexPriority);
       try {
         const spendableProofs: Proof[] = toProofs(
           this.spendableProofs(proofs, amount)
@@ -854,19 +855,22 @@ export const useWalletStore = defineStore("wallet", {
       }
     },
     meltQuote: meltQuoteBolt11,
-    meltInvoiceData: async function (silent?: boolean) {
+    meltInvoiceData: async function (
+      silent?: boolean,
+      mutexPriority: MutexPriority = "normal"
+    ) {
       if (
         this.payInvoiceData?.invoice &&
         (this.payInvoiceData.invoice as any).onchain
       ) {
-        return await meltInvoiceDataOnchain.call(this, silent);
+        return await meltInvoiceDataOnchain.call(this, silent, mutexPriority);
       } else if (
         this.payInvoiceData?.invoice &&
         (this.payInvoiceData.invoice as any).bolt12
       ) {
-        return await meltInvoiceDataBolt12.call(this, silent);
+        return await meltInvoiceDataBolt12.call(this, silent, mutexPriority);
       } else {
-        return await meltInvoiceDataBolt11.call(this, silent);
+        return await meltInvoiceDataBolt11.call(this, silent, mutexPriority);
       }
     },
     meltGeneric: meltGeneric,

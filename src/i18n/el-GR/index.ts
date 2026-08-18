@@ -1429,6 +1429,7 @@ export default {
         pay: {
           label: "Πληρωμή",
           in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
+          waiting_for_wallet: "Αναμονή για το πορτοφόλι…",
           error: "Σφάλμα",
         },
       },

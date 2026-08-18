@@ -1432,6 +1432,7 @@ export default {
         pay: {
           label: "Bezahlen",
           in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
+          waiting_for_wallet: "Warte auf Wallet…",
           error: "Fehler",
         },
       },

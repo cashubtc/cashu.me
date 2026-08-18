@@ -545,7 +545,7 @@
                 v-else-if="
                   enoughtotalUnitBalance ||
                   (hasMultinutSupport && multinutEnabled) ||
-                  globalMutexLock ||
+                  waitingForWallet ||
                   paymentInProgress
                 "
               >
@@ -558,22 +558,16 @@
                   data-testid="pay-payment-request"
                   :disabled="
                     payInvoiceData.blocking ||
-                    paymentInProgress ||
-                    globalMutexLock
+                    waitingForWallet ||
+                    paymentInProgress
                   "
                   @click="handleMeltButton"
-                  :label="
-                    !payInvoiceData.blocking && !paymentInProgress
-                      ? $t('PayInvoiceDialog.invoice.actions.pay.label')
-                      : $t('PayInvoiceDialog.invoice.actions.pay.in_progress')
-                  "
-                  :loading="
-                    paymentInProgress ||
-                    (globalMutexLock && !payInvoiceData.blocking)
-                  "
+                  :label="paymentButtonLabel"
+                  :loading="waitingForWallet || paymentInProgress"
                 >
                   <template v-slot:loading>
-                    <q-spinner />
+                    <q-spinner class="q-mr-sm" />
+                    <span>{{ paymentButtonLabel }}</span>
                   </template>
                 </q-btn>
                 <q-btn
@@ -812,6 +806,7 @@ export default defineComponent({
       fiatKeyboardMode: false as boolean,
       isPaying: false as boolean,
       isPaid: false as boolean,
+      waitingForWallet: false as boolean,
       autoCloseTimeout: null as ReturnType<typeof setTimeout> | null,
     };
   },
@@ -845,6 +840,12 @@ export default defineComponent({
     "payInvoiceData.meltQuote.error": function (val) {
       if (val && this.showAmountlessPaymentAmountEntry) {
         this.showNumericKeyboard = false;
+      }
+    },
+    "payInvoiceData.paying": function (val) {
+      if (val) {
+        this.waitingForWallet = false;
+        this.isPaying = true;
       }
     },
     "payInvoiceData.lnurlpay": {
@@ -897,7 +898,7 @@ export default defineComponent({
     },
   },
   computed: {
-    ...mapState(useUiStore, ["tickerShort", "globalMutexLock"]),
+    ...mapState(useUiStore, ["tickerShort"]),
     ...mapState(useSettingsStore, ["multinutEnabled"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     ...mapWritableState(useUiStore, ["showNumericKeyboard"]),
@@ -1038,6 +1039,19 @@ export default defineComponent({
     },
     paymentInProgress: function (): boolean {
       return Boolean(this.isPaying || this.payInvoiceData?.paying);
+    },
+    paymentButtonLabel: function (): string {
+      if (this.waitingForWallet) {
+        return this.$t(
+          "PayInvoiceDialog.invoice.actions.pay.waiting_for_wallet"
+        ) as string;
+      }
+      if (this.paymentInProgress) {
+        return this.$t(
+          "PayInvoiceDialog.invoice.actions.pay.in_progress"
+        ) as string;
+      }
+      return this.$t("PayInvoiceDialog.invoice.actions.pay.label") as string;
     },
     isBolt12Pay: function (): boolean {
       return this.payPaymentMethod === PaymentMethod.Bolt12;
@@ -1190,7 +1204,11 @@ export default defineComponent({
       }
     },
     handleMeltButton: async function () {
-      if (this.payInvoiceData.blocking) {
+      if (
+        this.payInvoiceData.blocking ||
+        this.waitingForWallet ||
+        this.paymentInProgress
+      ) {
         throw new Error("already processing an invoice.");
       }
       if (
@@ -1201,9 +1219,11 @@ export default defineComponent({
         this.openMultinutDialog();
         return;
       }
-      this.isPaying = true;
+      const uiStore = useUiStore();
+      this.waitingForWallet = true;
+      uiStore.beginForegroundPayment();
       try {
-        const result = await this.meltInvoiceData(true);
+        const result = await this.meltInvoiceData(true, "foreground");
         const returnedChange = useProofsStore().sumProofs(result?.change ?? []);
         this.payInvoiceData.fee_paid =
           this.payInvoiceData.meltQuote.response.fee_reserve - returnedChange;
@@ -1213,6 +1233,9 @@ export default defineComponent({
         // Error handling is done in the store, but we ensure isPaying is reset
         console.error("Payment error:", error);
         this.isPaying = false;
+      } finally {
+        this.waitingForWallet = false;
+        uiStore.endForegroundPayment();
       }
     },
     openMultinutDialog: function () {

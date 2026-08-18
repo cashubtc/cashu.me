@@ -1780,7 +1780,7 @@ describe("wallet store", () => {
     expect(h.uiStore.unlockMutex).toHaveBeenCalledTimes(2);
   });
 
-  it("forwards the silent flag through meltInvoiceData", async () => {
+  it("forwards the silent flag and mutex priority through meltInvoiceData", async () => {
     const wallet = useWalletStore();
     const proofs = [{ id: "00aa", amount: 105, secret: "s1" }];
     const quote = {
@@ -1809,9 +1809,16 @@ describe("wallet store", () => {
       change: [],
     });
 
-    await wallet.meltInvoiceData(true);
+    await wallet.meltInvoiceData(true, "foreground");
 
-    expect(meltBolt11).toHaveBeenCalledWith(proofs, quote, mintWallet, true);
+    expect(meltBolt11).toHaveBeenCalledWith(
+      proofs,
+      quote,
+      mintWallet,
+      true,
+      false,
+      "foreground"
+    );
   });
 
   it("passes selected on-chain fee index through recoverable melt completion", async () => {

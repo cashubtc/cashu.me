@@ -1525,6 +1525,7 @@ export default {
         pay: {
           label: "Zaplatit",
           in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
+          waiting_for_wallet: "Čekání na peněženku…",
           error: "Chyba",
         },
       },
