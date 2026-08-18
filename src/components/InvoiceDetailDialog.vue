@@ -85,6 +85,18 @@
                     color="primary"
                   />
                 </div>
+                <div
+                  v-if="isOnchain"
+                  class="q-mt-sm text-center text-grey-7 qr-copy-text cursor-pointer"
+                  @click="onCopyBolt11"
+                >
+                  <q-icon
+                    :name="copyButtonCopied ? 'check' : 'content_copy'"
+                    size="xs"
+                    class="q-mr-xs"
+                  />
+                  {{ invoiceData.request }}
+                </div>
               </div>
             </div>
 
@@ -218,12 +230,14 @@ export default defineComponent({
       return this.$q.screen.lt.sm;
     },
     invoiceMethod(): PaymentMethod {
-      return (
-        this.invoiceData.type ||
+      const method =
         (this.invoiceData as any).method ||
+        (this.invoiceData as any).paymentType ||
         (this.invoiceData as any).protocol ||
-        PaymentMethod.Bolt11
-      );
+        this.invoiceData.type;
+      return Object.values(PaymentMethod).includes(method)
+        ? method
+        : PaymentMethod.Bolt11;
     },
     copyButtonLabel: function () {
       if (this.copyButtonCopied) {
@@ -332,6 +346,16 @@ export default defineComponent({
   position: relative;
   border-radius: 8px;
   overflow: hidden;
+}
+
+.qr-copy-text {
+  overflow-wrap: anywhere;
+  word-break: break-all;
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  hyphens: none;
+  font-size: 0.9em;
+  font-family: monospace;
 }
 
 .checkmark-overlay {

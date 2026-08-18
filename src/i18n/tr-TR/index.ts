@@ -169,6 +169,61 @@ export default {
     },
   },
   Settings: {
+    menu: {
+      title: "Ayarlar",
+      backup: {
+        title: "Yedekleme ve Geri Yükleme",
+        caption: "Seed kelimeleri ve ecash kurtarma",
+      },
+      lightning_address: {
+        title: "Lightning Adresi",
+        caption: "Lightning adresinize ödeme alın",
+      },
+      nostr: {
+        title: "Nostr",
+        caption: "Anahtarlar, röleler ve Web of Trust",
+      },
+      payment_requests: {
+        title: "Ödeme Talepleri",
+        caption: "Nostr üzerinden ecash ödemeleri alın",
+      },
+      nwc: {
+        title: "Nostr Cüzdan Bağlantısı",
+        caption: "Cüzdanınızı diğer uygulamalardan kullanın",
+      },
+      hardware: {
+        title: "Donanım",
+        caption: "NFC ayarları",
+      },
+      p2pk: {
+        title: "P2PK",
+        caption: "Anahtarlarınıza kilitli ecash alın",
+      },
+      privacy: {
+        title: "Gizlilik",
+        caption: "Ağ kontrolleri ve Bitcoin fiyatı",
+      },
+      experimental: {
+        title: "Deneysel",
+        caption: "Yeni özellikleri erkenden deneyin",
+      },
+      appearance: {
+        title: "Görünüm",
+        caption: "Tema, klavye ve Bitcoin sembolü",
+      },
+      language: {
+        title: "Dil",
+        caption: "Dilinizi seçin",
+      },
+      advanced: {
+        title: "Gelişmiş",
+        caption: "Geliştirici araçları ve cüzdan sıfırlama",
+      },
+      about: {
+        title: "Hakkında",
+        caption: "Koşullar ve bağlantılar",
+      },
+    },
     language: {
       title: "Dil",
       description: "Lütfen aşağıdaki listeden tercih ettiğiniz dili seçin.",
@@ -227,13 +282,18 @@ export default {
       address: {
         copy_tooltip: "Lightning adresini kopyala",
       },
+      show_on_receive: {
+        toggle: "Alırken göster",
+        description: "Adres ve QR kodunu göster.",
+      },
       automatic_claim: {
         toggle: "Otomatik olarak talep et",
         description: "Gelen ödemeleri otomatik olarak alın.",
       },
-      npc_v2: {
-        choose_mint_title: "npub.cash v2 için mint seçin",
-        choose_mint_placeholder: "Bir mint seçin…",
+      mint: {
+        label: "npub.cash mint",
+        choose_title: "npub.cash için mint seçin",
+        choose_placeholder: "Bir mint seçin…",
       },
     },
     nostr_keys: {
@@ -335,7 +395,7 @@ export default {
       check_startup: {
         toggle: "Başlangıçta bekleyen faturaları kontrol et",
         description:
-          "Etkinleştirilirse, cüzdan başlangıçta son 24 saat içindeki bekleyen faturaları kontrol edecektir.",
+          "Etkinleştirilirse, cüzdan başlangıçta bekleyen faturaları kontrol edecektir.",
       },
       check_all: {
         toggle: "Tüm faturaları kontrol et",
@@ -503,9 +563,7 @@ export default {
       progress: "{crawlProcessed} / {crawlTotal}",
     },
     npub_cash: {
-      use_npubx: "npubx.cash kullan",
       copy_lightning_address: "Lightning adresini kopyala",
-      v2_mint: "npub.cash v2 mint",
     },
     multinut: {
       use_multinut: "Multinut kullan",
@@ -1003,6 +1061,7 @@ export default {
       },
       send: {
         label: "@:global.actions.send.label",
+        in_progress: "Gönderiliyor…",
       },
       delete: {
         tooltip_text: "Geçmişten sil",
@@ -1379,6 +1438,7 @@ export default {
         pay: {
           label: "Öde",
           in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
+          waiting_for_wallet: "Cüzdan bekleniyor…",
           error: "Hata",
         },
       },

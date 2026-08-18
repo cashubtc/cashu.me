@@ -382,10 +382,8 @@ export const useNostrUserStore = defineStore("nostrUser", {
       this.crawlCheckpointNextIndex = 0;
       this.crawlCheckpointTotal = 0;
     },
-    clearAllDatabases: function () {
-      db.wot.clear();
-      db.follows.clear();
-      db.meta.clear();
+    clearAllDatabases: async function () {
+      await Promise.all([db.wot.clear(), db.follows.clear(), db.meta.clear()]);
     },
   },
 });

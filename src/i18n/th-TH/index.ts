@@ -164,6 +164,61 @@ export default {
     },
   },
   Settings: {
+    menu: {
+      title: "การตั้งค่า",
+      backup: {
+        title: "สำรองและกู้คืนข้อมูล",
+        caption: "Seed phrase และการกู้คืน ecash",
+      },
+      lightning_address: {
+        title: "Lightning Address",
+        caption: "รับการชำระเงินผ่าน Lightning address ของคุณ",
+      },
+      nostr: {
+        title: "Nostr",
+        caption: "กุญแจ, relay และ Web of Trust",
+      },
+      payment_requests: {
+        title: "คำขอชำระเงิน",
+        caption: "รับการชำระเงิน ecash ผ่าน nostr",
+      },
+      nwc: {
+        title: "Nostr Wallet Connect",
+        caption: "ใช้ Wallet ของคุณจากแอปอื่น",
+      },
+      hardware: {
+        title: "ฮาร์ดแวร์",
+        caption: "การตั้งค่า NFC",
+      },
+      p2pk: {
+        title: "P2PK",
+        caption: "รับ ecash ที่ล็อกไว้กับกุญแจของคุณ",
+      },
+      privacy: {
+        title: "ความเป็นส่วนตัว",
+        caption: "การตรวจสอบเครือข่ายและราคา Bitcoin",
+      },
+      experimental: {
+        title: "ทดลอง",
+        caption: "ลองใช้ฟีเจอร์ใหม่ก่อนใคร",
+      },
+      appearance: {
+        title: "รูปลักษณ์",
+        caption: "ธีม, แป้นพิมพ์ และสัญลักษณ์ Bitcoin",
+      },
+      language: {
+        title: "ภาษา",
+        caption: "เลือกภาษาของคุณ",
+      },
+      advanced: {
+        title: "ขั้นสูง",
+        caption: "เครื่องมือนักพัฒนาและการรีเซ็ต Wallet",
+      },
+      about: {
+        title: "เกี่ยวกับ",
+        caption: "ข้อกำหนดและลิงก์",
+      },
+    },
     web_of_trust: {
       title: "เครือข่ายที่เชื่อถือได้",
       known_pubkeys: "Pubkey ที่รู้จัก: {wotCount}",
@@ -175,9 +230,7 @@ export default {
       progress: "{crawlProcessed} / {crawlTotal}",
     },
     npub_cash: {
-      use_npubx: "ใช้ npubx.cash",
       copy_lightning_address: "คัดลอกที่อยู่ Lightning",
-      v2_mint: "npub.cash v2 mint",
     },
     multinut: {
       use_multinut: "ใช้ Multinut",
@@ -239,13 +292,18 @@ export default {
       address: {
         copy_tooltip: "คัดลอกที่อยู่ Lightning",
       },
+      show_on_receive: {
+        toggle: "แสดงเมื่อรับเงิน",
+        description: "แสดงที่อยู่และรหัส QR",
+      },
       automatic_claim: {
         toggle: "รับอัตโนมัติ",
         description: "รับการชำระเงินขาเข้าโดยอัตโนมัติ",
       },
-      npc_v2: {
-        choose_mint_title: "เลือก mint สำหรับ npub.cash v2",
-        choose_mint_placeholder: "เลือก mint...",
+      mint: {
+        label: "npub.cash mint",
+        choose_title: "เลือก mint สำหรับ npub.cash",
+        choose_placeholder: "เลือก mint...",
       },
     },
     nostr_keys: {
@@ -344,7 +402,7 @@ export default {
       check_startup: {
         toggle: "ตรวจสอบใบแจ้งหนี้ที่รอดำเนินการเมื่อเริ่มต้น",
         description:
-          "หากเปิดใช้งาน Wallet จะตรวจสอบใบแจ้งหนี้ที่รอดำเนินการในช่วง 24 ชั่วโมงที่ผ่านมาเมื่อเริ่มต้น",
+          "หากเปิดใช้งาน Wallet จะตรวจสอบใบแจ้งหนี้ที่รอดำเนินการเมื่อเริ่มต้น",
       },
       check_all: {
         toggle: "ตรวจสอบใบแจ้งหนี้ทั้งหมด",
@@ -989,6 +1047,7 @@ export default {
       },
       send: {
         label: "@:global.actions.send.label",
+        in_progress: "กำลังส่ง…",
       },
       delete: {
         tooltip_text: "ลบออกจากประวัติ",
@@ -1364,6 +1423,7 @@ export default {
         pay: {
           label: "ชำระเงิน",
           in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
+          waiting_for_wallet: "กำลังรอกระเป๋าเงิน…",
           error: "ข้อผิดพลาด",
         },
       },

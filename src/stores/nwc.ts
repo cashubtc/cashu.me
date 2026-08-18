@@ -371,14 +371,15 @@ export const useNWCStore = defineStore("nwc", {
               message: "Already processing a payment.",
             },
           } as NWCError;
-        }
-        this.blocking = true;
-        try {
-          result = await this.handlePayInvoice(nwcCommand);
-        } catch (e) {
-          return;
-        } finally {
-          this.blocking = false;
+        } else {
+          this.blocking = true;
+          try {
+            result = await this.handlePayInvoice(nwcCommand);
+          } catch (e) {
+            return;
+          } finally {
+            this.blocking = false;
+          }
         }
       } else if (nwcCommand.method === "make_invoice") {
         result = await this.handleMakeInvoice(nwcCommand);

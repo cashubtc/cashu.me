@@ -165,6 +165,61 @@ export default {
     },
   },
   Settings: {
+    menu: {
+      title: "Ajustes",
+      backup: {
+        title: "Copia de seguridad y restauración",
+        caption: "Frase semilla y recuperación de ecash",
+      },
+      lightning_address: {
+        title: "Dirección Lightning",
+        caption: "Recibe pagos en tu dirección Lightning",
+      },
+      nostr: {
+        title: "Nostr",
+        caption: "Claves, relays y Web of Trust",
+      },
+      payment_requests: {
+        title: "Solicitudes de pago",
+        caption: "Recibe pagos de ecash a través de nostr",
+      },
+      nwc: {
+        title: "Nostr Wallet Connect",
+        caption: "Usa tu billetera desde otras aplicaciones",
+      },
+      hardware: {
+        title: "Hardware",
+        caption: "Ajustes de NFC",
+      },
+      p2pk: {
+        title: "P2PK",
+        caption: "Recibe ecash bloqueado a tus claves",
+      },
+      privacy: {
+        title: "Privacidad",
+        caption: "Comprobaciones de red y precio de Bitcoin",
+      },
+      experimental: {
+        title: "Experimental",
+        caption: "Prueba nuevas funciones antes que nadie",
+      },
+      appearance: {
+        title: "Apariencia",
+        caption: "Tema, teclado y símbolo de Bitcoin",
+      },
+      language: {
+        title: "Idioma",
+        caption: "Elige tu idioma",
+      },
+      advanced: {
+        title: "Avanzado",
+        caption: "Herramientas de desarrollador y reinicio de la billetera",
+      },
+      about: {
+        title: "Acerca de",
+        caption: "Términos y enlaces",
+      },
+    },
     language: {
       title: "Idioma",
       description: "Por favor, elige tu idioma preferido de la lista de abajo.",
@@ -222,13 +277,18 @@ export default {
       address: {
         copy_tooltip: "Copiar dirección Lightning",
       },
+      show_on_receive: {
+        toggle: "Mostrar al recibir",
+        description: "Mostrar dirección y código QR.",
+      },
       automatic_claim: {
         toggle: "Reclamar automáticamente",
         description: "Recibir pagos entrantes automáticamente.",
       },
-      npc_v2: {
-        choose_mint_title: "Elegir mint para npub.cash v2",
-        choose_mint_placeholder: "Seleccionar un mint...",
+      mint: {
+        label: "npub.cash mint",
+        choose_title: "Elegir mint para npub.cash",
+        choose_placeholder: "Seleccionar un mint...",
       },
     },
     nostr_keys: {
@@ -329,7 +389,7 @@ export default {
       check_startup: {
         toggle: "Verificar facturas pendientes al inicio",
         description:
-          "Si está habilitado, la billetera verificará las facturas pendientes de las últimas 24 horas al inicio.",
+          "Si está habilitado, la billetera verificará las facturas pendientes al inicio.",
       },
       check_all: {
         toggle: "Verificar todas las facturas",
@@ -435,9 +495,7 @@ export default {
       progress: "{crawlProcessed} / {crawlTotal}",
     },
     npub_cash: {
-      use_npubx: "Utilice npubx.cash",
       copy_lightning_address: "Copiar dirección Lightning",
-      v2_mint: "npub.cash v2 mint",
     },
     multinut: {
       use_multinut: "Usar Multinut",
@@ -996,6 +1054,7 @@ export default {
       },
       send: {
         label: "@:global.actions.send.label",
+        in_progress: "Enviando…",
       },
       delete: {
         tooltip_text: "Eliminar del historial",
@@ -1372,6 +1431,7 @@ export default {
         pay: {
           label: "Pagar",
           in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
+          waiting_for_wallet: "Esperando la billetera…",
           error: "Error",
         },
       },

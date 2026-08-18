@@ -173,6 +173,61 @@ export default {
     },
   },
   Settings: {
+    menu: {
+      title: "Settings",
+      backup: {
+        title: "Backup & Restore",
+        caption: "Seed phrase and ecash recovery",
+      },
+      lightning_address: {
+        title: "Lightning Address",
+        caption: "Receive payments to your Lightning address",
+      },
+      nostr: {
+        title: "Nostr",
+        caption: "Keys, relays, and Web of Trust",
+      },
+      payment_requests: {
+        title: "Payment Requests",
+        caption: "Receive ecash payments via nostr",
+      },
+      nwc: {
+        title: "Nostr Wallet Connect",
+        caption: "Use your wallet from other apps",
+      },
+      hardware: {
+        title: "Hardware",
+        caption: "NFC card settings",
+      },
+      p2pk: {
+        title: "P2PK",
+        caption: "Receive ecash locked to your keys",
+      },
+      privacy: {
+        title: "Privacy",
+        caption: "Network checks and Bitcoin price",
+      },
+      experimental: {
+        title: "Experimental",
+        caption: "Try new features early",
+      },
+      appearance: {
+        title: "Appearance",
+        caption: "Theme, keyboard, and Bitcoin symbol",
+      },
+      language: {
+        title: "Language",
+        caption: "Choose your language",
+      },
+      advanced: {
+        title: "Advanced",
+        caption: "Developer tools and wallet reset",
+      },
+      about: {
+        title: "About",
+        caption: "Terms and links",
+      },
+    },
     language: {
       title: "Language",
       description: "Please choose your preferred language from the list below.",
@@ -230,13 +285,18 @@ export default {
       address: {
         copy_tooltip: "Copy Lightning address",
       },
+      show_on_receive: {
+        toggle: "Show when receiving",
+        description: "Show address and QR code.",
+      },
       automatic_claim: {
         toggle: "Claim automatically",
         description: "Receive incoming payments automatically.",
       },
-      npc_v2: {
-        choose_mint_title: "Choose mint for npub.cash v2",
-        choose_mint_placeholder: "Select a mint...",
+      mint: {
+        label: "npub.cash mint",
+        choose_title: "Choose mint for npub.cash",
+        choose_placeholder: "Select a mint...",
       },
     },
     nostr_keys: {
@@ -336,7 +396,7 @@ export default {
       check_startup: {
         toggle: "Check pending invoices on startup",
         description:
-          "If enabled, the wallet will check pending invoices from the last 24 hours on startup.",
+          "If enabled, the wallet will check pending invoices on startup.",
       },
       check_all: {
         toggle: "Check all invoices",
@@ -441,9 +501,7 @@ export default {
       progress: "{crawlProcessed} / {crawlTotal}",
     },
     npub_cash: {
-      use_npubx: "Use npubx.cash",
       copy_lightning_address: "Copy Lightning address",
-      v2_mint: "npub.cash v2 mint",
     },
     multinut: {
       use_multinut: "Use Multinut",
@@ -1028,6 +1086,7 @@ export default {
       },
       send: {
         label: "@:global.actions.send.label",
+        in_progress: "Sending…",
       },
       delete: {
         tooltip_text: "Delete from history",
@@ -1450,6 +1509,7 @@ export default {
         pay: {
           label: "Pay",
           in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
+          waiting_for_wallet: "Waiting for wallet…",
           error: "Error",
         },
       },
@@ -1478,6 +1538,8 @@ export default {
     title: "Do you trust this mint?",
     description:
       "Before using this mint, make sure you trust it. Mints could become malicious or cease operation at any time.",
+    unreachable_error_text:
+      "This mint is not reachable. Check the URL and your connection, then try again.",
     inputs: {
       mint_url: {
         label: "@:global.inputs.mint_url.label",

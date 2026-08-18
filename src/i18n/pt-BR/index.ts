@@ -172,6 +172,61 @@ export default {
     },
   },
   Settings: {
+    menu: {
+      title: "Configurações",
+      backup: {
+        title: "Backup e restauração",
+        caption: "Frase semente e recuperação de ecash",
+      },
+      lightning_address: {
+        title: "Endereço Lightning",
+        caption: "Receba pagamentos no seu endereço Lightning",
+      },
+      nostr: {
+        title: "Nostr",
+        caption: "Chaves, relays e Web of Trust",
+      },
+      payment_requests: {
+        title: "Solicitações de pagamento",
+        caption: "Receba pagamentos de ecash via nostr",
+      },
+      nwc: {
+        title: "Nostr Wallet Connect",
+        caption: "Use sua carteira em outros aplicativos",
+      },
+      hardware: {
+        title: "Hardware",
+        caption: "Configurações de NFC",
+      },
+      p2pk: {
+        title: "P2PK",
+        caption: "Receba ecash bloqueado nas suas chaves",
+      },
+      privacy: {
+        title: "Privacidade",
+        caption: "Verificações de rede e preço do Bitcoin",
+      },
+      experimental: {
+        title: "Experimental",
+        caption: "Experimente novos recursos antes",
+      },
+      appearance: {
+        title: "Aparência",
+        caption: "Tema, teclado e símbolo do Bitcoin",
+      },
+      language: {
+        title: "Idioma",
+        caption: "Escolha seu idioma",
+      },
+      advanced: {
+        title: "Avançado",
+        caption: "Ferramentas de desenvolvedor e redefinição da carteira",
+      },
+      about: {
+        title: "Sobre",
+        caption: "Termos e links",
+      },
+    },
     language: {
       title: "Idioma",
       description:
@@ -230,13 +285,18 @@ export default {
       address: {
         copy_tooltip: "Copiar endereço Lightning",
       },
+      show_on_receive: {
+        toggle: "Mostrar ao receber",
+        description: "Mostrar endereço e código QR.",
+      },
       automatic_claim: {
         toggle: "Reivindicar automaticamente",
         description: "Receba pagamentos recebidos automaticamente.",
       },
-      npc_v2: {
-        choose_mint_title: "Escolha o mint para npub.cash v2",
-        choose_mint_placeholder: "Selecione um mint...",
+      mint: {
+        label: "Mint npub.cash",
+        choose_title: "Escolha o mint para npub.cash",
+        choose_placeholder: "Selecione um mint...",
       },
     },
     nostr_keys: {
@@ -338,7 +398,7 @@ export default {
       check_startup: {
         toggle: "Verificar faturas pendentes na inicialização",
         description:
-          "Se ativado, a carteira verificará faturas pendentes das últimas 24 horas na inicialização.",
+          "Se ativado, a carteira verificará faturas pendentes na inicialização.",
       },
       check_all: {
         toggle: "Verificar todas as faturas",
@@ -444,9 +504,7 @@ export default {
       progress: "{crawlProcessed} / {crawlTotal}",
     },
     npub_cash: {
-      use_npubx: "Usar npubx.cash",
       copy_lightning_address: "Copiar endereço Lightning",
-      v2_mint: "Mint npub.cash v2",
     },
     multinut: {
       use_multinut: "Usar Multinut",
@@ -1033,6 +1091,7 @@ export default {
       },
       send: {
         label: "@:global.actions.send.label",
+        in_progress: "Enviando…",
       },
       delete: {
         tooltip_text: "Excluir do histórico",
@@ -1454,6 +1513,7 @@ export default {
         pay: {
           label: "Pagar",
           in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
+          waiting_for_wallet: "Aguardando a carteira…",
           error: "Erro",
         },
       },

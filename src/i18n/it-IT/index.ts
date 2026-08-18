@@ -138,6 +138,61 @@ export default {
     },
   },
   Settings: {
+    menu: {
+      title: "Impostazioni",
+      backup: {
+        title: "Backup e ripristino",
+        caption: "Frase seed e recupero degli ecash",
+      },
+      lightning_address: {
+        title: "Indirizzo Lightning",
+        caption: "Ricevi pagamenti al tuo indirizzo Lightning",
+      },
+      nostr: {
+        title: "Nostr",
+        caption: "Chiavi, relay e Web of Trust",
+      },
+      payment_requests: {
+        title: "Richieste di pagamento",
+        caption: "Ricevi pagamenti ecash tramite nostr",
+      },
+      nwc: {
+        title: "Nostr Wallet Connect",
+        caption: "Usa il tuo portafoglio da altre app",
+      },
+      hardware: {
+        title: "Hardware",
+        caption: "Impostazioni NFC",
+      },
+      p2pk: {
+        title: "P2PK",
+        caption: "Ricevi ecash vincolati alle tue chiavi",
+      },
+      privacy: {
+        title: "Privacy",
+        caption: "Controlli di rete e prezzo del Bitcoin",
+      },
+      experimental: {
+        title: "Sperimentale",
+        caption: "Prova le nuove funzionalità in anteprima",
+      },
+      appearance: {
+        title: "Aspetto",
+        caption: "Tema, tastiera e simbolo Bitcoin",
+      },
+      language: {
+        title: "Lingua",
+        caption: "Scegli la tua lingua",
+      },
+      advanced: {
+        title: "Avanzate",
+        caption: "Strumenti per sviluppatori e reset del portafoglio",
+      },
+      about: {
+        title: "Informazioni",
+        caption: "Termini e link",
+      },
+    },
     language: {
       title: "Lingua",
       description: "Seleziona la tua lingua preferita dall'elenco sottostante.",
@@ -195,13 +250,18 @@ export default {
       address: {
         copy_tooltip: "Copia indirizzo Lightning",
       },
+      show_on_receive: {
+        toggle: "Mostra durante la ricezione",
+        description: "Mostra indirizzo e codice QR.",
+      },
       automatic_claim: {
         toggle: "Richiedi automaticamente",
         description: "Ricevi pagamenti in entrata automaticamente.",
       },
-      npc_v2: {
-        choose_mint_title: "Scegli mint per npub.cash v2",
-        choose_mint_placeholder: "Seleziona un mint...",
+      mint: {
+        label: "npub.cash mint",
+        choose_title: "Scegli mint per npub.cash",
+        choose_placeholder: "Seleziona un mint...",
       },
     },
     nostr_keys: {
@@ -301,7 +361,7 @@ export default {
       check_startup: {
         toggle: "Verifica fatture pendenti all'avvio",
         description:
-          "Se abilitato, il portafoglio verificherà le fatture pendenti delle ultime 24 ore all'avvio.",
+          "Se abilitato, il portafoglio verificherà le fatture pendenti all'avvio.",
       },
       check_all: {
         toggle: "Verifica tutte le fatture",
@@ -407,9 +467,7 @@ export default {
       progress: "{crawlProcessed} / {crawlTotal}",
     },
     npub_cash: {
-      use_npubx: "Usa npubx.cash",
       copy_lightning_address: "Copia indirizzo Lightning",
-      v2_mint: "npub.cash v2 mint",
     },
     multinut: {
       use_multinut: "Usa Multinut",
@@ -967,6 +1025,7 @@ export default {
       },
       send: {
         label: "@:global.actions.send.label",
+        in_progress: "Invio…",
       },
       delete: {
         tooltip_text: "Elimina dalla cronologia",
@@ -1342,6 +1401,7 @@ export default {
         pay: {
           label: "Paga",
           in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
+          waiting_for_wallet: "In attesa del portafoglio…",
           error: "Errore",
         },
       },

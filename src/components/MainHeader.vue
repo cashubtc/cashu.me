@@ -7,8 +7,8 @@
         round
         icon="menu"
         color="primary"
-        aria-label="Menu"
-        @click="toggleLeftDrawer"
+        aria-label="Settings"
+        @click="goToSettings"
         :disable="uiStore.globalMutexLock"
       />
       <q-toolbar-title></q-toolbar-title>
@@ -70,107 +70,24 @@
       </q-btn>
     </q-toolbar>
   </q-header>
-
-  <q-drawer v-model="leftDrawerOpen" bordered>
-    <q-list>
-      <q-item-label header>{{
-        $t("MainHeader.menu.settings.title")
-      }}</q-item-label>
-      <q-item clickable to="/settings">
-        <q-item-section avatar>
-          <q-icon name="settings" />
-        </q-item-section>
-        <q-item-section>
-          <q-item-label>{{
-            $t("MainHeader.menu.settings.settings.title")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("MainHeader.menu.settings.settings.caption")
-          }}</q-item-label>
-        </q-item-section>
-      </q-item>
-      <q-item-label header>{{
-        $t("MainHeader.menu.terms.title")
-      }}</q-item-label>
-      <q-item clickable to="/terms">
-        <q-item-section avatar>
-          <q-icon name="gavel" />
-        </q-item-section>
-        <q-item-section>
-          <q-item-label>{{
-            $t("MainHeader.menu.terms.terms.title")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("MainHeader.menu.terms.terms.caption")
-          }}</q-item-label>
-        </q-item-section>
-      </q-item>
-      <q-item-label header>{{
-        $t("MainHeader.menu.links.title")
-      }}</q-item-label>
-      <EssentialLink
-        v-for="link in essentialLinks"
-        :key="link.title"
-        v-bind="link"
-      />
-    </q-list>
-  </q-drawer>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import EssentialLink from "components/EssentialLink.vue";
+import { useRouter } from "vue-router";
 import { useUiStore } from "src/stores/ui";
-import { useI18n } from "vue-i18n";
 
 export default defineComponent({
   name: "MainHeader",
   mixins: [windowMixin],
-  components: {
-    EssentialLink,
-  },
   setup() {
-    const leftDrawerOpen = ref(false);
     const uiStore = useUiStore();
-    const { t } = useI18n();
+    const router = useRouter();
     const countdown = ref(0);
     let countdownInterval;
 
-    const essentialLinks = [
-      {
-        title: t("MainHeader.menu.links.cashuSpace.title"),
-        caption: t("MainHeader.menu.links.cashuSpace.caption"),
-        icon: "web",
-        link: "https://cashu.space",
-      },
-      {
-        title: t("MainHeader.menu.links.github.title"),
-        caption: t("MainHeader.menu.links.github.caption"),
-        icon: "code",
-        link: "https://github.com/cashubtc/cashu.me",
-      },
-      {
-        title: t("MainHeader.menu.links.telegram.title"),
-        caption: t("MainHeader.menu.links.telegram.caption"),
-        icon: "chat",
-        link: "https://t.me/CashuMe",
-      },
-      {
-        title: t("MainHeader.menu.links.twitter.title"),
-        caption: t("MainHeader.menu.links.twitter.caption"),
-        icon: "rss_feed",
-        link: "https://twitter.com/CashuBTC",
-      },
-      {
-        title: t("MainHeader.menu.links.donate.title"),
-        caption: t("MainHeader.menu.links.donate.caption"),
-        icon: "favorite",
-        link: "https://docs.cashu.space/contribute",
-      },
-    ];
-
-    const toggleLeftDrawer = () => {
-      leftDrawerOpen.value = !leftDrawerOpen.value;
+    const goToSettings = () => {
+      router.push("/settings");
     };
 
     const isStaging = () => {
@@ -198,9 +115,7 @@ export default defineComponent({
     };
 
     return {
-      essentialLinks,
-      leftDrawerOpen,
-      toggleLeftDrawer,
+      goToSettings,
       isStaging,
       reload,
       countdown,

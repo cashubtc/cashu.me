@@ -1,0 +1,42 @@
+[info]
+url = "http://127.0.0.1:8086"
+listen_host = "0.0.0.0"
+listen_port = 8086
+mnemonic = "env:CDK_MINTD_MNEMONIC"
+
+[info.quote_ttl]
+mint_ttl = 600
+melt_ttl = 120
+
+[info.logging]
+output = "stderr"
+console_level = "info"
+
+[database]
+engine = "sqlite"
+
+[ln]
+ln_backend = "fakewallet"
+unit = "sat"
+min_mint = 1
+max_mint = 1000000
+min_melt = 1
+max_melt = 1000000
+
+[onchain]
+onchain_backend = "fakewallet"
+min_mint = 1
+max_mint = 1000000
+min_melt = 1
+max_melt = 1000000
+
+[fake_wallet]
+fee_percent = 0.0
+reserve_fee_min = 1
+custom_payment_methods = []
+min_delay_time = 1
+max_delay_time = 2
+
+[limits]
+max_inputs = 1000
+max_outputs = 1000

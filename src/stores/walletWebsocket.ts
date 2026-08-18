@@ -1,4 +1,4 @@
-import { useInvoicesWorkerStore } from "./invoicesWorker";
+import { useTransactionWorkerStore } from "./transactionWorker";
 import { useSettingsStore } from "src/stores/settings";
 import { useWorkersStore } from "./workers";
 import { useUiStore } from "src/stores/ui";
@@ -39,7 +39,7 @@ const mintOnPaidConfigs: Record<IncomingMintMethod, MintOnPaidConfig> = {
     command: "bolt11_mint_quote",
     oneShot: true,
     addToChecker: (quoteId: string) =>
-      useInvoicesWorkerStore().addInvoiceToChecker(quoteId),
+      useTransactionWorkerStore().addInvoiceToChecker(quoteId),
     onPaid: async (walletStore: any, _quoteId, invoice) =>
       walletStore.mintBolt11(invoice, false),
   },
@@ -47,7 +47,7 @@ const mintOnPaidConfigs: Record<IncomingMintMethod, MintOnPaidConfig> = {
     command: "bolt12_mint_quote",
     oneShot: false,
     addToChecker: (quoteId: string) =>
-      useInvoicesWorkerStore().addBolt12OfferToChecker(quoteId),
+      useTransactionWorkerStore().addBolt12OfferToChecker(quoteId),
     onPaid: async (
       walletStore: any,
       quoteId,
@@ -65,7 +65,7 @@ const mintOnPaidConfigs: Record<IncomingMintMethod, MintOnPaidConfig> = {
     command: "onchain_mint_quote",
     oneShot: false,
     addToChecker: (quoteId: string) =>
-      useInvoicesWorkerStore().addOnchainQuoteToChecker(quoteId, true),
+      useTransactionWorkerStore().addOnchainQuoteToChecker(quoteId, true),
     onPaid: async (
       walletStore: any,
       quoteId,
@@ -203,14 +203,23 @@ export async function mintOnPaidGeneric(
     return;
   }
 
-  const mintWallet = await this.mintWallet(invoice.mint, invoice.unit);
+  const releaseSubscriptionReservation = () =>
+    activeMintQuoteSubscriptions.delete(key);
+  activeMintQuoteSubscriptions.set(key, releaseSubscriptionReservation);
+
+  let mintWallet: any;
+  try {
+    mintWallet = await this.mintWallet(invoice.mint, invoice.unit);
+  } catch (error) {
+    releaseSubscriptionReservation();
+    throw error;
+  }
 
   // 5. Subscribe via Websocket
   const uIStore = useUiStore();
-  let cleanup = () => activeMintQuoteSubscriptions.delete(key);
+  let cleanup = releaseSubscriptionReservation;
   try {
     this.activeWebsocketConnections++;
-    uIStore.triggerActivityOrb();
     let unsubscribe: (() => void) | undefined = undefined;
     let cleanupRequested = false;
     cleanup = () => {
@@ -223,42 +232,45 @@ export async function mintOnPaidGeneric(
     };
     activeMintQuoteSubscriptions.set(key, cleanup);
 
+    let paidCallbackInProgress = false;
     const onPaidCallback = async (_response: MintQuotePaidResponse) => {
-      let proofs;
+      if (paidCallbackInProgress) return;
+      paidCallbackInProgress = true;
       try {
-        proofs = await config.onPaid(
+        const proofs = await config.onPaid(
           this,
           quoteId,
           invoice,
           verbose,
           hideInvoiceDetailsOnMint
         );
+
+        if (type === PaymentMethod.Bolt11) {
+          if (hideInvoiceDetailsOnMint) {
+            this.hideInvoiceDetailsAfterReceiveSuccess(quoteId);
+          }
+          useUiStore().vibrate();
+          if (verbose) {
+            notifySuccess(
+              this.t("wallet.notifications.received_lightning", {
+                amount: uIStore.formatCurrency(invoice.amount, invoice.unit),
+              })
+            );
+          }
+        }
+
+        return proofs;
       } catch (error: any) {
         if (verbose) {
           console.error(error);
         }
         throw error;
       } finally {
+        paidCallbackInProgress = false;
         if (config.oneShot) {
           cleanup();
         }
       }
-
-      if (type === PaymentMethod.Bolt11) {
-        if (hideInvoiceDetailsOnMint) {
-          uIStore.showInvoiceDetails = false;
-        }
-        useUiStore().vibrate();
-        if (verbose) {
-          notifySuccess(
-            this.t("wallet.notifications.received_lightning", {
-              amount: uIStore.formatCurrency(invoice.amount, invoice.unit),
-            })
-          );
-        }
-      }
-
-      return proofs;
     };
 
     const onErrorCallback = async (error: any) => {

@@ -240,21 +240,26 @@
                 unelevated
                 size="lg"
                 :disable="
+                  sendingEcash ||
                   sendData.amount == null ||
                   sendData.amount <= 0 ||
                   insufficientFunds ||
                   (sendData.p2pkPubkey != '' &&
                     !isValidPubkey(sendData.p2pkPubkey))
                 "
+                data-testid="send-ecash"
                 @click="sendTokens"
                 color="primary"
                 rounded
                 type="submit"
-                :loading="globalMutexLock"
+                :loading="sendingEcash"
               >
                 {{ $t("SendTokenDialog.actions.send.label") }}
                 <template v-slot:loading>
-                  <q-spinner />
+                  <q-spinner class="q-mr-sm" />
+                  <span>{{
+                    $t("SendTokenDialog.actions.send.in_progress")
+                  }}</span>
                 </template>
               </q-btn>
             </div>
@@ -273,14 +278,13 @@
 import { defineComponent } from "vue";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { useWalletStore } from "src/stores/wallet";
-import { useUiStore } from "src/stores/ui";
+import { type MutexPriority, useUiStore } from "src/stores/ui";
 import { useProofsStore } from "src/stores/proofs";
 import { useMintsStore } from "src/stores/mints";
 import { useTokensStore } from "src/stores/tokens";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useSettingsStore } from "src/stores/settings";
-import { useWorkersStore } from "src/stores/workers";
-import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
+import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import { usePriceStore } from "src/stores/price";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
@@ -316,6 +320,7 @@ export default defineComponent({
   data: function () {
     return {
       fiatKeyboardMode: false as boolean,
+      sendingEcash: false as boolean,
     };
   },
   computed: {
@@ -354,7 +359,6 @@ export default defineComponent({
       "currentCurrencyPrice",
     ]),
     ...mapState(useSettingsStore, ["bitcoinPriceCurrency"]),
-    ...mapState(useWorkersStore, ["tokenWorkerRunning"]),
     insufficientFunds: function (): boolean {
       if (this.sendData.amount == null) return false;
       return (
@@ -468,6 +472,15 @@ export default defineComponent({
       if (!newUrl || !oldUrl || newUrl === oldUrl) return;
       useSendTokensStore().invalidatePreparedPaymentRequestToken();
     },
+    activeUnit: function (newUnit, oldUnit) {
+      // When the user switches active unit (e.g. from sat to usd or vice-versa) inside
+      // the Pay-PaymentRequest sheet, any proofs we already prepared belong to the
+      // previous unit. Drop them so the next pay attempt rebuilds with the new unit.
+      if (!this.showSendTokens) return;
+      if (!this.sendData.paymentRequest) return;
+      if (!newUnit || !oldUnit || newUnit === oldUnit) return;
+      useSendTokensStore().invalidatePreparedPaymentRequestToken();
+    },
     showSendTokens: function (val) {
       if (val) {
         this.$nextTick(() => {
@@ -501,16 +514,14 @@ export default defineComponent({
         }
       } else {
         clearInterval(this.qrInterval);
-        this.sendData.data = "";
         this.sendData.tokensBase64 = "";
-        this.sendData.historyToken = null;
-        this.sendData.paymentRequest = null;
+        this.sendData.historyToken = undefined;
+        this.sendData.paymentRequest = undefined;
       }
     },
   },
   methods: {
-    ...mapActions(useWorkersStore, ["clearAllWorkers"]),
-    ...mapActions(useInvoicesWorkerStore, ["addOutgoingTokenToChecker"]),
+    ...mapActions(useTransactionWorkerStore, ["addOutgoingTokenToChecker"]),
     ...mapActions(useWalletStore, [
       "send",
       "sendToLock",
@@ -560,13 +571,25 @@ export default defineComponent({
         this.activeUnit,
         true
       );
-      const { sendProofs } = await this.send(
-        this.activeProofs,
-        mintWallet,
-        sendAmount,
-        true,
-        this.includeFeesInSendAmount
-      );
+      // NUT-18 payment requests may require the proofs to be locked with a
+      // NUT-10 spending condition. PaymentRequest.toP2PKOptions() builds the
+      // P2PK/HTLC lock cashu-ts can honour, or returns undefined for any other
+      // kind, in which case we fall back to a normal unlocked send.
+      const lockOptions = this.sendData.paymentRequest.toP2PKOptions();
+      const { sendProofs } = lockOptions
+        ? await this.sendToLock(
+            this.activeProofs,
+            mintWallet,
+            sendAmount,
+            lockOptions
+          )
+        : await this.send(
+            this.activeProofs,
+            mintWallet,
+            sendAmount,
+            true,
+            this.includeFeesInSendAmount
+          );
       const serialized = this.serializeProofs(sendProofs);
       if (!serialized) {
         throw new Error(
@@ -584,17 +607,15 @@ export default defineComponent({
         paymentRequest: this.sendData.paymentRequest,
         status: "pending",
       };
-      if (!this.sendData.historyToken) {
-        const _id = this.addPendingToken(historyToken);
-        (historyToken as any).id = _id;
-        if (!this.g.offline) {
-          this.onTokenPaid(historyToken);
-        }
+      const _id = this.addPendingToken(historyToken);
+      (historyToken as any).id = _id;
+      if (!this.g.offline) {
+        this.onTokenPaid(historyToken);
       }
       this.sendData.historyToken = historyToken as any;
       return serialized;
     },
-    lockTokens: async function () {
+    lockTokens: async function (mutexPriority: MutexPriority = "normal") {
       if (!this.sendData.amount) {
         throw new Error("Amount is required");
       }
@@ -608,11 +629,12 @@ export default defineComponent({
           this.activeUnit,
           true
         );
-        const { _, sendProofs } = await this.sendToLock(
+        const { sendProofs } = await this.sendToLock(
           this.activeProofs,
           mintWallet,
           sendAmount,
-          this.sendData.p2pkPubkey
+          this.sendData.p2pkPubkey,
+          mutexPriority
         );
         // update UI
         this.sendData.tokens = sendProofs;
@@ -639,18 +661,24 @@ export default defineComponent({
       /*
       calls send, displays token and kicks off the spendableWorker
       */
-      this.sendData.p2pkPubkey = this.maybeConvertNpub(
-        this.sendData.p2pkPubkey
-      );
-      if (
-        this.sendData.p2pkPubkey &&
-        this.isValidPubkey(this.sendData.p2pkPubkey)
-      ) {
-        await this.lockTokens();
-        return;
-      }
+      if (this.sendingEcash) return;
+
+      const uiStore = useUiStore();
+      this.sendingEcash = true;
+      uiStore.beginForegroundPayment();
 
       try {
+        this.sendData.p2pkPubkey = this.maybeConvertNpub(
+          this.sendData.p2pkPubkey
+        );
+        if (
+          this.sendData.p2pkPubkey &&
+          this.isValidPubkey(this.sendData.p2pkPubkey)
+        ) {
+          await this.lockTokens("foreground");
+          return;
+        }
+
         const sendAmount = Math.floor(
           this.sendData.amount * this.activeUnitCurrencyMultiplyer
         );
@@ -660,12 +688,13 @@ export default defineComponent({
           false
         );
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
-        const { _, sendProofs } = await this.send(
+        const { sendProofs } = await this.send(
           this.activeProofs,
           mintWallet,
           sendAmount,
           true,
-          this.includeFeesInSendAmount
+          this.includeFeesInSendAmount,
+          "foreground"
         );
 
         // update UI
@@ -691,6 +720,9 @@ export default defineComponent({
         }
       } catch (error: any) {
         console.error(error);
+      } finally {
+        this.sendingEcash = false;
+        uiStore.endForegroundPayment();
       }
     },
     pasteToP2PKField: async function () {

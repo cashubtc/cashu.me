@@ -45,7 +45,7 @@ module.exports = configure(function (/* ctx */) {
     boot: ["base", "global-components", "i18n"],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
-    css: ["app.scss", "base.scss"],
+    css: ["app.scss", "base.scss", "settings.scss"],
 
     // https://github.com/quasarframework/quasar/tree/dev/extras
     extras: [
@@ -91,6 +91,7 @@ module.exports = configure(function (/* ctx */) {
         viteConf.optimizeDeps = viteConf.optimizeDeps || {};
         viteConf.optimizeDeps.exclude = [
           ...(viteConf.optimizeDeps.exclude || []),
+          "@agicash/qr-scanner",
           "@cashu/cashu-ts",
         ];
       },
@@ -103,8 +104,8 @@ module.exports = configure(function (/* ctx */) {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
     devServer: {
-      https: true,
-      open: true, // opens browser window automatically
+      https: process.env.E2E !== "true",
+      open: process.env.E2E !== "true", // keep automated runs headless
       port: 8080,
     },
 

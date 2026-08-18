@@ -43,7 +43,8 @@ export const useSendTokensStore = defineStore("sendTokensStore", {
     // until the dialog closes).
     invalidatePreparedPaymentRequestToken(): boolean {
       if (!this.sendData.paymentRequest) return false;
-      if (!this.sendData.tokensBase64) return false;
+      if (!this.sendData.tokensBase64 && !this.sendData.historyToken)
+        return false;
       this.sendData.tokens = "";
       this.sendData.tokensBase64 = "";
       this.sendData.historyToken = undefined;

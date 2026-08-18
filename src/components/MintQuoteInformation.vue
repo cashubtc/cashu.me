@@ -46,13 +46,19 @@
       <div class="detail-value">{{ networkDisplay }}</div>
     </div>
 
-    <div v-if="isOnchain && onchainMetadata" class="detail-item q-mb-md">
+    <div v-if="isOnchain && onchainExplorerUrl" class="detail-item q-mb-md">
       <div class="detail-label">
         <HashIcon :size="20" :color="iconColor" class="detail-icon" />
-        <div class="detail-name">Transaction ID</div>
+        <div class="detail-name">
+          {{ onchainMetadata ? "Transaction ID" : "Address" }}
+        </div>
       </div>
-      <a class="detail-value" :href="onchainMetadata.url" target="_blank">
-        {{ shortTxid(onchainMetadata.txid) }}
+      <a class="detail-value" :href="onchainExplorerUrl" target="_blank">
+        {{
+          onchainMetadata
+            ? shortTxid(onchainMetadata.txid)
+            : shortAddress(invoice.request)
+        }}
       </a>
     </div>
 
@@ -119,6 +125,7 @@ import {
 import { PaymentMethod } from "src/stores/walletTypes";
 import {
   fetchAddressTxMetadata,
+  onchainAddressExplorerUrl,
   onchainNetwork,
   onchainNetworkDisplay,
   type MempoolTxMetadata,
@@ -248,6 +255,13 @@ export default defineComponent({
         this.invoice.network || onchainNetwork(this.invoice.request);
       return network === "mutinynet" ? onchainNetworkDisplay(network) : "";
     },
+    onchainExplorerUrl(): string | null {
+      if (!this.isOnchain || !this.invoice?.request) return null;
+      return (
+        this.onchainMetadata?.url ||
+        onchainAddressExplorerUrl(this.invoice.request)
+      );
+    },
     onchainStatusDisplay(): string {
       if (!this.onchainMetadata) return "";
       const status = this.onchainMetadata.confirmed ? "Confirmed" : "Pending";
@@ -274,6 +288,9 @@ export default defineComponent({
   methods: {
     shortTxid(txid: string): string {
       return `${txid.slice(0, 8)}...${txid.slice(-8)}`;
+    },
+    shortAddress(address: string): string {
+      return `${address.slice(0, 8)}...${address.slice(-8)}`;
     },
     mintConfirmations(): number {
       const mintStore = useMintsStore();
@@ -327,6 +344,9 @@ export default defineComponent({
   watch: {
     "invoice.request": function () {
       this.loadOnchainMetadata();
+    },
+    "invoice.status": function (status: string) {
+      if (status === "paid") this.loadOnchainMetadata();
     },
     method: function () {
       this.loadOnchainMetadata();

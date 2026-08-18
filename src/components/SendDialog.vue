@@ -28,7 +28,15 @@
 
       <q-card-section class="q-pa-md">
         <div class="q-gutter-y-md">
-          <div class="action-row" @click="showSendTokensDialog">
+          <div
+            class="action-row"
+            role="button"
+            tabindex="0"
+            data-testid="send-ecash-option"
+            @click="showSendTokensDialog"
+            @keydown.enter.prevent="showSendTokensDialog"
+            @keydown.space.prevent="showSendTokensDialog"
+          >
             <div class="row items-center no-wrap">
               <div class="icon-circle">
                 <CoinsIcon :size="24" />
@@ -44,7 +52,12 @@
           <div
             v-if="canSendLightning"
             class="action-row"
+            role="button"
+            tabindex="0"
+            data-testid="send-lightning-option"
             @click="showParseDialog"
+            @keydown.enter.prevent="showParseDialog"
+            @keydown.space.prevent="showParseDialog"
           >
             <div class="row items-center no-wrap">
               <div class="icon-circle">
@@ -61,7 +74,12 @@
           <div
             v-if="canSendOnchain"
             class="action-row"
+            role="button"
+            tabindex="0"
+            data-testid="send-onchain-option"
             @click="showOnchainPayDialog"
+            @keydown.enter.prevent="showOnchainPayDialog"
+            @keydown.space.prevent="showOnchainPayDialog"
           >
             <div class="row items-center no-wrap">
               <div class="icon-circle">

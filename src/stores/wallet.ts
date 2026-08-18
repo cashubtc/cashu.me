@@ -5,12 +5,11 @@ import { useLocalStorage } from "@vueuse/core";
 import { useProofsStore } from "./proofs";
 import { HistoryToken, useTokensStore } from "./tokens";
 import { useReceiveTokensStore } from "./receiveTokensStore";
-import { useUiStore } from "src/stores/ui";
+import { type MutexPriority, useUiStore } from "src/stores/ui";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { usePRStore } from "./payment-request";
-import { useWorkersStore } from "./workers";
-import { useInvoicesWorkerStore } from "./invoicesWorker";
+import { useTransactionWorkerStore } from "./transactionWorker";
 
 import {
   requestMintBolt11,
@@ -80,8 +79,10 @@ import {
   ProofState,
   KeyChain,
   type AmountLike,
+  type P2PKOptions,
   type CounterSource,
   createEphemeralCounterSource,
+  StaleKeysetError,
   // ConsoleLogger,
 } from "@cashu/cashu-ts";
 // @ts-ignore
@@ -97,6 +98,7 @@ import { generateMnemonic, mnemonicToSeedSync } from "@scure/bip39";
 import { wordlist } from "@scure/bip39/wordlists/english";
 import { useSettingsStore } from "./settings";
 import { usePriceStore } from "./price";
+import { usePaymentHistoryStore } from "./paymentHistory";
 import { useI18n } from "vue-i18n";
 import { decodeBolt12Offer } from "src/js/bolt12";
 import { ensurePaymentMethodMintActive } from "src/js/mint-payment-methods";
@@ -115,6 +117,8 @@ type Invoice = {
   type?: PaymentMethod;
 };
 
+const activeSentTokenSubscriptions = new Set<string>();
+
 // The app uses number-typed amounts (strategy b). These types represent
 // cashu-ts quote responses with top-level Amount fields converted to number.
 type AppMintQuote = Omit<
@@ -127,6 +131,7 @@ type AppMintQuote = Omit<
 };
 
 export type InvoiceHistory = Invoice & {
+  id?: string;
   date: string;
   status: "pending" | "paid";
   mint: string;
@@ -141,6 +146,8 @@ export type InvoiceHistory = Invoice & {
   meltOutputData?: any[];
   network?: string;
   parentQuote?: string;
+  method?: PaymentMethod;
+  direction?: "mint" | "melt";
 };
 
 type KeysetCounter = {
@@ -151,6 +158,7 @@ type KeysetCounter = {
 const receiveStore = useReceiveTokensStore();
 const tokenStore = useTokensStore();
 const proofsStore = useProofsStore();
+const RECEIVE_SUCCESS_HIDE_DELAY_MS = 5000;
 
 function amountToNumber(value: AmountLike | undefined): number {
   if (value === undefined) return 0;
@@ -194,10 +202,8 @@ export const useWalletStore = defineStore("wallet", {
     return {
       t: t,
       mnemonic: useLocalStorage("cashu.mnemonic", ""),
-      invoiceHistory: useLocalStorage(
-        "cashu.invoiceHistory",
-        [] as InvoiceHistory[]
-      ),
+      invoiceHistory: [] as InvoiceHistory[],
+      paymentHistoryUnsubscribe: null as null | (() => void),
       keysetCounters: useLocalStorage(
         "cashu.keysetCounters",
         [] as KeysetCounter[]
@@ -270,6 +276,30 @@ export const useWalletStore = defineStore("wallet", {
     },
   },
   actions: {
+    async initPaymentHistory() {
+      const paymentHistoryStore = usePaymentHistoryStore();
+      await paymentHistoryStore.init();
+      if (!this.paymentHistoryUnsubscribe) {
+        this.paymentHistoryUnsubscribe = paymentHistoryStore.$subscribe(
+          (_mutation, state) => {
+            this.invoiceHistory = state.invoiceHistory as InvoiceHistory[];
+          },
+          { detached: true }
+        );
+      }
+      this.syncPaymentHistoryCache();
+    },
+    syncPaymentHistoryCache() {
+      const paymentHistoryStore = usePaymentHistoryStore();
+      this.invoiceHistory =
+        paymentHistoryStore.invoiceHistory as InvoiceHistory[];
+    },
+    async addPaymentHistory(invoice: InvoiceHistory) {
+      const paymentHistoryStore = usePaymentHistoryStore();
+      this.invoiceHistory.push(invoice);
+      await paymentHistoryStore.addPayment(invoice);
+      this.syncPaymentHistoryCache();
+    },
     setMnemonicFromUser: function (mnemonic: string) {
       this.mnemonic = mnemonic.trim().toLowerCase(); // normalize
     },
@@ -359,6 +389,7 @@ export const useWalletStore = defineStore("wallet", {
       url: string,
       unit: string
     ): Wallet {
+      const mints = useMintsStore();
       if (this.mnemonic == "") {
         this.mnemonic = generateMnemonic(wordlist);
       }
@@ -371,6 +402,26 @@ export const useWalletStore = defineStore("wallet", {
       });
       wallet.on.countersReserved(({ keysetId, next }) => {
         this.syncCounterToStorage(keysetId, next);
+      });
+      wallet.on.keychainUpdated(({ cache }) => {
+        const mint = mints.mints.find((m) => m.url === url);
+        if (!mint) return;
+
+        // Cashu TS repairs its short-lived wallet snapshot after a keyset
+        // rejection. Keep that repair for subsequent wallet instances too.
+        const { keysets, keys } = KeyChain.cacheToMintDTO(cache);
+        mint.keysets = [
+          ...mint.keysets.filter((existing) =>
+            keysets.every((updated) => updated.id !== existing.id)
+          ),
+          ...keysets,
+        ];
+        mint.keys = [
+          ...mint.keys.filter((existing) =>
+            keys.every((updated) => updated.id !== existing.id)
+          ),
+          ...keys,
+        ];
       });
       // Load the caches
       const keychainCache = KeyChain.mintToCacheDTO(
@@ -395,7 +446,7 @@ export const useWalletStore = defineStore("wallet", {
       this.sharedCounterSource = null; // force re-creation on next wallet init
       this.mnemonic = generateMnemonic(wordlist);
     },
-    retryOnceOnSignedOutputs: async function <T>(
+    retryOnceOnRecoverableError: async function <T>(
       keysetId: string,
       operation: () => Promise<T>,
       notifyUser = true
@@ -403,6 +454,14 @@ export const useWalletStore = defineStore("wallet", {
       try {
         return await operation();
       } catch (error: any) {
+        // Cashu TS v4.9.0+ refreshes the wallet snapshot when a mint rejects
+        // outputs on a retired keyset, then asks the caller to retry.
+        if (error instanceof StaleKeysetError && error.repaired) {
+          if (notifyUser) {
+            notify(this.t("wallet.notifications.trying_again"));
+          }
+          return await operation();
+        }
         const handled = await this.handleOutputsHaveAlreadyBeenSignedError(
           keysetId,
           error,
@@ -458,7 +517,7 @@ export const useWalletStore = defineStore("wallet", {
     /**
      * Sets an invoice status to paid
      */
-    setInvoicePaid(
+    async setInvoicePaid(
       quoteId: string,
       updates?: { amount?: number; mintQuote?: any }
     ) {
@@ -478,6 +537,29 @@ export const useWalletStore = defineStore("wallet", {
         }
         if (updates?.mintQuote) this.invoiceData.mintQuote = updates.mintQuote;
       }
+      try {
+        const paymentHistoryStore = usePaymentHistoryStore();
+        const paidDate = await paymentHistoryStore.setPaymentPaid(
+          quoteId,
+          updates
+        );
+        if (paidDate) {
+          this.syncPaymentHistoryCache();
+        }
+      } catch (error) {
+        console.error("Could not persist paid payment history", error);
+      }
+    },
+
+    hideInvoiceDetailsAfterReceiveSuccess(
+      quoteId: string,
+      delayMs = RECEIVE_SUCCESS_HIDE_DELAY_MS
+    ) {
+      setTimeout(() => {
+        if (this.invoiceData?.quote === quoteId) {
+          useUiStore().showInvoiceDetails = false;
+        }
+      }, delayMs);
     },
 
     splitAmount: function (value: number) {
@@ -542,34 +624,52 @@ export const useWalletStore = defineStore("wallet", {
       proofs: WalletProof[],
       wallet: Wallet,
       amount: number,
-      receiverPubkey: string
+      receiverPubkey: string | P2PKOptions,
+      mutexPriority: MutexPriority = "normal"
     ) {
-      const spendableProofs = this.spendableProofs(proofs, amount);
-      const proofsToSend = this.coinSelect(
-        spendableProofs,
-        wallet,
-        amount,
-        true
-      );
-      const keysetId = this.getKeyset(wallet.mint.mintUrl, wallet.unit);
-      const { keep: keepProofs, send: sendProofs } = await wallet.ops
-        .send(amount, toProofs(proofsToSend))
-        .keyset(keysetId)
-        .asP2PK({ pubkey: receiverPubkey })
-        .run();
-      const proofsStore = useProofsStore();
-      await proofsStore.removeProofs(proofsToSend);
-      // note: we do not store sendProofs in the proofs store but
-      // expect from the caller to store it in the history
-      await proofsStore.addProofs(keepProofs);
-      return { keepProofs, sendProofs };
+      // Accept a bare pubkey (manual lock flow) or a full P2PKOptions so a
+      // NUT-18 payment request can reproduce its requested NUT-10 condition
+      // (P2PK or HTLC). Going through the `.asP2PK()` builder keeps the
+      // blinding keyset-aware (for upcoming cashu-ts v5).
+      const uiStore = useUiStore();
+      await uiStore.lockMutex(mutexPriority);
+      try {
+        const p2pkOptions: P2PKOptions =
+          typeof receiverPubkey === "string"
+            ? { pubkey: receiverPubkey }
+            : receiverPubkey;
+        const spendableProofs = this.spendableProofs(proofs, amount);
+        const proofsToSend = this.coinSelect(
+          spendableProofs,
+          wallet,
+          amount,
+          true
+        );
+        const { keep: keepProofs, send: sendProofs } =
+          await this.retryOnceOnRecoverableError(wallet.keysetId, async () =>
+            wallet.ops
+              .send(amount, toProofs(proofsToSend))
+              .keyset(wallet.keysetId)
+              .asP2PK(p2pkOptions)
+              .run()
+          );
+        const proofsStore = useProofsStore();
+        await proofsStore.removeProofs(proofsToSend);
+        // note: we do not store sendProofs in the proofs store but
+        // expect from the caller to store it in the history
+        await proofsStore.addProofs(keepProofs);
+        return { keepProofs, sendProofs };
+      } finally {
+        uiStore.unlockMutex();
+      }
     },
     send: async function (
       proofs: WalletProof[],
       wallet: Wallet,
       amount: number,
       invalidate: boolean = false,
-      includeFees: boolean = false
+      includeFees: boolean = false,
+      mutexPriority: MutexPriority = "normal"
     ): Promise<{ keepProofs: ProofLike[]; sendProofs: ProofLike[] }> {
       // Returns sendProofs summing to `amount` (plus input fees when
       // includeFees=true). Tries an offline exact-match first; otherwise
@@ -577,8 +677,7 @@ export const useWalletStore = defineStore("wallet", {
       // or removes them if `invalidate` is true (caller takes ownership).
       const proofsStore = useProofsStore();
       const uIStore = useUiStore();
-      const keysetId = this.getKeyset(wallet.mint.mintUrl, wallet.unit);
-      await uIStore.lockMutex();
+      await uIStore.lockMutex(mutexPriority);
       try {
         const spendableProofs: Proof[] = toProofs(
           this.spendableProofs(proofs, amount)
@@ -613,13 +712,13 @@ export const useWalletStore = defineStore("wallet", {
           );
           // includeFees=true inflates send outputs so sendProofs sum to
           // amount + fees(sendProofs): required for melt and includeFees sends.
-          const swapResult = await this.retryOnceOnSignedOutputs(
-            keysetId,
+          const swapResult = await this.retryOnceOnRecoverableError(
+            swapWallet.keysetId,
             async () =>
               swapWallet.ops
                 .send(amount, spendableProofs)
                 .asDeterministic()
-                .keyset(keysetId)
+                .keyset(swapWallet.keysetId)
                 .proofsWeHave(spendableProofs)
                 .includeFees(includeFees)
                 .run()
@@ -704,17 +803,18 @@ export const useWalletStore = defineStore("wallet", {
       await uIStore.lockMutex();
       try {
         // redeem
-        const keysetId = this.getKeyset(historyToken.mint, historyToken.unit);
         const privkey = receiveStore.receiveData.p2pkPrivateKey;
         let proofs: Proof[];
         try {
-          proofs = await this.retryOnceOnSignedOutputs(keysetId, async () =>
-            mintWallet.ops
-              .receive(receiveStore.receiveData.tokensBase64)
-              .asDeterministic()
-              .privkey(privkey)
-              .proofsWeHave(mintStore.mintUnitProofs(mint, historyToken.unit))
-              .run()
+          proofs = await this.retryOnceOnRecoverableError(
+            mintWallet.keysetId,
+            async () =>
+              mintWallet.ops
+                .receive(receiveStore.receiveData.tokensBase64)
+                .asDeterministic()
+                .privkey(privkey)
+                .proofsWeHave(mintStore.mintUnitProofs(mint, historyToken.unit))
+                .run()
           );
           await proofsStore.addProofs(proofs);
         } catch (error: any) {
@@ -794,19 +894,22 @@ export const useWalletStore = defineStore("wallet", {
       }
     },
     meltQuote: meltQuoteBolt11,
-    meltInvoiceData: async function (silent?: boolean) {
+    meltInvoiceData: async function (
+      silent?: boolean,
+      mutexPriority: MutexPriority = "normal"
+    ) {
       if (
         this.payInvoiceData?.invoice &&
         (this.payInvoiceData.invoice as any).onchain
       ) {
-        return await meltInvoiceDataOnchain.call(this, silent);
+        return await meltInvoiceDataOnchain.call(this, silent, mutexPriority);
       } else if (
         this.payInvoiceData?.invoice &&
         (this.payInvoiceData.invoice as any).bolt12
       ) {
-        return await meltInvoiceDataBolt12.call(this, silent);
+        return await meltInvoiceDataBolt12.call(this, silent, mutexPriority);
       } else {
-        return await meltInvoiceDataBolt11.call(this, silent);
+        return await meltInvoiceDataBolt11.call(this, silent, mutexPriority);
       }
     },
     meltGeneric: meltGeneric,
@@ -848,7 +951,6 @@ export const useWalletStore = defineStore("wallet", {
         return;
       }
       try {
-        uIStore.triggerActivityOrb();
         const { spent: spentProofs } = await wallet.groupProofsByState(
           toProofs(proofs)
         );
@@ -1026,7 +1128,6 @@ export const useWalletStore = defineStore("wallet", {
     onTokenPaid: async function (historyToken: HistoryToken) {
       const sendTokensStore = useSendTokensStore();
       const uIStore = useUiStore();
-      const tokenJson = await token.decodeFull(historyToken.token);
       const mintStore = useMintsStore();
       const settingsStore = useSettingsStore();
       if (!settingsStore.checkSentTokens) {
@@ -1035,7 +1136,7 @@ export const useWalletStore = defineStore("wallet", {
         );
         return;
       }
-      useInvoicesWorkerStore().addOutgoingTokenToChecker?.(
+      useTransactionWorkerStore().addOutgoingTokenToChecker?.(
         historyToken.token,
         true
       );
@@ -1054,48 +1155,79 @@ export const useWalletStore = defineStore("wallet", {
         )
       ) {
         console.log(
-          "Websockets not supported, kicking off token check worker."
+          "Websockets not supported; the transaction worker will continue checking the token."
         );
-        useWorkersStore().checkTokenSpendableWorker(historyToken);
         return;
       }
+
+      const subscriptionKey = historyToken.token;
+      if (activeSentTokenSubscriptions.has(subscriptionKey)) {
+        console.log("Proof-state listener already active for sent token.");
+        return;
+      }
+      activeSentTokenSubscriptions.add(subscriptionKey);
+
+      let unsubscribe: (() => void) | undefined;
+      let cleanupRequested = false;
+      const cleanup = () => {
+        if (unsubscribe) {
+          unsubscribe();
+        } else {
+          cleanupRequested = true;
+        }
+        activeSentTokenSubscriptions.delete(subscriptionKey);
+      };
+
       try {
         console.log("onTokenPaid kicking off websocket");
+        const tokenJson = await token.decodeFull(historyToken.token);
         if (tokenJson == undefined) {
           throw new Error("no tokens provided.");
         }
         const proofs = token.getProofs(tokenJson);
         const oneProof = [proofs[0]];
         this.activeWebsocketConnections++;
-        uIStore.triggerActivityOrb();
         const wallet = await this.mintWallet(
           historyToken.mint,
           historyToken.unit
         );
-        const unsub = await wallet.on.proofStateUpdates(
+        let proofCheckInProgress = false;
+        unsubscribe = await wallet.on.proofStateUpdates(
           toProofs(oneProof),
           async (proofState: ProofState & { proof: Proof }) => {
             console.log(`Websocket: proof state updated: ${proofState.state}`);
-            if (proofState.state == CheckStateEnum.SPENT) {
-              const tokenSpent = await this.checkTokenSpendable(historyToken);
-              if (tokenSpent) {
-                sendTokensStore.showSendTokens = false;
-                unsub();
+            if (
+              proofState.state == CheckStateEnum.SPENT &&
+              !proofCheckInProgress
+            ) {
+              proofCheckInProgress = true;
+              try {
+                const tokenSpent = await this.checkTokenSpendable(historyToken);
+                if (tokenSpent) {
+                  sendTokensStore.showSendTokens = false;
+                  cleanup();
+                }
+              } finally {
+                proofCheckInProgress = false;
               }
             }
           },
           async (error: any) => {
+            cleanup();
             console.error(error);
             notifyApiError(error);
             throw error;
           }
         );
+        if (cleanupRequested) {
+          cleanup();
+        }
       } catch (error) {
+        cleanup();
         console.error(
-          "Error in websocket subscription. Starting invoices worker.",
+          "Error in websocket subscription. The transaction worker remains active.",
           error
         );
-        useWorkersStore().checkTokenSpendableWorker(historyToken);
       } finally {
         this.activeWebsocketConnections--;
       }
@@ -1122,7 +1254,7 @@ export const useWalletStore = defineStore("wallet", {
       unit: string,
       method: PaymentMethod = PaymentMethod.Bolt11
     ) {
-      this.invoiceHistory.push({
+      const invoice = {
         amount: -(quote.amount + quote.fee_reserve),
         request: this.payInvoiceData.input.request,
         quote: quote.quote,
@@ -1137,16 +1269,36 @@ export const useWalletStore = defineStore("wallet", {
           method === PaymentMethod.Onchain
             ? onchainNetwork(this.payInvoiceData.input.request || quote.request)
             : undefined,
-      });
-      useInvoicesWorkerStore().addOutgoingInvoiceToChecker?.(quote.quote, true);
+      };
+      this.invoiceHistory.push(invoice);
+      try {
+        await usePaymentHistoryStore().addPayment(invoice);
+        this.syncPaymentHistoryCache();
+      } catch (error) {
+        console.error("Could not persist outgoing payment history", error);
+      }
+      useTransactionWorkerStore().addOutgoingInvoiceToChecker?.(
+        quote.quote,
+        true
+      );
     },
-    removeOutgoingInvoiceFromHistory: function (quote: string) {
+    removeOutgoingInvoiceFromHistory: async function (quote: string) {
       const index = this.invoiceHistory.findIndex((i) => i.quote === quote);
       if (index >= 0) {
         this.invoiceHistory.splice(index, 1);
       }
+      try {
+        const updated = await usePaymentHistoryStore().removePaymentByQuote(
+          quote
+        );
+        if (updated) {
+          this.syncPaymentHistoryCache();
+        }
+      } catch (error) {
+        console.error("Could not remove payment history", error);
+      }
     },
-    updateOutgoingInvoiceInHistory: function (
+    updateOutgoingInvoiceInHistory: async function (
       quote: AppMeltQuote,
       options?: { status?: "pending" | "paid"; amount?: number }
     ) {
@@ -1169,6 +1321,29 @@ export const useWalletStore = defineStore("wallet", {
             i.network = onchainNetwork(i.request || quote.request);
           }
         });
+      try {
+        const updates: any = {
+          meltQuote: quote,
+        };
+        if (options?.status) {
+          updates.status = options.status;
+          if (options.status === "paid") {
+            updates.paidDate = currentDateStr();
+          }
+        }
+        if (options?.amount !== undefined) {
+          updates.amount = options.amount;
+        }
+        const updated = await usePaymentHistoryStore().updatePayment(
+          quote.quote,
+          updates
+        );
+        if (updated) {
+          this.syncPaymentHistoryCache();
+        }
+      } catch (error) {
+        console.error("Could not update payment history", error);
+      }
     },
     setMeltChangeOutputData: setMeltChangeOutputData,
     clearMeltChangeOutputData: clearMeltChangeOutputData,
@@ -1413,8 +1588,12 @@ export const useWalletStore = defineStore("wallet", {
       } else if (p2pkStore.isValidPubkey(req)) {
         this.handleP2PK(req);
       } else if (req.startsWith("http")) {
+        // Scanned/pasted mint URL: open the add-mint confirmation sheet on
+        // the mints tab instead of only filling the input box.
         const mintStore = useMintsStore();
         mintStore.addMintData = { url: req, nickname: "" };
+        useUiStore().setTab("mints");
+        mintStore.showAddMintDialog = true;
       } else if (
         req.toLowerCase().startsWith("creqa") ||
         req.toLowerCase().startsWith("creqb")

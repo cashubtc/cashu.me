@@ -6,13 +6,49 @@ import {
   notifyError,
   notifySuccess,
   notifyWarning,
-  notify,
 } from "../js/notify";
 import { Clipboard } from "@capacitor/clipboard";
 import { Haptics, ImpactStyle } from "@capacitor/haptics";
 
 import ts from "typescript";
 import { useSettingsStore } from "./settings";
+
+export type MutexPriority = "foreground" | "normal" | "background";
+
+type MutexWaiter = {
+  priority: MutexPriority;
+  resolve: () => void;
+};
+
+// This is intentionally module-local: waiting promises are ephemeral and must
+// never be persisted with UI state.
+const mutexWaiters: MutexWaiter[] = [];
+
+const mutexPriorityRank: Record<MutexPriority, number> = {
+  foreground: 2,
+  normal: 1,
+  background: 0,
+};
+
+function nextEligibleMutexWaiterIndex(foregroundPaymentRequests: number) {
+  let nextIndex = -1;
+
+  for (let index = 0; index < mutexWaiters.length; index++) {
+    const waiter = mutexWaiters[index];
+    if (waiter.priority === "background" && foregroundPaymentRequests > 0) {
+      continue;
+    }
+    if (
+      nextIndex === -1 ||
+      mutexPriorityRank[waiter.priority] >
+        mutexPriorityRank[mutexWaiters[nextIndex].priority]
+    ) {
+      nextIndex = index;
+    }
+  }
+
+  return nextIndex;
+}
 
 const unitTickerShortMap = {
   sat: "sats",
@@ -31,10 +67,10 @@ export const useUiStore = defineStore("ui", {
     showReceiveDialog: false,
     showReceiveEcashDrawer: false,
     showNumericKeyboard: false,
-    activityOrb: false,
     tab: useLocalStorage("cashu.ui.tab", "history" as string),
     expandHistory: useLocalStorage("cashu.ui.expandHistory", true as boolean),
     globalMutexLock: false,
+    foregroundPaymentRequests: 0,
     showDebugConsole: useLocalStorage("cashu.ui.showDebugConsole", false),
     lastBalanceCached: useLocalStorage("cashu.ui.lastBalanceCached", 0),
     multinutExperimentalWarningDismissed: useLocalStorage(
@@ -50,27 +86,37 @@ export const useUiStore = defineStore("ui", {
       this.showReceiveDialog = false;
       this.showReceiveEcashDrawer = false;
     },
-    async lockMutex() {
-      const nRetries = 10;
-      const retryInterval = 500;
-      let retries = 0;
-
-      while (this.globalMutexLock) {
-        if (retries >= nRetries) {
-          notify("Please try again.");
-          throw new Error("Failed to acquire global mutex lock");
-        }
-        retries++;
-        await new Promise((resolve) => setTimeout(resolve, retryInterval));
-      }
-
-      this.globalMutexLock = true;
+    async lockMutex(priority: MutexPriority = "normal") {
+      await new Promise<void>((resolve) => {
+        mutexWaiters.push({ priority, resolve });
+        this.dispatchMutexWaiters();
+      });
     },
     unlockMutex() {
       this.globalMutexLock = false;
+      this.dispatchMutexWaiters();
     },
-    triggerActivityOrb() {
-      this.activityOrb = true;
+    dispatchMutexWaiters() {
+      if (this.globalMutexLock) return;
+
+      const nextIndex = nextEligibleMutexWaiterIndex(
+        this.foregroundPaymentRequests
+      );
+      if (nextIndex === -1) return;
+
+      const [next] = mutexWaiters.splice(nextIndex, 1);
+      this.globalMutexLock = true;
+      next.resolve();
+    },
+    beginForegroundPayment() {
+      this.foregroundPaymentRequests += 1;
+    },
+    endForegroundPayment() {
+      this.foregroundPaymentRequests = Math.max(
+        0,
+        this.foregroundPaymentRequests - 1
+      );
+      this.dispatchMutexWaiters();
     },
     setTab(tab: string) {
       this.tab = tab;

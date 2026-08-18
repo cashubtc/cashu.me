@@ -21,6 +21,15 @@ body {
   line-height: 1.5; // Good line height for readability
 }
 
+// Native-app feel: disable text selection across the UI
+body {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
 // prevent pull to refresh
 html,
 body {

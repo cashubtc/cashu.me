@@ -1,18 +1,19 @@
 import { currentDateStr } from "src/js/utils";
 import { useMintsStore, WalletProof } from "./mints";
 import { useProofsStore } from "./proofs";
-import { useUiStore } from "src/stores/ui";
+import { type MutexPriority, useUiStore } from "src/stores/ui";
 import { Amount, Wallet, MintQuoteBolt12Response } from "@cashu/cashu-ts";
 import * as nobleSecp256k1 from "@noble/secp256k1";
 import { bytesToHex } from "@noble/hashes/utils";
 import { notifyApiError, notify, notifySuccess } from "src/js/notify";
 import type { InvoiceHistory } from "./wallet";
-import { useInvoicesWorkerStore } from "./invoicesWorker";
 import { mintOnPaidGeneric } from "./walletWebsocket";
 import { PaymentMethod } from "src/stores/walletTypes";
 import { usePriceStore } from "./price";
 import { type AppMeltQuote, normalizeMeltQuote } from "./walletMelt";
 import { createSubpaymentHistoryQuote } from "src/js/invoice-history";
+import { usePaymentHistoryStore } from "./paymentHistory";
+import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 
 // BOLT12: reusable offers
 
@@ -66,7 +67,7 @@ export async function requestMintBolt12(
     this.invoiceData.mintQuote = normalizeMintQuote(data);
     this.invoiceData.privKey = privkey;
 
-    this.invoiceHistory.push({
+    await this.addPaymentHistory({
       ...this.invoiceData,
       label: "Lightning Bolt12",
       type: PaymentMethod.Bolt12,
@@ -113,13 +114,24 @@ export async function checkOfferAndMintBolt12(
   if (!invoice) throw new Error("offer not found");
 
   const mintWallet = await this.mintWallet(invoice.mint, invoice.unit);
-  const keysetId = this.getKeyset(invoice.mint, invoice.unit);
   const mint = mintStore.mints.find((m: any) => m.url === invoice.mint);
   if (!mint) throw new Error("mint not found");
 
-  await uIStore.lockMutex();
+  const transactionWorkerStore = useTransactionWorkerStore();
+  while (true) {
+    await transactionWorkerStore.waitForMintQuoteRelease(
+      invoice.mint,
+      invoice.quote
+    );
+    await uIStore.lockMutex("background");
+    if (
+      !transactionWorkerStore.mintQuoteIsClaimed(invoice.mint, invoice.quote)
+    ) {
+      break;
+    }
+    uIStore.unlockMutex();
+  }
   try {
-    uIStore.triggerActivityOrb();
     const updated = await mintWallet.checkMintQuoteBolt12(quoteId);
 
     const paid = amountToNumber(updated.amount_paid);
@@ -131,12 +143,12 @@ export async function checkOfferAndMintBolt12(
       throw new Error("no new funds to mint");
     }
 
-    const proofs = await this.retryOnceOnSignedOutputs(
-      keysetId,
+    const proofs = await this.retryOnceOnRecoverableError(
+      mintWallet.keysetId,
       async () =>
         mintWallet.ops
           .mintBolt12(delta, updated)
-          .keyset(keysetId)
+          .keyset(mintWallet.keysetId)
           .asDeterministic()
           .proofsWeHave(mintStore.mintUnitProofs(mint, invoice.unit))
           .privkey(invoice.privKey)
@@ -149,14 +161,25 @@ export async function checkOfferAndMintBolt12(
     const meltQuoteAfterMint = await mintWallet.checkMintQuoteBolt12(quoteId);
     const normalizedMintQuote = normalizeMintQuote(meltQuoteAfterMint);
     invoice.mintQuote = normalizedMintQuote;
+    const paymentHistoryStore = usePaymentHistoryStore();
+    await paymentHistoryStore.upsertMintQuote(
+      normalizedMintQuote,
+      PaymentMethod.Bolt12
+    );
+    if (
+      paymentHistoryStore.paymentHistory.some((p) => p.quote === invoice.quote)
+    ) {
+      this.syncPaymentHistoryCache?.();
+    }
 
     if (invoice.status === "paid") {
       // If already paid, this is a reusable offer sub-payment.
       // Create a NEW history entry for this specific payment event.
-      this.invoiceHistory.push({
+      await this.addPaymentHistory({
         ...invoice,
+        id: createSubpaymentHistoryQuote(),
         amount: delta,
-        quote: createSubpaymentHistoryQuote(),
+        quote: invoice.quote,
         parentQuote: invoice.quote,
         date: currentDateStr(),
         status: "paid",
@@ -166,14 +189,14 @@ export async function checkOfferAndMintBolt12(
       });
     } else {
       // First payment: update the original offer entry
-      this.setInvoicePaid(invoice.quote, {
+      await this.setInvoicePaid(invoice.quote, {
         amount: delta,
         mintQuote: normalizedMintQuote,
       });
     }
 
     if (hideInvoiceDetailsOnMint) {
-      uIStore.showInvoiceDetails = false;
+      this.hideInvoiceDetailsAfterReceiveSuccess(invoice.quote);
     }
 
     useUiStore().vibrate();
@@ -190,7 +213,6 @@ export async function checkOfferAndMintBolt12(
       console.error(error);
     }
     if (verbose) notifyApiError(error);
-    this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error, verbose);
     throw error;
   } finally {
     uIStore.unlockMutex();
@@ -254,7 +276,11 @@ export async function meltQuoteInvoiceDataBolt12(this: any) {
   }
 }
 
-export async function meltInvoiceDataBolt12(this: any, silent?: boolean) {
+export async function meltInvoiceDataBolt12(
+  this: any,
+  silent?: boolean,
+  mutexPriority: MutexPriority = "normal"
+) {
   if (!this.payInvoiceData.invoice) throw new Error("no invoice provided.");
   const quote: AppMeltQuote = this.payInvoiceData.meltQuote.response;
   if (!quote) throw new Error("no quote found.");
@@ -268,7 +294,8 @@ export async function meltInvoiceDataBolt12(this: any, silent?: boolean) {
     mintStore.activeProofs,
     quote,
     mintWallet,
-    silent
+    silent,
+    mutexPriority
   );
 }
 
@@ -277,7 +304,8 @@ export async function meltBolt12(
   proofs: WalletProof[],
   quote: AppMeltQuote,
   mintWallet: Wallet,
-  silent?: boolean
+  silent?: boolean,
+  mutexPriority: MutexPriority = "normal"
 ) {
   return this.meltGeneric(
     proofs,
@@ -285,7 +313,10 @@ export async function meltBolt12(
     mintWallet,
     silent,
     (id: string) => mintWallet.mint.checkMeltQuoteBolt12(id),
-    PaymentMethod.Bolt12
+    PaymentMethod.Bolt12,
+    undefined,
+    false,
+    mutexPriority
   );
 }
 

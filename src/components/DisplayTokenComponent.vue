@@ -271,6 +271,7 @@
             size="lg"
             color="primary"
             rounded
+            data-testid="copy-ecash-token"
             @click="copyTokens"
           >
             {{ copyButtonLabel }}
@@ -322,7 +323,7 @@ import { Buffer } from "buffer";
 import { UR, UREncoder } from "@gandlaf21/bc-ur";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
-import { useWorkersStore } from "src/stores/workers";
+import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import { useUiStore } from "src/stores/ui";
 import { useCameraStore } from "src/stores/camera";
 import { useSettingsStore } from "src/stores/settings";
@@ -388,7 +389,7 @@ export default defineComponent({
     ...mapWritableState(useSendTokensStore, ["showSendTokens", "sendData"]),
     ...mapWritableState(useCameraStore, ["hasCamera"]),
     ...mapState(useUiStore, ["ndefSupported", "webShareSupported"]),
-    ...mapState(useWorkersStore, ["tokenWorkerRunning"]),
+    ...mapState(useTransactionWorkerStore, ["outgoingPayments"]),
     ...mapState(useSettingsStore, ["nfcEncoding"]),
     // display helpers
     sumProofs: function () {
@@ -406,7 +407,10 @@ export default defineComponent({
       return this.sumProofs - Math.abs(this.sendData.historyAmount ?? 0);
     },
     runnerActive: function () {
-      return this.tokenWorkerRunning;
+      return this.outgoingPayments.some(
+        (entry) =>
+          entry.type === "token" && entry.id === this.sendData.tokensBase64
+      );
     },
     copyButtonLabel: function () {
       if (this.copyButtonCopied) {
@@ -435,7 +439,9 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useWorkersStore, ["clearAllWorkers"]),
+    ...mapActions(useTransactionWorkerStore, [
+      "removeOutgoingTokenFromChecker",
+    ]),
     ...mapActions(useTokensStore, ["deleteToken"]),
     ...mapActions(useCameraStore, ["showCamera"]),
     copyUsingMixin(text: string) {
@@ -639,10 +645,11 @@ export default defineComponent({
       this.scanningCard = false;
     },
     deleteThisToken: function () {
-      this.deleteToken(this.sendData.tokensBase64);
+      const tokenToDelete = this.sendData.tokensBase64;
+      this.removeOutgoingTokenFromChecker(tokenToDelete);
+      this.deleteToken(tokenToDelete);
       this.showSendTokens = false;
       this.showDeleteDialog = false;
-      this.clearAllWorkers();
     },
     copyTokens: async function () {
       try {

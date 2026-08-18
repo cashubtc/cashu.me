@@ -163,6 +163,61 @@ export default {
     },
   },
   Settings: {
+    menu: {
+      title: "Inställningar",
+      backup: {
+        title: "Säkerhetskopiering och återställning",
+        caption: "Seed-fras och återställning av ecash",
+      },
+      lightning_address: {
+        title: "Lightning-adress",
+        caption: "Ta emot betalningar till din Lightning-adress",
+      },
+      nostr: {
+        title: "Nostr",
+        caption: "Nycklar, reläer och Web of Trust",
+      },
+      payment_requests: {
+        title: "Betalningsförfrågningar",
+        caption: "Ta emot ecash-betalningar via nostr",
+      },
+      nwc: {
+        title: "Nostr Wallet Connect",
+        caption: "Använd din plånbok från andra appar",
+      },
+      hardware: {
+        title: "Hårdvara",
+        caption: "NFC-inställningar",
+      },
+      p2pk: {
+        title: "P2PK",
+        caption: "Ta emot ecash låst till dina nycklar",
+      },
+      privacy: {
+        title: "Integritet",
+        caption: "Nätverkskontroller och Bitcoin-pris",
+      },
+      experimental: {
+        title: "Experimentellt",
+        caption: "Prova nya funktioner tidigt",
+      },
+      appearance: {
+        title: "Utseende",
+        caption: "Tema, tangentbord och Bitcoin-symbol",
+      },
+      language: {
+        title: "Språk",
+        caption: "Välj ditt språk",
+      },
+      advanced: {
+        title: "Avancerat",
+        caption: "Utvecklarverktyg och plånboksåterställning",
+      },
+      about: {
+        title: "Om",
+        caption: "Villkor och länkar",
+      },
+    },
     web_of_trust: {
       title: "Förtroendenätverk",
       known_pubkeys: "Kända pubkeys: {wotCount}",
@@ -174,9 +229,7 @@ export default {
       progress: "{crawlProcessed} / {crawlTotal}",
     },
     npub_cash: {
-      use_npubx: "Använd npubx.cash",
       copy_lightning_address: "Kopiera Lightning-adress",
-      v2_mint: "npub.cash v2 mint",
     },
     multinut: {
       use_multinut: "Använd Multinut",
@@ -238,13 +291,18 @@ export default {
       address: {
         copy_tooltip: "Kopiera Lightning-adress",
       },
+      show_on_receive: {
+        toggle: "Visa vid mottagning",
+        description: "Visa adress och QR-kod.",
+      },
       automatic_claim: {
         toggle: "Hämta automatiskt",
         description: "Ta emot inkommande betalningar automatiskt.",
       },
-      npc_v2: {
-        choose_mint_title: "Välj mint för npub.cash v2",
-        choose_mint_placeholder: "Välj en mint...",
+      mint: {
+        label: "npub.cash mint",
+        choose_title: "Välj mint för npub.cash",
+        choose_placeholder: "Välj en mint...",
       },
     },
     nostr_keys: {
@@ -345,7 +403,7 @@ export default {
       check_startup: {
         toggle: "Kontrollera väntande fakturor vid start",
         description:
-          "Om aktiverat kommer plånboken att kontrollera väntande fakturor från de senaste 24 timmarna vid start.",
+          "Om aktiverat kommer plånboken att kontrollera väntande fakturor vid start.",
       },
       check_all: {
         toggle: "Kontrollera alla fakturor",
@@ -992,6 +1050,7 @@ export default {
       },
       send: {
         label: "@:global.actions.send.label",
+        in_progress: "Skickar…",
       },
       delete: {
         tooltip_text: "Ta bort från historik",
@@ -1368,6 +1427,7 @@ export default {
         pay: {
           label: "Betala",
           in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
+          waiting_for_wallet: "Väntar på plånboken…",
           error: "Fel",
         },
       },

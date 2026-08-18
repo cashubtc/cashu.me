@@ -59,6 +59,7 @@
       <div class="checkbox-section">
         <q-checkbox
           v-model="welcomeStore.seedPhraseValidated"
+          data-testid="onboarding-seed-confirmed"
           :label="$t('WelcomeSlide3.inputs.checkbox.label')"
           color="primary"
           class="validation-checkbox"

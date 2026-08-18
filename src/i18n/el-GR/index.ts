@@ -165,6 +165,61 @@ export default {
     },
   },
   Settings: {
+    menu: {
+      title: "Ρυθμίσεις",
+      backup: {
+        title: "Αντίγραφο ασφαλείας & Επαναφορά",
+        caption: "Φράση seed και ανάκτηση ecash",
+      },
+      lightning_address: {
+        title: "Διεύθυνση Lightning",
+        caption: "Λάβετε πληρωμές στη διεύθυνση Lightning σας",
+      },
+      nostr: {
+        title: "Nostr",
+        caption: "Κλειδιά, relays και Web of Trust",
+      },
+      payment_requests: {
+        title: "Αιτήματα πληρωμής",
+        caption: "Λάβετε πληρωμές ecash μέσω nostr",
+      },
+      nwc: {
+        title: "Nostr Wallet Connect",
+        caption: "Χρησιμοποιήστε το πορτοφόλι σας από άλλες εφαρμογές",
+      },
+      hardware: {
+        title: "Υλικό",
+        caption: "Ρυθμίσεις NFC",
+      },
+      p2pk: {
+        title: "P2PK",
+        caption: "Λάβετε ecash κλειδωμένο στα κλειδιά σας",
+      },
+      privacy: {
+        title: "Απόρρητο",
+        caption: "Έλεγχοι δικτύου και τιμή Bitcoin",
+      },
+      experimental: {
+        title: "Πειραματικά",
+        caption: "Δοκιμάστε πρώτοι νέες λειτουργίες",
+      },
+      appearance: {
+        title: "Εμφάνιση",
+        caption: "Θέμα, πληκτρολόγιο και σύμβολο Bitcoin",
+      },
+      language: {
+        title: "Γλώσσα",
+        caption: "Επιλέξτε τη γλώσσα σας",
+      },
+      advanced: {
+        title: "Για προχωρημένους",
+        caption: "Εργαλεία προγραμματιστών και επαναφορά πορτοφολιού",
+      },
+      about: {
+        title: "Σχετικά",
+        caption: "Όροι και σύνδεσμοι",
+      },
+    },
     language: {
       title: "Γλώσσα",
       description:
@@ -223,13 +278,18 @@ export default {
       address: {
         copy_tooltip: "Αντιγραφή διεύθυνσης Lightning",
       },
+      show_on_receive: {
+        toggle: "Εμφάνιση κατά τη λήψη",
+        description: "Εμφάνιση διεύθυνσης και κωδικού QR.",
+      },
       automatic_claim: {
         toggle: "Αυτόματη διεκδίκηση",
         description: "Λήψη εισερχόμενων πληρωμών αυτόματα.",
       },
-      npc_v2: {
-        choose_mint_title: "Επιλέξτε mint για npub.cash v2",
-        choose_mint_placeholder: "Επιλέξτε ένα mint...",
+      mint: {
+        label: "npub.cash mint",
+        choose_title: "Επιλέξτε mint για npub.cash",
+        choose_placeholder: "Επιλέξτε ένα mint...",
       },
     },
     nostr_keys: {
@@ -330,7 +390,7 @@ export default {
       check_startup: {
         toggle: "Έλεγχος εκκρεμών τιμολογίων κατά την εκκίνηση",
         description:
-          "Εάν είναι ενεργοποιημένο, το πορτοφόλι θα ελέγχει τα εκκρεμή τιμολόγια των τελευταίων 24 ωρών κατά την εκκίνηση.",
+          "Εάν είναι ενεργοποιημένο, το πορτοφόλι θα ελέγχει τα εκκρεμή τιμολόγια κατά την εκκίνηση.",
       },
       check_all: {
         toggle: "Έλεγχος όλων των τιμολογίων",
@@ -437,9 +497,7 @@ export default {
       progress: "{crawlProcessed} / {crawlTotal}",
     },
     npub_cash: {
-      use_npubx: "Χρήση npubx.cash",
       copy_lightning_address: "Αντιγραφή διεύθυνσης Lightning",
-      v2_mint: "npub.cash v2 mint",
     },
     multinut: {
       use_multinut: "Χρήση Multinut",
@@ -999,6 +1057,7 @@ export default {
       },
       send: {
         label: "@:global.actions.send.label",
+        in_progress: "Αποστολή…",
       },
       delete: {
         tooltip_text: "Διαγραφή από το ιστορικό",
@@ -1375,6 +1434,7 @@ export default {
         pay: {
           label: "Πληρωμή",
           in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
+          waiting_for_wallet: "Αναμονή για το πορτοφόλι…",
           error: "Σφάλμα",
         },
       },

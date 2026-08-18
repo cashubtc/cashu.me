@@ -1,7 +1,7 @@
 import { currentDateStr } from "src/js/utils";
 import { useMintsStore, WalletProof } from "./mints";
 import { useProofsStore } from "./proofs";
-import { useUiStore } from "src/stores/ui";
+import { type MutexPriority, useUiStore } from "src/stores/ui";
 import {
   Amount,
   Wallet,
@@ -19,10 +19,11 @@ import {
 import type { InvoiceHistory } from "./wallet";
 import { PaymentMethod } from "src/stores/walletTypes";
 import { mintOnPaidGeneric } from "./walletWebsocket";
-import { useInvoicesWorkerStore } from "./invoicesWorker";
+import { useTransactionWorkerStore } from "./transactionWorker";
 import { onchainNetwork } from "src/js/onchain";
 import { type AppMeltQuote, normalizeMeltQuote } from "./walletMelt";
 import { createSubpaymentHistoryQuote } from "src/js/invoice-history";
+import { usePaymentHistoryStore } from "./paymentHistory";
 
 type AppMintQuote = Omit<
   MintQuoteOnchainResponse,
@@ -65,7 +66,7 @@ export async function requestMintOnchain(this: any, mintWallet: Wallet) {
     this.invoiceData.type = PaymentMethod.Onchain;
     this.invoiceData.network = onchainNetwork(data.request);
 
-    this.invoiceHistory.push({
+    await this.addPaymentHistory({
       ...this.invoiceData,
       label: "On-chain",
       type: PaymentMethod.Onchain,
@@ -115,22 +116,52 @@ export async function checkOnchainAndMint(
   if (!invoice) throw new Error("on-chain quote not found");
 
   const mintWallet = await this.mintWallet(invoice.mint, invoice.unit);
-  const keysetId = this.getKeyset(invoice.mint, invoice.unit);
   const mint = mintStore.mints.find((m: any) => m.url === invoice.mint);
   if (!mint) throw new Error("mint not found");
   if (!invoice.network) {
     invoice.network = onchainNetwork(invoice.request);
+    const networkUpdated = await usePaymentHistoryStore().updatePayment(
+      invoice.quote,
+      {
+        network: invoice.network,
+      }
+    );
+    if (networkUpdated) {
+      this.syncPaymentHistoryCache?.();
+    }
   }
 
-  await uIStore.lockMutex();
+  const transactionWorkerStore = useTransactionWorkerStore();
+  while (true) {
+    await transactionWorkerStore.waitForMintQuoteRelease(
+      invoice.mint,
+      invoice.quote
+    );
+    await uIStore.lockMutex("background");
+    if (
+      !transactionWorkerStore.mintQuoteIsClaimed(invoice.mint, invoice.quote)
+    ) {
+      break;
+    }
+    uIStore.unlockMutex();
+  }
   try {
-    uIStore.triggerActivityOrb();
     const updated = await mintWallet.checkMintQuoteOnchain(quoteId);
     const paid = amountToNumber(updated.amount_paid);
     const issued = amountToNumber(updated.amount_issued);
     const delta = paid - issued;
 
     invoice.mintQuote = normalizeMintQuote(updated);
+    const paymentHistoryStore = usePaymentHistoryStore();
+    await paymentHistoryStore.upsertMintQuote(
+      invoice.mintQuote,
+      PaymentMethod.Onchain
+    );
+    if (
+      paymentHistoryStore.paymentHistory.some((p) => p.quote === invoice.quote)
+    ) {
+      this.syncPaymentHistoryCache?.();
+    }
     if (this.invoiceData.quote === invoice.quote) {
       this.invoiceData.mintQuote = invoice.mintQuote;
     }
@@ -139,12 +170,12 @@ export async function checkOnchainAndMint(
       throw new Error("Address not paid");
     }
 
-    const proofs = await this.retryOnceOnSignedOutputs(
-      keysetId,
+    const proofs = await this.retryOnceOnRecoverableError(
+      mintWallet.keysetId,
       async () =>
         mintWallet.ops
           .mintOnchain(delta, updated)
-          .keyset(keysetId)
+          .keyset(mintWallet.keysetId)
           .asDeterministic()
           .proofsWeHave(mintStore.mintUnitProofs(mint, invoice.unit))
           .privkey(invoice.privKey)
@@ -156,12 +187,22 @@ export async function checkOnchainAndMint(
     const mintQuoteAfterMint = await mintWallet.checkMintQuoteOnchain(quoteId);
     const normalizedMintQuote = normalizeMintQuote(mintQuoteAfterMint);
     invoice.mintQuote = normalizedMintQuote;
+    await paymentHistoryStore.upsertMintQuote(
+      normalizedMintQuote,
+      PaymentMethod.Onchain
+    );
+    if (
+      paymentHistoryStore.paymentHistory.some((p) => p.quote === invoice.quote)
+    ) {
+      this.syncPaymentHistoryCache?.();
+    }
 
     if (invoice.status === "paid") {
-      this.invoiceHistory.push({
+      await this.addPaymentHistory({
         ...invoice,
+        id: createSubpaymentHistoryQuote(),
         amount: delta,
-        quote: createSubpaymentHistoryQuote(),
+        quote: invoice.quote,
         parentQuote: invoice.quote,
         date: currentDateStr(),
         paidDate: currentDateStr(),
@@ -171,14 +212,14 @@ export async function checkOnchainAndMint(
         type: PaymentMethod.OnchainSubpayment,
       });
     } else {
-      this.setInvoicePaid(invoice.quote, {
+      await this.setInvoicePaid(invoice.quote, {
         amount: delta,
         mintQuote: normalizedMintQuote,
       });
     }
 
     if (hideInvoiceDetailsOnMint) {
-      uIStore.showInvoiceDetails = false;
+      this.hideInvoiceDetailsAfterReceiveSuccess(invoice.quote);
     }
 
     useUiStore().vibrate();
@@ -201,7 +242,6 @@ export async function checkOnchainAndMint(
         notifyApiError(error);
       }
     }
-    this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error, verbose);
     throw error;
   } finally {
     uIStore.unlockMutex();
@@ -246,7 +286,11 @@ export async function meltQuoteInvoiceDataOnchain(this: any) {
   }
 }
 
-export async function meltInvoiceDataOnchain(this: any, silent?: boolean) {
+export async function meltInvoiceDataOnchain(
+  this: any,
+  silent?: boolean,
+  mutexPriority: MutexPriority = "normal"
+) {
   if (!this.payInvoiceData.invoice) throw new Error("no address provided.");
   const quote: AppMeltQuote = this.payInvoiceData.meltQuote.response;
   if (!quote) throw new Error("no quote found.");
@@ -260,7 +304,8 @@ export async function meltInvoiceDataOnchain(this: any, silent?: boolean) {
     mintStore.activeProofs,
     quote,
     mintWallet,
-    silent
+    silent,
+    mutexPriority
   );
 }
 
@@ -269,7 +314,8 @@ export async function meltOnchain(
   proofs: WalletProof[],
   quote: AppMeltQuote,
   mintWallet: Wallet,
-  silent?: boolean
+  silent?: boolean,
+  mutexPriority: MutexPriority = "normal"
 ) {
   const feeIndex =
     quote.selected_fee_index ?? quote.fee_options?.[0]?.fee_index;
@@ -283,7 +329,9 @@ export async function meltOnchain(
     silent,
     (id: string) => mintWallet.mint.checkMeltQuoteOnchain(id),
     PaymentMethod.Onchain,
-    { extraPayload: { fee_index: feeIndex } }
+    { extraPayload: { fee_index: feeIndex } },
+    false,
+    mutexPriority
   );
 }
 
@@ -306,7 +354,7 @@ export async function checkOutgoingOnchain(
     const meltQuote = normalizeMeltQuote(
       await mintWallet.mint.checkMeltQuoteOnchain(quote)
     );
-    this.updateOutgoingInvoiceInHistory(meltQuote);
+    await this.updateOutgoingInvoiceInHistory(meltQuote);
 
     if (meltQuote.state === MeltQuoteState.PENDING) {
       if (verbose) notify("Payment pending");
@@ -315,8 +363,8 @@ export async function checkOutgoingOnchain(
 
     if (meltQuote.state === MeltQuoteState.UNPAID) {
       await proofsStore.setReserved(proofs, false);
-      this.removeOutgoingInvoiceFromHistory(quote);
-      useInvoicesWorkerStore().removeOutgoingInvoiceFromChecker?.(quote);
+      await this.removeOutgoingInvoiceFromHistory(quote);
+      useTransactionWorkerStore().removeOutgoingInvoiceFromChecker?.(quote);
       notifyWarning(this.t("wallet.notifications.lightning_payment_failed"));
     }
 
@@ -334,7 +382,7 @@ export async function checkOutgoingOnchain(
           amount: uIStore.formatCurrency(finalizeData.amountPaid, invoice.unit),
         })
       );
-      useInvoicesWorkerStore().removeOutgoingInvoiceFromChecker?.(quote);
+      useTransactionWorkerStore().removeOutgoingInvoiceFromChecker?.(quote);
     }
   } catch (error: any) {
     if (verbose && error?.message !== "Payment pending") {

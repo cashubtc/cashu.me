@@ -1,3 +1,4 @@
+import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const h = vi.hoisted(() => {
@@ -35,9 +36,9 @@ const h = vi.hoisted(() => {
     lockMutex: vi.fn(async () => {}),
     unlockMutex: vi.fn(),
     closeDialogs: vi.fn(),
+    setTab: vi.fn(),
     formatCurrency: vi.fn((amount, unit) => `${amount} ${unit}`),
     vibrate: vi.fn(),
-    triggerActivityOrb: vi.fn(),
   };
   const p2pkStore = {
     isValidPubkey: vi.fn(() => false),
@@ -52,7 +53,7 @@ const h = vi.hoisted(() => {
     periodicallyCheckIncomingInvoices: true,
     useWebsockets: true,
   };
-  const invoicesWorkerStore = {
+  const transactionWorkerStore = {
     addInvoice: vi.fn(),
     removeInvoice: vi.fn(),
     addInvoiceToChecker: vi.fn(),
@@ -60,9 +61,10 @@ const h = vi.hoisted(() => {
     addBolt12OfferToChecker: vi.fn(),
     addOnchainQuoteToChecker: vi.fn(),
     addOutgoingTokenToChecker: vi.fn(),
+    mintQuoteIsClaimed: vi.fn(() => false),
+    waitForMintQuoteRelease: vi.fn(async () => {}),
   };
   const workersStore = {
-    checkTokenSpendableWorker: vi.fn(),
     invoiceCheckWorker: vi.fn(),
   };
   const mintsStore = {
@@ -76,6 +78,7 @@ const h = vi.hoisted(() => {
       h.mintsStore.activeMintUrl = url;
     }),
     addMintData: { url: "", nickname: "" },
+    showAddMintDialog: false,
     mints: [],
     mintUnitKeysets: vi.fn((mint, unit) =>
       mint.keysets.filter((k) => k.unit === unit)
@@ -91,6 +94,14 @@ const h = vi.hoisted(() => {
   const walletLoadMintFromCache = vi.fn();
   const walletGetFeesForProofs = vi.fn(() => 7);
   const keychainMintToCacheDTO = vi.fn(() => ({ cache: "dto" }));
+  const keychainCacheToMintDTO = vi.fn(() => ({ keysets: [], keys: [] }));
+  const walletKeychainUpdated = vi.fn(() => () => {});
+  class StaleKeysetErrorMock extends Error {
+    constructor(repaired) {
+      super("stale keyset");
+      this.repaired = repaired;
+    }
+  }
   const outputDataSerialize = vi.fn((output) => ({ serialized: output.id }));
   const outputDataDeserialize = vi.fn((output) => ({ deserialized: output }));
   const tokenModule = {
@@ -109,6 +120,7 @@ const h = vi.hoisted(() => {
       this.getFeesForProofs = walletGetFeesForProofs;
       this.on = {
         countersReserved: vi.fn(() => () => {}),
+        keychainUpdated: walletKeychainUpdated,
       };
     }
 
@@ -142,13 +154,16 @@ const h = vi.hoisted(() => {
     p2pkStore,
     prStore,
     settingsStore,
-    invoicesWorkerStore,
+    transactionWorkerStore,
     workersStore,
     mintsStore,
     priceStore,
     walletLoadMintFromCache,
     walletGetFeesForProofs,
     keychainMintToCacheDTO,
+    keychainCacheToMintDTO,
+    walletKeychainUpdated,
+    StaleKeysetErrorMock,
     outputDataSerialize,
     outputDataDeserialize,
     bolt12Decode,
@@ -207,7 +222,9 @@ vi.mock("@cashu/cashu-ts", () => ({
   },
   KeyChain: {
     mintToCacheDTO: (...args) => h.keychainMintToCacheDTO(...args),
+    cacheToMintDTO: (...args) => h.keychainCacheToMintDTO(...args),
   },
+  StaleKeysetError: h.StaleKeysetErrorMock,
   CheckStateEnum: { SPENT: "SPENT" },
   MeltQuoteState: { PAID: "PAID", PENDING: "PENDING", UNPAID: "UNPAID" },
   MintQuoteState: { PAID: "PAID", ISSUED: "ISSUED", PENDING: "PENDING" },
@@ -254,8 +271,8 @@ vi.mock("src/stores/workers", () => ({
   useWorkersStore: () => h.workersStore,
 }));
 
-vi.mock("src/stores/invoicesWorker", () => ({
-  useInvoicesWorkerStore: () => h.invoicesWorkerStore,
+vi.mock("src/stores/transactionWorker", () => ({
+  useTransactionWorkerStore: () => h.transactionWorkerStore,
 }));
 
 vi.mock("src/stores/settings", () => ({
@@ -291,6 +308,7 @@ vi.mock("src/js/token", () => ({
 }));
 
 import { useWalletStore } from "src/stores/wallet";
+import { cashuDb } from "src/stores/dexie";
 import { PaymentMethod } from "src/stores/walletTypes";
 
 function mockMintWebsocket(unit = "sat") {
@@ -311,6 +329,9 @@ function mockMintWebsocket(unit = "sat") {
       webSocketConnection: connection,
     },
     unit,
+    checkMintQuoteBatchBolt11: vi.fn(),
+    prepareBatchMint: vi.fn(),
+    completeBatchMint: vi.fn(),
   };
   return {
     connection,
@@ -321,8 +342,11 @@ function mockMintWebsocket(unit = "sat") {
 }
 
 describe("wallet store", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    await cashuDb.paymentHistory.clear();
+    await cashuDb.mintQuotes.clear();
+    await cashuDb.meltQuotes.clear();
 
     h.receiveTokensStore.showReceiveTokens = false;
     h.receiveTokensStore.receiveData.tokensBase64 = "";
@@ -463,6 +487,77 @@ describe("wallet store", () => {
     expect(wallet.invoiceData.amount).toBe(0);
   });
 
+  it("keeps manual Bolt11 checks on the single-quote path", async () => {
+    const wallet = useWalletStore();
+    const invoice = {
+      quote: "manual-q",
+      amount: 10,
+      request: "lnbc-manual",
+      memo: "manual",
+      date: "old",
+      status: "pending",
+      mint: "https://mint-a.example",
+      unit: "sat",
+      type: PaymentMethod.Bolt11,
+    };
+    wallet.invoiceHistory = [invoice];
+    const checkMintQuoteBolt11 = vi.fn(async () => ({ state: "PAID" }));
+    const checkMintQuoteBatchBolt11 = vi.fn();
+    const prepareBatchMint = vi.fn();
+    const completeBatchMint = vi.fn();
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue({
+      checkMintQuoteBolt11,
+      checkMintQuoteBatchBolt11,
+      prepareBatchMint,
+      completeBatchMint,
+    });
+    vi.spyOn(wallet, "mintBolt11").mockResolvedValue([
+      { id: "00aa", amount: 10, secret: "manual-proof" },
+    ]);
+
+    await wallet.checkInvoiceBolt11("manual-q");
+
+    expect(checkMintQuoteBolt11).toHaveBeenCalledWith("manual-q");
+    expect(checkMintQuoteBatchBolt11).not.toHaveBeenCalled();
+    expect(prepareBatchMint).not.toHaveBeenCalled();
+    expect(completeBatchMint).not.toHaveBeenCalled();
+    expect(wallet.mintBolt11).toHaveBeenCalledWith(invoice, true);
+    expect(h.notifySuccess).toHaveBeenCalledOnce();
+  });
+
+  it("keeps background single-quote checks silent after successful minting", async () => {
+    const wallet = useWalletStore();
+    wallet.invoiceHistory = [
+      {
+        quote: "background-q",
+        amount: 10,
+        request: "lnbc-background",
+        memo: "background",
+        date: "old",
+        status: "pending",
+        mint: "https://mint-a.example",
+        unit: "sat",
+        type: PaymentMethod.Bolt11,
+      },
+    ];
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue({
+      checkMintQuoteBolt11: vi.fn(async () => ({ state: "PAID" })),
+    });
+    vi.spyOn(wallet, "mintBolt11").mockResolvedValue([
+      { id: "00aa", amount: 10, secret: "background-proof" },
+    ]);
+    const hideInvoiceDetails = vi.spyOn(
+      wallet,
+      "hideInvoiceDetailsAfterReceiveSuccess"
+    );
+
+    await wallet.checkInvoiceBolt11("background-q", false);
+
+    expect(h.notifySuccess).not.toHaveBeenCalled();
+    expect(h.uiStore.vibrate).not.toHaveBeenCalled();
+    expect(hideInvoiceDetails).not.toHaveBeenCalled();
+  });
+
   it("adds, updates and removes outgoing invoices", async () => {
     const wallet = useWalletStore();
     wallet.payInvoiceData.input.request = "lnbc123";
@@ -516,6 +611,29 @@ describe("wallet store", () => {
       { name: "mint-a" },
       { cache: "dto" }
     );
+  });
+
+  it("persists Cashu TS keychain repairs in the mint cache", () => {
+    const wallet = useWalletStore();
+    const mint = h.mintsStore.mints[0];
+    h.keychainCacheToMintDTO.mockReturnValue({
+      keysets: [
+        { id: "00aa", unit: "sat", active: false },
+        { id: "00bb", unit: "sat", active: true },
+      ],
+      keys: [{ id: "00bb" }],
+    });
+
+    wallet.createWalletInstance(mint, mint.url, "sat");
+    const onKeychainUpdated = h.walletKeychainUpdated.mock.calls[0][0];
+    onKeychainUpdated({ cache: {} });
+
+    expect(mint.keysets).toEqual([
+      { id: "base64-a", unit: "sat", active: true },
+      { id: "00aa", unit: "sat", active: false },
+      { id: "00bb", unit: "sat", active: true },
+    ]);
+    expect(mint.keys).toEqual([{ id: "00aa" }, { id: "00bb" }]);
   });
 
   it("gets fees using the provided mint context instead of the active mint", () => {
@@ -688,6 +806,21 @@ describe("wallet store", () => {
     expect(h.notify).toHaveBeenCalledWith("wallet.notifications.trying_again");
   });
 
+  it("retries once after Cashu TS repairs a stale keyset", async () => {
+    const wallet = useWalletStore();
+    const operation = vi
+      .fn()
+      .mockRejectedValueOnce(new h.StaleKeysetErrorMock(true))
+      .mockResolvedValueOnce("minted");
+
+    await expect(
+      wallet.retryOnceOnRecoverableError("00aa", operation)
+    ).resolves.toBe("minted");
+
+    expect(operation).toHaveBeenCalledTimes(2);
+    expect(h.notify).toHaveBeenCalledWith("wallet.notifications.trying_again");
+  });
+
   it("cancels Bolt11 mint websocket subscriptions after a paid callback", async () => {
     const wallet = useWalletStore();
     const websocket = mockMintWebsocket();
@@ -731,6 +864,116 @@ describe("wallet store", () => {
       expect.any(Function)
     );
     expect(websocket.connection.cancelSubscription).toHaveBeenCalledTimes(1);
+    expect(wallet.mintBolt11).toHaveBeenCalledWith(
+      wallet.invoiceHistory[0],
+      false
+    );
+    expect(
+      websocket.mintWallet.checkMintQuoteBatchBolt11
+    ).not.toHaveBeenCalled();
+    expect(websocket.mintWallet.prepareBatchMint).not.toHaveBeenCalled();
+    expect(websocket.mintWallet.completeBatchMint).not.toHaveBeenCalled();
+  });
+
+  it("reserves Bolt11 websocket setup before awaiting the mint wallet", async () => {
+    const wallet = useWalletStore();
+    const websocket = mockMintWebsocket();
+    wallet.invoiceHistory = [
+      {
+        quote: "bolt11-setup-race-q",
+        amount: 100,
+        request: "lnbc123",
+        memo: "memo",
+        date: "old",
+        status: "pending",
+        mint: "https://mint-a.example",
+        unit: "sat",
+        type: PaymentMethod.Bolt11,
+      },
+    ];
+    h.mintsStore.mints[0].info = {
+      nuts: {
+        17: {
+          supported: [
+            {
+              method: PaymentMethod.Bolt11,
+              unit: "sat",
+              commands: ["bolt11_mint_quote"],
+            },
+          ],
+        },
+      },
+    };
+    let resolveMintWallet;
+    const mintWalletPending = new Promise((resolve) => {
+      resolveMintWallet = resolve;
+    });
+    const mintWallet = vi
+      .spyOn(wallet, "mintWallet")
+      .mockReturnValue(mintWalletPending);
+    vi.spyOn(wallet, "mintBolt11").mockResolvedValue([]);
+
+    const firstSetup = wallet.mintOnPaidBolt11("bolt11-setup-race-q");
+    const duplicateSetup = wallet.mintOnPaidBolt11("bolt11-setup-race-q");
+
+    expect(mintWallet).toHaveBeenCalledOnce();
+
+    resolveMintWallet(websocket.mintWallet);
+    await Promise.all([firstSetup, duplicateSetup]);
+
+    expect(websocket.connection.createSubscription).toHaveBeenCalledOnce();
+    await websocket.onUpdate()({ state: "PAID" });
+  });
+
+  it("does not overlap duplicate Bolt11 paid callbacks", async () => {
+    const wallet = useWalletStore();
+    const websocket = mockMintWebsocket();
+    wallet.invoiceHistory = [
+      {
+        quote: "bolt11-paid-race-q",
+        amount: 100,
+        request: "lnbc123",
+        memo: "memo",
+        date: "old",
+        status: "pending",
+        mint: "https://mint-a.example",
+        unit: "sat",
+        type: PaymentMethod.Bolt11,
+      },
+    ];
+    h.mintsStore.mints[0].info = {
+      nuts: {
+        17: {
+          supported: [
+            {
+              method: PaymentMethod.Bolt11,
+              unit: "sat",
+              commands: ["bolt11_mint_quote"],
+            },
+          ],
+        },
+      },
+    };
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue(websocket.mintWallet);
+    let resolveMint;
+    const mintPending = new Promise((resolve) => {
+      resolveMint = resolve;
+    });
+    const mintBolt11 = vi
+      .spyOn(wallet, "mintBolt11")
+      .mockReturnValue(mintPending);
+
+    await wallet.mintOnPaidBolt11("bolt11-paid-race-q");
+    const firstPaidCallback = websocket.onUpdate()({ state: "PAID" });
+    const duplicatePaidCallback = websocket.onUpdate()({ state: "PAID" });
+
+    expect(mintBolt11).toHaveBeenCalledOnce();
+
+    resolveMint([]);
+    await Promise.all([firstPaidCallback, duplicatePaidCallback]);
+
+    expect(mintBolt11).toHaveBeenCalledOnce();
+    expect(websocket.connection.cancelSubscription).toHaveBeenCalledOnce();
   });
 
   it("subscribes Bolt12 minting to Bolt12 websocket updates", async () => {
@@ -770,9 +1013,9 @@ describe("wallet store", () => {
     await wallet.mintOnPaidBolt12("bolt12-q");
     await websocket.onUpdate()({ state: "PAID" });
 
-    expect(h.invoicesWorkerStore.addBolt12OfferToChecker).toHaveBeenCalledWith(
-      "bolt12-q"
-    );
+    expect(
+      h.transactionWorkerStore.addBolt12OfferToChecker
+    ).toHaveBeenCalledWith("bolt12-q");
     expect(websocket.connection.createSubscription).toHaveBeenCalledWith(
       { kind: "bolt12_mint_quote", filters: ["bolt12-q"] },
       expect.any(Function),
@@ -823,10 +1066,9 @@ describe("wallet store", () => {
     await wallet.mintOnPaidOnchain("onchain-q");
     await websocket.onUpdate()({ state: "PAID" });
 
-    expect(h.invoicesWorkerStore.addOnchainQuoteToChecker).toHaveBeenCalledWith(
-      "onchain-q",
-      true
-    );
+    expect(
+      h.transactionWorkerStore.addOnchainQuoteToChecker
+    ).toHaveBeenCalledWith("onchain-q", true);
     expect(websocket.connection.createSubscription).toHaveBeenCalledWith(
       { kind: "onchain_mint_quote", filters: ["onchain-q"] },
       expect.any(Function),
@@ -892,7 +1134,7 @@ describe("wallet store", () => {
     });
 
     expect(
-      h.invoicesWorkerStore.addOutgoingTokenToChecker
+      h.transactionWorkerStore.addOutgoingTokenToChecker
     ).toHaveBeenCalledWith("cashu-token", true);
     expect(mintWalletSpy).toHaveBeenCalledWith("https://mint-b.example", "sat");
     expect(wallet.activeWallet).not.toHaveBeenCalled();
@@ -906,6 +1148,108 @@ describe("wallet store", () => {
       expect.any(Function),
       expect.any(Function)
     );
+  });
+
+  it("uses only the transaction worker when sent-token WebSockets are unavailable", async () => {
+    const wallet = useWalletStore();
+    h.settingsStore.useWebsockets = false;
+    h.mintsStore.mints = [
+      {
+        url: "https://mint-b.example",
+        keys: [{ id: "00bb" }],
+        keysets: [{ id: "00bb", unit: "sat", active: true }],
+        info: { nuts: {} },
+      },
+    ];
+    const mintWalletSpy = vi.spyOn(wallet, "mintWallet");
+
+    await wallet.onTokenPaid({
+      token: "cashu-token-no-websocket",
+      amount: -1,
+      mint: "https://mint-b.example",
+      unit: "sat",
+      status: "pending",
+    });
+
+    expect(
+      h.transactionWorkerStore.addOutgoingTokenToChecker
+    ).toHaveBeenCalledWith("cashu-token-no-websocket", true);
+    expect(mintWalletSpy).not.toHaveBeenCalled();
+  });
+
+  it("deduplicates sent-token websocket setup and spent checks", async () => {
+    const wallet = useWalletStore();
+    h.mintsStore.mints = [
+      {
+        url: "https://mint-b.example",
+        keys: [{ id: "00bb" }],
+        keysets: [{ id: "00bb", unit: "sat", active: true }],
+        info: {
+          nuts: {
+            17: {
+              supported: [
+                {
+                  method: PaymentMethod.Bolt11,
+                  unit: "sat",
+                  commands: ["proof_state"],
+                },
+              ],
+            },
+          },
+        },
+      },
+    ];
+    const historyToken = {
+      token: "cashu-token-concurrency",
+      amount: -1,
+      mint: "https://mint-b.example",
+      unit: "sat",
+      status: "pending",
+    };
+    let resolveDecode;
+    const decodePending = new Promise((resolve) => {
+      resolveDecode = resolve;
+    });
+    h.tokenModule.decodeFull.mockReturnValue(decodePending);
+    h.tokenModule.getProofs.mockReturnValue([
+      { id: "00bb", amount: 1, secret: "s1" },
+    ]);
+    let onProofStateUpdate;
+    const unsubscribe = vi.fn();
+    const tokenWallet = {
+      on: {
+        proofStateUpdates: vi.fn(async (_proofs, callback) => {
+          onProofStateUpdate = callback;
+          return unsubscribe;
+        }),
+      },
+    };
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue(tokenWallet);
+
+    const firstSetup = wallet.onTokenPaid(historyToken);
+    const duplicateSetup = wallet.onTokenPaid(historyToken);
+
+    expect(h.tokenModule.decodeFull).toHaveBeenCalledOnce();
+    resolveDecode({ proofs: [] });
+    await Promise.all([firstSetup, duplicateSetup]);
+    expect(tokenWallet.on.proofStateUpdates).toHaveBeenCalledOnce();
+
+    let resolveSpendabilityCheck;
+    const spendabilityCheckPending = new Promise((resolve) => {
+      resolveSpendabilityCheck = resolve;
+    });
+    const checkTokenSpendable = vi
+      .spyOn(wallet, "checkTokenSpendable")
+      .mockReturnValue(spendabilityCheckPending);
+    const firstUpdate = onProofStateUpdate({ state: "SPENT" });
+    const duplicateUpdate = onProofStateUpdate({ state: "SPENT" });
+
+    expect(checkTokenSpendable).toHaveBeenCalledOnce();
+    resolveSpendabilityCheck(true);
+    await Promise.all([firstUpdate, duplicateUpdate]);
+
+    expect(checkTokenSpendable).toHaveBeenCalledOnce();
+    expect(unsubscribe).toHaveBeenCalledOnce();
   });
 
   it("serializes Bolt12 minting so concurrent checks use distinct counters", async () => {
@@ -977,11 +1321,12 @@ describe("wallet store", () => {
     expect(wallet.keysetCounter("00aa")).toBe(3);
     expect(subpayment).toMatchObject({
       amount: 100,
+      quote: "offer-q",
       parentQuote: "offer-q",
       type: PaymentMethod.Bolt12Subpayment,
     });
-    expect(subpayment.quote).toMatch(/^subpayment:/);
-    expect(subpayment.quote).not.toContain("offer-q");
+    expect(subpayment.id).toMatch(/^subpayment:/);
+    expect(subpayment.id).not.toContain("offer-q");
     expect(h.uiStore.lockMutex).toHaveBeenCalledTimes(2);
     expect(h.uiStore.unlockMutex).toHaveBeenCalledTimes(2);
   });
@@ -1033,11 +1378,12 @@ describe("wallet store", () => {
     );
     expect(subpayment).toMatchObject({
       amount: 75,
+      quote: parentQuote,
       parentQuote,
       type: PaymentMethod.OnchainSubpayment,
     });
-    expect(subpayment.quote).toMatch(/^subpayment:/);
-    expect(subpayment.quote).not.toContain(parentQuote);
+    expect(subpayment.id).toMatch(/^subpayment:/);
+    expect(subpayment.id).not.toContain(parentQuote);
     expect(mintWallet.checkMintQuoteOnchain).toHaveBeenCalledWith(parentQuote);
   });
 
@@ -1371,6 +1717,7 @@ describe("wallet store", () => {
     const mintWallet = {
       mint: { mintUrl: "https://mint-a.example" },
       unit: "sat",
+      keysetId: "00aa",
       prepareMelt,
       completeMelt,
     };
@@ -1442,6 +1789,7 @@ describe("wallet store", () => {
     const mintWallet = {
       mint: { mintUrl: "https://mint-a.example" },
       unit: "sat",
+      keysetId: "00aa",
       prepareMelt,
       completeMelt,
     };
@@ -1487,7 +1835,7 @@ describe("wallet store", () => {
     expect(h.uiStore.unlockMutex).toHaveBeenCalledTimes(2);
   });
 
-  it("forwards the silent flag through meltInvoiceData", async () => {
+  it("forwards the silent flag and mutex priority through meltInvoiceData", async () => {
     const wallet = useWalletStore();
     const proofs = [{ id: "00aa", amount: 105, secret: "s1" }];
     const quote = {
@@ -1516,9 +1864,16 @@ describe("wallet store", () => {
       change: [],
     });
 
-    await wallet.meltInvoiceData(true);
+    await wallet.meltInvoiceData(true, "foreground");
 
-    expect(meltBolt11).toHaveBeenCalledWith(proofs, quote, mintWallet, true);
+    expect(meltBolt11).toHaveBeenCalledWith(
+      proofs,
+      quote,
+      mintWallet,
+      true,
+      false,
+      "foreground"
+    );
   });
 
   it("passes selected on-chain fee index through recoverable melt completion", async () => {
@@ -1556,6 +1911,7 @@ describe("wallet store", () => {
     const mintWallet = {
       mint: { mintUrl: "https://mint-a.example" },
       unit: "sat",
+      keysetId: "00aa",
       prepareMelt,
       completeMelt,
     };
@@ -1617,10 +1973,13 @@ describe("wallet store", () => {
     expect(h.outputDataDeserialize).toHaveBeenCalledWith({
       serialized: "change-output",
     });
-    expect(createMeltChangeProofs).toHaveBeenCalledWith(
-      [{ deserialized: { serialized: "change-output" } }],
-      changeSigs
-    );
+    const [restoredOutputs, restoredChangeSigs] =
+      createMeltChangeProofs.mock.calls[0];
+    expect(restoredOutputs).toEqual([
+      { deserialized: { serialized: "change-output" } },
+    ]);
+    expect(restoredChangeSigs[0]).toMatchObject({ id: "00aa", C_: "sig" });
+    expect(restoredChangeSigs[0].amount.toNumber()).toBe(3);
     expect(h.proofsStore.addMissingProofs).toHaveBeenCalledWith(changeProofs);
     expect(wallet.invoiceHistory[0]).toMatchObject({
       status: "paid",
@@ -1670,10 +2029,13 @@ describe("wallet store", () => {
     expect(h.outputDataDeserialize).toHaveBeenCalledWith({
       serialized: "legacy-change-output",
     });
-    expect(createMeltChangeProofs).toHaveBeenCalledWith(
-      [{ deserialized: { serialized: "legacy-change-output" } }],
-      changeSigs
-    );
+    const [restoredOutputs, restoredChangeSigs] =
+      createMeltChangeProofs.mock.calls[0];
+    expect(restoredOutputs).toEqual([
+      { deserialized: { serialized: "legacy-change-output" } },
+    ]);
+    expect(restoredChangeSigs[0]).toMatchObject({ id: "00aa", C_: "sig" });
+    expect(restoredChangeSigs[0].amount.toNumber()).toBe(3);
     expect(wallet.invoiceHistory[0]).toMatchObject({
       status: "paid",
       amount: -102,
@@ -1707,6 +2069,8 @@ describe("wallet store", () => {
     expect(h.receiveTokensStore.receiveData.tokensBase64).toBe("cashuAabcdef");
     expect(h.sendTokensStore.sendData.p2pkPubkey).toBe("02abcdef");
     expect(h.mintsStore.addMintData.url).toBe("https://mint-b.example");
+    expect(h.mintsStore.showAddMintDialog).toBe(true);
+    expect(h.uiStore.setTab).toHaveBeenCalledWith("mints");
     expect(wallet.handlePaymentRequest).toHaveBeenCalledWith("creqA123");
     expect(wallet.handlePaymentRequest).toHaveBeenCalledWith("creqb1xyz");
     expect(wallet.handlePaymentRequest).toHaveBeenCalledWith(

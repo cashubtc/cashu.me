@@ -164,6 +164,61 @@ export default {
     },
   },
   Settings: {
+    menu: {
+      title: "设置",
+      backup: {
+        title: "备份与恢复",
+        caption: "助记词与 ecash 恢复",
+      },
+      lightning_address: {
+        title: "闪电地址",
+        caption: "通过您的闪电地址接收付款",
+      },
+      nostr: {
+        title: "Nostr",
+        caption: "密钥、中继和信任网络",
+      },
+      payment_requests: {
+        title: "付款请求",
+        caption: "通过 nostr 接收 ecash 付款",
+      },
+      nwc: {
+        title: "Nostr 钱包连接",
+        caption: "从其他应用程序使用您的钱包",
+      },
+      hardware: {
+        title: "硬件",
+        caption: "NFC 设置",
+      },
+      p2pk: {
+        title: "P2PK",
+        caption: "接收锁定到您密钥的 ecash",
+      },
+      privacy: {
+        title: "隐私",
+        caption: "网络检查与比特币价格",
+      },
+      experimental: {
+        title: "实验性",
+        caption: "抢先体验新功能",
+      },
+      appearance: {
+        title: "外观",
+        caption: "主题、键盘和比特币符号",
+      },
+      language: {
+        title: "语言",
+        caption: "选择您的语言",
+      },
+      advanced: {
+        title: "高级",
+        caption: "开发者工具与钱包重置",
+      },
+      about: {
+        title: "关于",
+        caption: "条款与链接",
+      },
+    },
     web_of_trust: {
       title: "信任网络",
       known_pubkeys: "已知公钥：{wotCount}",
@@ -176,9 +231,7 @@ export default {
       progress: "{crawlProcessed} / {crawlTotal}",
     },
     npub_cash: {
-      use_npubx: "使用 npubx.cash",
       copy_lightning_address: "复制闪电地址",
-      v2_mint: "npub.cash v2 铸币厂",
     },
     multinut: {
       use_multinut: "使用 Multinut",
@@ -240,13 +293,18 @@ export default {
       address: {
         copy_tooltip: "复制 Lightning 地址",
       },
+      show_on_receive: {
+        toggle: "收款时显示",
+        description: "显示地址和二维码。",
+      },
       automatic_claim: {
         toggle: "自动认领",
         description: "自动接收收到的支付。",
       },
-      npc_v2: {
-        choose_mint_title: "为 npub.cash v2 选择铸币厂",
-        choose_mint_placeholder: "选择一个铸币厂…",
+      mint: {
+        label: "npub.cash 铸币厂",
+        choose_title: "为 npub.cash 选择铸币厂",
+        choose_placeholder: "选择一个铸币厂…",
       },
     },
     nostr_keys: {
@@ -345,7 +403,7 @@ export default {
       },
       check_startup: {
         toggle: "启动时检查待处理发票",
-        description: "如果启用，钱包会在启动时检查过去 24 小时内待处理的发票。",
+        description: "如果启用，钱包会在启动时检查待处理的发票。",
       },
       check_all: {
         toggle: "检查所有发票",
@@ -985,6 +1043,7 @@ export default {
       },
       send: {
         label: "@:global.actions.send.label",
+        in_progress: "正在发送…",
       },
       delete: {
         tooltip_text: "从历史记录中删除",
@@ -1358,6 +1417,7 @@ export default {
         pay: {
           label: "支付",
           in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
+          waiting_for_wallet: "正在等待钱包…",
           error: "错误",
         },
       },

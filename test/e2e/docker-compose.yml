@@ -1,0 +1,54 @@
+services:
+  mint-a:
+    image: cashubtc/mintd@sha256:82033e89f7a15709e12a5cb2a6ccba8c342f4e4a76bf2d4de05d07ffcddb04a9
+    command:
+      - cdk-mintd
+      - --work-dir
+      - /data
+      - --config
+      - /config/config.toml
+      - --enable-logging
+    environment:
+      CDK_MINTD_MNEMONIC: "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+      CDK_MINTD_MANAGEMENT_ENABLED: "true"
+      CDK_MINTD_MANAGEMENT_ADDRESS: "0.0.0.0"
+      CDK_MINTD_MANAGEMENT_PORT: "10000"
+    ports:
+      - "127.0.0.1:8085:8085"
+      - "127.0.0.1:10000:10000"
+    volumes:
+      - ./mints/mint-a.toml:/config/config.toml:ro
+    tmpfs:
+      - /data
+    healthcheck:
+      test:
+        ["CMD", "wget", "--spider", "--quiet", "http://127.0.0.1:8085/v1/info"]
+      interval: 2s
+      timeout: 2s
+      retries: 40
+      start_period: 5s
+
+  mint-b:
+    image: cashubtc/mintd@sha256:82033e89f7a15709e12a5cb2a6ccba8c342f4e4a76bf2d4de05d07ffcddb04a9
+    command:
+      - cdk-mintd
+      - --work-dir
+      - /data
+      - --config
+      - /config/config.toml
+      - --enable-logging
+    environment:
+      CDK_MINTD_MNEMONIC: "legal winner thank year wave sausage worth useful legal winner thank yellow"
+    ports:
+      - "127.0.0.1:8086:8086"
+    volumes:
+      - ./mints/mint-b.toml:/config/config.toml:ro
+    tmpfs:
+      - /data
+    healthcheck:
+      test:
+        ["CMD", "wget", "--spider", "--quiet", "http://127.0.0.1:8086/v1/info"]
+      interval: 2s
+      timeout: 2s
+      retries: 40
+      start_period: 5s

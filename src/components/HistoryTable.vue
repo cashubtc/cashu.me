@@ -164,7 +164,7 @@ import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { useWalletStore } from "src/stores/wallet";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { useUiStore } from "src/stores/ui";
-import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
+import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import token from "../js/token";
 import { notify } from "src/js/notify";
 import {
@@ -276,7 +276,7 @@ export default defineComponent({
       "checkOfferAndMintBolt12",
       "checkOnchainAndMint",
     ]),
-    ...mapActions(useInvoicesWorkerStore, [
+    ...mapActions(useTransactionWorkerStore, [
       "addInvoiceToChecker",
       "addBolt12OfferToChecker",
       "addOutgoingInvoiceToChecker",
@@ -393,12 +393,9 @@ export default defineComponent({
           this.checkOnchainAndMint(transaction.quote, true);
         }
       } else if (transaction.type === UnifiedTransactionType.Lightning) {
-        // Prefer explicit type check, fallback to heuristic for old history
         const isBolt12 =
           transaction.method === PaymentMethod.Bolt12 ||
-          transaction.method === PaymentMethod.Bolt12Subpayment ||
-          (transaction?.mintQuote &&
-            typeof transaction.mintQuote.amount_paid !== "undefined");
+          transaction.method === PaymentMethod.Bolt12Subpayment;
 
         if (transaction.amount < 0) {
           this.checkOutgoingInvoice(transaction.quote, true);
@@ -471,9 +468,7 @@ export default defineComponent({
         }
         const isBolt12 =
           invoice.method === PaymentMethod.Bolt12 ||
-          invoice.method === PaymentMethod.Bolt12Subpayment ||
-          (invoice?.mintQuote &&
-            typeof invoice.mintQuote.amount_paid !== "undefined");
+          invoice.method === PaymentMethod.Bolt12Subpayment;
 
         if (invoice.amount < 0) {
           this.addOutgoingInvoiceToChecker(invoice.quote, true);
@@ -515,15 +510,20 @@ export default defineComponent({
 
       // Add invoice transactions (lightning)
       this.invoiceHistory.forEach((invoice) => {
+        const paymentMethod =
+          invoice.method ||
+          invoice.paymentType ||
+          invoice.type ||
+          PaymentMethod.Bolt11;
         transactions.push({
           ...invoice,
           type:
-            invoice.type === PaymentMethod.Onchain ||
-            invoice.type === PaymentMethod.OnchainSubpayment
+            paymentMethod === PaymentMethod.Onchain ||
+            paymentMethod === PaymentMethod.OnchainSubpayment
               ? UnifiedTransactionType.Onchain
               : UnifiedTransactionType.Lightning,
-          method: invoice.type || PaymentMethod.Bolt11,
-          id: `invoice-${invoice.quote}`,
+          method: paymentMethod,
+          id: invoice.id ? `payment-${invoice.id}` : `invoice-${invoice.quote}`,
           label: invoice.label,
         });
       });

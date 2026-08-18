@@ -213,10 +213,8 @@ export const usePRStore = defineStore("payment-request", {
       }
 
       const sendTokenStore = useSendTokensStore();
-      if (!sendTokenStore.showSendTokens) {
-        // if the sendtokendialog is not currently open, clear all data and then show the send dialog
-        sendTokenStore.clearSendData();
-      }
+      // Always clear any existing send data so a new payment request starts fresh
+      sendTokenStore.clearSendData();
       // if the payment request has an amount, set it
       if (request.amount) {
         sendTokenStore.sendData.amount =

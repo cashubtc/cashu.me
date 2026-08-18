@@ -124,7 +124,7 @@
                           }}
                         </div>
                       </div>
-                      <div v-else-if="isPaying" class="q-mb-md">
+                      <div v-else-if="paymentInProgress" class="q-mb-md">
                         <div class="row">
                           <div class="col-12 text-h4 text-weight-bold q-mb-xs">
                             {{ $t("PayInvoiceDialog.invoice.paying") }}
@@ -233,12 +233,6 @@
                             </div>
                           </div>
                         </div>
-                        <MeltQuoteInformation
-                          v-if="showMeltQuoteInformation"
-                          class="q-mt-sm"
-                          :melt-quote="payInvoiceData.meltQuote.response"
-                          :mint-url="activeMintUrl"
-                        />
                         <p
                           class="text-wrap q-mt-xl"
                           style="max-width: 600px; font-size: 1.1rem"
@@ -304,6 +298,15 @@
                       </div>
                     </div>
                   </transition>
+                </div>
+                <div
+                  v-if="showBottomMeltQuoteInformation"
+                  class="invoice-details-bottom"
+                >
+                  <MeltQuoteInformation
+                    :melt-quote="payInvoiceData.meltQuote.response"
+                    :mint-url="activeMintUrl"
+                  />
                 </div>
               </div>
 
@@ -499,6 +502,7 @@
                 <ParseInputComponent
                   v-if="!camera.show"
                   v-model="payInvoiceData.input.request"
+                  test-id="payment-request-input"
                   :placeholder="parseInputPlaceholder"
                   :has-camera="hasCameraAvailable"
                   :ndef-supported="false"
@@ -541,7 +545,8 @@
                 v-else-if="
                   enoughtotalUnitBalance ||
                   (hasMultinutSupport && multinutEnabled) ||
-                  globalMutexLock
+                  waitingForWallet ||
+                  paymentInProgress
                 "
               >
                 <q-btn
@@ -550,17 +555,19 @@
                   size="lg"
                   color="primary"
                   rounded
-                  :disabled="payInvoiceData.blocking"
-                  @click="handleMeltButton"
-                  :label="
-                    !payInvoiceData.blocking
-                      ? $t('PayInvoiceDialog.invoice.actions.pay.label')
-                      : $t('PayInvoiceDialog.invoice.actions.pay.in_progress')
+                  data-testid="pay-payment-request"
+                  :disabled="
+                    payInvoiceData.blocking ||
+                    waitingForWallet ||
+                    paymentInProgress
                   "
-                  :loading="globalMutexLock && !payInvoiceData.blocking"
+                  @click="handleMeltButton"
+                  :label="paymentButtonLabel"
+                  :loading="waitingForWallet || paymentInProgress"
                 >
                   <template v-slot:loading>
-                    <q-spinner />
+                    <q-spinner class="q-mr-sm" />
+                    <span>{{ paymentButtonLabel }}</span>
                   </template>
                 </q-btn>
                 <q-btn
@@ -627,6 +634,7 @@
                 size="lg"
                 color="primary"
                 rounded
+                data-testid="quote-payment-request"
                 @click="handleAmountlessQuote"
                 :disabled="
                   payInvoiceData.blocking ||
@@ -798,6 +806,7 @@ export default defineComponent({
       fiatKeyboardMode: false as boolean,
       isPaying: false as boolean,
       isPaid: false as boolean,
+      waitingForWallet: false as boolean,
       autoCloseTimeout: null as ReturnType<typeof setTimeout> | null,
     };
   },
@@ -831,6 +840,12 @@ export default defineComponent({
     "payInvoiceData.meltQuote.error": function (val) {
       if (val && this.showAmountlessPaymentAmountEntry) {
         this.showNumericKeyboard = false;
+      }
+    },
+    "payInvoiceData.paying": function (val) {
+      if (val) {
+        this.waitingForWallet = false;
+        this.isPaying = true;
       }
     },
     "payInvoiceData.lnurlpay": {
@@ -883,7 +898,7 @@ export default defineComponent({
     },
   },
   computed: {
-    ...mapState(useUiStore, ["tickerShort", "globalMutexLock"]),
+    ...mapState(useUiStore, ["tickerShort"]),
     ...mapState(useSettingsStore, ["multinutEnabled"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     ...mapWritableState(useUiStore, ["showNumericKeyboard"]),
@@ -950,6 +965,14 @@ export default defineComponent({
         typeof paidRaw !== "boolean";
       return hasAmount || hasFeeReserve || hasFeePaid || hasPaidTimestamp;
     },
+    showBottomMeltQuoteInformation: function (): boolean {
+      return (
+        this.showMeltQuoteInformation &&
+        this.hasMeltQuote &&
+        !this.isPaid &&
+        !this.paymentInProgress
+      );
+    },
     showOnchainFeeOptions: function (): boolean {
       return this.isOnchainPay && this.onchainFeeOptions.length > 0;
     },
@@ -1014,6 +1037,22 @@ export default defineComponent({
     showNoMintForMethodError: function (): boolean {
       return this.payPaymentMethod != null && !this.hasMintForPayMethod;
     },
+    paymentInProgress: function (): boolean {
+      return Boolean(this.isPaying || this.payInvoiceData?.paying);
+    },
+    paymentButtonLabel: function (): string {
+      if (this.waitingForWallet) {
+        return this.$t(
+          "PayInvoiceDialog.invoice.actions.pay.waiting_for_wallet"
+        ) as string;
+      }
+      if (this.paymentInProgress) {
+        return this.$t(
+          "PayInvoiceDialog.invoice.actions.pay.in_progress"
+        ) as string;
+      }
+      return this.$t("PayInvoiceDialog.invoice.actions.pay.label") as string;
+    },
     isBolt12Pay: function (): boolean {
       return this.payPaymentMethod === PaymentMethod.Bolt12;
     },
@@ -1027,7 +1066,7 @@ export default defineComponent({
         !this.hasMeltQuote &&
         !this.payInvoiceData.blocking &&
         !this.isPaid &&
-        !this.isPaying &&
+        !this.paymentInProgress &&
         this.payInvoiceData.meltQuote.error == ""
       );
     },
@@ -1035,7 +1074,7 @@ export default defineComponent({
       if (
         !this.payInvoiceData.invoice ||
         this.isPaid ||
-        this.isPaying ||
+        this.paymentInProgress ||
         this.hasMeltQuote
       ) {
         return false;
@@ -1109,7 +1148,7 @@ export default defineComponent({
     invoiceStateKey: function (): string {
       if (this.isPaid) {
         return "paid";
-      } else if (this.isPaying) {
+      } else if (this.paymentInProgress) {
         return "paying";
       } else if (this.hasMeltQuote) {
         return "success";
@@ -1165,7 +1204,11 @@ export default defineComponent({
       }
     },
     handleMeltButton: async function () {
-      if (this.payInvoiceData.blocking) {
+      if (
+        this.payInvoiceData.blocking ||
+        this.waitingForWallet ||
+        this.paymentInProgress
+      ) {
         throw new Error("already processing an invoice.");
       }
       if (
@@ -1176,10 +1219,12 @@ export default defineComponent({
         this.openMultinutDialog();
         return;
       }
-      this.isPaying = true;
+      const uiStore = useUiStore();
+      this.waitingForWallet = true;
+      uiStore.beginForegroundPayment();
       try {
-        const result = await this.meltInvoiceData(true);
-        const returnedChange = useProofsStore().sumProofs(result.change);
+        const result = await this.meltInvoiceData(true, "foreground");
+        const returnedChange = useProofsStore().sumProofs(result?.change ?? []);
         this.payInvoiceData.fee_paid =
           this.payInvoiceData.meltQuote.response.fee_reserve - returnedChange;
         console.log("### fee_paid", this.payInvoiceData.fee_paid);
@@ -1188,6 +1233,9 @@ export default defineComponent({
         // Error handling is done in the store, but we ensure isPaying is reset
         console.error("Payment error:", error);
         this.isPaying = false;
+      } finally {
+        this.waitingForWallet = false;
+        uiStore.endForegroundPayment();
       }
     },
     openMultinutDialog: function () {
@@ -1337,6 +1385,13 @@ export default defineComponent({
   width: 100%;
 }
 
+.invoice-details-bottom {
+  width: 100%;
+  margin-top: auto;
+  padding-top: 16px;
+  padding-bottom: clamp(20px, 4vh, 36px);
+}
+
 .relative-container {
   position: relative;
 }
@@ -1391,6 +1446,10 @@ export default defineComponent({
   width: 100%;
 }
 
+.onchain-fee-options .text-subtitle2 {
+  margin-bottom: 12px;
+}
+
 .fee-option-row {
   border: 1px solid rgba(128, 128, 128, 0.25);
   border-radius: 14px;
@@ -1400,8 +1459,8 @@ export default defineComponent({
 }
 
 .fee-option-row--selected {
-  border-color: var(--q-primary);
   background: rgba(var(--q-primary-rgb), 0.12);
+  color: var(--q-primary);
 }
 
 .slide-down-enter-active {

@@ -1,259 +1,775 @@
-import { defineStore } from "pinia";
+import type { MintQuoteState } from "@cashu/cashu-ts";
 import NDK, { NDKEvent } from "@nostr-dev-kit/ndk";
-import { useLocalStorage } from "@vueuse/core";
+import { StorageSerializers, useLocalStorage } from "@vueuse/core";
+import { defineStore } from "pinia";
+import { date } from "quasar";
 import { nip19 } from "nostr-tools";
-import { useWalletStore } from "./wallet";
-import { useReceiveTokensStore } from "./receiveTokensStore";
-import { notifyApiError, notifyError, notifySuccess } from "../js/notify";
-import token from "../js/token";
-import { useTokensStore } from "../stores/tokens";
-import { useNostrStore } from "../stores/nostr";
-// type NPCConnection = {
-//   walletPublicKey: string,
-//   walletPrivateKey: string,
-// }
+import { markRaw } from "vue";
+import { notifyApiError, notifyError } from "src/js/notify";
+import { useTransactionWorkerStore } from "src/stores/transactionWorker";
+import { useMintsStore } from "src/stores/mints";
+import { useNostrStore } from "src/stores/nostr";
+import { useWalletStore } from "src/stores/wallet";
 
-type NPCInfo = {
+type NpubCashUser = {
+  lockQuote: boolean;
   mintUrl: string;
-  npub: string;
-  username: string;
-  error?: string;
-};
-
-type NPCBalance = {
-  error: string;
-  data: number;
-};
-
-type NPCClaim = {
-  error: string;
-  data: {
-    token: string;
-  };
-};
-
-type NPCWithdrawl = {
-  id: number;
-  claim_ids: number[];
-  created_at: number;
+  name?: string;
   pubkey: string;
+};
+
+type NpubCashInfoResponse =
+  | {
+      error: true;
+      message: string;
+    }
+  | {
+      error: false;
+      data: {
+        user: NpubCashUser;
+      };
+    };
+
+type NpubCashUsernameResponse =
+  | { error: true; message: string }
+  | { error: false; data: { user: NpubCashUser } };
+
+type NpubCashQuote = {
+  createdAt: number;
+  paidAt: number;
+  expiresAt: number;
+  mintUrl: string;
+  quoteId: string;
+  request: string;
   amount: number;
+  state: MintQuoteState;
+  locked: boolean;
 };
 
-type NPCWithdrawals = {
-  error: string;
-  data: {
-    count: number;
-    withdrawals: Array<NPCWithdrawl>;
-  };
-};
+type NpubCashQuoteResponse =
+  | {
+      error: true;
+      message: string;
+    }
+  | {
+      error: false;
+      data: {
+        quotes: NpubCashQuote[];
+      };
+      metadata: { limit: number; total: number; since?: number };
+    };
 
-const NIP98Kind = 27235;
+type UsernameQuote = { username: string; creq: string };
 
-export const useNPCStore = defineStore("npc", {
-  state: () => ({
-    npcEnabled: useLocalStorage<boolean>("cashu.npc.enabled", false),
-    npcLastCheck: useLocalStorage<number>("cashu.npc.lastCheck", null),
-    automaticClaim: useLocalStorage<boolean>("cashu.npc.automaticClaim", true),
-    // npcConnections: useLocalStorage<NPCConnection[]>("cashu.npc.connections", []),
-    npcAddress: useLocalStorage<string>("cashu.npc.address", ""),
-    npcDomain: useLocalStorage<string>("cashu.npc.domain", "npub.cash"),
-    baseURL: useLocalStorage<string>("cashu.npc.baseURL", "https://npub.cash"),
-    npcLoading: false,
-    // ndk: new NDK(),
-    // signer: {} as NDKPrivateKeySigner,
-  }),
-  getters: {},
+const NPUB_CASH_BASE_HOST = "npub.cash";
+const NPUB_CASH_STORAGE_VERSION = "1";
+const NPUB_CASH_STORAGE_PREFIX = "cashu.npubcash";
+const NIP_98_KIND = 27235;
+const QUOTE_PAGE_SIZE = 50;
+const QUOTE_SYNC_DEBOUNCE_MS = 250;
+const QUOTE_RECONNECT_MAX_MS = 30_000;
+
+export function normalizeNpubCashBaseHost(input: string): string {
+  const trimmed = input.trim();
+  let url: URL;
+  try {
+    url = new URL(
+      /^[a-z][a-z\d+.-]*:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`
+    );
+  } catch {
+    throw new Error("Enter a valid HTTPS server URL");
+  }
+  if (
+    url.protocol !== "https:" ||
+    url.username ||
+    url.password ||
+    url.port ||
+    (url.pathname !== "/" && url.pathname !== "") ||
+    url.search ||
+    url.hash
+  ) {
+    throw new Error("Enter a valid HTTPS server URL");
+  }
+  return url.host;
+}
+
+function npubCashHttpUrl(host: string): string {
+  return `https://${host}`;
+}
+
+function npubCashQuotesUrl(host: string): string {
+  return `${npubCashHttpUrl(host)}/api/v2/wallet/quotes`;
+}
+
+function npubCashWebSocketUrl(host: string): string {
+  return `wss://${host}/api/v2/ws/quote`;
+}
+
+const legacyStorageKeys = [
+  "cashu.npc.enabled",
+  "cashu.npc.lastCheck",
+  "cashu.npc.automaticClaim",
+  "cashu.npc.connections",
+  "cashu.npc.address",
+  "cashu.npc.domain",
+  "cashu.npc.baseURL",
+  "cashu.npc.v2.enabled",
+  "cashu.npc.v2.claimAutomatically",
+  "cashu.npc.v2.lastCheck",
+  "cashu.npc.v2.address",
+  "cashu.npc.v2.mint",
+  "cashu.npc.v2.baseURL",
+];
+
+function readStoredBoolean(key: string): boolean | undefined {
+  const value = localStorage.getItem(key);
+  return value === null ? undefined : value === "true";
+}
+
+function readStoredNumber(key: string): number | null {
+  const value = localStorage.getItem(key);
+  if (value === null || value === "null") {
+    return null;
+  }
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function readStoredString(key: string): string | null {
+  const value = localStorage.getItem(key);
+  return value === null || value === "null" || value === "" ? null : value;
+}
+
+function migrateNpubCashStorage() {
+  if (
+    typeof localStorage === "undefined" ||
+    localStorage.getItem(`${NPUB_CASH_STORAGE_PREFIX}.storageVersion`) ===
+      NPUB_CASH_STORAGE_VERSION
+  ) {
+    return;
+  }
+
+  const legacyV1Enabled = readStoredBoolean("cashu.npc.enabled") ?? false;
+  const legacyV2Enabled = readStoredBoolean("cashu.npc.v2.enabled") ?? false;
+  const legacyV1ClaimAutomatically = readStoredBoolean(
+    "cashu.npc.automaticClaim"
+  );
+  const legacyV2ClaimAutomatically = readStoredBoolean(
+    "cashu.npc.v2.claimAutomatically"
+  );
+
+  let claimAutomatically = true;
+  if (legacyV2Enabled) {
+    claimAutomatically = legacyV2ClaimAutomatically ?? true;
+  } else if (legacyV1Enabled) {
+    claimAutomatically = legacyV1ClaimAutomatically ?? true;
+  } else {
+    claimAutomatically =
+      legacyV2ClaimAutomatically ?? legacyV1ClaimAutomatically ?? true;
+  }
+
+  localStorage.setItem(
+    `${NPUB_CASH_STORAGE_PREFIX}.enabled`,
+    String(legacyV1Enabled || legacyV2Enabled)
+  );
+  localStorage.setItem(
+    `${NPUB_CASH_STORAGE_PREFIX}.claimAutomatically`,
+    String(claimAutomatically)
+  );
+
+  const lastCheck = readStoredNumber("cashu.npc.v2.lastCheck");
+  if (lastCheck === null) {
+    localStorage.removeItem(`${NPUB_CASH_STORAGE_PREFIX}.lastCheck`);
+  } else {
+    localStorage.setItem(
+      `${NPUB_CASH_STORAGE_PREFIX}.lastCheck`,
+      String(lastCheck)
+    );
+  }
+
+  localStorage.setItem(`${NPUB_CASH_STORAGE_PREFIX}.address`, "");
+  const mintUrl = readStoredString("cashu.npc.v2.mint");
+  if (mintUrl === null) {
+    localStorage.removeItem(`${NPUB_CASH_STORAGE_PREFIX}.mintUrl`);
+  } else {
+    localStorage.setItem(`${NPUB_CASH_STORAGE_PREFIX}.mintUrl`, mintUrl);
+  }
+
+  const legacyBaseUrl =
+    readStoredString("cashu.npc.v2.baseURL") ||
+    readStoredString("cashu.npc.baseURL");
+  if (legacyBaseUrl) {
+    try {
+      localStorage.setItem(
+        `${NPUB_CASH_STORAGE_PREFIX}.baseHost`,
+        normalizeNpubCashBaseHost(legacyBaseUrl)
+      );
+    } catch {
+      localStorage.removeItem(`${NPUB_CASH_STORAGE_PREFIX}.baseHost`);
+    }
+  }
+
+  localStorage.setItem(
+    `${NPUB_CASH_STORAGE_PREFIX}.storageVersion`,
+    NPUB_CASH_STORAGE_VERSION
+  );
+  legacyStorageKeys.forEach((key) => localStorage.removeItem(key));
+}
+
+export const useNpubCashStore = defineStore("npubCash", {
+  state: () => {
+    migrateNpubCashStorage();
+    const baseHost = useLocalStorage<string>(
+      `${NPUB_CASH_STORAGE_PREFIX}.baseHost`,
+      NPUB_CASH_BASE_HOST
+    );
+    try {
+      baseHost.value = normalizeNpubCashBaseHost(baseHost.value);
+    } catch {
+      baseHost.value = NPUB_CASH_BASE_HOST;
+    }
+    return {
+      enabled: useLocalStorage<boolean>(
+        `${NPUB_CASH_STORAGE_PREFIX}.enabled`,
+        false
+      ),
+      claimAutomatically: useLocalStorage<boolean>(
+        `${NPUB_CASH_STORAGE_PREFIX}.claimAutomatically`,
+        true
+      ),
+      showAddressOnReceive: useLocalStorage<boolean>(
+        `${NPUB_CASH_STORAGE_PREFIX}.showAddressOnReceive`,
+        true
+      ),
+      lastCheck: useLocalStorage<number | null>(
+        `${NPUB_CASH_STORAGE_PREFIX}.lastCheck`,
+        null,
+        { serializer: StorageSerializers.number }
+      ),
+      address: useLocalStorage<string>(
+        `${NPUB_CASH_STORAGE_PREFIX}.address`,
+        ""
+      ),
+      mintUrl: useLocalStorage<string | null>(
+        `${NPUB_CASH_STORAGE_PREFIX}.mintUrl`,
+        null
+      ),
+      baseHost,
+      loading: false,
+      quoteSocket: null as WebSocket | null,
+      quoteSyncPromise: null as Promise<void> | null,
+      quoteSyncRequested: false,
+      quoteSyncGeneration: 0,
+      quoteSyncTimer: null as ReturnType<typeof setTimeout> | null,
+      quoteReconnectTimer: null as ReturnType<typeof setTimeout> | null,
+      quoteReconnectAttempt: 0,
+      quoteResumeHandler: null as (() => void) | null,
+    };
+  },
   actions: {
-    generateNPCConnection: async function () {
+    initializeNpubCash: async function () {
+      if (!this.enabled) {
+        this.stopQuoteUpdates();
+        return;
+      }
       const nostrStore = useNostrStore();
+      await nostrStore.initSignerIfNotSet();
+      await this.refreshNpubCashConnection();
+      await this.synchronizeQuotes();
+      this.startQuoteUpdates();
+    },
+    setBaseHost: async function (input: string): Promise<string> {
+      const baseHost = normalizeNpubCashBaseHost(input);
+      const normalizedUrl = npubCashHttpUrl(baseHost);
+      if (baseHost === this.baseHost) return normalizedUrl;
+
+      this.stopQuoteUpdates();
+      this.baseHost = baseHost;
+      this.lastCheck = null;
+      this.address = "";
+      if (this.enabled) await this.initializeNpubCash();
+      return normalizedUrl;
+    },
+    refreshNpubCashConnection: async function () {
+      if (!this.enabled) {
+        return;
+      }
+      const nostrStore = useNostrStore();
+      const mintsStore = useMintsStore();
       if (!nostrStore.pubkey) {
         return;
       }
       const walletPublicKeyHex = nostrStore.pubkey;
-      console.log(
-        "Lightning address for wallet:",
-        nip19.npubEncode(walletPublicKeyHex) + "@" + this.npcDomain
-      );
-      console.log("npub:", nip19.npubEncode(walletPublicKeyHex));
-      this.baseURL = `https://${this.npcDomain}`;
-      const previousAddress = this.npcAddress;
-      this.npcAddress =
-        nip19.npubEncode(walletPublicKeyHex) + "@" + this.npcDomain;
-      if (!this.npcEnabled) {
+      const addressHost = new URL(npubCashHttpUrl(this.baseHost)).hostname;
+      this.address = nip19.npubEncode(walletPublicKeyHex) + "@" + addressHost;
+      this.loading = true;
+      try {
+        const previousAddress = this.address;
+        const info = await this.getInfo();
+        if (info.name) {
+          const usernameAddress = info.name + "@" + addressHost;
+          if (previousAddress !== usernameAddress) {
+            console.log(`[npub.cash] Logged in as ${info.name}`);
+          }
+          this.address = usernameAddress;
+        }
+        if (mintsStore.mints.map((mint) => mint.url).includes(info.mintUrl)) {
+          this.mintUrl = info.mintUrl;
+        } else if (mintsStore.activeMintUrl) {
+          await this.changeMintUrl(mintsStore.activeMintUrl);
+        } else {
+          await mintsStore.addMint({ url: info.mintUrl });
+          this.mintUrl = info.mintUrl;
+        }
+      } catch (error) {
+        if (error instanceof Error) {
+          notifyApiError(error);
+        }
+        console.log(error);
+      } finally {
+        this.loading = false;
+      }
+    },
+    getInfo: async function (): Promise<NpubCashUser> {
+      try {
+        const response = await this.sendAuthedRequest(
+          `${npubCashHttpUrl(this.baseHost)}/api/v2/user/info`
+        );
+        const info: NpubCashInfoResponse = await response.json();
+        if (info.error) {
+          notifyError(info.message);
+          throw new Error(info.message);
+        }
+        return info.data.user;
+      } catch (error) {
+        console.error(error);
+        return {
+          mintUrl: "",
+          name: "",
+          pubkey: "",
+          lockQuote: false,
+        };
+      }
+    },
+    changeMintUrl: async function (
+      mintUrl: string,
+      previousMintUrl: string | null = this.mintUrl
+    ) {
+      const mintsStore = useMintsStore();
+      if (!mintsStore.mints.find((mint) => mint.url === mintUrl)) {
+        notifyError(
+          `Please make sure ${mintUrl} is added to your wallet first!`,
+          "Could not update npub.cash mint"
+        );
         return;
       }
-      // get info
-      this.npcLoading = true;
+      this.loading = true;
       try {
-        const info = await this.getInfo();
-        if (info.error) {
-          notifyError(info.error);
+        const response = await this.sendAuthedRequest(
+          `${npubCashHttpUrl(this.baseHost)}/api/v2/user/mint`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+            method: "PATCH",
+            body: JSON.stringify({ mint_url: mintUrl }),
+          }
+        );
+        const data = await response.json();
+        if (data.error) {
+          throw new Error(data.message);
+        }
+        this.mintUrl = data.data.user.mintUrl;
+      } catch (error) {
+        if (this.mintUrl === mintUrl) {
+          this.mintUrl = previousMintUrl;
+        }
+        console.log(error);
+        if (error instanceof Error) {
+          notifyError(error.message);
+        } else {
+          notifyError("Something went wrong!");
+        }
+      } finally {
+        this.loading = false;
+      }
+    },
+    synchronizeQuotes: async function (): Promise<void> {
+      if (!this.enabled) return;
+      if (this.quoteSyncPromise) {
+        this.quoteSyncRequested = true;
+        return this.quoteSyncPromise;
+      }
+
+      this.quoteSyncRequested = true;
+      const syncPromise = (async () => {
+        do {
+          this.quoteSyncRequested = false;
+          await this.fetchAndQueueQuotes();
+        } while (this.enabled && this.quoteSyncRequested);
+      })().finally(() => {
+        if (this.quoteSyncPromise === syncPromise) {
+          this.quoteSyncPromise = null;
+        }
+      });
+      this.quoteSyncPromise = syncPromise;
+      return syncPromise;
+    },
+    fetchAndQueueQuotes: async function () {
+      if (!this.enabled) return;
+      const transactionWorkerStore = useTransactionWorkerStore();
+      const walletStore = useWalletStore();
+      const syncGeneration = this.quoteSyncGeneration;
+      const syncHost = this.baseHost;
+      try {
+        const quotes: NpubCashQuote[] = [];
+        const seenQuotes = new Set<string>();
+        const quotesUrl = npubCashQuotesUrl(syncHost);
+        let offset = 0;
+        let total = 0;
+
+        do {
+          const params = new URLSearchParams({
+            limit: String(QUOTE_PAGE_SIZE),
+            offset: String(offset),
+          });
+          // Re-read the previous second so quotes sharing a paidAt timestamp
+          // cannot fall through the strict `since` boundary.
+          if (this.lastCheck !== null) {
+            params.set("since", String(Math.max(0, this.lastCheck - 1)));
+          }
+          const response = await this.sendAuthedRequest(
+            `${quotesUrl}?${params.toString()}`,
+            undefined,
+            quotesUrl
+          );
+          if (!response.ok) {
+            throw new Error(`npub.cash quote sync failed (${response.status})`);
+          }
+          const responseData: NpubCashQuoteResponse = await response.json();
+          if (responseData.error) throw new Error(responseData.message);
+
+          const page = responseData.data.quotes;
+          total = responseData.metadata.total;
+          for (const quote of page) {
+            const key = `${quote.mintUrl}|${quote.quoteId}`;
+            if (!seenQuotes.has(key)) {
+              seenQuotes.add(key);
+              quotes.push(quote);
+            }
+          }
+          offset += page.length;
+          if (page.length === 0) break;
+        } while (offset < total);
+
+        if (
+          !this.enabled ||
+          this.quoteSyncGeneration !== syncGeneration ||
+          this.baseHost !== syncHost
+        ) {
           return;
         }
-        // log info
-        console.log(info);
-        if (info.username) {
-          const usernameAddress = info.username + "@" + this.npcDomain;
-          if (previousAddress !== usernameAddress) {
-            notifySuccess(`Logged in as ${info.username}`);
+        let latestQuoteTime: number | undefined;
+        let queuedQuotes = false;
+        for (const quote of quotes) {
+          const paidAt = quote.paidAt || quote.createdAt;
+          if (!latestQuoteTime || latestQuoteTime < paidAt) {
+            latestQuoteTime = paidAt;
           }
-          this.npcAddress = usernameAddress;
+          if (
+            walletStore.invoiceHistory.find(
+              (invoice) =>
+                invoice.quote === quote.quoteId &&
+                invoice.mint === quote.mintUrl
+            )
+          ) {
+            continue;
+          }
+          const invoice = {
+            label: "Zap",
+            mint: quote.mintUrl,
+            memo: "",
+            request: quote.request,
+            amount: quote.amount,
+            quote: quote.quoteId,
+            date: date.formatDate(
+              new Date(quote.createdAt * 1000),
+              "YYYY-MM-DD HH:mm:ss"
+            ),
+            status: "pending" as const,
+            unit: "sat",
+            mintQuote: {
+              request: quote.request,
+              quote: quote.quoteId,
+              state: quote.state,
+              expiry: quote.expiresAt,
+              amount: quote.amount,
+              unit: "sat",
+            },
+          };
+          await walletStore.addPaymentHistory(invoice);
+          if (this.claimAutomatically) {
+            transactionWorkerStore.queueIncomingMintQuote(invoice);
+            queuedQuotes = true;
+          }
         }
-      } catch (e: any) {
-        notifyApiError(e);
-      } finally {
-        this.npcLoading = false;
+        if (latestQuoteTime) {
+          this.lastCheck = latestQuoteTime;
+        }
+        if (queuedQuotes) {
+          await transactionWorkerStore.processIncomingTransactionsNow(
+            walletStore
+          );
+        }
+      } catch (error) {
+        console.error(error);
       }
+    },
+    scheduleQuoteSync: function (delay = QUOTE_SYNC_DEBOUNCE_MS) {
+      if (!this.enabled) return;
+      if (this.quoteSyncTimer) clearTimeout(this.quoteSyncTimer);
+      this.quoteSyncTimer = setTimeout(() => {
+        this.quoteSyncTimer = null;
+        void this.synchronizeQuotes();
+      }, delay);
+    },
+    startQuoteUpdates: function () {
+      if (!this.enabled || typeof WebSocket === "undefined") return;
+      if (!this.quoteResumeHandler) {
+        this.quoteResumeHandler = () => {
+          if (!this.enabled || document.visibilityState === "hidden") return;
+          // Browsers may keep a stale OPEN socket after a device resumes.
+          const socket = this.quoteSocket;
+          this.quoteSocket = null;
+          if (socket) socket.close(1000);
+          this.connectQuoteUpdates();
+          this.scheduleQuoteSync(0);
+        };
+        window.addEventListener("online", this.quoteResumeHandler);
+        document.addEventListener("visibilitychange", this.quoteResumeHandler);
+      }
+      this.connectQuoteUpdates();
+    },
+    connectQuoteUpdates: function () {
+      if (!this.enabled || typeof WebSocket === "undefined") return;
+      if (
+        this.quoteSocket &&
+        (this.quoteSocket.readyState === WebSocket.CONNECTING ||
+          this.quoteSocket.readyState === WebSocket.OPEN)
+      ) {
+        return;
+      }
+      if (this.quoteReconnectTimer) {
+        clearTimeout(this.quoteReconnectTimer);
+        this.quoteReconnectTimer = null;
+      }
+
+      try {
+        const socket = markRaw(
+          new WebSocket(npubCashWebSocketUrl(this.baseHost))
+        );
+        this.quoteSocket = socket;
+        socket.onmessage = (event) => {
+          void this.handleQuoteSocketMessage(socket, event.data);
+        };
+        socket.onerror = () => {
+          socket.close();
+        };
+        socket.onclose = () => {
+          if (this.quoteSocket !== socket) return;
+          this.quoteSocket = null;
+          this.scheduleQuoteReconnect();
+        };
+      } catch (error) {
+        console.error("Could not connect to npub.cash quote updates", error);
+        this.quoteSocket = null;
+        this.scheduleQuoteReconnect();
+      }
+    },
+    handleQuoteSocketMessage: async function (
+      socket: WebSocket,
+      rawMessage: unknown
+    ) {
+      if (typeof rawMessage !== "string") return;
+      try {
+        const message = JSON.parse(rawMessage);
+        if (message.type === "challenge") {
+          const payload = message.payload;
+          const usesPayloadProtocol =
+            payload !== null && typeof payload === "object";
+          const websocketUrl = npubCashWebSocketUrl(this.baseHost);
+          const authUrl = usesPayloadProtocol ? payload.url : websocketUrl;
+          const method = usesPayloadProtocol ? payload.method : "GET";
+          const parsedAuthUrl = new URL(authUrl);
+          const expectedAuthUrl = new URL(websocketUrl);
+          if (
+            !["https:", "wss:"].includes(parsedAuthUrl.protocol) ||
+            parsedAuthUrl.hostname !== expectedAuthUrl.hostname ||
+            parsedAuthUrl.port !== expectedAuthUrl.port ||
+            parsedAuthUrl.pathname !== expectedAuthUrl.pathname
+          ) {
+            throw new Error("Refusing an unexpected npub.cash auth URL");
+          }
+          const token = await this.generateNip98Event(authUrl, method || "GET");
+          if (
+            this.quoteSocket !== socket ||
+            socket.readyState !== WebSocket.OPEN
+          ) {
+            return;
+          }
+          socket.send(
+            JSON.stringify(
+              usesPayloadProtocol
+                ? {
+                    type: "challenge-response",
+                    payload: `Nostr ${token}`,
+                  }
+                : { type: "auth", token: `Nostr ${token}` }
+            )
+          );
+          return;
+        }
+        if (message.type === "ok" || message.type === "challenge-success") {
+          this.quoteReconnectAttempt = 0;
+          // This second catch-up closes the gap between the startup REST fetch
+          // and successful WebSocket authentication.
+          this.scheduleQuoteSync(0);
+          return;
+        }
+        if (message.type === "update") {
+          const quoteId = message.quoteId || message.payload?.quoteId;
+          if (quoteId) this.scheduleQuoteSync();
+          return;
+        }
+        if (message.type === "error") {
+          socket.close();
+        }
+      } catch (error) {
+        const errorDetails =
+          error instanceof Error
+            ? `${error.name}: ${error.message}`
+            : String(error);
+        console.error(
+          `Could not handle npub.cash quote update: ${errorDetails}`
+        );
+        socket.close();
+      }
+    },
+    scheduleQuoteReconnect: function () {
+      if (!this.enabled || this.quoteReconnectTimer) return;
+      const baseDelay = Math.min(
+        1_000 * 2 ** this.quoteReconnectAttempt,
+        QUOTE_RECONNECT_MAX_MS
+      );
+      const delay = Math.round(baseDelay * (0.75 + Math.random() * 0.5));
+      this.quoteReconnectAttempt += 1;
+      this.quoteReconnectTimer = setTimeout(() => {
+        this.quoteReconnectTimer = null;
+        this.connectQuoteUpdates();
+      }, delay);
+    },
+    stopQuoteUpdates: function () {
+      if (this.quoteSyncTimer) clearTimeout(this.quoteSyncTimer);
+      if (this.quoteReconnectTimer) clearTimeout(this.quoteReconnectTimer);
+      this.quoteSyncTimer = null;
+      this.quoteReconnectTimer = null;
+      this.quoteSyncRequested = false;
+      this.quoteSyncGeneration += 1;
+      this.quoteReconnectAttempt = 0;
+
+      const socket = this.quoteSocket;
+      this.quoteSocket = null;
+      if (socket) socket.close(1000);
+
+      if (this.quoteResumeHandler) {
+        window.removeEventListener("online", this.quoteResumeHandler);
+        document.removeEventListener(
+          "visibilitychange",
+          this.quoteResumeHandler
+        );
+        this.quoteResumeHandler = null;
+      }
+    },
+    getUsernameQuote: async function (
+      username: string
+    ): Promise<UsernameQuote> {
+      const response = await this.sendAuthedRequest(
+        `${npubCashHttpUrl(this.baseHost)}/api/v2/user/username`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username }),
+        }
+      );
+      const data = (await response.json()) as NpubCashUsernameResponse;
+      if (data.error) {
+        if (response.status === 402) {
+          const paymentHeader = response.headers.get("X-Cashu");
+          if (!paymentHeader) {
+            throw new Error("Unexpected reply without payment request");
+          }
+          return { username, creq: paymentHeader };
+        }
+        throw new Error(data.message);
+      }
+      throw new Error("Unexpected reply without payment request");
+    },
+    setUsername: async function (username: string, token: string) {
+      try {
+        const response = await this.sendAuthedRequest(
+          `${npubCashHttpUrl(this.baseHost)}/api/v2/user/username`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-Cashu": token },
+            body: JSON.stringify({ username }),
+          }
+        );
+        const data = (await response.json()) as NpubCashUsernameResponse;
+        if (data.error) {
+          throw new Error(data.message);
+        }
+        const addressHost = new URL(npubCashHttpUrl(this.baseHost)).hostname;
+        this.address = `${data.data.user.name}@${addressHost}`;
+      } catch (error) {
+        console.log(error);
+        if (error instanceof Error) {
+          notifyError(error.message);
+        }
+      }
+    },
+    sendAuthedRequest: async function (
+      url: string,
+      options?: RequestInit,
+      authUrl?: string
+    ) {
+      const authHeader = await this.generateNip98Event(
+        authUrl || url,
+        options?.method || "GET"
+      );
+      return fetch(url, {
+        ...options,
+        headers: {
+          ...options?.headers,
+          authorization: `Nostr ${authHeader}`,
+        },
+      });
     },
     generateNip98Event: async function (
       url: string,
-      method: string,
-      body?: string
+      method: string
     ): Promise<string> {
       const nostrStore = useNostrStore();
       await nostrStore.initSignerIfNotSet();
       const nip98Event = new NDKEvent(new NDK());
-      nip98Event.kind = NIP98Kind;
+      nip98Event.kind = NIP_98_KIND;
       nip98Event.content = "";
       nip98Event.tags = [
         ["u", url],
         ["method", method],
       ];
-      // TODO: if body is set, add 'payload' tag with sha256 hash of body
-      const sig = await nip98Event.sign(nostrStore.signer);
+      await nip98Event.sign(nostrStore.signer);
       const eventString = JSON.stringify(nip98Event.rawEvent());
-      // encode the eventString to base64
       return btoa(eventString);
-    },
-    getInfo: async function (): Promise<NPCInfo> {
-      const authHeader = await this.generateNip98Event(
-        `${this.baseURL}/api/v1/info`,
-        "GET"
-      );
-      try {
-        const response = await fetch(`${this.baseURL}/api/v1/info`, {
-          method: "GET",
-          headers: {
-            Authorization: `Nostr ${authHeader}`,
-          },
-        });
-        const info: NPCInfo = await response.json();
-        return info;
-      } catch (e) {
-        console.error(e);
-        return {
-          mintUrl: "",
-          npub: "",
-          username: "",
-        };
-      }
-    },
-    claimAllTokens: async function () {
-      if (!this.npcEnabled) {
-        return;
-      }
-      const receiveStore = useReceiveTokensStore();
-      const npubCashBalance = await this.getBalance();
-      console.log("npub.cash balance: " + npubCashBalance);
-      if (npubCashBalance > 0) {
-        notifySuccess(`You have ${npubCashBalance} sats on npub.cash`);
-        const token = await this.getClaim();
-        if (token) {
-          // add token to history first
-          this.addPendingTokenToHistory(token);
-          receiveStore.receiveData.tokensBase64 = token;
-          if (this.automaticClaim) {
-            try {
-              // redeem token automatically
-              const walletStore = useWalletStore();
-              await walletStore.redeem();
-            } catch {
-              // if it doesn't work, show the receive window
-              receiveStore.showReceiveTokens = true;
-            }
-          } else {
-            receiveStore.showReceiveTokens = true;
-          }
-        }
-      }
-    },
-    tokenAlreadyInHistory: function (tokenStr: string) {
-      const tokensStore = useTokensStore();
-      return (
-        tokensStore.historyTokens.find((t) => t.token === tokenStr) !==
-        undefined
-      );
-    },
-    addPendingTokenToHistory: function (tokenStr: string) {
-      const receiveStore = useReceiveTokensStore();
-      if (this.tokenAlreadyInHistory(tokenStr)) {
-        notifySuccess("Ecash already in history");
-        receiveStore.showReceiveTokens = false;
-        return;
-      }
-      const tokensStore = useTokensStore();
-      const decodedToken = token.decodeMeta(tokenStr);
-      if (decodedToken == undefined) {
-        throw Error("could not decode token");
-      }
-      const mintUrl = token.getMint(decodedToken);
-      const unit = token.getUnit(decodedToken);
-      tokensStore.addPendingToken({
-        label: "Zaps",
-        amount: decodedToken.amount,
-        token: tokenStr,
-        mint: mintUrl,
-        unit: unit,
-      });
-      receiveStore.showReceiveTokens = false;
-    },
-
-    getBalance: async function (): Promise<number> {
-      const authHeader = await this.generateNip98Event(
-        `${this.baseURL}/api/v1/balance`,
-        "GET"
-      );
-      try {
-        const response = await fetch(`${this.baseURL}/api/v1/balance`, {
-          method: "GET",
-          headers: {
-            Authorization: `Nostr ${authHeader}`,
-          },
-        });
-        // deserialize the response to NPCBalance
-        const balance: NPCBalance = await response.json();
-        if (balance.error) {
-          return 0;
-        }
-        return balance.data;
-      } catch (e) {
-        console.error(e);
-        return 0;
-      }
-    },
-    getClaim: async function (): Promise<string> {
-      const authHeader = await this.generateNip98Event(
-        `${this.baseURL}/api/v1/claim`,
-        "GET"
-      );
-      try {
-        const response = await fetch(`${this.baseURL}/api/v1/claim`, {
-          method: "GET",
-          headers: {
-            Authorization: `Nostr ${authHeader}`,
-          },
-        });
-        // deserialize the response to NPCClaim
-        const claim: NPCClaim = await response.json();
-        if (claim.error) {
-          return "";
-        }
-        return claim.data.token;
-      } catch (e) {
-        console.error(e);
-        return "";
-      }
     },
   },
 });

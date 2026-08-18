@@ -169,6 +169,61 @@ export default {
     },
   },
   Settings: {
+    menu: {
+      title: "Nastavení",
+      backup: {
+        title: "Záloha a obnovení",
+        caption: "Seed fráze a obnovení ecash",
+      },
+      lightning_address: {
+        title: "Lightning adresa",
+        caption: "Přijímejte platby na svou Lightning adresu",
+      },
+      nostr: {
+        title: "Nostr",
+        caption: "Klíče, relaye a Web of Trust",
+      },
+      payment_requests: {
+        title: "Platební požadavky",
+        caption: "Přijímejte ecash platby přes nostr",
+      },
+      nwc: {
+        title: "Nostr Wallet Connect",
+        caption: "Používejte peněženku z jiných aplikací",
+      },
+      hardware: {
+        title: "Hardware",
+        caption: "Nastavení NFC",
+      },
+      p2pk: {
+        title: "P2PK",
+        caption: "Přijímejte ecash uzamčený na vaše klíče",
+      },
+      privacy: {
+        title: "Soukromí",
+        caption: "Síťové kontroly a cena Bitcoinu",
+      },
+      experimental: {
+        title: "Experimentální",
+        caption: "Vyzkoušejte nové funkce jako první",
+      },
+      appearance: {
+        title: "Vzhled",
+        caption: "Motiv, klávesnice a symbol Bitcoinu",
+      },
+      language: {
+        title: "Jazyk",
+        caption: "Vyberte si jazyk",
+      },
+      advanced: {
+        title: "Pokročilé",
+        caption: "Vývojářské nástroje a reset peněženky",
+      },
+      about: {
+        title: "O aplikaci",
+        caption: "Podmínky a odkazy",
+      },
+    },
     language: {
       title: "Jazyk",
       description: "Vyberte si preferovaný jazyk ze seznamu níže.",
@@ -226,13 +281,18 @@ export default {
       address: {
         copy_tooltip: "Kopírovat Lightning adresu",
       },
+      show_on_receive: {
+        toggle: "Zobrazit při přijímání",
+        description: "Zobrazit adresu a QR kód.",
+      },
       automatic_claim: {
         toggle: "Přijímat automaticky",
         description: "Automaticky přijímat příchozí platby.",
       },
-      npc_v2: {
-        choose_mint_title: "Vyberte mint pro npub.cash v2",
-        choose_mint_placeholder: "Vyberte mint…",
+      mint: {
+        label: "mint pro npub.cash",
+        choose_title: "Vyberte mint pro npub.cash",
+        choose_placeholder: "Vyberte mint…",
       },
     },
 
@@ -339,7 +399,7 @@ export default {
       check_startup: {
         toggle: "Kontrolovat čekající faktury při spuštění",
         description:
-          "Pokud je povoleno, peněženka při spuštění zkontroluje čekající faktury z posledních 24 hodin.",
+          "Pokud je povoleno, peněženka při spuštění zkontroluje čekající faktury.",
       },
       check_all: {
         toggle: "Kontrolovat všechny faktury",
@@ -445,9 +505,7 @@ export default {
       progress: "{crawlProcessed} / {crawlTotal}",
     },
     npub_cash: {
-      use_npubx: "Použít npubx.cash",
       copy_lightning_address: "Kopírovat Lightning adresu",
-      v2_mint: "mint pro npub.cash v2",
     },
     multinut: {
       use_multinut: "Použít Multinut",
@@ -1036,6 +1094,7 @@ export default {
       },
       send: {
         label: "@:global.actions.send.label",
+        in_progress: "Odesílání…",
       },
       delete: {
         tooltip_text: "Smazat z historie",
@@ -1471,6 +1530,7 @@ export default {
         pay: {
           label: "Zaplatit",
           in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
+          waiting_for_wallet: "Čekání na peněženku…",
           error: "Chyba",
         },
       },
