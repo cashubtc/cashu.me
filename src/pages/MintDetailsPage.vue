@@ -742,7 +742,9 @@ body:not(.body--dark) .mint-details {
 
 /* Nuts toggle + expanded section */
 .nuts-toggle {
-  color: var(--q-primary);
+  /* theme-aware: --q-primary is near-white in the classic theme, which is
+     unreadable on light surfaces */
+  color: var(--md-text);
   cursor: pointer;
   gap: 2px;
 }
