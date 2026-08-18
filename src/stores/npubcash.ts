@@ -347,7 +347,10 @@ export const useNpubCashStore = defineStore("npubCash", {
         };
       }
     },
-    changeMintUrl: async function (mintUrl: string) {
+    changeMintUrl: async function (
+      mintUrl: string,
+      previousMintUrl: string | null = this.mintUrl
+    ) {
       const mintsStore = useMintsStore();
       if (!mintsStore.mints.find((mint) => mint.url === mintUrl)) {
         notifyError(
@@ -356,6 +359,7 @@ export const useNpubCashStore = defineStore("npubCash", {
         );
         return;
       }
+      this.loading = true;
       try {
         const response = await this.sendAuthedRequest(
           `${npubCashHttpUrl(this.baseHost)}/api/v2/user/mint`,
@@ -373,12 +377,17 @@ export const useNpubCashStore = defineStore("npubCash", {
         }
         this.mintUrl = data.data.user.mintUrl;
       } catch (error) {
+        if (this.mintUrl === mintUrl) {
+          this.mintUrl = previousMintUrl;
+        }
         console.log(error);
         if (error instanceof Error) {
           notifyError(error.message);
         } else {
           notifyError("Something went wrong!");
         }
+      } finally {
+        this.loading = false;
       }
     },
     synchronizeQuotes: async function (): Promise<void> {
