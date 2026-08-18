@@ -45,10 +45,21 @@
       #app-splash img {
         width: 96px;
         height: 96px;
+        opacity: 0;
+        animation: app-splash-logo-in 0.4s ease 0.5s forwards;
+      }
+      @keyframes app-splash-logo-in {
+        to {
+          opacity: 1;
+        }
       }
       @media (prefers-reduced-motion: reduce) {
         #app-splash {
           transition: none;
+        }
+        #app-splash img {
+          animation: none;
+          opacity: 1;
         }
       }
     </style>
