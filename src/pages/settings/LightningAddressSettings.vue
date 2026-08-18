@@ -59,19 +59,42 @@
             />
           </q-item-section>
         </q-item>
-        <q-item tag="label">
-          <q-item-section>
-            <q-item-label>{{
-              $t("Settings.lightning_address.automatic_claim.toggle")
-            }}</q-item-label>
-            <q-item-label caption>{{
-              $t("Settings.lightning_address.automatic_claim.description")
-            }}</q-item-label>
-          </q-item-section>
-          <q-item-section side>
-            <q-toggle v-model="claimAutomatically" color="primary" />
-          </q-item-section>
-        </q-item>
+        <q-expansion-item
+          :label="$t('Settings.menu.advanced.title')"
+          icon="tune"
+          dense
+        >
+          <q-item class="settings-control-item">
+            <q-item-section>
+              <q-input
+                outlined
+                v-model="serverUrlInput"
+                label="npub.cash hostname"
+                hint="Enter a hostname or HTTPS URL"
+                placeholder="https://npub.cash"
+                dense
+                rounded
+                :error="Boolean(serverUrlError)"
+                :error-message="serverUrlError"
+                @blur="applyServerUrl"
+                @keyup.enter="applyServerUrl"
+              />
+            </q-item-section>
+          </q-item>
+          <q-item tag="label">
+            <q-item-section>
+              <q-item-label>{{
+                $t("Settings.lightning_address.automatic_claim.toggle")
+              }}</q-item-label>
+              <q-item-label caption>{{
+                $t("Settings.lightning_address.automatic_claim.description")
+              }}</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <q-toggle v-model="claimAutomatically" color="primary" />
+            </q-item-section>
+          </q-item>
+        </q-expansion-item>
       </template>
     </SettingsSection>
   </SettingsPageShell>
@@ -81,7 +104,6 @@
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "src/components/ChooseMint.vue";
-import { useNostrStore } from "src/stores/nostr";
 import { useNpubCashStore } from "src/stores/npubcash";
 import SettingsPageShell from "src/pages/settings/SettingsPageShell.vue";
 import SettingsSection from "src/pages/settings/SettingsSection.vue";
@@ -94,8 +116,14 @@ export default defineComponent({
     SettingsSection,
     ChooseMint,
   },
+  data: function () {
+    return {
+      serverUrlInput: "",
+      serverUrlError: "",
+    };
+  },
   computed: {
-    ...mapState(useNpubCashStore, ["loading"]),
+    ...mapState(useNpubCashStore, ["loading", "baseHost"]),
     ...mapWritableState(useNpubCashStore, [
       "enabled",
       "address",
@@ -104,11 +132,17 @@ export default defineComponent({
     ]),
   },
   watch: {
+    baseHost: {
+      immediate: true,
+      handler(baseHost: string) {
+        this.serverUrlInput = `https://${baseHost}`;
+      },
+    },
     enabled: async function () {
       if (this.enabled) {
-        await this.initSigner();
-        await this.refreshNpubCashConnection();
+        await this.initializeNpubCash();
       } else {
+        this.stopQuoteUpdates();
         this.address = "";
       }
     },
@@ -119,11 +153,23 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useNostrStore, ["initSigner"]),
     ...mapActions(useNpubCashStore, [
-      "refreshNpubCashConnection",
+      "initializeNpubCash",
       "changeMintUrl",
+      "setBaseHost",
+      "stopQuoteUpdates",
     ]),
+    applyServerUrl: async function () {
+      try {
+        this.serverUrlError = "";
+        this.serverUrlInput = await this.setBaseHost(this.serverUrlInput);
+      } catch (error) {
+        this.serverUrlError =
+          error instanceof Error
+            ? error.message
+            : "Enter a valid HTTPS server URL";
+      }
+    },
   },
 });
 </script>

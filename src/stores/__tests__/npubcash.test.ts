@@ -5,7 +5,10 @@ import { nextTick } from "vue";
 import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import { useMintsStore } from "src/stores/mints";
 import { useNostrStore } from "src/stores/nostr";
-import { useNpubCashStore } from "src/stores/npubcash";
+import {
+  normalizeNpubCashBaseHost,
+  useNpubCashStore,
+} from "src/stores/npubcash";
 import { useSettingsStore } from "src/stores/settings";
 import { useWalletStore } from "src/stores/wallet";
 
@@ -17,10 +20,49 @@ vi.mock("vue-i18n", async (importOriginal) => {
   };
 });
 
+class MockQuoteWebSocket {
+  static CONNECTING = 0;
+  static OPEN = 1;
+  static CLOSED = 3;
+  static instances: MockQuoteWebSocket[] = [];
+
+  readyState = MockQuoteWebSocket.CONNECTING;
+  sent: string[] = [];
+  onmessage: ((event: { data: string }) => void) | null = null;
+  onerror: (() => void) | null = null;
+  onclose: (() => void) | null = null;
+
+  constructor(public url: string) {
+    MockQuoteWebSocket.instances.push(this);
+  }
+
+  open() {
+    this.readyState = MockQuoteWebSocket.OPEN;
+  }
+
+  message(message: unknown) {
+    this.onmessage?.({ data: JSON.stringify(message) });
+  }
+
+  send(message: string) {
+    this.sent.push(message);
+  }
+
+  close() {
+    if (this.readyState === MockQuoteWebSocket.CLOSED) return;
+    this.readyState = MockQuoteWebSocket.CLOSED;
+    this.onclose?.();
+  }
+}
+
 describe("npub.cash store", () => {
   beforeEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
     localStorage.clear();
     vi.restoreAllMocks();
+    MockQuoteWebSocket.instances = [];
+    vi.stubGlobal("WebSocket", MockQuoteWebSocket);
   });
 
   it("starts a fresh wallet with canonical defaults", () => {
@@ -32,9 +74,53 @@ describe("npub.cash store", () => {
       lastCheck: null,
       address: "",
       mintUrl: null,
+      baseHost: "npub.cash",
       loading: false,
     });
     expect(localStorage.getItem("cashu.npubcash.storageVersion")).toBe("1");
+  });
+
+  it.each([
+    ["npub.cash", "npub.cash"],
+    ["  custom.example  ", "custom.example"],
+    ["https://custom.example", "custom.example"],
+    ["https://CUSTOM.example/", "custom.example"],
+  ])("normalizes the npub.cash server host from %s", (input, expected) => {
+    expect(normalizeNpubCashBaseHost(input)).toBe(expected);
+  });
+
+  it.each([
+    "",
+    "http://npub.cash",
+    "https://custom.example:8443",
+    "https://npub.cash/path",
+    "https://user:secret@npub.cash",
+  ])("rejects invalid npub.cash server input %s", (input) => {
+    expect(() => normalizeNpubCashBaseHost(input)).toThrow(
+      "Enter a valid HTTPS server URL"
+    );
+  });
+
+  it("stores a custom host and reconnects with a fresh quote watermark", async () => {
+    const store = useNpubCashStore();
+    store.enabled = true;
+    store.lastCheck = 123;
+    store.address = "old@npub.cash";
+    const stopUpdates = vi
+      .spyOn(store, "stopQuoteUpdates")
+      .mockImplementation(() => {});
+    const initialize = vi
+      .spyOn(store, "initializeNpubCash")
+      .mockResolvedValue();
+
+    const normalizedUrl = await store.setBaseHost("custom.example");
+
+    expect(normalizedUrl).toBe("https://custom.example");
+    expect(store.baseHost).toBe("custom.example");
+    expect(store.lastCheck).toBeNull();
+    expect(store.address).toBe("");
+    expect(stopUpdates).toHaveBeenCalledOnce();
+    expect(initialize).toHaveBeenCalledOnce();
   });
 
   it("preserves enabled v1 preferences during an in-place upgrade", () => {
@@ -58,6 +144,7 @@ describe("npub.cash store", () => {
     localStorage.setItem("cashu.npc.v2.lastCheck", "1712345678");
     localStorage.setItem("cashu.npc.v2.address", "old@npubx.cash");
     localStorage.setItem("cashu.npc.v2.mint", "https://mint.example");
+    localStorage.setItem("cashu.npc.v2.baseURL", "https://custom.example");
 
     const store = useNpubCashStore();
 
@@ -65,6 +152,7 @@ describe("npub.cash store", () => {
     expect(store.claimAutomatically).toBe(false);
     expect(store.lastCheck).toBe(1712345678);
     expect(store.mintUrl).toBe("https://mint.example");
+    expect(store.baseHost).toBe("custom.example");
     expect(store.address).toBe("");
     expect(localStorage.getItem("cashu.npc.v2.enabled")).toBeNull();
     expect(localStorage.getItem("cashu.npc.v2.mint")).toBeNull();
@@ -139,7 +227,7 @@ describe("npub.cash store", () => {
             })
           );
         }
-        if (url === "https://npub.cash/api/v2/wallet/quotes") {
+        if (url.startsWith("https://npub.cash/api/v2/wallet/quotes?")) {
           return new Response(
             JSON.stringify({
               error: false,
@@ -190,7 +278,7 @@ describe("npub.cash store", () => {
             })
           );
         }
-        if (url === "https://npub.cash/api/v2/wallet/quotes") {
+        if (url.startsWith("https://npub.cash/api/v2/wallet/quotes?")) {
           return new Response(
             JSON.stringify({
               error: false,
@@ -209,7 +297,7 @@ describe("npub.cash store", () => {
 
     expect(requestedUrls.sort()).toEqual([
       "https://npub.cash/api/v2/user/info",
-      "https://npub.cash/api/v2/wallet/quotes",
+      "https://npub.cash/api/v2/wallet/quotes?limit=50&offset=0",
     ]);
     expect(store.address).toMatch(/^npub1.+@npub\.cash$/);
     expect(store.mintUrl).toBe(mintUrl);
@@ -369,5 +457,268 @@ describe("npub.cash store", () => {
     ]);
     expect(mintOnPaid).not.toHaveBeenCalled();
     expect(processNow).toHaveBeenCalledOnce();
+  });
+
+  it("authenticates realtime updates and debounces quote synchronization", async () => {
+    vi.useFakeTimers();
+    const store = useNpubCashStore();
+    store.enabled = true;
+    const generateToken = vi
+      .spyOn(store, "generateNip98Event")
+      .mockResolvedValue("signed-event");
+    const synchronize = vi
+      .spyOn(store, "synchronizeQuotes")
+      .mockResolvedValue();
+
+    store.startQuoteUpdates();
+    const socket = MockQuoteWebSocket.instances[0];
+    socket.open();
+    socket.message({
+      type: "challenge",
+      payload: {
+        url: "wss://npub.cash/api/v2/ws/quote",
+        method: "GET",
+      },
+    });
+    await vi.waitFor(() => expect(socket.sent).toHaveLength(1));
+
+    expect(generateToken).toHaveBeenCalledWith(
+      "wss://npub.cash/api/v2/ws/quote",
+      "GET"
+    );
+    expect(JSON.parse(socket.sent[0])).toEqual({
+      type: "challenge-response",
+      payload: "Nostr signed-event",
+    });
+
+    socket.message({ type: "update", payload: { quoteId: "zap-1" } });
+    socket.message({ type: "update", payload: { quoteId: "zap-2" } });
+    await vi.advanceTimersByTimeAsync(249);
+    expect(synchronize).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(1);
+    expect(synchronize).toHaveBeenCalledOnce();
+  });
+
+  it("supports the documented top-level WebSocket auth protocol", async () => {
+    const store = useNpubCashStore();
+    store.enabled = true;
+    const generateToken = vi
+      .spyOn(store, "generateNip98Event")
+      .mockResolvedValue("signed-event");
+
+    store.startQuoteUpdates();
+    const socket = MockQuoteWebSocket.instances[0];
+    socket.open();
+    socket.message({ type: "challenge", challenge: "nonce" });
+    await vi.waitFor(() => expect(socket.sent).toHaveLength(1));
+
+    expect(JSON.parse(socket.sent[0])).toEqual({
+      type: "auth",
+      token: "Nostr signed-event",
+    });
+    expect(generateToken).toHaveBeenCalledWith(
+      "wss://npub.cash/api/v2/ws/quote",
+      "GET"
+    );
+  });
+
+  it("paginates quotes and advances the paidAt watermark", async () => {
+    const mintUrl = "https://mint.example";
+    const store = useNpubCashStore();
+    store.enabled = true;
+    store.baseHost = "custom.example";
+    store.lastCheck = 100;
+    store.claimAutomatically = true;
+    useMintsStore().mints = [
+      { url: mintUrl, keys: [], keysets: [], info: { nuts: { 29: {} } } },
+    ];
+    const walletStore = useWalletStore();
+    walletStore.invoiceHistory = [];
+    vi.spyOn(walletStore, "addPaymentHistory").mockImplementation(
+      async (invoice) => {
+        walletStore.invoiceHistory.push(invoice);
+      }
+    );
+    const worker = useTransactionWorkerStore();
+    vi.spyOn(worker, "startTransactionWorker").mockImplementation(() => {});
+    const processNow = vi
+      .spyOn(worker, "processIncomingTransactionsNow")
+      .mockResolvedValue();
+    const requestedUrls: string[] = [];
+    vi.spyOn(store, "sendAuthedRequest").mockImplementation(async (url) => {
+      requestedUrls.push(url);
+      const offset = Number(new URL(url).searchParams.get("offset"));
+      const index = offset === 0 ? 1 : 2;
+      return new Response(
+        JSON.stringify({
+          error: false,
+          data: {
+            quotes: [
+              {
+                createdAt: 90 + index,
+                paidAt: 100 + index,
+                expiresAt: 1_000,
+                mintUrl,
+                quoteId: `zap-${index}`,
+                request: `lnbc${index}`,
+                amount: index * 10,
+                state: "PAID",
+                locked: false,
+              },
+            ],
+          },
+          metadata: { limit: 50, total: 2 },
+        })
+      );
+    });
+
+    await store.synchronizeQuotes();
+
+    expect(requestedUrls).toEqual([
+      "https://custom.example/api/v2/wallet/quotes?limit=50&offset=0&since=99",
+      "https://custom.example/api/v2/wallet/quotes?limit=50&offset=1&since=99",
+    ]);
+    expect(walletStore.invoiceHistory.map((invoice) => invoice.quote)).toEqual([
+      "zap-1",
+      "zap-2",
+    ]);
+    expect(store.lastCheck).toBe(102);
+    expect(processNow).toHaveBeenCalledOnce();
+  });
+
+  it("serializes quote sync bursts and follows up without overlap", async () => {
+    const store = useNpubCashStore();
+    store.enabled = true;
+    let releaseFirstRequest: (() => void) | undefined;
+    const firstRequest = new Promise<void>((resolve) => {
+      releaseFirstRequest = resolve;
+    });
+    let requests = 0;
+    let activeRequests = 0;
+    let maxActiveRequests = 0;
+    vi.spyOn(store, "sendAuthedRequest").mockImplementation(async () => {
+      requests += 1;
+      activeRequests += 1;
+      maxActiveRequests = Math.max(maxActiveRequests, activeRequests);
+      if (requests === 1) await firstRequest;
+      activeRequests -= 1;
+      return new Response(
+        JSON.stringify({
+          error: false,
+          data: { quotes: [] },
+          metadata: { limit: 50, total: 0 },
+        })
+      );
+    });
+
+    const firstSync = store.synchronizeQuotes();
+    const burstSync = store.synchronizeQuotes();
+    releaseFirstRequest?.();
+    await Promise.all([firstSync, burstSync]);
+
+    expect(requests).toBe(2);
+    expect(maxActiveRequests).toBe(1);
+  });
+
+  it("discards an in-flight quote sync when the server host changes", async () => {
+    const oldMintUrl = "https://old-mint.example";
+    const newMintUrl = "https://new-mint.example";
+    const store = useNpubCashStore();
+    store.enabled = true;
+    store.baseHost = "old.example";
+    store.lastCheck = 100;
+    store.claimAutomatically = false;
+    const walletStore = useWalletStore();
+    walletStore.invoiceHistory = [];
+    vi.spyOn(walletStore, "addPaymentHistory").mockImplementation(
+      async (invoice) => {
+        walletStore.invoiceHistory.push(invoice);
+      }
+    );
+
+    let releaseOldRequest: ((response: Response) => void) | undefined;
+    const oldRequest = new Promise<Response>((resolve) => {
+      releaseOldRequest = resolve;
+    });
+    const requestedUrls: string[] = [];
+    vi.spyOn(store, "sendAuthedRequest").mockImplementation(async (url) => {
+      requestedUrls.push(url);
+      if (url.startsWith("https://old.example")) return oldRequest;
+      return new Response(
+        JSON.stringify({
+          error: false,
+          data: {
+            quotes: [
+              {
+                createdAt: 190,
+                paidAt: 200,
+                expiresAt: 1_000,
+                mintUrl: newMintUrl,
+                quoteId: "new-zap",
+                request: "lnbcnew",
+                amount: 20,
+                state: "PAID",
+                locked: false,
+              },
+            ],
+          },
+          metadata: { limit: 50, total: 1 },
+        })
+      );
+    });
+    vi.spyOn(store, "initializeNpubCash").mockImplementation(async () => {
+      await store.synchronizeQuotes();
+    });
+
+    const oldSync = store.synchronizeQuotes();
+    const hostChange = store.setBaseHost("new.example");
+    releaseOldRequest?.(
+      new Response(
+        JSON.stringify({
+          error: false,
+          data: {
+            quotes: [
+              {
+                createdAt: 490,
+                paidAt: 500,
+                expiresAt: 1_000,
+                mintUrl: oldMintUrl,
+                quoteId: "old-zap",
+                request: "lnbcold",
+                amount: 50,
+                state: "PAID",
+                locked: false,
+              },
+            ],
+          },
+          metadata: { limit: 50, total: 1 },
+        })
+      )
+    );
+    await Promise.all([oldSync, hostChange]);
+
+    expect(requestedUrls).toEqual([
+      "https://old.example/api/v2/wallet/quotes?limit=50&offset=0&since=99",
+      "https://new.example/api/v2/wallet/quotes?limit=50&offset=0",
+    ]);
+    expect(walletStore.invoiceHistory.map((invoice) => invoice.quote)).toEqual([
+      "new-zap",
+    ]);
+    expect(store.lastCheck).toBe(200);
+  });
+
+  it("reconnects realtime quote updates with backoff", async () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const store = useNpubCashStore();
+    store.enabled = true;
+
+    store.startQuoteUpdates();
+    MockQuoteWebSocket.instances[0].close();
+    expect(MockQuoteWebSocket.instances).toHaveLength(1);
+    await vi.advanceTimersByTimeAsync(999);
+    expect(MockQuoteWebSocket.instances).toHaveLength(1);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(MockQuoteWebSocket.instances).toHaveLength(2);
   });
 });
