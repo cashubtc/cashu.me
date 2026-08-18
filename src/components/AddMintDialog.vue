@@ -1,46 +1,41 @@
 <template>
   <q-dialog
     v-model="showAddMintDialogLocal"
-    @keydown.enter.prevent="addMintLocal"
+    position="bottom"
     backdrop-filter="blur(4px) brightness(50%)"
-    transition-show="fade"
-    transition-hide="fade"
-    scrollable
+    transition-show="slide-up"
+    transition-hide="slide-down"
+    @keydown.enter.prevent="addMintLocal"
   >
-    <q-card class="add-mint-dialog">
+    <q-card class="add-mint-sheet" :class="isDark ? 'bg-dark' : 'bg-white'">
+      <!-- Drag handle -->
+      <div class="sheet-handle-container">
+        <div class="sheet-handle" />
+      </div>
+
       <!-- Header Section -->
-      <q-card-section class="add-mint-header q-pa-md">
-        <div class="add-mint-title-row">
-          <h4 class="add-mint-title q-my-none">
-            {{ $t("AddMintDialog.title") }}
-          </h4>
-        </div>
-      </q-card-section>
+      <div class="sheet-header q-px-lg">
+        <h4 class="sheet-title q-my-none">
+          {{ $t("AddMintDialog.title") }}
+        </h4>
+        <q-btn flat round dense icon="close" class="close-btn" v-close-popup />
+      </div>
 
       <!-- Scrollable Content Section -->
-      <q-card-section
-        class="add-mint-content q-px-md scroll"
-        style="max-height: 60vh"
-      >
-        <p class="add-mint-description q-mb-lg">
+      <div class="sheet-content q-px-lg scroll">
+        <p class="sheet-description q-mb-lg">
           {{ $t("AddMintDialog.description") }}
         </p>
 
-        <div class="q-mb-lg">
-          <label class="input-label">{{
-            $t("AddMintDialog.inputs.mint_url.label")
-          }}</label>
-          <q-input
-            outlined
-            readonly
-            :model-value="mintUrl"
-            dense
-            class="mint-input"
-            filled
-            type="textarea"
-            autogrow
-            style="font-family: monospace; font-size: 0.9em"
-          ></q-input>
+        <!-- Mint preview pill -->
+        <div class="mint-preview-pill q-mb-lg">
+          <MintInfoContainer
+            :url="mintUrl"
+            :name="mintDisplayName"
+            :iconUrl="mintIconUrl"
+            :loading="mintInfoLoading"
+            avatarSize="48px"
+          />
         </div>
 
         <!-- Audit Info Section -->
@@ -70,14 +65,13 @@
             </transition>
           </div>
         </div>
-      </q-card-section>
+      </div>
 
       <!-- Fixed Action Buttons Section -->
-      <q-card-actions class="action-buttons flex q-pa-md">
+      <div class="sheet-actions q-px-lg">
         <q-btn flat class="cancel-btn" v-close-popup>
           {{ $t("AddMintDialog.actions.cancel.label") }}
         </q-btn>
-        <q-spacer></q-spacer>
         <q-btn
           color="primary"
           class="add-btn"
@@ -93,21 +87,26 @@
             {{ $t("AddMintDialog.actions.add_mint.in_progress") }}
           </template>
         </q-btn>
-      </q-card-actions>
+      </div>
     </q-card>
   </q-dialog>
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref } from "vue";
+import { defineComponent, computed, ref, watch } from "vue";
+import { useQuasar } from "quasar";
 import { useSettingsStore } from "src/stores/settings";
+import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
+import { getShortUrl } from "src/js/wallet-helpers";
 import MintAuditInfo from "./MintAuditInfo.vue";
+import MintInfoContainer from "./MintInfoContainer.vue";
 import { Info as InfoIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "AddMintDialog",
   components: {
     MintAuditInfo,
+    MintInfoContainer,
     InfoIcon,
   },
   props: {
@@ -126,8 +125,11 @@ export default defineComponent({
   },
   emits: ["add", "update:showAddMintDialog"],
   setup(props, { emit }) {
+    const $q = useQuasar();
     const settings = useSettingsStore();
+    const mintRecommendations = useMintRecommendationsStore();
     const showAuditInfo = ref(false);
+    const mintInfoLoading = ref(false);
 
     const showAddMintDialogLocal = computed({
       get: () => props.showAddMintDialog,
@@ -140,54 +142,126 @@ export default defineComponent({
 
     const mintUrl = computed(() => props.addMintData.url);
 
+    const mintHttpInfo = computed(() => {
+      if (!mintUrl.value) return undefined;
+      return mintRecommendations.getHttpInfoForUrl(mintUrl.value);
+    });
+
+    const mintDisplayName = computed(() => {
+      return (
+        props.addMintData.nickname ||
+        mintHttpInfo.value?.name ||
+        (mintUrl.value ? getShortUrl(mintUrl.value) : "")
+      );
+    });
+
+    const mintIconUrl = computed(
+      () => mintHttpInfo.value?.icon_url || undefined
+    );
+
+    // Fetch the mint's info (name, icon) when the sheet opens so the user
+    // sees a rich preview instead of a bare URL.
+    const fetchMintPreview = async (url: string) => {
+      if (!url || mintRecommendations.hasHttpInfo(url)) return;
+      mintInfoLoading.value = true;
+      try {
+        await mintRecommendations.requestMintHttpInfo(url, 5000);
+      } finally {
+        // Only clear the loading state if the sheet is still showing
+        // the same mint URL.
+        if (mintUrl.value === url) {
+          mintInfoLoading.value = false;
+        }
+      }
+    };
+
+    watch(showAddMintDialogLocal, (isOpen) => {
+      if (isOpen) {
+        showAuditInfo.value = false;
+        mintInfoLoading.value = false;
+        fetchMintPreview(mintUrl.value);
+      }
+    });
+
+    watch(mintUrl, (url) => {
+      if (showAddMintDialogLocal.value) {
+        mintInfoLoading.value = false;
+        fetchMintPreview(url);
+      }
+    });
+
     return {
       addMintLocal,
       showAddMintDialogLocal,
       mintUrl,
+      mintDisplayName,
+      mintIconUrl,
+      mintInfoLoading,
       settings,
       showAuditInfo,
+      isDark: computed(() => $q.dark.isActive),
     };
   },
 });
 </script>
 
 <style scoped>
-.add-mint-dialog {
+.add-mint-sheet {
   width: 100%;
-  max-width: 450px;
+  max-width: 500px;
   max-height: 80vh;
-  border-radius: 16px;
+  border-radius: 20px 20px 0 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
-.add-mint-header {
-  position: relative;
-  padding-top: 20px;
+/* Drag handle */
+.sheet-handle-container {
+  display: flex;
+  justify-content: center;
+  padding-top: 10px;
+  padding-bottom: 4px;
   flex-shrink: 0;
 }
 
-.add-mint-title-row {
+.sheet-handle {
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  background-color: rgba(128, 128, 128, 0.4);
+}
+
+/* Header */
+.sheet-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding-top: 8px;
+  padding-bottom: 16px;
+  flex-shrink: 0;
 }
 
-.add-mint-title {
-  font-size: 24px;
+.sheet-title {
+  font-size: 22px;
   font-weight: 700;
   letter-spacing: -0.5px;
   font-family: "Inter", sans-serif;
 }
 
-.add-mint-content {
+.close-btn {
+  opacity: 0.7;
+}
+
+/* Content */
+.sheet-content {
   padding-top: 0;
   flex: 1;
   overflow-y: auto;
 }
 
-.add-mint-description {
+.sheet-description {
   font-size: 15px;
   line-height: 1.5;
   font-weight: 400;
@@ -196,112 +270,42 @@ export default defineComponent({
   font-family: "Inter", sans-serif;
 }
 
-.input-label {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  opacity: 0.7;
-  font-family: "Inter", sans-serif;
+/* Mint preview pill (styled like the mint selector pill, but static) */
+.mint-preview-pill {
+  width: 100%;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(128, 128, 128, 0.25);
+  background-color: rgba(128, 128, 128, 0.08);
 }
 
-.mint-data-display {
-  padding: 12px;
-  background-color: rgba(0, 0, 0, 0.03);
-  border-radius: 8px;
-  min-height: 48px;
-  display: flex;
-  align-items: center;
-  font-family: "Inter", sans-serif;
-}
-
-.body--dark .mint-data-display {
+.body--dark .mint-preview-pill {
+  border-color: rgba(255, 255, 255, 0.1);
   background-color: rgba(255, 255, 255, 0.05);
 }
 
-.mint-input {
-  border-radius: 8px;
-  height: 48px;
-  font-size: 16px;
+.body--light .mint-preview-pill {
+  border-color: rgba(0, 0, 0, 0.12);
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.mint-preview-pill :deep(.q-avatar) {
+  margin-right: 16px !important;
+}
+
+/* Audit info */
+.audit-info-btn {
   font-family: "Inter", sans-serif;
 }
 
-/* Completely remove all input animations */
-:deep(.mint-input),
-:deep(.mint-input *) {
-  animation: none !important;
-}
-
-:deep(.mint-input *) {
-  transition: none !important;
-}
-
-/* Add a smooth transition just for the input background-color */
-:deep(.mint-input) {
-  transition: background-color 0.2s ease-in-out !important;
-}
-
-:deep(.mint-input .q-field__focus-target) {
-  border-radius: 8px;
-}
-
-:deep(.mint-input .q-focus-helper) {
-  /* Remove animation completely */
-  opacity: 0 !important;
-  display: none !important; /* Hide it completely */
-}
-
-/* Add subtle focus/active state - theme responsive */
-:deep(.mint-input.q-field--focused) {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-/* For dark mode, adjust the focus color */
-:deep(.body--dark .mint-input.q-field--focused) {
-  background-color: rgba(255, 255, 255, 0.07);
-}
-
-/* For light mode, use a darker shade for contrast */
-:deep(.body--light .mint-input.q-field--focused) {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-/* Remove any ripple effects */
-:deep(.mint-input .q-ripple) {
-  display: none !important;
-}
-
-/* Remove any before/after pseudo-elements that might animate */
-:deep(.mint-input .q-field__control:before),
-:deep(.mint-input .q-field__control:after) {
-  display: none !important;
-}
-
-/* Ensure no border animations */
-:deep(.mint-input .q-field__control) {
-  height: 48px;
-  border-radius: 8px;
-  transition: none !important;
-}
-
-:deep(.mint-input .q-field__native) {
-  padding: 12px;
-  font-family: "Inter", sans-serif;
-}
-
-/* Make sure input placeholders use Inter font */
-:deep(.mint-input .q-field__native),
-:deep(.mint-input .q-field__input),
-:deep(.mint-input .q-placeholder) {
-  font-family: "Inter", sans-serif;
-}
-
-.action-buttons {
+/* Action buttons */
+.sheet-actions {
   display: flex;
   justify-content: space-between;
-  margin-top: 32px;
+  align-items: center;
+  padding-top: 8px;
+  padding-bottom: 16px;
+  flex-shrink: 0;
 }
 
 .cancel-btn {
