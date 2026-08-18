@@ -79,55 +79,13 @@
         <div class="col column items-center q-px-lg amount-area">
           <transition name="receive-content" mode="out-in">
             <div
-              v-if="showNpubCashPreview"
-              key="npub-cash-address"
+              v-if="qrPreview"
+              :key="qrPreview.key"
               class="row justify-center full-width q-mt-lg q-mb-auto"
             >
               <div class="col-12" style="max-width: 400px">
                 <div
-                  class="qr-container cursor-pointer"
-                  @click="copyNpubCashAddress"
-                >
-                  <q-responsive :ratio="1" class="q-mx-none">
-                    <vue-qrcode
-                      :value="npubCashLnurl"
-                      :options="{ width: 400 }"
-                      class="rounded-borders"
-                      style="width: 100%"
-                    >
-                    </vue-qrcode>
-                  </q-responsive>
-                </div>
-                <div
-                  class="q-mt-sm text-center text-grey-7 npub-cash-address cursor-pointer"
-                  data-testid="npub-cash-lightning-address"
-                  @click="copyNpubCashAddress"
-                >
-                  <q-icon
-                    :name="npubCashAddressCopied ? 'check' : 'content_copy'"
-                    size="xs"
-                    class="q-mr-xs"
-                  />
-                  {{ npubCashAddress }}
-                </div>
-              </div>
-            </div>
-            <div
-              v-else-if="isOnchain && checkingReusableOnchainQuote"
-              key="checking-onchain"
-              class="column items-center justify-center q-pa-xl q-my-auto"
-            >
-              <q-spinner size="48px" color="primary" />
-              <div class="text-grey-6 q-mt-md">Checking address...</div>
-            </div>
-            <div
-              v-else-if="!checkingReusableOnchainQuote && showReusableQuote"
-              key="reusable-quote"
-              class="row justify-center full-width q-my-auto"
-            >
-              <div class="col-12" style="max-width: 400px">
-                <div
-                  v-if="activeMintErrored"
+                  v-if="qrPreview.kind === 'reusable' && activeMintErrored"
                   class="mint-error-warning column items-center text-center q-pa-lg"
                 >
                   <q-icon name="warning" size="42px" color="warning" />
@@ -147,40 +105,47 @@
                     @click="refreshActiveMint"
                   />
                 </div>
-                <div
-                  v-else-if="reusableReceiveQuote"
-                  @click="onCopyReusableOffer"
-                  class="cursor-pointer"
-                >
-                  <q-responsive :ratio="1" class="q-mx-none">
-                    <vue-qrcode
-                      :value="reusableQrValue"
-                      :options="{ width: 400 }"
-                      class="rounded-borders"
-                      style="width: 100%"
-                    >
-                    </vue-qrcode>
-                  </q-responsive>
-                </div>
-                <div
-                  v-if="reusableReceiveQuote && !activeMintErrored"
-                  class="q-mt-sm text-center text-grey-7"
-                  @click="onCopyReusableOffer"
-                >
-                  <q-icon
-                    :name="copyButtonCopied ? 'check' : 'content_copy'"
-                    size="xs"
-                    class="q-mr-xs"
-                  />
-                  {{
-                    copyButtonCopied
-                      ? $t("global.copy_to_clipboard.success")
-                      : isOnchain
-                      ? "Copy Address"
-                      : "Copy Offer"
-                  }}
-                </div>
+                <template v-else>
+                  <div
+                    class="qr-container cursor-pointer"
+                    @click="copyQrPreview"
+                  >
+                    <q-responsive :ratio="1" class="q-mx-none">
+                      <vue-qrcode
+                        :value="qrPreview.value"
+                        :options="{ width: 400 }"
+                        class="rounded-borders"
+                        style="width: 100%"
+                      >
+                      </vue-qrcode>
+                    </q-responsive>
+                  </div>
+                  <div
+                    class="q-mt-sm text-center text-grey-7 qr-copy-text cursor-pointer"
+                    :data-testid="
+                      qrPreview.kind === 'npubcash'
+                        ? 'npub-cash-lightning-address'
+                        : null
+                    "
+                    @click="copyQrPreview"
+                  >
+                    <q-icon
+                      :name="qrPreview.copied ? 'check' : 'content_copy'"
+                      size="xs"
+                      class="q-mr-xs"
+                    />
+                    {{ qrPreview.text }}
+                  </div>
+                </template>
               </div>
+            </div>
+            <div
+              v-else-if="isOnchain && checkingReusableOnchainQuote"
+              key="checking-onchain"
+              class="column items-center justify-center q-pa-xl q-my-auto"
+            >
+              <q-spinner size="48px" color="primary" />
+              <div class="text-grey-6 q-mt-md">Checking address...</div>
             </div>
 
             <AmountInputComponent
@@ -439,6 +404,33 @@ export default defineComponent({
     npubCashLnurl(): string {
       return lightningAddressToLnurl(this.npubCashAddress || "");
     },
+    qrPreview(): {
+      key: string;
+      kind: string;
+      value: string;
+      text: string;
+      copied: boolean;
+    } | null {
+      if (this.showNpubCashPreview) {
+        return {
+          key: "npub-cash-address",
+          kind: "npubcash",
+          value: this.npubCashLnurl,
+          text: this.npubCashAddress,
+          copied: this.npubCashAddressCopied,
+        };
+      }
+      if (!this.checkingReusableOnchainQuote && this.showReusableQuote) {
+        return {
+          key: "reusable-quote",
+          kind: "reusable",
+          value: this.reusableQrValue,
+          text: this.reusableReceiveQuote?.request || "",
+          copied: this.copyButtonCopied,
+        };
+      }
+      return null;
+    },
     canCreate(): boolean {
       if (this.activeMintErrored) return false;
       // Bolt11 requires amount > 0
@@ -557,6 +549,14 @@ export default defineComponent({
       this.$nextTick(() => {
         this.showNumericKeyboard = true;
       });
+    },
+    copyQrPreview() {
+      if (!this.qrPreview) return;
+      if (this.qrPreview.kind === "npubcash") {
+        this.copyNpubCashAddress();
+      } else {
+        this.onCopyReusableOffer();
+      }
     },
     async copyNpubCashAddress() {
       if (!this.npubCashAddress) return;
@@ -743,7 +743,7 @@ export default defineComponent({
   border-radius: 8px;
   overflow: hidden;
 }
-.npub-cash-address {
+.qr-copy-text {
   overflow-wrap: anywhere;
   word-break: break-all;
   -webkit-hyphens: none;
