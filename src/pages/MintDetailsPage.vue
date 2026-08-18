@@ -1,6 +1,6 @@
 <template>
   <div
-    class="mint-details q-pa-md"
+    class="mint-details q-px-md"
     :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark'"
   >
     <div class="mint-details-page-content">
@@ -865,6 +865,14 @@ body:not(.body--dark) .nut-pill {
   justify-content: center;
   overflow: hidden;
   width: 100%;
+}
+
+/* The QR canvas has a fixed pixel width; scale it down on narrow screens
+   instead of letting the section's overflow clip off its rounded corners. */
+.qr-code-section canvas,
+.qr-code-section img {
+  max-width: 100%;
+  height: auto;
 }
 
 .smooth-slide-enter-active {
