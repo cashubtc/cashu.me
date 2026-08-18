@@ -295,7 +295,7 @@ export default {
       },
       show_on_receive: {
         toggle: "收款时显示",
-        description: "输入金额前显示您的 Lightning 地址和二维码。",
+        description: "显示地址和二维码。",
       },
       automatic_claim: {
         toggle: "自动认领",

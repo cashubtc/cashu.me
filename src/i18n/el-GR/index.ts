@@ -280,8 +280,7 @@ export default {
       },
       show_on_receive: {
         toggle: "Εμφάνιση κατά τη λήψη",
-        description:
-          "Εμφάνιση της διεύθυνσης Lightning και του κωδικού QR πριν την εισαγωγή ποσού.",
+        description: "Εμφάνιση διεύθυνσης και κωδικού QR.",
       },
       automatic_claim: {
         toggle: "Αυτόματη διεκδίκηση",

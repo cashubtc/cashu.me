@@ -277,7 +277,7 @@ export default {
       },
       show_on_receive: {
         toggle: "إظهار عند الاستلام",
-        description: "اعرض عنوان Lightning ورمز QR قبل إدخال المبلغ.",
+        description: "إظهار العنوان ورمز QR.",
       },
       automatic_claim: {
         toggle: "المطالبة تلقائيًا",

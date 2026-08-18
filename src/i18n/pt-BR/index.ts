@@ -287,8 +287,7 @@ export default {
       },
       show_on_receive: {
         toggle: "Mostrar ao receber",
-        description:
-          "Mostra seu endereço Lightning e o código QR antes de informar um valor.",
+        description: "Mostrar endereço e código QR.",
       },
       automatic_claim: {
         toggle: "Reivindicar automaticamente",

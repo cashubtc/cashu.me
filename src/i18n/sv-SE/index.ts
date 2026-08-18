@@ -293,8 +293,7 @@ export default {
       },
       show_on_receive: {
         toggle: "Visa vid mottagning",
-        description:
-          "Visa din Lightning-adress och QR-kod innan du anger ett belopp.",
+        description: "Visa adress och QR-kod.",
       },
       automatic_claim: {
         toggle: "Hämta automatiskt",

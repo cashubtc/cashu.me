@@ -283,7 +283,7 @@ export default {
       },
       show_on_receive: {
         toggle: "Zobrazit při přijímání",
-        description: "Před zadáním částky zobrazí Lightning adresu a QR kód.",
+        description: "Zobrazit adresu a QR kód.",
       },
       automatic_claim: {
         toggle: "Přijímat automaticky",

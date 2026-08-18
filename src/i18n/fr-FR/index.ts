@@ -280,8 +280,7 @@ export default {
       },
       show_on_receive: {
         toggle: "Afficher à la réception",
-        description:
-          "Affiche votre adresse Lightning et le code QR avant de saisir un montant.",
+        description: "Afficher l'adresse et le code QR.",
       },
       automatic_claim: {
         toggle: "Réclamer automatiquement",

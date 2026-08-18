@@ -287,8 +287,7 @@ export default {
       },
       show_on_receive: {
         toggle: "Show when receiving",
-        description:
-          "Show your Lightning address and QR code before entering an amount.",
+        description: "Show address and QR code.",
       },
       automatic_claim: {
         toggle: "Claim automatically",
