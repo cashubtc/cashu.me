@@ -59,4 +59,21 @@ describe("sendTokensStore.invalidatePreparedPaymentRequestToken", () => {
       mints: ["https://trusted.example"],
     });
   });
+
+  test("clears stale historyToken even if tokensBase64 is empty", () => {
+    const store = useSendTokensStore();
+    store.sendData.paymentRequest = {
+      id: "pr1",
+    } as any;
+    store.sendData.tokensBase64 = "";
+    store.sendData.historyToken = { id: "h1" } as any;
+    store.sendData.historyAmount = -42;
+
+    const changed = store.invalidatePreparedPaymentRequestToken();
+
+    expect(changed).toBe(true);
+    expect(store.sendData.tokensBase64).toBe("");
+    expect(store.sendData.historyToken).toBeUndefined();
+    expect(store.sendData.historyAmount).toBeNull();
+  });
 });
