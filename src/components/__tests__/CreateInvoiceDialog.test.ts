@@ -23,7 +23,7 @@ describe("CreateInvoiceDialog", () => {
         showAddressOnReceive: false,
         activeMintUrl: "https://mint.example",
         npubCashMintUrl: "https://mint.example",
-      }),
+      })
     ).toBe(false);
   });
 
@@ -42,7 +42,7 @@ describe("CreateInvoiceDialog", () => {
         showAddressOnReceive: true,
         activeMintUrl: "https://mint.example",
         npubCashMintUrl: "https://mint.example",
-      }),
+      })
     ).toBe(true);
   });
 });
