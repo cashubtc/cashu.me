@@ -81,7 +81,6 @@
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "src/components/ChooseMint.vue";
-import { useNostrStore } from "src/stores/nostr";
 import { useNpubCashStore } from "src/stores/npubcash";
 import SettingsPageShell from "src/pages/settings/SettingsPageShell.vue";
 import SettingsSection from "src/pages/settings/SettingsSection.vue";
@@ -106,9 +105,9 @@ export default defineComponent({
   watch: {
     enabled: async function () {
       if (this.enabled) {
-        await this.initSigner();
-        await this.refreshNpubCashConnection();
+        await this.initializeNpubCash();
       } else {
+        this.stopQuoteUpdates();
         this.address = "";
       }
     },
@@ -119,10 +118,10 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useNostrStore, ["initSigner"]),
     ...mapActions(useNpubCashStore, [
-      "refreshNpubCashConnection",
+      "initializeNpubCash",
       "changeMintUrl",
+      "stopQuoteUpdates",
     ]),
   },
 });

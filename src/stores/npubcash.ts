@@ -4,6 +4,7 @@ import { StorageSerializers, useLocalStorage } from "@vueuse/core";
 import { defineStore } from "pinia";
 import { date } from "quasar";
 import { nip19 } from "nostr-tools";
+import { markRaw } from "vue";
 import { notifyApiError, notifyError } from "src/js/notify";
 import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import { useMintsStore } from "src/stores/mints";
@@ -61,10 +62,16 @@ type NpubCashQuoteResponse =
 type UsernameQuote = { username: string; creq: string };
 
 const NPUB_CASH_BASE_URL = "https://npub.cash";
+const NPUB_CASH_QUOTES_URL = `${NPUB_CASH_BASE_URL}/api/v2/wallet/quotes`;
+const NPUB_CASH_WS_AUTH_URL = `${NPUB_CASH_BASE_URL}/api/v2/ws/quote`;
+const NPUB_CASH_WS_URL = "wss://npub.cash/api/v2/ws/quote";
 const NPUB_CASH_DOMAIN = "npub.cash";
 const NPUB_CASH_STORAGE_VERSION = "1";
 const NPUB_CASH_STORAGE_PREFIX = "cashu.npubcash";
 const NIP_98_KIND = 27235;
+const QUOTE_PAGE_SIZE = 50;
+const QUOTE_SYNC_DEBOUNCE_MS = 250;
+const QUOTE_RECONNECT_MAX_MS = 30_000;
 
 const legacyStorageKeys = [
   "cashu.npc.enabled",
@@ -189,19 +196,26 @@ export const useNpubCashStore = defineStore("npubCash", {
         null
       ),
       loading: false,
+      quoteSocket: null as WebSocket | null,
+      quoteSyncPromise: null as Promise<void> | null,
+      quoteSyncRequested: false,
+      quoteSyncTimer: null as ReturnType<typeof setTimeout> | null,
+      quoteReconnectTimer: null as ReturnType<typeof setTimeout> | null,
+      quoteReconnectAttempt: 0,
+      quoteResumeHandler: null as (() => void) | null,
     };
   },
   actions: {
     initializeNpubCash: async function () {
       if (!this.enabled) {
+        this.stopQuoteUpdates();
         return;
       }
       const nostrStore = useNostrStore();
       await nostrStore.initSignerIfNotSet();
-      await Promise.all([
-        this.refreshNpubCashConnection(),
-        this.synchronizeQuotes(),
-      ]);
+      await this.refreshNpubCashConnection();
+      await this.synchronizeQuotes();
+      this.startQuoteUpdates();
     },
     refreshNpubCashConnection: async function () {
       if (!this.enabled) {
@@ -298,36 +312,87 @@ export const useNpubCashStore = defineStore("npubCash", {
         }
       }
     },
-    synchronizeQuotes: async function () {
-      if (!this.enabled) {
-        return;
+    synchronizeQuotes: async function (): Promise<void> {
+      if (!this.enabled) return;
+      if (this.quoteSyncPromise) {
+        this.quoteSyncRequested = true;
+        return this.quoteSyncPromise;
       }
+
+      this.quoteSyncRequested = true;
+      const syncPromise = (async () => {
+        do {
+          this.quoteSyncRequested = false;
+          await this.fetchAndQueueQuotes();
+        } while (this.enabled && this.quoteSyncRequested);
+      })().finally(() => {
+        if (this.quoteSyncPromise === syncPromise) {
+          this.quoteSyncPromise = null;
+        }
+      });
+      this.quoteSyncPromise = syncPromise;
+      return syncPromise;
+    },
+    fetchAndQueueQuotes: async function () {
+      if (!this.enabled) return;
       const transactionWorkerStore = useTransactionWorkerStore();
       const walletStore = useWalletStore();
-      const since = this.lastCheck ? `?since=${this.lastCheck}` : "";
-      const quoteUrl = `${NPUB_CASH_BASE_URL}/api/v2/wallet/quotes`;
       try {
-        const response = await this.sendAuthedRequest(
-          quoteUrl + since,
-          undefined,
-          quoteUrl
-        );
-        const responseData: NpubCashQuoteResponse = await response.json();
-        if (responseData.error) {
-          return;
-        }
+        const quotes: NpubCashQuote[] = [];
+        const seenQuotes = new Set<string>();
+        let offset = 0;
+        let total = 0;
+
+        do {
+          const params = new URLSearchParams({
+            limit: String(QUOTE_PAGE_SIZE),
+            offset: String(offset),
+          });
+          // Re-read the previous second so quotes sharing a paidAt timestamp
+          // cannot fall through the strict `since` boundary.
+          if (this.lastCheck !== null) {
+            params.set("since", String(Math.max(0, this.lastCheck - 1)));
+          }
+          const response = await this.sendAuthedRequest(
+            `${NPUB_CASH_QUOTES_URL}?${params.toString()}`,
+            undefined,
+            NPUB_CASH_QUOTES_URL
+          );
+          if (!response.ok) {
+            throw new Error(`npub.cash quote sync failed (${response.status})`);
+          }
+          const responseData: NpubCashQuoteResponse = await response.json();
+          if (responseData.error) throw new Error(responseData.message);
+
+          const page = responseData.data.quotes;
+          total = responseData.metadata.total;
+          for (const quote of page) {
+            const key = `${quote.mintUrl}|${quote.quoteId}`;
+            if (!seenQuotes.has(key)) {
+              seenQuotes.add(key);
+              quotes.push(quote);
+            }
+          }
+          offset += page.length;
+          if (page.length === 0) break;
+        } while (offset < total);
+
+        if (!this.enabled) return;
         let latestQuoteTime: number | undefined;
         let queuedQuotes = false;
-        for (const quote of responseData.data.quotes) {
+        for (const quote of quotes) {
+          const paidAt = quote.paidAt || quote.createdAt;
+          if (!latestQuoteTime || latestQuoteTime < paidAt) {
+            latestQuoteTime = paidAt;
+          }
           if (
             walletStore.invoiceHistory.find(
-              (invoice) => invoice.quote === quote.quoteId
+              (invoice) =>
+                invoice.quote === quote.quoteId &&
+                invoice.mint === quote.mintUrl
             )
           ) {
             continue;
-          }
-          if (!latestQuoteTime || latestQuoteTime < quote.createdAt) {
-            latestQuoteTime = quote.createdAt;
           }
           const invoice = {
             label: "Zap",
@@ -367,6 +432,169 @@ export const useNpubCashStore = defineStore("npubCash", {
         }
       } catch (error) {
         console.error(error);
+      }
+    },
+    scheduleQuoteSync: function (delay = QUOTE_SYNC_DEBOUNCE_MS) {
+      if (!this.enabled) return;
+      if (this.quoteSyncTimer) clearTimeout(this.quoteSyncTimer);
+      this.quoteSyncTimer = setTimeout(() => {
+        this.quoteSyncTimer = null;
+        void this.synchronizeQuotes();
+      }, delay);
+    },
+    startQuoteUpdates: function () {
+      if (!this.enabled || typeof WebSocket === "undefined") return;
+      if (!this.quoteResumeHandler) {
+        this.quoteResumeHandler = () => {
+          if (!this.enabled || document.visibilityState === "hidden") return;
+          // Browsers may keep a stale OPEN socket after a device resumes.
+          const socket = this.quoteSocket;
+          this.quoteSocket = null;
+          if (socket) socket.close(1000);
+          this.connectQuoteUpdates();
+          this.scheduleQuoteSync(0);
+        };
+        window.addEventListener("online", this.quoteResumeHandler);
+        document.addEventListener("visibilitychange", this.quoteResumeHandler);
+      }
+      this.connectQuoteUpdates();
+    },
+    connectQuoteUpdates: function () {
+      if (!this.enabled || typeof WebSocket === "undefined") return;
+      if (
+        this.quoteSocket &&
+        (this.quoteSocket.readyState === WebSocket.CONNECTING ||
+          this.quoteSocket.readyState === WebSocket.OPEN)
+      ) {
+        return;
+      }
+      if (this.quoteReconnectTimer) {
+        clearTimeout(this.quoteReconnectTimer);
+        this.quoteReconnectTimer = null;
+      }
+
+      try {
+        const socket = markRaw(new WebSocket(NPUB_CASH_WS_URL));
+        this.quoteSocket = socket;
+        socket.onmessage = (event) => {
+          void this.handleQuoteSocketMessage(socket, event.data);
+        };
+        socket.onerror = () => {
+          socket.close();
+        };
+        socket.onclose = () => {
+          if (this.quoteSocket !== socket) return;
+          this.quoteSocket = null;
+          this.scheduleQuoteReconnect();
+        };
+      } catch (error) {
+        console.error("Could not connect to npub.cash quote updates", error);
+        this.quoteSocket = null;
+        this.scheduleQuoteReconnect();
+      }
+    },
+    handleQuoteSocketMessage: async function (
+      socket: WebSocket,
+      rawMessage: unknown
+    ) {
+      if (typeof rawMessage !== "string") return;
+      try {
+        const message = JSON.parse(rawMessage);
+        if (message.type === "challenge") {
+          const payload = message.payload;
+          const usesPayloadProtocol =
+            payload !== null && typeof payload === "object";
+          const authUrl = usesPayloadProtocol
+            ? payload.url
+            : NPUB_CASH_WS_AUTH_URL;
+          const method = usesPayloadProtocol ? payload.method : "GET";
+          const parsedAuthUrl = new URL(authUrl);
+          const expectedAuthUrl = new URL(NPUB_CASH_WS_AUTH_URL);
+          if (
+            !["https:", "wss:"].includes(parsedAuthUrl.protocol) ||
+            parsedAuthUrl.hostname !== expectedAuthUrl.hostname ||
+            parsedAuthUrl.port !== expectedAuthUrl.port ||
+            parsedAuthUrl.pathname !== expectedAuthUrl.pathname
+          ) {
+            throw new Error("Refusing an unexpected npub.cash auth URL");
+          }
+          const token = await this.generateNip98Event(authUrl, method || "GET");
+          if (
+            this.quoteSocket !== socket ||
+            socket.readyState !== WebSocket.OPEN
+          ) {
+            return;
+          }
+          socket.send(
+            JSON.stringify(
+              usesPayloadProtocol
+                ? {
+                    type: "challenge-response",
+                    payload: `Nostr ${token}`,
+                  }
+                : { type: "auth", token: `Nostr ${token}` }
+            )
+          );
+          return;
+        }
+        if (message.type === "ok" || message.type === "challenge-success") {
+          this.quoteReconnectAttempt = 0;
+          // This second catch-up closes the gap between the startup REST fetch
+          // and successful WebSocket authentication.
+          this.scheduleQuoteSync(0);
+          return;
+        }
+        if (message.type === "update") {
+          const quoteId = message.quoteId || message.payload?.quoteId;
+          if (quoteId) this.scheduleQuoteSync();
+          return;
+        }
+        if (message.type === "error") {
+          socket.close();
+        }
+      } catch (error) {
+        const errorDetails =
+          error instanceof Error
+            ? `${error.name}: ${error.message}`
+            : String(error);
+        console.error(
+          `Could not handle npub.cash quote update: ${errorDetails}`
+        );
+        socket.close();
+      }
+    },
+    scheduleQuoteReconnect: function () {
+      if (!this.enabled || this.quoteReconnectTimer) return;
+      const baseDelay = Math.min(
+        1_000 * 2 ** this.quoteReconnectAttempt,
+        QUOTE_RECONNECT_MAX_MS
+      );
+      const delay = Math.round(baseDelay * (0.75 + Math.random() * 0.5));
+      this.quoteReconnectAttempt += 1;
+      this.quoteReconnectTimer = setTimeout(() => {
+        this.quoteReconnectTimer = null;
+        this.connectQuoteUpdates();
+      }, delay);
+    },
+    stopQuoteUpdates: function () {
+      if (this.quoteSyncTimer) clearTimeout(this.quoteSyncTimer);
+      if (this.quoteReconnectTimer) clearTimeout(this.quoteReconnectTimer);
+      this.quoteSyncTimer = null;
+      this.quoteReconnectTimer = null;
+      this.quoteSyncRequested = false;
+      this.quoteReconnectAttempt = 0;
+
+      const socket = this.quoteSocket;
+      this.quoteSocket = null;
+      if (socket) socket.close(1000);
+
+      if (this.quoteResumeHandler) {
+        window.removeEventListener("online", this.quoteResumeHandler);
+        document.removeEventListener(
+          "visibilitychange",
+          this.quoteResumeHandler
+        );
+        this.quoteResumeHandler = null;
       }
     },
     getUsernameQuote: async function (
