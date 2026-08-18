@@ -47,6 +47,15 @@ function mempoolWebBase(apiBase: string): string {
   return apiBase.replace(/\/api$/, "");
 }
 
+export function onchainAddressExplorerUrl(address: string): string | null {
+  const normalizedAddress = normalizeBitcoinAddress(address);
+  const apiBase = mempoolBaseForAddress(normalizedAddress);
+  if (!apiBase) return null;
+  return `${mempoolWebBase(apiBase)}/address/${encodeURIComponent(
+    normalizedAddress
+  )}`;
+}
+
 async function fetchTipHeight(apiBase: string): Promise<number> {
   const response = await fetch(`${apiBase}/blocks/tip/height`, {
     cache: "no-store",
