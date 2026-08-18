@@ -1,5 +1,5 @@
 <template>
-  <q-header class="bg-dark">
+  <q-header :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'">
     <q-toolbar>
       <q-btn
         flat

@@ -1,5 +1,8 @@
 <template>
-  <div class="bg-dark text-white q-pa-md flex flex-center">
+  <div
+    class="mint-details q-pa-md"
+    :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark'"
+  >
     <div class="mint-details-page-content">
       <EditMintDialog
         :mint="mintToEdit"
@@ -15,10 +18,23 @@
 
       <div class="mint-content-container q-px-md">
         <!-- Mint Header Profile Name Section -->
-        <div class="mint-header-container q-mb-lg">
-          <div class="mint-header q-pa-md">
+        <div class="mint-header-container q-mb-md">
+          <div class="mint-header q-pa-lg">
+            <!-- QR Code Toggle -->
+            <q-btn
+              flat
+              dense
+              round
+              size="sm"
+              class="qr-toggle-btn"
+              aria-label="Toggle mint QR code"
+              @click="showQrCode = !showQrCode"
+            >
+              <qr-code-icon :size="20" />
+            </q-btn>
+
             <!-- Mint Profile Name Section -->
-            <q-avatar size="56px" class="mint-profile-icon q-mb-sm">
+            <q-avatar size="64px" class="mint-profile-icon q-mb-sm">
               <img
                 v-if="mintData.info?.icon_url"
                 :src="mintData.info.icon_url"
@@ -30,18 +46,9 @@
               {{ mintData.info?.name || "Mint" }}
             </div>
 
-            <!-- QR Code Icon -->
-            <div class="top-icons">
-              <qr-code-icon
-                size="24"
-                class="qr-icon cursor-pointer text-white"
-                @click="showQrCode = !showQrCode"
-              />
-            </div>
-
             <!-- QR Code Section (toggleable) -->
             <div class="qr-code-container">
-              <transition appear name="smooth-slide">
+              <transition name="smooth-slide">
                 <div
                   v-if="showQrCode"
                   class="qr-code-section q-my-md"
@@ -57,13 +64,9 @@
             </div>
           </div>
 
-          <div class="mint-descriptions q-mt-lg">
+          <div class="mint-descriptions q-mt-md">
             <!-- MOTD Component -->
-            <transition
-              appear
-              enter-active-class="animated pulse"
-              name="smooth-slide"
-            >
+            <transition name="smooth-slide">
               <mint-motd-message
                 v-if="mintData.info?.motd && !mintData.motdDismissed"
                 :message="mintData.info.motd"
@@ -77,7 +80,7 @@
               {{ mintData.info.description }}
             </div>
             <div
-              class="mint-description-long q-mt-md"
+              class="mint-description-long q-mt-sm"
               v-if="mintData.info?.description_long"
             >
               {{ mintData.info.description_long }}
@@ -94,30 +97,26 @@
           </transition>
         </div>
 
-        <!-- Section Divider -->
-        <div
-          class="section-divider q-mb-md"
-          v-if="mintData.info?.contact?.length > 0"
-        >
-          <div class="divider-line"></div>
-          <div class="divider-text">
-            {{ $t("MintDetailsDialog.contact.title") }}
-          </div>
-          <div class="divider-line"></div>
+        <!-- Section Label -->
+        <div class="section-label" v-if="mintData.info?.contact?.length > 0">
+          {{ $t("MintDetailsDialog.contact.title") }}
         </div>
 
         <!-- Contact Info Section -->
-        <div class="contact-section q-mb-lg">
+        <div
+          class="contact-section surface-card"
+          v-if="mintData.info?.contact?.length > 0"
+        >
           <div
             v-for="contactInfo in mintData.info?.contact"
             :key="contactInfo.method"
-            class="contact-item q-mb-md"
+            class="contact-item pressable cursor-pointer"
+            @click="copyText(contactInfo.info)"
           >
             <div class="contact-icon-container">
               <mail-icon
                 v-if="contactInfo.method === 'email'"
-                size="20"
-                color="#9E9E9E"
+                size="18"
                 class="contact-icon"
               />
               <img
@@ -143,84 +142,85 @@
               </div>
             </div>
             <div class="contact-text">{{ contactInfo.info }}</div>
-            <copy-icon
-              @click="copyText(contactInfo.info)"
-              size="20"
-              color="#9E9E9E"
-              class="copy-icon cursor-pointer"
-            />
+            <copy-icon size="16" class="copy-icon" />
           </div>
         </div>
 
-        <!-- Section Divider -->
-        <div class="section-divider q-mb-md">
-          <div class="divider-line"></div>
-          <div class="divider-text">
-            {{ $t("MintDetailsDialog.details.title") }}
-          </div>
-          <div class="divider-line"></div>
+        <!-- Section Label -->
+        <div class="section-label">
+          {{ $t("MintDetailsDialog.details.title") }}
         </div>
 
         <!-- Mint Details Section -->
-        <div class="mint-details-section q-mb-lg">
+        <div class="mint-details-section surface-card">
           <!-- URL -->
-          <div class="detail-item q-mb-md">
+          <div
+            class="detail-item detail-item--clickable pressable cursor-pointer"
+            @click="copyText(mintData.url)"
+          >
             <div class="detail-label">
-              <link-icon size="20" color="#9E9E9E" class="detail-icon" />
+              <link-icon size="18" class="detail-icon" />
               <div class="detail-name">
                 {{ $t("MintDetailsDialog.details.url.label") }}
               </div>
             </div>
-            <div
-              class="detail-value items-center"
-              @click="copyText(mintData.url)"
-            >
-              {{ mintData.url }}
+            <div class="detail-value items-center">
+              <span class="detail-value-text">{{ mintData.url }}</span>
+              <copy-icon size="14" class="detail-value-icon" />
             </div>
           </div>
 
           <!-- Nuts -->
-          <div class="detail-item q-mb-md" v-if="mintData.info?.nuts">
+          <div class="detail-item" v-if="mintData.info?.nuts">
             <div class="detail-label">
-              <nut-icon size="20" color="#9E9E9E" class="detail-icon" />
+              <nut-icon size="18" class="detail-icon" />
               <div class="detail-name">
                 {{ $t("MintDetailsDialog.details.nuts.label") }}
               </div>
             </div>
             <div
-              class="detail-value"
-              v-if="!showAllNuts"
-              @click="showAllNuts = true"
+              class="detail-value nuts-toggle"
+              @click="showAllNuts = !showAllNuts"
             >
-              {{ $t("MintDetailsDialog.details.nuts.actions.show.label") }}
-            </div>
-            <div class="detail-value" v-else @click="showAllNuts = false">
-              {{ $t("MintDetailsDialog.details.nuts.actions.hide.label") }}
+              <span>{{
+                showAllNuts
+                  ? $t("MintDetailsDialog.details.nuts.actions.hide.label")
+                  : $t("MintDetailsDialog.details.nuts.actions.show.label")
+              }}</span>
+              <q-icon
+                name="keyboard_arrow_down"
+                size="18px"
+                class="nuts-toggle-chevron"
+                :class="{ 'nuts-toggle-chevron--open': showAllNuts }"
+              />
             </div>
           </div>
 
           <!-- Expanded Nuts Section (when showAllNuts is true) -->
-          <div
-            class="nuts-expanded-section"
-            v-if="showAllNuts && mintData.info?.nuts"
-          >
-            <div class="nuts-grid">
-              <div
-                v-for="(nutName, nutNumber) in visibleNuts"
-                :key="nutNumber"
-                class="nut-pill"
-              >
-                <div class="nut-content">
-                  <span class="nut-number">{{ nutNumber }}:</span> {{ nutName }}
+          <transition name="expand">
+            <div
+              class="nuts-expanded-section"
+              v-if="showAllNuts && mintData.info?.nuts"
+            >
+              <div class="nuts-grid">
+                <div
+                  v-for="(nutName, nutNumber) in visibleNuts"
+                  :key="nutNumber"
+                  class="nut-pill"
+                >
+                  <div class="nut-content">
+                    <span class="nut-number">{{ nutNumber }}</span>
+                    {{ nutName }}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </transition>
 
           <!-- Currency (if available) -->
-          <div class="detail-item q-mb-md" v-if="mintData.info?.currencies">
+          <div class="detail-item" v-if="mintData.info?.currencies">
             <div class="detail-label">
-              <currency-icon size="20" color="#9E9E9E" class="detail-icon" />
+              <currency-icon size="18" class="detail-icon" />
               <div class="detail-name">
                 {{ $t("MintDetailsDialog.details.currency.label") }}
               </div>
@@ -229,12 +229,9 @@
           </div>
 
           <!-- Currency Units (if available) -->
-          <div
-            class="detail-item q-mb-md"
-            v-if="mintUnits && mintUnits.length > 0"
-          >
+          <div class="detail-item" v-if="mintUnits && mintUnits.length > 0">
             <div class="detail-label">
-              <banknote-icon size="20" color="#9E9E9E" class="detail-icon" />
+              <banknote-icon size="18" class="detail-icon" />
               <div class="detail-name">
                 {{ $t("MintDetailsDialog.details.currencies.label") }}
               </div>
@@ -247,7 +244,7 @@
           <!-- Version -->
           <div class="detail-item" v-if="mintData.info?.version">
             <div class="detail-label">
-              <info-icon size="20" color="#9E9E9E" class="detail-icon" />
+              <info-icon size="18" class="detail-icon" />
               <div class="detail-name">
                 {{ $t("MintDetailsDialog.details.version.label") }}
               </div>
@@ -256,11 +253,9 @@
           </div>
         </div>
 
-        <!-- Section Divider for Audit Info -->
-        <div v-if="settings.auditorEnabled" class="section-divider q-mb-md">
-          <div class="divider-line"></div>
-          <div class="divider-text">AUDIT INFO</div>
-          <div class="divider-line"></div>
+        <!-- Section Label for Audit Info -->
+        <div v-if="settings.auditorEnabled" class="section-label">
+          AUDIT INFO
         </div>
 
         <!-- Mint Audit Info Section -->
@@ -270,51 +265,47 @@
           @close="() => {}"
         />
 
-        <!-- Section Divider -->
-        <div class="section-divider q-mb-md">
-          <div class="divider-line"></div>
-          <div class="divider-text">
-            {{ $t("MintDetailsDialog.actions.title") }}
-          </div>
-          <div class="divider-line"></div>
+        <!-- Section Label -->
+        <div class="section-label">
+          {{ $t("MintDetailsDialog.actions.title") }}
         </div>
 
         <!-- Action Buttons -->
         <div class="action-buttons-section">
-          <div class="action-buttons-container">
+          <div class="action-buttons-container surface-card">
             <div
-              class="action-button cursor-pointer"
+              class="action-button pressable cursor-pointer"
               @click="openEditMintDialog"
             >
-              <pencil-icon size="20" color="#9E9E9E" class="action-icon" />
+              <pencil-icon size="18" class="action-icon" />
               <div class="action-label">
                 {{ $t("MintDetailsDialog.actions.edit.label") }}
               </div>
             </div>
 
             <div
-              class="action-button cursor-pointer"
+              class="action-button pressable cursor-pointer"
               @click="copyText(mintData.url)"
             >
-              <copy-icon size="20" color="#9E9E9E" class="action-icon" />
+              <copy-icon size="18" class="action-icon" />
               <div class="action-label">
                 {{ $t("MintDetailsDialog.actions.copy_mint_url.label") }}
               </div>
             </div>
 
             <div
-              class="action-button cursor-pointer"
+              class="action-button pressable cursor-pointer"
               @click="openCreateReviewDialog"
             >
-              <q-icon name="rate_review" size="20px" class="action-icon" />
+              <q-icon name="rate_review" size="18px" class="action-icon" />
               <div class="action-label">Review Mint</div>
             </div>
 
             <div
-              class="action-button delete-button cursor-pointer"
+              class="action-button delete-button pressable cursor-pointer"
               @click="openRemoveMintDialog"
             >
-              <trash-icon size="20" color="#FF453A" class="action-icon" />
+              <trash-icon size="18" class="action-icon" />
               <div class="action-label">
                 {{ $t("MintDetailsDialog.actions.delete.label") }}
               </div>
@@ -527,33 +518,33 @@ export default defineComponent({
 </script>
 
 <style scoped>
+/* Theme-aware design tokens: dark values by default (the app is dark-first),
+   light overrides below. Keeps the page working in both modes. */
+.mint-details {
+  --md-text: #ffffff;
+  --md-muted: #8e8e93;
+  --md-surface: rgba(255, 255, 255, 0.05);
+  --md-surface-hover: rgba(255, 255, 255, 0.1);
+  --md-danger: #ff453a;
+}
+body:not(.body--dark) .mint-details {
+  --md-text: #1d1d1d;
+  --md-muted: #6e6e73;
+  --md-surface: rgba(0, 0, 0, 0.04);
+  --md-surface-hover: rgba(0, 0, 0, 0.08);
+  --md-danger: #d70015;
+}
+
 .mint-details-page-content {
   max-width: 600px;
   margin: 0 auto;
-  color: white;
-  height: 100%;
-  overflow-y: auto;
-  position: absolute;
-  top: 0;
-  width: 100%;
+  color: var(--md-text);
 }
 
 .mint-content-container {
   max-width: 600px;
   margin: 0 auto;
-  color: white;
-  height: 100%;
-  overflow-y: auto;
-  position: relative;
-}
-
-/* Top Icons */
-.top-icons {
-  padding-top: 10px;
-  position: relative;
-  width: 100%;
-  display: flex;
-  justify-content: center;
+  color: var(--md-text);
 }
 
 /* Mint Header */
@@ -562,28 +553,30 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   width: 100%;
-  margin-top: 50px;
 }
 
 .mint-header {
-  width: 100%;
-  border-radius: 12px;
+  background-color: var(--md-surface);
+  border-radius: 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: rgba(255, 255, 255, 0.05);
+  position: relative;
+  width: 100%;
+}
+
+.qr-toggle-btn {
+  color: var(--md-muted);
+  position: absolute;
+  right: 10px;
+  top: 10px;
 }
 
 .mint-name {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 600;
-  text-align: center;
-}
-
-.mint-balance {
-  font-size: 20px;
-  font-weight: 600;
+  letter-spacing: -0.02em;
   text-align: center;
 }
 
@@ -598,6 +591,7 @@ export default defineComponent({
   font-size: 16px;
   font-weight: 600;
   line-height: 24px;
+  letter-spacing: -0.01em;
   width: 100%;
 }
 
@@ -606,30 +600,28 @@ export default defineComponent({
   position: relative;
   font-size: 14px;
   line-height: 20px;
-  color: #9e9e9e;
+  color: var(--md-muted);
   width: 100%;
   font-weight: 500;
 }
 
-/* Section Divider */
-.section-divider {
-  display: flex;
-  align-items: center;
-  width: 100%;
-}
-
-.divider-line {
-  flex: 1;
-  height: 1px;
-  background-color: #333;
-}
-
-.divider-text {
-  padding: 0 10px;
-  font-size: 14px;
+/* Section labels (iOS grouped-list style) */
+.section-label {
+  color: var(--md-muted);
+  font-size: 0.75rem;
   font-weight: 600;
-  color: #ffffff;
+  letter-spacing: 0.08em;
+  margin: 28px 0 8px 4px;
   text-transform: uppercase;
+}
+
+/* Grouped surface cards */
+.surface-card {
+  background-color: var(--md-surface);
+  border-radius: 16px;
+  overflow: hidden;
+  padding: 4px;
+  width: 100%;
 }
 
 /* Contact Section */
@@ -638,35 +630,47 @@ export default defineComponent({
 }
 
 .contact-item {
-  display: flex;
   align-items: center;
+  border-radius: 12px;
+  display: flex;
+  min-height: 44px;
+  padding: 8px 10px;
   width: 100%;
 }
 
+@media (hover: hover) and (pointer: fine) {
+  .contact-item:hover {
+    background-color: var(--md-surface-hover);
+  }
+}
+
 .contact-icon-container {
-  width: 24px;
+  align-items: center;
   display: flex;
   justify-content: center;
-  margin-right: 10px;
+  margin-right: 12px;
+  width: 24px;
 }
 
 .contact-icon {
-  width: 20px;
-  height: 20px;
-  color: #636366;
+  width: 18px;
+  height: 18px;
+  color: var(--md-muted);
 }
 
 .contact-text {
+  color: var(--md-text);
   flex: 1;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .copy-icon {
-  color: #636366;
+  color: var(--md-muted);
+  flex-shrink: 0;
   margin-left: 10px;
 }
 
@@ -676,96 +680,176 @@ export default defineComponent({
 }
 
 .detail-item {
+  align-items: center;
+  border-radius: 12px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  min-height: 44px;
+  padding: 8px 10px;
   width: 100%;
 }
 
+.detail-item--clickable {
+  transition: transform var(--dur-press) var(--ease-out),
+    background-color var(--dur-press) var(--ease-standard);
+}
+@media (hover: hover) and (pointer: fine) {
+  .detail-item--clickable:hover {
+    background-color: var(--md-surface-hover);
+  }
+}
+
 .detail-label {
-  display: flex;
   align-items: center;
+  display: flex;
+  flex-shrink: 0;
 }
 
 .detail-icon {
-  margin-right: 10px;
+  color: var(--md-muted);
+  margin-right: 12px;
 }
 
 .detail-name {
-  font-size: 16px;
-  font-weight: 600;
-  color: #9e9e9e;
+  color: var(--md-muted);
+  font-size: 15px;
+  font-weight: 500;
 }
 
 .detail-value {
-  font-size: 16px;
+  align-items: center;
+  color: var(--md-text);
+  display: flex;
+  font-size: 15px;
   font-weight: 600;
-  color: white;
-  text-align: right;
+  justify-content: flex-end;
   max-width: 60%;
+  min-width: 0;
+  text-align: right;
+}
+
+.detail-value-text {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.detail-value-icon {
+  color: var(--md-muted);
+  flex-shrink: 0;
+  margin-left: 6px;
+}
+
+/* Nuts toggle + expanded section */
+.nuts-toggle {
+  color: var(--q-primary);
+  cursor: pointer;
+  gap: 2px;
+}
+
+.nuts-toggle-chevron {
+  transition: transform var(--dur-ui) var(--ease-out);
+}
+
+.nuts-toggle-chevron--open {
+  transform: rotate(180deg);
+}
+
+.nuts-expanded-section {
+  overflow: hidden;
+  width: 100%;
+}
+
+.nuts-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px 4px 8px;
+  width: 100%;
+}
+
+.nut-pill {
+  background-color: var(--md-surface);
+  border-radius: 8px;
+  padding: 8px 12px;
+  width: 100%;
+}
+body:not(.body--dark) .nut-pill {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.nut-content {
+  color: var(--md-text);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.nut-number {
+  color: var(--md-muted);
+  display: inline-block;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  margin-right: 8px;
+  min-width: 18px;
+}
+
 /* Action Buttons */
 .action-buttons-section {
   width: 100%;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  margin-top: 16px;
   margin-bottom: 32px;
 }
 
 .action-buttons-container {
-  align-self: stretch;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
   width: 100%;
 }
 
 .action-button {
-  display: flex;
-  flex-direction: row;
   align-items: center;
-  justify-content: flex-start;
-  gap: 16px;
-  padding: 8px;
-  border-radius: 8px;
-  transition: background-color 0.3s;
+  border-radius: 12px;
+  display: flex;
+  gap: 14px;
+  min-height: 44px;
+  padding: 10px;
   width: 100%;
-  margin-bottom: 16px;
 }
 
-.action-button:last-child {
-  margin-bottom: 0;
+@media (hover: hover) and (pointer: fine) {
+  .action-button:hover {
+    background-color: var(--md-surface-hover);
+  }
+  .delete-button:hover {
+    background-color: color-mix(in srgb, var(--md-danger) 10%, transparent);
+  }
 }
 
-.action-button:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+.action-button:active {
+  background-color: var(--md-surface-hover);
+}
+.delete-button:active {
+  background-color: color-mix(in srgb, var(--md-danger) 14%, transparent);
 }
 
 .action-icon {
-  min-width: 20px;
+  color: var(--md-muted);
+  min-width: 18px;
 }
 
 .action-label {
-  position: relative;
-  line-height: 24px;
+  color: var(--md-text);
+  font-size: 15px;
   font-weight: 500;
-  font-size: 16px;
+  line-height: 24px;
 }
 
-.delete-button {
-  color: #ff453a;
+.delete-button .action-icon,
+.delete-button .action-label {
+  color: var(--md-danger);
 }
 
-/* QR Code Container and Animation */
+/* QR Code Container and expand/collapse animation.
+   Explicit properties only — never `transition: all`. Enter is slower than
+   exit (asymmetric timing: slow when deciding, fast when responding). */
 .qr-code-container {
   min-height: 0;
   display: flex;
@@ -775,13 +859,15 @@ export default defineComponent({
 }
 
 .qr-code-section {
-  width: 100%;
   display: flex;
   justify-content: center;
+  overflow: hidden;
+  width: 100%;
 }
 
 .smooth-slide-enter-active {
-  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: max-height 0.3s var(--ease-out), opacity 0.25s var(--ease-out),
+    transform 0.3s var(--ease-out), margin-bottom 0.3s var(--ease-out);
   max-height: 350px;
   margin-bottom: 16px;
   opacity: 1;
@@ -789,7 +875,8 @@ export default defineComponent({
 }
 
 .smooth-slide-leave-active {
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: max-height 0.2s var(--ease-out), opacity 0.15s var(--ease-out),
+    transform 0.2s var(--ease-out), margin-bottom 0.2s var(--ease-out);
   max-height: 350px;
   margin-bottom: 16px;
   opacity: 1;
@@ -800,62 +887,38 @@ export default defineComponent({
   max-height: 0;
   margin-bottom: 0;
   opacity: 0;
-  transform: translateY(-10px);
+  transform: translateY(-8px) scale(0.98);
   pointer-events: none;
 }
 
-.nuts-expanded-section {
-  width: 100%;
-  margin-bottom: 16px;
+.expand-enter-active {
+  transition: max-height 0.3s var(--ease-out), opacity 0.25s var(--ease-out);
+  max-height: 1200px;
+  opacity: 1;
 }
 
-.nuts-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
+.expand-leave-active {
+  transition: max-height 0.2s var(--ease-out), opacity 0.15s var(--ease-out);
+  max-height: 1200px;
+  opacity: 1;
 }
 
-.nut-pill {
-  border-radius: 4px;
-  padding: 8px;
-  width: 100%;
+.expand-enter-from,
+.expand-leave-to {
+  max-height: 0;
+  opacity: 0;
 }
 
-.nut-content {
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 24px;
-  color: white;
-}
-
-.nut-number {
-  color: #9e9e9e;
-}
-
-/* Make "View all" and "Hide" text clickable */
-.detail-value[v-if="!showAllNuts"],
-.detail-value[v-else] {
-  cursor: pointer;
-  color: white;
-  font-weight: 600;
-}
-
-/* Currency Units */
-.currency-units-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: flex-end;
-}
-
-.currency-unit-pill {
-  border-radius: 4px;
-  background-color: #1d1d1d;
-  padding: 4px 8px;
-  font-size: 14px;
-  font-weight: 600;
-  color: white;
-  display: inline-block;
+@media (prefers-reduced-motion: reduce) {
+  .smooth-slide-enter-active,
+  .smooth-slide-leave-active,
+  .expand-enter-active,
+  .expand-leave-active {
+    transition: opacity 0.15s ease;
+    transform: none;
+  }
+  .nuts-toggle-chevron {
+    transition: none;
+  }
 }
 </style>

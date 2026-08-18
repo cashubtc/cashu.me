@@ -14,7 +14,7 @@ export default defineComponent({
     },
     duration: {
       type: Number,
-      default: 1000, // Animation duration in milliseconds
+      default: 600, // Animation duration in milliseconds
     },
     format: {
       type: Function,
@@ -25,6 +25,13 @@ export default defineComponent({
     const displayedValue = ref(props.value);
     // value to remember that we do not want to animate the very first update (when the component is created)
     const initialized = ref(false);
+    const reduceMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // Ease-out cubic: the count starts fast and settles gently,
+    // which feels responsive instead of mechanical (linear).
+    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
     watch(
       () => props.value,
@@ -37,6 +44,10 @@ export default defineComponent({
           }
           return;
         }
+        if (reduceMotion) {
+          displayedValue.value = newValue;
+          return;
+        }
         const startTime = performance.now();
         const startValue = oldValue !== undefined ? oldValue : newValue;
         const endValue = newValue;
@@ -44,7 +55,8 @@ export default defineComponent({
         const animate = (currentTime: number) => {
           const elapsed = currentTime - startTime;
           const progress = Math.max(Math.min(elapsed / props.duration, 1), 0);
-          const currentValue = startValue + (endValue - startValue) * progress;
+          const currentValue =
+            startValue + (endValue - startValue) * easeOutCubic(progress);
           displayedValue.value = currentValue;
           if (progress < 1) {
             requestAnimationFrame(animate);

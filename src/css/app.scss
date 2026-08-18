@@ -3,6 +3,71 @@
 // Import Inter font from Google Fonts
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 
+// ---------------------------------------------------------------------------
+// Motion & interaction design tokens
+// (easing curves are intentionally stronger than the CSS defaults:
+//  built-in easings lack the punch that makes UI feel intentional)
+// ---------------------------------------------------------------------------
+:root {
+  // Strong ease-out for enter animations / UI interactions (starts fast)
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  // Strong ease-in-out for elements moving/morphing on screen
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  // Gentle standard curve for hover/color changes
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  // iOS-like drawer/sheet curve
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --dur-press: 160ms; // button press feedback
+  --dur-fast: 200ms; // tooltips, small popovers, hovers
+  --dur-ui: 250ms; // dropdowns, expands, small panels
+}
+
+// Buttons must feel responsive: instant, subtle scale on press.
+// Quasar's ripple confirms the tap; the scale confirms the *press*.
+// (box-shadow kept in the list so Quasar's elevation transition survives)
+.q-btn {
+  transition: transform var(--dur-press) var(--ease-out),
+    box-shadow 0.2s var(--ease-standard);
+}
+.q-btn:active {
+  transform: scale(0.97);
+}
+
+// Utility for custom pressable rows/cards that are not q-btns
+.pressable {
+  transition: transform var(--dur-press) var(--ease-out),
+    background-color var(--dur-press) var(--ease-standard);
+}
+.pressable:active {
+  transform: scale(0.98);
+}
+
+// Hover states only make sense on devices with a real pointer.
+// On touch, :hover sticks after the tap and reads as a bug.
+@media (hover: hover) and (pointer: fine) {
+  .hoverable:hover {
+    background-color: rgba(128, 128, 128, 0.14);
+  }
+}
+
+// Financial figures: equal-width digits so amounts don't jitter while counting
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+// Reduced motion: keep opacity/color feedback, drop movement.
+@media (prefers-reduced-motion: reduce) {
+  .q-btn,
+  .pressable {
+    transition: none;
+  }
+  .q-btn:active,
+  .pressable:active {
+    transform: none;
+  }
+}
+
 // Apply Inter as the primary font throughout the application
 body {
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
