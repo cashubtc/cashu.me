@@ -148,7 +148,7 @@ export default defineComponent({
     },
     mintUrl: async function (newMintUrl, oldMintUrl) {
       if (this.enabled && newMintUrl && newMintUrl !== oldMintUrl) {
-        await this.changeMintUrl(newMintUrl);
+        await this.changeMintUrl(newMintUrl, oldMintUrl);
       }
     },
   },

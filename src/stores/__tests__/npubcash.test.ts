@@ -20,6 +20,11 @@ vi.mock("vue-i18n", async (importOriginal) => {
   };
 });
 
+vi.mock("src/js/notify", () => ({
+  notifyApiError: vi.fn(),
+  notifyError: vi.fn(),
+}));
+
 class MockQuoteWebSocket {
   static CONNECTING = 0;
   static OPEN = 1;
@@ -190,6 +195,60 @@ describe("npub.cash store", () => {
     await store.initializeNpubCash();
 
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("shows loading while changing the npub.cash mint", async () => {
+    const previousMintUrl = "https://mint.previous";
+    const mintUrl = "https://mint.next";
+    const store = useNpubCashStore();
+    store.mintUrl = mintUrl;
+    useMintsStore().mints = [
+      { url: previousMintUrl, keys: [], keysets: [] },
+      { url: mintUrl, keys: [], keysets: [] },
+    ];
+
+    let resolveRequest: (response: Response) => void;
+    vi.spyOn(store, "sendAuthedRequest").mockReturnValue(
+      new Promise<Response>((resolve) => {
+        resolveRequest = resolve;
+      })
+    );
+
+    const changeMint = store.changeMintUrl(mintUrl, previousMintUrl);
+
+    expect(store.loading).toBe(true);
+
+    resolveRequest!(
+      new Response(
+        JSON.stringify({
+          error: false,
+          data: { user: { mintUrl } },
+        })
+      )
+    );
+    await changeMint;
+
+    expect(store.loading).toBe(false);
+    expect(store.mintUrl).toBe(mintUrl);
+  });
+
+  it("restores the previous mint when changing the npub.cash mint fails", async () => {
+    const previousMintUrl = "https://mint.previous";
+    const mintUrl = "https://mint.next";
+    const store = useNpubCashStore();
+    store.mintUrl = mintUrl;
+    useMintsStore().mints = [
+      { url: previousMintUrl, keys: [], keysets: [] },
+      { url: mintUrl, keys: [], keysets: [] },
+    ];
+    vi.spyOn(store, "sendAuthedRequest").mockResolvedValue(
+      new Response(JSON.stringify({ error: true, message: "Mint unavailable" }))
+    );
+
+    await store.changeMintUrl(mintUrl, previousMintUrl);
+
+    expect(store.mintUrl).toBe(previousMintUrl);
+    expect(store.loading).toBe(false);
   });
 
   it("initializes the signer before assigning an address", async () => {
