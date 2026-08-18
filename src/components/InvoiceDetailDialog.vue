@@ -85,6 +85,18 @@
                     color="primary"
                   />
                 </div>
+                <div
+                  v-if="isOnchain"
+                  class="q-mt-sm text-center text-grey-7 qr-copy-text cursor-pointer"
+                  @click="onCopyBolt11"
+                >
+                  <q-icon
+                    :name="copyButtonCopied ? 'check' : 'content_copy'"
+                    size="xs"
+                    class="q-mr-xs"
+                  />
+                  {{ invoiceData.request }}
+                </div>
               </div>
             </div>
 
@@ -320,6 +332,16 @@ export default defineComponent({
   position: relative;
   border-radius: 8px;
   overflow: hidden;
+}
+
+.qr-copy-text {
+  overflow-wrap: anywhere;
+  word-break: break-all;
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  hyphens: none;
+  font-size: 0.9em;
+  font-family: monospace;
 }
 
 .checkmark-overlay {
