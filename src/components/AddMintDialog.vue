@@ -214,20 +214,20 @@ export default defineComponent({
         : "error";
     };
 
-    watch(showAddMintDialogLocal, (isOpen) => {
-      if (isOpen) {
-        showAuditInfo.value = false;
-        mintFetchState.value = "idle";
-        fetchMintPreview(mintUrl.value);
-      }
-    });
-
-    watch(mintUrl, (url) => {
-      if (showAddMintDialogLocal.value) {
-        mintFetchState.value = "idle";
-        fetchMintPreview(url);
-      }
-    });
+    // Fire on every open and URL change — and immediately on mount, because
+    // the sheet can be mounted *after* the open flag was set (deep link and
+    // QR scan flows set the store state before the sheet's host mounts).
+    watch(
+      [showAddMintDialogLocal, mintUrl],
+      ([isOpen, url]) => {
+        if (isOpen && url) {
+          showAuditInfo.value = false;
+          mintFetchState.value = "idle";
+          fetchMintPreview(url);
+        }
+      },
+      { immediate: true }
+    );
 
     // If the mint info arrives late (e.g. the fetch outlived our local
     // timeout), recover from the error/loading state automatically.
