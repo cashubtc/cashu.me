@@ -1090,6 +1090,7 @@ export default {
       },
       send: {
         label: "@:global.actions.send.label",
+        in_progress: "Odesílání…",
       },
       delete: {
         tooltip_text: "Smazat z historie",

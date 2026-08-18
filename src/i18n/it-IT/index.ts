@@ -1021,6 +1021,7 @@ export default {
       },
       send: {
         label: "@:global.actions.send.label",
+        in_progress: "Invio…",
       },
       delete: {
         tooltip_text: "Elimina dalla cronologia",

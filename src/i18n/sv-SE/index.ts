@@ -1046,6 +1046,7 @@ export default {
       },
       send: {
         label: "@:global.actions.send.label",
+        in_progress: "Skickar…",
       },
       delete: {
         tooltip_text: "Ta bort från historik",

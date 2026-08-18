@@ -240,6 +240,7 @@
                 unelevated
                 size="lg"
                 :disable="
+                  sendingEcash ||
                   sendData.amount == null ||
                   sendData.amount <= 0 ||
                   insufficientFunds ||
@@ -251,11 +252,14 @@
                 color="primary"
                 rounded
                 type="submit"
-                :loading="globalMutexLock"
+                :loading="sendingEcash"
               >
                 {{ $t("SendTokenDialog.actions.send.label") }}
                 <template v-slot:loading>
-                  <q-spinner />
+                  <q-spinner class="q-mr-sm" />
+                  <span>{{
+                    $t("SendTokenDialog.actions.send.in_progress")
+                  }}</span>
                 </template>
               </q-btn>
             </div>
@@ -274,7 +278,7 @@
 import { defineComponent } from "vue";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { useWalletStore } from "src/stores/wallet";
-import { useUiStore } from "src/stores/ui";
+import { type MutexPriority, useUiStore } from "src/stores/ui";
 import { useProofsStore } from "src/stores/proofs";
 import { useMintsStore } from "src/stores/mints";
 import { useTokensStore } from "src/stores/tokens";
@@ -316,6 +320,7 @@ export default defineComponent({
   data: function () {
     return {
       fiatKeyboardMode: false as boolean,
+      sendingEcash: false as boolean,
     };
   },
   computed: {
@@ -610,7 +615,7 @@ export default defineComponent({
       this.sendData.historyToken = historyToken as any;
       return serialized;
     },
-    lockTokens: async function () {
+    lockTokens: async function (mutexPriority: MutexPriority = "normal") {
       if (!this.sendData.amount) {
         throw new Error("Amount is required");
       }
@@ -628,7 +633,8 @@ export default defineComponent({
           this.activeProofs,
           mintWallet,
           sendAmount,
-          this.sendData.p2pkPubkey
+          this.sendData.p2pkPubkey,
+          mutexPriority
         );
         // update UI
         this.sendData.tokens = sendProofs;
@@ -655,18 +661,24 @@ export default defineComponent({
       /*
       calls send, displays token and kicks off the spendableWorker
       */
-      this.sendData.p2pkPubkey = this.maybeConvertNpub(
-        this.sendData.p2pkPubkey
-      );
-      if (
-        this.sendData.p2pkPubkey &&
-        this.isValidPubkey(this.sendData.p2pkPubkey)
-      ) {
-        await this.lockTokens();
-        return;
-      }
+      if (this.sendingEcash) return;
+
+      const uiStore = useUiStore();
+      this.sendingEcash = true;
+      uiStore.beginForegroundPayment();
 
       try {
+        this.sendData.p2pkPubkey = this.maybeConvertNpub(
+          this.sendData.p2pkPubkey
+        );
+        if (
+          this.sendData.p2pkPubkey &&
+          this.isValidPubkey(this.sendData.p2pkPubkey)
+        ) {
+          await this.lockTokens("foreground");
+          return;
+        }
+
         const sendAmount = Math.floor(
           this.sendData.amount * this.activeUnitCurrencyMultiplyer
         );
@@ -681,7 +693,8 @@ export default defineComponent({
           mintWallet,
           sendAmount,
           true,
-          this.includeFeesInSendAmount
+          this.includeFeesInSendAmount,
+          "foreground"
         );
 
         // update UI
@@ -707,6 +720,9 @@ export default defineComponent({
         }
       } catch (error: any) {
         console.error(error);
+      } finally {
+        this.sendingEcash = false;
+        uiStore.endForegroundPayment();
       }
     },
     pasteToP2PKField: async function () {

@@ -1056,6 +1056,7 @@ export default {
       },
       send: {
         label: "@:global.actions.send.label",
+        in_progress: "Wird gesendet…",
       },
       delete: {
         tooltip_text: "Aus Verlauf löschen",

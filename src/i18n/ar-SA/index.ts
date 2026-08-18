@@ -1041,6 +1041,7 @@ export default {
       },
       send: {
         label: "@:global.actions.send.label",
+        in_progress: "جارٍ الإرسال…",
       },
       delete: {
         tooltip_text: "حذف من السجل",

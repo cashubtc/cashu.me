@@ -1087,6 +1087,7 @@ export default {
       },
       send: {
         label: "@:global.actions.send.label",
+        in_progress: "Enviando…",
       },
       delete: {
         tooltip_text: "Excluir do histórico",
