@@ -405,7 +405,7 @@ export default defineComponent({
   opacity: 0.28;
   padding: 0;
   transition: opacity 0.2s ease, transform 0.2s ease;
-  width: 22px;
+  width: 14px;
 }
 .balance-unit-dot::after {
   background: currentColor;
