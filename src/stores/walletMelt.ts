@@ -197,7 +197,7 @@ export async function meltGeneric(
     let data;
     let paidMeltQuote: AppMeltQuote | null = null;
     try {
-      data = await this.retryOnceOnSignedOutputs(
+      data = await this.retryOnceOnRecoverableError(
         mintWallet.keysetId,
         async () => {
           const preparedQuote = toMeltQuote(quote);

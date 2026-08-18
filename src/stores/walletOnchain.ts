@@ -170,7 +170,7 @@ export async function checkOnchainAndMint(
       throw new Error("Address not paid");
     }
 
-    const proofs = await this.retryOnceOnSignedOutputs(
+    const proofs = await this.retryOnceOnRecoverableError(
       mintWallet.keysetId,
       async () =>
         mintWallet.ops

@@ -595,6 +595,7 @@ describe("transaction worker", () => {
         pendingInvoice("fast-q", { mint: fastMint }),
       ],
       mintWallet: vi.fn(async (mintUrl) => ({
+        keysetId: "00aa",
         checkMintQuoteBatchBolt11: vi.fn(async (quotes) =>
           quotes.map((quote) => ({
             ...unpaidResponse(quote),
@@ -604,8 +605,7 @@ describe("transaction worker", () => {
         prepareBatchMint: vi.fn(async () => ({ preview: true })),
         completeBatchMint: completeBatchMintByMint[mintUrl],
       })),
-      getKeyset: vi.fn(() => "00aa"),
-      retryOnceOnSignedOutputs: vi.fn(
+      retryOnceOnRecoverableError: vi.fn(
         async (_keysetId, operation) => await operation()
       ),
       setInvoicePaid: vi.fn(),
@@ -641,6 +641,7 @@ describe("transaction worker", () => {
     vi.spyOn(useUiStore(), "lockMutex").mockResolvedValue();
     vi.spyOn(useUiStore(), "unlockMutex").mockImplementation(() => {});
     const mintWallet = {
+      keysetId: "00aa",
       checkMintQuoteBatchBolt11: vi.fn(async (quotes) =>
         quotes.map((quote) =>
           quote === "paid-q"
@@ -654,8 +655,7 @@ describe("transaction worker", () => {
     const walletStore = {
       invoiceHistory: [pendingInvoice("paid-q"), pendingInvoice("unpaid-q")],
       mintWallet: vi.fn(async () => mintWallet),
-      getKeyset: vi.fn(() => "00aa"),
-      retryOnceOnSignedOutputs: vi.fn(
+      retryOnceOnRecoverableError: vi.fn(
         async (_keysetId, operation) => await operation()
       ),
       setInvoicePaid: vi.fn(),
@@ -715,6 +715,7 @@ describe("transaction worker", () => {
         }));
       });
       const mintWallet = {
+        keysetId: "00aa",
         ...(method === PaymentMethod.Bolt12
           ? { checkMintQuoteBatchBolt12: checkBatch }
           : { checkMintQuoteBatch: checkBatch }),
@@ -731,8 +732,7 @@ describe("transaction worker", () => {
         ],
         invoiceData: {},
         mintWallet: vi.fn(async () => mintWallet),
-        getKeyset: vi.fn(() => "00aa"),
-        retryOnceOnSignedOutputs: vi.fn(
+        retryOnceOnRecoverableError: vi.fn(
           async (_keysetId, operation) => await operation()
         ),
         setInvoicePaid: vi.fn(),
@@ -783,11 +783,11 @@ describe("transaction worker", () => {
     const walletStore = {
       invoiceHistory: [pendingInvoice("race-q")],
       mintWallet: vi.fn(async () => ({
+        keysetId: "00aa",
         checkMintQuoteBatchBolt11,
         prepareBatchMint,
       })),
-      getKeyset: vi.fn(() => "00aa"),
-      retryOnceOnSignedOutputs: vi.fn(),
+      retryOnceOnRecoverableError: vi.fn(),
       setInvoicePaid: vi.fn(),
       syncPaymentHistoryCache: vi.fn(),
     };

@@ -58,6 +58,7 @@ try {
       ...process.env,
       E2E_MINT_A_URL: "http://127.0.0.1:8085",
       E2E_MINT_B_URL: "http://127.0.0.1:8086",
+      E2E_MINT_A_MANAGEMENT_URL: "http://127.0.0.1:10000",
     },
   });
 

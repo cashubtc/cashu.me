@@ -146,7 +146,7 @@ export async function mintBolt11(
         throw new Error("unknown state.");
     }
     // MintQuoteState must be PAID
-    const proofs = await this.retryOnceOnSignedOutputs(
+    const proofs = await this.retryOnceOnRecoverableError(
       mintWallet.keysetId,
       async () =>
         mintWallet.ops

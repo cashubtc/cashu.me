@@ -812,7 +812,7 @@ describe("wallet store", () => {
       .mockResolvedValueOnce("minted");
 
     await expect(
-      wallet.retryOnceOnSignedOutputs("00aa", operation)
+      wallet.retryOnceOnRecoverableError("00aa", operation)
     ).resolves.toBe("minted");
 
     expect(operation).toHaveBeenCalledTimes(2);

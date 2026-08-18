@@ -143,7 +143,7 @@ export async function checkOfferAndMintBolt12(
       throw new Error("no new funds to mint");
     }
 
-    const proofs = await this.retryOnceOnSignedOutputs(
+    const proofs = await this.retryOnceOnRecoverableError(
       mintWallet.keysetId,
       async () =>
         mintWallet.ops

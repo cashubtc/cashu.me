@@ -446,7 +446,7 @@ export const useWalletStore = defineStore("wallet", {
       this.sharedCounterSource = null; // force re-creation on next wallet init
       this.mnemonic = generateMnemonic(wordlist);
     },
-    retryOnceOnSignedOutputs: async function <T>(
+    retryOnceOnRecoverableError: async function <T>(
       keysetId: string,
       operation: () => Promise<T>,
       notifyUser = true
@@ -646,7 +646,7 @@ export const useWalletStore = defineStore("wallet", {
           true
         );
         const { keep: keepProofs, send: sendProofs } =
-          await this.retryOnceOnSignedOutputs(wallet.keysetId, async () =>
+          await this.retryOnceOnRecoverableError(wallet.keysetId, async () =>
             wallet.ops
               .send(amount, toProofs(proofsToSend))
               .keyset(wallet.keysetId)
@@ -712,7 +712,7 @@ export const useWalletStore = defineStore("wallet", {
           );
           // includeFees=true inflates send outputs so sendProofs sum to
           // amount + fees(sendProofs): required for melt and includeFees sends.
-          const swapResult = await this.retryOnceOnSignedOutputs(
+          const swapResult = await this.retryOnceOnRecoverableError(
             swapWallet.keysetId,
             async () =>
               swapWallet.ops
@@ -806,7 +806,7 @@ export const useWalletStore = defineStore("wallet", {
         const privkey = receiveStore.receiveData.p2pkPrivateKey;
         let proofs: Proof[];
         try {
-          proofs = await this.retryOnceOnSignedOutputs(
+          proofs = await this.retryOnceOnRecoverableError(
             mintWallet.keysetId,
             async () =>
               mintWallet.ops
