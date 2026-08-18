@@ -4,44 +4,46 @@
       <NoMintWarnBanner v-if="mints.length == 0" />
       <BalanceView v-else :set-tab="setTab" />
       <div
-        class="wallet-actions row items-center justify-center no-wrap q-mx-auto q-pt-md q-pb-md"
+        class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-lg q-pb-md position-relative"
       >
-        <q-btn
-          rounded
-          unelevated
-          data-testid="wallet-receive"
-          class="wallet-action-btn"
-          color="primary"
-          @click="showReceiveDialog = true"
-        >
-          <ArrowDownIcon :size="18" class="q-mr-sm" />
-          <span>{{ $t("WalletPage.actions.receive.label") }}</span>
-        </q-btn>
+        <div class="col-6 q-mb-md flex justify-center items-center">
+          <q-btn
+            rounded
+            dense
+            data-testid="wallet-receive"
+            class="q-px-md q-mr-md wallet-action-btn"
+            color="primary"
+            @click="showReceiveDialog = true"
+          >
+            <div class="button-content">
+              <span>{{ $t("WalletPage.actions.receive.label") }}</span>
+            </div>
+          </q-btn>
+        </div>
 
-        <q-btn
-          size="lg"
-          outline
-          color="primary"
-          flat
-          class="q-mx-md"
-          :aria-label="$t('global.actions.scan.label')"
-          @click="showCamera"
-        >
-          <ScanIcon size="2em" />
-        </q-btn>
+        <transition appear enter-active-class="animated pulse">
+          <div class="scan-button-container">
+            <q-btn size="lg" outline color="primary" flat @click="showCamera">
+              <ScanIcon size="2em" />
+            </q-btn>
+          </div>
+        </transition>
 
         <!-- button to showSendDialog -->
-        <q-btn
-          rounded
-          unelevated
-          data-testid="wallet-send"
-          class="wallet-action-btn"
-          color="primary"
-          @click="showSendDialog = true"
-        >
-          <ArrowUpIcon :size="18" class="q-mr-sm" />
-          <span>{{ $t("WalletPage.actions.send.label") }}</span>
-        </q-btn>
+        <div class="col-6 q-mb-md flex justify-center items-center">
+          <q-btn
+            rounded
+            dense
+            data-testid="wallet-send"
+            class="q-px-md q-ml-md wallet-action-btn"
+            color="primary"
+            @click="showSendDialog = true"
+          >
+            <div class="button-content">
+              <span>{{ $t("WalletPage.actions.send.label") }}</span>
+            </div>
+          </q-btn>
+        </div>
         <ReceiveDialog v-model="showReceiveDialog" />
         <SendDialog v-model="showSendDialog" />
       </div>
@@ -183,18 +185,29 @@
   grid-area: 1 / 4 / 5 / 4;
 }
 
-.wallet-actions {
-  max-width: 430px;
+.wallet-action-btn {
+  min-width: 140px;
+  width: auto;
+  white-space: nowrap;
+  font-size: 1.2rem;
 }
 
-.wallet-action-btn {
-  flex: 1 1 0;
-  min-width: 0;
-  height: 48px;
+.button-content {
+  display: flex;
+  align-items: center;
   white-space: nowrap;
-  font-size: 1.05rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+}
+
+/* Apply equal widths to wallet action buttons after render */
+.equal-width-buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.scan-button-container {
+  position: absolute;
+  z-index: 1;
+  padding-bottom: 15px;
 }
 </style>
 <script lang="ts">
@@ -249,8 +262,6 @@ import {
   Banknote as BanknoteIcon,
   Zap as ZapIcon,
   Scan as ScanIcon,
-  ArrowDown as ArrowDownIcon,
-  ArrowUp as ArrowUpIcon,
 } from "lucide-vue-next";
 
 import { useMigrationsStore } from "src/stores/migrations";
@@ -277,8 +288,6 @@ export default {
     iOSPWAPrompt,
     AndroidPWAPrompt,
     ScanIcon,
-    ArrowDownIcon,
-    ArrowUpIcon,
   },
   data: function () {
     return {
@@ -550,11 +559,42 @@ export default {
         }
       };
     },
+    equalizeButtonWidths: function () {
+      this.$nextTick(() => {
+        const actionBtns = document.querySelectorAll(".wallet-action-btn");
+        if (actionBtns.length >= 2) {
+          // Reset widths first
+          actionBtns.forEach((btn) => {
+            (btn as HTMLElement).style.width = "auto";
+          });
+
+          // Get the maximum width
+          let maxWidth = 0;
+          actionBtns.forEach((btn) => {
+            maxWidth = Math.max(maxWidth, (btn as HTMLElement).offsetWidth);
+          });
+
+          // Apply the maximum width to all buttons
+          actionBtns.forEach((btn) => {
+            (btn as HTMLElement).style.width = `${maxWidth}px`;
+          });
+        }
+      });
+    },
   },
   watch: {},
 
   mounted: function () {
     this.initializeNpubCash();
+    // Ensure wallet action buttons have equal width
+    this.$nextTick(this.equalizeButtonWidths);
+    // Add window resize listener to handle responsive layouts
+    window.addEventListener("resize", this.equalizeButtonWidths);
+  },
+
+  beforeUnmount: function () {
+    // Remove event listener when component is destroyed
+    window.removeEventListener("resize", this.equalizeButtonWidths);
   },
 
   created: async function () {
