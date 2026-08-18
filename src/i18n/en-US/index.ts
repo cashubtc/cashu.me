@@ -1082,6 +1082,7 @@ export default {
       },
       send: {
         label: "@:global.actions.send.label",
+        in_progress: "Sending…",
       },
       delete: {
         tooltip_text: "Delete from history",

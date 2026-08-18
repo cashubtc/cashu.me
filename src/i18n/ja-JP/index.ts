@@ -1042,6 +1042,7 @@ export default {
       },
       send: {
         label: "@:global.actions.send.label",
+        in_progress: "送信中…",
       },
       delete: {
         tooltip_text: "履歴から削除",

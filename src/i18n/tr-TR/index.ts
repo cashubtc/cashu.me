@@ -1057,6 +1057,7 @@ export default {
       },
       send: {
         label: "@:global.actions.send.label",
+        in_progress: "Gönderiliyor…",
       },
       delete: {
         tooltip_text: "Geçmişten sil",

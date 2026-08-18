@@ -1043,6 +1043,7 @@ export default {
       },
       send: {
         label: "@:global.actions.send.label",
+        in_progress: "กำลังส่ง…",
       },
       delete: {
         tooltip_text: "ลบออกจากประวัติ",

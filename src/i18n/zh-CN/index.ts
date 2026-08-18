@@ -1039,6 +1039,7 @@ export default {
       },
       send: {
         label: "@:global.actions.send.label",
+        in_progress: "正在发送…",
       },
       delete: {
         tooltip_text: "从历史记录中删除",

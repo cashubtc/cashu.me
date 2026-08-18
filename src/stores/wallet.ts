@@ -594,35 +594,42 @@ export const useWalletStore = defineStore("wallet", {
       proofs: WalletProof[],
       wallet: Wallet,
       amount: number,
-      receiverPubkey: string | P2PKOptions
+      receiverPubkey: string | P2PKOptions,
+      mutexPriority: MutexPriority = "normal"
     ) {
       // Accept a bare pubkey (manual lock flow) or a full P2PKOptions so a
       // NUT-18 payment request can reproduce its requested NUT-10 condition
       // (P2PK or HTLC). Going through the `.asP2PK()` builder keeps the
       // blinding keyset-aware (for upcoming cashu-ts v5).
-      const p2pkOptions: P2PKOptions =
-        typeof receiverPubkey === "string"
-          ? { pubkey: receiverPubkey }
-          : receiverPubkey;
-      const spendableProofs = this.spendableProofs(proofs, amount);
-      const proofsToSend = this.coinSelect(
-        spendableProofs,
-        wallet,
-        amount,
-        true
-      );
-      const keysetId = this.getKeyset(wallet.mint.mintUrl, wallet.unit);
-      const { keep: keepProofs, send: sendProofs } = await wallet.ops
-        .send(amount, toProofs(proofsToSend))
-        .keyset(keysetId)
-        .asP2PK(p2pkOptions)
-        .run();
-      const proofsStore = useProofsStore();
-      await proofsStore.removeProofs(proofsToSend);
-      // note: we do not store sendProofs in the proofs store but
-      // expect from the caller to store it in the history
-      await proofsStore.addProofs(keepProofs);
-      return { keepProofs, sendProofs };
+      const uiStore = useUiStore();
+      await uiStore.lockMutex(mutexPriority);
+      try {
+        const p2pkOptions: P2PKOptions =
+          typeof receiverPubkey === "string"
+            ? { pubkey: receiverPubkey }
+            : receiverPubkey;
+        const spendableProofs = this.spendableProofs(proofs, amount);
+        const proofsToSend = this.coinSelect(
+          spendableProofs,
+          wallet,
+          amount,
+          true
+        );
+        const keysetId = this.getKeyset(wallet.mint.mintUrl, wallet.unit);
+        const { keep: keepProofs, send: sendProofs } = await wallet.ops
+          .send(amount, toProofs(proofsToSend))
+          .keyset(keysetId)
+          .asP2PK(p2pkOptions)
+          .run();
+        const proofsStore = useProofsStore();
+        await proofsStore.removeProofs(proofsToSend);
+        // note: we do not store sendProofs in the proofs store but
+        // expect from the caller to store it in the history
+        await proofsStore.addProofs(keepProofs);
+        return { keepProofs, sendProofs };
+      } finally {
+        uiStore.unlockMutex();
+      }
     },
     send: async function (
       proofs: WalletProof[],

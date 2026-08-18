@@ -1053,6 +1053,7 @@ export default {
       },
       send: {
         label: "@:global.actions.send.label",
+        in_progress: "Αποστολή…",
       },
       delete: {
         tooltip_text: "Διαγραφή από το ιστορικό",
