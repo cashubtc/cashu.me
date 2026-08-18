@@ -313,6 +313,7 @@ export default defineComponent({
       npubCashEnabled: "enabled",
       npubCashAddress: "address",
       npubCashMintUrl: "mintUrl",
+      showAddressOnReceive: "showAddressOnReceive",
     }),
     isBolt12(): boolean {
       return this.invoiceData.type === PaymentMethod.Bolt12;
@@ -392,6 +393,7 @@ export default defineComponent({
           this.activeUnit === "sat" &&
           !this.npubCashAddAmount &&
           this.hasConfiguredNpubCashAddress &&
+          this.showAddressOnReceive &&
           this.activeMintUrl === this.npubCashMintUrl
       );
     },

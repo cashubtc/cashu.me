@@ -285,6 +285,11 @@ export default {
       address: {
         copy_tooltip: "Copy Lightning address",
       },
+      show_on_receive: {
+        toggle: "Show when receiving",
+        description:
+          "Show your Lightning address and QR code before entering an amount.",
+      },
       automatic_claim: {
         toggle: "Claim automatically",
         description: "Receive incoming payments automatically.",

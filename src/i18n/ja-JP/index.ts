@@ -275,6 +275,11 @@ export default {
       address: {
         copy_tooltip: "Lightningアドレスをコピー",
       },
+      show_on_receive: {
+        toggle: "受け取り時に表示",
+        description:
+          "金額を入力する前にLightningアドレスとQRコードを表示します。",
+      },
       automatic_claim: {
         toggle: "自動的に請求",
         description: "着信支払いを自動的に受け取ります。",

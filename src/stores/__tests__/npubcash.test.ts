@@ -76,6 +76,7 @@ describe("npub.cash store", () => {
     expect(store.$state).toMatchObject({
       enabled: false,
       claimAutomatically: true,
+      showAddressOnReceive: true,
       lastCheck: null,
       address: "",
       mintUrl: null,

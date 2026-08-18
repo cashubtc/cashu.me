@@ -160,6 +160,7 @@ export default defineComponent({
       npubCashEnabled: "enabled",
       npubCashAddress: "address",
       npubCashMintUrl: "mintUrl",
+      showAddressOnReceive: "showAddressOnReceive",
     }),
     hasConfiguredNpubCashAddress: function (): boolean {
       return Boolean(
@@ -212,7 +213,11 @@ export default defineComponent({
       this.showReceiveDialog = false;
     },
     showInvoiceCreateDialog: async function () {
-      if (this.hasConfiguredNpubCashAddress && this.npubCashMintUrl) {
+      if (
+        this.showAddressOnReceive &&
+        this.hasConfiguredNpubCashAddress &&
+        this.npubCashMintUrl
+      ) {
         this.selectMintUrl(this.npubCashMintUrl);
       }
       const mintResult = await ensurePaymentMintActive(

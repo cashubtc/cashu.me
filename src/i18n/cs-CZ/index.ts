@@ -281,6 +281,10 @@ export default {
       address: {
         copy_tooltip: "Kopírovat Lightning adresu",
       },
+      show_on_receive: {
+        toggle: "Zobrazit při přijímání",
+        description: "Před zadáním částky zobrazí Lightning adresu a QR kód.",
+      },
       automatic_claim: {
         toggle: "Přijímat automaticky",
         description: "Automaticky přijímat příchozí platby.",

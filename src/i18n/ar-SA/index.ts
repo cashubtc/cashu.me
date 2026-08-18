@@ -275,6 +275,10 @@ export default {
       address: {
         copy_tooltip: "نسخ عنوان Lightning",
       },
+      show_on_receive: {
+        toggle: "إظهار عند الاستلام",
+        description: "اعرض عنوان Lightning ورمز QR قبل إدخال المبلغ.",
+      },
       automatic_claim: {
         toggle: "المطالبة تلقائيًا",
         description: "استلام المدفوعات الواردة تلقائيًا.",

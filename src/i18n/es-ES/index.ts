@@ -277,6 +277,11 @@ export default {
       address: {
         copy_tooltip: "Copiar dirección Lightning",
       },
+      show_on_receive: {
+        toggle: "Mostrar al recibir",
+        description:
+          "Muestra tu dirección Lightning y el código QR antes de introducir un importe.",
+      },
       automatic_claim: {
         toggle: "Reclamar automáticamente",
         description: "Recibir pagos entrantes automáticamente.",
