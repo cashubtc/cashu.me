@@ -133,7 +133,6 @@ export async function checkOfferAndMintBolt12(
     uIStore.unlockMutex();
   }
   try {
-    uIStore.triggerActivityOrb();
     const updated = await mintWallet.checkMintQuoteBolt12(quoteId);
 
     const paid = amountToNumber(updated.amount_paid);

@@ -298,7 +298,6 @@ export async function checkInvoiceBolt11(
   hideInvoiceDetailsOnMint = true
 ) {
   const uIStore = useUiStore();
-  uIStore.triggerActivityOrb();
   const mintStore = useMintsStore();
   const invoice = this.invoiceHistory.find(
     (i: InvoiceHistory) => i.quote === quote

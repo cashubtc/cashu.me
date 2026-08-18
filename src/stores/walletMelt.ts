@@ -192,8 +192,6 @@ export async function meltGeneric(
     );
     await proofsStore.setReserved(sendProofs, true, quote.quote);
 
-    uIStore.triggerActivityOrb();
-
     if (releaseMutex) {
       uIStore.unlockMutex();
     }
