@@ -71,6 +71,11 @@ export const useUiStore = defineStore("ui", {
     expandHistory: useLocalStorage("cashu.ui.expandHistory", true as boolean),
     globalMutexLock: false,
     foregroundPaymentRequests: 0,
+    // Number of open BottomSheet instances (they register themselves), used
+    // by the back-button handler to know whether a sheet is open.
+    openLocalSheets: 0,
+    // Bump (Date.now()) to signal all open BottomSheets to close.
+    closeLocalSheetsSignal: 0,
     showDebugConsole: useLocalStorage("cashu.ui.showDebugConsole", false),
     lastBalanceCached: useLocalStorage("cashu.ui.lastBalanceCached", 0),
     multinutExperimentalWarningDismissed: useLocalStorage(
@@ -79,12 +84,24 @@ export const useUiStore = defineStore("ui", {
     ),
   }),
   actions: {
+    // Used by the back-button handler (called as a method on purpose).
+    hasOpenDialogs() {
+      return Boolean(
+        this.showInvoiceDetails ||
+          this.showCreateInvoiceDialog ||
+          this.showSendDialog ||
+          this.showReceiveDialog ||
+          this.showReceiveEcashDrawer ||
+          this.openLocalSheets > 0
+      );
+    },
     closeDialogs() {
       this.showInvoiceDetails = false;
       this.showCreateInvoiceDialog = false;
       this.showSendDialog = false;
       this.showReceiveDialog = false;
       this.showReceiveEcashDrawer = false;
+      this.closeLocalSheetsSignal = Date.now();
     },
     async lockMutex(priority: MutexPriority = "normal") {
       await new Promise<void>((resolve) => {

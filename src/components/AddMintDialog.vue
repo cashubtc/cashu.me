@@ -1,119 +1,99 @@
 <template>
-  <q-dialog
+  <BottomSheet
     v-model="showAddMintDialogLocal"
-    position="bottom"
-    backdrop-filter="blur(4px) brightness(50%)"
-    transition-show="slide-up"
-    transition-hide="slide-down"
-    @keydown.enter.prevent="addMintLocal"
+    :title="$t('AddMintDialog.title')"
+    @enter="addMintLocal"
   >
-    <q-card class="add-mint-sheet" :class="isDark ? 'bg-dark' : 'bg-white'">
-      <!-- Drag handle -->
-      <div class="sheet-handle-container">
-        <div class="sheet-handle" />
-      </div>
-
-      <!-- Header Section -->
-      <div class="sheet-header q-px-lg">
-        <h4 class="sheet-title q-my-none">
-          {{ $t("AddMintDialog.title") }}
-        </h4>
-        <q-btn flat round dense icon="close" class="close-btn" v-close-popup />
-      </div>
-
-      <!-- Scrollable Content Section -->
-      <div class="sheet-content q-px-lg scroll">
-        <transition name="fade-slide" mode="out-in">
-          <p
-            v-if="mintInfoError"
-            key="error"
-            class="sheet-description sheet-error q-mb-lg"
-          >
-            <q-icon
-              name="error_outline"
-              color="negative"
-              size="18px"
-              class="q-mr-xs sheet-error-icon"
-            />
-            {{ $t("AddMintDialog.unreachable_error_text") }}
-          </p>
-          <p v-else key="description" class="sheet-description q-mb-lg">
-            {{ $t("AddMintDialog.description") }}
-          </p>
-        </transition>
-
-        <!-- Mint preview pill -->
-        <div class="mint-preview-pill q-mb-lg">
-          <MintInfoContainer
-            :url="mintUrl"
-            :name="mintDisplayName"
-            :iconUrl="mintIconUrl"
-            :loading="mintInfoLoading"
-            avatarSize="48px"
-          />
-        </div>
-
-        <!-- Audit Info Section -->
-        <div v-if="mintUrl" class="q-mb-lg">
-          <div class="audit-info-section">
-            <q-btn
-              flat
-              class="audit-info-btn"
-              @click="showAuditInfo = !showAuditInfo"
-            >
-              <info-icon size="16" class="q-mr-xs" />
-              {{
-                showAuditInfo ? "Hide Mint Audit Info" : "View Mint Audit Info"
-              }}
-            </q-btn>
-
-            <!-- Audit Info Component -->
-            <transition
-              enter-active-class="animated fadeIn"
-              leave-active-class="animated fadeOut"
-            >
-              <MintAuditInfo
-                v-if="showAuditInfo"
-                :mintUrl="mintUrl"
-                class="q-mt-md"
-              />
-            </transition>
-          </div>
-        </div>
-      </div>
-
-      <!-- Fixed Action Buttons Section -->
-      <div class="sheet-actions q-px-lg">
-        <q-btn flat class="cancel-btn" v-close-popup>
-          {{ $t("AddMintDialog.actions.cancel.label") }}
-        </q-btn>
-        <q-btn
-          color="primary"
-          class="add-btn"
-          data-testid="confirm-add-mint"
-          @click="addMintLocal"
-          v-close-popup
-          :loading="addMintBlocking"
-          :disable="addMintDisabled"
-          icon="check"
+    <div class="q-px-lg">
+      <transition name="fade-slide" mode="out-in">
+        <p
+          v-if="mintInfoError"
+          key="error"
+          class="sheet-description sheet-error q-mb-lg"
         >
-          {{ $t("AddMintDialog.actions.add_mint.label") }}
-          <template v-slot:loading>
-            <q-spinner />
-            {{ $t("AddMintDialog.actions.add_mint.in_progress") }}
-          </template>
-        </q-btn>
+          <q-icon
+            name="error_outline"
+            color="negative"
+            size="18px"
+            class="q-mr-xs sheet-error-icon"
+          />
+          {{ $t("AddMintDialog.unreachable_error_text") }}
+        </p>
+        <p v-else key="description" class="sheet-description q-mb-lg">
+          {{ $t("AddMintDialog.description") }}
+        </p>
+      </transition>
+
+      <!-- Mint preview pill -->
+      <div class="mint-preview-pill q-mb-lg">
+        <MintInfoContainer
+          :url="mintUrl"
+          :name="mintDisplayName"
+          :iconUrl="mintIconUrl"
+          :loading="mintInfoLoading"
+          avatarSize="48px"
+        />
       </div>
-    </q-card>
-  </q-dialog>
+
+      <!-- Audit Info Section -->
+      <div v-if="mintUrl" class="q-mb-lg">
+        <div class="audit-info-section">
+          <q-btn
+            flat
+            class="audit-info-btn"
+            @click="showAuditInfo = !showAuditInfo"
+          >
+            <info-icon size="16" class="q-mr-xs" />
+            {{
+              showAuditInfo ? "Hide Mint Audit Info" : "View Mint Audit Info"
+            }}
+          </q-btn>
+
+          <!-- Audit Info Component -->
+          <transition
+            enter-active-class="animated fadeIn"
+            leave-active-class="animated fadeOut"
+          >
+            <MintAuditInfo
+              v-if="showAuditInfo"
+              :mintUrl="mintUrl"
+              class="q-mt-md"
+            />
+          </transition>
+        </div>
+      </div>
+    </div>
+
+    <template #actions>
+      <q-btn flat class="cancel-btn" v-close-popup>
+        {{ $t("AddMintDialog.actions.cancel.label") }}
+      </q-btn>
+      <q-btn
+        color="primary"
+        class="add-btn"
+        data-testid="confirm-add-mint"
+        @click="addMintLocal"
+        v-close-popup
+        :loading="addMintBlocking"
+        :disable="addMintDisabled"
+        icon="check"
+      >
+        {{ $t("AddMintDialog.actions.add_mint.label") }}
+        <template v-slot:loading>
+          <q-spinner />
+          {{ $t("AddMintDialog.actions.add_mint.in_progress") }}
+        </template>
+      </q-btn>
+    </template>
+  </BottomSheet>
 </template>
 
 <script lang="ts">
 import { defineComponent, computed, ref, watch } from "vue";
-import { useQuasar } from "quasar";
 import { useSettingsStore } from "src/stores/settings";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
 import { getShortUrl } from "src/js/wallet-helpers";
+import BottomSheet from "./BottomSheet.vue";
 import MintAuditInfo from "./MintAuditInfo.vue";
 import MintInfoContainer from "./MintInfoContainer.vue";
 import { Info as InfoIcon } from "lucide-vue-next";
@@ -121,6 +101,7 @@ import { Info as InfoIcon } from "lucide-vue-next";
 export default defineComponent({
   name: "AddMintDialog",
   components: {
+    BottomSheet,
     MintAuditInfo,
     MintInfoContainer,
     InfoIcon,
@@ -141,7 +122,6 @@ export default defineComponent({
   },
   emits: ["add", "update:showAddMintDialog"],
   setup(props, { emit }) {
-    const $q = useQuasar();
     const settings = useSettingsStore();
     const mintRecommendations = useMintRecommendationsStore();
     const showAuditInfo = ref(false);
@@ -248,68 +228,12 @@ export default defineComponent({
       addMintDisabled,
       settings,
       showAuditInfo,
-      isDark: computed(() => $q.dark.isActive),
     };
   },
 });
 </script>
 
 <style scoped>
-.add-mint-sheet {
-  width: 100%;
-  max-width: 500px;
-  max-height: 80vh;
-  border-radius: 20px 20px 0 0;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-/* Drag handle */
-.sheet-handle-container {
-  display: flex;
-  justify-content: center;
-  padding-top: 10px;
-  padding-bottom: 4px;
-  flex-shrink: 0;
-}
-
-.sheet-handle {
-  width: 40px;
-  height: 4px;
-  border-radius: 2px;
-  background-color: rgba(128, 128, 128, 0.4);
-}
-
-/* Header */
-.sheet-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 8px;
-  padding-bottom: 16px;
-  flex-shrink: 0;
-}
-
-.sheet-title {
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  font-family: "Inter", sans-serif;
-}
-
-.close-btn {
-  opacity: 0.7;
-}
-
-/* Content */
-.sheet-content {
-  padding-top: 0;
-  flex: 1;
-  overflow-y: auto;
-}
-
 .sheet-description {
   font-size: 15px;
   line-height: 1.5;
@@ -371,16 +295,6 @@ export default defineComponent({
 /* Audit info */
 .audit-info-btn {
   font-family: "Inter", sans-serif;
-}
-
-/* Action buttons */
-.sheet-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 8px;
-  padding-bottom: 16px;
-  flex-shrink: 0;
 }
 
 .cancel-btn {
