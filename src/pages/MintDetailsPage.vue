@@ -1,6 +1,6 @@
 <template>
   <div
-    class="mint-details q-px-md"
+    class="mint-details"
     :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark'"
   >
     <div class="mint-details-page-content">
@@ -19,7 +19,7 @@
       <div class="mint-content-container q-px-md">
         <!-- Mint Header Profile Name Section -->
         <div class="mint-header-container q-mb-md">
-          <div class="mint-header q-pa-lg">
+          <div class="mint-header q-pa-md">
             <!-- QR Code Toggle -->
             <q-btn
               flat
