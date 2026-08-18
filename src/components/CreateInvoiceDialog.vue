@@ -231,7 +231,7 @@
                 type="submit"
                 :loading="globalMutexLock || createInvoiceButtonBlocked"
               >
-              {{ createButtonLabel }}
+                {{ createButtonLabel }}
                 <template v-slot:loading>
                   <q-spinner />
                 </template>
@@ -439,9 +439,7 @@ export default defineComponent({
         return this.showReusableQuote ? "New Offer" : "Create Offer";
       }
       if (this.isOnchain) {
-        return this.showReusableQuote
-          ? "Create New Address"
-          : "Create Address";
+        return this.showReusableQuote ? "Create New Address" : "Create Address";
       }
       return this.$t("InvoiceDetailDialog.actions.create.label") as string;
     },
