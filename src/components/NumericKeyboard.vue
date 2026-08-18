@@ -176,7 +176,7 @@ export default defineComponent({
 .slide-up-fade-leave-active {
   transition: transform 0.3s ease, opacity 0.3s ease;
 }
-.slide-up-fade-enter,
+.slide-up-fade-enter-from,
 .slide-up-fade-leave-to {
   transform: translateY(100%);
   opacity: 0;
