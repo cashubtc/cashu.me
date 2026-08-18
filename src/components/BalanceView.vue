@@ -1,7 +1,7 @@
 <template>
   <!-- <q-card class="q-my-md q-py-sm">
     <q-card-section class="q-mt-sm q-py-xs"> -->
-  <div class="q-pt-md q-pb-md">
+  <div class="q-pt-none q-pb-md">
     <!-- mint selector pill -->
     <div class="row justify-center q-mb-none" v-if="activeMintUrl">
       <div class="mint-chip pressable cursor-pointer" @click="openMintChooser">
@@ -34,7 +34,7 @@
       leave-active-class="animated fadeInDown"
       mode="out-in"
     >
-      <div class="balance-carousel-shell q-mt-lg q-mb-xl text-primary">
+      <div class="balance-carousel-shell q-mb-xl text-primary">
         <transition
           appear
           enter-active-class="animated fadeIn"
@@ -364,6 +364,7 @@ export default defineComponent({
   animation-timing-function: var(--ease-out);
 }
 .balance-carousel-shell {
+  margin-top: 40px; /* centers the mint pill in the fixed header-to-balance band */
   overflow-x: hidden;
   overscroll-behavior-x: contain;
   position: relative;
