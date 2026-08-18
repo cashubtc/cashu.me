@@ -231,13 +231,7 @@
                 type="submit"
                 :loading="globalMutexLock || createInvoiceButtonBlocked"
               >
-                {{
-                  isBolt12
-                    ? "Create Offer"
-                    : isOnchain
-                    ? "Create Address"
-                    : $t("InvoiceDetailDialog.actions.create.label")
-                }}
+              {{ createButtonLabel }}
                 <template v-slot:loading>
                   <q-spinner />
                 </template>
@@ -439,6 +433,17 @@ export default defineComponent({
       return (
         this.invoiceData.amount != null && Number(this.invoiceData.amount) > 0
       );
+    },
+    createButtonLabel(): string {
+      if (this.isBolt12) {
+        return this.showReusableQuote ? "New Offer" : "Create Offer";
+      }
+      if (this.isOnchain) {
+        return this.showReusableQuote
+          ? "Create New Address"
+          : "Create Address";
+      }
+      return this.$t("InvoiceDetailDialog.actions.create.label") as string;
     },
     /**
      * Find a reusable Bolt12 offer from invoice history.
