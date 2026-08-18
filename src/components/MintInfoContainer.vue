@@ -1,33 +1,42 @@
 <template>
   <div class="row items-center">
     <q-avatar :size="avatarSize" class="q-mr-sm">
-      <q-spinner v-if="loading" color="grey-5" :size="fallbackIconSize" />
-      <q-img
-        v-else-if="iconUrl"
-        :src="iconUrl"
-        spinner-color="white"
-        spinner-size="xs"
-        :style="`height: ${avatarSize}; max-width: ${avatarSize}; font-size: 12px;`"
-      >
-        <template v-slot:error>
-          <div
-            class="row items-center justify-center"
-            style="height: 100%; width: 100%; padding: 0px"
-          >
-            <q-icon
-              name="account_balance"
-              color="grey-7"
-              :size="fallbackIconSize"
-            />
-          </div>
-        </template>
-      </q-img>
-      <q-icon
-        v-else
-        name="account_balance"
-        color="grey-7"
-        :size="fallbackIconSize"
-      />
+      <transition name="mint-icon" mode="out-in">
+        <q-spinner
+          v-if="loading"
+          key="loading"
+          color="grey-5"
+          :size="fallbackIconSize"
+        />
+        <q-img
+          v-else-if="iconUrl"
+          key="icon"
+          :src="iconUrl"
+          spinner-color="white"
+          spinner-size="xs"
+          :style="`height: ${avatarSize}; max-width: ${avatarSize}; font-size: 12px;`"
+        >
+          <template v-slot:error>
+            <div
+              class="row items-center justify-center"
+              style="height: 100%; width: 100%; padding: 0px"
+            >
+              <q-icon
+                name="account_balance"
+                color="grey-7"
+                :size="fallbackIconSize"
+              />
+            </div>
+          </template>
+        </q-img>
+        <q-icon
+          v-else
+          key="fallback"
+          name="account_balance"
+          color="grey-7"
+          :size="fallbackIconSize"
+        />
+      </transition>
     </q-avatar>
 
     <div class="mint-info-container">
@@ -94,5 +103,17 @@ export default defineComponent({
   /* For URLs, break-all is better */
   white-space: normal;
   max-width: 100%;
+}
+
+/* Smooth cross-fade between loading spinner, icon and fallback icon */
+.mint-icon-enter-active,
+.mint-icon-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.mint-icon-enter-from,
+.mint-icon-leave-to {
+  opacity: 0;
+  transform: scale(0.8);
 }
 </style>

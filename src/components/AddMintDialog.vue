@@ -23,9 +23,24 @@
 
       <!-- Scrollable Content Section -->
       <div class="sheet-content q-px-lg scroll">
-        <p class="sheet-description q-mb-lg">
-          {{ $t("AddMintDialog.description") }}
-        </p>
+        <transition name="fade-slide" mode="out-in">
+          <p
+            v-if="mintInfoError"
+            key="error"
+            class="sheet-description sheet-error q-mb-lg"
+          >
+            <q-icon
+              name="error_outline"
+              color="negative"
+              size="18px"
+              class="q-mr-xs sheet-error-icon"
+            />
+            {{ $t("AddMintDialog.unreachable_error_text") }}
+          </p>
+          <p v-else key="description" class="sheet-description q-mb-lg">
+            {{ $t("AddMintDialog.description") }}
+          </p>
+        </transition>
 
         <!-- Mint preview pill -->
         <div class="mint-preview-pill q-mb-lg">
@@ -79,6 +94,7 @@
           @click="addMintLocal"
           v-close-popup
           :loading="addMintBlocking"
+          :disable="addMintDisabled"
           icon="check"
         >
           {{ $t("AddMintDialog.actions.add_mint.label") }}
@@ -129,7 +145,9 @@ export default defineComponent({
     const settings = useSettingsStore();
     const mintRecommendations = useMintRecommendationsStore();
     const showAuditInfo = ref(false);
-    const mintInfoLoading = ref(false);
+    // "idle" | "loading" | "ok" | "error"
+    const mintFetchState = ref("idle");
+    const MINT_INFO_TIMEOUT_MS = 8000;
 
     const showAddMintDialogLocal = computed({
       get: () => props.showAddMintDialog,
@@ -159,34 +177,63 @@ export default defineComponent({
       () => mintHttpInfo.value?.icon_url || undefined
     );
 
+    const mintInfoLoading = computed(() => mintFetchState.value === "loading");
+    const mintInfoError = computed(() => mintFetchState.value === "error");
+    const addMintDisabled = computed(
+      () =>
+        props.addMintBlocking || mintInfoLoading.value || mintInfoError.value
+    );
+
     // Fetch the mint's info (name, icon) when the sheet opens so the user
-    // sees a rich preview instead of a bare URL.
+    // sees a rich preview instead of a bare URL. If the mint cannot be
+    // reached, we show an error and disable the add button.
     const fetchMintPreview = async (url: string) => {
-      if (!url || mintRecommendations.hasHttpInfo(url)) return;
-      mintInfoLoading.value = true;
-      try {
-        await mintRecommendations.requestMintHttpInfo(url, 5000);
-      } finally {
-        // Only clear the loading state if the sheet is still showing
-        // the same mint URL.
-        if (mintUrl.value === url) {
-          mintInfoLoading.value = false;
-        }
+      if (!url) {
+        mintFetchState.value = "idle";
+        return;
       }
+      if (mintRecommendations.hasHttpInfo(url)) {
+        mintFetchState.value = "ok";
+        return;
+      }
+      mintFetchState.value = "loading";
+      const timeout = new Promise((resolve) =>
+        setTimeout(() => resolve("timeout"), MINT_INFO_TIMEOUT_MS)
+      );
+      const fetch = mintRecommendations
+        .requestMintHttpInfo(url, MINT_INFO_TIMEOUT_MS)
+        .then(() => "done")
+        .catch(() => "done");
+      await Promise.race([fetch, timeout]);
+      // Bail out if the sheet was closed or the URL changed meanwhile;
+      // the watcher on mintHttpInfo still flips the state if the info
+      // arrives late.
+      if (mintUrl.value !== url || !showAddMintDialogLocal.value) return;
+      mintFetchState.value = mintRecommendations.hasHttpInfo(url)
+        ? "ok"
+        : "error";
     };
 
     watch(showAddMintDialogLocal, (isOpen) => {
       if (isOpen) {
         showAuditInfo.value = false;
-        mintInfoLoading.value = false;
+        mintFetchState.value = "idle";
         fetchMintPreview(mintUrl.value);
       }
     });
 
     watch(mintUrl, (url) => {
       if (showAddMintDialogLocal.value) {
-        mintInfoLoading.value = false;
+        mintFetchState.value = "idle";
         fetchMintPreview(url);
+      }
+    });
+
+    // If the mint info arrives late (e.g. the fetch outlived our local
+    // timeout), recover from the error/loading state automatically.
+    watch(mintHttpInfo, (info) => {
+      if (info && showAddMintDialogLocal.value) {
+        mintFetchState.value = "ok";
       }
     });
 
@@ -197,6 +244,8 @@ export default defineComponent({
       mintDisplayName,
       mintIconUrl,
       mintInfoLoading,
+      mintInfoError,
+      addMintDisabled,
       settings,
       showAuditInfo,
       isDark: computed(() => $q.dark.isActive),
@@ -268,6 +317,32 @@ export default defineComponent({
   margin-top: 0;
   opacity: 0.7;
   font-family: "Inter", sans-serif;
+}
+
+.sheet-error {
+  opacity: 1;
+  color: var(--q-negative);
+  font-weight: 500;
+}
+
+.sheet-error-icon {
+  vertical-align: -3px;
+}
+
+/* Smooth swap between description and unreachable-mint error */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(6px);
 }
 
 /* Mint preview pill (styled like the mint selector pill, but static) */
