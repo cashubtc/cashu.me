@@ -118,6 +118,7 @@ import {
   Bitcoin as BitcoinIcon,
 } from "lucide-vue-next";
 import { PaymentMethod } from "src/stores/walletTypes";
+import { useNpubCashStore } from "src/stores/npubcash";
 import {
   ensurePaymentMintActive,
   firstMintSupportingPaymentMethods,
@@ -155,6 +156,19 @@ export default defineComponent({
     ]),
     ...mapWritableState(useWalletStore, ["invoiceData"]),
     ...mapState(useMintsStore, ["mints", "activeMintUrl", "activeUnit"]),
+    ...mapState(useNpubCashStore, {
+      npubCashEnabled: "enabled",
+      npubCashAddress: "address",
+      npubCashMintUrl: "mintUrl",
+    }),
+    hasConfiguredNpubCashAddress: function (): boolean {
+      return Boolean(
+        this.npubCashEnabled &&
+          this.npubCashAddress &&
+          this.npubCashMintUrl &&
+          this.mints.some((mint: any) => mint.url === this.npubCashMintUrl)
+      );
+    },
     canReceivePayments: function () {
       if (!this.mints.length) {
         return false;
@@ -198,6 +212,9 @@ export default defineComponent({
       this.showReceiveDialog = false;
     },
     showInvoiceCreateDialog: async function () {
+      if (this.hasConfiguredNpubCashAddress && this.npubCashMintUrl) {
+        this.selectMintUrl(this.npubCashMintUrl);
+      }
       const mintResult = await ensurePaymentMintActive(
         this.mints as any,
         this.activeMintUrl as string,

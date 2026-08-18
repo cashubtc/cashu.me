@@ -32,7 +32,7 @@
               {{
                 isOnchain
                   ? "Receive On-chain"
-                  : isBolt12
+                  : isBolt12 && !showNpubCashPreview
                   ? "Receive Bolt12"
                   : $t("InvoiceDetailDialog.title")
               }}
@@ -76,86 +76,123 @@
         </div>
 
         <!-- Amount display -->
-        <div class="col column items-center justify-center q-px-lg amount-area">
-          <transition name="fade" mode="out-in">
+        <div class="col column items-center q-px-lg amount-area">
+          <transition name="receive-content" mode="out-in">
             <div
-              v-if="isOnchain && checkingReusableOnchainQuote"
+              v-if="showNpubCashPreview"
+              key="npub-cash-address"
+              class="row justify-center full-width q-mt-lg q-mb-auto"
+            >
+              <div class="col-12" style="max-width: 400px">
+                <div
+                  class="qr-container cursor-pointer"
+                  @click="copyNpubCashAddress"
+                >
+                  <q-responsive :ratio="1" class="q-mx-none">
+                    <vue-qrcode
+                      :value="npubCashLnurl"
+                      :options="{ width: 400 }"
+                      class="rounded-borders"
+                      style="width: 100%"
+                    >
+                    </vue-qrcode>
+                  </q-responsive>
+                </div>
+                <div
+                  class="q-mt-sm text-center text-grey-7 npub-cash-address cursor-pointer"
+                  data-testid="npub-cash-lightning-address"
+                  @click="copyNpubCashAddress"
+                >
+                  <q-icon
+                    :name="npubCashAddressCopied ? 'check' : 'content_copy'"
+                    size="xs"
+                    class="q-mr-xs"
+                  />
+                  {{ npubCashAddress }}
+                </div>
+              </div>
+            </div>
+            <div
+              v-else-if="isOnchain && checkingReusableOnchainQuote"
               key="checking-onchain"
-              class="column items-center justify-center q-pa-xl"
+              class="column items-center justify-center q-pa-xl q-my-auto"
             >
               <q-spinner size="48px" color="primary" />
               <div class="text-grey-6 q-mt-md">Checking address...</div>
             </div>
-          </transition>
-          <div
-            v-if="!checkingReusableOnchainQuote && showReusableQuote"
-            class="row justify-center full-width"
-          >
-            <div class="col-12" style="max-width: 400px">
-              <div
-                v-if="activeMintErrored"
-                class="mint-error-warning column items-center text-center q-pa-lg"
-              >
-                <q-icon name="warning" size="42px" color="warning" />
-                <div class="mint-error-title q-mt-md">Mint unreachable</div>
-                <div class="mint-error-text q-mt-sm">
-                  Reconnect to the mint to receive payments.
+            <div
+              v-else-if="!checkingReusableOnchainQuote && showReusableQuote"
+              key="reusable-quote"
+              class="row justify-center full-width q-my-auto"
+            >
+              <div class="col-12" style="max-width: 400px">
+                <div
+                  v-if="activeMintErrored"
+                  class="mint-error-warning column items-center text-center q-pa-lg"
+                >
+                  <q-icon name="warning" size="42px" color="warning" />
+                  <div class="mint-error-title q-mt-md">Mint unreachable</div>
+                  <div class="mint-error-text q-mt-sm">
+                    Reconnect to the mint to receive payments.
+                  </div>
+                  <q-btn
+                    flat
+                    dense
+                    no-caps
+                    color="primary"
+                    icon="refresh"
+                    class="q-mt-md"
+                    label="Reconnect mint"
+                    :loading="refreshingMint"
+                    @click="refreshActiveMint"
+                  />
                 </div>
-                <q-btn
-                  flat
-                  dense
-                  no-caps
-                  color="primary"
-                  icon="refresh"
-                  class="q-mt-md"
-                  label="Reconnect mint"
-                  :loading="refreshingMint"
-                  @click="refreshActiveMint"
-                />
-              </div>
-              <div
-                v-else-if="reusableReceiveQuote"
-                @click="onCopyReusableOffer"
-                class="cursor-pointer"
-              >
-                <q-responsive :ratio="1" class="q-mx-none">
-                  <vue-qrcode
-                    :value="reusableQrValue"
-                    :options="{ width: 400 }"
-                    class="rounded-borders"
-                    style="width: 100%"
-                  >
-                  </vue-qrcode>
-                </q-responsive>
-              </div>
-              <div
-                v-if="reusableReceiveQuote && !activeMintErrored"
-                class="q-mt-sm text-center text-grey-7"
-                @click="onCopyReusableOffer"
-              >
-                <q-icon
-                  :name="copyButtonCopied ? 'check' : 'content_copy'"
-                  size="xs"
-                  class="q-mr-xs"
-                />
-                {{
-                  copyButtonCopied
-                    ? $t("global.copy_to_clipboard.success")
-                    : isOnchain
-                    ? "Copy Address"
-                    : "Copy Offer"
-                }}
+                <div
+                  v-else-if="reusableReceiveQuote"
+                  @click="onCopyReusableOffer"
+                  class="cursor-pointer"
+                >
+                  <q-responsive :ratio="1" class="q-mx-none">
+                    <vue-qrcode
+                      :value="reusableQrValue"
+                      :options="{ width: 400 }"
+                      class="rounded-borders"
+                      style="width: 100%"
+                    >
+                    </vue-qrcode>
+                  </q-responsive>
+                </div>
+                <div
+                  v-if="reusableReceiveQuote && !activeMintErrored"
+                  class="q-mt-sm text-center text-grey-7"
+                  @click="onCopyReusableOffer"
+                >
+                  <q-icon
+                    :name="copyButtonCopied ? 'check' : 'content_copy'"
+                    size="xs"
+                    class="q-mr-xs"
+                  />
+                  {{
+                    copyButtonCopied
+                      ? $t("global.copy_to_clipboard.success")
+                      : isOnchain
+                      ? "Copy Address"
+                      : "Copy Offer"
+                  }}
+                </div>
               </div>
             </div>
-          </div>
 
-          <AmountInputComponent
-            v-if="showAmountInput"
-            v-model="invoiceData.amount"
-            :enabled="true"
-            @enter="requestMintButton"
-            @fiat-mode-changed="fiatKeyboardMode = $event"
-          />
+            <AmountInputComponent
+              v-else-if="showAmountInput"
+              key="amount-input"
+              class="q-my-auto"
+              v-model="invoiceData.amount"
+              :enabled="true"
+              @enter="requestMintButton"
+              @fiat-mode-changed="fiatKeyboardMode = $event"
+            />
+          </transition>
         </div>
 
         <!-- Numeric keypad -->
@@ -179,7 +216,10 @@
           </div>
 
           <!-- Secondary Actions Container (Add Amount) -->
-          <div class="row justify-center" v-if="isBolt12 && !showAmountInput">
+          <div
+            class="row justify-center"
+            v-if="isBolt12 && !showAmountInput && !showNpubCashPreview"
+          >
             <div
               class="col-12 col-sm-11 col-md-8 q-px-md"
               style="max-width: 600px"
@@ -196,13 +236,25 @@
             </div>
           </div>
 
-          <!-- Create action (Fixed position relative to bottom) -->
+          <!-- Primary action (Add amount / Create) -->
           <div class="row justify-center q-pb-lg q-pt-sm">
             <div
               class="col-12 col-sm-11 col-md-8 q-px-md"
               style="max-width: 600px"
             >
               <q-btn
+                v-if="showNpubCashPreview"
+                class="full-width"
+                unelevated
+                rounded
+                color="primary"
+                size="lg"
+                data-testid="npub-cash-add-amount"
+                :label="$t('PaymentRequestDialog.actions.add_amount.label')"
+                @click="enterNpubCashAmountMode"
+              />
+              <q-btn
+                v-else
                 class="full-width"
                 unelevated
                 data-testid="create-payment-request"
@@ -248,6 +300,8 @@ import { usePriceStore } from "src/stores/price";
 import type { InvoiceHistory } from "src/stores/wallet";
 import { PaymentMethod } from "src/stores/walletTypes";
 import { mintSupportsPaymentMethod } from "src/js/mint-payment-methods";
+import { useNpubCashStore } from "src/stores/npubcash";
+import { lightningAddressToLnurl } from "src/js/lnurl";
 
 declare const windowMixin: any;
 
@@ -266,6 +320,9 @@ export default defineComponent({
       createInvoiceButtonBlocked: false,
       fiatKeyboardMode: false as boolean,
       bolt12AddAmount: false as boolean,
+      npubCashAddAmount: false as boolean,
+      npubCashAddressCopied: false,
+      npubCashCopyTimeout: null as ReturnType<typeof setTimeout> | null,
       copyButtonCopied: false,
       copyButtonTimeout: null as any,
       refreshingMint: false,
@@ -293,6 +350,11 @@ export default defineComponent({
       "useNumericKeyboard",
     ]),
     ...mapState(usePriceStore, ["bitcoinPrice", "currentCurrencyPrice"]),
+    ...mapState(useNpubCashStore, {
+      npubCashEnabled: "enabled",
+      npubCashAddress: "address",
+      npubCashMintUrl: "mintUrl",
+    }),
     isBolt12(): boolean {
       return this.invoiceData.type === PaymentMethod.Bolt12;
     },
@@ -300,6 +362,7 @@ export default defineComponent({
       return this.invoiceData.type === PaymentMethod.Onchain;
     },
     showAmountInput(): boolean {
+      if (this.showNpubCashPreview) return false;
       if (this.isOnchain) return false;
       if (!this.isBolt12) return true;
       return this.bolt12AddAmount;
@@ -353,6 +416,28 @@ export default defineComponent({
     },
     activeMintErrored(): boolean {
       return Boolean(this.activeMint?.errored);
+    },
+    hasConfiguredNpubCashAddress(): boolean {
+      return Boolean(
+        this.npubCashEnabled &&
+          this.npubCashAddress &&
+          this.npubCashMintUrl &&
+          this.mints.some((mint: any) => mint.url === this.npubCashMintUrl)
+      );
+    },
+    showNpubCashPreview(): boolean {
+      return Boolean(
+        this.showCreateInvoiceDialog &&
+          !this.isOnchain &&
+          !this.isBolt12 &&
+          this.activeUnit === "sat" &&
+          !this.npubCashAddAmount &&
+          this.hasConfiguredNpubCashAddress &&
+          this.activeMintUrl === this.npubCashMintUrl
+      );
+    },
+    npubCashLnurl(): string {
+      return lightningAddressToLnurl(this.npubCashAddress || "");
     },
     canCreate(): boolean {
       if (this.activeMintErrored) return false;
@@ -426,10 +511,10 @@ export default defineComponent({
   watch: {
     showCreateInvoiceDialog: function (val) {
       if (val) {
+        this.npubCashAddAmount = false;
+        this.npubCashAddressCopied = false;
         this.$nextTick(() => {
-          // If editing a BOLT12 offer with existing amount, don't auto-show keyboard if amount exists?
-          // Actually user likely wants to edit.
-          this.showNumericKeyboard = true;
+          this.showNumericKeyboard = !this.showNpubCashPreview;
         });
         this.refreshReusableOnchainQuote();
       } else {
@@ -437,7 +522,15 @@ export default defineComponent({
       }
     },
     activeMintUrl: {
-      handler: function () {
+      handler: function (newMintUrl, oldMintUrl) {
+        if (
+          this.showCreateInvoiceDialog &&
+          !this.npubCashAddAmount &&
+          oldMintUrl === this.npubCashMintUrl &&
+          newMintUrl !== this.npubCashMintUrl
+        ) {
+          this.enterNpubCashAmountMode();
+        }
         this.syncInvoiceTypeWithActiveMint();
       },
       immediate: true,
@@ -458,6 +551,28 @@ export default defineComponent({
       "mintOnPaidOnchain",
     ]),
     ...mapActions(useMintsStore, ["activateMintUrl", "toggleUnit"]),
+    enterNpubCashAmountMode() {
+      this.npubCashAddAmount = true;
+      this.invoiceData.amount = "";
+      this.$nextTick(() => {
+        this.showNumericKeyboard = true;
+      });
+    },
+    async copyNpubCashAddress() {
+      if (!this.npubCashAddress) return;
+      try {
+        await copyToClipboard(this.npubCashAddress);
+        this.npubCashAddressCopied = true;
+        if (this.npubCashCopyTimeout) {
+          clearTimeout(this.npubCashCopyTimeout);
+        }
+        this.npubCashCopyTimeout = setTimeout(() => {
+          this.npubCashAddressCopied = false;
+        }, 3000);
+      } catch (error) {
+        console.error("Failed to copy lightning address:", error);
+      }
+    },
     toggleInvoiceType() {
       if (this.isBolt12) {
         this.invoiceData.type = PaymentMethod.Bolt11;
@@ -593,6 +708,9 @@ export default defineComponent({
     if (this.copyButtonTimeout) {
       clearTimeout(this.copyButtonTimeout);
     }
+    if (this.npubCashCopyTimeout) {
+      clearTimeout(this.npubCashCopyTimeout);
+    }
   },
 });
 </script>
@@ -618,6 +736,37 @@ export default defineComponent({
 }
 .amount-area {
   flex: 1;
+  min-height: 0;
+}
+.qr-container {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.npub-cash-address {
+  overflow-wrap: anywhere;
+  word-break: break-all;
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  hyphens: none;
+  font-size: 0.9em;
+  font-family: monospace;
+}
+.receive-content-enter-active,
+.receive-content-leave-active {
+  transition: opacity 180ms ease;
+}
+.receive-content-enter-from {
+  opacity: 0;
+}
+.receive-content-leave-to {
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .receive-content-enter-active,
+  .receive-content-leave-active {
+    transition: none;
+  }
 }
 .amount-container {
   position: relative;
