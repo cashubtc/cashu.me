@@ -1,7 +1,33 @@
 <template>
   <!-- <q-card class="q-my-md q-py-sm">
     <q-card-section class="q-mt-sm q-py-xs"> -->
-  <div class="q-pt-xl q-pb-md">
+  <div class="q-pt-md q-pb-md">
+    <!-- mint selector pill -->
+    <div class="row justify-center q-mb-none" v-if="activeMintUrl">
+      <div class="mint-chip pressable cursor-pointer" @click="openMintChooser">
+        <transition name="mint-chip-avatar">
+          <img
+            v-if="showMintAvatar"
+            :key="activeMintIconUrl"
+            :src="activeMintIconUrl"
+            class="mint-chip-avatar"
+            alt=""
+            @error="avatarLoadFailed = true"
+          />
+        </transition>
+        <transition name="mint-chip-name">
+          <span
+            :key="activeMintLabel"
+            class="mint-chip-name text-weight-medium"
+            >{{ activeMintLabel }}</span
+          >
+        </transition>
+      </div>
+      <!-- Hidden selector that owns the mint-selection bottom sheet -->
+      <div class="hidden">
+        <ChooseMint ref="chooseMint" />
+      </div>
+    </div>
     <transition
       appear
       enter-active-class="animated fadeInDown"
@@ -110,32 +136,6 @@
           {{ $t("BalanceView.mintError.label") }}
           <q-icon name="error" class="q-ml-xs" size="xs" />
         </span>
-      </div>
-    </div>
-    <!-- mint url -->
-    <div class="row justify-center q-mt-sm q-mb-none" v-if="activeMintUrl">
-      <div class="mint-chip pressable cursor-pointer" @click="openMintChooser">
-        <transition name="mint-chip-avatar">
-          <img
-            v-if="showMintAvatar"
-            :key="activeMintIconUrl"
-            :src="activeMintIconUrl"
-            class="mint-chip-avatar"
-            alt=""
-            @error="avatarLoadFailed = true"
-          />
-        </transition>
-        <transition name="mint-chip-name">
-          <span
-            :key="activeMintLabel"
-            class="mint-chip-name text-weight-medium"
-            >{{ activeMintLabel }}</span
-          >
-        </transition>
-      </div>
-      <!-- Hidden selector that owns the mint-selection bottom sheet -->
-      <div class="hidden">
-        <ChooseMint ref="chooseMint" />
       </div>
     </div>
   </div>
