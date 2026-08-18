@@ -75,6 +75,15 @@
           </div>
         </div>
 
+        <div v-if="isOnchain" class="row justify-center q-px-lg q-mb-sm">
+          <div class="col-12 col-sm-11 col-md-8" style="max-width: 600px">
+            <OnchainDepositLimits
+              :mint-url="activeMintUrl"
+              :unit="activeUnit"
+            />
+          </div>
+        </div>
+
         <!-- Amount display -->
         <div class="col column items-center justify-center q-px-lg amount-area">
           <transition name="fade" mode="out-in">
@@ -239,6 +248,7 @@ import VueQrcode from "@chenfengyuan/vue-qrcode";
 import ChooseMint from "components/ChooseMint.vue";
 import NumericKeyboard from "components/NumericKeyboard.vue";
 import AmountInputComponent from "components/AmountInputComponent.vue";
+import OnchainDepositLimits from "components/OnchainDepositLimits.vue";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 import { useMintsStore } from "src/stores/mints";
@@ -258,6 +268,7 @@ export default defineComponent({
     ChooseMint,
     NumericKeyboard,
     AmountInputComponent,
+    OnchainDepositLimits,
     VueQrcode,
   },
   props: {},
