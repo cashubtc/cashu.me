@@ -10,8 +10,12 @@ services:
       - --enable-logging
     environment:
       CDK_MINTD_MNEMONIC: "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+      CDK_MINTD_MANAGEMENT_ENABLED: "true"
+      CDK_MINTD_MANAGEMENT_ADDRESS: "0.0.0.0"
+      CDK_MINTD_MANAGEMENT_PORT: "10000"
     ports:
       - "127.0.0.1:8085:8085"
+      - "127.0.0.1:10000:10000"
     volumes:
       - ./mints/mint-a.toml:/config/config.toml:ro
     tmpfs:

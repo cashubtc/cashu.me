@@ -82,6 +82,7 @@ import {
   type P2PKOptions,
   type CounterSource,
   createEphemeralCounterSource,
+  StaleKeysetError,
   // ConsoleLogger,
 } from "@cashu/cashu-ts";
 // @ts-ignore
@@ -388,6 +389,7 @@ export const useWalletStore = defineStore("wallet", {
       url: string,
       unit: string
     ): Wallet {
+      const mints = useMintsStore();
       if (this.mnemonic == "") {
         this.mnemonic = generateMnemonic(wordlist);
       }
@@ -400,6 +402,26 @@ export const useWalletStore = defineStore("wallet", {
       });
       wallet.on.countersReserved(({ keysetId, next }) => {
         this.syncCounterToStorage(keysetId, next);
+      });
+      wallet.on.keychainUpdated(({ cache }) => {
+        const mint = mints.mints.find((m) => m.url === url);
+        if (!mint) return;
+
+        // Cashu TS repairs its short-lived wallet snapshot after a keyset
+        // rejection. Keep that repair for subsequent wallet instances too.
+        const { keysets, keys } = KeyChain.cacheToMintDTO(cache);
+        mint.keysets = [
+          ...mint.keysets.filter((existing) =>
+            keysets.every((updated) => updated.id !== existing.id)
+          ),
+          ...keysets,
+        ];
+        mint.keys = [
+          ...mint.keys.filter((existing) =>
+            keys.every((updated) => updated.id !== existing.id)
+          ),
+          ...keys,
+        ];
       });
       // Load the caches
       const keychainCache = KeyChain.mintToCacheDTO(
@@ -424,7 +446,7 @@ export const useWalletStore = defineStore("wallet", {
       this.sharedCounterSource = null; // force re-creation on next wallet init
       this.mnemonic = generateMnemonic(wordlist);
     },
-    retryOnceOnSignedOutputs: async function <T>(
+    retryOnceOnRecoverableError: async function <T>(
       keysetId: string,
       operation: () => Promise<T>,
       notifyUser = true
@@ -432,6 +454,14 @@ export const useWalletStore = defineStore("wallet", {
       try {
         return await operation();
       } catch (error: any) {
+        // Cashu TS v4.9.0+ refreshes the wallet snapshot when a mint rejects
+        // outputs on a retired keyset, then asks the caller to retry.
+        if (error instanceof StaleKeysetError && error.repaired) {
+          if (notifyUser) {
+            notify(this.t("wallet.notifications.trying_again"));
+          }
+          return await operation();
+        }
         const handled = await this.handleOutputsHaveAlreadyBeenSignedError(
           keysetId,
           error,
@@ -615,12 +645,14 @@ export const useWalletStore = defineStore("wallet", {
           amount,
           true
         );
-        const keysetId = this.getKeyset(wallet.mint.mintUrl, wallet.unit);
-        const { keep: keepProofs, send: sendProofs } = await wallet.ops
-          .send(amount, toProofs(proofsToSend))
-          .keyset(keysetId)
-          .asP2PK(p2pkOptions)
-          .run();
+        const { keep: keepProofs, send: sendProofs } =
+          await this.retryOnceOnRecoverableError(wallet.keysetId, async () =>
+            wallet.ops
+              .send(amount, toProofs(proofsToSend))
+              .keyset(wallet.keysetId)
+              .asP2PK(p2pkOptions)
+              .run()
+          );
         const proofsStore = useProofsStore();
         await proofsStore.removeProofs(proofsToSend);
         // note: we do not store sendProofs in the proofs store but
@@ -645,7 +677,6 @@ export const useWalletStore = defineStore("wallet", {
       // or removes them if `invalidate` is true (caller takes ownership).
       const proofsStore = useProofsStore();
       const uIStore = useUiStore();
-      const keysetId = this.getKeyset(wallet.mint.mintUrl, wallet.unit);
       await uIStore.lockMutex(mutexPriority);
       try {
         const spendableProofs: Proof[] = toProofs(
@@ -681,13 +712,13 @@ export const useWalletStore = defineStore("wallet", {
           );
           // includeFees=true inflates send outputs so sendProofs sum to
           // amount + fees(sendProofs): required for melt and includeFees sends.
-          const swapResult = await this.retryOnceOnSignedOutputs(
-            keysetId,
+          const swapResult = await this.retryOnceOnRecoverableError(
+            swapWallet.keysetId,
             async () =>
               swapWallet.ops
                 .send(amount, spendableProofs)
                 .asDeterministic()
-                .keyset(keysetId)
+                .keyset(swapWallet.keysetId)
                 .proofsWeHave(spendableProofs)
                 .includeFees(includeFees)
                 .run()
@@ -772,17 +803,18 @@ export const useWalletStore = defineStore("wallet", {
       await uIStore.lockMutex();
       try {
         // redeem
-        const keysetId = this.getKeyset(historyToken.mint, historyToken.unit);
         const privkey = receiveStore.receiveData.p2pkPrivateKey;
         let proofs: Proof[];
         try {
-          proofs = await this.retryOnceOnSignedOutputs(keysetId, async () =>
-            mintWallet.ops
-              .receive(receiveStore.receiveData.tokensBase64)
-              .asDeterministic()
-              .privkey(privkey)
-              .proofsWeHave(mintStore.mintUnitProofs(mint, historyToken.unit))
-              .run()
+          proofs = await this.retryOnceOnRecoverableError(
+            mintWallet.keysetId,
+            async () =>
+              mintWallet.ops
+                .receive(receiveStore.receiveData.tokensBase64)
+                .asDeterministic()
+                .privkey(privkey)
+                .proofsWeHave(mintStore.mintUnitProofs(mint, historyToken.unit))
+                .run()
           );
           await proofsStore.addProofs(proofs);
         } catch (error: any) {

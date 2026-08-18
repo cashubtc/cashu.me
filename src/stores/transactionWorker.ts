@@ -964,7 +964,6 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
       const mint = mintStore.mints.find((item) => item.url === mintUrl);
       if (!mint) throw new Error("mint not found");
 
-      const keysetId = walletStore.getKeyset(mintUrl, unit);
       const uiStore = useUiStore();
       let proofs: any[] = [];
       const entriesToMint: MintableQuote[] = [];
@@ -1011,8 +1010,8 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
         }
 
         if (entriesToMint.length > 0) {
-          proofs = await walletStore.retryOnceOnSignedOutputs(
-            keysetId,
+          proofs = await walletStore.retryOnceOnRecoverableError(
+            mintWallet.keysetId,
             async () => {
               let preview: any;
               await uiStore.lockMutex("background");
@@ -1024,7 +1023,7 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
                     quote: entry.mintQuote,
                   })),
                   {
-                    keysetId,
+                    keysetId: mintWallet.keysetId,
                     proofsWeHave: mintStore.mintUnitProofs(mint, unit),
                     ...(signingKeys.length > 0 ? { privkey: signingKeys } : {}),
                   }

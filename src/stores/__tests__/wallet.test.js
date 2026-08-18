@@ -92,6 +92,14 @@ const h = vi.hoisted(() => {
   const walletLoadMintFromCache = vi.fn();
   const walletGetFeesForProofs = vi.fn(() => 7);
   const keychainMintToCacheDTO = vi.fn(() => ({ cache: "dto" }));
+  const keychainCacheToMintDTO = vi.fn(() => ({ keysets: [], keys: [] }));
+  const walletKeychainUpdated = vi.fn(() => () => {});
+  class StaleKeysetErrorMock extends Error {
+    constructor(repaired) {
+      super("stale keyset");
+      this.repaired = repaired;
+    }
+  }
   const outputDataSerialize = vi.fn((output) => ({ serialized: output.id }));
   const outputDataDeserialize = vi.fn((output) => ({ deserialized: output }));
   const tokenModule = {
@@ -110,6 +118,7 @@ const h = vi.hoisted(() => {
       this.getFeesForProofs = walletGetFeesForProofs;
       this.on = {
         countersReserved: vi.fn(() => () => {}),
+        keychainUpdated: walletKeychainUpdated,
       };
     }
 
@@ -150,6 +159,9 @@ const h = vi.hoisted(() => {
     walletLoadMintFromCache,
     walletGetFeesForProofs,
     keychainMintToCacheDTO,
+    keychainCacheToMintDTO,
+    walletKeychainUpdated,
+    StaleKeysetErrorMock,
     outputDataSerialize,
     outputDataDeserialize,
     bolt12Decode,
@@ -208,7 +220,9 @@ vi.mock("@cashu/cashu-ts", () => ({
   },
   KeyChain: {
     mintToCacheDTO: (...args) => h.keychainMintToCacheDTO(...args),
+    cacheToMintDTO: (...args) => h.keychainCacheToMintDTO(...args),
   },
+  StaleKeysetError: h.StaleKeysetErrorMock,
   CheckStateEnum: { SPENT: "SPENT" },
   MeltQuoteState: { PAID: "PAID", PENDING: "PENDING", UNPAID: "UNPAID" },
   MintQuoteState: { PAID: "PAID", ISSUED: "ISSUED", PENDING: "PENDING" },
@@ -597,6 +611,29 @@ describe("wallet store", () => {
     );
   });
 
+  it("persists Cashu TS keychain repairs in the mint cache", () => {
+    const wallet = useWalletStore();
+    const mint = h.mintsStore.mints[0];
+    h.keychainCacheToMintDTO.mockReturnValue({
+      keysets: [
+        { id: "00aa", unit: "sat", active: false },
+        { id: "00bb", unit: "sat", active: true },
+      ],
+      keys: [{ id: "00bb" }],
+    });
+
+    wallet.createWalletInstance(mint, mint.url, "sat");
+    const onKeychainUpdated = h.walletKeychainUpdated.mock.calls[0][0];
+    onKeychainUpdated({ cache: {} });
+
+    expect(mint.keysets).toEqual([
+      { id: "base64-a", unit: "sat", active: true },
+      { id: "00aa", unit: "sat", active: false },
+      { id: "00bb", unit: "sat", active: true },
+    ]);
+    expect(mint.keys).toEqual([{ id: "00aa" }, { id: "00bb" }]);
+  });
+
   it("gets fees using the provided mint context instead of the active mint", () => {
     const wallet = useWalletStore();
     h.mintsStore.mints.push({
@@ -764,6 +801,21 @@ describe("wallet store", () => {
 
     expect(handled).toBe(true);
     expect(wallet.keysetCounter("00aa")).toBe(11);
+    expect(h.notify).toHaveBeenCalledWith("wallet.notifications.trying_again");
+  });
+
+  it("retries once after Cashu TS repairs a stale keyset", async () => {
+    const wallet = useWalletStore();
+    const operation = vi
+      .fn()
+      .mockRejectedValueOnce(new h.StaleKeysetErrorMock(true))
+      .mockResolvedValueOnce("minted");
+
+    await expect(
+      wallet.retryOnceOnRecoverableError("00aa", operation)
+    ).resolves.toBe("minted");
+
+    expect(operation).toHaveBeenCalledTimes(2);
     expect(h.notify).toHaveBeenCalledWith("wallet.notifications.trying_again");
   });
 
@@ -1663,6 +1715,7 @@ describe("wallet store", () => {
     const mintWallet = {
       mint: { mintUrl: "https://mint-a.example" },
       unit: "sat",
+      keysetId: "00aa",
       prepareMelt,
       completeMelt,
     };
@@ -1734,6 +1787,7 @@ describe("wallet store", () => {
     const mintWallet = {
       mint: { mintUrl: "https://mint-a.example" },
       unit: "sat",
+      keysetId: "00aa",
       prepareMelt,
       completeMelt,
     };
@@ -1855,6 +1909,7 @@ describe("wallet store", () => {
     const mintWallet = {
       mint: { mintUrl: "https://mint-a.example" },
       unit: "sat",
+      keysetId: "00aa",
       prepareMelt,
       completeMelt,
     };
