@@ -84,7 +84,7 @@ describe("npub.cash store", () => {
     ["npub.cash", "npub.cash"],
     ["  custom.example  ", "custom.example"],
     ["https://custom.example", "custom.example"],
-    ["https://CUSTOM.example:8443/", "custom.example:8443"],
+    ["https://CUSTOM.example/", "custom.example"],
   ])("normalizes the npub.cash server host from %s", (input, expected) => {
     expect(normalizeNpubCashBaseHost(input)).toBe(expected);
   });
@@ -92,6 +92,7 @@ describe("npub.cash store", () => {
   it.each([
     "",
     "http://npub.cash",
+    "https://custom.example:8443",
     "https://npub.cash/path",
     "https://user:secret@npub.cash",
   ])("rejects invalid npub.cash server input %s", (input) => {
@@ -617,6 +618,93 @@ describe("npub.cash store", () => {
 
     expect(requests).toBe(2);
     expect(maxActiveRequests).toBe(1);
+  });
+
+  it("discards an in-flight quote sync when the server host changes", async () => {
+    const oldMintUrl = "https://old-mint.example";
+    const newMintUrl = "https://new-mint.example";
+    const store = useNpubCashStore();
+    store.enabled = true;
+    store.baseHost = "old.example";
+    store.lastCheck = 100;
+    store.claimAutomatically = false;
+    const walletStore = useWalletStore();
+    walletStore.invoiceHistory = [];
+    vi.spyOn(walletStore, "addPaymentHistory").mockImplementation(
+      async (invoice) => {
+        walletStore.invoiceHistory.push(invoice);
+      }
+    );
+
+    let releaseOldRequest: ((response: Response) => void) | undefined;
+    const oldRequest = new Promise<Response>((resolve) => {
+      releaseOldRequest = resolve;
+    });
+    const requestedUrls: string[] = [];
+    vi.spyOn(store, "sendAuthedRequest").mockImplementation(async (url) => {
+      requestedUrls.push(url);
+      if (url.startsWith("https://old.example")) return oldRequest;
+      return new Response(
+        JSON.stringify({
+          error: false,
+          data: {
+            quotes: [
+              {
+                createdAt: 190,
+                paidAt: 200,
+                expiresAt: 1_000,
+                mintUrl: newMintUrl,
+                quoteId: "new-zap",
+                request: "lnbcnew",
+                amount: 20,
+                state: "PAID",
+                locked: false,
+              },
+            ],
+          },
+          metadata: { limit: 50, total: 1 },
+        })
+      );
+    });
+    vi.spyOn(store, "initializeNpubCash").mockImplementation(async () => {
+      await store.synchronizeQuotes();
+    });
+
+    const oldSync = store.synchronizeQuotes();
+    const hostChange = store.setBaseHost("new.example");
+    releaseOldRequest?.(
+      new Response(
+        JSON.stringify({
+          error: false,
+          data: {
+            quotes: [
+              {
+                createdAt: 490,
+                paidAt: 500,
+                expiresAt: 1_000,
+                mintUrl: oldMintUrl,
+                quoteId: "old-zap",
+                request: "lnbcold",
+                amount: 50,
+                state: "PAID",
+                locked: false,
+              },
+            ],
+          },
+          metadata: { limit: 50, total: 1 },
+        })
+      )
+    );
+    await Promise.all([oldSync, hostChange]);
+
+    expect(requestedUrls).toEqual([
+      "https://old.example/api/v2/wallet/quotes?limit=50&offset=0&since=99",
+      "https://new.example/api/v2/wallet/quotes?limit=50&offset=0",
+    ]);
+    expect(walletStore.invoiceHistory.map((invoice) => invoice.quote)).toEqual([
+      "new-zap",
+    ]);
+    expect(store.lastCheck).toBe(200);
   });
 
   it("reconnects realtime quote updates with backoff", async () => {

@@ -83,6 +83,7 @@ export function normalizeNpubCashBaseHost(input: string): string {
     url.protocol !== "https:" ||
     url.username ||
     url.password ||
+    url.port ||
     (url.pathname !== "/" && url.pathname !== "") ||
     url.search ||
     url.hash
@@ -254,6 +255,7 @@ export const useNpubCashStore = defineStore("npubCash", {
       quoteSocket: null as WebSocket | null,
       quoteSyncPromise: null as Promise<void> | null,
       quoteSyncRequested: false,
+      quoteSyncGeneration: 0,
       quoteSyncTimer: null as ReturnType<typeof setTimeout> | null,
       quoteReconnectTimer: null as ReturnType<typeof setTimeout> | null,
       quoteReconnectAttempt: 0,
@@ -404,10 +406,12 @@ export const useNpubCashStore = defineStore("npubCash", {
       if (!this.enabled) return;
       const transactionWorkerStore = useTransactionWorkerStore();
       const walletStore = useWalletStore();
+      const syncGeneration = this.quoteSyncGeneration;
+      const syncHost = this.baseHost;
       try {
         const quotes: NpubCashQuote[] = [];
         const seenQuotes = new Set<string>();
-        const quotesUrl = npubCashQuotesUrl(this.baseHost);
+        const quotesUrl = npubCashQuotesUrl(syncHost);
         let offset = 0;
         let total = 0;
 
@@ -445,7 +449,13 @@ export const useNpubCashStore = defineStore("npubCash", {
           if (page.length === 0) break;
         } while (offset < total);
 
-        if (!this.enabled) return;
+        if (
+          !this.enabled ||
+          this.quoteSyncGeneration !== syncGeneration ||
+          this.baseHost !== syncHost
+        ) {
+          return;
+        }
         let latestQuoteTime: number | undefined;
         let queuedQuotes = false;
         for (const quote of quotes) {
@@ -651,6 +661,7 @@ export const useNpubCashStore = defineStore("npubCash", {
       this.quoteSyncTimer = null;
       this.quoteReconnectTimer = null;
       this.quoteSyncRequested = false;
+      this.quoteSyncGeneration += 1;
       this.quoteReconnectAttempt = 0;
 
       const socket = this.quoteSocket;
