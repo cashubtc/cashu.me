@@ -278,6 +278,11 @@ export default {
       address: {
         copy_tooltip: "Αντιγραφή διεύθυνσης Lightning",
       },
+      show_on_receive: {
+        toggle: "Εμφάνιση κατά τη λήψη",
+        description:
+          "Εμφάνιση της διεύθυνσης Lightning και του κωδικού QR πριν την εισαγωγή ποσού.",
+      },
       automatic_claim: {
         toggle: "Αυτόματη διεκδίκηση",
         description: "Λήψη εισερχόμενων πληρωμών αυτόματα.",

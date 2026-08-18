@@ -41,6 +41,19 @@
             </q-input>
           </q-item-section>
         </q-item>
+        <q-item tag="label">
+          <q-item-section>
+            <q-item-label>{{
+              $t("Settings.lightning_address.show_on_receive.toggle")
+            }}</q-item-label>
+            <q-item-label caption>{{
+              $t("Settings.lightning_address.show_on_receive.description")
+            }}</q-item-label>
+          </q-item-section>
+          <q-item-section side>
+            <q-toggle v-model="showAddressOnReceive" color="primary" />
+          </q-item-section>
+        </q-item>
         <q-item class="settings-control-item">
           <q-item-section>
             <q-item-label caption class="q-mb-sm">{{
@@ -129,6 +142,7 @@ export default defineComponent({
       "address",
       "mintUrl",
       "claimAutomatically",
+      "showAddressOnReceive",
     ]),
   },
   watch: {

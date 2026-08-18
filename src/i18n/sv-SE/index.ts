@@ -291,6 +291,11 @@ export default {
       address: {
         copy_tooltip: "Kopiera Lightning-adress",
       },
+      show_on_receive: {
+        toggle: "Visa vid mottagning",
+        description:
+          "Visa din Lightning-adress och QR-kod innan du anger ett belopp.",
+      },
       automatic_claim: {
         toggle: "Hämta automatiskt",
         description: "Ta emot inkommande betalningar automatiskt.",

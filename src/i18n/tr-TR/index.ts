@@ -282,6 +282,11 @@ export default {
       address: {
         copy_tooltip: "Lightning adresini kopyala",
       },
+      show_on_receive: {
+        toggle: "Alırken göster",
+        description:
+          "Tutar girmeden önce Lightning adresinizi ve QR kodunu gösterir.",
+      },
       automatic_claim: {
         toggle: "Otomatik olarak talep et",
         description: "Gelen ödemeleri otomatik olarak alın.",

@@ -237,6 +237,10 @@ export const useNpubCashStore = defineStore("npubCash", {
         `${NPUB_CASH_STORAGE_PREFIX}.claimAutomatically`,
         true
       ),
+      showAddressOnReceive: useLocalStorage<boolean>(
+        `${NPUB_CASH_STORAGE_PREFIX}.showAddressOnReceive`,
+        true
+      ),
       lastCheck: useLocalStorage<number | null>(
         `${NPUB_CASH_STORAGE_PREFIX}.lastCheck`,
         null,

@@ -292,6 +292,10 @@ export default {
       address: {
         copy_tooltip: "คัดลอกที่อยู่ Lightning",
       },
+      show_on_receive: {
+        toggle: "แสดงเมื่อรับเงิน",
+        description: "แสดงที่อยู่ Lightning และรหัส QR ก่อนกรอกจำนวนเงิน",
+      },
       automatic_claim: {
         toggle: "รับอัตโนมัติ",
         description: "รับการชำระเงินขาเข้าโดยอัตโนมัติ",

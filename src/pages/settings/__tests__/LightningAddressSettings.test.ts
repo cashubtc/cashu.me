@@ -57,6 +57,9 @@ describe("LightningAddressSettings", () => {
     expect(advanced.text()).toContain(
       "Settings.lightning_address.automatic_claim.toggle"
     );
+    expect(wrapper.text()).toContain(
+      "Settings.lightning_address.show_on_receive.toggle"
+    );
   });
 
   it("writes the normalized HTTPS URL back into the input", async () => {
