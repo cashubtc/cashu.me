@@ -453,7 +453,9 @@ describe("npub.cash store", () => {
   it("supports the documented top-level WebSocket auth protocol", async () => {
     const store = useNpubCashStore();
     store.enabled = true;
-    vi.spyOn(store, "generateNip98Event").mockResolvedValue("signed-event");
+    const generateToken = vi
+      .spyOn(store, "generateNip98Event")
+      .mockResolvedValue("signed-event");
 
     store.startQuoteUpdates();
     const socket = MockQuoteWebSocket.instances[0];
@@ -465,6 +467,10 @@ describe("npub.cash store", () => {
       type: "auth",
       token: "Nostr signed-event",
     });
+    expect(generateToken).toHaveBeenCalledWith(
+      "wss://npub.cash/api/v2/ws/quote",
+      "GET"
+    );
   });
 
   it("paginates quotes and advances the paidAt watermark", async () => {

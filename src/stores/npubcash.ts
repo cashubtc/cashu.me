@@ -61,11 +61,10 @@ type NpubCashQuoteResponse =
 
 type UsernameQuote = { username: string; creq: string };
 
-const NPUB_CASH_BASE_URL = "https://npub.cash";
-const NPUB_CASH_QUOTES_URL = `${NPUB_CASH_BASE_URL}/api/v2/wallet/quotes`;
-const NPUB_CASH_WS_AUTH_URL = `${NPUB_CASH_BASE_URL}/api/v2/ws/quote`;
-const NPUB_CASH_WS_URL = "wss://npub.cash/api/v2/ws/quote";
-const NPUB_CASH_DOMAIN = "npub.cash";
+const NPUB_CASH_BASE_URL = "npub.cash";
+const NPUB_CASH_HTTP_URL = `https://${NPUB_CASH_BASE_URL}`;
+const NPUB_CASH_QUOTES_URL = `${NPUB_CASH_HTTP_URL}/api/v2/wallet/quotes`;
+const NPUB_CASH_WS_URL = `wss://${NPUB_CASH_BASE_URL}/api/v2/ws/quote`;
 const NPUB_CASH_STORAGE_VERSION = "1";
 const NPUB_CASH_STORAGE_PREFIX = "cashu.npubcash";
 const NIP_98_KIND = 27235;
@@ -228,13 +227,13 @@ export const useNpubCashStore = defineStore("npubCash", {
       }
       const walletPublicKeyHex = nostrStore.pubkey;
       this.address =
-        nip19.npubEncode(walletPublicKeyHex) + "@" + NPUB_CASH_DOMAIN;
+        nip19.npubEncode(walletPublicKeyHex) + "@" + NPUB_CASH_BASE_URL;
       this.loading = true;
       try {
         const previousAddress = this.address;
         const info = await this.getInfo();
         if (info.name) {
-          const usernameAddress = info.name + "@" + NPUB_CASH_DOMAIN;
+          const usernameAddress = info.name + "@" + NPUB_CASH_BASE_URL;
           if (previousAddress !== usernameAddress) {
             console.log(`[npub.cash] Logged in as ${info.name}`);
           }
@@ -260,7 +259,7 @@ export const useNpubCashStore = defineStore("npubCash", {
     getInfo: async function (): Promise<NpubCashUser> {
       try {
         const response = await this.sendAuthedRequest(
-          `${NPUB_CASH_BASE_URL}/api/v2/user/info`
+          `${NPUB_CASH_HTTP_URL}/api/v2/user/info`
         );
         const info: NpubCashInfoResponse = await response.json();
         if (info.error) {
@@ -289,7 +288,7 @@ export const useNpubCashStore = defineStore("npubCash", {
       }
       try {
         const response = await this.sendAuthedRequest(
-          `${NPUB_CASH_BASE_URL}/api/v2/user/mint`,
+          `${NPUB_CASH_HTTP_URL}/api/v2/user/mint`,
           {
             headers: {
               "Content-Type": "application/json",
@@ -504,12 +503,10 @@ export const useNpubCashStore = defineStore("npubCash", {
           const payload = message.payload;
           const usesPayloadProtocol =
             payload !== null && typeof payload === "object";
-          const authUrl = usesPayloadProtocol
-            ? payload.url
-            : NPUB_CASH_WS_AUTH_URL;
+          const authUrl = usesPayloadProtocol ? payload.url : NPUB_CASH_WS_URL;
           const method = usesPayloadProtocol ? payload.method : "GET";
           const parsedAuthUrl = new URL(authUrl);
-          const expectedAuthUrl = new URL(NPUB_CASH_WS_AUTH_URL);
+          const expectedAuthUrl = new URL(NPUB_CASH_WS_URL);
           if (
             !["https:", "wss:"].includes(parsedAuthUrl.protocol) ||
             parsedAuthUrl.hostname !== expectedAuthUrl.hostname ||
@@ -601,7 +598,7 @@ export const useNpubCashStore = defineStore("npubCash", {
       username: string
     ): Promise<UsernameQuote> {
       const response = await this.sendAuthedRequest(
-        `${NPUB_CASH_BASE_URL}/api/v2/user/username`,
+        `${NPUB_CASH_HTTP_URL}/api/v2/user/username`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -624,7 +621,7 @@ export const useNpubCashStore = defineStore("npubCash", {
     setUsername: async function (username: string, token: string) {
       try {
         const response = await this.sendAuthedRequest(
-          `${NPUB_CASH_BASE_URL}/api/v2/user/username`,
+          `${NPUB_CASH_HTTP_URL}/api/v2/user/username`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json", "X-Cashu": token },
@@ -635,7 +632,7 @@ export const useNpubCashStore = defineStore("npubCash", {
         if (data.error) {
           throw new Error(data.message);
         }
-        this.address = `${data.data.user.name}@${NPUB_CASH_DOMAIN}`;
+        this.address = `${data.data.user.name}@${NPUB_CASH_BASE_URL}`;
       } catch (error) {
         console.log(error);
         if (error instanceof Error) {
