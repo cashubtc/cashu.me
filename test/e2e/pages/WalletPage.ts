@@ -39,7 +39,9 @@ export class WalletPage {
     await mintInput.fill(mintUrl);
     await this.page.getByTestId("onboarding-add-mint").click();
     await this.page.getByTestId("confirm-add-mint").click();
-    await expect(this.page.getByText(mintUrl, { exact: true })).toBeVisible();
+    await expect(
+      this.page.locator(".mints-section").getByText(mintUrl, { exact: true })
+    ).toBeVisible();
 
     await this.page.getByTestId("onboarding-next").click();
     await expect(this.page.getByTestId("wallet-send")).toBeVisible();
