@@ -5,7 +5,7 @@
     </template>
     <div class="text-dark text-weight-medium">On-chain deposit limits</div>
     <div class="text-dark text-body2">
-      {{ limitMessage }} Deposits outside this range may not be credited and
+      {{ limitMessage }} Deposits outside this range WILL NOT be credited and
       could be lost.
     </div>
   </q-banner>
