@@ -11,6 +11,16 @@ import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "App",
+  mounted() {
+    const splash = document.getElementById("app-splash");
+    if (!splash) return;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        splash.classList.add("app-splash-fade");
+        window.setTimeout(() => splash.remove(), 500);
+      });
+    });
+  },
 });
 </script>
 

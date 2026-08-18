@@ -22,8 +22,67 @@
     <link rel="icon" type="image/png" sizes="32x32" href="icons/32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="icons/16x16.png" />
     <link rel="icon" type="image/ico" href="favicon.ico" />
+
+    <style>
+      html {
+        background-color: #000000;
+      }
+      #app-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--cashu-splash-bg, #000000);
+        opacity: 1;
+        transition: opacity 0.4s ease;
+      }
+      #app-splash.app-splash-fade {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #app-splash img {
+        width: 96px;
+        height: 96px;
+        opacity: 0;
+        animation: app-splash-logo-in 0.4s ease 0.5s forwards;
+      }
+      @keyframes app-splash-logo-in {
+        to {
+          opacity: 1;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #app-splash {
+          transition: none;
+        }
+        #app-splash img {
+          animation: none;
+          opacity: 1;
+        }
+      }
+    </style>
+    <script>
+      (function () {
+        try {
+          var raw = window.localStorage.getItem("cashu.darkMode");
+          var isDark = true;
+          if (raw != null) {
+            var v = String(raw).replace(/^__q_[a-z]+\|/i, "");
+            isDark = v === "1" || v === "true";
+          }
+          var bg = isDark ? "#000000" : "#ffffff";
+          document.documentElement.style.backgroundColor = bg;
+          document.documentElement.style.setProperty("--cashu-splash-bg", bg);
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
+    <div id="app-splash">
+      <img src="icons/icon-192x192.png" alt="" />
+    </div>
     <!-- quasar:entry-point -->
   </body>
 </html>
