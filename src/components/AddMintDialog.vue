@@ -7,7 +7,20 @@
     <div class="q-px-lg">
       <transition name="fade-slide" mode="out-in">
         <p
-          v-if="mintInfoError"
+          v-if="mintAlreadyAdded"
+          key="added"
+          class="sheet-description sheet-added q-mb-lg"
+        >
+          <q-icon
+            name="check_circle"
+            color="positive"
+            size="18px"
+            class="q-mr-xs sheet-error-icon"
+          />
+          {{ $t("wallet.mint.notifications.already_added") }}
+        </p>
+        <p
+          v-else-if="mintInfoError"
           key="error"
           class="sheet-description sheet-error q-mb-lg"
         >
@@ -95,6 +108,7 @@
 
 <script lang="ts">
 import { defineComponent, computed, ref, watch } from "vue";
+import { useMintsStore } from "src/stores/mints";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
 import { getShortUrl } from "src/js/wallet-helpers";
 import BottomSheet from "./BottomSheet.vue";
@@ -126,6 +140,7 @@ export default defineComponent({
   },
   emits: ["add", "update:showAddMintDialog"],
   setup(props, { emit }) {
+    const mintsStore = useMintsStore();
     const mintRecommendations = useMintRecommendationsStore();
     const showAuditInfo = ref(false);
     // "idle" | "loading" | "ok" | "error"
@@ -138,10 +153,17 @@ export default defineComponent({
     });
 
     const addMintLocal = () => {
+      // Guard against Enter-key submits while the add button is disabled
+      if (addMintDisabled.value) return;
       emit("add", props.addMintData, true); // Pass verbose = true
     };
 
     const mintUrl = computed(() => props.addMintData.url);
+
+    // Mirrors the exact-match duplicate check in the mints store
+    const mintAlreadyAdded = computed(() =>
+      mintsStore.mints.some((m) => m.url === mintUrl.value)
+    );
 
     const mintHttpInfo = computed(() => {
       if (!mintUrl.value) return undefined;
@@ -164,7 +186,10 @@ export default defineComponent({
     const mintInfoError = computed(() => mintFetchState.value === "error");
     const addMintDisabled = computed(
       () =>
-        props.addMintBlocking || mintInfoLoading.value || mintInfoError.value
+        props.addMintBlocking ||
+        mintInfoLoading.value ||
+        mintInfoError.value ||
+        mintAlreadyAdded.value
     );
 
     // Fetch the mint's info (name, icon) when the sheet opens so the user
@@ -228,6 +253,7 @@ export default defineComponent({
       mintIconUrl,
       mintInfoLoading,
       mintInfoError,
+      mintAlreadyAdded,
       addMintDisabled,
       showAuditInfo,
     };
@@ -248,6 +274,12 @@ export default defineComponent({
 .sheet-error {
   opacity: 1;
   color: var(--q-negative);
+  font-weight: 500;
+}
+
+.sheet-added {
+  opacity: 1;
+  color: var(--q-positive);
   font-weight: 500;
 }
 
