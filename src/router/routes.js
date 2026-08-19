@@ -128,6 +128,14 @@ const routes = [
     ],
   },
 
+  {
+    path: "/embed/pay",
+    component: () => import("layouts/BlankLayout.vue"),
+    children: [
+      { path: "", component: () => import("src/pages/EmbedPayPage.vue") },
+    ],
+  },
+
   // Always leave this as last one,
   // but you can also remove it
   {
