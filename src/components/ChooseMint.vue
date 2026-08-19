@@ -67,99 +67,66 @@
     </div>
 
     <!-- Bottom Sheet for Mint Selection -->
-    <teleport to="body">
-      <transition name="mint-overlay">
+    <BottomSheet v-model="showMintSheet" :title="$t('ChooseMint.sheet_title')">
+      <div class="mint-options">
         <div
-          v-if="showMintSheet"
-          class="mint-sheet-overlay"
-          @click="showMintSheet = false"
+          v-for="mint in chooseMintOptions()"
+          :key="mint.url"
+          class="mint-option"
+          :class="{ active: chosenMint?.url === mint.url }"
+          @click="selectMint(mint)"
         >
-          <div class="mint-sheet" @click.stop>
-            <!-- Header -->
-            <div class="mint-sheet-header">
-              <h3>{{ $t("ChooseMint.sheet_title") }}</h3>
-              <q-btn
-                flat
-                round
-                icon="close"
-                @click="showMintSheet = false"
-                class="close-btn"
-              />
-            </div>
-
-            <!-- Mint List -->
-            <div class="mint-options">
-              <div
-                v-for="mint in chooseMintOptions()"
-                :key="mint.url"
-                class="mint-option"
-                :class="{ active: chosenMint?.url === mint.url }"
-                @click="selectMint(mint)"
+          <div class="row items-center full-width no-wrap">
+            <!-- Mint Icon -->
+            <q-avatar size="48px" class="q-mr-md">
+              <q-img
+                v-if="mint.iconUrl"
+                :src="mint.iconUrl"
+                spinner-color="white"
+                spinner-size="xs"
               >
-                <div class="row items-center full-width no-wrap">
-                  <!-- Mint Icon -->
-                  <q-avatar size="48px" class="q-mr-md">
-                    <q-img
-                      v-if="mint.iconUrl"
-                      :src="mint.iconUrl"
-                      spinner-color="white"
-                      spinner-size="xs"
-                    >
-                      <template v-slot:error>
-                        <div
-                          class="row items-center justify-center full-height"
-                        >
-                          <q-icon
-                            name="account_balance"
-                            color="grey-7"
-                            size="24px"
-                          />
-                        </div>
-                      </template>
-                    </q-img>
-                    <q-icon
-                      v-else
-                      name="account_balance"
-                      color="grey-7"
-                      size="24px"
-                    />
-                  </q-avatar>
-
-                  <!-- Mint Info -->
-                  <div class="col text-left">
-                    <div class="mint-option-name">
-                      {{ mint.nickname || mint.shorturl }}
-                    </div>
-                    <div v-if="showBalances" class="mint-option-balance">
-                      <span v-if="!mint.errored" class="text-grey-6">
-                        <span
-                          v-for="unit in mint.units"
-                          :key="unit"
-                          class="q-mr-sm"
-                        >
-                          {{ formatCurrency(mint.balances[unit], unit) }}
-                        </span>
-                      </span>
-                      <span v-else class="text-red">
-                        {{ $t("ChooseMint.badge_mint_error_text") }}
-                      </span>
-                    </div>
+                <template v-slot:error>
+                  <div class="row items-center justify-center full-height">
+                    <q-icon name="account_balance" color="grey-7" size="24px" />
                   </div>
+                </template>
+              </q-img>
+              <q-icon
+                v-else
+                name="account_balance"
+                color="grey-7"
+                size="24px"
+              />
+            </q-avatar>
 
-                  <!-- Selection Indicator -->
-                  <q-icon
-                    v-if="chosenMint?.url === mint.url"
-                    name="check_circle"
-                    color="primary"
-                    size="24px"
-                  />
-                </div>
+            <!-- Mint Info -->
+            <div class="col text-left">
+              <div class="mint-option-name">
+                {{ mint.nickname || mint.shorturl }}
+              </div>
+              <div v-if="showBalances" class="mint-option-balance">
+                <span v-if="!mint.errored" class="text-grey-6">
+                  <span v-for="unit in mint.units" :key="unit" class="q-mr-sm">
+                    {{ formatCurrency(mint.balances[unit], unit) }}
+                  </span>
+                </span>
+                <span v-else class="text-red">
+                  {{ $t("ChooseMint.badge_mint_error_text") }}
+                </span>
               </div>
             </div>
+
+            <!-- Selection Indicator -->
+            <q-icon
+              v-if="chosenMint?.url === mint.url"
+              name="check_circle"
+              color="primary"
+              size="24px"
+            />
           </div>
         </div>
-      </transition>
-    </teleport>
+      </div>
+    </BottomSheet>
   </div>
 </template>
 
@@ -174,6 +141,7 @@ import { useUiStore } from "stores/ui";
 import { i18n } from "../boot/i18n";
 import { mintSupportsPaymentMethod } from "src/js/mint-payment-methods";
 import { PaymentMethod } from "src/stores/walletTypes";
+import BottomSheet from "./BottomSheet.vue";
 
 declare const windowMixin: any;
 
@@ -189,6 +157,7 @@ type MintOption = {
 
 export default defineComponent({
   name: "ChooseMint",
+  components: { BottomSheet },
   mixins: [windowMixin],
   props: {
     rounded: {
@@ -443,63 +412,12 @@ export default defineComponent({
   margin-top: 4px;
 }
 
-/* Bottom sheet overlay */
-.mint-sheet-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  z-index: 9999;
-  display: flex;
-  align-items: flex-end;
-}
-
-/* Bottom sheet */
-.mint-sheet {
-  width: 100%;
-  background: rgba(20, 20, 20, 0.98);
-  backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px 20px 0 0;
-  max-height: 70vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.mint-sheet-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 24px 16px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.mint-sheet-header h3 {
-  color: white;
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin: 0;
-}
-
-.close-btn {
-  color: rgba(255, 255, 255, 0.7) !important;
-}
-
-.mint-options {
-  flex: 1;
-  overflow-y: auto;
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
+/* Mint options list inside the shared BottomSheet */
 .mint-option {
   padding: 16px 24px;
   cursor: pointer;
   transition: all 0.2s ease;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(128, 128, 128, 0.15);
 
   &:hover {
     background: rgba(255, 255, 255, 0.08);
@@ -514,35 +432,19 @@ export default defineComponent({
   }
 }
 
+.body--light .mint-option:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
 .mint-option-name {
   font-size: 16px;
   font-weight: 500;
   line-height: 1.3;
-  color: white;
 }
 
 .mint-option-balance {
   font-size: 14px;
   line-height: 1.3;
   margin-top: 4px;
-}
-
-/* Vue transition for overlay fade and sheet slide */
-.mint-overlay-enter-active,
-.mint-overlay-leave-active {
-  transition: opacity 0.3s ease;
-}
-.mint-overlay-enter-from,
-.mint-overlay-leave-to {
-  opacity: 0;
-}
-/* Animate the sheet together with the overlay */
-.mint-overlay-enter-active .mint-sheet,
-.mint-overlay-leave-active .mint-sheet {
-  transition: transform 0.3s ease;
-}
-.mint-overlay-enter-from .mint-sheet,
-.mint-overlay-leave-to .mint-sheet {
-  transform: translateY(100%);
 }
 </style>

@@ -1462,7 +1462,7 @@ export default {
   AddMintDialog: {
     title: "Εμπιστεύεστε αυτό το mint;",
     description:
-      "Πριν χρησιμοποιήσετε αυτό το mint, βεβαιωθείτε ότι το εμπιστεύεστε. Τα mints μπορεί να γίνουν κακόβουλα ή να σταματήσουν τη λειτουργία τους ανά πάσα στιγμή.",
+      "Χρησιμοποιήστε αυτό το mint μόνο αν το εμπιστεύεστε. Τα mints μπορεί να σταματήσουν τη λειτουργία τους ανά πάσα στιγμή.",
     inputs: {
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1475,6 +1475,17 @@ export default {
       add_mint: {
         label: "@:global.actions.add_mint.label",
         in_progress: "Προσθήκη mint",
+      },
+    },
+    audit_info: {
+      label: "Πληροφορίες ελέγχου",
+      actions: {
+        show: {
+          label: "Εμφάνιση",
+        },
+        hide: {
+          label: "Απόκρυψη",
+        },
       },
     },
   },

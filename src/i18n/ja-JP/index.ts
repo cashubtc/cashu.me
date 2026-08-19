@@ -1452,7 +1452,7 @@ export default {
   AddMintDialog: {
     title: "このミントを信頼しますか？",
     description:
-      "このミントを使用する前に、信頼できることを確認してください。ミントはいつでも悪意のあるものになるか、運営を停止する可能性があります。",
+      "信頼できる場合のみ、このミントに参加してください。ミントはいつでも運営を停止する可能性があります。",
     inputs: {
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1465,6 +1465,17 @@ export default {
       add_mint: {
         label: "@:global.actions.add_mint.label",
         in_progress: "ミントを追加中",
+      },
+    },
+    audit_info: {
+      label: "監査情報",
+      actions: {
+        show: {
+          label: "表示",
+        },
+        hide: {
+          label: "隠す",
+        },
       },
     },
   },

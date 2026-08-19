@@ -1448,7 +1448,7 @@ export default {
   AddMintDialog: {
     title: "هل تثق في هذا الـ mint؟",
     description:
-      "قبل استخدام هذا الـ mint، تأكد من أنك تثق به. قد يصبح الـ mints ضارًا أو يتوقف عن العمل في أي وقت.",
+      "انضم إلى هذا الـ mint فقط إذا كنت تثق به. يمكن أن تتوقف الـ mints عن العمل في أي وقت.",
     inputs: {
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1461,6 +1461,17 @@ export default {
       add_mint: {
         label: "@:global.actions.add_mint.label",
         in_progress: "إضافة mint",
+      },
+    },
+    audit_info: {
+      label: "معلومات التدقيق",
+      actions: {
+        show: {
+          label: "عرض",
+        },
+        hide: {
+          label: "إخفاء",
+        },
       },
     },
   },

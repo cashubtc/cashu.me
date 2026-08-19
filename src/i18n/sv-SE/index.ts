@@ -1455,7 +1455,7 @@ export default {
   AddMintDialog: {
     title: "Litar du på denna mint?",
     description:
-      "Innan du använder denna mint, se till att du litar på den. Mints kan bli skadliga eller upphöra med sin verksamhet när som helst.",
+      "Gå med i denna mint endast om du litar på den. Mints kan när som helst upphöra med sin verksamhet.",
     inputs: {
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1468,6 +1468,17 @@ export default {
       add_mint: {
         label: "@:global.actions.add_mint.label",
         in_progress: "Lägger till mint",
+      },
+    },
+    audit_info: {
+      label: "Granskningsinfo",
+      actions: {
+        show: {
+          label: "Visa",
+        },
+        hide: {
+          label: "Dölj",
+        },
       },
     },
   },

@@ -1444,8 +1444,7 @@ export default {
   },
   AddMintDialog: {
     title: "您信任此 Mint 吗？",
-    description:
-      "在使用此 Mint 之前，请确保您信任它。Mints 随时可能变得恶意或停止运营。",
+    description: "仅在您信任的情况下加入此 Mint。Mints 随时可能停止运营。",
     inputs: {
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1458,6 +1457,17 @@ export default {
       add_mint: {
         label: "@:global.actions.add_mint.label",
         in_progress: "正在添加 Mint",
+      },
+    },
+    audit_info: {
+      label: "审计信息",
+      actions: {
+        show: {
+          label: "显示",
+        },
+        hide: {
+          label: "隐藏",
+        },
       },
     },
   },
