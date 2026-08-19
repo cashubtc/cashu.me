@@ -8,6 +8,43 @@ function nut4Config(info?: GetInfoResponse) {
 
 type MintOperation = "mint" | "melt";
 
+export type PaymentMethodLimits = {
+  minAmount: number | null;
+  maxAmount: number | null;
+};
+
+function amountLikeToNumber(value: any): number | null {
+  if (value == null) return null;
+  if (typeof value?.toNumber === "function") return value.toNumber();
+  const amount = Number(value);
+  return Number.isFinite(amount) ? amount : null;
+}
+
+export function mintPaymentMethodLimits(
+  mint: StoredMint | undefined,
+  method: PaymentMethod,
+  operation: MintOperation = "mint",
+  unit?: string
+): PaymentMethodLimits | null {
+  if (!mint) return null;
+  const nut =
+    operation === "melt"
+      ? mint.info?.nuts?.[5] || mint.info?.nuts?.["5"]
+      : mint.info?.nuts?.[4] || mint.info?.nuts?.["4"];
+  const advertisedMethod = nut?.methods?.find(
+    (entry: { method: string; unit?: string; disabled?: boolean }) =>
+      entry.disabled !== true &&
+      entry.method === method &&
+      (!unit || !entry.unit || entry.unit === unit)
+  );
+  if (!advertisedMethod) return null;
+
+  const minAmount = amountLikeToNumber(advertisedMethod.min_amount);
+  const maxAmount = amountLikeToNumber(advertisedMethod.max_amount);
+  if (minAmount == null && maxAmount == null) return null;
+  return { minAmount, maxAmount };
+}
+
 export function mintSupportsPaymentMethod(
   mint: StoredMint,
   method: PaymentMethod,

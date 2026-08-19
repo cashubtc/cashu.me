@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   firstMintSupportingPaymentMethods,
+  mintPaymentMethodLimits,
   mintSupportsPaymentMethod,
 } from "src/js/mint-payment-methods";
 import { PaymentMethod } from "src/stores/walletTypes";
@@ -88,5 +89,46 @@ describe("mint payment method helpers", () => {
         "usd"
       )
     ).toBe(true);
+  });
+
+  it("returns limits for the matching payment method and unit", () => {
+    const mint = {
+      ...onchainOnlyMint,
+      info: {
+        nuts: {
+          4: {
+            methods: [
+              {
+                method: "onchain",
+                unit: "sat",
+                min_amount: 10_000,
+                max_amount: 1_000_000,
+              },
+              {
+                method: "onchain",
+                unit: "usd",
+                min_amount: 1,
+                max_amount: 100,
+              },
+            ],
+          },
+        },
+      },
+    };
+
+    expect(
+      mintPaymentMethodLimits(mint, PaymentMethod.Onchain, "mint", "sat")
+    ).toEqual({ minAmount: 10_000, maxAmount: 1_000_000 });
+  });
+
+  it("returns null when a mint does not advertise deposit limits", () => {
+    expect(
+      mintPaymentMethodLimits(
+        onchainOnlyMint,
+        PaymentMethod.Onchain,
+        "mint",
+        "sat"
+      )
+    ).toBeNull();
   });
 });

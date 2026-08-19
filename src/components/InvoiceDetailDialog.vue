@@ -100,6 +100,18 @@
               </div>
             </div>
 
+            <div v-if="isOnchain" class="row justify-center q-mb-md">
+              <div
+                class="col-12 col-sm-11 col-md-8 q-px-md"
+                style="max-width: 600px"
+              >
+                <OnchainDepositLimits
+                  :mint-url="invoiceData.mint"
+                  :unit="invoiceData.unit"
+                />
+              </div>
+            </div>
+
             <q-card-section class="q-pa-sm">
               <div
                 v-if="invoiceData?.mintQuote"
@@ -177,6 +189,7 @@ import { useUiStore } from "../stores/ui";
 import { useWorkersStore } from "../stores/workers";
 import MeltQuoteInformation from "./MeltQuoteInformation.vue";
 import MintQuoteInformation from "./MintQuoteInformation.vue";
+import OnchainDepositLimits from "components/OnchainDepositLimits.vue";
 import { PaymentMethod } from "src/stores/walletTypes";
 // type hint for global mixin
 declare const windowMixin: any;
@@ -188,6 +201,7 @@ export default defineComponent({
     VueQrcode,
     MeltQuoteInformation,
     MintQuoteInformation,
+    OnchainDepositLimits,
   },
   props: {},
   data: function () {
