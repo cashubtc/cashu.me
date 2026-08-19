@@ -1554,6 +1554,17 @@ export default {
         in_progress: "Adding mint",
       },
     },
+    audit_info: {
+      label: "Audit info",
+      actions: {
+        show: {
+          label: "Show",
+        },
+        hide: {
+          label: "Hide",
+        },
+      },
+    },
   },
   restore: {
     mnemonic_error_text: "Please enter a mnemonic",

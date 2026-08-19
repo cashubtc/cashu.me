@@ -37,51 +37,56 @@
 
       <!-- Audit Info Section -->
       <div v-if="mintUrl" class="q-mb-lg">
-        <div class="audit-info-section">
-          <q-btn
-            flat
-            class="audit-info-btn"
+        <div class="detail-item">
+          <div class="detail-label">
+            <info-icon size="20" color="#9E9E9E" class="detail-icon" />
+            <div class="detail-name">
+              {{ $t("AddMintDialog.audit_info.label") }}
+            </div>
+          </div>
+          <div
+            class="detail-value audit-toggle"
             @click="showAuditInfo = !showAuditInfo"
           >
-            <info-icon size="16" class="q-mr-xs" />
             {{
-              showAuditInfo ? "Hide Mint Audit Info" : "View Mint Audit Info"
+              showAuditInfo
+                ? $t("AddMintDialog.audit_info.actions.hide.label")
+                : $t("AddMintDialog.audit_info.actions.show.label")
             }}
-          </q-btn>
-
-          <!-- Audit Info Component -->
-          <transition
-            enter-active-class="animated fadeIn"
-            leave-active-class="animated fadeOut"
-          >
-            <MintAuditInfo
-              v-if="showAuditInfo"
-              :mintUrl="mintUrl"
-              class="q-mt-md"
-            />
-          </transition>
+          </div>
         </div>
+
+        <!-- Audit Info Component -->
+        <transition
+          enter-active-class="animated fadeIn"
+          leave-active-class="animated fadeOut"
+        >
+          <MintAuditInfo
+            v-if="showAuditInfo"
+            :mintUrl="mintUrl"
+            class="q-mt-md"
+          />
+        </transition>
       </div>
     </div>
 
     <template #actions>
-      <q-btn flat class="cancel-btn" v-close-popup>
-        {{ $t("AddMintDialog.actions.cancel.label") }}
-      </q-btn>
       <q-btn
+        class="full-width"
+        unelevated
+        size="lg"
         color="primary"
-        class="add-btn"
+        rounded
         data-testid="confirm-add-mint"
         @click="addMintLocal"
         v-close-popup
         :loading="addMintBlocking"
         :disable="addMintDisabled"
-        icon="check"
       >
         {{ $t("AddMintDialog.actions.add_mint.label") }}
         <template v-slot:loading>
-          <q-spinner />
-          {{ $t("AddMintDialog.actions.add_mint.in_progress") }}
+          <q-spinner class="q-mr-sm" />
+          <span>{{ $t("AddMintDialog.actions.add_mint.in_progress") }}</span>
         </template>
       </q-btn>
     </template>
@@ -90,7 +95,6 @@
 
 <script lang="ts">
 import { defineComponent, computed, ref, watch } from "vue";
-import { useSettingsStore } from "src/stores/settings";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
 import { getShortUrl } from "src/js/wallet-helpers";
 import BottomSheet from "./BottomSheet.vue";
@@ -122,7 +126,6 @@ export default defineComponent({
   },
   emits: ["add", "update:showAddMintDialog"],
   setup(props, { emit }) {
-    const settings = useSettingsStore();
     const mintRecommendations = useMintRecommendationsStore();
     const showAuditInfo = ref(false);
     // "idle" | "loading" | "ok" | "error"
@@ -226,7 +229,6 @@ export default defineComponent({
       mintInfoLoading,
       mintInfoError,
       addMintDisabled,
-      settings,
       showAuditInfo,
     };
   },
@@ -292,27 +294,37 @@ export default defineComponent({
   margin-right: 16px !important;
 }
 
-/* Audit info */
-.audit-info-btn {
-  font-family: "Inter", sans-serif;
+/* Audit info row (styled like the detail rows on the mint details page) */
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
-.cancel-btn {
+.detail-label {
+  display: flex;
+  align-items: center;
+}
+
+.detail-icon {
+  margin-right: 10px;
+}
+
+.detail-name {
+  font-size: 16px;
   font-weight: 600;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-family: "Inter", sans-serif;
+  color: #9e9e9e;
 }
 
-.add-btn {
-  font-weight: 700;
-  padding: 8px 20px;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  font-family: "Inter", sans-serif;
+.detail-value {
+  font-size: 16px;
+  font-weight: 600;
+  text-align: right;
 }
 
-.add-btn:hover {
-  transform: translateY(-1px);
+.audit-toggle {
+  cursor: pointer;
+  user-select: none;
 }
 </style>
