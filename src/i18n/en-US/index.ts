@@ -1537,7 +1537,7 @@ export default {
   AddMintDialog: {
     title: "Do you trust this mint?",
     description:
-      "Before using this mint, make sure you trust it. Mints could become malicious or cease operation at any time.",
+      "Join this mint only if you trust it. Mints can cease operations at any time.",
     unreachable_error_text:
       "This mint is not reachable. Check the URL and your connection, then try again.",
     inputs: {

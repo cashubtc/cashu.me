@@ -5,37 +5,48 @@
     @enter="addMintLocal"
   >
     <div class="q-px-lg">
-      <transition name="fade-slide" mode="out-in">
+      <!--
+        Status messages are stacked in the same grid cell, so the stack is
+        always as tall as the tallest message and the sheet never resizes
+        when the state swaps (description / already added / error).
+      -->
+      <div class="message-stack q-mb-lg">
         <p
-          v-if="mintAlreadyAdded"
-          key="added"
-          class="sheet-description sheet-added q-mb-lg"
+          class="message sheet-added"
+          :class="{ active: messageState === 'added' }"
+          :aria-hidden="messageState !== 'added'"
         >
           <q-icon
             name="check_circle"
             color="positive"
             size="18px"
-            class="q-mr-xs sheet-error-icon"
+            class="q-mr-xs message-icon"
           />
           {{ $t("wallet.mint.notifications.already_added") }}
         </p>
         <p
-          v-else-if="mintInfoError"
-          key="error"
-          class="sheet-description sheet-error q-mb-lg"
+          class="message sheet-error"
+          :class="{ active: messageState === 'error' }"
+          :aria-hidden="messageState !== 'error'"
         >
           <q-icon
             name="error_outline"
             color="negative"
             size="18px"
-            class="q-mr-xs sheet-error-icon"
+            class="q-mr-xs message-icon"
           />
           {{ $t("AddMintDialog.unreachable_error_text") }}
         </p>
-        <p v-else key="description" class="sheet-description q-mb-lg">
-          {{ $t("AddMintDialog.description") }}
+        <p
+          class="message"
+          :class="{ active: messageState === 'description' }"
+          :aria-hidden="messageState !== 'description'"
+        >
+          <span class="message-muted">{{
+            $t("AddMintDialog.description")
+          }}</span>
         </p>
-      </transition>
+      </div>
 
       <!-- Mint preview pill -->
       <div class="mint-preview-pill q-mb-lg">
@@ -184,6 +195,14 @@ export default defineComponent({
 
     const mintInfoLoading = computed(() => mintFetchState.value === "loading");
     const mintInfoError = computed(() => mintFetchState.value === "error");
+    // Which status message is shown in the stacked message area
+    const messageState = computed(() =>
+      mintAlreadyAdded.value
+        ? "added"
+        : mintInfoError.value
+        ? "error"
+        : "description"
+    );
     const addMintDisabled = computed(
       () =>
         props.addMintBlocking ||
@@ -254,6 +273,7 @@ export default defineComponent({
       mintInfoLoading,
       mintInfoError,
       mintAlreadyAdded,
+      messageState,
       addMintDisabled,
       showAuditInfo,
     };
@@ -262,45 +282,48 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.sheet-description {
+/* All status messages occupy the same grid cell, so the stack's height is
+   always the height of the tallest message: the sheet never resizes when
+   the visible message changes. Inactive messages cross-fade out. */
+.message-stack {
+  display: grid;
+}
+
+.message {
+  grid-area: 1 / 1;
+  margin: 0;
   font-size: 15px;
   line-height: 1.5;
   font-weight: 400;
-  margin-top: 0;
-  opacity: 0.7;
   font-family: "Inter", sans-serif;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0s linear 0.25s;
+}
+
+.message.active {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.25s ease;
+}
+
+/* Muted look via a child span so it multiplies with the fade opacity */
+.message-muted {
+  opacity: 0.7;
 }
 
 .sheet-error {
-  opacity: 1;
   color: var(--q-negative);
   font-weight: 500;
 }
 
 .sheet-added {
-  opacity: 1;
   color: var(--q-positive);
   font-weight: 500;
 }
 
-.sheet-error-icon {
+.message-icon {
   vertical-align: -3px;
-}
-
-/* Smooth swap between description and unreachable-mint error */
-.fade-slide-enter-active,
-.fade-slide-leave-active {
-  transition: opacity 0.25s ease, transform 0.25s ease;
-}
-
-.fade-slide-enter-from {
-  opacity: 0;
-  transform: translateY(-6px);
-}
-
-.fade-slide-leave-to {
-  opacity: 0;
-  transform: translateY(6px);
 }
 
 /* Mint preview pill (styled like the mint selector pill, but static) */
