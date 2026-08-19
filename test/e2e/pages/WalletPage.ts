@@ -39,7 +39,13 @@ export class WalletPage {
     await mintInput.fill(mintUrl);
     await this.page.getByTestId("onboarding-add-mint").click();
     await this.page.getByTestId("confirm-add-mint").click();
-    await expect(this.page.getByText(mintUrl, { exact: true })).toBeVisible();
+    // Assert against the added-mints list specifically: the full mint URL is
+    // legitimately rendered in several places at once (the add-mint sheet's
+    // preview while it closes, mint discovery results), so a bare exact-text
+    // lookup can resolve to multiple elements.
+    await expect(
+      this.page.locator(".mint-item").getByText(mintUrl, { exact: true })
+    ).toBeVisible();
 
     await this.page.getByTestId("onboarding-next").click();
     await expect(this.page.getByTestId("wallet-send")).toBeVisible();
