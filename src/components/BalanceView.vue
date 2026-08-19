@@ -1,17 +1,43 @@
 <template>
   <!-- <q-card class="q-my-md q-py-sm">
     <q-card-section class="q-mt-sm q-py-xs"> -->
-  <div class="q-pt-xl q-pb-md">
+  <div class="q-pt-none q-pb-md">
+    <!-- mint selector pill -->
+    <div class="row justify-center q-mb-none" v-if="activeMintUrl">
+      <div class="mint-chip pressable cursor-pointer" @click="openMintChooser">
+        <transition name="mint-chip-avatar">
+          <img
+            v-if="showMintAvatar"
+            :key="activeMintIconUrl"
+            :src="activeMintIconUrl"
+            class="mint-chip-avatar"
+            alt=""
+            @error="avatarLoadFailed = true"
+          />
+        </transition>
+        <transition name="mint-chip-name">
+          <span
+            :key="activeMintLabel"
+            class="mint-chip-name text-weight-medium"
+            >{{ activeMintLabel }}</span
+          >
+        </transition>
+      </div>
+      <!-- Hidden selector that owns the mint-selection bottom sheet -->
+      <div class="hidden">
+        <ChooseMint ref="chooseMint" />
+      </div>
+    </div>
     <transition
       appear
       enter-active-class="animated fadeInDown"
       leave-active-class="animated fadeInDown"
       mode="out-in"
     >
-      <div class="balance-carousel-shell q-mt-lg q-mb-xl text-primary">
+      <div class="balance-carousel-shell q-mb-xl text-primary">
         <transition
           appear
-          enter-active-class="animated pulse"
+          enter-active-class="animated fadeIn"
           leave-active-class="animated fadeOut"
         >
           <q-spinner
@@ -112,29 +138,6 @@
         </span>
       </div>
     </div>
-    <!-- mint url -->
-    <div class="row q-mt-md q-mb-none text-secondary" v-if="activeMintUrl">
-      <div class="col-12 cursor-pointer">
-        <span class="text-weight-light" @click="setTab('mints')">
-          {{ $t("BalanceView.mintUrl.label") }}: <b>{{ activeMintLabel }}</b>
-        </span>
-      </div>
-    </div>
-    <!-- mint balance -->
-    <div class="row q-mb-none text-secondary" v-if="mints.length > 1">
-      <div class="col-12">
-        <span class="q-my-none q-py-none text-weight-regular">
-          {{ $t("BalanceView.mintBalance.label") }}:
-          <b>
-            <AnimatedNumber
-              :value="getActiveBalance"
-              :format="(val) => formatCurrency(val, activeUnit)"
-              class="q-my-none q-py-none cursor-pointer"
-            />
-          </b>
-        </span>
-      </div>
-    </div>
   </div>
   <!-- </q-card-section>
   </q-card> -->
@@ -150,6 +153,7 @@ import { useUiStore } from "src/stores/ui";
 import { useWalletStore } from "src/stores/wallet";
 import { usePriceStore } from "src/stores/price";
 import AnimatedNumber from "src/components/AnimatedNumber.vue";
+import ChooseMint from "src/components/ChooseMint.vue";
 import { sumProofAmounts } from "src/js/proofs";
 import { useProofsStore } from "src/stores/proofs";
 
@@ -158,6 +162,7 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     AnimatedNumber,
+    ChooseMint,
   },
   props: {
     setTab: Function,
@@ -166,7 +171,6 @@ export default defineComponent({
     ...mapState(useMintsStore, [
       "activeMintUrl",
       "activeProofs",
-      "activeBalance",
       "mints",
       "totalUnitBalance",
       "activeUnit",
@@ -222,9 +226,6 @@ export default defineComponent({
     getTotalBalance: function () {
       return this.totalUnitBalance;
     },
-    getActiveBalance: function () {
-      return this.activeBalance;
-    },
     activeMintLabel: function () {
       const mintClass = this.activeMint();
 
@@ -234,6 +235,13 @@ export default defineComponent({
         getShortUrl(this.activeMintUrl)
       );
     },
+    activeMintIconUrl: function () {
+      const mintClass = this.activeMint();
+      return mintClass?.mint?.info?.icon_url || null;
+    },
+    showMintAvatar: function () {
+      return Boolean(this.activeMintIconUrl) && !this.avatarLoadFailed;
+    },
     getBalance: function () {
       return sumProofAmounts(this.activeProofs.flat());
     },
@@ -241,6 +249,7 @@ export default defineComponent({
   data() {
     return {
       priceLabel: null,
+      avatarLoadFailed: false,
     };
   },
   mounted() {
@@ -255,12 +264,20 @@ export default defineComponent({
         }
       },
     },
+    activeMintIconUrl() {
+      // New icon URL -> give the new avatar a chance to load
+      this.avatarLoadFailed = false;
+    },
   },
   methods: {
     ...mapActions(useWalletStore, ["checkPendingTokens"]),
     ...mapActions(usePriceStore, ["fetchBitcoinPrice"]),
     setActiveUnit(unit: string) {
       this.activeUnit = unit;
+    },
+    openMintChooser() {
+      // Open the mint-selection bottom sheet owned by the hidden ChooseMint
+      this.$refs.chooseMint.showMintSheet = true;
     },
     toggleUnit: function () {
       const units = this.activeMint().units;
@@ -339,13 +356,15 @@ export default defineComponent({
 });
 </script>
 <style scoped>
-.animated.pulse {
-  animation-duration: 0.5s;
+.animated.fadeIn {
+  animation-duration: 0.2s;
 }
 .animated.fadeInDown {
   animation-duration: 0.3s;
+  animation-timing-function: var(--ease-out);
 }
 .balance-carousel-shell {
+  margin-top: 40px; /* centers the mint pill in the fixed header-to-balance band */
   overflow-x: hidden;
   overscroll-behavior-x: contain;
   position: relative;
@@ -372,15 +391,97 @@ export default defineComponent({
   align-items: center;
   display: flex;
   justify-content: center;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
   line-height: 1.05;
   min-height: 50px;
   white-space: nowrap;
+  transition: opacity var(--dur-fast) var(--ease-standard);
 }
 .balance-secondary-line {
   align-items: center;
   display: flex;
   justify-content: center;
   min-height: 24px;
+  font-variant-numeric: tabular-nums;
+}
+.mint-chip {
+  align-items: center;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--q-primary) 10%, transparent);
+  display: inline-flex;
+  font-size: 0.85rem;
+  gap: 6px;
+  max-width: 100%;
+  padding: 6px 14px;
+  position: relative;
+}
+.mint-chip-avatar {
+  border-radius: 50%;
+  flex-shrink: 0;
+  height: 18px;
+  object-fit: cover;
+  width: 18px;
+}
+.mint-chip-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Mint chip microanimations (mint switched, avatar (dis)appears).
+   Enter is gentle, exit faster (asymmetric timing); never animate from
+   scale(0); leaving elements are taken out of flow so the chip width
+   doesn't jump mid-swap. */
+.mint-chip-avatar-enter-active {
+  transition: opacity 180ms var(--ease-out), transform 180ms var(--ease-out);
+}
+.mint-chip-avatar-leave-active {
+  position: absolute;
+  transition: opacity 120ms var(--ease-out), transform 120ms var(--ease-out);
+}
+.mint-chip-avatar-enter-from,
+.mint-chip-avatar-leave-to {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.mint-chip-name-enter-active {
+  transition: opacity 160ms var(--ease-out), transform 160ms var(--ease-out),
+    filter 160ms var(--ease-out);
+}
+.mint-chip-name-leave-active {
+  position: absolute;
+  transition: opacity 100ms var(--ease-out), transform 100ms var(--ease-out),
+    filter 100ms var(--ease-out);
+}
+.mint-chip-name-enter-from {
+  filter: blur(2px);
+  opacity: 0;
+  transform: translateY(4px);
+}
+.mint-chip-name-leave-to {
+  filter: blur(2px);
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mint-chip-avatar-enter-active,
+  .mint-chip-avatar-leave-active,
+  .mint-chip-name-enter-active,
+  .mint-chip-name-leave-active {
+    transition: opacity 120ms ease;
+  }
+  .mint-chip-avatar-enter-from,
+  .mint-chip-avatar-leave-to,
+  .mint-chip-name-enter-from,
+  .mint-chip-name-leave-to {
+    filter: none;
+    transform: none;
+  }
 }
 .balance-unit-dots {
   align-items: center;
@@ -404,7 +505,8 @@ export default defineComponent({
   justify-content: center;
   opacity: 0.28;
   padding: 0;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity var(--dur-fast) var(--ease-standard),
+    transform var(--dur-fast) var(--ease-standard);
   width: 14px;
 }
 .balance-unit-dot::after {

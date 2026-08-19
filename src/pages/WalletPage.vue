@@ -108,17 +108,20 @@
         <div class="row q-pt-sm">
           <div class="col-12 q-pt-xs">
             <q-btn
-              class="q-mx-xs q-px-sm q-my-sm"
+              class="q-mx-xs q-px-md q-my-sm"
               outline
-              size="0.6rem"
+              rounded
+              no-caps
+              size="sm"
               v-if="
                 getPwaDisplayMode() == 'browser' &&
                 deferredPWAInstallPrompt != null
               "
               color="primary"
+              icon="download"
               @click="triggerPwaInstall()"
-              ><b>{{ $t("WalletPage.install.text") }}</b
-              ><q-tooltip>{{
+              >{{ $t("WalletPage.install.text")
+              }}<q-tooltip>{{
                 $t("WalletPage.install.tooltip")
               }}</q-tooltip></q-btn
             >
