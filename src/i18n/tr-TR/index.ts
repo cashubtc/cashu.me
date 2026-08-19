@@ -1466,7 +1466,7 @@ export default {
   AddMintDialog: {
     title: "Bu nane'ye güveniyor musunuz?",
     description:
-      "Bu nane'yi kullanmadan önce güvendiğinizden emin olun. Nane'ler herhangi bir zamanda kötü niyetli hale gelebilir veya faaliyetlerini durdurabilir.",
+      "Bu nane'ye yalnızca güveniyorsanız katılın. Nane'ler herhangi bir zamanda faaliyetlerini durdurabilir.",
     inputs: {
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1479,6 +1479,17 @@ export default {
       add_mint: {
         label: "@:global.actions.add_mint.label",
         in_progress: "Nane ekleniyor",
+      },
+    },
+    audit_info: {
+      label: "Denetim bilgisi",
+      actions: {
+        show: {
+          label: "Göster",
+        },
+        hide: {
+          label: "Gizle",
+        },
       },
     },
   },

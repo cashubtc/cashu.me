@@ -1559,7 +1559,7 @@ export default {
   AddMintDialog: {
     title: "Důvěřujete tomuto mintu?",
     description:
-      "Před použitím tohoto mintu se ujistěte, že mu důvěřujete. Mints mohou kdykoli přestat fungovat nebo se stát škodlivými.",
+      "Připojte se k tomuto mintu, pouze pokud mu důvěřujete. Mints mohou kdykoli ukončit provoz.",
     inputs: {
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1572,6 +1572,17 @@ export default {
       add_mint: {
         label: "@:global.actions.add_mint.label",
         in_progress: "Přidává se mint",
+      },
+    },
+    audit_info: {
+      label: "Informace o auditu",
+      actions: {
+        show: {
+          label: "Zobrazit",
+        },
+        hide: {
+          label: "Skrýt",
+        },
       },
     },
   },

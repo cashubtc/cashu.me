@@ -1429,7 +1429,7 @@ export default {
   AddMintDialog: {
     title: "Ti fidi di questo mint?",
     description:
-      "Prima di usare questo mint, assicurati di fidarti. I mints potrebbero diventare malevoli o cessare l'attività in qualsiasi momento.",
+      "Unisciti a questo mint solo se ti fidi. I mints possono cessare l'attività in qualsiasi momento.",
     inputs: {
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1442,6 +1442,17 @@ export default {
       add_mint: {
         label: "@:global.actions.add_mint.label",
         in_progress: "Aggiunta mint",
+      },
+    },
+    audit_info: {
+      label: "Info di audit",
+      actions: {
+        show: {
+          label: "Mostra",
+        },
+        hide: {
+          label: "Nascondi",
+        },
       },
     },
   },

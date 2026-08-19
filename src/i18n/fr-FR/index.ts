@@ -1465,7 +1465,7 @@ export default {
   AddMintDialog: {
     title: "Faites-vous confiance à cette mint ?",
     description:
-      "Avant d'utiliser cette mint, assurez-vous de lui faire confiance. Les mints pourraient devenir malveillantes ou cesser leurs opérations à tout moment.",
+      "Ne rejoignez cette mint que si vous lui faites confiance. Les mints peuvent cesser leurs opérations à tout moment.",
     inputs: {
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1478,6 +1478,17 @@ export default {
       add_mint: {
         label: "@:global.actions.add_mint.label",
         in_progress: "Ajout de la mint",
+      },
+    },
+    audit_info: {
+      label: "Infos d'audit",
+      actions: {
+        show: {
+          label: "Afficher",
+        },
+        hide: {
+          label: "Masquer",
+        },
       },
     },
   },

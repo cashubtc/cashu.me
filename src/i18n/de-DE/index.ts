@@ -1465,7 +1465,7 @@ export default {
   AddMintDialog: {
     title: "Vertrauen Sie dieser Mint?",
     description:
-      "Bevor Sie diese Mint verwenden, stellen Sie sicher, dass Sie ihr vertrauen. Mints könnten bösartig werden oder jederzeit den Betrieb einstellen.",
+      "Treten Sie dieser Mint nur bei, wenn Sie ihr vertrauen. Mints können jederzeit den Betrieb einstellen.",
     inputs: {
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1478,6 +1478,17 @@ export default {
       add_mint: {
         label: "@:global.actions.add_mint.label",
         in_progress: "Mint wird hinzugefügt",
+      },
+    },
+    audit_info: {
+      label: "Audit-Infos",
+      actions: {
+        show: {
+          label: "Anzeigen",
+        },
+        hide: {
+          label: "Ausblenden",
+        },
       },
     },
   },

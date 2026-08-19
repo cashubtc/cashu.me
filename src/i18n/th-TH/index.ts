@@ -1451,7 +1451,7 @@ export default {
   AddMintDialog: {
     title: "คุณเชื่อถือ Mint นี้หรือไม่?",
     description:
-      "ก่อนที่จะใช้ Mint นี้ ตรวจสอบให้แน่ใจว่าคุณเชื่อถือได้ Mints อาจกลายเป็นอันตรายหรือหยุดดำเนินการได้ทุกเมื่อ",
+      "เข้าร่วม Mint นี้เฉพาะเมื่อคุณเชื่อถือเท่านั้น Mints สามารถหยุดดำเนินการได้ทุกเมื่อ",
     inputs: {
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1464,6 +1464,17 @@ export default {
       add_mint: {
         label: "@:global.actions.add_mint.label",
         in_progress: "กำลังเพิ่ม Mint",
+      },
+    },
+    audit_info: {
+      label: "ข้อมูลการตรวจสอบ",
+      actions: {
+        show: {
+          label: "แสดง",
+        },
+        hide: {
+          label: "ซ่อน",
+        },
       },
     },
   },

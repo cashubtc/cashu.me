@@ -1541,7 +1541,7 @@ export default {
   AddMintDialog: {
     title: "Você confia neste mint?",
     description:
-      "Antes de usar este mint, certifique-se de que confia nele. Os mints podem se tornar maliciosos ou encerrar as operações a qualquer momento.",
+      "Entre neste mint apenas se você confiar nele. Os mints podem encerrar as operações a qualquer momento.",
     inputs: {
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1554,6 +1554,17 @@ export default {
       add_mint: {
         label: "@:global.actions.add_mint.label",
         in_progress: "Adicionando mint",
+      },
+    },
+    audit_info: {
+      label: "Informações de auditoria",
+      actions: {
+        show: {
+          label: "Mostrar",
+        },
+        hide: {
+          label: "Ocultar",
+        },
       },
     },
   },
