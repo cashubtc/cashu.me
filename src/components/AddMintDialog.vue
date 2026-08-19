@@ -204,11 +204,15 @@ export default defineComponent({
         : "description"
     );
     const addMintDisabled = computed(
+      // Gate on the resolved preview, not just the absence of loading:
+      // there is a brief "idle" window between the sheet opening and the
+      // watcher kicking off the fetch, and a click landing in it races the
+      // probe (the button flips state mid-click and the close/add handlers
+      // can be dropped).
       () =>
         props.addMintBlocking ||
-        mintInfoLoading.value ||
-        mintInfoError.value ||
-        mintAlreadyAdded.value
+        mintAlreadyAdded.value ||
+        mintFetchState.value !== "ok"
     );
 
     // Fetch the mint's info (name, icon) when the sheet opens so the user
