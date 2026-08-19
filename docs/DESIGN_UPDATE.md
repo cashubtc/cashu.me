@@ -24,14 +24,14 @@ The page reads as a top-down narrative: **identity → communication → facts �
 trust → actions.** Progressive disclosure keeps advanced content one tap away
 instead of cluttering the first viewport.
 
-| # | Block | Contents | Ordering rationale |
-| - | ----- | -------- | ------------------ |
-| 1 | **Header card** | Mint avatar (64px), mint name, QR toggle | Answers "where am I?" instantly. The QR (secondary, rarely needed) is hidden behind a small icon button anchored to the card's top-right corner. |
-| 2 | **Descriptions** | MOTD banner (dismissible), `description`, `description_long` | What the mint wants to communicate. MOTD is dismissible and collapses smoothly. |
-| 3 | **CONTACT** | One row per contact method (icon · value · copy) | Only rendered when contacts exist — no empty chrome. |
-| 4 | **MINT DETAILS** | URL, Nuts, Currency, Currency units, Version | Objective facts about the mint. Nuts collapse behind "View all" (progressive disclosure). |
-| 5 | **AUDIT INFO** | Audit status (only when the auditor is enabled) | Trust assessment comes after the facts. |
-| 6 | **ACTIONS** | Edit · Copy URL · Review · **Delete** | What the user can do. The destructive action is last and visually isolated in red. |
+| #   | Block            | Contents                                                     | Ordering rationale                                                                                                                               |
+| --- | ---------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | **Header card**  | Mint avatar (64px), mint name, QR toggle                     | Answers "where am I?" instantly. The QR (secondary, rarely needed) is hidden behind a small icon button anchored to the card's top-right corner. |
+| 2   | **Descriptions** | MOTD banner (dismissible), `description`, `description_long` | What the mint wants to communicate. MOTD is dismissible and collapses smoothly.                                                                  |
+| 3   | **CONTACT**      | One row per contact method (icon · value · copy)             | Only rendered when contacts exist — no empty chrome.                                                                                             |
+| 4   | **MINT DETAILS** | URL, Nuts, Currency, Currency units, Version                 | Objective facts about the mint. Nuts collapse behind "View all" (progressive disclosure).                                                        |
+| 5   | **AUDIT INFO**   | Audit status (only when the auditor is enabled)              | Trust assessment comes after the facts.                                                                                                          |
+| 6   | **ACTIONS**      | Edit · Copy URL · Review · **Delete**                        | What the user can do. The destructive action is last and visually isolated in red.                                                               |
 
 Layout rules:
 
@@ -54,10 +54,10 @@ the page works in dark and light mode without branching markup:
 ```scss
 .mint-details {
   --md-text: #ffffff;
-  --md-muted: #8e8e93;           // secondary text, icons
+  --md-muted: #8e8e93; // secondary text, icons
   --md-surface: rgba(255, 255, 255, 0.05);
   --md-surface-hover: rgba(255, 255, 255, 0.1);
-  --md-danger: #ff453a;          // destructive actions
+  --md-danger: #ff453a; // destructive actions
 }
 body:not(.body--dark) .mint-details {
   --md-text: #1d1d1d;
@@ -75,14 +75,14 @@ Brand-dependent accents use `var(--q-primary)` so all nine app themes work.
 
 ```scss
 :root {
-  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);      // enter / UI interactions
-  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);  // on-screen movement
-  --ease-standard: cubic-bezier(0.2, 0, 0, 1);     // hover / color changes
-  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);   // sheets
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1); // enter / UI interactions
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1); // on-screen movement
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1); // hover / color changes
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1); // sheets
 
-  --dur-press: 160ms;  // press feedback
-  --dur-fast: 200ms;   // small UI (hovers, tooltips)
-  --dur-ui: 250ms;     // expands, small panels
+  --dur-press: 160ms; // press feedback
+  --dur-fast: 200ms; // small UI (hovers, tooltips)
+  --dur-ui: 250ms; // expands, small panels
 }
 ```
 
@@ -97,15 +97,15 @@ feels sluggish).
 Hierarchy is built from **weight + size + tracking as a set**, not size alone.
 All type is Inter.
 
-| Role | Spec | Notes |
-| ---- | ---- | ----- |
-| Mint name | 22px / 600 / `letter-spacing: -0.02em` | Display text gets *negative* tracking |
-| Section label | 12px / 600 / `letter-spacing: 0.08em` / uppercase / `--md-muted` | The only "chrome" between sections |
-| Description | 16px / 600 / line-height 24px / `-0.01em` | |
-| Long description | 14px / 500 / line-height 20px / `--md-muted` | |
-| Row label | 15px / 500 / `--md-muted` | Left side of a detail row |
-| Row value | 15px / 600 / `--md-text` | Right side, truncates with ellipsis |
-| Numeric values | `font-variant-numeric: tabular-nums` | `.tnum` utility or inline; prevents jitter |
+| Role             | Spec                                                             | Notes                                      |
+| ---------------- | ---------------------------------------------------------------- | ------------------------------------------ |
+| Mint name        | 22px / 600 / `letter-spacing: -0.02em`                           | Display text gets _negative_ tracking      |
+| Section label    | 12px / 600 / `letter-spacing: 0.08em` / uppercase / `--md-muted` | The only "chrome" between sections         |
+| Description      | 16px / 600 / line-height 24px / `-0.01em`                        |                                            |
+| Long description | 14px / 500 / line-height 20px / `--md-muted`                     |                                            |
+| Row label        | 15px / 500 / `--md-muted`                                        | Left side of a detail row                  |
+| Row value        | 15px / 600 / `--md-text`                                         | Right side, truncates with ellipsis        |
+| Numeric values   | `font-variant-numeric: tabular-nums`                             | `.tnum` utility or inline; prevents jitter |
 
 ---
 
@@ -123,7 +123,7 @@ All type is Inter.
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.08em;
-  margin: 28px 0 8px 4px;   /* whitespace creates the grouping */
+  margin: 28px 0 8px 4px; /* whitespace creates the grouping */
   text-transform: uppercase;
 }
 ```
@@ -137,8 +137,8 @@ the label optically with the 10px row padding inside the card.
 .surface-card {
   background-color: var(--md-surface);
   border-radius: 16px;
-  overflow: hidden;   /* clips row press/hover backgrounds to the radius */
-  padding: 4px;       /* rows float inside with 12px radius */
+  overflow: hidden; /* clips row press/hover backgrounds to the radius */
+  padding: 4px; /* rows float inside with 12px radius */
   width: 100%;
 }
 ```
@@ -167,7 +167,7 @@ touching the card edge.
 - Label: muted, 15px/500. Value: 15px/600, right-aligned, `max-width: 60%`,
   truncates with ellipsis.
 - If the row performs an action (copy): add `detail-item--clickable
-  pressable cursor-pointer` and a small (14px) trailing affordance icon.
+pressable cursor-pointer` and a small (14px) trailing affordance icon.
 - If the row only expands content (Nuts): the value becomes a toggle in
   `var(--q-primary)` with a chevron that rotates 180° when open
   (`transition: transform var(--dur-ui) var(--ease-out)`).
@@ -185,7 +185,7 @@ Expanded content renders as chips, not bare text lines:
 .nut-number {
   color: var(--md-muted);
   font-variant-numeric: tabular-nums;
-  min-width: 18px;        /* numbers align in a clean column */
+  min-width: 18px; /* numbers align in a clean column */
   margin-right: 8px;
 }
 ```
@@ -215,7 +215,9 @@ Secondary affordances (QR code toggle) are **anchored to the card** as small
 icon buttons — not floating loose in the layout:
 
 ```scss
-.mint-header { position: relative; }
+.mint-header {
+  position: relative;
+}
 .qr-toggle-btn {
   color: var(--md-muted);
   position: absolute;
@@ -224,7 +226,7 @@ icon buttons — not floating loose in the layout:
 }
 ```
 
-The revealed content (QR) expands *inside* the same card via the
+The revealed content (QR) expands _inside_ the same card via the
 `smooth-slide` transition, so the spatial relationship trigger → content is
 obvious.
 
@@ -280,12 +282,21 @@ Defined globally in `app.scss`; the details page consumes it via `q-btn` and
 `.pressable`:
 
 ```scss
-.q-btn { transition: transform var(--dur-press) var(--ease-out), box-shadow 0.2s var(--ease-standard); }
-.q-btn:active { transform: scale(0.97); }
+.q-btn {
+  transition: transform var(--dur-press) var(--ease-out), box-shadow 0.2s var(--ease-standard);
+}
+.q-btn:active {
+  transform: scale(0.97);
+}
 
-.pressable { transition: transform var(--dur-press) var(--ease-out),
-                         background-color var(--dur-press) var(--ease-standard); }
-.pressable:active { transform: scale(0.98); }
+.pressable {
+  transition: transform var(--dur-press) var(--ease-out), background-color var(
+        --dur-press
+      ) var(--ease-standard);
+}
+.pressable:active {
+  transform: scale(0.98);
+}
 ```
 
 Press feedback fires on **pointer-down**, not on release — that is what makes
@@ -297,7 +308,9 @@ Only on devices with a real pointer; on touch, `:hover` sticks after the tap:
 
 ```scss
 @media (hover: hover) and (pointer: fine) {
-  .action-button:hover { background-color: var(--md-surface-hover); }
+  .action-button:hover {
+    background-color: var(--md-surface-hover);
+  }
 }
 ```
 
