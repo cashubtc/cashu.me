@@ -270,6 +270,16 @@
           @close="() => {}"
         />
 
+        <!-- Section Divider for PoL Solvency -->
+        <div class="section-divider q-mb-md">
+          <div class="divider-line"></div>
+          <div class="divider-text">SOLVENCY AUDIT (PoL)</div>
+          <div class="divider-line"></div>
+        </div>
+
+        <!-- Proof of Liabilities Solvency Auditor -->
+        <PoLAuditView v-if="mintData.url" :mintUrl="mintData.url" />
+
         <!-- Section Divider -->
         <div class="section-divider q-mb-md">
           <div class="divider-line"></div>
@@ -336,6 +346,7 @@ import EditMintDialog from "src/components/EditMintDialog.vue";
 import RemoveMintDialog from "src/components/RemoveMintDialog.vue";
 import MintMotdMessage from "src/components/MintMotdMessage.vue";
 import MintAuditInfo from "src/components/MintAuditInfo.vue";
+import PoLAuditView from "src/components/PoLAuditView.vue";
 import {
   QrCode as QrCodeIcon,
   Link as LinkIcon,
@@ -370,6 +381,7 @@ export default defineComponent({
     RemoveMintDialog,
     MintMotdMessage,
     MintAuditInfo,
+    PoLAuditView,
   },
   data: function () {
     return {

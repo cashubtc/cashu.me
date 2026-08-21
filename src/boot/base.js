@@ -3,7 +3,170 @@ import { useUiStore } from "stores/ui";
 import { Clipboard } from "@capacitor/clipboard";
 import { SafeArea } from "capacitor-plugin-safe-area";
 import { useSettingsStore } from "stores/settings";
+import { useWalletStore } from "stores/wallet";
+import { useMintsStore } from "stores/mints";
+
 window.LOCALE = "en";
+
+// Global fetch interceptor to enforce Proof of Liabilities (PoL) transaction receipts (NUT-20)
+if (typeof window !== "undefined") {
+  const originalFetch = window.fetch;
+  const storedReceipts = localStorage.getItem("cashu.polReceipts");
+  window.POL_RECEIPT_CACHE = storedReceipts ? JSON.parse(storedReceipts) : {};
+  window.KNOWN_POL_MINTS = JSON.parse(localStorage.getItem("cashu.polMints") || "[]");
+
+  window.fetch = async function (input, init) {
+    const url = typeof input === "string" ? input : (input instanceof URL ? input.toString() : (input && input.url ? input.url : ""));
+    const isPost = init && init.method && init.method.toUpperCase() === "POST";
+    const isMintOrSwap = url.includes("/v1/mint/bolt11") || url.includes("/v1/swap") || url.includes("/v1/melt/bolt11");
+
+    if (isPost && isMintOrSwap) {
+      let outputs = [];
+      let inputs = [];
+      try {
+        if (init.body) {
+          const bodyStr = typeof init.body === "string" ? init.body : new TextDecoder().decode(init.body);
+          const bodyJson = JSON.parse(bodyStr);
+          outputs = bodyJson.outputs || [];
+          if (bodyJson.outputs == null && bodyJson.change && bodyJson.change.outputs) {
+            outputs = bodyJson.change.outputs;
+          }
+          inputs = bodyJson.inputs || [];
+        }
+      } catch (e) {
+        // Ignore parsing errors
+      }
+
+      const response = await originalFetch(input, init);
+      if (response.status !== 200) {
+        return response;
+      }
+
+      const clone = response.clone();
+      try {
+        const data = await clone.json();
+        const signatures = data.signatures || data.promises || data.change || [];
+        const spentReceipts = data.spent_receipts || [];
+
+        // Check if mint supports PoL (Proof of Liabilities)
+        let supportsPol = false;
+        try {
+          const mintsStore = useMintsStore();
+          const matchedMint = mintsStore.mints.find(m => url.startsWith(m.url));
+          const matchedMintUrl = matchedMint ? matchedMint.url : url;
+
+          const hasReceipts = (signatures.length > 0 && signatures[0].pol_receipt) || spentReceipts.length > 0;
+          if (hasReceipts) {
+            supportsPol = true;
+            // Dynamically register the mint as PoL-supporting
+            const polMints = JSON.parse(localStorage.getItem("cashu.polMints") || "[]");
+            if (!polMints.includes(matchedMintUrl)) {
+              polMints.push(matchedMintUrl);
+              localStorage.setItem("cashu.polMints", JSON.stringify(polMints));
+            }
+            window.KNOWN_POL_MINTS = polMints;
+          } else {
+            // Fallback to active/proactive discovery registry
+            supportsPol = window.KNOWN_POL_MINTS && window.KNOWN_POL_MINTS.includes(matchedMintUrl);
+          }
+        } catch (err) {}
+
+        if (supportsPol) {
+          let updated = false;
+
+          // Symmetrically map spent receipts for spent inputs
+          if (spentReceipts.length > 0 && inputs.length > 0) {
+            for (let i = 0; i < spentReceipts.length; i++) {
+              const receipt = spentReceipts[i];
+              const inputProof = inputs[i];
+              if (receipt && inputProof && inputProof.secret) {
+                window.POL_RECEIPT_CACHE[inputProof.secret] = receipt;
+                updated = true;
+              }
+            }
+          }
+
+          if (signatures.length > 0) {
+            const missingReceipt = signatures.some(s => !s.pol_receipt);
+            if (missingReceipt) {
+              throw new Error("Mint Protocol Violation: The mint is a known Proof of Liabilities (PoL) supporting mint, but failed to return a signed transaction receipt (pol_receipt) on the transaction outputs! Transaction aborted for safety.");
+            }
+
+            // Build B_ to secret hex map via deterministic KDF walk
+            const bHexToSecret = {};
+            try {
+              const walletStore = useWalletStore();
+              const mintsStore = useMintsStore();
+              const matchedMint = mintsStore.mints.find(m => url.startsWith(m.url));
+              const keysetIds = matchedMint ? (matchedMint.keysets || []).map(k => k.id) : [];
+
+              if (walletStore.mnemonic && keysetIds.length > 0) {
+                const seed = walletStore.mnemonicToSeedSync(walletStore.mnemonic);
+                const { deriveSecret, deriveBlindingFactor, calculateBPrime } = await import("src/js/pol");
+
+                for (const kid of keysetIds) {
+                  const maxCounter = walletStore.keysetCounter(kid) || 0;
+                  // Optimization: only scan a narrow window of active counters to prevent UI thread freezing
+                  const startCounter = Math.max(0, maxCounter - signatures.length - 50);
+                  const endCounter = maxCounter + 100;
+
+                  for (let counter = startCounter; counter <= endCounter; counter++) {
+                    try {
+                      const secretBytes = deriveSecret(seed, kid, counter);
+                      const rBytes = deriveBlindingFactor(seed, kid, counter);
+
+                      const secretHex = Array.from(secretBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+                      const rHex = Array.from(rBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+
+                      const bPrime = await calculateBPrime(secretHex, rHex);
+                      bHexToSecret[bPrime] = secretHex;
+
+                      try {
+                        const secretStr = new TextDecoder().decode(secretBytes);
+                        bHexToSecret[bPrime] = secretStr;
+                      } catch (e) {}
+                    } catch (e) {}
+                  }
+                }
+              }
+            } catch (err) {
+              console.error("Failed to build B_ to secret map for receipts:", err);
+            }
+
+            // Symmetrically map receipts from signatures to secrets
+            for (let i = 0; i < signatures.length; i++) {
+              const sig = signatures[i];
+              const receipt = sig.pol_receipt;
+              if (receipt) {
+                const output = outputs[i];
+                const bHex = output ? output.B_ : null;
+                if (bHex) {
+                  const secret = bHexToSecret[bHex];
+                  if (secret) {
+                    window.POL_RECEIPT_CACHE[secret] = receipt;
+                    updated = true;
+                  }
+                }
+              }
+            }
+          }
+
+          if (updated) {
+            localStorage.setItem("cashu.polReceipts", JSON.stringify(window.POL_RECEIPT_CACHE));
+          }
+        }
+      } catch (err) {
+        if (err.message && err.message.includes("Mint Protocol Violation")) {
+          throw err;
+        }
+      }
+
+      return response;
+    };
+
+    return originalFetch(input, init);
+  };
+}
 // window.EventHub = new Vue();
 
 // Ensure we capture the PWA install prompt as early as possible
