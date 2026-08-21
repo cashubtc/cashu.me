@@ -1,4 +1,5 @@
 import { currentDateStr } from "src/js/utils";
+import { displayAmountToBaseUnits } from "src/js/amount-entry";
 import { useMintsStore, WalletProof } from "./mints";
 import { useProofsStore } from "./proofs";
 import { type MutexPriority, useUiStore } from "src/stores/ui";
@@ -268,8 +269,9 @@ export async function meltQuoteInvoiceDataOnchain(this: any) {
     if (!inputAmount || inputAmount <= 0) {
       throw new Error("no amount provided");
     }
-    const amount = Math.floor(
-      inputAmount * mintStore.activeUnitCurrencyMultiplyer
+    const amount = displayAmountToBaseUnits(
+      inputAmount,
+      mintStore.activeUnitCurrencyMultiplyer
     );
     const data = await mintWallet.createMeltQuoteOnchain(address, amount);
     mintStore.assertMintError(data);
