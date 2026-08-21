@@ -259,6 +259,7 @@ import { usePriceStore } from "src/stores/price";
 import type { InvoiceHistory } from "src/stores/wallet";
 import { PaymentMethod } from "src/stores/walletTypes";
 import { mintSupportsPaymentMethod } from "src/js/mint-payment-methods";
+import { displayAmountToBaseUnits } from "src/js/amount-entry";
 import { useNpubCashStore } from "src/stores/npubcash";
 import { lightningAddressToLnurl } from "src/js/lnurl";
 
@@ -609,8 +610,9 @@ export default defineComponent({
       }
       try {
         this.showNumericKeyboard = false;
-        const amount = Math.floor(
-          (this.invoiceData.amount || 0) * this.activeUnitCurrencyMultiplyer
+        const amount = displayAmountToBaseUnits(
+          this.invoiceData.amount || 0,
+          this.activeUnitCurrencyMultiplyer
         );
         this.createInvoiceButtonBlocked = true;
 
