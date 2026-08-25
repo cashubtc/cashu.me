@@ -88,7 +88,7 @@ export async function requestMintCustom(
       .getMintInfo()
       .isSupported(20);
     // Lock the quote to a fresh key whenever the mint supports NUT-20.
-    // Generic payment processors may require locked quotes (pecan does).
+    // Some generic payment processors only accept locked quotes.
     const privkey = nut20supported
       ? bytesToHex(nobleSecp256k1.utils.randomPrivateKey())
       : undefined;

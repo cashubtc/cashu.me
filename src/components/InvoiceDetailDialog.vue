@@ -101,8 +101,9 @@
                   />
                   {{ invoiceData.request }}
                 </div>
-                <!-- Quote id for custom methods: shown for the teller to
-                     match, with the last 6 characters emphasized -->
+                <!-- Quote id for custom methods: shown so the payment
+                     provider can match the payment, with the last 6
+                     characters emphasized -->
                 <div
                   v-if="isCustom"
                   class="q-mt-md text-center quote-id-display cursor-pointer"
@@ -268,7 +269,7 @@ export default defineComponent({
     },
     // For custom methods the QR encodes the mint-provided request when there
     // is one, otherwise the bare quote id (no URL scheme — handheld scanners
-    // type the payload verbatim into the teller's match field).
+    // type the payload verbatim into the payment provider's lookup field).
     qrEncodedValue(): string {
       if (this.isCustom) {
         const request = this.invoiceData.request;

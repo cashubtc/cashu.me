@@ -163,7 +163,7 @@ export async function ensurePaymentMethodMintActive(
 //
 // Mints can advertise payment methods beyond the first-class ones (bolt11,
 // bolt12, onchain) in their NUT-04/NUT-05 method lists, backed by generic
-// payment processors (e.g. pecan's "branch" counter settlement). The wallet
+// payment processors (e.g. cash settlement at a counter). The wallet
 // treats any well-formed, non-built-in method as a custom method and drives
 // it through the generic /v1/{mint,melt}/quote/{method} endpoints.
 // ---------------------------------------------------------------------------

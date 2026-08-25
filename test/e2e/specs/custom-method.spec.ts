@@ -46,7 +46,7 @@ async function onboard(wallet: WalletPage, page: Page, mintUrl: string) {
 async function balanceOra(wallet: WalletPage): Promise<number> {
   await expect(wallet.balance).toHaveAttribute("data-unit", "ora");
   const text = await wallet.balance.innerText();
-  // en-US currency formatting, e.g. "ORA 25.00"
+  // Custom units render as plain integers with the unit code, e.g. "25 ORA"
   const numeric = text.replace(/[^0-9.,-]/g, "").replace(/,/g, "");
   return Number(numeric);
 }

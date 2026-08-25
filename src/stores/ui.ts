@@ -192,10 +192,12 @@ export const useUiStore = defineStore("ui", {
       if (currency == "msat") return this.fromMsat(value);
       if (currency == "usd") value = value / 100;
       if (currency == "eur") value = value / 100;
-      // Fiat units render as currencies. Custom units (e.g. from mints with
-      // generic payment methods) are integer face values without decimal
-      // metadata, so they render as plain numbers with the unit code —
-      // currency formatting would invent decimals that do not exist.
+      // Fiat units render as currencies. NUT-01 only defines a minor unit for
+      // bitcoin and ISO 4217 currencies; custom units (e.g. from mints with
+      // generic payment methods) carry no precision metadata, so the wallet
+      // treats them as having no minor unit and renders them as plain
+      // integers with the unit code — currency formatting would invent
+      // decimals that do not exist.
       if (currency == "usd" || currency == "eur" || isIsoCurrency(currency)) {
         try {
           return new Intl.NumberFormat(navigator.language, {

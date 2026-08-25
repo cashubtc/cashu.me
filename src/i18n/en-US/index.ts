@@ -1453,7 +1453,7 @@ export default {
   PayInvoiceDialog: {
     custom: {
       title: "Withdraw { method }",
-      quote_id_hint: "Quote ID \u2014 show this to the teller",
+      quote_id_hint: "Quote ID \u2014 share this with the payment provider",
       memo_label: "Memo (optional)",
     },
     input_data: {

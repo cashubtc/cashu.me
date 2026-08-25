@@ -318,9 +318,9 @@
                     </div>
                   </transition>
                 </div>
-                <!-- Melt quote id for custom methods: the teller matches the
-                     withdrawal by this code. QR encodes the bare quote id
-                     (matching the mint flow); tap to copy. -->
+                <!-- Melt quote id for custom methods: the payment provider
+                     matches the withdrawal by this code. QR encodes the bare
+                     quote id (matching the mint flow); tap to copy. -->
                 <div
                   v-if="showCustomMeltQuoteId"
                   class="row justify-center q-mb-md"
