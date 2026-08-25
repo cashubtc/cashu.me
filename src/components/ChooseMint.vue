@@ -140,10 +140,7 @@ import type { StoredMint } from "stores/mints";
 import { useUiStore } from "stores/ui";
 import { i18n } from "../boot/i18n";
 import { mintSupportsPaymentMethod } from "src/js/mint-payment-methods";
-import {
-  PaymentMethod,
-  type PaymentMethodId,
-} from "src/stores/walletTypes";
+import { PaymentMethod, type PaymentMethodId } from "src/stores/walletTypes";
 import BottomSheet from "./BottomSheet.vue";
 
 declare const windowMixin: any;

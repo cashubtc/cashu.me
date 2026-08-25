@@ -427,7 +427,10 @@ export default defineComponent({
             true
           );
         } else if (isCustom) {
-          this.checkCustomAndMint(mintQuoteForHistoryInvoice(transaction), true);
+          this.checkCustomAndMint(
+            mintQuoteForHistoryInvoice(transaction),
+            true
+          );
         } else if (transaction.amount > 0) {
           this.checkInvoiceBolt11(transaction.quote, true);
         }

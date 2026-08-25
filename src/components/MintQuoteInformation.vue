@@ -130,10 +130,7 @@ import {
   QrCode as QrCodeIcon,
   Hash as HashIcon,
 } from "lucide-vue-next";
-import {
-  PaymentMethod,
-  isCustomPaymentMethod,
-} from "src/stores/walletTypes";
+import { PaymentMethod, isCustomPaymentMethod } from "src/stores/walletTypes";
 import { paymentMethodDisplayName } from "src/js/mint-payment-methods";
 import {
   fetchAddressTxMetadata,

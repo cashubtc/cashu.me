@@ -229,7 +229,10 @@ export class BranchMint {
       if (!body?.pubkey) {
         return {
           status: 400,
-          data: { detail: "Quote must be locked to a pubkey (NUT-20)", code: 0 },
+          data: {
+            detail: "Quote must be locked to a pubkey (NUT-20)",
+            code: 0,
+          },
         };
       }
       const quote: MintQuote = {

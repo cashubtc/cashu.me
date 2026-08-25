@@ -118,7 +118,12 @@ export async function requestMintCustom(
 
     await this.addPaymentHistory({
       ...this.invoiceData,
-      label: paymentMethodDisplayName(storedMint, method, "mint", mintWallet.unit),
+      label: paymentMethodDisplayName(
+        storedMint,
+        method,
+        "mint",
+        mintWallet.unit
+      ),
       type: method,
     });
 

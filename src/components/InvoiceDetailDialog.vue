@@ -202,10 +202,7 @@ import { useUiStore } from "../stores/ui";
 import { useWorkersStore } from "../stores/workers";
 import MeltQuoteInformation from "./MeltQuoteInformation.vue";
 import MintQuoteInformation from "./MintQuoteInformation.vue";
-import {
-  PaymentMethod,
-  isCustomPaymentMethod,
-} from "src/stores/walletTypes";
+import { PaymentMethod, isCustomPaymentMethod } from "src/stores/walletTypes";
 import { useMintsStore } from "src/stores/mints";
 import { paymentMethodDisplayName } from "src/js/mint-payment-methods";
 // type hint for global mixin

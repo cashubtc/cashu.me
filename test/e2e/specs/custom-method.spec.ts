@@ -36,9 +36,7 @@ async function onboard(wallet: WalletPage, page: Page, mintUrl: string) {
   await mintInput.fill(mintUrl);
   await page.getByTestId("onboarding-add-mint").click();
   await page.getByTestId("confirm-add-mint").click();
-  await expect(
-    page.getByText(mintUrl, { exact: true }).first()
-  ).toBeVisible();
+  await expect(page.getByText(mintUrl, { exact: true }).first()).toBeVisible();
 
   await page.getByTestId("onboarding-next").click();
   await expect(page.getByTestId("wallet-send")).toBeVisible();
@@ -80,9 +78,9 @@ test("mints and melts via a custom payment method", async ({
     await quoteIdDisplay.locator(".quote-id-value").innerText()
   ).replace(/\s+/g, "");
   expect(quoteId).toMatch(/^[0-9a-f]{32}$/);
-  await expect(
-    quoteIdDisplay.locator(".quote-id-tail")
-  ).toHaveText(quoteId.slice(-6));
+  await expect(quoteIdDisplay.locator(".quote-id-tail")).toHaveText(
+    quoteId.slice(-6)
+  );
   // Tapping the quote id copies it.
   await quoteIdDisplay.click();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
@@ -96,9 +94,7 @@ test("mints and melts via a custom payment method", async ({
   expect(payResponse.ok()).toBeTruthy();
 
   // The wallet polls the quote and mints the ecash.
-  await expect
-    .poll(() => balanceOra(wallet), { timeout: 45_000 })
-    .toBe(25);
+  await expect.poll(() => balanceOra(wallet), { timeout: 45_000 }).toBe(25);
   await wallet.closeFullscreenDialog();
 
   // --- Withdraw via the advertised custom method -------------------------
@@ -119,9 +115,9 @@ test("mints and melts via a custom payment method", async ({
     await meltQuoteDisplay.locator(".quote-id-value").innerText()
   ).replace(/\s+/g, "");
   expect(meltQuoteId).toMatch(/^[0-9a-f]{32}$/);
-  await expect(
-    meltQuoteDisplay.locator(".quote-id-tail")
-  ).toHaveText(meltQuoteId.slice(-6));
+  await expect(meltQuoteDisplay.locator(".quote-id-tail")).toHaveText(
+    meltQuoteId.slice(-6)
+  );
   await meltQuoteDisplay.locator(".quote-id-value").click();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
     meltQuoteId

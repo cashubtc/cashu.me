@@ -64,9 +64,9 @@ describe("method display names (NUT-06 method_name)", () => {
       advertisedDisplayName({ method: "branch", method_name: "Bux Counter" })
     ).toBe("Bux Counter");
     expect(advertisedDisplayName({ method: "branch" })).toBe("Branch");
-    expect(
-      advertisedDisplayName({ method: "branch", method_name: "  " })
-    ).toBe("Branch");
+    expect(advertisedDisplayName({ method: "branch", method_name: "  " })).toBe(
+      "Branch"
+    );
     expect(
       advertisedDisplayName({ method: "branch", method_name: "x".repeat(31) })
     ).toBe("Branch");
@@ -146,15 +146,15 @@ describe("custom payment method discovery", () => {
   });
 
   it("supports the generic mint support check for custom methods", () => {
-    expect(
-      mintSupportsPaymentMethod(branchMint, "branch", "mint", "ora")
-    ).toBe(true);
-    expect(
-      mintSupportsPaymentMethod(branchMint, "branch", "mint", "sat")
-    ).toBe(false);
-    expect(
-      mintSupportsPaymentMethod(branchMint, "branch", "melt", "ora")
-    ).toBe(true);
+    expect(mintSupportsPaymentMethod(branchMint, "branch", "mint", "ora")).toBe(
+      true
+    );
+    expect(mintSupportsPaymentMethod(branchMint, "branch", "mint", "sat")).toBe(
+      false
+    );
+    expect(mintSupportsPaymentMethod(branchMint, "branch", "melt", "ora")).toBe(
+      true
+    );
   });
 
   it("ignores malformed and disabled advertisements", () => {

@@ -516,9 +516,7 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
           const invoice = invoices.find(
             (item: any) => item.quote === entry.quote
           );
-          return (
-            invoice?.type === method && this.shouldCheckInvoice(invoice)
-          );
+          return invoice?.type === method && this.shouldCheckInvoice(invoice);
         });
         if (filtered.length === 0) {
           delete this.customQuotes[method];
@@ -1192,9 +1190,7 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
             : method === PaymentMethod.Onchain
             ? "On-chain Subpayment"
             : `${paymentMethodDisplayName(
-                useMintsStore().mints.find(
-                  (m) => m.url === entry.invoice.mint
-                ),
+                useMintsStore().mints.find((m) => m.url === entry.invoice.mint),
                 method,
                 "mint",
                 entry.invoice.unit

@@ -355,7 +355,9 @@
                       </div>
                       <div class="quote-id-value">
                         <span class="quote-id-head">{{ meltQuoteIdHead }}</span
-                        ><span class="quote-id-tail">{{ meltQuoteIdTail }}</span>
+                        ><span class="quote-id-tail">{{
+                          meltQuoteIdTail
+                        }}</span>
                       </div>
                     </div>
                   </div>
@@ -849,10 +851,7 @@ import {
   mintsSupportingPaymentMethod,
   paymentMethodDisplayName,
 } from "src/js/mint-payment-methods";
-import {
-  PaymentMethod,
-  isCustomPaymentMethod,
-} from "src/stores/walletTypes";
+import { PaymentMethod, isCustomPaymentMethod } from "src/stores/walletTypes";
 
 import * as _ from "underscore";
 

@@ -18,10 +18,7 @@ import {
   notifyWarning,
 } from "src/js/notify";
 import { useTransactionWorkerStore } from "src/stores/transactionWorker";
-import {
-  PaymentMethod,
-  type PaymentMethodId,
-} from "src/stores/walletTypes";
+import { PaymentMethod, type PaymentMethodId } from "src/stores/walletTypes";
 import { useMintsStore, WalletProof } from "./mints";
 import { usePaymentHistoryStore } from "./paymentHistory";
 import { useProofsStore } from "./proofs";
