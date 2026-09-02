@@ -443,7 +443,8 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
       }
       if (invoice.type === PaymentMethod.OnchainSubpayment) return false;
       if (isCustomPaymentMethod(invoice.type)) {
-        // Subpayment entries are settled records, not live quotes.
+        // Melts and subpayments are not incoming mint quotes.
+        if (invoice.amount < 0 || invoice.meltQuote) return false;
         if (basePaymentMethod(invoice.type) !== invoice.type) return false;
         if (age > this.maxAge) return false;
         const quote = invoice.mintQuote as any;

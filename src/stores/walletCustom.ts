@@ -345,6 +345,11 @@ export async function meltQuoteCustomData(this: any) {
     });
     mintStore.assertMintError(data);
     const quote = normalizeMeltQuote(data as any);
+    // Generic processors may omit the requested amount from their quote
+    // response. Keep the submitted amount so outgoing history never loses it.
+    if (data.amount === undefined || data.amount === null) {
+      quote.amount = amount;
+    }
     this.payInvoiceData.meltQuote.response = quote;
     return quote;
   } catch (error: any) {

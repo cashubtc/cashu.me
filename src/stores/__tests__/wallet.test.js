@@ -70,6 +70,7 @@ const h = vi.hoisted(() => {
   const mintsStore = {
     activeMintUrl: "https://mint-a.example",
     activeUnit: "sat",
+    activeUnitCurrencyMultiplyer: 1,
     assertMintError: vi.fn(),
     activateMintUrl: vi.fn(async (url) => {
       h.mintsStore.activeMintUrl = url;
@@ -596,6 +597,34 @@ describe("wallet store", () => {
       amount: -105,
       status: "pending",
     });
+  });
+
+  it("keeps the requested amount when a custom melt quote omits it", async () => {
+    const wallet = useWalletStore();
+    wallet.payInvoiceData.invoice = { custom: "custom_method" };
+    wallet.payInvoiceData.input.amount = 25;
+    wallet.payInvoiceData.input.comment = "test payment";
+    h.mintsStore.activeUnit = "tst";
+    const createMeltQuote = vi.fn(async () => ({
+      quote: "custom-melt-q",
+      state: "UNPAID",
+      fee_reserve: 0,
+    }));
+    vi.spyOn(wallet, "activeWallet").mockResolvedValue({
+      unit: "tst",
+      createMeltQuote,
+    });
+
+    const quote = await wallet.meltQuoteCustomData();
+
+    expect(createMeltQuote).toHaveBeenCalledWith("custom_method", {
+      method: "custom_method",
+      unit: "tst",
+      amount: 25,
+      request: "test payment",
+    });
+    expect(quote.amount).toBe(25);
+    expect(wallet.payInvoiceData.meltQuote.response.amount).toBe(25);
   });
 
   it("creates active wallet and loads cache", async () => {

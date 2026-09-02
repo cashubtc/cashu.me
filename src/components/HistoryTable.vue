@@ -19,6 +19,16 @@
               v-else-if="isOnchainTransaction(transaction)"
               class="transaction-icon"
             />
+            <ArrowUpRightIcon
+              v-else-if="
+                isCustomTransaction(transaction) && transaction.amount < 0
+              "
+              class="transaction-icon"
+            />
+            <ArrowDownLeftIcon
+              v-else-if="isCustomTransaction(transaction)"
+              class="transaction-icon"
+            />
             <ZapIcon v-else class="transaction-icon" />
           </q-avatar>
         </q-item-section>
@@ -164,12 +174,15 @@ import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { useWalletStore } from "src/stores/wallet";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { useUiStore } from "src/stores/ui";
+import { useMintsStore } from "src/stores/mints";
 import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import token from "../js/token";
 import { notify } from "src/js/notify";
 import {
   Bitcoin as BitcoinIcon,
   Coins as CoinsIcon,
+  ArrowDownLeft as ArrowDownLeftIcon,
+  ArrowUpRight as ArrowUpRightIcon,
   Zap as ZapIcon,
 } from "lucide-vue-next";
 import {
@@ -185,6 +198,8 @@ export default defineComponent({
   components: {
     CoinsIcon,
     BitcoinIcon,
+    ArrowDownLeftIcon,
+    ArrowUpRightIcon,
     ZapIcon,
   },
   mixins: [windowMixin],
@@ -351,6 +366,10 @@ export default defineComponent({
 
     isOnchainTransaction(transaction) {
       return transaction.type === UnifiedTransactionType.Onchain;
+    },
+
+    isCustomTransaction(transaction) {
+      return isCustomPaymentMethod(transaction.method);
     },
 
     getTransactionIcon(transaction) {

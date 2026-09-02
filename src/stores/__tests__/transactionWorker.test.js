@@ -128,6 +128,17 @@ describe("transaction worker", () => {
     );
   });
 
+  it("does not treat custom melts as incoming mint quotes", () => {
+    const worker = useTransactionWorkerStore();
+    const customMelt = pendingInvoice("custom-melt-q", {
+      amount: -10,
+      type: "custom_method",
+      meltQuote: { quote: "custom-melt-q", amount: 10 },
+    });
+
+    expect(worker.shouldCheckInvoice(customMelt)).toBe(false);
+  });
+
   it("keeps month-old quotes out of batches and checks them singly", async () => {
     const worker = useTransactionWorkerStore();
     const mintStore = useMintsStore();
