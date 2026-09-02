@@ -7,7 +7,7 @@ describe("mints store unit precision", () => {
     // NUT-01 only defines a minor unit for bitcoin and ISO 4217 currencies.
     // Units outside that (e.g. from mints with custom payment methods) carry
     // no precision metadata, so amounts are whole units.
-    mints.activeUnit = "ora";
+    mints.activeUnit = "tst";
     expect(mints.activeUnitCurrencyMultiplyer).toBe(1);
     mints.activeUnit = "sat";
     expect(mints.activeUnitCurrencyMultiplyer).toBe(1);

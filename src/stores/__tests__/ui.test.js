@@ -8,7 +8,7 @@ describe("ui store", () => {
     expect(ui.formatCurrency(12, "unit")).toBe("12 UNIT");
     // Three-letter custom units must not be formatted as decimal
     // currencies (no invented ".00" — Cashu amounts are integers).
-    expect(ui.formatCurrency(25, "bux")).toBe("25 BUX");
+    expect(ui.formatCurrency(25, "tst")).toBe("25 TST");
   });
 
   it("still formats real ISO currency units as currencies", () => {

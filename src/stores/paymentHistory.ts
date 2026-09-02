@@ -15,7 +15,7 @@ export type QuoteMethod =
   | PaymentMethod.Bolt11
   | PaymentMethod.Bolt12
   | PaymentMethod.Onchain
-  // custom (generic) payment method advertised by a mint, e.g. "branch"
+  // custom (generic) payment method advertised by a mint
   | (string & {});
 
 export type MintQuoteRow = {

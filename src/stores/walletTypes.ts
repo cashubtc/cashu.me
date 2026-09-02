@@ -7,7 +7,7 @@ export enum PaymentMethod {
 }
 
 // A NUT-04/05 payment method: either a first-class member of PaymentMethod
-// or a custom method string advertised by a mint (e.g. "branch").
+// or a custom method string advertised by a mint.
 export type PaymentMethodId = PaymentMethod | (string & {});
 
 const KNOWN_PAYMENT_METHODS = new Set<string>(Object.values(PaymentMethod));
@@ -35,7 +35,7 @@ export function isCustomPaymentMethod(
   return Boolean(method) && !KNOWN_PAYMENT_METHODS.has(method as string);
 }
 
-// "bolt12-subpayment" -> "bolt12", "branch-subpayment" -> "branch"
+// "bolt12-subpayment" -> "bolt12"
 export function basePaymentMethod(method: string): string {
   return method.endsWith(SUBPAYMENT_SUFFIX)
     ? method.slice(0, -SUBPAYMENT_SUFFIX.length)

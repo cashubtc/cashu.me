@@ -18,7 +18,7 @@ import {
 
 describe("custom payment method identity", () => {
   it("treats non-built-in method strings as custom", () => {
-    expect(isCustomPaymentMethod("branch")).toBe(true);
+    expect(isCustomPaymentMethod("custom_method")).toBe(true);
     expect(isCustomPaymentMethod("bolt11")).toBe(false);
     expect(isCustomPaymentMethod("bolt12")).toBe(false);
     expect(isCustomPaymentMethod("onchain")).toBe(false);
@@ -29,7 +29,7 @@ describe("custom payment method identity", () => {
   });
 
   it("validates method names conservatively", () => {
-    expect(isValidCustomMethodName("branch")).toBe(true);
+    expect(isValidCustomMethodName("custom_method")).toBe(true);
     expect(isValidCustomMethodName("bank_transfer-2")).toBe(true);
     expect(isValidCustomMethodName("has space")).toBe(false);
     expect(isValidCustomMethodName("UPPER")).toBe(false);
@@ -38,21 +38,23 @@ describe("custom payment method identity", () => {
     expect(isValidCustomMethodName("x".repeat(33))).toBe(false);
     expect(isValidCustomMethodName(42)).toBe(false);
     // "-subpayment" is reserved for internal history entry types
-    expect(isValidCustomMethodName("branch-subpayment")).toBe(false);
+    expect(isValidCustomMethodName("custom_method-subpayment")).toBe(false);
   });
 
   it("round-trips subpayment types", () => {
-    expect(subpaymentMethod("branch")).toBe("branch-subpayment");
-    expect(basePaymentMethod("branch-subpayment")).toBe("branch");
-    expect(basePaymentMethod("branch")).toBe("branch");
+    expect(subpaymentMethod("custom_method")).toBe("custom_method-subpayment");
+    expect(basePaymentMethod("custom_method-subpayment")).toBe("custom_method");
+    expect(basePaymentMethod("custom_method")).toBe("custom_method");
     expect(basePaymentMethod(PaymentMethod.Bolt12Subpayment)).toBe(
       PaymentMethod.Bolt12
     );
   });
 
   it("derives labels the way cdk does", () => {
-    expect(paymentMethodLabel("branch")).toBe("Branch");
-    expect(paymentMethodLabel("branch-subpayment")).toBe("Branch");
+    expect(paymentMethodLabel("custom_method")).toBe("Custom Method");
+    expect(paymentMethodLabel("custom_method-subpayment")).toBe(
+      "Custom Method"
+    );
     expect(paymentMethodLabel("bank_transfer")).toBe("Bank Transfer");
     expect(paymentMethodLabel("in-person")).toBe("In Person");
   });
@@ -61,18 +63,26 @@ describe("custom payment method identity", () => {
 describe("method display names (NUT-06 method_name)", () => {
   it("prefers a sane advertised method_name", () => {
     expect(
-      advertisedDisplayName({ method: "branch", method_name: "Bux Counter" })
-    ).toBe("Bux Counter");
-    expect(advertisedDisplayName({ method: "branch" })).toBe("Branch");
-    expect(advertisedDisplayName({ method: "branch", method_name: "  " })).toBe(
-      "Branch"
+      advertisedDisplayName({
+        method: "custom_method",
+        method_name: "Custom Payment",
+      })
+    ).toBe("Custom Payment");
+    expect(advertisedDisplayName({ method: "custom_method" })).toBe(
+      "Custom Method"
     );
     expect(
-      advertisedDisplayName({ method: "branch", method_name: "x".repeat(31) })
-    ).toBe("Branch");
+      advertisedDisplayName({ method: "custom_method", method_name: "  " })
+    ).toBe("Custom Method");
     expect(
-      advertisedDisplayName({ method: "branch", method_name: "a\tb" })
-    ).toBe("Branch");
+      advertisedDisplayName({
+        method: "custom_method",
+        method_name: "x".repeat(31),
+      })
+    ).toBe("Custom Method");
+    expect(
+      advertisedDisplayName({ method: "custom_method", method_name: "a\tb" })
+    ).toBe("Custom Method");
     expect(advertisedDisplayName(null)).toBe("");
   });
 
@@ -86,9 +96,9 @@ describe("method display names (NUT-06 method_name)", () => {
           4: {
             methods: [
               {
-                method: "branch",
-                method_name: "Bux Counter",
-                unit: "ora",
+                method: "custom_method",
+                method_name: "Custom Payment",
+                unit: "tst",
               },
             ],
             disabled: false,
@@ -96,37 +106,44 @@ describe("method display names (NUT-06 method_name)", () => {
         },
       },
     };
-    expect(paymentMethodDisplayName(mint, "branch", "mint", "ora")).toBe(
-      "Bux Counter"
+    expect(paymentMethodDisplayName(mint, "custom_method", "mint", "tst")).toBe(
+      "Custom Payment"
     );
     // subpayment types resolve through their base method
     expect(
-      paymentMethodDisplayName(mint, "branch-subpayment", "mint", "ora")
-    ).toBe("Bux Counter");
+      paymentMethodDisplayName(mint, "custom_method-subpayment", "mint", "tst")
+    ).toBe("Custom Payment");
     // unknown mint or missing advertisement falls back to derivation
-    expect(paymentMethodDisplayName(undefined, "branch")).toBe("Branch");
-    expect(paymentMethodDisplayName(mint, "branch", "melt", "ora")).toBe(
-      "Branch"
+    expect(paymentMethodDisplayName(undefined, "custom_method")).toBe(
+      "Custom Method"
+    );
+    expect(paymentMethodDisplayName(mint, "custom_method", "melt", "tst")).toBe(
+      "Custom Method"
     );
   });
 });
 
 describe("custom payment method discovery", () => {
-  const branchMint = {
-    url: "https://branch.example",
+  const customMint = {
+    url: "https://custom.example",
     keys: [],
-    keysets: [{ id: "00aa", unit: "ora", active: true }],
+    keysets: [{ id: "00aa", unit: "tst", active: true }],
     info: {
       nuts: {
         4: {
           methods: [
-            { method: "branch", unit: "ora", min_amount: 1, max_amount: 500 },
+            {
+              method: "custom_method",
+              unit: "tst",
+              min_amount: 1,
+              max_amount: 500,
+            },
             { method: "bolt11", unit: "sat" },
           ],
           disabled: false,
         },
         5: {
-          methods: [{ method: "branch", unit: "ora" }],
+          methods: [{ method: "custom_method", unit: "tst" }],
           disabled: false,
         },
       },
@@ -134,42 +151,42 @@ describe("custom payment method discovery", () => {
   };
 
   it("discovers custom mint methods and skips built-ins", () => {
-    const methods = customPaymentMethods(branchMint, "mint", "ora");
-    expect(methods.map((m) => m.method)).toEqual(["branch"]);
+    const methods = customPaymentMethods(customMint, "mint", "tst");
+    expect(methods.map((m) => m.method)).toEqual(["custom_method"]);
     expect(methods[0].min_amount).toBe(1);
     expect(methods[0].max_amount).toBe(500);
   });
 
   it("filters custom methods by unit", () => {
-    expect(customPaymentMethods(branchMint, "mint", "sat")).toEqual([]);
-    expect(customPaymentMethods(branchMint, "melt", "ora")).toHaveLength(1);
+    expect(customPaymentMethods(customMint, "mint", "sat")).toEqual([]);
+    expect(customPaymentMethods(customMint, "melt", "tst")).toHaveLength(1);
   });
 
   it("supports the generic mint support check for custom methods", () => {
-    expect(mintSupportsPaymentMethod(branchMint, "branch", "mint", "ora")).toBe(
-      true
-    );
-    expect(mintSupportsPaymentMethod(branchMint, "branch", "mint", "sat")).toBe(
-      false
-    );
-    expect(mintSupportsPaymentMethod(branchMint, "branch", "melt", "ora")).toBe(
-      true
-    );
+    expect(
+      mintSupportsPaymentMethod(customMint, "custom_method", "mint", "tst")
+    ).toBe(true);
+    expect(
+      mintSupportsPaymentMethod(customMint, "custom_method", "mint", "sat")
+    ).toBe(false);
+    expect(
+      mintSupportsPaymentMethod(customMint, "custom_method", "melt", "tst")
+    ).toBe(true);
   });
 
   it("ignores malformed and disabled advertisements", () => {
     const messyMint = {
-      ...branchMint,
+      ...customMint,
       url: "https://messy.example",
       info: {
         nuts: {
           4: {
             methods: [
-              { method: "OK NOT", unit: "ora" },
-              { method: "../path", unit: "ora" },
-              { method: "disabled-one", unit: "ora", disabled: true },
-              { method: "branch", unit: "ora" },
-              { method: "branch", unit: "ora" }, // duplicate
+              { method: "OK NOT", unit: "tst" },
+              { method: "../path", unit: "tst" },
+              { method: "disabled-one", unit: "tst", disabled: true },
+              { method: "custom_method", unit: "tst" },
+              { method: "custom_method", unit: "tst" }, // duplicate
               null,
               {},
             ],
@@ -178,50 +195,50 @@ describe("custom payment method discovery", () => {
         },
       },
     };
-    const methods = customPaymentMethods(messyMint, "mint", "ora");
-    expect(methods.map((m) => m.method)).toEqual(["branch"]);
+    const methods = customPaymentMethods(messyMint, "mint", "tst");
+    expect(methods.map((m) => m.method)).toEqual(["custom_method"]);
   });
 
   it("returns nothing when the nut is disabled", () => {
     const disabledMint = {
-      ...branchMint,
+      ...customMint,
       url: "https://disabled.example",
       info: {
         nuts: {
           4: {
-            methods: [{ method: "branch", unit: "ora" }],
+            methods: [{ method: "custom_method", unit: "tst" }],
             disabled: true,
           },
         },
       },
     };
-    expect(customPaymentMethods(disabledMint, "mint", "ora")).toEqual([]);
+    expect(customPaymentMethods(disabledMint, "mint", "tst")).toEqual([]);
   });
 
   it("deduplicates across mints", () => {
     const otherMint = {
-      ...branchMint,
+      ...customMint,
       url: "https://other.example",
     };
     const methods = customPaymentMethodsForMints(
-      [branchMint, otherMint],
+      [customMint, otherMint],
       "mint",
-      "ora"
+      "tst"
     );
-    expect(methods.map((m) => m.method)).toEqual(["branch"]);
+    expect(methods.map((m) => m.method)).toEqual(["custom_method"]);
   });
 
   it("looks up the advertised entry for a mint+method+unit", () => {
     const advertised = advertisedPaymentMethod(
-      branchMint,
-      "branch",
+      customMint,
+      "custom_method",
       "mint",
-      "ora"
+      "tst"
     );
     expect(advertised?.max_amount).toBe(500);
     expect(
-      advertisedPaymentMethod(branchMint, "branch", "mint", "sat")
+      advertisedPaymentMethod(customMint, "custom_method", "mint", "sat")
     ).toBeNull();
-    expect(advertisedPaymentMethod(undefined, "branch")).toBeNull();
+    expect(advertisedPaymentMethod(undefined, "custom_method")).toBeNull();
   });
 });
