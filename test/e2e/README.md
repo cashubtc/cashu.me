@@ -6,14 +6,22 @@ on-chain settlement; the mint APIs and wallet cryptography are not mocked.
 
 ## What runs
 
-| Area        | Browser behavior                                      | Backend assertion                             |
-| ----------- | ----------------------------------------------------- | --------------------------------------------- |
-| Onboarding  | Creates a new seed and adds the local mint            | Mint info and keys load over HTTP             |
-| Incoming    | Creates BOLT11, BOLT12, and on-chain requests         | Fake backend settles; wallet mints proofs     |
-| Outgoing    | Pays BOLT11, amountless BOLT12, and on-chain requests | Wallet melts proofs and receives change       |
-| Ecash       | Sends between two isolated browser contexts           | Receiver swaps proofs; replay is rejected     |
-| Persistence | Reloads after minting and receiving                   | IndexedDB-backed balances survive reload      |
-| Protocol    | Checks both mints and all quote types directly        | NUT-04/NUT-05 advertise every configured rail |
+| Area        | Browser behavior                                                                                                   | Backend assertion                                 |
+| ----------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------- |
+| Onboarding  | Creates a new seed and adds the local mint                                                                         | Mint info and keys load over HTTP                 |
+| Incoming    | Creates BOLT11, BOLT12, and on-chain requests                                                                      | Fake backend settles; wallet mints proofs         |
+| Outgoing    | Pays BOLT11, amountless BOLT12, and on-chain requests                                                              | Wallet melts proofs and receives change           |
+| Ecash       | Sends between two isolated browser contexts                                                                        | Receiver swaps proofs; replay is rejected         |
+| Persistence | Reloads after minting and receiving                                                                                | IndexedDB-backed balances survive reload          |
+| Protocol    | Checks both mints and all quote types directly                                                                     | NUT-04/NUT-05 advertise every configured rail     |
+| Resilience  | Exercises malformed input, insufficient balance, pending and failed payments, quote recovery, and duplicate clicks | Balances and proof reservations remain consistent |
+
+The resilience specs use Playwright's local route interception to make real CDK
+responses appear unpaid, pending, or failed after the quote has been created.
+This keeps error-state coverage deterministic while still exercising the real
+wallet UI, quote parsing, proof selection, reservation cleanup, and history
+updates. The protocol-failure specs separately verify that the CDK mint rejects
+unknown quotes and malformed payment requests.
 
 The second mint creates counterparty payment requests for outgoing tests. That
 keeps payment decoding and quote creation realistic without coupling the test

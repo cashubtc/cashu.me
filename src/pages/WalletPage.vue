@@ -578,6 +578,14 @@ export default {
         }
       });
     },
+    handleVisibilityChange: function () {
+      if (document.visibilityState === "visible") {
+        console.log("### App brought to foreground, checking NWC...");
+        if (this.nwcEnabled) {
+          this.listenToNWCCommands();
+        }
+      }
+    },
   },
   watch: {},
 
@@ -587,11 +595,16 @@ export default {
     this.$nextTick(this.equalizeButtonWidths);
     // Add window resize listener to handle responsive layouts
     window.addEventListener("resize", this.equalizeButtonWidths);
+    document.addEventListener("visibilitychange", this.handleVisibilityChange);
   },
 
   beforeUnmount: function () {
     // Remove event listener when component is destroyed
     window.removeEventListener("resize", this.equalizeButtonWidths);
+    document.removeEventListener(
+      "visibilitychange",
+      this.handleVisibilityChange
+    );
   },
 
   created: async function () {

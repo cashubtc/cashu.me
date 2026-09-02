@@ -39,7 +39,12 @@ export class WalletPage {
     await mintInput.fill(mintUrl);
     await this.page.getByTestId("onboarding-add-mint").click();
     await this.page.getByTestId("confirm-add-mint").click();
-    await expect(this.page.getByText(mintUrl, { exact: true })).toBeVisible();
+    await expect(
+      this.page
+        .getByText(mintUrl, { exact: true })
+        .filter({ visible: true })
+        .first()
+    ).toBeVisible();
 
     await this.page.getByTestId("onboarding-next").click();
     await expect(this.page.getByTestId("wallet-send")).toBeVisible();
@@ -115,6 +120,16 @@ export class WalletPage {
   }
 
   async payRequest(request: string, amount?: number) {
+    await this.quoteRequest(request, amount);
+
+    const pay = this.page.getByTestId("pay-payment-request");
+    await expect(pay).toBeEnabled();
+    await pay.click();
+    await expect(this.page.getByText("Paid", { exact: false })).toBeVisible();
+    await this.page.getByRole("button", { name: "Close", exact: true }).click();
+  }
+
+  async quoteRequest(request: string, amount?: number, expectPayButton = true) {
     const input = this.page
       .getByTestId("payment-request-input")
       .locator("textarea");
@@ -122,13 +137,12 @@ export class WalletPage {
 
     if (amount !== undefined) {
       await this.enterAmount(amount);
-      await this.page.getByTestId("quote-payment-request").click();
+      const quote = this.page.getByTestId("quote-payment-request");
+      if (await quote.isEnabled()) {
+        await quote.click();
+      }
+    } else if (expectPayButton) {
+      await expect(this.page.getByTestId("pay-payment-request")).toBeVisible();
     }
-
-    const pay = this.page.getByTestId("pay-payment-request");
-    await expect(pay).toBeEnabled();
-    await pay.click();
-    await expect(this.page.getByText("Paid", { exact: false })).toBeVisible();
-    await this.page.getByRole("button", { name: "Close", exact: true }).click();
   }
 }
