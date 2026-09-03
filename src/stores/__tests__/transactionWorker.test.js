@@ -63,6 +63,7 @@ describe("transaction worker", () => {
     worker.quotes = [];
     worker.bolt12Quotes = [];
     worker.onchainQuotes = [];
+    worker.customQuotes = {};
     worker.outgoingPayments = [];
     worker.reusableMintCooldowns = {};
     worker.batchPathCooldowns = {};
@@ -128,16 +129,35 @@ describe("transaction worker", () => {
     );
   });
 
-  it("does not treat custom melts as incoming mint quotes", () => {
-    const worker = useTransactionWorkerStore();
-    const customMelt = pendingInvoice("custom-melt-q", {
-      amount: -10,
-      type: "custom_method",
-      meltQuote: { quote: "custom-melt-q", amount: 10 },
-    });
+  it.each([
+    ["negative amount", { amount: -10 }],
+    ["melt quote", { meltQuote: { quote: "custom-melt-q", amount: 10 } }],
+  ])(
+    "does not treat a custom melt identified by %s as an incoming mint quote",
+    (_case, overrides) => {
+      const invoice = pendingInvoice("custom-melt-q", {
+        type: "custom_method",
+        unit: "tst",
+        ...overrides,
+      });
+      expect(useTransactionWorkerStore().shouldCheckInvoice(invoice)).toBe(
+        false
+      );
+    }
+  );
 
-    expect(worker.shouldCheckInvoice(customMelt)).toBe(false);
-  });
+  it.each(["constructor", "__proto__"])(
+    "queues prototype-like custom method %s safely",
+    (method) => {
+      const worker = useTransactionWorkerStore();
+      vi.spyOn(worker, "startTransactionWorker").mockImplementation(() => {});
+
+      worker.addSingleMintQuoteToChecker(method, "custom-q");
+
+      expect(Object.hasOwn(worker.customQuotes, method)).toBe(true);
+      expect(worker.customQuotes[method][0].quote).toBe("custom-q");
+    }
+  );
 
   it("keeps month-old quotes out of batches and checks them singly", async () => {
     const worker = useTransactionWorkerStore();

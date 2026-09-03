@@ -60,6 +60,7 @@ const h = vi.hoisted(() => {
     removeInvoiceFromChecker: vi.fn(),
     addBolt12OfferToChecker: vi.fn(),
     addOnchainQuoteToChecker: vi.fn(),
+    addSingleMintQuoteToChecker: vi.fn(),
     addOutgoingTokenToChecker: vi.fn(),
     mintQuoteIsClaimed: vi.fn(() => false),
     waitForMintQuoteRelease: vi.fn(async () => {}),
@@ -604,7 +605,6 @@ describe("wallet store", () => {
     wallet.payInvoiceData.invoice = { custom: "custom_method" };
     wallet.payInvoiceData.input.amount = 25;
     wallet.payInvoiceData.input.comment = "test payment";
-    h.mintsStore.activeUnit = "tst";
     const createMeltQuote = vi.fn(async () => ({
       quote: "custom-melt-q",
       state: "UNPAID",
@@ -615,7 +615,7 @@ describe("wallet store", () => {
       createMeltQuote,
     });
 
-    const quote = await wallet.meltQuoteCustomData();
+    const quote = await wallet.meltQuoteInvoiceData();
 
     expect(createMeltQuote).toHaveBeenCalledWith("custom_method", {
       method: "custom_method",
@@ -625,6 +625,48 @@ describe("wallet store", () => {
     });
     expect(quote.amount).toBe(25);
     expect(wallet.payInvoiceData.meltQuote.response.amount).toBe(25);
+
+    const proofs = [{ id: "00aa", amount: 25, secret: "s1" }];
+    const checkMeltQuote = vi.fn();
+    const mintWallet = { mint: { checkMeltQuote }, unit: "tst" };
+    h.mintsStore.activeUnit = "tst";
+    h.mintsStore.activeProofs = proofs;
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue(mintWallet);
+    const meltGeneric = vi.spyOn(wallet, "meltGeneric").mockResolvedValue();
+
+    await wallet.meltInvoiceData(true, "foreground");
+
+    expect(meltGeneric.mock.calls[0]).toEqual([
+      proofs,
+      quote,
+      mintWallet,
+      true,
+      expect.any(Function),
+      "custom_method",
+      undefined,
+      false,
+      "foreground",
+    ]);
+    await meltGeneric.mock.calls[0][4](quote.quote);
+    expect(checkMeltQuote).toHaveBeenCalledWith("custom_method", quote.quote);
+  });
+
+  it("does not confuse a custom method with an object property", async () => {
+    const wallet = useWalletStore();
+    wallet.invoiceHistory = [
+      {
+        quote: "custom-q",
+        mint: "https://mint-a.example",
+        unit: "tst",
+        type: "constructor",
+      },
+    ];
+
+    await wallet.mintOnPaidGeneric("custom-q", { type: "constructor" });
+
+    expect(
+      h.transactionWorkerStore.addSingleMintQuoteToChecker
+    ).toHaveBeenCalledWith("constructor", "custom-q");
   });
 
   it("creates active wallet and loads cache", async () => {

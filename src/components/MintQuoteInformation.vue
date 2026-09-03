@@ -258,11 +258,8 @@ export default defineComponent({
       }
       return "Bolt11";
     },
-    isCustomMethod(): boolean {
-      return isCustomPaymentMethod(this.method);
-    },
     amountPaidDisplay(): string {
-      if (!this.isCustomMethod) return "";
+      if (!isCustomPaymentMethod(this.method)) return "";
       const paid = (this.mintQuote as any)?.amount_paid;
       if (typeof paid !== "number" || paid <= 0) return "";
       return (this as any).formatCurrency(paid, this.unit);

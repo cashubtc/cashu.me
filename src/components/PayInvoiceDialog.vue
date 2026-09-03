@@ -287,20 +287,17 @@
                           v-if="isCustomPay"
                           class="row justify-center q-mt-sm"
                         >
-                          <div
+                          <q-input
                             class="col-12 col-sm-11 col-md-8 q-px-sm"
                             style="max-width: 600px"
-                          >
-                            <q-input
-                              round
-                              outlined
-                              dense
-                              v-model="payInvoiceData.input.comment"
-                              type="text"
-                              :label="$t('PayInvoiceDialog.custom.memo_label')"
-                              maxlength="200"
-                            ></q-input>
-                          </div>
+                            round
+                            outlined
+                            dense
+                            v-model="payInvoiceData.input.comment"
+                            type="text"
+                            :label="$t('PayInvoiceDialog.custom.memo_label')"
+                            maxlength="200"
+                          />
                         </div>
                       </div>
                       <div v-else>
@@ -318,50 +315,17 @@
                     </div>
                   </transition>
                 </div>
-                <!-- Melt quote id for custom methods: the payment provider
-                     matches the withdrawal by this code. QR encodes the bare
-                     quote id (matching the mint flow); tap to copy. -->
-                <div
+                <QuoteIdDisplay
                   v-if="showCustomMeltQuoteId"
-                  class="row justify-center q-mb-md"
+                  class="q-mx-auto q-mb-md q-px-md"
+                  style="width: 100%; max-width: 340px"
                   data-testid="custom-melt-quote-id"
-                >
-                  <div class="col-12 q-px-md" style="max-width: 340px">
-                    <div
-                      class="qr-container cursor-pointer"
-                      @click="copyMeltQuoteId"
-                    >
-                      <q-responsive :ratio="1" class="q-mx-none">
-                        <vue-qrcode
-                          :value="meltQuoteId"
-                          :options="{ width: 340 }"
-                          class="rounded-borders"
-                          style="width: 100%"
-                        >
-                        </vue-qrcode>
-                      </q-responsive>
-                    </div>
-                    <div
-                      class="q-mt-sm text-center quote-id-display cursor-pointer"
-                      @click="copyMeltQuoteId"
-                    >
-                      <div class="quote-id-caption text-grey-6">
-                        <q-icon
-                          :name="quoteIdCopied ? 'check' : 'content_copy'"
-                          size="xs"
-                          class="q-mr-xs"
-                        />
-                        {{ $t("PayInvoiceDialog.custom.quote_id_hint") }}
-                      </div>
-                      <div class="quote-id-value">
-                        <span class="quote-id-head">{{ meltQuoteIdHead }}</span
-                        ><span class="quote-id-tail">{{
-                          meltQuoteIdTail
-                        }}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  :quote-id="meltQuoteId"
+                  :label="$t('PayInvoiceDialog.custom.quote_id_hint')"
+                  :copied="quoteIdCopied"
+                  show-qr
+                  @copy="copyMeltQuoteId"
+                />
                 <div
                   v-if="showBottomMeltQuoteInformation"
                   class="invoice-details-bottom"
@@ -845,8 +809,8 @@ import MeltQuoteInformation from "components/MeltQuoteInformation.vue";
 import NumericKeyboard from "components/NumericKeyboard.vue";
 import AmountInputComponent from "components/AmountInputComponent.vue";
 import ParseInputComponent from "components/ParseInputComponent.vue";
-import VueQrcode from "@chenfengyuan/vue-qrcode";
 import { copyToClipboard } from "quasar";
+import QuoteIdDisplay from "src/components/QuoteIdDisplay.vue";
 import {
   mintsSupportingPaymentMethod,
   paymentMethodDisplayName,
@@ -867,7 +831,7 @@ export default defineComponent({
     NumericKeyboard,
     AmountInputComponent,
     ParseInputComponent,
-    VueQrcode,
+    QuoteIdDisplay,
   },
   props: {},
   data: function () {
@@ -1065,9 +1029,8 @@ export default defineComponent({
     },
     payPaymentMethod: function (): PaymentMethod | string | null {
       if (!this.payInvoiceData?.invoice) return null;
-      if ((this.payInvoiceData.invoice as any).custom) {
-        return (this.payInvoiceData.invoice as any).custom;
-      }
+      if (this.payInvoiceData.invoice.custom)
+        return this.payInvoiceData.invoice.custom;
       if (this.payInvoiceData.invoice.onchain) {
         return PaymentMethod.Onchain;
       }
@@ -1156,14 +1119,6 @@ export default defineComponent({
     },
     meltQuoteId: function (): string {
       return this.payInvoiceData?.meltQuote?.response?.quote || "";
-    },
-    meltQuoteIdHead: function (): string {
-      const quote = this.meltQuoteId;
-      return quote.slice(0, Math.max(0, quote.length - 6));
-    },
-    meltQuoteIdTail: function (): string {
-      const quote = this.meltQuoteId;
-      return quote.slice(Math.max(0, quote.length - 6));
     },
     showCustomMeltQuoteId: function (): boolean {
       return (
@@ -1424,40 +1379,6 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}
-
-/* Quote id display for custom payment methods */
-.qr-container {
-  position: relative;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.quote-id-display {
-  overflow-wrap: anywhere;
-  word-break: break-all;
-}
-
-.quote-id-caption {
-  font-size: 0.8em;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 4px;
-}
-
-.quote-id-value {
-  font-family: monospace;
-  font-size: 1.1em;
-}
-
-.quote-id-head {
-  color: var(--q-color-grey-6, #9e9e9e);
-}
-
-.quote-id-tail {
-  font-weight: 700;
-  font-size: 1.35em;
-  color: var(--q-primary);
 }
 
 .bottom-panel {

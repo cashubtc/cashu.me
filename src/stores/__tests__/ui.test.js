@@ -2,25 +2,15 @@ import { describe, expect, it } from "vitest";
 import { useUiStore } from "src/stores/ui";
 
 describe("ui store", () => {
-  it("formats custom Cashu units as plain integers with the unit code", () => {
+  it("distinguishes custom, ISO, and cent-based units", () => {
     const ui = useUiStore();
+    const gbp = new Intl.NumberFormat(navigator.language, {
+      style: "currency",
+      currency: "gbp",
+    }).format(12.5);
 
-    expect(ui.formatCurrency(12, "unit")).toBe("12 UNIT");
-    // Three-letter custom units must not be formatted as decimal
-    // currencies (no invented ".00" — Cashu amounts are integers).
     expect(ui.formatCurrency(25, "tst")).toBe("25 TST");
-  });
-
-  it("still formats real ISO currency units as currencies", () => {
-    const ui = useUiStore();
-
-    expect(ui.formatCurrency(12.5, "gbp")).toContain("12.5");
-    expect(ui.formatCurrency(12.5, "gbp")).not.toContain("GBP 12.5");
-  });
-
-  it("keeps cent-based fiat formatting", () => {
-    const ui = useUiStore();
-
+    expect(ui.formatCurrency(12.5, "gbp")).toBe(gbp);
     expect(ui.formatCurrency(1234, "usd")).toContain("12.34");
   });
 

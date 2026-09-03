@@ -158,19 +158,11 @@ export async function ensurePaymentMethodMintActive(
   return { ok: true };
 }
 
-// ---------------------------------------------------------------------------
-// Custom (generic) payment methods
-//
-// Mints can advertise payment methods beyond the first-class ones (bolt11,
-// bolt12, onchain) in their NUT-04/NUT-05 method lists, backed by generic
-// payment processors (e.g. cash settlement at a counter). The wallet
-// treats any well-formed, non-built-in method as a custom method and drives
-// it through the generic /v1/{mint,melt}/quote/{method} endpoints.
-// ---------------------------------------------------------------------------
+// Generic methods are well-formed, non-built-in NUT-04/05 advertisements
+// driven through cashu-ts' method-parametrized quote endpoints.
 
 export type AdvertisedPaymentMethod = {
   method: string;
-  // Optional human-readable display name (NUT-06)
   method_name?: string;
   unit?: string;
   min_amount?: number;
@@ -179,26 +171,21 @@ export type AdvertisedPaymentMethod = {
   [key: string]: any;
 };
 
-function nutConfig(mint: StoredMint, operation: MintOperation) {
-  return operation === "melt"
-    ? mint.info?.nuts?.[5] || mint.info?.nuts?.["5"] || ({} as any)
-    : nut4Config(mint.info);
-}
-
 function advertisedMethods(
   mint: StoredMint,
   operation: MintOperation
 ): AdvertisedPaymentMethod[] {
-  const nut = nutConfig(mint, operation);
-  if (nut.disabled === true) return [];
-  if (nut.supported === false) return [];
+  const nut =
+    operation === "melt"
+      ? mint.info?.nuts?.[5] || mint.info?.nuts?.["5"] || ({} as any)
+      : nut4Config(mint.info);
+  if (nut.disabled === true || nut.supported === false) return [];
   if (!Array.isArray(nut.methods)) return [];
   return nut.methods.filter(
     (m: any) => m && m.disabled !== true && isValidCustomMethodName(m.method)
   );
 }
 
-// Custom methods a single mint advertises for an operation (and unit).
 export function customPaymentMethods(
   mint: StoredMint,
   operation: MintOperation = "mint",
@@ -214,7 +201,6 @@ export function customPaymentMethods(
   });
 }
 
-// Custom methods any of the given mints advertise, deduplicated by method.
 export function customPaymentMethodsForMints(
   mints: StoredMint[],
   operation: MintOperation = "mint",
@@ -232,7 +218,6 @@ export function customPaymentMethodsForMints(
   return result;
 }
 
-// The advertised entry (limits etc.) for a specific mint+method+unit.
 export function advertisedPaymentMethod(
   mint: StoredMint | undefined,
   method: string,
@@ -240,15 +225,14 @@ export function advertisedPaymentMethod(
   unit?: string
 ): AdvertisedPaymentMethod | null {
   if (!mint) return null;
-  const methods = advertisedMethods(mint, operation).filter(
-    (m) => m.method === method && (!unit || !m.unit || m.unit === unit)
+  return (
+    advertisedMethods(mint, operation).find(
+      (m) => m.method === method && (!unit || !m.unit || m.unit === unit)
+    ) ?? null
   );
-  return methods[0] ?? null;
 }
 
-// Display name for a payment method: the mint-advertised `method_name`
-// (NUT-06, optional) when present and sane, otherwise the label derived
-// from the method id (matching cdk's derivation).
+// Prefer NUT-06's method_name, with cdk-compatible derivation as fallback.
 const MAX_METHOD_NAME_LENGTH = 30;
 
 function containsControlChars(value: string): boolean {

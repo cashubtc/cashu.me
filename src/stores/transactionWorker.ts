@@ -7,6 +7,7 @@ import { useWalletStore } from "src/stores/wallet";
 import { useSettingsStore } from "src/stores/settings";
 import {
   PaymentMethod,
+  type PaymentMethodId,
   basePaymentMethod,
   isCustomPaymentMethod,
   subpaymentMethod,
@@ -23,12 +24,7 @@ import { useUiStore } from "src/stores/ui";
 import { currentDateStr } from "src/js/utils";
 import { createSubpaymentHistoryQuote } from "src/js/invoice-history";
 
-// First-class methods plus any custom method string a mint advertises.
-type IncomingPaymentMethod =
-  | PaymentMethod.Bolt11
-  | PaymentMethod.Bolt12
-  | PaymentMethod.Onchain
-  | (string & {});
+type IncomingPaymentMethod = PaymentMethodId;
 
 interface InvoiceQuote {
   quote: string;
@@ -290,20 +286,12 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
       this.removeMintQuoteFromChecker(PaymentMethod.Onchain, quote);
     },
 
-    addCustomQuoteToChecker(method: string, quote: string, forceStart = false) {
-      this.addMintQuoteToChecker(method, quote, forceStart, false);
-    },
-
-    removeCustomQuoteFromChecker(method: string, quote: string) {
-      this.removeMintQuoteFromChecker(method, quote);
-    },
-
     mintQuoteQueue(method: IncomingPaymentMethod): InvoiceQuote[] {
       if (method === PaymentMethod.Bolt12) return this.bolt12Quotes;
       if (method === PaymentMethod.Onchain) return this.onchainQuotes;
       if (isCustomPaymentMethod(method)) {
-        if (!this.customQuotes[method]) {
-          this.customQuotes[method] = [];
+        if (!Object.prototype.hasOwnProperty.call(this.customQuotes, method)) {
+          this.customQuotes = { ...this.customQuotes, [method]: [] };
         }
         return this.customQuotes[method];
       }
@@ -1179,12 +1167,7 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
           walletStore
         );
         const paidAt = currentDateStr();
-        const subpaymentType =
-          method === PaymentMethod.Bolt12
-            ? PaymentMethod.Bolt12Subpayment
-            : method === PaymentMethod.Onchain
-            ? PaymentMethod.OnchainSubpayment
-            : subpaymentMethod(method);
+        const subpaymentType = subpaymentMethod(method);
         const label =
           method === PaymentMethod.Bolt12
             ? "Bolt12 Subpayment"
@@ -1545,7 +1528,11 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
         return walletStore.mintOnPaidOnchain(quote, false, false);
       }
       if (isCustomPaymentMethod(method)) {
-        return walletStore.mintOnPaidCustom(quote, false, false);
+        return walletStore.mintOnPaidGeneric(quote, {
+          type: method,
+          verbose: false,
+          kickOffInvoiceChecker: false,
+        });
       }
       return walletStore.mintOnPaidBolt11(quote, false, false);
     },

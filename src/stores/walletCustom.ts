@@ -1,8 +1,8 @@
 import { currentDateStr } from "src/js/utils";
-import { useMintsStore, WalletProof } from "./mints";
+import { useMintsStore } from "./mints";
 import { useProofsStore } from "./proofs";
 import { type MutexPriority, useUiStore } from "src/stores/ui";
-import { Amount, Wallet } from "@cashu/cashu-ts";
+import { Wallet } from "@cashu/cashu-ts";
 import * as nobleSecp256k1 from "@noble/secp256k1";
 import { bytesToHex } from "@noble/hashes/utils";
 import { notifyApiError, notify, notifySuccess } from "src/js/notify";
@@ -14,44 +14,18 @@ import {
   subpaymentMethod,
 } from "src/stores/walletTypes";
 import { paymentMethodDisplayName } from "src/js/mint-payment-methods";
-import { mintOnPaidGeneric } from "./walletWebsocket";
 import { type AppMeltQuote, normalizeMeltQuote } from "./walletMelt";
 import { createSubpaymentHistoryQuote } from "src/js/invoice-history";
 import { usePaymentHistoryStore } from "./paymentHistory";
+import { normalizeCashuQuoteAmounts } from "src/js/cashu-amount";
 
-// Custom (generic) payment methods: any NUT-04/05 method a mint advertises
-// beyond the first-class bolt11/bolt12/onchain ones. Quotes are driven
-// through cashu-ts' generic /v1/{mint,melt}/quote/{method} endpoints and
-// follow the amount_paid/amount_issued accounting model (like bolt12).
-//
-// These actions are implemented as regular functions that rely on dynamic
-// `this` when attached to the Pinia store (wallet.ts assigns them to
-// actions). Do not convert to arrow functions or `this` will be lost.
-
-function amountToNumber(value: any): number {
-  if (value === undefined || value === null) return 0;
-  return Amount.from(value).toNumber();
-}
-
-type AppMintQuote = Record<string, any>;
-
-function normalizeMintQuote(quote: Record<string, any>): AppMintQuote {
-  const normalized: AppMintQuote = { ...quote };
-  if (quote.amount !== undefined && quote.amount !== null) {
-    normalized.amount = amountToNumber(quote.amount);
-  }
-  if (quote.amount_paid !== undefined) {
-    normalized.amount_paid = amountToNumber(quote.amount_paid);
-  }
-  if (quote.amount_issued !== undefined) {
-    normalized.amount_issued = amountToNumber(quote.amount_issued);
-  }
-  return normalized;
-}
+// Generic NUT-04/05 methods use cashu-ts' method-parametrized endpoints and
+// reusable amount_paid/amount_issued accounting. These actions rely on the
+// dynamic `this` supplied when wallet.ts installs them on the Pinia store.
 
 function customMethodOfInvoice(invoice: InvoiceHistory): string {
   const method = basePaymentMethod(
-    String(invoice.type || (invoice as any).method || "")
+    String(invoice.type || invoice.method || "")
   );
   if (!isCustomPaymentMethod(method)) {
     throw new Error(`not a custom payment method: ${method}`);
@@ -59,18 +33,23 @@ function customMethodOfInvoice(invoice: InvoiceHistory): string {
   return method;
 }
 
-// How much of a quote is currently mintable. Prefers the NUT-04 accounting
-// fields; falls back to the state field for mints that predate them.
-function mintableDelta(quote: AppMintQuote): number {
-  if (quote.amount_paid !== undefined || quote.amount_issued !== undefined) {
-    return (
-      amountToNumber(quote.amount_paid) - amountToNumber(quote.amount_issued)
-    );
+async function persistMintQuote(
+  walletStore: any,
+  invoice: InvoiceHistory,
+  quote: Record<string, any>,
+  method: string
+) {
+  invoice.mintQuote = quote as any;
+  const history = usePaymentHistoryStore();
+  await history.upsertMintQuote(quote, method);
+  if (
+    history.paymentHistory.some((payment) => payment.quote === invoice.quote)
+  ) {
+    walletStore.syncPaymentHistoryCache?.();
   }
-  if (String(quote.state).toUpperCase() === "PAID") {
-    return amountToNumber(quote.amount);
+  if (walletStore.invoiceData.quote === invoice.quote) {
+    walletStore.invoiceData.mintQuote = quote;
   }
-  return 0;
 }
 
 export async function requestMintCustom(
@@ -93,7 +72,7 @@ export async function requestMintCustom(
       ? bytesToHex(nobleSecp256k1.utils.randomPrivateKey())
       : undefined;
     const pubkey = nut20supported
-      ? bytesToHex(nobleSecp256k1.getPublicKey(privkey!!, true))
+      ? bytesToHex(nobleSecp256k1.getPublicKey(privkey!, true))
       : undefined;
     const payload: Record<string, unknown> = {
       amount,
@@ -112,7 +91,7 @@ export async function requestMintCustom(
     this.invoiceData.status = "pending";
     this.invoiceData.mint = mintWallet.mint.mintUrl;
     this.invoiceData.unit = mintWallet.unit;
-    this.invoiceData.mintQuote = normalizeMintQuote(data);
+    this.invoiceData.mintQuote = normalizeCashuQuoteAmounts(data);
     this.invoiceData.privKey = privkey;
     this.invoiceData.type = method;
 
@@ -136,28 +115,6 @@ export async function requestMintCustom(
     );
     throw error;
   }
-}
-
-export async function mintOnPaidCustom(
-  this: any,
-  quote: string,
-  verbose = true,
-  kickOffInvoiceChecker = true,
-  hideInvoiceDetailsOnMint = true
-) {
-  const invoice = this.invoiceHistory.find(
-    (i: InvoiceHistory) => i.quote === quote
-  );
-  if (!invoice) {
-    throw new Error("invoice not found");
-  }
-  const method = customMethodOfInvoice(invoice);
-  return await mintOnPaidGeneric.call(this, quote, {
-    type: method,
-    verbose,
-    kickOffInvoiceChecker,
-    hideInvoiceDetailsOnMint,
-  });
 }
 
 export async function checkCustomAndMint(
@@ -194,29 +151,19 @@ export async function checkCustomAndMint(
     uIStore.unlockMutex();
   }
   try {
-    const updated = normalizeMintQuote(
+    const updated = normalizeCashuQuoteAmounts(
       await mintWallet.checkMintQuote(method, quoteId)
     );
 
-    invoice.mintQuote = updated;
-    const paymentHistoryStore = usePaymentHistoryStore();
-    await paymentHistoryStore.upsertMintQuote(updated, method);
-    if (
-      paymentHistoryStore.paymentHistory.some((p) => p.quote === invoice.quote)
-    ) {
-      this.syncPaymentHistoryCache?.();
-    }
-    if (this.invoiceData.quote === invoice.quote) {
-      this.invoiceData.mintQuote = updated;
-    }
+    await persistMintQuote(this, invoice, updated, method);
 
     if (String(updated.state).toUpperCase() === "ISSUED") {
       await this.setInvoicePaid(invoice.quote, { mintQuote: updated });
-      transactionWorkerStore.removeCustomQuoteFromChecker?.(method, quoteId);
+      transactionWorkerStore.removeMintQuoteFromChecker(method, quoteId);
       return;
     }
 
-    const delta = mintableDelta(updated);
+    const delta = transactionWorkerStore.mintableAmount(method, updated);
     if (delta <= 0) {
       if (verbose) notify(this.t("wallet.notifications.invoice_still_pending"));
       throw new Error("no new funds to mint");
@@ -240,19 +187,13 @@ export async function checkCustomAndMint(
       amount_issued: updated.amount_paid,
     };
     try {
-      normalizedMintQuote = normalizeMintQuote(
+      normalizedMintQuote = normalizeCashuQuoteAmounts(
         await mintWallet.checkMintQuote(method, quoteId)
       );
     } catch {
       // Proofs are stored; keep the conservative local state.
     }
-    invoice.mintQuote = normalizedMintQuote;
-    await paymentHistoryStore.upsertMintQuote(normalizedMintQuote, method);
-    if (
-      paymentHistoryStore.paymentHistory.some((p) => p.quote === invoice.quote)
-    ) {
-      this.syncPaymentHistoryCache?.();
-    }
+    await persistMintQuote(this, invoice, normalizedMintQuote, method);
 
     if (invoice.status === "paid") {
       // Additional payment on an already-settled quote: record it as a
@@ -369,7 +310,9 @@ export async function meltInvoiceDataCustom(
 ) {
   if (!this.payInvoiceData.invoice) throw new Error("no payment provided.");
   const method = this.payInvoiceData.invoice.custom;
-  if (!method) throw new Error("no payment method provided.");
+  if (!isCustomPaymentMethod(method)) {
+    throw new Error("no payment method provided.");
+  }
   const quote: AppMeltQuote = this.payInvoiceData.meltQuote.response;
   if (!quote) throw new Error("no quote found.");
   const mintStore = useMintsStore();
@@ -378,27 +321,8 @@ export async function meltInvoiceDataCustom(
     mintStore.activeUnit,
     true
   );
-  return await this.meltCustom(
+  return await this.meltGeneric(
     mintStore.activeProofs,
-    quote,
-    mintWallet,
-    method,
-    silent,
-    mutexPriority
-  );
-}
-
-export async function meltCustom(
-  this: any,
-  proofs: WalletProof[],
-  quote: AppMeltQuote,
-  mintWallet: Wallet,
-  method: string,
-  silent?: boolean,
-  mutexPriority: MutexPriority = "normal"
-) {
-  return this.meltGeneric(
-    proofs,
     quote,
     mintWallet,
     silent,
@@ -407,25 +331,5 @@ export async function meltCustom(
     undefined,
     false,
     mutexPriority
-  );
-}
-
-export async function checkOutgoingCustom(
-  this: any,
-  quote: string,
-  verbose = true
-) {
-  const invoice = this.invoiceHistory.find(
-    (i: InvoiceHistory) => i.quote === quote
-  );
-  if (!invoice) {
-    throw new Error("invoice not found");
-  }
-  const method = customMethodOfInvoice(invoice);
-  return this.checkOutgoingInvoiceGeneric(
-    quote,
-    verbose,
-    (wallet: Wallet, quoteId: string) =>
-      wallet.mint.checkMeltQuote(method, quoteId)
   );
 }

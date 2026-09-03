@@ -3,6 +3,7 @@ import { liveQuery } from "dexie";
 import { cashuDb } from "./dexie";
 import {
   PaymentMethod,
+  type PaymentMethodId,
   basePaymentMethod,
   isCustomPaymentMethod,
 } from "src/stores/walletTypes";
@@ -11,12 +12,7 @@ import { normalizeCashuQuoteAmounts } from "src/js/cashu-amount";
 
 export type PaymentDirection = "mint" | "melt";
 export type PaymentStatus = "pending" | "paid";
-export type QuoteMethod =
-  | PaymentMethod.Bolt11
-  | PaymentMethod.Bolt12
-  | PaymentMethod.Onchain
-  // custom (generic) payment method advertised by a mint
-  | (string & {});
+export type QuoteMethod = PaymentMethodId;
 
 export type MintQuoteRow = {
   quote: string;
@@ -60,7 +56,7 @@ export type PaymentHistoryRow = {
   quote: string;
   parentQuote?: string;
   method: QuoteMethod;
-  paymentType?: PaymentMethod | string;
+  paymentType?: PaymentMethodId;
   amount: number;
   request: string;
   memo: string;
@@ -86,8 +82,8 @@ export type LegacyInvoiceHistory = {
   status: PaymentStatus;
   mint: string;
   unit: string;
-  type?: PaymentMethod | string;
-  method?: PaymentMethod | string;
+  type?: PaymentMethodId;
+  method?: PaymentMethodId;
   mintQuote?: any;
   meltQuote?: any;
   label?: string;
@@ -161,8 +157,8 @@ function inferMethod(
 function inferPaymentType(
   invoice: LegacyInvoiceHistory,
   method: QuoteMethod
-): PaymentMethod | string {
-  return (invoice.type || invoice.method || method) as PaymentMethod | string;
+): PaymentMethodId {
+  return invoice.type || invoice.method || method;
 }
 
 function inferDirection(invoice: LegacyInvoiceHistory): PaymentDirection {

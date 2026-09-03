@@ -14,11 +14,7 @@ const KNOWN_PAYMENT_METHODS = new Set<string>(Object.values(PaymentMethod));
 
 const SUBPAYMENT_SUFFIX = "-subpayment";
 
-// Custom method names are used to build mint endpoint paths; only accept
-// conservative identifiers from mint advertisements (NUT-04 requires
-// [a-z0-9_-]+; we additionally cap the length). Names ending in
-// "-subpayment" are rejected because that suffix is reserved for the
-// wallet's internal subpayment history entries.
+// Endpoint-safe NUT-04 names; the suffix is reserved for local history rows.
 const CUSTOM_METHOD_PATTERN = /^[a-z0-9_-]{1,32}$/;
 
 export function isValidCustomMethodName(method: unknown): method is string {
@@ -32,7 +28,12 @@ export function isValidCustomMethodName(method: unknown): method is string {
 export function isCustomPaymentMethod(
   method?: string | null
 ): method is string {
-  return Boolean(method) && !KNOWN_PAYMENT_METHODS.has(method as string);
+  if (!method) return false;
+  const baseMethod = basePaymentMethod(method);
+  return (
+    !KNOWN_PAYMENT_METHODS.has(baseMethod) &&
+    isValidCustomMethodName(baseMethod)
+  );
 }
 
 // "bolt12-subpayment" -> "bolt12"

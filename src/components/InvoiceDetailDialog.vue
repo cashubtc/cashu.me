@@ -101,28 +101,15 @@
                   />
                   {{ invoiceData.request }}
                 </div>
-                <!-- Quote id for custom methods: shown so the payment
-                     provider can match the payment, with the last 6
-                     characters emphasized -->
-                <div
+                <QuoteIdDisplay
                   v-if="isCustom"
-                  class="q-mt-md text-center quote-id-display cursor-pointer"
+                  class="q-mt-md"
                   data-testid="custom-quote-id"
-                  @click="onCopyBolt11"
-                >
-                  <div class="quote-id-caption text-grey-7">
-                    <q-icon
-                      :name="copyButtonCopied ? 'check' : 'content_copy'"
-                      size="xs"
-                      class="q-mr-xs"
-                    />
-                    {{ $t("InvoiceDetailDialog.custom.quote_id") }}
-                  </div>
-                  <div class="quote-id-value">
-                    <span class="quote-id-head">{{ quoteIdHead }}</span
-                    ><span class="quote-id-tail">{{ quoteIdTail }}</span>
-                  </div>
-                </div>
+                  :quote-id="invoiceData.quote || ''"
+                  :label="$t('InvoiceDetailDialog.custom.quote_id')"
+                  :copied="copyButtonCopied"
+                  @copy="onCopyBolt11"
+                />
               </div>
             </div>
 
@@ -203,6 +190,7 @@ import { useUiStore } from "../stores/ui";
 import { useWorkersStore } from "../stores/workers";
 import MeltQuoteInformation from "./MeltQuoteInformation.vue";
 import MintQuoteInformation from "./MintQuoteInformation.vue";
+import QuoteIdDisplay from "src/components/QuoteIdDisplay.vue";
 import { PaymentMethod, isCustomPaymentMethod } from "src/stores/walletTypes";
 import { useMintsStore } from "src/stores/mints";
 import { paymentMethodDisplayName } from "src/js/mint-payment-methods";
@@ -216,6 +204,7 @@ export default defineComponent({
     VueQrcode,
     MeltQuoteInformation,
     MintQuoteInformation,
+    QuoteIdDisplay,
   },
   props: {},
   data: function () {
@@ -267,9 +256,7 @@ export default defineComponent({
         this.invoiceData.unit
       );
     },
-    // For custom methods the QR encodes the mint-provided request when there
-    // is one, otherwise the bare quote id (no URL scheme — handheld scanners
-    // type the payload verbatim into the payment provider's lookup field).
+    // Custom QR payloads are raw provider requests, falling back to quote IDs.
     qrEncodedValue(): string {
       if (this.isCustom) {
         const request = this.invoiceData.request;
@@ -280,14 +267,6 @@ export default defineComponent({
         return "bitcoin:" + this.invoiceData.request;
       }
       return "lightning:" + (this.invoiceData.request || "").toUpperCase();
-    },
-    quoteIdHead(): string {
-      const quote = this.invoiceData.quote || "";
-      return quote.slice(0, Math.max(0, quote.length - 6));
-    },
-    quoteIdTail(): string {
-      const quote = this.invoiceData.quote || "";
-      return quote.slice(Math.max(0, quote.length - 6));
     },
     copyButtonLabel: function () {
       if (this.copyButtonCopied) {
@@ -408,34 +387,6 @@ export default defineComponent({
   hyphens: none;
   font-size: 0.9em;
   font-family: monospace;
-}
-
-/* Quote id display for custom payment methods */
-.quote-id-display {
-  overflow-wrap: anywhere;
-  word-break: break-all;
-}
-
-.quote-id-caption {
-  font-size: 0.8em;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 4px;
-}
-
-.quote-id-value {
-  font-family: monospace;
-  font-size: 1.1em;
-}
-
-.quote-id-head {
-  color: var(--q-color-grey-6, #9e9e9e);
-}
-
-.quote-id-tail {
-  font-weight: 700;
-  font-size: 1.35em;
-  color: var(--q-primary);
 }
 
 .checkmark-overlay {

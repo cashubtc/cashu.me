@@ -4,26 +4,11 @@ import { useWorkersStore } from "./workers";
 import { useUiStore } from "src/stores/ui";
 import { useMintsStore } from "src/stores/mints";
 import { notifySuccess, notifyApiError } from "src/js/notify";
-import type {
-  MintQuoteBolt11Response,
-  MintQuoteBolt12Response,
-  MintQuoteOnchainResponse,
-} from "@cashu/cashu-ts";
-import { PaymentMethod } from "src/stores/walletTypes";
+import { PaymentMethod, type PaymentMethodId } from "src/stores/walletTypes";
 
-// First-class methods plus any custom method string a mint advertises.
-type IncomingMintMethod =
-  | PaymentMethod.Bolt11
-  | PaymentMethod.Bolt12
-  | PaymentMethod.Onchain
-  | (string & {});
+type IncomingMintMethod = PaymentMethodId;
 
-type MintQuotePaidResponse = (
-  | MintQuoteBolt11Response
-  | MintQuoteBolt12Response
-  | MintQuoteOnchainResponse
-) &
-  Record<string, any>;
+type MintQuotePaidResponse = Record<string, any> & { state: string };
 
 type MintOnPaidConfig = {
   command: string;
@@ -88,26 +73,32 @@ const mintOnPaidConfigs: Record<string, MintOnPaidConfig> = {
 // Custom methods share one config shape: NUT-17 command `{method}_mint_quote`
 // and reusable (amount_paid accounting) semantics, mirroring bolt12.
 function getMintOnPaidConfig(method: IncomingMintMethod): MintOnPaidConfig {
-  const config = mintOnPaidConfigs[method];
-  if (config) return config;
-  return {
-    command: `${method}_mint_quote`,
-    oneShot: false,
-    addToChecker: (quoteId: string) =>
-      useTransactionWorkerStore().addCustomQuoteToChecker?.(method, quoteId),
-    onPaid: async (
-      walletStore: any,
-      quoteId,
-      _invoice,
-      verbose,
-      hideInvoiceDetailsOnMint
-    ) =>
-      walletStore.checkCustomAndMint(
+  const config = Object.prototype.hasOwnProperty.call(mintOnPaidConfigs, method)
+    ? mintOnPaidConfigs[method]
+    : undefined;
+  return (
+    config || {
+      command: `${method}_mint_quote`,
+      oneShot: false,
+      addToChecker: (quoteId: string) =>
+        useTransactionWorkerStore().addSingleMintQuoteToChecker(
+          method,
+          quoteId
+        ),
+      onPaid: (
+        walletStore: any,
         quoteId,
+        _invoice,
         verbose,
         hideInvoiceDetailsOnMint
-      ),
-  };
+      ) =>
+        walletStore.checkCustomAndMint(
+          quoteId,
+          verbose,
+          hideInvoiceDetailsOnMint
+        ),
+    }
+  );
 }
 
 const activeMintQuoteSubscriptions = new Map<string, () => void>();

@@ -394,11 +394,7 @@ export default defineComponent({
     },
 
     getTransactionLabel(transaction) {
-      if (
-        !transaction.label &&
-        transaction.method &&
-        isCustomPaymentMethod(transaction.method)
-      ) {
+      if (!transaction.label && isCustomPaymentMethod(transaction.method)) {
         const mint = useMintsStore().mints.find(
           (m) => m.url === transaction.mint
         );

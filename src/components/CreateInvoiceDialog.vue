@@ -471,25 +471,15 @@ export default defineComponent({
       // Bolt11 requires amount > 0
       // Bolt12 and on-chain allow 0 amount (amountless request)
       if (this.isBolt12 || this.isOnchain) return true;
-      if (
-        this.invoiceData.amount == null ||
-        Number(this.invoiceData.amount) <= 0
-      ) {
-        return false;
-      }
-      if (this.isCustom) {
-        const advertised = this.customMethodAdvertisement;
-        const amount = Math.floor(
-          Number(this.invoiceData.amount) * this.activeUnitCurrencyMultiplyer
-        );
-        if (advertised?.min_amount != null && amount < advertised.min_amount) {
-          return false;
-        }
-        if (advertised?.max_amount != null && amount > advertised.max_amount) {
-          return false;
-        }
-      }
-      return true;
+      const amount = Number(this.invoiceData.amount);
+      if (!(amount > 0)) return false;
+      if (!this.isCustom) return true;
+      const advertised = this.customMethodAdvertisement;
+      const units = Math.floor(amount * this.activeUnitCurrencyMultiplyer);
+      return (
+        (advertised?.min_amount == null || units >= advertised.min_amount) &&
+        (advertised?.max_amount == null || units <= advertised.max_amount)
+      );
     },
     createButtonLabel(): string {
       if (this.isBolt12) {
@@ -602,7 +592,7 @@ export default defineComponent({
       "requestMintOnchain",
       "mintOnPaidOnchain",
       "requestMintCustom",
-      "mintOnPaidCustom",
+      "mintOnPaidGeneric",
     ]),
     ...mapActions(useMintsStore, ["activateMintUrl", "toggleUnit"]),
     enterNpubCashAmountMode() {
@@ -648,17 +638,13 @@ export default defineComponent({
       if (this.isCustom) {
         // Keep the custom method as long as the active mint supports it;
         // otherwise fall back to the regular lightning methods.
-        const mintStore = useMintsStore();
-        const mint = mintStore.mints.find(
-          (m: any) => m.url === mintStore.activeMintUrl
-        );
         if (
-          mint &&
+          this.activeMint &&
           mintSupportsPaymentMethod(
-            mint,
+            this.activeMint,
             this.customMethod,
             "mint",
-            mintStore.activeUnit
+            this.activeUnit as string
           )
         ) {
           return;
@@ -714,7 +700,9 @@ export default defineComponent({
 
           this.showCreateInvoiceDialog = false;
           this.showInvoiceDetails = true;
-          await this.mintOnPaidCustom(mintQuote.quote);
+          await this.mintOnPaidGeneric(mintQuote.quote, {
+            type: this.customMethod,
+          });
         } else if (this.isBolt12) {
           // BOLT12 Flow
           const mintQuote = await this.requestMintBolt12(amount, wallet);

@@ -15,27 +15,17 @@ import { useSettingsStore } from "./settings";
 
 export type MutexPriority = "foreground" | "normal" | "background";
 
-// Units that are real ISO 4217 currency codes (fiat mints) render as
-// currencies; other custom units render as plain integers with their code.
-let isoCurrencyCodes: Set<string> | null = null;
-function isIsoCurrency(unit: string): boolean {
-  if (isoCurrencyCodes === null) {
-    try {
-      isoCurrencyCodes = new Set(
-        (
-          Intl as unknown as {
-            supportedValuesOf: (key: string) => string[];
-          }
-        )
-          .supportedValuesOf("currency")
-          .map((code) => code.toLowerCase())
-      );
-    } catch {
-      isoCurrencyCodes = new Set();
-    }
+const isoCurrencyCodes = (() => {
+  try {
+    return new Set(
+      (Intl as unknown as { supportedValuesOf: (key: string) => string[] })
+        .supportedValuesOf("currency")
+        .map((code) => code.toLowerCase())
+    );
+  } catch {
+    return new Set<string>();
   }
-  return isoCurrencyCodes.has(unit.toLowerCase());
-}
+})();
 
 type MutexWaiter = {
   priority: MutexPriority;
@@ -192,13 +182,12 @@ export const useUiStore = defineStore("ui", {
       if (currency == "msat") return this.fromMsat(value);
       if (currency == "usd") value = value / 100;
       if (currency == "eur") value = value / 100;
-      // Fiat units render as currencies. NUT-01 only defines a minor unit for
-      // bitcoin and ISO 4217 currencies; custom units (e.g. from mints with
-      // generic payment methods) carry no precision metadata, so the wallet
-      // treats them as having no minor unit and renders them as plain
-      // integers with the unit code — currency formatting would invent
-      // decimals that do not exist.
-      if (currency == "usd" || currency == "eur" || isIsoCurrency(currency)) {
+      // ISO units have currency metadata; custom Cashu units are integers.
+      if (
+        currency == "usd" ||
+        currency == "eur" ||
+        isoCurrencyCodes.has(currency.toLowerCase())
+      ) {
         try {
           return new Intl.NumberFormat(navigator.language, {
             style: "currency",
