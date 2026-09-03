@@ -90,6 +90,30 @@
               </div>
             </div>
           </div>
+
+          <!-- Custom payment method options (advertised by a mint) -->
+          <div
+            v-for="customMethod in customSendMethods"
+            :key="customMethod.method"
+            class="action-row"
+            role="button"
+            tabindex="0"
+            :data-testid="`send-${customMethod.method}-option`"
+            @click="showCustomPayDialog(customMethod.method)"
+            @keydown.enter.prevent="showCustomPayDialog(customMethod.method)"
+            @keydown.space.prevent="showCustomPayDialog(customMethod.method)"
+          >
+            <div class="row items-center no-wrap">
+              <div class="icon-circle">
+                <BanknoteIcon :size="24" />
+              </div>
+              <div class="col q-ml-md">
+                <div class="text-body1 text-weight-medium">
+                  {{ methodDisplay(customMethod) }}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </q-card-section>
     </q-card>
@@ -112,12 +136,16 @@ import {
   Scan as ScanIcon,
   Coins as CoinsIcon,
   Bitcoin as BitcoinIcon,
+  Banknote as BanknoteIcon,
 } from "lucide-vue-next";
 import { PaymentMethod } from "src/stores/walletTypes";
 import { notifyWarning } from "src/js/notify";
 import {
   ensurePaymentMintActive,
   firstMintSupportingPaymentMethods,
+  customPaymentMethodsForMints,
+  advertisedDisplayName,
+  type AdvertisedPaymentMethod,
 } from "src/js/mint-payment-methods";
 
 export default defineComponent({
@@ -128,6 +156,7 @@ export default defineComponent({
     ZapIcon,
     ScanIcon,
     BitcoinIcon,
+    BanknoteIcon,
   },
   mixins: [windowMixin],
   props: {},
@@ -185,10 +214,57 @@ export default defineComponent({
         )
       );
     },
+    customSendMethods: function (): AdvertisedPaymentMethod[] {
+      return customPaymentMethodsForMints(
+        this.mints as any,
+        "melt",
+        this.activeUnit as string
+      );
+    },
   },
   methods: {
     ...mapActions(useMintsStore, ["selectMintUrl"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+    methodDisplay: advertisedDisplayName,
+    showCustomPayDialog: async function (method: string) {
+      const mintResult = await ensurePaymentMintActive(
+        this.mints as any,
+        this.activeMintUrl as string,
+        this.selectMintUrl,
+        [method],
+        "melt",
+        this.activeUnit as string
+      );
+      if (!mintResult.ok) {
+        notifyWarning("No mints available");
+        this.showSendDialog = false;
+        return;
+      }
+      this.payInvoiceData.show = true;
+      // No parseable request for custom methods: the user declares the
+      // amount (and optional memo) directly.
+      this.payInvoiceData.invoice = Object.freeze({
+        custom: method,
+        request: "",
+        memo: "",
+        sat: 0,
+      }) as any;
+      this.payInvoiceData.lnurlpay = null;
+      this.payInvoiceData.domain = "";
+      this.payInvoiceData.lnurlauth = null;
+      this.payInvoiceData.paymentMethod = method;
+      this.payInvoiceData.meltQuote.error = "";
+      this.payInvoiceData.meltQuote.response = {
+        quote: "",
+        amount: 0,
+        fee_reserve: 0,
+      };
+      this.payInvoiceData.input.request = "";
+      this.payInvoiceData.input.amount = undefined;
+      this.payInvoiceData.input.comment = "";
+      this.camera.show = false;
+      this.showSendDialog = false;
+    },
     showParseDialog: async function () {
       const mintResult = await ensurePaymentMintActive(
         this.mints as any,

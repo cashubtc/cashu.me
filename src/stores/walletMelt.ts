@@ -18,7 +18,7 @@ import {
   notifyWarning,
 } from "src/js/notify";
 import { useTransactionWorkerStore } from "src/stores/transactionWorker";
-import { PaymentMethod } from "src/stores/walletTypes";
+import { PaymentMethod, type PaymentMethodId } from "src/stores/walletTypes";
 import { useMintsStore, WalletProof } from "./mints";
 import { usePaymentHistoryStore } from "./paymentHistory";
 import { useProofsStore } from "./proofs";
@@ -93,13 +93,15 @@ export function normalizeMeltQuote(
     ...(rest as any),
     amount: amountToNumber(quote.amount),
     fee_reserve:
-      "fee_reserve" in quote
+      "fee_reserve" in quote && quote.fee_reserve !== undefined
         ? amountToNumber(quote.fee_reserve)
-        : amountToNumber(
+        : "fee_options" in quote && Array.isArray(quote.fee_options)
+        ? amountToNumber(
             quote.fee_options.find(
               (option) => option.fee_index === quote.selected_fee_index
             )?.fee_reserve ?? quote.fee_options[0]?.fee_reserve
-          ),
+          )
+        : 0,
     payment_preimage:
       "payment_preimage" in quote ? quote.payment_preimage : null,
   };
@@ -152,7 +154,7 @@ export async function meltGeneric(
   mintWallet: Wallet,
   silent: boolean | undefined,
   checkQuote: CheckMeltQuoteFn,
-  method: PaymentMethod = PaymentMethod.Bolt11,
+  method: PaymentMethodId = PaymentMethod.Bolt11,
   completeMeltOptions?: CompleteMeltOptions,
   releaseMutex = false,
   mutexPriority: MutexPriority = "normal"

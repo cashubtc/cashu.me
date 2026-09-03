@@ -2,15 +2,15 @@ import { describe, expect, it } from "vitest";
 import { useUiStore } from "src/stores/ui";
 
 describe("ui store", () => {
-  it("formats custom Cashu units without throwing", () => {
+  it("distinguishes custom, ISO, and cent-based units", () => {
     const ui = useUiStore();
+    const gbp = new Intl.NumberFormat(navigator.language, {
+      style: "currency",
+      currency: "gbp",
+    }).format(12.5);
 
-    expect(ui.formatCurrency(12, "unit")).toBe("12 unit");
-  });
-
-  it("keeps cent-based fiat formatting", () => {
-    const ui = useUiStore();
-
+    expect(ui.formatCurrency(25, "tst")).toBe("25 TST");
+    expect(ui.formatCurrency(12.5, "gbp")).toBe(gbp);
     expect(ui.formatCurrency(1234, "usd")).toContain("12.34");
   });
 

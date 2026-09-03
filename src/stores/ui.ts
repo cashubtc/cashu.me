@@ -15,6 +15,18 @@ import { useSettingsStore } from "./settings";
 
 export type MutexPriority = "foreground" | "normal" | "background";
 
+const isoCurrencyCodes = (() => {
+  try {
+    return new Set(
+      (Intl as unknown as { supportedValuesOf: (key: string) => string[] })
+        .supportedValuesOf("currency")
+        .map((code) => code.toLowerCase())
+    );
+  } catch {
+    return new Set<string>();
+  }
+})();
+
 type MutexWaiter = {
   priority: MutexPriority;
   resolve: () => void;
@@ -170,20 +182,26 @@ export const useUiStore = defineStore("ui", {
       if (currency == "msat") return this.fromMsat(value);
       if (currency == "usd") value = value / 100;
       if (currency == "eur") value = value / 100;
-      try {
-        return new Intl.NumberFormat(navigator.language, {
-          style: "currency",
-          currency: currency,
-        }).format(value);
-      } catch {
-        return (
-          new Intl.NumberFormat(navigator.language).format(value) +
-          " " +
-          String(currency)
-        );
+      // ISO units have currency metadata; custom Cashu units are integers.
+      if (
+        currency == "usd" ||
+        currency == "eur" ||
+        isoCurrencyCodes.has(currency.toLowerCase())
+      ) {
+        try {
+          return new Intl.NumberFormat(navigator.language, {
+            style: "currency",
+            currency: currency,
+          }).format(value);
+        } catch {
+          // fall through to plain formatting
+        }
       }
-      // + " " +
-      // currency.toUpperCase()
+      return (
+        new Intl.NumberFormat(navigator.language).format(value) +
+        " " +
+        String(currency).toUpperCase()
+      );
     },
     toggleDebugConsole() {
       this.showDebugConsole = !this.showDebugConsole;

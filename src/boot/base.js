@@ -139,30 +139,7 @@ window.windowMixin = {
       return text;
     },
     formatCurrency: function (value, currency, showBalance = false) {
-      if (currency == undefined) {
-        currency = "sat";
-      }
-      if (useUiStore().hideBalance && !showBalance) {
-        return "****";
-      }
-      if (currency == "sat") return this.formatSat(value);
-      if (currency == "msat") return this.fromMsat(value);
-      if (currency == "usd") value = value / 100;
-      if (currency == "eur") value = value / 100;
-      try {
-        return new Intl.NumberFormat(window.LOCALE, {
-          style: "currency",
-          currency: currency,
-        }).format(value);
-      } catch {
-        return (
-          new Intl.NumberFormat(window.LOCALE).format(value) +
-          " " +
-          String(currency)
-        );
-      }
-      // + " " +
-      // currency.toUpperCase()
+      return useUiStore().formatCurrency(value, currency, showBalance);
     },
     formatSat: function (value) {
       // convert value to integer

@@ -19,6 +19,16 @@
               v-else-if="isOnchainTransaction(transaction)"
               class="transaction-icon"
             />
+            <ArrowUpRightIcon
+              v-else-if="
+                isCustomTransaction(transaction) && transaction.amount < 0
+              "
+              class="transaction-icon"
+            />
+            <ArrowDownLeftIcon
+              v-else-if="isCustomTransaction(transaction)"
+              class="transaction-icon"
+            />
             <ZapIcon v-else class="transaction-icon" />
           </q-avatar>
         </q-item-section>
@@ -164,15 +174,23 @@ import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { useWalletStore } from "src/stores/wallet";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { useUiStore } from "src/stores/ui";
+import { useMintsStore } from "src/stores/mints";
 import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import token from "../js/token";
 import { notify } from "src/js/notify";
 import {
   Bitcoin as BitcoinIcon,
   Coins as CoinsIcon,
+  ArrowDownLeft as ArrowDownLeftIcon,
+  ArrowUpRight as ArrowUpRightIcon,
   Zap as ZapIcon,
 } from "lucide-vue-next";
-import { PaymentMethod, UnifiedTransactionType } from "src/stores/walletTypes";
+import {
+  PaymentMethod,
+  UnifiedTransactionType,
+  isCustomPaymentMethod,
+} from "src/stores/walletTypes";
+import { paymentMethodDisplayName } from "src/js/mint-payment-methods";
 import { mintQuoteForHistoryInvoice } from "src/js/invoice-history";
 
 export default defineComponent({
@@ -180,6 +198,8 @@ export default defineComponent({
   components: {
     CoinsIcon,
     BitcoinIcon,
+    ArrowDownLeftIcon,
+    ArrowUpRightIcon,
     ZapIcon,
   },
   mixins: [windowMixin],
@@ -274,6 +294,7 @@ export default defineComponent({
       "checkInvoiceBolt11",
       "checkOutgoingInvoice",
       "checkOfferAndMintBolt12",
+      "checkCustomAndMint",
       "checkOnchainAndMint",
     ]),
     ...mapActions(useTransactionWorkerStore, [
@@ -347,6 +368,10 @@ export default defineComponent({
       return transaction.type === UnifiedTransactionType.Onchain;
     },
 
+    isCustomTransaction(transaction) {
+      return isCustomPaymentMethod(transaction.method);
+    },
+
     getTransactionIcon(transaction) {
       return transaction.type === UnifiedTransactionType.Lightning
         ? "flash_on"
@@ -369,6 +394,17 @@ export default defineComponent({
     },
 
     getTransactionLabel(transaction) {
+      if (!transaction.label && isCustomPaymentMethod(transaction.method)) {
+        const mint = useMintsStore().mints.find(
+          (m) => m.url === transaction.mint
+        );
+        return paymentMethodDisplayName(
+          mint,
+          transaction.method,
+          transaction.amount < 0 ? "melt" : "mint",
+          transaction.unit
+        );
+      }
       return transaction.label || this.getDefaultLabel(transaction);
     },
 
@@ -396,11 +432,17 @@ export default defineComponent({
         const isBolt12 =
           transaction.method === PaymentMethod.Bolt12 ||
           transaction.method === PaymentMethod.Bolt12Subpayment;
+        const isCustom = isCustomPaymentMethod(transaction.method);
 
         if (transaction.amount < 0) {
           this.checkOutgoingInvoice(transaction.quote, true);
         } else if (isBolt12) {
           this.checkOfferAndMintBolt12(
+            mintQuoteForHistoryInvoice(transaction),
+            true
+          );
+        } else if (isCustom) {
+          this.checkCustomAndMint(
             mintQuoteForHistoryInvoice(transaction),
             true
           );
@@ -469,10 +511,17 @@ export default defineComponent({
         const isBolt12 =
           invoice.method === PaymentMethod.Bolt12 ||
           invoice.method === PaymentMethod.Bolt12Subpayment;
+        const isCustom = isCustomPaymentMethod(invoice.method);
 
         if (invoice.amount < 0) {
           this.addOutgoingInvoiceToChecker(invoice.quote, true);
           this.checkOutgoingInvoice(invoice.quote, true);
+        } else if (isCustom) {
+          this.checkCustomAndMint(
+            mintQuoteForHistoryInvoice(invoice),
+            false,
+            false
+          );
         } else if (isBolt12) {
           this.addBolt12OfferToChecker(
             mintQuoteForHistoryInvoice(invoice),

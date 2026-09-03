@@ -1,6 +1,13 @@
 import type { GetInfoResponse } from "@cashu/cashu-ts";
 import type { StoredMint } from "src/stores/mints";
-import { PaymentMethod } from "src/stores/walletTypes";
+import {
+  PaymentMethod,
+  type PaymentMethodId,
+  basePaymentMethod,
+  isCustomPaymentMethod,
+  isValidCustomMethodName,
+  paymentMethodLabel,
+} from "src/stores/walletTypes";
 
 function nut4Config(info?: GetInfoResponse) {
   return info?.nuts?.[4] || info?.nuts?.["4"] || ({} as any);
@@ -10,7 +17,7 @@ type MintOperation = "mint" | "melt";
 
 export function mintSupportsPaymentMethod(
   mint: StoredMint,
-  method: PaymentMethod,
+  method: PaymentMethodId,
   operation: MintOperation = "mint",
   unit?: string
 ): boolean {
@@ -31,7 +38,7 @@ export function mintSupportsPaymentMethod(
 
 export function mintsSupportingPaymentMethod(
   mints: StoredMint[],
-  method: PaymentMethod,
+  method: PaymentMethodId,
   operation: MintOperation = "mint",
   unit?: string
 ): StoredMint[] {
@@ -42,7 +49,7 @@ export function mintsSupportingPaymentMethod(
 
 export function mintSupportsAnyPaymentMethod(
   mint: StoredMint,
-  methods: PaymentMethod[],
+  methods: PaymentMethodId[],
   operation: MintOperation = "mint",
   unit?: string
 ): boolean {
@@ -53,10 +60,10 @@ export function mintSupportsAnyPaymentMethod(
 
 export function firstSupportedPaymentMethod(
   mint: StoredMint,
-  methods: PaymentMethod[],
+  methods: PaymentMethodId[],
   operation: MintOperation = "mint",
   unit?: string
-): PaymentMethod | null {
+): PaymentMethodId | null {
   return (
     methods.find((method) =>
       mintSupportsPaymentMethod(mint, method, operation, unit)
@@ -67,7 +74,7 @@ export function firstSupportedPaymentMethod(
 export function firstMintSupportingPaymentMethods(
   mints: StoredMint[],
   activeMintUrl: string,
-  methods: PaymentMethod[],
+  methods: PaymentMethodId[],
   operation: MintOperation = "mint",
   unit?: string
 ): StoredMint | null {
@@ -89,11 +96,11 @@ export async function ensurePaymentMintActive(
   mints: StoredMint[],
   activeMintUrl: string,
   selectMintUrl: (url: string) => void | Promise<void>,
-  methods: PaymentMethod[],
+  methods: PaymentMethodId[],
   operation: MintOperation = "mint",
   unit?: string
 ): Promise<
-  | { ok: true; mint: StoredMint; method: PaymentMethod }
+  | { ok: true; mint: StoredMint; method: PaymentMethodId }
   | { ok: false; errorKey: string }
 > {
   const mint = firstMintSupportingPaymentMethods(
@@ -116,7 +123,7 @@ export async function ensurePaymentMintActive(
   return { ok: true, mint, method };
 }
 
-export function paymentMethodNoMintErrorKey(method: PaymentMethod): string {
+export function paymentMethodNoMintErrorKey(method: PaymentMethodId): string {
   return method === PaymentMethod.Bolt12
     ? "wallet.notifications.no_bolt12_mint"
     : "wallet.notifications.no_bolt11_mint";
@@ -126,7 +133,7 @@ export async function ensurePaymentMethodMintActive(
   mints: StoredMint[],
   activeMintUrl: string,
   selectMintUrl: (url: string) => void | Promise<void>,
-  method: PaymentMethod,
+  method: PaymentMethodId,
   operation: MintOperation = "mint",
   unit?: string
 ): Promise<{ ok: true } | { ok: false; errorKey: string }> {
@@ -149,4 +156,120 @@ export async function ensurePaymentMethodMintActive(
   }
 
   return { ok: true };
+}
+
+// Generic methods are well-formed, non-built-in NUT-04/05 advertisements
+// driven through cashu-ts' method-parametrized quote endpoints.
+
+export type AdvertisedPaymentMethod = {
+  method: string;
+  method_name?: string;
+  unit?: string;
+  min_amount?: number;
+  max_amount?: number;
+  description?: boolean;
+  [key: string]: any;
+};
+
+function advertisedMethods(
+  mint: StoredMint,
+  operation: MintOperation
+): AdvertisedPaymentMethod[] {
+  const nut =
+    operation === "melt"
+      ? mint.info?.nuts?.[5] || mint.info?.nuts?.["5"] || ({} as any)
+      : nut4Config(mint.info);
+  if (nut.disabled === true || nut.supported === false) return [];
+  if (!Array.isArray(nut.methods)) return [];
+  return nut.methods.filter(
+    (m: any) => m && m.disabled !== true && isValidCustomMethodName(m.method)
+  );
+}
+
+export function customPaymentMethods(
+  mint: StoredMint,
+  operation: MintOperation = "mint",
+  unit?: string
+): AdvertisedPaymentMethod[] {
+  const seen = new Set<string>();
+  return advertisedMethods(mint, operation).filter((m) => {
+    if (!isCustomPaymentMethod(m.method)) return false;
+    if (unit && m.unit && m.unit !== unit) return false;
+    if (seen.has(m.method)) return false;
+    seen.add(m.method);
+    return true;
+  });
+}
+
+export function customPaymentMethodsForMints(
+  mints: StoredMint[],
+  operation: MintOperation = "mint",
+  unit?: string
+): AdvertisedPaymentMethod[] {
+  const seen = new Set<string>();
+  const result: AdvertisedPaymentMethod[] = [];
+  for (const mint of mints) {
+    for (const m of customPaymentMethods(mint, operation, unit)) {
+      if (seen.has(m.method)) continue;
+      seen.add(m.method);
+      result.push(m);
+    }
+  }
+  return result;
+}
+
+export function advertisedPaymentMethod(
+  mint: StoredMint | undefined,
+  method: string,
+  operation: MintOperation = "mint",
+  unit?: string
+): AdvertisedPaymentMethod | null {
+  if (!mint) return null;
+  return (
+    advertisedMethods(mint, operation).find(
+      (m) => m.method === method && (!unit || !m.unit || m.unit === unit)
+    ) ?? null
+  );
+}
+
+// Prefer NUT-06's method_name, with cdk-compatible derivation as fallback.
+const MAX_METHOD_NAME_LENGTH = 30;
+
+function containsControlChars(value: string): boolean {
+  for (const ch of value) {
+    const code = ch.codePointAt(0) ?? 0;
+    if (code < 32 || code === 127) return true;
+  }
+  return false;
+}
+
+export function advertisedDisplayName(
+  entry: AdvertisedPaymentMethod | null | undefined
+): string {
+  const name =
+    typeof entry?.method_name === "string" ? entry.method_name.trim() : "";
+  if (
+    name.length > 0 &&
+    name.length <= MAX_METHOD_NAME_LENGTH &&
+    !containsControlChars(name)
+  ) {
+    return name;
+  }
+  return entry?.method ? paymentMethodLabel(entry.method) : "";
+}
+
+export function paymentMethodDisplayName(
+  mint: StoredMint | undefined,
+  method: string,
+  operation: MintOperation = "mint",
+  unit?: string
+): string {
+  const entry = advertisedPaymentMethod(
+    mint,
+    basePaymentMethod(method),
+    operation,
+    unit
+  );
+  if (entry) return advertisedDisplayName(entry);
+  return paymentMethodLabel(method);
 }

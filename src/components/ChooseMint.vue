@@ -140,7 +140,7 @@ import type { StoredMint } from "stores/mints";
 import { useUiStore } from "stores/ui";
 import { i18n } from "../boot/i18n";
 import { mintSupportsPaymentMethod } from "src/js/mint-payment-methods";
-import { PaymentMethod } from "src/stores/walletTypes";
+import { PaymentMethod, type PaymentMethodId } from "src/stores/walletTypes";
 import BottomSheet from "./BottomSheet.vue";
 
 declare const windowMixin: any;
@@ -202,7 +202,9 @@ export default defineComponent({
       default: null,
     },
     filterPaymentMethod: {
-      type: [String, Array] as PropType<PaymentMethod | PaymentMethod[] | null>,
+      type: [String, Array] as PropType<
+        PaymentMethodId | PaymentMethodId[] | null
+      >,
       default: null,
     },
     filterMintOperation: {
@@ -269,7 +271,7 @@ export default defineComponent({
       const balance = this.chosenMint.balances?.[unit];
       return typeof balance === "number" ? balance : 0;
     },
-    filterPaymentMethods(): PaymentMethod[] {
+    filterPaymentMethods(): PaymentMethodId[] {
       if (!this.filterPaymentMethod) {
         return [];
       }

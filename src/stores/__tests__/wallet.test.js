@@ -60,6 +60,7 @@ const h = vi.hoisted(() => {
     removeInvoiceFromChecker: vi.fn(),
     addBolt12OfferToChecker: vi.fn(),
     addOnchainQuoteToChecker: vi.fn(),
+    addSingleMintQuoteToChecker: vi.fn(),
     addOutgoingTokenToChecker: vi.fn(),
     mintQuoteIsClaimed: vi.fn(() => false),
     waitForMintQuoteRelease: vi.fn(async () => {}),
@@ -70,6 +71,7 @@ const h = vi.hoisted(() => {
   const mintsStore = {
     activeMintUrl: "https://mint-a.example",
     activeUnit: "sat",
+    activeUnitCurrencyMultiplyer: 1,
     assertMintError: vi.fn(),
     activateMintUrl: vi.fn(async (url) => {
       h.mintsStore.activeMintUrl = url;
@@ -596,6 +598,75 @@ describe("wallet store", () => {
       amount: -105,
       status: "pending",
     });
+  });
+
+  it("keeps the requested amount when a custom melt quote omits it", async () => {
+    const wallet = useWalletStore();
+    wallet.payInvoiceData.invoice = { custom: "custom_method" };
+    wallet.payInvoiceData.input.amount = 25;
+    wallet.payInvoiceData.input.comment = "test payment";
+    const createMeltQuote = vi.fn(async () => ({
+      quote: "custom-melt-q",
+      state: "UNPAID",
+      fee_reserve: 0,
+    }));
+    vi.spyOn(wallet, "activeWallet").mockResolvedValue({
+      unit: "tst",
+      createMeltQuote,
+    });
+
+    const quote = await wallet.meltQuoteInvoiceData();
+
+    expect(createMeltQuote).toHaveBeenCalledWith("custom_method", {
+      method: "custom_method",
+      unit: "tst",
+      amount: 25,
+      request: "test payment",
+    });
+    expect(quote.amount).toBe(25);
+    expect(wallet.payInvoiceData.meltQuote.response.amount).toBe(25);
+
+    const proofs = [{ id: "00aa", amount: 25, secret: "s1" }];
+    const checkMeltQuote = vi.fn();
+    const mintWallet = { mint: { checkMeltQuote }, unit: "tst" };
+    h.mintsStore.activeUnit = "tst";
+    h.mintsStore.activeProofs = proofs;
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue(mintWallet);
+    const meltGeneric = vi.spyOn(wallet, "meltGeneric").mockResolvedValue();
+
+    await wallet.meltInvoiceData(true, "foreground");
+
+    expect(meltGeneric.mock.calls[0]).toEqual([
+      proofs,
+      quote,
+      mintWallet,
+      true,
+      expect.any(Function),
+      "custom_method",
+      undefined,
+      false,
+      "foreground",
+    ]);
+    await meltGeneric.mock.calls[0][4](quote.quote);
+    expect(checkMeltQuote).toHaveBeenCalledWith("custom_method", quote.quote);
+  });
+
+  it("does not confuse a custom method with an object property", async () => {
+    const wallet = useWalletStore();
+    wallet.invoiceHistory = [
+      {
+        quote: "custom-q",
+        mint: "https://mint-a.example",
+        unit: "tst",
+        type: "constructor",
+      },
+    ];
+
+    await wallet.mintOnPaidGeneric("custom-q", { type: "constructor" });
+
+    expect(
+      h.transactionWorkerStore.addSingleMintQuoteToChecker
+    ).toHaveBeenCalledWith("constructor", "custom-q");
   });
 
   it("creates active wallet and loads cache", async () => {

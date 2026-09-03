@@ -33,6 +33,8 @@
                   ? "Lightning Bolt12"
                   : isOnchain
                   ? "On-chain"
+                  : isCustom
+                  ? customMethodTitle
                   : $t("InvoiceDetailDialog.invoice.caption")
               }}
             </q-item-label>
@@ -42,20 +44,22 @@
         <!-- Content -->
         <div class="content-area">
           <q-card-section class="q-pa-none">
-            <div v-if="invoiceData.request" class="row justify-center q-mb-md">
+            <div
+              v-if="invoiceData.request || isCustom"
+              class="row justify-center q-mb-md"
+            >
               <div
                 class="col-12 col-sm-11 col-md-8 q-px-md"
                 style="max-width: 600px"
               >
                 <div class="qr-container">
-                  <a class="text-secondary" :href="qrLink">
+                  <a
+                    class="text-secondary"
+                    :href="isCustom ? undefined : qrLink"
+                  >
                     <q-responsive :ratio="1" class="q-mx-none">
                       <vue-qrcode
-                        :value="
-                          isOnchain
-                            ? 'bitcoin:' + invoiceData.request
-                            : 'lightning:' + invoiceData.request.toUpperCase()
-                        "
+                        :value="qrEncodedValue"
                         :options="{ width: 400 }"
                         class="rounded-borders"
                         style="width: 100%"
@@ -97,6 +101,15 @@
                   />
                   {{ invoiceData.request }}
                 </div>
+                <QuoteIdDisplay
+                  v-if="isCustom"
+                  class="q-mt-md"
+                  data-testid="custom-quote-id"
+                  :quote-id="invoiceData.quote || ''"
+                  :label="$t('InvoiceDetailDialog.custom.quote_id')"
+                  :copied="copyButtonCopied"
+                  @copy="onCopyBolt11"
+                />
               </div>
             </div>
 
@@ -149,7 +162,7 @@
               style="max-width: 600px"
             >
               <q-btn
-                v-if="invoiceData.request"
+                v-if="invoiceData.request || isCustom"
                 class="full-width"
                 unelevated
                 size="lg"
@@ -177,7 +190,10 @@ import { useUiStore } from "../stores/ui";
 import { useWorkersStore } from "../stores/workers";
 import MeltQuoteInformation from "./MeltQuoteInformation.vue";
 import MintQuoteInformation from "./MintQuoteInformation.vue";
-import { PaymentMethod } from "src/stores/walletTypes";
+import QuoteIdDisplay from "src/components/QuoteIdDisplay.vue";
+import { PaymentMethod, isCustomPaymentMethod } from "src/stores/walletTypes";
+import { useMintsStore } from "src/stores/mints";
+import { paymentMethodDisplayName } from "src/js/mint-payment-methods";
 // type hint for global mixin
 declare const windowMixin: any;
 
@@ -188,6 +204,7 @@ export default defineComponent({
     VueQrcode,
     MeltQuoteInformation,
     MintQuoteInformation,
+    QuoteIdDisplay,
   },
   props: {},
   data: function () {
@@ -215,15 +232,41 @@ export default defineComponent({
     isSmallScreen() {
       return this.$q.screen.lt.sm;
     },
-    invoiceMethod(): PaymentMethod {
+    invoiceMethod(): string {
       const method =
         (this.invoiceData as any).method ||
         (this.invoiceData as any).paymentType ||
         (this.invoiceData as any).protocol ||
         this.invoiceData.type;
-      return Object.values(PaymentMethod).includes(method)
-        ? method
-        : PaymentMethod.Bolt11;
+      if (Object.values(PaymentMethod).includes(method)) return method;
+      if (isCustomPaymentMethod(method)) return method;
+      return PaymentMethod.Bolt11;
+    },
+    isCustom(): boolean {
+      return isCustomPaymentMethod(this.invoiceMethod);
+    },
+    customMethodTitle(): string {
+      const mint = useMintsStore().mints.find(
+        (m: any) => m.url === this.invoiceData.mint
+      );
+      return paymentMethodDisplayName(
+        mint,
+        this.invoiceMethod,
+        this.invoiceData.amount < 0 ? "melt" : "mint",
+        this.invoiceData.unit
+      );
+    },
+    // Custom QR payloads are raw provider requests, falling back to quote IDs.
+    qrEncodedValue(): string {
+      if (this.isCustom) {
+        const request = this.invoiceData.request;
+        const quote = this.invoiceData.quote;
+        return request && request !== quote ? request : quote || "";
+      }
+      if (this.isOnchain) {
+        return "bitcoin:" + this.invoiceData.request;
+      }
+      return "lightning:" + (this.invoiceData.request || "").toUpperCase();
     },
     copyButtonLabel: function () {
       if (this.copyButtonCopied) {
@@ -261,7 +304,9 @@ export default defineComponent({
   },
   methods: {
     onCopyBolt11: async function () {
-      const request = this.invoiceData?.request;
+      const request = this.isCustom
+        ? this.invoiceData?.quote
+        : this.invoiceData?.request;
       if (request) {
         try {
           await copyToClipboard(request);

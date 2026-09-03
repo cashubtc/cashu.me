@@ -93,6 +93,30 @@
               </div>
             </div>
           </div>
+
+          <!-- Custom payment method options (advertised by a mint) -->
+          <div
+            v-for="customMethod in customReceiveMethods"
+            :key="customMethod.method"
+            class="action-row"
+            role="button"
+            tabindex="0"
+            :data-testid="`receive-${customMethod.method}-option`"
+            @click="showCustomCreateDialog(customMethod.method)"
+            @keydown.enter.prevent="showCustomCreateDialog(customMethod.method)"
+            @keydown.space.prevent="showCustomCreateDialog(customMethod.method)"
+          >
+            <div class="row items-center no-wrap">
+              <div class="icon-circle">
+                <BanknoteIcon :size="24" />
+              </div>
+              <div class="col q-ml-md">
+                <div class="text-body1 text-weight-medium">
+                  {{ methodDisplay(customMethod) }}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </q-card-section>
     </q-card>
@@ -116,12 +140,16 @@ import {
   Zap as ZapIcon,
   Scan as ScanIcon,
   Bitcoin as BitcoinIcon,
+  Banknote as BanknoteIcon,
 } from "lucide-vue-next";
 import { PaymentMethod } from "src/stores/walletTypes";
 import { useNpubCashStore } from "src/stores/npubcash";
 import {
   ensurePaymentMintActive,
   firstMintSupportingPaymentMethods,
+  customPaymentMethodsForMints,
+  advertisedDisplayName,
+  type AdvertisedPaymentMethod,
 } from "src/js/mint-payment-methods";
 
 export default defineComponent({
@@ -132,6 +160,7 @@ export default defineComponent({
     ZapIcon,
     ScanIcon,
     BitcoinIcon,
+    BanknoteIcon,
     ReceiveEcashDrawer,
   },
   mixins: [windowMixin],
@@ -199,9 +228,39 @@ export default defineComponent({
         )
       );
     },
+    customReceiveMethods: function (): AdvertisedPaymentMethod[] {
+      return customPaymentMethodsForMints(
+        this.mints as any,
+        "mint",
+        this.activeUnit as string
+      );
+    },
   },
   methods: {
     ...mapActions(useMintsStore, ["selectMintUrl"]),
+    methodDisplay: advertisedDisplayName,
+    showCustomCreateDialog: async function (method: string) {
+      const mintResult = await ensurePaymentMintActive(
+        this.mints as any,
+        this.activeMintUrl as string,
+        this.selectMintUrl,
+        [method],
+        "mint",
+        this.activeUnit as string
+      );
+      if (!mintResult.ok) {
+        notifyWarning("No mints available");
+        this.showReceiveDialog = false;
+        return;
+      }
+      this.invoiceData.amount = "";
+      this.invoiceData.request = "";
+      this.invoiceData.hash = "";
+      this.invoiceData.memo = "";
+      this.invoiceData.type = method;
+      this.showCreateInvoiceDialog = true;
+      this.showReceiveDialog = false;
+    },
     toggleReceiveEcashDrawer: function () {
       this.showReceiveDialog = false;
       this.showReceiveTokens = false;
