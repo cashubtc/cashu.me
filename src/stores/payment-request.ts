@@ -1,333 +1,306 @@
 import { defineStore } from "pinia";
 import {
-  Amount,
-  decodePaymentRequest,
-  JSONInt,
-  normalizeProofAmounts,
   PaymentRequest,
-  PaymentRequestPayload,
-  PaymentRequestTransport,
-  PaymentRequestTransportType,
+  decodePaymentRequest,
+  type PaymentRequestTransport,
 } from "@cashu/cashu-ts";
-import { useMintsStore } from "./mints";
-import { useSendTokensStore } from "./sendTokensStore";
-import { useNostrStore } from "./nostr";
-import { useTokensStore } from "./tokens";
-import type { HistoryToken } from "./tokens";
-import token from "src/js/token";
-import { notifyError, notifySuccess, notifyWarning } from "src/js/notify";
 import { useLocalStorage } from "@vueuse/core";
-import { v4 as uuidv4 } from "uuid";
+import { useMintsStore } from "src/stores/mints";
+import { useSendTokensStore } from "src/stores/sendTokensStore";
+import { useNostrStore } from "src/stores/nostr";
+import { useTokensStore } from "src/stores/tokens";
+import { usePaymentJobsStore } from "src/stores/paymentJobs";
+import { cashuDb } from "src/stores/dexie";
+import {
+  assertRequestSupported,
+  assertSupportedAmount,
+  decodeRecipient,
+  normalizeMintUrl,
+} from "src/js/paymentRequestProtocol";
+import {
+  paymentDto,
+  type OwnedPaymentRequest,
+} from "src/js/paymentRequestRepository";
+import { notifySuccess } from "src/js/notify";
 
-export type OurPaymentRequest = {
-  id: string; // UUID from PaymentRequest
-  encoded: string;
+export type OurPaymentRequest = OwnedPaymentRequest & {
   unit?: string;
   mints?: string[];
   memo?: string;
-  createdAt: string;
-  receivedPaymentIds: string[]; // HistoryToken ids mapped to this PR
 };
 
 export const usePRStore = defineStore("payment-request", {
   state: () => ({
     showPRDialog: false,
-    showPRKData: "" as string,
-    enablePaymentRequest: useLocalStorage<boolean>("cashu.pr.enable", true),
-    receivePaymentRequestsAutomatically: useLocalStorage<boolean>(
+    showPRKData: "",
+    enablePaymentRequest: useLocalStorage("cashu.pr.enable", true),
+    receivePaymentRequestsAutomatically: useLocalStorage(
       "cashu.pr.receive",
       false
     ),
-    ourPaymentRequests: useLocalStorage<OurPaymentRequest[]>(
-      "cashu.pr.ours",
-      []
-    ),
-    selectedPRIndex: useLocalStorage<number>("cashu.pr.selected_index", 0),
+    advertiseInbox: useLocalStorage("cashu.pr.advertiseInbox", false),
+    ourPaymentRequests: [] as OurPaymentRequest[],
+    selectedPRIndex: useLocalStorage("cashu.pr.selected_index", 0),
   }),
   getters: {
     currentPaymentRequest(state): OurPaymentRequest | undefined {
-      if (!state.ourPaymentRequests.length) return undefined;
-      const idx = Math.min(
-        Math.max(0, state.selectedPRIndex ?? 0),
-        state.ourPaymentRequests.length - 1
-      );
-      return state.ourPaymentRequests[idx];
+      return state.ourPaymentRequests[
+        Math.max(
+          0,
+          Math.min(state.selectedPRIndex, state.ourPaymentRequests.length - 1)
+        )
+      ];
     },
   },
   actions: {
-    newPaymentRequest(
+    ownsRequest(request: PaymentRequest) {
+      return (
+        request.transport?.some((t) => {
+          try {
+            return (
+              t.type === "nostr" &&
+              decodeRecipient(t.target).pubkey ===
+                useNostrStore().seedSignerPublicKey
+            );
+          } catch {
+            return false;
+          }
+        }) ?? false
+      );
+    },
+    async initOwnedRequests() {
+      await useNostrStore().walletSeedGenerateKeyPair();
+      const identity = useNostrStore().seedSignerPublicKey;
+      const raw = localStorage.getItem("cashu.pr.ours");
+      if (raw) {
+        const old: Array<{
+          id: string;
+          encoded: string;
+          createdAt?: string;
+          receivedPaymentIds?: string[];
+        }> = JSON.parse(raw);
+        await cashuDb.transaction(
+          "rw",
+          cashuDb.paymentRequests,
+          cashuDb.ecashHistory,
+          async () => {
+            for (const entry of old) {
+              if (await cashuDb.paymentRequests.get(entry.id)) continue;
+              let archived = true;
+              try {
+                archived = !this.ownsRequest(
+                  decodePaymentRequest(entry.encoded)
+                );
+              } catch {
+                /* Preserve unreadable legacy records. */
+              }
+              await cashuDb.paymentRequests.add({
+                id: entry.id,
+                identity,
+                encoded: entry.encoded,
+                createdAt: entry.createdAt ?? new Date().toISOString(),
+                archived,
+              });
+              if (!archived)
+                for (const historyId of entry.receivedPaymentIds ?? []) {
+                  const history = await cashuDb.ecashHistory.get(historyId);
+                  if (
+                    history &&
+                    history.amount > 0 &&
+                    !history.paymentRequestId
+                  )
+                    await cashuDb.ecashHistory.update(historyId, {
+                      paymentRequestId: entry.id,
+                    });
+                }
+            }
+          }
+        );
+        localStorage.removeItem("cashu.pr.ours");
+      }
+      const rows = await cashuDb.paymentRequests
+        .where("identity")
+        .equals(identity)
+        .toArray();
+      this.ourPaymentRequests = rows
+        .filter((r) => !r.archived)
+        .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+        .map((row) => {
+          const pr = decodePaymentRequest(row.encoded);
+          return {
+            ...row,
+            unit: pr.unit,
+            mints: pr.mints,
+            memo: pr.description,
+          };
+        });
+    },
+    async newPaymentRequest(
       amount?: number,
       memo?: string,
       mintUrl?: string,
-      forceNew: boolean = false
+      forceNew = false
     ) {
-      // If not forcing a new request and we already have at least one,
-      // do not auto-create a new one; just show the currently selected.
-      if (!forceNew && this.ourPaymentRequests.length > 0) {
-        const current =
-          this.currentPaymentRequest || this.ourPaymentRequests[0];
-        this.showPRKData = current.encoded;
-        return;
+      const opening = arguments.length === 0;
+      await this.initOwnedRequests();
+      if (opening && this.currentPaymentRequest && !forceNew) {
+        this.showPRKData = this.currentPaymentRequest.encoded;
+        return this.showPRKData;
       }
-      this.showPRKData = this.createPaymentRequest(amount, memo, mintUrl);
+      const current =
+        this.currentPaymentRequest &&
+        decodePaymentRequest(this.currentPaymentRequest.encoded);
+      if (
+        !forceNew &&
+        current &&
+        current.amount?.toNumber() === amount &&
+        current.unit === useMintsStore().activeUnit &&
+        (current.description ?? "") === (memo ?? "") &&
+        JSON.stringify(current.mints ?? []) ===
+          JSON.stringify(mintUrl ? [normalizeMintUrl(mintUrl)] : [])
+      ) {
+        this.showPRKData = this.currentPaymentRequest!.encoded;
+        return this.showPRKData;
+      }
+      return this.createPaymentRequest(amount, memo, mintUrl);
     },
-    createPaymentRequest: function (
+    async createPaymentRequest(
       amount?: number,
       memo?: string,
       mintUrl?: string
     ) {
-      const nostrStore = useNostrStore();
-      const mintStore = useMintsStore();
-      const tags = [["n", "17"]];
-      const transport = [
-        {
-          type: PaymentRequestTransportType.NOSTR,
-          target: nostrStore.seedSignerNprofile,
-          tags: tags,
-        },
-      ] as PaymentRequestTransport[];
-      const uuid = uuidv4().split("-")[0];
-      const paymentRequest = new PaymentRequest(
-        transport,
-        uuid,
-        amount,
-        mintStore.activeUnit,
-        mintUrl?.length
-          ? mintStore.activeMintUrl
-            ? [mintStore.activeMintUrl]
-            : undefined
-          : undefined,
-        memo
-      );
-      const encoded = paymentRequest.toEncodedRequest();
-      this.ensureStoredRequest(paymentRequest, encoded, memo);
+      await useNostrStore().walletSeedGenerateKeyPair();
+      if (amount !== undefined) assertSupportedAmount(amount);
+      const builder = PaymentRequest.builder()
+        .id(crypto.randomUUID())
+        .unit(useMintsStore().activeUnit)
+        .addNostrTransport(useNostrStore().seedSignerNprofile)
+        .singleUse(false);
+      if (amount !== undefined)
+        builder.amount(amount, useMintsStore().activeUnit);
+      if (memo) builder.description(memo);
+      if (mintUrl) builder.addMint(normalizeMintUrl(mintUrl));
+      const request = builder.build();
+      const encoded = request.toEncodedCreqA();
+      await this.ensureStoredRequest(request, encoded);
       this.showPRKData = encoded;
       return encoded;
     },
-    ensureStoredRequest(
-      request: PaymentRequest,
-      encoded: string,
-      memo?: string
-    ) {
-      // PaymentRequest.id is optional in v4; we key OurPaymentRequest by id,
-      // so a request without one can't be tracked.
-      if (!request.id) return;
-      const existIdx = this.ourPaymentRequests.findIndex(
+    async ensureStoredRequest(request: PaymentRequest, encoded: string) {
+      if (!request.id || !this.ownsRequest(request))
+        throw new Error("This is not an owned receiving request");
+      const existing = await cashuDb.paymentRequests.get(request.id);
+      if (existing && existing.encoded !== encoded)
+        throw new Error(
+          "Shared payment requests are immutable; create a new request"
+        );
+      if (!existing)
+        await cashuDb.paymentRequests.add(
+          paymentDto({
+            id: request.id,
+            encoded,
+            identity: useNostrStore().seedSignerPublicKey,
+            createdAt: new Date().toISOString(),
+          })
+        );
+      await this.initOwnedRequests();
+      this.selectedPRIndex = this.ourPaymentRequests.findIndex(
         (r) => r.id === request.id
       );
-      const entry: OurPaymentRequest = {
-        id: request.id,
-        encoded,
-        unit: request.unit,
-        mints: request.mints,
-        memo,
-        createdAt: new Date().toISOString(),
-        receivedPaymentIds: [],
-      };
-      if (existIdx >= 0) {
-        // Update encoded/memo/unit/mints in case changed
-        this.ourPaymentRequests[existIdx] = {
-          ...this.ourPaymentRequests[existIdx],
-          ...entry,
-        };
-        this.selectedPRIndex = existIdx;
-      } else {
-        this.ourPaymentRequests.push(entry);
-        this.selectedPRIndex = this.ourPaymentRequests.length - 1;
-      }
-    },
-    selectPrevRequest() {
-      if (!this.ourPaymentRequests.length) return;
-      this.selectedPRIndex =
-        (this.selectedPRIndex - 1 + this.ourPaymentRequests.length) %
-        this.ourPaymentRequests.length;
-      this.showPRKData = this.ourPaymentRequests[this.selectedPRIndex].encoded;
-    },
-    selectNextRequest() {
-      if (!this.ourPaymentRequests.length) return;
-      this.selectedPRIndex =
-        (this.selectedPRIndex + 1) % this.ourPaymentRequests.length;
-      this.showPRKData = this.ourPaymentRequests[this.selectedPRIndex].encoded;
     },
     selectRequestByIndex(index: number) {
       if (!this.ourPaymentRequests.length) return;
-      const idx = Math.min(
-        Math.max(0, index),
-        this.ourPaymentRequests.length - 1
-      );
-      this.selectedPRIndex = idx;
-      this.showPRKData = this.ourPaymentRequests[idx].encoded;
+      this.selectedPRIndex =
+        (index + this.ourPaymentRequests.length) %
+        this.ourPaymentRequests.length;
+      this.showPRKData = this.currentPaymentRequest!.encoded;
     },
-    registerIncomingPaymentForRequest(
+    selectPrevRequest() {
+      this.selectRequestByIndex(this.selectedPRIndex - 1);
+    },
+    selectNextRequest() {
+      this.selectRequestByIndex(this.selectedPRIndex + 1);
+    },
+    async registerIncomingPaymentForRequest(
       requestId: string,
       historyTokenId: string
     ) {
-      const pr = this.ourPaymentRequests.find((r) => r.id === requestId);
-      if (!pr) return;
-      if (!pr.receivedPaymentIds.includes(historyTokenId)) {
-        pr.receivedPaymentIds.push(historyTokenId);
-      }
+      if (!(await cashuDb.paymentRequests.get(requestId))) return;
+      await cashuDb.ecashHistory.update(historyTokenId, {
+        paymentRequestId: requestId,
+      });
+      await useTokensStore().refreshEcashHistory();
     },
     getPaymentsForRequest(requestId: string) {
-      const tokensStore = useTokensStore();
-      const pr = this.ourPaymentRequests.find((r) => r.id === requestId);
-      if (!pr) return [];
-      return pr.receivedPaymentIds
-        .map((id) => tokensStore.historyTokens.find((t) => t.id === id))
-        .filter((t): t is HistoryToken => !!t);
+      return useTokensStore().historyTokens.filter(
+        (t) => t.paymentRequestId === requestId && t.amount > 0
+      );
     },
-    async decodePaymentRequest(pr: string) {
-      console.log("decodePaymentRequest", pr);
-      const request: PaymentRequest = decodePaymentRequest(pr);
-      console.log("decodePaymentRequest", request);
-      const mintsStore = useMintsStore();
-      // activate the mint in the payment request
-      if (request.mints && request.mints.length > 0) {
-        let foundMint = false;
-        for (const mint of request.mints) {
-          if (mintsStore.mints.find((m) => m.url == mint)) {
-            // await mintsStore.activateMintUrl(mint, false, false, request.unit);
-            mintsStore.activeMintUrl = mint;
-            foundMint = true;
-            break;
-          }
-        }
-        if (!foundMint) {
-          notifyError(`This payment requires using the mint: ${request.mints}`);
-          throw new Error(
-            `This payment requires using the mint: ${request.mints}`
-          );
-        }
-      }
-
-      // activate the unit in the payment request
-      if (request.unit) {
-        // if the activeMint() supports this unit, set it
-        if (mintsStore.activeMint().units.find((u) => u == request.unit)) {
-          mintsStore.activeUnit = request.unit;
-        } else {
-          notifyWarning(
-            `The mint does not support the unit in the payment request: ${request.unit}`
-          );
-        }
-      }
-
-      const sendTokenStore = useSendTokensStore();
-      // Always clear any existing send data so a new payment request starts fresh
-      sendTokenStore.clearSendData();
-      // if the payment request has an amount, set it
-      if (request.amount) {
-        sendTokenStore.sendData.amount =
-          Amount.from(request.amount).toNumber() /
-          mintsStore.activeUnitCurrencyMultiplyer;
-      }
-      // Also make sure this decoded request gets stored (e.g., if user pasted an older one)
-      try {
-        const encoded = pr;
-        this.ensureStoredRequest(request, encoded);
-        this.showPRKData = encoded;
-      } catch (e) {
-        // noop
-      }
-      sendTokenStore.sendData.paymentRequest = request;
-      if (!sendTokenStore.showSendTokens) {
-        // show the send dialog
-        sendTokenStore.showSendTokens = true;
-      }
+    async decodePaymentRequest(encoded: string) {
+      const request = decodePaymentRequest(encoded);
+      assertRequestSupported(request);
+      const mints = useMintsStore();
+      const acceptable = mints.mints.filter(
+        (m) =>
+          (!request.isMintListStrict || request.includesMint(m.url)) &&
+          (!request.unit ||
+            m.keysets.some((keyset) => keyset.unit === request.unit))
+      );
+      const selected =
+        acceptable.find((m) => request.includesMint(m.url)) ??
+        acceptable.find((m) => m.url === mints.activeMintUrl) ??
+        acceptable[0];
+      if (!selected)
+        throw new Error(
+          "No trusted mint supports this request's mint and unit requirements"
+        );
+      mints.activeMintUrl = selected.url;
+      if (request.unit) mints.activeUnit = request.unit;
+      const send = useSendTokensStore();
+      send.clearSendData();
+      send.sendData.paymentRequest = request;
+      if (request.amount !== undefined)
+        send.sendData.amount =
+          assertSupportedAmount(request.amount) /
+          mints.activeUnitCurrencyMultiplyer;
+      send.showSendTokens = true;
     },
     async parseAndPayPaymentRequest(
       request: PaymentRequest,
       tokenStr: string
     ): Promise<boolean> {
-      const transports: PaymentRequestTransport[] = request.transport ?? [];
-      for (const transport of transports) {
-        if (transport.type == PaymentRequestTransportType.NOSTR) {
-          return await this.payNostrPaymentRequest(
-            request,
-            transport,
-            tokenStr
-          );
-        }
-        if (transport.type == PaymentRequestTransportType.POST) {
-          return await this.payPostPaymentRequest(request, transport, tokenStr);
-        }
-      }
-      throw new Error("Unsupported payment request transport.");
+      const job =
+        (await cashuDb.paymentJobs
+          .where("direction")
+          .equals("outgoing")
+          .filter(
+            (job) =>
+              job.token === tokenStr &&
+              job.requestEncoded === request.toEncodedRequest()
+          )
+          .first()) ??
+        (await usePaymentJobsStore().adoptLegacyOutgoing(request, tokenStr));
+      await usePaymentJobsStore().publishPayment(job.id);
+      notifySuccess(
+        job.transport?.type === "nostr"
+          ? "Published to relay"
+          : "Payment accepted by endpoint"
+      );
+      return true;
     },
     async payNostrPaymentRequest(
       request: PaymentRequest,
-      transport: PaymentRequestTransport,
+      _transport: PaymentRequestTransport,
       tokenStr: string
-    ): Promise<boolean> {
-      console.log("payNostrPaymentRequest", request, tokenStr);
-      console.log("transport", transport);
-      const nostrStore = useNostrStore();
-      const decodedToken = await token.decodeFull(tokenStr);
-      if (!decodedToken) {
-        console.error("could not decode token");
-        throw new Error("Could not decode ecash token.");
-      }
-      const proofs = token.getProofs(decodedToken);
-      const mint = token.getMint(decodedToken);
-      const paymentPayload: PaymentRequestPayload = {
-        id: request.id,
-        mint: mint,
-        unit: request.unit || "",
-        proofs: normalizeProofAmounts(proofs),
-      };
-      const paymentPayloadString = JSONInt.stringify(paymentPayload)!;
-      try {
-        await nostrStore.sendNip17DirectMessageToNprofile(
-          transport.target,
-          paymentPayloadString
-        );
-      } catch (error) {
-        console.error("Error paying payment request:", error);
-        throw error;
-      }
-      notifySuccess("Payment sent");
-      return true;
+    ) {
+      return this.parseAndPayPaymentRequest(request, tokenStr);
     },
     async payPostPaymentRequest(
       request: PaymentRequest,
-      transport: PaymentRequestTransport,
+      _transport: PaymentRequestTransport,
       tokenStr: string
-    ): Promise<boolean> {
-      console.log("payPostPaymentRequest", request, tokenStr);
-      // get the endpoint from the transport target and make an HTTP POST request with the paymentPayload as the body
-      const decodedToken = await token.decodeFull(tokenStr);
-      if (!decodedToken) {
-        console.error("could not decode token");
-        throw new Error("Could not decode ecash token.");
-      }
-      const proofs = token.getProofs(decodedToken);
-      const unit = token.getUnit(decodedToken);
-      const mint = token.getMint(decodedToken);
-      const paymentPayload: PaymentRequestPayload = {
-        id: request.id,
-        mint: mint,
-        unit: unit,
-        proofs: normalizeProofAmounts(proofs),
-      };
-      const paymentPayloadString = JSONInt.stringify(paymentPayload)!;
-      try {
-        const response = await fetch(transport.target, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          method: "POST",
-          body: paymentPayloadString,
-        });
-        if (!response.ok) {
-          console.error("Error paying payment request:", response.statusText);
-          throw new Error(response.statusText);
-        }
-        notifySuccess("Payment sent");
-      } catch (error) {
-        console.error("Error paying payment request:", error);
-        throw error;
-      }
-      return true;
+    ) {
+      return this.parseAndPayPaymentRequest(request, tokenStr);
     },
   },
 });

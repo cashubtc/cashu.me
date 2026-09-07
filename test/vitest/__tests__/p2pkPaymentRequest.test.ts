@@ -1,8 +1,7 @@
 import { test, describe, expect, vi } from "vitest";
 import { PaymentRequest } from "@cashu/cashu-ts";
 
-// The wallet store grabs `t` from useI18n() in its state initializer, which
-// only works inside a component setup context.
+// Provide setup-independent translations for legacy stores loaded by this test.
 vi.mock("vue-i18n", async (importOriginal) => ({
   ...(await importOriginal<typeof import("vue-i18n")>()),
   useI18n: () => ({ t: (key: string) => key }),
@@ -16,20 +15,17 @@ const PUBKEY =
 const HASH = "e0d21f5a0158ee5eafcd25f31036ff2b9ea23bda56c81b883c5b41d3d9b56b39";
 
 const makePr = (nut10?: { kind: string; data: string; tags: string[][] }) =>
-  new PaymentRequest(
-    undefined,
-    "pr1",
-    21,
-    "sat",
-    undefined,
-    undefined,
-    false,
-    nut10
-  );
+  new PaymentRequest({
+    id: "pr1",
+    amount: 21,
+    unit: "sat",
+    singleUse: false,
+    nut10,
+  });
 
 describe("PaymentRequest.toP2PKOptions (NUT-18 lock contract)", () => {
-  // SendTokenDialog.payPaymentRequest branches on this contract: options
-  // returned -> sendToLock, undefined -> plain send.
+  // The payment-request boundary rejects unsupported locks before debit;
+  // supported locks are handled by the SDK's sendToRequest builder.
   test("returns undefined when the request has no nut10 lock", () => {
     expect(makePr().toP2PKOptions()).toBeUndefined();
   });
@@ -46,8 +42,12 @@ describe("PaymentRequest.toP2PKOptions (NUT-18 lock contract)", () => {
       data: PUBKEY,
       tags: [["locktime", "1750000000"]],
     }).toP2PKOptions();
-    expect(opts).toMatchObject({ pubkey: PUBKEY, locktime: 1750000000 });
-    expect(opts?.hashlock).toBeUndefined();
+    expect(opts).toMatchObject({
+      kind: "P2PK",
+      data: PUBKEY,
+      locktime: 1750000000,
+    });
+    expect(opts).not.toHaveProperty("hashlock");
   });
 
   test("builds HTLC options from an HTLC lock", () => {
@@ -56,7 +56,7 @@ describe("PaymentRequest.toP2PKOptions (NUT-18 lock contract)", () => {
       data: HASH,
       tags: [["pubkeys", PUBKEY]],
     }).toP2PKOptions();
-    expect(opts).toMatchObject({ hashlock: HASH, pubkey: [PUBKEY] });
+    expect(opts).toMatchObject({ kind: "HTLC", data: HASH, pubkeys: [PUBKEY] });
   });
 
   test("survives a creqA encode/decode round-trip", () => {
@@ -66,7 +66,10 @@ describe("PaymentRequest.toP2PKOptions (NUT-18 lock contract)", () => {
       tags: [],
     }).toEncodedCreqA();
     const decoded = PaymentRequest.fromEncodedRequest(encoded);
-    expect(decoded.toP2PKOptions()).toMatchObject({ pubkey: PUBKEY });
+    expect(decoded.toP2PKOptions()).toMatchObject({
+      kind: "P2PK",
+      data: PUBKEY,
+    });
   });
 });
 
@@ -102,15 +105,16 @@ describe("walletStore.sendToLock pubkey normalization", () => {
     const { wallet, mockWallet, keyset, asP2PK, sendProofs } = setup();
     const result = await wallet.sendToLock([], mockWallet, 21, PUBKEY);
     expect(keyset).toHaveBeenCalledWith("ks1");
-    expect(asP2PK).toHaveBeenCalledWith({ pubkey: PUBKEY });
+    expect(asP2PK).toHaveBeenCalledWith({ kind: "P2PK", data: PUBKEY });
     expect(result.sendProofs).toEqual(sendProofs);
   });
 
   test("passes full P2PKOptions through untouched", async () => {
     const { wallet, mockWallet, asP2PK } = setup();
     const lockOptions = {
-      pubkey: [PUBKEY],
-      hashlock: HASH,
+      kind: "HTLC" as const,
+      data: HASH,
+      pubkeys: [PUBKEY],
       locktime: 1750000000,
     };
     await wallet.sendToLock([], mockWallet, 21, lockOptions);

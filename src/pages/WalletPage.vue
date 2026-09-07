@@ -710,9 +710,10 @@ export default {
       this.listenToNWCCommands();
     }
 
-    if (this.enablePaymentRequest) {
-      this.subscribeToNip17DirectMessages();
-    }
+    // Initialize lifecycle even when disabled, so enabling it later starts it.
+    this.subscribeToNip17DirectMessages().catch(() =>
+      console.warn("Payment inbox initialization failed")
+    );
 
     // Start background transaction reconciliation.
     this.startTransactionWorker();

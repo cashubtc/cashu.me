@@ -1,6 +1,12 @@
 import { defineStore } from "pinia";
 import Dexie, { Table } from "dexie";
 import { useLocalStorage } from "@vueuse/core";
+import type {
+  OwnedPaymentRequest,
+  PaymentJob,
+  PaymentEnvelope,
+  RelayCheckpoint,
+} from "src/js/paymentRequestRepository";
 import type { WalletProof } from "./mints";
 import {
   cashuAmountToNumber,
@@ -22,6 +28,13 @@ export class CashuDexie extends Dexie {
   mintQuotes!: Table<any>;
   meltQuotes!: Table<any>;
   ecashHistory!: Table<any>;
+  paymentRequests!: Table<OwnedPaymentRequest>;
+  paymentJobs!: Table<PaymentJob>;
+  paymentEnvelopes!: Table<PaymentEnvelope>;
+  paymentCheckpoints!: Table<RelayCheckpoint>;
+  paymentCounters!: Table<{ id: string; next: number }>;
+  paymentProofClaims!: Table<{ id: string; jobId: string }>;
+  paymentLocks!: Table<{ id: string; owner: string; expires: number }>;
 
   constructor(databaseName = "db") {
     super(databaseName);
@@ -74,6 +87,16 @@ export class CashuDexie extends Dexie {
             Object.assign(quote, normalizeCashuQuoteAmounts(quote));
           });
       });
+    this.version(5).stores({
+      paymentRequests: "id, identity, createdAt",
+      paymentJobs:
+        "id, identity, direction, state, requestId, historyId, fingerprint, retryAt, [identity+direction]",
+      paymentEnvelopes: "id, identity, state, created_at",
+      paymentCheckpoints: "id, identity, relay",
+      paymentCounters: "id",
+      paymentProofClaims: "id, jobId",
+      paymentLocks: "id",
+    });
   }
 }
 
@@ -132,6 +155,13 @@ export const useDexieStore = defineStore("dexie", {
         cashuDb.mintQuotes.clear(),
         cashuDb.meltQuotes.clear(),
         cashuDb.ecashHistory.clear(),
+        cashuDb.paymentRequests.clear(),
+        cashuDb.paymentJobs.clear(),
+        cashuDb.paymentEnvelopes.clear(),
+        cashuDb.paymentCheckpoints.clear(),
+        cashuDb.paymentCounters.clear(),
+        cashuDb.paymentProofClaims.clear(),
+        cashuDb.paymentLocks.clear(),
       ]);
     },
   },

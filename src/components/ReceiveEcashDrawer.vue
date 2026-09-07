@@ -65,7 +65,11 @@
           <div
             v-if="enablePaymentRequest"
             class="action-row"
+            role="button"
+            tabindex="0"
+            data-testid="receive-payment-request"
             @click="handlePaymentRequestBtn"
+            @keydown.enter.prevent="handlePaymentRequestBtn"
           >
             <div class="row items-center no-wrap">
               <div class="icon-circle">
@@ -244,11 +248,11 @@ export default defineComponent({
       this.showLastKey();
       this.showReceiveEcashDrawer = false;
     },
-    handlePaymentRequestBtn: function () {
+    handlePaymentRequestBtn: async function () {
       const prStore = usePRStore();
       this.showPRDialog = !this.showPRDialog;
       if (this.showPRDialog) {
-        prStore.newPaymentRequest();
+        await prStore.newPaymentRequest();
       }
       this.showReceiveEcashDrawer = false;
     },

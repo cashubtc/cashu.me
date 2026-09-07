@@ -1,6 +1,7 @@
 import { date } from "quasar";
 import { defineStore } from "pinia";
 import { liveQuery } from "dexie";
+import { shallowRef } from "vue";
 import { cashuDb } from "./dexie";
 import {
   PaymentRequest,
@@ -10,6 +11,8 @@ import {
 } from "@cashu/cashu-ts";
 import token from "src/js/token";
 import { v4 as uuidv4 } from "uuid";
+import { paymentDto } from "src/js/paymentRequestRepository";
+import { notifyError } from "src/js/notify";
 
 /**
  * The tokens store handles everything related to tokens and proofs
@@ -24,6 +27,10 @@ export type HistoryToken = {
   mint: string;
   unit: string;
   paymentRequest?: PaymentRequest;
+  paymentRequestEncoded?: string;
+  paymentJobId?: string;
+  paymentMatching?: boolean;
+  deliveryState?: string;
   fee?: number;
   label?: string; // Add label field for custom naming
   meltQuote?: MeltQuoteBolt11Response;
@@ -32,17 +39,46 @@ export type HistoryToken = {
 };
 
 function sortHistoryTokens(tokens: HistoryToken[]) {
-  return tokens.slice().sort((a, b) => {
-    const aTime = new Date(a.date).getTime();
-    const bTime = new Date(b.date).getTime();
-    if (aTime !== bTime) return aTime - bTime;
-    return a.id.localeCompare(b.id);
+  return tokens
+    .map((row) => {
+      if (!row.paymentRequestEncoded) return row;
+      try {
+        return {
+          ...row,
+          paymentRequest: PaymentRequest.fromEncodedRequest(
+            row.paymentRequestEncoded
+          ),
+        };
+      } catch {
+        return row;
+      }
+    })
+    .sort((a, b) => {
+      const aTime = new Date(a.date).getTime();
+      const bTime = new Date(b.date).getTime();
+      if (aTime !== bTime) return aTime - bTime;
+      return a.id.localeCompare(b.id);
+    });
+}
+
+export function historyTokenDto(historyToken: HistoryToken) {
+  const { paymentRequest, ...row } = historyToken;
+  return paymentDto({
+    ...row,
+    ...(paymentRequest
+      ? {
+          paymentRequestEncoded:
+            typeof paymentRequest.toEncodedRequest === "function"
+              ? paymentRequest.toEncodedRequest()
+              : new PaymentRequest(paymentRequest).toEncodedRequest(),
+        }
+      : {}),
   });
 }
 
 export const useTokensStore = defineStore("tokens", {
   state: () => ({
-    historyTokens: [] as HistoryToken[],
+    historyTokens: shallowRef<HistoryToken[]>([]),
     ecashHistorySubscription: null as any,
   }),
   actions: {
@@ -67,9 +103,9 @@ export const useTokensStore = defineStore("tokens", {
       );
     },
     persistHistoryToken(historyToken: HistoryToken) {
-      cashuDb.ecashHistory.put({ ...historyToken }).catch((error) => {
-        console.error("Could not persist ecash history token", error);
-      });
+      // Legacy synchronous UI actions still update their cache immediately. Payment
+      // jobs use awaited database transactions and never rely on this optimistic API.
+      return cashuDb.ecashHistory.put(historyTokenDto(historyToken));
     },
     async migrateHistoryTokensFromLocalStorage() {
       const raw = localStorage.getItem("cashu.historyTokens");
@@ -83,7 +119,7 @@ export const useTokensStore = defineStore("tokens", {
           id: historyToken.id || uuidv4(),
         })
       );
-      await cashuDb.ecashHistory.bulkPut(historyTokens);
+      await cashuDb.ecashHistory.bulkPut(historyTokens.map(historyTokenDto));
       localStorage.removeItem("cashu.historyTokens");
       await this.refreshEcashHistory();
     },
@@ -124,7 +160,11 @@ export const useTokensStore = defineStore("tokens", {
         paymentRequestId,
       } as HistoryToken;
       this.historyTokens.push(historyToken);
-      this.persistHistoryToken(historyToken);
+      this.persistHistoryToken(historyToken).catch(() =>
+        notifyError(
+          "Could not save ecash history. Keep this token until storage is available."
+        )
+      );
       return id;
     },
     addPendingToken({
@@ -149,7 +189,7 @@ export const useTokensStore = defineStore("tokens", {
       const id = uuidv4();
       const historyToken = {
         id,
-        status: "pending",
+        status: "pending" as const,
         amount,
         date: currentDateStr(),
         token: token,
@@ -161,7 +201,11 @@ export const useTokensStore = defineStore("tokens", {
         paymentRequestId,
       };
       this.historyTokens.push(historyToken);
-      this.persistHistoryToken(historyToken);
+      this.persistHistoryToken(historyToken).catch(() =>
+        notifyError(
+          "Could not save ecash history. Keep this token until storage is available."
+        )
+      );
       return id;
     },
     editHistoryToken(
@@ -182,7 +226,7 @@ export const useTokensStore = defineStore("tokens", {
           if (options.newToken) {
             this.historyTokens[index].token = options.newToken;
           }
-          if (options.newAmount) {
+          if (options.newAmount !== undefined) {
             this.historyTokens[index].amount =
               options.newAmount * Math.sign(this.historyTokens[index].amount);
           }
@@ -196,12 +240,14 @@ export const useTokensStore = defineStore("tokens", {
           if (options.newStatus) {
             this.historyTokens[index].status = options.newStatus;
           }
-          if (options.newFee) {
+          if (options.newFee !== undefined) {
             this.historyTokens[index].fee = options.newFee;
           }
         }
 
-        this.persistHistoryToken(this.historyTokens[index]);
+        this.persistHistoryToken(this.historyTokens[index]).catch(() =>
+          notifyError("Could not save ecash history")
+        );
         return this.historyTokens[index];
       }
 
@@ -214,7 +260,9 @@ export const useTokensStore = defineStore("tokens", {
       if (index >= 0) {
         this.historyTokens[index].status = "paid";
         this.historyTokens[index].paidDate = currentDateStr();
-        this.persistHistoryToken(this.historyTokens[index]);
+        this.persistHistoryToken(this.historyTokens[index]).catch(() =>
+          notifyError("Could not save ecash history")
+        );
       }
     },
     deleteToken(token: string) {
@@ -244,11 +292,26 @@ export const useTokensStore = defineStore("tokens", {
         .forEach((token) => {
           token.token = undefined;
         });
-      await cashuDb.transaction("rw", cashuDb.ecashHistory, async () => {
-        for (const token of redactTokens) {
-          await cashuDb.ecashHistory.update(token.id, { token: undefined });
+      await cashuDb.transaction(
+        "rw",
+        cashuDb.ecashHistory,
+        cashuDb.paymentJobs,
+        async () => {
+          for (const token of redactTokens) {
+            await cashuDb.ecashHistory.update(token.id, { token: undefined });
+            if (token.paymentJobId) {
+              // History is paid only after claiming/spending, not on relay ACK.
+              await cashuDb.paymentJobs.update(token.paymentJobId, {
+                state: "confirmed",
+                token: undefined,
+                payload: undefined,
+                preview: undefined,
+                envelope: undefined,
+              });
+            }
+          }
         }
-      });
+      );
       await this.refreshEcashHistory();
     },
   },

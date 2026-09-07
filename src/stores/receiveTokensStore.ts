@@ -13,6 +13,8 @@ import {
 } from "../js/notify";
 import { getDecodedTokenBinary, getEncodedToken } from "@cashu/cashu-ts";
 import { useSwapStore } from "./swap";
+import { cashuDb } from "src/stores/dexie";
+import { usePaymentJobsStore } from "src/stores/paymentJobs";
 
 export const useReceiveTokensStore = defineStore("receiveTokensStore", {
   state: () => ({
@@ -46,21 +48,33 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       const walletStore = useWalletStore();
       const receiveStore = useReceiveTokensStore();
       const uiStore = useUiStore();
-      console.log("### receive tokens", receiveStore.receiveData.tokensBase64);
-
-      if (receiveStore.receiveData.tokensBase64.length == 0) {
+      if (!encodedToken) {
         throw new Error("no tokens provided.");
       }
 
       // get the private key for the token we want to receive if it is locked with P2PK
-      receiveStore.receiveData.p2pkPrivateKey =
-        await useP2PKStore().getPrivateKeyForP2PKEncodedToken(
-          receiveStore.receiveData.tokensBase64
-        );
-
-      const tokenJson = await token.decodeFull(
-        receiveStore.receiveData.tokensBase64
+      const metadata = token.decodeMeta(encodedToken);
+      if (!metadata) throw new Error("Invalid token");
+      if (!mintStore.mints.some((mint) => mint.url === metadata.mint)) {
+        // receiveToken is the explicit claim action, not the background inbox.
+        await mintStore.addMint({ url: metadata.mint });
+      }
+      const receipt = await cashuDb.paymentJobs
+        .where("direction")
+        .equals("incoming")
+        .filter((job) => job.token === encodedToken)
+        .first();
+      if (receipt) {
+        await usePaymentJobsStore().redeemReceipt(receipt.id, true);
+        if (receiveStore.receiveData.tokensBase64 === encodedToken)
+          receiveStore.showReceiveTokens = false;
+        return;
+      }
+      const privateKey = await useP2PKStore().getPrivateKeyForP2PKEncodedToken(
+        encodedToken
       );
+
+      const tokenJson = await token.decodeFull(encodedToken);
       if (tokenJson == undefined) {
         throw new Error("no tokens provided.");
       }
@@ -70,9 +84,11 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
         await mintStore.addMint({ url: token.getMint(tokenJson) });
       }
       // redeem the token
-      await walletStore.redeem();
-      receiveStore.showReceiveTokens = false;
-      uiStore.closeDialogs();
+      await walletStore.redeem(encodedToken, privateKey);
+      if (receiveStore.receiveData.tokensBase64 === encodedToken) {
+        receiveStore.showReceiveTokens = false;
+        uiStore.closeDialogs();
+      }
     },
     receiveIfDecodes: async function () {
       try {
@@ -109,10 +125,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
         const tokensStore = useTokensStore();
         const historyToken = tokensStore.tokenAlreadyInHistory(text);
 
-        if (
-          historyToken &&
-          (historyToken.amount > 0 || historyToken.status === "paid")
-        ) {
+        if (historyToken && historyToken.status === "paid") {
           if (verbose) notify("Token already in history.");
           return false;
         }

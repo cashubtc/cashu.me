@@ -1,4 +1,6 @@
 import { expect, test } from "@playwright/test";
+import { Wallet } from "@cashu/cashu-ts";
+import { walletRows } from "../fixtures/database";
 
 import {
   counterpartyRequest,
@@ -177,7 +179,23 @@ test.describe("outgoing quote recovery", () => {
       await page.getByTestId("pay-payment-request").click();
 
       await expect(page.getByTestId("wallet-send")).toBeVisible();
-      await expect.poll(() => wallet.balanceSats()).toBe(before);
+      // The displayed balance is spendable value, excluding pending reservations.
+      // Assert both conservation and that these inputs cannot be spent twice.
+      await expect
+        .poll(
+          async () =>
+            (await walletRows(page, "proofs")).filter((proof) => proof.reserved)
+              .length
+        )
+        .toBeGreaterThan(0);
+      const proofs = await walletRows(page, "proofs");
+      expect(proofs.reduce((sum, proof) => sum + proof.amount, 0)).toBe(before);
+      const spendable = proofs
+        .filter((proof) => !proof.reserved)
+        .reduce((sum, proof) => sum + proof.amount, 0);
+      await expect.poll(() => wallet.balanceSats()).toBe(spendable);
+      const states = await new Wallet(MINT_A_URL).checkProofsStates(proofs);
+      expect(states.every((proof) => proof.state === "UNSPENT")).toBe(true);
     });
   }
 });

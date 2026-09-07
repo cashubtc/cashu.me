@@ -84,6 +84,7 @@
                     rounded
                     size="md"
                     @click="startEditingAmount"
+                    data-testid="request-edit-amount"
                   >
                     <q-icon name="edit_note" size="xs" class="q-mr-sm" />
                     {{ amountLabel }}
@@ -92,6 +93,7 @@
                 <div v-else class="col-12 col-sm-8 col-md-6">
                   <q-input
                     ref="amountInput"
+                    data-testid="request-amount-input"
                     v-model="amountInputValue"
                     type="number"
                     :placeholder="
@@ -120,9 +122,13 @@
                     <q-icon name="account_balance" size="xs" class="q-mr-sm" />
                     {{ getShortUrl(chosenMintUrl) }}
                   </q-chip>
-                  <div @click="toggleUnit">
-                    <ToggleUnit class="q-py-none" color="white" />
-                  </div>
+                  <q-btn
+                    flat
+                    color="white"
+                    :label="currentPaymentRequest?.unit || activeUnit"
+                    @click="toggleUnit"
+                    aria-label="Change request unit"
+                  />
                 </div>
               </div>
 
@@ -151,9 +157,11 @@
                     </q-chip>
                   </div>
                   <PaymentRequestPayments
+                    :key="currentPaymentRequest.id"
                     :payments="currentPayments"
                     :page-size="3"
                   />
+                  <PaymentJobsList :request-id="currentPaymentRequest.id" />
                 </div>
               </div>
 
@@ -182,6 +190,7 @@
                 color="primary"
                 rounded
                 @click="onCopyPRKData"
+                data-testid="copy-cashu-payment-request"
               >
                 {{ $t("PaymentRequestDialog.actions.copy.label") }}
               </q-btn>
@@ -202,8 +211,10 @@ import { usePRStore } from "src/stores/payment-request";
 import { useMintsStore } from "../stores/mints";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useUiStore } from "../stores/ui";
-import ToggleUnit from "./ToggleUnit.vue";
 import PaymentRequestPayments from "./PaymentRequestPayments.vue";
+import { decodePaymentRequest } from "@cashu/cashu-ts";
+import { notifyError } from "src/js/notify";
+import PaymentJobsList from "src/components/PaymentJobsList.vue";
 // type hint for global mixin
 declare const windowMixin: any;
 
@@ -212,8 +223,8 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     VueQrcode,
-    ToggleUnit,
     PaymentRequestPayments,
+    PaymentJobsList,
   },
   data() {
     const amountLabelDefault = (this as any).$i18n.t(
@@ -257,11 +268,23 @@ export default defineComponent({
     totalsByUnit(): Record<string, number> {
       const totals: Record<string, number> = {};
       for (const p of this.currentPayments) {
-        if (p.amount > 0) {
+        if (
+          p.amount > 0 &&
+          p.status === "paid" &&
+          p.paymentMatching !== false
+        ) {
           totals[p.unit] = (totals[p.unit] ?? 0) + p.amount;
         }
       }
       return totals;
+    },
+  },
+  watch: {
+    showPRKData: {
+      immediate: true,
+      handler(encoded: string) {
+        this.hydrateRequest(encoded);
+      },
     },
   },
   methods: {
@@ -270,22 +293,47 @@ export default defineComponent({
       "selectPrevRequest",
       "selectNextRequest",
     ]),
-    toggleUnit() {
+    hydrateRequest(encoded: string) {
+      if (!encoded) return;
+      const request = decodePaymentRequest(encoded);
+      this.paymentRequestAmount = request.amount?.toNumber();
+      this.chosenMintUrl = request.mints?.[0];
+      this.memo = request.description ?? "";
+      this.amountLabel =
+        this.paymentRequestAmount === undefined
+          ? this.amountLabelDefault
+          : useUiStore().formatCurrency(
+              this.paymentRequestAmount,
+              request.unit ?? "sat"
+            );
+    },
+    async saveRequest(forceNew = false) {
+      try {
+        await this.newPaymentRequest(
+          this.paymentRequestAmount,
+          this.memo,
+          this.chosenMintUrl,
+          forceNew
+        );
+      } catch {
+        // Never leave edited labels showing terms different from the saved QR.
+        this.hydrateRequest(this.showPRKData);
+        notifyError(
+          "Could not save request. Use a positive whole amount in base units and check wallet storage."
+        );
+      }
+    },
+    async toggleUnit() {
+      const mints = useMintsStore();
+      if (this.currentPaymentRequest?.unit)
+        mints.activeUnit = this.currentPaymentRequest.unit;
+      mints.toggleUnit();
       this.paymentRequestAmount = undefined;
       this.amountLabel = this.amountLabelDefault;
-      this.newPaymentRequest(
-        this.paymentRequestAmount,
-        this.memo,
-        this.chosenMintUrl
-      );
+      await this.saveRequest();
     },
-    newRequest() {
-      this.newPaymentRequest(
-        this.paymentRequestAmount,
-        this.memo,
-        this.chosenMintUrl,
-        true
-      );
+    async newRequest() {
+      await this.saveRequest(true);
     },
     getShortUrl(url: string | undefined) {
       if (!url) {
@@ -293,19 +341,17 @@ export default defineComponent({
       }
       return getShortUrl(url);
     },
-    setActiveMintUrl() {
+    async setActiveMintUrl() {
       if (this.activeMintUrl == this.chosenMintUrl) {
         return;
       }
       this.chosenMintUrl = this.activeMintUrl;
-      this.newPaymentRequest(
-        this.paymentRequestAmount,
-        this.memo,
-        this.chosenMintUrl
-      );
+      await this.saveRequest();
     },
     startEditingAmount() {
       this.isEditingAmount = true;
+      if (this.currentPaymentRequest?.unit)
+        useMintsStore().activeUnit = this.currentPaymentRequest.unit;
       this.$nextTick(() => {
         const input = this.$refs.amountInput as any;
         if (input) {
@@ -318,9 +364,11 @@ export default defineComponent({
         (this as any).copyText(this.showPRKData);
       }
     },
-    finishEditingAmount() {
-      const amount = parseFloat(this.amountInputValue);
-      if (isNaN(amount) || amount <= 0 || this.amountInputValue == "") {
+    async finishEditingAmount() {
+      if (!this.isEditingAmount) return;
+      this.isEditingAmount = false;
+      const amount = Number(this.amountInputValue);
+      if (this.amountInputValue.trim() === "") {
         this.paymentRequestAmount = undefined;
         this.amountLabel = this.amountLabelDefault;
       } else {
@@ -330,12 +378,7 @@ export default defineComponent({
           this.activeUnit
         );
       }
-      this.newPaymentRequest(
-        this.paymentRequestAmount,
-        this.memo,
-        this.chosenMintUrl
-      );
-      this.isEditingAmount = false;
+      await this.saveRequest();
       this.amountInputValue = "";
     },
   },

@@ -43,6 +43,8 @@ export const useSendTokensStore = defineStore("sendTokensStore", {
     // until the dialog closes).
     invalidatePreparedPaymentRequestToken(): boolean {
       if (!this.sendData.paymentRequest) return false;
+      // Durable payment jobs own already-debited proofs and must be resumed.
+      if (this.sendData.historyToken?.paymentJobId) return false;
       if (!this.sendData.tokensBase64 && !this.sendData.historyToken)
         return false;
       this.sendData.tokens = "";
