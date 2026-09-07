@@ -81,10 +81,12 @@ import {
   type AmountLike,
   type P2PKOptions,
   type CounterSource,
-  createEphemeralCounterSource,
   StaleKeysetError,
   // ConsoleLogger,
 } from "@cashu/cashu-ts";
+import { persistentCounterSource } from "src/js/paymentCounters";
+import { sha256 } from "@noble/hashes/sha256";
+import { bytesToHex } from "@noble/hashes/utils";
 // @ts-ignore
 import * as bolt11Decoder from "light-bolt11-decoder";
 import { bech32 } from "bech32";
@@ -99,7 +101,7 @@ import { wordlist } from "@scure/bip39/wordlists/english";
 import { useSettingsStore } from "./settings";
 import { usePriceStore } from "./price";
 import { usePaymentHistoryStore } from "./paymentHistory";
-import { useI18n } from "vue-i18n";
+import { i18n } from "src/boot/i18n";
 import { decodeBolt12Offer } from "src/js/bolt12";
 import { ensurePaymentMethodMintActive } from "src/js/mint-payment-methods";
 import {
@@ -216,7 +218,7 @@ function toProofs(proofs: WalletProof[]): Proof[] {
 
 export const useWalletStore = defineStore("wallet", {
   state: () => {
-    const { t } = useI18n();
+    const t = i18n.global.t.bind(i18n.global);
     return {
       t: t,
       mnemonic: useLocalStorage("cashu.mnemonic", ""),
@@ -231,6 +233,7 @@ export const useWalletStore = defineStore("wallet", {
         [] as { mnemonic: string; keysetCounters: KeysetCounter[] }[]
       ),
       sharedCounterSource: null as CounterSource | null,
+      counterSourceIdentity: "",
       invoiceData: createIncomingInvoiceDraft(),
       activeWebsocketConnections: 0,
       payInvoiceData: {
@@ -380,11 +383,16 @@ export const useWalletStore = defineStore("wallet", {
       return this.createWalletInstance(storedMint, url, unit);
     },
     getOrCreateCounterSource(): CounterSource {
-      if (!this.sharedCounterSource) {
+      const identity = bytesToHex(sha256(this.seed));
+      if (
+        !this.sharedCounterSource ||
+        this.counterSourceIdentity !== identity
+      ) {
         const initial = Object.fromEntries(
           this.keysetCounters.map(({ id, counter }) => [id, counter])
         );
-        this.sharedCounterSource = createEphemeralCounterSource(initial);
+        this.sharedCounterSource = persistentCounterSource(this.seed, initial);
+        this.counterSourceIdentity = identity;
       }
       return this.sharedCounterSource;
     },
@@ -400,10 +408,9 @@ export const useWalletStore = defineStore("wallet", {
       return this.keysetCounters.find((c) => c.id === id)?.counter ?? 0;
     },
     async increaseKeysetCounter(id: string, by: number) {
-      const next = this.keysetCounter(id) + by;
       const src = this.getOrCreateCounterSource();
-      await src.advanceToAtLeast(id, next);
-      this.syncCounterToStorage(id, next);
+      const range = await src.reserve(id, by);
+      this.syncCounterToStorage(id, range.start + range.count);
     },
     createWalletInstance(
       storedMint: StoredMint,
@@ -657,7 +664,7 @@ export const useWalletStore = defineStore("wallet", {
       try {
         const p2pkOptions: P2PKOptions =
           typeof receiverPubkey === "string"
-            ? { pubkey: receiverPubkey }
+            ? { kind: "P2PK", data: receiverPubkey }
             : receiverPubkey;
         const spendableProofs = this.spendableProofs(proofs, amount);
         const proofsToSend = this.coinSelect(
@@ -778,7 +785,7 @@ export const useWalletStore = defineStore("wallet", {
         uIStore.unlockMutex();
       }
     },
-    redeem: async function () {
+    redeem: async function (encodedToken?: string, privateKey?: string) {
       /*
       Receives a token that is prepared in the receiveToken – it is not yet in the history
       */
@@ -786,13 +793,13 @@ export const useWalletStore = defineStore("wallet", {
       const mintStore = useMintsStore();
       const p2pkStore = useP2PKStore();
       const wasReceiveDialogVisible = receiveStore.showReceiveTokens;
+      const tokenBase64 = encodedToken ?? receiveStore.receiveData.tokensBase64;
+      const privkey = privateKey ?? receiveStore.receiveData.p2pkPrivateKey;
 
-      if (receiveStore.receiveData.tokensBase64.length == 0) {
+      if (tokenBase64.length == 0) {
         throw new Error("no tokens provided.");
       }
-      const tokenJson = await token.decodeFull(
-        receiveStore.receiveData.tokensBase64
-      );
+      const tokenJson = await token.decodeFull(tokenBase64);
       if (tokenJson == undefined) {
         throw new Error("no tokens provided.");
       }
@@ -807,7 +814,7 @@ export const useWalletStore = defineStore("wallet", {
 
       const historyToken = {
         amount: inputAmount,
-        token: receiveStore.receiveData.tokensBase64,
+        token: tokenBase64,
         unit: unitInToken,
         mint: mintInToken,
         fee: fee,
@@ -824,14 +831,13 @@ export const useWalletStore = defineStore("wallet", {
       await uIStore.lockMutex();
       try {
         // redeem
-        const privkey = receiveStore.receiveData.p2pkPrivateKey;
         let proofs: Proof[];
         try {
           proofs = await this.retryOnceOnRecoverableError(
             mintWallet.keysetId,
             async () =>
               mintWallet.ops
-                .receive(receiveStore.receiveData.tokensBase64)
+                .receive(tokenBase64)
                 .asDeterministic()
                 .privkey(privkey)
                 .proofsWeHave(mintStore.mintUnitProofs(mint, historyToken.unit))
@@ -850,21 +856,22 @@ export const useWalletStore = defineStore("wallet", {
         // if token is already in history, set to paid, else add to history
         if (
           tokenStore.historyTokens.find(
-            (t) =>
-              t.token === receiveStore.receiveData.tokensBase64 && t.amount > 0
+            (t) => t.token === tokenBase64 && t.amount > 0
           )
         ) {
-          tokenStore.setTokenPaid(receiveStore.receiveData.tokensBase64);
+          tokenStore.editHistoryToken(tokenBase64, {
+            newAmount: outputAmount,
+            newFee: inputAmount - outputAmount,
+          });
+          tokenStore.setTokenPaid(tokenBase64);
         } else {
           // if this is a self-sent token, we will find an outgoing token with the inverse amount
           if (
             tokenStore.historyTokens.find(
-              (t) =>
-                t.token === receiveStore.receiveData.tokensBase64 &&
-                t.amount < 0
+              (t) => t.token === tokenBase64 && t.amount < 0
             )
           ) {
-            tokenStore.setTokenPaid(receiveStore.receiveData.tokensBase64);
+            tokenStore.setTokenPaid(tokenBase64);
           }
           fee = inputAmount - outputAmount;
           historyToken.fee = fee;
@@ -881,7 +888,10 @@ export const useWalletStore = defineStore("wallet", {
           });
         }
         notifySuccess(message);
-        if (wasReceiveDialogVisible) {
+        if (
+          wasReceiveDialogVisible &&
+          receiveStore.receiveData.tokensBase64 === tokenBase64
+        ) {
           receiveStore.showReceiveTokens = false;
           uIStore.closeDialogs();
         }

@@ -1,4 +1,23 @@
 services:
+  nostr-open:
+    # nostr-rs-relay 0.10.0: acknowledges NIP-42 AUTH and protects kind 1059.
+    image: scsibug/nostr-rs-relay@sha256:48d54c2d2781577cf3ed2951112f0953dc2c5e7c9d2ea20c64e8c0fa37d16e4d
+    platform: linux/amd64
+    ports:
+      - "127.0.0.1:7777:8080"
+    volumes:
+      - ./relays/open.toml:/usr/src/app/config.toml:ro
+    tmpfs:
+      - /usr/src/app/db:uid=100,mode=1777
+  nostr-auth:
+    image: scsibug/nostr-rs-relay@sha256:48d54c2d2781577cf3ed2951112f0953dc2c5e7c9d2ea20c64e8c0fa37d16e4d
+    platform: linux/amd64
+    ports:
+      - "127.0.0.1:7778:8080"
+    volumes:
+      - ./relays/auth.toml:/usr/src/app/config.toml:ro
+    tmpfs:
+      - /usr/src/app/db:uid=100,mode=1777
   mint-a:
     image: cashubtc/mintd@sha256:82033e89f7a15709e12a5cb2a6ccba8c342f4e4a76bf2d4de05d07ffcddb04a9
     command:

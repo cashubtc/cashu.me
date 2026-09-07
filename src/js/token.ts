@@ -23,10 +23,7 @@ export default {
 // This type narrows that to number amounts for the rest of the app.
 type MetadataProof = Omit<Proof, "amount" | "id"> & { amount: number };
 
-type DecodedTokenMetadata = Omit<
-  TokenMetadata,
-  "amount" | "incompleteProofs"
-> & {
+type DecodedTokenMetadata = Omit<TokenMetadata, "amount" | "proofAmounts"> & {
   amount: number;
   proofs: MetadataProof[];
 };
@@ -36,15 +33,13 @@ type DecodedTokenMetadata = Omit<
  */
 function decodeMeta(encoded_token: string): DecodedTokenMetadata | undefined {
   if (!encoded_token || encoded_token === "") return;
-  const { incompleteProofs, amount, ...rest } = getTokenMetadata(encoded_token);
+  const { proofAmounts, amount, ...rest } = getTokenMetadata(encoded_token);
   return {
     ...rest,
     amount: Amount.from(amount).toNumber(),
-    proofs:
-      incompleteProofs?.map((proof) => ({
-        ...proof,
-        amount: Amount.from(proof.amount).toNumber(),
-      })) ?? [],
+    proofs: proofAmounts.map((amount) => ({
+      amount: Amount.from(amount).toNumber(),
+    })) as MetadataProof[],
   };
 }
 
@@ -61,11 +56,9 @@ async function decodeFull(encoded_token: string): Promise<Token | undefined> {
     );
   } catch (error) {
     const tokenMint = getTokenMetadata(encoded_token).mint;
-    // TODO: Should tokens from unknown mints "call home" for keysets automatically?
-    // const knownMint = mintStore.mints.find((m) => m.url === tokenMint);
-    // if (!knownMint) {
-    //   throw new Error(`Token is from a mint you have not trusted: ${tokenMint}`);
-    // }
+    const knownMint = mintStore.mints.find((m) => m.url === tokenMint);
+    if (!knownMint)
+      throw new Error("Approve this mint before resolving its token keysets");
     const fetchKeysets = await new Mint(tokenMint).getKeySets();
     return getDecodedToken(
       encoded_token,

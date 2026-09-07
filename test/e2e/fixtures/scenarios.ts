@@ -53,6 +53,20 @@ export async function forceMeltQuoteState(
       await route.continue();
       return;
     }
+    if (state !== "PAID") {
+      // Do not spend real proofs while simulating an unfinished payment. Merely
+      // rewriting the POST response leaves the mint's WebSocket notifications
+      // and proof-state checks reporting PAID/SPENT, racing the fake HTTP state.
+      const { quote } = route.request().postDataJSON();
+      const response = await page.request.get(
+        `${mintUrl}/v1/melt/quote/${method}/${encodeURIComponent(quote)}`
+      );
+      await route.fulfill({
+        response,
+        json: withState(await response.json(), state),
+      });
+      return;
+    }
     await fulfillWithState(route, state);
   });
 

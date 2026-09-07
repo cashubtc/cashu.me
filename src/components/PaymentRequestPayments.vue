@@ -33,7 +33,12 @@
             </div>
           </q-item-label>
           <q-item-label caption class="text-grey-6">
-            {{ formattedDate(payment.date) }}
+            {{ formattedDate(payment.date) }} ·
+            {{
+              payment.status === "paid"
+                ? "Claimed"
+                : "Pending — not yet claimed"
+            }}
           </q-item-label>
         </q-item-section>
       </q-item>
@@ -56,6 +61,7 @@ import { HistoryToken } from "src/stores/tokens";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import token from "src/js/token";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
+import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { Coins as CoinsIcon } from "lucide-vue-next";
 
 export default defineComponent({
@@ -114,6 +120,12 @@ export default defineComponent({
         return;
       }
       const tokensBase64 = historyToken.token;
+      if (historyToken.amount > 0 && historyToken.status !== "paid") {
+        const receive = useReceiveTokensStore();
+        receive.receiveData.tokensBase64 = tokensBase64;
+        receive.showReceiveTokens = true;
+        return;
+      }
       const tokenObj = token.decodeMeta(tokensBase64);
       this.sendData.tokens = token.getProofs(tokenObj) as any;
       this.sendData.tokensBase64 = tokensBase64;

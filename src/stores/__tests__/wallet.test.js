@@ -344,6 +344,10 @@ function mockMintWebsocket(unit = "sat") {
 describe("wallet store", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
+    useWalletStore().mnemonic =
+      "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about";
+    useWalletStore().keysetCounters = [];
+    await cashuDb.paymentCounters.clear();
     await cashuDb.paymentHistory.clear();
     await cashuDb.mintQuotes.clear();
     await cashuDb.meltQuotes.clear();
@@ -394,6 +398,23 @@ describe("wallet store", () => {
     expect(wallet.keysetCounter("k1")).toBe(4);
     await wallet.increaseKeysetCounter("k2", 3);
     expect(wallet.keysetCounter("k2")).toBe(3);
+  });
+
+  it("rebinds durable counters when the active seed changes", async () => {
+    const wallet = useWalletStore();
+    const original = wallet.mnemonic;
+    const first = wallet.getOrCreateCounterSource();
+    await first.reserve("seed-switch", 3);
+    wallet.setMnemonicFromUser(
+      "legal winner thank year wave sausage worth useful legal winner thank yellow"
+    );
+    const second = wallet.getOrCreateCounterSource();
+    expect(second).not.toBe(first);
+    expect((await second.reserve("seed-switch", 1)).start).toBe(0);
+    wallet.setMnemonicFromUser(original);
+    expect(
+      (await wallet.getOrCreateCounterSource().reserve("seed-switch", 1)).start
+    ).toBe(3);
   });
 
   it("creates a new mnemonic and archives previous counters", () => {

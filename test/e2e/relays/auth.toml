@@ -1,0 +1,17 @@
+[info]
+name = "Local authenticated test payment inbox"
+relay_url = "ws://127.0.0.1:7778/"
+[database]
+data_directory = "db"
+[network]
+address = "0.0.0.0"
+port = 8080
+[authorization]
+nip42_auth = true
+nip42_dms = true
+[limits]
+messages_per_sec = 10000
+subscriptions_per_min = 10000
+max_event_bytes = 128000
+max_ws_message_bytes = 256000
+max_ws_frame_bytes = 256000

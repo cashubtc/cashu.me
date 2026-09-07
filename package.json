@@ -28,7 +28,7 @@
     "@capacitor/clipboard": "^6.0.2",
     "@capacitor/core": "^6.2.0",
     "@capacitor/haptics": "^6.0.2",
-    "@cashu/cashu-ts": "^4.9.0",
+    "@cashu/cashu-ts": "5.0.0-rc.9",
     "@chenfengyuan/vue-qrcode": "^2.0.0",
     "@gandlaf21/bc-ur": "^1.1.12",
     "@nostr-dev-kit/ndk": "^2.8.1",
@@ -65,6 +65,7 @@
     "@types/node": "^20.12.11",
     "@types/underscore": "^1.11.15",
     "@types/uuid": "^10.0.0",
+    "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
     "@vue/test-utils": "^2.4.6",
@@ -76,7 +77,7 @@
     "fake-indexeddb": "^6.2.5",
     "happy-dom": "^17.4.4",
     "prettier": "^2.8.8",
-    "typescript": "^5.4.5",
+    "typescript": "^5.9.3",
     "vite-jsconfig-paths": "^2.0.1",
     "vitest": "^3.1.1",
     "workbox-build": "^6.6.1",
@@ -85,7 +86,8 @@
     "workbox-expiration": "^6.6.1",
     "workbox-precaching": "^6.6.1",
     "workbox-routing": "^6.6.1",
-    "workbox-strategies": "^6.6.1"
+    "workbox-strategies": "^6.6.1",
+    "ws": "^8.18.3"
   },
   "engines": {
     "node": ">=22.4.0",

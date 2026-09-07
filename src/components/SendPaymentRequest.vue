@@ -15,6 +15,7 @@
       :disable="disable || !sendData.paymentRequest"
       :loading="isLoading"
       @click="clickPaymentRequest"
+      data-testid="pay-cashu-payment-request"
     >
       <q-icon v-if="!isLoading" name="send" class="q-pr-xs" />
       <q-spinner v-else size="1em" class="q-mr-md" />
@@ -148,7 +149,7 @@ export default defineComponent({
   methods: {
     ...mapActions(usePRStore, ["parseAndPayPaymentRequest"]),
     async clickPaymentRequest() {
-      if (this.disable || !this.sendData.paymentRequest) {
+      if (this.loading || this.disable || !this.sendData.paymentRequest) {
         return;
       }
       this.loading = true;
@@ -171,7 +172,6 @@ export default defineComponent({
           this.$emit("success");
         }
       } catch (error: any) {
-        console.error("Error paying payment request:", error);
         notifyError(`${error?.message ?? error}`, "Could not pay request");
       } finally {
         this.loading = false;

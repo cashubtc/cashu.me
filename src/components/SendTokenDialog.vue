@@ -277,6 +277,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
+import { usePaymentJobsStore } from "src/stores/paymentJobs";
 import { useWalletStore } from "src/stores/wallet";
 import { type MutexPriority, useUiStore } from "src/stores/ui";
 import { useProofsStore } from "src/stores/proofs";
@@ -563,52 +564,21 @@ export default defineComponent({
           ) as string
         );
       }
-      const sendAmount = Math.floor(
-        this.sendData.amount * this.activeUnitCurrencyMultiplyer
-      );
-      const mintWallet = await this.mintWallet(
+      const sendAmount =
+        this.sendData.amount * this.activeUnitCurrencyMultiplyer;
+      const job = await usePaymentJobsStore().prepareOutgoing(
+        this.sendData.paymentRequest,
+        sendAmount,
         this.activeMintUrl,
-        this.activeUnit,
-        true
+        this.activeUnit
       );
-      // NUT-18 payment requests may require the proofs to be locked with a
-      // NUT-10 spending condition. PaymentRequest.toP2PKOptions() builds the
-      // P2PK/HTLC lock cashu-ts can honour, or returns undefined for any other
-      // kind, in which case we fall back to a normal unlocked send.
-      const lockOptions = this.sendData.paymentRequest.toP2PKOptions();
-      const { sendProofs } = lockOptions
-        ? await this.sendToLock(
-            this.activeProofs,
-            mintWallet,
-            sendAmount,
-            lockOptions
-          )
-        : await this.send(
-            this.activeProofs,
-            mintWallet,
-            sendAmount,
-            true,
-            this.includeFeesInSendAmount
-          );
-      const serialized = this.serializeProofs(sendProofs);
-      if (!serialized) {
-        throw new Error(
-          this.$t("SendTokenDialog.errors.serialization_failed") as string
-        );
-      }
+      const serialized = job.token!;
       this.sendData.tokens = "";
       this.sendData.tokensBase64 = serialized;
       this.sendData.historyAmount = -sendAmount;
-      const historyToken = {
-        amount: -sendAmount,
-        token: serialized,
-        unit: this.activeUnit,
-        mint: this.activeMintUrl,
-        paymentRequest: this.sendData.paymentRequest,
-        status: "pending",
-      };
-      const _id = this.addPendingToken(historyToken);
-      (historyToken as any).id = _id;
+      const historyToken = useTokensStore().historyTokens.find(
+        (t) => t.id === job.historyId
+      )!;
       if (!this.g.offline) {
         this.onTokenPaid(historyToken);
       }

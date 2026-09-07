@@ -31,6 +31,29 @@ export function parseBackupTable(value: string): any[] {
   return parsed;
 }
 
+export const PAYMENT_BACKUP_TABLES = [
+  "paymentRequests",
+  "paymentJobs",
+  "paymentEnvelopes",
+  "paymentCheckpoints",
+  "paymentCounters",
+  "paymentProofClaims",
+] as const;
+
+export async function snapshotWalletDatabase() {
+  const tables = cashuDb.tables.filter(
+    (table) => table.name !== "paymentLocks"
+  );
+  return cashuDb.transaction("r", tables, async () => {
+    const result: Record<string, string> = {};
+    for (const table of tables)
+      result[`cashu.dexie.db.${table.name}`] = stringifyBackupTable(
+        await table.toArray()
+      );
+    return result;
+  });
+}
+
 export const useStorageStore = defineStore("storage", {
   state: () => ({
     lastLocalStorageCleanUp: useLocalStorage(
@@ -46,6 +69,28 @@ export const useStorageStore = defineStore("storage", {
       } else {
         const keys = Object.keys(backup);
         for (const key of keys) {
+          const paymentTable = PAYMENT_BACKUP_TABLES.find(
+            (name) => key === `cashu.dexie.db.${name}`
+          );
+          if (paymentTable) {
+            const rows = parseBackupTable(backup[key]);
+            if (paymentTable === "paymentCounters") {
+              await cashuDb.transaction(
+                "rw",
+                cashuDb.paymentCounters,
+                async () => {
+                  for (const row of rows) {
+                    const existing = await cashuDb.paymentCounters.get(row.id);
+                    await cashuDb.paymentCounters.put({
+                      id: row.id,
+                      next: Math.max(existing?.next ?? 0, row.next),
+                    });
+                  }
+                }
+              );
+            } else await cashuDb.table(paymentTable).bulkPut(rows);
+            continue;
+          }
           // we treat some keys differently *magic*
           if (key === "cashu.dexie.db.proofs") {
             const proofs = deserializeProofs(backup[key]);
@@ -111,21 +156,9 @@ export const useStorageStore = defineStore("storage", {
         const v = localStorage.getItem(k);
         jsonToSave[k] = v;
       }
-      // proofs table *magic*
-      const proofs = await useProofsStore().getProofs();
-      jsonToSave["cashu.dexie.db.proofs"] = JSONInt.stringify(proofs);
-      jsonToSave["cashu.dexie.db.paymentHistory"] = stringifyBackupTable(
-        await cashuDb.paymentHistory.toArray()
-      );
-      jsonToSave["cashu.dexie.db.mintQuotes"] = stringifyBackupTable(
-        await cashuDb.mintQuotes.toArray()
-      );
-      jsonToSave["cashu.dexie.db.meltQuotes"] = stringifyBackupTable(
-        await cashuDb.meltQuotes.toArray()
-      );
-      jsonToSave["cashu.dexie.db.ecashHistory"] = stringifyBackupTable(
-        await cashuDb.ecashHistory.toArray()
-      );
+      // A single read transaction keeps proofs, previews, counters and receipts
+      // consistent even when a payment finishes while the backup is exported.
+      Object.assign(jsonToSave, await snapshotWalletDatabase());
 
       const textToSave = JSON.stringify(jsonToSave);
       const textToSaveAsBlob = new Blob([textToSave], {
