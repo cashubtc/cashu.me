@@ -407,14 +407,18 @@ export default defineComponent({
     },
     readBackupFile: function (file) {
       const reader = new FileReader();
-      reader.onload = (f) => {
+      reader.onload = async (f) => {
         try {
           const content = f.target.result;
           const backup = JSON.parse(content);
-          this.restoreFromBackup(backup);
+          await this.restoreFromBackup(backup);
         } catch (error) {
           console.error("Error reading backup file:", error);
-          this.notifyError("Invalid backup file format");
+          this.notifyError(
+            error instanceof SyntaxError
+              ? "Invalid backup file format"
+              : "Could not restore wallet backup"
+          );
         }
       };
       reader.onerror = () => {

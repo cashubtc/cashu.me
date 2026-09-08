@@ -143,6 +143,11 @@ function`, followed by `Successfully restored 1 mint(s)`. The balance remains
   reader's synchronous `try/catch`.
 - Regression: `reimporting the same backup preserves funds without an unhandled error`.
 
+- Fixed: imports preflight conflicting proof data and insert only missing proofs,
+  preserving existing reservations. Current and legacy reimports are idempotent;
+  file readers await imports and show handled failure feedback. Regression and
+  focused storage/file-reader tests cover these invariants.
+
 ### UI-009 — Enabling a Lightning address fails after direct settings navigation
 
 - Severity: medium.
