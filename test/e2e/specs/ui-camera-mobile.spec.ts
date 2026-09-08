@@ -11,16 +11,6 @@ test("decodes a camera QR frame into a payable invoice", async ({
   await installCamera(page, invoice);
   const wallet = new WalletUi(page);
   await wallet.onboard(MINT_A_URL);
-  // The scanner currently requests its WASM from a CDN (UI-007). Serve the
-  // installed dependency locally so this test still exercises actual decoding.
-  await page.route(
-    "https://fastly.jsdelivr.net/**/zxing_reader.wasm",
-    (route) =>
-      route.fulfill({
-        path: require.resolve("zxing-wasm/reader/zxing_reader.wasm"),
-        contentType: "application/wasm",
-      })
-  );
   await wallet.mintBolt11(50);
   await wallet.openSend("lightning");
   await page
@@ -94,6 +84,7 @@ test.describe("touch viewport", () => {
 
 test("scans a QR code without fetching decoder code from a public CDN", async ({
   page,
+  context,
   request,
 }) => {
   const invoice = await counterpartyRequest(request, "bolt11", 10);
@@ -102,10 +93,10 @@ test("scans a QR code without fetching decoder code from a public CDN", async ({
   await wallet.onboard(MINT_A_URL);
   await wallet.mintBolt11(20);
   const decoderRequests: string[] = [];
-  page.on("request", (request) => {
+  context.on("request", (request) => {
     if (
-      request.url().startsWith("https://") &&
-      request.url().endsWith("zxing_reader.wasm")
+      /zxing_reader.*\.wasm/.test(request.url()) &&
+      new URL(request.url()).origin !== new URL(page.url()).origin
     )
       decoderRequests.push(new URL(request.url()).hostname);
   });
@@ -115,9 +106,16 @@ test("scans a QR code without fetching decoder code from a public CDN", async ({
     .getByText("Scan QR Code", { exact: true })
     .click();
   await expect(page.locator("video")).toBeVisible();
-  test.fail(true, "UI-007: scanner still loads decoder WASM from a public CDN");
   await expect(page.getByTestId("pay-payment-request")).toBeVisible({
     timeout: 5000,
   });
+  expect(decoderRequests).toHaveLength(0);
+  await wallet.closeFullscreenDialog();
+  await wallet.openSend("lightning");
+  await page
+    .locator(".q-dialog:visible")
+    .getByText("Scan QR Code", { exact: true })
+    .click();
+  await expect(page.getByTestId("pay-payment-request")).toBeVisible();
   expect(decoderRequests).toHaveLength(0);
 });

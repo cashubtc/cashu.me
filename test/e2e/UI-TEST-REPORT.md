@@ -119,14 +119,19 @@ function`, followed by `Successfully restored 1 mint(s)`. The balance remains
 
 ### UI-007 — QR decoding still depends on a public CDN
 
+- Fixed: a build-managed worker configures its own bundled ZXing WASM URL. Camera
+  tests use the actual same-origin decoder without a CDN response fixture.
+- Validation: development and production SPA camera flows pass. A standalone PWA
+  check decodes a real QR image offline using the precached worker and WASM.
+
 - Severity: medium; scanning cannot initialize when the CDN is unreachable.
 - Reproduce: provide a valid QR camera frame while public network access is
   blocked.
 - Expected: use the bundled decoder configured in `QrcodeReader.vue`.
 - Actual: the scanner requests `zxing_reader.wasm` from `fastly.jsdelivr.net`;
   initialization fails and the scanner stays open without decoding.
-- The separate successful-path test serves the installed WASM through a route
-  fixture, so decoder/parser coverage remains independent of CDN availability.
+- The original successful-path test used a CDN response fixture. Both camera tests
+  now decode with the bundled worker/WASM, including reopening the scanner.
 - Regression: `scans a QR code without fetching decoder code from a public CDN`.
 
 ### UI-008 — Reimporting a backup throws an unhandled duplicate-proof error
