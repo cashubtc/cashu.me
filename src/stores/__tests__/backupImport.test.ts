@@ -17,6 +17,7 @@ const proof = {
 };
 const backup = (proofs = [proof], key = "cashu.dexie.db.proofs") => ({
   "cashu.testSetting": "imported",
+  "cashu.mints": "[]",
   [key]: JSON.stringify(proofs),
 });
 
