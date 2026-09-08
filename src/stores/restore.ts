@@ -5,7 +5,7 @@ import { bytesToHex } from "@noble/hashes/utils"; // already an installed depend
 import { useWalletStore } from "./wallet";
 import { Mint, Wallet, CheckStateEnum, Proof } from "@cashu/cashu-ts";
 import { useMintsStore } from "./mints";
-import { notify, notifyError, notifySuccess } from "src/js/notify";
+import { notify, notifySuccess } from "src/js/notify";
 import { useUiStore } from "./ui";
 import { useProofsStore } from "./proofs";
 import { i18n } from "../boot/i18n";
@@ -39,10 +39,6 @@ export const useRestoreStore = defineStore("restore", {
       this.restoreStatus = "";
       try {
         await this._restoreMint(url);
-      } catch (error) {
-        notifyError(
-          i18n.global.t("restore.restore_mint_error_text", { error })
-        );
       } finally {
         this.restoringState = false;
         this.restoringMint = "";
@@ -51,8 +47,7 @@ export const useRestoreStore = defineStore("restore", {
     },
     _restoreMint: async function (url: string) {
       if (this.mnemonicToRestore.length === 0) {
-        notifyError(i18n.global.t("restore.mnemonic_error_text"));
-        return;
+        throw new Error(i18n.global.t("restore.mnemonic_error_text"));
       }
       this.restoreProgress = 0;
       const walletStore = useWalletStore();
@@ -85,18 +80,11 @@ export const useRestoreStore = defineStore("restore", {
 
         while (emptyBatchCount < MAX_GAP) {
           console.log(`Restoring proofs ${start} to ${start + BATCH_SIZE}`);
-          let proofs: Proof[] = [];
-          let lastCounterWithSignature: number | undefined;
-          try {
-            ({ proofs, lastCounterWithSignature } = await wallet.restore(
-              start,
-              BATCH_SIZE,
-              { keysetId: keyset.id }
-            ));
-          } catch (error) {
-            console.error(`Error restoring proofs: ${error}`);
-            proofs = [];
-          }
+          const { proofs, lastCounterWithSignature } = await wallet.restore(
+            start,
+            BATCH_SIZE,
+            { keysetId: keyset.id }
+          );
           if (proofs.length === 0) {
             console.log(`No proofs found for keyset ${keyset.id}`);
             emptyBatchCount++;
