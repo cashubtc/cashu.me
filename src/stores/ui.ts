@@ -8,6 +8,7 @@ import {
   notifyWarning,
 } from "../js/notify";
 import { Clipboard } from "@capacitor/clipboard";
+import { i18n } from "src/boot/i18n";
 import { Haptics, ImpactStyle } from "@capacitor/haptics";
 
 import ts from "typescript";
@@ -211,15 +212,17 @@ export const useUiStore = defineStore("ui", {
       document.querySelector("#eruda").remove();
     },
     pasteFromClipboard: async function () {
-      let text = "";
-      // @ts-ignore
-      if (window?.Capacitor) {
-        const { value } = await Clipboard.read();
-        text = value;
-      } else {
-        text = await navigator.clipboard.readText();
+      try {
+        // @ts-ignore
+        if (window?.Capacitor) {
+          const { value } = await Clipboard.read();
+          return value;
+        }
+        return await navigator.clipboard.readText();
+      } catch {
+        notifyError(i18n.global.t("RestoreView.actions.paste.error"));
+        return "";
       }
-      return text;
     },
     vibrate: async function () {
       // @ts-ignore
