@@ -283,6 +283,7 @@ import { useProofsStore } from "src/stores/proofs";
 import { useMintsStore } from "src/stores/mints";
 import { useTokensStore } from "src/stores/tokens";
 import { getShortUrl } from "src/js/wallet-helpers";
+import { displayAmountToBaseUnits } from "src/js/amount-entry";
 import { useSettingsStore } from "src/stores/settings";
 import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import { usePriceStore } from "src/stores/price";
@@ -563,8 +564,9 @@ export default defineComponent({
           ) as string
         );
       }
-      const sendAmount = Math.floor(
-        this.sendData.amount * this.activeUnitCurrencyMultiplyer
+      const sendAmount = displayAmountToBaseUnits(
+        this.sendData.amount,
+        this.activeUnitCurrencyMultiplyer
       );
       const mintWallet = await this.mintWallet(
         this.activeMintUrl,
@@ -619,8 +621,9 @@ export default defineComponent({
       if (!this.sendData.amount) {
         throw new Error("Amount is required");
       }
-      const sendAmount = Math.floor(
-        this.sendData.amount * this.activeUnitCurrencyMultiplyer
+      const sendAmount = displayAmountToBaseUnits(
+        this.sendData.amount,
+        this.activeUnitCurrencyMultiplyer
       );
       try {
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
@@ -679,8 +682,9 @@ export default defineComponent({
           return;
         }
 
-        const sendAmount = Math.floor(
-          this.sendData.amount * this.activeUnitCurrencyMultiplyer
+        const sendAmount = displayAmountToBaseUnits(
+          this.sendData.amount,
+          this.activeUnitCurrencyMultiplyer
         );
         const mintWallet = await this.mintWallet(
           this.activeMintUrl,

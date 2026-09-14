@@ -20,7 +20,15 @@
         <q-btn flat class="text-h5" @click="addDigit('8')">8</q-btn>
         <q-btn flat class="text-h5" @click="addDigit('9')">9</q-btn>
 
-        <q-btn flat class="text-h5 invisible" disable>•</q-btn>
+        <q-btn
+          v-if="!hideComma"
+          flat
+          class="text-h5"
+          aria-label="Decimal separator"
+          @click="addDecimalSeparator"
+          >.</q-btn
+        >
+        <q-btn v-else flat class="text-h5 invisible" disable>•</q-btn>
         <q-btn flat class="text-h5" @click="addDigit('0')">0</q-btn>
         <q-btn flat class="text-h5" @click="backspace">
           <q-icon name="chevron_left" size="md" />
@@ -63,6 +71,12 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+    // hide the decimal key for indivisible units (e.g. sat/msat): a fraction
+    // could only produce a rounding surprise there, so the slot stays blank
+    hideComma: {
+      type: Boolean,
+      default: false,
+    },
   },
   emits: ["update:modelValue", "done"],
   data() {
@@ -81,6 +95,10 @@ export default defineComponent({
     },
     addDigit(digit: string) {
       this.sendKey(digit);
+    },
+    addDecimalSeparator() {
+      // canonical "." — the entry grammar normalizes "," too
+      this.sendKey(".");
     },
     backspace() {
       this.sendKey("Backspace");
