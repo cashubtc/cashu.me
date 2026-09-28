@@ -1,0 +1,30 @@
+{
+  "target": "PR #000 or branch-name",
+  "before_sha": "40-character merge-base SHA",
+  "after_sha": "40-character target SHA",
+  "environment": {
+    "browser": "Chromium 1xx (Playwright)",
+    "viewport_px": "390x844",
+    "themes": ["dark", "light"]
+  },
+  "captures": [
+    {
+      "id": "mint-details-dark",
+      "surface": "Mint details page",
+      "state": "Seeded testnut fixture, collapsed sections",
+      "expected_change": "Section dividers replaced by labels + surface cards",
+      "before": "before-mint-details-dark.png",
+      "after": "after-mint-details-dark.png"
+    }
+  ],
+  "extras": [
+    {
+      "id": "after-nuts-expanded",
+      "role": "after-detail",
+      "file": "after-mint-details-nuts-dark.png"
+    }
+  ],
+  "limitations": [
+    "Motion and press states are not capturable in still images."
+  ]
+}
