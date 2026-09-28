@@ -1,4 +1,5 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { copyToClipboard } from "quasar";
 import { PaymentMethod } from "src/stores/walletTypes";
 
 const stores = vi.hoisted(() => ({
@@ -9,6 +10,11 @@ const stores = vi.hoisted(() => ({
     activeUnit: "sat",
     mints: [] as any[],
   },
+}));
+
+vi.mock("quasar", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("quasar")>()),
+  copyToClipboard: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock("src/js/notify", () => ({
@@ -135,6 +141,26 @@ describe("CreateInvoiceDialog", () => {
     expect(context.showAmountInput).toBe(true);
     expect(CreateInvoiceDialog.computed.qrPreview.call(context)).toBeNull();
     expect(CreateInvoiceDialog.computed.canCreate.call(context)).toBe(false);
+  });
+
+  it("renders a reused on-chain quote with an amount as BIP321 but copies only the address", async () => {
+    const quote = {
+      request: "bc1qexisting",
+      requestedAmount: 25000,
+      amount: 0,
+      unit: "sat",
+      status: "pending",
+    };
+    const context: any = {
+      isOnchain: true,
+      activeUnit: "sat",
+      reusableReceiveQuote: quote,
+    };
+    expect(CreateInvoiceDialog.computed.reusableQrValue.call(context)).toBe(
+      "bitcoin:bc1qexisting?amount=0.00025"
+    );
+    await CreateInvoiceDialog.methods.onCopyReusableOffer.call(context);
+    expect(copyToClipboard).toHaveBeenCalledWith("bc1qexisting");
   });
 
   it("retains the existing quote reuse eligibility rules", () => {
@@ -301,7 +327,8 @@ describe("CreateInvoiceDialog", () => {
         context.invoiceData.amount = amount;
         await CreateInvoiceDialog.methods.requestMintButton.call(context);
         expect(context.requestMintOnchain).toHaveBeenCalledExactlyOnceWith(
-          mintWallet
+          mintWallet,
+          amount
         );
         expect(context.showInvoiceDetails).toBe(true);
         expect(context.createInvoiceButtonBlocked).toBe(false);
@@ -382,7 +409,8 @@ describe("CreateInvoiceDialog", () => {
         expect(context.canCreate).toBe(true);
         await CreateInvoiceDialog.methods.requestMintButton.call(context);
         expect(context.requestMintOnchain).toHaveBeenCalledExactlyOnceWith(
-          mintWallet
+          mintWallet,
+          cents
         );
         expect(stores.notifyError).not.toHaveBeenCalled();
       }
@@ -401,7 +429,8 @@ describe("CreateInvoiceDialog", () => {
       context.canCreate = CreateInvoiceDialog.computed.canCreate.call(context);
       await CreateInvoiceDialog.methods.requestMintButton.call(context);
       expect(context.requestMintOnchain).toHaveBeenCalledExactlyOnceWith(
-        mintWallet
+        mintWallet,
+        context.invoiceData.amount
       );
     });
   });

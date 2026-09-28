@@ -68,6 +68,7 @@ export type PaymentHistoryRow = {
   meltChangeOutputData?: any[];
   meltOutputData?: any[];
   network?: string;
+  requestedAmount?: number;
   [key: string]: any;
 };
 
@@ -91,6 +92,7 @@ export type LegacyInvoiceHistory = {
   meltChangeOutputData?: any[];
   meltOutputData?: any[];
   network?: string;
+  requestedAmount?: number;
   parentQuote?: string;
   id?: string;
   [key: string]: any;
@@ -231,6 +233,7 @@ export function buildPaymentRowsFromLegacyInvoice(
     meltChangeOutputData: invoice.meltChangeOutputData,
     meltOutputData: invoice.meltOutputData,
     network: invoice.network,
+    requestedAmount: invoice.requestedAmount,
   });
 
   if (direction === "mint" && invoice.mintQuote) {

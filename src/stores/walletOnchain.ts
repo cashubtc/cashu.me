@@ -48,7 +48,11 @@ function normalizeMintQuote(quote: MintQuoteOnchainResponse): AppMintQuote {
   };
 }
 
-export async function requestMintOnchain(this: any, mintWallet: Wallet) {
+export async function requestMintOnchain(
+  this: any,
+  mintWallet: Wallet,
+  requestedAmount?: number
+) {
   try {
     const privkey = bytesToHex(nobleSecp256k1.utils.randomPrivateKey());
     const pubkey = bytesToHex(nobleSecp256k1.getPublicKey(privkey, true));
@@ -69,6 +73,8 @@ export async function requestMintOnchain(this: any, mintWallet: Wallet) {
       mintQuote: normalizeMintQuote(data),
       privKey: privkey,
       network: onchainNetwork(data.request),
+      // On-chain quotes are amountless; remember the amount for the BIP321 QR.
+      requestedAmount: requestedAmount || undefined,
     };
     this.invoiceData = invoice;
 

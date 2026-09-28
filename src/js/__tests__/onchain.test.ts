@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  bitcoinUriAmount,
   onchainDepositAmountError,
+  onchainDepositQrValue,
   onchainDepositAmountInBaseUnits,
   onchainAddressExplorerUrl,
 } from "src/js/onchain";
@@ -138,5 +140,43 @@ describe("onchainDepositAmountInBaseUnits", () => {
   it("does not round fractional sats into valid deposits", () => {
     const amount = onchainDepositAmountInBaseUnits(1.5, 1);
     expect(onchainDepositAmountError(amount, "sat", null)).not.toBe("");
+  });
+});
+
+describe("bitcoinUriAmount", () => {
+  it.each([
+    [1, "0.00000001"],
+    [25000, "0.00025"],
+    [100000000, "1"],
+    [123456789, "1.23456789"],
+    [Number.MAX_SAFE_INTEGER, "90071992.54740991"],
+  ])("formats %s sat as %s BTC", (sats, btc) => {
+    expect(bitcoinUriAmount(sats)).toBe(btc);
+  });
+});
+
+describe("onchainDepositQrValue", () => {
+  it("renders a BIP321 URI when the requested amount is known in sat", () => {
+    expect(onchainDepositQrValue("bc1qaddress", 25000, "sat")).toBe(
+      "bitcoin:bc1qaddress?amount=0.00025"
+    );
+  });
+
+  it("converts whole-satoshi msat amounts", () => {
+    expect(onchainDepositQrValue("bc1qaddress", 25000000, "msat")).toBe(
+      "bitcoin:bc1qaddress?amount=0.00025"
+    );
+  });
+
+  it.each([
+    [undefined, "sat"],
+    [0, "sat"],
+    [1500, "msat"],
+    [500, "usd"],
+    [500, "eur"],
+  ])("falls back to the bare address for %s %s", (amount, unit) => {
+    expect(onchainDepositQrValue("bc1qaddress", amount, unit)).toBe(
+      "bc1qaddress"
+    );
   });
 });

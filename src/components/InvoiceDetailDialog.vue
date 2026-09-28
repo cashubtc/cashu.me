@@ -185,6 +185,7 @@ import MeltQuoteInformation from "src/components/MeltQuoteInformation.vue";
 import MintQuoteInformation from "src/components/MintQuoteInformation.vue";
 import OnchainDepositLimits from "src/components/OnchainDepositLimits.vue";
 import { PaymentMethod } from "src/stores/walletTypes";
+import { onchainDepositQrValue } from "src/js/onchain";
 // type hint for global mixin
 declare const windowMixin: any;
 
@@ -255,7 +256,11 @@ export default defineComponent({
     },
     qrValue(): string {
       return this.isOnchain
-        ? this.invoiceData.request
+        ? onchainDepositQrValue(
+            this.invoiceData.request,
+            this.invoiceData.requestedAmount,
+            this.invoiceData.unit
+          )
         : "lightning:" + this.invoiceData.request.toUpperCase();
     },
     qrLink(): string | undefined {

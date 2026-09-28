@@ -39,6 +39,25 @@ describe("InvoiceDetailDialog payment display", () => {
     expect(copyToClipboard).toHaveBeenCalledWith("bc1qaddress");
   });
 
+  it("renders a BIP321 QR for an on-chain quote with an amount but copies only the address", async () => {
+    vi.useFakeTimers();
+    const context: any = {
+      isOnchain: true,
+      invoiceData: {
+        request: "bc1qaddress",
+        requestedAmount: 25000,
+        amount: 0,
+        unit: "sat",
+        status: "pending",
+      },
+    };
+    expect(InvoiceDetailDialog.computed.qrValue.call(context)).toBe(
+      "bitcoin:bc1qaddress?amount=0.00025"
+    );
+    await InvoiceDetailDialog.methods.onCopyBolt11.call(context);
+    expect(copyToClipboard).toHaveBeenCalledWith("bc1qaddress");
+  });
+
   it("displays amountless on-chain quotes", () => {
     expect(
       InvoiceDetailDialog.computed.qrValue.call({

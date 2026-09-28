@@ -46,6 +46,37 @@ export function onchainDepositAmountError(
   return "";
 }
 
+/** Format whole satoshis as a BIP321 decimal BTC amount. */
+export function bitcoinUriAmount(sats: number): string {
+  const value = BigInt(sats);
+  const whole = value / 100_000_000n;
+  const fraction = (value % 100_000_000n)
+    .toString()
+    .padStart(8, "0")
+    .replace(/0+$/, "");
+  return fraction ? `${whole}.${fraction}` : `${whole}`;
+}
+
+/**
+ * QR payload for an on-chain deposit address. Adds a BIP321 amount when the
+ * requested amount is known in satoshis; fiat-denominated quotes have no fixed
+ * BTC amount, so they fall back to the bare address.
+ */
+export function onchainDepositQrValue(
+  address: string,
+  requestedAmount: number | undefined,
+  unit: string
+): string {
+  if (!address || !requestedAmount || requestedAmount <= 0) return address;
+  let sats: number;
+  if (unit === "sat") sats = requestedAmount;
+  else if (unit === "msat" && requestedAmount % 1000 === 0)
+    sats = requestedAmount / 1000;
+  else return address;
+  if (!Number.isSafeInteger(sats)) return address;
+  return `bitcoin:${address}?amount=${bitcoinUriAmount(sats)}`;
+}
+
 export type MempoolTxMetadata = {
   txid: string;
   amount?: number;

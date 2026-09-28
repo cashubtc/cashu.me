@@ -291,6 +291,7 @@ import {
 import {
   onchainDepositAmountError,
   onchainDepositAmountInBaseUnits,
+  onchainDepositQrValue,
 } from "src/js/onchain";
 import { notifyError } from "src/js/notify";
 import { useNpubCashStore } from "src/stores/npubcash";
@@ -566,7 +567,12 @@ export default defineComponent({
     },
     reusableQrValue(): string {
       const request = this.reusableReceiveQuote?.request || "";
-      if (this.isOnchain) return request;
+      if (this.isOnchain)
+        return onchainDepositQrValue(
+          request,
+          this.reusableReceiveQuote?.requestedAmount,
+          this.reusableReceiveQuote?.unit || this.activeUnit
+        );
       return `lightning:${request.toUpperCase()}`;
     },
     showReusableQuote(): boolean {
@@ -737,7 +743,7 @@ export default defineComponent({
             notifyError(error);
             return;
           }
-          const mintQuote = await this.requestMintOnchain(wallet);
+          const mintQuote = await this.requestMintOnchain(wallet, amount);
 
           this.showCreateInvoiceDialog = false;
           this.showInvoiceDetails = true;
