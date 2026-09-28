@@ -3,12 +3,13 @@ import { defineStore } from "pinia";
 import { liveQuery } from "dexie";
 import { cashuDb } from "./dexie";
 import {
-  PaymentRequest,
+  JSONInt,
   Proof,
   Token,
   MeltQuoteBolt11Response,
 } from "@cashu/cashu-ts";
 import token from "src/js/token";
+import type { PaymentRequestData } from "src/stores/payment-request";
 import { v4 as uuidv4 } from "uuid";
 
 /**
@@ -23,7 +24,7 @@ export type HistoryToken = {
   token?: string;
   mint: string;
   unit: string;
-  paymentRequest?: PaymentRequest;
+  paymentRequest?: PaymentRequestData;
   fee?: number;
   label?: string; // Add label field for custom naming
   meltQuote?: MeltQuoteBolt11Response;
@@ -40,47 +41,6 @@ function sortHistoryTokens(tokens: HistoryToken[]) {
   });
 }
 
-type StoredHistoryToken = Omit<HistoryToken, "paymentRequest"> & {
-  paymentRequest?: string | PaymentRequest;
-};
-
-function restoreHistoryToken(stored: StoredHistoryToken): HistoryToken {
-  const { paymentRequest, ...historyToken } = stored;
-  if (!paymentRequest) return historyToken;
-  try {
-    // Older history stored the request's fields directly. New entries store
-    // its wire encoding so both Amount and PaymentRequest survive a reload.
-    const request =
-      typeof paymentRequest === "string"
-        ? PaymentRequest.fromEncodedRequest(paymentRequest)
-        : new PaymentRequest(
-            paymentRequest.transport,
-            paymentRequest.id,
-            paymentRequest.amount,
-            paymentRequest.unit,
-            paymentRequest.mints,
-            paymentRequest.description,
-            paymentRequest.singleUse,
-            paymentRequest.nut10
-          );
-    return { ...historyToken, paymentRequest: request };
-  } catch (error) {
-    // A damaged request must not hide the token needed to recover funds.
-    console.error("Could not restore history payment request", error);
-    return historyToken;
-  }
-}
-
-function serializeHistoryToken(historyToken: HistoryToken): StoredHistoryToken {
-  // A shallow spread leaves nested Vue proxies that IndexedDB cannot clone.
-  return JSON.parse(
-    JSON.stringify({
-      ...historyToken,
-      paymentRequest: historyToken.paymentRequest?.toEncodedCreqA(),
-    })
-  );
-}
-
 export const useTokensStore = defineStore("tokens", {
   state: () => ({
     historyTokens: [] as HistoryToken[],
@@ -94,7 +54,7 @@ export const useTokensStore = defineStore("tokens", {
         ).subscribe({
           next: (historyTokens) => {
             this.historyTokens = sortHistoryTokens(
-              historyTokens.map(restoreHistoryToken)
+              historyTokens as HistoryToken[]
             );
           },
           error: (error) => console.error(error),
@@ -104,12 +64,13 @@ export const useTokensStore = defineStore("tokens", {
     },
     async refreshEcashHistory() {
       this.historyTokens = sortHistoryTokens(
-        (await cashuDb.ecashHistory.toArray()).map(restoreHistoryToken)
+        (await cashuDb.ecashHistory.toArray()) as HistoryToken[]
       );
     },
     persistHistoryToken(historyToken: HistoryToken) {
+      // Strip nested Vue proxies and normalize SDK Amount values before IndexedDB.
       cashuDb.ecashHistory
-        .put(serializeHistoryToken(historyToken))
+        .put(JSONInt.parse(JSONInt.stringify(historyToken)!))
         .catch((error) => {
           console.error("Could not persist ecash history token", error);
         });
@@ -126,11 +87,7 @@ export const useTokensStore = defineStore("tokens", {
           id: historyToken.id || uuidv4(),
         })
       );
-      await cashuDb.ecashHistory.bulkPut(
-        historyTokens.map((historyToken) =>
-          serializeHistoryToken(restoreHistoryToken(historyToken))
-        )
-      );
+      await cashuDb.ecashHistory.bulkPut(historyTokens);
       localStorage.removeItem("cashu.historyTokens");
       await this.refreshEcashHistory();
     },
@@ -152,7 +109,7 @@ export const useTokensStore = defineStore("tokens", {
       mint: string;
       unit: string;
       fee?: number;
-      paymentRequest?: PaymentRequest;
+      paymentRequest?: PaymentRequestData;
       label?: string;
       paymentRequestId?: string;
     }): string {
@@ -189,7 +146,7 @@ export const useTokensStore = defineStore("tokens", {
       mint: string;
       unit: string;
       fee?: number;
-      paymentRequest?: PaymentRequest;
+      paymentRequest?: PaymentRequestData;
       label?: string;
       paymentRequestId?: string;
     }): string {

@@ -277,6 +277,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
+import { PaymentRequest } from "@cashu/cashu-ts";
 import { useWalletStore } from "src/stores/wallet";
 import { type MutexPriority, useUiStore } from "src/stores/ui";
 import { useProofsStore } from "src/stores/proofs";
@@ -575,7 +576,10 @@ export default defineComponent({
       // NUT-10 spending condition. PaymentRequest.toP2PKOptions() builds the
       // P2PK/HTLC lock cashu-ts can honour, or returns undefined for any other
       // kind, in which case we fall back to a normal unlocked send.
-      const lockOptions = this.sendData.paymentRequest.toP2PKOptions();
+      // History contains plain request data, so build the SDK lock converter here.
+      const lockRequest = new PaymentRequest();
+      lockRequest.nut10 = this.sendData.paymentRequest.nut10;
+      const lockOptions = lockRequest.toP2PKOptions();
       const { sendProofs } = lockOptions
         ? await this.sendToLock(
             this.activeProofs,

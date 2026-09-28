@@ -15,7 +15,7 @@ describe("tokens store", () => {
     await cashuDb.ecashHistory.clear();
   });
 
-  it("persists reactive payment requests and restores their methods after reload", async () => {
+  it("persists payment request fields as plain data across pending and paid reloads", async () => {
     const store = useTokensStore();
     const paymentRequest = reactive(
       new PaymentRequest(
@@ -27,7 +27,11 @@ describe("tokens store", () => {
         ],
         "request-id",
         21,
-        "sat"
+        "sat",
+        ["https://mint.example"],
+        "Payment memo",
+        true,
+        { kind: "P2PK", data: "pubkey", tags: [["locktime", "1750000000"]] }
       )
     );
     const id = store.addPendingToken({
@@ -40,17 +44,31 @@ describe("tokens store", () => {
     await expect.poll(async () => (await readEcashHistory()).length).toBe(1);
     await store.refreshEcashHistory();
     const restored = store.historyTokens.find((row) => row.id === id)!;
-    expect(restored.paymentRequest?.toEncodedCreqA()).toBe(
-      paymentRequest.toEncodedCreqA()
+    const expectedRequest = {
+      transport: [{ type: "post", target: "https://pay.example" }],
+      id: "request-id",
+      amount: 21,
+      unit: "sat",
+      mints: ["https://mint.example"],
+      description: "Payment memo",
+      singleUse: true,
+      nut10: {
+        kind: "P2PK",
+        data: "pubkey",
+        tags: [["locktime", "1750000000"]],
+      },
+    };
+    expect((await readEcashHistory())[0].paymentRequest).toEqual(
+      expectedRequest
     );
+    expect(restored.paymentRequest).toEqual(expectedRequest);
+    expect(paymentRequest.amount?.toNumber()).toBe(21);
     store.setTokenPaid("cashuA");
     await expect
       .poll(async () => (await readEcashHistory())[0]?.status)
       .toBe("paid");
     await store.refreshEcashHistory();
-    expect(store.historyTokens[0].paymentRequest?.toEncodedCreqA()).toBe(
-      paymentRequest.toEncodedCreqA()
-    );
+    expect(store.historyTokens[0].paymentRequest).toEqual(expectedRequest);
   });
 
   it("migrates legacy historyTokens into ecashHistory", async () => {
@@ -117,33 +135,12 @@ describe("tokens store", () => {
     const restoredRequest = store.historyTokens.find(
       (row) => row.status === "pending"
     )?.paymentRequest;
-    expect(restoredRequest?.amount?.toNumber()).toBe(7);
-    expect(restoredRequest?.toEncodedCreqA()).toMatch(/^creqA/);
+    expect(restoredRequest).toEqual(
+      JSON.parse(JSON.stringify(legacyHistory[1].paymentRequest))
+    );
 
     await store.migrateHistoryTokensFromLocalStorage();
     expect(await readEcashHistory()).toHaveLength(2);
-  });
-
-  it("keeps recovery tokens visible when stored request metadata is damaged", async () => {
-    await cashuDb.ecashHistory.put({
-      id: "damaged-request",
-      status: "pending",
-      amount: -21,
-      date: "2026-03-10T12:00:00.000Z",
-      token: "cashuA",
-      mint: "https://mint.example",
-      unit: "sat",
-      paymentRequest: "invalid-request",
-    });
-    const store = useTokensStore();
-    await store.refreshEcashHistory();
-    expect(store.historyTokens).toHaveLength(1);
-    expect(store.historyTokens[0]).toMatchObject({
-      token: "cashuA",
-      amount: -21,
-      status: "pending",
-    });
-    expect(store.historyTokens[0].paymentRequest).toBeUndefined();
   });
 
   it("keeps existing token history actions compatible with the cache", () => {

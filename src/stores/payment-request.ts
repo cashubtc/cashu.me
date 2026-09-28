@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import {
   Amount,
+  type AmountLike,
   decodePaymentRequest,
   JSONInt,
   normalizeProofAmounts,
@@ -18,6 +19,12 @@ import token from "src/js/token";
 import { notifySuccess, notifyWarning } from "src/js/notify";
 import { useLocalStorage } from "@vueuse/core";
 import { v4 as uuidv4 } from "uuid";
+
+// Request fields used by the UI and delivery; history stores these as plain data.
+export type PaymentRequestData = Pick<
+  PaymentRequest,
+  "transport" | "id" | "unit" | "mints" | "description" | "singleUse" | "nut10"
+> & { amount?: AmountLike };
 
 export type OurPaymentRequest = {
   id: string; // UUID from PaymentRequest
@@ -236,7 +243,7 @@ export const usePRStore = defineStore("payment-request", {
       }
     },
     getPaymentRequestTransport(
-      request: PaymentRequest
+      request: PaymentRequestData
     ): PaymentRequestTransport {
       const transport = request.transport?.find(
         (transport) =>
@@ -249,7 +256,7 @@ export const usePRStore = defineStore("payment-request", {
       return transport;
     },
     async parseAndPayPaymentRequest(
-      request: PaymentRequest,
+      request: PaymentRequestData,
       tokenStr: string
     ): Promise<boolean> {
       const transport = this.getPaymentRequestTransport(request);
@@ -262,7 +269,7 @@ export const usePRStore = defineStore("payment-request", {
       throw new Error("Unsupported payment request transport.");
     },
     async payNostrPaymentRequest(
-      request: PaymentRequest,
+      request: PaymentRequestData,
       transport: PaymentRequestTransport,
       tokenStr: string
     ): Promise<boolean> {
@@ -296,7 +303,7 @@ export const usePRStore = defineStore("payment-request", {
       return true;
     },
     async payPostPaymentRequest(
-      request: PaymentRequest,
+      request: PaymentRequestData,
       transport: PaymentRequestTransport,
       tokenStr: string
     ): Promise<boolean> {

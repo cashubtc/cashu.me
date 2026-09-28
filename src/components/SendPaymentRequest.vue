@@ -30,7 +30,8 @@ import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { usePRStore } from "src/stores/payment-request";
 import { useUiStore } from "src/stores/ui";
 import { notifyError } from "src/js/notify";
-import { PaymentRequest, PaymentRequestTransportType } from "@cashu/cashu-ts";
+import { PaymentRequestTransportType } from "@cashu/cashu-ts";
+import type { PaymentRequestData } from "src/stores/payment-request";
 
 declare const windowMixin: any;
 
@@ -182,7 +183,7 @@ export default defineComponent({
         this.loading = false;
       }
     },
-    getPaymentRequestTransportType(request?: PaymentRequest) {
+    getPaymentRequestTransportType(request?: PaymentRequestData) {
       if (!request || !request.transport) {
         return "";
       }
@@ -197,7 +198,7 @@ export default defineComponent({
       }
       return "";
     },
-    getPaymentRequestTarget(request?: PaymentRequest) {
+    getPaymentRequestTarget(request?: PaymentRequestData) {
       if (!request || !request.transport) {
         return "";
       }
