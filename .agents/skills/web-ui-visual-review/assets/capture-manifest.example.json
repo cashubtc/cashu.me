@@ -24,7 +24,5 @@
       "file": "after-mint-details-nuts-dark.png"
     }
   ],
-  "limitations": [
-    "Motion and press states are not capturable in still images."
-  ]
+  "limitations": ["Motion and press states are not capturable in still images."]
 }

@@ -42,7 +42,7 @@ The review worktree uses a `node_modules` symlink to the main checkout (to
 avoid a second `npm install`). Quasar/Vite stores compiled output in
 `node_modules/.q-cache`, which is therefore **shared between the two
 checkouts**. A dev server started against a populated cache can serve files
-compiled from the *other* checkout — your "before" screenshots then silently
+compiled from the _other_ checkout — your "before" screenshots then silently
 show after-code.
 
 Rules:
@@ -70,22 +70,22 @@ responsive behavior.
 Inject all localStorage through `page.addInitScript` so it exists before the
 app boots. Known keys:
 
-| Key | Value | Purpose |
-|---|---|---|
-| `cashu.welcome.showWelcome` | `"false"` | skip welcome flow |
-| `cashu.welcome.termsAccepted` | `"true"` | skip terms gate |
-| `cashu.darkMode` | `"__q_bool\|1"` / `"__q_bool\|0"` | dark / light theme — see encoding pitfall |
-| `cashu.mints` | JSON array of mint objects | wallet mints |
-| `cashu.activeMintUrl` | mint URL string | active mint |
-| `cashu.activeUnit` | `"sat"` | display unit |
-| `cashu.ui.expandHistory` | `"true"`/`"false"` | history panel open |
-| `cashu.ui.tab` | `"history"` / `"mints"` | active main-screen tab (persisted!) |
+| Key                           | Value                             | Purpose                                   |
+| ----------------------------- | --------------------------------- | ----------------------------------------- |
+| `cashu.welcome.showWelcome`   | `"false"`                         | skip welcome flow                         |
+| `cashu.welcome.termsAccepted` | `"true"`                          | skip terms gate                           |
+| `cashu.darkMode`              | `"__q_bool\|1"` / `"__q_bool\|0"` | dark / light theme — see encoding pitfall |
+| `cashu.mints`                 | JSON array of mint objects        | wallet mints                              |
+| `cashu.activeMintUrl`         | mint URL string                   | active mint                               |
+| `cashu.activeUnit`            | `"sat"`                           | display unit                              |
+| `cashu.ui.expandHistory`      | `"true"`/`"false"`                | history panel open                        |
+| `cashu.ui.tab`                | `"history"` / `"mints"`           | active main-screen tab (persisted!)       |
 
 ## The Quasar boolean encoding pitfall (light mode)
 
 `cashu.darkMode` is read through Quasar's `$q.localStorage`, which uses its own
 encoding: booleans are stored as `__q_bool|1` / `__q_bool|0`. If you write a
-plain `"false"`, Quasar decodes it as the *string* `"false"`, the app's
+plain `"false"`, Quasar decodes it as the _string_ `"false"`, the app's
 `getItem(...) == false` check fails, and it falls back to `dark.set(true)`.
 
 **Symptom:** your light-mode capture comes out pixel-identical to dark mode,
@@ -112,7 +112,7 @@ Rules:
 
 - Seed everything through `addInitScript` so it is present at first boot —
   the live ref then holds your value for the whole session.
-- For state changes *during* a session, drive the UI (click the tab, click
+- For state changes _during_ a session, drive the UI (click the tab, click
   the expansion chevron) instead of localStorage + reload.
 
 Related: `addInitScript(fn, arg)` serializes `fn` — it cannot close over
@@ -126,18 +126,26 @@ Pattern that works: boot once with localStorage seeds → put rows → reload.
 
 ```js
 await page.evaluate(async () => {
-  const put = (table, rows) => new Promise((resolve, reject) => {
-    const req = indexedDB.open("db");
-    req.onsuccess = () => {
-      const db = req.result;
-      const tx = db.transaction(table, "readwrite");
-      rows.forEach((r) => tx.objectStore(table).put(r));
-      tx.oncomplete = () => { db.close(); resolve(); };
-      tx.onerror = () => reject(tx.error);
-    };
-  });
-  await put("ecashHistory", [/* rows */]);
-  await put("paymentHistory", [/* rows */]);
+  const put = (table, rows) =>
+    new Promise((resolve, reject) => {
+      const req = indexedDB.open("db");
+      req.onsuccess = () => {
+        const db = req.result;
+        const tx = db.transaction(table, "readwrite");
+        rows.forEach((r) => tx.objectStore(table).put(r));
+        tx.oncomplete = () => {
+          db.close();
+          resolve();
+        };
+        tx.onerror = () => reject(tx.error);
+      };
+    });
+  await put("ecashHistory", [
+    /* rows */
+  ]);
+  await put("paymentHistory", [
+    /* rows */
+  ]);
 });
 await page.reload({ waitUntil: "domcontentloaded" });
 ```
@@ -192,7 +200,9 @@ on the dev server) and a `beforeinstallprompt` event was captured. Trigger it
 synthetically:
 
 ```js
-await page.evaluate(() => window.dispatchEvent(new Event("beforeinstallprompt")));
+await page.evaluate(() =>
+  window.dispatchEvent(new Event("beforeinstallprompt"))
+);
 ```
 
 The button sits **below the history panel** — if the panel is expanded it is
@@ -223,13 +233,13 @@ implements this exact recipe:
 
 ## Failure modes: symptom → cause → fix
 
-| Symptom | Cause | Fix |
-|---|---|---|
-| "Before" shots show after-code (or vice versa) | shared `node_modules/.q-cache` served stale compiled files | clear cache before every server start; run servers sequentially |
-| Light-mode shot is identical to dark | plain `"false"` fails Quasar's decode → app forces dark | write `__q_bool\|0` |
-| Mint label shows URL, no avatar, though info was seeded | `useLocalStorage` ref clobbered localStorage on reload | seed info via `addInitScript` before first boot |
-| Capture lands on the Mints tab unexpectedly | `cashu.ui.tab` persisted from an earlier click | click the History q-tab, or account for it in capture order |
-| Install button absent | history panel expanded → button below fold | collapse via expansion-header chevron |
-| `ReferenceError` inside addInitScript | function serialized without closure variables | pass data as `addInitScript(fn, arg)` |
-| `Cannot find module 'playwright'` | module not resolvable from script location | run via the playwright-skill runner |
-| Element not found on one build only | before/after markup legitimately differs | parameterize selectors per BUILD; never "fix" one build's code to match |
+| Symptom                                                 | Cause                                                      | Fix                                                                     |
+| ------------------------------------------------------- | ---------------------------------------------------------- | ----------------------------------------------------------------------- |
+| "Before" shots show after-code (or vice versa)          | shared `node_modules/.q-cache` served stale compiled files | clear cache before every server start; run servers sequentially         |
+| Light-mode shot is identical to dark                    | plain `"false"` fails Quasar's decode → app forces dark    | write `__q_bool\|0`                                                     |
+| Mint label shows URL, no avatar, though info was seeded | `useLocalStorage` ref clobbered localStorage on reload     | seed info via `addInitScript` before first boot                         |
+| Capture lands on the Mints tab unexpectedly             | `cashu.ui.tab` persisted from an earlier click             | click the History q-tab, or account for it in capture order             |
+| Install button absent                                   | history panel expanded → button below fold                 | collapse via expansion-header chevron                                   |
+| `ReferenceError` inside addInitScript                   | function serialized without closure variables              | pass data as `addInitScript(fn, arg)`                                   |
+| `Cannot find module 'playwright'`                       | module not resolvable from script location                 | run via the playwright-skill runner                                     |
+| Element not found on one build only                     | before/after markup legitimately differs                   | parameterize selectors per BUILD; never "fix" one build's code to match |

@@ -1,4 +1,5 @@
 <!-- web-ui-visual-review:PR_NUMBER:AFTER_SHA -->
+
 ## Visual review: before / after screenshots
 
 Captured from clean dev-server builds of the **actual merge-base**
@@ -14,8 +15,8 @@ was injected into both builds (details at the bottom).
 
 ### SURFACE_OR_STATE (THEME)
 
-| Before | After |
-|---|---|
+| Before                                              | After                                             |
+| --------------------------------------------------- | ------------------------------------------------- |
 | ![Before: ACCESSIBLE_DESCRIPTION](BEFORE_IMAGE_URL) | ![After: ACCESSIBLE_DESCRIPTION](AFTER_IMAGE_URL) |
 
 <!-- repeat one table per capture-matrix row -->
