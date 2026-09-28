@@ -18,7 +18,8 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { PaymentRequest, PaymentRequestTransportType } from "@cashu/cashu-ts";
+import { PaymentRequestTransportType } from "@cashu/cashu-ts";
+import type { PaymentRequestData } from "src/stores/payment-request";
 import { Send as SendIcon } from "lucide-vue-next";
 
 export default defineComponent({
@@ -28,7 +29,7 @@ export default defineComponent({
   },
   props: {
     request: {
-      type: Object as PropType<PaymentRequest | undefined>,
+      type: Object as PropType<PaymentRequestData | undefined>,
       required: false,
       default: undefined,
     },
@@ -70,7 +71,7 @@ export default defineComponent({
     },
   },
   methods: {
-    getPaymentRequestTarget(request: PaymentRequest): string {
+    getPaymentRequestTarget(request: PaymentRequestData): string {
       for (const transport of request.transport) {
         if (transport.type === PaymentRequestTransportType.NOSTR) {
           if (!transport.target) {
