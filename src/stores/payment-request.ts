@@ -15,7 +15,7 @@ import { useNostrStore } from "./nostr";
 import { useTokensStore } from "./tokens";
 import type { HistoryToken } from "./tokens";
 import token from "src/js/token";
-import { notifyError, notifySuccess, notifyWarning } from "src/js/notify";
+import { notifySuccess, notifyWarning } from "src/js/notify";
 import { useLocalStorage } from "@vueuse/core";
 import { v4 as uuidv4 } from "uuid";
 
@@ -179,6 +179,7 @@ export const usePRStore = defineStore("payment-request", {
     async decodePaymentRequest(pr: string) {
       console.log("decodePaymentRequest", pr);
       const request: PaymentRequest = decodePaymentRequest(pr);
+      this.getPaymentRequestTransport(request);
       console.log("decodePaymentRequest", request);
       const mintsStore = useMintsStore();
       // activate the mint in the payment request
@@ -193,7 +194,6 @@ export const usePRStore = defineStore("payment-request", {
           }
         }
         if (!foundMint) {
-          notifyError(`This payment requires using the mint: ${request.mints}`);
           throw new Error(
             `This payment requires using the mint: ${request.mints}`
           );
@@ -235,22 +235,29 @@ export const usePRStore = defineStore("payment-request", {
         sendTokenStore.showSendTokens = true;
       }
     },
+    getPaymentRequestTransport(
+      request: PaymentRequest
+    ): PaymentRequestTransport {
+      const transport = request.transport?.find(
+        (transport) =>
+          transport.type === PaymentRequestTransportType.NOSTR ||
+          transport.type === PaymentRequestTransportType.POST
+      );
+      if (!transport) {
+        throw new Error("Unsupported payment request transport.");
+      }
+      return transport;
+    },
     async parseAndPayPaymentRequest(
       request: PaymentRequest,
       tokenStr: string
     ): Promise<boolean> {
-      const transports: PaymentRequestTransport[] = request.transport ?? [];
-      for (const transport of transports) {
-        if (transport.type == PaymentRequestTransportType.NOSTR) {
-          return await this.payNostrPaymentRequest(
-            request,
-            transport,
-            tokenStr
-          );
-        }
-        if (transport.type == PaymentRequestTransportType.POST) {
-          return await this.payPostPaymentRequest(request, transport, tokenStr);
-        }
+      const transport = this.getPaymentRequestTransport(request);
+      if (transport.type == PaymentRequestTransportType.NOSTR) {
+        return await this.payNostrPaymentRequest(request, transport, tokenStr);
+      }
+      if (transport.type == PaymentRequestTransportType.POST) {
+        return await this.payPostPaymentRequest(request, transport, tokenStr);
       }
       throw new Error("Unsupported payment request transport.");
     },

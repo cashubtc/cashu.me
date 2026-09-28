@@ -40,6 +40,47 @@ function sortHistoryTokens(tokens: HistoryToken[]) {
   });
 }
 
+type StoredHistoryToken = Omit<HistoryToken, "paymentRequest"> & {
+  paymentRequest?: string | PaymentRequest;
+};
+
+function restoreHistoryToken(stored: StoredHistoryToken): HistoryToken {
+  const { paymentRequest, ...historyToken } = stored;
+  if (!paymentRequest) return historyToken;
+  try {
+    // Older history stored the request's fields directly. New entries store
+    // its wire encoding so both Amount and PaymentRequest survive a reload.
+    const request =
+      typeof paymentRequest === "string"
+        ? PaymentRequest.fromEncodedRequest(paymentRequest)
+        : new PaymentRequest(
+            paymentRequest.transport,
+            paymentRequest.id,
+            paymentRequest.amount,
+            paymentRequest.unit,
+            paymentRequest.mints,
+            paymentRequest.description,
+            paymentRequest.singleUse,
+            paymentRequest.nut10
+          );
+    return { ...historyToken, paymentRequest: request };
+  } catch (error) {
+    // A damaged request must not hide the token needed to recover funds.
+    console.error("Could not restore history payment request", error);
+    return historyToken;
+  }
+}
+
+function serializeHistoryToken(historyToken: HistoryToken): StoredHistoryToken {
+  // A shallow spread leaves nested Vue proxies that IndexedDB cannot clone.
+  return JSON.parse(
+    JSON.stringify({
+      ...historyToken,
+      paymentRequest: historyToken.paymentRequest?.toEncodedCreqA(),
+    })
+  );
+}
+
 export const useTokensStore = defineStore("tokens", {
   state: () => ({
     historyTokens: [] as HistoryToken[],
@@ -53,7 +94,7 @@ export const useTokensStore = defineStore("tokens", {
         ).subscribe({
           next: (historyTokens) => {
             this.historyTokens = sortHistoryTokens(
-              historyTokens as HistoryToken[]
+              historyTokens.map(restoreHistoryToken)
             );
           },
           error: (error) => console.error(error),
@@ -63,13 +104,15 @@ export const useTokensStore = defineStore("tokens", {
     },
     async refreshEcashHistory() {
       this.historyTokens = sortHistoryTokens(
-        (await cashuDb.ecashHistory.toArray()) as HistoryToken[]
+        (await cashuDb.ecashHistory.toArray()).map(restoreHistoryToken)
       );
     },
     persistHistoryToken(historyToken: HistoryToken) {
-      cashuDb.ecashHistory.put({ ...historyToken }).catch((error) => {
-        console.error("Could not persist ecash history token", error);
-      });
+      cashuDb.ecashHistory
+        .put(serializeHistoryToken(historyToken))
+        .catch((error) => {
+          console.error("Could not persist ecash history token", error);
+        });
     },
     async migrateHistoryTokensFromLocalStorage() {
       const raw = localStorage.getItem("cashu.historyTokens");
@@ -83,7 +126,11 @@ export const useTokensStore = defineStore("tokens", {
           id: historyToken.id || uuidv4(),
         })
       );
-      await cashuDb.ecashHistory.bulkPut(historyTokens);
+      await cashuDb.ecashHistory.bulkPut(
+        historyTokens.map((historyToken) =>
+          serializeHistoryToken(restoreHistoryToken(historyToken))
+        )
+      );
       localStorage.removeItem("cashu.historyTokens");
       await this.refreshEcashHistory();
     },

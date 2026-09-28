@@ -146,13 +146,18 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(usePRStore, ["parseAndPayPaymentRequest"]),
+    ...mapActions(usePRStore, [
+      "getPaymentRequestTransport",
+      "parseAndPayPaymentRequest",
+    ]),
     async clickPaymentRequest() {
-      if (this.disable || !this.sendData.paymentRequest) {
+      if (this.disable || this.isLoading || !this.sendData.paymentRequest) {
         return;
       }
       this.loading = true;
       try {
+        // Validate before prepareToken can swap or reserve any wallet proofs.
+        this.getPaymentRequestTransport(this.sendData.paymentRequest);
         let tokenStr = this.sendData.tokensBase64;
         if (this.prepareToken) {
           const prepared = await this.prepareToken();
