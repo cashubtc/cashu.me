@@ -278,11 +278,13 @@ export const useWalletStore = defineStore("wallet", {
         input: {
           request: "",
           amount: undefined,
+          externalAmount: false,
           comment: "",
           quote: "",
         } as {
           request: string;
           amount: number | undefined;
+          externalAmount: boolean;
           comment: string;
           quote: string;
         },
@@ -1473,10 +1475,10 @@ export const useWalletStore = defineStore("wallet", {
         /^[mn2][a-km-zA-HJ-NP-Z1-9]{25,34}$/.test(v)
       );
     },
-    handleOnchainAddress: async function (address: string) {
-      const mintStore = useMintsStore();
+    applyOnchainAddress: function (address: string) {
       this.payInvoiceData.show = true;
       this.payInvoiceData.input.amount = undefined;
+      this.payInvoiceData.input.externalAmount = false;
       this.payInvoiceData.input.quote = "";
       this.payInvoiceData.meltQuote.error = "";
       this.payInvoiceData.meltQuote.response = {
@@ -1484,8 +1486,7 @@ export const useWalletStore = defineStore("wallet", {
         amount: 0,
         fee_reserve: 0,
       };
-
-      const cleanAddress = {
+      this.payInvoiceData.invoice = Object.freeze({
         request: address,
         onchain: address,
         network: onchainNetwork(address),
@@ -1494,8 +1495,11 @@ export const useWalletStore = defineStore("wallet", {
         sat: 0,
         fsat: 0,
         description: "",
-      } as any;
-
+      } as any);
+    },
+    handleOnchainAddress: async function (address: string) {
+      const mintStore = useMintsStore();
+      this.applyOnchainAddress(address);
       const mintResult = await ensurePaymentMethodMintActive(
         mintStore.mints,
         mintStore.activeMintUrl,
@@ -1507,11 +1511,8 @@ export const useWalletStore = defineStore("wallet", {
       if (!mintResult.ok) {
         this.payInvoiceData.meltQuote.error =
           "None of your mints support on-chain payments";
-        this.payInvoiceData.invoice = Object.freeze(cleanAddress);
         return;
       }
-
-      this.payInvoiceData.invoice = Object.freeze(cleanAddress);
     },
     decodeRequest: async function (req: string) {
       const p2pkStore = useP2PKStore();
@@ -1646,6 +1647,16 @@ export const useWalletStore = defineStore("wallet", {
       uiStore.closeDialogs();
     },
     lnurlPayFirst: async function (address: string) {
+      const fetched = await this.fetchLnurlPayData(address);
+      if (!fetched) return;
+      this.applyLnurlPayData(address, fetched.host, fetched.data);
+    },
+    // Network part of lnurlPayFirst, split out so callers that must be
+    // cancellable (e.g. the Android Send clipboard shortcut) can fetch first
+    // and only mutate payInvoiceData once they still own the request.
+    fetchLnurlPayData: async function (
+      address: string
+    ): Promise<{ host: string; data: any } | null> {
       let host;
       let data;
       if (address.split("@").length == 2) {
@@ -1667,8 +1678,17 @@ export const useWalletStore = defineStore("wallet", {
           this.t("wallet.notifications.invalid_lnurl"),
           this.t("wallet.notifications.lnurl_error")
         );
-        return;
+        return null;
       }
+      return { host, data };
+    },
+    // State part of lnurlPayFirst. Returns whether the LNURL response was
+    // applied to payInvoiceData (false for non-payRequest responses).
+    applyLnurlPayData: function (
+      address: string,
+      host: string,
+      data: any
+    ): boolean {
       if (data.tag == "payRequest") {
         this.payInvoiceData.lnurlpay = data;
         this.payInvoiceData.lnurlpay.domain = host
@@ -1691,11 +1711,14 @@ export const useWalletStore = defineStore("wallet", {
         this.payInvoiceData.input = {
           request: "",
           amount: undefined,
+          externalAmount: false,
           comment: "",
           quote: "",
         };
         this.payInvoiceData.show = true;
+        return true;
       }
+      return false;
     },
     lnurlPaySecond: async function () {
       const mintStore = useMintsStore();
