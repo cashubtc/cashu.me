@@ -1,11 +1,18 @@
 <script lang="ts">
 import QrScanner, { type ScanResult } from "@agicash/qr-scanner";
 import { URDecoder } from "@gandlaf21/bc-ur";
+import workerUrl from "virtual:qr-scanner-worker-url";
 import zxingReaderWasmUrl from "zxing-wasm/reader/zxing_reader.wasm?url";
 import { useCameraStore } from "src/stores/camera";
 import { mapActions, mapState } from "pinia";
 import { useUiStore } from "src/stores/ui";
 
+// Keep the worker message cloneable when Vue makes the scanner instance reactive.
+const decoderOptions = Object.freeze({
+  tryHarder: true,
+  wasmUrl: new URL(zxingReaderWasmUrl, document.baseURI).href,
+});
+QrScanner.setWorkerUrl(workerUrl);
 QrScanner.configureWasm({
   locateFile: () => zxingReaderWasmUrl,
 });
@@ -30,6 +37,7 @@ export default {
         this.handleResult(result);
       },
       {
+        decoderOptions,
         calculateScanRegion: (video) => ({
           x: 0,
           y: 0,
