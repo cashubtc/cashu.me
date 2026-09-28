@@ -50,8 +50,8 @@ for (const unit of ["usd", "eur"] as const) {
     await expect(create).toBeEnabled();
     await create.click();
     await expect(page.locator(".qr-copy-text:visible")).toBeVisible();
-    await expect(page.locator(".deposit-limits-warning:visible")).toContainText(
-      `Send between ${symbol}1.13 and ${symbol}4.10.`
+    await expect(page.locator(".deposit-limits-warning:visible")).toHaveText(
+      `Deposits outside ${symbol}1.13–${symbol}4.10 won't be credited.`
     );
   });
 }
@@ -77,15 +77,15 @@ test("renders and reuses an address with an exact uint64 deposit limit", async (
   await wallet.openReceive("onchain");
   await wallet.enterAmount(1000);
   await page.getByTestId("create-payment-request").click();
-  const banner = page.locator(".deposit-limits-warning:visible");
-  await expect(banner).toContainText("18,446,744,073,709,551,615");
+  const limitsHint = page.locator(".deposit-limits-warning:visible");
+  await expect(limitsHint).toContainText("18,446,744,073,709,551,615");
   await wallet.closeFullscreenDialog();
   await page.reload();
   await wallet.openReceive("onchain");
   await expect(page.getByTestId("create-payment-request")).toHaveText(
     "Create New Address"
   );
-  await expect(banner).toContainText("18,446,744,073,709,551,615");
+  await expect(limitsHint).toContainText("18,446,744,073,709,551,615");
 });
 
 test("validates new on-chain addresses while preserving quote reuse and history minting", async ({
@@ -112,7 +112,7 @@ test("validates new on-chain addresses while preserving quote reuse and history 
   await wallet.openReceive("onchain");
   const create = page.getByTestId("create-payment-request");
   const error = page.getByTestId("onchain-amount-error");
-  const limitsBanner = page.locator(".deposit-limits-warning:visible");
+  const limitsHint = page.locator(".deposit-limits-warning:visible");
   let submissions = 0;
   page.on("request", (request) => {
     if (
@@ -122,10 +122,10 @@ test("validates new on-chain addresses while preserving quote reuse and history 
       submissions++;
   });
   await expect(create).toBeDisabled();
-  await expect(limitsBanner).toHaveCount(0);
+  await expect(limitsHint).toHaveCount(0);
   await expect(page.locator(".qr-container:visible")).toHaveCount(0);
   await wallet.enterAmount(999);
-  await expect(error).toContainText("at least 1,000 sat");
+  await expect(error).toContainText("at least ₿1,000");
   await expect(create).toBeDisabled();
   // Move focus off the last keypad button before using the physical keyboard.
   await page.locator(".amount-display:visible").click();
@@ -133,7 +133,7 @@ test("validates new on-chain addresses while preserving quote reuse and history 
   expect(submissions).toBe(0);
   for (let i = 0; i < 3; i++) await page.keyboard.press("Backspace");
   await wallet.enterAmount(5001);
-  await expect(error).toContainText("no more than 5,000 sat");
+  await expect(error).toContainText("no more than ₿5,000");
   await expect(create).toBeDisabled();
   // Move focus off the last keypad button before using the physical keyboard.
   await page.locator(".amount-display:visible").click();
@@ -156,7 +156,7 @@ test("validates new on-chain addresses while preserving quote reuse and history 
   const quote = await (await created).json();
   const addressText = page.locator(".qr-copy-text:visible");
   await expect(addressText).toContainText(quote.request);
-  await expect(limitsBanner).toBeVisible();
+  await expect(limitsHint).toBeVisible();
   await expect(addressText).not.toContainText("bitcoin:");
   await expect(page.locator(".qr-container:visible a")).toHaveCount(0);
   await page.locator(".qr-copy-text:visible").click();
@@ -168,7 +168,7 @@ test("validates new on-chain addresses while preserving quote reuse and history 
   await wallet.openReceive("onchain");
   await expect(addressText).toContainText(quote.request);
   await expect(addressText).not.toContainText("bitcoin:");
-  await expect(limitsBanner).toBeVisible();
+  await expect(limitsHint).toBeVisible();
   await expect(error).toHaveCount(0);
   await expect(create).toHaveText("Create New Address");
   expect(submissions).toBe(1);
@@ -179,7 +179,7 @@ test("validates new on-chain addresses while preserving quote reuse and history 
   await create.click();
   await expect(create).toBeDisabled();
   await expect(page.locator(".qr-container:visible")).toHaveCount(0);
-  await expect(limitsBanner).toHaveCount(0);
+  await expect(limitsHint).toHaveCount(0);
   expect(submissions).toBe(1);
   await wallet.enterAmount(2500);
   const nextCreated = page.waitForResponse(

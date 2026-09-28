@@ -1,19 +1,16 @@
 <template>
-  <q-banner v-if="limits" rounded class="deposit-limits-warning bg-warning">
-    <template v-slot:avatar>
-      <q-icon name="warning" color="dark" />
-    </template>
-    <div class="text-dark text-weight-medium">On-chain deposit limits</div>
-    <div class="text-dark text-body2">
-      {{ limitMessage }} Deposits outside this range WILL NOT be credited and
-      could be lost.
-    </div>
-  </q-banner>
+  <div
+    v-if="limitMessage"
+    class="deposit-limits-warning text-caption text-grey-6"
+  >
+    <InfoIcon :size="13" class="deposit-limits-icon" />{{ limitMessage }}
+  </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapState } from "pinia";
+import { Info as InfoIcon } from "lucide-vue-next";
 import { useMintsStore } from "src/stores/mints";
 import { PaymentMethod } from "src/stores/walletTypes";
 import { mintPaymentMethodLimits } from "src/js/mint-payment-methods";
@@ -23,6 +20,9 @@ declare const windowMixin: any;
 export default defineComponent({
   name: "OnchainDepositLimits",
   mixins: [windowMixin],
+  components: {
+    InfoIcon,
+  },
   props: {
     mintUrl: {
       type: String,
@@ -49,12 +49,15 @@ export default defineComponent({
       const min = this.limits.minAmount;
       const max = this.limits.maxAmount;
       if (min != null && max != null) {
-        return `Send between ${this.formatLimit(min)} and ${this.formatLimit(
+        return `Deposits outside ${this.formatLimit(min)}–${this.formatLimit(
           max
-        )}.`;
+        )} won't be credited.`;
       }
-      if (min != null) return `Send at least ${this.formatLimit(min)}.`;
-      return `Send no more than ${this.formatLimit(max as bigint)}.`;
+      if (min != null)
+        return `Deposits below ${this.formatLimit(min)} won't be credited.`;
+      if (max != null)
+        return `Deposits above ${this.formatLimit(max)} won't be credited.`;
+      return "";
     },
   },
   methods: {
@@ -64,3 +67,15 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.deposit-limits-warning {
+  line-height: 1.4;
+  text-align: center;
+  text-wrap: balance;
+}
+.deposit-limits-icon {
+  margin-right: 6px;
+  vertical-align: -2px;
+}
+</style>

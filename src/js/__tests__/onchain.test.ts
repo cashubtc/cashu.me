@@ -106,6 +106,17 @@ describe("onchainDepositAmountError", () => {
       })
     ).toBe("Enter at least 18,446,744,073,709,551,615 sat.");
   });
+
+  it("formats sat limits with the Bitcoin symbol when enabled", () => {
+    expect(
+      onchainDepositAmountError(
+        999,
+        "sat",
+        { minAmount: 1000n, maxAmount: null },
+        true
+      )
+    ).toBe("Enter at least ₿1,000.");
+  });
 });
 
 describe("onchainDepositAmountInBaseUnits", () => {

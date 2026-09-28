@@ -19,7 +19,8 @@ export function onchainDepositAmountInBaseUnits(
 export function onchainDepositAmountError(
   amount: number,
   unit: string,
-  limits: PaymentMethodLimits | null
+  limits: PaymentMethodLimits | null,
+  bitcoinSymbol = false
 ): string {
   if (!Number.isSafeInteger(amount) || amount <= 0) {
     return unit === "usd" || unit === "eur"
@@ -27,12 +28,19 @@ export function onchainDepositAmountError(
       : `Enter a positive whole amount in ${unit}.`;
   }
   if (limits?.minAmount != null && amount < limits.minAmount) {
-    return `Enter at least ${formatBigIntCurrency(limits.minAmount, unit)}.`;
+    return `Enter at least ${formatBigIntCurrency(
+      limits.minAmount,
+      unit,
+      undefined,
+      bitcoinSymbol
+    )}.`;
   }
   if (limits?.maxAmount != null && amount > limits.maxAmount) {
     return `Enter no more than ${formatBigIntCurrency(
       limits.maxAmount,
-      unit
+      unit,
+      undefined,
+      bitcoinSymbol
     )}.`;
   }
   return "";

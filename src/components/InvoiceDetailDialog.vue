@@ -97,15 +97,9 @@
                   />
                   {{ invoiceData.request }}
                 </div>
-              </div>
-            </div>
-
-            <div v-if="isOnchain" class="row justify-center q-mb-md">
-              <div
-                class="col-12 col-sm-11 col-md-8 q-px-md"
-                style="max-width: 600px"
-              >
                 <OnchainDepositLimits
+                  v-if="isOnchain && invoiceData.status !== 'paid'"
+                  class="q-mt-md"
                   :mint-url="invoiceData.mint"
                   :unit="invoiceData.unit"
                 />

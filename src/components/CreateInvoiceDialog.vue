@@ -159,19 +159,30 @@
               class="q-my-auto"
               v-model="invoiceData.amount"
               :enabled="!isOnchain || !createInvoiceButtonBlocked"
-              :muted="isOnchain && !!onchainAmountError"
+              :muted="showOnchainAmountWarning"
+              :show-fiat-conversion="!showOnchainAmountWarning"
               @enter="requestMintButton"
               @fiat-mode-changed="fiatKeyboardMode = $event"
-            />
+            >
+              <template #overlay>
+                <div
+                  v-if="showOnchainAmountWarning"
+                  class="amount-warning-badge"
+                  role="status"
+                  data-testid="onchain-amount-error"
+                >
+                  <transition name="wobble" mode="out-in" appear>
+                    <span
+                      :key="'warn-text-' + String(invoiceData.amount ?? '')"
+                      class="text-caption text-weight-medium text-grey-6 amount-warning-text"
+                    >
+                      {{ onchainAmountError }}
+                    </span>
+                  </transition>
+                </div>
+              </template>
+            </AmountInputComponent>
           </transition>
-          <div
-            v-if="isOnchain && showAmountInput && onchainAmountError"
-            class="text-negative text-center text-body2 q-mb-sm"
-            role="status"
-            data-testid="onchain-amount-error"
-          >
-            {{ onchainAmountError }}
-          </div>
         </div>
 
         <!-- Numeric keypad -->
@@ -332,6 +343,7 @@ export default defineComponent({
     ...mapState(useSettingsStore, [
       "bitcoinPriceCurrency",
       "useNumericKeyboard",
+      "bip177BitcoinSymbol",
     ]),
     ...mapState(usePriceStore, ["bitcoinPrice", "currentCurrencyPrice"]),
     ...mapState(useNpubCashStore, {
@@ -469,7 +481,16 @@ export default defineComponent({
           PaymentMethod.Onchain,
           "mint",
           this.activeUnit
-        )
+        ),
+        this.bip177BitcoinSymbol
+      );
+    },
+    showOnchainAmountWarning(): boolean {
+      // Stay quiet until an amount is entered; the disabled button covers zero.
+      return (
+        this.isOnchain &&
+        Number(this.invoiceData.amount) > 0 &&
+        !!this.onchainAmountError
       );
     },
     canCreate(): boolean {
@@ -709,7 +730,8 @@ export default defineComponent({
               PaymentMethod.Onchain,
               "mint",
               wallet.unit
-            )
+            ),
+            this.bip177BitcoinSymbol
           );
           if (error) {
             notifyError(error);
@@ -903,6 +925,55 @@ export default defineComponent({
   font-size: 14px;
   line-height: 1.45;
   max-width: 300px;
+}
+.amount-warning-badge {
+  position: absolute;
+  top: calc(100% - 20px);
+  left: 0;
+  right: 0;
+  z-index: 2;
+  pointer-events: none;
+  text-align: center;
+}
+.amount-warning-text {
+  display: inline-block;
+  font-size: 16px;
+}
+.wobble-enter-active {
+  animation: wobble-keyframes 600ms ease-out;
+  transform-origin: center;
+  will-change: transform;
+}
+.wobble-leave-active {
+  animation: none !important;
+}
+@keyframes wobble-keyframes {
+  0% {
+    transform: translateX(0) rotate(0deg);
+  }
+  15% {
+    transform: translateX(-8px) rotate(-3deg);
+  }
+  30% {
+    transform: translateX(8px) rotate(3deg);
+  }
+  45% {
+    transform: translateX(-6px) rotate(-2deg);
+  }
+  60% {
+    transform: translateX(6px) rotate(2deg);
+  }
+  75% {
+    transform: translateX(-3px) rotate(-1deg);
+  }
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wobble-enter-active {
+    animation: none;
+  }
 }
 .bottom-panel {
   margin-top: auto;
