@@ -120,6 +120,7 @@ export class WalletPage {
     await expect(
       this.page.getByText("Receive On-chain", { exact: true })
     ).toBeVisible();
+    await this.enterAmount(expectedAmount);
     await this.page.getByTestId("create-payment-request").click();
     await expect.poll(() => this.balanceSats()).toBe(before + expectedAmount);
     await this.closeFullscreenDialog();

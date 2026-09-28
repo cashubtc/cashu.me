@@ -1,12 +1,49 @@
 import type { GetInfoResponse } from "@cashu/cashu-ts";
 import type { StoredMint } from "src/stores/mints";
 import { PaymentMethod } from "src/stores/walletTypes";
+import { cashuAmountToBigInt } from "src/js/cashu-amount";
 
 function nut4Config(info?: GetInfoResponse) {
   return info?.nuts?.[4] || info?.nuts?.["4"] || ({} as any);
 }
 
 type MintOperation = "mint" | "melt";
+
+export type PaymentMethodLimits = {
+  minAmount: bigint | null;
+  maxAmount: bigint | null;
+};
+
+export function mintPaymentMethodLimits(
+  mint: StoredMint | undefined,
+  method: PaymentMethod,
+  operation: MintOperation = "mint",
+  unit?: string
+): PaymentMethodLimits | null {
+  if (!mint) return null;
+  const nut =
+    operation === "melt"
+      ? mint.info?.nuts?.[5] || mint.info?.nuts?.["5"]
+      : mint.info?.nuts?.[4] || mint.info?.nuts?.["4"];
+  const advertisedMethod = nut?.methods?.find(
+    (entry: { method: string; unit?: string; disabled?: boolean }) =>
+      entry.disabled !== true &&
+      entry.method === method &&
+      (!unit || !entry.unit || entry.unit === unit)
+  );
+  if (!advertisedMethod) return null;
+
+  const minAmount =
+    advertisedMethod.min_amount == null
+      ? null
+      : cashuAmountToBigInt(advertisedMethod.min_amount);
+  const maxAmount =
+    advertisedMethod.max_amount == null
+      ? null
+      : cashuAmountToBigInt(advertisedMethod.max_amount);
+  if (minAmount == null && maxAmount == null) return null;
+  return { minAmount, maxAmount };
+}
 
 export function mintSupportsPaymentMethod(
   mint: StoredMint,

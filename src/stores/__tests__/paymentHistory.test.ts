@@ -207,6 +207,31 @@ describe("payment history store", () => {
     );
   });
 
+  it("persists the requested amount of an on-chain deposit address", async () => {
+    const paymentHistoryStore = usePaymentHistoryStore();
+    await paymentHistoryStore.addPayment({
+      quote: "onchain-q",
+      amount: 0,
+      request: "bc1qaddress",
+      memo: "",
+      date: "2026-03-10T12:00:00.000Z",
+      status: "pending",
+      mint: "https://mint.example",
+      unit: "sat",
+      type: PaymentMethod.Onchain,
+      direction: "mint",
+      requestedAmount: 25000,
+    });
+
+    expect(await cashuDb.paymentHistory.toArray()).toEqual([
+      expect.objectContaining({ quote: "onchain-q", requestedAmount: 25000 }),
+    ]);
+    await paymentHistoryStore.refreshFromDexie();
+    expect(paymentHistoryStore.invoiceHistory[0]).toEqual(
+      expect.objectContaining({ quote: "onchain-q", requestedAmount: 25000 })
+    );
+  });
+
   it("creates a mint invoice after viewing a reactive outgoing payment", async () => {
     const paymentHistoryStore = usePaymentHistoryStore();
     await paymentHistoryStore.addPayment({

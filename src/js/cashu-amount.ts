@@ -32,6 +32,12 @@ export function cashuAmountToNumber(value: unknown): number {
   return Amount.from(amountLike as AmountLike).toNumber();
 }
 
+/** Keep metadata limits exact even when they exceed the wallet's number range. */
+export function cashuAmountToBigInt(value: unknown): bigint {
+  const amountLike = isStructuredClonedAmount(value) ? value.value : value;
+  return Amount.from(amountLike as AmountLike).toBigInt();
+}
+
 /**
  * Normalize every amount-bearing quote field before it crosses the app's
  * persistence boundary.

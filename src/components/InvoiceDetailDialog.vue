@@ -48,21 +48,21 @@
                 style="max-width: 600px"
               >
                 <div class="qr-container">
-                  <a class="text-secondary" :href="qrLink">
+                  <component
+                    :is="isOnchain ? 'div' : 'a'"
+                    class="text-secondary"
+                    :href="qrLink"
+                  >
                     <q-responsive :ratio="1" class="q-mx-none">
                       <vue-qrcode
-                        :value="
-                          isOnchain
-                            ? 'bitcoin:' + invoiceData.request
-                            : 'lightning:' + invoiceData.request.toUpperCase()
-                        "
+                        :value="qrValue"
                         :options="{ width: 400 }"
                         class="rounded-borders"
                         style="width: 100%"
                       >
                       </vue-qrcode>
                     </q-responsive>
-                  </a>
+                  </component>
                   <!-- Checkmark overlay when paid -->
                   <div
                     v-if="invoiceData.status === 'paid'"
@@ -97,6 +97,12 @@
                   />
                   {{ invoiceData.request }}
                 </div>
+                <OnchainDepositLimits
+                  v-if="isOnchain && invoiceData.status !== 'paid'"
+                  class="q-mt-md"
+                  :mint-url="invoiceData.mint"
+                  :unit="invoiceData.unit"
+                />
               </div>
             </div>
 
@@ -172,12 +178,14 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import VueQrcode from "@chenfengyuan/vue-qrcode";
 import { copyToClipboard } from "quasar";
 
-import { useWalletStore } from "../stores/wallet";
-import { useUiStore } from "../stores/ui";
-import { useWorkersStore } from "../stores/workers";
-import MeltQuoteInformation from "./MeltQuoteInformation.vue";
-import MintQuoteInformation from "./MintQuoteInformation.vue";
+import { useWalletStore } from "src/stores/wallet";
+import { useUiStore } from "src/stores/ui";
+import { useWorkersStore } from "src/stores/workers";
+import MeltQuoteInformation from "src/components/MeltQuoteInformation.vue";
+import MintQuoteInformation from "src/components/MintQuoteInformation.vue";
+import OnchainDepositLimits from "src/components/OnchainDepositLimits.vue";
 import { PaymentMethod } from "src/stores/walletTypes";
+import { onchainDepositQrValue } from "src/js/onchain";
 // type hint for global mixin
 declare const windowMixin: any;
 
@@ -188,6 +196,7 @@ export default defineComponent({
     VueQrcode,
     MeltQuoteInformation,
     MintQuoteInformation,
+    OnchainDepositLimits,
   },
   props: {},
   data: function () {
@@ -245,11 +254,19 @@ export default defineComponent({
         this.invoiceData.type === PaymentMethod.OnchainSubpayment
       );
     },
-    qrLink(): string {
-      if (this.isOnchain) {
-        return "bitcoin:" + this.invoiceData.request;
-      }
-      return "lightning:" + this.invoiceData.request;
+    qrValue(): string {
+      return this.isOnchain
+        ? onchainDepositQrValue(
+            this.invoiceData.request,
+            this.invoiceData.requestedAmount,
+            this.invoiceData.unit
+          )
+        : "lightning:" + this.invoiceData.request.toUpperCase();
+    },
+    qrLink(): string | undefined {
+      return this.isOnchain
+        ? undefined
+        : "lightning:" + this.invoiceData.request;
     },
   },
   watch: {

@@ -3,6 +3,7 @@ import { useUiStore } from "stores/ui";
 import { Clipboard } from "@capacitor/clipboard";
 import { SafeArea } from "capacitor-plugin-safe-area";
 import { useSettingsStore } from "stores/settings";
+import { formatBigIntCurrency } from "src/js/format-currency";
 window.LOCALE = "en";
 // window.EventHub = new Vue();
 
@@ -144,6 +145,14 @@ window.windowMixin = {
       }
       if (useUiStore().hideBalance && !showBalance) {
         return "****";
+      }
+      if (typeof value === "bigint") {
+        return formatBigIntCurrency(
+          value,
+          currency,
+          window.LOCALE,
+          useSettingsStore().bip177BitcoinSymbol
+        );
       }
       if (currency == "sat") return this.formatSat(value);
       if (currency == "msat") return this.fromMsat(value);

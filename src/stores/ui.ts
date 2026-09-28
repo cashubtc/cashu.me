@@ -9,6 +9,7 @@ import {
 } from "../js/notify";
 import { Clipboard } from "@capacitor/clipboard";
 import { Haptics, ImpactStyle } from "@capacitor/haptics";
+import { formatBigIntCurrency } from "src/js/format-currency";
 
 import ts from "typescript";
 import { useSettingsStore } from "./settings";
@@ -156,7 +157,7 @@ export const useUiStore = defineStore("ui", {
       return new Intl.NumberFormat(navigator.language).format(value) + " msat";
     },
     formatCurrency: function (
-      value: number,
+      value: number | bigint,
       currency: string,
       showBalance = false
     ) {
@@ -165,6 +166,14 @@ export const useUiStore = defineStore("ui", {
       }
       if (useUiStore().hideBalance && !showBalance) {
         return "****";
+      }
+      if (typeof value === "bigint") {
+        return formatBigIntCurrency(
+          value,
+          currency,
+          navigator.language,
+          useSettingsStore().bip177BitcoinSymbol
+        );
       }
       if (currency == "sat") return this.formatSat(value);
       if (currency == "msat") return this.fromMsat(value);

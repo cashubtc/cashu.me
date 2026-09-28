@@ -1030,6 +1030,41 @@ describe("wallet store", () => {
     expect(websocket.connection.cancelSubscription).not.toHaveBeenCalled();
   });
 
+  it("keeps on-chain quotes amountless until the mint reports a payment", async () => {
+    const quote = {
+      quote: "onchain-q",
+      request: "bc1qaddress",
+      unit: "sat",
+      amount_paid: 0,
+      amount_issued: 0,
+      expiry: 0,
+    };
+    const mintWallet = {
+      mint: { mintUrl: "https://mint-a.example" },
+      unit: "sat",
+      createMintQuoteOnchain: vi.fn().mockResolvedValue(quote),
+    };
+    const wallet = useWalletStore();
+    wallet.invoiceData.amount = 1234;
+    await wallet.requestMintOnchain(mintWallet);
+    expect(mintWallet.createMintQuoteOnchain).toHaveBeenCalledOnce();
+    expect(mintWallet.createMintQuoteOnchain.mock.calls[0]).toEqual([
+      expect.any(String),
+    ]);
+    expect(wallet.invoiceData).toMatchObject({
+      amount: 0,
+      request: quote.request,
+    });
+    expect(await cashuDb.paymentHistory.toArray()).toEqual([
+      expect.objectContaining({ amount: 0, request: quote.request }),
+    ]);
+    await wallet.setInvoicePaid(quote.quote, { amount: 1500 });
+    expect((await cashuDb.paymentHistory.toArray())[0]).toMatchObject({
+      amount: 1500,
+      status: "paid",
+    });
+  });
+
   it("subscribes on-chain minting to on-chain websocket updates", async () => {
     const wallet = useWalletStore();
     const websocket = mockMintWebsocket();

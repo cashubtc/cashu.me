@@ -145,6 +145,8 @@ export type InvoiceHistory = Invoice & {
   // Legacy persisted name; keep readable until old pending melts have cleared.
   meltOutputData?: any[];
   network?: string;
+  // Amount entered when creating an on-chain address, in `unit`.
+  requestedAmount?: number;
   parentQuote?: string;
   method?: PaymentMethod;
   direction?: "mint" | "melt";

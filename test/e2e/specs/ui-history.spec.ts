@@ -21,7 +21,7 @@ for (const method of ["bolt11", "bolt12", "onchain"] as const) {
         .getByRole("button", { name: "Add amount", exact: true })
         .click();
     }
-    if (method !== "onchain") await wallet.enterAmount(27);
+    await wallet.enterAmount(method === "onchain" ? 1000 : 27);
     const created = page.waitForResponse(
       (r) =>
         r.url() === `${MINT_A_URL}/v1/mint/quote/${method}` &&

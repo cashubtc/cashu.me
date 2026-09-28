@@ -136,6 +136,12 @@
                     />
                     {{ qrPreview.text }}
                   </div>
+                  <OnchainDepositLimits
+                    v-if="isOnchain"
+                    class="q-mt-md"
+                    :mint-url="activeMintUrl"
+                    :unit="activeUnit"
+                  />
                 </template>
               </div>
             </div>
@@ -147,16 +153,35 @@
               <q-spinner size="48px" color="primary" />
               <div class="text-grey-6 q-mt-md">Checking address...</div>
             </div>
-
             <AmountInputComponent
               v-else-if="showAmountInput"
               key="amount-input"
               class="q-my-auto"
               v-model="invoiceData.amount"
-              :enabled="true"
+              :enabled="!isOnchain || !createInvoiceButtonBlocked"
+              :muted="showOnchainAmountWarning"
+              :show-fiat-conversion="!showOnchainAmountWarning"
               @enter="requestMintButton"
               @fiat-mode-changed="fiatKeyboardMode = $event"
-            />
+            >
+              <template #overlay>
+                <div
+                  v-if="showOnchainAmountWarning"
+                  class="amount-warning-badge"
+                  role="status"
+                  data-testid="onchain-amount-error"
+                >
+                  <transition name="wobble" mode="out-in" appear>
+                    <span
+                      :key="'warn-text-' + String(invoiceData.amount ?? '')"
+                      class="text-caption text-weight-medium text-grey-6 amount-warning-text"
+                    >
+                      {{ onchainAmountError }}
+                    </span>
+                  </transition>
+                </div>
+              </template>
+            </AmountInputComponent>
           </transition>
         </div>
 
@@ -248,9 +273,10 @@ import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { copyToClipboard } from "quasar";
 import VueQrcode from "@chenfengyuan/vue-qrcode";
-import ChooseMint from "components/ChooseMint.vue";
-import NumericKeyboard from "components/NumericKeyboard.vue";
-import AmountInputComponent from "components/AmountInputComponent.vue";
+import ChooseMint from "src/components/ChooseMint.vue";
+import NumericKeyboard from "src/components/NumericKeyboard.vue";
+import AmountInputComponent from "src/components/AmountInputComponent.vue";
+import OnchainDepositLimits from "src/components/OnchainDepositLimits.vue";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 import { useMintsStore } from "src/stores/mints";
@@ -258,7 +284,16 @@ import { useSettingsStore } from "src/stores/settings";
 import { usePriceStore } from "src/stores/price";
 import type { InvoiceHistory } from "src/stores/wallet";
 import { PaymentMethod } from "src/stores/walletTypes";
-import { mintSupportsPaymentMethod } from "src/js/mint-payment-methods";
+import {
+  mintPaymentMethodLimits,
+  mintSupportsPaymentMethod,
+} from "src/js/mint-payment-methods";
+import {
+  onchainDepositAmountError,
+  onchainDepositAmountInBaseUnits,
+  onchainDepositQrValue,
+} from "src/js/onchain";
+import { notifyError } from "src/js/notify";
 import { useNpubCashStore } from "src/stores/npubcash";
 import { lightningAddressToLnurl } from "src/js/lnurl";
 
@@ -271,6 +306,7 @@ export default defineComponent({
     ChooseMint,
     NumericKeyboard,
     AmountInputComponent,
+    OnchainDepositLimits,
     VueQrcode,
   },
   props: {},
@@ -279,6 +315,7 @@ export default defineComponent({
       createInvoiceButtonBlocked: false,
       fiatKeyboardMode: false as boolean,
       bolt12AddAmount: false as boolean,
+      onchainAddAmount: false,
       npubCashAddAmount: false as boolean,
       npubCashAddressCopied: false,
       npubCashCopyTimeout: null as ReturnType<typeof setTimeout> | null,
@@ -307,6 +344,7 @@ export default defineComponent({
     ...mapState(useSettingsStore, [
       "bitcoinPriceCurrency",
       "useNumericKeyboard",
+      "bip177BitcoinSymbol",
     ]),
     ...mapState(usePriceStore, ["bitcoinPrice", "currentCurrencyPrice"]),
     ...mapState(useNpubCashStore, {
@@ -323,7 +361,11 @@ export default defineComponent({
     },
     showAmountInput(): boolean {
       if (this.showNpubCashPreview) return false;
-      if (this.isOnchain) return false;
+      if (this.isOnchain)
+        return (
+          this.onchainAddAmount ||
+          (!this.checkingReusableOnchainQuote && !this.reusableOnchainQuote)
+        );
       if (!this.isBolt12) return true;
       return this.bolt12AddAmount;
     },
@@ -427,11 +469,42 @@ export default defineComponent({
       }
       return null;
     },
+    onchainAmountError(): string {
+      if (!this.isOnchain) return "";
+      return onchainDepositAmountError(
+        onchainDepositAmountInBaseUnits(
+          Number(this.invoiceData.amount),
+          this.activeUnitCurrencyMultiplyer
+        ),
+        this.activeUnit,
+        mintPaymentMethodLimits(
+          this.activeMint,
+          PaymentMethod.Onchain,
+          "mint",
+          this.activeUnit
+        ),
+        this.bip177BitcoinSymbol
+      );
+    },
+    showOnchainAmountWarning(): boolean {
+      // Stay quiet until an amount is entered; the disabled button covers zero.
+      return (
+        this.isOnchain &&
+        Number(this.invoiceData.amount) > 0 &&
+        !!this.onchainAmountError
+      );
+    },
     canCreate(): boolean {
       if (this.activeMintErrored) return false;
-      // Bolt11 requires amount > 0
-      // Bolt12 and on-chain allow 0 amount (amountless request)
-      if (this.isBolt12 || this.isOnchain) return true;
+      if (this.isOnchain)
+        return (
+          this.onchainSupported &&
+          !this.createInvoiceButtonBlocked &&
+          !this.globalMutexLock &&
+          (this.showReusableQuote || !this.onchainAmountError)
+        );
+      // Bolt12 supports amountless offers; Bolt11 requires a positive amount.
+      if (this.isBolt12) return true;
       return (
         this.invoiceData.amount != null && Number(this.invoiceData.amount) > 0
       );
@@ -494,7 +567,12 @@ export default defineComponent({
     },
     reusableQrValue(): string {
       const request = this.reusableReceiveQuote?.request || "";
-      if (this.isOnchain) return `bitcoin:${request}`;
+      if (this.isOnchain)
+        return onchainDepositQrValue(
+          request,
+          this.reusableReceiveQuote?.requestedAmount,
+          this.reusableReceiveQuote?.unit || this.activeUnit
+        );
       return `lightning:${request.toUpperCase()}`;
     },
     showReusableQuote(): boolean {
@@ -508,6 +586,7 @@ export default defineComponent({
   watch: {
     showCreateInvoiceDialog: function (val) {
       if (val) {
+        this.onchainAddAmount = false;
         this.npubCashAddAmount = false;
         this.npubCashAddressCopied = false;
         this.$nextTick(() => {
@@ -607,18 +686,64 @@ export default defineComponent({
       if (!this.canCreate) {
         return;
       }
+      if (this.isOnchain && this.showReusableQuote) {
+        this.onchainAddAmount = true;
+        this.invoiceData.amount = "";
+        this.$nextTick(() => {
+          this.showNumericKeyboard = true;
+        });
+        return;
+      }
       try {
         this.showNumericKeyboard = false;
-        const amount = Math.floor(
-          (this.invoiceData.amount || 0) * this.activeUnitCurrencyMultiplyer
-        );
+        const amount = this.isOnchain
+          ? onchainDepositAmountInBaseUnits(
+              Number(this.invoiceData.amount),
+              this.activeUnitCurrencyMultiplyer
+            )
+          : Math.floor(
+              (this.invoiceData.amount || 0) * this.activeUnitCurrencyMultiplyer
+            );
         this.createInvoiceButtonBlocked = true;
 
         // Get wallet instance
         const wallet = await this.activeWallet(true);
 
         if (this.isOnchain) {
-          const mintQuote = await this.requestMintOnchain(wallet);
+          // Validate again against the refreshed mint before creating an address.
+          const mint = this.mints.find(
+            (entry) => entry.url === wallet.mint.mintUrl
+          );
+          if (
+            !mint ||
+            !mintSupportsPaymentMethod(
+              mint,
+              PaymentMethod.Onchain,
+              "mint",
+              wallet.unit
+            )
+          ) {
+            notifyError(
+              "This mint does not support on-chain deposits in this unit."
+            );
+            return;
+          }
+          const error = onchainDepositAmountError(
+            amount,
+            wallet.unit,
+            mintPaymentMethodLimits(
+              mint,
+              PaymentMethod.Onchain,
+              "mint",
+              wallet.unit
+            ),
+            this.bip177BitcoinSymbol
+          );
+          if (error) {
+            notifyError(error);
+            return;
+          }
+          const mintQuote = await this.requestMintOnchain(wallet, amount);
 
           this.showCreateInvoiceDialog = false;
           this.showInvoiceDetails = true;
@@ -806,6 +931,55 @@ export default defineComponent({
   font-size: 14px;
   line-height: 1.45;
   max-width: 300px;
+}
+.amount-warning-badge {
+  position: absolute;
+  top: calc(100% - 20px);
+  left: 0;
+  right: 0;
+  z-index: 2;
+  pointer-events: none;
+  text-align: center;
+}
+.amount-warning-text {
+  display: inline-block;
+  font-size: 16px;
+}
+.wobble-enter-active {
+  animation: wobble-keyframes 600ms ease-out;
+  transform-origin: center;
+  will-change: transform;
+}
+.wobble-leave-active {
+  animation: none !important;
+}
+@keyframes wobble-keyframes {
+  0% {
+    transform: translateX(0) rotate(0deg);
+  }
+  15% {
+    transform: translateX(-8px) rotate(-3deg);
+  }
+  30% {
+    transform: translateX(8px) rotate(3deg);
+  }
+  45% {
+    transform: translateX(-6px) rotate(-2deg);
+  }
+  60% {
+    transform: translateX(6px) rotate(2deg);
+  }
+  75% {
+    transform: translateX(-3px) rotate(-1deg);
+  }
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wobble-enter-active {
+    animation: none;
+  }
 }
 .bottom-panel {
   margin-top: auto;
