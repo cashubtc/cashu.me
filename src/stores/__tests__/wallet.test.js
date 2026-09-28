@@ -61,6 +61,7 @@ const h = vi.hoisted(() => {
     addBolt12OfferToChecker: vi.fn(),
     addOnchainQuoteToChecker: vi.fn(),
     addOutgoingTokenToChecker: vi.fn(),
+    removeOutgoingInvoiceFromChecker: vi.fn(),
     mintQuoteIsClaimed: vi.fn(() => false),
     waitForMintQuoteRelease: vi.fn(async () => {}),
   };
@@ -1645,7 +1646,7 @@ describe("wallet store", () => {
     expect(quoteSpy).not.toHaveBeenCalled();
   });
 
-  it("checks pending Bolt12 outgoing invoices with Bolt12 melt quotes", async () => {
+  it("does not record a recovered outgoing Bolt12 payment as an ecash send", async () => {
     const wallet = useWalletStore();
     const proofs = [{ id: "00aa", amount: 105, secret: "s1" }];
     const checkMeltQuoteBolt12 = vi.fn(async () => ({
@@ -1680,7 +1681,7 @@ describe("wallet store", () => {
     expect(wallet.checkProofsSpendable).toHaveBeenCalledWith(
       proofs,
       expect.objectContaining({ mint: { checkMeltQuoteBolt12 } }),
-      true
+      false
     );
     expect(wallet.invoiceHistory[0].status).toBe("paid");
     expect(wallet.invoiceHistory[0].meltQuote).toMatchObject({
@@ -1754,6 +1755,9 @@ describe("wallet store", () => {
     });
     expect(wallet.invoiceHistory[0].meltChangeOutputData).toEqual([]);
     expect(wallet.invoiceHistory[0].meltOutputData).toEqual([]);
+    expect(
+      h.transactionWorkerStore.removeOutgoingInvoiceFromChecker
+    ).toHaveBeenCalledWith("bolt11-melt-q");
   });
 
   it("keeps the mutex during normal melts and only releases when requested", async () => {

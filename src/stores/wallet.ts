@@ -1400,7 +1400,12 @@ export const useWalletStore = defineStore("wallet", {
     },
     handlePaymentRequest: async function (req: string) {
       const prStore = usePRStore();
-      await prStore.decodePaymentRequest(req);
+      try {
+        await prStore.decodePaymentRequest(req);
+        this.payInvoiceData.show = false;
+      } catch (error: any) {
+        notifyError(`${error?.message ?? error}`, "Could not pay request");
+      }
     },
     handleBolt12Offer: async function (offer: string) {
       const mintStore = useMintsStore();

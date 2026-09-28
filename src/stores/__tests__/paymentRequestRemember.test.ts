@@ -79,6 +79,23 @@ describe("usePRStore().decodePaymentRequest", () => {
     log.mockRestore();
   });
 
+  it("rejects an unsupported transport before opening a clipboard preview", async () => {
+    const store = usePRStore();
+    const request = new PaymentRequest(
+      [{ type: "UNKNOWN", target: "https://pay.example/req", tags: [] }] as any,
+      "unsupported",
+      21,
+      "sat",
+      [MINT_URL]
+    ).toEncodedRequest();
+
+    await expect(
+      store.decodePaymentRequest(request, { remember: false })
+    ).rejects.toThrow("Unsupported payment request transport.");
+    expect(h.sendTokens.showSendTokens).toBe(false);
+    expect(store.ourPaymentRequests).toHaveLength(0);
+  });
+
   it("still remembers explicitly pasted requests by default", async () => {
     const store = usePRStore();
     const request = encoded();

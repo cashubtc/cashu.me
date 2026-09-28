@@ -255,6 +255,7 @@ export async function meltGeneric(
       amount: -amount_paid,
     });
     await this.clearMeltChangeOutputData(quote.quote);
+    useTransactionWorkerStore().removeOutgoingInvoiceFromChecker?.(quote.quote);
 
     this.payInvoiceData.invoice = { sat: 0, memo: "", request: "" };
     this.payInvoiceData.show = false;
@@ -389,7 +390,9 @@ export async function finalizePaidMeltInvoice(
 
   let spentProofs;
   if (checkSpentProofs) {
-    spentProofs = await this.checkProofsSpendable(proofs, mintWallet, true);
+    // The outgoing invoice below is the ledger entry for this melt. Recording
+    // its spent inputs as an ecash send as well would double-count it.
+    spentProofs = await this.checkProofsSpendable(proofs, mintWallet, false);
   } else {
     await proofsStore.removeProofs(proofs);
     spentProofs = proofs;

@@ -27,6 +27,13 @@ The second mint creates counterparty payment requests for outgoing tests. That
 keeps payment decoding and quote creation realistic without coupling the test
 to a public Lightning or Bitcoin network.
 
+`payment-requests.spec.ts` covers Cashu (NUT-18) requests: pending and redeemed
+outgoing history across reloads, retrying failed HTTP delivery with the same
+proofs, selecting a supported transport among unknown alternatives, and
+rejecting unknown or missing transports without spending or locking funds.
+HTTP delivery is intercepted locally; issuance and redemption use the real CDK
+mint and two isolated browser wallets.
+
 ## UI coverage and known defects
 
 The `ui-*.spec.ts` suites cover mint management, real sat/USD/EUR balances,
