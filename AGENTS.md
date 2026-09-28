@@ -163,3 +163,15 @@ npm test -- src/path/to/test.ts
 - **Platform:** Use `this.getPwaDisplayMode()` to detect environment (Web vs PWA vs App).
 - **Assets:** Import icons from `lucide-vue-next` as `XIcon` (e.g., `import { Home as HomeIcon } from "lucide-vue-next"`).
 - **Reactivity:** Be careful with deep reactivity in Pinia state; use `storeToRefs` if destructuring in Composition API (though Options API is preferred here).
+
+## 6. Security Fixes
+
+When a task involves a vulnerability or an uncoordinated security fix, do not
+describe the exploit in depth in anything public: PR titles or bodies, commit
+messages, review comments, or code comments. Keep the public summary high-level
+(state that a security issue was fixed) and leave out reproduction steps, proofs
+of concept, root-cause specifics, and attack paths.
+
+Until a fix has been released and disclosure has been coordinated, send the
+detailed write-up to the security contact listed under "Reporting a Vulnerability"
+in `SECURITY.md`.
