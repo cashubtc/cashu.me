@@ -54,6 +54,7 @@ This document provides a comprehensive overview of the **Cashu.me** codebase for
 │   ├── stores/          # Pinia stores (Critical business logic)
 │   ├── App.vue          # Root component
 │   └── main.js          # Entry point
+├── docs/                # Design & developer documentation
 ├── src-capacitor/       # Capacitor configuration and native projects
 ├── src-electron/        # Electron main/preload scripts
 ├── src-pwa/             # PWA service worker and manifest
@@ -117,6 +118,16 @@ The `proofs` table stores tokens: `secret` (PK), `amount`, `C` (curve point), `i
 - **Utility Classes:** Use **Quasar Utility Classes** (e.g., `q-pa-md`, `text-center`, `row`, `col-12`).
 - **Scoped:** Use `<style scoped>` for component-specific overrides.
 - **Variables:** `src/css/quasar.variables.scss`.
+
+### UI Design Specifications (MANDATORY)
+
+The authoritative design specification lives at **[docs/UI_SPECIFICATIONS.md](docs/UI_SPECIFICATIONS.md)**. It defines all colors, themes, typography, spacing, radii, shadows, layouts, component patterns, animations, and microanimations of the wallet.
+
+The following rules are **required** for any UI work:
+
+1. **Check before you build.** Any new UI (components, screens, dialogs, animations, or visual patterns) MUST be checked against `docs/UI_SPECIFICATIONS.md` and MUST follow its tokens and established patterns (e.g., the white-overlay scale, spacing scale, dialog shells, motion catalog). Do not introduce new colors, sizes, easings, or durations that are not in the specification.
+2. **Keep the spec in sync.** Any change that alters the design (new patterns, changed values, new animations) MUST update `docs/UI_SPECIFICATIONS.md` **in the same change**. The specification must always reflect the current design of the wallet — code and spec must never drift apart.
+3. **Resolve conflicts in favor of the code, then update the spec.** If you find a discrepancy between the implementation and the specification, treat the implementation as the current truth and fix the specification (or fix the code to match the spec, if the code is the outlier).
 
 ### Error Handling & Notifications
 
