@@ -58,6 +58,9 @@ and reports the defects; it does not silently change wallet behavior.
 
 ### UI-001 — Removing an inactive mint changes the selected mint
 
+- Fixed: replacement selection now runs only when removing the active mint.
+  The regression asserts selection, currency, balance and reload persistence.
+
 - Severity: medium.
 - Reproduce: add three mints; select the third; remove the second.
 - Expected: the third remains selected.
