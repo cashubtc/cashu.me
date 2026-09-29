@@ -99,7 +99,7 @@ import { wordlist } from "@scure/bip39/wordlists/english";
 import { useSettingsStore } from "./settings";
 import { usePriceStore } from "./price";
 import { usePaymentHistoryStore } from "./paymentHistory";
-import { useI18n } from "vue-i18n";
+import { i18n } from "src/boot/i18n";
 import { decodeBolt12Offer } from "src/js/bolt12";
 import { ensurePaymentMethodMintActive } from "src/js/mint-payment-methods";
 import {
@@ -218,7 +218,7 @@ function toProofs(proofs: WalletProof[]): Proof[] {
 
 export const useWalletStore = defineStore("wallet", {
   state: () => {
-    const { t } = useI18n();
+    const t = i18n.global.t;
     return {
       t: t,
       mnemonic: useLocalStorage("cashu.mnemonic", ""),
