@@ -105,6 +105,20 @@ type BlindSignatureAudit = {
   r: string;
 };
 
+function normalizeMintUrl(url: string): string {
+  let normalized = url.trim().replace(/\/+$/, "");
+  if (!/^[a-z]+:\/\//i.test(normalized)) normalized = "https://" + normalized;
+  const parsed = new URL(normalized);
+  if (
+    !["http:", "https:"].includes(parsed.protocol) ||
+    !parsed.hostname ||
+    /[%\s]/.test(parsed.hostname)
+  ) {
+    throw new Error("Invalid mint URL");
+  }
+  return parsed.toString().replace(/\/+$/, "");
+}
+
 export const useMintsStore = defineStore("mints", {
   state: () => {
     const t = i18n.global.t;
@@ -289,7 +303,26 @@ export const useMintsStore = defineStore("mints", {
     },
     updateMint(oldMint: StoredMint, newMint: StoredMint) {
       const index = this.mints.findIndex((m) => m.url === oldMint.url);
-      this.mints[index] = newMint;
+      if (index < 0) return false;
+      let url: string;
+      try {
+        url = normalizeMintUrl(newMint.url);
+      } catch {
+        notifyError(
+          this.t("MintSettings.add.actions.add_mint.error_invalid_url")
+        );
+        return false;
+      }
+      if (
+        this.mints.some(
+          (mint, i) => i !== index && normalizeMintUrl(mint.url) === url
+        )
+      ) {
+        notifyError(this.t("wallet.mint.notifications.already_added"));
+        return false;
+      }
+      this.mints[index] = { ...newMint, url };
+      return true;
     },
     updateMintMultinutSelection(mintUrl: string, selected: boolean) {
       const mint = this.mints.find((m) => m.url === mintUrl);
@@ -317,16 +350,7 @@ export const useMintsStore = defineStore("mints", {
       let url = addMintData.url;
       this.addMintBlocking = true;
       try {
-        // sanitize url
-        const sanitizeUrl = (url: string): string => {
-          let cleanedUrl = url.trim().replace(/\/+$/, "");
-          if (!/^[a-z]+:\/\//.test(cleanedUrl)) {
-            // Check for any protocol followed by "://"
-            cleanedUrl = "https://" + cleanedUrl;
-          }
-          return cleanedUrl;
-        };
-        url = sanitizeUrl(url);
+        url = normalizeMintUrl(url);
 
         const mintToAdd: StoredMint = {
           url: url,
