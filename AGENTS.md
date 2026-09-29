@@ -1,165 +1,38 @@
-# Cashu.me Developer Guide for Agents
+# Cashu.me Agent Guide
 
-This document provides a comprehensive overview of the **Cashu.me** codebase for coding agents.
+## Commands and Tooling
 
-## 1. Tech Stack
+- Use npm and `package-lock.json`; `npm ci` matches CI. The app requires Node >=22.4; E2E documents Node 24+.
+- `npm run dev` serves HTTPS on port 8080 and opens a browser. `E2E=true` switches to HTTP and disables automatic browser opening.
+- `npm test` watches; `npm run test:ci` runs once. Focus a file with `npm run test:ci -- src/stores/__tests__/dexieAmountMigration.test.ts`; add `-t "test name"` to narrow further.
+- CI checks `npm run lint`, `npm run checkformat`, `npm run test:ci`, `npm run build`, and `npm run build:pwa`. No dedicated typecheck script is configured. `npm run build` is SPA, not PWA; the PWA output is `dist/pwa`.
+- `npm run format` rewrites the whole repo. For focused edits use `npx prettier --write <files>` and `npx eslint <source-files>`. The active ESLint config is `.eslintrc.js`, not the adjacent `.eslintrc.json`; Vue scripts must use `lang="ts"`.
+- UI text uses `src/i18n/en-US` as the source of truth; update other locales and run `npm run i18n:check` for key parity.
+- Do not run bare `make` as a build shortcut: its default target deploys to production. `make staging` also deploys remotely.
 
-### Core Frameworks
+## App Wiring and Conventions
 
-- **Framework:** [Quasar Framework](https://quasar.dev/) (Vue.js 3 + Vite)
-- **Language:** TypeScript (mostly) and JavaScript.
-- **State Management:** [Pinia](https://pinia.vuejs.org/)
-- **Routing:** Vue Router (standard Quasar setup)
-- **Build Tool:** Vite (via Quasar CLI)
-- **CSS:** SCSS/Sass with Quasar's utility classes.
+- Quasar owns startup. Follow `quasar.config.js` boot order (`base`, `global-components`, `i18n`), not `src/main.js` as a conventional mounted Vue entrypoint. `.quasar/` is generated.
+- Existing components use Options API with Pinia mappers; do not introduce `<script setup>` into them unless refactoring the whole component. `src/boot/base.js` defines `window.windowMixin` by side effect; components opt in via `mixins: [windowMixin]`.
+- Use `src/` for internal imports; omit `.ts`/`.js` extensions and include `.vue`. Use Quasar utility classes and scoped component overrides; theme variables live in `src/css/quasar.variables.scss`. Alias Lucide icons as `XIcon`.
+- Keep the Vite optimizer exclusions for `@cashu/cashu-ts` and `@agicash/qr-scanner`; the SDK's ESM/BigInt code is sensitive to dependency optimization.
+- PWA uses Workbox `generateSW` and emits `sw.js`; `src-pwa/custom-service-worker` is not used in this mode. Router history mode requires an `index.html` fallback when hosting.
 
-### Mobile & Desktop
+## Wallet Invariants
 
-- **Mobile:** [Capacitor](https://capacitorjs.com/) (Android & iOS)
-- **Desktop:** Electron (via Quasar mode)
-- **PWA:** Supported and primary delivery method for web.
+- `src/stores/wallet.ts` orchestrates wallet operations through adjacent payment-method modules; `walletMelt.ts` holds shared melt/recovery logic. Preserve the shared deterministic counter source and monotonic persistence of `countersReserved` events.
+- SDK v4 proofs use `Amount`, but app `WalletProof.amount` and persisted amounts are numbers. Use `src/js/cashu-amount.ts` conversions (`cashuAmountToNumber`, `normalizeCashuQuoteAmounts`), `sumProofAmounts` from `src/js/proofs.ts`, and existing SDK proof adapters. Do not persist raw SDK `Amount` objects; IndexedDB can clone them into plain `{ value }` objects.
+- Dexie stores proofs, payment history, mint/melt quotes, and ecash history. `proofs.ts` exposes a `liveQuery` projection: mutate through store actions, not the projection. Proofs are keyed by `secret`; spendable selection filters mint/unit keysets and excludes reserved proofs.
+- Preserve proof ownership transitions: ordinary sends reserve outgoing proofs; `invalidate` transfers ownership out of the wallet. Swaps may return unchanged input proofs, so insert only fresh outputs and remove only consumed inputs. Do not blanket-unreserve on payment/network errors; pending or uncertain melts need quote-linked reservations and saved change-recovery data.
+- Critical wallet operations use `ui.ts`'s mutex: await acquisition, release in `finally`, and avoid nested acquisition (it is not reentrant). Preserve melt's deliberate release/reacquire sequence.
+- Persisted-data changes need both `dexie.ts` schema-upgrade and `migrations.ts` application-migration review. Settings, mnemonic, and counters still use local storage; history has migrated to Dexie. Application migrations advance their version only after success and stop on failure.
+- Use `src/js/notify.ts` helpers, preserving `silent` handling and error propagation needed by callers for recovery.
 
-### Cashu & Cryptography
+## Test Gotchas
 
-- **Cashu Library:** [`@cashu/cashu-ts`](https://github.com/cashubtc/cashu-ts) (Core Cashu wallet logic)
-- **Crypto:** `@cashu/crypto`, `@noble/secp256k1`
-- **Lightning/Bitcoin:** `light-bolt11-decoder`, `bech32`
-
-### Persistence
-
-- **Database:** [Dexie.js](https://dexie.org/) (IndexedDB wrapper) for storing Cashu proofs (tokens).
-- **Local Storage:** `@vueuse/core` (`useLocalStorage`) for user settings, history, and simpler state.
-
-### Testing & Linting
-
-- **Testing:** Vitest
-- **Linting:** ESLint + Prettier
-
----
-
-## 2. Project Structure
-
-```
-.
-├── src/
-│   ├── assets/          # Static assets (images, icons)
-│   ├── boot/            # Quasar boot files (initialization logic)
-│   ├── components/      # Vue components (UI elements)
-│   ├── css/             # Global styles (SCSS)
-│   ├── i18n/            # Internationalization (locales)
-│   ├── js/              # Utility functions (non-component logic)
-│   ├── layouts/         # App layouts (MainLayout, FullscreenLayout)
-│   ├── pages/           # Route pages (WalletPage, Settings, etc.)
-│   ├── router/          # Vue Router configuration
-│   ├── stores/          # Pinia stores (Critical business logic)
-│   ├── App.vue          # Root component
-│   └── main.js          # Entry point
-├── src-capacitor/       # Capacitor configuration and native projects
-├── src-electron/        # Electron main/preload scripts
-├── src-pwa/             # PWA service worker and manifest
-└── quasar.config.js     # Quasar configuration
-```
-
----
-
-## 3. Architecture & Key Stores
-
-The application logic is heavily centralized in Pinia stores found in `src/stores/`.
-
-- **`wallet.ts` (`useWalletStore`):** **Primary controller**. Handles sending, receiving, melting, minting.
-- **`mints.ts` (`useMintsStore`):** Manages connected mints, keysets, and URLs.
-- **`proofs.ts` (`useProofsStore`):** Manages proofs (ecash tokens). CRUD + sync with storage.
-- **`tokens.ts` (`useTokensStore`):** Manages token history (spent/received logs).
-- **`dexie.ts` (`useDexieStore`):** Wrapper around Dexie.js for persistent storage.
-- **`ui.ts` (`useUiStore`):** Manages UI state (loaders, dialogs, tabs).
-
-### Database Schema (Dexie)
-
-The `proofs` table stores tokens: `secret` (PK), `amount`, `C` (curve point), `id` (keyset ID), `reserved` (locked boolean), `quote`.
-
----
-
-## 4. Coding Conventions
-
-### Imports & File Paths
-
-- **Alias:** ALWAYS use the `src/` alias for imports within the source directory.
-  - Good: `import { useWalletStore } from "src/stores/wallet";`
-  - Bad: `import { useWalletStore } from "../../stores/wallet";`
-- **Extensions:** Omit extensions for `.ts` and `.js` imports. Include `.vue` extension for components.
-
-### Component Style
-
-- **API:** Use **Options API** with **Pinia mappers** (`mapState`, `mapActions`) in `.vue` files.
-- **Structure:**
-
-  ```typescript
-  import { defineComponent } from "vue";
-  import { mapState, mapActions } from "pinia";
-  import { useWalletStore } from "src/stores/wallet";
-
-  export default defineComponent({
-    name: "MyComponent",
-    mixins: [windowMixin], // Common mixin
-    computed: {
-      ...mapState(useWalletStore, ["someState"]),
-    },
-    methods: {
-      ...mapActions(useWalletStore, ["someAction"]),
-    },
-  });
-  ```
-
-- **Note:** Do NOT use `<script setup>` for existing components unless refactoring the entire file. Maintain consistency.
-
-### Styling
-
-- **Utility Classes:** Use **Quasar Utility Classes** (e.g., `q-pa-md`, `text-center`, `row`, `col-12`).
-- **Scoped:** Use `<style scoped>` for component-specific overrides.
-- **Variables:** `src/css/quasar.variables.scss`.
-
-### Error Handling & Notifications
-
-- **Notify:** Use `src/js/notify.ts` helpers.
-  - `notifySuccess(message: string)`
-  - `notifyError(message: string)`
-  - `notifyApiError(error: any)` (for handling API/library errors)
-- **Catching:** In stores, wrap async operations in `try/catch` blocks and use `notifyError` or `notifyApiError` to inform the user.
-- **Mutex:** Critical wallet ops (mint/melt/swap) MUST use the global mutex (`ui.ts` -> `lockMutex`). ALWAYS release in `finally`.
-
-### Naming
-
-- **Files:** PascalCase for components (`BalanceView.vue`), camelCase for logic (`wallet.ts`).
-- **Stores:** `use[Name]Store` (e.g., `useWalletStore`).
-- **Types:** Define types locally if specific, or in `src/js/types.ts` (if exists) or top of file. PascalCase for interfaces/types.
-
----
-
-## 5. Development Workflow
-
-### Commands
-
-- **Run Dev Server:** `npm run dev`
-- **Lint Code:** `npm run lint`
-- **Format Code:** `npm run format`
-- **Run All Tests:** `npm test`
-
-### Running a Single Test
-
-To run a specific test file, use `npx vitest` followed by the path or pattern:
-
-```bash
-npx vitest src/path/to/test.ts
-# or
-npm test -- src/path/to/test.ts
-```
-
-### Adding Dependencies
-
-- Use `npm install` (not yarn or pnpm).
-
-### Common Gotchas
-
-- **Platform:** Use `this.getPwaDisplayMode()` to detect environment (Web vs PWA vs App).
-- **Assets:** Import icons from `lucide-vue-next` as `XIcon` (e.g., `import { Home as HomeIcon } from "lucide-vue-next"`).
-- **Reactivity:** Be careful with deep reactivity in Pinia state; use `storeToRefs` if destructuring in Composition API (though Options API is preferred here).
+- Vitest uses `happy-dom` and `test/vitest/setup-file.js`; tests are discovered under both `src/` and `test/vitest/__tests__/`. Setup initializes/resets Pinia, but does not clear mocked localStorage automatically. IndexedDB tests use `fake-indexeddb/auto` with isolated database names and cleanup.
+- Tests importing components that reference `windowMixin` must initialize it before dynamic import; see `src/components/__tests__/PayInvoiceDialog.test.ts`. Wallet-store tests may need a `vue-i18n.useI18n` mock outside component setup.
+- E2E prerequisites: Docker Compose v2 and `npx playwright install chromium`. `npm run test:e2e -- mint.spec.ts` runs a focused suite with stack lifecycle managed; `npm run test:e2e -- --grep "on-chain"` filters by title. Playwright starts its own HTTP dev server on port 4173.
+- Use disposable local wallets/mints only, never real seeds or funds. E2E uses real CDK APIs with fake payment rails; Node-side helpers can rotate keysets and are not covered by browser network blocking. Do not point E2E URL overrides at live services.
+- E2E runs serially on fixed ports 8085-8087 and 10000. The runner tears down its Compose project (`cashume-e2e` by default) **including volumes**, even after failures. Do not share that project with valuable data or run competing stacks.
+- Read `test/e2e/README.md` for manual stack control and protocol coverage. Known defects use `test.fail`, not skips; remove the annotation when fixing one. For demo recordings, follow `.agents/skills/e2e-test-playwright-video/SKILL.md`.
