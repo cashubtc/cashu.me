@@ -75,6 +75,10 @@ export default {
       token_still_pending: "Token still pending",
       received_lightning: "Received {amount} via Lightning",
       lightning_payment_failed: "Lightning payment failed",
+      spent_proofs_removed_one:
+        "Removed {count} spent proof from your balance. Please try again.",
+      spent_proofs_removed_other:
+        "Removed {count} spent proofs from your balance. Please try again.",
       failed_to_decode_invoice: "Failed to decode invoice",
       unsupported_legacy_qr: "Unsupported Legacy QR code",
       legacy_qr_not_supported:
