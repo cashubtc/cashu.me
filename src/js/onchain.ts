@@ -154,7 +154,9 @@ async function fetchTipHeightSafe(apiBase: string): Promise<number | null> {
 
 function txConfirmations(tx: any, tipHeight: number | null): number {
   if (!tx?.status?.confirmed || !tx.status.block_height) return 0;
-  if (tipHeight === null) return 0;
+  // A confirmed transaction has at least one confirmation even when the
+  // separate tip-height request is unavailable. Do not infer any more than one.
+  if (tipHeight === null) return 1;
   return Math.max(0, tipHeight - tx.status.block_height + 1);
 }
 
@@ -164,7 +166,6 @@ function txConfirmed(
   confirmationThreshold: number
 ): boolean {
   if (!tx?.status?.confirmed) return false;
-  if (confirmations <= 0) return true;
   return confirmations >= confirmationThreshold;
 }
 
