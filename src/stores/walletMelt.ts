@@ -86,12 +86,14 @@ export function normalizeMeltQuote(
   quote:
     | MeltQuoteBolt11Response
     | MeltQuoteBolt12Response
-    | MeltQuoteOnchainResponse
+    | MeltQuoteOnchainResponse,
+  fallbackAmount?: number
 ): AppMeltQuote {
   const { change, ...rest } = quote as any;
   const normalized: AppMeltQuote = {
     ...(rest as any),
-    amount: amountToNumber(quote.amount),
+    // Custom processors may omit the amount in subsequent quote responses.
+    amount: amountToNumber(quote.amount ?? fallbackAmount),
     fee_reserve:
       "fee_reserve" in quote && quote.fee_reserve !== undefined
         ? amountToNumber(quote.fee_reserve)
@@ -217,7 +219,7 @@ export async function meltGeneric(
           );
         }
       );
-      paidMeltQuote = normalizeMeltQuote(data.quote);
+      paidMeltQuote = normalizeMeltQuote(data.quote, quote.amount);
       await this.updateOutgoingInvoiceInHistory(paidMeltQuote);
       if (data.outputData?.length) {
         await this.setMeltChangeOutputData(quote.quote, data.outputData);
@@ -266,7 +268,10 @@ export async function meltGeneric(
     if (isUnloading) {
       throw error;
     }
-    const meltQuote = normalizeMeltQuote(await checkQuote(quote.quote));
+    const meltQuote = normalizeMeltQuote(
+      await checkQuote(quote.quote),
+      quote.amount
+    );
     await this.updateOutgoingInvoiceInHistory(meltQuote);
 
     if (
@@ -313,7 +318,10 @@ export async function checkOutgoingInvoiceGeneric(
   }
   const proofs = await proofsStore.getProofsForQuote(quote);
   try {
-    const meltQuote = normalizeMeltQuote(await checkQuote(mintWallet, quote));
+    const meltQuote = normalizeMeltQuote(
+      await checkQuote(mintWallet, quote),
+      invoice.meltQuote?.amount
+    );
     await this.updateOutgoingInvoiceInHistory(meltQuote);
     if (meltQuote.state == MeltQuoteState.PENDING) {
       console.log("### mintQuote not paid yet");
