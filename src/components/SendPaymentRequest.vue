@@ -30,7 +30,8 @@ import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { usePRStore } from "src/stores/payment-request";
 import { useUiStore } from "src/stores/ui";
 import { notifyError } from "src/js/notify";
-import { PaymentRequest, PaymentRequestTransportType } from "@cashu/cashu-ts";
+import { PaymentRequestTransportType } from "@cashu/cashu-ts";
+import type { PaymentRequestData } from "src/stores/payment-request";
 
 declare const windowMixin: any;
 
@@ -146,13 +147,18 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(usePRStore, ["parseAndPayPaymentRequest"]),
+    ...mapActions(usePRStore, [
+      "getPaymentRequestTransport",
+      "parseAndPayPaymentRequest",
+    ]),
     async clickPaymentRequest() {
-      if (this.disable || !this.sendData.paymentRequest) {
+      if (this.disable || this.isLoading || !this.sendData.paymentRequest) {
         return;
       }
       this.loading = true;
       try {
+        // Validate before prepareToken can swap or reserve any wallet proofs.
+        this.getPaymentRequestTransport(this.sendData.paymentRequest);
         let tokenStr = this.sendData.tokensBase64;
         if (this.prepareToken) {
           const prepared = await this.prepareToken();
@@ -177,7 +183,7 @@ export default defineComponent({
         this.loading = false;
       }
     },
-    getPaymentRequestTransportType(request?: PaymentRequest) {
+    getPaymentRequestTransportType(request?: PaymentRequestData) {
       if (!request || !request.transport) {
         return "";
       }
@@ -192,7 +198,7 @@ export default defineComponent({
       }
       return "";
     },
-    getPaymentRequestTarget(request?: PaymentRequest) {
+    getPaymentRequestTarget(request?: PaymentRequestData) {
       if (!request || !request.transport) {
         return "";
       }

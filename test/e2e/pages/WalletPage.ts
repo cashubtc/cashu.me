@@ -12,8 +12,10 @@ export class WalletPage {
   async goto() {
     if (!this.networkHardened) {
       await this.page.route("**/*", async (route) => {
-        const url = new URL(route.request().url());
-        if (url.hostname === "127.0.0.1" || url.hostname === "localhost") {
+        const url = URL.canParse(route.request().url())
+          ? new URL(route.request().url())
+          : null;
+        if (url?.hostname === "127.0.0.1" || url?.hostname === "localhost") {
           await route.continue();
         } else {
           await route.abort("blockedbyclient");
@@ -39,12 +41,11 @@ export class WalletPage {
     await mintInput.fill(mintUrl);
     await this.page.getByTestId("onboarding-add-mint").click();
     await this.page.getByTestId("confirm-add-mint").click();
+    await expect(this.page.getByTestId("confirm-add-mint")).toBeHidden();
+    // Match the joined-mint list, not the same URL still shown in the preview.
     await expect(
-      this.page
-        .getByText(mintUrl, { exact: true })
-        .filter({ visible: true })
-        .first()
-    ).toBeVisible();
+      this.page.locator(".mint-setup-slide .mint-item .mint-url")
+    ).toHaveText(mintUrl);
 
     await this.page.getByTestId("onboarding-next").click();
     await expect(this.page.getByTestId("wallet-send")).toBeVisible();
@@ -52,6 +53,7 @@ export class WalletPage {
   }
 
   async balanceSats() {
+    await expect(this.balance).toHaveCount(1);
     await expect(this.balance).toHaveAttribute("data-unit", "sat");
     const text = (await this.balance.innerText()).replace(/[^0-9-]/g, "");
     return Number(text);
@@ -67,7 +69,11 @@ export class WalletPage {
 
   async closeFullscreenDialog() {
     const close = this.page.locator("button.floating-close-btn:visible");
-    if (await close.count()) await close.first().click();
+    if (await close.count()) {
+      await expect(close).toHaveCount(1);
+      await close.first().click();
+      await expect(close).toHaveCount(0);
+    }
   }
 
   async openReceive(method: "lightning" | "onchain" | "ecash") {
@@ -114,6 +120,7 @@ export class WalletPage {
     await expect(
       this.page.getByText("Receive On-chain", { exact: true })
     ).toBeVisible();
+    await this.enterAmount(expectedAmount);
     await this.page.getByTestId("create-payment-request").click();
     await expect.poll(() => this.balanceSats()).toBe(before + expectedAmount);
     await this.closeFullscreenDialog();

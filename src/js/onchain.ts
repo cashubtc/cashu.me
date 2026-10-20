@@ -1,3 +1,82 @@
+import type { PaymentMethodLimits } from "src/js/mint-payment-methods";
+import { formatBigIntCurrency } from "src/js/format-currency";
+
+export function onchainDepositAmountInBaseUnits(
+  amount: number,
+  currencyMultiplier: number
+): number {
+  if (currencyMultiplier === 100) {
+    // Input uses dollars/euros, while mint limits use integer cents. Reject
+    // sub-cent input, then round away multiplication's floating-point error.
+    if (!Number.isFinite(amount) || Number(amount.toFixed(2)) !== amount) {
+      return NaN;
+    }
+    return Math.round(amount * currencyMultiplier);
+  }
+  return amount * currencyMultiplier;
+}
+
+export function onchainDepositAmountError(
+  amount: number,
+  unit: string,
+  limits: PaymentMethodLimits | null,
+  bitcoinSymbol = false
+): string {
+  if (!Number.isSafeInteger(amount) || amount <= 0) {
+    return unit === "usd" || unit === "eur"
+      ? `Enter a positive amount with at most two decimal places in ${unit.toUpperCase()}.`
+      : `Enter a positive whole amount in ${unit}.`;
+  }
+  if (limits?.minAmount != null && amount < limits.minAmount) {
+    return `Enter at least ${formatBigIntCurrency(
+      limits.minAmount,
+      unit,
+      undefined,
+      bitcoinSymbol
+    )}.`;
+  }
+  if (limits?.maxAmount != null && amount > limits.maxAmount) {
+    return `Enter no more than ${formatBigIntCurrency(
+      limits.maxAmount,
+      unit,
+      undefined,
+      bitcoinSymbol
+    )}.`;
+  }
+  return "";
+}
+
+/** Format whole satoshis as a BIP321 decimal BTC amount. */
+export function bitcoinUriAmount(sats: number): string {
+  const value = BigInt(sats);
+  const whole = value / 100_000_000n;
+  const fraction = (value % 100_000_000n)
+    .toString()
+    .padStart(8, "0")
+    .replace(/0+$/, "");
+  return fraction ? `${whole}.${fraction}` : `${whole}`;
+}
+
+/**
+ * QR payload for an on-chain deposit address. Adds a BIP321 amount when the
+ * requested amount is known in satoshis; fiat-denominated quotes have no fixed
+ * BTC amount, so they fall back to the bare address.
+ */
+export function onchainDepositQrValue(
+  address: string,
+  requestedAmount: number | undefined,
+  unit: string
+): string {
+  if (!address || !requestedAmount || requestedAmount <= 0) return address;
+  let sats: number;
+  if (unit === "sat") sats = requestedAmount;
+  else if (unit === "msat" && requestedAmount % 1000 === 0)
+    sats = requestedAmount / 1000;
+  else return address;
+  if (!Number.isSafeInteger(sats)) return address;
+  return `bitcoin:${address}?amount=${bitcoinUriAmount(sats)}`;
+}
+
 export type MempoolTxMetadata = {
   txid: string;
   amount?: number;

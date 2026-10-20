@@ -127,6 +127,7 @@
               class="q-mx-none"
               dense
               color="negative"
+              data-testid="delete-token"
               icon="delete"
               size="sm"
               @click="
@@ -145,6 +146,7 @@
             size="md"
             flat
             dense
+            data-testid="token-more"
             @click="toggleExpandButtons"
           >
             <q-icon

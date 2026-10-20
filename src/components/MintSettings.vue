@@ -15,6 +15,7 @@
         <!-- MINT CARDS -->
         <div v-for="mint in mints" :key="mint.url" class="q-px-md">
           <q-item
+            data-testid="mint-card"
             :active="mint.url == activeMintUrl"
             active-class="text-weight-bold text-primary"
             clickable
@@ -70,6 +71,7 @@
             <div class="more-vert-icon">
               <q-icon
                 name="more_vert"
+                data-testid="mint-details"
                 @click.stop="showMintInfo(mint)"
                 color="white"
                 class="cursor-pointer"
@@ -186,6 +188,7 @@
           <q-input
             rounded
             outlined
+            data-testid="add-mint-url"
             v-model="addMintData.url"
             placeholder="https://"
             @keydown.enter.prevent="sanitizeMintUrlAndShowAddDialog"
@@ -196,6 +199,7 @@
           <q-input
             rounded
             outlined
+            data-testid="add-mint-nickname"
             v-model="addMintData.nickname"
             :placeholder="$t('MintSettings.add.inputs.nickname.placeholder')"
             @keydown.enter.prevent="sanitizeMintUrlAndShowAddDialog"

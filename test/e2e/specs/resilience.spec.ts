@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../fixtures/test";
 
 import {
   counterpartyRequest,
@@ -151,13 +151,19 @@ test.describe("outgoing quote recovery", () => {
       await forceMeltQuoteState(page, MINT_A_URL, scenario.method, "UNPAID");
       await wallet.openSend(scenario.sendMethod);
       await wallet.quoteRequest(paymentRequest, scenario.quoteAmount);
+      const meltResponse = page.waitForResponse(
+        (response) =>
+          response.url() === `${MINT_A_URL}/v1/melt/${scenario.method}` &&
+          response.request().method() === "POST"
+      );
       await page.getByTestId("pay-payment-request").click();
+      await (await meltResponse).finished();
 
       await expect(page.getByText("Unpaid", { exact: true })).toBeVisible();
       await expect.poll(() => wallet.balanceSats()).toBe(before);
     });
 
-    test(`does not spend funds while a ${scenario.name} melt is pending`, async ({
+    test(`reserves funds while a ${scenario.name} melt is pending`, async ({
       page,
       request,
     }) => {
@@ -174,10 +180,19 @@ test.describe("outgoing quote recovery", () => {
       await forceMeltQuoteState(page, MINT_A_URL, scenario.method, "PENDING");
       await wallet.openSend(scenario.sendMethod);
       await wallet.quoteRequest(paymentRequest, scenario.quoteAmount);
+      const meltResponse = page.waitForResponse(
+        (response) =>
+          response.url() === `${MINT_A_URL}/v1/melt/${scenario.method}` &&
+          response.request().method() === "POST"
+      );
       await page.getByTestId("pay-payment-request").click();
+      await (await meltResponse).finished();
 
-      await expect(page.getByTestId("wallet-send")).toBeVisible();
-      await expect.poll(() => wallet.balanceSats()).toBe(before);
+      await expect(page.locator(".pay-fullscreen")).toBeHidden();
+      const reservedAmount = scenario.quoteAmount ?? scenario.requestAmount!;
+      await expect
+        .poll(() => wallet.balanceSats())
+        .toBe(before - reservedAmount - 1);
     });
   }
 });

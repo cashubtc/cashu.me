@@ -65,18 +65,23 @@ export async function requestMintBolt11(
     const data = pubkey
       ? await mintWallet.createLockedMintQuote(amount, pubkey)
       : await mintWallet.createMintQuoteBolt11(amount);
-    this.invoiceData.amount = amount;
-    this.invoiceData.request = data.request;
-    this.invoiceData.quote = data.quote;
-    this.invoiceData.date = currentDateStr();
-    this.invoiceData.status = "pending";
-    this.invoiceData.mint = mintWallet.mint.mintUrl;
-    this.invoiceData.unit = mintWallet.unit;
-    this.invoiceData.mintQuote = normalizeMintQuote(data);
-    this.invoiceData.privKey = privkey;
-    await this.addPaymentHistory({
-      ...this.invoiceData,
-    });
+    const invoice: InvoiceHistory = {
+      amount,
+      request: data.request,
+      quote: data.quote,
+      memo: "",
+      date: currentDateStr(),
+      status: "pending",
+      mint: mintWallet.mint.mintUrl,
+      unit: mintWallet.unit,
+      type: PaymentMethod.Bolt11,
+      method: PaymentMethod.Bolt11,
+      direction: "mint",
+      mintQuote: normalizeMintQuote(data),
+      privKey: privkey,
+    };
+    this.invoiceData = invoice;
+    await this.addPaymentHistory(invoice);
     return data;
   } catch (error: any) {
     console.error(error);

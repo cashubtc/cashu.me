@@ -56,21 +56,26 @@ export async function requestMintBolt12(
       description,
     });
 
-    // Store minimal invoice-like record for history and dialog usage
-    this.invoiceData.amount = amount || 0;
-    this.invoiceData.request = data.request;
-    this.invoiceData.quote = data.quote;
-    this.invoiceData.date = currentDateStr();
-    this.invoiceData.status = "pending";
-    this.invoiceData.mint = mintWallet.mint.mintUrl;
-    this.invoiceData.unit = mintWallet.unit;
-    this.invoiceData.mintQuote = normalizeMintQuote(data);
-    this.invoiceData.privKey = privkey;
+    const invoice: InvoiceHistory = {
+      amount: amount || 0,
+      request: data.request,
+      quote: data.quote,
+      memo: "",
+      date: currentDateStr(),
+      status: "pending",
+      mint: mintWallet.mint.mintUrl,
+      unit: mintWallet.unit,
+      type: PaymentMethod.Bolt12,
+      method: PaymentMethod.Bolt12,
+      direction: "mint",
+      mintQuote: normalizeMintQuote(data),
+      privKey: privkey,
+    };
+    this.invoiceData = invoice;
 
     await this.addPaymentHistory({
-      ...this.invoiceData,
+      ...invoice,
       label: "Lightning Bolt12",
-      type: PaymentMethod.Bolt12,
     });
 
     return data;

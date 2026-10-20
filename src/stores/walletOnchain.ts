@@ -48,29 +48,39 @@ function normalizeMintQuote(quote: MintQuoteOnchainResponse): AppMintQuote {
   };
 }
 
-export async function requestMintOnchain(this: any, mintWallet: Wallet) {
+export async function requestMintOnchain(
+  this: any,
+  mintWallet: Wallet,
+  requestedAmount?: number
+) {
   try {
     const privkey = bytesToHex(nobleSecp256k1.utils.randomPrivateKey());
     const pubkey = bytesToHex(nobleSecp256k1.getPublicKey(privkey, true));
     const data = await mintWallet.createMintQuoteOnchain(pubkey);
 
-    this.invoiceData.amount = 0;
-    this.invoiceData.request = data.request;
-    this.invoiceData.quote = data.quote;
-    this.invoiceData.date = currentDateStr();
-    this.invoiceData.status = "pending";
-    this.invoiceData.mint = mintWallet.mint.mintUrl;
-    this.invoiceData.unit = mintWallet.unit;
-    this.invoiceData.mintQuote = normalizeMintQuote(data);
-    this.invoiceData.privKey = privkey;
-    this.invoiceData.type = PaymentMethod.Onchain;
-    this.invoiceData.network = onchainNetwork(data.request);
+    const invoice: InvoiceHistory = {
+      amount: 0,
+      request: data.request,
+      quote: data.quote,
+      memo: "",
+      date: currentDateStr(),
+      status: "pending",
+      mint: mintWallet.mint.mintUrl,
+      unit: mintWallet.unit,
+      type: PaymentMethod.Onchain,
+      method: PaymentMethod.Onchain,
+      direction: "mint",
+      mintQuote: normalizeMintQuote(data),
+      privKey: privkey,
+      network: onchainNetwork(data.request),
+      // On-chain quotes are amountless; remember the amount for the BIP321 QR.
+      requestedAmount: requestedAmount || undefined,
+    };
+    this.invoiceData = invoice;
 
     await this.addPaymentHistory({
-      ...this.invoiceData,
+      ...invoice,
       label: "On-chain",
-      type: PaymentMethod.Onchain,
-      network: onchainNetwork(data.request),
     });
 
     return data;

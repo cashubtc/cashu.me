@@ -70,6 +70,7 @@ export type PaymentHistoryRow = {
   meltChangeOutputData?: any[];
   meltOutputData?: any[];
   network?: string;
+  requestedAmount?: number;
   [key: string]: any;
 };
 
@@ -84,6 +85,7 @@ export type LegacyInvoiceHistory = {
   unit: string;
   type?: PaymentMethodId;
   method?: PaymentMethodId;
+  direction?: PaymentDirection;
   mintQuote?: any;
   meltQuote?: any;
   label?: string;
@@ -92,6 +94,7 @@ export type LegacyInvoiceHistory = {
   meltChangeOutputData?: any[];
   meltOutputData?: any[];
   network?: string;
+  requestedAmount?: number;
   parentQuote?: string;
   id?: string;
   [key: string]: any;
@@ -162,6 +165,9 @@ function inferPaymentType(
 }
 
 function inferDirection(invoice: LegacyInvoiceHistory): PaymentDirection {
+  if (invoice.direction === "mint" || invoice.direction === "melt") {
+    return invoice.direction;
+  }
   return invoice.amount < 0 || Boolean(invoice.meltQuote) ? "melt" : "mint";
 }
 
@@ -233,6 +239,7 @@ export function buildPaymentRowsFromLegacyInvoice(
     meltChangeOutputData: invoice.meltChangeOutputData,
     meltOutputData: invoice.meltOutputData,
     network: invoice.network,
+    requestedAmount: invoice.requestedAmount,
   });
 
   if (direction === "mint" && invoice.mintQuote) {

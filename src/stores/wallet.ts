@@ -157,10 +157,30 @@ export type InvoiceHistory = Invoice & {
   // Legacy persisted name; keep readable until old pending melts have cleared.
   meltOutputData?: any[];
   network?: string;
+  // Amount entered when creating an on-chain address, in `unit`.
+  requestedAmount?: number;
   parentQuote?: string;
   method?: PaymentMethodId;
   direction?: "mint" | "melt";
 };
+
+function createIncomingInvoiceDraft(
+  method: PaymentMethodId = PaymentMethod.Bolt11
+): InvoiceHistory {
+  return {
+    amount: 0,
+    request: "",
+    quote: "",
+    memo: "",
+    date: "",
+    status: "pending",
+    mint: "",
+    unit: "",
+    type: method,
+    method,
+    direction: "mint",
+  };
+}
 
 type KeysetCounter = {
   id: string;
@@ -225,7 +245,7 @@ export const useWalletStore = defineStore("wallet", {
         [] as { mnemonic: string; keysetCounters: KeysetCounter[] }[]
       ),
       sharedCounterSource: null as CounterSource | null,
-      invoiceData: {} as InvoiceHistory,
+      invoiceData: createIncomingInvoiceDraft(),
       activeWebsocketConnections: 0,
       payInvoiceData: {
         blocking: false,
@@ -306,6 +326,9 @@ export const useWalletStore = defineStore("wallet", {
       const paymentHistoryStore = usePaymentHistoryStore();
       this.invoiceHistory =
         paymentHistoryStore.invoiceHistory as InvoiceHistory[];
+    },
+    resetInvoiceData(method: PaymentMethodId = PaymentMethod.Bolt11) {
+      this.invoiceData = createIncomingInvoiceDraft(method);
     },
     async addPaymentHistory(invoice: InvoiceHistory) {
       const paymentHistoryStore = usePaymentHistoryStore();
@@ -1407,7 +1430,12 @@ export const useWalletStore = defineStore("wallet", {
     },
     handlePaymentRequest: async function (req: string) {
       const prStore = usePRStore();
-      await prStore.decodePaymentRequest(req);
+      try {
+        await prStore.decodePaymentRequest(req);
+        this.payInvoiceData.show = false;
+      } catch (error: any) {
+        notifyError(`${error?.message ?? error}`, "Could not pay request");
+      }
     },
     handleBolt12Offer: async function (offer: string) {
       const mintStore = useMintsStore();

@@ -1,4 +1,5 @@
 import { beforeAll, describe, expect, it, vi } from "vitest";
+import { JSONInt, PaymentRequest } from "@cashu/cashu-ts";
 import { useUiStore } from "src/stores/ui";
 
 vi.mock("components/DisplayTokenComponent.vue", () => ({
@@ -13,6 +14,60 @@ beforeAll(async () => {
 });
 
 describe("SendTokenDialog", () => {
+  it.each([
+    { nut10: undefined, expected: undefined },
+    {
+      nut10: {
+        kind: "P2PK",
+        data: "pubkey",
+        tags: [["locktime", "1750000000"]],
+      },
+      expected: { pubkey: "pubkey", locktime: 1750000000 },
+    },
+    {
+      nut10: { kind: "HTLC", data: "hash", tags: [["pubkeys", "pubkey"]] },
+      expected: { hashlock: "hash", pubkey: ["pubkey"] },
+    },
+  ])(
+    "prepares the requested spending condition from plain history data: $nut10",
+    async ({ nut10, expected }) => {
+      const request = new PaymentRequest();
+      request.nut10 = nut10;
+      const context = {
+        sendData: {
+          paymentRequest: JSONInt.parse(JSONInt.stringify(request)!),
+          amount: 21,
+          tokensBase64: "",
+        },
+        activeUnitCurrencyMultiplyer: 1,
+        activeMintUrl: "https://mint.example",
+        activeUnit: "sat",
+        activeProofs: [],
+        mintWallet: vi.fn(async () => ({})),
+        send: vi.fn(async () => ({ sendProofs: [] })),
+        sendToLock: vi.fn(async () => ({ sendProofs: [] })),
+        serializeProofs: vi.fn(() => "cashuA"),
+        addPendingToken: vi.fn(() => "history-id"),
+        g: { offline: true },
+      };
+      await expect(
+        SendTokenDialog.methods.preparePaymentRequestTokens.call(context)
+      ).resolves.toBe("cashuA");
+      if (expected) {
+        expect(context.sendToLock).toHaveBeenCalledWith(
+          [],
+          {},
+          21,
+          expect.objectContaining(expected)
+        );
+        expect(context.send).not.toHaveBeenCalled();
+      } else {
+        expect(context.send).toHaveBeenCalledOnce();
+        expect(context.sendToLock).not.toHaveBeenCalled();
+      }
+    }
+  );
+
   it("queues an ecash send as foreground work after the user taps Send", async () => {
     const uiStore = useUiStore();
     let rejectSend!: (error: Error) => void;

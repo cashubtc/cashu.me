@@ -9,6 +9,7 @@ import {
 } from "../js/notify";
 import { Clipboard } from "@capacitor/clipboard";
 import { Haptics, ImpactStyle } from "@capacitor/haptics";
+import { formatBigIntCurrency } from "src/js/format-currency";
 
 import ts from "typescript";
 import { useSettingsStore } from "./settings";
@@ -168,7 +169,7 @@ export const useUiStore = defineStore("ui", {
       return new Intl.NumberFormat(navigator.language).format(value) + " msat";
     },
     formatCurrency: function (
-      value: number,
+      value: number | bigint,
       currency: string,
       showBalance = false
     ) {
@@ -178,24 +179,39 @@ export const useUiStore = defineStore("ui", {
       if (useUiStore().hideBalance && !showBalance) {
         return "****";
       }
+      // Custom Cashu units are integers, including large metadata limits.
+      if (
+        currency !== "sat" &&
+        currency !== "msat" &&
+        currency !== "usd" &&
+        currency !== "eur" &&
+        !isoCurrencyCodes.has(currency.toLowerCase())
+      ) {
+        return (
+          new Intl.NumberFormat(navigator.language).format(value) +
+          " " +
+          currency.toUpperCase()
+        );
+      }
+      if (typeof value === "bigint") {
+        return formatBigIntCurrency(
+          value,
+          currency,
+          navigator.language,
+          useSettingsStore().bip177BitcoinSymbol
+        );
+      }
       if (currency == "sat") return this.formatSat(value);
       if (currency == "msat") return this.fromMsat(value);
       if (currency == "usd") value = value / 100;
       if (currency == "eur") value = value / 100;
-      // ISO units have currency metadata; custom Cashu units are integers.
-      if (
-        currency == "usd" ||
-        currency == "eur" ||
-        isoCurrencyCodes.has(currency.toLowerCase())
-      ) {
-        try {
-          return new Intl.NumberFormat(navigator.language, {
-            style: "currency",
-            currency: currency,
-          }).format(value);
-        } catch {
-          // fall through to plain formatting
-        }
+      try {
+        return new Intl.NumberFormat(navigator.language, {
+          style: "currency",
+          currency: currency,
+        }).format(value);
+      } catch {
+        // fall through to plain formatting
       }
       return (
         new Intl.NumberFormat(navigator.language).format(value) +

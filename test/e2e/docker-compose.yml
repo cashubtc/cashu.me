@@ -52,3 +52,28 @@ services:
       timeout: 2s
       retries: 40
       start_period: 5s
+
+  mint-c:
+    image: cashubtc/mintd@sha256:82033e89f7a15709e12a5cb2a6ccba8c342f4e4a76bf2d4de05d07ffcddb04a9
+    command:
+      - cdk-mintd
+      - --work-dir
+      - /data
+      - --config
+      - /config/config.toml
+      - --enable-logging
+    environment:
+      CDK_MINTD_MNEMONIC: "letter advice cage absurd amount doctor acoustic avoid letter advice cage above"
+    ports:
+      - "127.0.0.1:8087:8087"
+    volumes:
+      - ./mints/mint-c.toml:/config/config.toml:ro
+    tmpfs:
+      - /data
+    healthcheck:
+      test:
+        ["CMD", "wget", "--spider", "--quiet", "http://127.0.0.1:8087/v1/info"]
+      interval: 2s
+      timeout: 2s
+      retries: 40
+      start_period: 5s

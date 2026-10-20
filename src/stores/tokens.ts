@@ -3,12 +3,13 @@ import { defineStore } from "pinia";
 import { liveQuery } from "dexie";
 import { cashuDb } from "./dexie";
 import {
-  PaymentRequest,
+  JSONInt,
   Proof,
   Token,
   MeltQuoteBolt11Response,
 } from "@cashu/cashu-ts";
 import token from "src/js/token";
+import type { PaymentRequestData } from "src/stores/payment-request";
 import { v4 as uuidv4 } from "uuid";
 
 /**
@@ -23,7 +24,7 @@ export type HistoryToken = {
   token?: string;
   mint: string;
   unit: string;
-  paymentRequest?: PaymentRequest;
+  paymentRequest?: PaymentRequestData;
   fee?: number;
   label?: string; // Add label field for custom naming
   meltQuote?: MeltQuoteBolt11Response;
@@ -67,9 +68,12 @@ export const useTokensStore = defineStore("tokens", {
       );
     },
     persistHistoryToken(historyToken: HistoryToken) {
-      cashuDb.ecashHistory.put({ ...historyToken }).catch((error) => {
-        console.error("Could not persist ecash history token", error);
-      });
+      // Strip nested Vue proxies and normalize SDK Amount values before IndexedDB.
+      cashuDb.ecashHistory
+        .put(JSONInt.parse(JSONInt.stringify(historyToken)!))
+        .catch((error) => {
+          console.error("Could not persist ecash history token", error);
+        });
     },
     async migrateHistoryTokensFromLocalStorage() {
       const raw = localStorage.getItem("cashu.historyTokens");
@@ -105,7 +109,7 @@ export const useTokensStore = defineStore("tokens", {
       mint: string;
       unit: string;
       fee?: number;
-      paymentRequest?: PaymentRequest;
+      paymentRequest?: PaymentRequestData;
       label?: string;
       paymentRequestId?: string;
     }): string {
@@ -142,7 +146,7 @@ export const useTokensStore = defineStore("tokens", {
       mint: string;
       unit: string;
       fee?: number;
-      paymentRequest?: PaymentRequest;
+      paymentRequest?: PaymentRequestData;
       label?: string;
       paymentRequestId?: string;
     }): string {

@@ -14,6 +14,15 @@ describe("ui store", () => {
     expect(ui.formatCurrency(1234, "usd")).toContain("12.34");
   });
 
+  it("formats large metadata limits without losing cents", () => {
+    expect(
+      useUiStore().formatCurrency(18446744073709551615n, "usd", true)
+    ).toBe("$184,467,440,737,095,516.15");
+    expect(
+      useUiStore().formatCurrency(18446744073709551615n, "tst", true)
+    ).toBe("18,446,744,073,709,551,615 TST");
+  });
+
   it("runs a queued foreground payment before background work", async () => {
     const ui = useUiStore();
     const order = [];

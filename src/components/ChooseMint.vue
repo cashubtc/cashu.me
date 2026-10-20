@@ -7,6 +7,7 @@
     >
       <div class="col-12">
         <div
+          data-testid="choose-mint"
           class="mint-selector-btn"
           :class="{ 'mint-selector-dense': dense }"
           :style="style"

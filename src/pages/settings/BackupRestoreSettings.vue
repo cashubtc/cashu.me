@@ -24,6 +24,7 @@
                 round
                 icon="visibility"
                 color="primary"
+                data-testid="reveal-seed"
                 @click="toggleMnemonicVisibility"
               ></q-btn>
               <q-btn
@@ -32,6 +33,7 @@
                 round
                 icon="content_copy"
                 color="primary"
+                data-testid="copy-seed"
                 @click="copyText(mnemonic)"
               ></q-btn>
             </template>

@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { decodePaymentRequest, PaymentRequest } from "@cashu/cashu-ts";
+import type { PaymentRequestData } from "src/stores/payment-request";
 import { HistoryToken } from "./tokens";
 
 export const useSendTokensStore = defineStore("sendTokensStore", {
@@ -22,7 +22,7 @@ export const useSendTokensStore = defineStore("sendTokensStore", {
       tokens: string;
       tokensBase64: string;
       p2pkPubkey: string;
-      paymentRequest?: PaymentRequest;
+      paymentRequest?: PaymentRequestData;
       historyToken: HistoryToken | undefined;
     },
   }),

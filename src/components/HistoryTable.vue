@@ -4,6 +4,7 @@
       <q-item
         v-for="transaction in paginatedTransactions"
         :key="getTransactionKey(transaction)"
+        data-testid="history-row"
         clickable
         v-ripple
         class="q-px-md q-py-md"
@@ -34,7 +35,10 @@
         </q-item-section>
 
         <!-- Main Content Section -->
-        <q-item-section @click="showTransactionDialog(transaction)">
+        <q-item-section
+          data-testid="history-details"
+          @click="showTransactionDialog(transaction)"
+        >
           <q-item-label class="row items-center justify-between">
             <!-- Transaction Label -->
             <div class="col text-left">
@@ -86,6 +90,7 @@
             flat
             dense
             round
+            data-testid="history-check"
             :icon="transaction.longPressActive ? 'arrow_circle_down' : 'sync'"
             @click="
               transaction.longPressActive
