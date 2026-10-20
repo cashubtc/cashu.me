@@ -60,6 +60,7 @@ const h = vi.hoisted(() => {
     removeInvoiceFromChecker: vi.fn(),
     addBolt12OfferToChecker: vi.fn(),
     addOnchainQuoteToChecker: vi.fn(),
+    addSingleMintQuoteToChecker: vi.fn(),
     addOutgoingTokenToChecker: vi.fn(),
     removeOutgoingInvoiceFromChecker: vi.fn(),
     mintQuoteIsClaimed: vi.fn(() => false),
@@ -71,6 +72,7 @@ const h = vi.hoisted(() => {
   const mintsStore = {
     activeMintUrl: "https://mint-a.example",
     activeUnit: "sat",
+    activeUnitCurrencyMultiplyer: 1,
     assertMintError: vi.fn(),
     activateMintUrl: vi.fn(async (url) => {
       h.mintsStore.activeMintUrl = url;
@@ -597,6 +599,81 @@ describe("wallet store", () => {
       amount: -105,
       status: "pending",
     });
+  });
+
+  it.each([
+    [undefined, 25],
+    [null, 25],
+    [0, 0],
+    [20, 20],
+  ])("handles custom melt quote amount %s as %s", async (amount, expected) => {
+    const wallet = useWalletStore();
+    wallet.payInvoiceData.invoice = { custom: "custom_method" };
+    wallet.payInvoiceData.input.amount = 25;
+    wallet.payInvoiceData.input.comment = "test payment";
+    const createMeltQuote = vi.fn(async () => ({
+      quote: "custom-melt-q",
+      amount,
+      state: "UNPAID",
+      fee_reserve: 0,
+    }));
+    vi.spyOn(wallet, "activeWallet").mockResolvedValue({
+      unit: "tst",
+      createMeltQuote,
+    });
+
+    const quote = await wallet.meltQuoteInvoiceData();
+
+    expect(createMeltQuote).toHaveBeenCalledWith("custom_method", {
+      method: "custom_method",
+      unit: "tst",
+      amount: 25,
+      request: "test payment",
+    });
+    expect(quote.amount).toBe(expected);
+    expect(wallet.payInvoiceData.meltQuote.response.amount).toBe(expected);
+
+    const proofs = [{ id: "00aa", amount: 25, secret: "s1" }];
+    const checkMeltQuote = vi.fn();
+    const mintWallet = { mint: { checkMeltQuote }, unit: "tst" };
+    h.mintsStore.activeUnit = "tst";
+    h.mintsStore.activeProofs = proofs;
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue(mintWallet);
+    const meltGeneric = vi.spyOn(wallet, "meltGeneric").mockResolvedValue();
+
+    await wallet.meltInvoiceData(true, "foreground");
+
+    expect(meltGeneric.mock.calls[0]).toEqual([
+      proofs,
+      quote,
+      mintWallet,
+      true,
+      expect.any(Function),
+      "custom_method",
+      undefined,
+      false,
+      "foreground",
+    ]);
+    await meltGeneric.mock.calls[0][4](quote.quote);
+    expect(checkMeltQuote).toHaveBeenCalledWith("custom_method", quote.quote);
+  });
+
+  it("does not confuse a custom method with an object property", async () => {
+    const wallet = useWalletStore();
+    wallet.invoiceHistory = [
+      {
+        quote: "custom-q",
+        mint: "https://mint-a.example",
+        unit: "tst",
+        type: "constructor",
+      },
+    ];
+
+    await wallet.mintOnPaidGeneric("custom-q", { type: "constructor" });
+
+    expect(
+      h.transactionWorkerStore.addSingleMintQuoteToChecker
+    ).toHaveBeenCalledWith("constructor", "custom-q");
   });
 
   it("creates active wallet and loads cache", async () => {
@@ -1725,7 +1802,11 @@ describe("wallet store", () => {
     });
   });
 
-  it("persists melt change output data before completing a melt", async () => {
+  it.each([
+    [PaymentMethod.Bolt11, 100],
+    ["custom_method", undefined],
+    ["custom_method", null],
+  ])("settles %s payments with response amount %s", async (method, amount) => {
     const wallet = useWalletStore();
     const proofs = [{ id: "00aa", amount: 105, secret: "s1" }];
     const quote = {
@@ -1738,7 +1819,7 @@ describe("wallet store", () => {
       payment_preimage: null,
     };
     const preview = {
-      method: "bolt11",
+      method,
       inputs: proofs,
       outputData: [{ id: "change-output" }],
       keysetId: "00aa",
@@ -1746,7 +1827,12 @@ describe("wallet store", () => {
     };
     const prepareMelt = vi.fn(async () => preview);
     const completeMelt = vi.fn(async () => ({
-      quote: { ...quote, state: "PAID", payment_preimage: "preimage-1" },
+      quote: {
+        ...quote,
+        amount,
+        state: "PAID",
+        payment_preimage: "preimage-1",
+      },
       change: [{ id: "00aa", amount: 2, secret: "change" }],
       outputData: [],
     }));
@@ -1762,30 +1848,31 @@ describe("wallet store", () => {
       sendProofs: proofs,
     });
 
-    await wallet.meltGeneric(
-      proofs,
-      quote,
-      mintWallet,
-      true,
-      vi.fn(),
-      PaymentMethod.Bolt11
-    );
+    await wallet.meltGeneric(proofs, quote, mintWallet, true, vi.fn(), method);
 
     expect(prepareMelt).toHaveBeenCalledWith(
-      PaymentMethod.Bolt11,
+      method,
       expect.objectContaining({ quote: "bolt11-melt-q" }),
       proofs,
       { keysetId: "00aa" }
     );
-    expect(h.outputDataSerialize).toHaveBeenCalledWith({ id: "change-output" });
+    expect(h.outputDataSerialize).toHaveBeenCalledWith({
+      id: "change-output",
+    });
     expect(completeMelt).toHaveBeenCalledWith(preview, undefined, undefined);
     expect(h.proofsStore.addMissingProofs).toHaveBeenCalledWith([
       { id: "00aa", amount: 2, secret: "change" },
     ]);
     expect(wallet.invoiceHistory[0].meltQuote).toMatchObject({
       quote: "bolt11-melt-q",
+      amount: 100,
       state: "PAID",
       payment_preimage: "preimage-1",
+      fee_paid: 3,
+    });
+    expect(wallet.invoiceHistory[0].amount).toBe(-103);
+    expect(await cashuDb.meltQuotes.get(quote.quote)).toMatchObject({
+      amount: 100,
       fee_paid: 3,
     });
     expect(wallet.invoiceHistory[0].meltChangeOutputData).toEqual([]);
@@ -1972,41 +2059,57 @@ describe("wallet store", () => {
     });
   });
 
-  it("recovers deferred melt change before finalizing pending payments", async () => {
+  it.each([
+    [PaymentMethod.Bolt12, 100],
+    ["custom_method", undefined],
+    ["custom_method", null],
+  ])("recovers %s payments with response amount %s", async (method, amount) => {
     const wallet = useWalletStore();
     const proofs = [{ id: "00aa", amount: 105, secret: "s1" }];
     const changeProofs = [{ id: "00aa", amount: 3, secret: "change" }];
     const changeSigs = [{ id: "00aa", amount: 3, C_: "sig" }];
-    const checkMeltQuoteBolt12 = vi.fn(async () => ({
+    const checkMeltQuote = vi.fn(async () => ({
       quote: "bolt12-melt-q",
-      amount: 100,
+      amount,
       fee_reserve: 5,
       state: "PAID",
       change: changeSigs,
     }));
+    checkMeltQuote.mockResolvedValueOnce({
+      quote: "bolt12-melt-q",
+      amount,
+      fee_reserve: 5,
+      state: "PENDING",
+    });
     const createMeltChangeProofs = vi.fn(() => changeProofs);
-    wallet.invoiceHistory = [
-      {
-        quote: "bolt12-melt-q",
-        amount: -105,
-        request: "lno1offer",
-        memo: "Outgoing invoice",
-        date: "old",
-        status: "pending",
-        mint: "https://mint-a.example",
-        unit: "sat",
-        type: PaymentMethod.Bolt12,
-        meltChangeOutputData: [{ serialized: "change-output" }],
-      },
-    ];
+    await wallet.addPaymentHistory({
+      quote: "bolt12-melt-q",
+      amount: -105,
+      request: "lno1offer",
+      memo: "Outgoing invoice",
+      date: "old",
+      status: "pending",
+      mint: "https://mint-a.example",
+      unit: "sat",
+      type: method,
+      meltQuote: { quote: "bolt12-melt-q", amount: 100, fee_reserve: 5 },
+      meltChangeOutputData: [{ serialized: "change-output" }],
+    });
     h.proofsStore.getProofsForQuote.mockResolvedValue(proofs);
     vi.spyOn(wallet, "mintWallet").mockResolvedValue({
-      mint: { checkMeltQuoteBolt12 },
+      mint: { checkMeltQuoteBolt12: checkMeltQuote, checkMeltQuote },
       unit: "sat",
       createMeltChangeProofs,
     });
     vi.spyOn(wallet, "checkProofsSpendable").mockResolvedValue(proofs);
 
+    await expect(
+      wallet.checkOutgoingInvoice("bolt12-melt-q", false)
+    ).rejects.toThrow("invoice not paid yet.");
+    expect(await cashuDb.meltQuotes.get("bolt12-melt-q")).toMatchObject({
+      amount: 100,
+      state: "PENDING",
+    });
     await wallet.checkOutgoingInvoice("bolt12-melt-q", false);
 
     expect(h.outputDataDeserialize).toHaveBeenCalledWith({
@@ -2026,8 +2129,50 @@ describe("wallet store", () => {
       meltChangeOutputData: [],
     });
     expect(wallet.invoiceHistory[0].meltQuote).toMatchObject({
+      amount: 100,
       fee_paid: 2,
     });
+    expect(await cashuDb.meltQuotes.get("bolt12-melt-q")).toMatchObject({
+      amount: 100,
+      fee_paid: 2,
+    });
+  });
+
+  it("keeps the custom melt amount after a lost completion response", async () => {
+    const wallet = useWalletStore();
+    const proofs = [{ id: "00aa", amount: 25, secret: "s1" }];
+    const quote = { quote: "custom-melt-q", amount: 25, fee_reserve: 0 };
+    const mintWallet = {
+      mint: { mintUrl: "https://mint-a.example" },
+      unit: "tst",
+      keysetId: "00aa",
+      prepareMelt: vi.fn(async () => ({ outputData: [] })),
+      completeMelt: vi.fn().mockRejectedValue(new Error("connection lost")),
+    };
+    vi.spyOn(wallet, "send").mockResolvedValue({ sendProofs: proofs });
+
+    await expect(
+      wallet.meltGeneric(
+        proofs,
+        quote,
+        mintWallet,
+        true,
+        vi.fn(async () => ({ quote: quote.quote, state: "PENDING" })),
+        "custom_method"
+      )
+    ).rejects.toThrow("connection lost");
+
+    expect(wallet.invoiceHistory[0]).toMatchObject({
+      amount: -25,
+      status: "pending",
+      meltQuote: { amount: 25, state: "PENDING" },
+    });
+    expect(await cashuDb.meltQuotes.get(quote.quote)).toMatchObject({
+      amount: 25,
+      state: "PENDING",
+    });
+    expect(h.proofsStore.removeProofs).not.toHaveBeenCalled();
+    expect(h.proofsStore.setReserved).not.toHaveBeenCalledWith(proofs, false);
   });
 
   it("recovers deferred melt change from legacy output data records", async () => {

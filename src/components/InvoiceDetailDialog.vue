@@ -33,6 +33,8 @@
                   ? "Lightning Bolt12"
                   : isOnchain
                   ? "On-chain"
+                  : isCustom
+                  ? customMethodTitle
                   : $t("InvoiceDetailDialog.invoice.caption")
               }}
             </q-item-label>
@@ -42,14 +44,17 @@
         <!-- Content -->
         <div class="content-area">
           <q-card-section class="q-pa-none">
-            <div v-if="invoiceData.request" class="row justify-center q-mb-md">
+            <div
+              v-if="invoiceData.request || isCustom"
+              class="row justify-center q-mb-md"
+            >
               <div
                 class="col-12 col-sm-11 col-md-8 q-px-md"
                 style="max-width: 600px"
               >
                 <div class="qr-container">
                   <component
-                    :is="isOnchain ? 'div' : 'a'"
+                    :is="isOnchain || isCustom ? 'div' : 'a'"
                     class="text-secondary"
                     :href="qrLink"
                   >
@@ -97,6 +102,15 @@
                   />
                   {{ invoiceData.request }}
                 </div>
+                <QuoteIdDisplay
+                  v-if="isCustom"
+                  class="q-mt-md"
+                  data-testid="custom-quote-id"
+                  :quote-id="invoiceData.quote || ''"
+                  :label="$t('InvoiceDetailDialog.custom.quote_id')"
+                  :copied="copyButtonCopied"
+                  @copy="onCopyBolt11"
+                />
                 <OnchainDepositLimits
                   v-if="isOnchain && invoiceData.status !== 'paid'"
                   class="q-mt-md"
@@ -155,7 +169,7 @@
               style="max-width: 600px"
             >
               <q-btn
-                v-if="invoiceData.request"
+                v-if="invoiceData.request || isCustom"
                 class="full-width"
                 unelevated
                 size="lg"
@@ -178,13 +192,16 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import VueQrcode from "@chenfengyuan/vue-qrcode";
 import { copyToClipboard } from "quasar";
 
+import QuoteIdDisplay from "src/components/QuoteIdDisplay.vue";
+import { PaymentMethod, isCustomPaymentMethod } from "src/stores/walletTypes";
+import { useMintsStore } from "src/stores/mints";
+import { paymentMethodDisplayName } from "src/js/mint-payment-methods";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 import { useWorkersStore } from "src/stores/workers";
 import MeltQuoteInformation from "src/components/MeltQuoteInformation.vue";
 import MintQuoteInformation from "src/components/MintQuoteInformation.vue";
 import OnchainDepositLimits from "src/components/OnchainDepositLimits.vue";
-import { PaymentMethod } from "src/stores/walletTypes";
 import { onchainDepositQrValue } from "src/js/onchain";
 // type hint for global mixin
 declare const windowMixin: any;
@@ -196,6 +213,7 @@ export default defineComponent({
     VueQrcode,
     MeltQuoteInformation,
     MintQuoteInformation,
+    QuoteIdDisplay,
     OnchainDepositLimits,
   },
   props: {},
@@ -224,15 +242,29 @@ export default defineComponent({
     isSmallScreen() {
       return this.$q.screen.lt.sm;
     },
-    invoiceMethod(): PaymentMethod {
+    invoiceMethod(): string {
       const method =
         (this.invoiceData as any).method ||
         (this.invoiceData as any).paymentType ||
         (this.invoiceData as any).protocol ||
         this.invoiceData.type;
-      return Object.values(PaymentMethod).includes(method)
-        ? method
-        : PaymentMethod.Bolt11;
+      if (Object.values(PaymentMethod).includes(method)) return method;
+      if (isCustomPaymentMethod(method)) return method;
+      return PaymentMethod.Bolt11;
+    },
+    isCustom(): boolean {
+      return isCustomPaymentMethod(this.invoiceMethod);
+    },
+    customMethodTitle(): string {
+      const mint = useMintsStore().mints.find(
+        (m: any) => m.url === this.invoiceData.mint
+      );
+      return paymentMethodDisplayName(
+        mint,
+        this.invoiceMethod,
+        this.invoiceData.amount < 0 ? "melt" : "mint",
+        this.invoiceData.unit
+      );
     },
     copyButtonLabel: function () {
       if (this.copyButtonCopied) {
@@ -255,6 +287,9 @@ export default defineComponent({
       );
     },
     qrValue(): string {
+      if (this.isCustom) {
+        return this.invoiceData.request || this.invoiceData.quote || "";
+      }
       return this.isOnchain
         ? onchainDepositQrValue(
             this.invoiceData.request,
@@ -264,7 +299,7 @@ export default defineComponent({
         : "lightning:" + this.invoiceData.request.toUpperCase();
     },
     qrLink(): string | undefined {
-      return this.isOnchain
+      return this.isOnchain || this.isCustom
         ? undefined
         : "lightning:" + this.invoiceData.request;
     },
@@ -278,7 +313,9 @@ export default defineComponent({
   },
   methods: {
     onCopyBolt11: async function () {
-      const request = this.invoiceData?.request;
+      const request = this.isCustom
+        ? this.invoiceData?.quote
+        : this.invoiceData?.request;
       if (request) {
         try {
           await copyToClipboard(request);

@@ -42,6 +42,23 @@ describe("CreateInvoiceDialog", () => {
     stores.notifyError.mockClear();
   });
 
+  it.each([
+    [0, false],
+    [9, false],
+    [10, true],
+    [20, true],
+    [21, false],
+  ])("checks custom mint limits for amount %s", (amount, expected) => {
+    expect(
+      CreateInvoiceDialog.computed.canCreate.call({
+        isCustom: true,
+        invoiceData: { amount },
+        activeUnitCurrencyMultiplyer: 1,
+        customMethodAdvertisement: { min_amount: 10, max_amount: 20 },
+      })
+    ).toBe(expected);
+  });
+
   it("uses the amount-first flow when showing the Lightning address is disabled", () => {
     const showNpubCashPreview =
       CreateInvoiceDialog.computed.showNpubCashPreview;

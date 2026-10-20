@@ -283,6 +283,22 @@
                             @fiat-mode-changed="fiatKeyboardMode = $event"
                           />
                         </div>
+                        <div
+                          v-if="isCustomPay"
+                          class="row justify-center q-mt-sm"
+                        >
+                          <q-input
+                            class="col-12 col-sm-11 col-md-8 q-px-sm"
+                            style="max-width: 600px"
+                            round
+                            outlined
+                            dense
+                            v-model="payInvoiceData.input.comment"
+                            type="text"
+                            :label="$t('PayInvoiceDialog.custom.memo_label')"
+                            maxlength="200"
+                          />
+                        </div>
                       </div>
                       <div v-else>
                         <div class="row">
@@ -299,6 +315,17 @@
                     </div>
                   </transition>
                 </div>
+                <QuoteIdDisplay
+                  v-if="showCustomMeltQuoteId"
+                  class="q-mx-auto q-mb-md q-px-md"
+                  style="width: 100%; max-width: 340px"
+                  data-testid="custom-melt-quote-id"
+                  :quote-id="meltQuoteId"
+                  :label="$t('PayInvoiceDialog.custom.quote_id_hint')"
+                  :copied="quoteIdCopied"
+                  show-qr
+                  @copy="copyMeltQuoteId"
+                />
                 <div
                   v-if="showBottomMeltQuoteInformation"
                   class="invoice-details-bottom"
@@ -782,8 +809,13 @@ import MeltQuoteInformation from "components/MeltQuoteInformation.vue";
 import NumericKeyboard from "components/NumericKeyboard.vue";
 import AmountInputComponent from "components/AmountInputComponent.vue";
 import ParseInputComponent from "components/ParseInputComponent.vue";
-import { mintsSupportingPaymentMethod } from "src/js/mint-payment-methods";
-import { PaymentMethod } from "src/stores/walletTypes";
+import { copyToClipboard } from "quasar";
+import QuoteIdDisplay from "src/components/QuoteIdDisplay.vue";
+import {
+  mintsSupportingPaymentMethod,
+  paymentMethodDisplayName,
+} from "src/js/mint-payment-methods";
+import { PaymentMethod, isCustomPaymentMethod } from "src/stores/walletTypes";
 
 import * as _ from "underscore";
 
@@ -799,6 +831,7 @@ export default defineComponent({
     NumericKeyboard,
     AmountInputComponent,
     ParseInputComponent,
+    QuoteIdDisplay,
   },
   props: {},
   data: function () {
@@ -808,6 +841,8 @@ export default defineComponent({
       isPaid: false as boolean,
       waitingForWallet: false as boolean,
       autoCloseTimeout: null as ReturnType<typeof setTimeout> | null,
+      quoteIdCopied: false as boolean,
+      quoteIdCopyTimeout: null as ReturnType<typeof setTimeout> | null,
     };
   },
   watch: {
@@ -992,8 +1027,10 @@ export default defineComponent({
       const quote = this.payInvoiceData?.meltQuote?.response;
       return Boolean(quote?.quote) && quote.amount > 0;
     },
-    payPaymentMethod: function (): PaymentMethod | null {
+    payPaymentMethod: function (): PaymentMethod | string | null {
       if (!this.payInvoiceData?.invoice) return null;
+      if (this.payInvoiceData.invoice.custom)
+        return this.payInvoiceData.invoice.custom;
       if (this.payInvoiceData.invoice.onchain) {
         return PaymentMethod.Onchain;
       }
@@ -1008,6 +1045,11 @@ export default defineComponent({
         this.payInvoiceData.paymentMethod === PaymentMethod.Onchain
       ) {
         return "Pay On-chain";
+      }
+      if (this.isCustomPay) {
+        return this.$t("PayInvoiceDialog.custom.title", {
+          method: this.customPayLabel,
+        }) as string;
       }
       if (this.payPaymentMethod === PaymentMethod.Bolt12) {
         return this.$t("PayInvoiceDialog.input_data.title_bolt12");
@@ -1059,9 +1101,36 @@ export default defineComponent({
     isOnchainPay: function (): boolean {
       return this.payPaymentMethod === PaymentMethod.Onchain;
     },
+    isCustomPay: function (): boolean {
+      return isCustomPaymentMethod(this.payPaymentMethod as string);
+    },
+    customPayLabel: function (): string {
+      if (!this.isCustomPay) return "";
+      const method = this.payPaymentMethod as string;
+      const activeMint = (this.mints as StoredMint[]).find(
+        (mint: any) => mint.url === this.activeMintUrl
+      );
+      return paymentMethodDisplayName(
+        activeMint,
+        method,
+        "melt",
+        this.activeUnit as string
+      );
+    },
+    meltQuoteId: function (): string {
+      return this.payInvoiceData?.meltQuote?.response?.quote || "";
+    },
+    showCustomMeltQuoteId: function (): boolean {
+      return (
+        this.isCustomPay &&
+        Boolean(this.meltQuoteId) &&
+        !this.isPaid &&
+        this.payInvoiceData.meltQuote.error == ""
+      );
+    },
     showAmountlessPaymentAmountEntry: function (): boolean {
       return (
-        (this.isBolt12Pay || this.isOnchainPay) &&
+        (this.isBolt12Pay || this.isOnchainPay || this.isCustomPay) &&
         this.hasMintForPayMethod &&
         !this.hasMeltQuote &&
         !this.payInvoiceData.blocking &&
@@ -1188,6 +1257,11 @@ export default defineComponent({
         clearTimeout(this.autoCloseTimeout);
         this.autoCloseTimeout = null;
       }
+      if (this.quoteIdCopyTimeout) {
+        clearTimeout(this.quoteIdCopyTimeout);
+        this.quoteIdCopyTimeout = null;
+      }
+      this.quoteIdCopied = false;
       this.payInvoiceData.show = false;
       this.isPaying = false;
       this.isPaid = false;
@@ -1272,6 +1346,21 @@ export default defineComponent({
       if (!quote || option == null) return;
       quote.selected_fee_index = option.fee_index;
       quote.fee_reserve = option.fee_reserve;
+    },
+    copyMeltQuoteId: async function () {
+      if (!this.meltQuoteId) return;
+      try {
+        await copyToClipboard(this.meltQuoteId);
+        this.quoteIdCopied = true;
+        if (this.quoteIdCopyTimeout) {
+          clearTimeout(this.quoteIdCopyTimeout);
+        }
+        this.quoteIdCopyTimeout = setTimeout(() => {
+          this.quoteIdCopied = false;
+        }, 3000);
+      } catch (error) {
+        console.error("Failed to copy to clipboard:", error);
+      }
     },
   },
   created: function () {},

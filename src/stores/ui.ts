@@ -16,6 +16,18 @@ import { useSettingsStore } from "./settings";
 
 export type MutexPriority = "foreground" | "normal" | "background";
 
+const isoCurrencyCodes = (() => {
+  try {
+    return new Set(
+      (Intl as unknown as { supportedValuesOf: (key: string) => string[] })
+        .supportedValuesOf("currency")
+        .map((code) => code.toLowerCase())
+    );
+  } catch {
+    return new Set<string>();
+  }
+})();
+
 type MutexWaiter = {
   priority: MutexPriority;
   resolve: () => void;
@@ -167,6 +179,20 @@ export const useUiStore = defineStore("ui", {
       if (useUiStore().hideBalance && !showBalance) {
         return "****";
       }
+      // Custom Cashu units are integers, including large metadata limits.
+      if (
+        currency !== "sat" &&
+        currency !== "msat" &&
+        currency !== "usd" &&
+        currency !== "eur" &&
+        !isoCurrencyCodes.has(currency.toLowerCase())
+      ) {
+        return (
+          new Intl.NumberFormat(navigator.language).format(value) +
+          " " +
+          currency.toUpperCase()
+        );
+      }
       if (typeof value === "bigint") {
         return formatBigIntCurrency(
           value,
@@ -185,14 +211,13 @@ export const useUiStore = defineStore("ui", {
           currency: currency,
         }).format(value);
       } catch {
-        return (
-          new Intl.NumberFormat(navigator.language).format(value) +
-          " " +
-          String(currency)
-        );
+        // fall through to plain formatting
       }
-      // + " " +
-      // currency.toUpperCase()
+      return (
+        new Intl.NumberFormat(navigator.language).format(value) +
+        " " +
+        String(currency).toUpperCase()
+      );
     },
     toggleDebugConsole() {
       this.showDebugConsole = !this.showDebugConsole;
