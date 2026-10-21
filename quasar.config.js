@@ -10,6 +10,7 @@
 
 const { configure } = require("quasar/wrappers");
 const { execSync } = require("child_process");
+const qrWorkerPlugin = require("./scripts/qr-worker-plugin.cjs");
 
 function resolveGitCommit() {
   try {
@@ -85,6 +86,7 @@ module.exports = configure(function (/* ctx */) {
       // distDir
 
       extendViteConf(viteConf) {
+        viteConf.plugins.push(qrWorkerPlugin());
         viteConf.define = viteConf.define || {};
         viteConf.define.GIT_COMMIT = JSON.stringify(resolveGitCommit());
         // cashu-ts v4 ships ESM with BigInt — Vite's dep optimizer can mangle it
