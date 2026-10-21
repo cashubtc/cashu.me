@@ -85,6 +85,9 @@ and reports the defects; it does not silently change wallet behavior.
 
 ### UI-004 — Lightning deep links do not parse the supplied invoice
 
+- Fixed: Lightning parameters use the ordinary parser after wallet initialization.
+  Valid links display a quote without paying; invalid invoices receive parser feedback.
+
 - Severity: medium.
 - Reproduce: fund a wallet and open `/?lightning=<valid BOLT11 invoice>`.
 - Expected: invoice parsing and the payable quote appear, as when pasting it.

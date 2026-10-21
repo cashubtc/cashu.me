@@ -92,17 +92,43 @@ test("a Lightning deep link parses its prefilled invoice", async ({
   await wallet.onboard(MINT_A_URL);
   await wallet.mintBolt11(100);
   const invoice = await counterpartyRequest(request, "bolt11", 10);
-  await page.goto(`/?lightning=${encodeURIComponent(invoice)}`);
-  await expect(
-    page.getByTestId("payment-request-input").locator("textarea")
-  ).toHaveValue(invoice);
-  test.fail(
-    true,
-    "UI-004: Lightning deep links fill the input without parsing it"
+  const payments: string[] = [];
+  page.on("request", (request) => {
+    if (
+      request.method() === "POST" &&
+      request.url().endsWith("/v1/melt/bolt11")
+    )
+      payments.push(request.url());
+  });
+  const quote = page.waitForRequest(
+    (request) =>
+      request.method() === "POST" &&
+      request.url() === `${MINT_A_URL}/v1/melt/quote/bolt11`
   );
+  await page.goto(`/?lightning=${encodeURIComponent(invoice)}`);
+  expect((await quote).postDataJSON().request).toBe(invoice);
   await expect(page.getByTestId("pay-payment-request")).toBeVisible({
     timeout: 3000,
   });
+  expect(payments).toEqual([]);
+  await expect.poll(() => wallet.balanceSats()).toBe(100);
+});
+
+test("an invalid Lightning deep link reports a parsing error without paying", async ({
+  page,
+}) => {
+  const wallet = new WalletUi(page);
+  await wallet.onboard(MINT_A_URL);
+  await wallet.mintBolt11(20);
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/?lightning=lnbc-invalid");
+  await expect(
+    page.getByRole("alert").filter({ hasText: /decode invoice/i })
+  ).toBeVisible();
+  await expect(page.getByTestId("pay-payment-request")).toBeHidden();
+  await expect.poll(() => wallet.balanceSats()).toBe(20);
+  expect(errors).toEqual([]);
 });
 
 test("opening a fresh wallet reaches onboarding without unhandled initialization errors", async ({
