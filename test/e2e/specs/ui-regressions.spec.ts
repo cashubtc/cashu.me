@@ -113,9 +113,64 @@ test("opening a fresh wallet reaches onboarding without unhandled initialization
   const wallet = new WalletUi(page);
   await wallet.goto();
   await expect(page.getByTestId("onboarding-start")).toBeVisible();
-  test.fail(
-    true,
-    "UI-010: the home page initializes Nostr before a fresh wallet has a seed"
-  );
+  expect(
+    await page.evaluate(() => localStorage.getItem("cashu.mnemonic") || "")
+  ).toBe("");
+  expect(
+    await page.evaluate(
+      () => localStorage.getItem("cashu.ndk.seedSignerPublicKey") || ""
+    )
+  ).toBe("");
   expect(errors).toEqual([]);
 });
+
+for (const path of ["new", "recover"]) {
+  test(`initializes the Nostr signer after ${path} wallet onboarding`, async ({
+    page,
+  }) => {
+    const errors: string[] = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    const wallet = new WalletUi(page);
+    if (path === "new") {
+      await wallet.onboard(MINT_A_URL);
+    } else {
+      await wallet.goto();
+      await page.getByTestId("onboarding-start").click();
+      await page.getByTestId("onboarding-next").click();
+      await page.getByTestId("onboarding-recover-wallet").click();
+      expect(
+        await page.evaluate(() => localStorage.getItem("cashu.mnemonic") || "")
+      ).toBe("");
+      await page
+        .locator(".recover-slide input")
+        .first()
+        .fill(
+          "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+        );
+      await page.getByTestId("onboarding-next").click();
+      await expect(page.locator(".mint-setup-slide")).toBeVisible();
+      await page.getByTestId("onboarding-next").click();
+      await expect(page.locator(".restore-ecash-slide")).toBeVisible();
+      await page.getByTestId("onboarding-next").click();
+      await expect(page.getByTestId("wallet-send")).toBeVisible();
+    }
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          localStorage.getItem("cashu.ndk.seedSignerPublicKey")
+        )
+      )
+      .toMatch(/^[0-9a-f]{64}$/);
+    const signer = await page.evaluate(() =>
+      localStorage.getItem("cashu.ndk.seedSignerPublicKey")
+    );
+    await page.reload();
+    await expect(page.getByTestId("wallet-send")).toBeVisible();
+    expect(
+      await page.evaluate(() =>
+        localStorage.getItem("cashu.ndk.seedSignerPublicKey")
+      )
+    ).toBe(signer);
+    expect(errors).toEqual([]);
+  });
+}

@@ -132,6 +132,7 @@ export const useNostrStore = defineStore("nostr", {
       } else if (this.signerType === SignerType.PRIVATEKEY) {
         await this.initPrivateKeySigner();
       } else {
+        if (!useWalletStore().mnemonic) return;
         await this.initWalletSeedPrivateKeySigner();
       }
       this.initialized = true;
@@ -395,6 +396,7 @@ export const useNostrStore = defineStore("nostr", {
       }
     },
     subscribeToNip17DirectMessages: async function () {
+      if (!useWalletStore().mnemonic) return;
       await this.walletSeedGenerateKeyPair();
       await this.initNdkReadOnly();
       let nip17DirectMessageEvents: Set<NDKEvent> = new Set();

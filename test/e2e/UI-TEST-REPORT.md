@@ -167,6 +167,10 @@ top of a setup function` before any service request.
   `subscribeToNip17DirectMessages` before a seed has been created.
 - Regression: `opening a fresh wallet reaches onboarding without unhandled initialization errors`.
 
+- Fixed: seed-based signer initialization and NIP-17 subscriptions defer until a
+  mnemonic exists. Normal startup after new/recovered onboarding initializes the
+  signer. Regression tests cover no premature seed creation and both paths.
+
 ### UI-011 — Clipboard permission errors are unhandled
 
 - Severity: low; manual payment entry still works.
