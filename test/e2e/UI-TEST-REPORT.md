@@ -180,6 +180,10 @@ top of a setup function` before any service request.
   `readText()`. The fixture denies both, and the test completes manual entry
   before asserting that the paste handler produced no unhandled error.
 - Regression: `clipboard denial leaves manual payment entry usable`.
+- Fixed: the shared clipboard helper catches browser and Capacitor read failures,
+  shows localized feedback and returns empty input. Browser coverage checks
+  feedback and payable manual entry; focused tests cover both clipboard APIs
+  and preservation of existing input.
 
 ## Validation
 
