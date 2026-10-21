@@ -186,11 +186,6 @@ for (const directNavigation of [false, true]) {
         await page.getByText("Lightning Address", { exact: true }).click();
       }
       await wallet.toggleSetting("Enable", true);
-      if (directNavigation)
-        test.fail(
-          true,
-          "UI-009: direct Lightning address settings navigation initializes wallet store outside setup"
-        );
       await expect(page.locator("input[readonly]")).toHaveValue(/@npub.cash$/, {
         timeout: 5000,
       });

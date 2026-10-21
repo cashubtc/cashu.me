@@ -105,6 +105,10 @@ and reports the defects; it does not silently change wallet behavior.
 
 ### UI-006 — Seed restoration errors but reports success
 
+- Fixed: wallet translation uses the global i18n instance outside component setup.
+  Restoration errors propagate to the existing UI error handlers, and failed
+  restore requests no longer count as empty successful batches.
+
 - Severity: high; the recovery flow does not recover the test wallet's funds.
 - Reproduce: mint 64 sats, copy its seed, and restore that seed against the same
   mint from a fresh browser wallet using Restore Selected Mints.
@@ -144,6 +148,10 @@ function`, followed by `Successfully restored 1 mint(s)`. The balance remains
 - Regression: `reimporting the same backup preserves funds without an unhandled error`.
 
 ### UI-009 — Enabling a Lightning address fails after direct settings navigation
+
+- Fixed: wallet translation uses the global i18n instance outside component setup.
+  Restoration errors propagate to the existing UI error handlers, and failed
+  restore requests no longer count as empty successful batches.
 
 - Severity: medium.
 - Reproduce: open `/settings/lightning-address` directly in an initialized

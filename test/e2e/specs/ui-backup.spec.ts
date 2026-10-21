@@ -146,14 +146,44 @@ test("reveals and copies a seed and restores spendable funds in a fresh wallet",
       })
     ).toBeVisible({ timeout: 60000 });
     await restored.home();
-    test.fail(
-      true,
-      "UI-006: seed restore reports success after a setup-context error"
-    );
     await expect.poll(() => restored.balanceSats(), { timeout: 3000 }).toBe(64);
     await restored.sendEcash(4);
     await expect.poll(() => restored.balanceSats()).toBe(60);
   } finally {
     await context.close();
   }
+});
+
+test("failed seed restoration shows an error without reporting success", async ({
+  page,
+}) => {
+  const wallet = new WalletUi(page);
+  await wallet.onboard(MINT_B_URL);
+  const mnemonic = (await wallet.stored("cashu.mnemonic"))!;
+  await page.route(`${MINT_B_URL}/v1/restore`, (route) =>
+    route.fulfill({ status: 503, json: { detail: "Restore unavailable" } })
+  );
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/restore");
+  await page.locator("textarea").fill(mnemonic);
+  await page.getByRole("button", { name: "Select All", exact: true }).click();
+  await page
+    .getByRole("button", { name: /Restore.*mint/i })
+    .first()
+    .click();
+  await expect(
+    page
+      .getByRole("alert")
+      .filter({ hasText: "Error restoring selected mints:" })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /Restore.*mint/i }).first()
+  ).toBeEnabled();
+  await expect(
+    page.getByText("Successfully restored 1 mint(s)", { exact: true })
+  ).toBeHidden();
+  expect(errors).toEqual([]);
+  await wallet.home();
+  await expect.poll(() => wallet.balanceSats()).toBe(0);
 });
