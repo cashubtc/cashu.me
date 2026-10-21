@@ -69,11 +69,7 @@ for (const repeatImport of [false, true]) {
             reloaded = true;
           });
           await importBackup(restored, backup, false, false);
-          await expect.poll(() => reloaded || errors.length > 0).toBe(true);
-          test.fail(
-            true,
-            "UI-008: importing the same proofs twice raises an unhandled ConstraintError"
-          );
+          await expect.poll(() => reloaded).toBe(true);
           expect(errors).toEqual([]);
           await restored.home("History");
           await expect.poll(() => restored.balanceSats()).toBe(80);
