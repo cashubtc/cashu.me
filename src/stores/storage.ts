@@ -13,7 +13,10 @@ import {
 } from "./paymentHistory";
 import { cashuDb } from "./dexie";
 import { deserializeProofs, JSONInt } from "@cashu/cashu-ts";
-import { normalizeCashuQuoteAmounts } from "src/js/cashu-amount";
+import {
+  cashuAmountToNumber,
+  normalizeCashuQuoteAmounts,
+} from "src/js/cashu-amount";
 
 export function stringifyBackupTable(rows: unknown[]): string {
   const serialized = JSONInt.stringify(rows);
@@ -31,6 +34,102 @@ export function parseBackupTable(value: string): any[] {
   return parsed;
 }
 
+/** Validate the existing backup format before either persistence backend is changed. */
+export function validateWalletBackup(
+  backup: unknown
+): asserts backup is Record<string, string> {
+  const invalid = () => {
+    throw new Error("Invalid wallet backup format");
+  };
+  const isObject = (value: any) =>
+    value !== null && typeof value === "object" && !Array.isArray(value);
+  const isString = (value: any) =>
+    typeof value === "string" && value.length > 0;
+  const validUrl = (value: any) => {
+    if (!isString(value)) return false;
+    try {
+      const url = new URL(value);
+      return (
+        ["http:", "https:"].includes(url.protocol) &&
+        Boolean(url.hostname) &&
+        !/[%\s]/.test(url.hostname)
+      );
+    } catch {
+      return false;
+    }
+  };
+  if (!isObject(backup)) invalid();
+  const data = backup as Record<string, string>;
+  if (Object.values(data).some((value) => typeof value !== "string")) invalid();
+  const proofKeys = ["cashu.dexie.db.proofs", "cashu.proofs"].filter(
+    (key) => key in data
+  );
+  if (!proofKeys.length || !("cashu.mints" in data)) invalid();
+  for (const key of proofKeys) {
+    const proofs = parseBackupTable(data[key]);
+    for (const proof of proofs) {
+      if (
+        !isObject(proof) ||
+        !isString(proof.id) ||
+        !isString(proof.secret) ||
+        !isString(proof.C)
+      )
+        invalid();
+      if (cashuAmountToNumber(proof.amount) <= 0) invalid();
+    }
+    if (key === "cashu.dexie.db.proofs") deserializeProofs(data[key]);
+  }
+  const mints = parseBackupTable(data["cashu.mints"]);
+  for (const mint of mints) {
+    if (
+      !isObject(mint) ||
+      !validUrl(mint.url) ||
+      !Array.isArray(mint.keys) ||
+      !Array.isArray(mint.keysets)
+    )
+      invalid();
+    if (mint.nickname !== undefined && typeof mint.nickname !== "string")
+      invalid();
+    if (
+      mint.keys.some(
+        (keys: any) =>
+          !isObject(keys) || !isString(keys.id) || !isObject(keys.keys)
+      )
+    )
+      invalid();
+    if (
+      mint.keysets.some(
+        (keyset: any) =>
+          !isObject(keyset) || !isString(keyset.id) || !isString(keyset.unit)
+      )
+    )
+      invalid();
+  }
+  if (data["cashu.activeMintUrl"] && !validUrl(data["cashu.activeMintUrl"]))
+    invalid();
+  const tableKeys = {
+    "cashu.dexie.db.paymentHistory": "id",
+    "cashu.dexie.db.mintQuotes": "quote",
+    "cashu.dexie.db.meltQuotes": "quote",
+    "cashu.dexie.db.ecashHistory": "id",
+    "cashu.invoiceHistory": "quote",
+    "cashu.historyTokens": "date",
+  };
+  for (const [key, primaryKey] of Object.entries(tableKeys)) {
+    if (!(key in data)) continue;
+    for (const row of parseBackupTable(data[key])) {
+      if (!isObject(row) || !isString(row[primaryKey])) invalid();
+      if (
+        key === "cashu.dexie.db.mintQuotes" ||
+        key === "cashu.dexie.db.meltQuotes"
+      )
+        normalizeCashuQuoteAmounts(row);
+      if (key === "cashu.invoiceHistory")
+        buildPaymentRowsFromLegacyInvoice(row);
+    }
+  }
+}
+
 export const useStorageStore = defineStore("storage", {
   state: () => ({
     lastLocalStorageCleanUp: useLocalStorage(
@@ -40,6 +139,12 @@ export const useStorageStore = defineStore("storage", {
   }),
   actions: {
     restoreFromBackup: async function (backup: any) {
+      try {
+        validateWalletBackup(backup);
+      } catch {
+        notifyError("Invalid wallet backup format");
+        return;
+      }
       const proofsStore = useProofsStore();
       if (!backup) {
         notifyError("Unrecognized Backup Format!");

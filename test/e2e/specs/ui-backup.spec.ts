@@ -27,11 +27,15 @@ async function importBackup(
   await reloaded;
 }
 
-for (const repeatImport of [false, true]) {
+for (const [format, repeatImport] of [
+  ["current", false],
+  ["current", true],
+  ["legacy", false],
+] as const) {
   test(
     repeatImport
       ? "reimporting the same backup preserves funds without an unhandled error"
-      : "exports and imports a funded wallet with history and spendable funds",
+      : `exports and imports a funded ${format} wallet with history and spendable funds`,
     async ({ page, browser }) => {
       const wallet = new WalletUi(page);
       await wallet.onboard(MINT_B_URL);
@@ -44,10 +48,17 @@ for (const repeatImport of [false, true]) {
       const stream = await download.createReadStream();
       const chunks: Buffer[] = [];
       for await (const chunk of stream!) chunks.push(Buffer.from(chunk));
-      const backup = Buffer.concat(chunks);
+      let backup = Buffer.concat(chunks);
       expect(
         Object.hasOwn(JSON.parse(backup.toString()), "cashu.dexie.db.proofs")
       ).toBe(true);
+      if (format === "legacy") {
+        const legacy = JSON.parse(backup.toString());
+        legacy["cashu.proofs"] = legacy["cashu.dexie.db.proofs"];
+        delete legacy["cashu.dexie.db.proofs"];
+        legacy["cashu.dexie.migrated"] = "false";
+        backup = Buffer.from(JSON.stringify(legacy));
+      }
       const context = await browser.newContext({
         permissions: ["clipboard-read", "clipboard-write"],
         serviceWorkers: "block",
@@ -156,4 +167,34 @@ test("reveals and copies a seed and restores spendable funds in a fresh wallet",
   } finally {
     await context.close();
   }
+});
+
+test("rejects a malformed later backup table before changing settings or funds", async ({
+  page,
+}) => {
+  const wallet = new WalletUi(page);
+  await wallet.onboard(MINT_B_URL);
+  await wallet.mintBolt11(20);
+  await wallet.settings("advanced");
+  const downloaded = page.waitForEvent("download");
+  await page.getByText("Export wallet data", { exact: true }).click();
+  const stream = await (await downloaded).createReadStream();
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream!) chunks.push(Buffer.from(chunk));
+  const backup = JSON.parse(Buffer.concat(chunks).toString());
+  backup["cashu.activeMintUrl"] = "https://mint.example";
+  backup["cashu.dexie.db.meltQuotes"] = "{}";
+  let reloaded = false;
+  page.once("load", () => {
+    reloaded = true;
+  });
+  await importBackup(wallet, Buffer.from(JSON.stringify(backup)), false, false);
+  await expect(
+    page.getByRole("alert").filter({ hasText: "Invalid wallet backup format" })
+  ).toBeVisible();
+  expect(reloaded).toBe(false);
+  expect(await wallet.stored("cashu.activeMintUrl")).toBe(MINT_B_URL);
+  await wallet.home("History");
+  await expect.poll(() => wallet.balanceSats()).toBe(20);
+  await expect(page.getByTestId("history-row")).toHaveCount(1);
 });

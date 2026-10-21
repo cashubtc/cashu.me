@@ -95,6 +95,10 @@ and reports the defects; it does not silently change wallet behavior.
 
 ### UI-005 — Structurally invalid backup JSON is accepted
 
+- Fixed: preflight validation checks current/legacy proof payloads, mint data and
+  included history/quote tables before any storage writes. Invalid imports stay on
+  the page and display an error.
+
 - Severity: high; malformed backups can overwrite wallet settings.
 - Reproduce: import an object containing only an invalid `cashu.activeMintUrl`.
 - Expected: reject the backup before changing storage.

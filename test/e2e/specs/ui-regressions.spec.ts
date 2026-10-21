@@ -77,11 +77,8 @@ test("rejects a structurally invalid backup before writing wallet state", async 
           .isVisible())
     )
     .toBe(true);
-  test.fail(
-    true,
-    "UI-005: structurally invalid backup is accepted and writes state"
-  );
   expect(await wallet.stored("cashu.activeMintUrl")).toBe(MINT_B_URL);
+  expect(loaded).toBe(false);
 });
 
 test("a Lightning deep link parses its prefilled invoice", async ({
