@@ -50,12 +50,7 @@
             {{ $t("EditMintDialog.actions.cancel.label") }}
           </q-btn>
           <q-spacer></q-spacer>
-          <q-btn
-            color="primary"
-            class="update-btn"
-            @click="updateMintLocal"
-            v-close-popup
-          >
+          <q-btn color="primary" class="update-btn" @click="updateMintLocal">
             {{ $t("EditMintDialog.actions.update.label") }}
           </q-btn>
         </div>
@@ -104,8 +99,9 @@ export default defineComponent({
 
     const updateMintLocal = () => {
       const mintStore = useMintsStore();
-      mintStore.updateMint(mintToEdit.value, editMintData.value);
-      showEditMintDialogLocal.value = false;
+      if (mintStore.updateMint(mintToEdit.value, editMintData.value)) {
+        showEditMintDialogLocal.value = false;
+      }
     };
 
     return {

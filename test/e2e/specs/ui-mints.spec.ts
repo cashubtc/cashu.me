@@ -72,7 +72,7 @@ test("edits and cancels mint nicknames and keeps funds spendable", async ({
   await wallet.editMint(MINT_A_URL, "Cancelled", MINT_A_URL, false);
   await wallet.home("Mints");
   await expect(wallet.mintCard(MINT_A_URL)).not.toContainText("Cancelled");
-  await wallet.editMint(MINT_A_URL, "Daily wallet");
+  await wallet.editMint(MINT_A_URL, "Daily wallet", ` ${MINT_A_URL}/ `);
   await wallet.home("Mints");
   await page.reload();
   await expect(wallet.mintCard(MINT_A_URL)).toContainText("Daily wallet");

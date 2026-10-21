@@ -72,17 +72,20 @@ export class WalletUi extends WalletPage {
     url: string,
     nickname: string,
     replacementUrl = url,
-    save = true
+    save = true,
+    accepted = true
   ) {
     await this.details(url);
     await this.page.getByText("Edit mint", { exact: true }).click();
     const dialog = this.page.locator(".edit-mint-dialog");
     await dialog.locator("textarea").nth(0).fill(replacementUrl);
     await dialog.locator("textarea").nth(1).fill(nickname);
+    await expect(dialog.locator("textarea").nth(0)).toHaveValue(replacementUrl);
     await dialog
       .getByRole("button", { name: save ? "Update" : "Cancel", exact: true })
       .click();
-    await expect(dialog).toBeHidden();
+    if (save && !accepted) await expect(dialog).toBeVisible();
+    else await expect(dialog).toBeHidden();
   }
 
   async sendEcash(amount: number) {
