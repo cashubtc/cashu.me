@@ -1,0 +1,23 @@
+{
+  "skill_name": "web-ui-visual-review",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create before/after screenshots for PR #588 and comment them on the PR. Fill in fake data if you need it, don't leak anything private.",
+      "expected_output": "Isolated worktree at the PR's merge-base, sequential dev servers with cleared Vite cache, identical synthetic fixtures, inspected screenshots, validated manifest, one PR comment with paired image tables posted via the uploads ref.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I'm on branch feat/settings-redesign (base main). Show me what visually changed on the settings pages, dark and light. Keep the results local.",
+      "expected_output": "Local-only run: merge-base worktree, capture matrix limited to settings surfaces in both themes, before/after pairs plus a manifest and Markdown report, no GitHub writes.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Does commit a1b2c3d change anything visible? It supposedly only refactors the invoice parsing helper.",
+      "expected_output": "Diff analysis concludes no UI/style/state-to-UI change; either reports no visual delta without captures or documents the nearest affected surface as a labeled no-visual-delta pair, without inventing UI claims.",
+      "files": []
+    }
+  ]
+}
