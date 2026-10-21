@@ -31,6 +31,7 @@ const h = vi.hoisted(() => {
     addMissingProofs: vi.fn(),
     setReserved: vi.fn(),
     getProofsForQuote: vi.fn(),
+    serializeProofs: vi.fn(() => "token"),
   };
   const uiStore = {
     lockMutex: vi.fn(async () => {}),
@@ -226,6 +227,8 @@ vi.mock("@cashu/cashu-ts", () => ({
     cacheToMintDTO: (...args) => h.keychainCacheToMintDTO(...args),
   },
   StaleKeysetError: h.StaleKeysetErrorMock,
+  isMintOperationError: (e) =>
+    e instanceof Error && e.name === "MintOperationError" && "code" in e,
   CheckStateEnum: { SPENT: "SPENT" },
   MeltQuoteState: { PAID: "PAID", PENDING: "PENDING", UNPAID: "UNPAID" },
   MintQuoteState: { PAID: "PAID", ISSUED: "ISSUED", PENDING: "PENDING" },
@@ -789,6 +792,119 @@ describe("wallet store", () => {
     // .includeFees(true) must be chained so cashu-ts inflates the send
     // outputs to cover their own input fees.
     expect(includeFeesSpy).toHaveBeenCalledWith(true);
+  });
+
+  it("removes spent proofs when the swap fails with token already spent", async () => {
+    const wallet = useWalletStore();
+    const proofs = [{ id: "00bb", amount: 128, reserved: false, secret: "s1" }];
+    const selectProofsToSend = vi.fn(
+      (proofs, _amount, _includeFees, exactMatch) => {
+        if (exactMatch) return { send: [], keep: proofs };
+        return { send: proofs, keep: [] };
+      }
+    );
+    const tokenSpentError = new Error("Token already spent.");
+    tokenSpentError.name = "MintOperationError";
+    tokenSpentError.code = 11001;
+    const builder = {
+      asDeterministic: vi.fn(),
+      keyset: vi.fn(),
+      proofsWeHave: vi.fn(),
+      includeFees: vi.fn(),
+      run: vi.fn(async () => {
+        throw tokenSpentError;
+      }),
+    };
+    builder.asDeterministic.mockReturnValue(builder);
+    builder.keyset.mockReturnValue(builder);
+    builder.proofsWeHave.mockReturnValue(builder);
+    builder.includeFees.mockReturnValue(builder);
+    const swapWallet = {
+      mint: { mintUrl: "https://mint-b.example" },
+      unit: "sat",
+      keysetId: "00bb",
+      selectProofsToSend,
+      ops: {
+        send: vi.fn(() => builder),
+      },
+    };
+
+    h.mintsStore.mints.push({
+      url: "https://mint-b.example",
+      keys: [{ id: "00bb" }],
+      keysets: [{ id: "00bb", unit: "sat", active: true }],
+      info: { name: "mint-b" },
+    });
+
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue(swapWallet);
+    const checkProofsSpendable = vi
+      .spyOn(wallet, "checkProofsSpendable")
+      .mockResolvedValue([proofs[0]]);
+
+    await expect(
+      wallet.send(proofs, swapWallet, 100, false, true)
+    ).rejects.toThrow("Token already spent.");
+
+    expect(checkProofsSpendable).toHaveBeenCalledWith(
+      expect.any(Array),
+      swapWallet,
+      false
+    );
+    expect(h.notifyWarning).toHaveBeenCalledWith(
+      "wallet.notifications.spent_proofs_removed"
+    );
+  });
+
+  it("does not check proof states when the swap fails with another error", async () => {
+    const wallet = useWalletStore();
+    const proofs = [{ id: "00bb", amount: 128, reserved: false, secret: "s1" }];
+    const selectProofsToSend = vi.fn(
+      (proofs, _amount, _includeFees, exactMatch) => {
+        if (exactMatch) return { send: [], keep: proofs };
+        return { send: proofs, keep: [] };
+      }
+    );
+    const builder = {
+      asDeterministic: vi.fn(),
+      keyset: vi.fn(),
+      proofsWeHave: vi.fn(),
+      includeFees: vi.fn(),
+      run: vi.fn(async () => {
+        throw new Error("connection refused");
+      }),
+    };
+    builder.asDeterministic.mockReturnValue(builder);
+    builder.keyset.mockReturnValue(builder);
+    builder.proofsWeHave.mockReturnValue(builder);
+    builder.includeFees.mockReturnValue(builder);
+    const swapWallet = {
+      mint: { mintUrl: "https://mint-b.example" },
+      unit: "sat",
+      keysetId: "00bb",
+      selectProofsToSend,
+      ops: {
+        send: vi.fn(() => builder),
+      },
+    };
+
+    h.mintsStore.mints.push({
+      url: "https://mint-b.example",
+      keys: [{ id: "00bb" }],
+      keysets: [{ id: "00bb", unit: "sat", active: true }],
+      info: { name: "mint-b" },
+    });
+
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue(swapWallet);
+    const checkProofsSpendable = vi.spyOn(wallet, "checkProofsSpendable");
+
+    await expect(
+      wallet.send(proofs, swapWallet, 100, false, true)
+    ).rejects.toThrow("connection refused");
+
+    expect(checkProofsSpendable).not.toHaveBeenCalled();
+    expect(h.notifyWarning).not.toHaveBeenCalledWith(
+      "wallet.notifications.spent_proofs_removed"
+    );
   });
 
   it("accounts for signed-output errors", async () => {
@@ -1793,6 +1909,284 @@ describe("wallet store", () => {
     expect(
       h.transactionWorkerStore.removeOutgoingInvoiceFromChecker
     ).toHaveBeenCalledWith("bolt11-melt-q");
+  });
+
+  it("removes spent proofs when the melt fails with token already spent", async () => {
+    const wallet = useWalletStore();
+    wallet.invoiceHistory = [];
+    const proofs = [{ id: "00aa", amount: 105, reserved: false, secret: "s1" }];
+    const quote = {
+      quote: "bolt11-melt-q",
+      amount: 100,
+      fee_reserve: 5,
+      state: "PENDING",
+      expiry: 0,
+      request: "lnbc123",
+      payment_preimage: null,
+    };
+    const tokenSpentError = new Error("Token already spent.");
+    tokenSpentError.name = "MintOperationError";
+    tokenSpentError.code = 11001;
+    const prepareMelt = vi.fn(async () => {
+      throw tokenSpentError;
+    });
+    const mintWallet = {
+      mint: { mintUrl: "https://mint-a.example" },
+      unit: "sat",
+      keysetId: "00aa",
+      prepareMelt,
+      completeMelt: vi.fn(),
+    };
+    const checkMeltQuote = vi.fn(async () => ({
+      ...quote,
+      state: "UNPAID",
+    }));
+    vi.spyOn(wallet, "send").mockResolvedValue({
+      keepProofs: [],
+      sendProofs: proofs,
+    });
+    const checkProofsSpendable = vi
+      .spyOn(wallet, "checkProofsSpendable")
+      .mockResolvedValue([proofs[0]]);
+
+    await expect(
+      wallet.meltGeneric(proofs, quote, mintWallet, true, checkMeltQuote)
+    ).rejects.toThrow("Token already spent.");
+
+    expect(checkProofsSpendable).toHaveBeenCalledWith(
+      proofs,
+      mintWallet,
+      false
+    );
+    expect(h.notifyWarning).toHaveBeenCalledWith(
+      "wallet.notifications.spent_proofs_removed"
+    );
+  });
+
+  it("keeps proofs when a token-already-spent melt actually settled", async () => {
+    const wallet = useWalletStore();
+    wallet.invoiceHistory = [];
+    const proofs = [{ id: "00aa", amount: 105, reserved: false, secret: "s1" }];
+    const quote = {
+      quote: "bolt11-melt-q",
+      amount: 100,
+      fee_reserve: 5,
+      state: "PENDING",
+      expiry: 0,
+      request: "lnbc123",
+      payment_preimage: null,
+    };
+    const tokenSpentError = new Error("Token already spent.");
+    tokenSpentError.name = "MintOperationError";
+    tokenSpentError.code = 11001;
+    const preview = {
+      method: PaymentMethod.Bolt11,
+      inputs: proofs,
+      outputData: [],
+      keysetId: "00aa",
+      quote,
+    };
+    const mintWallet = {
+      mint: { mintUrl: "https://mint-a.example" },
+      unit: "sat",
+      keysetId: "00aa",
+      prepareMelt: vi.fn(async () => preview),
+      completeMelt: vi.fn(async () => {
+        throw tokenSpentError;
+      }),
+    };
+    const checkMeltQuote = vi.fn(async () => ({
+      ...quote,
+      state: "PAID",
+      payment_preimage: "preimage-1",
+    }));
+    vi.spyOn(wallet, "send").mockResolvedValue({
+      keepProofs: [],
+      sendProofs: proofs,
+    });
+    const checkProofsSpendable = vi.spyOn(wallet, "checkProofsSpendable");
+
+    await expect(
+      wallet.meltGeneric(proofs, quote, mintWallet, true, checkMeltQuote)
+    ).rejects.toThrow("Token already spent.");
+
+    expect(checkProofsSpendable).not.toHaveBeenCalled();
+    expect(h.notifyWarning).not.toHaveBeenCalledWith(
+      "wallet.notifications.spent_proofs_removed"
+    );
+    expect(h.proofsStore.removeProofs).not.toHaveBeenCalled();
+    expect(wallet.invoiceHistory[0].meltQuote.state).toBe("PAID");
+    expect(h.uiStore.unlockMutex).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps proofs when the quote state cannot be checked after a token-already-spent melt", async () => {
+    const wallet = useWalletStore();
+    wallet.invoiceHistory = [];
+    const proofs = [{ id: "00aa", amount: 105, reserved: false, secret: "s1" }];
+    const quote = {
+      quote: "bolt11-melt-q",
+      amount: 100,
+      fee_reserve: 5,
+      state: "PENDING",
+      expiry: 0,
+      request: "lnbc123",
+      payment_preimage: null,
+    };
+    const tokenSpentError = new Error("Token already spent.");
+    tokenSpentError.name = "MintOperationError";
+    tokenSpentError.code = 11001;
+    const preview = {
+      method: PaymentMethod.Bolt11,
+      inputs: proofs,
+      outputData: [],
+      keysetId: "00aa",
+      quote,
+    };
+    const mintWallet = {
+      mint: { mintUrl: "https://mint-a.example" },
+      unit: "sat",
+      keysetId: "00aa",
+      prepareMelt: vi.fn(async () => preview),
+      completeMelt: vi.fn(async () => {
+        throw tokenSpentError;
+      }),
+    };
+    const checkMeltQuote = vi.fn(async () => {
+      throw new Error("check failed");
+    });
+    vi.spyOn(wallet, "send").mockResolvedValue({
+      keepProofs: [],
+      sendProofs: proofs,
+    });
+    const checkProofsSpendable = vi.spyOn(wallet, "checkProofsSpendable");
+
+    await expect(
+      wallet.meltGeneric(proofs, quote, mintWallet, true, checkMeltQuote)
+    ).rejects.toThrow("check failed");
+
+    expect(checkProofsSpendable).not.toHaveBeenCalled();
+    expect(h.notifyWarning).not.toHaveBeenCalledWith(
+      "wallet.notifications.spent_proofs_removed"
+    );
+    expect(h.uiStore.unlockMutex).toHaveBeenCalledTimes(1);
+  });
+
+  it("unreserves surviving proofs when a melt prunes only some spent proofs", async () => {
+    const wallet = useWalletStore();
+    wallet.invoiceHistory = [];
+    const proofs = [
+      { id: "00aa", amount: 105, reserved: false, secret: "s1" },
+      { id: "00aa", amount: 105, reserved: false, secret: "s2" },
+    ];
+    const quote = {
+      quote: "bolt11-melt-q",
+      amount: 100,
+      fee_reserve: 5,
+      state: "PENDING",
+      expiry: 0,
+      request: "lnbc123",
+      payment_preimage: null,
+    };
+    const tokenSpentError = new Error("Token already spent.");
+    tokenSpentError.name = "MintOperationError";
+    tokenSpentError.code = 11001;
+    const mintWallet = {
+      mint: { mintUrl: "https://mint-a.example" },
+      unit: "sat",
+      keysetId: "00aa",
+      prepareMelt: vi.fn(async () => {
+        throw tokenSpentError;
+      }),
+      completeMelt: vi.fn(),
+    };
+    const checkMeltQuote = vi.fn(async () => ({
+      ...quote,
+      state: "UNPAID",
+    }));
+    vi.spyOn(wallet, "send").mockResolvedValue({
+      keepProofs: [],
+      sendProofs: proofs,
+    });
+    const removeSpentProofs = vi
+      .spyOn(wallet, "removeSpentProofs")
+      .mockResolvedValue([proofs[0]]);
+
+    await expect(
+      wallet.meltGeneric(proofs, quote, mintWallet, true, checkMeltQuote)
+    ).rejects.toThrow("Token already spent.");
+
+    expect(removeSpentProofs).toHaveBeenCalledWith(proofs, mintWallet);
+    expect(h.proofsStore.setReserved).toHaveBeenCalledWith(proofs, false);
+  });
+
+  it("removeSpentProofs drops the spent proofs and notifies the user", async () => {
+    const wallet = useWalletStore();
+    const spentProof = { id: "00aa", amount: 64, secret: "spent" };
+    const unspentProof = { id: "00aa", amount: 32, secret: "unspent" };
+    const mintWallet = {
+      mint: { mintUrl: "https://mint-a.example" },
+      unit: "sat",
+      groupProofsByState: vi.fn(async () => ({
+        spent: [spentProof],
+        unspent: [unspentProof],
+        pending: [],
+      })),
+    };
+
+    const spent = await wallet.removeSpentProofs(
+      [spentProof, unspentProof],
+      mintWallet
+    );
+
+    expect(spent).toEqual([spentProof]);
+    expect(h.proofsStore.removeProofs).toHaveBeenCalledWith([spentProof]);
+    expect(h.notifyWarning).toHaveBeenCalledWith(
+      "wallet.notifications.spent_proofs_removed"
+    );
+  });
+
+  it("removeSpentProofs swallows state-check errors", async () => {
+    const wallet = useWalletStore();
+    const mintWallet = {
+      mint: { mintUrl: "https://mint-a.example" },
+      unit: "sat",
+      groupProofsByState: vi.fn(async () => {
+        throw new Error("network down");
+      }),
+    };
+
+    const spent = await wallet.removeSpentProofs(
+      [{ id: "00aa", amount: 64, secret: "s1" }],
+      mintWallet
+    );
+
+    expect(spent).toEqual([]);
+    expect(h.proofsStore.removeProofs).not.toHaveBeenCalled();
+    expect(h.notifyWarning).not.toHaveBeenCalled();
+  });
+
+  it("removeSpentProofs does not notify when no proofs are spent", async () => {
+    const wallet = useWalletStore();
+    const mintWallet = {
+      mint: { mintUrl: "https://mint-a.example" },
+      unit: "sat",
+      groupProofsByState: vi.fn(async () => ({
+        spent: [],
+        unspent: [],
+        pending: [],
+      })),
+    };
+
+    const spent = await wallet.removeSpentProofs(
+      [{ id: "00aa", amount: 64, secret: "s1" }],
+      mintWallet
+    );
+
+    expect(spent).toEqual([]);
+    expect(h.proofsStore.removeProofs).not.toHaveBeenCalled();
+    expect(h.notifyWarning).not.toHaveBeenCalledWith(
+      "wallet.notifications.spent_proofs_removed"
+    );
   });
 
   it("keeps the mutex during normal melts and only releases when requested", async () => {
