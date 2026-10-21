@@ -14,14 +14,19 @@ test("removing an inactive mint preserves the active mint", async ({
   await wallet.onboard(MINT_A_URL);
   await wallet.addMint(MINT_B_URL);
   await wallet.addMint(MINT_C_URL);
+  await wallet.mintBolt11(25);
+  const unitBefore = await wallet.stored("cashu.activeUnit");
   await expect(wallet.mintCard(MINT_C_URL)).toHaveClass(/q-item--active/);
   await wallet.removeMint(MINT_B_URL);
   await wallet.home("Mints");
   await expect(wallet.mintCard(MINT_B_URL)).toHaveCount(0);
-  test.fail(true, "UI-001: removing an inactive mint resets the active mint");
   await expect(wallet.mintCard(MINT_C_URL)).toHaveClass(/q-item--active/, {
     timeout: 3000,
   });
+  expect(await wallet.stored("cashu.activeUnit")).toBe(unitBefore);
+  await expect.poll(() => wallet.balanceSats()).toBe(25);
+  await page.reload();
+  await expect(wallet.mintCard(MINT_C_URL)).toHaveClass(/q-item--active/);
 });
 
 test("editing a mint rejects a duplicate URL", async ({ page }) => {

@@ -645,10 +645,9 @@ export const useMintsStore = defineStore("mints", {
       this.mints = this.mints.filter((m) => m.url !== url);
       if (url === this.activeMintUrl) {
         this.activeMintUrl = "";
-      }
-      // todo: we always reset to the first mint, improve this
-      if (this.mints.length > 0) {
-        await this.activateMint(this.mints[0], false);
+        if (this.mints.length > 0) {
+          await this.activateMint(this.mints[0], false);
+        }
       }
       notifySuccess(this.t("wallet.mint.notifications.removed"));
 
