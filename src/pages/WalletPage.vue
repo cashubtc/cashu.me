@@ -29,7 +29,7 @@
           </div>
         </transition>
 
-        <!-- button to showSendDialog -->
+        <!-- button to showSendDialog (on Android it first checks the clipboard) -->
         <div class="col-6 q-mb-md flex justify-center items-center">
           <q-btn
             rounded
@@ -37,11 +37,17 @@
             data-testid="wallet-send"
             class="q-px-md q-ml-md wallet-action-btn"
             color="primary"
-            @click="showSendDialog = true"
+            :loading="sendClipboardReading"
+            @click="handleSendClick"
           >
             <div class="button-content">
               <span>{{ $t("WalletPage.actions.send.label") }}</span>
             </div>
+            <template v-slot:loading>
+              <div class="button-content">
+                <span>{{ $t("WalletPage.actions.send.label") }}</span>
+              </div>
+            </template>
           </q-btn>
         </div>
         <ReceiveDialog v-model="showReceiveDialog" />
@@ -246,6 +252,7 @@ import { useNWCStore } from "src/stores/nwc";
 import { useNpubCashStore } from "src/stores/npubcash";
 import { useNostrStore } from "src/stores/nostr";
 import { usePRStore } from "src/stores/payment-request";
+import { useSendClipboardStore } from "src/stores/sendClipboard";
 import { useDexieStore } from "src/stores/dexie";
 
 import { useStorageStore } from "src/stores/storage";
@@ -341,6 +348,7 @@ export default {
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     ...mapWritableState(useP2PKStore, ["showP2PKDialog"]),
     ...mapWritableState(useNWCStore, ["showNWCDialog", "nwcEnabled"]),
+    ...mapState(useSendClipboardStore, { sendClipboardReading: "reading" }),
     pendingPaymentsExist: function () {
       return this.payments.findIndex((payment) => payment.pending) !== -1;
     },
@@ -389,6 +397,10 @@ export default {
     ...mapActions(useDexieStore, ["migrateToDexie"]),
     ...mapActions(useStorageStore, ["checkLocalStorage"]),
     ...mapActions(usePRStore, ["createPaymentRequest"]),
+    ...mapActions(useSendClipboardStore, {
+      trySendFromClipboard: "trySendFromClipboard",
+      cancelSendClipboard: "cancel",
+    }),
     ...mapActions(useTransactionWorkerStore, [
       "startTransactionWorker",
       "checkPendingTransactions",
@@ -468,6 +480,19 @@ export default {
       this.invoiceData.hash = "";
       this.invoiceData.memo = "";
       this.showCreateInvoiceDialog = true;
+    },
+    handleSendClick: function () {
+      const attempt = this.trySendFromClipboard() as Promise<string | null>;
+      attempt.then(
+        (outcome) => {
+          if (outcome === null) {
+            this.showSendDialog = true;
+          }
+        },
+        () => {
+          this.showSendDialog = true;
+        }
+      );
     },
     showSendTokensDialog: function () {
       console.log("##### showSendTokensDialog");
@@ -579,6 +604,10 @@ export default {
       });
     },
     handleVisibilityChange: function () {
+      if (document.visibilityState === "hidden") {
+        this.cancelSendClipboard();
+        return;
+      }
       if (document.visibilityState === "visible") {
         console.log("### App brought to foreground, checking NWC...");
         if (this.nwcEnabled) {
@@ -587,7 +616,23 @@ export default {
       }
     },
   },
-  watch: {},
+  watch: {
+    showReceiveDialog: function (val) {
+      if (val) this.cancelSendClipboard();
+    },
+    showSendDialog: function (val) {
+      if (val) this.cancelSendClipboard();
+    },
+    showReceiveTokens: function (val) {
+      if (val) this.cancelSendClipboard();
+    },
+    "camera.show": function (val) {
+      if (val) this.cancelSendClipboard();
+    },
+    tab: function () {
+      this.cancelSendClipboard();
+    },
+  },
 
   mounted: function () {
     this.initializeNpubCash();
@@ -599,6 +644,8 @@ export default {
   },
 
   beforeUnmount: function () {
+    // Navigating away cancels a pending Send-clipboard attempt
+    this.cancelSendClipboard();
     // Remove event listener when component is destroyed
     window.removeEventListener("resize", this.equalizeButtonWidths);
     document.removeEventListener(

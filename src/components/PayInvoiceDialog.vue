@@ -233,6 +233,16 @@
                             </div>
                           </div>
                         </div>
+                        <!-- On-chain destination, so the address stays visible
+                             while reviewing the quote before paying. -->
+                        <div
+                          v-if="onchainDestination"
+                          class="text-subtitle2 text-grey-6 q-mt-md"
+                          style="word-break: break-all"
+                          data-testid="onchain-destination"
+                        >
+                          Sending to {{ onchainDestination }}
+                        </div>
                         <p
                           class="text-wrap q-mt-xl"
                           style="max-width: 600px; font-size: 1.1rem"
@@ -258,6 +268,15 @@
                         </div>
                       </div>
                       <div v-else-if="showAmountlessPaymentAmountEntry">
+                        <!-- On-chain destination while the amount is entered -->
+                        <div
+                          v-if="onchainDestination"
+                          class="text-subtitle2 text-grey-6 q-mb-md text-center"
+                          style="word-break: break-all"
+                          data-testid="onchain-destination"
+                        >
+                          Sending to {{ onchainDestination }}
+                        </div>
                         <p
                           v-if="payInvoiceData.invoice.description"
                           class="text-wrap q-mb-md"
@@ -278,7 +297,7 @@
                             v-model="payInvoiceData.input.amount"
                             :enabled="true"
                             :muted="insufficientFundsForAmountlessPayment"
-                            :max-amount="amountlessPaymentMaxAmountFromBalance"
+                            :max-amount="amountlessPaymentInputMaxAmount"
                             @enter="handleAmountlessQuote"
                             @fiat-mode-changed="fiatKeyboardMode = $event"
                           />
@@ -331,6 +350,10 @@
                         <b>{{ payInvoiceData.lnurlpay.lightningAddress }}</b>
                       </template>
                     </i18n-t>
+                    <br />
+                    <b data-testid="lnurl-fixed-amount">
+                      {{ payInvoiceData.lnurlpay.maxSendable / 1000 }} sat
+                    </b>
                   </p>
                   <p
                     v-else
@@ -1059,6 +1082,12 @@ export default defineComponent({
     isOnchainPay: function (): boolean {
       return this.payPaymentMethod === PaymentMethod.Onchain;
     },
+    // Destination address of an on-chain send (empty for other methods).
+    onchainDestination: function (): string {
+      if (!this.isOnchainPay) return "";
+      const invoice = this.payInvoiceData?.invoice;
+      return typeof invoice?.onchain === "string" ? invoice.onchain : "";
+    },
     showAmountlessPaymentAmountEntry: function (): boolean {
       return (
         (this.isBolt12Pay || this.isOnchainPay) &&
@@ -1125,6 +1154,15 @@ export default defineComponent({
     },
     amountlessPaymentMaxAmountFromBalance: function (): number {
       return this.activeBalance / this.activeUnitCurrencyMultiplyer;
+    },
+    amountlessPaymentInputMaxAmount: function (): number | null {
+      if (
+        this.isOnchainPay &&
+        this.payInvoiceData.input.externalAmount === true
+      ) {
+        return null;
+      }
+      return this.amountlessPaymentMaxAmountFromBalance;
     },
     insufficientFunds: function (): boolean {
       if (

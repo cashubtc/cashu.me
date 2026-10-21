@@ -183,11 +183,23 @@ export const usePRStore = defineStore("payment-request", {
         .map((id) => tokensStore.historyTokens.find((t) => t.id === id))
         .filter((t): t is HistoryToken => !!t);
     },
-    async decodePaymentRequest(pr: string) {
-      console.log("decodePaymentRequest", pr);
+    // `options.remember` controls whether the decoded request is logged and
+    // kept in `ourPaymentRequests`/`showPRKData`. Callers that did not get an
+    // explicit user paste (the Android Send clipboard shortcut) pass false so
+    // clipboard content is neither logged nor persisted.
+    async decodePaymentRequest(
+      pr: string,
+      options: { remember?: boolean } = {}
+    ) {
+      const remember = options.remember !== false;
+      if (remember) {
+        console.log("decodePaymentRequest", pr);
+      }
       const request: PaymentRequest = decodePaymentRequest(pr);
       this.getPaymentRequestTransport(request);
-      console.log("decodePaymentRequest", request);
+      if (remember) {
+        console.log("decodePaymentRequest", request);
+      }
       const mintsStore = useMintsStore();
       // activate the mint in the payment request
       if (request.mints && request.mints.length > 0) {
@@ -229,12 +241,14 @@ export const usePRStore = defineStore("payment-request", {
           mintsStore.activeUnitCurrencyMultiplyer;
       }
       // Also make sure this decoded request gets stored (e.g., if user pasted an older one)
-      try {
-        const encoded = pr;
-        this.ensureStoredRequest(request, encoded);
-        this.showPRKData = encoded;
-      } catch (e) {
-        // noop
+      if (remember) {
+        try {
+          const encoded = pr;
+          this.ensureStoredRequest(request, encoded);
+          this.showPRKData = encoded;
+        } catch (e) {
+          // noop
+        }
       }
       sendTokenStore.sendData.paymentRequest = request;
       if (!sendTokenStore.showSendTokens) {
