@@ -29,7 +29,7 @@
           @keydown.enter.prevent="choose('new')"
           @keydown.space.prevent="choose('new')"
         >
-          <q-icon name="auto_awesome" size="2em" color="primary" class="icon" />
+          <q-icon name="auto_awesome" size="24px" class="icon" />
           <div class="text">
             <h3 class="title">
               {{ $t("WelcomeSlideChoice.options.new.title") }}
@@ -38,6 +38,7 @@
               {{ $t("WelcomeSlideChoice.options.new.subtitle") }}
             </p>
           </div>
+          <q-icon name="chevron_right" size="24px" class="chevron" />
         </div>
 
         <!-- Recover Option -->
@@ -50,7 +51,7 @@
           @keydown.enter.prevent="choose('recover')"
           @keydown.space.prevent="choose('recover')"
         >
-          <q-icon name="history" size="2em" color="primary" class="icon" />
+          <q-icon name="history" size="24px" class="icon" />
           <div class="text">
             <h3 class="title">
               {{ $t("WelcomeSlideChoice.options.recover.title") }}
@@ -59,6 +60,7 @@
               {{ $t("WelcomeSlideChoice.options.recover.subtitle") }}
             </p>
           </div>
+          <q-icon name="chevron_right" size="24px" class="chevron" />
         </div>
       </div>
     </div>
@@ -144,30 +146,41 @@ export default {
 .options {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 12px;
   width: 100%;
   max-width: 500px;
-  padding: 16px 0px;
 }
 
 .option {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 16px;
   cursor: pointer;
+  min-height: 72px;
   padding: 16px;
-  border-radius: 12px;
-  transition: all 0.2s ease;
+  border-radius: 14px;
+  background: var(--app-tint);
+  border: 1px solid var(--app-border);
+  transition: background-color 0.15s ease;
 }
 
 .option:hover {
-  background: rgba(255, 255, 255, 0.05);
-  transform: translateY(-2px);
+  background: var(--app-tint-strong);
+}
+
+.option:focus-visible {
+  outline: 2px solid var(--app-text);
+  outline-offset: 2px;
 }
 
 .icon {
   flex-shrink: 0;
-  margin-top: 2px;
+  color: var(--app-text);
+}
+
+.chevron {
+  flex-shrink: 0;
+  color: var(--app-text-subtle);
 }
 
 .text {
@@ -175,25 +188,23 @@ export default {
 }
 
 .text .title {
-  font-size: 15.2px; /* Exact match to platform titles in WelcomeSlide2 */
-  font-family: Inter, -apple-system, "system-ui", "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
   font-weight: 600;
-  color: #ffffff;
-  margin: 0 0 8px 0;
+  color: var(--app-text);
+  margin: 0 0 4px 0;
 }
 
 .subtitle {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.8);
-  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: var(--app-text-muted);
+  margin: 0;
   line-height: 1.4;
 }
 
 /* Mobile adjustments */
 @media (max-width: 600px) {
   .choice-slide {
-    padding: 30px 15px 15px 15px;
+    padding: 24px 16px 16px 16px;
   }
 
   .title {
@@ -203,18 +214,6 @@ export default {
   .description {
     font-size: 0.9rem;
     margin-bottom: 28px;
-  }
-
-  .option {
-    padding: 12px;
-  }
-
-  .text .title {
-    font-size: 14px;
-  }
-
-  .subtitle {
-    font-size: 0.85rem;
   }
 }
 </style>

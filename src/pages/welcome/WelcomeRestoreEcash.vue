@@ -123,7 +123,7 @@ export default {
 /* Mobile adjustments */
 @media (max-width: 600px) {
   .restore-ecash-slide {
-    padding: 30px 15px 15px 15px;
+    padding: 24px 16px 16px 16px;
   }
 
   .title {

@@ -3,10 +3,7 @@
     :title="$t('Settings.menu.lightning_address.title')"
     :caption="$t('Settings.menu.lightning_address.caption')"
   >
-    <SettingsSection
-      :title="$t('Settings.lightning_address.title')"
-      :caption="$t('Settings.lightning_address.description')"
-    >
+    <SettingsSection :caption="$t('Settings.lightning_address.description')">
       <q-item tag="label">
         <q-item-section>
           <q-item-label>{{

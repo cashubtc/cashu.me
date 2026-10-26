@@ -132,7 +132,10 @@ const routes = [
   // but you can also remove it
   {
     path: "/:pathMatch(.*)*",
-    component: () => import("src/pages/ErrorNotFound.vue"),
+    component: () => import("layouts/BlankLayout.vue"),
+    children: [
+      { path: "", component: () => import("src/pages/ErrorNotFound.vue") },
+    ],
   },
 ];
 

@@ -134,7 +134,7 @@ test("reveals and copies a seed and restores spendable funds in a fresh wallet",
     ).toBeDisabled();
     await restored.page.locator("textarea").fill(mnemonic);
     await restored.page
-      .getByRole("button", { name: "Select All", exact: true })
+      .getByRole("button", { name: "Select all", exact: true })
       .click();
     await restored.page
       .getByRole("button", { name: /Restore.*mint/i })

@@ -54,36 +54,24 @@
       </q-carousel>
 
       <div
-        class="q-pa-md flex justify-between"
+        class="welcome-footer welcome-surface row items-center no-wrap"
         v-if="welcomeStore.currentSlide > 0"
       >
         <q-btn
           flat
-          icon="arrow_left"
-          :label="$t('WelcomePage.actions.previous.label')"
+          round
+          icon="chevron_left"
+          class="welcome-footer__back"
+          :aria-label="$t('WelcomePage.actions.previous.label')"
           v-if="welcomeStore.canGoPrev"
           @click="welcomeStore.goToPrevSlide"
         />
-        <!-- language selector (hidden on first slide since it's now in the slide itself) -->
-        <div
-          class="q-ml-md"
-          v-if="!welcomeStore.canGoPrev && welcomeStore.currentSlide > 0"
-          style="position: relative; top: -5px"
-        >
-          <q-select
-            v-model="selectedLanguage"
-            :options="languageOptions"
-            emit-value
-            dense
-            map-options
-            @update:model-value="changeLanguage"
-            style="max-width: 200px; max-height: 20px"
-          />
-        </div>
-        <q-space />
         <q-btn
-          flat
-          icon="arrow_right"
+          rounded
+          unelevated
+          no-caps
+          color="primary"
+          class="welcome-footer__next"
           data-testid="onboarding-next"
           :label="$t('WelcomePage.actions.next.label')"
           :disable="!welcomeStore.canProceed"
@@ -119,43 +107,6 @@ export default {
     WelcomeRecoverSeed,
     WelcomeMintSetup,
     WelcomeRestoreEcash,
-  },
-  data() {
-    return {
-      selectedLanguage: "",
-      languageOptions: [
-        { label: "English", value: "en-US" },
-        { label: "Español", value: "es-ES" },
-        { label: "Italiano", value: "it-IT" },
-        { label: "Deutsch", value: "de-DE" },
-        { label: "Français", value: "fr-FR" },
-        { label: "Čeština", value: "cs-CZ" },
-        { label: "Português (Brasil)", value: "pt-BR" },
-        { label: "Svenska", value: "sv-SE" },
-        { label: "Ελληνικά", value: "el-GR" },
-        { label: "Türkçe", value: "tr-TR" },
-        { label: "ไทย", value: "th-TH" },
-        { label: "العربية", value: "ar-SA" },
-        { label: "中文", value: "zh-CN" },
-        { label: "日本語", value: "ja-JP" },
-      ],
-    };
-  },
-  methods: {
-    changeLanguage(locale) {
-      // Set the i18n locale
-      this.$i18n.locale = locale;
-
-      // Store the selected language in localStorage
-      localStorage.setItem("cashu.language", locale);
-    },
-  },
-  created() {
-    // Set the initial selected language based on the current locale or from storage
-    this.selectedLanguage =
-      this.languageOptions.find(
-        (option) => option.value === this.$i18n.locale || navigator.language
-      )?.label || "Language";
   },
   setup() {
     const welcomeStore = useWelcomeStore();
@@ -212,9 +163,21 @@ export default {
   flex: 1;
 }
 
-.custom-navigation {
-  display: flex;
-  justify-content: space-between;
-  padding: 16px;
+.welcome-footer {
+  gap: 12px;
+  padding: 12px 16px 24px;
+}
+
+.welcome-footer__back {
+  width: 48px;
+  height: 48px;
+}
+
+.welcome-footer__next {
+  flex: 1;
+  max-width: 500px;
+  min-height: 52px;
+  font-size: 16px;
+  font-weight: 600;
 }
 </style>

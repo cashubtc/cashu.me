@@ -51,9 +51,9 @@ test("changes theme, bitcoin symbol, keyboard preference and language persistent
   await wallet.settings("appearance");
   await wallet.toggleSetting("Use ₿ symbol", false);
   await wallet.toggleSetting("Use numeric keyboard", true);
-  await page.getByText("bitcoin", { exact: true }).click();
+  await page.getByText("Bitcoin", { exact: true }).click();
   await page.reload();
-  await expect(page.locator(".q-item--active")).toContainText("bitcoin");
+  await expect(page.locator(".q-item--active")).toContainText("Bitcoin");
   await wallet.home();
   await expect(wallet.balance).toContainText("sat");
   await wallet.openSend("ecash");
@@ -128,7 +128,7 @@ test("enables ecash payment requests and edits the request amount", async ({
   const wallet = new WalletUi(page);
   await wallet.onboard(MINT_A_URL);
   await wallet.settings("payment-requests");
-  await wallet.toggleSetting("Enable Payment Requests", true);
+  await wallet.toggleSetting("Enable payment requests", true);
   await wallet.home();
   await wallet.openReceive("ecash");
   await page.getByText("Request", { exact: true }).click();

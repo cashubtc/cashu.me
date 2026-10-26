@@ -15,7 +15,7 @@
     <div v-if="hasFeeReserve && !hasFeePaid" class="detail-item q-mb-md">
       <div class="detail-label">
         <ArrowDownUpIcon :size="20" class="detail-icon" />
-        <div class="detail-name">Fee Reserve</div>
+        <div class="detail-name">Fee reserve</div>
       </div>
       <div class="detail-value">{{ feeReserveDisplay }}</div>
     </div>
@@ -23,7 +23,7 @@
     <div v-if="hasFeePaid" class="detail-item q-mb-md">
       <div class="detail-label">
         <BadgeCheckIcon :size="20" class="detail-icon" />
-        <div class="detail-name">Fee Paid</div>
+        <div class="detail-name">Fee paid</div>
       </div>
       <div class="detail-value">{{ feePaidDisplay }}</div>
     </div>
@@ -78,7 +78,7 @@
     >
       <div class="detail-label">
         <InfoIcon :size="20" class="detail-icon" />
-        <div class="detail-name">Chain Status</div>
+        <div class="detail-name">Chain status</div>
       </div>
       <div class="detail-value detail-value-with-spinner">
         <q-spinner
@@ -103,7 +103,7 @@
     <div v-if="paidAtDisplay" class="detail-item q-mb-md">
       <div class="detail-label">
         <ClockIcon :size="20" class="detail-icon" />
-        <div class="detail-name">Time Paid</div>
+        <div class="detail-name">Paid at</div>
       </div>
       <div class="detail-value">{{ paidAtDisplay }}</div>
     </div>

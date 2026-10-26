@@ -9,17 +9,12 @@
       <div class="discover-button">
         <q-btn
           color="primary"
-          size="lg"
           rounded
+          unelevated
+          no-caps
           :loading="discovering"
           @click="discover"
           class="discover-btn full-width"
-          style="
-            min-height: 48px;
-            font-weight: 500;
-            text-transform: none;
-            font-size: 0.95rem;
-          "
         >
           <q-icon name="search" size="20px" class="q-mr-sm" />
           <span>{{ $t("MintSettings.discover.actions.discover.label") }}</span>
@@ -284,7 +279,7 @@ export default defineComponent({
 }
 
 .discover-button {
-  margin-top: 16px;
+  margin-top: 0;
 }
 
 .discover-btn {

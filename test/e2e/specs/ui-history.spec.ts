@@ -16,7 +16,7 @@ for (const method of ["bolt11", "bolt12", "onchain"] as const) {
     await holdIncomingQuote(wallet, MINT_A_URL, method);
     await wallet.openReceive(method === "onchain" ? "onchain" : "lightning");
     if (method === "bolt12") {
-      await page.getByRole("button", { name: "B11", exact: true }).click();
+      await page.getByRole("button", { name: "BOLT12", exact: true }).click();
       await page
         .getByRole("button", { name: "Add amount", exact: true })
         .click();

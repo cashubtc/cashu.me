@@ -43,15 +43,6 @@
             style="position: absolute; right: 16px"
           >
             <q-btn
-              v-if="!isOnchain && bolt11Supported && bolt12Supported"
-              flat
-              dense
-              size="lg"
-              color="primary"
-              @click="toggleInvoiceType"
-              :label="isBolt12 ? 'B12' : 'B11'"
-            />
-            <q-btn
               flat
               dense
               size="lg"
@@ -72,6 +63,26 @@
               :filter-payment-method="mintFilterMethod"
               filter-mint-operation="mint"
             />
+            <div
+              v-if="!isOnchain && bolt11Supported && bolt12Supported"
+              class="row justify-center q-mt-sm"
+            >
+              <q-btn-toggle
+                :model-value="isBolt12"
+                @update:model-value="
+                  (v) => v !== isBolt12 && toggleInvoiceType()
+                "
+                :options="[
+                  { label: 'BOLT11', value: false },
+                  { label: 'BOLT12', value: true },
+                ]"
+                rounded
+                unelevated
+                no-caps
+                toggle-color="primary"
+                class="invoice-type-toggle"
+              />
+            </div>
           </div>
         </div>
 

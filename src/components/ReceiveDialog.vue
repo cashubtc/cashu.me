@@ -6,7 +6,7 @@
     transition-show="slide-up"
     transition-hide="slide-down"
   >
-    <q-card class="drawer-card text-white full-width-card q-pb-lg">
+    <q-card class="drawer-card full-width-card q-pb-lg">
       <q-card-section class="row items-center q-pb-sm">
         <q-btn flat round dense v-close-popup class="q-ml-sm" color="primary">
           <XIcon />

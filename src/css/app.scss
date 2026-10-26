@@ -308,3 +308,92 @@ body[data-theme] .welcome-surface,
   color: var(--app-text-muted);
   font-variant-numeric: tabular-nums;
 }
+
+/* Toggles: an inset pill. On = filled primary track with an on-primary thumb; off = dim track,
+   muted thumb. Quasar's default (54% primary track, oversized primary thumb) reads the same as
+   off in monochrome. */
+.q-toggle:not(.q-toggle--dense) {
+  .q-toggle__inner {
+    padding: 0.2em 0.3em;
+  }
+  .q-toggle__track {
+    height: 0.6em;
+    border-radius: 0.3em;
+    opacity: 0.24;
+  }
+  .q-toggle__thumb {
+    top: 0.28em;
+    left: 0.38em;
+    width: 0.44em;
+    height: 0.44em;
+  }
+  .q-toggle__thumb:after {
+    box-shadow: none;
+  }
+  .q-toggle__inner--truthy {
+    .q-toggle__track {
+      opacity: 1;
+    }
+    .q-toggle__thumb {
+      left: 0.58em;
+    }
+    .q-toggle__thumb:after {
+      background-color: var(--app-on-primary);
+    }
+  }
+}
+.body--dark .q-toggle__inner--falsy .q-toggle__thumb:after {
+  background-color: var(--app-text-muted);
+}
+
+/* Centred confirmation and edit dialogs (edit mint, remove mint): one title, one list or form,
+   then a Cancel / confirm pair of equal pills. */
+.council-dialog {
+  width: 100%;
+  max-width: 420px;
+  border-radius: 20px;
+  padding: 24px 16px 16px;
+}
+.council-dialog__title {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 16px;
+}
+.council-dialog__summary {
+  background: var(--app-tint);
+  border: 1px solid var(--app-border);
+  border-radius: 14px !important;
+  overflow: hidden;
+  padding: 4px 0;
+}
+.council-dialog__summary .q-item {
+  min-height: 56px;
+}
+.council-dialog__note {
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--app-text-muted);
+  margin: 16px 0 0;
+}
+.council-dialog__actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+.council-dialog__actions .q-btn {
+  min-height: 48px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* Small segmented control (invoice type on Receive Lightning). */
+.invoice-type-toggle {
+  border: 1px solid var(--app-border-strong);
+  .q-btn {
+    min-height: 36px;
+    padding: 0 14px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+}

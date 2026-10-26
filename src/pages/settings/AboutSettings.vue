@@ -64,7 +64,7 @@ import {
   Globe as GlobeIcon,
   Code as CodeIcon,
   MessageCircle as MessageCircleIcon,
-  Rss as RssIcon,
+  AtSign as AtSignIcon,
   Heart as HeartIcon,
   ExternalLink as ExternalLinkIcon,
   ChevronRight as ChevronRightIcon,
@@ -103,7 +103,7 @@ export default defineComponent({
         {
           title: this.$t("MainHeader.menu.links.twitter.title"),
           caption: this.$t("MainHeader.menu.links.twitter.caption"),
-          icon: markRaw(RssIcon),
+          icon: markRaw(AtSignIcon),
           link: "https://twitter.com/CashuBTC",
         },
         {

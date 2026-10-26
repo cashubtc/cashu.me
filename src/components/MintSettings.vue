@@ -173,15 +173,11 @@
     <!-- Add mint section -->
     <div class="q-pt-xs q-px-sm" ref="addMintDiv">
       <div class="add-mint-container">
-        <div class="section-divider q-mb-md">
-          <div class="divider-line"></div>
-          <div class="divider-text">
-            {{ $t("MintSettings.add.title") }}
-          </div>
-          <div class="divider-line"></div>
+        <div class="mints-section-title">
+          {{ $t("MintSettings.add.title") }}
         </div>
 
-        <div class="add-mint-description q-mb-lg text-left text-app-muted">
+        <div class="add-mint-description q-mb-md text-left text-app-muted">
           {{ $t("MintSettings.add.description") }}
         </div>
 
@@ -195,7 +191,19 @@
             @keydown.enter.prevent="sanitizeMintUrlAndShowAddDialog"
             ref="mintInput"
             class="q-mb-md mint-input url-input"
-          />
+          >
+            <template v-slot:append>
+              <q-btn
+                flat
+                round
+                class="touch-target-44"
+                :aria-label="$t('MintSettings.add.actions.scan.label')"
+                @click="showCamera"
+              >
+                <ScanLineIcon :size="20" />
+              </q-btn>
+            </template>
+          </q-input>
 
           <q-input
             rounded
@@ -209,41 +217,27 @@
           />
         </div>
 
-        <div class="add-mint-actions">
-          <div class="row justify-between items-center q-mt-xs">
-            <q-btn
-              flat
-              class="touch-target-44"
-              :disable="addMintData.url.length === 0"
-              @click="
-                addMintData.url.length > 0
-                  ? sanitizeMintUrlAndShowAddDialog()
-                  : null
-              "
-            >
-              <PlusIcon :size="18" class="q-mr-sm" />
-              <span>{{ $t("MintSettings.add.actions.add_mint.label") }}</span>
-            </q-btn>
-
-            <q-btn flat class="touch-target-44" @click="showCamera">
-              <ScanLineIcon :size="18" class="q-mr-sm" />
-              <span>{{ $t("MintSettings.add.actions.scan.label") }}</span>
-            </q-btn>
-          </div>
-        </div>
+        <q-btn
+          color="primary"
+          rounded
+          unelevated
+          no-caps
+          class="full-width add-mint-submit q-mt-md"
+          :disable="addMintData.url.length === 0"
+          @click="sanitizeMintUrlAndShowAddDialog"
+        >
+          <PlusIcon :size="18" class="q-mr-sm" />
+          <span>{{ $t("MintSettings.add.actions.add_mint.label") }}</span>
+        </q-btn>
       </div>
     </div>
 
     <!-- Swap section -->
 
-    <div class="section-divider q-mb-md q-px-sm">
-      <div class="divider-line"></div>
-      <div class="divider-text">
+    <div v-if="mints.length > 1" class="q-px-sm q-pb-lg text-left swap-section">
+      <div class="mints-section-title">
         {{ $t("MintSettings.swap.title") }}
       </div>
-      <div class="divider-line"></div>
-    </div>
-    <div class="q-px-sm q-pb-lg text-left swap-section">
       <div class="swap-caption q-mb-md">
         {{ $t("MintSettings.swap.caption") }}
       </div>
@@ -662,6 +656,20 @@ export default defineComponent({
 </script>
 
 <style>
+.mints-section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--app-text);
+  text-align: left;
+  margin: 8px 0 8px;
+}
+
+.add-mint-submit {
+  min-height: 48px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
 @import "src/css/mintlist.css";
 
 .swap-caption {

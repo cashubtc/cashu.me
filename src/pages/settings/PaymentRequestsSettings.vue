@@ -3,10 +3,7 @@
     :title="$t('Settings.menu.payment_requests.title')"
     :caption="$t('Settings.menu.payment_requests.caption')"
   >
-    <SettingsSection
-      :title="$t('Settings.payment_requests.title')"
-      :caption="$t('Settings.payment_requests.description')"
-    >
+    <SettingsSection :caption="$t('Settings.payment_requests.description')">
       <q-item tag="label">
         <q-item-section>
           <q-item-label>{{

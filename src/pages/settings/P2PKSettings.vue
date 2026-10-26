@@ -3,19 +3,16 @@
     :title="$t('Settings.menu.p2pk.title')"
     :caption="$t('Settings.menu.p2pk.caption')"
   >
-    <SettingsSection
-      :title="$t('Settings.p2pk_features.title')"
-      :caption="$t('Settings.p2pk_features.description')"
-    >
+    <SettingsSection :caption="$t('Settings.p2pk_features.description')">
       <q-item>
         <q-item-section>
           <div class="row items-center q-gutter-sm">
             <q-btn
-              class="q-px-md"
               color="primary"
-              size="sm"
               rounded
-              outline
+              unelevated
+              no-caps
+              class="settings-primary-action"
               @click="generateKeypair"
               >{{ $t("Settings.p2pk_features.generate_button") }}</q-btn
             >

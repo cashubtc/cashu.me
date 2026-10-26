@@ -38,7 +38,19 @@
         <!-- Content -->
         <div class="content-area">
           <q-card-section class="q-pa-none">
-            <div v-if="invoiceData.request" class="row justify-center q-mb-md">
+            <div
+              v-if="invoiceData.status === 'paid'"
+              class="paid-status column items-center q-mb-md"
+            >
+              <q-icon name="check_circle" color="positive" size="64px" />
+              <div class="paid-status__label q-mt-sm">
+                {{ $t("InvoiceDetailDialog.invoice.status_paid_text") }}
+              </div>
+            </div>
+            <div
+              v-else-if="invoiceData.request"
+              class="row justify-center q-mb-md"
+            >
               <div
                 class="col-12 col-sm-11 col-md-8 q-px-md"
                 style="max-width: 600px"
@@ -59,20 +71,6 @@
                       </vue-qrcode>
                     </q-responsive>
                   </component>
-                  <!-- Checkmark overlay when paid -->
-                  <div
-                    v-if="invoiceData.status === 'paid'"
-                    class="checkmark-overlay"
-                    :class="$q.dark.isActive ? 'checkmark-overlay--dark' : ''"
-                  >
-                    <transition appear enter-active-class="animated tada">
-                      <q-icon
-                        name="check_circle"
-                        color="positive"
-                        class="checkmark-icon"
-                      />
-                    </transition>
-                  </div>
                 </div>
                 <div class="qr-progress">
                   <q-linear-progress
@@ -161,6 +159,8 @@
                 size="lg"
                 color="primary"
                 rounded
+                no-caps
+                :outline="invoiceData.status === 'paid'"
                 @click="onCopyBolt11"
               >
                 {{ copyButtonLabel }}
@@ -325,7 +325,7 @@ export default defineComponent({
 }
 .bottom-panel {
   margin-top: auto;
-  background: var(--q-color-grey-1);
+  background: var(--app-surface);
   box-shadow: 0 -8px 16px rgba(0, 0, 0, 0.05);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   position: sticky;
@@ -354,25 +354,11 @@ export default defineComponent({
   font-family: monospace;
 }
 
-.checkmark-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.94);
-  border-radius: 8px;
-  z-index: 1;
+.paid-status {
+  padding-top: 24px;
 }
-
-.checkmark-overlay--dark {
-  background: rgba(30, 30, 30, 0.94);
-}
-
-.checkmark-icon {
-  font-size: clamp(100px, 35vw, 200px);
+.paid-status__label {
+  font-size: 17px;
+  font-weight: 600;
 }
 </style>

@@ -42,7 +42,7 @@
 }
 
 .settings-section-header {
-  padding: 0 6px;
+  padding: 0;
   margin-bottom: 10px;
 }
 
@@ -113,4 +113,25 @@
   .settings-view {
     max-width: 528px;
   }
+}
+
+/* Inline settings actions share one secondary button: 44px tall, 14px label. */
+.settings-view .q-btn--outline:not(.q-btn--round) {
+  min-height: 44px;
+  font-size: 14px;
+  padding: 0 16px;
+}
+
+/* Status chips (Beta, Experimental) are quiet outlines, never louder than the row title. */
+.settings-view .q-badge {
+  background: transparent !important;
+  color: var(--app-text-muted) !important;
+  border: 1px solid var(--app-border-strong);
+  font-weight: 500;
+}
+
+.settings-view .settings-primary-action {
+  min-height: 44px;
+  font-size: 14px;
+  padding: 0 16px;
 }
