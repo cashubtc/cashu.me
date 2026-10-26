@@ -1007,7 +1007,7 @@ export default defineComponent({
         this.payPaymentMethod === PaymentMethod.Onchain ||
         this.payInvoiceData.paymentMethod === PaymentMethod.Onchain
       ) {
-        return "Pay On-chain";
+        return "Pay on-chain";
       }
       if (this.payPaymentMethod === PaymentMethod.Bolt12) {
         return this.$t("PayInvoiceDialog.input_data.title_bolt12");

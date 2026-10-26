@@ -425,3 +425,8 @@ textarea {
 .material-icons {
   font-family: "Material Icons Outlined" !important;
 }
+
+/* Dialog scrim: dark enough that the page behind recedes instead of reading as disabled. */
+.q-dialog__backdrop {
+  background: rgba(0, 0, 0, 0.6);
+}

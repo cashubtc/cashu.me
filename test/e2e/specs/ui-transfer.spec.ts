@@ -93,7 +93,7 @@ test("rejects a swap larger than the source balance and remains usable", async (
   await expect.poll(() => wallet.balanceSats()).toBe(10);
   await expect(
     page.getByRole("combobox", { name: "From", exact: true })
-  ).toHaveValue("");
+  ).toHaveValue("Select a mint");
   await wallet.mintCard(MINT_A_URL).click();
   await wallet.sendEcash(1);
   await expect.poll(() => wallet.balanceSats()).toBe(9);
@@ -157,7 +157,7 @@ test("retries a swap after the destination quote service recovers", async ({
   await failedQuote;
   await expect(
     page.getByRole("combobox", { name: "From", exact: true })
-  ).toHaveValue("");
+  ).toHaveValue("Select a mint");
   await expect.poll(() => wallet.balanceSats()).toBe(100);
   await expect(
     wallet.mintCard(MINT_B_URL).locator(".currency-unit-text")

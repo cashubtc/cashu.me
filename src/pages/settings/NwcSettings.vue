@@ -9,6 +9,9 @@
           <q-item-label>{{
             $t("Settings.nostr_wallet_connect.enable_toggle")
           }}</q-item-label>
+          <q-item-label caption>{{
+            $t("Settings.nostr_wallet_connect.description")
+          }}</q-item-label>
         </q-item-section>
         <q-item-section side>
           <q-toggle v-model="enableNwc" color="primary" />

@@ -31,7 +31,7 @@
             >
               {{
                 isOnchain
-                  ? "Receive On-chain"
+                  ? "Receive on-chain"
                   : isBolt12 && !showNpubCashPreview
                   ? "Receive Bolt12"
                   : $t("InvoiceDetailDialog.title")
@@ -525,7 +525,7 @@ export default defineComponent({
         return this.showReusableQuote ? "New Offer" : "Create Offer";
       }
       if (this.isOnchain) {
-        return this.showReusableQuote ? "Create New Address" : "Create Address";
+        return this.showReusableQuote ? "Create new address" : "Create address";
       }
       return this.$t("InvoiceDetailDialog.actions.create.label") as string;
     },

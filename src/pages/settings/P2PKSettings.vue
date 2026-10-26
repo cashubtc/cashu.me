@@ -3,7 +3,10 @@
     :title="$t('Settings.menu.p2pk.title')"
     :caption="$t('Settings.menu.p2pk.caption')"
   >
-    <SettingsSection :caption="$t('Settings.p2pk_features.description')">
+    <SettingsSection
+      warning
+      :caption="$t('Settings.p2pk_features.description')"
+    >
       <q-item>
         <q-item-section>
           <div class="row items-center q-gutter-sm">

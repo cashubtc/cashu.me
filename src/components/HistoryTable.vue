@@ -30,8 +30,12 @@
               "
               aria-hidden="true"
             >
-              <ArrowDownLeftIcon v-if="transaction.amount >= 0" :size="14" />
-              <ArrowUpRightIcon v-else :size="14" />
+              <ArrowDownLeftIcon
+                v-if="transaction.amount >= 0"
+                :size="14"
+                :stroke-width="2.5"
+              />
+              <ArrowUpRightIcon v-else :size="14" :stroke-width="2.5" />
             </span>
           </q-avatar>
         </q-item-section>
@@ -584,17 +588,20 @@ export default defineComponent({
 
 /* The direction arrow sits on the avatar's edge with no fill of its own, so it
    reads the same over the row's hover and pressed tints. */
+/* Direction badge: a solid disc cut out of the icon circle so the arrow reads at 1x. */
 .direction-badge {
   align-items: center;
+  background: var(--app-surface);
+  border: 1.5px solid var(--app-surface);
   border-radius: 50%;
-  bottom: -3px;
-  color: var(--app-text-muted);
+  bottom: -4px;
+  color: var(--app-text);
   display: flex;
-  height: 16px;
+  height: 20px;
   justify-content: center;
   position: absolute;
-  right: -3px;
-  width: 16px;
+  right: -4px;
+  width: 20px;
 }
 
 .direction-badge--in {

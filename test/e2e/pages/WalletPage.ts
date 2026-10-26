@@ -120,7 +120,7 @@ export class WalletPage {
     const before = await this.balanceSats();
     await this.openReceive("onchain");
     await expect(
-      this.page.getByText("Receive On-chain", { exact: true })
+      this.page.getByText("Receive on-chain", { exact: true })
     ).toBeVisible();
     await this.enterAmount(expectedAmount);
     await this.page.getByTestId("create-payment-request").click();

@@ -250,6 +250,9 @@
         clear-icon="close"
         class="q-mb-md"
         v-model="swapData.fromUrl"
+        :display-value="
+          swapData.fromUrl ? undefined : $t('ChooseMint.placeholder')
+        "
         :options="swapAmountDataOptions()"
         option-value="url"
         option-label="optionLabel"
@@ -265,6 +268,9 @@
         clear-icon="close"
         class="q-mb-md"
         v-model="swapData.toUrl"
+        :display-value="
+          swapData.toUrl ? undefined : $t('ChooseMint.placeholder')
+        "
         :options="swapAmountDataOptions()"
         option-value="url"
         option-label="optionLabel"
@@ -690,9 +696,14 @@ export default defineComponent({
 
 .mint-review-link {
   color: var(--app-text-muted);
-  text-decoration: underline;
-  text-decoration-color: var(--app-border-strong);
-  text-underline-offset: 3px;
+  font-weight: 400;
+}
+
+/* Several unit balances on one card read as separate holdings, not a conversion. */
+.currency-unit-badge + .currency-unit-badge::before {
+  content: "·";
+  margin-right: 8px;
+  color: var(--app-text-subtle);
 }
 
 .discover-mints-btn {

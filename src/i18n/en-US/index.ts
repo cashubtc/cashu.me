@@ -280,7 +280,7 @@ export default {
       description: "Receive payments to your Lightning address.",
       enable: {
         toggle: "Use a Lightning address",
-        description: "Lightning address with npub.cash",
+        description: "Get paid at an address from npub.cash",
       },
       address: {
         copy_tooltip: "Copy Lightning address",
@@ -336,7 +336,8 @@ export default {
     },
     nostr_wallet_connect: {
       title: "Nostr Wallet Connect (NWC)",
-      description: "Use NWC to control your wallet from any other application.",
+      description:
+        "Lets other apps pay from this wallet through Nostr Wallet Connect.",
       enable_toggle: "Enable NWC",
       payments_note:
         "You can only use NWC for payments from your Bitcoin balance. Payments will be made from your active mint.",
@@ -372,13 +373,12 @@ export default {
     p2pk_features: {
       title: "P2PK",
       description:
-        "Generate a key pair to receive P2PK-locked ecash. Warning: This feature is experimental. Only use with small amounts. If you lose your private keys, nobody will be able to unlock the ecash locked to it anymore.",
+        "Experimental. Use small amounts: if you lose the private key, nobody can unlock the ecash locked to it.",
       generate_button: "Generate key",
       import_button: "Import nsec",
       quick_access: {
         toggle: "Show lock key on Receive",
-        description:
-          "Use this to quickly show your P2PK locking key in the receive ecash menu.",
+        description: "Shows your P2PK lock key on the Receive ecash screen.",
       },
       keys_expansion: {
         label: "Click to browse {count} keys",

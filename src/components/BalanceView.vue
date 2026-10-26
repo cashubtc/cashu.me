@@ -8,7 +8,7 @@
       leave-active-class="animated fadeInDown"
       mode="out-in"
     >
-      <div class="balance-carousel-shell q-mt-md q-mb-sm text-primary">
+      <div class="balance-carousel-shell q-mb-sm text-primary">
         <transition
           appear
           enter-active-class="animated pulse"

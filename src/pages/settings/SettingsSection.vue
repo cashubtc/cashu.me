@@ -5,8 +5,18 @@
         {{ title }}
         <slot name="badge" />
       </div>
-      <div v-if="caption" class="settings-section-caption">
-        {{ caption }}
+      <div
+        v-if="caption"
+        class="settings-section-caption"
+        :class="{ 'settings-section-caption--warning': warning }"
+      >
+        <q-icon
+          v-if="warning"
+          name="warning_amber"
+          size="18px"
+          class="q-mr-sm"
+        />
+        <span>{{ caption }}</span>
       </div>
     </div>
     <q-list class="settings-card">
@@ -28,6 +38,10 @@ export default defineComponent({
     caption: {
       type: String,
       default: "",
+    },
+    warning: {
+      type: Boolean,
+      default: false,
     },
   },
 });

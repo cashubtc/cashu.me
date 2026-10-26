@@ -83,7 +83,7 @@ test("renders and reuses an address with an exact uint64 deposit limit", async (
   await page.reload();
   await wallet.openReceive("onchain");
   await expect(page.getByTestId("create-payment-request")).toHaveText(
-    "Create New Address"
+    "Create new address"
   );
   await expect(limitsHint).toContainText("18,446,744,073,709,551,615");
 });
@@ -170,7 +170,7 @@ test("validates new on-chain addresses while preserving quote reuse and history 
   await expect(addressText).not.toContainText("bitcoin:");
   await expect(limitsHint).toBeVisible();
   await expect(error).toHaveCount(0);
-  await expect(create).toHaveText("Create New Address");
+  await expect(create).toHaveText("Create new address");
   expect(submissions).toBe(1);
   await addressText.click();
   await expect
@@ -196,7 +196,7 @@ test("validates new on-chain addresses while preserving quote reuse and history 
   await page.reload();
   await wallet.openReceive("onchain");
   await expect(addressText).toContainText(nextQuote.request);
-  await expect(create).toHaveText("Create New Address");
+  await expect(create).toHaveText("Create new address");
   expect(submissions).toBe(2);
   await wallet.closeFullscreenDialog();
   await wallet.home("History");

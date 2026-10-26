@@ -3,11 +3,14 @@
     :title="$t('Settings.menu.payment_requests.title')"
     :caption="$t('Settings.menu.payment_requests.caption')"
   >
-    <SettingsSection :caption="$t('Settings.payment_requests.description')">
+    <SettingsSection>
       <q-item tag="label">
         <q-item-section>
           <q-item-label>{{
             $t("Settings.payment_requests.enable_toggle")
+          }}</q-item-label>
+          <q-item-label caption>{{
+            $t("Settings.payment_requests.description")
           }}</q-item-label>
         </q-item-section>
         <q-item-section side>
