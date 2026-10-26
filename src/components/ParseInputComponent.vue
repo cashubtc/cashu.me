@@ -68,7 +68,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { Scan as ScanIcon, Nfc as NfcIcon } from "lucide-vue-next";
+import { ScanLine as ScanIcon, Nfc as NfcIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "ParseInputComponent",

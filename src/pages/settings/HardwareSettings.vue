@@ -65,6 +65,9 @@
           }}</q-item-label>
         </q-item-section>
       </q-item>
+    </SettingsSection>
+
+    <SettingsSection>
       <q-item tag="label">
         <q-item-section>
           <q-item-label>{{

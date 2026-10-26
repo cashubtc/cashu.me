@@ -44,6 +44,9 @@
             </div>
           </div>
         </q-item-section>
+        <q-item-section side>
+          <q-icon name="chevron_right" class="settings-menu-chevron" />
+        </q-item-section>
       </q-item>
 
       <!-- remove spent proofs -->
@@ -55,6 +58,9 @@
           <q-item-label caption>{{
             $t("Settings.advanced.developer.remove_spent.description")
           }}</q-item-label>
+        </q-item-section>
+        <q-item-section side>
+          <q-icon name="chevron_right" class="settings-menu-chevron" />
         </q-item-section>
       </q-item>
 
@@ -68,17 +74,8 @@
             $t("Settings.advanced.developer.debug_console.description")
           }}</q-item-label>
         </q-item-section>
-      </q-item>
-
-      <!-- export proofs -->
-      <q-item clickable v-ripple @click="exportActiveProofs">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.advanced.developer.export_proofs.button")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.advanced.developer.export_proofs.description")
-          }}</q-item-label>
+        <q-item-section side>
+          <q-icon name="chevron_right" class="settings-menu-chevron" />
         </q-item-section>
       </q-item>
 
@@ -136,6 +133,9 @@
             $t("Settings.advanced.developer.unset_reserved.description")
           }}</q-item-label>
         </q-item-section>
+        <q-item-section side>
+          <q-icon name="chevron_right" class="settings-menu-chevron" />
+        </q-item-section>
       </q-item>
 
       <!-- show onboarding -->
@@ -148,6 +148,26 @@
             $t("Settings.advanced.developer.show_onboarding.description")
           }}</q-item-label>
         </q-item-section>
+        <q-item-section side>
+          <q-icon name="chevron_right" class="settings-menu-chevron" />
+        </q-item-section>
+      </q-item>
+    </SettingsSection>
+
+    <SettingsSection>
+      <!-- export proofs -->
+      <q-item clickable v-ripple @click="exportActiveProofs">
+        <q-item-section>
+          <q-item-label>{{
+            $t("Settings.advanced.developer.export_proofs.button")
+          }}</q-item-label>
+          <q-item-label caption>{{
+            $t("Settings.advanced.developer.export_proofs.description")
+          }}</q-item-label>
+        </q-item-section>
+        <q-item-section side>
+          <q-icon name="chevron_right" class="settings-menu-chevron" />
+        </q-item-section>
       </q-item>
 
       <!-- export wallet data -->
@@ -159,6 +179,9 @@
           <q-item-label caption>{{
             $t("Settings.advanced.developer.export_wallet.description")
           }}</q-item-label>
+        </q-item-section>
+        <q-item-section side>
+          <q-icon name="chevron_right" class="settings-menu-chevron" />
         </q-item-section>
       </q-item>
 
@@ -210,8 +233,13 @@
             @change="onChangeFileUpload"
           />
         </q-item-section>
+        <q-item-section side>
+          <q-icon name="chevron_right" class="settings-menu-chevron" />
+        </q-item-section>
       </q-item>
+    </SettingsSection>
 
+    <SettingsSection>
       <!-- reset wallet -->
       <q-item clickable v-ripple @click="confirmNuke = true">
         <q-item-section>
@@ -252,6 +280,9 @@
               >
             </div>
           </div>
+        </q-item-section>
+        <q-item-section side>
+          <q-icon name="chevron_right" class="settings-menu-chevron" />
         </q-item-section>
       </q-item>
     </SettingsSection>

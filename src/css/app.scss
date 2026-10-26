@@ -111,6 +111,12 @@ body,
   max-width: 600px;
   margin: 0 auto;
 }
+// On wide screens bottom sheets match the shared content column.
+@media (min-width: 600px) {
+  .full-width-card {
+    max-width: 528px;
+  }
+}
 
 .animated.tada {
   animation-duration: 1s;
@@ -238,6 +244,14 @@ button:focus-visible {
 .q-btn[disabled] {
   opacity: 0.38 !important;
 }
+// Filled primary buttons go quiet rather than translucent: a tinted fill with a muted but
+// legible label (translucent primary read as dark text on muddy grey).
+.q-btn.disabled.bg-primary,
+.q-btn[disabled].bg-primary {
+  opacity: 1 !important;
+  background: var(--app-tint-strong) !important;
+  color: var(--app-text-muted) !important;
+}
 
 // Full-width sheet CTAs (Copy, Send, Create invoice) share one size. Quasar's
 // `size` prop writes an inline font-size, hence the override.
@@ -319,7 +333,7 @@ body[data-theme] .welcome-surface,
   .q-toggle__track {
     height: 0.6em;
     border-radius: 0.3em;
-    opacity: 0.24;
+    opacity: 0.4;
   }
   .q-toggle__thumb {
     top: 0.28em;
@@ -341,9 +355,6 @@ body[data-theme] .welcome-surface,
       background-color: var(--app-on-primary);
     }
   }
-}
-.body--dark .q-toggle__inner--falsy .q-toggle__thumb:after {
-  background-color: var(--app-text-muted);
 }
 
 /* Centred confirmation and edit dialogs (edit mint, remove mint): one title, one list or form,
@@ -396,4 +407,14 @@ body[data-theme] .welcome-surface,
     font-size: 13px;
     font-weight: 600;
   }
+}
+
+/* Tab hover/pressed fills share the control radius instead of a hard rectangle. */
+.q-tab .q-focus-helper {
+  border-radius: 10px;
+}
+
+/* Multi-line fields grow with their content; no native resize grip. */
+textarea {
+  resize: none;
 }

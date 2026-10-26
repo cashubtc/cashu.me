@@ -623,11 +623,21 @@ export default defineComponent({
   font-weight: 500;
 }
 
-/* Section Divider */
+/* Section headers: left-aligned, same treatment as settings section titles. */
 .section-divider {
   display: flex;
   align-items: center;
   width: 100%;
+}
+.section-divider .divider-line {
+  display: none;
+}
+.section-divider .divider-text {
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--app-text-muted);
+  text-align: left;
 }
 
 /* Contact Section */

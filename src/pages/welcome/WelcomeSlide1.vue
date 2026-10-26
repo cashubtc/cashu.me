@@ -54,7 +54,7 @@
     >
       <div class="language-menu" @click.stop>
         <div class="language-menu-header">
-          <h3>Select Language</h3>
+          <h3>{{ $t("Settings.language.title") }}</h3>
           <q-btn
             flat
             round
@@ -71,7 +71,12 @@
             :class="{ active: selectedLanguage === option.label }"
             @click="selectLanguage(option)"
           >
-            {{ option.label }}
+            <span>{{ option.label }}</span>
+            <q-icon
+              v-if="selectedLanguage === option.label"
+              name="check"
+              size="20px"
+            />
           </div>
         </div>
       </div>
@@ -644,7 +649,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 24px 16px 24px;
+  padding: 16px 8px 12px 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -666,14 +671,18 @@ export default {
 }
 
 .language-option {
-  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
+  padding: 0 16px;
   color: rgba(255, 255, 255, 0.9);
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  text-align: center;
+  text-align: left;
 }
 
 .language-option:hover {
@@ -682,8 +691,8 @@ export default {
 }
 
 .language-option.active {
-  background: rgba(var(--q-primary-rgb), 0.2);
-  color: var(--q-primary);
+  color: white;
+  font-weight: 600;
 }
 
 .language-option:last-child {
@@ -741,7 +750,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 24px 16px 24px;
+  padding: 16px 8px 12px 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   flex-shrink: 0;
 }

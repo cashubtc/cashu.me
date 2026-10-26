@@ -22,10 +22,9 @@
         <div class="row justify-center">
           <q-card-section class="q-pa-sm">
             <div class="row justify-center">
-              <q-item-label
-                class="q-mb-sm q-pt-md sheet-title"
-                >{{ $t("NWCDialog.nwc.caption") }}</q-item-label
-              >
+              <q-item-label class="q-mb-sm q-pt-md sheet-title">{{
+                $t("NWCDialog.nwc.caption")
+              }}</q-item-label>
             </div>
             <div class="row justify-center q-pt-md">
               <q-item-label

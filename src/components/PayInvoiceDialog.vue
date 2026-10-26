@@ -42,7 +42,7 @@
           </div>
           <div
             class="row items-center q-gutter-sm"
-            style="position: absolute; right: 16px"
+            style="position: absolute; right: 8px"
           >
             <q-btn
               flat
@@ -71,7 +71,7 @@
 
         <!-- Content area -->
         <div
-          class="col column items-center q-px-lg scroll-container invoice-scroll-area"
+          class="col column items-center q-px-sm scroll-container invoice-scroll-area"
         >
           <div class="row justify-center full-width invoice-main-area">
             <div

@@ -109,7 +109,7 @@ import { useMintsStore } from "src/stores/mints";
 import {
   X as XIcon,
   Zap as ZapIcon,
-  Scan as ScanIcon,
+  ScanLine as ScanIcon,
   Coins as CoinsIcon,
   Bitcoin as BitcoinIcon,
 } from "lucide-vue-next";

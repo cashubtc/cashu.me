@@ -1,56 +1,24 @@
 <template>
   <div v-if="!autoAdd" class="nostr-mint-restore">
-    <!-- Header -->
-    <div class="q-px-xs text-left q-mt-lg">
-      <q-list padding>
-        <q-item>
-          <q-item-section>
-            <q-item-label
-              overline
-              class="text-weight-bold"
-              style="
-                font-size: 15.2px;
-                font-family: Inter, -apple-system, 'system-ui', 'Segoe UI',
-                  Roboto, 'Helvetica Neue', Arial, sans-serif;
-                font-weight: 600;
-                color: #ffffff;
-                text-transform: none;
-                margin-bottom: 8px;
-              "
-            >
-              {{ $t("RestoreView.nostr_mints.label") }}
-            </q-item-label>
-            <q-item-label
-              caption
-              style="
-                font-size: 0.9rem;
-                color: rgba(255, 255, 255, 0.8);
-                line-height: 1.4;
-              "
-            >
-              {{ $t("RestoreView.nostr_mints.caption") }}
-            </q-item-label>
-          </q-item-section>
-        </q-item>
-      </q-list>
+    <div class="settings-section-header q-mt-lg">
+      <div class="settings-section-title">
+        {{ $t("RestoreView.nostr_mints.label") }}
+      </div>
+      <div class="settings-section-caption">
+        {{ $t("RestoreView.nostr_mints.caption") }}
+      </div>
     </div>
 
-    <!-- Search Button -->
-    <div class="q-pb-lg q-pt-md q-px-xs text-left">
+    <div class="q-pb-lg q-pt-sm text-left">
       <q-btn
         class="full-width"
         color="primary"
-        size="lg"
+        outline
         rounded
+        no-caps
         @click="searchForMints"
         :disabled="!isMnemonicValid || searchInProgress"
         :loading="searchInProgress"
-        style="
-          min-height: 48px;
-          font-weight: 500;
-          text-transform: none;
-          font-size: 0.95rem;
-        "
       >
         <q-icon name="search" size="20px" class="q-mr-sm" />
         {{ $t("RestoreView.nostr_mints.search_button") }}

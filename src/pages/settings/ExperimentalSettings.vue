@@ -3,7 +3,7 @@
     :title="$t('Settings.menu.experimental.title')"
     :caption="$t('Settings.menu.experimental.caption')"
   >
-    <SettingsSection :caption="$t('Settings.experimental.description')">
+    <SettingsSection>
       <!-- receive swaps -->
       <q-item tag="label">
         <q-item-section>

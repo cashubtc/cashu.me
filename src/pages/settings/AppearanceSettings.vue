@@ -4,10 +4,7 @@
     :caption="$t('Settings.menu.appearance.caption')"
   >
     <!-- keyboard -->
-    <SettingsSection
-      :title="$t('Settings.appearance.keyboard.title')"
-      :caption="$t('Settings.appearance.keyboard.description')"
-    >
+    <SettingsSection :title="$t('Settings.appearance.keyboard.title')">
       <q-item tag="label">
         <q-item-section>
           <q-item-label>{{

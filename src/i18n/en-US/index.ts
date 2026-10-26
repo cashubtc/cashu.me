@@ -132,7 +132,7 @@ export default {
           caption: "cashu.space",
         },
         github: {
-          title: "Github",
+          title: "GitHub",
           caption: "github.com/cashubtc",
         },
         telegram: {
@@ -271,7 +271,7 @@ export default {
       restore_ecash: {
         title: "Restore ecash",
         description:
-          "The restore wizard lets you recover lost ecash from a mnemonic seed phrase. The seed phrase of your current wallet will remain unaffected, the wizard will only allow you to restore ecash from another seed phrase.",
+          "Recover ecash from another seed phrase. Your current seed phrase stays unchanged.",
         button: "Restore",
       },
     },
@@ -386,7 +386,7 @@ export default {
     },
     privacy: {
       title: "Privacy",
-      description: "These settings affect your privacy.",
+      description: "Background checks",
       check_incoming: {
         toggle: "Check incoming invoice",
         description:
@@ -505,12 +505,11 @@ export default {
       title: "Advanced",
       developer: {
         title: "Developer settings",
-        description:
-          "The following settings are for development and debugging.",
+        description: "Tools for troubleshooting and debugging.",
         new_seed: {
           button: "Generate new seed phrase",
           description:
-            "This will generate a new seed phrase. You must send your entire balance to yourself in order to be able to restore it with a new seed.",
+            "Creates a new seed phrase. Send your balance to yourself afterwards so the new seed can restore it.",
           confirm_question:
             "Are you sure you want to generate a new seed phrase?",
           cancel: "Cancel",
@@ -519,28 +518,28 @@ export default {
         remove_spent: {
           button: "Remove spent proofs",
           description:
-            "Check if the ecash tokens from your active mints are spent and remove the spent ones from your wallet. Only use this if your wallet is stuck.",
+            "Removes ecash your active mints report as spent. Use only if your wallet is stuck.",
         },
         debug_console: {
           button: "Toggle debug console",
           description:
-            "Open the Javascript debug terminal. Never paste anything into this terminal that you don't understand. A thief might try to trick you into pasting malicious code here.",
+            "Opens the JavaScript console. Never paste code you don't understand; scammers use it to steal funds.",
         },
         export_proofs: {
           button: "Export active proofs",
           description:
-            "Copy your entire balance from the active mint as a Cashu token into your clipboard. This will only export the tokens from the selected mint and unit. For a full export, select a different mint and unit and export again.",
+            "Copies the active mint's balance in the selected unit as one ecash token.",
         },
         keyset_counters: {
           title: "Increment keyset counters",
           description:
-            'Click the keyset ID to increment the derivation path counters for the keysets in your wallet. This is useful if you see the "outputs have already been signed" error.',
+            'Tap a keyset to increase its counter. Helps with the "outputs have already been signed" error.',
           counter: "counter: {count}",
         },
         unset_reserved: {
           button: "Unset all reserved tokens",
           description:
-            'This wallet marks pending outgoing ecash as reserved (and subtracts it from your balance) to prevent double-spend attempts. This button will unset all reserved tokens so they can be used again. If you do this, your wallet might include spent proofs. Press the "Remove spent proofs" button to get rid of them.',
+            'Releases ecash held for pending sends so it can be spent again. Run "Remove spent proofs" afterwards.',
         },
         show_onboarding: {
           button: "Show onboarding",
@@ -549,7 +548,7 @@ export default {
         reset_wallet: {
           button: "Reset wallet data",
           description:
-            "Reset your wallet data. Warning: This will delete everything! Make sure you create a backup first.",
+            "Deletes all wallet data on this device. Export a backup first.",
           confirm_question: "Are you sure you want to delete your wallet data?",
           cancel: "Cancel",
           confirm: "Delete wallet",
@@ -557,12 +556,12 @@ export default {
         export_wallet: {
           button: "Export wallet data",
           description:
-            "Download a dump of your wallet. You can restore your wallet from this file in the welcome screen of a new wallet. This file will be out of sync if you keep using your wallet after exporting it.",
+            "Downloads a backup file you can import on the welcome screen. It goes stale as you keep using the wallet.",
         },
         import_wallet: {
           button: "Import wallet backup",
           description:
-            "Restore your wallet from a previously exported backup file. This will replace your current wallet data with the backup.",
+            "Replaces this wallet's data with an exported backup file.",
           confirm_question:
             "Are you sure you want to restore your wallet data?",
           cancel: "Cancel",
@@ -653,7 +652,7 @@ export default {
     },
   },
   WelcomeSlide1: {
-    title: "Welcome to Cashu",
+    title: "Welcome to Cashu.me",
     text: "Cashu.me is a free and open-source Bitcoin wallet that uses ecash to keep your funds secure and private.",
     actions: {
       more: {
@@ -802,7 +801,7 @@ export default {
     title: "Mint reviews",
     reviews: "reviews",
     ratings: "Ratings",
-    no_reviews: "No reviews found",
+    no_reviews: "No reviews yet",
     your_review: "Your review",
     no_reviews_to_display: "No reviews to display.",
     no_rating: "No rating",
@@ -819,7 +818,7 @@ export default {
       write_review: "Write a review",
     },
     empty_state_subtitle:
-      "Help by leaving a review. Share your experience with this mint and help others by leaving a review.",
+      "Be the first to review this mint. Your experience helps others choose.",
   },
   CreateMintReview: {
     title: "Review mint",
@@ -835,8 +834,7 @@ export default {
   RestoreView: {
     seed_phrase: {
       label: "Restore from seed phrase",
-      caption:
-        "Enter your seed phrase to restore your wallet. Before you restore, make sure you have added all the mints that you have used before.",
+      caption: "Add every mint you used with this seed before you restore.",
       inputs: {
         seed_phrase: {
           label: "Seed phrase",
@@ -852,7 +850,7 @@ export default {
     restore_mints: {
       label: "Restore mints",
       caption:
-        'Select the mint to restore. You can add more mints in the main screen under "Mints" and restore them here.',
+        "Choose the mints to restore. Add missing mints from the Mints tab first.",
     },
     actions: {
       paste: {
@@ -889,7 +887,7 @@ export default {
       label: "Restore Mints from Nostr",
       caption:
         "Search for mint backups stored on Nostr relays using your seed phrase. This will help you discover mints you previously used.",
-      search_button: "Search for Mint Backups",
+      search_button: "Search for mint backups",
       select_all: "Select all",
       deselect_all: "Deselect all",
       backed_up: "Backed up",
@@ -1321,7 +1319,7 @@ export default {
         label: "URL",
       },
       nuts: {
-        label: "Nuts",
+        label: "Supported NUTs",
         actions: {
           show: {
             label: "View all",

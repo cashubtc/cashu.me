@@ -3,7 +3,7 @@
     :title="$t('Settings.menu.language.title')"
     :caption="$t('Settings.menu.language.caption')"
   >
-    <SettingsSection :caption="$t('Settings.language.description')">
+    <SettingsSection>
       <q-item
         v-for="option in languageOptions"
         :key="option.value"

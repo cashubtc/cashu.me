@@ -3,7 +3,7 @@
     :title="$t('Settings.menu.nwc.title')"
     :caption="$t('Settings.menu.nwc.caption')"
   >
-    <SettingsSection :caption="$t('Settings.nostr_wallet_connect.description')">
+    <SettingsSection>
       <q-item tag="label">
         <q-item-section>
           <q-item-label>{{

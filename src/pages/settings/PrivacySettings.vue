@@ -3,7 +3,7 @@
     :title="$t('Settings.menu.privacy.title')"
     :caption="$t('Settings.menu.privacy.caption')"
   >
-    <SettingsSection :caption="$t('Settings.privacy.description')">
+    <SettingsSection :title="$t('Settings.privacy.description')">
       <!-- nostr mint backup -->
       <q-item tag="label">
         <q-item-section>

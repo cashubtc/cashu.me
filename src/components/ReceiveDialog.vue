@@ -114,7 +114,7 @@ import {
   X as XIcon,
   Coins as CoinsIcon,
   Zap as ZapIcon,
-  Scan as ScanIcon,
+  ScanLine as ScanIcon,
   Bitcoin as BitcoinIcon,
 } from "lucide-vue-next";
 import { PaymentMethod } from "src/stores/walletTypes";

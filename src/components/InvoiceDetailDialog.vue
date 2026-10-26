@@ -13,7 +13,7 @@
         class="display-token-fullscreen"
       >
         <!-- Header -->
-        <div class="row items-center q-pa-md" style="position: relative">
+        <div class="row items-center q-pa-md sheet-column-header">
           <q-btn
             v-close-popup
             flat
@@ -354,6 +354,23 @@ export default defineComponent({
   font-family: monospace;
 }
 
+.sheet-column-header {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+/* On wide screens the action follows the details instead of pinning to the window bottom. */
+@media (min-width: 1024px) {
+  .content-area {
+    flex: none;
+  }
+  .bottom-panel {
+    margin-top: 8px;
+    position: static;
+    box-shadow: none;
+  }
+}
 .paid-status {
   padding-top: 24px;
 }

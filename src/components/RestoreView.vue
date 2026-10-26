@@ -31,18 +31,6 @@
       </q-item>
     </SettingsSection>
 
-    <!-- Information about restoring mints -->
-    <div v-if="!onboarding" class="settings-section">
-      <div class="settings-section-header">
-        <div class="settings-section-title">
-          {{ $t("RestoreView.information.label") }}
-        </div>
-        <div class="settings-section-caption">
-          {{ $t("RestoreView.information.caption") }}
-        </div>
-      </div>
-    </div>
-
     <!-- Mints to restore -->
     <div class="settings-section">
       <div v-if="!onboarding" class="settings-section-header">
@@ -52,30 +40,6 @@
         <div class="settings-section-caption">
           {{ $t("RestoreView.restore_mints.caption") }}
         </div>
-      </div>
-
-      <!-- Restore Selected Mints Button (Primary Action) -->
-      <div v-if="mints.length > 0" class="primary-action-section q-mb-md">
-        <q-btn
-          color="primary"
-          size="md"
-          rounded
-          @click="restoreSelectedMints"
-          :disabled="
-            (onboarding ? false : !isMnemonicValid) ||
-            restoringState ||
-            selectedMintsCount === 0
-          "
-          :loading="restoringState"
-          class="q-px-md"
-        >
-          <q-icon name="restore" class="q-mr-sm" />
-          {{
-            $t("RestoreView.actions.restore_selected_mints.label", {
-              count: selectedMintsCount,
-            })
-          }}
-        </q-btn>
       </div>
 
       <!-- Select All/Deselect All Buttons -->
@@ -210,16 +174,14 @@
 
                 <div v-if="!onboarding" class="col-auto">
                   <q-btn
-                    color="secondary"
-                    size="sm"
-                    rounded
-                    dense
+                    round
                     flat
+                    class="touch-target-44"
+                    :aria-label="$t('RestoreView.actions.restore.label')"
                     @click.stop="restoreMintForMint(mint.url)"
                     :disabled="!isMnemonicValid || restoringState"
                     :loading="restoringMint === mint.url"
                     icon="restore"
-                    class="q-px-sm"
                   >
                     <q-tooltip>{{
                       $t("RestoreView.actions.restore.label")
@@ -230,6 +192,30 @@
             </div>
           </q-item>
         </div>
+      </div>
+      <!-- Restore Selected Mints Button (Primary Action) -->
+      <div v-if="mints.length > 0" class="primary-action-section q-mt-sm">
+        <q-btn
+          color="primary"
+          rounded
+          unelevated
+          no-caps
+          @click="restoreSelectedMints"
+          :disabled="
+            (onboarding ? false : !isMnemonicValid) ||
+            restoringState ||
+            selectedMintsCount === 0
+          "
+          :loading="restoringState"
+          class="full-width"
+        >
+          <q-icon name="restore" class="q-mr-sm" />
+          {{
+            $t("RestoreView.actions.restore_selected_mints.label", {
+              count: selectedMintsCount,
+            })
+          }}
+        </q-btn>
       </div>
     </div>
 

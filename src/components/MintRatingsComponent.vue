@@ -1,9 +1,6 @@
 <template>
-  <q-card
-    class="bg-dark"
-    style="min-width: 360px; max-width: 820px; width: 100%"
-  >
-    <q-card-section class="q-pt-md q-pb-md">
+  <q-card flat class="bg-transparent full-width">
+    <q-card-section class="q-pa-none">
       <!-- Mint Header - Matching MintDetailsPage style -->
       <div class="mint-header-container q-mb-lg">
         <div class="mint-header q-pa-md">

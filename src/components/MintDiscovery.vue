@@ -6,7 +6,24 @@
           {{ $t("MintSettings.discover.caption") }}
         </p>
       </div> -->
-      <div class="discover-button">
+      <div v-if="discovering" class="discover-skeleton">
+        <div
+          class="discover-skeleton__row"
+          v-for="n in 3"
+          :key="n"
+          aria-hidden="true"
+        >
+          <q-skeleton type="QAvatar" size="40px" />
+          <div class="col q-ml-md">
+            <q-skeleton type="text" width="55%" />
+            <q-skeleton type="text" width="35%" />
+          </div>
+        </div>
+        <div class="discover-skeleton__label" role="status">
+          {{ $t("MintSettings.discover.actions.discover.in_progress") }}
+        </div>
+      </div>
+      <div v-else class="discover-button">
         <q-btn
           color="primary"
           rounded
@@ -280,6 +297,23 @@ export default defineComponent({
 
 .discover-button {
   margin-top: 0;
+}
+
+.discover-skeleton__row {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  border-radius: 14px;
+  background: var(--app-tint);
+  border: 1px solid var(--app-border);
+}
+
+.discover-skeleton__label {
+  font-size: 13px;
+  color: var(--app-text-muted);
+  text-align: center;
+  margin-top: 8px;
 }
 
 .discover-btn {
