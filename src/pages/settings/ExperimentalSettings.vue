@@ -7,12 +7,11 @@
       <!-- receive swaps -->
       <q-item tag="label">
         <q-item-section>
-          <q-item-label>
+          <q-item-label class="label-with-badge">
             {{ $t("Settings.experimental.receive_swaps.toggle") }}
             <q-badge
               color="primary"
               :label="$t('Settings.experimental.receive_swaps.badge')"
-              class="q-ml-sm"
             ></q-badge>
           </q-item-label>
           <q-item-label caption>{{
@@ -42,12 +41,11 @@
       <!-- auditor -->
       <q-item tag="label">
         <q-item-section>
-          <q-item-label>
+          <q-item-label class="label-with-badge">
             {{ $t("Settings.experimental.auditor.toggle") }}
             <q-badge
               color="primary"
               :label="$t('Settings.experimental.auditor.badge')"
-              class="q-ml-sm"
             ></q-badge>
           </q-item-label>
           <q-item-label caption>{{
@@ -112,12 +110,11 @@
       <!-- multinut -->
       <q-item tag="label">
         <q-item-section>
-          <q-item-label>
+          <q-item-label class="label-with-badge">
             {{ $t("Settings.multinut.use_multinut") }}
             <q-badge
               color="primary"
               :label="$t('Settings.experimental.receive_swaps.badge')"
-              class="q-ml-sm"
             ></q-badge>
           </q-item-label>
           <q-item-label caption>{{

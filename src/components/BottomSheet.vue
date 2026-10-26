@@ -2,7 +2,7 @@
   <q-dialog
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event)"
-    position="bottom"
+    :position="$q.screen.gt.sm ? 'standard' : 'bottom'"
     backdrop-filter="blur(4px) brightness(50%)"
     transition-show="slide-up"
     transition-hide="slide-down"
@@ -97,13 +97,13 @@ export default defineComponent({
 <style scoped>
 .bottom-sheet {
   width: 100%;
-  max-width: 500px;
+  max-width: 528px;
   max-height: 80vh;
   border-radius: 20px 20px 0 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: calc(8px + env(safe-area-inset-bottom));
 }
 
 /* Header */

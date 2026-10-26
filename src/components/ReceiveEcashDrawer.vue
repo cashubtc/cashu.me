@@ -1,7 +1,7 @@
 <template>
   <q-dialog
     v-model="showReceiveEcashDrawer"
-    position="bottom"
+    :position="$q.screen.gt.sm ? 'standard' : 'bottom'"
     :maximized="$q.screen.lt.sm"
     transition-show="slide-up"
     transition-hide="slide-down"
@@ -14,15 +14,8 @@
         <div class="col text-center">
           <span class="text-h6">{{ $t("ReceiveEcashDrawer.title") }}</span>
         </div>
-        <q-btn
-          flat
-          round
-          @click="showCamera"
-          class="drawer-header-btn"
-          color="primary"
-        >
-          <ScanIcon />
-        </q-btn>
+        <!-- Scan is the second row below; an empty slot keeps the title centred. -->
+        <div class="drawer-header-btn" aria-hidden="true" />
       </q-card-section>
 
       <q-card-section class="q-pa-md">
@@ -271,10 +264,10 @@ export default defineComponent({
 <style lang="scss" scoped>
 :deep(.q-dialog__backdrop) {
   backdrop-filter: blur(8px);
-  background: rgba(0, 0, 0, 0.4) !important;
+  background: rgba(0, 0, 0, 0.6) !important;
 }
 
-.q-dialog__inner > div {
+.q-dialog__inner--bottom > div {
   border-top-left-radius: 20px !important;
   border-top-right-radius: 20px !important;
   border-bottom-left-radius: 0px !important;

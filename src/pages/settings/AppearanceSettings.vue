@@ -21,14 +21,14 @@
     </SettingsSection>
 
     <!-- bip177 -->
-    <SettingsSection
-      :title="$t('Settings.appearance.bip177.title')"
-      :caption="$t('Settings.appearance.bip177.description')"
-    >
+    <SettingsSection :title="$t('Settings.appearance.bip177.title')">
       <q-item tag="label">
         <q-item-section>
           <q-item-label>{{
             $t("Settings.appearance.bip177.toggle")
+          }}</q-item-label>
+          <q-item-label caption>{{
+            $t("Settings.appearance.bip177.description")
           }}</q-item-label>
         </q-item-section>
         <q-item-section side>
@@ -66,7 +66,11 @@
           }}</q-item-label>
         </q-item-section>
         <q-item-section side>
-          <q-icon name="format_color_fill" :color="theme.color" size="sm" />
+          <span
+            class="theme-swatch"
+            :class="`bg-${theme.color}`"
+            aria-hidden="true"
+          />
         </q-item-section>
       </q-item>
     </SettingsSection>
@@ -139,6 +143,14 @@ export default defineComponent({
 </script>
 
 <style scoped>
+/* A filled swatch of each theme's accent, easier to compare than a small glyph (R15). */
+.theme-swatch {
+  display: block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px var(--app-border-strong);
+}
 .theme-option-label {
   color: var(--app-text);
 }

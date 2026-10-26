@@ -234,7 +234,7 @@
           >
             <div
               class="col-12 col-sm-11 col-md-8 q-px-md"
-              style="max-width: 600px"
+              style="max-width: 560px"
             >
               <PaymentRequestInfo :request="sendData.paymentRequest" />
             </div>
@@ -245,7 +245,7 @@
           >
             <div
               class="col-12 col-sm-11 col-md-8 q-px-md"
-              style="max-width: 600px"
+              style="max-width: 560px"
             >
               <MeltQuoteInformation
                 :melt-quote="sendData.historyToken.meltQuote"
@@ -273,7 +273,7 @@
     <!-- Fixed bottom panel with copy button -->
     <div class="bottom-panel">
       <div class="row justify-center q-pb-lg q-pt-sm">
-        <div class="col-12 col-sm-11 col-md-8 q-px-md" style="max-width: 600px">
+        <div class="col-12 col-sm-11 col-md-8 q-px-md" style="max-width: 560px">
           <q-btn
             class="full-width"
             unelevated

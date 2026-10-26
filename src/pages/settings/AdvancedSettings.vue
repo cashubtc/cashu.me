@@ -99,17 +99,18 @@
               </q-item-label>
               <q-btn
                 class="keyset-counter-btn"
-                dense
                 v-for="(counter, id) in mintCounter"
                 :key="id"
                 flat
+                no-caps
+                align="between"
                 :title="counter.id"
                 @click="increaseKeysetCounter(counter.id, 1)"
               >
                 <span class="keyset-id">{{
                   abbreviateKeysetId(counter.id)
                 }}</span>
-                <span class="keyset-counter-separator">-</span>
+                
                 <span class="keyset-counter-text">
                   {{
                     $t("Settings.advanced.developer.keyset_counters.counter", {
@@ -477,13 +478,23 @@ export default defineComponent({
   flex: 0 1 100%;
 }
 
+/* Each keyset is a 44px list row (+1 on tap): ID on the left, counter as a trailing value,
+   body weight, so they read as rows rather than buttons or debug text (R16, R17). */
 .keyset-counter-btn {
-  min-height: 28px;
+  width: 100%;
+  min-height: 44px;
+  font-weight: 400;
+  color: var(--app-text);
+  border-radius: 10px;
 }
 
 .keyset-id {
-  font-family: monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   overflow-wrap: normal;
+}
+
+.keyset-counter-text {
+  color: var(--app-text-muted);
 }
 
 .keyset-counter-separator {

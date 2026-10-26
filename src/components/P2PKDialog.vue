@@ -33,10 +33,7 @@
         <div class="content-area">
           <q-card-section class="q-pa-none">
             <div v-if="p2pkData.publicKey" class="row justify-center q-mb-md">
-              <div
-                class="col-12 col-sm-11 col-md-8 q-px-md"
-                style="max-width: 600px"
-              >
+              <div class="col-12 q-px-md p2pk-qr">
                 <q-responsive :ratio="1" class="q-mx-none">
                   <vue-qrcode
                     :value="p2pkData.publicKey"
@@ -46,6 +43,9 @@
                   >
                   </vue-qrcode>
                 </q-responsive>
+                <div class="p2pk-key-text text-center q-mt-sm">
+                  {{ shortKey(p2pkData.publicKey) }}
+                </div>
               </div>
             </div>
 
@@ -85,7 +85,7 @@
           <div class="row justify-center q-pb-lg q-pt-sm">
             <div
               class="col-12 col-sm-11 col-md-8 q-px-md"
-              style="max-width: 600px"
+              style="max-width: 560px"
             >
               <q-btn
                 class="full-width"
@@ -130,6 +130,9 @@ export default defineComponent({
     },
   },
   methods: {
+    shortKey(key: string) {
+      return key.length > 20 ? `${key.slice(0, 10)}…${key.slice(-8)}` : key;
+    },
     ...mapActions(useP2PKStore, [
       "generateKeypair",
       "showKeyDetails",
@@ -150,6 +153,15 @@ export default defineComponent({
 </script>
 
 <style scoped>
+/* One QR size on every screen: about the width of a phone column, never the window. */
+.p2pk-qr {
+  max-width: 392px;
+}
+.p2pk-key-text {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 14px;
+  color: var(--app-text-muted);
+}
 .display-token-fullscreen {
   height: 100vh;
   height: 100dvh;
@@ -175,6 +187,16 @@ export default defineComponent({
   position: sticky;
   bottom: 0;
   z-index: 2;
+}
+/* On desktop the action follows the key, as on the receipt, instead of sitting at the
+   window bottom (R17). */
+@media (min-width: 1024px) {
+  .content-area {
+    flex: 0 0 auto;
+  }
+  .bottom-panel {
+    margin-top: 0;
+  }
 }
 .qcard {
   border-top-left-radius: 20px;

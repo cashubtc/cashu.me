@@ -11,7 +11,7 @@
       <q-item class="settings-control-item">
         <q-item-section>
           <q-input
-            outlined
+            borderless
             readonly
             v-model="hiddenMnemonic"
             :label="$t('Settings.backup_restore.backup_seed.seed_phrase_label')"
@@ -43,13 +43,14 @@
     </SettingsSection>
 
     <!-- restore -->
-    <SettingsSection
-      :caption="$t('Settings.backup_restore.restore_ecash.description')"
-    >
+    <SettingsSection>
       <q-item clickable v-ripple to="/restore">
         <q-item-section>
           <q-item-label>{{
             $t("Settings.backup_restore.restore_ecash.title")
+          }}</q-item-label>
+          <q-item-label caption>{{
+            $t("Settings.backup_restore.restore_ecash.description")
           }}</q-item-label>
         </q-item-section>
         <q-item-section side>

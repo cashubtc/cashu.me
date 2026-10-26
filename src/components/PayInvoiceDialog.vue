@@ -60,7 +60,7 @@
         <div class="row justify-center">
           <div
             class="col-12 col-sm-11 col-md-8 q-px-md q-mb-sm"
-            style="max-width: 600px"
+            style="max-width: 560px"
           >
             <ChooseMint
               v-if="!showNoMintForMethodError"
@@ -77,7 +77,7 @@
           <div class="row justify-center full-width invoice-main-area">
             <div
               class="col-12 col-sm-11 col-md-8 q-px-sm q-mb-sm invoice-main-column"
-              style="max-width: 600px"
+              style="max-width: 560px"
             >
               <!-- INVOICE CONTENT -->
               <div v-if="payInvoiceData.invoice" class="invoice-content-fill">
@@ -371,7 +371,7 @@
                   >
                     <div
                       class="col-12 col-sm-11 col-md-8 q-px-sm"
-                      style="max-width: 600px"
+                      style="max-width: 560px"
                     >
                       <q-input
                         round
@@ -481,7 +481,7 @@
                   >
                     <div
                       class="col-12 col-sm-11 col-md-8 q-px-sm"
-                      style="max-width: 600px"
+                      style="max-width: 560px"
                     >
                       <q-input
                         round
@@ -527,7 +527,7 @@
           <div class="row justify-center q-pb-lg q-pt-sm">
             <div
               class="col-12 col-sm-11 col-md-8 q-px-md"
-              style="max-width: 600px"
+              style="max-width: 560px"
             >
               <!-- Close button when paid or error -->
               <template v-if="isPaid || payInvoiceData.meltQuote.error != ''">
@@ -627,7 +627,7 @@
           <div class="row justify-center q-pb-lg q-pt-sm">
             <div
               class="col-12 col-sm-11 col-md-8 q-px-md"
-              style="max-width: 600px"
+              style="max-width: 560px"
             >
               <q-btn
                 class="full-width"
@@ -685,7 +685,7 @@
           <div class="row justify-center q-pb-lg q-pt-sm">
             <div
               class="col-12 col-sm-11 col-md-8 q-px-md"
-              style="max-width: 600px"
+              style="max-width: 560px"
             >
               <q-btn
                 class="full-width"
@@ -732,7 +732,7 @@
           <div class="row justify-center q-pb-lg q-pt-sm">
             <div
               class="col-12 col-sm-11 col-md-8 q-px-md"
-              style="max-width: 600px"
+              style="max-width: 560px"
             >
               <q-btn
                 class="full-width"

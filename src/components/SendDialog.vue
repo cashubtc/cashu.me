@@ -1,7 +1,7 @@
 <template>
   <q-dialog
     v-model="showSendDialog"
-    position="bottom"
+    :position="$q.screen.gt.sm ? 'standard' : 'bottom'"
     :maximized="$q.screen.lt.sm"
     transition-show="slide-up"
     transition-hide="slide-down"
@@ -266,10 +266,10 @@ export default defineComponent({
 <style lang="scss" scoped>
 :deep(.q-dialog__backdrop) {
   backdrop-filter: blur(8px);
-  background: rgba(0, 0, 0, 0.4) !important;
+  background: rgba(0, 0, 0, 0.6) !important;
 }
 
-.q-dialog__inner > div {
+.q-dialog__inner--bottom > div {
   border-top-left-radius: 20px !important;
   border-top-right-radius: 20px !important;
   border-bottom-left-radius: 0px !important;

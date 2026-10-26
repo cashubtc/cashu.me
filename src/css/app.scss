@@ -266,7 +266,7 @@ button:focus-visible {
 .sheet-column-header {
   position: relative;
   width: 100%;
-  max-width: 600px;
+  max-width: 560px; // the page column: close and trailing buttons share its edges
   margin: 0 auto;
 }
 
@@ -439,12 +439,18 @@ textarea {
 .q-dialog__backdrop {
   background: rgba(0, 0, 0, 0.6);
 }
+// Over light pages a 60% wash reads as muddy grey; a lighter one dims without flattening.
+body.body--light .q-dialog__backdrop {
+  background: rgba(0, 0, 0, 0.32) !important;
+}
 
 // Sheet header trailing slot: 44px buttons, outermost is the unit toggle, same glyph size on
 // every sheet (amount entry, receive and pay).
 .sheet-header-actions {
   gap: 0;
 }
+// The unit switch is a 44px bare icon button like close, lock and more: one header-action
+// style on every sheet (R17). It shows the current unit (₿ or $).
 .sheet-unit-toggle {
   width: 44px;
   height: 44px;
@@ -464,4 +470,79 @@ textarea {
 .drawer-header .drawer-header-btn {
   width: 44px;
   height: 44px;
+}
+
+// Text for screen readers only.
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+// Desktop: sheets open as centred dialogs inside the viewport, rounded on all corners
+// (R15: bottom-anchored sheets were cut off at the fold on desktop).
+.q-dialog__inner--standard > .drawer-card,
+.q-dialog__inner--standard > .bottom-sheet {
+  border-radius: 20px !important;
+}
+
+// Dropdown menus (selects) float above the page: raised surface, one border and radius,
+// and the selected option in bold as in every other selection list (R15: the open currency
+// menu sat flat over the card and marked the choice only with a grey fill).
+body .q-menu {
+  background: var(--app-raised);
+  border: 1px solid var(--app-border-strong);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+body .q-menu .q-item--active,
+body .q-menu .q-manual-focusable--focused.q-item--active {
+  font-weight: 600;
+}
+// …and a trailing check, the same mark the other selection lists use.
+body .q-menu .q-item--active::after {
+  content: "";
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin-left: auto;
+  align-self: center;
+  background: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+// A title followed by a badge: when the badge wraps it starts on the text edge, not
+// indented by its margin (R15: the Multinut Beta badge).
+.label-with-badge {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 8px;
+  row-gap: 4px;
+}
+
+// Unselected rating stars are controls: muted text colour, not a near-invisible grey
+// on dark cards (R15).
+.review-stars .q-rating__icon:not(.q-rating__icon--active) {
+  color: var(--app-text-muted) !important;
+  opacity: 1; // Quasar dims unselected stars to 40%, which made them look disabled
+}
+
+// Multi-line fields share one shape: the 12px radius of cards and rows, not the 4px
+// default next to pill-shaped single-line fields (R15).
+.q-textarea.q-field--outlined .q-field__control {
+  border-radius: 12px;
+}
+.q-textarea textarea {
+  resize: none;
+}
+
+// Relay rows: one 52px rhythm like the other list rows (R15: 68px rows with stacked gaps).
+.relay-row {
+  min-height: 52px;
+  padding-top: 4px;
+  padding-bottom: 4px;
 }

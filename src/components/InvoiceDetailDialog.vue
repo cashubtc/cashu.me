@@ -42,7 +42,11 @@
               v-if="invoiceData.status === 'paid'"
               class="paid-status column items-center q-mb-md"
             >
-              <q-icon name="check_circle" color="positive" size="64px" />
+              <CircleCheckIcon
+                :size="64"
+                :stroke-width="1.5"
+                class="text-positive"
+              />
               <div class="paid-status__label q-mt-sm">
                 {{ $t("InvoiceDetailDialog.invoice.status_paid_text") }}
               </div>
@@ -53,7 +57,7 @@
             >
               <div
                 class="col-12 col-sm-11 col-md-8 q-px-md"
-                style="max-width: 600px"
+                style="max-width: 560px"
               >
                 <div class="qr-container">
                   <component
@@ -111,7 +115,7 @@
               <div v-if="invoiceData?.mintQuote" class="row justify-center">
                 <div
                   class="col-12 col-sm-11 col-md-8 q-px-md"
-                  style="max-width: 600px"
+                  style="max-width: 560px"
                 >
                   <MintQuoteInformation
                     hide-paid-status
@@ -130,7 +134,7 @@
               >
                 <div
                   class="col-12 col-sm-11 col-md-8 q-px-md"
-                  style="max-width: 600px"
+                  style="max-width: 560px"
                 >
                   <MeltQuoteInformation
                     hide-paid-status
@@ -152,7 +156,7 @@
           <div class="row justify-center q-pb-lg q-pt-sm">
             <div
               class="col-12 col-sm-11 col-md-8 q-px-md"
-              style="max-width: 600px"
+              style="max-width: 560px"
             >
               <q-btn
                 v-if="invoiceData.request"
@@ -179,6 +183,7 @@ import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import VueQrcode from "@chenfengyuan/vue-qrcode";
 import { copyToClipboard } from "quasar";
+import { CircleCheck as CircleCheckIcon } from "lucide-vue-next";
 
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
@@ -195,6 +200,7 @@ export default defineComponent({
   name: "InvoiceDetailDialog",
   mixins: [windowMixin],
   components: {
+    CircleCheckIcon,
     VueQrcode,
     MeltQuoteInformation,
     MintQuoteInformation,

@@ -2,7 +2,7 @@
   <div
     v-if="sendData.paymentRequest"
     class="col-12 col-sm-11 col-md-8 q-px-md"
-    style="max-width: 600px"
+    style="max-width: 560px"
   >
     <q-btn
       class="full-width"

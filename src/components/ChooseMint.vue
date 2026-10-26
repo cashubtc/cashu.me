@@ -271,8 +271,12 @@ export default defineComponent({
   methods: {
     // Units this mint holds a balance in; falls back to the first unit for an empty mint.
     heldUnits(mint: { units: string[]; balances: Record<string, number> }) {
-      const held = mint.units.filter((unit) => (mint.balances[unit] ?? 0) > 0);
-      return held.length ? held : mint.units.slice(0, 1);
+      // sat leads on every row so balances compare down the list (R17).
+      const units = [...mint.units].sort(
+        (a, b) => Number(b === "sat") - Number(a === "sat")
+      );
+      const held = units.filter((unit) => (mint.balances[unit] ?? 0) > 0);
+      return held.length ? held : units.slice(0, 1);
     },
     ...mapActions(useMintsStore, ["selectMintUrl"]),
     formatCurrency(value: number, currency: string) {

@@ -45,14 +45,15 @@
         dense
         expand-icon-class="hidden"
         header-class="wallet-history-toggle"
-        v-model="expandHistory"
+        :model-value="$q.screen.gt.sm || expandHistory"
+        @update:model-value="expandHistory = $event"
       >
-        <template v-slot:header="{ expanded }">
-          <q-item-section class="item-center text-center">
-            <span class="text-app-muted">
-              <ChevronUpIcon v-if="expanded" :size="22" />
-              <ChevronDownIcon v-else :size="22" />
-            </span>
+        <template v-slot:header>
+          <q-item-section class="items-center">
+            <span class="wallet-history-handle" aria-hidden="true" />
+            <span class="visually-hidden">{{
+              $t("WalletPage.tabs.history.label")
+            }}</span>
           </q-item-section>
         </template>
         <q-tabs
@@ -185,6 +186,23 @@
   min-height: 44px;
 }
 
+/* On desktop history is always open, so there is no handle to show (R16). */
+@media (min-width: 1024px) {
+  .wallet-history-toggle {
+    display: none !important;
+  }
+}
+
+/* A grab handle, the usual mark for a panel that opens and closes (R15: a lone chevron
+   read as nothing). */
+.wallet-history-handle {
+  display: block;
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--app-text-muted);
+}
+
 .row > .wallet-column {
   max-width: 560px;
 }
@@ -267,8 +285,6 @@ import {
   Banknote as BanknoteIcon,
   Zap as ZapIcon,
   ScanLine as ScanLineIcon,
-  ChevronUp as ChevronUpIcon,
-  ChevronDown as ChevronDownIcon,
 } from "lucide-vue-next";
 
 import { useMigrationsStore } from "src/stores/migrations";
@@ -295,8 +311,6 @@ export default {
     iOSPWAPrompt,
     AndroidPWAPrompt,
     ScanLineIcon,
-    ChevronUpIcon,
-    ChevronDownIcon,
   },
   data: function () {
     return {

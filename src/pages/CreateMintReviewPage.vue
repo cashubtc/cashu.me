@@ -11,13 +11,13 @@
         <q-rating
           v-model="rating"
           max="5"
-          size="40px"
+          size="44px"
           color="grey-5"
           color-selected="amber"
           icon-half="star_half"
           icon="star_border"
           icon-selected="star"
-          class="q-mt-sm q-mb-md"
+          class="q-mt-sm q-mb-md review-stars"
           :disable="prefilling || submitting"
         />
         <q-input

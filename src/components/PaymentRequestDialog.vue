@@ -61,7 +61,7 @@
             <div v-if="showPRKData" class="row justify-center q-mb-md">
               <div
                 class="col-12 col-sm-11 col-md-8 q-px-md"
-                style="max-width: 600px"
+                style="max-width: 560px"
               >
                 <q-responsive :ratio="1" class="q-mx-none">
                   <vue-qrcode
@@ -133,7 +133,7 @@
               >
                 <div
                   class="col-12 col-sm-11 col-md-8 q-px-md"
-                  style="max-width: 600px"
+                  style="max-width: 560px"
                 >
                   <div class="row q-gutter-sm items-center q-mb-sm">
                     <q-chip
@@ -173,7 +173,7 @@
           <div class="row justify-center q-pb-lg q-pt-sm">
             <div
               class="col-12 col-sm-11 col-md-8 q-px-md"
-              style="max-width: 600px"
+              style="max-width: 560px"
             >
               <q-btn
                 class="full-width"

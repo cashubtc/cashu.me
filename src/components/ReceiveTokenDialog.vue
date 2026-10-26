@@ -41,7 +41,7 @@
           <div class="row justify-center full-width">
             <div
               class="col-12 col-sm-11 col-md-8 q-px-sm q-mb-sm"
-              style="max-width: 600px"
+              style="max-width: 560px"
             >
               <!-- <div class="row items-center no-wrap q-pb-sm">
                 <div class="col-12">
@@ -177,7 +177,7 @@
             <div class="row justify-center q-pb-lg q-pt-sm">
               <div
                 class="col-12 col-sm-11 col-md-8 q-px-md"
-                style="max-width: 600px"
+                style="max-width: 560px"
               >
                 <template v-if="isNotLockedToUs">
                   <div

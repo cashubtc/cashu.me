@@ -153,10 +153,11 @@ body.body--dark[data-theme] {
   background: var(--app-surface);
 }
 body[data-theme] .q-drawer--dark,
-body[data-theme] .q-menu--dark,
 body[data-theme] .bg-dark {
   background: var(--app-surface) !important;
 }
+// Menus float above the page, so they take the raised surface like cards and sheets.
+body[data-theme] .q-menu--dark,
 body[data-theme] .q-card--dark,
 body[data-theme] .q-stepper--dark {
   background: var(--app-raised) !important;

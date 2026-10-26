@@ -31,7 +31,8 @@
           </div>
         </q-item-section>
       </q-item>
-      <q-item tag="label">
+      <!-- Shown once a key exists: before that the toggle could do nothing (R16). -->
+      <q-item v-if="p2pkKeys.length" tag="label">
         <q-item-section>
           <q-item-label>{{
             $t("Settings.p2pk_features.quick_access.toggle")
@@ -44,7 +45,6 @@
           <q-toggle
             v-model="showP2PkButtonInDrawer"
             color="primary"
-            :disable="!p2pkKeys.length"
           />
         </q-item-section>
       </q-item>

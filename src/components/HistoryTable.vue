@@ -687,6 +687,10 @@ export default defineComponent({
   min-height: 44px !important;
   min-width: 44px !important;
 }
+/* Only the current page uses the accent; other pages and arrows are muted text (R17). */
+.history-table :deep(.q-pagination .q-btn:not(.bg-primary)) {
+  color: var(--app-text-muted) !important;
+}
 
 .amount-text {
   font-size: 1rem;

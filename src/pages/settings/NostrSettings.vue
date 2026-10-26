@@ -177,14 +177,14 @@
           </q-input>
         </q-item-section>
       </q-item>
-      <q-item v-for="relay in relays" :key="relay">
+      <q-item v-for="relay in relays" :key="relay" class="relay-row">
         <q-item-section>
           <q-item-label caption style="word-break: break-all">{{
             relay
           }}</q-item-label>
         </q-item-section>
         <q-item-section side>
-          <div class="row items-center no-wrap q-gutter-sm">
+          <div class="row items-center no-wrap">
             <q-btn flat round class="touch-target-44" @click="copyText(relay)"
               ><CopyIcon :size="20" /><q-tooltip>{{
                 $t("Settings.sections.nostr.relays.list.copy_tooltip")

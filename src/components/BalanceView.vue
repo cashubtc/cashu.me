@@ -115,7 +115,7 @@
     <!-- active mint: tap to manage mints -->
     <ChooseMint
       v-if="activeMintUrl"
-      class="q-mt-md wallet-mint-picker"
+      class="q-mt-sm wallet-mint-picker"
       test-id="wallet-mint-chip"
       :show-balances="mints.length > 1"
     />
@@ -397,5 +397,9 @@ export default defineComponent({
 .balance-unit-dot:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 4px;
+}
+/* The picker belongs to the balance group: no extra gap before the action row (R17). */
+.wallet-mint-picker {
+  padding-bottom: 0 !important;
 }
 </style>

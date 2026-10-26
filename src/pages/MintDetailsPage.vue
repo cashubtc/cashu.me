@@ -580,7 +580,7 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   width: 100%;
-  margin-top: 50px;
+  margin-top: 8px;
 }
 
 .mint-header {
@@ -725,7 +725,7 @@ export default defineComponent({
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
-  gap: 16px;
+  gap: 12px;
   padding: 12px 8px;
   margin: 0 -8px;
   border-radius: 10px;
@@ -742,9 +742,12 @@ export default defineComponent({
   background-color: var(--app-tint-strong);
 }
 
+/* Same icon box and label edge as the detail rows above (R15: inset ~8px further). */
 .action-icon {
+  box-sizing: content-box;
   min-width: 20px;
-  margin: 0 8px;
+  padding: 2px;
+  margin: 0;
   color: var(--app-text-muted);
 }
 
