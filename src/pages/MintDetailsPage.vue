@@ -117,7 +117,6 @@
               <mail-icon
                 v-if="contactInfo.method === 'email'"
                 size="20"
-               
                 class="contact-icon"
               />
               <img
@@ -146,7 +145,6 @@
             <copy-icon
               @click="copyText(contactInfo.info)"
               size="20"
-             
               class="copy-icon cursor-pointer"
             />
           </div>
@@ -307,7 +305,7 @@
               @click="openCreateReviewDialog"
             >
               <q-icon name="rate_review" size="20px" class="action-icon" />
-              <div class="action-label">Review Mint</div>
+              <div class="action-label">Review mint</div>
             </div>
 
             <div
@@ -628,20 +626,6 @@ export default defineComponent({
   width: 100%;
 }
 
-.divider-line {
-  flex: 1;
-  height: 1px;
-  background-color: var(--app-border-strong);
-}
-
-.divider-text {
-  padding: 0 10px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--app-text);
-  text-transform: uppercase;
-}
-
 /* Contact Section */
 .contact-section {
   width: 100%;
@@ -684,11 +668,6 @@ export default defineComponent({
 .mint-details-section {
   width: 100%;
 }
-
-
-
-
-
 
 /* Action Buttons */
 .action-buttons-section {

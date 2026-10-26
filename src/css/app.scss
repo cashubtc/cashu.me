@@ -71,6 +71,10 @@ body,
   border-top-right-radius: 20px;
 }
 
+.q-dialog__inner--maximized > div {
+  border-radius: 0 !important;
+}
+
 .q-dialog__inner--minimized > div {
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
@@ -142,10 +146,52 @@ body,
   font-size: 15px;
   font-weight: 500;
   color: var(--app-text);
-  font-variant-numeric: tabular-nums;
   text-align: right;
   max-width: 60%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+// Section label between hairlines (Mints tab, mint details, discovery).
+// Matches the settings section overline.
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background-color: var(--app-border);
+}
+.divider-text {
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+}
+
+// Captions read evenly at body sizes without Quasar's positive tracking.
+.q-item__label--caption,
+.text-caption {
+  letter-spacing: 0;
+}
+
+// The amount a sheet is about (send, receive), shown under its QR.
+.amount-headline {
+  color: var(--app-text);
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  text-align: center;
+}
+
+// Quasar's hover/focus tint sticks after a tap on touch screens. Keep it for
+// mouse hover and keyboard focus only.
+@media (hover: none) {
+  .q-hoverable:hover > .q-focus-helper {
+    opacity: 0 !important;
+  }
+}
+.q-focusable:focus:not(:focus-visible):not(:hover) > .q-focus-helper {
+  opacity: 0 !important;
 }

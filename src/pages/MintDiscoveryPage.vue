@@ -33,18 +33,4 @@ export default defineComponent({
   align-items: center;
   width: 100%;
 }
-
-.divider-line {
-  flex: 1;
-  height: 1px;
-  background-color: #48484a;
-}
-
-.divider-text {
-  padding: 0 10px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--app-text);
-  text-transform: uppercase;
-}
 </style>

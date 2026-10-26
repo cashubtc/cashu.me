@@ -60,7 +60,7 @@
                   </strong>
                 </h3>
                 <div class="balance-secondary-line q-mt-sm">
-                  <strong v-if="showSecondaryBalance(unit)">
+                  <span v-if="showSecondaryBalance(unit)">
                     <AnimatedNumber
                       :value="secondaryBalanceValue(unit)"
                       :format="
@@ -76,7 +76,7 @@
                         )
                       }}
                     </q-tooltip>
-                  </strong>
+                  </span>
                 </div>
               </div>
             </div>
@@ -381,6 +381,9 @@ export default defineComponent({
   white-space: nowrap;
 }
 .balance-secondary-line {
+  color: var(--app-text-muted);
+  font-size: 1rem;
+  font-weight: 500;
   align-items: center;
   display: flex;
   justify-content: center;

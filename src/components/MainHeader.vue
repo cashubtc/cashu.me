@@ -1,6 +1,6 @@
 <template>
   <q-header class="bg-transparent">
-    <q-toolbar>
+    <q-toolbar class="main-toolbar">
       <q-btn
         flat
         dense
@@ -125,6 +125,12 @@ export default defineComponent({
 });
 </script>
 <style scoped>
+/* Keep header controls over the wallet column on wide screens. */
+.main-toolbar {
+  margin: 0 auto;
+  max-width: 600px;
+}
+
 .q-header {
   position: relative;
   z-index: auto;

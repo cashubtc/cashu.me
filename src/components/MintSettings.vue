@@ -112,7 +112,7 @@
                   </div>
                 </div>
                 <div
-                  class="text-grey-5"
+                  class="mint-review"
                   v-if="!isMintExcludedFromReviews(mint.url)"
                 >
                   <template
@@ -127,8 +127,7 @@
                       ·
                       {{ getRecommendation(mint.url).reviewsCount }}
                       <span
-                        class="text-primary cursor-pointer"
-                        style="text-decoration: underline"
+                        class="mint-review-link cursor-pointer"
                         @click.stop="openReviews(mint.url, mint)"
                         >{{ $t("MintSettings.reviews_text") }}</span
                       >
@@ -136,8 +135,7 @@
                   </template>
                   <template v-else>
                     <span
-                      class="text-primary cursor-pointer"
-                      style="text-decoration: underline"
+                      class="mint-review-link cursor-pointer"
                       @click.stop="openReviews(mint.url, mint)"
                     >
                       {{ $t("MintSettings.no_reviews_yet") }}
@@ -153,8 +151,10 @@
       <!-- Mint discovery -->
       <div class="q-px-md q-mb-md row justify-center">
         <q-btn
-          color="primary"
+          outline
           rounded
+          color="primary"
+          class="discover-mints-btn"
           @click="$router.push('/discoverMints')"
           style="width: 100%"
         >
@@ -650,6 +650,22 @@ export default defineComponent({
 </script>
 
 <style>
+.mint-review {
+  color: var(--app-text-muted);
+  font-size: 13px;
+}
+
+.mint-review-link {
+  color: var(--app-text-muted);
+  text-decoration: underline;
+  text-decoration-color: var(--app-border-strong);
+  text-underline-offset: 3px;
+}
+
+.discover-mints-btn {
+  min-height: 44px;
+}
+
 @import "src/css/mintlist.css";
 
 /* Add Mint Section Styles */
@@ -702,20 +718,6 @@ export default defineComponent({
   align-items: center;
   width: 100%;
   margin-bottom: 24px;
-}
-
-.divider-line {
-  flex: 1;
-  height: 1px;
-  background-color: #48484a;
-}
-
-.divider-text {
-  padding: 0 10px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--app-text);
-  text-transform: uppercase;
 }
 
 /* More vert icon positioning */

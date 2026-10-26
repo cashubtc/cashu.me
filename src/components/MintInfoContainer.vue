@@ -30,7 +30,7 @@
 
     <div class="mint-info-container">
       <div v-if="name" class="mint-name">{{ name }}</div>
-      <div class="text-grey-6 mint-url">{{ url }}</div>
+      <div class="mint-url">{{ url.replace(/^https?:\/\//, "") }}</div>
     </div>
   </div>
 </template>
@@ -103,9 +103,9 @@ export default defineComponent({
 
 .mint-url {
   text-align: left;
-  font-size: 12px;
-  line-height: 16px;
-  font-family: monospace !important;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--app-text-muted);
   margin-top: 4px;
   word-wrap: break-word;
   overflow-wrap: break-word;

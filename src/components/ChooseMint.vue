@@ -16,8 +16,8 @@
           <div class="row items-center full-width no-wrap">
             <!-- Mint Icon -->
             <q-avatar
-              :size="dense ? '40px' : '48px'"
-              class="q-mr-md mint-icon-avatar"
+              :size="dense ? '36px' : '40px'"
+              class="q-mr-sm mint-icon-avatar"
             >
               <q-img
                 v-if="chosenMint?.iconUrl"
@@ -383,10 +383,10 @@ export default defineComponent({
 <style lang="scss" scoped>
 .mint-selector-btn {
   width: 100%;
-  padding: 16px;
+  padding: 8px 16px 8px 8px;
   background: var(--app-tint);
   border: 1px solid var(--app-border);
-  border-radius: 12px;
+  border-radius: 999px;
   cursor: pointer;
   transition: all 0.2s ease;
 
@@ -396,11 +396,12 @@ export default defineComponent({
   }
 
   &.mint-selector-dense {
-    padding: 12px;
+    padding: 6px 14px 6px 6px;
   }
 }
 
 .mint-icon-avatar {
+  background: var(--app-tint-strong);
   flex-shrink: 0;
 }
 

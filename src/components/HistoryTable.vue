@@ -71,7 +71,6 @@
               v-if="transaction.status === 'pending'"
               class="row items-center no-wrap text-grey-6 text-caption"
             >
-              <span>Pending</span>
               <q-btn
                 flat
                 dense
@@ -98,6 +97,7 @@
                     : $t("HistoryTable.actions.check_status.tooltip_text")
                 }}</q-tooltip>
               </q-btn>
+              <span>Pending</span>
             </div>
           </q-item-label>
         </q-item-section>
@@ -119,7 +119,7 @@
               : 'HistoryTable.actions.filter_pending.label'
           )
         "
-        class="q-ml-sm q-px-md"
+        class="q-px-md"
         size="sm"
       />
       <q-btn
@@ -150,7 +150,7 @@
           :max="maxPages"
           :max-pages="5"
           direction-links
-          boundary-links
+          :boundary-links="maxPages > 3"
           @input="handlePageChange"
         />
       </div>
@@ -565,12 +565,11 @@ export default defineComponent({
 
 .amount-text {
   font-size: 1rem;
-  font-variant-numeric: tabular-nums;
   line-height: 1.2;
 }
 
 .history-check-btn {
-  margin: -6px -8px -6px 2px;
+  margin: -6px 2px -6px -6px;
 }
 
 .text-amount-positive {

@@ -23,9 +23,7 @@
             class="floating-close-btn"
           />
           <div class="col text-center fixed-title-height">
-            <q-item-label
-              class="q-mt-sm sheet-title"
-            >
+            <q-item-label class="q-mt-sm sheet-title">
               {{
                 isBolt12
                   ? "Lightning Bolt12"
@@ -104,6 +102,13 @@
               </div>
             </div>
 
+            <div
+              v-if="invoiceData.amount"
+              class="amount-headline text-center q-mt-sm"
+            >
+              {{ displayUnit }}
+            </div>
+
             <q-card-section class="q-pa-sm">
               <div
                 v-if="invoiceData?.mintQuote"
@@ -117,7 +122,7 @@
                     :mint-quote="invoiceData.mintQuote"
                     :invoice="invoiceData"
                     :mint-url="invoiceData.mint"
-                    :show-amount="true"
+                    :show-amount="!invoiceData.amount"
                     :method="invoiceMethod"
                     :refresh-trigger="metadataRefreshTrigger"
                   />
@@ -136,7 +141,7 @@
                     :invoice="invoiceData"
                     :mint-url="invoiceData.mint"
                     :history-paid-at="invoiceData.paidDate"
-                    :show-amount="true"
+                    :show-amount="!invoiceData.amount"
                     :refresh-trigger="metadataRefreshTrigger"
                   />
                 </div>

@@ -1091,20 +1091,6 @@ export default defineComponent({
   width: 100%;
 }
 
-.divider-line {
-  flex: 1;
-  height: 1px;
-  background-color: var(--app-border-strong);
-}
-
-.divider-text {
-  padding: 0 10px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--app-text);
-  text-transform: uppercase;
-}
-
 /* Mint Selection Section */
 .mint-selection-section {
   width: 100%;

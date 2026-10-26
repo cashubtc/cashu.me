@@ -183,7 +183,7 @@ for (const directNavigation of [false, true]) {
         await page
           .getByRole("button", { name: "Settings", exact: true })
           .click();
-        await page.getByText("Lightning Address", { exact: true }).click();
+        await page.getByText("Lightning address", { exact: true }).click();
       }
       await wallet.toggleSetting("Enable", true);
       if (directNavigation)

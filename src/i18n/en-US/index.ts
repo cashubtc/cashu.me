@@ -176,19 +176,19 @@ export default {
     menu: {
       title: "Settings",
       backup: {
-        title: "Backup & Restore",
+        title: "Backup & restore",
         caption: "Seed phrase and ecash recovery",
       },
       lightning_address: {
-        title: "Lightning Address",
-        caption: "Receive payments to your Lightning address",
+        title: "Lightning address",
+        caption: "Get paid to your Lightning address",
       },
       nostr: {
         title: "Nostr",
         caption: "Keys, relays, and Web of Trust",
       },
       payment_requests: {
-        title: "Payment Requests",
+        title: "Payment requests",
         caption: "Receive ecash payments via nostr",
       },
       nwc: {
@@ -827,7 +827,7 @@ export default {
       "Help by leaving a review. Share your experience with this mint and help others by leaving a review.",
   },
   CreateMintReview: {
-    title: "Review Mint",
+    title: "Review mint",
     publishing_as: "Publishing as",
     inputs: {
       rating: { label: "Rating" },
@@ -924,7 +924,7 @@ export default {
           error_invalid_url: "Invalid URL",
         },
         scan: {
-          label: "Scan QR Code",
+          label: "Scan QR code",
         },
       },
     },
@@ -953,7 +953,7 @@ export default {
     },
     swap: {
       title: "Swap",
-      overline: "Multimint Swaps",
+      overline: "Multimint swaps",
       actions: {
         receove_to_trusted_mint: {
           label: "Receive to trusted mint",
@@ -1042,7 +1042,7 @@ export default {
     },
   },
   SendTokenDialog: {
-    title: "Send Ecash",
+    title: "Send ecash",
     title_ecash_text: "Ecash",
     badge_offline_text: "Offline",
     inputs: {
@@ -1141,7 +1141,7 @@ export default {
     },
   },
   ReceiveEcashDrawer: {
-    title: "Receive Ecash",
+    title: "Receive ecash",
     actions: {
       paste: {
         label: "@:global.actions.paste.label",
@@ -1162,7 +1162,7 @@ export default {
     },
   },
   ReceiveTokenDialog: {
-    title: "Receive Ecash",
+    title: "Receive ecash",
     title_ecash_text: "Ecash",
     inputs: {
       tokens_base64: {
@@ -1439,7 +1439,7 @@ export default {
       pay: "Lightning address or invoice",
     },
     qr_scanner: {
-      title: "Scan QR Code",
+      title: "Scan QR code",
       description: "Tap to scan an address",
     },
     paste_button: {

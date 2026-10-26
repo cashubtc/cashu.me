@@ -59,7 +59,7 @@
         <q-tabs
           v-model="tab"
           no-caps
-          class="bg-dark wallet-tabs"
+          class="bg-transparent wallet-tabs"
           active-class="wallet-tab--active"
           indicator-color="primary"
         >

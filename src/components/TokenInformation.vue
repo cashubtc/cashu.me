@@ -2,7 +2,7 @@
   <div class="token-information-container q-px-md">
     <!-- Amount Header -->
     <div v-if="!hideAmount" class="token-header-container">
-      <div class="token-amount">
+      <div class="amount-headline">
         {{ displayUnit }}
       </div>
     </div>
@@ -338,12 +338,6 @@ export default defineComponent({
   width: 100%;
 }
 
-.token-amount {
-  font-size: 36px;
-  font-weight: 700;
-  text-align: center;
-}
-
 /* Action Buttons Section */
 .action-buttons-section {
   width: 100%;
@@ -353,11 +347,6 @@ export default defineComponent({
 .token-details-section {
   width: 100%;
 }
-
-
-
-
-
 
 /* Golden shine for P2PK locked-to-you */
 .p2pk-locked-me {
