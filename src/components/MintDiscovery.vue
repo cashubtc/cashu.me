@@ -19,7 +19,7 @@
             <q-skeleton type="text" width="35%" />
           </div>
         </div>
-        <div class="discover-skeleton__label" role="status">
+        <div class="discover-skeleton__label visually-hidden" role="status">
           {{ $t("MintSettings.discover.actions.discover.in_progress") }}
         </div>
       </div>

@@ -85,7 +85,7 @@
                   {{
                     heldUnits(mint)
                       .map((unit) => formatCurrency(mint.balances[unit], unit))
-                      .join(" · ")
+                      .join(" + ")
                   }}
                 </span>
                 <span v-else class="text-red">

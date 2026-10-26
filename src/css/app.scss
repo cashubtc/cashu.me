@@ -419,10 +419,9 @@ body[data-theme] .welcome-surface,
   }
 }
 
-/* Tab hover/pressed fills share the control radius instead of a hard rectangle. */
-.q-tab .q-focus-helper,
-.q-tab .q-focus-helper:before,
-.q-tab .q-focus-helper:after {
+/* Tab hover/pressed fills share the control radius instead of a hard rectangle. The fill
+   inherits the tab's radius (Quasar's body.desktop rule), so round the tab itself. */
+.q-tab {
   border-radius: 10px;
 }
 /* The tab focus ring sits inside the cell, clear of the active underline (R18). */
@@ -537,11 +536,6 @@ body .q-menu .q-item--active::after {
   opacity: 1; // Quasar dims unselected stars to 40%, which made them look disabled
 }
 
-// Multi-line fields share one shape: the 12px radius of cards and rows, not the 4px
-// default next to pill-shaped single-line fields (R15).
-.q-textarea.q-field--outlined .q-field__control {
-  border-radius: 12px;
-}
 .q-textarea textarea {
   resize: none;
 }
@@ -557,4 +551,15 @@ body .q-menu .q-item--active::after {
 // (R17, R18: Quasar's default 24% black edge is about 1.9:1).
 body.body--light .q-field--outlined .q-field__control:before {
   border-color: rgba(0, 0, 0, 0.45);
+}
+
+// One field shape: every outlined text field and select uses the 12px card and row radius,
+// whether or not it was declared "rounded" (R19: pill fields next to rounded rectangles).
+.q-field--outlined .q-field__control,
+.q-field--outlined .q-field__control:before,
+.q-field--outlined .q-field__control:after,
+.q-field--outlined.q-field--rounded .q-field__control,
+.q-field--outlined.q-field--rounded .q-field__control:before,
+.q-field--outlined.q-field--rounded .q-field__control:after {
+  border-radius: 12px;
 }

@@ -4,13 +4,13 @@
     <div class="history-filters row items-center q-mb-sm">
       <q-btn
         rounded
-        :outline="!filterPending"
-        :unelevated="filterPending"
+        unelevated
         no-caps
         :icon="filterPending ? 'check' : undefined"
         :aria-pressed="filterPending ? 'true' : 'false'"
         @click="filterPending = !filterPending"
-        :color="filterPending ? 'primary' : 'grey'"
+        :color="filterPending ? 'primary' : undefined"
+        :class="{ 'history-filter-btn--off': !filterPending }"
         :label="
           $t(
             filterPending
@@ -679,9 +679,15 @@ export default defineComponent({
   font-size: 13px;
 }
 
+/* Filters are chips, not actions: tinted fill when off, primary fill with a check when on
+   (R19: an outlined pill read as a page action). */
 .history-filter-btn {
   font-size: 14px;
   min-height: 44px;
+}
+.history-filter-btn--off {
+  background: var(--app-tint-strong);
+  color: var(--app-text);
 }
 
 .history-table :deep(.q-pagination .q-btn) {

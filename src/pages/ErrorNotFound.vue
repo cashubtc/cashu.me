@@ -1,5 +1,15 @@
 <template>
   <div class="not-found fullscreen column flex-center text-center q-pa-md">
+    <!-- The shared header slot: the same way out as every other page (R19). -->
+    <q-btn
+      flat
+      round
+      to="/"
+      class="not-found__close"
+      :aria-label="$t('global.actions.close.label')"
+    >
+      <XIcon />
+    </q-btn>
     <div class="not-found__code">{{ $t("ErrorNotFound.title") }}</div>
     <div class="text-h6 text-weight-bold q-mt-sm">
       {{ $t("ErrorNotFound.text") }}
@@ -18,15 +28,26 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import { X as XIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "ErrorNotFound",
+  components: { XIcon },
 });
 </script>
 
 <style scoped>
 .not-found {
   background: var(--app-surface, #000);
+  color: var(--app-text);
+}
+
+.not-found__close {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 44px;
+  height: 44px;
   color: var(--app-text);
 }
 

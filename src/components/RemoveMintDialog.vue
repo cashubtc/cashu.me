@@ -39,7 +39,7 @@
                     unit
                   )
                 )
-                .join(" · ")
+                .join(" + ")
             }}</q-item-label>
           </q-item-section>
         </q-item>

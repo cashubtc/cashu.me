@@ -1,6 +1,6 @@
 <template>
   <div class="blocking-state fullscreen column flex-center text-center q-pa-md">
-    <q-icon name="tab" size="48px" class="blocking-state__icon" />
+    <AppWindowIcon :size="48" :stroke-width="1.5" class="blocking-state__icon" />
     <div class="blocking-state__title q-mt-md">
       {{ $t("AlreadyRunning.title") }}
     </div>
@@ -21,9 +21,11 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import { AppWindow as AppWindowIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "AlreadyRunning",
+  components: { AppWindowIcon },
 });
 </script>
 
@@ -42,12 +44,14 @@ export default defineComponent({
   font-weight: 700;
   line-height: 1.3;
   max-width: 320px;
+  text-wrap: balance;
 }
 
 .blocking-state__text {
   font-size: 15px;
   color: var(--app-text-muted);
   max-width: 320px;
+  text-wrap: balance;
 }
 
 .blocking-state__action {
