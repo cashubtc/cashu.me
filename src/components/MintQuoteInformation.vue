@@ -32,7 +32,7 @@
 
     <div class="detail-item q-mb-md">
       <div class="detail-label">
-        <QrCodeIcon :size="20" class="detail-icon" />
+        <ZapIcon :size="20" class="detail-icon" />
         <div class="detail-name">Method</div>
       </div>
       <div class="detail-value">{{ methodDisplay }}</div>
@@ -119,7 +119,6 @@ import {
   Info as InfoIcon,
   Clock as ClockIcon,
   Landmark as LandmarkIcon,
-  QrCode as QrCodeIcon,
   Hash as HashIcon,
 } from "lucide-vue-next";
 import { PaymentMethod } from "src/stores/walletTypes";
@@ -152,7 +151,6 @@ export default defineComponent({
     InfoIcon,
     ClockIcon,
     LandmarkIcon,
-    QrCodeIcon,
     HashIcon,
   },
   props: {
@@ -195,7 +193,7 @@ export default defineComponent({
       return "sat";
     },
     unitDisplay(): string {
-      return this.unit?.toUpperCase?.() || "";
+      return this.unit === "sat" ? "sat" : this.unit?.toUpperCase?.() || "";
     },
     hasValidAmount(): boolean {
       const amount =

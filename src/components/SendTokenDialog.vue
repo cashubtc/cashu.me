@@ -35,7 +35,7 @@
           </div>
           <div
             class="row items-center q-gutter-sm"
-            style="position: absolute; right: 16px"
+            style="position: absolute; right: 8px"
           >
             <q-btn
               flat

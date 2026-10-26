@@ -26,7 +26,9 @@
           <coins-icon size="20" class="detail-icon" />
           <div class="detail-name">{{ $t("TokenInformation.unit") }}</div>
         </div>
-        <div class="detail-value">{{ tokenUnit.toUpperCase() }}</div>
+        <div class="detail-value">
+          {{ tokenUnit === "sat" ? "sat" : tokenUnit.toUpperCase() }}
+        </div>
       </div>
 
       <!-- Fiat -->

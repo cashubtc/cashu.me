@@ -102,3 +102,15 @@
 .settings-menu-chevron {
   color: var(--app-text-subtle);
 }
+
+/* Wrapped row captions keep a readable line pitch. */
+.settings-view .q-item__label--caption {
+  line-height: 1.4;
+}
+
+/* On wide screens the settings column matches the wallet's content edges. */
+@media (min-width: 600px) {
+  .settings-view {
+    max-width: 528px;
+  }
+}

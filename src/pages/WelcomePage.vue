@@ -9,12 +9,12 @@
     @drop.prevent="dragFile"
     @dragover.prevent
   >
-    <q-card class="q-pa-none" style="height: 100%">
+    <q-card class="q-pa-none welcome-surface" style="height: 100%">
       <q-carousel
         v-model="welcomeStore.currentSlide"
         animated
         control-color="primary"
-        class="flex-1"
+        class="flex-1 welcome-surface"
         style="height: 100%"
       >
         <q-carousel-slide :name="0">

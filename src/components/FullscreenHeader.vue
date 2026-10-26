@@ -5,7 +5,7 @@
         flat
         dense
         round
-        class="fullscreen-back-btn text-primary"
+        class="fullscreen-back-btn"
         @click="goBack"
         aria-label="Back"
       >
@@ -54,6 +54,7 @@ export default defineComponent({
 }
 
 .fullscreen-back-btn {
+  color: var(--app-text);
   height: 44px;
   width: 44px;
 }

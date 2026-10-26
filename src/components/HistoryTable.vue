@@ -30,8 +30,8 @@
               "
               aria-hidden="true"
             >
-              <ArrowDownLeftIcon v-if="transaction.amount >= 0" :size="12" />
-              <ArrowUpRightIcon v-else :size="12" />
+              <ArrowDownLeftIcon v-if="transaction.amount >= 0" :size="14" />
+              <ArrowUpRightIcon v-else :size="14" />
             </span>
           </q-avatar>
         </q-item-section>
@@ -121,8 +121,11 @@
     <div class="text-center q-mt-lg">
       <q-btn
         rounded
-        outline
+        :outline="!filterPending"
+        :unelevated="filterPending"
         no-caps
+        :icon="filterPending ? 'check' : undefined"
+        :aria-pressed="filterPending ? 'true' : 'false'"
         @click="filterPending = !filterPending"
         :color="filterPending ? 'primary' : 'grey'"
         :label="
@@ -579,19 +582,19 @@ export default defineComponent({
   position: relative;
 }
 
+/* The direction arrow sits on the avatar's edge with no fill of its own, so it
+   reads the same over the row's hover and pressed tints. */
 .direction-badge {
   align-items: center;
-  background: var(--app-surface);
-  border: 1.5px solid var(--app-surface);
   border-radius: 50%;
-  bottom: -4px;
+  bottom: -3px;
   color: var(--app-text-muted);
   display: flex;
-  height: 19px;
+  height: 16px;
   justify-content: center;
   position: absolute;
-  right: -4px;
-  width: 19px;
+  right: -3px;
+  width: 16px;
 }
 
 .direction-badge--in {
@@ -601,7 +604,7 @@ export default defineComponent({
 .transaction-icon {
   width: 20px;
   height: 20px;
-  color: var(--app-accent);
+  color: var(--app-text);
 }
 
 .history-table {

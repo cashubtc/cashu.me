@@ -713,7 +713,7 @@ export default defineComponent({
 }
 .floating-actions {
   position: absolute;
-  right: 16px;
+  right: 8px;
   top: 50%;
   transform: translateY(-50%);
   z-index: 2;

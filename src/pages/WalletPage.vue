@@ -173,6 +173,14 @@
   grid-area: 1 / 4 / 5 / 4;
 }
 
+/* Full-bleed tabs on phones; on wider screens they sit on the content edges. */
+@media (min-width: 600px) {
+  .wallet-tabs,
+  .wallet-history-toggle {
+    margin: 0 16px;
+  }
+}
+
 .wallet-history-toggle {
   min-height: 44px;
 }
@@ -201,7 +209,7 @@
 .wallet-scan-btn {
   background: var(--app-tint);
   border: 1px solid var(--app-border-strong);
-  color: var(--app-accent);
+  color: var(--app-text);
   flex: 0 0 auto;
   height: 52px;
   width: 52px;

@@ -124,6 +124,7 @@ body {
 }
 
 body.body--dark {
+  --app-welcome-bg: var(--app-surface);
   --app-text: #fff;
   --app-text-muted: rgba(255, 255, 255, 0.72);
   --app-text-subtle: rgba(255, 255, 255, 0.6);
@@ -135,13 +136,15 @@ body.body--dark {
   --q-negative: #ffa8a8;
 }
 body.body--light {
+  // Onboarding is designed dark (its slides use white text) in every mode.
+  --app-welcome-bg: #1d1d1d;
   --app-text: #111;
   --app-text-muted: rgba(0, 0, 0, 0.64);
   --app-text-subtle: rgba(0, 0, 0, 0.58);
   --app-border: rgba(0, 0, 0, 0.09);
   --app-tint: rgba(0, 0, 0, 0.035);
   --app-tint-strong: rgba(0, 0, 0, 0.07);
-  --app-border-strong: rgba(0, 0, 0, 0.18);
+  --app-border-strong: rgba(0, 0, 0, 0.42);
   --q-positive: #15803d;
   --q-negative: #c10015;
 }

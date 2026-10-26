@@ -24,7 +24,7 @@
                 :src="mintData.info.icon_url"
                 alt="Mint Profile"
               />
-              <landmark-icon v-else size="36" />
+              <landmark-icon v-else size="36" :stroke-width="1.5" />
             </q-avatar>
             <div class="mint-name q-mb-xs">
               {{ mintDisplayName }}
@@ -238,7 +238,11 @@
               </div>
             </div>
             <div class="detail-value">
-              {{ mintUnits.map((unit) => unit.toUpperCase()).join(", ") }}
+              {{
+                mintUnits
+                  .map((unit) => (unit === "sat" ? "sat" : unit.toUpperCase()))
+                  .join(", ")
+              }}
             </div>
           </div>
 
@@ -257,7 +261,7 @@
         <!-- Section Divider for Audit Info -->
         <div v-if="settings.auditorEnabled" class="section-divider q-mb-md">
           <div class="divider-line"></div>
-          <div class="divider-text">AUDIT INFO</div>
+          <div class="divider-text">Audit info</div>
           <div class="divider-line"></div>
         </div>
 
@@ -724,6 +728,7 @@ export default defineComponent({
 
 .action-icon {
   min-width: 20px;
+  margin: 0 8px;
   color: var(--app-text-muted);
 }
 

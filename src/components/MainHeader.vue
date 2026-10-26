@@ -5,7 +5,7 @@
         flat
         dense
         round
-        class="main-toolbar-btn text-primary"
+        class="main-toolbar-btn"
         aria-label="Settings"
         @click="goToSettings"
         :disable="uiStore.globalMutexLock"
@@ -62,7 +62,7 @@
         dense
         round
         class="main-toolbar-btn"
-        :class="countdown > 0 ? 'text-negative' : 'text-primary'"
+        :class="countdown > 0 ? 'text-negative' : ''"
         aria-label="Refresh"
         @click="reload"
         :disable="uiStore.globalMutexLock && countdown === 0"
@@ -141,6 +141,7 @@ export default defineComponent({
 }
 
 .main-toolbar-btn {
+  color: var(--app-text);
   height: 44px;
   width: 44px;
 }

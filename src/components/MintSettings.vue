@@ -244,9 +244,6 @@
       <div class="divider-line"></div>
     </div>
     <div class="q-px-sm q-pb-lg text-left swap-section">
-      <div class="text-subtitle1 text-weight-bold">
-        {{ $t("MintSettings.swap.overline") }}
-      </div>
       <div class="swap-caption q-mb-md">
         {{ $t("MintSettings.swap.caption") }}
       </div>

@@ -240,7 +240,9 @@ export default defineComponent({
       return "sat";
     },
     unitDisplay(): string {
-      return this.quoteUnit?.toUpperCase?.() || "";
+      return this.quoteUnit === "sat"
+        ? "sat"
+        : this.quoteUnit?.toUpperCase?.() || "";
     },
     amountDisplay(): string {
       const amount =

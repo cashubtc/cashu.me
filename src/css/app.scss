@@ -211,11 +211,24 @@ body,
   background: currentColor;
   opacity: var(--app-pressed-opacity) !important;
 }
+// Quasar's .no-outline sets outline:0 !important on buttons, hence !important.
 .q-focusable:focus-visible,
 .mint-chip:focus-visible,
 button:focus-visible {
-  outline: 2px solid var(--app-accent);
+  outline: 2px solid var(--app-accent) !important;
   outline-offset: 2px;
+}
+// Rows and tabs sit in overflow-clipped containers: draw the ring inside.
+.q-item.q-focusable:focus-visible,
+.q-tab.q-focusable:focus-visible {
+  outline-offset: -2px;
+  border-radius: 10px;
+}
+
+// One disabled treatment for every button.
+.q-btn.disabled,
+.q-btn[disabled] {
+  opacity: 0.38 !important;
 }
 
 // Full-width sheet CTAs (Copy, Send, Create invoice) share one size. Quasar's
@@ -240,4 +253,10 @@ button:focus-visible {
 .touch-target-44 {
   min-height: 44px !important;
   min-width: 44px !important;
+}
+
+// Onboarding surface: the theme surface in dark mode, a fixed dark grey in light mode.
+body[data-theme] .welcome-surface,
+.welcome-surface {
+  background: var(--app-welcome-bg) !important;
 }
