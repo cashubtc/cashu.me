@@ -14,6 +14,10 @@
       />
 
       <div class="mint-content-container q-px-md">
+        <!-- The shared page title slot, as on every settings sub-page (R20) -->
+        <div class="settings-page-header q-pt-sm q-pb-md">
+          <div class="text-h5 text-weight-bold">{{ mintDisplayName }}</div>
+        </div>
         <!-- Mint Header Profile Name Section -->
         <div class="mint-header-container q-mb-lg">
           <div class="mint-header q-pa-md">
@@ -26,9 +30,6 @@
               />
               <landmark-icon v-else size="36" :stroke-width="1.5" />
             </q-avatar>
-            <div class="mint-name q-mb-xs">
-              {{ mintDisplayName }}
-            </div>
 
             <!-- QR Code Icon -->
             <div class="top-icons">
@@ -580,7 +581,6 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   width: 100%;
-  margin-top: 8px;
 }
 
 .mint-header {

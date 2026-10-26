@@ -448,10 +448,12 @@ export default defineComponent({
     // Hide zero balances in units the user has never funded at this mint.
     visibleUnits(mint) {
       const mintClass = this.mintClass(mint);
-      const funded = mintClass.units.filter(
-        (unit) => mintClass.unitBalance(unit) > 0
+      // sat leads on every card, as in the mint picker (R20).
+      const units = [...mintClass.units].sort(
+        (a, b) => Number(b === "sat") - Number(a === "sat")
       );
-      return funded.length ? funded : mintClass.units.slice(0, 1);
+      const funded = units.filter((unit) => mintClass.unitBalance(unit) > 0);
+      return funded.length ? funded : units.slice(0, 1);
     },
     ...mapActions(useNostrStore, [
       "init",
@@ -701,7 +703,7 @@ export default defineComponent({
 
 /* Several unit balances on one card read as separate holdings, not a conversion. */
 .currency-unit-badge + .currency-unit-badge::before {
-  content: "·";
+  content: "+";
   margin-right: 8px;
   color: var(--app-text-subtle);
 }
