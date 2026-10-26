@@ -112,7 +112,7 @@ test("Cashu payment request persists pending and redeemed outgoing history", asy
   const row = page.getByTestId("history-row").filter({ hasText: "Ecash" });
   await expect(row).toHaveCount(1);
   await expect(row).toContainText("Pending");
-  await expect(row).toContainText("-₿21");
+  await expect(row).toContainText("−₿21");
   await page.reload();
   await expect(row).toHaveCount(1);
   await expect(row).toContainText("Pending");
