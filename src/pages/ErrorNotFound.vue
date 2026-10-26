@@ -6,9 +6,9 @@
       round
       to="/"
       class="not-found__close"
-      :aria-label="$t('global.actions.close.label')"
+      :aria-label="$t('ErrorNotFound.actions.home.label')"
     >
-      <XIcon />
+      <ChevronLeftIcon />
     </q-btn>
     <div class="not-found__code">{{ $t("ErrorNotFound.title") }}</div>
     <div class="text-h6 text-weight-bold q-mt-sm">
@@ -28,11 +28,11 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { X as XIcon } from "lucide-vue-next";
+import { ChevronLeft as ChevronLeftIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "ErrorNotFound",
-  components: { XIcon },
+  components: { ChevronLeftIcon },
 });
 </script>
 

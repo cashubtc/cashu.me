@@ -30,6 +30,10 @@
               />
               <landmark-icon v-else size="36" :stroke-width="1.5" />
             </q-avatar>
+            <!-- This mint's holdings, sats first, like the mint picker (R21) -->
+            <div v-if="heroBalance" class="mint-balance q-mb-xs">
+              {{ heroBalance }}
+            </div>
 
             <!-- QR Code Icon -->
             <div class="top-icons">
@@ -414,6 +418,17 @@ export default defineComponent({
     };
   },
   computed: {
+    heroBalance(): string {
+      try {
+        const balances = new MintClass(this.mintData as any).allBalances;
+        const units = Object.keys(balances)
+          .filter((u) => balances[u] > 0)
+          .sort((a, b) => Number(b === "sat") - Number(a === "sat"));
+        return units.map((u) => this.formatCurrency(balances[u], u)).join(" + ");
+      } catch {
+        return "";
+      }
+    },
     mintDisplayName(): string {
       const data = this.mintData as any;
       if (data?.nickname) return data.nickname;

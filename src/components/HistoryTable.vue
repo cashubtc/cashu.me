@@ -688,6 +688,10 @@ export default defineComponent({
   padding: 0 14px;
   color: var(--app-text);
 }
+/* Secondary-control outline: muted, like the mint chip; full white is kept for focus. */
+.history-filter-btn.q-btn--outline:before {
+  border-color: var(--app-text-muted);
+}
 .history-filter-btn::after {
   content: "";
   position: absolute;

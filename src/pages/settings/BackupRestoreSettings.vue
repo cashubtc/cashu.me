@@ -46,7 +46,7 @@
     <SettingsSection>
       <q-item clickable v-ripple to="/restore">
         <q-item-section>
-          <q-item-label>{{
+          <q-item-label class="text-weight-regular">{{
             $t("Settings.backup_restore.restore_ecash.title")
           }}</q-item-label>
           <q-item-label caption>{{
