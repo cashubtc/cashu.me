@@ -420,8 +420,14 @@ body[data-theme] .welcome-surface,
 }
 
 /* Tab hover/pressed fills share the control radius instead of a hard rectangle. */
-.q-tab .q-focus-helper {
+.q-tab .q-focus-helper,
+.q-tab .q-focus-helper:before,
+.q-tab .q-focus-helper:after {
   border-radius: 10px;
+}
+/* The tab focus ring sits inside the cell, clear of the active underline (R18). */
+.q-tab.q-focusable:focus-visible {
+  outline-offset: -6px;
 }
 
 /* Multi-line fields grow with their content; no native resize grip. */
@@ -541,8 +547,14 @@ body .q-menu .q-item--active::after {
 }
 
 // Relay rows: one 52px rhythm like the other list rows (R15: 68px rows with stacked gaps).
-.relay-row {
+.settings-card .q-item.relay-row {
   min-height: 52px;
   padding-top: 4px;
   padding-bottom: 4px;
+}
+
+// Light mode: outlined field edges at 3:1 against the page, so empty fields read as fields
+// (R17, R18: Quasar's default 24% black edge is about 1.9:1).
+body.body--light .q-field--outlined .q-field__control:before {
+  border-color: rgba(0, 0, 0, 0.45);
 }

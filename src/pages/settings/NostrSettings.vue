@@ -15,7 +15,7 @@
         clickable
         @click="handleSeedClick"
       >
-        <q-item-section avatar>
+        <q-item-section avatar top>
           <q-icon
             :color="signerType === 'SEED' ? 'primary' : 'grey'"
             :name="
@@ -55,7 +55,7 @@
         @click="handleBunkerClick"
         v-if="false"
       >
-        <q-item-section avatar>
+        <q-item-section avatar top>
           <q-icon
             :color="signerType === 'NIP46' ? 'primary' : 'grey'"
             :name="
@@ -90,7 +90,7 @@
         clickable
         @click="handleNsecClick"
       >
-        <q-item-section avatar>
+        <q-item-section avatar top>
           <q-icon
             :color="signerType === 'PRIVATEKEY' ? 'primary' : 'grey'"
             :name="
@@ -128,7 +128,7 @@
         @click="handleExtensionClick"
         v-if="nip07SignerAvailable"
       >
-        <q-item-section avatar>
+        <q-item-section avatar top>
           <q-icon
             :color="signerType === 'NIP07' ? 'primary' : 'grey'"
             :name="

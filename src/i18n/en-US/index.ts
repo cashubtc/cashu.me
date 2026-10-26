@@ -885,7 +885,7 @@ export default {
       },
     },
     nostr_mints: {
-      label: "Restore Mints from Nostr",
+      label: "Restore mints from Nostr",
       caption:
         "Search for mint backups stored on Nostr relays using your seed phrase. This will help you discover mints you previously used.",
       search_button: "Search for mint backups",

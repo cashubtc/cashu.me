@@ -1,5 +1,5 @@
 <template>
-  <q-card flat class="bg-transparent full-width">
+  <q-card flat class="bg-transparent full-width mint-ratings-root">
     <q-card-section class="q-pa-none">
       <!-- Mint Header - Matching MintDetailsPage style -->
       <div class="mint-header-container q-mb-lg">
@@ -13,9 +13,9 @@
             <LandmarkIcon v-else :size="36" class="text-app-muted mint-glyph" />
           </q-avatar>
           <div class="mint-name q-mb-xs">
-            {{ mintInfo?.name || "Mint" }}
+            {{ mintInfo?.name || url.replace(/^https?:\/\//, "") }}
           </div>
-          <div class="mint-url text-grey-6">
+          <div v-if="mintInfo?.name" class="mint-url text-grey-6">
             {{ url }}
           </div>
         </div>
@@ -710,11 +710,11 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   width: 100%;
-  margin-top: 50px;
 }
 
 .mint-header {
   width: 100%;
+  border: 1px solid var(--app-border);
   border-radius: 12px;
   display: flex;
   flex-direction: column;
@@ -745,7 +745,10 @@ export default defineComponent({
 
 .empty-state {
   width: 100%;
-  background-color: rgba(0, 0, 0, 0.25);
+}
+/* One surface level like mint details: no grey wrapper behind the cards (R18). */
+body[data-theme] .q-card--dark.mint-ratings-root {
+  background: transparent !important;
 }
 
 .empty-title {

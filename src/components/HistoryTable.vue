@@ -1,5 +1,37 @@
 <template>
   <div class="history-table">
+    <!-- Filter controls sit above the list they filter (R18) -->
+    <div class="history-filters row items-center q-mb-sm">
+      <q-btn
+        rounded
+        :outline="!filterPending"
+        :unelevated="filterPending"
+        no-caps
+        :icon="filterPending ? 'check' : undefined"
+        :aria-pressed="filterPending ? 'true' : 'false'"
+        @click="filterPending = !filterPending"
+        :color="filterPending ? 'primary' : 'grey'"
+        :label="
+          $t(
+            filterPending
+              ? 'HistoryTable.actions.show_all.label'
+              : 'HistoryTable.actions.filter_pending.label'
+          )
+        "
+        class="q-px-md history-filter-btn"
+      />
+      <q-btn
+        v-if="filterPending"
+        rounded
+        outline
+        no-caps
+        @click="filterPendingEcash = !filterPendingEcash"
+        :color="filterPendingEcash ? 'primary' : 'grey'"
+        label="Ecash only"
+        class="q-ml-sm q-px-md history-filter-btn"
+      />
+    </div>
+
     <q-list>
       <q-item
         v-for="transaction in paginatedTransactions"
@@ -60,6 +92,7 @@
                 :class="{
                   'text-amount-positive':
                     transaction.amount >= 0 && transaction.status !== 'pending',
+                  'amount-text--pending': transaction.status === 'pending',
                 }"
               >
                 {{ transaction.amount >= 0 ? "+" : "\u2212"
@@ -127,38 +160,6 @@
         aria-hidden="true"
       />
     </q-list>
-
-    <!-- Filter Controls -->
-    <div class="text-center q-mt-lg">
-      <q-btn
-        rounded
-        :outline="!filterPending"
-        :unelevated="filterPending"
-        no-caps
-        :icon="filterPending ? 'check' : undefined"
-        :aria-pressed="filterPending ? 'true' : 'false'"
-        @click="filterPending = !filterPending"
-        :color="filterPending ? 'primary' : 'grey'"
-        :label="
-          $t(
-            filterPending
-              ? 'HistoryTable.actions.show_all.label'
-              : 'HistoryTable.actions.filter_pending.label'
-          )
-        "
-        class="q-px-md history-filter-btn"
-      />
-      <q-btn
-        v-if="filterPending"
-        rounded
-        outline
-        no-caps
-        @click="filterPendingEcash = !filterPendingEcash"
-        :color="filterPendingEcash ? 'primary' : 'grey'"
-        label="Ecash only"
-        class="q-ml-sm q-px-md history-filter-btn"
-      />
-    </div>
 
     <!-- Empty State -->
     <div v-if="paginatedTransactions.length === 0" class="text-center q-mt-lg">
@@ -686,6 +687,10 @@ export default defineComponent({
 .history-table :deep(.q-pagination .q-btn) {
   min-height: 44px !important;
   min-width: 44px !important;
+}
+/* Pending amounts are not settled yet: secondary text, not full emphasis (R18). */
+.amount-text--pending {
+  color: var(--app-text-muted);
 }
 /* Only the current page uses the accent; other pages and arrows are muted text (R17). */
 .history-table :deep(.q-pagination .q-btn:not(.bg-primary)) {
