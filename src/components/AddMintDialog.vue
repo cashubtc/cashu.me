@@ -63,7 +63,7 @@
       <div v-if="mintUrl" class="q-mb-lg">
         <div class="detail-item">
           <div class="detail-label">
-            <info-icon size="20" color="#9E9E9E" class="detail-icon" />
+            <info-icon size="20" class="detail-icon" />
             <div class="detail-name">
               {{ $t("AddMintDialog.audit_info.label") }}
             </div>
@@ -336,8 +336,8 @@ export default defineComponent({
 }
 
 .body--dark .mint-preview-pill {
-  border-color: rgba(255, 255, 255, 0.1);
-  background-color: rgba(255, 255, 255, 0.05);
+  border-color: var(--app-border);
+  background-color: var(--app-tint);
 }
 
 .body--light .mint-preview-pill {
@@ -369,7 +369,7 @@ export default defineComponent({
 .detail-name {
   font-size: 16px;
   font-weight: 600;
-  color: #9e9e9e;
+  color: var(--app-text-muted);
 }
 
 .detail-value {

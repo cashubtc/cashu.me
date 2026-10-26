@@ -493,7 +493,7 @@ export default defineComponent({
 }
 
 .nostr-mint-restore {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--app-border);
   margin-top: 2rem;
   padding-top: 1rem;
 }

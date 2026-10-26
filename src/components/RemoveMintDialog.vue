@@ -200,7 +200,7 @@ export default defineComponent({
 }
 
 .body--dark .mint-data-display {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: var(--app-tint);
 }
 
 .mint-input {
@@ -217,7 +217,7 @@ export default defineComponent({
 }
 
 .body--dark .mint-note {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: var(--app-tint);
 }
 
 /* Completely remove all input animations */
@@ -247,12 +247,12 @@ export default defineComponent({
 
 /* Add subtle focus/active state - theme responsive */
 :deep(.mint-input.q-field--focused) {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--app-tint-strong);
 }
 
 /* For dark mode, adjust the focus color */
 :deep(.body--dark .mint-input.q-field--focused) {
-  background-color: rgba(255, 255, 255, 0.07);
+  background-color: var(--app-tint);
 }
 
 /* For light mode, use a darker shade for contrast */

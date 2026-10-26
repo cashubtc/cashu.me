@@ -1,61 +1,57 @@
 <template>
   <div class="row q-col-gutter-y-md justify-center q-pt-sm q-pb-md">
-    <div class="col-12 col-sm-11 col-md-8 text-center q-gutter-y-md">
+    <div
+      class="col-12 col-sm-11 col-md-8 text-center q-gutter-y-md wallet-column"
+    >
       <NoMintWarnBanner v-if="mints.length == 0" />
       <BalanceView v-else :set-tab="setTab" />
-      <div
-        class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-lg q-pb-md position-relative"
-      >
-        <div class="col-6 q-mb-md flex justify-center items-center">
-          <q-btn
-            rounded
-            dense
-            data-testid="wallet-receive"
-            class="q-px-md q-mr-md wallet-action-btn"
-            color="primary"
-            @click="showReceiveDialog = true"
-          >
-            <div class="button-content">
-              <span>{{ $t("WalletPage.actions.receive.label") }}</span>
-            </div>
-          </q-btn>
-        </div>
-
-        <transition appear enter-active-class="animated pulse">
-          <div class="scan-button-container">
-            <q-btn size="lg" outline color="primary" flat @click="showCamera">
-              <ScanIcon size="2em" />
-            </q-btn>
-          </div>
-        </transition>
-
-        <!-- button to showSendDialog -->
-        <div class="col-6 q-mb-md flex justify-center items-center">
-          <q-btn
-            rounded
-            dense
-            data-testid="wallet-send"
-            class="q-px-md q-ml-md wallet-action-btn"
-            color="primary"
-            @click="showSendDialog = true"
-          >
-            <div class="button-content">
-              <span>{{ $t("WalletPage.actions.send.label") }}</span>
-            </div>
-          </q-btn>
-        </div>
+      <div class="wallet-actions q-pt-md q-pb-sm">
+        <q-btn
+          unelevated
+          rounded
+          no-caps
+          data-testid="wallet-receive"
+          class="wallet-action-btn"
+          color="primary"
+          :label="$t('WalletPage.actions.receive.label')"
+          @click="showReceiveDialog = true"
+        />
+        <q-btn
+          round
+          unelevated
+          class="wallet-scan-btn"
+          :aria-label="$t('global.actions.scan.label')"
+          @click="showCamera"
+        >
+          <ScanLineIcon :size="22" />
+        </q-btn>
+        <q-btn
+          unelevated
+          rounded
+          no-caps
+          data-testid="wallet-send"
+          class="wallet-action-btn"
+          color="primary"
+          :label="$t('WalletPage.actions.send.label')"
+          @click="showSendDialog = true"
+        />
         <ReceiveDialog v-model="showReceiveDialog" />
         <SendDialog v-model="showSendDialog" />
       </div>
       <!-- ///////////////////////////////////////////
       ////////////////// TABLES /////////////////
       /////////////////////////////////////////// -->
-      <q-expansion-item expand-icon-class="hidden" v-model="expandHistory">
+      <q-expansion-item
+        dense
+        expand-icon-class="hidden"
+        header-class="wallet-history-toggle"
+        v-model="expandHistory"
+      >
         <template v-slot:header="{ expanded }">
           <q-item-section class="item-center text-center">
             <span
               ><q-icon
-                color="primary"
+                class="text-app-muted"
                 :name="expanded ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"
             /></span>
           </q-item-section>
@@ -63,26 +59,22 @@
         <q-tabs
           v-model="tab"
           no-caps
-          :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
+          class="bg-dark wallet-tabs"
+          active-class="wallet-tab--active"
+          indicator-color="primary"
         >
           <q-tab
             name="history"
-            class="text-secondary"
             :label="$t('WalletPage.tabs.history.label')"
           ></q-tab>
           <!-- <q-tab name="tokens" label="Tokens"></q-tab> -->
           <q-tab
             name="mints"
-            class="text-secondary"
             :label="$t('WalletPage.tabs.mints.label')"
           ></q-tab>
         </q-tabs>
 
-        <q-tab-panels
-          :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
-          v-model="tab"
-          animated
-        >
+        <q-tab-panels class="bg-dark" v-model="tab" animated>
           <!-- ////////////////// UNIFIED HISTORY LIST ///////////////// -->
 
           <q-tab-panel name="history">
@@ -182,29 +174,38 @@
   grid-area: 1 / 4 / 5 / 4;
 }
 
-.wallet-action-btn {
-  min-width: 140px;
-  width: auto;
-  white-space: nowrap;
-  font-size: 1.2rem;
+.wallet-history-toggle {
+  min-height: 32px;
 }
 
-.button-content {
-  display: flex;
+.wallet-column {
+  max-width: 560px;
+}
+
+.wallet-actions {
   align-items: center;
-  white-space: nowrap;
-}
-
-/* Apply equal widths to wallet action buttons after render */
-.equal-width-buttons {
   display: flex;
-  justify-content: space-between;
+  gap: 12px;
+  justify-content: center;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 400px;
+  padding-left: 16px;
+  padding-right: 16px;
 }
 
-.scan-button-container {
-  position: absolute;
-  z-index: 1;
-  padding-bottom: 15px;
+.wallet-action-btn {
+  flex: 1 1 0;
+  font-size: 1.0625rem;
+  min-height: 52px;
+}
+
+.wallet-scan-btn {
+  background: var(--app-tint-strong);
+  color: var(--app-text);
+  flex: 0 0 auto;
+  height: 52px;
+  width: 52px;
 }
 </style>
 <script lang="ts">
@@ -258,7 +259,7 @@ import {
   X as XIcon,
   Banknote as BanknoteIcon,
   Zap as ZapIcon,
-  Scan as ScanIcon,
+  ScanLine as ScanLineIcon,
 } from "lucide-vue-next";
 
 import { useMigrationsStore } from "src/stores/migrations";
@@ -284,7 +285,7 @@ export default {
     ReceiveDialog,
     iOSPWAPrompt,
     AndroidPWAPrompt,
-    ScanIcon,
+    ScanLineIcon,
   },
   data: function () {
     return {

@@ -44,7 +44,7 @@ export default defineComponent({
   padding: 0 10px;
   font-size: 14px;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--app-text);
   text-transform: uppercase;
 }
 </style>

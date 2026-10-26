@@ -579,13 +579,13 @@ export default {
   NoMintWarnBanner: {
     title: "Join a mint",
     subtitle:
-      "You haven't joined any Cashu mint yet. Add a mint URL in the settings or receive ecash from a new mint to get started.",
+      "Mints issue the ecash this wallet holds. Add a mint, or receive ecash from one, to get started.",
     actions: {
       add_mint: {
         label: "@:global.actions.add_mint.label",
       },
       receive: {
-        label: "Receive Ecash",
+        label: "Receive ecash",
       },
     },
   },

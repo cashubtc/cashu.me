@@ -13,7 +13,7 @@
               :src="mintInfo.icon_url"
               alt="Mint Profile"
             />
-            <q-icon v-else name="account_balance" size="36px" color="grey-7" />
+            <LandmarkIcon v-else :size="36" class="text-app-muted mint-glyph" />
           </q-avatar>
           <div class="mint-name q-mb-xs">
             {{ mintInfo?.name || "Mint" }}
@@ -332,6 +332,7 @@
 </template>
 
 <script lang="ts">
+import { Landmark as LandmarkIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { useNostrStore } from "src/stores/nostr";
 import NDK from "@nostr-dev-kit/ndk";
@@ -348,7 +349,7 @@ export default defineComponent({
     mintInfo: { type: Object, required: false },
   },
   emits: ["close"],
-  components: {},
+  components: { LandmarkIcon },
   methods: {
     // Calculate percentage for star rating bars
     ratingPercentage(star: number): number {
@@ -722,14 +723,14 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: var(--app-tint);
 }
 
 .mint-name {
   font-size: 24px;
   font-weight: 600;
   text-align: center;
-  color: white;
+  color: var(--app-text);
 }
 
 .mint-url {
@@ -740,9 +741,9 @@ export default defineComponent({
 }
 
 .section-card {
-  background-color: rgba(255, 255, 255, 0.03);
+  background-color: var(--app-tint);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--app-border);
 }
 
 .empty-state {
@@ -753,18 +754,18 @@ export default defineComponent({
 .empty-title {
   font-size: 18px;
   font-weight: 600;
-  color: white;
+  color: var(--app-text);
 }
 
 .empty-subtitle {
   font-size: 14px;
   line-height: 1.5;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--app-text-muted);
   max-width: 320px;
 }
 
 .empty-icon {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--app-text-muted);
 }
 
 .review-item {
@@ -781,7 +782,7 @@ export default defineComponent({
 }
 
 .own-review {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--app-tint);
   padding: 20px 16px;
   margin: 0 -16px;
   border-radius: 8px;
@@ -828,7 +829,7 @@ export default defineComponent({
   width: 100%;
   background: rgba(20, 20, 20, 0.98);
   backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--app-border);
   border-radius: 20px 20px 0 0;
   max-height: 50vh;
   overflow: hidden;
@@ -842,18 +843,18 @@ export default defineComponent({
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px 16px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--app-border);
 }
 
 .sort-sheet-header h3 {
-  color: white;
+  color: var(--app-text);
   font-size: 1.1rem;
   font-weight: 600;
   margin: 0;
 }
 
 .close-btn {
-  color: rgba(255, 255, 255, 0.7) !important;
+  color: var(--app-text-muted) !important;
 }
 
 .sort-options {
@@ -864,18 +865,18 @@ export default defineComponent({
 
 .sort-option {
   padding: 16px 24px;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--app-text);
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--app-border);
   text-align: center;
 }
 
 .sort-option:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: white;
+  background: var(--app-tint-strong);
+  color: var(--app-text);
 }
 
 .sort-option.active {
@@ -908,14 +909,14 @@ export default defineComponent({
 /* Match balance badges style from MintSettings.vue */
 .currency-unit-badge {
   border-radius: 4px;
-  background-color: #1d1d1d;
+  background-color: var(--app-raised);
   display: inline-block;
   padding: 4px 8px;
   margin: 4px 4px 4px 0;
 }
 
 .currency-unit-text {
-  color: white;
+  color: var(--app-text);
   font-size: 14px;
   font-weight: 500;
 }

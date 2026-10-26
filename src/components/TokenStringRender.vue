@@ -190,7 +190,7 @@ export default defineComponent({
     rgba(0, 0, 0, 0.15) 100%
   ) !important;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--app-border);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
   backdrop-filter: blur(10px);
   position: relative;
@@ -277,13 +277,13 @@ export default defineComponent({
 
 .mint-name {
   font-weight: 400;
-  color: white;
+  color: var(--app-text);
   font-size: 14px;
 }
 
 .token-amount {
   font-weight: 700;
-  color: white;
+  color: var(--app-text);
   line-height: 1.2;
 }
 </style>

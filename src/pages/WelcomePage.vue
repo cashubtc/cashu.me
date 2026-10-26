@@ -5,7 +5,7 @@
     persistent
     transition-show="slide-up"
     transition-hide="fadeOut"
-    full-screen
+    :maximized="$q.screen.lt.sm"
     @drop.prevent="dragFile"
     @dragover.prevent
   >

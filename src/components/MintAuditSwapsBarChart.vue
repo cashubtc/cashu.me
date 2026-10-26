@@ -504,7 +504,7 @@ export default defineComponent({
 .time-tick {
   position: absolute;
   transform: translateX(-50%);
-  color: #888;
+  color: var(--app-text-muted);
   font-size: 10px;
   white-space: nowrap;
 }

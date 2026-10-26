@@ -27,15 +27,17 @@
               >
                 <template v-slot:error>
                   <div class="row items-center justify-center full-height">
-                    <q-icon name="account_balance" color="grey-7" size="24px" />
+                    <LandmarkIcon
+                      :size="24"
+                      class="text-app-muted mint-glyph"
+                    />
                   </div>
                 </template>
               </q-img>
-              <q-icon
+              <LandmarkIcon
                 v-else
-                name="account_balance"
-                color="grey-7"
-                size="24px"
+                :size="24"
+                class="text-app-muted mint-glyph"
               />
             </q-avatar>
 
@@ -88,15 +90,17 @@
               >
                 <template v-slot:error>
                   <div class="row items-center justify-center full-height">
-                    <q-icon name="account_balance" color="grey-7" size="24px" />
+                    <LandmarkIcon
+                      :size="24"
+                      class="text-app-muted mint-glyph"
+                    />
                   </div>
                 </template>
               </q-img>
-              <q-icon
+              <LandmarkIcon
                 v-else
-                name="account_balance"
-                color="grey-7"
-                size="24px"
+                :size="24"
+                class="text-app-muted mint-glyph"
               />
             </q-avatar>
 
@@ -132,6 +136,7 @@
 </template>
 
 <script lang="ts">
+import { Landmark as LandmarkIcon } from "lucide-vue-next";
 import { defineComponent, type PropType } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -158,7 +163,10 @@ type MintOption = {
 
 export default defineComponent({
   name: "ChooseMint",
-  components: { BottomSheet },
+  components: {
+    LandmarkIcon,
+    BottomSheet,
+  },
   mixins: [windowMixin],
   props: {
     rounded: {
@@ -376,15 +384,15 @@ export default defineComponent({
 .mint-selector-btn {
   width: 100%;
   padding: 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--app-tint);
+  border: 1px solid var(--app-border);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.2);
+    background: var(--app-tint-strong);
+    border-color: var(--app-border-strong);
   }
 
   &.mint-selector-dense {
@@ -404,7 +412,7 @@ export default defineComponent({
   font-size: 16px;
   font-weight: 500;
   line-height: 1.3;
-  color: white;
+  color: var(--app-text);
 }
 
 .mint-balance-label {
@@ -421,7 +429,7 @@ export default defineComponent({
   border-bottom: 1px solid rgba(128, 128, 128, 0.15);
 
   &:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--app-tint-strong);
   }
 
   &.active {

@@ -24,9 +24,7 @@
           />
           <div class="col text-center fixed-title-height">
             <q-item-label
-              overline
-              class="q-mt-sm text-white"
-              style="font-size: 1rem"
+              class="q-mt-sm sheet-title"
             >
               {{ $t("P2PKDialog.p2pk.caption") }}
             </q-item-label>

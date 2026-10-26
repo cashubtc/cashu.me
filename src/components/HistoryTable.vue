@@ -7,7 +7,7 @@
         data-testid="history-row"
         clickable
         v-ripple
-        class="q-px-md q-py-md"
+        class="q-px-md q-py-sm history-row"
       >
         <!-- Icon Section -->
         <q-item-section avatar class="q-pr-md" style="min-width: 40px">
@@ -66,41 +66,40 @@
               }}
             </div>
 
-            <!-- Status or empty space for consistent height -->
-            <div class="text-grey-6 text-caption">
-              <span v-if="transaction.status === 'pending'">Pending</span>
-              <span v-else>&nbsp;</span>
+            <!-- Status, with the check action for pending rows -->
+            <div
+              v-if="transaction.status === 'pending'"
+              class="row items-center no-wrap text-grey-6 text-caption"
+            >
+              <span>Pending</span>
+              <q-btn
+                flat
+                dense
+                round
+                data-testid="history-check"
+                :icon="
+                  transaction.longPressActive ? 'arrow_circle_down' : 'sync'
+                "
+                @click.stop="
+                  transaction.longPressActive
+                    ? handleLongPress(transaction)
+                    : checkTransactionStatus(transaction)
+                "
+                @mousedown="startLongPress(transaction)"
+                @mouseup="endLongPress(transaction)"
+                @touchstart="startLongPress(transaction)"
+                @touchend="endLongTap(transaction)"
+                class="cursor-pointer history-check-btn"
+                size="sm"
+              >
+                <q-tooltip>{{
+                  transaction.longPressActive
+                    ? $t("HistoryTable.actions.receive.tooltip_text")
+                    : $t("HistoryTable.actions.check_status.tooltip_text")
+                }}</q-tooltip>
+              </q-btn>
             </div>
           </q-item-label>
-        </q-item-section>
-
-        <!-- Actions Section -->
-        <q-item-section side top style="min-width: 40px">
-          <q-btn
-            flat
-            dense
-            round
-            data-testid="history-check"
-            :icon="transaction.longPressActive ? 'arrow_circle_down' : 'sync'"
-            @click="
-              transaction.longPressActive
-                ? handleLongPress(transaction)
-                : checkTransactionStatus(transaction)
-            "
-            @mousedown="startLongPress(transaction)"
-            @mouseup="endLongPress(transaction)"
-            @touchstart="startLongPress(transaction)"
-            @touchend="endLongTap(transaction)"
-            class="cursor-pointer"
-            v-if="transaction.status === 'pending'"
-            size="sm"
-          >
-            <q-tooltip>{{
-              transaction.longPressActive
-                ? $t("HistoryTable.actions.receive.tooltip_text")
-                : $t("HistoryTable.actions.check_status.tooltip_text")
-            }}</q-tooltip>
-          </q-btn>
         </q-item-section>
       </q-item>
     </q-list>
@@ -557,15 +556,24 @@ export default defineComponent({
 .transaction-icon {
   width: 20px;
   height: 20px;
-  color: var(--q-primary);
+  color: var(--app-accent);
+}
+
+.history-row {
+  min-height: 60px;
 }
 
 .amount-text {
   font-size: 1rem;
+  font-variant-numeric: tabular-nums;
   line-height: 1.2;
 }
 
+.history-check-btn {
+  margin: -6px -8px -6px 2px;
+}
+
 .text-amount-positive {
-  color: hsl(120, 88%, 58%);
+  color: var(--q-positive);
 }
 </style>

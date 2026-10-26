@@ -43,9 +43,9 @@
 /* Mint URL styling with proper text wrapping */
 .mint-url {
   text-align: left;
-  font-size: 12px;
-  line-height: 16px;
-  font-family: monospace !important;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--app-text-muted);
   margin-top: 4px;
   word-wrap: break-word;
   overflow-wrap: break-word;
@@ -58,14 +58,14 @@
 /* Currency unit badges */
 .currency-unit-badge {
   border-radius: 4px;
-  background-color: #1d1d1d;
+  background-color: var(--app-raised);
   display: inline-block;
   padding: 4px 8px;
   margin: 4px 4px 4px 0;
 }
 
 .currency-unit-text {
-  color: white;
+  color: var(--app-text);
   font-size: 14px;
   font-weight: 500;
 }

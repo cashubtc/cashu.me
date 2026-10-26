@@ -40,7 +40,7 @@ import { mapState } from "pinia";
 import { useUiStore } from "src/stores/ui";
 import SettingsPageShell from "./SettingsPageShell.vue";
 import {
-  Vault as VaultIcon,
+  ArchiveRestore as ArchiveRestoreIcon,
   AtSign as AtSignIcon,
   KeyRound as KeyRoundIcon,
   Inbox as InboxIcon,
@@ -73,7 +73,7 @@ export default defineComponent({
             {
               key: "backup",
               path: "/settings/backup",
-              icon: markRaw(VaultIcon),
+              icon: markRaw(ArchiveRestoreIcon),
             },
             {
               key: "lightning_address",

@@ -117,7 +117,7 @@
                     "
                     @click="setActiveMintUrl"
                   >
-                    <q-icon name="account_balance" size="xs" class="q-mr-sm" />
+                    <LandmarkIcon :size="16" class="q-mr-sm mint-glyph" />
                     {{ getShortUrl(chosenMintUrl) }}
                   </q-chip>
                   <div @click="toggleUnit">
@@ -194,6 +194,7 @@
 </template>
 
 <script lang="ts">
+import { Landmark as LandmarkIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import VueQrcode from "@chenfengyuan/vue-qrcode";
@@ -211,6 +212,7 @@ export default defineComponent({
   name: "PRDialog",
   mixins: [windowMixin],
   components: {
+    LandmarkIcon,
     VueQrcode,
     ToggleUnit,
     PaymentRequestPayments,

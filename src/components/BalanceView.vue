@@ -1,14 +1,14 @@
 <template>
   <!-- <q-card class="q-my-md q-py-sm">
     <q-card-section class="q-mt-sm q-py-xs"> -->
-  <div class="q-pt-xl q-pb-md">
+  <div class="q-pt-lg q-pb-sm">
     <transition
       appear
       enter-active-class="animated fadeInDown"
       leave-active-class="animated fadeInDown"
       mode="out-in"
     >
-      <div class="balance-carousel-shell q-mt-lg q-mb-xl text-primary">
+      <div class="balance-carousel-shell q-mt-lg q-mb-sm text-primary">
         <transition
           appear
           enter-active-class="animated pulse"
@@ -112,28 +112,26 @@
         </span>
       </div>
     </div>
-    <!-- mint url -->
-    <div class="row q-mt-md q-mb-none text-secondary" v-if="activeMintUrl">
-      <div class="col-12 cursor-pointer">
-        <span class="text-weight-light" @click="setTab('mints')">
-          {{ $t("BalanceView.mintUrl.label") }}: <b>{{ activeMintLabel }}</b>
-        </span>
-      </div>
-    </div>
-    <!-- mint balance -->
-    <div class="row q-mb-none text-secondary" v-if="mints.length > 1">
-      <div class="col-12">
-        <span class="q-my-none q-py-none text-weight-regular">
-          {{ $t("BalanceView.mintBalance.label") }}:
-          <b>
-            <AnimatedNumber
-              :value="getActiveBalance"
-              :format="(val) => formatCurrency(val, activeUnit)"
-              class="q-my-none q-py-none cursor-pointer"
-            />
-          </b>
-        </span>
-      </div>
+    <!-- active mint: tap to manage mints -->
+    <div class="row justify-center q-mt-md" v-if="activeMintUrl">
+      <button
+        type="button"
+        class="mint-chip"
+        :aria-label="`${$t('BalanceView.mintUrl.label')}: ${activeMintLabel}`"
+        @click="setTab('mints')"
+      >
+        <LandmarkIcon :size="16" class="mint-chip__icon" />
+        <span class="mint-chip__name">{{ activeMintLabel }}</span>
+        <template v-if="mints.length > 1">
+          <span class="mint-chip__dot" aria-hidden="true">·</span>
+          <AnimatedNumber
+            class="mint-chip__balance"
+            :value="getActiveBalance"
+            :format="(val) => formatCurrency(val, activeUnit)"
+          />
+        </template>
+        <ChevronDownIcon :size="16" class="mint-chip__icon" />
+      </button>
     </div>
   </div>
   <!-- </q-card-section>
@@ -150,6 +148,10 @@ import { useUiStore } from "src/stores/ui";
 import { useWalletStore } from "src/stores/wallet";
 import { usePriceStore } from "src/stores/price";
 import AnimatedNumber from "src/components/AnimatedNumber.vue";
+import {
+  Landmark as LandmarkIcon,
+  ChevronDown as ChevronDownIcon,
+} from "lucide-vue-next";
 import { sumProofAmounts } from "src/js/proofs";
 import { useProofsStore } from "src/stores/proofs";
 
@@ -158,6 +160,8 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     AnimatedNumber,
+    LandmarkIcon,
+    ChevronDownIcon,
   },
   props: {
     setTab: Function,
@@ -417,6 +421,40 @@ export default defineComponent({
 .balance-unit-dot--active {
   opacity: 0.9;
   transform: scale(1.15);
+}
+.mint-chip {
+  align-items: center;
+  background: var(--app-tint);
+  border: 1px solid var(--app-border);
+  border-radius: 999px;
+  color: var(--app-text);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  gap: 6px;
+  max-width: 100%;
+  min-height: 36px;
+  padding: 6px 12px;
+}
+.mint-chip:focus-visible {
+  outline: 2px solid var(--app-accent);
+  outline-offset: 2px;
+}
+.mint-chip__icon {
+  color: var(--app-text-muted);
+  flex-shrink: 0;
+}
+.mint-chip__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mint-chip__dot,
+.mint-chip__balance {
+  color: var(--app-text-muted);
+  font-variant-numeric: tabular-nums;
 }
 .balance-unit-dot:focus-visible {
   outline: 2px solid currentColor;

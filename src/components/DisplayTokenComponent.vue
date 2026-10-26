@@ -17,9 +17,7 @@
       <div class="col text-center fixed-title-height">
         <div v-show="!showExpandedButtons">
           <q-item-label
-            overline
-            class="q-mt-sm text-white"
-            style="font-size: 1rem"
+            class="q-mt-sm sheet-title"
           >
             {{
               sendData.historyToken.amount && sendData.historyToken.amount < 0
@@ -28,7 +26,7 @@
                   : "Pending"
                 : "Received"
             }}
-            Ecash</q-item-label
+            ecash</q-item-label
           >
         </div>
       </div>
@@ -191,24 +189,24 @@
                 <q-btn
                   v-if="showAnimatedQR"
                   flat
-                  style="font-size: 10px"
+                  style="font-size: 13px"
                   color="grey"
                   class="q-ma-none"
                   @click="changeSpeed"
                 >
                   <q-icon name="speed" style="margin-right: 8px"></q-icon>
-                  Speed: {{ fragmentSpeedLabel }}
+                  Speed: {{ { F: "Fast", M: "Medium", S: "Slow" }[fragmentSpeedLabel] }}
                 </q-btn>
                 <q-btn
                   v-if="showAnimatedQR"
                   flat
-                  style="font-size: 10px"
+                  style="font-size: 13px"
                   class="q-ma-none"
                   color="grey"
                   @click="changeSize"
                 >
                   <q-icon name="zoom_in" style="margin-right: 8px"></q-icon>
-                  Size: {{ fragmentLengthLabel }}
+                  Size: {{ { L: "Large", M: "Medium", S: "Small" }[fragmentLengthLabel] }}
                 </q-btn>
               </div>
             </div>
@@ -481,6 +479,7 @@ export default defineComponent({
       const firstSeqNum = 0;
       this.encoder = new UREncoder(ur, this.currentFragmentLength, firstSeqNum);
       clearInterval(this.qrInterval);
+      this.qrCodeFragment = this.encoder.nextPart();
       this.qrInterval = setInterval(() => {
         this.qrCodeFragment = this.encoder.nextPart();
       }, this.currentFragmentInterval);

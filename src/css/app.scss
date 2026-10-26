@@ -13,12 +13,22 @@ body {
 // Dialog header typography
 // This class provides proper letter-spacing for dialog titles
 // The default Quasar 'overline' class has excessive letter-spacing for headers
-.dialog-header {
-  font-size: 1.2rem; // 16px
-  font-weight: 500; // Medium weight for headers
-  letter-spacing: -0.01em; // Tight letter spacing for better readability on headers
-  text-transform: none; // No uppercase transformation
-  line-height: 1.5; // Good line height for readability
+// One title style for every dialog and sheet header.
+.dialog-header,
+.sheet-title {
+  font-size: 1.0625rem; // 17px
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  line-height: 1.5;
+  color: var(--app-text);
+}
+
+// Sentence-case buttons across the app, matching list and title copy.
+.q-btn {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 600;
 }
 
 // Native-app feel: disable text selection across the UI
@@ -106,4 +116,36 @@ body,
 
 .q-checkbox__svg {
   color: var(--q-dark);
+}
+
+// Label/value rows in quote, token and mint detail views.
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+.detail-label {
+  display: flex;
+  align-items: center;
+}
+.detail-icon {
+  margin-right: 10px;
+  color: var(--app-text-muted);
+}
+.detail-name {
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--app-text-muted);
+}
+.detail-value {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--app-text);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

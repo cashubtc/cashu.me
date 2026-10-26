@@ -12,7 +12,7 @@
       <!-- Fee (if applicable) -->
       <div v-if="receiveFee > 0 && !hideFee" class="detail-item q-mb-md">
         <div class="detail-label">
-          <arrow-down-up-icon size="20" color="#9E9E9E" class="detail-icon" />
+          <arrow-down-up-icon size="20" class="detail-icon" />
           <div class="detail-name">{{ $t("TokenInformation.fee") }}</div>
         </div>
         <div class="detail-value">
@@ -23,7 +23,7 @@
       <!-- Unit -->
       <div v-if="!hideUnit" class="detail-item q-mb-md">
         <div class="detail-label">
-          <banknote-icon size="20" color="#9E9E9E" class="detail-icon" />
+          <coins-icon size="20" class="detail-icon" />
           <div class="detail-name">{{ $t("TokenInformation.unit") }}</div>
         </div>
         <div class="detail-value">{{ tokenUnit.toUpperCase() }}</div>
@@ -32,7 +32,7 @@
       <!-- Fiat -->
       <div v-if="showFiat && !hideFiat" class="detail-item q-mb-md">
         <div class="detail-label">
-          <banknote-icon size="20" color="#9E9E9E" class="detail-icon" />
+          <banknote-icon size="20" class="detail-icon" />
           <div class="detail-name">{{ $t("TokenInformation.fiat") }}</div>
         </div>
         <div class="detail-value">
@@ -46,7 +46,7 @@
         class="detail-item q-mb-md"
       >
         <div class="detail-label">
-          <lock-icon size="20" color="#9E9E9E" class="detail-icon" />
+          <lock-icon size="20" class="detail-icon" />
           <div class="detail-name">{{ $t("TokenInformation.p2pk") }}</div>
         </div>
         <div
@@ -68,7 +68,7 @@
       <!-- Mint URL -->
       <div v-if="!hideMint" class="detail-item q-mb-md">
         <div class="detail-label">
-          <building-icon size="20" color="#9E9E9E" class="detail-icon" />
+          <landmark-icon size="20" class="detail-icon" />
           <div class="detail-name">{{ $t("TokenInformation.mint") }}</div>
         </div>
         <div class="detail-value">
@@ -80,7 +80,7 @@
       <!-- Memo (if available) -->
       <div v-if="displayMemo && !hideMemo" class="detail-item q-mb-md">
         <div class="detail-label">
-          <message-circle-icon size="20" color="#9E9E9E" class="detail-icon" />
+          <message-circle-icon size="20" class="detail-icon" />
           <div class="detail-name">{{ $t("TokenInformation.memo") }}</div>
         </div>
         <div
@@ -94,7 +94,7 @@
       <!-- Payment Request (if applicable) -->
       <div v-if="paymentRequestId" class="detail-item">
         <div class="detail-label">
-          <banknote-icon size="20" color="#9E9E9E" class="detail-icon" />
+          <banknote-icon size="20" class="detail-icon" />
           <div class="detail-name">
             {{ $t("TokenInformation.payment_request") }}
           </div>
@@ -117,9 +117,10 @@ import { useSettingsStore } from "src/stores/settings";
 import token from "src/js/token";
 import {
   ArrowDownUp as ArrowDownUpIcon,
-  Building as BuildingIcon,
+  Landmark as LandmarkIcon,
   Lock as LockIcon,
   Banknote as BanknoteIcon,
+  Coins as CoinsIcon,
   MessageCircle as MessageCircleIcon,
 } from "lucide-vue-next";
 
@@ -128,9 +129,10 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     ArrowDownUpIcon,
-    BuildingIcon,
+    LandmarkIcon,
     LockIcon,
     BanknoteIcon,
+    CoinsIcon,
     MessageCircleIcon,
   },
   props: {
@@ -325,7 +327,7 @@ export default defineComponent({
 <style scoped>
 .token-information-container {
   width: 100%;
-  color: white;
+  color: var(--app-text);
 }
 
 /* Token Header - matches mint-header-container from MintDetailsPage */
@@ -352,38 +354,10 @@ export default defineComponent({
   width: 100%;
 }
 
-.detail-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
 
-.detail-label {
-  display: flex;
-  align-items: center;
-}
 
-.detail-icon {
-  margin-right: 10px;
-}
 
-.detail-name {
-  font-size: 16px;
-  font-weight: 600;
-  color: #9e9e9e;
-}
 
-.detail-value {
-  font-size: 16px;
-  font-weight: 600;
-  color: white;
-  text-align: right;
-  max-width: 60%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 
 /* Golden shine for P2PK locked-to-you */
 .p2pk-locked-me {

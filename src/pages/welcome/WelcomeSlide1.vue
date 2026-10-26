@@ -523,9 +523,11 @@ export default {
   font-size: 1.1rem;
   line-height: 1.5;
   color: rgba(255, 255, 255, 0.8);
-  margin: 0 0 50px 0;
-  max-width: 500px;
-  text-align: left;
+  margin: 0 auto 50px;
+  max-width: 32ch;
+  text-align: center;
+  hyphens: manual;
+  text-wrap: pretty;
 }
 
 /* Unified content width */

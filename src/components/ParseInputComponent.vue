@@ -141,7 +141,7 @@ export default defineComponent({
 .parse-input {
   :deep(.q-field__control) {
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--app-tint);
     min-height: 120px;
     max-height: 120px;
     padding: 16px;
@@ -155,7 +155,7 @@ export default defineComponent({
   :deep(.q-field__native) {
     padding: 0;
     font-size: 16px;
-    color: white;
+    color: var(--app-text);
     min-height: 88px;
   }
 
@@ -164,7 +164,7 @@ export default defineComponent({
   }
 
   :deep(.q-placeholder) {
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--app-text-muted);
     font-size: 16px;
   }
 
@@ -195,14 +195,14 @@ export default defineComponent({
 }
 
 .qr-scanner-row {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--app-tint);
   border-radius: 12px;
   padding: 12px 16px;
   cursor: pointer;
   transition: background 0.2s ease;
 
   &:active {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--app-tint-strong);
   }
 }
 
@@ -210,7 +210,7 @@ export default defineComponent({
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--app-tint-strong);
   display: flex;
   align-items: center;
   justify-content: center;

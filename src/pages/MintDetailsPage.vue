@@ -24,17 +24,17 @@
                 :src="mintData.info.icon_url"
                 alt="Mint Profile"
               />
-              <building-icon v-else size="36" />
+              <landmark-icon v-else size="36" />
             </q-avatar>
             <div class="mint-name q-mb-xs">
-              {{ mintData.info?.name || "Mint" }}
+              {{ mintDisplayName }}
             </div>
 
             <!-- QR Code Icon -->
             <div class="top-icons">
               <qr-code-icon
                 size="24"
-                class="qr-icon cursor-pointer text-white"
+                class="qr-icon cursor-pointer"
                 @click="showQrCode = !showQrCode"
               />
             </div>
@@ -117,7 +117,7 @@
               <mail-icon
                 v-if="contactInfo.method === 'email'"
                 size="20"
-                color="#9E9E9E"
+               
                 class="contact-icon"
               />
               <img
@@ -146,7 +146,7 @@
             <copy-icon
               @click="copyText(contactInfo.info)"
               size="20"
-              color="#9E9E9E"
+             
               class="copy-icon cursor-pointer"
             />
           </div>
@@ -166,7 +166,7 @@
           <!-- URL -->
           <div class="detail-item q-mb-md">
             <div class="detail-label">
-              <link-icon size="20" color="#9E9E9E" class="detail-icon" />
+              <link-icon size="20" class="detail-icon" />
               <div class="detail-name">
                 {{ $t("MintDetailsDialog.details.url.label") }}
               </div>
@@ -182,7 +182,7 @@
           <!-- Nuts -->
           <div class="detail-item q-mb-md" v-if="mintData.info?.nuts">
             <div class="detail-label">
-              <nut-icon size="20" color="#9E9E9E" class="detail-icon" />
+              <nut-icon size="20" class="detail-icon" />
               <div class="detail-name">
                 {{ $t("MintDetailsDialog.details.nuts.label") }}
               </div>
@@ -220,7 +220,7 @@
           <!-- Currency (if available) -->
           <div class="detail-item q-mb-md" v-if="mintData.info?.currencies">
             <div class="detail-label">
-              <currency-icon size="20" color="#9E9E9E" class="detail-icon" />
+              <currency-icon size="20" class="detail-icon" />
               <div class="detail-name">
                 {{ $t("MintDetailsDialog.details.currency.label") }}
               </div>
@@ -234,7 +234,7 @@
             v-if="mintUnits && mintUnits.length > 0"
           >
             <div class="detail-label">
-              <banknote-icon size="20" color="#9E9E9E" class="detail-icon" />
+              <banknote-icon size="20" class="detail-icon" />
               <div class="detail-name">
                 {{ $t("MintDetailsDialog.details.currencies.label") }}
               </div>
@@ -247,7 +247,7 @@
           <!-- Version -->
           <div class="detail-item" v-if="mintData.info?.version">
             <div class="detail-label">
-              <info-icon size="20" color="#9E9E9E" class="detail-icon" />
+              <info-icon size="20" class="detail-icon" />
               <div class="detail-name">
                 {{ $t("MintDetailsDialog.details.version.label") }}
               </div>
@@ -286,7 +286,7 @@
               class="action-button cursor-pointer"
               @click="openEditMintDialog"
             >
-              <pencil-icon size="20" color="#9E9E9E" class="action-icon" />
+              <pencil-icon size="20" class="action-icon" />
               <div class="action-label">
                 {{ $t("MintDetailsDialog.actions.edit.label") }}
               </div>
@@ -296,7 +296,7 @@
               class="action-button cursor-pointer"
               @click="copyText(mintData.url)"
             >
-              <copy-icon size="20" color="#9E9E9E" class="action-icon" />
+              <copy-icon size="20" class="action-icon" />
               <div class="action-label">
                 {{ $t("MintDetailsDialog.actions.copy_mint_url.label") }}
               </div>
@@ -314,7 +314,7 @@
               class="action-button delete-button cursor-pointer"
               @click="openRemoveMintDialog"
             >
-              <trash-icon size="20" color="#FF453A" class="action-icon" />
+              <trash-icon size="20" class="action-icon text-negative" />
               <div class="action-label">
                 {{ $t("MintDetailsDialog.actions.delete.label") }}
               </div>
@@ -346,7 +346,7 @@ import {
   Copy as CopyIcon,
   Pencil as PencilIcon,
   Trash as TrashIcon,
-  Building as BuildingIcon,
+  Landmark as LandmarkIcon,
   Banknote as BanknoteIcon,
 } from "lucide-vue-next";
 
@@ -364,7 +364,7 @@ export default defineComponent({
     CopyIcon,
     PencilIcon,
     TrashIcon,
-    BuildingIcon,
+    LandmarkIcon,
     BanknoteIcon,
     EditMintDialog,
     RemoveMintDialog,
@@ -408,6 +408,16 @@ export default defineComponent({
     };
   },
   computed: {
+    mintDisplayName(): string {
+      const data = this.mintData as any;
+      if (data?.nickname) return data.nickname;
+      if (data?.info?.name) return data.info.name;
+      try {
+        return new URL(data?.url).host;
+      } catch {
+        return "Mint";
+      }
+    },
     ...mapWritableState(useMintsStore, [
       "showEditMintDialog",
       "showRemoveMintDialog",
@@ -530,7 +540,7 @@ export default defineComponent({
 .mint-details-page-content {
   max-width: 600px;
   margin: 0 auto;
-  color: white;
+  color: var(--app-text);
   height: 100%;
   overflow-y: auto;
   position: absolute;
@@ -541,7 +551,7 @@ export default defineComponent({
 .mint-content-container {
   max-width: 600px;
   margin: 0 auto;
-  color: white;
+  color: var(--app-text);
   height: 100%;
   overflow-y: auto;
   position: relative;
@@ -572,7 +582,7 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: var(--app-tint);
 }
 
 .mint-name {
@@ -606,7 +616,7 @@ export default defineComponent({
   position: relative;
   font-size: 14px;
   line-height: 20px;
-  color: #9e9e9e;
+  color: var(--app-text-muted);
   width: 100%;
   font-weight: 500;
 }
@@ -621,14 +631,14 @@ export default defineComponent({
 .divider-line {
   flex: 1;
   height: 1px;
-  background-color: #333;
+  background-color: var(--app-border-strong);
 }
 
 .divider-text {
   padding: 0 10px;
   font-size: 14px;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--app-text);
   text-transform: uppercase;
 }
 
@@ -675,38 +685,10 @@ export default defineComponent({
   width: 100%;
 }
 
-.detail-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
 
-.detail-label {
-  display: flex;
-  align-items: center;
-}
 
-.detail-icon {
-  margin-right: 10px;
-}
 
-.detail-name {
-  font-size: 16px;
-  font-weight: 600;
-  color: #9e9e9e;
-}
 
-.detail-value {
-  font-size: 16px;
-  font-weight: 600;
-  color: white;
-  text-align: right;
-  max-width: 60%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 
 /* Action Buttons */
 .action-buttons-section {
@@ -747,11 +729,12 @@ export default defineComponent({
 }
 
 .action-button:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--app-tint-strong);
 }
 
 .action-icon {
   min-width: 20px;
+  color: var(--app-text-muted);
 }
 
 .action-label {
@@ -762,7 +745,7 @@ export default defineComponent({
 }
 
 .delete-button {
-  color: #ff453a;
+  color: var(--q-negative);
 }
 
 /* QR Code Container and Animation */
@@ -826,18 +809,18 @@ export default defineComponent({
   font-size: 14px;
   font-weight: 600;
   line-height: 24px;
-  color: white;
+  color: var(--app-text);
 }
 
 .nut-number {
-  color: #9e9e9e;
+  color: var(--app-text-muted);
 }
 
 /* Make "View all" and "Hide" text clickable */
 .detail-value[v-if="!showAllNuts"],
 .detail-value[v-else] {
   cursor: pointer;
-  color: white;
+  color: var(--app-text);
   font-weight: 600;
 }
 
@@ -851,11 +834,11 @@ export default defineComponent({
 
 .currency-unit-pill {
   border-radius: 4px;
-  background-color: #1d1d1d;
+  background-color: var(--app-raised);
   padding: 4px 8px;
   font-size: 14px;
   font-weight: 600;
-  color: white;
+  color: var(--app-text);
   display: inline-block;
 }
 </style>

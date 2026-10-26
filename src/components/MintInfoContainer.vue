@@ -12,12 +12,10 @@
              already covers the image download -->
         <template v-slot:loading />
       </q-img>
-      <q-icon
+      <LandmarkIcon
         v-else-if="!loading || imgError"
-        name="account_balance"
-        color="grey-7"
         :size="fallbackIconSize"
-        class="mint-avatar-fallback"
+        class="mint-avatar-fallback text-app-muted mint-glyph"
       />
       <!-- Single spinner for the whole network chain: mint info fetch
            and icon image download. The transition wraps a plain div on
@@ -38,10 +36,12 @@
 </template>
 
 <script lang="ts">
+import { Landmark as LandmarkIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "MintInfoContainer",
+  components: { LandmarkIcon },
   props: {
     url: { type: String, required: true },
     name: { type: String, required: false },

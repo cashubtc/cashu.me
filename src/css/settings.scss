@@ -6,7 +6,7 @@
 
 .settings-view {
   width: 100%;
-  max-width: 800px;
+  max-width: 600px;
   margin: 0 auto;
   overflow-x: hidden;
 }
@@ -51,21 +51,21 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--app-text-muted);
 }
 
 .settings-section-caption {
   font-size: 12px;
   line-height: 1.4;
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--app-text-subtle);
   margin-top: 4px;
 }
 
 /* Card-style groups (settings menu, about page, section content) */
 .settings-card,
 .settings-menu-group {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--app-tint);
+  border: 1px solid var(--app-border);
   border-radius: 14px;
   padding: 4px 0;
   overflow: hidden;
@@ -98,9 +98,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--q-primary);
+  color: var(--app-accent);
 }
 
 .settings-menu-chevron {
-  color: rgba(255, 255, 255, 0.35);
+  color: var(--app-text-subtle);
 }

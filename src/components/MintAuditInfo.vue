@@ -26,7 +26,9 @@
         to donate ecash and help initiate an audit of this mint.
       </span>
     </div>
-    <div v-else-if="error" class="q-mx-sm text-bold">Error: {{ error }}</div>
+    <div v-else-if="error" class="q-mx-sm text-app-muted">
+      {{ /fetch|network/i.test(error) ? "Audit info is unavailable right now." : error }}
+    </div>
     <div v-else-if="mintInfo" class="mint-info">
       <!-- Warning Box -->
       <div style="margin-bottom: 32px">
@@ -306,7 +308,7 @@ export default {
 
 .text-subtitle1 {
   font-size: 14px;
-  color: #9e9e9e;
+  color: var(--app-text-muted);
   margin-bottom: 8px;
 }
 
@@ -318,7 +320,7 @@ export default {
 
 .text-caption {
   font-size: 12px;
-  color: #9e9e9e;
+  color: var(--app-text-muted);
 }
 
 .row {

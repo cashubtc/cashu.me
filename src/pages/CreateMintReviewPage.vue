@@ -371,14 +371,14 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: var(--app-tint);
 }
 
 .mint-name {
   font-size: 24px;
   font-weight: 600;
   text-align: center;
-  color: white;
+  color: var(--app-text);
 }
 
 .mint-url {
@@ -390,9 +390,9 @@ export default defineComponent({
 
 /* Section Cards */
 .section-card {
-  background-color: rgba(255, 255, 255, 0.03);
+  background-color: var(--app-tint);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--app-border);
 }
 
 .rating-section,
@@ -411,7 +411,7 @@ export default defineComponent({
 }
 
 .review-input :deep(.q-field__native) {
-  color: white;
+  color: var(--app-text);
 }
 
 /* Publisher Info */

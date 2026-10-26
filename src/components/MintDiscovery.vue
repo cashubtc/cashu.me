@@ -271,14 +271,14 @@ export default defineComponent({
   font-family: Inter, -apple-system, "system-ui", "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--app-text);
   margin: 0 0 8px 0;
   text-transform: none;
 }
 
 .discover-subtitle {
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--app-text-muted);
   margin: 0;
   line-height: 1.4;
 }

@@ -1021,7 +1021,7 @@ export default defineComponent({
 .multinut-content-container {
   max-width: 600px;
   margin: 0 auto;
-  color: white;
+  color: var(--app-text);
   height: 100%;
   overflow-y: auto;
   position: relative;
@@ -1060,28 +1060,28 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: var(--app-tint);
 }
 
 .multinut-title {
   font-size: 20px;
   font-weight: 600;
   text-align: center;
-  color: white;
+  color: var(--app-text);
 }
 
 .multinut-amount {
   font-size: 32px;
   font-weight: 600;
   text-align: center;
-  color: white;
+  color: var(--app-text);
 }
 
 .multinut-description {
   font-size: 14px;
   font-weight: 500;
   text-align: center;
-  color: #9e9e9e;
+  color: var(--app-text-muted);
 }
 
 /* Section Divider */
@@ -1094,14 +1094,14 @@ export default defineComponent({
 .divider-line {
   flex: 1;
   height: 1px;
-  background-color: #333;
+  background-color: var(--app-border-strong);
 }
 
 .divider-text {
   padding: 0 10px;
   font-size: 14px;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--app-text);
   text-transform: uppercase;
 }
 
@@ -1113,7 +1113,7 @@ export default defineComponent({
 .mint-selection-description {
   font-size: 14px;
   line-height: 20px;
-  color: #9e9e9e;
+  color: var(--app-text-muted);
   font-weight: 500;
   text-align: left;
 }
@@ -1130,7 +1130,7 @@ export default defineComponent({
 .mint-card {
   width: 100%;
   border-radius: 12px;
-  background-color: rgba(255, 255, 255, 0.02);
+  background-color: var(--app-tint);
   transition: all 0.2s ease;
 }
 
@@ -1205,12 +1205,12 @@ export default defineComponent({
 }
 
 .total-balance-badge {
-  background-color: #1d1d1d;
+  background-color: var(--app-raised);
   border-radius: 4px;
   padding: 4px 8px;
   font-size: 14px;
   font-weight: 500;
-  color: white;
+  color: var(--app-text);
   display: inline-block;
 }
 
@@ -1226,12 +1226,12 @@ export default defineComponent({
 }
 
 .payment-progress .q-linear-progress__track {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--app-tint-strong);
 }
 
 .payment-state-text {
   font-size: 10px;
-  color: #9e9e9e;
+  color: var(--app-text-muted);
   font-weight: 500;
   text-align: left;
 }
@@ -1315,7 +1315,7 @@ export default defineComponent({
 .warning-text {
   font-size: 14px;
   line-height: 20px;
-  color: #ffffff;
+  color: var(--app-text);
   font-weight: 500;
 }
 

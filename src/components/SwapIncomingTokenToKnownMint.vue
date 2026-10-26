@@ -67,11 +67,11 @@
             >
               <template v-slot:error>
                 <div class="row items-center justify-center full-height">
-                  <q-icon name="account_balance" color="grey-7" size="24px" />
+                  <LandmarkIcon :size="24" class="text-app-muted mint-glyph" />
                 </div>
               </template>
             </q-img>
-            <q-icon v-else name="account_balance" color="grey-7" size="24px" />
+            <LandmarkIcon v-else :size="24" class="text-app-muted mint-glyph" />
           </q-avatar>
 
           <!-- Mint Info -->
@@ -115,13 +115,17 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 import ChooseMint from "src/components/ChooseMint.vue";
-import { ArrowDown as ArrowDownIcon } from "lucide-vue-next";
+import {
+  ArrowDown as ArrowDownIcon,
+  Landmark as LandmarkIcon,
+} from "lucide-vue-next";
 import ToolTipInfo from "src/components/ToolTipInfo.vue";
 import { useMintsStore } from "stores/mints";
 
 export default defineComponent({
   name: "SwapIncomingTokenToKnownMint",
   components: {
+    LandmarkIcon,
     ChooseMint,
     ArrowDownIcon,
     ToolTipInfo,
@@ -210,22 +214,22 @@ export default defineComponent({
 /* Swap Section Styles */
 .swap-section {
   padding: 16px;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--app-tint);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--app-border);
 }
 
 .swap-mint-info {
   padding: 12px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--app-tint);
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--app-border);
 }
 
 .swap-mint-name {
   font-size: 16px;
   font-weight: 500;
-  color: white;
+  color: var(--app-text);
   line-height: 1.3;
 }
 
@@ -238,7 +242,7 @@ export default defineComponent({
 .swap-arrow-icon {
   width: 24px;
   height: 24px;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--app-text-muted);
 }
 
 .swap-destination-section {
@@ -248,7 +252,7 @@ export default defineComponent({
 .swap-section-label {
   font-size: 14px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--app-text-muted);
 }
 
 .swap-info-tip {
@@ -262,7 +266,7 @@ export default defineComponent({
 
 .swap-info-text {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--app-text-muted);
   line-height: 1.4;
 }
 </style>

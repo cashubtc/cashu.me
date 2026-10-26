@@ -2,12 +2,7 @@
   <q-card class="q-ma-lg bg-dark q-pa-md">
     <q-card-section>
       <div class="row items-center justify-center">
-        <q-icon
-          color="primary"
-          class="q-pb-md"
-          name="account_balance"
-          size="50px"
-        />
+        <LandmarkIcon :size="48" class="q-pb-md mint-glyph" />
       </div>
       <div class="row items-center justify-center">
         <div class="text-h6">{{ $t("NoMintWarnBanner.title") }}</div>
@@ -40,6 +35,7 @@
   </q-card>
 </template>
 <script lang="ts">
+import { Landmark as LandmarkIcon } from "lucide-vue-next";
 import { defineComponent, ref } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useUiStore } from "src/stores/ui";
@@ -50,6 +46,7 @@ import { sumProofAmounts } from "src/js/proofs";
 
 export default defineComponent({
   name: "NoMintWarnBanner",
+  components: { LandmarkIcon },
   mixins: [windowMixin],
   props: {
     proofs: Array,

@@ -31,7 +31,7 @@ export default defineComponent({
 
 .tool-tip-info-text {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--app-text-muted);
   line-height: 1.4;
 }
 </style>

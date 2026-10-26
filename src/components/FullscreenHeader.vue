@@ -1,6 +1,6 @@
 <template>
   <q-header class="bg-dark">
-    <q-toolbar>
+    <q-toolbar class="fullscreen-toolbar">
       <q-btn
         flat
         dense
@@ -41,3 +41,11 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+/* Keep the back control in the same column as page content on wide screens. */
+.fullscreen-toolbar {
+  margin: 0 auto;
+  max-width: 632px;
+}
+</style>

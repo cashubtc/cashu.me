@@ -17,7 +17,7 @@
           <q-item
             data-testid="mint-card"
             :active="mint.url == activeMintUrl"
-            active-class="text-weight-bold text-primary"
+            active-class="text-weight-bold"
             clickable
             @click="activateMintUrlInternal(mint.url)"
             class="mint-card q-mb-md cursor-pointer"
@@ -25,8 +25,8 @@
               'border-radius': '10px',
               border:
                 mint.url == activeMintUrl
-                  ? '1px solid var(--q-primary) !important'
-                  : '1px solid rgba(128, 128, 128, 0.2) !important',
+                  ? '1px solid var(--app-accent) !important'
+                  : '1px solid var(--app-border-strong) !important',
               padding: '0px',
               position: 'relative',
             }"
@@ -41,7 +41,6 @@
             >
               <q-spinner
                 v-if="mint.url == activatingMintUrl"
-                color="white"
                 size="1.3rem"
                 class="mint-loading-spinner"
               />
@@ -73,7 +72,6 @@
                 name="more_vert"
                 data-testid="mint-details"
                 @click.stop="showMintInfo(mint)"
-                color="white"
                 class="cursor-pointer"
                 size="1.3rem"
               />
@@ -177,10 +175,7 @@
           <div class="divider-line"></div>
         </div>
 
-        <div
-          class="add-mint-description q-mb-lg text-left"
-          style="color: rgba(255, 255, 255, 0.7)"
-        >
+        <div class="add-mint-description q-mb-lg text-left text-app-muted">
           {{ $t("MintSettings.add.description") }}
         </div>
 
@@ -218,14 +213,13 @@
                   ? sanitizeMintUrlAndShowAddDialog()
                   : null
               "
-              class="text-white"
               :class="{ 'text-grey-7': addMintData.url.length === 0 }"
             >
               <q-icon name="add" size="20px" class="q-mr-sm" />
               <span>{{ $t("MintSettings.add.actions.add_mint.label") }}</span>
             </q-btn>
 
-            <q-btn flat @click="showCamera" class="text-white">
+            <q-btn flat @click="showCamera">
               <q-icon name="qr_code" size="20px" class="q-mr-sm" />
               <span>{{ $t("MintSettings.add.actions.scan.label") }}</span>
             </q-btn>
@@ -267,12 +261,7 @@
             option-value="url"
             option-label="optionLabel"
             :label="$t('MintSettings.swap.inputs.from.label')"
-            style="
-              min-width: 200px;
-              width: 100%;
-              font-family: monospace;
-              font-size: 0.9em;
-            "
+            style="min-width: 200px; width: 100%"
             :disable="swapBlocking"
           />
         </q-item>
@@ -288,12 +277,7 @@
             option-value="url"
             option-label="optionLabel"
             :label="$t('MintSettings.swap.inputs.to.label')"
-            style="
-              min-width: 200px;
-              width: 100%;
-              font-family: monospace;
-              font-size: 0.9em;
-            "
+            style="min-width: 200px; width: 100%"
             :disable="swapBlocking"
           />
         </q-item>
@@ -730,7 +714,7 @@ export default defineComponent({
   padding: 0 10px;
   font-size: 14px;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--app-text);
   text-transform: uppercase;
 }
 

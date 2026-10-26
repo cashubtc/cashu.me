@@ -51,7 +51,7 @@
         clickable
         @click="selectTheme(theme.name)"
         :active="activeTheme === theme.name"
-        active-class="text-weight-bold text-primary"
+        active-class="text-weight-bold"
       >
         <q-item-section avatar>
           <q-icon
@@ -64,7 +64,7 @@
           />
         </q-item-section>
         <q-item-section>
-          <q-item-label>{{
+          <q-item-label class="theme-option-label">{{
             $t(`Settings.appearance.theme.tooltips.${theme.tooltip}`)
           }}</q-item-label>
         </q-item-section>
@@ -140,3 +140,9 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.theme-option-label {
+  color: var(--app-text);
+}
+</style>

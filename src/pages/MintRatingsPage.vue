@@ -81,7 +81,7 @@ export default defineComponent({
 .mint-ratings-page-content {
   max-width: 820px;
   margin: 0 auto;
-  color: white;
+  color: var(--app-text);
   height: 100%;
   overflow-y: auto;
   position: absolute;
@@ -92,7 +92,7 @@ export default defineComponent({
 .mint-content-container {
   max-width: 820px;
   margin: 0 auto;
-  color: white;
+  color: var(--app-text);
   height: 100%;
   overflow-y: auto;
   position: relative;

@@ -120,7 +120,7 @@
 
     <div v-if="mintDisplay" class="detail-item">
       <div class="detail-label">
-        <BuildingIcon :size="20" :color="iconColor" class="detail-icon" />
+        <LandmarkIcon :size="20" :color="iconColor" class="detail-icon" />
         <div class="detail-name">Mint</div>
       </div>
       <div class="detail-value">{{ mintDisplay }}</div>
@@ -147,7 +147,7 @@ import {
   ArrowDownUp as ArrowDownUpIcon,
   BadgeCheck as BadgeCheckIcon,
   Clock as ClockIcon,
-  Building as BuildingIcon,
+  Landmark as LandmarkIcon,
   Banknote as BanknoteIcon,
   Info as InfoIcon,
   Fingerprint as FingerprintIcon,
@@ -173,7 +173,7 @@ export default defineComponent({
     ArrowDownUpIcon,
     BadgeCheckIcon,
     ClockIcon,
-    BuildingIcon,
+    LandmarkIcon,
     BanknoteIcon,
     InfoIcon,
     FingerprintIcon,
@@ -518,38 +518,10 @@ export default defineComponent({
   width: 100%;
 }
 
-.detail-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
 
-.detail-label {
-  display: flex;
-  align-items: center;
-}
 
-.detail-icon {
-  margin-right: 10px;
-}
 
-.detail-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--q-color-grey-6);
-}
 
-.detail-value {
-  font-size: 16px;
-  font-weight: 600;
-  color: inherit;
-  text-align: right;
-  max-width: 60%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 
 .detail-value-with-spinner {
   display: flex;

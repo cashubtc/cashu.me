@@ -280,18 +280,18 @@ export default defineComponent({
 }
 
 .drawer-card {
-  background: #1a1a1a;
+  background: var(--app-raised);
 }
 
 .action-row {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--app-tint);
   border-radius: 12px;
   padding: 12px 16px;
   cursor: pointer;
   transition: background 0.2s ease;
 
   &:active {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--app-tint-strong);
   }
 }
 
@@ -299,7 +299,7 @@ export default defineComponent({
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--app-tint-strong);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -309,7 +309,7 @@ export default defineComponent({
 .lucide {
   width: 24px;
   height: 24px;
-  color: white;
+  color: var(--app-text);
 }
 
 .qcard {
