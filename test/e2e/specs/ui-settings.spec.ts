@@ -114,7 +114,7 @@ test("generates and browses P2PK keys and enables quick access", async ({
   await page.getByRole("button", { name: /Copy/i }).click();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(key);
   await wallet.closeFullscreenDialog();
-  await wallet.toggleSetting("Quick access to lock", true);
+  await wallet.toggleSetting("Show lock key on Receive", true);
   await page.reload();
   await expect(publicKey).toHaveText(key);
   await wallet.home();
@@ -185,7 +185,7 @@ for (const directNavigation of [false, true]) {
           .click();
         await page.getByText("Lightning address", { exact: true }).click();
       }
-      await wallet.toggleSetting("Enable", true);
+      await wallet.toggleSetting("Use a Lightning address", true);
       if (directNavigation)
         test.fail(
           true,
@@ -200,7 +200,7 @@ for (const directNavigation of [false, true]) {
         .filter({ hasText: "Address mint" })
         .click();
       await expect.poll(() => selectedMint).toBe(MINT_B_URL);
-      await wallet.toggleSetting("Enable", false);
+      await wallet.toggleSetting("Use a Lightning address", false);
       await expect(page.getByTestId("choose-mint")).toBeHidden();
     }
   );

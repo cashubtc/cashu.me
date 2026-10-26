@@ -309,9 +309,12 @@
               @click="openCreateReviewDialog"
             >
               <star-icon size="20" class="action-icon" />
-              <div class="action-label">Review mint</div>
+              <div class="action-label">
+                {{ $t("CreateMintReview.title") }}
+              </div>
             </div>
-
+          </div>
+          <div class="action-buttons-container q-mt-md">
             <div
               class="action-button delete-button cursor-pointer"
               @click="openRemoveMintDialog"
@@ -725,7 +728,7 @@ export default defineComponent({
   border-radius: 10px;
   transition: background-color 0.3s;
   width: calc(100% + 16px);
-  margin-bottom: 16px;
+  min-height: 48px;
 }
 
 .action-button:last-child {

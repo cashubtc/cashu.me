@@ -113,8 +113,9 @@ body,
 }
 // On wide screens bottom sheets match the shared content column.
 @media (min-width: 600px) {
-  .full-width-card {
-    max-width: 528px;
+  .full-width-card,
+  .q-dialog__inner > .full-width-card {
+    max-width: 528px !important;
   }
 }
 
@@ -417,4 +418,10 @@ body[data-theme] .welcome-surface,
 /* Multi-line fields grow with their content; no native resize grip. */
 textarea {
   resize: none;
+}
+
+/* One icon language: every Material glyph renders in its outlined form, which matches the
+   stroked Lucide set used across the app. */
+.material-icons {
+  font-family: "Material Icons Outlined" !important;
 }

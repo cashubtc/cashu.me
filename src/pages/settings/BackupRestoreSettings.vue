@@ -44,25 +44,16 @@
 
     <!-- restore -->
     <SettingsSection
-      :title="$t('Settings.backup_restore.restore_ecash.title')"
       :caption="$t('Settings.backup_restore.restore_ecash.description')"
     >
-      <q-item>
+      <q-item clickable v-ripple to="/restore">
         <q-item-section>
           <q-item-label>{{
             $t("Settings.backup_restore.restore_ecash.title")
           }}</q-item-label>
         </q-item-section>
         <q-item-section side>
-          <q-btn
-            class="q-px-md"
-            color="primary"
-            size="sm"
-            rounded
-            outline
-            to="/restore"
-            >{{ $t("Settings.backup_restore.restore_ecash.button") }}</q-btn
-          >
+          <q-icon name="chevron_right" class="settings-menu-chevron" />
         </q-item-section>
       </q-item>
     </SettingsSection>

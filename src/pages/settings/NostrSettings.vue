@@ -34,20 +34,15 @@
             caption
             v-if="signerType === 'SEED' && seedSignerPrivateKeyNsec"
           >
-            <q-badge
-              class="cursor-pointer q-mt-xs"
-              @click.stop="copyText(seedSignerPrivateKeyNsec)"
+            <q-btn
               outline
-              color="grey"
-            >
-              <q-icon
-                name="content_copy"
-                size="0.8em"
-                color="grey"
-                class="q-mr-xs"
-              ></q-icon
-              >{{ $t("Settings.nostr_keys.wallet_seed.copy_nsec") }}
-            </q-badge>
+              rounded
+              no-caps
+              icon="content_copy"
+              class="q-mt-sm"
+              @click.stop="copyText(seedSignerPrivateKeyNsec)"
+              :label="$t('Settings.nostr_keys.wallet_seed.copy_nsec')"
+            />
           </q-item-label>
         </q-item-section>
       </q-item>

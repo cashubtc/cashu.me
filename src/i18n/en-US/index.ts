@@ -185,7 +185,7 @@ export default {
       },
       nostr: {
         title: "Nostr",
-        caption: "Keys, relays, and Web of Trust",
+        caption: "Keys, relays and web of trust",
       },
       payment_requests: {
         title: "Payment requests",
@@ -279,7 +279,7 @@ export default {
       title: "Lightning address",
       description: "Receive payments to your Lightning address.",
       enable: {
-        toggle: "Enable",
+        toggle: "Use a Lightning address",
         description: "Lightning address with npub.cash",
       },
       address: {
@@ -314,7 +314,8 @@ export default {
       },
       use_nsec: {
         title: "Use your nsec",
-        description: "This method is dangerous and not recommended",
+        description:
+          "Pastes your main Nostr private key into this wallet. Not recommended.",
         delete_tooltip: "Delete nsec",
       },
       signing_extension: {
@@ -347,7 +348,7 @@ export default {
     },
     hardware_features: {
       webnfc: {
-        title: "WebNFC",
+        title: "NFC card format",
         description: "Choose the encoding for writing to NFC cards",
         text: {
           title: "Text",
@@ -359,7 +360,7 @@ export default {
         },
         binary: {
           title: "Binary",
-          description: "Store tokens as binary data",
+          description: "Store token as binary data",
         },
         quick_access: {
           toggle: "Quick access to NFC",
@@ -375,7 +376,7 @@ export default {
       generate_button: "Generate key",
       import_button: "Import nsec",
       quick_access: {
-        toggle: "Quick access to lock",
+        toggle: "Show lock key on Receive",
         description:
           "Use this to quickly show your P2PK locking key in the receive ecash menu.",
       },
@@ -499,7 +500,7 @@ export default {
       copy_lightning_address: "Copy Lightning address",
     },
     multinut: {
-      use_multinut: "Use Multinut",
+      use_multinut: "Pay from several mints (Multinut)",
     },
     advanced: {
       title: "Advanced",
@@ -1355,7 +1356,7 @@ export default {
   ChooseMint: {
     title: "Select a mint",
     placeholder: "Select a mint",
-    available_text: "available",
+    available_text: "on this mint",
     sheet_title: "Select mint",
     badge_mint_error_text: "Error",
     badge_option_mint_error_text: "@:ChooseMint.badge_mint_error_text",

@@ -116,9 +116,11 @@
 }
 
 /* Inline settings actions share one secondary button: 44px tall, 14px label. */
-.settings-view .q-btn--outline:not(.q-btn--round) {
+.settings-view .q-btn--outline:not(.q-btn--round),
+.settings-view .settings-primary-action {
   min-height: 44px;
-  font-size: 14px;
+  font-size: 14px !important;
+  font-weight: 600;
   padding: 0 16px;
 }
 
@@ -131,8 +133,8 @@ body .settings-view .q-badge.bg-primary {
   font-weight: 500;
 }
 
-.settings-view .settings-primary-action {
-  min-height: 44px;
-  font-size: 14px;
-  padding: 0 16px;
+/* Read-only fields (seed phrase) keep the solid outline; Quasar's dashed readonly border
+   read as a second container inside the card. */
+.settings-view .q-field--outlined.q-field--readonly .q-field__control:before {
+  border-style: solid;
 }

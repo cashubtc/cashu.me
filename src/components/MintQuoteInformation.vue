@@ -12,7 +12,7 @@
       <div class="detail-value">{{ amountDisplay }}</div>
     </div>
 
-    <div class="detail-item q-mb-md">
+    <div v-if="unit !== 'sat'" class="detail-item q-mb-md">
       <div class="detail-label">
         <CoinsIcon :size="20" class="detail-icon" />
         <div class="detail-name">Unit</div>
@@ -20,7 +20,10 @@
       <div class="detail-value">{{ unitDisplay }}</div>
     </div>
 
-    <div v-if="stateDisplay" class="detail-item q-mb-md">
+    <div
+      v-if="stateDisplay && !(hidePaidStatus && isPaidState)"
+      class="detail-item q-mb-md"
+    >
       <div class="detail-label">
         <InfoIcon :size="20" class="detail-icon" />
         <div class="detail-name">Status</div>
@@ -154,6 +157,10 @@ export default defineComponent({
     HashIcon,
   },
   props: {
+    hidePaidStatus: {
+      type: Boolean,
+      default: false,
+    },
     mintQuote: {
       type: Object as PropType<MintQuote | null>,
       default: null,

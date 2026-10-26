@@ -12,7 +12,7 @@
           v-model="rating"
           max="5"
           size="40px"
-          color="grey-6"
+          color="grey-5"
           color-selected="amber"
           icon-half="star_half"
           icon="star_border"

@@ -114,6 +114,7 @@
                   style="max-width: 600px"
                 >
                   <MintQuoteInformation
+                    hide-paid-status
                     :mint-quote="invoiceData.mintQuote"
                     :invoice="invoiceData"
                     :mint-url="invoiceData.mint"
@@ -132,6 +133,7 @@
                   style="max-width: 600px"
                 >
                   <MeltQuoteInformation
+                    hide-paid-status
                     :melt-quote="invoiceData.meltQuote"
                     :invoice="invoiceData"
                     :mint-url="invoiceData.mint"
@@ -216,7 +218,8 @@ export default defineComponent({
         this.invoiceData.unit,
         true
       );
-      return display;
+      // Same true minus sign as the history list.
+      return display.replace(/^-\s*/, "\u2212");
     },
     runnerActive: function () {
       return this.invoiceWorkerRunning;
