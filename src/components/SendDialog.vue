@@ -7,8 +7,8 @@
     transition-hide="slide-down"
   >
     <q-card class="drawer-card full-width-card q-pb-lg">
-      <q-card-section class="row items-center q-pb-sm">
-        <q-btn flat round dense v-close-popup class="q-ml-sm" color="primary">
+      <q-card-section class="row items-center no-wrap drawer-header">
+        <q-btn flat round v-close-popup class="drawer-header-btn" color="primary">
           <XIcon />
         </q-btn>
         <div class="col text-center">
@@ -17,8 +17,7 @@
         <q-btn
           flat
           round
-          dense
-          class="q-mr-sm"
+          class="drawer-header-btn"
           @click="showCamera"
           color="primary"
         >

@@ -454,3 +454,14 @@ textarea {
   font-size: 18px !important;
   font-weight: 600;
 }
+
+// Floating drawer headers (Receive, Send, Receive ecash) share the bottom-sheet header
+// geometry: 44px buttons on the 6px toolbar inset, so each glyph lands on the 16px gutter.
+.drawer-header {
+  min-height: 56px;
+  padding: 6px 6px 8px;
+}
+.drawer-header .drawer-header-btn {
+  width: 44px;
+  height: 44px;
+}

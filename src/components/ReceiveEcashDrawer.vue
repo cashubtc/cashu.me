@@ -7,8 +7,8 @@
     transition-hide="slide-down"
   >
     <q-card class="drawer-card full-width-card q-pb-lg">
-      <q-card-section class="row items-center q-pb-sm">
-        <q-btn flat round dense @click="goBack" class="q-ml-sm" color="primary">
+      <q-card-section class="row items-center no-wrap drawer-header">
+        <q-btn flat round @click="goBack" class="drawer-header-btn" color="primary">
           <ChevronLeftIcon />
         </q-btn>
         <div class="col text-center">
@@ -17,9 +17,8 @@
         <q-btn
           flat
           round
-          dense
           @click="showCamera"
-          class="q-mr-sm"
+          class="drawer-header-btn"
           color="primary"
         >
           <ScanIcon />
