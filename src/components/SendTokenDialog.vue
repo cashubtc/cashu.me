@@ -38,10 +38,11 @@
             style="position: absolute; right: 16px"
           >
             <q-btn
-              flat
+              outline
               dense
               color="primary"
               round
+              class="lock-toggle-btn"
               :aria-label="$t('SendTokenDialog.actions.lock.label')"
               @click="showLockInput = !showLockInput"
             >
@@ -760,6 +761,11 @@ export default defineComponent({
 });
 </script>
 <style scoped>
+.lock-toggle-btn {
+  height: 32px;
+  width: 32px;
+}
+
 .unit-toggle-chip {
   font-size: 15px;
   min-height: 32px;

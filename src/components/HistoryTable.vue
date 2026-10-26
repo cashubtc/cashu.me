@@ -7,11 +7,11 @@
         data-testid="history-row"
         clickable
         v-ripple
-        class="q-px-md q-py-sm history-row"
+        class="q-px-none q-py-sm history-row"
       >
         <!-- Icon Section -->
         <q-item-section avatar class="q-pr-md" style="min-width: 40px">
-          <q-avatar size="32px">
+          <q-avatar size="40px" class="transaction-avatar">
             <CoinsIcon
               v-if="isEcashTransaction(transaction)"
               class="transaction-icon"
@@ -21,6 +21,18 @@
               class="transaction-icon"
             />
             <ZapIcon v-else class="transaction-icon" />
+            <span
+              class="direction-badge"
+              :class="
+                transaction.amount >= 0
+                  ? 'direction-badge--in'
+                  : 'direction-badge--out'
+              "
+              aria-hidden="true"
+            >
+              <ArrowDownLeftIcon v-if="transaction.amount >= 0" :size="11" />
+              <ArrowUpRightIcon v-else :size="11" />
+            </span>
           </q-avatar>
         </q-item-section>
 
@@ -179,6 +191,8 @@ import {
   Bitcoin as BitcoinIcon,
   Coins as CoinsIcon,
   Zap as ZapIcon,
+  ArrowDownLeft as ArrowDownLeftIcon,
+  ArrowUpRight as ArrowUpRightIcon,
 } from "lucide-vue-next";
 import { PaymentMethod, UnifiedTransactionType } from "src/stores/walletTypes";
 import { mintQuoteForHistoryInvoice } from "src/js/invoice-history";
@@ -189,6 +203,8 @@ export default defineComponent({
     CoinsIcon,
     BitcoinIcon,
     ZapIcon,
+    ArrowDownLeftIcon,
+    ArrowUpRightIcon,
   },
   mixins: [windowMixin],
   props: {},
@@ -557,6 +573,31 @@ export default defineComponent({
   background-color: rgba(0, 0, 0, 0.04);
 }
 
+.transaction-avatar {
+  background: var(--app-tint-strong);
+  overflow: visible;
+  position: relative;
+}
+
+.direction-badge {
+  align-items: center;
+  background: var(--app-surface);
+  border: 1.5px solid var(--app-surface);
+  border-radius: 50%;
+  bottom: -3px;
+  color: var(--app-text-muted);
+  display: flex;
+  height: 17px;
+  justify-content: center;
+  position: absolute;
+  right: -3px;
+  width: 17px;
+}
+
+.direction-badge--in {
+  color: var(--q-positive);
+}
+
 .transaction-icon {
   width: 20px;
   height: 20px;
@@ -566,10 +607,15 @@ export default defineComponent({
 .history-table {
   margin: 0 auto;
   max-width: 100%;
+  padding: 0 16px;
 }
 
 .history-row {
-  min-height: 60px;
+  min-height: 64px;
+}
+
+.history-row :deep(.q-item__label--caption) {
+  font-size: 13px;
 }
 
 .history-filter-btn {

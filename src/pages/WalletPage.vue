@@ -174,10 +174,10 @@
 }
 
 .wallet-history-toggle {
-  min-height: 32px;
+  min-height: 44px;
 }
 
-.wallet-column {
+.row > .wallet-column {
   max-width: 480px;
 }
 
@@ -199,7 +199,8 @@
 }
 
 .wallet-scan-btn {
-  background: var(--app-tint-strong);
+  background: var(--app-tint);
+  border: 1px solid var(--app-border);
   color: var(--app-accent);
   flex: 0 0 auto;
   height: 52px;

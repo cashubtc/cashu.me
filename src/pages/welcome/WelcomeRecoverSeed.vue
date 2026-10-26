@@ -193,7 +193,7 @@ export default {
   flex-direction: column;
   justify-content: space-between;
   height: 100%;
-  background: var(--q-dark);
+  background: var(--app-surface);
   color: white;
   padding: 40px 20px 20px 20px;
   box-sizing: border-box;

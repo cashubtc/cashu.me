@@ -1,5 +1,5 @@
 <template>
-  <q-card flat class="no-mint-card q-mx-md q-my-lg q-pa-md">
+  <div class="no-mint-card q-mx-md q-my-lg q-pa-md">
     <q-card-section>
       <div class="row items-center justify-center">
         <LandmarkIcon :size="48" class="q-pb-md mint-glyph" />
@@ -35,7 +35,7 @@
         />
       </div>
     </q-card-section>
-  </q-card>
+  </div>
 </template>
 <script lang="ts">
 import { Landmark as LandmarkIcon } from "lucide-vue-next";
@@ -102,7 +102,7 @@ export default defineComponent({
 }
 
 .no-mint-card {
-  background: var(--app-tint) !important;
+  background: var(--app-tint);
   border: 1px solid var(--app-border);
   border-radius: 20px;
   display: flex;

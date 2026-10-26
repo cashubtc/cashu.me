@@ -383,10 +383,10 @@ export default defineComponent({
 <style lang="scss" scoped>
 .mint-selector-btn {
   width: 100%;
-  padding: 8px 16px 8px 8px;
+  padding: 10px 16px 10px 12px;
   background: var(--app-tint);
   border: 1px solid var(--app-border);
-  border-radius: 999px;
+  border-radius: 16px;
   cursor: pointer;
   transition: all 0.2s ease;
 
@@ -396,7 +396,7 @@ export default defineComponent({
   }
 
   &.mint-selector-dense {
-    padding: 6px 14px 6px 6px;
+    padding: 8px 14px 8px 10px;
   }
 }
 

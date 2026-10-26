@@ -181,7 +181,7 @@ export default {
       },
       lightning_address: {
         title: "Lightning address",
-        caption: "Get paid to your Lightning address",
+        caption: "Receive sats at a name@domain address",
       },
       nostr: {
         title: "Nostr",
@@ -658,7 +658,7 @@ export default {
     },
   },
   WelcomeSlide1: {
-    title: "Welcome to Cashu",
+    title: "Welcome to Cashu.me",
     text: "Cashu.me is a free and open-source Bitcoin wallet that uses ecash to keep your funds secure and private.",
     actions: {
       more: {

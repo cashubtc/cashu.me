@@ -218,7 +218,7 @@
           <!-- Currency (if available) -->
           <div class="detail-item q-mb-md" v-if="mintData.info?.currencies">
             <div class="detail-label">
-              <currency-icon size="20" class="detail-icon" />
+              <coins-icon size="20" class="detail-icon" />
               <div class="detail-name">
                 {{ $t("MintDetailsDialog.details.currency.label") }}
               </div>
@@ -338,7 +338,7 @@ import {
   QrCode as QrCodeIcon,
   Link as LinkIcon,
   Nut as NutIcon,
-  DollarSign as CurrencyIcon,
+  Coins as CoinsIcon,
   Star as StarIcon,
   Info as InfoIcon,
   Mail as MailIcon,
@@ -357,7 +357,7 @@ export default defineComponent({
     QrCodeIcon,
     LinkIcon,
     NutIcon,
-    CurrencyIcon,
+    CoinsIcon,
     StarIcon,
     InfoIcon,
     MailIcon,
@@ -667,8 +667,18 @@ export default defineComponent({
 }
 
 /* Mint Details Section */
-.mint-details-section {
+/* Details and actions are grouped cards, like the settings menu. */
+.mint-details-section,
+.action-buttons-container {
+  background: var(--app-tint);
+  border: 1px solid var(--app-border);
+  border-radius: 14px;
+  padding: 16px 16px 4px;
   width: 100%;
+}
+
+.action-buttons-container {
+  padding: 4px 16px;
 }
 
 /* Action Buttons */

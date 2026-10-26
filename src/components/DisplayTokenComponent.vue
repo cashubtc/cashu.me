@@ -21,7 +21,7 @@
               sendData.historyToken.amount && sendData.historyToken.amount < 0
                 ? sendData.historyToken.status === "paid"
                   ? "Sent"
-                  : "Pending"
+                  : "Send"
                 : "Received"
             }}
             ecash</q-item-label
@@ -173,48 +173,10 @@
                 v-if="runnerActive"
                 indeterminate
                 rounded
-                size="3px"
-                color="primary"
+                size="2px"
+                color="grey-7"
+                track-color="transparent"
               />
-            </div>
-          </div>
-        </div>
-        <div class="row justify-center q-pb-xs q-ba-none">
-          <div
-            class="col-12 col-sm-11 col-md-8 q-px-md"
-            style="max-width: 600px; position: relative"
-          >
-            <div class="row justify-center items-center no-wrap">
-              <div class="row no-wrap" style="gap: 8px">
-                <q-btn
-                  v-if="showAnimatedQR"
-                  outline
-                  rounded
-                  no-caps
-                  class="qr-control-chip"
-                  @click="changeSpeed"
-                >
-                  <q-icon name="speed" size="18px" class="q-mr-xs"></q-icon>
-                  Speed:
-                  {{
-                    { F: "Fast", M: "Medium", S: "Slow" }[fragmentSpeedLabel]
-                  }}
-                </q-btn>
-                <q-btn
-                  v-if="showAnimatedQR"
-                  outline
-                  rounded
-                  no-caps
-                  class="qr-control-chip"
-                  @click="changeSize"
-                >
-                  <q-icon name="zoom_in" size="18px" class="q-mr-xs"></q-icon>
-                  Size:
-                  {{
-                    { L: "Large", M: "Medium", S: "Small" }[fragmentLengthLabel]
-                  }}
-                </q-btn>
-              </div>
             </div>
           </div>
         </div>
@@ -224,6 +186,47 @@
               :encodedToken="sendData.tokensBase64"
               :payment-request-id="sendData.historyToken?.paymentRequestId"
             />
+          </div>
+          <div class="row justify-center q-pt-sm q-pb-xs">
+            <div
+              class="col-12 col-sm-11 col-md-8 q-px-md"
+              style="max-width: 600px; position: relative"
+            >
+              <div class="row justify-center items-center no-wrap">
+                <div class="row no-wrap" style="gap: 8px">
+                  <q-btn
+                    v-if="showAnimatedQR"
+                    outline
+                    rounded
+                    no-caps
+                    class="qr-control-chip"
+                    @click="changeSpeed"
+                  >
+                    <q-icon name="speed" size="18px" class="q-mr-xs"></q-icon>
+                    Speed:
+                    {{
+                      { F: "Fast", M: "Medium", S: "Slow" }[fragmentSpeedLabel]
+                    }}
+                  </q-btn>
+                  <q-btn
+                    v-if="showAnimatedQR"
+                    outline
+                    rounded
+                    no-caps
+                    class="qr-control-chip"
+                    @click="changeSize"
+                  >
+                    <q-icon name="zoom_in" size="18px" class="q-mr-xs"></q-icon>
+                    Size:
+                    {{
+                      { L: "Large", M: "Medium", S: "Small" }[
+                        fragmentLengthLabel
+                      ]
+                    }}
+                  </q-btn>
+                </div>
+              </div>
+            </div>
           </div>
           <div
             v-if="sendData.paymentRequest"

@@ -124,11 +124,13 @@
         <span class="mint-chip__name">{{ activeMintLabel }}</span>
         <template v-if="mints.length > 1">
           <span class="mint-chip__dot" aria-hidden="true">·</span>
-          <AnimatedNumber
-            class="mint-chip__balance"
-            :value="getActiveBalance"
-            :format="(val) => formatCurrency(val, activeUnit)"
-          />
+          <span class="mint-chip__balance">
+            <AnimatedNumber
+              :value="getActiveBalance"
+              :format="(val) => formatCurrency(val, activeUnit)"
+            />
+            {{ $t("ChooseMint.available_text") }}
+          </span>
         </template>
         <ChevronDownIcon :size="16" class="mint-chip__icon" />
       </button>
@@ -404,12 +406,11 @@ export default defineComponent({
   align-items: center;
   background: transparent;
   border: 0;
-  color: var(--q-primary);
+  color: var(--app-text-subtle);
   cursor: pointer;
   display: flex;
   height: 18px;
   justify-content: center;
-  opacity: 0.28;
   padding: 0;
   transition: opacity 0.2s ease, transform 0.2s ease;
   width: 14px;
@@ -422,7 +423,7 @@ export default defineComponent({
   width: 7px;
 }
 .balance-unit-dot--active {
-  opacity: 0.9;
+  color: var(--app-accent);
   transform: scale(1.15);
 }
 .mint-chip {

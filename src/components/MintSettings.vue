@@ -66,10 +66,16 @@
               </div>
             </transition>
 
-            <!-- Top right more_vert icon -->
-            <div class="more-vert-icon">
+            <!-- Top right: active marker and mint details -->
+            <div class="more-vert-icon row items-center no-wrap">
+              <CircleCheckIcon
+                v-if="mint.url == activeMintUrl"
+                :size="18"
+                class="text-primary q-mr-sm"
+                aria-hidden="true"
+              />
               <q-icon
-                name="more_vert"
+                name="more_horiz"
                 data-testid="mint-details"
                 @click.stop="showMintInfo(mint)"
                 class="cursor-pointer"
@@ -96,7 +102,7 @@
                   <!-- Currency units with regular text styling -->
                   <div class="row q-gutter-x-sm">
                     <div
-                      v-for="unit in mintClass(mint).units"
+                      v-for="unit in visibleUnits(mint)"
                       :key="unit"
                       class="currency-unit-badge"
                     >
@@ -328,6 +334,7 @@
   </div>
 </template>
 <script lang="ts">
+import { CircleCheck as CircleCheckIcon } from "lucide-vue-next";
 import { ref, defineComponent, onMounted, onBeforeUnmount } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -358,6 +365,7 @@ export default defineComponent({
   name: "MintSettings",
   mixins: [windowMixin],
   components: {
+    CircleCheckIcon,
     AddMintDialog,
     MintInfoContainer,
   },
@@ -441,6 +449,14 @@ export default defineComponent({
     },
   },
   methods: {
+    // Hide zero balances in units the user has never funded at this mint.
+    visibleUnits(mint) {
+      const mintClass = this.mintClass(mint);
+      const funded = mintClass.units.filter(
+        (unit) => mintClass.unitBalance(unit) > 0
+      );
+      return funded.length ? funded : mintClass.units.slice(0, 1);
+    },
     ...mapActions(useNostrStore, [
       "init",
       "initNdkReadOnly",
@@ -723,8 +739,8 @@ export default defineComponent({
 /* More vert icon positioning */
 .more-vert-icon {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 10px;
+  right: 14px;
   z-index: 10;
 }
 </style>
