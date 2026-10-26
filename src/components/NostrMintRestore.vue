@@ -457,8 +457,6 @@ export default defineComponent({
 @import "src/css/mintlist.css";
 
 .discovered-mints-list {
-  max-height: 500px;
-  overflow-y: auto;
   padding: 0 !important;
 }
 

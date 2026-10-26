@@ -16,7 +16,7 @@
         :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
       >
         <!-- Header with centered title and unit toggle on right -->
-        <div class="row items-center q-pa-md" style="position: relative">
+        <div class="row items-center q-pa-md sheet-column-header">
           <q-btn
             v-close-popup
             flat
@@ -42,7 +42,7 @@
           </div>
           <div
             class="row items-center no-wrap sheet-header-actions"
-            style="position: absolute; right: 8px"
+            style="position: absolute; right: 6px"
           >
             <q-btn
               flat

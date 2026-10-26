@@ -113,35 +113,18 @@
       </div>
     </div>
     <!-- active mint: tap to manage mints -->
-    <div class="row justify-center q-mt-md" v-if="activeMintUrl">
-      <button
-        type="button"
-        class="mint-chip"
-        :aria-label="`${$t('BalanceView.mintUrl.label')}: ${activeMintLabel}`"
-        @click="setTab('mints')"
-      >
-        <LandmarkIcon :size="16" class="mint-chip__icon" />
-        <span class="mint-chip__name">{{ activeMintLabel }}</span>
-        <template v-if="mints.length > 1">
-          <span class="mint-chip__dot" aria-hidden="true">·</span>
-          <span class="mint-chip__balance">
-            <AnimatedNumber
-              :value="getActiveBalance"
-              :format="(val) => formatCurrency(val, activeUnit)"
-            />
-            {{ $t("ChooseMint.available_text") }}
-          </span>
-        </template>
-        <ChevronDownIcon :size="16" class="mint-chip__icon" />
-      </button>
-    </div>
+    <ChooseMint
+      v-if="activeMintUrl"
+      class="q-mt-md wallet-mint-picker"
+      test-id="wallet-mint-chip"
+      :show-balances="mints.length > 1"
+    />
   </div>
   <!-- </q-card-section>
   </q-card> -->
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
-import { getShortUrl } from "src/js/wallet-helpers";
 import { mapState, mapWritableState, mapActions } from "pinia";
 import { useMintsStore } from "src/stores/mints";
 import { useSettingsStore } from "src/stores/settings";
@@ -150,10 +133,7 @@ import { useUiStore } from "src/stores/ui";
 import { useWalletStore } from "src/stores/wallet";
 import { usePriceStore } from "src/stores/price";
 import AnimatedNumber from "src/components/AnimatedNumber.vue";
-import {
-  Landmark as LandmarkIcon,
-  ChevronDown as ChevronDownIcon,
-} from "lucide-vue-next";
+import ChooseMint from "src/components/ChooseMint.vue";
 import { sumProofAmounts } from "src/js/proofs";
 import { useProofsStore } from "src/stores/proofs";
 
@@ -162,8 +142,7 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     AnimatedNumber,
-    LandmarkIcon,
-    ChevronDownIcon,
+    ChooseMint,
   },
   props: {
     setTab: Function,
@@ -227,18 +206,6 @@ export default defineComponent({
     },
     getTotalBalance: function () {
       return this.totalUnitBalance;
-    },
-    getActiveBalance: function () {
-      return this.activeBalance;
-    },
-    activeMintLabel: function () {
-      const mintClass = this.activeMint();
-
-      return (
-        mintClass.mint.nickname ||
-        mintClass.mint.info?.name ||
-        getShortUrl(this.activeMintUrl)
-      );
     },
     getBalance: function () {
       return sumProofAmounts(this.activeProofs.flat());

@@ -13,7 +13,7 @@
         class="display-token-fullscreen"
       >
         <!-- Header -->
-        <div class="row items-center q-pa-md" style="position: relative">
+        <div class="row items-center q-pa-md sheet-column-header">
           <q-btn
             v-close-popup
             flat

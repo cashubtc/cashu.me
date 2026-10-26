@@ -10,16 +10,16 @@
   >
     <q-card class="bottom-sheet" :class="isDark ? 'bg-dark' : 'bg-white'">
       <!-- Header -->
-      <div v-if="title" class="bottom-sheet-header q-px-lg">
-        <h4 class="bottom-sheet-title q-my-none">{{ title }}</h4>
+      <div v-if="title" class="bottom-sheet-header">
         <q-btn
           flat
           round
-          dense
           icon="close"
           class="bottom-sheet-close"
+          :aria-label="$t('global.actions.close.label')"
           v-close-popup
         />
+        <h4 class="bottom-sheet-title q-my-none">{{ title }}</h4>
       </div>
 
       <!-- Scrollable content -->
@@ -107,24 +107,30 @@ export default defineComponent({
 }
 
 /* Header */
+/* Same header as every other sheet: close on the leading 6px inset, title centred. */
 .bottom-sheet-header {
+  position: relative;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding-top: 20px;
-  padding-bottom: 16px;
+  justify-content: center;
+  min-height: 56px;
+  padding: 0 56px;
   flex-shrink: 0;
 }
 
 .bottom-sheet-title {
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  font-family: "Inter", sans-serif;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  text-align: center;
 }
 
 .bottom-sheet-close {
-  opacity: 0.7;
+  position: absolute;
+  left: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
 }
 
 /* Content */

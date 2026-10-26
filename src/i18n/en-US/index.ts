@@ -387,7 +387,7 @@ export default {
     },
     privacy: {
       title: "Privacy",
-      description: "Background checks",
+      description: "These settings affect your privacy.",
       check_incoming: {
         toggle: "Check incoming invoice",
         description:
@@ -958,7 +958,7 @@ export default {
         },
       },
       caption:
-        "Move funds between your mints over Lightning. Leave a little room for fees.",
+        "Move funds between your mints over Lightning. Leave a little room for fees; if a swap does not arrive, check its invoice in History.",
       inputs: {
         from: {
           label: "From",

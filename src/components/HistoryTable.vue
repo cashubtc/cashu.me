@@ -119,6 +119,13 @@
           </q-item-label>
         </q-item-section>
       </q-item>
+      <!-- Short last page: hold the list at full page height so pagination does not move. -->
+      <div
+        v-for="n in placeholderRowCount"
+        :key="`placeholder-${n}`"
+        class="history-row history-row--placeholder"
+        aria-hidden="true"
+      />
     </q-list>
 
     <!-- Filter Controls -->
@@ -291,6 +298,11 @@ export default defineComponent({
 
     maxPages() {
       return Math.ceil(this.filteredTransactions.length / this.pageSize);
+    },
+
+    placeholderRowCount() {
+      if (this.maxPages <= 1) return 0;
+      return Math.max(0, this.pageSize - this.paginatedTransactions.length);
     },
 
     paginatedTransactions() {
@@ -581,7 +593,7 @@ export default defineComponent({
 }
 
 .transaction-avatar {
-  background: var(--app-tint-strong);
+  background: var(--row-avatar);
   overflow: visible;
   position: relative;
 }
@@ -591,8 +603,8 @@ export default defineComponent({
 /* Direction badge: a solid disc cut out of the icon circle so the arrow reads at 1x. */
 .direction-badge {
   align-items: center;
-  background: var(--app-surface);
-  border: 1.5px solid var(--app-surface);
+  background: var(--row-bg);
+  border: 1.5px solid var(--row-bg);
   border-radius: 50%;
   bottom: -4px;
   color: var(--app-text);
@@ -622,11 +634,44 @@ export default defineComponent({
 /* Rows keep 12px inner padding for their hover, pressed and focus shapes,
    with a negative margin so content stays on the page gutter. */
 .history-row {
+  --row-bg: var(--app-surface);
+  --row-avatar: var(--app-tint-strong);
+  background: var(--row-bg);
   border-radius: 12px;
   margin: 0 -12px;
   min-height: 64px;
   padding-left: 12px;
   padding-right: 12px;
+}
+
+/* Hover and pressed tint the row, its icon circle and the badge's cut-out together, so the
+   whole avatar responds instead of sitting as a fixed dark disc on a lighter row. */
+.history-row--placeholder {
+  background: transparent;
+  min-height: 64px;
+  pointer-events: none;
+}
+
+.history-row :deep(.q-focus-helper) {
+  display: none;
+}
+@media (hover: hover) {
+  .history-row:hover {
+    --row-bg: color-mix(
+      in srgb,
+      var(--app-text) calc(var(--app-hover-opacity) * 100%),
+      var(--app-surface)
+    );
+    --row-avatar: color-mix(in srgb, var(--app-text) 18%, var(--app-surface));
+  }
+}
+.history-row:active {
+  --row-bg: color-mix(
+    in srgb,
+    var(--app-text) calc(var(--app-pressed-opacity) * 100%),
+    var(--app-surface)
+  );
+  --row-avatar: color-mix(in srgb, var(--app-text) 26%, var(--app-surface));
 }
 
 .history-row :deep(.q-item__label--caption) {

@@ -261,10 +261,19 @@ button:focus-visible {
   min-height: 52px;
 }
 
+// Fullscreen sheet header: bound to the same 600px column as the sheet content, so the close
+// button and trailing actions sit on the content edges on desktop instead of the window edges.
+.sheet-column-header {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
 // Sheet header close button, shared by every fullscreen sheet.
 .floating-close-btn {
   position: absolute;
-  left: 8px;
+  left: 6px;
   top: 50%;
   transform: translateY(-50%);
   z-index: 1;

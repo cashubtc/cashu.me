@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-dark text-white q-pa-md flex flex-center">
+  <div class="q-pt-md">
     <div class="mint-details-page-content">
       <EditMintDialog
         :mint="mintToEdit"
@@ -542,24 +542,27 @@ export default defineComponent({
 </script>
 
 <style scoped>
+/* The page scrolls as a whole; no inner scroll container. */
 .mint-details-page-content {
   max-width: 600px;
   margin: 0 auto;
   color: var(--app-text);
-  height: 100%;
-  overflow-y: auto;
-  position: absolute;
-  top: 0;
   width: 100%;
+  padding-bottom: 32px;
 }
 
 .mint-content-container {
   max-width: 600px;
   margin: 0 auto;
   color: var(--app-text);
-  height: 100%;
-  overflow-y: auto;
-  position: relative;
+}
+
+/* On wide screens, the same content column as settings and the wallet. */
+@media (min-width: 600px) {
+  .mint-details-page-content,
+  .mint-content-container {
+    max-width: 560px;
+  }
 }
 
 /* Top Icons */

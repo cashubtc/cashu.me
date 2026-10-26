@@ -8,7 +8,7 @@
       <div class="col-12 row justify-center">
         <button
           type="button"
-          data-testid="choose-mint"
+          :data-testid="testId"
           class="mint-chip"
           :style="style"
           @click="showMintSheet = true"
@@ -82,9 +82,11 @@
               </div>
               <div v-if="showBalances" class="mint-option-balance">
                 <span v-if="!mint.errored" class="text-grey-6">
-                  <span v-for="unit in mint.units" :key="unit" class="q-mr-sm">
-                    {{ formatCurrency(mint.balances[unit], unit) }}
-                  </span>
+                  {{
+                    heldUnits(mint)
+                      .map((unit) => formatCurrency(mint.balances[unit], unit))
+                      .join(" · ")
+                  }}
                 </span>
                 <span v-else class="text-red">
                   {{ $t("ChooseMint.badge_mint_error_text") }}
@@ -144,6 +146,10 @@ export default defineComponent({
   },
   mixins: [windowMixin],
   props: {
+    testId: {
+      type: String,
+      default: "choose-mint",
+    },
     rounded: {
       type: Boolean,
       default: false,
@@ -263,6 +269,11 @@ export default defineComponent({
     },
   },
   methods: {
+    // Units this mint holds a balance in; falls back to the first unit for an empty mint.
+    heldUnits(mint: { units: string[]; balances: Record<string, number> }) {
+      const held = mint.units.filter((unit) => (mint.balances[unit] ?? 0) > 0);
+      return held.length ? held : mint.units.slice(0, 1);
+    },
     ...mapActions(useMintsStore, ["selectMintUrl"]),
     formatCurrency(value: number, currency: string) {
       return useUiStore().formatCurrency(value, currency);
