@@ -241,7 +241,7 @@
       <q-list padding>
         <q-item>
           <q-item-section>
-            <q-item-label overline>
+            <q-item-label class="text-subtitle1 text-weight-bold">
               {{ $t("MintSettings.swap.overline") }}</q-item-label
             >
             <q-item-label caption>
@@ -650,6 +650,8 @@ export default defineComponent({
 </script>
 
 <style>
+@import "src/css/mintlist.css";
+
 .mint-review {
   color: var(--app-text-muted);
   font-size: 13px;
@@ -665,8 +667,6 @@ export default defineComponent({
 .discover-mints-btn {
   min-height: 44px;
 }
-
-@import "src/css/mintlist.css";
 
 /* Add Mint Section Styles */
 .add-mint-container {

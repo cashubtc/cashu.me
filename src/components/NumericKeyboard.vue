@@ -22,8 +22,8 @@
 
         <q-btn flat class="text-h5 invisible" disable>•</q-btn>
         <q-btn flat class="text-h5" @click="addDigit('0')">0</q-btn>
-        <q-btn flat class="text-h5" @click="backspace">
-          <q-icon name="chevron_left" size="md" />
+        <q-btn flat class="text-h5" aria-label="Backspace" @click="backspace">
+          <DeleteIcon :size="26" />
         </q-btn>
         <q-btn v-if="!hideClose" flat @click="closeKeyboard">{{
           $t("NumericKeyboard.actions.close.label")
@@ -43,9 +43,11 @@ import { useUiStore } from "../stores/ui";
 import { mapWritableState } from "pinia";
 import { useSettingsStore } from "../stores/settings";
 import { notify } from "src/js/notify";
+import { Delete as DeleteIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "NumericKeyboard",
+  components: { DeleteIcon },
   props: {
     modelValue: {
       type: String,

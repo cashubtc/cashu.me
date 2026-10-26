@@ -20,6 +20,7 @@
       <q-btn
         color="primary"
         rounded
+        unelevated
         data-testid="onboarding-start"
         :label="$t('WelcomePage.actions.next.label')"
         @click="goToNext"
@@ -483,7 +484,7 @@ export default {
 .welcome-slide {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   height: 100%;
   background: var(--q-dark);
@@ -494,6 +495,7 @@ export default {
 }
 
 .logo {
+  margin-top: auto;
   margin-bottom: 30px;
   width: 120px;
   height: 120px;
@@ -523,7 +525,8 @@ export default {
   font-size: 1.1rem;
   line-height: 1.5;
   color: rgba(255, 255, 255, 0.8);
-  margin: 0 auto 50px;
+  margin: 0 auto auto;
+  padding-bottom: 32px;
   max-width: 32ch;
   text-align: center;
   hyphens: manual;
@@ -536,31 +539,23 @@ export default {
 .language-section {
   width: 100%;
   max-width: 500px;
+  margin-top: 12px;
 }
 
 .welcome-actions {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  flex: 1;
-  justify-content: center;
   width: 100%;
 }
 
 .welcome-next-btn {
   width: 100%;
-  height: 44px;
+  height: 52px;
   font-weight: 600;
   text-transform: none;
-  font-size: 1rem;
-  border-radius: 22px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
-}
-
-.welcome-next-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  font-size: 1.0625rem;
+  border-radius: 26px;
 }
 
 .terms-agreement {
@@ -576,7 +571,7 @@ export default {
 }
 
 .terms-link {
-  color: var(--q-primary);
+  color: var(--app-accent);
   cursor: pointer;
   text-decoration: underline;
   transition: color 0.2s ease;

@@ -5,12 +5,13 @@
         flat
         dense
         round
-        icon="menu"
-        color="primary"
+        class="main-toolbar-btn text-primary"
         aria-label="Settings"
         @click="goToSettings"
         :disable="uiStore.globalMutexLock"
-      />
+      >
+        <MenuIcon :size="22" />
+      </q-btn>
       <q-toolbar-title></q-toolbar-title>
       <transition
         appear
@@ -60,13 +61,14 @@
         flat
         dense
         round
-        size="0.8em"
-        :icon="countdown > 0 ? 'close' : 'refresh'"
-        :color="countdown > 0 ? 'negative' : 'primary'"
+        class="main-toolbar-btn"
+        :class="countdown > 0 ? 'text-negative' : 'text-primary'"
         aria-label="Refresh"
         @click="reload"
         :disable="uiStore.globalMutexLock && countdown === 0"
       >
+        <XIcon v-if="countdown > 0" :size="20" />
+        <RefreshCwIcon v-else :size="20" />
       </q-btn>
     </q-toolbar>
   </q-header>
@@ -76,10 +78,16 @@
 import { defineComponent, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useUiStore } from "src/stores/ui";
+import {
+  Menu as MenuIcon,
+  RefreshCw as RefreshCwIcon,
+  X as XIcon,
+} from "lucide-vue-next";
 
 export default defineComponent({
   name: "MainHeader",
   mixins: [windowMixin],
+  components: { MenuIcon, RefreshCwIcon, XIcon },
   setup() {
     const uiStore = useUiStore();
     const router = useRouter();
@@ -128,7 +136,12 @@ export default defineComponent({
 /* Keep header controls over the wallet column on wide screens. */
 .main-toolbar {
   margin: 0 auto;
-  max-width: 600px;
+  max-width: 480px;
+}
+
+.main-toolbar-btn {
+  height: 44px;
+  width: 44px;
 }
 
 .q-header {

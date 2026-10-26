@@ -49,11 +49,10 @@
       >
         <template v-slot:header="{ expanded }">
           <q-item-section class="item-center text-center">
-            <span
-              ><q-icon
-                class="text-app-muted"
-                :name="expanded ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"
-            /></span>
+            <span class="text-app-muted">
+              <ChevronUpIcon v-if="expanded" :size="22" />
+              <ChevronDownIcon v-else :size="22" />
+            </span>
           </q-item-section>
         </template>
         <q-tabs
@@ -179,7 +178,7 @@
 }
 
 .wallet-column {
-  max-width: 560px;
+  max-width: 480px;
 }
 
 .wallet-actions {
@@ -189,7 +188,6 @@
   justify-content: center;
   margin-left: auto;
   margin-right: auto;
-  max-width: 400px;
   padding-left: 16px;
   padding-right: 16px;
 }
@@ -202,7 +200,7 @@
 
 .wallet-scan-btn {
   background: var(--app-tint-strong);
-  color: var(--app-text);
+  color: var(--app-accent);
   flex: 0 0 auto;
   height: 52px;
   width: 52px;
@@ -260,6 +258,8 @@ import {
   Banknote as BanknoteIcon,
   Zap as ZapIcon,
   ScanLine as ScanLineIcon,
+  ChevronUp as ChevronUpIcon,
+  ChevronDown as ChevronDownIcon,
 } from "lucide-vue-next";
 
 import { useMigrationsStore } from "src/stores/migrations";
@@ -286,6 +286,8 @@ export default {
     iOSPWAPrompt,
     AndroidPWAPrompt,
     ScanLineIcon,
+    ChevronUpIcon,
+    ChevronDownIcon,
   },
   data: function () {
     return {

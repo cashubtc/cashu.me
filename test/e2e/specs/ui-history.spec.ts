@@ -119,7 +119,7 @@ test("reopens, copies, filters, reclaims and deletes unclaimed ecash history", a
   await page
     .getByRole("button", { name: "Filter pending", exact: true })
     .click();
-  await page.getByRole("button", { name: "Ecash Only", exact: true }).click();
+  await page.getByRole("button", { name: "Ecash only", exact: true }).click();
   const row = page.getByTestId("history-row").first();
   await expect(page.getByTestId("history-row")).toHaveCount(1);
   await row.getByTestId("history-details").click();

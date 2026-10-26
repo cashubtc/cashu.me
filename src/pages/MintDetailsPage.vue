@@ -304,7 +304,7 @@
               class="action-button cursor-pointer"
               @click="openCreateReviewDialog"
             >
-              <q-icon name="rate_review" size="20px" class="action-icon" />
+              <star-icon size="20" class="action-icon" />
               <div class="action-label">Review mint</div>
             </div>
 
@@ -339,6 +339,7 @@ import {
   Link as LinkIcon,
   Nut as NutIcon,
   DollarSign as CurrencyIcon,
+  Star as StarIcon,
   Info as InfoIcon,
   Mail as MailIcon,
   Copy as CopyIcon,
@@ -357,6 +358,7 @@ export default defineComponent({
     LinkIcon,
     NutIcon,
     CurrencyIcon,
+    StarIcon,
     InfoIcon,
     MailIcon,
     CopyIcon,
@@ -696,10 +698,11 @@ export default defineComponent({
   align-items: center;
   justify-content: flex-start;
   gap: 16px;
-  padding: 8px;
-  border-radius: 8px;
+  padding: 12px 8px;
+  margin: 0 -8px;
+  border-radius: 10px;
   transition: background-color 0.3s;
-  width: 100%;
+  width: calc(100% + 16px);
   margin-bottom: 16px;
 }
 

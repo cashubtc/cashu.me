@@ -29,8 +29,8 @@
     </q-avatar>
 
     <div class="mint-info-container">
-      <div v-if="name" class="mint-name">{{ name }}</div>
-      <div class="mint-url">{{ url.replace(/^https?:\/\//, "") }}</div>
+      <div class="mint-name">{{ name || host }}</div>
+      <div v-if="name" class="mint-url">{{ host }}</div>
     </div>
   </div>
 </template>
@@ -56,6 +56,9 @@ export default defineComponent({
     };
   },
   computed: {
+    host(): string {
+      return this.url.replace(/^https?:\/\//, "");
+    },
     fallbackIconSize(): string {
       // pick a slightly smaller icon inside the avatar
       const n = parseInt(String(this.avatarSize).replace(/px$/, "")) || 34;

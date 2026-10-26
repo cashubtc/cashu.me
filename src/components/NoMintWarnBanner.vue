@@ -5,7 +5,9 @@
         <LandmarkIcon :size="48" class="q-pb-md mint-glyph" />
       </div>
       <div class="row items-center justify-center">
-        <div class="text-h6">{{ $t("NoMintWarnBanner.title") }}</div>
+        <div class="text-h6 text-weight-bold">
+          {{ $t("NoMintWarnBanner.title") }}
+        </div>
       </div>
       <div class="row items-center justify-center">
         <div class="no-mint-subtitle q-mt-xs">
@@ -100,7 +102,7 @@ export default defineComponent({
 }
 
 .no-mint-card {
-  background: var(--app-tint);
+  background: var(--app-tint) !important;
   border: 1px solid var(--app-border);
   border-radius: 20px;
   display: flex;

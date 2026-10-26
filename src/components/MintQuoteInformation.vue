@@ -6,7 +6,7 @@
   >
     <div v-if="showAmount && hasValidAmount" class="detail-item q-mb-md">
       <div class="detail-label">
-        <ZapIcon :size="20" :color="iconColor" class="detail-icon" />
+        <ZapIcon :size="20" class="detail-icon" />
         <div class="detail-name">Amount</div>
       </div>
       <div class="detail-value">{{ amountDisplay }}</div>
@@ -14,7 +14,7 @@
 
     <div class="detail-item q-mb-md">
       <div class="detail-label">
-        <BanknoteIcon :size="20" :color="iconColor" class="detail-icon" />
+        <CoinsIcon :size="20" class="detail-icon" />
         <div class="detail-name">Unit</div>
       </div>
       <div class="detail-value">{{ unitDisplay }}</div>
@@ -22,7 +22,7 @@
 
     <div v-if="stateDisplay" class="detail-item q-mb-md">
       <div class="detail-label">
-        <InfoIcon :size="20" :color="iconColor" class="detail-icon" />
+        <InfoIcon :size="20" class="detail-icon" />
         <div class="detail-name">State</div>
       </div>
       <div class="detail-value" :class="{ 'text-positive': isPaidState }">
@@ -32,7 +32,7 @@
 
     <div class="detail-item q-mb-md">
       <div class="detail-label">
-        <QrCodeIcon :size="20" :color="iconColor" class="detail-icon" />
+        <QrCodeIcon :size="20" class="detail-icon" />
         <div class="detail-name">Method</div>
       </div>
       <div class="detail-value">{{ methodDisplay }}</div>
@@ -40,7 +40,7 @@
 
     <div v-if="networkDisplay" class="detail-item q-mb-md">
       <div class="detail-label">
-        <InfoIcon :size="20" :color="iconColor" class="detail-icon" />
+        <InfoIcon :size="20" class="detail-icon" />
         <div class="detail-name">Network</div>
       </div>
       <div class="detail-value">{{ networkDisplay }}</div>
@@ -48,7 +48,7 @@
 
     <div v-if="isOnchain && onchainExplorerUrl" class="detail-item q-mb-md">
       <div class="detail-label">
-        <HashIcon :size="20" :color="iconColor" class="detail-icon" />
+        <HashIcon :size="20" class="detail-icon" />
         <div class="detail-name">
           {{ onchainMetadata ? "Transaction ID" : "Address" }}
         </div>
@@ -67,7 +67,7 @@
       class="detail-item q-mb-md"
     >
       <div class="detail-label">
-        <InfoIcon :size="20" :color="iconColor" class="detail-icon" />
+        <InfoIcon :size="20" class="detail-icon" />
         <div class="detail-name">Chain Status</div>
       </div>
       <div class="detail-value detail-value-with-spinner">
@@ -92,7 +92,7 @@
 
     <div v-if="paidAtDisplay" class="detail-item q-mb-md">
       <div class="detail-label">
-        <ClockIcon :size="20" :color="iconColor" class="detail-icon" />
+        <ClockIcon :size="20" class="detail-icon" />
         <div class="detail-name">Time Paid</div>
       </div>
       <div class="detail-value">{{ paidAtDisplay }}</div>
@@ -100,7 +100,7 @@
 
     <div v-if="mintDisplay" class="detail-item">
       <div class="detail-label">
-        <LandmarkIcon :size="20" :color="iconColor" class="detail-icon" />
+        <LandmarkIcon :size="20" class="detail-icon" />
         <div class="detail-name">Mint</div>
       </div>
       <div class="detail-value">{{ mintDisplay }}</div>
@@ -115,7 +115,7 @@ import { useMintsStore } from "stores/mints";
 import { getShortUrl } from "src/js/wallet-helpers";
 import {
   Zap as ZapIcon,
-  Banknote as BanknoteIcon,
+  Coins as CoinsIcon,
   Info as InfoIcon,
   Clock as ClockIcon,
   Landmark as LandmarkIcon,
@@ -148,7 +148,7 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     ZapIcon,
-    BanknoteIcon,
+    CoinsIcon,
     InfoIcon,
     ClockIcon,
     LandmarkIcon,
@@ -185,9 +185,6 @@ export default defineComponent({
     ...mapState(useMintsStore, ["activeMintUrl", "activeUnit"]),
     hasQuote(): boolean {
       return Boolean(this.mintQuote && this.mintQuote.quote);
-    },
-    iconColor(): string {
-      return this.$q.dark.isActive ? "#9E9E9E" : "#616161";
     },
     containerTextClass(): string {
       return this.$q.dark.isActive ? "text-white" : "text-dark";
@@ -365,11 +362,6 @@ export default defineComponent({
 .mint-quote-information {
   width: 100%;
 }
-
-
-
-
-
 
 .detail-value-with-spinner {
   display: flex;

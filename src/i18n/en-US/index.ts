@@ -189,7 +189,7 @@ export default {
       },
       payment_requests: {
         title: "Payment requests",
-        caption: "Receive ecash payments via nostr",
+        caption: "Receive ecash payments via Nostr",
       },
       nwc: {
         title: "Nostr Wallet Connect",
@@ -1337,7 +1337,7 @@ export default {
         },
       },
       currency: {
-        label: "Currency",
+        label: "Unit",
       },
       currencies: {
         label: "@:MintDetailsDialog.details.currency.label",

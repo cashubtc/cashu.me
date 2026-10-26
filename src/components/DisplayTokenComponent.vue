@@ -16,9 +16,7 @@
       />
       <div class="col text-center fixed-title-height">
         <div v-show="!showExpandedButtons">
-          <q-item-label
-            class="q-mt-sm sheet-title"
-          >
+          <q-item-label class="q-mt-sm sheet-title">
             {{
               sendData.historyToken.amount && sendData.historyToken.amount < 0
                 ? sendData.historyToken.status === "paid"
@@ -170,10 +168,12 @@
               >
               </vue-qrcode>
             </q-responsive>
-            <div style="height: 2px">
+            <div class="qr-progress">
               <q-linear-progress
                 v-if="runnerActive"
                 indeterminate
+                rounded
+                size="3px"
                 color="primary"
               />
             </div>
@@ -185,28 +185,34 @@
             style="max-width: 600px; position: relative"
           >
             <div class="row justify-center items-center no-wrap">
-              <div class="q-gutter-sm">
+              <div class="row no-wrap" style="gap: 8px">
                 <q-btn
                   v-if="showAnimatedQR"
-                  flat
-                  style="font-size: 13px"
-                  color="grey"
-                  class="q-ma-none"
+                  outline
+                  rounded
+                  no-caps
+                  class="qr-control-chip"
                   @click="changeSpeed"
                 >
-                  <q-icon name="speed" style="margin-right: 8px"></q-icon>
-                  Speed: {{ { F: "Fast", M: "Medium", S: "Slow" }[fragmentSpeedLabel] }}
+                  <q-icon name="speed" size="18px" class="q-mr-xs"></q-icon>
+                  Speed:
+                  {{
+                    { F: "Fast", M: "Medium", S: "Slow" }[fragmentSpeedLabel]
+                  }}
                 </q-btn>
                 <q-btn
                   v-if="showAnimatedQR"
-                  flat
-                  style="font-size: 13px"
-                  class="q-ma-none"
-                  color="grey"
+                  outline
+                  rounded
+                  no-caps
+                  class="qr-control-chip"
                   @click="changeSize"
                 >
-                  <q-icon name="zoom_in" style="margin-right: 8px"></q-icon>
-                  Size: {{ { L: "Large", M: "Medium", S: "Small" }[fragmentLengthLabel] }}
+                  <q-icon name="zoom_in" size="18px" class="q-mr-xs"></q-icon>
+                  Size:
+                  {{
+                    { L: "Large", M: "Medium", S: "Small" }[fragmentLengthLabel]
+                  }}
                 </q-btn>
               </div>
             </div>
@@ -681,6 +687,18 @@ export default defineComponent({
 });
 </script>
 <style scoped>
+.qr-progress {
+  height: 3px;
+  margin-top: 8px;
+}
+
+.qr-control-chip {
+  color: var(--app-text-muted);
+  font-size: 13px;
+  min-height: 36px;
+  padding: 0 14px;
+}
+
 .display-token-fullscreen {
   height: 100vh; /* fallback */
   height: 100dvh; /* account for mobile browser UI */

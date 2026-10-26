@@ -26,8 +26,12 @@
         to donate ecash and help initiate an audit of this mint.
       </span>
     </div>
-    <div v-else-if="error" class="q-mx-sm text-app-muted">
-      {{ /fetch|network/i.test(error) ? "Audit info is unavailable right now." : error }}
+    <div v-else-if="error" class="text-app-muted">
+      {{
+        /fetch|network/i.test(error)
+          ? "Audit info is unavailable right now."
+          : error
+      }}
     </div>
     <div v-else-if="mintInfo" class="mint-info">
       <!-- Warning Box -->

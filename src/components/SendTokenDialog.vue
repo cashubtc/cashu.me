@@ -42,6 +42,7 @@
               dense
               color="primary"
               round
+              :aria-label="$t('SendTokenDialog.actions.lock.label')"
               @click="showLockInput = !showLockInput"
             >
               <LockIcon size="1.2em" />
@@ -50,10 +51,12 @@
               }}</q-tooltip>
             </q-btn>
             <q-btn
-              flat
+              outline
+              rounded
               dense
-              size="lg"
+              no-caps
               color="primary"
+              class="unit-toggle-chip"
               @click="toggleUnit()"
               :label="activeUnitLabel"
             />
@@ -757,6 +760,13 @@ export default defineComponent({
 });
 </script>
 <style scoped>
+.unit-toggle-chip {
+  font-size: 15px;
+  min-height: 32px;
+  min-width: 44px;
+  padding: 0 10px;
+}
+
 .wobble-enter-active {
   animation: wobble-keyframes 600ms ease-out;
   transform-origin: center;

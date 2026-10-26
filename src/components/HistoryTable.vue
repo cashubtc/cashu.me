@@ -1,5 +1,5 @@
 <template>
-  <div class="q-pa-xs" style="max-width: 500px; margin: 0 auto">
+  <div class="history-table">
     <q-list>
       <q-item
         v-for="transaction in paginatedTransactions"
@@ -44,11 +44,12 @@
                 :class="{
                   'text-amount-positive':
                     transaction.amount >= 0 && transaction.status !== 'pending',
-                  'text-grey-6': transaction.status === 'pending',
                 }"
               >
-                <span v-if="transaction.amount >= 0">+</span
-                >{{ formatCurrency(transaction.amount, transaction.unit) }}
+                {{ transaction.amount >= 0 ? "+" : "\u2212"
+                }}{{
+                  formatCurrency(Math.abs(transaction.amount), transaction.unit)
+                }}
               </div>
             </div>
           </q-item-label>
@@ -109,7 +110,7 @@
       <q-btn
         rounded
         outline
-        dense
+        no-caps
         @click="filterPending = !filterPending"
         :color="filterPending ? 'primary' : 'grey'"
         :label="
@@ -119,19 +120,17 @@
               : 'HistoryTable.actions.filter_pending.label'
           )
         "
-        class="q-px-md"
-        size="sm"
+        class="q-px-md history-filter-btn"
       />
       <q-btn
         v-if="filterPending"
         rounded
         outline
-        dense
+        no-caps
         @click="filterPendingEcash = !filterPendingEcash"
         :color="filterPendingEcash ? 'primary' : 'grey'"
-        label="Ecash Only"
-        class="q-ml-sm q-px-md"
-        size="sm"
+        label="Ecash only"
+        class="q-ml-sm q-px-md history-filter-btn"
       />
     </div>
 
@@ -151,6 +150,11 @@
           :max-pages="5"
           direction-links
           :boundary-links="maxPages > 3"
+          round
+          flat
+          active-design="unelevated"
+          active-color="primary"
+          size="md"
           @input="handlePageChange"
         />
       </div>
@@ -559,12 +563,23 @@ export default defineComponent({
   color: var(--app-accent);
 }
 
+.history-table {
+  margin: 0 auto;
+  max-width: 100%;
+}
+
 .history-row {
   min-height: 60px;
 }
 
+.history-filter-btn {
+  font-size: 14px;
+  min-height: 40px;
+}
+
 .amount-text {
   font-size: 1rem;
+  font-variant-numeric: tabular-nums;
   line-height: 1.2;
 }
 

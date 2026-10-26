@@ -6,7 +6,7 @@
   >
     <div v-if="showAmount" class="detail-item q-mb-md">
       <div class="detail-label">
-        <ZapIcon :size="20" :color="iconColor" class="detail-icon" />
+        <ZapIcon :size="20" class="detail-icon" />
         <div class="detail-name">Amount</div>
       </div>
       <div class="detail-value">{{ amountDisplay }}</div>
@@ -14,7 +14,7 @@
 
     <div v-if="hasFeeReserve && !hasFeePaid" class="detail-item q-mb-md">
       <div class="detail-label">
-        <ArrowDownUpIcon :size="20" :color="iconColor" class="detail-icon" />
+        <ArrowDownUpIcon :size="20" class="detail-icon" />
         <div class="detail-name">Fee Reserve</div>
       </div>
       <div class="detail-value">{{ feeReserveDisplay }}</div>
@@ -22,7 +22,7 @@
 
     <div v-if="hasFeePaid" class="detail-item q-mb-md">
       <div class="detail-label">
-        <BadgeCheckIcon :size="20" :color="iconColor" class="detail-icon" />
+        <BadgeCheckIcon :size="20" class="detail-icon" />
         <div class="detail-name">Fee Paid</div>
       </div>
       <div class="detail-value">{{ feePaidDisplay }}</div>
@@ -30,7 +30,7 @@
 
     <div class="detail-item q-mb-md">
       <div class="detail-label">
-        <BanknoteIcon :size="20" :color="iconColor" class="detail-icon" />
+        <CoinsIcon :size="20" class="detail-icon" />
         <div class="detail-name">Unit</div>
       </div>
       <div class="detail-value">{{ unitDisplay }}</div>
@@ -38,7 +38,7 @@
 
     <div v-if="stateDisplay" class="detail-item q-mb-md">
       <div class="detail-label">
-        <InfoIcon :size="20" :color="iconColor" class="detail-icon" />
+        <InfoIcon :size="20" class="detail-icon" />
         <div class="detail-name">State</div>
       </div>
       <div class="detail-value" :class="{ 'text-positive': isPaidState }">
@@ -48,7 +48,7 @@
 
     <div v-if="networkDisplay" class="detail-item q-mb-md">
       <div class="detail-label">
-        <InfoIcon :size="20" :color="iconColor" class="detail-icon" />
+        <InfoIcon :size="20" class="detail-icon" />
         <div class="detail-name">Network</div>
       </div>
       <div class="detail-value">{{ networkDisplay }}</div>
@@ -56,7 +56,7 @@
 
     <div v-if="hasTxid" class="detail-item q-mb-md">
       <div class="detail-label">
-        <HashIcon :size="20" :color="iconColor" class="detail-icon" />
+        <HashIcon :size="20" class="detail-icon" />
         <div class="detail-name">Transaction ID</div>
       </div>
       <div class="detail-value detail-value-with-action">
@@ -77,7 +77,7 @@
       class="detail-item q-mb-md"
     >
       <div class="detail-label">
-        <InfoIcon :size="20" :color="iconColor" class="detail-icon" />
+        <InfoIcon :size="20" class="detail-icon" />
         <div class="detail-name">Chain Status</div>
       </div>
       <div class="detail-value detail-value-with-spinner">
@@ -102,7 +102,7 @@
 
     <div v-if="paidAtDisplay" class="detail-item q-mb-md">
       <div class="detail-label">
-        <ClockIcon :size="20" :color="iconColor" class="detail-icon" />
+        <ClockIcon :size="20" class="detail-icon" />
         <div class="detail-name">Time Paid</div>
       </div>
       <div class="detail-value">{{ paidAtDisplay }}</div>
@@ -110,7 +110,7 @@
 
     <div v-if="hasPreimage" class="detail-item q-mb-md">
       <div class="detail-label">
-        <FingerprintIcon :size="20" :color="iconColor" class="detail-icon" />
+        <FingerprintIcon :size="20" class="detail-icon" />
         <div class="detail-name">Preimage</div>
       </div>
       <div class="detail-value" @click="copyPreimage" style="cursor: pointer">
@@ -120,7 +120,7 @@
 
     <div v-if="mintDisplay" class="detail-item">
       <div class="detail-label">
-        <LandmarkIcon :size="20" :color="iconColor" class="detail-icon" />
+        <LandmarkIcon :size="20" class="detail-icon" />
         <div class="detail-name">Mint</div>
       </div>
       <div class="detail-value">{{ mintDisplay }}</div>
@@ -148,7 +148,7 @@ import {
   BadgeCheck as BadgeCheckIcon,
   Clock as ClockIcon,
   Landmark as LandmarkIcon,
-  Banknote as BanknoteIcon,
+  Coins as CoinsIcon,
   Info as InfoIcon,
   Fingerprint as FingerprintIcon,
   Hash as HashIcon,
@@ -174,7 +174,7 @@ export default defineComponent({
     BadgeCheckIcon,
     ClockIcon,
     LandmarkIcon,
-    BanknoteIcon,
+    CoinsIcon,
     InfoIcon,
     FingerprintIcon,
     HashIcon,
@@ -223,9 +223,6 @@ export default defineComponent({
     ...mapState(useMintsStore, ["activeMintUrl", "activeUnit"]),
     hasQuote(): boolean {
       return Boolean(this.meltQuote && this.meltQuote.quote);
-    },
-    iconColor(): string {
-      return this.$q.dark.isActive ? "#9E9E9E" : "#616161";
     },
     containerTextClass(): string {
       return this.$q.dark.isActive ? "text-white" : "text-dark";
@@ -517,11 +514,6 @@ export default defineComponent({
 .melt-quote-information {
   width: 100%;
 }
-
-
-
-
-
 
 .detail-value-with-spinner {
   display: flex;
