@@ -232,7 +232,7 @@
             v-if="mintUnits && mintUnits.length > 0"
           >
             <div class="detail-label">
-              <banknote-icon size="20" class="detail-icon" />
+              <coins-icon size="20" class="detail-icon" />
               <div class="detail-name">
                 {{ $t("MintDetailsDialog.details.currencies.label") }}
               </div>
@@ -346,7 +346,6 @@ import {
   Pencil as PencilIcon,
   Trash as TrashIcon,
   Landmark as LandmarkIcon,
-  Banknote as BanknoteIcon,
 } from "lucide-vue-next";
 
 export default defineComponent({
@@ -365,7 +364,6 @@ export default defineComponent({
     PencilIcon,
     TrashIcon,
     LandmarkIcon,
-    BanknoteIcon,
     EditMintDialog,
     RemoveMintDialog,
     MintMotdMessage,

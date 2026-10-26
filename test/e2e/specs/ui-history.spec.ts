@@ -91,7 +91,7 @@ for (const method of ["bolt11", "bolt12", "onchain"] as const) {
     await expect(page.locator(".pay-fullscreen")).toBeHidden();
     await wallet.home("History");
     await page
-      .getByRole("button", { name: "Filter pending", exact: true })
+      .getByRole("button", { name: "Show pending only", exact: true })
       .click();
     const row = page.getByTestId("history-row").first();
     await expect(row).toContainText("Pending");
@@ -117,7 +117,7 @@ test("reopens, copies, filters, reclaims and deletes unclaimed ecash history", a
   await wallet.closeFullscreenDialog();
   await wallet.home("History");
   await page
-    .getByRole("button", { name: "Filter pending", exact: true })
+    .getByRole("button", { name: "Show pending only", exact: true })
     .click();
   await page.getByRole("button", { name: "Ecash only", exact: true }).click();
   const row = page.getByTestId("history-row").first();
@@ -167,7 +167,7 @@ test("paginates history and resets correctly when filtering an empty result", as
     .click();
   await expect(page.getByTestId("history-row")).toHaveCount(1);
   await page
-    .getByRole("button", { name: "Filter pending", exact: true })
+    .getByRole("button", { name: "Show pending only", exact: true })
     .click();
   await expect(page.getByText("No history yet", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Show all", exact: true }).click();

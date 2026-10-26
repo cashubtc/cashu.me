@@ -178,7 +178,7 @@
 }
 
 .row > .wallet-column {
-  max-width: 480px;
+  max-width: 560px;
 }
 
 .wallet-actions {
@@ -200,7 +200,7 @@
 
 .wallet-scan-btn {
   background: var(--app-tint);
-  border: 1px solid var(--app-border);
+  border: 1px solid var(--app-border-strong);
   color: var(--app-accent);
   flex: 0 0 auto;
   height: 52px;

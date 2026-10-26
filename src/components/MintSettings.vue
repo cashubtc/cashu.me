@@ -9,11 +9,11 @@
 
   <div style="max-width: 800px; margin: 0 auto">
     <!-- ////////////////////// SETTINGS ////////////////// -->
-    <div class="q-py-md q-px-xs text-left" on-left>
+    <div class="q-py-md q-px-sm text-left" on-left>
       <q-list padding>
         <!-- <q-item-label header>Your mints</q-item-label> -->
         <!-- MINT CARDS -->
-        <div v-for="mint in mints" :key="mint.url" class="q-px-md">
+        <div v-for="mint in mints" :key="mint.url">
           <q-item
             data-testid="mint-card"
             :active="mint.url == activeMintUrl"
@@ -155,7 +155,7 @@
       </q-list>
 
       <!-- Mint discovery -->
-      <div class="q-px-md q-mb-md row justify-center">
+      <div class="q-mb-md row justify-center">
         <q-btn
           outline
           rounded
@@ -164,14 +164,14 @@
           @click="$router.push('/discoverMints')"
           style="width: 100%"
         >
-          <q-icon name="search" size="20px" class="q-mr-sm" />
+          <SearchIcon :size="18" class="q-mr-sm" />
           <span>{{ $t("MintSettings.discover_mints_button") }}</span>
         </q-btn>
       </div>
     </div>
 
     <!-- Add mint section -->
-    <div class="q-pt-xs q-px-md" ref="addMintDiv">
+    <div class="q-pt-xs q-px-sm" ref="addMintDiv">
       <div class="add-mint-container">
         <div class="section-divider q-mb-md">
           <div class="divider-line"></div>
@@ -221,12 +221,12 @@
               "
               :class="{ 'text-grey-7': addMintData.url.length === 0 }"
             >
-              <q-icon name="add" size="20px" class="q-mr-sm" />
+              <PlusIcon :size="18" class="q-mr-sm" />
               <span>{{ $t("MintSettings.add.actions.add_mint.label") }}</span>
             </q-btn>
 
             <q-btn flat @click="showCamera">
-              <q-icon name="qr_code" size="20px" class="q-mr-sm" />
+              <ScanLineIcon :size="18" class="q-mr-sm" />
               <span>{{ $t("MintSettings.add.actions.scan.label") }}</span>
             </q-btn>
           </div>
@@ -236,14 +236,14 @@
 
     <!-- Swap section -->
 
-    <div class="section-divider q-mb-md q-px-md">
+    <div class="section-divider q-mb-md q-px-sm">
       <div class="divider-line"></div>
       <div class="divider-text">
         {{ $t("MintSettings.swap.title") }}
       </div>
       <div class="divider-line"></div>
     </div>
-    <div class="q-px-xs text-left" on-left>
+    <div class="q-px-sm text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
@@ -334,7 +334,12 @@
   </div>
 </template>
 <script lang="ts">
-import { CircleCheck as CircleCheckIcon } from "lucide-vue-next";
+import {
+  CircleCheck as CircleCheckIcon,
+  Plus as PlusIcon,
+  ScanLine as ScanLineIcon,
+  Search as SearchIcon,
+} from "lucide-vue-next";
 import { ref, defineComponent, onMounted, onBeforeUnmount } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -366,6 +371,9 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     CircleCheckIcon,
+    PlusIcon,
+    ScanLineIcon,
+    SearchIcon,
     AddMintDialog,
     MintInfoContainer,
   },

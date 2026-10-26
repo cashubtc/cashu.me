@@ -1,6 +1,6 @@
 <template>
   <div class="row items-center">
-    <q-avatar :size="avatarSize" class="q-mr-sm mint-avatar">
+    <q-avatar :size="avatarSize" class="q-mr-md mint-avatar">
       <q-img
         v-if="iconUrl && !imgError"
         :src="iconUrl"
@@ -82,6 +82,10 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.mint-avatar {
+  background: var(--app-tint-strong);
+}
+
 /* Self-contained styles (mirrors src/css/mintlist.css) so this component
    renders correctly even when that global stylesheet is not loaded. */
 .mint-info-container {

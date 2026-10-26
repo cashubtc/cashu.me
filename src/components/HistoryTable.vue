@@ -30,8 +30,8 @@
               "
               aria-hidden="true"
             >
-              <ArrowDownLeftIcon v-if="transaction.amount >= 0" :size="11" />
-              <ArrowUpRightIcon v-else :size="11" />
+              <ArrowDownLeftIcon v-if="transaction.amount >= 0" :size="12" />
+              <ArrowUpRightIcon v-else :size="12" />
             </span>
           </q-avatar>
         </q-item-section>
@@ -584,14 +584,14 @@ export default defineComponent({
   background: var(--app-surface);
   border: 1.5px solid var(--app-surface);
   border-radius: 50%;
-  bottom: -3px;
+  bottom: -4px;
   color: var(--app-text-muted);
   display: flex;
-  height: 17px;
+  height: 19px;
   justify-content: center;
   position: absolute;
-  right: -3px;
-  width: 17px;
+  right: -4px;
+  width: 19px;
 }
 
 .direction-badge--in {
@@ -607,7 +607,6 @@ export default defineComponent({
 .history-table {
   margin: 0 auto;
   max-width: 100%;
-  padding: 0 16px;
 }
 
 .history-row {

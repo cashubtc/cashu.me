@@ -195,3 +195,10 @@ body,
 .q-focusable:focus:not(:focus-visible):not(:hover) > .q-focus-helper {
   opacity: 0 !important;
 }
+
+// Full-width sheet CTAs (Copy, Send, Create invoice) share one size. Quasar's
+// `size` prop writes an inline font-size, hence the override.
+.q-btn.q-btn--rounded.full-width {
+  font-size: 1.0625rem !important;
+  min-height: 52px;
+}

@@ -487,7 +487,7 @@ export default {
   justify-content: flex-start;
   align-items: center;
   height: 100%;
-  background: var(--app-surface);
+  background: var(--q-dark);
   color: white;
   padding: 40px 20px 20px 20px;
   box-sizing: border-box;

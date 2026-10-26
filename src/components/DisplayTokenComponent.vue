@@ -203,7 +203,7 @@
                     @click="changeSpeed"
                   >
                     <q-icon name="speed" size="18px" class="q-mr-xs"></q-icon>
-                    Speed:
+                    QR speed:
                     {{
                       { F: "Fast", M: "Medium", S: "Slow" }[fragmentSpeedLabel]
                     }}
@@ -217,7 +217,7 @@
                     @click="changeSize"
                   >
                     <q-icon name="zoom_in" size="18px" class="q-mr-xs"></q-icon>
-                    Size:
+                    QR size:
                     {{
                       { L: "Large", M: "Medium", S: "Small" }[
                         fragmentLengthLabel

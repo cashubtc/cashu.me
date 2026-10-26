@@ -1,14 +1,14 @@
 <template>
   <!-- <q-card class="q-my-md q-py-sm">
     <q-card-section class="q-mt-sm q-py-xs"> -->
-  <div class="q-pt-lg q-pb-sm">
+  <div class="q-pt-md q-pb-sm">
     <transition
       appear
       enter-active-class="animated fadeInDown"
       leave-active-class="animated fadeInDown"
       mode="out-in"
     >
-      <div class="balance-carousel-shell q-mt-lg q-mb-sm text-primary">
+      <div class="balance-carousel-shell q-mt-md q-mb-sm text-primary">
         <transition
           appear
           enter-active-class="animated pulse"

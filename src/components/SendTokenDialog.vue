@@ -53,7 +53,7 @@
             </q-btn>
             <q-btn
               outline
-              rounded
+              round
               dense
               no-caps
               color="primary"
@@ -761,16 +761,15 @@ export default defineComponent({
 });
 </script>
 <style scoped>
-.lock-toggle-btn {
-  height: 32px;
-  width: 32px;
-}
-
+/* Lock and unit share one 40px outlined circle. */
+.lock-toggle-btn,
 .unit-toggle-chip {
   font-size: 15px;
-  min-height: 32px;
-  min-width: 44px;
-  padding: 0 10px;
+  height: 40px;
+  min-height: 40px;
+  min-width: 40px;
+  padding: 0;
+  width: 40px;
 }
 
 .wobble-enter-active {

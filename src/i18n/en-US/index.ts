@@ -658,7 +658,7 @@ export default {
     },
   },
   WelcomeSlide1: {
-    title: "Welcome to Cashu.me",
+    title: "Welcome to Cashu",
     text: "Cashu.me is a free and open-source Bitcoin wallet that uses ecash to keep your funds secure and private.",
     actions: {
       more: {
@@ -1381,7 +1381,7 @@ export default {
         tooltip_text: "Receive",
       },
       filter_pending: {
-        label: "Filter pending",
+        label: "Show pending only",
       },
       show_all: {
         label: "Show all",
@@ -1401,7 +1401,7 @@ export default {
         tooltip_text: "Check status",
       },
       filter_pending: {
-        label: "Filter pending",
+        label: "Show pending only",
       },
       show_all: {
         label: "Show all",

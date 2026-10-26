@@ -46,6 +46,6 @@ export default defineComponent({
 /* Keep the back control in the same column as page content on wide screens. */
 .fullscreen-toolbar {
   margin: 0 auto;
-  max-width: 632px;
+  max-width: 560px;
 }
 </style>
