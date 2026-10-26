@@ -74,11 +74,14 @@
                     </transition>
                   </div>
                 </div>
-                <div style="height: 2px">
+                <div class="qr-progress">
                   <q-linear-progress
                     v-if="runnerActive"
                     indeterminate
-                    color="primary"
+                    rounded
+                    size="2px"
+                    color="grey-7"
+                    track-color="transparent"
                   />
                 </div>
                 <div
@@ -102,18 +105,12 @@
               </div>
             </div>
 
-            <div
-              v-if="invoiceData.amount"
-              class="amount-headline text-center q-mt-sm"
-            >
+            <div v-if="invoiceData.amount" class="amount-headline text-center">
               {{ displayUnit }}
             </div>
 
-            <q-card-section class="q-pa-sm">
-              <div
-                v-if="invoiceData?.mintQuote"
-                class="row justify-center q-pt-md"
-              >
+            <q-card-section class="q-px-sm q-py-none">
+              <div v-if="invoiceData?.mintQuote" class="row justify-center">
                 <div
                   class="col-12 col-sm-11 col-md-8 q-px-md"
                   style="max-width: 600px"
@@ -319,13 +316,6 @@ export default defineComponent({
 .content-area {
   flex: 1;
   overflow-y: auto;
-}
-.floating-close-btn {
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 1;
 }
 .fixed-title-height {
   height: 24px;

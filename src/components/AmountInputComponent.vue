@@ -515,13 +515,15 @@ export default defineComponent({
   transform: translate(-50%, -50%);
 }
 .fiat-display {
-  font-size: 20px;
+  font-size: 17px;
   text-align: center;
 }
 .fiat-icon {
   position: absolute;
   left: 100%;
-  margin-left: 4px;
+  margin-left: -6px;
+  padding: 10px;
+  box-sizing: content-box;
 }
 .invisible {
   visibility: hidden;

@@ -181,7 +181,7 @@ export default {
       },
       lightning_address: {
         title: "Lightning address",
-        caption: "Receive sats at a name@domain address",
+        caption: "Receive bitcoin at a name@domain address",
       },
       nostr: {
         title: "Nostr",

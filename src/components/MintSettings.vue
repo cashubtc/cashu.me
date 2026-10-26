@@ -213,19 +213,19 @@
           <div class="row justify-between items-center q-mt-xs">
             <q-btn
               flat
+              class="touch-target-44"
               :disable="addMintData.url.length === 0"
               @click="
                 addMintData.url.length > 0
                   ? sanitizeMintUrlAndShowAddDialog()
                   : null
               "
-              :class="{ 'text-grey-7': addMintData.url.length === 0 }"
             >
               <PlusIcon :size="18" class="q-mr-sm" />
               <span>{{ $t("MintSettings.add.actions.add_mint.label") }}</span>
             </q-btn>
 
-            <q-btn flat @click="showCamera">
+            <q-btn flat class="touch-target-44" @click="showCamera">
               <ScanLineIcon :size="18" class="q-mr-sm" />
               <span>{{ $t("MintSettings.add.actions.scan.label") }}</span>
             </q-btn>
@@ -243,93 +243,84 @@
       </div>
       <div class="divider-line"></div>
     </div>
-    <div class="q-px-sm text-left" on-left>
-      <q-list padding>
-        <q-item>
-          <q-item-section>
-            <q-item-label class="text-subtitle1 text-weight-bold">
-              {{ $t("MintSettings.swap.overline") }}</q-item-label
-            >
-            <q-item-label caption>
-              {{ $t("MintSettings.swap.caption") }}
-            </q-item-label>
-          </q-item-section>
-        </q-item>
-        <q-item class="q-pt-sm">
-          <q-select
-            clearable
-            rounded
-            outlined
-            dense
-            color="primary"
-            v-model="swapData.fromUrl"
-            :options="swapAmountDataOptions()"
-            option-value="url"
-            option-label="optionLabel"
-            :label="$t('MintSettings.swap.inputs.from.label')"
-            style="min-width: 200px; width: 100%"
-            :disable="swapBlocking"
-          />
-        </q-item>
-        <q-item>
-          <q-select
-            clearable
-            rounded
-            outlined
-            dense
-            color="primary"
-            v-model="swapData.toUrl"
-            :options="swapAmountDataOptions()"
-            option-value="url"
-            option-label="optionLabel"
-            :label="$t('MintSettings.swap.inputs.to.label')"
-            style="min-width: 200px; width: 100%"
-            :disable="swapBlocking"
-          />
-        </q-item>
-        <q-item>
-          <q-input
-            rounded
-            outlined
-            dense
-            v-model.number="swapData.amount"
-            type="number"
-            :label="
-              $t('MintSettings.swap.inputs.amount.label', {
-                ticker: tickerShort,
-              })
-            "
-            style="min-width: 200px"
-            @keydown.enter.prevent="extractAndMintAmountSwap(swapAmountData)"
-            :disable="
-              !swapData.fromUrl ||
-              !swapData.toUrl ||
-              swapData.fromUrl == swapData.toUrl ||
-              swapBlocking
-            "
-          ></q-input>
-          <q-btn
-            class="q-ml-sm q-px-md"
-            color="primary"
-            rounded
-            @click="extractAndMintAmountSwap(swapAmountData)"
-            :disable="
-              !swapData.fromUrl ||
-              !swapData.toUrl ||
-              !(swapData.amount > 0) ||
-              swapData.fromUrl == swapData.toUrl
-            "
-            :loading="swapBlocking"
-          >
-            <q-icon size="xs" name="swap_horiz" class="q-pr-xs" />
-            {{ $t("MintSettings.swap.actions.swap.label") }}
-            <template v-slot:loading>
-              <q-spinner size="xs" />
-              {{ $t("MintSettings.swap.actions.swap.in_progress") }}
-            </template>
-          </q-btn>
-        </q-item>
-      </q-list>
+    <div class="q-px-sm q-pb-lg text-left swap-section">
+      <div class="text-subtitle1 text-weight-bold">
+        {{ $t("MintSettings.swap.overline") }}
+      </div>
+      <div class="swap-caption q-mb-md">
+        {{ $t("MintSettings.swap.caption") }}
+      </div>
+      <q-select
+        :clearable="!!swapData.fromUrl?.url"
+        rounded
+        outlined
+        color="primary"
+        dropdown-icon="expand_more"
+        clear-icon="close"
+        class="q-mb-md"
+        v-model="swapData.fromUrl"
+        :options="swapAmountDataOptions()"
+        option-value="url"
+        option-label="optionLabel"
+        :label="$t('MintSettings.swap.inputs.from.label')"
+        :disable="swapBlocking"
+      />
+      <q-select
+        :clearable="!!swapData.toUrl?.url"
+        rounded
+        outlined
+        color="primary"
+        dropdown-icon="expand_more"
+        clear-icon="close"
+        class="q-mb-md"
+        v-model="swapData.toUrl"
+        :options="swapAmountDataOptions()"
+        option-value="url"
+        option-label="optionLabel"
+        :label="$t('MintSettings.swap.inputs.to.label')"
+        :disable="swapBlocking"
+      />
+      <div class="row no-wrap items-center" style="gap: 8px">
+        <q-input
+          class="col"
+          rounded
+          outlined
+          v-model.number="swapData.amount"
+          type="number"
+          :label="
+            $t('MintSettings.swap.inputs.amount.label', {
+              ticker: tickerShort,
+            })
+          "
+          @keydown.enter.prevent="extractAndMintAmountSwap(swapAmountData)"
+          :disable="
+            !swapData.fromUrl ||
+            !swapData.toUrl ||
+            swapData.fromUrl == swapData.toUrl ||
+            swapBlocking
+          "
+        ></q-input>
+        <q-btn
+          class="col-auto q-px-lg swap-btn"
+          color="primary"
+          rounded
+          unelevated
+          @click="extractAndMintAmountSwap(swapAmountData)"
+          :disable="
+            !swapData.fromUrl ||
+            !swapData.toUrl ||
+            !(swapData.amount > 0) ||
+            swapData.fromUrl == swapData.toUrl
+          "
+          :loading="swapBlocking"
+        >
+          {{ $t("MintSettings.swap.actions.swap.label") }}
+          <template v-slot:loading>
+            <q-spinner size="xs" />
+            {{ $t("MintSettings.swap.actions.swap.in_progress") }}
+          </template>
+        </q-btn>
+      </div>
     </div>
   </div>
 </template>
@@ -675,6 +666,17 @@ export default defineComponent({
 
 <style>
 @import "src/css/mintlist.css";
+
+.swap-caption {
+  color: var(--app-text-muted);
+  font-size: 15px;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
+.swap-btn {
+  min-height: 56px;
+}
 
 .mint-review {
   color: var(--app-text-muted);

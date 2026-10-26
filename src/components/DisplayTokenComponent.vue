@@ -138,7 +138,7 @@
             </q-btn>
           </div>
           <q-btn
-            class="q-mx-none"
+            class="q-mx-none touch-target-44"
             size="md"
             flat
             dense
@@ -180,8 +180,8 @@
             </div>
           </div>
         </div>
-        <q-card-section class="q-pa-sm">
-          <div class="row justify-center q-pt-lg">
+        <q-card-section class="q-px-sm q-py-none">
+          <div class="row justify-center q-pt-none">
             <TokenInformation
               :encodedToken="sendData.tokensBase64"
               :payment-request-id="sendData.historyToken?.paymentRequestId"
@@ -272,7 +272,7 @@
     </div>
     <!-- Fixed bottom panel with copy button -->
     <div class="bottom-panel">
-      <div class="row justify-center q-pb-md q-pt-sm">
+      <div class="row justify-center q-pb-lg q-pt-sm">
         <div class="col-12 col-sm-11 col-md-8 q-px-md" style="max-width: 600px">
           <q-btn
             class="full-width"
@@ -690,15 +690,10 @@ export default defineComponent({
 });
 </script>
 <style scoped>
-.qr-progress {
-  height: 3px;
-  margin-top: 8px;
-}
-
 .qr-control-chip {
   color: var(--app-text-muted);
   font-size: 13px;
-  min-height: 36px;
+  min-height: 44px;
   padding: 0 14px;
 }
 
@@ -715,13 +710,6 @@ export default defineComponent({
   max-width: 600px;
   width: 100%;
   margin: 0 auto;
-}
-.floating-close-btn {
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 1;
 }
 .floating-actions {
   position: absolute;

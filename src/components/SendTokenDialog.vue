@@ -38,7 +38,7 @@
             style="position: absolute; right: 16px"
           >
             <q-btn
-              outline
+              flat
               dense
               color="primary"
               round
@@ -52,7 +52,7 @@
               }}</q-tooltip>
             </q-btn>
             <q-btn
-              outline
+              flat
               round
               dense
               no-caps
@@ -77,7 +77,7 @@
         <!-- Mint selection -->
         <div class="row justify-center">
           <div
-            class="col-12 col-sm-11 col-md-8 q-px-lg q-mb-sm"
+            class="col-12 col-sm-11 col-md-8 q-px-md q-mb-sm"
             style="max-width: 600px"
           >
             <ChooseMint />
@@ -761,15 +761,15 @@ export default defineComponent({
 });
 </script>
 <style scoped>
-/* Lock and unit share one 40px outlined circle. */
+/* Lock and unit are bare 44px header buttons, like close and more. */
 .lock-toggle-btn,
 .unit-toggle-chip {
   font-size: 15px;
-  height: 40px;
-  min-height: 40px;
-  min-width: 40px;
+  height: 44px;
+  min-height: 44px;
+  min-width: 44px;
   padding: 0;
-  width: 40px;
+  width: 44px;
 }
 
 .wobble-enter-active {
@@ -808,13 +808,6 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}
-.floating-close-btn {
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 1;
 }
 .fixed-title-height {
   height: 24px;

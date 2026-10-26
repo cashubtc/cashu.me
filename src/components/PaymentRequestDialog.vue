@@ -356,13 +356,6 @@ export default defineComponent({
   flex: 1;
   overflow-y: auto;
 }
-.floating-close-btn {
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 1;
-}
 .fixed-title-height {
   height: 24px;
   display: flex;

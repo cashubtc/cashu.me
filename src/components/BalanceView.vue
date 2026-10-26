@@ -409,11 +409,12 @@ export default defineComponent({
   color: var(--app-text-subtle);
   cursor: pointer;
   display: flex;
-  height: 18px;
+  height: 44px;
   justify-content: center;
+  margin: -13px 0;
   padding: 0;
   transition: opacity 0.2s ease, transform 0.2s ease;
-  width: 14px;
+  width: 24px;
 }
 .balance-unit-dot::after {
   background: currentColor;
@@ -429,7 +430,7 @@ export default defineComponent({
 .mint-chip {
   align-items: center;
   background: var(--app-tint);
-  border: 1px solid var(--app-border);
+  border: 1px solid var(--app-border-strong);
   border-radius: 999px;
   color: var(--app-text);
   cursor: pointer;
@@ -439,12 +440,16 @@ export default defineComponent({
   font-weight: 500;
   gap: 6px;
   max-width: 100%;
-  min-height: 36px;
-  padding: 6px 12px;
+  min-height: 44px;
+  padding: 8px 14px;
 }
-.mint-chip:focus-visible {
-  outline: 2px solid var(--app-accent);
-  outline-offset: 2px;
+@media (hover: hover) {
+  .mint-chip:hover {
+    background: var(--app-tint-strong);
+  }
+}
+.mint-chip:active {
+  background: var(--app-border-strong);
 }
 .mint-chip__icon {
   color: var(--app-text-muted);

@@ -619,7 +619,12 @@ export default defineComponent({
 
 .history-filter-btn {
   font-size: 14px;
-  min-height: 40px;
+  min-height: 44px;
+}
+
+.history-table :deep(.q-pagination .q-btn) {
+  min-height: 44px !important;
+  min-width: 44px !important;
 }
 
 .amount-text {
@@ -629,7 +634,9 @@ export default defineComponent({
 }
 
 .history-check-btn {
-  margin: -6px 2px -6px -6px;
+  margin: -10px -6px -10px -14px;
+  min-height: 44px;
+  min-width: 44px;
 }
 
 .text-amount-positive {

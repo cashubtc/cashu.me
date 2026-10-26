@@ -137,6 +137,7 @@ export default defineComponent({
 .main-toolbar {
   margin: 0 auto;
   max-width: 560px;
+  padding: 0 5px;
 }
 
 .main-toolbar-btn {

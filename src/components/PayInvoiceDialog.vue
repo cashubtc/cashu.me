@@ -58,7 +58,7 @@
         <!-- Mint selection -->
         <div class="row justify-center">
           <div
-            class="col-12 col-sm-11 col-md-8 q-px-lg q-mb-sm"
+            class="col-12 col-sm-11 col-md-8 q-px-md q-mb-sm"
             style="max-width: 600px"
           >
             <ChooseMint
@@ -1405,14 +1405,6 @@ export default defineComponent({
   background-color: var(--q-primary);
   border-radius: 50%;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.floating-close-btn {
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 1;
 }
 
 .amount-area {

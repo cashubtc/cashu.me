@@ -154,7 +154,7 @@ body,
 }
 
 // Section label between hairlines (Mints tab, mint details, discovery).
-// Matches the settings section overline.
+// Sentence case, like the settings section titles.
 .divider-line {
   flex: 1;
   height: 1px;
@@ -162,10 +162,8 @@ body,
 }
 .divider-text {
   padding: 0 12px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 13px;
+  font-weight: 600;
   color: var(--app-text-muted);
 }
 
@@ -173,6 +171,12 @@ body,
 .q-item__label--caption,
 .text-caption {
   letter-spacing: 0;
+}
+
+// QR sheets (send, receive): QR, a thin activity track, then the amount.
+.qr-progress {
+  height: 2px;
+  margin: 8px 0 12px;
 }
 
 // The amount a sheet is about (send, receive), shown under its QR.
@@ -185,15 +189,33 @@ body,
   text-align: center;
 }
 
-// Quasar's hover/focus tint sticks after a tap on touch screens. Keep it for
-// mouse hover and keyboard focus only.
+// Interaction states, one system for every control. Quasar draws hover and
+// focus as a currentColor tint (.q-focus-helper); we keep that tint faint for
+// hover, make pressed clearly stronger (touch included), and carry keyboard
+// focus with a ring instead of a tint.
+.q-hoverable:hover > .q-focus-helper,
+.q-focusable:focus > .q-focus-helper {
+  background: currentColor;
+  opacity: var(--app-hover-opacity) !important;
+}
 @media (hover: none) {
   .q-hoverable:hover > .q-focus-helper {
     opacity: 0 !important;
   }
 }
-.q-focusable:focus:not(:focus-visible):not(:hover) > .q-focus-helper {
+.q-focusable:focus:not(:focus-visible) > .q-focus-helper {
   opacity: 0 !important;
+}
+.q-hoverable:active > .q-focus-helper,
+.q-hoverable:active:hover > .q-focus-helper {
+  background: currentColor;
+  opacity: var(--app-pressed-opacity) !important;
+}
+.q-focusable:focus-visible,
+.mint-chip:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--app-accent);
+  outline-offset: 2px;
 }
 
 // Full-width sheet CTAs (Copy, Send, Create invoice) share one size. Quasar's
@@ -201,4 +223,21 @@ body,
 .q-btn.q-btn--rounded.full-width {
   font-size: 1.0625rem !important;
   min-height: 52px;
+}
+
+// Sheet header close button, shared by every fullscreen sheet.
+.floating-close-btn {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+// Small icon controls keep a 44px touch target without growing visually.
+.touch-target-44 {
+  min-height: 44px !important;
+  min-width: 44px !important;
 }

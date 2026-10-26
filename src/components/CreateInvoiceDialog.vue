@@ -65,7 +65,7 @@
         <!-- Mint selection -->
         <div class="row justify-center">
           <div
-            class="col-12 col-sm-11 col-md-8 q-px-lg q-mb-sm"
+            class="col-12 col-sm-11 col-md-8 q-px-md q-mb-sm"
             style="max-width: 600px"
           >
             <ChooseMint
@@ -850,13 +850,6 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}
-.floating-close-btn {
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 1;
 }
 .fixed-title-height {
   height: 24px;

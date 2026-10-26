@@ -5,20 +5,23 @@
         flat
         dense
         round
-        icon="arrow_back_ios_new"
+        class="fullscreen-back-btn text-primary"
         @click="goBack"
-        color="primary"
         aria-label="Back"
-      />
+      >
+        <ChevronLeftIcon :size="24" />
+      </q-btn>
     </q-toolbar>
   </q-header>
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { ChevronLeft as ChevronLeftIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "FullscreenHeader",
+  components: { ChevronLeftIcon },
   mixins: [windowMixin],
   setup() {
     const router = useRouter();
@@ -47,5 +50,11 @@ export default defineComponent({
 .fullscreen-toolbar {
   margin: 0 auto;
   max-width: 560px;
+  padding: 0 6px;
+}
+
+.fullscreen-back-btn {
+  height: 44px;
+  width: 44px;
 }
 </style>

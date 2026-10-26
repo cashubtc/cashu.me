@@ -23,7 +23,7 @@
     <div v-if="stateDisplay" class="detail-item q-mb-md">
       <div class="detail-label">
         <InfoIcon :size="20" class="detail-icon" />
-        <div class="detail-name">State</div>
+        <div class="detail-name">Status</div>
       </div>
       <div class="detail-value" :class="{ 'text-positive': isPaidState }">
         {{ stateDisplay }}
@@ -236,9 +236,9 @@ export default defineComponent({
         method === PaymentMethod.Bolt12 ||
         method === PaymentMethod.Bolt12Subpayment
       ) {
-        return "Bolt12";
+        return "Lightning offer";
       }
-      return "Bolt11";
+      return "Lightning";
     },
     isOnchain(): boolean {
       return (

@@ -23,9 +23,7 @@
             class="floating-close-btn"
           />
           <div class="col text-center fixed-title-height">
-            <q-item-label
-              class="q-mt-sm sheet-title"
-            >
+            <q-item-label class="q-mt-sm sheet-title">
               {{ $t("P2PKDialog.p2pk.caption") }}
             </q-item-label>
           </div>
@@ -162,13 +160,6 @@ export default defineComponent({
 .content-area {
   flex: 1;
   overflow-y: auto;
-}
-.floating-close-btn {
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 1;
 }
 .fixed-title-height {
   height: 24px;
