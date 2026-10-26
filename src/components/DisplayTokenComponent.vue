@@ -16,7 +16,7 @@
       />
       <div class="col text-center fixed-title-height">
         <div v-show="!showExpandedButtons">
-          <q-item-label class="q-mt-sm sheet-title">
+          <q-item-label class="sheet-title">
             {{
               sendData.historyToken.amount && sendData.historyToken.amount < 0
                 ? sendData.historyToken.status === "paid"
@@ -180,7 +180,7 @@
             </div>
           </div>
         </div>
-        <q-card-section class="q-px-sm q-py-none">
+        <q-card-section class="q-pa-none">
           <div class="row justify-center q-pt-none">
             <TokenInformation
               :encodedToken="sendData.tokensBase64"

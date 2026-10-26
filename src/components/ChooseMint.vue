@@ -5,67 +5,38 @@
       class="row q-mt-xs q-mb-none"
       v-if="activeMintUrl || !requireActiveMint"
     >
-      <div class="col-12">
-        <div
+      <div class="col-12 row justify-center">
+        <button
+          type="button"
           data-testid="choose-mint"
-          class="mint-selector-btn"
-          :class="{ 'mint-selector-dense': dense }"
+          class="mint-chip"
           :style="style"
           @click="showMintSheet = true"
         >
-          <div class="row items-center full-width no-wrap">
-            <!-- Mint Icon -->
-            <q-avatar
-              :size="dense ? '36px' : '40px'"
-              class="q-mr-sm mint-icon-avatar"
-            >
-              <q-img
-                v-if="chosenMint?.iconUrl"
-                :src="chosenMint.iconUrl"
-                spinner-color="white"
-                spinner-size="xs"
-              >
-                <template v-slot:error>
-                  <div class="row items-center justify-center full-height">
-                    <LandmarkIcon
-                      :size="24"
-                      class="text-app-muted mint-glyph"
-                    />
-                  </div>
-                </template>
-              </q-img>
-              <LandmarkIcon
-                v-else
-                :size="24"
-                class="text-app-muted mint-glyph"
-              />
-            </q-avatar>
-
-            <!-- Mint Info -->
-            <div class="col text-left mint-info-section">
-              <div class="mint-name-label">
-                {{
-                  chosenMint?.nickname ||
-                  chosenMint?.shorturl ||
-                  placeholder ||
-                  $t("ChooseMint.placeholder")
-                }}
-              </div>
-              <div v-if="showBalances && chosenMint" class="mint-balance-label">
-                <span v-if="!chosenMint.errored" class="text-grey-6">
-                  {{ formatCurrency(selectedMintBalance, activeUnit) }}
-                  {{ $t("ChooseMint.available_text") }}
-                </span>
-                <span v-else class="text-red">
-                  {{ $t("ChooseMint.badge_mint_error_text") }}
-                </span>
-              </div>
-            </div>
-
-            <!-- Chevron -->
-            <q-icon name="expand_more" color="grey-6" size="20px" />
-          </div>
-        </div>
+          <q-avatar v-if="chosenMint?.iconUrl" size="20px">
+            <q-img :src="chosenMint.iconUrl" spinner-size="xs" />
+          </q-avatar>
+          <LandmarkIcon v-else :size="16" class="mint-chip__icon" />
+          <span class="mint-chip__name">
+            {{
+              chosenMint?.nickname ||
+              chosenMint?.shorturl ||
+              placeholder ||
+              $t("ChooseMint.placeholder")
+            }}
+          </span>
+          <template v-if="showBalances && chosenMint">
+            <span class="mint-chip__dot" aria-hidden="true">·</span>
+            <span v-if="!chosenMint.errored" class="mint-chip__balance">
+              {{ formatCurrency(selectedMintBalance, activeUnit) }}
+              {{ $t("ChooseMint.available_text") }}
+            </span>
+            <span v-else class="text-negative">
+              {{ $t("ChooseMint.badge_mint_error_text") }}
+            </span>
+          </template>
+          <ChevronDownIcon :size="16" class="mint-chip__icon" />
+        </button>
       </div>
     </div>
 
@@ -136,7 +107,10 @@
 </template>
 
 <script lang="ts">
-import { Landmark as LandmarkIcon } from "lucide-vue-next";
+import {
+  Landmark as LandmarkIcon,
+  ChevronDown as ChevronDownIcon,
+} from "lucide-vue-next";
 import { defineComponent, type PropType } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -165,6 +139,7 @@ export default defineComponent({
   name: "ChooseMint",
   components: {
     LandmarkIcon,
+    ChevronDownIcon,
     BottomSheet,
   },
   mixins: [windowMixin],
@@ -381,47 +356,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.mint-selector-btn {
-  width: 100%;
-  padding: 10px 16px 10px 12px;
-  background: var(--app-tint);
-  border: 1px solid var(--app-border);
-  border-radius: 16px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: var(--app-tint-strong);
-    border-color: var(--app-border-strong);
-  }
-
-  &.mint-selector-dense {
-    padding: 8px 14px 8px 10px;
-  }
-}
-
-.mint-icon-avatar {
-  background: var(--app-tint-strong);
-  flex-shrink: 0;
-}
-
-.mint-info-section {
-  min-width: 0;
-}
-
-.mint-name-label {
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 1.3;
-  color: var(--app-text);
-}
-
-.mint-balance-label {
-  font-size: 14px;
-  line-height: 1.3;
-  margin-top: 4px;
-}
-
 /* Mint options list inside the shared BottomSheet */
 .mint-option {
   padding: 16px 24px;

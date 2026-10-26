@@ -23,7 +23,7 @@
             class="floating-close-btn"
           />
           <div class="col text-center fixed-title-height">
-            <q-item-label class="q-mt-sm sheet-title">
+            <q-item-label class="sheet-title">
               {{
                 isBolt12
                   ? "Lightning Bolt12"
@@ -109,7 +109,7 @@
               {{ displayUnit }}
             </div>
 
-            <q-card-section class="q-px-sm q-py-none">
+            <q-card-section class="q-pa-none">
               <div v-if="invoiceData?.mintQuote" class="row justify-center">
                 <div
                   class="col-12 col-sm-11 col-md-8 q-px-md"

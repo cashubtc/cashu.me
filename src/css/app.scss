@@ -16,6 +16,10 @@ body {
 // One title style for every dialog and sheet header.
 .dialog-header,
 .sheet-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
   font-size: 1.0625rem; // 17px
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -134,7 +138,10 @@ body,
   align-items: center;
 }
 .detail-icon {
-  margin-right: 10px;
+  box-sizing: content-box;
+  flex-shrink: 0;
+  margin-right: 12px;
+  padding: 2px;
   color: var(--app-text-muted);
 }
 .detail-name {
@@ -181,6 +188,7 @@ body,
 
 // The amount a sheet is about (send, receive), shown under its QR.
 .amount-headline {
+  font-variant-numeric: tabular-nums;
   color: var(--app-text);
   font-size: 36px;
   font-weight: 700;
@@ -259,4 +267,44 @@ button:focus-visible {
 body[data-theme] .welcome-surface,
 .welcome-surface {
   background: var(--app-welcome-bg) !important;
+}
+
+// Mint picker chip, shared by the wallet home and every amount sheet.
+.mint-chip {
+  align-items: center;
+  background: var(--app-tint);
+  border: 1px solid var(--app-border-strong);
+  border-radius: 999px;
+  color: var(--app-text);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  gap: 6px;
+  max-width: 100%;
+  min-height: 44px;
+  padding: 8px 14px;
+}
+@media (hover: hover) {
+  .mint-chip:hover {
+    background: var(--app-tint-strong);
+  }
+}
+.mint-chip:active {
+  background: var(--app-border-strong);
+}
+.mint-chip__icon {
+  color: var(--app-text-muted);
+  flex-shrink: 0;
+}
+.mint-chip__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mint-chip__dot,
+.mint-chip__balance {
+  color: var(--app-text-muted);
+  font-variant-numeric: tabular-nums;
 }

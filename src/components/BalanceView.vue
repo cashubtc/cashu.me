@@ -427,44 +427,6 @@ export default defineComponent({
   color: var(--app-accent);
   transform: scale(1.15);
 }
-.mint-chip {
-  align-items: center;
-  background: var(--app-tint);
-  border: 1px solid var(--app-border-strong);
-  border-radius: 999px;
-  color: var(--app-text);
-  cursor: pointer;
-  display: inline-flex;
-  font: inherit;
-  font-size: 14px;
-  font-weight: 500;
-  gap: 6px;
-  max-width: 100%;
-  min-height: 44px;
-  padding: 8px 14px;
-}
-@media (hover: hover) {
-  .mint-chip:hover {
-    background: var(--app-tint-strong);
-  }
-}
-.mint-chip:active {
-  background: var(--app-border-strong);
-}
-.mint-chip__icon {
-  color: var(--app-text-muted);
-  flex-shrink: 0;
-}
-.mint-chip__name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.mint-chip__dot,
-.mint-chip__balance {
-  color: var(--app-text-muted);
-  font-variant-numeric: tabular-nums;
-}
 .balance-unit-dot:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 4px;

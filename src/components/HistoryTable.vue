@@ -7,7 +7,7 @@
         data-testid="history-row"
         clickable
         v-ripple
-        class="q-px-none q-py-sm history-row"
+        class="q-py-sm history-row"
       >
         <!-- Icon Section -->
         <q-item-section avatar class="q-pr-md" style="min-width: 40px">
@@ -612,8 +612,14 @@ export default defineComponent({
   max-width: 100%;
 }
 
+/* Rows keep 12px inner padding for their hover, pressed and focus shapes,
+   with a negative margin so content stays on the page gutter. */
 .history-row {
+  border-radius: 12px;
+  margin: 0 -12px;
   min-height: 64px;
+  padding-left: 12px;
+  padding-right: 12px;
 }
 
 .history-row :deep(.q-item__label--caption) {
@@ -637,7 +643,7 @@ export default defineComponent({
 }
 
 .history-check-btn {
-  margin: -10px -6px -10px -14px;
+  margin: -13px -6px -13px -14px;
   min-height: 44px;
   min-width: 44px;
 }

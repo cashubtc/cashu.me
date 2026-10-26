@@ -181,7 +181,7 @@ export default {
       },
       lightning_address: {
         title: "Lightning address",
-        caption: "Receive bitcoin at a name@domain address",
+        caption: "Get paid at name@domain",
       },
       nostr: {
         title: "Nostr",
@@ -205,7 +205,7 @@ export default {
       },
       privacy: {
         title: "Privacy",
-        caption: "Network checks and Bitcoin price",
+        caption: "Network checks and bitcoin price",
       },
       experimental: {
         title: "Experimental",
@@ -213,7 +213,7 @@ export default {
       },
       appearance: {
         title: "Appearance",
-        caption: "Theme, keyboard, and Bitcoin symbol",
+        caption: "Theme, keyboard, and bitcoin symbol",
       },
       language: {
         title: "Language",
@@ -577,7 +577,7 @@ export default {
     },
   },
   NoMintWarnBanner: {
-    title: "Join a mint",
+    title: "Add a mint",
     subtitle:
       "Mints issue the ecash this wallet holds. Add a mint, or receive ecash from one, to get started.",
     actions: {
@@ -1023,7 +1023,7 @@ export default {
           label: "@:global.actions.close.label",
         },
         copy: {
-          label: "@:global.actions.copy.label",
+          label: "Copy invoice",
         },
       },
     },
@@ -1067,7 +1067,7 @@ export default {
         tooltip_text: "Copy Emoji",
       },
       copy_tokens: {
-        label: "@:global.actions.copy.label",
+        label: "Copy ecash",
       },
       copy_link: {
         tooltip_text: "Copy link",

@@ -78,7 +78,7 @@
                 name="more_horiz"
                 data-testid="mint-details"
                 @click.stop="showMintInfo(mint)"
-                class="cursor-pointer"
+                class="cursor-pointer mint-card-more"
                 size="1.3rem"
               />
             </div>
@@ -744,6 +744,12 @@ export default defineComponent({
 }
 
 /* More vert icon positioning */
+.mint-card-more {
+  box-sizing: content-box;
+  margin: -10px;
+  padding: 10px;
+}
+
 .more-vert-icon {
   position: absolute;
   top: 10px;

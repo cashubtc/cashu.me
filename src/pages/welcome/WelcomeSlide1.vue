@@ -489,7 +489,7 @@ export default {
   height: 100%;
   background: var(--app-welcome-bg);
   color: white;
-  padding: 40px 16px 24px 16px;
+  padding: 40px 0 24px;
   box-sizing: border-box;
   text-align: center;
 }

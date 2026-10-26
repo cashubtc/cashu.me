@@ -28,7 +28,7 @@
           <div class="col text-center fixed-title-height">
             <div>
               <q-item-label
-                class="dialog-header q-mt-sm"
+                class="dialog-header"
                 :class="$q.dark.isActive ? 'text-white' : 'text-black'"
                 style="
                   display: inline-block;
