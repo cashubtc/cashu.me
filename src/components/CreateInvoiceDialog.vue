@@ -39,14 +39,15 @@
             </q-item-label>
           </div>
           <div
-            class="row items-center q-gutter-sm"
+            class="row items-center no-wrap sheet-header-actions"
             style="position: absolute; right: 8px"
           >
             <q-btn
               flat
-              dense
-              size="lg"
+              round
+              no-caps
               color="primary"
+              class="sheet-unit-toggle"
               @click="toggleUnit()"
               :label="activeUnitLabel"
             />

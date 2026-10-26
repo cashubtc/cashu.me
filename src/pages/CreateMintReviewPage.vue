@@ -52,12 +52,12 @@
           flat
           round
           dense
-          icon="content_copy"
           size="sm"
           class="q-ml-xs"
           :aria-label="$t('global.actions.copy.label')"
           @click="copyText(displayNpub)"
-        />
+          ><CopyIcon :size="20"
+        /></q-btn>
       </div>
 
       <q-btn
@@ -85,6 +85,7 @@
 </template>
 
 <script lang="ts">
+import { Copy as CopyIcon } from "lucide-vue-next";
 import { defineComponent, computed, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useNostrStore } from "src/stores/nostr";
@@ -97,7 +98,7 @@ import SettingsPageShell from "src/pages/settings/SettingsPageShell.vue";
 
 export default defineComponent({
   name: "CreateMintReviewPage",
-  components: { SettingsPageShell },
+  components: { CopyIcon, SettingsPageShell },
   setup() {
     const router = useRouter();
     const nostr = useNostrStore();

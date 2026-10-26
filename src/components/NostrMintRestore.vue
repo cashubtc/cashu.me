@@ -20,7 +20,7 @@
         :disabled="!isMnemonicValid || searchInProgress"
         :loading="searchInProgress"
       >
-        <q-icon name="search" size="20px" class="q-mr-sm" />
+        <SearchIcon :size="20" class="q-mr-sm" />
         {{ $t("RestoreView.nostr_mints.search_button") }}
       </q-btn>
     </div>
@@ -198,6 +198,7 @@
 </template>
 
 <script lang="ts">
+import { Search as SearchIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapState, mapActions } from "pinia";
 import { useNostrMintBackupStore } from "src/stores/nostrMintBackup";
@@ -207,6 +208,7 @@ import { notifyError } from "src/js/notify";
 import { date } from "quasar";
 
 export default defineComponent({
+  components: { SearchIcon },
   name: "NostrMintRestore",
   props: {
     mnemonic: {

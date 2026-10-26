@@ -18,13 +18,9 @@
             :error-message="mnemonicError"
           >
             <template v-slot:append>
-              <q-btn
-                flat
-                dense
-                round
-                icon="content_paste"
-                @click="pasteMnemonic"
-              ></q-btn>
+              <q-btn flat dense round @click="pasteMnemonic"
+                ><ClipboardPasteIcon :size="20"
+              /></q-btn>
             </template>
           </q-input>
         </q-item-section>
@@ -181,8 +177,7 @@
                     @click.stop="restoreMintForMint(mint.url)"
                     :disabled="!isMnemonicValid || restoringState"
                     :loading="restoringMint === mint.url"
-                    icon="restore"
-                  >
+                    ><HistoryIcon :size="20" />
                     <q-tooltip>{{
                       $t("RestoreView.actions.restore.label")
                     }}</q-tooltip>
@@ -209,7 +204,7 @@
           :loading="restoringState"
           class="full-width"
         >
-          <q-icon name="restore" class="q-mr-sm" />
+          <HistoryIcon :size="20" class="q-mr-sm" />
           {{
             $t("RestoreView.actions.restore_selected_mints.label", {
               count: selectedMintsCount,
@@ -229,6 +224,10 @@
 </template>
 
 <script lang="ts">
+import {
+  ClipboardPaste as ClipboardPasteIcon,
+  History as HistoryIcon,
+} from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore, MintClass } from "src/stores/mints";
@@ -245,6 +244,8 @@ export default defineComponent({
   name: "RestoreView",
   mixins: [windowMixin],
   components: {
+    ClipboardPasteIcon,
+    HistoryIcon,
     NostrMintRestore,
     SettingsSection,
   },

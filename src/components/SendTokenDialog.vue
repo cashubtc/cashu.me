@@ -34,7 +34,7 @@
             </q-item-label>
           </div>
           <div
-            class="row items-center q-gutter-sm"
+            class="row items-center no-wrap sheet-header-actions"
             style="position: absolute; right: 8px"
           >
             <q-btn
@@ -57,7 +57,7 @@
               dense
               no-caps
               color="primary"
-              class="unit-toggle-chip"
+              class="sheet-unit-toggle"
               @click="toggleUnit()"
               :label="activeUnitLabel"
             />
@@ -763,15 +763,6 @@ export default defineComponent({
 <style scoped>
 /* Lock and unit are bare 44px header buttons, like close and more. */
 .lock-toggle-btn,
-.unit-toggle-chip {
-  font-size: 15px;
-  height: 44px;
-  min-height: 44px;
-  min-width: 44px;
-  padding: 0;
-  width: 44px;
-}
-
 .wobble-enter-active {
   animation: wobble-keyframes 600ms ease-out;
   transform-origin: center;

@@ -7,7 +7,12 @@
       :title="$t('Settings.hardware_features.webnfc.title')"
       :caption="$t('Settings.hardware_features.webnfc.description')"
     >
-      <q-item clickable @click="nfcEncoding = 'text'">
+      <q-item
+        clickable
+        @click="nfcEncoding = 'text'"
+        :active="nfcEncoding === 'text'"
+        active-class="text-weight-bold"
+      >
         <q-item-section avatar>
           <q-icon
             :color="nfcEncoding === 'text' ? 'primary' : 'grey'"
@@ -25,7 +30,12 @@
           }}</q-item-label>
         </q-item-section>
       </q-item>
-      <q-item clickable @click="nfcEncoding = 'weburl'">
+      <q-item
+        clickable
+        @click="nfcEncoding = 'weburl'"
+        :active="nfcEncoding === 'weburl'"
+        active-class="text-weight-bold"
+      >
         <q-item-section avatar>
           <q-icon
             :color="nfcEncoding === 'weburl' ? 'primary' : 'grey'"
@@ -45,7 +55,12 @@
           }}</q-item-label>
         </q-item-section>
       </q-item>
-      <q-item clickable @click="nfcEncoding = 'binary'">
+      <q-item
+        clickable
+        @click="nfcEncoding = 'binary'"
+        :active="nfcEncoding === 'binary'"
+        active-class="text-weight-bold"
+      >
         <q-item-section avatar>
           <q-icon
             :color="nfcEncoding === 'binary' ? 'primary' : 'grey'"

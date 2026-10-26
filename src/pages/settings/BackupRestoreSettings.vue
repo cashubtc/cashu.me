@@ -22,20 +22,20 @@
                 flat
                 dense
                 round
-                icon="visibility"
                 color="primary"
                 data-testid="reveal-seed"
                 @click="toggleMnemonicVisibility"
-              ></q-btn>
+                ><EyeIcon :size="20"
+              /></q-btn>
               <q-btn
                 flat
                 dense
                 round
-                icon="content_copy"
                 color="primary"
                 data-testid="copy-seed"
                 @click="copyText(mnemonic)"
-              ></q-btn>
+                ><CopyIcon :size="20"
+              /></q-btn>
             </template>
           </q-input>
         </q-item-section>
@@ -61,6 +61,7 @@
 </template>
 
 <script lang="ts">
+import { Copy as CopyIcon, Eye as EyeIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapState } from "pinia";
 import { useWalletStore } from "src/stores/wallet";
@@ -70,10 +71,7 @@ import SettingsSection from "./SettingsSection.vue";
 export default defineComponent({
   name: "BackupRestoreSettings",
   mixins: [windowMixin],
-  components: {
-    SettingsPageShell,
-    SettingsSection,
-  },
+  components: { CopyIcon, EyeIcon, SettingsPageShell, SettingsSection },
   data: function () {
     return {
       hideMnemonic: true,

@@ -38,11 +38,12 @@
               outline
               rounded
               no-caps
-              icon="content_copy"
               class="q-mt-sm"
               @click.stop="copyText(seedSignerPrivateKeyNsec)"
-              :label="$t('Settings.nostr_keys.wallet_seed.copy_nsec')"
-            />
+            >
+              <CopyIcon :size="18" class="q-mr-sm" />
+              <span>{{ $t("Settings.nostr_keys.wallet_seed.copy_nsec") }}</span>
+            </q-btn>
           </q-item-label>
         </q-item-section>
       </q-item>
@@ -71,14 +72,15 @@
           }}</q-item-label>
         </q-item-section>
         <q-item-section side v-if="signerType === 'NIP46'">
-          <q-icon
-            name="delete_outline"
+          <q-btn
+            flat
+            round
+            class="touch-target-44"
             @click.stop="handleResetNip46Signer"
-            class="cursor-pointer"
-            ><q-tooltip>{{
+            ><Trash2Icon :size="20" /><q-tooltip>{{
               $t("Settings.nostr_keys.nsec_bunker.delete_tooltip")
-            }}</q-tooltip>
-          </q-icon>
+            }}</q-tooltip></q-btn
+          >
         </q-item-section>
       </q-item>
       <!-- PrivateKeySigner -->
@@ -107,13 +109,14 @@
           }}</q-item-label>
         </q-item-section>
         <q-item-section side v-if="signerType === 'PRIVATEKEY'">
-          <q-icon
-            name="delete_outline"
+          <q-btn
+            flat
+            round
+            class="touch-target-44"
             @click.stop="handleResetPrivateKeySigner"
-            class="cursor-pointer"
-            ><q-tooltip>{{
+            ><Trash2Icon :size="20" /><q-tooltip>{{
               $t("Settings.nostr_keys.use_nsec.delete_tooltip")
-            }}</q-tooltip></q-icon
+            }}</q-tooltip></q-btn
           >
         </q-item-section>
       </q-item>
@@ -182,25 +185,19 @@
         </q-item-section>
         <q-item-section side>
           <div class="row items-center no-wrap q-gutter-sm">
-            <q-icon
-              name="content_copy"
-              @click="copyText(relay)"
-              size="xs"
-              color="grey"
-              class="cursor-pointer"
-              ><q-tooltip>{{
+            <q-btn flat round class="touch-target-44" @click="copyText(relay)"
+              ><CopyIcon :size="20" /><q-tooltip>{{
                 $t("Settings.sections.nostr.relays.list.copy_tooltip")
-              }}</q-tooltip></q-icon
+              }}</q-tooltip></q-btn
             >
-            <q-icon
-              name="delete_outline"
+            <q-btn
+              flat
+              round
+              class="touch-target-44"
               @click="removeRelay(relay)"
-              size="xs"
-              color="grey"
-              class="cursor-pointer"
-              ><q-tooltip>{{
+              ><Trash2Icon :size="20" /><q-tooltip>{{
                 $t("Settings.sections.nostr.relays.list.remove_tooltip")
-              }}</q-tooltip></q-icon
+              }}</q-tooltip></q-btn
             >
           </div>
         </q-item-section>
@@ -244,13 +241,12 @@
               {{ $t("Settings.web_of_trust.pause") }}
             </q-btn>
             <q-btn
-              v-if="!wotLoading"
-              size="sm"
+              v-if="!wotLoading && wotCount > 0"
+              flat
               rounded
-              outline
+              no-caps
               class="q-px-md"
-              color="grey"
-              :disable="wotLoading"
+              color="negative"
               @click="resetWebOfTrust"
             >
               {{ $t("Settings.web_of_trust.reset") }}
@@ -281,6 +277,7 @@
 </template>
 
 <script lang="ts">
+import { Copy as CopyIcon, Trash2 as Trash2Icon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useNostrStore } from "src/stores/nostr";
@@ -292,10 +289,7 @@ import SettingsSection from "./SettingsSection.vue";
 export default defineComponent({
   name: "NostrSettings",
   mixins: [windowMixin],
-  components: {
-    SettingsPageShell,
-    SettingsSection,
-  },
+  components: { CopyIcon, Trash2Icon, SettingsPageShell, SettingsSection },
   data: function () {
     return {
       nip07SignerAvailable: false,

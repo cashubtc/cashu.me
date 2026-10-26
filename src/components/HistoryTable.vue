@@ -94,7 +94,7 @@
                 round
                 data-testid="history-check"
                 :icon="
-                  transaction.longPressActive ? 'arrow_circle_down' : 'sync'
+                  transaction.longPressActive ? 'arrow_circle_down' : 'schedule'
                 "
                 @click.stop="
                   transaction.longPressActive

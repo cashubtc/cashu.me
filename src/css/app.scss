@@ -430,3 +430,18 @@ textarea {
 .q-dialog__backdrop {
   background: rgba(0, 0, 0, 0.6);
 }
+
+// Sheet header trailing slot: 44px buttons, outermost is the unit toggle, same glyph size on
+// every sheet (amount entry, receive and pay).
+.sheet-header-actions {
+  gap: 0;
+}
+.sheet-unit-toggle {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  font-size: 18px !important;
+  font-weight: 600;
+}

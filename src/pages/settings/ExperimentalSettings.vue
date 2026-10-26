@@ -74,11 +74,11 @@
                   dense
                   flat
                   round
-                  icon="content_copy"
                   @click="copyText(auditorUrl)"
                   size="sm"
                   color="grey"
-                />
+                  ><CopyIcon :size="20"
+                /></q-btn>
               </template>
             </q-input>
           </q-item-section>
@@ -98,11 +98,11 @@
                   dense
                   flat
                   round
-                  icon="content_copy"
                   @click="copyText(auditorApiUrl)"
                   size="sm"
                   color="grey"
-                />
+                  ><CopyIcon :size="20"
+                /></q-btn>
               </template>
             </q-input>
           </q-item-section>
@@ -133,6 +133,7 @@
 </template>
 
 <script lang="ts">
+import { Copy as CopyIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapWritableState } from "pinia";
 import { useSettingsStore } from "src/stores/settings";
@@ -142,10 +143,7 @@ import SettingsSection from "./SettingsSection.vue";
 export default defineComponent({
   name: "ExperimentalSettings",
   mixins: [windowMixin],
-  components: {
-    SettingsPageShell,
-    SettingsSection,
-  },
+  components: { CopyIcon, SettingsPageShell, SettingsSection },
   computed: {
     ...mapWritableState(useSettingsStore, [
       "enableReceiveSwaps",
