@@ -102,20 +102,9 @@
           :key="mint.url"
           clickable
           @click="toggleMintSelection(mint.url)"
-          class="mint-item"
-          :class="{ 'mint-item-selected': mint.selected }"
-          :style="{
-            'border-radius': '12px',
-            border: mint.selected
-              ? '2px solid var(--q-primary)'
-              : '1px solid rgba(128, 128, 128, 0.2)',
-            'background-color': mint.selected
-              ? 'rgba(var(--q-primary-rgb), 0.1)'
-              : 'transparent',
-            padding: '16px',
-            'margin-bottom': '12px',
-            transition: 'all 0.2s ease',
-          }"
+          class="mint-select-row"
+          :class="{ 'mint-select-row--selected': mint.selected }"
+          :style="{ padding: '16px', 'margin-bottom': '12px' }"
         >
           <q-item-section avatar>
             <q-checkbox

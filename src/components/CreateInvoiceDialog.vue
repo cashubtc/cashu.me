@@ -102,7 +102,7 @@
               <div class="col-12" style="max-width: 400px">
                 <div
                   v-if="qrPreview.kind === 'reusable' && activeMintErrored"
-                  class="mint-error-warning column items-center text-center q-pa-lg"
+                  class="app-callout app-callout--warning mint-error-warning column items-center text-center q-pa-lg"
                 >
                   <q-icon name="warning" size="42px" color="warning" />
                   <div class="mint-error-title q-mt-md">
@@ -139,7 +139,7 @@
                     </q-responsive>
                   </div>
                   <div
-                    class="q-mt-sm text-center text-grey-7 qr-copy-text cursor-pointer"
+                    class="q-mt-sm text-center text-grey-7 qr-copy-text app-mono app-mono--wrap cursor-pointer"
                     :data-testid="
                       qrPreview.kind === 'npubcash'
                         ? 'npub-cash-lightning-address'
@@ -945,12 +945,6 @@ export default defineComponent({
   flex-direction: column;
   overflow: hidden;
 }
-.fixed-title-height {
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 .amount-area {
   flex: 1;
   min-height: 0;
@@ -959,15 +953,6 @@ export default defineComponent({
   position: relative;
   border-radius: 8px;
   overflow: hidden;
-}
-.qr-copy-text {
-  overflow-wrap: anywhere;
-  word-break: break-all;
-  -webkit-hyphens: none;
-  -moz-hyphens: none;
-  hyphens: none;
-  font-size: 0.9em;
-  font-family: monospace;
 }
 .receive-content-enter-active,
 .receive-content-leave-active {
@@ -992,20 +977,11 @@ export default defineComponent({
   overflow: hidden;
 }
 .amount-display {
-  font-size: clamp(56px, 11vw, 80px);
-  line-height: 1.1;
   overflow-wrap: break-word;
   word-break: break-all;
   max-width: 100%;
 }
-.fiat-display {
-  font-size: 14px;
-}
 .mint-error-warning {
-  border: 1px solid rgba(255, 193, 7, 0.28);
-  border-radius: 12px;
-  background: rgba(255, 193, 7, 0.08);
-  color: inherit;
   min-height: 260px;
   justify-content: center;
 }

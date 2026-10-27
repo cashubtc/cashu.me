@@ -732,10 +732,4 @@ export default defineComponent({
   transform: translateY(-50%);
   z-index: 2;
 }
-.fixed-title-height {
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 </style>

@@ -1,14 +1,14 @@
 <template>
-  <div class="payment-request-info">
+  <div class="app-option-row payment-request-info">
     <div class="row items-center no-wrap">
-      <div class="icon-circle">
+      <div class="app-icon-circle">
         <SendIcon :size="20" />
       </div>
       <div class="col q-ml-md">
-        <div class="text-body1 text-weight-medium">
+        <div class="app-option-row__label">
           {{ infoTitle }}
         </div>
-        <div class="text-caption text-grey-6">
+        <div class="app-option-row__caption">
           {{ infoSubtitle }}
         </div>
       </div>
@@ -102,25 +102,6 @@ export default defineComponent({
 
 <style scoped>
 .payment-request-info {
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
-  padding: 12px 16px;
   margin-top: 12px;
-  transition: background 0.2s ease;
-}
-
-.payment-request-info:active {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.icon-circle {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
 }
 </style>

@@ -486,8 +486,6 @@ export default defineComponent({
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  font-size: clamp(56px, 11vw, 80px);
-  line-height: 1.1;
   white-space: nowrap;
   max-width: 90vw;
 }
@@ -513,10 +511,6 @@ export default defineComponent({
   display: inline-flex;
   align-items: center;
   transform: translate(-50%, -50%);
-}
-.fiat-display {
-  font-size: 17px;
-  text-align: center;
 }
 .fiat-icon {
   position: absolute;

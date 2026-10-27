@@ -49,7 +49,7 @@
       </div>
 
       <!-- Mint preview pill -->
-      <div class="mint-preview-pill q-mb-lg">
+      <div class="app-box mint-preview-pill q-mb-lg">
         <MintInfoContainer
           :url="mintUrl"
           :name="mintDisplayName"
@@ -328,56 +328,15 @@ export default defineComponent({
 
 /* Mint preview pill (styled like the mint selector pill, but static) */
 .mint-preview-pill {
-  width: 100%;
   padding: 16px;
-  border-radius: 12px;
-  border: 1px solid rgba(128, 128, 128, 0.25);
-  background-color: rgba(128, 128, 128, 0.08);
-}
-
-.body--dark .mint-preview-pill {
-  border-color: var(--app-border);
-  background-color: var(--app-tint);
-}
-
-.body--light .mint-preview-pill {
-  border-color: rgba(0, 0, 0, 0.12);
-  background-color: rgba(0, 0, 0, 0.03);
+  width: 100%;
 }
 
 .mint-preview-pill :deep(.q-avatar) {
   margin-inline-end: 16px !important;
 }
 
-/* Audit info row (styled like the detail rows on the mint details page) */
-.detail-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
-.detail-label {
-  display: flex;
-  align-items: center;
-}
-
-.detail-icon {
-  margin-inline-end: 10px;
-}
-
-.detail-name {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--app-text-muted);
-}
-
-.detail-value {
-  font-size: 16px;
-  font-weight: 600;
-  text-align: end;
-}
-
+/* Audit info rows use the shared detail rows (src/css/app.scss). */
 .audit-toggle {
   cursor: pointer;
   user-select: none;

@@ -42,7 +42,7 @@
                   >
                   </vue-qrcode>
                 </q-responsive>
-                <div class="p2pk-key-text text-center q-mt-sm">
+                <div class="p2pk-key-text app-mono text-center q-mt-sm">
                   {{ shortKey(p2pkData.publicKey) }}
                 </div>
               </div>
@@ -154,18 +154,6 @@ export default defineComponent({
   max-width: 392px;
 }
 .p2pk-key-text {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 14px;
   color: var(--app-text-muted);
-}
-.fixed-title-height {
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.qcard {
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
 }
 </style>

@@ -130,25 +130,6 @@ body,
   max-width: 650px;
 }
 
-.custom-btn {
-  background: $grey-9;
-  color: white;
-  border-radius: 8px;
-  height: 80px;
-  box-shadow: none;
-  font-size: 18px;
-}
-
-.custom-btn:hover {
-  background: $grey-8;
-}
-
-.custom-btn-text {
-  font-size: 18px !important;
-  color: white;
-  padding-top: 2px;
-}
-
 .full-width-card {
   width: 100%;
   max-width: var(--app-column);
@@ -477,9 +458,9 @@ body[data-theme] .welcome-surface,
   margin-bottom: 16px;
 }
 .council-dialog__summary {
-  background: var(--app-tint);
-  border: 1px solid var(--app-border);
-  border-radius: 14px !important;
+  background: var(--app-group-fill);
+  border: 1px solid var(--app-group-edge);
+  border-radius: 12px !important;
   overflow: hidden;
   padding: 4px 0;
 }
@@ -800,12 +781,6 @@ body .q-menu .q-item--active::after {
 
 // Option rows on a sheet are tinted fills with no border (user direction, R56: the hairline
 // read as too strong); in light mode they are white cards on the grey sheet, like Settings.
-body.body--light .q-dialog .action-row {
-  background: var(--app-surface);
-}
-body.body--light .q-dialog .action-row:active {
-  background: color-mix(in srgb, var(--app-text) 6%, var(--app-surface));
-}
 
 // Captions and body copy break evenly, without a lone word or glyph on the last line, in
 // every locale (R44: Arabic and Chinese captions ended on a single word or character).
@@ -1193,18 +1168,6 @@ html[dir="rtl"] .q-field__append {
 // Sheet option rows (Receive, Send, Receive ecash): the app's body style for the label, with
 // no extra letter-spacing (Quasar's body1 adds 0.03em), and a muted one-line caption that
 // says what each option does (R42).
-.action-row__label {
-  font-size: 16px;
-  font-weight: 500;
-  letter-spacing: normal;
-  line-height: 22px;
-}
-.action-row__caption {
-  color: var(--app-text-muted);
-  font-size: 13px;
-  line-height: 18px;
-  margin-top: 2px;
-}
 
 // Mint cards, shared by the installed mints list and Discover mints (user direction, R46:
 // discovered mints are drawn as the same card).

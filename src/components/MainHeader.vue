@@ -1,11 +1,11 @@
 <template>
   <q-header class="bg-transparent">
-    <q-toolbar class="main-toolbar">
+    <q-toolbar class="app-toolbar">
       <q-btn
         flat
         dense
         round
-        class="main-toolbar-btn"
+        class="app-toolbar-btn"
         :aria-label="$t('common.settings')"
         @click="goToSettings"
         :disable="uiStore.globalMutexLock"
@@ -61,7 +61,7 @@
         flat
         dense
         round
-        class="main-toolbar-btn"
+        class="app-toolbar-btn"
         :class="countdown > 0 ? 'text-negative' : ''"
         :aria-label="$t('common.refresh')"
         @click="reload"
@@ -132,20 +132,8 @@ export default defineComponent({
   },
 });
 </script>
+
 <style scoped>
-/* Keep header controls over the wallet column on wide screens. */
-.main-toolbar {
-  margin: 0 auto;
-  max-width: var(--app-column);
-  padding: 0 6px;
-}
-
-.main-toolbar-btn {
-  color: var(--app-text);
-  height: 44px;
-  width: 44px;
-}
-
 .q-header {
   position: relative;
   z-index: auto;

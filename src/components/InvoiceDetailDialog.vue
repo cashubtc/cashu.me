@@ -84,7 +84,7 @@
                 </div>
                 <div
                   v-if="isOnchain"
-                  class="q-mt-sm text-center text-grey-7 qr-copy-text cursor-pointer"
+                  class="q-mt-sm text-center text-grey-7 qr-copy-text app-mono app-mono--wrap cursor-pointer"
                   @click="onCopyBolt11"
                 >
                   <q-icon
@@ -309,32 +309,11 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.fixed-title-height {
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.qcard {
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-}
-
 /* QR Code with checkmark overlay */
 .qr-container {
   position: relative;
   border-radius: 8px;
   overflow: hidden;
-}
-
-.qr-copy-text {
-  overflow-wrap: anywhere;
-  word-break: break-all;
-  -webkit-hyphens: none;
-  -moz-hyphens: none;
-  hyphens: none;
-  font-size: 0.9em;
-  font-family: monospace;
 }
 
 .paid-status {

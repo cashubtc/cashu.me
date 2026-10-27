@@ -1,19 +1,21 @@
 <template>
   <div class="restore-ecash-slide">
     <!-- Main content area -->
-    <div class="content">
+    <div class="welcome-slide__content">
       <!-- Header Icon -->
-      <div class="header-icon">
-        <div class="icon-circle">
-          <q-icon name="restore" size="2.5em" color="white" />
+      <div class="welcome-slide__icon">
+        <div class="app-icon-circle app-icon-circle--xl">
+          <q-icon name="restore" size="2.5em" />
         </div>
       </div>
 
       <!-- Title -->
-      <h1 class="title">{{ $t("WelcomeRestoreEcash.title") }}</h1>
+      <h1 class="welcome-slide__title">
+        {{ $t("WelcomeRestoreEcash.title") }}
+      </h1>
 
       <!-- Description -->
-      <p class="description">
+      <p class="welcome-slide__description">
         {{ $t("WelcomeRestoreEcash.text") }}
       </p>
 
@@ -51,52 +53,6 @@ export default {
   box-sizing: border-box;
 }
 
-.content {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start; /* Left-aligned */
-  text-align: start;
-  flex: 1;
-}
-
-.header-icon {
-  margin-bottom: 20px;
-  display: flex;
-  justify-content: flex-start; /* Left-aligned */
-  align-items: center;
-}
-
-.icon-circle {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.title {
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin: 0 0 16px 0;
-  color: white;
-  line-height: 1.2;
-  text-align: start;
-  width: 100%;
-  max-width: 500px;
-}
-
-.description {
-  font-size: 0.95rem;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.8);
-  margin: 0 0 32px 0;
-  text-align: start;
-  width: 100%;
-  max-width: 500px;
-}
-
 .restore-content {
   width: 100%;
   max-width: 500px;
@@ -124,15 +80,6 @@ export default {
 @media (max-width: 600px) {
   .restore-ecash-slide {
     padding: 24px 16px 16px 16px;
-  }
-
-  .title {
-    font-size: 1.6rem;
-  }
-
-  .description {
-    font-size: 0.9rem;
-    margin-bottom: 28px;
   }
 
   .restore-content {

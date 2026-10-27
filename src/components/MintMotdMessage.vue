@@ -1,28 +1,28 @@
 <template>
-  <div class="motd-container" v-if="message && !dismissed">
-    <div class="motd-content">
-      <info-icon size="24" class="motd-icon" />
-      <div class="motd-text-container">
-        <div class="motd-header">
-          <div class="motd-title">{{ $t("MintMotdMessage.title") }}</div>
-          <x-icon
-            size="18"
-            class="motd-close-icon cursor-pointer"
-            @click="dismissMessage"
-          />
-        </div>
-        <div class="motd-message">{{ message }}</div>
-      </div>
+  <!-- A mint's message of the day: the standard warning callout while new, a neutral one
+       once dismissed (src/css/elements.scss). -->
+  <div
+    v-if="message"
+    class="app-callout motd-callout"
+    :class="dismissed ? 'q-mt-md' : 'app-callout--warning q-mb-md'"
+  >
+    <info-icon :size="20" class="app-callout__icon" />
+    <div class="app-callout__body">
+      <div class="app-callout__title">{{ $t("MintMotdMessage.title") }}</div>
+      <div class="app-callout__text">{{ message }}</div>
     </div>
-  </div>
-  <div class="motd-dismissed q-mt-md" v-else-if="message && dismissed">
-    <div class="motd-dismissed-message">
-      <info-icon size="24" class="motd-dismissed-icon" />
-      <div class="motd-text-container">
-        <div class="motd-title">{{ $t("MintMotdMessage.title") }}</div>
-        <div class="motd-message">{{ message }}</div>
-      </div>
-    </div>
+    <q-btn
+      v-if="!dismissed"
+      flat
+      round
+      dense
+      size="sm"
+      class="motd-close"
+      :aria-label="$t('global.actions.close.label')"
+      @click="dismissMessage"
+    >
+      <x-icon :size="16" />
+    </q-btn>
   </div>
 </template>
 
@@ -69,87 +69,8 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.motd-container {
-  width: 100%;
-  position: relative;
-  border-radius: 8px;
-  border: 1px solid #f18408;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  padding: 8px;
-  text-align: start;
-  font-size: 14px;
-  color: #f18408;
-  margin-bottom: 16px;
-}
-
-.motd-content {
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: flex-start;
-  gap: 12px;
-}
-
-.motd-icon {
-  flex-shrink: 0;
-  color: #f18408;
-}
-
-.motd-text-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 2px;
-}
-
-.motd-header {
-  align-self: stretch;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.motd-title {
-  position: relative;
-  line-height: 16px;
-  font-weight: 500;
-}
-
-.motd-close-icon {
-  overflow: hidden;
-  flex-shrink: 0;
-  color: #f18408;
-}
-
-.motd-message {
-  align-self: stretch;
-  position: relative;
-  line-height: 16px;
-}
-
-.motd-dismissed {
-  width: 100%;
-}
-
-.motd-dismissed-message {
-  font-size: 14px;
+.motd-close {
   color: var(--app-text-muted);
-  line-height: 16px;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.motd-dismissed-icon {
-  flex-shrink: 0;
-  color: var(--app-text-muted);
+  margin: -4px -6px 0 0;
 }
 </style>

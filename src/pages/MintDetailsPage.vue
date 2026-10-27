@@ -781,14 +781,4 @@ export default defineComponent({
   gap: 8px;
   justify-content: flex-end;
 }
-
-.currency-unit-pill {
-  border-radius: 4px;
-  background-color: var(--app-raised);
-  padding: 4px 8px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--app-text);
-  display: inline-block;
-}
 </style>

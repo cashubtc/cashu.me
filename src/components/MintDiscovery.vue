@@ -13,15 +13,15 @@
            is the compact action in the results header. -->
       <div
         v-if="!discovering && discoverList.length === 0"
-        class="discover-empty column items-center text-center"
+        class="app-empty app-box discover-empty"
       >
-        <div class="discover-empty__icon">
+        <div class="app-icon-circle app-icon-circle--lg">
           <q-icon name="travel_explore" size="28px" />
         </div>
-        <div class="discover-empty__title">
+        <div class="app-empty__title">
           {{ $t("MintSettings.discover.empty.title") }}
         </div>
-        <div class="discover-empty__text">
+        <div class="app-empty__text">
           {{ $t("MintSettings.discover.empty.text") }}
         </div>
         <q-btn
@@ -31,7 +31,7 @@
           no-caps
           :loading="discovering"
           @click="discover"
-          class="discover-btn full-width"
+          class="discover-btn full-width app-empty__action"
         >
           <q-icon name="search" size="20px" class="discover-btn__icon" />
           <span>{{ $t("MintSettings.discover.actions.discover.label") }}</span>
@@ -122,9 +122,7 @@
           >
             <!-- The installed mints' card (user direction, R46): identity row with its action
                  on the right, then the rating on the card's right edge. -->
-            <q-item
-              class="mint-card"
-            >
+            <q-item class="mint-card">
               <div class="mint-card__body">
                 <div class="mint-card__head">
                   <MintInfoContainer
@@ -359,36 +357,7 @@ export default defineComponent({
 }
 
 .discover-empty {
-  background: var(--app-tint);
-  border: 1px solid var(--app-border);
-  border-radius: 16px;
-  gap: 8px;
   margin-bottom: 24px;
-  padding: 32px 24px 24px;
-}
-.discover-empty__icon {
-  align-items: center;
-  background: var(--app-tint-strong);
-  border-radius: 50%;
-  color: var(--app-text-muted);
-  display: flex;
-  height: 56px;
-  justify-content: center;
-  margin-bottom: 8px;
-  width: 56px;
-}
-.discover-empty__title {
-  color: var(--app-text);
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 24px;
-}
-.discover-empty__text {
-  color: var(--app-text-muted);
-  font-size: 15px;
-  line-height: 1.5;
-  margin-bottom: 16px;
-  max-width: 320px;
 }
 
 /* Skeleton rows match the loaded mint cards: same height, gap, radius and outline, no fill. */
@@ -398,8 +367,9 @@ export default defineComponent({
   min-height: 100px;
   padding: 16px;
   margin-bottom: 16px;
-  border-radius: 10px;
-  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  background: var(--app-card-fill);
+  border: 1px solid var(--app-card-edge);
 }
 
 .discover-skeleton__label {
@@ -412,8 +382,7 @@ export default defineComponent({
 /* One exact height in every state, and a spinner the size of the search icon, so pressing
    Discover never shifts the page. */
 .discover-btn {
-  height: 48px;
-  min-height: 48px;
+  min-height: 52px;
   width: 100%;
 }
 .discover-btn__icon {

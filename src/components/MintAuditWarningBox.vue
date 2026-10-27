@@ -1,25 +1,16 @@
 <template>
-  <div class="warning-container" v-if="hasWarnings">
-    <div class="warning-content">
-      <q-icon name="warning" size="24px" class="warning-icon" />
-      <div class="warning-text-container">
-        <div class="warning-header">
-          <div class="warning-title">
-            {{ $t("MintAuditInfo.warnings_title") }}
-          </div>
-        </div>
-        <div class="warning-messages">
-          <ul class="warning-list">
-            <li
-              v-for="(message, index) in warningMessages"
-              :key="index"
-              class="warning-message"
-            >
-              {{ message }}
-            </li>
-          </ul>
-        </div>
+  <!-- The standard warning callout (src/css/elements.scss). -->
+  <div v-if="hasWarnings" class="app-callout app-callout--warning q-mb-md">
+    <q-icon name="warning_amber" size="20px" class="app-callout__icon" />
+    <div class="app-callout__body">
+      <div class="app-callout__title">
+        {{ $t("MintAuditInfo.warnings_title") }}
       </div>
+      <ul class="app-callout__text audit-warning-list">
+        <li v-for="(message, index) in warningMessages" :key="index">
+          {{ message }}
+        </li>
+      </ul>
     </div>
   </div>
 </template>
@@ -234,78 +225,8 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.warning-container {
-  width: 100%;
-  position: relative;
-  border-radius: 8px;
-  border: 1px solid #f18408;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  padding: 16px;
-  text-align: start;
-  font-size: 14px;
-  color: #f18408;
-  margin-bottom: 16px;
-  margin-top: 8px;
-}
-
-.warning-content {
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: flex-start;
-  gap: 12px;
-}
-
-.warning-icon {
-  flex-shrink: 0;
-  color: #f18408;
-}
-
-.warning-text-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 2px;
-}
-
-.warning-header {
-  align-self: stretch;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.warning-title {
-  position: relative;
-  line-height: 16px;
-  font-weight: 500;
-}
-
-.warning-messages {
-  align-self: stretch;
-}
-
-.warning-list {
-  margin: 4px 0 0 0;
-  padding-inline-start: 20px;
-}
-
-.warning-message {
-  align-self: stretch;
-  position: relative;
-  line-height: 16px;
-  margin-bottom: 4px;
-}
-
-.warning-message:last-child {
-  margin-bottom: 0;
+.audit-warning-list {
+  margin: 2px 0 0;
+  padding-inline-start: 18px;
 }
 </style>

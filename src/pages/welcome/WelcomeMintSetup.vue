@@ -1,19 +1,19 @@
 <template>
   <div class="mint-setup-slide">
     <!-- Main content area -->
-    <div class="content">
+    <div class="welcome-slide__content">
       <!-- Header Icon -->
-      <div class="header-icon">
-        <div class="icon-circle">
-          <q-icon name="account_tree" size="2.5em" color="white" />
+      <div class="welcome-slide__icon">
+        <div class="app-icon-circle app-icon-circle--xl">
+          <q-icon name="account_tree" size="2.5em" />
         </div>
       </div>
 
       <!-- Title -->
-      <h1 class="title">{{ $t("WelcomeMintSetup.title") }}</h1>
+      <h1 class="welcome-slide__title">{{ $t("WelcomeMintSetup.title") }}</h1>
 
       <!-- Description -->
-      <p class="description">
+      <p class="welcome-slide__description">
         {{ $t("WelcomeMintSetup.text") }}
       </p>
 
@@ -217,52 +217,6 @@ export default {
   box-sizing: border-box;
 }
 
-.content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: start;
-  flex: 1;
-  width: 100%;
-  max-width: 500px;
-}
-
-.header-icon {
-  margin-bottom: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.icon-circle {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.title {
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin: 0 0 16px 0;
-  color: white;
-  line-height: 1.2;
-  text-align: start;
-  width: 100%;
-}
-
-.description {
-  font-size: 0.95rem;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.8);
-  margin: 0 0 32px 0;
-  text-align: start;
-  width: 100%;
-}
-
 .mints-section,
 .add-mint-section {
   width: 100%;
@@ -331,12 +285,12 @@ export default {
   font-size: 0.9rem;
   border-radius: 18px;
   color: var(--q-primary);
-  background: rgba(var(--q-primary-rgb), 0.1);
+  background: color-mix(in srgb, var(--q-primary) 10%, transparent);
   transition: all 0.2s ease;
 }
 
 .add-mint-btn:hover {
-  background: rgba(var(--q-primary-rgb), 0.2);
+  background: color-mix(in srgb, var(--q-primary) 20%, transparent);
   transform: translateY(-1px);
 }
 
@@ -361,23 +315,14 @@ export default {
 
 .mint-input .q-field--focused .q-field__control {
   background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(var(--q-primary-rgb), 0.5);
-  box-shadow: 0 0 0 2px rgba(var(--q-primary-rgb), 0.1);
+  border-color: color-mix(in srgb, var(--q-primary) 50%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--q-primary) 10%, transparent);
 }
 
 /* Mobile adjustments */
 @media (max-width: 600px) {
   .mint-setup-slide {
     padding: 24px 16px 16px 16px;
-  }
-
-  .title {
-    font-size: 1.6rem;
-  }
-
-  .description {
-    font-size: 0.9rem;
-    margin-bottom: 28px;
   }
 
   .mints-section,

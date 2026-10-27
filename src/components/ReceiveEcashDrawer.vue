@@ -27,7 +27,7 @@
       <q-card-section class="q-pa-md">
         <div class="q-gutter-y-md">
           <div
-            class="action-row"
+            class="app-option-row"
             role="button"
             tabindex="0"
             data-testid="receive-ecash-paste"
@@ -36,24 +36,24 @@
             @keydown.space.prevent="handlePasteBtn"
           >
             <div class="row items-center no-wrap">
-              <div class="icon-circle">
+              <div class="app-icon-circle">
                 <ClipboardIcon :size="24" />
               </div>
               <div class="col q-ml-md">
-                <div class="action-row__label">
+                <div class="app-option-row__label">
                   {{ $t("ReceiveEcashDrawer.actions.paste.label") }}
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="action-row" @click="showCamera">
+          <div class="app-option-row" @click="showCamera">
             <div class="row items-center no-wrap">
-              <div class="icon-circle">
+              <div class="app-icon-circle">
                 <ScanIcon :size="24" />
               </div>
               <div class="col q-ml-md">
-                <div class="action-row__label">
+                <div class="app-option-row__label">
                   {{ $t("ReceiveEcashDrawer.actions.scan.label") }}
                 </div>
               </div>
@@ -62,15 +62,15 @@
 
           <div
             v-if="enablePaymentRequest"
-            class="action-row"
+            class="app-option-row"
             @click="handlePaymentRequestBtn"
           >
             <div class="row items-center no-wrap">
-              <div class="icon-circle">
+              <div class="app-icon-circle">
                 <FileTextIcon :size="24" />
               </div>
               <div class="col q-ml-md">
-                <div class="action-row__label">
+                <div class="app-option-row__label">
                   {{ $t("ReceiveEcashDrawer.actions.request.label") }}
                 </div>
               </div>
@@ -79,15 +79,15 @@
 
           <div
             v-if="showP2PkButtonInDrawer"
-            class="action-row"
+            class="app-option-row"
             @click="handleLockBtn"
           >
             <div class="row items-center no-wrap">
-              <div class="icon-circle">
+              <div class="app-icon-circle">
                 <LockIcon :size="24" />
               </div>
               <div class="col q-ml-md">
-                <div class="action-row__label">
+                <div class="app-option-row__label">
                   {{ $t("ReceiveEcashDrawer.actions.lock.label") }}
                 </div>
               </div>
@@ -96,16 +96,16 @@
 
           <div
             v-if="ndefSupported && showNfcButtonInDrawer"
-            class="action-row"
+            class="app-option-row"
             @click="handleNFCBtn"
           >
             <div class="row items-center no-wrap">
-              <div class="icon-circle">
+              <div class="app-icon-circle">
                 <q-spinner v-if="scanningCard" size="sm" color="white" />
                 <NfcIcon v-else :size="24" />
               </div>
               <div class="col q-ml-md">
-                <div class="action-row__label">
+                <div class="app-option-row__label">
                   {{ $t("ReceiveEcashDrawer.actions.nfc.label") }}
                   {{
                     scanningCard
@@ -266,45 +266,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style lang="scss" scoped>
-.q-dialog__inner--bottom > div {
-  border-top-left-radius: 20px !important;
-  border-top-right-radius: 20px !important;
-  border-bottom-left-radius: 0px !important;
-  border-bottom-right-radius: 0px !important;
-}
-
-.drawer-card {
-  background: #1a1a1a;
-}
-
-.action-row {
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
-  padding: 12px 16px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-
-  &:active {
-    background: rgba(255, 255, 255, 0.1);
-  }
-}
-
-.icon-circle {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.lucide {
-  width: 24px;
-  height: 24px;
-  color: white;
-}
-</style>

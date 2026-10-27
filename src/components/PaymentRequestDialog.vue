@@ -581,16 +581,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.fixed-title-height {
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.qcard {
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-}
 .pr-controls {
   gap: 12px;
 }

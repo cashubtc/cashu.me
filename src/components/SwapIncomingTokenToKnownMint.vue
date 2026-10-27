@@ -254,19 +254,4 @@ export default defineComponent({
   font-weight: 500;
   color: var(--app-text-muted);
 }
-
-.swap-info-tip {
-  display: flex;
-  align-items: center;
-  padding: 12px;
-  background: rgba(33, 150, 243, 0.1);
-  border-radius: 8px;
-  border: 1px solid rgba(33, 150, 243, 0.2);
-}
-
-.swap-info-text {
-  font-size: 13px;
-  color: var(--app-text-muted);
-  line-height: 1.4;
-}
 </style>

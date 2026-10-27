@@ -49,15 +49,6 @@
   max-width: 100%;
 }
 
-/* Currency unit badges */
-.currency-unit-badge {
-  border-radius: 4px;
-  background-color: var(--app-raised);
-  display: inline-block;
-  padding: 4px 8px;
-  margin: 4px 4px 4px 0;
-}
-
 .currency-unit-text {
   color: var(--app-text);
   font-size: 14px;
@@ -105,10 +96,16 @@
   cursor: pointer;
 }
 
-/* Mint item selected state */
-.mint-item-selected {
-  border-color: var(--q-primary) !important;
-  background-color: rgba(var(--q-primary-rgb), 0.1);
+/* Selectable mint rows (Nostr mint restore): the standard surface and selected tokens. */
+.mint-select-row {
+  background: var(--app-card-fill);
+  border: 1px solid var(--app-card-edge);
+  border-radius: 12px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.mint-select-row--selected {
+  background: var(--app-card-fill-active);
+  border-color: var(--app-card-edge-active) !important;
 }
 
 /* Ensure text alignment is consistent */

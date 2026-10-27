@@ -574,7 +574,7 @@ export default {
 }
 
 .terms-link:hover {
-  color: rgba(var(--q-primary-rgb), 0.8);
+  color: color-mix(in srgb, var(--q-primary) 80%, transparent);
 }
 
 /* Language trigger button */

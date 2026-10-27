@@ -128,7 +128,7 @@
                   <transition name="fade">
                     <div
                       v-if="receiveError && !isReceiving"
-                      class="receive-error text-negative q-mb-md q-mt-xl text-subtitle2"
+                      class="app-callout app-callout--danger q-mb-md q-mt-xl"
                     >
                       {{ receiveError }}
                     </div>
@@ -177,9 +177,7 @@
             <div class="row justify-center q-pb-lg q-pt-sm">
               <div class="col-12 q-px-md" style="max-width: var(--app-column)">
                 <template v-if="isNotLockedToUs">
-                  <div
-                    class="receive-error text-negative text-subtitle2 text-left"
-                  >
+                  <div class="app-callout app-callout--danger">
                     {{
                       $t("ReceiveTokenDialog.errors.p2pk_lock_mismatch.label")
                     }}
@@ -767,15 +765,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.custom-btn {
-  background: $grey-9;
-  color: var(--app-text);
-  border-radius: 8px;
-  height: 60px;
-  box-shadow: none;
-  font-size: 14px;
-}
-
 .full-width-card {
   width: 100%;
   max-width: var(--app-column);
@@ -813,15 +802,6 @@ export default defineComponent({
   border-top-right-radius: 0px !important;
 }
 
-.cashub-nowrap {
-  word-break: break-all;
-  -webkit-hyphens: none;
-  -moz-hyphens: none;
-  hyphens: none;
-  font-size: 0.9em;
-  font-family: monospace;
-}
-
 .relative-container {
   position: relative;
 }
@@ -847,12 +827,6 @@ export default defineComponent({
 .scroll-container {
   overflow-y: auto;
   overflow-x: hidden;
-}
-.fixed-title-height {
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .token-input {
@@ -887,72 +861,9 @@ export default defineComponent({
 }
 
 /* Swap Section Styles */
-.swap-section {
-  padding: 16px;
-  background: var(--app-tint);
-  border-radius: 12px;
-  border: 1px solid var(--app-border);
-}
-
-.swap-mint-info {
-  padding: 12px;
-  background: var(--app-tint);
-  border-radius: 10px;
-  border: 1px solid var(--app-border);
-}
-
-.swap-mint-name {
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--app-text);
-  line-height: 1.3;
-}
-
-.swap-mint-url {
-  font-size: 14px;
-  line-height: 1.3;
-  margin-top: 2px;
-}
-
-.swap-arrow-icon {
-  width: 24px;
-  height: 24px;
-  color: var(--app-text-muted);
-}
-
-.swap-destination-section {
-  margin-top: 8px;
-}
-
-.swap-section-label {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--app-text-muted);
-}
-
-.swap-info-tip {
-  display: flex;
-  align-items: center;
-  padding: 12px;
-  background: rgba(33, 150, 243, 0.1);
-  border-radius: 8px;
-  border: 1px solid rgba(33, 150, 243, 0.2);
-}
-
-.swap-info-text {
-  font-size: 13px;
-  color: var(--app-text-muted);
-  line-height: 1.4;
-}
 
 .receiving-state {
   position: relative;
-}
-
-.receive-error {
-  padding: 12px;
-  border-radius: 8px;
-  background-color: rgba(244, 67, 54, 0.1);
 }
 
 .fade-enter-active,

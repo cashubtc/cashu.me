@@ -45,7 +45,13 @@ module.exports = configure(function (/* ctx */) {
     boot: ["base", "global-components", "i18n", "password-manager-ignore"],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
-    css: ["app.scss", "base.scss", "settings.scss", "ui-variants.scss"],
+    css: [
+      "app.scss",
+      "base.scss",
+      "settings.scss",
+      "elements.scss",
+      "ui-variants.scss",
+    ],
 
     // https://github.com/quasarframework/quasar/tree/dev/extras
     extras: [

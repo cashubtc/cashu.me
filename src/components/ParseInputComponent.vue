@@ -31,16 +31,16 @@
     </div>
 
     <!-- QR Scanner row -->
-    <div v-if="hasCamera" class="qr-scanner-row q-mt-md" @click="$emit('scan')">
+    <div v-if="hasCamera" class="app-option-row q-mt-md" @click="$emit('scan')">
       <div class="row items-center no-wrap">
-        <div class="qr-icon-circle">
+        <div class="app-icon-circle">
           <ScanIcon :size="24" />
         </div>
         <div class="col q-ml-md">
-          <div class="text-body1 text-weight-medium">
+          <div class="app-option-row__label">
             {{ $t("ParseInputComponent.qr_scanner.title") }}
           </div>
-          <div class="text-caption text-grey-6">
+          <div class="app-option-row__caption">
             {{ $t("ParseInputComponent.qr_scanner.description") }}
           </div>
         </div>
@@ -194,28 +194,5 @@ export default defineComponent({
   &:active {
     opacity: 0.7;
   }
-}
-
-.qr-scanner-row {
-  background: var(--app-tint);
-  border-radius: 12px;
-  padding: 12px 16px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-
-  &:active {
-    background: var(--app-tint-strong);
-  }
-}
-
-.qr-icon-circle {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: var(--app-tint-strong);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
 }
 </style>

@@ -34,7 +34,7 @@
       <q-card-section class="q-pa-md">
         <div class="q-gutter-y-md">
           <div
-            class="action-row"
+            class="app-option-row"
             role="button"
             tabindex="0"
             data-testid="send-ecash-option"
@@ -43,14 +43,14 @@
             @keydown.space.prevent="showSendTokensDialog"
           >
             <div class="row items-center no-wrap">
-              <div class="icon-circle">
+              <div class="app-icon-circle">
                 <CoinsIcon :size="24" />
               </div>
               <div class="col q-ml-md">
-                <div class="action-row__label">
+                <div class="app-option-row__label">
                   {{ $t("SendDialog.actions.ecash.label") }}
                 </div>
-                <div class="action-row__caption">
+                <div class="app-option-row__caption">
                   {{ $t("SendDialog.captions.ecash") }}
                 </div>
               </div>
@@ -59,7 +59,7 @@
 
           <div
             v-if="canSendLightning"
-            class="action-row"
+            class="app-option-row"
             role="button"
             tabindex="0"
             data-testid="send-lightning-option"
@@ -68,14 +68,14 @@
             @keydown.space.prevent="showParseDialog"
           >
             <div class="row items-center no-wrap">
-              <div class="icon-circle">
+              <div class="app-icon-circle">
                 <ZapIcon :size="24" />
               </div>
               <div class="col q-ml-md">
-                <div class="action-row__label">
+                <div class="app-option-row__label">
                   {{ $t("SendDialog.actions.lightning.label") }}
                 </div>
-                <div class="action-row__caption">
+                <div class="app-option-row__caption">
                   {{ $t("SendDialog.captions.lightning") }}
                 </div>
               </div>
@@ -84,7 +84,7 @@
 
           <div
             v-if="canSendOnchain"
-            class="action-row"
+            class="app-option-row"
             role="button"
             tabindex="0"
             data-testid="send-onchain-option"
@@ -93,14 +93,14 @@
             @keydown.space.prevent="showOnchainPayDialog"
           >
             <div class="row items-center no-wrap">
-              <div class="icon-circle">
+              <div class="app-icon-circle">
                 <BitcoinIcon :size="24" />
               </div>
               <div class="col q-ml-md">
-                <div class="action-row__label">
+                <div class="app-option-row__label">
                   {{ $t("common.on_chain") }}
                 </div>
-                <div class="action-row__caption">
+                <div class="app-option-row__caption">
                   {{ $t("SendDialog.captions.onchain") }}
                 </div>
               </div>
@@ -279,45 +279,3 @@ export default defineComponent({
   created: function () {},
 });
 </script>
-
-<style lang="scss" scoped>
-.q-dialog__inner--bottom > div {
-  border-top-left-radius: 20px !important;
-  border-top-right-radius: 20px !important;
-  border-bottom-left-radius: 0px !important;
-  border-bottom-right-radius: 0px !important;
-}
-
-.drawer-card {
-  background: var(--app-raised);
-}
-
-.action-row {
-  background: var(--app-tint);
-  border-radius: 12px;
-  padding: 12px 16px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-
-  &:active {
-    background: var(--app-tint-strong);
-  }
-}
-
-.icon-circle {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: var(--app-tint-strong);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.lucide {
-  width: 24px;
-  height: 24px;
-  color: var(--app-text);
-}
-</style>

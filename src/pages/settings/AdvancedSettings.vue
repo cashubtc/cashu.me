@@ -558,7 +558,7 @@ export default defineComponent({
 
 /* Keysets of one mint sit in one tinted group, a hairline between rows. */
 .keyset-counter-list {
-  background: var(--app-tint);
+  background: var(--app-group-fill);
   border-radius: 12px;
   overflow: hidden;
   width: 100%;

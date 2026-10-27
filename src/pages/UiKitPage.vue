@@ -151,7 +151,7 @@
         color="primary"
         class="full-width add-mint-submit"
       >
-        <PlusIcon :size="18" class="q-mr-sm" /> Add mint (48px)
+        <PlusIcon :size="18" class="q-mr-sm" /> Add mint
       </q-btn>
     </UiKitItem>
     <UiKitItem
@@ -159,13 +159,7 @@
       sources="Quasar q-btn outline / flat · app.scss disabled token · busy: CreateInvoiceDialog dots + label, AddMintDialog / MintDiscovery / Restore bare spinner · RemoveMintDialog danger pill"
       note="Busy buttons come in two forms: dots with a label (CreateInvoiceDialog) and a bare spinner (seven other files)."
     >
-      <q-btn
-        rounded
-        outline
-        no-caps
-        color="primary"
-        class="full-width ui-kit-48 q-mb-sm"
-      >
+      <q-btn rounded outline no-caps color="primary" class="full-width q-mb-sm">
         <SearchIcon :size="18" class="q-mr-sm" /> Discover mints
       </q-btn>
       <div class="row q-gutter-sm">
@@ -460,7 +454,9 @@
         <span class="mint-chip"
           ><LandmarkIcon :size="14" class="q-mr-xs" />Mint C</span
         >
-        <span class="currency-unit-badge">₿2,289</span>
+        <span class="app-badge app-badge--solid">₿2,289</span>
+        <span class="app-badge">Your review</span>
+        <span class="app-badge app-badge--primary">60%</span>
       </div>
     </UiKitItem>
     <UiKitItem
@@ -812,8 +808,135 @@
       </q-responsive>
     </UiKitItem>
 
-    <!-- 10. Duplicates -->
+    <!-- 10. Standard elements (src/css/elements.scss) -->
     <h2 :id="sections[9].id" class="ui-kit-section">{{ sections[9].title }}</h2>
+    <p class="ui-kit-body text-app-muted">
+      The one implementation of each repeated pattern (src/css/elements.scss).
+      New screens use these classes instead of their own copies.
+    </p>
+    <UiKitItem
+      title="Icon circle"
+      sources=".app-icon-circle --sm 40 · 48 · --lg 56 · --xl 80"
+    >
+      <div class="row q-gutter-md items-center">
+        <div class="app-icon-circle app-icon-circle--sm">
+          <ZapIcon :size="20" />
+        </div>
+        <div class="app-icon-circle"><ZapIcon :size="24" /></div>
+        <div class="app-icon-circle app-icon-circle--lg">
+          <ZapIcon :size="26" />
+        </div>
+        <div class="app-icon-circle app-icon-circle--xl">
+          <ZapIcon :size="36" />
+        </div>
+      </div>
+    </UiKitItem>
+    <UiKitItem
+      title="Option row"
+      sources=".app-option-row (+ __label, __caption, --selected) · SheetOption, Send, Receive, Receive ecash, scanner row, payment request, onboarding choice"
+    >
+      <div class="column q-gutter-y-sm">
+        <div class="app-option-row" role="button" tabindex="0">
+          <div class="app-icon-circle"><CoinsIcon :size="24" /></div>
+          <div class="app-option-row__text">
+            <div class="app-option-row__label">Ecash</div>
+            <div class="app-option-row__caption">
+              Paste, scan or request a token
+            </div>
+          </div>
+        </div>
+        <div
+          class="app-option-row app-option-row--selected"
+          role="button"
+          tabindex="0"
+        >
+          <div class="app-icon-circle"><ZapIcon :size="24" /></div>
+          <div class="app-option-row__text">
+            <div class="app-option-row__label">Lightning</div>
+            <div class="app-option-row__caption">Selected</div>
+          </div>
+        </div>
+      </div>
+    </UiKitItem>
+    <UiKitItem
+      title="Callout"
+      sources=".app-callout --info --warning --danger · ToolTipInfo, MintMotdMessage, MintAuditWarningBox, Multinut, CreateInvoice, ReceiveToken"
+    >
+      <div class="column q-gutter-y-sm">
+        <div class="app-callout">
+          <q-icon name="info" size="18px" class="app-callout__icon" />
+          <div class="app-callout__body app-callout__text">
+            Neutral advice for the next step.
+          </div>
+        </div>
+        <div class="app-callout app-callout--info">
+          <q-icon name="info" size="18px" class="app-callout__icon" />
+          <div class="app-callout__body app-callout__text">
+            Swapping costs a small Lightning fee.
+          </div>
+        </div>
+        <div class="app-callout app-callout--warning">
+          <q-icon name="warning_amber" size="18px" class="app-callout__icon" />
+          <div class="app-callout__body">
+            <div class="app-callout__title">Experimental feature</div>
+            <div class="app-callout__text">
+              Paying from several mints can fail part way.
+            </div>
+          </div>
+        </div>
+        <div class="app-callout app-callout--danger">
+          <q-icon name="error_outline" size="18px" class="app-callout__icon" />
+          <div class="app-callout__body app-callout__text">
+            This token is locked to a different key.
+          </div>
+        </div>
+      </div>
+    </UiKitItem>
+    <UiKitItem
+      title="Badge"
+      sources=".app-badge --solid --primary · reviews, multi-mint amounts"
+    >
+      <div class="row q-gutter-sm items-center">
+        <span class="app-badge">Your review</span>
+        <span class="app-badge app-badge--solid">₿2,289</span>
+        <span class="app-badge app-badge--primary">60%</span>
+      </div>
+    </UiKitItem>
+    <UiKitItem
+      title="Box and empty state"
+      sources=".app-box · .app-empty (+ __title, __text, __action) · MintRatings, MintDiscovery, AddMint preview, confirm summary"
+    >
+      <div class="app-empty app-box">
+        <div class="app-icon-circle app-icon-circle--lg">
+          <q-icon name="travel_explore" size="28px" />
+        </div>
+        <div class="app-empty__title">No mints found</div>
+        <div class="app-empty__text">
+          Try again, or add a mint you trust by its URL.
+        </div>
+        <q-btn
+          rounded
+          unelevated
+          no-caps
+          color="primary"
+          class="full-width app-empty__action"
+          >Discover mints</q-btn
+        >
+      </div>
+    </UiKitItem>
+    <UiKitItem
+      title="Machine text"
+      sources=".app-mono (+ --wrap) · invoices, tokens, lock keys"
+    >
+      <div class="app-mono app-mono--wrap text-app-muted">
+        lnbc10u1pjxyz0pp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqypq
+      </div>
+    </UiKitItem>
+
+    <!-- 11. Duplicates -->
+    <h2 :id="sections[10].id" class="ui-kit-section">
+      {{ sections[10].title }}
+    </h2>
     <p class="ui-kit-body text-app-muted">
       Patterns implemented more than once (src/js/ui-audit.ts). Merge each into
       one shared implementation, then delete its entry.
@@ -947,6 +1070,7 @@ export default defineComponent({
         { id: "rows", title: "Rows and lists" },
         { id: "feedback", title: "Feedback and loading" },
         { id: "data", title: "Data display" },
+        { id: "standard", title: "Standard elements" },
         { id: "duplicates", title: "Duplicates" },
       ],
       tokens: [

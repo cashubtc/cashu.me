@@ -1269,12 +1269,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.fixed-title-height {
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 .pay-fullscreen {
   height: 100vh;
   display: flex;
@@ -1285,20 +1279,6 @@ export default defineComponent({
 .q-dialog__inner > div {
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;
-}
-
-.qcard {
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-}
-
-.cashub-nowrap {
-  word-break: break-all;
-  -webkit-hyphens: none;
-  -moz-hyphens: none;
-  hyphens: none;
-  font-size: 0.9em;
-  font-family: monospace;
 }
 
 .token-input {
@@ -1427,16 +1407,17 @@ export default defineComponent({
 }
 
 .fee-option-row {
-  border: 1px solid rgba(128, 128, 128, 0.25);
-  border-radius: 14px;
+  background: var(--app-card-fill);
+  border: 1px solid var(--app-card-edge);
+  border-radius: 12px;
   padding: 12px 14px;
   cursor: pointer;
   transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .fee-option-row--selected {
-  background: rgba(var(--q-primary-rgb), 0.12);
-  color: var(--q-primary);
+  background: var(--app-card-fill-active);
+  border-color: var(--app-card-edge-active);
 }
 
 .slide-down-enter-active {

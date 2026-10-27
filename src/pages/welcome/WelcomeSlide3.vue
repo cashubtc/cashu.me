@@ -2,19 +2,19 @@
 <template>
   <div class="seed-phrase-slide">
     <!-- Main content area -->
-    <div class="content">
+    <div class="welcome-slide__content">
       <!-- Header Icon -->
-      <div class="header-icon">
-        <div class="icon-circle">
-          <q-icon name="vpn_key" size="2.5em" color="white" />
+      <div class="welcome-slide__icon">
+        <div class="app-icon-circle app-icon-circle--xl">
+          <q-icon name="vpn_key" size="2.5em" />
         </div>
       </div>
 
       <!-- Title -->
-      <h1 class="title">{{ $t("WelcomeSlide3.title") }}</h1>
+      <h1 class="welcome-slide__title">{{ $t("WelcomeSlide3.title") }}</h1>
 
       <!-- Description -->
-      <p class="description">{{ $t("WelcomeSlide3.text") }}</p>
+      <p class="welcome-slide__description">{{ $t("WelcomeSlide3.text") }}</p>
 
       <!-- Seed Phrase Section -->
       <div class="seed-section">
@@ -142,53 +142,6 @@ export default {
   box-sizing: border-box;
 }
 
-.content {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: start;
-  flex: 1;
-}
-
-.header-icon {
-  margin-bottom: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-}
-
-.icon-circle {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.title {
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin: 0 0 16px 0;
-  color: white;
-  line-height: 1.2;
-  text-align: start;
-  width: 100%;
-  max-width: 500px;
-}
-
-.description {
-  font-size: 0.95rem;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.8);
-  margin: 0 0 32px 0;
-  text-align: start;
-  width: 100%;
-  max-width: 500px;
-}
-
 .seed-section {
   width: 100%;
   margin-bottom: 24px;
@@ -281,15 +234,6 @@ export default {
 @media (max-width: 600px) {
   .seed-phrase-slide {
     padding: 24px 16px 16px 16px;
-  }
-
-  .title {
-    font-size: 1.6rem;
-  }
-
-  .description {
-    font-size: 0.9rem;
-    margin-bottom: 28px;
   }
 
   .seed-text {

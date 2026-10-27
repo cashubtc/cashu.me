@@ -132,18 +132,14 @@
         </div>
       </div>
       <div v-else class="q-mb-lg">
-        <div
-          class="empty-state section-card q-pa-xl column items-center text-center"
-        >
-          <q-icon
-            name="chat_bubble_outline"
-            size="26px"
-            class="empty-icon q-mb-sm"
-          />
-          <div class="empty-title q-mb-sm">
+        <div class="app-empty app-box">
+          <div class="app-icon-circle app-icon-circle--lg">
+            <q-icon name="chat_bubble_outline" size="26px" />
+          </div>
+          <div class="app-empty__title">
             {{ $t("MintRatings.no_reviews") }}
           </div>
-          <div class="empty-subtitle q-mb-lg">
+          <div class="app-empty__text">
             {{ $t("MintRatings.empty_state_subtitle") }}
           </div>
           <q-btn
@@ -152,7 +148,7 @@
             unelevated
             rounded
             no-caps
-            class="full-width write-review-btn"
+            class="full-width write-review-btn app-empty__action"
             @click="openCreateReview"
           >
             {{ $t("MintRatings.actions.write_review") }}
@@ -285,9 +281,11 @@
                   })
                 }}</q-tooltip>
               </q-icon>
-              <span v-if="r.pubkey === myPubkey" class="own-review-chip">{{
-                $t("MintRatings.your_review")
-              }}</span>
+              <span
+                v-if="r.pubkey === myPubkey"
+                class="app-badge own-review-chip"
+                >{{ $t("MintRatings.your_review") }}</span
+              >
               <span class="review-date">{{
                 formatDateOnly(r.created_at)
               }}</span>
@@ -768,35 +766,10 @@ export default defineComponent({
   line-height: 18px;
   margin-top: 2px;
 }
-.section-card {
-  background-color: var(--app-tint);
-  border-radius: 12px;
-  border: 1px solid var(--app-border);
-}
 
-.empty-state {
-  width: 100%;
-}
 /* One surface level like mint details: no grey wrapper behind the cards (R18). */
 body[data-theme] .q-card--dark.mint-ratings-root {
   background: transparent !important;
-}
-
-.empty-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--app-text);
-}
-
-.empty-subtitle {
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--app-text-muted);
-  max-width: 320px;
-}
-
-.empty-icon {
-  color: var(--app-text-muted);
 }
 
 /* Review rows, after the app-store pattern: a small avatar, the name with the date at the
@@ -935,16 +908,8 @@ body[data-theme] .q-card--dark.mint-ratings-root {
   padding: 4px 16px 16px;
 }
 
-/* "Your review": a quiet outline chip beside the name, like the settings status chips. */
 .own-review-chip {
-  border: 1px solid var(--app-border-strong);
-  border-radius: 999px;
-  color: var(--app-text-muted);
   flex: none;
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 18px;
-  padding: 0 8px;
 }
 
 .ratings-filter-row {

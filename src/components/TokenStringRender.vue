@@ -188,8 +188,8 @@ export default defineComponent({
 .token-card {
   background: linear-gradient(
     135deg,
-    rgba(var(--q-primary-rgb), 0.18) 0%,
-    rgba(var(--q-primary-rgb), 0.08) 40%,
+    color-mix(in srgb, var(--q-primary) 18%, transparent) 0%,
+    color-mix(in srgb, var(--q-primary) 8%, transparent) 40%,
     rgba(0, 0, 0, 0.15) 100%
   ) !important;
   border-radius: 10px;

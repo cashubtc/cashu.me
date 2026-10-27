@@ -644,12 +644,6 @@ export default defineComponent({
 </script>
 
 <style>
-.add-mint-submit {
-  min-height: 48px;
-  font-size: 15px;
-  font-weight: 600;
-}
-
 @import "src/css/mintlist.css";
 
 .swap-caption {
@@ -666,17 +660,9 @@ export default defineComponent({
 }
 
 /* Add mint matches the height and label size of Discover mints and Swap. */
-.q-btn.add-mint-submit {
-  font-size: 1rem !important;
-  height: 48px;
-  min-height: 48px;
-}
-
-/* Discover mints, Add mint and Swap share one 48px button height and 1rem label. */
+/* Discover mints, Add mint and Swap are full-width actions: the shared 52px height. */
 .discover-mints-btn {
-  font-size: 1rem;
-  height: 48px;
-  min-height: 48px;
+  min-height: 52px;
 }
 
 /* Add Mint Section Styles */

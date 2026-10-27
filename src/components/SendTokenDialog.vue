@@ -794,12 +794,6 @@ export default defineComponent({
   flex-direction: column;
   overflow: hidden;
 }
-.fixed-title-height {
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 .amount-area {
   flex: 1;
   position: relative;
@@ -810,13 +804,8 @@ export default defineComponent({
   max-width: 90vw;
 }
 .amount-display {
-  font-size: clamp(56px, 11vw, 80px);
-  line-height: 1.1;
   white-space: nowrap;
   max-width: 100%;
-}
-.fiat-display {
-  font-size: 14px;
 }
 .p2pk-overlay {
   position: absolute;

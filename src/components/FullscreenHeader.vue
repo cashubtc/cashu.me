@@ -1,11 +1,11 @@
 <template>
   <q-header class="bg-dark">
-    <q-toolbar class="fullscreen-toolbar">
+    <q-toolbar class="app-toolbar">
       <q-btn
         flat
         dense
         round
-        class="fullscreen-back-btn"
+        class="app-toolbar-btn"
         @click="goBack"
         :aria-label="$t('common.back')"
       >
@@ -44,18 +44,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style scoped>
-/* Keep the back control in the same column as page content on wide screens. */
-.fullscreen-toolbar {
-  margin: 0 auto;
-  max-width: var(--app-column);
-  padding: 0 6px;
-}
-
-.fullscreen-back-btn {
-  color: var(--app-text);
-  height: 44px;
-  width: 44px;
-}
-</style>

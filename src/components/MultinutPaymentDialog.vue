@@ -15,12 +15,15 @@
       <div class="multinut-content-container q-pa-md">
         <!-- Top Icons -->
         <div class="top-icons q-pt-md q-mb-lg">
-          <q-icon
-            name="close"
-            size="24px"
-            class="close-icon cursor-pointer text-white"
+          <q-btn
+            flat
+            round
+            class="floating-close-btn"
+            :aria-label="$t('global.actions.close.label')"
             @click="closeMultinutDialog"
-          />
+          >
+            <XIcon :size="22" />
+          </q-btn>
         </div>
 
         <!-- Header Section -->
@@ -29,7 +32,7 @@
             <div class="multinut-title q-mb-xs">
               {{ $t("MultinutPicker.dialog_title") }}
             </div>
-            <div class="multinut-amount">
+            <div class="amount-headline">
               {{
                 formatCurrency(
                   payInvoiceData.meltQuote.response.amount,
@@ -57,21 +60,29 @@
               "
               class="experimental-warning q-mt-lg"
             >
-              <div class="warning-content q-pa-md">
-                <div class="warning-title q-mb-xs">
-                  {{ $t("MultinutPicker.experimental_title") }}
+              <div class="app-callout app-callout--warning">
+                <q-icon
+                  name="warning_amber"
+                  size="20px"
+                  class="app-callout__icon"
+                />
+                <div class="app-callout__body">
+                  <div class="app-callout__title">
+                    {{ $t("MultinutPicker.experimental_title") }}
+                  </div>
+                  <div class="app-callout__text">
+                    {{ $t("MultinutPicker.experimental_text") }}
+                  </div>
+                  <q-btn
+                    flat
+                    dense
+                    no-caps
+                    class="q-mt-sm warning-dismiss-btn"
+                    @click="dismissExperimentalWarning"
+                  >
+                    {{ $t("MultinutPicker.understand") }}
+                  </q-btn>
                 </div>
-                <div class="warning-text q-mb-md">
-                  {{ $t("MultinutPicker.experimental_text") }}
-                </div>
-                <q-btn
-                  flat
-                  color="warning"
-                  @click="dismissExperimentalWarning"
-                  class="warning-dismiss-btn"
-                >
-                  {{ $t("MultinutPicker.understand") }}
-                </q-btn>
               </div>
             </div>
           </transition>
@@ -210,7 +221,7 @@
                     v-if="!isSelected(mint)"
                     class="mint-balance-section q-mt-md"
                   >
-                    <div class="currency-unit-badge">
+                    <div class="app-badge app-badge--solid q-mr-xs q-mb-xs">
                       <span class="currency-unit-text">
                         {{
                           formatCurrency(
@@ -230,7 +241,9 @@
                     <div class="row items-center q-gutter-sm no-wrap">
                       <!-- Allocation Badge -->
                       <div class="col-auto">
-                        <div class="allocation-badge">
+                        <div
+                          class="app-badge app-badge--primary allocation-badge"
+                        >
                           {{
                             formatCurrency(getPartialAmount(mint), activeUnit)
                           }}
@@ -255,7 +268,7 @@
 
                       <!-- Total Balance Badge -->
                       <div class="col-auto">
-                        <div class="total-balance-badge">
+                        <div class="app-badge app-badge--solid">
                           {{
                             formatCurrency(
                               mintClass(mint).unitBalance(this.activeUnit),
@@ -284,9 +297,6 @@
             class="pay-button-fixed"
             size="lg"
           >
-            <template v-slot:loading>
-              <q-spinner />
-            </template>
             {{ $t("MultinutPicker.pay_invoice") }}
           </q-btn>
         </div>
@@ -304,11 +314,12 @@ import { useUiStore } from "src/stores/ui";
 import { notifyError, notifySuccess } from "src/js/notify";
 import { sumProofAmounts } from "src/js/proofs";
 import { getShortUrl } from "src/js/wallet-helpers";
+import { X as XIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "MultinutPaymentDialog",
   mixins: [windowMixin],
-  components: {},
+  components: { XIcon },
   data() {
     return {
       multiMeltButtonLoading: false,
@@ -1042,14 +1053,6 @@ export default defineComponent({
   justify-content: flex-start;
 }
 
-.close-icon {
-  transition: opacity 0.2s ease;
-}
-
-.close-icon:hover {
-  opacity: 0.7;
-}
-
 /* Header Section */
 .multinut-header-container {
   display: flex;
@@ -1070,13 +1073,6 @@ export default defineComponent({
 
 .multinut-title {
   font-size: 20px;
-  font-weight: 600;
-  text-align: center;
-  color: var(--app-text);
-}
-
-.multinut-amount {
-  font-size: 32px;
   font-weight: 600;
   text-align: center;
   color: var(--app-text);
@@ -1167,15 +1163,8 @@ export default defineComponent({
 }
 
 .allocation-badge {
-  background-color: var(--q-primary);
-  border-radius: 4px;
-  padding: 4px 8px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--q-dark);
-  display: inline-block;
+  justify-content: center;
   min-width: 50px;
-  text-align: center;
 }
 
 .slider-container {
@@ -1186,16 +1175,6 @@ export default defineComponent({
 
 .mint-slider {
   margin: 8px 0;
-}
-
-.total-balance-badge {
-  background-color: var(--app-raised);
-  border-radius: 4px;
-  padding: 4px 8px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--app-text);
-  display: inline-block;
 }
 
 /* Payment Progress */
@@ -1227,8 +1206,8 @@ export default defineComponent({
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: var(--q-dark);
-  padding: 16px;
+  background: var(--app-surface);
+  padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px));
   z-index: 1000;
 }
 
@@ -1237,7 +1216,7 @@ export default defineComponent({
   max-width: 600px;
   margin: 0 auto;
   display: block;
-  height: 48px;
+  min-height: 52px;
   font-size: 16px;
   font-weight: 600;
 }
@@ -1278,33 +1257,10 @@ export default defineComponent({
   width: 100%;
 }
 
-.warning-content {
-  background-color: rgba(255, 193, 7, 0.1);
-  border: 1px solid rgba(255, 193, 7, 0.3);
-  border-radius: 12px;
-  text-align: center;
-}
-
-.warning-icon {
-  display: flex;
-  justify-content: center;
-}
-
-.warning-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #ffc107;
-}
-
-.warning-text {
-  font-size: 14px;
-  line-height: 20px;
-  color: var(--app-text);
-  font-weight: 500;
-}
-
 .warning-dismiss-btn {
+  color: var(--app-warning);
   font-weight: 600;
+  margin-inline-start: -8px;
 }
 
 /* Smooth slide animation for warning */
