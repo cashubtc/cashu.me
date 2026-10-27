@@ -59,6 +59,15 @@ body {
 // Map CSS env() safe area to our custom variable for PWA iOS
 :root {
   --safe-area-inset-top: env(safe-area-inset-top);
+  // The one content column every page, sheet and QR screen shares: the column with its 16px
+  // gutters, and the content inside them. A little wider on desktop.
+  --app-column: 560px;
+  --app-content: calc(var(--app-column) - 32px);
+}
+@media (min-width: 1024px) {
+  :root {
+    --app-column: 640px;
+  }
 }
 
 // margin for top elements for ios safe area
@@ -114,14 +123,14 @@ body,
 
 .full-width-card {
   width: 100%;
-  max-width: 600px;
+  max-width: var(--app-column);
   margin: 0 auto;
 }
 // On wide screens bottom sheets match the shared content column.
 @media (min-width: 600px) {
   .full-width-card,
   .q-dialog__inner > .full-width-card {
-    max-width: 528px !important;
+    max-width: var(--app-content) !important;
   }
 }
 
@@ -196,7 +205,7 @@ body,
 // QR sheets (send, receive): QR, a thin activity track, then the amount.
 .qr-progress {
   height: 2px;
-  margin: 8px 0 12px;
+  margin: 8px 0 20px;
   padding-inline: 35%;
 }
 // Under reduced motion the indeterminate bar stops and would draw a full static rule under
@@ -292,12 +301,14 @@ button:focus-visible {
   min-height: 52px;
 }
 
-// Fullscreen sheet header: bound to the same 600px column as the sheet content, so the close
+// Fullscreen sheet header: bound to the same app column as the sheet content, so the close
 // button and trailing actions sit on the content edges on desktop instead of the window edges.
 .sheet-column-header {
   position: relative;
   width: 100%;
-  max-width: 560px; // the page column: close and trailing buttons share its edges
+  max-width: var(
+    --app-column
+  ); // the page column: close and trailing buttons share its edges
   margin: 0 auto;
 }
 
@@ -346,9 +357,15 @@ body[data-theme] .welcome-surface,
     background: var(--app-tint-strong);
   }
 }
+// Pickers and fields press with a fill only: shrinking a full-width field reads as the whole
+// control collapsing, unlike a pill button sinking.
 .mint-chip:active {
-  background: color-mix(in srgb, var(--app-text) 24%, transparent);
-  scale: 0.97;
+  background: color-mix(in srgb, var(--app-text) 16%, transparent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .mint-chip {
+    transition: background-color 0.12s ease;
+  }
 }
 .mint-chip__icon {
   color: var(--app-text-muted);
@@ -938,4 +955,42 @@ html[dir="rtl"] .q-field__append {
 .mint-chip:disabled {
   cursor: default;
   opacity: 0.5;
+}
+
+// Full-screen QR and receipt screens (send ecash, invoices, P2PK key, payment requests): header,
+// content, then the primary action. On phones and tablets the action is pinned to the bottom,
+// in reach of the thumb, and the content scrolls above it. On desktop the page scrolls as one
+// and the action follows the details, so a short receipt has no gap above a far-off button.
+.display-token-fullscreen {
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.display-token-fullscreen .content-area {
+  flex: 1;
+  overflow-y: auto;
+}
+// Every full-screen flow's action footer (QR screens, send, receive, pay): pushed to the bottom
+// of its flex column, on the page surface, clear of the home indicator.
+.bottom-panel {
+  margin-top: auto;
+  background: var(--app-surface);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.display-token-fullscreen .bottom-panel {
+  z-index: 2;
+}
+@media (min-width: 1024px) {
+  .display-token-fullscreen {
+    overflow-y: auto;
+  }
+  .display-token-fullscreen .content-area {
+    flex: none;
+    overflow: visible;
+  }
+  .display-token-fullscreen .bottom-panel {
+    margin-top: 16px;
+  }
 }

@@ -562,7 +562,7 @@ export default {
             "Removes ecash your active mints report as spent. Use only if your wallet is stuck.",
         },
         debug_console: {
-          button: "Toggle debug console",
+          button: "Debug console",
           description:
             "Opens the JavaScript console. Never paste code you don't understand; scammers use it to steal funds.",
         },
@@ -1053,7 +1053,7 @@ export default {
       },
       create: {
         label: "Create invoice",
-        label_blocked: "Creating invoice…",
+        label_blocked: "Creating invoice",
         in_progress: "Creating",
       },
     },

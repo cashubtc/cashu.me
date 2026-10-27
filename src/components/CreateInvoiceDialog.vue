@@ -54,8 +54,8 @@
         <!-- Mint selection -->
         <div class="row justify-center">
           <div
-            class="col-12 col-sm-11 col-md-8 q-px-md q-mb-sm"
-            style="max-width: 560px"
+            class="col-12 q-px-md q-mb-sm"
+            style="max-width: var(--app-column)"
           >
             <ChooseMint
               :filter-payment-method="mintFilterMethod"
@@ -230,10 +230,7 @@
             class="row justify-center"
             v-if="isBolt12 && !showAmountInput && !showNpubCashPreview"
           >
-            <div
-              class="col-12 col-sm-11 col-md-8 q-px-md"
-              style="max-width: 560px"
-            >
+            <div class="col-12 q-px-md" style="max-width: var(--app-column)">
               <q-btn
                 class="full-width"
                 outline
@@ -248,10 +245,7 @@
 
           <!-- Primary action (Add amount / Create) -->
           <div class="row justify-center q-pb-lg q-pt-sm">
-            <div
-              class="col-12 col-sm-11 col-md-8 q-px-md"
-              style="max-width: 560px"
-            >
+            <div class="col-12 q-px-md" style="max-width: var(--app-column)">
               <q-btn
                 v-if="showNpubCashPreview"
                 class="full-width"
@@ -1014,11 +1008,6 @@ export default defineComponent({
   .wobble-enter-active {
     animation: none;
   }
-}
-.bottom-panel {
-  margin-top: auto;
-  background: var(--app-surface);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 .keypad-wrapper {
   width: 100%;

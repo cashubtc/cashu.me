@@ -58,7 +58,7 @@
       </q-list>
       <div
         class="discover-skeleton__row"
-        v-for="n in 3"
+        v-for="n in 5"
         :key="n"
         aria-hidden="true"
       >

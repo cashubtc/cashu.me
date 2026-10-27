@@ -62,7 +62,8 @@
       </q-item>
 
       <!-- debug console -->
-      <q-item clickable v-ripple @click="toggleTerminal">
+      <!-- On or off, so a switch bound to its saved state, like every other setting. -->
+      <q-item tag="label">
         <q-item-section>
           <q-item-label>{{
             $t("Settings.advanced.developer.debug_console.button")
@@ -70,6 +71,13 @@
           <q-item-label caption>{{
             $t("Settings.advanced.developer.debug_console.description")
           }}</q-item-label>
+        </q-item-section>
+        <q-item-section side>
+          <q-toggle
+            :model-value="showDebugConsole"
+            color="primary"
+            @update:model-value="toggleTerminal"
+          />
         </q-item-section>
       </q-item>
 
@@ -324,6 +332,7 @@ export default defineComponent({
       "activeProofs",
     ]),
     ...mapWritableState(useWalletStore, ["keysetCounters"]),
+    ...mapState(useUiStore, ["showDebugConsole"]),
     keysetCountersByMint() {
       const mints = this.mints;
       const keysetCountersByMint = {}; // {mintUrl: [keysetCounter: {id: string, count: number}, ...]}

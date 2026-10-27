@@ -1,37 +1,5 @@
 <template>
   <div class="history-table">
-    <!-- Filter controls sit above the list they filter (R18) -->
-    <div class="history-filters row items-center q-mb-sm">
-      <q-btn
-        rounded
-        :outline="!filterPending"
-        :unelevated="filterPending"
-        no-caps
-        :icon="filterPending ? 'check' : undefined"
-        :aria-pressed="filterPending ? 'true' : 'false'"
-        @click="filterPending = !filterPending"
-        :color="filterPending ? 'primary' : undefined"
-        :label="
-          $t(
-            filterPending
-              ? 'HistoryTable.actions.show_all.label'
-              : 'HistoryTable.actions.filter_pending.label'
-          )
-        "
-        class="q-px-md history-filter-btn"
-      />
-      <q-btn
-        v-if="filterPending"
-        rounded
-        outline
-        no-caps
-        @click="filterPendingEcash = !filterPendingEcash"
-        :color="filterPendingEcash ? 'primary' : 'grey'"
-        :label="$t('HistoryTable.actions.filter_ecash_only.label')"
-        class="q-ml-sm q-px-md history-filter-btn"
-      />
-    </div>
-
     <q-list>
       <q-item
         v-for="transaction in paginatedTransactions"
@@ -148,7 +116,15 @@
           </q-item-label>
         </q-item-section>
       </q-item>
-      <!-- Short last page: hold the list at full page height so pagination does not move. -->
+      <!-- Nothing matches: one row-height message in the list. -->
+      <div
+        v-if="paginatedTransactions.length === 0"
+        class="history-row history-row--placeholder history-empty row items-center justify-center"
+      >
+        <q-item-label caption>{{ $t("HistoryTable.empty_text") }}</q-item-label>
+      </div>
+      <!-- Hold the list at a full page while paging or filtering, so the filters and
+           pagination below never move. -->
       <div
         v-for="n in placeholderRowCount"
         :key="`placeholder-${n}`"
@@ -157,15 +133,41 @@
       />
     </q-list>
 
-    <!-- Empty State -->
-    <div v-if="paginatedTransactions.length === 0" class="text-center q-mt-lg">
-      <q-item-label caption class="text-primary">{{
-        $t("HistoryTable.empty_text")
-      }}</q-item-label>
+    <!-- Filters sit under the list, above pagination (as on main). The list above keeps its
+         full height while filtering, so these buttons never move. -->
+    <div class="history-filters row justify-center items-center q-mt-md">
+      <q-btn
+        rounded
+        :outline="!filterPending"
+        :unelevated="filterPending"
+        no-caps
+        :icon="filterPending ? 'check' : undefined"
+        :aria-pressed="filterPending ? 'true' : 'false'"
+        @click="filterPending = !filterPending"
+        :color="filterPending ? 'primary' : undefined"
+        :label="
+          $t(
+            filterPending
+              ? 'HistoryTable.actions.show_all.label'
+              : 'HistoryTable.actions.filter_pending.label'
+          )
+        "
+        class="q-px-md history-filter-btn"
+      />
+      <q-btn
+        v-if="filterPending"
+        rounded
+        outline
+        no-caps
+        @click="filterPendingEcash = !filterPendingEcash"
+        :color="filterPendingEcash ? 'primary' : 'grey'"
+        :label="$t('HistoryTable.actions.filter_ecash_only.label')"
+        class="q-ml-sm q-px-md history-filter-btn"
+      />
     </div>
 
     <!-- Pagination -->
-    <div v-else-if="maxPages > 1" class="text-center q-mt-lg">
+    <div v-if="maxPages > 1" class="text-center q-mt-md">
       <div style="display: flex; justify-content: center">
         <q-pagination
           v-model="currentPage"
@@ -304,8 +306,10 @@ export default defineComponent({
     },
 
     placeholderRowCount() {
-      if (this.maxPages <= 1) return 0;
-      return Math.max(0, this.pageSize - this.paginatedTransactions.length);
+      // Pad to the height the unfiltered first page has, so filtering never shortens the list.
+      const fullPage = Math.min(this.pageSize, this.unifiedTransactions.length);
+      const shown = Math.max(1, this.paginatedTransactions.length);
+      return Math.max(0, fullPage - shown);
     },
 
     paginatedTransactions() {
@@ -668,6 +672,9 @@ export default defineComponent({
   background: transparent;
   min-height: 64px;
   pointer-events: none;
+}
+.history-empty .q-item__label {
+  color: var(--app-text-muted);
 }
 
 .history-row :deep(.q-focus-helper) {

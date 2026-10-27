@@ -14,10 +14,6 @@
       />
 
       <div class="mint-content-container q-px-md">
-        <!-- The shared page title slot, as on every settings sub-page (R20) -->
-        <div class="settings-page-header q-pt-sm q-pb-md">
-          <div class="text-h5 text-weight-bold">{{ mintDisplayName }}</div>
-        </div>
         <!-- Mint Header Profile Name Section -->
         <div class="mint-header-container q-mb-lg">
           <div class="mint-header q-pa-md">
@@ -30,28 +26,29 @@
               />
               <landmark-icon v-else size="36" :stroke-width="1.5" />
             </q-avatar>
-            <!-- This mint's holdings, sats first, like the mint picker (R21) -->
-            <div v-if="heroBalance" class="mint-balance q-mb-xs">
-              {{ heroBalance }}
-            </div>
+            <!-- The original header: the mint's identity in its own card, no balance. -->
+            <div class="mint-name q-mb-xs">{{ mintDisplayName }}</div>
 
-            <!-- QR Code Icon -->
-            <!-- A labelled button, not a bare glyph, so its purpose and state are clear. -->
+            <!-- The QR toggle as an icon, as originally, but a real labelled button. -->
             <div class="top-icons">
               <q-btn
                 flat
-                rounded
-                no-caps
+                round
                 class="qr-toggle"
+                :aria-label="
+                  showQrCode
+                    ? $t('MintDetailsDialog.qr.hide')
+                    : $t('MintDetailsDialog.qr.show')
+                "
                 :aria-expanded="showQrCode"
                 @click="showQrCode = !showQrCode"
               >
-                <qr-code-icon size="20" class="qr-icon" />
-                <span class="q-ml-sm">{{
+                <qr-code-icon size="24" class="qr-icon" />
+                <q-tooltip>{{
                   showQrCode
                     ? $t("MintDetailsDialog.qr.hide")
                     : $t("MintDetailsDialog.qr.show")
-                }}</span>
+                }}</q-tooltip>
               </q-btn>
             </div>
 
@@ -329,8 +326,6 @@
                 {{ $t("CreateMintReview.title") }}
               </div>
             </div>
-          </div>
-          <div class="action-buttons-container q-mt-md">
             <div
               class="action-button delete-button cursor-pointer"
               @click="openRemoveMintDialog"
@@ -429,19 +424,6 @@ export default defineComponent({
     };
   },
   computed: {
-    heroBalance(): string {
-      try {
-        const balances = new MintClass(this.mintData as any).allBalances;
-        const units = Object.keys(balances)
-          .filter((u) => balances[u] > 0)
-          .sort((a, b) => Number(b === "sat") - Number(a === "sat"));
-        return units
-          .map((u) => this.formatCurrency(balances[u], u))
-          .join(" + ");
-      } catch {
-        return "";
-      }
-    },
     mintDisplayName(): string {
       const data = this.mintData as any;
       if (data?.nickname) return data.nickname;
@@ -573,7 +555,7 @@ export default defineComponent({
 <style scoped>
 /* The page scrolls as a whole; no inner scroll container. */
 .mint-details-page-content {
-  max-width: 600px;
+  max-width: var(--app-column);
   margin: 0 auto;
   color: var(--app-text);
   width: 100%;
@@ -581,17 +563,9 @@ export default defineComponent({
 }
 
 .mint-content-container {
-  max-width: 600px;
+  max-width: var(--app-column);
   margin: 0 auto;
   color: var(--app-text);
-}
-
-/* On wide screens, the same content column as settings and the wallet. */
-@media (min-width: 600px) {
-  .mint-details-page-content,
-  .mint-content-container {
-    max-width: 560px;
-  }
 }
 
 /* Top Icons */
@@ -605,9 +579,6 @@ export default defineComponent({
 
 .qr-toggle {
   color: var(--app-text);
-  font-size: 14px;
-  font-weight: 600;
-  min-height: 44px;
 }
 
 /* Mint Header */
@@ -630,12 +601,6 @@ export default defineComponent({
 
 .mint-name {
   font-size: 24px;
-  font-weight: 600;
-  text-align: center;
-}
-
-.mint-balance {
-  font-size: 20px;
   font-weight: 600;
   text-align: center;
 }
@@ -664,21 +629,25 @@ export default defineComponent({
   font-weight: 500;
 }
 
-/* Section headers: left-aligned, same treatment as settings section titles. */
+/* Section headers: centred between two hairlines, as in the original design, in the quiet
+   label style of the rows below. */
 .section-divider {
   display: flex;
   align-items: center;
+  gap: 12px;
   width: 100%;
 }
 .section-divider .divider-line {
-  display: none;
+  flex: 1;
+  height: 1px;
+  background: var(--app-border);
 }
 .section-divider .divider-text {
-  padding: 0;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--app-text-muted);
-  text-align: start;
 }
 
 /* Contact Section */
@@ -702,37 +671,28 @@ export default defineComponent({
 .contact-icon {
   width: 20px;
   height: 20px;
-  color: #636366;
+  color: var(--app-text-muted);
 }
 
+/* Contact values read like the detail rows: regular weight on the text colour. */
 .contact-text {
   flex: 1;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 400;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .copy-icon {
-  color: #636366;
+  color: var(--app-text-muted);
   margin-inline-start: 10px;
 }
 
-/* Mint Details Section */
-/* Details and actions are grouped cards, like the settings menu. */
-/* Mint details read like the invoice and token details: flat label/value rows on the page,
-   the same shared .detail-item rows, no card around them. Actions stay in a card. */
+/* Details, contact and actions are all flat rows on the page, like the invoice and token
+   details: no cards. */
 .mint-details-section {
   padding: 4px 0 0;
-  width: 100%;
-}
-
-.action-buttons-container {
-  background: var(--app-tint);
-  border: 1px solid var(--app-border);
-  border-radius: 14px;
-  padding: 4px 16px;
   width: 100%;
 }
 
@@ -744,7 +704,6 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  margin-top: 16px;
   margin-bottom: 32px;
 }
 

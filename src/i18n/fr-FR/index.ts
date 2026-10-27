@@ -567,7 +567,7 @@ export default {
             "Supprime l'ecash que vos mints actives signalent comme dépensé. À utiliser uniquement si votre portefeuille est bloqué.",
         },
         debug_console: {
-          button: "Afficher/masquer la console de débogage",
+          button: "Console de débogage",
           description:
             "Ouvre la console JavaScript. Ne collez jamais de code que vous ne comprenez pas ; des escrocs s'en servent pour voler des fonds.",
         },
@@ -1047,7 +1047,7 @@ export default {
       },
       create: {
         label: "Créer une facture",
-        label_blocked: "Création en cours…",
+        label_blocked: "Création en cours",
         in_progress: "Création",
       },
     },

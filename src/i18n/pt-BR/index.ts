@@ -566,7 +566,7 @@ export default {
             "Remove o ecash que seus mints ativos informam como gasto. Use apenas se sua carteira travar.",
         },
         debug_console: {
-          button: "Alternar console de depuração",
+          button: "Console de depuração",
           description:
             "Abre o console JavaScript. Nunca cole código que você não entende; golpistas usam isso para roubar fundos.",
         },
@@ -1060,7 +1060,7 @@ export default {
       },
       create: {
         label: "Criar fatura",
-        label_blocked: "Criando fatura…",
+        label_blocked: "Criando fatura",
         in_progress: "Criando",
       },
     },

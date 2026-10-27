@@ -530,7 +530,7 @@ export default {
             "Rimuove l'ecash che i tuoi mint attivi segnalano come speso. Usalo solo se il portafoglio è bloccato.",
         },
         debug_console: {
-          button: "Mostra/nascondi console di debug",
+          button: "Console di debug",
           description:
             "Apre la console JavaScript. Non incollare mai codice che non capisci: i truffatori la usano per rubare fondi.",
         },
@@ -1009,7 +1009,7 @@ export default {
       },
       create: {
         label: "Crea fattura",
-        label_blocked: "Creazione fattura…",
+        label_blocked: "Creazione fattura",
         in_progress: "Creazione",
       },
     },

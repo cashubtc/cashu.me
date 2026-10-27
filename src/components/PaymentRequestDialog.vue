@@ -56,10 +56,7 @@
         <div class="content-area">
           <q-card-section class="q-pa-none">
             <div v-if="showPRKData" class="row justify-center q-mb-md">
-              <div
-                class="col-12 col-sm-11 col-md-8 q-px-md"
-                style="max-width: 560px"
-              >
+              <div class="col-12 q-px-md" style="max-width: var(--app-column)">
                 <q-responsive :ratio="1" class="q-mx-none">
                   <vue-qrcode
                     :value="showPRKData"
@@ -129,8 +126,8 @@
                 v-if="currentPaymentRequest"
               >
                 <div
-                  class="col-12 col-sm-11 col-md-8 q-px-md"
-                  style="max-width: 560px"
+                  class="col-12 q-px-md"
+                  style="max-width: var(--app-column)"
                 >
                   <div class="row q-gutter-sm items-center q-mb-sm">
                     <q-chip
@@ -168,10 +165,7 @@
         <!-- Bottom panel action -->
         <div class="bottom-panel">
           <div class="row justify-center q-pb-lg q-pt-sm">
-            <div
-              class="col-12 col-sm-11 col-md-8 q-px-md"
-              style="max-width: 560px"
-            >
+            <div class="col-12 q-px-md" style="max-width: var(--app-column)">
               <q-btn
                 class="full-width"
                 unelevated
@@ -341,30 +335,11 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.display-token-fullscreen {
-  height: 100vh;
-  height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-.content-area {
-  flex: 1;
-  overflow-y: auto;
-}
 .fixed-title-height {
   height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-.bottom-panel {
-  margin-top: auto;
-  background: var(--app-surface);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  position: sticky;
-  bottom: 0;
-  z-index: 2;
 }
 .qcard {
   border-top-left-radius: 20px;

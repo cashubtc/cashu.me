@@ -40,8 +40,8 @@
         >
           <div class="row justify-center full-width">
             <div
-              class="col-12 col-sm-11 col-md-8 q-px-sm q-mb-sm"
-              style="max-width: 560px"
+              class="col-12 q-px-sm q-mb-sm"
+              style="max-width: var(--app-column)"
             >
               <!-- <div class="row items-center no-wrap q-pb-sm">
                 <div class="col-12">
@@ -176,10 +176,7 @@
         <transition appear enter-active-class="animated fadeIn">
           <div class="bottom-panel" v-if="tokenDecodesCorrectly">
             <div class="row justify-center q-pb-lg q-pt-sm">
-              <div
-                class="col-12 col-sm-11 col-md-8 q-px-md"
-                style="max-width: 560px"
-              >
+              <div class="col-12 q-px-md" style="max-width: var(--app-column)">
                 <template v-if="isNotLockedToUs">
                   <div
                     class="receive-error text-negative text-subtitle2 text-left"
@@ -782,7 +779,7 @@ export default defineComponent({
 
 .full-width-card {
   width: 100%;
-  max-width: 600px;
+  max-width: var(--app-column);
   margin: 0 auto;
 }
 
@@ -857,12 +854,6 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.bottom-panel {
-  margin-top: auto;
-  background: var(--app-surface);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .token-input {

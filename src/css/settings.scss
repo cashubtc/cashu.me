@@ -6,7 +6,7 @@
 
 .settings-view {
   width: 100%;
-  max-width: 560px;
+  max-width: var(--app-column);
   margin: 0 auto;
   overflow-x: hidden;
 }
@@ -111,7 +111,7 @@
 /* On wide screens the settings column matches the wallet's content edges. */
 @media (min-width: 600px) {
   .settings-view {
-    max-width: 528px;
+    max-width: var(--app-content);
   }
 }
 

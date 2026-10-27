@@ -570,7 +570,7 @@ export default {
             "Odstraní ecash, který vaše aktivní minty hlásí jako utracený. Použijte jen tehdy, když peněženka uvízne.",
         },
         debug_console: {
-          button: "Přepnout ladicí konzoli",
+          button: "Ladicí konzole",
           description:
             "Otevře JavaScriptovou konzoli. Nikdy nevkládejte kód, kterému nerozumíte; podvodníci ji zneužívají ke krádeži peněz.",
         },
@@ -1066,7 +1066,7 @@ export default {
       },
       create: {
         label: "Vytvořit fakturu",
-        label_blocked: "Vytváří se faktura…",
+        label_blocked: "Vytváří se faktura",
         in_progress: "Vytváří se",
       },
     },

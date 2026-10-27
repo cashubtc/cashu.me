@@ -42,10 +42,7 @@
           }}</q-item-label>
         </q-item-section>
         <q-item-section side>
-          <q-toggle
-            v-model="showP2PkButtonInDrawer"
-            color="primary"
-          />
+          <q-toggle v-model="showP2PkButtonInDrawer" color="primary" />
         </q-item-section>
       </q-item>
     </SettingsSection>

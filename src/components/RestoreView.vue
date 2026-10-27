@@ -3,29 +3,26 @@
     <!-- Mnemonic seed phrase input -->
     <SettingsSection
       v-if="!onboarding"
+      flat
       :title="$t('RestoreView.seed_phrase.label')"
       :caption="$t('RestoreView.seed_phrase.caption')"
     >
-      <q-item class="settings-control-item q-pt-md">
-        <q-item-section>
-          <q-input
-            outlined
-            v-model="mnemonicInput"
-            :label="$t('RestoreView.seed_phrase.inputs.seed_phrase.label')"
-            autogrow
-            type="textarea"
-            hide-bottom-space
-            :error="mnemonicError !== ''"
-            :error-message="mnemonicError"
-          >
-            <template v-slot:append>
-              <q-btn flat dense round @click="pasteMnemonic"
-                ><ClipboardPasteIcon :size="20"
-              /></q-btn>
-            </template>
-          </q-input>
-        </q-item-section>
-      </q-item>
+      <q-input
+        outlined
+        v-model="mnemonicInput"
+        :label="$t('RestoreView.seed_phrase.inputs.seed_phrase.label')"
+        autogrow
+        type="textarea"
+        hide-bottom-space
+        :error="mnemonicError !== ''"
+        :error-message="mnemonicError"
+      >
+        <template v-slot:append>
+          <q-btn flat dense round @click="pasteMnemonic"
+            ><ClipboardPasteIcon :size="20"
+          /></q-btn>
+        </template>
+      </q-input>
     </SettingsSection>
 
     <!-- Mints to restore -->

@@ -158,7 +158,7 @@
     <div class="content-area">
       <q-card-section class="q-pa-none">
         <div v-if="qrCodeFragment" class="row justify-center q-mb-md">
-          <div class="col-12 col-sm-11 col-md-8 q-px-md">
+          <div class="col-12 q-px-md">
             <q-responsive :ratio="1" class="q-mx-none">
               <vue-qrcode
                 :value="qrCodeFragment"
@@ -190,7 +190,7 @@
           </div>
           <div class="row justify-center q-pt-sm q-pb-xs">
             <div
-              class="col-12 col-sm-11 col-md-8 q-px-md"
+              class="col-12 q-px-md"
               style="max-width: 600px; position: relative"
             >
               <div class="row justify-center items-center no-wrap">
@@ -245,10 +245,7 @@
             v-if="sendData.paymentRequest"
             class="row justify-center q-pt-md"
           >
-            <div
-              class="col-12 col-sm-11 col-md-8 q-px-md"
-              style="max-width: 560px"
-            >
+            <div class="col-12 q-px-md" style="max-width: var(--app-column)">
               <PaymentRequestInfo :request="sendData.paymentRequest" />
             </div>
           </div>
@@ -256,10 +253,7 @@
             v-if="sendData.historyToken?.meltQuote"
             class="row justify-center q-pt-md"
           >
-            <div
-              class="col-12 col-sm-11 col-md-8 q-px-md"
-              style="max-width: 560px"
-            >
+            <div class="col-12 q-px-md" style="max-width: var(--app-column)">
               <MeltQuoteInformation
                 :melt-quote="sendData.historyToken.meltQuote"
                 :invoice="sendData.historyToken"
@@ -286,7 +280,7 @@
     <!-- Fixed bottom panel with copy button -->
     <div class="bottom-panel">
       <div class="row justify-center q-pb-lg q-pt-sm">
-        <div class="col-12 col-sm-11 col-md-8 q-px-md" style="max-width: 560px">
+        <div class="col-12 q-px-md" style="max-width: var(--app-column)">
           <q-btn
             class="full-width"
             unelevated
@@ -726,17 +720,8 @@ export default defineComponent({
   padding: 0 14px;
 }
 
-.display-token-fullscreen {
-  height: 100vh; /* fallback */
-  height: 100dvh; /* account for mobile browser UI */
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
 .content-area {
-  flex: 1;
-  overflow-y: auto;
-  max-width: 600px;
+  max-width: var(--app-column);
   width: 100%;
   margin: 0 auto;
 }
@@ -752,13 +737,5 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: center;
-}
-.bottom-panel {
-  margin-top: auto;
-  background: var(--app-surface);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  position: sticky;
-  bottom: 0;
-  z-index: 2;
 }
 </style>

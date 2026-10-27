@@ -548,7 +548,7 @@ export default {
             "使用中のミントが使用済みと報告した ecash を削除します。ウォレットが動かなくなったときだけ使ってください。",
         },
         debug_console: {
-          button: "デバッグコンソールの切り替え",
+          button: "デバッグコンソール",
           description:
             "JavaScript コンソールを開きます。理解できないコードは絶対に貼り付けないでください。詐欺師が資金を盗むのに使います。",
         },
@@ -1025,7 +1025,7 @@ export default {
       },
       create: {
         label: "請求書を作成",
-        label_blocked: "請求書作成中…",
+        label_blocked: "請求書作成中",
         in_progress: "作成中",
       },
     },

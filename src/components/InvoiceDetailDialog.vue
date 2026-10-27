@@ -55,10 +55,7 @@
               v-else-if="invoiceData.request"
               class="row justify-center q-mb-md"
             >
-              <div
-                class="col-12 col-sm-11 col-md-8 q-px-md"
-                style="max-width: 560px"
-              >
+              <div class="col-12 q-px-md" style="max-width: var(--app-column)">
                 <div class="qr-container">
                   <component
                     :is="isOnchain ? 'div' : 'a'"
@@ -114,8 +111,8 @@
             <q-card-section class="q-pa-none">
               <div v-if="invoiceData?.mintQuote" class="row justify-center">
                 <div
-                  class="col-12 col-sm-11 col-md-8 q-px-md"
-                  style="max-width: 560px"
+                  class="col-12 q-px-md"
+                  style="max-width: var(--app-column)"
                 >
                   <MintQuoteInformation
                     hide-paid-status
@@ -133,8 +130,8 @@
                 class="row justify-center q-pt-lg"
               >
                 <div
-                  class="col-12 col-sm-11 col-md-8 q-px-md"
-                  style="max-width: 560px"
+                  class="col-12 q-px-md"
+                  style="max-width: var(--app-column)"
                 >
                   <MeltQuoteInformation
                     hide-paid-status
@@ -154,10 +151,7 @@
         <!-- Bottom panel action -->
         <div class="bottom-panel">
           <div class="row justify-center q-pb-lg q-pt-sm">
-            <div
-              class="col-12 col-sm-11 col-md-8 q-px-md"
-              style="max-width: 560px"
-            >
+            <div class="col-12 q-px-md" style="max-width: var(--app-column)">
               <!-- Always rendered (disabled until the request arrives), so the footer never
                    appears late and shifts the screen. -->
               <q-btn
@@ -168,7 +162,6 @@
                 color="primary"
                 rounded
                 no-caps
-                :outline="invoiceData.status === 'paid'"
                 @click="onCopyBolt11"
               >
                 {{ copyButtonLabel }}
@@ -317,30 +310,11 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.display-token-fullscreen {
-  height: 100vh;
-  height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-.content-area {
-  flex: 1;
-  overflow-y: auto;
-}
 .fixed-title-height {
   height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-.bottom-panel {
-  margin-top: auto;
-  background: var(--app-surface);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  position: sticky;
-  bottom: 0;
-  z-index: 2;
 }
 .qcard {
   border-top-left-radius: 20px;
@@ -364,17 +338,6 @@ export default defineComponent({
   font-family: monospace;
 }
 
-/* On wide screens the action follows the details instead of pinning to the window bottom. */
-@media (min-width: 1024px) {
-  .content-area {
-    flex: none;
-  }
-  .bottom-panel {
-    margin-top: 8px;
-    position: static;
-    box-shadow: none;
-  }
-}
 .paid-status {
   padding-top: 24px;
 }

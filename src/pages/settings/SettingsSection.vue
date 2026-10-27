@@ -19,7 +19,11 @@
         <span>{{ caption }}</span>
       </div>
     </div>
-    <q-list class="settings-card">
+    <!-- flat: a lone field sits on the page under its header, without a card around it. -->
+    <div v-if="flat" class="settings-section-flat">
+      <slot />
+    </div>
+    <q-list v-else class="settings-card">
       <slot />
     </q-list>
   </div>
@@ -31,6 +35,10 @@ import { defineComponent } from "vue";
 export default defineComponent({
   name: "SettingsSection",
   props: {
+    flat: {
+      type: Boolean,
+      default: false,
+    },
     title: {
       type: String,
       default: "",

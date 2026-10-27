@@ -61,10 +61,7 @@
 
         <!-- Payment request info -->
         <div v-if="sendData.paymentRequest" class="row justify-center q-pt-sm">
-          <div
-            class="col-12 col-sm-11 col-md-8 q-px-lg"
-            style="max-width: 560px"
-          >
+          <div class="col-12 q-px-lg" style="max-width: var(--app-column)">
             <PaymentRequestInfo :request="sendData.paymentRequest" />
           </div>
         </div>
@@ -72,8 +69,8 @@
         <!-- Mint selection -->
         <div class="row justify-center">
           <div
-            class="col-12 col-sm-11 col-md-8 q-px-md q-mb-sm"
-            style="max-width: 560px"
+            class="col-12 q-px-md q-mb-sm"
+            style="max-width: var(--app-column)"
           >
             <ChooseMint />
             <q-banner
@@ -97,7 +94,10 @@
           >
             <div v-if="showLockInput" class="p2pk-overlay">
               <div class="row justify-center">
-                <div class="col-12 q-px-lg" style="max-width: 560px">
+                <div
+                  class="col-12 q-px-lg"
+                  style="max-width: var(--app-column)"
+                >
                   <div class="row items-center">
                     <div :class="!sendData.p2pkPubkey ? 'col-8' : 'col-12'">
                       <q-input
@@ -215,7 +215,7 @@
           <!-- Send action below keyboard -->
           <div class="row justify-center q-pb-lg q-pt-sm">
             <div
-              class="col-12 col-sm-11 col-md-8 q-px-md"
+              class="col-12 q-px-md"
               style="max-width: 600px; max-height: 60px"
             >
               <SendPaymentRequest
@@ -842,11 +842,6 @@ export default defineComponent({
   pointer-events: none;
   font-size: 16px;
   white-space: nowrap;
-}
-.bottom-panel {
-  margin-top: auto;
-  background: var(--app-surface);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 .keypad-wrapper {
   width: 100%;

@@ -541,7 +541,7 @@ export default {
             "移除您当前 Mint 报告为已花费的 ecash。仅在钱包卡住时使用。",
         },
         debug_console: {
-          button: "切换调试控制台",
+          button: "调试控制台",
           description:
             "打开 JavaScript 控制台。切勿粘贴您不理解的代码，骗子会借此盗取资金。",
         },
@@ -1009,7 +1009,7 @@ export default {
       },
       create: {
         label: "创建发票",
-        label_blocked: "正在创建发票…",
+        label_blocked: "正在创建发票",
         in_progress: "正在创建",
       },
     },

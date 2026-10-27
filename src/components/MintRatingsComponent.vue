@@ -222,7 +222,7 @@
 
     <q-card-section v-if="hasAnyReviews || fetchingReviews" class="q-px-none">
       <div v-if="!hasAnyReviews" class="column" aria-hidden="true">
-        <div v-for="n in 2" :key="n" class="review-item">
+        <div v-for="n in 3" :key="n" class="review-item">
           <div class="row items-start" style="gap: 12px">
             <q-skeleton type="QAvatar" size="40px" />
             <div class="col">
@@ -258,7 +258,8 @@
             }}</span>
           </div>
           <div class="row items-start" style="gap: 12px">
-            <!-- Avatar on the left -->
+            <!-- Avatar: the reviewer's picture, else the same tinted disc and line glyph as
+                 history rows. -->
             <q-avatar size="40px" class="review-avatar">
               <q-img
                 v-if="profiles[r.pubkey]?.picture"
@@ -266,28 +267,16 @@
                 spinner-color="white"
                 spinner-size="xs"
               />
-              <q-icon v-else name="account_circle" size="40px" />
+              <UserIcon v-else :size="20" aria-hidden="true" />
             </q-avatar>
 
-            <!-- Content on the right -->
             <div class="col">
-              <!-- Name and verified badge -->
-              <div
-                class="row items-center"
-                style="gap: 6px; margin-bottom: 2px"
-              >
-                <span
-                  v-if="hasProfileName(r.pubkey)"
-                  class="text-body1"
-                  style="font-weight: 600"
-                  >{{ displayName(r.pubkey) }}</span
-                >
-                <span
-                  v-else
-                  class="text-body1 monospace"
-                  style="font-weight: 600"
-                  >{{ shortNpub(r.pubkey) }}</span
-                >
+              <div class="row items-center no-wrap review-head">
+                <span class="review-author ellipsis">{{
+                  hasProfileName(r.pubkey)
+                    ? displayName(r.pubkey)
+                    : shortNpub(r.pubkey)
+                }}</span>
                 <q-icon
                   v-if="wotHop(r.pubkey)"
                   name="verified"
@@ -300,38 +289,33 @@
                     })
                   }}</q-tooltip>
                 </q-icon>
-                <q-icon
-                  name="content_copy"
-                  size="14px"
-                  class="cursor-pointer text-grey-7"
+                <q-btn
+                  flat
+                  round
+                  size="sm"
+                  class="review-copy"
+                  :aria-label="$t('common.copy_npub')"
                   @click="copyNpub(r.pubkey)"
-                  style="margin-inline-start: 4px"
                 >
-                  <q-tooltip>{{ $t("common.copy_npub") }}</q-tooltip>
-                </q-icon>
+                  <CopyIcon :size="16" />
+                </q-btn>
               </div>
 
-              <!-- Date and Star Rating on same line -->
-              <div
-                class="row items-center"
-                style="gap: 8px; margin-bottom: 8px"
-              >
-                <span class="text-caption text-grey-6">
-                  {{ formatDateOnly(r.created_at) }}
-                </span>
+              <!-- Rating first, then the date, as one quiet meta line. -->
+              <div class="row items-center review-meta">
                 <q-rating
                   v-if="r.rating !== null"
                   :model-value="r.rating"
                   readonly
-                  size="12px"
+                  size="13px"
                   color="primary"
                   icon="star"
                   icon-selected="star"
                   icon-half="star_half"
                 />
-                <span v-else class="text-caption text-grey-6">{{
-                  $t("MintRatings.no_rating")
-                }}</span>
+                <span v-else>{{ $t("MintRatings.no_rating") }}</span>
+                <span aria-hidden="true">·</span>
+                <span>{{ formatDateOnly(r.created_at) }}</span>
               </div>
 
               <!-- Review Comment -->
@@ -396,7 +380,11 @@
 </template>
 
 <script lang="ts">
-import { Landmark as LandmarkIcon } from "lucide-vue-next";
+import {
+  Copy as CopyIcon,
+  Landmark as LandmarkIcon,
+  User as UserIcon,
+} from "lucide-vue-next";
 import BottomSheet from "src/components/BottomSheet.vue";
 import SheetOption from "src/components/SheetOption.vue";
 import { defineComponent } from "vue";
@@ -415,7 +403,7 @@ export default defineComponent({
     mintInfo: { type: Object, required: false },
   },
   emits: ["close"],
-  components: { LandmarkIcon, BottomSheet, SheetOption },
+  components: { CopyIcon, LandmarkIcon, UserIcon, BottomSheet, SheetOption },
   methods: {
     // Calculate percentage for star rating bars
     ratingPercentage(star: number): number {
@@ -843,7 +831,7 @@ body[data-theme] .q-card--dark.mint-ratings-root {
 
 .review-item {
   padding: 20px 0;
-  border-bottom: 1px solid rgba(128, 128, 128, 0.1);
+  border-bottom: 1px solid var(--app-border);
 }
 
 .review-item:last-child {
@@ -864,12 +852,33 @@ body[data-theme] .q-card--dark.mint-ratings-root {
 }
 
 .review-avatar {
+  background: var(--app-tint-strong);
+  color: var(--app-text-muted);
   flex-shrink: 0;
 }
 
-.monospace {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    "Liberation Mono", "Courier New", monospace;
+.review-head {
+  gap: 6px;
+  min-height: 24px;
+}
+
+.review-author {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 20px;
+  min-width: 0;
+}
+
+.review-copy {
+  color: var(--app-text-muted);
+  margin-block: -8px;
+}
+
+.review-meta {
+  color: var(--app-text-muted);
+  font-size: 13px;
+  gap: 6px;
+  margin: 2px 0 8px;
 }
 
 /* Sort trigger: a real button styled as a row. */

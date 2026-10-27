@@ -1,8 +1,6 @@
 <template>
   <div class="row q-col-gutter-y-md justify-center q-pt-none q-pb-md">
-    <div
-      class="col-12 col-sm-11 col-md-8 text-center q-gutter-y-md wallet-column"
-    >
+    <div class="col-12 text-center q-gutter-y-md wallet-column">
       <NoMintWarnBanner v-if="mints.length == 0" />
       <BalanceView v-else :set-tab="setTab" />
       <div class="wallet-actions q-pt-md q-pb-sm">
@@ -205,7 +203,7 @@
 }
 
 .row > .wallet-column {
-  max-width: 560px;
+  max-width: var(--app-column);
 }
 
 .wallet-actions {

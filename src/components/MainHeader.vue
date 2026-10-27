@@ -136,7 +136,7 @@ export default defineComponent({
 /* Keep header controls over the wallet column on wide screens. */
 .main-toolbar {
   margin: 0 auto;
-  max-width: 560px;
+  max-width: var(--app-column);
   padding: 0 6px;
 }
 

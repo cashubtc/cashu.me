@@ -1,8 +1,8 @@
 <template>
   <div
     v-if="sendData.paymentRequest"
-    class="col-12 col-sm-11 col-md-8 q-px-md"
-    style="max-width: 560px"
+    class="col-12 q-px-md"
+    style="max-width: var(--app-column)"
   >
     <q-btn
       class="full-width"

@@ -56,8 +56,8 @@
         <!-- Mint selection -->
         <div class="row justify-center">
           <div
-            class="col-12 col-sm-11 col-md-8 q-px-md q-mb-sm"
-            style="max-width: 560px"
+            class="col-12 q-px-md q-mb-sm"
+            style="max-width: var(--app-column)"
           >
             <ChooseMint
               v-if="!showNoMintForMethodError"
@@ -73,8 +73,8 @@
         >
           <div class="row justify-center full-width invoice-main-area">
             <div
-              class="col-12 col-sm-11 col-md-8 q-px-sm q-mb-sm invoice-main-column"
-              style="max-width: 560px"
+              class="col-12 q-px-sm q-mb-sm invoice-main-column"
+              style="max-width: var(--app-column)"
             >
               <!-- INVOICE CONTENT -->
               <div v-if="payInvoiceData.invoice" class="invoice-content-fill">
@@ -373,8 +373,8 @@
                     v-if="payInvoiceData.lnurlpay.commentAllowed > 0"
                   >
                     <div
-                      class="col-12 col-sm-11 col-md-8 q-px-sm"
-                      style="max-width: 560px"
+                      class="col-12 q-px-sm"
+                      style="max-width: var(--app-column)"
                     >
                       <q-input
                         round
@@ -483,8 +483,8 @@
                     v-if="payInvoiceData.lnurlpay.commentAllowed > 0"
                   >
                     <div
-                      class="col-12 col-sm-11 col-md-8 q-px-sm"
-                      style="max-width: 560px"
+                      class="col-12 q-px-sm"
+                      style="max-width: var(--app-column)"
                     >
                       <q-input
                         round
@@ -528,10 +528,7 @@
           "
         >
           <div class="row justify-center q-pb-lg q-pt-sm">
-            <div
-              class="col-12 col-sm-11 col-md-8 q-px-md"
-              style="max-width: 560px"
-            >
+            <div class="col-12 q-px-md" style="max-width: var(--app-column)">
               <!-- Close button when paid or error -->
               <template v-if="isPaid || payInvoiceData.meltQuote.error != ''">
                 <q-btn
@@ -628,10 +625,7 @@
             />
           </div>
           <div class="row justify-center q-pb-lg q-pt-sm">
-            <div
-              class="col-12 col-sm-11 col-md-8 q-px-md"
-              style="max-width: 560px"
-            >
+            <div class="col-12 q-px-md" style="max-width: var(--app-column)">
               <q-btn
                 class="full-width"
                 unelevated
@@ -686,10 +680,7 @@
           </div>
           <!-- LNURL pay action below keyboard -->
           <div class="row justify-center q-pb-lg q-pt-sm">
-            <div
-              class="col-12 col-sm-11 col-md-8 q-px-md"
-              style="max-width: 560px"
-            >
+            <div class="col-12 q-px-md" style="max-width: var(--app-column)">
               <q-btn
                 class="full-width"
                 unelevated
@@ -733,10 +724,7 @@
           "
         >
           <div class="row justify-center q-pb-lg q-pt-sm">
-            <div
-              class="col-12 col-sm-11 col-md-8 q-px-md"
-              style="max-width: 560px"
-            >
+            <div class="col-12 q-px-md" style="max-width: var(--app-column)">
               <q-btn
                 class="full-width"
                 unelevated
@@ -1293,12 +1281,6 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}
-
-.bottom-panel {
-  margin-top: auto;
-  background: var(--app-surface);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .q-dialog__inner > div {

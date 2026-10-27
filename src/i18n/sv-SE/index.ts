@@ -549,7 +549,7 @@ export default {
             "Tar bort ecash som dina aktiva mints rapporterar som spenderad. Använd bara om plånboken har fastnat.",
         },
         debug_console: {
-          button: "Visa/dölj felsökningskonsol",
+          button: "Felsökningskonsol",
           description:
             "Öppnar JavaScript-konsolen. Klistra aldrig in kod du inte förstår; bedragare använder den för att stjäla pengar.",
         },
@@ -1028,7 +1028,7 @@ export default {
       },
       create: {
         label: "Skapa faktura",
-        label_blocked: "Skapar faktura…",
+        label_blocked: "Skapar faktura",
         in_progress: "Skapar",
       },
     },

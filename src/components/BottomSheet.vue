@@ -114,7 +114,7 @@ export default defineComponent({
   background: var(--app-raised);
   color: var(--app-text);
   width: 100%;
-  max-width: 528px;
+  max-width: var(--app-content);
   max-height: 80vh;
   border-radius: 20px 20px 0 0;
   overflow: hidden;

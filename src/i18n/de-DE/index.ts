@@ -559,7 +559,7 @@ export default {
             "Entfernt Ecash, das Ihre aktiven Mints als ausgegeben melden. Nur verwenden, wenn Ihre Wallet hängt.",
         },
         debug_console: {
-          button: "Debug-Konsole umschalten",
+          button: "Debug-Konsole",
           description:
             "Öffnet die JavaScript-Konsole. Fügen Sie nie Code ein, den Sie nicht verstehen; Betrüger nutzen sie, um Geld zu stehlen.",
         },
@@ -1045,7 +1045,7 @@ export default {
       },
       create: {
         label: "Rechnung erstellen",
-        label_blocked: "Rechnung wird erstellt…",
+        label_blocked: "Rechnung wird erstellt",
         in_progress: "Erstellt",
       },
     },

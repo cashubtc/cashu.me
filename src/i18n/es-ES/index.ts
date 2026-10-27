@@ -554,7 +554,7 @@ export default {
             "Elimina el ecash que tus mints activos marcan como gastado. Úsalo solo si tu billetera se queda bloqueada.",
         },
         debug_console: {
-          button: "Mostrar/ocultar consola de depuración",
+          button: "Consola de depuración",
           description:
             "Abre la consola de JavaScript. Nunca pegues código que no entiendas; los estafadores la usan para robar fondos.",
         },
@@ -1035,7 +1035,7 @@ export default {
       },
       create: {
         label: "Crear factura",
-        label_blocked: "Creando factura…",
+        label_blocked: "Creando factura",
         in_progress: "Creando",
       },
     },

@@ -542,7 +542,7 @@ export default {
             "Etkin mint'lerinizin harcanmış bildirdiği ecash'i kaldırır. Yalnızca cüzdanınız takılırsa kullanın.",
         },
         debug_console: {
-          button: "Hata ayıklama konsolunu aç/kapat",
+          button: "Hata ayıklama konsolu",
           description:
             "JavaScript konsolunu açar. Anlamadığınız kodu asla yapıştırmayın; dolandırıcılar bunu para çalmak için kullanır.",
         },
@@ -1041,7 +1041,7 @@ export default {
       },
       create: {
         label: "Fatura oluştur",
-        label_blocked: "Fatura oluşturuluyor…",
+        label_blocked: "Fatura oluşturuluyor",
         in_progress: "Oluşturuluyor",
       },
     },
