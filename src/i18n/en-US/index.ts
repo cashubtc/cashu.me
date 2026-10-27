@@ -959,7 +959,7 @@ export default {
         },
       },
       caption:
-        "Move funds between your mints over Lightning. Leave a little room for fees; if a swap does not arrive, check its invoice in History.",
+        "Move funds between your mints over Lightning. Fees may apply.",
       inputs: {
         from: {
           label: "From",

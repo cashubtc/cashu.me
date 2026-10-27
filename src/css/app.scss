@@ -233,25 +233,11 @@ button:focus-visible {
   outline: 2px solid var(--app-accent) !important;
   outline-offset: 2px;
 }
-// Rows sit in overflow-clipped containers: draw the ring inside.
-.q-item.q-focusable:focus-visible {
+// Rows and tabs sit in overflow-clipped containers: draw the ring inside.
+.q-item.q-focusable:focus-visible,
+.q-tab.q-focusable:focus-visible {
   outline-offset: -2px;
   border-radius: 10px;
-}
-// Tabs ring their label as a pill, so the ring never crosses the active underline.
-.q-tab.q-focusable:focus-visible {
-  outline: none !important;
-  .q-tab__content {
-    border-radius: 999px;
-    box-shadow: 0 0 0 2px var(--app-accent);
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-}
-
-// Text areas grow with their content; the native resize grip read as a stray mark.
-textarea {
-  resize: none;
 }
 
 // One disabled treatment for every button.
@@ -458,9 +444,19 @@ body[data-theme] .welcome-surface,
 .q-tab {
   border-radius: 10px;
 }
-/* The tab focus ring sits inside the cell, clear of the active underline (R18). */
+/* Tab hover, pressed and focus share one inset shape that ends above the active underline:
+   the fill and the ring both sit 6px inside the cell. */
 .q-tab.q-focusable:focus-visible {
   outline-offset: -6px;
+}
+.q-tab > .q-focus-helper {
+  inset: 6px;
+  border-radius: 6px;
+}
+
+/* A select showing its placeholder reads muted until a value is picked. */
+.select--placeholder .q-field__native {
+  color: var(--app-text-muted);
 }
 
 /* Multi-line fields grow with their content; no native resize grip. */
@@ -480,7 +476,7 @@ textarea {
 }
 // Over light pages a 60% wash reads as muddy grey; a lighter one dims without flattening.
 body.body--light .q-dialog__backdrop {
-  background: rgba(0, 0, 0, 0.32) !important;
+  background: rgba(0, 0, 0, 0.44) !important;
 }
 
 // Sheet header trailing slot: 44px buttons, outermost is the unit toggle, same glyph size on

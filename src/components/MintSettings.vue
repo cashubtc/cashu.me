@@ -249,6 +249,7 @@
         dropdown-icon="expand_more"
         clear-icon="close"
         class="q-mb-md"
+        :class="{ 'select--placeholder': !swapData.fromUrl?.url }"
         v-model="swapData.fromUrl"
         :display-value="
           swapData.fromUrl?.url ? undefined : $t('ChooseMint.placeholder')
@@ -267,6 +268,7 @@
         dropdown-icon="expand_more"
         clear-icon="close"
         class="q-mb-md"
+        :class="{ 'select--placeholder': !swapData.toUrl?.url }"
         v-model="swapData.toUrl"
         :display-value="
           swapData.toUrl?.url ? undefined : $t('ChooseMint.placeholder')
