@@ -131,11 +131,9 @@
                         )
                       }}
                     </template>
-                    <!-- Only a mint already looked up on Nostr can honestly say it has no
-                         reviews; one never looked up offers a neutral link instead. -->
-                    <template v-else-if="getRecommendation(mint.url)">{{
-                      $t("MintSettings.no_reviews_yet")
-                    }}</template>
+                    <!-- The card only knows a score from a Nostr discovery scan; reviews load on
+                         the ratings page, so without a score it links there instead of claiming
+                         none (R54: "No reviews yet" sat beside a mint rated 4.7). -->
                     <template v-else>{{
                       $t("MintSettings.see_reviews")
                     }}</template>
