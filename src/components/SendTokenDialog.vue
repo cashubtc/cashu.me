@@ -848,7 +848,7 @@ export default defineComponent({
 }
 .bottom-panel {
   margin-top: auto;
-  background: var(--q-color-grey-1);
+  background: var(--app-surface);
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 .keypad-wrapper {

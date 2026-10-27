@@ -21,7 +21,7 @@
       </div>
 
       <!-- Unit -->
-      <div v-if="!hideUnit" class="detail-item q-mb-md">
+      <div v-if="!hideUnit && tokenUnit !== 'sat'" class="detail-item q-mb-md">
         <div class="detail-label">
           <coins-icon size="20" class="detail-icon" />
           <div class="detail-name">{{ $t("TokenInformation.unit") }}</div>

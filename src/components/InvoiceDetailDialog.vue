@@ -335,7 +335,6 @@ export default defineComponent({
 .bottom-panel {
   margin-top: auto;
   background: var(--app-surface);
-  box-shadow: 0 -8px 16px rgba(0, 0, 0, 0.05);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   position: sticky;
   bottom: 0;

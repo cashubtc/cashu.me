@@ -92,6 +92,21 @@
       </div>
 
       <!-- No Reviews State -->
+      <!-- While the first fetch runs, a skeleton of the summary and review rows, so the
+           page never claims "No reviews yet" before it knows. -->
+      <div v-else-if="fetchingReviews" class="q-mb-lg" aria-busy="true">
+        <div class="section-card q-pa-md">
+          <q-skeleton type="text" width="40%" height="32px" />
+          <q-skeleton type="text" width="60%" class="q-mb-md" />
+          <div v-for="n in 3" :key="n" class="row no-wrap items-center q-mt-md">
+            <q-skeleton type="QAvatar" size="36px" class="q-mr-md" />
+            <div class="col">
+              <q-skeleton type="text" width="50%" />
+              <q-skeleton type="text" width="80%" />
+            </div>
+          </div>
+        </div>
+      </div>
       <div v-else class="q-mb-lg">
         <div
           class="empty-state section-card q-pa-xl column items-center text-center"
@@ -506,6 +521,7 @@ export default defineComponent({
       profiles: {} as Record<string, { name?: string; picture?: string }>,
       loadingProfiles: new Set<string>(),
       showSortSheet: false,
+      fetchingReviews: true,
     };
   },
   computed: {
@@ -652,8 +668,13 @@ export default defineComponent({
     // Fetch latest reviews from Nostr in background (non-blocking)
     try {
       const recs = useMintRecommendationsStore();
-      recs.fetchReviewsForUrl(this.url);
-    } catch {}
+      // Stop showing the skeleton after the fetch, or after 8s if relays never answer.
+      const done = () => (this.fetchingReviews = false);
+      setTimeout(done, 8000);
+      Promise.resolve(recs.fetchReviewsForUrl(this.url)).finally(done);
+    } catch {
+      this.fetchingReviews = false;
+    }
   },
 
   watch: {

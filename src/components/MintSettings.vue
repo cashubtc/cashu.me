@@ -135,7 +135,12 @@
                       <span
                         class="mint-review-link cursor-pointer"
                         @click.stop="openReviews(mint.url, mint)"
-                        >{{ $t("MintSettings.reviews_text") }}</span
+                        >{{
+                          $t(
+                            "MintSettings.reviews_text",
+                            getRecommendation(mint.url).reviewsCount
+                          )
+                        }}</span
                       >
                     </span>
                   </template>

@@ -709,6 +709,11 @@ export default defineComponent({
 .history-table :deep(.q-pagination .q-btn:not(.bg-primary)) {
   color: var(--app-text-muted) !important;
 }
+/* The current page is a quiet tinted chip, not a filled pill competing with Receive/Send. */
+.history-table :deep(.q-pagination .q-btn.bg-primary) {
+  background: var(--app-tint-strong) !important;
+  color: var(--app-text) !important;
+}
 
 .amount-text {
   font-size: 1rem;

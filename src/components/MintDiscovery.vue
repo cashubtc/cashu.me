@@ -6,24 +6,7 @@
           {{ $t("MintSettings.discover.caption") }}
         </p>
       </div> -->
-      <div v-if="discovering" class="discover-skeleton">
-        <div
-          class="discover-skeleton__row"
-          v-for="n in 3"
-          :key="n"
-          aria-hidden="true"
-        >
-          <q-skeleton type="QAvatar" size="40px" />
-          <div class="col q-ml-md">
-            <q-skeleton type="text" width="55%" />
-            <q-skeleton type="text" width="35%" />
-          </div>
-        </div>
-        <div class="discover-skeleton__label visually-hidden" role="status">
-          {{ $t("MintSettings.discover.actions.discover.in_progress") }}
-        </div>
-      </div>
-      <div v-else class="discover-button">
+      <div class="discover-button">
         <q-btn
           color="primary"
           rounded
@@ -41,13 +24,33 @@
           </template>
         </q-btn>
       </div>
+      <div
+        v-if="discovering && discoverList.length === 0"
+        class="discover-skeleton q-mt-md"
+      >
+        <div
+          class="discover-skeleton__row"
+          v-for="n in 3"
+          :key="n"
+          aria-hidden="true"
+        >
+          <q-skeleton type="QAvatar" size="40px" />
+          <div class="col q-ml-md">
+            <q-skeleton type="text" width="55%" />
+            <q-skeleton type="text" width="35%" />
+          </div>
+        </div>
+        <div class="discover-skeleton__label visually-hidden" role="status">
+          {{ $t("MintSettings.discover.actions.discover.in_progress") }}
+        </div>
+      </div>
     </div>
 
     <div v-if="discoverList.length > 0" class="text-left" on-left>
       <q-list padding>
         <q-item class="q-px-none">
           <q-item-section>
-            <q-item-label overline>
+            <q-item-label class="discover-count">
               {{
                 $t("MintSettings.discover.recommendations.overline", {
                   length: discoverList.length,
@@ -102,7 +105,9 @@
                             class="text-primary cursor-pointer"
                             style="text-decoration: underline"
                             @click.stop="openReviews(rec.url)"
-                            >{{ $t("MintSettings.reviews_text") }}</span
+                            >{{
+                              $t("MintSettings.reviews_text", countFor(rec.url))
+                            }}</span
                           >
                         </span>
                       </div>
@@ -325,15 +330,22 @@ export default defineComponent({
   border-radius: 10px;
 }
 
-.mint-card.dimmed {
-  opacity: 0.5;
+.discover-count {
+  font-size: 14px;
+  font-weight: 600;
 }
 
+/* A row still fetching its mint info reads as loading, not disabled. */
+.mint-card.dimmed {
+  opacity: 0.8;
+}
+
+/* Per-row loading sits in the trailing slot, clear of the mint name and URL. */
 .spinner-overlay {
   position: absolute;
   top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  right: 16px;
+  transform: translateY(-50%);
   z-index: 10;
   display: flex;
   align-items: center;
