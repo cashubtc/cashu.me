@@ -23,7 +23,7 @@
           :aria-label="$t('global.actions.scan.label')"
           @click="showCamera"
         >
-          <ScanLineIcon :size="22" />
+          <ScanIcon :size="24" />
         </q-btn>
         <q-btn
           unelevated
@@ -284,7 +284,7 @@ import {
   X as XIcon,
   Banknote as BanknoteIcon,
   Zap as ZapIcon,
-  ScanLine as ScanLineIcon,
+  Scan as ScanIcon,
 } from "lucide-vue-next";
 
 import { useMigrationsStore } from "src/stores/migrations";
@@ -310,7 +310,7 @@ export default {
     ReceiveDialog,
     iOSPWAPrompt,
     AndroidPWAPrompt,
-    ScanLineIcon,
+    ScanIcon,
   },
   data: function () {
     return {
