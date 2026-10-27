@@ -1,8 +1,12 @@
 <template>
-  <SettingsPageShell
-    :title="$t('CreateMintReview.title')"
-    :caption="mintInfo?.name ? `${mintInfo.name} · ${mintUrl}` : mintUrl"
-  >
+  <SettingsPageShell :title="$t('CreateMintReview.title')">
+    <!-- The same mint header as the reviews page. -->
+    <MintIdentityHeader
+      v-if="mintUrl"
+      :url="mintUrl"
+      :info="mintInfo"
+      class="q-mb-lg"
+    />
     <div class="review-form">
       <div class="section-card q-pa-md">
         <div class="text-subtitle2 text-weight-medium">
@@ -99,10 +103,11 @@ import { nip19 } from "nostr-tools";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
 import { useMintsStore } from "src/stores/mints";
 import SettingsPageShell from "src/pages/settings/SettingsPageShell.vue";
+import MintIdentityHeader from "src/components/MintIdentityHeader.vue";
 
 export default defineComponent({
   name: "CreateMintReviewPage",
-  components: { CopyIcon, SettingsPageShell },
+  components: { CopyIcon, SettingsPageShell, MintIdentityHeader },
   setup() {
     const router = useRouter();
     const nostr = useNostrStore();

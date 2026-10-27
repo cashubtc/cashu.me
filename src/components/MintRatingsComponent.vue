@@ -1,22 +1,7 @@
 <template>
   <q-card flat class="bg-transparent full-width mint-ratings-root">
     <q-card-section class="q-pa-none">
-      <!-- Mint identity as one compact row (icon, name, host), so the rating and the first
-           reviews sit higher on the page. -->
-      <div class="mint-header row items-center no-wrap q-mb-lg">
-        <q-avatar size="44px" class="mint-header__avatar">
-          <img v-if="mintInfo?.icon_url" :src="mintInfo.icon_url" alt="" />
-          <LandmarkIcon v-else :size="24" class="text-app-muted mint-glyph" />
-        </q-avatar>
-        <div class="mint-header__text">
-          <div class="mint-name">
-            {{ mintInfo?.name || url.replace(/^https?:\/\//, "") }}
-          </div>
-          <div v-if="mintInfo?.name" class="mint-url text-grey-6">
-            <bdi dir="ltr">{{ url.replace(/^https?:\/\//, "") }}</bdi>
-          </div>
-        </div>
-      </div>
+      <MintIdentityHeader :url="url" :info="mintInfo" class="q-mb-lg" />
 
       <!-- Rating Summary Section - Apple Podcasts Style -->
       <div v-if="hasAnyReviews" class="q-mb-lg">
@@ -156,8 +141,8 @@
             color="primary"
             unelevated
             rounded
-            class="q-px-xl q-mt-md"
-            style="font-weight: 600"
+            no-caps
+            class="full-width write-review-btn"
             @click="openCreateReview"
           >
             {{ $t("MintRatings.actions.write_review") }}
@@ -171,19 +156,20 @@
         class="row q-mt-md q-mb-md justify-center"
         style="gap: 12px"
       >
+        <!-- The app's one full-width pill (52px, like Publish review and the sheet CTAs). -->
         <q-skeleton
           v-if="!hasAnyReviews"
           type="rect"
-          height="36px"
-          style="width: 100%; border-radius: 18px"
+          height="52px"
+          style="width: 100%; border-radius: 26px"
         />
         <q-btn
           v-else
           color="primary"
           unelevated
           rounded
-          class="q-px-lg"
-          style="font-weight: 500; width: 100%"
+          no-caps
+          class="full-width write-review-btn"
           @click="openCreateReview"
         >
           {{ $t("MintRatings.actions.write_review") }}
@@ -223,23 +209,24 @@
     <q-card-section v-if="hasAnyReviews || fetchingReviews" class="q-px-none">
       <div v-if="!hasAnyReviews" class="column" aria-hidden="true">
         <div v-for="n in 3" :key="n" class="review-item">
-          <div class="row items-start" style="gap: 12px">
-            <q-skeleton type="QAvatar" size="40px" />
-            <div class="col">
-              <q-skeleton type="rect" width="40%" height="20px" />
-              <q-skeleton
-                type="rect"
-                width="30%"
-                height="14px"
-                style="margin-top: 8px"
-              />
-              <q-skeleton
-                type="rect"
-                width="90%"
-                height="14px"
-                style="margin-top: 12px"
-              />
+          <q-skeleton type="QAvatar" size="36px" />
+          <div class="col">
+            <div class="row items-center justify-between review-head">
+              <q-skeleton type="rect" width="40%" height="14px" />
+              <q-skeleton type="rect" width="64px" height="12px" />
             </div>
+            <q-skeleton
+              type="rect"
+              width="72px"
+              height="12px"
+              style="margin-top: 4px"
+            />
+            <q-skeleton
+              type="rect"
+              width="90%"
+              height="14px"
+              style="margin-top: 12px"
+            />
           </div>
         </div>
       </div>
@@ -249,87 +236,70 @@
           :key="r.eventId"
           :class="['review-item', { 'own-review': r.pubkey === myPubkey }]"
         >
-          <div
-            v-if="r.pubkey === myPubkey"
-            class="own-review-badge currency-unit-badge"
-          >
-            <span class="currency-unit-text">{{
-              $t("MintRatings.your_review")
-            }}</span>
-          </div>
-          <div class="row items-start" style="gap: 12px">
-            <!-- Avatar: the reviewer's picture, else the same tinted disc and line glyph as
-                 history rows. -->
-            <q-avatar size="40px" class="review-avatar">
-              <q-img
-                v-if="profiles[r.pubkey]?.picture"
-                :src="profiles[r.pubkey].picture"
-                spinner-color="white"
-                spinner-size="xs"
-              />
-              <UserIcon v-else :size="20" aria-hidden="true" />
-            </q-avatar>
+          <!-- Avatar: the reviewer's picture, else the same tinted disc and line glyph as
+               history rows. -->
+          <q-avatar size="36px" class="review-avatar">
+            <q-img
+              v-if="profiles[r.pubkey]?.picture"
+              :src="profiles[r.pubkey].picture"
+              spinner-color="white"
+              spinner-size="xs"
+            />
+            <UserIcon v-else :size="18" aria-hidden="true" />
+          </q-avatar>
 
-            <div class="col">
-              <div class="row items-center no-wrap review-head">
-                <span class="review-author ellipsis">{{
-                  hasProfileName(r.pubkey)
-                    ? displayName(r.pubkey)
-                    : shortNpub(r.pubkey)
-                }}</span>
-                <q-icon
-                  v-if="wotHop(r.pubkey)"
-                  name="verified"
-                  size="14px"
-                  :color="wotColor(wotHop(r.pubkey))"
-                >
-                  <q-tooltip>{{
-                    $t("MintRatings.web_of_trust_hop", {
-                      hop: wotHop(r.pubkey),
-                    })
-                  }}</q-tooltip>
-                </q-icon>
-                <q-btn
-                  flat
-                  round
-                  size="sm"
-                  class="review-copy"
-                  :aria-label="$t('common.copy_npub')"
-                  @click="copyNpub(r.pubkey)"
-                >
-                  <CopyIcon :size="16" />
-                </q-btn>
-              </div>
-
-              <!-- Rating first, then the date, as one quiet meta line. -->
-              <div class="row items-center review-meta">
-                <q-rating
-                  v-if="r.rating !== null"
-                  :model-value="r.rating"
-                  readonly
-                  size="13px"
-                  color="primary"
-                  icon="star"
-                  icon-selected="star"
-                  icon-half="star_half"
-                />
-                <span v-else>{{ $t("MintRatings.no_rating") }}</span>
-                <span aria-hidden="true">·</span>
-                <span>{{ formatDateOnly(r.created_at) }}</span>
-              </div>
-
-              <!-- Review Comment -->
-              <div
-                v-if="r.comment"
-                class="text-body2"
-                style="
-                  white-space: pre-wrap;
-                  line-height: 1.5;
-                  color: var(--app-text);
-                "
+          <div class="col review-body">
+            <!-- Name (tap to copy the npub) and verification, the date at the end. -->
+            <div class="row items-center no-wrap review-head">
+              <button
+                type="button"
+                class="review-author ellipsis"
+                :aria-label="`${$t('common.copy_npub')}: ${authorLabel(
+                  r.pubkey
+                )}`"
+                @click="copyNpub(r.pubkey)"
               >
-                {{ r.comment }}
-              </div>
+                <bdi>{{ authorLabel(r.pubkey) }}</bdi>
+                <q-tooltip>{{ $t("common.copy_npub") }}</q-tooltip>
+              </button>
+              <q-icon
+                v-if="wotHop(r.pubkey)"
+                name="verified"
+                size="14px"
+                class="review-verified"
+                :color="wotColor(wotHop(r.pubkey))"
+              >
+                <q-tooltip>{{
+                  $t("MintRatings.web_of_trust_hop", {
+                    hop: wotHop(r.pubkey),
+                  })
+                }}</q-tooltip>
+              </q-icon>
+              <span v-if="r.pubkey === myPubkey" class="own-review-chip">{{
+                $t("MintRatings.your_review")
+              }}</span>
+              <span class="review-date">{{
+                formatDateOnly(r.created_at)
+              }}</span>
+            </div>
+
+            <q-rating
+              v-if="r.rating !== null"
+              :model-value="r.rating"
+              readonly
+              size="14px"
+              color="primary"
+              icon="star"
+              icon-selected="star"
+              icon-half="star_half"
+              class="review-stars"
+            />
+            <div v-else class="review-no-rating">
+              {{ $t("MintRatings.no_rating") }}
+            </div>
+
+            <div v-if="r.comment" class="review-comment" dir="auto">
+              {{ r.comment }}
             </div>
           </div>
         </div>
@@ -380,13 +350,10 @@
 </template>
 
 <script lang="ts">
-import {
-  Copy as CopyIcon,
-  Landmark as LandmarkIcon,
-  User as UserIcon,
-} from "lucide-vue-next";
+import { User as UserIcon } from "lucide-vue-next";
 import BottomSheet from "src/components/BottomSheet.vue";
 import SheetOption from "src/components/SheetOption.vue";
+import MintIdentityHeader from "src/components/MintIdentityHeader.vue";
 import { defineComponent } from "vue";
 import { useNostrStore } from "src/stores/nostr";
 import NDK from "@nostr-dev-kit/ndk";
@@ -403,7 +370,7 @@ export default defineComponent({
     mintInfo: { type: Object, required: false },
   },
   emits: ["close"],
-  components: { CopyIcon, LandmarkIcon, UserIcon, BottomSheet, SheetOption },
+  components: { UserIcon, BottomSheet, SheetOption, MintIdentityHeader },
   methods: {
     // Calculate percentage for star rating bars
     ratingPercentage(star: number): number {
@@ -466,6 +433,11 @@ export default defineComponent({
     displayName(pk: string) {
       const p = (this as any).profiles[pk];
       return p?.name || this.shortPubkey(pk);
+    },
+    authorLabel(pk: string) {
+      return this.hasProfileName(pk)
+        ? this.displayName(pk)
+        : this.shortNpub(pk);
     },
     hasProfileName(pk: string) {
       const p = (this as any).profiles[pk];
@@ -769,35 +741,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-/* Mint Header - Matching MintDetailsPage style */
-.mint-header {
-  gap: 12px;
-}
-
-.mint-header__avatar {
-  background: var(--app-tint-strong);
-  flex: none;
-}
-
-.mint-header__text {
-  min-width: 0;
-}
-
-.mint-name {
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 24px;
-  text-align: start;
-  color: var(--app-text);
-}
-
-.mint-url {
-  font-size: 13px;
-  line-height: 18px;
-  text-align: start;
-  word-break: break-all;
-}
-
 .section-card {
   background-color: var(--app-tint);
   border-radius: 12px;
@@ -829,25 +772,28 @@ body[data-theme] .q-card--dark.mint-ratings-root {
   color: var(--app-text-muted);
 }
 
+/* Review rows, after the app-store pattern: a small avatar, the name with the date at the
+   end, the stars under it, then the comment. Air between reviews instead of rules. */
 .review-item {
-  padding: 20px 0;
-  border-bottom: 1px solid var(--app-border);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
 }
 
-.review-item:last-child {
-  border-bottom: none;
+.review-item + .review-item {
+  margin-top: 8px;
 }
 
 .review-item:first-child {
-  padding-top: 0;
+  padding-top: 4px;
 }
 
 .own-review {
   background: var(--app-tint);
-  padding: 20px 16px;
-  margin: 0 -16px;
-  border-radius: 8px;
-  border-bottom: none;
+  padding: 16px;
+  margin-inline: -16px;
+  border-radius: 12px;
   position: relative;
 }
 
@@ -857,28 +803,76 @@ body[data-theme] .q-card--dark.mint-ratings-root {
   flex-shrink: 0;
 }
 
+.review-body {
+  min-width: 0;
+}
+
 .review-head {
   gap: 6px;
-  min-height: 24px;
+  min-height: 20px;
 }
 
 .review-author {
+  background: none;
+  border: 0;
+  border-radius: 4px;
+  color: var(--app-text);
+  cursor: pointer;
+  font: inherit;
   font-size: 15px;
   font-weight: 600;
   line-height: 20px;
   min-width: 0;
+  padding: 0;
+  text-align: start;
+}
+.review-author:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.review-author:focus-visible {
+  outline: 2px solid var(--app-text);
+  outline-offset: 2px;
 }
 
-.review-copy {
+.review-verified {
+  flex: none;
+}
+
+.review-date {
   color: var(--app-text-muted);
-  margin-block: -8px;
+  flex: none;
+  font-size: 13px;
+  line-height: 20px;
+  margin-inline-start: auto;
+  padding-inline-start: 8px;
+  white-space: nowrap;
 }
 
-.review-meta {
+.review-stars {
+  display: flex;
+  gap: 1px;
+  margin-top: 4px;
+}
+
+.review-no-rating {
   color: var(--app-text-muted);
   font-size: 13px;
-  gap: 6px;
-  margin: 2px 0 8px;
+  line-height: 18px;
+  margin-top: 2px;
+}
+
+.review-comment {
+  color: var(--app-text);
+  font-size: 15px;
+  line-height: 1.5;
+  margin-top: 8px;
+  text-align: start;
+  white-space: pre-wrap;
+}
+
+.write-review-btn {
+  font-weight: 600;
 }
 
 /* Sort trigger: a real button styled as a row. */
@@ -904,26 +898,16 @@ body[data-theme] .q-card--dark.mint-ratings-root {
   padding: 4px 16px 16px;
 }
 
-/* Match balance badges style from MintSettings.vue */
-.currency-unit-badge {
-  border-radius: 4px;
-  background-color: var(--app-raised);
-  display: inline-block;
-  padding: 4px 8px;
-  margin: 4px 4px 4px 0;
-}
-
-.currency-unit-text {
-  color: var(--app-text);
-  font-size: 14px;
+/* "Your review": a quiet outline chip beside the name, like the settings status chips. */
+.own-review-chip {
+  border: 1px solid var(--app-border-strong);
+  border-radius: 999px;
+  color: var(--app-text-muted);
+  flex: none;
+  font-size: 12px;
   font-weight: 500;
-}
-
-.own-review-badge {
-  position: absolute;
-  top: -2px;
-  inset-inline-end: 12px;
-  z-index: 1;
+  line-height: 18px;
+  padding: 0 8px;
 }
 
 .ratings-filter-row {

@@ -1,14 +1,15 @@
 <template>
   <!-- <q-card class="q-my-md q-py-sm">
     <q-card-section class="q-mt-sm q-py-xs"> -->
-  <div class="q-pt-lg q-pb-sm">
+  <!-- The original wallet's generous air around the balance (user direction, R41). -->
+  <div class="q-pt-xl q-pb-sm">
     <transition
       appear
       enter-active-class="animated fadeInDown"
       leave-active-class="animated fadeInDown"
       mode="out-in"
     >
-      <div class="balance-carousel-shell q-mt-md q-mb-md text-primary">
+      <div class="balance-carousel-shell q-mt-lg q-mb-lg text-primary">
         <transition
           appear
           enter-active-class="animated pulse"
@@ -115,7 +116,7 @@
     <!-- active mint: tap to manage mints -->
     <ChooseMint
       v-if="activeMintUrl"
-      class="q-mt-sm wallet-mint-picker"
+      class="q-mt-md wallet-mint-picker"
       test-id="wallet-mint-chip"
       :show-balances="mints.length > 1"
     />

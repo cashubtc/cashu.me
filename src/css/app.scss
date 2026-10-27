@@ -534,20 +534,30 @@ body.body--light .q-dialog__backdrop {
 
 // The mint picker as a labelled full-width field (Lightning address mint, swap From/To,
 // currency): label over value, matching the outlined inputs around it, 12px corners included.
+// Inside: the field's 16px text inset, a 20px leading icon with 12px to the text, and the
+// label and value as one centred 2-line block (user direction, R41: the 16px glyph and 6px
+// gap crowded the text).
 .mint-chip--field {
   border-radius: 12px;
+  gap: 12px;
   justify-content: flex-start;
-  min-height: 56px;
-  padding: 8px 20px;
+  min-height: 60px;
+  padding: 8px 16px;
   text-align: start;
   width: 100%;
 }
 .mint-chip--field > :last-child {
   margin-inline-start: auto;
 }
+.mint-chip--field > .mint-chip__icon:first-child,
+.mint-chip--field > .q-avatar:first-child {
+  height: 20px;
+  width: 20px;
+}
 .mint-chip__field-text {
   display: flex;
   flex-direction: column;
+  gap: 2px;
   min-width: 0;
 }
 .mint-chip__label {
@@ -555,6 +565,10 @@ body.body--light .q-dialog__backdrop {
   font-size: 12px;
   font-weight: 400;
   line-height: 16px;
+}
+.mint-chip--field .mint-chip__name {
+  font-size: 15px;
+  line-height: 20px;
 }
 
 // Floating drawer headers (Receive, Send, Receive ecash) share the bottom-sheet header
@@ -576,13 +590,6 @@ body.body--light .q-dialog__backdrop {
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
-}
-
-// Desktop: sheets open as centred dialogs inside the viewport, rounded on all corners
-// (R15: bottom-anchored sheets were cut off at the fold on desktop).
-.q-dialog__inner--standard > .drawer-card,
-.q-dialog__inner--standard > .bottom-sheet {
-  border-radius: 20px !important;
 }
 
 // Dropdown menus (selects), after the shadcn select: a raised popover with a 4px inner

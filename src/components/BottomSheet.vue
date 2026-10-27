@@ -4,7 +4,7 @@
   <q-dialog
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event)"
-    :position="$q.screen.gt.sm ? 'standard' : 'bottom'"
+    position="bottom"
     transition-show="slide-up"
     transition-hide="slide-down"
     @keydown.enter.prevent="$emit('enter')"

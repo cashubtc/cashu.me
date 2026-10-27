@@ -1,7 +1,7 @@
 <template>
   <q-dialog
     v-model="showSendDialog"
-    :position="$q.screen.gt.sm ? 'standard' : 'bottom'"
+    position="bottom"
     :maximized="$q.screen.lt.sm"
     transition-show="slide-up"
     transition-hide="slide-down"

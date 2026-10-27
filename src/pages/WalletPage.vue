@@ -3,7 +3,7 @@
     <div class="col-12 text-center q-gutter-y-md wallet-column">
       <NoMintWarnBanner v-if="mints.length == 0" />
       <BalanceView v-else :set-tab="setTab" />
-      <div class="wallet-actions q-pt-md q-pb-sm">
+      <div class="wallet-actions q-pt-xl q-pb-lg">
         <q-btn
           unelevated
           rounded

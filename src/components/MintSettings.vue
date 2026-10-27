@@ -17,12 +17,12 @@
           <q-item
             data-testid="mint-card"
             :active="mint.url == activeMintUrl"
-            active-class="text-weight-bold"
+            active-class="mint-card--active"
             clickable
             @click="activateMintUrlInternal(mint.url)"
             class="mint-card q-mb-md cursor-pointer"
             :style="{
-              'border-radius': '10px',
+              'border-radius': '12px',
               border:
                 mint.url == activeMintUrl
                   ? '1px solid var(--app-accent) !important'
@@ -53,98 +53,88 @@
               </div>
             </transition>
 
-            <!-- Top right: active marker and mint details -->
-            <div class="more-vert-icon row items-center no-wrap">
-              <!-- The active-mint slot: a spinner while switching, then the check. -->
-              <q-spinner
-                v-if="mint.url == activatingMintUrl"
-                size="18px"
-                class="q-mr-sm"
-              />
-              <CircleCheckIcon
-                v-else-if="mint.url == activeMintUrl"
-                :size="18"
-                class="text-primary q-mr-sm"
-                aria-hidden="true"
-              />
-              <q-icon
-                name="more_horiz"
-                data-testid="mint-details"
-                @click.stop="showMintInfo(mint)"
-                class="cursor-pointer mint-card-more"
-                size="1.3rem"
-              />
-            </div>
-            <div class="full-width" style="position: relative">
-              <div class="row items-center q-pa-md">
-                <div class="col">
-                  <div class="row items-center">
-                    <MintInfoContainer
-                      :iconUrl="getMintIconUrl(mint)"
-                      :name="mint.nickname || mint.info?.name"
-                      :url="mint.url"
-                    />
-                  </div>
-                </div>
+            <!-- One 16px inset: the identity row with its trailing actions centred on it, then
+                 the holdings and the rating on the same left and right edges (R41 card pass). -->
+            <div class="mint-card__body">
+              <div class="mint-card__head">
+                <MintInfoContainer
+                  class="col"
+                  :iconUrl="getMintIconUrl(mint)"
+                  :name="mint.nickname || mint.info?.name"
+                  :url="mint.url"
+                />
+                <!-- The active-mint slot: a spinner while switching, then the check. -->
+                <q-spinner
+                  v-if="mint.url == activatingMintUrl"
+                  size="18px"
+                  class="mint-card__status"
+                />
+                <CircleCheckIcon
+                  v-else-if="mint.url == activeMintUrl"
+                  :size="18"
+                  class="text-primary mint-card__status"
+                  aria-hidden="true"
+                />
+                <q-btn
+                  flat
+                  round
+                  dense
+                  data-testid="mint-details"
+                  class="mint-card-more"
+                  :aria-label="$t('MintDetailsDialog.details.title')"
+                  @click.stop="showMintInfo(mint)"
+                >
+                  <q-icon name="more_horiz" size="1.3rem" />
+                </q-btn>
               </div>
 
-              <div
-                class="row items-center justify-between q-pb-md q-pl-lg q-pr-md"
-              >
-                <div class="col">
-                  <!-- Currency units with regular text styling -->
-                  <div class="row q-gutter-x-sm">
-                    <div
-                      v-for="unit in visibleUnits(mint)"
-                      :key="unit"
-                      class="currency-unit-badge"
+              <div class="mint-card__foot">
+                <div class="mint-card__balances">
+                  <template v-for="(unit, i) in visibleUnits(mint)" :key="unit">
+                    <!-- Several unit balances read as separate holdings, not a conversion. -->
+                    <span
+                      v-if="i > 0"
+                      class="mint-card__plus"
+                      aria-hidden="true"
+                      >+</span
                     >
-                      <bdi dir="ltr" class="currency-unit-text">
-                        {{
-                          formatCurrency(
-                            mintClass(mint).unitBalance(unit),
-                            unit
-                          )
-                        }}
-                      </bdi>
-                    </div>
-                  </div>
+                    <bdi dir="ltr" class="currency-unit-text">{{
+                      formatCurrency(mintClass(mint).unitBalance(unit), unit)
+                    }}</bdi>
+                  </template>
                 </div>
                 <div
                   class="mint-review"
                   v-if="!isMintExcludedFromReviews(mint.url)"
                 >
-                  <template
-                    v-if="
-                      getRecommendation(mint.url) &&
-                      getRecommendation(mint.url).averageRating !== null
-                    "
+                  <button
+                    type="button"
+                    class="mint-review-link"
+                    @click.stop="openReviews(mint.url, mint)"
                   >
-                    <span>
-                      <q-icon name="star" size="14px" class="rating-star" />
-                      {{ getRecommendation(mint.url).averageRating.toFixed(1) }}
-                      ·
-                      {{ getRecommendation(mint.url).reviewsCount }}
-                      <span
-                        class="mint-review-link cursor-pointer"
-                        @click.stop="openReviews(mint.url, mint)"
-                        >{{
-                          $t(
-                            "MintSettings.reviews_text",
-                            getRecommendation(mint.url).reviewsCount
-                          )
-                        }}</span
-                      >
-                    </span>
-                  </template>
-                  <template v-else>
-                    <span
-                      class="mint-review-link mint-review-link--empty cursor-pointer"
-                      @click.stop="openReviews(mint.url, mint)"
+                    <template
+                      v-if="
+                        getRecommendation(mint.url) &&
+                        getRecommendation(mint.url).averageRating !== null
+                      "
                     >
-                      {{ $t("MintSettings.no_reviews_yet") }}
-                    </span>
-                  </template>
+                      <q-icon name="star" size="14px" class="rating-star" />
+                      <span class="mint-review__score">{{
+                        getRecommendation(mint.url).averageRating.toFixed(1)
+                      }}</span>
+                      <span aria-hidden="true">·</span>
+                      {{ getRecommendation(mint.url).reviewsCount }}
+                      {{
+                        $t(
+                          "MintSettings.reviews_text",
+                          getRecommendation(mint.url).reviewsCount
+                        )
+                      }}
+                    </template>
+                    <template v-else>{{
+                      $t("MintSettings.no_reviews_yet")
+                    }}</template>
+                  </button>
                 </div>
               </div>
             </div>
@@ -683,32 +673,39 @@ export default defineComponent({
 }
 
 .mint-review-link {
+  align-items: center;
+  background: none;
+  border: 0;
+  border-radius: 6px;
   color: var(--app-text-muted);
-  font-weight: 400;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  gap: 4px;
+  min-height: 32px;
+  margin: -4px -6px;
+  padding: 4px 6px;
+  white-space: nowrap;
+}
+@media (hover: hover) {
+  .mint-review-link:hover {
+    background: var(--app-tint);
+    color: var(--app-text);
+  }
+}
+.mint-review-link:focus-visible {
+  outline: 2px solid var(--app-text);
+  outline-offset: 2px;
 }
 /* Rating stars use the text colour, like every other glyph (no emoji gold). */
 .rating-star {
   color: var(--app-text);
-  vertical-align: -2px;
 }
 /* Add mint matches the height and label size of Discover mints and Swap. */
 .q-btn.add-mint-submit {
   font-size: 1rem !important;
   height: 48px;
   min-height: 48px;
-}
-/* "No reviews yet" is a state, not a link label. */
-.mint-review-link--empty {
-  text-decoration: none;
-}
-
-/* Several unit balances on one card read as separate holdings, not a conversion. */
-.currency-unit-badge + .currency-unit-badge::before {
-  content: "+";
-  margin-inline-end: 8px;
-  color: var(--app-text-subtle);
 }
 
 /* Discover mints, Add mint and Swap share one 48px button height and 1rem label. */
@@ -770,21 +767,58 @@ export default defineComponent({
   margin-bottom: 24px;
 }
 
-/* More vert icon positioning */
+/* Mint card (R41 pass): one 16px inset, the identity row with its actions centred on it,
+   the holdings and rating below on the same edges. */
+.mint-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  width: 100%;
+}
+.mint-card__head {
+  align-items: center;
+  display: flex;
+  gap: 4px;
+  min-width: 0;
+}
+.mint-card__status {
+  flex: none;
+  margin-inline-end: 4px;
+}
 .mint-card-more {
-  box-sizing: content-box;
-  margin: -10px;
-  padding: 10px;
+  color: var(--app-text-muted);
+  flex: none;
+  height: 40px;
+  margin: -8px -10px -8px 0;
+  width: 40px;
 }
-
-.more-vert-icon {
-  position: absolute;
-  top: 10px;
-  right: 14px;
-  z-index: 10;
+html[dir="rtl"] .mint-card-more {
+  margin: -8px 0 -8px -10px;
 }
-html[dir="rtl"] .more-vert-icon {
-  left: 14px;
-  right: auto;
+.mint-card__foot {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  min-height: 24px;
+}
+.mint-card__balances {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  min-width: 0;
+}
+.mint-card__balances .currency-unit-text {
+  font-size: 16px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.mint-card__plus {
+  color: var(--app-text-subtle);
+}
+.mint-review__score {
+  color: var(--app-text);
+  font-weight: 500;
 }
 </style>
