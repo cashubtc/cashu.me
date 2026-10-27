@@ -198,9 +198,12 @@
       <div v-if="!hasAnyReviews" class="sort-trigger row items-center">
         <q-skeleton type="rect" width="128px" height="20px" />
       </div>
-      <div
+      <button
         v-else
-        class="sort-trigger row items-center justify-between"
+        type="button"
+        class="sort-trigger row items-center justify-between no-wrap full-width"
+        aria-haspopup="listbox"
+        :aria-expanded="showSortSheet"
         @click="showSortSheet = true"
       >
         <div class="row items-center" style="gap: 8px">
@@ -211,7 +214,7 @@
           <span class="text-body2 text-grey-5">{{ currentSortLabel }}</span>
         </div>
         <q-icon name="keyboard_arrow_down" size="20px" class="text-grey-5" />
-      </div>
+      </button>
     </q-card-section>
 
     <q-separator v-if="hasAnyReviews || fetchingReviews" />
@@ -374,42 +377,27 @@
     </q-card-section>
   </q-card>
 
-  <!-- Sort Bottom Sheet - Outside card, positioned to viewport -->
-  <teleport to="body">
+  <BottomSheet v-model="showSortSheet" :title="$t('MintRatings.sort')">
     <div
-      v-if="showSortSheet"
-      class="sort-sheet-overlay"
-      @click="closeSortSheet"
+      role="listbox"
+      :aria-label="$t('MintRatings.sort')"
+      class="sort-options"
     >
-      <div class="sort-sheet" @click.stop>
-        <div class="sort-sheet-header">
-          <h3>{{ $t("MintRatings.sort") }}</h3>
-          <q-btn
-            flat
-            round
-            icon="close"
-            @click="closeSortSheet"
-            class="close-btn"
-          />
-        </div>
-        <div class="sort-options">
-          <div
-            v-for="option in sortOptions"
-            :key="option.value"
-            class="sort-option"
-            :class="{ active: sortMode === option.value }"
-            @click="selectSort(option.value)"
-          >
-            {{ option.label }}
-          </div>
-        </div>
-      </div>
+      <SheetOption
+        v-for="option in sortOptions"
+        :key="option.value"
+        :label="option.label"
+        :selected="sortMode === option.value"
+        @select="selectSort(option.value)"
+      />
     </div>
-  </teleport>
+  </BottomSheet>
 </template>
 
 <script lang="ts">
 import { Landmark as LandmarkIcon } from "lucide-vue-next";
+import BottomSheet from "src/components/BottomSheet.vue";
+import SheetOption from "src/components/SheetOption.vue";
 import { defineComponent } from "vue";
 import { useNostrStore } from "src/stores/nostr";
 import NDK from "@nostr-dev-kit/ndk";
@@ -426,7 +414,7 @@ export default defineComponent({
     mintInfo: { type: Object, required: false },
   },
   emits: ["close"],
-  components: { LandmarkIcon },
+  components: { LandmarkIcon, BottomSheet, SheetOption },
   methods: {
     // Calculate percentage for star rating bars
     ratingPercentage(star: number): number {
@@ -887,111 +875,27 @@ body[data-theme] .q-card--dark.mint-ratings-root {
     "Liberation Mono", "Courier New", monospace;
 }
 
-/* Sort trigger */
+/* Sort trigger: a real button styled as a row. */
 .sort-trigger {
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  color: inherit;
   cursor: pointer;
-  transition: background 0.2s ease;
+  font: inherit;
   padding: 8px 0;
+  text-align: start;
 }
-
 .sort-trigger:hover {
   opacity: 0.8;
 }
-
-/* Sort bottom sheet */
-.sort-sheet-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  z-index: 9999;
-  display: flex;
-  align-items: flex-end;
-  animation: fadeIn 0.3s ease;
-}
-
-.sort-sheet {
-  width: 100%;
-  background: rgba(20, 20, 20, 0.98);
-  backdrop-filter: blur(20px);
-  border-top: 1px solid var(--app-border);
-  border-radius: 20px 20px 0 0;
-  max-height: 50vh;
-  overflow: hidden;
-  animation: slideUp 0.3s ease;
-  display: flex;
-  flex-direction: column;
-}
-
-.sort-sheet-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 24px 16px 24px;
-  border-bottom: 1px solid var(--app-border);
-}
-
-.sort-sheet-header h3 {
-  color: var(--app-text);
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin: 0;
-}
-
-.close-btn {
-  color: var(--app-text-muted) !important;
+.sort-trigger:focus-visible {
+  outline: 2px solid var(--app-text);
+  outline-offset: 2px;
 }
 
 .sort-options {
-  flex: 1;
-  overflow-y: auto;
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-.sort-option {
-  padding: 16px 24px;
-  color: var(--app-text);
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border-bottom: 1px solid var(--app-border);
-  text-align: center;
-}
-
-.sort-option:hover {
-  background: var(--app-tint-strong);
-  color: var(--app-text);
-}
-
-.sort-option.active {
-  background: rgba(var(--q-primary-rgb), 0.2);
-  color: var(--q-primary);
-}
-
-.sort-option:last-child {
-  border-bottom: none;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
+  padding: 4px 16px 16px;
 }
 
 /* Match balance badges style from MintSettings.vue */

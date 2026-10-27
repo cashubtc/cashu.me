@@ -48,10 +48,10 @@ async function chooseSwap(
   await expect(wallet.page.getByRole("listbox")).toHaveCount(0);
   await expect(
     wallet.page.getByRole("combobox", { name: "From", exact: true })
-  ).toHaveValue(new RegExp(new URL(from).host.replaceAll(".", "\\.")));
+  ).toContainText(new URL(from).host);
   await expect(
     wallet.page.getByRole("combobox", { name: "To", exact: true })
-  ).toHaveValue(new RegExp(new URL(to).host.replaceAll(".", "\\.")));
+  ).toContainText(new URL(to).host);
   await wallet.page.getByRole("spinbutton", { name: /Amount/ }).fill(amount);
   await expect(
     wallet.page.getByRole("spinbutton", { name: /Amount/ })
@@ -93,7 +93,7 @@ test("rejects a swap larger than the source balance and remains usable", async (
   await expect.poll(() => wallet.balanceSats()).toBe(10);
   await expect(
     page.getByRole("combobox", { name: "From", exact: true })
-  ).toHaveValue("Select a mint");
+  ).toContainText("Select a mint");
   await wallet.mintCard(MINT_A_URL).click();
   await wallet.sendEcash(1);
   await expect.poll(() => wallet.balanceSats()).toBe(9);
@@ -157,7 +157,7 @@ test("retries a swap after the destination quote service recovers", async ({
   await failedQuote;
   await expect(
     page.getByRole("combobox", { name: "From", exact: true })
-  ).toHaveValue("Select a mint");
+  ).toContainText("Select a mint");
   await expect.poll(() => wallet.balanceSats()).toBe(100);
   await expect(
     wallet.mintCard(MINT_B_URL).locator(".currency-unit-text")

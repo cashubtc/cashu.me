@@ -239,70 +239,25 @@
       <div class="swap-caption q-mb-md">
         {{ $t("MintSettings.swap.caption") }}
       </div>
-      <q-select
-        :clearable="!!swapData.fromUrl?.url"
-        rounded
-        outlined
-        color="primary"
-        dropdown-icon="expand_more"
-        clear-icon="close"
-        class="q-mb-md"
-        :class="{ 'select--placeholder': !swapData.fromUrl?.url }"
-        v-model="swapData.fromUrl"
-        :display-value="
-          swapData.fromUrl?.url ? undefined : $t('ChooseMint.placeholder')
-        "
-        :options="swapAmountDataOptions()"
-        option-value="url"
-        option-label="optionLabel"
+      <!-- From and To are the wallet's mint picker (icons, balances, the same sheet). -->
+      <ChooseMint
+        test-id="swap-from"
+        allow-empty
+        :require-active-mint="false"
         :label="$t('MintSettings.swap.inputs.from.label')"
+        :model-value="swapData.fromUrl?.url ?? ''"
         :disable="swapBlocking"
-      >
-        <template v-slot:option="scope">
-          <q-item v-bind="scope.itemProps">
-            <q-item-section>
-              <q-item-label class="swap-option-name">
-                <bdi>{{ scope.opt.optionLabel }}</bdi>
-              </q-item-label>
-            </q-item-section>
-            <q-item-section side class="swap-option-balance">
-              <bdi dir="ltr">{{ scope.opt.balance }}</bdi>
-            </q-item-section>
-          </q-item>
-        </template>
-      </q-select>
-      <q-select
-        :clearable="!!swapData.toUrl?.url"
-        rounded
-        outlined
-        color="primary"
-        dropdown-icon="expand_more"
-        clear-icon="close"
-        class="q-mb-md"
-        :class="{ 'select--placeholder': !swapData.toUrl?.url }"
-        v-model="swapData.toUrl"
-        :display-value="
-          swapData.toUrl?.url ? undefined : $t('ChooseMint.placeholder')
-        "
-        :options="swapAmountDataOptions()"
-        option-value="url"
-        option-label="optionLabel"
+        @update:model-value="swapData.fromUrl = swapOptionFor($event)"
+      />
+      <ChooseMint
+        test-id="swap-to"
+        allow-empty
+        :require-active-mint="false"
         :label="$t('MintSettings.swap.inputs.to.label')"
+        :model-value="swapData.toUrl?.url ?? ''"
         :disable="swapBlocking"
-      >
-        <template v-slot:option="scope">
-          <q-item v-bind="scope.itemProps">
-            <q-item-section>
-              <q-item-label class="swap-option-name">
-                <bdi>{{ scope.opt.optionLabel }}</bdi>
-              </q-item-label>
-            </q-item-section>
-            <q-item-section side class="swap-option-balance">
-              <bdi dir="ltr">{{ scope.opt.balance }}</bdi>
-            </q-item-section>
-          </q-item>
-        </template>
-      </q-select>
+        @update:model-value="swapData.toUrl = swapOptionFor($event)"
+      />
       <div class="row no-wrap items-center" style="gap: 8px">
         <q-input
           class="col"
@@ -371,6 +326,7 @@ import { useUiStore } from "src/stores/ui";
 import { notifyError, notifyWarning } from "src/js/notify";
 import { EventBus } from "../js/eventBus";
 import AddMintDialog from "src/components/AddMintDialog.vue";
+import ChooseMint from "src/components/ChooseMint.vue";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
 import MintInfoContainer from "./MintInfoContainer.vue";
 
@@ -389,6 +345,7 @@ export default defineComponent({
     ScanLineIcon,
     SearchIcon,
     AddMintDialog,
+    ChooseMint,
     MintInfoContainer,
   },
   props: {},
@@ -561,6 +518,9 @@ export default defineComponent({
     mintClass(mint) {
       return new MintClass(mint);
     },
+    swapOptionFor(url: string) {
+      return this.swapAmountDataOptions().find((o) => o.url === url) ?? null;
+    },
     swapAmountDataOptions: function () {
       const options = [];
       for (const [i, m] of Object.entries(this.mints)) {
@@ -727,17 +687,6 @@ export default defineComponent({
   font-weight: 400;
   text-decoration: underline;
   text-underline-offset: 2px;
-}
-/* Swap options: mint name first, its balance right-aligned and muted (a shadcn-style row). */
-/* The name truncates at its end but keeps the row's start edge (right in rtl). */
-.swap-option-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.swap-option-balance {
-  color: var(--app-text-muted);
-  font-variant-numeric: tabular-nums;
 }
 /* Rating stars use the text colour, like every other glyph (no emoji gold). */
 .rating-star {

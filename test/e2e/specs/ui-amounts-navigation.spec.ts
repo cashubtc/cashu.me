@@ -105,10 +105,7 @@ test("switching the mint in a payment dialog replaces the old quote", async ({
       r.url() === `${MINT_B_URL}/v1/melt/quote/bolt11` &&
       r.request().method() === "POST"
   );
-  await page
-    .locator(".mint-option")
-    .filter({ hasText: "Payment mint" })
-    .click();
+  await page.getByRole("option").filter({ hasText: "Payment mint" }).click();
   expect((await newQuote).ok()).toBe(true);
   const paid = page.waitForRequest(
     (r) => r.url() === `${MINT_B_URL}/v1/melt/bolt11` && r.method() === "POST"

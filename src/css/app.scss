@@ -507,6 +507,31 @@ body.body--light .q-dialog__backdrop {
   font-weight: 600;
 }
 
+// The mint picker as a labelled full-width field (Lightning address mint, swap From/To,
+// currency): label over value, matching the outlined inputs around it.
+.mint-chip--field {
+  border-radius: 28px;
+  justify-content: flex-start;
+  min-height: 56px;
+  padding: 8px 20px;
+  text-align: start;
+  width: 100%;
+}
+.mint-chip--field > :last-child {
+  margin-inline-start: auto;
+}
+.mint-chip__field-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.mint-chip__label {
+  color: var(--app-text-muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+}
+
 // Floating drawer headers (Receive, Send, Receive ecash) share the bottom-sheet header
 // geometry: 44px buttons on the 6px toolbar inset, so each glyph lands on the 16px gutter.
 .drawer-header {
@@ -896,4 +921,13 @@ html[dir="rtl"] .q-field__append {
 // Wrapped secondary text needs room for Arabic marks and dense CJK.
 .q-item__label--caption {
   line-height: 1.45 !important;
+}
+
+// A mint field with nothing chosen yet reads as a placeholder; a disabled one dims.
+.mint-chip--empty .mint-chip__name {
+  color: var(--app-text-muted);
+}
+.mint-chip:disabled {
+  cursor: default;
+  opacity: 0.5;
 }

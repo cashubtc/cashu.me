@@ -1,25 +1,28 @@
 <template>
+  <!-- The Send and Receive sheet, shared: same dialog, transitions, backdrop, surface and
+       header, so every sheet in the app opens and closes the same way. -->
   <q-dialog
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event)"
     :position="$q.screen.gt.sm ? 'standard' : 'bottom'"
-    backdrop-filter="blur(4px) brightness(50%)"
     transition-show="slide-up"
     transition-hide="slide-down"
     @keydown.enter.prevent="$emit('enter')"
   >
-    <q-card class="bottom-sheet" :class="isDark ? 'bg-dark' : 'bg-white'">
+    <q-card class="bottom-sheet" :class="{ 'bottom-sheet--dark': dark }">
       <!-- Header -->
       <div v-if="title" class="bottom-sheet-header">
         <q-btn
           flat
           round
-          icon="close"
+          color="primary"
           class="bottom-sheet-close"
           :aria-label="$t('global.actions.close.label')"
           v-close-popup
-        />
-        <h4 class="bottom-sheet-title q-my-none">{{ title }}</h4>
+        >
+          <XIcon />
+        </q-btn>
+        <h4 class="bottom-sheet-title sheet-title q-my-none">{{ title }}</h4>
       </div>
 
       <!-- Scrollable content -->
@@ -38,21 +41,28 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapState } from "pinia";
+import { X as XIcon } from "lucide-vue-next";
 import { useUiStore } from "src/stores/ui";
 
 /**
  * Shared bottom sheet shell. Use it for every sheet that slides up from the
  * bottom so all sheets share the same look and behavior:
- * - q-dialog at the bottom with slide-up/slide-down transitions and a
- *   blurred backdrop (Esc and backdrop click work out of the box)
- * - theme-aware background (dark/light)
+ * - q-dialog at the bottom with slide-up/slide-down transitions and the same
+ *   backdrop as Send and Receive (Esc and backdrop click work out of the box)
+ * - the raised surface token, so it follows every theme
  * - max-width 500px, rounded top corners, safe-area bottom padding
  * - optional header (title + close button) and a fixed actions bar
  * - registers itself with the ui store so the Android back button closes it
  */
 export default defineComponent({
   name: "BottomSheet",
+  components: { XIcon },
   props: {
+    // Onboarding is designed dark in every mode; its sheets follow it.
+    dark: {
+      type: Boolean,
+      default: false,
+    },
     modelValue: {
       type: Boolean,
       required: true,
@@ -65,9 +75,6 @@ export default defineComponent({
   emits: ["update:modelValue", "enter"],
   computed: {
     ...mapState(useUiStore, ["closeLocalSheetsSignal"]),
-    isDark(): boolean {
-      return this.$q.dark.isActive;
-    },
   },
   watch: {
     modelValue: {
@@ -95,7 +102,17 @@ export default defineComponent({
 </script>
 
 <style scoped>
+/* Same backdrop as the Send and Receive sheets. A static blur, not Quasar's backdrop-filter
+   prop: that one also dimmed with brightness() and re-rendered the page on every frame of
+   the slide, which made sheets like the mint picker stutter. */
+:deep(.q-dialog__backdrop) {
+  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.6) !important;
+}
+
 .bottom-sheet {
+  background: var(--app-raised);
+  color: var(--app-text);
   width: 100%;
   max-width: 528px;
   max-height: 80vh;
@@ -104,6 +121,17 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   padding-bottom: calc(8px + env(safe-area-inset-bottom));
+}
+
+/* Onboarding sheets: the dark tokens in every app mode. */
+.bottom-sheet--dark {
+  --app-text: #fff;
+  --app-text-muted: rgba(255, 255, 255, 0.72);
+  --app-tint: rgba(255, 255, 255, 0.06);
+  --app-tint-strong: rgba(255, 255, 255, 0.1);
+  --app-border-strong: rgba(255, 255, 255, 0.28);
+  background: #1f1f1f;
+  color: #fff;
 }
 
 /* Header */
@@ -119,12 +147,11 @@ export default defineComponent({
 }
 
 .bottom-sheet-title {
-  font-size: 1.0625rem;
-  font-weight: 600;
   text-align: center;
 }
 
 .bottom-sheet-close {
+  color: var(--app-text) !important;
   position: absolute;
   inset-inline-start: 6px;
   top: 50%;

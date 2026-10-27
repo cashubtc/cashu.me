@@ -196,7 +196,7 @@ for (const directNavigation of [false, true]) {
       });
       await page.getByTestId("choose-mint").click();
       await page
-        .locator(".mint-option")
+        .getByRole("option")
         .filter({ hasText: "Address mint" })
         .click();
       await expect.poll(() => selectedMint).toBe(MINT_B_URL);

@@ -129,14 +129,10 @@
         </q-item>
         <q-item class="settings-control-item">
           <q-item-section>
-            <q-select
+            <SheetSelect
               v-model="bitcoinPriceCurrency"
               :options="currencyOptions"
-              rounded
-              outlined
-              dense
-              emit-value
-              map-options
+              :label="$t('Settings.privacy.bitcoin_price.currency.title')"
               @update:model-value="onCurrencyChange"
             />
           </q-item-section>
@@ -154,6 +150,7 @@ import { useNostrMintBackupStore } from "src/stores/nostrMintBackup";
 import { usePriceStore } from "src/stores/price";
 import SettingsPageShell from "./SettingsPageShell.vue";
 import SettingsSection from "./SettingsSection.vue";
+import SheetSelect from "src/components/SheetSelect.vue";
 
 export default defineComponent({
   name: "PrivacySettings",
@@ -161,6 +158,7 @@ export default defineComponent({
   components: {
     SettingsPageShell,
     SettingsSection,
+    SheetSelect,
   },
   data: function () {
     return {
