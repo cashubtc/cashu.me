@@ -578,7 +578,7 @@ export default {
           title: "Αύξηση μετρητών keyset",
           description:
             "Πατήστε ένα keyset για να αυξήσετε τον μετρητή του. Βοηθά με το σφάλμα «outputs have already been signed».",
-          counter: "μετρητής: {count}",
+          counter: "Μετρητής: {count}",
           increase: "Αύξηση μετρητή για {id}",
         },
         unset_reserved: {

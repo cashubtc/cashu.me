@@ -54,6 +54,8 @@ export default defineComponent({
 .not-found__code {
   font-size: 64px;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
   line-height: 1;
   color: var(--app-text-muted);
 }

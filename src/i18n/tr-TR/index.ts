@@ -562,7 +562,7 @@ export default {
           title: "Anahtar kümesi sayaçlarını artır",
           description:
             'Sayacını artırmak için bir keyset\'e dokunun. "outputs have already been signed" hatasına yardımcı olur.',
-          counter: "sayaç: {count}",
+          counter: "Sayaç: {count}",
           increase: "{id} için sayacı artır",
         },
 

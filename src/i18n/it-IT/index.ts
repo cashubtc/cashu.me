@@ -550,7 +550,7 @@ export default {
           title: "Incrementa contatori keyset",
           description:
             'Tocca un keyset per incrementarne il contatore. Aiuta con l\'errore "outputs have already been signed".',
-          counter: "contatore: {count}",
+          counter: "Contatore: {count}",
           increase: "Aumenta il contatore di {id}",
         },
         unset_reserved: {

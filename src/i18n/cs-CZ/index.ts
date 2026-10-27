@@ -590,7 +590,7 @@ export default {
           title: "Navýšit čítače keysetů",
           description:
             "Klepnutím na keyset zvýšíte jeho čítač. Pomáhá při chybě „outputs have already been signed“.",
-          counter: "čítač: {count}",
+          counter: "Čítač: {count}",
           increase: "Zvýšit čítač pro {id}",
         },
         unset_reserved: {

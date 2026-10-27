@@ -557,7 +557,7 @@ export default {
           title: "Incrémenter les compteurs de keyset",
           description:
             "Touchez un keyset pour augmenter son compteur. Utile en cas d'erreur « outputs have already been signed ».",
-          counter: "compteur : {count}",
+          counter: "Compteur : {count}",
           increase: "Augmenter le compteur de {id}",
         },
         new_seed: {

@@ -582,7 +582,7 @@ export default {
           title: "Increment keyset counters",
           description:
             'Tap a keyset to increase its counter. Helps with the "outputs have already been signed" error.',
-          counter: "counter: {count}",
+          counter: "Counter: {count}",
           increase: "Increase counter for {id}",
         },
         unset_reserved: {

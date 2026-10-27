@@ -569,7 +569,7 @@ export default {
           title: "Öka keyset-räknare",
           description:
             'Tryck på ett keyset för att öka dess räknare. Hjälper mot felet "outputs have already been signed".',
-          counter: "räknare: {count}",
+          counter: "Räknare: {count}",
           increase: "Öka räknaren för {id}",
         },
         unset_reserved: {
