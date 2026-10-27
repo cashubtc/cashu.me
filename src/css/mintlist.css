@@ -1,16 +1,10 @@
 /* Shared styles for mint list items across MintSettings, RestoreView, and NostrMintRestore */
 
 /* Common mint card styling */
+/* Edge, fill and radius come from the surface tokens (app.scss, "Every mint card"). */
 .mint-card {
-  border-radius: 10px;
-  border: 1px solid rgba(128, 128, 128, 0.2);
-  padding: 0px;
   position: relative;
-  transition: border-color 0.2s ease;
-}
-
-.mint-card:hover {
-  border-color: rgba(128, 128, 128, 0.4) !important;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .mint-card.q-loading {

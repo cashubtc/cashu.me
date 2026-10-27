@@ -76,13 +76,6 @@
             @click="toggleMintSelection(mint.url)"
             class="mint-card cursor-pointer"
             :class="{ 'mint-card--active': selectedMints.has(mint.url) }"
-            :style="{
-              'border-radius': '12px',
-              border: selectedMints.has(mint.url)
-                ? '1px solid var(--app-accent)'
-                : '1px solid var(--app-border-strong)',
-              padding: '0px',
-            }"
             :disable="(onboarding ? false : !isMnemonicValid) || restoringState"
           >
             <div class="mint-card__body">

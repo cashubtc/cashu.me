@@ -62,8 +62,8 @@
 /* Card-style groups (settings menu, about page, section content) */
 .settings-card,
 .settings-menu-group {
-  background: var(--app-tint);
-  border: 1px solid var(--app-border);
+  background: var(--app-group-fill);
+  border: 1px solid var(--app-group-edge);
   border-radius: 14px;
   padding: 0;
   overflow: hidden;

@@ -127,6 +127,14 @@ const routes = [
       { path: "", component: () => import("src/pages/TermsPage.vue") },
     ],
   },
+  // Every UI element on one page, with the surface style switcher (src/js/ui-variant.ts).
+  {
+    path: "/ui",
+    component: () => import("layouts/FullscreenLayout.vue"),
+    children: [
+      { path: "", component: () => import("src/pages/UiKitPage.vue") },
+    ],
+  },
 
   // Always leave this as last one,
   // but you can also remove it

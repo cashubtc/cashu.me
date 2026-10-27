@@ -505,7 +505,8 @@ body[data-theme] .welcome-surface,
 
 /* Small segmented control (invoice type on Receive Lightning). */
 .invoice-type-toggle {
-  border: 1px solid var(--app-border-strong);
+  border: 1px solid var(--app-segment-edge);
+  background: var(--app-outline-fill);
   .q-btn {
     min-height: 36px;
     padding: 0 14px;
@@ -619,7 +620,7 @@ body.body--light .q-dialog__backdrop {
 // Picker fields are drawn exactly like the outlined text fields (user direction, R44): no
 // fill, the field edge colour, 56px tall, the edge brightening on hover as an input's does.
 .mint-chip--field {
-  background: transparent;
+  background: var(--app-field-fill);
   border-color: var(--app-field-edge);
   border-radius: 12px;
   gap: 12px;
@@ -631,7 +632,7 @@ body.body--light .q-dialog__backdrop {
 }
 @media (hover: hover) {
   .mint-chip--field:hover {
-    background: transparent;
+    background: var(--app-field-fill);
     border-color: var(--app-text);
   }
 }
@@ -844,8 +845,19 @@ body {
 body.body--light {
   --app-field-edge: rgba(0, 0, 0, 0.45);
 }
-body.body--light .q-field--outlined .q-field__control:before {
+body .q-field--outlined .q-field__control:before {
   border-color: var(--app-field-edge);
+}
+body .q-field--outlined .q-field__control {
+  background: var(--app-field-fill);
+}
+// Outline buttons take their edge and fill from the surface tokens (Quasar draws the edge
+// in currentColor).
+body .q-btn--outline {
+  background: var(--app-outline-fill);
+}
+body .q-btn--outline:before {
+  border-color: var(--app-outline-edge);
 }
 
 // One field shape: every outlined text field and select uses the 12px card and row radius,
@@ -1248,6 +1260,20 @@ html[dir="rtl"] .q-field__append {
 
 body .mint-card.q-item--active {
   color: var(--app-text);
+}
+
+// Every mint card (Mints tab, Discover, Restore): edge, fill and shadow from the surface
+// tokens; the active or selected card swaps to the active edge and fill.
+body .mint-card {
+  border: 1px solid var(--app-card-edge);
+  border-radius: 12px;
+  padding: 0;
+  background: var(--app-card-fill);
+  box-shadow: var(--app-card-shadow);
+}
+body .mint-card.mint-card--active {
+  border-color: var(--app-card-edge-active);
+  background: var(--app-card-fill-active);
 }
 
 /* Mint card (R41 pass): one 16px inset, the identity row with its actions centred on it,

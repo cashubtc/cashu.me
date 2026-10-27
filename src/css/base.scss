@@ -122,6 +122,19 @@ $themes: (
 body {
   --app-hover-opacity: 0.1;
   --app-pressed-opacity: 0.24;
+  // Container edges and fills, in one place so a surface style can change them together
+  // (src/css/ui-variants.scss, previewed at /ui). The defaults are the shipped look.
+  --app-card-edge: var(--app-border-strong);
+  --app-card-edge-active: var(--app-accent);
+  --app-card-fill: transparent;
+  --app-card-fill-active: transparent;
+  --app-card-shadow: none;
+  --app-group-edge: var(--app-border);
+  --app-group-fill: var(--app-tint);
+  --app-field-fill: transparent;
+  --app-outline-edge: currentColor;
+  --app-outline-fill: transparent;
+  --app-segment-edge: var(--app-border-strong);
 }
 
 body.body--dark {

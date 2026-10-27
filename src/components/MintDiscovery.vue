@@ -124,11 +124,6 @@
                  on the right, then the rating on the card's right edge. -->
             <q-item
               class="mint-card"
-              :style="{
-                'border-radius': '12px',
-                border: '1px solid var(--app-border-strong)',
-                padding: '0px',
-              }"
             >
               <div class="mint-card__body">
                 <div class="mint-card__head">
@@ -427,11 +422,6 @@ export default defineComponent({
 .discover-btn :deep(.q-btn__content) {
   flex-wrap: nowrap;
   line-height: 20px;
-}
-
-.mint-card {
-  border: 1px solid var(--app-border-strong);
-  border-radius: 10px;
 }
 
 /* Review counts link the same way as on the mint cards. */

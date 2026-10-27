@@ -21,15 +21,7 @@
             clickable
             @click="activateMintUrlInternal(mint.url)"
             class="mint-card q-mb-md cursor-pointer"
-            :style="{
-              'border-radius': '12px',
-              border:
-                mint.url == activeMintUrl
-                  ? '1px solid var(--app-accent) !important'
-                  : '1px solid var(--app-border-strong) !important',
-              padding: '0px',
-              position: 'relative',
-            }"
+            style="position: relative"
             :loading="mint.url == activatingMintUrl"
           >
             <transition

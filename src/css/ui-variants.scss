@@ -1,0 +1,183 @@
+// Surface style variations, previewed at /ui (src/pages/UiKitPage.vue) and switchable on any
+// page with ?ui=<id>. Each one only sets the container tokens from base.scss, so a variation
+// that wins can become the default by moving its values there. "current" sets nothing.
+
+// Segmented controls follow the outline buttons in every variation.
+html[data-ui-variant] body {
+  --app-segment-edge: var(--app-outline-edge);
+}
+
+// 1. Soft hairline: the same outlines, at about half the weight.
+html[data-ui-variant="soft"] body.body--dark {
+  --app-card-edge: rgba(255, 255, 255, 0.12);
+  --app-card-edge-active: rgba(255, 255, 255, 0.45);
+  --app-field-edge: rgba(255, 255, 255, 0.24);
+  --app-outline-edge: rgba(255, 255, 255, 0.24);
+  --app-group-edge: rgba(255, 255, 255, 0.08);
+}
+html[data-ui-variant="soft"] body.body--light {
+  --app-card-edge: rgba(0, 0, 0, 0.1);
+  --app-card-edge-active: rgba(0, 0, 0, 0.4);
+  --app-field-edge: rgba(0, 0, 0, 0.2);
+  --app-outline-edge: rgba(0, 0, 0, 0.2);
+  --app-group-edge: rgba(0, 0, 0, 0.06);
+}
+
+// 2. Filled: no outlines; every container is a tinted fill, the active card a stronger one.
+html[data-ui-variant="filled"] body.body--dark {
+  --app-card-edge: transparent;
+  --app-card-edge-active: transparent;
+  --app-card-fill: rgba(255, 255, 255, 0.06);
+  --app-card-fill-active: rgba(255, 255, 255, 0.12);
+  --app-field-edge: transparent;
+  --app-field-fill: rgba(255, 255, 255, 0.07);
+  --app-outline-edge: transparent;
+  --app-outline-fill: rgba(255, 255, 255, 0.08);
+  --app-group-edge: transparent;
+  --app-group-fill: rgba(255, 255, 255, 0.06);
+}
+html[data-ui-variant="filled"] body.body--light {
+  --app-card-edge: transparent;
+  --app-card-edge-active: transparent;
+  --app-card-fill: rgba(0, 0, 0, 0.04);
+  --app-card-fill-active: rgba(0, 0, 0, 0.09);
+  --app-field-edge: transparent;
+  --app-field-fill: rgba(0, 0, 0, 0.05);
+  --app-outline-edge: transparent;
+  --app-outline-fill: rgba(0, 0, 0, 0.06);
+  --app-group-edge: transparent;
+  --app-group-fill: rgba(0, 0, 0, 0.04);
+}
+
+// 3. Fill and hairline: a faint fill with a faint edge, so containers read as surfaces, not
+// drawn boxes (the shadcn and Linear look).
+html[data-ui-variant="hairline"] body.body--dark {
+  --app-card-edge: rgba(255, 255, 255, 0.08);
+  --app-card-edge-active: rgba(255, 255, 255, 0.32);
+  --app-card-fill: rgba(255, 255, 255, 0.03);
+  --app-card-fill-active: rgba(255, 255, 255, 0.07);
+  --app-field-edge: rgba(255, 255, 255, 0.14);
+  --app-field-fill: rgba(255, 255, 255, 0.03);
+  --app-outline-edge: rgba(255, 255, 255, 0.14);
+  --app-outline-fill: rgba(255, 255, 255, 0.03);
+  --app-group-edge: rgba(255, 255, 255, 0.08);
+  --app-group-fill: rgba(255, 255, 255, 0.03);
+}
+html[data-ui-variant="hairline"] body.body--light {
+  --app-card-edge: rgba(0, 0, 0, 0.08);
+  --app-card-edge-active: rgba(0, 0, 0, 0.3);
+  --app-card-fill: rgba(0, 0, 0, 0.015);
+  --app-card-fill-active: rgba(0, 0, 0, 0.05);
+  --app-field-edge: rgba(0, 0, 0, 0.14);
+  --app-field-fill: #fff;
+  --app-outline-edge: rgba(0, 0, 0, 0.14);
+  --app-outline-fill: #fff;
+  --app-group-edge: rgba(0, 0, 0, 0.08);
+  --app-group-fill: rgba(0, 0, 0, 0.015);
+}
+
+// 4. Elevated: raised fills with a soft shadow and a faint top highlight, no outlines (the
+// iOS grouped look). Fields stay flat fills.
+html[data-ui-variant="elevated"] body.body--dark {
+  --app-card-edge: transparent;
+  --app-card-edge-active: rgba(255, 255, 255, 0.3);
+  --app-card-fill: var(--app-raised);
+  --app-card-fill-active: var(--app-raised);
+  --app-card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.4);
+  --app-field-edge: transparent;
+  --app-field-fill: rgba(255, 255, 255, 0.08);
+  --app-outline-edge: transparent;
+  --app-outline-fill: var(--app-raised);
+  --app-group-edge: transparent;
+  --app-group-fill: var(--app-raised);
+}
+html[data-ui-variant="elevated"] body.body--light {
+  --app-card-edge: transparent;
+  --app-card-edge-active: rgba(0, 0, 0, 0.3);
+  --app-card-fill: #fff;
+  --app-card-fill-active: #fff;
+  --app-card-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04),
+    0 1px 3px rgba(0, 0, 0, 0.08);
+  --app-field-edge: transparent;
+  --app-field-fill: rgba(0, 0, 0, 0.05);
+  --app-outline-edge: transparent;
+  --app-outline-fill: rgba(0, 0, 0, 0.06);
+  --app-group-edge: transparent;
+  --app-group-fill: #fff;
+}
+html[data-ui-variant="elevated"] body.body--light {
+  background: #f2f2f4;
+}
+
+// 5. Tonal: no outlines; fills carry a little of the theme's accent, and the active card a
+// little more, so containers belong to the theme instead of reading as grey boxes.
+html[data-ui-variant="tonal"] body.body--dark {
+  --app-card-edge: transparent;
+  --app-card-edge-active: color-mix(
+    in srgb,
+    var(--app-accent) 55%,
+    transparent
+  );
+  --app-card-fill: color-mix(in srgb, var(--app-accent) 7%, transparent);
+  --app-card-fill-active: color-mix(
+    in srgb,
+    var(--app-accent) 14%,
+    transparent
+  );
+  --app-field-edge: transparent;
+  --app-field-fill: color-mix(in srgb, var(--app-accent) 8%, transparent);
+  --app-outline-edge: transparent;
+  --app-outline-fill: color-mix(in srgb, var(--app-accent) 12%, transparent);
+  --app-group-edge: transparent;
+  --app-group-fill: color-mix(in srgb, var(--app-accent) 6%, transparent);
+}
+html[data-ui-variant="tonal"] body.body--light {
+  --app-card-edge: transparent;
+  --app-card-edge-active: color-mix(in srgb, var(--q-primary) 55%, transparent);
+  --app-card-fill: color-mix(in srgb, var(--q-primary) 5%, transparent);
+  --app-card-fill-active: color-mix(in srgb, var(--q-primary) 11%, transparent);
+  --app-field-edge: transparent;
+  --app-field-fill: color-mix(in srgb, var(--q-primary) 6%, transparent);
+  --app-outline-edge: transparent;
+  --app-outline-fill: color-mix(in srgb, var(--q-primary) 9%, transparent);
+  --app-group-edge: transparent;
+  --app-group-fill: color-mix(in srgb, var(--q-primary) 4%, transparent);
+}
+
+// 6. Tonal, refined (council rounds 1 and 2): Tonal's fills and selected card, plus the boundaries
+// every reviewer asked for. Fields and the mint picker keep a quiet edge so they still read as
+// fields; outline buttons and segmented controls keep their outline instead of turning into
+// text; passive groups stay borderless.
+html[data-ui-variant="tonal-plus"] body.body--dark {
+  --app-card-edge: transparent;
+  --app-card-edge-active: color-mix(
+    in srgb,
+    var(--app-accent) 70%,
+    transparent
+  );
+  --app-card-fill: color-mix(in srgb, var(--app-accent) 7%, transparent);
+  --app-card-fill-active: color-mix(
+    in srgb,
+    var(--app-accent) 13%,
+    transparent
+  );
+  --app-field-edge: rgba(255, 255, 255, 0.34);
+  --app-field-fill: color-mix(in srgb, var(--app-accent) 6%, transparent);
+  --app-outline-edge: rgba(255, 255, 255, 0.34);
+  --app-outline-fill: transparent;
+  --app-group-edge: transparent;
+  --app-group-fill: color-mix(in srgb, var(--app-accent) 6%, transparent);
+}
+html[data-ui-variant="tonal-plus"] body.body--light {
+  --app-card-edge: transparent;
+  --app-card-edge-active: color-mix(in srgb, var(--q-primary) 85%, transparent);
+  --app-card-fill: color-mix(in srgb, var(--q-primary) 5%, transparent);
+  --app-card-fill-active: color-mix(in srgb, var(--q-primary) 5%, transparent);
+  --app-field-edge: rgba(0, 0, 0, 0.34);
+  --app-field-fill: color-mix(in srgb, var(--q-primary) 3%, #fff);
+  --app-outline-edge: rgba(0, 0, 0, 0.3);
+  --app-outline-fill: transparent;
+  --app-group-edge: transparent;
+  --app-group-fill: color-mix(in srgb, var(--q-primary) 4%, transparent);
+}
