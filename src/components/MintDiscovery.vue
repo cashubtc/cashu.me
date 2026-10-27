@@ -7,12 +7,12 @@
         </p>
       </div> -->
       <div class="discover-button">
-        <!-- Once results are listed, the button steps back to an outline so the list leads. -->
+        <!-- An outline in every state, so the button keeps one shape from idle to loading to loaded. -->
         <q-btn
           color="primary"
           rounded
           unelevated
-          :outline="discoverList.length > 0 && !discovering"
+          outline
           no-caps
           :loading="discovering"
           @click="discover"
@@ -40,6 +40,7 @@
           <div class="col q-ml-md">
             <q-skeleton type="text" width="55%" />
             <q-skeleton type="text" width="35%" />
+            <q-skeleton type="text" width="25%" />
           </div>
         </div>
         <div class="discover-skeleton__label visually-hidden" role="status">

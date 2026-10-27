@@ -146,7 +146,7 @@
                   </template>
                   <template v-else>
                     <span
-                      class="mint-review-link cursor-pointer"
+                      class="mint-review-link mint-review-link--empty cursor-pointer"
                       @click.stop="openReviews(mint.url, mint)"
                     >
                       {{ $t("MintSettings.no_reviews_yet") }}
@@ -708,6 +708,10 @@ export default defineComponent({
   font-weight: 400;
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+/* "No reviews yet" is a state, not a link label. */
+.mint-review-link--empty {
+  text-decoration: none;
 }
 
 /* Several unit balances on one card read as separate holdings, not a conversion. */

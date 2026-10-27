@@ -22,7 +22,7 @@
 
     <div v-if="hasFeePaid" class="detail-item q-mb-md">
       <div class="detail-label">
-        <BadgeCheckIcon :size="20" class="detail-icon" />
+        <ReceiptIcon :size="20" class="detail-icon" />
         <div class="detail-name">Fee paid</div>
       </div>
       <div class="detail-value">{{ feePaidDisplay }}</div>
@@ -148,7 +148,7 @@ import {
 import {
   Zap as ZapIcon,
   ArrowDownUp as ArrowDownUpIcon,
-  BadgeCheck as BadgeCheckIcon,
+  Receipt as ReceiptIcon,
   Clock as ClockIcon,
   Landmark as LandmarkIcon,
   Coins as CoinsIcon,
@@ -174,7 +174,7 @@ export default defineComponent({
   components: {
     ZapIcon,
     ArrowDownUpIcon,
-    BadgeCheckIcon,
+    ReceiptIcon,
     ClockIcon,
     LandmarkIcon,
     CoinsIcon,

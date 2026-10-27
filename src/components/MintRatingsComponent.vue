@@ -152,7 +152,7 @@
       <!-- Action Buttons Row -->
       <div
         v-if="allowCreateReview && hasAnyReviews"
-        class="row q-mt-md justify-center"
+        class="row q-mt-md q-mb-md justify-center"
         style="gap: 12px"
       >
         <q-btn
@@ -189,7 +189,7 @@
 
     <q-separator v-if="hasAnyReviews" />
 
-    <q-card-section v-if="hasAnyReviews">
+    <q-card-section v-if="hasAnyReviews" class="q-px-none">
       <div class="column">
         <div
           v-for="r in paged"
@@ -270,7 +270,7 @@
                   :model-value="r.rating"
                   readonly
                   size="12px"
-                  color="amber"
+                  color="primary"
                   icon="star"
                   icon-selected="star"
                   icon-half="star_half"
@@ -287,7 +287,7 @@
                 style="
                   white-space: pre-wrap;
                   line-height: 1.5;
-                  color: rgba(255, 255, 255, 0.87);
+                  color: var(--app-text);
                 "
               >
                 {{ r.comment }}
@@ -296,7 +296,10 @@
           </div>
         </div>
 
-        <div class="row justify-between items-center q-mt-sm">
+        <div
+          v-if="totalPages > 1"
+          class="row justify-between items-center q-mt-sm"
+        >
           <q-select
             dense
             class="q-ml-sm"

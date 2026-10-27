@@ -671,3 +671,29 @@ html[dir="rtl"] .on-right {
   margin-left: 0;
   margin-right: 12px;
 }
+// URLs, addresses and amounts typed into fields stay left to right inside an rtl form.
+html[dir="rtl"] .url-input input,
+html[dir="rtl"] input[type="url"],
+html[dir="rtl"] input[type="number"] {
+  direction: ltr;
+  text-align: right;
+}
+// Switches and radios follow the reading direction: the "on" end and the label gap mirror.
+html[dir="rtl"] .q-toggle__inner {
+  transform: scaleX(-1);
+}
+html[dir="rtl"] .q-radio__label,
+html[dir="rtl"] .q-checkbox__label,
+html[dir="rtl"] .q-toggle__label {
+  padding-left: 0;
+  padding-right: 12px;
+}
+// Quasar list sections pad on the physical right; in rtl the leading section pads the left.
+html[dir="rtl"] .q-item__section--side {
+  padding-right: 0;
+  padding-left: 16px;
+}
+html[dir="rtl"] .q-item__section--main ~ .q-item__section--side {
+  padding-left: 0;
+  padding-right: 16px;
+}
