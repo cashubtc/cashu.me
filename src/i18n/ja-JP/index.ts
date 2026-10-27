@@ -768,6 +768,7 @@ export default {
     },
   },
   WelcomeSlide4: {
+    english_only: "法的文書は英語のみで提供されています。",
     title: "利用規約",
     actions: {
       more: {
@@ -1712,6 +1713,11 @@ export default {
     },
   },
   DisplayTokenComponent: {
+    title: {
+      send: "ecash を送る",
+      sent: "ecash 送信済み",
+      received: "ecash 受信済み",
+    },
     qr_speed: "QR の速度: {value}",
     qr_size: "QR のサイズ: {value}",
     speed: {

@@ -164,38 +164,47 @@ export default defineComponent({
   },
   data: function () {
     return {
-      currencyOptions: [
-        { label: "US Dollar (USD)", value: "USD" },
-        { label: "Euro (EUR)", value: "EUR" },
-
-        { label: "Australian Dollar (AUD)", value: "AUD" },
-        { label: "Brazilian Real (BRL)", value: "BRL" },
-        { label: "Canadian Dollar (CAD)", value: "CAD" },
-        { label: "Swiss Franc (CHF)", value: "CHF" },
-        { label: "Chinese Yuan (CNY)", value: "CNY" },
-        { label: "Czech Koruna (CZK)", value: "CZK" },
-        { label: "Danish Krone (DKK)", value: "DKK" },
-        { label: "British Pound (GBP)", value: "GBP" },
-        { label: "Hong Kong Dollar (HKD)", value: "HKD" },
-        { label: "Hungarian Forint (HUF)", value: "HUF" },
-        { label: "Israeli Shekel (ILS)", value: "ILS" },
-        { label: "Indian Rupee (INR)", value: "INR" },
-        { label: "Japanese Yen (JPY)", value: "JPY" },
-        { label: "South Korean Won (KRW)", value: "KRW" },
-        { label: "Mexican Peso (MXN)", value: "MXN" },
-        { label: "New Zealand Dollar (NZD)", value: "NZD" },
-        { label: "Norwegian Krone (NOK)", value: "NOK" },
-        { label: "Polish Zloty (PLN)", value: "PLN" },
-        { label: "Russian Ruble (RUB)", value: "RUB" },
-        { label: "Swedish Krona (SEK)", value: "SEK" },
-        { label: "Singapore Dollar (SGD)", value: "SGD" },
-        { label: "Thai Baht (THB)", value: "THB" },
-        { label: "Turkish Lira (TRY)", value: "TRY" },
-        { label: "South African Rand (ZAR)", value: "ZAR" },
+      currencyCodes: [
+        "USD",
+        "EUR",
+        "AUD",
+        "BRL",
+        "CAD",
+        "CHF",
+        "CNY",
+        "CZK",
+        "DKK",
+        "GBP",
+        "HKD",
+        "HUF",
+        "ILS",
+        "INR",
+        "JPY",
+        "KRW",
+        "MXN",
+        "NZD",
+        "NOK",
+        "PLN",
+        "RUB",
+        "SEK",
+        "SGD",
+        "THB",
+        "TRY",
+        "ZAR",
       ],
     };
   },
   computed: {
+    // Currency names in the app's language (e.g. "美元 (USD)"), from the browser's CLDR data.
+    currencyOptions() {
+      const names = new Intl.DisplayNames([this.$i18n.locale, "en"], {
+        type: "currency",
+      });
+      return this.currencyCodes.map((code) => ({
+        label: `${names.of(code) ?? code} (${code})`,
+        value: code,
+      }));
+    },
     ...mapWritableState(useSettingsStore, [
       "getBitcoinPrice",
       "bitcoinPriceCurrency",

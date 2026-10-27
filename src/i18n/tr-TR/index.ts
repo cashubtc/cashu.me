@@ -784,6 +784,7 @@ export default {
     },
   },
   WelcomeSlide4: {
+    english_only: "Yasal metin yalnızca İngilizce olarak mevcuttur.",
     title: "Hizmet Şartları",
     actions: {
       more: {
@@ -1725,6 +1726,11 @@ export default {
     },
   },
   DisplayTokenComponent: {
+    title: {
+      send: "Ecash gönder",
+      sent: "Ecash gönderildi",
+      received: "Ecash alındı",
+    },
     qr_speed: "QR hızı: {value}",
     qr_size: "QR boyutu: {value}",
     speed: {

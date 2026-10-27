@@ -793,6 +793,7 @@ export default {
     },
   },
   WelcomeSlide4: {
+    english_only: "Právní text je k dispozici pouze v angličtině.",
     title: "Podmínky služby",
     actions: {
       more: {
@@ -1763,6 +1764,11 @@ export default {
     },
   },
   DisplayTokenComponent: {
+    title: {
+      send: "Odeslat ecash",
+      sent: "Odeslaný ecash",
+      received: "Přijatý ecash",
+    },
     qr_speed: "Rychlost QR: {value}",
     qr_size: "Velikost QR: {value}",
     speed: {

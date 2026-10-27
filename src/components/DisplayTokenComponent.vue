@@ -18,13 +18,14 @@
         <div v-show="!showExpandedButtons">
           <q-item-label class="sheet-title">
             {{
-              sendData.historyToken.amount && sendData.historyToken.amount < 0
-                ? sendData.historyToken.status === "paid"
-                  ? "Sent"
-                  : "Send"
-                : "Received"
-            }}
-            ecash</q-item-label
+              $t(
+                sendData.historyToken.amount && sendData.historyToken.amount < 0
+                  ? sendData.historyToken.status === "paid"
+                    ? "DisplayTokenComponent.title.sent"
+                    : "DisplayTokenComponent.title.send"
+                  : "DisplayTokenComponent.title.received"
+              )
+            }}</q-item-label
           >
         </div>
       </div>

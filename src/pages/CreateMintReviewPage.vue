@@ -42,7 +42,10 @@
             spinner-size="xs"
           />
         </q-avatar>
-        <span>{{ $t("CreateMintReview.publishing_as") }}:</span>
+        <span
+          >{{ $t("CreateMintReview.publishing_as")
+          }}{{ /^(zh|ja)/.test($i18n.locale) ? "：" : ":" }}</span
+        >
         <span v-if="publisherName" class="text-white q-ml-xs">{{
           publisherName
         }}</span>

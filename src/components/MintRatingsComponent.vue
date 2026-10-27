@@ -101,7 +101,10 @@
              trust switch. The button, sort row and reviews below render their own skeletons. -->
         <div class="row items-start q-mb-sm" style="gap: 24px">
           <div class="column items-center" style="min-width: 100px">
-            <q-skeleton type="rect" width="64px" height="60px" />
+            <!-- The score's glyph height inside its 60px line box. -->
+            <div class="column justify-center" style="height: 60px">
+              <q-skeleton type="rect" width="56px" height="40px" />
+            </div>
             <q-skeleton
               type="rect"
               width="48px"
@@ -120,7 +123,16 @@
         </div>
         <div class="row items-center justify-between ratings-filter-row">
           <q-skeleton type="rect" width="72px" height="16px" />
-          <q-skeleton type="rect" width="136px" height="40px" />
+          <!-- Label and switch, at the switch's own size; the row keeps its 40px height. -->
+          <div class="row items-center no-wrap" style="gap: 12px; height: 40px">
+            <q-skeleton type="rect" width="88px" height="14px" />
+            <q-skeleton
+              type="rect"
+              width="40px"
+              height="24px"
+              style="border-radius: 12px"
+            />
+          </div>
         </div>
       </div>
       <div v-else class="q-mb-lg">
@@ -179,7 +191,10 @@
     </q-card-section>
 
     <!-- Sort Section -->
-    <q-card-section v-if="hasAnyReviews || fetchingReviews" class="q-py-sm">
+    <q-card-section
+      v-if="hasAnyReviews || fetchingReviews"
+      class="q-py-sm q-px-none"
+    >
       <div v-if="!hasAnyReviews" class="sort-trigger row items-center">
         <q-skeleton type="rect" width="128px" height="20px" />
       </div>

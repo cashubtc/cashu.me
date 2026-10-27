@@ -758,6 +758,7 @@ export default {
     },
   },
   WelcomeSlide4: {
+    english_only: "法律文本仅提供英文版本。",
     title: "服务条款",
     actions: {
       more: {
@@ -915,7 +916,7 @@ export default {
       description: "输入 Cashu Mint 的 URL 以连接。此钱包不隶属于任何 Mint。",
       inputs: {
         nickname: {
-          placeholder: "昵称 (例如 Testnet)",
+          placeholder: "昵称（例如 Testnet）",
         },
       },
       actions: {
@@ -1686,6 +1687,11 @@ export default {
     },
   },
   DisplayTokenComponent: {
+    title: {
+      send: "发送 ecash",
+      sent: "已发送 ecash",
+      received: "已收到 ecash",
+    },
     qr_speed: "QR 速度：{value}",
     qr_size: "QR 大小：{value}",
     speed: {

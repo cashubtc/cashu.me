@@ -791,6 +791,7 @@ export default {
     },
   },
   WelcomeSlide4: {
+    english_only: "O texto legal está disponível apenas em inglês.",
     title: "Termos de Serviço",
     actions: {
       more: {
@@ -1742,6 +1743,11 @@ export default {
     },
   },
   DisplayTokenComponent: {
+    title: {
+      send: "Enviar ecash",
+      sent: "Ecash enviado",
+      received: "Ecash recebido",
+    },
     qr_speed: "Velocidade do QR: {value}",
     qr_size: "Tamanho do QR: {value}",
     speed: {

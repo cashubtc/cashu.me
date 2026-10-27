@@ -8,11 +8,17 @@
   >
     <q-card class="drawer-card full-width-card q-pb-lg">
       <q-card-section class="row items-center no-wrap drawer-header">
-        <q-btn flat round @click="goBack" class="drawer-header-btn" color="primary">
+        <q-btn
+          flat
+          round
+          @click="goBack"
+          class="drawer-header-btn"
+          color="primary"
+        >
           <ChevronLeftIcon />
         </q-btn>
         <div class="col text-center">
-          <span class="text-h6">{{ $t("ReceiveEcashDrawer.title") }}</span>
+          <span class="sheet-title">{{ $t("ReceiveEcashDrawer.title") }}</span>
         </div>
         <!-- Scan is the second row below; an empty slot keeps the title centred. -->
         <div class="drawer-header-btn" aria-hidden="true" />

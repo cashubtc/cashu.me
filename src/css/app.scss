@@ -485,7 +485,7 @@ textarea,
 }
 // Over light pages a 60% wash reads as muddy grey; a lighter one dims without flattening.
 body.body--light .q-dialog__backdrop {
-  background: rgba(0, 0, 0, 0.44) !important;
+  background: rgba(0, 0, 0, 0.32) !important;
 }
 
 // Sheet header trailing slot: 44px buttons, outermost is the unit toggle, same glyph size on
@@ -629,9 +629,17 @@ html[dir="rtl"] #q-app {
   direction: rtl;
 }
 html[dir="rtl"] .amount-text,
-html[dir="rtl"] .ellipsis {
+html[dir="rtl"] .amount-headline,
+html[dir="rtl"] .amount-display,
+html[dir="rtl"] .balance-amount {
   direction: ltr;
   unicode-bidi: isolate;
+}
+// Truncated single-line values (URLs, names) take their direction from their own text, but
+// still sit on the rtl start edge. Field labels also carry .ellipsis and stay rtl.
+html[dir="rtl"] .ellipsis:not(.q-field__label) {
+  unicode-bidi: plaintext;
+  text-align: right;
 }
 // Quasar's alignment utilities are physical; in rtl they swap so "left" means the start edge.
 html[dir="rtl"] .text-left {
@@ -751,7 +759,7 @@ html[dir="rtl"] .url-input textarea,
 html[dir="rtl"] input[type="url"],
 html[dir="rtl"] input[type="number"] {
   direction: ltr;
-  text-align: left;
+  text-align: right;
 }
 // Switches and radios follow the reading direction: the "on" end and the label gap mirror.
 html[dir="rtl"] .q-toggle__inner {
@@ -840,4 +848,52 @@ html[dir="rtl"] .q-field__label {
   left: auto;
   right: 0;
   transform-origin: right top;
+}
+// Rounded button groups (segmented toggles) set physical corner radii; in rtl the first item
+// sits on the right, so its rounded corners move to the right edge too.
+html[dir="rtl"] .q-btn-group--rounded {
+  overflow: hidden;
+}
+html[dir="rtl"]
+  .q-btn-group--rounded
+  > .q-btn-item:first-child:not(:last-child) {
+  border-radius: 0 28px 28px 0;
+}
+html[dir="rtl"]
+  .q-btn-group--rounded
+  > .q-btn-item:last-child:not(:first-child) {
+  border-radius: 28px 0 0 28px;
+}
+// Placeholders use the app font (and its Arabic fallback), not the UA default.
+input::placeholder,
+textarea::placeholder {
+  font-family: inherit;
+}
+// Even line endings: no single stranded word or CJK character on the last line of captions;
+// headings balance their lines. Not on every <p>: with CJK text Chrome then sized the welcome
+// slide to about 2,000px tall.
+.q-item__label--caption,
+.text-caption {
+  text-wrap: pretty;
+}
+h1,
+h2,
+h3,
+.dialog-header,
+.page-title {
+  text-wrap: balance;
+}
+// Quasar pads field prepend/append slots on a physical side; in rtl the slots swap sides, so the
+// gap between an icon and the text has to swap with them.
+html[dir="rtl"] .q-field__prepend {
+  padding-right: 0;
+  padding-left: 12px;
+}
+html[dir="rtl"] .q-field__append {
+  padding-left: 0;
+  padding-right: 12px;
+}
+// Wrapped secondary text needs room for Arabic marks and dense CJK.
+.q-item__label--caption {
+  line-height: 1.45 !important;
 }

@@ -765,6 +765,7 @@ export default {
     },
   },
   WelcomeSlide4: {
+    english_only: "النص القانوني متوفر باللغة الإنجليزية فقط.",
     title: "شروط الخدمة",
     actions: {
       more: {
@@ -1700,6 +1701,11 @@ export default {
     },
   },
   DisplayTokenComponent: {
+    title: {
+      send: "إرسال ecash",
+      sent: "تم إرسال ecash",
+      received: "تم استلام ecash",
+    },
     qr_speed: "سرعة QR: {value}",
     qr_size: "حجم QR: {value}",
     speed: {

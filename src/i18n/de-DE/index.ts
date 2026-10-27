@@ -782,6 +782,7 @@ export default {
     },
   },
   WelcomeSlide4: {
+    english_only: "Der Rechtstext ist nur auf Englisch verfügbar.",
     title: "Nutzungsbedingungen",
     actions: {
       more: {
@@ -1731,6 +1732,11 @@ export default {
     },
   },
   DisplayTokenComponent: {
+    title: {
+      send: "Ecash senden",
+      sent: "Ecash gesendet",
+      received: "Ecash empfangen",
+    },
     qr_speed: "QR-Tempo: {value}",
     qr_size: "QR-Größe: {value}",
     speed: {

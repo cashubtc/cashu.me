@@ -18,7 +18,7 @@
           <XIcon />
         </q-btn>
         <div class="col text-center">
-          <span class="text-h6">{{ $t("ReceiveDialog.title") }}</span>
+          <span class="sheet-title">{{ $t("ReceiveDialog.title") }}</span>
         </div>
         <q-btn
           flat

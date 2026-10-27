@@ -6,7 +6,12 @@
           {{ $t("MintSettings.discover.caption") }}
         </p>
       </div> -->
-      <div class="discover-button">
+      <!-- Only when idle with no results; while loading and once results exist, refreshing is the
+           compact action in the results header, so the list never jumps when the button goes. -->
+      <div
+        v-if="!discovering && discoverList.length === 0"
+        class="discover-button"
+      >
         <!-- An outline in every state, so the button keeps one shape from idle to loading to loaded. -->
         <q-btn
           color="primary"
@@ -26,41 +31,46 @@
           </template>
         </q-btn>
       </div>
+    </div>
+
+    <div
+      v-if="discovering && discoverList.length === 0"
+      class="discover-skeleton"
+    >
+      <!-- Same list, item and gap structure as the loaded results below, so the heading,
+           note and cards land exactly where they will stay. -->
+      <q-list padding aria-hidden="true">
+        <q-item class="q-px-none">
+          <q-item-section>
+            <q-item-label class="discover-count">
+              <q-skeleton type="text" width="30%" />
+            </q-item-label>
+            <q-item-label caption>
+              {{ $t("MintSettings.discover.recommendations.caption") }}
+            </q-item-label>
+          </q-item-section>
+          <q-item-section side top>
+            <div class="row flex-center" style="width: 44px; height: 44px">
+              <q-spinner-dots size="20px" color="primary" />
+            </div>
+          </q-item-section>
+        </q-item>
+      </q-list>
       <div
-        v-if="discovering && discoverList.length === 0"
-        class="discover-skeleton"
+        class="discover-skeleton__row"
+        v-for="n in 3"
+        :key="n"
+        aria-hidden="true"
       >
-        <!-- Same list, item and gap structure as the loaded results below, so the heading,
-             note and cards land exactly where they will stay. -->
-        <q-list padding aria-hidden="true">
-          <q-item class="q-px-none">
-            <q-item-section>
-              <q-item-label class="discover-count">
-                <q-skeleton type="text" width="30%" />
-              </q-item-label>
-              <q-item-label caption>
-                <q-skeleton type="text" width="90%" />
-                <q-skeleton type="text" width="55%" />
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-        </q-list>
-        <div
-          class="discover-skeleton__row"
-          v-for="n in 3"
-          :key="n"
-          aria-hidden="true"
-        >
-          <q-skeleton type="QAvatar" size="40px" />
-          <div class="col q-ml-md">
-            <q-skeleton type="text" width="55%" />
-            <q-skeleton type="text" width="35%" />
-            <q-skeleton type="text" width="25%" />
-          </div>
+        <q-skeleton type="QAvatar" size="40px" />
+        <div class="col q-ml-md">
+          <q-skeleton type="text" width="55%" />
+          <q-skeleton type="text" width="35%" />
+          <q-skeleton type="text" width="25%" />
         </div>
-        <div class="discover-skeleton__label visually-hidden" role="status">
-          {{ $t("MintSettings.discover.actions.discover.in_progress") }}
-        </div>
+      </div>
+      <div class="discover-skeleton__label visually-hidden" role="status">
+        {{ $t("MintSettings.discover.actions.discover.in_progress") }}
       </div>
     </div>
 
@@ -78,6 +88,23 @@
             <q-item-label caption>
               {{ $t("MintSettings.discover.recommendations.caption") }}
             </q-item-label>
+          </q-item-section>
+          <!-- Busy until every card has its mint info. -->
+          <q-item-section side top>
+            <q-btn
+              flat
+              round
+              icon="refresh"
+              color="primary"
+              class="touch-target-44"
+              :loading="busy"
+              :aria-label="$t('common.refresh')"
+              @click="discover"
+            >
+              <template v-slot:loading>
+                <q-spinner-dots size="20px" />
+              </template>
+            </q-btn>
           </q-item-section>
         </q-item>
         <TransitionGroup name="mint" tag="div" class="q-pt-sm">
@@ -109,6 +136,7 @@
                         :iconUrl="getMintIconUrlUrl(rec.url) || undefined"
                         :name="getMintDisplayName(rec.url)"
                         :url="rec.url"
+                        :loading="isFetchingMintInfo(rec.url)"
                       />
                     </div>
                     <div class="row">
@@ -177,25 +205,23 @@ export default defineComponent({
     const recsStore = useMintRecommendationsStore();
     const mints = useMintsStore();
 
-    const discovering = ref(false);
+    // Starts busy when discovery runs on mount, so the first frame is already the skeleton.
+    const discovering = ref(props.autoDiscover);
 
     const recommendations = computed(() => recsStore.recommendations);
     const isExistingMint = (url: string) =>
       mints.mints.some((m) => m.url === url);
+    // Each card keeps the position it first appeared at: the store re-sorts recommendations as
+    // reviews and mint info arrive, which inserted new cards above ones already on screen.
+    const firstSeen = new Map<string, number>();
     const discoverList = computed(() =>
       recommendations.value
         .filter((r) => !isExistingMint(r.url) && !r.error)
-        .sort((a, b) => {
-          const aFetching = isFetchingMintInfo(a.url);
-          const bFetching = isFetchingMintInfo(b.url);
-
-          // If one is fetching and the other isn't, put the fetching one at the bottom
-          if (aFetching && !bFetching) return 1;
-          if (!aFetching && bFetching) return -1;
-
-          // If both are in the same state, maintain original order
-          return 0;
+        .map((r) => {
+          if (!firstSeen.has(r.url)) firstSeen.set(r.url, firstSeen.size);
+          return r;
         })
+        .sort((a, b) => firstSeen.get(a.url)! - firstSeen.get(b.url)!)
     );
 
     // Use store-managed HTTP info (Dexie + in-memory), persist only error in localStorage
@@ -205,7 +231,7 @@ export default defineComponent({
     const getMintIconUrlUrl = (url: string) =>
       recsStore.getHttpInfoForUrl(url)?.icon_url || null;
     const getMintDisplayName = (url: string) =>
-      recsStore.getHttpInfoForUrl(url)?.name || url.replace(/^https?:\/\//, "");
+      recsStore.getHttpInfoForUrl(url)?.name;
     const isFetchingMintInfo = (url: string) => {
       const rec = getRec(url);
       return rec
@@ -229,12 +255,20 @@ export default defineComponent({
       immediate: true,
     });
 
+    // Discovery stays busy while any found mint is still fetching its info.
+    const busy = computed(
+      () =>
+        discovering.value ||
+        discoverList.value.some((rec) => isFetchingMintInfo(rec.url))
+    );
+
     const discover = async () => {
       discovering.value = true;
       try {
         // ensure cached reviews from IndexedDB are visible immediately
         await (recsStore as any).hydrateFromDb?.();
         recsStore.clearDiscoveryCaches();
+        firstSeen.clear();
         // recsStore.clearRecommendations();
         // Start live updates immediately
         recsStore.startSubscriptions();
@@ -268,6 +302,7 @@ export default defineComponent({
     };
 
     return {
+      busy,
       discovering,
       discover,
       discoverList,
@@ -331,10 +366,6 @@ export default defineComponent({
   margin-bottom: 16px;
   border-radius: 10px;
   border: 1px solid var(--app-border);
-}
-
-.discover-skeleton .q-list + .discover-skeleton__row {
-  margin-top: 8px; /* the loaded list's q-pt-sm */
 }
 
 .discover-skeleton__label {

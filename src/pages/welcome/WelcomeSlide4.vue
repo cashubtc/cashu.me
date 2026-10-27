@@ -3,6 +3,12 @@
     :title="$t('WelcomeSlide4.title')"
     :caption="$t('WelcomeSlide4.actions.more.label')"
   >
+    <p
+      v-if="!$i18n.locale.startsWith('en')"
+      class="terms-english-only text-caption"
+    >
+      {{ $t("WelcomeSlide4.english_only") }}
+    </p>
     <div class="settings-card terms-body" dir="ltr" lang="en">
       <p><strong>Last Updated: 20.12.2024</strong></p>
       <p>
@@ -339,6 +345,11 @@ export default {
 </script>
 
 <style scoped>
+.terms-english-only {
+  color: var(--app-text-muted);
+  margin: 0 0 12px;
+}
+
 .terms-body {
   padding: 16px;
   text-align: left; /* the English text keeps its own alignment inside an rtl page */

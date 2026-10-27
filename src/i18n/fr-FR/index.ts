@@ -784,6 +784,7 @@ export default {
     },
   },
   WelcomeSlide4: {
+    english_only: "Le texte juridique est disponible uniquement en anglais.",
     title: "Conditions d'utilisation",
     actions: {
       more: {
@@ -1734,6 +1735,11 @@ export default {
     },
   },
   DisplayTokenComponent: {
+    title: {
+      send: "Envoyer de l’ecash",
+      sent: "Ecash envoyé",
+      received: "Ecash reçu",
+    },
     qr_speed: "Vitesse QR : {value}",
     qr_size: "Taille QR : {value}",
     speed: {

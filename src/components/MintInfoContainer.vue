@@ -29,8 +29,18 @@
     </q-avatar>
 
     <div class="mint-info-container">
-      <div class="mint-name">{{ name || host }}</div>
-      <div v-if="name" class="mint-url">{{ host }}</div>
+      <!-- While the mint's info loads, a placeholder holds the name line and the host stays on
+           its own line, so the card keeps one height and the title fills in instead of changing. -->
+      <div v-if="loading && !name" class="mint-name">
+        <q-skeleton type="text" width="96px" />
+      </div>
+      <div v-else class="mint-name">{{ name || host }}</div>
+      <div
+        v-if="(loading && !name) || (name && name !== host)"
+        class="mint-url"
+      >
+        {{ host }}
+      </div>
     </div>
   </div>
 </template>

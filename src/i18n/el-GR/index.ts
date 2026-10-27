@@ -781,6 +781,7 @@ export default {
     },
   },
   WelcomeSlide4: {
+    english_only: "Το νομικό κείμενο είναι διαθέσιμο μόνο στα αγγλικά.",
     title: "Όροι Χρήσης",
     actions: {
       more: {
@@ -1726,6 +1727,11 @@ export default {
     },
   },
   DisplayTokenComponent: {
+    title: {
+      send: "Αποστολή ecash",
+      sent: "Εστάλη ecash",
+      received: "Ελήφθη ecash",
+    },
     qr_speed: "Ταχύτητα QR: {value}",
     qr_size: "Μέγεθος QR: {value}",
     speed: {

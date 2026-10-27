@@ -771,6 +771,7 @@ export default {
     },
   },
   WelcomeSlide4: {
+    english_only: "Den juridiska texten finns endast på engelska.",
     title: "Användarvillkor",
     actions: {
       more: {
@@ -1714,6 +1715,11 @@ export default {
     },
   },
   DisplayTokenComponent: {
+    title: {
+      send: "Skicka ecash",
+      sent: "Skickad ecash",
+      received: "Mottagen ecash",
+    },
     qr_speed: "QR-hastighet: {value}",
     qr_size: "QR-storlek: {value}",
     speed: {

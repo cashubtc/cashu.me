@@ -766,6 +766,7 @@ export default {
     },
   },
   WelcomeSlide4: {
+    english_only: "ข้อความทางกฎหมายมีให้เป็นภาษาอังกฤษเท่านั้น",
     title: "ข้อกำหนดการให้บริการ",
     actions: {
       more: {
@@ -1701,6 +1702,11 @@ export default {
     },
   },
   DisplayTokenComponent: {
+    title: {
+      send: "ส่ง ecash",
+      sent: "ส่ง ecash แล้ว",
+      received: "ได้รับ ecash แล้ว",
+    },
     qr_speed: "ความเร็ว QR: {value}",
     qr_size: "ขนาด QR: {value}",
     speed: {
