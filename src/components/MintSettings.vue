@@ -164,8 +164,12 @@
     <!-- Add mint section -->
     <div class="q-pt-xs q-px-sm" ref="addMintDiv">
       <div class="add-mint-container">
-        <div class="mints-section-title">
-          {{ $t("MintSettings.add.title") }}
+        <div class="section-divider q-mt-sm q-mb-md">
+          <div class="divider-line"></div>
+          <div class="divider-text">
+            {{ $t("MintSettings.add.title") }}
+          </div>
+          <div class="divider-line"></div>
         </div>
 
         <div class="add-mint-description q-mb-md text-left text-app-muted">
@@ -226,8 +230,12 @@
     <!-- Swap section -->
 
     <div v-if="mints.length > 1" class="q-px-sm q-pb-lg text-left swap-section">
-      <div class="mints-section-title">
-        {{ $t("MintSettings.swap.title") }}
+      <div class="section-divider q-mt-sm">
+        <div class="divider-line"></div>
+        <div class="divider-text">
+          {{ $t("MintSettings.swap.title") }}
+        </div>
+        <div class="divider-line"></div>
       </div>
       <div class="swap-caption q-mb-md">
         {{ $t("MintSettings.swap.caption") }}
@@ -644,14 +652,6 @@ export default defineComponent({
 </script>
 
 <style>
-.mints-section-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--app-text);
-  text-align: start;
-  margin: 8px 0 8px;
-}
-
 .add-mint-submit {
   min-height: 48px;
   font-size: 15px;
@@ -729,13 +729,5 @@ export default defineComponent({
 .add-mint-actions {
   width: 100%;
   margin-top: 16px;
-}
-
-/* Section Divider */
-.section-divider {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  margin-bottom: 24px;
 }
 </style>

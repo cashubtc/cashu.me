@@ -210,8 +210,13 @@ body,
   white-space: nowrap;
 }
 
-// Section label between hairlines (Mints tab, mint details, discovery).
-// Sentence case, like the settings section titles.
+// Section label centred between two hairlines, in small capitals, as in the original design
+// (Mints tab, mint details, multi-mint payments).
+.section-divider {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
 .divider-line {
   flex: 1;
   height: 1px;
@@ -219,9 +224,18 @@ body,
 }
 .divider-text {
   padding: 0 12px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--app-text-muted);
+}
+// Chinese, Japanese and Korean have no capitals, and tracking only spreads the characters.
+.divider-text:lang(zh),
+.divider-text:lang(ja),
+.divider-text:lang(ko) {
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 // Captions read evenly at body sizes without Quasar's positive tracking.

@@ -590,34 +590,6 @@ export default defineComponent({
   font-weight: 500;
 }
 
-/* Section headers: centred between two hairlines, as in the original design, in the quiet
-   label style of the rows below. */
-.section-divider {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-}
-.section-divider .divider-line {
-  flex: 1;
-  height: 1px;
-  background: var(--app-border);
-}
-.section-divider .divider-text {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--app-text-muted);
-}
-/* Chinese, Japanese and Korean have no capitals, and tracking only spreads the characters. */
-.section-divider .divider-text:lang(zh),
-.section-divider .divider-text:lang(ja),
-.section-divider .divider-text:lang(ko) {
-  letter-spacing: 0;
-  text-transform: none;
-}
-
 /* Contact Section */
 .contact-section {
   width: 100%;

@@ -1089,13 +1089,6 @@ export default defineComponent({
   color: var(--app-text-muted);
 }
 
-/* Section Divider */
-.section-divider {
-  display: flex;
-  align-items: center;
-  width: 100%;
-}
-
 /* Mint Selection Section */
 .mint-selection-section {
   width: 100%;
