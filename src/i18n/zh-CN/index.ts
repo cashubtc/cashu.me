@@ -980,7 +980,7 @@ export default {
           label: "到",
         },
         amount: {
-          label: "金额 ({ ticker })",
+          label: "金额（{ ticker }）",
         },
       },
       actions: {
@@ -1016,7 +1016,7 @@ export default {
     create_invoice_title: "创建发票",
     inputs: {
       amount: {
-        label: "金额 ({ ticker }) *",
+        label: "金额（{ ticker }） *",
       },
     },
     actions: {
@@ -1067,7 +1067,7 @@ export default {
     badge_offline_text: "离线",
     inputs: {
       amount: {
-        label: "金额 ({ ticker }) *",
+        label: "金额（{ ticker }） *",
         invalid_too_much_error_text: "太多了",
       },
       p2pk_pubkey: {
@@ -1504,7 +1504,7 @@ export default {
       sending_to_lightning_address: "发送至 { address }",
       inputs: {
         amount: {
-          label: "金额 ({ ticker }) *",
+          label: "金额（{ ticker }） *",
         },
         comment: {
           label: "评论 (可选)",

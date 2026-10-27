@@ -295,7 +295,7 @@ export default defineComponent({
   font-size: 15px;
   line-height: 1.5;
   font-weight: 400;
-  font-family: "Inter", sans-serif;
+  font-family: inherit;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.25s ease, visibility 0s linear 0.25s;

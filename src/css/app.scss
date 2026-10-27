@@ -11,6 +11,14 @@ body {
     "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans",
     "Helvetica Neue", sans-serif;
 }
+// Form controls don't inherit the page font by default, so Arabic in inputs and their
+// placeholders fell back to a different system face; they use the app's stack too.
+input,
+textarea,
+select,
+button {
+  font-family: inherit;
+}
 // Arabic script needs no letter-spacing (it breaks joining).
 :lang(ar) * {
   letter-spacing: 0 !important;

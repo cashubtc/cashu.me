@@ -349,8 +349,7 @@ export default defineComponent({
 
 .discover-title {
   font-size: 15.2px;
-  font-family: Inter, -apple-system, "system-ui", "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  font-family: inherit;
   font-weight: 600;
   color: var(--app-text);
   margin: 0 0 8px 0;

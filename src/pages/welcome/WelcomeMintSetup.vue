@@ -271,8 +271,7 @@ export default {
 
 .section-title {
   font-size: 15.2px;
-  font-family: Inter, -apple-system, "system-ui", "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  font-family: inherit;
   font-weight: 600;
   color: #ffffff;
   margin: 0 0 16px 0;
@@ -302,8 +301,7 @@ export default {
 
 .mint-name {
   font-size: 15.2px;
-  font-family: Inter, -apple-system, "system-ui", "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  font-family: inherit;
   font-weight: 600;
   color: #ffffff;
   margin: 0 0 4px 0;

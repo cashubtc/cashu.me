@@ -714,7 +714,7 @@ export default defineComponent({
 
 .mint-input {
   width: 100%;
-  font-family: "Inter", sans-serif;
+  font-family: inherit;
 }
 
 .mint-input .q-field__control {
@@ -725,7 +725,7 @@ export default defineComponent({
 .mint-input .q-field__native,
 .mint-input .q-field__input,
 .mint-input .q-placeholder {
-  font-family: "Inter", sans-serif;
+  font-family: inherit;
 }
 
 .add-mint-actions {
