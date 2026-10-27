@@ -33,6 +33,7 @@
               dense
               round
               icon="chevron_left"
+              class="rtl-flip"
               color="grey"
               :aria-label="$t('PaymentRequestDialog.actions.previous.label')"
               @click="stepRequest(-1)"
@@ -46,6 +47,7 @@
               dense
               round
               icon="chevron_right"
+              class="rtl-flip"
               color="grey"
               :aria-label="$t('PaymentRequestDialog.actions.next.label')"
               @click="stepRequest(1)"
