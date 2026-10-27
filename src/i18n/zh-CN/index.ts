@@ -921,6 +921,7 @@ export default {
     },
   },
   MintSettings: {
+    see_reviews: "查看评价",
     add: {
       title: "添加 Mint",
       description: "输入 Cashu Mint 的 URL 以连接。此钱包不隶属于任何 Mint。",

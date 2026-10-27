@@ -938,6 +938,7 @@ export default {
     },
   },
   MintSettings: {
+    see_reviews: "Visa recensioner",
     add: {
       title: "Lägg till mint",
       description:

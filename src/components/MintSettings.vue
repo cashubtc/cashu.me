@@ -131,8 +131,13 @@
                         )
                       }}
                     </template>
-                    <template v-else>{{
+                    <!-- Only a mint already looked up on Nostr can honestly say it has no
+                         reviews; one never looked up offers a neutral link instead. -->
+                    <template v-else-if="getRecommendation(mint.url)">{{
                       $t("MintSettings.no_reviews_yet")
+                    }}</template>
+                    <template v-else>{{
+                      $t("MintSettings.see_reviews")
                     }}</template>
                   </button>
                 </div>

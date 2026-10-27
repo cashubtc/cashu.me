@@ -949,6 +949,7 @@ export default {
     },
   },
   MintSettings: {
+    see_reviews: "Δείτε κριτικές",
     add: {
       title: "Προσθήκη mint",
       description:

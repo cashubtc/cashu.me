@@ -951,6 +951,7 @@ export default {
     },
   },
   MintSettings: {
+    see_reviews: "Yorumları gör",
     add: {
       title: "Mint ekle",
       description:

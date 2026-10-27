@@ -930,6 +930,7 @@ export default {
     },
   },
   MintSettings: {
+    see_reviews: "ดูรีวิว",
     add: {
       title: "เพิ่ม Mint",
       description:

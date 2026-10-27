@@ -935,6 +935,7 @@ export default {
     },
   },
   MintSettings: {
+    see_reviews: "レビューを見る",
     add: {
       title: "ミントを追加",
       description:

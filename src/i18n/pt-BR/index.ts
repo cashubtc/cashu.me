@@ -969,6 +969,7 @@ export default {
     },
   },
   MintSettings: {
+    see_reviews: "Ver avaliações",
     add: {
       title: "Adicionar mint",
       description:

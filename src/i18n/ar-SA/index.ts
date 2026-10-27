@@ -930,6 +930,7 @@ export default {
     },
   },
   MintSettings: {
+    see_reviews: "عرض المراجعات",
     add: {
       title: "إضافة مِنْت",
       description:

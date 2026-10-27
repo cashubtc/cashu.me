@@ -972,6 +972,7 @@ export default {
   },
 
   MintSettings: {
+    see_reviews: "Zobrazit recenze",
     add: {
       title: "Přidat mint",
       description:

@@ -962,6 +962,7 @@ export default {
     },
   },
   MintSettings: {
+    see_reviews: "See reviews",
     add: {
       title: "Add mint",
       description:
