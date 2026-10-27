@@ -1258,13 +1258,15 @@ body .q-notification {
   padding: 6px 6px 6px 14px;
   padding-inline: 14px 6px;
 }
-// Quasar sets a physical right margin on the icon; replace it with the inline-end gap
-// (physical sides first, then the logical one, so the logical one wins in both directions).
+// Quasar sets a physical right margin on the icon. Material icons force direction: ltr on
+// themselves, so the gap goes on the message's inline start instead, which mirrors.
 body .q-notification .q-notification__icon {
   font-size: 22px;
   margin-left: 0 !important;
   margin-right: 0 !important;
-  margin-inline-end: 12px !important;
+}
+body .q-notification .q-notification__icon + .q-notification__message {
+  margin-inline-start: 12px;
 }
 body .q-notification.bg-positive .q-notification__icon {
   color: var(--q-positive);
