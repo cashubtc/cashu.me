@@ -74,8 +74,20 @@ function resolveEffectiveTopBackgroundColor() {
     if (isTransparent(color)) {
       color = getBg(document.body);
     }
+    if (isTransparent(color)) {
+      color = getBg(document.documentElement);
+    }
   }
-  return color || "#000000";
+  return isTransparent(color) ? "#000000" : color;
+}
+
+// index.html paints the document (and the splash) black or white from the saved mode before
+// the app loads. Keep it in step with the mode: it shows behind every sheet's scrim, so a
+// stale black made light mode look broken until a reload (R46).
+function syncDocumentBackground(isDark) {
+  const bg = isDark ? "#000000" : "#ffffff";
+  document.documentElement.style.backgroundColor = bg;
+  document.documentElement.style.setProperty("--cashu-splash-bg", bg);
 }
 
 function updateStatusBarMeta() {
@@ -121,6 +133,7 @@ window.windowMixin = {
     toggleDarkMode: function () {
       this.$q.dark.toggle();
       this.$q.localStorage.set("cashu.darkMode", this.$q.dark.isActive);
+      syncDocumentBackground(this.$q.dark.isActive);
       // The browser/PWA top bar takes its colour from the page header. Read it again once the
       // new mode has painted: read at once it could keep the old mode's colour until a reload
       // (R46: "light theme only seems to work after refresh").
@@ -229,6 +242,7 @@ window.windowMixin = {
     } else {
       this.$q.dark.set(true);
     }
+    syncDocumentBackground(this.$q.dark.isActive);
     this.g.allowedThemes = window.allowedThemes ?? ["classic"];
 
     addEventListener("offline", (event) => {
