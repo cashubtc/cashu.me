@@ -850,6 +850,7 @@ export default {
     text: "Scan for unspent proofs on your configured mints and add them to your wallet.",
   },
   MintRatings: {
+    web_of_trust_caption: "Only count reviews from people you trust",
     web_of_trust_hop: "In your web of trust (hop {hop})",
     no_mint_url: "No mint URL provided",
     title: "Mint reviews",
@@ -1314,7 +1315,7 @@ export default {
     },
     actions: {
       copy: {
-        label: "@:global.actions.copy.label",
+        label: "Copy public key",
       },
       close: {
         label: "@:global.actions.close.label",
@@ -1410,7 +1411,7 @@ export default {
         label: "URL",
       },
       nuts: {
-        label: "Supported NUTs",
+        label: "Supported features",
         actions: {
           show: {
             label: "View all",

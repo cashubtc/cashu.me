@@ -813,6 +813,7 @@ export default {
     text: "扫描您配置的 Mint 上未花费的证明，并将其添加到您的钱包。",
   },
   MintRatings: {
+    web_of_trust_caption: "只统计你信任网络中的人的评价",
     web_of_trust_hop: "在您的信任网络中（第 {hop} 跳）",
     no_mint_url: "未提供 Mint URL",
     title: "Mint 评价",
@@ -1240,7 +1241,7 @@ export default {
     },
     actions: {
       copy: {
-        label: "@:global.actions.copy.label",
+        label: "复制公钥",
       },
       close: {
         label: "@:global.actions.close.label",
@@ -1335,7 +1336,7 @@ export default {
         label: "URL",
       },
       nuts: {
-        label: "支持的 NUT",
+        label: "支持的功能",
         actions: {
           show: {
             label: "显示全部",

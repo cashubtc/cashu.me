@@ -821,6 +821,7 @@ export default {
     text: "ابحث عن البراهين غير المصروفة على المِنْت المُكوَّنة لديك وأضِفها إلى محفظتك.",
   },
   MintRatings: {
+    web_of_trust_caption: "احتساب مراجعات الأشخاص في شبكة ثقتك فقط",
     web_of_trust_hop: "ضمن شبكة الثقة الخاصة بك (القفزة {hop})",
     no_mint_url: "لم يُقدَّم عنوان URL للمِنْت",
     title: "مراجعات المِنْت",
@@ -1252,7 +1253,7 @@ export default {
     },
     actions: {
       copy: {
-        label: "@:global.actions.copy.label",
+        label: "نسخ المفتاح العام",
       },
       close: {
         label: "@:global.actions.close.label",
@@ -1348,7 +1349,7 @@ export default {
         label: "URL",
       },
       nuts: {
-        label: "NUTs المدعومة",
+        label: "الميزات المدعومة",
         actions: {
           show: {
             label: "عرض الكل",

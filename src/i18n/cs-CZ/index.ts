@@ -857,6 +857,7 @@ export default {
     text: "Skenujte nevyužité proofy na nakonfigurovaných mintech a přidejte je do peněženky.",
   },
   MintRatings: {
+    web_of_trust_caption: "Počítat jen recenze od lidí z vaší sítě důvěry",
     web_of_trust_hop: "Ve vaší síti důvěry (skok {hop})",
     no_mint_url: "Nebyla zadána URL mintu",
     title: "Recenze mintu",
@@ -1333,7 +1334,7 @@ export default {
     },
     actions: {
       copy: {
-        label: "@:global.actions.copy.label",
+        label: "Kopírovat veřejný klíč",
       },
       close: {
         label: "@:global.actions.close.label",
@@ -1434,7 +1435,7 @@ export default {
         label: "URL",
       },
       nuts: {
-        label: "Podporované NUTy",
+        label: "Podporované funkce",
         actions: {
           show: {
             label: "Zobrazit vše",

@@ -824,6 +824,7 @@ export default {
     text: "設定済みミントで未使用のproofをスキャンし、ウォレットに追加します。",
   },
   MintRatings: {
+    web_of_trust_caption: "信頼の輪の人のレビューだけを数える",
     web_of_trust_hop: "あなたの信頼の輪の中（{hop} ホップ）",
     no_mint_url: "ミントの URL が指定されていません",
     title: "ミントのレビュー",
@@ -1261,7 +1262,7 @@ export default {
     },
     actions: {
       copy: {
-        label: "@:global.actions.copy.label",
+        label: "公開鍵をコピー",
       },
       close: {
         label: "@:global.actions.close.label",
@@ -1357,7 +1358,7 @@ export default {
         label: "URL",
       },
       nuts: {
-        label: "対応 NUT",
+        label: "対応機能",
         actions: {
           show: {
             label: "すべて表示",

@@ -841,6 +841,8 @@ export default {
     text: "Recherchez les preuves non dépensées sur vos mints configurés et ajoutez-les à votre portefeuille.",
   },
   MintRatings: {
+    web_of_trust_caption:
+      "Ne compter que les avis des personnes de votre réseau de confiance",
     web_of_trust_hop: "Dans votre réseau de confiance (saut {hop})",
     no_mint_url: "Aucune URL de mint fournie",
     title: "Avis sur la mint",
@@ -1282,7 +1284,7 @@ export default {
     },
     actions: {
       copy: {
-        label: "@:global.actions.copy.label",
+        label: "Copier la clé publique",
       },
       close: {
         label: "@:global.actions.close.label",
@@ -1378,7 +1380,7 @@ export default {
         label: "URL",
       },
       nuts: {
-        label: "NUTs pris en charge",
+        label: "Fonctionnalités prises en charge",
         actions: {
           show: {
             label: "Tout afficher",

@@ -855,6 +855,8 @@ export default {
     text: "Busque provas não gastas nos seus mints configurados e adicione-as à sua carteira.",
   },
   MintRatings: {
+    web_of_trust_caption:
+      "Contar apenas avaliações de pessoas da sua rede de confiança",
     web_of_trust_hop: "Na sua rede de confiança (salto {hop})",
     no_mint_url: "Nenhuma URL de mint fornecida",
     title: "Avaliações do mint",
@@ -1321,7 +1323,7 @@ export default {
     },
     actions: {
       copy: {
-        label: "@:global.actions.copy.label",
+        label: "Copiar chave pública",
       },
       close: {
         label: "@:global.actions.close.label",
@@ -1417,7 +1419,7 @@ export default {
         label: "URL",
       },
       nuts: {
-        label: "NUTs suportados",
+        label: "Recursos compatíveis",
         actions: {
           show: {
             label: "Ver todos",

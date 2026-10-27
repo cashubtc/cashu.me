@@ -838,6 +838,8 @@ export default {
     text: "Scannen Sie nach nicht ausgegebenen Nachweisen auf Ihren konfigurierten Mints und fügen Sie sie Ihrer Wallet hinzu.",
   },
   MintRatings: {
+    web_of_trust_caption:
+      "Nur Bewertungen von Personen in deinem Web of Trust zählen",
     web_of_trust_hop: "In deinem Vertrauensnetz (Hop {hop})",
     no_mint_url: "Keine Mint-URL angegeben",
     title: "Mint-Bewertungen",
@@ -1280,7 +1282,7 @@ export default {
     },
     actions: {
       copy: {
-        label: "@:global.actions.copy.label",
+        label: "Öffentlichen Schlüssel kopieren",
       },
       close: {
         label: "@:global.actions.close.label",
@@ -1376,7 +1378,7 @@ export default {
         label: "URL",
       },
       nuts: {
-        label: "Unterstützte NUTs",
+        label: "Unterstützte Funktionen",
         actions: {
           show: {
             label: "Alle anzeigen",

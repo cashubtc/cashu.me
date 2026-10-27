@@ -68,16 +68,24 @@
             </div>
           </div>
         </div>
-        <!-- The web-of-trust filter on its own row, at the end edge, as a settings switch. -->
-        <div class="col-12 row items-center justify-end ratings-filter-row">
+        <!-- The web-of-trust filter as a full-width settings row: what it does on the start
+             side, the switch at the end (R53: a bare end-aligned switch read as orphaned). -->
+        <label class="col-12 row items-center no-wrap ratings-filter-row">
+          <div class="col">
+            <div class="ratings-filter-row__title">
+              {{ $t("Settings.web_of_trust.title") }}
+            </div>
+            <div class="ratings-filter-row__caption">
+              {{ $t("MintRatings.web_of_trust_caption") }}
+            </div>
+          </div>
           <q-toggle
             v-model="filterByWoT"
             color="primary"
-            left-label
-            :label="$t('Settings.web_of_trust.title')"
             class="ratings-wot-toggle"
+            :aria-label="$t('Settings.web_of_trust.title')"
           />
-        </div>
+        </label>
       </div>
 
       <!-- No Reviews State -->
@@ -114,17 +122,18 @@
             />
           </div>
         </div>
-        <div class="row items-center justify-end ratings-filter-row">
-          <!-- Label and switch, at the switch's own size; the row keeps its 40px height. -->
-          <div class="row items-center no-wrap" style="gap: 12px; height: 40px">
-            <q-skeleton type="rect" width="88px" height="14px" />
-            <q-skeleton
-              type="rect"
-              width="40px"
-              height="24px"
-              style="border-radius: 12px"
-            />
+        <!-- Same row as the loaded filter: title and caption, then the switch at the end. -->
+        <div class="row items-center no-wrap ratings-filter-row">
+          <div class="col column" style="gap: 6px">
+            <q-skeleton type="rect" width="96px" height="14px" />
+            <q-skeleton type="rect" width="70%" height="12px" />
           </div>
+          <q-skeleton
+            type="rect"
+            width="40px"
+            height="24px"
+            style="border-radius: 12px"
+          />
         </div>
       </div>
       <div v-else class="q-mb-lg">
@@ -748,6 +757,22 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.ratings-filter-row {
+  cursor: pointer;
+  gap: 16px;
+}
+.ratings-filter-row__title {
+  color: var(--app-text);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 20px;
+}
+.ratings-filter-row__caption {
+  color: var(--app-text-muted);
+  font-size: 13px;
+  line-height: 18px;
+  margin-top: 2px;
+}
 .section-card {
   background-color: var(--app-tint);
   border-radius: 12px;

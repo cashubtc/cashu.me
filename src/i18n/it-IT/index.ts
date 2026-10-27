@@ -808,6 +808,8 @@ export default {
     text: "Scansiona le proofs non spese sui mints configurati e aggiungile al tuo portafoglio.",
   },
   MintRatings: {
+    web_of_trust_caption:
+      "Conta solo le recensioni delle persone nella tua rete di fiducia",
     web_of_trust_hop: "Nella tua rete di fiducia (salto {hop})",
     no_mint_url: "Nessun URL del mint fornito",
     title: "Recensioni del mint",
@@ -1243,7 +1245,7 @@ export default {
     },
     actions: {
       copy: {
-        label: "@:global.actions.copy.label",
+        label: "Copia chiave pubblica",
       },
       close: {
         label: "@:global.actions.close.label",
@@ -1339,7 +1341,7 @@ export default {
         label: "URL",
       },
       nuts: {
-        label: "NUT supportati",
+        label: "Funzioni supportate",
         actions: {
           show: {
             label: "Vedi tutto",

@@ -840,6 +840,7 @@ export default {
     text: "Yapılandırılmış mintlerinizde harcanmamış kanıtları tarayın ve cüzdanınıza ekleyin.",
   },
   MintRatings: {
+    web_of_trust_caption: "Yalnızca güven ağındaki kişilerin yorumlarını say",
     web_of_trust_hop: "Güven ağınızda ({hop}. adım)",
     no_mint_url: "Mint URL'si belirtilmedi",
     title: "Mint yorumları",
@@ -1276,7 +1277,7 @@ export default {
     },
     actions: {
       copy: {
-        label: "@:global.actions.copy.label",
+        label: "Açık anahtarı kopyala",
       },
       close: {
         label: "@:global.actions.close.label",
@@ -1372,7 +1373,7 @@ export default {
         label: "URL",
       },
       nuts: {
-        label: "Desteklenen NUT'lar",
+        label: "Desteklenen özellikler",
         actions: {
           show: {
             label: "Tümünü görüntüle",

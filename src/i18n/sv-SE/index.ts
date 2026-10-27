@@ -827,6 +827,8 @@ export default {
     text: "Sök efter ospenderade proofs på dina konfigurerade mints och lägg till dem i plånboken.",
   },
   MintRatings: {
+    web_of_trust_caption:
+      "Räkna bara recensioner från personer i ditt förtroendenätverk",
     web_of_trust_hop: "I ditt förtroendenätverk (steg {hop})",
     no_mint_url: "Ingen mint-URL angiven",
     title: "Mint-recensioner",
@@ -1263,7 +1265,7 @@ export default {
     },
     actions: {
       copy: {
-        label: "@:global.actions.copy.label",
+        label: "Kopiera publik nyckel",
       },
       close: {
         label: "@:global.actions.close.label",
@@ -1359,7 +1361,7 @@ export default {
         label: "URL",
       },
       nuts: {
-        label: "NUTs som stöds",
+        label: "Funktioner som stöds",
         actions: {
           show: {
             label: "Visa alla",

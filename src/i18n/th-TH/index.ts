@@ -822,6 +822,7 @@ export default {
     text: "สแกนหา proof ที่ยังไม่ถูกใช้บน Mint ที่กำหนดค่าไว้และเพิ่มลงในกระเป๋าเงินของคุณ",
   },
   MintRatings: {
+    web_of_trust_caption: "นับเฉพาะรีวิวจากคนในเครือข่ายความไว้วางใจของคุณ",
     web_of_trust_hop: "อยู่ในเครือข่ายความเชื่อถือของคุณ (ลำดับ {hop})",
     no_mint_url: "ไม่ได้ระบุ URL ของ Mint",
     title: "รีวิว Mint",
@@ -1252,7 +1253,7 @@ export default {
     },
     actions: {
       copy: {
-        label: "@:global.actions.copy.label",
+        label: "คัดลอกกุญแจสาธารณะ",
       },
       close: {
         label: "@:global.actions.close.label",
@@ -1348,7 +1349,7 @@ export default {
         label: "URL",
       },
       nuts: {
-        label: "NUT ที่รองรับ",
+        label: "ฟีเจอร์ที่รองรับ",
         actions: {
           show: {
             label: "แสดงทั้งหมด",

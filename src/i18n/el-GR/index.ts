@@ -837,6 +837,8 @@ export default {
     text: "Σαρώστε για μη δαπανημένες αποδείξεις (proofs) στα ρυθμισμένα mints και προσθέστε τες στο πορτοφόλι σας.",
   },
   MintRatings: {
+    web_of_trust_caption:
+      "Μέτρηση μόνο κριτικών από άτομα του δικτύου εμπιστοσύνης σας",
     web_of_trust_hop: "Στο δίκτυο εμπιστοσύνης σας (βήμα {hop})",
     no_mint_url: "Δεν δόθηκε URL mint",
     title: "Κριτικές mint",
@@ -1274,7 +1276,7 @@ export default {
     },
     actions: {
       copy: {
-        label: "@:global.actions.copy.label",
+        label: "Αντιγραφή δημόσιου κλειδιού",
       },
       close: {
         label: "@:global.actions.close.label",
@@ -1370,7 +1372,7 @@ export default {
         label: "URL",
       },
       nuts: {
-        label: "Υποστηριζόμενα NUT",
+        label: "Υποστηριζόμενες λειτουργίες",
         actions: {
           show: {
             label: "Προβολή όλων",

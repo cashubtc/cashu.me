@@ -833,6 +833,8 @@ export default {
     text: "Busca comprobantes no gastados en tus mints configurados y agrégalos a tu billetera.",
   },
   MintRatings: {
+    web_of_trust_caption:
+      "Contar solo reseñas de personas de tu red de confianza",
     web_of_trust_hop: "En tu red de confianza (salto {hop})",
     no_mint_url: "No se proporcionó la URL del mint",
     title: "Reseñas del mint",
@@ -1270,7 +1272,7 @@ export default {
     },
     actions: {
       copy: {
-        label: "@:global.actions.copy.label",
+        label: "Copiar clave pública",
       },
       close: {
         label: "@:global.actions.close.label",
@@ -1366,7 +1368,7 @@ export default {
         label: "URL",
       },
       nuts: {
-        label: "NUTs compatibles",
+        label: "Funciones compatibles",
         actions: {
           show: {
             label: "Ver todo",
