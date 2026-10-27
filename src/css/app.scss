@@ -1316,6 +1316,14 @@ body .q-notification .q-notification__actions {
   padding-bottom: 0 !important;
   padding-top: 0 !important;
 }
+// Quasar pulls the close button to the card edge with a physical right margin, so in rtl it
+// sat 16px further in than in ltr; the logical sides keep the inset the same both ways.
+body .q-notification--standard .q-notification__actions {
+  margin-right: 0;
+  margin-inline-end: -8px;
+  padding-left: 0;
+  padding-inline-start: 8px;
+}
 body .q-notification .q-notification__actions .q-icon {
   font-size: 20px;
 }
