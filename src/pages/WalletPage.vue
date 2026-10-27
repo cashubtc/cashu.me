@@ -17,13 +17,14 @@
           @click="showReceiveDialog = true"
         />
         <q-btn
+          flat
+          dense
           round
-          unelevated
           class="wallet-scan-btn"
           :aria-label="$t('global.actions.scan.label')"
           @click="showCamera"
         >
-          <ScanIcon :size="24" />
+          <ScanIcon :size="22" />
         </q-btn>
         <q-btn
           unelevated
@@ -225,12 +226,10 @@
 }
 
 .wallet-scan-btn {
-  background: var(--app-tint);
-  border: 1px solid var(--app-border-strong);
   color: var(--app-text);
   flex: 0 0 auto;
-  height: 52px;
-  width: 52px;
+  height: 44px;
+  width: 44px;
 }
 </style>
 <script lang="ts">
