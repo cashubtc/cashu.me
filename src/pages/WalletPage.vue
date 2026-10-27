@@ -24,7 +24,7 @@
           :aria-label="$t('global.actions.scan.label')"
           @click="showCamera"
         >
-          <ScanIcon :size="22" />
+          <ScanIcon :size="26" />
         </q-btn>
         <q-btn
           unelevated
@@ -228,8 +228,8 @@
 .wallet-scan-btn {
   color: var(--app-text);
   flex: 0 0 auto;
-  height: 44px;
-  width: 44px;
+  height: 52px;
+  width: 52px;
 }
 </style>
 <script lang="ts">
