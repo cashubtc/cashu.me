@@ -414,6 +414,9 @@ export default defineComponent({
 }
 /* The picker belongs to the balance group: no extra gap before the action row (R17). */
 .wallet-mint-picker {
+  margin-inline: auto;
+  max-width: var(--app-column);
   padding-bottom: 0 !important;
+  padding-inline: 16px;
 }
 </style>

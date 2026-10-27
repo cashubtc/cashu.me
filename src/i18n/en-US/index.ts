@@ -1696,6 +1696,7 @@ export default {
     token_copied: "Token copied to clipboard",
   },
   QuoteInformation: {
+    address: "Address",
     amount: "Amount",
     fee_reserve: "Fee reserve",
     fee_paid: "Fee paid",

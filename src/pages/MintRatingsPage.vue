@@ -1,5 +1,6 @@
 <template>
-  <SettingsPageShell :title="$t('MintRatings.title')">
+  <!-- No page title: the mint header below names the page (user direction, R46). -->
+  <SettingsPageShell>
     <MintRatingsComponent
       v-if="mintUrl"
       :url="mintUrl"

@@ -1663,6 +1663,7 @@ export default {
     invalid_url: "رابط غير صالح",
   },
   QuoteInformation: {
+    address: "العنوان",
     amount: "المبلغ",
     fee_reserve: "احتياطي الرسوم",
     fee_paid: "الرسوم المدفوعة",

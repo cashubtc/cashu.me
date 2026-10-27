@@ -1651,6 +1651,7 @@ export default {
     invalid_url: "无效的网址",
   },
   QuoteInformation: {
+    address: "地址",
     amount: "金额",
     fee_reserve: "预留手续费",
     fee_paid: "已付手续费",

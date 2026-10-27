@@ -16,22 +16,7 @@
       >
         <!-- Header -->
         <div class="row items-center q-pa-md sheet-column-header">
-          <!-- From the amount step back to the address or offer it came from, as in the
-               onboarding (user direction, R44); otherwise close. -->
           <q-btn
-            v-if="canReturnToPreview"
-            flat
-            round
-            color="grey"
-            class="floating-close-btn"
-            data-testid="invoice-amount-back"
-            :aria-label="$t('common.back')"
-            @click="returnToPreview"
-          >
-            <ChevronLeftIcon :size="24" />
-          </q-btn>
-          <q-btn
-            v-else
             v-close-popup
             flat
             round
@@ -138,7 +123,7 @@
                     class="qr-container cursor-pointer"
                     @click="copyQrPreview"
                   >
-                    <q-responsive :ratio="1" class="q-mx-none">
+                    <q-responsive :ratio="1" class="app-qr">
                       <vue-qrcode
                         :value="qrPreview.value"
                         :options="{ width: 400 }"
@@ -183,35 +168,41 @@
                 {{ $t("CreateInvoiceDialog.checking_address") }}
               </div>
             </div>
-            <AmountInputComponent
+            <!-- A plain keyed wrapper: the out-in transition then leaves a DOM element it can
+                 track, so going back to the address or offer mounts its QR (R46). -->
+            <div
               v-else-if="showAmountInput"
               key="amount-input"
-              class="q-my-auto"
-              v-model="invoiceData.amount"
-              :enabled="!isOnchain || !createInvoiceButtonBlocked"
-              :muted="showOnchainAmountWarning"
-              :show-fiat-conversion="!showOnchainAmountWarning"
-              @enter="requestMintButton"
-              @fiat-mode-changed="fiatKeyboardMode = $event"
+              class="amount-step column justify-center q-my-auto"
             >
-              <template #overlay>
-                <div
-                  v-if="showOnchainAmountWarning"
-                  class="amount-warning-badge"
-                  role="status"
-                  data-testid="onchain-amount-error"
-                >
-                  <transition name="wobble" mode="out-in" appear>
-                    <span
-                      :key="'warn-text-' + String(invoiceData.amount ?? '')"
-                      class="text-caption text-weight-medium text-grey-6 amount-warning-text"
-                    >
-                      {{ onchainAmountError }}
-                    </span>
-                  </transition>
-                </div>
-              </template>
-            </AmountInputComponent>
+              <AmountInputComponent
+                class="q-my-auto"
+                v-model="invoiceData.amount"
+                :enabled="!isOnchain || !createInvoiceButtonBlocked"
+                :muted="showOnchainAmountWarning"
+                :show-fiat-conversion="!showOnchainAmountWarning"
+                @enter="requestMintButton"
+                @fiat-mode-changed="fiatKeyboardMode = $event"
+              >
+                <template #overlay>
+                  <div
+                    v-if="showOnchainAmountWarning"
+                    class="amount-warning-badge"
+                    role="status"
+                    data-testid="onchain-amount-error"
+                  >
+                    <transition name="wobble" mode="out-in" appear>
+                      <span
+                        :key="'warn-text-' + String(invoiceData.amount ?? '')"
+                        class="text-caption text-weight-medium text-grey-6 amount-warning-text"
+                      >
+                        {{ onchainAmountError }}
+                      </span>
+                    </transition>
+                  </div>
+                </template>
+              </AmountInputComponent>
+            </div>
           </transition>
         </div>
 
@@ -258,9 +249,25 @@
             </div>
           </div>
 
-          <!-- Primary action (Add amount / Create) -->
+          <!-- Primary action (Add amount / Create). From an amount step opened on an address,
+               offer or Lightning address, a back chevron sits before it, as in the onboarding
+               footer (user direction, R46); the header keeps its close button. -->
           <div class="row justify-center q-pb-lg q-pt-sm">
-            <div class="col-12 q-px-md" style="max-width: var(--app-column)">
+            <div
+              class="col-12 q-px-md row no-wrap items-center flow-footer"
+              style="max-width: var(--app-column)"
+            >
+              <q-btn
+                v-if="canReturnToPreview"
+                flat
+                round
+                class="flow-footer__back"
+                data-testid="invoice-amount-back"
+                :aria-label="$t('common.back')"
+                @click="returnToPreview"
+              >
+                <ChevronLeftIcon :size="24" class="rtl-flip" />
+              </q-btn>
               <q-btn
                 v-if="showNpubCashPreview"
                 class="full-width"
@@ -910,6 +917,17 @@ export default defineComponent({
 });
 </script>
 <style scoped>
+.flow-footer {
+  gap: 12px;
+}
+.flow-footer > .q-btn:not(.flow-footer__back) {
+  flex: 1;
+}
+.flow-footer__back {
+  flex: none;
+  height: 48px;
+  width: 48px;
+}
 .keypad-wrapper--busy {
   opacity: 0.4;
   pointer-events: none;

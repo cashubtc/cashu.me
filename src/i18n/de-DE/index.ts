@@ -1693,6 +1693,7 @@ export default {
     invalid_url: "Ungültige URL",
   },
   QuoteInformation: {
+    address: "Adresse",
     amount: "Betrag",
     fee_reserve: "Gebührenreserve",
     fee_paid: "Gezahlte Gebühr",

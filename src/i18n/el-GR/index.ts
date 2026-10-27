@@ -1687,6 +1687,7 @@ export default {
     invalid_url: "Μη έγκυρο URL",
   },
   QuoteInformation: {
+    address: "Διεύθυνση",
     amount: "Ποσό",
     fee_reserve: "Αποθεματικό τελών",
     fee_paid: "Τέλος που πληρώθηκε",

@@ -120,68 +120,66 @@
             :key="rec.url"
             class="q-px-none q-mb-md"
           >
+            <!-- The installed mints' card (user direction, R46): identity row with its action
+                 on the right, then the rating on the card's right edge. -->
             <q-item
               class="mint-card"
-              :class="{ dimmed: isFetchingMintInfo(rec.url) }"
               :style="{
-                'border-radius': '10px',
+                'border-radius': '12px',
                 border: '1px solid var(--app-border-strong)',
                 padding: '0px',
-                position: 'relative',
               }"
             >
-              <div class="full-width" style="position: relative">
-                <!-- Centered spinner overlay -->
-                <div v-if="isFetchingMintInfo(rec.url)" class="spinner-overlay">
-                  <q-spinner-dots size="34px" color="grey-5" />
+              <div class="mint-card__body">
+                <div class="mint-card__head">
+                  <MintInfoContainer
+                    class="col"
+                    :iconUrl="getMintIconUrlUrl(rec.url) || undefined"
+                    :name="getMintDisplayName(rec.url)"
+                    :url="rec.url"
+                    :loading="isFetchingMintInfo(rec.url)"
+                    :unnamed-label="$t('MintSettings.discover.unnamed')"
+                  />
+                  <q-spinner
+                    v-if="isFetchingMintInfo(rec.url)"
+                    size="18px"
+                    class="mint-card__status"
+                  />
+                  <q-btn
+                    v-else
+                    flat
+                    round
+                    dense
+                    class="mint-card-more"
+                    :aria-label="$t('global.actions.add_mint.label')"
+                    :disable="isExistingMint(rec.url)"
+                    @click="addDiscovered(rec.url)"
+                  >
+                    <PlusIcon :size="22" />
+                  </q-btn>
                 </div>
-
-                <div class="row items-center q-pa-md">
-                  <div class="col">
-                    <div class="row items-center">
-                      <MintInfoContainer
-                        :iconUrl="getMintIconUrlUrl(rec.url) || undefined"
-                        :name="getMintDisplayName(rec.url)"
-                        :url="rec.url"
-                        :loading="isFetchingMintInfo(rec.url)"
-                        :unnamed-label="$t('MintSettings.discover.unnamed')"
-                      />
-                    </div>
-                    <!-- Indented to the name column, so each card has one text edge. -->
-                    <div class="row discover-review-row">
-                      <div
-                        class="text-grey-5 q-mt-xs"
+                <div class="mint-card__foot discover-card-foot">
+                  <div class="mint-review">
+                    <button
+                      type="button"
+                      class="mint-review-link"
+                      @click.stop="openReviews(rec.url)"
+                    >
+                      <template
                         v-if="avgFor(rec.url) !== null && countFor(rec.url) > 0"
                       >
-                        <span>
-                          <q-icon name="star" size="14px" class="rating-star" />
-                          {{ (avgFor(rec.url) ?? 0).toFixed(1) }} ·
-                          {{ countFor(rec.url) }}
-                          <span
-                            class="mint-review-link cursor-pointer"
-                            @click.stop="openReviews(rec.url)"
-                            >{{
-                              $t("MintSettings.reviews_text", countFor(rec.url))
-                            }}</span
-                          >
-                        </span>
-                      </div>
-                      <div class="text-grey-7 q-mt-xs" v-else>
-                        <span>{{ $t("MintRatings.no_reviews") }}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-auto">
-                    <q-btn
-                      dense
-                      round
-                      flat
-                      icon="add"
-                      @click="addDiscovered(rec.url)"
-                      :disable="
-                        isFetchingMintInfo(rec.url) || isExistingMint(rec.url)
-                      "
-                    />
+                        <q-icon name="star" size="14px" class="rating-star" />
+                        <span class="mint-review__score">{{
+                          (avgFor(rec.url) ?? 0).toFixed(1)
+                        }}</span>
+                        <span aria-hidden="true">·</span>
+                        {{ countFor(rec.url) }}
+                        {{ $t("MintSettings.reviews_text", countFor(rec.url)) }}
+                      </template>
+                      <template v-else>{{
+                        $t("MintSettings.no_reviews_yet")
+                      }}</template>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -199,11 +197,12 @@ import { useRouter } from "vue-router";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import MintInfoContainer from "./MintInfoContainer.vue";
+import { Plus as PlusIcon } from "lucide-vue-next";
 import { notifyError, notifySuccess } from "src/js/notify";
 
 export default defineComponent({
   name: "MintDiscovery",
-  components: { MintInfoContainer },
+  components: { MintInfoContainer, PlusIcon },
   props: {
     infoTimeoutMs: { type: Number, default: 5000 },
     autoDiscover: { type: Boolean, default: false },
@@ -330,9 +329,6 @@ export default defineComponent({
 
 <style scoped>
 /* Avatar (34px) plus its 16px gap. */
-.discover-review-row {
-  padding-inline-start: 50px;
-}
 
 @import "src/css/mintlist.css";
 
@@ -440,15 +436,14 @@ export default defineComponent({
 }
 
 /* Review counts link the same way as on the mint cards. */
-.mint-review-link {
-  color: var(--app-text-muted);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
 .rating-star {
   color: var(--app-text);
   vertical-align: -2px;
+}
+
+/* The rating sits on the card's end edge, where the installed cards keep it. */
+.discover-card-foot {
+  justify-content: flex-end;
 }
 
 .discover-count {
@@ -457,21 +452,8 @@ export default defineComponent({
 }
 
 /* A row still fetching its mint info reads as loading, not disabled. */
-.mint-card.dimmed {
-  opacity: 1;
-}
 
 /* Per-row loading sits in the trailing slot, clear of the mint name and URL. */
-.spinner-overlay {
-  position: absolute;
-  top: 50%;
-  inset-inline-end: 16px;
-  transform: translateY(-50%);
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
 /* Smooth list animations for discovered mints */
 .mint-move {

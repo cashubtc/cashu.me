@@ -1696,6 +1696,7 @@ export default {
     invalid_url: "URL invalide",
   },
   QuoteInformation: {
+    address: "Adresse",
     amount: "Montant",
     fee_reserve: "Réserve de frais",
     fee_paid: "Frais payés",

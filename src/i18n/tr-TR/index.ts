@@ -1689,6 +1689,7 @@ export default {
     invalid_url: "Geçersiz URL",
   },
   QuoteInformation: {
+    address: "Adres",
     amount: "Tutar",
     fee_reserve: "Ücret rezervi",
     fee_paid: "Ödenen ücret",

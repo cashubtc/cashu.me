@@ -5,13 +5,17 @@
       class="row q-mt-xs q-mb-none"
       v-if="activeMintUrl || !requireActiveMint"
     >
-      <div class="col-12 row" :class="label ? '' : 'justify-center'">
+      <div class="col-12 row">
+        <!-- One mint field in two sizes (user direction, R46), both drawn like the outlined
+             inputs: compact (with a label: label over the name, the balance at the end) for
+             forms, and normal (no label: a 40px avatar, the name, the balance under it) for
+             the wallet and the amount sheets. -->
         <button
           type="button"
           :data-testid="testId"
-          class="mint-chip"
+          class="mint-chip mint-chip--field"
           :class="{
-            'mint-chip--field': !!label,
+            'mint-chip--card': !label,
             'mint-chip--empty': !chosenMint,
           }"
           :style="style"
@@ -22,39 +26,57 @@
           :disabled="disable"
           @click="showMintSheet = true"
         >
-          <q-avatar v-if="chosenMint?.iconUrl" size="20px">
-            <q-img :src="chosenMint.iconUrl" spinner-size="xs" />
-          </q-avatar>
-          <LandmarkIcon v-else :size="16" class="mint-chip__icon" />
-          <span v-if="label" class="mint-chip__field-text">
-            <span class="mint-chip__label">{{ label }}</span>
-            <span class="mint-chip__name">{{
+          <span class="mint-chip__avatar" aria-hidden="true">
+            <q-img
+              v-if="chosenMint?.iconUrl"
+              :src="chosenMint.iconUrl"
+              spinner-size="xs"
+              class="full-height"
+            >
+              <template v-slot:error>
+                <LandmarkIcon :size="label ? 14 : 20" class="mint-chip__icon" />
+              </template>
+            </q-img>
+            <LandmarkIcon
+              v-else
+              :size="label ? 14 : 20"
+              class="mint-chip__icon"
+            />
+          </span>
+          <span class="mint-chip__field-text">
+            <span v-if="label" class="mint-chip__label">{{ label }}</span>
+            <span class="mint-chip__name ellipsis">{{
               chosenMint?.nickname ||
               chosenMint?.shorturl ||
               placeholder ||
               $t("ChooseMint.placeholder")
             }}</span>
-          </span>
-          <span v-else class="mint-chip__name">
-            {{
-              chosenMint?.nickname ||
-              chosenMint?.shorturl ||
-              placeholder ||
-              $t("ChooseMint.placeholder")
-            }}
-          </span>
-          <template v-if="showBalances && chosenMint">
-            <span class="mint-chip__dot" aria-hidden="true">·</span>
-            <span v-if="!chosenMint.errored" class="mint-chip__balance">
-              <bdi dir="ltr">{{
-                formatCurrency(selectedMintBalance, activeUnit)
-              }}</bdi>
-              {{ $t("ChooseMint.available_text") }}
+            <span
+              v-if="!label && showBalances && chosenMint"
+              class="mint-chip__caption"
+            >
+              <span v-if="!chosenMint.errored"
+                ><bdi dir="ltr">{{
+                  formatCurrency(selectedMintBalance, activeUnit)
+                }}</bdi>
+                {{ $t("ChooseMint.available_text") }}</span
+              >
+              <span v-else class="text-negative">{{
+                $t("ChooseMint.badge_mint_error_text")
+              }}</span>
             </span>
-            <span v-else class="text-negative">
-              {{ $t("ChooseMint.badge_mint_error_text") }}
-            </span>
-          </template>
+          </span>
+          <span
+            v-if="label && showBalances && chosenMint"
+            class="mint-chip__balance"
+          >
+            <bdi v-if="!chosenMint.errored" dir="ltr">{{
+              formatCurrency(selectedMintBalance, activeUnit)
+            }}</bdi>
+            <span v-else class="text-negative">{{
+              $t("ChooseMint.badge_mint_error_text")
+            }}</span>
+          </span>
           <ChevronDownIcon :size="16" class="mint-chip__icon" />
         </button>
       </div>

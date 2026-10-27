@@ -148,10 +148,14 @@ body.body--light {
   --app-text-muted: rgba(0, 0, 0, 0.64);
   --app-text-subtle: rgba(0, 0, 0, 0.58);
   --app-text-disabled: rgba(0, 0, 0, 0.5);
-  --app-border: rgba(0, 0, 0, 0.09);
-  --app-tint: rgba(0, 0, 0, 0.035);
-  --app-tint-strong: rgba(0, 0, 0, 0.07);
-  --app-border-strong: rgba(0, 0, 0, 0.42);
+  // Light mode mirrors dark mode's steps (user direction, R46: light had been tuned less):
+  // hairlines and card edges at about the same visual weight as their dark counterparts,
+  // fills a touch stronger so grouped surfaces read on white. Field edges keep their own
+  // 3:1 token (--app-field-edge).
+  --app-border: rgba(0, 0, 0, 0.1);
+  --app-tint: rgba(0, 0, 0, 0.04);
+  --app-tint-strong: rgba(0, 0, 0, 0.075);
+  --app-border-strong: rgba(0, 0, 0, 0.22);
   --q-positive: #15803d;
   --q-negative: #c10015;
   --app-negative-text: #c10015;

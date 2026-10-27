@@ -60,7 +60,7 @@
           <q-card-section class="q-pa-none">
             <div v-if="showPRKData" class="row justify-center q-mb-md">
               <div class="col-12 q-px-md" style="max-width: var(--app-column)">
-                <q-responsive :ratio="1" class="q-mx-none">
+                <q-responsive :ratio="1" class="app-qr">
                   <vue-qrcode
                     :value="showPRKData"
                     :options="{ width: 400 }"
@@ -131,7 +131,15 @@
                     :aria-expanded="showMintSheet"
                     @click="showMintSheet = true"
                   >
-                    <LandmarkIcon :size="16" class="mint-chip__icon" />
+                    <span class="mint-chip__avatar" aria-hidden="true">
+                      <img
+                        v-if="requestMintIcon"
+                        :src="requestMintIcon"
+                        alt=""
+                        class="pr-mint-icon"
+                      />
+                      <LandmarkIcon v-else :size="14" class="mint-chip__icon" />
+                    </span>
                     <span class="mint-chip__name">{{ mintLabel }}</span>
                     <ChevronDownIcon :size="16" class="mint-chip__icon" />
                   </button>
@@ -241,9 +249,15 @@
           :selected="requestMint === mint.url"
           @select="chooseMint(mint.url)"
         >
-          <template #icon
-            ><LandmarkIcon :size="20" class="mint-glyph"
-          /></template>
+          <template #icon>
+            <img
+              v-if="mint.info?.icon_url"
+              :src="mint.info.icon_url"
+              alt=""
+              class="pr-mint-icon"
+            />
+            <LandmarkIcon v-else :size="20" class="mint-glyph" />
+          </template>
         </SheetOption>
       </div>
     </BottomSheet>
@@ -349,6 +363,10 @@ export default defineComponent({
     },
     requestMint(): string | undefined {
       return this.request.mints?.[0];
+    },
+    requestMintIcon(): string | undefined {
+      return this.mints.find((m: any) => m.url === this.requestMint)?.info
+        ?.icon_url;
     },
     amountLabel(): string {
       if (this.request.amount === undefined) {
@@ -614,5 +632,11 @@ export default defineComponent({
 }
 .mint-glyph {
   color: var(--app-text-muted);
+}
+.pr-mint-icon {
+  border-radius: 50%;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
 }
 </style>

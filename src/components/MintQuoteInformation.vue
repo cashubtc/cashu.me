@@ -51,20 +51,42 @@
       <div class="detail-value">{{ networkDisplay }}</div>
     </div>
 
-    <div v-if="isOnchain && onchainExplorerUrl" class="detail-item q-mb-md">
+    <!-- The deposit address always shows on an on-chain invoice, paid or pending, linked to
+         an explorer when the network has one (user report, R46: it came and went). -->
+    <div v-if="isOnchain && invoice?.request" class="detail-item q-mb-md">
+      <div class="detail-label">
+        <HashIcon :size="20" class="detail-icon" />
+        <div class="detail-name">{{ $t("QuoteInformation.address") }}</div>
+      </div>
+      <a
+        v-if="addressExplorerUrl"
+        class="detail-value"
+        :href="addressExplorerUrl"
+        target="_blank"
+        ><bdi dir="ltr">{{ shortAddress(invoice.request) }}</bdi></a
+      >
+      <div v-else class="detail-value">
+        <bdi dir="ltr">{{ shortAddress(invoice.request) }}</bdi>
+      </div>
+    </div>
+
+    <div v-if="isOnchain && onchainMetadata" class="detail-item q-mb-md">
       <div class="detail-label">
         <HashIcon :size="20" class="detail-icon" />
         <div class="detail-name">
-          {{ onchainMetadata ? "Transaction ID" : "Address" }}
+          {{ $t("QuoteInformation.transaction_id") }}
         </div>
       </div>
-      <a class="detail-value" :href="onchainExplorerUrl" target="_blank">
-        {{
-          onchainMetadata
-            ? shortTxid(onchainMetadata.txid)
-            : shortAddress(invoice.request)
-        }}
-      </a>
+      <a
+        v-if="onchainMetadata.url"
+        class="detail-value"
+        :href="onchainMetadata.url"
+        target="_blank"
+        ><bdi dir="ltr">{{ shortTxid(onchainMetadata.txid) }}</bdi></a
+      >
+      <div v-else class="detail-value">
+        <bdi dir="ltr">{{ shortTxid(onchainMetadata.txid) }}</bdi>
+      </div>
     </div>
 
     <div
@@ -271,12 +293,9 @@ export default defineComponent({
         this.invoice.network || onchainNetwork(this.invoice.request);
       return network === "mutinynet" ? onchainNetworkDisplay(network) : "";
     },
-    onchainExplorerUrl(): string | null {
+    addressExplorerUrl(): string | null {
       if (!this.isOnchain || !this.invoice?.request) return null;
-      return (
-        this.onchainMetadata?.url ||
-        onchainAddressExplorerUrl(this.invoice.request)
-      );
+      return onchainAddressExplorerUrl(this.invoice.request);
     },
     onchainStatusDisplay(): string {
       if (!this.onchainMetadata) return "";
@@ -308,10 +327,10 @@ export default defineComponent({
   },
   methods: {
     shortTxid(txid: string): string {
-      return `${txid.slice(0, 8)}...${txid.slice(-8)}`;
+      return `${txid.slice(0, 8)}…${txid.slice(-8)}`;
     },
     shortAddress(address: string): string {
-      return `${address.slice(0, 8)}...${address.slice(-8)}`;
+      return `${address.slice(0, 8)}…${address.slice(-8)}`;
     },
     mintConfirmations(): number {
       const mintStore = useMintsStore();

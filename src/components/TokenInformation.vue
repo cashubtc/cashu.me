@@ -108,6 +108,7 @@
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
+import { notifyCopied } from "src/js/notify";
 import { type Token } from "@cashu/cashu-ts";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState } from "pinia";
@@ -312,12 +313,7 @@ export default defineComponent({
     copyToken: async function () {
       try {
         await navigator.clipboard.writeText(this.encodedToken);
-        this.$q.notify({
-          message: this.$t("TokenInformation.token_copied"),
-          color: "positive",
-          position: "top",
-          timeout: 1000,
-        });
+        notifyCopied(this.$t("TokenInformation.token_copied") as string);
       } catch (error) {
         console.error("Failed to copy to clipboard:", error);
       }

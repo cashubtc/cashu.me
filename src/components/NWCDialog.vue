@@ -10,11 +10,12 @@
     >
       <div class="text-center q-mb-md q-mt-none q-pt-none">
         <a :href="showNWCData.connectionString">
-          <q-responsive :ratio="1" class="q-mx-md q-mt-none q-pt-none">
+          <q-responsive :ratio="1" class="app-qr">
             <vue-qrcode
               :value="showNWCData.connectionString"
-              :options="{ width: 340 }"
+              :options="{ width: 400 }"
               class="rounded-borders"
+              style="width: 100%"
             >
             </vue-qrcode>
           </q-responsive>

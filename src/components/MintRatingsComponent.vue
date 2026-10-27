@@ -61,14 +61,15 @@
                 />
               </div>
             </div>
+            <!-- How many ratings the score stands on, under the bars (user report, R46: it
+                 sat alone beside the trust switch). -->
+            <div class="ratings-count">
+              {{ $t("MintRatings.ratings", totalReviews) }}
+            </div>
           </div>
         </div>
-        <!-- WoT Filter and Total Ratings Count -->
-        <!-- The count is a muted caption; the filter uses the app's standard switch. -->
-        <div class="col-12 row items-center justify-between ratings-filter-row">
-          <span class="ratings-count">
-            {{ $t("MintRatings.ratings", totalReviews) }}
-          </span>
+        <!-- The web-of-trust filter on its own row, at the end edge, as a settings switch. -->
+        <div class="col-12 row items-center justify-end ratings-filter-row">
           <q-toggle
             v-model="filterByWoT"
             color="primary"
@@ -105,10 +106,15 @@
               type="rect"
               height="12px"
             />
+            <q-skeleton
+              type="rect"
+              width="72px"
+              height="16px"
+              class="self-end"
+            />
           </div>
         </div>
-        <div class="row items-center justify-between ratings-filter-row">
-          <q-skeleton type="rect" width="72px" height="16px" />
+        <div class="row items-center justify-end ratings-filter-row">
           <!-- Label and switch, at the switch's own size; the row keeps its 40px height. -->
           <div class="row items-center no-wrap" style="gap: 12px; height: 40px">
             <q-skeleton type="rect" width="88px" height="14px" />
@@ -362,6 +368,7 @@ import BottomSheet from "src/components/BottomSheet.vue";
 import SheetOption from "src/components/SheetOption.vue";
 import MintIdentityHeader from "src/components/MintIdentityHeader.vue";
 import { defineComponent } from "vue";
+import { notifyCopied } from "src/js/notify";
 import { useNostrStore } from "src/stores/nostr";
 import NDK from "@nostr-dev-kit/ndk";
 import { nip19 } from "nostr-tools";
@@ -427,14 +434,7 @@ export default defineComponent({
       try {
         const v = this.npub(pk);
         navigator.clipboard.writeText(v);
-        // @ts-ignore
-        this.$q?.notify &&
-          this.$q.notify({
-            message: this.$t("common.copied"),
-            color: "positive",
-            position: "top",
-            timeout: 800,
-          });
+        notifyCopied(this.$t("common.copied") as string);
       } catch {}
     },
     displayName(pk: string) {
@@ -931,8 +931,10 @@ body[data-theme] .q-card--dark.mint-ratings-root {
   margin-top: 8px;
 }
 .ratings-count {
+  align-self: flex-end;
   color: var(--app-text-muted);
-  font-size: 14px;
+  font-size: 13px;
+  line-height: 16px;
 }
 .ratings-wot-toggle {
   color: var(--app-text-muted);

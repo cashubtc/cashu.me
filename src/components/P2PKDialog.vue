@@ -34,7 +34,7 @@
           <q-card-section class="q-pa-none">
             <div v-if="p2pkData.publicKey" class="row justify-center q-mb-md">
               <div class="col-12 q-px-md p2pk-qr">
-                <q-responsive :ratio="1" class="q-mx-none">
+                <q-responsive :ratio="1" class="app-qr">
                   <vue-qrcode
                     :value="p2pkData.publicKey"
                     :options="{ width: 400 }"

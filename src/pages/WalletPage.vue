@@ -129,7 +129,12 @@
     <PayInvoiceDialog v-model="payInvoiceData.show" />
 
     <!-- QR CODE SCANNER  -->
-    <q-dialog v-model="camera.show" backdrop-filter="blur(2px) brightness(60%)">
+    <q-dialog
+      v-model="camera.show"
+      maximized
+      transition-show="fade"
+      transition-hide="fade"
+    >
       <QrcodeReader @decode="decodeQR" />
     </q-dialog>
 

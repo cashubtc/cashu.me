@@ -1656,6 +1656,7 @@ export default {
     invalid_url: "URL non valido",
   },
   QuoteInformation: {
+    address: "Indirizzo",
     amount: "Importo",
     fee_reserve: "Riserva commissioni",
     fee_paid: "Commissione pagata",

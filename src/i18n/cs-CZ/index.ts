@@ -1726,6 +1726,7 @@ export default {
     token_copied: "Token zkopírován do schránky",
   },
   QuoteInformation: {
+    address: "Adresa",
     amount: "Částka",
     fee_reserve: "Rezerva na poplatek",
     fee_paid: "Zaplacený poplatek",

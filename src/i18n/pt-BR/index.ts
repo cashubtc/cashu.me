@@ -1703,6 +1703,7 @@ export default {
     token_copied: "Token copiado para a área de transferência",
   },
   QuoteInformation: {
+    address: "Endereço",
     amount: "Valor",
     fee_reserve: "Reserva de taxa",
     fee_paid: "Taxa paga",

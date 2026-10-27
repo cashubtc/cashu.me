@@ -4,6 +4,13 @@ import { Clipboard } from "@capacitor/clipboard";
 import { SafeArea } from "capacitor-plugin-safe-area";
 import { useSettingsStore } from "stores/settings";
 import { formatBigIntCurrency } from "src/js/format-currency";
+import {
+  notify,
+  notifyCopied,
+  notifyError,
+  notifySuccess,
+  notifyWarning,
+} from "src/js/notify";
 window.LOCALE = "en";
 // window.EventHub = new Vue();
 
@@ -114,20 +121,14 @@ window.windowMixin = {
     toggleDarkMode: function () {
       this.$q.dark.toggle();
       this.$q.localStorage.set("cashu.darkMode", this.$q.dark.isActive);
+      // The browser/PWA top bar takes its colour from the page header. Read it again once the
+      // new mode has painted: read at once it could keep the old mode's colour until a reload
+      // (R46: "light theme only seems to work after refresh").
       updateStatusBarMeta();
+      requestAnimationFrame(() => setTimeout(updateStatusBarMeta, 300));
     },
-    copyText: function (text, message, position) {
-      const notify = this.$q.notify;
-      const i18n = this.$i18n;
-      copyToClipboard(text).then(function () {
-        notify({
-          message:
-            message ||
-            (i18n && i18n.t("global.copy_to_clipboard.success")) ||
-            "Copied to clipboard!",
-          position: position || "bottom",
-        });
-      });
+    copyText: function (text, message) {
+      copyToClipboard(text).then(() => notifyCopied(message));
     },
     pasteFromClipboard: async function () {
       let text = "";
@@ -192,112 +193,31 @@ window.windowMixin = {
       return new Intl.NumberFormat(window.LOCALE).format(value) + " msat";
     },
     notifyApiError: function (error) {
-      const types = {
-        400: "warning",
-        401: "warning",
-        500: "negative",
-      };
-      this.$q.notify({
-        timeout: 5000,
-        type: types[error.response.status] || "warning",
-        message:
-          error.message ||
-          error.response.data.message ||
-          error.response.data.detail ||
-          null,
-        caption:
-          [error.response.status, " ", error.response.statusText]
-            .join("")
-            .toUpperCase() || null,
-        icon: null,
-      });
+      const message =
+        error.message ||
+        error.response?.data?.message ||
+        error.response?.data?.detail ||
+        "";
+      const caption = error.response
+        ? `${error.response.status} ${error.response.statusText}`.toUpperCase()
+        : undefined;
+      if (error.response?.status >= 500) notifyError(message, caption);
+      else notifyWarning(message, caption);
     },
-    notifySuccess: async function (message, position = "top") {
-      this.$q.notify({
-        timeout: 5000,
-        type: "positive",
-        message: message,
-        position: position,
-        progress: true,
-        actions: [
-          {
-            icon: "close",
-            color: "white",
-            handler: () => {},
-          },
-        ],
-      });
+    notifySuccess: async function (message) {
+      notifySuccess(message);
     },
-    notifyRefreshed: async function (message, position = "top") {
-      this.$q.notify({
-        timeout: 500,
-        type: "positive",
-        message: message,
-        position: position,
-        actions: [
-          {
-            color: "white",
-            handler: () => {},
-          },
-        ],
-      });
+    notifyRefreshed: async function (message) {
+      notifySuccess(message);
     },
     notifyError: async function (message, caption = null) {
-      this.$q.notify({
-        color: "red",
-        message: message,
-        caption: caption,
-        position: "top",
-        progress: true,
-        actions: [
-          {
-            icon: "close",
-            color: "white",
-            handler: () => {},
-          },
-        ],
-      });
+      notifyError(message, caption || undefined);
     },
     notifyWarning: async function (message, caption = null, timeout = 5000) {
-      this.$q.notify({
-        timeout: timeout,
-        type: "warning",
-        message: message,
-        caption: caption,
-        position: "top",
-        progress: true,
-        actions: [
-          {
-            icon: "close",
-            color: "black",
-            handler: () => {},
-          },
-        ],
-      });
+      notifyWarning(message, caption || undefined, timeout);
     },
-    notify: async function (
-      message,
-      type = "null",
-      position = "top",
-      caption = null,
-      color = null
-    ) {
-      // failure
-      this.$q.notify({
-        timeout: 5000,
-        type: "nuill",
-        color: "grey",
-        message: message,
-        caption: null,
-        position: "top",
-        actions: [
-          {
-            icon: "close",
-            color: "white",
-            handler: () => {},
-          },
-        ],
-      });
+    notify: async function (message) {
+      notify(message);
     },
   },
   created: function () {

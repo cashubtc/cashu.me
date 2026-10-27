@@ -48,11 +48,14 @@
                   class="qr-code-section q-my-md"
                   key="qr-code"
                 >
-                  <vue-qrcode
-                    :value="mintData.url"
-                    :options="{ width: 300 }"
-                    class="rounded-borders"
-                  />
+                  <q-responsive :ratio="1" class="app-qr">
+                    <vue-qrcode
+                      :value="mintData.url"
+                      :options="{ width: 400 }"
+                      class="rounded-borders"
+                      style="width: 100%"
+                    />
+                  </q-responsive>
                 </div>
               </transition>
             </div>
@@ -332,6 +335,8 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import { copyToClipboard } from "quasar";
+import { notifyCopied } from "src/js/notify";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import VueQrcode from "@chenfengyuan/vue-qrcode";
 import { useMintsStore, MintClass } from "src/stores/mints";
@@ -459,13 +464,7 @@ export default defineComponent({
       return text;
     },
     copyText(text) {
-      navigator.clipboard.writeText(text);
-      this.$q.notify({
-        message: this.$i18n.t("global.copy_to_clipboard.success"),
-        color: "positive",
-        position: "top",
-        timeout: 1000,
-      });
+      copyToClipboard(text).then(() => notifyCopied());
     },
     openEditMintDialog() {
       this.mintToEdit = Object.assign({}, this.mintData);

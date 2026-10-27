@@ -159,7 +159,7 @@
       <q-card-section class="q-pa-none">
         <div v-if="qrCodeFragment" class="row justify-center q-mb-md">
           <div class="col-12 q-px-md">
-            <q-responsive :ratio="1" class="q-mx-none">
+            <q-responsive :ratio="1" class="app-qr">
               <vue-qrcode
                 :value="qrCodeFragment"
                 :options="{ width: 600, height: 600 }"

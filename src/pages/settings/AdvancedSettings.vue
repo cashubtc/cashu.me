@@ -96,23 +96,31 @@
               v-for="(mintCounter, mintUrl) in keysetCountersByMint"
               :key="mintUrl"
             >
-              <q-item-label class="keyset-mint-label" caption>
-                {{ shortUrl(mintUrl) }}
-              </q-item-label>
-              <!-- Each keyset is a stepper row: ID, its count, and a + on the end; the whole
-                   row is the button, as the caption says (tap a keyset). -->
+              <!-- The mint as everywhere else: its icon (or the landmark glyph) and its name. -->
+              <div class="keyset-mint-label row items-center no-wrap">
+                <span class="mint-chip__avatar" aria-hidden="true">
+                  <img
+                    v-if="mintFor(mintUrl)?.info?.icon_url"
+                    :src="mintFor(mintUrl).info.icon_url"
+                    alt=""
+                    class="keyset-mint-icon"
+                  />
+                  <LandmarkIcon v-else :size="14" class="keyset-mint-glyph" />
+                </span>
+                <span class="ellipsis">{{
+                  mintFor(mintUrl)?.nickname ||
+                  mintFor(mintUrl)?.info?.name ||
+                  shortUrl(mintUrl)
+                }}</span>
+              </div>
+              <!-- Each keyset is a stepper row: ID, its count, and the round + button that
+                   presses like the wallet's scan and menu buttons (user direction, R46). -->
               <div class="keyset-counter-list">
-                <button
+                <div
                   v-for="(counter, id) in mintCounter"
                   :key="id"
-                  type="button"
                   class="keyset-counter-row"
                   :title="counter.id"
-                  :aria-label="
-                    $t('Settings.advanced.developer.keyset_counters.increase', {
-                      id: abbreviateKeysetId(counter.id),
-                    })
-                  "
                   @click="increaseKeysetCounter(counter.id, 1)"
                 >
                   <span class="keyset-id ellipsis">{{
@@ -126,10 +134,22 @@
                       )
                     }}
                   </span>
-                  <span class="keyset-counter-plus" aria-hidden="true">
-                    <PlusIcon :size="20" />
-                  </span>
-                </button>
+                  <q-btn
+                    flat
+                    dense
+                    round
+                    class="keyset-counter-plus"
+                    :aria-label="
+                      $t(
+                        'Settings.advanced.developer.keyset_counters.increase',
+                        { id: abbreviateKeysetId(counter.id) }
+                      )
+                    "
+                    @click.stop="increaseKeysetCounter(counter.id, 1)"
+                  >
+                    <PlusIcon :size="22" />
+                  </q-btn>
+                </div>
               </div>
             </div>
           </div>
@@ -317,7 +337,11 @@ import { useStorageStore } from "src/stores/storage";
 import { useNostrUserStore } from "src/stores/nostrUser";
 import SettingsPageShell from "./SettingsPageShell.vue";
 import SettingsSection from "./SettingsSection.vue";
-import { Download as DownloadIcon, Plus as PlusIcon } from "lucide-vue-next";
+import {
+  Download as DownloadIcon,
+  Landmark as LandmarkIcon,
+  Plus as PlusIcon,
+} from "lucide-vue-next";
 
 export default defineComponent({
   name: "AdvancedSettings",
@@ -327,6 +351,7 @@ export default defineComponent({
     SettingsSection,
     DownloadIcon,
     PlusIcon,
+    LandmarkIcon,
   },
   data: function () {
     return {
@@ -375,6 +400,9 @@ export default defineComponent({
     },
     shortUrl: function (url) {
       return getShortUrl(url);
+    },
+    mintFor: function (url) {
+      return this.mints.find((m) => m.url === url);
     },
     abbreviateKeysetId: function (id) {
       const value = String(id || "");
@@ -498,7 +526,21 @@ export default defineComponent({
 }
 
 .keyset-mint-label {
+  color: var(--app-text-muted);
   flex: 0 1 100%;
+  font-size: 13px;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.keyset-mint-icon {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.keyset-mint-glyph {
+  color: var(--app-text-muted);
 }
 
 /* Keysets of one mint sit in one tinted group, a hairline between rows. */
@@ -511,42 +553,22 @@ export default defineComponent({
 
 .keyset-counter-row {
   align-items: center;
-  background: transparent;
-  border: 0;
-  color: inherit;
   cursor: pointer;
   display: flex;
-  font: inherit;
   gap: 12px;
-  min-height: 52px;
+  min-height: 56px;
   padding-block: 4px;
-  padding-inline: 16px 4px;
-  text-align: start;
-  width: 100%;
+  padding-inline: 16px 6px;
 }
 
 .keyset-counter-row + .keyset-counter-row {
   border-top: 1px solid var(--app-border);
 }
 
-@media (hover: hover) {
-  .keyset-counter-row:hover .keyset-counter-plus {
-    background: var(--app-tint-strong);
-  }
-}
-
-.keyset-counter-row:active .keyset-counter-plus {
-  background: color-mix(in srgb, var(--app-text) 16%, transparent);
-}
-
 .keyset-counter-plus {
-  align-items: center;
-  border-radius: 50%;
   color: var(--app-text);
-  display: inline-flex;
   flex: none;
   height: 44px;
-  justify-content: center;
   width: 44px;
 }
 

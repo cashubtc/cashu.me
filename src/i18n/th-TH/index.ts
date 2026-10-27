@@ -1665,6 +1665,7 @@ export default {
     invalid_url: "URL ไม่ถูกต้อง",
   },
   QuoteInformation: {
+    address: "ที่อยู่",
     amount: "จำนวน",
     fee_reserve: "ค่าธรรมเนียมสำรอง",
     fee_paid: "ค่าธรรมเนียมที่จ่าย",

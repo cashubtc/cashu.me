@@ -137,6 +137,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
+import { notifyCopied } from "src/js/notify";
 import { mapState } from "pinia";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useMintsStore } from "stores/mints";
@@ -460,17 +461,8 @@ export default defineComponent({
       const pre = this.preimageValue;
       if (!pre) return;
       try {
-        if (navigator?.clipboard?.writeText) {
-          await navigator.clipboard.writeText(pre);
-        } else {
-          (this as any).copyText?.(pre);
-        }
-        this.$q.notify({
-          message: this.$t("QuoteInformation.preimage_copied"),
-          color: "positive",
-          position: "top",
-          timeout: 1000,
-        });
+        await copyToClipboard(pre);
+        notifyCopied(this.$t("QuoteInformation.preimage_copied") as string);
       } catch (e) {
         console.error("Failed to copy preimage", e);
       }

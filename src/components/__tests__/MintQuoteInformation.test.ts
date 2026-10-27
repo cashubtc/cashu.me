@@ -13,15 +13,15 @@ beforeAll(async () => {
 });
 
 describe("MintQuoteInformation", () => {
-  it("uses the address explorer page until a transaction is available", () => {
-    const onchainExplorerUrl = MintQuoteInformation.computed.onchainExplorerUrl;
+  it("keeps linking the address to its explorer page once a transaction is known", () => {
+    const addressExplorerUrl = MintQuoteInformation.computed.addressExplorerUrl;
     const context: any = {
       isOnchain: true,
       invoice: { request: "bc1qexampleaddress" },
       onchainMetadata: null,
     };
 
-    expect(onchainExplorerUrl.call(context)).toBe(
+    expect(addressExplorerUrl.call(context)).toBe(
       "https://mempool.space/address/bc1qexampleaddress"
     );
 
@@ -29,8 +29,8 @@ describe("MintQuoteInformation", () => {
       url: "https://mempool.space/tx/transaction-id",
     };
 
-    expect(onchainExplorerUrl.call(context)).toBe(
-      "https://mempool.space/tx/transaction-id"
+    expect(addressExplorerUrl.call(context)).toBe(
+      "https://mempool.space/address/bc1qexampleaddress"
     );
   });
 
@@ -50,10 +50,10 @@ describe("MintQuoteInformation", () => {
   });
 
   it("does not create an explorer URL for non-on-chain payments", () => {
-    const onchainExplorerUrl = MintQuoteInformation.computed.onchainExplorerUrl;
+    const addressExplorerUrl = MintQuoteInformation.computed.addressExplorerUrl;
 
     expect(
-      onchainExplorerUrl.call({
+      addressExplorerUrl.call({
         isOnchain: false,
         method: PaymentMethod.Bolt11,
         invoice: { request: "lnbc1example" },

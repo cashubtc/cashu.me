@@ -72,10 +72,10 @@
 <script lang="ts">
 declare const windowMixin: any;
 import { useWelcomeStore } from "src/stores/welcome";
+import { notifyCopied } from "src/js/notify";
 import { useWalletStore } from "src/stores/wallet";
 import { ref, computed, onMounted } from "vue";
-import { useQuasar, copyToClipboard } from "quasar";
-import { i18n } from "src/boot/i18n";
+import { copyToClipboard } from "quasar";
 
 export default {
   name: "WelcomeSlide3",
@@ -83,7 +83,6 @@ export default {
   setup() {
     const welcomeStore = useWelcomeStore();
     const walletStore = useWalletStore();
-    const $q = useQuasar();
     const hideMnemonic = ref(true);
 
     onMounted(() => {
@@ -110,10 +109,7 @@ export default {
     const copyText = async (text: string) => {
       try {
         await copyToClipboard(text);
-        $q.notify({
-          message: i18n.global.t("global.copy_to_clipboard.success"),
-          position: "bottom",
-        });
+        notifyCopied();
       } catch {}
     };
 

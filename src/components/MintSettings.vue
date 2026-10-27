@@ -670,40 +670,6 @@ export default defineComponent({
   min-height: 56px;
 }
 
-.mint-review {
-  color: var(--app-text-muted);
-  font-size: 13px;
-}
-
-.mint-review-link {
-  align-items: center;
-  background: none;
-  border: 0;
-  border-radius: 6px;
-  color: var(--app-text-muted);
-  cursor: pointer;
-  display: inline-flex;
-  font: inherit;
-  gap: 4px;
-  min-height: 32px;
-  margin: -4px -6px;
-  padding: 4px 6px;
-  white-space: nowrap;
-}
-@media (hover: hover) {
-  .mint-review-link:hover {
-    background: var(--app-tint);
-    color: var(--app-text);
-  }
-}
-.mint-review-link:focus-visible {
-  outline: 2px solid var(--app-text);
-  outline-offset: 2px;
-}
-/* Rating stars use the text colour, like every other glyph (no emoji gold). */
-.rating-star {
-  color: var(--app-text);
-}
 /* Add mint matches the height and label size of Discover mints and Swap. */
 .q-btn.add-mint-submit {
   font-size: 1rem !important;
@@ -768,72 +734,5 @@ export default defineComponent({
   align-items: center;
   width: 100%;
   margin-bottom: 24px;
-}
-
-/* The active card is marked by its accent border and check; its text stays ink, so raw
-   accent colours never carry body text on a dark card (R42: classic and salvador missed AA). */
-/* The active check is ink: in red and pink themes an accent check read as an error (R44);
-   the accent stays on the active card's border. */
-.mint-card__check {
-  color: var(--app-text);
-}
-
-body .mint-card.q-item--active {
-  color: var(--app-text);
-}
-
-/* Mint card (R41 pass): one 16px inset, the identity row with its actions centred on it,
-   the holdings and rating below on the same edges. */
-.mint-card__body {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 16px;
-  width: 100%;
-}
-.mint-card__head {
-  align-items: center;
-  display: flex;
-  gap: 4px;
-  min-width: 0;
-}
-.mint-card__status {
-  flex: none;
-  margin-inline-end: 4px;
-}
-.mint-card-more {
-  color: var(--app-text-muted);
-  flex: none;
-  height: 40px;
-  margin: -8px -10px -8px 0;
-  width: 40px;
-}
-html[dir="rtl"] .mint-card-more {
-  margin: -8px 0 -8px -10px;
-}
-.mint-card__foot {
-  align-items: center;
-  display: flex;
-  gap: 12px;
-  justify-content: space-between;
-  min-height: 24px;
-}
-.mint-card__balances {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 8px;
-  min-width: 0;
-}
-.mint-card__balances .currency-unit-text {
-  font-size: 16px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-.mint-card__plus {
-  color: var(--app-text-subtle);
-}
-.mint-review__score {
-  color: var(--app-text);
-  font-weight: 500;
 }
 </style>

@@ -1676,6 +1676,7 @@ export default {
     invalid_url: "Ogiltig URL",
   },
   QuoteInformation: {
+    address: "Adress",
     amount: "Belopp",
     fee_reserve: "Avgiftsreserv",
     fee_paid: "Betald avgift",

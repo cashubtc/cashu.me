@@ -62,7 +62,7 @@
                     class="text-secondary"
                     :href="qrLink"
                   >
-                    <q-responsive :ratio="1" class="q-mx-none">
+                    <q-responsive :ratio="1" class="app-qr">
                       <vue-qrcode
                         :value="qrValue"
                         :options="{ width: 400 }"

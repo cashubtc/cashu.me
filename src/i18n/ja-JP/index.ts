@@ -1675,6 +1675,7 @@ export default {
     invalid_url: "無効な URL",
   },
   QuoteInformation: {
+    address: "アドレス",
     amount: "金額",
     fee_reserve: "手数料の予備",
     fee_paid: "支払った手数料",
