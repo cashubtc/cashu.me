@@ -140,19 +140,6 @@ body .settings-view .q-badge.bg-primary {
   border-style: solid;
 }
 
-/* Captions that carry a risk (lost keys, experimental features) read as a callout. */
-.settings-section-caption--warning {
-  display: flex;
-  align-items: flex-start;
-  margin-top: 8px;
-  padding: 12px;
-  border-radius: 12px;
-  border: 1px solid var(--app-border-strong);
-  background: var(--app-tint);
-  color: var(--app-text-muted);
-  font-size: 13px;
-}
-
 /* Relay URLs are content: body size and colour, left to right in every locale. */
 .relay-url {
   color: var(--app-text);

@@ -1,6 +1,11 @@
 <template>
   <!-- One entry on /ui: a pattern's name, where it is implemented, and a live sample. -->
-  <section class="ui-kit-item" :data-ui-item="title">
+  <section
+    v-show="visible"
+    :id="slug"
+    class="ui-kit-item"
+    :data-ui-item="title"
+  >
     <div class="ui-kit-item__title">{{ title }}</div>
     <div v-if="sources" class="ui-kit-item__sources">{{ sources }}</div>
     <div class="ui-kit-item__sample">
@@ -11,7 +16,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { computed, defineComponent, inject, type ComputedRef } from "vue";
 
 export default defineComponent({
   name: "UiKitItem",
@@ -20,12 +25,33 @@ export default defineComponent({
     sources: { type: String, default: "" },
     note: { type: String, default: "" },
   },
+  setup(props) {
+    // The page's search box (UiKitPage provides it); an entry hides when it doesn't match its
+    // title or the files that implement it.
+    const query = inject<ComputedRef<string>>(
+      "uiKitQuery",
+      computed(() => "")
+    );
+    const visible = computed(() => {
+      const q = query.value.trim().toLowerCase();
+      return (
+        !q ||
+        props.title.toLowerCase().includes(q) ||
+        props.sources.toLowerCase().includes(q)
+      );
+    });
+    const slug = computed(
+      () => "ui-" + props.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")
+    );
+    return { visible, slug };
+  },
 });
 </script>
 
 <style scoped>
 .ui-kit-item {
   margin-bottom: 28px;
+  scroll-margin-top: 120px;
 }
 .ui-kit-item__title {
   font-size: 15px;

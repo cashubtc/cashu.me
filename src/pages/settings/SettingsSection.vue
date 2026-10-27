@@ -5,18 +5,14 @@
         {{ title }}
         <slot name="badge" />
       </div>
-      <div
-        v-if="caption"
-        class="settings-section-caption"
-        :class="{ 'settings-section-caption--warning': warning }"
-      >
-        <q-icon
-          v-if="warning"
-          name="warning_amber"
-          size="18px"
-          class="q-mr-sm"
-        />
-        <span>{{ caption }}</span>
+      <AppCallout
+        v-if="caption && warning"
+        variant="warning"
+        class="q-mt-sm"
+        :text="caption"
+      />
+      <div v-else-if="caption" class="settings-section-caption">
+        {{ caption }}
       </div>
     </div>
     <!-- flat: a lone field sits on the page under its header, without a card around it. -->
@@ -31,9 +27,11 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import AppCallout from "src/components/AppCallout.vue";
 
 export default defineComponent({
   name: "SettingsSection",
+  components: { AppCallout },
   props: {
     flat: {
       type: Boolean,

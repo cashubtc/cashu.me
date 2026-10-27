@@ -60,30 +60,23 @@
               "
               class="experimental-warning q-mt-lg"
             >
-              <div class="app-callout app-callout--warning">
-                <q-icon
-                  name="warning_amber"
-                  size="20px"
-                  class="app-callout__icon"
-                />
-                <div class="app-callout__body">
-                  <div class="app-callout__title">
-                    {{ $t("MultinutPicker.experimental_title") }}
-                  </div>
-                  <div class="app-callout__text">
-                    {{ $t("MultinutPicker.experimental_text") }}
-                  </div>
+              <AppCallout
+                variant="warning"
+                :title="$t('MultinutPicker.experimental_title')"
+                :text="$t('MultinutPicker.experimental_text')"
+              >
+                <template #actions>
                   <q-btn
                     flat
                     dense
                     no-caps
-                    class="q-mt-sm warning-dismiss-btn"
+                    class="warning-dismiss-btn"
                     @click="dismissExperimentalWarning"
                   >
                     {{ $t("MultinutPicker.understand") }}
                   </q-btn>
-                </div>
-              </div>
+                </template>
+              </AppCallout>
             </div>
           </transition>
         </div>
@@ -320,11 +313,12 @@ import { notifyError, notifySuccess } from "src/js/notify";
 import { sumProofAmounts } from "src/js/proofs";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { X as XIcon } from "lucide-vue-next";
+import AppCallout from "src/components/AppCallout.vue";
 
 export default defineComponent({
   name: "MultinutPaymentDialog",
   mixins: [windowMixin],
-  components: { XIcon },
+  components: { XIcon, AppCallout },
   data() {
     return {
       multiMeltButtonLoading: false,

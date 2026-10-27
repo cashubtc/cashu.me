@@ -153,8 +153,10 @@ body,
   animation-duration: 1s;
 }
 
+// The tick is drawn in the on-primary ink, so a checked box shows a tick in every theme and
+// mode (a dark tick on the black light-mode fill read as a solid square).
 .q-checkbox__svg {
-  color: var(--q-dark);
+  color: var(--app-on-primary);
 }
 
 // Label/value rows in quote, token and mint detail views.
@@ -441,6 +443,10 @@ body[data-theme] .welcome-surface,
       background-color: var(--app-on-primary);
     }
   }
+}
+// A disabled toggle reads weaker than both on and off.
+.q-toggle.disabled {
+  opacity: 0.4 !important;
 }
 
 /* Centred confirmation and edit dialogs (edit mint, remove mint): one title, one list or form,
@@ -1289,13 +1295,14 @@ html[dir="rtl"] .mint-card-more {
   font-weight: 500;
 }
 
-// Toasts (user direction, R46; restyled after shadcn's Sonner in R56): one compact neutral
-// card for every kind, in every theme and mode — a thin border, a soft shadow, 8px corners,
-// medium-weight 14px text and a small leading icon whose colour carries the kind.
+// Toasts (user direction, R46; Sonner style since R56, rich colours since R57): a compact
+// card tinted with its kind's tone — the same tones and treatment as the callouts — with a
+// hairline in the tone, a soft shadow, 8px corners and medium-weight 14px text.
 body .q-notification {
+  --tone: var(--app-text-muted);
   align-items: center;
-  background: var(--app-raised) !important;
-  border: 1px solid var(--app-border);
+  background: color-mix(in srgb, var(--tone) 14%, var(--app-raised)) !important;
+  border: 1px solid color-mix(in srgb, var(--tone) 32%, transparent);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   color: var(--app-text) !important;
@@ -1309,30 +1316,26 @@ body .q-notification {
   padding-inline: 14px 6px;
   transition: transform 0.25s ease, opacity 0.25s ease;
 }
+body .q-notification.bg-positive {
+  --tone: var(--app-success);
+}
+body .q-notification.bg-negative {
+  --tone: var(--app-danger);
+}
+body .q-notification.bg-warning {
+  --tone: var(--app-warning);
+}
+body .q-notification.bg-info {
+  --tone: var(--app-info);
+}
 body .q-notification .q-notification__icon {
+  color: var(--tone);
   font-size: 18px;
   margin-left: 0 !important;
   margin-right: 0 !important;
 }
 body .q-notification .q-notification__icon + .q-notification__message {
   margin-inline-start: 10px;
-}
-body .q-notification.bg-positive .q-notification__icon {
-  color: var(--q-positive);
-}
-body .q-notification.bg-negative .q-notification__icon {
-  color: var(--q-negative);
-}
-body .q-notification.bg-warning .q-notification__icon {
-  color: #f2a900;
-}
-// On the pale light-mode toast the warning amber is darkened to the same weight as the
-// success and error icons (R47: the bright yellow triangle sat apart from them).
-body.body--light .q-notification.bg-warning .q-notification__icon {
-  color: #b45309;
-}
-body .q-notification.bg-info .q-notification__icon {
-  color: var(--app-text-muted);
 }
 body .q-notification .q-notification__caption {
   color: var(--app-text-muted);
@@ -1368,10 +1371,13 @@ body .q-notification .q-notification__actions .q-btn {
   min-height: 40px;
   min-width: 40px;
 }
-// Light mode: toasts are white cards on the page, like the Settings groups (R48: the
-// #f4f4f5 raised grey read as faint on a near-white page).
+// Light mode: the tint sits on white, like the Settings groups (R48).
 body.body--light .q-notification {
-  background: var(--app-surface) !important;
+  background: color-mix(
+    in srgb,
+    var(--tone) 10%,
+    var(--app-surface)
+  ) !important;
 }
 // Toasts sit above the pinned bottom action (52px button + 24px inset), so they never cover
 // the balance or the primary button (user direction, R50).
@@ -1388,7 +1394,7 @@ body .q-notifications__list--bottom .q-notification {
 }
 body .q-notifications__list--bottom .q-notification:not(:last-child) {
   opacity: 0.9;
-  transform: translateY(calc(100% - 2px)) scale(0.94);
+  transform: translateY(calc(100% - 14px)) scale(0.94);
   z-index: 0;
 }
 body .q-notifications__list--bottom:hover .q-notification {

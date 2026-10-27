@@ -146,9 +146,9 @@
             data-testid="token-more"
             @click="toggleExpandButtons"
           >
-            <q-icon
-              name="more_horiz"
-              :color="showExpandedButtons ? 'primary' : 'grey'"
+            <EllipsisIcon
+              :size="20"
+              :class="showExpandedButtons ? 'text-primary' : 'text-app-muted'"
             />
           </q-btn>
         </div>
@@ -359,6 +359,7 @@ import {
   Nfc as NfcIcon,
   Share as ShareIcon,
   Nut as NutIcon,
+  Ellipsis as EllipsisIcon,
 } from "lucide-vue-next";
 
 declare const windowMixin: any;
@@ -367,6 +368,7 @@ export default defineComponent({
   name: "DisplayTokenComponent",
   mixins: [windowMixin],
   components: {
+    EllipsisIcon,
     TokenInformation,
     MeltQuoteInformation,
     SendPaymentRequest,

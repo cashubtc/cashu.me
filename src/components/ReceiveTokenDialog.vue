@@ -126,12 +126,12 @@
                     </div>
                   </transition>
                   <transition name="fade">
-                    <div
+                    <AppCallout
                       v-if="receiveError && !isReceiving"
-                      class="app-callout app-callout--danger q-mb-md q-mt-xl"
-                    >
-                      {{ receiveError }}
-                    </div>
+                      variant="danger"
+                      class="q-mb-md q-mt-xl"
+                      :text="receiveError"
+                    />
                   </transition>
 
                   <!-- swap mint selection -->
@@ -177,11 +177,12 @@
             <div class="row justify-center q-pb-lg q-pt-sm">
               <div class="col-12 q-px-md" style="max-width: var(--app-column)">
                 <template v-if="isNotLockedToUs">
-                  <div class="app-callout app-callout--danger">
-                    {{
-                      $t("ReceiveTokenDialog.errors.p2pk_lock_mismatch.label")
-                    }}
-                  </div>
+                  <AppCallout
+                    variant="danger"
+                    :text="
+                      $t('ReceiveTokenDialog.errors.p2pk_lock_mismatch.label')
+                    "
+                  />
                 </template>
                 <template v-else-if="swapSelected">
                   <q-btn
@@ -296,6 +297,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import AppCallout from "src/components/AppCallout.vue";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
@@ -326,6 +328,7 @@ export default defineComponent({
   name: "ReceiveTokenDialog",
   mixins: [windowMixin],
   components: {
+    AppCallout,
     TokenInformation,
     TokenStringRender,
     SwapIncomingTokenToKnownMint,

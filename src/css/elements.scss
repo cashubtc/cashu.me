@@ -113,40 +113,62 @@ body.body--light .q-dialog .app-option-row:active {
   margin-top: 2px;
 }
 
-// Callout (shadcn Alert): an icon, an optional title and a message in a bordered box. The
-// neutral one is for advice; info, warning and danger tint the edge, the fill and the icon.
+// Status tones, shared by callouts and toasts: one colour per meaning, darker in light mode.
+body.body--dark {
+  --app-success: #4ade80;
+}
+body.body--light {
+  --app-success: #15803d;
+}
+.app-tone--neutral {
+  --tone: var(--app-text-muted);
+}
+.app-tone--info,
+.app-callout--info {
+  --tone: var(--app-info);
+}
+.app-tone--success,
+.app-callout--success {
+  --tone: var(--app-success);
+}
+.app-tone--warning,
+.app-callout--warning {
+  --tone: var(--app-warning);
+}
+.app-tone--danger,
+.app-callout--danger {
+  --tone: var(--app-danger);
+}
+
+// Callout (AppCallout.vue; shadcn Alert with Sonner's rich colours): a tone-tinted surface,
+// a hairline in the tone, the icon and title in the tone, the message in muted ink. The
+// neutral one is a plain card for advice.
 .app-callout {
-  --callout-colour: var(--app-text-muted);
   align-items: flex-start;
-  background: var(--app-tint);
-  border: 1px solid var(--app-border);
+  background: color-mix(
+    in srgb,
+    var(--tone, transparent) 10%,
+    var(--app-surface)
+  );
+  border: 1px solid
+    color-mix(in srgb, var(--tone, var(--app-border)) 28%, transparent);
   border-radius: 12px;
   color: var(--app-text);
   display: flex;
   font-size: 14px;
-  gap: 12px;
+  gap: 10px;
   line-height: 1.45;
   padding: 12px 14px;
   text-align: start;
   width: 100%;
 }
-.app-callout--info {
-  --callout-colour: var(--app-info);
-}
-.app-callout--warning {
-  --callout-colour: var(--app-warning);
-}
-.app-callout--danger {
-  --callout-colour: var(--app-danger);
-}
-.app-callout--info,
-.app-callout--warning,
-.app-callout--danger {
-  background: color-mix(in srgb, var(--callout-colour) 8%, transparent);
-  border-color: color-mix(in srgb, var(--callout-colour) 35%, transparent);
+.app-callout--neutral,
+.app-callout:not([class*="app-callout--"]) {
+  background: var(--app-tint);
+  border-color: var(--app-border);
 }
 .app-callout__icon {
-  color: var(--callout-colour);
+  color: var(--tone, var(--app-text-muted));
   flex-shrink: 0;
   margin-top: 1px;
 }
@@ -155,6 +177,7 @@ body.body--light .q-dialog .app-option-row:active {
   min-width: 0;
 }
 .app-callout__title {
+  color: color-mix(in srgb, var(--tone, var(--app-text)) 55%, var(--app-text));
   font-weight: 600;
 }
 .app-callout__text {
@@ -162,6 +185,19 @@ body.body--light .q-dialog .app-option-row:active {
 }
 .app-callout__title + .app-callout__text {
   margin-top: 2px;
+}
+.app-callout__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+.app-callout__close {
+  color: var(--app-text-muted);
+  margin: -6px -8px -6px 0;
+}
+html[dir="rtl"] .app-callout__close {
+  margin: -6px 0 -6px -8px;
 }
 
 // Badge (shadcn Badge): a small pill label. Outline by default; "solid" for counts and units.
@@ -437,4 +473,16 @@ body .q-skeleton--type-text {
   .wobble-enter-active {
     animation: none;
   }
+}
+
+// Busy buttons: the dots and the busy label replace the label in the button's own layout, on
+// one line, so a longer busy label ("Swapping…") widens the button instead of spilling out.
+.q-btn--loading .q-btn__content--hidden {
+  display: none !important;
+}
+.q-btn--loading > .absolute-full {
+  flex-wrap: nowrap;
+  gap: 2px;
+  position: static;
+  white-space: nowrap;
 }

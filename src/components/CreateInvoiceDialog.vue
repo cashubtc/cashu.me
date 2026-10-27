@@ -102,32 +102,32 @@
               <div class="col-12" style="max-width: 400px">
                 <div
                   v-if="qrPreview.kind === 'reusable' && activeMintErrored"
-                  class="app-callout app-callout--warning mint-error-warning column items-center text-center q-pa-lg"
+                  class="mint-error-warning"
                 >
-                  <q-icon name="warning" size="42px" color="warning" />
-                  <div class="mint-error-title q-mt-md">
-                    {{ $t("CreateInvoiceDialog.mint_unreachable") }}
-                  </div>
-                  <div class="mint-error-text q-mt-sm">
-                    {{ $t("CreateInvoiceDialog.mint_unreachable_text") }}
-                  </div>
-                  <q-btn
-                    flat
-                    dense
-                    no-caps
-                    color="primary"
-                    icon="refresh"
-                    class="q-mt-md"
-                    :label="$t('CreateInvoiceDialog.reconnect_mint')"
-                    :loading="refreshingMint"
-                    @click="refreshActiveMint"
+                  <AppCallout
+                    variant="warning"
+                    :title="$t('CreateInvoiceDialog.mint_unreachable')"
+                    :text="$t('CreateInvoiceDialog.mint_unreachable_text')"
                   >
-                    <template v-slot:loading
-                      ><q-spinner-dots size="20px" class="on-left" />{{
-                        $t("CreateInvoiceDialog.reconnect_mint")
-                      }}</template
-                    >
-                  </q-btn>
+                    <template #actions>
+                      <q-btn
+                        flat
+                        dense
+                        no-caps
+                        color="primary"
+                        icon="refresh"
+                        :label="$t('CreateInvoiceDialog.reconnect_mint')"
+                        :loading="refreshingMint"
+                        @click="refreshActiveMint"
+                      >
+                        <template v-slot:loading
+                          ><q-spinner-dots size="20px" class="on-left" />{{
+                            $t("CreateInvoiceDialog.reconnect_mint")
+                          }}</template
+                        >
+                      </q-btn>
+                    </template>
+                  </AppCallout>
                 </div>
                 <template v-else>
                   <div
@@ -319,6 +319,7 @@
 </template>
 <script lang="ts">
 import { ChevronLeft as ChevronLeftIcon } from "lucide-vue-next";
+import AppCallout from "src/components/AppCallout.vue";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { copyToClipboard } from "quasar";
@@ -354,6 +355,7 @@ export default defineComponent({
   name: "CreateInvoiceDialog",
   mixins: [windowMixin],
   components: {
+    AppCallout,
     ChevronLeftIcon,
     ChooseMint,
     NumericKeyboard,
@@ -981,18 +983,9 @@ export default defineComponent({
   max-width: 100%;
 }
 .mint-error-warning {
+  align-items: center;
+  display: flex;
   min-height: 260px;
-  justify-content: center;
-}
-.mint-error-title {
-  font-size: 18px;
-  font-weight: 600;
-}
-.mint-error-text {
-  opacity: 0.68;
-  font-size: 14px;
-  line-height: 1.45;
-  max-width: 300px;
 }
 .amount-warning-badge {
   position: absolute;

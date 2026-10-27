@@ -72,14 +72,12 @@
             style="max-width: var(--app-column)"
           >
             <ChooseMint />
-            <q-banner
+            <AppCallout
               v-if="paymentRequestMintWarning"
-              dense
-              rounded
-              class="bg-red-1 text-red-9 q-mt-sm"
-            >
-              {{ paymentRequestMintWarning }}
-            </q-banner>
+              variant="danger"
+              class="q-mt-sm"
+              :text="paymentRequestMintWarning"
+            />
           </div>
         </div>
 
@@ -274,6 +272,7 @@
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
+import AppCallout from "src/components/AppCallout.vue";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { PaymentRequest } from "@cashu/cashu-ts";
 import { useWalletStore } from "src/stores/wallet";
@@ -306,6 +305,7 @@ export default defineComponent({
   name: "SendTokenDialog",
   mixins: [windowMixin],
   components: {
+    AppCallout,
     ChooseMint,
     NumericKeyboard,
     DisplayTokenComponent,

@@ -1,16 +1,14 @@
 <template>
-  <!-- The standard info callout (src/css/elements.scss). -->
-  <div class="app-callout app-callout--info">
-    <q-icon name="info" size="18px" class="app-callout__icon" />
-    <div class="app-callout__body app-callout__text">{{ text }}</div>
-  </div>
+  <AppCallout variant="info" :text="text" />
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import AppCallout from "src/components/AppCallout.vue";
 
 export default defineComponent({
   name: "ToolTipInfo",
+  components: { AppCallout },
   props: {
     text: {
       type: String,

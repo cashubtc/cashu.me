@@ -1,22 +1,21 @@
 <template>
-  <!-- The standard warning callout (src/css/elements.scss). -->
-  <div v-if="hasWarnings" class="app-callout app-callout--warning q-mb-md">
-    <q-icon name="warning_amber" size="20px" class="app-callout__icon" />
-    <div class="app-callout__body">
-      <div class="app-callout__title">
-        {{ $t("MintAuditInfo.warnings_title") }}
-      </div>
-      <ul class="app-callout__text audit-warning-list">
-        <li v-for="(message, index) in warningMessages" :key="index">
-          {{ message }}
-        </li>
-      </ul>
-    </div>
-  </div>
+  <AppCallout
+    v-if="hasWarnings"
+    variant="warning"
+    class="q-mb-md"
+    :title="$t('MintAuditInfo.warnings_title')"
+  >
+    <ul class="audit-warning-list">
+      <li v-for="(message, index) in warningMessages" :key="index">
+        {{ message }}
+      </li>
+    </ul>
+  </AppCallout>
 </template>
 
 <script lang="ts">
 import { defineComponent, computed } from "vue";
+import AppCallout from "src/components/AppCallout.vue";
 import { i18n } from "src/boot/i18n";
 
 const t = i18n.global.t;
@@ -52,6 +51,7 @@ interface SwapEventRead {
 
 export default defineComponent({
   name: "MintAuditWarningBox",
+  components: { AppCallout },
   props: {
     mint: {
       type: Object as () => MintRead,

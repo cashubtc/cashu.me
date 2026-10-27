@@ -76,7 +76,7 @@
                   :aria-label="$t('MintDetailsDialog.details.title')"
                   @click.stop="showMintInfo(mint)"
                 >
-                  <q-icon name="more_horiz" size="1.3rem" />
+                  <EllipsisIcon :size="20" />
                 </q-btn>
               </div>
 
@@ -299,6 +299,7 @@
 <script lang="ts">
 import {
   CircleCheck as CircleCheckIcon,
+  Ellipsis as EllipsisIcon,
   Plus as PlusIcon,
   Scan as ScanIcon,
   Search as SearchIcon,
@@ -334,6 +335,7 @@ export default defineComponent({
   name: "MintSettings",
   mixins: [windowMixin],
   components: {
+    EllipsisIcon,
     CircleCheckIcon,
     PlusIcon,
     ScanIcon,
