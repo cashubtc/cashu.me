@@ -683,6 +683,7 @@ export default {
     },
   },
   BalanceView: {
+    total_label: "Celkový zůstatek",
     mintUrl: {
       label: "Mint",
     },
@@ -1228,13 +1229,13 @@ export default {
     title: "Přijmout ecash",
     actions: {
       paste: {
-        label: "@:global.actions.paste.label",
+        label: "Vložit token",
       },
       scan: {
-        label: "@:global.actions.scan.label",
+        label: "Naskenovat token",
       },
       request: {
-        label: "Požádat",
+        label: "Požádat o ecash",
       },
       lock: {
         label: "@:global.actions.lock.label",
@@ -1526,7 +1527,7 @@ export default {
       label: "Přezdívka",
     },
     balances: {
-      label: "Zůstatky",
+      label: "Zůstatek v tomto mintu",
     },
     warning_text:
       "Váš ecash z tohoto mintu zůstane v tomto zařízení. Vrátí se, když mint znovu přidáte.",
@@ -1649,7 +1650,7 @@ export default {
     inputs: {
       nickname: {
         placeholder: "např. Testnet",
-        label: "Přezdívka",
+        label: "Přezdívka (nepovinné)",
       },
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1837,6 +1838,10 @@ export default {
     },
   },
   CreateInvoiceDialog: {
+    formats: {
+      bolt11: "Faktura",
+      bolt12: "Nabídka",
+    },
     onchain_title: "Přijmout on-chain",
     bolt12_title: "Přijmout Bolt12",
     mint_unreachable: "Mint je nedostupný",

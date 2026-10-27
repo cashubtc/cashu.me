@@ -676,6 +676,7 @@ export default {
     },
   },
   BalanceView: {
+    total_label: "Toplam bakiye",
     mintUrl: {
       label: "Mint",
     },
@@ -1175,13 +1176,13 @@ export default {
     title: "Ecash al",
     actions: {
       paste: {
-        label: "@:global.actions.paste.label",
+        label: "Token yapıştır",
       },
       scan: {
-        label: "@:global.actions.scan.label",
+        label: "Token tara",
       },
       request: {
-        label: "Talep et",
+        label: "Ecash iste",
       },
       lock: {
         label: "@:global.actions.lock.label",
@@ -1461,7 +1462,7 @@ export default {
       label: "Takma ad",
     },
     balances: {
-      label: "Bakiyeler",
+      label: "Bu mint'teki bakiye",
     },
     warning_text:
       "Bu mint'teki ecash'iniz bu cihazda kalır. Mint'i tekrar eklerseniz geri gelir.",
@@ -1581,7 +1582,7 @@ export default {
     inputs: {
       nickname: {
         placeholder: "ör. Testnet",
-        label: "Takma ad",
+        label: "Takma ad (isteğe bağlı)",
       },
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1798,6 +1799,10 @@ export default {
     },
   },
   CreateInvoiceDialog: {
+    formats: {
+      bolt11: "Fatura",
+      bolt12: "Teklif",
+    },
     onchain_title: "Zincir üstü al",
     bolt12_title: "Bolt12 al",
     mint_unreachable: "Mint'e ulaşılamıyor",

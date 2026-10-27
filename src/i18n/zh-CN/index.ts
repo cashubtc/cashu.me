@@ -651,6 +651,7 @@ export default {
     },
   },
   BalanceView: {
+    total_label: "总余额",
     mintUrl: {
       label: "Mint",
     },
@@ -1141,13 +1142,13 @@ export default {
     title: "接收 ecash",
     actions: {
       paste: {
-        label: "@:global.actions.paste.label",
+        label: "粘贴代币",
       },
       scan: {
-        label: "@:global.actions.scan.label",
+        label: "扫描代币",
       },
       request: {
-        label: "请求",
+        label: "请求 ecash",
       },
       lock: {
         label: "@:global.actions.lock.label",
@@ -1424,7 +1425,7 @@ export default {
       label: "昵称",
     },
     balances: {
-      label: "余额",
+      label: "在此 Mint 中的余额",
     },
     warning_text:
       "您在此 Mint 的 ecash 会保留在本设备上。如果再次添加该 Mint，它会重新出现。",
@@ -1544,7 +1545,7 @@ export default {
     inputs: {
       nickname: {
         placeholder: "例如 Testnet",
-        label: "昵称",
+        label: "昵称（可选）",
       },
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1758,6 +1759,10 @@ export default {
     },
   },
   CreateInvoiceDialog: {
+    formats: {
+      bolt11: "发票",
+      bolt12: "要约",
+    },
     onchain_title: "链上接收",
     bolt12_title: "接收 Bolt12",
     mint_unreachable: "无法连接 Mint",

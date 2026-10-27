@@ -134,7 +134,7 @@ test("enables ecash payment requests and edits the request amount", async ({
   await wallet.toggleSetting("Enable payment requests", true);
   await wallet.home();
   await wallet.openReceive("ecash");
-  await page.getByText("Request", { exact: true }).click();
+  await page.getByText("Request ecash", { exact: true }).click();
   await page.getByRole("button", { name: /Add amount/i }).click();
   await page.getByLabel(/^Enter amount/).fill("15");
   await page.getByLabel(/^Enter amount/).press("Enter");

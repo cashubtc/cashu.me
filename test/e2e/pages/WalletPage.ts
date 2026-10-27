@@ -101,9 +101,7 @@ export class WalletPage {
   async mintBolt12(amount: number) {
     const before = await this.balanceSats();
     await this.openReceive("lightning");
-    await this.page
-      .getByRole("button", { name: "BOLT12", exact: true })
-      .click();
+    await this.page.getByRole("button", { name: "Offer", exact: true }).click();
     await expect(
       this.page.getByText("Receive Bolt12", { exact: true })
     ).toBeVisible();

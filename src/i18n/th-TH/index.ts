@@ -659,6 +659,7 @@ export default {
     },
   },
   BalanceView: {
+    total_label: "ยอดคงเหลือรวม",
     mintUrl: {
       label: "Mint",
     },
@@ -1151,13 +1152,13 @@ export default {
     title: "รับ ecash",
     actions: {
       paste: {
-        label: "@:global.actions.paste.label",
+        label: "วางโทเค็น",
       },
       scan: {
-        label: "@:global.actions.scan.label",
+        label: "สแกนโทเค็น",
       },
       request: {
-        label: "ขอ",
+        label: "ขอ ecash",
       },
       lock: {
         label: "@:global.actions.lock.label",
@@ -1437,7 +1438,7 @@ export default {
       label: "ชื่อเล่น",
     },
     balances: {
-      label: "ยอดเงินคงเหลือ",
+      label: "ยอดคงเหลือใน Mint นี้",
     },
     warning_text:
       "ecash ของคุณจาก Mint นี้ยังอยู่บนอุปกรณ์นี้ และจะกลับมาเมื่อคุณเพิ่ม Mint นี้อีกครั้ง",
@@ -1557,7 +1558,7 @@ export default {
     inputs: {
       nickname: {
         placeholder: "เช่น Testnet",
-        label: "ชื่อเล่น",
+        label: "ชื่อเล่น (ไม่บังคับ)",
       },
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1774,6 +1775,10 @@ export default {
     },
   },
   CreateInvoiceDialog: {
+    formats: {
+      bolt11: "ใบแจ้งหนี้",
+      bolt12: "ข้อเสนอ",
+    },
     onchain_title: "รับแบบออนเชน",
     bolt12_title: "รับ Bolt12",
     mint_unreachable: "เข้าถึง Mint ไม่ได้",

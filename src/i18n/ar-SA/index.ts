@@ -658,6 +658,7 @@ export default {
     },
   },
   BalanceView: {
+    total_label: "إجمالي الرصيد",
     mintUrl: {
       label: "المِنْت",
     },
@@ -1151,13 +1152,13 @@ export default {
     title: "استلام ecash",
     actions: {
       paste: {
-        label: "@:global.actions.paste.label",
+        label: "لصق الرمز",
       },
       scan: {
-        label: "@:global.actions.scan.label",
+        label: "مسح الرمز",
       },
       request: {
-        label: "طلب",
+        label: "طلب ecash",
       },
       lock: {
         label: "@:global.actions.lock.label",
@@ -1437,7 +1438,7 @@ export default {
       label: "الاسم المستعار",
     },
     balances: {
-      label: "الأرصدة",
+      label: "الرصيد في هذا المِنْت",
     },
     warning_text:
       "يبقى ecash الخاص بك من هذا المِنْت على هذا الجهاز، ويعود إذا أضفت المِنْت مرة أخرى.",
@@ -1556,7 +1557,7 @@ export default {
     inputs: {
       nickname: {
         placeholder: "مثال: Testnet",
-        label: "الاسم المستعار",
+        label: "الاسم المستعار (اختياري)",
       },
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1774,6 +1775,10 @@ export default {
     },
   },
   CreateInvoiceDialog: {
+    formats: {
+      bolt11: "فاتورة",
+      bolt12: "عرض",
+    },
     onchain_title: "الاستلام على السلسلة",
     bolt12_title: "استلام Bolt12",
     mint_unreachable: "تعذّر الوصول إلى المِنْت",

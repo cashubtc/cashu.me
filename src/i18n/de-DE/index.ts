@@ -674,6 +674,7 @@ export default {
     },
   },
   BalanceView: {
+    total_label: "Gesamtguthaben",
     mintUrl: {
       label: "Mint",
     },
@@ -1179,13 +1180,13 @@ export default {
     title: "Ecash empfangen",
     actions: {
       paste: {
-        label: "@:global.actions.paste.label",
+        label: "Token einfügen",
       },
       scan: {
-        label: "@:global.actions.scan.label",
+        label: "Token scannen",
       },
       request: {
-        label: "Anfordern",
+        label: "Ecash anfordern",
       },
       lock: {
         label: "@:global.actions.lock.label",
@@ -1465,7 +1466,7 @@ export default {
       label: "Spitzname",
     },
     balances: {
-      label: "Guthaben",
+      label: "Guthaben bei dieser Mint",
     },
     warning_text:
       "Ihr Ecash von dieser Mint bleibt auf diesem Gerät. Es erscheint wieder, wenn Sie die Mint erneut hinzufügen.",
@@ -1585,7 +1586,7 @@ export default {
     inputs: {
       nickname: {
         placeholder: "z. B. Testnet",
-        label: "Spitzname",
+        label: "Spitzname (optional)",
       },
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1805,6 +1806,10 @@ export default {
     },
   },
   CreateInvoiceDialog: {
+    formats: {
+      bolt11: "Rechnung",
+      bolt12: "Angebot",
+    },
     onchain_title: "On-Chain empfangen",
     bolt12_title: "Bolt12 empfangen",
     mint_unreachable: "Mint nicht erreichbar",

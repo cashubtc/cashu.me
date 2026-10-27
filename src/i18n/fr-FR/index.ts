@@ -676,6 +676,7 @@ export default {
     },
   },
   BalanceView: {
+    total_label: "Solde total",
     mintUrl: {
       label: "Mint",
     },
@@ -1181,13 +1182,13 @@ export default {
     title: "Recevoir de l'ecash",
     actions: {
       paste: {
-        label: "@:global.actions.paste.label",
+        label: "Coller le jeton",
       },
       scan: {
-        label: "@:global.actions.scan.label",
+        label: "Scanner le jeton",
       },
       request: {
-        label: "Demander",
+        label: "Demander de l'ecash",
       },
       lock: {
         label: "@:global.actions.lock.label",
@@ -1467,7 +1468,7 @@ export default {
       label: "Surnom",
     },
     balances: {
-      label: "Soldes",
+      label: "Solde sur cette mint",
     },
     warning_text:
       "Votre ecash de cette mint reste sur cet appareil. Il réapparaît si vous ajoutez de nouveau la mint.",
@@ -1587,7 +1588,7 @@ export default {
     inputs: {
       nickname: {
         placeholder: "ex. Testnet",
-        label: "Surnom",
+        label: "Surnom (facultatif)",
       },
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1808,6 +1809,10 @@ export default {
     },
   },
   CreateInvoiceDialog: {
+    formats: {
+      bolt11: "Facture",
+      bolt12: "Offre",
+    },
     onchain_title: "Recevoir on-chain",
     bolt12_title: "Recevoir Bolt12",
     mint_unreachable: "Mint injoignable",

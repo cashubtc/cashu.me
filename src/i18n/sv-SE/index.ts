@@ -663,6 +663,7 @@ export default {
     },
   },
   BalanceView: {
+    total_label: "Totalt saldo",
     mintUrl: {
       label: "Mint",
     },
@@ -1162,13 +1163,13 @@ export default {
     title: "Ta emot ecash",
     actions: {
       paste: {
-        label: "@:global.actions.paste.label",
+        label: "Klistra in token",
       },
       scan: {
-        label: "@:global.actions.scan.label",
+        label: "Skanna token",
       },
       request: {
-        label: "Begär",
+        label: "Begär ecash",
       },
       lock: {
         label: "@:global.actions.lock.label",
@@ -1448,7 +1449,7 @@ export default {
       label: "Smeknamn",
     },
     balances: {
-      label: "Saldon",
+      label: "Saldo på den här minten",
     },
     warning_text:
       "Din ecash från den här minten finns kvar på enheten. Den kommer tillbaka om du lägger till minten igen.",
@@ -1568,7 +1569,7 @@ export default {
     inputs: {
       nickname: {
         placeholder: "t.ex. Testnet",
-        label: "Smeknamn",
+        label: "Smeknamn (valfritt)",
       },
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1788,6 +1789,10 @@ export default {
     },
   },
   CreateInvoiceDialog: {
+    formats: {
+      bolt11: "Faktura",
+      bolt12: "Erbjudande",
+    },
     onchain_title: "Ta emot on-chain",
     bolt12_title: "Ta emot Bolt12",
     mint_unreachable: "Minten går inte att nå",

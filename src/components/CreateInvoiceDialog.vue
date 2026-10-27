@@ -73,8 +73,14 @@
                   (v) => v !== isBolt12 && toggleInvoiceType()
                 "
                 :options="[
-                  { label: 'BOLT11', value: false },
-                  { label: 'BOLT12', value: true },
+                  {
+                    label: $t('CreateInvoiceDialog.formats.bolt11'),
+                    value: false,
+                  },
+                  {
+                    label: $t('CreateInvoiceDialog.formats.bolt12'),
+                    value: true,
+                  },
                 ]"
                 rounded
                 unelevated

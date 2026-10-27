@@ -1345,6 +1345,22 @@ body.body--light .q-notification {
 body .q-notifications__list--bottom {
   bottom: calc(env(safe-area-inset-bottom, 0px) + 84px);
 }
+// Stacked toasts join into one grouped card (R52, user direction): no gap between them, a
+// shared hairline and outer corners only, so list rows never show through between toasts.
+body .q-notifications__list .q-notification {
+  margin-top: 0;
+}
+body .q-notifications__list .q-notification + .q-notification {
+  margin-top: -1px;
+}
+body .q-notifications__list .q-notification:not(:last-child) {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+body .q-notifications__list .q-notification:not(:first-child) {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
 // Toasts live outside #q-app; in right-to-left they follow the page's direction too.
 html[dir="rtl"] .q-notifications {
   direction: rtl;

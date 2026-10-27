@@ -673,6 +673,7 @@ export default {
     },
   },
   BalanceView: {
+    total_label: "Συνολικό υπόλοιπο",
     mintUrl: {
       label: "Mint",
     },
@@ -1173,13 +1174,13 @@ export default {
     title: "Λήψη ecash",
     actions: {
       paste: {
-        label: "@:global.actions.paste.label",
+        label: "Επικόλληση token",
       },
       scan: {
-        label: "@:global.actions.scan.label",
+        label: "Σάρωση token",
       },
       request: {
-        label: "Αίτημα",
+        label: "Αίτημα ecash",
       },
       lock: {
         label: "@:global.actions.lock.label",
@@ -1459,7 +1460,7 @@ export default {
       label: "Ψευδώνυμο",
     },
     balances: {
-      label: "Υπόλοιπα",
+      label: "Υπόλοιπο σε αυτό το mint",
     },
     warning_text:
       "Το ecash σας από αυτό το mint μένει σε αυτή τη συσκευή. Επιστρέφει αν προσθέσετε ξανά το mint.",
@@ -1579,7 +1580,7 @@ export default {
     inputs: {
       nickname: {
         placeholder: "π.χ. Testnet",
-        label: "Ψευδώνυμο",
+        label: "Ψευδώνυμο (προαιρετικό)",
       },
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1800,6 +1801,10 @@ export default {
     },
   },
   CreateInvoiceDialog: {
+    formats: {
+      bolt11: "Τιμολόγιο",
+      bolt12: "Προσφορά",
+    },
     onchain_title: "Λήψη on-chain",
     bolt12_title: "Λήψη Bolt12",
     mint_unreachable: "Το mint δεν είναι προσβάσιμο",

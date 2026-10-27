@@ -22,6 +22,10 @@
             color="primary"
           />
         </transition>
+        <!-- Names the hero figure, so it reads apart from the selected mint's own balance. -->
+        <div class="balance-total-label">
+          {{ $t("BalanceView.total_label") }}
+        </div>
         <q-carousel
           v-model="activeUnit"
           transition-prev="slide-right"
@@ -313,6 +317,13 @@ export default defineComponent({
 });
 </script>
 <style scoped>
+.balance-total-label {
+  color: var(--app-text-muted);
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+}
+
 .animated.pulse {
   animation-duration: 0.5s;
 }

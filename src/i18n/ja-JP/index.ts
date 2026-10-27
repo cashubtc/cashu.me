@@ -661,6 +661,7 @@ export default {
     },
   },
   BalanceView: {
+    total_label: "合計残高",
     mintUrl: {
       label: "ミント",
     },
@@ -1159,13 +1160,13 @@ export default {
     title: "ecash を受け取る",
     actions: {
       paste: {
-        label: "@:global.actions.paste.label",
+        label: "トークンを貼り付け",
       },
       scan: {
-        label: "@:global.actions.scan.label",
+        label: "トークンをスキャン",
       },
       request: {
-        label: "リクエスト",
+        label: "ecashをリクエスト",
       },
       lock: {
         label: "@:global.actions.lock.label",
@@ -1446,7 +1447,7 @@ export default {
       label: "ニックネーム",
     },
     balances: {
-      label: "残高",
+      label: "このミントの残高",
     },
     warning_text:
       "このミントの ecash はこのデバイスに残ります。ミントを再度追加すると元に戻ります。",
@@ -1567,7 +1568,7 @@ export default {
     inputs: {
       nickname: {
         placeholder: "例: Testnet",
-        label: "ニックネーム",
+        label: "ニックネーム（任意）",
       },
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1786,6 +1787,10 @@ export default {
     },
   },
   CreateInvoiceDialog: {
+    formats: {
+      bolt11: "インボイス",
+      bolt12: "オファー",
+    },
     onchain_title: "オンチェーンで受け取る",
     bolt12_title: "Bolt12 で受け取る",
     mint_unreachable: "ミントに接続できません",
