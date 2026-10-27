@@ -26,6 +26,11 @@ function isolateAmounts(text: string): string {
   return text.replace(AMOUNT_RUN, (run) => `\u2066${run}\u2069`);
 }
 
+// At most two toasts at once: a newer one dismisses the oldest, so a burst of messages never
+// covers the page (R48).
+const MAX_VISIBLE = 2;
+const visible: Array<() => void> = [];
+
 function toast(
   kind: ToastKind,
   message: string,
@@ -33,7 +38,7 @@ function toast(
   timeout = 5000
 ) {
   try {
-    Notify.create({
+    const dismiss: () => void = Notify.create({
       type: kind,
       icon: ICONS[kind],
       message: isolateAmounts(message),
@@ -41,7 +46,13 @@ function toast(
       position: POSITION,
       timeout,
       actions: CLOSE_ACTION,
+      onDismiss: () => {
+        const i = visible.indexOf(dismiss);
+        if (i >= 0) visible.splice(i, 1);
+      },
     });
+    visible.push(dismiss);
+    while (visible.length > MAX_VISIBLE) visible.shift()?.();
   } catch {
     // no Quasar app (unit tests)
   }

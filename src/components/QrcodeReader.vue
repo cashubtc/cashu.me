@@ -180,10 +180,22 @@ export default {
   pointer-events: none;
   position: absolute;
 }
+/* A scan target: four white corner brackets around a clear square, the page dimmed
+   outside it (R48: a plain outline did not read as a target). */
 .qr-scanner__frame {
+  --corner: 36px;
+  --stroke: 4px;
   aspect-ratio: 1;
-  border: 2px solid rgba(255, 255, 255, 0.9);
-  border-radius: 24px;
+  background: linear-gradient(#fff, #fff) top left / var(--corner) var(--stroke),
+    linear-gradient(#fff, #fff) top left / var(--stroke) var(--corner),
+    linear-gradient(#fff, #fff) top right / var(--corner) var(--stroke),
+    linear-gradient(#fff, #fff) top right / var(--stroke) var(--corner),
+    linear-gradient(#fff, #fff) bottom left / var(--corner) var(--stroke),
+    linear-gradient(#fff, #fff) bottom left / var(--stroke) var(--corner),
+    linear-gradient(#fff, #fff) bottom right / var(--corner) var(--stroke),
+    linear-gradient(#fff, #fff) bottom right / var(--stroke) var(--corner);
+  background-repeat: no-repeat;
+  border-radius: 6px;
   box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.55);
   width: min(72vw, 280px);
 }

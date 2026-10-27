@@ -1254,9 +1254,11 @@ body .q-notification {
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
   color: var(--app-text) !important;
   font-size: 14px;
-  max-width: min(calc(100vw - 32px), 480px);
+  max-width: none;
   min-height: 52px;
-  min-width: min(calc(100vw - 32px), 320px);
+  // One width for every toast: the page column inside its 16px gutters (R48: content-sized
+  // toasts left uneven ~70px margins).
+  width: min(calc(100vw - 32px), calc(var(--app-column) - 32px));
   padding: 6px 6px 6px 14px;
   padding-inline: 14px 6px;
 }
@@ -1308,6 +1310,11 @@ body .q-notification .q-notification__actions .q-btn .q-icon {
 body .q-notification .q-notification__actions .q-btn {
   min-height: 40px;
   min-width: 40px;
+}
+// Light mode: toasts are white cards on the page, like the Settings groups (R48: the
+// #f4f4f5 raised grey read as faint on a near-white page).
+body.body--light .q-notification {
+  background: var(--app-surface) !important;
 }
 // Toasts start under the 56px header row, so the menu, refresh and close buttons stay usable
 // while a toast is up (R47: the stack covered the header).
