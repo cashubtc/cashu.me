@@ -233,11 +233,25 @@ button:focus-visible {
   outline: 2px solid var(--app-accent) !important;
   outline-offset: 2px;
 }
-// Rows and tabs sit in overflow-clipped containers: draw the ring inside.
-.q-item.q-focusable:focus-visible,
-.q-tab.q-focusable:focus-visible {
+// Rows sit in overflow-clipped containers: draw the ring inside.
+.q-item.q-focusable:focus-visible {
   outline-offset: -2px;
   border-radius: 10px;
+}
+// Tabs ring their label as a pill, so the ring never crosses the active underline.
+.q-tab.q-focusable:focus-visible {
+  outline: none !important;
+  .q-tab__content {
+    border-radius: 999px;
+    box-shadow: 0 0 0 2px var(--app-accent);
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+// Text areas grow with their content; the native resize grip read as a stray mark.
+textarea {
+  resize: none;
 }
 
 // One disabled treatment for every button.
@@ -331,7 +345,8 @@ body[data-theme] .welcome-surface,
   }
 }
 .mint-chip:active {
-  background: var(--app-border-strong);
+  background: color-mix(in srgb, var(--app-text) 24%, transparent);
+  transform: scale(0.97);
 }
 .mint-chip__icon {
   color: var(--app-text-muted);
@@ -348,9 +363,9 @@ body[data-theme] .welcome-surface,
   font-variant-numeric: tabular-nums;
 }
 
-/* Toggles: an inset pill. On = filled primary track with an on-primary thumb; off = dim track,
-   muted thumb. Quasar's default (54% primary track, oversized primary thumb) reads the same as
-   off in monochrome. */
+/* Toggles: an inset pill. On = filled primary track with an on-primary thumb on the right;
+   off = an empty outlined track with a muted thumb on the left, so off never reads as an
+   inverted on (a dim filled track did, in monochrome). */
 .q-toggle:not(.q-toggle--dense) {
   .q-toggle__inner {
     padding: 0.2em 0.3em;
@@ -358,7 +373,9 @@ body[data-theme] .welcome-surface,
   .q-toggle__track {
     height: 0.6em;
     border-radius: 0.3em;
-    opacity: 0.4;
+    opacity: 1;
+    background: transparent;
+    box-shadow: inset 0 0 0 2px var(--app-text-subtle);
   }
   .q-toggle__thumb {
     top: 0.28em;
@@ -367,11 +384,13 @@ body[data-theme] .welcome-surface,
     height: 0.44em;
   }
   .q-toggle__thumb:after {
+    background-color: var(--app-text-subtle);
     box-shadow: none;
   }
   .q-toggle__inner--truthy {
     .q-toggle__track {
-      opacity: 1;
+      background: currentColor;
+      box-shadow: none;
     }
     .q-toggle__thumb {
       left: 0.58em;

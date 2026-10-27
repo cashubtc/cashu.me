@@ -77,7 +77,7 @@ test("enables NWC, edits its allowance, copies and reopens the connection", asyn
   const wallet = new WalletUi(page);
   await wallet.onboard(MINT_A_URL);
   await wallet.settings("nwc");
-  await wallet.toggleSetting("Enable NWC", true);
+  await wallet.toggleSetting("Enable Nostr Wallet Connect", true);
   await page
     .getByRole("spinbutton", { name: "Allowance left (sat)" })
     .fill("250");
@@ -93,7 +93,7 @@ test("enables NWC, edits its allowance, copies and reopens the connection", asyn
   await expect(
     page.getByRole("spinbutton", { name: "Allowance left (sat)" })
   ).toHaveValue("250");
-  await wallet.toggleSetting("Enable NWC", false);
+  await wallet.toggleSetting("Enable Nostr Wallet Connect", false);
   await expect(page.getByRole("spinbutton")).toHaveCount(0);
 });
 

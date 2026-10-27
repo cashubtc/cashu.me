@@ -599,15 +599,15 @@ export default defineComponent({
   position: relative;
 }
 
-/* Direction badge: a disc tinted in the arrow's own colour, cut out of the icon circle by a
-   ring of the row colour, so direction reads at a glance and follows hover and pressed. */
+/* Direction badge: a solid disc (text colour out, positive colour in) with the arrow knocked
+   out in the row colour, cut from the icon circle by a ring of the row colour. */
 .direction-badge {
   align-items: center;
-  background: color-mix(in srgb, currentColor 24%, var(--row-bg));
+  background: var(--app-text);
   border: 2px solid var(--row-bg);
   border-radius: 50%;
   bottom: -5px;
-  color: var(--app-text);
+  color: var(--row-bg);
   display: flex;
   height: 22px;
   justify-content: center;
@@ -617,7 +617,7 @@ export default defineComponent({
 }
 
 .direction-badge--in {
-  color: var(--q-positive);
+  background: var(--q-positive);
 }
 
 .transaction-icon {

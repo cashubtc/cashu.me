@@ -23,7 +23,9 @@
             <q-item-label caption>{{
               $t("RemoveMintDialog.inputs.mint_url.label")
             }}</q-item-label>
-            <q-item-label class="ellipsis">{{ mintToRemove.url }}</q-item-label>
+            <q-item-label class="ellipsis">{{
+              mintToRemove.url.replace(/^https?:\/\//, "")
+            }}</q-item-label>
           </q-item-section>
         </q-item>
         <q-item>
@@ -52,10 +54,9 @@
           {{ $t("RemoveMintDialog.actions.cancel.label") }}
         </q-btn>
         <q-btn
-          outline
+          unelevated
           rounded
           no-caps
-          color="negative"
           class="col remove-btn"
           @click="removeMintLocal"
           v-close-popup
@@ -119,3 +120,11 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+/* The destructive action is the filled pill; Cancel stays the quiet one. */
+.remove-btn {
+  background: var(--q-negative);
+  color: var(--app-surface);
+}
+</style>

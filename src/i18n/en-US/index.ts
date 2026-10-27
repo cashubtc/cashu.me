@@ -122,7 +122,7 @@ export default {
         title: "Terms",
         terms: {
           title: "Terms",
-          caption: "Terms of Service",
+          caption: "What you agree to by using Cashu.me",
         },
       },
       links: {
@@ -331,14 +331,15 @@ export default {
       enable_toggle: "Enable payment requests",
       claim_automatically: {
         toggle: "Claim automatically",
-        description: "Receive incoming payments automatically.",
+        description:
+          "Add incoming payments to your balance without asking. When off, you claim each one.",
       },
     },
     nostr_wallet_connect: {
       title: "Nostr Wallet Connect (NWC)",
       description:
         "Lets other apps pay from this wallet through Nostr Wallet Connect.",
-      enable_toggle: "Enable NWC",
+      enable_toggle: "Enable Nostr Wallet Connect",
       payments_note:
         "You can only use NWC for payments from your Bitcoin balance. Payments will be made from your active mint.",
       connection: {
@@ -448,7 +449,7 @@ export default {
         description: "Pays invoices from several mints at once.",
       },
       nostr_mint_backup: {
-        toggle: "Backup mint list on Nostr",
+        toggle: "Back up mint list to Nostr",
         description:
           "Backs up your mint list to your Nostr relays so you can restore it on another device.",
         notifications: {
@@ -482,7 +483,7 @@ export default {
       },
       bip177: {
         title: "Bitcoin symbol",
-        description: "Use ₿ symbol instead of sats.",
+        description: "Show amounts as ₿2,789 instead of 2,789 sats.",
         toggle: "Use ₿ symbol",
       },
     },
@@ -500,7 +501,7 @@ export default {
       copy_lightning_address: "Copy Lightning address",
     },
     multinut: {
-      use_multinut: "Pay from several mints (Multinut)",
+      use_multinut: "Multi-mint payments",
     },
     advanced: {
       title: "Advanced",
@@ -1434,7 +1435,7 @@ export default {
     },
     qr_scanner: {
       title: "Scan QR code",
-      description: "Tap to scan an address",
+      description: "Scan an invoice or address",
     },
     paste_button: {
       label: "@:global.actions.paste.label",
@@ -1442,7 +1443,7 @@ export default {
   },
   PayInvoiceDialog: {
     input_data: {
-      title: "Pay Lightning invoice",
+      title: "Pay with Lightning",
       title_bolt12: "Pay Lightning offer",
       inputs: {
         invoice_data: {
@@ -1531,7 +1532,7 @@ export default {
   AddMintDialog: {
     title: "Do you trust this mint?",
     description:
-      "Join this mint only if you trust it. Mints can cease operations at any time.",
+      "Join this mint only if you trust it. If it stops operating, the ecash you hold with it is lost.",
     unreachable_error_text:
       "This mint is not reachable. Check the URL and your connection, then try again.",
     inputs: {
