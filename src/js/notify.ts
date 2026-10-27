@@ -17,6 +17,15 @@ const ICONS: Record<ToastKind, string> = {
   info: "info",
 };
 
+// Amounts keep their left-to-right order inside right-to-left toasts: each run such as
+// "₿500" or "$1.00" is wrapped in Unicode isolates (LRI…PDI), so Arabic shows ₿500, not 500₿.
+const AMOUNT_RUN = /[₿$€]?\d[\d.,\u00a0\u202f]*(\s?(sats?|[₿$€]))?/g;
+function isolateAmounts(text: string): string {
+  if (typeof document === "undefined" || document.documentElement.dir !== "rtl")
+    return text;
+  return text.replace(AMOUNT_RUN, (run) => `\u2066${run}\u2069`);
+}
+
 function toast(
   kind: ToastKind,
   message: string,
@@ -27,8 +36,8 @@ function toast(
     Notify.create({
       type: kind,
       icon: ICONS[kind],
-      message,
-      caption: caption || undefined,
+      message: isolateAmounts(message),
+      caption: caption ? isolateAmounts(caption) : undefined,
       position: POSITION,
       timeout,
       actions: CLOSE_ACTION,

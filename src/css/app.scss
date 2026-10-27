@@ -1277,6 +1277,11 @@ body .q-notification.bg-negative .q-notification__icon {
 body .q-notification.bg-warning .q-notification__icon {
   color: #f2a900;
 }
+// On the pale light-mode toast the warning amber is darkened to the same weight as the
+// success and error icons (R47: the bright yellow triangle sat apart from them).
+body.body--light .q-notification.bg-warning .q-notification__icon {
+  color: #b45309;
+}
 body .q-notification.bg-info .q-notification__icon {
   color: var(--app-text-muted);
 }
@@ -1303,6 +1308,11 @@ body .q-notification .q-notification__actions .q-btn .q-icon {
 body .q-notification .q-notification__actions .q-btn {
   min-height: 40px;
   min-width: 40px;
+}
+// Toasts start under the 56px header row, so the menu, refresh and close buttons stay usable
+// while a toast is up (R47: the stack covered the header).
+body .q-notifications__list--top {
+  top: calc(var(--safe-area-inset-top, 0px) + 52px);
 }
 // Toasts live outside #q-app; in right-to-left they follow the page's direction too.
 html[dir="rtl"] .q-notifications {
