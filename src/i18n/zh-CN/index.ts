@@ -560,7 +560,7 @@ export default {
           title: "增加 keyset 计数器",
           description:
             "点击某个 keyset 以增加其计数器。可用于解决“outputs have already been signed”错误。",
-          counter: "计数器: {count}",
+          counter: "计数器：{count}",
           increase: "增加 {id} 的计数器",
         },
         unset_reserved: {
@@ -1253,6 +1253,7 @@ export default {
       caption: "付款请求",
       description: "通过 Nostr 接收支付",
     },
+    request_index: "第 {index} 个，共 {total} 个请求",
     actions: {
       copy: {
         label: "@:global.actions.copy.label",
@@ -1668,6 +1669,7 @@ export default {
     chain_confirmed: "已确认",
     chain_pending: "待确认",
     states: {
+      waiting: "等待付款",
       paid: "已付款",
       unpaid: "未付款",
       pending: "待处理",

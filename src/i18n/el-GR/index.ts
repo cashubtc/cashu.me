@@ -1287,6 +1287,7 @@ export default {
       caption: "Αίτημα πληρωμής",
       description: "Λήψη πληρωμών μέσω Nostr",
     },
+    request_index: "Αίτημα {index} από {total}",
     actions: {
       copy: {
         label: "@:global.actions.copy.label",
@@ -1704,6 +1705,7 @@ export default {
     chain_confirmed: "Επιβεβαιώθηκε",
     chain_pending: "Σε εκκρεμότητα",
     states: {
+      waiting: "Αναμονή πληρωμής",
       paid: "Πληρώθηκε",
       unpaid: "Απλήρωτη",
       pending: "Σε εκκρεμότητα",

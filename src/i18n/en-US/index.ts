@@ -1329,6 +1329,7 @@ export default {
     },
     received_total: "Received total",
     no_payments_yet: "No payments yet",
+    request_index: "Request {index} of {total}",
     actions: {
       copy: {
         label: "@:global.actions.copy.label",
@@ -1713,6 +1714,7 @@ export default {
     chain_confirmed: "Confirmed",
     chain_pending: "Pending",
     states: {
+      waiting: "Waiting for payment",
       paid: "Paid",
       unpaid: "Unpaid",
       pending: "Pending",

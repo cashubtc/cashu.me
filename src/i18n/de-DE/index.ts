@@ -1293,6 +1293,7 @@ export default {
       caption: "Zahlungsanforderung",
       description: "Zahlungen über Nostr empfangen",
     },
+    request_index: "Anfrage {index} von {total}",
     actions: {
       copy: {
         label: "@:global.actions.copy.label",
@@ -1710,6 +1711,7 @@ export default {
     chain_confirmed: "Bestätigt",
     chain_pending: "Ausstehend",
     states: {
+      waiting: "Warten auf Zahlung",
       paid: "Bezahlt",
       unpaid: "Unbezahlt",
       pending: "Ausstehend",

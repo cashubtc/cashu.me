@@ -1289,6 +1289,7 @@ export default {
       caption: "Ödeme talebi",
       description: "Nostr aracılığıyla ödeme al",
     },
+    request_index: "İstek {index} / {total}",
     actions: {
       copy: {
         label: "@:global.actions.copy.label",
@@ -1706,6 +1707,7 @@ export default {
     chain_confirmed: "Onaylandı",
     chain_pending: "Bekliyor",
     states: {
+      waiting: "Ödeme bekleniyor",
       paid: "Ödendi",
       unpaid: "Ödenmedi",
       pending: "Bekliyor",

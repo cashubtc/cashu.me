@@ -227,6 +227,10 @@ export default defineComponent({
       const state = (this.invoice?.status as string) || this.mintQuote?.state;
       if (!state) return "";
       const lower = state.toLowerCase();
+      // An incoming invoice that is not paid yet is waiting on the payer, not on the wallet.
+      if (["pending", "unpaid"].includes(lower)) {
+        return this.$t("QuoteInformation.states.waiting") as string;
+      }
       const key = `QuoteInformation.states.${lower}`;
       if (this.$te(key)) return this.$t(key) as string;
       return lower.charAt(0).toUpperCase() + lower.slice(1);

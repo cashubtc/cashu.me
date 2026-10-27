@@ -1264,6 +1264,7 @@ export default {
       caption: "طلب دفع",
       description: "استلام المدفوعات عبر Nostr",
     },
+    request_index: "الطلب {index} من {total}",
     actions: {
       copy: {
         label: "@:global.actions.copy.label",
@@ -1680,6 +1681,7 @@ export default {
     chain_confirmed: "مؤكَّدة",
     chain_pending: "معلّقة",
     states: {
+      waiting: "في انتظار الدفع",
       paid: "مدفوعة",
       unpaid: "غير مدفوعة",
       pending: "معلّقة",

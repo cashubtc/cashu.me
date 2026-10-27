@@ -27,33 +27,32 @@
               {{ $t("PaymentRequestDialog.payment_request.caption") }}
             </q-item-label>
           </div>
-          <div class="row items-center no-wrap sheet-header-actions">
-            <q-btn
-              flat
-              dense
-              round
-              icon="chevron_left"
-              class="rtl-flip touch-target-44"
-              color="grey"
-              :aria-label="$t('PaymentRequestDialog.actions.previous.label')"
-              @click="stepRequest(-1)"
-              :disable="ownRequestIndices.length <= 1"
-            />
-            <div class="q-mx-sm text-caption text-grey-6">
-              {{ currentIndexDisplay }}
-            </div>
-            <q-btn
-              flat
-              dense
-              round
-              icon="chevron_right"
-              class="rtl-flip touch-target-44"
-              color="grey"
-              :aria-label="$t('PaymentRequestDialog.actions.next.label')"
-              @click="stepRequest(1)"
-              :disable="ownRequestIndices.length <= 1"
-            />
-          </div>
+        </div>
+
+        <!-- Earlier requests: a pager under the title, only once there is more than one. -->
+        <div
+          v-if="ownRequestIndices.length > 1"
+          class="row items-center justify-center no-wrap pr-pager"
+        >
+          <q-btn
+            flat
+            round
+            icon="chevron_left"
+            class="rtl-flip touch-target-44"
+            color="grey"
+            :aria-label="$t('PaymentRequestDialog.actions.previous.label')"
+            @click="stepRequest(-1)"
+          />
+          <div class="pr-pager__label">{{ currentIndexDisplay }}</div>
+          <q-btn
+            flat
+            round
+            icon="chevron_right"
+            class="rtl-flip touch-target-44"
+            color="grey"
+            :aria-label="$t('PaymentRequestDialog.actions.next.label')"
+            @click="stepRequest(1)"
+          />
         </div>
 
         <!-- Content -->
@@ -82,9 +81,8 @@
                   class="row items-center no-wrap pr-amount-row"
                 >
                   <q-btn
-                    color="primary"
+                    outline
                     rounded
-                    unelevated
                     no-caps
                     data-testid="pr-amount"
                     class="pr-amount-pill"
@@ -189,7 +187,7 @@
               </div>
 
               <!-- New request button -->
-              <div class="row justify-center q-pt-lg q-pb-md">
+              <div class="row justify-center q-pt-sm q-pb-md">
                 <q-btn
                   flat
                   size="md"
@@ -392,7 +390,10 @@ export default defineComponent({
       const own = this.ownRequestIndices;
       if (!own.length) return "0/0";
       const position = own.indexOf(this.selectedPRIndex as number);
-      return `${(position < 0 ? own.length - 1 : position) + 1}/${own.length}`;
+      return this.$t("PaymentRequestDialog.request_index", {
+        index: (position < 0 ? own.length - 1 : position) + 1,
+        total: own.length,
+      }) as string;
     },
     currentPayments(): any[] {
       const prStore = usePRStore();
@@ -594,6 +595,19 @@ export default defineComponent({
 }
 .pr-chip-row .mint-chip:disabled {
   cursor: default;
+}
+/* The pager is quiet chrome under the title: muted "Request 2 of 3" between 44px arrows. */
+.pr-pager {
+  gap: 4px;
+  margin-top: -8px;
+  padding-bottom: 8px;
+}
+.pr-pager__label {
+  color: var(--app-text-muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  min-width: 96px;
+  text-align: center;
 }
 .pr-sheet-options {
   padding: 4px 16px 16px;

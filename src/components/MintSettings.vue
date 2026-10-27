@@ -72,7 +72,7 @@
                 <CircleCheckIcon
                   v-else-if="mint.url == activeMintUrl"
                   :size="18"
-                  class="text-primary mint-card__status"
+                  class="mint-card__status mint-card__check"
                   aria-hidden="true"
                 />
                 <q-btn
@@ -273,6 +273,7 @@
           color="primary"
           rounded
           unelevated
+          no-caps
           @click="extractAndMintAmountSwap(swapAmountData)"
           :disable="
             !swapData.fromUrl ||
@@ -663,7 +664,9 @@ export default defineComponent({
   margin-top: 4px;
 }
 
-.swap-btn {
+/* Swap sits beside the 56px amount field, with the 1rem label of the other mint actions. */
+.q-btn.swap-btn {
+  font-size: 1rem;
   min-height: 56px;
 }
 
@@ -769,6 +772,12 @@ export default defineComponent({
 
 /* The active card is marked by its accent border and check; its text stays ink, so raw
    accent colours never carry body text on a dark card (R42: classic and salvador missed AA). */
+/* The active check is ink: in red and pink themes an accent check read as an error (R44);
+   the accent stays on the active card's border. */
+.mint-card__check {
+  color: var(--app-text);
+}
+
 body .mint-card.q-item--active {
   color: var(--app-text);
 }

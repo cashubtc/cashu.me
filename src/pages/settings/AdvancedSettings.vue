@@ -381,7 +381,7 @@ export default defineComponent({
       if (value.length <= 24) {
         return value;
       }
-      return `${value.slice(0, 8)}...${value.slice(-8)}`;
+      return `${value.slice(0, 8)}…${value.slice(-8)}`;
     },
     toggleTerminal: function () {
       useUiStore().toggleDebugConsole();
@@ -552,6 +552,7 @@ export default defineComponent({
 
 .keyset-id {
   color: var(--app-text);
+  font-size: 15px;
   min-width: 0;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   overflow-wrap: normal;

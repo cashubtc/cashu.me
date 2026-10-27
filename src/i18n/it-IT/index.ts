@@ -1256,6 +1256,7 @@ export default {
       caption: "Richiesta di pagamento",
       description: "Ricevi pagamenti via Nostr",
     },
+    request_index: "Richiesta {index} di {total}",
     actions: {
       copy: {
         label: "@:global.actions.copy.label",
@@ -1673,6 +1674,7 @@ export default {
     chain_confirmed: "Confermata",
     chain_pending: "In sospeso",
     states: {
+      waiting: "In attesa di pagamento",
       paid: "Pagata",
       unpaid: "Non pagata",
       pending: "In sospeso",

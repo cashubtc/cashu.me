@@ -1347,6 +1347,7 @@ export default {
       caption: "Žádost o platbu",
       description: "Přijímat platby přes Nostr",
     },
+    request_index: "Požadavek {index} z {total}",
     received_total: "Celkem přijato",
     no_payments_yet: "Žádné platby dosud",
     actions: {
@@ -1743,6 +1744,7 @@ export default {
     chain_confirmed: "Potvrzeno",
     chain_pending: "Čeká",
     states: {
+      waiting: "Čeká na platbu",
       paid: "Zaplaceno",
       unpaid: "Nezaplaceno",
       pending: "Čeká",

@@ -1276,6 +1276,7 @@ export default {
       caption: "Betalningsförfrågan",
       description: "Ta emot betalningar via Nostr",
     },
+    request_index: "Begäran {index} av {total}",
     actions: {
       copy: {
         label: "@:global.actions.copy.label",
@@ -1693,6 +1694,7 @@ export default {
     chain_confirmed: "Bekräftad",
     chain_pending: "Väntande",
     states: {
+      waiting: "Väntar på betalning",
       paid: "Betald",
       unpaid: "Obetald",
       pending: "Väntande",

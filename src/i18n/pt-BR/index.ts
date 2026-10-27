@@ -1334,6 +1334,7 @@ export default {
       caption: "Pedido de pagamento",
       description: "Receba pagamentos via Nostr",
     },
+    request_index: "Solicitação {index} de {total}",
     received_total: "Total recebido",
     no_payments_yet: "Nenhum pagamento ainda",
     actions: {
@@ -1720,6 +1721,7 @@ export default {
     chain_confirmed: "Confirmada",
     chain_pending: "Pendente",
     states: {
+      waiting: "Aguardando pagamento",
       paid: "Paga",
       unpaid: "Não paga",
       pending: "Pendente",

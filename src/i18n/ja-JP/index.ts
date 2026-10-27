@@ -1274,6 +1274,7 @@ export default {
       caption: "支払いリクエスト",
       description: "Nostr経由で支払いを受け取る",
     },
+    request_index: "リクエスト {index}/{total}",
     actions: {
       copy: {
         label: "@:global.actions.copy.label",
@@ -1692,6 +1693,7 @@ export default {
     chain_confirmed: "承認済み",
     chain_pending: "保留中",
     states: {
+      waiting: "支払い待ち",
       paid: "支払い済み",
       unpaid: "未払い",
       pending: "保留中",

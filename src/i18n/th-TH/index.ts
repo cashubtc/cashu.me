@@ -1265,6 +1265,7 @@ export default {
       caption: "คำขอชำระเงิน",
       description: "รับการชำระเงินผ่าน Nostr",
     },
+    request_index: "คำขอที่ {index} จาก {total}",
     actions: {
       copy: {
         label: "@:global.actions.copy.label",
@@ -1682,6 +1683,7 @@ export default {
     chain_confirmed: "ยืนยันแล้ว",
     chain_pending: "รอดำเนินการ",
     states: {
+      waiting: "กำลังรอการชำระเงิน",
       paid: "ชำระแล้ว",
       unpaid: "ยังไม่ชำระ",
       pending: "รอดำเนินการ",
