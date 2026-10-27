@@ -190,12 +190,22 @@ export default {
 /* The header is the sheets' header (16px inset, 44px close on the 6px toolbar inset) on a
    dark gradient, with fixed white ink, so it reads over any camera image in every theme. */
 .qr-scanner__header {
-  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
   left: 0;
-  padding: max(16px, env(safe-area-inset-top)) 16px 32px;
+  padding: max(16px, env(safe-area-inset-top)) 16px 16px;
   position: absolute;
   right: 0;
   top: 0;
+}
+/* The scrim extends below the header row, so the row itself stays symmetric and the
+   centred close button lines up with the title (R47). */
+.qr-scanner__header::before {
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
+  content: "";
+  height: calc(100% + 32px);
+  inset: 0 0 auto;
+  pointer-events: none;
+  position: absolute;
+  z-index: -1;
 }
 .qr-scanner__header,
 .qr-scanner__header .dialog-header,
