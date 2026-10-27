@@ -836,15 +836,7 @@ input[type="number"] {
   padding-bottom: 4px;
 }
 
-// Light mode: outlined field edges at 3:1 against the page, so empty fields read as fields
-// (R17, R18: Quasar's default 24% black edge is about 1.9:1).
-// Picker fields share the token (Quasar's dark outlined edge is 60% white).
-body {
-  --app-field-edge: rgba(255, 255, 255, 0.6);
-}
-body.body--light {
-  --app-field-edge: rgba(0, 0, 0, 0.45);
-}
+// Outlined fields and picker fields take their edge and fill from the surface tokens.
 body .q-field--outlined .q-field__control:before {
   border-color: var(--app-field-edge);
 }
@@ -1466,4 +1458,38 @@ body .q-notification__progress {
   .q-dialog__inner--standard > .q-card {
     border-radius: 20px !important;
   }
+}
+
+// Blocking states (already running, 404): one icon or code, a title, a line of text and one
+// full-width action, centred on the page surface.
+.blocking-state {
+  background: var(--app-surface, #000);
+  color: var(--app-text);
+}
+
+.blocking-state__icon {
+  color: var(--app-text-muted);
+}
+
+.blocking-state__title {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.3;
+  max-width: 320px;
+  text-wrap: balance;
+}
+
+.blocking-state__text {
+  font-size: 15px;
+  color: var(--app-text-muted);
+  max-width: 320px;
+  text-wrap: balance;
+}
+
+.blocking-state__action {
+  width: 100%;
+  max-width: 320px;
+  min-height: 52px;
+  font-size: 16px;
+  font-weight: 600;
 }

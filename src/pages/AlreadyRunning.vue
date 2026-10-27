@@ -33,36 +33,4 @@ export default defineComponent({
 });
 </script>
 
-<style scoped>
-.blocking-state {
-  background: var(--app-surface, #000);
-  color: var(--app-text);
-}
-
-.blocking-state__icon {
-  color: var(--app-text-muted);
-}
-
-.blocking-state__title {
-  font-size: 22px;
-  font-weight: 700;
-  line-height: 1.3;
-  max-width: 320px;
-  text-wrap: balance;
-}
-
-.blocking-state__text {
-  font-size: 15px;
-  color: var(--app-text-muted);
-  max-width: 320px;
-  text-wrap: balance;
-}
-
-.blocking-state__action {
-  width: 100%;
-  max-width: 320px;
-  min-height: 52px;
-  font-size: 16px;
-  font-weight: 600;
-}
-</style>
+<!-- The blocking-state styles live in src/css/app.scss (shared with the 404 page). -->

@@ -1,17 +1,9 @@
 <template>
-  <div class="not-found fullscreen column flex-center text-center q-pa-md">
-    <!-- The shared header slot: the same way out as every other page (R19). -->
-    <q-btn
-      flat
-      round
-      to="/"
-      class="not-found__close"
-      :aria-label="$t('ErrorNotFound.actions.home.label')"
-    >
-      <ChevronLeftIcon />
-    </q-btn>
+  <!-- Under the full-screen layout, so the back button sits in the shared header inside the
+       page column; the body is the shared blocking state (AlreadyRunning uses it too). -->
+  <q-page class="blocking-state column flex-center text-center q-pa-md">
     <div class="not-found__code">{{ $t("ErrorNotFound.title") }}</div>
-    <div class="text-h6 text-weight-bold q-mt-sm">
+    <div class="blocking-state__title q-mt-sm">
       {{ $t("ErrorNotFound.text") }}
     </div>
     <q-btn
@@ -19,38 +11,22 @@
       unelevated
       no-caps
       color="primary"
-      class="not-found__action q-mt-lg"
+      class="blocking-state__action q-mt-lg"
       to="/"
       :label="$t('ErrorNotFound.actions.home.label')"
     />
-  </div>
+  </q-page>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { ChevronLeft as ChevronLeftIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "ErrorNotFound",
-  components: { ChevronLeftIcon },
 });
 </script>
 
 <style scoped>
-.not-found {
-  background: var(--app-surface, #000);
-  color: var(--app-text);
-}
-
-.not-found__close {
-  position: absolute;
-  top: 3px; /* centre y 25, the shared header slot (measured on every other page) */
-  inset-inline-start: 6px;
-  width: 44px;
-  height: 44px;
-  color: var(--app-text);
-}
-
 .not-found__code {
   font-size: 64px;
   font-weight: 700;
@@ -58,9 +34,5 @@ export default defineComponent({
   letter-spacing: -0.02em;
   line-height: 1;
   color: var(--app-text-muted);
-}
-
-.not-found__action {
-  min-width: 200px;
 }
 </style>

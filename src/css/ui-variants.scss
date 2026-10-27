@@ -1,10 +1,25 @@
 // Surface style variations, previewed at /ui (src/pages/UiKitPage.vue) and switchable on any
 // page with ?ui=<id>. Each one only sets the container tokens from base.scss, so a variation
-// that wins can become the default by moving its values there. "current" sets nothing.
+// that wins can become the default by moving its values there. "current" (the default,
+// Tonal) sets nothing.
 
-// Segmented controls follow the outline buttons in every variation.
-html[data-ui-variant] body {
-  --app-segment-edge: var(--app-outline-edge);
+// 0. Outlined: the look before Tonal, strong outlines and no fills.
+html[data-ui-variant="outlined"] body {
+  --app-card-edge: var(--app-border-strong);
+  --app-card-edge-active: var(--app-accent);
+  --app-card-fill: transparent;
+  --app-card-fill-active: transparent;
+  --app-group-edge: var(--app-border);
+  --app-group-fill: var(--app-tint);
+  --app-field-fill: transparent;
+  --app-outline-edge: currentColor;
+  --app-segment-edge: var(--app-border-strong);
+}
+html[data-ui-variant="outlined"] body.body--dark {
+  --app-field-edge: rgba(255, 255, 255, 0.6);
+}
+html[data-ui-variant="outlined"] body.body--light {
+  --app-field-edge: rgba(0, 0, 0, 0.45);
 }
 
 // 1. Soft hairline: the same outlines, at about half the weight.
@@ -110,7 +125,7 @@ html[data-ui-variant="elevated"] body.body--light {
   background: #f2f2f4;
 }
 
-// 5. Tonal: no outlines; fills carry a little of the theme's accent, and the active card a
+// 5. Tonal without edges: no outlines; fills carry a little of the theme's accent, and the active card a
 // little more, so containers belong to the theme instead of reading as grey boxes.
 html[data-ui-variant="tonal"] body.body--dark {
   --app-card-edge: transparent;
@@ -141,43 +156,6 @@ html[data-ui-variant="tonal"] body.body--light {
   --app-field-fill: color-mix(in srgb, var(--q-primary) 6%, transparent);
   --app-outline-edge: transparent;
   --app-outline-fill: color-mix(in srgb, var(--q-primary) 9%, transparent);
-  --app-group-edge: transparent;
-  --app-group-fill: color-mix(in srgb, var(--q-primary) 4%, transparent);
-}
-
-// 6. Tonal, refined (council rounds 1 and 2): Tonal's fills and selected card, plus the boundaries
-// every reviewer asked for. Fields and the mint picker keep a quiet edge so they still read as
-// fields; outline buttons and segmented controls keep their outline instead of turning into
-// text; passive groups stay borderless.
-html[data-ui-variant="tonal-plus"] body.body--dark {
-  --app-card-edge: transparent;
-  --app-card-edge-active: color-mix(
-    in srgb,
-    var(--app-accent) 70%,
-    transparent
-  );
-  --app-card-fill: color-mix(in srgb, var(--app-accent) 7%, transparent);
-  --app-card-fill-active: color-mix(
-    in srgb,
-    var(--app-accent) 13%,
-    transparent
-  );
-  --app-field-edge: rgba(255, 255, 255, 0.34);
-  --app-field-fill: color-mix(in srgb, var(--app-accent) 6%, transparent);
-  --app-outline-edge: rgba(255, 255, 255, 0.34);
-  --app-outline-fill: transparent;
-  --app-group-edge: transparent;
-  --app-group-fill: color-mix(in srgb, var(--app-accent) 6%, transparent);
-}
-html[data-ui-variant="tonal-plus"] body.body--light {
-  --app-card-edge: transparent;
-  --app-card-edge-active: color-mix(in srgb, var(--q-primary) 85%, transparent);
-  --app-card-fill: color-mix(in srgb, var(--q-primary) 5%, transparent);
-  --app-card-fill-active: color-mix(in srgb, var(--q-primary) 5%, transparent);
-  --app-field-edge: rgba(0, 0, 0, 0.34);
-  --app-field-fill: color-mix(in srgb, var(--q-primary) 3%, #fff);
-  --app-outline-edge: rgba(0, 0, 0, 0.3);
-  --app-outline-fill: transparent;
   --app-group-edge: transparent;
   --app-group-fill: color-mix(in srgb, var(--q-primary) 4%, transparent);
 }

@@ -2,13 +2,13 @@
 // ?ui=<id>; the choice is kept on this device until it is set back to "current".
 
 export const UI_VARIANTS = [
-  { id: "current", label: "Current" },
+  { id: "current", label: "Tonal (default)" },
+  { id: "outlined", label: "Outlined (before)" },
   { id: "soft", label: "Soft hairline" },
   { id: "filled", label: "Filled" },
   { id: "hairline", label: "Fill + hairline" },
   { id: "elevated", label: "Elevated" },
-  { id: "tonal", label: "Tonal" },
-  { id: "tonal-plus", label: "Tonal, refined" },
+  { id: "tonal", label: "Tonal, no edges" },
 ] as const;
 
 export type UiVariantId = (typeof UI_VARIANTS)[number]["id"];

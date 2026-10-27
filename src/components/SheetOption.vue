@@ -74,8 +74,8 @@ export default defineComponent({
   outline-offset: 2px;
 }
 .sheet-option--selected {
-  background: var(--app-tint-strong);
-  border-color: var(--app-border-strong);
+  background: var(--app-card-fill-active);
+  border-color: var(--app-card-edge-active);
 }
 .sheet-option__icon {
   align-items: center;

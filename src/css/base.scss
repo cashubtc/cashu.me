@@ -122,19 +122,45 @@ $themes: (
 body {
   --app-hover-opacity: 0.1;
   --app-pressed-opacity: 0.24;
-  // Container edges and fills, in one place so a surface style can change them together
-  // (src/css/ui-variants.scss, previewed at /ui). The defaults are the shipped look.
-  --app-card-edge: var(--app-border-strong);
-  --app-card-edge-active: var(--app-accent);
-  --app-card-fill: transparent;
-  --app-card-fill-active: transparent;
   --app-card-shadow: none;
-  --app-group-edge: var(--app-border);
-  --app-group-fill: var(--app-tint);
-  --app-field-fill: transparent;
-  --app-outline-edge: currentColor;
   --app-outline-fill: transparent;
-  --app-segment-edge: var(--app-border-strong);
+  --app-segment-edge: var(--app-outline-edge);
+}
+
+// Surfaces ("Tonal", chosen at /ui after two council rounds): cards and settings groups are
+// borderless fills with a little of the theme's accent; fields, the mint picker, outline
+// buttons and segmented controls keep a quiet edge so they still read as controls; a selected
+// card or row is a stronger tint with a soft accent edge. The alternatives, including the
+// earlier outlined look, live in src/css/ui-variants.scss.
+body.body--dark {
+  --app-card-edge: transparent;
+  --app-card-edge-active: color-mix(
+    in srgb,
+    var(--app-accent) 32%,
+    transparent
+  );
+  --app-card-fill: color-mix(in srgb, var(--app-accent) 7%, transparent);
+  --app-card-fill-active: color-mix(
+    in srgb,
+    var(--app-accent) 12%,
+    transparent
+  );
+  --app-field-edge: rgba(255, 255, 255, 0.34);
+  --app-field-fill: color-mix(in srgb, var(--app-accent) 6%, transparent);
+  --app-outline-edge: rgba(255, 255, 255, 0.34);
+  --app-group-edge: transparent;
+  --app-group-fill: color-mix(in srgb, var(--app-accent) 6%, transparent);
+}
+body.body--light {
+  --app-card-edge: transparent;
+  --app-card-edge-active: color-mix(in srgb, var(--q-primary) 40%, transparent);
+  --app-card-fill: color-mix(in srgb, var(--q-primary) 5%, transparent);
+  --app-card-fill-active: color-mix(in srgb, var(--q-primary) 8%, transparent);
+  --app-field-edge: rgba(0, 0, 0, 0.34);
+  --app-field-fill: color-mix(in srgb, var(--q-primary) 3%, #fff);
+  --app-outline-edge: rgba(0, 0, 0, 0.3);
+  --app-group-edge: transparent;
+  --app-group-fill: color-mix(in srgb, var(--q-primary) 4%, transparent);
 }
 
 body.body--dark {
