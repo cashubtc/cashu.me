@@ -1316,10 +1316,10 @@ body .q-notification .q-notification__actions .q-btn {
 body.body--light .q-notification {
   background: var(--app-surface) !important;
 }
-// Toasts start under the 56px header row, so the menu, refresh and close buttons stay usable
-// while a toast is up (R47: the stack covered the header).
-body .q-notifications__list--top {
-  top: calc(var(--safe-area-inset-top, 0px) + 52px);
+// Toasts sit above the pinned bottom action (52px button + 24px inset), so they never cover
+// the balance or the primary button (user direction, R50).
+body .q-notifications__list--bottom {
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 84px);
 }
 // Toasts live outside #q-app; in right-to-left they follow the page's direction too.
 html[dir="rtl"] .q-notifications {
@@ -1339,4 +1339,12 @@ body .q-notification__progress {
   margin-inline: auto !important;
   max-width: 100%;
   width: var(--app-qr-size);
+}
+
+// Desktop: sheets open as centred dialogs, rounded on every corner (user direction, R50);
+// phones keep the bottom sheet.
+@media (min-width: 1024px) {
+  .q-dialog__inner--standard > .q-card {
+    border-radius: 20px !important;
+  }
 }

@@ -1,10 +1,11 @@
 import { Notify, QNotifyCreateOptions } from "quasar";
 import { i18n } from "src/boot/i18n";
 
-// One toast for the whole app (user direction, R46): every kind appears at the top, as a
+// One toast for the whole app (user direction, R46; at the bottom since R50 so it never
+// covers the balance): every kind appears in one place, as a
 // raised card with a status icon (styled in app.scss), and closes on its own or with ✕.
 // Positions are no longer chosen per call: copy confirmations used to appear at the bottom.
-const POSITION: QNotifyCreateOptions["position"] = "top";
+const POSITION: QNotifyCreateOptions["position"] = "bottom";
 const CLOSE_ACTION = [
   { icon: "close", color: "grey", round: true, handler: () => {} },
 ];

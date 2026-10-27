@@ -1,10 +1,10 @@
 <template>
   <q-dialog
     v-model="showReceiveDialog"
-    position="bottom"
+    :position="$q.screen.gt.sm ? 'standard' : 'bottom'"
     :maximized="$q.screen.lt.sm"
-    transition-show="slide-up"
-    transition-hide="slide-down"
+    :transition-show="$q.screen.gt.sm ? 'scale' : 'slide-up'"
+    :transition-hide="$q.screen.gt.sm ? 'scale' : 'slide-down'"
   >
     <q-card class="drawer-card full-width-card q-pb-lg">
       <q-card-section class="row items-center no-wrap drawer-header">

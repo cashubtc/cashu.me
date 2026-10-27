@@ -139,6 +139,13 @@ export default defineComponent({
   max-width: var(--app-column);
   padding: 0 6px;
 }
+/* Desktop: over the two-column wallet, the controls sit on its outer edges (R50). */
+@media (min-width: 1024px) {
+  .main-toolbar {
+    max-width: 1120px;
+    padding: 0 26px;
+  }
+}
 
 .main-toolbar-btn {
   color: var(--app-text);

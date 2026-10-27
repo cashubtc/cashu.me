@@ -1,47 +1,52 @@
 <template>
   <div class="row q-col-gutter-y-md justify-center q-pt-none q-pb-md">
     <div class="col-12 text-center q-gutter-y-md wallet-column">
-      <NoMintWarnBanner v-if="mints.length == 0" />
-      <BalanceView v-else :set-tab="setTab" />
-      <div class="wallet-actions q-pt-xl q-pb-lg">
-        <q-btn
-          unelevated
-          rounded
-          no-caps
-          data-testid="wallet-receive"
-          class="wallet-action-btn"
-          color="primary"
-          :label="$t('WalletPage.actions.receive.label')"
-          @click="showReceiveDialog = true"
-        />
-        <q-btn
-          flat
-          dense
-          round
-          class="wallet-scan-btn"
-          :aria-label="$t('global.actions.scan.label')"
-          @click="showCamera"
-        >
-          <ScanIcon :size="26" />
-        </q-btn>
-        <q-btn
-          unelevated
-          rounded
-          no-caps
-          data-testid="wallet-send"
-          class="wallet-action-btn"
-          color="primary"
-          :label="$t('WalletPage.actions.send.label')"
-          @click="showSendDialog = true"
-        />
-        <ReceiveDialog v-model="showReceiveDialog" />
-        <SendDialog v-model="showSendDialog" />
+      <!-- On desktop the wallet is two columns (user direction, R50): the balance, mint and
+           actions on the left, history and mints on the right; one column on phones. -->
+      <div class="wallet-hero q-gutter-y-md">
+        <NoMintWarnBanner v-if="mints.length == 0" />
+        <BalanceView v-else :set-tab="setTab" />
+        <div class="wallet-actions q-pt-xl q-pb-lg">
+          <q-btn
+            unelevated
+            rounded
+            no-caps
+            data-testid="wallet-receive"
+            class="wallet-action-btn"
+            color="primary"
+            :label="$t('WalletPage.actions.receive.label')"
+            @click="showReceiveDialog = true"
+          />
+          <q-btn
+            flat
+            dense
+            round
+            class="wallet-scan-btn"
+            :aria-label="$t('global.actions.scan.label')"
+            @click="showCamera"
+          >
+            <ScanIcon :size="26" />
+          </q-btn>
+          <q-btn
+            unelevated
+            rounded
+            no-caps
+            data-testid="wallet-send"
+            class="wallet-action-btn"
+            color="primary"
+            :label="$t('WalletPage.actions.send.label')"
+            @click="showSendDialog = true"
+          />
+          <ReceiveDialog v-model="showReceiveDialog" />
+          <SendDialog v-model="showSendDialog" />
+        </div>
       </div>
       <!-- ///////////////////////////////////////////
       ////////////////// TABLES /////////////////
       /////////////////////////////////////////// -->
       <q-expansion-item
         dense
+        class="wallet-panel"
         expand-icon-class="hidden"
         header-class="wallet-history-toggle"
         :model-value="$q.screen.gt.sm || expandHistory"
@@ -209,6 +214,25 @@
 
 .row > .wallet-column {
   max-width: var(--app-column);
+}
+
+/* Desktop: two columns, the hero held in view while history scrolls beside it. */
+@media (min-width: 1024px) {
+  .row > .wallet-column {
+    align-items: start;
+    column-gap: 48px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    max-width: 1120px;
+    padding: 0 32px;
+  }
+  .wallet-hero {
+    position: sticky;
+    top: 72px;
+  }
+  .wallet-panel {
+    padding-top: 48px;
+  }
 }
 
 .wallet-actions {

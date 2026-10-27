@@ -4,9 +4,9 @@
   <q-dialog
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event)"
-    position="bottom"
-    transition-show="slide-up"
-    transition-hide="slide-down"
+    :position="$q.screen.gt.sm ? 'standard' : 'bottom'"
+    :transition-show="$q.screen.gt.sm ? 'scale' : 'slide-up'"
+    :transition-hide="$q.screen.gt.sm ? 'scale' : 'slide-down'"
     @keydown.enter.prevent="$emit('enter')"
   >
     <q-card class="bottom-sheet" :class="{ 'bottom-sheet--dark': dark }">
