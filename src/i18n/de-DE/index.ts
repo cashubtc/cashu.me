@@ -429,6 +429,7 @@ export default {
     },
     privacy: {
       title: "Datenschutz",
+      network_title: "Netzwerkabfragen",
       description: "Diese Einstellungen beeinflussen Ihren Datenschutz.",
       check_incoming: {
         toggle: "Eingehende Rechnung prüfen",
@@ -455,6 +456,7 @@ export default {
           "Hält eine Live-Verbindung zu Mints für sofortige Zahlungsupdates. Schneller, aber leichteres Fingerprinting.",
       },
       bitcoin_price: {
+        title: "Bitcoin-Kurs",
         toggle: "Wechselkurs von Coinbase abrufen",
         description:
           "Ruft den Bitcoin-Kurs von coinbase.com ab, um Ihr Guthaben in Fiat anzuzeigen.",
@@ -976,6 +978,10 @@ export default {
         },
       },
       unnamed: "Mint ohne Namen",
+      empty: {
+        title: "Eine Mint finden",
+        text: "Cashu.me fragt Nostr-Relays nach Mints, die andere empfehlen, mit Bewertungen und Rezensionen.",
+      },
       recommendations: {
         overline: "{ length } Mints gefunden",
         caption: "Prüfe eine Mint selbst, bevor du sie nutzt.",
@@ -1064,6 +1070,11 @@ export default {
     },
   },
   SendDialog: {
+    captions: {
+      ecash: "Token oder QR-Code teilen",
+      lightning: "Rechnung oder Adresse bezahlen",
+      onchain: "An eine Bitcoin-Adresse senden",
+    },
     title: "Senden",
     actions: {
       ecash: {
@@ -1140,6 +1151,11 @@ export default {
     },
   },
   ReceiveDialog: {
+    captions: {
+      ecash: "Token einfügen, scannen oder anfordern",
+      lightning: "Rechnung erstellen und bezahlt werden",
+      onchain: "Bitcoin-Adresse erhalten",
+    },
     title: "Empfangen",
     actions: {
       ecash: {

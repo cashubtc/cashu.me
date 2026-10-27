@@ -429,8 +429,10 @@ export default {
 
 /* Mobile adjustments */
 @media (max-width: 600px) {
+  /* The carousel slide already insets 16px: the text sits on the shared 16px gutter with
+     the footer CTA (R42: 32px read as a different page). */
   .pwa-slide {
-    padding: 24px 16px 16px 16px;
+    padding: 24px 0 16px;
   }
 
   .title {

@@ -412,6 +412,7 @@ export default {
     },
     privacy: {
       title: "Απόρρητο",
+      network_title: "Έλεγχοι δικτύου",
       description: "Αυτές οι ρυθμίσεις επηρεάζουν το απόρρητό σας.",
       check_incoming: {
         toggle: "Έλεγχος εισερχόμενου τιμολογίου",
@@ -438,6 +439,7 @@ export default {
           "Διατηρεί ζωντανή σύνδεση με τα mint για άμεσες ενημερώσεις πληρωμών. Γρηγορότερο, αλλά ευκολότερο fingerprinting.",
       },
       bitcoin_price: {
+        title: "Τιμή bitcoin",
         toggle: "Λήψη συναλλαγματικής ισοτιμίας από Coinbase",
         description:
           "Λαμβάνει την τιμή του bitcoin από το coinbase.com για να εμφανίζει το υπόλοιπό σας σε fiat.",
@@ -972,6 +974,10 @@ export default {
         },
       },
       unnamed: "Mint χωρίς όνομα",
+      empty: {
+        title: "Βρείτε ένα mint",
+        text: "Το Cashu.me ρωτά τα relays του Nostr για mints που προτείνουν άλλοι, με βαθμολογίες και κριτικές.",
+      },
       recommendations: {
         overline: "Βρέθηκαν { length } mints",
         caption: "Κάντε τη δική σας έρευνα πριν χρησιμοποιήσετε ένα mint.",
@@ -1058,6 +1064,11 @@ export default {
     },
   },
   SendDialog: {
+    captions: {
+      ecash: "Μοιραστείτε token ή κωδικό QR",
+      lightning: "Πληρώστε τιμολόγιο ή διεύθυνση",
+      onchain: "Στείλτε σε διεύθυνση Bitcoin",
+    },
     title: "Αποστολή",
     actions: {
       ecash: {
@@ -1134,6 +1145,11 @@ export default {
     },
   },
   ReceiveDialog: {
+    captions: {
+      ecash: "Επικολλήστε, σαρώστε ή ζητήστε token",
+      lightning: "Δημιουργήστε τιμολόγιο για να πληρωθείτε",
+      onchain: "Λάβετε διεύθυνση Bitcoin",
+    },
     title: "Λήψη",
     actions: {
       ecash: {

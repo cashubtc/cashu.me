@@ -427,6 +427,7 @@ export default {
 
     privacy: {
       title: "Soukromí",
+      network_title: "Síťové kontroly",
       description: "Tato nastavení ovlivňují vaše soukromí.",
       check_incoming: {
         toggle: "Kontrolovat příchozí faktury",
@@ -453,6 +454,7 @@ export default {
           "Udržuje živé spojení s minty pro okamžité informace o platbách. Rychlejší, ale snazší fingerprinting.",
       },
       bitcoin_price: {
+        title: "Cena bitcoinu",
         toggle: "Získávat kurz z Coinbase",
         description:
           "Načte cenu bitcoinu z coinbase.com a zobrazí váš zůstatek ve fiat měně.",
@@ -995,6 +997,10 @@ export default {
         },
       },
       unnamed: "Mint bez názvu",
+      empty: {
+        title: "Najít mint",
+        text: "Cashu.me se zeptá Nostr relayů na minty, které doporučují ostatní, včetně hodnocení a recenzí.",
+      },
       recommendations: {
         overline: "Nalezeno { length } mintů",
         caption: "Než mint použijete, prověřte si ho.",
@@ -1086,6 +1092,11 @@ export default {
   },
 
   SendDialog: {
+    captions: {
+      ecash: "Sdílejte token nebo QR kód",
+      lightning: "Zaplaťte fakturu nebo adresu",
+      onchain: "Pošlete na bitcoinovou adresu",
+    },
     title: "Odeslat",
     actions: {
       ecash: {
@@ -1190,6 +1201,11 @@ export default {
   },
 
   ReceiveDialog: {
+    captions: {
+      ecash: "Vložte, naskenujte nebo vyžádejte token",
+      lightning: "Vytvořte fakturu a nechte si zaplatit",
+      onchain: "Získejte bitcoinovou adresu",
+    },
     title: "Přijmout",
     actions: {
       ecash: {

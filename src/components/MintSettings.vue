@@ -188,7 +188,7 @@
                 :aria-label="$t('MintSettings.add.actions.scan.label')"
                 @click="showCamera"
               >
-                <ScanLineIcon :size="20" />
+                <ScanIcon :size="20" />
               </q-btn>
             </template>
           </q-input>
@@ -296,7 +296,7 @@
 import {
   CircleCheck as CircleCheckIcon,
   Plus as PlusIcon,
-  ScanLine as ScanLineIcon,
+  Scan as ScanIcon,
   Search as SearchIcon,
 } from "lucide-vue-next";
 import { ref, defineComponent, onMounted, onBeforeUnmount } from "vue";
@@ -332,7 +332,7 @@ export default defineComponent({
   components: {
     CircleCheckIcon,
     PlusIcon,
-    ScanLineIcon,
+    ScanIcon,
     SearchIcon,
     AddMintDialog,
     ChooseMint,
@@ -765,6 +765,12 @@ export default defineComponent({
   align-items: center;
   width: 100%;
   margin-bottom: 24px;
+}
+
+/* The active card is marked by its accent border and check; its text stays ink, so raw
+   accent colours never carry body text on a dark card (R42: classic and salvador missed AA). */
+body .mint-card.q-item--active {
+  color: var(--app-text);
 }
 
 /* Mint card (R41 pass): one 16px inset, the identity row with its actions centred on it,

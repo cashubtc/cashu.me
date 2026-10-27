@@ -8,16 +8,26 @@
       </div> -->
       <!-- Only when idle with no results; while loading and once results exist, refreshing is the
            compact action in the results header, so the list never jumps when the button goes. -->
+      <!-- Idle, before the first search: a designed empty state that says what discovery does,
+           with the one primary action (R42). While loading and once results exist, refreshing
+           is the compact action in the results header. -->
       <div
         v-if="!discovering && discoverList.length === 0"
-        class="discover-button"
+        class="discover-empty column items-center text-center"
       >
-        <!-- An outline in every state, so the button keeps one shape from idle to loading to loaded. -->
+        <div class="discover-empty__icon">
+          <q-icon name="travel_explore" size="28px" />
+        </div>
+        <div class="discover-empty__title">
+          {{ $t("MintSettings.discover.empty.title") }}
+        </div>
+        <div class="discover-empty__text">
+          {{ $t("MintSettings.discover.empty.text") }}
+        </div>
         <q-btn
           color="primary"
           rounded
           unelevated
-          outline
           no-caps
           :loading="discovering"
           @click="discover"
@@ -25,10 +35,6 @@
         >
           <q-icon name="search" size="20px" class="discover-btn__icon" />
           <span>{{ $t("MintSettings.discover.actions.discover.label") }}</span>
-          <template v-slot:loading>
-            <q-spinner-dots size="20px" class="discover-btn__icon" />
-            {{ $t("MintSettings.discover.actions.discover.in_progress") }}
-          </template>
         </q-btn>
       </div>
     </div>
@@ -362,9 +368,37 @@ export default defineComponent({
   line-height: 1.4;
 }
 
-.discover-button {
-  margin-top: 0;
+.discover-empty {
+  background: var(--app-tint);
+  border: 1px solid var(--app-border);
+  border-radius: 16px;
+  gap: 8px;
   margin-bottom: 24px;
+  padding: 32px 24px 24px;
+}
+.discover-empty__icon {
+  align-items: center;
+  background: var(--app-tint-strong);
+  border-radius: 50%;
+  color: var(--app-text-muted);
+  display: flex;
+  height: 56px;
+  justify-content: center;
+  margin-bottom: 8px;
+  width: 56px;
+}
+.discover-empty__title {
+  color: var(--app-text);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 24px;
+}
+.discover-empty__text {
+  color: var(--app-text-muted);
+  font-size: 15px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+  max-width: 320px;
 }
 
 /* Skeleton rows match the loaded mint cards: same height, gap, radius and outline, no fill. */

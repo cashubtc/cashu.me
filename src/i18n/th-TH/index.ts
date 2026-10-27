@@ -421,6 +421,7 @@ export default {
     },
     privacy: {
       title: "ความเป็นส่วนตัว",
+      network_title: "การตรวจสอบเครือข่าย",
       description: "การตั้งค่าเหล่านี้ส่งผลต่อความเป็นส่วนตัวของคุณ",
       check_incoming: {
         toggle: "ตรวจสอบใบแจ้งหนี้ขาเข้า",
@@ -447,6 +448,7 @@ export default {
           "เชื่อมต่อกับ Mint ตลอดเวลาเพื่อรับสถานะการชำระเงินทันที เร็วขึ้น แต่ถูกระบุตัวตนได้ง่ายขึ้น",
       },
       bitcoin_price: {
+        title: "ราคาบิตคอยน์",
         toggle: "รับอัตราแลกเปลี่ยนจาก Coinbase",
         description:
           "ดึงราคาบิตคอยน์จาก coinbase.com เพื่อแสดงยอดเงินของคุณเป็นสกุลเงินทั่วไป",
@@ -953,6 +955,10 @@ export default {
         },
       },
       unnamed: "Mint ไม่มีชื่อ",
+      empty: {
+        title: "ค้นหามินต์",
+        text: "Cashu.me จะสอบถามรีเลย์ Nostr เพื่อหามินต์ที่ผู้อื่นแนะนำ พร้อมคะแนนและรีวิว",
+      },
       recommendations: {
         overline: "พบ { length } Mints",
         caption: "ศึกษาข้อมูลด้วยตัวเองก่อนใช้ Mint",
@@ -1038,6 +1044,11 @@ export default {
     },
   },
   SendDialog: {
+    captions: {
+      ecash: "แชร์โทเค็นหรือ QR โค้ด",
+      lightning: "ชำระใบแจ้งหนี้หรือที่อยู่",
+      onchain: "ส่งไปยังที่อยู่บิตคอยน์",
+    },
     title: "ส่ง",
     actions: {
       ecash: {
@@ -1113,6 +1124,11 @@ export default {
     },
   },
   ReceiveDialog: {
+    captions: {
+      ecash: "วาง สแกน หรือขอโทเค็น",
+      lightning: "สร้างใบแจ้งหนี้เพื่อรับเงิน",
+      onchain: "รับที่อยู่บิตคอยน์",
+    },
     title: "รับ",
     actions: {
       ecash: {

@@ -355,7 +355,7 @@ import token from "src/js/token";
 import { notifyError, notifySuccess } from "src/js/notify";
 import { copyToClipboard } from "quasar";
 import {
-  ScanLine as ScanIcon,
+  Scan as ScanIcon,
   Nfc as NfcIcon,
   Share as ShareIcon,
   Nut as NutIcon,

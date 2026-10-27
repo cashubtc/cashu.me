@@ -406,6 +406,7 @@ export default {
     },
     privacy: {
       title: "プライバシー",
+      network_title: "ネットワーク確認",
       description: "これらの設定はプライバシーに影響します。",
       check_incoming: {
         toggle: "着信請求書をチェック",
@@ -432,6 +433,7 @@ export default {
           "ミントと常時接続し、支払いの状況をすぐに受け取ります。速くなりますが、フィンガープリントされやすくなります。",
       },
       bitcoin_price: {
+        title: "ビットコイン価格",
         toggle: "Coinbaseから為替レートを取得",
         description:
           "coinbase.com からビットコイン価格を取得し、残高を法定通貨で表示します。",
@@ -958,6 +960,10 @@ export default {
         },
       },
       unnamed: "名前のないミント",
+      empty: {
+        title: "ミントを探す",
+        text: "Cashu.me は Nostr リレーに、ほかの人がおすすめするミントを評価やレビューと一緒に問い合わせます。",
+      },
       recommendations: {
         overline: "{ length }個のミントが見つかりました",
         caption: "ミントを使う前に自分で調べてください。",
@@ -1044,6 +1050,11 @@ export default {
     },
   },
   SendDialog: {
+    captions: {
+      ecash: "トークンまたは QR コードを共有",
+      lightning: "請求書またはアドレスに支払う",
+      onchain: "ビットコインアドレスへ送金",
+    },
     title: "送る",
     actions: {
       ecash: {
@@ -1120,6 +1131,11 @@ export default {
     },
   },
   ReceiveDialog: {
+    captions: {
+      ecash: "トークンを貼り付け、スキャン、またはリクエスト",
+      lightning: "請求書を作成して受け取る",
+      onchain: "ビットコインアドレスを取得",
+    },
     title: "受け取る",
     actions: {
       ecash: {

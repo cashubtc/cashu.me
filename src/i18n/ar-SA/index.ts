@@ -404,6 +404,7 @@ export default {
     },
     privacy: {
       title: "الخصوصية",
+      network_title: "عمليات فحص الشبكة",
       description: "تؤثر هذه الإعدادات على خصوصيتك.",
       check_incoming: {
         toggle: "التحقق من الفاتورة الواردة",
@@ -430,6 +431,7 @@ export default {
           "يحافظ على اتصال مباشر بالمِنْتات لتحديثات فورية عن المدفوعات. أسرع، لكن يسهل تتبّع بصمتك.",
       },
       bitcoin_price: {
+        title: "سعر البيتكوين",
         toggle: "الحصول على سعر الصرف من Coinbase",
         description:
           "يجلب سعر البيتكوين من coinbase.com لعرض رصيدك بالعملة الورقية.",
@@ -952,6 +954,10 @@ export default {
         },
       },
       unnamed: "مِنْت بلا اسم",
+      empty: {
+        title: "ابحث عن مِنْت",
+        text: "يسأل Cashu.me مرحلات Nostr عن المِنْتات التي يوصي بها الآخرون، مع تقييماتها ومراجعاتها.",
+      },
       recommendations: {
         overline: "تم العثور على { length } من المِنْتات",
         caption: "ابحث بنفسك قبل استخدام أي مِنْت.",
@@ -1037,6 +1043,11 @@ export default {
     },
   },
   SendDialog: {
+    captions: {
+      ecash: "شارك رمزًا أو رمز QR",
+      lightning: "ادفع فاتورة أو عنوانًا",
+      onchain: "أرسل إلى عنوان بيتكوين",
+    },
     title: "إرسال",
     actions: {
       ecash: {
@@ -1112,6 +1123,11 @@ export default {
     },
   },
   ReceiveDialog: {
+    captions: {
+      ecash: "الصق رمزًا أو امسحه أو اطلبه",
+      lightning: "أنشئ فاتورة لتتلقى الدفع",
+      onchain: "احصل على عنوان بيتكوين",
+    },
     title: "استلام",
     actions: {
       ecash: {

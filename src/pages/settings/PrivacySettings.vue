@@ -3,7 +3,11 @@
     :title="$t('Settings.menu.privacy.title')"
     :caption="$t('Settings.menu.privacy.caption')"
   >
-    <SettingsSection :caption="$t('Settings.privacy.description')">
+    <!-- Each group names what it covers, like the other settings pages (R42). -->
+    <SettingsSection
+      :title="$t('Settings.privacy.network_title')"
+      :caption="$t('Settings.privacy.description')"
+    >
       <!-- nostr mint backup -->
       <q-item tag="label">
         <q-item-section>
@@ -104,6 +108,7 @@
 
     <!-- bitcoin price -->
     <SettingsSection
+      :title="$t('Settings.privacy.bitcoin_price.title')"
       :caption="$t('Settings.privacy.bitcoin_price.description')"
     >
       <q-item tag="label">

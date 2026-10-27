@@ -300,7 +300,7 @@ import {
   Clipboard as ClipboardIcon,
   FileText as FileTextIcon,
   Lock as LockIcon,
-  ScanLine as ScanIcon,
+  Scan as ScanIcon,
 } from "lucide-vue-next";
 declare const windowMixin: any;
 export default defineComponent({

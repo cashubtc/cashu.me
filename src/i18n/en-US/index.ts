@@ -420,6 +420,7 @@ export default {
     },
     privacy: {
       title: "Privacy",
+      network_title: "Network checks",
       description: "These settings affect your privacy.",
       check_incoming: {
         toggle: "Check incoming invoice",
@@ -446,6 +447,7 @@ export default {
           "Keeps a live connection to mints for instant payment updates. Faster, but easier to fingerprint.",
       },
       bitcoin_price: {
+        title: "Bitcoin price",
         toggle: "Get exchange rate from Coinbase",
         description:
           "Fetches the bitcoin price from coinbase.com to show your balance in fiat.",
@@ -985,6 +987,10 @@ export default {
         },
       },
       unnamed: "Unnamed mint",
+      empty: {
+        title: "Find a mint",
+        text: "Cashu.me asks Nostr relays for mints other people recommend, with their ratings and reviews.",
+      },
       recommendations: {
         overline: "Found { length } mints",
         caption: "Do your own research before using a mint.",
@@ -1072,6 +1078,11 @@ export default {
     },
   },
   SendDialog: {
+    captions: {
+      ecash: "Share a token or QR code",
+      lightning: "Pay an invoice or address",
+      onchain: "Send to a Bitcoin address",
+    },
     title: "Send",
     actions: {
       ecash: {
@@ -1172,6 +1183,11 @@ export default {
     invalid_url: "Invalid URL",
   },
   ReceiveDialog: {
+    captions: {
+      ecash: "Paste, scan or request a token",
+      lightning: "Create an invoice to get paid",
+      onchain: "Get a Bitcoin address",
+    },
     title: "Receive",
     actions: {
       ecash: {

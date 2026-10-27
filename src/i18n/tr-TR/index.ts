@@ -416,6 +416,7 @@ export default {
     },
     privacy: {
       title: "Gizlilik",
+      network_title: "Ağ kontrolleri",
       description: "Bu ayarlar gizliliğinizi etkiler.",
       check_incoming: {
         toggle: "Gelen faturayı kontrol et",
@@ -442,6 +443,7 @@ export default {
           "Anlık ödeme güncellemeleri için mint'lerle canlı bağlantı tutar. Daha hızlı, ama parmak izi çıkarmak kolaylaşır.",
       },
       bitcoin_price: {
+        title: "Bitcoin fiyatı",
         toggle: "Döviz kurunu Coinbase'den al",
         description:
           "Bakiyenizi itibari parayla göstermek için bitcoin fiyatını coinbase.com'dan alır.",
@@ -974,6 +976,10 @@ export default {
         },
       },
       unnamed: "Adsız mint",
+      empty: {
+        title: "Bir mint bulun",
+        text: "Cashu.me, başkalarının önerdiği mint'leri puanları ve yorumlarıyla birlikte Nostr relay'lerinden sorgular.",
+      },
       recommendations: {
         overline: "{ length } mint bulundu",
         caption: "Bir mint'i kullanmadan önce kendi araştırmanı yap.",
@@ -1060,6 +1066,11 @@ export default {
     },
   },
   SendDialog: {
+    captions: {
+      ecash: "Token veya QR kod paylaşın",
+      lightning: "Fatura ya da adres ödeyin",
+      onchain: "Bitcoin adresine gönderin",
+    },
     title: "Gönder",
     actions: {
       ecash: {
@@ -1136,6 +1147,11 @@ export default {
     },
   },
   ReceiveDialog: {
+    captions: {
+      ecash: "Token yapıştırın, tarayın veya isteyin",
+      lightning: "Ödeme almak için fatura oluşturun",
+      onchain: "Bitcoin adresi alın",
+    },
     title: "Al",
     actions: {
       ecash: {

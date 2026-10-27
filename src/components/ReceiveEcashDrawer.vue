@@ -40,7 +40,7 @@
                 <ClipboardIcon :size="24" />
               </div>
               <div class="col q-ml-md">
-                <div class="text-body1 text-weight-medium">
+                <div class="action-row__label">
                   {{ $t("ReceiveEcashDrawer.actions.paste.label") }}
                 </div>
               </div>
@@ -53,7 +53,7 @@
                 <ScanIcon :size="24" />
               </div>
               <div class="col q-ml-md">
-                <div class="text-body1 text-weight-medium">
+                <div class="action-row__label">
                   {{ $t("ReceiveEcashDrawer.actions.scan.label") }}
                 </div>
               </div>
@@ -70,7 +70,7 @@
                 <FileTextIcon :size="24" />
               </div>
               <div class="col q-ml-md">
-                <div class="text-body1 text-weight-medium">
+                <div class="action-row__label">
                   {{ $t("ReceiveEcashDrawer.actions.request.label") }}
                 </div>
               </div>
@@ -87,7 +87,7 @@
                 <LockIcon :size="24" />
               </div>
               <div class="col q-ml-md">
-                <div class="text-body1 text-weight-medium">
+                <div class="action-row__label">
                   {{ $t("ReceiveEcashDrawer.actions.lock.label") }}
                 </div>
               </div>
@@ -105,7 +105,7 @@
                 <NfcIcon v-else :size="24" />
               </div>
               <div class="col q-ml-md">
-                <div class="text-body1 text-weight-medium">
+                <div class="action-row__label">
                   {{ $t("ReceiveEcashDrawer.actions.nfc.label") }}
                   {{
                     scanningCard
@@ -146,7 +146,7 @@ import {
   FileText as FileTextIcon,
   Lock as LockIcon,
   Nfc as NfcIcon,
-  ScanLine as ScanIcon,
+  Scan as ScanIcon,
 } from "lucide-vue-next";
 // import ChooseMint from "components/ChooseMint.vue";
 import TokenInformation from "components/TokenInformation.vue";

@@ -422,6 +422,7 @@ export default {
     },
     privacy: {
       title: "Integritet",
+      network_title: "Nätverkskontroller",
       description: "Dessa inställningar påverkar din integritet.",
       check_incoming: {
         toggle: "Kontrollera inkommande faktura",
@@ -448,6 +449,7 @@ export default {
           "Håller en liveanslutning till mints för direkta betalningsuppdateringar. Snabbare, men lättare att fingeravtrycka.",
       },
       bitcoin_price: {
+        title: "Bitcoinpris",
         toggle: "Hämta växelkurs från Coinbase",
         description:
           "Hämtar bitcoinpriset från coinbase.com för att visa ditt saldo i fiat.",
@@ -961,6 +963,10 @@ export default {
         },
       },
       unnamed: "Namnlös mint",
+      empty: {
+        title: "Hitta en mint",
+        text: "Cashu.me frågar Nostr-reläer efter mintar som andra rekommenderar, med betyg och recensioner.",
+      },
       recommendations: {
         overline: "{ length } mints hittades",
         caption: "Gör din egen research innan du använder en mint.",
@@ -1047,6 +1053,11 @@ export default {
     },
   },
   SendDialog: {
+    captions: {
+      ecash: "Dela en token eller QR-kod",
+      lightning: "Betala en faktura eller adress",
+      onchain: "Skicka till en bitcoinadress",
+    },
     title: "Skicka",
     actions: {
       ecash: {
@@ -1123,6 +1134,11 @@ export default {
     },
   },
   ReceiveDialog: {
+    captions: {
+      ecash: "Klistra in, skanna eller begär en token",
+      lightning: "Skapa en faktura för att få betalt",
+      onchain: "Få en bitcoinadress",
+    },
     title: "Ta emot",
     actions: {
       ecash: {

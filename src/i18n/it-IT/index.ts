@@ -384,6 +384,7 @@ export default {
     },
     privacy: {
       title: "Privacy",
+      network_title: "Controlli di rete",
       description: "Queste impostazioni influenzano la tua privacy.",
       check_incoming: {
         toggle: "Verifica fattura in entrata",
@@ -411,6 +412,7 @@ export default {
           "Mantiene una connessione attiva con i mint per aggiornamenti istantanei sui pagamenti. Più veloce, ma fingerprinting più facile.",
       },
       bitcoin_price: {
+        title: "Prezzo del bitcoin",
         toggle: "Ottieni tasso di cambio da Coinbase",
         description:
           "Recupera il prezzo del bitcoin da coinbase.com per mostrare il saldo in valuta fiat.",
@@ -942,6 +944,10 @@ export default {
         },
       },
       unnamed: "Mint senza nome",
+      empty: {
+        title: "Trova una mint",
+        text: "Cashu.me chiede ai relay Nostr le mint consigliate da altre persone, con valutazioni e recensioni.",
+      },
       recommendations: {
         overline: "Trovati { length } mints",
         caption: "Informati prima di usare un mint.",
@@ -1028,6 +1034,11 @@ export default {
     },
   },
   SendDialog: {
+    captions: {
+      ecash: "Condividi un token o un codice QR",
+      lightning: "Paga una fattura o un indirizzo",
+      onchain: "Invia a un indirizzo Bitcoin",
+    },
     title: "Invia",
     actions: {
       ecash: {
@@ -1104,6 +1115,11 @@ export default {
     },
   },
   ReceiveDialog: {
+    captions: {
+      ecash: "Incolla, scansiona o richiedi un token",
+      lightning: "Crea una fattura per farti pagare",
+      onchain: "Ottieni un indirizzo Bitcoin",
+    },
     title: "Ricevi",
     actions: {
       ecash: {

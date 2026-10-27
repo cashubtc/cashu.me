@@ -48,8 +48,11 @@
                 <CoinsIcon :size="24" />
               </div>
               <div class="col q-ml-md">
-                <div class="text-body1 text-weight-medium">
+                <div class="action-row__label">
                   {{ $t("ReceiveDialog.actions.ecash.label") }}
+                </div>
+                <div class="action-row__caption">
+                  {{ $t("ReceiveDialog.captions.ecash") }}
                 </div>
               </div>
             </div>
@@ -71,8 +74,11 @@
                 <ZapIcon :size="24" />
               </div>
               <div class="col q-ml-md">
-                <div class="text-body1 text-weight-medium">
+                <div class="action-row__label">
                   {{ $t("ReceiveDialog.actions.lightning.label") }}
+                </div>
+                <div class="action-row__caption">
+                  {{ $t("ReceiveDialog.captions.lightning") }}
                 </div>
               </div>
             </div>
@@ -94,8 +100,11 @@
                 <BitcoinIcon :size="24" />
               </div>
               <div class="col q-ml-md">
-                <div class="text-body1 text-weight-medium">
+                <div class="action-row__label">
                   {{ $t("common.on_chain") }}
+                </div>
+                <div class="action-row__caption">
+                  {{ $t("ReceiveDialog.captions.onchain") }}
                 </div>
               </div>
             </div>
@@ -121,7 +130,7 @@ import {
   X as XIcon,
   Coins as CoinsIcon,
   Zap as ZapIcon,
-  ScanLine as ScanIcon,
+  Scan as ScanIcon,
   Bitcoin as BitcoinIcon,
 } from "lucide-vue-next";
 import { PaymentMethod } from "src/stores/walletTypes";

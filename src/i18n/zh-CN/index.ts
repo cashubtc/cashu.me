@@ -419,6 +419,7 @@ export default {
     },
     privacy: {
       title: "隐私",
+      network_title: "网络检查",
       description: "这些设置会影响您的隐私。",
       check_incoming: {
         toggle: "检查收到的发票",
@@ -444,6 +445,7 @@ export default {
           "与 Mint 保持实时连接，即时获取付款更新。更快，但更容易被识别指纹。",
       },
       bitcoin_price: {
+        title: "比特币价格",
         toggle: "从 Coinbase 获取汇率",
         description: "从 coinbase.com 获取比特币价格，以法币显示您的余额。",
         currency: {
@@ -943,6 +945,10 @@ export default {
         },
       },
       unnamed: "未命名 Mint",
+      empty: {
+        title: "查找 Mint",
+        text: "Cashu.me 会向 Nostr 中继查询其他人推荐的 Mint，以及它们的评分和评价。",
+      },
       recommendations: {
         overline: "找到 { length } 个 Mint",
         caption: "使用 Mint 前请自行调查。",
@@ -1028,6 +1034,11 @@ export default {
     },
   },
   SendDialog: {
+    captions: {
+      ecash: "分享代币或二维码",
+      lightning: "支付发票或地址",
+      onchain: "发送到比特币地址",
+    },
     title: "发送",
     actions: {
       ecash: {
@@ -1103,6 +1114,11 @@ export default {
     },
   },
   ReceiveDialog: {
+    captions: {
+      ecash: "粘贴、扫描或请求代币",
+      lightning: "创建发票以收款",
+      onchain: "获取比特币地址",
+    },
     title: "接收",
     actions: {
       ecash: {
