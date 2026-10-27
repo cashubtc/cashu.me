@@ -75,7 +75,7 @@
               :class="{ dimmed: isFetchingMintInfo(rec.url) }"
               :style="{
                 'border-radius': '10px',
-                border: '1px solid rgba(128,128,128,0.2)',
+                border: '1px solid var(--app-border-strong)',
                 padding: '0px',
                 position: 'relative',
               }"
@@ -324,11 +324,12 @@ export default defineComponent({
 }
 
 .discover-btn {
+  min-height: 48px;
   width: 100%;
 }
 
 .mint-card {
-  border: 1px solid rgba(128, 128, 128, 0.2);
+  border: 1px solid var(--app-border-strong);
   border-radius: 10px;
 }
 

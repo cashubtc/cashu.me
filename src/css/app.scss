@@ -473,7 +473,7 @@ textarea {
 
 /* Dialog scrim: dark enough that the page behind recedes instead of reading as disabled. */
 .q-dialog__backdrop {
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.7);
 }
 // Over light pages a 60% wash reads as muddy grey; a lighter one dims without flattening.
 body.body--light .q-dialog__backdrop {
@@ -620,4 +620,54 @@ html[dir="rtl"] .lucide-chevron-right-icon,
 html[dir="rtl"] .lucide-arrow-left-icon,
 html[dir="rtl"] .lucide-arrow-right-icon {
   transform: scaleX(-1);
+}
+
+// Quasar spacing utilities are physical; in rtl the inline-start/end margins swap sides.
+html[dir="rtl"] .q-mr-xs {
+  margin-right: 0 !important;
+  margin-left: 4px !important;
+}
+html[dir="rtl"] .q-ml-xs {
+  margin-left: 0 !important;
+  margin-right: 4px !important;
+}
+html[dir="rtl"] .q-mr-sm {
+  margin-right: 0 !important;
+  margin-left: 8px !important;
+}
+html[dir="rtl"] .q-ml-sm {
+  margin-left: 0 !important;
+  margin-right: 8px !important;
+}
+html[dir="rtl"] .q-mr-md {
+  margin-right: 0 !important;
+  margin-left: 16px !important;
+}
+html[dir="rtl"] .q-ml-md {
+  margin-left: 0 !important;
+  margin-right: 16px !important;
+}
+html[dir="rtl"] .q-mr-lg {
+  margin-right: 0 !important;
+  margin-left: 24px !important;
+}
+html[dir="rtl"] .q-ml-lg {
+  margin-left: 0 !important;
+  margin-right: 24px !important;
+}
+html[dir="rtl"] .q-mr-xl {
+  margin-right: 0 !important;
+  margin-left: 48px !important;
+}
+html[dir="rtl"] .q-ml-xl {
+  margin-left: 0 !important;
+  margin-right: 48px !important;
+}
+html[dir="rtl"] .on-left {
+  margin-right: 0;
+  margin-left: 12px;
+}
+html[dir="rtl"] .on-right {
+  margin-left: 0;
+  margin-right: 12px;
 }

@@ -341,7 +341,10 @@ export default defineComponent({
   display: flex;
   justify-content: center;
 }
+/* The balance is content, not an action: ink colour in every theme and mode (an accent
+   balance read as debt in red-accent themes). */
 .balance-amount {
+  color: var(--app-text);
   align-items: center;
   display: flex;
   justify-content: center;
