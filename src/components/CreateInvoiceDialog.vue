@@ -173,7 +173,7 @@
             <div
               v-else-if="showAmountInput"
               key="amount-input"
-              class="amount-step column justify-center q-my-auto"
+              class="amount-step column justify-center full-width q-my-auto"
             >
               <AmountInputComponent
                 class="q-my-auto"
