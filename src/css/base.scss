@@ -120,7 +120,7 @@ $themes: (
 // Neutral, semantic tokens per mode.
 body {
   --app-hover-opacity: 0.12;
-  --app-pressed-opacity: 0.2;
+  --app-pressed-opacity: 0.24;
 }
 
 body.body--dark {
@@ -128,6 +128,7 @@ body.body--dark {
   --app-text: #fff;
   --app-text-muted: rgba(255, 255, 255, 0.72);
   --app-text-subtle: rgba(255, 255, 255, 0.6);
+  --app-text-disabled: rgba(255, 255, 255, 0.4);
   --app-border: rgba(255, 255, 255, 0.11);
   --app-tint: rgba(255, 255, 255, 0.06);
   --app-tint-strong: rgba(255, 255, 255, 0.1);
@@ -141,6 +142,7 @@ body.body--light {
   --app-text: #111;
   --app-text-muted: rgba(0, 0, 0, 0.64);
   --app-text-subtle: rgba(0, 0, 0, 0.58);
+  --app-text-disabled: rgba(0, 0, 0, 0.36);
   --app-border: rgba(0, 0, 0, 0.09);
   --app-tint: rgba(0, 0, 0, 0.035);
   --app-tint-strong: rgba(0, 0, 0, 0.07);

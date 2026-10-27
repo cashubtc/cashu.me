@@ -251,7 +251,7 @@
         class="q-mb-md"
         v-model="swapData.fromUrl"
         :display-value="
-          swapData.fromUrl ? undefined : $t('ChooseMint.placeholder')
+          swapData.fromUrl?.url ? undefined : $t('ChooseMint.placeholder')
         "
         :options="swapAmountDataOptions()"
         option-value="url"
@@ -269,7 +269,7 @@
         class="q-mb-md"
         v-model="swapData.toUrl"
         :display-value="
-          swapData.toUrl ? undefined : $t('ChooseMint.placeholder')
+          swapData.toUrl?.url ? undefined : $t('ChooseMint.placeholder')
         "
         :options="swapAmountDataOptions()"
         option-value="url"

@@ -200,8 +200,8 @@ export default {
         caption: "NFC card settings",
       },
       p2pk: {
-        title: "P2PK",
-        caption: "Receive ecash locked to your keys",
+        title: "Locked ecash",
+        caption: "Receive ecash only your key can unlock",
       },
       privacy: {
         title: "Privacy",
@@ -305,18 +305,18 @@ export default {
       wallet_seed: {
         title: "Wallet seed phrase",
         description: "Generate a Nostr key pair from your wallet seed",
-        copy_nsec: "Copy nsec",
+        copy_nsec: "Copy private key",
       },
       nsec_bunker: {
-        title: "Nsec Bunker",
-        description: "Use a NIP-46 bunker",
+        title: "Remote signer",
+        description: "Sign with a NIP-46 bunker",
         delete_tooltip: "Delete connection",
       },
       use_nsec: {
-        title: "Use your nsec",
+        title: "Use your own private key",
         description:
-          "Pastes your main Nostr private key into this wallet. Not recommended.",
-        delete_tooltip: "Delete nsec",
+          "Paste your Nostr private key (nsec) into this wallet. Not recommended.",
+        delete_tooltip: "Delete private key",
       },
       signing_extension: {
         title: "Signing extension",
@@ -371,14 +371,14 @@ export default {
       },
     },
     p2pk_features: {
-      title: "P2PK",
+      title: "Locked ecash",
       description:
         "Experimental. Use small amounts: if you lose the private key, nobody can unlock the ecash locked to it.",
       generate_button: "Generate key",
-      import_button: "Import nsec",
+      import_button: "Import private key",
       quick_access: {
         toggle: "Show lock key on Receive",
-        description: "Shows your P2PK lock key on the Receive ecash screen.",
+        description: "Shows your lock key on the Receive ecash screen, so senders can lock ecash to you.",
       },
       keys_expansion: {
         label: "Click to browse {count} keys",
@@ -1231,7 +1231,7 @@ export default {
   },
   P2PKDialog: {
     p2pk: {
-      caption: "P2PK key",
+      caption: "Lock key",
       description: "Receive ecash locked to this key",
       used_warning_text:
         "Warning: This key was used before. Use a new key for better privacy.",
@@ -1443,7 +1443,7 @@ export default {
   PayInvoiceDialog: {
     input_data: {
       title: "Pay Lightning invoice",
-      title_bolt12: "Pay Lightning Bolt12",
+      title_bolt12: "Pay Lightning offer",
       inputs: {
         invoice_data: {
           label: "Lightning invoice or address",

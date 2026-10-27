@@ -251,7 +251,22 @@ button:focus-visible {
 .q-btn[disabled].bg-primary {
   opacity: 1 !important;
   background: var(--app-tint-strong) !important;
-  color: var(--app-text-muted) !important;
+  color: var(--app-text-disabled) !important;
+}
+.q-btn.disabled,
+.q-btn[disabled] {
+  cursor: not-allowed !important;
+}
+
+// Pressed buttons also sink slightly, so pressed reads apart from hover on filled pills
+// where a tint alone barely shows.
+.q-btn:not(.disabled):active {
+  transform: scale(0.97);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .q-btn {
+    transition: transform 0.08s ease;
+  }
 }
 
 // Full-width sheet CTAs (Copy, Send, Create invoice) share one size. Quasar's
