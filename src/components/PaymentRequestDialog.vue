@@ -33,7 +33,7 @@
               dense
               round
               icon="chevron_left"
-              class="rtl-flip"
+              class="rtl-flip touch-target-44"
               color="grey"
               :aria-label="$t('PaymentRequestDialog.actions.previous.label')"
               @click="stepRequest(-1)"
@@ -47,7 +47,7 @@
               dense
               round
               icon="chevron_right"
-              class="rtl-flip"
+              class="rtl-flip touch-target-44"
               color="grey"
               :aria-label="$t('PaymentRequestDialog.actions.next.label')"
               @click="stepRequest(1)"
@@ -87,6 +87,7 @@
                     unelevated
                     no-caps
                     data-testid="pr-amount"
+                    class="pr-amount-pill"
                     @click="startEditingAmount"
                   >
                     <q-icon name="edit_note" size="xs" class="q-mr-sm" />
@@ -189,7 +190,13 @@
 
               <!-- New request button -->
               <div class="row justify-center q-pt-lg q-pb-md">
-                <q-btn flat size="md" rounded @click="newRequest">
+                <q-btn
+                  flat
+                  size="md"
+                  rounded
+                  class="pr-new-request"
+                  @click="newRequest"
+                >
                   <q-icon name="refresh" class="q-mr-sm" size="xs" />
                   {{ $t("PaymentRequestDialog.actions.new_request.label") }}
                 </q-btn>
@@ -571,6 +578,11 @@ export default defineComponent({
 }
 .pr-amount-row {
   gap: 4px;
+}
+/* 44px targets for the pill and the text button (the measured tap-target floor). */
+.pr-amount-pill,
+.pr-new-request {
+  min-height: 44px;
 }
 .pr-amount-editor {
   max-width: var(--app-column);
