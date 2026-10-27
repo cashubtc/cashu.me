@@ -11,7 +11,9 @@ import {
   notifySuccess,
   notifyWarning,
 } from "src/js/notify";
+import { applyDeviceEffects } from "src/js/device-effects";
 window.LOCALE = "en";
+applyDeviceEffects();
 // window.EventHub = new Vue();
 
 // Ensure we capture the PWA install prompt as early as possible

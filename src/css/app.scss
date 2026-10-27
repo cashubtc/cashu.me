@@ -556,6 +556,25 @@ textarea,
 body.body--light .q-dialog__backdrop {
   background: rgba(0, 0, 0, 0.45) !important;
 }
+// A light, static blur on top of the dim, set here once rather than per dialog. Browsers
+// without backdrop-filter (older Android WebViews, Firefox before 103) skip it and keep the
+// dim. Low-end and old devices (src/js/device-effects.ts) and people who ask for less
+// transparency skip it too. Quasar only fades the backdrop's opacity, so the blur radius is
+// never animated.
+@supports (
+  (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))
+) {
+  html:not(.reduced-effects) .q-dialog__backdrop {
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .q-dialog__backdrop {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}
 
 // A refresh control that is busy spins its own glyph, so it never turns into a different
 // mark (three dots read as an overflow menu, R41).

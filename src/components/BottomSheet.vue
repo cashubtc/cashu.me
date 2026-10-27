@@ -102,13 +102,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-/* Same backdrop as the Send and Receive sheets. A static blur, not Quasar's backdrop-filter
-   prop: that one also dimmed with brightness() and re-rendered the page on every frame of
-   the slide, which made sheets like the mint picker stutter. */
-:deep(.q-dialog__backdrop) {
-  backdrop-filter: blur(8px);
-}
-
 .bottom-sheet {
   background: var(--app-raised);
   color: var(--app-text);

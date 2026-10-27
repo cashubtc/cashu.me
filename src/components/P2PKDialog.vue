@@ -2,7 +2,6 @@
   <q-dialog
     v-model="showP2PKDialog"
     maximized
-    backdrop-filter="blur(2px) brightness(60%)"
     transition-show="fade"
     transition-hide="fade"
     no-backdrop-dismiss

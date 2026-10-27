@@ -1,7 +1,6 @@
 <template>
   <q-dialog
     v-model="showRemoveMintDialogLocal"
-    backdrop-filter="blur(4px) brightness(50%)"
     transition-show="fade"
     transition-hide="fade"
   >

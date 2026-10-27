@@ -1,9 +1,5 @@
 <template>
-  <q-dialog
-    v-model="showNWCDialog"
-    position="top"
-    backdrop-filter="blur(2px) brightness(60%)"
-  >
+  <q-dialog v-model="showNWCDialog" position="top">
     <q-card
       v-if="showNWCData.connectionString"
       class="q-px-lg q-pt-md q-pb-md qcard"

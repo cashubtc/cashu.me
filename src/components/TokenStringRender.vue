@@ -195,7 +195,6 @@ export default defineComponent({
   border-radius: 10px;
   border: 1px solid var(--app-border);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
-  backdrop-filter: blur(10px);
   position: relative;
   overflow: hidden;
   min-height: 200px;

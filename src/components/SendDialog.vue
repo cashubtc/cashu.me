@@ -281,10 +281,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-:deep(.q-dialog__backdrop) {
-  backdrop-filter: blur(8px);
-}
-
 .q-dialog__inner--bottom > div {
   border-top-left-radius: 20px !important;
   border-top-right-radius: 20px !important;
