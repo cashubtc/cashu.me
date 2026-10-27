@@ -941,10 +941,10 @@ export default {
           success: "找到 { length } 个 Mint",
         },
       },
+      unnamed: "未命名 Mint",
       recommendations: {
         overline: "找到 { length } 个 Mint",
-        caption:
-          "这些 Mint 是由其他 Nostr 用户推荐的。请小心谨慎，并在使用 Mint 之前自行研究。",
+        caption: "使用 Mint 前请自行调查。",
         actions: {
           browse: {
             label: "点击浏览 Mint",

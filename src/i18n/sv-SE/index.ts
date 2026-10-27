@@ -959,10 +959,10 @@ export default {
           success: "{ length } mints hittades",
         },
       },
+      unnamed: "Namnlös mint",
       recommendations: {
         overline: "{ length } mints hittades",
-        caption:
-          "Dessa mints rekommenderades av andra Nostr-användare. Var försiktig och gör din egen research innan du använder en mint.",
+        caption: "Gör din egen research innan du använder en mint.",
         actions: {
           browse: {
             label: "Klicka för att bläddra bland mints",

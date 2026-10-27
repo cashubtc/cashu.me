@@ -974,10 +974,10 @@ export default {
           success: "{ length } Mints gefunden",
         },
       },
+      unnamed: "Mint ohne Namen",
       recommendations: {
         overline: "{ length } Mints gefunden",
-        caption:
-          "Diese Mints wurden von anderen Nostr-Benutzern empfohlen. Seien Sie vorsichtig und recherchieren Sie selbst, bevor Sie eine Mint verwenden.",
+        caption: "Prüfe eine Mint selbst, bevor du sie nutzt.",
         actions: {
           browse: {
             label: "Klicken, um Mints zu durchsuchen",

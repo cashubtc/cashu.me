@@ -29,6 +29,8 @@
         <div class="detail-name">{{ $t("QuoteInformation.status") }}</div>
       </div>
       <div class="detail-value" :class="{ 'text-positive': isPaidState }">
+        <!-- A pulsing dot while the wallet waits for payment, so a pending invoice reads as live. -->
+        <span v-if="isWaitingState" class="waiting-dot" aria-hidden="true" />
         {{ stateDisplay }}
       </div>
     </div>
@@ -229,6 +231,10 @@ export default defineComponent({
       if (this.$te(key)) return this.$t(key) as string;
       return lower.charAt(0).toUpperCase() + lower.slice(1);
     },
+    isWaitingState(): boolean {
+      const state = (this.invoice?.status as string) || this.mintQuote?.state;
+      return ["pending", "unpaid"].includes(state?.toLowerCase() ?? "");
+    },
     isPaidState(): boolean {
       const state = (this.invoice?.status as string) || this.mintQuote?.state;
       return state?.toLowerCase() === "paid";
@@ -381,6 +387,27 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: flex-end;
+}
+
+.waiting-dot {
+  animation: waiting-pulse 1.6s ease-in-out infinite;
+  background: var(--q-primary);
+  border-radius: 50%;
+  display: inline-block;
+  height: 8px;
+  margin-inline-end: 8px;
+  vertical-align: middle;
+  width: 8px;
+}
+@keyframes waiting-pulse {
+  50% {
+    opacity: 0.3;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .waiting-dot {
+    animation: none;
+  }
 }
 
 .chain-status-fade-enter-active,

@@ -951,10 +951,10 @@ export default {
           success: "พบ { length } Mints",
         },
       },
+      unnamed: "Mint ไม่มีชื่อ",
       recommendations: {
         overline: "พบ { length } Mints",
-        caption:
-          "Mints เหล่านี้ถูกแนะนำโดยผู้ใช้ Nostr คนอื่น ๆ โปรดใช้ความระมัดระวังและทำการวิจัยของคุณเองก่อนใช้ Mint",
+        caption: "ศึกษาข้อมูลด้วยตัวเองก่อนใช้ Mint",
         actions: {
           browse: {
             label: "คลิกเพื่อเรียกดู Mints",

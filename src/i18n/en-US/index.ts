@@ -983,10 +983,10 @@ export default {
           success: "Found { length } mints",
         },
       },
+      unnamed: "Unnamed mint",
       recommendations: {
         overline: "Found { length } mints",
-        caption:
-          "These mints were recommended by other Nostr users. Be careful and do your own research before using a mint.",
+        caption: "Do your own research before using a mint.",
         actions: {
           browse: {
             label: "Click to browse mints",

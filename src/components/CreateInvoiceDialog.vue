@@ -60,6 +60,7 @@
             <ChooseMint
               :filter-payment-method="mintFilterMethod"
               filter-mint-operation="mint"
+              :disable="createInvoiceButtonBlocked"
             />
             <div
               v-if="!isOnchain && bolt11Supported && bolt12Supported"
@@ -67,6 +68,7 @@
             >
               <q-btn-toggle
                 :model-value="isBolt12"
+                :disable="createInvoiceButtonBlocked"
                 @update:model-value="
                   (v) => v !== isBolt12 && toggleInvoiceType()
                 "
@@ -201,7 +203,12 @@
         <!-- Numeric keypad -->
         <!-- Numeric keypad and Secondary Actions -->
         <div class="bottom-panel column justify-end">
-          <div class="keypad-wrapper" v-if="showAmountInput">
+          <!-- While the invoice is being created, only the busy button reads as active. -->
+          <div
+            class="keypad-wrapper"
+            :class="{ 'keypad-wrapper--busy': createInvoiceButtonBlocked }"
+            v-if="showAmountInput"
+          >
             <NumericKeyboard
               :force-visible="true"
               :hide-close="true"
@@ -873,6 +880,12 @@ export default defineComponent({
 });
 </script>
 <style scoped>
+.keypad-wrapper--busy {
+  opacity: 0.4;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
 .send-fullscreen {
   height: 100vh;
   display: flex;

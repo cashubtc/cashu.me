@@ -993,10 +993,10 @@ export default {
           success: "Nalezeno { length } mintů",
         },
       },
+      unnamed: "Mint bez názvu",
       recommendations: {
         overline: "Nalezeno { length } mintů",
-        caption:
-          "Tyto minty doporučili ostatní uživatelé Nostr. Buďte opatrní a prověřte mint před použitím.",
+        caption: "Než mint použijete, prověřte si ho.",
         actions: {
           browse: {
             label: "Klikněte pro prohlížení mintů",

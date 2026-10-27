@@ -970,10 +970,10 @@ export default {
           success: "Βρέθηκαν { length } mints",
         },
       },
+      unnamed: "Mint χωρίς όνομα",
       recommendations: {
         overline: "Βρέθηκαν { length } mints",
-        caption:
-          "Αυτά τα mints προτάθηκαν από άλλους χρήστες Nostr. Να είστε προσεκτικοί και κάντε τη δική σας έρευνα πριν χρησιμοποιήσετε ένα mint.",
+        caption: "Κάντε τη δική σας έρευνα πριν χρησιμοποιήσετε ένα mint.",
         actions: {
           browse: {
             label: "Κάντε κλικ για περιήγηση στα mints",

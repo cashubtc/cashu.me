@@ -940,10 +940,10 @@ export default {
           success: "Trovati { length } mints",
         },
       },
+      unnamed: "Mint senza nome",
       recommendations: {
         overline: "Trovati { length } mints",
-        caption:
-          "Questi mints sono stati raccomandati da altri utenti Nostr. Sii cauto e fai le tue ricerche prima di usare un mint.",
+        caption: "Informati prima di usare un mint.",
         actions: {
           browse: {
             label: "Clicca per sfogliare i mints",

@@ -197,6 +197,14 @@ body,
 .qr-progress {
   height: 2px;
   margin: 8px 0 12px;
+  padding-inline: 35%;
+}
+// Under reduced motion the indeterminate bar stops and would draw a full static rule under
+// the QR, which reads as a stray divider; the cycling QR itself is the activity cue there.
+@media (prefers-reduced-motion: reduce) {
+  .qr-progress .q-linear-progress {
+    visibility: hidden;
+  }
 }
 
 // The amount a sheet is about (send, receive), shown under its QR.
@@ -508,9 +516,9 @@ body.body--light .q-dialog__backdrop {
 }
 
 // The mint picker as a labelled full-width field (Lightning address mint, swap From/To,
-// currency): label over value, matching the outlined inputs around it.
+// currency): label over value, matching the outlined inputs around it, 12px corners included.
 .mint-chip--field {
-  border-radius: 28px;
+  border-radius: 12px;
   justify-content: flex-start;
   min-height: 56px;
   padding: 8px 20px;

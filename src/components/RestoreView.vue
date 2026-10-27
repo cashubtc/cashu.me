@@ -14,6 +14,7 @@
             :label="$t('RestoreView.seed_phrase.inputs.seed_phrase.label')"
             autogrow
             type="textarea"
+            hide-bottom-space
             :error="mnemonicError !== ''"
             :error-message="mnemonicError"
           >
@@ -119,15 +120,18 @@
 
                     <div class="mint-info-container">
                       <!-- Mint Name -->
+                      <!-- The bare host is the title when the mint has no name, as on every
+                           other mint list. -->
+                      <div class="mint-name">
+                        {{
+                          mint.nickname || mint.info?.name || mintHost(mint.url)
+                        }}
+                      </div>
                       <div
                         v-if="mint.nickname || mint.info?.name"
-                        class="mint-name"
+                        class="text-grey-6 mint-url"
                       >
-                        {{ mint.nickname || mint.info?.name }}
-                      </div>
-                      <!-- Mint URL -->
-                      <div class="text-grey-6 mint-url">
-                        {{ mint.url }}
+                        {{ mintHost(mint.url) }}
                       </div>
                     </div>
                   </div>
@@ -140,7 +144,7 @@
                   <!-- Currency units with regular text styling -->
                   <div class="row q-gutter-x-sm">
                     <div
-                      v-for="unit in mintClass(mint).units"
+                      v-for="unit in heldUnits(mint)"
                       :key="unit"
                       class="currency-unit-badge"
                     >
@@ -347,6 +351,14 @@ export default defineComponent({
     },
   },
   methods: {
+    mintHost(url: string): string {
+      return url.replace(/^https?:\/\//, "").replace(/\/$/, "");
+    },
+    // Only the units this mint holds; a row of zero chips is noise.
+    heldUnits(mint: any): string[] {
+      const m = this.mintClass(mint);
+      return m.units.filter((unit: string) => m.unitBalance(unit) > 0);
+    },
     ...mapActions(useRestoreStore, ["restoreMint"]),
     ...mapActions(useUiStore, ["pasteFromClipboard"]),
     mintClass(mint) {

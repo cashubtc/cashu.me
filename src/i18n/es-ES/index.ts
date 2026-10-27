@@ -966,10 +966,10 @@ export default {
           success: "Encontrados { length } mints",
         },
       },
+      unnamed: "Mint sin nombre",
       recommendations: {
         overline: "Encontrados { length } mints",
-        caption:
-          "Estos mints fueron recomendados por otros usuarios de Nostr. Ten cuidado y haz tu propia investigación antes de usar un mint.",
+        caption: "Investiga por tu cuenta antes de usar un mint.",
         actions: {
           browse: {
             label: "Haz clic para explorar mints",

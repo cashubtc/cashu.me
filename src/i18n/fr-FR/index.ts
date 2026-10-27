@@ -976,10 +976,10 @@ export default {
           success: "{ length } mints trouvées",
         },
       },
+      unnamed: "Mint sans nom",
       recommendations: {
         overline: "{ length } mints trouvées",
-        caption:
-          "Ces mints ont été recommandées par d'autres utilisateurs Nostr. Soyez prudent et faites vos propres recherches avant d'utiliser une mint.",
+        caption: "Renseignez-vous avant d’utiliser un mint.",
         actions: {
           browse: {
             label: "Cliquez pour parcourir les mints",

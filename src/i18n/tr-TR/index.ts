@@ -972,10 +972,10 @@ export default {
           success: "{ length } mint bulundu",
         },
       },
+      unnamed: "Adsız mint",
       recommendations: {
         overline: "{ length } mint bulundu",
-        caption:
-          "Bu mint'ler diğer Nostr kullanıcıları tarafından önerildi. Dikkatli olun ve bir mint kullanmadan önce kendi araştırmanızı yapın.",
+        caption: "Bir mint'i kullanmadan önce kendi araştırmanı yap.",
         actions: {
           browse: {
             label: "Mint'lere göz atmak için tıklayın",

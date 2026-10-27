@@ -41,6 +41,9 @@
       >
         {{ host }}
       </div>
+      <!-- A mint without its own name: the host is the title, and lists that need every card at
+           one height pass a muted second line for it. -->
+      <div v-else-if="unnamedLabel" class="mint-url">{{ unnamedLabel }}</div>
     </div>
   </div>
 </template>
@@ -58,6 +61,7 @@ export default defineComponent({
     iconUrl: { type: String, required: false },
     avatarSize: { type: String, default: "34px" },
     loading: { type: Boolean, default: false },
+    unnamedLabel: { type: String, default: "" },
   },
   data() {
     return {

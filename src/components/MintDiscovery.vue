@@ -137,6 +137,7 @@
                         :name="getMintDisplayName(rec.url)"
                         :url="rec.url"
                         :loading="isFetchingMintInfo(rec.url)"
+                        :unnamed-label="$t('MintSettings.discover.unnamed')"
                       />
                     </div>
                     <div class="row">
@@ -327,9 +328,10 @@ export default defineComponent({
   margin-bottom: 24px;
 }
 
+/* The gap belongs to the idle button; once results show, the count sits right under the page
+   caption. */
 .discover-card {
   padding: 0;
-  margin-bottom: 24px;
 }
 
 .discover-header {
@@ -355,6 +357,7 @@ export default defineComponent({
 
 .discover-button {
   margin-top: 0;
+  margin-bottom: 24px;
 }
 
 /* Skeleton rows match the loaded mint cards: same height, gap, radius and outline, no fill. */

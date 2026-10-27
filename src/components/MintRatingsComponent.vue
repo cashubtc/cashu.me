@@ -45,8 +45,12 @@
               class="row items-center no-wrap"
               style="gap: 8px"
             >
-              <!-- Star Icons (show only the number of stars for this rating level) -->
-              <div class="row items-center" style="gap: 1px">
+              <!-- Star Icons (show only the number of stars for this rating level), end-aligned in a
+                   fixed column so all five bars start on one line. -->
+              <div
+                class="row items-center justify-end no-wrap"
+                style="gap: 1px; width: 64px; flex: none"
+              >
                 <q-icon
                   v-for="i in star"
                   :key="i"

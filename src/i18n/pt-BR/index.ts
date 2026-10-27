@@ -990,10 +990,10 @@ export default {
           success: "Encontrado(s) { length } mint(s)",
         },
       },
+      unnamed: "Mint sem nome",
       recommendations: {
         overline: "Encontrado(s) { length } mint(s)",
-        caption:
-          "Esses mints foram recomendados por outros usuários do Nostr. Tome cuidado e faça sua própria pesquisa antes de usar um mint.",
+        caption: "Pesquise por conta própria antes de usar um mint.",
         actions: {
           browse: {
             label: "Clique para ver os mints",

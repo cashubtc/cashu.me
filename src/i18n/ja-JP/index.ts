@@ -956,10 +956,10 @@ export default {
           success: "{ length }個のミントが見つかりました",
         },
       },
+      unnamed: "名前のないミント",
       recommendations: {
         overline: "{ length }個のミントが見つかりました",
-        caption:
-          "これらのミントは他のNostrユーザーによって推奨されました。ミントを使用する前に注意し、ご自身の調査を行ってください。",
+        caption: "ミントを使う前に自分で調べてください。",
         actions: {
           browse: {
             label: "ミントをブラウズするにはクリック",
