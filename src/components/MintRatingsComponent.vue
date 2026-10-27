@@ -95,15 +95,28 @@
       <!-- While the first fetch runs, a skeleton of the summary and review rows, so the
            page never claims "No reviews yet" before it knows. -->
       <div v-else-if="fetchingReviews" class="q-mb-lg" aria-busy="true">
-        <div class="section-card q-pa-md">
-          <q-skeleton type="text" width="40%" height="32px" />
-          <q-skeleton type="text" width="60%" class="q-mb-md" />
-          <div v-for="n in 3" :key="n" class="row no-wrap items-center q-mt-md">
-            <q-skeleton type="QAvatar" size="36px" class="q-mr-md" />
-            <div class="col">
-              <q-skeleton type="text" width="50%" />
-              <q-skeleton type="text" width="80%" />
-            </div>
+        <div class="row no-wrap items-center q-mb-lg">
+          <div class="q-mr-lg">
+            <q-skeleton type="text" width="64px" height="56px" />
+            <q-skeleton type="text" width="48px" />
+          </div>
+          <div class="col">
+            <q-skeleton
+              v-for="n in 5"
+              :key="'bar' + n"
+              type="text"
+              height="10px"
+              class="q-mb-xs"
+            />
+          </div>
+        </div>
+        <q-skeleton type="rect" height="44px" class="q-mb-lg rounded-borders" />
+        <div v-for="n in 3" :key="n" class="row no-wrap q-mb-lg">
+          <q-skeleton type="QAvatar" size="36px" class="q-mr-md" />
+          <div class="col">
+            <q-skeleton type="text" width="40%" />
+            <q-skeleton type="text" width="90%" />
+            <q-skeleton type="text" width="70%" />
           </div>
         </div>
       </div>

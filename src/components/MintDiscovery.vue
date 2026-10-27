@@ -7,10 +7,12 @@
         </p>
       </div> -->
       <div class="discover-button">
+        <!-- Once results are listed, the button steps back to an outline so the list leads. -->
         <q-btn
           color="primary"
           rounded
           unelevated
+          :outline="discoverList.length > 0 && !discovering"
           no-caps
           :loading="discovering"
           @click="discover"
@@ -19,7 +21,7 @@
           <q-icon name="search" size="20px" class="q-mr-sm" />
           <span>{{ $t("MintSettings.discover.actions.discover.label") }}</span>
           <template v-slot:loading>
-            <q-spinner class="on-left" />
+            <q-spinner size="20px" class="on-left" />
             {{ $t("MintSettings.discover.actions.discover.in_progress") }}
           </template>
         </q-btn>
@@ -102,8 +104,7 @@
                           ⭐ {{ (avgFor(rec.url) ?? 0).toFixed(1) }} ·
                           {{ countFor(rec.url) }}
                           <span
-                            class="text-primary cursor-pointer"
-                            style="text-decoration: underline"
+                            class="mint-review-link cursor-pointer"
                             @click.stop="openReviews(rec.url)"
                             >{{
                               $t("MintSettings.reviews_text", countFor(rec.url))
@@ -304,13 +305,14 @@ export default defineComponent({
   margin-top: 0;
 }
 
+/* Skeleton rows match the loaded mint cards: same height, gap, radius and outline, no fill. */
 .discover-skeleton__row {
   display: flex;
   align-items: center;
-  padding: 12px 16px;
-  margin-bottom: 8px;
-  border-radius: 14px;
-  background: var(--app-tint);
+  min-height: 100px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border-radius: 10px;
   border: 1px solid var(--app-border);
 }
 
@@ -328,6 +330,13 @@ export default defineComponent({
 .mint-card {
   border: 1px solid rgba(128, 128, 128, 0.2);
   border-radius: 10px;
+}
+
+/* Review counts link the same way as on the mint cards. */
+.mint-review-link {
+  color: var(--app-text-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .discover-count {

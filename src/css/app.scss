@@ -594,3 +594,30 @@ body.body--light .q-field--outlined .q-field__control:before {
 .q-field--outlined.q-field--rounded .q-field__control:after {
   border-radius: 12px;
 }
+
+/* Right-to-left locales: Quasar pins html, body and #q-app to ltr; follow <html dir> instead,
+   so rows, tabs and text alignment mirror. Amounts and addresses stay left to right. */
+html[dir="rtl"] body,
+html[dir="rtl"] #q-app {
+  direction: rtl;
+}
+html[dir="rtl"] .amount-text,
+html[dir="rtl"] .mint-chip__balance,
+html[dir="rtl"] .ellipsis {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+// Quasar's alignment utilities are physical; in rtl they swap so "left" means the start edge.
+html[dir="rtl"] .text-left {
+  text-align: right !important;
+}
+html[dir="rtl"] .text-right {
+  text-align: left !important;
+}
+// Directional glyphs point the other way in rtl (back is →, forward is ←).
+html[dir="rtl"] .lucide-chevron-left-icon,
+html[dir="rtl"] .lucide-chevron-right-icon,
+html[dir="rtl"] .lucide-arrow-left-icon,
+html[dir="rtl"] .lucide-arrow-right-icon {
+  transform: scaleX(-1);
+}

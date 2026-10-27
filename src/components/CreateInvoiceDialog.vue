@@ -270,7 +270,7 @@
               >
                 {{ createButtonLabel }}
                 <template v-slot:loading>
-                  <q-spinner />
+                  <q-spinner size="22px" />
                 </template>
               </q-btn>
             </div>

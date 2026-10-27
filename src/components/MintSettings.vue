@@ -706,6 +706,8 @@ export default defineComponent({
 .mint-review-link {
   color: var(--app-text-muted);
   font-weight: 400;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 /* Several unit balances on one card read as separate holdings, not a conversion. */
@@ -783,5 +785,9 @@ export default defineComponent({
   top: 10px;
   right: 14px;
   z-index: 10;
+}
+html[dir="rtl"] .more-vert-icon {
+  left: 14px;
+  right: auto;
 }
 </style>
