@@ -610,6 +610,13 @@ export default defineComponent({
   text-transform: uppercase;
   color: var(--app-text-muted);
 }
+/* Chinese, Japanese and Korean have no capitals, and tracking only spreads the characters. */
+.section-divider .divider-text:lang(zh),
+.section-divider .divider-text:lang(ja),
+.section-divider .divider-text:lang(ko) {
+  letter-spacing: 0;
+  text-transform: none;
+}
 
 /* Contact Section */
 .contact-section {

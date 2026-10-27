@@ -15,6 +15,7 @@
             readonly
             v-model="hiddenMnemonic"
             :label="$t('Settings.backup_restore.backup_seed.seed_phrase_label')"
+            :input-style="{ direction: 'ltr', textAlign: 'left' }"
             autogrow
           >
             <template v-slot:append>

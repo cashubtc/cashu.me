@@ -220,7 +220,7 @@ export default defineComponent({
         true
       );
       // Same true minus sign as the history list.
-      return display.replace(/^-\s*/, "\u2212");
+      return display.replace(/^(\u2066?)-\s*/, "$1\u2212");
     },
     runnerActive: function () {
       return this.invoiceWorkerRunning;

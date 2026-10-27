@@ -6,7 +6,7 @@
       <div class="wallet-hero q-gutter-y-md">
         <NoMintWarnBanner v-if="mints.length == 0" />
         <BalanceView v-else :set-tab="setTab" />
-        <div class="wallet-actions q-pt-xl q-pb-lg">
+        <div class="wallet-actions q-pt-lg q-pb-md">
           <q-btn
             unelevated
             rounded

@@ -15,6 +15,18 @@ body {
 :lang(ar) * {
   letter-spacing: 0 !important;
 }
+// Noto Sans Arabic sits optically smaller than Inter, and its marks above and below the
+// letters need taller lines: Arabic body text is a pixel larger, and captions and
+// paragraphs get looser lines.
+html:lang(ar) body {
+  font-size: 15px;
+}
+html:lang(ar) .q-item__label--caption,
+html:lang(ar) .text-caption,
+html:lang(ar) .text-body2,
+html:lang(ar) p {
+  line-height: 1.6;
+}
 
 // Dialog header typography
 // This class provides proper letter-spacing for dialog titles
@@ -837,6 +849,10 @@ html[dir="rtl"] .rtl-flip,
 html[dir="rtl"] .settings-menu-chevron,
 html[dir="rtl"] .welcome-footer__back .q-icon {
   transform: scaleX(-1);
+}
+// "Opens elsewhere" is not a reading direction, so the external-link arrow never mirrors.
+html[dir="rtl"] .lucide-external-link-icon {
+  transform: none;
 }
 
 // Quasar spacing utilities are physical; in rtl the inline-start/end margins swap sides.

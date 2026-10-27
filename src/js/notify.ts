@@ -1,5 +1,6 @@
 import { Notify, QNotifyCreateOptions } from "quasar";
 import { i18n } from "src/boot/i18n";
+import { isolateLtr } from "src/js/format-currency";
 
 // One toast for the whole app (user direction, R46; at the bottom since R50 so it never
 // covers the balance): every kind appears in one place, as a
@@ -22,9 +23,7 @@ const ICONS: Record<ToastKind, string> = {
 // "₿500" or "$1.00" is wrapped in Unicode isolates (LRI…PDI), so Arabic shows ₿500, not 500₿.
 const AMOUNT_RUN = /[₿$€]?\d[\d.,\u00a0\u202f]*(\s?(sats?|[₿$€]))?/g;
 function isolateAmounts(text: string): string {
-  if (typeof document === "undefined" || document.documentElement.dir !== "rtl")
-    return text;
-  return text.replace(AMOUNT_RUN, (run) => `\u2066${run}\u2069`);
+  return text.replace(AMOUNT_RUN, (run) => isolateLtr(run));
 }
 
 // At most two toasts at once: a newer one dismisses the oldest, so a burst of messages never

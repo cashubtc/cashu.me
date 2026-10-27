@@ -57,6 +57,7 @@
             <div class="text-right">
               <div
                 class="amount-text text-weight-bold"
+                dir="ltr"
                 :class="{
                   'text-amount-positive':
                     transaction.amount >= 0 && transaction.status !== 'pending',

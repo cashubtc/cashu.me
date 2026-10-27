@@ -59,6 +59,10 @@
             $t("Settings.advanced.developer.remove_spent.description")
           }}</q-item-label>
         </q-item-section>
+        <!-- Runs straight away, so an action glyph like the export rows, not a chevron. -->
+        <q-item-section side>
+          <RefreshCwIcon :size="20" class="settings-menu-action" />
+        </q-item-section>
       </q-item>
 
       <!-- debug console -->
@@ -166,6 +170,9 @@
             $t("Settings.advanced.developer.unset_reserved.description")
           }}</q-item-label>
         </q-item-section>
+        <q-item-section side>
+          <RotateCcwIcon :size="20" class="settings-menu-action" />
+        </q-item-section>
       </q-item>
 
       <!-- show onboarding -->
@@ -195,9 +202,9 @@
             $t("Settings.advanced.developer.export_proofs.description")
           }}</q-item-label>
         </q-item-section>
-        <!-- Downloads a file straight away, so a download glyph instead of a navigation chevron. -->
+        <!-- Copies a token straight away, so a copy glyph instead of a navigation chevron. -->
         <q-item-section side>
-          <DownloadIcon :size="20" class="settings-menu-chevron" />
+          <CopyIcon :size="20" class="settings-menu-action" />
         </q-item-section>
       </q-item>
 
@@ -213,7 +220,7 @@
         </q-item-section>
         <!-- Downloads a file straight away, so a download glyph instead of a navigation chevron. -->
         <q-item-section side>
-          <DownloadIcon :size="20" class="settings-menu-chevron" />
+          <DownloadIcon :size="20" class="settings-menu-action" />
         </q-item-section>
       </q-item>
 
@@ -338,7 +345,10 @@ import { useNostrUserStore } from "src/stores/nostrUser";
 import SettingsPageShell from "./SettingsPageShell.vue";
 import SettingsSection from "./SettingsSection.vue";
 import {
+  Copy as CopyIcon,
   Download as DownloadIcon,
+  RefreshCw as RefreshCwIcon,
+  RotateCcw as RotateCcwIcon,
   Landmark as LandmarkIcon,
   Plus as PlusIcon,
 } from "lucide-vue-next";
@@ -349,7 +359,10 @@ export default defineComponent({
   components: {
     SettingsPageShell,
     SettingsSection,
+    CopyIcon,
     DownloadIcon,
+    RefreshCwIcon,
+    RotateCcwIcon,
     PlusIcon,
     LandmarkIcon,
   },

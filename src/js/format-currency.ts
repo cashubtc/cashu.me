@@ -1,3 +1,12 @@
+/** In a right-to-left page, wrap a left-to-right run such as "₿500" or "-$1.00" in Unicode
+ * isolates (LRI…PDI), so Arabic shows ₿500 and -₿101, never 500₿ or ₿101-. Left-to-right
+ * pages get the text unchanged. */
+export function isolateLtr(text: string): string {
+  if (typeof document === "undefined" || document.documentElement.dir !== "rtl")
+    return text;
+  return `\u2066${text}\u2069`;
+}
+
 /** Format integer Cashu amounts without converting large values to numbers. */
 export function formatBigIntCurrency(
   value: bigint,

@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { formatBigIntCurrency } from "src/js/format-currency";
+import { afterEach, describe, expect, it } from "vitest";
+import { formatBigIntCurrency, isolateLtr } from "src/js/format-currency";
 
 describe("exact integer currency formatting", () => {
   it.each([
@@ -28,5 +28,21 @@ describe("exact integer currency formatting", () => {
     expect(formatBigIntCurrency(18446744073709551615n, "sat", "en", true)).toBe(
       "₿18,446,744,073,709,551,615"
     );
+  });
+});
+
+describe("isolateLtr", () => {
+  afterEach(() => {
+    document.documentElement.dir = "";
+  });
+
+  it("leaves amounts unchanged on a left-to-right page", () => {
+    document.documentElement.dir = "ltr";
+    expect(isolateLtr("-₿101")).toBe("-₿101");
+  });
+
+  it("isolates amounts on a right-to-left page so the sign stays in front", () => {
+    document.documentElement.dir = "rtl";
+    expect(isolateLtr("-₿101")).toBe("⁦-₿101⁩");
   });
 });

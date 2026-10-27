@@ -3,7 +3,7 @@ import { useUiStore } from "stores/ui";
 import { Clipboard } from "@capacitor/clipboard";
 import { SafeArea } from "capacitor-plugin-safe-area";
 import { useSettingsStore } from "stores/settings";
-import { formatBigIntCurrency } from "src/js/format-currency";
+import { formatBigIntCurrency, isolateLtr } from "src/js/format-currency";
 import {
   notify,
   notifyCopied,
@@ -153,7 +153,11 @@ window.windowMixin = {
       }
       return text;
     },
+    // Every amount reads left to right, also inside Arabic text.
     formatCurrency: function (value, currency, showBalance = false) {
+      return isolateLtr(this.formatCurrencyText(value, currency, showBalance));
+    },
+    formatCurrencyText: function (value, currency, showBalance = false) {
       if (currency == undefined) {
         currency = "sat";
       }
