@@ -504,13 +504,31 @@ textarea,
   font-family: "Material Icons Outlined" !important;
 }
 
-/* Dialog scrim: dark enough that the page behind recedes instead of reading as disabled. */
+/* Dialog scrim, one for every sheet and dialog: dark enough that the page behind recedes
+   instead of reading as disabled. */
 .q-dialog__backdrop {
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.6) !important;
 }
-// Over light pages a 60% wash reads as muddy grey; a lighter one dims without flattening.
+// Over light pages a 60% wash reads as muddy grey; 45% still dims the dark pills behind
+// a sheet (R41) without flattening the page.
 body.body--light .q-dialog__backdrop {
-  background: rgba(0, 0, 0, 0.32) !important;
+  background: rgba(0, 0, 0, 0.45) !important;
+}
+
+// A refresh control that is busy spins its own glyph, so it never turns into a different
+// mark (three dots read as an overflow menu, R41).
+.refresh-spin {
+  animation: refresh-spin 1s linear infinite;
+}
+@keyframes refresh-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .refresh-spin {
+    animation-duration: 3s;
+  }
 }
 
 // Sheet header trailing slot: 44px buttons, outermost is the unit toggle, same glyph size on

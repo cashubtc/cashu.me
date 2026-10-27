@@ -8,7 +8,9 @@
       class="q-mb-lg"
     />
     <div class="review-form">
-      <div class="section-card q-pa-md">
+      <!-- One container level: the label, stars and text box sit straight on the page (R41:
+           the outlined text box inside a bordered card read as a box in a box). -->
+      <div>
         <div class="text-subtitle2 text-weight-medium">
           {{ $t("CreateMintReview.inputs.rating.label") }}
         </div>
@@ -58,9 +60,7 @@
           v-if="displayNpub"
           flat
           round
-          dense
-          size="sm"
-          class="q-ml-xs"
+          class="publisher-copy"
           :aria-label="$t('global.actions.copy.label')"
           @click="copyText(displayNpub)"
           ><CopyIcon :size="20"
@@ -313,10 +313,11 @@ export default defineComponent({
   position: relative;
 }
 
-.section-card {
-  background-color: var(--app-tint);
-  border-radius: 12px;
-  border: 1px solid var(--app-border);
+/* A 44px copy target that doesn't push the caption line taller. */
+.publisher-copy {
+  height: 44px;
+  margin-block: -12px;
+  width: 44px;
 }
 
 .review-input :deep(.q-field__native) {

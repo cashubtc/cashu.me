@@ -822,6 +822,7 @@ export default {
     your_review: "รีวิวของคุณ",
     no_reviews_to_display: "ไม่มีรีวิวที่จะแสดง",
     no_rating: "ไม่มีคะแนน",
+    stars_label: "{rating} จาก 5 ดาว",
     out_of: "จาก",
     rows: "Reviews",
     sort: "เรียงลำดับ",

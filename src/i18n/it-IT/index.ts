@@ -808,6 +808,7 @@ export default {
     your_review: "La tua recensione",
     no_reviews_to_display: "Nessuna recensione da mostrare.",
     no_rating: "Nessuna valutazione",
+    stars_label: "{rating} su 5 stelle",
     out_of: "su",
     rows: "Reviews",
     sort: "Ordina",

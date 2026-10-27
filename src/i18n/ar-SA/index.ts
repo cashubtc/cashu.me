@@ -820,6 +820,7 @@ export default {
     your_review: "مراجعتك",
     no_reviews_to_display: "لا توجد مراجعات للعرض.",
     no_rating: "لا يوجد تقييم",
+    stars_label: "{rating} من 5 نجوم",
     out_of: "من",
     rows: "Reviews",
     sort: "ترتيب",

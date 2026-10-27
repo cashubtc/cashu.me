@@ -107,7 +107,6 @@ export default defineComponent({
    the slide, which made sheets like the mint picker stutter. */
 :deep(.q-dialog__backdrop) {
   backdrop-filter: blur(8px);
-  background: rgba(0, 0, 0, 0.6) !important;
 }
 
 .bottom-sheet {

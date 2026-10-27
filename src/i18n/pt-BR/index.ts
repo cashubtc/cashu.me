@@ -855,6 +855,7 @@ export default {
     your_review: "Sua avaliação",
     no_reviews_to_display: "Nenhuma avaliação para exibir.",
     no_rating: "Sem avaliação",
+    stars_label: "{rating} de 5 estrelas",
     out_of: "de",
     rows: "Avaliações",
     sort: "Ordenar",

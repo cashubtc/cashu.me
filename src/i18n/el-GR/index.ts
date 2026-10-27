@@ -837,6 +837,7 @@ export default {
     your_review: "Η κριτική σας",
     no_reviews_to_display: "Καμία κριτική προς εμφάνιση.",
     no_rating: "Χωρίς βαθμολογία",
+    stars_label: "{rating} από 5 αστέρια",
     out_of: "από",
     rows: "Reviews",
     sort: "Ταξινόμηση",

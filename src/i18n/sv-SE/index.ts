@@ -827,6 +827,7 @@ export default {
     your_review: "Din recension",
     no_reviews_to_display: "Inga recensioner att visa.",
     no_rating: "Ingen betygsättning",
+    stars_label: "{rating} av 5 stjärnor",
     out_of: "av",
     rows: "Reviews",
     sort: "Sortera",

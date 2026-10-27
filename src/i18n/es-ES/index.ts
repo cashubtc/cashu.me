@@ -833,6 +833,7 @@ export default {
     your_review: "Tu reseña",
     no_reviews_to_display: "No hay reseñas para mostrar.",
     no_rating: "Sin calificación",
+    stars_label: "{rating} de 5 estrellas",
     out_of: "de",
     rows: "Reviews",
     sort: "Ordenar",

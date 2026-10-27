@@ -841,6 +841,7 @@ export default {
     your_review: "Votre avis",
     no_reviews_to_display: "Aucun avis à afficher.",
     no_rating: "Aucune note",
+    stars_label: "{rating} sur 5 étoiles",
     out_of: "sur",
     rows: "Reviews",
     sort: "Trier",

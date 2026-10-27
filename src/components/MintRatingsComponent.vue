@@ -283,17 +283,24 @@
               }}</span>
             </div>
 
-            <q-rating
+            <div
               v-if="r.rating !== null"
-              :model-value="r.rating"
-              readonly
-              size="14px"
-              color="primary"
-              icon="star"
-              icon-selected="star"
-              icon-half="star_half"
-              class="review-stars"
-            />
+              role="img"
+              class="review-stars-wrap"
+              :aria-label="$t('MintRatings.stars_label', { rating: r.rating })"
+            >
+              <q-rating
+                aria-hidden="true"
+                :model-value="r.rating"
+                readonly
+                size="14px"
+                color="primary"
+                icon="star"
+                icon-selected="star"
+                icon-half="star_half"
+                class="review-stars"
+              />
+            </div>
             <div v-else class="review-no-rating">
               {{ $t("MintRatings.no_rating") }}
             </div>
@@ -812,9 +819,13 @@ body[data-theme] .q-card--dark.mint-ratings-root {
   min-height: 20px;
 }
 
+/* The name is a 44px tap target (copy npub) without moving the text. */
 .review-author {
   background: none;
   border: 0;
+  margin-block: -12px;
+  min-width: 44px;
+  padding-block: 12px;
   border-radius: 4px;
   color: var(--app-text);
   cursor: pointer;
@@ -822,8 +833,7 @@ body[data-theme] .q-card--dark.mint-ratings-root {
   font-size: 15px;
   font-weight: 600;
   line-height: 20px;
-  min-width: 0;
-  padding: 0;
+  padding-inline: 0;
   text-align: start;
 }
 .review-author:hover {
@@ -855,6 +865,12 @@ body[data-theme] .q-card--dark.mint-ratings-root {
   margin-top: 4px;
 }
 
+/* Unearned stars recede, so a 4 reads as 4 at a glance (R41). */
+.review-stars :deep(.q-rating__icon:not(.q-rating__icon--active)) {
+  color: var(--app-text-subtle) !important;
+  opacity: 0.5;
+}
+
 .review-no-rating {
   color: var(--app-text-muted);
   font-size: 13px;
@@ -883,6 +899,7 @@ body[data-theme] .q-card--dark.mint-ratings-root {
   color: inherit;
   cursor: pointer;
   font: inherit;
+  min-height: 44px;
   padding: 8px 0;
   text-align: start;
 }

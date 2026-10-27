@@ -276,7 +276,6 @@ export default defineComponent({
 <style lang="scss" scoped>
 :deep(.q-dialog__backdrop) {
   backdrop-filter: blur(8px);
-  background: rgba(0, 0, 0, 0.6) !important;
 }
 
 .q-dialog__inner--bottom > div {

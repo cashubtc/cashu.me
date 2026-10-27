@@ -851,6 +851,7 @@ export default {
     your_review: "Your review",
     no_reviews_to_display: "No reviews to display.",
     no_rating: "No rating",
+    stars_label: "{rating} of 5 stars",
     out_of: "out of",
     rows: "Reviews",
     sort: "Sort",

@@ -813,6 +813,7 @@ export default {
     your_review: "您的评价",
     no_reviews_to_display: "暂无可显示的评价。",
     no_rating: "暂无评分",
+    stars_label: "{rating} / 5 星",
     out_of: "共",
     rows: "Reviews",
     sort: "排序",

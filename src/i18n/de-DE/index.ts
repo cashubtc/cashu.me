@@ -838,6 +838,7 @@ export default {
     your_review: "Ihre Bewertung",
     no_reviews_to_display: "Keine Bewertungen anzuzeigen.",
     no_rating: "Keine Bewertung",
+    stars_label: "{rating} von 5 Sternen",
     out_of: "von",
     rows: "Reviews",
     sort: "Sortieren",

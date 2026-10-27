@@ -840,6 +840,7 @@ export default {
     your_review: "Yorumunuz",
     no_reviews_to_display: "Gösterilecek yorum yok.",
     no_rating: "Puan yok",
+    stars_label: "5 yıldızdan {rating}",
     out_of: "üzerinden",
     rows: "Reviews",
     sort: "Sırala",

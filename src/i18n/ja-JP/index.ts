@@ -824,6 +824,7 @@ export default {
     your_review: "あなたのレビュー",
     no_reviews_to_display: "表示するレビューはありません。",
     no_rating: "評価なし",
+    stars_label: "5つ星中{rating}",
     out_of: "のうち",
     rows: "Reviews",
     sort: "並び替え",

@@ -51,7 +51,7 @@
           </q-item-section>
           <q-item-section side top>
             <div class="row flex-center" style="width: 44px; height: 44px">
-              <q-spinner-dots size="20px" color="primary" />
+              <q-icon name="refresh" size="24px" class="refresh-spin" />
             </div>
           </q-item-section>
         </q-item>
@@ -62,7 +62,8 @@
         :key="n"
         aria-hidden="true"
       >
-        <q-skeleton type="QAvatar" size="40px" />
+        <!-- The loaded card's 34px avatar, so the text column doesn't move. -->
+        <q-skeleton type="QAvatar" size="34px" />
         <div class="col q-ml-md">
           <q-skeleton type="text" width="55%" />
           <q-skeleton type="text" width="35%" />
@@ -102,7 +103,7 @@
               @click="discover"
             >
               <template v-slot:loading>
-                <q-spinner-dots size="20px" />
+                <q-icon name="refresh" size="24px" class="refresh-spin" />
               </template>
             </q-btn>
           </q-item-section>

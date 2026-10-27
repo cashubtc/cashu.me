@@ -857,6 +857,7 @@ export default {
     your_review: "Vaše recenze",
     no_reviews_to_display: "Žádné recenze k zobrazení.",
     no_rating: "Bez hodnocení",
+    stars_label: "{rating} z 5 hvězdiček",
     out_of: "z",
     rows: "Recenze",
     sort: "Třídit",
