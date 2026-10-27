@@ -1,8 +1,6 @@
 <template>
   <div class="row q-col-gutter-y-md justify-center q-pt-none q-pb-md">
     <div class="col-12 text-center q-gutter-y-md wallet-column">
-      <!-- On desktop the wallet is two columns (user direction, R50): the balance, mint and
-           actions on the left, history and mints on the right; one column on phones. -->
       <div class="wallet-hero q-gutter-y-md">
         <NoMintWarnBanner v-if="mints.length == 0" />
         <BalanceView v-else :set-tab="setTab" />
@@ -10,7 +8,6 @@
           <q-btn
             unelevated
             rounded
-            no-caps
             data-testid="wallet-receive"
             class="wallet-action-btn"
             color="primary"
@@ -30,7 +27,6 @@
           <q-btn
             unelevated
             rounded
-            no-caps
             data-testid="wallet-send"
             class="wallet-action-btn"
             color="primary"
@@ -216,25 +212,6 @@
   max-width: var(--app-column);
 }
 
-/* Desktop: two columns, the hero held in view while history scrolls beside it. */
-@media (min-width: 1024px) {
-  .row > .wallet-column {
-    align-items: start;
-    column-gap: 48px;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    max-width: 1120px;
-    padding: 0 32px;
-  }
-  .wallet-hero {
-    position: sticky;
-    top: 72px;
-  }
-  .wallet-panel {
-    padding-top: 48px;
-  }
-}
-
 .wallet-actions {
   align-items: center;
   display: flex;
@@ -246,10 +223,13 @@
   padding-right: 16px;
 }
 
+/* Send and Receive keep the original design's capitals (user direction, R56). */
 .wallet-action-btn {
   flex: 1 1 0;
-  font-size: 1.0625rem;
+  font-size: 1rem;
+  letter-spacing: 0.06em;
   min-height: 52px;
+  text-transform: uppercase;
 }
 
 .wallet-scan-btn {

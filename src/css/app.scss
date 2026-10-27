@@ -60,6 +60,14 @@ html:lang(ar) p {
   letter-spacing: 0;
   font-weight: 600;
 }
+// Strategic capitals, as in the original design (user direction, R56): the one filled,
+// full-width action that completes a flow (Create invoice, Pay, Receive, Copy…) is set in
+// caps; secondary and inline buttons stay in sentence case.
+.q-dialog .q-btn--unelevated.q-btn--rounded.full-width.bg-primary {
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
 
 // Native-app feel: disable text selection across the UI
 body {
@@ -756,12 +764,8 @@ body .q-menu .q-item--active::after {
   resize: none;
 }
 
-// Option rows on a raised sheet carry the card hairline in every mode, and are white cards in
-// light mode like the Settings groups; a 3.5% grey tint on the #f4f4f5 sheet barely separated
-// them (R44).
-.q-dialog .action-row {
-  box-shadow: inset 0 0 0 1px var(--app-border);
-}
+// Option rows on a sheet are tinted fills with no border (user direction, R56: the hairline
+// read as too strong); in light mode they are white cards on the grey sheet, like Settings.
 body.body--light .q-dialog .action-row {
   background: var(--app-surface);
 }
@@ -1222,8 +1226,10 @@ body .mint-card.q-item--active {
   padding: 16px;
   width: 100%;
 }
+/* The trailing menu (or add) button sits in the card's top corner rather than centred on a
+   two-line name (user direction, R56). */
 .mint-card__head {
-  align-items: center;
+  align-items: flex-start;
   display: flex;
   gap: 4px;
   min-width: 0;
@@ -1231,6 +1237,7 @@ body .mint-card.q-item--active {
 .mint-card__status {
   flex: none;
   margin-inline-end: 4px;
+  margin-top: 3px;
 }
 .mint-card-more {
   color: var(--app-text-muted);
@@ -1268,31 +1275,33 @@ html[dir="rtl"] .mint-card-more {
   font-weight: 500;
 }
 
-// Toasts (user direction, R46): one raised card for every kind, in every theme and mode.
-// The kind shows in the leading icon's colour; text is ink on the raised surface.
+// Toasts (user direction, R46; restyled after shadcn's Sonner in R56): one compact neutral
+// card for every kind, in every theme and mode — a thin border, a soft shadow, 8px corners,
+// medium-weight 14px text and a small leading icon whose colour carries the kind.
 body .q-notification {
   align-items: center;
   background: var(--app-raised) !important;
-  border: 1px solid var(--app-border-strong);
-  border-radius: 14px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   color: var(--app-text) !important;
   font-size: 14px;
+  font-weight: 500;
   max-width: none;
-  min-height: 52px;
-  // One width for every toast: the page column inside its 16px gutters (R48: content-sized
-  // toasts left uneven ~70px margins).
-  width: min(calc(100vw - 32px), calc(var(--app-column) - 32px));
-  padding: 6px 6px 6px 14px;
+  min-height: 48px;
+  // One width for every toast, Sonner's 356px or the column inside its 16px gutters.
+  width: min(356px, calc(100vw - 32px));
+  padding: 4px 6px 4px 14px;
   padding-inline: 14px 6px;
+  transition: transform 0.25s ease, opacity 0.25s ease;
 }
 body .q-notification .q-notification__icon {
-  font-size: 22px;
+  font-size: 18px;
   margin-left: 0 !important;
   margin-right: 0 !important;
 }
 body .q-notification .q-notification__icon + .q-notification__message {
-  margin-inline-start: 12px;
+  margin-inline-start: 10px;
 }
 body .q-notification.bg-positive .q-notification__icon {
   color: var(--q-positive);
@@ -1313,6 +1322,8 @@ body .q-notification.bg-info .q-notification__icon {
 }
 body .q-notification .q-notification__caption {
   color: var(--app-text-muted);
+  font-size: 13px;
+  font-weight: 400;
   opacity: 1;
 }
 // The close button centres on the message, in one-line and two-line toasts alike.
@@ -1333,7 +1344,7 @@ body .q-notification--standard .q-notification__actions {
   padding-inline-start: 8px;
 }
 body .q-notification .q-notification__actions .q-icon {
-  font-size: 20px;
+  font-size: 16px;
 }
 body .q-notification .q-notification__actions .q-btn,
 body .q-notification .q-notification__actions .q-btn .q-icon {
@@ -1353,21 +1364,22 @@ body.body--light .q-notification {
 body .q-notifications__list--bottom {
   bottom: calc(env(safe-area-inset-bottom, 0px) + 84px);
 }
-// Stacked toasts join into one grouped card (R52, user direction): no gap between them, a
-// shared hairline and outer corners only, so list rows never show through between toasts.
-body .q-notifications__list .q-notification {
-  margin-top: 0;
+// Stacked toasts collapse like Sonner's: the newest (last, at the bottom) is in front and an
+// older one tucks behind it, scaled down with only its top edge showing; hovering the stack
+// fans them out again.
+body .q-notifications__list--bottom .q-notification {
+  margin-top: 8px;
+  position: relative;
+  z-index: 1;
 }
-body .q-notifications__list .q-notification + .q-notification {
-  margin-top: -1px;
+body .q-notifications__list--bottom .q-notification:not(:last-child) {
+  opacity: 0.9;
+  transform: translateY(calc(100% - 2px)) scale(0.94);
+  z-index: 0;
 }
-body .q-notifications__list .q-notification:not(:last-child) {
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-}
-body .q-notifications__list .q-notification:not(:first-child) {
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
+body .q-notifications__list--bottom:hover .q-notification {
+  opacity: 1;
+  transform: none;
 }
 // Toasts live outside #q-app; in right-to-left they follow the page's direction too.
 html[dir="rtl"] .q-notifications {

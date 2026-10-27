@@ -68,122 +68,81 @@
       <!-- Mints List with Card Design -->
       <div>
         <div v-for="mint in mints" :key="mint.url" class="q-mb-md">
+          <!-- The installed-mint card (user direction, R56): avatar, name and host on top
+               with the selection box in the top corner, holdings and the restore action
+               below on the same edges. -->
           <q-item
             clickable
             @click="toggleMintSelection(mint.url)"
             class="mint-card cursor-pointer"
+            :class="{ 'mint-card--active': selectedMints.has(mint.url) }"
             :style="{
-              'border-radius': '10px',
+              'border-radius': '12px',
               border: selectedMints.has(mint.url)
-                ? '1px solid var(--q-primary)'
-                : '1px solid rgba(128, 128, 128, 0.2)',
+                ? '1px solid var(--app-accent)'
+                : '1px solid var(--app-border-strong)',
               padding: '0px',
-              position: 'relative',
-              'background-color': selectedMints.has(mint.url)
-                ? 'rgba(var(--q-primary-rgb), 0.1)'
-                : 'transparent',
             }"
             :disable="(onboarding ? false : !isMnemonicValid) || restoringState"
           >
-            <div class="full-width" style="position: relative">
-              <div class="row items-center q-pa-md">
-                <!-- Checkbox Section -->
-                <q-item-section avatar>
-                  <q-checkbox
-                    :model-value="selectedMints.has(mint.url)"
-                    @update:model-value="toggleMintSelection(mint.url)"
-                    @click.stop
-                    color="primary"
-                    class="clickable-checkbox"
-                  />
-                </q-item-section>
-
-                <div class="col">
-                  <div class="row items-center">
-                    <!-- Mint Avatar -->
-                    <q-avatar
-                      v-if="getMintIconUrl(mint)"
-                      size="34px"
-                      class="q-mr-sm"
-                    >
-                      <q-img
-                        spinner-color="white"
-                        spinner-size="xs"
-                        :src="getMintIconUrl(mint)"
-                        alt="Mint Icon"
-                        style="height: 34px; max-width: 34px; font-size: 12px"
-                      />
-                    </q-avatar>
-
-                    <div class="mint-info-container">
-                      <!-- Mint Name -->
-                      <!-- The bare host is the title when the mint has no name, as on every
-                           other mint list. -->
-                      <div class="mint-name">
-                        {{
-                          mint.nickname || mint.info?.name || mintHost(mint.url)
-                        }}
-                      </div>
-                      <div
-                        v-if="mint.nickname || mint.info?.name"
-                        class="text-grey-6 mint-url"
-                      >
-                        {{ mintHost(mint.url) }}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+            <div class="mint-card__body">
+              <div class="mint-card__head">
+                <MintInfoContainer
+                  class="col"
+                  :iconUrl="getMintIconUrl(mint)"
+                  :name="mint.nickname || mint.info?.name"
+                  :url="mint.url"
+                />
+                <q-checkbox
+                  :model-value="selectedMints.has(mint.url)"
+                  @update:model-value="toggleMintSelection(mint.url)"
+                  @click.stop
+                  color="primary"
+                  dense
+                  class="restore-mint-check"
+                  :aria-label="mint.nickname || mint.info?.name || mint.url"
+                />
               </div>
-
-              <!-- Balance and Restore Section -->
-              <div class="row justify-between q-pb-md q-pl-lg q-pr-md">
-                <div class="col">
-                  <!-- Currency units with regular text styling -->
-                  <div class="row q-gutter-x-sm">
-                    <div
-                      v-for="unit in heldUnits(mint)"
-                      :key="unit"
-                      class="currency-unit-badge"
+              <div class="mint-card__foot">
+                <div class="mint-card__balances">
+                  <template v-for="(unit, i) in heldUnits(mint)" :key="unit">
+                    <span
+                      v-if="i > 0"
+                      class="mint-card__plus"
+                      aria-hidden="true"
+                      >+</span
                     >
-                      <span class="currency-unit-text">
-                        {{
-                          formatCurrency(
-                            mintClass(mint).unitBalance(unit),
-                            unit
-                          )
-                        }}
-                      </span>
-                    </div>
-                  </div>
-
-                  <!-- Restore Progress -->
-                  <div v-if="restoringMint === mint.url" class="q-mt-sm">
-                    <div class="text-grey-6 q-mb-xs" style="font-size: 12px">
-                      {{ restoreStatus }}
-                    </div>
-                    <q-linear-progress
-                      :value="restoreProgress"
-                      color="primary"
-                      style="height: 4px; border-radius: 2px"
-                    />
-                  </div>
+                    <bdi dir="ltr" class="currency-unit-text">{{
+                      formatCurrency(mintClass(mint).unitBalance(unit), unit)
+                    }}</bdi>
+                  </template>
                 </div>
-
-                <div v-if="!onboarding" class="col-auto">
-                  <q-btn
-                    round
-                    flat
-                    class="touch-target-44"
-                    :aria-label="$t('RestoreView.actions.restore.label')"
-                    @click.stop="restoreMintForMint(mint.url)"
-                    :disabled="!isMnemonicValid || restoringState"
-                    :loading="restoringMint === mint.url"
-                    ><HistoryIcon :size="20" />
-                    <q-tooltip>{{
-                      $t("RestoreView.actions.restore.label")
-                    }}</q-tooltip>
-                  </q-btn>
+                <q-btn
+                  v-if="!onboarding"
+                  round
+                  flat
+                  dense
+                  class="mint-card-more"
+                  :aria-label="$t('RestoreView.actions.restore.label')"
+                  @click.stop="restoreMintForMint(mint.url)"
+                  :disabled="!isMnemonicValid || restoringState"
+                  :loading="restoringMint === mint.url"
+                  ><HistoryIcon :size="20" />
+                  <q-tooltip>{{
+                    $t("RestoreView.actions.restore.label")
+                  }}</q-tooltip>
+                </q-btn>
+              </div>
+              <!-- Restore Progress -->
+              <div v-if="restoringMint === mint.url">
+                <div class="text-grey-6 q-mb-xs" style="font-size: 12px">
+                  {{ restoreStatus }}
                 </div>
+                <q-linear-progress
+                  :value="restoreProgress"
+                  color="primary"
+                  style="height: 4px; border-radius: 2px"
+                />
               </div>
             </div>
           </q-item>
@@ -237,6 +196,7 @@ import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 import { notifyError, notifySuccess } from "src/js/notify";
 import NostrMintRestore from "./NostrMintRestore.vue";
+import MintInfoContainer from "src/components/MintInfoContainer.vue";
 import SettingsSection from "src/pages/settings/SettingsSection.vue";
 import { validateMnemonic as validateBip39Mnemonic } from "@scure/bip39";
 import { wordlist } from "@scure/bip39/wordlists/english";
@@ -247,6 +207,7 @@ export default defineComponent({
   components: {
     ClipboardPasteIcon,
     HistoryIcon,
+    MintInfoContainer,
     NostrMintRestore,
     SettingsSection,
   },
@@ -348,9 +309,6 @@ export default defineComponent({
     },
   },
   methods: {
-    mintHost(url: string): string {
-      return url.replace(/^https?:\/\//, "").replace(/\/$/, "");
-    },
     // Only the units this mint holds; a row of zero chips is noise.
     heldUnits(mint: any): string[] {
       const m = this.mintClass(mint);
@@ -512,6 +470,15 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: flex-start;
+}
+
+/* The selection box sits in the card's top corner, where an installed mint shows its menu. */
+.restore-mint-check {
+  flex: none;
+  margin: -6px -6px 0 0;
+}
+html[dir="rtl"] .restore-mint-check {
+  margin: -6px 0 0 -6px;
 }
 
 /* Primary action section */

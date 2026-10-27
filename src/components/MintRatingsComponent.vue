@@ -17,6 +17,11 @@
             >
               {{ $t("MintRatings.out_of") }} 5
             </div>
+            <!-- How many ratings the score stands on, read with the score itself (user report,
+                 R56: under the bars it looked out of place). -->
+            <div class="ratings-count">
+              {{ $t("MintRatings.ratings", totalReviews) }}
+            </div>
           </div>
 
           <!-- Star Distribution Bars on Right -->
@@ -61,11 +66,6 @@
                 />
               </div>
             </div>
-            <!-- How many ratings the score stands on, under the bars (user report, R46: it
-                 sat alone beside the trust switch). -->
-            <div class="ratings-count">
-              {{ $t("MintRatings.ratings", totalReviews) }}
-            </div>
           </div>
         </div>
         <!-- The web-of-trust filter as a full-width settings row: what it does on the start
@@ -92,8 +92,8 @@
       <!-- While the first fetch runs, a skeleton of the summary and review rows, so the
            page never claims "No reviews yet" before it knows. -->
       <div v-else-if="fetchingReviews" class="q-mb-lg" aria-busy="true">
-        <!-- Same rows and heights as the loaded summary: score and bars, then the count and
-             trust switch. The button, sort row and reviews below render their own skeletons. -->
+        <!-- Same rows and heights as the loaded summary: score, caption and count, bars, then
+             the trust switch. The button, sort row and reviews below render their own skeletons. -->
         <div class="row items-start q-mb-sm" style="gap: 24px">
           <div class="column items-center" style="min-width: 100px">
             <!-- The score's glyph height inside its 60px line box. -->
@@ -106,6 +106,7 @@
               height="16px"
               style="margin-top: 8px"
             />
+            <q-skeleton type="rect" width="56px" height="14px" />
           </div>
           <div class="col column" style="gap: 6px">
             <q-skeleton
@@ -113,12 +114,6 @@
               :key="'bar' + n"
               type="rect"
               height="12px"
-            />
-            <q-skeleton
-              type="rect"
-              width="72px"
-              height="16px"
-              class="self-end"
             />
           </div>
         </div>
@@ -956,7 +951,6 @@ body[data-theme] .q-card--dark.mint-ratings-root {
   margin-top: 8px;
 }
 .ratings-count {
-  align-self: flex-end;
   color: var(--app-text-muted);
   font-size: 13px;
   line-height: 16px;
