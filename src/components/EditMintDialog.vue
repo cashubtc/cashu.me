@@ -5,7 +5,7 @@
     v-model="showEditMintDialogLocal"
     :title="$t('EditMintDialog.title')"
   >
-    <div class="edit-mint-dialog q-px-md q-pb-md">
+    <div class="edit-mint-dialog q-px-lg q-pb-md">
       <q-input
         v-model="editMintData.url"
         outlined
@@ -29,12 +29,10 @@
           unelevated
           no-caps
           class="full-width"
+          :disable="!hasChanges"
           @click="updateMintLocal"
         >
           {{ $t("EditMintDialog.actions.update.label") }}
-        </q-btn>
-        <q-btn flat rounded no-caps class="full-width" v-close-popup>
-          {{ $t("EditMintDialog.actions.cancel.label") }}
         </q-btn>
       </div>
     </div>
@@ -87,7 +85,16 @@ export default defineComponent({
       showEditMintDialogLocal.value = false;
     };
 
+    // Update stays disabled until a field differs from the saved mint.
+    const hasChanges = computed(
+      () =>
+        editMintData.value.url !== (mintToEdit.value as any).url ||
+        (editMintData.value.nickname || "") !==
+          ((mintToEdit.value as any).nickname || "")
+    );
+
     return {
+      hasChanges,
       editMintData,
       mintToEdit,
       updateMintLocal,
@@ -99,7 +106,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-/* One full-width primary, with Cancel as a quiet second row: the sheet's action stack. */
+/* One full-width primary; the header close dismisses, as on every sheet. */
 .edit-mint-dialog__actions {
   display: flex;
   flex-direction: column;

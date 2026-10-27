@@ -34,16 +34,25 @@
       <div v-if="loading && !name" class="mint-name">
         <q-skeleton type="text" width="96px" />
       </div>
+      <!-- A mint without its own name keeps the same two lines as named mints in lists that
+           pass unnamedLabel: a muted placeholder title over the host. -->
+      <div
+        v-else-if="unnamedLabel && (!name || name === host)"
+        class="mint-name mint-name--unnamed"
+      >
+        {{ unnamedLabel }}
+      </div>
       <div v-else class="mint-name">{{ name || host }}</div>
       <div
-        v-if="(loading && !name) || (name && name !== host)"
+        v-if="
+          (loading && !name) ||
+          (name && name !== host) ||
+          (unnamedLabel && (!name || name === host))
+        "
         class="mint-url"
       >
         {{ host }}
       </div>
-      <!-- A mint without its own name: the host is the title, and lists that need every card at
-           one height pass a muted second line for it. -->
-      <div v-else-if="unnamedLabel" class="mint-url">{{ unnamedLabel }}</div>
     </div>
   </div>
 </template>
@@ -120,6 +129,10 @@ export default defineComponent({
   word-break: break-word;
   white-space: normal;
   max-width: 100%;
+}
+
+.mint-name--unnamed {
+  color: var(--app-text-muted);
 }
 
 .mint-url {

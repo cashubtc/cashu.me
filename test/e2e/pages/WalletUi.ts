@@ -79,8 +79,11 @@ export class WalletUi extends WalletPage {
     const dialog = this.page.locator(".edit-mint-dialog");
     await dialog.locator("textarea").nth(0).fill(replacementUrl);
     await dialog.locator("textarea").nth(1).fill(nickname);
-    await dialog
-      .getByRole("button", { name: save ? "Update" : "Cancel", exact: true })
+    // The sheet has one Update action; dismissing uses the header close.
+    await this.page
+      .getByRole("button", { name: save ? "Update" : "Close", exact: true })
+      .filter({ visible: true })
+      .last()
       .click();
     await expect(dialog).toBeHidden();
   }

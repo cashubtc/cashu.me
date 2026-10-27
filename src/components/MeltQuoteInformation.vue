@@ -152,7 +152,7 @@ import {
 import {
   Zap as ZapIcon,
   ArrowDownUp as ArrowDownUpIcon,
-  Receipt as ReceiptIcon,
+  ReceiptText as ReceiptIcon,
   Clock as ClockIcon,
   Landmark as LandmarkIcon,
   Coins as CoinsIcon,

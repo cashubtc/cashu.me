@@ -140,7 +140,8 @@
                         :unnamed-label="$t('MintSettings.discover.unnamed')"
                       />
                     </div>
-                    <div class="row">
+                    <!-- Indented to the name column, so each card has one text edge. -->
+                    <div class="row discover-review-row">
                       <div
                         class="text-grey-5 q-mt-xs"
                         v-if="avgFor(rec.url) !== null && countFor(rec.url) > 0"
@@ -321,6 +322,11 @@ export default defineComponent({
 </script>
 
 <style scoped>
+/* Avatar (34px) plus its 16px gap. */
+.discover-review-row {
+  padding-inline-start: 50px;
+}
+
 @import "src/css/mintlist.css";
 
 .discover-section {
