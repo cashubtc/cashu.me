@@ -234,6 +234,15 @@
                   ? $t("Settings.web_of_trust.crawl_odell")
                   : $t("Settings.web_of_trust.crawl_wot")
               }}
+              <template v-slot:loading
+                ><q-spinner-dots size="20px" class="on-left" />{{
+                  hasCrawlCheckpoint && !wotLoading
+                    ? $t("Settings.web_of_trust.continue_crawl")
+                    : signerType === "SEED"
+                    ? $t("Settings.web_of_trust.crawl_odell")
+                    : $t("Settings.web_of_trust.crawl_wot")
+                }}</template
+              >
             </q-btn>
             <q-btn
               v-if="wotLoading"

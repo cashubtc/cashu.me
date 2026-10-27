@@ -163,6 +163,13 @@
               count: selectedMintsCount,
             })
           }}
+          <template v-slot:loading
+            ><q-spinner-dots size="20px" class="on-left" />{{
+              $t("RestoreView.actions.restore_selected_mints.label", {
+                count: selectedMintsCount,
+              })
+            }}</template
+          >
         </q-btn>
       </div>
     </div>

@@ -1,40 +1,29 @@
 <template>
-  <div class="no-mint-card q-mx-md q-my-lg q-pa-md">
-    <q-card-section>
-      <div class="row items-center justify-center">
-        <LandmarkIcon :size="48" class="q-pb-md mint-glyph" />
-      </div>
-      <div class="row items-center justify-center">
-        <div class="text-h6 text-weight-bold">
-          {{ $t("NoMintWarnBanner.title") }}
-        </div>
-      </div>
-      <div class="row items-center justify-center">
-        <div class="no-mint-subtitle q-mt-xs">
-          {{ $t("NoMintWarnBanner.subtitle") }}
-        </div>
-      </div>
-      <div class="row items-center justify-center q-pt-lg">
-        <q-btn
-          unelevated
-          rounded
-          color="primary"
-          class="q-px-lg no-mint-btn"
-          :label="$t('NoMintWarnBanner.actions.add_mint.label')"
-          @click="handleAddMintClick"
-        />
-      </div>
-      <div class="row items-center justify-center q-pt-md">
-        <q-btn
-          flat
-          rounded
-          color="primary"
-          class="q-px-lg no-mint-btn"
-          :label="$t('NoMintWarnBanner.actions.receive.label')"
-          @click="handleReceiveEcash"
-        />
-      </div>
-    </q-card-section>
+  <!-- The standard empty state (src/css/elements.scss): no mint yet, two ways forward. -->
+  <div class="app-empty app-box q-mx-md q-my-lg">
+    <div class="app-icon-circle app-icon-circle--lg">
+      <LandmarkIcon :size="26" />
+    </div>
+    <div class="app-empty__title">{{ $t("NoMintWarnBanner.title") }}</div>
+    <div class="app-empty__text">{{ $t("NoMintWarnBanner.subtitle") }}</div>
+    <q-btn
+      unelevated
+      rounded
+      no-caps
+      color="primary"
+      class="full-width app-empty__action"
+      :label="$t('NoMintWarnBanner.actions.add_mint.label')"
+      @click="handleAddMintClick"
+    />
+    <q-btn
+      flat
+      rounded
+      no-caps
+      color="primary"
+      class="full-width"
+      :label="$t('NoMintWarnBanner.actions.receive.label')"
+      @click="handleReceiveEcash"
+    />
   </div>
 </template>
 <script lang="ts">
@@ -94,31 +83,3 @@ export default defineComponent({
   },
 });
 </script>
-<style scoped>
-.q-dialog__inner {
-  height: 100%;
-  width: 100%;
-  margin: 0; /* Align dialog to cover the entire viewport */
-}
-
-.no-mint-card {
-  background: var(--app-tint);
-  border: 1px solid var(--app-border);
-  border-radius: 20px;
-  display: flex;
-  flex-direction: column;
-}
-
-.no-mint-subtitle {
-  color: var(--app-text-muted);
-  font-size: 15px;
-  line-height: 1.45;
-  max-width: 30ch;
-  text-align: center;
-}
-
-.no-mint-btn {
-  min-height: 44px;
-  min-width: 180px;
-}
-</style>

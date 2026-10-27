@@ -288,7 +288,7 @@
         >
           {{ $t("MintSettings.swap.actions.swap.label") }}
           <template v-slot:loading>
-            <q-spinner size="xs" />
+            <q-spinner-dots size="20px" class="on-left" />
             {{ $t("MintSettings.swap.actions.swap.in_progress") }}
           </template>
         </q-btn>

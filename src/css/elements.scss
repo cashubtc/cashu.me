@@ -318,3 +318,123 @@ body.body--light .q-dialog .app-option-row:active {
   font-size: 16px;
   text-align: center;
 }
+
+// Loading placeholders (shadcn Skeleton): one muted fill and radius for every q-skeleton, and
+// a standard row (SkeletonRow.vue) of an avatar beside lines of text.
+body .q-skeleton {
+  background: var(--app-tint-strong);
+}
+body .q-skeleton--type-rect,
+body .q-skeleton--type-text {
+  border-radius: 6px;
+}
+.app-skeleton-row {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+}
+.app-skeleton-row__lines {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+// Install-the-app prompts (Android top right, iOS bottom centre): one card on the raised
+// surface with an arrow toward the browser's menu. Each prompt sets only its position and
+// arrow direction. The bounce stops for people who ask for reduced motion.
+@keyframes pwa-prompt-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+.pwa-prompt {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 0 auto;
+  position: fixed;
+  text-align: center;
+  z-index: 9999;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .pwa-prompt {
+    animation: pwa-prompt-bounce 1s infinite;
+  }
+}
+.pwa-prompt-content {
+  align-items: center;
+  background: var(--app-raised);
+  border: 1px solid var(--app-border-strong);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  color: var(--app-text);
+  display: inline-flex;
+  font-size: 14px;
+  padding: 10px 12px;
+}
+.pwa-prompt-arrow {
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  height: 0;
+  margin: 2px auto;
+  width: 0;
+}
+
+// Amount entry layout (Receive Lightning, Send ecash, Pay): the amount area fills the space
+// above the keypad; an amount that is too large shakes once (not with reduced motion).
+.amount-area {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+.amount-container {
+  display: inline-block;
+  max-width: 90vw;
+  position: relative;
+}
+.keypad-wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+.wobble-enter-active {
+  animation: wobble-keyframes 600ms ease-out;
+  transform-origin: center;
+  will-change: transform;
+}
+.wobble-leave-active {
+  animation: none !important;
+}
+@keyframes wobble-keyframes {
+  0%,
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  15% {
+    transform: translateX(-8px) rotate(-3deg);
+  }
+  30% {
+    transform: translateX(8px) rotate(3deg);
+  }
+  45% {
+    transform: translateX(-6px) rotate(-2deg);
+  }
+  60% {
+    transform: translateX(6px) rotate(2deg);
+  }
+  75% {
+    transform: translateX(-3px) rotate(-1deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wobble-enter-active {
+    animation: none;
+  }
+}

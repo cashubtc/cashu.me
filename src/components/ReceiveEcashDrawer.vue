@@ -101,7 +101,7 @@
           >
             <div class="row items-center no-wrap">
               <div class="app-icon-circle">
-                <q-spinner v-if="scanningCard" size="sm" color="white" />
+                <q-spinner v-if="scanningCard" size="sm" />
                 <NfcIcon v-else :size="24" />
               </div>
               <div class="col q-ml-md">

@@ -16,9 +16,13 @@
       :loading="isLoading"
       @click="clickPaymentRequest"
     >
-      <q-icon v-if="!isLoading" name="send" class="q-pr-xs" />
-      <q-spinner v-else size="1em" class="q-mr-md" />
+      <q-icon name="send" class="q-pr-xs" />
       {{ resolvedLabel }}
+      <template v-slot:loading
+        ><q-spinner-dots size="20px" class="on-left" />{{
+          resolvedLabel
+        }}</template
+      >
     </q-btn>
   </div>
 </template>

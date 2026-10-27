@@ -145,9 +145,9 @@ body.body--dark {
     var(--app-accent) 12%,
     transparent
   );
-  --app-field-edge: rgba(255, 255, 255, 0.34);
+  --app-field-edge: rgba(255, 255, 255, 0.4);
   --app-field-fill: color-mix(in srgb, var(--app-accent) 6%, transparent);
-  --app-outline-edge: rgba(255, 255, 255, 0.34);
+  --app-outline-edge: rgba(255, 255, 255, 0.4);
   --app-group-edge: transparent;
   --app-group-fill: color-mix(in srgb, var(--app-accent) 6%, transparent);
 }
@@ -156,9 +156,9 @@ body.body--light {
   --app-card-edge-active: color-mix(in srgb, var(--q-primary) 40%, transparent);
   --app-card-fill: color-mix(in srgb, var(--q-primary) 5%, transparent);
   --app-card-fill-active: color-mix(in srgb, var(--q-primary) 8%, transparent);
-  --app-field-edge: rgba(0, 0, 0, 0.34);
+  --app-field-edge: rgba(0, 0, 0, 0.4);
   --app-field-fill: color-mix(in srgb, var(--q-primary) 3%, #fff);
-  --app-outline-edge: rgba(0, 0, 0, 0.3);
+  --app-outline-edge: rgba(0, 0, 0, 0.4);
   --app-group-edge: transparent;
   --app-group-fill: color-mix(in srgb, var(--q-primary) 4%, transparent);
 }

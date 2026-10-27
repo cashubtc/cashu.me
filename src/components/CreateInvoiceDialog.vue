@@ -121,7 +121,13 @@
                     :label="$t('CreateInvoiceDialog.reconnect_mint')"
                     :loading="refreshingMint"
                     @click="refreshActiveMint"
-                  />
+                  >
+                    <template v-slot:loading
+                      ><q-spinner-dots size="20px" class="on-left" />{{
+                        $t("CreateInvoiceDialog.reconnect_mint")
+                      }}</template
+                    >
+                  </q-btn>
                 </div>
                 <template v-else>
                   <div
@@ -945,10 +951,6 @@ export default defineComponent({
   flex-direction: column;
   overflow: hidden;
 }
-.amount-area {
-  flex: 1;
-  min-height: 0;
-}
 .qr-container {
   position: relative;
   border-radius: 8px;
@@ -971,9 +973,6 @@ export default defineComponent({
   }
 }
 .amount-container {
-  position: relative;
-  display: inline-block;
-  max-width: 90vw;
   overflow: hidden;
 }
 .amount-display {
@@ -1008,45 +1007,6 @@ export default defineComponent({
   display: inline-block;
   font-size: 16px;
 }
-.wobble-enter-active {
-  animation: wobble-keyframes 600ms ease-out;
-  transform-origin: center;
-  will-change: transform;
-}
-.wobble-leave-active {
-  animation: none !important;
-}
-@keyframes wobble-keyframes {
-  0% {
-    transform: translateX(0) rotate(0deg);
-  }
-  15% {
-    transform: translateX(-8px) rotate(-3deg);
-  }
-  30% {
-    transform: translateX(8px) rotate(3deg);
-  }
-  45% {
-    transform: translateX(-6px) rotate(-2deg);
-  }
-  60% {
-    transform: translateX(6px) rotate(2deg);
-  }
-  75% {
-    transform: translateX(-3px) rotate(-1deg);
-  }
-  100% {
-    transform: translateX(0) rotate(0deg);
-  }
-}
 @media (prefers-reduced-motion: reduce) {
-  .wobble-enter-active {
-    animation: none;
-  }
-}
-.keypad-wrapper {
-  width: 100%;
-  display: flex;
-  justify-content: center;
 }
 </style>

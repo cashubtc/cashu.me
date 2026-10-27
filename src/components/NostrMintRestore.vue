@@ -22,6 +22,11 @@
       >
         <SearchIcon :size="20" class="q-mr-sm" />
         {{ $t("RestoreView.nostr_mints.search_button") }}
+        <template v-slot:loading
+          ><q-spinner-dots size="20px" class="on-left" />{{
+            $t("RestoreView.nostr_mints.search_button")
+          }}</template
+        >
       </q-btn>
     </div>
 
@@ -58,6 +63,13 @@
               })
             }}
           </span>
+          <template v-slot:loading
+            ><q-spinner-dots size="20px" class="on-left" />{{
+              $t("RestoreView.nostr_mints.add_selected", {
+                count: selectedMints.length,
+              })
+            }}</template
+          >
         </q-btn>
       </div>
 

@@ -68,54 +68,16 @@ export default defineComponent({
 });
 </script>
 
+<!-- Shared prompt styles: src/css/elements.scss (.pwa-prompt). -->
 <style scoped>
-@keyframes moveUpDown {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
 .pwa-prompt {
-  position: fixed;
   top: 20px;
   right: 20px;
-  margin: 0 auto;
-  z-index: 9999;
-  text-align: center;
-  display: flex;
-  flex-direction: column; /* Add this line */
-  align-items: center; /* Add this line */
-  justify-content: center;
-  animation: moveUpDown 1s infinite; /* Add this line for animation */
 }
-
-.pwa-prompt-content {
-  display: inline-flex;
-  align-items: center;
-  background-color: black;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-}
-
-.pwa-prompt-content q-icon {
-  margin-inline-end: 5px;
-}
-
 .pwa-prompt-arrow {
   position: relative;
-  width: 0;
-  height: 0;
   bottom: 60px;
   left: 45%;
-  border-left: 10px solid transparent;
-  border-right: 10px solid transparent;
-  border-bottom: 10px solid white;
-  text-align: center;
-  margin: 0 auto;
+  border-bottom: 10px solid var(--app-border-strong);
 }
 </style>

@@ -214,8 +214,12 @@
 
     <q-card-section v-if="hasAnyReviews || fetchingReviews" class="q-px-none">
       <div v-if="!hasAnyReviews" class="column" aria-hidden="true">
-        <div v-for="n in 3" :key="n" class="review-item">
-          <q-skeleton type="QAvatar" size="36px" />
+        <SkeletonRow
+          v-for="n in 3"
+          :key="n"
+          avatar="36px"
+          class="review-item review-item--skeleton"
+        >
           <div class="col">
             <div class="row items-center justify-between review-head">
               <q-skeleton type="rect" width="40%" height="14px" />
@@ -234,7 +238,7 @@
               style="margin-top: 12px"
             />
           </div>
-        </div>
+        </SkeletonRow>
       </div>
       <div v-else class="column">
         <div
@@ -369,6 +373,7 @@ import { User as UserIcon } from "lucide-vue-next";
 import BottomSheet from "src/components/BottomSheet.vue";
 import SheetOption from "src/components/SheetOption.vue";
 import MintIdentityHeader from "src/components/MintIdentityHeader.vue";
+import SkeletonRow from "src/components/SkeletonRow.vue";
 import { defineComponent } from "vue";
 import { notifyCopied } from "src/js/notify";
 import { useNostrStore } from "src/stores/nostr";
@@ -386,7 +391,13 @@ export default defineComponent({
     mintInfo: { type: Object, required: false },
   },
   emits: ["close"],
-  components: { UserIcon, BottomSheet, SheetOption, MintIdentityHeader },
+  components: {
+    UserIcon,
+    BottomSheet,
+    SheetOption,
+    MintIdentityHeader,
+    SkeletonRow,
+  },
   methods: {
     // Calculate percentage for star rating bars
     ratingPercentage(star: number): number {

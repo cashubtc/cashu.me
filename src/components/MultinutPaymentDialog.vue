@@ -298,6 +298,11 @@
             size="lg"
           >
             {{ $t("MultinutPicker.pay_invoice") }}
+            <template v-slot:loading
+              ><q-spinner-dots size="20px" class="on-left" />{{
+                $t("MultinutPicker.pay_invoice")
+              }}</template
+            >
           </q-btn>
         </div>
       </div>

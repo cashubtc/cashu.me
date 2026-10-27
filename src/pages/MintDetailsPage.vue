@@ -601,11 +601,12 @@ export default defineComponent({
   width: 100%;
 }
 
+/* Contact rows share the detail rows' icon slot, gap and text size (app.scss .detail-*). */
 .contact-icon-container {
   width: 24px;
   display: flex;
   justify-content: center;
-  margin-inline-end: 10px;
+  margin-inline-end: 12px;
 }
 
 .contact-icon {
@@ -617,7 +618,7 @@ export default defineComponent({
 /* Contact values read like the detail rows: regular weight on the text colour. */
 .contact-text {
   flex: 1;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 400;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -626,7 +627,7 @@ export default defineComponent({
 
 .copy-icon {
   color: var(--app-text-muted);
-  margin-inline-start: 10px;
+  margin-inline-start: 12px;
 }
 
 /* Details, contact and actions are all flat rows on the page, like the invoice and token

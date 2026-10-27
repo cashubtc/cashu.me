@@ -1,5 +1,6 @@
 // Surface style variations (src/css/ui-variants.scss). Pick one at /ui, or on any page with
-// ?ui=<id>; the choice is kept on this device until it is set back to "current".
+// ?ui=<id>, in development builds; the choice is kept on this device until it is set back
+// to "current".
 
 export const UI_VARIANTS = [
   { id: "current", label: "Tonal (default)" },
@@ -44,6 +45,8 @@ export function setUiVariant(id: UiVariantId): void {
 // At startup: a ?ui= parameter wins and is remembered, otherwise the stored choice applies.
 export function applyUiVariant(): void {
   if (typeof window === "undefined") return;
+  // A design tool: production builds always use the default surfaces.
+  if (!process.env.DEV) return;
   const param = new URLSearchParams(window.location.search).get("ui");
   if (isUiVariant(param)) setUiVariant(param);
   else setUiVariant(getUiVariant());

@@ -566,7 +566,7 @@
                   :loading="waitingForWallet || paymentInProgress"
                 >
                   <template v-slot:loading>
-                    <q-spinner class="q-mr-sm" />
+                    <q-spinner-dots size="20px" class="on-left" />
                     <span>{{ paymentButtonLabel }}</span>
                   </template>
                 </q-btn>
@@ -643,8 +643,9 @@
               >
                 {{ $t("PayInvoiceDialog.quote.label") }}
                 <template v-slot:loading>
-                  <q-spinner />
-                </template>
+                  <q-spinner-dots size="20px" class="on-left" />
+                  {{ $t("PayInvoiceDialog.quote.label") }}</template
+                >
               </q-btn>
             </div>
           </div>
@@ -705,8 +706,13 @@
                     : $t("PayInvoiceDialog.lnurlpay.actions.send.label")
                 }}
                 <template v-slot:loading>
-                  <q-spinner />
-                </template>
+                  <q-spinner-dots size="20px" class="on-left" />
+                  {{
+                    payInvoiceData.blocking
+                      ? $t("PayInvoiceDialog.lnurlpay.actions.send.in_progress")
+                      : $t("PayInvoiceDialog.lnurlpay.actions.send.label")
+                  }}</template
+                >
               </q-btn>
             </div>
           </div>
@@ -740,8 +746,13 @@
                     : $t("PayInvoiceDialog.lnurlpay.actions.send.label")
                 }}
                 <template v-slot:loading>
-                  <q-spinner />
-                </template>
+                  <q-spinner-dots size="20px" class="on-left" />
+                  {{
+                    payInvoiceData.blocking
+                      ? $t("PayInvoiceDialog.lnurlpay.actions.send.in_progress")
+                      : $t("PayInvoiceDialog.lnurlpay.actions.send.label")
+                  }}</template
+                >
               </q-btn>
             </div>
           </div>
@@ -1369,17 +1380,6 @@ export default defineComponent({
   background-color: var(--q-primary);
   border-radius: 50%;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.amount-area {
-  flex: 1;
-  position: relative;
-}
-
-.keypad-wrapper {
-  width: 100%;
-  display: flex;
-  justify-content: center;
 }
 
 .invoice-state-container {

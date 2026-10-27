@@ -200,8 +200,13 @@
                       )
                     }}
                     <template v-slot:loading>
-                      <q-spinner size="xs" />
-                    </template>
+                      <q-spinner-dots size="20px" class="on-left" />
+                      {{
+                        $t(
+                          "ReceiveTokenDialog.actions.receive_to_selected_mint.label"
+                        )
+                      }}</template
+                    >
                     <q-tooltip>{{
                       $t("ReceiveTokenDialog.actions.confirm_swap.tooltip_text")
                     }}</q-tooltip>
@@ -265,8 +270,19 @@
                         : $t("ReceiveTokenDialog.actions.receive.label")
                     }}
                     <template v-slot:loading>
-                      <q-spinner />
-                    </template>
+                      <q-spinner-dots size="20px" class="on-left" />
+                      {{
+                        knowThisMint
+                          ? addMintBlocking
+                            ? $t(
+                                "ReceiveTokenDialog.actions.receive.label_adding_mint"
+                              )
+                            : $t(
+                                "ReceiveTokenDialog.actions.receive.label_known_mint"
+                              )
+                          : $t("ReceiveTokenDialog.actions.receive.label")
+                      }}</template
+                    >
                   </q-btn>
                 </template>
               </div>

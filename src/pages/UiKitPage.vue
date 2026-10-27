@@ -925,6 +925,12 @@
       </div>
     </UiKitItem>
     <UiKitItem
+      title="Skeleton row"
+      sources="SkeletonRow.vue · body .q-skeleton · MintDiscovery, MintRatingsComponent"
+    >
+      <SkeletonRow avatar="34px" :lines="['55%', '35%', '25%']" />
+    </UiKitItem>
+    <UiKitItem
       title="Machine text"
       sources=".app-mono (+ --wrap) · invoices, tokens, lock keys"
     >
@@ -968,6 +974,7 @@ import MintMotdMessage from "src/components/MintMotdMessage.vue";
 import NumericKeyboard from "src/components/NumericKeyboard.vue";
 import SheetOption from "src/components/SheetOption.vue";
 import SheetSelect from "src/components/SheetSelect.vue";
+import SkeletonRow from "src/components/SkeletonRow.vue";
 import ToggleUnit from "src/components/ToggleUnit.vue";
 import ToolTipInfo from "src/components/ToolTipInfo.vue";
 import UiKitItem from "src/components/UiKitItem.vue";
@@ -1032,6 +1039,7 @@ export default defineComponent({
     NumericKeyboard,
     SheetOption,
     SheetSelect,
+    SkeletonRow,
     ToggleUnit,
     ToolTipInfo,
     UiKitItem,

@@ -60,8 +60,9 @@
       {{ nfcLabel }}
       <q-tooltip>{{ nfcTooltip }}</q-tooltip>
       <template v-slot:loading>
-        <q-spinner />
-      </template>
+        <q-spinner-dots size="20px" class="on-left" />
+        {{ nfcLabel }}</template
+      >
     </q-btn>
   </div>
 </template>

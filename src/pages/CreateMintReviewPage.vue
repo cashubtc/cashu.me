@@ -79,7 +79,7 @@
       >
         <span>{{ $t("CreateMintReview.actions.publish.label") }}</span>
         <template v-slot:loading>
-          <q-spinner class="on-left" />
+          <q-spinner-dots size="20px" class="on-left" />
           <span>{{ $t("CreateMintReview.actions.publish.in_progress") }}</span>
         </template>
       </q-btn>

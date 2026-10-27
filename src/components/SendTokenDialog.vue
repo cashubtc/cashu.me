@@ -254,7 +254,7 @@
               >
                 {{ $t("SendTokenDialog.actions.send.label") }}
                 <template v-slot:loading>
-                  <q-spinner class="q-mr-sm" />
+                  <q-spinner-dots size="20px" class="on-left" />
                   <span>{{
                     $t("SendTokenDialog.actions.send.in_progress")
                   }}</span>
@@ -755,53 +755,11 @@ export default defineComponent({
 });
 </script>
 <style scoped>
-/* Lock and unit are bare 44px header buttons, like close and more. */
-.lock-toggle-btn,
-.wobble-enter-active {
-  animation: wobble-keyframes 600ms ease-out;
-  transform-origin: center;
-  will-change: transform;
-}
-.wobble-leave-active {
-  animation: none !important;
-}
-@keyframes wobble-keyframes {
-  0% {
-    transform: translateX(0) rotate(0deg);
-  }
-  15% {
-    transform: translateX(-8px) rotate(-3deg);
-  }
-  30% {
-    transform: translateX(8px) rotate(3deg);
-  }
-  45% {
-    transform: translateX(-6px) rotate(-2deg);
-  }
-  60% {
-    transform: translateX(6px) rotate(2deg);
-  }
-  75% {
-    transform: translateX(-3px) rotate(-1deg);
-  }
-  100% {
-    transform: translateX(0) rotate(0deg);
-  }
-}
 .send-fullscreen {
   height: 100vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}
-.amount-area {
-  flex: 1;
-  position: relative;
-}
-.amount-container {
-  position: relative;
-  display: inline-block;
-  max-width: 90vw;
 }
 .amount-display {
   white-space: nowrap;
@@ -830,10 +788,5 @@ export default defineComponent({
   pointer-events: none;
   font-size: 16px;
   white-space: nowrap;
-}
-.keypad-wrapper {
-  width: 100%;
-  display: flex;
-  justify-content: center;
 }
 </style>

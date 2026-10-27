@@ -109,7 +109,7 @@
       >
         {{ $t("AddMintDialog.actions.add_mint.label") }}
         <template v-slot:loading>
-          <q-spinner class="q-mr-sm" />
+          <q-spinner-dots size="20px" class="on-left" />
           <span>{{ $t("AddMintDialog.actions.add_mint.in_progress") }}</span>
         </template>
       </q-btn>

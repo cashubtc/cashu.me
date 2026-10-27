@@ -35,6 +35,11 @@
         >
           <q-icon name="search" size="20px" class="discover-btn__icon" />
           <span>{{ $t("MintSettings.discover.actions.discover.label") }}</span>
+          <template v-slot:loading
+            ><q-spinner-dots size="20px" class="on-left" />{{
+              $t("MintSettings.discover.actions.discover.label")
+            }}</template
+          >
         </q-btn>
       </div>
     </div>
@@ -69,12 +74,7 @@
         aria-hidden="true"
       >
         <!-- The loaded card's 34px avatar, so the text column doesn't move. -->
-        <q-skeleton type="QAvatar" size="34px" />
-        <div class="col q-ml-md">
-          <q-skeleton type="text" width="55%" />
-          <q-skeleton type="text" width="35%" />
-          <q-skeleton type="text" width="25%" />
-        </div>
+        <SkeletonRow avatar="34px" :lines="['55%', '35%', '25%']" class="col" />
       </div>
       <div class="discover-skeleton__label visually-hidden" role="status">
         {{ $t("MintSettings.discover.actions.discover.in_progress") }}
@@ -187,6 +187,7 @@
 <script lang="ts">
 import { defineComponent, ref, computed, watch, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import SkeletonRow from "src/components/SkeletonRow.vue";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import MintInfoContainer from "./MintInfoContainer.vue";
@@ -195,7 +196,7 @@ import { notifyError, notifySuccess } from "src/js/notify";
 
 export default defineComponent({
   name: "MintDiscovery",
-  components: { MintInfoContainer, PlusIcon },
+  components: { MintInfoContainer, PlusIcon, SkeletonRow },
   props: {
     infoTimeoutMs: { type: Number, default: 5000 },
     autoDiscover: { type: Boolean, default: false },
