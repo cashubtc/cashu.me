@@ -495,6 +495,11 @@ export default {
         description: "Tutarları 2.789 sats yerine ₿2.789 olarak göster.",
         toggle: "₿ sembolünü kullan",
       },
+      mode: {
+        title: "Mod",
+        dark: "Koyu",
+        light: "Açık",
+      },
       keyboard: {
         title: "Ekran klavyesi",
         description: "Miktarları girmek için sayısal klavyeyi kullanın.",
@@ -558,6 +563,7 @@ export default {
           description:
             'Sayacını artırmak için bir keyset\'e dokunun. "outputs have already been signed" hatasına yardımcı olur.',
           counter: "sayaç: {count}",
+          increase: "{id} için sayacı artır",
         },
 
         unset_reserved: {
@@ -1298,6 +1304,15 @@ export default {
       },
       use_active_mint: {
         label: "Herhangi bir mint",
+      },
+      remove_amount: {
+        label: "Tutarı kaldır",
+      },
+      previous: {
+        label: "Önceki istek",
+      },
+      next: {
+        label: "Sonraki istek",
       },
     },
     inputs: {

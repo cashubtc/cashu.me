@@ -16,19 +16,7 @@
       <div class="mint-content-container q-px-md">
         <!-- Mint Header Profile Name Section -->
         <div class="mint-header-container q-mb-lg">
-          <div class="mint-header q-pa-md">
-            <!-- Mint Profile Name Section -->
-            <q-avatar size="56px" class="mint-profile-icon q-mb-sm">
-              <img
-                v-if="mintData.info?.icon_url"
-                :src="mintData.info.icon_url"
-                alt="Mint Profile"
-              />
-              <landmark-icon v-else size="36" :stroke-width="1.5" />
-            </q-avatar>
-            <!-- The original header: the mint's identity in its own card, no balance. -->
-            <div class="mint-name q-mb-xs">{{ mintDisplayName }}</div>
-
+          <MintIdentityHeader :url="mintData.url" :info="mintData.info">
             <!-- The QR toggle as an icon, as originally, but a real labelled button. -->
             <div class="top-icons">
               <q-btn
@@ -68,7 +56,7 @@
                 </div>
               </transition>
             </div>
-          </div>
+          </MintIdentityHeader>
 
           <div class="mint-descriptions q-mt-lg">
             <!-- MOTD Component -->
@@ -363,8 +351,8 @@ import {
   Copy as CopyIcon,
   Pencil as PencilIcon,
   Trash as TrashIcon,
-  Landmark as LandmarkIcon,
 } from "lucide-vue-next";
+import MintIdentityHeader from "src/components/MintIdentityHeader.vue";
 
 export default defineComponent({
   name: "MintDetailsPage",
@@ -381,7 +369,7 @@ export default defineComponent({
     CopyIcon,
     PencilIcon,
     TrashIcon,
-    LandmarkIcon,
+    MintIdentityHeader,
     EditMintDialog,
     RemoveMintDialog,
     MintMotdMessage,
@@ -424,16 +412,6 @@ export default defineComponent({
     };
   },
   computed: {
-    mintDisplayName(): string {
-      const data = this.mintData as any;
-      if (data?.nickname) return data.nickname;
-      if (data?.info?.name) return data.info.name;
-      try {
-        return new URL(data?.url).host;
-      } catch {
-        return "Mint";
-      }
-    },
     ...mapWritableState(useMintsStore, [
       "showEditMintDialog",
       "showRemoveMintDialog",
@@ -587,22 +565,6 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   width: 100%;
-}
-
-.mint-header {
-  width: 100%;
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--app-tint);
-}
-
-.mint-name {
-  font-size: 24px;
-  font-weight: 600;
-  text-align: center;
 }
 
 .mint-descriptions {

@@ -81,7 +81,8 @@ export const usePRStore = defineStore("payment-request", {
     createPaymentRequest: function (
       amount?: number,
       memo?: string,
-      mintUrl?: string
+      mintUrl?: string,
+      unit?: string
     ) {
       const nostrStore = useNostrStore();
       const mintStore = useMintsStore();
@@ -98,12 +99,8 @@ export const usePRStore = defineStore("payment-request", {
         transport,
         uuid,
         amount,
-        mintStore.activeUnit,
-        mintUrl?.length
-          ? mintStore.activeMintUrl
-            ? [mintStore.activeMintUrl]
-            : undefined
-          : undefined,
+        unit ?? mintStore.activeUnit,
+        mintUrl ? [mintUrl] : undefined,
         memo
       );
       const encoded = paymentRequest.toEncodedRequest();
@@ -132,10 +129,14 @@ export const usePRStore = defineStore("payment-request", {
         receivedPaymentIds: [],
       };
       if (existIdx >= 0) {
-        // Update encoded/memo/unit/mints in case changed
+        // Update encoded/memo/unit/mints in case changed, keeping the payments already
+        // received against this request and when it was first made.
+        const existing = this.ourPaymentRequests[existIdx];
         this.ourPaymentRequests[existIdx] = {
-          ...this.ourPaymentRequests[existIdx],
+          ...existing,
           ...entry,
+          createdAt: existing.createdAt,
+          receivedPaymentIds: existing.receivedPaymentIds,
         };
         this.selectedPRIndex = existIdx;
       } else {
@@ -228,14 +229,8 @@ export const usePRStore = defineStore("payment-request", {
           Amount.from(request.amount).toNumber() /
           mintsStore.activeUnitCurrencyMultiplyer;
       }
-      // Also make sure this decoded request gets stored (e.g., if user pasted an older one)
-      try {
-        const encoded = pr;
-        this.ensureStoredRequest(request, encoded);
-        this.showPRKData = encoded;
-      } catch (e) {
-        // noop
-      }
+      // A request being paid belongs to its recipient: it is never added to the requests this
+      // wallet receives on, so it can't be shown or copied from Receive.
       sendTokenStore.sendData.paymentRequest = request;
       if (!sendTokenStore.showSendTokens) {
         // show the send dialog

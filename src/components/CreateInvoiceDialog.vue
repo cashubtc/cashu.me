@@ -16,7 +16,22 @@
       >
         <!-- Header -->
         <div class="row items-center q-pa-md sheet-column-header">
+          <!-- From the amount step back to the address or offer it came from, as in the
+               onboarding (user direction, R44); otherwise close. -->
           <q-btn
+            v-if="canReturnToPreview"
+            flat
+            round
+            color="grey"
+            class="floating-close-btn"
+            data-testid="invoice-amount-back"
+            :aria-label="$t('common.back')"
+            @click="returnToPreview"
+          >
+            <ChevronLeftIcon :size="24" />
+          </q-btn>
+          <q-btn
+            v-else
             v-close-popup
             flat
             round
@@ -285,6 +300,7 @@
   </q-dialog>
 </template>
 <script lang="ts">
+import { ChevronLeft as ChevronLeftIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { copyToClipboard } from "quasar";
@@ -320,6 +336,7 @@ export default defineComponent({
   name: "CreateInvoiceDialog",
   mixins: [windowMixin],
   components: {
+    ChevronLeftIcon,
     ChooseMint,
     NumericKeyboard,
     AmountInputComponent,
@@ -454,6 +471,20 @@ export default defineComponent({
           this.hasConfiguredNpubCashAddress &&
           this.showAddressOnReceive &&
           this.activeMintUrl === this.npubCashMintUrl
+      );
+    },
+    // The amount step was opened from a reusable address, offer or Lightning address preview.
+    canReturnToPreview(): boolean {
+      if (!this.showAmountInput) return false;
+      if (this.isBolt12) return this.bolt12AddAmount;
+      if (this.isOnchain)
+        return this.onchainAddAmount && this.reusableOnchainQuote !== null;
+      // Leaving the amount step shows the Lightning address again only on its own mint
+      // and unit (showNpubCashPreview).
+      return (
+        this.npubCashAddAmount &&
+        this.activeUnit === "sat" &&
+        this.activeMintUrl === this.npubCashMintUrl
       );
     },
     npubCashLnurl(): string {
@@ -654,6 +685,11 @@ export default defineComponent({
       "mintOnPaidOnchain",
     ]),
     ...mapActions(useMintsStore, ["activateMintUrl", "toggleUnit"]),
+    returnToPreview() {
+      if (this.isBolt12) this.bolt12AddAmount = false;
+      else if (this.isOnchain) this.onchainAddAmount = false;
+      else this.npubCashAddAmount = false;
+    },
     enterNpubCashAmountMode() {
       this.npubCashAddAmount = true;
       this.invoiceData.amount = "";

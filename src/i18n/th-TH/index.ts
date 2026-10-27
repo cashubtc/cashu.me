@@ -495,6 +495,11 @@ export default {
       },
     },
     appearance: {
+      mode: {
+        title: "โหมด",
+        dark: "มืด",
+        light: "สว่าง",
+      },
       keyboard: {
         title: "แป้นพิมพ์บนหน้าจอ",
         description: "ใช้แป้นพิมพ์ตัวเลขสำหรับการป้อนจำนวนเงิน",
@@ -563,6 +568,7 @@ export default {
           description:
             'แตะ keyset เพื่อเพิ่มตัวนับ ช่วยแก้ข้อผิดพลาด "outputs have already been signed"',
           counter: "ตัวนับ: {count}",
+          increase: "เพิ่มตัวนับสำหรับ {id}",
         },
         unset_reserved: {
           button: "ยกเลิกการสำรองโทเค็นทั้งหมด",
@@ -1274,6 +1280,15 @@ export default {
       },
       use_active_mint: {
         label: "Mint ใดก็ได้",
+      },
+      remove_amount: {
+        label: "ลบจำนวนเงิน",
+      },
+      previous: {
+        label: "คำขอก่อนหน้า",
+      },
+      next: {
+        label: "คำขอถัดไป",
       },
     },
     inputs: {

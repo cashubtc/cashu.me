@@ -498,6 +498,11 @@ export default {
       },
     },
     appearance: {
+      mode: {
+        title: "Modo",
+        dark: "Escuro",
+        light: "Claro",
+      },
       keyboard: {
         title: "Teclado na tela",
         description: "Use o teclado numérico para inserir valores.",
@@ -582,6 +587,7 @@ export default {
           description:
             'Toque em um keyset para aumentar o contador dele. Ajuda com o erro "outputs have already been signed".',
           counter: "contador: {count}",
+          increase: "Aumentar o contador de {id}",
         },
         unset_reserved: {
           button: "Desmarcar todos os tokens reservados",
@@ -1345,6 +1351,15 @@ export default {
       },
       use_active_mint: {
         label: "Qualquer mint",
+      },
+      remove_amount: {
+        label: "Remover valor",
+      },
+      previous: {
+        label: "Solicitação anterior",
+      },
+      next: {
+        label: "Próxima solicitação",
       },
     },
     inputs: {

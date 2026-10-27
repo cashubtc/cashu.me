@@ -490,6 +490,11 @@ export default {
       },
     },
     appearance: {
+      mode: {
+        title: "模式",
+        dark: "深色",
+        light: "浅色",
+      },
       keyboard: {
         title: "屏幕键盘",
         description: "使用数字键盘输入金额。",
@@ -556,6 +561,7 @@ export default {
           description:
             "点击某个 keyset 以增加其计数器。可用于解决“outputs have already been signed”错误。",
           counter: "计数器: {count}",
+          increase: "增加 {id} 的计数器",
         },
         unset_reserved: {
           button: "取消所有保留的 token",
@@ -1262,6 +1268,15 @@ export default {
       },
       use_active_mint: {
         label: "任何 Mint",
+      },
+      remove_amount: {
+        label: "移除金额",
+      },
+      previous: {
+        label: "上一个请求",
+      },
+      next: {
+        label: "下一个请求",
       },
     },
     inputs: {

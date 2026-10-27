@@ -496,6 +496,11 @@ export default {
       },
     },
     appearance: {
+      mode: {
+        title: "Läge",
+        dark: "Mörkt",
+        light: "Ljust",
+      },
       keyboard: {
         title: "Skärmtangentbord",
         description: "Använd det numeriska tangentbordet för att ange belopp.",
@@ -565,6 +570,7 @@ export default {
           description:
             'Tryck på ett keyset för att öka dess räknare. Hjälper mot felet "outputs have already been signed".',
           counter: "räknare: {count}",
+          increase: "Öka räknaren för {id}",
         },
         unset_reserved: {
           button: "Avboka alla reserverade tokens",
@@ -1285,6 +1291,15 @@ export default {
       },
       use_active_mint: {
         label: "Valfri mint",
+      },
+      remove_amount: {
+        label: "Ta bort belopp",
+      },
+      previous: {
+        label: "Föregående begäran",
+      },
+      next: {
+        label: "Nästa begäran",
       },
     },
     inputs: {

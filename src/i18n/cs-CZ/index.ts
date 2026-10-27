@@ -503,6 +503,11 @@ export default {
       },
     },
     appearance: {
+      mode: {
+        title: "Režim",
+        dark: "Tmavý",
+        light: "Světlý",
+      },
       keyboard: {
         title: "Klávesnice na obrazovce",
         description: "Použít číselnou klávesnici pro zadávání částek.",
@@ -586,6 +591,7 @@ export default {
           description:
             "Klepnutím na keyset zvýšíte jeho čítač. Pomáhá při chybě „outputs have already been signed“.",
           counter: "čítač: {count}",
+          increase: "Zvýšit čítač pro {id}",
         },
         unset_reserved: {
           button: "Zrušit rezervaci všech tokenů",
@@ -1358,6 +1364,15 @@ export default {
       },
       use_active_mint: {
         label: "Libovolný mint",
+      },
+      remove_amount: {
+        label: "Odebrat částku",
+      },
+      previous: {
+        label: "Předchozí požadavek",
+      },
+      next: {
+        label: "Další požadavek",
       },
     },
     inputs: {

@@ -17,10 +17,7 @@
       <q-input
         v-model="editMintData.nickname"
         outlined
-        type="textarea"
-        autogrow
         :label="$t('EditMintDialog.inputs.nickname.label')"
-        :placeholder="$t('EditMintDialog.inputs.nickname.placeholder')"
       />
       <div class="edit-mint-dialog__actions">
         <q-btn

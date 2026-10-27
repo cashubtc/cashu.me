@@ -555,14 +555,24 @@ body.body--light .q-dialog__backdrop {
 // Inside: the field's 16px text inset, a 20px leading icon with 12px to the text, and the
 // label and value as one centred 2-line block (user direction, R41: the 16px glyph and 6px
 // gap crowded the text).
+// Picker fields are drawn exactly like the outlined text fields (user direction, R44): no
+// fill, the field edge colour, 56px tall, the edge brightening on hover as an input's does.
 .mint-chip--field {
+  background: transparent;
+  border-color: var(--app-field-edge);
   border-radius: 12px;
   gap: 12px;
   justify-content: flex-start;
-  min-height: 60px;
-  padding: 8px 16px;
+  min-height: 56px;
+  padding: 6px 12px;
   text-align: start;
   width: 100%;
+}
+@media (hover: hover) {
+  .mint-chip--field:hover {
+    background: transparent;
+    border-color: var(--app-text);
+  }
 }
 .mint-chip--field > :last-child {
   margin-inline-start: auto;
@@ -585,8 +595,9 @@ body.body--light .q-dialog__backdrop {
   line-height: 16px;
 }
 .mint-chip--field .mint-chip__name {
-  font-size: 15px;
-  line-height: 20px;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 22px;
 }
 
 // Floating drawer headers (Receive, Send, Receive ecash) share the bottom-sheet header
@@ -673,6 +684,18 @@ body .q-menu .q-item--active::after {
   resize: none;
 }
 
+// Number fields (amounts) without the browser's spin arrows: a native white stepper inside
+// a dark outlined field (user report, R44); amounts are typed, not stepped.
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
 // Relay rows: one 52px rhythm like the other list rows (R15: 68px rows with stacked gaps).
 .settings-card .q-item.relay-row {
   min-height: 52px;
@@ -682,8 +705,15 @@ body .q-menu .q-item--active::after {
 
 // Light mode: outlined field edges at 3:1 against the page, so empty fields read as fields
 // (R17, R18: Quasar's default 24% black edge is about 1.9:1).
+// Picker fields share the token (Quasar's dark outlined edge is 60% white).
+body {
+  --app-field-edge: rgba(255, 255, 255, 0.6);
+}
+body.body--light {
+  --app-field-edge: rgba(0, 0, 0, 0.45);
+}
 body.body--light .q-field--outlined .q-field__control:before {
-  border-color: rgba(0, 0, 0, 0.45);
+  border-color: var(--app-field-edge);
 }
 
 // One field shape: every outlined text field and select uses the 12px card and row radius,

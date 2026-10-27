@@ -461,6 +461,11 @@ export default {
       },
     },
     appearance: {
+      mode: {
+        title: "Modalità",
+        dark: "Scura",
+        light: "Chiara",
+      },
       keyboard: {
         title: "Tastiera su schermo",
         description: "Usa la tastiera numerica per inserire importi.",
@@ -546,6 +551,7 @@ export default {
           description:
             'Tocca un keyset per incrementarne il contatore. Aiuta con l\'errore "outputs have already been signed".',
           counter: "contatore: {count}",
+          increase: "Aumenta il contatore di {id}",
         },
         unset_reserved: {
           button: "Annulla prenotazione tutti i token riservati",
@@ -1265,6 +1271,15 @@ export default {
       },
       use_active_mint: {
         label: "Qualsiasi mint",
+      },
+      remove_amount: {
+        label: "Rimuovi importo",
+      },
+      previous: {
+        label: "Richiesta precedente",
+      },
+      next: {
+        label: "Richiesta successiva",
       },
     },
     inputs: {

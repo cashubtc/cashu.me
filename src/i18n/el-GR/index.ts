@@ -488,6 +488,11 @@ export default {
       },
     },
     appearance: {
+      mode: {
+        title: "Λειτουργία",
+        dark: "Σκοτεινή",
+        light: "Φωτεινή",
+      },
       keyboard: {
         title: "Πληκτρολόγιο οθόνης",
         description:
@@ -574,6 +579,7 @@ export default {
           description:
             "Πατήστε ένα keyset για να αυξήσετε τον μετρητή του. Βοηθά με το σφάλμα «outputs have already been signed».",
           counter: "μετρητής: {count}",
+          increase: "Αύξηση μετρητή για {id}",
         },
         unset_reserved: {
           button: "Κατάργηση δέσμευσης όλων των δεσμευμένων token",
@@ -1296,6 +1302,15 @@ export default {
       },
       use_active_mint: {
         label: "Οποιοδήποτε mint",
+      },
+      remove_amount: {
+        label: "Αφαίρεση ποσού",
+      },
+      previous: {
+        label: "Προηγούμενο αίτημα",
+      },
+      next: {
+        label: "Επόμενο αίτημα",
       },
     },
     inputs: {

@@ -34,8 +34,9 @@
               round
               icon="chevron_left"
               color="grey"
-              @click="selectPrevRequest"
-              :disable="ourPaymentRequests.length <= 1"
+              :aria-label="$t('PaymentRequestDialog.actions.previous.label')"
+              @click="stepRequest(-1)"
+              :disable="ownRequestIndices.length <= 1"
             />
             <div class="q-mx-sm text-caption text-grey-6">
               {{ currentIndexDisplay }}
@@ -46,8 +47,9 @@
               round
               icon="chevron_right"
               color="grey"
-              @click="selectNextRequest"
-              :disable="ourPaymentRequests.length <= 1"
+              :aria-label="$t('PaymentRequestDialog.actions.next.label')"
+              @click="stepRequest(1)"
+              :disable="ownRequestIndices.length <= 1"
             />
           </div>
         </div>
@@ -70,53 +72,86 @@
             </div>
 
             <q-card-section class="q-pa-sm">
-              <!-- Amount display/edit -->
-              <div class="row justify-center q-pt-md">
-                <div v-if="!isEditingAmount">
+              <!-- The controls describe the request in the QR: amount, mint and unit are read
+                   back from it, and each change makes a new request (old ones keep working). -->
+              <div class="pr-controls column items-center q-pt-md">
+                <div
+                  v-if="!isEditingAmount"
+                  class="row items-center no-wrap pr-amount-row"
+                >
                   <q-btn
                     color="primary"
                     rounded
-                    size="md"
+                    unelevated
+                    no-caps
+                    data-testid="pr-amount"
                     @click="startEditingAmount"
                   >
                     <q-icon name="edit_note" size="xs" class="q-mr-sm" />
                     {{ amountLabel }}
                   </q-btn>
+                  <q-btn
+                    v-if="request.amount !== undefined"
+                    flat
+                    round
+                    class="touch-target-44"
+                    data-testid="pr-amount-clear"
+                    :aria-label="
+                      $t('PaymentRequestDialog.actions.remove_amount.label')
+                    "
+                    @click="applyChanges({ amount: undefined })"
+                  >
+                    <XIcon :size="20" />
+                  </q-btn>
                 </div>
-                <div v-else class="col-12 col-sm-8 col-md-6">
+                <div v-else class="pr-amount-editor">
                   <q-input
                     ref="amountInput"
                     v-model="amountInputValue"
-                    type="number"
-                    :placeholder="
-                      $t('PaymentRequestDialog.inputs.amount.placeholder')
-                    "
-                    @blur="finishEditingAmount"
-                    @keyup.enter="finishEditingAmount"
-                  ></q-input>
+                    outlined
+                    inputmode="decimal"
+                    data-testid="pr-amount-input"
+                    :label="`${$t(
+                      'PaymentRequestDialog.inputs.amount.placeholder'
+                    )} (${unitLabel(request.unit)})`"
+                    :error="amountError"
+                    @blur="commitAmount"
+                    @keyup.enter="commitAmount"
+                    @keyup.esc="isEditingAmount = false"
+                  />
                 </div>
-              </div>
 
-              <!-- Mint selection and unit toggle -->
-              <div class="row justify-center q-pt-md">
-                <div class="row no-wrap items-center q-gutter-sm">
-                  <q-chip
-                    outline
-                    clickable
-                    class="q-pa-md"
-                    :style="
-                      chosenMintUrl == undefined
-                        ? ''
-                        : 'height: 36px; font-family: monospace'
-                    "
-                    @click="setActiveMintUrl"
+                <div class="row no-wrap items-center pr-chip-row">
+                  <button
+                    type="button"
+                    class="mint-chip"
+                    data-testid="pr-mint"
+                    aria-haspopup="listbox"
+                    :aria-expanded="showMintSheet"
+                    @click="showMintSheet = true"
                   >
-                    <LandmarkIcon :size="16" class="q-mr-sm mint-glyph" />
-                    {{ getShortUrl(chosenMintUrl) }}
-                  </q-chip>
-                  <div @click="toggleUnit">
-                    <ToggleUnit class="q-py-none" color="white" />
-                  </div>
+                    <LandmarkIcon :size="16" class="mint-chip__icon" />
+                    <span class="mint-chip__name">{{ mintLabel }}</span>
+                    <ChevronDownIcon :size="16" class="mint-chip__icon" />
+                  </button>
+                  <button
+                    type="button"
+                    class="mint-chip"
+                    data-testid="pr-unit"
+                    aria-haspopup="listbox"
+                    :aria-expanded="showUnitSheet"
+                    :disabled="unitOptions.length <= 1"
+                    @click="showUnitSheet = true"
+                  >
+                    <span class="mint-chip__name">{{
+                      unitLabel(request.unit)
+                    }}</span>
+                    <ChevronDownIcon
+                      v-if="unitOptions.length > 1"
+                      :size="16"
+                      class="mint-chip__icon"
+                    />
+                  </button>
                 </div>
               </div>
 
@@ -139,9 +174,8 @@
                     >
                       {{ $t("PaymentRequestDialog.received_total") }}:
                       <span class="q-ml-xs text-weight-medium">{{
-                        total
+                        formatCurrency(total, unit, true)
                       }}</span>
-                      <span class="q-ml-xs">{{ unit }}</span>
                     </q-chip>
                   </div>
                   <PaymentRequestPayments
@@ -181,47 +215,104 @@
         </div>
       </div>
     </q-card>
+    <BottomSheet v-model="showMintSheet" :title="$t('ChooseMint.sheet_title')">
+      <div role="listbox" class="pr-sheet-options">
+        <SheetOption
+          :label="$t('PaymentRequestDialog.actions.use_active_mint.label')"
+          :selected="!requestMint"
+          @select="chooseMint(undefined)"
+        >
+          <template #icon
+            ><LandmarkIcon :size="20" class="mint-glyph"
+          /></template>
+        </SheetOption>
+        <SheetOption
+          v-for="mint in mints"
+          :key="mint.url"
+          :label="mint.nickname || shortUrl(mint.url)"
+          :caption="mintUnits(mint).map(unitLabel).join(' · ')"
+          :selected="requestMint === mint.url"
+          @select="chooseMint(mint.url)"
+        >
+          <template #icon
+            ><LandmarkIcon :size="20" class="mint-glyph"
+          /></template>
+        </SheetOption>
+      </div>
+    </BottomSheet>
+    <BottomSheet
+      v-model="showUnitSheet"
+      :title="$t('MintDetailsDialog.details.currency.label')"
+    >
+      <div role="listbox" class="pr-sheet-options">
+        <SheetOption
+          v-for="unit in unitOptions"
+          :key="unit"
+          :label="unitLabel(unit)"
+          :selected="request.unit === unit"
+          @select="chooseUnit(unit)"
+        />
+      </div>
+    </BottomSheet>
   </q-dialog>
 </template>
 
 <script lang="ts">
-import { Landmark as LandmarkIcon } from "lucide-vue-next";
+import {
+  ChevronDown as ChevronDownIcon,
+  Landmark as LandmarkIcon,
+  X as XIcon,
+} from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import VueQrcode from "@chenfengyuan/vue-qrcode";
+import {
+  decodePaymentRequest,
+  PaymentRequestTransportType,
+} from "@cashu/cashu-ts";
+import { nip19 } from "nostr-tools";
 
 import { usePRStore } from "src/stores/payment-request";
-import { useMintsStore } from "../stores/mints";
+import { useMintsStore } from "src/stores/mints";
+import { useNostrStore } from "src/stores/nostr";
 import { getShortUrl } from "src/js/wallet-helpers";
-import ToggleUnit from "./ToggleUnit.vue";
-import PaymentRequestPayments from "./PaymentRequestPayments.vue";
+import { notifyError } from "src/js/notify";
+import BottomSheet from "src/components/BottomSheet.vue";
+import SheetOption from "src/components/SheetOption.vue";
+import PaymentRequestPayments from "src/components/PaymentRequestPayments.vue";
 // type hint for global mixin
 declare const windowMixin: any;
+
+type RequestFields = {
+  amount?: number;
+  unit: string;
+  mints?: string[];
+  description?: string;
+};
+
+const FIAT_UNITS = ["usd", "eur"];
+const unitMultiplier = (unit: string) =>
+  FIAT_UNITS.includes(unit.toLowerCase()) ? 100 : 1;
 
 export default defineComponent({
   name: "PRDialog",
   mixins: [windowMixin],
   components: {
+    ChevronDownIcon,
     LandmarkIcon,
+    XIcon,
     VueQrcode,
-    ToggleUnit,
+    BottomSheet,
+    SheetOption,
     PaymentRequestPayments,
   },
   data() {
-    const amountLabelDefault = (this as any).$i18n.t(
-      "PaymentRequestDialog.actions.add_amount.label"
-    );
     return {
-      paymentRequestAmount: undefined as number | undefined,
       isEditingAmount: false,
       amountInputValue: "",
-      amountLabelDefault,
-      amountLabel: amountLabelDefault,
-      defaultAnyMint: (this as any).$i18n.t(
-        "PaymentRequestDialog.actions.use_active_mint.label"
-      ),
-      chosenMintUrl: undefined as string | undefined,
-      memo: "",
+      amountError: false,
+      showMintSheet: false,
+      showUnitSheet: false,
     };
   },
   computed: {
@@ -231,15 +322,68 @@ export default defineComponent({
       "selectedPRIndex",
       "currentPaymentRequest",
     ]),
-    ...mapState(useMintsStore, ["activeMintUrl", "activeUnit"]),
-    activeUnitCurrencyMultiplyer() {
-      return (useMintsStore() as any).activeUnitCurrencyMultiplyer;
-    },
+    ...mapState(useMintsStore, ["activeUnit", "mints"]),
+    ...mapState(useNostrStore, ["seedSignerPublicKey"]),
     ...mapWritableState(usePRStore, ["showPRDialog"]),
+    // What the QR encodes; the only source for the amount, mint and unit shown.
+    request(): RequestFields {
+      try {
+        const decoded = decodePaymentRequest(this.showPRKData);
+        return {
+          amount:
+            decoded.amount !== undefined ? Number(decoded.amount) : undefined,
+          unit: decoded.unit || this.activeUnit,
+          mints: decoded.mints?.length ? decoded.mints : undefined,
+          description: decoded.description,
+        };
+      } catch {
+        return { unit: this.activeUnit };
+      }
+    },
+    requestMint(): string | undefined {
+      return this.request.mints?.[0];
+    },
+    amountLabel(): string {
+      if (this.request.amount === undefined) {
+        return this.$t("PaymentRequestDialog.actions.add_amount.label");
+      }
+      return this.formatCurrency(this.request.amount, this.request.unit, true);
+    },
+    mintLabel(): string {
+      const mints = this.request.mints;
+      if (!mints) {
+        return this.$t("PaymentRequestDialog.actions.use_active_mint.label");
+      }
+      const known = this.mints.find((m: any) => m.url === mints[0]);
+      const name = known?.nickname || this.shortUrl(mints[0]);
+      return mints.length > 1 ? `${name} +${mints.length - 1}` : name;
+    },
+    // Units the request can be in: the chosen mint's, or any of the wallet's mints'.
+    unitOptions(): string[] {
+      const mints = this.requestMint
+        ? this.mints.filter((m: any) => m.url === this.requestMint)
+        : this.mints;
+      const units = new Set<string>(
+        mints.flatMap((m: any) => this.mintUnits(m))
+      );
+      units.add(this.request.unit);
+      return [...units].sort((a, b) =>
+        a === "sat" ? -1 : b === "sat" ? 1 : a.localeCompare(b)
+      );
+    },
+    // Requests this wallet receives on. Older versions also stored requests the user paid,
+    // which carry someone else's address; those are never shown or copied here.
+    ownRequestIndices(): number[] {
+      return this.ourPaymentRequests
+        .map((entry: any, index: number) => ({ entry, index }))
+        .filter(({ entry }) => this.isOwnRequest(entry.encoded))
+        .map(({ index }) => index);
+    },
     currentIndexDisplay(): string {
-      const total = this.ourPaymentRequests.length || 0;
-      if (!total) return "0/0";
-      return `${(this.selectedPRIndex as number) + 1}/${total}`;
+      const own = this.ownRequestIndices;
+      if (!own.length) return "0/0";
+      const position = own.indexOf(this.selectedPRIndex as number);
+      return `${(position < 0 ? own.length - 1 : position) + 1}/${own.length}`;
     },
     currentPayments(): any[] {
       const prStore = usePRStore();
@@ -256,79 +400,154 @@ export default defineComponent({
       return totals;
     },
   },
+  watch: {
+    showPRDialog: {
+      handler(open: boolean) {
+        if (open) this.showOwnRequest();
+        else this.isEditingAmount = false;
+      },
+      immediate: true,
+    },
+  },
   methods: {
-    ...mapActions(usePRStore, [
-      "newPaymentRequest",
-      "selectPrevRequest",
-      "selectNextRequest",
-    ]),
-    toggleUnit() {
-      this.paymentRequestAmount = undefined;
-      this.amountLabel = this.amountLabelDefault;
-      this.newPaymentRequest(
-        this.paymentRequestAmount,
-        this.memo,
-        this.chosenMintUrl
-      );
-    },
-    newRequest() {
-      this.newPaymentRequest(
-        this.paymentRequestAmount,
-        this.memo,
-        this.chosenMintUrl,
-        true
-      );
-    },
-    getShortUrl(url: string | undefined) {
-      if (!url) {
-        return this.defaultAnyMint;
-      }
+    ...mapActions(usePRStore, ["createPaymentRequest", "selectRequestByIndex"]),
+    shortUrl(url: string) {
       return getShortUrl(url);
     },
-    setActiveMintUrl() {
-      if (this.activeMintUrl == this.chosenMintUrl) {
-        return;
+    unitLabel(unit: string) {
+      return unit === "sat" ? "BTC" : unit.toUpperCase();
+    },
+    mintUnits(mint: any): string[] {
+      const keysets = mint.keysets || [];
+      const active = keysets.filter((k: any) => k.active);
+      return [
+        ...new Set<string>(
+          (active.length ? active : keysets).map((k: any) => k.unit)
+        ),
+      ];
+    },
+    isOwnRequest(encoded: string): boolean {
+      if (!this.seedSignerPublicKey) return true;
+      try {
+        return (decodePaymentRequest(encoded).transport || []).some((t) => {
+          if (t.type !== PaymentRequestTransportType.NOSTR) return false;
+          const target = nip19.decode(t.target);
+          return (
+            target.type === "nprofile" &&
+            target.data.pubkey === this.seedSignerPublicKey
+          );
+        });
+      } catch {
+        return false;
       }
-      this.chosenMintUrl = this.activeMintUrl;
-      this.newPaymentRequest(
-        this.paymentRequestAmount,
-        this.memo,
-        this.chosenMintUrl
+    },
+    showOwnRequest() {
+      const own = this.ownRequestIndices;
+      if (own.includes(this.selectedPRIndex as number)) {
+        this.selectRequestByIndex(this.selectedPRIndex as number);
+      } else if (own.length) {
+        this.selectRequestByIndex(own[own.length - 1]);
+      } else {
+        this.newRequest();
+      }
+    },
+    stepRequest(step: number) {
+      const own = this.ownRequestIndices;
+      if (own.length <= 1) return;
+      const position = Math.max(0, own.indexOf(this.selectedPRIndex as number));
+      this.selectRequestByIndex(
+        own[(position + step + own.length) % own.length]
       );
     },
+    // Every change is a new request with its own id: one already shared keeps working.
+    applyChanges(changes: Partial<RequestFields>) {
+      const next = { ...this.request, ...changes };
+      try {
+        this.createPaymentRequest(
+          next.amount,
+          next.description,
+          next.mints?.[0],
+          next.unit
+        );
+      } catch (error) {
+        notifyError(String(error));
+      }
+    },
+    // A fresh, open request: no amount, any mint, in the request's current unit.
+    newRequest() {
+      this.isEditingAmount = false;
+      try {
+        this.createPaymentRequest(
+          undefined,
+          undefined,
+          undefined,
+          this.request.unit
+        );
+      } catch (error) {
+        notifyError(String(error));
+      }
+    },
+    chooseMint(url: string | undefined) {
+      this.showMintSheet = false;
+      if (url === this.requestMint && (url || !this.request.mints)) return;
+      const mint = this.mints.find((m: any) => m.url === url);
+      const units = mint ? this.mintUnits(mint) : [];
+      // Keep the unit (and so the amount) when the new mint has it; otherwise its own
+      // first unit, without an amount in the old denomination.
+      if (!mint || units.includes(this.request.unit)) {
+        this.applyChanges({ mints: url ? [url] : undefined });
+      } else {
+        const unit = units.includes("sat") ? "sat" : units[0];
+        this.applyChanges({ mints: [url as string], unit, amount: undefined });
+      }
+    },
+    chooseUnit(unit: string) {
+      this.showUnitSheet = false;
+      if (unit === this.request.unit) return;
+      this.applyChanges({ unit, amount: undefined });
+    },
     startEditingAmount() {
+      const { amount, unit } = this.request;
+      this.amountInputValue =
+        amount === undefined ? "" : String(amount / unitMultiplier(unit));
+      this.amountError = false;
       this.isEditingAmount = true;
       this.$nextTick(() => {
-        const input = this.$refs.amountInput as any;
-        if (input) {
-          input.focus();
-        }
+        (this.$refs.amountInput as any)?.focus();
       });
+    },
+    commitAmount() {
+      // Enter and the blur that follows both commit: only the first one counts.
+      if (!this.isEditingAmount) return;
+      const text = this.amountInputValue.trim().replace(",", ".");
+      if (text === "") {
+        this.isEditingAmount = false;
+        if (this.request.amount !== undefined) {
+          this.applyChanges({ amount: undefined });
+        }
+        return;
+      }
+      const multiplier = unitMultiplier(this.request.unit);
+      const value = Number(text) * multiplier;
+      const baseUnits = Math.round(value);
+      // Amounts are whole base units (sats, cents): reject anything finer than that.
+      if (
+        !Number.isFinite(value) ||
+        baseUnits <= 0 ||
+        Math.abs(value - baseUnits) > 1e-6
+      ) {
+        this.amountError = true;
+        return;
+      }
+      this.isEditingAmount = false;
+      if (baseUnits !== this.request.amount) {
+        this.applyChanges({ amount: baseUnits });
+      }
     },
     onCopyPRKData() {
       if (this.showPRKData) {
         (this as any).copyText(this.showPRKData);
       }
-    },
-    finishEditingAmount() {
-      const amount = parseFloat(this.amountInputValue);
-      if (isNaN(amount) || amount <= 0 || this.amountInputValue == "") {
-        this.paymentRequestAmount = undefined;
-        this.amountLabel = this.amountLabelDefault;
-      } else {
-        this.paymentRequestAmount = amount * this.activeUnitCurrencyMultiplyer;
-        this.amountLabel = this.formatCurrency(
-          amount * this.activeUnitCurrencyMultiplyer,
-          this.activeUnit
-        );
-      }
-      this.newPaymentRequest(
-        this.paymentRequestAmount,
-        this.memo,
-        this.chosenMintUrl
-      );
-      this.isEditingAmount = false;
-      this.amountInputValue = "";
     },
   },
 });
@@ -344,5 +563,28 @@ export default defineComponent({
 .qcard {
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
+}
+.pr-controls {
+  gap: 12px;
+}
+.pr-amount-row {
+  gap: 4px;
+}
+.pr-amount-editor {
+  max-width: var(--app-column);
+  padding: 0 16px;
+  width: 100%;
+}
+.pr-chip-row {
+  gap: 8px;
+}
+.pr-chip-row .mint-chip:disabled {
+  cursor: default;
+}
+.pr-sheet-options {
+  padding: 4px 16px 16px;
+}
+.mint-glyph {
+  color: var(--app-text-muted);
 }
 </style>

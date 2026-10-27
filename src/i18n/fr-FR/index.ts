@@ -494,6 +494,11 @@ export default {
       use_multinut: "Paiements multi-mint",
     },
     appearance: {
+      mode: {
+        title: "Mode",
+        dark: "Sombre",
+        light: "Clair",
+      },
       keyboard: {
         title: "Clavier à l'écran",
         description: "Utilisez le clavier numérique pour saisir les montants.",
@@ -553,6 +558,7 @@ export default {
           description:
             "Touchez un keyset pour augmenter son compteur. Utile en cas d'erreur « outputs have already been signed ».",
           counter: "compteur : {count}",
+          increase: "Augmenter le compteur de {id}",
         },
         new_seed: {
           button: "Générer une nouvelle phrase de départ",
@@ -1304,6 +1310,15 @@ export default {
       },
       use_active_mint: {
         label: "N'importe quelle mint",
+      },
+      remove_amount: {
+        label: "Retirer le montant",
+      },
+      previous: {
+        label: "Demande précédente",
+      },
+      next: {
+        label: "Demande suivante",
       },
     },
     inputs: {

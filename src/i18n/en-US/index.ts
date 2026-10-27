@@ -494,6 +494,11 @@ export default {
       },
     },
     appearance: {
+      mode: {
+        title: "Mode",
+        dark: "Dark",
+        light: "Light",
+      },
       keyboard: {
         title: "On-screen keyboard",
         description: "Use the numeric keyboard for entering amounts.",
@@ -578,6 +583,7 @@ export default {
           description:
             'Tap a keyset to increase its counter. Helps with the "outputs have already been signed" error.',
           counter: "counter: {count}",
+          increase: "Increase counter for {id}",
         },
         unset_reserved: {
           button: "Unset all reserved tokens",
@@ -1338,6 +1344,15 @@ export default {
       },
       use_active_mint: {
         label: "Any mint",
+      },
+      remove_amount: {
+        label: "Remove amount",
+      },
+      previous: {
+        label: "Previous request",
+      },
+      next: {
+        label: "Next request",
       },
     },
     inputs: {

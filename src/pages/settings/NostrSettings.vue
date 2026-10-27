@@ -150,56 +150,65 @@
       </q-item>
     </SettingsSection>
 
-    <!-- relays -->
+    <!-- relays: one quiet row per relay (tap to copy, trash to remove), and the add field on
+         the page under the list rather than inside the card (user direction, R44). -->
     <SettingsSection
       :title="$t('Settings.sections.nostr.relays.list.title')"
       :caption="$t('Settings.sections.nostr.relays.add.description')"
     >
-      <q-item class="settings-control-item">
+      <q-item
+        v-for="relay in displayRelays"
+        :key="relay"
+        clickable
+        class="relay-row"
+        :aria-label="`${$t(
+          'Settings.sections.nostr.relays.list.copy_tooltip'
+        )}: ${relay}`"
+        @click="copyText(relay)"
+      >
         <q-item-section>
-          <q-input
-            outlined
-            rounded
-            v-model="newRelay"
-            :label="$t('Settings.sections.nostr.relays.add.title')"
+          <q-item-label class="relay-url ellipsis" dir="ltr"
+            ><span class="relay-scheme">{{ relayScheme(relay) }}</span
+            >{{ relayHost(relay) }}</q-item-label
           >
-            <template v-slot:append>
-              <q-btn
-                flat
-                dense
-                round
-                icon="add"
-                color="primary"
-                @click="addRelay"
-              ></q-btn>
-            </template>
-          </q-input>
-        </q-item-section>
-      </q-item>
-      <q-item v-for="relay in displayRelays" :key="relay" class="relay-row">
-        <q-item-section>
-          <q-item-label class="relay-url" dir="ltr">{{ relay }}</q-item-label>
         </q-item-section>
         <q-item-section side>
-          <div class="row items-center no-wrap">
-            <q-btn flat round class="touch-target-44" @click="copyText(relay)"
-              ><CopyIcon :size="20" /><q-tooltip>{{
-                $t("Settings.sections.nostr.relays.list.copy_tooltip")
-              }}</q-tooltip></q-btn
-            >
-            <q-btn
-              flat
-              round
-              class="touch-target-44"
-              @click="removeRelay(relay)"
-              ><Trash2Icon :size="20" /><q-tooltip>{{
-                $t("Settings.sections.nostr.relays.list.remove_tooltip")
-              }}</q-tooltip></q-btn
-            >
-          </div>
+          <q-btn
+            flat
+            round
+            class="touch-target-44 relay-remove"
+            :aria-label="
+              $t('Settings.sections.nostr.relays.list.remove_tooltip')
+            "
+            @click.stop="removeRelay(relay)"
+            ><Trash2Icon :size="20" /><q-tooltip>{{
+              $t("Settings.sections.nostr.relays.list.remove_tooltip")
+            }}</q-tooltip></q-btn
+          >
         </q-item-section>
       </q-item>
     </SettingsSection>
+    <div class="relay-add">
+      <q-input
+        outlined
+        v-model="newRelay"
+        dir="ltr"
+        :label="$t('Settings.sections.nostr.relays.add.title')"
+        @keydown.enter.prevent="addRelay"
+      >
+        <template v-slot:append>
+          <q-btn
+            flat
+            round
+            class="touch-target-44"
+            :disable="!newRelay.trim()"
+            :aria-label="$t('Settings.sections.nostr.relays.add.title')"
+            @click="addRelay"
+            ><PlusIcon :size="20"
+          /></q-btn>
+        </template>
+      </q-input>
+    </div>
 
     <!-- web of trust -->
     <SettingsSection
@@ -274,7 +283,11 @@
 </template>
 
 <script lang="ts">
-import { Copy as CopyIcon, Trash2 as Trash2Icon } from "lucide-vue-next";
+import {
+  Copy as CopyIcon,
+  Plus as PlusIcon,
+  Trash2 as Trash2Icon,
+} from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useNostrStore } from "src/stores/nostr";
@@ -286,7 +299,13 @@ import SettingsSection from "./SettingsSection.vue";
 export default defineComponent({
   name: "NostrSettings",
   mixins: [windowMixin],
-  components: { CopyIcon, Trash2Icon, SettingsPageShell, SettingsSection },
+  components: {
+    CopyIcon,
+    PlusIcon,
+    Trash2Icon,
+    SettingsPageShell,
+    SettingsSection,
+  },
   data: function () {
     return {
       nip07SignerAvailable: false,
@@ -394,6 +413,12 @@ export default defineComponent({
         }
       }
     },
+    relayScheme: function (relay) {
+      return relay.match(/^[a-z]+:\/\//i)?.[0] ?? "";
+    },
+    relayHost: function (relay) {
+      return relay.slice(this.relayScheme(relay).length);
+    },
     removeRelay: function (relay) {
       this.relays = this.relays.filter((r) => r.trim() !== relay);
     },
@@ -403,3 +428,18 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.relay-scheme {
+  color: var(--app-text-muted);
+}
+.relay-remove {
+  color: var(--app-text-muted);
+}
+/* The add field sits 12px under the relay card (the section's 24px bottom margin, pulled up),
+   then the usual 24px before the next section. */
+.relay-add {
+  margin-top: -12px;
+  margin-bottom: 24px;
+}
+</style>

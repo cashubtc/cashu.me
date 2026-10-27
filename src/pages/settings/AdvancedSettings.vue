@@ -99,28 +99,38 @@
               <q-item-label class="keyset-mint-label" caption>
                 {{ shortUrl(mintUrl) }}
               </q-item-label>
-              <q-btn
-                class="keyset-counter-btn"
-                v-for="(counter, id) in mintCounter"
-                :key="id"
-                flat
-                no-caps
-                align="between"
-                :title="counter.id"
-                @click="increaseKeysetCounter(counter.id, 1)"
-              >
-                <span class="keyset-id">{{
-                  abbreviateKeysetId(counter.id)
-                }}</span>
-
-                <span class="keyset-counter-text">
-                  {{
-                    $t("Settings.advanced.developer.keyset_counters.counter", {
-                      count: counter.counter,
+              <!-- Each keyset is a stepper row: ID, its count, and a + on the end; the whole
+                   row is the button, as the caption says (tap a keyset). -->
+              <div class="keyset-counter-list">
+                <button
+                  v-for="(counter, id) in mintCounter"
+                  :key="id"
+                  type="button"
+                  class="keyset-counter-row"
+                  :title="counter.id"
+                  :aria-label="
+                    $t('Settings.advanced.developer.keyset_counters.increase', {
+                      id: abbreviateKeysetId(counter.id),
                     })
-                  }}
-                </span>
-              </q-btn>
+                  "
+                  @click="increaseKeysetCounter(counter.id, 1)"
+                >
+                  <span class="keyset-id ellipsis">{{
+                    abbreviateKeysetId(counter.id)
+                  }}</span>
+                  <span class="keyset-counter-text">
+                    {{
+                      $t(
+                        "Settings.advanced.developer.keyset_counters.counter",
+                        { count: counter.counter }
+                      )
+                    }}
+                  </span>
+                  <span class="keyset-counter-plus" aria-hidden="true">
+                    <PlusIcon :size="20" />
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
         </q-item-section>
@@ -307,7 +317,7 @@ import { useStorageStore } from "src/stores/storage";
 import { useNostrUserStore } from "src/stores/nostrUser";
 import SettingsPageShell from "./SettingsPageShell.vue";
 import SettingsSection from "./SettingsSection.vue";
-import { Download as DownloadIcon } from "lucide-vue-next";
+import { Download as DownloadIcon, Plus as PlusIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "AdvancedSettings",
@@ -316,6 +326,7 @@ export default defineComponent({
     SettingsPageShell,
     SettingsSection,
     DownloadIcon,
+    PlusIcon,
   },
   data: function () {
     return {
@@ -490,30 +501,67 @@ export default defineComponent({
   flex: 0 1 100%;
 }
 
-/* Each keyset is a 44px list row (+1 on tap): ID on the left, counter as a trailing value,
-   body weight, so they read as rows rather than buttons or debug text (R16, R17). */
-.keyset-counter-btn {
+/* Keysets of one mint sit in one tinted group, a hairline between rows. */
+.keyset-counter-list {
+  background: var(--app-tint);
+  border-radius: 12px;
+  overflow: hidden;
   width: 100%;
-  min-height: 44px;
-  font-weight: 400;
+}
+
+.keyset-counter-row {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  gap: 12px;
+  min-height: 52px;
+  padding-block: 4px;
+  padding-inline: 16px 4px;
+  text-align: start;
+  width: 100%;
+}
+
+.keyset-counter-row + .keyset-counter-row {
+  border-top: 1px solid var(--app-border);
+}
+
+@media (hover: hover) {
+  .keyset-counter-row:hover .keyset-counter-plus {
+    background: var(--app-tint-strong);
+  }
+}
+
+.keyset-counter-row:active .keyset-counter-plus {
+  background: color-mix(in srgb, var(--app-text) 16%, transparent);
+}
+
+.keyset-counter-plus {
+  align-items: center;
+  border-radius: 50%;
   color: var(--app-text);
-  border-radius: 10px;
+  display: inline-flex;
+  flex: none;
+  height: 44px;
+  justify-content: center;
+  width: 44px;
 }
 
 .keyset-id {
+  color: var(--app-text);
+  min-width: 0;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   overflow-wrap: normal;
 }
 
 .keyset-counter-text {
   color: var(--app-text-muted);
-}
-
-.keyset-counter-separator {
-  margin: 0 4px;
-}
-
-.keyset-counter-text {
-  min-width: 0;
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  margin-inline-start: auto;
+  white-space: nowrap;
 }
 </style>

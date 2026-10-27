@@ -481,6 +481,11 @@ export default {
       },
     },
     appearance: {
+      mode: {
+        title: "モード",
+        dark: "ダーク",
+        light: "ライト",
+      },
       keyboard: {
         title: "オンスクリーンキーボード",
         description: "金額入力に数字キーボードを使用します。",
@@ -564,6 +569,7 @@ export default {
           description:
             "キーセットをタップするとカウンターが増えます。「outputs have already been signed」エラーの対処に役立ちます。",
           counter: "カウンター: {count}",
+          increase: "{id} のカウンターを増やす",
         },
         unset_reserved: {
           button: "すべての予約済みトークンを解除",
@@ -1283,6 +1289,15 @@ export default {
       },
       use_active_mint: {
         label: "任意のミント",
+      },
+      remove_amount: {
+        label: "金額を削除",
+      },
+      previous: {
+        label: "前のリクエスト",
+      },
+      next: {
+        label: "次のリクエスト",
       },
     },
     inputs: {

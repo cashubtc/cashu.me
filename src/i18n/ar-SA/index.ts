@@ -478,6 +478,11 @@ export default {
       },
     },
     appearance: {
+      mode: {
+        title: "الوضع",
+        dark: "داكن",
+        light: "فاتح",
+      },
       keyboard: {
         title: "لوحة مفاتيح على الشاشة",
         description: "استخدم لوحة المفاتيح الرقمية لإدخال المبالغ.",
@@ -561,6 +566,7 @@ export default {
           description:
             'اضغط على مجموعة مفاتيح لزيادة عدّادها. يساعد في حل خطأ "outputs have already been signed".',
           counter: "العداد: {count}",
+          increase: "زيادة العداد لـ {id}",
         },
         unset_reserved: {
           button: "إلغاء تعيين جميع الرموز المحجوزة",
@@ -1273,6 +1279,15 @@ export default {
       },
       use_active_mint: {
         label: "أي مِنْت",
+      },
+      remove_amount: {
+        label: "إزالة المبلغ",
+      },
+      previous: {
+        label: "الطلب السابق",
+      },
+      next: {
+        label: "الطلب التالي",
       },
     },
     inputs: {

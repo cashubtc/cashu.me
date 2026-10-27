@@ -505,6 +505,11 @@ export default {
       },
     },
     appearance: {
+      mode: {
+        title: "Modus",
+        dark: "Dunkel",
+        light: "Hell",
+      },
       keyboard: {
         title: "Bildschirmtastatur",
         description:
@@ -575,6 +580,7 @@ export default {
           description:
             "Tippen Sie auf ein Keyset, um seinen Zähler zu erhöhen. Hilft beim Fehler „outputs have already been signed“.",
           counter: "Zähler: {count}",
+          increase: "Zähler für {id} erhöhen",
         },
         unset_reserved: {
           button: "Alle reservierten Token freigeben",
@@ -1302,6 +1308,15 @@ export default {
       },
       use_active_mint: {
         label: "Beliebige Mint",
+      },
+      remove_amount: {
+        label: "Betrag entfernen",
+      },
+      previous: {
+        label: "Vorherige Anfrage",
+      },
+      next: {
+        label: "Nächste Anfrage",
       },
     },
     inputs: {

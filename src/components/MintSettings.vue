@@ -175,7 +175,7 @@
             outlined
             data-testid="add-mint-url"
             v-model="addMintData.url"
-            placeholder="https://"
+            :label="$t('global.inputs.mint_url.label')"
             @keydown.enter.prevent="sanitizeMintUrlAndShowAddDialog"
             ref="mintInput"
             class="q-mb-md mint-input url-input"
@@ -198,7 +198,7 @@
             outlined
             data-testid="add-mint-nickname"
             v-model="addMintData.nickname"
-            :placeholder="$t('MintSettings.add.inputs.nickname.placeholder')"
+            :label="$t('EditMintDialog.inputs.nickname.label')"
             @keydown.enter.prevent="sanitizeMintUrlAndShowAddDialog"
             ref="mintNicknameInput"
             class="mint-input"

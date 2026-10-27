@@ -53,7 +53,10 @@ test("changes theme, bitcoin symbol, keyboard preference and language persistent
   await wallet.toggleSetting("Use numeric keyboard", true);
   await page.getByText("Bitcoin", { exact: true }).click();
   await page.reload();
-  await expect(page.locator(".q-item--active")).toContainText("Bitcoin");
+  // The theme list's active row (the Mode list above it has its own active row).
+  await expect(
+    page.locator('.q-item--active:not([data-testid="appearance-mode"])')
+  ).toContainText("Bitcoin");
   await wallet.home();
   await expect(wallet.balance).toContainText("sat");
   await wallet.openSend("ecash");
@@ -133,8 +136,8 @@ test("enables ecash payment requests and edits the request amount", async ({
   await wallet.openReceive("ecash");
   await page.getByText("Request", { exact: true }).click();
   await page.getByRole("button", { name: /Add amount/i }).click();
-  await page.getByPlaceholder("Enter amount", { exact: true }).fill("15");
-  await page.getByPlaceholder("Enter amount", { exact: true }).press("Enter");
+  await page.getByLabel(/^Enter amount/).fill("15");
+  await page.getByLabel(/^Enter amount/).press("Enter");
   await expect(page.getByRole("button", { name: /15/ })).toBeVisible();
   await page.getByRole("button", { name: "Copy", exact: true }).click();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toMatch(

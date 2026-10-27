@@ -337,6 +337,16 @@ export default defineComponent({
   overscroll-behavior-x: contain;
   touch-action: pan-y;
 }
+/* Quasar wraps each slide in a ".q-panel.scroll" (overflow: auto), so a balance taller than
+   the carousel could be scrolled by hand and showed a scrollbar. Slides only move by swipe
+   or the unit dots. */
+.balance-carousel :deep(.q-panel) {
+  overflow: hidden !important;
+  scrollbar-width: none;
+}
+.balance-carousel :deep(.q-panel)::-webkit-scrollbar {
+  display: none;
+}
 .balance-slide {
   align-items: flex-start;
   display: flex;

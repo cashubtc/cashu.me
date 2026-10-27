@@ -37,6 +37,40 @@
       </q-item>
     </SettingsSection>
 
+    <!-- mode: dark or light, chosen like a theme (user direction, R44: light mode had no
+         control in the app) -->
+    <SettingsSection :title="$t('Settings.appearance.mode.title')">
+      <q-item
+        v-for="mode in modeOptions"
+        :key="mode.name"
+        clickable
+        data-testid="appearance-mode"
+        :data-mode="mode.name"
+        @click="selectMode(mode.dark)"
+        :active="$q.dark.isActive === mode.dark"
+        active-class="text-weight-bold"
+      >
+        <q-item-section avatar>
+          <q-icon
+            :color="$q.dark.isActive === mode.dark ? 'primary' : 'grey'"
+            :name="
+              $q.dark.isActive === mode.dark
+                ? 'check_circle'
+                : 'radio_button_unchecked'
+            "
+          />
+        </q-item-section>
+        <q-item-section>
+          <q-item-label class="theme-option-label">{{
+            $t(`Settings.appearance.mode.${mode.name}`)
+          }}</q-item-label>
+        </q-item-section>
+        <q-item-section side>
+          <component :is="mode.icon" :size="20" class="mode-glyph" />
+        </q-item-section>
+      </q-item>
+    </SettingsSection>
+
     <!-- theme -->
     <SettingsSection
       :title="$t('Settings.appearance.theme.title')"
@@ -83,6 +117,7 @@ import { mapWritableState } from "pinia";
 import { useSettingsStore } from "src/stores/settings";
 import SettingsPageShell from "./SettingsPageShell.vue";
 import SettingsSection from "./SettingsSection.vue";
+import { Moon as MoonIcon, Sun as SunIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "AppearanceSettings",
@@ -90,10 +125,16 @@ export default defineComponent({
   components: {
     SettingsPageShell,
     SettingsSection,
+    MoonIcon,
+    SunIcon,
   },
   data: function () {
     return {
       activeTheme: "monochrome",
+      modeOptions: [
+        { name: "dark", dark: true, icon: "MoonIcon" },
+        { name: "light", dark: false, icon: "SunIcon" },
+      ],
       themes: [
         "monochrome",
         "classic",
@@ -130,6 +171,9 @@ export default defineComponent({
     },
   },
   methods: {
+    selectMode: function (dark: boolean) {
+      if (this.$q.dark.isActive !== dark) this.toggleDarkMode();
+    },
     selectTheme: function (themeName) {
       this.changeColor(themeName);
       this.activeTheme = themeName;
@@ -143,6 +187,9 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.mode-glyph {
+  color: var(--app-text-muted);
+}
 /* A filled swatch of each theme's accent, easier to compare than a small glyph (R15). */
 .theme-swatch {
   display: block;

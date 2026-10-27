@@ -1,23 +1,22 @@
 <template>
-  <!-- A mint's identity as one compact row (icon, name, host): the header of the reviews page
-       and of the write-a-review page, so both read as the same mint. -->
-  <div class="mint-header row items-center no-wrap">
-    <q-avatar size="44px" class="mint-header__avatar">
+  <!-- A mint's identity in its own tinted card, as in the original mint details design: the
+       header of the mint details, reviews and write-a-review pages, so all three read as the
+       same mint. The default slot holds page extras such as the QR toggle. -->
+  <div class="mint-header">
+    <q-avatar size="56px" class="q-mb-sm">
       <img v-if="info?.icon_url" :src="info.icon_url" alt="" />
-      <LandmarkIcon v-else :size="24" class="text-app-muted mint-glyph" />
+      <LandmarkIcon v-else :size="36" :stroke-width="1.5" />
     </q-avatar>
-    <div class="mint-header__text">
-      <div class="mint-name ellipsis">{{ info?.name || host }}</div>
-      <div v-if="info?.name" class="mint-url">
-        <bdi dir="ltr">{{ host }}</bdi>
-      </div>
-    </div>
+    <div class="mint-name">{{ displayName }}</div>
+    <slot />
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import { mapState } from "pinia";
 import { Landmark as LandmarkIcon } from "lucide-vue-next";
+import { useMintsStore } from "src/stores/mints";
 
 export default defineComponent({
   name: "MintIdentityHeader",
@@ -27,8 +26,17 @@ export default defineComponent({
     info: { type: Object, required: false },
   },
   computed: {
-    host(): string {
-      return this.url.replace(/^https?:\/\//, "");
+    ...mapState(useMintsStore, ["mints"]),
+    // The same name everywhere: the user's nickname, then the mint's own name, then its host.
+    displayName(): string {
+      const nickname = this.mints.find((m) => m.url === this.url)?.nickname;
+      if (nickname) return nickname;
+      if (this.info?.name) return this.info.name;
+      try {
+        return new URL(this.url).host;
+      } catch {
+        return this.url;
+      }
     },
   },
 });
@@ -36,31 +44,22 @@ export default defineComponent({
 
 <style scoped>
 .mint-header {
-  gap: 12px;
-}
-
-.mint-header__avatar {
-  background: var(--app-tint-strong);
-  flex: none;
-}
-
-.mint-header__text {
-  min-width: 0;
+  align-items: center;
+  background-color: var(--app-tint);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 16px;
+  width: 100%;
 }
 
 .mint-name {
-  font-size: 18px;
-  font-weight: 600;
-  line-height: 24px;
-  text-align: start;
   color: var(--app-text);
-}
-
-.mint-url {
-  color: var(--app-text-muted);
-  font-size: 13px;
-  line-height: 18px;
-  text-align: start;
-  word-break: break-all;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 32px;
+  overflow-wrap: anywhere;
+  text-align: center;
 }
 </style>
