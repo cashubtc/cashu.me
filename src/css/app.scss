@@ -1285,6 +1285,10 @@ body .q-notification .q-notification__actions .q-btn .q-icon {
   min-height: 40px;
   min-width: 40px;
 }
+// Toasts live outside #q-app; in right-to-left they follow the page's direction too.
+html[dir="rtl"] .q-notifications {
+  direction: rtl;
+}
 body .q-notification__progress {
   display: none;
 }
