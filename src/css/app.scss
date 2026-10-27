@@ -1247,19 +1247,19 @@ html[dir="rtl"] .mint-card-more {
 // Toasts (user direction, R46): one raised card for every kind, in every theme and mode.
 // The kind shows in the leading icon's colour; text is ink on the raised surface.
 body .q-notification {
+  align-items: center;
   background: var(--app-raised) !important;
   border: 1px solid var(--app-border-strong);
   border-radius: 14px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
   color: var(--app-text) !important;
   font-size: 14px;
   max-width: min(calc(100vw - 32px), 480px);
   min-height: 52px;
+  min-width: min(calc(100vw - 32px), 320px);
   padding: 6px 6px 6px 14px;
   padding-inline: 14px 6px;
 }
-// Quasar sets a physical right margin on the icon. Material icons force direction: ltr on
-// themselves, so the gap goes on the message's inline start instead, which mirrors.
 body .q-notification .q-notification__icon {
   font-size: 22px;
   margin-left: 0 !important;
@@ -1284,9 +1284,23 @@ body .q-notification .q-notification__caption {
   color: var(--app-text-muted);
   opacity: 1;
 }
+// The close button centres on the message, in one-line and two-line toasts alike.
+body .q-notification .q-notification__wrapper {
+  align-items: center !important;
+}
+body .q-notification .q-notification__actions {
+  align-self: center;
+  padding-bottom: 0 !important;
+  padding-top: 0 !important;
+}
+body .q-notification .q-notification__actions .q-icon {
+  font-size: 20px;
+}
 body .q-notification .q-notification__actions .q-btn,
 body .q-notification .q-notification__actions .q-btn .q-icon {
   color: var(--app-text-muted) !important;
+}
+body .q-notification .q-notification__actions .q-btn {
   min-height: 40px;
   min-width: 40px;
 }

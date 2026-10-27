@@ -66,7 +66,7 @@ async function notify(message: string) {
 function notifyCopied(message?: string) {
   toast(
     "positive",
-    message || (i18n.global.t("global.copy_to_clipboard.success") as string),
+    message || (i18n.global.t("common.copied") as string),
     undefined,
     2000
   );
