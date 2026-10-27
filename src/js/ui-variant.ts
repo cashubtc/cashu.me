@@ -9,6 +9,13 @@ export const UI_VARIANTS = [
   { id: "hairline", label: "Fill + hairline" },
   { id: "elevated", label: "Elevated" },
   { id: "tonal", label: "Tonal, no edges" },
+  { id: "shadcn", label: "shadcn outline" },
+  { id: "shadcn-card", label: "shadcn card" },
+  { id: "muted", label: "Muted fills" },
+  { id: "tonal-ring", label: "Tonal, ring selection" },
+  { id: "underline", label: "Underlined fields" },
+  { id: "separated", label: "Separated lists" },
+  { id: "rounded", label: "Soft rounded" },
 ] as const;
 
 export type UiVariantId = (typeof UI_VARIANTS)[number]["id"];
