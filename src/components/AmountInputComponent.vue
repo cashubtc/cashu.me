@@ -28,7 +28,7 @@
               size="24px"
               class="fiat-icon text-grey-6 cursor-pointer"
               @click="toggleFiatMode"
-              aria-label="Swap amount/fiat input mode"
+              :aria-label="$t('common.swap_input_mode')"
               :aria-pressed="fiatMode ? 'true' : 'false'"
               role="button"
             />
@@ -520,8 +520,8 @@ export default defineComponent({
 }
 .fiat-icon {
   position: absolute;
-  left: 100%;
-  margin-left: -6px;
+  inset-inline-start: 100%;
+  margin-inline-start: -6px;
   padding: 10px;
   box-sizing: content-box;
 }

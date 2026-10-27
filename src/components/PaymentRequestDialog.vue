@@ -27,10 +27,7 @@
               {{ $t("PaymentRequestDialog.payment_request.caption") }}
             </q-item-label>
           </div>
-          <div
-            class="row items-center no-wrap"
-            style="position: absolute; right: 6px"
-          >
+          <div class="row items-center no-wrap sheet-header-actions">
             <q-btn
               flat
               dense
@@ -160,7 +157,7 @@
               <!-- New request button -->
               <div class="row justify-center q-pt-lg q-pb-md">
                 <q-btn flat size="md" rounded @click="newRequest">
-                  <q-icon name="refresh" class="q-pr-sm" size="xs" />
+                  <q-icon name="refresh" class="q-mr-sm" size="xs" />
                   {{ $t("PaymentRequestDialog.actions.new_request.label") }}
                 </q-btn>
               </div>
@@ -202,7 +199,6 @@ import VueQrcode from "@chenfengyuan/vue-qrcode";
 import { usePRStore } from "src/stores/payment-request";
 import { useMintsStore } from "../stores/mints";
 import { getShortUrl } from "src/js/wallet-helpers";
-import { useUiStore } from "../stores/ui";
 import ToggleUnit from "./ToggleUnit.vue";
 import PaymentRequestPayments from "./PaymentRequestPayments.vue";
 // type hint for global mixin
@@ -327,7 +323,7 @@ export default defineComponent({
         this.amountLabel = this.amountLabelDefault;
       } else {
         this.paymentRequestAmount = amount * this.activeUnitCurrencyMultiplyer;
-        this.amountLabel = useUiStore().formatCurrency(
+        this.amountLabel = this.formatCurrency(
           amount * this.activeUnitCurrencyMultiplyer,
           this.activeUnit
         );

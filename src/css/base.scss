@@ -135,7 +135,11 @@ body.body--dark {
   --app-tint-strong: rgba(255, 255, 255, 0.1);
   --app-border-strong: rgba(255, 255, 255, 0.28);
   --q-positive: #4ade80;
-  --q-negative: #ffa8a8;
+  // A clear red, not a pastel: destructive actions should read as danger (was #ffa8a8).
+  --q-negative: #ff6b6b;
+  // Destructive text on raised surfaces: lifted toward white so it clears 4.5:1 on the
+  // lighter tinted surfaces (flamingo, autumn); fills and icons keep the full red.
+  --app-negative-text: color-mix(in srgb, #ff6b6b 60%, #fff);
 }
 body.body--light {
   // Onboarding is designed dark (its slides use white text) in every mode.
@@ -150,6 +154,7 @@ body.body--light {
   --app-border-strong: rgba(0, 0, 0, 0.42);
   --q-positive: #15803d;
   --q-negative: #c10015;
+  --app-negative-text: #c10015;
 }
 
 body.body--dark[data-theme] {
@@ -249,12 +254,12 @@ body.body--dark .q-field--error {
   th:first-child,
   td:first-child,
   .q-table__bottom {
-    padding-left: 6px !important;
+    padding-inline-start: 6px !important;
   }
   th:last-child,
   td:last-child,
   .q-table__bottom {
-    padding-right: 6px !important;
+    padding-inline-end: 6px !important;
   }
 }
 

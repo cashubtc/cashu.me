@@ -78,16 +78,18 @@
           </div>
         </div>
         <!-- WoT Filter and Total Ratings Count -->
-        <div class="col-12 row items-center justify-end" style="gap: 6px">
-          <div class="row items-center" style="gap: 6px">
-            <span class="text-caption text-grey-6" style="font-size: 0.7rem">
-              {{ $t("Settings.web_of_trust.title") }}
-            </span>
-            <q-toggle v-model="filterByWoT" size="xs" color="primary" dense />
-          </div>
-          <div class="text-body2 text-grey-5" style="font-weight: 500">
-            {{ totalReviews }} {{ $t("MintRatings.ratings") }}
-          </div>
+        <!-- The count is a muted caption; the filter uses the app's standard switch. -->
+        <div class="col-12 row items-center justify-between ratings-filter-row">
+          <span class="ratings-count">
+            {{ $t("MintRatings.ratings", totalReviews) }}
+          </span>
+          <q-toggle
+            v-model="filterByWoT"
+            color="primary"
+            left-label
+            :label="$t('Settings.web_of_trust.title')"
+            class="ratings-wot-toggle"
+          />
         </div>
       </div>
 
@@ -95,29 +97,30 @@
       <!-- While the first fetch runs, a skeleton of the summary and review rows, so the
            page never claims "No reviews yet" before it knows. -->
       <div v-else-if="fetchingReviews" class="q-mb-lg" aria-busy="true">
-        <div class="row no-wrap items-center q-mb-lg">
-          <div class="q-mr-lg">
-            <q-skeleton type="text" width="64px" height="56px" />
-            <q-skeleton type="text" width="48px" />
+        <!-- Same rows and heights as the loaded summary: score and bars, then the count and
+             trust switch. The button, sort row and reviews below render their own skeletons. -->
+        <div class="row items-start q-mb-sm" style="gap: 24px">
+          <div class="column items-center" style="min-width: 100px">
+            <q-skeleton type="rect" width="64px" height="60px" />
+            <q-skeleton
+              type="rect"
+              width="48px"
+              height="16px"
+              style="margin-top: 8px"
+            />
           </div>
-          <div class="col">
+          <div class="col column" style="gap: 6px">
             <q-skeleton
               v-for="n in 5"
               :key="'bar' + n"
-              type="text"
-              height="10px"
-              class="q-mb-xs"
+              type="rect"
+              height="12px"
             />
           </div>
         </div>
-        <q-skeleton type="rect" height="44px" class="q-mb-lg rounded-borders" />
-        <div v-for="n in 3" :key="n" class="row no-wrap q-mb-lg">
-          <q-skeleton type="QAvatar" size="36px" class="q-mr-md" />
-          <div class="col">
-            <q-skeleton type="text" width="40%" />
-            <q-skeleton type="text" width="90%" />
-            <q-skeleton type="text" width="70%" />
-          </div>
+        <div class="row items-center justify-between ratings-filter-row">
+          <q-skeleton type="rect" width="72px" height="16px" />
+          <q-skeleton type="rect" width="136px" height="40px" />
         </div>
       </div>
       <div v-else class="q-mb-lg">
@@ -151,11 +154,18 @@
 
       <!-- Action Buttons Row -->
       <div
-        v-if="allowCreateReview && hasAnyReviews"
+        v-if="allowCreateReview && (hasAnyReviews || fetchingReviews)"
         class="row q-mt-md q-mb-md justify-center"
         style="gap: 12px"
       >
+        <q-skeleton
+          v-if="!hasAnyReviews"
+          type="rect"
+          height="36px"
+          style="width: 100%; border-radius: 18px"
+        />
         <q-btn
+          v-else
           color="primary"
           unelevated
           rounded
@@ -168,11 +178,13 @@
       </div>
     </q-card-section>
 
-    <q-separator v-if="hasAnyReviews" />
-
     <!-- Sort Section -->
-    <q-card-section v-if="hasAnyReviews" class="q-py-sm">
+    <q-card-section v-if="hasAnyReviews || fetchingReviews" class="q-py-sm">
+      <div v-if="!hasAnyReviews" class="sort-trigger row items-center">
+        <q-skeleton type="rect" width="128px" height="20px" />
+      </div>
       <div
+        v-else
         class="sort-trigger row items-center justify-between"
         @click="showSortSheet = true"
       >
@@ -187,10 +199,32 @@
       </div>
     </q-card-section>
 
-    <q-separator v-if="hasAnyReviews" />
+    <q-separator v-if="hasAnyReviews || fetchingReviews" />
 
-    <q-card-section v-if="hasAnyReviews" class="q-px-none">
-      <div class="column">
+    <q-card-section v-if="hasAnyReviews || fetchingReviews" class="q-px-none">
+      <div v-if="!hasAnyReviews" class="column" aria-hidden="true">
+        <div v-for="n in 2" :key="n" class="review-item">
+          <div class="row items-start" style="gap: 12px">
+            <q-skeleton type="QAvatar" size="40px" />
+            <div class="col">
+              <q-skeleton type="rect" width="40%" height="20px" />
+              <q-skeleton
+                type="rect"
+                width="30%"
+                height="14px"
+                style="margin-top: 8px"
+              />
+              <q-skeleton
+                type="rect"
+                width="90%"
+                height="14px"
+                style="margin-top: 12px"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div v-else class="column">
         <div
           v-for="r in paged"
           :key="r.eventId"
@@ -241,19 +275,20 @@
                   size="14px"
                   :color="wotColor(wotHop(r.pubkey))"
                 >
-                  <q-tooltip
-                    >In your web of trust (hop
-                    {{ wotHop(r.pubkey) }})</q-tooltip
-                  >
+                  <q-tooltip>{{
+                    $t("MintRatings.web_of_trust_hop", {
+                      hop: wotHop(r.pubkey),
+                    })
+                  }}</q-tooltip>
                 </q-icon>
                 <q-icon
                   name="content_copy"
                   size="14px"
                   class="cursor-pointer text-grey-7"
                   @click="copyNpub(r.pubkey)"
-                  style="margin-left: 4px"
+                  style="margin-inline-start: 4px"
                 >
-                  <q-tooltip>Copy npub</q-tooltip>
+                  <q-tooltip>{{ $t("common.copy_npub") }}</q-tooltip>
                 </q-icon>
               </div>
 
@@ -296,30 +331,29 @@
           </div>
         </div>
 
-        <div
-          v-if="totalPages > 1"
-          class="row justify-between items-center q-mt-sm"
-        >
-          <q-select
-            dense
-            class="q-ml-sm"
-            color="primary"
-            v-model="rowsPerPage"
-            :options="rowsPerPageOptions"
-            emit-value
-            map-options
-            :label="$t('MintRatings.rows')"
-            style="width: 100px"
-          />
+        <!-- One centred pager with its range count built in, like the history pager; hidden
+             when everything fits on one page. -->
+        <div v-if="totalPages > 1" class="column items-center q-mt-md">
           <q-pagination
             v-model="page"
             :max="totalPages"
-            color="primary"
-            max-pages="6"
-            boundary-numbers
+            :max-pages="5"
             direction-links
-            rounded
+            round
+            flat
+            active-design="unelevated"
+            active-color="primary"
+            size="md"
           />
+          <div class="ratings-range q-mt-xs">
+            {{
+              $t("MintRatings.range", {
+                from: (page - 1) * rowsPerPage + 1,
+                to: Math.min(page * rowsPerPage, sorted.length),
+                total: sorted.length,
+              })
+            }}
+          </div>
         </div>
       </div>
     </q-card-section>
@@ -388,7 +422,9 @@ export default defineComponent({
     },
     formatDate(ts: number) {
       try {
-        return new Date(ts * 1000).toLocaleString();
+        return new Date(ts * 1000).toLocaleString(this.$i18n.locale, {
+          numberingSystem: "latn",
+        });
       } catch {
         return "";
       }
@@ -428,7 +464,7 @@ export default defineComponent({
         // @ts-ignore
         this.$q?.notify &&
           this.$q.notify({
-            message: "Copied",
+            message: this.$t("common.copied"),
             color: "positive",
             position: "top",
             timeout: 800,
@@ -961,7 +997,24 @@ body[data-theme] .q-card--dark.mint-ratings-root {
 .own-review-badge {
   position: absolute;
   top: -2px;
-  right: 12px;
+  inset-inline-end: 12px;
   z-index: 1;
+}
+
+.ratings-filter-row {
+  margin-top: 8px;
+}
+.ratings-count {
+  color: var(--app-text-muted);
+  font-size: 14px;
+}
+.ratings-wot-toggle {
+  color: var(--app-text-muted);
+  font-size: 14px;
+}
+.ratings-range {
+  color: var(--app-text-muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
 }
 </style>

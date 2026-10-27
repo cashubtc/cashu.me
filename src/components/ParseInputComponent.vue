@@ -180,7 +180,7 @@ export default defineComponent({
 
 .paste-text-btn {
   position: absolute;
-  right: 20px;
+  inset-inline-end: 20px;
   top: 16px;
   font-size: 16px;
   font-weight: 500;

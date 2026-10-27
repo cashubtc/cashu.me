@@ -40,10 +40,7 @@
               </q-item-label>
             </div>
           </div>
-          <div
-            class="row items-center no-wrap sheet-header-actions"
-            style="position: absolute; right: 6px"
-          >
+          <div class="row items-center no-wrap sheet-header-actions">
             <q-btn
               flat
               round
@@ -181,7 +178,7 @@
                           class="onchain-fee-options q-mt-lg"
                         >
                           <div class="text-subtitle2 text-grey-6 q-mb-sm">
-                            Choose confirmation speed
+                            {{ $t("PayInvoiceDialog.onchain.choose_speed") }}
                           </div>
                           <div class="q-gutter-y-sm">
                             <div
@@ -197,15 +194,19 @@
                               <div class="row items-center no-wrap">
                                 <div class="col text-left">
                                   <div class="text-weight-medium">
-                                    {{ option.estimated_blocks }}
                                     {{
-                                      option.estimated_blocks === 1
-                                        ? "block"
-                                        : "blocks"
+                                      $t(
+                                        "PayInvoiceDialog.onchain.blocks",
+                                        option.estimated_blocks
+                                      )
                                     }}
                                   </div>
                                   <div class="text-caption text-grey-6">
-                                    Estimated confirmation
+                                    {{
+                                      $t(
+                                        "PayInvoiceDialog.onchain.estimated_confirmation"
+                                      )
+                                    }}
                                   </div>
                                 </div>
                                 <div class="text-right q-mr-sm">
@@ -219,7 +220,9 @@
                                     }}
                                   </div>
                                   <div class="text-caption text-grey-6">
-                                    fee reserve
+                                    {{
+                                      $t("PayInvoiceDialog.onchain.fee_reserve")
+                                    }}
                                   </div>
                                 </div>
                                 <q-icon
@@ -579,7 +582,7 @@
                   color="primary"
                   rounded
                   @click="openMultinutDialog"
-                  label="Pay with multiple mints"
+                  :label="$t('PayInvoiceDialog.multinut.label')"
                 />
               </template>
               <!-- Balance too low -->
@@ -645,7 +648,7 @@
                 "
                 :loading="payInvoiceData.blocking"
               >
-                Quote
+                {{ $t("PayInvoiceDialog.quote.label") }}
                 <template v-slot:loading>
                   <q-spinner />
                 </template>
@@ -1008,7 +1011,7 @@ export default defineComponent({
         this.payPaymentMethod === PaymentMethod.Onchain ||
         this.payInvoiceData.paymentMethod === PaymentMethod.Onchain
       ) {
-        return "Pay on-chain";
+        return this.$t("PayInvoiceDialog.onchain.title") as string;
       }
       if (this.payPaymentMethod === PaymentMethod.Bolt12) {
         return this.$t("PayInvoiceDialog.input_data.title_bolt12");
@@ -1017,7 +1020,9 @@ export default defineComponent({
     },
     parseInputPlaceholder: function (): string {
       if (this.payInvoiceData.paymentMethod === PaymentMethod.Onchain) {
-        return "Bitcoin address";
+        return this.$t(
+          "PayInvoiceDialog.onchain.address_placeholder"
+        ) as string;
       }
       return this.$t("ParseInputComponent.placeholder.pay");
     },
@@ -1171,9 +1176,6 @@ export default defineComponent({
     ]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
-    formatCurrency(value: number, currency: string, showBalance = false) {
-      return useUiStore().formatCurrency(value, currency, showBalance);
-    },
     canPay: function () {
       if (!this.payInvoiceData.invoice) return false;
       return (
@@ -1400,7 +1402,7 @@ export default defineComponent({
 .floating-button {
   position: absolute;
   top: 10px;
-  right: 0px;
+  inset-inline-end: 0px;
   z-index: 100;
   padding: 1px;
   background-color: var(--q-primary);

@@ -468,7 +468,7 @@ export default defineComponent({
 
 /* Mint item styling - specific to NostrMintRestore */
 .mint-item {
-  text-align: left;
+  text-align: start;
 }
 
 .mint-item:hover {
@@ -489,6 +489,6 @@ export default defineComponent({
 
 /* Ensure all text aligns to the left */
 .text-left {
-  text-align: left !important;
+  text-align: start !important;
 }
 </style>

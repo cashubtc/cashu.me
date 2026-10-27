@@ -45,7 +45,7 @@ export default defineComponent({
 .not-found__close {
   position: absolute;
   top: 3px; /* centre y 25, the shared header slot (measured on every other page) */
-  left: 6px;
+  inset-inline-start: 6px;
   width: 44px;
   height: 44px;
   color: var(--app-text);

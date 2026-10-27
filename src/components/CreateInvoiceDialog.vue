@@ -31,17 +31,14 @@
             >
               {{
                 isOnchain
-                  ? "Receive on-chain"
+                  ? $t("CreateInvoiceDialog.onchain_title")
                   : isBolt12 && !showNpubCashPreview
-                  ? "Receive Bolt12"
+                  ? $t("CreateInvoiceDialog.bolt12_title")
                   : $t("InvoiceDetailDialog.title")
               }}
             </q-item-label>
           </div>
-          <div
-            class="row items-center no-wrap sheet-header-actions"
-            style="position: absolute; right: 6px"
-          >
+          <div class="row items-center no-wrap sheet-header-actions">
             <q-btn
               flat
               round
@@ -101,9 +98,11 @@
                   class="mint-error-warning column items-center text-center q-pa-lg"
                 >
                   <q-icon name="warning" size="42px" color="warning" />
-                  <div class="mint-error-title q-mt-md">Mint unreachable</div>
+                  <div class="mint-error-title q-mt-md">
+                    {{ $t("CreateInvoiceDialog.mint_unreachable") }}
+                  </div>
                   <div class="mint-error-text q-mt-sm">
-                    Reconnect to the mint to receive payments.
+                    {{ $t("CreateInvoiceDialog.mint_unreachable_text") }}
                   </div>
                   <q-btn
                     flat
@@ -112,7 +111,7 @@
                     color="primary"
                     icon="refresh"
                     class="q-mt-md"
-                    label="Reconnect mint"
+                    :label="$t('CreateInvoiceDialog.reconnect_mint')"
                     :loading="refreshingMint"
                     @click="refreshActiveMint"
                   />
@@ -163,7 +162,9 @@
               class="column items-center justify-center q-pa-xl q-my-auto"
             >
               <q-spinner size="48px" color="primary" />
-              <div class="text-grey-6 q-mt-md">Checking address...</div>
+              <div class="text-grey-6 q-mt-md">
+                {{ $t("CreateInvoiceDialog.checking_address") }}
+              </div>
             </div>
             <AmountInputComponent
               v-else-if="showAmountInput"
@@ -233,7 +234,7 @@
                 color="primary"
                 size="lg"
                 @click="bolt12AddAmount = true"
-                label="Add amount"
+                :label="$t('CreateInvoiceDialog.add_amount')"
               />
             </div>
           </div>
@@ -308,6 +309,7 @@ import {
   onchainDepositQrValue,
 } from "src/js/onchain";
 import { notifyError } from "src/js/notify";
+import { i18n } from "src/boot/i18n";
 import { useNpubCashStore } from "src/stores/npubcash";
 import { lightningAddressToLnurl } from "src/js/lnurl";
 
@@ -497,7 +499,9 @@ export default defineComponent({
           "mint",
           this.activeUnit
         ),
-        this.bip177BitcoinSymbol
+        this.bip177BitcoinSymbol,
+        (key: string, named: Record<string, string>) =>
+          i18n.global.t(key, named)
       );
     },
     showOnchainAmountWarning(): boolean {
@@ -525,10 +529,18 @@ export default defineComponent({
     },
     createButtonLabel(): string {
       if (this.isBolt12) {
-        return this.showReusableQuote ? "New Offer" : "Create Offer";
+        return i18n.global.t(
+          this.showReusableQuote
+            ? "CreateInvoiceDialog.new_offer"
+            : "CreateInvoiceDialog.create_offer"
+        );
       }
       if (this.isOnchain) {
-        return this.showReusableQuote ? "Create new address" : "Create address";
+        return i18n.global.t(
+          this.showReusableQuote
+            ? "CreateInvoiceDialog.create_new_address"
+            : "CreateInvoiceDialog.create_address"
+        );
       }
       return this.$t("InvoiceDetailDialog.actions.create.label") as string;
     },
@@ -738,7 +750,7 @@ export default defineComponent({
             )
           ) {
             notifyError(
-              "This mint does not support on-chain deposits in this unit."
+              i18n.global.t("CreateInvoiceDialog.onchain_unsupported")
             );
             return;
           }
@@ -751,7 +763,9 @@ export default defineComponent({
               "mint",
               wallet.unit
             ),
-            this.bip177BitcoinSymbol
+            this.bip177BitcoinSymbol,
+            (key: string, named: Record<string, string>) =>
+              i18n.global.t(key, named)
           );
           if (error) {
             notifyError(error);

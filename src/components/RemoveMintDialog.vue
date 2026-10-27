@@ -71,7 +71,6 @@
 <script lang="ts">
 import { defineComponent, computed } from "vue";
 import { MintClass } from "src/stores/mints";
-import { useUiStore } from "src/stores/ui";
 import { useMintsStore } from "src/stores/mints";
 
 export default defineComponent({
@@ -108,7 +107,11 @@ export default defineComponent({
       return new MintClass(mint);
     };
     const formatCurrency = (amount, unit) => {
-      return useUiStore().formatCurrency(amount, unit);
+      return window.windowMixin.methods.formatCurrency.call(
+        window.windowMixin.methods,
+        amount,
+        unit
+      );
     };
 
     return {

@@ -18,24 +18,33 @@
           @click="discover"
           class="discover-btn full-width"
         >
-          <q-icon name="search" size="20px" class="q-mr-sm" />
+          <q-icon name="search" size="20px" class="discover-btn__icon" />
           <span>{{ $t("MintSettings.discover.actions.discover.label") }}</span>
           <template v-slot:loading>
-            <q-spinner-dots size="20px" class="on-left" />
+            <q-spinner-dots size="20px" class="discover-btn__icon" />
             {{ $t("MintSettings.discover.actions.discover.in_progress") }}
           </template>
         </q-btn>
       </div>
       <div
         v-if="discovering && discoverList.length === 0"
-        class="discover-skeleton q-mt-md"
+        class="discover-skeleton"
       >
-        <!-- Reserves the "Found N mints" heading and note, so cards land where they will stay. -->
-        <div class="q-mb-md" aria-hidden="true">
-          <q-skeleton type="text" width="30%" />
-          <q-skeleton type="text" width="85%" />
-          <q-skeleton type="text" width="60%" />
-        </div>
+        <!-- Same list, item and gap structure as the loaded results below, so the heading,
+             note and cards land exactly where they will stay. -->
+        <q-list padding aria-hidden="true">
+          <q-item class="q-px-none">
+            <q-item-section>
+              <q-item-label class="discover-count">
+                <q-skeleton type="text" width="30%" />
+              </q-item-label>
+              <q-item-label caption>
+                <q-skeleton type="text" width="90%" />
+                <q-skeleton type="text" width="55%" />
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
         <div
           class="discover-skeleton__row"
           v-for="n in 3"
@@ -324,6 +333,10 @@ export default defineComponent({
   border: 1px solid var(--app-border);
 }
 
+.discover-skeleton .q-list + .discover-skeleton__row {
+  margin-top: 8px; /* the loaded list's q-pt-sm */
+}
+
 .discover-skeleton__label {
   font-size: 13px;
   color: var(--app-text-muted);
@@ -331,9 +344,19 @@ export default defineComponent({
   margin-top: 8px;
 }
 
+/* One exact height in every state, and a spinner the size of the search icon, so pressing
+   Discover never shifts the page. */
 .discover-btn {
+  height: 48px;
   min-height: 48px;
   width: 100%;
+}
+.discover-btn__icon {
+  margin-inline-end: 8px;
+}
+.discover-btn :deep(.q-btn__content) {
+  flex-wrap: nowrap;
+  line-height: 20px;
 }
 
 .mint-card {
@@ -360,14 +383,14 @@ export default defineComponent({
 
 /* A row still fetching its mint info reads as loading, not disabled. */
 .mint-card.dimmed {
-  opacity: 0.8;
+  opacity: 1;
 }
 
 /* Per-row loading sits in the trailing slot, clear of the mint name and URL. */
 .spinner-overlay {
   position: absolute;
   top: 50%;
-  right: 16px;
+  inset-inline-end: 16px;
   transform: translateY(-50%);
   z-index: 10;
   display: flex;

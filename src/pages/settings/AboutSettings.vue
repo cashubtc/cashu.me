@@ -46,7 +46,9 @@
           <q-item-label class="text-weight-medium">{{
             link.title
           }}</q-item-label>
-          <q-item-label caption>{{ link.caption }}</q-item-label>
+          <q-item-label caption
+            ><bdi>{{ link.caption }}</bdi></q-item-label
+          >
         </q-item-section>
         <q-item-section side>
           <ExternalLinkIcon :size="18" class="settings-menu-chevron" />

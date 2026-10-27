@@ -4,7 +4,9 @@
       <q-icon name="warning" size="24px" class="warning-icon" />
       <div class="warning-text-container">
         <div class="warning-header">
-          <div class="warning-title">Auditor Warnings</div>
+          <div class="warning-title">
+            {{ $t("MintAuditInfo.warnings_title") }}
+          </div>
         </div>
         <div class="warning-messages">
           <ul class="warning-list">
@@ -24,6 +26,9 @@
 
 <script lang="ts">
 import { defineComponent, computed } from "vue";
+import { i18n } from "src/boot/i18n";
+
+const t = i18n.global.t;
 
 interface MintRead {
   id: number;
@@ -109,28 +114,36 @@ export default defineComponent({
 
       // Check mint state
       if (props.mint.state === "WARN" || props.mint.state === "ERROR") {
-        const baseMessage = "The last swap attempt has failed.";
+        const baseMessage = t("MintAuditInfo.warnings.last_swap_failed");
 
         if (recentSwaps.length > 0) {
-          const successMessage = `${successfulRecentSwaps.length} of ${recentSwaps.length} swaps in the last ${props.recentDaysThreshold} days succeeded.`;
+          const successMessage = t("MintAuditInfo.warnings.recent_success", {
+            successful: successfulRecentSwaps.length,
+            total: recentSwaps.length,
+            days: props.recentDaysThreshold,
+          });
 
           // Add "However, " prefix if success rate is above threshold
           if (recentSuccessRate >= props.successRateThreshold) {
             messages.push(
-              `${baseMessage} However, ${successMessage} This mint seems reliable, failures might be due to the receiving mint.`
+              t("MintAuditInfo.warnings.reliable", {
+                base: baseMessage,
+                success: successMessage,
+              })
             );
           } else {
             messages.push(
-              `${baseMessage} Only ${successMessage} This mint might be unreliable.`
+              t("MintAuditInfo.warnings.unreliable", {
+                base: baseMessage,
+                success: successMessage,
+              })
             );
           }
         } else {
           messages.push(baseMessage);
         }
       } else if (props.mint.state === "UNKNOWN") {
-        messages.push(
-          "The auditor was not able to determine the quality of this mint yet."
-        );
+        messages.push(t("MintAuditInfo.warnings.unknown"));
       } else if (props.mint.state === "OK") {
         // Add warnings for OK state mints with not enough successful swaps or low success rate
         const warningsNeeded = [];
@@ -138,11 +151,14 @@ export default defineComponent({
         // Check for not enough successful swaps
         if (successfulRecentSwaps.length < props.requiredSuccessfulSwaps) {
           warningsNeeded.push(
-            `The auditor does not have enough recent data on this mint. There were only ${
+            t(
+              "MintAuditInfo.warnings.not_enough_data",
+              {
+                count: successfulRecentSwaps.length,
+                days: props.recentDaysThreshold,
+              },
               successfulRecentSwaps.length
-            } successful ${
-              successfulRecentSwaps.length === 1 ? "swap" : "swaps"
-            } in the last ${props.recentDaysThreshold} days.`
+            )
           );
         }
 
@@ -152,11 +168,11 @@ export default defineComponent({
           recentSuccessRate < props.successRateThreshold
         ) {
           warningsNeeded.push(
-            `In the last ${
-              props.recentDaysThreshold
-            } days, this mint had a success rate of ${Math.round(
-              recentSuccessRate
-            )}%, below the recommended ${props.successRateThreshold}%.`
+            t("MintAuditInfo.warnings.low_success", {
+              days: props.recentDaysThreshold,
+              rate: Math.round(recentSuccessRate),
+              threshold: props.successRateThreshold,
+            })
           );
         }
 
@@ -178,10 +194,7 @@ export default defineComponent({
         if (daysDifference > props.inactiveThresholdDays) {
           const days = Math.floor(daysDifference);
 
-          const baseMessage = `This mint had no swaps for ${days} ${
-            days === 1 ? "day" : "days"
-          }. It might be unreachable.`;
-          messages.push(baseMessage);
+          messages.push(t("MintAuditInfo.warnings.inactive", { days }, days));
         }
 
         // Check if mint is slow
@@ -198,15 +211,13 @@ export default defineComponent({
           if (averageTimeMs > props.slowMintThresholdMs) {
             const averageTimeSeconds = (averageTimeMs / 1000).toFixed(1);
             messages.push(
-              `This mint is slow. Payments from this mint took ${averageTimeSeconds} seconds on average.`
+              t("MintAuditInfo.warnings.slow", { seconds: averageTimeSeconds })
             );
           }
         }
       } else if (props.swaps.length > 0) {
         // If there are swaps but none are successful
-        messages.push(
-          "No successful swaps recorded for this mint. It might be unreachable."
-        );
+        messages.push(t("MintAuditInfo.warnings.no_successful"));
       }
 
       return messages;
@@ -234,7 +245,7 @@ export default defineComponent({
   align-items: flex-start;
   justify-content: flex-start;
   padding: 16px;
-  text-align: left;
+  text-align: start;
   font-size: 14px;
   color: #f18408;
   margin-bottom: 16px;
@@ -284,7 +295,7 @@ export default defineComponent({
 
 .warning-list {
   margin: 4px 0 0 0;
-  padding-left: 20px;
+  padding-inline-start: 20px;
 }
 
 .warning-message {

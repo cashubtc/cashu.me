@@ -40,11 +40,9 @@
         </q-item>
         <q-item class="settings-control-item">
           <q-item-section>
-            <q-item-label caption class="q-mb-sm">{{
-              $t("Settings.lightning_address.mint.label")
-            }}</q-item-label>
             <ChooseMint
               v-model="mintUrl"
+              :label="$t('Settings.lightning_address.mint.label')"
               :title="$t('Settings.lightning_address.mint.choose_title')"
               :placeholder="
                 $t('Settings.lightning_address.mint.choose_placeholder')
@@ -66,8 +64,8 @@
               <q-input
                 outlined
                 v-model="serverUrlInput"
-                label="npub.cash hostname"
-                hint="Enter a hostname or HTTPS URL"
+                :label="$t('Settings.lightning_address.server_url.label')"
+                :hint="$t('Settings.lightning_address.server_url.hint')"
                 placeholder="https://npub.cash"
                 dense
                 rounded
@@ -178,7 +176,7 @@ export default defineComponent({
         this.serverUrlError =
           error instanceof Error
             ? error.message
-            : "Enter a valid HTTPS server URL";
+            : this.$t("Settings.lightning_address.server_url.invalid");
       }
     },
   },

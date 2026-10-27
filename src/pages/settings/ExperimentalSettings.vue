@@ -63,6 +63,7 @@
               v-model="auditorUrl"
               :label="$t('Settings.experimental.auditor.url_label')"
               color="primary"
+              class="url-input"
               outlined
               dense
               rounded
@@ -87,6 +88,7 @@
               v-model="auditorApiUrl"
               :label="$t('Settings.experimental.auditor.api_url_label')"
               color="primary"
+              class="url-input"
               outlined
               dense
               rounded

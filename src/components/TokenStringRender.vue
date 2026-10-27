@@ -21,7 +21,6 @@ import { computed, defineComponent, onBeforeUnmount, ref, watch } from "vue";
 import token from "src/js/token";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useMintsStore } from "src/stores/mints";
-import { useUiStore } from "src/stores/ui";
 
 export default defineComponent({
   name: "TokenStringRender",
@@ -38,7 +37,6 @@ export default defineComponent({
   },
   setup(props) {
     const mintsStore = useMintsStore();
-    const uiStore = useUiStore();
     const displayedToken = ref("");
 
     // Decode token and extract data
@@ -90,7 +88,12 @@ export default defineComponent({
 
     const displayAmount = computed(() => {
       if (!tokenAmount.value || !tokenUnit.value) return "";
-      return uiStore.formatCurrency(tokenAmount.value, tokenUnit.value, true);
+      return window.windowMixin.methods.formatCurrency.call(
+        window.windowMixin.methods,
+        tokenAmount.value,
+        tokenUnit.value,
+        true
+      );
     });
 
     // Animation for truncated token string

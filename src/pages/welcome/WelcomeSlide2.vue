@@ -356,12 +356,12 @@ export default {
   line-height: 1.5;
   color: rgba(255, 255, 255, 0.8);
   margin: 0 0 20px 0;
-  text-align: left;
+  text-align: start;
 }
 
 .platform-section {
   margin-bottom: 16px;
-  text-align: left;
+  text-align: start;
 }
 
 .platform-title {
@@ -398,7 +398,7 @@ export default {
   line-height: 1.4;
   color: rgba(255, 255, 255, 0.8);
   margin: 16px 0 0 0;
-  text-align: left;
+  text-align: start;
 }
 
 .success-message {

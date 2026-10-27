@@ -3,7 +3,7 @@
     :title="$t('WelcomeSlide4.title')"
     :caption="$t('WelcomeSlide4.actions.more.label')"
   >
-    <div class="settings-card terms-body">
+    <div class="settings-card terms-body" dir="ltr" lang="en">
       <p><strong>Last Updated: 20.12.2024</strong></p>
       <p>
         <strong>
@@ -341,6 +341,7 @@ export default {
 <style scoped>
 .terms-body {
   padding: 16px;
+  text-align: left; /* the English text keeps its own alignment inside an rtl page */
 }
 
 .terms-body p {

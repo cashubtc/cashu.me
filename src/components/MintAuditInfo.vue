@@ -2,7 +2,7 @@
   <div class="q-mt-lg q-mb-lg">
     <div class="text-caption q-mx-sm" v-if="loading">
       <q-spinner color="grey" size="20px" class="q-mr-sm" />
-      Loading audit info...
+      {{ $t("MintAuditInfo.loading") }}
     </div>
     <div v-else-if="mintNotAudited" class="q-mx-sm">
       <q-icon
@@ -12,25 +12,28 @@
         class="q-mr-sm"
         style="padding-bottom: 2px; margin-bottom: 2px"
       />
-      <span class="text-bold">This mint has not been audited yet.</span>
+      <span class="text-bold">{{ $t("MintAuditInfo.not_audited") }}</span>
       <br />
-      <span class="text-caption">
-        To learn more about the auditor or support a future audit, visit
-        <a :href="auditUrl">audit.8333.space</a> or click
-        <span
-          class="text-bold cursor-pointer text-primary"
-          @click="getAuditorPaymentRequestsAndHandle"
-        >
-          here
-        </span>
-        to donate ecash and help initiate an audit of this mint.
-      </span>
+      <i18n-t
+        keypath="MintAuditInfo.not_audited_text"
+        tag="span"
+        class="text-caption"
+      >
+        <template #link>
+          <a :href="auditUrl">audit.8333.space</a>
+        </template>
+        <template #here>
+          <span
+            class="text-bold cursor-pointer text-primary"
+            @click="getAuditorPaymentRequestsAndHandle"
+            >{{ $t("MintAuditInfo.here") }}</span
+          >
+        </template>
+      </i18n-t>
     </div>
     <div v-else-if="error" class="text-app-muted">
       {{
-        /fetch|network/i.test(error)
-          ? "Audit info is unavailable right now."
-          : error
+        /fetch|network/i.test(error) ? $t("MintAuditInfo.unavailable") : error
       }}
     </div>
     <div v-else-if="mintInfo" class="mint-info">
@@ -50,19 +53,30 @@
           <!-- Success Rate Card -->
           <div class="col-6 stat-card">
             <div class="q-pa-md">
-              <div class="text-subtitle1">Success Rate</div>
+              <div class="text-subtitle1">
+                {{ $t("MintAuditInfo.success_rate") }}
+              </div>
               <div class="text-h5">{{ successRate }}%</div>
               <div class="text-caption">
-                {{ successfulSwaps }} of {{ mintSwaps.length }} swaps
+                {{
+                  $t("MintAuditInfo.swaps_count", {
+                    successful: successfulSwaps,
+                    total: mintSwaps.length,
+                  })
+                }}
               </div>
             </div>
           </div>
           <!-- Average Time Card -->
           <div class="col-6 stat-card q-ml-md">
             <div class="q-pa-md">
-              <div class="text-subtitle1">Average Time</div>
+              <div class="text-subtitle1">
+                {{ $t("MintAuditInfo.average_time") }}
+              </div>
               <div class="text-h5">{{ formatTime(averageTime) }}</div>
-              <div class="text-caption">For successful swaps</div>
+              <div class="text-caption">
+                {{ $t("MintAuditInfo.average_time_caption") }}
+              </div>
             </div>
           </div>
         </div>
@@ -75,29 +89,35 @@
 
       <!-- Disclaimer -->
       <div class="q-mt-md text-grey-6 text-caption">
-        Audit data is provided by independent third parties to help assess a
-        mint’s reliability over time. However, these results are informational
-        only and do not guarantee the safety, solvency, or trustworthiness of
-        any mint. Always conduct your own research and ensure you trust the mint
-        operator before using their services.
+        {{ $t("MintAuditInfo.disclaimer") }}
       </div>
       <!-- Donate ecash to the auditor -->
-      <div class="q-mt-md text-grey-6 text-caption">
-        Audit information is made available by
-        <a :href="auditUrl">{{ auditUrlShort }}</a
-        >. The current balance held by the auditor for this mint is
-        <span class="text-bold">{{ mintInfo.balance }} sats</span>, with a total
-        of
-        <span class="text-bold">{{ mintInfo.sum_donations }} sats</span>
-        donated so far. To support continued auditing, you can
-        <span
-          class="text-bold cursor-pointer text-primary"
-          @click="getAuditorPaymentRequestsAndHandle"
-        >
-          press here
-        </span>
-        to donate ecash to the auditor.
-      </div>
+      <i18n-t
+        keypath="MintAuditInfo.donate_text"
+        tag="div"
+        class="q-mt-md text-grey-6 text-caption"
+      >
+        <template #link>
+          <a :href="auditUrl">{{ auditUrlShort }}</a>
+        </template>
+        <template #balance>
+          <span class="text-bold">{{
+            $t("MintAuditInfo.sats_amount", { amount: mintInfo.balance })
+          }}</span>
+        </template>
+        <template #donations>
+          <span class="text-bold">{{
+            $t("MintAuditInfo.sats_amount", { amount: mintInfo.sum_donations })
+          }}</span>
+        </template>
+        <template #press_here>
+          <span
+            class="text-bold cursor-pointer text-primary"
+            @click="getAuditorPaymentRequestsAndHandle"
+            >{{ $t("MintAuditInfo.press_here") }}</span
+          >
+        </template>
+      </i18n-t>
     </div>
   </div>
 </template>
@@ -198,7 +218,8 @@ export default {
         await this.getMintSwaps(this.mintInfo.id);
       }
     } catch (err: any) {
-      this.error = err.message || "Failed to load mint data";
+      this.error =
+        err.message || (this.$t("MintAuditInfo.load_failed") as string);
     } finally {
       this.loading = false;
     }
@@ -295,7 +316,7 @@ export default {
 
 <style scoped>
 .mint-info {
-  text-align: left;
+  text-align: start;
   margin-top: 20px;
 }
 
@@ -342,7 +363,7 @@ export default {
 }
 
 .q-ml-md {
-  margin-left: 16px;
+  margin-inline-start: 16px;
 }
 
 .q-pa-md {

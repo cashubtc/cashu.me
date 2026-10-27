@@ -45,7 +45,7 @@
               class="action-btn"
               size="sm"
             >
-              <q-tooltip>Copy</q-tooltip>
+              <q-tooltip>{{ $t("global.actions.copy.label") }}</q-tooltip>
             </q-btn>
           </div>
         </div>
@@ -75,6 +75,7 @@ import { useWelcomeStore } from "src/stores/welcome";
 import { useWalletStore } from "src/stores/wallet";
 import { ref, computed, onMounted } from "vue";
 import { useQuasar, copyToClipboard } from "quasar";
+import { i18n } from "src/boot/i18n";
 
 export default {
   name: "WelcomeSlide3",
@@ -109,7 +110,10 @@ export default {
     const copyText = async (text: string) => {
       try {
         await copyToClipboard(text);
-        $q.notify({ message: "Copied to clipboard!", position: "bottom" });
+        $q.notify({
+          message: i18n.global.t("global.copy_to_clipboard.success"),
+          position: "bottom",
+        });
       } catch {}
     };
 
@@ -146,7 +150,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  text-align: left;
+  text-align: start;
   flex: 1;
 }
 
@@ -174,7 +178,7 @@ export default {
   margin: 0 0 16px 0;
   color: white;
   line-height: 1.2;
-  text-align: left;
+  text-align: start;
   width: 100%;
   max-width: 500px;
 }
@@ -184,7 +188,7 @@ export default {
   line-height: 1.5;
   color: rgba(255, 255, 255, 0.8);
   margin: 0 0 32px 0;
-  text-align: left;
+  text-align: start;
   width: 100%;
   max-width: 500px;
 }
@@ -230,13 +234,13 @@ export default {
   line-height: 1.8;
   color: white;
   word-wrap: break-word;
-  padding-right: 80px; /* Space for action buttons */
+  padding-inline-end: 80px; /* Space for action buttons */
 }
 
 .seed-actions {
   position: absolute;
   top: 16px;
-  right: 12px;
+  inset-inline-end: 12px;
   display: flex;
   gap: 4px;
 }
@@ -295,12 +299,12 @@ export default {
 
   .seed-text {
     font-size: 0.85rem;
-    padding-right: 50px;
+    padding-inline-end: 50px;
   }
 
   .seed-actions {
     top: 12px;
-    right: 8px;
+    inset-inline-end: 8px;
   }
 
   .action-btn {

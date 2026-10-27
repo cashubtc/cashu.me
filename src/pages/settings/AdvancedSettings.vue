@@ -110,7 +110,7 @@
                 <span class="keyset-id">{{
                   abbreviateKeysetId(counter.id)
                 }}</span>
-                
+
                 <span class="keyset-counter-text">
                   {{
                     $t("Settings.advanced.developer.keyset_counters.counter", {
@@ -375,7 +375,9 @@ export default defineComponent({
       // mark all this.proofs as reserved=false
       const proofsStore = useProofsStore();
       await proofsStore.setReserved(await proofsStore.getProofs(), false);
-      this.notifySuccess("All reserved proofs unset");
+      this.notifySuccess(
+        this.$t("Settings.advanced.notifications.reserved_unset")
+      );
     },
     checkActiveProofsSpendable: async function () {
       // iterate over this.activeProofs in batches of 50 and check if they are spendable
@@ -396,9 +398,13 @@ export default defineComponent({
       const spentProofs = allSpentProofs.flat();
       if (spentProofs.length > 0) {
         console.log("Spent proofs", spentProofs);
-        this.notifySuccess("Removed " + spentProofs.length + " spent proofs");
+        this.notifySuccess(
+          this.$t("Settings.advanced.notifications.removed_spent", {
+            count: spentProofs.length,
+          })
+        );
       } else {
-        this.notifySuccess("No spent proofs found");
+        this.notifySuccess(this.$t("Settings.advanced.notifications.no_spent"));
       }
     },
     exportActiveProofs: async function () {
@@ -446,11 +452,13 @@ export default defineComponent({
           this.restoreFromBackup(backup);
         } catch (error) {
           console.error("Error reading backup file:", error);
-          this.notifyError("Invalid backup file format");
+          this.notifyError(
+            this.$t("Settings.advanced.notifications.invalid_backup")
+          );
         }
       };
       reader.onerror = () => {
-        this.notifyError("Error reading file");
+        this.notifyError(this.$t("Settings.advanced.notifications.read_error"));
       };
       reader.readAsText(file);
     },

@@ -47,6 +47,9 @@
 
 <script lang="ts">
 import { defineComponent, ref, computed, onMounted, watch } from "vue";
+import { i18n } from "src/boot/i18n";
+
+const t = i18n.global.t;
 
 interface SwapEventRead {
   id: number;
@@ -327,7 +330,7 @@ export default defineComponent({
         ).getTime();
         if (Math.abs(date.getTime() - latestSwapTime) < 1000) {
           // Within 1 second
-          return "Now";
+          return t("MintAuditInfo.chart.now");
         }
       }
 
@@ -339,9 +342,9 @@ export default defineComponent({
 
       let dateStr = "";
       if (isToday) {
-        dateStr = "Today";
+        dateStr = t("MintAuditInfo.chart.today");
       } else if (isYesterday) {
-        dateStr = "Yesterday";
+        dateStr = t("MintAuditInfo.chart.yesterday");
       } else {
         dateStr = date.toLocaleDateString(undefined, {
           month: "short",
@@ -366,7 +369,7 @@ export default defineComponent({
 
       const dateObj = new Date(utcDateStr);
       if (isNaN(dateObj.getTime())) {
-        return "Invalid Date";
+        return t("MintAuditInfo.chart.invalid_date");
       }
 
       const today = new Date();
@@ -377,9 +380,9 @@ export default defineComponent({
 
       let formattedDate = "";
       if (isToday) {
-        formattedDate = "Today";
+        formattedDate = t("MintAuditInfo.chart.today");
       } else if (isYesterday) {
-        formattedDate = "Yesterday";
+        formattedDate = t("MintAuditInfo.chart.yesterday");
       } else {
         formattedDate = dateObj.toLocaleDateString(undefined, {
           month: "short",
@@ -414,9 +417,11 @@ export default defineComponent({
         x: event.clientX + 10,
         y: event.clientY + 10,
         content: `
-          <div><b>Swaps:</b> ${bucket.count}</div>
-          <div><b>Success rate:</b> ${successRate}% (${bucket.successCount}/${bucket.count})</div>
-          <div><b>Time range:</b> ${timeRange}</div>
+          <div><b>${t("MintAuditInfo.chart.swaps")}</b> ${bucket.count}</div>
+          <div><b>${t(
+            "MintAuditInfo.chart.success_rate"
+          )}</b> ${successRate}% (${bucket.successCount}/${bucket.count})</div>
+          <div><b>${t("MintAuditInfo.chart.time_range")}</b> ${timeRange}</div>
         `,
       };
     };

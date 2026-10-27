@@ -7,7 +7,7 @@
     <div v-if="showAmount && hasValidAmount" class="detail-item q-mb-md">
       <div class="detail-label">
         <ZapIcon :size="20" class="detail-icon" />
-        <div class="detail-name">Amount</div>
+        <div class="detail-name">{{ $t("QuoteInformation.amount") }}</div>
       </div>
       <div class="detail-value">{{ amountDisplay }}</div>
     </div>
@@ -15,7 +15,7 @@
     <div v-if="unit !== 'sat'" class="detail-item q-mb-md">
       <div class="detail-label">
         <CoinsIcon :size="20" class="detail-icon" />
-        <div class="detail-name">Unit</div>
+        <div class="detail-name">{{ $t("QuoteInformation.unit") }}</div>
       </div>
       <div class="detail-value">{{ unitDisplay }}</div>
     </div>
@@ -26,7 +26,7 @@
     >
       <div class="detail-label">
         <InfoIcon :size="20" class="detail-icon" />
-        <div class="detail-name">Status</div>
+        <div class="detail-name">{{ $t("QuoteInformation.status") }}</div>
       </div>
       <div class="detail-value" :class="{ 'text-positive': isPaidState }">
         {{ stateDisplay }}
@@ -36,7 +36,7 @@
     <div class="detail-item q-mb-md">
       <div class="detail-label">
         <ZapIcon :size="20" class="detail-icon" />
-        <div class="detail-name">Method</div>
+        <div class="detail-name">{{ $t("QuoteInformation.method") }}</div>
       </div>
       <div class="detail-value">{{ methodDisplay }}</div>
     </div>
@@ -44,7 +44,7 @@
     <div v-if="networkDisplay" class="detail-item q-mb-md">
       <div class="detail-label">
         <InfoIcon :size="20" class="detail-icon" />
-        <div class="detail-name">Network</div>
+        <div class="detail-name">{{ $t("QuoteInformation.network") }}</div>
       </div>
       <div class="detail-value">{{ networkDisplay }}</div>
     </div>
@@ -71,7 +71,7 @@
     >
       <div class="detail-label">
         <InfoIcon :size="20" class="detail-icon" />
-        <div class="detail-name">Chain status</div>
+        <div class="detail-name">{{ $t("QuoteInformation.chain_status") }}</div>
       </div>
       <div class="detail-value detail-value-with-spinner">
         <q-spinner
@@ -88,7 +88,9 @@
           >
             {{ onchainStatusDisplay }}
           </span>
-          <span v-else key="loading" class="text-grey-6">Fetching</span>
+          <span v-else key="loading" class="text-grey-6">{{
+            $t("QuoteInformation.fetching")
+          }}</span>
         </transition>
       </div>
     </div>
@@ -96,7 +98,7 @@
     <div v-if="paidAtDisplay" class="detail-item q-mb-md">
       <div class="detail-label">
         <ClockIcon :size="20" class="detail-icon" />
-        <div class="detail-name">Paid at</div>
+        <div class="detail-name">{{ $t("QuoteInformation.paid_at") }}</div>
       </div>
       <div class="detail-value">{{ paidAtDisplay }}</div>
     </div>
@@ -104,7 +106,7 @@
     <div v-if="mintDisplay" class="detail-item">
       <div class="detail-label">
         <LandmarkIcon :size="20" class="detail-icon" />
-        <div class="detail-name">Mint</div>
+        <div class="detail-name">{{ $t("QuoteInformation.mint") }}</div>
       </div>
       <div class="detail-value">{{ mintDisplay }}</div>
     </div>
@@ -223,6 +225,8 @@ export default defineComponent({
       const state = (this.invoice?.status as string) || this.mintQuote?.state;
       if (!state) return "";
       const lower = state.toLowerCase();
+      const key = `QuoteInformation.states.${lower}`;
+      if (this.$te(key)) return this.$t(key) as string;
       return lower.charAt(0).toUpperCase() + lower.slice(1);
     },
     isPaidState(): boolean {
@@ -235,13 +239,13 @@ export default defineComponent({
         method === PaymentMethod.Onchain ||
         method === PaymentMethod.OnchainSubpayment
       ) {
-        return "On-chain";
+        return this.$t("common.on_chain") as string;
       }
       if (
         method === PaymentMethod.Bolt12 ||
         method === PaymentMethod.Bolt12Subpayment
       ) {
-        return "Lightning offer";
+        return this.$t("QuoteInformation.lightning_offer") as string;
       }
       return "Lightning";
     },
@@ -266,7 +270,11 @@ export default defineComponent({
     },
     onchainStatusDisplay(): string {
       if (!this.onchainMetadata) return "";
-      const status = this.onchainMetadata.confirmed ? "Confirmed" : "Pending";
+      const status = this.$t(
+        this.onchainMetadata.confirmed
+          ? "QuoteInformation.chain_confirmed"
+          : "QuoteInformation.chain_pending"
+      );
       return `${status} (${this.onchainMetadata.confirmations}/${this.onchainMetadata.confirmationThreshold})`;
     },
     paidAtTimestamp(): number | null {
@@ -277,7 +285,8 @@ export default defineComponent({
     },
     paidAtDisplay(): string {
       if (!this.paidAtTimestamp) return "";
-      return new Intl.DateTimeFormat(undefined, {
+      return new Intl.DateTimeFormat(this.$i18n.locale, {
+        numberingSystem: "latn",
         dateStyle: "medium",
         timeStyle: "short",
       }).format(new Date(this.paidAtTimestamp));

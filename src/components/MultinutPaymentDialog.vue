@@ -26,7 +26,9 @@
         <!-- Header Section -->
         <div class="multinut-header-container q-mb-lg">
           <div class="multinut-header q-pa-md q-py-lg">
-            <div class="multinut-title q-mb-xs">Multinut Payment</div>
+            <div class="multinut-title q-mb-xs">
+              {{ $t("MultinutPicker.dialog_title") }}
+            </div>
             <div class="multinut-amount">
               {{
                 formatCurrency(
@@ -39,7 +41,7 @@
               v-if="!isPaymentInProgress"
               class="multinut-description q-mt-sm"
             >
-              Pay using multiple mints
+              {{ $t("MultinutPicker.pay_using_multiple") }}
             </div>
           </div>
 
@@ -56,11 +58,11 @@
               class="experimental-warning q-mt-lg"
             >
               <div class="warning-content q-pa-md">
-                <div class="warning-title q-mb-xs">Experimental Feature</div>
+                <div class="warning-title q-mb-xs">
+                  {{ $t("MultinutPicker.experimental_title") }}
+                </div>
                 <div class="warning-text q-mb-md">
-                  This feature is highly experimental and may not work as
-                  expected. Make sure you don't try to pay an invoice that has
-                  already been paid before. You could lose funds.
+                  {{ $t("MultinutPicker.experimental_text") }}
                 </div>
                 <q-btn
                   flat
@@ -68,7 +70,7 @@
                   @click="dismissExperimentalWarning"
                   class="warning-dismiss-btn"
                 >
-                  I understand
+                  {{ $t("MultinutPicker.understand") }}
                 </q-btn>
               </div>
             </div>
@@ -81,7 +83,7 @@
             class="mint-selection-description q-mb-md"
             v-if="multinutExperimentalWarningDismissed && !isPaymentInProgress"
           >
-            Select funds from multiple mints to execute the payment.
+            {{ $t("MultinutPicker.select_funds") }}
           </div>
 
           <div class="mints-container">
@@ -285,7 +287,7 @@
             <template v-slot:loading>
               <q-spinner />
             </template>
-            Pay Invoice
+            {{ $t("MultinutPicker.pay_invoice") }}
           </q-btn>
         </div>
       </div>
@@ -765,13 +767,13 @@ export default defineComponent({
     getStateText(state) {
       switch (state) {
         case "requesting":
-          return "Requesting...";
+          return this.$t("MultinutPicker.states.requesting");
         case "paying":
-          return "Paying...";
+          return this.$t("MultinutPicker.states.paying");
         case "success":
-          return "Success";
+          return this.$t("MultinutPicker.states.success");
         case "error":
-          return "Failed";
+          return this.$t("MultinutPicker.states.failed");
         default:
           return "";
       }
@@ -897,7 +899,10 @@ export default defineComponent({
             `Amount mismatch: calculated ${totalCalculated}, expected ${totalQuoteAmount}`
           );
           notifyError(
-            `Amount calculation error: ${totalCalculated} vs ${totalQuoteAmount}`
+            this.$t("MultinutPicker.amount_mismatch", {
+              calculated: totalCalculated,
+              expected: totalQuoteAmount,
+            })
           );
           return;
         }
@@ -987,9 +992,9 @@ export default defineComponent({
         ) - data.reduce((acc, d) => acc + sumProofAmounts(d.change), 0);
 
       notifySuccess(
-        "Paid " +
-          uiStore.formatCurrency(amountPaid, activeUnit) +
-          " via Lightning"
+        this.$t("MultinutPicker.paid", {
+          amount: uiStore.formatCurrency(amountPaid, activeUnit),
+        })
       );
 
       // Close the dialog after successful payment
@@ -1101,7 +1106,7 @@ export default defineComponent({
   line-height: 20px;
   color: var(--app-text-muted);
   font-weight: 500;
-  text-align: left;
+  text-align: start;
 }
 
 .mints-container {
@@ -1219,7 +1224,7 @@ export default defineComponent({
   font-size: 10px;
   color: var(--app-text-muted);
   font-weight: 500;
-  text-align: left;
+  text-align: start;
 }
 
 /* Action Buttons Section */

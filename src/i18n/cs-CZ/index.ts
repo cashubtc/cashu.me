@@ -51,9 +51,34 @@ export default {
     },
   },
   common: {
+    copied: "Zkopírováno",
+    on_chain: "On-chain",
+    pending: "Čeká",
+    delete: "Smazat",
+    copy_npub: "Kopírovat npub",
+    back: "Zpět",
+    refresh: "Obnovit",
+    settings: "Nastavení",
+    backspace: "Smazat znak",
+    swap_input_mode: "Přepnout zadávání částky/fiat",
     fee: "Poplatek",
   },
   MultinutPicker: {
+    dialog_title: "Platba Multinut",
+    pay_using_multiple: "Platit pomocí více mintů",
+    experimental_title: "Experimentální funkce",
+    experimental_text:
+      "Tato funkce je vysoce experimentální a nemusí fungovat podle očekávání. Nepokoušejte se zaplatit fakturu, která už byla zaplacena. Mohli byste přijít o prostředky.",
+    understand: "Rozumím",
+    select_funds: "Vyberte prostředky z více mintů k provedení platby.",
+    pay_invoice: "Zaplatit fakturu",
+    amount_mismatch: "Chyba výpočtu částky: {calculated} vs {expected}",
+    states: {
+      requesting: "Žádám...",
+      paying: "Platím...",
+      success: "Hotovo",
+      failed: "Selhalo",
+    },
     payment: "Platba Multinut",
     selectMints:
       "Vyberte jeden nebo více mintů, ze kterých se má platba provést.",
@@ -84,6 +109,11 @@ export default {
       no_price_data: "Žádná cenová data.",
       please_try_again: "Zkuste to prosím znovu.",
       trying_again: "Zkouší se znovu...",
+      unsupported_legacy_qr: "Nepodporovaný starší QR kód",
+      legacy_qr_not_supported:
+        "Tento starší QR kód nepochází od podporovaného obchodníka",
+      no_bolt12_mint: "Žádný z vašich mintů nepodporuje BOLT12 nabídky",
+      no_bolt11_mint: "Žádný z vašich mintů nepodporuje BOLT11 faktury",
     },
     mint: {
       notifications: {
@@ -118,7 +148,7 @@ export default {
         title: "Podmínky",
         terms: {
           title: "Podmínky",
-          caption: "Podmínky služby",
+          caption: "S čím souhlasíte používáním Cashu.me",
         },
       },
       links: {
@@ -172,20 +202,20 @@ export default {
     menu: {
       title: "Nastavení",
       backup: {
-        title: "Záloha a obnovení",
+        title: "Záloha a obnova",
         caption: "Seed fráze a obnovení ecash",
       },
       lightning_address: {
         title: "Lightning adresa",
-        caption: "Přijímejte platby na svou Lightning adresu",
+        caption: "Přijímejte platby na jmeno@domena",
       },
       nostr: {
         title: "Nostr",
-        caption: "Klíče, relaye a Web of Trust",
+        caption: "Klíče, relaye a síť důvěry",
       },
       payment_requests: {
-        title: "Platební požadavky",
-        caption: "Přijímejte ecash platby přes nostr",
+        title: "Žádosti o platbu",
+        caption: "Přijímejte platby v ecash přes Nostr",
       },
       nwc: {
         title: "Nostr Wallet Connect",
@@ -196,12 +226,12 @@ export default {
         caption: "Nastavení NFC",
       },
       p2pk: {
-        title: "P2PK",
-        caption: "Přijímejte ecash uzamčený na vaše klíče",
+        title: "Uzamčený ecash",
+        caption: "Přijímejte ecash, který odemkne jen váš klíč",
       },
       privacy: {
         title: "Soukromí",
-        caption: "Síťové kontroly a cena Bitcoinu",
+        caption: "Síťové kontroly a cena bitcoinu",
       },
       experimental: {
         title: "Experimentální",
@@ -209,7 +239,7 @@ export default {
       },
       appearance: {
         title: "Vzhled",
-        caption: "Motiv, klávesnice a symbol Bitcoinu",
+        caption: "Motiv, klávesnice a symbol bitcoinu",
       },
       language: {
         title: "Jazyk",
@@ -235,11 +265,12 @@ export default {
       nostr: {
         title: "NOSTR",
         relays: {
+          already_added: "Relay už je přidán",
           expand_label: "Klikněte pro úpravu relayů",
           add: {
             title: "Přidat relay",
             description:
-              "Vaše peněženka používá tyto relaye pro Nostr operace, jako jsou žádosti o platbu, Nostr Wallet Connect a zálohy.",
+              "Vaše peněženka používá tyto relaye pro funkce Nostru, jako jsou žádosti o platbu, Nostr Wallet Connect a zálohy.",
           },
           list: {
             title: "Relaye",
@@ -267,16 +298,21 @@ export default {
       restore_ecash: {
         title: "Obnovit ecash",
         description:
-          "Průvodce obnovou vám umožní obnovit ztracený ecash pomocí mnemotechnické seed fráze. Seed fráze vaší aktuální peněženky zůstane nedotčena – průvodce umožňuje obnovu ecashe pouze z jiné seed fráze.",
+          "Obnovte ecash z jiné seed fráze. Vaše současná seed fráze zůstane beze změny.",
         button: "Obnovit",
       },
     },
     lightning_address: {
+      server_url: {
+        label: "Název hostitele npub.cash",
+        hint: "Zadejte název hostitele nebo HTTPS URL",
+        invalid: "Zadejte platnou HTTPS URL serveru",
+      },
       title: "Lightning adresa",
       description: "Přijímejte platby na svou Lightning adresu.",
       enable: {
-        toggle: "Povolit",
-        description: "Lightning adresa s npub.cash",
+        toggle: "Používat Lightning adresu",
+        description: "Přijímejte platby na adresu od npub.cash",
       },
       address: {
         copy_tooltip: "Kopírovat Lightning adresu",
@@ -298,22 +334,22 @@ export default {
 
     nostr_keys: {
       title: "Vaše Nostr klíče",
-      description:
-        "Vaše Nostr klíče budou použity k určení vaší Lightning adresy.",
+      description: "Vaše Nostr klíče určují vaši Lightning adresu.",
       wallet_seed: {
         title: "Seed fráze peněženky",
-        description: "Vygenerovat Nostr klíčový pár ze seedu peněženky",
-        copy_nsec: "Kopírovat nsec",
+        description: "Vygenerovat pár Nostr klíčů ze seedu peněženky",
+        copy_nsec: "Kopírovat soukromý klíč",
       },
       nsec_bunker: {
-        title: "Nsec Bunker",
-        description: "Použít NIP-46 bunker",
+        title: "Vzdálený podepisovatel",
+        description: "Podepisovat přes NIP-46 bunker",
         delete_tooltip: "Odstranit připojení",
       },
       use_nsec: {
-        title: "Použít vlastní nsec",
-        description: "Tato metoda je nebezpečná a nedoporučuje se",
-        delete_tooltip: "Odstranit nsec",
+        title: "Použít vlastní soukromý klíč",
+        description:
+          "Vložte svůj soukromý Nostr klíč (nsec) do této peněženky. Nedoporučujeme.",
+        delete_tooltip: "Smazat soukromý klíč",
       },
       signing_extension: {
         title: "Podepisovací rozšíření",
@@ -325,19 +361,20 @@ export default {
     payment_requests: {
       title: "Žádosti o platbu",
       description:
-        "Žádosti o platbu vám umožňují přijímat platby přes Nostr. Pokud tuto funkci povolíte, vaše peněženka se přihlásí k odběru vašich Nostr relayů.",
-      enable_toggle: "Povolit žádosti o platbu",
+        "Přijímejte platby přes Nostr. Když je zapnuto, peněženka naslouchá na vašich Nostr relayích.",
+      enable_toggle: "Zapnout žádosti o platbu",
       claim_automatically: {
         toggle: "Přijímat automaticky",
-        description: "Automaticky přijímat příchozí platby.",
+        description:
+          "Připíše příchozí platby k zůstatku bez ptaní. Když je vypnuto, každou přijímáte sami.",
       },
     },
 
     nostr_wallet_connect: {
       title: "Nostr Wallet Connect (NWC)",
       description:
-        "Použijte NWC k ovládání své peněženky z jakékoli jiné aplikace.",
-      enable_toggle: "Povolit NWC",
+        "Umožní jiným aplikacím platit z této peněženky přes Nostr Wallet Connect.",
+      enable_toggle: "Zapnout Nostr Wallet Connect",
       payments_note:
         "NWC lze použít pouze pro platby z vašeho bitcoinového zůstatku. Platby budou prováděny z aktivního mintu.",
       connection: {
@@ -349,7 +386,7 @@ export default {
 
     hardware_features: {
       webnfc: {
-        title: "WebNFC",
+        title: "Formát NFC karty",
         description: "Vyberte kódování pro zápis na NFC karty",
         text: {
           title: "Text",
@@ -361,26 +398,26 @@ export default {
         },
         binary: {
           title: "Binární",
-          description: "Uložit tokeny jako binární data",
+          description: "Ukládat token jako binární data",
         },
         quick_access: {
           toggle: "Rychlý přístup k NFC",
           description:
-            "Rychlé skenování NFC karet v nabídce Přijmout ecash. Tato volba přidá tlačítko NFC do nabídky Přijmout ecash.",
+            "Přidá na obrazovku Přijmout ecash tlačítko NFC pro skenování karet.",
         },
       },
     },
 
     p2pk_features: {
-      title: "P2PK",
+      title: "Uzamčený ecash",
       description:
-        "Vygenerujte klíčový pár pro příjem ecashe uzamčeného pomocí P2PK. Varování: Tato funkce je experimentální. Používejte ji pouze s malými částkami. Pokud ztratíte své soukromé klíče, nikdo už nebude schopen ecash uzamčený k nim odemknout.",
+        "Experimentální. Používejte malé částky: pokud ztratíte soukromý klíč, nikdo už ecash jím uzamčený neodemkne.",
       generate_button: "Vygenerovat klíč",
-      import_button: "Importovat nsec",
+      import_button: "Importovat soukromý klíč",
       quick_access: {
-        toggle: "Rychlý přístup k uzamčení",
+        toggle: "Zobrazit zamykací klíč při přijímání",
         description:
-          "Použijte tuto možnost pro rychlé zobrazení vašeho P2PK uzamykacího klíče v nabídce Přijmout ecash.",
+          "Zobrazí váš zamykací klíč na obrazovce Přijmout ecash, aby vám odesílatelé mohli ecash uzamknout.",
       },
       keys_expansion: {
         label: "Klikněte pro zobrazení {count} klíčů",
@@ -394,32 +431,31 @@ export default {
       check_incoming: {
         toggle: "Kontrolovat příchozí faktury",
         description:
-          "Pokud je povoleno, peněženka bude na pozadí kontrolovat nejnovější fakturu. To zvyšuje odezvu peněženky, ale také usnadňuje fingerprinting. Nezaplacené faktury můžete kontrolovat ručně na kartě Faktury.",
+          "Kontroluje vaši poslední fakturu na pozadí. Rychlejší aktualizace, ale snazší fingerprinting.",
       },
       check_startup: {
         toggle: "Kontrolovat čekající faktury při spuštění",
-        description:
-          "Pokud je povoleno, peněženka při spuštění zkontroluje čekající faktury.",
+        description: "Při otevření peněženky zkontroluje čekající faktury.",
       },
       check_all: {
         toggle: "Kontrolovat všechny faktury",
         description:
-          "Pokud je povoleno, peněženka bude až po dobu dvou týdnů periodicky kontrolovat nezaplacené faktury na pozadí. To zvyšuje síťovou aktivitu peněženky a usnadňuje fingerprinting. Nezaplacené faktury můžete kontrolovat ručně na kartě Faktury.",
+          "Kontroluje nezaplacené faktury na pozadí až dva týdny. Víc aktivity online usnadňuje fingerprinting.",
       },
       check_sent: {
         toggle: "Kontrolovat odeslaný ecash",
         description:
-          "Pokud je povoleno, peněženka bude pomocí periodických kontrol na pozadí zjišťovat, zda byly odeslané tokeny uplatněny. To zvyšuje síťovou aktivitu peněženky a usnadňuje fingerprinting.",
+          "Na pozadí kontroluje, zda byl odeslaný ecash přijat. Víc aktivity online usnadňuje fingerprinting.",
       },
       websockets: {
         toggle: "Používat WebSockety",
         description:
-          "Pokud je povoleno, peněženka bude používat dlouhodobá WebSocket připojení pro přijímání aktualizací o zaplacených fakturách a utracených tokenech z mintů. To zvyšuje odezvu peněženky, ale také usnadňuje fingerprinting.",
+          "Udržuje živé spojení s minty pro okamžité informace o platbách. Rychlejší, ale snazší fingerprinting.",
       },
       bitcoin_price: {
         toggle: "Získávat kurz z Coinbase",
         description:
-          "Pokud je povoleno, aktuální kurz Bitcoinu bude načítán z coinbase.com a převedený zůstatek bude zobrazen.",
+          "Načte cenu bitcoinu z coinbase.com a zobrazí váš zůstatek ve fiat měně.",
         currency: {
           title: "Fiat měna",
           description: "Vyberte fiat měnu pro zobrazení ceny Bitcoinu.",
@@ -434,30 +470,29 @@ export default {
         toggle: "Přijímat swapy",
         badge: "Beta",
         description:
-          "Možnost směnit přijatý ecash na váš aktivní mint v dialogu Přijmout ecash.",
+          "Nabídne výměnu přijatého ecash do vašeho aktivního mintu.",
       },
       auto_paste: {
         toggle: "Automaticky vkládat ecash",
         description:
-          "Automaticky vloží ecash ze schránky při stisknutí Přijmout → Ecash → Vložit. Automatické vkládání může na iOS způsobovat problémy v UI – pokud k nim dochází, vypněte tuto funkci.",
+          "Při otevření Přijmout ecash vloží ecash ze schránky. Vypněte, pokud na iOS způsobuje chyby zobrazení.",
       },
       auditor: {
         toggle: "Povolit auditora",
         badge: "Beta",
         description:
-          "Pokud je povoleno, peněženka zobrazí informace o auditorovi v dialogu detailů mintu. Auditor je služba třetí strany, která sleduje spolehlivost mintů.",
+          "V detailech mintu zobrazí údaje o spolehlivosti od nezávislého auditora mintů.",
         url_label: "URL auditora",
         api_url_label: "API URL auditora",
       },
       multinut: {
         toggle: "Povolit Multinut",
-        description:
-          "Pokud je povoleno, peněženka použije Multinut k placení faktur z více mintů najednou.",
+        description: "Platí faktury z více mintů najednou.",
       },
       nostr_mint_backup: {
         toggle: "Zálohovat seznam mintů na Nostr",
         description:
-          "Pokud je povoleno, váš seznam mintů bude automaticky zálohován na Nostr relaye pomocí nakonfigurovaných Nostr klíčů. To umožňuje obnovu seznamu mintů napříč zařízeními.",
+          "Zálohuje seznam vašich mintů na vaše Nostr relaye, abyste ho mohli obnovit na jiném zařízení.",
         notifications: {
           enabled: "Záloha mintů na Nostr povolena",
           disabled: "Záloha mintů na Nostr zakázána",
@@ -470,35 +505,34 @@ export default {
         title: "Klávesnice na obrazovce",
         description: "Použít číselnou klávesnici pro zadávání částek.",
         toggle: "Použít číselnou klávesnici",
-        toggle_description:
-          "Pokud je povoleno, pro zadávání částek bude použita číselná klávesnice.",
+        toggle_description: "Pro zadávání částek použije číselnou klávesnici.",
       },
       theme: {
-        title: "Vzhled",
+        title: "Motiv",
         description: "Změňte vzhled své peněženky.",
         tooltips: {
-          mono: "mono",
-          cyber: "cyber",
-          freedom: "freedom",
-          nostr: "nostr",
-          bitcoin: "bitcoin",
-          mint: "mint",
-          nut: "nut",
-          blu: "blu",
-          flamingo: "flamingo",
+          mono: "Mono",
+          cyber: "Cyber",
+          freedom: "Svoboda",
+          nostr: "Nostr",
+          bitcoin: "Bitcoin",
+          mint: "Máta",
+          nut: "Oříšek",
+          blu: "Modrá",
+          flamingo: "Plameňák",
         },
       },
       bip177: {
         title: "Symbol Bitcoinu",
-        description: "Používat symbol ₿ místo satů.",
+        description: "Zobrazovat částky jako ₿2 789 místo 2 789 sats.",
         toggle: "Používat symbol ₿",
       },
     },
     web_of_trust: {
       title: "Web of trust",
-      known_pubkeys: "Známé pubkey: {wotCount}",
+      known_pubkeys: "Známé veřejné klíče: {wotCount}",
       continue_crawl: "Pokračovat v procházení",
-      crawl_odell: "Procházet ODELLŮV WEB OF TRUST",
+      crawl_odell: "Importovat Odellovu síť důvěry",
       crawl_wot: "Procházet web of trust",
       pause: "Pozastavit",
       reset: "Resetovat",
@@ -508,17 +542,24 @@ export default {
       copy_lightning_address: "Kopírovat Lightning adresu",
     },
     multinut: {
-      use_multinut: "Použít Multinut",
+      use_multinut: "Platby z více mintů",
     },
     advanced: {
+      notifications: {
+        reserved_unset: "Rezervace všech důkazů zrušena",
+        removed_spent: "Odstraněno utracených důkazů: {count}",
+        no_spent: "Nebyly nalezeny žádné utracené důkazy",
+        invalid_backup: "Neplatný formát souboru zálohy",
+        read_error: "Chyba při čtení souboru",
+      },
       title: "Pokročilé",
       developer: {
         title: "Vývojářská nastavení",
-        description: "Následující nastavení slouží pro vývoj a ladění.",
+        description: "Nástroje pro řešení problémů a ladění.",
         new_seed: {
           button: "Vygenerovat novou seed frázi",
           description:
-            "Tímto se vygeneruje nová seed fráze. Abyste ji mohli později obnovit, musíte si nejprve poslat celý zůstatek sami sobě.",
+            "Vytvoří novou seed frázi. Poté pošlete zůstatek sami sobě, aby ho nový seed dokázal obnovit.",
           confirm_question: "Opravdu chcete vygenerovat novou seed frázi?",
           cancel: "Zrušit",
           confirm: "Potvrdit",
@@ -526,28 +567,28 @@ export default {
         remove_spent: {
           button: "Odstranit utracené proofy",
           description:
-            "Zkontroluje, zda jsou ecash tokeny z vašich aktivních mintů utracené, a odstraní ty utracené z peněženky. Používejte pouze v případě, že je peněženka zaseknutá.",
+            "Odstraní ecash, který vaše aktivní minty hlásí jako utracený. Použijte jen tehdy, když peněženka uvízne.",
         },
         debug_console: {
           button: "Přepnout ladicí konzoli",
           description:
-            "Otevře ladicí Javascript konzoli. Nikdy sem nevkládejte nic, čemu nerozumíte. Útočník by vás mohl přimět vložit sem škodlivý kód.",
+            "Otevře JavaScriptovou konzoli. Nikdy nevkládejte kód, kterému nerozumíte; podvodníci ji zneužívají ke krádeži peněz.",
         },
         export_proofs: {
           button: "Exportovat aktivní proofy",
           description:
-            "Zkopíruje celý váš zůstatek z aktivního mintu jako Cashu token do schránky. Exportuje se pouze vybraný mint a jednotka. Pro kompletní export vyberte jiný mint a jednotku a export opakujte.",
+            "Zkopíruje zůstatek aktivního mintu ve vybrané jednotce jako jeden ecash token.",
         },
         keyset_counters: {
           title: "Navýšit čítače keysetů",
           description:
-            "Kliknutím na ID keysetu zvýšíte čítače derivační cesty pro keysety ve vaší peněžence. To je užitečné, pokud se zobrazí chyba „outputs have already been signed“.",
+            "Klepnutím na keyset zvýšíte jeho čítač. Pomáhá při chybě „outputs have already been signed“.",
           counter: "čítač: {count}",
         },
         unset_reserved: {
           button: "Zrušit rezervaci všech tokenů",
           description:
-            "Tato peněženka označuje čekající odchozí ecash jako rezervovaný (a odečítá jej ze zůstatku), aby zabránila pokusům o double-spend. Toto tlačítko zruší rezervaci všech tokenů, aby je bylo možné znovu použít. Pokud tak učiníte, peněženka může obsahovat utracené proofy. Pro jejich odstranění použijte tlačítko „Odstranit utracené proofy“.",
+            "Uvolní ecash držený pro čekající odeslání, aby šel znovu utratit. Poté spusťte „Odstranit utracené proofy“.",
         },
         show_onboarding: {
           button: "Zobrazit onboarding",
@@ -556,7 +597,7 @@ export default {
         reset_wallet: {
           button: "Resetovat data peněženky",
           description:
-            "Resetuje data vaší peněženky. Varování: Tímto dojde ke smazání všeho! Nezapomeňte si nejprve vytvořit zálohu.",
+            "Smaže všechna data peněženky v tomto zařízení. Nejdřív exportujte zálohu.",
           confirm_question: "Opravdu chcete smazat data peněženky?",
           cancel: "Zrušit",
           confirm: "Smazat peněženku",
@@ -564,12 +605,12 @@ export default {
         export_wallet: {
           button: "Exportovat data peněženky",
           description:
-            "Stáhne výpis vaší peněženky. Z tohoto souboru můžete obnovit peněženku na úvodní obrazovce nové peněženky. Pokud budete peněženku po exportu dál používat, soubor nebude aktuální.",
+            "Stáhne záložní soubor, který můžete importovat na úvodní obrazovce. Dalším používáním peněženky zastarává.",
         },
         import_wallet: {
           button: "Importovat zálohu peněženky",
           description:
-            "Obnoví peněženku z dříve exportovaného záložního souboru. Tímto nahradíte aktuální data peněženky daty ze zálohy.",
+            "Nahradí data této peněženky exportovaným záložním souborem.",
           confirm_question: "Opravdu chcete obnovit data peněženky?",
           cancel: "Zrušit",
           confirm: "IMPORTOVAT ZÁLOHU PENĚŽENKY",
@@ -578,15 +619,15 @@ export default {
     },
   },
   NoMintWarnBanner: {
-    title: "Připojte mint",
+    title: "Přidat mint",
     subtitle:
-      "Ještě jste se nepřipojili k žádnému Cashu mintu. Přidejte URL mintu v nastavení nebo přijměte ecash z nového mintu, abyste mohli začít.",
+      "Minty vydávají ecash, který tato peněženka drží. Začněte přidáním mintu nebo přijetím ecash z některého z nich.",
     actions: {
       add_mint: {
         label: "@:global.actions.add_mint.label",
       },
       receive: {
-        label: "Přijmout Ecash",
+        label: "Přijmout ecash",
       },
     },
   },
@@ -616,8 +657,8 @@ export default {
     },
   },
   AlreadyRunning: {
-    title: "Ne.",
-    text: "Jiná karta už běží. Zavřete ji a zkuste to znovu.",
+    title: "Cashu.me je otevřené na jiné kartě",
+    text: "Zavřete druhou kartu a pak klepněte na Zkusit znovu.",
     actions: {
       retry: {
         label: "Zkusit znovu",
@@ -626,7 +667,7 @@ export default {
   },
   ErrorNotFound: {
     title: "404",
-    text: "Oops. Nic tu není…",
+    text: "Tato stránka neexistuje",
     actions: {
       home: {
         label: "Zpět domů",
@@ -659,7 +700,8 @@ export default {
     },
   },
   WelcomeSlide1: {
-    title: "Vítejte v Cashu",
+    terms_agreement: "Pokračováním souhlasíte s {terms}",
+    title: "Vítejte v Cashu.me",
     text: "Cashu.me je bezplatná a open-source bitcoinová peněženka, která používá ecash pro bezpečné a soukromé uchování vašich prostředků.",
     actions: {
       more: {
@@ -683,9 +725,9 @@ export default {
     },
   },
   WelcomeSlide2: {
-    title: "Nainstalujte PWA",
+    title: "Nainstalujte Cashu.me",
     alt: {
-      pwa_example: "Příklad instalace PWA",
+      pwa_example: "Ukázka instalace PWA",
     },
     installing: "Instaluje se…",
     instruction: {
@@ -717,7 +759,7 @@ export default {
         },
       },
       outro: {
-        text: "Jakmile tuto aplikaci nainstalujete, zavřete okno prohlížeče a používejte aplikaci z domovské obrazovky.",
+        text: "Po instalaci zavřete tuto kartu prohlížeče a otevřete Cashu.me z domovské obrazovky.",
       },
     },
     pwa: {
@@ -751,10 +793,10 @@ export default {
     },
   },
   WelcomeSlide4: {
-    title: "Podmínky",
+    title: "Podmínky služby",
     actions: {
       more: {
-        label: "Přečíst Podmínky služby",
+        label: "Před použitím Cashu.me si je přečtěte",
       },
     },
     inputs: {
@@ -805,10 +847,12 @@ export default {
     text: "Skenujte nevyužité proofy na nakonfigurovaných mintech a přidejte je do peněženky.",
   },
   MintRatings: {
+    web_of_trust_hop: "Ve vaší síti důvěry (skok {hop})",
+    no_mint_url: "Nebyla zadána URL mintu",
     title: "Recenze mintu",
     reviews: "recenze",
-    ratings: "Hodnocení",
-    no_reviews: "Žádné recenze nebyly nalezeny",
+    ratings: "{n} hodnocení | {n} hodnocení",
+    no_reviews: "Zatím žádné recenze",
     your_review: "Vaše recenze",
     no_reviews_to_display: "Žádné recenze k zobrazení.",
     no_rating: "Bez hodnocení",
@@ -825,10 +869,14 @@ export default {
       write_review: "Napsat recenzi",
     },
     empty_state_subtitle:
-      "Pomozte tím, že napíšete recenzi. Sdílejte svou zkušenost s tímto mintem a pomozte ostatním.",
+      "Napište první recenzi tohoto mintu. Vaše zkušenost pomůže ostatním s výběrem.",
+    range: "{from}–{to} z {total}",
   },
 
   CreateMintReview: {
+    connect_nostr: "Pro zveřejnění recenze připojte v Nastavení účet Nostr.",
+    published: "Recenze zveřejněna",
+    publish_failed: "Recenzi se nepodařilo zveřejnit",
     title: "Recenze mintu",
     publishing_as: "Publikujete jako",
     inputs: {
@@ -836,7 +884,7 @@ export default {
       review: { label: "Recenze (volitelně)" },
     },
     actions: {
-      publish: { label: "Odeslat recenzi", in_progress: "Odesílání…" },
+      publish: { label: "Zveřejnit recenzi", in_progress: "Zveřejňování…" },
     },
   },
 
@@ -844,7 +892,7 @@ export default {
     seed_phrase: {
       label: "Obnovit ze seed fráze",
       caption:
-        "Zadejte svou seed frázi pro obnovení peněženky. Před obnovením se ujistěte, že jste přidali všechny minty, které jste dříve používali.",
+        "Před obnovou přidejte všechny minty, které jste s tímto seedem používali.",
       inputs: {
         seed_phrase: {
           label: "Seed fráze",
@@ -860,7 +908,7 @@ export default {
     restore_mints: {
       label: "Obnovit minty",
       caption:
-        'Vyberte mint k obnovení. Další minty můžete přidat na hlavní obrazovce pod "Minty" a obnovit je zde.',
+        "Vyberte minty k obnově. Chybějící minty nejprve přidejte na kartě Minty.",
     },
     actions: {
       paste: {
@@ -873,7 +921,7 @@ export default {
         label: "Vybrat vše",
       },
       deselect_all: {
-        label: "Odznačit vše",
+        label: "Zrušit výběr",
       },
       restore: {
         label: "Obnovit",
@@ -894,12 +942,12 @@ export default {
       },
     },
     nostr_mints: {
-      label: "Obnovit minty z Nostr",
+      label: "Obnovit minty z Nostru",
       caption:
         "Hledejte zálohy mintů uložené na Nostr relays pomocí vaší seed fráze. Pomůže to objevit minty, které jste dříve používali.",
       search_button: "Hledat zálohy mintů",
       select_all: "Vybrat vše",
-      deselect_all: "Odznačit vše",
+      deselect_all: "Zrušit výběr",
       backed_up: "Zálohováno",
       already_added: "Již přidáno",
       add_selected: "Přidat vybrané ({count})",
@@ -928,14 +976,14 @@ export default {
           error_invalid_url: "Neplatná URL",
         },
         scan: {
-          label: "Skenovat QR kód",
+          label: "Naskenovat QR kód",
         },
       },
     },
     discover: {
       title: "Objevte minty",
       overline: "Objevovat",
-      caption: "Objevte minty, které doporučili jiní uživatelé na Nostr.",
+      caption: "Minty, které ostatní doporučují na Nostru.",
       actions: {
         discover: {
           label: "Objevovat minty",
@@ -957,7 +1005,7 @@ export default {
     },
     swap: {
       title: "Swap",
-      overline: "Multimint Swapy",
+      overline: "Výměny mezi minty",
       actions: {
         receove_to_trusted_mint: {
           label: "Přijmout do důvěryhodného mintu",
@@ -968,7 +1016,7 @@ export default {
         },
       },
       caption:
-        "Prohození prostředků mezi minty přes Lightning. Poznámka: Nechte rezervu na poplatky Lightning. Pokud příchozí platba neproběhne, zkontrolujte fakturu manuálně.",
+        "Přesouvejte prostředky mezi svými minty přes Lightning. Mohou se účtovat poplatky.",
       inputs: {
         from: {
           label: "Odesílatel",
@@ -982,7 +1030,7 @@ export default {
       },
     },
     error_badge: "Chyba",
-    reviews_text: "recenze",
+    reviews_text: "recenze | recenze",
     no_reviews_yet: "Žádné recenze",
     discover_mints_button: "Objevovat minty",
   },
@@ -1023,13 +1071,13 @@ export default {
     },
     invoice: {
       caption: "Faktura Lightning",
-      status_paid_text: "Zaplaceno!",
+      status_paid_text: "Zaplaceno",
       actions: {
         close: {
           label: "@:global.actions.close.label",
         },
         copy: {
-          label: "@:global.actions.copy.label",
+          label: "Kopírovat fakturu",
         },
       },
     },
@@ -1050,7 +1098,8 @@ export default {
   },
 
   SendTokenDialog: {
-    title: "Odeslat Ecash",
+    badge_locked: "zamčeno",
+    title: "Odeslat ecash",
     title_ecash_text: "Ecash",
     badge_offline_text: "Offline",
     inputs: {
@@ -1075,7 +1124,7 @@ export default {
         tooltip_text: "Kopírovat emoji",
       },
       copy_tokens: {
-        label: "@:global.actions.copy.label",
+        label: "Kopírovat ecash",
       },
       copy_link: {
         tooltip_text: "Kopírovat odkaz",
@@ -1124,6 +1173,7 @@ export default {
       },
     },
     info: {
+      pay_failed: "Požadavek se nepodařilo zaplatit",
       pay_to: "Zaplatit {target}",
       invalid_url: "Neplatná URL",
     },
@@ -1151,7 +1201,7 @@ export default {
     },
   },
   ReceiveEcashDrawer: {
-    title: "Přijmout Ecash",
+    title: "Přijmout ecash",
     actions: {
       paste: {
         label: "@:global.actions.paste.label",
@@ -1173,7 +1223,8 @@ export default {
   },
 
   ReceiveTokenDialog: {
-    title: "Přijmout Ecash",
+    receiving_amount: "Přijímání {amount}",
+    title: "Přijmout ecash",
     title_ecash_text: "Ecash",
     inputs: {
       tokens_base64: {
@@ -1234,7 +1285,7 @@ export default {
       later: {
         label: "Přijmout později",
         tooltip_text: "Přidat do historie pro pozdější příjem",
-        already_in_history_success_text: "Ecash již v historii",
+        already_in_history_success_text: "Ecash už je v historii",
         added_to_history_success_text: "Ecash přidán do historie",
       },
       nfc: {
@@ -1249,7 +1300,7 @@ export default {
 
   P2PKDialog: {
     p2pk: {
-      caption: "P2PK klíč",
+      caption: "Zamykací klíč",
       description: "Přijímat ecash uzamčený tímto klíčem",
       used_warning_text:
         "Varování: Tento klíč byl již použit. Pro lepší soukromí použijte nový klíč.",
@@ -1269,7 +1320,7 @@ export default {
 
   PaymentRequestDialog: {
     payment_request: {
-      caption: "Platební požadavek",
+      caption: "Žádost o platbu",
       description: "Přijímat platby přes Nostr",
     },
     received_total: "Celkem přijato",
@@ -1343,7 +1394,7 @@ export default {
         label: "URL",
       },
       nuts: {
-        label: "Nuts",
+        label: "Podporované NUTy",
         actions: {
           show: {
             label: "Zobrazit vše",
@@ -1354,7 +1405,7 @@ export default {
         },
       },
       currency: {
-        label: "Měna",
+        label: "Jednotka",
       },
       currencies: {
         label: "@:MintDetailsDialog.details.currency.label",
@@ -1379,8 +1430,8 @@ export default {
   ChooseMint: {
     title: "Vyberte mint",
     placeholder: "Vyberte mint",
-    available_text: "dostupný",
-    sheet_title: "Vybrat mint",
+    available_text: "v tomto mintu",
+    sheet_title: "Vyberte mint",
     badge_mint_error_text: "Chyba",
     badge_option_mint_error_text: "@:ChooseMint.badge_mint_error_text",
   },
@@ -1392,6 +1443,9 @@ export default {
       date_label: "před { value }",
     },
     actions: {
+      filter_ecash_only: {
+        label: "Jen ecash",
+      },
       check_status: {
         tooltip_text: "Zkontrolovat stav",
       },
@@ -1399,7 +1453,7 @@ export default {
         tooltip_text: "Přijmout",
       },
       filter_pending: {
-        label: "Filtrovat čekající",
+        label: "Jen čekající",
       },
       show_all: {
         label: "Zobrazit vše",
@@ -1420,7 +1474,7 @@ export default {
         tooltip_text: "Zkontrolovat stav",
       },
       filter_pending: {
-        label: "Filtrovat čekající",
+        label: "Jen čekající",
       },
       show_all: {
         label: "Zobrazit vše",
@@ -1429,7 +1483,7 @@ export default {
   },
 
   RemoveMintDialog: {
-    title: "Opravdu chcete smazat tento mint?",
+    title: "Odebrat tento mint?",
     nickname: {
       label: "Přezdívka",
     },
@@ -1437,7 +1491,7 @@ export default {
       label: "Zůstatky",
     },
     warning_text:
-      "Poznámka: Protože je tato peněženka paranoidní, váš ecash z tohoto mintu nebude skutečně smazán, ale zůstane uložen na zařízení. Uvidíte ho znovu, pokud tento mint později znovu přidáte.",
+      "Váš ecash z tohoto mintu zůstane v tomto zařízení. Vrátí se, když mint znovu přidáte.",
     inputs: {
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1460,8 +1514,8 @@ export default {
       pay: "Lightning adresa nebo faktura",
     },
     qr_scanner: {
-      title: "Skenovat QR kód",
-      description: "Klikněte pro skenování adresy",
+      title: "Naskenovat QR kód",
+      description: "Namiřte fotoaparát na QR kód",
     },
     paste_button: {
       label: "@:global.actions.paste.label",
@@ -1469,8 +1523,22 @@ export default {
   },
 
   PayInvoiceDialog: {
+    onchain: {
+      title: "Platit on-chain",
+      address_placeholder: "Bitcoinová adresa",
+      choose_speed: "Zvolte rychlost potvrzení",
+      blocks: "{n} blok | {n} bloků",
+      estimated_confirmation: "Odhadované potvrzení",
+      fee_reserve: "rezerva na poplatek",
+    },
+    multinut: {
+      label: "Platit z více mintů",
+    },
+    quote: {
+      label: "Nabídka",
+    },
     input_data: {
-      title: "Zaplatit Lightning",
+      title: "Zaplatit přes Lightning",
       inputs: {
         invoice_data: {
           label: "Lightning faktura nebo adresa",
@@ -1490,6 +1558,7 @@ export default {
           label: "@:global.actions.scan.label",
         },
       },
+      title_bolt12: "Zaplatit Lightning nabídku",
     },
     lnurlpay: {
       amount_exact_label: "{ payee } požaduje { value } { ticker }",
@@ -1541,6 +1610,7 @@ export default {
     title: "Upravit mint",
     inputs: {
       nickname: {
+        placeholder: "např. Testnet",
         label: "Přezdívka",
       },
       mint_url: {
@@ -1559,7 +1629,7 @@ export default {
   AddMintDialog: {
     title: "Důvěřujete tomuto mintu?",
     description:
-      "Připojte se k tomuto mintu, pouze pokud mu důvěřujete. Mints mohou kdykoli ukončit provoz.",
+      "Připojte se k tomuto mintu, jen pokud mu důvěřujete. Pokud ukončí provoz, ecash, který u něj máte, je ztracen.",
     inputs: {
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1585,6 +1655,8 @@ export default {
         },
       },
     },
+    unreachable_error_text:
+      "Tento mint není dostupný. Zkontrolujte URL a připojení a zkuste to znovu.",
   },
   restore: {
     mnemonic_error_text: "Zadejte mnemotechnickou frázi",
@@ -1614,5 +1686,136 @@ export default {
     payment_request: "Platební požadavek",
     nostr: "Nostr",
     token_copied: "Token zkopírován do schránky",
+  },
+  QuoteInformation: {
+    amount: "Částka",
+    fee_reserve: "Rezerva na poplatek",
+    fee_paid: "Zaplacený poplatek",
+    unit: "Jednotka",
+    status: "Stav",
+    network: "Síť",
+    transaction_id: "ID transakce",
+    chain_status: "Stav v blockchainu",
+    fetching: "Načítání",
+    paid_at: "Zaplaceno",
+    preimage: "Preimage",
+    preimage_copied: "Preimage zkopírován",
+    mint: "Mint",
+    method: "Metoda",
+    lightning_offer: "Lightning nabídka",
+    chain_confirmed: "Potvrzeno",
+    chain_pending: "Čeká",
+    states: {
+      paid: "Zaplaceno",
+      unpaid: "Nezaplaceno",
+      pending: "Čeká",
+      issued: "Vydáno",
+      expired: "Vypršelo",
+      failed: "Selhalo",
+    },
+  },
+  MintAuditInfo: {
+    title: "Informace o auditu",
+    loading: "Načítání informací o auditu...",
+    not_audited: "Tento mint zatím nebyl auditován.",
+    not_audited_text:
+      "Chcete-li se dozvědět více o auditorovi nebo podpořit budoucí audit, navštivte {link} nebo klikněte {here} a darujte ecash na zahájení auditu tohoto mintu.",
+    here: "zde",
+    unavailable: "Informace o auditu nejsou momentálně k dispozici.",
+    load_failed: "Nepodařilo se načíst data mintu",
+    success_rate: "Úspěšnost",
+    swaps_count: "{successful} z {total} výměn",
+    average_time: "Průměrná doba",
+    average_time_caption: "U úspěšných výměn",
+    disclaimer:
+      "Data auditu poskytují nezávislé třetí strany, aby pomohla v čase posoudit spolehlivost mintu. Tyto výsledky jsou však pouze informativní a nezaručují bezpečnost, solventnost ani důvěryhodnost žádného mintu. Vždy si udělejte vlastní průzkum a před použitím služeb se ujistěte, že provozovateli mintu důvěřujete.",
+    donate_text:
+      "Informace o auditu poskytuje {link}. Aktuální zůstatek, který auditor pro tento mint drží, je {balance}, dosud bylo celkem darováno {donations}. Chcete-li podpořit další audity, můžete {press_here} a darovat auditorovi ecash.",
+    press_here: "kliknout zde",
+    sats_amount: "{amount} sats",
+    warnings_title: "Upozornění auditora",
+    warnings: {
+      last_swap_failed: "Poslední pokus o výměnu selhal.",
+      recent_success:
+        "Za posledních {days} dní uspělo {successful} z {total} výměn.",
+      reliable:
+        "{base} Nicméně {success} Tento mint se zdá spolehlivý, selhání mohou být způsobena přijímajícím mintem.",
+      unreliable: "{base} Pouze {success} Tento mint může být nespolehlivý.",
+      unknown: "Auditor zatím nedokázal určit kvalitu tohoto mintu.",
+      not_enough_data:
+        "Auditor nemá o tomto mintu dostatek nedávných dat. Za posledních {days} dní proběhlo jen {count} úspěšných výměn.",
+      low_success:
+        "Za posledních {days} dní měl tento mint úspěšnost {rate} %, což je pod doporučenými {threshold} %.",
+      inactive:
+        "Tento mint neměl žádné výměny {days} dní. Může být nedostupný.",
+      slow: "Tento mint je pomalý. Platby z něj trvaly v průměru {seconds} s.",
+      no_successful:
+        "U tohoto mintu nebyla zaznamenána žádná úspěšná výměna. Může být nedostupný.",
+    },
+    chart: {
+      now: "Nyní",
+      today: "Dnes",
+      yesterday: "Včera",
+      invalid_date: "Neplatné datum",
+      swaps: "Výměny:",
+      success_rate: "Úspěšnost:",
+      time_range: "Časové rozmezí:",
+    },
+  },
+  DisplayTokenComponent: {
+    qr_speed: "Rychlost QR: {value}",
+    qr_size: "Velikost QR: {value}",
+    speed: {
+      fast: "Rychlá",
+      medium: "Střední",
+      slow: "Pomalá",
+    },
+    size: {
+      large: "Velká",
+      medium: "Střední",
+      small: "Malá",
+    },
+    delete_dialog: {
+      title: "Smazat ecash",
+      text: "Opravdu chcete tuto transakci smazat z historie?",
+      warning:
+        "Upozornění: Tuto akci nelze vrátit a token nebude možné obnovit.",
+    },
+    nfc: {
+      read_failed: "Čtení NFC selhalo",
+      write_failed: "Zápis NFC selhal",
+      error: "Chyba NFC",
+      writing: "Zapisování na kartu NFC...",
+      success: "Token byl úspěšně zapsán na kartu!",
+      capacity:
+        "Karta možná nemá dostatečnou kapacitu (potřeba {bytes} bajtů).",
+    },
+  },
+  CreateInvoiceDialog: {
+    onchain_title: "Přijmout on-chain",
+    bolt12_title: "Přijmout Bolt12",
+    mint_unreachable: "Mint je nedostupný",
+    mint_unreachable_text: "Pro příjem plateb se znovu připojte k mintu.",
+    reconnect_mint: "Znovu připojit mint",
+    checking_address: "Kontrola adresy...",
+    add_amount: "Přidat částku",
+    new_offer: "Nová nabídka",
+    create_offer: "Vytvořit nabídku",
+    create_new_address: "Vytvořit novou adresu",
+    create_address: "Vytvořit adresu",
+    onchain_unsupported:
+      "Tento mint nepodporuje on-chain vklady v této jednotce.",
+    deposit_limits: {
+      outside: "Vklady mimo rozsah {min}–{max} nebudou připsány.",
+      below: "Vklady pod {min} nebudou připsány.",
+      above: "Vklady nad {max} nebudou připsány.",
+    },
+    amount_errors: {
+      positive_decimal:
+        "Zadejte kladnou částku v {unit} s nejvýše dvěma desetinnými místy.",
+      positive_whole: "Zadejte kladnou celou částku v {unit}.",
+      min: "Zadejte alespoň {amount}.",
+      max: "Zadejte nejvýše {amount}.",
+    },
   },
 };

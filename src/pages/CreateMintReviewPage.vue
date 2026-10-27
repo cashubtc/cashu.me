@@ -91,6 +91,7 @@ import { useRouter } from "vue-router";
 import { useNostrStore } from "src/stores/nostr";
 import NDK, { NDKEvent, NDKKind } from "@nostr-dev-kit/ndk";
 import { notifyError, notifySuccess } from "src/js/notify";
+import { i18n } from "src/boot/i18n";
 import { nip19 } from "nostr-tools";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
 import { useMintsStore } from "src/stores/mints";
@@ -155,9 +156,7 @@ export default defineComponent({
       try {
         await ensureNdk();
         if (!nostr.signer) {
-          notifyError(
-            "Please connect a Nostr account in Settings to publish a review."
-          );
+          notifyError(i18n.global.t("CreateMintReview.connect_nostr"));
           return;
         }
         const ndk: NDK = nostr.ndk as any;
@@ -181,11 +180,11 @@ export default defineComponent({
           // @ts-ignore NDKEvent
           recs.handleReviewEvent(event as any);
         } catch {}
-        notifySuccess("Review published");
+        notifySuccess(i18n.global.t("CreateMintReview.published"));
         router.back();
       } catch (e) {
         console.error(e);
-        notifyError("Failed to publish review");
+        notifyError(i18n.global.t("CreateMintReview.publish_failed"));
       } finally {
         submitting.value = false;
       }
@@ -293,7 +292,7 @@ export default defineComponent({
       copyText: (t: string) => {
         try {
           navigator.clipboard.writeText(t);
-          notifySuccess("Copied to clipboard");
+          notifySuccess(i18n.global.t("global.copy_to_clipboard.success"));
         } catch {}
       },
     };

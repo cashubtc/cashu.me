@@ -110,13 +110,14 @@
                     <div v-if="isReceiving" class="receiving-state q-mb-md">
                       <div class="row items-center no-wrap">
                         <div class="col-auto text-h5 text-weight-bold">
-                          Receiving
                           {{
-                            formatCurrency(
-                              Math.max(tokenAmount - receiveFee, 0),
-                              tokenUnit,
-                              true
-                            )
+                            $t("ReceiveTokenDialog.receiving_amount", {
+                              amount: formatCurrency(
+                                Math.max(tokenAmount - receiveFee, 0),
+                                tokenUnit,
+                                true
+                              ),
+                            })
                           }}
                         </div>
                         <div class="col-auto">
@@ -538,9 +539,6 @@ export default defineComponent({
       "pasteToParseDialog",
       "receiveToken",
     ]),
-    formatCurrency(value: number, currency: string, showBalance = false) {
-      return useUiStore().formatCurrency(value, currency, showBalance);
-    },
     handleReceive: async function () {
       if (this.isReceiving) {
         return;
@@ -809,7 +807,7 @@ export default defineComponent({
 
 .close-btn-position {
   position: absolute;
-  right: 16px;
+  inset-inline-end: 16px;
   bottom: 22px;
   z-index: 100;
 }
@@ -835,7 +833,7 @@ export default defineComponent({
 .floating-button {
   position: absolute;
   top: 10px;
-  right: 0px;
+  inset-inline-end: 0px;
   z-index: 100;
   padding: 1px;
   background-color: var(--q-primary);

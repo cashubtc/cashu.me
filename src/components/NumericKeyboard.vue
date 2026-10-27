@@ -22,7 +22,12 @@
 
         <q-btn flat class="text-h5 invisible" disable>•</q-btn>
         <q-btn flat class="text-h5" @click="addDigit('0')">0</q-btn>
-        <q-btn flat class="text-h5" aria-label="Backspace" @click="backspace">
+        <q-btn
+          flat
+          class="text-h5"
+          :aria-label="$t('common.backspace')"
+          @click="backspace"
+        >
           <DeleteIcon :size="26" />
         </q-btn>
         <q-btn v-if="!hideClose" flat @click="closeKeyboard">{{
@@ -124,6 +129,7 @@ export default defineComponent({
 }
 
 .keyboard-grid {
+  direction: ltr; /* keypads keep 1-2-3 order in right-to-left locales */
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;

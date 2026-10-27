@@ -16,7 +16,7 @@
         type="textarea"
         autogrow
         :label="$t('EditMintDialog.inputs.mint_url.label')"
-        class="q-mb-md"
+        class="q-mb-md url-input"
       />
       <q-input
         v-model="editMintData.nickname"
@@ -25,7 +25,7 @@
         type="textarea"
         autogrow
         :label="$t('EditMintDialog.inputs.nickname.label')"
-        placeholder="e.g. Testnet"
+        :placeholder="$t('EditMintDialog.inputs.nickname.placeholder')"
       />
       <div class="council-dialog__actions">
         <q-btn flat rounded no-caps class="col" v-close-popup>

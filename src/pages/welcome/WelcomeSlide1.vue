@@ -29,12 +29,17 @@
 
       <!-- Terms agreement -->
       <div class="terms-agreement">
-        <p class="terms-text">
-          By continuing, you agree to the
-          <span class="terms-link" @click="showTermsSheet"
-            >Terms of Service</span
-          >
-        </p>
+        <i18n-t
+          keypath="WelcomeSlide1.terms_agreement"
+          tag="p"
+          class="terms-text"
+        >
+          <template #terms>
+            <span class="terms-link" @click="showTermsSheet">{{
+              $t("WelcomeSlide4.title")
+            }}</span>
+          </template>
+        </i18n-t>
       </div>
     </div>
 
@@ -86,7 +91,7 @@
     <div v-if="showTerms" class="terms-menu-overlay" @click="closeTermsSheet">
       <div class="terms-menu" @click.stop>
         <div class="terms-menu-header">
-          <h3>Terms of Service</h3>
+          <h3>{{ $t("WelcomeSlide4.title") }}</h3>
           <q-btn
             flat
             round
@@ -96,7 +101,7 @@
           />
         </div>
         <div class="terms-content">
-          <div class="terms-text-content">
+          <div class="terms-text-content" dir="ltr" lang="en">
             <p><strong>Last Updated: 20.12.2024</strong></p>
             <p>
               <strong>
@@ -459,6 +464,14 @@ export default {
     },
     toggleLanguageMenu() {
       this.showLanguageMenu = !this.showLanguageMenu;
+      if (this.showLanguageMenu) {
+        // Open on the current language, which can sit below the fold in a long list.
+        this.$nextTick(() => {
+          this.$el
+            ?.querySelector?.(".language-option.active")
+            ?.scrollIntoView({ block: "nearest" });
+        });
+      }
     },
     closeLanguageMenu() {
       this.showLanguageMenu = false;
@@ -644,23 +657,35 @@ export default {
   flex-direction: column;
 }
 
+/* The shared sheet header (BottomSheet): close on the leading 6px inset, title centred. */
 .language-menu-header {
+  position: relative;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  padding: 16px 8px 12px 16px;
+  min-height: 56px;
+  padding: 0 56px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
 }
 
 .language-menu-header h3 {
   color: white;
-  font-size: 1.1rem;
+  font-size: 1.0625rem;
   font-weight: 600;
+  line-height: 1.3;
   margin: 0;
+  text-align: center;
 }
 
 .close-btn {
   color: rgba(255, 255, 255, 0.7) !important;
+  position: absolute;
+  inset-inline-start: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
 }
 
 .language-options {
@@ -681,7 +706,7 @@ export default {
   cursor: pointer;
   transition: all 0.2s ease;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  text-align: left;
+  text-align: start;
 }
 
 .language-option:hover {
@@ -745,20 +770,25 @@ export default {
   flex-direction: column;
 }
 
+/* The shared sheet header (BottomSheet): close on the leading 6px inset, title centred. */
 .terms-menu-header {
+  position: relative;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  padding: 16px 8px 12px 16px;
+  min-height: 56px;
+  padding: 0 56px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   flex-shrink: 0;
 }
 
 .terms-menu-header h3 {
   color: white;
-  font-size: 1.1rem;
+  font-size: 1.0625rem;
   font-weight: 600;
+  line-height: 1.3;
   margin: 0;
+  text-align: center;
 }
 
 .terms-content {
@@ -769,6 +799,7 @@ export default {
 }
 
 .terms-text-content {
+  text-align: left; /* English text inside an rtl page */
   color: rgba(255, 255, 255, 0.9);
   line-height: 1.5;
 }

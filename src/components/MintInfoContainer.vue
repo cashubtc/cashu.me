@@ -97,7 +97,7 @@ export default defineComponent({
 }
 
 .mint-name {
-  text-align: left;
+  text-align: start;
   font-size: 16px;
   font-weight: 600;
   line-height: 20px;
@@ -109,7 +109,7 @@ export default defineComponent({
 }
 
 .mint-url {
-  text-align: left;
+  text-align: start;
   font-size: 13px;
   line-height: 18px;
   color: var(--app-text-muted);

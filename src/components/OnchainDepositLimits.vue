@@ -49,14 +49,19 @@ export default defineComponent({
       const min = this.limits.minAmount;
       const max = this.limits.maxAmount;
       if (min != null && max != null) {
-        return `Deposits outside ${this.formatLimit(min)}–${this.formatLimit(
-          max
-        )} won't be credited.`;
+        return this.$t("CreateInvoiceDialog.deposit_limits.outside", {
+          min: this.formatLimit(min),
+          max: this.formatLimit(max),
+        }) as string;
       }
       if (min != null)
-        return `Deposits below ${this.formatLimit(min)} won't be credited.`;
+        return this.$t("CreateInvoiceDialog.deposit_limits.below", {
+          min: this.formatLimit(min),
+        }) as string;
       if (max != null)
-        return `Deposits above ${this.formatLimit(max)} won't be credited.`;
+        return this.$t("CreateInvoiceDialog.deposit_limits.above", {
+          max: this.formatLimit(max),
+        }) as string;
       return "";
     },
   },
@@ -75,7 +80,7 @@ export default defineComponent({
   text-wrap: balance;
 }
 .deposit-limits-icon {
-  margin-right: 6px;
+  margin-inline-end: 6px;
   vertical-align: -2px;
 }
 </style>

@@ -160,7 +160,6 @@
           <q-input
             outlined
             rounded
-            dense
             v-model="newRelay"
             :label="$t('Settings.sections.nostr.relays.add.title')"
           >
@@ -177,11 +176,9 @@
           </q-input>
         </q-item-section>
       </q-item>
-      <q-item v-for="relay in relays" :key="relay" class="relay-row">
+      <q-item v-for="relay in displayRelays" :key="relay" class="relay-row">
         <q-item-section>
-          <q-item-label caption style="word-break: break-all">{{
-            relay
-          }}</q-item-label>
+          <q-item-label class="relay-url" dir="ltr">{{ relay }}</q-item-label>
         </q-item-section>
         <q-item-section side>
           <div class="row items-center no-wrap">
@@ -298,6 +295,10 @@ export default defineComponent({
   },
   computed: {
     ...mapWritableState(useNostrStore, ["relays"]),
+    // One row per relay: stored lists can hold the same URL twice (e.g. with a trailing space).
+    displayRelays() {
+      return [...new Set(this.relays.map((r) => r.trim()))];
+    },
     ...mapState(useNostrStore, [
       "pubkey",
       "signerType",
@@ -384,7 +385,9 @@ export default defineComponent({
         this.newRelay = this.newRelay.trim();
         // if relay is already in relays, don't add it, send notification
         if (this.relays.includes(this.newRelay)) {
-          this.notifyWarning("Relay already added");
+          this.notifyWarning(
+            this.$t("Settings.sections.nostr.relays.already_added")
+          );
         } else {
           this.relays.push(this.newRelay);
           this.newRelay = "";
@@ -392,7 +395,7 @@ export default defineComponent({
       }
     },
     removeRelay: function (relay) {
-      this.relays = this.relays.filter((r) => r !== relay);
+      this.relays = this.relays.filter((r) => r.trim() !== relay);
     },
   },
   created: async function () {

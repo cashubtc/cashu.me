@@ -203,9 +203,16 @@
                     @click="changeSpeed"
                   >
                     <q-icon name="speed" size="18px" class="q-mr-xs"></q-icon>
-                    QR speed:
                     {{
-                      { F: "Fast", M: "Medium", S: "Slow" }[fragmentSpeedLabel]
+                      $t("DisplayTokenComponent.qr_speed", {
+                        value: $t(
+                          `DisplayTokenComponent.speed.${
+                            { F: "fast", M: "medium", S: "slow" }[
+                              fragmentSpeedLabel
+                            ]
+                          }`
+                        ),
+                      })
                     }}
                   </q-btn>
                   <q-btn
@@ -217,11 +224,16 @@
                     @click="changeSize"
                   >
                     <q-icon name="zoom_in" size="18px" class="q-mr-xs"></q-icon>
-                    QR size:
                     {{
-                      { L: "Large", M: "Medium", S: "Small" }[
-                        fragmentLengthLabel
-                      ]
+                      $t("DisplayTokenComponent.qr_size", {
+                        value: $t(
+                          `DisplayTokenComponent.size.${
+                            { L: "large", M: "medium", S: "small" }[
+                              fragmentLengthLabel
+                            ]
+                          }`
+                        ),
+                      })
                     }}
                   </q-btn>
                 </div>
@@ -295,18 +307,18 @@
       <q-card-section class="q-pa-none">
         <div class="row items-center no-wrap q-mb-sm">
           <div class="col-12">
-            <span class="text-h6">Delete Ecash</span>
+            <span class="text-h6">{{
+              $t("DisplayTokenComponent.delete_dialog.title")
+            }}</span>
           </div>
         </div>
         <div class="row items-center no-wrap q-my-sm q-py-none">
           <div class="col-12">
             <q-item-label>
-              Are you sure you want to delete this transaction from your
-              history?
+              {{ $t("DisplayTokenComponent.delete_dialog.text") }}
             </q-item-label>
             <q-item-label class="q-pt-md text-weight-bold">
-              Warning: This action cannot be undone and there is no way to
-              recover the token.
+              {{ $t("DisplayTokenComponent.delete_dialog.warning") }}
             </q-item-label>
           </div>
         </div>
@@ -316,11 +328,11 @@
             color="negative"
             rounded
             class="q-mr-sm"
-            >Delete</q-btn
+            >{{ $t("common.delete") }}</q-btn
           >
-          <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto"
-            >Cancel</q-btn
-          >
+          <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto">{{
+            $t("global.actions.cancel.label")
+          }}</q-btn>
         </div>
       </q-card-section>
     </q-card>
@@ -423,7 +435,7 @@ export default defineComponent({
     },
     copyButtonLabel: function () {
       if (this.copyButtonCopied) {
-        return "Copied";
+        return this.$t("common.copied");
       }
       return this.$t("SendTokenDialog.actions.copy_tokens.label");
     },
@@ -567,7 +579,10 @@ export default defineComponent({
             .then(() => {
               this.ndef.onreadingerror = (error: any) => {
                 console.error(`NFC read failed: ${error}`);
-                notifyError(`${error?.message || error}`, "NFC read failed");
+                notifyError(
+                  `${error?.message || error}`,
+                  this.$t("DisplayTokenComponent.nfc.read_failed")
+                );
                 this.controller.abort();
                 this.scanningCard = false;
               };
@@ -615,36 +630,49 @@ export default defineComponent({
                         `Unknown NFC encoding: ${this.nfcEncoding}`
                       );
                   }
-                  notifySuccess("Writing to NFC card...");
+                  notifySuccess(this.$t("DisplayTokenComponent.nfc.writing"));
                   this.ndef
                     .write({ records: records }, { overwrite: true })
                     .then(() => {
-                      notifySuccess("Successfully flashed token to card!");
+                      notifySuccess(
+                        this.$t("DisplayTokenComponent.nfc.success")
+                      );
                     })
                     .catch((err: any) => {
                       console.error(
                         `NFC write failed: The card may not have enough capacity (needed ${records[0].data.length} bytes).`
                       );
                       notifyError(
-                        `The card may not have enough capacity (needed ${records[0].data.length} bytes).`,
-                        "NFC write failed"
+                        this.$t("DisplayTokenComponent.nfc.capacity", {
+                          bytes: records[0].data.length,
+                        }),
+                        this.$t("DisplayTokenComponent.nfc.write_failed")
                       );
                     });
                 } catch (err: any) {
                   console.error(`NFC error: ${err?.message}`);
-                  notifyError(`${err?.message}`, "NFC error");
+                  notifyError(
+                    `${err?.message}`,
+                    this.$t("DisplayTokenComponent.nfc.error")
+                  );
                 }
               };
               this.scanningCard = true;
             })
             .catch((error: any) => {
               console.error(`NFC error: ${error?.message}`);
-              notifyError(`${error?.message}`, "NFC error");
+              notifyError(
+                `${error?.message}`,
+                this.$t("DisplayTokenComponent.nfc.error")
+              );
               this.scanningCard = false;
             });
         } catch (error: any) {
           console.error(`NFC error: ${error?.message}`);
-          notifyError(`${error?.message}`, "NFC error");
+          notifyError(
+            `${error?.message}`,
+            this.$t("DisplayTokenComponent.nfc.error")
+          );
           this.scanningCard = false;
         }
       }
@@ -713,7 +741,7 @@ export default defineComponent({
 }
 .floating-actions {
   position: absolute;
-  right: 8px;
+  inset-inline-end: 8px;
   top: 50%;
   transform: translateY(-50%);
   z-index: 2;

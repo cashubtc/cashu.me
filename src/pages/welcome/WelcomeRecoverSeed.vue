@@ -203,7 +203,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: left;
+  text-align: start;
   flex: 1;
 }
 
@@ -230,7 +230,7 @@ export default {
   margin: 0 0 16px 0;
   color: white;
   line-height: 1.2;
-  text-align: left;
+  text-align: start;
   width: 100%;
   max-width: 500px; /* unified */
 }
@@ -240,7 +240,7 @@ export default {
   line-height: 1.5;
   color: rgba(255, 255, 255, 0.8);
   margin: 0 0 32px 0;
-  text-align: left;
+  text-align: start;
   max-width: 500px; /* unified */
   width: 100%;
 }
@@ -268,7 +268,7 @@ export default {
   font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.4);
   min-width: 22px;
-  text-align: right;
+  text-align: end;
   font-weight: 600;
 }
 
@@ -341,7 +341,7 @@ export default {
   color: rgba(255, 255, 255, 0.7);
   margin: 0;
   line-height: 1.4;
-  text-align: left;
+  text-align: start;
 }
 
 /* Mobile adjustments */

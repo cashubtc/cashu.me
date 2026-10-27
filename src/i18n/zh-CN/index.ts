@@ -1,10 +1,25 @@
 export default {
   MultinutPicker: {
-    payment: "多坚果支付",
-    selectMints: "选择一个或多个铸币厂来发起支付。",
+    dialog_title: "多 Mint 支付",
+    pay_using_multiple: "使用多个 Mint 支付",
+    experimental_title: "实验性功能",
+    experimental_text:
+      "此功能处于高度实验阶段，可能无法按预期工作。请勿尝试支付已支付过的发票，否则可能损失资金。",
+    understand: "我已了解",
+    select_funds: "从多个 Mint 选择资金以完成支付。",
+    pay_invoice: "支付发票",
+    amount_mismatch: "金额计算错误：{calculated}，应为 {expected}",
+    states: {
+      requesting: "请求中...",
+      paying: "支付中...",
+      success: "成功",
+      failed: "失败",
+    },
+    payment: "多 Mint 支付",
+    selectMints: "选择一个或多个 Mint 来发起支付。",
     totalSelectedBalance: "所选总余额",
-    multiMintPay: "多铸币支付",
-    balanceNotEnough: "多铸币余额不足以支付此发票",
+    multiMintPay: "多 Mint 支付",
+    balanceNotEnough: "多 Mint 余额不足以支付此发票",
     failed: "处理失败：{error}",
     paid: "通过闪电网络支付了 {amount}",
   },
@@ -50,6 +65,7 @@ export default {
       update: {
         label: "更新",
       },
+      pay: { label: "支付" },
     },
     inputs: {
       mint_url: {
@@ -79,6 +95,10 @@ export default {
       no_price_data: "没有价格数据。",
       please_try_again: "请重试。",
       trying_again: "正在重试...",
+      unsupported_legacy_qr: "不支持的旧版二维码",
+      legacy_qr_not_supported: "此旧版二维码并非来自受支持的商家",
+      no_bolt12_mint: "您的 Mint 都不支持 BOLT12 Offer",
+      no_bolt11_mint: "您的 Mint 都不支持 BOLT11 发票",
     },
     mint: {
       notifications: {
@@ -96,7 +116,7 @@ export default {
         could_not_get_keysets: "无法获取 Mint 密钥集",
         removed: "Mint 已移除",
         error: "Mint 错误",
-        mint_validation_error: "铸币厂验证错误",
+        mint_validation_error: "Mint 验证错误",
       },
     },
   },
@@ -113,7 +133,7 @@ export default {
         title: "条款",
         terms: {
           title: "条款",
-          caption: "服务条款",
+          caption: "使用 Cashu.me 即表示您同意的内容",
         },
       },
       links: {
@@ -123,7 +143,7 @@ export default {
           caption: "cashu.space",
         },
         github: {
-          title: "Github",
+          title: "GitHub",
           caption: "github.com/cashubtc",
         },
         telegram: {
@@ -172,7 +192,7 @@ export default {
       },
       lightning_address: {
         title: "闪电地址",
-        caption: "通过您的闪电地址接收付款",
+        caption: "通过 name@domain 收款",
       },
       nostr: {
         title: "Nostr",
@@ -180,7 +200,7 @@ export default {
       },
       payment_requests: {
         title: "付款请求",
-        caption: "通过 nostr 接收 ecash 付款",
+        caption: "通过 Nostr 接收 ecash 付款",
       },
       nwc: {
         title: "Nostr 钱包连接",
@@ -191,8 +211,8 @@ export default {
         caption: "NFC 设置",
       },
       p2pk: {
-        title: "P2PK",
-        caption: "接收锁定到您密钥的 ecash",
+        title: "锁定的 ecash",
+        caption: "接收只有您的密钥才能解锁的 ecash",
       },
       privacy: {
         title: "隐私",
@@ -224,7 +244,7 @@ export default {
       known_pubkeys: "已知公钥：{wotCount}",
 
       continue_crawl: "继续抓取",
-      crawl_odell: "抓取 ODELL 的信任网络",
+      crawl_odell: "导入 Odell 的信任网络",
       crawl_wot: "抓取信任网络",
       pause: "暂停",
       reset: "重置",
@@ -234,7 +254,7 @@ export default {
       copy_lightning_address: "复制闪电地址",
     },
     multinut: {
-      use_multinut: "使用 Multinut",
+      use_multinut: "多 Mint 支付",
     },
     language: {
       title: "语言",
@@ -247,11 +267,12 @@ export default {
       nostr: {
         title: "NOSTR",
         relays: {
+          already_added: "中继已添加",
           expand_label: "点击编辑中继",
           add: {
             title: "添加中继",
             description:
-              "您的钱包使用这些中继进行nostr操作，例如付款请求、nostr钱包连接和备份。",
+              "您的钱包使用这些中继来实现 Nostr 功能，例如付款请求、Nostr Wallet Connect 和备份。",
           },
           list: {
             title: "中继",
@@ -278,17 +299,21 @@ export default {
       },
       restore_ecash: {
         title: "恢复 ecash",
-        description:
-          "恢复向导允许您从助记符种子短语中恢复丢失的 ecash。您当前钱包的种子短语不会受到影响，该向导仅允许您从另一个种子短语中 恢复 ecash。",
+        description: "从另一个种子短语恢复 ecash。您当前的种子短语保持不变。",
         button: "恢复",
       },
     },
     lightning_address: {
+      server_url: {
+        label: "npub.cash 主机名",
+        hint: "输入主机名或 HTTPS URL",
+        invalid: "请输入有效的 HTTPS 服务器 URL",
+      },
       title: "Lightning 地址",
       description: "接收支付到您的 Lightning 地址。",
       enable: {
-        toggle: "启用",
-        description: "带有 npub.cash 的 Lightning 地址",
+        toggle: "使用闪电地址",
+        description: "通过 npub.cash 提供的地址收款",
       },
       address: {
         copy_tooltip: "复制 Lightning 地址",
@@ -302,28 +327,28 @@ export default {
         description: "自动接收收到的支付。",
       },
       mint: {
-        label: "npub.cash 铸币厂",
-        choose_title: "为 npub.cash 选择铸币厂",
-        choose_placeholder: "选择一个铸币厂…",
+        label: "npub.cash Mint",
+        choose_title: "为 npub.cash 选择 Mint",
+        choose_placeholder: "选择一个 Mint…",
       },
     },
     nostr_keys: {
       title: "您的 Nostr 密钥",
-      description: "为您的 Lightning 地址设置 Nostr 密钥。",
+      description: "您的 Nostr 密钥决定您的闪电地址。",
       wallet_seed: {
         title: "钱包种子短语",
-        description: "从钱包种子生成 Nostr 密钥对",
-        copy_nsec: "复制 nsec",
+        description: "从您的钱包种子生成 Nostr 密钥对",
+        copy_nsec: "复制私钥",
       },
       nsec_bunker: {
-        title: "Nsec Bunker",
-        description: "使用 NIP-46 bunker",
+        title: "远程签名器",
+        description: "使用 NIP-46 bunker 签名",
         delete_tooltip: "删除连接",
       },
       use_nsec: {
-        title: "使用您的 nsec",
-        description: "这种方法很危险，不建议使用",
-        delete_tooltip: "删除 nsec",
+        title: "使用您自己的私钥",
+        description: "将您的 Nostr 私钥（nsec）粘贴到此钱包。不推荐。",
+        delete_tooltip: "删除私钥",
       },
       signing_extension: {
         title: "签名扩展",
@@ -334,18 +359,18 @@ export default {
 
     payment_requests: {
       title: "支付请求",
-      description:
-        "支付请求允许您通过 Nostr 接收支付。如果您启用此功能，您的钱包将订阅您的 Nostr 中继。",
-      enable_toggle: "启用支付请求",
+      description: "通过 Nostr 收款。开启后，您的钱包会监听您的 Nostr 中继。",
+      enable_toggle: "启用付款请求",
       claim_automatically: {
         toggle: "自动认领",
-        description: "自动接收收到的支付。",
+        description:
+          "无需确认，直接将收到的付款加入余额。关闭时，需要您逐笔领取。",
       },
     },
     nostr_wallet_connect: {
       title: "Nostr 钱包连接 (NWC)",
-      description: "使用 NWC 从任何其他应用程序控制您的钱包。",
-      enable_toggle: "启用 NWC",
+      description: "允许其他应用通过 Nostr Wallet Connect 从此钱包付款。",
+      enable_toggle: "启用 Nostr Wallet Connect",
       payments_note:
         "您只能使用 NWC 从您的比特币余额支付。支付将从您激活的 Mint 进行。",
       connection: {
@@ -356,7 +381,7 @@ export default {
     },
     hardware_features: {
       webnfc: {
-        title: "WebNFC",
+        title: "NFC 卡格式",
         description: "选择写入 NFC 卡的编码",
         text: {
           title: "文本",
@@ -368,25 +393,24 @@ export default {
         },
         binary: {
           title: "二进制",
-          description: "将令牌存储为二进制数据",
+          description: "将 token 存储为二进制数据",
         },
         quick_access: {
           toggle: "NFC 快速访问",
-          description:
-            "在 '接收 Ecash' 菜单中快速扫描 NFC 卡。此选项会在 '接收 Ecash' 菜单中添加一个 NFC 按钮。",
+          description: "在“接收 ecash”界面添加一个用于扫描卡片的 NFC 按钮。",
         },
       },
     },
     p2pk_features: {
-      title: "P2PK",
+      title: "锁定的 ecash",
       description:
-        "生成密钥对以接收 P2PK 锁定的 ecash。警告：此功能是实验性的。仅用于小额。如果您丢失了您的私钥，将没有人能够再解锁锁定到它的 ecash。",
+        "实验性功能，请仅用于小额：如果您丢失了私钥，任何人都无法再解锁锁定到它的 ecash。",
       generate_button: "生成密钥",
-      import_button: "导入 nsec",
+      import_button: "导入私钥",
       quick_access: {
-        toggle: "快速访问锁定",
+        toggle: "在“接收”中显示锁定密钥",
         description:
-          "使用此功能在 '接收 Ecash' 菜单中快速显示您的 P2PK 锁定密钥。",
+          "在“接收 ecash”界面显示您的锁定密钥，方便对方将 ecash 锁定给您。",
       },
       keys_expansion: {
         label: "点击浏览 {count} 个密钥",
@@ -398,32 +422,30 @@ export default {
       description: "这些设置会影响您的隐私。",
       check_incoming: {
         toggle: "检查收到的发票",
-        description:
-          "如果启用，钱包会在后台检查最新的发票。这增加了钱包的响应速度，但也使指纹识别更容易。您可以在发票标签中手动检查未付款的发票。",
+        description: "在后台检查您最新的发票。更新更快，但更容易被识别指纹。",
       },
       check_startup: {
         toggle: "启动时检查待处理发票",
-        description: "如果启用，钱包会在启动时检查待处理的发票。",
+        description: "打开钱包时检查待处理的发票。",
       },
       check_all: {
         toggle: "检查所有发票",
         description:
-          "如果启用，钱包会在后台定期检查未付款的发票，最长可达两周。这增加了钱包的在线活动，从而使指纹识别更容易。您可以在发票标签中手动检查未付款的发票。",
+          "在后台检查未付款的发票，最长两周。在线活动越多，越容易被识别指纹。",
       },
       check_sent: {
         toggle: "检查已发送的 ecash",
         description:
-          "如果启用，钱包会使用周期性后台检查来确定已发送的 token 是否已被兑换。这增加了钱包的在线活动，从而使指纹识别更容易。",
+          "在后台检查已发送的 ecash 是否已被领取。在线活动越多，越容易被识别指纹。",
       },
       websockets: {
         toggle: "使用 WebSockets",
         description:
-          "如果启用，钱包将使用长连接的 WebSocket 来接收有关已付款发票和已花费 token 的更新信息。这增加了钱包的响应速度，但也使指纹识别更容易。",
+          "与 Mint 保持实时连接，即时获取付款更新。更快，但更容易被识别指纹。",
       },
       bitcoin_price: {
         toggle: "从 Coinbase 获取汇率",
-        description:
-          "如果启用，将从 coinbase.com 获取当前比特币汇率并显示您的转换后余额。",
+        description: "从 coinbase.com 获取比特币价格，以法币显示您的余额。",
         currency: {
           title: "法定货币",
           description: "选择用于比特币价格显示的法定货币。",
@@ -436,30 +458,28 @@ export default {
       receive_swaps: {
         toggle: "接收 swaps",
         badge: "测试版",
-        description:
-          "在接收 Ecash 对话框中，选择将接收到的 Ecash 兑换为您的激活 Mint。",
+        description: "提供将收到的 ecash 兑换到您当前 Mint 的选项。",
       },
       auto_paste: {
-        toggle: "自动粘贴 Ecash",
+        toggle: "自动粘贴 ecash",
         description:
-          "当您按接收，然后Ecash，然后粘贴时，自动粘贴剪贴板中的 ecash。自动粘贴可能会导致 iOS 中的 UI 故障，如果您遇到问题，请关闭此功能。",
+          "打开“接收 ecash”时自动粘贴剪贴板中的 ecash。如果在 iOS 上出现显示问题，请关闭。",
       },
       auditor: {
         toggle: "启用审计器",
         badge: "测试版",
-        description:
-          "如果启用，钱包将在 Mint 详细信息对话框中显示审计器信息。审计器是第三方服务，用于监控 Mint 的可靠性。",
+        description: "在 Mint 详情中显示第三方 Mint 审计服务提供的可靠性数据。",
         url_label: "审计器 URL",
         api_url_label: "审计器 API URL",
       },
       multinut: {
         toggle: "启用 Multinut",
-        description: "如果启用，钱包将使用 Multinut 同时从多个 Mint 支付发票。",
+        description: "同时从多个 Mint 支付发票。",
       },
       nostr_mint_backup: {
-        toggle: "在 Nostr 上备份 Mint 列表",
+        toggle: "将 Mint 列表备份到 Nostr",
         description:
-          "如果启用，您的 Mint 列表将使用您配置的 Nostr 密钥自动备份到 Nostr 中继。这允许您在不同设备上恢复您的 Mint 列表。",
+          "将您的 Mint 列表备份到您的 Nostr 中继，以便在其他设备上恢复。",
         notifications: {
           enabled: "Nostr Mint 备份已启用",
           disabled: "Nostr Mint 备份已禁用",
@@ -472,16 +492,16 @@ export default {
         title: "屏幕键盘",
         description: "使用数字键盘输入金额。",
         toggle: "使用数字键盘",
-        toggle_description: "如果启用，将使用数字键盘输入金额。",
+        toggle_description: "使用数字键盘输入金额。",
       },
       theme: {
-        title: "外观",
+        title: "主题",
         description: "更改您钱包的外观。",
         tooltips: {
           mono: "单色",
           cyber: "赛博",
           freedom: "自由",
-          nostr: "nostr",
+          nostr: "Nostr",
           bitcoin: "比特币",
           mint: "薄荷",
           nut: "坚果",
@@ -491,19 +511,26 @@ export default {
       },
       bip177: {
         title: "比特币符号",
-        description: "使用 ₿ 符号代替 sats。",
+        description: "将金额显示为 ₿2,789，而不是 2,789 sats。",
         toggle: "使用 ₿ 符号",
       },
     },
     advanced: {
+      notifications: {
+        reserved_unset: "已取消所有预留证明",
+        removed_spent: "已移除 {count} 个已花费证明",
+        no_spent: "未发现已花费证明",
+        invalid_backup: "备份文件格式无效",
+        read_error: "读取文件出错",
+      },
       title: "高级",
       developer: {
         title: "开发者设置",
-        description: "以下设置为开发和调试用途。",
+        description: "用于故障排查和调试的工具。",
         new_seed: {
           button: "生成新的种子短语",
           description:
-            "这将生成一个新的种子短语。您必须将您的全部余额发送给自己，以便能够使用新的种子恢复。",
+            "创建新的种子短语。之后请把余额发送给自己，以便新种子短语可以恢复它。",
           confirm_question: "您确定要生成新的种子短语吗？",
           cancel: "取消",
           confirm: "确认",
@@ -511,28 +538,27 @@ export default {
         remove_spent: {
           button: "删除已花费的证明",
           description:
-            "检查您的活动 Mint 中的 ecash token 是否已花费，并从您的钱包中删除已花费的 token。仅当您的钱包卡住时使用此功能。",
+            "移除您当前 Mint 报告为已花费的 ecash。仅在钱包卡住时使用。",
         },
         debug_console: {
           button: "切换调试控制台",
           description:
-            "打开 Javascript 调试终端。切勿向此终端粘贴您不理解的任何内容。小偷可能会试图欺骗您在此处粘贴恶意代码。",
+            "打开 JavaScript 控制台。切勿粘贴您不理解的代码，骗子会借此盗取资金。",
         },
         export_proofs: {
           button: "导出活动证明",
-          description:
-            "将活动 Mint 中的全部余额作为 Cashu token 复制到剪贴板。这只会导出所选 Mint 和单位的 token。要进行完全导出，请选择不同的 Mint 和单位并再次导出。",
+          description: "将当前 Mint 中所选单位的余额复制为一个 ecash token。",
         },
         keyset_counters: {
           title: "增加 keyset 计数器",
           description:
-            "点击 keyset ID 以增加您钱包中 keysets 的 derivation path 计数器。如果您看到输出已被签名错误，这将很有用。",
+            "点击某个 keyset 以增加其计数器。可用于解决“outputs have already been signed”错误。",
           counter: "计数器: {count}",
         },
         unset_reserved: {
           button: "取消所有保留的 token",
           description:
-            "此钱包会将待处理的传出 ecash 标记为已保留（并从您的余额中扣除），以防止双重支付尝试。此按钮将取消所有保留的 token，以便可以再次使用它们。如果您执行此操作，您的钱包可能会包含已花费的证明。按删除已花费的证明按钮以清除它们。",
+            "释放为待处理发送而保留的 ecash，使其可以再次使用。之后请运行“删除已花费的证明”。",
         },
         show_onboarding: {
           button: "显示入门指南",
@@ -540,8 +566,7 @@ export default {
         },
         reset_wallet: {
           button: "重置钱包数据",
-          description:
-            "重置您的钱包数据。警告：这将删除所有内容！请务必先创建备份。",
+          description: "删除此设备上的所有钱包数据。请先导出备份。",
           confirm_question: "您确定要删除您的钱包数据吗？",
           cancel: "取消",
           confirm: "删除钱包",
@@ -549,21 +574,28 @@ export default {
         export_wallet: {
           button: "导出钱包数据",
           description:
-            "下载您的钱包数据。您可以在新钱包的欢迎屏幕上从该文件中恢复您的钱包。如果您在导出后继续使用您的钱包，该文件将不同步。",
+            "下载一个备份文件，可在欢迎界面导入。继续使用钱包后，该文件会过时。",
+        },
+        import_wallet: {
+          description: "用导出的备份文件替换此钱包的数据。",
+          button: "导入钱包备份",
+          confirm_question: "确定要恢复您的钱包数据吗？",
+          cancel: "取消",
+          confirm: "导入钱包备份",
         },
       },
     },
   },
   NoMintWarnBanner: {
-    title: "加入 Mint",
+    title: "添加 Mint",
     subtitle:
-      "您还没有加入任何 Cashu Mint。请在设置中添加 Mint URL 或接收来自新 Mint 的 ecash 以开始。",
+      "Mint 负责发行此钱包持有的 ecash。添加一个 Mint，或从某个 Mint 接收 ecash，即可开始。",
     actions: {
       add_mint: {
         label: "@:global.actions.add_mint.label",
       },
       receive: {
-        label: "接收 Ecash",
+        label: "接收 ecash",
       },
     },
   },
@@ -584,7 +616,7 @@ export default {
         label: "发票",
       },
       mints: {
-        label: "Mints",
+        label: "Mint",
       },
     },
     install: {
@@ -593,8 +625,8 @@ export default {
     },
   },
   AlreadyRunning: {
-    title: "不行。",
-    text: "另一个标签页正在运行。请关闭此标签页并重试。",
+    title: "Cashu.me 已在另一个标签页中打开",
+    text: "请关闭另一个标签页，然后点击“重试”。",
     actions: {
       retry: {
         label: "重试",
@@ -603,7 +635,7 @@ export default {
   },
   ErrorNotFound: {
     title: "404",
-    text: "哎呀。这里什么都没有…",
+    text: "此页面不存在",
     actions: {
       home: {
         label: "返回主页",
@@ -636,7 +668,8 @@ export default {
     },
   },
   WelcomeSlide1: {
-    title: "欢迎使用 Cashu",
+    terms_agreement: "继续即表示您同意{terms}",
+    title: "欢迎使用 Cashu.me",
     text: "Cashu.me 是一款免费且开源的比特币钱包，使用 ecash 确保您的资金安全和隐私。",
     actions: {
       more: {
@@ -660,7 +693,7 @@ export default {
     },
   },
   WelcomeSlide2: {
-    title: "安装 PWA",
+    title: "安装 Cashu.me",
     alt: { pwa_example: "PWA 安装示例" },
     installing: "正在安装…",
     instruction: {
@@ -692,7 +725,7 @@ export default {
         },
       },
       outro: {
-        text: "在您的设备上安装此应用后，关闭此浏览器窗口并从主屏幕使用该应用。",
+        text: "安装完成后，关闭此浏览器标签页，从主屏幕打开 Cashu.me。",
       },
     },
     pwa: {
@@ -725,10 +758,10 @@ export default {
     },
   },
   WelcomeSlide4: {
-    title: "条款",
+    title: "服务条款",
     actions: {
       more: {
-        label: "阅读服务条款",
+        label: "使用 Cashu.me 前请阅读",
       },
     },
     inputs: {
@@ -747,15 +780,15 @@ export default {
       },
       recover: {
         title: "恢复钱包",
-        subtitle: "输入您的种子短语，恢复 Mints 和 ecash。",
+        subtitle: "输入您的种子短语，恢复 Mint 和 ecash。",
       },
     },
   },
   WelcomeMintSetup: {
-    title: "添加 Mints",
+    title: "添加 Mint",
     text: "Mint 是帮助您发送和接收 ecash 的服务器。选择一个已发现的 Mint 或手动添加。您也可以稍后添加。",
-    sections: { your_mints: "您的 Mints" },
-    restoring: "正在恢复 Mints…",
+    sections: { your_mints: "您的 Mint" },
+    restoring: "正在恢复 Mint…",
     placeholder: { mint_url: "https://" },
   },
   WelcomeRecoverSeed: {
@@ -767,13 +800,15 @@ export default {
   },
   WelcomeRestoreEcash: {
     title: "恢复您的 ecash",
-    text: "扫描您配置的 Mints 上未花费的证明，并将其添加到您的钱包。",
+    text: "扫描您配置的 Mint 上未花费的证明，并将其添加到您的钱包。",
   },
   MintRatings: {
+    web_of_trust_hop: "在您的信任网络中（第 {hop} 跳）",
+    no_mint_url: "未提供 Mint URL",
     title: "Mint 评价",
     reviews: "条评价",
-    ratings: "评分",
-    no_reviews: "未找到评价",
+    ratings: "{n} 个评分",
+    no_reviews: "暂无评价",
     your_review: "您的评价",
     no_reviews_to_display: "暂无可显示的评价。",
     no_rating: "暂无评分",
@@ -788,9 +823,13 @@ export default {
     },
     actions: { write_review: "撰写评价" },
     empty_state_subtitle:
-      "通过留下评价来帮助他人。分享您对此 Mint 的体验，通过留下评价来帮助他人。",
+      "成为第一个评价此 Mint 的人。您的体验能帮助他人做出选择。",
+    range: "第 {from}–{to} 条，共 {total} 条",
   },
   CreateMintReview: {
+    connect_nostr: "请在设置中连接 Nostr 账户以发布评价。",
+    published: "评价已发布",
+    publish_failed: "评价发布失败",
     title: "评价 Mint",
     publishing_as: "发布身份",
     inputs: {
@@ -798,14 +837,13 @@ export default {
       review: { label: "评价（可选）" },
     },
     actions: {
-      publish: { label: "发布", in_progress: "发布中…" },
+      publish: { label: "发布评价", in_progress: "正在发布…" },
     },
   },
   RestoreView: {
     seed_phrase: {
       label: "从种子短语恢复",
-      caption:
-        "输入您的种子短语以恢复您的钱包。在恢复之前，请确保您已添加所有您之前使用过的 Mint。",
+      caption: "恢复前，请先添加您用此种子短语使用过的所有 Mint。",
       inputs: {
         seed_phrase: {
           label: "种子短语",
@@ -819,12 +857,11 @@ export default {
         "该向导仅从另一个种子短语恢复 ecash，您将无法使用此种子短语或更改您当前使用的钱包的种子短语。这意味着，除非您将 ecash 发送给自己一次，否则恢复的 ecash 将不会受到您当前种子短语的保护。",
     },
     restore_mints: {
-      label: "恢复 Mints",
-      caption:
-        "选择要恢复的 Mint。您可以在主屏幕的Mints下添加更多 Mint 并在此处恢复它们。",
+      label: "恢复 Mint",
+      caption: "选择要恢复的 Mint。请先在 Mint 标签页中添加缺少的 Mint。",
     },
     nostr_mints: {
-      label: "从 Nostr 恢复 Mints",
+      label: "从 Nostr 恢复 Mint",
       caption:
         "使用您的种子短语在 Nostr 中继上搜索存储的 Mint 备份。这将帮助您发现以前使用过的 Mint。",
       search_button: "搜索 Mint 备份",
@@ -859,16 +896,16 @@ export default {
         error: "恢复 Mint 错误: { error }",
       },
       restore_all_mints: {
-        label: "恢复所有 Mints",
+        label: "恢复所有 Mint",
         in_progress: "正在恢复第 { index } 个 Mint，共 { length } 个…",
         success: "恢复成功",
-        error: "恢复 Mints 错误: { error }",
+        error: "恢复 Mint 错误: { error }",
       },
       restore_selected_mints: {
-        label: "恢复所选 Mints ({count})",
+        label: "恢复所选 Mint（{count}）",
         in_progress: "正在恢复第 { index } 个 Mint，共 { length } 个…",
         success: "成功恢复 {count} 个 Mint",
-        error: "恢复所选 Mints 错误: { error }",
+        error: "恢复所选 Mint 错误: { error }",
       },
     },
   },
@@ -892,24 +929,24 @@ export default {
       },
     },
     discover: {
-      title: "发现 Mints",
+      title: "发现 Mint",
       overline: "发现",
-      caption: "发现其他用户在 Nostr 上推荐的 Mints。",
+      caption: "其他人在 Nostr 上推荐的 Mint。",
       actions: {
         discover: {
-          label: "发现 Mints",
+          label: "发现 Mint",
           in_progress: "正在加载…",
-          error_no_mints: "未找到 Mints",
-          success: "找到 { length } 个 Mints",
+          error_no_mints: "未找到 Mint",
+          success: "找到 { length } 个 Mint",
         },
       },
       recommendations: {
-        overline: "找到 { length } 个 Mints",
+        overline: "找到 { length } 个 Mint",
         caption:
-          "这些 Mints 是由其他 Nostr 用户推荐的。请小心谨慎，并在使用 Mint 之前自行研究。",
+          "这些 Mint 是由其他 Nostr 用户推荐的。请小心谨慎，并在使用 Mint 之前自行研究。",
         actions: {
           browse: {
-            label: "点击浏览 Mints",
+            label: "点击浏览 Mint",
           },
         },
       },
@@ -917,8 +954,7 @@ export default {
     swap: {
       title: "兑换",
       overline: "多 Mint 兑换",
-      caption:
-        "通过 Lightning 在 Mints 之间兑换资金。注意：留出潜在的 Lightning 费用。如果收到的支付不成功，请手动检查发票。",
+      caption: "通过闪电网络在您的 Mint 之间转移资金。可能产生费用。",
       inputs: {
         from: {
           label: "从",
@@ -935,12 +971,13 @@ export default {
           label: "@:global.actions.swap.label",
           in_progress: "@:MintSettings.swap.actions.swap.label",
         },
+        receove_to_trusted_mint: { label: "接收到受信任的 Mint" },
       },
     },
     error_badge: "错误",
-    reviews_text: "评论",
+    reviews_text: "条评价",
     no_reviews_yet: "暂无评论",
-    discover_mints_button: "发现 Mints",
+    discover_mints_button: "发现 Mint",
   },
   QrcodeReader: {
     progress: {
@@ -977,13 +1014,13 @@ export default {
     },
     invoice: {
       caption: "Lightning 发票",
-      status_paid_text: "已付款！",
+      status_paid_text: "已付款",
       actions: {
         close: {
           label: "@:global.actions.close.label",
         },
         copy: {
-          label: "@:global.actions.copy.label",
+          label: "复制发票",
         },
       },
     },
@@ -993,16 +1030,17 @@ export default {
     actions: {
       ecash: {
         label: "Ecash",
-        error_no_mints: "没有可用的 Mints",
+        error_no_mints: "没有可用的 Mint",
       },
       lightning: {
         label: "Lightning",
-        error_no_mints: "没有可用的 Mints",
+        error_no_mints: "没有可用的 Mint",
       },
     },
   },
   SendTokenDialog: {
-    title: "发送 Ecash",
+    badge_locked: "已锁定",
+    title: "发送 ecash",
     title_ecash_text: "Ecash",
     badge_offline_text: "离线",
     inputs: {
@@ -1024,10 +1062,10 @@ export default {
       },
       copy_emoji: {
         label: "🥜",
-        tooltip_text: "复制 Emoji",
+        tooltip_text: "复制表情符号",
       },
       copy_tokens: {
-        label: "@:global.actions.copy.label",
+        label: "复制 ecash",
       },
       copy_link: {
         tooltip_text: "复制链接",
@@ -1054,6 +1092,12 @@ export default {
           ndef_unsupported_text: "不支持 NDEF",
         },
       },
+      pay: { label: "@:global.actions.pay.label" },
+    },
+    errors: {
+      amount_required: "请先输入金额。",
+      serialization_failed: "无法准备 ecash token。",
+      mint_not_allowed_by_request: "此付款请求不接受所选的 Mint。",
     },
   },
   ReceiveDialog: {
@@ -1061,7 +1105,7 @@ export default {
     actions: {
       ecash: {
         label: "Ecash",
-        error_no_mints: "没有可用的 Mints",
+        error_no_mints: "没有可用的 Mint",
       },
       lightning: {
         label: "Lightning",
@@ -1070,7 +1114,7 @@ export default {
     },
   },
   ReceiveEcashDrawer: {
-    title: "接收 Ecash",
+    title: "接收 ecash",
     actions: {
       paste: {
         label: "@:global.actions.paste.label",
@@ -1091,7 +1135,8 @@ export default {
     },
   },
   ReceiveTokenDialog: {
-    title: "接收 Ecash",
+    receiving_amount: "正在接收 {amount}",
+    title: "接收 ecash",
     title_ecash_text: "Ecash",
     inputs: {
       tokens_base64: {
@@ -1125,6 +1170,8 @@ export default {
         label: "@:global.actions.swap.label",
         tooltip_text: "兑换到信任的 Mint",
         caption: "兑换 { value }",
+        processing: "正在兑换…",
+        failed: "兑换失败",
       },
       cancel_swap: {
         label: "@:global.actions.cancel.label",
@@ -1138,8 +1185,8 @@ export default {
       later: {
         label: "稍后接收",
         tooltip_text: "添加到历史记录，稍后接收",
-        already_in_history_success_text: "Ecash 已在历史记录中",
-        added_to_history_success_text: "Ecash 已添加到历史记录",
+        already_in_history_success_text: "ecash 已在历史记录中",
+        added_to_history_success_text: "ecash 已添加到历史记录",
       },
       nfc: {
         label: "NFC",
@@ -1148,11 +1195,19 @@ export default {
           ndef_unsupported_text: "不支持 NDEF",
         },
       },
+      receive_to_selected_mint: { label: "接收到所选 Mint" },
+    },
+    unknown_mint_info_text: "未知的 Mint。接收此 token 后会自动添加。",
+    swap_section: {
+      title: "兑换",
+      source_label: "从",
+      destination_label: "到",
+      fee_info: "此次兑换会产生闪电网络费用。",
     },
   },
   P2PKDialog: {
     p2pk: {
-      caption: "P2PK 密钥",
+      caption: "锁定密钥",
       description: "接收此密钥锁定的 ecash",
       used_warning_text:
         "警告：此密钥已被使用过。请使用新密钥以获得更好的隐私。",
@@ -1171,7 +1226,7 @@ export default {
   },
   PaymentRequestDialog: {
     payment_request: {
-      caption: "支付请求",
+      caption: "付款请求",
       description: "通过 Nostr 接收支付",
     },
     actions: {
@@ -1196,6 +1251,8 @@ export default {
         placeholder: "输入金额",
       },
     },
+    received_total: "已收到总额",
+    no_payments_yet: "暂无付款",
   },
   NumericKeyboard: {
     actions: {
@@ -1238,7 +1295,7 @@ export default {
         label: "URL",
       },
       nuts: {
-        label: "Nuts",
+        label: "支持的 NUT",
         actions: {
           show: {
             label: "显示全部",
@@ -1249,7 +1306,7 @@ export default {
         },
       },
       currency: {
-        label: "货币",
+        label: "单位",
       },
       currencies: {
         label: "@:MintDetailsDialog.details.currency.label",
@@ -1275,6 +1332,9 @@ export default {
     title: "选择 Mint",
     badge_mint_error_text: "错误",
     badge_option_mint_error_text: "@:ChooseMint.badge_mint_error_text",
+    available_text: "在此 Mint 中",
+    sheet_title: "选择 Mint",
+    placeholder: "选择一个 Mint",
   },
   HistoryTable: {
     empty_text: "暂无历史记录",
@@ -1283,6 +1343,9 @@ export default {
       date_label: "{ value } 前",
     },
     actions: {
+      filter_ecash_only: {
+        label: "仅 ecash",
+      },
       check_status: {
         tooltip_text: "检查状态",
       },
@@ -1290,7 +1353,7 @@ export default {
         tooltip_text: "接收",
       },
       filter_pending: {
-        label: "过滤待处理",
+        label: "仅显示待处理",
       },
       show_all: {
         label: "显示全部",
@@ -1310,7 +1373,7 @@ export default {
         tooltip_text: "检查状态",
       },
       filter_pending: {
-        label: "过滤待处理",
+        label: "仅显示待处理",
       },
       show_all: {
         label: "显示全部",
@@ -1318,7 +1381,7 @@ export default {
     },
   },
   RemoveMintDialog: {
-    title: "您确定要删除此 Mint 吗？",
+    title: "移除此 Mint？",
     nickname: {
       label: "昵称",
     },
@@ -1326,7 +1389,7 @@ export default {
       label: "余额",
     },
     warning_text:
-      "注意：由于此钱包是偏执的，您的此 Mint 中的 ecash 不会真正删除，但会保留在您的设备上。如果您稍后再次添加此 Mint，您会再次看到它。",
+      "您在此 Mint 的 ecash 会保留在本设备上。如果再次添加该 Mint，它会重新出现。",
     inputs: {
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1334,7 +1397,7 @@ export default {
     },
     actions: {
       confirm: {
-        label: "删除 Mint",
+        label: "移除 Mint",
       },
       cancel: {
         label: "@:global.actions.cancel.label",
@@ -1349,15 +1412,29 @@ export default {
     },
     qr_scanner: {
       title: "扫描二维码",
-      description: "点击扫描地址",
+      description: "将相机对准二维码",
     },
     paste_button: {
       label: "@:global.actions.paste.label",
     },
   },
   PayInvoiceDialog: {
+    onchain: {
+      title: "链上支付",
+      address_placeholder: "比特币地址",
+      choose_speed: "选择确认速度",
+      blocks: "{n} 个区块",
+      estimated_confirmation: "预计确认",
+      fee_reserve: "预留手续费",
+    },
+    multinut: {
+      label: "使用多个 Mint 支付",
+    },
+    quote: {
+      label: "报价",
+    },
     input_data: {
-      title: "支付 Lightning",
+      title: "用闪电支付",
       inputs: {
         invoice_data: {
           label: "Lightning 发票或地址",
@@ -1377,6 +1454,7 @@ export default {
           label: "@:global.actions.scan.label",
         },
       },
+      title_bolt12: "支付闪电 Offer",
     },
     lnurlpay: {
       amount_exact_label: "{ payee } 请求 { value } { ticker }",
@@ -1427,6 +1505,7 @@ export default {
     title: "编辑 Mint",
     inputs: {
       nickname: {
+        placeholder: "例如 Testnet",
         label: "昵称",
       },
       mint_url: {
@@ -1444,7 +1523,8 @@ export default {
   },
   AddMintDialog: {
     title: "您信任此 Mint 吗？",
-    description: "仅在您信任的情况下加入此 Mint。Mints 随时可能停止运营。",
+    description:
+      "仅在您信任此 Mint 时加入。如果它停止运营，您在其中持有的 ecash 将会丢失。",
     inputs: {
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1470,6 +1550,7 @@ export default {
         },
       },
     },
+    unreachable_error_text: "无法连接此 Mint。请检查网址和网络连接，然后重试。",
   },
   restore: {
     mnemonic_error_text: "请输入助记符",
@@ -1494,10 +1575,166 @@ export default {
     p2pk: "P2PK",
     locked: "已锁定",
     locked_to_you: "已锁定给您",
-    mint: "铸币厂",
+    mint: "Mint",
     memo: "备注",
     payment_request: "支付请求",
     nostr: "Nostr",
     token_copied: "令牌已复制到剪贴板",
+  },
+  common: {
+    copied: "已复制",
+    on_chain: "链上",
+    pending: "待处理",
+    delete: "删除",
+    copy_npub: "复制 npub",
+    back: "返回",
+    refresh: "刷新",
+    settings: "设置",
+    backspace: "退格",
+    swap_input_mode: "切换金额/法币输入",
+    fee: "费用",
+  },
+  SendPaymentRequest: {
+    actions: {
+      pay: { label: "支付" },
+      pay_via: { label: "通过 {transport} 支付" },
+    },
+    info: {
+      pay_failed: "无法支付请求",
+      pay_to: "支付给 {target}",
+      invalid_url: "无效的网址",
+    },
+  },
+  PaymentRequestInfo: {
+    title_with_transport: "通过 {transport} 的付款请求",
+    title: "付款请求",
+    subtitle: "支付给 {target}",
+    subtitle_fallback: "付款请求",
+    invalid_url: "无效的网址",
+  },
+  QuoteInformation: {
+    amount: "金额",
+    fee_reserve: "预留手续费",
+    fee_paid: "已付手续费",
+    unit: "单位",
+    status: "状态",
+    network: "网络",
+    transaction_id: "交易 ID",
+    chain_status: "链上状态",
+    fetching: "获取中",
+    paid_at: "支付时间",
+    preimage: "原像",
+    preimage_copied: "原像已复制",
+    mint: "Mint",
+    method: "方式",
+    lightning_offer: "Lightning Offer",
+    chain_confirmed: "已确认",
+    chain_pending: "待确认",
+    states: {
+      paid: "已付款",
+      unpaid: "未付款",
+      pending: "待处理",
+      issued: "已发行",
+      expired: "已过期",
+      failed: "失败",
+    },
+  },
+  MintAuditInfo: {
+    title: "审计信息",
+    loading: "正在加载审计信息...",
+    not_audited: "此 Mint 尚未经过审计。",
+    not_audited_text:
+      "如需了解审计方或支持未来的审计，请访问 {link}，或点击{here}捐赠 ecash，帮助启动对此 Mint 的审计。",
+    here: "这里",
+    unavailable: "审计信息暂时不可用。",
+    load_failed: "无法加载 Mint 数据",
+    success_rate: "成功率",
+    swaps_count: "{total} 次兑换中的 {successful} 次",
+    average_time: "平均时间",
+    average_time_caption: "成功兑换的平均值",
+    disclaimer:
+      "审计数据由独立第三方提供，用于帮助评估 Mint 长期的可靠性。但这些结果仅供参考，不保证任何 Mint 的安全性、偿付能力或可信度。使用其服务前，请务必自行研究，并确保您信任该 Mint 的运营者。",
+    donate_text:
+      "审计信息由 {link} 提供。审计方目前为此 Mint 持有的余额为 {balance}，迄今累计捐赠 {donations}。如需支持持续审计，您可以{press_here}向审计方捐赠 ecash。",
+    press_here: "点击这里",
+    sats_amount: "{amount} sats",
+    warnings_title: "审计警告",
+    warnings: {
+      last_swap_failed: "最近一次兑换尝试失败。",
+      recent_success:
+        "过去 {days} 天内 {total} 次兑换中有 {successful} 次成功。",
+      reliable:
+        "{base} 不过，{success}此 Mint 看起来可靠，失败可能是接收方 Mint 导致的。",
+      unreliable: "{base} 仅 {success}此 Mint 可能不可靠。",
+      unknown: "审计方尚无法确定此 Mint 的质量。",
+      not_enough_data:
+        "审计方没有此 Mint 足够的近期数据。过去 {days} 天内仅有 {count} 次成功兑换。",
+      low_success:
+        "过去 {days} 天内，此 Mint 的成功率为 {rate}%，低于建议的 {threshold}%。",
+      inactive: "此 Mint 已有 {days} 天没有兑换记录，可能无法访问。",
+      slow: "此 Mint 速度较慢，来自此 Mint 的支付平均耗时 {seconds} 秒。",
+      no_successful: "此 Mint 没有成功兑换的记录，可能无法访问。",
+    },
+    chart: {
+      now: "现在",
+      today: "今天",
+      yesterday: "昨天",
+      invalid_date: "无效日期",
+      swaps: "兑换次数：",
+      success_rate: "成功率：",
+      time_range: "时间范围：",
+    },
+  },
+  DisplayTokenComponent: {
+    qr_speed: "QR 速度：{value}",
+    qr_size: "QR 大小：{value}",
+    speed: {
+      fast: "快",
+      medium: "中",
+      slow: "慢",
+    },
+    size: {
+      large: "大",
+      medium: "中",
+      small: "小",
+    },
+    delete_dialog: {
+      title: "删除 ecash",
+      text: "确定要从历史记录中删除此交易吗？",
+      warning: "警告：此操作无法撤销，且无法恢复该 token。",
+    },
+    nfc: {
+      read_failed: "NFC 读取失败",
+      write_failed: "NFC 写入失败",
+      error: "NFC 错误",
+      writing: "正在写入 NFC 卡...",
+      success: "已成功将 token 写入卡片！",
+      capacity: "卡片容量可能不足（需要 {bytes} 字节）。",
+    },
+  },
+  CreateInvoiceDialog: {
+    onchain_title: "链上接收",
+    bolt12_title: "接收 Bolt12",
+    mint_unreachable: "无法连接 Mint",
+    mint_unreachable_text: "请重新连接 Mint 以接收付款。",
+    reconnect_mint: "重新连接 Mint",
+    checking_address: "正在检查地址...",
+    add_amount: "添加金额",
+    new_offer: "新建 Offer",
+    create_offer: "创建 Offer",
+    create_new_address: "创建新地址",
+    create_address: "创建地址",
+    onchain_unsupported: "此 Mint 不支持以该单位进行链上充值。",
+    deposit_limits: {
+      outside: "超出 {min}–{max} 范围的充值不会入账。",
+      below: "低于 {min} 的充值不会入账。",
+      above: "高于 {max} 的充值不会入账。",
+    },
+    amount_errors: {
+      positive_decimal: "请输入以 {unit} 计、最多两位小数的正数金额。",
+      positive_whole: "请输入以 {unit} 计的正整数金额。",
+      min: "请输入至少 {amount}。",
+      max: "请输入不超过 {amount}。",
+    },
   },
 };

@@ -27,7 +27,7 @@
         no-caps
         @click="filterPendingEcash = !filterPendingEcash"
         :color="filterPendingEcash ? 'primary' : 'grey'"
-        label="Ecash only"
+        :label="$t('HistoryTable.actions.filter_ecash_only.label')"
         class="q-ml-sm q-px-md history-filter-btn"
       />
     </div>
@@ -143,7 +143,7 @@
                     : $t("HistoryTable.actions.check_status.tooltip_text")
                 }}</q-tooltip>
               </q-btn>
-              <span>Pending</span>
+              <span>{{ $t("common.pending") }}</span>
             </div>
           </q-item-label>
         </q-item-section>
@@ -260,6 +260,7 @@ export default defineComponent({
     relativeTime() {
       return new Intl.RelativeTimeFormat(this.$i18n.locale, {
         numeric: "auto",
+        numberingSystem: "latn", // amounts use Latin digits in every locale
       });
     },
     ...mapState(useTokensStore, ["historyTokens"]),
@@ -422,11 +423,11 @@ export default defineComponent({
 
     getDefaultLabel(transaction) {
       if (transaction.type === UnifiedTransactionType.Onchain) {
-        return "On-chain";
+        return this.$t("common.on_chain");
       }
       return transaction.type === UnifiedTransactionType.Lightning
-        ? "Lightning"
-        : "Ecash";
+        ? this.$t("InvoiceTable.row.type_label")
+        : this.$t("HistoryTable.row.type_label");
     },
 
     getTransactionLabel(transaction) {
@@ -629,7 +630,7 @@ export default defineComponent({
   height: 22px;
   justify-content: center;
   position: absolute;
-  right: -5px;
+  inset-inline-end: -5px;
   width: 22px;
 }
 
@@ -739,7 +740,8 @@ export default defineComponent({
 }
 
 .history-check-btn {
-  margin: -13px -6px -13px -14px;
+  margin-block: -13px;
+  margin-inline: -14px -6px;
   min-height: 44px;
   min-width: 44px;
 }

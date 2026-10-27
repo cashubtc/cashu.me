@@ -30,6 +30,7 @@ import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { usePRStore } from "src/stores/payment-request";
 import { useUiStore } from "src/stores/ui";
 import { notifyError } from "src/js/notify";
+import { i18n } from "src/boot/i18n";
 import { PaymentRequestTransportType } from "@cashu/cashu-ts";
 import type { PaymentRequestData } from "src/stores/payment-request";
 
@@ -178,7 +179,10 @@ export default defineComponent({
         }
       } catch (error: any) {
         console.error("Error paying payment request:", error);
-        notifyError(`${error?.message ?? error}`, "Could not pay request");
+        notifyError(
+          `${error?.message ?? error}`,
+          i18n.global.t("SendPaymentRequest.info.pay_failed")
+        );
       } finally {
         this.loading = false;
       }

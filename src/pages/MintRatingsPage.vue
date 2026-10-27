@@ -9,7 +9,9 @@
       @close="goBack"
     />
     <div v-else class="text-center q-pa-lg">
-      <div class="text-h6 text-grey-5">No mint URL provided</div>
+      <div class="text-h6 text-grey-5">
+        {{ $t("MintRatings.no_mint_url") }}
+      </div>
     </div>
   </SettingsPageShell>
 </template>

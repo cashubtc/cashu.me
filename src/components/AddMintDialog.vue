@@ -346,7 +346,7 @@ export default defineComponent({
 }
 
 .mint-preview-pill :deep(.q-avatar) {
-  margin-right: 16px !important;
+  margin-inline-end: 16px !important;
 }
 
 /* Audit info row (styled like the detail rows on the mint details page) */
@@ -363,7 +363,7 @@ export default defineComponent({
 }
 
 .detail-icon {
-  margin-right: 10px;
+  margin-inline-end: 10px;
 }
 
 .detail-name {
@@ -375,7 +375,7 @@ export default defineComponent({
 .detail-value {
   font-size: 16px;
   font-weight: 600;
-  text-align: right;
+  text-align: end;
 }
 
 .audit-toggle {

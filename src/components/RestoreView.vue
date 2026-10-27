@@ -363,9 +363,6 @@ export default defineComponent({
         return undefined;
       }
     },
-    formatCurrency(amount, unit) {
-      return useUiStore().formatCurrency(amount, unit);
-    },
     toggleMintSelection(mintUrl) {
       if (this.selectedMints.has(mintUrl)) {
         this.selectedMints.delete(mintUrl);

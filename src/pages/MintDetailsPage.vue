@@ -266,7 +266,7 @@
         <!-- Section Divider for Audit Info -->
         <div v-if="settings.auditorEnabled" class="section-divider q-mb-md">
           <div class="divider-line"></div>
-          <div class="divider-text">Audit info</div>
+          <div class="divider-text">{{ $t("MintAuditInfo.title") }}</div>
           <div class="divider-line"></div>
         </div>
 
@@ -424,7 +424,9 @@ export default defineComponent({
         const units = Object.keys(balances)
           .filter((u) => balances[u] > 0)
           .sort((a, b) => Number(b === "sat") - Number(a === "sat"));
-        return units.map((u) => this.formatCurrency(balances[u], u)).join(" + ");
+        return units
+          .map((u) => this.formatCurrency(balances[u], u))
+          .join(" + ");
       } catch {
         return "";
       }
@@ -658,7 +660,7 @@ export default defineComponent({
   font-size: 13px;
   font-weight: 600;
   color: var(--app-text-muted);
-  text-align: left;
+  text-align: start;
 }
 
 /* Contact Section */
@@ -676,7 +678,7 @@ export default defineComponent({
   width: 24px;
   display: flex;
   justify-content: center;
-  margin-right: 10px;
+  margin-inline-end: 10px;
 }
 
 .contact-icon {
@@ -696,22 +698,24 @@ export default defineComponent({
 
 .copy-icon {
   color: #636366;
-  margin-left: 10px;
+  margin-inline-start: 10px;
 }
 
 /* Mint Details Section */
 /* Details and actions are grouped cards, like the settings menu. */
-.mint-details-section,
-.action-buttons-container {
-  background: var(--app-tint);
-  border: 1px solid var(--app-border);
-  border-radius: 14px;
-  padding: 16px 16px 4px;
+/* Mint details read like the invoice and token details: flat label/value rows on the page,
+   the same shared .detail-item rows, no card around them. Actions stay in a card. */
+.mint-details-section {
+  padding: 4px 0 0;
   width: 100%;
 }
 
 .action-buttons-container {
+  background: var(--app-tint);
+  border: 1px solid var(--app-border);
+  border-radius: 14px;
   padding: 4px 16px;
+  width: 100%;
 }
 
 /* Action Buttons */
@@ -774,7 +778,7 @@ export default defineComponent({
 }
 
 .delete-button {
-  color: var(--q-negative);
+  color: var(--app-negative-text);
 }
 
 /* QR Code Container and Animation */

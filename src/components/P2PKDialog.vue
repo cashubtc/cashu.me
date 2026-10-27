@@ -72,7 +72,7 @@
               <!-- New key button -->
               <div class="row justify-center q-pt-lg q-pb-md">
                 <q-btn flat size="md" rounded @click="newKeys">
-                  <q-icon name="refresh" class="q-pr-sm" size="xs" />
+                  <q-icon name="refresh" class="q-mr-sm" size="xs" />
                   {{ $t("P2PKDialog.actions.new_key.label") }}
                 </q-btn>
               </div>

@@ -7,7 +7,7 @@
         round
         class="fullscreen-back-btn"
         @click="goBack"
-        aria-label="Back"
+        :aria-label="$t('common.back')"
       >
         <ChevronLeftIcon :size="24" />
       </q-btn>

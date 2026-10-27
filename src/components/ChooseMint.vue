@@ -5,11 +5,12 @@
       class="row q-mt-xs q-mb-none"
       v-if="activeMintUrl || !requireActiveMint"
     >
-      <div class="col-12 row justify-center">
+      <div class="col-12 row" :class="label ? '' : 'justify-center'">
         <button
           type="button"
           :data-testid="testId"
           class="mint-chip"
+          :class="{ 'mint-chip--field': !!label }"
           :style="style"
           @click="showMintSheet = true"
         >
@@ -17,7 +18,16 @@
             <q-img :src="chosenMint.iconUrl" spinner-size="xs" />
           </q-avatar>
           <LandmarkIcon v-else :size="16" class="mint-chip__icon" />
-          <span class="mint-chip__name">
+          <span v-if="label" class="mint-chip__field-text">
+            <span class="mint-chip__label">{{ label }}</span>
+            <span class="mint-chip__name">{{
+              chosenMint?.nickname ||
+              chosenMint?.shorturl ||
+              placeholder ||
+              $t("ChooseMint.placeholder")
+            }}</span>
+          </span>
+          <span v-else class="mint-chip__name">
             {{
               chosenMint?.nickname ||
               chosenMint?.shorturl ||
@@ -28,7 +38,9 @@
           <template v-if="showBalances && chosenMint">
             <span class="mint-chip__dot" aria-hidden="true">·</span>
             <span v-if="!chosenMint.errored" class="mint-chip__balance">
-              {{ formatCurrency(selectedMintBalance, activeUnit) }}
+              <bdi dir="ltr">{{
+                formatCurrency(selectedMintBalance, activeUnit)
+              }}</bdi>
               {{ $t("ChooseMint.available_text") }}
             </span>
             <span v-else class="text-negative">
@@ -82,11 +94,12 @@
               </div>
               <div v-if="showBalances" class="mint-option-balance">
                 <span v-if="!mint.errored" class="text-grey-6">
-                  {{
-                    heldUnits(mint)
-                      .map((unit) => formatCurrency(mint.balances[unit], unit))
-                      .join(" + ")
-                  }}
+                  <template v-for="(unit, i) in heldUnits(mint)" :key="unit">
+                    <template v-if="i > 0"> + </template>
+                    <bdi dir="ltr">{{
+                      formatCurrency(mint.balances[unit], unit)
+                    }}</bdi>
+                  </template>
                 </span>
                 <span v-else class="text-red">
                   {{ $t("ChooseMint.badge_mint_error_text") }}
@@ -119,7 +132,6 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "stores/mints";
 import { MintClass } from "stores/mints";
 import type { StoredMint } from "stores/mints";
-import { useUiStore } from "stores/ui";
 import { i18n } from "../boot/i18n";
 import { mintSupportsPaymentMethod } from "src/js/mint-payment-methods";
 import { PaymentMethod } from "src/stores/walletTypes";
@@ -167,6 +179,12 @@ export default defineComponent({
       default: "",
     },
     placeholder: {
+      type: String,
+      default: "",
+    },
+    // With a label, the picker renders as a full-width field (label over value), matching
+    // the outlined inputs around it; without one it stays the compact pill.
+    label: {
       type: String,
       default: "",
     },
@@ -279,9 +297,6 @@ export default defineComponent({
       return held.length ? held : units.slice(0, 1);
     },
     ...mapActions(useMintsStore, ["selectMintUrl"]),
-    formatCurrency(value: number, currency: string) {
-      return useUiStore().formatCurrency(value, currency);
-    },
     applyChosenMint(option: MintOption | null) {
       if (!option) {
         this.chosenMint = null;
@@ -405,5 +420,28 @@ export default defineComponent({
   font-size: 14px;
   line-height: 1.3;
   margin-top: 4px;
+}
+
+.mint-chip--field {
+  border-radius: 28px;
+  justify-content: flex-start;
+  min-height: 56px;
+  padding: 8px 20px;
+  text-align: start;
+  width: 100%;
+}
+.mint-chip--field > :last-child {
+  margin-inline-start: auto;
+}
+.mint-chip__field-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.mint-chip__label {
+  color: var(--app-text-muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
 }
 </style>

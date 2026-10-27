@@ -6,7 +6,7 @@
         dense
         round
         class="main-toolbar-btn"
-        aria-label="Settings"
+        :aria-label="$t('common.settings')"
         @click="goToSettings"
         :disable="uiStore.globalMutexLock"
       >
@@ -63,7 +63,7 @@
         round
         class="main-toolbar-btn"
         :class="countdown > 0 ? 'text-negative' : ''"
-        aria-label="Refresh"
+        :aria-label="$t('common.refresh')"
         @click="reload"
         :disable="uiStore.globalMutexLock && countdown === 0"
       >

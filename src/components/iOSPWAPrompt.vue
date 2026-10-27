@@ -101,7 +101,7 @@ export default defineComponent({
 }
 
 .pwa-prompt-content q-icon {
-  margin-right: 5px;
+  margin-inline-end: 5px;
 }
 
 .pwa-prompt-arrow {

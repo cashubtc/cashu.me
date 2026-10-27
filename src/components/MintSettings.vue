@@ -32,19 +32,6 @@
             }"
             :loading="mint.url == activatingMintUrl"
           >
-            <!-- hourglass spinner if mint is being activated -->
-            <transition
-              appear
-              enter-active-class="animated fadeIn"
-              leave-active-class="animated fadeOut"
-              name="fade"
-            >
-              <q-spinner
-                v-if="mint.url == activatingMintUrl"
-                size="1.3rem"
-                class="mint-loading-spinner"
-              />
-            </transition>
             <transition
               appear
               enter-active-class="animated fadeIn"
@@ -68,8 +55,14 @@
 
             <!-- Top right: active marker and mint details -->
             <div class="more-vert-icon row items-center no-wrap">
+              <!-- The active-mint slot: a spinner while switching, then the check. -->
+              <q-spinner
+                v-if="mint.url == activatingMintUrl"
+                size="18px"
+                class="q-mr-sm"
+              />
               <CircleCheckIcon
-                v-if="mint.url == activeMintUrl"
+                v-else-if="mint.url == activeMintUrl"
                 :size="18"
                 class="text-primary q-mr-sm"
                 aria-hidden="true"
@@ -106,14 +99,14 @@
                       :key="unit"
                       class="currency-unit-badge"
                     >
-                      <span class="currency-unit-text">
+                      <bdi dir="ltr" class="currency-unit-text">
                         {{
                           formatCurrency(
                             mintClass(mint).unitBalance(unit),
                             unit
                           )
                         }}
-                      </span>
+                      </bdi>
                     </div>
                   </div>
                 </div>
@@ -169,7 +162,7 @@
           @click="$router.push('/discoverMints')"
           style="width: 100%"
         >
-          <SearchIcon :size="18" class="q-mr-sm" />
+          <SearchIcon :size="20" class="q-mr-sm" />
           <span>{{ $t("MintSettings.discover_mints_button") }}</span>
         </q-btn>
       </div>
@@ -264,7 +257,20 @@
         option-label="optionLabel"
         :label="$t('MintSettings.swap.inputs.from.label')"
         :disable="swapBlocking"
-      />
+      >
+        <template v-slot:option="scope">
+          <q-item v-bind="scope.itemProps">
+            <q-item-section>
+              <q-item-label class="swap-option-name">
+                <bdi>{{ scope.opt.optionLabel }}</bdi>
+              </q-item-label>
+            </q-item-section>
+            <q-item-section side class="swap-option-balance">
+              <bdi dir="ltr">{{ scope.opt.balance }}</bdi>
+            </q-item-section>
+          </q-item>
+        </template>
+      </q-select>
       <q-select
         :clearable="!!swapData.toUrl?.url"
         rounded
@@ -283,7 +289,20 @@
         option-label="optionLabel"
         :label="$t('MintSettings.swap.inputs.to.label')"
         :disable="swapBlocking"
-      />
+      >
+        <template v-slot:option="scope">
+          <q-item v-bind="scope.itemProps">
+            <q-item-section>
+              <q-item-label class="swap-option-name">
+                <bdi>{{ scope.opt.optionLabel }}</bdi>
+              </q-item-label>
+            </q-item-section>
+            <q-item-section side class="swap-option-balance">
+              <bdi dir="ltr">{{ scope.opt.balance }}</bdi>
+            </q-item-section>
+          </q-item>
+        </template>
+      </q-select>
       <div class="row no-wrap items-center" style="gap: 8px">
         <q-input
           class="col"
@@ -547,11 +566,11 @@ export default defineComponent({
       for (const [i, m] of Object.entries(this.mints)) {
         const unitStr = "sat";
         const unitBalance = this.mintClass(m).unitBalance(unitStr);
-        const balanceStr = useUiStore().formatCurrency(unitBalance, unitStr);
+        const balanceStr = this.formatCurrency(unitBalance, unitStr);
         options.push({
           url: m.url,
-          optionLabel:
-            (m.nickname || getShortUrl(m.url)) + " (" + balanceStr + ")",
+          optionLabel: m.nickname || getShortUrl(m.url),
+          balance: balanceStr,
         });
       }
       return options;
@@ -675,7 +694,7 @@ export default defineComponent({
   font-size: 15px;
   font-weight: 600;
   color: var(--app-text);
-  text-align: left;
+  text-align: start;
   margin: 8px 0 8px;
 }
 
@@ -709,6 +728,17 @@ export default defineComponent({
   text-decoration: underline;
   text-underline-offset: 2px;
 }
+/* Swap options: mint name first, its balance right-aligned and muted (a shadcn-style row). */
+/* The name truncates at its end but keeps the row's start edge (right in rtl). */
+.swap-option-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.swap-option-balance {
+  color: var(--app-text-muted);
+  font-variant-numeric: tabular-nums;
+}
 /* Rating stars use the text colour, like every other glyph (no emoji gold). */
 .rating-star {
   color: var(--app-text);
@@ -717,6 +747,7 @@ export default defineComponent({
 /* Add mint matches the height and label size of Discover mints and Swap. */
 .q-btn.add-mint-submit {
   font-size: 1rem !important;
+  height: 48px;
   min-height: 48px;
 }
 /* "No reviews yet" is a state, not a link label. */
@@ -727,12 +758,15 @@ export default defineComponent({
 /* Several unit balances on one card read as separate holdings, not a conversion. */
 .currency-unit-badge + .currency-unit-badge::before {
   content: "+";
-  margin-right: 8px;
+  margin-inline-end: 8px;
   color: var(--app-text-subtle);
 }
 
+/* Discover mints, Add mint and Swap share one 48px button height and 1rem label. */
 .discover-mints-btn {
-  min-height: 44px;
+  font-size: 1rem;
+  height: 48px;
+  min-height: 48px;
 }
 
 /* Add Mint Section Styles */
@@ -748,7 +782,7 @@ export default defineComponent({
   font-size: 14px;
   line-height: 24px;
   font-weight: 500;
-  text-align: left;
+  text-align: start;
   margin-bottom: 24px;
 }
 

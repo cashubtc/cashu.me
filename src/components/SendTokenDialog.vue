@@ -33,10 +33,7 @@
               {{ $t("SendTokenDialog.title") }}
             </q-item-label>
           </div>
-          <div
-            class="row items-center no-wrap sheet-header-actions"
-            style="position: absolute; right: 6px"
-          >
+          <div class="row items-center no-wrap sheet-header-actions">
             <q-btn
               flat
               color="primary"
@@ -165,12 +162,12 @@
               >
                 <LockIcon
                   size="1.3em"
-                  style="margin-right: 6px; margin-bottom: 4px"
+                  style="margin-inline-end: 6px; margin-bottom: 4px"
                 />
                 <span
                   class="text-caption text-weight-medium"
                   style="font-size: 14px"
-                  >locked</span
+                  >{{ $t("SendTokenDialog.badge_locked") }}</span
                 >
               </q-badge>
               <div

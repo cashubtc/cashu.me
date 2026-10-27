@@ -16,32 +16,58 @@ export function onchainDepositAmountInBaseUnits(
   return amount * currencyMultiplier;
 }
 
+type Translate = (key: string, named: Record<string, string>) => string;
+
+const englishAmountErrors: Record<
+  string,
+  (p: Record<string, string>) => string
+> = {
+  positive_decimal: (p) =>
+    `Enter a positive amount with at most two decimal places in ${p.unit}.`,
+  positive_whole: (p) => `Enter a positive whole amount in ${p.unit}.`,
+  min: (p) => `Enter at least ${p.amount}.`,
+  max: (p) => `Enter no more than ${p.amount}.`,
+};
+
+/**
+ * Validate an on-chain deposit amount. Pass the app's translator to get a
+ * localized message; without it the message is English.
+ */
 export function onchainDepositAmountError(
   amount: number,
   unit: string,
   limits: PaymentMethodLimits | null,
-  bitcoinSymbol = false
+  bitcoinSymbol = false,
+  t?: Translate
 ): string {
+  const message = (key: string, named: Record<string, string>) =>
+    t
+      ? t(`CreateInvoiceDialog.amount_errors.${key}`, named)
+      : englishAmountErrors[key](named);
   if (!Number.isSafeInteger(amount) || amount <= 0) {
     return unit === "usd" || unit === "eur"
-      ? `Enter a positive amount with at most two decimal places in ${unit.toUpperCase()}.`
-      : `Enter a positive whole amount in ${unit}.`;
+      ? message("positive_decimal", { unit: unit.toUpperCase() })
+      : message("positive_whole", { unit });
   }
   if (limits?.minAmount != null && amount < limits.minAmount) {
-    return `Enter at least ${formatBigIntCurrency(
-      limits.minAmount,
-      unit,
-      undefined,
-      bitcoinSymbol
-    )}.`;
+    return message("min", {
+      amount: formatBigIntCurrency(
+        limits.minAmount,
+        unit,
+        undefined,
+        bitcoinSymbol
+      ),
+    });
   }
   if (limits?.maxAmount != null && amount > limits.maxAmount) {
-    return `Enter no more than ${formatBigIntCurrency(
-      limits.maxAmount,
-      unit,
-      undefined,
-      bitcoinSymbol
-    )}.`;
+    return message("max", {
+      amount: formatBigIntCurrency(
+        limits.maxAmount,
+        unit,
+        undefined,
+        bitcoinSymbol
+      ),
+    });
   }
   return "";
 }

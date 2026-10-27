@@ -8,7 +8,13 @@
   >
     <q-card class="drawer-card full-width-card q-pb-lg">
       <q-card-section class="row items-center no-wrap drawer-header">
-        <q-btn flat round v-close-popup class="drawer-header-btn" color="primary">
+        <q-btn
+          flat
+          round
+          v-close-popup
+          class="drawer-header-btn"
+          color="primary"
+        >
           <XIcon />
         </q-btn>
         <div class="col text-center">
@@ -85,7 +91,9 @@
                 <BitcoinIcon :size="24" />
               </div>
               <div class="col q-ml-md">
-                <div class="text-body1 text-weight-medium">On-chain</div>
+                <div class="text-body1 text-weight-medium">
+                  {{ $t("common.on_chain") }}
+                </div>
               </div>
             </div>
           </div>
@@ -225,7 +233,7 @@ export default defineComponent({
         this.activeUnit as string
       );
       if (!mintResult.ok) {
-        notifyWarning("No mints available");
+        notifyWarning(this.$t("SendDialog.actions.lightning.error_no_mints"));
         this.showSendDialog = false;
         return;
       }

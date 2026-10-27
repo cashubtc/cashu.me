@@ -38,7 +38,7 @@
               {{ $t("WelcomeSlideChoice.options.new.subtitle") }}
             </p>
           </div>
-          <q-icon name="chevron_right" size="24px" class="chevron" />
+          <q-icon name="chevron_right" size="24px" class="chevron rtl-flip" />
         </div>
 
         <!-- Recover Option -->
@@ -60,7 +60,7 @@
               {{ $t("WelcomeSlideChoice.options.recover.subtitle") }}
             </p>
           </div>
-          <q-icon name="chevron_right" size="24px" class="chevron" />
+          <q-icon name="chevron_right" size="24px" class="chevron rtl-flip" />
         </div>
       </div>
     </div>
@@ -101,7 +101,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: left;
+  text-align: start;
   flex: 1;
 }
 
@@ -128,7 +128,7 @@ export default {
   margin: 0 0 16px 0;
   color: white;
   line-height: 1.2;
-  text-align: left;
+  text-align: start;
   width: 100%;
   max-width: 500px;
 }
@@ -138,7 +138,7 @@ export default {
   line-height: 1.5;
   color: rgba(255, 255, 255, 0.8);
   margin: 0 0 32px 0;
-  text-align: left;
+  text-align: start;
   max-width: 500px;
   width: 100%;
 }

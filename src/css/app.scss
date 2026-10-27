@@ -1,13 +1,19 @@
 // app global css in SCSS form
 
-// Import Inter font from Google Fonts
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+// Import Inter font from Google Fonts, with Noto Sans Arabic for Arabic script. Google
+// Fonts serves Noto Sans Arabic with an Arabic-only unicode-range, so it only downloads when
+// Arabic text is on screen, and Latin text always stays Inter.
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap");
 
 // Apply Inter as the primary font throughout the application
 body {
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+  font-family: "Inter", "Noto Sans Arabic", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif;
+}
+// Arabic script needs no letter-spacing (it breaks joining).
+:lang(ar) * {
+  letter-spacing: 0 !important;
 }
 
 // Dialog header typography
@@ -147,7 +153,7 @@ body,
 .detail-icon {
   box-sizing: content-box;
   flex-shrink: 0;
-  margin-right: 12px;
+  margin-inline-end: 12px;
   padding: 2px;
   color: var(--app-text-muted);
 }
@@ -160,7 +166,7 @@ body,
   font-size: 15px;
   font-weight: 500;
   color: var(--app-text);
-  text-align: right;
+  text-align: end;
   max-width: 60%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -260,13 +266,14 @@ button:focus-visible {
 }
 
 // Pressed buttons also sink slightly, so pressed reads apart from hover on filled pills
-// where a tint alone barely shows.
+// where a tint alone barely shows. `scale` composes with any positioning `transform`
+// (centred close buttons use translateY), so a press never moves the button.
 .q-btn:not(.disabled):active {
-  transform: scale(0.97);
+  scale: 0.97;
 }
 @media (prefers-reduced-motion: no-preference) {
   .q-btn {
-    transition: transform 0.08s ease;
+    transition: scale 0.08s ease;
   }
 }
 
@@ -289,7 +296,7 @@ button:focus-visible {
 // Sheet header close button, shared by every fullscreen sheet.
 .floating-close-btn {
   position: absolute;
-  left: 6px;
+  inset-inline-start: 6px;
   top: 50%;
   transform: translateY(-50%);
   z-index: 1;
@@ -333,7 +340,7 @@ body[data-theme] .welcome-surface,
 }
 .mint-chip:active {
   background: color-mix(in srgb, var(--app-text) 24%, transparent);
-  transform: scale(0.97);
+  scale: 0.97;
 }
 .mint-chip__icon {
   color: var(--app-text-muted);
@@ -485,6 +492,8 @@ body.body--light .q-dialog__backdrop {
 // every sheet (amount entry, receive and pay).
 .sheet-header-actions {
   gap: 0;
+  position: absolute;
+  inset-inline-end: 6px;
 }
 // The unit switch is a 44px bare icon button like close, lock and more: one header-action
 // style on every sheet (R17). It shows the current unit (₿ or $).
@@ -526,29 +535,46 @@ body.body--light .q-dialog__backdrop {
   border-radius: 20px !important;
 }
 
-// Dropdown menus (selects) float above the page: raised surface, one border and radius,
-// and the selected option in bold as in every other selection list (R15: the open currency
-// menu sat flat over the card and marked the choice only with a grey fill).
+// Dropdown menus (selects), after the shadcn select: a raised popover with a 4px inner
+// padding, compact 36px rows with their own rounded highlight, normal weight, and a
+// trailing check on the chosen option. One look for every select in the app.
 body .q-menu {
   background: var(--app-raised);
   border: 1px solid var(--app-border-strong);
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  padding: 4px;
+}
+body .q-menu .q-item {
+  border-radius: 6px;
+  font-size: 14px;
+  min-height: 36px;
+  padding: 6px 8px;
+}
+body .q-menu .q-item .q-focus-helper {
+  border-radius: 6px;
 }
 body .q-menu .q-item--active,
 body .q-menu .q-manual-focusable--focused.q-item--active {
-  font-weight: 600;
+  color: var(--app-text) !important;
 }
-// …and a trailing check, the same mark the other selection lists use.
+body .q-menu .q-manual-focusable--focused > .q-focus-helper {
+  background: currentColor;
+  opacity: var(--app-hover-opacity) !important;
+}
+// The chosen option carries a trailing check, the mark every other selection list uses.
 body .q-menu .q-item--active::after {
   content: "";
   flex: none;
-  width: 20px;
-  height: 20px;
-  margin-left: auto;
+  width: 16px;
+  height: 16px;
+  margin-inline-start: auto;
+  padding-inline-start: 8px;
   align-self: center;
   background: currentColor;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E")
+    center / contain no-repeat;
 }
 
 // A title followed by a badge: when the badge wraps it starts on the text edge, not
@@ -603,7 +629,6 @@ html[dir="rtl"] #q-app {
   direction: rtl;
 }
 html[dir="rtl"] .amount-text,
-html[dir="rtl"] .mint-chip__balance,
 html[dir="rtl"] .ellipsis {
   direction: ltr;
   unicode-bidi: isolate;
@@ -619,11 +644,59 @@ html[dir="rtl"] .text-right {
 html[dir="rtl"] .lucide-chevron-left-icon,
 html[dir="rtl"] .lucide-chevron-right-icon,
 html[dir="rtl"] .lucide-arrow-left-icon,
-html[dir="rtl"] .lucide-arrow-right-icon {
+html[dir="rtl"] .lucide-arrow-right-icon,
+html[dir="rtl"] .rtl-flip,
+html[dir="rtl"] .settings-menu-chevron,
+html[dir="rtl"] .welcome-footer__back .q-icon {
   transform: scaleX(-1);
 }
 
 // Quasar spacing utilities are physical; in rtl the inline-start/end margins swap sides.
+// Quasar padding utilities likewise: q-pl/q-pr swap sides in rtl.
+html[dir="rtl"] .q-pr-xs {
+  padding-right: 0 !important;
+  padding-left: 4px !important;
+}
+html[dir="rtl"] .q-pl-xs {
+  padding-left: 0 !important;
+  padding-right: 4px !important;
+}
+html[dir="rtl"] .q-pr-sm {
+  padding-right: 0 !important;
+  padding-left: 8px !important;
+}
+html[dir="rtl"] .q-pl-sm {
+  padding-left: 0 !important;
+  padding-right: 8px !important;
+}
+html[dir="rtl"] .q-pr-md {
+  padding-right: 0 !important;
+  padding-left: 16px !important;
+}
+html[dir="rtl"] .q-pl-md {
+  padding-left: 0 !important;
+  padding-right: 16px !important;
+}
+html[dir="rtl"] .q-pr-lg {
+  padding-right: 0 !important;
+  padding-left: 24px !important;
+}
+html[dir="rtl"] .q-pl-lg {
+  padding-left: 0 !important;
+  padding-right: 24px !important;
+}
+html[dir="rtl"] .q-pr-xl {
+  padding-right: 0 !important;
+  padding-left: 48px !important;
+}
+html[dir="rtl"] .q-pl-xl {
+  padding-left: 0 !important;
+  padding-right: 48px !important;
+}
+html[dir="rtl"] .q-pl-lg.q-pr-md {
+  padding-left: 16px !important;
+  padding-right: 24px !important;
+}
 html[dir="rtl"] .q-mr-xs {
   margin-right: 0 !important;
   margin-left: 4px !important;
@@ -674,10 +747,11 @@ html[dir="rtl"] .on-right {
 }
 // URLs, addresses and amounts typed into fields stay left to right inside an rtl form.
 html[dir="rtl"] .url-input input,
+html[dir="rtl"] .url-input textarea,
 html[dir="rtl"] input[type="url"],
 html[dir="rtl"] input[type="number"] {
   direction: ltr;
-  text-align: right;
+  text-align: left;
 }
 // Switches and radios follow the reading direction: the "on" end and the label gap mirror.
 html[dir="rtl"] .q-toggle__inner {
@@ -697,4 +771,73 @@ html[dir="rtl"] .q-item__section--side {
 html[dir="rtl"] .q-item__section--main ~ .q-item__section--side {
   padding-left: 0;
   padding-right: 16px;
+}
+
+// Pager buttons space evenly in both directions, and its arrows point the reading way.
+.q-pagination .q-btn {
+  margin-inline: 1px !important;
+}
+html[dir="rtl"] .q-pagination .q-icon {
+  transform: scaleX(-1);
+}
+
+// Quasar gutters, rating stars and field icons space with physical left margins; mirror them.
+html[dir="rtl"] .q-gutter-xs,
+html[dir="rtl"] .q-gutter-x-xs {
+  margin-left: 0;
+  margin-right: -4px;
+}
+html[dir="rtl"] .q-gutter-xs > *,
+html[dir="rtl"] .q-gutter-x-xs > * {
+  margin-left: 0;
+  margin-right: 4px;
+}
+html[dir="rtl"] .q-gutter-sm,
+html[dir="rtl"] .q-gutter-x-sm {
+  margin-left: 0;
+  margin-right: -8px;
+}
+html[dir="rtl"] .q-gutter-sm > *,
+html[dir="rtl"] .q-gutter-x-sm > * {
+  margin-left: 0;
+  margin-right: 8px;
+}
+html[dir="rtl"] .q-gutter-md,
+html[dir="rtl"] .q-gutter-x-md {
+  margin-left: 0;
+  margin-right: -16px;
+}
+html[dir="rtl"] .q-gutter-md > *,
+html[dir="rtl"] .q-gutter-x-md > * {
+  margin-left: 0;
+  margin-right: 16px;
+}
+html[dir="rtl"] .q-gutter-lg,
+html[dir="rtl"] .q-gutter-x-lg {
+  margin-left: 0;
+  margin-right: -24px;
+}
+html[dir="rtl"] .q-gutter-lg > *,
+html[dir="rtl"] .q-gutter-x-lg > * {
+  margin-left: 0;
+  margin-right: 24px;
+}
+html[dir="rtl"] .q-rating__icon-container + .q-rating__icon-container {
+  margin-left: 0;
+  margin-right: 2px;
+}
+html[dir="rtl"] .q-field__marginal > * + * {
+  margin-left: 0;
+  margin-right: 2px;
+}
+
+// Menus are teleported to <body>; they follow the document direction like the page does.
+html[dir="rtl"] .q-menu {
+  direction: rtl;
+}
+// Floating field labels sit at the start edge (right) in rtl, above the value.
+html[dir="rtl"] .q-field__label {
+  left: auto;
+  right: 0;
+  transform-origin: right top;
 }

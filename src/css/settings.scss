@@ -151,3 +151,16 @@ body .settings-view .q-badge.bg-primary {
   color: var(--app-text-muted);
   font-size: 13px;
 }
+
+/* Relay URLs are content: body size and colour, left to right in every locale. */
+.relay-url {
+  color: var(--app-text);
+  font-size: 14px;
+  text-align: start;
+  word-break: break-all;
+}
+
+// Relay URLs read left to right but hug the start edge of an rtl row.
+html[dir="rtl"] .relay-url {
+  text-align: right;
+}

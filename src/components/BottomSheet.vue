@@ -126,7 +126,7 @@ export default defineComponent({
 
 .bottom-sheet-close {
   position: absolute;
-  left: 6px;
+  inset-inline-start: 6px;
   top: 50%;
   transform: translateY(-50%);
   width: 44px;

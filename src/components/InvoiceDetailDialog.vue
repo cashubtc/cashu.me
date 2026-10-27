@@ -158,8 +158,10 @@
               class="col-12 col-sm-11 col-md-8 q-px-md"
               style="max-width: 560px"
             >
+              <!-- Always rendered (disabled until the request arrives), so the footer never
+                   appears late and shifts the screen. -->
               <q-btn
-                v-if="invoiceData.request"
+                :disable="!invoiceData.request"
                 class="full-width"
                 unelevated
                 size="lg"
@@ -245,7 +247,7 @@ export default defineComponent({
     },
     copyButtonLabel: function () {
       if (this.copyButtonCopied) {
-        return "Copied";
+        return this.$t("common.copied");
       }
       return this.$t("InvoiceDetailDialog.invoice.actions.copy.label");
     },

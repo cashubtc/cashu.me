@@ -80,7 +80,7 @@ export default defineComponent({
   align-items: flex-start;
   justify-content: flex-start;
   padding: 8px;
-  text-align: left;
+  text-align: start;
   font-size: 14px;
   color: #f18408;
   margin-bottom: 16px;
