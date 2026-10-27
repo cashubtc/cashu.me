@@ -105,7 +105,8 @@ $themes: (
     --app-accent: #{map-get($t, accent)};
     --app-on-primary: #{map-get($t, on-fill)};
     --app-surface: #{map-get($t, dark)};
-    --app-raised: #{map-get($t, info)};
+    // Raised surfaces (sheets, dialogs) lift every theme's page by the same step, in its own hue.
+    --app-raised: color-mix(in srgb, #fff 8%, #{map-get($t, dark)});
   }
   body.body--light[data-theme="#{$theme}"] {
     --q-primary: #{map-get($t, light)};

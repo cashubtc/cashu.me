@@ -271,7 +271,7 @@
                 {{ createButtonLabel }}
                 <!-- A label beside the spinner, so the busy state reads even with reduced motion. -->
                 <template v-slot:loading>
-                  <q-spinner size="20px" class="on-left" />
+                  <q-spinner-dots size="20px" class="on-left" />
                   {{ $t("InvoiceDetailDialog.actions.create.label_blocked") }}
                 </template>
               </q-btn>

@@ -109,11 +109,7 @@
           >
             <!-- Date -->
             <div class="text-grey-6">
-              {{
-                $t("HistoryTable.row.date_label", {
-                  value: formattedDate(transaction.date),
-                })
-              }}
+              {{ formattedDate(transaction.date) }}
             </div>
 
             <!-- Status, with the check action for pending rows -->
@@ -192,7 +188,7 @@
 import * as _ from "underscore";
 import { defineComponent } from "vue";
 import { shortenString } from "src/js/string-utils";
-import { formatDistanceToNow, parseISO } from "date-fns";
+import { parseISO } from "date-fns";
 import { useTokensStore } from "src/stores/tokens";
 import { mapState, mapWritableState, mapActions } from "pinia";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
@@ -261,6 +257,11 @@ export default defineComponent({
     },
   },
   computed: {
+    relativeTime() {
+      return new Intl.RelativeTimeFormat(this.$i18n.locale, {
+        numeric: "auto",
+      });
+    },
     ...mapState(useTokensStore, ["historyTokens"]),
     ...mapState(useWalletStore, ["invoiceHistory"]),
     ...mapWritableState(useReceiveTokensStore, [
@@ -357,9 +358,25 @@ export default defineComponent({
       }
     },
 
+    // One locale-formatted phrase ("5 minutes ago", "منذ 5 دقائق", "5分钟前"), so the number,
+    // unit and direction words never come from different languages.
     formattedDate(date_str) {
-      const date = parseISO(date_str);
-      return formatDistanceToNow(date, { addSuffix: false });
+      const seconds = (parseISO(date_str).getTime() - Date.now()) / 1000;
+      const steps = [
+        ["second", 60],
+        ["minute", 60],
+        ["hour", 24],
+        ["day", 30],
+        ["month", 12],
+      ];
+      let value = seconds;
+      for (const [unit, size] of steps) {
+        if (Math.abs(value) < size) {
+          return this.relativeTime.format(Math.round(value), unit);
+        }
+        value /= size;
+      }
+      return this.relativeTime.format(Math.round(value), "year");
     },
 
     shortenString: function (s) {

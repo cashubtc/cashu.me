@@ -71,7 +71,7 @@
             :class="{ active: selectedLanguage === option.label }"
             @click="selectLanguage(option)"
           >
-            <span>{{ option.label }}</span>
+            <span dir="auto">{{ option.label }}</span>
             <q-icon
               v-if="selectedLanguage === option.label"
               name="check"
@@ -478,9 +478,8 @@ export default {
   },
   created() {
     this.selectedLanguage =
-      this.languageOptions.find(
-        (option) => option.value === this.$i18n.locale || navigator.language
-      )?.label || "English";
+      this.languageOptions.find((option) => option.value === this.$i18n.locale)
+        ?.label || "English";
   },
 };
 </script>
@@ -624,7 +623,7 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(4px);
   z-index: 9999;
   display: flex;
@@ -634,8 +633,8 @@ export default {
 
 .language-menu {
   width: 100%;
-  background: rgba(20, 20, 20, 0.98);
-  backdrop-filter: blur(20px);
+  /* Opaque, so the welcome copy never shows through the sheet. */
+  background: #141414;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px 20px 0 0;
   height: 85vh;
@@ -735,8 +734,8 @@ export default {
 
 .terms-menu {
   width: 100%;
-  background: rgba(20, 20, 20, 0.98);
-  backdrop-filter: blur(20px);
+  /* Opaque, so the welcome copy never shows through the sheet. */
+  background: #141414;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px 20px 0 0;
   height: 85vh;

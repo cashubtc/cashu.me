@@ -460,9 +460,10 @@ body[data-theme] .welcome-surface,
   color: var(--app-text-muted);
 }
 
-/* Multi-line fields grow with their content; no native resize grip. */
-textarea {
-  resize: none;
+/* Multi-line fields grow with their content; no native resize grip (Quasar's field sets one). */
+textarea,
+.q-textarea .q-field__native {
+  resize: none !important;
 }
 
 /* One icon language: every Material glyph renders in its outlined form, which matches the

@@ -21,7 +21,7 @@
           <q-icon name="search" size="20px" class="q-mr-sm" />
           <span>{{ $t("MintSettings.discover.actions.discover.label") }}</span>
           <template v-slot:loading>
-            <q-spinner size="20px" class="on-left" />
+            <q-spinner-dots size="20px" class="on-left" />
             {{ $t("MintSettings.discover.actions.discover.in_progress") }}
           </template>
         </q-btn>
@@ -30,6 +30,12 @@
         v-if="discovering && discoverList.length === 0"
         class="discover-skeleton q-mt-md"
       >
+        <!-- Reserves the "Found N mints" heading and note, so cards land where they will stay. -->
+        <div class="q-mb-md" aria-hidden="true">
+          <q-skeleton type="text" width="30%" />
+          <q-skeleton type="text" width="85%" />
+          <q-skeleton type="text" width="60%" />
+        </div>
         <div
           class="discover-skeleton__row"
           v-for="n in 3"
@@ -102,7 +108,8 @@
                         v-if="avgFor(rec.url) !== null && countFor(rec.url) > 0"
                       >
                         <span>
-                          ⭐ {{ (avgFor(rec.url) ?? 0).toFixed(1) }} ·
+                          <q-icon name="star" size="14px" class="rating-star" />
+                          {{ (avgFor(rec.url) ?? 0).toFixed(1) }} ·
                           {{ countFor(rec.url) }}
                           <span
                             class="mint-review-link cursor-pointer"
@@ -339,6 +346,11 @@ export default defineComponent({
   color: var(--app-text-muted);
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+.rating-star {
+  color: var(--app-text);
+  vertical-align: -2px;
 }
 
 .discover-count {

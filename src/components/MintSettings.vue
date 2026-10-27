@@ -128,7 +128,7 @@
                     "
                   >
                     <span>
-                      ⭐
+                      <q-icon name="star" size="14px" class="rating-star" />
                       {{ getRecommendation(mint.url).averageRating.toFixed(1) }}
                       ·
                       {{ getRecommendation(mint.url).reviewsCount }}
@@ -708,6 +708,16 @@ export default defineComponent({
   font-weight: 400;
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+/* Rating stars use the text colour, like every other glyph (no emoji gold). */
+.rating-star {
+  color: var(--app-text);
+  vertical-align: -2px;
+}
+/* Add mint matches the height and label size of Discover mints and Swap. */
+.q-btn.add-mint-submit {
+  font-size: 1rem !important;
+  min-height: 48px;
 }
 /* "No reviews yet" is a state, not a link label. */
 .mint-review-link--empty {
