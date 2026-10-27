@@ -1291,6 +1291,10 @@ export default {
     title: "Messaggio del mint",
   },
   MintDetailsDialog: {
+    qr: {
+      show: "Mostra codice QR",
+      hide: "Nascondi codice QR",
+    },
     contact: {
       title: "Contatto",
     },

@@ -1386,6 +1386,10 @@ export default {
   },
 
   MintDetailsDialog: {
+    qr: {
+      show: "Zobrazit QR kód",
+      hide: "Skrýt QR kód",
+    },
     contact: {
       title: "Kontakt",
     },

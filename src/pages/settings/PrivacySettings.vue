@@ -133,6 +133,7 @@
               v-model="bitcoinPriceCurrency"
               :options="currencyOptions"
               :label="$t('Settings.privacy.bitcoin_price.currency.title')"
+              hide-label
               @update:model-value="onCurrencyChange"
             />
           </q-item-section>

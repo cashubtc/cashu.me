@@ -59,9 +59,6 @@
             $t("Settings.advanced.developer.remove_spent.description")
           }}</q-item-label>
         </q-item-section>
-        <q-item-section side>
-          <q-icon name="chevron_right" class="settings-menu-chevron" />
-        </q-item-section>
       </q-item>
 
       <!-- debug console -->
@@ -73,9 +70,6 @@
           <q-item-label caption>{{
             $t("Settings.advanced.developer.debug_console.description")
           }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-icon name="chevron_right" class="settings-menu-chevron" />
         </q-item-section>
       </q-item>
 
@@ -134,9 +128,6 @@
             $t("Settings.advanced.developer.unset_reserved.description")
           }}</q-item-label>
         </q-item-section>
-        <q-item-section side>
-          <q-icon name="chevron_right" class="settings-menu-chevron" />
-        </q-item-section>
       </q-item>
 
       <!-- show onboarding -->
@@ -166,8 +157,9 @@
             $t("Settings.advanced.developer.export_proofs.description")
           }}</q-item-label>
         </q-item-section>
+        <!-- Downloads a file straight away, so a download glyph instead of a navigation chevron. -->
         <q-item-section side>
-          <q-icon name="chevron_right" class="settings-menu-chevron" />
+          <DownloadIcon :size="20" class="settings-menu-chevron" />
         </q-item-section>
       </q-item>
 
@@ -181,8 +173,9 @@
             $t("Settings.advanced.developer.export_wallet.description")
           }}</q-item-label>
         </q-item-section>
+        <!-- Downloads a file straight away, so a download glyph instead of a navigation chevron. -->
         <q-item-section side>
-          <q-icon name="chevron_right" class="settings-menu-chevron" />
+          <DownloadIcon :size="20" class="settings-menu-chevron" />
         </q-item-section>
       </q-item>
 
@@ -306,6 +299,7 @@ import { useStorageStore } from "src/stores/storage";
 import { useNostrUserStore } from "src/stores/nostrUser";
 import SettingsPageShell from "./SettingsPageShell.vue";
 import SettingsSection from "./SettingsSection.vue";
+import { Download as DownloadIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "AdvancedSettings",
@@ -313,6 +307,7 @@ export default defineComponent({
   components: {
     SettingsPageShell,
     SettingsSection,
+    DownloadIcon,
   },
   data: function () {
     return {

@@ -1287,6 +1287,10 @@ export default {
     title: "Mint 消息",
   },
   MintDetailsDialog: {
+    qr: {
+      show: "显示二维码",
+      hide: "隐藏二维码",
+    },
     contact: {
       title: "联系",
     },

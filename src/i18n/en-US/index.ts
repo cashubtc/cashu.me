@@ -1362,6 +1362,10 @@ export default {
     title: "Mint message",
   },
   MintDetailsDialog: {
+    qr: {
+      show: "Show QR code",
+      hide: "Hide QR code",
+    },
     contact: {
       title: "Contact",
     },

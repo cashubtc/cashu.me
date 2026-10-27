@@ -17,7 +17,7 @@
         <slot name="icon" :option="selectedOption" />
       </span>
       <span class="mint-chip__field-text">
-        <span class="mint-chip__label">{{ label }}</span>
+        <span v-if="!hideLabel" class="mint-chip__label">{{ label }}</span>
         <span class="mint-chip__name">{{
           selectedOption?.label ?? placeholder
         }}</span>
@@ -64,6 +64,9 @@ export default defineComponent({
   name: "SheetSelect",
   components: { BottomSheet, SheetOption, ChevronDownIcon },
   props: {
+    // When the row above already names the setting, the field shows only its value; the
+    // label still names the control and the sheet.
+    hideLabel: { type: Boolean, default: false },
     modelValue: {
       type: [String, Number] as PropType<string | number | null>,
       default: null,

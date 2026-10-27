@@ -1309,6 +1309,10 @@ export default {
     title: "ミントからのメッセージ",
   },
   MintDetailsDialog: {
+    qr: {
+      show: "QRコードを表示",
+      hide: "QRコードを隠す",
+    },
     contact: {
       title: "連絡先",
     },

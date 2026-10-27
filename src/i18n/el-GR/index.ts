@@ -1322,6 +1322,10 @@ export default {
     title: "Μήνυμα mint",
   },
   MintDetailsDialog: {
+    qr: {
+      show: "Εμφάνιση κωδικού QR",
+      hide: "Απόκρυψη κωδικού QR",
+    },
     contact: {
       title: "Επαφή",
     },

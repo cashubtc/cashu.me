@@ -1328,6 +1328,10 @@ export default {
     title: "Nachricht der Mint",
   },
   MintDetailsDialog: {
+    qr: {
+      show: "QR-Code anzeigen",
+      hide: "QR-Code ausblenden",
+    },
     contact: {
       title: "Kontakt",
     },

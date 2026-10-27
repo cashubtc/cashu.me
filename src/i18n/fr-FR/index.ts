@@ -1330,6 +1330,10 @@ export default {
     title: "Message de la mint",
   },
   MintDetailsDialog: {
+    qr: {
+      show: "Afficher le code QR",
+      hide: "Masquer le code QR",
+    },
     contact: {
       title: "Contact",
     },

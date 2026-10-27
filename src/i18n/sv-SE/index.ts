@@ -1311,6 +1311,10 @@ export default {
     title: "Meddelande från minten",
   },
   MintDetailsDialog: {
+    qr: {
+      show: "Visa QR-kod",
+      hide: "Dölj QR-kod",
+    },
     contact: {
       title: "Kontakt",
     },

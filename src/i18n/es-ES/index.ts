@@ -1318,6 +1318,10 @@ export default {
     title: "Mensaje del mint",
   },
   MintDetailsDialog: {
+    qr: {
+      show: "Mostrar código QR",
+      hide: "Ocultar código QR",
+    },
     contact: {
       title: "Contacto",
     },

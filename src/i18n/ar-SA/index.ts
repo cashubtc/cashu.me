@@ -1299,6 +1299,10 @@ export default {
     title: "رسالة المِنْت",
   },
   MintDetailsDialog: {
+    qr: {
+      show: "إظهار رمز QR",
+      hide: "إخفاء رمز QR",
+    },
     contact: {
       title: "جهة الاتصال",
     },

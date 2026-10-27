@@ -36,12 +36,23 @@
             </div>
 
             <!-- QR Code Icon -->
+            <!-- A labelled button, not a bare glyph, so its purpose and state are clear. -->
             <div class="top-icons">
-              <qr-code-icon
-                size="24"
-                class="qr-icon cursor-pointer"
+              <q-btn
+                flat
+                rounded
+                no-caps
+                class="qr-toggle"
+                :aria-expanded="showQrCode"
                 @click="showQrCode = !showQrCode"
-              />
+              >
+                <qr-code-icon size="20" class="qr-icon" />
+                <span class="q-ml-sm">{{
+                  showQrCode
+                    ? $t("MintDetailsDialog.qr.hide")
+                    : $t("MintDetailsDialog.qr.show")
+                }}</span>
+              </q-btn>
             </div>
 
             <!-- QR Code Section (toggleable) -->
@@ -590,6 +601,13 @@ export default defineComponent({
   width: 100%;
   display: flex;
   justify-content: center;
+}
+
+.qr-toggle {
+  color: var(--app-text);
+  font-size: 14px;
+  font-weight: 600;
+  min-height: 44px;
 }
 
 /* Mint Header */

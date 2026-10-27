@@ -1,22 +1,19 @@
 <template>
   <q-card flat class="bg-transparent full-width mint-ratings-root">
     <q-card-section class="q-pa-none">
-      <!-- Mint Header - Matching MintDetailsPage style -->
-      <div class="mint-header-container q-mb-lg">
-        <div class="mint-header q-pa-md">
-          <q-avatar size="56px" class="q-mb-sm">
-            <img
-              v-if="mintInfo?.icon_url"
-              :src="mintInfo.icon_url"
-              alt="Mint Profile"
-            />
-            <LandmarkIcon v-else :size="36" class="text-app-muted mint-glyph" />
-          </q-avatar>
-          <div class="mint-name q-mb-xs">
+      <!-- Mint identity as one compact row (icon, name, host), so the rating and the first
+           reviews sit higher on the page. -->
+      <div class="mint-header row items-center no-wrap q-mb-lg">
+        <q-avatar size="44px" class="mint-header__avatar">
+          <img v-if="mintInfo?.icon_url" :src="mintInfo.icon_url" alt="" />
+          <LandmarkIcon v-else :size="24" class="text-app-muted mint-glyph" />
+        </q-avatar>
+        <div class="mint-header__text">
+          <div class="mint-name">
             {{ mintInfo?.name || url.replace(/^https?:\/\//, "") }}
           </div>
           <div v-if="mintInfo?.name" class="mint-url text-grey-6">
-            {{ url }}
+            <bdi dir="ltr">{{ url.replace(/^https?:\/\//, "") }}</bdi>
           </div>
         </div>
       </div>
@@ -785,35 +782,31 @@ export default defineComponent({
 
 <style scoped>
 /* Mint Header - Matching MintDetailsPage style */
-.mint-header-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
+.mint-header {
+  gap: 12px;
 }
 
-.mint-header {
-  width: 100%;
-  border: 1px solid var(--app-border);
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--app-tint);
+.mint-header__avatar {
+  background: var(--app-tint-strong);
+  flex: none;
+}
+
+.mint-header__text {
+  min-width: 0;
 }
 
 .mint-name {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: 600;
-  text-align: center;
+  line-height: 24px;
+  text-align: start;
   color: var(--app-text);
 }
 
 .mint-url {
-  font-size: 14px;
-  font-weight: 500;
-  text-align: center;
+  font-size: 13px;
+  line-height: 18px;
+  text-align: start;
   word-break: break-all;
 }
 

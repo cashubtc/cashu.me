@@ -1300,6 +1300,10 @@ export default {
     title: "ข้อความจาก Mint",
   },
   MintDetailsDialog: {
+    qr: {
+      show: "แสดงรหัส QR",
+      hide: "ซ่อนรหัส QR",
+    },
     contact: {
       title: "ติดต่อ",
     },

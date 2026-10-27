@@ -1324,6 +1324,10 @@ export default {
     title: "Mint mesajı",
   },
   MintDetailsDialog: {
+    qr: {
+      show: "QR kodunu göster",
+      hide: "QR kodunu gizle",
+    },
     contact: {
       title: "İletişim",
     },
