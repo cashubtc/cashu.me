@@ -1,5 +1,5 @@
 <!-- The standard empty state (src/css/elements.scss .app-empty): an icon in a round
-     slot, a title, one line of help and optional actions. Boxed by default. -->
+     slot, a title, one line of help and optional actions. Bare on the page by default. -->
 <template>
   <div class="app-empty" :class="{ 'app-box': boxed }">
     <div class="app-icon-circle app-icon-circle--lg">
@@ -35,7 +35,7 @@ export default defineComponent({
     /** Adds the app-box surface around the empty state. */
     boxed: {
       type: Boolean,
-      default: true,
+      default: false,
     },
   },
 });

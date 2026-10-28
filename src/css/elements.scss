@@ -6,13 +6,38 @@
 // Colours that carry meaning, for callouts and status text, in both modes.
 body.body--dark {
   --app-info: #60a5fa;
-  --app-warning: #fbbf24;
+  --app-warning: #facc15;
   --app-danger: var(--q-negative);
+  // A filled destructive button: the danger colour with dark text (white on coral is ~2.8:1).
+  --app-danger-fill: var(--q-negative);
+  --app-on-danger: #0a0a0a;
 }
 body.body--light {
   --app-info: #2563eb;
-  --app-warning: #b45309;
+  --app-warning: #a16207;
   --app-danger: var(--q-negative);
+  --app-danger-fill: #c42b2b;
+  --app-on-danger: #fff;
+}
+// Checkboxes take the small control radius, like the rest of the kit.
+.q-checkbox__bg {
+  border-radius: var(--app-radius-sm) !important;
+}
+// An empty state's action is sized to the message, not stretched to the card's edges.
+.app-empty__action {
+  max-width: 320px;
+}
+// Destructive button: the one filled danger treatment (Remove mint, inline Remove), at AA.
+.app-btn-danger.q-btn:not(.q-btn--dense) {
+  min-height: 44px;
+}
+.app-btn-danger.q-btn {
+  background: var(--app-danger-fill) !important;
+  color: var(--app-on-danger) !important;
+}
+// Quasar's own warning colour (text-warning, color="warning") is the same single yellow.
+body {
+  --q-warning: var(--app-warning);
 }
 
 // Onboarding is dark in every app mode: give it the dark neutral tokens, so standard elements
@@ -140,18 +165,13 @@ body.body--light {
   --tone: var(--app-danger);
 }
 
-// Callout (AppCallout.vue; shadcn Alert with Sonner's rich colours): a tone-tinted surface,
-// a hairline in the tone, the icon and title in the tone, the message in muted ink. The
-// neutral one is a plain card for advice.
+// Callout (AppCallout.vue; shadcn Alert): one neutral surface for every tone, with the meaning
+// carried by the icon's colour, so a page of callouts never turns into coloured boxes and a
+// warning never looks like a themed selection. Warning and danger titles take the tone too.
 .app-callout {
   align-items: flex-start;
-  background: color-mix(
-    in srgb,
-    var(--tone, transparent) 10%,
-    var(--app-surface)
-  );
-  border: 1px solid
-    color-mix(in srgb, var(--tone, var(--app-border)) 28%, transparent);
+  background: var(--app-group-fill);
+  border: 1px solid var(--app-border);
   border-radius: var(--app-radius-lg);
   color: var(--app-text);
   display: flex;
@@ -162,10 +182,10 @@ body.body--light {
   text-align: start;
   width: 100%;
 }
-.app-callout--neutral,
-.app-callout:not([class*="app-callout--"]) {
-  background: var(--app-tint);
-  border-color: var(--app-border);
+// Warning and danger also tint their edge, so a risk never reads as neutral advice.
+.app-callout--warning,
+.app-callout--danger {
+  border-color: color-mix(in srgb, var(--tone) 40%, var(--app-border));
 }
 .app-callout__icon {
   color: var(--tone, var(--app-text-muted));
@@ -177,9 +197,10 @@ body.body--light {
   min-width: 0;
 }
 .app-callout__title {
-  color: color-mix(in srgb, var(--tone, var(--app-text)) 55%, var(--app-text));
+  color: var(--app-text);
   font-weight: 600;
 }
+
 .app-callout__text {
   color: var(--app-text-muted);
 }
@@ -284,7 +305,8 @@ button.app-badge {
 // Machine text: tokens, keys, invoices, keyset ids.
 .app-mono {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 13px;
+  font-size: 14px;
+  line-height: 1.5;
   letter-spacing: 0;
 }
 // Long machine strings that wrap anywhere, without hyphens.
@@ -388,6 +410,9 @@ button.app-badge {
 body .q-skeleton {
   background: var(--app-tint-strong);
 }
+body.body--light .q-skeleton {
+  background: rgba(0, 0, 0, 0.1);
+}
 body .q-skeleton--type-rect,
 body .q-skeleton--type-text {
   border-radius: var(--app-radius-sm);
@@ -407,16 +432,7 @@ body .q-skeleton--type-text {
 
 // Install-the-app prompts (Android top right, iOS bottom centre): one card on the raised
 // surface with an arrow toward the browser's menu. Each prompt sets only its position and
-// arrow direction. The bounce stops for people who ask for reduced motion.
-@keyframes pwa-prompt-bounce {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
+// pointer. It fades in once and then stays still (no bounce).
 .pwa-prompt {
   align-items: center;
   display: flex;
@@ -427,11 +443,6 @@ body .q-skeleton--type-text {
   text-align: center;
   z-index: 9999;
 }
-@media (prefers-reduced-motion: no-preference) {
-  .pwa-prompt {
-    animation: pwa-prompt-bounce 1s infinite;
-  }
-}
 .pwa-prompt-content {
   align-items: center;
   background: var(--app-raised);
@@ -441,14 +452,9 @@ body .q-skeleton--type-text {
   color: var(--app-text);
   display: inline-flex;
   font-size: 14px;
-  padding: 10px 12px;
-}
-.pwa-prompt-arrow {
-  border-left: 10px solid transparent;
-  border-right: 10px solid transparent;
-  height: 0;
-  margin: 2px auto;
-  width: 0;
+  gap: 4px;
+  line-height: 1.4;
+  padding: 12px 14px;
 }
 
 // Amount entry layout (Receive Lightning, Send ecash, Pay): the amount area fills the space
@@ -505,10 +511,12 @@ body .q-skeleton--type-text {
 
 // Busy buttons: the dots and the busy label replace the label in the button's own layout, on
 // one line, so a longer busy label ("Swapping…") widens the button instead of spilling out.
-.q-btn--loading .q-btn__content--hidden {
+// (Quasar marks the busy state only by hiding the label, so the rules key off that.)
+.q-btn > .q-btn__content--hidden {
   display: none !important;
 }
-.q-btn--loading > .absolute-full {
+.q-btn > .q-btn__content--hidden + .absolute-full {
+  flex: 1 1 auto;
   flex-wrap: nowrap;
   gap: 2px;
   position: static;
@@ -585,6 +593,9 @@ body .q-skeleton--type-text {
 }
 .activity-row__direction--in {
   background: var(--q-positive);
+}
+.activity-row__direction--pending {
+  background: var(--app-text-muted);
 }
 .activity-row__label {
   font-size: 1rem;

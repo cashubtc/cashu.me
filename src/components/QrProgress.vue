@@ -1,14 +1,7 @@
 <template>
   <!-- The thin activity track under a cycling or polled QR; the track keeps its space when idle. -->
   <div class="qr-progress">
-    <q-linear-progress
-      v-if="active"
-      indeterminate
-      rounded
-      size="2px"
-      color="grey-7"
-      track-color="transparent"
-    />
+    <q-linear-progress v-if="active" indeterminate rounded size="3px" />
   </div>
 </template>
 

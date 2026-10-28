@@ -1,7 +1,7 @@
 <template>
   <WelcomeSlideScaffold
     class="mint-setup-slide"
-    icon="account_tree"
+    :icon="LandmarkIcon"
     :title="$t('WelcomeMintSetup.title')"
     :text="$t('WelcomeMintSetup.text')"
   >
@@ -105,6 +105,7 @@
 </template>
 
 <script lang="ts">
+import { Landmark as LandmarkIcon } from "lucide-vue-next";
 import WelcomeSlideScaffold from "src/components/ui/WelcomeSlideScaffold.vue";
 import { computed, ref, watch, onMounted } from "vue";
 import { useWelcomeStore } from "src/stores/welcome";
@@ -179,6 +180,7 @@ export default {
     });
 
     return {
+      LandmarkIcon,
       welcome,
       restore,
       mints,

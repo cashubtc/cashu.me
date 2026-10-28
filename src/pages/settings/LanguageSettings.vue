@@ -9,7 +9,6 @@
         :key="option.value"
         :selected="activeLocale === option.value"
         :label="option.label"
-        active-class="text-weight-bold text-primary"
         @select="selectLanguage(option.value)"
       />
     </SettingsSection>

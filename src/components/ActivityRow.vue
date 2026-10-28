@@ -1,4 +1,5 @@
-<!-- One transaction or payment in a list: a 40px icon circle with a direction disc, a label and
+<!-- One transaction or payment in a list: a 40px icon circle with a direction disc (a clock
+     while pending), a label and
      amount line, and a date line. Styles: src/css/elements.scss (.activity-row). -->
 <template>
   <q-item clickable v-ripple class="q-py-sm activity-row" @click="emitClick">
@@ -7,10 +8,14 @@
         <component :is="icon" class="activity-row__icon" />
         <span
           class="activity-row__direction"
-          :class="isIn ? 'activity-row__direction--in' : ''"
+          :class="{
+            'activity-row__direction--in': isIn && !pending,
+            'activity-row__direction--pending': pending,
+          }"
           aria-hidden="true"
         >
-          <ArrowDownLeftIcon v-if="isIn" :size="13" :stroke-width="2.75" />
+          <ClockIcon v-if="pending" :size="13" :stroke-width="2.75" />
+          <ArrowDownLeftIcon v-else-if="isIn" :size="13" :stroke-width="2.75" />
           <ArrowUpRightIcon v-else :size="13" :stroke-width="2.75" />
         </span>
       </q-avatar>
@@ -52,12 +57,13 @@
 import { defineComponent, PropType, Component } from "vue";
 import {
   ArrowDownLeft as ArrowDownLeftIcon,
+  Clock as ClockIcon,
   ArrowUpRight as ArrowUpRightIcon,
 } from "lucide-vue-next";
 
 export default defineComponent({
   name: "ActivityRow",
-  components: { ArrowDownLeftIcon, ArrowUpRightIcon },
+  components: { ArrowDownLeftIcon, ArrowUpRightIcon, ClockIcon },
   props: {
     /** The kind of activity (ecash, lightning, on-chain), as a lucide icon component. */
     icon: {

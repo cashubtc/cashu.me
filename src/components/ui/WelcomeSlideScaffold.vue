@@ -11,7 +11,7 @@
     <div class="welcome-slide__content">
       <div class="welcome-slide__icon">
         <div class="app-icon-circle app-icon-circle--xl">
-          <q-icon :name="icon" size="2.5em" />
+          <component :is="icon" :size="36" :stroke-width="1.75" />
         </div>
       </div>
 
@@ -27,14 +27,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, type Component, type PropType } from "vue";
 
 export default defineComponent({
   name: "WelcomeSlideScaffold",
   props: {
-    /** Material icon name for the header circle. */
+    /** A lucide icon component for the header circle (outline, like every other icon). */
     icon: {
-      type: String,
+      type: [Object, Function] as PropType<Component>,
       required: true,
     },
     title: {

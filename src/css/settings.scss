@@ -125,10 +125,14 @@
   padding: 0 16px;
 }
 
-/* Read-only fields (seed phrase) keep the solid outline; Quasar's dashed readonly border
-   read as a second container inside the card. */
-.settings-view .q-field--outlined.q-field--readonly .q-field__control:before {
-  border-style: solid;
+/* Expandable settings rows ("Advanced"): the same row as the other settings rows, with the
+   chevron in the row glyph colour and a rounded pressed fill; no leading Material icon. */
+.settings-view .q-expansion-item .q-item {
+  border-radius: var(--app-radius-lg);
+  min-height: 56px;
+}
+.settings-view .q-expansion-item__toggle-icon {
+  color: var(--app-text-muted);
 }
 
 /* Relay URLs are content: body size and colour, left to right in every locale. */

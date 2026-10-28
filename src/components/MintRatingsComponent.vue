@@ -300,15 +300,11 @@
               class="review-stars-wrap"
               :aria-label="$t('MintRatings.stars_label', { rating: r.rating })"
             >
-              <q-rating
+              <AppRating
                 aria-hidden="true"
                 :model-value="r.rating"
                 readonly
-                size="14px"
-                color="primary"
-                icon="star"
-                icon-selected="star"
-                icon-half="star_half"
+                :size="14"
                 class="review-stars"
               />
             </div>
@@ -369,6 +365,7 @@
 
 <script lang="ts">
 import { User as UserIcon } from "lucide-vue-next";
+import AppRating from "src/components/ui/AppRating.vue";
 import BottomSheet from "src/components/BottomSheet.vue";
 import SheetOption from "src/components/SheetOption.vue";
 import MintIdentityHeader from "src/components/MintIdentityHeader.vue";
@@ -392,6 +389,7 @@ export default defineComponent({
   },
   emits: ["close"],
   components: {
+    AppRating,
     UserIcon,
     BottomSheet,
     SheetOption,
@@ -474,8 +472,8 @@ export default defineComponent({
     },
     wotColor(hop: number | null): string {
       if (!hop) return "";
-      if (hop === 1) return "light-green-5";
-      if (hop === 2) return "amber-5";
+      if (hop === 1) return "positive";
+      if (hop === 2) return "warning";
       return "";
     },
     async ensureNdk() {
@@ -868,12 +866,6 @@ body[data-theme] .q-card--dark.mint-ratings-root {
   display: flex;
   gap: 1px;
   margin-top: 4px;
-}
-
-/* Unearned stars recede, so a 4 reads as 4 at a glance (R41). */
-.review-stars :deep(.q-rating__icon:not(.q-rating__icon--active)) {
-  color: var(--app-text-subtle) !important;
-  opacity: 0.5;
 }
 
 .review-no-rating {

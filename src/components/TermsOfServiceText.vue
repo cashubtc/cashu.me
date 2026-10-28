@@ -1,28 +1,22 @@
 <!-- The Cashu.me Terms of Service body (English only), shared by the onboarding
      terms sheet and the Terms page. Sites style it through their own wrapper class. -->
 <template>
-  <div dir="ltr" lang="en">
-    <p><strong>Last Updated: 20.12.2024</strong></p>
-    <p>
-      <strong>
-        IMPORTANT NOTICE: THESE TERMS OF SERVICE INCLUDE A MEDIATION-FIRST
-        CLAUSE REQUIRING MEDIATION BEFORE ARBITRATION OR LITIGATION. PLEASE READ
-        THESE TERMS CAREFULLY. IF YOU DO NOT AGREE, DO NOT USE CASHU.ME.
-      </strong>
+  <div dir="ltr" lang="en" class="terms">
+    <p class="terms__updated">Last Updated: 20.12.2024</p>
+    <p class="terms__notice">
+      IMPORTANT NOTICE: THESE TERMS OF SERVICE INCLUDE A MEDIATION-FIRST CLAUSE
+      REQUIRING MEDIATION BEFORE ARBITRATION OR LITIGATION. PLEASE READ THESE
+      TERMS CAREFULLY. IF YOU DO NOT AGREE, DO NOT USE CASHU.ME.
     </p>
-    <p>
-      <strong>
-        ALL REFERENCES TO LAW, REGULATION, AND JURISDICTION IN THESE TERMS REFER
-        TO THE LAWS AND REGULATIONS OF THE USER’S JURISDICTION. USERS ARE
-        RESPONSIBLE FOR DETERMINING THE LEGALITY AND REGULATORY COMPLIANCE OF
-        THEIR ACTIVITIES.
-      </strong>
+    <p class="terms__notice">
+      ALL REFERENCES TO LAW, REGULATION, AND JURISDICTION IN THESE TERMS REFER
+      TO THE LAWS AND REGULATIONS OF THE USER’S JURISDICTION. USERS ARE
+      RESPONSIBLE FOR DETERMINING THE LEGALITY AND REGULATORY COMPLIANCE OF
+      THEIR ACTIVITIES.
     </p>
-    <p>
-      <strong
-        >CASHU.ME DOES NOT HOLD ECASH, DOES NOT EXECUTE AND CANNOT MONITOR
-        TRANSACTIONS, AND DOES NOT OPERATE OR VERIFY ANY MINTS.</strong
-      >
+    <p class="terms__notice">
+      CASHU.ME DOES NOT HOLD ECASH, DOES NOT EXECUTE AND CANNOT MONITOR
+      TRANSACTIONS, AND DOES NOT OPERATE OR VERIFY ANY MINTS.
     </p>
     <p>
       These Terms of Service (these “Terms”) constitute the entire agreement and
@@ -300,3 +294,40 @@ export default defineComponent({
   name: "TermsOfServiceText",
 });
 </script>
+
+<style scoped>
+/* Legal text set for reading: muted body at 14px, numbered headings in ink, and the
+   capitalised notices as one quiet tinted block each instead of runs of bold capitals. */
+.terms {
+  color: var(--app-text-muted);
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: left; /* English text keeps its alignment inside an rtl page */
+}
+.terms p {
+  margin: 0 0 12px;
+}
+.terms p:last-child {
+  margin-bottom: 0;
+}
+.terms strong {
+  color: var(--app-text);
+  font-weight: 600;
+}
+.terms p:has(> strong:only-child) {
+  margin-top: 20px;
+}
+.terms__updated {
+  color: var(--app-text-subtle);
+  font-size: 12px;
+}
+.terms__notice {
+  background: var(--app-tint);
+  border-radius: var(--app-radius-md);
+  color: var(--app-text);
+  font-size: 12px;
+  letter-spacing: 0.01em;
+  line-height: 1.55;
+  padding: 10px 12px;
+}
+</style>

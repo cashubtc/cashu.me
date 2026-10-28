@@ -3,7 +3,7 @@
   <div class="welcome-slide">
     <!-- Logo -->
     <div class="logo">
-      <transition appear enter-active-class="animated bounce">
+      <transition appear enter-active-class="animated fadeIn">
         <img src="/clean.png" alt="Cashu Logo" class="logo-image" />
       </transition>
     </div>
@@ -318,19 +318,7 @@ export default {
 }
 
 .terms-text-content {
-  text-align: left; /* English text inside an rtl page */
-  color: rgba(255, 255, 255, 0.9);
-  line-height: 1.5;
-}
-
-.terms-text-content :deep(p) {
-  margin: 0 0 16px 0;
-  font-size: 0.9rem;
-}
-
-.terms-text-content :deep(strong) {
-  color: white;
-  font-weight: 600;
+  padding: 0 4px;
 }
 
 .language-section {

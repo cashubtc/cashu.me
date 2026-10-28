@@ -1,7 +1,7 @@
 <template>
   <WelcomeSlideScaffold
     class="choice-slide"
-    icon="account_balance_wallet"
+    :icon="WalletIcon"
     :title="$t('WelcomeSlideChoice.title')"
     :text="$t('WelcomeSlideChoice.text')"
     themed-text
@@ -61,6 +61,7 @@
 </template>
 
 <script lang="ts">
+import { Wallet as WalletIcon } from "lucide-vue-next";
 import WelcomeSlideScaffold from "src/components/ui/WelcomeSlideScaffold.vue";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useWalletStore } from "src/stores/wallet";
@@ -75,7 +76,7 @@ export default {
       // advance to next stage immediately for snappier UX
       welcomeStore.setCurrentSlide(3);
     };
-    return { welcomeStore, walletStore, choose };
+    return { WalletIcon, welcomeStore, walletStore, choose };
   },
 };
 </script>

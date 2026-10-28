@@ -15,7 +15,7 @@
       <q-toolbar-title></q-toolbar-title>
       <transition
         appear
-        enter-active-class="animated wobble"
+        enter-active-class="animated fadeIn"
         leave-active-class="animated fadeOut"
       >
         <span v-if="g.offline" class="app-badge app-badge--danger q-mr-sm">

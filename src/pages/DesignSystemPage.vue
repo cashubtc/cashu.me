@@ -199,7 +199,9 @@
               <q-spinner-dots size="20px" class="on-left" /> Creating
             </template>
           </q-btn>
-          <q-btn rounded unelevated no-caps color="negative">Remove mint</q-btn>
+          <q-btn rounded unelevated no-caps class="app-btn-danger"
+            >Remove mint</q-btn
+          >
         </div>
       </DsEntry>
       <DsEntry id="icon-buttons">
@@ -212,9 +214,6 @@
           /></q-btn>
           <q-btn flat round class="app-icon-btn" aria-label="Menu"
             ><MenuIcon :size="22"
-          /></q-btn>
-          <q-btn flat round class="app-icon-btn" aria-label="Refresh"
-            ><RefreshCwIcon :size="20"
           /></q-btn>
           <q-btn flat round class="app-icon-btn" aria-label="Refreshing"
             ><RefreshCwIcon :size="20" class="refresh-spin"
@@ -230,8 +229,8 @@
       <DsEntry id="copy-button">
         <div class="row items-center q-gutter-md">
           <CopyButton value="lnurl1example" tooltip="Copy" />
-          <CopyButton value="npub1example" color="primary" size="md" />
-          <span class="text-app-muted">Click: copies, then shows a check.</span>
+          <CopyButton ref="copied" value="npub1example" tooltip="Copied" />
+          <span class="text-app-muted">Ready, and just copied.</span>
         </div>
       </DsEntry>
       <DsEntry id="inline-confirm">
@@ -307,24 +306,16 @@
         />
       </DsEntry>
       <DsEntry id="amount-entry">
-        <div class="text-center">
-          <div class="ui-kit-amount">₿{{ keypad || "0" }}</div>
-          <div class="text-app-muted">$0.00</div>
-        </div>
-        <NumericKeyboard
-          v-model="keypad"
-          force-visible
-          hide-close
-          hide-enter
-          class="ui-kit-keypad"
-        />
-      </DsEntry>
-      <DsEntry id="amount-keypad-panel">
-        <div class="ds-keypad">
+        <div class="ds-keypad q-mx-auto">
+          <div class="text-center q-mb-md">
+            <div class="amount-headline">
+              ₿{{ (keypadAmount ?? 0).toLocaleString("en-US") }}
+            </div>
+            <div class="text-app-muted">
+              ${{ ((keypadAmount ?? 0) / 1000).toFixed(2) }}
+            </div>
+          </div>
           <AmountKeypadPanel v-model="keypadAmount" />
-        </div>
-        <div class="q-mt-sm text-app-muted">
-          Amount: {{ keypadAmount ?? 0 }}
         </div>
       </DsEntry>
       <DsEntry id="segmented-control">
@@ -379,22 +370,10 @@
           <q-checkbox v-model="checkOn" label="Selected" />
           <q-checkbox v-model="checkOff" label="Not selected" />
         </div>
-        <q-list class="settings-card">
-          <q-item
-            v-for="m in ['Dark', 'Light']"
-            :key="m"
-            clickable
-            @click="radio = m"
-          >
-            <q-item-section avatar>
-              <q-icon
-                :color="radio === m ? 'primary' : 'grey'"
-                :name="radio === m ? 'check_circle' : 'radio_button_unchecked'"
-              />
-            </q-item-section>
-            <q-item-section>{{ m }}</q-item-section>
-          </q-item>
-        </q-list>
+        <div class="row q-gutter-md">
+          <q-radio v-model="radio" val="Dark" label="Dark" />
+          <q-radio v-model="radio" val="Light" label="Light" />
+        </div>
       </DsEntry>
       <DsEntry id="settings-radio-row">
         <q-list class="settings-menu-group settings-view">
@@ -416,15 +395,10 @@
           color="primary"
           class="q-mb-md"
         />
-        <q-rating
-          v-model="rating"
-          max="5"
-          size="32px"
-          color="grey-5"
-          color-selected="amber"
-          icon="star_border"
-          icon-selected="star"
-        />
+        <div class="row items-center q-gutter-md">
+          <AppRating v-model="rating" :size="32" label="Rating" />
+          <AppRating :model-value="4" readonly :size="14" />
+        </div>
       </DsEntry>
       <h2 id="ds-group-navigation" class="ds-section">Navigation</h2>
       <DsEntry id="tabs">
@@ -457,7 +431,7 @@
             :caption="row.caption"
           />
           <SettingsLinkRow
-            :icon="LandmarkIcon"
+            :icon="CodeIcon"
             label="Source code"
             caption="github.com/cashubtc/cashu.me"
             external
@@ -471,7 +445,7 @@
             label="Export proofs"
             caption="Download a backup file"
           >
-            <template #side><CopyIcon :size="18" /></template>
+            <template #side><DownloadIcon :size="18" /></template>
           </SettingsActionRow>
           <SettingsActionRow
             label="Delete wallet"
@@ -518,9 +492,18 @@
         </div>
       </DsEntry>
       <DsEntry id="expansion-row">
-        <q-expansion-item label="Advanced" icon="tune" dense>
-          <div class="q-pa-md text-app-muted">Expanded content.</div>
-        </q-expansion-item>
+        <q-list class="settings-menu-group settings-view">
+          <SettingsToggleRow
+            v-model="toggleOn"
+            label="Lightning address"
+            caption="Receive to a reusable address"
+          />
+          <q-expansion-item label="Advanced">
+            <div class="q-px-md q-pb-md text-app-muted">
+              Server URL and mint for the address.
+            </div>
+          </q-expansion-item>
+        </q-list>
       </DsEntry>
       <h2 id="ds-group-containers" class="ds-section">Cards and containers</h2>
       <DsEntry id="mint-cards">
@@ -539,7 +522,7 @@
                 :name="card.name"
                 :url="card.url"
               />
-              <CircleCheckIcon
+              <CheckIcon
                 v-if="card.active"
                 :size="18"
                 class="mint-card__status mint-card__check"
@@ -598,13 +581,16 @@
         </SettingsSection>
         <SettingsSection
           title="Locked ecash"
-          caption="Anyone with this key can unlock ecash sent to it. Keep it private."
+          caption="Experimental. Use small amounts: if you lose the private key, nobody can unlock the ecash locked to it."
           warning
         >
           <q-item>
             <q-item-section>
               <q-item-label>Lock key</q-item-label>
               <q-item-label caption>npub1…k3x9</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <CopyButton value="npub1example" label="Copy lock key" />
             </q-item-section>
           </q-item>
         </SettingsSection>
@@ -624,9 +610,10 @@
           <span class="app-badge">Beta</span>
           <span class="app-badge app-badge--solid">₿2,289</span>
           <span class="app-badge app-badge--primary">60%</span>
-          <span class="app-badge app-badge--success"
+          <span class="app-badge app-badge--solid"
             ><LockIcon :size="14" />Locked</span
           >
+          <span class="app-badge app-badge--success">Received</span>
           <span class="app-badge app-badge--warning">Staging</span>
           <span class="app-badge app-badge--danger">Offline</span>
         </div>
@@ -641,7 +628,7 @@
           :value="d.value"
         />
         <DetailRow
-          :icon="LandmarkIcon"
+          :icon="GlobeIcon"
           label="Explorer"
           value="mempool.space"
           href="https://mempool.space"
@@ -670,7 +657,11 @@
             amount="−₿210"
             caption="5 minutes ago"
             pending
-          />
+          >
+            <template #caption-end>
+              <span class="text-app-muted">Pending</span>
+            </template>
+          </ActivityRow>
         </q-list>
       </DsEntry>
       <DsEntry id="amounts">
@@ -689,16 +680,21 @@
         <QrBlock value="cashu:demo-token" />
       </DsEntry>
       <DsEntry id="qr-progress">
-        <div class="text-app-muted q-mb-xs">Checking</div>
-        <QrProgress active />
-        <div class="text-app-muted q-mt-md q-mb-xs">Idle (keeps its space)</div>
-        <QrProgress />
+        <div class="ds-qr-progress q-mx-auto">
+          <QrBlock value="cashu:demo-token" />
+          <QrProgress active />
+          <div class="text-center text-app-muted">Checking for payment</div>
+        </div>
       </DsEntry>
       <DsEntry id="tooltip">
-        <q-btn rounded outline no-caps color="primary">
-          Hover me
-          <q-tooltip>Copied to clipboard</q-tooltip>
-        </q-btn>
+        <div class="ds-tooltip-stage">
+          <q-btn rounded outline no-caps color="primary">
+            Copy address
+            <q-tooltip anchor="top middle" self="bottom middle" :offset="[0, 8]"
+              >Copied to clipboard</q-tooltip
+            >
+          </q-btn>
+        </div>
       </DsEntry>
       <h2 id="ds-group-feedback" class="ds-section">Feedback and overlays</h2>
       <DsEntry id="callouts">
@@ -735,41 +731,28 @@
           </div>
         </div>
         <div class="row q-gutter-sm">
-          <q-btn
-            rounded
-            outline
-            no-caps
-            color="primary"
-            @click="toast('success')"
+          <q-btn rounded outline no-caps @click="toast('success')"
             >Success</q-btn
           >
-          <q-btn rounded outline no-caps color="primary" @click="toast('error')"
-            >Error</q-btn
-          >
-          <q-btn
-            rounded
-            outline
-            no-caps
-            color="primary"
-            @click="toast('warning')"
+          <q-btn rounded outline no-caps @click="toast('error')">Error</q-btn>
+          <q-btn rounded outline no-caps @click="toast('warning')"
             >Warning</q-btn
           >
-          <q-btn rounded outline no-caps color="primary" @click="toast('info')"
-            >Info</q-btn
-          >
+          <q-btn rounded outline no-caps @click="toast('info')">Info</q-btn>
         </div>
       </DsEntry>
       <DsEntry id="loading">
-        <div class="row q-gutter-md items-center q-mb-md">
-          <q-spinner-dots size="24px" color="primary" />
-          <q-spinner size="24px" color="primary" />
-          <RefreshCwIcon :size="20" class="refresh-spin" />
+        <div class="row q-gutter-lg items-center q-mb-lg">
+          <q-btn rounded unelevated no-caps color="primary" loading>
+            Continue
+            <template #loading
+              ><q-spinner-dots size="20px" class="on-left" />Creating</template
+            >
+          </q-btn>
+          <q-btn flat round class="app-icon-btn" aria-label="Refreshing"
+            ><RefreshCwIcon :size="20" class="refresh-spin"
+          /></q-btn>
         </div>
-        <q-linear-progress
-          indeterminate
-          color="primary"
-          class="qr-progress q-mb-md"
-        />
         <SkeletonRow avatar="34px" :lines="['55%', '35%', '25%']" />
       </DsEntry>
       <DsEntry id="empty-state">
@@ -798,9 +781,7 @@
         />
       </DsEntry>
       <DsEntry id="blocking-state">
-        <div
-          class="ui-kit-frame blocking-state column flex-center text-center q-pa-lg"
-        >
+        <div class="blocking-state column flex-center text-center q-pa-lg">
           <div class="blocking-state__title">This page doesn’t exist</div>
           <div class="blocking-state__text q-mt-sm">
             Check the link and try again.
@@ -942,7 +923,7 @@
         </div>
       </DsEntry>
       <DsEntry id="terms-text">
-        <div class="ds-scroll settings-card terms-body">
+        <div class="ds-scroll settings-card">
           <TermsOfServiceText />
         </div>
       </DsEntry>
@@ -950,7 +931,7 @@
       <DsEntry id="welcome-slide">
         <div class="ds-contain ds-welcome welcome-surface">
           <WelcomeSlideScaffold
-            icon="key"
+            :icon="KeyRoundIcon"
             title="Back up your seed phrase"
             text="Write these words down and keep them somewhere safe."
           >
@@ -991,13 +972,13 @@ import { defineComponent, markRaw, reactive } from "vue";
 import SettingsSection from "src/pages/settings/SettingsSection.vue";
 import AnimatedNumber from "src/components/AnimatedNumber.vue";
 import AppCallout from "src/components/AppCallout.vue";
+import AppRating from "src/components/ui/AppRating.vue";
 import BottomSheet from "src/components/BottomSheet.vue";
 import ChooseMint from "src/components/ChooseMint.vue";
 import HistoryTable from "src/components/HistoryTable.vue";
 import MintIdentityHeader from "src/components/MintIdentityHeader.vue";
 import MintInfoContainer from "src/components/MintInfoContainer.vue";
 import MintMotdMessage from "src/components/MintMotdMessage.vue";
-import NumericKeyboard from "src/components/NumericKeyboard.vue";
 import SheetOption from "src/components/SheetOption.vue";
 import SheetSelect from "src/components/SheetSelect.vue";
 import SkeletonRow from "src/components/SkeletonRow.vue";
@@ -1040,11 +1021,15 @@ import {
 } from "src/js/notify";
 import {
   ChevronLeft as ChevronLeftIcon,
-  CircleCheck as CircleCheckIcon,
+  Check as CheckIcon,
   Clock as ClockIcon,
   Coins as CoinsIcon,
   Copy as CopyIcon,
+  Download as DownloadIcon,
   Ellipsis as EllipsisIcon,
+  Code as CodeIcon,
+  Globe as GlobeIcon,
+  KeyRound as KeyRoundIcon,
   Landmark as LandmarkIcon,
   Lock as LockIcon,
   Menu as MenuIcon,
@@ -1078,6 +1063,7 @@ export default defineComponent({
     AmountKeypadPanel,
     AnimatedNumber,
     AppCallout,
+    AppRating,
     BottomSheet,
     ChainStatusRow,
     ChooseMint,
@@ -1093,7 +1079,6 @@ export default defineComponent({
     MintInfoContainer,
     MintMotdMessage,
     MintReviewSummary,
-    NumericKeyboard,
     PwaPrompt,
     QrBlock,
     QrProgress,
@@ -1110,9 +1095,12 @@ export default defineComponent({
     ToggleUnit,
     WelcomeSlideScaffold,
     ChevronLeftIcon,
-    CircleCheckIcon,
+    CheckIcon,
+    CoinsIcon,
     CopyIcon,
+    DownloadIcon,
     EllipsisIcon,
+    LockIcon,
     MenuIcon,
     PlusIcon,
     RefreshCwIcon,
@@ -1125,6 +1113,9 @@ export default defineComponent({
     // Icons passed as props in the samples.
     return {
       CoinsIcon: markRaw(CoinsIcon),
+      CodeIcon: markRaw(CodeIcon),
+      GlobeIcon: markRaw(GlobeIcon),
+      KeyRoundIcon: markRaw(KeyRoundIcon),
       LandmarkIcon: markRaw(LandmarkIcon),
       SearchIcon: markRaw(SearchIcon),
       ZapIcon: markRaw(ZapIcon),
@@ -1179,21 +1170,19 @@ export default defineComponent({
         "--app-text",
         "--app-text-muted",
         "--app-text-subtle",
-        "--app-text-disabled",
         "--app-surface",
         "--app-raised",
         "--app-tint",
         "--app-tint-strong",
         "--app-border",
         "--app-border-strong",
-        "--app-accent",
         "--q-primary",
-        "--q-positive",
-        "--q-negative",
-        "--app-card-fill",
         "--app-card-fill-active",
-        "--app-card-edge-active",
         "--app-field-edge",
+        "--app-info",
+        "--app-success",
+        "--app-warning",
+        "--app-danger",
       ],
       duplicates: UI_DUPLICATES,
       sortOptions,
@@ -1207,7 +1196,6 @@ export default defineComponent({
       filled: "https://mint.example.com",
       memo: "",
       bad: "₿5,000",
-      keypad: "",
       toggleOn: true,
       toggleOff: false,
       checkOn: true,
@@ -1305,6 +1293,9 @@ export default defineComponent({
     this.$router.isReady().then(() => window.setTimeout(this.followHash, 300));
     this.$nextTick(() => {
       this.updateActive();
+      // Show the copied state of the second copy button.
+      const copied = this.$refs.copied as { copied: boolean } | undefined;
+      if (copied) copied.copied = true;
       // The install prompt only opens itself in an installable browser; show it here.
       const pwa = this.$refs.pwaIos as { show: boolean } | undefined;
       if (pwa) pwa.show = true;
@@ -1454,9 +1445,16 @@ export default defineComponent({
 .ds-keypad {
   max-width: 360px;
 }
+.ds-qr-progress {
+  max-width: 240px;
+}
+.ds-tooltip-stage {
+  display: flex;
+  justify-content: center;
+  padding-top: 48px;
+}
 /* A transform makes fixed children (the install prompt) position inside the frame. */
 .ds-contain {
-  border: 1px dashed var(--app-border-strong);
   border-radius: var(--app-radius-lg);
   min-height: 140px;
   overflow: hidden;
@@ -1467,8 +1465,9 @@ export default defineComponent({
   height: 460px;
 }
 .ds-scroll {
-  max-height: 280px;
+  max-height: 320px;
   overflow-y: auto;
+  padding: 20px;
 }
 .ui-kit-display {
   align-items: center;
@@ -1558,14 +1557,6 @@ export default defineComponent({
   border: 1px dashed var(--app-border);
   border-radius: 12px;
   overflow: hidden;
-}
-.ui-kit-amount {
-  font-size: 48px;
-  font-weight: 700;
-  line-height: 1.1;
-}
-.ui-kit-keypad {
-  position: static !important;
 }
 .ui-kit-toast {
   position: static;

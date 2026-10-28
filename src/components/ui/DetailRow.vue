@@ -15,15 +15,23 @@
       @click="$emit('value-click', $event)"
     >
       <slot>{{ value }}</slot>
+      <ExternalLinkIcon
+        v-if="href"
+        :size="14"
+        class="detail-value__external"
+        aria-hidden="true"
+      />
     </component>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, type Component, type PropType } from "vue";
+import { ExternalLink as ExternalLinkIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "DetailRow",
+  components: { ExternalLinkIcon },
   props: {
     icon: {
       type: [Object, Function] as PropType<Component>,
@@ -52,3 +60,17 @@ export default defineComponent({
   emits: ["value-click"],
 });
 </script>
+
+<style scoped>
+/* External links: no underline, a trailing link glyph, like the settings link rows. */
+a.detail-value {
+  align-items: center;
+  display: inline-flex;
+  gap: 4px;
+  text-decoration: none;
+}
+.detail-value__external {
+  color: var(--app-text-muted);
+  flex-shrink: 0;
+}
+</style>

@@ -13,7 +13,6 @@
         :selected="signerType === 'SEED'"
         :label="$t('Settings.nostr_keys.wallet_seed.title')"
         :caption="$t('Settings.nostr_keys.wallet_seed.description')"
-        active-class="text-weight-bold text-primary"
         top
         @select="handleSeedClick"
       >
@@ -39,7 +38,6 @@
         :selected="signerType === 'NIP46'"
         :label="$t('Settings.nostr_keys.nsec_bunker.title')"
         :caption="$t('Settings.nostr_keys.nsec_bunker.description')"
-        active-class="text-weight-bold text-primary"
         top
         @select="handleBunkerClick"
       >
@@ -60,7 +58,6 @@
         :selected="signerType === 'PRIVATEKEY'"
         :label="$t('Settings.nostr_keys.use_nsec.title')"
         :caption="$t('Settings.nostr_keys.use_nsec.description')"
-        active-class="text-weight-bold text-primary"
         top
         @select="handleNsecClick"
       >
@@ -86,7 +83,6 @@
             ? $t('Settings.nostr_keys.signing_extension.description')
             : $t('Settings.nostr_keys.signing_extension.not_found')
         "
-        active-class="text-weight-bold text-primary"
         top
         @select="handleExtensionClick"
       />

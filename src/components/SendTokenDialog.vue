@@ -138,7 +138,7 @@
             <template #overlay>
               <span
                 v-if="isLocked && !showLockInput"
-                class="app-badge app-badge--success locked-badge"
+                class="app-badge app-badge--solid locked-badge"
               >
                 <LockIcon :size="14" aria-hidden="true" />
                 {{ $t("SendTokenDialog.badge_locked") }}

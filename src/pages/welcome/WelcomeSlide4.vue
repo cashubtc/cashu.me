@@ -56,23 +56,7 @@ export default {
 }
 
 .terms-body {
-  padding: 16px;
-  text-align: left; /* the English text keeps its own alignment inside an rtl page */
-}
-
-.terms-body :deep(p) {
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--app-text-muted);
-  margin: 0 0 12px;
-}
-
-.terms-body :deep(p:last-child) {
-  margin-bottom: 0;
-}
-
-.terms-body :deep(strong) {
-  color: var(--app-text);
+  padding: 20px;
 }
 
 .terms-accept {

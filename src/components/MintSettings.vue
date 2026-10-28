@@ -57,7 +57,7 @@
                   size="18px"
                   class="mint-card__status"
                 />
-                <CircleCheckIcon
+                <CheckIcon
                   v-else-if="mint.url == activeMintUrl"
                   :size="18"
                   class="mint-card__status mint-card__check"
@@ -260,7 +260,7 @@
 <script lang="ts">
 import {
   CircleAlert as CircleAlertIcon,
-  CircleCheck as CircleCheckIcon,
+  Check as CheckIcon,
   Ellipsis as EllipsisIcon,
   Plus as PlusIcon,
   Scan as ScanIcon,
@@ -301,7 +301,7 @@ export default defineComponent({
   components: {
     EllipsisIcon,
     CircleAlertIcon,
-    CircleCheckIcon,
+    CheckIcon,
     PlusIcon,
     ScanIcon,
     SearchIcon,

@@ -578,8 +578,7 @@
                   class="full-width"
                   unelevated
                   size="lg"
-                  color="yellow"
-                  text-color="black"
+                  color="primary"
                   rounded
                   disabled
                 >

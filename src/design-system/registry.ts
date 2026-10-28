@@ -191,16 +191,8 @@ export const DS_ITEMS: DsItem[] = [
     name: "Amount entry and keypad",
     group: "forms",
     tier: "composite",
-    source: "src/components/NumericKeyboard.vue",
-    usage: { tag: "NumericKeyboard" },
-    example: `<NumericKeyboard v-model="amount" force-visible hide-close hide-enter />`,
-  },
-  {
-    id: "amount-keypad-panel",
-    name: "Amount keypad panel",
-    group: "forms",
-    tier: "composite",
-    source: "src/components/AmountKeypadPanel.vue",
+    source:
+      "src/components/AmountKeypadPanel.vue · NumericKeyboard.vue · elements.scss .amount-display",
     usage: { tag: "AmountKeypadPanel" },
     example: `<AmountKeypadPanel v-model="sendData.amount" :busy="sending" />`,
   },
@@ -251,12 +243,12 @@ export const DS_ITEMS: DsItem[] = [
   },
   {
     id: "slider-rating",
-    name: "Slider and rating",
+    name: "Rating and slider",
     group: "forms",
     tier: "primitive",
-    source: "q-slider · q-rating",
-    usage: { text: "<q-rating" },
-    example: `<q-rating v-model="rating" max="5" size="32px" icon="star_border" icon-selected="star" />`,
+    source: "src/components/ui/AppRating.vue · q-slider",
+    usage: { tag: "AppRating" },
+    example: `<AppRating v-model="rating" :size="32" :label="$t('…rating.label')" />`,
   },
 
   // Navigation

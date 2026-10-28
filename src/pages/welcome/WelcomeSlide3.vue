@@ -2,7 +2,7 @@
 <template>
   <WelcomeSlideScaffold
     class="seed-phrase-slide"
-    icon="vpn_key"
+    :icon="KeyRoundIcon"
     :title="$t('WelcomeSlide3.title')"
     :text="$t('WelcomeSlide3.text')"
   >
@@ -59,6 +59,7 @@
 </template>
 
 <script lang="ts">
+import { KeyRound as KeyRoundIcon } from "lucide-vue-next";
 import WelcomeSlideScaffold from "src/components/ui/WelcomeSlideScaffold.vue";
 declare const windowMixin: any;
 import { useWelcomeStore } from "src/stores/welcome";
@@ -109,6 +110,7 @@ export default {
     };
 
     return {
+      KeyRoundIcon,
       welcomeStore,
       walletStore,
       proceed,

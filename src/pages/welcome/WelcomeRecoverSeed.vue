@@ -1,7 +1,7 @@
 <template>
   <WelcomeSlideScaffold
     class="recover-slide"
-    icon="vpn_key"
+    :icon="KeyRoundIcon"
     :title="$t('WelcomeRecoverSeed.title')"
     :text="$t('WelcomeRecoverSeed.text')"
   >
@@ -49,6 +49,7 @@
 </template>
 
 <script lang="ts">
+import { KeyRound as KeyRoundIcon } from "lucide-vue-next";
 import WelcomeSlideScaffold from "src/components/ui/WelcomeSlideScaffold.vue";
 import { ref, computed, watch } from "vue";
 import { useWelcomeStore } from "src/stores/welcome";
@@ -162,6 +163,7 @@ export default {
     };
 
     return {
+      KeyRoundIcon,
       welcome,
       restore,
       wallet,
@@ -246,7 +248,7 @@ export default {
 
 .error-msg {
   font-size: 0.85rem;
-  color: rgba(255, 200, 87, 0.9);
+  color: var(--app-danger);
   margin: 8px 0 0 0;
   line-height: 1.4;
 }

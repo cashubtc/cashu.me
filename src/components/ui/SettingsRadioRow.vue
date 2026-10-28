@@ -1,16 +1,19 @@
-<!-- One option of a single-choice settings list: a check/empty circle on the start edge,
-     label and caption, and an optional side slot. Emits select when tapped. -->
+<!-- One option of a single-choice settings list: a radio dot on the start edge (the theme
+     colour when selected), label and caption in ink at their normal weight, and an optional
+     side slot. Selection is the dot alone, the same in every list. Emits select when tapped. -->
 <template>
   <q-item
     clickable
+    class="settings-radio-row"
     :active="selected"
-    :active-class="activeClass"
+    :aria-checked="selected"
+    role="radio"
     @click="$emit('select', $event)"
   >
     <q-item-section avatar :top="top">
       <q-icon
         :color="selected ? 'primary' : 'grey'"
-        :name="selected ? 'check_circle' : 'radio_button_unchecked'"
+        :name="selected ? 'radio_button_checked' : 'radio_button_unchecked'"
       />
     </q-item-section>
     <q-item-section style="word-break: break-word">
@@ -49,11 +52,14 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    activeClass: {
-      type: String,
-      default: "text-weight-bold",
-    },
   },
   emits: ["select"],
 });
 </script>
+
+<style scoped>
+/* The selected row keeps ink text; the dot carries the selection. */
+.settings-radio-row.q-item--active {
+  color: inherit;
+}
+</style>

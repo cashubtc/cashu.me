@@ -8,7 +8,9 @@ import { DS_GROUPS, DS_ITEMS } from "src/design-system/registry";
 
 const SRC = join(__dirname, "../../../src");
 const board = readFileSync(join(SRC, "pages/DesignSystemPage.vue"), "utf8");
-const boardIds = [...board.matchAll(/<DsEntry\s+id="([^"]+)"/g)].map((m) => m[1]);
+const boardIds = [...board.matchAll(/<DsEntry\s+id="([^"]+)"/g)].map(
+  (m) => m[1]
+);
 
 describe("design system board", () => {
   it("renders every registered entry once, in registry order", () => {
@@ -38,6 +40,20 @@ describe("design system board", () => {
         }
       });
     expect(missing).toEqual([]);
+  });
+
+  it("registers every component tag its samples use", () => {
+    const template = board.slice(0, board.indexOf("<script"));
+    const used = new Set(
+      [...template.matchAll(/<([A-Z][A-Za-z0-9]+)/g)].map((m) => m[1])
+    );
+    const registry = board.slice(
+      board.indexOf("components: {"),
+      board.indexOf("},", board.indexOf("components: {"))
+    );
+    expect(
+      [...used].filter((t) => !new RegExp(`\\b${t}\\b`).test(registry))
+    ).toEqual([]);
   });
 
   it("has unique ids", () => {

@@ -3,11 +3,14 @@
        header of the mint details, reviews and write-a-review pages, so all three read as the
        same mint. The default slot holds page extras such as the QR toggle. -->
   <div class="mint-header">
-    <q-avatar size="56px" class="q-mb-sm">
+    <q-avatar size="56px" class="q-mb-sm app-icon-circle app-icon-circle--lg">
       <img v-if="info?.icon_url" :src="info.icon_url" alt="" />
-      <LandmarkIcon v-else :size="36" :stroke-width="1.5" />
+      <LandmarkIcon v-else :size="26" />
     </q-avatar>
     <div class="mint-name">{{ displayName }}</div>
+    <div v-if="host !== displayName" class="mint-host" dir="ltr">
+      {{ host }}
+    </div>
     <slot />
   </div>
 </template>
@@ -27,6 +30,13 @@ export default defineComponent({
   },
   computed: {
     ...mapState(useMintsStore, ["mints"]),
+    host(): string {
+      try {
+        return new URL(this.url).host;
+      } catch {
+        return this.url;
+      }
+    },
     // The same name everywhere: the user's nickname, then the mint's own name, then its host.
     displayName(): string {
       const nickname = this.mints.find((m) => m.url === this.url)?.nickname;
@@ -61,5 +71,11 @@ export default defineComponent({
   line-height: 32px;
   overflow-wrap: anywhere;
   text-align: center;
+}
+
+.mint-host {
+  color: var(--app-text-muted);
+  font-size: 14px;
+  margin-top: 2px;
 }
 </style>

@@ -14,15 +14,10 @@
         <div class="text-subtitle2 text-weight-medium">
           {{ $t("CreateMintReview.inputs.rating.label") }}
         </div>
-        <q-rating
+        <AppRating
           v-model="rating"
-          max="5"
-          size="44px"
-          color="grey-5"
-          color-selected="amber"
-          icon-half="star_half"
-          icon="star_border"
-          icon-selected="star"
+          :size="32"
+          :label="$t('CreateMintReview.inputs.rating.label')"
           class="q-mt-sm q-mb-md review-stars"
           :disable="prefilling || submitting"
         />
@@ -103,11 +98,12 @@ import { nip19 } from "nostr-tools";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
 import { useMintsStore } from "src/stores/mints";
 import SettingsPageShell from "src/pages/settings/SettingsPageShell.vue";
+import AppRating from "src/components/ui/AppRating.vue";
 import MintIdentityHeader from "src/components/MintIdentityHeader.vue";
 
 export default defineComponent({
   name: "CreateMintReviewPage",
-  components: { CopyIcon, SettingsPageShell, MintIdentityHeader },
+  components: { AppRating, CopyIcon, SettingsPageShell, MintIdentityHeader },
   setup() {
     const router = useRouter();
     const nostr = useNostrStore();

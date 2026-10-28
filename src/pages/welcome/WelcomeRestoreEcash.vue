@@ -1,7 +1,7 @@
 <template>
   <WelcomeSlideScaffold
     class="restore-ecash-slide"
-    icon="restore"
+    :icon="ArchiveRestoreIcon"
     :title="$t('WelcomeRestoreEcash.title')"
     :text="$t('WelcomeRestoreEcash.text')"
   >
@@ -13,6 +13,7 @@
 </template>
 
 <script lang="ts">
+import { ArchiveRestore as ArchiveRestoreIcon } from "lucide-vue-next";
 import WelcomeSlideScaffold from "src/components/ui/WelcomeSlideScaffold.vue";
 import RestoreView from "src/components/RestoreView.vue";
 import { useWelcomeStore } from "src/stores/welcome";
@@ -22,7 +23,7 @@ export default {
   components: { WelcomeSlideScaffold, RestoreView },
   setup() {
     const welcome = useWelcomeStore();
-    return { welcome };
+    return { ArchiveRestoreIcon, welcome };
   },
 };
 </script>

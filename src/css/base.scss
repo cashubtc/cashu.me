@@ -133,44 +133,42 @@ body {
   --app-radius-xl: 20px;
   --app-radius-pill: 999px;
   --app-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
-  --app-focus-ring: 0 0 0 2px
-    color-mix(in srgb, var(--q-primary) 10%, transparent);
+  --app-focus-ring: 0 0 0 3px
+    color-mix(in srgb, var(--q-primary) 55%, transparent);
 }
 
-// Surfaces ("Tonal", chosen at /ui after two council rounds): cards and settings groups are
-// borderless fills with a little of the theme's accent; fields, the mint picker, outline
-// buttons and segmented controls keep a quiet edge so they still read as controls; a selected
-// card or row is a stronger tint with a soft accent edge. The alternatives, including the
-// earlier outlined look, live in src/css/ui-variants.scss.
+// Surfaces ("Tonal", chosen at /ui and again on the design system board in round 57): cards and
+// settings groups are borderless neutral fills; fields, the mint picker, outline buttons and
+// segmented controls keep a quiet edge so they still read as controls; a selected card or row
+// is a stronger neutral fill with the theme colour on its edge (same width as at rest), so a
+// selection never turns muddy in a coloured theme or reads like a warning.
+// Light mode's field edge matches dark mode's contrast. The alternatives live in
+// src/css/ui-variants.scss.
 body.body--dark {
   --app-card-edge: transparent;
   --app-card-edge-active: color-mix(
     in srgb,
-    var(--app-accent) 32%,
+    var(--app-accent) 55%,
     transparent
   );
-  --app-card-fill: color-mix(in srgb, var(--app-accent) 7%, transparent);
-  --app-card-fill-active: color-mix(
-    in srgb,
-    var(--app-accent) 12%,
-    transparent
-  );
+  --app-card-fill: color-mix(in srgb, var(--app-text) 7%, transparent);
+  --app-card-fill-active: color-mix(in srgb, var(--app-text) 11%, transparent);
   --app-field-edge: rgba(255, 255, 255, 0.4);
-  --app-field-fill: color-mix(in srgb, var(--app-accent) 6%, transparent);
+  --app-field-fill: color-mix(in srgb, var(--app-text) 5%, transparent);
   --app-outline-edge: rgba(255, 255, 255, 0.4);
   --app-group-edge: transparent;
-  --app-group-fill: color-mix(in srgb, var(--app-accent) 6%, transparent);
+  --app-group-fill: color-mix(in srgb, var(--app-text) 6%, transparent);
 }
 body.body--light {
   --app-card-edge: transparent;
   --app-card-edge-active: color-mix(in srgb, var(--q-primary) 40%, transparent);
-  --app-card-fill: color-mix(in srgb, var(--q-primary) 5%, transparent);
-  --app-card-fill-active: color-mix(in srgb, var(--q-primary) 8%, transparent);
-  --app-field-edge: rgba(0, 0, 0, 0.4);
-  --app-field-fill: color-mix(in srgb, var(--q-primary) 3%, #fff);
-  --app-outline-edge: rgba(0, 0, 0, 0.4);
+  --app-card-fill: color-mix(in srgb, var(--app-text) 4%, transparent);
+  --app-card-fill-active: color-mix(in srgb, var(--app-text) 7%, transparent);
+  --app-field-edge: rgba(0, 0, 0, 0.3);
+  --app-field-fill: #fff;
+  --app-outline-edge: rgba(0, 0, 0, 0.3);
   --app-group-edge: transparent;
-  --app-group-fill: color-mix(in srgb, var(--q-primary) 4%, transparent);
+  --app-group-fill: color-mix(in srgb, var(--app-text) 4%, transparent);
 }
 
 body.body--dark {
@@ -290,10 +288,16 @@ body.body--dark .q-table--dark {
   background: transparent;
 }
 
-body.body--dark .q-field--error {
+// Field errors use the danger colour, the same as error callouts and toasts.
+.q-field--error {
   .text-negative,
-  .q-field__messages {
-    color: yellow !important;
+  .q-field__messages,
+  .q-field__label,
+  .q-field__marginal {
+    color: var(--app-danger) !important;
+  }
+  .q-field__control:after {
+    border-color: var(--app-danger) !important;
   }
 }
 

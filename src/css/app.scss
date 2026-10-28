@@ -205,22 +205,14 @@ body,
   height: 1px;
   background-color: var(--app-border);
 }
+// One section heading style: the settings section title (13px semibold, muted, sentence case).
 .divider-text {
   padding: 0 12px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   color: var(--app-text-muted);
 }
 // Chinese, Japanese and Korean have no capitals, and tracking only spreads the characters.
-.divider-text:lang(zh),
-.divider-text:lang(ja),
-.divider-text:lang(ko) {
-  letter-spacing: 0;
-  text-transform: none;
-}
-
 // Captions read evenly at body sizes without Quasar's positive tracking.
 .q-item__label--caption,
 .text-caption {
@@ -228,16 +220,25 @@ body,
 }
 
 // QR sheets (send, receive): QR, a thin activity track, then the amount.
+// Checking for payment: a short 3px rail under the QR with a moving fill in muted ink.
 .qr-progress {
-  height: 2px;
+  height: 3px;
   margin: 8px 0 20px;
   padding-inline: 35%;
 }
-// Under reduced motion the indeterminate bar stops and would draw a full static rule under
-// the QR, which reads as a stray divider; the cycling QR itself is the activity cue there.
+.qr-progress .q-linear-progress {
+  border-radius: 999px;
+  color: var(--app-text-muted) !important;
+}
+// Under reduced motion the fill stops; it rests as a centred segment so the rail still reads
+// as progress, not as a divider.
 @media (prefers-reduced-motion: reduce) {
-  .qr-progress .q-linear-progress {
-    visibility: hidden;
+  .qr-progress .q-linear-progress__model {
+    animation: none !important;
+    transform: none !important;
+    left: 30% !important;
+    right: 30% !important;
+    width: auto !important;
   }
 }
 
@@ -397,8 +398,8 @@ body[data-theme] .welcome-surface,
 }
 
 /* Toggles: an inset pill. On = filled primary track with an on-primary thumb on the right;
-   off = an empty outlined track with a muted thumb on the left, so off never reads as an
-   inverted on (a dim filled track did, in monochrome). */
+   off = a solid neutral track with an ink thumb on the left (the iOS model): both are solid,
+   so off never looks disabled, and the two differ in brightness as well as position. */
 .q-toggle:not(.q-toggle--dense) {
   .q-toggle__inner {
     padding: 0.2em 0.3em;
@@ -407,8 +408,8 @@ body[data-theme] .welcome-surface,
     height: 0.6em;
     border-radius: 0.3em;
     opacity: 1;
-    background: transparent;
-    box-shadow: inset 0 0 0 2px var(--app-text-subtle);
+    background: var(--app-border-strong);
+    box-shadow: none;
   }
   .q-toggle__thumb {
     top: 0.28em;
@@ -417,13 +418,12 @@ body[data-theme] .welcome-surface,
     height: 0.44em;
   }
   .q-toggle__thumb:after {
-    background-color: var(--app-text-subtle);
+    background-color: var(--app-text-muted);
     box-shadow: none;
   }
   .q-toggle__inner--truthy {
     .q-toggle__track {
       background: currentColor;
-      box-shadow: none;
     }
     .q-toggle__thumb {
       left: 0.58em;
@@ -433,9 +433,23 @@ body[data-theme] .welcome-surface,
     }
   }
 }
-// A disabled toggle reads weaker than both on and off.
+body.body--light .q-toggle:not(.q-toggle--dense) .q-toggle__thumb:after {
+  background-color: #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+body.body--light
+  .q-toggle:not(.q-toggle--dense)
+  .q-toggle__inner--truthy
+  .q-toggle__thumb:after {
+  background-color: var(--app-on-primary);
+  box-shadow: none;
+}
+// A disabled toggle is one grey treatment whatever its value, weaker than both on and off.
 .q-toggle.disabled {
-  opacity: 0.4 !important;
+  opacity: 0.5 !important;
+}
+.q-toggle.disabled .q-toggle__inner--truthy .q-toggle__track {
+  background: var(--app-border-strong);
 }
 
 /* Centred confirmation and edit dialogs (edit mint, remove mint): one title, one list or form,
@@ -484,9 +498,9 @@ body[data-theme] .welcome-surface,
   border: 1px solid var(--app-segment-edge);
   background: var(--app-outline-fill);
   .q-btn {
-    min-height: 36px;
-    padding: 0 14px;
-    font-size: 13px;
+    min-height: 44px;
+    padding: 0 18px;
+    font-size: 14px;
     font-weight: 600;
   }
 }
@@ -717,8 +731,25 @@ body.body--light .q-dialog__backdrop {
   row-gap: 4px;
 }
 
-// Unselected rating stars are controls: muted text colour, not a near-invisible grey
-// on dark cards (R15).
+// Tooltips: a small raised label on the card surface with a hairline, not Quasar's grey slab.
+body .q-tooltip {
+  background: var(--app-raised);
+  border: 1px solid var(--app-border-strong);
+  border-radius: var(--app-radius-sm);
+  box-shadow: var(--app-shadow-md);
+  color: var(--app-text);
+  font-size: 12px;
+  padding: 6px 8px;
+}
+// Rating stars are ink, like every other glyph: no gold anywhere (round 57). Selected stars
+// are full text colour; unselected stars in an input are muted controls, not a near-invisible
+// grey on dark cards (R15).
+.q-rating .q-rating__icon--active {
+  color: var(--app-text) !important;
+}
+.q-rating .q-rating__icon:not(.q-rating__icon--active) {
+  color: var(--app-text-subtle) !important;
+}
 .review-stars .q-rating__icon:not(.q-rating__icon--active) {
   color: var(--app-text-muted) !important;
   opacity: 1; // Quasar dims unselected stars to 40%, which made them look disabled
@@ -766,6 +797,14 @@ body .q-field--outlined .q-field__control:before {
 }
 body .q-field--outlined .q-field__control {
   background: var(--app-field-fill);
+}
+// Read-only fields (a seed phrase, a relay) are values to copy, not inputs: a quiet tint
+// with no edge, so they never read as editable.
+body .q-field--outlined.q-field--readonly .q-field__control {
+  background: var(--app-tint);
+}
+body .q-field--outlined.q-field--readonly .q-field__control:before {
+  border-color: transparent;
 }
 // Outline buttons take their edge and fill from the surface tokens (Quasar draws the edge
 // in currentColor).
@@ -1240,10 +1279,10 @@ html[dir="rtl"] .mint-card-more {
 body .q-notification {
   --tone: var(--app-text-muted);
   align-items: center;
-  background: color-mix(in srgb, var(--tone) 14%, var(--app-raised)) !important;
-  border: 1px solid color-mix(in srgb, var(--tone) 32%, transparent);
-  border-radius: var(--app-radius-md);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: var(--app-raised) !important;
+  border: 1px solid var(--app-border-strong);
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow-md);
   color: var(--app-text) !important;
   font-size: 14px;
   font-weight: 500;
@@ -1310,13 +1349,10 @@ body .q-notification .q-notification__actions .q-btn {
   min-height: 40px;
   min-width: 40px;
 }
-// Light mode: the tint sits on white, like the Settings groups (R48).
+// Light mode: a white card with a hairline and a soft shadow, as in dark mode.
 body.body--light .q-notification {
-  background: color-mix(
-    in srgb,
-    var(--tone) 10%,
-    var(--app-surface)
-  ) !important;
+  background: var(--app-surface) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 // Toasts sit above the pinned bottom action (52px button + 24px inset), so they never cover
 // the balance or the primary button (user direction, R50).

@@ -113,9 +113,9 @@
                 </template>
               </q-btn>
               <q-btn
-                class="q-mx-none"
+                class="q-mx-none app-btn-danger"
                 dense
-                color="negative"
+                unelevated
                 data-testid="delete-token"
                 icon="delete"
                 size="sm"
@@ -295,9 +295,9 @@
         <div class="row q-mt-lg">
           <q-btn
             @click="deleteThisToken"
-            color="negative"
             rounded
-            class="q-mr-sm"
+            unelevated
+            class="q-mr-sm app-btn-danger"
             >{{ $t("common.delete") }}</q-btn
           >
           <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto">{{

@@ -42,11 +42,7 @@
             />
           </q-item-section>
         </q-item>
-        <q-expansion-item
-          :label="$t('Settings.menu.advanced.title')"
-          icon="tune"
-          dense
-        >
+        <q-expansion-item :label="$t('Settings.menu.advanced.title')">
           <q-item class="settings-control-item">
             <q-item-section>
               <q-input

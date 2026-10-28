@@ -8,11 +8,7 @@
         class="header-image"
         :class="{ centered: isInstalling || wasInstalled }"
       >
-        <transition
-          v-if="isPWA()"
-          appear
-          enter-active-class="animated bounceIn"
-        >
+        <transition v-if="isPWA()" appear enter-active-class="animated fadeIn">
           <q-icon name="check_circle" size="3em" color="positive" />
         </transition>
         <div v-else class="pwa-image-wrapper">
@@ -107,7 +103,7 @@
 
       <!-- Success message when PWA is installed or installation confirmed -->
       <div v-if="isPWA() || wasInstalled" class="success-message">
-        <transition appear enter-active-class="animated tada">
+        <transition appear enter-active-class="animated fadeIn">
           <h3 class="success-title">
             {{ $t("WelcomeSlide2.pwa.success.title") }}
           </h3>

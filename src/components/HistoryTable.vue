@@ -1,132 +1,144 @@
 <template>
   <div class="history-table">
-    <q-list>
-      <ActivityRow
-        v-for="transaction in paginatedTransactions"
-        :key="getTransactionKey(transaction)"
-        data-testid="history-row"
-        details-testid="history-details"
-        :icon="getTransactionIcon(transaction)"
-        :direction="transaction.amount >= 0 ? 'in' : 'out'"
-        :label="getTransactionLabel(transaction)"
-        :amount="
-          (transaction.amount >= 0 ? '+' : '\u2212') +
-          formatCurrency(Math.abs(transaction.amount), transaction.unit)
-        "
-        :pending="transaction.status === 'pending'"
-        :caption="formattedDate(transaction.date)"
-        caption-class="text-grey-6"
-        @details-click="showTransactionDialog(transaction)"
-      >
-        <template #caption-end>
-          <!-- Status, with the check action for pending rows -->
-          <div
-            v-if="transaction.status === 'pending'"
-            class="row items-center no-wrap text-grey-6 text-caption"
-          >
-            <q-btn
-              flat
-              dense
-              round
-              data-testid="history-check"
-              :icon="
-                transaction.longPressActive ? 'arrow_circle_down' : 'schedule'
-              "
-              @click.stop="
-                transaction.longPressActive
-                  ? handleLongPress(transaction)
-                  : checkTransactionStatus(transaction)
-              "
-              @mousedown="startLongPress(transaction)"
-              @mouseup="endLongPress(transaction)"
-              @touchstart="startLongPress(transaction)"
-              @touchend="endLongTap(transaction)"
-              class="cursor-pointer history-check-btn"
-              size="sm"
+    <!-- A wallet with no history at all gets the shared empty state, with nothing to filter. -->
+    <EmptyState
+      v-if="unifiedTransactions.length === 0"
+      :icon="HistoryIcon"
+      :boxed="false"
+      :title="$t('HistoryTable.empty_text')"
+      class="history-empty-state"
+    />
+    <template v-else>
+      <q-list>
+        <ActivityRow
+          v-for="transaction in paginatedTransactions"
+          :key="getTransactionKey(transaction)"
+          data-testid="history-row"
+          details-testid="history-details"
+          :icon="getTransactionIcon(transaction)"
+          :direction="transaction.amount >= 0 ? 'in' : 'out'"
+          :label="getTransactionLabel(transaction)"
+          :amount="
+            (transaction.amount >= 0 ? '+' : '\u2212') +
+            formatCurrency(Math.abs(transaction.amount), transaction.unit)
+          "
+          :pending="transaction.status === 'pending'"
+          :caption="formattedDate(transaction.date)"
+          caption-class="text-grey-6"
+          @details-click="showTransactionDialog(transaction)"
+        >
+          <template #caption-end>
+            <!-- Status, with the check action for pending rows -->
+            <div
+              v-if="transaction.status === 'pending'"
+              class="row items-center no-wrap text-grey-6 text-caption"
             >
-              <q-tooltip>{{
-                transaction.longPressActive
-                  ? $t("HistoryTable.actions.receive.tooltip_text")
-                  : $t("HistoryTable.actions.check_status.tooltip_text")
-              }}</q-tooltip>
-            </q-btn>
-            <span>{{ $t("common.pending") }}</span>
-          </div>
-        </template>
-      </ActivityRow>
-      <!-- Nothing matches: one row-height message in the list. -->
-      <div
-        v-if="paginatedTransactions.length === 0"
-        class="activity-row activity-row--placeholder history-empty row items-center justify-center"
-      >
-        <q-item-label caption>{{ $t("HistoryTable.empty_text") }}</q-item-label>
-      </div>
-      <!-- Hold the list at a full page while paging or filtering, so the filters and
+              <q-btn
+                flat
+                dense
+                round
+                data-testid="history-check"
+                :icon="
+                  transaction.longPressActive ? 'arrow_circle_down' : 'schedule'
+                "
+                @click.stop="
+                  transaction.longPressActive
+                    ? handleLongPress(transaction)
+                    : checkTransactionStatus(transaction)
+                "
+                @mousedown="startLongPress(transaction)"
+                @mouseup="endLongPress(transaction)"
+                @touchstart="startLongPress(transaction)"
+                @touchend="endLongTap(transaction)"
+                class="cursor-pointer history-check-btn"
+                size="sm"
+              >
+                <q-tooltip>{{
+                  transaction.longPressActive
+                    ? $t("HistoryTable.actions.receive.tooltip_text")
+                    : $t("HistoryTable.actions.check_status.tooltip_text")
+                }}</q-tooltip>
+              </q-btn>
+              <span>{{ $t("common.pending") }}</span>
+            </div>
+          </template>
+        </ActivityRow>
+        <!-- Nothing matches: one row-height message in the list. -->
+        <div
+          v-if="paginatedTransactions.length === 0"
+          class="activity-row activity-row--placeholder history-empty row items-center justify-center"
+        >
+          <q-item-label caption>{{
+            $t("HistoryTable.empty_text")
+          }}</q-item-label>
+        </div>
+        <!-- Hold the list at a full page while paging or filtering, so the filters and
            pagination below never move. -->
-      <div
-        v-for="n in placeholderRowCount"
-        :key="`placeholder-${n}`"
-        class="activity-row activity-row--placeholder"
-        aria-hidden="true"
-      />
-    </q-list>
+        <div
+          v-for="n in placeholderRowCount"
+          :key="`placeholder-${n}`"
+          class="activity-row activity-row--placeholder"
+          aria-hidden="true"
+        />
+      </q-list>
 
-    <!-- Filters sit under the list, above pagination (as on main). The list above keeps its
+      <!-- Filters sit under the list, above pagination (as on main). The list above keeps its
          full height while filtering, so these buttons never move. -->
-    <div class="history-filters row justify-center items-center q-mt-md">
-      <q-btn
-        rounded
-        :outline="!filterPending"
-        :unelevated="filterPending"
-        no-caps
-        :icon="filterPending ? 'check' : undefined"
-        :aria-pressed="filterPending ? 'true' : 'false'"
-        @click="filterPending = !filterPending"
-        :color="filterPending ? 'primary' : undefined"
-        :label="
-          $t(
-            filterPending
-              ? 'HistoryTable.actions.show_all.label'
-              : 'HistoryTable.actions.filter_pending.label'
-          )
-        "
-        class="q-px-md history-filter-btn"
-      />
-      <q-btn
-        v-if="filterPending"
-        rounded
-        outline
-        no-caps
-        @click="filterPendingEcash = !filterPendingEcash"
-        :color="filterPendingEcash ? 'primary' : 'grey'"
-        :label="$t('HistoryTable.actions.filter_ecash_only.label')"
-        class="q-ml-sm q-px-md history-filter-btn"
-      />
-    </div>
-
-    <!-- Pagination -->
-    <div v-if="maxPages > 1" class="text-center q-mt-md">
-      <div style="display: flex; justify-content: center">
-        <q-pagination
-          v-model="currentPage"
-          :max="maxPages"
-          :max-pages="5"
-          direction-links
-          :boundary-links="maxPages > 3"
-          round
-          flat
-          active-design="unelevated"
-          active-color="primary"
-          size="md"
-          @input="handlePageChange"
+      <div class="history-filters row justify-center items-center q-mt-md">
+        <q-btn
+          rounded
+          :outline="!filterPending"
+          :unelevated="filterPending"
+          no-caps
+          :icon="filterPending ? 'check' : undefined"
+          :aria-pressed="filterPending ? 'true' : 'false'"
+          @click="filterPending = !filterPending"
+          :color="filterPending ? 'primary' : undefined"
+          :label="
+            $t(
+              filterPending
+                ? 'HistoryTable.actions.show_all.label'
+                : 'HistoryTable.actions.filter_pending.label'
+            )
+          "
+          class="q-px-md history-filter-btn"
+        />
+        <q-btn
+          v-if="filterPending"
+          rounded
+          outline
+          no-caps
+          @click="filterPendingEcash = !filterPendingEcash"
+          :color="filterPendingEcash ? 'primary' : 'grey'"
+          :label="$t('HistoryTable.actions.filter_ecash_only.label')"
+          class="q-ml-sm q-px-md history-filter-btn"
         />
       </div>
-    </div>
+
+      <!-- Pagination -->
+      <div v-if="maxPages > 1" class="text-center q-mt-md">
+        <div style="display: flex; justify-content: center">
+          <q-pagination
+            v-model="currentPage"
+            :max="maxPages"
+            :max-pages="5"
+            direction-links
+            :boundary-links="maxPages > 3"
+            round
+            flat
+            active-design="unelevated"
+            active-color="primary"
+            size="md"
+            @input="handlePageChange"
+          />
+        </div>
+      </div>
+    </template>
   </div>
 </template>
 <script lang="ts">
 import * as _ from "underscore";
-import { defineComponent } from "vue";
+import { defineComponent, markRaw } from "vue";
 import { shortenString } from "src/js/string-utils";
 import { parseISO } from "date-fns";
 import { useTokensStore } from "src/stores/tokens";
@@ -139,9 +151,11 @@ import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import token from "../js/token";
 import { notify } from "src/js/notify";
 import ActivityRow from "src/components/ActivityRow.vue";
+import EmptyState from "src/components/ui/EmptyState.vue";
 import {
   Bitcoin as BitcoinIcon,
   Coins as CoinsIcon,
+  History as HistoryIcon,
   Zap as ZapIcon,
 } from "lucide-vue-next";
 import { PaymentMethod, UnifiedTransactionType } from "src/stores/walletTypes";
@@ -151,6 +165,10 @@ export default defineComponent({
   name: "HistoryTable",
   components: {
     ActivityRow,
+    EmptyState,
+  },
+  setup() {
+    return { HistoryIcon: markRaw(HistoryIcon) };
   },
   mixins: [windowMixin],
   props: {},

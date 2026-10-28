@@ -56,7 +56,7 @@
           unelevated
           rounded
           no-caps
-          class="col remove-btn"
+          class="col remove-btn app-btn-danger"
           @click="removeMintLocal"
           v-close-popup
         >
@@ -125,8 +125,4 @@ export default defineComponent({
 
 <style scoped>
 /* The destructive action is the filled pill; Cancel stays the quiet one. */
-.remove-btn {
-  background: var(--q-negative);
-  color: var(--app-surface);
-}
 </style>

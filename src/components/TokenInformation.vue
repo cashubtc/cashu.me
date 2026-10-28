@@ -335,35 +335,14 @@ export default defineComponent({
   white-space: normal;
 }
 
-/* Golden shine for P2PK locked-to-you */
+/* Locked to your key: the success tone; locked to someone else: the warning tone. Plain
+   colour, no shimmer or glow (round 57). */
 .token-details-section :deep(.p2pk-locked-me) {
-  color: #ffd700;
-  background: linear-gradient(
-    90deg,
-    #b8860b 0%,
-    #ffd700 40%,
-    #fff6b7 50%,
-    #ffd700 60%,
-    #b8860b 100%
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shine 2.5s linear infinite;
-  text-shadow: 0 0 6px rgba(255, 215, 0, 0.35);
+  color: var(--app-success);
+  font-weight: 600;
 }
-
-/* Warning colors for P2PK locked (not to us) */
 .token-details-section :deep(.p2pk-locked-warning) {
-  color: #ff9800;
-  text-shadow: 0 0 6px rgba(255, 152, 0, 0.4);
-}
-
-@keyframes shine {
-  0% {
-    background-position: -200px 0;
-  }
-  100% {
-    background-position: 200px 0;
-  }
+  color: var(--app-warning);
+  font-weight: 600;
 }
 </style>

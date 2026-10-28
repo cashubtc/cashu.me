@@ -107,22 +107,39 @@ export default defineComponent({
 
 <!-- Shared prompt styles: src/css/elements.scss (.pwa-prompt). -->
 <style scoped>
+/* The pointer is a small square of the bubble's own surface and edge, turned 45° and tucked
+   under the bubble, so bubble and pointer read as one shape. */
+.pwa-prompt-arrow {
+  background: var(--app-raised);
+  border: 1px solid var(--app-border-strong);
+  height: 12px;
+  position: relative;
+  transform: rotate(45deg);
+  width: 12px;
+  z-index: 1;
+}
 .pwa-prompt--android {
   top: 20px;
   right: 20px;
 }
+/* Android: the pointer sits above the bubble's end edge, towards the browser menu. */
 .pwa-prompt--android .pwa-prompt-arrow {
-  position: relative;
-  bottom: 60px;
-  left: 45%;
-  border-bottom: 10px solid var(--app-border-strong);
+  border-bottom-color: transparent;
+  border-right-color: transparent;
+  inset-inline-end: 38px;
+  margin: 0;
+  position: absolute;
+  top: 10px;
 }
 .pwa-prompt--ios {
-  bottom: 0;
+  bottom: 12px;
   left: 0;
   right: 0;
 }
+/* iPhone: the pointer hangs under the bubble's centre, towards Share. */
 .pwa-prompt--ios .pwa-prompt-arrow {
-  border-top: 10px solid var(--app-border-strong);
+  border-left-color: transparent;
+  border-top-color: transparent;
+  margin: -7px auto 0;
 }
 </style>
