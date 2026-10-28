@@ -1037,6 +1037,7 @@ export default {
           success: "Nalezeno { length } mintů",
         },
       },
+      add: "Přidat",
       unnamed: "Mint bez názvu",
       empty: {
         title: "Najít mint",

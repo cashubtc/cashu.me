@@ -120,15 +120,12 @@
             class="q-mb-md mint-input url-input"
           >
             <template v-slot:append>
-              <q-btn
-                flat
-                round
-                class="touch-target-44"
-                :aria-label="$t('MintSettings.add.actions.scan.label')"
+              <IconButton
+                :label="$t('MintSettings.add.actions.scan.label')"
                 @click="showCamera"
               >
                 <ScanIcon :size="20" />
-              </q-btn>
+              </IconButton>
             </template>
           </q-input>
 
@@ -229,6 +226,7 @@
   </div>
 </template>
 <script lang="ts">
+import IconButton from "src/components/ui/IconButton.vue";
 import BusyLabel from "src/components/ui/BusyLabel.vue";
 import MintCard from "src/components/MintCard.vue";
 import AppBadge from "src/components/ui/AppBadge.vue";
@@ -271,6 +269,7 @@ export default defineComponent({
   name: "MintSettings",
   mixins: [windowMixin],
   components: {
+    IconButton,
     BusyLabel,
     MintCard,
     AppBadge,

@@ -999,6 +999,7 @@ export default {
           success: "{ length } mints hittades",
         },
       },
+      add: "Lägg till",
       unnamed: "Namnlös mint",
       empty: {
         title: "Hitta en mint",

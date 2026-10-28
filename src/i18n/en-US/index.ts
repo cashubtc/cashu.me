@@ -1028,6 +1028,7 @@ export default {
           success: "Found { length } mints",
         },
       },
+      add: "Add",
       unnamed: "Unnamed mint",
       empty: {
         title: "Find a mint",

@@ -180,7 +180,6 @@
       :label="$t('QuoteInformation.mint')"
       :any-label="$t('PaymentRequestDialog.actions.use_active_mint.label')"
       :model-value="requestMint || ''"
-      :show-balances="false"
       :require-active-mint="false"
       dry-run
       @update:model-value="chooseMint"

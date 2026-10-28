@@ -976,6 +976,7 @@ export default {
           success: "找到 { length } 个 Mint",
         },
       },
+      add: "添加",
       unnamed: "未命名 Mint",
       empty: {
         title: "查找 Mint",

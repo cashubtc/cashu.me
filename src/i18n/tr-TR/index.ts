@@ -1012,6 +1012,7 @@ export default {
           success: "{ length } mint bulundu",
         },
       },
+      add: "Ekle",
       unnamed: "Adsız mint",
       empty: {
         title: "Bir mint bulun",

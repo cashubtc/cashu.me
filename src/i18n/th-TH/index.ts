@@ -986,6 +986,7 @@ export default {
           success: "พบ { length } Mints",
         },
       },
+      add: "เพิ่ม",
       unnamed: "Mint ไม่มีชื่อ",
       empty: {
         title: "ค้นหามินต์",

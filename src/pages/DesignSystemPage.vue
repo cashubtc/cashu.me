@@ -478,7 +478,7 @@
         </q-list>
       </DsEntry>
       <DsEntry id="unit-toggle">
-        <!-- With the lock action it sits beside in Send: the same disc. -->
+        <!-- Beside the lock action in Send: both bare header actions. -->
         <div class="ds-frame row items-center no-wrap q-pa-sm" style="gap: 4px">
           <IconButton class="lock-toggle-btn" label="Lock to a key">
             <LockIcon :size="20" />

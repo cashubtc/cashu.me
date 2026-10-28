@@ -1035,6 +1035,7 @@ export default {
           success: "Encontrado(s) { length } mint(s)",
         },
       },
+      add: "Adicionar",
       unnamed: "Mint sem nome",
       empty: {
         title: "Encontre uma mint",

@@ -50,6 +50,15 @@ html:lang(zh) p,
 html:lang(zh) .q-item__label--caption {
   line-height: 1.6;
 }
+// Strict CJK line breaking (no line opens with "，" or "。"), and lines balanced so a short
+// word or a trailing "ecash。" doesn't sit alone on the last line (council R68-R76).
+html:lang(zh) p,
+html:lang(zh) .q-item__label--caption,
+html:lang(ja) p,
+html:lang(ja) .q-item__label--caption {
+  line-break: strict;
+  text-wrap: pretty;
+}
 
 // Dialog header typography
 // This class provides proper letter-spacing for dialog titles
@@ -668,37 +677,26 @@ body.body--light .q-dialog__backdrop {
 // Sheet header trailing slot: 44px buttons, outermost is the unit toggle, same glyph size on
 // every sheet (amount entry, receive and pay).
 .sheet-header-actions {
-  gap: 4px;
+  gap: 0;
   position: absolute;
   inset-inline-end: 6px;
 }
-// The unit switch is a 44px bare icon button like close, lock and more: one header-action
-// style on every sheet. It shows the current unit (₿ or $).
+// The unit switch is a bare header action like close, lock and more: the active unit (₿ or $)
+// with a small swap glyph after it, so it reads as "switch unit" rather than a logo in a disc
+// (council R76: both reviewers). At least 44px square; wider when the glyph is there.
 .sheet-unit-toggle {
-  width: 44px;
-  height: 44px;
-  min-width: 44px;
   min-height: 44px;
-  padding: 0;
+  min-width: 44px;
+  padding: 0 8px;
   font-size: 16px !important;
   font-weight: 600;
 }
-// The unit symbol sits in a 36px tinted disc, so a bare "₿" reads as a control (council
-// R72-R74), the same quiet container as the scan button.
-// The lock beside it shares the disc, so the header's trailing pair reads as one set (R75).
-.sheet-unit-toggle::before,
-.lock-toggle-btn::before {
-  background: var(--app-tint-strong);
-  border-radius: 50%;
-  content: "";
-  height: 36px;
-  inset: 4px;
-  position: absolute;
-  width: 36px;
+.sheet-unit-toggle .q-btn__content {
+  flex-wrap: nowrap;
+  gap: 2px;
 }
-.sheet-unit-toggle > .q-btn__content,
-.lock-toggle-btn > .q-btn__content {
-  position: relative;
+.sheet-unit-toggle__swap {
+  opacity: 0.72;
 }
 
 // The mint picker as a labelled full-width field (Lightning address mint, swap From/To,
@@ -1370,6 +1368,11 @@ body .mint-card.mint-card--active {
   background: var(--app-card-fill-active);
   border-color: var(--app-card-edge-active);
 }
+// In light mode a grey fill and a 1px edge read faint on pale themes: the selected card takes
+// a light tint of the theme colour instead, so every theme marks it alike (council R75-R76).
+body.body--light .mint-card.mint-card--active {
+  background: color-mix(in srgb, var(--q-primary) 9%, transparent);
+}
 
 /* Mint card: one 16px inset, the identity row with its actions centred on it,
    the holdings and rating below on the same edges. */
@@ -1405,6 +1408,14 @@ body .mint-card.mint-card--active {
 html[dir="rtl"] .mint-card-more {
   margin: -12px 0 -12px -16px;
 }
+/* Discover's labelled add: a compact 36px outline pill on the name's line. */
+.mint-card-add {
+  flex: none;
+  font-size: 14px;
+  font-weight: 600;
+  min-height: 36px;
+  padding: 0 12px;
+}
 /* Restore's selection box sits where an installed mint shows its menu, on the same line. */
 .restore-mint-check {
   flex: none;
@@ -1421,9 +1432,11 @@ html[dir="rtl"] .restore-mint-check {
   justify-content: space-between;
   min-height: 24px;
 }
-// No balance: the review line keeps the same end-edge slot as on every other card.
+// No balance (Discover): the review line reads as the identity's third line, under the host
+// on the text edge, so the card has no empty band between them (council R68-R76).
 .mint-card__foot--meta {
-  justify-content: flex-end;
+  justify-content: flex-start;
+  margin-top: -8px;
 }
 .mint-card__balances {
   display: flex;

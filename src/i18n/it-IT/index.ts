@@ -980,6 +980,7 @@ export default {
           success: "Trovati { length } mints",
         },
       },
+      add: "Aggiungi",
       unnamed: "Mint senza nome",
       empty: {
         title: "Trova una mint",

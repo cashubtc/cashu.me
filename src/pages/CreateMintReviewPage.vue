@@ -37,7 +37,7 @@
       </div>
 
       <div
-        class="publisher-info row items-center no-wrap q-mt-md text-caption text-app-muted"
+        class="publisher-info row items-center no-wrap q-mt-md text-body2 text-app-muted"
       >
         <q-avatar v-if="publisherPicture" size="20px" class="q-mr-xs">
           <q-img

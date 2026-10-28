@@ -41,15 +41,12 @@
         @select="handleBunkerClick"
       >
         <template v-if="signerType === 'NIP46'" #side>
-          <q-btn
-            flat
-            round
-            class="touch-target-44"
+          <IconButton
+            :label="$t('Settings.nostr_keys.nsec_bunker.delete_tooltip')"
+            tooltip
             @click.stop="handleResetNip46Signer"
-            ><Trash2Icon :size="20" /><q-tooltip>{{
-              $t("Settings.nostr_keys.nsec_bunker.delete_tooltip")
-            }}</q-tooltip></q-btn
-          >
+            ><Trash2Icon :size="20"
+          /></IconButton>
         </template>
       </SettingsRadioRow>
       <!-- PrivateKeySigner -->
@@ -61,15 +58,12 @@
         @select="handleNsecClick"
       >
         <template v-if="signerType === 'PRIVATEKEY'" #side>
-          <q-btn
-            flat
-            round
-            class="touch-target-44"
+          <IconButton
+            :label="$t('Settings.nostr_keys.use_nsec.delete_tooltip')"
+            tooltip
             @click.stop="handleResetPrivateKeySigner"
-            ><Trash2Icon :size="20" /><q-tooltip>{{
-              $t("Settings.nostr_keys.use_nsec.delete_tooltip")
-            }}</q-tooltip></q-btn
-          >
+            ><Trash2Icon :size="20"
+          /></IconButton>
         </template>
       </SettingsRadioRow>
       <!-- Nip07Signer -->
@@ -110,18 +104,13 @@
           >
         </q-item-section>
         <q-item-section side>
-          <q-btn
-            flat
-            round
-            class="touch-target-44 relay-remove"
-            :aria-label="
-              $t('Settings.sections.nostr.relays.list.remove_tooltip')
-            "
+          <IconButton
+            class="relay-remove"
+            :label="$t('Settings.sections.nostr.relays.list.remove_tooltip')"
+            tooltip
             @click.stop="removeRelay(relay)"
-            ><Trash2Icon :size="20" /><q-tooltip>{{
-              $t("Settings.sections.nostr.relays.list.remove_tooltip")
-            }}</q-tooltip></q-btn
-          >
+            ><Trash2Icon :size="20"
+          /></IconButton>
         </q-item-section>
       </q-item>
     </SettingsSection>
@@ -134,15 +123,12 @@
         @keydown.enter.prevent="addRelay"
       >
         <template v-slot:append>
-          <q-btn
-            flat
-            round
-            class="touch-target-44"
+          <IconButton
             :disable="!newRelay.trim()"
-            :aria-label="$t('Settings.sections.nostr.relays.add.title')"
+            :label="$t('Settings.sections.nostr.relays.add.title')"
             @click="addRelay"
             ><PlusIcon :size="20"
-          /></q-btn>
+          /></IconButton>
         </template>
       </q-input>
     </div>
@@ -228,6 +214,7 @@
 </template>
 
 <script lang="ts">
+import IconButton from "src/components/ui/IconButton.vue";
 import BusyLabel from "src/components/ui/BusyLabel.vue";
 import {
   Copy as CopyIcon,
@@ -247,6 +234,7 @@ export default defineComponent({
   name: "NostrSettings",
   mixins: [windowMixin],
   components: {
+    IconButton,
     BusyLabel,
     SettingsRadioRow,
     CopyIcon,

@@ -207,7 +207,7 @@
             :value="
               mintUnits
                 .map((unit) =>
-                  unit === 'sat' ? 'sat' : unit.toUpperCase()
+                  unit === 'sat' ? '₿ (sat)' : unit.toUpperCase()
                 )
                 .join(', ')
             "

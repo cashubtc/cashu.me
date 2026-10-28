@@ -18,7 +18,13 @@
         <template v-else>{{ averageDisplay }}</template>
       </div>
       <div class="text-caption text-app-muted ratings-summary__out-of">
-        <q-skeleton v-if="skeleton" type="rect" width="48px" height="16px" />
+        <q-skeleton
+          v-if="skeleton"
+          type="rect"
+          width="48px"
+          height="14px"
+          class="q-my-xs"
+        />
         <template v-else>{{ $t("MintRatings.out_of") }} 5</template>
       </div>
     </div>
@@ -39,7 +45,7 @@
             v-if="skeleton"
             type="rect"
             :width="`${star * 13}px`"
-            height="10px"
+            height="12px"
           />
           <StarIcon
             v-else
@@ -117,10 +123,12 @@ export default defineComponent({
   line-height: 1;
   min-height: 60px;
 }
+/* One caption line tall in both states, so nothing below moves when the score lands. */
 .ratings-summary__out-of {
   font-weight: 400;
+  line-height: 20px;
   margin-top: 4px;
-  min-height: 16px;
+  min-height: 20px;
 }
 .ratings-summary__bars {
   gap: 6px;

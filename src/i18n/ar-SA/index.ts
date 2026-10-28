@@ -986,6 +986,7 @@ export default {
           success: "تم العثور على { length } من المِنْتات",
         },
       },
+      add: "إضافة",
       unnamed: "مِنْت بلا اسم",
       empty: {
         title: "ابحث عن مِنْت",

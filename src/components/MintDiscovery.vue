@@ -96,20 +96,16 @@
           </q-item-section>
           <!-- Busy until every card has its mint info. -->
           <q-item-section side top>
-            <q-btn
-              flat
-              round
-              color="primary"
-              class="touch-target-44"
+            <IconButton
+              :label="$t('common.refresh')"
               :loading="busy"
-              :aria-label="$t('common.refresh')"
               @click="discover"
             >
               <RefreshCwIcon :size="20" />
-              <template v-slot:loading>
+              <template #loading>
                 <RefreshCwIcon :size="20" class="refresh-spin" />
               </template>
-            </q-btn>
+            </IconButton>
           </q-item-section>
         </q-item>
         <TransitionGroup name="mint" tag="div" class="q-pt-sm">
@@ -128,17 +124,20 @@
               :unnamed-label="$t('MintSettings.discover.unnamed')"
             >
               <template #action>
+                <!-- A labelled add, so it doesn't read as a second way into the reviews
+                     (council R76). -->
                 <q-btn
                   v-if="!isFetchingMintInfo(rec.url)"
-                  flat
-                  round
-                  dense
-                  class="mint-card-more"
-                  :aria-label="$t('global.actions.add_mint.label')"
+                  outline
+                  rounded
+                  no-caps
+                  color="primary"
+                  class="mint-card-add"
                   :disable="isExistingMint(rec.url)"
                   @click="addDiscovered(rec.url)"
                 >
-                  <PlusIcon :size="20" />
+                  <PlusIcon :size="16" class="q-mr-xs" aria-hidden="true" />
+                  {{ $t("MintSettings.discover.add") }}
                 </q-btn>
               </template>
               <template #meta>
@@ -158,6 +157,7 @@
 </template>
 
 <script lang="ts">
+import IconButton from "src/components/ui/IconButton.vue";
 import BusyLabel from "src/components/ui/BusyLabel.vue";
 import MintCard from "src/components/MintCard.vue";
 import { defineComponent, ref, computed, watch, onMounted } from "vue";
@@ -177,6 +177,7 @@ import { notifyError, notifySuccess } from "src/js/notify";
 export default defineComponent({
   name: "MintDiscovery",
   components: {
+    IconButton,
     BusyLabel,
     MintCard,
     CompassIcon,

@@ -1010,6 +1010,7 @@ export default {
           success: "Βρέθηκαν { length } mints",
         },
       },
+      add: "Προσθήκη",
       unnamed: "Mint χωρίς όνομα",
       empty: {
         title: "Βρείτε ένα mint",

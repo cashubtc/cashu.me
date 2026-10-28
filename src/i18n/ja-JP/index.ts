@@ -995,6 +995,7 @@ export default {
           success: "{ length }個のミントが見つかりました",
         },
       },
+      add: "追加",
       unnamed: "名前のないミント",
       empty: {
         title: "ミントを探す",

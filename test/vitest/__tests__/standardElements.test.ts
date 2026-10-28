@@ -56,7 +56,7 @@ describe("standard elements", () => {
     ["ui/QrCopyLine.vue", /^qr-copy-line(__icon)?$/],
     ["ui/AmountHeadline.vue", /^amount-headline$/],
     ["ui/PaymentStatus.vue", /^payment-status(__[\w-]+)?$/],
-    ["ui/UnitToggle.vue", /^sheet-unit-toggle$/],
+    ["ui/UnitToggle.vue", /^sheet-unit-toggle(__swap)?$/],
     ["ui/FlowFooter.vue", /^(bottom-panel|flow-footer__(bar|col))$/],
     [
       "ui/SectionDivider.vue",
@@ -101,6 +101,18 @@ describe("standard elements", () => {
       offenders((text) => /<PendingDots class="on-left"/.test(text)).filter(
         (file) => !file.endsWith("ui/BusyLabel.vue")
       )
+    ).toEqual([]);
+  });
+
+  // Round 44px icon buttons are IconButton, which requires a label (two hand-built trash
+  // buttons in Nostr settings had none, council R76).
+  it("round icon buttons use IconButton", () => {
+    expect(
+      offenders((text) =>
+        /<q-btn\b[^>]*\bround\b[^>]*touch-target-44|<q-btn\b[^>]*touch-target-44[^>]*\bround\b/.test(
+          text
+        )
+      ).filter((file) => !file.endsWith("pages/DesignSystemPage.vue"))
     ).toEqual([]);
   });
 
