@@ -39,6 +39,12 @@ export default {
       lock: { label: "Blocca" },
       paste: { label: "Incolla" },
       receive: { label: "Ricevi" },
+      show_seed: {
+        label: "Mostra frase seed",
+      },
+      hide_seed: {
+        label: "Nascondi frase seed",
+      },
       scan: { label: "Scansiona" },
       send: { label: "Invia" },
       swap: { label: "Scambia" },

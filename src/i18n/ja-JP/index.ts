@@ -52,6 +52,12 @@ export default {
       receive: {
         label: "受け取る",
       },
+      show_seed: {
+        label: "シードフレーズを表示",
+      },
+      hide_seed: {
+        label: "シードフレーズを隠す",
+      },
       scan: {
         label: "スキャン",
       },

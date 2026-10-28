@@ -28,6 +28,12 @@ export default {
       receive: {
         label: "Přijmout",
       },
+      show_seed: {
+        label: "Zobrazit seed frázi",
+      },
+      hide_seed: {
+        label: "Skrýt seed frázi",
+      },
       scan: {
         label: "Skenovat",
       },

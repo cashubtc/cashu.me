@@ -53,6 +53,12 @@ export default {
       receive: {
         label: "استلام",
       },
+      show_seed: {
+        label: "إظهار عبارة الاسترداد",
+      },
+      hide_seed: {
+        label: "إخفاء عبارة الاسترداد",
+      },
       scan: {
         label: "مسح ضوئي",
       },

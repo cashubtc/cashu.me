@@ -18,13 +18,11 @@
         :error-message="mnemonicError"
       >
         <template v-slot:append>
-          <q-btn
-            flat
-            round
-            :aria-label="$t('global.actions.paste.label')"
+          <IconButton
+            :label="$t('global.actions.paste.label')"
             @click="pasteMnemonic"
             ><ClipboardPasteIcon :size="20"
-          /></q-btn>
+          /></IconButton>
         </template>
       </q-input>
     </SettingsSection>
@@ -162,6 +160,7 @@
 </template>
 
 <script lang="ts">
+import IconButton from "src/components/ui/IconButton.vue";
 import BusyLabel from "src/components/ui/BusyLabel.vue";
 import MintCard from "src/components/MintCard.vue";
 import PendingDots from "src/components/ui/PendingDots.vue";
@@ -185,6 +184,7 @@ export default defineComponent({
   name: "RestoreView",
   mixins: [windowMixin],
   components: {
+    IconButton,
     BusyLabel,
     MintCard,
     PendingDots,

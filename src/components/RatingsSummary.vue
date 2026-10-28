@@ -69,6 +69,11 @@
             :style="{ width: percentage(star) + '%' }"
           />
         </div>
+        <!-- How many reviews gave this score, so a bar can be read with few reviews
+             (council R76-R77). -->
+        <span class="ratings-summary__count" aria-hidden="true">{{
+          skeleton ? "" : distribution[star] || 0
+        }}</span>
       </div>
     </div>
   </div>
@@ -147,6 +152,15 @@ export default defineComponent({
   height: 4px;
   overflow: hidden;
 }
+.ratings-summary__count {
+  color: var(--app-text-muted);
+  flex: none;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  line-height: 12px;
+  min-width: 2ch;
+  text-align: end;
+}
 .ratings-summary__fill {
   background: var(--q-primary);
   height: 100%;
@@ -160,6 +174,15 @@ export default defineComponent({
   border-radius: 4px;
 }
 @media (prefers-reduced-motion: reduce) {
+  .ratings-summary__count {
+    color: var(--app-text-muted);
+    flex: none;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    line-height: 12px;
+    min-width: 2ch;
+    text-align: end;
+  }
   .ratings-summary__fill {
     transition: none;
   }

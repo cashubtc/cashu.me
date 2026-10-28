@@ -19,39 +19,25 @@
           }}
         </span>
         <PendingDots v-if="swapProcessing" />
-        <q-btn
+        <IconButton
           v-if="swapError"
-          flat
-          round
-          dense
+          :label="$t('ReceiveTokenDialog.actions.cancel_swap.tooltip_text')"
+          tooltip
           @click="$emit('close')"
-          color="grey-6"
-          :aria-label="
-            $t('ReceiveTokenDialog.actions.cancel_swap.tooltip_text')
-          "
         >
           <XIcon :size="20" />
-          <q-tooltip>{{
-            $t("ReceiveTokenDialog.actions.cancel_swap.tooltip_text")
-          }}</q-tooltip>
-        </q-btn>
+        </IconButton>
       </div>
       <!-- Normal close button (hidden during processing) -->
-      <q-btn
+      <IconButton
         v-else
-        flat
-        round
-        dense
-        @click="$emit('close')"
+        :label="$t('ReceiveTokenDialog.actions.cancel_swap.tooltip_text')"
+        tooltip
         :disable="swapBlocking"
-        color="grey-6"
-        :aria-label="$t('ReceiveTokenDialog.actions.cancel_swap.tooltip_text')"
+        @click="$emit('close')"
       >
         <XIcon :size="20" />
-        <q-tooltip>{{
-          $t("ReceiveTokenDialog.actions.cancel_swap.tooltip_text")
-        }}</q-tooltip>
-      </q-btn>
+      </IconButton>
     </div>
 
     <!-- Source Mint (Token Origin) -->
@@ -93,6 +79,7 @@
 </template>
 
 <script lang="ts">
+import IconButton from "src/components/ui/IconButton.vue";
 import MintCard from "src/components/MintCard.vue";
 import PendingDots from "src/components/ui/PendingDots.vue";
 import { defineComponent, PropType } from "vue";
@@ -104,6 +91,7 @@ import { useMintsStore } from "stores/mints";
 export default defineComponent({
   name: "SwapIncomingTokenToKnownMint",
   components: {
+    IconButton,
     MintCard,
     PendingDots,
     XIcon,

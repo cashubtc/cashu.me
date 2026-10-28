@@ -18,15 +18,16 @@
             autogrow
           >
             <template v-slot:append>
-              <q-btn
-                flat
-                dense
-                round
-                color="primary"
+              <IconButton
+                :label="
+                  hideMnemonic
+                    ? $t('global.actions.show_seed.label')
+                    : $t('global.actions.hide_seed.label')
+                "
                 data-testid="reveal-seed"
                 @click="toggleMnemonicVisibility"
                 ><EyeIcon :size="20"
-              /></q-btn>
+              /></IconButton>
               <CopyButton
                 :value="mnemonic"
                 color="primary"
@@ -52,6 +53,7 @@
 </template>
 
 <script lang="ts">
+import IconButton from "src/components/ui/IconButton.vue";
 import { Eye as EyeIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapState } from "pinia";
@@ -65,6 +67,7 @@ export default defineComponent({
   name: "BackupRestoreSettings",
   mixins: [windowMixin],
   components: {
+    IconButton,
     CopyButton,
     EyeIcon,
     SettingsActionRow,

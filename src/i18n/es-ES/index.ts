@@ -28,6 +28,12 @@ export default {
       receive: {
         label: "Recibir",
       },
+      show_seed: {
+        label: "Mostrar frase semilla",
+      },
+      hide_seed: {
+        label: "Ocultar frase semilla",
+      },
       scan: {
         label: "Escanear",
       },

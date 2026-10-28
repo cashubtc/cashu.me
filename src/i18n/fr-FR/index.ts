@@ -56,6 +56,12 @@ export default {
       receive: {
         label: "Recevoir",
       },
+      show_seed: {
+        label: "Afficher la phrase de récupération",
+      },
+      hide_seed: {
+        label: "Masquer la phrase de récupération",
+      },
       scan: {
         label: "Scanner",
       },

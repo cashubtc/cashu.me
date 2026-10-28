@@ -209,6 +209,9 @@
           <IconButton label="Refresh" :icon="RefreshCwIcon" />
           <IconButton label="More" :icon="EllipsisIcon" />
           <IconButton label="Working" loading />
+          <IconButton label="Disabled" :icon="PlusIconRaw" disable />
+          <IconButton label="Show seed phrase" :icon="EyeIcon" tooltip />
+          <IconButton label="Delete" :icon="Trash2Icon" tooltip />
         </div>
       </DsEntry>
       <DsEntry id="copy-button">
@@ -1191,6 +1194,8 @@ import {
   Search as SearchIcon,
   Shield as ShieldIcon,
   X as XIcon,
+  Eye as EyeIcon,
+  Trash2 as Trash2Icon,
   Zap as ZapIcon,
 } from "lucide-vue-next";
 
@@ -1294,6 +1299,9 @@ export default defineComponent({
       CopyIcon: markRaw(CopyIcon),
       ScanIcon: markRaw(ScanIcon),
       SearchXIcon: markRaw(SearchXIcon),
+      PlusIconRaw: markRaw(PlusIcon),
+      EyeIcon: markRaw(EyeIcon),
+      Trash2Icon: markRaw(Trash2Icon),
     };
   },
   provide() {

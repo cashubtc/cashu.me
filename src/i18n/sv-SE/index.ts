@@ -53,6 +53,12 @@ export default {
       receive: {
         label: "Ta emot",
       },
+      show_seed: {
+        label: "Visa seedfras",
+      },
+      hide_seed: {
+        label: "Dölj seedfras",
+      },
       scan: {
         label: "Skanna",
       },

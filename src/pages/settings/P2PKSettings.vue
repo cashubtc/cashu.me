@@ -65,19 +65,12 @@
               $t("Settings.p2pk_features.keys_expansion.used_badge")
             }}</AppBadge>
             <CopyButton :value="key.publicKey" :icon-size="18" />
-            <q-btn
-              flat
-              dense
-              round
-              size="sm"
-              color="grey"
-              :aria-label="
-                $t('Settings.nostr_wallet_connect.connection.qr_tooltip')
-              "
+            <IconButton
+              :label="$t('Settings.nostr_wallet_connect.connection.qr_tooltip')"
               @click="showP2PKKeyEntry(key.publicKey)"
             >
-              <QrCodeIcon :size="18" />
-            </q-btn>
+              <QrCodeIcon :size="20" />
+            </IconButton>
           </div>
         </q-item-section>
       </q-item>
@@ -89,6 +82,7 @@
 </template>
 
 <script lang="ts">
+import IconButton from "src/components/ui/IconButton.vue";
 import AppBadge from "src/components/ui/AppBadge.vue";
 import { QrCode as QrCodeIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
@@ -104,6 +98,7 @@ export default defineComponent({
   name: "P2PKSettings",
   mixins: [windowMixin],
   components: {
+    IconButton,
     AppBadge,
     QrCodeIcon,
     CopyButton,

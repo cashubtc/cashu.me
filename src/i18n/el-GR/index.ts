@@ -55,6 +55,12 @@ export default {
       receive: {
         label: "Λήψη",
       },
+      show_seed: {
+        label: "Εμφάνιση φράσης seed",
+      },
+      hide_seed: {
+        label: "Απόκρυψη φράσης seed",
+      },
       scan: {
         label: "Σάρωση",
       },

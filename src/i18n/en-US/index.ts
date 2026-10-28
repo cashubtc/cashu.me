@@ -28,6 +28,12 @@ export default {
       receive: {
         label: "Receive",
       },
+      show_seed: {
+        label: "Show seed phrase",
+      },
+      hide_seed: {
+        label: "Hide seed phrase",
+      },
       scan: {
         label: "Scan",
       },

@@ -57,6 +57,12 @@ export default {
       receive: {
         label: "Empfangen",
       },
+      show_seed: {
+        label: "Seed-Phrase anzeigen",
+      },
+      hide_seed: {
+        label: "Seed-Phrase verbergen",
+      },
       scan: {
         label: "Scannen",
       },

@@ -128,7 +128,7 @@
                      (council R76). -->
                 <q-btn
                   v-if="!isFetchingMintInfo(rec.url)"
-                  outline
+                  flat
                   rounded
                   no-caps
                   color="primary"

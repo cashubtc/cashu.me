@@ -53,6 +53,12 @@ export default {
       receive: {
         label: "รับ",
       },
+      show_seed: {
+        label: "แสดงวลี seed",
+      },
+      hide_seed: {
+        label: "ซ่อนวลี seed",
+      },
       scan: {
         label: "สแกน",
       },

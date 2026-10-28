@@ -15,18 +15,18 @@
       <div class="seed-box">
         <div class="seed-text">{{ hiddenMnemonic }}</div>
         <div class="seed-actions">
-          <q-btn
-            flat
-            round
-            dense
+          <IconButton
+            :label="
+              hideMnemonic
+                ? $t('global.actions.show_seed.label')
+                : $t('global.actions.hide_seed.label')
+            "
+            tooltip
             @click="toggleMnemonicVisibility"
-            class="action-btn"
-            size="sm"
           >
-            <EyeIcon v-if="hideMnemonic" :size="18" />
-            <EyeOffIcon v-else :size="18" />
-            <q-tooltip>{{ hideMnemonic ? "Show" : "Hide" }}</q-tooltip>
-          </q-btn>
+            <EyeIcon v-if="hideMnemonic" :size="20" />
+            <EyeOffIcon v-else :size="20" />
+          </IconButton>
           <CopyButton
             class="action-btn"
             :value="walletStore.mnemonic"
@@ -55,6 +55,7 @@
 </template>
 
 <script lang="ts">
+import IconButton from "src/components/ui/IconButton.vue";
 import {
   Eye as EyeIcon,
   EyeOff as EyeOffIcon,
@@ -69,7 +70,13 @@ import { ref, computed, onMounted } from "vue";
 
 export default {
   name: "WelcomeSlide3",
-  components: { EyeIcon, EyeOffIcon, CopyButton, WelcomeSlideScaffold },
+  components: {
+    IconButton,
+    EyeIcon,
+    EyeOffIcon,
+    CopyButton,
+    WelcomeSlideScaffold,
+  },
   mixins: [windowMixin],
   setup() {
     const welcomeStore = useWelcomeStore();

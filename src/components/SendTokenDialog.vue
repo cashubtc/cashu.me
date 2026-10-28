@@ -92,16 +92,12 @@
                         )
                       }}</q-tooltip>
                     </q-btn>
-                    <q-btn
-                      align="center"
-                      flat
-                      outline
-                      color="primary"
-                      round
+                    <IconButton
+                      :label="$t('global.actions.scan.label')"
                       @click="showCamera"
                     >
                       <ScanIcon :size="20" />
-                    </q-btn>
+                    </IconButton>
                   </div>
                 </div>
               </div>

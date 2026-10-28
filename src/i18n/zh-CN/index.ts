@@ -53,6 +53,12 @@ export default {
       receive: {
         label: "接收",
       },
+      show_seed: {
+        label: "显示助记词",
+      },
+      hide_seed: {
+        label: "隐藏助记词",
+      },
       scan: {
         label: "扫描",
       },

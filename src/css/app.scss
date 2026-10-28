@@ -59,6 +59,12 @@ html:lang(ja) .q-item__label--caption {
   line-break: strict;
   text-wrap: pretty;
 }
+// Short captions (option and settings rows) balance their lines outright: "pretty" left a
+// trailing "ecash。" alone on the second line (council R77).
+html:lang(zh) .q-item__label--caption,
+html:lang(ja) .q-item__label--caption {
+  text-wrap: balance;
+}
 
 // Dialog header typography
 // This class provides proper letter-spacing for dialog titles
@@ -638,6 +644,12 @@ textarea,
 body.body--light .q-dialog__backdrop {
   background: rgba(0, 0, 0, 0.45) !important;
 }
+// A centred desktop flow keeps more of the page legible behind it (council R77).
+@media (min-width: 1024px) {
+  body.body--dark .q-dialog__backdrop {
+    background: rgba(0, 0, 0, 0.5) !important;
+  }
+}
 // A light, static blur on top of the dim, set here once rather than per dialog. Browsers
 // without backdrop-filter (older Android WebViews, Firefox before 103) skip it and keep the
 // dim. Low-end and old devices (src/js/device-effects.ts) and people who ask for less
@@ -682,8 +694,8 @@ body.body--light .q-dialog__backdrop {
   inset-inline-end: 6px;
 }
 // The unit switch is a bare header action like close, lock and more: the active unit (₿ or $)
-// with a small swap glyph after it, so it reads as "switch unit" rather than a logo in a disc
-// (council R76: both reviewers). At least 44px square; wider when the glyph is there.
+// with a small chevron after it, so it reads as "choose unit" rather than a logo in a disc
+// (council R76) or a second ⇅ amount swap (R77). At least 44px square; wider when the glyph is there.
 .sheet-unit-toggle {
   min-height: 44px;
   min-width: 44px;
@@ -1408,9 +1420,12 @@ body.body--light .mint-card.mint-card--active {
 html[dir="rtl"] .mint-card-more {
   margin: -12px 0 -12px -16px;
 }
-/* Discover's labelled add: a compact 36px outline pill on the name's line. */
+/* Discover's labelled add: a compact 36px text button on the name's line (outlined pills
+   dominated a list of five, council R77). */
 .mint-card-add {
   flex: none;
+  margin-block-start: -6px;
+  margin-inline-end: -8px;
   font-size: 14px;
   font-weight: 600;
   min-height: 36px;

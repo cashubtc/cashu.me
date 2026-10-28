@@ -104,15 +104,26 @@ describe("standard elements", () => {
     ).toEqual([]);
   });
 
-  // Round 44px icon buttons are IconButton, which requires a label (two hand-built trash
-  // buttons in Nostr settings had none, council R76).
+  // Round icon buttons are IconButton: 44px and always labelled (hand-built ones had no name
+  // or a 24px target, council R76-R77). Allowed: the card corner menu, the callout close and
+  // the mint QR toggle, the wallet scan disc and the flow footer's back, which own their
+  // geometry.
   it("round icon buttons use IconButton", () => {
+    const allowed =
+      /class="[^"]*\b(mint-card-more|app-callout__close|qr-toggle|wallet-scan-btn|flow-footer__back)\b/;
     expect(
       offenders((text) =>
-        /<q-btn\b[^>]*\bround\b[^>]*touch-target-44|<q-btn\b[^>]*touch-target-44[^>]*\bround\b/.test(
-          text
+        [...text.matchAll(/<q-btn\b[^>]*>/g)].some(
+          ([tag]) =>
+            /(?<![:\w-])round\b/.test(tag) &&
+            /(?<![:\w-])flat\b/.test(tag) &&
+            !allowed.test(tag)
         )
-      ).filter((file) => !file.endsWith("pages/DesignSystemPage.vue"))
+      ).filter(
+        (file) =>
+          !file.endsWith("pages/DesignSystemPage.vue") &&
+          !file.includes("components/ui/")
+      )
     ).toEqual([]);
   });
 

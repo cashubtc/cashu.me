@@ -57,6 +57,12 @@ export default {
       receive: {
         label: "Al",
       },
+      show_seed: {
+        label: "Kurtarma ifadesini göster",
+      },
+      hide_seed: {
+        label: "Kurtarma ifadesini gizle",
+      },
       scan: {
         label: "Tara",
       },
