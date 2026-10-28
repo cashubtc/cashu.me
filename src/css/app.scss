@@ -337,17 +337,6 @@ button:focus-visible {
   margin: 0 auto;
 }
 
-// Sheet header close button, shared by every fullscreen sheet.
-.floating-close-btn {
-  position: absolute;
-  inset-inline-start: 6px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 1;
-  min-height: 44px;
-  min-width: 44px;
-}
-
 // Small icon controls keep a 44px touch target without growing visually.
 .touch-target-44 {
   min-height: 44px !important;
@@ -707,10 +696,6 @@ body.body--light .q-dialog__backdrop {
   min-height: 56px;
   padding: 6px 6px 8px;
 }
-.drawer-header .drawer-header-btn {
-  width: 44px;
-  height: 44px;
-}
 
 // Text for screen readers only.
 .visually-hidden {
@@ -850,7 +835,7 @@ html[dir="rtl"] body,
 html[dir="rtl"] #q-app {
   direction: rtl;
 }
-html[dir="rtl"] .amount-text,
+html[dir="rtl"] .activity-row__amount,
 html[dir="rtl"] .amount-headline,
 html[dir="rtl"] .amount-display,
 html[dir="rtl"] .balance-amount {

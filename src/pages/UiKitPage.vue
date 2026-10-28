@@ -2,8 +2,9 @@
   <!-- Every UI pattern in the app on one page: for comparing surface styles
        (src/css/ui-variants.scss), checking consistency, and finding duplicates
        (src/js/ui-audit.ts). A design tool, not a product screen: its labels are plain English.
-       Each entry names the files that implement it; samples use the real components or the
-       shared global classes, so they change when the app does. -->
+       Each entry is one pattern: "sources" is its single implementation and "used" the
+       screens that use it. Samples use the real components or the shared global classes, so
+       they change when the app does. -->
   <div class="settings-sub-page bg-dark text-white q-pa-md ui-kit-page">
     <!-- Desktop: a sticky outline of every section and entry beside the catalogue. -->
     <aside class="ui-kit-sidebar" aria-label="Contents">
@@ -126,7 +127,8 @@
       </UiKitItem>
       <UiKitItem
         title="Section divider"
-        sources="app.scss .section-divider · MintSettings, MintDetailsPage, UiKitPage"
+        sources="app.scss .section-divider"
+        used="MintSettings, MintDetailsPage"
       >
         <div class="section-divider">
           <div class="divider-line"></div>
@@ -142,6 +144,7 @@
       <UiKitItem
         title="Wallet actions"
         sources="WalletPage.vue .wallet-action-btn (52px, caps)"
+        used="Wallet"
       >
         <div class="row no-wrap items-center q-gutter-x-md">
           <q-btn
@@ -165,7 +168,8 @@
       </UiKitItem>
       <UiKitItem
         title="Full-width primary"
-        sources="app.scss .q-btn--rounded.full-width (52px) · caps inside dialogs (strategic caps rule)"
+        sources="app.scss .q-btn--rounded.full-width (52px, caps inside dialogs)"
+        used="every sheet's main action"
       >
         <q-btn
           rounded
@@ -188,8 +192,8 @@
       </UiKitItem>
       <UiKitItem
         title="Secondary, flat, disabled, danger"
-        sources="Quasar q-btn outline / flat · app.scss disabled token · busy: CreateInvoiceDialog dots + label, AddMintDialog / MintDiscovery / Restore bare spinner · RemoveMintDialog danger pill"
-        note="Busy buttons show dots and a label saying what is happening."
+        sources="q-btn outline / flat · app.scss disabled token · elements.scss busy state (q-spinner-dots + label)"
+        used="every sheet; danger pill in RemoveMintDialog"
       >
         <q-btn
           rounded
@@ -217,7 +221,8 @@
       </UiKitItem>
       <UiKitItem
         title="Icon buttons"
-        sources="44px header buttons: MainHeader, FullscreenHeader, .floating-close-btn, .drawer-header-btn, BottomSheet close"
+        sources="elements.scss .app-icon-btn (44px, ink) · .floating-close-btn pins it to the header edge"
+        used="MainHeader, FullscreenHeader, BottomSheet, every fullscreen sheet"
       >
         <div class="row q-gutter-sm items-center">
           <q-btn flat round class="touch-target-44" aria-label="Close"
@@ -250,15 +255,24 @@
       </h2>
       <UiKitItem
         title="Sheet header"
-        sources="app.scss .drawer-header + .sheet-title · SendDialog, ReceiveDialog, ReceiveEcashDrawer"
+        sources="app.scss .drawer-header + .sheet-title"
+        used="SendDialog, ReceiveDialog, ReceiveEcashDrawer"
       >
         <div class="ui-kit-frame">
           <div class="drawer-header row items-center no-wrap">
-            <q-btn flat round class="drawer-header-btn" aria-label="Close"
+            <q-btn
+              flat
+              round
+              class="drawer-header-btn app-icon-btn"
+              aria-label="Close"
               ><XIcon :size="22"
             /></q-btn>
             <div class="col sheet-title">Receive</div>
-            <q-btn flat round class="drawer-header-btn" aria-label="Scan"
+            <q-btn
+              flat
+              round
+              class="drawer-header-btn app-icon-btn"
+              aria-label="Scan"
               ><ScanIcon :size="20"
             /></q-btn>
           </div>
@@ -266,7 +280,8 @@
       </UiKitItem>
       <UiKitItem
         title="Bottom sheet"
-        sources="BottomSheet.vue + SheetOption.vue · ChooseMint, SheetSelect, sort, currency, language, terms"
+        sources="BottomSheet.vue + SheetOption.vue"
+        used="ChooseMint, SheetSelect, sort, currency, language, terms"
       >
         <q-btn
           rounded
@@ -291,7 +306,8 @@
       </UiKitItem>
       <UiKitItem
         title="Confirm dialog"
-        sources="app.scss .council-dialog* · RemoveMintDialog only"
+        sources="app.scss .council-dialog*"
+        used="RemoveMintDialog"
       >
         <q-btn
           rounded
@@ -346,7 +362,8 @@
       </h2>
       <UiKitItem
         title="Mint picker"
-        sources="ChooseMint.vue · app.scss .mint-chip--field · wallet, every amount sheet, swap From/To"
+        sources="ChooseMint.vue · app.scss .mint-chip, .mint-chip--field"
+        used="wallet, every amount sheet, swap From / To"
       >
         <ChooseMint test-id="ui-kit-mint" />
         <ChooseMint
@@ -358,7 +375,8 @@
       </UiKitItem>
       <UiKitItem
         title="Text fields"
-        sources="Quasar q-input outlined · app.scss field radius, edge and fill tokens"
+        sources="q-input outlined · app.scss field radius, edge and fill tokens"
+        used="every form"
       >
         <q-input
           rounded
@@ -407,6 +425,7 @@
       <UiKitItem
         title="Select"
         sources="SheetSelect.vue (bottom sheet) · q-select menu (app.scss body .q-menu)"
+        used="settings pickers"
       >
         <SheetSelect
           v-model="sort"
@@ -423,7 +442,8 @@
       </UiKitItem>
       <UiKitItem
         title="Amount entry and keypad"
-        sources="NumericKeyboard.vue · AmountInputComponent, CreateInvoiceDialog, SendTokenDialog, PayInvoiceDialog (duplicated wrappers)"
+        sources="NumericKeyboard.vue · elements.scss .amount-display, .keypad-wrapper"
+        used="AmountInputComponent, CreateInvoiceDialog, SendTokenDialog, PayInvoiceDialog"
       >
         <div class="text-center">
           <div class="ui-kit-amount">₿{{ keypad || "0" }}</div>
@@ -444,7 +464,8 @@
       </h2>
       <UiKitItem
         title="Segmented control"
-        sources="app.scss .invoice-type-toggle · CreateInvoiceDialog"
+        sources="app.scss .invoice-type-toggle"
+        used="CreateInvoiceDialog"
       >
         <q-btn-toggle
           v-model="invoiceType"
@@ -461,7 +482,8 @@
       </UiKitItem>
       <UiKitItem
         title="Toggles"
-        sources="app.scss .q-toggle · every settings page"
+        sources="app.scss .q-toggle"
+        used="every settings page"
       >
         <div class="row q-gutter-md items-center">
           <q-toggle v-model="toggleOn" color="primary" label="On" />
@@ -476,7 +498,8 @@
       </UiKitItem>
       <UiKitItem
         title="Checkbox and radio rows"
-        sources="q-checkbox: RestoreView, NostrMintRestore, Multinut, welcome · radio rows: AppearanceSettings, LanguageSettings"
+        sources="q-checkbox · q-radio rows (app.scss)"
+        used="RestoreView, NostrMintRestore, Multinut, welcome · AppearanceSettings, LanguageSettings"
       >
         <div class="row q-gutter-md q-mb-sm">
           <q-checkbox v-model="checkOn" label="Selected" />
@@ -499,30 +522,32 @@
           </q-item>
         </q-list>
       </UiKitItem>
-      <UiKitItem title="Tabs" sources="WalletPage.vue q-tabs · app.scss .q-tab">
+      <UiKitItem title="Tabs" sources="app.scss .q-tab" used="WalletPage">
         <q-tabs v-model="tab" no-caps active-color="primary">
           <q-tab name="history" label="History" />
           <q-tab name="mints" label="Mints" />
         </q-tabs>
       </UiKitItem>
       <UiKitItem
-        title="Chips, badges and pills"
-        sources="settings.scss .q-badge outline · HistoryTable pending chip · app.scss .mint-chip · mintlist.css .currency-unit-badge · MintDetailsPage .nut-pill"
+        title="Badges"
+        sources="elements.scss .app-badge (--solid, --primary, --success, --warning, --danger)"
+        used="settings status, P2PK keys, mint errors, header offline / staging / reload, locked send, payment request totals, reviews, multi-mint amounts"
       >
         <div class="row q-gutter-sm items-center">
-          <q-badge outline class="q-pa-xs">Beta</q-badge>
-          <q-chip outline clickable icon="schedule">Pending only</q-chip>
-          <span class="mint-chip"
-            ><LandmarkIcon :size="14" class="q-mr-xs" />Mint C</span
-          >
+          <span class="app-badge">Beta</span>
           <span class="app-badge app-badge--solid">₿2,289</span>
-          <span class="app-badge">Your review</span>
           <span class="app-badge app-badge--primary">60%</span>
+          <span class="app-badge app-badge--success"
+            ><LockIcon :size="14" />Locked</span
+          >
+          <span class="app-badge app-badge--warning">Staging</span>
+          <span class="app-badge app-badge--danger">Offline</span>
         </div>
       </UiKitItem>
       <UiKitItem
         title="Slider and rating"
-        sources="q-slider: MultinutPaymentDialog · q-rating: CreateMintReviewPage, MintRatingsComponent"
+        sources="q-slider · q-rating"
+        used="MultinutPaymentDialog · CreateMintReviewPage, MintRatingsComponent"
       >
         <q-slider
           v-model="slider"
@@ -548,7 +573,8 @@
       </h2>
       <UiKitItem
         title="Mint cards"
-        sources="app.scss .mint-card* · MintSettings (installed), MintDiscovery (add), RestoreView (checkbox)"
+        sources="app.scss .mint-card*"
+        used="MintSettings (installed), MintDiscovery (add), RestoreView (checkbox)"
       >
         <q-item
           v-for="card in cards"
@@ -607,7 +633,8 @@
       </UiKitItem>
       <UiKitItem
         title="Mint identity header"
-        sources="MintIdentityHeader.vue · MintDetailsPage, MintRatings, CreateMintReview · near-copy: Multinut .multinut-header"
+        sources="MintIdentityHeader.vue"
+        used="MintDetailsPage, MintRatings, CreateMintReview"
       >
         <MintIdentityHeader
           url="https://mint.example.com"
@@ -617,6 +644,7 @@
       <UiKitItem
         title="Settings group and rows"
         sources="settings.scss .settings-menu-group, .settings-menu-item, .settings-card · SettingsSection.vue"
+        used="every settings page"
       >
         <q-list class="settings-menu-group q-mb-lg">
           <q-item
@@ -660,7 +688,8 @@
       </UiKitItem>
       <UiKitItem
         title="Detail rows"
-        sources="app.scss .detail-item · Mint/MeltQuoteInformation, InvoiceDetailDialog, TokenInformation · copies: AddMintDialog, MintDetailsPage"
+        sources="app.scss .detail-item (+ -label, -icon, -name, -value)"
+        used="Mint / MeltQuoteInformation, InvoiceDetailDialog, TokenInformation, AddMintDialog, MintDetailsPage"
       >
         <div v-for="d in details" :key="d.name" class="detail-item q-mb-md">
           <div class="detail-label">
@@ -672,8 +701,26 @@
       </UiKitItem>
       <UiKitItem
         title="Callouts"
-        sources="settings.scss --warning · ToolTipInfo.vue · MintMotdMessage.vue (+ MintAuditWarningBox, Multinut, CreateInvoice, ReceiveToken copies)"
+        sources="AppCallout.vue · elements.scss .app-callout (neutral, info, success, warning, danger)"
+        used="ToolTipInfo, MintMotdMessage, MintAuditWarningBox, SettingsSection warning, Multinut, CreateInvoice, ReceiveToken, SendToken"
       >
+        <div class="column q-gutter-y-sm q-mb-md">
+          <AppCallout text="Neutral advice for the next step." />
+          <AppCallout
+            variant="info"
+            text="Swapping costs a small Lightning fee."
+          />
+          <AppCallout variant="success" text="Backup confirmed." />
+          <AppCallout
+            variant="warning"
+            title="Experimental feature"
+            text="Paying from several mints can fail part way."
+          />
+          <AppCallout
+            variant="danger"
+            text="This token is locked to a different key."
+          />
+        </div>
         <SettingsSection
           title="Locked ecash"
           caption="Anyone with this key can unlock ecash sent to it. Keep it private."
@@ -702,7 +749,8 @@
       </h2>
       <UiKitItem
         title="Sheet option rows"
-        sources="SheetOption.vue · copies: SendDialog/ReceiveDialog/ReceiveEcashDrawer .action-row, PaymentRequestInfo, ParseInputComponent, WelcomeSlideChoice"
+        sources="elements.scss .app-option-row (+ __label, __caption, --selected) · SheetOption.vue"
+        used="Send, Receive, Receive ecash, sort / currency / language sheets, scanner row, payment request, onboarding choice"
       >
         <div class="column q-gutter-y-sm">
           <SheetOption
@@ -725,13 +773,15 @@
       </UiKitItem>
       <UiKitItem
         title="History"
-        sources="HistoryTable.vue (.history-row, .direction-badge, pagination) · near-copy: PaymentRequestPayments"
+        sources="elements.scss .activity-row (+ __avatar, __direction, __label, __amount)"
+        used="HistoryTable, PaymentRequestPayments"
       >
         <HistoryTable />
       </UiKitItem>
       <UiKitItem
         title="Pagination"
-        sources="q-pagination: HistoryTable, MintRatingsComponent, PaymentRequestPayments"
+        sources="elements.scss q-pagination (44px, muted pages, tinted current page)"
+        used="HistoryTable, MintRatingsComponent, PaymentRequestPayments"
       >
         <q-pagination
           v-model="page"
@@ -748,7 +798,8 @@
       </UiKitItem>
       <UiKitItem
         title="Expansion row"
-        sources="q-expansion-item: WalletPage, LightningAddressSettings"
+        sources="q-expansion-item"
+        used="WalletPage, LightningAddressSettings"
       >
         <q-expansion-item label="Advanced" icon="tune" dense>
           <div class="q-pa-md text-app-muted">Expanded content.</div>
@@ -761,7 +812,8 @@
       </h2>
       <UiKitItem
         title="Toasts"
-        sources="src/js/notify.ts · app.scss body .q-notification"
+        sources="src/js/notify.ts · app.scss body .q-notification (tone per kind)"
+        used="every notifySuccess / notifyError / notifyWarning"
       >
         <div
           class="q-notification row items-stretch q-notification--standard ui-kit-toast q-mb-md"
@@ -803,7 +855,8 @@
       </UiKitItem>
       <UiKitItem
         title="Loading"
-        sources="q-spinner-dots: CreateInvoiceDialog, NostrMintRestore, WelcomeMintSetup · q-linear-progress .qr-progress · q-skeleton (MintDiscovery, MintRatings, WalletPage, MintInfoContainer)"
+        sources="elements.scss busy buttons (q-spinner-dots + label) · .qr-progress · SkeletonRow.vue"
+        used="busy: every primary action · skeletons: MintDiscovery, MintRatingsComponent, WalletPage, MintInfoContainer"
       >
         <div class="row q-gutter-md items-center q-mb-md">
           <q-spinner-dots size="24px" color="primary" />
@@ -815,17 +868,12 @@
           color="primary"
           class="qr-progress q-mb-md"
         />
-        <div class="row items-center no-wrap q-gutter-x-md">
-          <q-skeleton type="QAvatar" size="34px" />
-          <div class="col">
-            <q-skeleton type="text" width="60%" />
-            <q-skeleton type="text" width="40%" />
-          </div>
-        </div>
+        <SkeletonRow avatar="34px" :lines="['55%', '35%', '25%']" />
       </UiKitItem>
       <UiKitItem
         title="Blocking and empty states"
-        sources="app.scss .blocking-state (AlreadyRunning, 404) · empty states in MintRatings, MintDiscovery, NoMintWarnBanner, HistoryTable"
+        sources="app.scss .blocking-state · elements.scss .app-empty (+ __title, __text, __action), .app-box"
+        used="AlreadyRunning, 404 · MintRatings, MintDiscovery, NoMintWarnBanner, HistoryTable · AddMint preview, Multinut summary"
       >
         <div
           class="ui-kit-frame blocking-state column flex-center text-center q-pa-lg"
@@ -844,164 +892,8 @@
             Go back home
           </q-btn>
         </div>
-      </UiKitItem>
-      <UiKitItem
-        title="Banner"
-        sources="q-banner: SendTokenDialog (payment request mint warning)"
-      >
-        <q-banner dense rounded class="bg-red-1 text-red-9"
-          >This request asks for a different mint.</q-banner
-        >
-      </UiKitItem>
-      <UiKitItem title="Tooltip" sources="q-tooltip in 16 files (hover only)">
-        <q-btn rounded outline no-caps color="primary">
-          Hover me
-          <q-tooltip>Copied to clipboard</q-tooltip>
-        </q-btn>
-      </UiKitItem>
 
-      <!-- 9. Data display -->
-      <h2 :id="sections[8].id" class="ui-kit-section">
-        {{ sections[8].title }}
-      </h2>
-      <UiKitItem
-        title="Amounts"
-        sources="app.scss .amount-headline · AnimatedNumber.vue · ToggleUnit.vue · copies: BalanceView, Multinut .multinut-amount"
-      >
-        <div class="column items-center q-gutter-y-sm">
-          <div class="amount-headline">−₿101</div>
-          <div class="text-h4 text-weight-bold">
-            <AnimatedNumber
-              :value="2789"
-              :format="(n) => '₿' + Math.round(n).toLocaleString('en-US')"
-            />
-          </div>
-          <ToggleUnit />
-        </div>
-      </UiKitItem>
-      <UiKitItem
-        title="QR code"
-        sources="vue-qrcode in .app-qr: InvoiceDetail, CreateInvoice, DisplayToken, P2PK, NWC, PaymentRequest, MintDetails"
-      >
-        <q-responsive :ratio="1" class="app-qr">
-          <vue-qrcode
-            value="cashu:demo-token"
-            :options="{ width: 400 }"
-            class="rounded-borders"
-            style="width: 100%"
-          />
-        </q-responsive>
-      </UiKitItem>
-
-      <!-- 10. Standard elements (src/css/elements.scss) -->
-      <h2 :id="sections[9].id" class="ui-kit-section">
-        {{ sections[9].title }}
-      </h2>
-      <p class="ui-kit-body text-app-muted">
-        The one implementation of each repeated pattern (src/css/elements.scss).
-        New screens use these classes instead of their own copies.
-      </p>
-      <UiKitItem
-        title="Icon circle"
-        sources=".app-icon-circle --sm 40 · 48 · --lg 56 · --xl 80"
-      >
-        <div class="row q-gutter-md items-center">
-          <div class="app-icon-circle app-icon-circle--sm">
-            <ZapIcon :size="20" />
-          </div>
-          <div class="app-icon-circle"><ZapIcon :size="24" /></div>
-          <div class="app-icon-circle app-icon-circle--lg">
-            <ZapIcon :size="26" />
-          </div>
-          <div class="app-icon-circle app-icon-circle--xl">
-            <ZapIcon :size="36" />
-          </div>
-        </div>
-      </UiKitItem>
-      <UiKitItem
-        title="Option row"
-        sources=".app-option-row (+ __label, __caption, --selected) · SheetOption, Send, Receive, Receive ecash, scanner row, payment request, onboarding choice"
-      >
-        <div class="column q-gutter-y-sm">
-          <div class="app-option-row" role="button" tabindex="0">
-            <div class="app-icon-circle"><CoinsIcon :size="24" /></div>
-            <div class="app-option-row__text">
-              <div class="app-option-row__label">Ecash</div>
-              <div class="app-option-row__caption">
-                Paste, scan or request a token
-              </div>
-            </div>
-          </div>
-          <div
-            class="app-option-row app-option-row--selected"
-            role="button"
-            tabindex="0"
-          >
-            <div class="app-icon-circle"><ZapIcon :size="24" /></div>
-            <div class="app-option-row__text">
-              <div class="app-option-row__label">Lightning</div>
-              <div class="app-option-row__caption">Selected</div>
-            </div>
-          </div>
-        </div>
-      </UiKitItem>
-      <UiKitItem
-        title="Callout"
-        sources=".app-callout --info --warning --danger · ToolTipInfo, MintMotdMessage, MintAuditWarningBox, Multinut, CreateInvoice, ReceiveToken"
-      >
-        <div class="column q-gutter-y-sm">
-          <div class="app-callout">
-            <q-icon name="info" size="18px" class="app-callout__icon" />
-            <div class="app-callout__body app-callout__text">
-              Neutral advice for the next step.
-            </div>
-          </div>
-          <div class="app-callout app-callout--info">
-            <q-icon name="info" size="18px" class="app-callout__icon" />
-            <div class="app-callout__body app-callout__text">
-              Swapping costs a small Lightning fee.
-            </div>
-          </div>
-          <div class="app-callout app-callout--warning">
-            <q-icon
-              name="warning_amber"
-              size="18px"
-              class="app-callout__icon"
-            />
-            <div class="app-callout__body">
-              <div class="app-callout__title">Experimental feature</div>
-              <div class="app-callout__text">
-                Paying from several mints can fail part way.
-              </div>
-            </div>
-          </div>
-          <div class="app-callout app-callout--danger">
-            <q-icon
-              name="error_outline"
-              size="18px"
-              class="app-callout__icon"
-            />
-            <div class="app-callout__body app-callout__text">
-              This token is locked to a different key.
-            </div>
-          </div>
-        </div>
-      </UiKitItem>
-      <UiKitItem
-        title="Badge"
-        sources=".app-badge --solid --primary · reviews, multi-mint amounts"
-      >
-        <div class="row q-gutter-sm items-center">
-          <span class="app-badge">Your review</span>
-          <span class="app-badge app-badge--solid">₿2,289</span>
-          <span class="app-badge app-badge--primary">60%</span>
-        </div>
-      </UiKitItem>
-      <UiKitItem
-        title="Box and empty state"
-        sources=".app-box · .app-empty (+ __title, __text, __action) · MintRatings, MintDiscovery, AddMint preview, confirm summary"
-      >
-        <div class="app-empty app-box">
+        <div class="app-empty app-box q-mt-md">
           <div class="app-icon-circle app-icon-circle--lg">
             <q-icon name="travel_explore" size="28px" />
           </div>
@@ -1020,27 +912,90 @@
         </div>
       </UiKitItem>
       <UiKitItem
-        title="Skeleton row"
-        sources="SkeletonRow.vue · body .q-skeleton · MintDiscovery, MintRatingsComponent"
+        title="Tooltip"
+        sources="q-tooltip (hover only)"
+        used="16 files"
       >
-        <SkeletonRow avatar="34px" :lines="['55%', '35%', '25%']" />
+        <q-btn rounded outline no-caps color="primary">
+          Hover me
+          <q-tooltip>Copied to clipboard</q-tooltip>
+        </q-btn>
+      </UiKitItem>
+
+      <!-- 9. Data display -->
+      <h2 :id="sections[8].id" class="ui-kit-section">
+        {{ sections[8].title }}
+      </h2>
+      <UiKitItem
+        title="Amounts"
+        sources="app.scss .amount-headline · AnimatedNumber.vue · ToggleUnit.vue"
+        used="InvoiceDetailDialog, TokenInformation, Multinut · hero: BalanceView .balance-amount"
+      >
+        <div class="column items-center q-gutter-y-sm">
+          <div class="amount-headline">−₿101</div>
+          <div class="text-h4 text-weight-bold">
+            <AnimatedNumber
+              :value="2789"
+              :format="(n) => '₿' + Math.round(n).toLocaleString('en-US')"
+            />
+          </div>
+          <ToggleUnit />
+        </div>
+      </UiKitItem>
+      <UiKitItem
+        title="QR code"
+        sources="app.scss .app-qr · vue-qrcode"
+        used="InvoiceDetail, CreateInvoice, DisplayToken, P2PK, NWC, PaymentRequest, MintDetails"
+      >
+        <q-responsive :ratio="1" class="app-qr">
+          <vue-qrcode
+            value="cashu:demo-token"
+            :options="{ width: 400 }"
+            class="rounded-borders"
+            style="width: 100%"
+          />
+        </q-responsive>
+      </UiKitItem>
+      <UiKitItem
+        title="Icon circle"
+        sources="elements.scss .app-icon-circle (--sm 40, 48, --lg 56, --xl 80)"
+        used="option rows, empty states, onboarding slides, mint avatars"
+      >
+        <div class="row q-gutter-md items-center">
+          <div class="app-icon-circle app-icon-circle--sm">
+            <ZapIcon :size="20" />
+          </div>
+          <div class="app-icon-circle"><ZapIcon :size="24" /></div>
+          <div class="app-icon-circle app-icon-circle--lg">
+            <ZapIcon :size="26" />
+          </div>
+          <div class="app-icon-circle app-icon-circle--xl">
+            <ZapIcon :size="36" />
+          </div>
+        </div>
       </UiKitItem>
       <UiKitItem
         title="Machine text"
-        sources=".app-mono (+ --wrap) · invoices, tokens, lock keys"
+        sources="elements.scss .app-mono (+ --wrap)"
+        used="InvoiceDetail, CreateInvoice, P2PK keys, keyset IDs"
       >
         <div class="app-mono app-mono--wrap text-app-muted">
           lnbc10u1pjxyz0pp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqypq
         </div>
       </UiKitItem>
 
-      <!-- 11. Duplicates -->
-      <h2 :id="sections[10].id" class="ui-kit-section">
-        {{ sections[10].title }}
+      <!-- 10. Duplicates -->
+      <h2 :id="sections[9].id" class="ui-kit-section">
+        {{ sections[9].title }}
       </h2>
       <p class="ui-kit-body text-app-muted">
-        Patterns implemented more than once (src/js/ui-audit.ts). Merge each
-        into one shared implementation, then delete its entry.
+        Patterns still implemented more than once (src/js/ui-audit.ts).
+        <template v-if="!duplicates.length">
+          None: every entry above has one implementation.
+          test/vitest/__tests__/standardElements.test.ts fails if a raw q-badge,
+          q-chip or q-banner, or a component restyling a standard element, comes
+          back.
+        </template>
       </p>
       <div v-for="d in duplicates" :key="d.pattern" class="ui-kit-dup">
         <div class="ui-kit-dup__head">
@@ -1060,6 +1015,7 @@
 import { computed, defineComponent } from "vue";
 import SettingsSection from "src/pages/settings/SettingsSection.vue";
 import AnimatedNumber from "src/components/AnimatedNumber.vue";
+import AppCallout from "src/components/AppCallout.vue";
 import BottomSheet from "src/components/BottomSheet.vue";
 import ChooseMint from "src/components/ChooseMint.vue";
 import HistoryTable from "src/components/HistoryTable.vue";
@@ -1123,6 +1079,7 @@ export default defineComponent({
   name: "UiKitPage",
   mixins: [windowMixin],
   components: {
+    AppCallout,
     SettingsSection,
     AnimatedNumber,
     BottomSheet,
@@ -1183,7 +1140,6 @@ export default defineComponent({
         { id: "rows", title: "Rows and lists" },
         { id: "feedback", title: "Feedback and loading" },
         { id: "data", title: "Data display" },
-        { id: "standard", title: "Standard elements" },
         { id: "duplicates", title: "Duplicates" },
       ],
       tokens: [

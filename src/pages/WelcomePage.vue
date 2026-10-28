@@ -147,12 +147,6 @@ export default {
 </script>
 
 <style scoped>
-.q-dialog__inner {
-  height: 100%;
-  width: 100%;
-  margin: 0; /* Align dialog to cover the entire viewport */
-}
-
 .q-card {
   display: flex;
   flex-direction: column;

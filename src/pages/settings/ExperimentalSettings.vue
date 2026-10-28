@@ -9,10 +9,9 @@
         <q-item-section>
           <q-item-label class="label-with-badge">
             {{ $t("Settings.experimental.receive_swaps.toggle") }}
-            <q-badge
-              color="primary"
-              :label="$t('Settings.experimental.receive_swaps.badge')"
-            ></q-badge>
+            <span class="app-badge">{{
+              $t("Settings.experimental.receive_swaps.badge")
+            }}</span>
           </q-item-label>
           <q-item-label caption>{{
             $t("Settings.experimental.receive_swaps.description")
@@ -43,10 +42,9 @@
         <q-item-section>
           <q-item-label class="label-with-badge">
             {{ $t("Settings.experimental.auditor.toggle") }}
-            <q-badge
-              color="primary"
-              :label="$t('Settings.experimental.auditor.badge')"
-            ></q-badge>
+            <span class="app-badge">{{
+              $t("Settings.experimental.auditor.badge")
+            }}</span>
           </q-item-label>
           <q-item-label caption>{{
             $t("Settings.experimental.auditor.description")
@@ -114,10 +112,9 @@
         <q-item-section>
           <q-item-label class="label-with-badge">
             {{ $t("Settings.multinut.use_multinut") }}
-            <q-badge
-              color="primary"
-              :label="$t('Settings.experimental.receive_swaps.badge')"
-            ></q-badge>
+            <span class="app-badge">{{
+              $t("Settings.experimental.receive_swaps.badge")
+            }}</span>
           </q-item-label>
           <q-item-label caption>{{
             $t("Settings.experimental.multinut.description")

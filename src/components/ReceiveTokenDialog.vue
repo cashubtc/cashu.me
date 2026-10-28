@@ -21,7 +21,7 @@
             round
             icon="close"
             color="grey"
-            class="floating-close-btn"
+            class="floating-close-btn app-icon-btn"
           />
           <div class="col text-center fixed-title-height">
             <q-item-label
@@ -788,11 +788,6 @@ export default defineComponent({
   width: 100%;
   max-width: var(--app-column);
   margin: 0 auto;
-}
-
-.q-dialog__inner > div {
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
 }
 
 .icon-background {

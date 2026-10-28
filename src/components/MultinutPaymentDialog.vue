@@ -18,7 +18,7 @@
           <q-btn
             flat
             round
-            class="floating-close-btn"
+            class="floating-close-btn app-icon-btn"
             :aria-label="$t('global.actions.close.label')"
             @click="closeMultinutDialog"
           >
@@ -28,7 +28,7 @@
 
         <!-- Header Section -->
         <div class="multinut-header-container q-mb-lg">
-          <div class="multinut-header q-pa-md q-py-lg">
+          <div class="multinut-header app-box q-pa-md q-py-lg">
             <div class="multinut-title q-mb-xs">
               {{ $t("MultinutPicker.dialog_title") }}
             </div>
@@ -1062,12 +1062,10 @@ export default defineComponent({
 
 .multinut-header {
   width: 100%;
-  border-radius: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: var(--app-tint);
 }
 
 .multinut-title {

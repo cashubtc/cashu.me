@@ -22,7 +22,7 @@
             round
             icon="close"
             color="grey"
-            class="floating-close-btn"
+            class="floating-close-btn app-icon-btn"
           />
           <div class="col text-center fixed-title-height">
             <div>
@@ -1285,11 +1285,6 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}
-
-.q-dialog__inner > div {
-  border-top-left-radius: 0px;
-  border-top-right-radius: 0px;
 }
 
 .token-input {

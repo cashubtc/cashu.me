@@ -7,26 +7,24 @@
         data-testid="history-row"
         clickable
         v-ripple
-        class="q-py-sm history-row"
+        class="q-py-sm activity-row"
       >
         <!-- Icon Section -->
         <q-item-section avatar class="q-pr-md" style="min-width: 40px">
-          <q-avatar size="40px" class="transaction-avatar">
+          <q-avatar size="40px" class="activity-row__avatar">
             <CoinsIcon
               v-if="isEcashTransaction(transaction)"
-              class="transaction-icon"
+              class="activity-row__icon"
             />
             <BitcoinIcon
               v-else-if="isOnchainTransaction(transaction)"
-              class="transaction-icon"
+              class="activity-row__icon"
             />
-            <ZapIcon v-else class="transaction-icon" />
+            <ZapIcon v-else class="activity-row__icon" />
             <span
-              class="direction-badge"
+              class="activity-row__direction"
               :class="
-                transaction.amount >= 0
-                  ? 'direction-badge--in'
-                  : 'direction-badge--out'
+                transaction.amount >= 0 ? 'activity-row__direction--in' : ''
               "
               aria-hidden="true"
             >
@@ -48,7 +46,7 @@
           <q-item-label class="row items-center justify-between">
             <!-- Transaction Label -->
             <div class="col text-left">
-              <span class="transaction-label text-weight-medium">
+              <span class="activity-row__label">
                 {{ getTransactionLabel(transaction) }}
               </span>
             </div>
@@ -56,12 +54,13 @@
             <!-- Amount -->
             <div class="text-right">
               <div
-                class="amount-text text-weight-bold"
+                class="activity-row__amount"
                 dir="ltr"
                 :class="{
-                  'text-amount-positive':
+                  'activity-row__amount--in':
                     transaction.amount >= 0 && transaction.status !== 'pending',
-                  'amount-text--pending': transaction.status === 'pending',
+                  'activity-row__amount--pending':
+                    transaction.status === 'pending',
                 }"
               >
                 {{ transaction.amount >= 0 ? "+" : "\u2212"
@@ -120,7 +119,7 @@
       <!-- Nothing matches: one row-height message in the list. -->
       <div
         v-if="paginatedTransactions.length === 0"
-        class="history-row history-row--placeholder history-empty row items-center justify-center"
+        class="activity-row activity-row--placeholder history-empty row items-center justify-center"
       >
         <q-item-label caption>{{ $t("HistoryTable.empty_text") }}</q-item-label>
       </div>
@@ -129,7 +128,7 @@
       <div
         v-for="n in placeholderRowCount"
         :key="`placeholder-${n}`"
-        class="history-row history-row--placeholder"
+        class="activity-row activity-row--placeholder"
         aria-hidden="true"
       />
     </q-list>
@@ -606,102 +605,13 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.transaction-label {
-  border-radius: 4px;
-  font-size: 1rem;
-  transition: background-color 0.2s ease;
-}
-
-.transaction-label:hover {
-  background-color: rgba(0, 0, 0, 0.04);
-}
-
-.transaction-avatar {
-  background: var(--row-avatar);
-  overflow: visible;
-  position: relative;
-}
-
-/* Direction badge: a solid disc (text colour out, positive colour in) with the arrow knocked
-   out in the row colour, cut from the icon circle by a ring of the row colour. */
-.direction-badge {
-  align-items: center;
-  background: var(--app-text);
-  border: 2px solid var(--row-bg);
-  border-radius: 50%;
-  bottom: -5px;
-  color: var(--row-bg);
-  display: flex;
-  height: 22px;
-  justify-content: center;
-  position: absolute;
-  inset-inline-end: -5px;
-  width: 22px;
-}
-
-.direction-badge--in {
-  background: var(--q-positive);
-}
-
-.transaction-icon {
-  width: 20px;
-  height: 20px;
-  color: var(--app-text);
-}
-
 .history-table {
   margin: 0 auto;
   max-width: 100%;
 }
 
-/* Rows keep 12px inner padding for their hover, pressed and focus shapes,
-   with a negative margin so content stays on the page gutter. */
-.history-row {
-  --row-bg: var(--app-surface);
-  --row-avatar: var(--app-tint-strong);
-  background: var(--row-bg);
-  border-radius: 12px;
-  margin: 0 -12px;
-  min-height: 64px;
-  padding-left: 12px;
-  padding-right: 12px;
-}
-
-/* Hover and pressed tint the row, its icon circle and the badge's cut-out together, so the
-   whole avatar responds instead of sitting as a fixed dark disc on a lighter row. */
-.history-row--placeholder {
-  background: transparent;
-  min-height: 64px;
-  pointer-events: none;
-}
 .history-empty .q-item__label {
   color: var(--app-text-muted);
-}
-
-.history-row :deep(.q-focus-helper) {
-  display: none;
-}
-@media (hover: hover) {
-  .history-row:hover {
-    --row-bg: color-mix(
-      in srgb,
-      var(--app-text) calc(var(--app-hover-opacity) * 100%),
-      var(--app-surface)
-    );
-    --row-avatar: color-mix(in srgb, var(--app-text) 18%, var(--app-surface));
-  }
-}
-.history-row:active {
-  --row-bg: color-mix(
-    in srgb,
-    var(--app-text) calc(var(--app-pressed-opacity) * 100%),
-    var(--app-surface)
-  );
-  --row-avatar: color-mix(in srgb, var(--app-text) 26%, var(--app-surface));
-}
-
-.history-row :deep(.q-item__label--caption) {
-  font-size: 13px;
 }
 
 /* Filters are toggle chips, not actions: a compact 36px pill, outlined when off and filled
@@ -723,38 +633,10 @@ export default defineComponent({
   inset: -4px 0;
 }
 
-.history-table :deep(.q-pagination .q-btn) {
-  min-height: 44px !important;
-  min-width: 44px !important;
-}
-/* Pending amounts are not settled yet: secondary text, not full emphasis (R18). */
-.amount-text--pending {
-  color: var(--app-text-muted);
-}
-/* Only the current page uses the accent; other pages and arrows are muted text (R17). */
-.history-table :deep(.q-pagination .q-btn:not(.bg-primary)) {
-  color: var(--app-text-muted) !important;
-}
-/* The current page is a quiet tinted chip, not a filled pill competing with Receive/Send. */
-.history-table :deep(.q-pagination .q-btn.bg-primary) {
-  background: var(--app-tint-strong) !important;
-  color: var(--app-text) !important;
-}
-
-.amount-text {
-  font-size: 1rem;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.2;
-}
-
 .history-check-btn {
   margin-block: -13px;
   margin-inline: -14px -6px;
   min-height: 44px;
   min-width: 44px;
-}
-
-.text-amount-positive {
-  color: var(--q-positive);
 }
 </style>

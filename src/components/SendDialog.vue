@@ -12,7 +12,7 @@
           flat
           round
           v-close-popup
-          class="drawer-header-btn"
+          class="drawer-header-btn app-icon-btn"
           color="primary"
         >
           <XIcon />
@@ -23,7 +23,7 @@
         <q-btn
           flat
           round
-          class="drawer-header-btn"
+          class="drawer-header-btn app-icon-btn"
           @click="showCamera"
           color="primary"
         >

@@ -5,7 +5,7 @@
         flat
         dense
         round
-        class="app-toolbar-btn"
+        class="app-icon-btn"
         :aria-label="$t('common.settings')"
         @click="goToSettings"
         :disable="uiStore.globalMutexLock"
@@ -18,50 +18,30 @@
         enter-active-class="animated wobble"
         leave-active-class="animated fadeOut"
       >
-        <q-badge
-          v-if="g.offline"
-          color="red"
-          text-color="black"
-          class="q-mr-sm"
-        >
+        <span v-if="g.offline" class="app-badge app-badge--danger q-mr-sm">
           <span>{{ $t("MainHeader.offline.warning.text") }}</span>
-        </q-badge>
+        </span>
       </transition>
-      <q-badge
-        v-if="isStaging()"
-        color="yellow"
-        text-color="black"
-        class="q-mr-sm"
-      >
+      <span v-if="isStaging()" class="app-badge app-badge--warning q-mr-sm">
         <span>{{ $t("MainHeader.staging.warning.text") }}</span>
-      </q-badge>
-      <!-- <q-badge color="yellow" text-color="black" class="q-mr-sm">
-        <span v-if="!isStaging()">Beta</span>
-        <span v-else>Staging – don't use with real funds!</span>
-      </q-badge> -->
+      </span>
       <transition-group appear enter-active-class="animated pulse">
-        <q-badge
+        <button
           v-if="countdown > 0"
-          color="negative"
-          text-color="white"
-          class="q-mr-sm"
+          key="reload"
+          type="button"
+          class="app-badge app-badge--danger q-mr-sm"
           @click="reload"
         >
           {{ $t("MainHeader.reload.warning.text", { countdown }) }}
-          <q-spinner
-            v-if="countdown > 0"
-            size="0.8em"
-            :thickness="10"
-            class="q-ml-sm"
-            color="white"
-          />
-        </q-badge>
+          <q-spinner size="12px" :thickness="6" />
+        </button>
       </transition-group>
       <q-btn
         flat
         dense
         round
-        class="app-toolbar-btn"
+        class="app-icon-btn"
         :class="countdown > 0 ? 'text-negative' : ''"
         :aria-label="$t('common.refresh')"
         @click="reload"
@@ -147,10 +127,5 @@ export default defineComponent({
 
 .q-toolbar-title {
   flex: 0 1 auto; /* Allow title to shrink */
-}
-
-/* Make badges container handle overflow properly */
-.q-toolbar > .q-badge {
-  flex-shrink: 0;
 }
 </style>

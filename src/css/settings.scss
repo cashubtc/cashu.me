@@ -125,15 +125,6 @@
   padding: 0 16px;
 }
 
-/* Status chips (Beta, Experimental) are quiet outlines, never louder than the row title. */
-.settings-view .q-badge,
-body .settings-view .q-badge.bg-primary {
-  background: transparent !important;
-  color: var(--app-text-muted) !important;
-  border: 1px solid var(--app-border-strong);
-  font-weight: 500;
-}
-
 /* Read-only fields (seed phrase) keep the solid outline; Quasar's dashed readonly border
    read as a second container inside the card. */
 .settings-view .q-field--outlined.q-field--readonly .q-field__control:before {

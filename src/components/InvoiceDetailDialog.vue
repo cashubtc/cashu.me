@@ -19,7 +19,7 @@
             round
             icon="close"
             color="grey"
-            class="floating-close-btn"
+            class="floating-close-btn app-icon-btn"
           />
           <div class="col text-center fixed-title-height">
             <q-item-label class="sheet-title">

@@ -102,7 +102,7 @@ export default {
         flat
         round
         icon="close"
-        class="floating-close-btn qr-scanner__close"
+        class="floating-close-btn app-icon-btn qr-scanner__close"
         :aria-label="$t('QrcodeReader.actions.close.label')"
         @click="closeCamera"
       />

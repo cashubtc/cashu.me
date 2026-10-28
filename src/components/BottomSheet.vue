@@ -16,7 +16,7 @@
           flat
           round
           color="primary"
-          class="bottom-sheet-close"
+          class="bottom-sheet-close floating-close-btn app-icon-btn"
           :aria-label="$t('global.actions.close.label')"
           v-close-popup
         >
@@ -140,16 +140,6 @@ export default defineComponent({
 
 .bottom-sheet-title {
   text-align: center;
-}
-
-.bottom-sheet-close {
-  color: var(--app-text) !important;
-  position: absolute;
-  inset-inline-start: 6px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 44px;
-  height: 44px;
 }
 
 /* Content */

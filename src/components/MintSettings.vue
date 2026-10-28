@@ -34,14 +34,10 @@
                 v-if="mint.url != activatingMintUrl && mint.errored"
                 class="error-badge"
               >
-                <q-badge
-                  color="red"
-                  outline
-                  class="q-mr-xs q-mt-sm text-weight-bold"
-                >
+                <span class="app-badge app-badge--danger q-mt-sm">
+                  <CircleAlertIcon :size="14" aria-hidden="true" />
                   {{ $t("MintSettings.error_badge") }}
-                  <q-icon name="error" class="q-ml-xs" size="xs" />
-                </q-badge>
+                </span>
               </div>
             </transition>
 
@@ -298,6 +294,7 @@
 </template>
 <script lang="ts">
 import {
+  CircleAlert as CircleAlertIcon,
   CircleCheck as CircleCheckIcon,
   Ellipsis as EllipsisIcon,
   Plus as PlusIcon,
@@ -336,6 +333,7 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     EllipsisIcon,
+    CircleAlertIcon,
     CircleCheckIcon,
     PlusIcon,
     ScanIcon,

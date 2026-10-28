@@ -11,7 +11,7 @@
         round
         icon="close"
         color="grey"
-        class="floating-close-btn"
+        class="floating-close-btn app-icon-btn"
         @click="closeCardScanner"
       />
       <div class="col text-center fixed-title-height">

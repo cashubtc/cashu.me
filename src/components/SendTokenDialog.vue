@@ -22,7 +22,7 @@
             round
             icon="close"
             color="grey"
-            class="floating-close-btn"
+            class="floating-close-btn app-icon-btn"
           />
           <div class="col text-center fixed-title-height">
             <q-item-label
@@ -151,22 +151,13 @@
             @fiat-mode-changed="fiatKeyboardMode = $event"
           >
             <template #overlay>
-              <q-badge
+              <span
                 v-if="isLocked && !showLockInput"
-                rounded
-                color="positive"
-                class="locked-badge"
+                class="app-badge app-badge--success locked-badge"
               >
-                <LockIcon
-                  size="1.3em"
-                  style="margin-inline-end: 6px; margin-bottom: 4px"
-                />
-                <span
-                  class="text-caption text-weight-medium"
-                  style="font-size: 14px"
-                  >{{ $t("SendTokenDialog.badge_locked") }}</span
-                >
-              </q-badge>
+                <LockIcon :size="14" aria-hidden="true" />
+                {{ $t("SendTokenDialog.badge_locked") }}
+              </span>
               <div
                 v-if="insufficientFunds && sendData.amount"
                 outline

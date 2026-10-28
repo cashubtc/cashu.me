@@ -12,7 +12,7 @@
           flat
           round
           @click="goBack"
-          class="drawer-header-btn"
+          class="drawer-header-btn app-icon-btn"
           color="primary"
         >
           <ChevronLeftIcon />
@@ -21,7 +21,7 @@
           <span class="sheet-title">{{ $t("ReceiveEcashDrawer.title") }}</span>
         </div>
         <!-- Scan is the second row below; an empty slot keeps the title centred. -->
-        <div class="drawer-header-btn" aria-hidden="true" />
+        <div class="drawer-header-btn app-icon-btn" aria-hidden="true" />
       </q-card-section>
 
       <q-card-section class="q-pa-md">

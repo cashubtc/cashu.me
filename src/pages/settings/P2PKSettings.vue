@@ -68,11 +68,9 @@
         </q-item-section>
         <q-item-section side>
           <div class="row items-center no-wrap q-gutter-sm">
-            <q-badge
-              v-if="key.used"
-              :label="$t('Settings.p2pk_features.keys_expansion.used_badge')"
-              color="primary"
-            />
+            <span v-if="key.used" class="app-badge">{{
+              $t("Settings.p2pk_features.keys_expansion.used_badge")
+            }}</span>
             <q-icon
               name="content_copy"
               @click="copyText(key.publicKey)"

@@ -767,14 +767,6 @@ export default defineComponent({
   color: var(--app-text-muted);
 }
 
-/* Make "View all" and "Hide" text clickable */
-.detail-value[v-if="!showAllNuts"],
-.detail-value[v-else] {
-  cursor: pointer;
-  color: var(--app-text);
-  font-weight: 600;
-}
-
 /* Currency Units */
 .currency-units-container {
   display: flex;

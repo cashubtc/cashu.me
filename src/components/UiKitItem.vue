@@ -1,5 +1,6 @@
 <template>
-  <!-- One entry on /ui: a pattern's name, where it is implemented, and a live sample. -->
+  <!-- One entry on /ui: a pattern's name, its one implementation, where it is used, and a
+       live sample. -->
   <section
     v-show="visible"
     :id="slug"
@@ -8,6 +9,7 @@
   >
     <div class="ui-kit-item__title">{{ title }}</div>
     <div v-if="sources" class="ui-kit-item__sources">{{ sources }}</div>
+    <div v-if="used" class="ui-kit-item__used">Used by {{ used }}</div>
     <div class="ui-kit-item__sample">
       <slot />
     </div>
@@ -23,11 +25,12 @@ export default defineComponent({
   props: {
     title: { type: String, required: true },
     sources: { type: String, default: "" },
+    used: { type: String, default: "" },
     note: { type: String, default: "" },
   },
   setup(props) {
     // The page's search box (UiKitPage provides it); an entry hides when it doesn't match its
-    // title or the files that implement it.
+    // title, the files that implement it or the screens that use it.
     const query = inject<ComputedRef<string>>(
       "uiKitQuery",
       computed(() => "")
@@ -37,7 +40,8 @@ export default defineComponent({
       return (
         !q ||
         props.title.toLowerCase().includes(q) ||
-        props.sources.toLowerCase().includes(q)
+        props.sources.toLowerCase().includes(q) ||
+        props.used.toLowerCase().includes(q)
       );
     });
     const slug = computed(
@@ -66,6 +70,12 @@ export default defineComponent({
   color: var(--app-text-subtle);
   direction: ltr;
   text-align: start;
+}
+.ui-kit-item__used {
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--app-text-muted);
 }
 .ui-kit-item__sample {
   margin-top: 12px;

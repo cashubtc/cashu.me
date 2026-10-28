@@ -207,6 +207,7 @@ html[dir="rtl"] .app-callout__close {
   border-radius: 999px;
   color: var(--app-text-muted);
   display: inline-flex;
+  flex-shrink: 0;
   font-size: 12px;
   font-weight: 500;
   gap: 4px;
@@ -223,6 +224,27 @@ html[dir="rtl"] .app-callout__close {
   background: var(--q-primary);
   border-color: transparent;
   color: var(--app-on-primary, #000);
+}
+button.app-badge {
+  cursor: pointer;
+  font-family: inherit;
+}
+// Status badges take the callout tones: a tinted fill, a tone edge and tone-mixed text.
+.app-badge--success {
+  --tone: var(--app-success);
+}
+.app-badge--warning {
+  --tone: var(--app-warning);
+}
+.app-badge--danger {
+  --tone: var(--app-danger);
+}
+.app-badge--success,
+.app-badge--warning,
+.app-badge--danger {
+  background: color-mix(in srgb, var(--tone) 14%, var(--app-surface));
+  border-color: color-mix(in srgb, var(--tone) 40%, transparent);
+  color: color-mix(in srgb, var(--tone) 70%, var(--app-text));
 }
 
 // Box: a grouped surface (summaries, counters, previews), on the group tokens.
@@ -280,11 +302,22 @@ html[dir="rtl"] .app-callout__close {
   justify-content: center;
 }
 
-// Header close and back buttons are ink in every sheet, never the theme colour or grey.
-.floating-close-btn,
-.drawer-header-btn,
-.bottom-sheet-close {
+// Icon button: the 44px ink icon button in every header and sheet (back, close, menu,
+// refresh), never the theme colour or grey. .floating-close-btn pins one to the header's
+// leading edge, centred on the title.
+.app-icon-btn {
   color: var(--app-text) !important;
+  height: 44px;
+  min-height: 44px;
+  min-width: 44px;
+  width: 44px;
+}
+.floating-close-btn {
+  inset-inline-start: 6px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
 }
 
 // Onboarding slide scaffold: a large icon in a round slot, a title and a description on the
@@ -337,11 +370,6 @@ html[dir="rtl"] .app-callout__close {
   margin: 0 auto;
   max-width: var(--app-column);
   padding: 0 6px;
-}
-.app-toolbar-btn {
-  color: var(--app-text);
-  height: 44px;
-  width: 44px;
 }
 
 // Amount entry: the big amount and the fiat line under it, the same size on every amount
@@ -485,4 +513,107 @@ body .q-skeleton--type-text {
   gap: 2px;
   position: static;
   white-space: nowrap;
+}
+
+// Activity row: one transaction or payment in a list (History, payment request payments). A
+// 40px icon circle with a direction disc, a label and amount line, and a date line. The row
+// keeps 12px inner padding for its hover and pressed shape, with a negative margin so the
+// content stays on the page gutter.
+.activity-row {
+  --row-bg: var(--app-surface);
+  --row-avatar: var(--app-tint-strong);
+  background: var(--row-bg);
+  border-radius: 12px;
+  margin: 0 -12px;
+  min-height: 64px;
+  padding-inline: 12px;
+}
+.activity-row .q-focus-helper {
+  display: none;
+}
+.activity-row .q-item__label--caption {
+  color: var(--app-text-muted);
+  font-size: 13px;
+}
+@media (hover: hover) {
+  .activity-row.q-item--clickable:hover {
+    --row-bg: color-mix(
+      in srgb,
+      var(--app-text) calc(var(--app-hover-opacity) * 100%),
+      var(--app-surface)
+    );
+    --row-avatar: color-mix(in srgb, var(--app-text) 18%, var(--app-surface));
+  }
+}
+.activity-row.q-item--clickable:active {
+  --row-bg: color-mix(
+    in srgb,
+    var(--app-text) calc(var(--app-pressed-opacity) * 100%),
+    var(--app-surface)
+  );
+  --row-avatar: color-mix(in srgb, var(--app-text) 26%, var(--app-surface));
+}
+.activity-row--placeholder {
+  background: transparent;
+  pointer-events: none;
+}
+.activity-row__avatar {
+  background: var(--row-avatar);
+  overflow: visible;
+  position: relative;
+}
+.activity-row__icon {
+  color: var(--app-text);
+  height: 20px;
+  width: 20px;
+}
+// Direction: a solid disc (ink out, positive in) with the arrow knocked out in the row
+// colour, cut from the icon circle by a ring of the row colour.
+.activity-row__direction {
+  align-items: center;
+  background: var(--app-text);
+  border: 2px solid var(--row-bg);
+  border-radius: 50%;
+  bottom: -5px;
+  color: var(--row-bg);
+  display: flex;
+  height: 22px;
+  inset-inline-end: -5px;
+  justify-content: center;
+  position: absolute;
+  width: 22px;
+}
+.activity-row__direction--in {
+  background: var(--q-positive);
+}
+.activity-row__label {
+  font-size: 1rem;
+  font-weight: 500;
+}
+.activity-row__amount {
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.activity-row__amount--in {
+  color: var(--q-positive);
+}
+// Pending amounts are not settled yet: secondary text, not full emphasis.
+.activity-row__amount--pending {
+  color: var(--app-text-muted);
+}
+
+// Pager: 44px targets, muted pages and arrows, and the current page as a quiet tinted chip
+// rather than a filled pill competing with the screen's primary action.
+.q-pagination .q-btn {
+  min-height: 44px !important;
+  min-width: 44px !important;
+}
+.q-pagination .q-btn:not(.bg-primary) {
+  color: var(--app-text-muted) !important;
+}
+.q-pagination .q-btn.bg-primary {
+  background: var(--app-tint-strong) !important;
+  color: var(--app-text) !important;
 }

@@ -19,7 +19,7 @@
             round
             icon="close"
             color="grey"
-            class="floating-close-btn"
+            class="floating-close-btn app-icon-btn"
           />
           <div class="col text-center fixed-title-height">
             <q-item-label class="dialog-header">
@@ -173,18 +173,16 @@
                   style="max-width: var(--app-column)"
                 >
                   <div class="row q-gutter-sm items-center q-mb-sm">
-                    <q-chip
-                      outline
+                    <span
                       v-for="(total, unit) in totalsByUnit"
                       :key="unit"
-                      color="primary"
-                      text-color="primary"
+                      class="app-badge"
                     >
                       {{ $t("PaymentRequestDialog.received_total") }}:
                       <span class="q-ml-xs text-weight-medium">{{
                         formatCurrency(total, unit, true)
                       }}</span>
-                    </q-chip>
+                    </span>
                   </div>
                   <PaymentRequestPayments
                     :payments="currentPayments"

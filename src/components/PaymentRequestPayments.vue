@@ -1,7 +1,7 @@
 <template>
   <div class="q-pa-none">
     <div v-if="payments.length === 0" class="text-center q-mt-sm">
-      <q-item-label caption class="text-grey-6">
+      <q-item-label caption>
         {{ $t("PaymentRequestDialog.no_payments_yet") }}
       </q-item-label>
     </div>
@@ -11,28 +11,37 @@
         :key="payment.id"
         clickable
         v-ripple
-        class="q-px-md q-py-md"
+        class="q-py-sm activity-row"
         @click="showTokenDialog(payment)"
       >
         <q-item-section avatar class="q-pr-md" style="min-width: 40px">
-          <q-avatar size="28px">
-            <CoinsIcon class="transaction-icon" />
+          <q-avatar size="40px" class="activity-row__avatar">
+            <CoinsIcon class="activity-row__icon" />
+            <span
+              class="activity-row__direction activity-row__direction--in"
+              aria-hidden="true"
+            >
+              <ArrowDownLeftIcon :size="13" :stroke-width="2.75" />
+            </span>
           </q-avatar>
         </q-item-section>
         <q-item-section>
           <q-item-label class="row items-center justify-between">
             <div class="col text-left">
-              <span class="transaction-label text-weight-medium">
+              <span class="activity-row__label">
                 {{ payment.label || "Ecash" }}
               </span>
             </div>
             <div class="text-right">
-              <div class="amount-text text-weight-bold">
+              <div
+                class="activity-row__amount activity-row__amount--in"
+                dir="ltr"
+              >
                 +{{ formatCurrency(payment.amount, payment.unit) }}
               </div>
             </div>
           </q-item-label>
-          <q-item-label caption class="text-grey-6">
+          <q-item-label caption class="q-mt-none">
             {{ formattedDate(payment.date) }}
           </q-item-label>
         </q-item-section>
@@ -56,11 +65,14 @@ import { HistoryToken } from "src/stores/tokens";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import token from "src/js/token";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
-import { Coins as CoinsIcon } from "lucide-vue-next";
+import {
+  ArrowDownLeft as ArrowDownLeftIcon,
+  Coins as CoinsIcon,
+} from "lucide-vue-next";
 
 export default defineComponent({
   name: "PaymentRequestPayments",
-  components: { CoinsIcon },
+  components: { ArrowDownLeftIcon, CoinsIcon },
   props: {
     payments: {
       type: Array as PropType<HistoryToken[]>,
@@ -125,18 +137,3 @@ export default defineComponent({
   },
 });
 </script>
-<style scoped>
-.transaction-label {
-  border-radius: 4px;
-  font-size: 0.95rem;
-}
-.transaction-icon {
-  width: 18px;
-  height: 18px;
-  color: var(--q-primary);
-}
-.amount-text {
-  font-size: 0.95rem;
-  line-height: 1.2;
-}
-</style>

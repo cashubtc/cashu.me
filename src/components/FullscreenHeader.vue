@@ -5,7 +5,7 @@
         flat
         dense
         round
-        class="app-toolbar-btn"
+        class="app-icon-btn"
         @click="goBack"
         :aria-label="$t('common.back')"
       >
