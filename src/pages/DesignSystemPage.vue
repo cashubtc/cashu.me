@@ -470,6 +470,12 @@
             caption="github.com/cashubtc/cashu.me"
             external
           />
+          <SettingsLinkRow
+            :icon="GlobeIcon"
+            label="Language"
+            caption="Choose your language"
+            value="English"
+          />
         </q-list>
       </DsEntry>
       <DsEntry id="settings-action-row">

@@ -13,6 +13,7 @@
           :icon="entry.icon"
           :label="$t(`Settings.menu.${entry.key}.title`)"
           :caption="$t(`Settings.menu.${entry.key}.caption`)"
+          :value="entry.key === 'language' ? languageLabel($i18n.locale) : ''"
         />
       </q-list>
     </template>
@@ -20,6 +21,7 @@
 </template>
 
 <script lang="ts">
+import { languageLabel } from "src/js/languages";
 import { defineComponent, markRaw } from "vue";
 import { mapState } from "pinia";
 import { useUiStore } from "src/stores/ui";
@@ -48,6 +50,7 @@ export default defineComponent({
     SettingsPageShell,
     SettingsLinkRow,
   },
+  methods: { languageLabel },
   computed: {
     ...mapState(useUiStore, ["ndefSupported"]),
     visibleGroups() {

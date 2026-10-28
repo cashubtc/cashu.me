@@ -2,9 +2,9 @@
   <div class="sheet-select">
     <!-- A labelled field that opens a bottom sheet of options: the same field as the
          Lightning address mint picker and the same sheet as Send and Receive. -->
-    <!-- As a settings row: the setting's name, its current value under it and the
-         description on the start side, one centred chevron on the end side (a value beside
-         the chevron wrapped and pushed the chevron off-centre, council R75). -->
+    <!-- As a settings row: the setting's name and description on the start side, the current
+         value's short form (an option's `short`, e.g. "USD") muted beside one centred chevron
+         on the end side, like platform settings (council R75-R79). -->
     <q-item
       v-if="row"
       clickable
@@ -19,12 +19,12 @@
     >
       <q-item-section>
         <q-item-label>{{ label }}</q-item-label>
-        <q-item-label class="sheet-select__value">{{
-          selectedOption?.label ?? placeholder
-        }}</q-item-label>
         <q-item-label v-if="caption" caption>{{ caption }}</q-item-label>
       </q-item-section>
-      <q-item-section side>
+      <q-item-section side class="row no-wrap items-center sheet-select__side">
+        <span class="sheet-select__value">{{
+          selectedOption?.short ?? selectedOption?.label ?? placeholder
+        }}</span>
         <ChevronRightIcon
           :size="18"
           class="settings-menu-chevron"
@@ -61,6 +61,7 @@
         role="listbox"
         :aria-label="title || label"
         class="sheet-select__list"
+        :class="{ 'sheet-select__list--grouped': options.length > 8 }"
       >
         <SheetOption
           v-for="option in options"
@@ -91,6 +92,8 @@ import SheetOption from "src/components/SheetOption.vue";
 export type SheetSelectOption = {
   value: string | number;
   label: string;
+  /** A short form for the settings-row value slot (e.g. a currency code). */
+  short?: string;
   caption?: string;
 };
 
@@ -140,11 +143,12 @@ export default defineComponent({
 .sheet-select__field--empty .mint-chip__name {
   color: var(--app-text-muted);
 }
+.sheet-select__side {
+  gap: 4px;
+}
 .sheet-select__value {
-  color: var(--app-text);
+  color: var(--app-text-muted);
   font-size: 15px;
-  font-weight: 500;
-  margin-top: 2px;
 }
 .sheet-select__icon {
   display: inline-flex;

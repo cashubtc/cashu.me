@@ -136,6 +136,7 @@ export default defineComponent({
       });
       return this.currencyCodes.map((code) => ({
         label: `${names.of(code) ?? code} (${code})`,
+        short: code,
         value: code,
       }));
     },

@@ -16,6 +16,7 @@
 </template>
 
 <script lang="ts">
+import { LANGUAGE_OPTIONS } from "src/js/languages";
 import { defineComponent } from "vue";
 import SettingsPageShell from "./SettingsPageShell.vue";
 import SettingsRadioRow from "src/components/ui/SettingsRadioRow.vue";
@@ -31,22 +32,7 @@ export default defineComponent({
   },
   data: function () {
     return {
-      languageOptions: [
-        { label: "English", value: "en-US" },
-        { label: "Español", value: "es-ES" },
-        { label: "Italiano", value: "it-IT" },
-        { label: "Deutsch", value: "de-DE" },
-        { label: "Français", value: "fr-FR" },
-        { label: "Čeština", value: "cs-CZ" },
-        { label: "Português (Brasil)", value: "pt-BR" },
-        { label: "Svenska", value: "sv-SE" },
-        { label: "Ελληνικά", value: "el-GR" },
-        { label: "Türkçe", value: "tr-TR" },
-        { label: "ไทย", value: "th-TH" },
-        { label: "العربية", value: "ar-SA" },
-        { label: "中文", value: "zh-CN" },
-        { label: "日本語", value: "ja-JP" },
-      ],
+      languageOptions: LANGUAGE_OPTIONS,
     };
   },
   computed: {

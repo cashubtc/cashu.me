@@ -128,6 +128,13 @@ describe("standard elements", () => {
     ).toEqual([]);
   });
 
+  // One language list (src/js/languages.ts): two hand-kept copies drifted (council R79).
+  it("language options come from src/js/languages", () => {
+    expect(
+      offenders((text) => /label:\s*"English",\s*value:\s*"en-US"/.test(text))
+    ).toEqual([]);
+  });
+
   it("one pending mark: no spinner outside PendingDots", () => {
     expect(
       offenders((text) => /<q-spinner/.test(text)).filter(

@@ -6,7 +6,9 @@
 // Colours that carry meaning, for callouts and status text, in both modes.
 body.body--dark {
   --app-info: #60a5fa;
-  --app-warning: #facc15;
+  // amber-400: the same amber family as light mode's amber-800 (yellow-400 read as a
+  // different colour from mode to mode, council R79).
+  --app-warning: #fbbf24;
   --app-danger: var(--q-negative);
   // A filled destructive button: the danger colour with dark text (white on coral is ~2.8:1).
   --app-danger-fill: var(--q-negative);
@@ -124,6 +126,29 @@ body {
   background: var(--app-card-fill-active);
   border-color: var(--app-card-edge-active);
   box-shadow: inset 0 0 0 0.5px var(--app-card-edge-active);
+}
+/* SheetSelect: a long list (30-odd currencies) reads as one grouped list with hairline dividers, not a
+   stack of separate cards (council R76-R79). */
+.sheet-select__list--grouped {
+  background: var(--app-tint);
+  border-radius: var(--app-radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 0 !important;
+  overflow: hidden;
+}
+.sheet-select__list--grouped .app-option-row {
+  background: transparent !important;
+  border-radius: 0;
+  margin: 0 !important;
+  min-height: 52px;
+}
+.sheet-select__list--grouped .app-option-row + .app-option-row {
+  box-shadow: inset 0 1px 0 var(--app-border);
+}
+.sheet-select__list--grouped .app-option-row--selected {
+  background: var(--app-card-fill-active) !important;
+  box-shadow: inset 0 0 0 1px var(--app-card-edge-active);
 }
 // Light-mode sheets are white: rows sit on the page colour so they still read as rows.
 body.body--light .q-dialog .app-option-row {
@@ -540,7 +565,12 @@ body .q-skeleton--type-text {
       var(--app-text) calc(var(--app-hover-opacity) * 100%),
       var(--app-surface)
     );
-    --row-avatar: color-mix(in srgb, var(--app-text) 18%, var(--app-surface));
+    // The disc stays a fixed step above the row in every state (it vanished on press, R79).
+    --row-avatar: color-mix(
+      in srgb,
+      var(--app-text) calc(var(--app-hover-opacity) * 100% + 10%),
+      var(--app-surface)
+    );
   }
 }
 .activity-row.q-item--clickable:active {
@@ -549,7 +579,11 @@ body .q-skeleton--type-text {
     var(--app-text) calc(var(--app-pressed-opacity) * 100%),
     var(--app-surface)
   );
-  --row-avatar: color-mix(in srgb, var(--app-text) 26%, var(--app-surface));
+  --row-avatar: color-mix(
+    in srgb,
+    var(--app-text) calc(var(--app-pressed-opacity) * 100% + 10%),
+    var(--app-surface)
+  );
 }
 .activity-row--placeholder {
   background: transparent;

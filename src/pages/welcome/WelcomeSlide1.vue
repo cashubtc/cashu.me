@@ -72,7 +72,7 @@
         <SheetOption
           v-for="option in languageOptions"
           :key="option.value"
-          :selected="selectedLanguage === option.label"
+          :selected="option.value === $i18n.locale"
           @select="selectLanguage(option)"
         >
           <template #label>
@@ -92,6 +92,7 @@
 </template>
 
 <script lang="ts">
+import { LANGUAGE_OPTIONS, languageLabel } from "src/js/languages";
 import {
   ChevronDown as ChevronDownIcon,
   Globe as GlobeIcon,
@@ -112,26 +113,10 @@ export default {
   },
   data() {
     return {
-      selectedLanguage: "",
       showLanguageMenu: false,
       showTerms: false,
       termsAccepted: true,
-      languageOptions: [
-        { label: "English", value: "en-US" },
-        { label: "Español", value: "es-ES" },
-        { label: "Italiano", value: "it-IT" },
-        { label: "Deutsch", value: "de-DE" },
-        { label: "Français", value: "fr-FR" },
-        { label: "Čeština", value: "cs-CZ" },
-        { label: "Português (Brasil)", value: "pt-BR" },
-        { label: "Svenska", value: "sv-SE" },
-        { label: "Ελληνικά", value: "el-GR" },
-        { label: "Türkçe", value: "tr-TR" },
-        { label: "ไทย", value: "th-TH" },
-        { label: "العربية", value: "ar-SA" },
-        { label: "中文", value: "zh-CN" },
-        { label: "日本語", value: "ja-JP" },
-      ],
+      languageOptions: LANGUAGE_OPTIONS,
     };
   },
   methods: {
@@ -163,7 +148,6 @@ export default {
       this.showLanguageMenu = false;
     },
     selectLanguage(option: any) {
-      this.selectedLanguage = option.label;
       this.changeLanguage(option.value);
       this.closeLanguageMenu();
     },
@@ -175,10 +159,22 @@ export default {
       this.termsAccepted = true;
     },
   },
-  created() {
-    this.selectedLanguage =
-      this.languageOptions.find((option) => option.value === this.$i18n.locale)
-        ?.label || "English";
+  computed: {
+    // From the live locale, so the button and the sheet's check never go stale.
+    selectedLanguage(): string {
+      return languageLabel(this.$i18n.locale);
+    },
+  },
+  watch: {
+    // Open the sheet with the current language in view (it can sit below the fold).
+    showLanguageMenu(open: boolean) {
+      if (!open) return;
+      this.$nextTick(() =>
+        document
+          .querySelector('.language-options [aria-selected="true"]')
+          ?.scrollIntoView({ block: "center" })
+      );
+    },
   },
 };
 </script>
