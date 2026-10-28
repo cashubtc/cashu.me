@@ -132,28 +132,27 @@
         </div>
       </div>
       <div v-else class="q-mb-lg">
-        <div class="app-empty app-box">
-          <div class="app-icon-circle app-icon-circle--lg">
+        <EmptyState
+          :title="$t('MintRatings.no_reviews')"
+          :text="$t('MintRatings.empty_state_subtitle')"
+        >
+          <template #icon>
             <q-icon name="chat_bubble_outline" size="26px" />
-          </div>
-          <div class="app-empty__title">
-            {{ $t("MintRatings.no_reviews") }}
-          </div>
-          <div class="app-empty__text">
-            {{ $t("MintRatings.empty_state_subtitle") }}
-          </div>
-          <q-btn
-            v-if="allowCreateReview"
-            color="primary"
-            unelevated
-            rounded
-            no-caps
-            class="full-width write-review-btn app-empty__action"
-            @click="openCreateReview"
-          >
-            {{ $t("MintRatings.actions.write_review") }}
-          </q-btn>
-        </div>
+          </template>
+          <template #actions>
+            <q-btn
+              v-if="allowCreateReview"
+              color="primary"
+              unelevated
+              rounded
+              no-caps
+              class="full-width write-review-btn app-empty__action"
+              @click="openCreateReview"
+            >
+              {{ $t("MintRatings.actions.write_review") }}
+            </q-btn>
+          </template>
+        </EmptyState>
       </div>
 
       <!-- Action Buttons Row -->
@@ -374,6 +373,7 @@ import BottomSheet from "src/components/BottomSheet.vue";
 import SheetOption from "src/components/SheetOption.vue";
 import MintIdentityHeader from "src/components/MintIdentityHeader.vue";
 import SkeletonRow from "src/components/SkeletonRow.vue";
+import EmptyState from "src/components/ui/EmptyState.vue";
 import { defineComponent } from "vue";
 import { notifyCopied } from "src/js/notify";
 import { useNostrStore } from "src/stores/nostr";
@@ -397,6 +397,7 @@ export default defineComponent({
     SheetOption,
     MintIdentityHeader,
     SkeletonRow,
+    EmptyState,
   },
   methods: {
     // Calculate percentage for star rating bars
@@ -804,7 +805,7 @@ body[data-theme] .q-card--dark.mint-ratings-root {
   background: var(--app-tint);
   padding: 16px;
   margin-inline: -16px;
-  border-radius: 12px;
+  border-radius: var(--app-radius-lg);
   position: relative;
 }
 
@@ -899,7 +900,7 @@ body[data-theme] .q-card--dark.mint-ratings-root {
 .sort-trigger {
   background: none;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--app-radius-md);
   color: inherit;
   cursor: pointer;
   font: inherit;

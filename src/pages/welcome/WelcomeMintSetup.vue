@@ -1,110 +1,97 @@
 <template>
-  <div class="mint-setup-slide">
-    <!-- Main content area -->
-    <div class="welcome-slide__content">
-      <!-- Header Icon -->
-      <div class="welcome-slide__icon">
-        <div class="app-icon-circle app-icon-circle--xl">
-          <q-icon name="account_tree" size="2.5em" />
-        </div>
-      </div>
-
-      <!-- Title -->
-      <h1 class="welcome-slide__title">{{ $t("WelcomeMintSetup.title") }}</h1>
-
-      <!-- Description -->
-      <p class="welcome-slide__description">
-        {{ $t("WelcomeMintSetup.text") }}
-      </p>
-
-      <!-- Your added mints -->
-      <div class="mints-section">
-        <div class="mints-section-header">
-          <h3 v-if="mints.mints.length > 0" class="section-title">
-            {{ $t("WelcomeMintSetup.sections.your_mints") }}
-          </h3>
-          <!-- Restoring indicator during recover + Nostr search -->
-          <div
-            v-if="welcome.onboardingPath === 'recover' && restoringMints"
-            class="row items-center q-mb-md q-px-lg"
-          >
-            <q-spinner-dots size="24px" color="grey-5" class="q-mr-sm" />
-            <div class="text-grey-6">
-              {{ $t("WelcomeMintSetup.restoring") }}
-            </div>
-          </div>
-        </div>
-        <div v-for="mint in mints.mints" :key="mint.url" class="mint-item">
-          <div class="mint-content">
-            <q-avatar
-              v-if="getMintIconUrlExisting(mint)"
-              size="34px"
-              class="mint-icon"
-            >
-              <q-img
-                spinner-color="white"
-                spinner-size="xs"
-                :src="getMintIconUrlExisting(mint)"
-                alt="Mint Icon"
-                style="height: 34px; max-width: 34px; font-size: 12px"
-              />
-            </q-avatar>
-            <div class="mint-info">
-              <div class="mint-name">
-                {{ mint.nickname || mint.info?.name }}
-              </div>
-              <div class="mint-url">{{ mint.url }}</div>
-            </div>
+  <WelcomeSlideScaffold
+    class="mint-setup-slide"
+    icon="account_tree"
+    :title="$t('WelcomeMintSetup.title')"
+    :text="$t('WelcomeMintSetup.text')"
+  >
+    <!-- Your added mints -->
+    <div class="mints-section">
+      <div class="mints-section-header">
+        <h3 v-if="mints.mints.length > 0" class="section-title">
+          {{ $t("WelcomeMintSetup.sections.your_mints") }}
+        </h3>
+        <!-- Restoring indicator during recover + Nostr search -->
+        <div
+          v-if="welcome.onboardingPath === 'recover' && restoringMints"
+          class="row items-center q-mb-md q-px-lg"
+        >
+          <q-spinner-dots size="24px" color="grey-5" class="q-mr-sm" />
+          <div class="text-grey-6">
+            {{ $t("WelcomeMintSetup.restoring") }}
           </div>
         </div>
       </div>
-
-      <!-- Manual add mint -->
-      <div class="add-mint-section">
-        <h3 class="section-title">{{ $t("MintSettings.add.title") }}</h3>
-        <div class="add-mint-inputs" data-testid="onboarding-mint-url">
-          <q-input
-            rounded
-            outlined
-            v-model="addMintData.url"
-            :placeholder="$t('WelcomeMintSetup.placeholder.mint_url')"
-            @keydown.enter.prevent="sanitizeMintUrlAndShowAddDialog"
-            ref="mintInput"
-            class="q-mb-md mint-input url-input"
-          />
-        </div>
-        <div class="add-mint-button">
-          <q-btn
-            flat
-            rounded
-            data-testid="onboarding-add-mint"
-            :disable="addMintData.url.length === 0"
-            @click="
-              addMintData.url.length > 0
-                ? sanitizeMintUrlAndShowAddDialog()
-                : null
-            "
-            class="add-mint-btn"
+      <div v-for="mint in mints.mints" :key="mint.url" class="mint-item">
+        <div class="mint-content">
+          <q-avatar
+            v-if="getMintIconUrlExisting(mint)"
+            size="34px"
+            class="mint-icon"
           >
-            <q-icon name="add" size="18px" class="q-mr-sm" />
-            <span>{{ $t("MintSettings.add.actions.add_mint.label") }}</span>
-          </q-btn>
+            <q-img
+              spinner-color="white"
+              spinner-size="xs"
+              :src="getMintIconUrlExisting(mint)"
+              alt="Mint Icon"
+              style="height: 34px; max-width: 34px; font-size: 12px"
+            />
+          </q-avatar>
+          <div class="mint-info">
+            <div class="mint-name">
+              {{ mint.nickname || mint.info?.name }}
+            </div>
+            <div class="mint-url">{{ mint.url }}</div>
+          </div>
         </div>
       </div>
+    </div>
 
-      <!-- Recovery-specific: search user mints on nostr using seed -->
-      <div v-if="welcome.onboardingPath === 'recover'">
-        <NostrMintRestore
-          :mnemonic="restore.mnemonicToRestore"
-          :is-mnemonic-valid="isSeedValid"
-          :auto-add="true"
+    <!-- Manual add mint -->
+    <div class="add-mint-section">
+      <h3 class="section-title">{{ $t("MintSettings.add.title") }}</h3>
+      <div class="add-mint-inputs" data-testid="onboarding-mint-url">
+        <q-input
+          rounded
+          outlined
+          v-model="addMintData.url"
+          :placeholder="$t('WelcomeMintSetup.placeholder.mint_url')"
+          @keydown.enter.prevent="sanitizeMintUrlAndShowAddDialog"
+          ref="mintInput"
+          class="q-mb-md mint-input url-input"
         />
       </div>
-
-      <!-- Discover mints on nostr (global) -->
-      <div>
-        <MintDiscovery :autoDiscover="true" :allowCreateReview="false" />
+      <div class="add-mint-button">
+        <q-btn
+          flat
+          rounded
+          data-testid="onboarding-add-mint"
+          :disable="addMintData.url.length === 0"
+          @click="
+            addMintData.url.length > 0
+              ? sanitizeMintUrlAndShowAddDialog()
+              : null
+          "
+          class="add-mint-btn"
+        >
+          <q-icon name="add" size="18px" class="q-mr-sm" />
+          <span>{{ $t("MintSettings.add.actions.add_mint.label") }}</span>
+        </q-btn>
       </div>
+    </div>
+
+    <!-- Recovery-specific: search user mints on nostr using seed -->
+    <div v-if="welcome.onboardingPath === 'recover'">
+      <NostrMintRestore
+        :mnemonic="restore.mnemonicToRestore"
+        :is-mnemonic-valid="isSeedValid"
+        :auto-add="true"
+      />
+    </div>
+
+    <!-- Discover mints on nostr (global) -->
+    <div>
+      <MintDiscovery :autoDiscover="true" :allowCreateReview="false" />
     </div>
 
     <AddMintDialog
@@ -114,10 +101,11 @@
       :addMintBlocking="addMintBlocking"
       @add="addMintInternal"
     />
-  </div>
+  </WelcomeSlideScaffold>
 </template>
 
 <script lang="ts">
+import WelcomeSlideScaffold from "src/components/ui/WelcomeSlideScaffold.vue";
 import { computed, ref, watch, onMounted } from "vue";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useRestoreStore } from "src/stores/restore";
@@ -132,7 +120,12 @@ import MintDiscovery from "../../components/MintDiscovery.vue";
 
 export default {
   name: "WelcomeMintSetup",
-  components: { AddMintDialog, NostrMintRestore, MintDiscovery },
+  components: {
+    WelcomeSlideScaffold,
+    AddMintDialog,
+    NostrMintRestore,
+    MintDiscovery,
+  },
   setup() {
     const welcome = useWelcomeStore();
     const restore = useRestoreStore();
@@ -206,17 +199,6 @@ export default {
 </script>
 
 <style scoped>
-.mint-setup-slide {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
-  background: var(--app-welcome-bg);
-  color: white;
-  padding: 40px 20px 20px 20px;
-  box-sizing: border-box;
-}
-
 .mints-section,
 .add-mint-section {
   width: 100%;
@@ -233,7 +215,7 @@ export default {
 
 .mint-item {
   padding: 12px 12px 12px 0px;
-  border-radius: 12px;
+  border-radius: var(--app-radius-lg);
   transition: all 0.2s ease;
   margin-bottom: 8px;
 }
@@ -302,7 +284,7 @@ export default {
 
 .mint-input .q-field__control {
   height: 44px;
-  border-radius: 8px;
+  border-radius: var(--app-radius-md);
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.2s ease;
@@ -316,15 +298,11 @@ export default {
 .mint-input .q-field--focused .q-field__control {
   background: rgba(255, 255, 255, 0.08);
   border-color: color-mix(in srgb, var(--q-primary) 50%, transparent);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--q-primary) 10%, transparent);
+  box-shadow: var(--app-focus-ring);
 }
 
 /* Mobile adjustments */
 @media (max-width: 600px) {
-  .mint-setup-slide {
-    padding: 24px 16px 16px 16px;
-  }
-
   .mints-section,
   .add-mint-section {
     width: 100%;

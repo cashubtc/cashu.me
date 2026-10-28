@@ -4,19 +4,11 @@
     :caption="$t('Settings.menu.nwc.caption')"
   >
     <SettingsSection>
-      <q-item tag="label">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.nostr_wallet_connect.enable_toggle")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.nostr_wallet_connect.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-toggle v-model="enableNwc" color="primary" />
-        </q-item-section>
-      </q-item>
+      <SettingsToggleRow
+        v-model="enableNwc"
+        :label="$t('Settings.nostr_wallet_connect.enable_toggle')"
+        :caption="$t('Settings.nostr_wallet_connect.description')"
+      />
       <template v-if="enableNwc">
         <q-item class="q-pt-none">
           <q-item-section>
@@ -45,16 +37,13 @@
           </q-item-section>
           <q-item-section side>
             <div class="row items-center no-wrap q-gutter-sm">
-              <q-icon
-                name="content_copy"
-                @click="copyText(getConnectionString(connection))"
-                size="xs"
-                color="grey"
-                class="cursor-pointer"
-                ><q-tooltip>{{
-                  $t("Settings.nostr_wallet_connect.connection.copy_tooltip")
-                }}</q-tooltip></q-icon
-              >
+              <CopyButton
+                :value="getConnectionString(connection)"
+                :icon-size="18"
+                :tooltip="
+                  $t('Settings.nostr_wallet_connect.connection.copy_tooltip')
+                "
+              />
               <q-icon
                 name="qr_code"
                 @click="showNWCEntry(connection)"
@@ -83,12 +72,16 @@ import { mapActions, mapWritableState } from "pinia";
 import { useNWCStore } from "src/stores/nwc";
 import NWCDialog from "src/components/NWCDialog.vue";
 import SettingsPageShell from "./SettingsPageShell.vue";
+import CopyButton from "src/components/ui/CopyButton.vue";
+import SettingsToggleRow from "src/components/ui/SettingsToggleRow.vue";
 import SettingsSection from "./SettingsSection.vue";
 
 export default defineComponent({
   name: "NwcSettings",
   mixins: [windowMixin],
   components: {
+    CopyButton,
+    SettingsToggleRow,
     SettingsPageShell,
     SettingsSection,
     NWCDialog,

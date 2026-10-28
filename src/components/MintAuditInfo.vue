@@ -324,7 +324,7 @@ export default {
   background-color: #1e1e1e;
   color: white;
   min-height: 100px;
-  border-radius: 8px;
+  border-radius: var(--app-radius-md);
   padding-top: 0px;
   padding-bottom: 0px;
   padding-left: 15px;

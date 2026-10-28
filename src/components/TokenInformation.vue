@@ -10,99 +10,78 @@
     <!-- Token Details Section -->
     <div class="token-details-section q-mt-md q-mb-lg">
       <!-- Fee (if applicable) -->
-      <div v-if="receiveFee > 0 && !hideFee" class="detail-item q-mb-md">
-        <div class="detail-label">
-          <arrow-down-up-icon size="20" class="detail-icon" />
-          <div class="detail-name">{{ $t("TokenInformation.fee") }}</div>
-        </div>
-        <div class="detail-value">
-          {{ formatCurrency(receiveFee, tokenUnit, true) }}
-        </div>
-      </div>
+      <DetailRow
+        v-if="receiveFee > 0 && !hideFee"
+        class="q-mb-md"
+        :icon="ArrowDownUpIcon"
+        :label="$t('TokenInformation.fee')"
+        :value="formatCurrency(receiveFee, tokenUnit, true)"
+      />
 
       <!-- Unit -->
-      <div v-if="!hideUnit && tokenUnit !== 'sat'" class="detail-item q-mb-md">
-        <div class="detail-label">
-          <coins-icon size="20" class="detail-icon" />
-          <div class="detail-name">{{ $t("TokenInformation.unit") }}</div>
-        </div>
-        <div class="detail-value">
-          {{ tokenUnit === "sat" ? "sat" : tokenUnit.toUpperCase() }}
-        </div>
-      </div>
+      <DetailRow
+        v-if="!hideUnit && tokenUnit !== 'sat'"
+        class="q-mb-md"
+        :icon="CoinsIcon"
+        :label="$t('TokenInformation.unit')"
+        :value="tokenUnit === 'sat' ? 'sat' : tokenUnit.toUpperCase()"
+      />
 
       <!-- Fiat -->
-      <div v-if="showFiat && !hideFiat" class="detail-item q-mb-md">
-        <div class="detail-label">
-          <banknote-icon size="20" class="detail-icon" />
-          <div class="detail-name">{{ $t("TokenInformation.fiat") }}</div>
-        </div>
-        <div class="detail-value">
-          {{ formatCurrency(fiatAmount, bitcoinPriceCurrency, true) }}
-        </div>
-      </div>
+      <DetailRow
+        v-if="showFiat && !hideFiat"
+        class="q-mb-md"
+        :icon="BanknoteIcon"
+        :label="$t('TokenInformation.fiat')"
+        :value="formatCurrency(fiatAmount, bitcoinPriceCurrency, true)"
+      />
 
       <!-- P2PK Lock Status (if locked) -->
-      <div
+      <DetailRow
         v-if="isLocked(proofsToShow) && !hideP2PK"
-        class="detail-item q-mb-md"
-      >
-        <div class="detail-label">
-          <lock-icon size="20" class="detail-icon" />
-          <div class="detail-name">{{ $t("TokenInformation.p2pk") }}</div>
-        </div>
-        <div
-          class="detail-value"
-          :class="{
-            'p2pk-locked-me': isLockedToUs(proofsToShow),
-            'p2pk-locked-warning':
-              isLocked(proofsToShow) && !isLockedToUs(proofsToShow),
-          }"
-        >
-          {{
-            isLockedToUs(proofsToShow)
-              ? $t("TokenInformation.locked_to_you")
-              : $t("TokenInformation.locked")
-          }}
-        </div>
-      </div>
+        class="q-mb-md"
+        :icon="LockIcon"
+        :label="$t('TokenInformation.p2pk')"
+        :value="
+          isLockedToUs(proofsToShow)
+            ? $t('TokenInformation.locked_to_you')
+            : $t('TokenInformation.locked')
+        "
+        :value-class="{
+          'p2pk-locked-me': isLockedToUs(proofsToShow),
+          'p2pk-locked-warning':
+            isLocked(proofsToShow) && !isLockedToUs(proofsToShow),
+        }"
+      />
 
       <!-- Mint URL -->
-      <div v-if="!hideMint" class="detail-item q-mb-md">
-        <div class="detail-label">
-          <landmark-icon size="20" class="detail-icon" />
-          <div class="detail-name">{{ $t("TokenInformation.mint") }}</div>
-        </div>
-        <div class="detail-value">
-          {{ tokenMintUrl }}
-          <q-spinner v-if="addMintBlocking" size="sm" class="q-ml-xs" />
-        </div>
-      </div>
+      <DetailRow
+        v-if="!hideMint"
+        class="q-mb-md"
+        :icon="LandmarkIcon"
+        :label="$t('TokenInformation.mint')"
+      >
+        {{ tokenMintUrl }}
+        <q-spinner v-if="addMintBlocking" size="sm" class="q-ml-xs" />
+      </DetailRow>
 
       <!-- Memo (if available) -->
-      <div v-if="displayMemo && !hideMemo" class="detail-item q-mb-md">
-        <div class="detail-label">
-          <message-circle-icon size="20" class="detail-icon" />
-          <div class="detail-name">{{ $t("TokenInformation.memo") }}</div>
-        </div>
-        <div
-          class="detail-value"
-          style="max-width: 60%; word-break: break-word; white-space: normal"
-        >
-          {{ displayMemo }}
-        </div>
-      </div>
+      <DetailRow
+        v-if="displayMemo && !hideMemo"
+        class="q-mb-md"
+        :icon="MessageCircleIcon"
+        :label="$t('TokenInformation.memo')"
+        :value="displayMemo"
+        value-class="token-memo-value"
+      />
 
       <!-- Payment Request (if applicable) -->
-      <div v-if="paymentRequestId" class="detail-item">
-        <div class="detail-label">
-          <banknote-icon size="20" class="detail-icon" />
-          <div class="detail-name">
-            {{ $t("TokenInformation.payment_request") }}
-          </div>
-        </div>
-        <div class="detail-value">{{ $t("TokenInformation.nostr") }}</div>
-      </div>
+      <DetailRow
+        v-if="paymentRequestId"
+        :icon="BanknoteIcon"
+        :label="$t('TokenInformation.payment_request')"
+        :value="$t('TokenInformation.nostr')"
+      />
     </div>
   </div>
 </template>
@@ -126,17 +105,21 @@ import {
   Coins as CoinsIcon,
   MessageCircle as MessageCircleIcon,
 } from "lucide-vue-next";
+import DetailRow from "src/components/ui/DetailRow.vue";
 
 export default defineComponent({
   name: "TokenInformation",
   mixins: [windowMixin],
-  components: {
-    ArrowDownUpIcon,
-    LandmarkIcon,
-    LockIcon,
-    BanknoteIcon,
-    CoinsIcon,
-    MessageCircleIcon,
+  components: { DetailRow },
+  setup() {
+    return {
+      ArrowDownUpIcon,
+      LandmarkIcon,
+      LockIcon,
+      BanknoteIcon,
+      CoinsIcon,
+      MessageCircleIcon,
+    };
   },
   props: {
     encodedToken: String,
@@ -346,8 +329,14 @@ export default defineComponent({
   width: 100%;
 }
 
+/* The value elements belong to DetailRow, so they are reached through the section. */
+.token-details-section :deep(.token-memo-value) {
+  word-break: break-word;
+  white-space: normal;
+}
+
 /* Golden shine for P2PK locked-to-you */
-.p2pk-locked-me {
+.token-details-section :deep(.p2pk-locked-me) {
   color: #ffd700;
   background: linear-gradient(
     90deg,
@@ -364,7 +353,7 @@ export default defineComponent({
 }
 
 /* Warning colors for P2PK locked (not to us) */
-.p2pk-locked-warning {
+.token-details-section :deep(.p2pk-locked-warning) {
   color: #ff9800;
   text-shadow: 0 0 6px rgba(255, 152, 0, 0.4);
 }

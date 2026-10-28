@@ -8,82 +8,50 @@
       :caption="$t('Settings.advanced.developer.description')"
     >
       <!-- new seed -->
-      <q-item clickable v-ripple @click="confirmMnemonic = true">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.advanced.developer.new_seed.button")
-          }}</q-item-label>
-          <q-item-label caption v-if="!confirmMnemonic">{{
-            $t("Settings.advanced.developer.new_seed.description")
-          }}</q-item-label>
-          <div v-if="confirmMnemonic" class="q-mt-xs">
-            <span class="text-caption">{{
-              $t("Settings.advanced.developer.new_seed.confirm_question")
-            }}</span>
-            <div class="row items-center q-gutter-sm q-mt-xs">
-              <q-btn
-                size="sm"
-                rounded
-                outline
-                class="q-px-md"
-                @click.stop="confirmMnemonic = false"
-                >{{ $t("Settings.advanced.developer.new_seed.cancel") }}</q-btn
-              >
-              <q-btn
-                size="sm"
-                rounded
-                outline
-                class="q-px-md"
-                color="negative"
-                @click.stop="
-                  confirmMnemonic = false;
-                  generateNewMnemonic();
-                "
-                >{{ $t("Settings.advanced.developer.new_seed.confirm") }}</q-btn
-              >
-            </div>
-          </div>
-        </q-item-section>
-        <q-item-section side>
-          <q-icon name="chevron_right" class="settings-menu-chevron" />
-        </q-item-section>
-      </q-item>
+      <SettingsActionRow
+        :label="$t('Settings.advanced.developer.new_seed.button')"
+        :caption="
+          confirmMnemonic
+            ? ''
+            : $t('Settings.advanced.developer.new_seed.description')
+        "
+        @click="confirmMnemonic = true"
+      >
+        <InlineConfirm
+          v-if="confirmMnemonic"
+          :question="
+            $t('Settings.advanced.developer.new_seed.confirm_question')
+          "
+          :cancel-label="$t('Settings.advanced.developer.new_seed.cancel')"
+          :confirm-label="$t('Settings.advanced.developer.new_seed.confirm')"
+          @cancel="confirmMnemonic = false"
+          @confirm="
+            confirmMnemonic = false;
+            generateNewMnemonic();
+          "
+        />
+      </SettingsActionRow>
 
       <!-- remove spent proofs -->
-      <q-item clickable v-ripple @click="checkActiveProofsSpendable">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.advanced.developer.remove_spent.button")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.advanced.developer.remove_spent.description")
-          }}</q-item-label>
-        </q-item-section>
-        <!-- Runs straight away, so an action glyph like the export rows, not a chevron. -->
-        <q-item-section side>
+      <!-- Runs straight away, so an action glyph like the export rows, not a chevron. -->
+      <SettingsActionRow
+        :label="$t('Settings.advanced.developer.remove_spent.button')"
+        :caption="$t('Settings.advanced.developer.remove_spent.description')"
+        @click="checkActiveProofsSpendable"
+      >
+        <template #side>
           <RefreshCwIcon :size="20" class="settings-menu-action" />
-        </q-item-section>
-      </q-item>
+        </template>
+      </SettingsActionRow>
 
       <!-- debug console -->
       <!-- On or off, so a switch bound to its saved state, like every other setting. -->
-      <q-item tag="label">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.advanced.developer.debug_console.button")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.advanced.developer.debug_console.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-toggle
-            :model-value="showDebugConsole"
-            color="primary"
-            @update:model-value="toggleTerminal"
-          />
-        </q-item-section>
-      </q-item>
+      <SettingsToggleRow
+        :model-value="showDebugConsole"
+        :label="$t('Settings.advanced.developer.debug_console.button')"
+        :caption="$t('Settings.advanced.developer.debug_console.description')"
+        @update:model-value="toggleTerminal"
+      />
 
       <!-- keyset counters -->
       <q-item>
@@ -161,169 +129,112 @@
       </q-item>
 
       <!-- unset reserved proofs -->
-      <q-item clickable v-ripple @click="unsetAllReservedProofs">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.advanced.developer.unset_reserved.button")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.advanced.developer.unset_reserved.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
+      <SettingsActionRow
+        :label="$t('Settings.advanced.developer.unset_reserved.button')"
+        :caption="$t('Settings.advanced.developer.unset_reserved.description')"
+        @click="unsetAllReservedProofs"
+      >
+        <template #side>
           <RotateCcwIcon :size="20" class="settings-menu-action" />
-        </q-item-section>
-      </q-item>
+        </template>
+      </SettingsActionRow>
 
       <!-- show onboarding -->
-      <q-item clickable v-ripple @click="showOnboarding">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.advanced.developer.show_onboarding.button")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.advanced.developer.show_onboarding.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-icon name="chevron_right" class="settings-menu-chevron" />
-        </q-item-section>
-      </q-item>
+      <SettingsActionRow
+        :label="$t('Settings.advanced.developer.show_onboarding.button')"
+        :caption="$t('Settings.advanced.developer.show_onboarding.description')"
+        @click="showOnboarding"
+      />
     </SettingsSection>
 
     <SettingsSection>
       <!-- export proofs -->
-      <q-item clickable v-ripple @click="exportActiveProofs">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.advanced.developer.export_proofs.button")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.advanced.developer.export_proofs.description")
-          }}</q-item-label>
-        </q-item-section>
-        <!-- Copies a token straight away, so a copy glyph instead of a navigation chevron. -->
-        <q-item-section side>
+      <!-- Copies a token straight away, so a copy glyph instead of a navigation chevron. -->
+      <SettingsActionRow
+        :label="$t('Settings.advanced.developer.export_proofs.button')"
+        :caption="$t('Settings.advanced.developer.export_proofs.description')"
+        @click="exportActiveProofs"
+      >
+        <template #side>
           <CopyIcon :size="20" class="settings-menu-action" />
-        </q-item-section>
-      </q-item>
+        </template>
+      </SettingsActionRow>
 
       <!-- export wallet data -->
-      <q-item clickable v-ripple @click="exportWalletState">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.advanced.developer.export_wallet.button")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.advanced.developer.export_wallet.description")
-          }}</q-item-label>
-        </q-item-section>
-        <!-- Downloads a file straight away, so a download glyph instead of a navigation chevron. -->
-        <q-item-section side>
+      <!-- Downloads a file straight away, so a download glyph instead of a navigation chevron. -->
+      <SettingsActionRow
+        :label="$t('Settings.advanced.developer.export_wallet.button')"
+        :caption="$t('Settings.advanced.developer.export_wallet.description')"
+        @click="exportWalletState"
+      >
+        <template #side>
           <DownloadIcon :size="20" class="settings-menu-action" />
-        </q-item-section>
-      </q-item>
+        </template>
+      </SettingsActionRow>
 
       <!-- import wallet backup -->
-      <q-item clickable v-ripple @click="confirmImport = true">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.advanced.developer.import_wallet.button")
-          }}</q-item-label>
-          <q-item-label caption v-if="!confirmImport">{{
-            $t("Settings.advanced.developer.import_wallet.description")
-          }}</q-item-label>
-          <div v-if="confirmImport" class="q-mt-xs">
-            <span class="text-caption">{{
-              $t("Settings.advanced.developer.import_wallet.confirm_question")
-            }}</span>
-            <div class="row items-center q-gutter-sm q-mt-xs">
-              <q-btn
-                size="sm"
-                rounded
-                outline
-                class="q-px-md"
-                @click.stop="confirmImport = false"
-                >{{
-                  $t("Settings.advanced.developer.import_wallet.cancel")
-                }}</q-btn
-              >
-              <q-btn
-                size="sm"
-                rounded
-                outline
-                class="q-px-md"
-                color="negative"
-                @click.stop="
-                  confirmImport = false;
-                  browseBackupFile();
-                "
-                >{{
-                  $t("Settings.advanced.developer.import_wallet.confirm")
-                }}</q-btn
-              >
-            </div>
-          </div>
-          <input
-            type="file"
-            ref="fileUpload"
-            accept=".json"
-            style="display: none"
-            @change="onChangeFileUpload"
-          />
-        </q-item-section>
-        <q-item-section side>
-          <q-icon name="chevron_right" class="settings-menu-chevron" />
-        </q-item-section>
-      </q-item>
+      <SettingsActionRow
+        :label="$t('Settings.advanced.developer.import_wallet.button')"
+        :caption="
+          confirmImport
+            ? ''
+            : $t('Settings.advanced.developer.import_wallet.description')
+        "
+        @click="confirmImport = true"
+      >
+        <InlineConfirm
+          v-if="confirmImport"
+          :question="
+            $t('Settings.advanced.developer.import_wallet.confirm_question')
+          "
+          :cancel-label="$t('Settings.advanced.developer.import_wallet.cancel')"
+          :confirm-label="
+            $t('Settings.advanced.developer.import_wallet.confirm')
+          "
+          @cancel="confirmImport = false"
+          @confirm="
+            confirmImport = false;
+            browseBackupFile();
+          "
+        />
+        <input
+          type="file"
+          ref="fileUpload"
+          accept=".json"
+          style="display: none"
+          @change="onChangeFileUpload"
+        />
+      </SettingsActionRow>
     </SettingsSection>
 
     <SettingsSection>
       <!-- reset wallet -->
-      <q-item clickable v-ripple @click="confirmNuke = true">
-        <q-item-section>
-          <q-item-label class="text-negative">{{
-            $t("Settings.advanced.developer.reset_wallet.button")
-          }}</q-item-label>
-          <q-item-label caption v-if="!confirmNuke">{{
-            $t("Settings.advanced.developer.reset_wallet.description")
-          }}</q-item-label>
-          <div v-if="confirmNuke" class="q-mt-xs">
-            <span class="text-caption">{{
-              $t("Settings.advanced.developer.reset_wallet.confirm_question")
-            }}</span>
-            <div class="row items-center q-gutter-sm q-mt-xs">
-              <q-btn
-                size="sm"
-                rounded
-                outline
-                class="q-px-md"
-                @click.stop="confirmNuke = false"
-                >{{
-                  $t("Settings.advanced.developer.reset_wallet.cancel")
-                }}</q-btn
-              >
-              <q-btn
-                size="sm"
-                rounded
-                outline
-                class="q-px-md"
-                color="negative"
-                @click.stop="
-                  confirmNuke = false;
-                  nukeWallet();
-                "
-                >{{
-                  $t("Settings.advanced.developer.reset_wallet.confirm")
-                }}</q-btn
-              >
-            </div>
-          </div>
-        </q-item-section>
-        <q-item-section side>
-          <q-icon name="chevron_right" class="settings-menu-chevron" />
-        </q-item-section>
-      </q-item>
+      <SettingsActionRow
+        :label="$t('Settings.advanced.developer.reset_wallet.button')"
+        :caption="
+          confirmNuke
+            ? ''
+            : $t('Settings.advanced.developer.reset_wallet.description')
+        "
+        danger
+        @click="confirmNuke = true"
+      >
+        <InlineConfirm
+          v-if="confirmNuke"
+          :question="
+            $t('Settings.advanced.developer.reset_wallet.confirm_question')
+          "
+          :cancel-label="$t('Settings.advanced.developer.reset_wallet.cancel')"
+          :confirm-label="
+            $t('Settings.advanced.developer.reset_wallet.confirm')
+          "
+          @cancel="confirmNuke = false"
+          @confirm="
+            confirmNuke = false;
+            nukeWallet();
+          "
+        />
+      </SettingsActionRow>
     </SettingsSection>
   </SettingsPageShell>
 </template>
@@ -343,6 +254,9 @@ import { useWelcomeStore } from "src/stores/welcome";
 import { useStorageStore } from "src/stores/storage";
 import { useNostrUserStore } from "src/stores/nostrUser";
 import SettingsPageShell from "./SettingsPageShell.vue";
+import SettingsActionRow from "src/components/ui/SettingsActionRow.vue";
+import SettingsToggleRow from "src/components/ui/SettingsToggleRow.vue";
+import InlineConfirm from "src/components/ui/InlineConfirm.vue";
 import SettingsSection from "./SettingsSection.vue";
 import {
   Copy as CopyIcon,
@@ -357,6 +271,9 @@ export default defineComponent({
   name: "AdvancedSettings",
   mixins: [windowMixin],
   components: {
+    SettingsActionRow,
+    SettingsToggleRow,
+    InlineConfirm,
     SettingsPageShell,
     SettingsSection,
     CopyIcon,
@@ -559,7 +476,7 @@ export default defineComponent({
 /* Keysets of one mint sit in one tinted group, a hairline between rows. */
 .keyset-counter-list {
   background: var(--app-group-fill);
-  border-radius: 12px;
+  border-radius: var(--app-radius-lg);
   overflow: hidden;
   width: 100%;
 }

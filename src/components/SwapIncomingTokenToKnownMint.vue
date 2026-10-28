@@ -105,7 +105,8 @@
     </div>
 
     <!-- Info Tip about fees -->
-    <ToolTipInfo
+    <AppCallout
+      variant="info"
       class="q-mt-md"
       :text="$t('ReceiveTokenDialog.swap_section.fee_info')"
     />
@@ -119,7 +120,7 @@ import {
   ArrowDown as ArrowDownIcon,
   Landmark as LandmarkIcon,
 } from "lucide-vue-next";
-import ToolTipInfo from "src/components/ToolTipInfo.vue";
+import AppCallout from "src/components/AppCallout.vue";
 import { useMintsStore } from "stores/mints";
 
 export default defineComponent({
@@ -128,7 +129,7 @@ export default defineComponent({
     LandmarkIcon,
     ChooseMint,
     ArrowDownIcon,
-    ToolTipInfo,
+    AppCallout,
   },
   props: {
     swapProcessing: {
@@ -215,7 +216,7 @@ export default defineComponent({
 .swap-section {
   padding: 16px;
   background: var(--app-tint);
-  border-radius: 12px;
+  border-radius: var(--app-radius-lg);
   border: 1px solid var(--app-border);
 }
 

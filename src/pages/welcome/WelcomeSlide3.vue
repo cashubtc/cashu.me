@@ -1,75 +1,65 @@
 <!-- src/components/WelcomeSlide3.vue -->
 <template>
-  <div class="seed-phrase-slide">
-    <!-- Main content area -->
-    <div class="welcome-slide__content">
-      <!-- Header Icon -->
-      <div class="welcome-slide__icon">
-        <div class="app-icon-circle app-icon-circle--xl">
-          <q-icon name="vpn_key" size="2.5em" />
+  <WelcomeSlideScaffold
+    class="seed-phrase-slide"
+    icon="vpn_key"
+    :title="$t('WelcomeSlide3.title')"
+    :text="$t('WelcomeSlide3.text')"
+  >
+    <!-- Seed Phrase Section -->
+    <div class="seed-section">
+      <div class="seed-label">
+        {{ $t("WelcomeSlide3.inputs.seed_phrase.label") }}
+      </div>
+
+      <div class="seed-box">
+        <div class="seed-text">{{ hiddenMnemonic }}</div>
+        <div class="seed-actions">
+          <q-btn
+            flat
+            round
+            dense
+            :icon="hideMnemonic ? 'visibility' : 'visibility_off'"
+            @click="toggleMnemonicVisibility"
+            class="action-btn"
+            size="sm"
+          >
+            <q-tooltip>{{ hideMnemonic ? "Show" : "Hide" }}</q-tooltip>
+          </q-btn>
+          <q-btn
+            flat
+            round
+            dense
+            icon="content_copy"
+            @click="copyText(walletStore.mnemonic)"
+            class="action-btn"
+            size="sm"
+          >
+            <q-tooltip>{{ $t("global.actions.copy.label") }}</q-tooltip>
+          </q-btn>
         </div>
       </div>
 
-      <!-- Title -->
-      <h1 class="welcome-slide__title">{{ $t("WelcomeSlide3.title") }}</h1>
-
-      <!-- Description -->
-      <p class="welcome-slide__description">{{ $t("WelcomeSlide3.text") }}</p>
-
-      <!-- Seed Phrase Section -->
-      <div class="seed-section">
-        <div class="seed-label">
-          {{ $t("WelcomeSlide3.inputs.seed_phrase.label") }}
-        </div>
-
-        <div class="seed-box">
-          <div class="seed-text">{{ hiddenMnemonic }}</div>
-          <div class="seed-actions">
-            <q-btn
-              flat
-              round
-              dense
-              :icon="hideMnemonic ? 'visibility' : 'visibility_off'"
-              @click="toggleMnemonicVisibility"
-              class="action-btn"
-              size="sm"
-            >
-              <q-tooltip>{{ hideMnemonic ? "Show" : "Hide" }}</q-tooltip>
-            </q-btn>
-            <q-btn
-              flat
-              round
-              dense
-              icon="content_copy"
-              @click="copyText(walletStore.mnemonic)"
-              class="action-btn"
-              size="sm"
-            >
-              <q-tooltip>{{ $t("global.actions.copy.label") }}</q-tooltip>
-            </q-btn>
-          </div>
-        </div>
-
-        <p class="seed-caption">
-          {{ $t("WelcomeSlide3.inputs.seed_phrase.caption") }}
-        </p>
-      </div>
-
-      <!-- Checkbox -->
-      <div class="checkbox-section">
-        <q-checkbox
-          v-model="welcomeStore.seedPhraseValidated"
-          data-testid="onboarding-seed-confirmed"
-          :label="$t('WelcomeSlide3.inputs.checkbox.label')"
-          color="primary"
-          class="validation-checkbox"
-        />
-      </div>
+      <p class="seed-caption">
+        {{ $t("WelcomeSlide3.inputs.seed_phrase.caption") }}
+      </p>
     </div>
-  </div>
+
+    <!-- Checkbox -->
+    <div class="checkbox-section">
+      <q-checkbox
+        v-model="welcomeStore.seedPhraseValidated"
+        data-testid="onboarding-seed-confirmed"
+        :label="$t('WelcomeSlide3.inputs.checkbox.label')"
+        color="primary"
+        class="validation-checkbox"
+      />
+    </div>
+  </WelcomeSlideScaffold>
 </template>
 
 <script lang="ts">
+import WelcomeSlideScaffold from "src/components/ui/WelcomeSlideScaffold.vue";
 declare const windowMixin: any;
 import { useWelcomeStore } from "src/stores/welcome";
 import { notifyCopied } from "src/js/notify";
@@ -79,6 +69,7 @@ import { copyToClipboard } from "quasar";
 
 export default {
   name: "WelcomeSlide3",
+  components: { WelcomeSlideScaffold },
   mixins: [windowMixin],
   setup() {
     const welcomeStore = useWelcomeStore();
@@ -131,17 +122,6 @@ export default {
 </script>
 
 <style scoped>
-.seed-phrase-slide {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
-  background: var(--app-welcome-bg);
-  color: white;
-  padding: 40px 20px 20px 20px;
-  box-sizing: border-box;
-}
-
 .seed-section {
   width: 100%;
   margin-bottom: 24px;
@@ -165,7 +145,7 @@ export default {
   position: relative;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
+  border-radius: var(--app-radius-lg);
   padding: 20px;
   margin-bottom: 12px;
   transition: all 0.2s ease;
@@ -232,10 +212,6 @@ export default {
 
 /* Mobile adjustments */
 @media (max-width: 600px) {
-  .seed-phrase-slide {
-    padding: 24px 16px 16px 16px;
-  }
-
   .seed-text {
     font-size: 0.85rem;
     padding-inline-end: 50px;

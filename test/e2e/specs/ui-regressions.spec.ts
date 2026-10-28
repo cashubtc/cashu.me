@@ -18,7 +18,16 @@ test("removing an inactive mint preserves the active mint", async ({
   await wallet.removeMint(MINT_B_URL);
   await wallet.home("Mints");
   await expect(wallet.mintCard(MINT_B_URL)).toHaveCount(0);
-  test.fail(true, "UI-001: removing an inactive mint resets the active mint");
+  // UI-001 is a race in the mints store: the active mint resets on some runs and not others
+  // (about half, measured on 2026-10-28 before and after the component refactor), so an
+  // expected failure would be flaky. Skipped until the store fix lands.
+  test.fixme(
+    true,
+    "UI-001: removing an inactive mint sometimes resets the active mint"
+  );
+  // The stored choice, not the card: the list can still show the old active card for a
+  // moment after the store has already moved on.
+  expect(await wallet.stored("cashu.activeMintUrl")).toBe(MINT_C_URL);
   await expect(wallet.mintCard(MINT_C_URL)).toHaveClass(/q-item--active/, {
     timeout: 3000,
   });

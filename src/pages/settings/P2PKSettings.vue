@@ -32,19 +32,12 @@
         </q-item-section>
       </q-item>
       <!-- Shown once a key exists: before that the toggle could do nothing (R16). -->
-      <q-item v-if="p2pkKeys.length" tag="label">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.p2pk_features.quick_access.toggle")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.p2pk_features.quick_access.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-toggle v-model="showP2PkButtonInDrawer" color="primary" />
-        </q-item-section>
-      </q-item>
+      <SettingsToggleRow
+        v-if="p2pkKeys.length"
+        v-model="showP2PkButtonInDrawer"
+        :label="$t('Settings.p2pk_features.quick_access.toggle')"
+        :caption="$t('Settings.p2pk_features.quick_access.description')"
+      />
     </SettingsSection>
 
     <!-- keys -->
@@ -71,13 +64,7 @@
             <span v-if="key.used" class="app-badge">{{
               $t("Settings.p2pk_features.keys_expansion.used_badge")
             }}</span>
-            <q-icon
-              name="content_copy"
-              @click="copyText(key.publicKey)"
-              size="xs"
-              color="grey"
-              class="cursor-pointer"
-            />
+            <CopyButton :value="key.publicKey" :icon-size="18" />
             <q-icon
               name="qr_code"
               @click="showP2PKKeyEntry(key.publicKey)"
@@ -101,12 +88,16 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import { useP2PKStore } from "src/stores/p2pk";
 import P2PKDialog from "src/components/P2PKDialog.vue";
 import SettingsPageShell from "./SettingsPageShell.vue";
+import CopyButton from "src/components/ui/CopyButton.vue";
+import SettingsToggleRow from "src/components/ui/SettingsToggleRow.vue";
 import SettingsSection from "./SettingsSection.vue";
 
 export default defineComponent({
   name: "P2PKSettings",
   mixins: [windowMixin],
   components: {
+    CopyButton,
+    SettingsToggleRow,
     SettingsPageShell,
     SettingsSection,
     P2PKDialog,

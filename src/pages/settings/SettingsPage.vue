@@ -5,31 +5,14 @@
       :key="group.name"
       class="settings-menu-group q-mb-lg"
     >
-      <q-item
+      <SettingsLinkRow
         v-for="entry in group.entries"
         :key="entry.path"
-        clickable
-        v-ripple
         :to="entry.path"
-        class="settings-menu-item"
-      >
-        <q-item-section avatar>
-          <div class="settings-menu-icon">
-            <component :is="entry.icon" :size="20" />
-          </div>
-        </q-item-section>
-        <q-item-section>
-          <q-item-label class="text-weight-medium">{{
-            $t(`Settings.menu.${entry.key}.title`)
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t(`Settings.menu.${entry.key}.caption`)
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <ChevronRightIcon :size="18" class="settings-menu-chevron" />
-        </q-item-section>
-      </q-item>
+        :icon="entry.icon"
+        :label="$t(`Settings.menu.${entry.key}.title`)"
+        :caption="$t(`Settings.menu.${entry.key}.caption`)"
+      />
     </q-list>
   </SettingsPageShell>
 </template>
@@ -39,6 +22,7 @@ import { defineComponent, markRaw } from "vue";
 import { mapState } from "pinia";
 import { useUiStore } from "src/stores/ui";
 import SettingsPageShell from "./SettingsPageShell.vue";
+import SettingsLinkRow from "src/components/ui/SettingsLinkRow.vue";
 import {
   ArchiveRestore as ArchiveRestoreIcon,
   AtSign as AtSignIcon,
@@ -53,7 +37,6 @@ import {
   Globe as GlobeIcon,
   Terminal as TerminalIcon,
   Info as InfoIcon,
-  ChevronRight as ChevronRightIcon,
 } from "lucide-vue-next";
 
 export default defineComponent({
@@ -61,7 +44,7 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     SettingsPageShell,
-    ChevronRightIcon,
+    SettingsLinkRow,
   },
   computed: {
     ...mapState(useUiStore, ["ndefSupported"]),

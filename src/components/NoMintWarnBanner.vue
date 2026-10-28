@@ -1,34 +1,37 @@
 <template>
   <!-- The standard empty state (src/css/elements.scss): no mint yet, two ways forward. -->
-  <div class="app-empty app-box q-mx-md q-my-lg">
-    <div class="app-icon-circle app-icon-circle--lg">
-      <LandmarkIcon :size="26" />
-    </div>
-    <div class="app-empty__title">{{ $t("NoMintWarnBanner.title") }}</div>
-    <div class="app-empty__text">{{ $t("NoMintWarnBanner.subtitle") }}</div>
-    <q-btn
-      unelevated
-      rounded
-      no-caps
-      color="primary"
-      class="full-width app-empty__action"
-      :label="$t('NoMintWarnBanner.actions.add_mint.label')"
-      @click="handleAddMintClick"
-    />
-    <q-btn
-      flat
-      rounded
-      no-caps
-      color="primary"
-      class="full-width"
-      :label="$t('NoMintWarnBanner.actions.receive.label')"
-      @click="handleReceiveEcash"
-    />
-  </div>
+  <EmptyState
+    class="q-mx-md q-my-lg"
+    :icon="LandmarkIcon"
+    :title="$t('NoMintWarnBanner.title')"
+    :text="$t('NoMintWarnBanner.subtitle')"
+  >
+    <template #actions>
+      <q-btn
+        unelevated
+        rounded
+        no-caps
+        color="primary"
+        class="full-width app-empty__action"
+        :label="$t('NoMintWarnBanner.actions.add_mint.label')"
+        @click="handleAddMintClick"
+      />
+      <q-btn
+        flat
+        rounded
+        no-caps
+        color="primary"
+        class="full-width"
+        :label="$t('NoMintWarnBanner.actions.receive.label')"
+        @click="handleReceiveEcash"
+      />
+    </template>
+  </EmptyState>
 </template>
 <script lang="ts">
 import { Landmark as LandmarkIcon } from "lucide-vue-next";
-import { defineComponent, ref } from "vue";
+import { defineComponent, markRaw } from "vue";
+import EmptyState from "src/components/ui/EmptyState.vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useUiStore } from "src/stores/ui";
 import { mapWritableState } from "pinia";
@@ -38,7 +41,7 @@ import { sumProofAmounts } from "src/js/proofs";
 
 export default defineComponent({
   name: "NoMintWarnBanner",
-  components: { LandmarkIcon },
+  components: { EmptyState },
   mixins: [windowMixin],
   props: {
     proofs: Array,
@@ -46,6 +49,9 @@ export default defineComponent({
     mints: Array,
     tickerShort: String,
     activeMintUrl: String,
+  },
+  data() {
+    return { LandmarkIcon: markRaw(LandmarkIcon) };
   },
   computed: {
     ...mapWritableState(useUiStore, [

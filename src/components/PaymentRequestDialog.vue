@@ -12,21 +12,10 @@
         class="display-token-fullscreen"
       >
         <!-- Header -->
-        <div class="row items-center q-pa-md sheet-column-header">
-          <q-btn
-            v-close-popup
-            flat
-            round
-            icon="close"
-            color="grey"
-            class="floating-close-btn app-icon-btn"
-          />
-          <div class="col text-center fixed-title-height">
-            <q-item-label class="dialog-header">
-              {{ $t("PaymentRequestDialog.payment_request.caption") }}
-            </q-item-label>
-          </div>
-        </div>
+        <FullscreenDialogHeader
+          :title="$t('PaymentRequestDialog.payment_request.caption')"
+          balanced
+        />
 
         <!-- Earlier requests: a pager under the title, only once there is more than one. -->
         <div
@@ -59,15 +48,7 @@
           <q-card-section class="q-pa-none">
             <div v-if="showPRKData" class="row justify-center q-mb-md">
               <div class="col-12 q-px-md" style="max-width: var(--app-column)">
-                <q-responsive :ratio="1" class="app-qr">
-                  <vue-qrcode
-                    :value="showPRKData"
-                    :options="{ width: 400 }"
-                    class="rounded-borders"
-                    style="width: 100%"
-                  >
-                  </vue-qrcode>
-                </q-responsive>
+                <QrBlock :value="showPRKData" />
               </div>
             </div>
 
@@ -283,7 +264,8 @@ import {
 } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
-import VueQrcode from "@chenfengyuan/vue-qrcode";
+import QrBlock from "src/components/QrBlock.vue";
+import FullscreenDialogHeader from "src/components/ui/FullscreenDialogHeader.vue";
 import {
   decodePaymentRequest,
   PaymentRequestTransportType,
@@ -319,7 +301,8 @@ export default defineComponent({
     ChevronDownIcon,
     LandmarkIcon,
     XIcon,
-    VueQrcode,
+    QrBlock,
+    FullscreenDialogHeader,
     BottomSheet,
     SheetOption,
     PaymentRequestPayments,

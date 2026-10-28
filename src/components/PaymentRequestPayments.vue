@@ -6,46 +6,16 @@
       </q-item-label>
     </div>
     <q-list v-else>
-      <q-item
+      <ActivityRow
         v-for="payment in paginatedPayments"
         :key="payment.id"
-        clickable
-        v-ripple
-        class="q-py-sm activity-row"
+        :icon="CoinsIcon"
+        direction="in"
+        :label="payment.label || 'Ecash'"
+        :amount="'+' + formatCurrency(payment.amount, payment.unit)"
+        :caption="formattedDate(payment.date)"
         @click="showTokenDialog(payment)"
-      >
-        <q-item-section avatar class="q-pr-md" style="min-width: 40px">
-          <q-avatar size="40px" class="activity-row__avatar">
-            <CoinsIcon class="activity-row__icon" />
-            <span
-              class="activity-row__direction activity-row__direction--in"
-              aria-hidden="true"
-            >
-              <ArrowDownLeftIcon :size="13" :stroke-width="2.75" />
-            </span>
-          </q-avatar>
-        </q-item-section>
-        <q-item-section>
-          <q-item-label class="row items-center justify-between">
-            <div class="col text-left">
-              <span class="activity-row__label">
-                {{ payment.label || "Ecash" }}
-              </span>
-            </div>
-            <div class="text-right">
-              <div
-                class="activity-row__amount activity-row__amount--in"
-                dir="ltr"
-              >
-                +{{ formatCurrency(payment.amount, payment.unit) }}
-              </div>
-            </div>
-          </q-item-label>
-          <q-item-label caption class="q-mt-none">
-            {{ formattedDate(payment.date) }}
-          </q-item-label>
-        </q-item-section>
-      </q-item>
+      />
     </q-list>
     <div v-if="maxPages > 1" class="text-center q-mt-sm">
       <q-pagination
@@ -59,20 +29,18 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent, PropType, markRaw } from "vue";
 import { mapWritableState } from "pinia";
 import { HistoryToken } from "src/stores/tokens";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import token from "src/js/token";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
-import {
-  ArrowDownLeft as ArrowDownLeftIcon,
-  Coins as CoinsIcon,
-} from "lucide-vue-next";
+import { Coins as CoinsIcon } from "lucide-vue-next";
+import ActivityRow from "src/components/ActivityRow.vue";
 
 export default defineComponent({
   name: "PaymentRequestPayments",
-  components: { ArrowDownLeftIcon, CoinsIcon },
+  components: { ActivityRow },
   props: {
     payments: {
       type: Array as PropType<HistoryToken[]>,
@@ -88,6 +56,7 @@ export default defineComponent({
   data() {
     return {
       currentPage: 1,
+      CoinsIcon: markRaw(CoinsIcon),
     };
   },
   computed: {

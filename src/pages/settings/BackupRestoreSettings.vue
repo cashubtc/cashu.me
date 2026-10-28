@@ -28,15 +28,12 @@
                 @click="toggleMnemonicVisibility"
                 ><EyeIcon :size="20"
               /></q-btn>
-              <q-btn
-                flat
-                dense
-                round
+              <CopyButton
+                :value="mnemonic"
                 color="primary"
+                size="md"
                 data-testid="copy-seed"
-                @click="copyText(mnemonic)"
-                ><CopyIcon :size="20"
-              /></q-btn>
+              />
             </template>
           </q-input>
         </q-item-section>
@@ -45,35 +42,36 @@
 
     <!-- restore -->
     <SettingsSection>
-      <q-item clickable v-ripple to="/restore">
-        <q-item-section>
-          <q-item-label class="text-weight-regular">{{
-            $t("Settings.backup_restore.restore_ecash.title")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.backup_restore.restore_ecash.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-icon name="chevron_right" class="settings-menu-chevron" />
-        </q-item-section>
-      </q-item>
+      <SettingsActionRow
+        to="/restore"
+        label-class="text-weight-regular"
+        :label="$t('Settings.backup_restore.restore_ecash.title')"
+        :caption="$t('Settings.backup_restore.restore_ecash.description')"
+      />
     </SettingsSection>
   </SettingsPageShell>
 </template>
 
 <script lang="ts">
-import { Copy as CopyIcon, Eye as EyeIcon } from "lucide-vue-next";
+import { Eye as EyeIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapState } from "pinia";
 import { useWalletStore } from "src/stores/wallet";
 import SettingsPageShell from "./SettingsPageShell.vue";
 import SettingsSection from "./SettingsSection.vue";
+import CopyButton from "src/components/ui/CopyButton.vue";
+import SettingsActionRow from "src/components/ui/SettingsActionRow.vue";
 
 export default defineComponent({
   name: "BackupRestoreSettings",
   mixins: [windowMixin],
-  components: { CopyIcon, EyeIcon, SettingsPageShell, SettingsSection },
+  components: {
+    CopyButton,
+    EyeIcon,
+    SettingsActionRow,
+    SettingsPageShell,
+    SettingsSection,
+  },
   data: function () {
     return {
       hideMnemonic: true,

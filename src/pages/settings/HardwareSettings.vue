@@ -7,95 +7,34 @@
       :title="$t('Settings.hardware_features.webnfc.title')"
       :caption="$t('Settings.hardware_features.webnfc.description')"
     >
-      <q-item
-        clickable
-        @click="nfcEncoding = 'text'"
-        :active="nfcEncoding === 'text'"
-        active-class="text-weight-bold"
-      >
-        <q-item-section avatar>
-          <q-icon
-            :color="nfcEncoding === 'text' ? 'primary' : 'grey'"
-            :name="
-              nfcEncoding === 'text' ? 'check_circle' : 'radio_button_unchecked'
-            "
-          />
-        </q-item-section>
-        <q-item-section style="word-break: break-word">
-          <q-item-label>{{
-            $t("Settings.hardware_features.webnfc.text.title")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.hardware_features.webnfc.text.description")
-          }}</q-item-label>
-        </q-item-section>
-      </q-item>
-      <q-item
-        clickable
-        @click="nfcEncoding = 'weburl'"
-        :active="nfcEncoding === 'weburl'"
-        active-class="text-weight-bold"
-      >
-        <q-item-section avatar>
-          <q-icon
-            :color="nfcEncoding === 'weburl' ? 'primary' : 'grey'"
-            :name="
-              nfcEncoding === 'weburl'
-                ? 'check_circle'
-                : 'radio_button_unchecked'
-            "
-          />
-        </q-item-section>
-        <q-item-section style="word-break: break-word">
-          <q-item-label>{{
-            $t("Settings.hardware_features.webnfc.weburl.title")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.hardware_features.webnfc.weburl.description")
-          }}</q-item-label>
-        </q-item-section>
-      </q-item>
-      <q-item
-        clickable
-        @click="nfcEncoding = 'binary'"
-        :active="nfcEncoding === 'binary'"
-        active-class="text-weight-bold"
-      >
-        <q-item-section avatar>
-          <q-icon
-            :color="nfcEncoding === 'binary' ? 'primary' : 'grey'"
-            :name="
-              nfcEncoding === 'binary'
-                ? 'check_circle'
-                : 'radio_button_unchecked'
-            "
-          />
-        </q-item-section>
-        <q-item-section style="word-break: break-word">
-          <q-item-label>{{
-            $t("Settings.hardware_features.webnfc.binary.title")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.hardware_features.webnfc.binary.description")
-          }}</q-item-label>
-        </q-item-section>
-      </q-item>
+      <SettingsRadioRow
+        :selected="nfcEncoding === 'text'"
+        :label="$t('Settings.hardware_features.webnfc.text.title')"
+        :caption="$t('Settings.hardware_features.webnfc.text.description')"
+        @select="nfcEncoding = 'text'"
+      />
+      <SettingsRadioRow
+        :selected="nfcEncoding === 'weburl'"
+        :label="$t('Settings.hardware_features.webnfc.weburl.title')"
+        :caption="$t('Settings.hardware_features.webnfc.weburl.description')"
+        @select="nfcEncoding = 'weburl'"
+      />
+      <SettingsRadioRow
+        :selected="nfcEncoding === 'binary'"
+        :label="$t('Settings.hardware_features.webnfc.binary.title')"
+        :caption="$t('Settings.hardware_features.webnfc.binary.description')"
+        @select="nfcEncoding = 'binary'"
+      />
     </SettingsSection>
 
     <SettingsSection>
-      <q-item tag="label">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.hardware_features.webnfc.quick_access.toggle")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.hardware_features.webnfc.quick_access.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-toggle v-model="showNfcButtonInDrawer" color="primary" />
-        </q-item-section>
-      </q-item>
+      <SettingsToggleRow
+        v-model="showNfcButtonInDrawer"
+        :label="$t('Settings.hardware_features.webnfc.quick_access.toggle')"
+        :caption="
+          $t('Settings.hardware_features.webnfc.quick_access.description')
+        "
+      />
     </SettingsSection>
   </SettingsPageShell>
 </template>
@@ -106,12 +45,16 @@ import { mapState, mapWritableState } from "pinia";
 import { useSettingsStore } from "src/stores/settings";
 import { useUiStore } from "src/stores/ui";
 import SettingsPageShell from "./SettingsPageShell.vue";
+import SettingsRadioRow from "src/components/ui/SettingsRadioRow.vue";
+import SettingsToggleRow from "src/components/ui/SettingsToggleRow.vue";
 import SettingsSection from "./SettingsSection.vue";
 
 export default defineComponent({
   name: "HardwareSettings",
   mixins: [windowMixin],
   components: {
+    SettingsRadioRow,
+    SettingsToggleRow,
     SettingsPageShell,
     SettingsSection,
   },

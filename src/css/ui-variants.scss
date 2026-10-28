@@ -1,4 +1,4 @@
-// Surface style variations, previewed at /ui (src/pages/UiKitPage.vue) and switchable on any
+// Surface style variations, previewed at /design-system (src/pages/DesignSystemPage.vue) and switchable on any
 // page with ?ui=<id>. Each one only sets the container tokens from base.scss, so a variation
 // that wins can become the default by moving its values there. "current" (the default,
 // Tonal) sets nothing.
@@ -335,11 +335,11 @@ html[data-ui-variant="rounded"] body.body--light {
 }
 html[data-ui-variant="rounded"] .mint-card,
 html[data-ui-variant="rounded"] .sheet-option {
-  border-radius: 20px;
+  border-radius: var(--app-radius-xl);
 }
 html[data-ui-variant="rounded"] .settings-menu-group,
 html[data-ui-variant="rounded"] .settings-card {
-  border-radius: 20px;
+  border-radius: var(--app-radius-xl);
 }
 html[data-ui-variant="rounded"] .q-field--outlined .q-field__control,
 html[data-ui-variant="rounded"] .q-field--outlined .q-field__control:before,

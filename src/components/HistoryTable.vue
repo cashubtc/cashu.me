@@ -1,121 +1,59 @@
 <template>
   <div class="history-table">
     <q-list>
-      <q-item
+      <ActivityRow
         v-for="transaction in paginatedTransactions"
         :key="getTransactionKey(transaction)"
         data-testid="history-row"
-        clickable
-        v-ripple
-        class="q-py-sm activity-row"
+        details-testid="history-details"
+        :icon="getTransactionIcon(transaction)"
+        :direction="transaction.amount >= 0 ? 'in' : 'out'"
+        :label="getTransactionLabel(transaction)"
+        :amount="
+          (transaction.amount >= 0 ? '+' : '\u2212') +
+          formatCurrency(Math.abs(transaction.amount), transaction.unit)
+        "
+        :pending="transaction.status === 'pending'"
+        :caption="formattedDate(transaction.date)"
+        caption-class="text-grey-6"
+        @details-click="showTransactionDialog(transaction)"
       >
-        <!-- Icon Section -->
-        <q-item-section avatar class="q-pr-md" style="min-width: 40px">
-          <q-avatar size="40px" class="activity-row__avatar">
-            <CoinsIcon
-              v-if="isEcashTransaction(transaction)"
-              class="activity-row__icon"
-            />
-            <BitcoinIcon
-              v-else-if="isOnchainTransaction(transaction)"
-              class="activity-row__icon"
-            />
-            <ZapIcon v-else class="activity-row__icon" />
-            <span
-              class="activity-row__direction"
-              :class="
-                transaction.amount >= 0 ? 'activity-row__direction--in' : ''
-              "
-              aria-hidden="true"
-            >
-              <ArrowDownLeftIcon
-                v-if="transaction.amount >= 0"
-                :size="13"
-                :stroke-width="2.75"
-              />
-              <ArrowUpRightIcon v-else :size="13" :stroke-width="2.75" />
-            </span>
-          </q-avatar>
-        </q-item-section>
-
-        <!-- Main Content Section -->
-        <q-item-section
-          data-testid="history-details"
-          @click="showTransactionDialog(transaction)"
-        >
-          <q-item-label class="row items-center justify-between">
-            <!-- Transaction Label -->
-            <div class="col text-left">
-              <span class="activity-row__label">
-                {{ getTransactionLabel(transaction) }}
-              </span>
-            </div>
-
-            <!-- Amount -->
-            <div class="text-right">
-              <div
-                class="activity-row__amount"
-                dir="ltr"
-                :class="{
-                  'activity-row__amount--in':
-                    transaction.amount >= 0 && transaction.status !== 'pending',
-                  'activity-row__amount--pending':
-                    transaction.status === 'pending',
-                }"
-              >
-                {{ transaction.amount >= 0 ? "+" : "\u2212"
-                }}{{
-                  formatCurrency(Math.abs(transaction.amount), transaction.unit)
-                }}
-              </div>
-            </div>
-          </q-item-label>
-
-          <q-item-label
-            caption
-            class="q-mt-none row items-center justify-between"
+        <template #caption-end>
+          <!-- Status, with the check action for pending rows -->
+          <div
+            v-if="transaction.status === 'pending'"
+            class="row items-center no-wrap text-grey-6 text-caption"
           >
-            <!-- Date -->
-            <div class="text-grey-6">
-              {{ formattedDate(transaction.date) }}
-            </div>
-
-            <!-- Status, with the check action for pending rows -->
-            <div
-              v-if="transaction.status === 'pending'"
-              class="row items-center no-wrap text-grey-6 text-caption"
+            <q-btn
+              flat
+              dense
+              round
+              data-testid="history-check"
+              :icon="
+                transaction.longPressActive ? 'arrow_circle_down' : 'schedule'
+              "
+              @click.stop="
+                transaction.longPressActive
+                  ? handleLongPress(transaction)
+                  : checkTransactionStatus(transaction)
+              "
+              @mousedown="startLongPress(transaction)"
+              @mouseup="endLongPress(transaction)"
+              @touchstart="startLongPress(transaction)"
+              @touchend="endLongTap(transaction)"
+              class="cursor-pointer history-check-btn"
+              size="sm"
             >
-              <q-btn
-                flat
-                dense
-                round
-                data-testid="history-check"
-                :icon="
-                  transaction.longPressActive ? 'arrow_circle_down' : 'schedule'
-                "
-                @click.stop="
-                  transaction.longPressActive
-                    ? handleLongPress(transaction)
-                    : checkTransactionStatus(transaction)
-                "
-                @mousedown="startLongPress(transaction)"
-                @mouseup="endLongPress(transaction)"
-                @touchstart="startLongPress(transaction)"
-                @touchend="endLongTap(transaction)"
-                class="cursor-pointer history-check-btn"
-                size="sm"
-              >
-                <q-tooltip>{{
-                  transaction.longPressActive
-                    ? $t("HistoryTable.actions.receive.tooltip_text")
-                    : $t("HistoryTable.actions.check_status.tooltip_text")
-                }}</q-tooltip>
-              </q-btn>
-              <span>{{ $t("common.pending") }}</span>
-            </div>
-          </q-item-label>
-        </q-item-section>
-      </q-item>
+              <q-tooltip>{{
+                transaction.longPressActive
+                  ? $t("HistoryTable.actions.receive.tooltip_text")
+                  : $t("HistoryTable.actions.check_status.tooltip_text")
+              }}</q-tooltip>
+            </q-btn>
+            <span>{{ $t("common.pending") }}</span>
+          </div>
+        </template>
+      </ActivityRow>
       <!-- Nothing matches: one row-height message in the list. -->
       <div
         v-if="paginatedTransactions.length === 0"
@@ -200,12 +138,11 @@ import { useUiStore } from "src/stores/ui";
 import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import token from "../js/token";
 import { notify } from "src/js/notify";
+import ActivityRow from "src/components/ActivityRow.vue";
 import {
   Bitcoin as BitcoinIcon,
   Coins as CoinsIcon,
   Zap as ZapIcon,
-  ArrowDownLeft as ArrowDownLeftIcon,
-  ArrowUpRight as ArrowUpRightIcon,
 } from "lucide-vue-next";
 import { PaymentMethod, UnifiedTransactionType } from "src/stores/walletTypes";
 import { mintQuoteForHistoryInvoice } from "src/js/invoice-history";
@@ -213,11 +150,7 @@ import { mintQuoteForHistoryInvoice } from "src/js/invoice-history";
 export default defineComponent({
   name: "HistoryTable",
   components: {
-    CoinsIcon,
-    BitcoinIcon,
-    ZapIcon,
-    ArrowDownLeftIcon,
-    ArrowUpRightIcon,
+    ActivityRow,
   },
   mixins: [windowMixin],
   props: {},
@@ -414,9 +347,9 @@ export default defineComponent({
     },
 
     getTransactionIcon(transaction) {
-      return transaction.type === UnifiedTransactionType.Lightning
-        ? "flash_on"
-        : "account_balance_wallet";
+      if (this.isEcashTransaction(transaction)) return CoinsIcon;
+      if (this.isOnchainTransaction(transaction)) return BitcoinIcon;
+      return ZapIcon;
     },
 
     getTransactionIconColor(transaction) {

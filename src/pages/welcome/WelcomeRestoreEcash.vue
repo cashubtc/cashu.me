@@ -1,39 +1,25 @@
 <template>
-  <div class="restore-ecash-slide">
-    <!-- Main content area -->
-    <div class="welcome-slide__content">
-      <!-- Header Icon -->
-      <div class="welcome-slide__icon">
-        <div class="app-icon-circle app-icon-circle--xl">
-          <q-icon name="restore" size="2.5em" />
-        </div>
-      </div>
-
-      <!-- Title -->
-      <h1 class="welcome-slide__title">
-        {{ $t("WelcomeRestoreEcash.title") }}
-      </h1>
-
-      <!-- Description -->
-      <p class="welcome-slide__description">
-        {{ $t("WelcomeRestoreEcash.text") }}
-      </p>
-
-      <!-- Restore View Component -->
-      <div class="restore-content">
-        <RestoreView :onboarding="true" />
-      </div>
+  <WelcomeSlideScaffold
+    class="restore-ecash-slide"
+    icon="restore"
+    :title="$t('WelcomeRestoreEcash.title')"
+    :text="$t('WelcomeRestoreEcash.text')"
+  >
+    <!-- Restore View Component -->
+    <div class="restore-content">
+      <RestoreView :onboarding="true" />
     </div>
-  </div>
+  </WelcomeSlideScaffold>
 </template>
 
 <script lang="ts">
+import WelcomeSlideScaffold from "src/components/ui/WelcomeSlideScaffold.vue";
 import RestoreView from "src/components/RestoreView.vue";
 import { useWelcomeStore } from "src/stores/welcome";
 
 export default {
   name: "WelcomeRestoreEcash",
-  components: { RestoreView },
+  components: { WelcomeSlideScaffold, RestoreView },
   setup() {
     const welcome = useWelcomeStore();
     return { welcome };
@@ -42,17 +28,6 @@ export default {
 </script>
 
 <style scoped>
-.restore-ecash-slide {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
-  background: var(--app-welcome-bg);
-  color: white;
-  padding: 40px 20px 20px 20px;
-  box-sizing: border-box;
-}
-
 .restore-content {
   width: 100%;
   max-width: 500px;
@@ -78,10 +53,6 @@ export default {
 
 /* Mobile adjustments */
 @media (max-width: 600px) {
-  .restore-ecash-slide {
-    padding: 24px 16px 16px 16px;
-  }
-
   .restore-content {
     width: 100%;
   }

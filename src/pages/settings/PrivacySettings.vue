@@ -9,101 +9,48 @@
       :caption="$t('Settings.privacy.description')"
     >
       <!-- nostr mint backup -->
-      <q-item tag="label">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.experimental.nostr_mint_backup.toggle")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.experimental.nostr_mint_backup.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-toggle
-            v-model="nostrMintBackupEnabled"
-            color="primary"
-            @update:model-value="onNostrMintBackupToggle"
-          />
-        </q-item-section>
-      </q-item>
+      <SettingsToggleRow
+        v-model="nostrMintBackupEnabled"
+        :label="$t('Settings.experimental.nostr_mint_backup.toggle')"
+        :caption="$t('Settings.experimental.nostr_mint_backup.description')"
+        @update:model-value="onNostrMintBackupToggle"
+      />
 
       <!-- check incoming invoices -->
-      <q-item tag="label">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.privacy.check_incoming.toggle")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.privacy.check_incoming.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-toggle v-model="checkIncomingInvoices" color="primary" />
-        </q-item-section>
-      </q-item>
+      <SettingsToggleRow
+        v-model="checkIncomingInvoices"
+        :label="$t('Settings.privacy.check_incoming.toggle')"
+        :caption="$t('Settings.privacy.check_incoming.description')"
+      />
 
       <!-- check pending invoices on startup -->
-      <q-item tag="label">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.privacy.check_startup.toggle")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.privacy.check_startup.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-toggle v-model="checkInvoicesOnStartup" color="primary" />
-        </q-item-section>
-      </q-item>
+      <SettingsToggleRow
+        v-model="checkInvoicesOnStartup"
+        :label="$t('Settings.privacy.check_startup.toggle')"
+        :caption="$t('Settings.privacy.check_startup.description')"
+      />
 
       <!-- periodically check incoming invoices -->
-      <q-item tag="label">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.privacy.check_all.toggle")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.privacy.check_all.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-toggle
-            v-model="periodicallyCheckIncomingInvoices"
-            color="primary"
-          />
-        </q-item-section>
-      </q-item>
+      <SettingsToggleRow
+        v-model="periodicallyCheckIncomingInvoices"
+        :label="$t('Settings.privacy.check_all.toggle')"
+        :caption="$t('Settings.privacy.check_all.description')"
+      />
 
       <!-- check outgoing token state -->
-      <q-item tag="label">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.privacy.check_sent.toggle")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.privacy.check_sent.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-toggle v-model="checkSentTokens" color="primary" />
-        </q-item-section>
-      </q-item>
+      <SettingsToggleRow
+        v-model="checkSentTokens"
+        :label="$t('Settings.privacy.check_sent.toggle')"
+        :caption="$t('Settings.privacy.check_sent.description')"
+      />
 
       <!-- websockets -->
-      <q-item tag="label" v-if="checkIncomingInvoices || checkSentTokens">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.privacy.websockets.toggle")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.privacy.websockets.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-toggle v-model="useWebsockets" color="primary" />
-        </q-item-section>
-      </q-item>
+      <SettingsToggleRow
+        v-if="checkIncomingInvoices || checkSentTokens"
+        v-model="useWebsockets"
+        :label="$t('Settings.privacy.websockets.toggle')"
+        :caption="$t('Settings.privacy.websockets.description')"
+      />
     </SettingsSection>
 
     <!-- bitcoin price -->
@@ -111,16 +58,10 @@
       :title="$t('Settings.privacy.bitcoin_price.title')"
       :caption="$t('Settings.privacy.bitcoin_price.description')"
     >
-      <q-item tag="label">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.privacy.bitcoin_price.toggle")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-toggle v-model="getBitcoinPrice" color="primary" />
-        </q-item-section>
-      </q-item>
+      <SettingsToggleRow
+        v-model="getBitcoinPrice"
+        :label="$t('Settings.privacy.bitcoin_price.toggle')"
+      />
       <template v-if="getBitcoinPrice">
         <q-item>
           <q-item-section>
@@ -155,6 +96,7 @@ import { useSettingsStore } from "src/stores/settings";
 import { useNostrMintBackupStore } from "src/stores/nostrMintBackup";
 import { usePriceStore } from "src/stores/price";
 import SettingsPageShell from "./SettingsPageShell.vue";
+import SettingsToggleRow from "src/components/ui/SettingsToggleRow.vue";
 import SettingsSection from "./SettingsSection.vue";
 import SheetSelect from "src/components/SheetSelect.vue";
 
@@ -162,6 +104,7 @@ export default defineComponent({
   name: "PrivacySettings",
   mixins: [windowMixin],
   components: {
+    SettingsToggleRow,
     SettingsPageShell,
     SettingsSection,
     SheetSelect,

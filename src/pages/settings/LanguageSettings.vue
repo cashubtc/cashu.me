@@ -4,28 +4,14 @@
     :caption="$t('Settings.menu.language.caption')"
   >
     <SettingsSection>
-      <q-item
+      <SettingsRadioRow
         v-for="option in languageOptions"
         :key="option.value"
-        clickable
-        @click="selectLanguage(option.value)"
-        :active="activeLocale === option.value"
+        :selected="activeLocale === option.value"
+        :label="option.label"
         active-class="text-weight-bold text-primary"
-      >
-        <q-item-section avatar>
-          <q-icon
-            :color="activeLocale === option.value ? 'primary' : 'grey'"
-            :name="
-              activeLocale === option.value
-                ? 'check_circle'
-                : 'radio_button_unchecked'
-            "
-          />
-        </q-item-section>
-        <q-item-section>
-          <q-item-label>{{ option.label }}</q-item-label>
-        </q-item-section>
-      </q-item>
+        @select="selectLanguage(option.value)"
+      />
     </SettingsSection>
   </SettingsPageShell>
 </template>
@@ -33,12 +19,14 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import SettingsPageShell from "./SettingsPageShell.vue";
+import SettingsRadioRow from "src/components/ui/SettingsRadioRow.vue";
 import SettingsSection from "./SettingsSection.vue";
 
 export default defineComponent({
   name: "LanguageSettings",
   mixins: [windowMixin],
   components: {
+    SettingsRadioRow,
     SettingsPageShell,
     SettingsSection,
   },

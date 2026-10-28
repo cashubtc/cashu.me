@@ -452,7 +452,7 @@ export default defineComponent({
 <style scoped>
 .bar-chart-container {
   background-color: #1e1e1e;
-  border-radius: 8px;
+  border-radius: var(--app-radius-md);
   padding-bottom: 6px;
   padding-top: 20px;
   padding-left: 20px;

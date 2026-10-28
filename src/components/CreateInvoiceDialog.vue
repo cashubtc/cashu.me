@@ -10,45 +10,34 @@
     <q-card class="q-pa-none q-pt-none qcard">
       <!-- enter invoice amount (full-screen) -->
       <div
-        class="column fit send-fullscreen"
+        class="column fit overflow-hidden send-fullscreen"
         :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
       >
         <!-- Header -->
-        <div class="row items-center q-pa-md sheet-column-header">
-          <q-btn
-            v-close-popup
-            flat
-            round
-            icon="close"
-            color="grey"
-            class="floating-close-btn app-icon-btn"
-          />
-          <div class="col text-center fixed-title-height">
-            <q-item-label
-              class="dialog-header"
-              :class="$q.dark.isActive ? 'text-white' : 'text-black'"
-            >
-              {{
-                isOnchain
-                  ? $t("CreateInvoiceDialog.onchain_title")
-                  : isBolt12 && !showNpubCashPreview
-                  ? $t("CreateInvoiceDialog.bolt12_title")
-                  : $t("InvoiceDetailDialog.title")
-              }}
-            </q-item-label>
-          </div>
-          <div class="row items-center no-wrap sheet-header-actions">
-            <q-btn
-              flat
-              round
-              no-caps
-              color="primary"
-              class="sheet-unit-toggle"
-              @click="toggleUnit()"
-              :label="activeUnitLabel"
-            />
-          </div>
-        </div>
+        <FullscreenDialogHeader
+          :title="
+            isOnchain
+              ? $t('CreateInvoiceDialog.onchain_title')
+              : isBolt12 && !showNpubCashPreview
+              ? $t('CreateInvoiceDialog.bolt12_title')
+              : $t('InvoiceDetailDialog.title')
+          "
+          balanced
+        >
+          <template #actions>
+            <div class="row items-center no-wrap sheet-header-actions">
+              <q-btn
+                flat
+                round
+                no-caps
+                color="primary"
+                class="sheet-unit-toggle"
+                @click="toggleUnit()"
+                :label="activeUnitLabel"
+              />
+            </div>
+          </template>
+        </FullscreenDialogHeader>
 
         <!-- Mint selection -->
         <div class="row justify-center">
@@ -134,15 +123,7 @@
                     class="qr-container cursor-pointer"
                     @click="copyQrPreview"
                   >
-                    <q-responsive :ratio="1" class="app-qr">
-                      <vue-qrcode
-                        :value="qrPreview.value"
-                        :options="{ width: 400 }"
-                        class="rounded-borders"
-                        style="width: 100%"
-                      >
-                      </vue-qrcode>
-                    </q-responsive>
+                    <QrBlock :value="qrPreview.value" />
                   </div>
                   <div
                     class="q-mt-sm text-center text-grey-7 qr-copy-text app-mono app-mono--wrap cursor-pointer"
@@ -193,7 +174,6 @@
                 :muted="showOnchainAmountWarning"
                 :show-fiat-conversion="!showOnchainAmountWarning"
                 @enter="requestMintButton"
-                @fiat-mode-changed="fiatKeyboardMode = $event"
               >
                 <template #overlay>
                   <div
@@ -221,26 +201,12 @@
         <!-- Numeric keypad and Secondary Actions -->
         <div class="bottom-panel column justify-end">
           <!-- While the invoice is being created, only the busy button reads as active. -->
-          <div
-            class="keypad-wrapper"
-            :class="{ 'keypad-wrapper--busy': createInvoiceButtonBlocked }"
+          <AmountKeypadPanel
             v-if="showAmountInput"
-          >
-            <NumericKeyboard
-              :force-visible="true"
-              :hide-close="true"
-              :hide-enter="true"
-              :hide-comma="
-                (activeUnit === 'sat' || activeUnit === 'msat') &&
-                !fiatKeyboardMode
-              "
-              :model-value="String(invoiceData.amount ?? 0)"
-              @update:modelValue="
-                (val: string | number) => (invoiceData.amount = Number(val))
-              "
-              @done="requestMintButton"
-            />
-          </div>
+            v-model="invoiceData.amount"
+            :busy="createInvoiceButtonBlocked"
+            @done="requestMintButton"
+          />
 
           <!-- Secondary Actions Container (Add Amount) -->
           <div
@@ -323,9 +289,10 @@ import AppCallout from "src/components/AppCallout.vue";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { copyToClipboard } from "quasar";
-import VueQrcode from "@chenfengyuan/vue-qrcode";
 import ChooseMint from "src/components/ChooseMint.vue";
-import NumericKeyboard from "src/components/NumericKeyboard.vue";
+import AmountKeypadPanel from "src/components/AmountKeypadPanel.vue";
+import QrBlock from "src/components/QrBlock.vue";
+import FullscreenDialogHeader from "src/components/ui/FullscreenDialogHeader.vue";
 import AmountInputComponent from "src/components/AmountInputComponent.vue";
 import OnchainDepositLimits from "src/components/OnchainDepositLimits.vue";
 import { useWalletStore } from "src/stores/wallet";
@@ -358,16 +325,16 @@ export default defineComponent({
     AppCallout,
     ChevronLeftIcon,
     ChooseMint,
-    NumericKeyboard,
+    AmountKeypadPanel,
+    FullscreenDialogHeader,
     AmountInputComponent,
     OnchainDepositLimits,
-    VueQrcode,
+    QrBlock,
   },
   props: {},
   data: function () {
     return {
       createInvoiceButtonBlocked: false,
-      fiatKeyboardMode: false as boolean,
       bolt12AddAmount: false as boolean,
       onchainAddAmount: false,
       npubCashAddAmount: false as boolean,
@@ -941,21 +908,10 @@ export default defineComponent({
   height: 48px;
   width: 48px;
 }
-.keypad-wrapper--busy {
-  opacity: 0.4;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-}
 
-.send-fullscreen {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
 .qr-container {
   position: relative;
-  border-radius: 8px;
+  border-radius: var(--app-radius-md);
   overflow: hidden;
 }
 .receive-content-enter-active,
@@ -974,14 +930,6 @@ export default defineComponent({
     transition: none;
   }
 }
-.amount-container {
-  overflow: hidden;
-}
-.amount-display {
-  overflow-wrap: break-word;
-  word-break: break-all;
-  max-width: 100%;
-}
 .mint-error-warning {
   align-items: center;
   display: flex;
@@ -999,7 +947,5 @@ export default defineComponent({
 .amount-warning-text {
   display: inline-block;
   font-size: 16px;
-}
-@media (prefers-reduced-motion: reduce) {
 }
 </style>

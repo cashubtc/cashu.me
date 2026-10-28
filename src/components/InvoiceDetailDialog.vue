@@ -12,27 +12,15 @@
         class="display-token-fullscreen"
       >
         <!-- Header -->
-        <div class="row items-center q-pa-md sheet-column-header">
-          <q-btn
-            v-close-popup
-            flat
-            round
-            icon="close"
-            color="grey"
-            class="floating-close-btn app-icon-btn"
-          />
-          <div class="col text-center fixed-title-height">
-            <q-item-label class="sheet-title">
-              {{
-                isBolt12
-                  ? "Lightning Bolt12"
-                  : isOnchain
-                  ? "On-chain"
-                  : $t("InvoiceDetailDialog.invoice.caption")
-              }}
-            </q-item-label>
-          </div>
-        </div>
+        <FullscreenDialogHeader
+          :title="
+            isBolt12
+              ? 'Lightning Bolt12'
+              : isOnchain
+              ? 'On-chain'
+              : $t('InvoiceDetailDialog.invoice.caption')
+          "
+        />
 
         <!-- Content -->
         <div class="content-area">
@@ -61,27 +49,10 @@
                     class="text-secondary"
                     :href="qrLink"
                   >
-                    <q-responsive :ratio="1" class="app-qr">
-                      <vue-qrcode
-                        :value="qrValue"
-                        :options="{ width: 400 }"
-                        class="rounded-borders"
-                        style="width: 100%"
-                      >
-                      </vue-qrcode>
-                    </q-responsive>
+                    <QrBlock :value="qrValue" />
                   </component>
                 </div>
-                <div class="qr-progress">
-                  <q-linear-progress
-                    v-if="runnerActive"
-                    indeterminate
-                    rounded
-                    size="2px"
-                    color="grey-7"
-                    track-color="transparent"
-                  />
-                </div>
+                <QrProgress :active="runnerActive" />
                 <div
                   v-if="isOnchain"
                   class="q-mt-sm text-center text-grey-7 qr-copy-text app-mono app-mono--wrap cursor-pointer"
@@ -175,7 +146,9 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
-import VueQrcode from "@chenfengyuan/vue-qrcode";
+import QrBlock from "src/components/QrBlock.vue";
+import QrProgress from "src/components/QrProgress.vue";
+import FullscreenDialogHeader from "src/components/ui/FullscreenDialogHeader.vue";
 import { copyToClipboard } from "quasar";
 import { CircleCheck as CircleCheckIcon } from "lucide-vue-next";
 
@@ -195,7 +168,9 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     CircleCheckIcon,
-    VueQrcode,
+    QrBlock,
+    QrProgress,
+    FullscreenDialogHeader,
     MeltQuoteInformation,
     MintQuoteInformation,
     OnchainDepositLimits,
@@ -312,7 +287,7 @@ export default defineComponent({
 /* QR Code with checkmark overlay */
 .qr-container {
   position: relative;
-  border-radius: 8px;
+  border-radius: var(--app-radius-md);
   overflow: hidden;
 }
 

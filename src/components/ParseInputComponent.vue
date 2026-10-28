@@ -141,7 +141,7 @@ export default defineComponent({
 
 .parse-input {
   :deep(.q-field__control) {
-    border-radius: 12px;
+    border-radius: var(--app-radius-lg);
     background: var(--app-tint);
     min-height: 120px;
     max-height: 120px;

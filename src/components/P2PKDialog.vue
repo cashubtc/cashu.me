@@ -12,36 +12,14 @@
         class="display-token-fullscreen"
       >
         <!-- Header -->
-        <div class="row items-center q-pa-md sheet-column-header">
-          <q-btn
-            v-close-popup
-            flat
-            round
-            icon="close"
-            color="grey"
-            class="floating-close-btn app-icon-btn"
-          />
-          <div class="col text-center fixed-title-height">
-            <q-item-label class="sheet-title">
-              {{ $t("P2PKDialog.p2pk.caption") }}
-            </q-item-label>
-          </div>
-        </div>
+        <FullscreenDialogHeader :title="$t('P2PKDialog.p2pk.caption')" />
 
         <!-- Content -->
         <div class="content-area">
           <q-card-section class="q-pa-none">
             <div v-if="p2pkData.publicKey" class="row justify-center q-mb-md">
               <div class="col-12 q-px-md p2pk-qr">
-                <q-responsive :ratio="1" class="app-qr">
-                  <vue-qrcode
-                    :value="p2pkData.publicKey"
-                    :options="{ width: 400 }"
-                    class="rounded-borders"
-                    style="width: 100%"
-                  >
-                  </vue-qrcode>
-                </q-responsive>
+                <QrBlock :value="p2pkData.publicKey" />
                 <div class="p2pk-key-text app-mono text-center q-mt-sm">
                   {{ shortKey(p2pkData.publicKey) }}
                 </div>
@@ -103,7 +81,8 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
-import VueQrcode from "@chenfengyuan/vue-qrcode";
+import QrBlock from "src/components/QrBlock.vue";
+import FullscreenDialogHeader from "src/components/ui/FullscreenDialogHeader.vue";
 
 import { useP2PKStore } from "src/stores/p2pk";
 // type hint for global mixin
@@ -113,7 +92,8 @@ export default defineComponent({
   name: "P2PKDialog",
   mixins: [windowMixin],
   components: {
-    VueQrcode,
+    QrBlock,
+    FullscreenDialogHeader,
   },
   data: function () {
     return {};

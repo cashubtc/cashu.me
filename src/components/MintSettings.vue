@@ -91,42 +91,16 @@
                     }}</bdi>
                   </template>
                 </div>
-                <div
-                  class="mint-review"
+                <!-- The card only knows a score from a Nostr discovery scan; reviews load on
+                     the ratings page, so without a score it links there instead of claiming
+                     none (R54: "No reviews yet" sat beside a mint rated 4.7). -->
+                <MintReviewSummary
                   v-if="!isMintExcludedFromReviews(mint.url)"
-                >
-                  <button
-                    type="button"
-                    class="mint-review-link"
-                    @click.stop="openReviews(mint.url, mint)"
-                  >
-                    <template
-                      v-if="
-                        getRecommendation(mint.url) &&
-                        getRecommendation(mint.url).averageRating !== null
-                      "
-                    >
-                      <q-icon name="star" size="14px" class="rating-star" />
-                      <span class="mint-review__score">{{
-                        getRecommendation(mint.url).averageRating.toFixed(1)
-                      }}</span>
-                      <span aria-hidden="true">·</span>
-                      {{ getRecommendation(mint.url).reviewsCount }}
-                      {{
-                        $t(
-                          "MintSettings.reviews_text",
-                          getRecommendation(mint.url).reviewsCount
-                        )
-                      }}
-                    </template>
-                    <!-- The card only knows a score from a Nostr discovery scan; reviews load on
-                         the ratings page, so without a score it links there instead of claiming
-                         none (R54: "No reviews yet" sat beside a mint rated 4.7). -->
-                    <template v-else>{{
-                      $t("MintSettings.see_reviews")
-                    }}</template>
-                  </button>
-                </div>
+                  :average="getRecommendation(mint.url)?.averageRating ?? null"
+                  :count="getRecommendation(mint.url)?.reviewsCount ?? 0"
+                  :fallback-label="$t('MintSettings.see_reviews')"
+                  @open="openReviews(mint.url, mint)"
+                />
               </div>
             </div>
           </q-item>
@@ -152,13 +126,10 @@
     <!-- Add mint section -->
     <div class="q-pt-xs q-px-sm" ref="addMintDiv">
       <div class="add-mint-container">
-        <div class="section-divider q-mt-sm q-mb-md">
-          <div class="divider-line"></div>
-          <div class="divider-text">
-            {{ $t("MintSettings.add.title") }}
-          </div>
-          <div class="divider-line"></div>
-        </div>
+        <SectionDivider
+          class="q-mt-sm q-mb-md"
+          :label="$t('MintSettings.add.title')"
+        />
 
         <div class="add-mint-description q-mb-md text-left text-app-muted">
           {{ $t("MintSettings.add.description") }}
@@ -218,13 +189,7 @@
     <!-- Swap section -->
 
     <div v-if="mints.length > 1" class="q-px-sm q-pb-lg text-left swap-section">
-      <div class="section-divider q-mt-sm">
-        <div class="divider-line"></div>
-        <div class="divider-text">
-          {{ $t("MintSettings.swap.title") }}
-        </div>
-        <div class="divider-line"></div>
-      </div>
+      <SectionDivider class="q-mt-sm" :label="$t('MintSettings.swap.title')" />
       <div class="swap-caption q-mb-md">
         {{ $t("MintSettings.swap.caption") }}
       </div>
@@ -321,6 +286,8 @@ import AddMintDialog from "src/components/AddMintDialog.vue";
 import ChooseMint from "src/components/ChooseMint.vue";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
 import MintInfoContainer from "./MintInfoContainer.vue";
+import MintReviewSummary from "src/components/MintReviewSummary.vue";
+import SectionDivider from "src/components/ui/SectionDivider.vue";
 
 // Mints that should not show reviews
 const EXCLUDED_FROM_REVIEWS = [
@@ -341,6 +308,8 @@ export default defineComponent({
     AddMintDialog,
     ChooseMint,
     MintInfoContainer,
+    MintReviewSummary,
+    SectionDivider,
   },
   props: {},
   setup() {

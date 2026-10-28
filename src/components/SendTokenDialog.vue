@@ -11,52 +11,38 @@
       <!--  enter send data (full-screen) -->
       <div
         v-if="!sendData.tokens"
-        class="column fit send-fullscreen"
+        class="column fit overflow-hidden send-fullscreen"
         :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
       >
         <!-- Header -->
-        <div class="row items-center q-pa-md sheet-column-header">
-          <q-btn
-            v-close-popup
-            flat
-            round
-            icon="close"
-            color="grey"
-            class="floating-close-btn app-icon-btn"
-          />
-          <div class="col text-center fixed-title-height">
-            <q-item-label
-              class="dialog-header"
-              :class="$q.dark.isActive ? 'text-white' : 'text-black'"
-            >
-              {{ $t("SendTokenDialog.title") }}
-            </q-item-label>
-          </div>
-          <div class="row items-center no-wrap sheet-header-actions">
-            <q-btn
-              flat
-              color="primary"
-              round
-              class="lock-toggle-btn touch-target-44"
-              :aria-label="$t('SendTokenDialog.actions.lock.label')"
-              @click="showLockInput = !showLockInput"
-            >
-              <LockIcon size="1.2em" />
-              <q-tooltip>{{
-                $t("SendTokenDialog.actions.lock.label")
-              }}</q-tooltip>
-            </q-btn>
-            <q-btn
-              flat
-              round
-              no-caps
-              color="primary"
-              class="sheet-unit-toggle"
-              @click="toggleUnit()"
-              :label="activeUnitLabel"
-            />
-          </div>
-        </div>
+        <FullscreenDialogHeader :title="$t('SendTokenDialog.title')" balanced>
+          <template #actions>
+            <div class="row items-center no-wrap sheet-header-actions">
+              <q-btn
+                flat
+                color="primary"
+                round
+                class="lock-toggle-btn touch-target-44"
+                :aria-label="$t('SendTokenDialog.actions.lock.label')"
+                @click="showLockInput = !showLockInput"
+              >
+                <LockIcon size="1.2em" />
+                <q-tooltip>{{
+                  $t("SendTokenDialog.actions.lock.label")
+                }}</q-tooltip>
+              </q-btn>
+              <q-btn
+                flat
+                round
+                no-caps
+                color="primary"
+                class="sheet-unit-toggle"
+                @click="toggleUnit()"
+                :label="activeUnitLabel"
+              />
+            </div>
+          </template>
+        </FullscreenDialogHeader>
 
         <!-- Payment request info -->
         <div v-if="sendData.paymentRequest" class="row justify-center q-pt-sm">
@@ -148,7 +134,6 @@
             :enabled="!sendData.tokens"
             :show-fiat-conversion="!insufficientFunds"
             @enter="sendTokens"
-            @fiat-mode-changed="fiatKeyboardMode = $event"
           >
             <template #overlay>
               <span
@@ -186,20 +171,7 @@
 
         <!-- Numeric keypad -->
         <div class="bottom-panel">
-          <div class="keypad-wrapper">
-            <NumericKeyboard
-              :force-visible="true"
-              :hide-close="true"
-              :hide-enter="true"
-              :hide-comma="
-                (activeUnit === 'sat' || activeUnit === 'msat') &&
-                !fiatKeyboardMode
-              "
-              :model-value="String(sendData.amount ?? 0)"
-              @update:modelValue="(val: string | number) => (sendData.amount = Number(val))"
-              @done="sendTokens"
-            />
-          </div>
+          <AmountKeypadPanel v-model="sendData.amount" @done="sendTokens" />
           <!-- Send action below keyboard -->
           <div class="row justify-center q-pb-lg q-pt-sm">
             <div
@@ -279,7 +251,8 @@ import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
-import NumericKeyboard from "components/NumericKeyboard.vue";
+import AmountKeypadPanel from "src/components/AmountKeypadPanel.vue";
+import FullscreenDialogHeader from "src/components/ui/FullscreenDialogHeader.vue";
 import DisplayTokenComponent from "components/DisplayTokenComponent.vue";
 import AmountInputComponent from "components/AmountInputComponent.vue";
 import SendPaymentRequest from "components/SendPaymentRequest.vue";
@@ -298,7 +271,8 @@ export default defineComponent({
   components: {
     AppCallout,
     ChooseMint,
-    NumericKeyboard,
+    AmountKeypadPanel,
+    FullscreenDialogHeader,
     DisplayTokenComponent,
     AmountInputComponent,
     SendPaymentRequest,
@@ -309,7 +283,6 @@ export default defineComponent({
   props: {},
   data: function () {
     return {
-      fiatKeyboardMode: false as boolean,
       sendingEcash: false as boolean,
     };
   },
@@ -746,16 +719,6 @@ export default defineComponent({
 });
 </script>
 <style scoped>
-.send-fullscreen {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-.amount-display {
-  white-space: nowrap;
-  max-width: 100%;
-}
 .p2pk-overlay {
   position: absolute;
   top: 0;

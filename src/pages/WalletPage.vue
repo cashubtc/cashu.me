@@ -118,8 +118,8 @@
         </div>
       </div>
 
-      <iOSPWAPrompt />
-      <AndroidPWAPrompt />
+      <PwaPrompt platform="ios" />
+      <PwaPrompt platform="android" />
     </div>
 
     <!-- BOTTOM LIGHTNING BUTTONS -->
@@ -259,8 +259,7 @@ import CreateInvoiceDialog from "components/CreateInvoiceDialog.vue";
 import SendDialog from "components/SendDialog.vue";
 import ReceiveDialog from "components/ReceiveDialog.vue";
 import QrcodeReader from "components/QrcodeReader.vue";
-import iOSPWAPrompt from "components/iOSPWAPrompt.vue";
-import AndroidPWAPrompt from "components/AndroidPWAPrompt.vue";
+import PwaPrompt from "src/components/PwaPrompt.vue";
 
 // pinia stores
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -314,8 +313,7 @@ export default {
     QrcodeReader,
     SendDialog,
     ReceiveDialog,
-    iOSPWAPrompt,
-    AndroidPWAPrompt,
+    PwaPrompt,
     ScanIcon,
   },
   data: function () {
@@ -551,7 +549,7 @@ export default {
     },
     triggerPwaInstall: function () {
       // Show the install prompt
-      // Note: this doesn't work with IOS, we do it with iOSPWAPrompt
+      // Note: this doesn't work with IOS, we do it with PwaPrompt
       this.deferredPWAInstallPrompt.prompt();
       // Wait for the user to respond to the prompt
       this.deferredPWAInstallPrompt.userChoice.then((choiceResult) => {

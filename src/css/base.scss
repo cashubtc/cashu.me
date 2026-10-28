@@ -125,6 +125,16 @@ body {
   --app-card-shadow: none;
   --app-outline-fill: transparent;
   --app-segment-edge: var(--app-outline-edge);
+  // Shape and depth, the same in every mode and theme. Radii: small controls 6, inner
+  // surfaces 8, cards and rows 12, sheets 20, pills 999.
+  --app-radius-sm: 6px;
+  --app-radius-md: 8px;
+  --app-radius-lg: 12px;
+  --app-radius-xl: 20px;
+  --app-radius-pill: 999px;
+  --app-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --app-focus-ring: 0 0 0 2px
+    color-mix(in srgb, var(--q-primary) 10%, transparent);
 }
 
 // Surfaces ("Tonal", chosen at /ui after two council rounds): cards and settings groups are
@@ -207,8 +217,7 @@ body[data-theme] .q-drawer--dark,
 body[data-theme] .bg-dark {
   background: var(--app-surface) !important;
 }
-// Menus float above the page, so they take the raised surface like cards and sheets.
-body[data-theme] .q-menu--dark,
+// Cards and steppers float above the page, so they take the raised surface like sheets.
 body[data-theme] .q-card--dark,
 body[data-theme] .q-stepper--dark {
   background: var(--app-raised) !important;

@@ -10,28 +10,14 @@
     <q-card class="q-pa-none q-pt-none qcard">
       <!-- full-screen receive flow -->
       <div
-        class="column fit receive-fullscreen"
+        class="column fit overflow-hidden receive-fullscreen"
         :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
       >
         <!-- Header -->
-        <div class="row items-center q-pa-md sheet-column-header">
-          <q-btn
-            v-close-popup
-            flat
-            round
-            icon="close"
-            color="grey"
-            class="floating-close-btn app-icon-btn"
-          />
-          <div class="col text-center fixed-title-height">
-            <q-item-label
-              class="dialog-header"
-              :class="$q.dark.isActive ? 'text-white' : 'text-black'"
-            >
-              {{ $t("ReceiveTokenDialog.title") }}
-            </q-item-label>
-          </div>
-        </div>
+        <FullscreenDialogHeader
+          :title="$t('ReceiveTokenDialog.title')"
+          balanced
+        />
 
         <!-- Content area -->
         <div
@@ -100,7 +86,8 @@
                     v-if="!knowThisMint && !isNotLockedToUs"
                   >
                     <div class="col-12">
-                      <ToolTipInfo
+                      <AppCallout
+                        variant="info"
                         :text="$t('ReceiveTokenDialog.unknown_mint_info_text')"
                       />
                     </div>
@@ -317,7 +304,7 @@ import type { StoredMint } from "src/stores/mints";
 import TokenInformation from "components/TokenInformation.vue";
 import TokenStringRender from "components/TokenStringRender.vue";
 import SwapIncomingTokenToKnownMint from "src/components/SwapIncomingTokenToKnownMint.vue";
-import ToolTipInfo from "src/components/ToolTipInfo.vue";
+import FullscreenDialogHeader from "src/components/ui/FullscreenDialogHeader.vue";
 import ParseInputComponent from "components/ParseInputComponent.vue";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -332,7 +319,7 @@ export default defineComponent({
     TokenInformation,
     TokenStringRender,
     SwapIncomingTokenToKnownMint,
-    ToolTipInfo,
+    FullscreenDialogHeader,
     ParseInputComponent,
   },
   data: function () {
@@ -784,97 +771,10 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.full-width-card {
-  width: 100%;
-  max-width: var(--app-column);
-  margin: 0 auto;
-}
-
-.icon-background {
-  background-color: $grey-10;
-  border-radius: 8px;
-  padding: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.lucide {
-  width: 24px;
-  height: 24px;
-}
-
-.close-btn-position {
-  position: absolute;
-  inset-inline-end: 16px;
-  bottom: 22px;
-  z-index: 100;
-}
-
-.q-card-top {
-  border-top-left-radius: 0px !important;
-  border-top-right-radius: 0px !important;
-}
-
-.relative-container {
-  position: relative;
-}
-
-.floating-button {
-  position: absolute;
-  top: 10px;
-  inset-inline-end: 0px;
-  z-index: 100;
-  padding: 1px;
-  background-color: var(--q-primary);
-  border-radius: 50%;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.receive-fullscreen {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
 .scroll-container {
   overflow-y: auto;
   overflow-x: hidden;
 }
-
-.token-input {
-  // rounded input border
-  height: 180px;
-  border-radius: 10px;
-  border: 1px solid $grey-2;
-  padding: 10px 20px;
-  font-size: 14px;
-  font-family: monospace;
-  background-color: var(--q-background);
-  color: var(--q-text);
-  text-decoration: none !important;
-  &:focus {
-    border-color: $primary;
-  }
-  // hide inner border from q-input
-  &::before {
-    display: none;
-  }
-  &::after {
-    display: none;
-  }
-  &:disabled {
-    background-color: var(--q-background-disabled);
-    color: var(--q-text-disabled);
-  }
-  &:hover {
-    background-color: var(--q-background-hover);
-    color: var(--q-text-hover);
-  }
-}
-
-/* Swap Section Styles */
 
 .receiving-state {
   position: relative;

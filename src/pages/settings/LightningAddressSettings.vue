@@ -4,36 +4,24 @@
     :caption="$t('Settings.menu.lightning_address.caption')"
   >
     <SettingsSection>
-      <q-item tag="label">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.lightning_address.enable.toggle")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.lightning_address.enable.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-toggle v-model="enabled" color="primary" />
-        </q-item-section>
-      </q-item>
+      <SettingsToggleRow
+        v-model="enabled"
+        :label="$t('Settings.lightning_address.enable.toggle')"
+        :caption="$t('Settings.lightning_address.enable.description')"
+      />
       <template v-if="enabled">
         <q-item class="settings-control-item">
           <q-item-section>
             <q-input outlined v-model="address" dense rounded readonly>
               <template v-slot:append>
                 <q-spinner size="sm" v-if="loading" />
-                <q-icon
-                  name="content_copy"
-                  @click="copyText(address)"
-                  size="xs"
-                  color="grey"
-                  class="cursor-pointer"
-                >
-                  <q-tooltip>{{
-                    $t("Settings.lightning_address.address.copy_tooltip")
-                  }}</q-tooltip>
-                </q-icon>
+                <CopyButton
+                  :value="address"
+                  :icon-size="18"
+                  :tooltip="
+                    $t('Settings.lightning_address.address.copy_tooltip')
+                  "
+                />
               </template>
             </q-input>
           </q-item-section>
@@ -76,32 +64,20 @@
               />
             </q-item-section>
           </q-item>
-          <q-item tag="label">
-            <q-item-section>
-              <q-item-label>{{
-                $t("Settings.lightning_address.automatic_claim.toggle")
-              }}</q-item-label>
-              <q-item-label caption>{{
-                $t("Settings.lightning_address.automatic_claim.description")
-              }}</q-item-label>
-            </q-item-section>
-            <q-item-section side>
-              <q-toggle v-model="claimAutomatically" color="primary" />
-            </q-item-section>
-          </q-item>
-          <q-item tag="label">
-            <q-item-section>
-              <q-item-label>{{
-                $t("Settings.lightning_address.show_on_receive.toggle")
-              }}</q-item-label>
-              <q-item-label caption>{{
-                $t("Settings.lightning_address.show_on_receive.description")
-              }}</q-item-label>
-            </q-item-section>
-            <q-item-section side>
-              <q-toggle v-model="showAddressOnReceive" color="primary" />
-            </q-item-section>
-          </q-item>
+          <SettingsToggleRow
+            v-model="claimAutomatically"
+            :label="$t('Settings.lightning_address.automatic_claim.toggle')"
+            :caption="
+              $t('Settings.lightning_address.automatic_claim.description')
+            "
+          />
+          <SettingsToggleRow
+            v-model="showAddressOnReceive"
+            :label="$t('Settings.lightning_address.show_on_receive.toggle')"
+            :caption="
+              $t('Settings.lightning_address.show_on_receive.description')
+            "
+          />
         </q-expansion-item>
       </template>
     </SettingsSection>
@@ -114,12 +90,16 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "src/components/ChooseMint.vue";
 import { useNpubCashStore } from "src/stores/npubcash";
 import SettingsPageShell from "src/pages/settings/SettingsPageShell.vue";
+import CopyButton from "src/components/ui/CopyButton.vue";
+import SettingsToggleRow from "src/components/ui/SettingsToggleRow.vue";
 import SettingsSection from "src/pages/settings/SettingsSection.vue";
 
 export default defineComponent({
   name: "LightningAddressSettings",
   mixins: [windowMixin],
   components: {
+    CopyButton,
+    SettingsToggleRow,
     SettingsPageShell,
     SettingsSection,
     ChooseMint,

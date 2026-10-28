@@ -1,67 +1,55 @@
 <template>
-  <div class="recover-slide">
-    <!-- Main content area -->
-    <div class="welcome-slide__content">
-      <!-- Header Icon -->
-      <div class="welcome-slide__icon">
-        <div class="app-icon-circle app-icon-circle--xl">
-          <q-icon name="vpn_key" size="2.5em" />
+  <WelcomeSlideScaffold
+    class="recover-slide"
+    icon="vpn_key"
+    :title="$t('WelcomeRecoverSeed.title')"
+    :text="$t('WelcomeRecoverSeed.text')"
+  >
+    <!-- Seed phrase input grid -->
+    <div class="input-section">
+      <div class="words-grid">
+        <div v-for="index in 12" :key="index" class="word-input-wrapper">
+          <span class="word-number">{{ index }}</span>
+          <q-input
+            :model-value="words[index - 1]"
+            @update:model-value="updateWord($event, index - 1)"
+            outlined
+            dense
+            :ref="(el) => setInputRef(el, index - 1)"
+            @paste="handlePaste($event, index - 1)"
+            class="word-input"
+            :placeholder="$t('WelcomeRecoverSeed.inputs.word', { index })"
+            :input-attrs="{
+              autocapitalize: 'none',
+              autocorrect: 'off',
+              autocomplete: 'off',
+              spellcheck: 'false',
+            }"
+          />
         </div>
       </div>
 
-      <!-- Title -->
-      <h1 class="welcome-slide__title">{{ $t("WelcomeRecoverSeed.title") }}</h1>
+      <!-- Paste button below inputs -->
+      <q-btn
+        flat
+        :label="$t('WelcomeRecoverSeed.actions.paste_all')"
+        @click="paste"
+        class="paste-btn"
+      />
 
-      <!-- Description -->
-      <p class="welcome-slide__description">
-        {{ $t("WelcomeRecoverSeed.text") }}
-      </p>
-
-      <!-- Seed phrase input grid -->
-      <div class="input-section">
-        <div class="words-grid">
-          <div v-for="index in 12" :key="index" class="word-input-wrapper">
-            <span class="word-number">{{ index }}</span>
-            <q-input
-              :model-value="words[index - 1]"
-              @update:model-value="updateWord($event, index - 1)"
-              outlined
-              dense
-              :ref="(el) => setInputRef(el, index - 1)"
-              @paste="handlePaste($event, index - 1)"
-              class="word-input"
-              :placeholder="$t('WelcomeRecoverSeed.inputs.word', { index })"
-              :input-attrs="{
-                autocapitalize: 'none',
-                autocorrect: 'off',
-                autocomplete: 'off',
-                spellcheck: 'false',
-              }"
-            />
-          </div>
-        </div>
-
-        <!-- Paste button below inputs -->
-        <q-btn
-          flat
-          :label="$t('WelcomeRecoverSeed.actions.paste_all')"
-          @click="paste"
-          class="paste-btn"
-        />
-
-        <!-- Error message -->
-        <p v-if="errorMsg" class="error-msg">{{ errorMsg }}</p>
-      </div>
-
-      <!-- Disclaimer -->
-      <p class="disclaimer">
-        {{ $t("WelcomeRecoverSeed.disclaimer") }}
-      </p>
+      <!-- Error message -->
+      <p v-if="errorMsg" class="error-msg">{{ errorMsg }}</p>
     </div>
-  </div>
+
+    <!-- Disclaimer -->
+    <p class="disclaimer">
+      {{ $t("WelcomeRecoverSeed.disclaimer") }}
+    </p>
+  </WelcomeSlideScaffold>
 </template>
 
 <script lang="ts">
+import WelcomeSlideScaffold from "src/components/ui/WelcomeSlideScaffold.vue";
 import { ref, computed, watch } from "vue";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useRestoreStore } from "src/stores/restore";
@@ -73,6 +61,7 @@ import { i18n } from "../../boot/i18n";
 
 export default {
   name: "WelcomeRecoverSeed",
+  components: { WelcomeSlideScaffold },
   setup() {
     const welcome = useWelcomeStore();
     const restore = useRestoreStore();
@@ -188,17 +177,6 @@ export default {
 </script>
 
 <style scoped>
-.recover-slide {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
-  background: var(--app-welcome-bg);
-  color: white;
-  padding: 40px 20px 20px 20px;
-  box-sizing: border-box;
-}
-
 .input-section {
   width: 100%;
   max-width: 500px; /* unified */
@@ -234,7 +212,7 @@ export default {
 
 .word-input :deep(.q-field__control) {
   min-height: 44px;
-  border-radius: 8px;
+  border-radius: var(--app-radius-md);
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.2s ease;
@@ -252,7 +230,7 @@ export default {
 .word-input :deep(.q-field--focused .q-field__control) {
   background: rgba(255, 255, 255, 0.08);
   border-color: color-mix(in srgb, var(--q-primary) 50%, transparent);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--q-primary) 10%, transparent);
+  box-shadow: var(--app-focus-ring);
 }
 
 .word-input :deep(input) {
@@ -300,10 +278,6 @@ export default {
 
 /* Mobile adjustments */
 @media (max-width: 600px) {
-  .recover-slide {
-    padding: 24px 16px 16px 16px;
-  }
-
   .input-section {
     max-width: 100%;
   }

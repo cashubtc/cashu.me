@@ -4,136 +4,90 @@
     class="mint-quote-information q-mt-md"
     :class="containerTextClass"
   >
-    <div v-if="showAmount && hasValidAmount" class="detail-item q-mb-md">
-      <div class="detail-label">
-        <ZapIcon :size="20" class="detail-icon" />
-        <div class="detail-name">{{ $t("QuoteInformation.amount") }}</div>
-      </div>
-      <div class="detail-value">{{ amountDisplay }}</div>
-    </div>
+    <DetailRow
+      v-if="showAmount && hasValidAmount"
+      class="q-mb-md"
+      :icon="ZapIcon"
+      :label="$t('QuoteInformation.amount')"
+      :value="amountDisplay"
+    />
 
-    <div v-if="unit !== 'sat'" class="detail-item q-mb-md">
-      <div class="detail-label">
-        <CoinsIcon :size="20" class="detail-icon" />
-        <div class="detail-name">{{ $t("QuoteInformation.unit") }}</div>
-      </div>
-      <div class="detail-value">{{ unitDisplay }}</div>
-    </div>
+    <DetailRow
+      v-if="unit !== 'sat'"
+      class="q-mb-md"
+      :icon="CoinsIcon"
+      :label="$t('QuoteInformation.unit')"
+      :value="unitDisplay"
+    />
 
-    <div
+    <DetailRow
       v-if="stateDisplay && !(hidePaidStatus && isPaidState)"
-      class="detail-item q-mb-md"
+      class="q-mb-md"
+      :icon="InfoIcon"
+      :label="$t('QuoteInformation.status')"
+      :value-class="{ 'text-positive': isPaidState }"
     >
-      <div class="detail-label">
-        <InfoIcon :size="20" class="detail-icon" />
-        <div class="detail-name">{{ $t("QuoteInformation.status") }}</div>
-      </div>
-      <div class="detail-value" :class="{ 'text-positive': isPaidState }">
-        <!-- A pulsing dot while the wallet waits for payment, so a pending invoice reads as live. -->
-        <span v-if="isWaitingState" class="waiting-dot" aria-hidden="true" />
-        {{ stateDisplay }}
-      </div>
-    </div>
+      <!-- A pulsing dot while the wallet waits for payment, so a pending invoice reads as live. -->
+      <span v-if="isWaitingState" class="waiting-dot" aria-hidden="true" />
+      {{ stateDisplay }}
+    </DetailRow>
 
-    <div class="detail-item q-mb-md">
-      <div class="detail-label">
-        <ZapIcon :size="20" class="detail-icon" />
-        <div class="detail-name">{{ $t("QuoteInformation.method") }}</div>
-      </div>
-      <div class="detail-value">{{ methodDisplay }}</div>
-    </div>
+    <DetailRow
+      class="q-mb-md"
+      :icon="ZapIcon"
+      :label="$t('QuoteInformation.method')"
+      :value="methodDisplay"
+    />
 
-    <div v-if="networkDisplay" class="detail-item q-mb-md">
-      <div class="detail-label">
-        <InfoIcon :size="20" class="detail-icon" />
-        <div class="detail-name">{{ $t("QuoteInformation.network") }}</div>
-      </div>
-      <div class="detail-value">{{ networkDisplay }}</div>
-    </div>
+    <DetailRow
+      v-if="networkDisplay"
+      class="q-mb-md"
+      :icon="InfoIcon"
+      :label="$t('QuoteInformation.network')"
+      :value="networkDisplay"
+    />
 
     <!-- The deposit address always shows on an on-chain invoice, paid or pending, linked to
          an explorer when the network has one (user report, R46: it came and went). -->
-    <div v-if="isOnchain && invoice?.request" class="detail-item q-mb-md">
-      <div class="detail-label">
-        <HashIcon :size="20" class="detail-icon" />
-        <div class="detail-name">{{ $t("QuoteInformation.address") }}</div>
-      </div>
-      <a
-        v-if="addressExplorerUrl"
-        class="detail-value"
-        :href="addressExplorerUrl"
-        target="_blank"
-        ><bdi dir="ltr">{{ shortAddress(invoice.request) }}</bdi></a
-      >
-      <div v-else class="detail-value">
-        <bdi dir="ltr">{{ shortAddress(invoice.request) }}</bdi>
-      </div>
-    </div>
-
-    <div v-if="isOnchain && onchainMetadata" class="detail-item q-mb-md">
-      <div class="detail-label">
-        <HashIcon :size="20" class="detail-icon" />
-        <div class="detail-name">
-          {{ $t("QuoteInformation.transaction_id") }}
-        </div>
-      </div>
-      <a
-        v-if="onchainMetadata.url"
-        class="detail-value"
-        :href="onchainMetadata.url"
-        target="_blank"
-        ><bdi dir="ltr">{{ shortTxid(onchainMetadata.txid) }}</bdi></a
-      >
-      <div v-else class="detail-value">
-        <bdi dir="ltr">{{ shortTxid(onchainMetadata.txid) }}</bdi>
-      </div>
-    </div>
-
-    <div
-      v-if="isOnchain && (onchainMetadata || loadingOnchainMetadata)"
-      class="detail-item q-mb-md"
+    <DetailRow
+      v-if="isOnchain && invoice?.request"
+      class="q-mb-md"
+      :icon="HashIcon"
+      :label="$t('QuoteInformation.address')"
+      :href="addressExplorerUrl"
+      ><bdi dir="ltr">{{ shortAddress(invoice.request) }}</bdi></DetailRow
     >
-      <div class="detail-label">
-        <InfoIcon :size="20" class="detail-icon" />
-        <div class="detail-name">{{ $t("QuoteInformation.chain_status") }}</div>
-      </div>
-      <div class="detail-value detail-value-with-spinner">
-        <q-spinner
-          v-if="loadingOnchainMetadata"
-          size="14px"
-          color="grey-6"
-          class="q-mr-xs"
-        />
-        <transition name="chain-status-fade" mode="out-in">
-          <span
-            v-if="onchainMetadata"
-            :key="onchainStatusDisplay"
-            :class="{ 'text-positive': onchainMetadata.confirmed }"
-          >
-            {{ onchainStatusDisplay }}
-          </span>
-          <span v-else key="loading" class="text-grey-6">{{
-            $t("QuoteInformation.fetching")
-          }}</span>
-        </transition>
-      </div>
-    </div>
 
-    <div v-if="paidAtDisplay" class="detail-item q-mb-md">
-      <div class="detail-label">
-        <ClockIcon :size="20" class="detail-icon" />
-        <div class="detail-name">{{ $t("QuoteInformation.paid_at") }}</div>
-      </div>
-      <div class="detail-value">{{ paidAtDisplay }}</div>
-    </div>
+    <DetailRow
+      v-if="isOnchain && onchainMetadata"
+      class="q-mb-md"
+      :icon="HashIcon"
+      :label="$t('QuoteInformation.transaction_id')"
+      :href="onchainMetadata.url"
+      ><bdi dir="ltr">{{ shortTxid(onchainMetadata.txid) }}</bdi></DetailRow
+    >
 
-    <div v-if="mintDisplay" class="detail-item">
-      <div class="detail-label">
-        <LandmarkIcon :size="20" class="detail-icon" />
-        <div class="detail-name">{{ $t("QuoteInformation.mint") }}</div>
-      </div>
-      <div class="detail-value">{{ mintDisplay }}</div>
-    </div>
+    <ChainStatusRow
+      v-if="isOnchain && (onchainMetadata || loadingOnchainMetadata)"
+      class="q-mb-md"
+      :metadata="onchainMetadata"
+      :loading="loadingOnchainMetadata"
+    />
+
+    <DetailRow
+      v-if="paidAtDisplay"
+      class="q-mb-md"
+      :icon="ClockIcon"
+      :label="$t('QuoteInformation.paid_at')"
+      :value="paidAtDisplay"
+    />
+
+    <DetailRow
+      v-if="mintDisplay"
+      :icon="LandmarkIcon"
+      :label="$t('QuoteInformation.mint')"
+      :value="mintDisplay"
+    />
   </div>
 </template>
 
@@ -150,6 +104,8 @@ import {
   Landmark as LandmarkIcon,
   Hash as HashIcon,
 } from "lucide-vue-next";
+import DetailRow from "src/components/ui/DetailRow.vue";
+import ChainStatusRow from "src/components/ChainStatusRow.vue";
 import { PaymentMethod } from "src/stores/walletTypes";
 import {
   fetchAddressTxMetadata,
@@ -174,13 +130,16 @@ type MintQuote = {
 export default defineComponent({
   name: "MintQuoteInformation",
   mixins: [windowMixin],
-  components: {
-    ZapIcon,
-    CoinsIcon,
-    InfoIcon,
-    ClockIcon,
-    LandmarkIcon,
-    HashIcon,
+  components: { DetailRow, ChainStatusRow },
+  setup() {
+    return {
+      ZapIcon,
+      CoinsIcon,
+      InfoIcon,
+      ClockIcon,
+      LandmarkIcon,
+      HashIcon,
+    };
   },
   props: {
     hidePaidStatus: {
@@ -297,15 +256,6 @@ export default defineComponent({
       if (!this.isOnchain || !this.invoice?.request) return null;
       return onchainAddressExplorerUrl(this.invoice.request);
     },
-    onchainStatusDisplay(): string {
-      if (!this.onchainMetadata) return "";
-      const status = this.$t(
-        this.onchainMetadata.confirmed
-          ? "QuoteInformation.chain_confirmed"
-          : "QuoteInformation.chain_pending"
-      );
-      return `${status} (${this.onchainMetadata.confirmations}/${this.onchainMetadata.confirmationThreshold})`;
-    },
     paidAtTimestamp(): number | null {
       if (this.invoice?.paidDate) {
         return this.normalizeToTimestamp(this.invoice.paidDate);
@@ -406,12 +356,6 @@ export default defineComponent({
   width: 100%;
 }
 
-.detail-value-with-spinner {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
-
 .waiting-dot {
   animation: waiting-pulse 1.6s ease-in-out infinite;
   background: var(--q-primary);
@@ -431,15 +375,5 @@ export default defineComponent({
   .waiting-dot {
     animation: none;
   }
-}
-
-.chain-status-fade-enter-active,
-.chain-status-fade-leave-active {
-  transition: opacity 0.2s ease;
-}
-
-.chain-status-fade-enter-from,
-.chain-status-fade-leave-to {
-  opacity: 0;
 }
 </style>

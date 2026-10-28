@@ -5,55 +5,30 @@
   >
     <!-- terms -->
     <q-list class="settings-menu-group q-mb-lg">
-      <q-item clickable v-ripple to="/terms" class="settings-menu-item">
-        <q-item-section avatar>
-          <div class="settings-menu-icon">
-            <ScaleIcon :size="20" />
-          </div>
-        </q-item-section>
-        <q-item-section>
-          <q-item-label class="text-weight-medium">{{
-            $t("MainHeader.menu.terms.terms.title")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("MainHeader.menu.terms.terms.caption")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <ChevronRightIcon :size="18" class="settings-menu-chevron" />
-        </q-item-section>
-      </q-item>
+      <SettingsLinkRow
+        to="/terms"
+        :icon="scaleIcon"
+        :label="$t('MainHeader.menu.terms.terms.title')"
+        :caption="$t('MainHeader.menu.terms.terms.caption')"
+      />
     </q-list>
 
     <!-- links -->
     <q-list class="settings-menu-group">
-      <q-item
+      <SettingsLinkRow
         v-for="link in links"
         :key="link.link"
-        clickable
-        v-ripple
         tag="a"
         target="_blank"
         :href="link.link"
-        class="settings-menu-item"
+        :icon="link.icon"
+        :label="link.title"
+        external
       >
-        <q-item-section avatar>
-          <div class="settings-menu-icon">
-            <component :is="link.icon" :size="20" />
-          </div>
-        </q-item-section>
-        <q-item-section>
-          <q-item-label class="text-weight-medium">{{
-            link.title
-          }}</q-item-label>
-          <q-item-label caption
-            ><bdi>{{ link.caption }}</bdi></q-item-label
-          >
-        </q-item-section>
-        <q-item-section side>
-          <ExternalLinkIcon :size="18" class="settings-menu-chevron" />
-        </q-item-section>
-      </q-item>
+        <template #caption
+          ><bdi>{{ link.caption }}</bdi></template
+        >
+      </SettingsLinkRow>
     </q-list>
   </SettingsPageShell>
 </template>
@@ -61,6 +36,7 @@
 <script lang="ts">
 import { defineComponent, markRaw } from "vue";
 import SettingsPageShell from "./SettingsPageShell.vue";
+import SettingsLinkRow from "src/components/ui/SettingsLinkRow.vue";
 import {
   Scale as ScaleIcon,
   Globe as GlobeIcon,
@@ -68,8 +44,6 @@ import {
   MessageCircle as MessageCircleIcon,
   AtSign as AtSignIcon,
   Heart as HeartIcon,
-  ExternalLink as ExternalLinkIcon,
-  ChevronRight as ChevronRightIcon,
 } from "lucide-vue-next";
 
 export default defineComponent({
@@ -77,9 +51,12 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     SettingsPageShell,
-    ScaleIcon,
-    ExternalLinkIcon,
-    ChevronRightIcon,
+    SettingsLinkRow,
+  },
+  data: function () {
+    return {
+      scaleIcon: markRaw(ScaleIcon),
+    };
   },
   computed: {
     links() {

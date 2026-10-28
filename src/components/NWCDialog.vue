@@ -6,15 +6,7 @@
     >
       <div class="text-center q-mb-md q-mt-none q-pt-none">
         <a :href="showNWCData.connectionString">
-          <q-responsive :ratio="1" class="app-qr">
-            <vue-qrcode
-              :value="showNWCData.connectionString"
-              :options="{ width: 400 }"
-              class="rounded-borders"
-              style="width: 100%"
-            >
-            </vue-qrcode>
-          </q-responsive>
+          <QrBlock :value="showNWCData.connectionString" />
         </a>
         <div class="row justify-center">
           <q-card-section class="q-pa-sm">
@@ -56,7 +48,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
-import VueQrcode from "@chenfengyuan/vue-qrcode";
+import QrBlock from "src/components/QrBlock.vue";
 
 import { useNWCStore } from "src/stores/nwc";
 
@@ -64,7 +56,7 @@ export default defineComponent({
   name: "NWCDialog",
   mixins: [windowMixin],
   components: {
-    VueQrcode,
+    QrBlock,
   },
   data: function () {
     return {};

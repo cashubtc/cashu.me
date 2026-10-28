@@ -5,55 +5,27 @@
   >
     <SettingsSection>
       <!-- receive swaps -->
-      <q-item tag="label">
-        <q-item-section>
-          <q-item-label class="label-with-badge">
-            {{ $t("Settings.experimental.receive_swaps.toggle") }}
-            <span class="app-badge">{{
-              $t("Settings.experimental.receive_swaps.badge")
-            }}</span>
-          </q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.experimental.receive_swaps.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-toggle v-model="enableReceiveSwaps" color="primary" />
-        </q-item-section>
-      </q-item>
+      <SettingsToggleRow
+        v-model="enableReceiveSwaps"
+        :label="$t('Settings.experimental.receive_swaps.toggle')"
+        :badge="$t('Settings.experimental.receive_swaps.badge')"
+        :caption="$t('Settings.experimental.receive_swaps.description')"
+      />
 
       <!-- auto paste -->
-      <q-item tag="label">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.experimental.auto_paste.toggle")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.experimental.auto_paste.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-toggle v-model="autoPasteEcashReceive" color="primary" />
-        </q-item-section>
-      </q-item>
+      <SettingsToggleRow
+        v-model="autoPasteEcashReceive"
+        :label="$t('Settings.experimental.auto_paste.toggle')"
+        :caption="$t('Settings.experimental.auto_paste.description')"
+      />
 
       <!-- auditor -->
-      <q-item tag="label">
-        <q-item-section>
-          <q-item-label class="label-with-badge">
-            {{ $t("Settings.experimental.auditor.toggle") }}
-            <span class="app-badge">{{
-              $t("Settings.experimental.auditor.badge")
-            }}</span>
-          </q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.experimental.auditor.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-toggle v-model="auditorEnabled" color="primary" />
-        </q-item-section>
-      </q-item>
+      <SettingsToggleRow
+        v-model="auditorEnabled"
+        :label="$t('Settings.experimental.auditor.toggle')"
+        :badge="$t('Settings.experimental.auditor.badge')"
+        :caption="$t('Settings.experimental.auditor.description')"
+      />
       <template v-if="auditorEnabled">
         <q-item class="settings-control-item">
           <q-item-section>
@@ -67,15 +39,7 @@
               rounded
             >
               <template v-slot:append>
-                <q-btn
-                  dense
-                  flat
-                  round
-                  @click="copyText(auditorUrl)"
-                  size="sm"
-                  color="grey"
-                  ><CopyIcon :size="20"
-                /></q-btn>
+                <CopyButton :value="auditorUrl" />
               </template>
             </q-input>
           </q-item-section>
@@ -92,15 +56,7 @@
               rounded
             >
               <template v-slot:append>
-                <q-btn
-                  dense
-                  flat
-                  round
-                  @click="copyText(auditorApiUrl)"
-                  size="sm"
-                  color="grey"
-                  ><CopyIcon :size="20"
-                /></q-btn>
+                <CopyButton :value="auditorApiUrl" />
               </template>
             </q-input>
           </q-item-section>
@@ -108,38 +64,34 @@
       </template>
 
       <!-- multinut -->
-      <q-item tag="label">
-        <q-item-section>
-          <q-item-label class="label-with-badge">
-            {{ $t("Settings.multinut.use_multinut") }}
-            <span class="app-badge">{{
-              $t("Settings.experimental.receive_swaps.badge")
-            }}</span>
-          </q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.experimental.multinut.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-toggle v-model="multinutEnabled" color="primary" />
-        </q-item-section>
-      </q-item>
+      <SettingsToggleRow
+        v-model="multinutEnabled"
+        :label="$t('Settings.multinut.use_multinut')"
+        :badge="$t('Settings.experimental.receive_swaps.badge')"
+        :caption="$t('Settings.experimental.multinut.description')"
+      />
     </SettingsSection>
   </SettingsPageShell>
 </template>
 
 <script lang="ts">
-import { Copy as CopyIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapWritableState } from "pinia";
 import { useSettingsStore } from "src/stores/settings";
 import SettingsPageShell from "./SettingsPageShell.vue";
+import CopyButton from "src/components/ui/CopyButton.vue";
+import SettingsToggleRow from "src/components/ui/SettingsToggleRow.vue";
 import SettingsSection from "./SettingsSection.vue";
 
 export default defineComponent({
   name: "ExperimentalSettings",
   mixins: [windowMixin],
-  components: { CopyIcon, SettingsPageShell, SettingsSection },
+  components: {
+    SettingsToggleRow,
+    CopyButton,
+    SettingsPageShell,
+    SettingsSection,
+  },
   computed: {
     ...mapWritableState(useSettingsStore, [
       "enableReceiveSwaps",

@@ -1106,14 +1106,14 @@ export default defineComponent({
 /* MultinutPaymentDialog specific mint card styles */
 .mint-card {
   width: 100%;
-  border-radius: 12px;
+  border-radius: var(--app-radius-lg);
   background-color: var(--app-tint);
   transition: all 0.2s ease;
 }
 
 .mint-card:hover:not(.cursor-not-allowed) {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--app-shadow-md);
 }
 
 .mint-card-selected {

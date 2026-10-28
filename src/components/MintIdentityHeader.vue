@@ -46,7 +46,7 @@ export default defineComponent({
 .mint-header {
   align-items: center;
   background-color: var(--app-tint);
-  border-radius: 12px;
+  border-radius: var(--app-radius-lg);
   display: flex;
   flex-direction: column;
   justify-content: center;

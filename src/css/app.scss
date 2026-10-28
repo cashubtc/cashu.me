@@ -354,7 +354,7 @@ body[data-theme] .welcome-surface,
   align-items: center;
   background: var(--app-tint);
   border: 1px solid var(--app-border-strong);
-  border-radius: 999px;
+  border-radius: var(--app-radius-pill);
   color: var(--app-text);
   cursor: pointer;
   display: inline-flex;
@@ -443,7 +443,7 @@ body[data-theme] .welcome-surface,
 .council-dialog {
   width: 100%;
   max-width: 420px;
-  border-radius: 20px;
+  border-radius: var(--app-radius-xl);
   padding: 24px 16px 16px;
 }
 .council-dialog__title {
@@ -455,7 +455,7 @@ body[data-theme] .welcome-surface,
 .council-dialog__summary {
   background: var(--app-group-fill);
   border: 1px solid var(--app-group-edge);
-  border-radius: 12px !important;
+  border-radius: var(--app-radius-lg) !important;
   overflow: hidden;
   padding: 4px 0;
 }
@@ -503,7 +503,7 @@ body[data-theme] .welcome-surface,
 }
 .q-tab > .q-focus-helper {
   inset: 6px;
-  border-radius: 6px;
+  border-radius: var(--app-radius-sm);
 }
 
 /* A select showing its placeholder reads muted until a value is picked. */
@@ -598,7 +598,7 @@ body.body--light .q-dialog__backdrop {
 .mint-chip--field {
   background: var(--app-field-fill);
   border-color: var(--app-field-edge);
-  border-radius: 12px;
+  border-radius: var(--app-radius-lg);
   gap: 12px;
   justify-content: flex-start;
   min-height: 56px;
@@ -707,48 +707,6 @@ body.body--light .q-dialog__backdrop {
   white-space: nowrap;
 }
 
-// Dropdown menus (selects), after the shadcn select: a raised popover with a 4px inner
-// padding, compact 36px rows with their own rounded highlight, normal weight, and a
-// trailing check on the chosen option. One look for every select in the app.
-body .q-menu {
-  background: var(--app-raised);
-  border: 1px solid var(--app-border-strong);
-  border-radius: 8px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -2px rgba(0, 0, 0, 0.1);
-  padding: 4px;
-}
-body .q-menu .q-item {
-  border-radius: 6px;
-  font-size: 14px;
-  min-height: 36px;
-  padding: 6px 8px;
-}
-body .q-menu .q-item .q-focus-helper {
-  border-radius: 6px;
-}
-body .q-menu .q-item--active,
-body .q-menu .q-manual-focusable--focused.q-item--active {
-  color: var(--app-text) !important;
-}
-body .q-menu .q-manual-focusable--focused > .q-focus-helper {
-  background: currentColor;
-  opacity: var(--app-hover-opacity) !important;
-}
-// The chosen option carries a trailing check, the mark every other selection list uses.
-body .q-menu .q-item--active::after {
-  content: "";
-  flex: none;
-  width: 16px;
-  height: 16px;
-  margin-inline-start: auto;
-  padding-inline-start: 8px;
-  align-self: center;
-  background: currentColor;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E")
-    center / contain no-repeat;
-}
-
 // A title followed by a badge: when the badge wraps it starts on the text edge, not
 // indented by its margin (R15: the Multinut Beta badge).
 .label-with-badge {
@@ -826,7 +784,7 @@ body .q-btn--outline:before {
 .q-field--outlined.q-field--rounded .q-field__control,
 .q-field--outlined.q-field--rounded .q-field__control:before,
 .q-field--outlined.q-field--rounded .q-field__control:after {
-  border-radius: 12px;
+  border-radius: var(--app-radius-lg);
 }
 
 /* Right-to-left locales: Quasar pins html, body and #q-app to ltr; follow <html dir> instead,
@@ -1050,10 +1008,6 @@ html[dir="rtl"] .q-field__marginal > * + * {
   margin-right: 2px;
 }
 
-// Menus are teleported to <body>; they follow the document direction like the page does.
-html[dir="rtl"] .q-menu {
-  direction: rtl;
-}
 // Floating field labels sit at the start edge (right) in rtl, above the value.
 html[dir="rtl"] .q-field__label {
   left: auto;
@@ -1171,7 +1125,7 @@ html[dir="rtl"] .q-field__append {
   align-items: center;
   background: none;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--app-radius-sm);
   color: var(--app-text-muted);
   cursor: pointer;
   display: inline-flex;
@@ -1212,7 +1166,7 @@ body .mint-card.q-item--active {
 // tokens; the active or selected card swaps to the active edge and fill.
 body .mint-card {
   border: 1px solid var(--app-card-edge);
-  border-radius: 12px;
+  border-radius: var(--app-radius-lg);
   padding: 0;
   background: var(--app-card-fill);
   box-shadow: var(--app-card-shadow);
@@ -1288,7 +1242,7 @@ body .q-notification {
   align-items: center;
   background: color-mix(in srgb, var(--tone) 14%, var(--app-raised)) !important;
   border: 1px solid color-mix(in srgb, var(--tone) 32%, transparent);
-  border-radius: 8px;
+  border-radius: var(--app-radius-md);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   color: var(--app-text) !important;
   font-size: 14px;
@@ -1410,7 +1364,7 @@ body .q-notification__progress {
 // phones keep the bottom sheet.
 @media (min-width: 1024px) {
   .q-dialog__inner--standard > .q-card {
-    border-radius: 20px !important;
+    border-radius: var(--app-radius-xl) !important;
   }
 }
 

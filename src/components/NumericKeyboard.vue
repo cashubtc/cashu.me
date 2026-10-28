@@ -139,7 +139,7 @@ export default defineComponent({
 }
 
 .q-btn {
-  border-radius: 8px;
+  border-radius: var(--app-radius-md);
   font-weight: 600;
   text-transform: capitalize;
   transition: none;

@@ -4,134 +4,104 @@
     class="melt-quote-information q-mt-md"
     :class="containerTextClass"
   >
-    <div v-if="showAmount" class="detail-item q-mb-md">
-      <div class="detail-label">
-        <ZapIcon :size="20" class="detail-icon" />
-        <div class="detail-name">{{ $t("QuoteInformation.amount") }}</div>
-      </div>
-      <div class="detail-value">{{ amountDisplay }}</div>
-    </div>
+    <DetailRow
+      v-if="showAmount"
+      class="q-mb-md"
+      :icon="ZapIcon"
+      :label="$t('QuoteInformation.amount')"
+      :value="amountDisplay"
+    />
 
-    <div v-if="hasFeeReserve && !hasFeePaid" class="detail-item q-mb-md">
-      <div class="detail-label">
-        <ArrowDownUpIcon :size="20" class="detail-icon" />
-        <div class="detail-name">{{ $t("QuoteInformation.fee_reserve") }}</div>
-      </div>
-      <div class="detail-value">{{ feeReserveDisplay }}</div>
-    </div>
+    <DetailRow
+      v-if="hasFeeReserve && !hasFeePaid"
+      class="q-mb-md"
+      :icon="ArrowDownUpIcon"
+      :label="$t('QuoteInformation.fee_reserve')"
+      :value="feeReserveDisplay"
+    />
 
-    <div v-if="hasFeePaid" class="detail-item q-mb-md">
-      <div class="detail-label">
-        <ReceiptIcon :size="20" class="detail-icon" />
-        <div class="detail-name">{{ $t("QuoteInformation.fee_paid") }}</div>
-      </div>
-      <div class="detail-value">{{ feePaidDisplay }}</div>
-    </div>
+    <DetailRow
+      v-if="hasFeePaid"
+      class="q-mb-md"
+      :icon="ReceiptIcon"
+      :label="$t('QuoteInformation.fee_paid')"
+      :value="feePaidDisplay"
+    />
 
-    <div v-if="quoteUnit !== 'sat'" class="detail-item q-mb-md">
-      <div class="detail-label">
-        <CoinsIcon :size="20" class="detail-icon" />
-        <div class="detail-name">{{ $t("QuoteInformation.unit") }}</div>
-      </div>
-      <div class="detail-value">{{ unitDisplay }}</div>
-    </div>
+    <DetailRow
+      v-if="quoteUnit !== 'sat'"
+      class="q-mb-md"
+      :icon="CoinsIcon"
+      :label="$t('QuoteInformation.unit')"
+      :value="unitDisplay"
+    />
 
-    <div
+    <DetailRow
       v-if="stateDisplay && !(hidePaidStatus && isPaidState)"
-      class="detail-item q-mb-md"
+      class="q-mb-md"
+      :icon="InfoIcon"
+      :label="$t('QuoteInformation.status')"
+      :value="stateDisplay"
+      :value-class="{ 'text-positive': isPaidState }"
+    />
+
+    <DetailRow
+      v-if="networkDisplay"
+      class="q-mb-md"
+      :icon="InfoIcon"
+      :label="$t('QuoteInformation.network')"
+      :value="networkDisplay"
+    />
+
+    <DetailRow
+      v-if="hasTxid"
+      class="q-mb-md"
+      :icon="HashIcon"
+      :label="$t('QuoteInformation.transaction_id')"
+      value-class="detail-value-with-action"
     >
-      <div class="detail-label">
-        <InfoIcon :size="20" class="detail-icon" />
-        <div class="detail-name">{{ $t("QuoteInformation.status") }}</div>
-      </div>
-      <div class="detail-value" :class="{ 'text-positive': isPaidState }">
-        {{ stateDisplay }}
-      </div>
-    </div>
+      <a :href="onchainTxUrl" target="_blank">{{ shortTxid(txidValue) }}</a>
+      <q-btn
+        flat
+        dense
+        round
+        size="sm"
+        :icon="txidCopied ? 'check' : 'content_copy'"
+        @click="copyTxid"
+      />
+    </DetailRow>
 
-    <div v-if="networkDisplay" class="detail-item q-mb-md">
-      <div class="detail-label">
-        <InfoIcon :size="20" class="detail-icon" />
-        <div class="detail-name">{{ $t("QuoteInformation.network") }}</div>
-      </div>
-      <div class="detail-value">{{ networkDisplay }}</div>
-    </div>
-
-    <div v-if="hasTxid" class="detail-item q-mb-md">
-      <div class="detail-label">
-        <HashIcon :size="20" class="detail-icon" />
-        <div class="detail-name">
-          {{ $t("QuoteInformation.transaction_id") }}
-        </div>
-      </div>
-      <div class="detail-value detail-value-with-action">
-        <a :href="onchainTxUrl" target="_blank">{{ shortTxid(txidValue) }}</a>
-        <q-btn
-          flat
-          dense
-          round
-          size="sm"
-          :icon="txidCopied ? 'check' : 'content_copy'"
-          @click="copyTxid"
-        />
-      </div>
-    </div>
-
-    <div
+    <ChainStatusRow
       v-if="hasTxid && (onchainMetadata || loadingOnchainMetadata)"
-      class="detail-item q-mb-md"
-    >
-      <div class="detail-label">
-        <InfoIcon :size="20" class="detail-icon" />
-        <div class="detail-name">{{ $t("QuoteInformation.chain_status") }}</div>
-      </div>
-      <div class="detail-value detail-value-with-spinner">
-        <q-spinner
-          v-if="loadingOnchainMetadata"
-          size="14px"
-          color="grey-6"
-          class="q-mr-xs"
-        />
-        <transition name="chain-status-fade" mode="out-in">
-          <span
-            v-if="onchainMetadata"
-            :key="onchainStatusDisplay"
-            :class="{ 'text-positive': onchainMetadata.confirmed }"
-          >
-            {{ onchainStatusDisplay }}
-          </span>
-          <span v-else key="loading" class="text-grey-6">{{
-            $t("QuoteInformation.fetching")
-          }}</span>
-        </transition>
-      </div>
-    </div>
+      class="q-mb-md"
+      :metadata="onchainMetadata"
+      :loading="loadingOnchainMetadata"
+    />
 
-    <div v-if="paidAtDisplay" class="detail-item q-mb-md">
-      <div class="detail-label">
-        <ClockIcon :size="20" class="detail-icon" />
-        <div class="detail-name">{{ $t("QuoteInformation.paid_at") }}</div>
-      </div>
-      <div class="detail-value">{{ paidAtDisplay }}</div>
-    </div>
+    <DetailRow
+      v-if="paidAtDisplay"
+      class="q-mb-md"
+      :icon="ClockIcon"
+      :label="$t('QuoteInformation.paid_at')"
+      :value="paidAtDisplay"
+    />
 
-    <div v-if="hasPreimage" class="detail-item q-mb-md">
-      <div class="detail-label">
-        <FingerprintIcon :size="20" class="detail-icon" />
-        <div class="detail-name">{{ $t("QuoteInformation.preimage") }}</div>
-      </div>
-      <div class="detail-value" @click="copyPreimage" style="cursor: pointer">
-        {{ preimageValue }}
-      </div>
-    </div>
+    <DetailRow
+      v-if="hasPreimage"
+      class="q-mb-md"
+      :icon="FingerprintIcon"
+      :label="$t('QuoteInformation.preimage')"
+      :value="preimageValue"
+      value-class="cursor-pointer"
+      @value-click="copyPreimage"
+    />
 
-    <div v-if="mintDisplay" class="detail-item">
-      <div class="detail-label">
-        <LandmarkIcon :size="20" class="detail-icon" />
-        <div class="detail-name">{{ $t("QuoteInformation.mint") }}</div>
-      </div>
-      <div class="detail-value">{{ mintDisplay }}</div>
-    </div>
+    <DetailRow
+      v-if="mintDisplay"
+      :icon="LandmarkIcon"
+      :label="$t('QuoteInformation.mint')"
+      :value="mintDisplay"
+    />
   </div>
 </template>
 
@@ -161,6 +131,8 @@ import {
   Fingerprint as FingerprintIcon,
   Hash as HashIcon,
 } from "lucide-vue-next";
+import DetailRow from "src/components/ui/DetailRow.vue";
+import ChainStatusRow from "src/components/ChainStatusRow.vue";
 
 declare const windowMixin: any;
 declare const formatCurrency: any;
@@ -176,16 +148,19 @@ type ExtendedMeltQuote = MeltQuoteBolt11Response & {
 export default defineComponent({
   name: "MeltQuoteInformation",
   mixins: [windowMixin],
-  components: {
-    ZapIcon,
-    ArrowDownUpIcon,
-    ReceiptIcon,
-    ClockIcon,
-    LandmarkIcon,
-    CoinsIcon,
-    InfoIcon,
-    FingerprintIcon,
-    HashIcon,
+  components: { DetailRow, ChainStatusRow },
+  setup() {
+    return {
+      ZapIcon,
+      ArrowDownUpIcon,
+      ReceiptIcon,
+      ClockIcon,
+      LandmarkIcon,
+      CoinsIcon,
+      InfoIcon,
+      FingerprintIcon,
+      HashIcon,
+    };
   },
   data: function () {
     return {
@@ -400,15 +375,6 @@ export default defineComponent({
       if (!this.isMutinynet) return "";
       return onchainNetworkDisplay("mutinynet");
     },
-    onchainStatusDisplay(): string {
-      if (!this.onchainMetadata) return "";
-      const status = this.$t(
-        this.onchainMetadata.confirmed
-          ? "QuoteInformation.chain_confirmed"
-          : "QuoteInformation.chain_pending"
-      );
-      return `${status} (${this.onchainMetadata.confirmations}/${this.onchainMetadata.confirmationThreshold})`;
-    },
   },
   methods: {
     shortTxid(txid: string): string {
@@ -525,21 +491,5 @@ export default defineComponent({
 <style scoped>
 .melt-quote-information {
   width: 100%;
-}
-
-.detail-value-with-spinner {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
-
-.chain-status-fade-enter-active,
-.chain-status-fade-leave-active {
-  transition: opacity 0.2s ease;
-}
-
-.chain-status-fade-enter-from,
-.chain-status-fade-leave-to {
-  opacity: 0;
 }
 </style>

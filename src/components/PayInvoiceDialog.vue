@@ -11,24 +11,15 @@
   >
     <q-card class="q-pa-none q-pt-none qcard">
       <div
-        class="column fit pay-fullscreen"
+        class="column fit overflow-hidden pay-fullscreen"
         :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
       >
         <!-- Header with centered title and unit toggle on right -->
-        <div class="row items-center q-pa-md sheet-column-header">
-          <q-btn
-            v-close-popup
-            flat
-            round
-            icon="close"
-            color="grey"
-            class="floating-close-btn app-icon-btn"
-          />
-          <div class="col text-center fixed-title-height">
+        <FullscreenDialogHeader>
+          <template #title>
             <div>
               <q-item-label
                 class="dialog-header"
-                :class="$q.dark.isActive ? 'text-white' : 'text-black'"
                 style="
                   display: inline-block;
                   white-space: normal;
@@ -38,19 +29,21 @@
                 {{ dialogTitle }}
               </q-item-label>
             </div>
-          </div>
-          <div class="row items-center no-wrap sheet-header-actions">
-            <q-btn
-              flat
-              round
-              no-caps
-              color="primary"
-              class="sheet-unit-toggle"
-              @click="toggleUnit()"
-              :label="activeUnitLabel"
-            />
-          </div>
-        </div>
+          </template>
+          <template #actions>
+            <div class="row items-center no-wrap sheet-header-actions">
+              <q-btn
+                flat
+                round
+                no-caps
+                color="primary"
+                class="sheet-unit-toggle"
+                @click="toggleUnit()"
+                :label="activeUnitLabel"
+              />
+            </div>
+          </template>
+        </FullscreenDialogHeader>
 
         <!-- Mint selection -->
         <div class="row justify-center">
@@ -283,7 +276,6 @@
                             :muted="insufficientFundsForAmountlessPayment"
                             :max-amount="amountlessPaymentMaxAmountFromBalance"
                             @enter="handleAmountlessQuote"
-                            @fiat-mode-changed="fiatKeyboardMode = $event"
                           />
                         </div>
                       </div>
@@ -472,7 +464,6 @@
                         )
                       "
                       @enter="handleLnurlPaySecond"
-                      @fiat-mode-changed="fiatKeyboardMode = $event"
                     />
                   </div>
 
@@ -606,23 +597,10 @@
           class="bottom-panel"
           v-if="showAmountlessPaymentAmountKeyboard && payInvoiceData.invoice"
         >
-          <div class="keypad-wrapper">
-            <NumericKeyboard
-              :force-visible="true"
-              :hide-close="true"
-              :hide-enter="true"
-              :hide-comma="
-                (activeUnit === 'sat' || activeUnit === 'msat') &&
-                !fiatKeyboardMode
-              "
-              :model-value="String(payInvoiceData.input.amount ?? 0)"
-              @update:modelValue="
-                (val: string | number) =>
-                  (payInvoiceData.input.amount = Number(val))
-              "
-              @done="handleAmountlessQuote"
-            />
-          </div>
+          <AmountKeypadPanel
+            v-model="payInvoiceData.input.amount"
+            @done="handleAmountlessQuote"
+          />
           <div class="row justify-center q-pb-lg q-pt-sm">
             <div class="col-12 q-px-md" style="max-width: var(--app-column)">
               <q-btn
@@ -661,23 +639,11 @@
               payInvoiceData.lnurlpay.minSendable
           "
         >
-          <div class="keypad-wrapper" v-if="showNumericKeyboard">
-            <NumericKeyboard
-              :force-visible="true"
-              :hide-close="true"
-              :hide-enter="true"
-              :hide-comma="
-                (activeUnit === 'sat' || activeUnit === 'msat') &&
-                !fiatKeyboardMode
-              "
-              :model-value="String(payInvoiceData.input.amount ?? 0)"
-              @update:modelValue="
-                (val: string | number) =>
-                  (payInvoiceData.input.amount = Number(val))
-              "
-              @done="handleLnurlPaySecond"
-            />
-          </div>
+          <AmountKeypadPanel
+            v-if="showNumericKeyboard"
+            v-model="payInvoiceData.input.amount"
+            @done="handleLnurlPaySecond"
+          />
           <!-- LNURL pay action below keyboard -->
           <div class="row justify-center q-pb-lg q-pt-sm">
             <div class="col-12 q-px-md" style="max-width: var(--app-column)">
@@ -781,7 +747,8 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
 import MultinutPaymentDialog from "./MultinutPaymentDialog.vue";
 import MeltQuoteInformation from "components/MeltQuoteInformation.vue";
-import NumericKeyboard from "components/NumericKeyboard.vue";
+import AmountKeypadPanel from "src/components/AmountKeypadPanel.vue";
+import FullscreenDialogHeader from "src/components/ui/FullscreenDialogHeader.vue";
 import AmountInputComponent from "components/AmountInputComponent.vue";
 import ParseInputComponent from "components/ParseInputComponent.vue";
 import { mintsSupportingPaymentMethod } from "src/js/mint-payment-methods";
@@ -798,14 +765,14 @@ export default defineComponent({
     ChooseMint,
     MultinutPaymentDialog,
     MeltQuoteInformation,
-    NumericKeyboard,
+    AmountKeypadPanel,
+    FullscreenDialogHeader,
     AmountInputComponent,
     ParseInputComponent,
   },
   props: {},
   data: function () {
     return {
-      fiatKeyboardMode: false as boolean,
       isPaying: false as boolean,
       isPaid: false as boolean,
       waitingForWallet: false as boolean,
@@ -1280,44 +1247,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.pay-fullscreen {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.token-input {
-  // rounded input border
-  height: 180px;
-  border-radius: 10px;
-  border: 1px solid $grey-2;
-  padding: 10px 20px;
-  font-size: 14px;
-  font-family: monospace;
-  background-color: var(--q-background);
-  color: var(--q-text);
-  text-decoration: none !important;
-  &:focus {
-    border-color: $primary;
-  }
-  // hide inner border from q-input
-  &::before {
-    display: none;
-  }
-  &::after {
-    display: none;
-  }
-  &:disabled {
-    background-color: var(--q-background-disabled);
-    color: var(--q-text-disabled);
-  }
-  &:hover {
-    background-color: var(--q-background-hover);
-    color: var(--q-text-hover);
-  }
-}
-
 .scroll-container {
   overflow-y: auto;
   overflow-x: hidden;
@@ -1362,21 +1291,6 @@ export default defineComponent({
   padding-bottom: clamp(20px, 4vh, 36px);
 }
 
-.relative-container {
-  position: relative;
-}
-
-.floating-button {
-  position: absolute;
-  top: 10px;
-  inset-inline-end: 0px;
-  z-index: 100;
-  padding: 1px;
-  background-color: var(--q-primary);
-  border-radius: 50%;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
 .invoice-state-container {
   position: relative;
   min-height: 100px;
@@ -1404,7 +1318,7 @@ export default defineComponent({
 .fee-option-row {
   background: var(--app-card-fill);
   border: 1px solid var(--app-card-edge);
-  border-radius: 12px;
+  border-radius: var(--app-radius-lg);
   padding: 12px 14px;
   cursor: pointer;
   transition: border-color 0.2s ease, background-color 0.2s ease;

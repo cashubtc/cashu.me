@@ -9,69 +9,41 @@
       :caption="$t('Settings.nostr_keys.description')"
     >
       <!-- initWalletSeedPrivateKeySigner -->
-      <q-item
-        :active="signerType === 'SEED'"
+      <SettingsRadioRow
+        :selected="signerType === 'SEED'"
+        :label="$t('Settings.nostr_keys.wallet_seed.title')"
+        :caption="$t('Settings.nostr_keys.wallet_seed.description')"
         active-class="text-weight-bold text-primary"
-        clickable
-        @click="handleSeedClick"
+        top
+        @select="handleSeedClick"
       >
-        <q-item-section avatar top>
-          <q-icon
-            :color="signerType === 'SEED' ? 'primary' : 'grey'"
-            :name="
-              signerType === 'SEED' ? 'check_circle' : 'radio_button_unchecked'
-            "
-          />
-        </q-item-section>
-        <q-item-section style="word-break: break-word">
-          <q-item-label>{{
-            $t("Settings.nostr_keys.wallet_seed.title")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.nostr_keys.wallet_seed.description")
-          }}</q-item-label>
-          <q-item-label
-            caption
-            v-if="signerType === 'SEED' && seedSignerPrivateKeyNsec"
+        <q-item-label
+          caption
+          v-if="signerType === 'SEED' && seedSignerPrivateKeyNsec"
+        >
+          <q-btn
+            outline
+            rounded
+            no-caps
+            class="q-mt-sm"
+            @click.stop="copyText(seedSignerPrivateKeyNsec)"
           >
-            <q-btn
-              outline
-              rounded
-              no-caps
-              class="q-mt-sm"
-              @click.stop="copyText(seedSignerPrivateKeyNsec)"
-            >
-              <CopyIcon :size="18" class="q-mr-sm" />
-              <span>{{ $t("Settings.nostr_keys.wallet_seed.copy_nsec") }}</span>
-            </q-btn>
-          </q-item-label>
-        </q-item-section>
-      </q-item>
+            <CopyIcon :size="18" class="q-mr-sm" />
+            <span>{{ $t("Settings.nostr_keys.wallet_seed.copy_nsec") }}</span>
+          </q-btn>
+        </q-item-label>
+      </SettingsRadioRow>
       <!-- Nip46Signer -->
-      <q-item
-        :active="signerType === 'NIP46'"
-        active-class="text-weight-bold text-primary"
-        clickable
-        @click="handleBunkerClick"
+      <SettingsRadioRow
         v-if="false"
+        :selected="signerType === 'NIP46'"
+        :label="$t('Settings.nostr_keys.nsec_bunker.title')"
+        :caption="$t('Settings.nostr_keys.nsec_bunker.description')"
+        active-class="text-weight-bold text-primary"
+        top
+        @select="handleBunkerClick"
       >
-        <q-item-section avatar top>
-          <q-icon
-            :color="signerType === 'NIP46' ? 'primary' : 'grey'"
-            :name="
-              signerType === 'NIP46' ? 'check_circle' : 'radio_button_unchecked'
-            "
-          />
-        </q-item-section>
-        <q-item-section style="word-break: break-word">
-          <q-item-label>{{
-            $t("Settings.nostr_keys.nsec_bunker.title")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.nostr_keys.nsec_bunker.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side v-if="signerType === 'NIP46'">
+        <template v-if="signerType === 'NIP46'" #side>
           <q-btn
             flat
             round
@@ -81,34 +53,18 @@
               $t("Settings.nostr_keys.nsec_bunker.delete_tooltip")
             }}</q-tooltip></q-btn
           >
-        </q-item-section>
-      </q-item>
+        </template>
+      </SettingsRadioRow>
       <!-- PrivateKeySigner -->
-      <q-item
-        :active="signerType === 'PRIVATEKEY'"
+      <SettingsRadioRow
+        :selected="signerType === 'PRIVATEKEY'"
+        :label="$t('Settings.nostr_keys.use_nsec.title')"
+        :caption="$t('Settings.nostr_keys.use_nsec.description')"
         active-class="text-weight-bold text-primary"
-        clickable
-        @click="handleNsecClick"
+        top
+        @select="handleNsecClick"
       >
-        <q-item-section avatar top>
-          <q-icon
-            :color="signerType === 'PRIVATEKEY' ? 'primary' : 'grey'"
-            :name="
-              signerType === 'PRIVATEKEY'
-                ? 'check_circle'
-                : 'radio_button_unchecked'
-            "
-          />
-        </q-item-section>
-        <q-item-section style="word-break: break-word">
-          <q-item-label>{{
-            $t("Settings.nostr_keys.use_nsec.title")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.nostr_keys.use_nsec.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side v-if="signerType === 'PRIVATEKEY'">
+        <template v-if="signerType === 'PRIVATEKEY'" #side>
           <q-btn
             flat
             round
@@ -118,36 +74,22 @@
               $t("Settings.nostr_keys.use_nsec.delete_tooltip")
             }}</q-tooltip></q-btn
           >
-        </q-item-section>
-      </q-item>
+        </template>
+      </SettingsRadioRow>
       <!-- Nip07Signer -->
-      <q-item
-        :active="signerType === 'NIP07'"
-        active-class="text-weight-bold text-primary"
-        clickable
-        @click="handleExtensionClick"
+      <SettingsRadioRow
         v-if="nip07SignerAvailable"
-      >
-        <q-item-section avatar top>
-          <q-icon
-            :color="signerType === 'NIP07' ? 'primary' : 'grey'"
-            :name="
-              signerType === 'NIP07' ? 'check_circle' : 'radio_button_unchecked'
-            "
-          />
-        </q-item-section>
-        <q-item-section style="word-break: break-word">
-          <q-item-label>{{
-            $t("Settings.nostr_keys.signing_extension.title")
-          }}</q-item-label>
-          <q-item-label caption v-if="nip07SignerAvailable">{{
-            $t("Settings.nostr_keys.signing_extension.description")
-          }}</q-item-label>
-          <q-item-label caption v-else>{{
-            $t("Settings.nostr_keys.signing_extension.not_found")
-          }}</q-item-label>
-        </q-item-section>
-      </q-item>
+        :selected="signerType === 'NIP07'"
+        :label="$t('Settings.nostr_keys.signing_extension.title')"
+        :caption="
+          nip07SignerAvailable
+            ? $t('Settings.nostr_keys.signing_extension.description')
+            : $t('Settings.nostr_keys.signing_extension.not_found')
+        "
+        active-class="text-weight-bold text-primary"
+        top
+        @select="handleExtensionClick"
+      />
     </SettingsSection>
 
     <!-- relays: one quiet row per relay (tap to copy, trash to remove), and the add field on
@@ -303,12 +245,14 @@ import { useNostrStore } from "src/stores/nostr";
 import { useNostrUserStore } from "src/stores/nostrUser";
 import { useNpubCashStore } from "src/stores/npubcash";
 import SettingsPageShell from "./SettingsPageShell.vue";
+import SettingsRadioRow from "src/components/ui/SettingsRadioRow.vue";
 import SettingsSection from "./SettingsSection.vue";
 
 export default defineComponent({
   name: "NostrSettings",
   mixins: [windowMixin],
   components: {
+    SettingsRadioRow,
     CopyIcon,
     PlusIcon,
     Trash2Icon,

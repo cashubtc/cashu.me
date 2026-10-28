@@ -64,7 +64,7 @@ body.body--light {
   align-items: center;
   background: var(--app-tint);
   border: 1px solid transparent;
-  border-radius: 12px;
+  border-radius: var(--app-radius-lg);
   color: var(--app-text);
   cursor: pointer;
   display: flex;
@@ -152,7 +152,7 @@ body.body--light {
   );
   border: 1px solid
     color-mix(in srgb, var(--tone, var(--app-border)) 28%, transparent);
-  border-radius: 12px;
+  border-radius: var(--app-radius-lg);
   color: var(--app-text);
   display: flex;
   font-size: 14px;
@@ -204,7 +204,7 @@ html[dir="rtl"] .app-callout__close {
 .app-badge {
   align-items: center;
   border: 1px solid var(--app-border-strong);
-  border-radius: 999px;
+  border-radius: var(--app-radius-pill);
   color: var(--app-text-muted);
   display: inline-flex;
   flex-shrink: 0;
@@ -251,7 +251,7 @@ button.app-badge {
 .app-box {
   background: var(--app-group-fill);
   border: 1px solid var(--app-group-edge);
-  border-radius: 12px;
+  border-radius: var(--app-radius-lg);
 }
 
 // Empty state: an icon in a round slot, a title, one line of help and an optional action.
@@ -390,7 +390,7 @@ body .q-skeleton {
 }
 body .q-skeleton--type-rect,
 body .q-skeleton--type-text {
-  border-radius: 6px;
+  border-radius: var(--app-radius-sm);
 }
 .app-skeleton-row {
   align-items: center;
@@ -436,8 +436,8 @@ body .q-skeleton--type-text {
   align-items: center;
   background: var(--app-raised);
   border: 1px solid var(--app-border-strong);
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow-md);
   color: var(--app-text);
   display: inline-flex;
   font-size: 14px;
@@ -523,7 +523,7 @@ body .q-skeleton--type-text {
   --row-bg: var(--app-surface);
   --row-avatar: var(--app-tint-strong);
   background: var(--row-bg);
-  border-radius: 12px;
+  border-radius: var(--app-radius-lg);
   margin: 0 -12px;
   min-height: 64px;
   padding-inline: 12px;

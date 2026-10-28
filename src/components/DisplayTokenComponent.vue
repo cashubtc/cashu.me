@@ -4,17 +4,8 @@
     class="display-token-fullscreen"
   >
     <!-- Header -->
-    <div class="row items-center q-pa-md sheet-column-header">
-      <q-btn
-        v-close-popup
-        flat
-        round
-        icon="close"
-        color="grey"
-        class="floating-close-btn app-icon-btn"
-        @click="closeCardScanner"
-      />
-      <div class="col text-center fixed-title-height">
+    <FullscreenDialogHeader @close="closeCardScanner">
+      <template #title>
         <div v-show="!showExpandedButtons">
           <q-item-label class="sheet-title">
             {{
@@ -28,157 +19,141 @@
             }}</q-item-label
           >
         </div>
-      </div>
-      <!-- Floating actions (expandable) -->
-      <div class="floating-actions">
-        <div class="row no-wrap items-center">
-          <div
-            v-if="showExpandedButtons"
-            class="row no-wrap items-center q-gutter-xs justify-end q-mr-sm"
-          >
-            <q-btn
-              class="q-mx-xs q-pb-sm"
-              size="md"
-              flat
-              dense
-              @click="copyUsingMixin(encodeToPeanut(sendData.tokensBase64))"
+      </template>
+      <template #actions>
+        <!-- Floating actions (expandable) -->
+        <div class="floating-actions">
+          <div class="row no-wrap items-center">
+            <div
+              v-if="showExpandedButtons"
+              class="row no-wrap items-center q-gutter-xs justify-end q-mr-sm"
             >
-              <NutIcon :size="16" />
+              <q-btn
+                class="q-mx-xs q-pb-sm"
+                size="md"
+                flat
+                dense
+                @click="copyUsingMixin(encodeToPeanut(sendData.tokensBase64))"
+              >
+                <NutIcon :size="16" />
 
-              <q-tooltip>{{
-                $t("SendTokenDialog.actions.copy_emoji.tooltip_text")
-              }}</q-tooltip>
-            </q-btn>
+                <q-tooltip>{{
+                  $t("SendTokenDialog.actions.copy_emoji.tooltip_text")
+                }}</q-tooltip>
+              </q-btn>
 
-            <q-btn
-              v-if="webShareSupported"
-              class="q-mx-xs q-pb-sm"
-              size="md"
-              dense
-              flat
-              @click="shareToken"
-            >
-              <ShareIcon :size="16" />
-              <q-tooltip>{{
-                $t("SendTokenDialog.actions.share.tooltip_text")
-              }}</q-tooltip>
-            </q-btn>
+              <q-btn
+                v-if="webShareSupported"
+                class="q-mx-xs q-pb-sm"
+                size="md"
+                dense
+                flat
+                @click="shareToken"
+              >
+                <ShareIcon :size="16" />
+                <q-tooltip>{{
+                  $t("SendTokenDialog.actions.share.tooltip_text")
+                }}</q-tooltip>
+              </q-btn>
 
+              <q-btn
+                class="q-mx-none"
+                size="md"
+                dense
+                icon="link"
+                flat
+                @click="
+                  copyUsingMixin(baseURL + '#token=' + sendData.tokensBase64)
+                "
+                ><q-tooltip>{{
+                  $t("SendTokenDialog.actions.copy_link.tooltip_text")
+                }}</q-tooltip></q-btn
+              >
+              <q-btn
+                unelevated
+                dense
+                size="md"
+                class="q-mx-xs"
+                v-if="
+                  hasCamera &&
+                  !sendData.paymentRequest &&
+                  sendData.historyAmount < 0
+                "
+                @click="showCamera"
+              >
+                <ScanIcon :size="16" />
+              </q-btn>
+              <q-btn
+                unelevated
+                dense
+                v-if="
+                  ndefSupported &&
+                  !sendData.paymentRequest &&
+                  sendData.historyAmount < 0
+                "
+                :disabled="scanningCard"
+                :loading="scanningCard"
+                class="q-mx-xs"
+                size="md"
+                @click="writeTokensToCard"
+                flat
+              >
+                <NfcIcon :size="16" />
+                <q-tooltip>{{
+                  ndefSupported
+                    ? $t(
+                        "SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_supported_text"
+                      )
+                    : $t(
+                        "SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_unsupported_text"
+                      )
+                }}</q-tooltip>
+                <template v-slot:loading>
+                  <q-spinner @click="closeCardScanner" />
+                </template>
+              </q-btn>
+              <q-btn
+                class="q-mx-none"
+                dense
+                color="negative"
+                data-testid="delete-token"
+                icon="delete"
+                size="sm"
+                @click="
+                  showDeleteDialog = true;
+                  closeCardScanner();
+                "
+                flat
+              >
+                <q-tooltip>{{
+                  $t("SendTokenDialog.actions.delete.tooltip_text")
+                }}</q-tooltip>
+              </q-btn>
+            </div>
             <q-btn
-              class="q-mx-none"
+              class="q-mx-none touch-target-44"
               size="md"
-              dense
-              icon="link"
               flat
-              @click="
-                copyUsingMixin(baseURL + '#token=' + sendData.tokensBase64)
-              "
-              ><q-tooltip>{{
-                $t("SendTokenDialog.actions.copy_link.tooltip_text")
-              }}</q-tooltip></q-btn
-            >
-            <q-btn
-              unelevated
               dense
-              size="md"
-              class="q-mx-xs"
-              v-if="
-                hasCamera &&
-                !sendData.paymentRequest &&
-                sendData.historyAmount < 0
-              "
-              @click="showCamera"
+              data-testid="token-more"
+              @click="toggleExpandButtons"
             >
-              <ScanIcon :size="16" />
-            </q-btn>
-            <q-btn
-              unelevated
-              dense
-              v-if="
-                ndefSupported &&
-                !sendData.paymentRequest &&
-                sendData.historyAmount < 0
-              "
-              :disabled="scanningCard"
-              :loading="scanningCard"
-              class="q-mx-xs"
-              size="md"
-              @click="writeTokensToCard"
-              flat
-            >
-              <NfcIcon :size="16" />
-              <q-tooltip>{{
-                ndefSupported
-                  ? $t(
-                      "SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_supported_text"
-                    )
-                  : $t(
-                      "SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_unsupported_text"
-                    )
-              }}</q-tooltip>
-              <template v-slot:loading>
-                <q-spinner @click="closeCardScanner" />
-              </template>
-            </q-btn>
-            <q-btn
-              class="q-mx-none"
-              dense
-              color="negative"
-              data-testid="delete-token"
-              icon="delete"
-              size="sm"
-              @click="
-                showDeleteDialog = true;
-                closeCardScanner();
-              "
-              flat
-            >
-              <q-tooltip>{{
-                $t("SendTokenDialog.actions.delete.tooltip_text")
-              }}</q-tooltip>
+              <EllipsisIcon
+                :size="20"
+                :class="showExpandedButtons ? 'text-primary' : 'text-app-muted'"
+              />
             </q-btn>
           </div>
-          <q-btn
-            class="q-mx-none touch-target-44"
-            size="md"
-            flat
-            dense
-            data-testid="token-more"
-            @click="toggleExpandButtons"
-          >
-            <EllipsisIcon
-              :size="20"
-              :class="showExpandedButtons ? 'text-primary' : 'text-app-muted'"
-            />
-          </q-btn>
         </div>
-      </div>
-    </div>
+      </template>
+    </FullscreenDialogHeader>
     <!-- Content area -->
     <div class="content-area">
       <q-card-section class="q-pa-none">
         <div v-if="qrCodeFragment" class="row justify-center q-mb-md">
           <div class="col-12 q-px-md">
-            <q-responsive :ratio="1" class="app-qr">
-              <vue-qrcode
-                :value="qrCodeFragment"
-                :options="{ width: 600, height: 600 }"
-                class="rounded-borders"
-                style="width: 100%; height: 100%"
-                @click="copyTokens"
-              >
-              </vue-qrcode>
-            </q-responsive>
-            <div class="qr-progress">
-              <q-linear-progress
-                v-if="runnerActive"
-                indeterminate
-                rounded
-                size="2px"
-                color="grey-7"
-                track-color="transparent"
-              />
-            </div>
+            <QrBlock :value="qrCodeFragment" :width="600" @click="copyTokens" />
+            <QrProgress :active="runnerActive" />
           </div>
         </div>
         <q-card-section class="q-pa-none">
@@ -346,6 +321,9 @@ import { useSettingsStore } from "src/stores/settings";
 import { useTokensStore } from "src/stores/tokens";
 import { useMintsStore } from "src/stores/mints";
 import TokenInformation from "components/TokenInformation.vue";
+import QrBlock from "src/components/QrBlock.vue";
+import QrProgress from "src/components/QrProgress.vue";
+import FullscreenDialogHeader from "src/components/ui/FullscreenDialogHeader.vue";
 import MeltQuoteInformation from "components/MeltQuoteInformation.vue";
 import SendPaymentRequest from "./SendPaymentRequest.vue";
 import PaymentRequestInfo from "./PaymentRequestInfo.vue";
@@ -370,6 +348,9 @@ export default defineComponent({
   components: {
     EllipsisIcon,
     TokenInformation,
+    QrBlock,
+    QrProgress,
+    FullscreenDialogHeader,
     MeltQuoteInformation,
     SendPaymentRequest,
     PaymentRequestInfo,

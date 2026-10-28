@@ -127,17 +127,21 @@ const routes = [
       { path: "", component: () => import("src/pages/TermsPage.vue") },
     ],
   },
-  // Every UI element on one page, with the surface style switcher (src/js/ui-variant.ts).
-  // Development builds only.
+  // The design system board: every component, live, with a surface style switcher
+  // (src/js/ui-variant.ts). Development builds only; /ui is its old address.
   ...(process.env.DEV
     ? [
         {
-          path: "/ui",
+          path: "/design-system",
           component: () => import("layouts/FullscreenLayout.vue"),
           children: [
-            { path: "", component: () => import("src/pages/UiKitPage.vue") },
+            {
+              path: "",
+              component: () => import("src/pages/DesignSystemPage.vue"),
+            },
           ],
         },
+        { path: "/ui", redirect: "/design-system" },
       ]
     : []),
 

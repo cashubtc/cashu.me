@@ -48,14 +48,7 @@
                   class="qr-code-section q-my-md"
                   key="qr-code"
                 >
-                  <q-responsive :ratio="1" class="app-qr">
-                    <vue-qrcode
-                      :value="mintData.url"
-                      :options="{ width: 400 }"
-                      class="rounded-borders"
-                      style="width: 100%"
-                    />
-                  </q-responsive>
+                  <QrBlock :value="mintData.url" />
                 </div>
               </transition>
             </div>
@@ -99,16 +92,11 @@
         </div>
 
         <!-- Section Divider -->
-        <div
-          class="section-divider q-mb-md"
+        <SectionDivider
           v-if="mintData.info?.contact?.length > 0"
-        >
-          <div class="divider-line"></div>
-          <div class="divider-text">
-            {{ $t("MintDetailsDialog.contact.title") }}
-          </div>
-          <div class="divider-line"></div>
-        </div>
+          class="q-mb-md"
+          :label="$t('MintDetailsDialog.contact.title')"
+        />
 
         <!-- Contact Info Section -->
         <div class="contact-section q-mb-lg">
@@ -155,51 +143,36 @@
         </div>
 
         <!-- Section Divider -->
-        <div class="section-divider q-mb-md">
-          <div class="divider-line"></div>
-          <div class="divider-text">
-            {{ $t("MintDetailsDialog.details.title") }}
-          </div>
-          <div class="divider-line"></div>
-        </div>
+        <SectionDivider
+          class="q-mb-md"
+          :label="$t('MintDetailsDialog.details.title')"
+        />
 
         <!-- Mint Details Section -->
         <div class="mint-details-section q-mb-lg">
           <!-- URL -->
-          <div class="detail-item q-mb-md">
-            <div class="detail-label">
-              <link-icon size="20" class="detail-icon" />
-              <div class="detail-name">
-                {{ $t("MintDetailsDialog.details.url.label") }}
-              </div>
-            </div>
-            <div
-              class="detail-value items-center"
-              @click="copyText(mintData.url)"
-            >
-              {{ mintData.url }}
-            </div>
-          </div>
+          <DetailRow
+            class="q-mb-md"
+            :icon="LinkIcon"
+            :label="$t('MintDetailsDialog.details.url.label')"
+            :value="mintData.url"
+            value-class="items-center"
+            @value-click="copyText(mintData.url)"
+          />
 
           <!-- Nuts -->
-          <div class="detail-item q-mb-md" v-if="mintData.info?.nuts">
-            <div class="detail-label">
-              <nut-icon size="20" class="detail-icon" />
-              <div class="detail-name">
-                {{ $t("MintDetailsDialog.details.nuts.label") }}
-              </div>
-            </div>
-            <div
-              class="detail-value"
-              v-if="!showAllNuts"
-              @click="showAllNuts = true"
-            >
-              {{ $t("MintDetailsDialog.details.nuts.actions.show.label") }}
-            </div>
-            <div class="detail-value" v-else @click="showAllNuts = false">
-              {{ $t("MintDetailsDialog.details.nuts.actions.hide.label") }}
-            </div>
-          </div>
+          <DetailRow
+            v-if="mintData.info?.nuts"
+            class="q-mb-md"
+            :icon="NutIcon"
+            :label="$t('MintDetailsDialog.details.nuts.label')"
+            :value="
+              showAllNuts
+                ? $t('MintDetailsDialog.details.nuts.actions.hide.label')
+                : $t('MintDetailsDialog.details.nuts.actions.show.label')
+            "
+            @value-click="showAllNuts = !showAllNuts"
+          />
 
           <!-- Expanded Nuts Section (when showAllNuts is true) -->
           <div
@@ -220,54 +193,42 @@
           </div>
 
           <!-- Currency (if available) -->
-          <div class="detail-item q-mb-md" v-if="mintData.info?.currencies">
-            <div class="detail-label">
-              <coins-icon size="20" class="detail-icon" />
-              <div class="detail-name">
-                {{ $t("MintDetailsDialog.details.currency.label") }}
-              </div>
-            </div>
-            <div class="detail-value">{{ mintData.info.currencies }}</div>
-          </div>
+          <DetailRow
+            v-if="mintData.info?.currencies"
+            class="q-mb-md"
+            :icon="CoinsIcon"
+            :label="$t('MintDetailsDialog.details.currency.label')"
+            >{{ mintData.info.currencies }}</DetailRow
+          >
 
           <!-- Currency Units (if available) -->
-          <div
-            class="detail-item q-mb-md"
+          <DetailRow
             v-if="mintUnits && mintUnits.length > 0"
-          >
-            <div class="detail-label">
-              <coins-icon size="20" class="detail-icon" />
-              <div class="detail-name">
-                {{ $t("MintDetailsDialog.details.currencies.label") }}
-              </div>
-            </div>
-            <div class="detail-value">
-              {{
-                mintUnits
-                  .map((unit) => (unit === "sat" ? "sat" : unit.toUpperCase()))
-                  .join(", ")
-              }}
-            </div>
-          </div>
+            class="q-mb-md"
+            :icon="CoinsIcon"
+            :label="$t('MintDetailsDialog.details.currencies.label')"
+            :value="
+              mintUnits
+                .map((unit) => (unit === 'sat' ? 'sat' : unit.toUpperCase()))
+                .join(', ')
+            "
+          />
 
           <!-- Version -->
-          <div class="detail-item" v-if="mintData.info?.version">
-            <div class="detail-label">
-              <info-icon size="20" class="detail-icon" />
-              <div class="detail-name">
-                {{ $t("MintDetailsDialog.details.version.label") }}
-              </div>
-            </div>
-            <div class="detail-value">{{ mintData.info.version }}</div>
-          </div>
+          <DetailRow
+            v-if="mintData.info?.version"
+            :icon="InfoIcon"
+            :label="$t('MintDetailsDialog.details.version.label')"
+            :value="mintData.info.version"
+          />
         </div>
 
         <!-- Section Divider for Audit Info -->
-        <div v-if="settings.auditorEnabled" class="section-divider q-mb-md">
-          <div class="divider-line"></div>
-          <div class="divider-text">{{ $t("MintAuditInfo.title") }}</div>
-          <div class="divider-line"></div>
-        </div>
+        <SectionDivider
+          v-if="settings.auditorEnabled"
+          class="q-mb-md"
+          :label="$t('MintAuditInfo.title')"
+        />
 
         <!-- Mint Audit Info Section -->
         <MintAuditInfo
@@ -277,13 +238,10 @@
         />
 
         <!-- Section Divider -->
-        <div class="section-divider q-mb-md">
-          <div class="divider-line"></div>
-          <div class="divider-text">
-            {{ $t("MintDetailsDialog.actions.title") }}
-          </div>
-          <div class="divider-line"></div>
-        </div>
+        <SectionDivider
+          class="q-mb-md"
+          :label="$t('MintDetailsDialog.actions.title')"
+        />
 
         <!-- Action Buttons -->
         <div class="action-buttons-section">
@@ -338,7 +296,7 @@ import { defineComponent } from "vue";
 import { copyToClipboard } from "quasar";
 import { notifyCopied } from "src/js/notify";
 import { mapActions, mapState, mapWritableState } from "pinia";
-import VueQrcode from "@chenfengyuan/vue-qrcode";
+import QrBlock from "src/components/QrBlock.vue";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import { useSettingsStore } from "src/stores/settings";
 import EditMintDialog from "src/components/EditMintDialog.vue";
@@ -358,18 +316,16 @@ import {
   Trash as TrashIcon,
 } from "lucide-vue-next";
 import MintIdentityHeader from "src/components/MintIdentityHeader.vue";
+import DetailRow from "src/components/ui/DetailRow.vue";
+import SectionDivider from "src/components/ui/SectionDivider.vue";
 
 export default defineComponent({
   name: "MintDetailsPage",
   mixins: [windowMixin],
   components: {
-    VueQrcode,
+    QrBlock,
     QrCodeIcon,
-    LinkIcon,
-    NutIcon,
-    CoinsIcon,
     StarIcon,
-    InfoIcon,
     MailIcon,
     CopyIcon,
     PencilIcon,
@@ -379,6 +335,11 @@ export default defineComponent({
     RemoveMintDialog,
     MintMotdMessage,
     MintAuditInfo,
+    DetailRow,
+    SectionDivider,
+  },
+  setup() {
+    return { LinkIcon, NutIcon, CoinsIcon, InfoIcon };
   },
   data: function () {
     return {
@@ -537,12 +498,6 @@ export default defineComponent({
   color: var(--app-text);
   width: 100%;
   padding-bottom: 32px;
-}
-
-.mint-content-container {
-  max-width: var(--app-column);
-  margin: 0 auto;
-  color: var(--app-text);
 }
 
 /* Top Icons */
@@ -765,13 +720,5 @@ export default defineComponent({
 
 .nut-number {
   color: var(--app-text-muted);
-}
-
-/* Currency Units */
-.currency-units-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: flex-end;
 }
 </style>

@@ -11,37 +11,37 @@
       <!-- Idle, before the first search: a designed empty state that says what discovery does,
            with the one primary action (R42). While loading and once results exist, refreshing
            is the compact action in the results header. -->
-      <div
+      <EmptyState
         v-if="!discovering && discoverList.length === 0"
-        class="app-empty app-box discover-empty"
+        class="discover-empty"
+        :title="$t('MintSettings.discover.empty.title')"
+        :text="$t('MintSettings.discover.empty.text')"
       >
-        <div class="app-icon-circle app-icon-circle--lg">
+        <template #icon>
           <q-icon name="travel_explore" size="28px" />
-        </div>
-        <div class="app-empty__title">
-          {{ $t("MintSettings.discover.empty.title") }}
-        </div>
-        <div class="app-empty__text">
-          {{ $t("MintSettings.discover.empty.text") }}
-        </div>
-        <q-btn
-          color="primary"
-          rounded
-          unelevated
-          no-caps
-          :loading="discovering"
-          @click="discover"
-          class="discover-btn full-width app-empty__action"
-        >
-          <q-icon name="search" size="20px" class="discover-btn__icon" />
-          <span>{{ $t("MintSettings.discover.actions.discover.label") }}</span>
-          <template v-slot:loading
-            ><q-spinner-dots size="20px" class="on-left" />{{
-              $t("MintSettings.discover.actions.discover.label")
-            }}</template
+        </template>
+        <template #actions>
+          <q-btn
+            color="primary"
+            rounded
+            unelevated
+            no-caps
+            :loading="discovering"
+            @click="discover"
+            class="discover-btn full-width app-empty__action"
           >
-        </q-btn>
-      </div>
+            <q-icon name="search" size="20px" class="discover-btn__icon" />
+            <span>{{
+              $t("MintSettings.discover.actions.discover.label")
+            }}</span>
+            <template v-slot:loading
+              ><q-spinner-dots size="20px" class="on-left" />{{
+                $t("MintSettings.discover.actions.discover.label")
+              }}</template
+            >
+          </q-btn>
+        </template>
+      </EmptyState>
     </div>
 
     <div
@@ -152,28 +152,12 @@
                   </q-btn>
                 </div>
                 <div class="mint-card__foot discover-card-foot">
-                  <div class="mint-review">
-                    <button
-                      type="button"
-                      class="mint-review-link"
-                      @click.stop="openReviews(rec.url)"
-                    >
-                      <template
-                        v-if="avgFor(rec.url) !== null && countFor(rec.url) > 0"
-                      >
-                        <q-icon name="star" size="14px" class="rating-star" />
-                        <span class="mint-review__score">{{
-                          (avgFor(rec.url) ?? 0).toFixed(1)
-                        }}</span>
-                        <span aria-hidden="true">·</span>
-                        {{ countFor(rec.url) }}
-                        {{ $t("MintSettings.reviews_text", countFor(rec.url)) }}
-                      </template>
-                      <template v-else>{{
-                        $t("MintSettings.no_reviews_yet")
-                      }}</template>
-                    </button>
-                  </div>
+                  <MintReviewSummary
+                    :average="countFor(rec.url) > 0 ? avgFor(rec.url) : null"
+                    :count="countFor(rec.url)"
+                    :fallback-label="$t('MintSettings.no_reviews_yet')"
+                    @open="openReviews(rec.url)"
+                  />
                 </div>
               </div>
             </q-item>
@@ -188,15 +172,23 @@
 import { defineComponent, ref, computed, watch, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import SkeletonRow from "src/components/SkeletonRow.vue";
+import EmptyState from "src/components/ui/EmptyState.vue";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import MintInfoContainer from "./MintInfoContainer.vue";
+import MintReviewSummary from "src/components/MintReviewSummary.vue";
 import { Plus as PlusIcon } from "lucide-vue-next";
 import { notifyError, notifySuccess } from "src/js/notify";
 
 export default defineComponent({
   name: "MintDiscovery",
-  components: { MintInfoContainer, PlusIcon, SkeletonRow },
+  components: {
+    EmptyState,
+    MintInfoContainer,
+    MintReviewSummary,
+    PlusIcon,
+    SkeletonRow,
+  },
   props: {
     infoTimeoutMs: { type: Number, default: 5000 },
     autoDiscover: { type: Boolean, default: false },
@@ -368,7 +360,7 @@ export default defineComponent({
   min-height: 100px;
   padding: 16px;
   margin-bottom: 16px;
-  border-radius: 12px;
+  border-radius: var(--app-radius-lg);
   background: var(--app-card-fill);
   border: 1px solid var(--app-card-edge);
 }
@@ -392,12 +384,6 @@ export default defineComponent({
 .discover-btn :deep(.q-btn__content) {
   flex-wrap: nowrap;
   line-height: 20px;
-}
-
-/* Review counts link the same way as on the mint cards. */
-.rating-star {
-  color: var(--app-text);
-  vertical-align: -2px;
 }
 
 /* The rating sits on the card's end edge, where the installed cards keep it. */

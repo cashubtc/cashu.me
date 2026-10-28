@@ -195,7 +195,7 @@ export default {
     linear-gradient(#fff, #fff) bottom right / var(--corner) var(--stroke),
     linear-gradient(#fff, #fff) bottom right / var(--stroke) var(--corner);
   background-repeat: no-repeat;
-  border-radius: 6px;
+  border-radius: var(--app-radius-sm);
   box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.55);
   width: min(72vw, 280px);
 }

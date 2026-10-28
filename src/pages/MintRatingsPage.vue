@@ -9,16 +9,18 @@
       :mintInfo="mintInfo"
       @close="goBack"
     />
-    <div v-else class="text-center q-pa-lg">
-      <div class="text-h6 text-grey-5">
-        {{ $t("MintRatings.no_mint_url") }}
-      </div>
-    </div>
+    <EmptyState
+      v-else
+      :icon="LandmarkIcon"
+      :title="$t('MintRatings.no_mint_url')"
+    />
   </SettingsPageShell>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, markRaw } from "vue";
+import { Landmark as LandmarkIcon } from "lucide-vue-next";
+import EmptyState from "src/components/ui/EmptyState.vue";
 import MintRatingsComponent from "src/components/MintRatingsComponent.vue";
 import SettingsPageShell from "src/pages/settings/SettingsPageShell.vue";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
@@ -29,6 +31,7 @@ export default defineComponent({
   components: {
     SettingsPageShell,
     MintRatingsComponent,
+    EmptyState,
   },
   data() {
     return {
@@ -36,6 +39,7 @@ export default defineComponent({
       reviews: [],
       allowCreateReview: true,
       mintInfo: null,
+      LandmarkIcon: markRaw(LandmarkIcon),
     };
   },
   methods: {

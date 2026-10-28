@@ -125,8 +125,12 @@
     <div class="spacer"></div>
 
     <!-- PWA Prompts -->
-    <iOSPWAPrompt v-if="!isPWA() && !wasInstalled && !isInstalling && isIos" />
-    <AndroidPWAPrompt
+    <PwaPrompt
+      platform="ios"
+      v-if="!isPWA() && !wasInstalled && !isInstalling && isIos"
+    />
+    <PwaPrompt
+      platform="android"
       v-if="
         !isPWA() &&
         !wasInstalled &&
@@ -140,14 +144,12 @@
 
 <script lang="ts">
 import { ref, onMounted, onBeforeUnmount, computed } from "vue";
-import iOSPWAPrompt from "components/iOSPWAPrompt.vue";
-import AndroidPWAPrompt from "components/AndroidPWAPrompt.vue";
+import PwaPrompt from "src/components/PwaPrompt.vue";
 
 export default {
   name: "WelcomeSlide2",
   components: {
-    iOSPWAPrompt,
-    AndroidPWAPrompt,
+    PwaPrompt,
   },
   setup() {
     const isPWA = () => {

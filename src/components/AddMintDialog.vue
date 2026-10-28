@@ -61,24 +61,17 @@
 
       <!-- Audit Info Section -->
       <div v-if="mintUrl" class="q-mb-lg">
-        <div class="detail-item">
-          <div class="detail-label">
-            <info-icon size="20" class="detail-icon" />
-            <div class="detail-name">
-              {{ $t("AddMintDialog.audit_info.label") }}
-            </div>
-          </div>
-          <div
-            class="detail-value audit-toggle"
-            @click="showAuditInfo = !showAuditInfo"
-          >
-            {{
-              showAuditInfo
-                ? $t("AddMintDialog.audit_info.actions.hide.label")
-                : $t("AddMintDialog.audit_info.actions.show.label")
-            }}
-          </div>
-        </div>
+        <DetailRow
+          :icon="InfoIcon"
+          :label="$t('AddMintDialog.audit_info.label')"
+          :value="
+            showAuditInfo
+              ? $t('AddMintDialog.audit_info.actions.hide.label')
+              : $t('AddMintDialog.audit_info.actions.show.label')
+          "
+          value-class="audit-toggle"
+          @value-click="showAuditInfo = !showAuditInfo"
+        />
 
         <!-- Audit Info Component -->
         <transition
@@ -126,6 +119,7 @@ import BottomSheet from "./BottomSheet.vue";
 import MintAuditInfo from "./MintAuditInfo.vue";
 import MintInfoContainer from "./MintInfoContainer.vue";
 import { Info as InfoIcon } from "lucide-vue-next";
+import DetailRow from "src/components/ui/DetailRow.vue";
 
 export default defineComponent({
   name: "AddMintDialog",
@@ -133,7 +127,7 @@ export default defineComponent({
     BottomSheet,
     MintAuditInfo,
     MintInfoContainer,
-    InfoIcon,
+    DetailRow,
   },
   props: {
     addMintData: {
@@ -276,6 +270,7 @@ export default defineComponent({
       messageState,
       addMintDisabled,
       showAuditInfo,
+      InfoIcon,
     };
   },
 });
@@ -336,8 +331,9 @@ export default defineComponent({
   margin-inline-end: 16px !important;
 }
 
-/* Audit info rows use the shared detail rows (src/css/app.scss). */
-.audit-toggle {
+/* Audit info rows use the shared detail rows (src/css/app.scss); the value element belongs
+   to DetailRow, so it is reached through the row's root. */
+:deep(.audit-toggle) {
   cursor: pointer;
   user-select: none;
 }
