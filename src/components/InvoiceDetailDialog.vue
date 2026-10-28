@@ -53,23 +53,12 @@
                   </component>
                 </div>
                 <QrProgress :active="runnerActive" />
-                <div
+                <QrCopyLine
                   v-if="isOnchain"
-                  class="q-mt-sm text-center text-app-muted qr-copy-text app-mono app-mono--wrap cursor-pointer"
-                  @click="onCopyBolt11"
-                >
-                  <CheckIcon
-                    v-if="copyButtonCopied"
-                    :size="16"
-                    class="q-mr-xs qr-copy-text__icon"
-                  />
-                  <CopyIcon
-                    v-else
-                    :size="16"
-                    class="q-mr-xs qr-copy-text__icon"
-                  />
-                  {{ invoiceData.request }}
-                </div>
+                  :text="invoiceData.request"
+                  :copied="copyButtonCopied"
+                  @copy="onCopyBolt11"
+                />
                 <OnchainDepositLimits
                   v-if="isOnchain && invoiceData.status !== 'paid'"
                   class="q-mt-md"
@@ -148,17 +137,14 @@
   </q-dialog>
 </template>
 <script lang="ts">
+import QrCopyLine from "src/components/ui/QrCopyLine.vue";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import QrBlock from "src/components/QrBlock.vue";
 import QrProgress from "src/components/QrProgress.vue";
 import FullscreenDialogHeader from "src/components/ui/FullscreenDialogHeader.vue";
 import { copyToClipboard } from "quasar";
-import {
-  Check as CheckIcon,
-  CircleCheck as CircleCheckIcon,
-  Copy as CopyIcon,
-} from "lucide-vue-next";
+import { CircleCheck as CircleCheckIcon } from "lucide-vue-next";
 
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
@@ -175,8 +161,7 @@ export default defineComponent({
   name: "InvoiceDetailDialog",
   mixins: [windowMixin],
   components: {
-    CheckIcon,
-    CopyIcon,
+    QrCopyLine,
     CircleCheckIcon,
     QrBlock,
     QrProgress,

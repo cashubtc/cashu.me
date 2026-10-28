@@ -12,17 +12,13 @@
         <div class="qr-container">
           <QrBlock :value="request" />
         </div>
-        <!-- The request text, tap to copy, as under the on-chain address. -->
-        <button
-          type="button"
-          class="pr-code qr-copy-text app-mono"
-          :aria-label="$t('PaymentRequestDialog.actions.copy_request.label')"
-          @click="copy"
-        >
-          <CopyIcon :size="16" class="q-mr-xs qr-copy-text__icon" />{{
-            shortRequest
-          }}
-        </button>
+        <!-- The request text, tap to copy: the same line as under the invoice QRs. -->
+        <QrCopyLine
+          :text="shortRequest"
+          :copied="copied"
+          :label="$t('PaymentRequestDialog.actions.copy_request.label')"
+          @copy="copy"
+        />
 
         <div v-if="hasAmount" class="amount-headline text-center">
           {{ amountLabel }}
@@ -197,6 +193,7 @@
 </template>
 
 <script lang="ts">
+import QrCopyLine from "src/components/ui/QrCopyLine.vue";
 import {
   CircleDollarSign as CircleDollarSignIcon,
   Coins as CoinsIcon,
@@ -235,6 +232,7 @@ export default defineComponent({
   name: "PaymentRequestView",
   mixins: [windowMixin],
   components: {
+    QrCopyLine,
     AmountInputComponent,
     AmountKeypadPanel,
     AppBadge,
@@ -259,6 +257,8 @@ export default defineComponent({
   },
   data() {
     return {
+      copied: false,
+      copiedTimer: undefined as ReturnType<typeof setTimeout> | undefined,
       showAmountSheet: false,
       showUnitSheet: false,
       showMintSheet: false,
@@ -419,7 +419,12 @@ export default defineComponent({
       }
     },
     copy() {
-      if (this.request) (this as any).copyText(this.request);
+      if (!this.request) return;
+      (this as any).copyText(this.request);
+      // The copy glyph turns into a check for a moment, as under the invoice QRs.
+      this.copied = true;
+      clearTimeout(this.copiedTimer);
+      this.copiedTimer = setTimeout(() => (this.copied = false), 3000);
     },
     async share() {
       if (!this.request || !this.webShareSupported) return;
@@ -448,20 +453,6 @@ export default defineComponent({
 /* The QR gives up some height on short phones so the table under it stays in view. */
 .pr-body {
   --app-qr-size: clamp(200px, min(70vw, 34vh), 300px);
-}
-.pr-code {
-  align-self: center;
-  background: none;
-  border: 0;
-  color: var(--app-text-muted);
-  cursor: pointer;
-  font-size: 13px;
-  margin-top: -8px;
-  max-width: 100%;
-  overflow: hidden;
-  padding: 4px 8px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 .pr-table {
   display: flex;

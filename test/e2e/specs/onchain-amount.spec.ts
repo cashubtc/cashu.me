@@ -49,7 +49,7 @@ for (const unit of ["usd", "eur"] as const) {
     await enterCents(113);
     await expect(create).toBeEnabled();
     await create.click();
-    await expect(page.locator(".qr-copy-text:visible")).toBeVisible();
+    await expect(page.locator(".qr-copy-line:visible")).toBeVisible();
     await expect(page.locator(".deposit-limits-warning:visible")).toHaveText(
       `Deposits outside ${symbol}1.13–${symbol}4.10 won't be credited.`
     );
@@ -154,12 +154,12 @@ test("validates new on-chain addresses while preserving quote reuse and history 
   );
   await create.click();
   const quote = await (await created).json();
-  const addressText = page.locator(".qr-copy-text:visible");
+  const addressText = page.locator(".qr-copy-line:visible");
   await expect(addressText).toContainText(quote.request);
   await expect(limitsHint).toBeVisible();
   await expect(addressText).not.toContainText("bitcoin:");
   await expect(page.locator(".qr-container:visible a")).toHaveCount(0);
-  await page.locator(".qr-copy-text:visible").click();
+  await page.locator(".qr-copy-line:visible").click();
   await expect
     .poll(() => page.evaluate(() => navigator.clipboard.readText()))
     .toBe(quote.request);

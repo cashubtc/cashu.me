@@ -430,6 +430,16 @@ export const DS_ITEMS: DsItem[] = [
     example: `<QrBlock :value="invoice" />\n<QrProgress :active="checking" />`,
   },
   {
+    id: "qr-copy-line",
+    name: "QR copy line",
+    group: "data",
+    tier: "primitive",
+    source: "src/components/ui/QrCopyLine.vue",
+    usage: { tag: "QrCopyLine" },
+    example: `<QrCopyLine :text="address" :copied="copied" @copy="copyAddress" />`,
+    note: "The tap-to-copy text under every QR (on-chain address, Lightning address, payment request): the copy glyph turns into a check once copied.",
+  },
+  {
     id: "qr-progress",
     name: "QR progress",
     group: "data",

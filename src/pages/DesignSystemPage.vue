@@ -645,6 +645,14 @@
       <DsEntry id="qr-code">
         <QrBlock value="cashu:demo-token" />
       </DsEntry>
+      <DsEntry id="qr-copy-line">
+        <QrCopyLine
+          text="bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq"
+          :copied="qrCopied"
+          @copy="qrCopied = !qrCopied"
+        />
+        <QrCopyLine text="creqApGF0gaNhd...dWNzYXQ=" copied />
+      </DsEntry>
       <DsEntry id="qr-progress">
         <div class="ds-qr-progress q-mx-auto">
           <QrBlock value="cashu:demo-token" />
@@ -1001,6 +1009,7 @@ import ChainStatusRow from "src/components/ChainStatusRow.vue";
 import MintReviewSummary from "src/components/MintReviewSummary.vue";
 import PwaPrompt from "src/components/PwaPrompt.vue";
 import QrBlock from "src/components/QrBlock.vue";
+import QrCopyLine from "src/components/ui/QrCopyLine.vue";
 import QrProgress from "src/components/QrProgress.vue";
 import TermsOfServiceText from "src/components/TermsOfServiceText.vue";
 import CopyButton from "src/components/ui/CopyButton.vue";
@@ -1087,6 +1096,7 @@ export default defineComponent({
     MintReviewSummary,
     PwaPrompt,
     QrBlock,
+    QrCopyLine,
     QrProgress,
     SectionDivider,
     SettingsActionRow,
@@ -1335,6 +1345,7 @@ export default defineComponent({
         "sat"
       ).toEncodedRequest(),
       unitPick: "sat",
+      qrCopied: false,
       cards: [
         {
           url: "https://mint.example.com",

@@ -119,27 +119,16 @@
                   >
                     <QrBlock :value="qrPreview.value" />
                   </div>
-                  <div
-                    class="q-mt-sm text-center text-app-muted qr-copy-text app-mono app-mono--wrap cursor-pointer"
+                  <QrCopyLine
+                    :text="qrPreview.text"
+                    :copied="qrPreview.copied"
                     :data-testid="
                       qrPreview.kind === 'npubcash'
                         ? 'npub-cash-lightning-address'
                         : null
                     "
-                    @click="copyQrPreview"
-                  >
-                    <CheckIcon
-                      v-if="qrPreview.copied"
-                      :size="16"
-                      class="q-mr-xs qr-copy-text__icon"
-                    />
-                    <CopyIcon
-                      v-else
-                      :size="16"
-                      class="q-mr-xs qr-copy-text__icon"
-                    />
-                    {{ qrPreview.text }}
-                  </div>
+                    @copy="copyQrPreview"
+                  />
                   <OnchainDepositLimits
                     v-if="isOnchain"
                     class="q-mt-md"
@@ -283,12 +272,11 @@
   </q-dialog>
 </template>
 <script lang="ts">
+import QrCopyLine from "src/components/ui/QrCopyLine.vue";
 import SegmentedControl from "src/components/ui/SegmentedControl.vue";
 import PendingDots from "src/components/ui/PendingDots.vue";
 import {
-  Check as CheckIcon,
   ChevronLeft as ChevronLeftIcon,
-  Copy as CopyIcon,
   RefreshCw as RefreshCwIcon,
 } from "lucide-vue-next";
 import AppCallout from "src/components/AppCallout.vue";
@@ -328,11 +316,10 @@ export default defineComponent({
   name: "CreateInvoiceDialog",
   mixins: [windowMixin],
   components: {
+    QrCopyLine,
     SegmentedControl,
     PendingDots,
     RefreshCwIcon,
-    CheckIcon,
-    CopyIcon,
     AppCallout,
     ChevronLeftIcon,
     ChooseMint,
