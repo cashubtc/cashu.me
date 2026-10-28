@@ -209,6 +209,7 @@ export default {
         wallet: "Wallet",
         connections: "Connections",
         preferences: "Preferences",
+        more: "More",
       },
       title: "Settings",
       backup: {

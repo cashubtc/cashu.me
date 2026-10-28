@@ -190,6 +190,7 @@ export default {
         wallet: "กระเป๋าเงิน",
         connections: "การเชื่อมต่อ",
         preferences: "การตั้งค่า",
+        more: "เพิ่มเติม",
       },
       title: "การตั้งค่า",
       backup: {

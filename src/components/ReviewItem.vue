@@ -75,8 +75,17 @@
 
       <!-- Two comment lines, as most loaded reviews have, so rows don't grow when text lands. -->
       <div v-if="skeleton" class="review-comment column" style="gap: 6px">
-        <q-skeleton type="rect" width="92%" height="14px" />
-        <q-skeleton type="rect" width="64%" height="14px" />
+        <q-skeleton
+          type="rect"
+          :width="skeletonLines > 1 ? '92%' : '72%'"
+          height="14px"
+        />
+        <q-skeleton
+          v-if="skeletonLines > 1"
+          type="rect"
+          width="64%"
+          height="14px"
+        />
       </div>
       <div v-else-if="comment" class="review-comment" dir="auto">
         {{ comment }}
@@ -115,6 +124,8 @@ export default defineComponent({
     /** The user's own review: tinted and pinned. */
     own: { type: Boolean, default: false },
     skeleton: { type: Boolean, default: false },
+    /** Comment lines the skeleton draws (1 or 2), so a list of them varies like reviews. */
+    skeletonLines: { type: Number, default: 2 },
   },
   emits: ["copy-npub"],
 });

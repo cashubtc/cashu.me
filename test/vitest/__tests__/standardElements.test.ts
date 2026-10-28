@@ -56,6 +56,7 @@ describe("standard elements", () => {
     ["ui/QrCopyLine.vue", /^qr-copy-line(__icon)?$/],
     ["ui/AmountHeadline.vue", /^amount-headline$/],
     ["ui/PaymentStatus.vue", /^payment-status(__[\w-]+)?$/],
+    ["ui/UnitToggle.vue", /^sheet-unit-toggle$/],
     ["ui/FlowFooter.vue", /^(bottom-panel|flow-footer__(bar|col))$/],
     [
       "ui/SectionDivider.vue",

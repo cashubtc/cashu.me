@@ -197,6 +197,7 @@ export default {
         wallet: "Cüzdan",
         connections: "Bağlantılar",
         preferences: "Tercihler",
+        more: "Daha fazla",
       },
       title: "Ayarlar",
       backup: {

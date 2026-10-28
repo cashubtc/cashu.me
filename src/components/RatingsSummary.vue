@@ -11,8 +11,8 @@
         <q-skeleton
           v-if="skeleton"
           type="rect"
-          width="56px"
-          height="40px"
+          width="72px"
+          height="56px"
           class="ratings-summary__score-skeleton"
         />
         <template v-else>{{ averageDisplay }}</template>
@@ -33,7 +33,16 @@
         <div
           class="row items-center justify-end no-wrap ratings-summary__stars"
         >
+          <!-- Loading: the star labels are placeholders too, so the empty tracks don't
+               read as a finished chart with no ratings (council R75). -->
+          <q-skeleton
+            v-if="skeleton"
+            type="rect"
+            :width="`${star * 13}px`"
+            height="10px"
+          />
           <StarIcon
+            v-else
             v-for="i in star"
             :key="i"
             :size="12"
@@ -137,6 +146,10 @@ export default defineComponent({
 }
 .ratings-summary__track-skeleton {
   border-radius: 2px;
+}
+.ratings-summary__track:has(.ratings-summary__track-skeleton) {
+  height: 8px;
+  border-radius: 4px;
 }
 @media (prefers-reduced-motion: reduce) {
   .ratings-summary__fill {

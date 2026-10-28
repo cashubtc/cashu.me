@@ -192,6 +192,7 @@ export default {
         wallet: "Πορτοφόλι",
         connections: "Συνδέσεις",
         preferences: "Προτιμήσεις",
+        more: "Περισσότερα",
       },
       title: "Ρυθμίσεις",
       backup: {

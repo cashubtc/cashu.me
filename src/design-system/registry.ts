@@ -311,6 +311,15 @@ export const DS_ITEMS: DsItem[] = [
   },
 
   {
+    id: "unit-toggle",
+    name: "Unit toggle",
+    group: "navigation",
+    tier: "primitive",
+    source: "src/components/ui/UnitToggle.vue",
+    usage: { tag: "UnitToggle" },
+    example: `<UnitToggle :label="activeUnitLabel" @toggle="toggleUnit()" />`,
+  },
+  {
     id: "fullscreen-dialog-header",
     name: "Fullscreen dialog header",
     group: "navigation",

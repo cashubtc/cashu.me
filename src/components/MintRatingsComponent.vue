@@ -85,7 +85,12 @@
 
     <q-card-section v-if="hasAnyReviews || fetchingReviews" class="q-px-none">
       <div v-if="!hasAnyReviews" class="column">
-        <ReviewItem v-for="n in 3" :key="n" skeleton />
+        <ReviewItem
+          v-for="n in 3"
+          :key="n"
+          skeleton
+          :skeleton-lines="n === 2 ? 1 : 2"
+        />
       </div>
       <div v-else class="column">
         <ReviewItem

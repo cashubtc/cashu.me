@@ -206,7 +206,9 @@
             :label="$t('MintDetailsDialog.details.currencies.label')"
             :value="
               mintUnits
-                .map((unit) => (unit === 'sat' ? 'sat' : unit.toUpperCase()))
+                .map((unit) =>
+                  unit === 'sat' ? 'sat' : unit.toUpperCase()
+                )
                 .join(', ')
             "
           />
@@ -480,6 +482,18 @@ export default defineComponent({
 </script>
 
 <style scoped>
+/* One gap before every section label: each section drops its own trailing margin and the
+   label sits 32px below it (the gaps were 56px above Mint details and 24px above Audit info,
+   council R75). */
+.mint-content-container > :has(+ .section-divider-block) {
+  margin-bottom: 0 !important;
+}
+.mint-content-container > :has(+ .section-divider-block) > :deep(:last-child) {
+  margin-bottom: 0 !important;
+}
+.mint-content-container > .section-divider-block {
+  margin-top: 32px;
+}
 /* The page scrolls as a whole; no inner scroll container. */
 .mint-details-page-content {
   max-width: var(--app-column);

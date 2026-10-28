@@ -466,11 +466,26 @@
             <template #side><DownloadIcon :size="18" /></template>
           </SettingsActionRow>
           <SettingsActionRow
+            label="New seed phrase"
+            caption="Replaces the phrase this wallet uses"
+            caution
+          />
+          <SettingsActionRow
             label="Delete wallet"
             caption="Removes everything on this device"
             danger
           />
         </q-list>
+      </DsEntry>
+      <DsEntry id="unit-toggle">
+        <!-- With the lock action it sits beside in Send: the same disc. -->
+        <div class="ds-frame row items-center no-wrap q-pa-sm" style="gap: 4px">
+          <IconButton class="lock-toggle-btn" label="Lock to a key">
+            <LockIcon :size="20" />
+          </IconButton>
+          <UnitToggle label="₿" />
+          <UnitToggle label="$" />
+        </div>
       </DsEntry>
       <DsEntry id="fullscreen-dialog-header">
         <div class="ds-frame">
@@ -1138,6 +1153,7 @@ import FullscreenDialogHeader from "src/components/ui/FullscreenDialogHeader.vue
 import InlineConfirm from "src/components/ui/InlineConfirm.vue";
 import SectionDivider from "src/components/ui/SectionDivider.vue";
 import SettingsActionRow from "src/components/ui/SettingsActionRow.vue";
+import UnitToggle from "src/components/ui/UnitToggle.vue";
 import SettingsLinkRow from "src/components/ui/SettingsLinkRow.vue";
 import SettingsRadioRow from "src/components/ui/SettingsRadioRow.vue";
 import SettingsToggleRow from "src/components/ui/SettingsToggleRow.vue";
@@ -1225,6 +1241,7 @@ export default defineComponent({
     QrProgress,
     SectionDivider,
     SettingsActionRow,
+    UnitToggle,
     SettingsLinkRow,
     SettingsRadioRow,
     SettingsSection,

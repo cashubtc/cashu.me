@@ -131,6 +131,7 @@
             ? ''
             : $t('Settings.advanced.developer.new_seed.description')
         "
+        caution
         @click="confirmMnemonic = true"
       >
         <InlineConfirm

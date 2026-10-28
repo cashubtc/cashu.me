@@ -189,6 +189,7 @@ export default {
         wallet: "钱包",
         connections: "连接",
         preferences: "偏好设置",
+        more: "更多",
       },
       title: "设置",
       backup: {

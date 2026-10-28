@@ -210,6 +210,7 @@ export default {
         wallet: "Carteira",
         connections: "Conexões",
         preferences: "Preferências",
+        more: "Mais",
       },
       title: "Configurações",
       backup: {

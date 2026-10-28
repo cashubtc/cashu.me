@@ -192,6 +192,7 @@ export default {
         wallet: "Cartera",
         connections: "Conexiones",
         preferences: "Preferencias",
+        more: "Más",
       },
       title: "Ajustes",
       backup: {

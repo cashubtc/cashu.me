@@ -2,8 +2,9 @@
   <div class="sheet-select">
     <!-- A labelled field that opens a bottom sheet of options: the same field as the
          Lightning address mint picker and the same sheet as Send and Receive. -->
-    <!-- As a settings row: the setting's name and description on the start side, the
-         current value and a chevron on the end side, like every other settings row. -->
+    <!-- As a settings row: the setting's name, its current value under it and the
+         description on the start side, one centred chevron on the end side (a value beside
+         the chevron wrapped and pushed the chevron off-centre, council R75). -->
     <q-item
       v-if="row"
       clickable
@@ -18,12 +19,12 @@
     >
       <q-item-section>
         <q-item-label>{{ label }}</q-item-label>
+        <q-item-label class="sheet-select__value">{{
+          selectedOption?.label ?? placeholder
+        }}</q-item-label>
         <q-item-label v-if="caption" caption>{{ caption }}</q-item-label>
       </q-item-section>
-      <q-item-section side class="row no-wrap items-center sheet-select__side">
-        <span class="sheet-select__value">{{
-          selectedOption?.label ?? placeholder
-        }}</span>
+      <q-item-section side>
         <ChevronRightIcon
           :size="18"
           class="settings-menu-chevron"
@@ -140,9 +141,10 @@ export default defineComponent({
   color: var(--app-text-muted);
 }
 .sheet-select__value {
-  color: var(--app-text-muted);
+  color: var(--app-text);
   font-size: 15px;
-  margin-inline-end: 4px;
+  font-weight: 500;
+  margin-top: 2px;
 }
 .sheet-select__icon {
   display: inline-flex;

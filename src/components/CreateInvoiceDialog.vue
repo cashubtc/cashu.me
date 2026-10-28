@@ -18,14 +18,7 @@
       >
         <template #actions>
           <div class="row items-center no-wrap sheet-header-actions">
-            <q-btn
-              flat
-              round
-              color="primary"
-              class="sheet-unit-toggle"
-              @click="toggleUnit()"
-              :label="activeUnitLabel"
-            />
+            <UnitToggle :label="activeUnitLabel" @toggle="toggleUnit()" />
           </div>
         </template>
       </FullscreenDialogHeader>
@@ -267,6 +260,7 @@ import {
   RefreshCw as RefreshCwIcon,
 } from "lucide-vue-next";
 import AppCallout from "src/components/AppCallout.vue";
+import UnitToggle from "src/components/ui/UnitToggle.vue";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { copyToClipboard } from "quasar";
@@ -303,6 +297,7 @@ export default defineComponent({
   name: "CreateInvoiceDialog",
   mixins: [windowMixin],
   components: {
+    UnitToggle,
     FlowDialog,
     BusyLabel,
     FlowFooter,

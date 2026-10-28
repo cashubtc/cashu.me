@@ -210,6 +210,7 @@ export default {
         wallet: "Peněženka",
         connections: "Připojení",
         preferences: "Předvolby",
+        more: "Další",
       },
       title: "Nastavení",
       backup: {

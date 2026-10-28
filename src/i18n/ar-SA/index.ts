@@ -188,6 +188,7 @@ export default {
         wallet: "المحفظة",
         connections: "الاتصالات",
         preferences: "التفضيلات",
+        more: "المزيد",
       },
       title: "الإعدادات",
       backup: {

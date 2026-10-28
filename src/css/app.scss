@@ -581,8 +581,18 @@ body.body--light .q-toggle.disabled .q-toggle__inner--truthy .q-toggle__track {
 }
 /* Tab hover, pressed and focus share one inset shape that ends above the active underline:
    the fill and the ring both sit 6px inside the cell. */
+// The ring is drawn on that inset fill, so it has the fill's rounded corners (an outline at
+// a -6px offset shrank its radius and read square, council R75).
 .q-tab.q-focusable:focus-visible {
-  outline-offset: -6px;
+  outline: none !important;
+}
+.q-tab.q-focusable:focus-visible::after {
+  border-radius: var(--app-radius-sm);
+  box-shadow: 0 0 0 2px var(--app-accent);
+  content: "";
+  inset: 6px;
+  pointer-events: none;
+  position: absolute;
 }
 .q-tab > .q-focus-helper {
   border-radius: var(--app-radius-sm);
@@ -658,7 +668,7 @@ body.body--light .q-dialog__backdrop {
 // Sheet header trailing slot: 44px buttons, outermost is the unit toggle, same glyph size on
 // every sheet (amount entry, receive and pay).
 .sheet-header-actions {
-  gap: 0;
+  gap: 4px;
   position: absolute;
   inset-inline-end: 6px;
 }
@@ -675,7 +685,9 @@ body.body--light .q-dialog__backdrop {
 }
 // The unit symbol sits in a 36px tinted disc, so a bare "₿" reads as a control (council
 // R72-R74), the same quiet container as the scan button.
-.sheet-unit-toggle::before {
+// The lock beside it shares the disc, so the header's trailing pair reads as one set (R75).
+.sheet-unit-toggle::before,
+.lock-toggle-btn::before {
   background: var(--app-tint-strong);
   border-radius: 50%;
   content: "";
@@ -684,7 +696,8 @@ body.body--light .q-dialog__backdrop {
   position: absolute;
   width: 36px;
 }
-.sheet-unit-toggle > .q-btn__content {
+.sheet-unit-toggle > .q-btn__content,
+.lock-toggle-btn > .q-btn__content {
   position: relative;
 }
 

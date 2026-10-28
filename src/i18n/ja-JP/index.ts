@@ -189,6 +189,7 @@ export default {
         wallet: "ウォレット",
         connections: "接続",
         preferences: "環境設定",
+        more: "その他",
       },
       title: "設定",
       backup: {

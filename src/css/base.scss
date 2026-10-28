@@ -93,16 +93,19 @@ $themes: (
       raised: #222226,
       info: #27272a,
     ),
-  "cyber": (
-    fill: #00ff00,
-    on-fill: #0b0b0b,
-    accent: #00ff00,
-    accent-2: #00ff00,
-    light: #007a00,
-    light-2: #007a00,
-    dark: #000,
-    info: #1b1b1b,
-  ),
+  // Cyber's green is pulled back from pure #00ff00, so the large fills and the selected
+  // edge stop glaring while the neon look stays (council R75).
+  "cyber":
+    (
+      fill: #22e55a,
+      on-fill: #0b0b0b,
+      accent: #3df06f,
+      accent-2: #3df06f,
+      light: #007a00,
+      light-2: #007a00,
+      dark: #000,
+      info: #1b1b1b,
+    ),
 );
 
 @each $theme, $t in $themes {

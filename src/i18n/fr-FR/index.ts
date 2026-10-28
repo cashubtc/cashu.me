@@ -195,6 +195,7 @@ export default {
         wallet: "Portefeuille",
         connections: "Connexions",
         preferences: "Préférences",
+        more: "Plus",
       },
       title: "Paramètres",
       backup: {

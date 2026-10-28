@@ -26,14 +26,7 @@
         </template>
         <template #actions>
           <div class="row items-center no-wrap sheet-header-actions">
-            <q-btn
-              flat
-              round
-              color="primary"
-              class="sheet-unit-toggle"
-              @click="toggleUnit()"
-              :label="activeUnitLabel"
-            />
+            <UnitToggle :label="activeUnitLabel" @toggle="toggleUnit()" />
           </div>
         </template>
       </FullscreenDialogHeader>
@@ -677,6 +670,7 @@ import FlowDialog from "src/components/ui/FlowDialog.vue";
 import BusyLabel from "src/components/ui/BusyLabel.vue";
 import FlowFooter from "src/components/ui/FlowFooter.vue";
 import PendingDots from "src/components/ui/PendingDots.vue";
+import UnitToggle from "src/components/ui/UnitToggle.vue";
 import { defineComponent } from "vue";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
@@ -705,6 +699,7 @@ export default defineComponent({
   name: "PayInvoiceDialog",
   mixins: [windowMixin],
   components: {
+    UnitToggle,
     PaymentStatus,
     FlowDialog,
     BusyLabel,

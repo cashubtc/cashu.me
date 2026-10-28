@@ -18,14 +18,7 @@
             >
               <LockIcon :size="20" />
             </IconButton>
-            <q-btn
-              flat
-              round
-              color="primary"
-              class="sheet-unit-toggle"
-              @click="toggleUnit()"
-              :label="activeUnitLabel"
-            />
+            <UnitToggle :label="activeUnitLabel" @toggle="toggleUnit()" />
           </div>
         </template>
       </FullscreenDialogHeader>
@@ -216,6 +209,7 @@ import BusyLabel from "src/components/ui/BusyLabel.vue";
 import FlowFooter from "src/components/ui/FlowFooter.vue";
 import IconButton from "src/components/ui/IconButton.vue";
 import AppBadge from "src/components/ui/AppBadge.vue";
+import UnitToggle from "src/components/ui/UnitToggle.vue";
 import { defineComponent } from "vue";
 import AppCallout from "src/components/AppCallout.vue";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
@@ -249,6 +243,7 @@ export default defineComponent({
   name: "SendTokenDialog",
   mixins: [windowMixin],
   components: {
+    UnitToggle,
     FlowDialog,
     BusyLabel,
     FlowFooter,

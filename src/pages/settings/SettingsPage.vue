@@ -1,11 +1,8 @@
 <template>
   <SettingsPageShell :title="$t('Settings.menu.title')">
     <template v-for="group in visibleGroups" :key="group.name">
-      <!-- The everyday groups are named; Advanced and About read as themselves. -->
-      <div
-        v-if="group.titled"
-        class="settings-section-title settings-menu-heading"
-      >
+      <!-- Every group is named (council R75); the last gathers the rest. -->
+      <div class="settings-section-title settings-menu-heading">
         {{ $t(`Settings.menu.groups.${group.name}`) }}
       </div>
       <q-list class="settings-menu-group q-mb-lg">
@@ -57,7 +54,6 @@ export default defineComponent({
       const groups = [
         {
           name: "wallet",
-          titled: true,
           entries: [
             {
               key: "backup",
@@ -78,7 +74,6 @@ export default defineComponent({
         },
         {
           name: "connections",
-          titled: true,
           entries: [
             {
               key: "payment_requests",
@@ -108,7 +103,6 @@ export default defineComponent({
         },
         {
           name: "preferences",
-          titled: true,
           entries: [
             {
               key: "appearance",
@@ -128,7 +122,7 @@ export default defineComponent({
           ],
         },
         {
-          name: "advanced",
+          name: "more",
           entries: [
             {
               key: "experimental",
@@ -140,11 +134,6 @@ export default defineComponent({
               path: "/settings/advanced",
               icon: markRaw(TerminalIcon),
             },
-          ],
-        },
-        {
-          name: "about",
-          entries: [
             {
               key: "about",
               path: "/settings/about",

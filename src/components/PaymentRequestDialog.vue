@@ -29,27 +29,21 @@
           v-if="ownRequestIndices.length > 1"
           class="row items-center justify-center no-wrap pr-pager"
         >
-          <q-btn
-            flat
-            round
-            class="touch-target-44"
-            color="grey"
-            :aria-label="$t('PaymentRequestDialog.actions.previous.label')"
+          <IconButton
+            :label="$t('PaymentRequestDialog.actions.previous.label')"
+            :disable="requestPosition <= 0"
             @click="stepRequest(-1)"
           >
             <ChevronLeftIcon :size="24" />
-          </q-btn>
+          </IconButton>
           <div class="pr-pager__label">{{ currentIndexDisplay }}</div>
-          <q-btn
-            flat
-            round
-            class="touch-target-44"
-            color="grey"
-            :aria-label="$t('PaymentRequestDialog.actions.next.label')"
+          <IconButton
+            :label="$t('PaymentRequestDialog.actions.next.label')"
+            :disable="requestPosition >= ownRequestIndices.length - 1"
             @click="stepRequest(1)"
           >
             <ChevronRightIcon :size="24" />
-          </q-btn>
+          </IconButton>
         </div>
 
         <PaymentRequestView
@@ -120,12 +114,17 @@ export default defineComponent({
         .filter(({ entry }) => this.isOwnRequest(entry.encoded))
         .map(({ index }) => index);
     },
+    // The shown request's place among them (the newest when none is selected).
+    requestPosition(): number {
+      const own = this.ownRequestIndices;
+      const position = own.indexOf(this.selectedPRIndex as number);
+      return position < 0 ? own.length - 1 : position;
+    },
     currentIndexDisplay(): string {
       const own = this.ownRequestIndices;
       if (!own.length) return "0/0";
-      const position = own.indexOf(this.selectedPRIndex as number);
       return this.$t("PaymentRequestDialog.request_index", {
-        index: (position < 0 ? own.length - 1 : position) + 1,
+        index: this.requestPosition + 1,
         total: own.length,
       }) as string;
     },
@@ -173,10 +172,10 @@ export default defineComponent({
     stepRequest(step: number) {
       const own = this.ownRequestIndices;
       if (own.length <= 1) return;
-      const position = Math.max(0, own.indexOf(this.selectedPRIndex as number));
-      this.selectRequestByIndex(
-        own[(position + step + own.length) % own.length]
-      );
+      // The pager stops at the first and last request (its arrows disable there).
+      const next = this.requestPosition + step;
+      if (next < 0 || next >= own.length) return;
+      this.selectRequestByIndex(own[next]);
     },
     applyChanges(next: RequestFields) {
       try {

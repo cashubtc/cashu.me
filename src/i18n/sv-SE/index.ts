@@ -189,6 +189,7 @@ export default {
         wallet: "Plånbok",
         connections: "Anslutningar",
         preferences: "Inställningar",
+        more: "Mer",
       },
       title: "Inställningar",
       backup: {

@@ -9,21 +9,22 @@
     >
       <q-item>
         <q-item-section>
-          <div class="row items-center q-gutter-sm">
+          <!-- Two equal choices, one filled and one outlined, sharing the row (council
+               R75: a full button beside a small one read as unrelated). -->
+          <div class="row no-wrap p2pk-setup-actions">
             <q-btn
               color="primary"
               rounded
               unelevated
-              class="settings-primary-action"
+              class="col settings-primary-action"
               @click="generateKeypair"
               >{{ $t("Settings.p2pk_features.generate_button") }}</q-btn
             >
             <q-btn
-              class="q-px-md"
               color="primary"
-              size="sm"
               rounded
               outline
+              class="col"
               @click="importNsec"
               >{{ $t("Settings.p2pk_features.import_button") }}</q-btn
             >
@@ -131,3 +132,9 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.p2pk-setup-actions {
+  gap: 12px;
+}
+</style>

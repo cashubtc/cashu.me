@@ -165,6 +165,7 @@ export default {
         wallet: "Portafoglio",
         connections: "Connessioni",
         preferences: "Preferenze",
+        more: "Altro",
       },
       title: "Impostazioni",
       backup: {
