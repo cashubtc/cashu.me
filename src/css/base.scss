@@ -73,7 +73,8 @@ $themes: (
     accent-2: #ff85c5,
     light: #d1006b,
     light-2: #d1006b,
-    dark: #56353f,
+    // A deeper plum page: captions on the raised sheets clear 4.5:1 (#56353f left them ~3.9).
+    dark: #4a2d36,
     info: #56353a,
   ),
   // Dark mode on a charcoal page with zinc steps, not pure black: the council's colour vote
@@ -192,7 +193,7 @@ body.body--dark {
   // thing on screen without the glare of #fff on dark pages.
   --app-text: #f4f4f5;
   --app-text-muted: rgba(244, 244, 245, 0.72);
-  --app-text-subtle: rgba(244, 244, 245, 0.6);
+  --app-text-subtle: rgba(244, 244, 245, 0.64);
   --app-text-disabled: rgba(244, 244, 245, 0.5);
   --app-border: rgba(255, 255, 255, 0.16);
   --app-tint: rgba(255, 255, 255, 0.08);

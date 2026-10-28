@@ -85,6 +85,15 @@ describe("standard elements", () => {
     ]);
   });
 
+  // Full-screen flows are FlowDialog (one shell: fade, Escape closes, the desktop dialog).
+  it("full-screen flows use FlowDialog", () => {
+    expect(
+      offenders((text) => /<q-dialog\b[^>]*\smaximized[\s>]/.test(text)).filter(
+        (file) => !file.endsWith("ui/FlowDialog.vue")
+      )
+    ).toEqual(["pages/WalletPage.vue"]);
+  });
+
   it("busy buttons say what they are doing with BusyLabel", () => {
     expect(
       offenders((text) => /<PendingDots class="on-left"/.test(text)).filter(

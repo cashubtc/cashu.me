@@ -73,8 +73,10 @@
         {{ $t("MintRatings.no_rating") }}
       </div>
 
-      <div v-if="skeleton" class="review-comment">
-        <q-skeleton type="rect" width="90%" height="14px" />
+      <!-- Two comment lines, as most loaded reviews have, so rows don't grow when text lands. -->
+      <div v-if="skeleton" class="review-comment column" style="gap: 6px">
+        <q-skeleton type="rect" width="92%" height="14px" />
+        <q-skeleton type="rect" width="64%" height="14px" />
       </div>
       <div v-else-if="comment" class="review-comment" dir="auto">
         {{ comment }}

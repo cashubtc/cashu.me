@@ -137,16 +137,13 @@ export default defineComponent({
   box-shadow: var(--app-focus-ring);
   outline: none;
 }
-/* Disabled: the choice still reads, as a surface thumb with a hairline and a muted label. */
+/* Disabled: the same control, selection included, dimmed as a whole like the keypad beside
+   it (an outlined thumb read as a different, deselected state). */
+.segmented--disabled {
+  opacity: 0.5;
+}
 .segmented--disabled .segmented__option {
   cursor: default;
-}
-.segmented--disabled .segmented__thumb {
-  background: var(--app-surface);
-  box-shadow: inset 0 0 0 1px var(--app-border-strong);
-}
-.segmented--disabled .segmented__option--on {
-  color: var(--app-text-muted);
 }
 @media (prefers-reduced-motion: reduce) {
   .segmented__thumb,

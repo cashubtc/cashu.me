@@ -1,12 +1,6 @@
 <template>
-  <q-dialog
-    v-model="showPRDialog"
-    maximized
-    transition-show="fade"
-    transition-hide="fade"
-    no-backdrop-dismiss
-  >
-    <q-card v-if="showPRKData" class="q-pa-none qcard">
+  <FlowDialog v-model="showPRDialog">
+    <template v-if="showPRKData">
       <div
         :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
         class="display-token-fullscreen"
@@ -64,11 +58,12 @@
           @change="applyChanges"
         />
       </div>
-    </q-card>
-  </q-dialog>
+    </template>
+  </FlowDialog>
 </template>
 
 <script lang="ts">
+import FlowDialog from "src/components/ui/FlowDialog.vue";
 import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
@@ -99,6 +94,7 @@ import PaymentRequestView from "src/components/PaymentRequestView.vue";
 export default defineComponent({
   name: "PRDialog",
   components: {
+    FlowDialog,
     ChevronLeftIcon,
     ChevronRightIcon,
     RefreshCwIcon,

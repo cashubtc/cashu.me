@@ -805,6 +805,32 @@
           action="Go back home"
         />
       </DsEntry>
+      <DsEntry id="flow-dialog">
+        <q-btn rounded outline color="primary" @click="flowOpen = true">
+          Open a full-screen flow
+        </q-btn>
+        <FlowDialog v-model="flowOpen">
+          <div class="display-token-fullscreen bg-dark">
+            <FullscreenDialogHeader title="Lightning invoice" />
+            <div class="content-area q-px-md">
+              <QrBlock value="lnbc1demo" />
+              <QrCopyLine text="lnbc10u1p4wytd...spuaqmj0" />
+              <AmountHeadline>₿1,000</AmountHeadline>
+            </div>
+            <FlowFooter>
+              <q-btn
+                class="full-width"
+                unelevated
+                size="lg"
+                color="primary"
+                rounded
+                @click="flowOpen = false"
+                >Copy invoice</q-btn
+              >
+            </FlowFooter>
+          </div>
+        </FlowDialog>
+      </DsEntry>
       <DsEntry id="bottom-sheet">
         <!-- Shown open in place (inline), with the button that opens the real dialog. -->
         <BottomSheet inline title="Send">
@@ -1040,6 +1066,7 @@
 </template>
 
 <script lang="ts">
+import FlowDialog from "src/components/ui/FlowDialog.vue";
 import BusyLabel from "src/components/ui/BusyLabel.vue";
 import FlowFooter from "src/components/ui/FlowFooter.vue";
 import AmountInputComponent from "src/components/AmountInputComponent.vue";
@@ -1147,6 +1174,7 @@ export default defineComponent({
   name: "DesignSystemPage",
   mixins: [windowMixin],
   components: {
+    FlowDialog,
     BusyLabel,
     FlowFooter,
     AmountHeadline,
@@ -1389,6 +1417,7 @@ export default defineComponent({
       sortSheetOptions: sortOptions.map((o) => ({ label: o, value: o })),
       sort: "Newest",
       sheetOpen: false,
+      flowOpen: false,
       confirmOpen: false,
       invoiceType: "bolt11",
       url: "",

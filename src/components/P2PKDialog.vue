@@ -1,12 +1,6 @@
 <template>
-  <q-dialog
-    v-model="showP2PKDialog"
-    maximized
-    transition-show="fade"
-    transition-hide="fade"
-    no-backdrop-dismiss
-  >
-    <q-card v-if="p2pkData.publicKey" class="q-pa-none qcard">
+  <FlowDialog v-model="showP2PKDialog">
+    <template v-if="p2pkData.publicKey">
       <div
         :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
         class="display-token-fullscreen"
@@ -72,10 +66,11 @@
           </q-btn>
         </FlowFooter>
       </div>
-    </q-card>
-  </q-dialog>
+    </template>
+  </FlowDialog>
 </template>
 <script lang="ts">
+import FlowDialog from "src/components/ui/FlowDialog.vue";
 import FlowFooter from "src/components/ui/FlowFooter.vue";
 import { RefreshCw as RefreshCwIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
@@ -92,6 +87,7 @@ export default defineComponent({
   name: "P2PKDialog",
   mixins: [windowMixin],
   components: {
+    FlowDialog,
     FlowFooter,
     RefreshCwIcon,
     QrBlock,

@@ -1,230 +1,217 @@
 <template>
-  <q-dialog
-    v-model="showSendTokens"
-    maximized
-    transition-show="fade"
-    transition-hide="fade"
-    no-backdrop-dismiss
-    @keydown.esc="showSendTokens = false"
-  >
-    <q-card class="q-pa-none q-pt-none qcard">
-      <!--  enter send data (full-screen) -->
-      <div
-        v-if="!sendData.tokens"
-        class="column fit overflow-hidden send-fullscreen"
-        :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
-      >
-        <!-- Header -->
-        <FullscreenDialogHeader :title="$t('SendTokenDialog.title')" balanced>
-          <template #actions>
-            <div class="row items-center no-wrap sheet-header-actions">
-              <IconButton
-                class="lock-toggle-btn"
-                tooltip
-                :label="$t('SendTokenDialog.actions.lock.label')"
-                @click="showLockInput = !showLockInput"
-              >
-                <LockIcon :size="20" />
-              </IconButton>
-              <q-btn
-                flat
-                round
-                color="primary"
-                class="sheet-unit-toggle"
-                @click="toggleUnit()"
-                :label="activeUnitLabel"
-              />
-            </div>
-          </template>
-        </FullscreenDialogHeader>
-
-        <!-- Payment request info -->
-        <div v-if="sendData.paymentRequest" class="row justify-center q-pt-sm">
-          <div class="col-12 q-px-lg" style="max-width: var(--app-column)">
-            <PaymentRequestInfo :request="sendData.paymentRequest" />
-          </div>
-        </div>
-
-        <!-- Mint selection -->
-        <div class="row justify-center">
-          <div
-            class="col-12 q-px-md q-mb-sm"
-            style="max-width: var(--app-column)"
-          >
-            <ChooseMint />
-            <AppCallout
-              v-if="paymentRequestMintWarning"
-              variant="danger"
-              class="q-mt-sm"
-              :text="paymentRequestMintWarning"
+  <FlowDialog v-model="showSendTokens">
+    <!--  enter send data (full-screen) -->
+    <div
+      v-if="!sendData.tokens"
+      class="column fit overflow-hidden send-fullscreen"
+      :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
+    >
+      <!-- Header -->
+      <FullscreenDialogHeader :title="$t('SendTokenDialog.title')" balanced>
+        <template #actions>
+          <div class="row items-center no-wrap sheet-header-actions">
+            <IconButton
+              class="lock-toggle-btn"
+              tooltip
+              :label="$t('SendTokenDialog.actions.lock.label')"
+              @click="showLockInput = !showLockInput"
+            >
+              <LockIcon :size="20" />
+            </IconButton>
+            <q-btn
+              flat
+              round
+              color="primary"
+              class="sheet-unit-toggle"
+              @click="toggleUnit()"
+              :label="activeUnitLabel"
             />
           </div>
-        </div>
+        </template>
+      </FullscreenDialogHeader>
 
-        <!-- Amount display -->
-        <div class="col column items-center justify-center q-px-lg amount-area">
-          <!-- Floating P2PK input overlay -->
-          <transition
-            appear
-            enter-active-class="animated fadeIn"
-            leave-active-class="animated fadeOut"
-          >
-            <div v-if="showLockInput" class="p2pk-overlay">
-              <div class="row justify-center">
-                <div
-                  class="col-12 q-px-lg"
-                  style="max-width: var(--app-column)"
-                >
-                  <div class="row items-center">
-                    <div :class="!sendData.p2pkPubkey ? 'col-8' : 'col-12'">
-                      <q-input
-                        v-model="sendData.p2pkPubkey"
-                        :label="
-                          sendData.p2pkPubkey && !isLocked
-                            ? $t(
-                                'SendTokenDialog.inputs.p2pk_pubkey.label_invalid'
-                              )
-                            : $t('SendTokenDialog.inputs.p2pk_pubkey.label')
-                        "
-                        outlined
-                        clearable
-                        :color="sendData.p2pkPubkey && !isLocked ? 'red' : ''"
-                        @keyup.enter="lockTokens"
-                      />
-                    </div>
-                    <div class="col-4 q-pl-sm" v-if="!sendData.p2pkPubkey">
-                      <q-btn
-                        unelevated
-                        v-if="canPasteFromClipboard"
-                        :aria-label="
-                          $t(
-                            'SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text'
-                          )
-                        "
-                        @click="pasteToP2PKField"
-                      >
-                        <ClipboardPasteIcon :size="20" />
-                        <q-tooltip>{{
-                          $t(
-                            "SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text"
-                          )
-                        }}</q-tooltip>
-                      </q-btn>
-                      <q-btn
-                        align="center"
-                        flat
-                        outline
-                        color="primary"
-                        round
-                        @click="showCamera"
-                      >
-                        <ScanIcon :size="20" />
-                      </q-btn>
-                    </div>
+      <!-- Payment request info -->
+      <div v-if="sendData.paymentRequest" class="row justify-center q-pt-sm">
+        <div class="col-12 q-px-lg" style="max-width: var(--app-column)">
+          <PaymentRequestInfo :request="sendData.paymentRequest" />
+        </div>
+      </div>
+
+      <!-- Mint selection -->
+      <div class="row justify-center">
+        <div
+          class="col-12 q-px-md q-mb-sm"
+          style="max-width: var(--app-column)"
+        >
+          <ChooseMint />
+          <AppCallout
+            v-if="paymentRequestMintWarning"
+            variant="danger"
+            class="q-mt-sm"
+            :text="paymentRequestMintWarning"
+          />
+        </div>
+      </div>
+
+      <!-- Amount display -->
+      <div class="col column items-center justify-center q-px-lg amount-area">
+        <!-- Floating P2PK input overlay -->
+        <transition
+          appear
+          enter-active-class="animated fadeIn"
+          leave-active-class="animated fadeOut"
+        >
+          <div v-if="showLockInput" class="p2pk-overlay">
+            <div class="row justify-center">
+              <div class="col-12 q-px-lg" style="max-width: var(--app-column)">
+                <div class="row items-center">
+                  <div :class="!sendData.p2pkPubkey ? 'col-8' : 'col-12'">
+                    <q-input
+                      v-model="sendData.p2pkPubkey"
+                      :label="
+                        sendData.p2pkPubkey && !isLocked
+                          ? $t(
+                              'SendTokenDialog.inputs.p2pk_pubkey.label_invalid'
+                            )
+                          : $t('SendTokenDialog.inputs.p2pk_pubkey.label')
+                      "
+                      outlined
+                      clearable
+                      :color="sendData.p2pkPubkey && !isLocked ? 'red' : ''"
+                      @keyup.enter="lockTokens"
+                    />
+                  </div>
+                  <div class="col-4 q-pl-sm" v-if="!sendData.p2pkPubkey">
+                    <q-btn
+                      unelevated
+                      v-if="canPasteFromClipboard"
+                      :aria-label="
+                        $t(
+                          'SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text'
+                        )
+                      "
+                      @click="pasteToP2PKField"
+                    >
+                      <ClipboardPasteIcon :size="20" />
+                      <q-tooltip>{{
+                        $t(
+                          "SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text"
+                        )
+                      }}</q-tooltip>
+                    </q-btn>
+                    <q-btn
+                      align="center"
+                      flat
+                      outline
+                      color="primary"
+                      round
+                      @click="showCamera"
+                    >
+                      <ScanIcon :size="20" />
+                    </q-btn>
                   </div>
                 </div>
               </div>
             </div>
-          </transition>
-          <AmountInputComponent
-            v-if="!showLockInput"
-            v-model="sendData.amount"
-            :muted="insufficientFunds"
-            :enabled="!sendData.tokens"
-            :show-fiat-conversion="!insufficientFunds"
-            @enter="sendTokens"
-          >
-            <template #overlay>
-              <AppBadge v-if="isLocked && !showLockInput" class="locked-badge">
-                <LockIcon :size="14" aria-hidden="true" />
-                {{ $t("SendTokenDialog.badge_locked") }}
-              </AppBadge>
-              <div
-                v-if="insufficientFunds && sendData.amount"
-                outline
-                rounded
-                size="md"
-                class="amount-warning-badge"
-              >
-                <transition name="wobble" mode="out-in" appear>
-                  <span
-                    v-if="insufficientFunds && sendData.amount"
-                    :key="'warn-text-' + String(sendData.amount ?? '')"
-                    class="text-caption text-weight-medium text-app-muted"
-                    style="font-size: 16px; display: inline-block"
-                  >
-                    {{
-                      $t(
-                        "PayInvoiceDialog.invoice.balance_too_low_warning_text"
-                      )
-                    }}
-                  </span>
-                </transition>
-              </div>
-            </template>
-          </AmountInputComponent>
-        </div>
-
-        <!-- Numeric keypad -->
-        <FlowFooter>
-          <template #above>
-            <AmountKeypadPanel v-model="sendData.amount" @done="sendTokens" />
-            <!-- Send action below keyboard -->
-          </template>
-          <SendPaymentRequest
-            v-if="sendData.paymentRequest"
-            :button-label="$t('SendTokenDialog.actions.pay.label')"
-            :disable="paymentRequestButtonDisabled"
-            :show-details="false"
-            :full-width="true"
-            :button-rounded="true"
-            :button-dense="false"
-            :button-unelevated="true"
-            button-size="lg"
-            button-color="primary"
-            :button-class="[]"
-            :prepare-token="preparePaymentRequestTokens"
-            @success="handlePaymentRequestSuccess"
-          />
-          <q-btn
-            v-else
-            class="full-width"
-            unelevated
-            size="lg"
-            :disable="
-              sendingEcash ||
-              sendData.amount == null ||
-              sendData.amount <= 0 ||
-              insufficientFunds ||
-              (sendData.p2pkPubkey != '' && !isValidPubkey(sendData.p2pkPubkey))
-            "
-            data-testid="send-ecash"
-            @click="sendTokens"
-            color="primary"
-            rounded
-            type="submit"
-            :loading="sendingEcash"
-          >
-            {{ $t("SendTokenDialog.actions.send.label") }}
-            <template #loading
-              ><BusyLabel
-                ><span>{{
-                  $t("SendTokenDialog.actions.send.in_progress")
-                }}</span></BusyLabel
-              ></template
+          </div>
+        </transition>
+        <AmountInputComponent
+          v-if="!showLockInput"
+          v-model="sendData.amount"
+          :muted="insufficientFunds"
+          :enabled="!sendData.tokens"
+          :show-fiat-conversion="!insufficientFunds"
+          @enter="sendTokens"
+        >
+          <template #overlay>
+            <AppBadge v-if="isLocked && !showLockInput" class="locked-badge">
+              <LockIcon :size="14" aria-hidden="true" />
+              {{ $t("SendTokenDialog.badge_locked") }}
+            </AppBadge>
+            <div
+              v-if="insufficientFunds && sendData.amount"
+              outline
+              rounded
+              size="md"
+              class="amount-warning-badge"
             >
-          </q-btn>
-        </FlowFooter>
+              <transition name="wobble" mode="out-in" appear>
+                <span
+                  v-if="insufficientFunds && sendData.amount"
+                  :key="'warn-text-' + String(sendData.amount ?? '')"
+                  class="text-caption text-weight-medium text-app-muted"
+                  style="font-size: 16px; display: inline-block"
+                >
+                  {{
+                    $t("PayInvoiceDialog.invoice.balance_too_low_warning_text")
+                  }}
+                </span>
+              </transition>
+            </div>
+          </template>
+        </AmountInputComponent>
       </div>
 
-      <!-- show ecash details -->
-      <div v-else class="text-center">
-        <DisplayTokenComponent />
-      </div>
-    </q-card>
-  </q-dialog>
+      <!-- Numeric keypad -->
+      <FlowFooter>
+        <template #above>
+          <AmountKeypadPanel v-model="sendData.amount" @done="sendTokens" />
+          <!-- Send action below keyboard -->
+        </template>
+        <SendPaymentRequest
+          v-if="sendData.paymentRequest"
+          :button-label="$t('SendTokenDialog.actions.pay.label')"
+          :disable="paymentRequestButtonDisabled"
+          :show-details="false"
+          :full-width="true"
+          :button-rounded="true"
+          :button-dense="false"
+          :button-unelevated="true"
+          button-size="lg"
+          button-color="primary"
+          :button-class="[]"
+          :prepare-token="preparePaymentRequestTokens"
+          @success="handlePaymentRequestSuccess"
+        />
+        <q-btn
+          v-else
+          class="full-width"
+          unelevated
+          size="lg"
+          :disable="
+            sendingEcash ||
+            sendData.amount == null ||
+            sendData.amount <= 0 ||
+            insufficientFunds ||
+            (sendData.p2pkPubkey != '' && !isValidPubkey(sendData.p2pkPubkey))
+          "
+          data-testid="send-ecash"
+          @click="sendTokens"
+          color="primary"
+          rounded
+          type="submit"
+          :loading="sendingEcash"
+        >
+          {{ $t("SendTokenDialog.actions.send.label") }}
+          <template #loading
+            ><BusyLabel
+              ><span>{{
+                $t("SendTokenDialog.actions.send.in_progress")
+              }}</span></BusyLabel
+            ></template
+          >
+        </q-btn>
+      </FlowFooter>
+    </div>
+
+    <!-- show ecash details -->
+    <div v-else class="text-center">
+      <DisplayTokenComponent />
+    </div>
+  </FlowDialog>
 </template>
 <script lang="ts">
+import FlowDialog from "src/components/ui/FlowDialog.vue";
 import BusyLabel from "src/components/ui/BusyLabel.vue";
 import FlowFooter from "src/components/ui/FlowFooter.vue";
 import IconButton from "src/components/ui/IconButton.vue";
@@ -262,6 +249,7 @@ export default defineComponent({
   name: "SendTokenDialog",
   mixins: [windowMixin],
   components: {
+    FlowDialog,
     BusyLabel,
     FlowFooter,
     IconButton,

@@ -80,11 +80,10 @@
           outline
           rounded
           size="lg"
-          class="pr-foot__btn"
+          class="full-width pr-foot__btn"
           data-testid="pr-share"
           @click="share"
         >
-          <ShareIcon :size="20" class="q-mr-sm" />
           {{ $t("PaymentRequestDialog.actions.share.label") }}
         </q-btn>
         <q-btn
@@ -92,11 +91,10 @@
           rounded
           size="lg"
           color="primary"
-          class="pr-foot__btn"
+          class="full-width pr-foot__btn"
           data-testid="pr-copy"
           @click="copy"
         >
-          <CopyIcon :size="20" class="q-mr-sm" />
           {{ $t("PaymentRequestDialog.actions.copy.label") }}
         </q-btn>
       </div>
@@ -197,9 +195,7 @@ import QrCopyLine from "src/components/ui/QrCopyLine.vue";
 import {
   Banknote as BanknoteIcon,
   Coins as CoinsIcon,
-  Copy as CopyIcon,
   Landmark as LandmarkIcon,
-  Share as ShareIcon,
 } from "lucide-vue-next";
 import { defineComponent, type PropType } from "vue";
 import { mapState } from "pinia";
@@ -240,11 +236,9 @@ export default defineComponent({
     AppBadge,
     BottomSheet,
     ChooseMint,
-    CopyIcon,
     DetailRow,
     PaymentRequestPayments,
     QrBlock,
-    ShareIcon,
     SheetOption,
   },
   props: {

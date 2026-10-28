@@ -1243,7 +1243,28 @@ html[dir="rtl"] .q-field__append {
 .display-token-fullscreen .bottom-panel {
   z-index: 2;
 }
+// On desktop the full-screen flows (invoice, token, lock key, payment request) are the same
+// centred 560px dialog as the choosers, over the dimmed wallet, instead of a phone layout
+// stretched across the whole window.
 @media (min-width: 1024px) {
+  .q-dialog__inner--maximized {
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+  }
+  .q-dialog__inner--maximized > .q-card {
+    border-radius: var(--app-radius-xl) !important;
+    height: auto !important;
+    max-height: calc(100vh - 64px) !important;
+    max-width: 560px !important;
+    overflow: hidden;
+    width: 560px !important;
+  }
+  .q-dialog__inner--maximized .display-token-fullscreen {
+    background: var(--app-raised) !important;
+    height: auto;
+    max-height: calc(100vh - 64px);
+  }
   .display-token-fullscreen {
     overflow-y: auto;
   }

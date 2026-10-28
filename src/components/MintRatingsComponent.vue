@@ -69,6 +69,7 @@
       <button
         type="button"
         class="reviews-toolbar__sort"
+        :disabled="!hasAnyReviews"
         aria-haspopup="dialog"
         :aria-expanded="showSortSheet"
         :aria-label="`${$t(
@@ -604,6 +605,11 @@ body[data-theme] .q-card--dark.mint-ratings-root {
 .reviews-toolbar__sort:focus-visible {
   outline: 2px solid var(--app-text);
   outline-offset: 2px;
+}
+/* Nothing to sort until reviews arrive. */
+.reviews-toolbar__sort:disabled {
+  cursor: default;
+  opacity: 0.5;
 }
 .ratings-range {
   color: var(--app-text-muted);

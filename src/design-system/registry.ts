@@ -521,6 +521,16 @@ export const DS_ITEMS: DsItem[] = [
     note: "AlreadyRunning and the 404: the empty state's icon disc, a larger page title, one 320px action.",
   },
   {
+    id: "flow-dialog",
+    name: "Full-screen flow",
+    group: "feedback",
+    tier: "pattern",
+    source: "src/components/ui/FlowDialog.vue",
+    usage: { tag: "FlowDialog" },
+    example: `<FlowDialog v-model="show">\n  <FullscreenDialogHeader :title="…" />\n  …\n  <FlowFooter>…</FlowFooter>\n</FlowDialog>`,
+    note: "Pay, receive, send, invoice, lock key and payment request: full screen on phones, the centred 560px dialog on desktop. Closes on Escape, not on a backdrop tap.",
+  },
+  {
     id: "bottom-sheet",
     name: "Bottom sheet",
     group: "feedback",

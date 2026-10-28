@@ -1,275 +1,262 @@
 <template>
-  <q-dialog
-    v-model="showCreateInvoiceDialog"
-    maximized
-    transition-show="fade"
-    transition-hide="fade"
-    no-backdrop-dismiss
-    @keydown.esc="showCreateInvoiceDialog = false"
-  >
-    <q-card class="q-pa-none q-pt-none qcard">
-      <!-- enter invoice amount (full-screen) -->
-      <div
-        class="column fit overflow-hidden send-fullscreen"
-        :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
+  <FlowDialog v-model="showCreateInvoiceDialog">
+    <!-- enter invoice amount (full-screen) -->
+    <div
+      class="column fit overflow-hidden send-fullscreen"
+      :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
+    >
+      <!-- Header -->
+      <FullscreenDialogHeader
+        :title="
+          isOnchain
+            ? $t('CreateInvoiceDialog.onchain_title')
+            : isBolt12 && !showNpubCashPreview
+            ? $t('CreateInvoiceDialog.bolt12_title')
+            : $t('InvoiceDetailDialog.title')
+        "
+        balanced
       >
-        <!-- Header -->
-        <FullscreenDialogHeader
-          :title="
-            isOnchain
-              ? $t('CreateInvoiceDialog.onchain_title')
-              : isBolt12 && !showNpubCashPreview
-              ? $t('CreateInvoiceDialog.bolt12_title')
-              : $t('InvoiceDetailDialog.title')
-          "
-          balanced
-        >
-          <template #actions>
-            <div class="row items-center no-wrap sheet-header-actions">
-              <q-btn
-                flat
-                round
-                color="primary"
-                class="sheet-unit-toggle"
-                @click="toggleUnit()"
-                :label="activeUnitLabel"
-              />
-            </div>
-          </template>
-        </FullscreenDialogHeader>
-
-        <!-- Mint selection -->
-        <div class="row justify-center">
-          <div
-            class="col-12 q-px-md q-mb-sm"
-            style="max-width: var(--app-column)"
-          >
-            <ChooseMint
-              :filter-payment-method="mintFilterMethod"
-              filter-mint-operation="mint"
-              :disable="createInvoiceButtonBlocked"
-            />
-            <div
-              v-if="!isOnchain && bolt11Supported && bolt12Supported"
-              class="row justify-center q-mt-sm"
-            >
-              <SegmentedControl
-                :model-value="isBolt12"
-                :disable="createInvoiceButtonBlocked"
-                :label="$t('CreateInvoiceDialog.format_label')"
-                @update:model-value="
-                  (v) => v !== isBolt12 && toggleInvoiceType()
-                "
-                :options="[
-                  {
-                    label: $t('CreateInvoiceDialog.formats.bolt11'),
-                    value: false,
-                  },
-                  {
-                    label: $t('CreateInvoiceDialog.formats.bolt12'),
-                    value: true,
-                  },
-                ]"
-              />
-            </div>
-          </div>
-        </div>
-
-        <!-- Amount display -->
-        <div class="col column items-center q-px-lg amount-area">
-          <transition name="receive-content" mode="out-in">
-            <div
-              v-if="qrPreview"
-              :key="qrPreview.key"
-              class="row justify-center full-width q-mt-lg q-mb-auto"
-            >
-              <div class="col-12" style="max-width: 400px">
-                <div
-                  v-if="qrPreview.kind === 'reusable' && activeMintErrored"
-                  class="mint-error-warning"
-                >
-                  <AppCallout
-                    variant="warning"
-                    :title="$t('CreateInvoiceDialog.mint_unreachable')"
-                    :text="$t('CreateInvoiceDialog.mint_unreachable_text')"
-                  >
-                    <template #actions>
-                      <q-btn
-                        flat
-                        dense
-                        color="primary"
-                        :loading="refreshingMint"
-                        @click="refreshActiveMint"
-                      >
-                        <RefreshCwIcon :size="18" class="q-mr-sm" />
-                        {{ $t("CreateInvoiceDialog.reconnect_mint") }}
-                        <template #loading
-                          ><BusyLabel>{{
-                            $t("CreateInvoiceDialog.reconnect_mint")
-                          }}</BusyLabel></template
-                        >
-                      </q-btn>
-                    </template>
-                  </AppCallout>
-                </div>
-                <template v-else>
-                  <div
-                    class="qr-container cursor-pointer"
-                    @click="copyQrPreview"
-                  >
-                    <QrBlock :value="qrPreview.value" />
-                  </div>
-                  <QrCopyLine
-                    :text="qrPreview.text"
-                    :copied="qrPreview.copied"
-                    :data-testid="
-                      qrPreview.kind === 'npubcash'
-                        ? 'npub-cash-lightning-address'
-                        : null
-                    "
-                    @copy="copyQrPreview"
-                  />
-                  <OnchainDepositLimits
-                    v-if="isOnchain"
-                    class="q-mt-md"
-                    :mint-url="activeMintUrl"
-                    :unit="activeUnit"
-                  />
-                </template>
-              </div>
-            </div>
-            <div
-              v-else-if="isOnchain && checkingReusableOnchainQuote"
-              key="checking-onchain"
-              class="column items-center justify-center q-pa-xl q-my-auto"
-            >
-              <PendingDots size="48px" />
-              <div class="text-app-muted q-mt-md">
-                {{ $t("CreateInvoiceDialog.checking_address") }}
-              </div>
-            </div>
-            <!-- A plain keyed wrapper: the out-in transition then leaves a DOM element it can
-                 track, so going back to the address or offer mounts its QR. -->
-            <div
-              v-else-if="showAmountInput"
-              key="amount-input"
-              class="amount-step column justify-center full-width q-my-auto"
-            >
-              <AmountInputComponent
-                class="q-my-auto"
-                v-model="invoiceData.amount"
-                :enabled="!isOnchain || !createInvoiceButtonBlocked"
-                :muted="showOnchainAmountWarning"
-                :show-fiat-conversion="!showOnchainAmountWarning"
-                @enter="requestMintButton"
-              >
-                <template #overlay>
-                  <div
-                    v-if="showOnchainAmountWarning"
-                    class="amount-warning-badge"
-                    role="status"
-                    data-testid="onchain-amount-error"
-                  >
-                    <transition name="wobble" mode="out-in" appear>
-                      <span
-                        :key="'warn-text-' + String(invoiceData.amount ?? '')"
-                        class="text-caption text-weight-medium text-app-muted amount-warning-text"
-                      >
-                        {{ onchainAmountError }}
-                      </span>
-                    </transition>
-                  </div>
-                </template>
-              </AmountInputComponent>
-            </div>
-          </transition>
-        </div>
-
-        <!-- Numeric keypad -->
-        <!-- Numeric keypad and Secondary Actions -->
-        <FlowFooter class="column justify-end">
-          <template #above>
-            <!-- While the invoice is being created, only the busy button reads as active. -->
-            <AmountKeypadPanel
-              v-if="showAmountInput"
-              v-model="invoiceData.amount"
-              :busy="createInvoiceButtonBlocked"
-              @done="requestMintButton"
-            />
-
-            <!-- Secondary Actions Container (Add Amount) -->
-            <div
-              class="row justify-center"
-              v-if="isBolt12 && !showAmountInput && !showNpubCashPreview"
-            >
-              <div class="col-12 q-px-md" style="max-width: var(--app-column)">
-                <q-btn
-                  class="full-width"
-                  outline
-                  rounded
-                  color="primary"
-                  size="lg"
-                  @click="bolt12AddAmount = true"
-                  :label="$t('CreateInvoiceDialog.add_amount')"
-                />
-              </div>
-            </div>
-
-            <!-- Primary action (Add amount / Create). From an amount step opened on an address,
-               offer or Lightning address, a back chevron sits before it, as in the onboarding
-               footer; the header keeps its close button. -->
-          </template>
-          <div class="row no-wrap items-center flow-footer">
+        <template #actions>
+          <div class="row items-center no-wrap sheet-header-actions">
             <q-btn
-              v-if="canReturnToPreview"
               flat
               round
-              class="flow-footer__back"
-              data-testid="invoice-amount-back"
-              :aria-label="$t('common.back')"
-              @click="returnToPreview"
-            >
-              <ChevronLeftIcon :size="24" class="rtl-flip" />
-            </q-btn>
-            <q-btn
-              v-if="showNpubCashPreview"
-              class="full-width"
-              unelevated
-              rounded
               color="primary"
-              size="lg"
-              data-testid="npub-cash-add-amount"
-              :label="$t('PaymentRequestDialog.actions.add_amount.label')"
-              @click="enterNpubCashAmountMode"
+              class="sheet-unit-toggle"
+              @click="toggleUnit()"
+              :label="activeUnitLabel"
             />
-            <q-btn
-              v-else
-              class="full-width"
-              unelevated
-              data-testid="create-payment-request"
-              size="lg"
-              :disable="!canCreate"
-              @click="requestMintButton"
-              color="primary"
-              rounded
-              type="submit"
-              :loading="globalMutexLock || createInvoiceButtonBlocked"
-            >
-              {{ createButtonLabel }}
-              <!-- A label beside the spinner, so the busy state reads even with reduced motion. -->
-              <template #loading
-                ><BusyLabel>{{
-                  $t("InvoiceDetailDialog.actions.create.label_blocked")
-                }}</BusyLabel></template
-              >
-            </q-btn>
           </div>
-        </FlowFooter>
+        </template>
+      </FullscreenDialogHeader>
+
+      <!-- Mint selection -->
+      <div class="row justify-center">
+        <div
+          class="col-12 q-px-md q-mb-sm"
+          style="max-width: var(--app-column)"
+        >
+          <ChooseMint
+            :filter-payment-method="mintFilterMethod"
+            filter-mint-operation="mint"
+            :disable="createInvoiceButtonBlocked"
+          />
+          <div
+            v-if="!isOnchain && bolt11Supported && bolt12Supported"
+            class="row justify-center q-mt-sm"
+          >
+            <SegmentedControl
+              :model-value="isBolt12"
+              :disable="createInvoiceButtonBlocked"
+              :label="$t('CreateInvoiceDialog.format_label')"
+              @update:model-value="(v) => v !== isBolt12 && toggleInvoiceType()"
+              :options="[
+                {
+                  label: $t('CreateInvoiceDialog.formats.bolt11'),
+                  value: false,
+                },
+                {
+                  label: $t('CreateInvoiceDialog.formats.bolt12'),
+                  value: true,
+                },
+              ]"
+            />
+          </div>
+        </div>
       </div>
-    </q-card>
-  </q-dialog>
+
+      <!-- Amount display -->
+      <div class="col column items-center q-px-lg amount-area">
+        <transition name="receive-content" mode="out-in">
+          <div
+            v-if="qrPreview"
+            :key="qrPreview.key"
+            class="row justify-center full-width q-mt-lg q-mb-auto"
+          >
+            <div class="col-12" style="max-width: 400px">
+              <div
+                v-if="qrPreview.kind === 'reusable' && activeMintErrored"
+                class="mint-error-warning"
+              >
+                <AppCallout
+                  variant="warning"
+                  :title="$t('CreateInvoiceDialog.mint_unreachable')"
+                  :text="$t('CreateInvoiceDialog.mint_unreachable_text')"
+                >
+                  <template #actions>
+                    <q-btn
+                      flat
+                      dense
+                      color="primary"
+                      :loading="refreshingMint"
+                      @click="refreshActiveMint"
+                    >
+                      <RefreshCwIcon :size="18" class="q-mr-sm" />
+                      {{ $t("CreateInvoiceDialog.reconnect_mint") }}
+                      <template #loading
+                        ><BusyLabel>{{
+                          $t("CreateInvoiceDialog.reconnect_mint")
+                        }}</BusyLabel></template
+                      >
+                    </q-btn>
+                  </template>
+                </AppCallout>
+              </div>
+              <template v-else>
+                <div class="qr-container cursor-pointer" @click="copyQrPreview">
+                  <QrBlock :value="qrPreview.value" />
+                </div>
+                <QrCopyLine
+                  :text="qrPreview.text"
+                  :copied="qrPreview.copied"
+                  :data-testid="
+                    qrPreview.kind === 'npubcash'
+                      ? 'npub-cash-lightning-address'
+                      : null
+                  "
+                  @copy="copyQrPreview"
+                />
+                <OnchainDepositLimits
+                  v-if="isOnchain"
+                  class="q-mt-md"
+                  :mint-url="activeMintUrl"
+                  :unit="activeUnit"
+                />
+              </template>
+            </div>
+          </div>
+          <div
+            v-else-if="isOnchain && checkingReusableOnchainQuote"
+            key="checking-onchain"
+            class="column items-center justify-center q-pa-xl q-my-auto"
+          >
+            <PendingDots size="48px" />
+            <div class="text-app-muted q-mt-md">
+              {{ $t("CreateInvoiceDialog.checking_address") }}
+            </div>
+          </div>
+          <!-- A plain keyed wrapper: the out-in transition then leaves a DOM element it can
+                 track, so going back to the address or offer mounts its QR. -->
+          <div
+            v-else-if="showAmountInput"
+            key="amount-input"
+            class="amount-step column justify-center full-width q-my-auto"
+          >
+            <AmountInputComponent
+              class="q-my-auto"
+              v-model="invoiceData.amount"
+              :enabled="!isOnchain || !createInvoiceButtonBlocked"
+              :muted="showOnchainAmountWarning"
+              :show-fiat-conversion="!showOnchainAmountWarning"
+              @enter="requestMintButton"
+            >
+              <template #overlay>
+                <div
+                  v-if="showOnchainAmountWarning"
+                  class="amount-warning-badge"
+                  role="status"
+                  data-testid="onchain-amount-error"
+                >
+                  <transition name="wobble" mode="out-in" appear>
+                    <span
+                      :key="'warn-text-' + String(invoiceData.amount ?? '')"
+                      class="text-caption text-weight-medium text-app-muted amount-warning-text"
+                    >
+                      {{ onchainAmountError }}
+                    </span>
+                  </transition>
+                </div>
+              </template>
+            </AmountInputComponent>
+          </div>
+        </transition>
+      </div>
+
+      <!-- Numeric keypad -->
+      <!-- Numeric keypad and Secondary Actions -->
+      <FlowFooter class="column justify-end">
+        <template #above>
+          <!-- While the invoice is being created, only the busy button reads as active. -->
+          <AmountKeypadPanel
+            v-if="showAmountInput"
+            v-model="invoiceData.amount"
+            :busy="createInvoiceButtonBlocked"
+            @done="requestMintButton"
+          />
+
+          <!-- Secondary Actions Container (Add Amount) -->
+          <div
+            class="row justify-center"
+            v-if="isBolt12 && !showAmountInput && !showNpubCashPreview"
+          >
+            <div class="col-12 q-px-md" style="max-width: var(--app-column)">
+              <q-btn
+                class="full-width"
+                outline
+                rounded
+                color="primary"
+                size="lg"
+                @click="bolt12AddAmount = true"
+                :label="$t('CreateInvoiceDialog.add_amount')"
+              />
+            </div>
+          </div>
+
+          <!-- Primary action (Add amount / Create). From an amount step opened on an address,
+               offer or Lightning address, a back chevron sits before it, as in the onboarding
+               footer; the header keeps its close button. -->
+        </template>
+        <div class="row no-wrap items-center flow-footer">
+          <q-btn
+            v-if="canReturnToPreview"
+            flat
+            round
+            class="flow-footer__back"
+            data-testid="invoice-amount-back"
+            :aria-label="$t('common.back')"
+            @click="returnToPreview"
+          >
+            <ChevronLeftIcon :size="24" class="rtl-flip" />
+          </q-btn>
+          <q-btn
+            v-if="showNpubCashPreview"
+            class="full-width"
+            unelevated
+            rounded
+            color="primary"
+            size="lg"
+            data-testid="npub-cash-add-amount"
+            :label="$t('PaymentRequestDialog.actions.add_amount.label')"
+            @click="enterNpubCashAmountMode"
+          />
+          <q-btn
+            v-else
+            class="full-width"
+            unelevated
+            data-testid="create-payment-request"
+            size="lg"
+            :disable="!canCreate"
+            @click="requestMintButton"
+            color="primary"
+            rounded
+            type="submit"
+            :loading="globalMutexLock || createInvoiceButtonBlocked"
+          >
+            {{ createButtonLabel }}
+            <!-- A label beside the spinner, so the busy state reads even with reduced motion. -->
+            <template #loading
+              ><BusyLabel>{{
+                $t("InvoiceDetailDialog.actions.create.label_blocked")
+              }}</BusyLabel></template
+            >
+          </q-btn>
+        </div>
+      </FlowFooter>
+    </div>
+  </FlowDialog>
 </template>
 <script lang="ts">
+import FlowDialog from "src/components/ui/FlowDialog.vue";
 import BusyLabel from "src/components/ui/BusyLabel.vue";
 import FlowFooter from "src/components/ui/FlowFooter.vue";
 import QrCopyLine from "src/components/ui/QrCopyLine.vue";
@@ -316,6 +303,7 @@ export default defineComponent({
   name: "CreateInvoiceDialog",
   mixins: [windowMixin],
   components: {
+    FlowDialog,
     BusyLabel,
     FlowFooter,
     QrCopyLine,
