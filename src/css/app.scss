@@ -235,15 +235,20 @@ body,
   border-radius: 999px;
   color: var(--app-text-muted) !important;
 }
-// Under reduced motion the fill stops; the rail rests as a plain muted track and the caption
-// under it says what is happening, so it never reads as a percentage.
+// Under reduced motion the sweep freezes mid-track: a solid centre segment on a faint rail,
+// so it still reads as "working" (a bare rail read as a divider) without moving.
 @media (prefers-reduced-motion: reduce) {
   .qr-progress .q-linear-progress__model {
     display: none;
   }
   .qr-progress .q-linear-progress__track {
-    background: currentColor !important;
-    opacity: 0.35 !important;
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, currentColor 30%, transparent) 35%,
+      currentColor 35% 65%,
+      color-mix(in srgb, currentColor 30%, transparent) 65%
+    ) !important;
+    opacity: 1 !important;
   }
 }
 
@@ -335,6 +340,15 @@ button:focus-visible {
 .q-btn.q-btn--rounded:not(.q-btn--dense):not(.full-width):not(.q-btn--round) {
   min-height: 44px;
 }
+// Hero actions (empty and blocking states) share one size: sized to the message at 320px,
+// at the full-width height. Quasar's .full-width sets max-width with !important.
+.q-btn.app-empty__action,
+.q-btn.blocking-state__action {
+  font-size: 1.0625rem !important;
+  max-width: 320px !important;
+  min-height: 52px !important;
+  width: 100% !important;
+}
 
 // Fullscreen sheet header: bound to the same app column as the sheet content, so the close
 // button and trailing actions sit on the content edges on desktop instead of the window edges.
@@ -394,6 +408,14 @@ body[data-theme] .welcome-surface,
 .mint-chip__icon {
   color: var(--app-text-muted);
   flex-shrink: 0;
+}
+// Lucide's chevron-down only fills the middle half of its box, so at 20px it reads as 10px
+// beside the 20px scan and lock glyphs; 24px with a heavier stroke matches their weight.
+.mint-chip__icon.lucide-chevron-down-icon {
+  height: 24px;
+  margin-block: -2px;
+  stroke-width: 2.25;
+  width: 24px;
 }
 .mint-chip__name {
   overflow: hidden;
@@ -1506,9 +1528,5 @@ body .q-notification__progress {
 }
 
 .blocking-state__action {
-  width: 100%;
-  max-width: 320px;
-  min-height: 52px;
-  font-size: 16px;
   font-weight: 600;
 }

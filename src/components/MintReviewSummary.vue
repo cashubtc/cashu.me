@@ -12,7 +12,7 @@
       </template>
       <template v-else>{{ fallbackLabel }}</template>
       <ChevronRightIcon
-        :size="14"
+        :size="16"
         class="mint-review__chevron"
         aria-hidden="true"
       />
@@ -51,7 +51,7 @@ export default defineComponent({
 
 <style scoped>
 .mint-review__chevron {
-  color: var(--app-text-subtle);
+  color: var(--app-text-muted);
   flex-shrink: 0;
 }
 html[dir="rtl"] .mint-review__chevron {

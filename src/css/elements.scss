@@ -23,10 +23,6 @@ body.body--light {
 .q-checkbox__bg {
   border-radius: var(--app-radius-sm) !important;
 }
-// An empty state's action is sized to the message, not stretched to the card's edges.
-.app-empty__action {
-  max-width: 320px;
-}
 // Destructive button: the one filled danger treatment (Remove mint, inline Remove), at AA.
 .app-btn-danger.q-btn:not(.q-btn--dense) {
   min-height: 44px;
@@ -312,7 +308,7 @@ button.app-badge {
   max-width: 320px;
 }
 .app-empty__action {
-  margin-top: 8px;
+  margin-top: 16px;
 }
 
 // Machine text: tokens, keys, invoices, keyset ids.

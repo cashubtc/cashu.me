@@ -123,7 +123,7 @@
 }
 
 /* Inline settings actions share one secondary button: 44px tall, 14px label. */
-.settings-view .q-btn--outline:not(.q-btn--round),
+.settings-view .q-btn--outline:not(.q-btn--round):not(.full-width),
 .settings-view .settings-primary-action {
   min-height: 44px;
   font-size: 14px !important;

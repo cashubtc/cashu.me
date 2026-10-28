@@ -55,15 +55,13 @@ export default defineComponent({
 </script>
 
 <style scoped>
-/* Disabled: the switch dims (and stops taking taps); the label and its reason stay readable. */
+/* Disabled: the whole row fades with its switch, so it reads as one unavailable setting;
+   the reason stays legible. */
 .settings-toggle-row--disabled {
   cursor: default;
   pointer-events: none;
 }
-.settings-toggle-row--disabled .q-item__label:not(.q-item__label--caption) {
-  color: var(--app-text-muted);
-}
-.settings-toggle-row--disabled .q-item__label--caption {
-  color: var(--app-text-subtle);
+.settings-toggle-row--disabled .q-item__section--main {
+  opacity: 0.55;
 }
 </style>
