@@ -25,7 +25,7 @@ body.body--light {
 }
 // An empty state's action is sized to the message, not stretched to the card's edges.
 .app-empty__action {
-  max-width: 280px;
+  max-width: 320px;
 }
 // Destructive button: the one filled danger treatment (Remove mint, inline Remove), at AA.
 .app-btn-danger.q-btn:not(.q-btn--dense) {

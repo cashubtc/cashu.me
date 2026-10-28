@@ -187,25 +187,25 @@
         >
           <SearchIcon :size="18" class="q-mr-sm" /> Discover mints
         </q-btn>
+        <q-btn
+          rounded
+          unelevated
+          no-caps
+          color="primary"
+          class="full-width q-mb-sm"
+          loading
+        >
+          Create invoice
+          <template v-slot:loading>
+            <q-spinner-dots size="20px" class="on-left" /> Creating
+          </template>
+        </q-btn>
         <div class="row q-gutter-sm">
           <q-btn rounded outline no-caps color="primary">Outline</q-btn>
           <q-btn rounded flat no-caps color="primary">Flat</q-btn>
           <q-btn rounded unelevated no-caps color="primary" disable
             >Disabled</q-btn
           >
-          <q-btn
-            rounded
-            unelevated
-            no-caps
-            color="primary"
-            class="full-width"
-            loading
-          >
-            Create invoice
-            <template v-slot:loading>
-              <q-spinner-dots size="20px" class="on-left" /> Creating
-            </template>
-          </q-btn>
           <q-btn rounded unelevated no-caps class="app-btn-danger"
             >Remove mint</q-btn
           >

@@ -235,19 +235,15 @@ body,
   border-radius: 999px;
   color: var(--app-text-muted) !important;
 }
-// Under reduced motion the fill stops; the rail shows even dashes, which read as an ongoing
-// check rather than a measured percentage or a divider.
+// Under reduced motion the fill stops; the rail rests as a plain muted track and the caption
+// under it says what is happening, so it never reads as a percentage.
 @media (prefers-reduced-motion: reduce) {
   .qr-progress .q-linear-progress__model {
     display: none;
   }
   .qr-progress .q-linear-progress__track {
-    background: repeating-linear-gradient(
-      90deg,
-      currentColor 0 10px,
-      transparent 10px 16px
-    ) !important;
-    opacity: 0.6 !important;
+    background: currentColor !important;
+    opacity: 0.35 !important;
   }
 }
 
@@ -331,9 +327,13 @@ button:focus-visible {
 
 // Full-width sheet CTAs (Copy, Send, Create invoice) share one size. Quasar's
 // `size` prop writes an inline font-size, hence the override.
+// Two button heights: 52px for full-width and hero actions, 44px for every other pill.
 .q-btn.q-btn--rounded.full-width {
   font-size: 1.0625rem !important;
   min-height: 52px;
+}
+.q-btn.q-btn--rounded:not(.q-btn--dense):not(.full-width):not(.q-btn--round) {
+  min-height: 44px;
 }
 
 // Fullscreen sheet header: bound to the same app column as the sheet content, so the close
@@ -843,10 +843,33 @@ body .q-field--outlined .q-field__control {
 // with no edge, so they never read as editable.
 body .q-field--outlined.q-field--readonly .q-field__control {
   background: var(--app-tint);
+  padding-inline-end: 40px;
 }
 body .q-field--outlined.q-field--readonly .q-field__control:before {
-  border-color: var(--app-border-strong);
-  border-style: solid;
+  border-color: transparent;
+}
+// A lock on the end edge says "can't be edited" without relying on the surface alone.
+body .q-field--outlined.q-field--readonly .q-field__control::after {
+  background: var(--app-text-muted);
+  border: 0 !important;
+  content: "";
+  height: 16px;
+  inset: 50% 16px auto auto !important;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='18' height='11' x='3' y='11' rx='2'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='18' height='11' x='3' y='11' rx='2'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  opacity: 1 !important;
+  pointer-events: none;
+  position: absolute;
+  transform: translateY(-50%) !important;
+  width: 16px;
+}
+html[dir="rtl"]
+  body
+  .q-field--outlined.q-field--readonly
+  .q-field__control::after {
+  inset: 50% auto auto 16px !important;
 }
 // Outline buttons take their edge and fill from the surface tokens (Quasar draws the edge
 // in currentColor).
@@ -1288,6 +1311,7 @@ html[dir="rtl"] .mint-card-more {
   margin: -8px 0 -8px -10px;
 }
 .mint-card__foot {
+  padding-inline-start: 50px;
   align-items: center;
   display: flex;
   gap: 12px;

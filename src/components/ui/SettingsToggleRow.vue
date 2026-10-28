@@ -63,4 +63,7 @@ export default defineComponent({
 .settings-toggle-row--disabled .q-item__label:not(.q-item__label--caption) {
   color: var(--app-text-muted);
 }
+.settings-toggle-row--disabled .q-item__label--caption {
+  color: var(--app-text-subtle);
+}
 </style>
