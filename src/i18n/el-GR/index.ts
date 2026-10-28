@@ -188,6 +188,11 @@ export default {
   },
   Settings: {
     menu: {
+      groups: {
+        wallet: "Πορτοφόλι",
+        connections: "Συνδέσεις",
+        preferences: "Προτιμήσεις",
+      },
       title: "Ρυθμίσεις",
       backup: {
         title: "Αντίγραφα ασφαλείας και επαναφορά",
@@ -889,7 +894,10 @@ export default {
     title: "Κριτική mint",
     publishing_as: "Δημοσίευση ως",
     inputs: {
-      rating: { label: "Βαθμολογία" },
+      rating: {
+        label: "Βαθμολογία",
+        hint: "Επιλέξτε βαθμολογία για να δημοσιεύσετε την κριτική σας.",
+      },
       review: { label: "Κριτική (προαιρετικά)" },
     },
     actions: {

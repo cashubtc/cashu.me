@@ -1,19 +1,24 @@
 <template>
   <SettingsPageShell :title="$t('Settings.menu.title')">
-    <q-list
-      v-for="group in visibleGroups"
-      :key="group.name"
-      class="settings-menu-group q-mb-lg"
-    >
-      <SettingsLinkRow
-        v-for="entry in group.entries"
-        :key="entry.path"
-        :to="entry.path"
-        :icon="entry.icon"
-        :label="$t(`Settings.menu.${entry.key}.title`)"
-        :caption="$t(`Settings.menu.${entry.key}.caption`)"
-      />
-    </q-list>
+    <template v-for="group in visibleGroups" :key="group.name">
+      <!-- The everyday groups are named; Advanced and About read as themselves. -->
+      <div
+        v-if="group.titled"
+        class="settings-section-title settings-menu-heading"
+      >
+        {{ $t(`Settings.menu.groups.${group.name}`) }}
+      </div>
+      <q-list class="settings-menu-group q-mb-lg">
+        <SettingsLinkRow
+          v-for="entry in group.entries"
+          :key="entry.path"
+          :to="entry.path"
+          :icon="entry.icon"
+          :label="$t(`Settings.menu.${entry.key}.title`)"
+          :caption="$t(`Settings.menu.${entry.key}.caption`)"
+        />
+      </q-list>
+    </template>
   </SettingsPageShell>
 </template>
 
@@ -52,6 +57,7 @@ export default defineComponent({
       const groups = [
         {
           name: "wallet",
+          titled: true,
           entries: [
             {
               key: "backup",
@@ -72,6 +78,7 @@ export default defineComponent({
         },
         {
           name: "connections",
+          titled: true,
           entries: [
             {
               key: "payment_requests",
@@ -101,6 +108,7 @@ export default defineComponent({
         },
         {
           name: "preferences",
+          titled: true,
           entries: [
             {
               key: "appearance",

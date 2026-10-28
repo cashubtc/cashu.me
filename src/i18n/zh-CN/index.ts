@@ -185,6 +185,11 @@ export default {
   },
   Settings: {
     menu: {
+      groups: {
+        wallet: "钱包",
+        connections: "连接",
+        preferences: "偏好设置",
+      },
       title: "设置",
       backup: {
         title: "备份与恢复",
@@ -862,7 +867,7 @@ export default {
     title: "评价 Mint",
     publishing_as: "发布身份",
     inputs: {
-      rating: { label: "评分" },
+      rating: { label: "评分", hint: "选择评分后即可发布评价。" },
       review: { label: "评价（可选）" },
     },
     actions: {

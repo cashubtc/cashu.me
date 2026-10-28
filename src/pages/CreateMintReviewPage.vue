@@ -20,6 +20,10 @@
           class="q-mt-sm q-mb-md review-stars"
           :disable="prefilling || submitting"
         />
+        <!-- Says why Publish is off until there is a rating. -->
+        <div v-if="!rating" class="review-rating-hint">
+          {{ $t("CreateMintReview.inputs.rating.hint") }}
+        </div>
         <q-input
           v-model="review"
           type="textarea"
@@ -318,5 +322,11 @@ export default defineComponent({
 
 .review-input :deep(.q-field__native) {
   color: var(--app-text);
+}
+.review-rating-hint {
+  color: var(--app-text-muted);
+  font-size: 14px;
+  line-height: 20px;
+  margin: -8px 0 16px;
 }
 </style>

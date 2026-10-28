@@ -205,6 +205,11 @@ export default {
   },
   Settings: {
     menu: {
+      groups: {
+        wallet: "Wallet",
+        connections: "Connections",
+        preferences: "Preferences",
+      },
       title: "Settings",
       backup: {
         title: "Backup & restore",
@@ -909,7 +914,10 @@ export default {
     title: "Review mint",
     publishing_as: "Publishing as",
     inputs: {
-      rating: { label: "Rating" },
+      rating: {
+        label: "Rating",
+        hint: "Choose a rating to publish your review.",
+      },
       review: { label: "Review (optional)" },
     },
     actions: {

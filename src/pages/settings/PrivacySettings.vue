@@ -63,27 +63,14 @@
         :label="$t('Settings.privacy.bitcoin_price.toggle')"
       />
       <template v-if="getBitcoinPrice">
-        <q-item>
-          <q-item-section>
-            <q-item-label>{{
-              $t("Settings.privacy.bitcoin_price.currency.title")
-            }}</q-item-label>
-            <q-item-label caption>{{
-              $t("Settings.privacy.bitcoin_price.currency.description")
-            }}</q-item-label>
-          </q-item-section>
-        </q-item>
-        <q-item class="settings-control-item">
-          <q-item-section>
-            <SheetSelect
-              v-model="bitcoinPriceCurrency"
-              :options="currencyOptions"
-              :label="$t('Settings.privacy.bitcoin_price.currency.title')"
-              hide-label
-              @update:model-value="onCurrencyChange"
-            />
-          </q-item-section>
-        </q-item>
+        <SheetSelect
+          row
+          v-model="bitcoinPriceCurrency"
+          :options="currencyOptions"
+          :label="$t('Settings.privacy.bitcoin_price.currency.title')"
+          :caption="$t('Settings.privacy.bitcoin_price.currency.description')"
+          @update:model-value="onCurrencyChange"
+        />
       </template>
     </SettingsSection>
   </SettingsPageShell>

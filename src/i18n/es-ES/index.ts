@@ -188,6 +188,11 @@ export default {
   },
   Settings: {
     menu: {
+      groups: {
+        wallet: "Cartera",
+        connections: "Conexiones",
+        preferences: "Preferencias",
+      },
       title: "Ajustes",
       backup: {
         title: "Copia de seguridad y restauración",
@@ -885,7 +890,10 @@ export default {
     title: "Reseñar mint",
     publishing_as: "Publicando como",
     inputs: {
-      rating: { label: "Calificación" },
+      rating: {
+        label: "Calificación",
+        hint: "Elige una valoración para publicar tu reseña.",
+      },
       review: { label: "Reseña (opcional)" },
     },
     actions: {

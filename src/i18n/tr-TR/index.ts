@@ -193,6 +193,11 @@ export default {
   },
   Settings: {
     menu: {
+      groups: {
+        wallet: "Cüzdan",
+        connections: "Bağlantılar",
+        preferences: "Tercihler",
+      },
       title: "Ayarlar",
       backup: {
         title: "Yedekleme ve geri yükleme",
@@ -892,7 +897,10 @@ export default {
     title: "Mint'i değerlendir",
     publishing_as: "Şu kişi olarak yayımlanıyor",
     inputs: {
-      rating: { label: "Puan" },
+      rating: {
+        label: "Puan",
+        hint: "İncelemenizi yayınlamak için bir puan seçin.",
+      },
       review: { label: "Yorum (isteğe bağlı)" },
     },
     actions: {

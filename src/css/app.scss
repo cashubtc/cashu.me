@@ -670,8 +670,22 @@ body.body--light .q-dialog__backdrop {
   min-width: 44px;
   min-height: 44px;
   padding: 0;
-  font-size: 18px !important;
+  font-size: 16px !important;
   font-weight: 600;
+}
+// The unit symbol sits in a 36px tinted disc, so a bare "₿" reads as a control (council
+// R72-R74), the same quiet container as the scan button.
+.sheet-unit-toggle::before {
+  background: var(--app-tint-strong);
+  border-radius: 50%;
+  content: "";
+  height: 36px;
+  inset: 4px;
+  position: absolute;
+  width: 36px;
+}
+.sheet-unit-toggle > .q-btn__content {
+  position: relative;
 }
 
 // The mint picker as a labelled full-width field (Lightning address mint, swap From/To,
@@ -1527,6 +1541,13 @@ body.body--light .q-notification {
 // the balance or the primary button.
 body .q-notifications__list--bottom {
   bottom: calc(env(safe-area-inset-bottom, 0px) + 84px);
+}
+// Desktop has no pinned bottom action: toasts sit at the window's bottom edge, below the
+// wallet's history rather than over it.
+@media (min-width: 1024px) {
+  body .q-notifications__list--bottom {
+    bottom: 24px;
+  }
 }
 // Stacked toasts collapse like Sonner's: the newest (last, at the bottom) is in front and an
 // older one tucks behind it, scaled down with only its top edge showing; hovering the stack

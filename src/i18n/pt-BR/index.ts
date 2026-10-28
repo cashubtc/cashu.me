@@ -206,6 +206,11 @@ export default {
   },
   Settings: {
     menu: {
+      groups: {
+        wallet: "Carteira",
+        connections: "Conexões",
+        preferences: "Preferências",
+      },
       title: "Configurações",
       backup: {
         title: "Backup e restauração",
@@ -914,7 +919,10 @@ export default {
     title: "Avaliar mint",
     publishing_as: "Publicando como",
     inputs: {
-      rating: { label: "Avaliação" },
+      rating: {
+        label: "Avaliação",
+        hint: "Escolha uma nota para publicar sua avaliação.",
+      },
       review: { label: "Comentário (opcional)" },
     },
     actions: {

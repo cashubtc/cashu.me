@@ -284,6 +284,16 @@
       </DsEntry>
       <DsEntry id="select">
         <SheetSelect v-model="sort" :options="sortSheetOptions" label="Sort" />
+        <!-- The settings-row variant (Privacy → Fiat currency). -->
+        <q-list class="settings-menu-group settings-view q-mt-md">
+          <SheetSelect
+            row
+            v-model="sort"
+            :options="sortSheetOptions"
+            label="Sort reviews"
+            caption="Order of the reviews list"
+          />
+        </q-list>
       </DsEntry>
       <DsEntry id="mint-picker">
         <ChooseMint test-id="ui-kit-mint" />

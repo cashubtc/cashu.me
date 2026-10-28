@@ -186,6 +186,11 @@ export default {
   },
   Settings: {
     menu: {
+      groups: {
+        wallet: "กระเป๋าเงิน",
+        connections: "การเชื่อมต่อ",
+        preferences: "การตั้งค่า",
+      },
       title: "การตั้งค่า",
       backup: {
         title: "สำรองและกู้คืน",
@@ -871,7 +876,7 @@ export default {
     title: "รีวิว Mint",
     publishing_as: "เผยแพร่เป็น",
     inputs: {
-      rating: { label: "คะแนน" },
+      rating: { label: "คะแนน", hint: "เลือกคะแนนเพื่อเผยแพร่รีวิวของคุณ" },
       review: { label: "รีวิว (ไม่บังคับ)" },
     },
     actions: {

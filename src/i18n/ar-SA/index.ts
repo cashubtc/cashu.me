@@ -184,6 +184,11 @@ export default {
   },
   Settings: {
     menu: {
+      groups: {
+        wallet: "المحفظة",
+        connections: "الاتصالات",
+        preferences: "التفضيلات",
+      },
       title: "الإعدادات",
       backup: {
         title: "النسخ الاحتياطي والاستعادة",
@@ -870,7 +875,7 @@ export default {
     title: "مراجعة المِنْت",
     publishing_as: "النشر باسم",
     inputs: {
-      rating: { label: "التقييم" },
+      rating: { label: "التقييم", hint: "اختر تقييمًا لنشر مراجعتك." },
       review: { label: "مراجعة (اختياري)" },
     },
     actions: {

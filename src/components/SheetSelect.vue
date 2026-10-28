@@ -2,7 +2,37 @@
   <div class="sheet-select">
     <!-- A labelled field that opens a bottom sheet of options: the same field as the
          Lightning address mint picker and the same sheet as Send and Receive. -->
+    <!-- As a settings row: the setting's name and description on the start side, the
+         current value and a chevron on the end side, like every other settings row. -->
+    <q-item
+      v-if="row"
+      clickable
+      v-ripple
+      role="combobox"
+      class="sheet-select__row"
+      :aria-label="label"
+      aria-haspopup="listbox"
+      :aria-expanded="open"
+      :disable="disable"
+      @click="open = true"
+    >
+      <q-item-section>
+        <q-item-label>{{ label }}</q-item-label>
+        <q-item-label v-if="caption" caption>{{ caption }}</q-item-label>
+      </q-item-section>
+      <q-item-section side class="row no-wrap items-center sheet-select__side">
+        <span class="sheet-select__value">{{
+          selectedOption?.label ?? placeholder
+        }}</span>
+        <ChevronRightIcon
+          :size="18"
+          class="settings-menu-chevron"
+          aria-hidden="true"
+        />
+      </q-item-section>
+    </q-item>
     <button
+      v-else
       type="button"
       role="combobox"
       class="mint-chip mint-chip--field sheet-select__field"
@@ -17,7 +47,7 @@
         <slot name="icon" :option="selectedOption" />
       </span>
       <span class="mint-chip__field-text">
-        <span v-if="!hideLabel" class="mint-chip__label">{{ label }}</span>
+        <span class="mint-chip__label">{{ label }}</span>
         <span class="mint-chip__name">{{
           selectedOption?.label ?? placeholder
         }}</span>
@@ -50,7 +80,10 @@
 
 <script lang="ts">
 import { defineComponent, type PropType } from "vue";
-import { ChevronDown as ChevronDownIcon } from "lucide-vue-next";
+import {
+  ChevronDown as ChevronDownIcon,
+  ChevronRight as ChevronRightIcon,
+} from "lucide-vue-next";
 import BottomSheet from "src/components/BottomSheet.vue";
 import SheetOption from "src/components/SheetOption.vue";
 
@@ -62,11 +95,11 @@ export type SheetSelectOption = {
 
 export default defineComponent({
   name: "SheetSelect",
-  components: { BottomSheet, SheetOption, ChevronDownIcon },
+  components: { BottomSheet, SheetOption, ChevronDownIcon, ChevronRightIcon },
   props: {
-    // When the row above already names the setting, the field shows only its value; the
-    // label still names the control and the sheet.
-    hideLabel: { type: Boolean, default: false },
+    /** Draw as a settings row (name and caption, value and chevron) instead of a field. */
+    row: { type: Boolean, default: false },
+    caption: { type: String, default: "" },
     modelValue: {
       type: [String, Number] as PropType<string | number | null>,
       default: null,
@@ -105,6 +138,11 @@ export default defineComponent({
 }
 .sheet-select__field--empty .mint-chip__name {
   color: var(--app-text-muted);
+}
+.sheet-select__value {
+  color: var(--app-text-muted);
+  font-size: 15px;
+  margin-inline-end: 4px;
 }
 .sheet-select__icon {
   display: inline-flex;

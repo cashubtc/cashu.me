@@ -339,8 +339,10 @@ export default defineComponent({
     },
   },
   methods: {
+    // Sats are named as the amounts show them (₿, BIP-177), not "BTC", which read as whole
+    // bitcoin next to ₿2,100.
     unitLabel(unit: string) {
-      return unit === "sat" ? "BTC" : unit.toUpperCase();
+      return unit === "sat" ? "₿ (sat)" : unit.toUpperCase();
     },
     mintUnits(mint: any): string[] {
       const keysets = mint.keysets || [];

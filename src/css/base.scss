@@ -132,7 +132,7 @@ $themes: (
 
 // Neutral, semantic tokens per mode.
 body {
-  --app-hover-opacity: 0.1;
+  --app-hover-opacity: 0.12;
   --app-pressed-opacity: 0.24;
   --app-card-shadow: none;
   --app-outline-fill: transparent;
@@ -159,7 +159,7 @@ body.body--dark {
   --app-card-edge: transparent;
   --app-card-edge-active: color-mix(
     in srgb,
-    var(--app-accent) 55%,
+    var(--app-accent) 75%,
     transparent
   );
   // Dark steps over the pure-black page, about 5 points apart so each level separates on any
@@ -175,7 +175,8 @@ body.body--dark {
 }
 body.body--light {
   --app-card-edge: transparent;
-  --app-card-edge-active: color-mix(in srgb, var(--q-primary) 40%, transparent);
+  // 75% (was 40%): the selected edge reads in every theme, not just the strong accents.
+  --app-card-edge-active: color-mix(in srgb, var(--q-primary) 75%, transparent);
   // 5% and 9%: on white, 4% cards (the wallet's mint card, settings groups) read as barely
   // there next to dark mode's steps (council R69-R70).
   --app-card-fill: color-mix(in srgb, var(--app-text) 5%, transparent);

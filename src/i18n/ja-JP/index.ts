@@ -185,6 +185,11 @@ export default {
   },
   Settings: {
     menu: {
+      groups: {
+        wallet: "ウォレット",
+        connections: "接続",
+        preferences: "環境設定",
+      },
       title: "設定",
       backup: {
         title: "バックアップと復元",
@@ -875,7 +880,10 @@ export default {
     title: "ミントをレビュー",
     publishing_as: "次として公開",
     inputs: {
-      rating: { label: "評価" },
+      rating: {
+        label: "評価",
+        hint: "レビューを公開するには評価を選んでください。",
+      },
       review: { label: "レビュー（任意）" },
     },
     actions: {

@@ -47,6 +47,11 @@
 }
 
 /* One section heading style, shared with the section divider: 14px semibold ink. */
+// A settings-menu group's name, spaced like a section header above its card.
+.settings-menu-heading {
+  margin-bottom: 10px;
+}
+
 .settings-section-title {
   font-size: 14px;
   font-weight: 600;

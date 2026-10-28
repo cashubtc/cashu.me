@@ -185,6 +185,11 @@ export default {
   },
   Settings: {
     menu: {
+      groups: {
+        wallet: "Plånbok",
+        connections: "Anslutningar",
+        preferences: "Inställningar",
+      },
       title: "Inställningar",
       backup: {
         title: "Säkerhetskopiering och återställning",
@@ -879,7 +884,10 @@ export default {
     title: "Recensera mint",
     publishing_as: "Publicerar som",
     inputs: {
-      rating: { label: "Betyg" },
+      rating: {
+        label: "Betyg",
+        hint: "Välj ett betyg för att publicera din recension.",
+      },
       review: { label: "Recension (valfritt)" },
     },
     actions: {

@@ -190,6 +190,11 @@ export default {
   },
   Settings: {
     menu: {
+      groups: {
+        wallet: "Wallet",
+        connections: "Verbindungen",
+        preferences: "Einstellungen",
+      },
       title: "Einstellungen",
       backup: {
         title: "Sichern & Wiederherstellen",
@@ -890,7 +895,10 @@ export default {
     title: "Mint bewerten",
     publishing_as: "Veröffentlichen als",
     inputs: {
-      rating: { label: "Bewertung" },
+      rating: {
+        label: "Bewertung",
+        hint: "Wähle eine Bewertung, um deine Rezension zu veröffentlichen.",
+      },
       review: { label: "Rezension (optional)" },
     },
     actions: {

@@ -206,6 +206,11 @@ export default {
   },
   Settings: {
     menu: {
+      groups: {
+        wallet: "Peněženka",
+        connections: "Připojení",
+        preferences: "Předvolby",
+      },
       title: "Nastavení",
       backup: {
         title: "Záloha a obnova",
@@ -915,7 +920,10 @@ export default {
     title: "Recenze mintu",
     publishing_as: "Publikujete jako",
     inputs: {
-      rating: { label: "Hodnocení" },
+      rating: {
+        label: "Hodnocení",
+        hint: "Vyberte hodnocení, abyste mohli recenzi zveřejnit.",
+      },
       review: { label: "Recenze (volitelně)" },
     },
     actions: {
