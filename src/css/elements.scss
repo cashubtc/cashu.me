@@ -25,7 +25,7 @@ body.body--light {
 }
 // An empty state's action is sized to the message, not stretched to the card's edges.
 .app-empty__action {
-  max-width: 320px;
+  max-width: 280px;
 }
 // Destructive button: the one filled danger treatment (Remove mint, inline Remove), at AA.
 .app-btn-danger.q-btn:not(.q-btn--dense) {
@@ -182,7 +182,10 @@ body.body--light {
   text-align: start;
   width: 100%;
 }
-// Warning and danger also tint their edge, so a risk never reads as neutral advice.
+// Every tone tints its edge the same way (the neutral one keeps the plain hairline), so a
+// tone never reads as neutral advice.
+.app-callout--info,
+.app-callout--success,
 .app-callout--warning,
 .app-callout--danger {
   border-color: color-mix(in srgb, var(--tone) 40%, var(--app-border));
@@ -229,7 +232,7 @@ html[dir="rtl"] .app-callout__close {
   color: var(--app-text-muted);
   display: inline-flex;
   flex-shrink: 0;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   gap: 4px;
   line-height: 18px;

@@ -1008,6 +1008,7 @@ export default {
       },
     },
     error_badge: "エラー",
+    active_badge: "使用中",
     reviews_text: "件のレビュー",
     no_reviews_yet: "まだレビューはありません",
     discover_mints_button: "ミントを発見",
@@ -1401,6 +1402,7 @@ export default {
   },
   HistoryTable: {
     empty_text: "履歴はまだありません",
+    empty_hint: "送受信した支払いがここに表示されます。",
     row: {
       type_label: "Ecash",
       date_label: "{ value }前",

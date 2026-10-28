@@ -992,6 +992,7 @@ export default {
       },
     },
     error_badge: "错误",
+    active_badge: "当前",
     reviews_text: "条评价",
     no_reviews_yet: "暂无评论",
     discover_mints_button: "发现 Mint",
@@ -1379,6 +1380,7 @@ export default {
   },
   HistoryTable: {
     empty_text: "暂无历史记录",
+    empty_hint: "你发送和收到的付款会显示在这里。",
     row: {
       type_label: "Ecash",
       date_label: "{ value } 前",

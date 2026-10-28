@@ -522,12 +522,11 @@
                 :name="card.name"
                 :url="card.url"
               />
-              <CheckIcon
+              <span
                 v-if="card.active"
-                :size="18"
-                class="mint-card__status mint-card__check"
-                aria-hidden="true"
-              />
+                class="app-badge app-badge--solid mint-card__status"
+                >Active</span
+              >
               <q-checkbox
                 v-if="card.check"
                 v-model="cardCheck"
@@ -550,7 +549,7 @@
               <div class="mint-card__balances">
                 <template v-for="(b, i) in card.balances" :key="b">
                   <span v-if="i > 0" class="mint-card__plus" aria-hidden="true"
-                    >+</span
+                    >·</span
                   >
                   <bdi dir="ltr" class="currency-unit-text">{{ b }}</bdi>
                 </template>
@@ -758,6 +757,7 @@
       <DsEntry id="empty-state">
         <EmptyState
           :icon="SearchIcon"
+          boxed
           title="No mints found"
           text="Try again, or add a mint you trust by its URL."
         >
@@ -774,8 +774,7 @@
         </EmptyState>
         <EmptyState
           class="q-mt-md"
-          :icon="CoinsIcon"
-          :boxed="false"
+          :icon="HistoryIcon"
           title="No history yet"
           text="Payments you send and receive appear here."
         />
@@ -1021,7 +1020,6 @@ import {
 } from "src/js/notify";
 import {
   ChevronLeft as ChevronLeftIcon,
-  Check as CheckIcon,
   Clock as ClockIcon,
   Coins as CoinsIcon,
   Copy as CopyIcon,
@@ -1029,6 +1027,7 @@ import {
   Ellipsis as EllipsisIcon,
   Code as CodeIcon,
   Globe as GlobeIcon,
+  History as HistoryIcon,
   KeyRound as KeyRoundIcon,
   Landmark as LandmarkIcon,
   Lock as LockIcon,
@@ -1095,7 +1094,6 @@ export default defineComponent({
     ToggleUnit,
     WelcomeSlideScaffold,
     ChevronLeftIcon,
-    CheckIcon,
     CoinsIcon,
     CopyIcon,
     DownloadIcon,
@@ -1115,6 +1113,7 @@ export default defineComponent({
       CoinsIcon: markRaw(CoinsIcon),
       CodeIcon: markRaw(CodeIcon),
       GlobeIcon: markRaw(GlobeIcon),
+      HistoryIcon: markRaw(HistoryIcon),
       KeyRoundIcon: markRaw(KeyRoundIcon),
       LandmarkIcon: markRaw(LandmarkIcon),
       SearchIcon: markRaw(SearchIcon),

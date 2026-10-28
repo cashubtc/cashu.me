@@ -46,10 +46,11 @@
   margin-bottom: 10px;
 }
 
+/* One section heading style, shared with the section divider: 14px semibold ink. */
 .settings-section-title {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  color: var(--app-text-muted);
+  color: var(--app-text);
 }
 
 .settings-section-caption {

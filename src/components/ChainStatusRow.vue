@@ -11,7 +11,7 @@
       <span
         v-if="metadata"
         :key="statusDisplay"
-        :class="{ 'text-positive': metadata.confirmed }"
+        :class="metadata.confirmed ? 'text-positive' : 'chain-status--pending'"
       >
         {{ statusDisplay }}
       </span>
@@ -59,6 +59,12 @@ export default defineComponent({
 </script>
 
 <style scoped>
+/* Pending is secondary text at regular weight; only Confirmed takes a colour. */
+.chain-status--pending {
+  color: var(--app-text-muted);
+  font-weight: 400;
+}
+
 /* The value element belongs to DetailRow, so it is reached through this row's root. */
 :deep(.detail-value-with-spinner) {
   display: flex;

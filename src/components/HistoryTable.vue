@@ -6,6 +6,7 @@
       :icon="HistoryIcon"
       :boxed="false"
       :title="$t('HistoryTable.empty_text')"
+      :text="$t('HistoryTable.empty_hint')"
       class="history-empty-state"
     />
     <template v-else>

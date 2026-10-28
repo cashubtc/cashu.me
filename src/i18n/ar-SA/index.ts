@@ -1002,6 +1002,7 @@ export default {
       },
     },
     error_badge: "خطأ",
+    active_badge: "نشطة",
     reviews_text: "مراجعة | مراجعات",
     no_reviews_yet: "لا توجد مراجعات بعد",
     discover_mints_button: "اكتشف المِنْتات",
@@ -1392,6 +1393,7 @@ export default {
   },
   HistoryTable: {
     empty_text: "لا يوجد سجل حتى الآن",
+    empty_hint: "ستظهر هنا المدفوعات التي ترسلها وتستلمها.",
     row: {
       type_label: "Ecash",
       date_label: "منذ { value }",

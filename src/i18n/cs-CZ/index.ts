@@ -1047,6 +1047,7 @@ export default {
       },
     },
     error_badge: "Chyba",
+    active_badge: "Aktivní",
     reviews_text: "recenze | recenze",
     no_reviews_yet: "Žádné recenze",
     discover_mints_button: "Objevovat minty",
@@ -1479,6 +1480,7 @@ export default {
 
   HistoryTable: {
     empty_text: "Žádná historie zatím",
+    empty_hint: "Zde se zobrazí platby, které odešlete a přijmete.",
     row: {
       type_label: "Ecash",
       date_label: "před { value }",

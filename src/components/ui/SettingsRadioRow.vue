@@ -10,7 +10,7 @@
     role="radio"
     @click="$emit('select', $event)"
   >
-    <q-item-section avatar :top="top">
+    <q-item-section avatar :top="top || !!caption">
       <q-icon
         :color="selected ? 'primary' : 'grey'"
         :name="selected ? 'radio_button_checked' : 'radio_button_unchecked'"

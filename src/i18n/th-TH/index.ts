@@ -1002,6 +1002,7 @@ export default {
       },
     },
     error_badge: "ข้อผิดพลาด",
+    active_badge: "ใช้งานอยู่",
     reviews_text: "รีวิว",
     no_reviews_yet: "ยังไม่มีรีวิว",
     discover_mints_button: "สำรวจ Mints",
@@ -1392,6 +1393,7 @@ export default {
   },
   HistoryTable: {
     empty_text: "ยังไม่มีประวัติ",
+    empty_hint: "การชำระเงินที่คุณส่งและรับจะแสดงที่นี่",
     row: {
       type_label: "Ecash",
       date_label: "{ value } ที่ผ่านมา",

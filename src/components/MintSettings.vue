@@ -57,12 +57,11 @@
                   size="18px"
                   class="mint-card__status"
                 />
-                <CheckIcon
+                <span
                   v-else-if="mint.url == activeMintUrl"
-                  :size="18"
-                  class="mint-card__status mint-card__check"
-                  aria-hidden="true"
-                />
+                  class="app-badge app-badge--solid mint-card__status"
+                  >{{ $t("MintSettings.active_badge") }}</span
+                >
                 <q-btn
                   flat
                   round
@@ -84,7 +83,7 @@
                       v-if="i > 0"
                       class="mint-card__plus"
                       aria-hidden="true"
-                      >+</span
+                      >·</span
                     >
                     <bdi dir="ltr" class="currency-unit-text">{{
                       formatCurrency(mintClass(mint).unitBalance(unit), unit)
@@ -260,7 +259,6 @@
 <script lang="ts">
 import {
   CircleAlert as CircleAlertIcon,
-  Check as CheckIcon,
   Ellipsis as EllipsisIcon,
   Plus as PlusIcon,
   Scan as ScanIcon,
@@ -301,7 +299,6 @@ export default defineComponent({
   components: {
     EllipsisIcon,
     CircleAlertIcon,
-    CheckIcon,
     PlusIcon,
     ScanIcon,
     SearchIcon,

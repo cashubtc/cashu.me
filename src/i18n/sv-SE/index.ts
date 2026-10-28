@@ -1012,6 +1012,7 @@ export default {
       },
     },
     error_badge: "Fel",
+    active_badge: "Aktiv",
     reviews_text: "recension | recensioner",
     no_reviews_yet: "Inga recensioner ännu",
     discover_mints_button: "Upptäck mints",
@@ -1404,6 +1405,7 @@ export default {
   },
   HistoryTable: {
     empty_text: "Ingen historik än",
+    empty_hint: "Betalningar du skickar och tar emot visas här.",
     row: {
       type_label: "Ecash",
       date_label: "{ value } sedan",

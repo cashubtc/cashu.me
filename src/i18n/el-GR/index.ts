@@ -1023,6 +1023,7 @@ export default {
       },
     },
     error_badge: "Σφάλμα",
+    active_badge: "Ενεργό",
     reviews_text: "κριτική | κριτικές",
     no_reviews_yet: "Δεν υπάρχουν κριτικές ακόμα",
     discover_mints_button: "Ανακαλύψτε mints",
@@ -1415,6 +1416,7 @@ export default {
   },
   HistoryTable: {
     empty_text: "Δεν υπάρχει ακόμη ιστορικό",
+    empty_hint: "Οι πληρωμές που στέλνετε και λαμβάνετε εμφανίζονται εδώ.",
     row: {
       type_label: "Ecash",
       date_label: "πριν από { value }",

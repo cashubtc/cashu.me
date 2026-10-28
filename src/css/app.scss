@@ -208,9 +208,9 @@ body,
 // One section heading style: the settings section title (13px semibold, muted, sentence case).
 .divider-text {
   padding: 0 12px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  color: var(--app-text-muted);
+  color: var(--app-text);
 }
 // Chinese, Japanese and Korean have no capitals, and tracking only spreads the characters.
 // Captions read evenly at body sizes without Quasar's positive tracking.
@@ -433,6 +433,15 @@ body[data-theme] .welcome-surface,
     }
   }
 }
+body.body--light .q-toggle:not(.q-toggle--dense) .q-toggle__track {
+  background: rgba(0, 0, 0, 0.42);
+}
+body.body--light
+  .q-toggle:not(.q-toggle--dense)
+  .q-toggle__inner--truthy
+  .q-toggle__track {
+  background: currentColor;
+}
 body.body--light .q-toggle:not(.q-toggle--dense) .q-toggle__thumb:after {
   background-color: #fff;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.15);
@@ -450,6 +459,9 @@ body.body--light
 }
 .q-toggle.disabled .q-toggle__inner--truthy .q-toggle__track {
   background: var(--app-border-strong);
+}
+.q-toggle.disabled .q-toggle__inner--truthy .q-toggle__thumb:after {
+  background-color: var(--app-text-muted);
 }
 
 /* Centred confirmation and edit dialogs (edit mint, remove mint): one title, one list or form,
@@ -497,6 +509,10 @@ body.body--light
 .invoice-type-toggle {
   border: 1px solid var(--app-segment-edge);
   background: var(--app-outline-fill);
+  > .q-btn {
+    flex: 1 1 0;
+    min-width: 112px;
+  }
   .q-btn {
     min-height: 44px;
     padding: 0 18px;
@@ -735,11 +751,11 @@ body.body--light .q-dialog__backdrop {
 body .q-tooltip {
   background: var(--app-raised);
   border: 1px solid var(--app-border-strong);
-  border-radius: var(--app-radius-sm);
+  border-radius: var(--app-radius-md);
   box-shadow: var(--app-shadow-md);
   color: var(--app-text);
   font-size: 12px;
-  padding: 6px 8px;
+  padding: 6px 10px;
 }
 // Rating stars are ink, like every other glyph: no gold anywhere (round 57). Selected stars
 // are full text colour; unselected stars in an input are muted controls, not a near-invisible
@@ -1189,13 +1205,9 @@ html[dir="rtl"] .q-field__append {
 .rating-star {
   color: var(--app-text);
 }
-/* The active card is marked by its accent border and check; its text stays ink, so raw
-   accent colours never carry body text on a dark card (R42: classic and salvador missed AA). */
-/* The active check is ink: in red and pink themes an accent check read as an error (R44);
-   the accent stays on the active card's border. */
-.mint-card__check {
-  color: var(--app-text);
-}
+/* The active card is marked by its accent border and an "Active" badge; its text stays ink,
+   so raw accent colours never carry body text on a dark card (R42: classic and salvador
+   missed AA). */
 
 body .mint-card.q-item--active {
   color: var(--app-text);
@@ -1391,6 +1403,8 @@ body .q-notification__progress {
   --app-qr-size: clamp(220px, min(70vw, 42vh), 300px);
 }
 .app-qr {
+  border-radius: var(--app-radius-lg);
+  overflow: hidden;
   margin-inline: auto !important;
   max-width: 100%;
   width: var(--app-qr-size);

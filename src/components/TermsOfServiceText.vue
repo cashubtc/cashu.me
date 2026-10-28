@@ -3,7 +3,7 @@
 <template>
   <div dir="ltr" lang="en" class="terms">
     <p class="terms__updated">Last Updated: 20.12.2024</p>
-    <p class="terms__notice">
+    <p class="terms__notice terms__notice--lead">
       IMPORTANT NOTICE: THESE TERMS OF SERVICE INCLUDE A MEDIATION-FIRST CLAUSE
       REQUIRING MEDIATION BEFORE ARBITRATION OR LITIGATION. PLEASE READ THESE
       TERMS CAREFULLY. IF YOU DO NOT AGREE, DO NOT USE CASHU.ME.
@@ -297,7 +297,7 @@ export default defineComponent({
 
 <style scoped>
 /* Legal text set for reading: muted body at 14px, numbered headings in ink, and the
-   capitalised notices as one quiet tinted block each instead of runs of bold capitals. */
+   capitalised notices as plain paragraphs, with only the lead notice in a quiet tinted block. */
 .terms {
   color: var(--app-text-muted);
   font-size: 14px;
@@ -322,6 +322,12 @@ export default defineComponent({
   font-size: 12px;
 }
 .terms__notice {
+  color: var(--app-text);
+  font-size: 13px;
+  letter-spacing: 0.01em;
+  line-height: 1.55;
+}
+.terms__notice--lead {
   background: var(--app-tint);
   border-radius: var(--app-radius-md);
   color: var(--app-text);

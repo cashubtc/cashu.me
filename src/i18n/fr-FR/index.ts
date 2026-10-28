@@ -1031,6 +1031,7 @@ export default {
       },
     },
     error_badge: "Erreur",
+    active_badge: "Active",
     reviews_text: "avis | avis",
     no_reviews_yet: "Aucun avis pour l'instant",
     discover_mints_button: "Découvrir les mints",
@@ -1423,6 +1424,7 @@ export default {
   },
   HistoryTable: {
     empty_text: "Aucun historique pour l'instant",
+    empty_hint: "Les paiements envoyés et reçus apparaissent ici.",
     row: {
       type_label: "Ecash",
       date_label: "Il y a { value }",

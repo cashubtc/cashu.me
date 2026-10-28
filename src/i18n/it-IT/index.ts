@@ -993,6 +993,7 @@ export default {
       },
     },
     error_badge: "Errore",
+    active_badge: "Attiva",
     reviews_text: "recensione | recensioni",
     no_reviews_yet: "Nessuna recensione ancora",
     discover_mints_button: "Scopri mints",
@@ -1384,6 +1385,7 @@ export default {
   },
   HistoryTable: {
     empty_text: "Nessuna cronologia ancora",
+    empty_hint: "Qui compaiono i pagamenti che invii e ricevi.",
     row: {
       type_label: "Ecash",
       date_label: "{ value } fa",

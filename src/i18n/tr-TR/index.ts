@@ -1024,6 +1024,7 @@ export default {
       },
     },
     error_badge: "Hata",
+    active_badge: "Etkin",
     reviews_text: "yorum | yorum",
     no_reviews_yet: "Henüz yorum yok",
     discover_mints_button: "Mint'leri keşfet",
@@ -1416,6 +1417,7 @@ export default {
   },
   HistoryTable: {
     empty_text: "Henüz geçmiş yok",
+    empty_hint: "Gönderdiğin ve aldığın ödemeler burada görünür.",
     row: {
       type_label: "Ecash",
       date_label: "{ value } önce",

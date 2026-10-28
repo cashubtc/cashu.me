@@ -23,7 +23,7 @@ $themes: (
     accent-2: #ff8753,
     light: #bc4b00,
     light-2: #c64f00,
-    dark: #2d293b,
+    dark: #232325,
     info: #333646,
   ),
   "freedom": (
@@ -164,9 +164,9 @@ body.body--light {
   --app-card-edge-active: color-mix(in srgb, var(--q-primary) 40%, transparent);
   --app-card-fill: color-mix(in srgb, var(--app-text) 4%, transparent);
   --app-card-fill-active: color-mix(in srgb, var(--app-text) 7%, transparent);
-  --app-field-edge: rgba(0, 0, 0, 0.3);
+  --app-field-edge: rgba(0, 0, 0, 0.46);
   --app-field-fill: #fff;
-  --app-outline-edge: rgba(0, 0, 0, 0.3);
+  --app-outline-edge: rgba(0, 0, 0, 0.46);
   --app-group-edge: transparent;
   --app-group-fill: color-mix(in srgb, var(--app-text) 4%, transparent);
 }

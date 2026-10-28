@@ -103,7 +103,7 @@
                       v-if="i > 0"
                       class="mint-card__plus"
                       aria-hidden="true"
-                      >+</span
+                      >·</span
                     >
                     <bdi dir="ltr" class="currency-unit-text">{{
                       formatCurrency(mintClass(mint).unitBalance(unit), unit)
