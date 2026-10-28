@@ -610,7 +610,7 @@ export default defineComponent({
 
 .history-check-btn {
   color: var(--app-text-muted);
-  font-size: 13px;
+  font-size: 14px !important;
   font-weight: 500;
   margin-block: -13px;
   margin-inline-end: -8px;

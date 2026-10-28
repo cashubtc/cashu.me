@@ -738,7 +738,7 @@
           loading
         >
           Continue
-          <template #loading><PendingDots class="on-left" />Creating</template>
+          <template #loading><BusyLabel>Creating</BusyLabel></template>
         </q-btn>
         <div class="row items-center q-gutter-sm q-mb-lg text-app-muted">
           <PendingDots />
@@ -748,6 +748,31 @@
           Loading: the component draws itself as a skeleton
         </div>
         <MintCard skeleton />
+      </DsEntry>
+      <DsEntry id="busy-label">
+        <div class="column q-gutter-y-sm">
+          <q-btn
+            class="full-width"
+            unelevated
+            rounded
+            size="lg"
+            color="primary"
+            loading
+            >Create invoice<template #loading
+              ><BusyLabel>Creating invoice</BusyLabel></template
+            ></q-btn
+          >
+          <q-btn class="full-width" outline rounded size="lg" loading
+            >Search for mint backups<template #loading
+              ><BusyLabel>Searching</BusyLabel></template
+            ></q-btn
+          >
+          <q-btn flat rounded loading
+            >Import<template #loading
+              ><BusyLabel>Importing</BusyLabel></template
+            ></q-btn
+          >
+        </div>
       </DsEntry>
       <DsEntry id="empty-state">
         <EmptyState
@@ -1015,6 +1040,7 @@
 </template>
 
 <script lang="ts">
+import BusyLabel from "src/components/ui/BusyLabel.vue";
 import FlowFooter from "src/components/ui/FlowFooter.vue";
 import AmountInputComponent from "src/components/AmountInputComponent.vue";
 import AmountHeadline from "src/components/ui/AmountHeadline.vue";
@@ -1121,6 +1147,7 @@ export default defineComponent({
   name: "DesignSystemPage",
   mixins: [windowMixin],
   components: {
+    BusyLabel,
     FlowFooter,
     AmountHeadline,
     AmountInputComponent,

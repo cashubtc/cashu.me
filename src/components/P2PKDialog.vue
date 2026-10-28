@@ -28,7 +28,7 @@
             </div>
 
             <q-card-section class="q-pa-sm">
-              <div v-if="p2pkData.used" class="row justify-center q-pt-md">
+              <div v-if="p2pkData.used" class="row justify-center">
                 <q-item-label
                   caption
                   class="text-weight-bold text-warning"
@@ -37,10 +37,10 @@
                   {{ $t("P2PKDialog.p2pk.used_warning_text") }}
                 </q-item-label>
               </div>
-              <div v-else class="row justify-center q-pt-md">
+              <div v-else class="row justify-center">
                 <q-item-label
                   caption
-                  class="text-weight-light"
+                  class="text-app-muted"
                   style="font-size: 14px"
                 >
                   {{ $t("P2PKDialog.p2pk.description") }}
@@ -48,7 +48,7 @@
               </div>
 
               <!-- New key button -->
-              <div class="row justify-center q-pt-lg q-pb-md">
+              <div class="row justify-center q-pt-sm q-pb-md">
                 <q-btn flat size="md" rounded @click="newKeys">
                   <RefreshCwIcon :size="18" class="q-mr-sm" />
                   {{ $t("P2PKDialog.actions.new_key.label") }}

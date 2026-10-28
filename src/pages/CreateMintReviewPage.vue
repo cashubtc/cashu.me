@@ -67,10 +67,13 @@
         class="full-width submit-btn q-mt-lg"
       >
         <span>{{ $t("CreateMintReview.actions.publish.label") }}</span>
-        <template v-slot:loading>
-          <PendingDots class="on-left" />
-          <span>{{ $t("CreateMintReview.actions.publish.in_progress") }}</span>
-        </template>
+        <template #loading
+          ><BusyLabel
+            ><span>{{
+              $t("CreateMintReview.actions.publish.in_progress")
+            }}</span></BusyLabel
+          ></template
+        >
       </q-btn>
 
       <q-inner-loading :showing="prefilling">
@@ -81,6 +84,7 @@
 </template>
 
 <script lang="ts">
+import BusyLabel from "src/components/ui/BusyLabel.vue";
 import PendingDots from "src/components/ui/PendingDots.vue";
 import CopyButton from "src/components/ui/CopyButton.vue";
 import { defineComponent, computed, ref, onMounted } from "vue";
@@ -99,6 +103,7 @@ import MintIdentityHeader from "src/components/MintIdentityHeader.vue";
 export default defineComponent({
   name: "CreateMintReviewPage",
   components: {
+    BusyLabel,
     PendingDots,
     AppRating,
     CopyButton,

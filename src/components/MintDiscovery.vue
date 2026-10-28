@@ -33,10 +33,10 @@
             <span>{{
               $t("MintSettings.discover.actions.discover.label")
             }}</span>
-            <template v-slot:loading
-              ><PendingDots class="on-left" />{{
+            <template #loading
+              ><BusyLabel>{{
                 $t("MintSettings.discover.actions.discover.label")
-              }}</template
+              }}</BusyLabel></template
             >
           </q-btn>
         </template>
@@ -158,8 +158,8 @@
 </template>
 
 <script lang="ts">
+import BusyLabel from "src/components/ui/BusyLabel.vue";
 import MintCard from "src/components/MintCard.vue";
-import PendingDots from "src/components/ui/PendingDots.vue";
 import { defineComponent, ref, computed, watch, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import EmptyState from "src/components/ui/EmptyState.vue";
@@ -177,8 +177,8 @@ import { notifyError, notifySuccess } from "src/js/notify";
 export default defineComponent({
   name: "MintDiscovery",
   components: {
+    BusyLabel,
     MintCard,
-    PendingDots,
     CompassIcon,
     SearchIcon,
     RefreshCwIcon,

@@ -206,10 +206,13 @@
             :loading="sendingEcash"
           >
             {{ $t("SendTokenDialog.actions.send.label") }}
-            <template v-slot:loading>
-              <PendingDots class="on-left" />
-              <span>{{ $t("SendTokenDialog.actions.send.in_progress") }}</span>
-            </template>
+            <template #loading
+              ><BusyLabel
+                ><span>{{
+                  $t("SendTokenDialog.actions.send.in_progress")
+                }}</span></BusyLabel
+              ></template
+            >
           </q-btn>
         </FlowFooter>
       </div>
@@ -222,9 +225,9 @@
   </q-dialog>
 </template>
 <script lang="ts">
+import BusyLabel from "src/components/ui/BusyLabel.vue";
 import FlowFooter from "src/components/ui/FlowFooter.vue";
 import IconButton from "src/components/ui/IconButton.vue";
-import PendingDots from "src/components/ui/PendingDots.vue";
 import AppBadge from "src/components/ui/AppBadge.vue";
 import { defineComponent } from "vue";
 import AppCallout from "src/components/AppCallout.vue";
@@ -259,9 +262,9 @@ export default defineComponent({
   name: "SendTokenDialog",
   mixins: [windowMixin],
   components: {
+    BusyLabel,
     FlowFooter,
     IconButton,
-    PendingDots,
     AppBadge,
     ClipboardPasteIcon,
     AppCallout,

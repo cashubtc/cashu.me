@@ -17,10 +17,10 @@
     >
       <SearchIcon :size="20" class="q-mr-sm" />
       {{ $t("RestoreView.nostr_mints.search_button") }}
-      <template v-slot:loading
-        ><PendingDots class="on-left" />{{
+      <template #loading
+        ><BusyLabel>{{
           $t("RestoreView.nostr_mints.search_button")
-        }}</template
+        }}</BusyLabel></template
       >
     </q-btn>
 
@@ -41,12 +41,12 @@
             count: selectedMints.length,
           })
         }}
-        <template v-slot:loading
-          ><PendingDots class="on-left" />{{
+        <template #loading
+          ><BusyLabel>{{
             $t("RestoreView.nostr_mints.add_selected", {
               count: selectedMints.length,
             })
-          }}</template
+          }}</BusyLabel></template
         >
       </q-btn>
 
@@ -116,7 +116,7 @@
 </template>
 
 <script lang="ts">
-import PendingDots from "src/components/ui/PendingDots.vue";
+import BusyLabel from "src/components/ui/BusyLabel.vue";
 import EmptyState from "src/components/ui/EmptyState.vue";
 import MintCard from "src/components/MintCard.vue";
 import SettingsSection from "src/pages/settings/SettingsSection.vue";
@@ -135,9 +135,9 @@ import { date } from "quasar";
 
 export default defineComponent({
   components: {
+    BusyLabel,
     EmptyState,
     MintCard,
-    PendingDots,
     PlusIcon,
     SearchIcon,
     SettingsSection,

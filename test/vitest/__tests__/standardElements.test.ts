@@ -85,6 +85,14 @@ describe("standard elements", () => {
     ]);
   });
 
+  it("busy buttons say what they are doing with BusyLabel", () => {
+    expect(
+      offenders((text) => /<PendingDots class="on-left"/.test(text)).filter(
+        (file) => !file.endsWith("ui/BusyLabel.vue")
+      )
+    ).toEqual([]);
+  });
+
   it("one pending mark: no spinner outside PendingDots", () => {
     expect(
       offenders((text) => /<q-spinner/.test(text)).filter(

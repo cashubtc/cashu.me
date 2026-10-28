@@ -103,10 +103,10 @@
                       >
                         <RefreshCwIcon :size="18" class="q-mr-sm" />
                         {{ $t("CreateInvoiceDialog.reconnect_mint") }}
-                        <template v-slot:loading
-                          ><PendingDots class="on-left" />{{
+                        <template #loading
+                          ><BusyLabel>{{
                             $t("CreateInvoiceDialog.reconnect_mint")
-                          }}</template
+                          }}</BusyLabel></template
                         >
                       </q-btn>
                     </template>
@@ -257,10 +257,11 @@
             >
               {{ createButtonLabel }}
               <!-- A label beside the spinner, so the busy state reads even with reduced motion. -->
-              <template v-slot:loading>
-                <PendingDots class="on-left" />
-                {{ $t("InvoiceDetailDialog.actions.create.label_blocked") }}
-              </template>
+              <template #loading
+                ><BusyLabel>{{
+                  $t("InvoiceDetailDialog.actions.create.label_blocked")
+                }}</BusyLabel></template
+              >
             </q-btn>
           </div>
         </FlowFooter>
@@ -269,6 +270,7 @@
   </q-dialog>
 </template>
 <script lang="ts">
+import BusyLabel from "src/components/ui/BusyLabel.vue";
 import FlowFooter from "src/components/ui/FlowFooter.vue";
 import QrCopyLine from "src/components/ui/QrCopyLine.vue";
 import SegmentedControl from "src/components/ui/SegmentedControl.vue";
@@ -314,6 +316,7 @@ export default defineComponent({
   name: "CreateInvoiceDialog",
   mixins: [windowMixin],
   components: {
+    BusyLabel,
     FlowFooter,
     QrCopyLine,
     SegmentedControl,

@@ -98,33 +98,44 @@ a.detail-value {
   flex-shrink: 0;
   margin-inline-start: 2px;
 }
-/* An editable row: the same row, made a 48px button whose tint reaches past the text by the
+/* An editable row: the same 32px row in the flow (so mixed tables keep one rhythm), made a
+   button whose 48px hit area and tint reach 8px above and below and past the text by the
    row's own inset, so the label and value stay on the table's edges. */
 .detail-item--action {
   background: none;
   border: 0;
-  border-radius: var(--app-radius-md);
   color: inherit;
   cursor: pointer;
   font: inherit;
   margin-inline: -12px;
-  min-height: 48px;
+  min-height: 32px;
+  isolation: isolate;
   padding: 0 12px;
+  position: relative;
   text-align: start;
-  transition: background 0.15s ease;
   width: calc(100% + 24px);
 }
+.detail-item--action::before {
+  border-radius: var(--app-radius-md);
+  content: "";
+  inset: -8px 0;
+  position: absolute;
+  z-index: -1;
+  transition: background 0.15s ease;
+}
 @media (hover: hover) {
-  .detail-item--action:hover {
+  .detail-item--action:hover::before {
     background: var(--app-tint);
   }
 }
-.detail-item--action:active {
+.detail-item--action:active::before {
   background: var(--app-tint);
 }
 .detail-item--action:focus-visible {
-  box-shadow: var(--app-focus-ring);
   outline: none;
+}
+.detail-item--action:focus-visible::before {
+  box-shadow: var(--app-focus-ring);
 }
 .detail-item--action .detail-value {
   flex: 1;

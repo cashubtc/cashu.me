@@ -9,7 +9,8 @@ export class WalletUi extends WalletPage {
 
   async home(tab?: "Mints" | "History") {
     await this.page.goto("/");
-    await expect(this.page.getByTestId("wallet-send")).toBeVisible();
+    // The wallet's hero (Receive and Send only show once the wallet has a mint).
+    await expect(this.page.locator(".wallet-hero")).toBeVisible();
     if (tab)
       await this.page.getByRole("tab", { name: tab, exact: true }).click();
   }

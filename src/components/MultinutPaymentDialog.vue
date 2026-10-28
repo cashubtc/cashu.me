@@ -225,10 +225,10 @@
             size="lg"
           >
             {{ $t("MultinutPicker.pay_invoice") }}
-            <template v-slot:loading
-              ><PendingDots class="on-left" />{{
+            <template #loading
+              ><BusyLabel>{{
                 $t("MultinutPicker.pay_invoice")
-              }}</template
+              }}</BusyLabel></template
             >
           </q-btn>
         </div>
@@ -238,6 +238,7 @@
 </template>
 
 <script lang="ts">
+import BusyLabel from "src/components/ui/BusyLabel.vue";
 import AmountHeadline from "src/components/ui/AmountHeadline.vue";
 import MintCard from "src/components/MintCard.vue";
 import PendingDots from "src/components/ui/PendingDots.vue";
@@ -262,6 +263,7 @@ export default defineComponent({
   name: "MultinutPaymentDialog",
   mixins: [windowMixin],
   components: {
+    BusyLabel,
     AmountHeadline,
     MintCard,
     PendingDots,

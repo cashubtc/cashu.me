@@ -18,15 +18,15 @@
     >
       <SendIcon :size="20" class="q-mr-sm" />
       {{ resolvedLabel }}
-      <template v-slot:loading
-        ><PendingDots class="on-left" />{{ resolvedLabel }}</template
+      <template #loading
+        ><BusyLabel>{{ resolvedLabel }}</BusyLabel></template
       >
     </q-btn>
   </div>
 </template>
 
 <script lang="ts">
-import PendingDots from "src/components/ui/PendingDots.vue";
+import BusyLabel from "src/components/ui/BusyLabel.vue";
 import { Send as SendIcon } from "lucide-vue-next";
 import { defineComponent, PropType } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -42,7 +42,10 @@ declare const windowMixin: any;
 
 export default defineComponent({
   name: "SendPaymentRequest",
-  components: { PendingDots, SendIcon },
+  components: {
+    BusyLabel,
+    SendIcon,
+  },
   mixins: [windowMixin],
   props: {
     buttonLabel: {

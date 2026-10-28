@@ -484,12 +484,22 @@ export const DS_ITEMS: DsItem[] = [
     group: "feedback",
     tier: "primitive",
     source:
-      "src/components/ui/PendingDots.vue · each list component's skeleton prop",
+      "src/components/ui/PendingDots.vue · BusyLabel.vue · each list component's skeleton prop",
     usage: { tag: "PendingDots" },
     example: `<PendingDots />
-<template #loading><PendingDots class="on-left" />Creating</template>
+<template #loading><BusyLabel>Creating</BusyLabel></template>
 <MintCard skeleton />  <ActivityRow skeleton />  <ReviewItem skeleton />`,
-    note: "Anything pending or busy shows the three dots, never a ring or a pulse. Loading lists render their own rows with skeleton set, so nothing moves when data arrives.",
+    note: "Anything pending or busy shows the three dots, never a ring or a pulse; a busy button's label is BusyLabel (dots before the text). Loading lists render their own rows with skeleton set, so nothing moves when data arrives.",
+  },
+  {
+    id: "busy-label",
+    name: "Busy label",
+    group: "feedback",
+    tier: "primitive",
+    source: "src/components/ui/BusyLabel.vue",
+    usage: { tag: "BusyLabel" },
+    example: `<q-btn :loading="busy" …>Swap<template #loading><BusyLabel>Swapping</BusyLabel></template></q-btn>`,
+    note: "A busy button keeps saying what it does: the pending dots before the label, on filled, outline and flat buttons.",
   },
   {
     id: "empty-state",

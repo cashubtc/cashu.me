@@ -97,17 +97,20 @@
         :disable="addMintDisabled"
       >
         {{ $t("AddMintDialog.actions.add_mint.label") }}
-        <template v-slot:loading>
-          <PendingDots class="on-left" />
-          <span>{{ $t("AddMintDialog.actions.add_mint.in_progress") }}</span>
-        </template>
+        <template #loading
+          ><BusyLabel
+            ><span>{{
+              $t("AddMintDialog.actions.add_mint.in_progress")
+            }}</span></BusyLabel
+          ></template
+        >
       </q-btn>
     </template>
   </BottomSheet>
 </template>
 
 <script lang="ts">
-import PendingDots from "src/components/ui/PendingDots.vue";
+import BusyLabel from "src/components/ui/BusyLabel.vue";
 import { defineComponent, computed, ref, watch } from "vue";
 import { useMintsStore } from "src/stores/mints";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
@@ -125,7 +128,7 @@ import DetailRow from "src/components/ui/DetailRow.vue";
 export default defineComponent({
   name: "AddMintDialog",
   components: {
-    PendingDots,
+    BusyLabel,
     CircleCheckIcon,
     CircleAlertIcon,
     BottomSheet,

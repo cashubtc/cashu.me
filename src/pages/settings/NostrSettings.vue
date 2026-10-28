@@ -171,14 +171,14 @@
                   ? $t("Settings.web_of_trust.crawl_odell")
                   : $t("Settings.web_of_trust.crawl_wot")
               }}
-              <template v-slot:loading
-                ><PendingDots class="on-left" />{{
+              <template #loading
+                ><BusyLabel>{{
                   hasCrawlCheckpoint && !wotLoading
                     ? $t("Settings.web_of_trust.continue_crawl")
                     : signerType === "SEED"
                     ? $t("Settings.web_of_trust.crawl_odell")
                     : $t("Settings.web_of_trust.crawl_wot")
-                }}</template
+                }}</BusyLabel></template
               >
             </q-btn>
             <q-btn
@@ -228,7 +228,7 @@
 </template>
 
 <script lang="ts">
-import PendingDots from "src/components/ui/PendingDots.vue";
+import BusyLabel from "src/components/ui/BusyLabel.vue";
 import {
   Copy as CopyIcon,
   Plus as PlusIcon,
@@ -247,7 +247,7 @@ export default defineComponent({
   name: "NostrSettings",
   mixins: [windowMixin],
   components: {
-    PendingDots,
+    BusyLabel,
     SettingsRadioRow,
     CopyIcon,
     PlusIcon,

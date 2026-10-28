@@ -141,12 +141,12 @@
               count: selectedMintsCount,
             })
           }}
-          <template v-slot:loading
-            ><PendingDots class="on-left" />{{
+          <template #loading
+            ><BusyLabel>{{
               $t("RestoreView.actions.restore_selected_mints.label", {
                 count: selectedMintsCount,
               })
-            }}</template
+            }}</BusyLabel></template
           >
         </q-btn>
       </div>
@@ -162,6 +162,7 @@
 </template>
 
 <script lang="ts">
+import BusyLabel from "src/components/ui/BusyLabel.vue";
 import MintCard from "src/components/MintCard.vue";
 import PendingDots from "src/components/ui/PendingDots.vue";
 import {
@@ -184,6 +185,7 @@ export default defineComponent({
   name: "RestoreView",
   mixins: [windowMixin],
   components: {
+    BusyLabel,
     MintCard,
     PendingDots,
     ClipboardPasteIcon,

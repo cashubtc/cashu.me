@@ -52,8 +52,9 @@
         :aria-expanded="showLanguageMenu"
         @click="toggleLanguageMenu"
       >
+        <GlobeIcon :size="16" class="language-icon" />
         <span class="language-text">{{ selectedLanguage }}</span>
-        <ChevronUpIcon :size="16" class="language-icon" />
+        <ChevronDownIcon :size="16" class="language-icon" />
       </button>
     </div>
 
@@ -91,7 +92,10 @@
 </template>
 
 <script lang="ts">
-import { ChevronUp as ChevronUpIcon } from "lucide-vue-next";
+import {
+  ChevronDown as ChevronDownIcon,
+  Globe as GlobeIcon,
+} from "lucide-vue-next";
 import { useWelcomeStore } from "src/stores/welcome";
 import BottomSheet from "src/components/BottomSheet.vue";
 import SheetOption from "src/components/SheetOption.vue";
@@ -99,7 +103,13 @@ import TermsOfServiceText from "src/components/TermsOfServiceText.vue";
 
 export default {
   name: "WelcomeSlide1",
-  components: { ChevronUpIcon, BottomSheet, SheetOption, TermsOfServiceText },
+  components: {
+    ChevronDownIcon,
+    GlobeIcon,
+    BottomSheet,
+    SheetOption,
+    TermsOfServiceText,
+  },
   data() {
     return {
       selectedLanguage: "",

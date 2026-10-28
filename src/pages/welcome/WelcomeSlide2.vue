@@ -343,12 +343,17 @@ export default {
   color: var(--app-text-muted);
 }
 
+/* The title shares the instructions' start edge (a centred title over start-aligned body
+   read as two layouts on one screen). */
 .title {
   font-size: 1.8rem;
   font-weight: 700;
   margin: 0 0 16px 0;
   color: var(--app-text);
   line-height: 1.2;
+  max-width: 500px;
+  text-align: start;
+  width: 100%;
 }
 
 .instructions {

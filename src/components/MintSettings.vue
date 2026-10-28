@@ -218,18 +218,19 @@
           :loading="swapBlocking"
         >
           {{ $t("MintSettings.swap.actions.swap.label") }}
-          <template v-slot:loading>
-            <PendingDots class="on-left" />
-            {{ $t("MintSettings.swap.actions.swap.in_progress") }}
-          </template>
+          <template #loading
+            ><BusyLabel>{{
+              $t("MintSettings.swap.actions.swap.in_progress")
+            }}</BusyLabel></template
+          >
         </q-btn>
       </div>
     </div>
   </div>
 </template>
 <script lang="ts">
+import BusyLabel from "src/components/ui/BusyLabel.vue";
 import MintCard from "src/components/MintCard.vue";
-import PendingDots from "src/components/ui/PendingDots.vue";
 import AppBadge from "src/components/ui/AppBadge.vue";
 import {
   CircleAlert as CircleAlertIcon,
@@ -270,8 +271,8 @@ export default defineComponent({
   name: "MintSettings",
   mixins: [windowMixin],
   components: {
+    BusyLabel,
     MintCard,
-    PendingDots,
     AppBadge,
     EllipsisIcon,
     CircleAlertIcon,

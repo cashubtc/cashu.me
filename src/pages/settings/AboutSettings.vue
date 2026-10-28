@@ -3,18 +3,14 @@
     :title="$t('Settings.menu.about.title')"
     :caption="$t('Settings.menu.about.caption')"
   >
-    <!-- terms -->
-    <q-list class="settings-menu-group q-mb-lg">
+    <!-- Terms first, then the project links, in one group. -->
+    <q-list class="settings-menu-group">
       <SettingsLinkRow
         to="/terms"
         :icon="scaleIcon"
         :label="$t('MainHeader.menu.terms.terms.title')"
         :caption="$t('MainHeader.menu.terms.terms.caption')"
       />
-    </q-list>
-
-    <!-- links -->
-    <q-list class="settings-menu-group">
       <SettingsLinkRow
         v-for="link in links"
         :key="link.link"

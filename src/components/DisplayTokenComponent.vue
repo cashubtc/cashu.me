@@ -179,7 +179,7 @@
                 <div class="row no-wrap" style="gap: 8px">
                   <q-btn
                     v-if="showAnimatedQR"
-                    outline
+                    unelevated
                     rounded
                     class="qr-control-chip"
                     @click="changeSpeed"
@@ -199,7 +199,7 @@
                   </q-btn>
                   <q-btn
                     v-if="showAnimatedQR"
-                    outline
+                    unelevated
                     rounded
                     class="qr-control-chip"
                     @click="changeSize"
@@ -713,8 +713,11 @@ export default defineComponent({
 });
 </script>
 <style scoped>
+/* Tonal chips (a tint fill, no edge), the app's quiet option style; outlined pills were
+   the only ones of their kind. */
 .qr-control-chip {
-  color: var(--app-text-muted);
+  background: var(--app-tint-strong);
+  color: var(--app-text);
   font-size: 13px;
   min-height: 44px;
   padding: 0 14px;

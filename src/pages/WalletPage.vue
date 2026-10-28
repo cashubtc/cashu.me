@@ -4,15 +4,17 @@
       <div class="wallet-hero q-gutter-y-md">
         <NoMintWarnBanner v-if="mints.length == 0" />
         <BalanceView v-else :set-tab="setTab" />
+        <!-- With no mint yet the empty state's Add mint and Receive ecash are the only
+             actions; Receive, Scan and Send join once there is a mint to use. -->
         <WalletActions
+          v-if="mints.length > 0"
           class="q-pt-lg q-pb-md"
           @receive="showReceiveDialog = true"
           @scan="showCamera"
           @send="showSendDialog = true"
-        >
-          <ReceiveDialog v-model="showReceiveDialog" />
-          <SendDialog v-model="showSendDialog" />
-        </WalletActions>
+        />
+        <ReceiveDialog v-model="showReceiveDialog" />
+        <SendDialog v-model="showSendDialog" />
       </div>
       <!-- ///////////////////////////////////////////
       ////////////////// TABLES /////////////////

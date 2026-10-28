@@ -51,23 +51,27 @@
       <NfcIcon class="q-mr-sm" :size="20" />
       {{ nfcLabel }}
       <q-tooltip>{{ nfcTooltip }}</q-tooltip>
-      <template v-slot:loading>
-        <PendingDots class="on-left" />
-        {{ nfcLabel }}</template
+      <template #loading
+        ><BusyLabel>{{ nfcLabel }}</BusyLabel></template
       >
     </q-btn>
   </div>
 </template>
 
 <script lang="ts">
-import PendingDots from "src/components/ui/PendingDots.vue";
+import BusyLabel from "src/components/ui/BusyLabel.vue";
 import OptionRow from "src/components/ui/OptionRow.vue";
 import { defineComponent } from "vue";
 import { ScanLine as ScanIcon, Nfc as NfcIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "ParseInputComponent",
-  components: { PendingDots, OptionRow, ScanIcon, NfcIcon },
+  components: {
+    BusyLabel,
+    OptionRow,
+    ScanIcon,
+    NfcIcon,
+  },
   props: {
     modelValue: {
       type: String,

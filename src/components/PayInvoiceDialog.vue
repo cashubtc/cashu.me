@@ -552,10 +552,11 @@
               :label="paymentButtonLabel"
               :loading="waitingForWallet || paymentInProgress"
             >
-              <template v-slot:loading>
-                <PendingDots class="on-left" />
-                <span>{{ paymentButtonLabel }}</span>
-              </template>
+              <template #loading
+                ><BusyLabel
+                  ><span>{{ paymentButtonLabel }}</span></BusyLabel
+                ></template
+              >
             </q-btn>
             <q-btn
               v-if="hasMultinutSupport && multinutEnabled"
@@ -610,9 +611,10 @@
             :loading="payInvoiceData.blocking"
           >
             {{ $t("PayInvoiceDialog.quote.label") }}
-            <template v-slot:loading>
-              <PendingDots class="on-left" />
-              {{ $t("PayInvoiceDialog.quote.label") }}</template
+            <template #loading
+              ><BusyLabel>{{
+                $t("PayInvoiceDialog.quote.label")
+              }}</BusyLabel></template
             >
           </q-btn>
         </FlowFooter>
@@ -658,13 +660,12 @@
                 ? $t("PayInvoiceDialog.lnurlpay.actions.send.in_progress")
                 : $t("PayInvoiceDialog.lnurlpay.actions.send.label")
             }}
-            <template v-slot:loading>
-              <PendingDots class="on-left" />
-              {{
+            <template #loading
+              ><BusyLabel>{{
                 payInvoiceData.blocking
                   ? $t("PayInvoiceDialog.lnurlpay.actions.send.in_progress")
                   : $t("PayInvoiceDialog.lnurlpay.actions.send.label")
-              }}</template
+              }}</BusyLabel></template
             >
           </q-btn>
         </FlowFooter>
@@ -693,13 +694,12 @@
                 ? $t("PayInvoiceDialog.lnurlpay.actions.send.in_progress")
                 : $t("PayInvoiceDialog.lnurlpay.actions.send.label")
             }}
-            <template v-slot:loading>
-              <PendingDots class="on-left" />
-              {{
+            <template #loading
+              ><BusyLabel>{{
                 payInvoiceData.blocking
                   ? $t("PayInvoiceDialog.lnurlpay.actions.send.in_progress")
                   : $t("PayInvoiceDialog.lnurlpay.actions.send.label")
-              }}</template
+              }}</BusyLabel></template
             >
           </q-btn>
         </FlowFooter>
@@ -714,6 +714,7 @@
   />
 </template>
 <script lang="ts">
+import BusyLabel from "src/components/ui/BusyLabel.vue";
 import FlowFooter from "src/components/ui/FlowFooter.vue";
 import PendingDots from "src/components/ui/PendingDots.vue";
 import { CircleCheck as CircleCheckIcon } from "lucide-vue-next";
@@ -745,6 +746,7 @@ export default defineComponent({
   name: "PayInvoiceDialog",
   mixins: [windowMixin],
   components: {
+    BusyLabel,
     FlowFooter,
     PendingDots,
     CircleCheckIcon,

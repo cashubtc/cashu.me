@@ -183,13 +183,12 @@
                     "ReceiveTokenDialog.actions.receive_to_selected_mint.label"
                   )
                 }}
-                <template v-slot:loading>
-                  <PendingDots class="on-left" />
-                  {{
+                <template #loading
+                  ><BusyLabel>{{
                     $t(
                       "ReceiveTokenDialog.actions.receive_to_selected_mint.label"
                     )
-                  }}</template
+                  }}</BusyLabel></template
                 >
                 <q-tooltip>{{
                   $t("ReceiveTokenDialog.actions.confirm_swap.tooltip_text")
@@ -253,9 +252,8 @@
                         )
                     : $t("ReceiveTokenDialog.actions.receive.label")
                 }}
-                <template v-slot:loading>
-                  <PendingDots class="on-left" />
-                  {{
+                <template #loading
+                  ><BusyLabel>{{
                     knowThisMint
                       ? addMintBlocking
                         ? $t(
@@ -265,7 +263,7 @@
                             "ReceiveTokenDialog.actions.receive.label_known_mint"
                           )
                       : $t("ReceiveTokenDialog.actions.receive.label")
-                  }}</template
+                  }}</BusyLabel></template
                 >
               </q-btn>
             </template>
@@ -277,6 +275,7 @@
 </template>
 
 <script lang="ts">
+import BusyLabel from "src/components/ui/BusyLabel.vue";
 import FlowFooter from "src/components/ui/FlowFooter.vue";
 import PendingDots from "src/components/ui/PendingDots.vue";
 import { defineComponent } from "vue";
@@ -311,6 +310,7 @@ export default defineComponent({
   name: "ReceiveTokenDialog",
   mixins: [windowMixin],
   components: {
+    BusyLabel,
     FlowFooter,
     PendingDots,
     AppCallout,

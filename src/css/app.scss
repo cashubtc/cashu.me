@@ -175,10 +175,13 @@ body,
 }
 
 // Label/value rows in quote, token and mint detail views.
+// Every detail row takes the same 32px in the flow; editable rows are 48px buttons that
+// reach 8px into the gaps above and below, so a table of mixed rows keeps one rhythm.
 .detail-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  min-height: 32px;
   width: 100%;
 }
 .detail-label {
@@ -698,6 +701,10 @@ body.body--light .q-dialog__backdrop {
     background: var(--app-card-fill-active);
     border-color: transparent;
   }
+}
+// Pressed is a clear step past hover.
+.mint-chip--card:active {
+  background: color-mix(in srgb, var(--app-text) 20%, transparent);
 }
 .mint-chip--field > :last-child {
   margin-inline-start: auto;
@@ -1396,7 +1403,8 @@ body .q-notification {
   --tone: var(--app-text-muted);
   align-items: center;
   background: var(--app-raised) !important;
-  border: 1px solid var(--app-group-edge);
+  // A hairline in every mode: on the charcoal page the raised fill alone barely separated.
+  border: 1px solid var(--app-border);
   border-radius: var(--app-radius-xl);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
   color: var(--app-text) !important;
@@ -1491,7 +1499,6 @@ body .q-notification .q-notification__actions .q-btn {
 // Light mode: a white card with a hairline and a soft shadow, as in dark mode.
 body.body--light .q-notification {
   background: var(--app-surface) !important;
-  border-color: var(--app-border);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 // Toasts sit above the pinned bottom action (52px button + 24px inset), so they never cover

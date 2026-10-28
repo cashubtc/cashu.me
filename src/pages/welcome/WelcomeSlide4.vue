@@ -9,7 +9,7 @@
     >
       {{ $t("WelcomeSlide4.english_only") }}
     </p>
-    <TermsOfServiceText class="settings-card terms-body" />
+    <TermsOfServiceText class="terms-body" />
     <div class="settings-card q-mt-md">
       <q-item tag="label" clickable class="terms-accept">
         <q-item-section side>
@@ -55,8 +55,10 @@ export default {
   margin: 0 0 12px;
 }
 
+/* Long-form text reads on the page at the content gutter, not boxed in a card; only the
+   acceptance row below is a card. */
 .terms-body {
-  padding: 20px;
+  padding: 4px 0 0;
 }
 
 .terms-accept {
