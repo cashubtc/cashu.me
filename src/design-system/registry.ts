@@ -106,10 +106,10 @@ export const DS_ITEMS: DsItem[] = [
     name: "Wallet actions",
     group: "actions",
     tier: "pattern",
-    source: "src/pages/WalletPage.vue .wallet-action-btn",
-    usage: { className: "wallet-action-btn" },
-    example: `<q-btn rounded unelevated color="primary" class="wallet-action-btn">Receive</q-btn>`,
-    note: "Caps by design: the two strategic wallet actions.",
+    source: "src/css/app.scss .wallet-actions",
+    usage: { className: "wallet-scan-btn" },
+    example: `<div class="wallet-actions"><q-btn class="wallet-action-btn" …/><q-btn class="wallet-scan-btn" …/><q-btn class="wallet-action-btn" …/></div>`,
+    note: "Caps by design: the two strategic wallet actions, with scan in a tinted circle between them.",
   },
   {
     id: "primary-button",
@@ -478,7 +478,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/css/app.scss .blocking-state",
     usage: { className: "blocking-state" },
     example: `<div class="blocking-state">…</div>`,
-    note: "Only AlreadyRunning and the 404; their tops differ (icon vs code), so no component yet.",
+    note: "AlreadyRunning and the 404: the empty state's icon disc, a larger page title, one 320px action.",
   },
   {
     id: "bottom-sheet",

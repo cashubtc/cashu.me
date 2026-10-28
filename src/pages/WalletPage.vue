@@ -211,34 +211,6 @@
 .row > .wallet-column {
   max-width: var(--app-column);
 }
-
-.wallet-actions {
-  align-items: center;
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 16px;
-  padding-right: 16px;
-}
-
-/* Send and Receive keep the original design's capitals (user direction, R56). */
-.wallet-action-btn {
-  flex: 1 1 0;
-  font-size: 1rem;
-  letter-spacing: 0.06em;
-  min-height: 52px;
-  text-transform: uppercase;
-}
-
-.wallet-scan-btn {
-  background: var(--app-tint);
-  color: var(--app-text);
-  flex: 0 0 auto;
-  height: 52px;
-  width: 52px;
-}
 </style>
 <script lang="ts">
 import { date } from "quasar";

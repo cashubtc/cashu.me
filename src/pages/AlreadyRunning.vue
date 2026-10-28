@@ -1,10 +1,8 @@
 <template>
   <div class="blocking-state fullscreen column flex-center text-center q-pa-md">
-    <AppWindowIcon
-      :size="48"
-      :stroke-width="1.5"
-      class="blocking-state__icon"
-    />
+    <div class="app-icon-circle app-icon-circle--lg blocking-state__icon">
+      <AppWindowIcon :size="26" />
+    </div>
     <div class="blocking-state__title q-mt-md">
       {{ $t("AlreadyRunning.title") }}
     </div>

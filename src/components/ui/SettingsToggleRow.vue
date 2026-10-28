@@ -55,13 +55,13 @@ export default defineComponent({
 </script>
 
 <style scoped>
-/* Disabled: the whole row fades with its switch, so it reads as one unavailable setting;
-   the reason stays legible. */
+/* Disabled: the title fades with its switch, so the row reads as unavailable; the caption
+   keeps caption contrast because it explains why. */
 .settings-toggle-row--disabled {
   cursor: default;
   pointer-events: none;
 }
-.settings-toggle-row--disabled .q-item__section--main {
-  opacity: 0.55;
+.settings-toggle-row--disabled .q-item__label:not(.q-item__label--caption) {
+  opacity: 0.5;
 }
 </style>

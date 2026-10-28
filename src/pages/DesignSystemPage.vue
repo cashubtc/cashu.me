@@ -137,24 +137,24 @@
       </DsEntry>
       <h2 id="ds-group-actions" class="ds-section">Actions and buttons</h2>
       <DsEntry id="wallet-actions">
-        <div class="row no-wrap items-center q-gutter-x-md">
+        <div class="wallet-actions">
           <q-btn
-            rounded
             unelevated
+            rounded
             color="primary"
-            class="col wallet-action-btn ui-kit-caps"
-          >
-            Receive
+            class="wallet-action-btn"
+            label="Receive"
+          />
+          <q-btn flat dense round class="wallet-scan-btn" aria-label="Scan">
+            <ScanIcon :size="26" />
           </q-btn>
-          <q-btn flat round aria-label="Scan"><ScanIcon :size="22" /></q-btn>
           <q-btn
-            rounded
             unelevated
+            rounded
             color="primary"
-            class="col wallet-action-btn ui-kit-caps"
-          >
-            Send
-          </q-btn>
+            class="wallet-action-btn"
+            label="Send"
+          />
         </div>
       </DsEntry>
       <DsEntry id="primary-button">
@@ -804,10 +804,11 @@
       </DsEntry>
       <DsEntry id="blocking-state">
         <div class="blocking-state column flex-center text-center q-pa-lg">
-          <div class="blocking-state__title">This page doesn’t exist</div>
-          <div class="blocking-state__text q-mt-sm">
-            Check the link and try again.
+          <div class="app-icon-circle app-icon-circle--lg blocking-state__icon">
+            <CompassIcon :size="26" />
           </div>
+          <div class="blocking-state__title q-mt-md">This page doesn’t exist</div>
+          <div class="blocking-state__text q-mt-sm">Error 404</div>
           <q-btn
             rounded
             unelevated
@@ -1045,6 +1046,7 @@ import {
   ChevronLeft as ChevronLeftIcon,
   Clock as ClockIcon,
   Coins as CoinsIcon,
+  Compass as CompassIcon,
   Copy as CopyIcon,
   Download as DownloadIcon,
   Ellipsis as EllipsisIcon,
@@ -1118,6 +1120,7 @@ export default defineComponent({
     WelcomeSlideScaffold,
     ChevronLeftIcon,
     CoinsIcon,
+    CompassIcon,
     CopyIcon,
     DownloadIcon,
     EllipsisIcon,
@@ -1567,11 +1570,6 @@ export default defineComponent({
   flex-shrink: 0;
   height: 24px;
   width: 24px;
-}
-.ui-kit-caps {
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-size: 1rem;
 }
 .ui-kit-48 {
   min-height: 48px;

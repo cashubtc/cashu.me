@@ -1,17 +1,24 @@
-<!-- The on-chain confirmation status row in quote details. The leading icon carries the state
-     (a link while checking, a clock while pending, a check once confirmed); the value is a
-     spinner while the explorer is queried, then "Confirmed/Pending (n/threshold)". -->
+<!-- The on-chain confirmation status row in quote details. The label keeps one icon; the value
+     carries the state: busy dots while the explorer is queried, then a clock and "Pending
+     (n/threshold)", or a green check and "Confirmed (n/threshold)". -->
 <template>
   <DetailRow
-    :icon="statusIcon"
+    :icon="LinkIcon"
     :label="$t('QuoteInformation.chain_status')"
     value-class="detail-value-with-spinner"
   >
-    <q-spinner
-      v-if="loading"
+    <q-spinner-dots
+      v-if="loading || !metadata"
       size="16px"
-      :thickness="4"
-      class="q-mr-xs chain-status__spinner"
+      class="chain-status__icon chain-status__spinner"
+    />
+    <component
+      :is="statusIcon"
+      v-else
+      :size="16"
+      class="chain-status__icon"
+      :class="metadata.confirmed ? 'text-positive' : 'chain-status--pending'"
+      aria-hidden="true"
     />
     <transition name="chain-status-fade" mode="out-in">
       <span
@@ -56,8 +63,7 @@ export default defineComponent({
   },
   computed: {
     statusIcon() {
-      if (!this.metadata) return this.LinkIcon;
-      return this.metadata.confirmed ? this.CircleCheckIcon : this.ClockIcon;
+      return this.metadata?.confirmed ? this.CircleCheckIcon : this.ClockIcon;
     },
     statusDisplay(): string {
       if (!this.metadata) return "";
@@ -73,6 +79,10 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.chain-status__icon {
+  flex-shrink: 0;
+  margin-inline-end: 6px;
+}
 .chain-status__spinner {
   color: var(--app-text-muted);
 }

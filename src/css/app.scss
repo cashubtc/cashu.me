@@ -894,9 +894,13 @@ html[dir="rtl"]
   inset: 50% auto auto 16px !important;
 }
 // Outline buttons take their edge and fill from the surface tokens (Quasar draws the edge
-// in currentColor).
+// in currentColor), and an ink label: the theme colour is kept for filled primaries and
+// selection, so every secondary button reads the same in every theme.
 body .q-btn--outline {
   background: var(--app-outline-fill);
+}
+body .q-btn--outline.text-primary {
+  color: var(--app-text) !important;
 }
 body .q-btn--outline:before {
   border-color: var(--app-outline-edge);
@@ -1368,14 +1372,14 @@ html[dir="rtl"] .mint-card-more {
   font-weight: 500;
 }
 
-// Toasts (user direction, R46; Sonner style since R56, rich colours since R57): a compact
-// card tinted with its kind's tone — the same tones and treatment as the callouts — with a
-// hairline in the tone, a soft shadow, 8px corners and medium-weight 14px text.
+// Toasts (user direction, R46; Sonner style since R56): a compact raised card with the shared
+// hairline edge (so it still separates on white pages), a soft shadow, the tone carried by
+// its icon, and medium-weight 14px text.
 body .q-notification {
   --tone: var(--app-text-muted);
   align-items: center;
   background: var(--app-raised) !important;
-  border: 1px solid transparent;
+  border: 1px solid var(--app-border);
   border-radius: var(--app-radius-lg);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   color: var(--app-text) !important;
@@ -1529,4 +1533,34 @@ body .q-notification__progress {
 
 .blocking-state__action {
   font-weight: 600;
+}
+
+// Wallet actions: Receive and Send as equal pills with the scan action between them in a
+// 52px tinted circle. Global so the design system board renders the real pattern.
+.wallet-actions {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+/* Send and Receive keep the original design's capitals (user direction, R56). */
+.wallet-action-btn {
+  flex: 1 1 0;
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+  min-height: 52px;
+  text-transform: uppercase;
+}
+
+.wallet-scan-btn {
+  background: var(--app-tint);
+  color: var(--app-text);
+  flex: 0 0 auto;
+  height: 52px;
+  width: 52px;
 }
