@@ -597,9 +597,6 @@ export default defineComponent({
   min-width: 96px;
   text-align: center;
 }
-.pr-sheet-options {
-  padding: 4px 16px 16px;
-}
 .mint-glyph {
   color: var(--app-text-muted);
 }

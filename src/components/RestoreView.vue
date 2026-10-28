@@ -472,15 +472,6 @@ export default defineComponent({
   justify-content: flex-start;
 }
 
-/* The selection box sits in the card's top corner, where an installed mint shows its menu. */
-.restore-mint-check {
-  flex: none;
-  margin: -6px -6px 0 0;
-}
-html[dir="rtl"] .restore-mint-check {
-  margin: -6px 0 0 -6px;
-}
-
 /* Primary action section */
 .primary-action-section {
   display: flex;

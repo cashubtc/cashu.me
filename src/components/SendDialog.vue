@@ -1,119 +1,100 @@
 <template>
-  <q-dialog
-    v-model="showSendDialog"
-    :position="$q.screen.gt.sm ? 'standard' : 'bottom'"
-    :maximized="$q.screen.lt.sm"
-    :transition-show="$q.screen.gt.sm ? 'scale' : 'slide-up'"
-    :transition-hide="$q.screen.gt.sm ? 'scale' : 'slide-down'"
-  >
-    <q-card class="drawer-card full-width-card q-pb-lg">
-      <q-card-section class="row items-center no-wrap drawer-header">
-        <q-btn
-          flat
-          round
-          v-close-popup
-          class="drawer-header-btn app-icon-btn"
-          color="primary"
+  <BottomSheet v-model="showSendDialog" :title="$t('SendDialog.title')">
+    <template #trailing>
+      <q-btn
+        flat
+        round
+        class="app-icon-btn"
+        :aria-label="$t('global.actions.scan.label')"
+        @click="showCamera"
+        color="primary"
+      >
+        <ScanIcon />
+      </q-btn>
+    </template>
+    <div>
+      <div class="q-gutter-y-md">
+        <div
+          class="app-option-row"
+          role="button"
+          tabindex="0"
+          data-testid="send-ecash-option"
+          @click="showSendTokensDialog"
+          @keydown.enter.prevent="showSendTokensDialog"
+          @keydown.space.prevent="showSendTokensDialog"
         >
-          <XIcon />
-        </q-btn>
-        <div class="col text-center">
-          <span class="sheet-title">{{ $t("SendDialog.title") }}</span>
-        </div>
-        <q-btn
-          flat
-          round
-          class="drawer-header-btn app-icon-btn"
-          @click="showCamera"
-          color="primary"
-        >
-          <ScanIcon />
-        </q-btn>
-      </q-card-section>
-
-      <q-card-section class="q-pa-md">
-        <div class="q-gutter-y-md">
-          <div
-            class="app-option-row"
-            role="button"
-            tabindex="0"
-            data-testid="send-ecash-option"
-            @click="showSendTokensDialog"
-            @keydown.enter.prevent="showSendTokensDialog"
-            @keydown.space.prevent="showSendTokensDialog"
-          >
-            <div class="row items-center no-wrap">
-              <div class="app-icon-circle">
-                <CoinsIcon :size="24" />
-              </div>
-              <div class="col q-ml-md">
-                <div class="app-option-row__label">
-                  {{ $t("SendDialog.actions.ecash.label") }}
-                </div>
-                <div class="app-option-row__caption">
-                  {{ $t("SendDialog.captions.ecash") }}
-                </div>
-              </div>
+          <div class="row items-center no-wrap">
+            <div class="app-icon-circle">
+              <CoinsIcon :size="24" />
             </div>
-          </div>
-
-          <div
-            v-if="canSendLightning"
-            class="app-option-row"
-            role="button"
-            tabindex="0"
-            data-testid="send-lightning-option"
-            @click="showParseDialog"
-            @keydown.enter.prevent="showParseDialog"
-            @keydown.space.prevent="showParseDialog"
-          >
-            <div class="row items-center no-wrap">
-              <div class="app-icon-circle">
-                <ZapIcon :size="24" />
+            <div class="col q-ml-md">
+              <div class="app-option-row__label">
+                {{ $t("SendDialog.actions.ecash.label") }}
               </div>
-              <div class="col q-ml-md">
-                <div class="app-option-row__label">
-                  {{ $t("SendDialog.actions.lightning.label") }}
-                </div>
-                <div class="app-option-row__caption">
-                  {{ $t("SendDialog.captions.lightning") }}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            v-if="canSendOnchain"
-            class="app-option-row"
-            role="button"
-            tabindex="0"
-            data-testid="send-onchain-option"
-            @click="showOnchainPayDialog"
-            @keydown.enter.prevent="showOnchainPayDialog"
-            @keydown.space.prevent="showOnchainPayDialog"
-          >
-            <div class="row items-center no-wrap">
-              <div class="app-icon-circle">
-                <BitcoinIcon :size="24" />
-              </div>
-              <div class="col q-ml-md">
-                <div class="app-option-row__label">
-                  {{ $t("common.on_chain") }}
-                </div>
-                <div class="app-option-row__caption">
-                  {{ $t("SendDialog.captions.onchain") }}
-                </div>
+              <div class="app-option-row__caption">
+                {{ $t("SendDialog.captions.ecash") }}
               </div>
             </div>
           </div>
         </div>
-      </q-card-section>
-    </q-card>
-  </q-dialog>
+
+        <div
+          v-if="canSendLightning"
+          class="app-option-row"
+          role="button"
+          tabindex="0"
+          data-testid="send-lightning-option"
+          @click="showParseDialog"
+          @keydown.enter.prevent="showParseDialog"
+          @keydown.space.prevent="showParseDialog"
+        >
+          <div class="row items-center no-wrap">
+            <div class="app-icon-circle">
+              <ZapIcon :size="24" />
+            </div>
+            <div class="col q-ml-md">
+              <div class="app-option-row__label">
+                {{ $t("SendDialog.actions.lightning.label") }}
+              </div>
+              <div class="app-option-row__caption">
+                {{ $t("SendDialog.captions.lightning") }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          v-if="canSendOnchain"
+          class="app-option-row"
+          role="button"
+          tabindex="0"
+          data-testid="send-onchain-option"
+          @click="showOnchainPayDialog"
+          @keydown.enter.prevent="showOnchainPayDialog"
+          @keydown.space.prevent="showOnchainPayDialog"
+        >
+          <div class="row items-center no-wrap">
+            <div class="app-icon-circle">
+              <BitcoinIcon :size="24" />
+            </div>
+            <div class="col q-ml-md">
+              <div class="app-option-row__label">
+                {{ $t("common.on_chain") }}
+              </div>
+              <div class="app-option-row__caption">
+                {{ $t("SendDialog.captions.onchain") }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </BottomSheet>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import BottomSheet from "src/components/BottomSheet.vue";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useUiStore } from "src/stores/ui";
@@ -123,7 +104,6 @@ import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { useSettingsStore } from "../stores/settings";
 import { useMintsStore } from "src/stores/mints";
 import {
-  X as XIcon,
   Zap as ZapIcon,
   Scan as ScanIcon,
   Coins as CoinsIcon,
@@ -139,7 +119,7 @@ import {
 export default defineComponent({
   name: "SendDialog",
   components: {
-    XIcon,
+    BottomSheet,
     CoinsIcon,
     ZapIcon,
     ScanIcon,

@@ -309,12 +309,9 @@ export default {
 }
 
 /* The language and terms lists sit inside the shared BottomSheet. */
-.language-options {
-  padding: 4px 16px 16px;
-}
 
 .terms-content {
-  padding: 4px 24px 16px;
+  padding: 0 8px;
 }
 
 .terms-text-content {

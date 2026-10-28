@@ -130,18 +130,6 @@ body,
   max-width: 650px;
 }
 
-.full-width-card {
-  width: 100%;
-  max-width: var(--app-column);
-  margin: 0 auto;
-}
-// On wide screens bottom sheets match the shared content column.
-@media (min-width: 600px) {
-  .full-width-card,
-  .q-dialog__inner > .full-width-card {
-    max-width: var(--app-content) !important;
-  }
-}
 
 .animated.tada {
   animation-duration: 1s;
@@ -194,30 +182,32 @@ body,
 }
 
 // Section label centred between two hairlines, in small capitals, as in the original design
-// (Mints tab, mint details, multi-mint payments).
-// Section divider: the section title on the start edge, then a hairline to the end, so it
-// matches the left-aligned settings section headings.
+// (Mints tab: Swap and Add mint, mint details, multi-mint payments; user direction).
 .section-divider {
   display: flex;
   align-items: center;
   width: 100%;
-}
-.section-divider > .divider-line:first-child {
-  display: none;
 }
 .divider-line {
   flex: 1;
   height: 1px;
   background-color: var(--app-border);
 }
-// One section heading style, shared with the settings section title.
 .divider-text {
-  padding: 0 12px 0 0;
-  font-size: 14px;
+  padding: 0 12px;
+  font-size: 12px;
   font-weight: 600;
-  color: var(--app-text);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
 }
 // Chinese, Japanese and Korean have no capitals, and tracking only spreads the characters.
+.divider-text:lang(zh),
+.divider-text:lang(ja),
+.divider-text:lang(ko) {
+  letter-spacing: 0;
+  text-transform: none;
+}
 // Captions read evenly at body sizes without Quasar's positive tracking.
 .q-item__label--caption,
 .text-caption {
@@ -324,6 +314,11 @@ button:focus-visible {
 .q-btn:not(.disabled):active {
   scale: 0.97;
 }
+// Full-width buttons press with their fill only: 3% of a 480px button is a 14px jump, and
+// Safari clipped the outline's end edge mid-scale (Discover mints).
+.q-btn.full-width:not(.disabled):active {
+  scale: none;
+}
 @media (prefers-reduced-motion: no-preference) {
   .q-btn {
     transition: scale 0.08s ease;
@@ -411,9 +406,11 @@ body[data-theme] .welcome-surface,
 }
 // Lucide's chevron-down only fills the middle half of its box, so at 20px it reads as 10px
 // beside the 20px scan and lock glyphs; 24px with a heavier stroke matches their weight.
+// Its ink ends on the shared 16px trailing guideline (see "Trailing guideline").
 .mint-chip__icon.lucide-chevron-down-icon {
   height: 24px;
   margin-block: -2px;
+  margin-inline-end: -2px;
   stroke-width: 2.25;
   width: 24px;
 }
@@ -755,12 +752,6 @@ body.body--light .q-dialog__backdrop {
   line-height: 22px;
 }
 
-// Floating drawer headers (Receive, Send, Receive ecash) share the bottom-sheet header
-// geometry: 44px buttons on the 6px toolbar inset, so each glyph lands on the 16px gutter.
-.drawer-header {
-  min-height: 56px;
-  padding: 6px 6px 8px;
-}
 
 // Text for screen readers only.
 .visually-hidden {
@@ -865,15 +856,21 @@ body .q-field--outlined .q-field__control {
 // with no edge, so they never read as editable.
 body .q-field--outlined.q-field--readonly .q-field__control {
   background: var(--app-tint);
+}
+body .q-field--outlined.q-field--readonly:not(:has(.q-field__append)) .q-field__control {
   padding-inline-end: 40px;
 }
 body .q-field--outlined.q-field--readonly .q-field__control:before {
   border-color: transparent;
 }
-// A lock on the end edge says "can't be edited" without relying on the surface alone.
-body .q-field--outlined.q-field--readonly .q-field__control::after {
+// A lock on the end edge says "can't be edited" without relying on the surface alone. A field
+// with its own end action (Copy on the Lightning address) keeps that action instead, so the
+// lock never sits on top of it.
+body .q-field--outlined.q-field--readonly:not(:has(.q-field__append)) .q-field__control::after {
   background: var(--app-text-muted);
   border: 0 !important;
+  // The shared 12px field radius also lands on this pseudo-element and clipped the shackle.
+  border-radius: 0 !important;
   content: "";
   height: 16px;
   inset: 50% 16px auto auto !important;
@@ -889,7 +886,7 @@ body .q-field--outlined.q-field--readonly .q-field__control::after {
 }
 html[dir="rtl"]
   body
-  .q-field--outlined.q-field--readonly
+  .q-field--outlined.q-field--readonly:not(:has(.q-field__append))
   .q-field__control::after {
   inset: 50% auto auto 16px !important;
 }
@@ -1321,20 +1318,29 @@ body .mint-card.mint-card--active {
   gap: 4px;
   min-width: 0;
 }
+/* The Active badge (24px) and the menu (40px) both centre on the mint name's line. */
 .mint-card__status {
   flex: none;
   margin-inline-end: 4px;
-  margin-top: 3px;
+  margin-top: -2px;
 }
 .mint-card-more {
   color: var(--app-text-muted);
   flex: none;
   height: 40px;
-  margin: -8px -10px -8px 0;
+  margin: -10px -14px -10px 0;
   width: 40px;
 }
 html[dir="rtl"] .mint-card-more {
-  margin: -8px 0 -8px -10px;
+  margin: -10px 0 -10px -14px;
+}
+/* Restore's selection box sits where an installed mint shows its menu, on the same line. */
+.restore-mint-check {
+  flex: none;
+  margin: -4px -4px 0 0;
+}
+html[dir="rtl"] .restore-mint-check {
+  margin: -4px 0 0 -4px;
 }
 .mint-card__foot {
   padding-inline-start: 50px;
@@ -1358,11 +1364,6 @@ html[dir="rtl"] .mint-card-more {
   font-size: 17px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-}
-.mint-card__plus ~ .currency-unit-text {
-  color: var(--app-text-muted);
-  font-size: 14px;
-  font-weight: 400;
 }
 .mint-card__plus {
   color: var(--app-text-subtle);
@@ -1563,4 +1564,22 @@ body .q-notification__progress {
   flex: 0 0 auto;
   height: 52px;
   width: 52px;
+}
+
+// Trailing guideline: whatever ends a row, card or field (switch, chevron, copy, scan, check,
+// close, menu) puts its visible ink 16px from the container's end edge, the same line as the
+// switch track. Icon buttons carry their 40px target past the glyph, so each pulls its end
+// margin in by the glyph's own inset.
+.q-field--outlined .q-field__append > .q-btn:last-child {
+  margin-inline-end: -10px;
+}
+.q-item__section--side > .q-btn--round:last-child {
+  margin-inline-end: -3px;
+}
+.q-item__section--side > .q-checkbox:last-child {
+  margin-inline-end: -4px;
+}
+// Quasar centres the 32px track in a 56px box, so the visible switch ended 29px in.
+.q-item__section--side > .q-toggle:last-child {
+  margin-inline-end: -13px;
 }

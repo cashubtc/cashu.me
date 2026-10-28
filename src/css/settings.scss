@@ -104,6 +104,10 @@
 .settings-menu-action {
   color: var(--app-text-subtle);
 }
+/* The chevron's ink sits 6px inside its 18px box; pull it onto the 16px trailing guideline. */
+.lucide-chevron-right-icon.settings-menu-chevron {
+  margin-inline-end: -6px;
+}
 
 /* Wrapped row captions keep a readable line pitch. */
 .settings-view .q-item__label--caption {
@@ -131,14 +135,28 @@
   padding: 0 16px;
 }
 
-/* Expandable settings rows ("Advanced"): the same row as the other settings rows, with the
-   chevron in the row glyph colour and a rounded pressed fill; no leading Material icon. */
+/* Expandable settings rows ("Advanced"): the same row as the other settings rows. Inside a
+   group card the header is square-cornered like its sibling rows, so its pressed fill runs to
+   the card's edges and the card's own corners clip it. The chevron is the Lucide line chevron
+   (masked over Quasar's Material glyph), in the row glyph colour, on the 16px trailing line. */
 .settings-view .q-expansion-item .q-item {
   border-radius: var(--app-radius-lg);
   min-height: 56px;
 }
-.settings-view .q-expansion-item__toggle-icon {
+.settings-menu-group .q-expansion-item .q-item {
+  border-radius: 0;
+}
+.q-expansion-item__toggle-icon.material-icons {
+  background: currentColor;
   color: var(--app-text-muted);
+  font-size: 0 !important;
+  height: 24px;
+  margin-inline-end: -7px;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")
+    center / 20px no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")
+    center / 20px no-repeat;
+  width: 24px;
 }
 
 /* Relay URLs are content: body size and colour, left to right in every locale. */

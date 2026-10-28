@@ -130,6 +130,42 @@
           </div>
         </div>
       </DsEntry>
+      <DsEntry id="icons">
+        <div class="ds-icons">
+          <div class="ds-icons__head">
+            Lucide · {{ lucideIcons.length }} icons, 20px, 2px stroke
+          </div>
+          <div class="ds-icons__grid">
+            <div
+              v-for="ic in lucideIcons"
+              :key="ic.name"
+              class="ds-icons__cell"
+              :title="ic.files.join('\n')"
+            >
+              <component :is="lucideComponent(ic.name)" :size="20" />
+              <span class="ds-icons__name">{{ ic.name }}</span>
+              <span class="ds-icons__count">{{ ic.files.length }}</span>
+            </div>
+          </div>
+          <template v-if="materialIcons.length">
+            <div class="ds-icons__head q-mt-lg">
+              Material (to replace) · {{ materialIcons.length }}
+            </div>
+            <div class="ds-icons__grid">
+              <div
+                v-for="ic in materialIcons"
+                :key="ic.name"
+                class="ds-icons__cell ds-icons__cell--off"
+                :title="ic.files.join('\n')"
+              >
+                <q-icon :name="ic.name" size="20px" />
+                <span class="ds-icons__name">{{ ic.name }}</span>
+                <span class="ds-icons__count">{{ ic.files.length }}</span>
+              </div>
+            </div>
+          </template>
+        </div>
+      </DsEntry>
       <DsEntry id="machine-text">
         <div class="app-mono app-mono--wrap text-app-muted">
           lnbc10u1pjxyz0pp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqypq
@@ -325,19 +361,27 @@
           <AmountKeypadPanel v-model="keypadAmount" />
         </div>
       </DsEntry>
-      <DsEntry id="segmented-control">
-        <q-btn-toggle
-          v-model="invoiceType"
-          rounded
-          unelevated
-          no-caps
-          class="invoice-type-toggle"
-          toggle-color="primary"
-          :options="[
-            { label: 'Invoice', value: 'bolt11' },
-            { label: 'Offer', value: 'bolt12' },
-          ]"
-        />
+      <DsEntry
+        id="segmented-control"
+        :variants="segmentedVariants"
+        :scores="explorationScores['segmented-control']"
+        v-slot="{ variant }"
+      >
+        <template v-if="variant === 0">
+          <q-btn-toggle
+            v-model="invoiceType"
+            rounded
+            unelevated
+            no-caps
+            class="invoice-type-toggle"
+            toggle-color="primary"
+            :options="[
+              { label: 'Invoice', value: 'bolt11' },
+              { label: 'Offer', value: 'bolt12' },
+            ]"
+          />
+        </template>
+        <SegmentedExplorations v-else :variant="variant" />
       </DsEntry>
       <DsEntry id="toggles">
         <div class="row q-gutter-md items-center">
@@ -466,27 +510,6 @@
             danger
           />
         </q-list>
-      </DsEntry>
-      <DsEntry id="sheet-header">
-        <div class="ui-kit-frame">
-          <div class="drawer-header row items-center no-wrap">
-            <q-btn
-              flat
-              round
-              class="drawer-header-btn app-icon-btn"
-              aria-label="Close"
-              ><XIcon :size="22"
-            /></q-btn>
-            <div class="col sheet-title">Receive</div>
-            <q-btn
-              flat
-              round
-              class="drawer-header-btn app-icon-btn"
-              aria-label="Scan"
-              ><ScanIcon :size="20"
-            /></q-btn>
-          </div>
-        </div>
       </DsEntry>
       <DsEntry id="fullscreen-dialog-header">
         <div class="ds-frame">
@@ -712,49 +735,62 @@
         </div>
       </DsEntry>
       <h2 id="ds-group-feedback" class="ds-section">Feedback and overlays</h2>
-      <DsEntry id="callouts">
-        <div class="column q-gutter-y-sm q-mb-md">
-          <AppCallout text="Neutral advice for the next step." />
-          <AppCallout
-            variant="info"
-            text="Swapping costs a small Lightning fee."
-          />
-          <AppCallout variant="success" text="Backup confirmed." />
-          <AppCallout
-            variant="warning"
-            title="Experimental feature"
-            text="Paying from several mints can fail part way."
-          />
-          <AppCallout
-            variant="danger"
-            text="This token is locked to a different key."
-          />
-        </div>
+      <DsEntry
+        id="callouts"
+        :variants="calloutVariants"
+        :scores="explorationScores['callouts']"
+        v-slot="{ variant }"
+      >
+        <CalloutExplorations :variant="variant" />
       </DsEntry>
-      <DsEntry id="toasts">
-        <div
-          class="q-notification row items-stretch q-notification--standard ui-kit-toast q-mb-md"
-        >
-          <div class="row items-center no-wrap q-notification__wrapper">
-            <q-icon
-              name="check_circle"
-              size="18px"
-              color="positive"
-              class="q-notification__icon q-mr-sm"
-            />
-            <div class="q-notification__message col">Received ₿500</div>
+      <DsEntry
+        id="toasts"
+        :variants="toastVariants"
+        :scores="explorationScores['toasts']"
+        v-slot="{ variant }"
+      >
+        <template v-if="variant === 0">
+          <!-- The real toast classes, static: the same five messages as the variations. -->
+          <div class="ds-toast-stack q-mb-md">
+            <div
+              v-for="t in toastSpecimen"
+              :key="t.message"
+              class="q-notification row items-stretch q-notification--standard ui-kit-toast"
+              :class="`bg-${t.type}`"
+            >
+              <div
+                class="row items-center no-wrap q-notification__wrapper full-width"
+              >
+                <q-icon
+                  :name="t.icon"
+                  size="18px"
+                  class="q-notification__icon q-mr-sm"
+                />
+                <div class="q-notification__message col">
+                  {{ t.message }}
+                  <div v-if="t.caption" class="q-notification__caption">
+                    {{ t.caption }}
+                  </div>
+                </div>
+                <div class="q-notification__actions row items-center">
+                  <q-btn v-if="t.action" flat no-caps dense :label="t.action" />
+                  <q-btn v-else flat round dense icon="close" color="grey" />
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="row q-gutter-sm">
-          <q-btn rounded outline no-caps @click="toast('success')"
-            >Success</q-btn
-          >
-          <q-btn rounded outline no-caps @click="toast('error')">Error</q-btn>
-          <q-btn rounded outline no-caps @click="toast('warning')"
-            >Warning</q-btn
-          >
-          <q-btn rounded outline no-caps @click="toast('info')">Info</q-btn>
-        </div>
+          <div class="row q-gutter-sm">
+            <q-btn rounded outline no-caps @click="toast('success')"
+              >Success</q-btn
+            >
+            <q-btn rounded outline no-caps @click="toast('error')">Error</q-btn>
+            <q-btn rounded outline no-caps @click="toast('warning')"
+              >Warning</q-btn
+            >
+            <q-btn rounded outline no-caps @click="toast('info')">Info</q-btn>
+          </div>
+        </template>
+        <ToastExplorations v-else :variant="variant" />
       </DsEntry>
       <DsEntry id="loading">
         <q-btn
@@ -807,7 +843,9 @@
           <div class="app-icon-circle app-icon-circle--lg blocking-state__icon">
             <CompassIcon :size="26" />
           </div>
-          <div class="blocking-state__title q-mt-md">This page doesn’t exist</div>
+          <div class="blocking-state__title q-mt-md">
+            This page doesn’t exist
+          </div>
           <div class="blocking-state__text q-mt-sm">Error 404</div>
           <q-btn
             rounded
@@ -821,14 +859,37 @@
         </div>
       </DsEntry>
       <DsEntry id="bottom-sheet">
+        <!-- Shown open in place (inline), with the button that opens the real dialog. -->
+        <BottomSheet inline title="Send">
+          <template #trailing>
+            <q-btn
+              flat
+              round
+              color="primary"
+              class="app-icon-btn"
+              aria-label="Scan"
+              ><ScanIcon
+            /></q-btn>
+          </template>
+          <div class="column q-gutter-y-sm">
+            <SheetOption
+              v-for="o in sortOptions"
+              :key="o"
+              :label="o"
+              :selected="sort === o"
+              @select="sort = o"
+            />
+          </div>
+        </BottomSheet>
         <q-btn
           rounded
           outline
           no-caps
           color="primary"
+          class="q-mt-lg"
           @click="sheetOpen = true"
         >
-          Open bottom sheet
+          Open as a dialog
         </q-btn>
         <BottomSheet v-model="sheetOpen" title="Sort reviews">
           <div class="column q-gutter-y-sm">
@@ -863,14 +924,36 @@
         </div>
       </DsEntry>
       <DsEntry id="confirm-dialog">
+        <!-- Shown open in place, with the button that opens the real dialog. -->
+        <q-card class="council-dialog q-pa-lg">
+          <div class="text-h6 text-weight-bold">Remove this mint?</div>
+          <q-list class="council-dialog__summary q-mt-md">
+            <q-item>
+              <q-item-section>
+                <q-item-label caption>Mint URL</q-item-label>
+                <q-item-label>mint.example.com</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+          <p class="council-dialog__note">
+            Your ecash from this mint stays on this device.
+          </p>
+          <div class="council-dialog__actions">
+            <q-btn flat rounded no-caps class="col">Cancel</q-btn>
+            <q-btn unelevated rounded no-caps color="negative" class="col">
+              Remove mint
+            </q-btn>
+          </div>
+        </q-card>
         <q-btn
           rounded
           outline
           no-caps
           color="primary"
+          class="q-mt-lg"
           @click="confirmOpen = true"
         >
-          Open confirm dialog
+          Open as a dialog
         </q-btn>
         <q-dialog v-model="confirmOpen">
           <q-card class="council-dialog q-pa-lg">
@@ -910,8 +993,50 @@
         </q-dialog>
       </DsEntry>
       <h2 id="ds-group-feature" class="ds-section">Feature components</h2>
-      <DsEntry id="history">
-        <HistoryTable />
+      <DsEntry
+        id="history"
+        :variants="historyVariants"
+        :scores="explorationScores['history']"
+        v-slot="{ variant }"
+      >
+        <template v-if="variant === 0">
+          <!-- The current rows (ActivityRow, as HistoryTable draws them) with the same seven
+               payments as the variations, then the real empty state. -->
+          <q-list class="full-width">
+            <ActivityRow
+              v-for="h in historySpecimen"
+              :key="h.caption + h.amount"
+              :icon="h.icon"
+              :direction="h.dir"
+              :label="h.label"
+              :amount="h.amount"
+              :caption="h.caption"
+              :pending="h.pending"
+            >
+              <template v-if="h.pending" #caption-end>
+                <span class="text-app-muted">Pending</span>
+              </template>
+            </ActivityRow>
+          </q-list>
+          <q-pagination
+            :model-value="1"
+            :max="7"
+            :max-pages="5"
+            direction-links
+            boundary-numbers
+            class="q-mt-md"
+          />
+          <div class="full-width q-mt-lg"><HistoryTable /></div>
+        </template>
+        <HistoryExplorations v-else :variant="variant" />
+      </DsEntry>
+      <DsEntry
+        id="payment-request"
+        :variants="paymentRequestVariants"
+        :scores="explorationScores['payment-request']"
+        v-slot="{ variant }"
+      >
+        <PaymentRequestExplorations :variant="variant" />
       </DsEntry>
       <DsEntry id="mint-review-summary">
         <div class="row q-gutter-lg items-center">
@@ -933,17 +1058,24 @@
         <ChainStatusRow :metadata="chainPending" class="q-mb-md" />
         <ChainStatusRow :metadata="chainConfirmed" />
       </DsEntry>
-      <DsEntry id="mint-motd">
-        <MintMotdMessage
-          mint-url="https://mint.example.com"
-          message="Maintenance tonight from 22:00 UTC."
-        />
-      </DsEntry>
-      <DsEntry id="pwa-prompt">
-        <!-- The prompt is fixed to the viewport; the transformed frame contains it here. -->
-        <div class="ds-contain">
-          <PwaPrompt ref="pwaIos" platform="ios" />
-        </div>
+      <DsEntry
+        id="pwa-prompt"
+        :variants="installPromptVariants"
+        :scores="explorationScores['pwa-prompt']"
+        v-slot="{ variant }"
+      >
+        <template v-if="variant === 0">
+          <!-- The prompt is fixed to the viewport; each transformed frame contains one. -->
+          <div class="ds-contain ds-phone">
+            <div class="ds-phone__balance">₿2,500</div>
+            <PwaPrompt ref="pwaIos" platform="ios" />
+          </div>
+          <div class="ds-contain ds-phone q-mt-md">
+            <div class="ds-phone__balance">₿2,500</div>
+            <PwaPrompt ref="pwaAndroid" platform="android" />
+          </div>
+        </template>
+        <InstallPromptExplorations v-else :variant="variant" />
       </DsEntry>
       <DsEntry id="terms-text">
         <div class="ds-scroll settings-card">
@@ -994,14 +1126,33 @@
 import { defineComponent, markRaw, reactive } from "vue";
 import SettingsSection from "src/pages/settings/SettingsSection.vue";
 import AnimatedNumber from "src/components/AnimatedNumber.vue";
-import AppCallout from "src/components/AppCallout.vue";
 import AppRating from "src/components/ui/AppRating.vue";
 import BottomSheet from "src/components/BottomSheet.vue";
 import ChooseMint from "src/components/ChooseMint.vue";
 import HistoryTable from "src/components/HistoryTable.vue";
 import MintIdentityHeader from "src/components/MintIdentityHeader.vue";
 import MintInfoContainer from "src/components/MintInfoContainer.vue";
-import MintMotdMessage from "src/components/MintMotdMessage.vue";
+import ToastExplorations, {
+  toastVariants,
+} from "src/design-system/explorations/ToastExplorations.vue";
+import InstallPromptExplorations, {
+  installPromptVariants,
+} from "src/design-system/explorations/InstallPromptExplorations.vue";
+import SegmentedExplorations, {
+  segmentedVariants,
+} from "src/design-system/explorations/SegmentedExplorations.vue";
+import HistoryExplorations, {
+  historyVariants,
+} from "src/design-system/explorations/HistoryExplorations.vue";
+import PaymentRequestExplorations, {
+  paymentRequestVariants,
+} from "src/design-system/explorations/PaymentRequestExplorations.vue";
+import * as Lucide from "lucide-vue-next";
+import { lucideIcons, materialIcons } from "src/design-system/icons";
+import { explorationScores } from "src/design-system/explorations/scores";
+import CalloutExplorations, {
+  calloutVariants,
+} from "src/design-system/explorations/CalloutExplorations.vue";
 import SheetOption from "src/components/SheetOption.vue";
 import SheetSelect from "src/components/SheetSelect.vue";
 import SkeletonRow from "src/components/SkeletonRow.vue";
@@ -1086,7 +1237,6 @@ export default defineComponent({
     ActivityRow,
     AmountKeypadPanel,
     AnimatedNumber,
-    AppCallout,
     AppRating,
     BottomSheet,
     ChainStatusRow,
@@ -1101,7 +1251,12 @@ export default defineComponent({
     InlineConfirm,
     MintIdentityHeader,
     MintInfoContainer,
-    MintMotdMessage,
+    CalloutExplorations,
+    ToastExplorations,
+    InstallPromptExplorations,
+    SegmentedExplorations,
+    HistoryExplorations,
+    PaymentRequestExplorations,
     MintReviewSummary,
     PwaPrompt,
     QrBlock,
@@ -1163,6 +1318,84 @@ export default defineComponent({
   data() {
     const sortOptions = ["Newest", "Oldest", "Highest rated", "Lowest rated"];
     return {
+      calloutVariants,
+      explorationScores,
+      historySpecimen: [
+        {
+          icon: markRaw(ZapIcon),
+          dir: "in",
+          label: "Lightning",
+          amount: "+₿5,000",
+          caption: "Today, 14:02",
+        },
+        {
+          icon: markRaw(CoinsIcon),
+          dir: "out",
+          label: "Ecash",
+          amount: "−₿210",
+          caption: "Today, 13:40",
+          pending: true,
+        },
+        {
+          icon: markRaw(ZapIcon),
+          dir: "out",
+          label: "Lightning",
+          amount: "−₿101",
+          caption: "Yesterday",
+        },
+        {
+          icon: markRaw(CoinsIcon),
+          dir: "in",
+          label: "Ecash",
+          amount: "+₿500",
+          caption: "Yesterday",
+        },
+        {
+          icon: markRaw(ZapIcon),
+          dir: "in",
+          label: "Invoice expired",
+          amount: "+₿1,000",
+          caption: "Mon",
+        },
+        {
+          icon: markRaw(ZapIcon),
+          dir: "in",
+          label: "Lightning",
+          amount: "+₿2,289",
+          caption: "12 Oct",
+        },
+        {
+          icon: markRaw(CoinsIcon),
+          dir: "out",
+          label: "Ecash",
+          amount: "−₿42",
+          caption: "10 Oct",
+        },
+      ],
+      toastSpecimen: [
+        { type: "positive", icon: "check_circle", message: "Received ₿500" },
+        {
+          type: "negative",
+          icon: "error",
+          message: "Payment failed",
+          caption: "The mint didn't respond. Try again.",
+        },
+        { type: "warning", icon: "warning", message: "Mint is offline" },
+        { type: "info", icon: "info", message: "Copied to clipboard" },
+        {
+          type: "info",
+          icon: "delete",
+          message: "Mint removed",
+          action: "Undo",
+        },
+      ],
+      lucideIcons,
+      materialIcons,
+      toastVariants,
+      installPromptVariants,
+      segmentedVariants,
+      historyVariants,
+      paymentRequestVariants,
       query: "",
       active: "",
       pinned: "",
@@ -1322,8 +1555,10 @@ export default defineComponent({
       const copied = this.$refs.copied as { copied: boolean } | undefined;
       if (copied) copied.copied = true;
       // The install prompt only opens itself in an installable browser; show it here.
-      const pwa = this.$refs.pwaIos as { show: boolean } | undefined;
-      if (pwa) pwa.show = true;
+      for (const ref of ["pwaIos", "pwaAndroid"]) {
+        const pwa = this.$refs[ref] as { show: boolean } | undefined;
+        if (pwa) pwa.show = true;
+      }
     });
   },
   beforeUnmount() {
@@ -1333,6 +1568,9 @@ export default defineComponent({
       window.removeEventListener(e, this.unpin);
   },
   methods: {
+    lucideComponent(name: string) {
+      return (Lucide as unknown as Record<string, unknown>)[name];
+    },
     matches(id: string): boolean {
       const q = (this.query || "").trim().toLowerCase();
       if (!q) return true;
@@ -1612,5 +1850,70 @@ export default defineComponent({
 }
 .ui-kit-dup__differs {
   font-size: 13px;
+}
+.ds-icons {
+  width: 100%;
+}
+.ds-icons__head {
+  color: var(--app-text-muted);
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+.ds-icons__grid {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+}
+.ds-icons__cell {
+  align-items: center;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  color: var(--app-text);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 76px;
+  padding: 12px 4px 8px;
+  position: relative;
+}
+.ds-icons__cell--off {
+  border-style: dashed;
+  color: var(--app-text-muted);
+}
+.ds-icons__name {
+  color: var(--app-text-muted);
+  font-size: 11px;
+  line-height: 1.2;
+  max-width: 100%;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ds-icons__count {
+  color: var(--app-text-subtle);
+  font-size: 10px;
+  inset-inline-end: 6px;
+  position: absolute;
+  top: 4px;
+}
+.ds-toast-stack {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+.ds-phone {
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  height: 280px;
+  width: 100%;
+}
+.ds-phone__balance {
+  font-size: 28px;
+  font-weight: 700;
+  padding-top: 72px;
+  text-align: center;
 }
 </style>

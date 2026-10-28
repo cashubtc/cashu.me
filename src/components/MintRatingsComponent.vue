@@ -908,9 +908,6 @@ body[data-theme] .q-card--dark.mint-ratings-root {
   outline-offset: 2px;
 }
 
-.sort-options {
-  padding: 4px 16px 16px;
-}
 
 .own-review-chip {
   flex: none;

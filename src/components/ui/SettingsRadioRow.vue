@@ -11,9 +11,16 @@
     @click="$emit('select', $event)"
   >
     <q-item-section avatar :top="top || !!caption">
-      <q-icon
-        :color="selected ? 'primary' : 'grey'"
-        :name="selected ? 'radio_button_checked' : 'radio_button_unchecked'"
+      <!-- The same q-radio as standalone radios, so the dot animates in and out the same
+           way; the row carries the role and the tap, so this one is display only. -->
+      <q-radio
+        :model-value="selected"
+        :val="true"
+        color="primary"
+        dense
+        tabindex="-1"
+        aria-hidden="true"
+        class="settings-radio-row__dot"
       />
     </q-item-section>
     <q-item-section style="word-break: break-word">
@@ -65,5 +72,8 @@ export default defineComponent({
 }
 .settings-radio-row.q-item--active {
   color: inherit;
+}
+.settings-radio-row__dot {
+  pointer-events: none;
 }
 </style>

@@ -112,9 +112,9 @@
           outline
           rounded
           color="primary"
-          class="discover-mints-btn"
+          no-caps
+          class="discover-mints-btn full-width"
           @click="$router.push('/discoverMints')"
-          style="width: 100%"
         >
           <SearchIcon :size="20" class="q-mr-sm" />
           <span>{{ $t("MintSettings.discover_mints_button") }}</span>
@@ -627,10 +627,6 @@ export default defineComponent({
 
 /* Add mint matches the height and label size of Discover mints and Swap. */
 /* Discover mints, Add mint and Swap are full-width actions: the shared 52px height. */
-.discover-mints-btn {
-  min-height: 52px;
-}
-
 /* Add Mint Section Styles */
 .add-mint-container {
   width: 100%;

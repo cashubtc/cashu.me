@@ -91,6 +91,16 @@ export const DS_ITEMS: DsItem[] = [
     example: `<div class="app-icon-circle app-icon-circle--lg"><ZapIcon :size="26" /></div>`,
   },
   {
+    id: "icons",
+    name: "Icons",
+    group: "foundations",
+    tier: "primitive",
+    source: "lucide-vue-next (read from every import in src)",
+    example: `import { Zap as ZapIcon } from "lucide-vue-next";
+<ZapIcon :size="20" />`,
+    note: "Every icon in the app, in one grid. Lucide line icons are the family; any Material names still passed to Quasar are listed apart so they can be replaced.",
+  },
+  {
     id: "machine-text",
     name: "Machine text",
     group: "foundations",
@@ -288,16 +298,7 @@ export const DS_ITEMS: DsItem[] = [
     usage: { tag: "SettingsActionRow" },
     example: `<SettingsActionRow label="Restore" caption="From a seed phrase" to="/restore" />`,
   },
-  {
-    id: "sheet-header",
-    name: "Sheet header",
-    group: "navigation",
-    tier: "pattern",
-    source: "src/css/app.scss .drawer-header + .sheet-title",
-    usage: { className: "drawer-header" },
-    example: `<q-card-section class="row items-center no-wrap drawer-header">…</q-card-section>`,
-    note: "Send, Receive and Receive ecash; candidates to move onto BottomSheet.",
-  },
+
   {
     id: "fullscreen-dialog-header",
     name: "Fullscreen dialog header",
@@ -442,6 +443,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/components/AppCallout.vue",
     usage: { tag: "AppCallout" },
     example: `<AppCallout variant="warning" title="Experimental" text="Paying from several mints can fail part way." />`,
+    note: "The mint message (MintMotdMessage) is this callout: info and dismissible while new, neutral once read.",
   },
   {
     id: "toasts",
@@ -487,7 +489,11 @@ export const DS_ITEMS: DsItem[] = [
     tier: "composite",
     source: "src/components/BottomSheet.vue",
     usage: { tag: "BottomSheet" },
-    example: `<BottomSheet v-model="open" title="Sort reviews">…</BottomSheet>`,
+    example: `<BottomSheet v-model="open" title="Send">
+  <template #trailing><q-btn … /></template>
+  …
+</BottomSheet>`,
+    note: "The only sheet: Send, Receive and every picker. Optional trailing header action, back mode for stacked sheets, one 16px content inset.",
   },
   {
     id: "option-row",
@@ -519,6 +525,16 @@ export const DS_ITEMS: DsItem[] = [
     example: `<HistoryTable />`,
   },
   {
+    id: "payment-request",
+    name: "Payment request",
+    group: "feature",
+    tier: "feature",
+    source: "src/components/PaymentRequestDialog.vue",
+    usage: { tag: "PaymentRequestDialog" },
+    example: `<PaymentRequestDialog v-model="open" />`,
+    note: "Explorations: the hardest screen (amount or amountless, new request, currency, mint, QR, copy and share).",
+  },
+  {
     id: "mint-review-summary",
     name: "Mint review summary",
     group: "feature",
@@ -536,15 +552,7 @@ export const DS_ITEMS: DsItem[] = [
     usage: { tag: "ChainStatusRow" },
     example: `<ChainStatusRow :metadata="txMetadata" :loading="fetching" />`,
   },
-  {
-    id: "mint-motd",
-    name: "Mint message",
-    group: "feature",
-    tier: "feature",
-    source: "src/components/MintMotdMessage.vue",
-    usage: { tag: "MintMotdMessage" },
-    example: `<MintMotdMessage :mint-url="url" :message="motd" />`,
-  },
+
   {
     id: "pwa-prompt",
     name: "Install prompt",

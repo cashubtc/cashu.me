@@ -109,7 +109,4 @@ export default defineComponent({
 .sheet-select__icon {
   display: inline-flex;
 }
-.sheet-select__list {
-  padding: 4px 16px 16px;
-}
 </style>

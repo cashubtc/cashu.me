@@ -407,9 +407,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 /* Mint rows inside the shared BottomSheet use SheetOption. */
-.mint-options {
-  padding: 4px 16px 16px;
-}
 .mint-glyph {
   color: var(--app-text-muted);
 }

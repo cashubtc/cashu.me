@@ -5,7 +5,7 @@
     v-model="showEditMintDialogLocal"
     :title="$t('EditMintDialog.title')"
   >
-    <div class="edit-mint-dialog q-px-lg q-pb-md">
+    <div class="edit-mint-dialog">
       <q-input
         v-model="editMintData.url"
         outlined

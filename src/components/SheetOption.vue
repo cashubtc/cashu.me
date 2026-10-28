@@ -60,5 +60,7 @@ export default defineComponent({
 .sheet-option__check {
   color: var(--app-text);
   flex-shrink: 0;
+  /* Ink onto the shared 16px trailing guideline. */
+  margin-inline-end: -4px;
 }
 </style>

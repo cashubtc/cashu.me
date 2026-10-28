@@ -4,7 +4,7 @@
     :title="$t('AddMintDialog.title')"
     @enter="addMintLocal"
   >
-    <div class="q-px-lg">
+    <div>
       <!--
         Status messages are stacked in the same grid cell, so the stack is
         always as tall as the tallest message and the sheet never resizes

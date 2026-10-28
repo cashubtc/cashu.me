@@ -1,131 +1,112 @@
 <template>
-  <q-dialog
+  <BottomSheet
     v-model="showReceiveEcashDrawer"
-    :position="$q.screen.gt.sm ? 'standard' : 'bottom'"
-    :maximized="$q.screen.lt.sm"
-    :transition-show="$q.screen.gt.sm ? 'scale' : 'slide-up'"
-    :transition-hide="$q.screen.gt.sm ? 'scale' : 'slide-down'"
+    :title="$t('ReceiveEcashDrawer.title')"
+    :back="$t('ReceiveDialog.title')"
+    @back="goBack"
   >
-    <q-card class="drawer-card full-width-card q-pb-lg">
-      <q-card-section class="row items-center no-wrap drawer-header">
-        <q-btn
-          flat
-          round
-          @click="goBack"
-          class="drawer-header-btn app-icon-btn"
-          color="primary"
+    <div>
+      <div class="q-gutter-y-md">
+        <div
+          class="app-option-row"
+          role="button"
+          tabindex="0"
+          data-testid="receive-ecash-paste"
+          @click="handlePasteBtn"
+          @keydown.enter.prevent="handlePasteBtn"
+          @keydown.space.prevent="handlePasteBtn"
         >
-          <ChevronLeftIcon />
-        </q-btn>
-        <div class="col text-center">
-          <span class="sheet-title">{{ $t("ReceiveEcashDrawer.title") }}</span>
-        </div>
-        <!-- Scan is the second row below; an empty slot keeps the title centred. -->
-        <div class="drawer-header-btn app-icon-btn" aria-hidden="true" />
-      </q-card-section>
-
-      <q-card-section class="q-pa-md">
-        <div class="q-gutter-y-md">
-          <div
-            class="app-option-row"
-            role="button"
-            tabindex="0"
-            data-testid="receive-ecash-paste"
-            @click="handlePasteBtn"
-            @keydown.enter.prevent="handlePasteBtn"
-            @keydown.space.prevent="handlePasteBtn"
-          >
-            <div class="row items-center no-wrap">
-              <div class="app-icon-circle">
-                <ClipboardIcon :size="24" />
-              </div>
-              <div class="col q-ml-md">
-                <div class="app-option-row__label">
-                  {{ $t("ReceiveEcashDrawer.actions.paste.label") }}
-                </div>
-              </div>
+          <div class="row items-center no-wrap">
+            <div class="app-icon-circle">
+              <ClipboardIcon :size="24" />
             </div>
-          </div>
-
-          <div class="app-option-row" @click="showCamera">
-            <div class="row items-center no-wrap">
-              <div class="app-icon-circle">
-                <ScanIcon :size="24" />
-              </div>
-              <div class="col q-ml-md">
-                <div class="app-option-row__label">
-                  {{ $t("ReceiveEcashDrawer.actions.scan.label") }}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            v-if="enablePaymentRequest"
-            class="app-option-row"
-            @click="handlePaymentRequestBtn"
-          >
-            <div class="row items-center no-wrap">
-              <div class="app-icon-circle">
-                <FileTextIcon :size="24" />
-              </div>
-              <div class="col q-ml-md">
-                <div class="app-option-row__label">
-                  {{ $t("ReceiveEcashDrawer.actions.request.label") }}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            v-if="showP2PkButtonInDrawer"
-            class="app-option-row"
-            @click="handleLockBtn"
-          >
-            <div class="row items-center no-wrap">
-              <div class="app-icon-circle">
-                <LockIcon :size="24" />
-              </div>
-              <div class="col q-ml-md">
-                <div class="app-option-row__label">
-                  {{ $t("ReceiveEcashDrawer.actions.lock.label") }}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            v-if="ndefSupported && showNfcButtonInDrawer"
-            class="app-option-row"
-            @click="handleNFCBtn"
-          >
-            <div class="row items-center no-wrap">
-              <div class="app-icon-circle">
-                <q-spinner v-if="scanningCard" size="sm" />
-                <NfcIcon v-else :size="24" />
-              </div>
-              <div class="col q-ml-md">
-                <div class="app-option-row__label">
-                  {{ $t("ReceiveEcashDrawer.actions.nfc.label") }}
-                  {{
-                    scanningCard
-                      ? $t("ReceiveEcashDrawer.actions.nfc.scanning_text")
-                      : ""
-                  }}
-                </div>
+            <div class="col q-ml-md">
+              <div class="app-option-row__label">
+                {{ $t("ReceiveEcashDrawer.actions.paste.label") }}
               </div>
             </div>
           </div>
         </div>
-      </q-card-section>
-    </q-card>
-  </q-dialog>
+
+        <div class="app-option-row" @click="showCamera">
+          <div class="row items-center no-wrap">
+            <div class="app-icon-circle">
+              <ScanIcon :size="24" />
+            </div>
+            <div class="col q-ml-md">
+              <div class="app-option-row__label">
+                {{ $t("ReceiveEcashDrawer.actions.scan.label") }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          v-if="enablePaymentRequest"
+          class="app-option-row"
+          @click="handlePaymentRequestBtn"
+        >
+          <div class="row items-center no-wrap">
+            <div class="app-icon-circle">
+              <FileTextIcon :size="24" />
+            </div>
+            <div class="col q-ml-md">
+              <div class="app-option-row__label">
+                {{ $t("ReceiveEcashDrawer.actions.request.label") }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          v-if="showP2PkButtonInDrawer"
+          class="app-option-row"
+          @click="handleLockBtn"
+        >
+          <div class="row items-center no-wrap">
+            <div class="app-icon-circle">
+              <LockIcon :size="24" />
+            </div>
+            <div class="col q-ml-md">
+              <div class="app-option-row__label">
+                {{ $t("ReceiveEcashDrawer.actions.lock.label") }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          v-if="ndefSupported && showNfcButtonInDrawer"
+          class="app-option-row"
+          @click="handleNFCBtn"
+        >
+          <div class="row items-center no-wrap">
+            <div class="app-icon-circle">
+              <q-spinner v-if="scanningCard" size="sm" />
+              <NfcIcon v-else :size="24" />
+            </div>
+            <div class="col q-ml-md">
+              <div class="app-option-row__label">
+                {{ $t("ReceiveEcashDrawer.actions.nfc.label") }}
+                {{
+                  scanningCard
+                    ? $t("ReceiveEcashDrawer.actions.nfc.scanning_text")
+                    : ""
+                }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </BottomSheet>
   <P2PKDialog v-model="showP2PKDialog" />
   <PRDialog v-model="showPRDialog" />
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import BottomSheet from "src/components/BottomSheet.vue";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
@@ -141,7 +122,6 @@ import PRDialog from "./PaymentRequestDialog.vue";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import {
-  ChevronLeft as ChevronLeftIcon,
   Clipboard as ClipboardIcon,
   FileText as FileTextIcon,
   Lock as LockIcon,
@@ -157,9 +137,9 @@ export default defineComponent({
   name: "ReceiveTokenDialog",
   mixins: [windowMixin],
   components: {
+    BottomSheet,
     P2PKDialog,
     PRDialog,
-    ChevronLeftIcon,
     ClipboardIcon,
     FileTextIcon,
     LockIcon,

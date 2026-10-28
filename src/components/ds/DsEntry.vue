@@ -41,9 +41,38 @@
       </ul>
 
       <div class="ds-entry__card">
-        <div class="ds-entry__stage">
+        <!-- Explorations: whole alternative designs of one component, switched in place. -->
+        <div
+          v-if="variants.length"
+          class="ds-entry__variants"
+          role="tablist"
+          :aria-label="`${item.name} variations`"
+        >
+          <button
+            v-for="n in variantOrder"
+            :key="variants[n]"
+            type="button"
+            role="tab"
+            class="ds-entry__variant"
+            :class="{ 'ds-entry__variant--on': variant === n }"
+            :aria-selected="variant === n"
+            :data-ds-variant-tab="n"
+            :title="scoreTitle(n)"
+            @click="variant = n"
+          >
+            <span class="ds-entry__variant-n">{{ n === 0 ? "Now" : n }}</span>
+            {{ variants[n] }}
+            <span v-if="scores" class="ds-entry__variant-score">{{
+              mean(n).toFixed(1)
+            }}</span>
+          </button>
+        </div>
+        <div
+          class="ds-entry__stage"
+          :data-ds-variant="variants.length ? variant : null"
+        >
           <div class="ds-entry__sample">
-            <slot />
+            <slot :variant="variant" />
           </div>
         </div>
         <div
@@ -109,10 +138,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, inject } from "vue";
+import { defineComponent, inject, type PropType } from "vue";
 import { dsItem, type DsItem } from "src/design-system/registry";
 import { apiOf, usageOf, type DsApi } from "src/design-system/usage";
 import type { DsBoard } from "src/components/ds/board";
+import type { VariantScore } from "src/design-system/explorations/scores";
 import CopyButton from "src/components/ui/CopyButton.vue";
 import { Link as LinkIcon } from "lucide-vue-next";
 
@@ -122,14 +152,34 @@ export default defineComponent({
   props: {
     /** The registry id (src/design-system/registry.ts). */
     id: { type: String, required: true },
+    /** Names of whole alternative designs (the first is the current one); the slot gets the
+     *  chosen index as `variant`. */
+    variants: { type: Array as PropType<string[]>, default: () => [] },
+    /** Council scores per variation (src/design-system/explorations/scores.ts); when given,
+     *  the tabs are ordered best first and show the mean. */
+    scores: {
+      type: Array as PropType<VariantScore[] | undefined>,
+      default: undefined,
+    },
   },
   setup() {
     return { board: inject<DsBoard>("dsBoard") as DsBoard };
   },
   data() {
-    return { showUsage: false, codeOpen: false, api: null as DsApi | null };
+    return {
+      showUsage: false,
+      codeOpen: false,
+      api: null as DsApi | null,
+      variant: 0,
+    };
   },
   computed: {
+    variantOrder(): number[] {
+      const order = this.variants.map((_, n) => n);
+      return this.scores
+        ? order.sort((a, b) => this.mean(b) - this.mean(a))
+        : order;
+    },
     item(): DsItem | undefined {
       return dsItem(this.id);
     },
@@ -157,6 +207,16 @@ export default defineComponent({
     },
     visible(): boolean {
       return this.board.matches(this.id);
+    },
+  },
+  methods: {
+    mean(n: number): number {
+      const sc = this.scores?.[n];
+      return sc ? (sc.sol + sc.opus) / 2 : 0;
+    },
+    scoreTitle(n: number): string {
+      const sc = this.scores?.[n];
+      return sc ? `Council: Sol ${sc.sol}, Opus ${sc.opus}` : "";
     },
   },
   async mounted() {
@@ -254,6 +314,54 @@ export default defineComponent({
   border-color: var(--app-border-strong);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--app-text) 6%, transparent);
 }
+.ds-entry__variants {
+  border-bottom: 1px solid var(--app-border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 12px;
+}
+.ds-entry__variant {
+  align-items: center;
+  background: none;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-pill);
+  color: var(--app-text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 13px;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px 0 6px;
+}
+.ds-entry__variant--on {
+  background: var(--app-text);
+  border-color: var(--app-text);
+  color: var(--app-surface);
+}
+.ds-entry__variant:focus-visible {
+  box-shadow: var(--app-focus-ring);
+  outline: none;
+}
+.ds-entry__variant-score {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  opacity: 0.8;
+}
+.ds-entry__variant-n {
+  align-items: center;
+  background: color-mix(in srgb, currentColor 14%, transparent);
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 11px;
+  font-weight: 600;
+  height: 20px;
+  justify-content: center;
+  min-width: 20px;
+  padding: 0 5px;
+}
 .ds-entry__stage {
   align-items: center;
   display: flex;
@@ -261,9 +369,26 @@ export default defineComponent({
   min-height: 280px;
   padding: 64px 48px;
 }
+/* The sample column: block samples fill it; anything narrower (a lone button, a segmented
+   control, a row of chips) is centred in the stage instead of hugging its start edge. */
 .ds-entry__sample {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
   max-width: 480px;
   width: 100%;
+}
+.ds-entry__sample > * {
+  max-width: 100%;
+}
+.ds-entry__sample
+  > :not(.q-btn):not(.q-btn-group):not(.q-toggle):not(.q-checkbox):not(
+    .q-radio
+  ):not(.star-rating):not(.app-badge):not(span):not(a) {
+  align-self: stretch;
+}
+.ds-entry__sample > .row {
+  justify-content: center;
 }
 .ds-entry__code {
   --ds-code-bg: color-mix(in srgb, var(--app-text) 3%, var(--app-surface));

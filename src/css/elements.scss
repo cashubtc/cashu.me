@@ -74,11 +74,6 @@ body {
   width: 80px;
 }
 
-// Bottom-sheet menus (Send, Receive, Receive ecash) sit on the raised surface.
-.drawer-card {
-  background: var(--app-raised);
-}
-
 // Tappable option row: an icon, a label and a caption on a tinted fill (Send, Receive, sheet
 // pickers, payment requests, onboarding choices). Selected rows use the selected tokens.
 .app-option-row {
@@ -217,13 +212,13 @@ body.body--light {
 .app-callout__close {
   color: var(--app-text-muted);
   height: 40px;
-  margin: -10px -10px -10px 0;
+  margin: -10px -14px -10px 0;
   min-height: 40px;
   min-width: 40px;
   width: 40px;
 }
 html[dir="rtl"] .app-callout__close {
-  margin: -10px 0 -10px -10px;
+  margin: -10px 0 -10px -14px;
 }
 
 // Badge: one small pill on a subtle neutral fill (status tones and a quiet primary tint are
@@ -360,9 +355,11 @@ button.app-badge {
   flex-direction: column;
   text-align: start;
 }
+// The slide's hero (icon, title, description) is centred, like the empty and blocking states;
+// the slide's own content below keeps its layout.
 .welcome-slide__icon {
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
   margin-bottom: 20px;
   width: 100%;
 }
@@ -373,7 +370,8 @@ button.app-badge {
   line-height: 1.2;
   margin: 0 0 16px;
   max-width: 500px;
-  text-align: start;
+  text-align: center;
+  text-wrap: balance;
   width: 100%;
 }
 .welcome-slide__description {
@@ -382,7 +380,8 @@ button.app-badge {
   line-height: 1.5;
   margin: 0 0 32px;
   max-width: 500px;
-  text-align: start;
+  text-align: center;
+  text-wrap: pretty;
   width: 100%;
 }
 @media (max-width: 600px) {
@@ -416,14 +415,25 @@ button.app-badge {
 
 // Loading placeholders (shadcn Skeleton): one muted fill and radius for every q-skeleton, and
 // a standard row (SkeletonRow.vue) of an avatar beside lines of text.
-@media (prefers-reduced-motion: reduce) {
-  body .q-skeleton::after {
-    display: none;
-  }
+// No sweeping highlight: Quasar's wave drew a bright gradient across every bar. Loading is a
+// slow, shallow pulse of the fill instead, and holds still under reduced motion.
+body .q-skeleton::after {
+  display: none;
 }
 body .q-skeleton {
   background: var(--app-tint-strong);
   background-image: none !important;
+  animation: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  body .q-skeleton {
+    animation: app-skeleton-pulse 1.8s ease-in-out infinite;
+  }
+}
+@keyframes app-skeleton-pulse {
+  50% {
+    opacity: 0.6;
+  }
 }
 body.body--light .q-skeleton {
   background: rgba(0, 0, 0, 0.1);

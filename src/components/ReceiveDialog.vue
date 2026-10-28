@@ -1,123 +1,104 @@
 <template>
-  <q-dialog
-    v-model="showReceiveDialog"
-    :position="$q.screen.gt.sm ? 'standard' : 'bottom'"
-    :maximized="$q.screen.lt.sm"
-    :transition-show="$q.screen.gt.sm ? 'scale' : 'slide-up'"
-    :transition-hide="$q.screen.gt.sm ? 'scale' : 'slide-down'"
-  >
-    <q-card class="drawer-card full-width-card q-pb-lg">
-      <q-card-section class="row items-center no-wrap drawer-header">
-        <q-btn
-          flat
-          round
-          v-close-popup
-          class="drawer-header-btn app-icon-btn"
-          color="primary"
+  <BottomSheet v-model="showReceiveDialog" :title="$t('ReceiveDialog.title')">
+    <template #trailing>
+      <q-btn
+        flat
+        round
+        class="app-icon-btn"
+        :aria-label="$t('global.actions.scan.label')"
+        @click="showCamera"
+        color="primary"
+      >
+        <ScanIcon />
+      </q-btn>
+    </template>
+    <div>
+      <div class="q-gutter-y-md">
+        <!-- Ecash Option -->
+        <div
+          class="app-option-row"
+          role="button"
+          tabindex="0"
+          data-testid="receive-ecash-option"
+          @click="toggleReceiveEcashDrawer"
+          @keydown.enter.prevent="toggleReceiveEcashDrawer"
+          @keydown.space.prevent="toggleReceiveEcashDrawer"
         >
-          <XIcon />
-        </q-btn>
-        <div class="col text-center">
-          <span class="sheet-title">{{ $t("ReceiveDialog.title") }}</span>
-        </div>
-        <q-btn
-          flat
-          round
-          class="drawer-header-btn app-icon-btn"
-          @click="showCamera"
-          color="primary"
-        >
-          <ScanIcon />
-        </q-btn>
-      </q-card-section>
-
-      <q-card-section class="q-pa-md">
-        <div class="q-gutter-y-md">
-          <!-- Ecash Option -->
-          <div
-            class="app-option-row"
-            role="button"
-            tabindex="0"
-            data-testid="receive-ecash-option"
-            @click="toggleReceiveEcashDrawer"
-            @keydown.enter.prevent="toggleReceiveEcashDrawer"
-            @keydown.space.prevent="toggleReceiveEcashDrawer"
-          >
-            <div class="row items-center no-wrap">
-              <div class="app-icon-circle">
-                <CoinsIcon :size="24" />
-              </div>
-              <div class="col q-ml-md">
-                <div class="app-option-row__label">
-                  {{ $t("ReceiveDialog.actions.ecash.label") }}
-                </div>
-                <div class="app-option-row__caption">
-                  {{ $t("ReceiveDialog.captions.ecash") }}
-                </div>
-              </div>
+          <div class="row items-center no-wrap">
+            <div class="app-icon-circle">
+              <CoinsIcon :size="24" />
             </div>
-          </div>
-
-          <!-- Lightning Invoice Option -->
-          <div
-            v-if="canReceiveLightning"
-            class="app-option-row"
-            role="button"
-            tabindex="0"
-            data-testid="receive-lightning-option"
-            @click="showInvoiceCreateDialog"
-            @keydown.enter.prevent="showInvoiceCreateDialog"
-            @keydown.space.prevent="showInvoiceCreateDialog"
-          >
-            <div class="row items-center no-wrap">
-              <div class="app-icon-circle">
-                <ZapIcon :size="24" />
+            <div class="col q-ml-md">
+              <div class="app-option-row__label">
+                {{ $t("ReceiveDialog.actions.ecash.label") }}
               </div>
-              <div class="col q-ml-md">
-                <div class="app-option-row__label">
-                  {{ $t("ReceiveDialog.actions.lightning.label") }}
-                </div>
-                <div class="app-option-row__caption">
-                  {{ $t("ReceiveDialog.captions.lightning") }}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- On-chain Option -->
-          <div
-            v-if="canReceiveOnchain"
-            class="app-option-row"
-            role="button"
-            tabindex="0"
-            data-testid="receive-onchain-option"
-            @click="showOnchainCreateDialog"
-            @keydown.enter.prevent="showOnchainCreateDialog"
-            @keydown.space.prevent="showOnchainCreateDialog"
-          >
-            <div class="row items-center no-wrap">
-              <div class="app-icon-circle">
-                <BitcoinIcon :size="24" />
-              </div>
-              <div class="col q-ml-md">
-                <div class="app-option-row__label">
-                  {{ $t("common.on_chain") }}
-                </div>
-                <div class="app-option-row__caption">
-                  {{ $t("ReceiveDialog.captions.onchain") }}
-                </div>
+              <div class="app-option-row__caption">
+                {{ $t("ReceiveDialog.captions.ecash") }}
               </div>
             </div>
           </div>
         </div>
-      </q-card-section>
-    </q-card>
-  </q-dialog>
+
+        <!-- Lightning Invoice Option -->
+        <div
+          v-if="canReceiveLightning"
+          class="app-option-row"
+          role="button"
+          tabindex="0"
+          data-testid="receive-lightning-option"
+          @click="showInvoiceCreateDialog"
+          @keydown.enter.prevent="showInvoiceCreateDialog"
+          @keydown.space.prevent="showInvoiceCreateDialog"
+        >
+          <div class="row items-center no-wrap">
+            <div class="app-icon-circle">
+              <ZapIcon :size="24" />
+            </div>
+            <div class="col q-ml-md">
+              <div class="app-option-row__label">
+                {{ $t("ReceiveDialog.actions.lightning.label") }}
+              </div>
+              <div class="app-option-row__caption">
+                {{ $t("ReceiveDialog.captions.lightning") }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- On-chain Option -->
+        <div
+          v-if="canReceiveOnchain"
+          class="app-option-row"
+          role="button"
+          tabindex="0"
+          data-testid="receive-onchain-option"
+          @click="showOnchainCreateDialog"
+          @keydown.enter.prevent="showOnchainCreateDialog"
+          @keydown.space.prevent="showOnchainCreateDialog"
+        >
+          <div class="row items-center no-wrap">
+            <div class="app-icon-circle">
+              <BitcoinIcon :size="24" />
+            </div>
+            <div class="col q-ml-md">
+              <div class="app-option-row__label">
+                {{ $t("common.on_chain") }}
+              </div>
+              <div class="app-option-row__caption">
+                {{ $t("ReceiveDialog.captions.onchain") }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </BottomSheet>
   <ReceiveEcashDrawer />
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import BottomSheet from "src/components/BottomSheet.vue";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useUiStore } from "src/stores/ui";
@@ -127,7 +108,6 @@ import ReceiveEcashDrawer from "src/components/ReceiveEcashDrawer.vue";
 import { useMintsStore } from "src/stores/mints";
 import { notifyWarning } from "src/js/notify.ts";
 import {
-  X as XIcon,
   Coins as CoinsIcon,
   Zap as ZapIcon,
   Scan as ScanIcon,
@@ -143,7 +123,7 @@ import {
 export default defineComponent({
   name: "ReceiveDialog",
   components: {
-    XIcon,
+    BottomSheet,
     CoinsIcon,
     ZapIcon,
     ScanIcon,

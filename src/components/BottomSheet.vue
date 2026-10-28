@@ -1,18 +1,29 @@
 <template>
-  <!-- The Send and Receive sheet, shared: same dialog, transitions, backdrop, surface and
-       header, so every sheet in the app opens and closes the same way. -->
-  <q-dialog
-    :model-value="modelValue"
-    @update:model-value="$emit('update:modelValue', $event)"
-    :position="$q.screen.gt.sm ? 'standard' : 'bottom'"
-    :transition-show="$q.screen.gt.sm ? 'scale' : 'slide-up'"
-    :transition-hide="$q.screen.gt.sm ? 'scale' : 'slide-down'"
+  <!-- The one sheet in the app (Send, Receive, every picker and form sheet): same dialog,
+       transitions, backdrop, surface, header (close, centred title, optional trailing action)
+       and content inset, so every sheet opens, closes and lines up the same way. -->
+  <!-- inline renders the open sheet in place, without the dialog (the design system board). -->
+  <component
+    :is="inline ? 'div' : QDialog"
+    v-bind="inline ? { class: 'bottom-sheet--inline' } : dialogProps"
     @keydown.enter.prevent="$emit('enter')"
   >
     <q-card class="bottom-sheet" :class="{ 'bottom-sheet--dark': dark }">
       <!-- Header -->
       <div v-if="title" class="bottom-sheet-header">
         <q-btn
+          v-if="back"
+          flat
+          round
+          color="primary"
+          class="bottom-sheet-close floating-close-btn app-icon-btn"
+          :aria-label="back"
+          @click="$emit('back')"
+        >
+          <ChevronLeftIcon />
+        </q-btn>
+        <q-btn
+          v-else
           flat
           round
           color="primary"
@@ -23,6 +34,9 @@
           <XIcon />
         </q-btn>
         <h4 class="bottom-sheet-title sheet-title q-my-none">{{ title }}</h4>
+        <div v-if="$slots.trailing" class="bottom-sheet-trailing">
+          <slot name="trailing" />
+        </div>
       </div>
 
       <!-- Scrollable content -->
@@ -31,17 +45,18 @@
       </div>
 
       <!-- Fixed action buttons -->
-      <div v-if="$slots.actions" class="bottom-sheet-actions q-px-lg">
+      <div v-if="$slots.actions" class="bottom-sheet-actions">
         <slot name="actions" />
       </div>
     </q-card>
-  </q-dialog>
+  </component>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import { QDialog } from "quasar";
 import { mapState } from "pinia";
-import { X as XIcon } from "lucide-vue-next";
+import { ChevronLeft as ChevronLeftIcon, X as XIcon } from "lucide-vue-next";
 import { useUiStore } from "src/stores/ui";
 
 /**
@@ -56,7 +71,7 @@ import { useUiStore } from "src/stores/ui";
  */
 export default defineComponent({
   name: "BottomSheet",
-  components: { XIcon },
+  components: { ChevronLeftIcon, XIcon },
   props: {
     // Onboarding is designed dark in every mode; its sheets follow it.
     dark: {
@@ -65,22 +80,47 @@ export default defineComponent({
     },
     modelValue: {
       type: Boolean,
-      required: true,
+      default: false,
+    },
+    inline: {
+      type: Boolean,
+      default: false,
     },
     title: {
       type: String,
       default: "",
     },
+    // A stacked sheet leads with a back chevron instead of close; the value names where it
+    // goes (its accessible label), and the sheet emits "back" for the parent to handle.
+    back: {
+      type: String,
+      default: "",
+    },
   },
-  emits: ["update:modelValue", "enter"],
+  emits: ["update:modelValue", "enter", "back"],
+  setup() {
+    return { QDialog };
+  },
   computed: {
     ...mapState(useUiStore, ["closeLocalSheetsSignal"]),
+    dialogProps(): Record<string, unknown> {
+      const wide = this.$q.screen.gt.sm;
+      return {
+        modelValue: this.modelValue,
+        "onUpdate:modelValue": (v: boolean) =>
+          this.$emit("update:modelValue", v),
+        position: wide ? "standard" : "bottom",
+        transitionShow: wide ? "scale" : "slide-up",
+        transitionHide: wide ? "scale" : "slide-down",
+      };
+    },
   },
   watch: {
     modelValue: {
       // immediate: the sheet can be mounted while already open (deep links)
       immediate: true,
       handler(open: boolean) {
+        if (this.inline) return;
         const ui = useUiStore();
         ui.openLocalSheets = Math.max(0, ui.openLocalSheets + (open ? 1 : -1));
       },
@@ -93,7 +133,7 @@ export default defineComponent({
     },
   },
   beforeUnmount() {
-    if (this.modelValue) {
+    if (this.modelValue && !this.inline) {
       const ui = useUiStore();
       ui.openLocalSheets = Math.max(0, ui.openLocalSheets - 1);
     }
@@ -113,6 +153,12 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   padding-bottom: calc(8px + env(safe-area-inset-bottom));
+}
+
+/* In place on the board: the open sheet's card, full width, with all four corners rounded. */
+.bottom-sheet--inline .bottom-sheet {
+  border-radius: 20px;
+  max-height: none;
 }
 
 /* Onboarding sheets: the dark tokens in every app mode. */
@@ -142,10 +188,19 @@ export default defineComponent({
   text-align: center;
 }
 
-/* Content */
+/* The trailing header action (Send and Receive: scan) mirrors the close button's inset. */
+.bottom-sheet-trailing {
+  inset-inline-end: 6px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Content: one inset for every sheet, on the 16px gutter. */
 .bottom-sheet-content {
   flex: 1;
   overflow-y: auto;
+  padding: 4px 16px 16px;
 }
 
 /* Action buttons */
@@ -153,8 +208,7 @@ export default defineComponent({
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 8px;
-  padding-bottom: 16px;
+  padding: 8px 16px 16px;
   flex-shrink: 0;
 }
 </style>
