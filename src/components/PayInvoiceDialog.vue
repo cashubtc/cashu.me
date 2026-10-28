@@ -68,58 +68,31 @@
               >
                 <transition name="slide-down">
                   <div :key="invoiceStateKey" class="invoice-state-content">
-                    <div v-if="isPaid" class="q-mb-md">
-                      <div class="row">
-                        <div class="col-12 text-h4 text-weight-bold">
-                          {{ $t("PayInvoiceDialog.invoice.paid") }}
-                          {{
-                            payInvoiceData.meltQuote.response &&
-                            payInvoiceData.meltQuote.response.amount > 0
-                              ? formatCurrency(
-                                  payInvoiceData.meltQuote.response.amount,
-                                  activeUnit,
-                                  true
-                                )
-                              : ""
-                          }}
-                          <CircleCheckIcon
-                            :size="32"
-                            class="q-mb-sm text-positive"
-                          />
-                        </div>
-                      </div>
-                      <div
-                        v-if="payInvoiceData.fee_paid != null"
-                        class="text-subtitle2 text-app-muted"
-                      >
-                        {{ $t("PayInvoiceDialog.invoice.fee") }}:
-                        {{
-                          formatCurrency(
-                            payInvoiceData.fee_paid,
-                            activeUnit,
-                            true
-                          )
-                        }}
-                      </div>
-                    </div>
-                    <div v-else-if="paymentInProgress" class="q-mb-md">
-                      <div class="row">
-                        <div class="col-12 text-h4 text-weight-bold q-mb-xs">
-                          {{ $t("PayInvoiceDialog.invoice.paying") }}
-                          {{
-                            payInvoiceData.meltQuote.response &&
-                            payInvoiceData.meltQuote.response.amount > 0
-                              ? formatCurrency(
-                                  payInvoiceData.meltQuote.response.amount,
-                                  activeUnit,
-                                  true
-                                )
-                              : ""
-                          }}
-                          <PendingDots class="q-mb-sm" />
-                        </div>
-                      </div>
-                    </div>
+                    <PaymentStatus
+                      v-if="isPaid"
+                      state="paid"
+                      class="q-mb-md"
+                      :label="$t('PayInvoiceDialog.invoice.paid')"
+                      :caption="
+                        payInvoiceData.fee_paid != null
+                          ? `${$t(
+                              'PayInvoiceDialog.invoice.fee'
+                            )}: ${formatCurrency(
+                              payInvoiceData.fee_paid,
+                              activeUnit,
+                              true
+                            )}`
+                          : ''
+                      "
+                      >{{ meltAmountLabel }}</PaymentStatus
+                    >
+                    <PaymentStatus
+                      v-else-if="paymentInProgress"
+                      state="pending"
+                      class="q-mb-md"
+                      :label="$t('PayInvoiceDialog.invoice.paying')"
+                      >{{ meltAmountLabel }}</PaymentStatus
+                    >
                     <div
                       v-else-if="
                         payInvoiceData.meltQuote.response &&
@@ -699,11 +672,11 @@
   />
 </template>
 <script lang="ts">
+import PaymentStatus from "src/components/ui/PaymentStatus.vue";
 import FlowDialog from "src/components/ui/FlowDialog.vue";
 import BusyLabel from "src/components/ui/BusyLabel.vue";
 import FlowFooter from "src/components/ui/FlowFooter.vue";
 import PendingDots from "src/components/ui/PendingDots.vue";
-import { CircleCheck as CircleCheckIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
@@ -732,11 +705,11 @@ export default defineComponent({
   name: "PayInvoiceDialog",
   mixins: [windowMixin],
   components: {
+    PaymentStatus,
     FlowDialog,
     BusyLabel,
     FlowFooter,
     PendingDots,
-    CircleCheckIcon,
     ChooseMint,
     MultinutPaymentDialog,
     MeltQuoteInformation,
@@ -847,6 +820,13 @@ export default defineComponent({
     },
   },
   computed: {
+    // The melt amount in the wallet's unit, or nothing before the quote arrives.
+    meltAmountLabel(): string {
+      const amount = this.payInvoiceData.meltQuote.response?.amount;
+      return amount > 0
+        ? this.formatCurrency(amount, this.activeUnit, true)
+        : "";
+    },
     ...mapState(useUiStore, ["tickerShort"]),
     ...mapState(useSettingsStore, ["multinutEnabled"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),

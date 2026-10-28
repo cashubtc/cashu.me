@@ -543,6 +543,8 @@ export default {
       copy_lightning_address: "Copier l'adresse Lightning",
     },
     advanced: {
+      backup_files_title: "Fichiers de sauvegarde",
+      danger_zone_title: "Zone de danger",
       notifications: {
         reserved_unset: "Toutes les preuves réservées ont été libérées",
         removed_spent: "{count} preuves dépensées supprimées",

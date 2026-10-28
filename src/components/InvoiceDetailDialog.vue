@@ -5,32 +5,17 @@
       class="display-token-fullscreen"
     >
       <!-- Header -->
-      <FullscreenDialogHeader
-        :title="
-          isBolt12
-            ? 'Lightning Bolt12'
-            : isOnchain
-            ? 'On-chain'
-            : $t('InvoiceDetailDialog.invoice.caption')
-        "
-      />
+      <FullscreenDialogHeader :title="headerTitle" />
 
       <!-- Content -->
       <div class="content-area">
         <q-card-section class="q-pa-none">
-          <div
+          <PaymentStatus
             v-if="invoiceData.status === 'paid'"
-            class="paid-status column items-center q-mb-md"
-          >
-            <CircleCheckIcon
-              :size="64"
-              :stroke-width="1.5"
-              class="text-positive"
-            />
-            <div class="paid-status__label q-mt-sm">
-              {{ $t("InvoiceDetailDialog.invoice.status_paid_text") }}
-            </div>
-          </div>
+            state="paid"
+            class="q-mb-md q-pt-lg"
+            :label="$t('InvoiceDetailDialog.invoice.status_paid_text')"
+          />
           <div
             v-else-if="invoiceData.request"
             class="row justify-center q-mb-md"
@@ -128,6 +113,7 @@
   </FlowDialog>
 </template>
 <script lang="ts">
+import PaymentStatus from "src/components/ui/PaymentStatus.vue";
 import FlowDialog from "src/components/ui/FlowDialog.vue";
 import FlowFooter from "src/components/ui/FlowFooter.vue";
 import AmountHeadline from "src/components/ui/AmountHeadline.vue";
@@ -139,7 +125,6 @@ import QrBlock from "src/components/QrBlock.vue";
 import QrProgress from "src/components/QrProgress.vue";
 import FullscreenDialogHeader from "src/components/ui/FullscreenDialogHeader.vue";
 import { copyToClipboard } from "quasar";
-import { CircleCheck as CircleCheckIcon } from "lucide-vue-next";
 
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
@@ -156,11 +141,11 @@ export default defineComponent({
   name: "InvoiceDetailDialog",
   mixins: [windowMixin],
   components: {
+    PaymentStatus,
     FlowDialog,
     FlowFooter,
     AmountHeadline,
     QrCopyLine,
-    CircleCheckIcon,
     QrBlock,
     QrProgress,
     FullscreenDialogHeader,
@@ -177,6 +162,19 @@ export default defineComponent({
     };
   },
   computed: {
+    // A settled payment is titled by what happened (Sent, Received), as its history row is;
+    // an open one by what it is (the invoice, the address).
+    headerTitle(): string {
+      if (this.invoiceData.status === "paid")
+        return this.$t(
+          (this.invoiceData.amount ?? 0) < 0
+            ? "ActivityRow.sent"
+            : "ActivityRow.received"
+        );
+      if (this.isBolt12) return "Lightning Bolt12";
+      if (this.isOnchain) return "On-chain";
+      return this.$t("InvoiceDetailDialog.invoice.caption");
+    },
     ...mapState(useWalletStore, ["invoiceData"]),
     ...mapState(useWorkersStore, ["invoiceWorkerRunning"]),
     ...mapWritableState(useUiStore, ["showInvoiceDetails"]),
@@ -283,13 +281,5 @@ export default defineComponent({
   position: relative;
   border-radius: var(--app-radius-md);
   overflow: hidden;
-}
-
-.paid-status {
-  padding-top: 24px;
-}
-.paid-status__label {
-  font-size: 17px;
-  font-weight: 600;
 }
 </style>

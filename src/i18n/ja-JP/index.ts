@@ -531,6 +531,8 @@ export default {
       use_multinut: "複数ミントでの支払い",
     },
     advanced: {
+      backup_files_title: "バックアップファイル",
+      danger_zone_title: "危険ゾーン",
       notifications: {
         reserved_unset: "予約済みのプルーフをすべて解除しました",
         removed_spent: "使用済みのプルーフを {count} 件削除しました",

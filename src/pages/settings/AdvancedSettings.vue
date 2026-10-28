@@ -7,31 +7,6 @@
       :title="$t('Settings.advanced.developer.title')"
       :caption="$t('Settings.advanced.developer.description')"
     >
-      <!-- new seed -->
-      <SettingsActionRow
-        :label="$t('Settings.advanced.developer.new_seed.button')"
-        :caption="
-          confirmMnemonic
-            ? ''
-            : $t('Settings.advanced.developer.new_seed.description')
-        "
-        @click="confirmMnemonic = true"
-      >
-        <InlineConfirm
-          v-if="confirmMnemonic"
-          :question="
-            $t('Settings.advanced.developer.new_seed.confirm_question')
-          "
-          :cancel-label="$t('Settings.advanced.developer.new_seed.cancel')"
-          :confirm-label="$t('Settings.advanced.developer.new_seed.confirm')"
-          @cancel="confirmMnemonic = false"
-          @confirm="
-            confirmMnemonic = false;
-            generateNewMnemonic();
-          "
-        />
-      </SettingsActionRow>
-
       <!-- remove spent proofs -->
       <!-- Runs straight away, so an action glyph like the export rows, not a chevron. -->
       <SettingsActionRow
@@ -87,7 +62,7 @@
       />
     </SettingsSection>
 
-    <SettingsSection>
+    <SettingsSection :title="$t('Settings.advanced.backup_files_title')">
       <!-- export proofs -->
       <!-- Copies a token straight away, so a copy glyph instead of a navigation chevron. -->
       <SettingsActionRow
@@ -147,7 +122,32 @@
       </SettingsActionRow>
     </SettingsSection>
 
-    <SettingsSection>
+    <SettingsSection :title="$t('Settings.advanced.danger_zone_title')">
+      <!-- new seed -->
+      <SettingsActionRow
+        :label="$t('Settings.advanced.developer.new_seed.button')"
+        :caption="
+          confirmMnemonic
+            ? ''
+            : $t('Settings.advanced.developer.new_seed.description')
+        "
+        @click="confirmMnemonic = true"
+      >
+        <InlineConfirm
+          v-if="confirmMnemonic"
+          :question="
+            $t('Settings.advanced.developer.new_seed.confirm_question')
+          "
+          :cancel-label="$t('Settings.advanced.developer.new_seed.cancel')"
+          :confirm-label="$t('Settings.advanced.developer.new_seed.confirm')"
+          @cancel="confirmMnemonic = false"
+          @confirm="
+            confirmMnemonic = false;
+            generateNewMnemonic();
+          "
+        />
+      </SettingsActionRow>
+
       <!-- reset wallet -->
       <SettingsActionRow
         :label="$t('Settings.advanced.developer.reset_wallet.button')"

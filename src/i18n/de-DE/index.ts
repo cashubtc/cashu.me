@@ -541,6 +541,8 @@ export default {
       },
     },
     advanced: {
+      backup_files_title: "Sicherungsdateien",
+      danger_zone_title: "Gefahrenbereich",
       notifications: {
         reserved_unset: "Alle reservierten Proofs freigegeben",
         removed_spent: "{count} ausgegebene Proofs entfernt",

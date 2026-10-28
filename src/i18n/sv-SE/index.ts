@@ -531,6 +531,8 @@ export default {
       },
     },
     advanced: {
+      backup_files_title: "Säkerhetskopior",
+      danger_zone_title: "Riskzon",
       notifications: {
         reserved_unset: "Alla reserverade bevis frigjorda",
         removed_spent: "Tog bort {count} spenderade bevis",

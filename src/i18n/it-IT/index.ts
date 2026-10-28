@@ -512,6 +512,8 @@ export default {
       use_multinut: "Pagamenti da più mint",
     },
     advanced: {
+      backup_files_title: "File di backup",
+      danger_zone_title: "Zona pericolosa",
       notifications: {
         reserved_unset: "Tutte le prove riservate sono state liberate",
         removed_spent: "Rimosse {count} prove spese",

@@ -529,6 +529,8 @@ export default {
       use_multinut: "الدفع من عدة مِنْتات",
     },
     advanced: {
+      backup_files_title: "ملفات النسخ الاحتياطي",
+      danger_zone_title: "منطقة الخطر",
       notifications: {
         reserved_unset: "أُلغي حجز جميع البراهين",
         removed_spent: "أُزيلت {count} من البراهين المُنفَقة",

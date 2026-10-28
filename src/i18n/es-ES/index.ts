@@ -535,6 +535,8 @@ export default {
       use_multinut: "Pagos con varios mints",
     },
     advanced: {
+      backup_files_title: "Archivos de respaldo",
+      danger_zone_title: "Zona de peligro",
       notifications: {
         reserved_unset: "Todas las pruebas reservadas liberadas",
         removed_spent: "Se eliminaron {count} pruebas gastadas",

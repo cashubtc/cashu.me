@@ -550,6 +550,8 @@ export default {
       use_multinut: "Multi-mint payments",
     },
     advanced: {
+      backup_files_title: "Backup files",
+      danger_zone_title: "Danger zone",
       notifications: {
         reserved_unset: "All reserved proofs unset",
         removed_spent: "Removed {count} spent proofs",

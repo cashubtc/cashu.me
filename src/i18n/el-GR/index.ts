@@ -540,6 +540,8 @@ export default {
       use_multinut: "Πληρωμές από πολλά mint",
     },
     advanced: {
+      backup_files_title: "Αρχεία αντιγράφων ασφαλείας",
+      danger_zone_title: "Επικίνδυνη ζώνη",
       notifications: {
         reserved_unset: "Όλες οι δεσμευμένες αποδείξεις αποδεσμεύτηκαν",
         removed_spent: "Αφαιρέθηκαν {count} δαπανημένες αποδείξεις",

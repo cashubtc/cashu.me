@@ -524,6 +524,8 @@ export default {
       },
     },
     advanced: {
+      backup_files_title: "Yedek dosyaları",
+      danger_zone_title: "Tehlikeli bölge",
       notifications: {
         reserved_unset: "Tüm ayrılmış kanıtlar serbest bırakıldı",
         removed_spent: "{count} harcanmış kanıt kaldırıldı",

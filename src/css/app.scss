@@ -1244,7 +1244,7 @@ html[dir="rtl"] .q-field__append {
   z-index: 2;
 }
 // On desktop the full-screen flows (invoice, token, lock key, payment request) are the same
-// centred 560px dialog as the choosers, over the dimmed wallet, instead of a phone layout
+// centred dialog as the choosers, over the dimmed wallet, instead of a phone layout
 // stretched across the whole window.
 @media (min-width: 1024px) {
   .q-dialog__inner--maximized {
@@ -1256,9 +1256,10 @@ html[dir="rtl"] .q-field__append {
     border-radius: var(--app-radius-xl) !important;
     height: auto !important;
     max-height: calc(100vh - 64px) !important;
-    max-width: 560px !important;
+    // The same width as the desktop choosers (BottomSheet): one dialog width.
+    max-width: var(--app-content) !important;
     overflow: hidden;
-    width: 560px !important;
+    width: var(--app-content) !important;
   }
   .q-dialog__inner--maximized .display-token-fullscreen {
     background: var(--app-raised) !important;

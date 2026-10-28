@@ -85,24 +85,20 @@
                   </div>
                 </div>
                 <transition name="fade">
-                  <div v-if="isReceiving" class="receiving-state q-mb-md">
-                    <div class="row items-center no-wrap">
-                      <div class="col-auto text-h5 text-weight-bold">
-                        {{
-                          $t("ReceiveTokenDialog.receiving_amount", {
-                            amount: formatCurrency(
-                              Math.max(tokenAmount - receiveFee, 0),
-                              tokenUnit,
-                              true
-                            ),
-                          })
-                        }}
-                      </div>
-                      <div class="col-auto">
-                        <PendingDots class="q-ml-sm" />
-                      </div>
-                    </div>
-                  </div>
+                  <PaymentStatus
+                    v-if="isReceiving"
+                    state="pending"
+                    class="receiving-state q-mb-md"
+                    :label="
+                      $t('ReceiveTokenDialog.receiving_amount', {
+                        amount: formatCurrency(
+                          Math.max(tokenAmount - receiveFee, 0),
+                          tokenUnit,
+                          true
+                        ),
+                      })
+                    "
+                  />
                 </transition>
                 <transition name="fade">
                   <AppCallout
@@ -260,10 +256,10 @@
 </template>
 
 <script lang="ts">
+import PaymentStatus from "src/components/ui/PaymentStatus.vue";
 import FlowDialog from "src/components/ui/FlowDialog.vue";
 import BusyLabel from "src/components/ui/BusyLabel.vue";
 import FlowFooter from "src/components/ui/FlowFooter.vue";
-import PendingDots from "src/components/ui/PendingDots.vue";
 import { defineComponent } from "vue";
 import AppCallout from "src/components/AppCallout.vue";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
@@ -296,10 +292,10 @@ export default defineComponent({
   name: "ReceiveTokenDialog",
   mixins: [windowMixin],
   components: {
+    PaymentStatus,
     FlowDialog,
     BusyLabel,
     FlowFooter,
-    PendingDots,
     AppCallout,
     TokenInformation,
     TokenStringRender,

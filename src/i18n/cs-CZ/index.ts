@@ -559,6 +559,8 @@ export default {
       use_multinut: "Platby z více mintů",
     },
     advanced: {
+      backup_files_title: "Záložní soubory",
+      danger_zone_title: "Nebezpečná zóna",
       notifications: {
         reserved_unset: "Rezervace všech důkazů zrušena",
         removed_spent: "Odstraněno utracených důkazů: {count}",

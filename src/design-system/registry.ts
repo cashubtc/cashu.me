@@ -421,6 +421,16 @@ export const DS_ITEMS: DsItem[] = [
     example: `<div class="amount-headline">−₿101</div>`,
   },
   {
+    id: "payment-status",
+    name: "Payment status",
+    group: "data",
+    tier: "composite",
+    source: "src/components/ui/PaymentStatus.vue",
+    usage: { tag: "PaymentStatus" },
+    example: `<PaymentStatus state="paid" :label="$t('…paid')" :caption="fee">₿100</PaymentStatus>`,
+    note: "The outcome at the top of a payment: paid (green check), pending (dots) or none, the state in words, the amount, a muted caption.",
+  },
+  {
     id: "qr-code",
     name: "QR code",
     group: "data",

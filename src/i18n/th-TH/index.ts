@@ -529,6 +529,8 @@ export default {
       },
     },
     advanced: {
+      backup_files_title: "ไฟล์สำรองข้อมูล",
+      danger_zone_title: "โซนอันตราย",
       notifications: {
         reserved_unset: "ยกเลิกการจองหลักฐานทั้งหมดแล้ว",
         removed_spent: "ลบหลักฐานที่ใช้แล้ว {count} รายการ",

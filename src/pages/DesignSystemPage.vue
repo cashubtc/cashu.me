@@ -652,6 +652,15 @@
           <ToggleUnit />
         </div>
       </DsEntry>
+      <DsEntry id="payment-status">
+        <div class="row q-col-gutter-lg justify-center">
+          <PaymentStatus state="paid" label="Paid" caption="Fee: ₿1"
+            >₿100</PaymentStatus
+          >
+          <PaymentStatus state="pending" label="Paying">₿100</PaymentStatus>
+          <PaymentStatus state="pending" label="Receiving ₿500" />
+        </div>
+      </DsEntry>
       <DsEntry id="qr-code">
         <QrBlock value="cashu:demo-token" />
       </DsEntry>
@@ -1066,6 +1075,7 @@
 </template>
 
 <script lang="ts">
+import PaymentStatus from "src/components/ui/PaymentStatus.vue";
 import FlowDialog from "src/components/ui/FlowDialog.vue";
 import BusyLabel from "src/components/ui/BusyLabel.vue";
 import FlowFooter from "src/components/ui/FlowFooter.vue";
@@ -1174,6 +1184,7 @@ export default defineComponent({
   name: "DesignSystemPage",
   mixins: [windowMixin],
   components: {
+    PaymentStatus,
     FlowDialog,
     BusyLabel,
     FlowFooter,

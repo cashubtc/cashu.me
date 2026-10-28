@@ -524,6 +524,8 @@ export default {
       },
     },
     advanced: {
+      backup_files_title: "备份文件",
+      danger_zone_title: "危险操作",
       notifications: {
         reserved_unset: "已取消所有预留证明",
         removed_spent: "已移除 {count} 个已花费证明",
