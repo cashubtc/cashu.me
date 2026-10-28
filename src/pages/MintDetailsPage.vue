@@ -31,7 +31,7 @@
                 :aria-expanded="showQrCode"
                 @click="showQrCode = !showQrCode"
               >
-                <qr-code-icon size="24" class="qr-icon" />
+                <QrCodeIcon size="24" class="qr-icon" />
                 <q-tooltip>{{
                   showQrCode
                     ? $t("MintDetailsDialog.qr.hide")
@@ -106,7 +106,7 @@
             class="contact-item q-mb-md"
           >
             <div class="contact-icon-container">
-              <mail-icon
+              <MailIcon
                 v-if="contactInfo.method === 'email'"
                 size="20"
                 class="contact-icon"
@@ -134,7 +134,7 @@
               </div>
             </div>
             <div class="contact-text">{{ contactInfo.info }}</div>
-            <copy-icon
+            <CopyIcon
               @click="copyText(contactInfo.info)"
               size="20"
               class="copy-icon cursor-pointer"
@@ -250,7 +250,7 @@
               class="action-button cursor-pointer"
               @click="openEditMintDialog"
             >
-              <pencil-icon size="20" class="action-icon" />
+              <PencilIcon size="20" class="action-icon" />
               <div class="action-label">
                 {{ $t("MintDetailsDialog.actions.edit.label") }}
               </div>
@@ -260,7 +260,7 @@
               class="action-button cursor-pointer"
               @click="copyText(mintData.url)"
             >
-              <copy-icon size="20" class="action-icon" />
+              <CopyIcon size="20" class="action-icon" />
               <div class="action-label">
                 {{ $t("MintDetailsDialog.actions.copy_mint_url.label") }}
               </div>
@@ -270,7 +270,7 @@
               class="action-button cursor-pointer"
               @click="openCreateReviewDialog"
             >
-              <star-icon size="20" class="action-icon" />
+              <StarIcon size="20" class="action-icon" />
               <div class="action-label">
                 {{ $t("CreateMintReview.title") }}
               </div>
@@ -279,7 +279,7 @@
               class="action-button delete-button cursor-pointer"
               @click="openRemoveMintDialog"
             >
-              <trash-icon size="20" class="action-icon text-negative" />
+              <Trash2Icon size="20" class="action-icon text-negative" />
               <div class="action-label">
                 {{ $t("MintDetailsDialog.actions.delete.label") }}
               </div>
@@ -305,9 +305,15 @@ import MintMotdMessage from "src/components/MintMotdMessage.vue";
 import MintAuditInfo from "src/components/MintAuditInfo.vue";
 import {
   CircleDollarSign as CircleDollarSignIcon,
+  Copy as CopyIcon,
   Info as InfoIcon,
   Link as LinkIcon,
+  Mail as MailIcon,
   Nut as NutIcon,
+  Pencil as PencilIcon,
+  QrCode as QrCodeIcon,
+  Star as StarIcon,
+  Trash2 as Trash2Icon,
 } from "lucide-vue-next";
 import MintIdentityHeader from "src/components/MintIdentityHeader.vue";
 import DetailRow from "src/components/ui/DetailRow.vue";
@@ -317,6 +323,12 @@ export default defineComponent({
   name: "MintDetailsPage",
   mixins: [windowMixin],
   components: {
+    QrCodeIcon,
+    Trash2Icon,
+    StarIcon,
+    CopyIcon,
+    PencilIcon,
+    MailIcon,
     QrBlock,
     MintIdentityHeader,
     EditMintDialog,

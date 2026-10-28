@@ -10,57 +10,48 @@
     <!-- Options -->
     <div class="options">
       <!-- Create New Option -->
-      <div
-        class="app-option-row welcome-option"
-        role="button"
-        tabindex="0"
+      <OptionRow
         data-testid="onboarding-create-wallet"
         @click="choose('new')"
-        @keydown.enter.prevent="choose('new')"
-        @keydown.space.prevent="choose('new')"
+        class="welcome-option"
+        icon-size="sm"
       >
-        <div class="app-icon-circle app-icon-circle--sm">
-          <SparklesIcon :size="22" />
-        </div>
-        <div class="app-option-row__text">
-          <div class="app-option-row__label">
-            {{ $t("WelcomeSlideChoice.options.new.title") }}
-          </div>
-          <div class="app-option-row__caption">
-            {{ $t("WelcomeSlideChoice.options.new.subtitle") }}
-          </div>
-        </div>
-        <ChevronRightIcon :size="20" class="chevron" />
-      </div>
+        <template #icon><SparklesIcon :size="20" /></template>
+        <template #label>{{
+          $t("WelcomeSlideChoice.options.new.title")
+        }}</template>
+        <template #caption>{{
+          $t("WelcomeSlideChoice.options.new.subtitle")
+        }}</template>
+        <template #trailing
+          ><ChevronRightIcon :size="20" class="chevron"
+        /></template>
+      </OptionRow>
 
       <!-- Recover Option -->
-      <div
-        class="app-option-row welcome-option"
-        role="button"
-        tabindex="0"
+      <OptionRow
         data-testid="onboarding-recover-wallet"
         @click="choose('recover')"
-        @keydown.enter.prevent="choose('recover')"
-        @keydown.space.prevent="choose('recover')"
+        class="welcome-option"
+        icon-size="sm"
       >
-        <div class="app-icon-circle app-icon-circle--sm">
-          <KeyRoundIcon :size="22" />
-        </div>
-        <div class="app-option-row__text">
-          <div class="app-option-row__label">
-            {{ $t("WelcomeSlideChoice.options.recover.title") }}
-          </div>
-          <div class="app-option-row__caption">
-            {{ $t("WelcomeSlideChoice.options.recover.subtitle") }}
-          </div>
-        </div>
-        <ChevronRightIcon :size="20" class="chevron" />
-      </div>
+        <template #icon><KeyRoundIcon :size="20" /></template>
+        <template #label>{{
+          $t("WelcomeSlideChoice.options.recover.title")
+        }}</template>
+        <template #caption>{{
+          $t("WelcomeSlideChoice.options.recover.subtitle")
+        }}</template>
+        <template #trailing
+          ><ChevronRightIcon :size="20" class="chevron"
+        /></template>
+      </OptionRow>
     </div>
   </WelcomeSlideScaffold>
 </template>
 
 <script lang="ts">
+import OptionRow from "src/components/ui/OptionRow.vue";
 import {
   ChevronRight as ChevronRightIcon,
   KeyRound as KeyRoundIcon,
@@ -73,6 +64,7 @@ import { useWalletStore } from "src/stores/wallet";
 export default {
   name: "WelcomeSlideChoice",
   components: {
+    OptionRow,
     SparklesIcon,
     KeyRoundIcon,
     ChevronRightIcon,

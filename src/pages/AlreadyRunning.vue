@@ -1,34 +1,24 @@
 <template>
-  <div class="blocking-state fullscreen column flex-center text-center q-pa-md">
-    <div class="app-icon-circle app-icon-circle--lg blocking-state__icon">
-      <AppWindowIcon :size="26" />
-    </div>
-    <div class="blocking-state__title q-mt-md">
-      {{ $t("AlreadyRunning.title") }}
-    </div>
-    <div class="blocking-state__text q-mt-sm">
-      {{ $t("AlreadyRunning.text") }}
-    </div>
-    <q-btn
-      rounded
-      unelevated
-      no-caps
-      color="primary"
-      class="blocking-state__action q-mt-lg"
-      to="/"
-      :label="$t('AlreadyRunning.actions.retry.label')"
-    />
-  </div>
+  <BlockingState
+    class="fullscreen"
+    :icon="AppWindowIcon"
+    :title="$t('AlreadyRunning.title')"
+    :text="$t('AlreadyRunning.text')"
+    :action="$t('AlreadyRunning.actions.retry.label')"
+    to="/"
+  />
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import { AppWindow as AppWindowIcon } from "lucide-vue-next";
+import BlockingState from "src/components/ui/BlockingState.vue";
 
 export default defineComponent({
   name: "AlreadyRunning",
-  components: { AppWindowIcon },
+  components: { BlockingState },
+  setup() {
+    return { AppWindowIcon };
+  },
 });
 </script>
-
-<!-- The blocking-state styles live in src/css/app.scss (shared with the 404 page). -->

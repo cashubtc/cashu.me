@@ -108,7 +108,7 @@
                       )
                 }}</q-tooltip>
                 <template v-slot:loading>
-                  <q-spinner @click="closeCardScanner" />
+                  <PendingDots @click="closeCardScanner" />
                 </template>
               </q-btn>
               <q-btn
@@ -308,6 +308,7 @@
   </q-dialog>
 </template>
 <script lang="ts">
+import PendingDots from "src/components/ui/PendingDots.vue";
 import { defineComponent } from "vue";
 import { Buffer } from "buffer";
 import { UR, UREncoder } from "@gandlaf21/bc-ur";
@@ -349,6 +350,7 @@ export default defineComponent({
   name: "DisplayTokenComponent",
   mixins: [windowMixin],
   components: {
+    PendingDots,
     LinkIcon,
     Trash2Icon,
     GaugeIcon,

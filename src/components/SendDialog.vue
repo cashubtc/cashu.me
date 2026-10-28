@@ -1,98 +1,52 @@
 <template>
   <BottomSheet v-model="showSendDialog" :title="$t('SendDialog.title')">
     <template #trailing>
-      <q-btn
-        flat
-        round
-        class="app-icon-btn"
-        :aria-label="$t('global.actions.scan.label')"
-        @click="showCamera"
-        color="primary"
-      >
-        <ScanIcon />
-      </q-btn>
+      <IconButton :label="$t('global.actions.scan.label')" @click="showCamera">
+        <ScanIcon :size="20" />
+      </IconButton>
     </template>
     <div>
       <div class="q-gutter-y-md">
-        <div
-          class="app-option-row"
-          role="button"
-          tabindex="0"
+        <OptionRow
           data-testid="send-ecash-option"
           @click="showSendTokensDialog"
-          @keydown.enter.prevent="showSendTokensDialog"
-          @keydown.space.prevent="showSendTokensDialog"
         >
-          <div class="row items-center no-wrap">
-            <div class="app-icon-circle">
-              <CoinsIcon :size="24" />
-            </div>
-            <div class="col q-ml-md">
-              <div class="app-option-row__label">
-                {{ $t("SendDialog.actions.ecash.label") }}
-              </div>
-              <div class="app-option-row__caption">
-                {{ $t("SendDialog.captions.ecash") }}
-              </div>
-            </div>
-          </div>
-        </div>
+          <template #icon><CoinsIcon :size="24" /></template>
+          <template #label>{{ $t("SendDialog.actions.ecash.label") }}</template>
+          <template #caption>{{ $t("SendDialog.captions.ecash") }}</template>
+        </OptionRow>
 
-        <div
+        <OptionRow
           v-if="canSendLightning"
-          class="app-option-row"
-          role="button"
-          tabindex="0"
           data-testid="send-lightning-option"
           @click="showParseDialog"
-          @keydown.enter.prevent="showParseDialog"
-          @keydown.space.prevent="showParseDialog"
         >
-          <div class="row items-center no-wrap">
-            <div class="app-icon-circle">
-              <ZapIcon :size="24" />
-            </div>
-            <div class="col q-ml-md">
-              <div class="app-option-row__label">
-                {{ $t("SendDialog.actions.lightning.label") }}
-              </div>
-              <div class="app-option-row__caption">
-                {{ $t("SendDialog.captions.lightning") }}
-              </div>
-            </div>
-          </div>
-        </div>
+          <template #icon><ZapIcon :size="24" /></template>
+          <template #label>{{
+            $t("SendDialog.actions.lightning.label")
+          }}</template>
+          <template #caption>{{
+            $t("SendDialog.captions.lightning")
+          }}</template>
+        </OptionRow>
 
-        <div
+        <OptionRow
           v-if="canSendOnchain"
-          class="app-option-row"
-          role="button"
-          tabindex="0"
           data-testid="send-onchain-option"
           @click="showOnchainPayDialog"
-          @keydown.enter.prevent="showOnchainPayDialog"
-          @keydown.space.prevent="showOnchainPayDialog"
         >
-          <div class="row items-center no-wrap">
-            <div class="app-icon-circle">
-              <BitcoinIcon :size="24" />
-            </div>
-            <div class="col q-ml-md">
-              <div class="app-option-row__label">
-                {{ $t("common.on_chain") }}
-              </div>
-              <div class="app-option-row__caption">
-                {{ $t("SendDialog.captions.onchain") }}
-              </div>
-            </div>
-          </div>
-        </div>
+          <template #icon><BitcoinIcon :size="24" /></template>
+          <template #label>{{ $t("common.on_chain") }}</template>
+          <template #caption>{{ $t("SendDialog.captions.onchain") }}</template>
+        </OptionRow>
       </div>
     </div>
   </BottomSheet>
 </template>
 
 <script lang="ts">
+import IconButton from "src/components/ui/IconButton.vue";
+import OptionRow from "src/components/ui/OptionRow.vue";
 import { defineComponent } from "vue";
 import BottomSheet from "src/components/BottomSheet.vue";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
@@ -119,6 +73,8 @@ import {
 export default defineComponent({
   name: "SendDialog",
   components: {
+    IconButton,
+    OptionRow,
     BottomSheet,
     CoinsIcon,
     ZapIcon,

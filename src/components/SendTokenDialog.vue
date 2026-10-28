@@ -141,13 +141,10 @@
             @enter="sendTokens"
           >
             <template #overlay>
-              <span
-                v-if="isLocked && !showLockInput"
-                class="app-badge app-badge--solid locked-badge"
-              >
+              <AppBadge v-if="isLocked && !showLockInput" class="locked-badge">
                 <LockIcon :size="14" aria-hidden="true" />
                 {{ $t("SendTokenDialog.badge_locked") }}
-              </span>
+              </AppBadge>
               <div
                 v-if="insufficientFunds && sendData.amount"
                 outline
@@ -220,7 +217,7 @@
               >
                 {{ $t("SendTokenDialog.actions.send.label") }}
                 <template v-slot:loading>
-                  <q-spinner-dots size="20px" class="on-left" />
+                  <PendingDots class="on-left" />
                   <span>{{
                     $t("SendTokenDialog.actions.send.in_progress")
                   }}</span>
@@ -239,6 +236,8 @@
   </q-dialog>
 </template>
 <script lang="ts">
+import PendingDots from "src/components/ui/PendingDots.vue";
+import AppBadge from "src/components/ui/AppBadge.vue";
 import { defineComponent } from "vue";
 import AppCallout from "src/components/AppCallout.vue";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
@@ -272,6 +271,8 @@ export default defineComponent({
   name: "SendTokenDialog",
   mixins: [windowMixin],
   components: {
+    PendingDots,
+    AppBadge,
     ClipboardPasteIcon,
     AppCallout,
     ChooseMint,

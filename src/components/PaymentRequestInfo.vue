@@ -1,19 +1,12 @@
 <template>
-  <div class="app-option-row payment-request-info">
-    <div class="row items-center no-wrap">
-      <div class="app-icon-circle">
-        <FileTextIcon :size="20" />
-      </div>
-      <div class="col q-ml-md">
-        <div class="app-option-row__label">
-          {{ infoTitle }}
-        </div>
-        <div class="app-option-row__caption">
-          {{ infoSubtitle }}
-        </div>
-      </div>
-    </div>
-  </div>
+  <OptionRow
+    static
+    class="payment-request-info"
+    :label="infoTitle"
+    :caption="infoSubtitle"
+  >
+    <template #icon><FileTextIcon :size="24" /></template>
+  </OptionRow>
 </template>
 
 <script lang="ts">
@@ -21,11 +14,13 @@ import { defineComponent, PropType } from "vue";
 import { PaymentRequestTransportType } from "@cashu/cashu-ts";
 import type { PaymentRequestData } from "src/stores/payment-request";
 import { FileText as FileTextIcon } from "lucide-vue-next";
+import OptionRow from "src/components/ui/OptionRow.vue";
 
 export default defineComponent({
   name: "PaymentRequestInfo",
   components: {
     FileTextIcon,
+    OptionRow,
   },
   props: {
     request: {

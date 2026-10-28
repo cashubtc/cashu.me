@@ -74,19 +74,20 @@
       >
         <span>{{ $t("CreateMintReview.actions.publish.label") }}</span>
         <template v-slot:loading>
-          <q-spinner-dots size="20px" class="on-left" />
+          <PendingDots class="on-left" />
           <span>{{ $t("CreateMintReview.actions.publish.in_progress") }}</span>
         </template>
       </q-btn>
 
       <q-inner-loading :showing="prefilling">
-        <q-spinner size="32px" color="primary" />
+        <PendingDots size="32px" />
       </q-inner-loading>
     </div>
   </SettingsPageShell>
 </template>
 
 <script lang="ts">
+import PendingDots from "src/components/ui/PendingDots.vue";
 import { Copy as CopyIcon } from "lucide-vue-next";
 import { defineComponent, computed, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
@@ -103,7 +104,13 @@ import MintIdentityHeader from "src/components/MintIdentityHeader.vue";
 
 export default defineComponent({
   name: "CreateMintReviewPage",
-  components: { AppRating, CopyIcon, SettingsPageShell, MintIdentityHeader },
+  components: {
+    PendingDots,
+    AppRating,
+    CopyIcon,
+    SettingsPageShell,
+    MintIdentityHeader,
+  },
   setup() {
     const router = useRouter();
     const nostr = useNostrStore();

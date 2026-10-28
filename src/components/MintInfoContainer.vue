@@ -1,6 +1,12 @@
 <template>
   <div class="row items-center">
-    <q-avatar :size="avatarSize" class="q-mr-md mint-avatar">
+    <q-skeleton
+      v-if="skeleton"
+      type="QAvatar"
+      :size="avatarSize"
+      class="q-mr-md"
+    />
+    <q-avatar v-else :size="avatarSize" class="q-mr-md mint-avatar">
       <q-img
         v-if="iconUrl && !imgError"
         :src="iconUrl"
@@ -23,7 +29,7 @@
            transition timing because of its infinite CSS animation. -->
       <transition name="mint-avatar-fade">
         <div v-if="showSpinner" class="mint-avatar-spinner">
-          <q-spinner color="grey-5" :size="fallbackIconSize" />
+          <PendingDots :size="fallbackIconSize" />
         </div>
       </transition>
     </q-avatar>
@@ -31,7 +37,11 @@
     <div class="mint-info-container">
       <!-- While the mint's info loads, a placeholder holds the name line and the host stays on
            its own line, so the card keeps one height and the title fills in instead of changing. -->
-      <div v-if="loading && !name" class="mint-name">
+      <template v-if="skeleton">
+        <div class="mint-name"><q-skeleton type="text" width="96px" /></div>
+        <div class="mint-url"><q-skeleton type="text" width="140px" /></div>
+      </template>
+      <div v-else-if="loading && !name" class="mint-name">
         <q-skeleton type="text" width="96px" />
       </div>
       <!-- A mint without its own name keeps the same two lines as named mints in lists that
@@ -45,9 +55,10 @@
       <div v-else class="mint-name">{{ name || host }}</div>
       <div
         v-if="
-          (loading && !name) ||
-          (name && name !== host) ||
-          (unnamedLabel && (!name || name === host))
+          !skeleton &&
+          ((loading && !name) ||
+            (name && name !== host) ||
+            (unnamedLabel && (!name || name === host)))
         "
         class="mint-url"
       >
@@ -58,19 +69,22 @@
 </template>
 
 <script lang="ts">
+import PendingDots from "src/components/ui/PendingDots.vue";
 import { Landmark as LandmarkIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "MintInfoContainer",
-  components: { LandmarkIcon },
+  components: { PendingDots, LandmarkIcon },
   props: {
-    url: { type: String, required: true },
+    url: { type: String, default: "" },
     name: { type: String, required: false },
     iconUrl: { type: String, required: false },
     avatarSize: { type: String, default: "34px" },
     loading: { type: Boolean, default: false },
     unnamedLabel: { type: String, default: "" },
+    /** A placeholder in the same boxes: avatar, name line and host line. */
+    skeleton: { type: Boolean, default: false },
   },
   data() {
     return {

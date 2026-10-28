@@ -15,15 +15,13 @@
       <div class="multinut-content-container q-pa-md">
         <!-- Top Icons -->
         <div class="top-icons q-pt-md q-mb-lg">
-          <q-btn
-            flat
-            round
-            class="floating-close-btn app-icon-btn"
-            :aria-label="$t('global.actions.close.label')"
+          <IconButton
+            :label="$t('global.actions.close.label')"
             @click="closeMultinutDialog"
+            floating
           >
             <XIcon :size="24" />
-          </q-btn>
+          </IconButton>
         </div>
 
         <!-- Header Section -->
@@ -97,181 +95,122 @@
               v-show="!isPaymentInProgress || isSelected(mint)"
               class="mint-item q-mb-md"
             >
-              <div
-                class="mint-card cursor-pointer"
+              <!-- The standard mint card; selecting a mint gives it the active fill. -->
+              <MintCard
+                :clickable="!isPaymentInProgress"
+                :class="{ 'cursor-not-allowed': isPaymentInProgress }"
+                :active="isSelected(mint)"
+                :icon-url="getMintIconUrl(mint) || undefined"
+                :name="mint.nickname || mint.info?.name"
+                :url="mint.url"
+                :balances="
+                  isSelected(mint)
+                    ? []
+                    : [
+                        formatCurrency(
+                          mintClass(mint).unitBalance(activeUnit),
+                          activeUnit
+                        ),
+                      ]
+                "
                 @click="
                   !isPaymentInProgress && !isSelected(mint) && toggleMint(mint)
                 "
-                :class="{
-                  'mint-card-selected': isSelected(mint),
-                  'cursor-not-allowed': isPaymentInProgress,
-                  'mint-card-success':
-                    isPaymentInProgress &&
-                    isSelected(mint) &&
-                    mintStates[mint.url] === 'success',
-                  'mint-card-error':
-                    isPaymentInProgress &&
-                    isSelected(mint) &&
-                    mintStates[mint.url] === 'error',
-                }"
               >
-                <div class="mint-card-content q-pa-md">
-                  <div class="row items-center">
-                    <div class="col-auto q-mr-md">
-                      <q-checkbox
-                        v-if="!isPaymentInProgress"
-                        :model-value="isSelected(mint)"
-                        @update:model-value="toggleMint(mint)"
-                        :color="isSelected(mint) ? 'primary' : 'grey'"
-                        class="cursor-pointer"
-                      />
-                    </div>
-
-                    <div class="col">
-                      <div class="row items-center">
-                        <q-avatar
-                          v-if="getMintIconUrl(mint)"
-                          size="34px"
-                          class="q-mr-sm"
-                        >
-                          <q-img
-                            spinner-color="white"
-                            spinner-size="xs"
-                            :src="getMintIconUrl(mint)"
-                            alt="Mint Icon"
-                            style="
-                              height: 34px;
-                              max-width: 34px;
-                              font-size: 12px;
-                            "
-                          />
-                        </q-avatar>
-
-                        <div class="mint-info-container">
-                          <div
-                            v-if="mint.nickname || mint.info?.name"
-                            class="mint-name"
-                          >
-                            {{ mint.nickname || mint.info?.name }}
-                          </div>
-                          <div class="text-grey-6 mint-url">
-                            {{ getShortUrl(mint.url) }}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <!-- Show state indicator during payment, checkbox otherwise -->
-                    <div
-                      v-if="isPaymentInProgress && isSelected(mint)"
-                      class="col-auto state-indicator"
-                    >
-                      <q-spinner
-                        v-if="
-                          mintStates[mint.url] === 'requesting' ||
-                          mintStates[mint.url] === 'paying'
-                        "
-                        color="primary"
-                        size="24px"
-                      />
-                      <CircleCheckIcon
-                        v-else-if="mintStates[mint.url] === 'success'"
-                        :size="24"
-                        class="text-positive"
-                      />
-                      <CircleAlertIcon
-                        v-else-if="mintStates[mint.url] === 'error'"
-                        :size="24"
-                        class="text-negative"
-                      />
-                    </div>
-                  </div>
-
-                  <!-- Payment State Progress Bar - Full Width -->
-                  <div
-                    v-if="
-                      isPaymentInProgress &&
-                      isSelected(mint) &&
-                      mintStates[mint.url]
-                    "
-                    class="payment-progress-section q-mt-md q-px-md"
-                  >
-                    <q-linear-progress
-                      :value="getStateProgress(mintStates[mint.url])"
-                      :color="getStateColor(mintStates[mint.url])"
-                      size="4px"
-                      rounded
-                      class="payment-progress"
+                <template #action>
+                  <q-checkbox
+                    v-if="!isPaymentInProgress"
+                    :model-value="isSelected(mint)"
+                    @update:model-value="toggleMint(mint)"
+                    @click.stop
+                    color="primary"
+                    dense
+                    class="restore-mint-check"
+                    :aria-label="mint.nickname || mint.info?.name || mint.url"
+                  />
+                  <div v-else-if="isSelected(mint)" class="state-indicator">
+                    <PendingDots
+                      v-if="
+                        mintStates[mint.url] === 'requesting' ||
+                        mintStates[mint.url] === 'paying'
+                      "
                     />
-                    <div class="payment-state-text q-mt-xs">
-                      {{ getStateText(mintStates[mint.url]) }}
-                    </div>
+                    <CircleCheckIcon
+                      v-else-if="mintStates[mint.url] === 'success'"
+                      :size="24"
+                      class="text-positive"
+                    />
+                    <CircleAlertIcon
+                      v-else-if="mintStates[mint.url] === 'error'"
+                      :size="24"
+                      class="text-negative"
+                    />
                   </div>
+                </template>
+                <!-- Payment State Progress Bar - Full Width -->
+                <div
+                  v-if="
+                    isPaymentInProgress &&
+                    isSelected(mint) &&
+                    mintStates[mint.url]
+                  "
+                  class="payment-progress-section q-mt-md q-px-md"
+                >
+                  <q-linear-progress
+                    :value="getStateProgress(mintStates[mint.url])"
+                    :color="getStateColor(mintStates[mint.url])"
+                    size="4px"
+                    rounded
+                    class="payment-progress"
+                  />
+                  <div class="payment-state-text q-mt-xs">
+                    {{ getStateText(mintStates[mint.url]) }}
+                  </div>
+                </div>
 
-                  <!-- Balance Display for Unselected Mints -->
-                  <div
-                    v-if="!isSelected(mint)"
-                    class="mint-balance-section q-mt-md"
-                  >
-                    <div class="app-badge app-badge--solid q-mr-xs q-mb-xs">
-                      <span class="currency-unit-text">
+                <!-- Payment Distribution Slider for Selected Mints -->
+                <div
+                  v-if="isSelected(mint) && !isPaymentInProgress"
+                  class="mint-slider-section q-mt-md"
+                >
+                  <div class="row items-center q-gutter-sm no-wrap">
+                    <!-- Allocation Badge -->
+                    <div class="col-auto">
+                      <AppBadge tone="primary" class="allocation-badge">
+                        {{ formatCurrency(getPartialAmount(mint), activeUnit) }}
+                      </AppBadge>
+                    </div>
+
+                    <!-- Slider -->
+                    <div class="col slider-container">
+                      <q-slider
+                        :model-value="getMintProportion(mint)"
+                        @update:model-value="
+                          (value) => updateMintProportion(mint, value)
+                        "
+                        :min="0"
+                        :max="getMaxPercentageForMint(mint)"
+                        :step="1"
+                        color="primary"
+                        :disable="selectedMints.length <= 1"
+                        class="mint-slider q-px-md"
+                      />
+                    </div>
+
+                    <!-- Total Balance Badge -->
+                    <div class="col-auto">
+                      <AppBadge>
                         {{
                           formatCurrency(
                             mintClass(mint).unitBalance(this.activeUnit),
-                            this.activeUnit
+                            activeUnit
                           )
                         }}
-                      </span>
-                    </div>
-                  </div>
-
-                  <!-- Payment Distribution Slider for Selected Mints -->
-                  <div
-                    v-if="isSelected(mint) && !isPaymentInProgress"
-                    class="mint-slider-section q-mt-md"
-                  >
-                    <div class="row items-center q-gutter-sm no-wrap">
-                      <!-- Allocation Badge -->
-                      <div class="col-auto">
-                        <div
-                          class="app-badge app-badge--primary allocation-badge"
-                        >
-                          {{
-                            formatCurrency(getPartialAmount(mint), activeUnit)
-                          }}
-                        </div>
-                      </div>
-
-                      <!-- Slider -->
-                      <div class="col slider-container">
-                        <q-slider
-                          :model-value="getMintProportion(mint)"
-                          @update:model-value="
-                            (value) => updateMintProportion(mint, value)
-                          "
-                          :min="0"
-                          :max="getMaxPercentageForMint(mint)"
-                          :step="1"
-                          color="primary"
-                          :disable="selectedMints.length <= 1"
-                          class="mint-slider q-px-md"
-                        />
-                      </div>
-
-                      <!-- Total Balance Badge -->
-                      <div class="col-auto">
-                        <div class="app-badge app-badge--solid">
-                          {{
-                            formatCurrency(
-                              mintClass(mint).unitBalance(this.activeUnit),
-                              activeUnit
-                            )
-                          }}
-                        </div>
-                      </div>
+                      </AppBadge>
                     </div>
                   </div>
                 </div>
-              </div>
+              </MintCard>
             </div>
           </div>
         </div>
@@ -290,7 +229,7 @@
           >
             {{ $t("MultinutPicker.pay_invoice") }}
             <template v-slot:loading
-              ><q-spinner-dots size="20px" class="on-left" />{{
+              ><PendingDots class="on-left" />{{
                 $t("MultinutPicker.pay_invoice")
               }}</template
             >
@@ -302,6 +241,10 @@
 </template>
 
 <script lang="ts">
+import MintCard from "src/components/MintCard.vue";
+import PendingDots from "src/components/ui/PendingDots.vue";
+import IconButton from "src/components/ui/IconButton.vue";
+import AppBadge from "src/components/ui/AppBadge.vue";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore, MintClass } from "src/stores/mints";
@@ -320,7 +263,16 @@ import AppCallout from "src/components/AppCallout.vue";
 export default defineComponent({
   name: "MultinutPaymentDialog",
   mixins: [windowMixin],
-  components: { CircleCheckIcon, CircleAlertIcon, XIcon, AppCallout },
+  components: {
+    MintCard,
+    PendingDots,
+    IconButton,
+    AppBadge,
+    CircleCheckIcon,
+    CircleAlertIcon,
+    XIcon,
+    AppCallout,
+  },
   data() {
     return {
       multiMeltButtonLoading: false,
@@ -1105,38 +1057,6 @@ export default defineComponent({
   width: 100%;
 }
 
-/* MultinutPaymentDialog specific mint card styles */
-.mint-card {
-  width: 100%;
-  border-radius: var(--app-radius-lg);
-  background-color: var(--app-tint);
-  transition: all 0.2s ease;
-}
-
-.mint-card:hover:not(.cursor-not-allowed) {
-  transform: translateY(-1px);
-  box-shadow: var(--app-shadow-md);
-}
-
-.mint-card-selected {
-  border-color: var(--q-primary) !important;
-  background-color: rgba(25, 118, 210, 0.1) !important;
-}
-
-.mint-card-success {
-  border-color: var(--q-positive) !important;
-  background-color: rgba(76, 175, 80, 0.1) !important;
-}
-
-.mint-card-error {
-  border-color: var(--q-negative) !important;
-  background-color: rgba(244, 67, 54, 0.1) !important;
-}
-
-.mint-card-content {
-  width: 100%;
-}
-
 .state-indicator {
   display: flex;
   align-items: center;
@@ -1229,10 +1149,6 @@ export default defineComponent({
   .multinut-content-container {
     padding: 12px;
     padding-bottom: 100px;
-  }
-
-  .mint-card-content {
-    padding: 12px;
   }
 }
 

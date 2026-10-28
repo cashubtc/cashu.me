@@ -309,6 +309,7 @@ export default {
         description: "npub.cash'ten alınan bir adresle ödeme alın",
       },
       address: {
+        label: "Adresin",
         copy_tooltip: "Lightning adresini kopyala",
       },
       show_on_receive: {
@@ -1823,6 +1824,7 @@ export default {
     },
   },
   CreateInvoiceDialog: {
+    format_label: "İstek türü",
     formats: {
       bolt11: "Fatura",
       bolt12: "Teklif",

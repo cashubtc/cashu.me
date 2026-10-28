@@ -1,79 +1,27 @@
 <template>
-  <q-dialog
+  <ConfirmDialog
     v-model="showRemoveMintDialogLocal"
-    transition-show="fade"
-    transition-hide="fade"
-  >
-    <q-card class="council-dialog remove-mint-dialog">
-      <div class="council-dialog__title">
-        {{ $t("RemoveMintDialog.title") }}
-      </div>
-      <q-list class="council-dialog__summary">
-        <q-item v-if="mintToRemove.nickname">
-          <q-item-section>
-            <q-item-label caption>{{
-              $t("RemoveMintDialog.nickname.label")
-            }}</q-item-label>
-            <q-item-label>{{ mintToRemove.nickname }}</q-item-label>
-          </q-item-section>
-        </q-item>
-        <q-item>
-          <q-item-section>
-            <q-item-label caption>{{
-              $t("RemoveMintDialog.inputs.mint_url.label")
-            }}</q-item-label>
-            <q-item-label class="ellipsis">{{
-              mintToRemove.url.replace(/^https?:\/\//, "")
-            }}</q-item-label>
-          </q-item-section>
-        </q-item>
-        <q-item>
-          <q-item-section>
-            <q-item-label caption>{{
-              $t("RemoveMintDialog.balances.label")
-            }}</q-item-label>
-            <q-item-label>{{
-              mintClass(mintToRemove)
-                .units.map((unit) =>
-                  formatCurrency(
-                    mintClass(mintToRemove).unitBalance(unit),
-                    unit
-                  )
-                )
-                .join(" + ")
-            }}</q-item-label>
-          </q-item-section>
-        </q-item>
-      </q-list>
-      <p class="council-dialog__note">
-        {{ $t("RemoveMintDialog.warning_text") }}
-      </p>
-      <div class="council-dialog__actions">
-        <q-btn flat rounded no-caps class="col" v-close-popup>
-          {{ $t("RemoveMintDialog.actions.cancel.label") }}
-        </q-btn>
-        <q-btn
-          unelevated
-          rounded
-          no-caps
-          class="col remove-btn app-btn-danger"
-          @click="removeMintLocal"
-          v-close-popup
-        >
-          {{ $t("RemoveMintDialog.actions.confirm.label") }}
-        </q-btn>
-      </div>
-    </q-card>
-  </q-dialog>
+    class="remove-mint-dialog"
+    danger
+    :title="$t('RemoveMintDialog.title')"
+    :summary="summary"
+    :note="$t('RemoveMintDialog.warning_text')"
+    :cancel-label="$t('RemoveMintDialog.actions.cancel.label')"
+    :confirm-label="$t('RemoveMintDialog.actions.confirm.label')"
+    @confirm="removeMintLocal"
+  />
 </template>
 
 <script lang="ts">
 import { defineComponent, computed } from "vue";
 import { MintClass } from "src/stores/mints";
 import { useMintsStore } from "src/stores/mints";
+import { i18n } from "src/boot/i18n";
+import ConfirmDialog from "src/components/ui/ConfirmDialog.vue";
 
 export default defineComponent({
   name: "RemoveMintDialog",
+  components: { ConfirmDialog },
   props: {
     mintToRemove: {
       type: Object,
@@ -113,7 +61,35 @@ export default defineComponent({
       );
     };
 
+    // What is being removed: its nickname (when it has one), host and holdings.
+    const summary = computed(() => {
+      const t = i18n.global.t;
+      const mint = props.mintToRemove as any;
+      const rows = [];
+      if (!mint?.url) return rows;
+      if (mint.nickname) {
+        rows.push({
+          label: t("RemoveMintDialog.nickname.label"),
+          value: mint.nickname,
+        });
+      }
+      rows.push({
+        label: t("RemoveMintDialog.inputs.mint_url.label"),
+        value: String(mint.url).replace(/^https?:\/\//, ""),
+      });
+      rows.push({
+        label: t("RemoveMintDialog.balances.label"),
+        value: mintClass(mint)
+          .units.map((unit) =>
+            formatCurrency(mintClass(mint).unitBalance(unit), unit)
+          )
+          .join(" + "),
+      });
+      return rows;
+    });
+
     return {
+      summary,
       removeMintLocal,
       showRemoveMintDialogLocal,
       mintClass,
@@ -122,7 +98,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style scoped>
-/* The destructive action is the filled pill; Cancel stays the quiet one. */
-</style>

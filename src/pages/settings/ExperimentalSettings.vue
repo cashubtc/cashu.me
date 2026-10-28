@@ -35,8 +35,6 @@
               color="primary"
               class="url-input"
               outlined
-              dense
-              rounded
             >
               <template v-slot:append>
                 <CopyButton :value="auditorUrl" />
@@ -52,8 +50,6 @@
               color="primary"
               class="url-input"
               outlined
-              dense
-              rounded
             >
               <template v-slot:append>
                 <CopyButton :value="auditorApiUrl" />

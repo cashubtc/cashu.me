@@ -56,6 +56,20 @@ describe("design system board", () => {
     ).toEqual([]);
   });
 
+  // The sample is the component itself, never a copy of its markup.
+  it("renders each component entry with that component", () => {
+    const blocks = Object.fromEntries(
+      [...board.matchAll(/<DsEntry\s+id="([^"]+)"[\s\S]*?<\/DsEntry>/g)].map(
+        (m) => [m[1], m[0]]
+      )
+    );
+    expect(
+      DS_ITEMS.filter((i) => i.usage?.tag)
+        .filter((i) => !blocks[i.id]?.includes(`<${i.usage?.tag}`))
+        .map((i) => i.id)
+    ).toEqual([]);
+  });
+
   it("has unique ids", () => {
     const ids = DS_ITEMS.map((i) => i.id);
     expect(new Set(ids).size).toBe(ids.length);

@@ -4,38 +4,15 @@
       <div class="wallet-hero q-gutter-y-md">
         <NoMintWarnBanner v-if="mints.length == 0" />
         <BalanceView v-else :set-tab="setTab" />
-        <div class="wallet-actions q-pt-lg q-pb-md">
-          <q-btn
-            unelevated
-            rounded
-            data-testid="wallet-receive"
-            class="wallet-action-btn"
-            color="primary"
-            :label="$t('WalletPage.actions.receive.label')"
-            @click="showReceiveDialog = true"
-          />
-          <q-btn
-            flat
-            dense
-            round
-            class="wallet-scan-btn"
-            :aria-label="$t('global.actions.scan.label')"
-            @click="showCamera"
-          >
-            <ScanIcon :size="26" />
-          </q-btn>
-          <q-btn
-            unelevated
-            rounded
-            data-testid="wallet-send"
-            class="wallet-action-btn"
-            color="primary"
-            :label="$t('WalletPage.actions.send.label')"
-            @click="showSendDialog = true"
-          />
+        <WalletActions
+          class="q-pt-lg q-pb-md"
+          @receive="showReceiveDialog = true"
+          @scan="showCamera"
+          @send="showSendDialog = true"
+        >
           <ReceiveDialog v-model="showReceiveDialog" />
           <SendDialog v-model="showSendDialog" />
-        </div>
+        </WalletActions>
       </div>
       <!-- ///////////////////////////////////////////
       ////////////////// TABLES /////////////////
@@ -78,14 +55,7 @@
           <!-- ////////////////// UNIFIED HISTORY LIST ///////////////// -->
 
           <q-tab-panel name="history">
-            <HistoryTable v-if="historyHydrated" />
-            <q-skeleton
-              v-else
-              type="rect"
-              height="260px"
-              class="q-mx-auto"
-              style="max-width: 500px"
-            />
+            <HistoryTable :skeleton="!historyHydrated" />
           </q-tab-panel>
 
           <!-- ////////////////////// SETTINGS ////////////////// -->
@@ -258,7 +228,7 @@ import { useWelcomeStore } from "../stores/welcome";
 import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import { notifyError, notify } from "../js/notify";
 
-import { Scan as ScanIcon } from "lucide-vue-next";
+import WalletActions from "src/components/WalletActions.vue";
 
 import { useMigrationsStore } from "src/stores/migrations";
 
@@ -282,7 +252,7 @@ export default {
     SendDialog,
     ReceiveDialog,
     PwaPrompt,
-    ScanIcon,
+    WalletActions,
   },
   data: function () {
     return {

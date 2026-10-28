@@ -10,9 +10,9 @@
   >
     <div class="welcome-slide__content">
       <div class="welcome-slide__icon">
-        <div class="app-icon-circle app-icon-circle--xl">
+        <IconCircle size="xl">
           <component :is="icon" :size="36" :stroke-width="1.75" />
-        </div>
+        </IconCircle>
       </div>
 
       <h1 class="welcome-slide__title">{{ title }}</h1>
@@ -27,10 +27,12 @@
 </template>
 
 <script lang="ts">
+import IconCircle from "src/components/ui/IconCircle.vue";
 import { defineComponent, type Component, type PropType } from "vue";
 
 export default defineComponent({
   name: "WelcomeSlideScaffold",
+  components: { IconCircle },
   props: {
     /** A lucide icon component for the header circle (outline, like every other icon). */
     icon: {

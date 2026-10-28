@@ -126,7 +126,7 @@
                                   )
                                 : ""
                             }}
-                            <q-spinner class="q-mb-sm" />
+                            <PendingDots class="q-mb-sm" />
                           </div>
                         </div>
                       </div>
@@ -289,7 +289,7 @@
                                 "PayInvoiceDialog.invoice.processing_info_text"
                               )
                             }}
-                            <q-spinner />
+                            <PendingDots />
                           </div>
                         </div>
                       </div>
@@ -559,7 +559,7 @@
                   :loading="waitingForWallet || paymentInProgress"
                 >
                   <template v-slot:loading>
-                    <q-spinner-dots size="20px" class="on-left" />
+                    <PendingDots class="on-left" />
                     <span>{{ paymentButtonLabel }}</span>
                   </template>
                 </q-btn>
@@ -622,7 +622,7 @@
               >
                 {{ $t("PayInvoiceDialog.quote.label") }}
                 <template v-slot:loading>
-                  <q-spinner-dots size="20px" class="on-left" />
+                  <PendingDots class="on-left" />
                   {{ $t("PayInvoiceDialog.quote.label") }}</template
                 >
               </q-btn>
@@ -673,7 +673,7 @@
                     : $t("PayInvoiceDialog.lnurlpay.actions.send.label")
                 }}
                 <template v-slot:loading>
-                  <q-spinner-dots size="20px" class="on-left" />
+                  <PendingDots class="on-left" />
                   {{
                     payInvoiceData.blocking
                       ? $t("PayInvoiceDialog.lnurlpay.actions.send.in_progress")
@@ -713,7 +713,7 @@
                     : $t("PayInvoiceDialog.lnurlpay.actions.send.label")
                 }}
                 <template v-slot:loading>
-                  <q-spinner-dots size="20px" class="on-left" />
+                  <PendingDots class="on-left" />
                   {{
                     payInvoiceData.blocking
                       ? $t("PayInvoiceDialog.lnurlpay.actions.send.in_progress")
@@ -735,6 +735,7 @@
   />
 </template>
 <script lang="ts">
+import PendingDots from "src/components/ui/PendingDots.vue";
 import { CircleCheck as CircleCheckIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { useWalletStore } from "src/stores/wallet";
@@ -764,6 +765,7 @@ export default defineComponent({
   name: "PayInvoiceDialog",
   mixins: [windowMixin],
   components: {
+    PendingDots,
     CircleCheckIcon,
     ChooseMint,
     MultinutPaymentDialog,

@@ -15,12 +15,7 @@
           enter-active-class="animated pulse"
           leave-active-class="animated fadeOut"
         >
-          <q-spinner
-            v-if="globalMutexLock"
-            class="balance-lock-spinner"
-            size="sm"
-            color="primary"
-          />
+          <PendingDots v-if="globalMutexLock" class="balance-lock-spinner" />
         </transition>
         <!-- Names the hero figure, so it reads apart from the selected mint's own balance. -->
         <div class="balance-total-label">
@@ -133,6 +128,7 @@
   </q-card> -->
 </template>
 <script lang="ts">
+import PendingDots from "src/components/ui/PendingDots.vue";
 import { CircleAlert as CircleAlertIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapState, mapWritableState, mapActions } from "pinia";
@@ -150,7 +146,7 @@ import { useProofsStore } from "src/stores/proofs";
 export default defineComponent({
   name: "BalanceView",
   mixins: [windowMixin],
-  components: { CircleAlertIcon, AnimatedNumber, ChooseMint },
+  components: { PendingDots, CircleAlertIcon, AnimatedNumber, ChooseMint },
   props: {
     setTab: Function,
   },

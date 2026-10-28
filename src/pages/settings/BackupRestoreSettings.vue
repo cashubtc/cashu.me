@@ -11,7 +11,6 @@
       <q-item class="settings-control-item">
         <q-item-section>
           <q-input
-            borderless
             readonly
             v-model="hiddenMnemonic"
             :label="$t('Settings.backup_restore.backup_seed.seed_phrase_label')"

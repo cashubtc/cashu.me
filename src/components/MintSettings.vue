@@ -14,95 +14,73 @@
         <!-- <q-item-label header>Your mints</q-item-label> -->
         <!-- MINT CARDS -->
         <div v-for="mint in mints" :key="mint.url">
-          <q-item
+          <MintCard
             data-testid="mint-card"
-            :active="mint.url == activeMintUrl"
-            active-class="mint-card--active"
             clickable
+            class="q-mb-md cursor-pointer"
+            :active="mint.url == activeMintUrl"
+            :busy="mint.url == activatingMintUrl"
+            :icon-url="getMintIconUrl(mint)"
+            :name="mint.nickname || mint.info?.name"
+            :url="mint.url"
+            :balances="
+              visibleUnits(mint).map((unit) =>
+                formatCurrency(mintClass(mint).unitBalance(unit), unit)
+              )
+            "
             @click="activateMintUrlInternal(mint.url)"
-            class="mint-card q-mb-md cursor-pointer"
-            style="position: relative"
-            :loading="mint.url == activatingMintUrl"
           >
-            <transition
-              appear
-              enter-active-class="animated fadeIn"
-              leave-active-class="animated fadeOut"
-              name="fade"
-            >
-              <div
-                v-if="mint.url != activatingMintUrl && mint.errored"
-                class="error-badge"
+            <template #overlay>
+              <transition
+                appear
+                enter-active-class="animated fadeIn"
+                leave-active-class="animated fadeOut"
+                name="fade"
               >
-                <span class="app-badge app-badge--danger q-mt-sm">
-                  <CircleAlertIcon :size="14" aria-hidden="true" />
-                  {{ $t("MintSettings.error_badge") }}
-                </span>
-              </div>
-            </transition>
-
-            <!-- One 16px inset: the identity row with its trailing actions centred on it, then
-                 the holdings and the rating on the same left and right edges (R41 card pass). -->
-            <div class="mint-card__body">
-              <div class="mint-card__head">
-                <MintInfoContainer
-                  class="col"
-                  :iconUrl="getMintIconUrl(mint)"
-                  :name="mint.nickname || mint.info?.name"
-                  :url="mint.url"
-                />
-                <!-- The active-mint slot: a spinner while switching, then the check. -->
-                <q-spinner
-                  v-if="mint.url == activatingMintUrl"
-                  size="18px"
-                  class="mint-card__status"
-                />
-                <span
-                  v-else-if="mint.url == activeMintUrl"
-                  class="app-badge app-badge--solid mint-card__status"
-                  >{{ $t("MintSettings.active_badge") }}</span
+                <div
+                  v-if="mint.url != activatingMintUrl && mint.errored"
+                  class="error-badge"
                 >
-                <q-btn
-                  flat
-                  round
-                  dense
-                  data-testid="mint-details"
-                  class="mint-card-more"
-                  :aria-label="$t('MintDetailsDialog.details.title')"
-                  @click.stop="showMintInfo(mint)"
-                >
-                  <EllipsisIcon :size="20" />
-                </q-btn>
-              </div>
-
-              <div class="mint-card__foot">
-                <div class="mint-card__balances">
-                  <template v-for="(unit, i) in visibleUnits(mint)" :key="unit">
-                    <!-- Several unit balances read as separate holdings, not a conversion. -->
-                    <span
-                      v-if="i > 0"
-                      class="mint-card__plus"
-                      aria-hidden="true"
-                      >·</span
-                    >
-                    <bdi dir="ltr" class="currency-unit-text">{{
-                      formatCurrency(mintClass(mint).unitBalance(unit), unit)
-                    }}</bdi>
-                  </template>
+                  <AppBadge tone="danger" class="q-mt-sm">
+                    <CircleAlertIcon :size="14" aria-hidden="true" />
+                    {{ $t("MintSettings.error_badge") }}
+                  </AppBadge>
                 </div>
-                <!-- The card only knows a score from a Nostr discovery scan; reviews load on
-                     the ratings page, so without a score it links there instead of claiming
-                     none (R54: "No reviews yet" sat beside a mint rated 4.7). -->
-                <MintReviewSummary
-                  v-if="!isMintExcludedFromReviews(mint.url)"
-                  :average="getRecommendation(mint.url)?.averageRating ?? null"
-                  :count="getRecommendation(mint.url)?.reviewsCount ?? 0"
-                  :fallback-label="$t('MintSettings.see_reviews')"
-                  @open="openReviews(mint.url, mint)"
-                />
-              </div>
-            </div>
-          </q-item>
+              </transition>
+            </template>
+            <template #status>
+              <AppBadge
+                v-if="mint.url == activeMintUrl"
+                class="mint-card__status"
+                >{{ $t("MintSettings.active_badge") }}</AppBadge
+              >
+            </template>
+            <template #action>
+              <q-btn
+                flat
+                round
+                dense
+                data-testid="mint-details"
+                class="mint-card-more"
+                :aria-label="$t('MintDetailsDialog.details.title')"
+                @click.stop="showMintInfo(mint)"
+              >
+                <EllipsisIcon :size="20" />
+              </q-btn>
+            </template>
+            <!-- The card only knows a score from a Nostr discovery scan; reviews load on
+                 the ratings page, so without a score it links there instead of claiming
+                 none (R54: "No reviews yet" sat beside a mint rated 4.7). -->
+            <template #meta>
+              <MintReviewSummary
+                v-if="!isMintExcludedFromReviews(mint.url)"
+                :average="getRecommendation(mint.url)?.averageRating ?? null"
+                :count="getRecommendation(mint.url)?.reviewsCount ?? 0"
+                :fallback-label="$t('MintSettings.see_reviews')"
+                @open="openReviews(mint.url, mint)"
+              />
+            </template>
+          </MintCard>
         </div>
       </q-list>
 
@@ -136,7 +114,6 @@
 
         <div class="add-mint-inputs">
           <q-input
-            rounded
             outlined
             data-testid="add-mint-url"
             v-model="addMintData.url"
@@ -159,7 +136,6 @@
           </q-input>
 
           <q-input
-            rounded
             outlined
             data-testid="add-mint-nickname"
             v-model="addMintData.nickname"
@@ -214,7 +190,6 @@
       <div class="row no-wrap items-center" style="gap: 8px">
         <q-input
           class="col"
-          rounded
           outlined
           v-model.number="swapData.amount"
           type="number"
@@ -248,7 +223,7 @@
         >
           {{ $t("MintSettings.swap.actions.swap.label") }}
           <template v-slot:loading>
-            <q-spinner-dots size="20px" class="on-left" />
+            <PendingDots class="on-left" />
             {{ $t("MintSettings.swap.actions.swap.in_progress") }}
           </template>
         </q-btn>
@@ -257,6 +232,9 @@
   </div>
 </template>
 <script lang="ts">
+import MintCard from "src/components/MintCard.vue";
+import PendingDots from "src/components/ui/PendingDots.vue";
+import AppBadge from "src/components/ui/AppBadge.vue";
 import {
   CircleAlert as CircleAlertIcon,
   Ellipsis as EllipsisIcon,
@@ -283,7 +261,6 @@ import { EventBus } from "../js/eventBus";
 import AddMintDialog from "src/components/AddMintDialog.vue";
 import ChooseMint from "src/components/ChooseMint.vue";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
-import MintInfoContainer from "./MintInfoContainer.vue";
 import MintReviewSummary from "src/components/MintReviewSummary.vue";
 import SectionDivider from "src/components/ui/SectionDivider.vue";
 
@@ -297,6 +274,9 @@ export default defineComponent({
   name: "MintSettings",
   mixins: [windowMixin],
   components: {
+    MintCard,
+    PendingDots,
+    AppBadge,
     EllipsisIcon,
     CircleAlertIcon,
     PlusIcon,
@@ -304,7 +284,6 @@ export default defineComponent({
     SearchIcon,
     AddMintDialog,
     ChooseMint,
-    MintInfoContainer,
     MintReviewSummary,
     SectionDivider,
   },

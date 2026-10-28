@@ -300,6 +300,7 @@ export default {
         description: "npub.cash のアドレスで支払いを受け取る",
       },
       address: {
+        label: "あなたのアドレス",
         copy_tooltip: "Lightningアドレスをコピー",
       },
       show_on_receive: {
@@ -1811,6 +1812,7 @@ export default {
     },
   },
   CreateInvoiceDialog: {
+    format_label: "リクエストの種類",
     formats: {
       bolt11: "インボイス",
       bolt12: "オファー",

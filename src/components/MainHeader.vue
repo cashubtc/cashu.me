@@ -1,60 +1,56 @@
 <template>
   <q-header class="bg-transparent">
     <q-toolbar class="app-toolbar">
-      <q-btn
-        flat
-        dense
-        round
-        class="app-icon-btn"
-        :aria-label="$t('common.settings')"
+      <IconButton
+        :label="$t('common.settings')"
         @click="goToSettings"
         :disable="uiStore.globalMutexLock"
       >
-        <MenuIcon :size="22" />
-      </q-btn>
+        <MenuIcon :size="24" />
+      </IconButton>
       <q-toolbar-title></q-toolbar-title>
       <transition
         appear
         enter-active-class="animated fadeIn"
         leave-active-class="animated fadeOut"
       >
-        <span v-if="g.offline" class="app-badge app-badge--danger q-mr-sm">
+        <AppBadge v-if="g.offline" tone="danger" class="q-mr-sm">
           <span>{{ $t("MainHeader.offline.warning.text") }}</span>
-        </span>
+        </AppBadge>
       </transition>
-      <span v-if="isStaging()" class="app-badge app-badge--warning q-mr-sm">
+      <AppBadge v-if="isStaging()" tone="warning" class="q-mr-sm">
         <span>{{ $t("MainHeader.staging.warning.text") }}</span>
-      </span>
+      </AppBadge>
       <transition-group appear enter-active-class="animated pulse">
-        <button
+        <AppBadge
           v-if="countdown > 0"
           key="reload"
-          type="button"
-          class="app-badge app-badge--danger q-mr-sm"
+          tag="button"
+          tone="danger"
+          class="q-mr-sm"
           @click="reload"
         >
           {{ $t("MainHeader.reload.warning.text", { countdown }) }}
-          <q-spinner size="12px" :thickness="6" />
-        </button>
+          <PendingDots size="14px" />
+        </AppBadge>
       </transition-group>
-      <q-btn
-        flat
-        dense
-        round
-        class="app-icon-btn"
+      <IconButton
         :class="countdown > 0 ? 'text-negative' : ''"
-        :aria-label="$t('common.refresh')"
+        :label="$t('common.refresh')"
         @click="reload"
         :disable="uiStore.globalMutexLock && countdown === 0"
       >
         <XIcon v-if="countdown > 0" :size="20" />
         <RefreshCwIcon v-else :size="20" />
-      </q-btn>
+      </IconButton>
     </q-toolbar>
   </q-header>
 </template>
 
 <script lang="ts">
+import IconButton from "src/components/ui/IconButton.vue";
+import AppBadge from "src/components/ui/AppBadge.vue";
+import PendingDots from "src/components/ui/PendingDots.vue";
 import { defineComponent, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useUiStore } from "src/stores/ui";
@@ -67,7 +63,14 @@ import {
 export default defineComponent({
   name: "MainHeader",
   mixins: [windowMixin],
-  components: { MenuIcon, RefreshCwIcon, XIcon },
+  components: {
+    PendingDots,
+    IconButton,
+    AppBadge,
+    MenuIcon,
+    RefreshCwIcon,
+    XIcon,
+  },
   setup() {
     const uiStore = useUiStore();
     const router = useRouter();

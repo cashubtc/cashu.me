@@ -18,7 +18,7 @@
               : $t("ReceiveTokenDialog.actions.swap.processing")
           }}
         </span>
-        <q-spinner v-if="swapProcessing" color="primary" size="20px" />
+        <PendingDots v-if="swapProcessing" />
         <q-btn
           v-if="swapError"
           flat
@@ -118,6 +118,7 @@
 </template>
 
 <script lang="ts">
+import PendingDots from "src/components/ui/PendingDots.vue";
 import { defineComponent, PropType } from "vue";
 import ChooseMint from "src/components/ChooseMint.vue";
 import {
@@ -130,7 +131,14 @@ import { useMintsStore } from "stores/mints";
 
 export default defineComponent({
   name: "SwapIncomingTokenToKnownMint",
-  components: { XIcon, LandmarkIcon, ChooseMint, ArrowDownIcon, AppCallout },
+  components: {
+    PendingDots,
+    XIcon,
+    LandmarkIcon,
+    ChooseMint,
+    ArrowDownIcon,
+    AppCallout,
+  },
   props: {
     swapProcessing: {
       type: Boolean,

@@ -1,8 +1,12 @@
 <template>
   <div class="history-table">
+    <!-- Loading: the rows themselves as skeletons, so the list doesn't move when it fills. -->
+    <q-list v-if="skeleton" aria-hidden="true">
+      <ActivityRow v-for="n in 5" :key="n" skeleton />
+    </q-list>
     <!-- A wallet with no history at all gets the shared empty state, with nothing to filter. -->
     <EmptyState
-      v-if="unifiedTransactions.length === 0"
+      v-else-if="unifiedTransactions.length === 0"
       :icon="HistoryIcon"
       :boxed="false"
       :title="$t('HistoryTable.empty_text')"
@@ -174,6 +178,10 @@ import { mintQuoteForHistoryInvoice } from "src/js/invoice-history";
 
 export default defineComponent({
   name: "HistoryTable",
+  props: {
+    /** Show placeholder rows while the history is being read. */
+    skeleton: { type: Boolean, default: false },
+  },
   components: {
     CircleArrowDownIcon,
     RefreshCwIcon,
@@ -185,7 +193,6 @@ export default defineComponent({
     return { HistoryIcon: markRaw(HistoryIcon) };
   },
   mixins: [windowMixin],
-  props: {},
   data: function () {
     return {
       currentPage: 1,

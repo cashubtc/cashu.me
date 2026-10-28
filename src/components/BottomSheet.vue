@@ -11,28 +11,24 @@
     <q-card class="bottom-sheet" :class="{ 'bottom-sheet--dark': dark }">
       <!-- Header -->
       <div v-if="title" class="bottom-sheet-header">
-        <q-btn
+        <IconButton
           v-if="back"
-          flat
-          round
-          color="primary"
-          class="bottom-sheet-close floating-close-btn app-icon-btn"
-          :aria-label="back"
+          :label="back"
           @click="$emit('back')"
+          floating
+          class="bottom-sheet-close"
         >
           <ChevronLeftIcon />
-        </q-btn>
-        <q-btn
+        </IconButton>
+        <IconButton
           v-else
-          flat
-          round
-          color="primary"
-          class="bottom-sheet-close floating-close-btn app-icon-btn"
-          :aria-label="$t('global.actions.close.label')"
-          v-close-popup
+          :label="$t('global.actions.close.label')"
+          close-popup
+          floating
+          class="bottom-sheet-close"
         >
           <XIcon />
-        </q-btn>
+        </IconButton>
         <h4 class="bottom-sheet-title sheet-title q-my-none">{{ title }}</h4>
         <div v-if="$slots.trailing" class="bottom-sheet-trailing">
           <slot name="trailing" />
@@ -53,6 +49,7 @@
 </template>
 
 <script lang="ts">
+import IconButton from "src/components/ui/IconButton.vue";
 import { defineComponent } from "vue";
 import { QDialog } from "quasar";
 import { mapState } from "pinia";
@@ -71,7 +68,7 @@ import { useUiStore } from "src/stores/ui";
  */
 export default defineComponent({
   name: "BottomSheet",
-  components: { ChevronLeftIcon, XIcon },
+  components: { IconButton, ChevronLeftIcon, XIcon },
   props: {
     // Onboarding is designed dark in every mode; its sheets follow it.
     dark: {

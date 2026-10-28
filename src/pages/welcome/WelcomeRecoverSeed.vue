@@ -14,7 +14,6 @@
             :model-value="words[index - 1]"
             @update:model-value="updateWord($event, index - 1)"
             outlined
-            dense
             :ref="(el) => setInputRef(el, index - 1)"
             @paste="handlePaste($event, index - 1)"
             class="word-input"

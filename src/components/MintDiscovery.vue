@@ -35,7 +35,7 @@
               $t("MintSettings.discover.actions.discover.label")
             }}</span>
             <template v-slot:loading
-              ><q-spinner-dots size="20px" class="on-left" />{{
+              ><PendingDots class="on-left" />{{
                 $t("MintSettings.discover.actions.discover.label")
               }}</template
             >
@@ -53,8 +53,9 @@
       <q-list padding aria-hidden="true">
         <q-item class="q-px-none">
           <q-item-section>
+            <!-- The heading says what is happening instead of a placeholder bar. -->
             <q-item-label class="discover-count">
-              <q-skeleton type="text" width="30%" />
+              {{ $t("MintSettings.discover.actions.discover.in_progress") }}
             </q-item-label>
             <q-item-label caption>
               {{ $t("MintSettings.discover.recommendations.caption") }}
@@ -66,16 +67,14 @@
             </div>
           </q-item-section>
         </q-item>
+        <!-- The loaded card itself in its skeleton form, in the same wrappers, so nothing
+             moves as results arrive. -->
+        <div class="q-pt-sm">
+          <div v-for="n in 5" :key="n" class="q-mb-md">
+            <MintCard skeleton />
+          </div>
+        </div>
       </q-list>
-      <div
-        class="discover-skeleton__row"
-        v-for="n in 5"
-        :key="n"
-        aria-hidden="true"
-      >
-        <!-- The loaded card's 34px avatar, so the text column doesn't move. -->
-        <SkeletonRow avatar="34px" :lines="['55%', '35%', '25%']" class="col" />
-      </div>
       <div class="discover-skeleton__label visually-hidden" role="status">
         {{ $t("MintSettings.discover.actions.discover.in_progress") }}
       </div>
@@ -122,45 +121,37 @@
           >
             <!-- The installed mints' card (user direction, R46): identity row with its action
                  on the right, then the rating on the card's right edge. -->
-            <q-item class="mint-card">
-              <div class="mint-card__body">
-                <div class="mint-card__head">
-                  <MintInfoContainer
-                    class="col"
-                    :iconUrl="getMintIconUrlUrl(rec.url) || undefined"
-                    :name="getMintDisplayName(rec.url)"
-                    :url="rec.url"
-                    :loading="isFetchingMintInfo(rec.url)"
-                    :unnamed-label="$t('MintSettings.discover.unnamed')"
-                  />
-                  <q-spinner
-                    v-if="isFetchingMintInfo(rec.url)"
-                    size="18px"
-                    class="mint-card__status"
-                  />
-                  <q-btn
-                    v-else
-                    flat
-                    round
-                    dense
-                    class="mint-card-more"
-                    :aria-label="$t('global.actions.add_mint.label')"
-                    :disable="isExistingMint(rec.url)"
-                    @click="addDiscovered(rec.url)"
-                  >
-                    <PlusIcon :size="22" />
-                  </q-btn>
-                </div>
-                <div class="mint-card__foot mint-card__foot--meta">
-                  <MintReviewSummary
-                    :average="countFor(rec.url) > 0 ? avgFor(rec.url) : null"
-                    :count="countFor(rec.url)"
-                    :fallback-label="$t('MintSettings.no_reviews_yet')"
-                    @open="openReviews(rec.url)"
-                  />
-                </div>
-              </div>
-            </q-item>
+            <MintCard
+              :icon-url="getMintIconUrlUrl(rec.url) || undefined"
+              :name="getMintDisplayName(rec.url)"
+              :url="rec.url"
+              :loading="isFetchingMintInfo(rec.url)"
+              :busy="isFetchingMintInfo(rec.url)"
+              :unnamed-label="$t('MintSettings.discover.unnamed')"
+            >
+              <template #action>
+                <q-btn
+                  v-if="!isFetchingMintInfo(rec.url)"
+                  flat
+                  round
+                  dense
+                  class="mint-card-more"
+                  :aria-label="$t('global.actions.add_mint.label')"
+                  :disable="isExistingMint(rec.url)"
+                  @click="addDiscovered(rec.url)"
+                >
+                  <PlusIcon :size="20" />
+                </q-btn>
+              </template>
+              <template #meta>
+                <MintReviewSummary
+                  :average="countFor(rec.url) > 0 ? avgFor(rec.url) : null"
+                  :count="countFor(rec.url)"
+                  :fallback-label="$t('MintSettings.no_reviews_yet')"
+                  @open="openReviews(rec.url)"
+                />
+              </template>
+            </MintCard>
           </div>
         </TransitionGroup>
       </q-list>
@@ -169,13 +160,13 @@
 </template>
 
 <script lang="ts">
+import MintCard from "src/components/MintCard.vue";
+import PendingDots from "src/components/ui/PendingDots.vue";
 import { defineComponent, ref, computed, watch, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import SkeletonRow from "src/components/SkeletonRow.vue";
 import EmptyState from "src/components/ui/EmptyState.vue";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
 import { useMintsStore, MintClass } from "src/stores/mints";
-import MintInfoContainer from "./MintInfoContainer.vue";
 import MintReviewSummary from "src/components/MintReviewSummary.vue";
 import {
   Compass as CompassIcon,
@@ -188,14 +179,14 @@ import { notifyError, notifySuccess } from "src/js/notify";
 export default defineComponent({
   name: "MintDiscovery",
   components: {
+    MintCard,
+    PendingDots,
     CompassIcon,
     SearchIcon,
     RefreshCwIcon,
     EmptyState,
-    MintInfoContainer,
     MintReviewSummary,
     PlusIcon,
-    SkeletonRow,
   },
   props: {
     infoTimeoutMs: { type: Number, default: 5000 },
@@ -362,16 +353,6 @@ export default defineComponent({
 }
 
 /* Skeleton rows match the loaded mint cards: same height, gap, radius and outline, no fill. */
-.discover-skeleton__row {
-  display: flex;
-  align-items: center;
-  min-height: 100px;
-  padding: 16px;
-  margin-bottom: 16px;
-  border-radius: var(--app-radius-lg);
-  background: var(--app-card-fill);
-  border: 1px solid var(--app-card-edge);
-}
 
 .discover-skeleton__label {
   font-size: 13px;

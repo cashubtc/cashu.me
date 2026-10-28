@@ -173,7 +173,7 @@
                   : $t("Settings.web_of_trust.crawl_wot")
               }}
               <template v-slot:loading
-                ><q-spinner-dots size="20px" class="on-left" />{{
+                ><PendingDots class="on-left" />{{
                   hasCrawlCheckpoint && !wotLoading
                     ? $t("Settings.web_of_trust.continue_crawl")
                     : signerType === "SEED"
@@ -230,6 +230,7 @@
 </template>
 
 <script lang="ts">
+import PendingDots from "src/components/ui/PendingDots.vue";
 import {
   Copy as CopyIcon,
   Plus as PlusIcon,
@@ -248,6 +249,7 @@ export default defineComponent({
   name: "NostrSettings",
   mixins: [windowMixin],
   components: {
+    PendingDots,
     SettingsRadioRow,
     CopyIcon,
     PlusIcon,

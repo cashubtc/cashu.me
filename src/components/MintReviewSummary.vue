@@ -2,7 +2,13 @@
      otherwise a fallback label. Styled by the global .mint-review rules in app.scss. -->
 <template>
   <div class="mint-review">
-    <button type="button" class="mint-review-link" @click.stop="$emit('open')">
+    <q-skeleton v-if="skeleton" type="text" width="112px" />
+    <button
+      v-else
+      type="button"
+      class="mint-review-link"
+      @click.stop="$emit('open')"
+    >
       <template v-if="average !== null">
         <StarIcon :size="14" fill="currentColor" class="rating-star" />
         <span class="mint-review__score">{{ average.toFixed(1) }}</span>
@@ -31,6 +37,8 @@ export default defineComponent({
   name: "MintReviewSummary",
   components: { ChevronRightIcon, StarIcon },
   props: {
+    /** A placeholder on the same line, while reviews load. */
+    skeleton: { type: Boolean, default: false },
     // The average rating, or null when no score is known (the fallback label shows).
     average: {
       type: Number as PropType<number | null>,
@@ -42,7 +50,7 @@ export default defineComponent({
     },
     fallbackLabel: {
       type: String,
-      required: true,
+      default: "",
     },
   },
   emits: ["open"],

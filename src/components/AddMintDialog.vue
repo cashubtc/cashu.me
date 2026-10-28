@@ -98,7 +98,7 @@
       >
         {{ $t("AddMintDialog.actions.add_mint.label") }}
         <template v-slot:loading>
-          <q-spinner-dots size="20px" class="on-left" />
+          <PendingDots class="on-left" />
           <span>{{ $t("AddMintDialog.actions.add_mint.in_progress") }}</span>
         </template>
       </q-btn>
@@ -107,6 +107,7 @@
 </template>
 
 <script lang="ts">
+import PendingDots from "src/components/ui/PendingDots.vue";
 import { defineComponent, computed, ref, watch } from "vue";
 import { useMintsStore } from "src/stores/mints";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
@@ -124,6 +125,7 @@ import DetailRow from "src/components/ui/DetailRow.vue";
 export default defineComponent({
   name: "AddMintDialog",
   components: {
+    PendingDots,
     CircleCheckIcon,
     CircleAlertIcon,
     BottomSheet,

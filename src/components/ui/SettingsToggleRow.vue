@@ -5,7 +5,7 @@
     <q-item-section>
       <q-item-label v-if="badge" class="label-with-badge">
         {{ label }}
-        <span class="app-badge">{{ badge }}</span>
+        <AppBadge>{{ badge }}</AppBadge>
       </q-item-label>
       <q-item-label v-else>{{ label }}</q-item-label>
       <q-item-label v-if="caption" caption>{{ caption }}</q-item-label>
@@ -23,10 +23,12 @@
 </template>
 
 <script lang="ts">
+import AppBadge from "src/components/ui/AppBadge.vue";
 import { defineComponent, type PropType } from "vue";
 
 export default defineComponent({
   name: "SettingsToggleRow",
+  components: { AppBadge },
   props: {
     modelValue: {
       type: Boolean as PropType<boolean>,

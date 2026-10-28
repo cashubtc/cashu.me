@@ -445,18 +445,6 @@ body .q-skeleton--type-rect,
 body .q-skeleton--type-text {
   border-radius: var(--app-radius-sm);
 }
-.app-skeleton-row {
-  align-items: center;
-  display: flex;
-  gap: 16px;
-}
-.app-skeleton-row__lines {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 0;
-}
 
 // Amount entry layout (Receive Lightning, Send ecash, Pay): the amount area fills the space
 // above the keypad; an amount that is too large shakes once (not with reduced motion).
@@ -629,4 +617,14 @@ body.body--light .activity-row__avatar--in {
 .q-pagination .q-btn.bg-primary {
   background: var(--q-primary) !important;
   color: var(--app-on-primary) !important;
+}
+
+// An option row that only informs (OptionRow static): no pointer, no hover fill.
+.app-option-row:not([role]) {
+  cursor: default;
+}
+@media (hover: hover) {
+  .app-option-row:not([role]):hover {
+    background: var(--app-tint);
+  }
 }

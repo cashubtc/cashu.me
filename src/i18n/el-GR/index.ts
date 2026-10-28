@@ -304,6 +304,7 @@ export default {
         description: "Λάβετε πληρωμές σε διεύθυνση από το npub.cash",
       },
       address: {
+        label: "Η διεύθυνσή σας",
         copy_tooltip: "Αντιγραφή διεύθυνσης Lightning",
       },
       show_on_receive: {
@@ -1826,6 +1827,7 @@ export default {
     },
   },
   CreateInvoiceDialog: {
+    format_label: "Τύπος αιτήματος",
     formats: {
       bolt11: "Τιμολόγιο",
       bolt12: "Προσφορά",

@@ -321,6 +321,7 @@ export default {
         description: "Přijímejte platby na adresu od npub.cash",
       },
       address: {
+        label: "Vaše adresa",
         copy_tooltip: "Kopírovat Lightning adresu",
       },
       show_on_receive: {
@@ -1862,6 +1863,7 @@ export default {
     },
   },
   CreateInvoiceDialog: {
+    format_label: "Typ žádosti",
     formats: {
       bolt11: "Faktura",
       bolt12: "Nabídka",

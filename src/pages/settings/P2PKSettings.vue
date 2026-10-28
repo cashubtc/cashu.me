@@ -61,9 +61,9 @@
         </q-item-section>
         <q-item-section side>
           <div class="row items-center no-wrap q-gutter-sm">
-            <span v-if="key.used" class="app-badge">{{
+            <AppBadge v-if="key.used">{{
               $t("Settings.p2pk_features.keys_expansion.used_badge")
-            }}</span>
+            }}</AppBadge>
             <CopyButton :value="key.publicKey" :icon-size="18" />
             <q-btn
               flat
@@ -89,6 +89,7 @@
 </template>
 
 <script lang="ts">
+import AppBadge from "src/components/ui/AppBadge.vue";
 import { QrCode as QrCodeIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -103,6 +104,7 @@ export default defineComponent({
   name: "P2PKSettings",
   mixins: [windowMixin],
   components: {
+    AppBadge,
     QrCodeIcon,
     CopyButton,
     SettingsToggleRow,

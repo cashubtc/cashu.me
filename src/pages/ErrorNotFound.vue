@@ -1,24 +1,14 @@
 <template>
   <!-- Under the full-screen layout, so the back button sits in the shared header inside the
        page column; the body is the shared blocking state (AlreadyRunning uses it too). -->
-  <q-page class="blocking-state column flex-center text-center q-pa-md">
-    <div class="app-icon-circle app-icon-circle--lg blocking-state__icon">
-      <SearchXIcon :size="26" />
-    </div>
-    <div class="blocking-state__title q-mt-md">
-      {{ $t("ErrorNotFound.text") }}
-    </div>
-    <div class="blocking-state__text q-mt-sm">
-      {{ $t("ErrorNotFound.title") }}
-    </div>
-    <q-btn
-      rounded
-      unelevated
-      no-caps
-      color="primary"
-      class="blocking-state__action q-mt-lg"
+  <q-page class="column">
+    <BlockingState
+      class="col"
+      :icon="SearchXIcon"
+      :title="$t('ErrorNotFound.text')"
+      :text="$t('ErrorNotFound.title')"
+      :action="$t('ErrorNotFound.actions.home.label')"
       to="/"
-      :label="$t('ErrorNotFound.actions.home.label')"
     />
   </q-page>
 </template>
@@ -26,9 +16,13 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { SearchX as SearchXIcon } from "lucide-vue-next";
+import BlockingState from "src/components/ui/BlockingState.vue";
 
 export default defineComponent({
   name: "ErrorNotFound",
-  components: { SearchXIcon },
+  components: { BlockingState },
+  setup() {
+    return { SearchXIcon };
+  },
 });
 </script>

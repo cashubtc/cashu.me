@@ -18,7 +18,7 @@
             class="pwa-image"
           />
           <div v-if="isInstalling" class="installing-overlay">
-            <q-spinner color="primary" size="48px" />
+            <PendingDots size="48px" />
             <div class="installing-text">
               {{ $t("WelcomeSlide2.installing") }}
             </div>
@@ -136,6 +136,7 @@
 </template>
 
 <script lang="ts">
+import PendingDots from "src/components/ui/PendingDots.vue";
 import {
   CircleCheck as CircleCheckIcon,
   EllipsisVertical as EllipsisVerticalIcon,
@@ -148,6 +149,7 @@ import PwaPrompt from "src/components/PwaPrompt.vue";
 export default {
   name: "WelcomeSlide2",
   components: {
+    PendingDots,
     CircleCheckIcon,
     SquarePlusIcon,
     EllipsisVerticalIcon,

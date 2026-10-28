@@ -1,4 +1,5 @@
 <script lang="ts">
+import IconButton from "src/components/ui/IconButton.vue";
 import QrScanner, { type ScanResult } from "@agicash/qr-scanner";
 import { URDecoder } from "@gandlaf21/bc-ur";
 import zxingReaderWasmUrl from "zxing-wasm/reader/zxing_reader.wasm?url";
@@ -15,7 +16,7 @@ QrScanner.configureWasm({
 });
 
 export default {
-  components: { XIcon, ClipboardPasteIcon },
+  components: { IconButton, XIcon, ClipboardPasteIcon },
   emits: ["decode"],
   data(): {
     qrScanner: QrScanner | null;
@@ -101,15 +102,14 @@ export default {
     </div>
 
     <div class="row items-center sheet-column-header qr-scanner__header">
-      <q-btn
-        flat
-        round
-        class="floating-close-btn app-icon-btn qr-scanner__close"
-        :aria-label="$t('QrcodeReader.actions.close.label')"
+      <IconButton
+        :label="$t('QrcodeReader.actions.close.label')"
         @click="closeCamera"
+        floating
+        class="qr-scanner__close"
       >
         <XIcon :size="24" />
-      </q-btn>
+      </IconButton>
       <div class="col text-center dialog-header">
         {{ $t("ParseInputComponent.qr_scanner.title") }}
       </div>

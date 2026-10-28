@@ -535,45 +535,6 @@ body.body--light .q-toggle.disabled .q-toggle__inner--truthy .q-toggle__track {
   font-weight: 600;
 }
 
-/* Segmented control (council exploration XV1 winner "Primary sliding pill", 8.7/10): a quiet
-   pill track on the group fill with a 3px inset, and the chosen segment as a primary pill
-   whose radius is concentric with the track. Equal segments; the chosen label is semibold,
-   the others medium, so the choice never rests on the fill alone. Disabled keeps the choice
-   visible but locked: a hairline pill on the surface, dimmed label, no grey fill. */
-.invoice-type-toggle {
-  background: var(--app-group-fill);
-  border: 1px solid var(--app-group-edge);
-  border-radius: var(--app-radius-pill) !important;
-  gap: 0;
-  padding: 3px;
-  > .q-btn {
-    border-radius: var(--app-radius-pill) !important;
-    flex: 1 1 0;
-    min-width: 112px;
-  }
-  .q-btn {
-    font-size: 14px;
-    font-weight: 500;
-    min-height: 40px;
-    padding: 0 18px;
-    transition: background-color 0.2s ease, color 0.2s ease;
-  }
-  .q-btn.bg-primary {
-    font-weight: 600;
-  }
-  .q-btn.disabled.bg-primary,
-  .q-btn[disabled].bg-primary {
-    background: var(--app-surface) !important;
-    box-shadow: inset 0 0 0 1px var(--app-border-strong);
-    color: var(--app-text-muted) !important;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .invoice-type-toggle .q-btn {
-    transition: none;
-  }
-}
-
 /* Tab hover/pressed fills share the control radius instead of a hard rectangle. The fill
    inherits the tab's radius (Quasar's body.desktop rule), so round the tab itself. */
 .q-tab {

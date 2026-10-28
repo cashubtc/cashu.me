@@ -54,9 +54,10 @@
               v-if="!isOnchain && bolt11Supported && bolt12Supported"
               class="row justify-center q-mt-sm"
             >
-              <q-btn-toggle
+              <SegmentedControl
                 :model-value="isBolt12"
                 :disable="createInvoiceButtonBlocked"
+                :label="$t('CreateInvoiceDialog.format_label')"
                 @update:model-value="
                   (v) => v !== isBolt12 && toggleInvoiceType()
                 "
@@ -70,11 +71,6 @@
                     value: true,
                   },
                 ]"
-                rounded
-                unelevated
-                no-caps
-                toggle-color="primary"
-                class="invoice-type-toggle"
               />
             </div>
           </div>
@@ -110,7 +106,7 @@
                         <RefreshCwIcon :size="18" class="q-mr-sm" />
                         {{ $t("CreateInvoiceDialog.reconnect_mint") }}
                         <template v-slot:loading
-                          ><q-spinner-dots size="20px" class="on-left" />{{
+                          ><PendingDots class="on-left" />{{
                             $t("CreateInvoiceDialog.reconnect_mint")
                           }}</template
                         >
@@ -160,7 +156,7 @@
               key="checking-onchain"
               class="column items-center justify-center q-pa-xl q-my-auto"
             >
-              <q-spinner size="48px" color="primary" />
+              <PendingDots size="48px" />
               <div class="text-grey-6 q-mt-md">
                 {{ $t("CreateInvoiceDialog.checking_address") }}
               </div>
@@ -277,7 +273,7 @@
                 {{ createButtonLabel }}
                 <!-- A label beside the spinner, so the busy state reads even with reduced motion. -->
                 <template v-slot:loading>
-                  <q-spinner-dots size="20px" class="on-left" />
+                  <PendingDots class="on-left" />
                   {{ $t("InvoiceDetailDialog.actions.create.label_blocked") }}
                 </template>
               </q-btn>
@@ -289,6 +285,8 @@
   </q-dialog>
 </template>
 <script lang="ts">
+import SegmentedControl from "src/components/ui/SegmentedControl.vue";
+import PendingDots from "src/components/ui/PendingDots.vue";
 import {
   Check as CheckIcon,
   ChevronLeft as ChevronLeftIcon,
@@ -332,6 +330,8 @@ export default defineComponent({
   name: "CreateInvoiceDialog",
   mixins: [windowMixin],
   components: {
+    SegmentedControl,
+    PendingDots,
     RefreshCwIcon,
     CheckIcon,
     CopyIcon,

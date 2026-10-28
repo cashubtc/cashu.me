@@ -71,74 +71,61 @@
           <!-- The installed-mint card (user direction, R56): avatar, name and host on top
                with the selection box in the top corner, holdings and the restore action
                below on the same edges. -->
-          <q-item
+          <MintCard
             clickable
-            @click="toggleMintSelection(mint.url)"
-            class="mint-card cursor-pointer"
-            :class="{ 'mint-card--active': selectedMints.has(mint.url) }"
+            class="cursor-pointer"
+            :active="selectedMints.has(mint.url)"
             :disable="(onboarding ? false : !isMnemonicValid) || restoringState"
+            :icon-url="getMintIconUrl(mint)"
+            :name="mint.nickname || mint.info?.name"
+            :url="mint.url"
+            :balances="
+              heldUnits(mint).map((unit) =>
+                formatCurrency(mintClass(mint).unitBalance(unit), unit)
+              )
+            "
+            @click="toggleMintSelection(mint.url)"
           >
-            <div class="mint-card__body">
-              <div class="mint-card__head">
-                <MintInfoContainer
-                  class="col"
-                  :iconUrl="getMintIconUrl(mint)"
-                  :name="mint.nickname || mint.info?.name"
-                  :url="mint.url"
-                />
-                <q-checkbox
-                  :model-value="selectedMints.has(mint.url)"
-                  @update:model-value="toggleMintSelection(mint.url)"
-                  @click.stop
-                  color="primary"
-                  dense
-                  class="restore-mint-check"
-                  :aria-label="mint.nickname || mint.info?.name || mint.url"
-                />
+            <template #action>
+              <q-checkbox
+                :model-value="selectedMints.has(mint.url)"
+                @update:model-value="toggleMintSelection(mint.url)"
+                @click.stop
+                color="primary"
+                dense
+                class="restore-mint-check"
+                :aria-label="mint.nickname || mint.info?.name || mint.url"
+              />
+            </template>
+            <template v-if="!onboarding" #meta>
+              <q-btn
+                round
+                flat
+                dense
+                class="mint-card-more"
+                :aria-label="$t('RestoreView.actions.restore.label')"
+                @click.stop="restoreMintForMint(mint.url)"
+                :disabled="!isMnemonicValid || restoringState"
+                :loading="restoringMint === mint.url"
+                ><ArchiveRestoreIcon :size="20" />
+                <template #loading><PendingDots /></template>
+                <q-tooltip>{{
+                  $t("RestoreView.actions.restore.label")
+                }}</q-tooltip>
+              </q-btn>
+            </template>
+            <!-- Restore Progress -->
+            <div v-if="restoringMint === mint.url">
+              <div class="text-grey-6 q-mb-xs" style="font-size: 12px">
+                {{ restoreStatus }}
               </div>
-              <div class="mint-card__foot">
-                <div class="mint-card__balances">
-                  <template v-for="(unit, i) in heldUnits(mint)" :key="unit">
-                    <span
-                      v-if="i > 0"
-                      class="mint-card__plus"
-                      aria-hidden="true"
-                      >·</span
-                    >
-                    <bdi dir="ltr" class="currency-unit-text">{{
-                      formatCurrency(mintClass(mint).unitBalance(unit), unit)
-                    }}</bdi>
-                  </template>
-                </div>
-                <q-btn
-                  v-if="!onboarding"
-                  round
-                  flat
-                  dense
-                  class="mint-card-more"
-                  :aria-label="$t('RestoreView.actions.restore.label')"
-                  @click.stop="restoreMintForMint(mint.url)"
-                  :disabled="!isMnemonicValid || restoringState"
-                  :loading="restoringMint === mint.url"
-                  ><ArchiveRestoreIcon :size="20" />
-                  <q-tooltip>{{
-                    $t("RestoreView.actions.restore.label")
-                  }}</q-tooltip>
-                </q-btn>
-              </div>
-              <!-- Restore Progress -->
-              <div v-if="restoringMint === mint.url">
-                <div class="text-grey-6 q-mb-xs" style="font-size: 12px">
-                  {{ restoreStatus }}
-                </div>
-                <q-linear-progress
-                  :value="restoreProgress"
-                  color="primary"
-                  style="height: 4px; border-radius: 2px"
-                />
-              </div>
+              <q-linear-progress
+                :value="restoreProgress"
+                color="primary"
+                style="height: 4px; border-radius: 2px"
+              />
             </div>
-          </q-item>
+          </MintCard>
         </div>
       </div>
       <!-- Restore Selected Mints Button (Primary Action) -->
@@ -164,7 +151,7 @@
             })
           }}
           <template v-slot:loading
-            ><q-spinner-dots size="20px" class="on-left" />{{
+            ><PendingDots class="on-left" />{{
               $t("RestoreView.actions.restore_selected_mints.label", {
                 count: selectedMintsCount,
               })
@@ -184,6 +171,8 @@
 </template>
 
 <script lang="ts">
+import MintCard from "src/components/MintCard.vue";
+import PendingDots from "src/components/ui/PendingDots.vue";
 import {
   ClipboardPaste as ClipboardPasteIcon,
   ArchiveRestore as ArchiveRestoreIcon,
@@ -196,7 +185,6 @@ import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 import { notifyError, notifySuccess } from "src/js/notify";
 import NostrMintRestore from "./NostrMintRestore.vue";
-import MintInfoContainer from "src/components/MintInfoContainer.vue";
 import SettingsSection from "src/pages/settings/SettingsSection.vue";
 import { validateMnemonic as validateBip39Mnemonic } from "@scure/bip39";
 import { wordlist } from "@scure/bip39/wordlists/english";
@@ -205,9 +193,10 @@ export default defineComponent({
   name: "RestoreView",
   mixins: [windowMixin],
   components: {
+    MintCard,
+    PendingDots,
     ClipboardPasteIcon,
     ArchiveRestoreIcon,
-    MintInfoContainer,
     NostrMintRestore,
     SettingsSection,
   },

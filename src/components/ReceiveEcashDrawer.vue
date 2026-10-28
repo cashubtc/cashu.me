@@ -7,96 +7,50 @@
   >
     <div>
       <div class="q-gutter-y-md">
-        <div
-          class="app-option-row"
-          role="button"
-          tabindex="0"
-          data-testid="receive-ecash-paste"
-          @click="handlePasteBtn"
-          @keydown.enter.prevent="handlePasteBtn"
-          @keydown.space.prevent="handlePasteBtn"
-        >
-          <div class="row items-center no-wrap">
-            <div class="app-icon-circle">
-              <ClipboardPasteIcon :size="24" />
-            </div>
-            <div class="col q-ml-md">
-              <div class="app-option-row__label">
-                {{ $t("ReceiveEcashDrawer.actions.paste.label") }}
-              </div>
-            </div>
-          </div>
-        </div>
+        <OptionRow data-testid="receive-ecash-paste" @click="handlePasteBtn">
+          <template #icon><ClipboardPasteIcon :size="24" /></template>
+          <template #label>{{
+            $t("ReceiveEcashDrawer.actions.paste.label")
+          }}</template>
+        </OptionRow>
 
-        <div class="app-option-row" @click="showCamera">
-          <div class="row items-center no-wrap">
-            <div class="app-icon-circle">
-              <ScanIcon :size="24" />
-            </div>
-            <div class="col q-ml-md">
-              <div class="app-option-row__label">
-                {{ $t("ReceiveEcashDrawer.actions.scan.label") }}
-              </div>
-            </div>
-          </div>
-        </div>
+        <OptionRow @click="showCamera">
+          <template #icon><ScanIcon :size="24" /></template>
+          <template #label>{{
+            $t("ReceiveEcashDrawer.actions.scan.label")
+          }}</template>
+        </OptionRow>
 
-        <div
-          v-if="enablePaymentRequest"
-          class="app-option-row"
-          @click="handlePaymentRequestBtn"
-        >
-          <div class="row items-center no-wrap">
-            <div class="app-icon-circle">
-              <FileTextIcon :size="24" />
-            </div>
-            <div class="col q-ml-md">
-              <div class="app-option-row__label">
-                {{ $t("ReceiveEcashDrawer.actions.request.label") }}
-              </div>
-            </div>
-          </div>
-        </div>
+        <OptionRow v-if="enablePaymentRequest" @click="handlePaymentRequestBtn">
+          <template #icon><FileTextIcon :size="24" /></template>
+          <template #label>{{
+            $t("ReceiveEcashDrawer.actions.request.label")
+          }}</template>
+        </OptionRow>
 
-        <div
-          v-if="showP2PkButtonInDrawer"
-          class="app-option-row"
-          @click="handleLockBtn"
-        >
-          <div class="row items-center no-wrap">
-            <div class="app-icon-circle">
-              <LockIcon :size="24" />
-            </div>
-            <div class="col q-ml-md">
-              <div class="app-option-row__label">
-                {{ $t("ReceiveEcashDrawer.actions.lock.label") }}
-              </div>
-            </div>
-          </div>
-        </div>
+        <OptionRow v-if="showP2PkButtonInDrawer" @click="handleLockBtn">
+          <template #icon><LockIcon :size="24" /></template>
+          <template #label>{{
+            $t("ReceiveEcashDrawer.actions.lock.label")
+          }}</template>
+        </OptionRow>
 
-        <div
+        <OptionRow
           v-if="ndefSupported && showNfcButtonInDrawer"
-          class="app-option-row"
           @click="handleNFCBtn"
         >
-          <div class="row items-center no-wrap">
-            <div class="app-icon-circle">
-              <q-spinner v-if="scanningCard" size="sm" />
-              <NfcIcon v-else :size="24" />
-            </div>
-            <div class="col q-ml-md">
-              <div class="app-option-row__label">
-                {{ $t("ReceiveEcashDrawer.actions.nfc.label") }}
-                {{
-                  scanningCard
-                    ? $t("ReceiveEcashDrawer.actions.nfc.scanning_text")
-                    : ""
-                }}
-              </div>
-            </div>
-          </div>
-        </div>
+          <template #icon
+            ><PendingDots v-if="scanningCard" /> <NfcIcon v-else :size="24"
+          /></template>
+          <template #label
+            >{{ $t("ReceiveEcashDrawer.actions.nfc.label") }}
+            {{
+              scanningCard
+                ? $t("ReceiveEcashDrawer.actions.nfc.scanning_text")
+                : ""
+            }}</template
+          >
+        </OptionRow>
       </div>
     </div>
   </BottomSheet>
@@ -105,6 +59,8 @@
 </template>
 
 <script lang="ts">
+import PendingDots from "src/components/ui/PendingDots.vue";
+import OptionRow from "src/components/ui/OptionRow.vue";
 import { defineComponent } from "vue";
 import BottomSheet from "src/components/BottomSheet.vue";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
@@ -137,6 +93,8 @@ export default defineComponent({
   name: "ReceiveTokenDialog",
   mixins: [windowMixin],
   components: {
+    PendingDots,
+    OptionRow,
     BottomSheet,
     P2PKDialog,
     PRDialog,

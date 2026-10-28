@@ -5,8 +5,6 @@
       <q-input
         ref="inputRef"
         :aria-label="computedPlaceholder"
-        filled
-        borderless
         :class="[
           'parse-input',
           { 'has-paste-button': canPasteFromClipboard && !modelValue },
@@ -31,21 +29,15 @@
     </div>
 
     <!-- QR Scanner row -->
-    <div v-if="hasCamera" class="app-option-row q-mt-md" @click="$emit('scan')">
-      <div class="row items-center no-wrap">
-        <div class="app-icon-circle">
-          <ScanIcon :size="24" />
-        </div>
-        <div class="col q-ml-md">
-          <div class="app-option-row__label">
-            {{ $t("ParseInputComponent.qr_scanner.title") }}
-          </div>
-          <div class="app-option-row__caption">
-            {{ $t("ParseInputComponent.qr_scanner.description") }}
-          </div>
-        </div>
-      </div>
-    </div>
+    <OptionRow v-if="hasCamera" @click="$emit('scan')" class="q-mt-md">
+      <template #icon><ScanIcon :size="24" /></template>
+      <template #label>{{
+        $t("ParseInputComponent.qr_scanner.title")
+      }}</template>
+      <template #caption>{{
+        $t("ParseInputComponent.qr_scanner.description")
+      }}</template>
+    </OptionRow>
 
     <!-- NFC button (if supported) -->
     <q-btn
@@ -60,7 +52,7 @@
       {{ nfcLabel }}
       <q-tooltip>{{ nfcTooltip }}</q-tooltip>
       <template v-slot:loading>
-        <q-spinner-dots size="20px" class="on-left" />
+        <PendingDots class="on-left" />
         {{ nfcLabel }}</template
       >
     </q-btn>
@@ -68,15 +60,14 @@
 </template>
 
 <script lang="ts">
+import PendingDots from "src/components/ui/PendingDots.vue";
+import OptionRow from "src/components/ui/OptionRow.vue";
 import { defineComponent } from "vue";
 import { Scan as ScanIcon, Nfc as NfcIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "ParseInputComponent",
-  components: {
-    ScanIcon,
-    NfcIcon,
-  },
+  components: { PendingDots, OptionRow, ScanIcon, NfcIcon },
   props: {
     modelValue: {
       type: String,

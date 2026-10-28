@@ -16,7 +16,7 @@
           v-if="welcome.onboardingPath === 'recover' && restoringMints"
           class="row items-center q-mb-md q-px-lg"
         >
-          <q-spinner-dots size="24px" color="grey-5" class="q-mr-sm" />
+          <PendingDots class="q-mr-sm" size="24px" />
           <div class="text-grey-6">
             {{ $t("WelcomeMintSetup.restoring") }}
           </div>
@@ -52,7 +52,6 @@
       <h3 class="section-title">{{ $t("MintSettings.add.title") }}</h3>
       <div class="add-mint-inputs" data-testid="onboarding-mint-url">
         <q-input
-          rounded
           outlined
           v-model="addMintData.url"
           :placeholder="$t('WelcomeMintSetup.placeholder.mint_url')"
@@ -105,6 +104,7 @@
 </template>
 
 <script lang="ts">
+import PendingDots from "src/components/ui/PendingDots.vue";
 import { Landmark as LandmarkIcon, Plus as PlusIcon } from "lucide-vue-next";
 import WelcomeSlideScaffold from "src/components/ui/WelcomeSlideScaffold.vue";
 import { computed, ref, watch, onMounted } from "vue";
@@ -122,6 +122,7 @@ import MintDiscovery from "../../components/MintDiscovery.vue";
 export default {
   name: "WelcomeMintSetup",
   components: {
+    PendingDots,
     PlusIcon,
     WelcomeSlideScaffold,
     AddMintDialog,

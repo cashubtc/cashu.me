@@ -7,10 +7,10 @@
     :label="$t('QuoteInformation.chain_status')"
     value-class="detail-value-with-spinner"
   >
-    <q-spinner-dots
+    <PendingDots
       v-if="loading || !metadata"
-      size="16px"
       class="chain-status__icon chain-status__spinner"
+      size="16px"
     />
     <component
       :is="statusIcon"
@@ -36,6 +36,7 @@
 </template>
 
 <script lang="ts">
+import PendingDots from "src/components/ui/PendingDots.vue";
 import { defineComponent, type PropType } from "vue";
 import {
   CircleCheck as CircleCheckIcon,
@@ -47,7 +48,7 @@ import type { MempoolTxMetadata } from "src/js/onchain";
 
 export default defineComponent({
   name: "ChainStatusRow",
-  components: { DetailRow },
+  components: { PendingDots, DetailRow },
   props: {
     metadata: {
       type: Object as PropType<MempoolTxMetadata | null>,

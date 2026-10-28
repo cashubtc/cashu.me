@@ -299,6 +299,7 @@ export default {
         description: "استقبل المدفوعات على عنوان من npub.cash",
       },
       address: {
+        label: "عنوانك",
         copy_tooltip: "نسخ عنوان Lightning",
       },
       show_on_receive: {
@@ -1799,6 +1800,7 @@ export default {
     },
   },
   CreateInvoiceDialog: {
+    format_label: "نوع الطلب",
     formats: {
       bolt11: "فاتورة",
       bolt12: "عرض",

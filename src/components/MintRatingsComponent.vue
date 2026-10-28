@@ -3,73 +3,20 @@
     <q-card-section class="q-pa-none">
       <MintIdentityHeader :url="url" :info="mintInfo" class="q-mb-lg" />
 
-      <!-- Rating Summary Section - Apple Podcasts Style -->
-      <div v-if="hasAnyReviews" class="q-mb-lg">
-        <div class="row items-start q-mb-sm" style="gap: 24px">
-          <!-- Large Rating Display on Left -->
-          <div class="column items-center" style="min-width: 100px">
-            <div class="text-h2" style="font-weight: 600; line-height: 1">
-              {{ averageDisplay }}
-            </div>
-            <div
-              class="text-caption text-grey-5"
-              style="font-weight: 400; margin-top: 4px"
-            >
-              {{ $t("MintRatings.out_of") }} 5
-            </div>
-            <!-- How many ratings the score stands on, read with the score itself (user report,
-                 R56: under the bars it looked out of place). -->
-            <div class="ratings-count">
-              {{ $t("MintRatings.ratings", totalReviews) }}
-            </div>
-          </div>
-
-          <!-- Star Distribution Bars on Right -->
-          <div class="col column" style="gap: 6px">
-            <div
-              v-for="star in [5, 4, 3, 2, 1]"
-              :key="star"
-              class="row items-center no-wrap"
-              style="gap: 8px"
-            >
-              <!-- Star Icons (show only the number of stars for this rating level), end-aligned in a
-                   fixed column so all five bars start on one line. -->
-              <div
-                class="row items-center justify-end no-wrap"
-                style="gap: 1px; width: 64px; flex: none"
-              >
-                <StarIcon
-                  v-for="i in star"
-                  :key="i"
-                  :size="12"
-                  fill="currentColor"
-                  class="text-grey-6"
-                />
-              </div>
-              <!-- Distribution Bar -->
-              <div
-                class="col"
-                style="
-                  height: 4px;
-                  background: rgba(128, 128, 128, 0.2);
-                  border-radius: 2px;
-                  overflow: hidden;
-                "
-              >
-                <div
-                  :style="{
-                    width: ratingPercentage(star) + '%',
-                    height: '100%',
-                    background: 'var(--q-primary)',
-                    transition: 'width 0.3s ease',
-                  }"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
+      <!-- Rating summary (app-store style), then the web-of-trust filter. While the first
+           fetch runs, the same summary draws its own placeholders, so the page never claims
+           "No reviews yet" before it knows and nothing moves when the reviews arrive. -->
+      <div v-if="hasAnyReviews || fetchingReviews" class="q-mb-lg">
+        <RatingsSummary
+          class="q-mb-sm"
+          :skeleton="!hasAnyReviews"
+          :average="average"
+          :count="totalReviews"
+          :distribution="ratingDistribution"
+        />
         <!-- The web-of-trust filter as a full-width settings row: what it does on the start
-             side, the switch at the end (R53: a bare end-aligned switch read as orphaned). -->
+             side, the switch at the end (R53: a bare end-aligned switch read as orphaned).
+             Its text is fixed, so it shows as it is while reviews load. -->
         <label class="col-12 row items-center no-wrap ratings-filter-row">
           <div class="col">
             <div class="ratings-filter-row__title">
@@ -86,50 +33,6 @@
             :aria-label="$t('Settings.web_of_trust.title')"
           />
         </label>
-      </div>
-
-      <!-- No Reviews State -->
-      <!-- While the first fetch runs, a skeleton of the summary and review rows, so the
-           page never claims "No reviews yet" before it knows. -->
-      <div v-else-if="fetchingReviews" class="q-mb-lg" aria-busy="true">
-        <!-- Same rows and heights as the loaded summary: score, caption and count, bars, then
-             the trust switch. The button, sort row and reviews below render their own skeletons. -->
-        <div class="row items-start q-mb-sm" style="gap: 24px">
-          <div class="column items-center" style="min-width: 100px">
-            <!-- The score's glyph height inside its 60px line box. -->
-            <div class="column justify-center" style="height: 60px">
-              <q-skeleton type="rect" width="56px" height="40px" />
-            </div>
-            <q-skeleton
-              type="rect"
-              width="48px"
-              height="16px"
-              style="margin-top: 8px"
-            />
-            <q-skeleton type="rect" width="56px" height="14px" />
-          </div>
-          <div class="col column" style="gap: 6px">
-            <q-skeleton
-              v-for="n in 5"
-              :key="'bar' + n"
-              type="rect"
-              height="12px"
-            />
-          </div>
-        </div>
-        <!-- Same row as the loaded filter: title and caption, then the switch at the end. -->
-        <div class="row items-center no-wrap ratings-filter-row">
-          <div class="col column" style="gap: 6px">
-            <q-skeleton type="rect" width="96px" height="14px" />
-            <q-skeleton type="rect" width="70%" height="12px" />
-          </div>
-          <q-skeleton
-            type="rect"
-            width="40px"
-            height="24px"
-            style="border-radius: 12px"
-          />
-        </div>
       </div>
       <div v-else class="q-mb-lg">
         <EmptyState
@@ -161,15 +64,9 @@
         class="row q-mt-md q-mb-md justify-center"
         style="gap: 12px"
       >
-        <!-- The app's one full-width pill (52px, like Publish review and the sheet CTAs). -->
-        <q-skeleton
-          v-if="!hasAnyReviews"
-          type="rect"
-          height="52px"
-          style="width: 100%; border-radius: 26px"
-        />
+        <!-- The app's one full-width pill (52px, like Publish review and the sheet CTAs); it
+             needs no reviews, so it shows as it is while they load. -->
         <q-btn
-          v-else
           color="primary"
           unelevated
           rounded
@@ -187,11 +84,7 @@
       v-if="hasAnyReviews || fetchingReviews"
       class="q-py-sm q-px-none"
     >
-      <div v-if="!hasAnyReviews" class="sort-trigger row items-center">
-        <q-skeleton type="rect" width="128px" height="20px" />
-      </div>
       <button
-        v-else
         type="button"
         class="sort-trigger row items-center justify-between no-wrap full-width"
         aria-haspopup="listbox"
@@ -212,110 +105,23 @@
     <q-separator v-if="hasAnyReviews || fetchingReviews" />
 
     <q-card-section v-if="hasAnyReviews || fetchingReviews" class="q-px-none">
-      <div v-if="!hasAnyReviews" class="column" aria-hidden="true">
-        <SkeletonRow
-          v-for="n in 3"
-          :key="n"
-          avatar="36px"
-          class="review-item review-item--skeleton"
-        >
-          <div class="col">
-            <div class="row items-center justify-between review-head">
-              <q-skeleton type="rect" width="40%" height="14px" />
-              <q-skeleton type="rect" width="64px" height="12px" />
-            </div>
-            <q-skeleton
-              type="rect"
-              width="72px"
-              height="12px"
-              style="margin-top: 4px"
-            />
-            <q-skeleton
-              type="rect"
-              width="90%"
-              height="14px"
-              style="margin-top: 12px"
-            />
-          </div>
-        </SkeletonRow>
+      <div v-if="!hasAnyReviews" class="column">
+        <ReviewItem v-for="n in 3" :key="n" skeleton />
       </div>
       <div v-else class="column">
-        <div
+        <ReviewItem
           v-for="r in paged"
           :key="r.eventId"
-          :class="['review-item', { 'own-review': r.pubkey === myPubkey }]"
-        >
-          <!-- Avatar: the reviewer's picture, else the same tinted disc and line glyph as
-               history rows. -->
-          <q-avatar size="36px" class="review-avatar">
-            <q-img
-              v-if="profiles[r.pubkey]?.picture"
-              :src="profiles[r.pubkey].picture"
-              spinner-color="white"
-              spinner-size="xs"
-            />
-            <UserIcon v-else :size="18" aria-hidden="true" />
-          </q-avatar>
-
-          <div class="col review-body">
-            <!-- Name (tap to copy the npub) and verification, the date at the end. -->
-            <div class="row items-center no-wrap review-head">
-              <button
-                type="button"
-                class="review-author ellipsis"
-                :aria-label="`${$t('common.copy_npub')}: ${authorLabel(
-                  r.pubkey
-                )}`"
-                @click="copyNpub(r.pubkey)"
-              >
-                <bdi>{{ authorLabel(r.pubkey) }}</bdi>
-                <q-tooltip>{{ $t("common.copy_npub") }}</q-tooltip>
-              </button>
-              <span
-                v-if="wotHop(r.pubkey)"
-                class="review-verified"
-                :class="`text-${wotColor(wotHop(r.pubkey))}`"
-              >
-                <BadgeCheckIcon :size="14" />
-                <q-tooltip>{{
-                  $t("MintRatings.web_of_trust_hop", {
-                    hop: wotHop(r.pubkey),
-                  })
-                }}</q-tooltip>
-              </span>
-              <span
-                v-if="r.pubkey === myPubkey"
-                class="app-badge own-review-chip"
-                >{{ $t("MintRatings.your_review") }}</span
-              >
-              <span class="review-date">{{
-                formatDateOnly(r.created_at)
-              }}</span>
-            </div>
-
-            <div
-              v-if="r.rating !== null"
-              role="img"
-              class="review-stars-wrap"
-              :aria-label="$t('MintRatings.stars_label', { rating: r.rating })"
-            >
-              <AppRating
-                aria-hidden="true"
-                :model-value="r.rating"
-                readonly
-                :size="14"
-                class="review-stars"
-              />
-            </div>
-            <div v-else class="review-no-rating">
-              {{ $t("MintRatings.no_rating") }}
-            </div>
-
-            <div v-if="r.comment" class="review-comment" dir="auto">
-              {{ r.comment }}
-            </div>
-          </div>
-        </div>
+          :author="authorLabel(r.pubkey)"
+          :picture="profiles[r.pubkey]?.picture || ''"
+          :date="formatDateOnly(r.created_at)"
+          :rating="r.rating"
+          :comment="r.comment || ''"
+          :hop="wotHop(r.pubkey)"
+          :hop-color="wotColor(wotHop(r.pubkey))"
+          :own="r.pubkey === myPubkey"
+          @copy-npub="copyNpub(r.pubkey)"
+        />
 
         <!-- One centred pager with its range count built in, like the history pager; hidden
              when everything fits on one page. -->
@@ -365,17 +171,14 @@
 <script lang="ts">
 import {
   ArrowDownWideNarrow as ArrowDownWideNarrowIcon,
-  BadgeCheck as BadgeCheckIcon,
   ChevronDown as ChevronDownIcon,
   MessageCircle as MessageCircleIcon,
-  Star as StarIcon,
-  User as UserIcon,
 } from "lucide-vue-next";
-import AppRating from "src/components/ui/AppRating.vue";
 import BottomSheet from "src/components/BottomSheet.vue";
 import SheetOption from "src/components/SheetOption.vue";
 import MintIdentityHeader from "src/components/MintIdentityHeader.vue";
-import SkeletonRow from "src/components/SkeletonRow.vue";
+import RatingsSummary from "src/components/RatingsSummary.vue";
+import ReviewItem from "src/components/ReviewItem.vue";
 import EmptyState from "src/components/ui/EmptyState.vue";
 import { defineComponent } from "vue";
 import { notifyCopied } from "src/js/notify";
@@ -395,27 +198,17 @@ export default defineComponent({
   },
   emits: ["close"],
   components: {
-    StarIcon,
-    BadgeCheckIcon,
     MessageCircleIcon,
     ArrowDownWideNarrowIcon,
     ChevronDownIcon,
-    AppRating,
-    UserIcon,
     BottomSheet,
     SheetOption,
     MintIdentityHeader,
-    SkeletonRow,
+    RatingsSummary,
+    ReviewItem,
     EmptyState,
   },
   methods: {
-    // Calculate percentage for star rating bars
-    ratingPercentage(star: number): number {
-      const total = this.ratingsOnly.length;
-      if (total === 0) return 0;
-      const count = this.ratingDistribution[star] || 0;
-      return (count / total) * 100;
-    },
     formatDate(ts: number) {
       try {
         return new Date(ts * 1000).toLocaleString(this.$i18n.locale, {
@@ -617,9 +410,6 @@ export default defineComponent({
       const sum = rs.reduce((acc: number, r: any) => acc + (r.rating || 0), 0);
       return sum / rs.length;
     },
-    averageDisplay(): string {
-      return this.average !== null ? this.average.toFixed(1) : "n/a";
-    },
     currentSortLabel(): string {
       const option = this.sortOptions.find(
         (opt) => opt.value === this.sortMode
@@ -793,109 +583,6 @@ body[data-theme] .q-card--dark.mint-ratings-root {
   background: transparent !important;
 }
 
-/* Review rows, after the app-store pattern: a small avatar, the name with the date at the
-   end, the stars under it, then the comment. Air between reviews instead of rules. */
-.review-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 12px 0;
-}
-
-.review-item + .review-item {
-  margin-top: 8px;
-}
-
-.review-item:first-child {
-  padding-top: 4px;
-}
-
-.own-review {
-  background: var(--app-tint);
-  padding: 16px;
-  margin-inline: -16px;
-  border-radius: var(--app-radius-lg);
-  position: relative;
-}
-
-.review-avatar {
-  background: var(--app-tint-strong);
-  color: var(--app-text-muted);
-  flex-shrink: 0;
-}
-
-.review-body {
-  min-width: 0;
-}
-
-.review-head {
-  gap: 6px;
-  min-height: 20px;
-}
-
-/* The name is a 44px tap target (copy npub) without moving the text. */
-.review-author {
-  background: none;
-  border: 0;
-  margin-block: -12px;
-  min-width: 44px;
-  padding-block: 12px;
-  border-radius: 4px;
-  color: var(--app-text);
-  cursor: pointer;
-  font: inherit;
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 20px;
-  padding-inline: 0;
-  text-align: start;
-}
-.review-author:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-.review-author:focus-visible {
-  outline: 2px solid var(--app-text);
-  outline-offset: 2px;
-}
-
-.review-verified {
-  display: inline-flex;
-  flex: none;
-}
-
-.review-date {
-  color: var(--app-text-muted);
-  flex: none;
-  font-size: 13px;
-  line-height: 20px;
-  margin-inline-start: auto;
-  padding-inline-start: 8px;
-  white-space: nowrap;
-}
-
-.review-stars {
-  display: flex;
-  gap: 1px;
-  margin-top: 4px;
-}
-
-.review-no-rating {
-  color: var(--app-text-muted);
-  font-size: 13px;
-  line-height: 18px;
-  margin-top: 2px;
-}
-
-.review-comment {
-  color: var(--app-text);
-  font-size: 15px;
-  line-height: 1.5;
-  margin-top: 8px;
-  text-align: start;
-  white-space: pre-wrap;
-}
-
 .write-review-btn {
   font-weight: 600;
 }
@@ -920,17 +607,8 @@ body[data-theme] .q-card--dark.mint-ratings-root {
   outline-offset: 2px;
 }
 
-.own-review-chip {
-  flex: none;
-}
-
 .ratings-filter-row {
   margin-top: 8px;
-}
-.ratings-count {
-  color: var(--app-text-muted);
-  font-size: 13px;
-  line-height: 16px;
 }
 .ratings-wot-toggle {
   color: var(--app-text-muted);

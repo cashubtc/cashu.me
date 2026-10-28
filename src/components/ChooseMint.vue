@@ -44,6 +44,7 @@
             <span class="mint-chip__name ellipsis">{{
               chosenMint?.nickname ||
               chosenMint?.shorturl ||
+              anyLabel ||
               placeholder ||
               $t("ChooseMint.placeholder")
             }}</span>
@@ -88,6 +89,16 @@
         :aria-label="$t('ChooseMint.sheet_title')"
         class="mint-options"
       >
+        <SheetOption
+          v-if="anyLabel"
+          :label="anyLabel"
+          :selected="!chosenMint"
+          @select="selectAny"
+        >
+          <template #icon
+            ><LandmarkIcon :size="20" class="mint-glyph"
+          /></template>
+        </SheetOption>
         <SheetOption
           v-for="mint in chooseMintOptions()"
           :key="mint.url"
@@ -209,6 +220,12 @@ export default defineComponent({
     disable: {
       type: Boolean,
       default: false,
+    },
+    // A first option meaning "no particular mint" (a payment request any mint can pay),
+    // chosen by an empty value. Implies allowEmpty.
+    anyLabel: {
+      type: String,
+      default: "",
     },
     requireActiveMint: {
       type: Boolean,
@@ -350,13 +367,17 @@ export default defineComponent({
           return;
         }
       }
-      if (this.allowEmpty) {
+      if (this.allowEmpty || this.anyLabel) {
         this.applyChosenMint(null);
       } else if (options.length) {
         this.applyChosenMint(options[0]);
       } else {
         this.applyChosenMint(null);
       }
+    },
+    selectAny() {
+      this.applyChosenMint(null);
+      this.showMintSheet = false;
     },
     selectMint(mint: MintOption) {
       if (this.excludeMint && mint.url === this.excludeMint) {

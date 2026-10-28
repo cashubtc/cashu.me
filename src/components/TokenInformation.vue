@@ -62,7 +62,7 @@
         :label="$t('TokenInformation.mint')"
       >
         {{ tokenMintUrl }}
-        <q-spinner v-if="addMintBlocking" size="sm" class="q-ml-xs" />
+        <PendingDots v-if="addMintBlocking" class="q-ml-xs" />
       </DetailRow>
 
       <!-- Memo (if available) -->
@@ -86,6 +86,7 @@
   </div>
 </template>
 <script lang="ts">
+import PendingDots from "src/components/ui/PendingDots.vue";
 import { defineComponent } from "vue";
 import { notifyCopied } from "src/js/notify";
 import { type Token } from "@cashu/cashu-ts";
@@ -111,7 +112,7 @@ import DetailRow from "src/components/ui/DetailRow.vue";
 export default defineComponent({
   name: "TokenInformation",
   mixins: [windowMixin],
-  components: { DetailRow },
+  components: { PendingDots, DetailRow },
   setup() {
     return {
       BanknoteIcon,

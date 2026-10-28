@@ -12,18 +12,14 @@
       <template v-if="enabled">
         <q-item class="settings-control-item">
           <q-item-section>
-            <q-input outlined v-model="address" dense rounded readonly>
-              <template v-slot:append>
-                <q-spinner size="sm" v-if="loading" />
-                <CopyButton
-                  :value="address"
-                  :icon-size="18"
-                  :tooltip="
-                    $t('Settings.lightning_address.address.copy_tooltip')
-                  "
-                />
-              </template>
-            </q-input>
+            <CopyField
+              :value="address"
+              :label="$t('Settings.lightning_address.address.label')"
+              :copy-label="
+                $t('Settings.lightning_address.address.copy_tooltip')
+              "
+              :loading="loading"
+            />
           </q-item-section>
         </q-item>
         <q-item class="settings-control-item">
@@ -51,8 +47,6 @@
                 :label="$t('Settings.lightning_address.server_url.label')"
                 :hint="$t('Settings.lightning_address.server_url.hint')"
                 placeholder="https://npub.cash"
-                dense
-                rounded
                 :error="Boolean(serverUrlError)"
                 :error-message="serverUrlError"
                 @blur="applyServerUrl"
@@ -86,7 +80,7 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "src/components/ChooseMint.vue";
 import { useNpubCashStore } from "src/stores/npubcash";
 import SettingsPageShell from "src/pages/settings/SettingsPageShell.vue";
-import CopyButton from "src/components/ui/CopyButton.vue";
+import CopyField from "src/components/ui/CopyField.vue";
 import SettingsToggleRow from "src/components/ui/SettingsToggleRow.vue";
 import SettingsSection from "src/pages/settings/SettingsSection.vue";
 
@@ -94,7 +88,7 @@ export default defineComponent({
   name: "LightningAddressSettings",
   mixins: [windowMixin],
   components: {
-    CopyButton,
+    CopyField,
     SettingsToggleRow,
     SettingsPageShell,
     SettingsSection,

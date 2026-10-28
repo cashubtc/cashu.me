@@ -320,6 +320,7 @@ export default {
         description: "Get paid at an address from npub.cash",
       },
       address: {
+        label: "Your address",
         copy_tooltip: "Copy Lightning address",
       },
       show_on_receive: {
@@ -1832,6 +1833,7 @@ export default {
     },
   },
   CreateInvoiceDialog: {
+    format_label: "Request type",
     formats: {
       bolt11: "Invoice",
       bolt12: "Offer",

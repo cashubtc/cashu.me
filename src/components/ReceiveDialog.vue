@@ -1,95 +1,51 @@
 <template>
   <BottomSheet v-model="showReceiveDialog" :title="$t('ReceiveDialog.title')">
     <template #trailing>
-      <q-btn
-        flat
-        round
-        class="app-icon-btn"
-        :aria-label="$t('global.actions.scan.label')"
-        @click="showCamera"
-        color="primary"
-      >
-        <ScanIcon />
-      </q-btn>
+      <IconButton :label="$t('global.actions.scan.label')" @click="showCamera">
+        <ScanIcon :size="20" />
+      </IconButton>
     </template>
     <div>
       <div class="q-gutter-y-md">
         <!-- Ecash Option -->
-        <div
-          class="app-option-row"
-          role="button"
-          tabindex="0"
+        <OptionRow
           data-testid="receive-ecash-option"
           @click="toggleReceiveEcashDrawer"
-          @keydown.enter.prevent="toggleReceiveEcashDrawer"
-          @keydown.space.prevent="toggleReceiveEcashDrawer"
         >
-          <div class="row items-center no-wrap">
-            <div class="app-icon-circle">
-              <CoinsIcon :size="24" />
-            </div>
-            <div class="col q-ml-md">
-              <div class="app-option-row__label">
-                {{ $t("ReceiveDialog.actions.ecash.label") }}
-              </div>
-              <div class="app-option-row__caption">
-                {{ $t("ReceiveDialog.captions.ecash") }}
-              </div>
-            </div>
-          </div>
-        </div>
+          <template #icon><CoinsIcon :size="24" /></template>
+          <template #label>{{
+            $t("ReceiveDialog.actions.ecash.label")
+          }}</template>
+          <template #caption>{{ $t("ReceiveDialog.captions.ecash") }}</template>
+        </OptionRow>
 
         <!-- Lightning Invoice Option -->
-        <div
+        <OptionRow
           v-if="canReceiveLightning"
-          class="app-option-row"
-          role="button"
-          tabindex="0"
           data-testid="receive-lightning-option"
           @click="showInvoiceCreateDialog"
-          @keydown.enter.prevent="showInvoiceCreateDialog"
-          @keydown.space.prevent="showInvoiceCreateDialog"
         >
-          <div class="row items-center no-wrap">
-            <div class="app-icon-circle">
-              <ZapIcon :size="24" />
-            </div>
-            <div class="col q-ml-md">
-              <div class="app-option-row__label">
-                {{ $t("ReceiveDialog.actions.lightning.label") }}
-              </div>
-              <div class="app-option-row__caption">
-                {{ $t("ReceiveDialog.captions.lightning") }}
-              </div>
-            </div>
-          </div>
-        </div>
+          <template #icon><ZapIcon :size="24" /></template>
+          <template #label>{{
+            $t("ReceiveDialog.actions.lightning.label")
+          }}</template>
+          <template #caption>{{
+            $t("ReceiveDialog.captions.lightning")
+          }}</template>
+        </OptionRow>
 
         <!-- On-chain Option -->
-        <div
+        <OptionRow
           v-if="canReceiveOnchain"
-          class="app-option-row"
-          role="button"
-          tabindex="0"
           data-testid="receive-onchain-option"
           @click="showOnchainCreateDialog"
-          @keydown.enter.prevent="showOnchainCreateDialog"
-          @keydown.space.prevent="showOnchainCreateDialog"
         >
-          <div class="row items-center no-wrap">
-            <div class="app-icon-circle">
-              <BitcoinIcon :size="24" />
-            </div>
-            <div class="col q-ml-md">
-              <div class="app-option-row__label">
-                {{ $t("common.on_chain") }}
-              </div>
-              <div class="app-option-row__caption">
-                {{ $t("ReceiveDialog.captions.onchain") }}
-              </div>
-            </div>
-          </div>
-        </div>
+          <template #icon><BitcoinIcon :size="24" /></template>
+          <template #label>{{ $t("common.on_chain") }}</template>
+          <template #caption>{{
+            $t("ReceiveDialog.captions.onchain")
+          }}</template>
+        </OptionRow>
       </div>
     </div>
   </BottomSheet>
@@ -97,6 +53,8 @@
 </template>
 
 <script lang="ts">
+import IconButton from "src/components/ui/IconButton.vue";
+import OptionRow from "src/components/ui/OptionRow.vue";
 import { defineComponent } from "vue";
 import BottomSheet from "src/components/BottomSheet.vue";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
@@ -123,6 +81,8 @@ import {
 export default defineComponent({
   name: "ReceiveDialog",
   components: {
+    IconButton,
+    OptionRow,
     BottomSheet,
     CoinsIcon,
     ZapIcon,

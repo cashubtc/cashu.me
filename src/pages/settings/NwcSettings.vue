@@ -26,8 +26,6 @@
             <q-input
               type="number"
               outlined
-              rounded
-              dense
               v-model="connection.allowanceLeft"
               :label="
                 $t('Settings.nostr_wallet_connect.connection.allowance_label')

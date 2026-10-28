@@ -107,7 +107,7 @@
                           }}
                         </div>
                         <div class="col-auto">
-                          <q-spinner size="sm" class="q-ml-sm" />
+                          <PendingDots class="q-ml-sm" />
                         </div>
                       </div>
                     </div>
@@ -188,7 +188,7 @@
                       )
                     }}
                     <template v-slot:loading>
-                      <q-spinner-dots size="20px" class="on-left" />
+                      <PendingDots class="on-left" />
                       {{
                         $t(
                           "ReceiveTokenDialog.actions.receive_to_selected_mint.label"
@@ -258,7 +258,7 @@
                         : $t("ReceiveTokenDialog.actions.receive.label")
                     }}
                     <template v-slot:loading>
-                      <q-spinner-dots size="20px" class="on-left" />
+                      <PendingDots class="on-left" />
                       {{
                         knowThisMint
                           ? addMintBlocking
@@ -283,6 +283,7 @@
 </template>
 
 <script lang="ts">
+import PendingDots from "src/components/ui/PendingDots.vue";
 import { defineComponent } from "vue";
 import AppCallout from "src/components/AppCallout.vue";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
@@ -315,6 +316,7 @@ export default defineComponent({
   name: "ReceiveTokenDialog",
   mixins: [windowMixin],
   components: {
+    PendingDots,
     AppCallout,
     TokenInformation,
     TokenStringRender,

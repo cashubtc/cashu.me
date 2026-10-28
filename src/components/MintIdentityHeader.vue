@@ -3,10 +3,15 @@
        header of the mint details, reviews and write-a-review pages, so all three read as the
        same mint. The default slot holds page extras such as the QR toggle. -->
   <div class="mint-header">
-    <q-avatar size="56px" class="q-mb-sm app-icon-circle app-icon-circle--lg">
-      <img v-if="info?.icon_url" :src="info.icon_url" alt="" />
+    <IconCircle size="lg" class="q-mb-sm">
+      <img
+        v-if="info?.icon_url"
+        :src="info.icon_url"
+        alt=""
+        class="mint-header__icon"
+      />
       <LandmarkIcon v-else :size="26" />
-    </q-avatar>
+    </IconCircle>
     <div class="mint-name">{{ displayName }}</div>
     <div v-if="host !== displayName" class="mint-host" dir="ltr">
       {{ host }}
@@ -16,6 +21,7 @@
 </template>
 
 <script lang="ts">
+import IconCircle from "src/components/ui/IconCircle.vue";
 import { defineComponent } from "vue";
 import { mapState } from "pinia";
 import { Landmark as LandmarkIcon } from "lucide-vue-next";
@@ -23,7 +29,7 @@ import { useMintsStore } from "src/stores/mints";
 
 export default defineComponent({
   name: "MintIdentityHeader",
-  components: { LandmarkIcon },
+  components: { IconCircle, LandmarkIcon },
   props: {
     url: { type: String, required: true },
     info: { type: Object, required: false },
@@ -53,6 +59,11 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.mint-header__icon {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
 .mint-header {
   align-items: center;
   background-color: var(--app-tint);

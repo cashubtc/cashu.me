@@ -23,7 +23,7 @@
         <SearchIcon :size="20" class="q-mr-sm" />
         {{ $t("RestoreView.nostr_mints.search_button") }}
         <template v-slot:loading
-          ><q-spinner-dots size="20px" class="on-left" />{{
+          ><PendingDots class="on-left" />{{
             $t("RestoreView.nostr_mints.search_button")
           }}</template
         >
@@ -64,7 +64,7 @@
             }}
           </span>
           <template v-slot:loading
-            ><q-spinner-dots size="20px" class="on-left" />{{
+            ><PendingDots class="on-left" />{{
               $t("RestoreView.nostr_mints.add_selected", {
                 count: selectedMints.length,
               })
@@ -145,11 +145,10 @@
               </q-avatar>
 
               <!-- Loading spinner for mint info -->
-              <q-spinner-dots
+              <PendingDots
                 v-else-if="isFetchingMintInfo(mint.url)"
-                size="34px"
-                color="grey-5"
                 class="q-mr-sm"
+                size="34px"
               />
 
               <div class="mint-info-container">
@@ -199,6 +198,7 @@
 </template>
 
 <script lang="ts">
+import PendingDots from "src/components/ui/PendingDots.vue";
 import {
   CloudOff as CloudOffIcon,
   Plus as PlusIcon,
@@ -213,7 +213,7 @@ import { notifyError } from "src/js/notify";
 import { date } from "quasar";
 
 export default defineComponent({
-  components: { PlusIcon, CloudOffIcon, SearchIcon },
+  components: { PendingDots, PlusIcon, CloudOffIcon, SearchIcon },
   name: "NostrMintRestore",
   props: {
     mnemonic: {

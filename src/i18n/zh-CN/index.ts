@@ -316,6 +316,7 @@ export default {
         description: "通过 npub.cash 提供的地址收款",
       },
       address: {
+        label: "你的地址",
         copy_tooltip: "复制 Lightning 地址",
       },
       show_on_receive: {
@@ -1783,6 +1784,7 @@ export default {
     },
   },
   CreateInvoiceDialog: {
+    format_label: "请求类型",
     formats: {
       bolt11: "发票",
       bolt12: "要约",

@@ -2,11 +2,9 @@
      slot, a title, one line of help and optional actions. Bare on the page by default. -->
 <template>
   <div class="app-empty" :class="{ 'app-box': boxed }">
-    <div class="app-icon-circle app-icon-circle--lg">
-      <slot name="icon">
-        <component :is="icon" v-if="icon" :size="26" />
-      </slot>
-    </div>
+    <IconCircle :icon="icon" size="lg">
+      <slot name="icon" />
+    </IconCircle>
     <div v-if="title" class="app-empty__title">{{ title }}</div>
     <div v-if="text" class="app-empty__text">{{ text }}</div>
     <slot name="actions" />
@@ -14,10 +12,12 @@
 </template>
 
 <script lang="ts">
+import IconCircle from "src/components/ui/IconCircle.vue";
 import { defineComponent, PropType, Component } from "vue";
 
 export default defineComponent({
   name: "EmptyState",
+  components: { IconCircle },
   props: {
     /** A lucide icon component, rendered at 26px. Use the icon slot for anything else. */
     icon: {

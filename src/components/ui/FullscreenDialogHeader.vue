@@ -2,16 +2,14 @@
   <!-- Full-screen dialog header: a close button pinned to the leading edge, the centred title
        and optional trailing actions, bound to the app column (.sheet-column-header). -->
   <div class="row items-center q-pa-md sheet-column-header">
-    <q-btn
-      v-close-popup
-      flat
-      round
-      class="floating-close-btn app-icon-btn"
-      :aria-label="$t('global.actions.close.label')"
+    <IconButton
+      close-popup
+      :label="$t('global.actions.close.label')"
       @click="$emit('close')"
+      floating
     >
       <XIcon :size="24" />
-    </q-btn>
+    </IconButton>
     <div class="col text-center fixed-title-height">
       <slot name="title">
         <q-item-label
@@ -27,12 +25,13 @@
 </template>
 
 <script lang="ts">
+import IconButton from "src/components/ui/IconButton.vue";
 import { X as XIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "FullscreenDialogHeader",
-  components: { XIcon },
+  components: { IconButton, XIcon },
   props: {
     title: { type: String, default: "" },
     // Balance the title's lines when it wraps (the global .dialog-header rule adds

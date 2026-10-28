@@ -42,6 +42,64 @@ describe("standard elements", () => {
     expect(scripts).toEqual([]);
   });
 
+  // A pattern's classes belong to its component: everyone else uses the component, so the
+  // markup (and the board's sample of it) can't drift into copies.
+  it.each([
+    ["ui/AppBadge.vue", /^app-badge(--[\w-]+)?$/],
+    ["ui/IconButton.vue", /^(app-icon-btn|floating-close-btn)$/],
+    ["ui/IconCircle.vue", /^app-icon-circle(--[\w-]+)?$/],
+    ["ui/OptionRow.vue", /^app-option-row(__[\w-]+|--[\w-]+)?$/],
+    ["ui/BlockingState.vue", /^blocking-state(__[\w-]+)?$/],
+    ["ui/ConfirmDialog.vue", /^council-dialog(__[\w-]+)?$/],
+    ["ui/EmptyState.vue", /^app-empty(__(title|text))?$/],
+    ["WalletActions.vue", /^wallet-(actions|action-btn|scan-btn)$/],
+    [
+      "MintCard.vue",
+      /^mint-card(--active|__(body|head|foot|foot--meta|balances|plus))?$/,
+    ],
+  ])("only %s uses its classes", (owner, pattern) => {
+    expect(
+      offenders((text) =>
+        [...text.matchAll(/\s:?class="([^"]*)"/g)].some(([, value]) =>
+          value.split(/[\s'"`{}:,?]+/).some((token) => pattern.test(token))
+        )
+      ).filter((file) => !file.endsWith(owner))
+    ).toEqual([]);
+  });
+
+  it("one pending mark: no spinner outside PendingDots", () => {
+    expect(
+      offenders((text) => /<q-spinner/.test(text)).filter(
+        (file) => !file.endsWith("ui/PendingDots.vue")
+      )
+    ).toEqual([]);
+  });
+
+  // A skeleton drawn by the component it stands in for has the loaded boxes by construction.
+  it("skeletons live in components with a skeleton prop", () => {
+    expect(
+      offenders(
+        (text) =>
+          text.includes("<q-skeleton") &&
+          !/\bskeleton:\s*\{\s*type:\s*Boolean/.test(text)
+      )
+    ).toEqual([]);
+  });
+
+  it("no q-btn-toggle (use SegmentedControl)", () => {
+    expect(offenders((text) => text.includes("<q-btn-toggle"))).toEqual([]);
+  });
+
+  it("text fields are the one outlined style", () => {
+    expect(
+      offenders((text) =>
+        [...text.matchAll(/<q-input\b[^>]*>/g)].some(([tag]) =>
+          /\s(dense|rounded|filled|standout|borderless)(?=[\s>/=])/.test(tag)
+        )
+      )
+    ).toEqual([]);
+  });
+
   it("no component restyles a standard element in its own styles", () => {
     expect(
       offenders((text) =>

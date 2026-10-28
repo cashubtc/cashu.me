@@ -317,6 +317,7 @@ export default {
         description: "รับเงินที่ที่อยู่จาก npub.cash",
       },
       address: {
+        label: "ที่อยู่ของคุณ",
         copy_tooltip: "คัดลอกที่อยู่ Lightning",
       },
       show_on_receive: {
@@ -1799,6 +1800,7 @@ export default {
     },
   },
   CreateInvoiceDialog: {
+    format_label: "ประเภทคำขอ",
     formats: {
       bolt11: "ใบแจ้งหนี้",
       bolt12: "ข้อเสนอ",

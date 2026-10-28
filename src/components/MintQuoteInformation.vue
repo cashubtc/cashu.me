@@ -27,8 +27,8 @@
       :label="$t('QuoteInformation.status')"
       :value-class="{ 'text-positive': isPaidState }"
     >
-      <!-- A pulsing dot while the wallet waits for payment, so a pending invoice reads as live. -->
-      <span v-if="isWaitingState" class="waiting-dot" aria-hidden="true" />
+      <!-- The pending dots while the wallet waits for payment, so a pending invoice reads as live. -->
+      <PendingDots v-if="isWaitingState" size="16px" class="q-mr-sm" />
       {{ stateDisplay }}
     </DetailRow>
 
@@ -92,6 +92,7 @@
 </template>
 
 <script lang="ts">
+import PendingDots from "src/components/ui/PendingDots.vue";
 import { defineComponent, PropType } from "vue";
 import { mapState } from "pinia";
 import { useMintsStore } from "stores/mints";
@@ -133,7 +134,7 @@ type MintQuote = {
 export default defineComponent({
   name: "MintQuoteInformation",
   mixins: [windowMixin],
-  components: { DetailRow, ChainStatusRow },
+  components: { PendingDots, DetailRow, ChainStatusRow },
   setup() {
     return {
       BitcoinIcon,
@@ -360,26 +361,5 @@ export default defineComponent({
 <style scoped>
 .mint-quote-information {
   width: 100%;
-}
-
-.waiting-dot {
-  animation: waiting-pulse 1.6s ease-in-out infinite;
-  background: var(--q-primary);
-  border-radius: 50%;
-  display: inline-block;
-  height: 8px;
-  margin-inline-end: 8px;
-  vertical-align: middle;
-  width: 8px;
-}
-@keyframes waiting-pulse {
-  50% {
-    opacity: 0.3;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .waiting-dot {
-    animation: none;
-  }
 }
 </style>

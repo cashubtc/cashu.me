@@ -94,7 +94,10 @@ test("removes active and last mint, warns about funds, and recovers after re-add
   await wallet.details(MINT_A_URL);
   await page.locator(".delete-button").click();
   await expect(page.locator(".remove-mint-dialog")).toContainText("45");
-  await page.locator(".remove-mint-dialog .remove-btn").click();
+  await page
+    .locator(".remove-mint-dialog")
+    .getByRole("button", { name: "Remove mint" })
+    .click();
   await wallet.home("Mints");
   await expect(wallet.mintCard(MINT_B_URL)).toHaveClass(/q-item--active/);
   await wallet.removeMint(MINT_B_URL);

@@ -1,7 +1,7 @@
 <template>
   <div class="q-mt-lg q-mb-lg">
     <div class="text-caption q-mx-sm" v-if="loading">
-      <q-spinner color="grey" size="20px" class="q-mr-sm" />
+      <PendingDots class="q-mr-sm" />
       {{ $t("MintAuditInfo.loading") }}
     </div>
     <div v-else-if="mintNotAudited" class="q-mx-sm">
@@ -121,6 +121,7 @@
 </template>
 
 <script lang="ts">
+import PendingDots from "src/components/ui/PendingDots.vue";
 import { Info as InfoIcon } from "lucide-vue-next";
 interface MintRead {
   id: number;
@@ -160,7 +161,12 @@ import { getShortUrl } from "../js/wallet-helpers";
 
 export default {
   name: "MintAuditInfo",
-  components: { InfoIcon, MintAuditWarningBox, MintAuditSwapsBarChart },
+  components: {
+    PendingDots,
+    InfoIcon,
+    MintAuditWarningBox,
+    MintAuditSwapsBarChart,
+  },
   props: {
     mintUrl: {
       type: String,

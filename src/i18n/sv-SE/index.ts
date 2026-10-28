@@ -316,6 +316,7 @@ export default {
         description: "Ta emot betalningar på en adress från npub.cash",
       },
       address: {
+        label: "Din adress",
         copy_tooltip: "Kopiera Lightning-adress",
       },
       show_on_receive: {
@@ -1814,6 +1815,7 @@ export default {
     },
   },
   CreateInvoiceDialog: {
+    format_label: "Typ av begäran",
     formats: {
       bolt11: "Faktura",
       bolt12: "Erbjudande",
