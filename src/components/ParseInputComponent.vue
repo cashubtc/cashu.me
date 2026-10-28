@@ -63,7 +63,7 @@
 import PendingDots from "src/components/ui/PendingDots.vue";
 import OptionRow from "src/components/ui/OptionRow.vue";
 import { defineComponent } from "vue";
-import { Scan as ScanIcon, Nfc as NfcIcon } from "lucide-vue-next";
+import { ScanLine as ScanIcon, Nfc as NfcIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "ParseInputComponent",

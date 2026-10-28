@@ -82,7 +82,7 @@ import {
   FileText as FileTextIcon,
   Lock as LockIcon,
   Nfc as NfcIcon,
-  Scan as ScanIcon,
+  ScanLine as ScanIcon,
 } from "lucide-vue-next";
 // import ChooseMint from "components/ChooseMint.vue";
 import TokenInformation from "components/TokenInformation.vue";

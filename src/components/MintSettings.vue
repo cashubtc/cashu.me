@@ -234,7 +234,7 @@ import {
   CircleAlert as CircleAlertIcon,
   Ellipsis as EllipsisIcon,
   Plus as PlusIcon,
-  Scan as ScanIcon,
+  ScanLine as ScanIcon,
   Search as SearchIcon,
 } from "lucide-vue-next";
 import { ref, defineComponent, onMounted, onBeforeUnmount } from "vue";

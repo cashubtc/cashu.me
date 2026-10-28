@@ -187,91 +187,89 @@
 
         <!-- Numeric keypad -->
         <!-- Numeric keypad and Secondary Actions -->
-        <div class="bottom-panel column justify-end">
-          <!-- While the invoice is being created, only the busy button reads as active. -->
-          <AmountKeypadPanel
-            v-if="showAmountInput"
-            v-model="invoiceData.amount"
-            :busy="createInvoiceButtonBlocked"
-            @done="requestMintButton"
-          />
+        <FlowFooter class="column justify-end">
+          <template #above>
+            <!-- While the invoice is being created, only the busy button reads as active. -->
+            <AmountKeypadPanel
+              v-if="showAmountInput"
+              v-model="invoiceData.amount"
+              :busy="createInvoiceButtonBlocked"
+              @done="requestMintButton"
+            />
 
-          <!-- Secondary Actions Container (Add Amount) -->
-          <div
-            class="row justify-center"
-            v-if="isBolt12 && !showAmountInput && !showNpubCashPreview"
-          >
-            <div class="col-12 q-px-md" style="max-width: var(--app-column)">
-              <q-btn
-                class="full-width"
-                outline
-                rounded
-                color="primary"
-                size="lg"
-                @click="bolt12AddAmount = true"
-                :label="$t('CreateInvoiceDialog.add_amount')"
-              />
+            <!-- Secondary Actions Container (Add Amount) -->
+            <div
+              class="row justify-center"
+              v-if="isBolt12 && !showAmountInput && !showNpubCashPreview"
+            >
+              <div class="col-12 q-px-md" style="max-width: var(--app-column)">
+                <q-btn
+                  class="full-width"
+                  outline
+                  rounded
+                  color="primary"
+                  size="lg"
+                  @click="bolt12AddAmount = true"
+                  :label="$t('CreateInvoiceDialog.add_amount')"
+                />
+              </div>
             </div>
-          </div>
 
-          <!-- Primary action (Add amount / Create). From an amount step opened on an address,
+            <!-- Primary action (Add amount / Create). From an amount step opened on an address,
                offer or Lightning address, a back chevron sits before it, as in the onboarding
                footer; the header keeps its close button. -->
-          <div class="row justify-center q-pb-lg q-pt-sm">
-            <div
-              class="col-12 q-px-md row no-wrap items-center flow-footer"
-              style="max-width: var(--app-column)"
+          </template>
+          <div class="row no-wrap items-center flow-footer">
+            <q-btn
+              v-if="canReturnToPreview"
+              flat
+              round
+              class="flow-footer__back"
+              data-testid="invoice-amount-back"
+              :aria-label="$t('common.back')"
+              @click="returnToPreview"
             >
-              <q-btn
-                v-if="canReturnToPreview"
-                flat
-                round
-                class="flow-footer__back"
-                data-testid="invoice-amount-back"
-                :aria-label="$t('common.back')"
-                @click="returnToPreview"
-              >
-                <ChevronLeftIcon :size="24" class="rtl-flip" />
-              </q-btn>
-              <q-btn
-                v-if="showNpubCashPreview"
-                class="full-width"
-                unelevated
-                rounded
-                color="primary"
-                size="lg"
-                data-testid="npub-cash-add-amount"
-                :label="$t('PaymentRequestDialog.actions.add_amount.label')"
-                @click="enterNpubCashAmountMode"
-              />
-              <q-btn
-                v-else
-                class="full-width"
-                unelevated
-                data-testid="create-payment-request"
-                size="lg"
-                :disable="!canCreate"
-                @click="requestMintButton"
-                color="primary"
-                rounded
-                type="submit"
-                :loading="globalMutexLock || createInvoiceButtonBlocked"
-              >
-                {{ createButtonLabel }}
-                <!-- A label beside the spinner, so the busy state reads even with reduced motion. -->
-                <template v-slot:loading>
-                  <PendingDots class="on-left" />
-                  {{ $t("InvoiceDetailDialog.actions.create.label_blocked") }}
-                </template>
-              </q-btn>
-            </div>
+              <ChevronLeftIcon :size="24" class="rtl-flip" />
+            </q-btn>
+            <q-btn
+              v-if="showNpubCashPreview"
+              class="full-width"
+              unelevated
+              rounded
+              color="primary"
+              size="lg"
+              data-testid="npub-cash-add-amount"
+              :label="$t('PaymentRequestDialog.actions.add_amount.label')"
+              @click="enterNpubCashAmountMode"
+            />
+            <q-btn
+              v-else
+              class="full-width"
+              unelevated
+              data-testid="create-payment-request"
+              size="lg"
+              :disable="!canCreate"
+              @click="requestMintButton"
+              color="primary"
+              rounded
+              type="submit"
+              :loading="globalMutexLock || createInvoiceButtonBlocked"
+            >
+              {{ createButtonLabel }}
+              <!-- A label beside the spinner, so the busy state reads even with reduced motion. -->
+              <template v-slot:loading>
+                <PendingDots class="on-left" />
+                {{ $t("InvoiceDetailDialog.actions.create.label_blocked") }}
+              </template>
+            </q-btn>
           </div>
-        </div>
+        </FlowFooter>
       </div>
     </q-card>
   </q-dialog>
 </template>
 <script lang="ts">
+import FlowFooter from "src/components/ui/FlowFooter.vue";
 import QrCopyLine from "src/components/ui/QrCopyLine.vue";
 import SegmentedControl from "src/components/ui/SegmentedControl.vue";
 import PendingDots from "src/components/ui/PendingDots.vue";
@@ -316,6 +314,7 @@ export default defineComponent({
   name: "CreateInvoiceDialog",
   mixins: [windowMixin],
   components: {
+    FlowFooter,
     QrCopyLine,
     SegmentedControl,
     PendingDots,

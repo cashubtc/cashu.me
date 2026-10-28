@@ -73,7 +73,7 @@
     </div>
 
     <!-- Footer: Share (where the platform can) and Copy, an equal pair. -->
-    <div class="bottom-panel">
+    <FlowFooter>
       <div class="pr-foot row no-wrap">
         <q-btn
           v-if="webShareSupported"
@@ -100,7 +100,7 @@
           {{ $t("PaymentRequestDialog.actions.copy.label") }}
         </q-btn>
       </div>
-    </div>
+    </FlowFooter>
 
     <!-- Amount: the app's keypad where the wallet uses it (and the request is in the wallet's
          unit), otherwise a typed field, which brings up the device's number pad. -->
@@ -191,6 +191,7 @@
 </template>
 
 <script lang="ts">
+import FlowFooter from "src/components/ui/FlowFooter.vue";
 import AmountHeadline from "src/components/ui/AmountHeadline.vue";
 import QrCopyLine from "src/components/ui/QrCopyLine.vue";
 import {
@@ -231,6 +232,7 @@ export default defineComponent({
   name: "PaymentRequestView",
   mixins: [windowMixin],
   components: {
+    FlowFooter,
     AmountHeadline,
     QrCopyLine,
     AmountInputComponent,
@@ -465,10 +467,6 @@ export default defineComponent({
 }
 .pr-foot {
   gap: 10px;
-  margin: 0 auto;
-  max-width: var(--app-column);
-  padding: 8px 16px 24px;
-  width: 100%;
 }
 .pr-foot__btn {
   flex: 1 1 0;

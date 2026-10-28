@@ -46,10 +46,7 @@
 
         <!-- Mint selection -->
         <div class="row justify-center">
-          <div
-            class="col-12 q-px-md q-mb-sm"
-            style="max-width: var(--app-column)"
-          >
+          <div class="col-12 q-px-md" style="max-width: var(--app-column)">
             <ChooseMint
               v-if="!showNoMintForMethodError"
               :filter-payment-method="payPaymentMethod"
@@ -494,8 +491,11 @@
 
               <!-- INPUT CONTENT -->
               <div v-else>
+                <!-- One 16px gap under the mint picker (its own bottom inset), as between
+                     the input and the scan card. -->
                 <ParseInputComponent
                   v-if="!camera.show"
+                  style="margin-top: 0"
                   v-model="payInvoiceData.input.request"
                   test-id="payment-request-input"
                   :placeholder="parseInputPlaceholder"
@@ -511,127 +511,114 @@
         </div>
 
         <!-- Bottom fixed pay action -->
-        <div
-          class="bottom-panel"
+        <FlowFooter
           v-if="
             payInvoiceData.invoice &&
             (hasMeltQuote || payInvoiceData.meltQuote.error != '')
           "
         >
-          <div class="row justify-center q-pb-lg q-pt-sm">
-            <div class="col-12 q-px-md" style="max-width: var(--app-column)">
-              <!-- Close button when paid or error -->
-              <template v-if="isPaid || payInvoiceData.meltQuote.error != ''">
-                <q-btn
-                  class="full-width"
-                  unelevated
-                  size="lg"
-                  color="primary"
-                  rounded
-                  @click="closeDialog"
-                  :label="$t('PayInvoiceDialog.invoice.actions.close.label')"
-                />
+          <!-- Close button when paid or error -->
+          <template v-if="isPaid || payInvoiceData.meltQuote.error != ''">
+            <q-btn
+              class="full-width"
+              unelevated
+              size="lg"
+              color="primary"
+              rounded
+              @click="closeDialog"
+              :label="$t('PayInvoiceDialog.invoice.actions.close.label')"
+            />
+          </template>
+          <!-- Pay button when ready to pay -->
+          <template
+            v-else-if="
+              enoughtotalUnitBalance ||
+              (hasMultinutSupport && multinutEnabled) ||
+              waitingForWallet ||
+              paymentInProgress
+            "
+          >
+            <q-btn
+              class="full-width"
+              unelevated
+              size="lg"
+              color="primary"
+              rounded
+              data-testid="pay-payment-request"
+              :disabled="
+                payInvoiceData.blocking || waitingForWallet || paymentInProgress
+              "
+              @click="handleMeltButton"
+              :label="paymentButtonLabel"
+              :loading="waitingForWallet || paymentInProgress"
+            >
+              <template v-slot:loading>
+                <PendingDots class="on-left" />
+                <span>{{ paymentButtonLabel }}</span>
               </template>
-              <!-- Pay button when ready to pay -->
-              <template
-                v-else-if="
-                  enoughtotalUnitBalance ||
-                  (hasMultinutSupport && multinutEnabled) ||
-                  waitingForWallet ||
-                  paymentInProgress
-                "
-              >
-                <q-btn
-                  class="full-width"
-                  unelevated
-                  size="lg"
-                  color="primary"
-                  rounded
-                  data-testid="pay-payment-request"
-                  :disabled="
-                    payInvoiceData.blocking ||
-                    waitingForWallet ||
-                    paymentInProgress
-                  "
-                  @click="handleMeltButton"
-                  :label="paymentButtonLabel"
-                  :loading="waitingForWallet || paymentInProgress"
-                >
-                  <template v-slot:loading>
-                    <PendingDots class="on-left" />
-                    <span>{{ paymentButtonLabel }}</span>
-                  </template>
-                </q-btn>
-                <q-btn
-                  v-if="hasMultinutSupport && multinutEnabled"
-                  class="full-width q-mt-sm"
-                  flat
-                  size="md"
-                  color="primary"
-                  rounded
-                  @click="openMultinutDialog"
-                  :label="$t('PayInvoiceDialog.multinut.label')"
-                />
-              </template>
-              <!-- Balance too low -->
-              <template v-else>
-                <q-btn
-                  class="full-width"
-                  unelevated
-                  size="lg"
-                  color="primary"
-                  rounded
-                  disabled
-                >
-                  {{
-                    $t("PayInvoiceDialog.invoice.balance_too_low_warning_text")
-                  }}
-                </q-btn>
-              </template>
-            </div>
-          </div>
-        </div>
+            </q-btn>
+            <q-btn
+              v-if="hasMultinutSupport && multinutEnabled"
+              class="full-width q-mt-sm"
+              flat
+              size="md"
+              color="primary"
+              rounded
+              @click="openMultinutDialog"
+              :label="$t('PayInvoiceDialog.multinut.label')"
+            />
+          </template>
+          <!-- Balance too low -->
+          <template v-else>
+            <q-btn
+              class="full-width"
+              unelevated
+              size="lg"
+              color="primary"
+              rounded
+              disabled
+            >
+              {{ $t("PayInvoiceDialog.invoice.balance_too_low_warning_text") }}
+            </q-btn>
+          </template>
+        </FlowFooter>
 
         <!-- Bottom fixed amountless payment quote action -->
-        <div
-          class="bottom-panel"
+        <FlowFooter
           v-if="showAmountlessPaymentAmountKeyboard && payInvoiceData.invoice"
         >
-          <AmountKeypadPanel
-            v-model="payInvoiceData.input.amount"
-            @done="handleAmountlessQuote"
-          />
-          <div class="row justify-center q-pb-lg q-pt-sm">
-            <div class="col-12 q-px-md" style="max-width: var(--app-column)">
-              <q-btn
-                class="full-width"
-                unelevated
-                size="lg"
-                color="primary"
-                rounded
-                data-testid="quote-payment-request"
-                @click="handleAmountlessQuote"
-                :disabled="
-                  payInvoiceData.blocking ||
-                  payInvoiceData.input.amount == null ||
-                  payInvoiceData.input.amount <= 0 ||
-                  insufficientFundsForAmountlessPayment
-                "
-                :loading="payInvoiceData.blocking"
-              >
-                {{ $t("PayInvoiceDialog.quote.label") }}
-                <template v-slot:loading>
-                  <PendingDots class="on-left" />
-                  {{ $t("PayInvoiceDialog.quote.label") }}</template
-                >
-              </q-btn>
-            </div>
-          </div>
-        </div>
+          <template #above>
+            <AmountKeypadPanel
+              v-model="payInvoiceData.input.amount"
+              @done="handleAmountlessQuote"
+            />
+          </template>
+          <q-btn
+            class="full-width"
+            unelevated
+            size="lg"
+            color="primary"
+            rounded
+            data-testid="quote-payment-request"
+            @click="handleAmountlessQuote"
+            :disabled="
+              payInvoiceData.blocking ||
+              payInvoiceData.input.amount == null ||
+              payInvoiceData.input.amount <= 0 ||
+              insufficientFundsForAmountlessPayment
+            "
+            :loading="payInvoiceData.blocking"
+          >
+            {{ $t("PayInvoiceDialog.quote.label") }}
+            <template v-slot:loading>
+              <PendingDots class="on-left" />
+              {{ $t("PayInvoiceDialog.quote.label") }}</template
+            >
+          </q-btn>
+        </FlowFooter>
 
         <!-- Bottom fixed LNURL pay action -->
-        <div
-          class="bottom-panel"
+        <FlowFooter
           v-if="
             payInvoiceData.lnurlpay &&
             !payInvoiceData.invoice &&
@@ -639,54 +626,51 @@
               payInvoiceData.lnurlpay.minSendable
           "
         >
-          <AmountKeypadPanel
-            v-if="showNumericKeyboard"
-            v-model="payInvoiceData.input.amount"
-            @done="handleLnurlPaySecond"
-          />
-          <!-- LNURL pay action below keyboard -->
-          <div class="row justify-center q-pb-lg q-pt-sm">
-            <div class="col-12 q-px-md" style="max-width: var(--app-column)">
-              <q-btn
-                class="full-width"
-                unelevated
-                size="lg"
-                color="primary"
-                rounded
-                @click="handleLnurlPaySecond"
-                :disabled="
-                  payInvoiceData.blocking ||
-                  payInvoiceData.input.amount == null ||
-                  payInvoiceData.input.amount <= 0 ||
-                  payInvoiceData.input.amount <
-                    payInvoiceData.lnurlpay.minSendable / 1000 ||
-                  payInvoiceData.input.amount >
-                    payInvoiceData.lnurlpay.maxSendable / 1000 ||
-                  insufficientFunds
-                "
-                :loading="payInvoiceData.blocking"
-              >
-                {{
-                  payInvoiceData.blocking
-                    ? $t("PayInvoiceDialog.lnurlpay.actions.send.in_progress")
-                    : $t("PayInvoiceDialog.lnurlpay.actions.send.label")
-                }}
-                <template v-slot:loading>
-                  <PendingDots class="on-left" />
-                  {{
-                    payInvoiceData.blocking
-                      ? $t("PayInvoiceDialog.lnurlpay.actions.send.in_progress")
-                      : $t("PayInvoiceDialog.lnurlpay.actions.send.label")
-                  }}</template
-                >
-              </q-btn>
-            </div>
-          </div>
-        </div>
+          <template #above>
+            <AmountKeypadPanel
+              v-if="showNumericKeyboard"
+              v-model="payInvoiceData.input.amount"
+              @done="handleLnurlPaySecond"
+            />
+            <!-- LNURL pay action below keyboard -->
+          </template>
+          <q-btn
+            class="full-width"
+            unelevated
+            size="lg"
+            color="primary"
+            rounded
+            @click="handleLnurlPaySecond"
+            :disabled="
+              payInvoiceData.blocking ||
+              payInvoiceData.input.amount == null ||
+              payInvoiceData.input.amount <= 0 ||
+              payInvoiceData.input.amount <
+                payInvoiceData.lnurlpay.minSendable / 1000 ||
+              payInvoiceData.input.amount >
+                payInvoiceData.lnurlpay.maxSendable / 1000 ||
+              insufficientFunds
+            "
+            :loading="payInvoiceData.blocking"
+          >
+            {{
+              payInvoiceData.blocking
+                ? $t("PayInvoiceDialog.lnurlpay.actions.send.in_progress")
+                : $t("PayInvoiceDialog.lnurlpay.actions.send.label")
+            }}
+            <template v-slot:loading>
+              <PendingDots class="on-left" />
+              {{
+                payInvoiceData.blocking
+                  ? $t("PayInvoiceDialog.lnurlpay.actions.send.in_progress")
+                  : $t("PayInvoiceDialog.lnurlpay.actions.send.label")
+              }}</template
+            >
+          </q-btn>
+        </FlowFooter>
 
         <!-- Bottom fixed LNURL pay action (fixed amount, no keyboard) -->
-        <div
-          class="bottom-panel"
+        <FlowFooter
           v-if="
             payInvoiceData.lnurlpay &&
             !payInvoiceData.invoice &&
@@ -694,35 +678,31 @@
               payInvoiceData.lnurlpay.minSendable
           "
         >
-          <div class="row justify-center q-pb-lg q-pt-sm">
-            <div class="col-12 q-px-md" style="max-width: var(--app-column)">
-              <q-btn
-                class="full-width"
-                unelevated
-                size="lg"
-                color="primary"
-                rounded
-                @click="handleLnurlPaySecond"
-                :disabled="payInvoiceData.blocking"
-                :loading="payInvoiceData.blocking"
-              >
-                {{
-                  payInvoiceData.blocking
-                    ? $t("PayInvoiceDialog.lnurlpay.actions.send.in_progress")
-                    : $t("PayInvoiceDialog.lnurlpay.actions.send.label")
-                }}
-                <template v-slot:loading>
-                  <PendingDots class="on-left" />
-                  {{
-                    payInvoiceData.blocking
-                      ? $t("PayInvoiceDialog.lnurlpay.actions.send.in_progress")
-                      : $t("PayInvoiceDialog.lnurlpay.actions.send.label")
-                  }}</template
-                >
-              </q-btn>
-            </div>
-          </div>
-        </div>
+          <q-btn
+            class="full-width"
+            unelevated
+            size="lg"
+            color="primary"
+            rounded
+            @click="handleLnurlPaySecond"
+            :disabled="payInvoiceData.blocking"
+            :loading="payInvoiceData.blocking"
+          >
+            {{
+              payInvoiceData.blocking
+                ? $t("PayInvoiceDialog.lnurlpay.actions.send.in_progress")
+                : $t("PayInvoiceDialog.lnurlpay.actions.send.label")
+            }}
+            <template v-slot:loading>
+              <PendingDots class="on-left" />
+              {{
+                payInvoiceData.blocking
+                  ? $t("PayInvoiceDialog.lnurlpay.actions.send.in_progress")
+                  : $t("PayInvoiceDialog.lnurlpay.actions.send.label")
+              }}</template
+            >
+          </q-btn>
+        </FlowFooter>
       </div>
     </q-card>
   </q-dialog>
@@ -734,6 +714,7 @@
   />
 </template>
 <script lang="ts">
+import FlowFooter from "src/components/ui/FlowFooter.vue";
 import PendingDots from "src/components/ui/PendingDots.vue";
 import { CircleCheck as CircleCheckIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
@@ -764,6 +745,7 @@ export default defineComponent({
   name: "PayInvoiceDialog",
   mixins: [windowMixin],
   components: {
+    FlowFooter,
     PendingDots,
     CircleCheckIcon,
     ChooseMint,

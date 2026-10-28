@@ -55,6 +55,7 @@ describe("standard elements", () => {
     ["WalletActions.vue", /^wallet-(actions|action-btn|scan-btn)$/],
     ["ui/QrCopyLine.vue", /^qr-copy-line(__icon)?$/],
     ["ui/AmountHeadline.vue", /^amount-headline$/],
+    ["ui/FlowFooter.vue", /^(bottom-panel|flow-footer__(bar|col))$/],
     [
       "ui/SectionDivider.vue",
       /^(section-divider(-block|__caption)?|divider-(line|text))$/,

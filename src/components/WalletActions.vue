@@ -36,7 +36,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { Scan as ScanIcon } from "lucide-vue-next";
+import { ScanLine as ScanIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "WalletActions",

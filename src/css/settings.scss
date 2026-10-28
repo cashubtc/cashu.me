@@ -53,6 +53,14 @@
   color: var(--app-text);
 }
 
+// The page's description under its title: one step above section captions (15 vs 14), so
+// the order is title, page description, section title, section description.
+.settings-page-caption {
+  color: var(--app-text-muted);
+  font-size: 15px;
+  line-height: 22px;
+}
+
 // A section's description reads at the row-description size and colour (14/20, muted):
 // at 12px subtle it was smaller and dimmer than the rows it introduces.
 .settings-section-caption {

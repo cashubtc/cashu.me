@@ -632,6 +632,16 @@ export const DS_ITEMS: DsItem[] = [
     usage: { tag: "WelcomeSlideScaffold" },
     example: `<WelcomeSlideScaffold :icon="KeyRoundIcon" :title="$t('…title')" :text="$t('…text')">…</WelcomeSlideScaffold>`,
   },
+  {
+    id: "flow-footer",
+    name: "Flow footer",
+    group: "layout",
+    tier: "pattern",
+    source: "src/components/ui/FlowFooter.vue",
+    usage: { tag: "FlowFooter" },
+    example: `<FlowFooter>\n  <q-btn class="full-width" unelevated rounded size="lg" color="primary">…</q-btn>\n</FlowFooter>`,
+    note: "The main action pinned under a full-screen flow, in the app column. The above slot holds the keypad on amount steps.",
+  },
 ];
 
 export const dsItem = (id: string): DsItem | undefined =>

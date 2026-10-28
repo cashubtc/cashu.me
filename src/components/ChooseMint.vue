@@ -122,7 +122,7 @@
           <template v-if="showBalances" #caption>
             <span v-if="!mint.errored">
               <template v-for="(unit, i) in heldUnits(mint)" :key="unit">
-                <template v-if="i > 0"> · </template>
+                <template v-if="i > 0"> + </template>
                 <bdi dir="ltr">{{
                   formatCurrency(mint.balances[unit], unit)
                 }}</bdi>

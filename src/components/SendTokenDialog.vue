@@ -166,60 +166,52 @@
         </div>
 
         <!-- Numeric keypad -->
-        <div class="bottom-panel">
-          <AmountKeypadPanel v-model="sendData.amount" @done="sendTokens" />
-          <!-- Send action below keyboard -->
-          <div class="row justify-center q-pb-lg q-pt-sm">
-            <div
-              class="col-12 q-px-md"
-              style="max-width: 600px; max-height: 60px"
-            >
-              <SendPaymentRequest
-                v-if="sendData.paymentRequest"
-                :button-label="$t('SendTokenDialog.actions.pay.label')"
-                :disable="paymentRequestButtonDisabled"
-                :show-details="false"
-                :full-width="true"
-                :button-rounded="true"
-                :button-dense="false"
-                :button-unelevated="true"
-                button-size="lg"
-                button-color="primary"
-                :button-class="[]"
-                :prepare-token="preparePaymentRequestTokens"
-                @success="handlePaymentRequestSuccess"
-              />
-              <q-btn
-                v-else
-                class="full-width"
-                unelevated
-                size="lg"
-                :disable="
-                  sendingEcash ||
-                  sendData.amount == null ||
-                  sendData.amount <= 0 ||
-                  insufficientFunds ||
-                  (sendData.p2pkPubkey != '' &&
-                    !isValidPubkey(sendData.p2pkPubkey))
-                "
-                data-testid="send-ecash"
-                @click="sendTokens"
-                color="primary"
-                rounded
-                type="submit"
-                :loading="sendingEcash"
-              >
-                {{ $t("SendTokenDialog.actions.send.label") }}
-                <template v-slot:loading>
-                  <PendingDots class="on-left" />
-                  <span>{{
-                    $t("SendTokenDialog.actions.send.in_progress")
-                  }}</span>
-                </template>
-              </q-btn>
-            </div>
-          </div>
-        </div>
+        <FlowFooter>
+          <template #above>
+            <AmountKeypadPanel v-model="sendData.amount" @done="sendTokens" />
+            <!-- Send action below keyboard -->
+          </template>
+          <SendPaymentRequest
+            v-if="sendData.paymentRequest"
+            :button-label="$t('SendTokenDialog.actions.pay.label')"
+            :disable="paymentRequestButtonDisabled"
+            :show-details="false"
+            :full-width="true"
+            :button-rounded="true"
+            :button-dense="false"
+            :button-unelevated="true"
+            button-size="lg"
+            button-color="primary"
+            :button-class="[]"
+            :prepare-token="preparePaymentRequestTokens"
+            @success="handlePaymentRequestSuccess"
+          />
+          <q-btn
+            v-else
+            class="full-width"
+            unelevated
+            size="lg"
+            :disable="
+              sendingEcash ||
+              sendData.amount == null ||
+              sendData.amount <= 0 ||
+              insufficientFunds ||
+              (sendData.p2pkPubkey != '' && !isValidPubkey(sendData.p2pkPubkey))
+            "
+            data-testid="send-ecash"
+            @click="sendTokens"
+            color="primary"
+            rounded
+            type="submit"
+            :loading="sendingEcash"
+          >
+            {{ $t("SendTokenDialog.actions.send.label") }}
+            <template v-slot:loading>
+              <PendingDots class="on-left" />
+              <span>{{ $t("SendTokenDialog.actions.send.in_progress") }}</span>
+            </template>
+          </q-btn>
+        </FlowFooter>
       </div>
 
       <!-- show ecash details -->
@@ -230,6 +222,7 @@
   </q-dialog>
 </template>
 <script lang="ts">
+import FlowFooter from "src/components/ui/FlowFooter.vue";
 import IconButton from "src/components/ui/IconButton.vue";
 import PendingDots from "src/components/ui/PendingDots.vue";
 import AppBadge from "src/components/ui/AppBadge.vue";
@@ -259,13 +252,14 @@ import PaymentRequestInfo from "components/PaymentRequestInfo.vue";
 import {
   ClipboardPaste as ClipboardPasteIcon,
   Lock as LockIcon,
-  Scan as ScanIcon,
+  ScanLine as ScanIcon,
 } from "lucide-vue-next";
 declare const windowMixin: any;
 export default defineComponent({
   name: "SendTokenDialog",
   mixins: [windowMixin],
   components: {
+    FlowFooter,
     IconButton,
     PendingDots,
     AppBadge,

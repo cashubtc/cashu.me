@@ -35,9 +35,10 @@
       >
         <div v-if="balances.length" class="mint-card__balances">
           <template v-for="(balance, i) in balances" :key="balance">
-            <!-- Several unit balances read as separate holdings, not a conversion. -->
+            <!-- Several unit balances read as separate holdings joined by a plus; a middle dot
+                 read as "₿500, worth $25.00" (council R68-R69). -->
             <span v-if="i > 0" class="mint-card__plus" aria-hidden="true"
-              >·</span
+              >+</span
             >
             <bdi dir="ltr" class="currency-unit-text">{{ balance }}</bdi>
           </template>

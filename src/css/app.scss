@@ -459,10 +459,12 @@ body[data-theme] .welcome-surface,
   font-variant-numeric: tabular-nums;
 }
 
-/* Toggles: an inset pill. On = filled primary track with an on-primary thumb on the right;
-   off = a solid neutral track with an ink thumb on the left (the iOS model): both are solid,
-   so off never looks disabled, and the two differ in brightness as well as position. */
+/* Toggles (the Material 3 switch): on = a filled primary track with a large on-primary thumb on
+   the end side; off = an empty outlined track with a small ink thumb on the start side. On and
+   off differ in fill, thumb size and position, not just in which grey is lighter (council R68:
+   a light track with a dark thumb next to a grey track with a light thumb read as inverted). */
 .q-toggle:not(.q-toggle--dense) {
+  --toggle-off-ink: color-mix(in srgb, var(--app-text) 60%, transparent);
   .q-toggle__inner {
     padding: 0.2em 0.3em;
   }
@@ -470,51 +472,34 @@ body[data-theme] .welcome-surface,
     height: 0.6em;
     border-radius: 0.3em;
     opacity: 1;
-    // 46% ink: the off track clears 3:1 against cards and groups, not just the page.
-    background: color-mix(in srgb, var(--app-text) 46%, transparent);
-    box-shadow: none;
+    background: transparent;
+    box-shadow: inset 0 0 0 0.05em var(--toggle-off-ink);
   }
   .q-toggle__thumb {
-    top: 0.28em;
-    left: 0.38em;
-    width: 0.44em;
-    height: 0.44em;
+    top: 0.35em;
+    left: 0.45em;
+    width: 0.3em;
+    height: 0.3em;
   }
   .q-toggle__thumb:after {
-    background-color: var(--app-text-muted);
+    background-color: var(--toggle-off-ink);
     box-shadow: none;
   }
   .q-toggle__inner--truthy {
     .q-toggle__track {
       background: currentColor;
+      box-shadow: none;
     }
     .q-toggle__thumb {
+      top: 0.28em;
       left: 0.58em;
+      width: 0.44em;
+      height: 0.44em;
     }
     .q-toggle__thumb:after {
       background-color: var(--app-on-primary);
     }
   }
-}
-body.body--light .q-toggle:not(.q-toggle--dense) .q-toggle__track {
-  background: rgba(0, 0, 0, 0.5);
-}
-body.body--light
-  .q-toggle:not(.q-toggle--dense)
-  .q-toggle__inner--truthy
-  .q-toggle__track {
-  background: currentColor;
-}
-body.body--light .q-toggle:not(.q-toggle--dense) .q-toggle__thumb:after {
-  background-color: #fff;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.15);
-}
-body.body--light
-  .q-toggle:not(.q-toggle--dense)
-  .q-toggle__inner--truthy
-  .q-toggle__thumb:after {
-  background-color: var(--app-on-primary);
-  box-shadow: none;
 }
 // A disabled toggle is one grey treatment whatever its value, weaker than both on and off.
 .q-toggle.disabled {
@@ -1240,6 +1225,17 @@ html[dir="rtl"] .q-field__append {
   background: var(--app-surface);
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
+// FlowFooter's action bar: the app column, 16px sides, 8px above and 24px below.
+.flow-footer__bar {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0 24px;
+}
+.flow-footer__col {
+  max-width: var(--app-column);
+  padding: 0 16px;
+  width: 100%;
+}
 .display-token-fullscreen .bottom-panel {
   z-index: 2;
 }
@@ -1496,6 +1492,7 @@ body .q-notification .q-notification__actions .q-btn {
 // Light mode: a white card with a hairline and a soft shadow, as in dark mode.
 body.body--light .q-notification {
   background: var(--app-surface) !important;
+  border-color: var(--app-border);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 // Toasts sit above the pinned bottom action (52px button + 24px inset), so they never cover
@@ -1511,14 +1508,20 @@ body .q-notifications__list--bottom .q-notification {
   position: relative;
   z-index: 1;
 }
+// The tucked toast is opaque and shows only its edge: its own content is hidden until the
+// stack fans out, so no half-covered text or icon peeks out above the front toast.
 body .q-notifications__list--bottom .q-notification:not(:last-child) {
-  opacity: 0.9;
   transform: translateY(calc(100% - 14px)) scale(0.94);
   z-index: 0;
 }
+body .q-notifications__list--bottom .q-notification:not(:last-child) > * {
+  visibility: hidden;
+}
 body .q-notifications__list--bottom:hover .q-notification {
-  opacity: 1;
   transform: none;
+}
+body .q-notifications__list--bottom:hover .q-notification > * {
+  visibility: visible;
 }
 // Toasts live outside #q-app; in right-to-left they follow the page's direction too.
 html[dir="rtl"] .q-notifications {

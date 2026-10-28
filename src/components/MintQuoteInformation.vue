@@ -23,7 +23,7 @@
     <DetailRow
       v-if="stateDisplay && !(hidePaidStatus && isPaidState)"
       class="q-mb-md"
-      :icon="InfoIcon"
+      :icon="ActivityIcon"
       :label="$t('QuoteInformation.status')"
       :value-class="{ 'text-positive': isPaidState }"
     >
@@ -103,7 +103,7 @@ import {
   Clock as ClockIcon,
   Coins as CoinsIcon,
   Hash as HashIcon,
-  Info as InfoIcon,
+  Activity as ActivityIcon,
   Landmark as LandmarkIcon,
   Network as NetworkIcon,
   Zap as ZapIcon,
@@ -142,7 +142,7 @@ export default defineComponent({
       ClockIcon,
       CoinsIcon,
       HashIcon,
-      InfoIcon,
+      ActivityIcon,
       LandmarkIcon,
       NetworkIcon,
       ZapIcon,

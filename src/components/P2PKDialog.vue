@@ -59,27 +59,24 @@
         </div>
 
         <!-- Bottom panel action -->
-        <div class="bottom-panel">
-          <div class="row justify-center q-pb-lg q-pt-sm">
-            <div class="col-12 q-px-md" style="max-width: var(--app-column)">
-              <q-btn
-                class="full-width"
-                unelevated
-                size="lg"
-                color="primary"
-                rounded
-                @click="onCopyPublicKey"
-              >
-                {{ $t("P2PKDialog.actions.copy.label") }}
-              </q-btn>
-            </div>
-          </div>
-        </div>
+        <FlowFooter>
+          <q-btn
+            class="full-width"
+            unelevated
+            size="lg"
+            color="primary"
+            rounded
+            @click="onCopyPublicKey"
+          >
+            {{ $t("P2PKDialog.actions.copy.label") }}
+          </q-btn>
+        </FlowFooter>
       </div>
     </q-card>
   </q-dialog>
 </template>
 <script lang="ts">
+import FlowFooter from "src/components/ui/FlowFooter.vue";
 import { RefreshCw as RefreshCwIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -94,7 +91,13 @@ declare const windowMixin: any;
 export default defineComponent({
   name: "P2PKDialog",
   mixins: [windowMixin],
-  components: { RefreshCwIcon, QrBlock, QrCopyLine, FullscreenDialogHeader },
+  components: {
+    FlowFooter,
+    RefreshCwIcon,
+    QrBlock,
+    QrCopyLine,
+    FullscreenDialogHeader,
+  },
   data: function () {
     return {};
   },

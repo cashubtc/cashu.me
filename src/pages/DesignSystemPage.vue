@@ -969,11 +969,45 @@
           </WelcomeSlideScaffold>
         </div>
       </DsEntry>
+      <DsEntry id="flow-footer">
+        <div class="column q-gutter-y-md">
+          <FlowFooter>
+            <q-btn
+              class="full-width"
+              unelevated
+              size="lg"
+              color="primary"
+              rounded
+              >Copy invoice</q-btn
+            >
+          </FlowFooter>
+          <FlowFooter>
+            <q-btn
+              class="full-width"
+              unelevated
+              size="lg"
+              color="primary"
+              rounded
+              disable
+              >Send</q-btn
+            >
+          </FlowFooter>
+          <FlowFooter>
+            <div class="row no-wrap" style="gap: 10px">
+              <q-btn class="col" outline rounded size="lg">Share</q-btn>
+              <q-btn class="col" unelevated rounded size="lg" color="primary"
+                >Copy</q-btn
+              >
+            </div>
+          </FlowFooter>
+        </div>
+      </DsEntry>
     </div>
   </div>
 </template>
 
 <script lang="ts">
+import FlowFooter from "src/components/ui/FlowFooter.vue";
 import AmountInputComponent from "src/components/AmountInputComponent.vue";
 import AmountHeadline from "src/components/ui/AmountHeadline.vue";
 import { defineComponent, markRaw, reactive } from "vue";
@@ -1056,7 +1090,7 @@ import {
   Palette as PaletteIcon,
   Plus as PlusIcon,
   RefreshCw as RefreshCwIcon,
-  Scan as ScanIcon,
+  ScanLine as ScanIcon,
   Search as SearchIcon,
   Shield as ShieldIcon,
   X as XIcon,
@@ -1079,6 +1113,7 @@ export default defineComponent({
   name: "DesignSystemPage",
   mixins: [windowMixin],
   components: {
+    FlowFooter,
     AmountHeadline,
     AmountInputComponent,
     AppCallout,

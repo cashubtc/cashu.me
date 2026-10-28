@@ -44,14 +44,9 @@
       <div v-else-if="loading && !name" class="mint-name">
         <q-skeleton type="text" width="96px" />
       </div>
-      <!-- A mint without its own name keeps the same two lines as named mints in lists that
-           pass unnamedLabel: a muted placeholder title over the host. -->
-      <div
-        v-else-if="unnamedLabel && (!name || name === host)"
-        class="mint-name mint-name--unnamed"
-      >
-        {{ unnamedLabel }}
-      </div>
+      <!-- Every mint has the same two lines in lists that pass unnamedLabel: a mint without
+           its own name takes its host as the title (in the normal colour, so it never reads
+           as disabled) over a muted "unnamed" line. -->
       <div v-else class="mint-name">{{ name || host }}</div>
       <div
         v-if="
@@ -62,7 +57,9 @@
         "
         class="mint-url"
       >
-        {{ host }}
+        {{
+          (loading && !name) || (name && name !== host) ? host : unnamedLabel
+        }}
       </div>
     </div>
   </div>
@@ -143,10 +140,6 @@ export default defineComponent({
   word-break: break-word;
   white-space: normal;
   max-width: 100%;
-}
-
-.mint-name--unnamed {
-  color: var(--app-text-muted);
 }
 
 .mint-url {

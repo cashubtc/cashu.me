@@ -258,23 +258,19 @@
       </q-card-section>
     </div>
     <!-- Fixed bottom panel with copy button -->
-    <div class="bottom-panel">
-      <div class="row justify-center q-pb-lg q-pt-sm">
-        <div class="col-12 q-px-md" style="max-width: var(--app-column)">
-          <q-btn
-            class="full-width"
-            unelevated
-            size="lg"
-            color="primary"
-            rounded
-            data-testid="copy-ecash-token"
-            @click="copyTokens"
-          >
-            {{ copyButtonLabel }}
-          </q-btn>
-        </div>
-      </div>
-    </div>
+    <FlowFooter>
+      <q-btn
+        class="full-width"
+        unelevated
+        size="lg"
+        color="primary"
+        rounded
+        data-testid="copy-ecash-token"
+        @click="copyTokens"
+      >
+        {{ copyButtonLabel }}
+      </q-btn>
+    </FlowFooter>
   </div>
   <!-- popup dialog to confirm deletion -->
   <q-dialog v-model="showDeleteDialog">
@@ -314,6 +310,7 @@
   </q-dialog>
 </template>
 <script lang="ts">
+import FlowFooter from "src/components/ui/FlowFooter.vue";
 import PendingDots from "src/components/ui/PendingDots.vue";
 import { defineComponent } from "vue";
 import { Buffer } from "buffer";
@@ -346,7 +343,7 @@ import {
   Link as LinkIcon,
   Nfc as NfcIcon,
   Nut as NutIcon,
-  Scan as ScanIcon,
+  ScanLine as ScanIcon,
   Share as ShareIcon,
   Trash2 as Trash2Icon,
   ZoomIn as ZoomInIcon,
@@ -358,6 +355,7 @@ export default defineComponent({
   name: "DisplayTokenComponent",
   mixins: [windowMixin],
   components: {
+    FlowFooter,
     PendingDots,
     LinkIcon,
     Trash2Icon,

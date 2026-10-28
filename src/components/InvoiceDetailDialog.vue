@@ -119,30 +119,30 @@
         </div>
 
         <!-- Bottom panel action -->
-        <div class="bottom-panel">
-          <div class="row justify-center q-pb-lg q-pt-sm">
-            <div class="col-12 q-px-md" style="max-width: var(--app-column)">
-              <!-- Always rendered (disabled until the request arrives), so the footer never
-                   appears late and shifts the screen. -->
-              <q-btn
-                :disable="!invoiceData.request"
-                class="full-width"
-                unelevated
-                size="lg"
-                color="primary"
-                rounded
-                @click="onCopyBolt11"
-              >
-                {{ copyButtonLabel }}
-              </q-btn>
-            </div>
-          </div>
-        </div>
+        <FlowFooter>
+          <!-- Always rendered (disabled until the request arrives), so the footer never
+               appears late and shifts the screen. -->
+          <!-- Once paid there is nothing left to do, so copying is a secondary (outline)
+               action; while waiting it is the screen's primary action. -->
+          <q-btn
+            :disable="!invoiceData.request"
+            class="full-width"
+            :unelevated="invoiceData.status !== 'paid'"
+            :outline="invoiceData.status === 'paid'"
+            size="lg"
+            :color="invoiceData.status === 'paid' ? undefined : 'primary'"
+            rounded
+            @click="onCopyBolt11"
+          >
+            {{ copyButtonLabel }}
+          </q-btn>
+        </FlowFooter>
       </div>
     </q-card>
   </q-dialog>
 </template>
 <script lang="ts">
+import FlowFooter from "src/components/ui/FlowFooter.vue";
 import AmountHeadline from "src/components/ui/AmountHeadline.vue";
 import QrCopyLine from "src/components/ui/QrCopyLine.vue";
 import { shortenString } from "src/js/string-utils";
@@ -169,6 +169,7 @@ export default defineComponent({
   name: "InvoiceDetailDialog",
   mixins: [windowMixin],
   components: {
+    FlowFooter,
     AmountHeadline,
     QrCopyLine,
     CircleCheckIcon,

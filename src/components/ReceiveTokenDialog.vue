@@ -160,122 +160,116 @@
 
         <!-- Bottom fixed receive action -->
         <transition appear enter-active-class="animated fadeIn">
-          <div class="bottom-panel" v-if="tokenDecodesCorrectly">
-            <div class="row justify-center q-pb-lg q-pt-sm">
-              <div class="col-12 q-px-md" style="max-width: var(--app-column)">
-                <template v-if="isNotLockedToUs">
-                  <AppCallout
-                    variant="danger"
-                    :text="
-                      $t('ReceiveTokenDialog.errors.p2pk_lock_mismatch.label')
-                    "
-                  />
-                </template>
-                <template v-else-if="swapSelected">
-                  <q-btn
-                    class="full-width"
-                    unelevated
-                    size="lg"
-                    @click="handleSwapToTrustedMint"
-                    color="primary"
-                    rounded
-                    :loading="swapProcessing || swapBlocking"
-                    :disabled="!canConfirmSwap"
-                  >
-                    {{
-                      $t(
-                        "ReceiveTokenDialog.actions.receive_to_selected_mint.label"
-                      )
-                    }}
-                    <template v-slot:loading>
-                      <PendingDots class="on-left" />
-                      {{
-                        $t(
-                          "ReceiveTokenDialog.actions.receive_to_selected_mint.label"
+          <FlowFooter v-if="tokenDecodesCorrectly">
+            <template v-if="isNotLockedToUs">
+              <AppCallout
+                variant="danger"
+                :text="$t('ReceiveTokenDialog.errors.p2pk_lock_mismatch.label')"
+              />
+            </template>
+            <template v-else-if="swapSelected">
+              <q-btn
+                class="full-width"
+                unelevated
+                size="lg"
+                @click="handleSwapToTrustedMint"
+                color="primary"
+                rounded
+                :loading="swapProcessing || swapBlocking"
+                :disabled="!canConfirmSwap"
+              >
+                {{
+                  $t(
+                    "ReceiveTokenDialog.actions.receive_to_selected_mint.label"
+                  )
+                }}
+                <template v-slot:loading>
+                  <PendingDots class="on-left" />
+                  {{
+                    $t(
+                      "ReceiveTokenDialog.actions.receive_to_selected_mint.label"
+                    )
+                  }}</template
+                >
+                <q-tooltip>{{
+                  $t("ReceiveTokenDialog.actions.confirm_swap.tooltip_text")
+                }}</q-tooltip>
+              </q-btn>
+            </template>
+            <template v-else>
+              <q-btn
+                @click="addPendingTokenToHistory(receiveData.tokensBase64)"
+                color="primary"
+                rounded
+                flat
+                class="full-width q-mb-md"
+              >
+                {{ $t("ReceiveTokenDialog.actions.later.label") }}
+                <q-tooltip>{{
+                  $t("ReceiveTokenDialog.actions.later.tooltip_text")
+                }}</q-tooltip>
+              </q-btn>
+              <q-btn
+                v-if="
+                  enableReceiveSwaps &&
+                  activeMintUrl &&
+                  mints.length > 0 &&
+                  !(
+                    mints.length === 1 &&
+                    tokenMint &&
+                    mints[0]?.url === tokenMint
+                  )
+                "
+                @click="openSwap"
+                color="primary"
+                rounded
+                outline
+                class="full-width q-mb-md"
+              >
+                {{ $t("ReceiveTokenDialog.actions.swap.label") }}
+                <q-tooltip>{{
+                  $t("ReceiveTokenDialog.actions.swap.tooltip_text")
+                }}</q-tooltip>
+              </q-btn>
+              <q-btn
+                class="full-width"
+                unelevated
+                size="lg"
+                data-testid="receive-ecash"
+                @click="handleReceive"
+                color="primary"
+                rounded
+                :disabled="addMintBlocking || isReceiving"
+                :loading="swapBlocking || isReceiving"
+              >
+                {{
+                  knowThisMint
+                    ? addMintBlocking
+                      ? $t(
+                          "ReceiveTokenDialog.actions.receive.label_adding_mint"
                         )
-                      }}</template
-                    >
-                    <q-tooltip>{{
-                      $t("ReceiveTokenDialog.actions.confirm_swap.tooltip_text")
-                    }}</q-tooltip>
-                  </q-btn>
-                </template>
-                <template v-else>
-                  <q-btn
-                    @click="addPendingTokenToHistory(receiveData.tokensBase64)"
-                    color="primary"
-                    rounded
-                    flat
-                    class="full-width q-mb-md"
-                  >
-                    {{ $t("ReceiveTokenDialog.actions.later.label") }}
-                    <q-tooltip>{{
-                      $t("ReceiveTokenDialog.actions.later.tooltip_text")
-                    }}</q-tooltip>
-                  </q-btn>
-                  <q-btn
-                    v-if="
-                      enableReceiveSwaps &&
-                      activeMintUrl &&
-                      mints.length > 0 &&
-                      !(
-                        mints.length === 1 &&
-                        tokenMint &&
-                        mints[0]?.url === tokenMint
-                      )
-                    "
-                    @click="openSwap"
-                    color="primary"
-                    rounded
-                    outline
-                    class="full-width q-mb-md"
-                  >
-                    {{ $t("ReceiveTokenDialog.actions.swap.label") }}
-                    <q-tooltip>{{
-                      $t("ReceiveTokenDialog.actions.swap.tooltip_text")
-                    }}</q-tooltip>
-                  </q-btn>
-                  <q-btn
-                    class="full-width"
-                    unelevated
-                    size="lg"
-                    data-testid="receive-ecash"
-                    @click="handleReceive"
-                    color="primary"
-                    rounded
-                    :disabled="addMintBlocking || isReceiving"
-                    :loading="swapBlocking || isReceiving"
-                  >
-                    {{
-                      knowThisMint
-                        ? addMintBlocking
-                          ? $t(
-                              "ReceiveTokenDialog.actions.receive.label_adding_mint"
-                            )
-                          : $t(
-                              "ReceiveTokenDialog.actions.receive.label_known_mint"
-                            )
-                        : $t("ReceiveTokenDialog.actions.receive.label")
-                    }}
-                    <template v-slot:loading>
-                      <PendingDots class="on-left" />
-                      {{
-                        knowThisMint
-                          ? addMintBlocking
-                            ? $t(
-                                "ReceiveTokenDialog.actions.receive.label_adding_mint"
-                              )
-                            : $t(
-                                "ReceiveTokenDialog.actions.receive.label_known_mint"
-                              )
-                          : $t("ReceiveTokenDialog.actions.receive.label")
-                      }}</template
-                    >
-                  </q-btn>
-                </template>
-              </div>
-            </div>
-          </div>
+                      : $t(
+                          "ReceiveTokenDialog.actions.receive.label_known_mint"
+                        )
+                    : $t("ReceiveTokenDialog.actions.receive.label")
+                }}
+                <template v-slot:loading>
+                  <PendingDots class="on-left" />
+                  {{
+                    knowThisMint
+                      ? addMintBlocking
+                        ? $t(
+                            "ReceiveTokenDialog.actions.receive.label_adding_mint"
+                          )
+                        : $t(
+                            "ReceiveTokenDialog.actions.receive.label_known_mint"
+                          )
+                      : $t("ReceiveTokenDialog.actions.receive.label")
+                  }}</template
+                >
+              </q-btn>
+            </template>
+          </FlowFooter>
         </transition>
       </div>
     </q-card>
@@ -283,6 +277,7 @@
 </template>
 
 <script lang="ts">
+import FlowFooter from "src/components/ui/FlowFooter.vue";
 import PendingDots from "src/components/ui/PendingDots.vue";
 import { defineComponent } from "vue";
 import AppCallout from "src/components/AppCallout.vue";
@@ -316,6 +311,7 @@ export default defineComponent({
   name: "ReceiveTokenDialog",
   mixins: [windowMixin],
   components: {
+    FlowFooter,
     PendingDots,
     AppCallout,
     TokenInformation,

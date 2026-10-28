@@ -29,6 +29,9 @@
           :pending="transaction.status === 'pending'"
           :caption="
             getDefaultLabel(transaction) +
+            (transaction.unit && transaction.unit !== 'sat'
+              ? ' · ' + transaction.unit.toUpperCase()
+              : '') +
             ' · ' +
             formattedDate(transaction.date)
           "

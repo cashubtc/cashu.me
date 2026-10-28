@@ -59,7 +59,7 @@ import { useSettingsStore } from "../stores/settings";
 import { useMintsStore } from "src/stores/mints";
 import {
   Zap as ZapIcon,
-  Scan as ScanIcon,
+  ScanLine as ScanIcon,
   Coins as CoinsIcon,
   Bitcoin as BitcoinIcon,
 } from "lucide-vue-next";
