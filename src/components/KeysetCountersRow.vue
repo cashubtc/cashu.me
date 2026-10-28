@@ -18,14 +18,8 @@
     </div>
     <div v-for="group in groups" :key="group.url" class="keysets__group">
       <div class="keysets__mint">
-        <IconCircle size="sm" class="keysets__avatar">
-          <img
-            v-if="group.iconUrl"
-            :src="group.iconUrl"
-            alt=""
-            class="keysets__img"
-          />
-          <LandmarkIcon v-else :size="16" />
+        <IconCircle size="sm" class="keysets__avatar" :src="group.iconUrl">
+          <LandmarkIcon :size="16" />
         </IconCircle>
         <span class="ellipsis">{{ group.name }}</span>
         <span aria-hidden="true">·</span>
@@ -138,11 +132,6 @@ export default defineComponent({
   height: 24px;
   margin-inline-end: 4px;
   width: 24px;
-}
-.keysets__img {
-  height: 100%;
-  object-fit: cover;
-  width: 100%;
 }
 .keysets__column {
   font-weight: 500;

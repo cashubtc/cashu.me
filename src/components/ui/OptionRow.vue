@@ -13,7 +13,12 @@
     @keydown.enter.prevent="activate"
     @keydown.space.prevent="activate"
   >
-    <IconCircle v-if="icon || $slots.icon" :icon="icon" :size="iconSize">
+    <IconCircle
+      v-if="icon || iconSrc || $slots.icon"
+      :icon="icon"
+      :src="iconSrc"
+      :size="iconSize"
+    >
       <slot name="icon" />
     </IconCircle>
     <div class="app-option-row__text">
@@ -41,6 +46,8 @@ export default defineComponent({
     icon: { type: [Object, Function] as PropType<Component>, default: null },
     /** md in action lists (Send, Receive), sm in sheet pickers. */
     iconSize: { type: String as PropType<IconCircleSize>, default: "md" },
+    /** A picture in the icon slot (a mint's icon); the icon or slot shows if it fails. */
+    iconSrc: { type: String, default: "" },
     label: { type: String, default: "" },
     caption: { type: String, default: "" },
     selected: { type: Boolean, default: false },

@@ -9,6 +9,7 @@
     :label="label"
     :caption="caption"
     :selected="selected"
+    :icon-src="iconSrc"
     @click="$emit('select')"
   >
     <template v-if="$slots.icon" #icon><slot name="icon" /></template>
@@ -37,6 +38,8 @@ export default defineComponent({
     label: { type: String, default: "" },
     caption: { type: String, default: "" },
     selected: { type: Boolean, default: false },
+    /** A picture for the icon slot (a mint's icon); the icon slot is the fallback. */
+    iconSrc: { type: String, default: "" },
   },
   emits: ["select"],
 });

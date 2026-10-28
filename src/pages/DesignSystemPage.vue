@@ -106,10 +106,18 @@
       </DsEntry>
       <DsEntry id="icon-circle">
         <div class="row q-gutter-md items-center">
+          <IconCircle :icon="ZapIcon" size="xs" />
           <IconCircle :icon="ZapIcon" size="sm" />
           <IconCircle :icon="ZapIcon" />
           <IconCircle :icon="ZapIcon" size="lg" />
           <IconCircle :icon="ZapIcon" size="xl" />
+        </div>
+        <!-- With a picture (mint icon, profile picture), and the glyph it falls back to. -->
+        <div class="row q-gutter-md items-center q-mt-sm">
+          <IconCircle size="xs" src="icons/icon-128x128.png" />
+          <IconCircle size="sm" src="icons/icon-128x128.png" />
+          <IconCircle size="lg" src="icons/icon-128x128.png" />
+          <IconCircle size="sm" src="missing.png" :icon="LandmarkIcon" />
         </div>
       </DsEntry>
       <DsEntry id="icons">

@@ -3,15 +3,12 @@
        header of the mint details, reviews and write-a-review pages, so all three read as the
        same mint. The default slot holds page extras such as the QR toggle. -->
   <div class="mint-header">
-    <IconCircle size="lg" class="q-mb-sm">
-      <img
-        v-if="info?.icon_url"
-        :src="info.icon_url"
-        alt=""
-        class="mint-header__icon"
-      />
-      <LandmarkIcon v-else :size="26" />
-    </IconCircle>
+    <IconCircle
+      size="lg"
+      class="q-mb-sm"
+      :src="info?.icon_url"
+      :icon="LandmarkIcon"
+    />
     <div class="mint-name">{{ displayName }}</div>
     <div v-if="host !== displayName" class="mint-host" dir="ltr">
       {{ host }}
@@ -29,7 +26,10 @@ import { useMintsStore } from "src/stores/mints";
 
 export default defineComponent({
   name: "MintIdentityHeader",
-  components: { IconCircle, LandmarkIcon },
+  components: { IconCircle },
+  setup() {
+    return { LandmarkIcon };
+  },
   props: {
     url: { type: String, required: true },
     info: { type: Object, required: false },
@@ -59,11 +59,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.mint-header__icon {
-  height: 100%;
-  object-fit: cover;
-  width: 100%;
-}
 .mint-header {
   align-items: center;
   background-color: var(--app-tint);

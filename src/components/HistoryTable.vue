@@ -44,10 +44,13 @@
               v-if="transaction.status === 'pending'"
               class="row items-center no-wrap text-app-muted text-caption"
             >
+              <!-- A labelled action ("Check status"), not a bare refresh glyph that read as
+                   the wallet-wide refresh (council R68-R70). -->
               <q-btn
                 flat
                 dense
-                round
+                rounded
+                no-caps
                 data-testid="history-check"
                 @click.stop="
                   transaction.longPressActive
@@ -70,12 +73,12 @@
                   v-if="transaction.longPressActive"
                   :size="18"
                 />
-                <RefreshCwIcon v-else :size="18" />
-                <q-tooltip>{{
+                <RefreshCwIcon v-else :size="16" />
+                <span class="history-check-btn__label">{{
                   transaction.longPressActive
                     ? $t("HistoryTable.actions.receive.tooltip_text")
                     : $t("HistoryTable.actions.check_status.tooltip_text")
-                }}</q-tooltip>
+                }}</span>
               </q-btn>
             </div>
           </template>
@@ -606,9 +609,15 @@ export default defineComponent({
 }
 
 .history-check-btn {
+  color: var(--app-text-muted);
+  font-size: 13px;
+  font-weight: 500;
   margin-block: -13px;
-  margin-inline: -14px -6px;
+  margin-inline-end: -8px;
   min-height: 44px;
-  min-width: 44px;
+  padding: 0 8px;
+}
+.history-check-btn__label {
+  margin-inline-start: 6px;
 }
 </style>

@@ -175,13 +175,15 @@ body.body--dark {
 body.body--light {
   --app-card-edge: transparent;
   --app-card-edge-active: color-mix(in srgb, var(--q-primary) 40%, transparent);
-  --app-card-fill: color-mix(in srgb, var(--app-text) 4%, transparent);
-  --app-card-fill-active: color-mix(in srgb, var(--app-text) 7%, transparent);
+  // 5% and 9%: on white, 4% cards (the wallet's mint card, settings groups) read as barely
+  // there next to dark mode's steps (council R69-R70).
+  --app-card-fill: color-mix(in srgb, var(--app-text) 5%, transparent);
+  --app-card-fill-active: color-mix(in srgb, var(--app-text) 9%, transparent);
   --app-field-edge: rgba(0, 0, 0, 0.46);
   --app-field-fill: #fff;
   --app-outline-edge: rgba(0, 0, 0, 0.46);
   --app-group-edge: transparent;
-  --app-group-fill: color-mix(in srgb, var(--app-text) 4%, transparent);
+  --app-group-fill: color-mix(in srgb, var(--app-text) 5%, transparent);
 }
 
 body.body--dark {

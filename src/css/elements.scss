@@ -70,6 +70,15 @@ body {
   overflow: hidden;
   width: 48px;
 }
+.app-icon-circle__img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+.app-icon-circle--xs {
+  height: 36px;
+  width: 36px;
+}
 .app-icon-circle--sm {
   height: 40px;
   width: 40px;

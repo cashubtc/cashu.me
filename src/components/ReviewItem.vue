@@ -5,15 +5,13 @@
   <div class="review-item" :aria-hidden="skeleton || undefined">
     <!-- Avatar: the reviewer's picture, else the tinted disc and line glyph of history rows. -->
     <q-skeleton v-if="skeleton" type="QAvatar" size="36px" />
-    <q-avatar v-else size="36px" class="review-avatar">
-      <q-img
-        v-if="picture"
-        :src="picture"
-        spinner-color="white"
-        spinner-size="xs"
-      />
-      <UserIcon v-else :size="18" aria-hidden="true" />
-    </q-avatar>
+    <IconCircle
+      v-else
+      size="xs"
+      class="review-avatar"
+      :src="picture"
+      :icon="UserIcon"
+    />
 
     <div class="col review-body">
       <div class="row items-center no-wrap review-head">
@@ -86,6 +84,7 @@
 </template>
 
 <script lang="ts">
+import IconCircle from "src/components/ui/IconCircle.vue";
 import { defineComponent, type PropType } from "vue";
 import {
   BadgeCheck as BadgeCheckIcon,
@@ -96,7 +95,10 @@ import AppRating from "src/components/ui/AppRating.vue";
 
 export default defineComponent({
   name: "ReviewItem",
-  components: { AppBadge, AppRating, BadgeCheckIcon, UserIcon },
+  components: { AppBadge, AppRating, BadgeCheckIcon, IconCircle },
+  setup() {
+    return { UserIcon };
+  },
   props: {
     /** The reviewer's name, or a short npub. */
     author: { type: String, default: "" },
@@ -134,9 +136,7 @@ export default defineComponent({
    same row and edges as every other review (a tinted block around it read as a misaligned
    highlight). */
 .review-avatar {
-  background: var(--app-tint-strong);
   color: var(--app-text-muted);
-  flex-shrink: 0;
 }
 .review-body {
   min-width: 0;

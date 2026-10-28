@@ -35,6 +35,21 @@ html:lang(ar) .text-body2,
 html:lang(ar) p {
   line-height: 1.6;
 }
+// Chinese: a named CJK face after Inter (Latin stays Inter), bold drawn at 600 because CJK
+// glyphs at 700 look heavier than the Latin beside them, and roomier paragraph lines.
+html:lang(zh) body {
+  font-family: "Inter", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC",
+    "Microsoft YaHei", sans-serif;
+}
+html:lang(zh) .text-weight-bold,
+html:lang(zh) .text-h5,
+html:lang(zh) .sheet-title {
+  font-weight: 600 !important;
+}
+html:lang(zh) p,
+html:lang(zh) .q-item__label--caption {
+  line-height: 1.6;
+}
 
 // Dialog header typography
 // This class provides proper letter-spacing for dialog titles
@@ -693,21 +708,7 @@ body.body--light .q-dialog__backdrop {
 }
 // The mint's own icon in a round slot (a landmark glyph on a tint when it has none):
 // 40px in both the compact field and the card.
-.mint-chip__avatar {
-  align-items: center;
-  background: var(--app-tint-strong);
-  border-radius: 50%;
-  display: inline-flex;
-  flex: none;
-  height: 40px;
-  justify-content: center;
-  overflow: hidden;
-  width: 40px;
-}
-.mint-chip__avatar .q-img {
-  height: 100%;
-  width: 100%;
-}
+
 // The wallet's mint selector is a filled card, not an outlined field: an edge made it read
 // as a text input (council, R44-R68). Forms keep the outlined compact field.
 .mint-chip--card {
@@ -717,10 +718,6 @@ body.body--light .q-dialog__backdrop {
   min-height: 72px;
   padding: 12px 12px 12px 16px;
   padding-inline: 16px 12px;
-}
-.mint-chip--card .mint-chip__avatar {
-  height: 40px;
-  width: 40px;
 }
 .mint-chip--card .mint-chip__name {
   font-weight: 500;
@@ -1310,10 +1307,12 @@ body .mint-card {
   background: var(--app-card-fill);
   box-shadow: var(--app-card-shadow);
 }
-// The active or selected card is a stronger fill; its control (the Active badge, or the
-// restore checkbox) is the one explicit signal, so there is no second coloured edge.
+// The active or selected card: a stronger fill and the shared selected edge, beside its
+// control (the Active badge, or the restore checkbox). The fill alone read as too faint a
+// difference in both modes (council R69-R70).
 body .mint-card.mint-card--active {
   background: var(--app-card-fill-active);
+  border-color: var(--app-card-edge-active);
 }
 
 /* Mint card: one 16px inset, the identity row with its actions centred on it,

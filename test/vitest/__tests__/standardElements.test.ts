@@ -74,6 +74,17 @@ describe("standard elements", () => {
     ).toEqual([]);
   });
 
+  // Pictures and glyphs in a round slot are IconCircle (src for a picture, the icon as its
+  // fallback). The remaining q-avatars are the ones still waiting to move over; no new ones.
+  it("round avatars use IconCircle", () => {
+    expect(offenders((text) => text.includes("<q-avatar")).sort()).toEqual([
+      "components/ActivityRow.vue",
+      "components/MintInfoContainer.vue",
+      "components/WelcomeDialog.vue",
+      "pages/CreateMintReviewPage.vue",
+    ]);
+  });
+
   it("one pending mark: no spinner outside PendingDots", () => {
     expect(
       offenders((text) => /<q-spinner/.test(text)).filter(

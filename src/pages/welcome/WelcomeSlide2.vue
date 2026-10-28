@@ -59,7 +59,10 @@
             </div>
             <div class="step">
               <SquarePlusIcon :size="18" class="step-icon" />
-              <i18n-t keypath="WelcomeSlide2.instruction.android.step2.text">
+              <i18n-t
+                keypath="WelcomeSlide2.instruction.android.step2.text"
+                tag="span"
+              >
                 <template v-slot:buttonText>
                   <strong>{{
                     $t("WelcomeSlide2.instruction.android.step2.buttonText")
@@ -82,7 +85,10 @@
             </div>
             <div class="step">
               <SquarePlusIcon :size="18" class="step-icon" />
-              <i18n-t keypath="WelcomeSlide2.instruction.ios.step2.text">
+              <i18n-t
+                keypath="WelcomeSlide2.instruction.ios.step2.text"
+                tag="span"
+              >
                 <template v-slot:buttonText>
                   <strong>{{
                     $t("WelcomeSlide2.instruction.ios.step2.buttonText")

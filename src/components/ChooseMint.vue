@@ -26,19 +26,14 @@
           :disabled="disable"
           @click="showMintSheet = true"
         >
-          <span class="mint-chip__avatar" aria-hidden="true">
-            <q-img
-              v-if="chosenMint?.iconUrl"
-              :src="chosenMint.iconUrl"
-              spinner-size="xs"
-              class="full-height"
-            >
-              <template v-slot:error>
-                <LandmarkIcon :size="20" class="mint-chip__icon" />
-              </template>
-            </q-img>
-            <LandmarkIcon v-else :size="20" class="mint-chip__icon" />
-          </span>
+          <IconCircle
+            size="sm"
+            class="mint-chip__avatar"
+            aria-hidden="true"
+            :src="chosenMint?.iconUrl"
+          >
+            <LandmarkIcon :size="20" class="mint-chip__icon" />
+          </IconCircle>
           <span class="mint-chip__field-text">
             <span v-if="label" class="mint-chip__label">{{ label }}</span>
             <span class="mint-chip__name ellipsis">{{
@@ -104,20 +99,11 @@
           :key="mint.url"
           :label="mint.nickname || mint.shorturl"
           :selected="chosenMint?.url === mint.url"
+          :icon-src="mint.iconUrl"
           @select="selectMint(mint)"
         >
           <template #icon>
-            <q-img
-              v-if="mint.iconUrl"
-              :src="mint.iconUrl"
-              spinner-size="xs"
-              class="full-height"
-            >
-              <template v-slot:error>
-                <LandmarkIcon :size="20" class="mint-glyph" />
-              </template>
-            </q-img>
-            <LandmarkIcon v-else :size="20" class="mint-glyph" />
+            <LandmarkIcon :size="20" class="mint-glyph" />
           </template>
           <template v-if="showBalances" #caption>
             <span v-if="!mint.errored">
@@ -139,6 +125,7 @@
 </template>
 
 <script lang="ts">
+import IconCircle from "src/components/ui/IconCircle.vue";
 import {
   Landmark as LandmarkIcon,
   ChevronDown as ChevronDownIcon,
@@ -170,6 +157,7 @@ type MintOption = {
 export default defineComponent({
   name: "ChooseMint",
   components: {
+    IconCircle,
     LandmarkIcon,
     ChevronDownIcon,
     BottomSheet,
