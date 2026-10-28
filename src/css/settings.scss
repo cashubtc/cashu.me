@@ -107,7 +107,12 @@
 
 /* Wrapped row captions keep a readable line pitch. */
 .settings-view .q-item__label--caption {
+  font-size: 14px;
   line-height: 1.4;
+}
+/* Row titles share the sheet option rows' 16px. */
+.settings-view .q-item__label:not(.q-item__label--caption) {
+  font-size: 16px;
 }
 
 /* On wide screens the settings column matches the wallet's content edges. */

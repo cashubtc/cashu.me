@@ -22,7 +22,7 @@
           selectedOption?.label ?? placeholder
         }}</span>
       </span>
-      <ChevronDownIcon :size="16" class="mint-chip__icon" aria-hidden="true" />
+      <ChevronDownIcon :size="20" class="mint-chip__icon" aria-hidden="true" />
     </button>
 
     <BottomSheet v-model="open" :title="title || label">

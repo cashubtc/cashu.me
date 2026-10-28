@@ -34,14 +34,10 @@
               class="full-height"
             >
               <template v-slot:error>
-                <LandmarkIcon :size="label ? 14 : 20" class="mint-chip__icon" />
+                <LandmarkIcon :size="20" class="mint-chip__icon" />
               </template>
             </q-img>
-            <LandmarkIcon
-              v-else
-              :size="label ? 14 : 20"
-              class="mint-chip__icon"
-            />
+            <LandmarkIcon v-else :size="20" class="mint-chip__icon" />
           </span>
           <span class="mint-chip__field-text">
             <span v-if="label" class="mint-chip__label">{{ label }}</span>
@@ -77,7 +73,7 @@
               $t("ChooseMint.badge_mint_error_text")
             }}</span>
           </span>
-          <ChevronDownIcon :size="16" class="mint-chip__icon" />
+          <ChevronDownIcon :size="20" class="mint-chip__icon" />
         </button>
       </div>
     </div>

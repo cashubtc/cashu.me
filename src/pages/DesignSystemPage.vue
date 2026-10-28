@@ -193,7 +193,14 @@
           <q-btn rounded unelevated no-caps color="primary" disable
             >Disabled</q-btn
           >
-          <q-btn rounded unelevated no-caps color="primary" loading>
+          <q-btn
+            rounded
+            unelevated
+            no-caps
+            color="primary"
+            class="full-width"
+            loading
+          >
             Create invoice
             <template v-slot:loading>
               <q-spinner-dots size="20px" class="on-left" /> Creating
@@ -750,16 +757,24 @@
         </div>
       </DsEntry>
       <DsEntry id="loading">
-        <div class="row q-gutter-lg items-center q-mb-lg">
-          <q-btn rounded unelevated no-caps color="primary" loading>
-            Continue
-            <template #loading
-              ><q-spinner-dots size="20px" class="on-left" />Creating</template
-            >
-          </q-btn>
+        <q-btn
+          rounded
+          unelevated
+          no-caps
+          color="primary"
+          class="full-width q-mb-md"
+          loading
+        >
+          Continue
+          <template #loading
+            ><q-spinner-dots size="20px" class="on-left" />Creating</template
+          >
+        </q-btn>
+        <div class="row items-center q-gutter-sm q-mb-lg text-app-muted">
           <q-btn flat round class="app-icon-btn" aria-label="Refreshing"
             ><RefreshCwIcon :size="20" class="refresh-spin"
           /></q-btn>
+          <span>Refreshing (icon button, busy)</span>
         </div>
         <SkeletonRow avatar="34px" :lines="['55%', '35%', '25%']" />
       </DsEntry>
@@ -1471,10 +1486,13 @@ export default defineComponent({
 .ds-welcome {
   height: 460px;
 }
+/* Scrolling text fades out at the bottom edge, so a cut line reads as "more below". */
 .ds-scroll {
+  -webkit-mask-image: linear-gradient(black calc(100% - 48px), transparent);
+  mask-image: linear-gradient(black calc(100% - 48px), transparent);
   max-height: 320px;
   overflow-y: auto;
-  padding: 20px;
+  padding: 20px 20px 40px;
 }
 .ui-kit-display {
   align-items: center;

@@ -235,15 +235,19 @@ body,
   border-radius: 999px;
   color: var(--app-text-muted) !important;
 }
-// Under reduced motion the fill stops; it rests as a centred segment so the rail still reads
-// as progress, not as a divider.
+// Under reduced motion the fill stops; the rail shows even dashes, which read as an ongoing
+// check rather than a measured percentage or a divider.
 @media (prefers-reduced-motion: reduce) {
   .qr-progress .q-linear-progress__model {
-    animation: none !important;
-    transform: none !important;
-    left: 30% !important;
-    right: 30% !important;
-    width: auto !important;
+    display: none;
+  }
+  .qr-progress .q-linear-progress__track {
+    background: repeating-linear-gradient(
+      90deg,
+      currentColor 0 10px,
+      transparent 10px 16px
+    ) !important;
+    opacity: 0.6 !important;
   }
 }
 
@@ -701,7 +705,7 @@ body.body--light .q-dialog__backdrop {
   margin-inline-start: auto;
 }
 .mint-chip--field .mint-chip__balance + .mint-chip__icon {
-  margin-inline-start: 0;
+  margin-inline-start: 4px;
 }
 .mint-chip--field > .mint-chip__icon:first-child,
 .mint-chip--field > .q-avatar:first-child {
@@ -1207,10 +1211,11 @@ html[dir="rtl"] .q-field__append {
   cursor: pointer;
   display: inline-flex;
   font: inherit;
+  font-size: 14px;
   gap: 4px;
-  min-height: 32px;
-  margin: -4px -6px;
-  padding: 4px 6px;
+  min-height: 40px;
+  margin: -8px -8px;
+  padding: 8px 8px;
   white-space: nowrap;
 }
 @media (hover: hover) {
@@ -1289,9 +1294,9 @@ html[dir="rtl"] .mint-card-more {
   justify-content: space-between;
   min-height: 24px;
 }
-// No balance: the review line starts on the text edge instead of floating right.
+// No balance: the review line keeps the same end-edge slot as on every other card.
 .mint-card__foot--meta {
-  justify-content: flex-start;
+  justify-content: flex-end;
 }
 .mint-card__balances {
   display: flex;
@@ -1306,6 +1311,7 @@ html[dir="rtl"] .mint-card-more {
 }
 .mint-card__plus ~ .currency-unit-text {
   color: var(--app-text-muted);
+  font-size: 14px;
   font-weight: 400;
 }
 .mint-card__plus {
@@ -1323,9 +1329,9 @@ body .q-notification {
   --tone: var(--app-text-muted);
   align-items: center;
   background: var(--app-raised) !important;
-  border: 1px solid var(--app-border-strong);
+  border: 1px solid transparent;
   border-radius: var(--app-radius-lg);
-  box-shadow: var(--app-shadow-md);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   color: var(--app-text) !important;
   font-size: 14px;
   font-weight: 500;

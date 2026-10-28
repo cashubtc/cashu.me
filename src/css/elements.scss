@@ -114,6 +114,7 @@ body {
 .app-option-row--selected {
   background: var(--app-card-fill-active);
   border-color: var(--app-card-edge-active);
+  box-shadow: inset 0 0 0 0.5px var(--app-card-edge-active);
 }
 // Light-mode sheets are white: rows sit on the page colour so they still read as rows.
 body.body--light .q-dialog .app-option-row {
@@ -275,9 +276,9 @@ button.app-badge {
 .app-badge--success,
 .app-badge--warning,
 .app-badge--danger {
-  background: color-mix(in srgb, var(--tone) 14%, var(--app-surface));
-  border-color: color-mix(in srgb, var(--tone) 40%, transparent);
-  color: color-mix(in srgb, var(--tone) 70%, var(--app-text));
+  background: color-mix(in srgb, var(--tone) 16%, transparent);
+  border-color: transparent;
+  color: var(--tone);
 }
 
 // Box: a grouped surface (summaries, counters, previews), on the group tokens.
@@ -419,6 +420,11 @@ button.app-badge {
 
 // Loading placeholders (shadcn Skeleton): one muted fill and radius for every q-skeleton, and
 // a standard row (SkeletonRow.vue) of an avatar beside lines of text.
+@media (prefers-reduced-motion: reduce) {
+  body .q-skeleton::after {
+    display: none;
+  }
+}
 body .q-skeleton {
   background: var(--app-tint-strong);
   background-image: none !important;

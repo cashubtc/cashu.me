@@ -60,4 +60,7 @@ export default defineComponent({
   cursor: default;
   pointer-events: none;
 }
+.settings-toggle-row--disabled .q-item__label:not(.q-item__label--caption) {
+  color: var(--app-text-muted);
+}
 </style>
