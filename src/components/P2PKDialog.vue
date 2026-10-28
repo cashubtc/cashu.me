@@ -20,9 +20,10 @@
             <div v-if="p2pkData.publicKey" class="row justify-center q-mb-md">
               <div class="col-12 q-px-md p2pk-qr">
                 <QrBlock :value="p2pkData.publicKey" />
-                <div class="p2pk-key-text app-mono text-center q-mt-sm">
-                  {{ shortKey(p2pkData.publicKey) }}
-                </div>
+                <QrCopyLine
+                  :text="shortKey(p2pkData.publicKey)"
+                  @copy="onCopyPublicKey"
+                />
               </div>
             </div>
 
@@ -83,6 +84,7 @@ import { RefreshCw as RefreshCwIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import QrBlock from "src/components/QrBlock.vue";
+import QrCopyLine from "src/components/ui/QrCopyLine.vue";
 import FullscreenDialogHeader from "src/components/ui/FullscreenDialogHeader.vue";
 
 import { useP2PKStore } from "src/stores/p2pk";
@@ -92,7 +94,7 @@ declare const windowMixin: any;
 export default defineComponent({
   name: "P2PKDialog",
   mixins: [windowMixin],
-  components: { RefreshCwIcon, QrBlock, FullscreenDialogHeader },
+  components: { RefreshCwIcon, QrBlock, QrCopyLine, FullscreenDialogHeader },
   data: function () {
     return {};
   },
@@ -130,8 +132,5 @@ export default defineComponent({
 /* One QR size on every screen: about the width of a phone column, never the window. */
 .p2pk-qr {
   max-width: 392px;
-}
-.p2pk-key-text {
-  color: var(--app-text-muted);
 }
 </style>

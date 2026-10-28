@@ -87,7 +87,10 @@ function resolveEffectiveTopBackgroundColor() {
 // the app loads. Keep it in step with the mode: it shows behind every sheet's scrim, so a
 // stale black made light mode look broken until a reload.
 function syncDocumentBackground(isDark) {
-  const bg = isDark ? "#000000" : "#ffffff";
+  const surface = getComputedStyle(document.body)
+    .getPropertyValue("--app-surface")
+    .trim();
+  const bg = isDark ? surface || "#151518" : "#ffffff";
   document.documentElement.style.backgroundColor = bg;
   document.documentElement.style.setProperty("--cashu-splash-bg", bg);
 }

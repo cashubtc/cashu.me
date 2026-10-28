@@ -90,7 +90,7 @@
         </div>
       </DsEntry>
       <DsEntry id="type-scale">
-        <div class="amount-headline">₿2,789</div>
+        <AmountHeadline>₿2,789</AmountHeadline>
         <div class="text-h5 text-weight-bold">Page title</div>
         <div class="sheet-title">Sheet title</div>
         <div class="ui-kit-body">
@@ -288,14 +288,11 @@
       </DsEntry>
       <DsEntry id="amount-entry">
         <div class="ds-keypad q-mx-auto">
-          <div class="text-center q-mb-md">
-            <div class="amount-headline">
-              ₿{{ (keypadAmount ?? 0).toLocaleString("en-US") }}
-            </div>
-            <div class="text-app-muted">
-              ${{ ((keypadAmount ?? 0) / 1000).toFixed(2) }}
-            </div>
-          </div>
+          <!-- The app's own amount display (AmountInputComponent), not a stand-in. -->
+          <AmountInputComponent
+            class="q-mb-md"
+            :model-value="keypadAmount ?? 0"
+          />
           <AmountKeypadPanel v-model="keypadAmount" />
         </div>
       </DsEntry>
@@ -571,6 +568,10 @@
       </DsEntry>
       <DsEntry id="section-divider">
         <SectionDivider label="Mint details" />
+        <SectionDivider
+          label="Swap"
+          caption="Move funds between your mints over Lightning. Fees may apply."
+        />
       </DsEntry>
       <h2 id="ds-group-data" class="ds-section">Data display</h2>
       <DsEntry id="badges">
@@ -632,7 +633,8 @@
       </DsEntry>
       <DsEntry id="amounts">
         <div class="column items-center q-gutter-y-sm">
-          <div class="amount-headline">−₿101</div>
+          <AmountHeadline>−₿101</AmountHeadline>
+          <div dir="rtl"><AmountHeadline>−₿101</AmountHeadline></div>
           <div class="text-h6 text-app-muted">
             <AnimatedNumber
               :value="2789"
@@ -972,6 +974,8 @@
 </template>
 
 <script lang="ts">
+import AmountInputComponent from "src/components/AmountInputComponent.vue";
+import AmountHeadline from "src/components/ui/AmountHeadline.vue";
 import { defineComponent, markRaw, reactive } from "vue";
 import SettingsSection from "src/pages/settings/SettingsSection.vue";
 import AnimatedNumber from "src/components/AnimatedNumber.vue";
@@ -1075,6 +1079,8 @@ export default defineComponent({
   name: "DesignSystemPage",
   mixins: [windowMixin],
   components: {
+    AmountHeadline,
+    AmountInputComponent,
     AppCallout,
     ActivityRow,
     AmountKeypadPanel,

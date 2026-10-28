@@ -66,12 +66,20 @@ html:lang(ar) p {
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
+// Scripts without capitals keep the Latin words inside them (Mint, ecash) as written:
+// forced capitals turned 添加 Mint into 添加 MINT beside a heading that says Mint.
 .q-btn.full-width:lang(zh),
 .q-btn.full-width:lang(ja),
 .q-btn.full-width:lang(ko),
 .q-btn.full-width:lang(ar),
-.q-btn.full-width:lang(th) {
+.q-btn.full-width:lang(th),
+.wallet-action-btn:lang(zh),
+.wallet-action-btn:lang(ja),
+.wallet-action-btn:lang(ko),
+.wallet-action-btn:lang(ar),
+.wallet-action-btn:lang(th) {
   letter-spacing: 0;
+  text-transform: none;
 }
 
 // Native-app feel: disable text selection across the UI
@@ -187,10 +195,22 @@ body,
 
 // Section label centred between two hairlines, in small capitals, as in the original design
 // (Mints tab: Swap and Add mint, mint details, multi-mint payments).
+.section-divider-block {
+  margin-bottom: 16px;
+}
 .section-divider {
   display: flex;
   align-items: center;
   width: 100%;
+}
+// The description under a section label: the row-description size and colour, on the
+// text edge.
+.section-divider__caption {
+  color: var(--app-text-muted);
+  font-size: 14px;
+  line-height: 20px;
+  margin: 12px 0 0;
+  text-align: start;
 }
 .divider-line {
   flex: 1;
@@ -302,12 +322,21 @@ button:focus-visible {
 // Filled primary buttons go quiet rather than translucent (translucent primary read as dark
 // text on muddy grey): an empty pill with a hairline and a muted label. Not a filled surface,
 // which read as one more card or field next to the cards and fields it sits with.
+// Filled and outline buttons that are disabled become one flat tinted pill with a muted
+// label and no edge: an edge made them look exactly like an enabled outline button
+// (council R68: Publish review, Update, Add mint).
 .q-btn.disabled.bg-primary:not(.q-btn--loading),
-.q-btn[disabled].bg-primary:not(.q-btn--loading) {
-  background: transparent !important;
-  box-shadow: inset 0 0 0 1px var(--app-border-strong);
+.q-btn[disabled].bg-primary:not(.q-btn--loading),
+.q-btn--outline.disabled:not(.q-btn--loading),
+.q-btn--outline[disabled]:not(.q-btn--loading) {
+  background: var(--app-tint-strong) !important;
+  box-shadow: none;
   color: var(--app-text-disabled) !important;
   opacity: 1 !important;
+}
+.q-btn--outline.disabled:not(.q-btn--loading):before,
+.q-btn--outline[disabled]:not(.q-btn--loading):before {
+  border-color: transparent !important;
 }
 .q-btn.disabled,
 .q-btn[disabled] {
@@ -441,7 +470,8 @@ body[data-theme] .welcome-surface,
     height: 0.6em;
     border-radius: 0.3em;
     opacity: 1;
-    background: color-mix(in srgb, var(--app-text) 32%, transparent);
+    // 46% ink: the off track clears 3:1 against cards and groups, not just the page.
+    background: color-mix(in srgb, var(--app-text) 46%, transparent);
     box-shadow: none;
   }
   .q-toggle__thumb {
@@ -467,7 +497,7 @@ body[data-theme] .welcome-surface,
   }
 }
 body.body--light .q-toggle:not(.q-toggle--dense) .q-toggle__track {
-  background: rgba(0, 0, 0, 0.42);
+  background: rgba(0, 0, 0, 0.5);
 }
 body.body--light
   .q-toggle:not(.q-toggle--dense)
@@ -664,6 +694,10 @@ body.body--light .q-dialog__backdrop {
     background: var(--app-field-fill);
     border-color: var(--app-text);
   }
+  .mint-chip--card:hover {
+    background: var(--app-card-fill-active);
+    border-color: transparent;
+  }
 }
 .mint-chip--field > :last-child {
   margin-inline-start: auto;
@@ -689,7 +723,11 @@ body.body--light .q-dialog__backdrop {
   height: 100%;
   width: 100%;
 }
+// The wallet's mint selector is a filled card, not an outlined field: an edge made it read
+// as a text input (council, R44-R68). Forms keep the outlined compact field.
 .mint-chip--card {
+  background: var(--app-card-fill);
+  border-color: transparent;
   gap: 12px;
   min-height: 72px;
   padding: 12px 12px 12px 16px;
@@ -1305,15 +1343,16 @@ body .mint-card.mint-card--active {
   margin-inline-end: 4px;
   margin-top: -2px;
 }
+// 44px target; the negative margins keep the glyph where the 40px button had it.
 .mint-card-more {
   color: var(--app-text-muted);
   flex: none;
-  height: 40px;
-  margin: -10px -14px -10px 0;
-  width: 40px;
+  height: 44px;
+  margin: -12px -16px -12px 0;
+  width: 44px;
 }
 html[dir="rtl"] .mint-card-more {
-  margin: -10px 0 -10px -14px;
+  margin: -12px 0 -12px -16px;
 }
 /* Restore's selection box sits where an installed mint shows its menu, on the same line. */
 .restore-mint-check {

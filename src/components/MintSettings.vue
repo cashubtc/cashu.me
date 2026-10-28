@@ -103,13 +103,10 @@
     <div class="q-pt-xs q-px-sm" ref="addMintDiv">
       <div class="add-mint-container">
         <SectionDivider
-          class="q-mt-sm q-mb-md"
+          class="q-mt-sm"
           :label="$t('MintSettings.add.title')"
+          :caption="$t('MintSettings.add.description')"
         />
-
-        <div class="add-mint-description q-mb-md text-left text-app-muted">
-          {{ $t("MintSettings.add.description") }}
-        </div>
 
         <div class="add-mint-inputs">
           <q-input
@@ -162,10 +159,11 @@
     <!-- Swap section -->
 
     <div v-if="mints.length > 1" class="q-px-sm q-pb-lg text-left swap-section">
-      <SectionDivider class="q-mt-sm" :label="$t('MintSettings.swap.title')" />
-      <div class="swap-caption q-mb-md">
-        {{ $t("MintSettings.swap.caption") }}
-      </div>
+      <SectionDivider
+        class="q-mt-sm"
+        :label="$t('MintSettings.swap.title')"
+        :caption="$t('MintSettings.swap.caption')"
+      />
       <!-- From and To are the wallet's mint picker (icons, balances, the same sheet). -->
       <ChooseMint
         test-id="swap-from"
@@ -185,9 +183,9 @@
         :disable="swapBlocking"
         @update:model-value="swapData.toUrl = swapOptionFor($event)"
       />
-      <div class="row no-wrap items-center" style="gap: 8px">
+      <!-- Amount, then the full-width Swap action, the same shape as Add mint above. -->
+      <div>
         <q-input
-          class="col"
           outlined
           v-model.number="swapData.amount"
           type="number"
@@ -205,7 +203,7 @@
           "
         ></q-input>
         <q-btn
-          class="col-auto q-px-lg swap-btn"
+          class="full-width q-mt-md swap-btn"
           color="primary"
           rounded
           unelevated
@@ -588,18 +586,7 @@ export default defineComponent({
 <style>
 @import "src/css/mintlist.css";
 
-.swap-caption {
-  color: var(--app-text-muted);
-  font-size: 15px;
-  line-height: 1.5;
-  margin-top: 4px;
-}
-
 /* Swap sits beside the 56px amount field, with the 1rem label of the other mint actions. */
-.q-btn.swap-btn {
-  font-size: 1rem;
-  min-height: 56px;
-}
 
 /* Add mint matches the height and label size of Discover mints and Swap. */
 /* Discover mints, Add mint and Swap are full-width actions: the shared 52px height. */
@@ -610,14 +597,6 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   margin-bottom: 32px;
-}
-
-.add-mint-description {
-  font-size: 14px;
-  line-height: 24px;
-  font-weight: 500;
-  text-align: start;
-  margin-bottom: 24px;
 }
 
 .add-mint-inputs {

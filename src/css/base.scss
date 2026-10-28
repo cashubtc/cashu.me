@@ -76,16 +76,22 @@ $themes: (
     dark: #56353f,
     info: #56353a,
   ),
-  "monochrome": (
-    fill: #ededed,
-    on-fill: #0b0b0b,
-    accent: #ededed,
-    accent-2: #d5d5d5,
-    light: #111111,
-    light-2: #3d3d3d,
-    dark: #000,
-    info: rgb(39, 39, 39),
-  ),
+  // Dark mode on a charcoal page with zinc steps, not pure black: the council's colour vote
+  // (xv-3) put black under near-white pills last for comfort; fills stay bright (#e4e4e7,
+  // never below #d4d4d8, where pills start to read as disabled) and raised surfaces sit a
+  // small step above the page so sheets don't glare.
+  "monochrome":
+    (
+      fill: #e4e4e7,
+      on-fill: #18181b,
+      accent: #e4e4e7,
+      accent-2: #d4d4d8,
+      light: #111111,
+      light-2: #3d3d3d,
+      dark: #151518,
+      raised: #222226,
+      info: #27272a,
+    ),
   "cyber": (
     fill: #00ff00,
     on-fill: #0b0b0b,
@@ -107,7 +113,11 @@ $themes: (
     --app-surface: #{map-get($t, dark)};
     // Raised surfaces (sheets, dialogs, toasts) sit a clear step above cards and groups (13% over
     // the page vs 10%), in each theme's own hue (council contrast review: 8% read as a group).
-    --app-raised: color-mix(in srgb, #fff 13%, #{map-get($t, dark)});
+    --app-raised: #{if(
+        map-has-key($t, raised),
+        map-get($t, raised),
+        color-mix(in srgb, #fff 13%, map-get($t, dark))
+      )};
   }
   body.body--light[data-theme="#{$theme}"] {
     --q-primary: #{map-get($t, light)};
@@ -176,10 +186,12 @@ body.body--light {
 
 body.body--dark {
   --app-welcome-bg: var(--app-surface);
-  --app-text: #fff;
-  --app-text-muted: rgba(255, 255, 255, 0.72);
-  --app-text-subtle: rgba(255, 255, 255, 0.6);
-  --app-text-disabled: rgba(255, 255, 255, 0.5);
+  // Off-white ink (zinc-100), not pure white: the balance and titles stay the brightest
+  // thing on screen without the glare of #fff on dark pages.
+  --app-text: #f4f4f5;
+  --app-text-muted: rgba(244, 244, 245, 0.72);
+  --app-text-subtle: rgba(244, 244, 245, 0.6);
+  --app-text-disabled: rgba(244, 244, 245, 0.5);
   --app-border: rgba(255, 255, 255, 0.16);
   --app-tint: rgba(255, 255, 255, 0.08);
   --app-tint-strong: rgba(255, 255, 255, 0.14);

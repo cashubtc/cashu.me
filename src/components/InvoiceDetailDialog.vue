@@ -53,9 +53,15 @@
                   </component>
                 </div>
                 <QrProgress :active="runnerActive" />
+                <!-- Every QR has its copy line: the full address on-chain, a shortened
+                     invoice for Lightning (the button below copies it too). -->
                 <QrCopyLine
-                  v-if="isOnchain"
-                  :text="invoiceData.request"
+                  :text="
+                    isOnchain
+                      ? invoiceData.request
+                      : shortenString(invoiceData.request, 14, 8) ||
+                        invoiceData.request
+                  "
                   :copied="copyButtonCopied"
                   @copy="onCopyBolt11"
                 />
@@ -68,9 +74,9 @@
               </div>
             </div>
 
-            <div v-if="invoiceData.amount" class="amount-headline text-center">
-              {{ displayUnit }}
-            </div>
+            <AmountHeadline v-if="invoiceData.amount">{{
+              displayUnit
+            }}</AmountHeadline>
 
             <q-card-section class="q-pa-none">
               <div v-if="invoiceData?.mintQuote" class="row justify-center">
@@ -137,7 +143,9 @@
   </q-dialog>
 </template>
 <script lang="ts">
+import AmountHeadline from "src/components/ui/AmountHeadline.vue";
 import QrCopyLine from "src/components/ui/QrCopyLine.vue";
+import { shortenString } from "src/js/string-utils";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import QrBlock from "src/components/QrBlock.vue";
@@ -161,6 +169,7 @@ export default defineComponent({
   name: "InvoiceDetailDialog",
   mixins: [windowMixin],
   components: {
+    AmountHeadline,
     QrCopyLine,
     CircleCheckIcon,
     QrBlock,
@@ -250,6 +259,7 @@ export default defineComponent({
     },
   },
   methods: {
+    shortenString,
     onCopyBolt11: async function () {
       const request = this.invoiceData?.request;
       if (request) {

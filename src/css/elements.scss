@@ -14,7 +14,8 @@ body.body--dark {
 }
 body.body--light {
   --app-info: #2563eb;
-  --app-warning: #a16207;
+  // amber-800: clears 4.5:1 as badge text on its own 16% tint (a16207 was ~3.9:1).
+  --app-warning: #854d0e;
   --app-danger: var(--q-negative);
   --app-danger-fill: #c42b2b;
   --app-on-danger: #fff;
@@ -606,8 +607,9 @@ body.body--light .activity-row__avatar--in {
   color: var(--app-text-muted) !important;
 }
 .q-pagination .q-btn.bg-primary {
-  background: var(--q-primary) !important;
-  color: var(--app-on-primary) !important;
+  background: var(--app-tint-strong) !important;
+  color: var(--app-text) !important;
+  font-weight: 600;
 }
 
 // An option row that only informs (OptionRow static): no pointer, no hover fill.

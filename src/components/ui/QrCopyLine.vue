@@ -10,7 +10,7 @@
   >
     <CheckIcon v-if="copied" :size="16" class="qr-copy-line__icon" />
     <CopyIcon v-else :size="16" class="qr-copy-line__icon" />
-    {{ text }}
+    {{ shown }}
   </button>
 </template>
 
@@ -29,6 +29,12 @@ export default defineComponent({
     label: { type: String, default: "" },
   },
   emits: ["copy"],
+  computed: {
+    // One ellipsis character everywhere, whoever shortened the text.
+    shown(): string {
+      return this.text.replace("...", "…");
+    },
+  },
 });
 </script>
 
@@ -41,8 +47,10 @@ export default defineComponent({
   cursor: pointer;
   display: block;
   font-size: 13px;
-  margin: 8px auto 0;
+  margin: 0 auto;
   max-width: 100%;
+  /* A 44px target; the text sits where the 8px gap and 4px padding put it before. */
+  min-height: 44px;
   padding: 4px 8px;
   text-align: center;
 }

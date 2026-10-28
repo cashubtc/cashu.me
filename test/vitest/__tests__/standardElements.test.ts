@@ -53,6 +53,12 @@ describe("standard elements", () => {
     ["ui/ConfirmDialog.vue", /^council-dialog(__[\w-]+)?$/],
     ["ui/EmptyState.vue", /^app-empty(__(title|text))?$/],
     ["WalletActions.vue", /^wallet-(actions|action-btn|scan-btn)$/],
+    ["ui/QrCopyLine.vue", /^qr-copy-line(__icon)?$/],
+    ["ui/AmountHeadline.vue", /^amount-headline$/],
+    [
+      "ui/SectionDivider.vue",
+      /^(section-divider(-block|__caption)?|divider-(line|text))$/,
+    ],
     [
       "MintCard.vue",
       /^mint-card(--active|__(body|head|foot|foot--meta|balances|plus))?$/,

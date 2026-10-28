@@ -2,9 +2,7 @@
   <div class="token-information-container q-px-md">
     <!-- Amount Header -->
     <div v-if="!hideAmount" class="token-header-container">
-      <div class="amount-headline">
-        {{ displayUnit }}
-      </div>
+      <AmountHeadline>{{ displayUnit }}</AmountHeadline>
     </div>
 
     <!-- Token Details Section -->
@@ -86,6 +84,7 @@
   </div>
 </template>
 <script lang="ts">
+import AmountHeadline from "src/components/ui/AmountHeadline.vue";
 import PendingDots from "src/components/ui/PendingDots.vue";
 import { defineComponent } from "vue";
 import { notifyCopied } from "src/js/notify";
@@ -112,7 +111,11 @@ import DetailRow from "src/components/ui/DetailRow.vue";
 export default defineComponent({
   name: "TokenInformation",
   mixins: [windowMixin],
-  components: { PendingDots, DetailRow },
+  components: {
+    AmountHeadline,
+    PendingDots,
+    DetailRow,
+  },
   setup() {
     return {
       BanknoteIcon,

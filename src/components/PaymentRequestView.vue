@@ -20,15 +20,13 @@
           @copy="copy"
         />
 
-        <div v-if="hasAmount" class="amount-headline text-center">
-          {{ amountLabel }}
-        </div>
+        <AmountHeadline v-if="hasAmount">{{ amountLabel }}</AmountHeadline>
 
         <div class="pr-table">
           <DetailRow
             action
             data-testid="pr-amount"
-            :icon="CoinsIcon"
+            :icon="BanknoteIcon"
             :label="$t('QuoteInformation.amount')"
             :value="
               hasAmount ? amountLabel : $t('PaymentRequestDialog.any_amount')
@@ -44,7 +42,7 @@
           <DetailRow
             :action="unitOptions.length > 1"
             data-testid="pr-unit"
-            :icon="CircleDollarSignIcon"
+            :icon="CoinsIcon"
             :label="$t('QuoteInformation.unit')"
             :value="unitLabel(fields.unit)"
             @click="showUnitSheet = true"
@@ -193,9 +191,10 @@
 </template>
 
 <script lang="ts">
+import AmountHeadline from "src/components/ui/AmountHeadline.vue";
 import QrCopyLine from "src/components/ui/QrCopyLine.vue";
 import {
-  CircleDollarSign as CircleDollarSignIcon,
+  Banknote as BanknoteIcon,
   Coins as CoinsIcon,
   Copy as CopyIcon,
   Landmark as LandmarkIcon,
@@ -232,6 +231,7 @@ export default defineComponent({
   name: "PaymentRequestView",
   mixins: [windowMixin],
   components: {
+    AmountHeadline,
     QrCopyLine,
     AmountInputComponent,
     AmountKeypadPanel,
@@ -253,7 +253,7 @@ export default defineComponent({
   },
   emits: ["change"],
   setup() {
-    return { CircleDollarSignIcon, CoinsIcon, LandmarkIcon };
+    return { BanknoteIcon, CoinsIcon, LandmarkIcon };
   },
   data() {
     return {

@@ -118,7 +118,7 @@ export default defineComponent({
   font: inherit;
   font-size: 14px;
   font-weight: 500;
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 18px;
   position: relative;
   transition: color 0.2s ease;

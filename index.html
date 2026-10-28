@@ -25,7 +25,7 @@
 
     <style>
       html {
-        background-color: #000000;
+        background-color: #151518;
       }
       #app-splash {
         position: fixed;
@@ -34,7 +34,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background-color: var(--cashu-splash-bg, #000000);
+        background-color: var(--cashu-splash-bg, #151518);
         opacity: 1;
         transition: opacity 0.4s ease;
       }
@@ -73,7 +73,10 @@
             var v = String(raw).replace(/^__q_[a-z]+\|/i, "");
             isDark = v === "1" || v === "true";
           }
-          var bg = isDark ? "#000000" : "#ffffff";
+          // Each theme's dark page (src/css/base.scss), so the first paint matches the app.
+          var pages = { classic: "#1f2234", bitcoin: "#232325", freedom: "#000000", salvador: "#242424", mint: "#1f342b", autumn: "#34291f", flamingo: "#56353f", monochrome: "#151518", cyber: "#000000" };
+          var theme = String(window.localStorage.getItem("cashu.theme") || "").replace(/^__q_[a-z]+\|/i, "");
+          var bg = isDark ? pages[theme] || pages.monochrome : "#ffffff";
           document.documentElement.style.backgroundColor = bg;
           document.documentElement.style.setProperty("--cashu-splash-bg", bg);
         } catch (e) {}

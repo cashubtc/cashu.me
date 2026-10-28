@@ -153,6 +153,14 @@
           <div class="col-12 q-px-md">
             <QrBlock :value="qrCodeFragment" :width="600" @click="copyTokens" />
             <QrProgress :active="runnerActive" />
+            <QrCopyLine
+              :text="
+                shortenString(sendData.tokensBase64, 14, 8) ||
+                sendData.tokensBase64
+              "
+              :copied="copyButtonCopied"
+              @copy="copyTokens"
+            />
           </div>
         </div>
         <q-card-section class="q-pa-none">
@@ -321,6 +329,8 @@ import { useMintsStore } from "src/stores/mints";
 import TokenInformation from "components/TokenInformation.vue";
 import QrBlock from "src/components/QrBlock.vue";
 import QrProgress from "src/components/QrProgress.vue";
+import QrCopyLine from "src/components/ui/QrCopyLine.vue";
+import { shortenString } from "src/js/string-utils";
 import FullscreenDialogHeader from "src/components/ui/FullscreenDialogHeader.vue";
 import MeltQuoteInformation from "components/MeltQuoteInformation.vue";
 import SendPaymentRequest from "./SendPaymentRequest.vue";
@@ -357,6 +367,7 @@ export default defineComponent({
     TokenInformation,
     QrBlock,
     QrProgress,
+    QrCopyLine,
     FullscreenDialogHeader,
     MeltQuoteInformation,
     SendPaymentRequest,
@@ -445,6 +456,7 @@ export default defineComponent({
     },
   },
   methods: {
+    shortenString,
     ...mapActions(useTransactionWorkerStore, [
       "removeOutgoingTokenFromChecker",
     ]),

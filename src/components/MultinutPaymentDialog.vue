@@ -30,14 +30,12 @@
             <div class="multinut-title q-mb-xs">
               {{ $t("MultinutPicker.dialog_title") }}
             </div>
-            <div class="amount-headline">
-              {{
-                formatCurrency(
-                  payInvoiceData.meltQuote.response.amount,
-                  activeUnit
-                )
-              }}
-            </div>
+            <AmountHeadline>{{
+              formatCurrency(
+                payInvoiceData.meltQuote.response.amount,
+                activeUnit
+              )
+            }}</AmountHeadline>
             <div
               v-if="!isPaymentInProgress"
               class="multinut-description q-mt-sm"
@@ -240,6 +238,7 @@
 </template>
 
 <script lang="ts">
+import AmountHeadline from "src/components/ui/AmountHeadline.vue";
 import MintCard from "src/components/MintCard.vue";
 import PendingDots from "src/components/ui/PendingDots.vue";
 import IconButton from "src/components/ui/IconButton.vue";
@@ -263,6 +262,7 @@ export default defineComponent({
   name: "MultinutPaymentDialog",
   mixins: [windowMixin],
   components: {
+    AmountHeadline,
     MintCard,
     PendingDots,
     IconButton,

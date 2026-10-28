@@ -416,8 +416,8 @@ export const DS_ITEMS: DsItem[] = [
     group: "data",
     tier: "primitive",
     source:
-      "src/css/app.scss .amount-headline · AnimatedNumber.vue · ToggleUnit.vue",
-    usage: { className: "amount-headline" },
+      "src/components/ui/AmountHeadline.vue · AnimatedNumber.vue · ToggleUnit.vue",
+    usage: { tag: "AmountHeadline" },
     example: `<div class="amount-headline">−₿101</div>`,
   },
   {

@@ -15,10 +15,7 @@
         "
         class="mint-setup-section"
       >
-        <SectionDivider
-          class="q-mb-md"
-          :label="$t('WelcomeMintSetup.sections.your_mints')"
-        />
+        <SectionDivider :label="$t('WelcomeMintSetup.sections.your_mints')" />
         <!-- Restoring indicator during recover + Nostr search -->
         <div
           v-if="welcome.onboardingPath === 'recover' && restoringMints"
@@ -38,7 +35,7 @@
 
       <!-- Manual add mint: the Mints tab's field and full-width action. -->
       <section class="mint-setup-section">
-        <SectionDivider class="q-mb-md" :label="$t('MintSettings.add.title')" />
+        <SectionDivider :label="$t('MintSettings.add.title')" />
         <div data-testid="onboarding-mint-url">
           <q-input
             outlined

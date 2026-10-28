@@ -53,10 +53,12 @@
   color: var(--app-text);
 }
 
+// A section's description reads at the row-description size and colour (14/20, muted):
+// at 12px subtle it was smaller and dimmer than the rows it introduces.
 .settings-section-caption {
-  font-size: 12px;
-  line-height: 1.4;
-  color: var(--app-text-subtle);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--app-text-muted);
   margin-top: 4px;
 }
 

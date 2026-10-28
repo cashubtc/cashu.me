@@ -94,7 +94,6 @@
         <!-- Section Divider -->
         <SectionDivider
           v-if="mintData.info?.contact?.length > 0"
-          class="q-mb-md"
           :label="$t('MintDetailsDialog.contact.title')"
         />
 
@@ -143,10 +142,7 @@
         </div>
 
         <!-- Section Divider -->
-        <SectionDivider
-          class="q-mb-md"
-          :label="$t('MintDetailsDialog.details.title')"
-        />
+        <SectionDivider :label="$t('MintDetailsDialog.details.title')" />
 
         <!-- Mint Details Section -->
         <div class="mint-details-section q-mb-lg">
@@ -163,15 +159,16 @@
           <!-- Nuts -->
           <DetailRow
             v-if="mintData.info?.nuts"
+            action
             class="q-mb-md"
-            :icon="NutIcon"
+            :icon="ListChecksIcon"
             :label="$t('MintDetailsDialog.details.nuts.label')"
             :value="
               showAllNuts
                 ? $t('MintDetailsDialog.details.nuts.actions.hide.label')
                 : $t('MintDetailsDialog.details.nuts.actions.show.label')
             "
-            @value-click="showAllNuts = !showAllNuts"
+            @click="showAllNuts = !showAllNuts"
           />
 
           <!-- Expanded Nuts Section (when showAllNuts is true) -->
@@ -196,7 +193,7 @@
           <DetailRow
             v-if="mintData.info?.currencies"
             class="q-mb-md"
-            :icon="CircleDollarSignIcon"
+            :icon="CoinsIcon"
             :label="$t('MintDetailsDialog.details.currency.label')"
             >{{ mintData.info.currencies }}</DetailRow
           >
@@ -205,7 +202,7 @@
           <DetailRow
             v-if="mintUnits && mintUnits.length > 0"
             class="q-mb-md"
-            :icon="CircleDollarSignIcon"
+            :icon="CoinsIcon"
             :label="$t('MintDetailsDialog.details.currencies.label')"
             :value="
               mintUnits
@@ -226,7 +223,6 @@
         <!-- Section Divider for Audit Info -->
         <SectionDivider
           v-if="settings.auditorEnabled"
-          class="q-mb-md"
           :label="$t('MintAuditInfo.title')"
         />
 
@@ -238,54 +234,41 @@
         />
 
         <!-- Section Divider -->
-        <SectionDivider
-          class="q-mb-md"
-          :label="$t('MintDetailsDialog.actions.title')"
-        />
+        <SectionDivider :label="$t('MintDetailsDialog.actions.title')" />
 
-        <!-- Action Buttons -->
-        <div class="action-buttons-section">
-          <div class="action-buttons-container">
-            <div
-              class="action-button cursor-pointer"
-              @click="openEditMintDialog"
-            >
-              <PencilIcon size="20" class="action-icon" />
-              <div class="action-label">
-                {{ $t("MintDetailsDialog.actions.edit.label") }}
-              </div>
-            </div>
-
-            <div
-              class="action-button cursor-pointer"
-              @click="copyText(mintData.url)"
-            >
-              <CopyIcon size="20" class="action-icon" />
-              <div class="action-label">
-                {{ $t("MintDetailsDialog.actions.copy_mint_url.label") }}
-              </div>
-            </div>
-
-            <div
-              class="action-button cursor-pointer"
-              @click="openCreateReviewDialog"
-            >
-              <StarIcon size="20" class="action-icon" />
-              <div class="action-label">
-                {{ $t("CreateMintReview.title") }}
-              </div>
-            </div>
-            <div
-              class="action-button delete-button cursor-pointer"
-              @click="openRemoveMintDialog"
-            >
-              <Trash2Icon size="20" class="action-icon text-negative" />
-              <div class="action-label">
-                {{ $t("MintDetailsDialog.actions.delete.label") }}
-              </div>
-            </div>
-          </div>
-        </div>
+        <!-- Actions: everyday actions in one group, the destructive one on its own below,
+             as real buttons (SettingsActionRow) with the shared row hover and focus. -->
+        <q-list class="settings-menu-group mint-details-actions">
+          <SettingsActionRow
+            :icon="PencilIcon"
+            data-testid="mint-edit"
+            :label="$t('MintDetailsDialog.actions.edit.label')"
+            @click="openEditMintDialog"
+          />
+          <SettingsActionRow
+            :icon="CopyIcon"
+            :label="$t('MintDetailsDialog.actions.copy_mint_url.label')"
+            @click="copyText(mintData.url)"
+          >
+            <template #side><span /></template>
+          </SettingsActionRow>
+          <SettingsActionRow
+            :icon="StarIcon"
+            :label="$t('CreateMintReview.title')"
+            @click="openCreateReviewDialog"
+          />
+        </q-list>
+        <q-list class="settings-menu-group mint-details-actions q-mt-md">
+          <SettingsActionRow
+            :icon="Trash2Icon"
+            data-testid="mint-delete"
+            :label="$t('MintDetailsDialog.actions.delete.label')"
+            danger
+            @click="openRemoveMintDialog"
+          >
+            <template #side><span /></template>
+          </SettingsActionRow>
+        </q-list>
       </div>
     </div>
   </div>
@@ -304,12 +287,12 @@ import RemoveMintDialog from "src/components/RemoveMintDialog.vue";
 import MintMotdMessage from "src/components/MintMotdMessage.vue";
 import MintAuditInfo from "src/components/MintAuditInfo.vue";
 import {
-  CircleDollarSign as CircleDollarSignIcon,
+  Coins as CoinsIcon,
   Copy as CopyIcon,
   Info as InfoIcon,
   Link as LinkIcon,
   Mail as MailIcon,
-  Nut as NutIcon,
+  ListChecks as ListChecksIcon,
   Pencil as PencilIcon,
   QrCode as QrCodeIcon,
   Star as StarIcon,
@@ -319,17 +302,15 @@ import MintIdentityHeader from "src/components/MintIdentityHeader.vue";
 import CopyButton from "src/components/ui/CopyButton.vue";
 import DetailRow from "src/components/ui/DetailRow.vue";
 import SectionDivider from "src/components/ui/SectionDivider.vue";
+import SettingsActionRow from "src/components/ui/SettingsActionRow.vue";
 
 export default defineComponent({
   name: "MintDetailsPage",
   mixins: [windowMixin],
   components: {
+    SettingsActionRow,
     CopyButton,
     QrCodeIcon,
-    Trash2Icon,
-    StarIcon,
-    CopyIcon,
-    PencilIcon,
     MailIcon,
     QrBlock,
     MintIdentityHeader,
@@ -342,10 +323,14 @@ export default defineComponent({
   },
   setup() {
     return {
-      CircleDollarSignIcon,
+      CopyIcon,
+      PencilIcon,
+      StarIcon,
+      Trash2Icon,
+      CoinsIcon,
       InfoIcon,
       LinkIcon,
-      NutIcon,
+      ListChecksIcon,
     };
   },
   data: function () {
@@ -595,66 +580,11 @@ export default defineComponent({
   width: 100%;
 }
 
-/* Action Buttons */
-.action-buttons-section {
-  width: 100%;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
+.mint-details-actions {
   margin-bottom: 32px;
 }
-
-.action-buttons-container {
-  align-self: stretch;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  width: 100%;
-}
-
-.action-button {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 12px;
-  padding: 12px 8px;
-  margin: 0 -8px;
-  border-radius: 10px;
-  transition: background-color 0.3s;
-  width: calc(100% + 16px);
-  min-height: 48px;
-}
-
-.action-button:last-child {
-  margin-bottom: 0;
-}
-
-.action-button:hover {
-  background-color: var(--app-tint-strong);
-}
-
-/* Same icon box and label edge as the detail rows above (inset ~8px further). */
-.action-icon {
-  box-sizing: content-box;
-  min-width: 20px;
-  padding: 2px;
-  margin: 0;
-  color: var(--app-text-muted);
-}
-
-.action-label {
-  position: relative;
-  line-height: 24px;
-  font-weight: 500;
-  font-size: 16px;
-}
-
-.delete-button {
-  color: var(--app-negative-text);
+.mint-details-actions + .mint-details-actions {
+  margin-top: -16px;
 }
 
 /* QR Code Container and Animation */

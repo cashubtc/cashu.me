@@ -56,7 +56,7 @@ export class WalletUi extends WalletPage {
 
   async removeMint(url: string, confirm = true) {
     await this.details(url);
-    await this.page.locator(".delete-button").click();
+    await this.page.getByTestId("mint-delete").click();
     const dialog = this.page.locator(".remove-mint-dialog");
     await expect(dialog).toBeVisible();
     await dialog
