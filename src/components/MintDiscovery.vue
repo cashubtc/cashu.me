@@ -126,19 +126,14 @@
               <template #action>
                 <!-- A labelled add, so it doesn't read as a second way into the reviews
                      (council R76). -->
-                <q-btn
+                <MintCardAction
                   v-if="!isFetchingMintInfo(rec.url)"
-                  flat
-                  rounded
-                  no-caps
-                  color="primary"
-                  class="mint-card-add"
+                  :label="$t('MintSettings.discover.add')"
                   :disable="isExistingMint(rec.url)"
                   @click="addDiscovered(rec.url)"
                 >
-                  <PlusIcon :size="16" class="q-mr-xs" aria-hidden="true" />
-                  {{ $t("MintSettings.discover.add") }}
-                </q-btn>
+                  <template #icon><PlusIcon :size="16" /></template>
+                </MintCardAction>
               </template>
               <template #meta>
                 <MintReviewSummary
@@ -157,6 +152,7 @@
 </template>
 
 <script lang="ts">
+import MintCardAction from "src/components/ui/MintCardAction.vue";
 import IconButton from "src/components/ui/IconButton.vue";
 import BusyLabel from "src/components/ui/BusyLabel.vue";
 import MintCard from "src/components/MintCard.vue";
@@ -177,6 +173,7 @@ import { notifyError, notifySuccess } from "src/js/notify";
 export default defineComponent({
   name: "MintDiscovery",
   components: {
+    MintCardAction,
     IconButton,
     BusyLabel,
     MintCard,

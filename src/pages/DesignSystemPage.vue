@@ -237,6 +237,19 @@
           </q-item>
         </q-list>
       </DsEntry>
+      <DsEntry id="mint-card-action">
+        <div class="ds-frame row items-center no-wrap q-pa-sm" style="gap: 8px">
+          <MintCardAction label="Add">
+            <template #icon><PlusIcon :size="16" /></template>
+          </MintCardAction>
+          <MintCardAction label="Add" disable>
+            <template #icon><PlusIcon :size="16" /></template>
+          </MintCardAction>
+          <MintCardAction label="Restore" loading>
+            <template #icon><ArchiveRestoreIcon :size="16" /></template>
+          </MintCardAction>
+        </div>
+      </DsEntry>
       <h2 id="ds-group-forms" class="ds-section">Form controls</h2>
       <DsEntry id="text-fields">
         <q-input outlined v-model="url" label="Mint URL" class="q-mb-md">
@@ -1157,6 +1170,7 @@ import InlineConfirm from "src/components/ui/InlineConfirm.vue";
 import SectionDivider from "src/components/ui/SectionDivider.vue";
 import SettingsActionRow from "src/components/ui/SettingsActionRow.vue";
 import UnitToggle from "src/components/ui/UnitToggle.vue";
+import MintCardAction from "src/components/ui/MintCardAction.vue";
 import SettingsLinkRow from "src/components/ui/SettingsLinkRow.vue";
 import SettingsRadioRow from "src/components/ui/SettingsRadioRow.vue";
 import SettingsToggleRow from "src/components/ui/SettingsToggleRow.vue";
@@ -1194,6 +1208,7 @@ import {
   Search as SearchIcon,
   Shield as ShieldIcon,
   X as XIcon,
+  ArchiveRestore as ArchiveRestoreIcon,
   Eye as EyeIcon,
   Trash2 as Trash2Icon,
   Zap as ZapIcon,
@@ -1215,6 +1230,7 @@ export default defineComponent({
   name: "DesignSystemPage",
   mixins: [windowMixin],
   components: {
+    ArchiveRestoreIcon,
     PaymentStatus,
     FlowDialog,
     BusyLabel,
@@ -1247,6 +1263,7 @@ export default defineComponent({
     SectionDivider,
     SettingsActionRow,
     UnitToggle,
+    MintCardAction,
     SettingsLinkRow,
     SettingsRadioRow,
     SettingsSection,

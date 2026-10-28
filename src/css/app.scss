@@ -62,7 +62,13 @@ html:lang(ja) .q-item__label--caption {
 // Short captions (option and settings rows) balance their lines outright: "pretty" left a
 // trailing "ecash。" alone on the second line (council R77).
 html:lang(zh) .q-item__label--caption,
-html:lang(ja) .q-item__label--caption {
+html:lang(ja) .q-item__label--caption,
+html:lang(zh) .app-option-row__caption,
+html:lang(ja) .app-option-row__caption,
+html:lang(zh) .welcome-slide p,
+html:lang(ja) .welcome-slide p,
+html:lang(zh) .pwa-slide p,
+html:lang(ja) .pwa-slide p {
   text-wrap: balance;
 }
 
@@ -1420,8 +1426,8 @@ body.body--light .mint-card.mint-card--active {
 html[dir="rtl"] .mint-card-more {
   margin: -12px 0 -12px -16px;
 }
-/* Discover's labelled add: a compact 36px text button on the name's line (outlined pills
-   dominated a list of five, council R77). */
+/* A mint card's labelled action (MintCardAction: Discover's Add, Restore's Restore): a
+   compact 36px text button (outlined pills dominated a list of five, council R77). */
 .mint-card-add {
   flex: none;
   margin-block-start: -6px;
@@ -1430,6 +1436,10 @@ html[dir="rtl"] .mint-card-more {
   font-weight: 600;
   min-height: 36px;
   padding: 0 12px;
+}
+.mint-card-add__icon {
+  display: inline-flex;
+  margin-inline-end: 4px;
 }
 /* Restore's selection box sits where an installed mint shows its menu, on the same line. */
 .restore-mint-check {

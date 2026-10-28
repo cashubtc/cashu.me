@@ -311,6 +311,16 @@ export const DS_ITEMS: DsItem[] = [
   },
 
   {
+    id: "mint-card-action",
+    name: "Mint card action",
+    group: "actions",
+    tier: "primitive",
+    source: "src/components/ui/MintCardAction.vue",
+    usage: { tag: "MintCardAction" },
+    example: `<MintCardAction :label="$t('MintSettings.discover.add')" @click="add"><template #icon><PlusIcon :size="16" /></template></MintCardAction>`,
+    note: "A labelled text action on a mint card's name line. Default, disabled and busy.",
+  },
+  {
     id: "unit-toggle",
     name: "Unit toggle",
     group: "navigation",

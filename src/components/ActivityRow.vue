@@ -24,8 +24,9 @@
         aria-hidden="true"
       >
         <XIcon v-if="expired" :size="20" />
-        <ArrowDownLeftIcon v-else-if="isIn" :size="20" />
-        <ArrowUpRightIcon v-else :size="20" />
+        <!-- Direction glyphs follow the reading direction (council R78). -->
+        <ArrowDownLeftIcon v-else-if="isIn" :size="20" class="rtl-flip" />
+        <ArrowUpRightIcon v-else :size="20" class="rtl-flip" />
       </q-avatar>
     </q-item-section>
 

@@ -33,25 +33,24 @@
       :title="onboarding ? '' : $t('RestoreView.restore_mints.label')"
       :caption="onboarding ? '' : $t('RestoreView.restore_mints.caption')"
     >
-      <!-- Select All/Deselect All Buttons -->
-      <div v-if="mints.length > 0 && !onboarding" class="row no-wrap q-mb-md">
+      <!-- One select-all toggle on the list's end edge (two far-apart links read as a
+           segmented control with a dead half, council R77-R78). -->
+      <div
+        v-if="mints.length > 0 && !onboarding"
+        class="row justify-end q-mb-sm restore-select-toggle"
+      >
         <q-btn
           flat
           rounded
-          class="col"
-          @click="selectAllMints"
-          :disabled="allSelected"
+          no-caps
+          color="primary"
+          @click="allSelected ? deselectAllMints() : selectAllMints()"
         >
-          {{ $t("RestoreView.actions.select_all.label") }}
-        </q-btn>
-        <q-btn
-          flat
-          rounded
-          class="col"
-          @click="deselectAllMints"
-          :disabled="!anySelected"
-        >
-          {{ $t("RestoreView.actions.deselect_all.label") }}
+          {{
+            allSelected
+              ? $t("RestoreView.actions.deselect_all.label")
+              : $t("RestoreView.actions.select_all.label")
+          }}
         </q-btn>
       </div>
 
@@ -65,7 +64,7 @@
             clickable
             class="cursor-pointer"
             :active="selectedMints.has(mint.url)"
-            :disable="(onboarding ? false : !isMnemonicValid) || restoringState"
+            :disable="restoringState"
             :icon-url="getMintIconUrl(mint)"
             :name="mint.nickname || mint.info?.name"
             :url="mint.url"
@@ -88,21 +87,14 @@
               />
             </template>
             <template v-if="!onboarding" #meta>
-              <q-btn
-                round
-                flat
-                dense
-                class="mint-card-more"
-                :aria-label="$t('RestoreView.actions.restore.label')"
-                @click.stop="restoreMintForMint(mint.url)"
-                :disabled="!isMnemonicValid || restoringState"
+              <MintCardAction
+                :label="$t('RestoreView.actions.restore.label')"
+                :disable="!isMnemonicValid || restoringState"
                 :loading="restoringMint === mint.url"
-                ><ArchiveRestoreIcon :size="20" />
-                <template #loading><PendingDots /></template>
-                <q-tooltip>{{
-                  $t("RestoreView.actions.restore.label")
-                }}</q-tooltip>
-              </q-btn>
+                @click="restoreMintForMint(mint.url)"
+              >
+                <template #icon><ArchiveRestoreIcon :size="16" /></template>
+              </MintCardAction>
             </template>
             <!-- Restore Progress -->
             <div v-if="restoringMint === mint.url">
@@ -160,10 +152,10 @@
 </template>
 
 <script lang="ts">
+import MintCardAction from "src/components/ui/MintCardAction.vue";
 import IconButton from "src/components/ui/IconButton.vue";
 import BusyLabel from "src/components/ui/BusyLabel.vue";
 import MintCard from "src/components/MintCard.vue";
-import PendingDots from "src/components/ui/PendingDots.vue";
 import {
   ClipboardPaste as ClipboardPasteIcon,
   ArchiveRestore as ArchiveRestoreIcon,
@@ -184,10 +176,10 @@ export default defineComponent({
   name: "RestoreView",
   mixins: [windowMixin],
   components: {
+    MintCardAction,
     IconButton,
     BusyLabel,
     MintCard,
-    PendingDots,
     ClipboardPasteIcon,
     ArchiveRestoreIcon,
     NostrMintRestore,
