@@ -83,7 +83,7 @@ export default defineComponent({
           .units.map((unit) =>
             formatCurrency(mintClass(mint).unitBalance(unit), unit)
           )
-          .join(" + "),
+          .join(" • "),
       });
       return rows;
     });

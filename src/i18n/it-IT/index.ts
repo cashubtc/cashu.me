@@ -741,7 +741,7 @@ export default {
     },
   },
   PwaPrompt: {
-    title: "Aggiungi Cashu alla schermata Home",
+    title: "Installa Cashu",
     text: "Si apre dalla schermata Home, senza la barra del browser.",
     ios: {
       share: "Tocca Condividi",
@@ -815,6 +815,9 @@ export default {
     text: "Scansiona le proofs non spese sui mints configurati e aggiungile al tuo portafoglio.",
   },
   MintRatings: {
+    sort_and_filter: "Ordina e filtra",
+    reviews_title: "Recensioni",
+    reviews_count: "{n} recensione | {n} recensioni",
     web_of_trust_caption:
       "Conta solo le recensioni delle persone nella tua rete di fiducia",
     web_of_trust_hop: "Nella tua rete di fiducia (salto {hop})",

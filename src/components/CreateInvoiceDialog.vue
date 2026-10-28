@@ -29,7 +29,6 @@
               <q-btn
                 flat
                 round
-                no-caps
                 color="primary"
                 class="sheet-unit-toggle"
                 @click="toggleUnit()"
@@ -98,7 +97,6 @@
                       <q-btn
                         flat
                         dense
-                        no-caps
                         color="primary"
                         :loading="refreshingMint"
                         @click="refreshActiveMint"

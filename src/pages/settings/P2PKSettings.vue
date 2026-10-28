@@ -14,7 +14,6 @@
               color="primary"
               rounded
               unelevated
-              no-caps
               class="settings-primary-action"
               @click="generateKeypair"
               >{{ $t("Settings.p2pk_features.generate_button") }}</q-btn

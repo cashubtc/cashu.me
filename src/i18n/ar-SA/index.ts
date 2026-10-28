@@ -755,7 +755,7 @@ export default {
     },
   },
   PwaPrompt: {
-    title: "أضف Cashu إلى شاشتك الرئيسية",
+    title: "تثبيت Cashu",
     text: "يفتح من شاشتك الرئيسية، بدون شريط المتصفح.",
     ios: {
       share: "انقر على مشاركة",
@@ -828,6 +828,9 @@ export default {
     text: "ابحث عن البراهين غير المصروفة على المِنْت المُكوَّنة لديك وأضِفها إلى محفظتك.",
   },
   MintRatings: {
+    sort_and_filter: "الترتيب والتصفية",
+    reviews_title: "المراجعات",
+    reviews_count: "{n} مراجعة | {n} مراجعات",
     web_of_trust_caption: "احتساب مراجعات الأشخاص في شبكة ثقتك فقط",
     web_of_trust_hop: "ضمن شبكة الثقة الخاصة بك (القفزة {hop})",
     no_mint_url: "لم يُقدَّم عنوان URL للمِنْت",

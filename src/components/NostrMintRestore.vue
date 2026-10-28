@@ -15,7 +15,6 @@
         color="primary"
         outline
         rounded
-        no-caps
         @click="searchForMints"
         :disabled="!isMnemonicValid || searchInProgress"
         :loading="searchInProgress"
@@ -42,12 +41,7 @@
           :loading="addingMints"
           :disabled="addingMints || selectedMints.length === 0"
           class="full-width"
-          style="
-            min-height: 48px;
-            font-weight: 500;
-            text-transform: none;
-            font-size: 0.95rem;
-          "
+          style="min-height: 48px; font-weight: 500; font-size: 0.95rem"
         >
           <PlusIcon :size="20" class="q-mr-sm" />
           <span
@@ -81,12 +75,7 @@
           color="primary"
           @click="selectAllMints"
           :disabled="allSelected"
-          style="
-            flex: 1;
-            min-height: 40px;
-            font-weight: 500;
-            text-transform: none;
-          "
+          style="flex: 1; min-height: 40px; font-weight: 500"
         >
           {{ $t("RestoreView.nostr_mints.select_all") }}
         </q-btn>
@@ -96,12 +85,7 @@
           color="grey"
           @click="deselectAllMints"
           :disabled="!anySelected"
-          style="
-            flex: 1;
-            min-height: 40px;
-            font-weight: 500;
-            text-transform: none;
-          "
+          style="flex: 1; min-height: 40px; font-weight: 500"
         >
           {{ $t("RestoreView.nostr_mints.deselect_all") }}
         </q-btn>

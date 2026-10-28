@@ -134,7 +134,6 @@
           color="primary"
           rounded
           unelevated
-          no-caps
           @click="restoreSelectedMints"
           :disabled="
             (onboarding ? false : !isMnemonicValid) ||

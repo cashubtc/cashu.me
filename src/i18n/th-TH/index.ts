@@ -755,7 +755,7 @@ export default {
     },
   },
   PwaPrompt: {
-    title: "เพิ่ม Cashu ไปยังหน้าจอหลัก",
+    title: "ติดตั้ง Cashu",
     text: "เปิดจากหน้าจอหลักได้เลย โดยไม่มีแถบเบราว์เซอร์",
     ios: {
       share: "แตะ แชร์",
@@ -829,6 +829,9 @@ export default {
     text: "สแกนหา proof ที่ยังไม่ถูกใช้บน Mint ที่กำหนดค่าไว้และเพิ่มลงในกระเป๋าเงินของคุณ",
   },
   MintRatings: {
+    sort_and_filter: "เรียงและกรอง",
+    reviews_title: "รีวิว",
+    reviews_count: "{n} รีวิว | {n} รีวิว",
     web_of_trust_caption: "นับเฉพาะรีวิวจากคนในเครือข่ายความไว้วางใจของคุณ",
     web_of_trust_hop: "อยู่ในเครือข่ายความเชื่อถือของคุณ (ลำดับ {hop})",
     no_mint_url: "ไม่ได้ระบุ URL ของ Mint",

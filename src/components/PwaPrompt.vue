@@ -11,23 +11,19 @@
           <div class="pwa-prompt__title">{{ $t("PwaPrompt.title") }}</div>
           <div class="pwa-prompt__text">{{ $t("PwaPrompt.text") }}</div>
         </div>
-        <q-btn
+        <IconButton
           v-if="!canInstall"
-          flat
-          round
           class="pwa-prompt__close"
-          :aria-label="$t('global.actions.close.label')"
+          :icon="XIcon"
+          :label="$t('global.actions.close.label')"
           @click="closePrompt"
-        >
-          <XIcon :size="20" />
-        </q-btn>
+        />
       </div>
 
       <template v-if="canInstall">
         <q-btn
           unelevated
           rounded
-          no-caps
           color="primary"
           class="full-width"
           :label="$t('PwaPrompt.install')"
@@ -36,7 +32,6 @@
         <q-btn
           flat
           rounded
-          no-caps
           class="pwa-prompt__later"
           :label="$t('PwaPrompt.notNow')"
           @click="closePrompt"
@@ -70,6 +65,7 @@ import {
   SquarePlus as SquarePlusIcon,
   X as XIcon,
 } from "lucide-vue-next";
+import IconButton from "src/components/ui/IconButton.vue";
 
 type PwaPlatform = "android" | "ios";
 
@@ -91,7 +87,10 @@ const deferredOffer = (): BeforeInstallPromptEvent | null =>
 
 export default defineComponent({
   name: "PwaPrompt",
-  components: { XIcon },
+  setup() {
+    return { XIcon };
+  },
+  components: { IconButton, XIcon },
   props: {
     platform: {
       type: String as PropType<PwaPlatform>,
@@ -228,6 +227,10 @@ export default defineComponent({
   font-weight: 600;
   line-height: 1.3;
 }
+.pwa-prompt__title,
+.pwa-prompt__text {
+  text-wrap: pretty;
+}
 .pwa-prompt__text {
   color: var(--app-text-muted);
   font-size: 14px;
@@ -236,16 +239,11 @@ export default defineComponent({
 }
 .pwa-prompt__close {
   align-self: flex-start;
-  color: var(--app-text-muted);
+  color: var(--app-text-muted) !important;
   flex-shrink: 0;
-  height: 40px;
-  margin: -8px -10px 0 0;
-  min-height: 40px;
-  min-width: 40px;
-  width: 40px;
-}
-[dir="rtl"] .pwa-prompt__close {
-  margin: -8px 0 0 -10px;
+  /* The 44px button's glyph ink onto the sheet's 16px edge, level with the title. */
+  margin-block-start: -10px;
+  margin-inline-end: -12px;
 }
 .pwa-prompt__later {
   align-self: center;
@@ -253,25 +251,31 @@ export default defineComponent({
   margin-top: -8px;
 }
 .pwa-prompt__steps {
+  background: var(--app-group-fill);
+  border: 1px solid var(--app-group-edge);
+  border-radius: var(--app-radius-lg);
   display: flex;
   flex-direction: column;
-  gap: 4px;
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 0 16px;
 }
+/* The steps as one grouped list, like a settings group: a hairline between rows. */
 .pwa-prompt__step {
   align-items: center;
   display: flex;
   font-size: 15px;
   gap: 12px;
-  min-height: 40px;
+  min-height: 52px;
+}
+.pwa-prompt__step + .pwa-prompt__step {
+  border-top: 1px solid var(--app-group-edge);
 }
 .pwa-prompt__num {
   align-items: center;
-  border: 1px solid var(--app-border-strong);
+  background: var(--app-tint-strong);
   border-radius: 50%;
-  color: var(--app-text-muted);
+  color: var(--app-text);
   display: inline-flex;
   flex-shrink: 0;
   font-size: 12px;

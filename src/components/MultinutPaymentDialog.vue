@@ -67,7 +67,6 @@
                   <q-btn
                     flat
                     dense
-                    no-caps
                     class="warning-dismiss-btn"
                     @click="dismissExperimentalWarning"
                   >

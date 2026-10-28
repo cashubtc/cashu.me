@@ -70,7 +70,6 @@
         <q-btn
           rounded
           unelevated
-          no-caps
           color="primary"
           class="welcome-footer__next"
           data-testid="onboarding-next"

@@ -62,9 +62,13 @@ function toPath(tag: string, a: Record<string, string | number>): string {
       const ry = n(a.ry ?? a.r);
       const cx = n(a.cx);
       const cy = n(a.cy);
-      return `M${cx - rx} ${cy}a${rx} ${ry} 0 1 0 ${
-        2 * rx
-      } 0a${rx} ${ry} 0 1 0 ${-2 * rx} 0`;
+      // Four quarter arcs: two half arcs between opposite points are ambiguous, and some
+      // renderers flattened one side of the circle.
+      const q = `${rx} ${ry} 0 0 1`;
+      return (
+        `M${cx + rx} ${cy}A${q} ${cx} ${cy + ry}A${q} ${cx - rx} ${cy}` +
+        `A${q} ${cx} ${cy - ry}A${q} ${cx + rx} ${cy}Z`
+      );
     }
     case "rect": {
       const x = n(a.x);

@@ -54,19 +54,20 @@ html:lang(ar) p {
   color: var(--app-text);
 }
 
-// Sentence-case buttons across the app, matching list and title copy.
+// Every button label is in capitals, as Send and Receive always were (user direction): one
+// voice for every action, primary or secondary. Nothing opts out (no-caps is banned by a
+// guard test); scripts without capitals drop the tracking.
 .q-btn {
-  text-transform: none;
-  letter-spacing: 0;
   font-weight: 600;
-}
-// Strategic capitals, as in the original design (user direction, R56): the one filled,
-// full-width action that completes a flow (Create invoice, Pay, Receive, Copy…) is set in
-// caps; secondary and inline buttons stay in sentence case.
-.q-dialog .q-btn--unelevated.q-btn--rounded.full-width.bg-primary {
-  font-size: 1rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+}
+.q-btn:lang(zh),
+.q-btn:lang(ja),
+.q-btn:lang(ko),
+.q-btn:lang(ar),
+.q-btn:lang(th) {
+  letter-spacing: 0;
 }
 
 // Native-app feel: disable text selection across the UI
@@ -548,6 +549,10 @@ body.body--light .q-toggle.disabled .q-toggle__inner--truthy .q-toggle__track {
 .q-tab > .q-focus-helper {
   inset: 6px;
   border-radius: var(--app-radius-sm);
+  // Quasar sizes the helper at 100% with a physical side, so an inset slid it off the tab
+  // (6px left in rtl); the inset alone sizes it.
+  height: auto;
+  width: auto;
 }
 
 /* A select showing its placeholder reads muted until a value is picked. */
@@ -757,6 +762,12 @@ body .q-tab__indicator {
   border-radius: 2px;
   height: 3px;
 }
+// The underline is as wide as the label (narrow-indicator), not the 16px-padded cell.
+body .q-tabs .q-tab__indicator {
+  left: 16px;
+  right: 16px;
+  width: auto;
+}
 // Tooltips: a small inverse label (ink fill, page-colour text), so it never reads as a control.
 body .q-tooltip {
   background: var(--app-text);
@@ -930,6 +941,8 @@ html[dir="rtl"] .settings-menu-chevron {
   transform: scaleX(-1);
 }
 // "Opens elsewhere" is not a reading direction, so the external-link arrow never mirrors.
+html[dir="rtl"] .detail-value__external,
+html[dir="rtl"] .settings-menu-chevron.lucide-arrow-up-right-icon,
 html[dir="rtl"] .lucide-external-link-icon {
   transform: none;
 }
@@ -1386,6 +1399,16 @@ body .q-notification .q-notification__icon {
   margin-right: 0 !important;
   width: 36px;
 }
+// Leaving: Quasar takes the toast out of flow (absolute, pinned to the list's bottom edge),
+// so it snapped to the bottom before fading. It fades and drops from where it is instead, and
+// the toasts above slide down once it's gone (the move transition below).
+body .q-notification--bottom-leave-active {
+  bottom: auto;
+  position: relative;
+}
+body .q-notification--bottom-move {
+  transition: transform 0.25s ease;
+}
 body .q-notification .q-notification__icon > svg {
   height: 20px;
   width: 20px;
@@ -1548,6 +1571,15 @@ body .q-notification__progress {
 // close, menu) puts its visible ink 16px from the container's end edge, the same line as the
 // switch track. Icon buttons carry their 40px target past the glyph, so each pulls its end
 // margin in by the glyph's own inset.
+// A field's trailing button (copy, paste, scan, reveal) is always the 44px target with its
+// 20px glyph centred, whatever size the button was declared at, so the glyph sits on the
+// guideline instead of a dense 24px button jammed against the edge.
+.q-field__append > .q-btn--round {
+  height: 44px;
+  min-height: 44px;
+  min-width: 44px;
+  width: 44px;
+}
 .q-field--outlined .q-field__append > .q-btn:last-child {
   margin-inline-end: -10px;
 }

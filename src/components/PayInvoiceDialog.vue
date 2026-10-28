@@ -15,7 +15,7 @@
         :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
       >
         <!-- Header with centered title and unit toggle on right -->
-        <FullscreenDialogHeader>
+        <FullscreenDialogHeader @close="closeDialog">
           <template #title>
             <div>
               <q-item-label
@@ -35,7 +35,6 @@
               <q-btn
                 flat
                 round
-                no-caps
                 color="primary"
                 class="sheet-unit-toggle"
                 @click="toggleUnit()"
@@ -836,6 +835,11 @@ export default defineComponent({
     },
     "payInvoiceData.show": {
       handler: async function (val, oldVal) {
+        // A fresh open never inherits "paying" from the last payment: the previous dialog
+        // can be closed while the wallet is still finishing (its toast already says Paid).
+        if (val && !oldVal && !this.isPaid && !this.payInvoiceData.paying) {
+          this.isPaying = false;
+        }
         // Intercept automatic close after successful payment
         if (
           !val &&

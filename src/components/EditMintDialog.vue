@@ -24,7 +24,6 @@
           color="primary"
           rounded
           unelevated
-          no-caps
           class="full-width"
           :disable="!hasChanges"
           @click="updateMintLocal"

@@ -788,7 +788,7 @@ export default {
     },
   },
   PwaPrompt: {
-    title: "Přidejte si Cashu na domovskou obrazovku",
+    title: "Nainstalovat Cashu",
     text: "Otevře se z domovské obrazovky, bez lišty prohlížeče.",
     ios: {
       share: "Klepněte na Sdílet",
@@ -870,6 +870,9 @@ export default {
     text: "Skenujte nevyužité proofy na nakonfigurovaných mintech a přidejte je do peněženky.",
   },
   MintRatings: {
+    sort_and_filter: "Řazení a filtr",
+    reviews_title: "Recenze",
+    reviews_count: "{n} recenze | {n} recenzí",
     web_of_trust_caption: "Počítat jen recenze od lidí z vaší sítě důvěry",
     web_of_trust_hop: "Ve vaší síti důvěry (skok {hop})",
     no_mint_url: "Nebyla zadána URL mintu",

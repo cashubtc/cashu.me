@@ -165,19 +165,12 @@
         <WalletActions />
       </DsEntry>
       <DsEntry id="primary-button">
-        <q-btn
-          rounded
-          unelevated
-          no-caps
-          color="primary"
-          class="full-width q-mb-sm"
-        >
+        <q-btn rounded unelevated color="primary" class="full-width q-mb-sm">
           Continue
         </q-btn>
         <q-btn
           rounded
           unelevated
-          no-caps
           color="primary"
           class="full-width add-mint-submit"
         >
@@ -185,19 +178,12 @@
         </q-btn>
       </DsEntry>
       <DsEntry id="secondary-buttons">
-        <q-btn
-          rounded
-          outline
-          no-caps
-          color="primary"
-          class="full-width q-mb-sm"
-        >
+        <q-btn rounded outline color="primary" class="full-width q-mb-sm">
           <SearchIcon :size="18" class="q-mr-sm" /> Discover mints
         </q-btn>
         <q-btn
           rounded
           unelevated
-          no-caps
           color="primary"
           class="full-width q-mb-sm"
           loading
@@ -208,14 +194,10 @@
           </template>
         </q-btn>
         <div class="row q-gutter-sm">
-          <q-btn rounded outline no-caps color="primary">Outline</q-btn>
-          <q-btn rounded flat no-caps color="primary">Flat</q-btn>
-          <q-btn rounded unelevated no-caps color="primary" disable
-            >Disabled</q-btn
-          >
-          <q-btn rounded unelevated no-caps class="app-btn-danger"
-            >Remove mint</q-btn
-          >
+          <q-btn rounded outline color="primary">Outline</q-btn>
+          <q-btn rounded flat color="primary">Flat</q-btn>
+          <q-btn rounded unelevated color="primary" disable>Disabled</q-btn>
+          <q-btn rounded unelevated class="app-btn-danger">Remove mint</q-btn>
         </div>
       </DsEntry>
       <DsEntry id="icon-buttons">
@@ -236,28 +218,24 @@
         </div>
       </DsEntry>
       <DsEntry id="inline-confirm">
-        <q-item class="settings-view">
-          <q-item-section>
-            <q-item-label>Remove spent proofs</q-item-label>
-            <InlineConfirm
-              question="Remove them from this device?"
-              cancel-label="Cancel"
-              confirm-label="Remove"
-              @confirm="toast('success')"
-              @cancel="toast('info')"
-            />
-          </q-item-section>
-        </q-item>
+        <q-list class="settings-menu-group settings-view">
+          <q-item>
+            <q-item-section>
+              <q-item-label>Remove spent proofs</q-item-label>
+              <InlineConfirm
+                question="Remove them from this device?"
+                cancel-label="Cancel"
+                confirm-label="Remove"
+                @confirm="toast('success')"
+                @cancel="toast('info')"
+              />
+            </q-item-section>
+          </q-item>
+        </q-list>
       </DsEntry>
       <h2 id="ds-group-forms" class="ds-section">Form controls</h2>
       <DsEntry id="text-fields">
-        <q-input
-          rounded
-          outlined
-          v-model="url"
-          label="Mint URL"
-          class="q-mb-md"
-        >
+        <q-input outlined v-model="url" label="Mint URL" class="q-mb-md">
           <template v-slot:append>
             <q-btn flat round class="touch-target-44" aria-label="Scan"
               ><ScanIcon :size="20"
@@ -708,7 +686,7 @@
                 </div>
               </div>
               <div class="q-notification__actions row items-center">
-                <q-btn v-if="t.action" flat no-caps dense :label="t.action" />
+                <q-btn v-if="t.action" flat :label="t.action" />
                 <q-btn v-else flat round dense color="grey"
                   ><XIcon :size="16"
                 /></q-btn>
@@ -717,21 +695,16 @@
           </div>
         </div>
         <div class="row q-gutter-sm">
-          <q-btn rounded outline no-caps @click="toast('success')"
-            >Success</q-btn
-          >
-          <q-btn rounded outline no-caps @click="toast('error')">Error</q-btn>
-          <q-btn rounded outline no-caps @click="toast('warning')"
-            >Warning</q-btn
-          >
-          <q-btn rounded outline no-caps @click="toast('info')">Info</q-btn>
+          <q-btn rounded outline @click="toast('success')">Success</q-btn>
+          <q-btn rounded outline @click="toast('error')">Error</q-btn>
+          <q-btn rounded outline @click="toast('warning')">Warning</q-btn>
+          <q-btn rounded outline @click="toast('info')">Info</q-btn>
         </div>
       </DsEntry>
       <DsEntry id="loading">
         <q-btn
           rounded
           unelevated
-          no-caps
           color="primary"
           class="full-width q-mb-md"
           loading
@@ -758,7 +731,6 @@
             <q-btn
               rounded
               unelevated
-              no-caps
               color="primary"
               class="full-width app-empty__action"
               >Discover mints</q-btn
@@ -799,7 +771,6 @@
         <q-btn
           rounded
           outline
-          no-caps
           color="primary"
           class="q-mt-lg"
           @click="sheetOpen = true"
@@ -857,7 +828,6 @@
         <q-btn
           rounded
           outline
-          no-caps
           color="primary"
           class="q-mt-lg"
           @click="confirmOpen = true"
@@ -977,7 +947,7 @@
             title="Back up your seed phrase"
             text="Write these words down and keep them somewhere safe."
           >
-            <q-btn rounded unelevated no-caps color="primary" class="full-width"
+            <q-btn rounded unelevated color="primary" class="full-width"
               >Continue</q-btn
             >
           </WelcomeSlideScaffold>
@@ -1080,6 +1050,7 @@ import {
 import {
   ChevronLeft as ChevronLeftIcon,
   Clock as ClockIcon,
+  ReceiptText as ReceiptTextIcon,
   Coins as CoinsIcon,
   SearchX as SearchXIcon,
   Copy as CopyIcon,
@@ -1441,7 +1412,7 @@ export default defineComponent({
         },
       ],
       details: [
-        { name: "Fee paid", value: "₿1", icon: CoinsIcon },
+        { name: "Fee paid", value: "₿1", icon: ReceiptTextIcon },
         { name: "Paid at", value: "Oct 27, 2026, 8:35 AM", icon: ClockIcon },
         { name: "Mint", value: "mint.example.com", icon: LandmarkIcon },
       ],

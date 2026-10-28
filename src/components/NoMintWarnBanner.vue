@@ -10,7 +10,6 @@
       <q-btn
         unelevated
         rounded
-        no-caps
         color="primary"
         class="full-width app-empty__action"
         :label="$t('NoMintWarnBanner.actions.add_mint.label')"
@@ -19,7 +18,6 @@
       <q-btn
         flat
         rounded
-        no-caps
         color="primary"
         class="full-width"
         :label="$t('NoMintWarnBanner.actions.receive.label')"

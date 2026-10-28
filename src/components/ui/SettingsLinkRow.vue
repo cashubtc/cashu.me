@@ -14,7 +14,7 @@
       >
     </q-item-section>
     <q-item-section side>
-      <ExternalLinkIcon
+      <ArrowUpRightIcon
         v-if="external"
         :size="18"
         class="settings-menu-chevron"
@@ -28,12 +28,12 @@
 import { defineComponent, type Component, type PropType } from "vue";
 import {
   ChevronRight as ChevronRightIcon,
-  ExternalLink as ExternalLinkIcon,
+  ArrowUpRight as ArrowUpRightIcon,
 } from "lucide-vue-next";
 
 export default defineComponent({
   name: "SettingsLinkRow",
-  components: { ChevronRightIcon, ExternalLinkIcon },
+  components: { ChevronRightIcon, ArrowUpRightIcon },
   props: {
     icon: {
       type: [Object, Function] as PropType<Component>,

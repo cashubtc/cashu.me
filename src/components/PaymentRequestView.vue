@@ -1,46 +1,74 @@
-<!-- The body of a payment request (PaymentRequestDialog adds the header and the pager):
-     the amount as the hero, the QR with its text and a copy button, then the request's
-     settings — the unit as a segmented control and the mint as the standard mint picker —
-     received payments, and Share and Copy. Everything shown is read back from the encoded
-     request; every change is emitted as `change` and the owner makes a new request. -->
+<!-- The body of a payment request (PaymentRequestDialog adds the header and the pager),
+     in three blocks: the amount as the hero, edited in place on the same dashed line; the QR
+     and its request text on one surface; then the request's settings on one shared width —
+     the unit as a segmented control and the mint as the standard mint picker. Received
+     payments follow, and Share and Copy sit in the footer. Everything shown is read back
+     from the encoded request; every change is emitted as `change` and the owner makes a
+     new request. -->
 <template>
   <div class="pr-view column">
     <div class="content-area">
-      <div class="pr-body column items-center">
+      <div class="pr-body column">
         <div class="pr-amount column items-center">
-          <div class="pr-overline">
+          <!-- The line above the figure says what it means, or what's wrong with an edit. -->
+          <div
+            class="pr-overline"
+            :class="{ 'pr-overline--error': amountError }"
+            :role="amountError ? 'alert' : undefined"
+          >
             {{
-              hasAmount || isEditingAmount
+              amountError
+                ? amountErrorText
+                : hasAmount || isEditingAmount
                 ? $t("PaymentRequestDialog.requesting")
                 : $t("PaymentRequestDialog.payer_chooses_amount")
             }}
           </div>
-          <div v-if="isEditingAmount" class="pr-amount-editor">
-            <q-input
-              ref="amountInput"
-              v-model="amountInputValue"
-              outlined
-              inputmode="decimal"
-              data-testid="pr-amount-input"
-              :label="`${$t(
-                'PaymentRequestDialog.inputs.amount.placeholder'
-              )} (${unitLabel(fields.unit)})`"
-              :error="amountError"
-              @blur="commitAmount"
-              @keyup.enter="commitAmount"
-              @keyup.esc="isEditingAmount = false"
-            />
-          </div>
-          <div v-else-if="hasAmount" class="row items-center no-wrap">
+          <div class="pr-amount__line row items-center justify-center no-wrap">
+            <!-- Editing keeps the figure where it is: same type, same dashed line. -->
+            <label
+              v-if="isEditingAmount"
+              class="pr-hero-amount pr-hero-amount--editing"
+              :class="{ 'pr-hero-amount--error': amountError }"
+            >
+              <span class="pr-hero-amount__symbol" aria-hidden="true">{{
+                unitSymbol
+              }}</span>
+              <input
+                ref="amountInput"
+                v-model="amountInputValue"
+                class="pr-hero-amount__input"
+                data-testid="pr-amount-input"
+                inputmode="decimal"
+                autocomplete="off"
+                placeholder="0"
+                :aria-label="`${$t(
+                  'PaymentRequestDialog.inputs.amount.placeholder'
+                )} (${unitLabel(fields.unit)})`"
+                :aria-invalid="amountError || undefined"
+                :style="{ width: `${inputWidth}ch` }"
+                @input="amountError = false"
+                @blur="commitAmount"
+                @keydown.enter.prevent="commitAmount"
+                @keydown.esc.prevent="cancelAmount"
+              />
+            </label>
             <button
+              v-else
               type="button"
               class="pr-hero-amount"
+              :class="{ 'pr-hero-amount--empty': !hasAmount }"
               data-testid="pr-amount"
               @click="startEditingAmount"
             >
-              {{ amountLabel }}
+              {{
+                hasAmount
+                  ? amountLabel
+                  : $t("PaymentRequestDialog.actions.add_amount.label")
+              }}
             </button>
             <IconButton
+              v-if="hasAmount && !isEditingAmount"
               :icon="XIcon"
               class="pr-amount-clear"
               data-testid="pr-amount-clear"
@@ -48,28 +76,17 @@
               @click="emitChange({ amount: undefined })"
             />
           </div>
-          <q-btn
-            v-else
-            outline
-            rounded
-            no-caps
-            data-testid="pr-amount"
-            class="pr-add-amount"
-            @click="startEditingAmount"
-          >
-            <PlusIcon :size="18" class="q-mr-xs" />
-            {{ $t("PaymentRequestDialog.actions.add_amount.label") }}
-          </q-btn>
         </div>
 
-        <div class="pr-qr-group">
+        <!-- The request itself: the code and its text, as one object. -->
+        <div class="pr-card">
           <QrBlock :value="request" />
-          <div class="pr-code row items-center justify-center no-wrap">
+          <div class="pr-code row items-center no-wrap">
             <span class="app-mono pr-code__text">{{ shortRequest }}</span>
             <CopyButton
               :value="request"
               :label="$t('PaymentRequestDialog.actions.copy_request.label')"
-              class="touch-target-44"
+              class="touch-target-44 pr-code__copy"
             />
           </div>
         </div>
@@ -78,7 +95,7 @@
         <div class="pr-settings column">
           <SegmentedControl
             v-if="unitOptions.length > 1 && unitOptions.length <= 4"
-            class="pr-unit"
+            block
             data-testid="pr-unit"
             :label="$t('MintDetailsDialog.details.currency.label')"
             :model-value="fields.unit"
@@ -139,7 +156,6 @@
           v-if="webShareSupported"
           outline
           rounded
-          no-caps
           size="lg"
           class="pr-foot__btn"
           data-testid="pr-share"
@@ -151,7 +167,6 @@
         <q-btn
           unelevated
           rounded
-          no-caps
           size="lg"
           color="primary"
           class="pr-foot__btn"
@@ -169,7 +184,6 @@
 <script lang="ts">
 import {
   Copy as CopyIcon,
-  Plus as PlusIcon,
   Share as ShareIcon,
   X as XIcon,
 } from "lucide-vue-next";
@@ -207,7 +221,6 @@ export default defineComponent({
     CopyIcon,
     IconButton,
     PaymentRequestPayments,
-    PlusIcon,
     QrBlock,
     SegmentedControl,
     ShareIcon,
@@ -242,6 +255,27 @@ export default defineComponent({
     hasAmount(): boolean {
       return this.fields.amount !== undefined;
     },
+    // The currency mark beside the figure while it is being edited.
+    unitSymbol(): string {
+      const unit = this.fields.unit.toLowerCase();
+      return { sat: "₿", usd: "$", eur: "€" }[unit] ?? `${unit.toUpperCase()} `;
+    },
+    // The input grows with what is typed, so the figure stays centred on its line.
+    inputWidth(): number {
+      // Tabular digits at this tracking are a little narrower than 1ch.
+      return Math.max(1, this.amountInputValue.length) * 0.92 + 0.15;
+    },
+    amountErrorText(): string {
+      // Base units by name: "sat" (the hero shows ₿, but amounts are whole sats).
+      const unit =
+        this.fields.unit === "sat" ? "sat" : this.fields.unit.toUpperCase();
+      return this.$t(
+        unitMultiplier(this.fields.unit) === 1
+          ? "CreateInvoiceDialog.amount_errors.positive_whole"
+          : "CreateInvoiceDialog.amount_errors.positive_decimal",
+        { unit }
+      ) as string;
+    },
     amountLabel(): string {
       if (this.fields.amount === undefined) return "";
       return this.formatCurrency(this.fields.amount, this.fields.unit, true);
@@ -273,6 +307,7 @@ export default defineComponent({
   watch: {
     request() {
       this.isEditingAmount = false;
+      this.amountError = false;
     },
   },
   methods: {
@@ -315,7 +350,15 @@ export default defineComponent({
         amount === undefined ? "" : String(amount / unitMultiplier(unit));
       this.amountError = false;
       this.isEditingAmount = true;
-      this.$nextTick(() => (this.$refs.amountInput as any)?.focus());
+      this.$nextTick(() => {
+        const input = this.$refs.amountInput as HTMLInputElement | undefined;
+        input?.focus();
+        input?.select();
+      });
+    },
+    cancelAmount() {
+      this.amountError = false;
+      this.isEditingAmount = false;
     },
     commitAmount() {
       // Enter and the blur that follows both commit: only the first one counts.
@@ -364,72 +407,116 @@ export default defineComponent({
   flex: 1;
   min-height: 0;
 }
+/* Three blocks on the app column's 16px gutters, 20px apart. */
 .pr-body {
-  gap: 16px;
+  gap: 20px;
   margin: 0 auto;
   max-width: var(--app-column);
-  padding: 0 16px 16px;
+  padding: 4px 16px 16px;
   width: 100%;
 }
 .pr-amount {
-  gap: 8px;
-  padding-top: 4px;
+  gap: 6px;
   width: 100%;
 }
 .pr-overline {
   color: var(--app-text-muted);
   font-size: 14px;
+  line-height: 20px;
+  min-height: 20px;
+  text-align: center;
 }
-/* The hero amount reads as editable text: a dashed underline, no button chrome. The clear
-   button hangs off its end so the figure itself stays centred. */
+.pr-overline--error {
+  color: var(--app-danger);
+}
+/* The clear button hangs off the figure's end, so the figure itself stays centred. */
+.pr-amount__line {
+  min-height: 52px;
+}
+/* The hero figure reads as editable text: a dashed underline, no button chrome. Shown,
+   edited and empty, it keeps the same type and the same line, so tapping it never jumps. */
 .pr-hero-amount {
+  align-items: baseline;
   background: none;
   border: 0;
   border-block-end: 2px dashed var(--app-border-strong);
   color: var(--app-text);
   cursor: text;
+  display: inline-flex;
   font: inherit;
   font-size: 40px;
   font-variant-numeric: tabular-nums;
   font-weight: 700;
   letter-spacing: -0.02em;
-  line-height: 1.15;
-  min-height: 48px;
+  line-height: 48px;
   padding: 0 2px;
+  white-space: nowrap;
+}
+.pr-hero-amount--empty {
+  color: var(--app-text-muted);
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.pr-hero-amount--editing {
+  border-block-end-color: var(--q-primary);
+  border-block-end-style: solid;
+}
+.pr-hero-amount--error {
+  border-block-end-color: var(--app-danger);
+}
+.pr-hero-amount__input {
+  background: none;
+  border: 0;
+  caret-color: var(--q-primary);
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
+  min-width: 1.4ch;
+  outline: none;
+  padding: 0;
+  text-align: start;
+}
+.pr-hero-amount__input::placeholder {
+  color: var(--app-text-subtle);
 }
 .pr-amount-clear {
   color: var(--app-text-muted) !important;
   margin-inline-end: -44px;
 }
-.pr-add-amount {
-  min-height: 44px;
-}
-.pr-amount-editor {
-  width: 100%;
-}
-/* The QR gives up some height on short phones so the settings under it stay above the
-   footer. */
-.pr-qr-group {
-  --app-qr-size: clamp(200px, min(70vw, 32vh), 300px);
+/* The QR and its request text as one surface; the QR gives up some height on short
+   phones so the settings under it stay above the footer. */
+.pr-card {
+  --app-qr-size: clamp(184px, min(64vw, 30vh), 280px);
+  align-items: center;
+  background: var(--app-group-fill);
+  border: 1px solid var(--app-group-edge);
+  border-radius: var(--app-radius-xl);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 16px 4px;
   width: 100%;
 }
 .pr-code {
   gap: 4px;
-  margin-top: 4px;
+  justify-content: center;
+  max-width: 100%;
+  min-width: 0;
 }
 .pr-code__text {
   color: var(--app-text-muted);
   font-size: 13px;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* Unit and mint share one width, so their edges line up with the card above. */
 .pr-settings {
   gap: 12px;
   width: 100%;
-}
-.pr-unit {
-  align-self: center;
 }
 /* ChooseMint carries its own bottom padding for forms; here the stack's gap spaces it. */
 .pr-mint {
@@ -447,5 +534,10 @@ export default defineComponent({
 }
 .pr-foot__btn {
   flex: 1 1 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .pr-hero-amount {
+    transition: border-color 0.15s ease;
+  }
 }
 </style>

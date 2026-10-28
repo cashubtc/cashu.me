@@ -86,8 +86,31 @@ describe("standard elements", () => {
     ).toEqual([]);
   });
 
+  it("button labels are all capitals: no no-caps", () => {
+    expect(
+      offenders((text) =>
+        [...text.matchAll(/<q-btn\b[^>]*>/g)].some(([tag]) =>
+          /\sno-caps(?=[\s>/=])/.test(tag)
+        )
+      )
+    ).toEqual([]);
+  });
+
   it("no q-btn-toggle (use SegmentedControl)", () => {
     expect(offenders((text) => text.includes("<q-btn-toggle"))).toEqual([]);
+  });
+
+  // The field's shape, fill and edge come from app.scss alone; a component that resets the
+  // control's radius or fill paints a second shape inside the first (a pill fill inside a
+  // rounded border). The paste box is its own borderless pattern.
+  it("no component restyles a field's control", () => {
+    expect(
+      offenders((text) =>
+        [...text.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].some(([, css]) =>
+          css.includes("q-field__control")
+        )
+      ).filter((file) => !file.endsWith("ParseInputComponent.vue"))
+    ).toEqual([]);
   });
 
   it("text fields are the one outlined style", () => {

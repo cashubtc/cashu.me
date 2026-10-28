@@ -4,7 +4,7 @@
 <template>
   <div
     class="segmented"
-    :class="{ 'segmented--disabled': disable }"
+    :class="{ 'segmented--disabled': disable, 'segmented--block': block }"
     role="radiogroup"
     :aria-label="label || undefined"
     :aria-disabled="disable || undefined"
@@ -51,6 +51,8 @@ export default defineComponent({
     /** The group's accessible name. */
     label: { type: String, default: "" },
     disable: { type: Boolean, default: false },
+    /** Fill the container, with equal segments, to share edges with fields around it. */
+    block: { type: Boolean, default: false },
   },
   emits: ["update:modelValue"],
   computed: {
@@ -87,6 +89,11 @@ export default defineComponent({
   max-width: 100%;
   padding: 3px;
   position: relative;
+}
+.segmented--block {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  width: 100%;
 }
 /* The thumb sits under the chosen option and slides to the next one. */
 .segmented__thumb {

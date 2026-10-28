@@ -757,7 +757,7 @@ export default {
     },
   },
   PwaPrompt: {
-    title: "Cashuをホーム画面に追加",
+    title: "Cashuをインストール",
     text: "ホーム画面から、ブラウザのバーなしで開けます。",
     ios: {
       share: "共有をタップ",
@@ -831,6 +831,9 @@ export default {
     text: "設定済みミントで未使用のproofをスキャンし、ウォレットに追加します。",
   },
   MintRatings: {
+    sort_and_filter: "並べ替えとフィルター",
+    reviews_title: "レビュー",
+    reviews_count: "{n} 件のレビュー | {n} 件のレビュー",
     web_of_trust_caption: "信頼の輪の人のレビューだけを数える",
     web_of_trust_hop: "あなたの信頼の輪の中（{hop} ホップ）",
     no_mint_url: "ミントの URL が指定されていません",

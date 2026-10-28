@@ -66,7 +66,6 @@
         color="primary"
         rounded
         unelevated
-        no-caps
         :disable="!canPublish || prefilling"
         :loading="submitting"
         @click="publishReview"

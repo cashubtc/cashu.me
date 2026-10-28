@@ -136,7 +136,6 @@
                 size="lg"
                 color="primary"
                 rounded
-                no-caps
                 @click="onCopyBolt11"
               >
                 {{ copyButtonLabel }}

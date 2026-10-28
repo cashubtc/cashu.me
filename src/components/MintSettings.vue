@@ -90,7 +90,6 @@
           outline
           rounded
           color="primary"
-          no-caps
           class="discover-mints-btn full-width"
           @click="$router.push('/discoverMints')"
         >
@@ -150,7 +149,6 @@
           color="primary"
           rounded
           unelevated
-          no-caps
           class="full-width add-mint-submit q-mt-md"
           :disable="addMintData.url.length === 0"
           @click="sanitizeMintUrlAndShowAddDialog"
@@ -211,7 +209,6 @@
           color="primary"
           rounded
           unelevated
-          no-caps
           @click="extractAndMintAmountSwap(swapAmountData)"
           :disable="
             !swapData.fromUrl ||
@@ -632,11 +629,6 @@ export default defineComponent({
 .mint-input {
   width: 100%;
   font-family: inherit;
-}
-
-.mint-input .q-field__control {
-  height: 54px;
-  border-radius: 100px;
 }
 
 .mint-input .q-field__native,

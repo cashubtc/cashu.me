@@ -103,7 +103,6 @@
           rounded
           :outline="!filterPending"
           :unelevated="filterPending"
-          no-caps
           :aria-pressed="filterPending ? 'true' : 'false'"
           @click="filterPending = !filterPending"
           :color="filterPending ? 'primary' : undefined"
@@ -122,7 +121,6 @@
           v-if="filterPending"
           rounded
           outline
-          no-caps
           @click="filterPendingEcash = !filterPendingEcash"
           :color="filterPendingEcash ? 'primary' : 'grey'"
           :label="$t('HistoryTable.actions.filter_ecash_only.label')"

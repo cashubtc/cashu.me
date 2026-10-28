@@ -760,7 +760,7 @@ export default {
     },
   },
   PwaPrompt: {
-    title: "Lägg till Cashu på hemskärmen",
+    title: "Installera Cashu",
     text: "Öppnas från hemskärmen, utan webbläsarens adressfält.",
     ios: {
       share: "Tryck på Dela",
@@ -834,6 +834,9 @@ export default {
     text: "Sök efter ospenderade proofs på dina konfigurerade mints och lägg till dem i plånboken.",
   },
   MintRatings: {
+    sort_and_filter: "Sortera och filtrera",
+    reviews_title: "Omdömen",
+    reviews_count: "{n} omdöme | {n} omdömen",
     web_of_trust_caption:
       "Räkna bara recensioner från personer i ditt förtroendenätverk",
     web_of_trust_hop: "I ditt förtroendenätverk (steg {hop})",

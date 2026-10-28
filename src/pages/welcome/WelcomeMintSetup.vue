@@ -286,25 +286,6 @@ export default {
   transform: none;
 }
 
-.mint-input .q-field__control {
-  height: 44px;
-  border-radius: var(--app-radius-md);
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.2s ease;
-}
-
-.mint-input .q-field__control:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.mint-input .q-field--focused .q-field__control {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: color-mix(in srgb, var(--q-primary) 50%, transparent);
-  box-shadow: var(--app-focus-ring);
-}
-
 /* Mobile adjustments */
 @media (max-width: 600px) {
   .mints-section,

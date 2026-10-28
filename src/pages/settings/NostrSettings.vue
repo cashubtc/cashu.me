@@ -23,7 +23,6 @@
           <q-btn
             outline
             rounded
-            no-caps
             class="q-mt-sm"
             @click.stop="copyText(seedSignerPrivateKeyNsec)"
           >
@@ -197,7 +196,6 @@
               v-if="!wotLoading && wotCount > 0"
               flat
               rounded
-              no-caps
               class="q-px-md"
               color="negative"
               @click="resetWebOfTrust"

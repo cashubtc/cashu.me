@@ -9,7 +9,6 @@
       v-if="action"
       unelevated
       rounded
-      no-caps
       color="primary"
       class="blocking-state__action full-width q-mt-lg"
       :to="to || undefined"

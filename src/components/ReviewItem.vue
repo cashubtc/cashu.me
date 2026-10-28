@@ -2,11 +2,7 @@
      npub) with trust and "your review" marks and the date at the end, the stars under it,
      then the comment. `skeleton` draws the same boxes with placeholders while reviews load. -->
 <template>
-  <div
-    class="review-item"
-    :class="{ 'own-review': own && !skeleton }"
-    :aria-hidden="skeleton || undefined"
-  >
+  <div class="review-item" :aria-hidden="skeleton || undefined">
     <!-- Avatar: the reviewer's picture, else the tinted disc and line glyph of history rows. -->
     <q-skeleton v-if="skeleton" type="QAvatar" size="36px" />
     <q-avatar v-else size="36px" class="review-avatar">
@@ -134,13 +130,9 @@ export default defineComponent({
 .review-item:first-child {
   padding-top: 4px;
 }
-.own-review {
-  background: var(--app-tint);
-  border-radius: var(--app-radius-lg);
-  margin-inline: -16px;
-  padding: 16px;
-  position: relative;
-}
+/* The user's own review is marked by its "Your review" badge and pinned first; it keeps the
+   same row and edges as every other review (a tinted block around it read as a misaligned
+   highlight). */
 .review-avatar {
   background: var(--app-tint-strong);
   color: var(--app-text-muted);

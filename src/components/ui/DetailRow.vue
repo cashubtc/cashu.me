@@ -15,7 +15,7 @@
       @click="$emit('value-click', $event)"
     >
       <slot>{{ value }}</slot>
-      <ExternalLinkIcon
+      <ArrowUpRightIcon
         v-if="href"
         :size="14"
         class="detail-value__external"
@@ -27,11 +27,11 @@
 
 <script lang="ts">
 import { defineComponent, type Component, type PropType } from "vue";
-import { ExternalLink as ExternalLinkIcon } from "lucide-vue-next";
+import { ArrowUpRight as ArrowUpRightIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "DetailRow",
-  components: { ExternalLinkIcon },
+  components: { ArrowUpRightIcon },
   props: {
     icon: {
       type: [Object, Function] as PropType<Component>,
@@ -70,7 +70,8 @@ a.detail-value {
   text-decoration: none;
 }
 .detail-value__external {
-  color: var(--app-text-muted);
+  color: var(--app-text-subtle);
   flex-shrink: 0;
+  margin-inline-start: 2px;
 }
 </style>

@@ -28,13 +28,12 @@
       </q-list>
       <p v-if="note" class="council-dialog__note">{{ note }}</p>
       <div class="council-dialog__actions">
-        <q-btn flat rounded no-caps class="col" @click="close">
+        <q-btn flat rounded class="col" @click="close">
           {{ cancelLabel || $t("global.actions.cancel.label") }}
         </q-btn>
         <q-btn
           unelevated
           rounded
-          no-caps
           class="col"
           :class="danger ? 'app-btn-danger' : null"
           :color="danger ? undefined : 'primary'"

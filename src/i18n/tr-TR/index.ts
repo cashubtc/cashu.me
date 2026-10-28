@@ -773,7 +773,7 @@ export default {
     },
   },
   PwaPrompt: {
-    title: "Cashu'yu ana ekranınıza ekleyin",
+    title: "Cashu'yu yükle",
     text: "Ana ekranınızdan, tarayıcı çubuğu olmadan açılır.",
     ios: {
       share: "Paylaş'a dokunun",
@@ -847,6 +847,9 @@ export default {
     text: "Yapılandırılmış mintlerinizde harcanmamış kanıtları tarayın ve cüzdanınıza ekleyin.",
   },
   MintRatings: {
+    sort_and_filter: "Sırala ve filtrele",
+    reviews_title: "Yorumlar",
+    reviews_count: "{n} yorum | {n} yorum",
     web_of_trust_caption: "Yalnızca güven ağındaki kişilerin yorumlarını say",
     web_of_trust_hop: "Güven ağınızda ({hop}. adım)",
     no_mint_url: "Mint URL'si belirtilmedi",

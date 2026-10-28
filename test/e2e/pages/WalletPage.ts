@@ -132,7 +132,11 @@ export class WalletPage {
     const pay = this.page.getByTestId("pay-payment-request");
     await expect(pay).toBeEnabled();
     await pay.click();
-    await expect(this.page.getByText("Paid", { exact: false })).toBeVisible();
+    // The dialog's own paid state, not the "Paid" toast, which appears while the wallet is
+    // still finishing the payment (closing then raced the dialog's reset).
+    await expect(
+      this.page.getByRole("dialog").last().getByText("Paid", { exact: false })
+    ).toBeVisible();
     // The Send sheet stays open under the payment dialog and has its own Close; close the
     // payment dialog (the topmost one).
     await this.page

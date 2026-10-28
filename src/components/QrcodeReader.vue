@@ -147,7 +147,6 @@ export default {
         v-if="canPasteFromClipboard"
         rounded
         unelevated
-        no-caps
         class="qr-scanner__paste"
         @click="pasteToParseDialog"
       >

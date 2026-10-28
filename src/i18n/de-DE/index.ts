@@ -771,7 +771,7 @@ export default {
     },
   },
   PwaPrompt: {
-    title: "Cashu zum Home-Bildschirm hinzufügen",
+    title: "Cashu installieren",
     text: "Öffnet sich vom Home-Bildschirm, ohne Browserleiste.",
     ios: {
       share: "Tippen Sie auf Teilen",
@@ -845,6 +845,9 @@ export default {
     text: "Scannen Sie nach nicht ausgegebenen Nachweisen auf Ihren konfigurierten Mints und fügen Sie sie Ihrer Wallet hinzu.",
   },
   MintRatings: {
+    sort_and_filter: "Sortieren und filtern",
+    reviews_title: "Bewertungen",
+    reviews_count: "{n} Bewertung | {n} Bewertungen",
     web_of_trust_caption:
       "Nur Bewertungen von Personen in deinem Web of Trust zählen",
     web_of_trust_hop: "In deinem Vertrauensnetz (Hop {hop})",

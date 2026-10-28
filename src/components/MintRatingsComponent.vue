@@ -8,31 +8,23 @@
            "No reviews yet" before it knows and nothing moves when the reviews arrive. -->
       <div v-if="hasAnyReviews || fetchingReviews" class="q-mb-lg">
         <RatingsSummary
-          class="q-mb-sm"
           :skeleton="!hasAnyReviews"
           :average="average"
           :count="totalReviews"
           :distribution="ratingDistribution"
         />
-        <!-- The web-of-trust filter as a full-width settings row: what it does on the start
-             side, the switch at the end (R53: a bare end-aligned switch read as orphaned).
-             Its text is fixed, so it shows as it is while reviews load. -->
-        <label class="col-12 row items-center no-wrap ratings-filter-row">
-          <div class="col">
-            <div class="ratings-filter-row__title">
-              {{ $t("Settings.web_of_trust.title") }}
-            </div>
-            <div class="ratings-filter-row__caption">
-              {{ $t("MintRatings.web_of_trust_caption") }}
-            </div>
-          </div>
-          <q-toggle
-            v-model="filterByWoT"
-            color="primary"
-            class="ratings-wot-toggle"
-            :aria-label="$t('Settings.web_of_trust.title')"
-          />
-        </label>
+        <!-- The page's one action, right under the score it adds to. It needs no reviews, so
+             it shows as it is while they load. -->
+        <q-btn
+          v-if="allowCreateReview"
+          color="primary"
+          unelevated
+          rounded
+          class="full-width write-review-btn q-mt-lg"
+          @click="openCreateReview"
+        >
+          {{ $t("MintRatings.actions.write_review") }}
+        </q-btn>
       </div>
       <div v-else class="q-mb-lg">
         <EmptyState
@@ -48,7 +40,6 @@
               color="primary"
               unelevated
               rounded
-              no-caps
               class="full-width write-review-btn app-empty__action"
               @click="openCreateReview"
             >
@@ -57,52 +48,40 @@
           </template>
         </EmptyState>
       </div>
-
-      <!-- Action Buttons Row -->
-      <div
-        v-if="allowCreateReview && (hasAnyReviews || fetchingReviews)"
-        class="row q-mt-md q-mb-md justify-center"
-        style="gap: 12px"
-      >
-        <!-- The app's one full-width pill (52px, like Publish review and the sheet CTAs); it
-             needs no reviews, so it shows as it is while they load. -->
-        <q-btn
-          color="primary"
-          unelevated
-          rounded
-          no-caps
-          class="full-width write-review-btn"
-          @click="openCreateReview"
-        >
-          {{ $t("MintRatings.actions.write_review") }}
-        </q-btn>
-      </div>
     </q-card-section>
 
-    <!-- Sort Section -->
-    <q-card-section
+    <!-- The list's header: how many reviews, the trust filter when it is on, and one quiet
+         control that opens sorting and filtering together. -->
+    <div
       v-if="hasAnyReviews || fetchingReviews"
-      class="q-py-sm q-px-none"
+      class="reviews-toolbar row items-center no-wrap"
     >
+      <div class="col row items-center no-wrap reviews-toolbar__count">
+        <span class="reviews-toolbar__title">
+          <template v-if="hasAnyReviews">{{
+            $t("MintRatings.reviews_count", sorted.length)
+          }}</template>
+          <template v-else>{{ $t("MintRatings.reviews_title") }}</template>
+        </span>
+        <AppBadge v-if="filterByWoT" tone="primary">{{
+          $t("Settings.web_of_trust.title")
+        }}</AppBadge>
+      </div>
       <button
         type="button"
-        class="sort-trigger row items-center justify-between no-wrap full-width"
-        aria-haspopup="listbox"
+        class="reviews-toolbar__sort"
+        aria-haspopup="dialog"
         :aria-expanded="showSortSheet"
+        :aria-label="`${$t(
+          'MintRatings.sort_and_filter'
+        )}: ${currentSortLabel}`"
         @click="showSortSheet = true"
       >
-        <div class="row items-center" style="gap: 8px">
-          <ArrowDownWideNarrowIcon :size="16" class="text-grey-7" />
-          <span class="text-body2" style="font-weight: 600">{{
-            $t("MintRatings.sort")
-          }}</span>
-          <span class="text-body2 text-grey-5">{{ currentSortLabel }}</span>
-        </div>
-        <ChevronDownIcon :size="20" class="text-grey-5" />
+        <ListFilterIcon :size="16" aria-hidden="true" />
+        <span>{{ currentSortLabel }}</span>
+        <ChevronDownIcon :size="16" aria-hidden="true" />
       </button>
-    </q-card-section>
-
-    <q-separator v-if="hasAnyReviews || fetchingReviews" />
+    </div>
 
     <q-card-section v-if="hasAnyReviews || fetchingReviews" class="q-px-none">
       <div v-if="!hasAnyReviews" class="column">
@@ -151,7 +130,10 @@
     </q-card-section>
   </q-card>
 
-  <BottomSheet v-model="showSortSheet" :title="$t('MintRatings.sort')">
+  <BottomSheet
+    v-model="showSortSheet"
+    :title="$t('MintRatings.sort_and_filter')"
+  >
     <div
       role="listbox"
       :aria-label="$t('MintRatings.sort')"
@@ -165,13 +147,20 @@
         @select="selectSort(option.value)"
       />
     </div>
+    <q-list class="settings-menu-group q-mt-lg">
+      <SettingsToggleRow
+        v-model="filterByWoT"
+        :label="$t('Settings.web_of_trust.title')"
+        :caption="$t('MintRatings.web_of_trust_caption')"
+      />
+    </q-list>
   </BottomSheet>
 </template>
 
 <script lang="ts">
 import {
-  ArrowDownWideNarrow as ArrowDownWideNarrowIcon,
   ChevronDown as ChevronDownIcon,
+  ListFilter as ListFilterIcon,
   MessageCircle as MessageCircleIcon,
 } from "lucide-vue-next";
 import BottomSheet from "src/components/BottomSheet.vue";
@@ -180,6 +169,8 @@ import MintIdentityHeader from "src/components/MintIdentityHeader.vue";
 import RatingsSummary from "src/components/RatingsSummary.vue";
 import ReviewItem from "src/components/ReviewItem.vue";
 import EmptyState from "src/components/ui/EmptyState.vue";
+import AppBadge from "src/components/ui/AppBadge.vue";
+import SettingsToggleRow from "src/components/ui/SettingsToggleRow.vue";
 import { defineComponent } from "vue";
 import { notifyCopied } from "src/js/notify";
 import { useNostrStore } from "src/stores/nostr";
@@ -199,8 +190,10 @@ export default defineComponent({
   emits: ["close"],
   components: {
     MessageCircleIcon,
-    ArrowDownWideNarrowIcon,
+    ListFilterIcon,
     ChevronDownIcon,
+    AppBadge,
+    SettingsToggleRow,
     BottomSheet,
     SheetOption,
     MintIdentityHeader,
@@ -561,23 +554,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.ratings-filter-row {
-  cursor: pointer;
-  gap: 16px;
-}
-.ratings-filter-row__title {
-  color: var(--app-text);
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 20px;
-}
-.ratings-filter-row__caption {
-  color: var(--app-text-muted);
-  font-size: 13px;
-  line-height: 18px;
-  margin-top: 2px;
-}
-
 /* One surface level like mint details: no grey wrapper behind the cards (R18). */
 body[data-theme] .q-card--dark.mint-ratings-root {
   background: transparent !important;
@@ -587,32 +563,48 @@ body[data-theme] .q-card--dark.mint-ratings-root {
   font-weight: 600;
 }
 
-/* Sort trigger: a real button styled as a row. */
-.sort-trigger {
-  background: none;
-  border: 0;
-  border-radius: var(--app-radius-md);
-  color: inherit;
-  cursor: pointer;
-  font: inherit;
+/* The list header: the count on the start edge, the sort-and-filter control on the end,
+   one line, no rule (the reviews below are spaced by air). */
+.reviews-toolbar {
+  gap: 12px;
+  margin-bottom: 4px;
   min-height: 44px;
-  padding: 8px 0;
-  text-align: start;
 }
-.sort-trigger:hover {
-  opacity: 0.8;
+.reviews-toolbar__count {
+  gap: 8px;
+  min-width: 0;
 }
-.sort-trigger:focus-visible {
+.reviews-toolbar__title {
+  color: var(--app-text);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 24px;
+}
+/* A quiet pill: the current order, with the filter glyph and a chevron. */
+.reviews-toolbar__sort {
+  align-items: center;
+  background: var(--app-tint);
+  border: 0;
+  border-radius: var(--app-radius-pill);
+  color: var(--app-text);
+  cursor: pointer;
+  display: inline-flex;
+  flex: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 12px;
+}
+@media (hover: hover) {
+  .reviews-toolbar__sort:hover {
+    background: var(--app-tint-strong);
+  }
+}
+.reviews-toolbar__sort:focus-visible {
   outline: 2px solid var(--app-text);
   outline-offset: 2px;
-}
-
-.ratings-filter-row {
-  margin-top: 8px;
-}
-.ratings-wot-toggle {
-  color: var(--app-text-muted);
-  font-size: 14px;
 }
 .ratings-range {
   color: var(--app-text-muted);

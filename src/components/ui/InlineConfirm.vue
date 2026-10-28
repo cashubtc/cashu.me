@@ -4,18 +4,12 @@
   <div class="q-mt-xs">
     <span class="text-caption text-app-muted">{{ question }}</span>
     <div class="row items-center q-gutter-sm q-mt-xs">
-      <q-btn
-        rounded
-        outline
-        no-caps
-        class="q-px-md"
-        @click.stop="$emit('cancel')"
-        >{{ cancelLabel }}</q-btn
-      >
+      <q-btn rounded outline class="q-px-md" @click.stop="$emit('cancel')">{{
+        cancelLabel
+      }}</q-btn>
       <q-btn
         rounded
         unelevated
-        no-caps
         class="q-px-md app-btn-danger"
         @click.stop="$emit('confirm')"
         >{{ confirmLabel }}</q-btn

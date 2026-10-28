@@ -34,7 +34,6 @@
               <q-btn
                 flat
                 round
-                no-caps
                 color="primary"
                 class="sheet-unit-toggle"
                 @click="toggleUnit()"

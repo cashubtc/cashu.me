@@ -211,33 +211,13 @@ export default {
   font-size: 0.9rem;
 }
 
-.word-input :deep(.q-field__control) {
-  min-height: 44px;
-  border-radius: var(--app-radius-md);
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.2s ease;
-}
-
-.word-input :deep(.q-field__control):hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
 .word-input :deep(.q-field__native) {
   padding: 0 12px;
-}
-
-.word-input :deep(.q-field--focused .q-field__control) {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: color-mix(in srgb, var(--q-primary) 50%, transparent);
-  box-shadow: var(--app-focus-ring);
 }
 
 .word-input :deep(input) {
   font-family: monospace;
   font-size: 0.9rem;
-  color: white;
 }
 
 .word-input :deep(input::placeholder) {

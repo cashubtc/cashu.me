@@ -61,8 +61,8 @@ export default defineComponent({
 .mint-review__chevron {
   color: var(--app-text-muted);
   flex-shrink: 0;
-}
-html[dir="rtl"] .mint-review__chevron {
-  transform: scaleX(-1);
+  /* The 16px chevron's ink sits 6px inside its box: pull it onto the card's 16px guideline,
+     under the menu dots. (It mirrors in rtl through the global chevron rule.) */
+  margin-inline-end: -6px;
 }
 </style>

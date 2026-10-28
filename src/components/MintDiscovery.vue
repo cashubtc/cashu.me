@@ -25,7 +25,6 @@
             color="primary"
             rounded
             unelevated
-            no-caps
             :loading="discovering"
             @click="discover"
             class="discover-btn full-width app-empty__action"

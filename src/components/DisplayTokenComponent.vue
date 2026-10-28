@@ -173,7 +173,6 @@
                     v-if="showAnimatedQR"
                     outline
                     rounded
-                    no-caps
                     class="qr-control-chip"
                     @click="changeSpeed"
                   >
@@ -194,7 +193,6 @@
                     v-if="showAnimatedQR"
                     outline
                     rounded
-                    no-caps
                     class="qr-control-chip"
                     @click="changeSize"
                   >
