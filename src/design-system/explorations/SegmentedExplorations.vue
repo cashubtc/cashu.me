@@ -69,7 +69,7 @@ import {
 } from "lucide-vue-next";
 
 export const segmentedVariants = [
-  "Current: filled pill segments",
+  "Current (was: filled pill segments; now ships V6)",
   "Sliding thumb",
   "Underline tabs",
   "Outlined chips",

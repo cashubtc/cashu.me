@@ -50,6 +50,12 @@ export default {
       },
     },
   },
+  ActivityRow: {
+    received: "Recebido",
+    sent: "Enviado",
+    receiving: "Recebendo",
+    sending: "Enviando",
+  },
   common: {
     copied: "Copiado",
     on_chain: "On-chain",
@@ -750,7 +756,7 @@ export default {
         step2: {
           item: "2. { icon } { text }",
           text: "Pressione { buttonText }",
-          buttonText: "@:AndroidPWAPrompt.buttonText",
+          buttonText: "@:PwaPrompt.android.add",
         },
       },
       ios: {
@@ -762,7 +768,7 @@ export default {
         step2: {
           item: "2. { icon } { text }",
           text: "Pressione { buttonText }",
-          buttonText: "@:iOSPWAPrompt.buttonText",
+          buttonText: "@:PwaPrompt.ios.add",
         },
       },
       outro: {
@@ -778,13 +784,19 @@ export default {
       },
     },
   },
-  iOSPWAPrompt: {
-    text: "Toque em { icon } e { buttonText }",
-    buttonText: "Adicionar à Tela de Início",
-  },
-  AndroidPWAPrompt: {
-    text: "Toque em { icon } e { buttonText }",
-    buttonText: "Adicionar à Tela de Início",
+  PwaPrompt: {
+    title: "Adicione o Cashu à sua tela de início",
+    text: "Abre pela tela de início, sem a barra do navegador.",
+    ios: {
+      share: "Toque em Compartilhar",
+      add: "Adicionar à Tela de Início",
+    },
+    android: {
+      menu: "Abra o menu do navegador",
+      add: "Adicionar à Tela de Início",
+    },
+    install: "Instalar",
+    notNow: "Agora não",
   },
   WelcomeSlide3: {
     title: "Sua frase de recuperação",
@@ -1340,6 +1352,8 @@ export default {
       description: "Receba pagamentos via Nostr",
     },
     request_index: "Solicitação {index} de {total}",
+    requesting: "Solicitando",
+    payer_chooses_amount: "O pagador escolhe o valor",
     received_total: "Total recebido",
     no_payments_yet: "Nenhum pagamento ainda",
     actions: {
@@ -1351,6 +1365,12 @@ export default {
       },
       new_request: {
         label: "Nova solicitação",
+      },
+      share: {
+        label: "Compartilhar",
+      },
+      copy_request: {
+        label: "Copiar solicitação",
       },
       add_amount: {
         label: "Adicionar valor",

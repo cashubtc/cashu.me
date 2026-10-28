@@ -728,7 +728,7 @@ export default {
         step2: {
           item: "2. { icon } { text }",
           text: "{ buttonText }を押す",
-          buttonText: "@:AndroidPWAPrompt.buttonText",
+          buttonText: "@:PwaPrompt.android.add",
         },
       },
       ios: {
@@ -740,7 +740,7 @@ export default {
         step2: {
           item: "2. { icon } { text }",
           text: "{ buttonText }を押す",
-          buttonText: "@:iOSPWAPrompt.buttonText",
+          buttonText: "@:PwaPrompt.ios.add",
         },
       },
       outro: {
@@ -755,13 +755,19 @@ export default {
       },
     },
   },
-  iOSPWAPrompt: {
-    text: "{ icon }と{ buttonText }をタップ",
-    buttonText: "ホーム画面に追加",
-  },
-  AndroidPWAPrompt: {
-    text: "{ icon }と{ buttonText }をタップ",
-    buttonText: "ホーム画面に追加",
+  PwaPrompt: {
+    title: "Cashuをホーム画面に追加",
+    text: "ホーム画面から、ブラウザのバーなしで開けます。",
+    ios: {
+      share: "共有をタップ",
+      add: "ホーム画面に追加",
+    },
+    android: {
+      menu: "ブラウザのメニューを開く",
+      add: "ホーム画面に追加",
+    },
+    install: "インストール",
+    notNow: "後で",
   },
   WelcomeSlide3: {
     title: "あなたのシードフレーズ",
@@ -1279,6 +1285,8 @@ export default {
       description: "Nostr経由で支払いを受け取る",
     },
     request_index: "リクエスト {index}/{total}",
+    requesting: "請求額",
+    payer_chooses_amount: "金額は支払者が決定",
     actions: {
       copy: {
         label: "@:global.actions.copy.label",
@@ -1288,6 +1296,12 @@ export default {
       },
       new_request: {
         label: "新しいリクエスト",
+      },
+      share: {
+        label: "共有",
+      },
+      copy_request: {
+        label: "リクエストをコピー",
       },
       add_amount: {
         label: "金額を追加",
@@ -1647,6 +1661,12 @@ export default {
     payment_request: "支払いリクエスト",
     nostr: "Nostr",
     token_copied: "トークンをクリップボードにコピーしました",
+  },
+  ActivityRow: {
+    received: "受け取り済み",
+    sent: "送金済み",
+    receiving: "受け取り中",
+    sending: "送金中",
   },
   common: {
     copied: "コピーしました",

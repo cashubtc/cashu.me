@@ -718,7 +718,7 @@ export default {
         step2: {
           item: "2. { icon } { text }",
           text: "按 { buttonText }",
-          buttonText: "@:AndroidPWAPrompt.buttonText",
+          buttonText: "@:PwaPrompt.android.add",
         },
       },
       ios: {
@@ -730,7 +730,7 @@ export default {
         step2: {
           item: "2. { icon } { text }",
           text: "按 { buttonText }",
-          buttonText: "@:iOSPWAPrompt.buttonText",
+          buttonText: "@:PwaPrompt.ios.add",
         },
       },
       outro: {
@@ -745,13 +745,19 @@ export default {
       },
     },
   },
-  iOSPWAPrompt: {
-    text: "点击 { icon } 和 { buttonText }",
-    buttonText: "添加到主屏幕",
-  },
-  AndroidPWAPrompt: {
-    text: "点击 { icon } 和 { buttonText }",
-    buttonText: "添加到主屏幕",
+  PwaPrompt: {
+    title: "将 Cashu 添加到主屏幕",
+    text: "从主屏幕打开，不显示浏览器地址栏。",
+    ios: {
+      share: "点击“共享”",
+      add: "添加到主屏幕",
+    },
+    android: {
+      menu: "打开浏览器菜单",
+      add: "添加到主屏幕",
+    },
+    install: "安装",
+    notNow: "以后再说",
   },
   WelcomeSlide3: {
     title: "您的种子短语",
@@ -1258,6 +1264,8 @@ export default {
       description: "通过 Nostr 接收支付",
     },
     request_index: "第 {index} 个，共 {total} 个请求",
+    requesting: "请求金额",
+    payer_chooses_amount: "由付款人决定金额",
     actions: {
       copy: {
         label: "@:global.actions.copy.label",
@@ -1267,6 +1275,12 @@ export default {
       },
       new_request: {
         label: "新请求",
+      },
+      share: {
+        label: "分享",
+      },
+      copy_request: {
+        label: "复制请求",
       },
       add_amount: {
         label: "添加金额",
@@ -1623,6 +1637,12 @@ export default {
     payment_request: "支付请求",
     nostr: "Nostr",
     token_copied: "令牌已复制到剪贴板",
+  },
+  ActivityRow: {
+    received: "已收到",
+    sent: "已发送",
+    receiving: "接收中",
+    sending: "发送中",
   },
   common: {
     copied: "已复制",

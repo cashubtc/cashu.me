@@ -1,50 +1,83 @@
-<!-- The "add to home screen" hint for a browser that can install the wallet: Chrome on Android
-     (top, points at the menu) or Safari on iPhone (bottom, points at Share). Shown until closed. -->
+<!-- The "add to home screen" sheet for a browser that can install the wallet: Safari on iPhone
+     (two steps: Share, then Add to Home Screen) or Chrome on Android (an Install button that
+     opens the browser's own install flow, or the menu steps when the browser hasn't offered
+     one). It floats at the bottom without dimming the wallet, and shows until closed. -->
 <template>
-  <transition
-    :appear="isAndroid"
-    :enter-active-class="
-      isAndroid ? 'animated fadeInDown' : 'animated fadeInUp'
-    "
-  >
-    <div
-      v-if="show"
-      class="pwa-prompt q-pa-md text-center"
-      :class="
-        isAndroid
-          ? 'android-pwa-prompt pwa-prompt--android'
-          : 'q-mx-auto pwa-prompt--ios'
-      "
-    >
-      <div class="pwa-prompt-content">
-        <i18n-t :keypath="`${i18nKey}.text`" tag="span">
-          <template v-slot:icon>
-            <q-icon :name="isAndroid ? 'more_vert' : 'ios_share'" size="sm" />
-          </template>
-          <template v-slot:buttonText>
-            <strong>{{ $t(`${i18nKey}.buttonText`) }}</strong>
-          </template>
-        </i18n-t>
+  <transition name="pwa-prompt" appear>
+    <section v-if="show" class="pwa-prompt" :aria-label="$t('PwaPrompt.title')">
+      <div class="pwa-prompt__head">
+        <img :src="appIcon" alt="" class="pwa-prompt__icon" />
+        <div class="pwa-prompt__titles">
+          <div class="pwa-prompt__title">{{ $t("PwaPrompt.title") }}</div>
+          <div class="pwa-prompt__text">{{ $t("PwaPrompt.text") }}</div>
+        </div>
         <q-btn
+          v-if="!canInstall"
           flat
           round
-          icon="close"
-          @click="closePrompt"
-          size="sm"
-          class="close-btn pwa-prompt__close"
+          class="pwa-prompt__close"
           :aria-label="$t('global.actions.close.label')"
-        />
+          @click="closePrompt"
+        >
+          <XIcon :size="20" />
+        </q-btn>
       </div>
 
-      <div class="pwa-prompt-arrow"></div>
-    </div>
+      <template v-if="canInstall">
+        <q-btn
+          unelevated
+          rounded
+          no-caps
+          color="primary"
+          class="full-width"
+          :label="$t('PwaPrompt.install')"
+          @click="install"
+        />
+        <q-btn
+          flat
+          rounded
+          no-caps
+          class="pwa-prompt__later"
+          :label="$t('PwaPrompt.notNow')"
+          @click="closePrompt"
+        />
+      </template>
+      <ol v-else class="pwa-prompt__steps">
+        <li
+          v-for="(step, i) in steps"
+          :key="step.text"
+          class="pwa-prompt__step"
+        >
+          <span class="pwa-prompt__num">{{ i + 1 }}</span>
+          <span class="pwa-prompt__step-text">{{ step.text }}</span>
+          <component
+            :is="step.icon"
+            :size="20"
+            class="pwa-prompt__glyph"
+            aria-hidden="true"
+          />
+        </li>
+      </ol>
+    </section>
   </transition>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
+import {
+  EllipsisVertical as EllipsisVerticalIcon,
+  Share as ShareIcon,
+  SquarePlus as SquarePlusIcon,
+  X as XIcon,
+} from "lucide-vue-next";
 
 type PwaPlatform = "android" | "ios";
+
+// The browser's deferred install offer (Chromium only; not in the DOM typings).
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+}
 
 // The "seen" flag each platform has always used; kept so a dismissed prompt stays dismissed.
 const SEEN_KEYS: Record<PwaPlatform, string> = {
@@ -52,8 +85,13 @@ const SEEN_KEYS: Record<PwaPlatform, string> = {
   ios: "cashu.ui.showIosPWAPrompt",
 };
 
+// src/boot/base.js captures the offer as early as possible and announces it with this event.
+const deferredOffer = (): BeforeInstallPromptEvent | null =>
+  (window as any).__deferredBeforeInstallPrompt ?? null;
+
 export default defineComponent({
   name: "PwaPrompt",
+  components: { XIcon },
   props: {
     platform: {
       type: String as PropType<PwaPlatform>,
@@ -64,26 +102,67 @@ export default defineComponent({
   data() {
     return {
       show: false,
+      appIcon: "/icons/apple-icon-180x180.png",
+      deferredPrompt: null as BeforeInstallPromptEvent | null,
     };
   },
   computed: {
     isAndroid(): boolean {
       return this.platform === "android";
     },
-    i18nKey(): string {
-      return this.isAndroid ? "AndroidPWAPrompt" : "iOSPWAPrompt";
+    canInstall(): boolean {
+      return this.isAndroid && !!this.deferredPrompt;
+    },
+    steps(): { text: string; icon: unknown }[] {
+      return this.isAndroid
+        ? [
+            {
+              text: this.$t("PwaPrompt.android.menu"),
+              icon: EllipsisVerticalIcon,
+            },
+            { text: this.$t("PwaPrompt.android.add"), icon: SquarePlusIcon },
+          ]
+        : [
+            { text: this.$t("PwaPrompt.ios.share"), icon: ShareIcon },
+            { text: this.$t("PwaPrompt.ios.add"), icon: SquarePlusIcon },
+          ];
     },
   },
   mounted() {
+    if (this.isAndroid) {
+      this.deferredPrompt = deferredOffer();
+      window.addEventListener("bip-available", this.onOfferAvailable);
+      window.addEventListener("appinstalled", this.closePrompt);
+    }
     const notSeen = localStorage.getItem(SEEN_KEYS[this.platform]) != "seen";
     if (notSeen && this.isSupportedBrowser() && !this.isInStandaloneMode()) {
       this.show = true;
     }
   },
+  beforeUnmount() {
+    window.removeEventListener("bip-available", this.onOfferAvailable);
+    window.removeEventListener("appinstalled", this.closePrompt);
+  },
   methods: {
     closePrompt() {
       localStorage.setItem(SEEN_KEYS[this.platform], "seen");
       this.show = false;
+    },
+    onOfferAvailable() {
+      this.deferredPrompt = deferredOffer();
+    },
+    // The offer can be used once: whatever the person chooses, the prompt has done its job.
+    async install() {
+      const offer = this.deferredPrompt;
+      if (!offer) return;
+      this.deferredPrompt = null;
+      (window as any).__deferredBeforeInstallPrompt = null;
+      try {
+        await offer.prompt();
+        await offer.userChoice;
+      } finally {
+        this.closePrompt();
+      }
     },
     isSupportedBrowser(): boolean {
       const userAgent = window.navigator.userAgent.toLowerCase();
@@ -107,48 +186,127 @@ export default defineComponent({
 });
 </script>
 
-<!-- Shared prompt styles: src/css/elements.scss (.pwa-prompt). -->
 <style scoped>
-.pwa-prompt__close {
-  color: var(--app-text-muted);
-  flex-shrink: 0;
-  margin: -8px -8px -8px 8px;
-  min-height: 40px;
-  min-width: 40px;
-}
-/* The pointer is a small square of the bubble's own surface and edge, turned 45° and tucked
-   under the bubble, so bubble and pointer read as one shape. */
-.pwa-prompt-arrow {
+/* One sheet on the raised surface, in the app column, above the page's bottom edge and its
+   safe area. No scrim: installing is optional, so the wallet stays usable behind it. */
+.pwa-prompt {
   background: var(--app-raised);
   border: 1px solid var(--app-border-strong);
-  height: 12px;
-  position: relative;
-  transform: rotate(45deg);
-  width: 12px;
-  z-index: 1;
+  border-bottom: 0;
+  border-radius: var(--app-radius-xl) var(--app-radius-xl) 0 0;
+  bottom: 0;
+  box-shadow: var(--app-shadow-md);
+  color: var(--app-text);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  inset-inline: 0;
+  margin-inline: auto;
+  max-width: var(--app-content);
+  padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+  position: fixed;
+  text-align: start;
+  z-index: 3000;
 }
-.pwa-prompt--android {
-  top: 20px;
-  right: 20px;
+.pwa-prompt__head {
+  align-items: center;
+  display: flex;
+  gap: 12px;
 }
-/* Android: the pointer sits above the bubble's end edge, towards the browser menu. */
-.pwa-prompt--android .pwa-prompt-arrow {
-  border-bottom-color: transparent;
-  border-right-color: transparent;
-  inset-inline-end: 38px;
+.pwa-prompt__icon {
+  border-radius: 22%;
+  flex-shrink: 0;
+  height: 48px;
+  width: 48px;
+}
+.pwa-prompt__titles {
+  flex: 1;
+  min-width: 0;
+}
+.pwa-prompt__title {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.pwa-prompt__text {
+  color: var(--app-text-muted);
+  font-size: 14px;
+  line-height: 1.4;
+  margin-top: 2px;
+}
+.pwa-prompt__close {
+  align-self: flex-start;
+  color: var(--app-text-muted);
+  flex-shrink: 0;
+  height: 40px;
+  margin: -8px -10px 0 0;
+  min-height: 40px;
+  min-width: 40px;
+  width: 40px;
+}
+[dir="rtl"] .pwa-prompt__close {
+  margin: -8px 0 0 -10px;
+}
+.pwa-prompt__later {
+  align-self: center;
+  color: var(--app-text-muted);
+  margin-top: -8px;
+}
+.pwa-prompt__steps {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  list-style: none;
   margin: 0;
-  position: absolute;
-  top: 10px;
+  padding: 0;
 }
-.pwa-prompt--ios {
-  bottom: 12px;
-  left: 0;
-  right: 0;
+.pwa-prompt__step {
+  align-items: center;
+  display: flex;
+  font-size: 15px;
+  gap: 12px;
+  min-height: 40px;
 }
-/* iPhone: the pointer hangs under the bubble's centre, towards Share. */
-.pwa-prompt--ios .pwa-prompt-arrow {
-  border-left-color: transparent;
-  border-top-color: transparent;
-  margin: -7px auto 0;
+.pwa-prompt__num {
+  align-items: center;
+  border: 1px solid var(--app-border-strong);
+  border-radius: 50%;
+  color: var(--app-text-muted);
+  display: inline-flex;
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 600;
+  height: 24px;
+  justify-content: center;
+  width: 24px;
+}
+.pwa-prompt__step-text {
+  flex: 1;
+  min-width: 0;
+}
+/* Safari's and Chrome's own glyphs, as a picture of what to look for (not a control). */
+.pwa-prompt__glyph {
+  color: var(--app-text-muted);
+  flex-shrink: 0;
+}
+
+.pwa-prompt-enter-active,
+.pwa-prompt-leave-active {
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+.pwa-prompt-enter-from,
+.pwa-prompt-leave-to {
+  opacity: 0;
+  transform: translateY(16px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .pwa-prompt-enter-active,
+  .pwa-prompt-leave-active {
+    transition: opacity 200ms ease;
+  }
+  .pwa-prompt-enter-from,
+  .pwa-prompt-leave-to {
+    transform: none;
+  }
 }
 </style>

@@ -50,6 +50,12 @@ export default {
       },
     },
   },
+  ActivityRow: {
+    received: "Přijato",
+    sent: "Odesláno",
+    receiving: "Přijímá se",
+    sending: "Odesílá se",
+  },
   common: {
     copied: "Zkopírováno",
     on_chain: "On-chain",
@@ -752,7 +758,7 @@ export default {
         step2: {
           item: "2. { icon } { text }",
           text: "Stiskněte { buttonText }",
-          buttonText: "@:AndroidPWAPrompt.buttonText",
+          buttonText: "@:PwaPrompt.android.add",
         },
       },
       ios: {
@@ -764,7 +770,7 @@ export default {
         step2: {
           item: "2. { icon } { text }",
           text: "Stiskněte { buttonText }",
-          buttonText: "@:iOSPWAPrompt.buttonText",
+          buttonText: "@:PwaPrompt.ios.add",
         },
       },
       outro: {
@@ -780,13 +786,19 @@ export default {
       },
     },
   },
-  iOSPWAPrompt: {
-    text: "Klepněte na { icon } a { buttonText }",
-    buttonText: "Přidat na domovskou obrazovku",
-  },
-  AndroidPWAPrompt: {
-    text: "Klepněte na { icon } a { buttonText }",
-    buttonText: "Přidat na domovskou obrazovku",
+  PwaPrompt: {
+    title: "Přidejte si Cashu na domovskou obrazovku",
+    text: "Otevře se z domovské obrazovky, bez lišty prohlížeče.",
+    ios: {
+      share: "Klepněte na Sdílet",
+      add: "Přidat na domovskou obrazovku",
+    },
+    android: {
+      menu: "Otevřete nabídku prohlížeče",
+      add: "Přidat na domovskou obrazovku",
+    },
+    install: "Nainstalovat",
+    notNow: "Teď ne",
   },
   WelcomeSlide3: {
     title: "Vaše seed fráze",
@@ -1352,6 +1364,8 @@ export default {
       description: "Přijímat platby přes Nostr",
     },
     request_index: "Požadavek {index} z {total}",
+    requesting: "Požadováno",
+    payer_chooses_amount: "Částku zvolí plátce",
     received_total: "Celkem přijato",
     no_payments_yet: "Žádné platby dosud",
     actions: {
@@ -1363,6 +1377,12 @@ export default {
       },
       new_request: {
         label: "Nový požadavek",
+      },
+      share: {
+        label: "Sdílet",
+      },
+      copy_request: {
+        label: "Kopírovat žádost",
       },
       add_amount: {
         label: "Přidat částku",

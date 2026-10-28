@@ -730,7 +730,7 @@ export default {
         step2: {
           item: "2. { icon } { text }",
           text: "Tryck på { buttonText }",
-          buttonText: "@:AndroidPWAPrompt.buttonText",
+          buttonText: "@:PwaPrompt.android.add",
         },
       },
       ios: {
@@ -742,7 +742,7 @@ export default {
         step2: {
           item: "2. { icon } { text }",
           text: "Tryck på { buttonText }",
-          buttonText: "@:iOSPWAPrompt.buttonText",
+          buttonText: "@:PwaPrompt.ios.add",
         },
       },
       outro: {
@@ -758,13 +758,19 @@ export default {
       },
     },
   },
-  iOSPWAPrompt: {
-    text: "Tryck på { icon } och { buttonText }",
-    buttonText: "Lägg till på hemskärmen",
-  },
-  AndroidPWAPrompt: {
-    text: "Tryck på { icon } och { buttonText }",
-    buttonText: "Lägg till på hemskärmen",
+  PwaPrompt: {
+    title: "Lägg till Cashu på hemskärmen",
+    text: "Öppnas från hemskärmen, utan webbläsarens adressfält.",
+    ios: {
+      share: "Tryck på Dela",
+      add: "Lägg till på hemskärmen",
+    },
+    android: {
+      menu: "Öppna webbläsarens meny",
+      add: "Lägg till på hemskärmen",
+    },
+    install: "Installera",
+    notNow: "Inte nu",
   },
   WelcomeSlide3: {
     title: "Din återställningsfras",
@@ -1282,6 +1288,8 @@ export default {
       description: "Ta emot betalningar via Nostr",
     },
     request_index: "Begäran {index} av {total}",
+    requesting: "Begär",
+    payer_chooses_amount: "Betalaren väljer belopp",
     actions: {
       copy: {
         label: "@:global.actions.copy.label",
@@ -1291,6 +1299,12 @@ export default {
       },
       new_request: {
         label: "Ny förfrågan",
+      },
+      share: {
+        label: "Dela",
+      },
+      copy_request: {
+        label: "Kopiera begäran",
       },
       add_amount: {
         label: "Lägg till belopp",
@@ -1649,6 +1663,12 @@ export default {
     payment_request: "Betalningsförfrågan",
     nostr: "Nostr",
     token_copied: "Token kopierad till urklipp",
+  },
+  ActivityRow: {
+    received: "Mottaget",
+    sent: "Skickat",
+    receiving: "Tar emot",
+    sending: "Skickar",
   },
   common: {
     copied: "Kopierat",

@@ -133,7 +133,13 @@ export class WalletPage {
     await expect(pay).toBeEnabled();
     await pay.click();
     await expect(this.page.getByText("Paid", { exact: false })).toBeVisible();
-    await this.page.getByRole("button", { name: "Close", exact: true }).click();
+    // The Send sheet stays open under the payment dialog and has its own Close; close the
+    // payment dialog (the topmost one).
+    await this.page
+      .getByRole("dialog")
+      .last()
+      .getByRole("button", { name: "Close", exact: true })
+      .click();
   }
 
   async quoteRequest(request: string, amount?: number, expectPayButton = true) {

@@ -157,13 +157,13 @@ body.body--light {
   --tone: var(--app-danger);
 }
 
-// Callout (AppCallout.vue; shadcn Alert): one neutral surface for every tone, with the meaning
-// carried by the icon's colour, so a page of callouts never turns into coloured boxes and a
-// warning never looks like a themed selection. Warning and danger titles take the tone too.
+// Callout (AppCallout.vue; council exploration XV1 winner "Soft tint", 8.75/10): the tone tints
+// the whole rounded surface, with no edge, so warning and error read stronger than info without
+// any extra chrome; the neutral tip sits on the group fill. Text stays ink; the icon carries the
+// tone. Error and warning fills are a step stronger so they outrank info.
 .app-callout {
   align-items: flex-start;
-  background: var(--app-group-fill);
-  border: 1px solid var(--app-border);
+  background: color-mix(in srgb, var(--tone) 12%, var(--app-surface));
   border-radius: var(--app-radius-lg);
   color: var(--app-text);
   display: flex;
@@ -174,13 +174,16 @@ body.body--light {
   text-align: start;
   width: 100%;
 }
-// Every tone tints its edge the same way (the neutral one keeps the plain hairline), so a
-// tone never reads as neutral advice.
-.app-callout--info,
-.app-callout--success,
+.app-callout--neutral {
+  background: var(--app-group-fill);
+}
+// Light mode: the neutral tip's grey fill nearly vanishes on white, so it keeps a hairline.
+body.body--light .app-callout--neutral {
+  box-shadow: inset 0 0 0 1px var(--app-border);
+}
 .app-callout--warning,
 .app-callout--danger {
-  border-color: color-mix(in srgb, var(--tone) 40%, var(--app-border));
+  background: color-mix(in srgb, var(--tone) 16%, var(--app-surface));
 }
 .app-callout__icon {
   color: var(--tone, var(--app-text-muted));
@@ -197,7 +200,7 @@ body.body--light {
 }
 
 .app-callout__text {
-  color: var(--app-text-muted);
+  color: color-mix(in srgb, var(--app-text) 80%, transparent);
 }
 .app-callout__title + .app-callout__text {
   margin-top: 2px;
@@ -455,33 +458,6 @@ body .q-skeleton--type-text {
   min-width: 0;
 }
 
-// Install-the-app prompts (Android top right, iOS bottom centre): one card on the raised
-// surface with an arrow toward the browser's menu. Each prompt sets only its position and
-// pointer. It fades in once and then stays still (no bounce).
-.pwa-prompt {
-  align-items: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  margin: 0 auto;
-  position: fixed;
-  text-align: center;
-  z-index: 9999;
-}
-.pwa-prompt-content {
-  align-items: center;
-  background: var(--app-raised);
-  border: 1px solid var(--app-border-strong);
-  border-radius: var(--app-radius-lg);
-  box-shadow: var(--app-shadow-md);
-  color: var(--app-text);
-  display: inline-flex;
-  font-size: 14px;
-  gap: 4px;
-  line-height: 1.4;
-  padding: 12px 14px;
-}
-
 // Amount entry layout (Receive Lightning, Send ecash, Pay): the amount area fills the space
 // above the keypad; an amount that is too large shakes once (not with reduced motion).
 .amount-area {
@@ -592,52 +568,53 @@ body .q-skeleton--type-text {
 }
 .activity-row__avatar {
   background: var(--row-avatar);
-  overflow: visible;
-  position: relative;
-}
-.activity-row__icon {
   color: var(--app-text);
-  height: 20px;
-  width: 20px;
 }
-// Direction: a solid disc (ink out, positive in) with the arrow knocked out in the row
-// colour, cut from the icon circle by a ring of the row colour.
-.activity-row__direction {
+// Money in: the disc takes a success tint (a step stronger in light mode, where a faint tint
+// fades on white); out, pending and expired stay on the neutral disc.
+.activity-row__avatar--in {
+  background: color-mix(in srgb, var(--app-success) 18%, var(--row-bg));
+  color: var(--app-success);
+}
+body.body--light .activity-row__avatar--in {
+  background: color-mix(in srgb, var(--app-success) 24%, var(--row-bg));
+}
+.activity-row__title {
   align-items: center;
-  background: var(--app-text);
-  border: 2px solid var(--row-bg);
-  border-radius: 50%;
-  bottom: -5px;
-  color: var(--row-bg);
   display: flex;
-  height: 22px;
-  inset-inline-end: -5px;
-  justify-content: center;
-  position: absolute;
-  width: 22px;
-}
-.activity-row__direction--in {
-  background: var(--q-positive);
-}
-.activity-row__direction--pending {
-  background: var(--app-text-muted);
+  gap: 8px;
+  min-width: 0;
 }
 .activity-row__label {
   font-size: 1rem;
   font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.activity-row__pill {
+  flex-shrink: 0;
 }
 .activity-row__amount {
+  flex-shrink: 0;
   font-size: 1rem;
   font-variant-numeric: tabular-nums;
   font-weight: 700;
   line-height: 1.2;
+  margin-inline-start: 12px;
 }
 .activity-row__amount--in {
-  color: var(--q-positive);
+  color: var(--app-success);
 }
-// Pending amounts are not settled yet: secondary text, not full emphasis.
+// Not final yet: secondary text at full weight, so the column keeps one rhythm.
 .activity-row__amount--pending {
-  color: var(--app-text);
+  color: var(--app-text-muted);
+}
+// Nothing arrived: muted and struck through, never green.
+.activity-row__amount--expired {
+  color: var(--app-text-muted);
+  font-weight: 500;
+  text-decoration: line-through;
 }
 
 // Pager: 44px targets, muted pages and arrows, and the current page as a quiet tinted chip

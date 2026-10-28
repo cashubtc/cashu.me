@@ -740,7 +740,7 @@ export default {
         step2: {
           item: "2. { icon } { text }",
           text: "Πατήστε { buttonText }",
-          buttonText: "@:AndroidPWAPrompt.buttonText",
+          buttonText: "@:PwaPrompt.android.add",
         },
       },
       ios: {
@@ -752,7 +752,7 @@ export default {
         step2: {
           item: "2. { icon } { text }",
           text: "Πατήστε { buttonText }",
-          buttonText: "@:iOSPWAPrompt.buttonText",
+          buttonText: "@:PwaPrompt.ios.add",
         },
       },
       outro: {
@@ -768,13 +768,19 @@ export default {
       },
     },
   },
-  iOSPWAPrompt: {
-    text: "Πατήστε { icon } και { buttonText }",
-    buttonText: "Προσθήκη στην αρχική οθόνη",
-  },
-  AndroidPWAPrompt: {
-    text: "Πατήστε { icon } και { buttonText }",
-    buttonText: "Προσθήκη στην αρχική οθόνη",
+  PwaPrompt: {
+    title: "Προσθέστε το Cashu στην αρχική οθόνη",
+    text: "Ανοίγει από την αρχική οθόνη, χωρίς τη γραμμή του προγράμματος περιήγησης.",
+    ios: {
+      share: "Πατήστε Κοινοποίηση",
+      add: "Προσθήκη στην αρχική οθόνη",
+    },
+    android: {
+      menu: "Ανοίξτε το μενού του προγράμματος περιήγησης",
+      add: "Προσθήκη στην αρχική οθόνη",
+    },
+    install: "Εγκατάσταση",
+    notNow: "Όχι τώρα",
   },
   WelcomeSlide3: {
     title: "Η φράση seed σας",
@@ -1293,6 +1299,8 @@ export default {
       description: "Λήψη πληρωμών μέσω Nostr",
     },
     request_index: "Αίτημα {index} από {total}",
+    requesting: "Ζητούμενο ποσό",
+    payer_chooses_amount: "Ο πληρωτής επιλέγει το ποσό",
     actions: {
       copy: {
         label: "@:global.actions.copy.label",
@@ -1302,6 +1310,12 @@ export default {
       },
       new_request: {
         label: "Νέο αίτημα",
+      },
+      share: {
+        label: "Κοινοποίηση",
+      },
+      copy_request: {
+        label: "Αντιγραφή αιτήματος",
       },
       add_amount: {
         label: "Προσθήκη ποσού",
@@ -1660,6 +1674,12 @@ export default {
     payment_request: "Αίτημα πληρωμής",
     nostr: "Nostr",
     token_copied: "Το token αντιγράφηκε στο πρόχειρο",
+  },
+  ActivityRow: {
+    received: "Ελήφθη",
+    sent: "Εστάλη",
+    receiving: "Λήψη σε εξέλιξη",
+    sending: "Αποστολή σε εξέλιξη",
   },
   common: {
     copied: "Αντιγράφηκε",

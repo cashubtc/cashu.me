@@ -741,7 +741,7 @@ export default {
         step2: {
           item: "2. { icon } { text }",
           text: "Drücken Sie { buttonText }",
-          buttonText: "@:AndroidPWAPrompt.buttonText",
+          buttonText: "@:PwaPrompt.android.add",
         },
       },
       ios: {
@@ -753,7 +753,7 @@ export default {
         step2: {
           item: "2. { icon } { text }",
           text: "Drücken Sie { buttonText }",
-          buttonText: "@:iOSPWAPrompt.buttonText",
+          buttonText: "@:PwaPrompt.ios.add",
         },
       },
       outro: {
@@ -769,13 +769,19 @@ export default {
       },
     },
   },
-  iOSPWAPrompt: {
-    text: "Tippen Sie auf { icon } und { buttonText }",
-    buttonText: "Zum Home-Bildschirm",
-  },
-  AndroidPWAPrompt: {
-    text: "Tippen Sie auf { icon } und { buttonText }",
-    buttonText: "Zum Startbildschirm hinzufügen",
+  PwaPrompt: {
+    title: "Cashu zum Home-Bildschirm hinzufügen",
+    text: "Öffnet sich vom Home-Bildschirm, ohne Browserleiste.",
+    ios: {
+      share: "Tippen Sie auf Teilen",
+      add: "Zum Home-Bildschirm",
+    },
+    android: {
+      menu: "Öffnen Sie das Browsermenü",
+      add: "Zum Startbildschirm hinzufügen",
+    },
+    install: "Installieren",
+    notNow: "Nicht jetzt",
   },
   WelcomeSlide3: {
     title: "Ihre Seed-Phrase",
@@ -1299,6 +1305,8 @@ export default {
       description: "Zahlungen über Nostr empfangen",
     },
     request_index: "Anfrage {index} von {total}",
+    requesting: "Angefordert",
+    payer_chooses_amount: "Zahler wählt den Betrag",
     actions: {
       copy: {
         label: "@:global.actions.copy.label",
@@ -1308,6 +1316,12 @@ export default {
       },
       new_request: {
         label: "Neue Anforderung",
+      },
+      share: {
+        label: "Teilen",
+      },
+      copy_request: {
+        label: "Anfrage kopieren",
       },
       add_amount: {
         label: "Betrag hinzufügen",
@@ -1666,6 +1680,12 @@ export default {
     payment_request: "Zahlungsanforderung",
     nostr: "Nostr",
     token_copied: "Token in Zwischenablage kopiert",
+  },
+  ActivityRow: {
+    received: "Empfangen",
+    sent: "Gesendet",
+    receiving: "Wird empfangen",
+    sending: "Wird gesendet",
   },
   common: {
     copied: "Kopiert",

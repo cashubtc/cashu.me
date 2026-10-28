@@ -16,15 +16,18 @@
           :key="getTransactionKey(transaction)"
           data-testid="history-row"
           details-testid="history-details"
-          :icon="getTransactionIcon(transaction)"
           :direction="transaction.amount >= 0 ? 'in' : 'out'"
-          :label="getTransactionLabel(transaction)"
+          :label="getTransactionTitle(transaction)"
           :amount="
             (transaction.amount >= 0 ? '+' : '\u2212') +
             formatCurrency(Math.abs(transaction.amount), transaction.unit)
           "
           :pending="transaction.status === 'pending'"
-          :caption="formattedDate(transaction.date)"
+          :caption="
+            getDefaultLabel(transaction) +
+            ' · ' +
+            formattedDate(transaction.date)
+          "
           caption-class="text-grey-6"
           @details-click="showTransactionDialog(transaction)"
         >
@@ -60,7 +63,6 @@
                     : $t("HistoryTable.actions.check_status.tooltip_text")
                 }}</q-tooltip>
               </q-btn>
-              <span>{{ $t("common.pending") }}</span>
             </div>
           </template>
         </ActivityRow>
@@ -153,12 +155,7 @@ import token from "../js/token";
 import { notify } from "src/js/notify";
 import ActivityRow from "src/components/ActivityRow.vue";
 import EmptyState from "src/components/ui/EmptyState.vue";
-import {
-  Bitcoin as BitcoinIcon,
-  Coins as CoinsIcon,
-  History as HistoryIcon,
-  Zap as ZapIcon,
-} from "lucide-vue-next";
+import { History as HistoryIcon } from "lucide-vue-next";
 import { PaymentMethod, UnifiedTransactionType } from "src/stores/walletTypes";
 import { mintQuoteForHistoryInvoice } from "src/js/invoice-history";
 
@@ -365,18 +362,6 @@ export default defineComponent({
       return transaction.type === UnifiedTransactionType.Onchain;
     },
 
-    getTransactionIcon(transaction) {
-      if (this.isEcashTransaction(transaction)) return CoinsIcon;
-      if (this.isOnchainTransaction(transaction)) return BitcoinIcon;
-      return ZapIcon;
-    },
-
-    getTransactionIconColor(transaction) {
-      return transaction.type === UnifiedTransactionType.Lightning
-        ? "orange"
-        : "blue";
-    },
-
     getDefaultLabel(transaction) {
       if (transaction.type === UnifiedTransactionType.Onchain) {
         return this.$t("common.on_chain");
@@ -386,8 +371,19 @@ export default defineComponent({
         : this.$t("HistoryTable.row.type_label");
     },
 
-    getTransactionLabel(transaction) {
-      return transaction.label || this.getDefaultLabel(transaction);
+    // The row's title: the payment's own label, or what happened ("Received", "Sending").
+    getTransactionTitle(transaction) {
+      if (transaction.label) return transaction.label;
+      const incoming = transaction.amount >= 0;
+      const key =
+        transaction.status === "pending"
+          ? incoming
+            ? "receiving"
+            : "sending"
+          : incoming
+          ? "received"
+          : "sent";
+      return this.$t(`ActivityRow.${key}`);
     },
 
     checkTransactionStatus(transaction) {

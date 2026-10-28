@@ -92,7 +92,7 @@ import {
 import AppCallout, { type CalloutVariant } from "src/components/AppCallout.vue";
 
 export const calloutVariants = [
-  "Current: neutral card, tinted edge",
+  "Current (was: neutral card, tinted edge; now ships V2)",
   "Leading bar",
   "Soft tint",
   "Inline note",

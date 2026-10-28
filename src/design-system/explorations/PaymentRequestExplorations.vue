@@ -793,7 +793,7 @@ import {
 import QrBlock from "src/components/QrBlock.vue";
 
 export const paymentRequestVariants = [
-  "Current: QR, pill and chips",
+  "Before: QR, pill and chips (the app now ships V2)",
   "Settings rows",
   "Hero amount",
   "Fixed or any amount",

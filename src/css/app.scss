@@ -536,19 +536,42 @@ body.body--light .q-toggle.disabled .q-toggle__inner--truthy .q-toggle__track {
   font-weight: 600;
 }
 
-/* Small segmented control (invoice type on Receive Lightning). */
+/* Segmented control (council exploration XV1 winner "Primary sliding pill", 8.7/10): a quiet
+   pill track on the group fill with a 3px inset, and the chosen segment as a primary pill
+   whose radius is concentric with the track. Equal segments; the chosen label is semibold,
+   the others medium, so the choice never rests on the fill alone. Disabled keeps the choice
+   visible but locked: a hairline pill on the surface, dimmed label, no grey fill. */
 .invoice-type-toggle {
-  border: 1px solid var(--app-segment-edge);
-  background: var(--app-outline-fill);
+  background: var(--app-group-fill);
+  border: 1px solid var(--app-group-edge);
+  border-radius: var(--app-radius-pill) !important;
+  gap: 0;
+  padding: 3px;
   > .q-btn {
+    border-radius: var(--app-radius-pill) !important;
     flex: 1 1 0;
     min-width: 112px;
   }
   .q-btn {
-    min-height: 44px;
-    padding: 0 18px;
     font-size: 14px;
+    font-weight: 500;
+    min-height: 40px;
+    padding: 0 18px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+  .q-btn.bg-primary {
     font-weight: 600;
+  }
+  .q-btn.disabled.bg-primary,
+  .q-btn[disabled].bg-primary {
+    background: var(--app-surface) !important;
+    box-shadow: inset 0 0 0 1px var(--app-border-strong);
+    color: var(--app-text-muted) !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .invoice-type-toggle .q-btn {
+    transition: none;
   }
 }
 
@@ -1141,21 +1164,6 @@ html[dir="rtl"] .q-field__label {
   right: 0;
   transform-origin: right top;
 }
-// Rounded button groups (segmented toggles) set physical corner radii; in rtl the first item
-// sits on the right, so its rounded corners move to the right edge too.
-html[dir="rtl"] .q-btn-group--rounded {
-  overflow: hidden;
-}
-html[dir="rtl"]
-  .q-btn-group--rounded
-  > .q-btn-item:first-child:not(:last-child) {
-  border-radius: 0 28px 28px 0;
-}
-html[dir="rtl"]
-  .q-btn-group--rounded
-  > .q-btn-item:last-child:not(:first-child) {
-  border-radius: 28px 0 0 28px;
-}
 // Placeholders use the app font (and its Arabic fallback), not the UA default.
 input::placeholder,
 textarea::placeholder {
@@ -1373,25 +1381,26 @@ html[dir="rtl"] .restore-mint-check {
   font-weight: 500;
 }
 
-// Toasts (user direction, R46; Sonner style since R56): a compact raised card with the shared
-// hairline edge (so it still separates on white pages), a soft shadow, the tone carried by
-// its icon, and medium-weight 14px text.
+// Toasts (user direction, R46; council exploration XV1 winner "Icon disc card", 8.65/10): a
+// filled card on the group fill with a thin neutral edge (it separates from black and white
+// pages alike), the kind carried by its icon in a tinted 36px disc (the app's icon-circle
+// language), medium-weight 14px text, and the dismiss on the end.
 body .q-notification {
   --tone: var(--app-text-muted);
   align-items: center;
   background: var(--app-raised) !important;
-  border: 1px solid var(--app-border);
-  border-radius: var(--app-radius-lg);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--app-group-edge);
+  border-radius: var(--app-radius-xl);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
   color: var(--app-text) !important;
   font-size: 14px;
   font-weight: 500;
   max-width: none;
-  min-height: 48px;
-  // One width for every toast, Sonner's 356px or the column inside its 16px gutters.
-  width: min(356px, calc(100vw - 32px));
-  padding: 4px 6px 4px 14px;
-  padding-inline: 14px 6px;
+  min-height: 56px;
+  // One width for every toast: the content column inside its 16px gutters.
+  width: min(440px, calc(100vw - 32px));
+  padding: 10px 6px 10px 10px;
+  padding-inline: 10px 6px;
   transition: transform 0.25s ease, opacity 0.25s ease;
 }
 body .q-notification.bg-positive {
@@ -1407,13 +1416,22 @@ body .q-notification.bg-info {
   --tone: var(--app-info);
 }
 body .q-notification .q-notification__icon {
+  align-items: center;
+  background: color-mix(in srgb, var(--tone) 16%, transparent);
+  border-radius: 50%;
   color: var(--tone);
-  font-size: 18px;
+  display: inline-flex;
+  // Quasar sizes the icon with flex: 0 0 1em, which squeezed the disc into an oval.
+  flex: 0 0 36px;
+  font-size: 20px;
+  height: 36px;
+  justify-content: center;
   margin-left: 0 !important;
   margin-right: 0 !important;
+  width: 36px;
 }
 body .q-notification .q-notification__icon + .q-notification__message {
-  margin-inline-start: 10px;
+  margin-inline-start: 12px;
 }
 body .q-notification .q-notification__caption {
   color: var(--app-text-muted);

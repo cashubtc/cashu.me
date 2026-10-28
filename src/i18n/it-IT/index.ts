@@ -711,7 +711,7 @@ export default {
         step2: {
           item: "2. { icon } { text }",
           text: "Premi { buttonText }",
-          buttonText: "@:AndroidPWAPrompt.buttonText",
+          buttonText: "@:PwaPrompt.android.add",
         },
       },
       ios: {
@@ -723,7 +723,7 @@ export default {
         step2: {
           item: "2. { icon } { text }",
           text: "Premi { buttonText }",
-          buttonText: "@:iOSPWAPrompt.buttonText",
+          buttonText: "@:PwaPrompt.ios.add",
         },
       },
       outro: {
@@ -739,13 +739,19 @@ export default {
       },
     },
   },
-  iOSPWAPrompt: {
-    text: "Tocca { icon } e { buttonText }",
-    buttonText: "Aggiungi alla schermata Home",
-  },
-  AndroidPWAPrompt: {
-    text: "Tocca { icon } e { buttonText }",
-    buttonText: "Aggiungi alla schermata Home",
+  PwaPrompt: {
+    title: "Aggiungi Cashu alla schermata Home",
+    text: "Si apre dalla schermata Home, senza la barra del browser.",
+    ios: {
+      share: "Tocca Condividi",
+      add: "Aggiungi alla schermata Home",
+    },
+    android: {
+      menu: "Apri il menu del browser",
+      add: "Aggiungi alla schermata Home",
+    },
+    install: "Installa",
+    notNow: "Non ora",
   },
   WelcomeSlide3: {
     title: "La tua frase seed",
@@ -1262,6 +1268,8 @@ export default {
       description: "Ricevi pagamenti via Nostr",
     },
     request_index: "Richiesta {index} di {total}",
+    requesting: "Importo richiesto",
+    payer_chooses_amount: "Il pagatore sceglie l'importo",
     actions: {
       copy: {
         label: "@:global.actions.copy.label",
@@ -1271,6 +1279,12 @@ export default {
       },
       new_request: {
         label: "Nuova richiesta",
+      },
+      share: {
+        label: "Condividi",
+      },
+      copy_request: {
+        label: "Copia richiesta",
       },
       add_amount: {
         label: "Aggiungi importo",
@@ -1629,6 +1643,12 @@ export default {
     payment_request: "Richiesta di pagamento",
     nostr: "Nostr",
     token_copied: "Token copiato negli appunti",
+  },
+  ActivityRow: {
+    received: "Ricevuto",
+    sent: "Inviato",
+    receiving: "In ricezione",
+    sending: "In invio",
   },
   common: {
     copied: "Copiato",

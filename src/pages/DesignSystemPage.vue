@@ -672,35 +672,25 @@
           href="https://mempool.space"
         />
       </DsEntry>
-      <DsEntry id="activity-row">
-        <q-list>
+      <DsEntry
+        id="activity-row"
+        :variants="activityRowVariants"
+        :scores="explorationScores['activity-row']"
+        v-slot="{ variant }"
+      >
+        <q-list v-if="variant === 0" class="full-width">
           <ActivityRow
-            :icon="CoinsIcon"
-            direction="in"
-            label="Ecash"
-            amount="+₿500"
-            caption="5 minutes ago"
+            v-for="h in historySpecimen"
+            :key="h.caption + h.amount"
+            :direction="h.dir"
+            :label="h.label"
+            :amount="h.amount"
+            :caption="h.caption"
+            :pending="h.pending"
+            :expired="h.expired"
           />
-          <ActivityRow
-            :icon="ZapIcon"
-            direction="out"
-            label="Lightning"
-            amount="−₿101"
-            caption="5 minutes ago"
-          />
-          <ActivityRow
-            :icon="CoinsIcon"
-            direction="out"
-            label="Ecash"
-            amount="−₿210"
-            caption="5 minutes ago"
-            pending
-          >
-            <template #caption-end>
-              <span class="text-app-muted">Pending</span>
-            </template>
-          </ActivityRow>
         </q-list>
+        <ActivityRowExplorations v-else :variant="variant" />
       </DsEntry>
       <DsEntry id="amounts">
         <div class="column items-center q-gutter-y-sm">
@@ -993,42 +983,30 @@
         </q-dialog>
       </DsEntry>
       <h2 id="ds-group-feature" class="ds-section">Feature components</h2>
-      <DsEntry
-        id="history"
-        :variants="historyVariants"
-        :scores="explorationScores['history']"
-        v-slot="{ variant }"
-      >
-        <template v-if="variant === 0">
-          <!-- The current rows (ActivityRow, as HistoryTable draws them) with the same seven
-               payments as the variations, then the real empty state. -->
-          <q-list class="full-width">
-            <ActivityRow
-              v-for="h in historySpecimen"
-              :key="h.caption + h.amount"
-              :icon="h.icon"
-              :direction="h.dir"
-              :label="h.label"
-              :amount="h.amount"
-              :caption="h.caption"
-              :pending="h.pending"
-            >
-              <template v-if="h.pending" #caption-end>
-                <span class="text-app-muted">Pending</span>
-              </template>
-            </ActivityRow>
-          </q-list>
-          <q-pagination
-            :model-value="1"
-            :max="7"
-            :max-pages="5"
-            direction-links
-            boundary-numbers
-            class="q-mt-md"
+      <DsEntry id="history">
+        <!-- The current rows (ActivityRow, as HistoryTable draws them) with the same seven
+             payments as the variations, then the real empty state. -->
+        <q-list class="full-width">
+          <ActivityRow
+            v-for="h in historySpecimen"
+            :key="h.caption + h.amount"
+            :direction="h.dir"
+            :label="h.label"
+            :amount="h.amount"
+            :caption="h.caption"
+            :pending="h.pending"
+            :expired="h.expired"
           />
-          <div class="full-width q-mt-lg"><HistoryTable /></div>
-        </template>
-        <HistoryExplorations v-else :variant="variant" />
+        </q-list>
+        <q-pagination
+          :model-value="1"
+          :max="7"
+          :max-pages="5"
+          direction-links
+          boundary-numbers
+          class="q-mt-md"
+        />
+        <div class="full-width q-mt-lg"><HistoryTable /></div>
       </DsEntry>
       <DsEntry
         id="payment-request"
@@ -1141,9 +1119,9 @@ import InstallPromptExplorations, {
 import SegmentedExplorations, {
   segmentedVariants,
 } from "src/design-system/explorations/SegmentedExplorations.vue";
-import HistoryExplorations, {
-  historyVariants,
-} from "src/design-system/explorations/HistoryExplorations.vue";
+import ActivityRowExplorations, {
+  activityRowVariants,
+} from "src/design-system/explorations/ActivityRowExplorations.vue";
 import PaymentRequestExplorations, {
   paymentRequestVariants,
 } from "src/design-system/explorations/PaymentRequestExplorations.vue";
@@ -1255,7 +1233,7 @@ export default defineComponent({
     ToastExplorations,
     InstallPromptExplorations,
     SegmentedExplorations,
-    HistoryExplorations,
+    ActivityRowExplorations,
     PaymentRequestExplorations,
     MintReviewSummary,
     PwaPrompt,
@@ -1322,54 +1300,48 @@ export default defineComponent({
       explorationScores,
       historySpecimen: [
         {
-          icon: markRaw(ZapIcon),
           dir: "in",
-          label: "Lightning",
+          label: "Received",
           amount: "+₿5,000",
-          caption: "Today, 14:02",
+          caption: "Lightning · Today, 14:02",
         },
         {
-          icon: markRaw(CoinsIcon),
           dir: "out",
-          label: "Ecash",
+          label: "Sending",
           amount: "−₿210",
-          caption: "Today, 13:40",
+          caption: "Ecash · Today, 13:40",
           pending: true,
         },
         {
-          icon: markRaw(ZapIcon),
           dir: "out",
-          label: "Lightning",
+          label: "Sent",
           amount: "−₿101",
-          caption: "Yesterday",
+          caption: "Lightning · Yesterday",
         },
         {
-          icon: markRaw(CoinsIcon),
           dir: "in",
-          label: "Ecash",
+          label: "Received",
           amount: "+₿500",
-          caption: "Yesterday",
+          caption: "Ecash · Yesterday",
         },
         {
-          icon: markRaw(ZapIcon),
           dir: "in",
           label: "Invoice expired",
-          amount: "+₿1,000",
-          caption: "Mon",
+          amount: "₿1,000",
+          caption: "Lightning · Mon",
+          expired: true,
         },
         {
-          icon: markRaw(ZapIcon),
           dir: "in",
-          label: "Lightning",
+          label: "Received",
           amount: "+₿2,289",
-          caption: "12 Oct",
+          caption: "Lightning · 12 Oct",
         },
         {
-          icon: markRaw(CoinsIcon),
           dir: "out",
-          label: "Ecash",
+          label: "Sent",
           amount: "−₿42",
-          caption: "10 Oct",
+          caption: "Ecash · 10 Oct",
         },
       ],
       toastSpecimen: [
@@ -1383,7 +1355,7 @@ export default defineComponent({
         { type: "warning", icon: "warning", message: "Mint is offline" },
         { type: "info", icon: "info", message: "Copied to clipboard" },
         {
-          type: "info",
+          type: "neutral",
           icon: "delete",
           message: "Mint removed",
           action: "Undo",
@@ -1394,7 +1366,7 @@ export default defineComponent({
       toastVariants,
       installPromptVariants,
       segmentedVariants,
-      historyVariants,
+      activityRowVariants,
       paymentRequestVariants,
       query: "",
       active: "",
@@ -1558,6 +1530,16 @@ export default defineComponent({
       for (const ref of ["pwaIos", "pwaAndroid"]) {
         const pwa = this.$refs[ref] as { show: boolean } | undefined;
         if (pwa) pwa.show = true;
+      }
+      // …and give Android a stand-in for the browser's install offer, for its Install button.
+      const android = this.$refs.pwaAndroid as
+        | { deferredPrompt: unknown }
+        | undefined;
+      if (android) {
+        android.deferredPrompt = {
+          prompt: async () => undefined,
+          userChoice: new Promise(() => undefined),
+        };
       }
     });
   },
@@ -1907,13 +1889,13 @@ export default defineComponent({
 .ds-phone {
   background: var(--app-surface);
   border: 1px solid var(--app-border);
-  height: 280px;
+  height: 360px;
   width: 100%;
 }
 .ds-phone__balance {
   font-size: 28px;
   font-weight: 700;
-  padding-top: 72px;
+  padding-top: 48px;
   text-align: center;
 }
 </style>

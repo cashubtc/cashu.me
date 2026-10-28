@@ -726,7 +726,7 @@ export default {
         step2: {
           item: "2. { icon } { text }",
           text: "กด { buttonText }",
-          buttonText: "@:AndroidPWAPrompt.buttonText",
+          buttonText: "@:PwaPrompt.android.add",
         },
       },
       ios: {
@@ -738,7 +738,7 @@ export default {
         step2: {
           item: "2. { icon } { text }",
           text: "กด { buttonText }",
-          buttonText: "@:iOSPWAPrompt.buttonText",
+          buttonText: "@:PwaPrompt.ios.add",
         },
       },
       outro: {
@@ -753,13 +753,19 @@ export default {
       },
     },
   },
-  iOSPWAPrompt: {
-    text: "แตะ { icon } และ { buttonText }",
-    buttonText: "เพิ่มไปยังหน้าจอหลัก",
-  },
-  AndroidPWAPrompt: {
-    text: "แตะ { icon } และ { buttonText }",
-    buttonText: "เพิ่มไปยังหน้าจอหลัก",
+  PwaPrompt: {
+    title: "เพิ่ม Cashu ไปยังหน้าจอหลัก",
+    text: "เปิดจากหน้าจอหลักได้เลย โดยไม่มีแถบเบราว์เซอร์",
+    ios: {
+      share: "แตะ แชร์",
+      add: "เพิ่มไปยังหน้าจอหลัก",
+    },
+    android: {
+      menu: "เปิดเมนูของเบราว์เซอร์",
+      add: "เพิ่มไปยังหน้าจอหลัก",
+    },
+    install: "ติดตั้ง",
+    notNow: "ไว้ทีหลัง",
   },
   WelcomeSlide3: {
     title: "วลีสำหรับกู้คืนของคุณ",
@@ -1270,6 +1276,8 @@ export default {
       description: "รับการชำระเงินผ่าน Nostr",
     },
     request_index: "คำขอที่ {index} จาก {total}",
+    requesting: "จำนวนที่ขอ",
+    payer_chooses_amount: "ผู้จ่ายเลือกจำนวนเงิน",
     actions: {
       copy: {
         label: "@:global.actions.copy.label",
@@ -1279,6 +1287,12 @@ export default {
       },
       new_request: {
         label: "คำขอใหม่",
+      },
+      share: {
+        label: "แชร์",
+      },
+      copy_request: {
+        label: "คัดลอกคำขอ",
       },
       add_amount: {
         label: "เพิ่มจำนวนเงิน",
@@ -1637,6 +1651,12 @@ export default {
     payment_request: "คำขอชำระเงิน",
     nostr: "Nostr",
     token_copied: "คัดลอกโทเค็นไปยังคลิปบอร์ดแล้ว",
+  },
+  ActivityRow: {
+    received: "ได้รับแล้ว",
+    sent: "ส่งแล้ว",
+    receiving: "กำลังรับ",
+    sending: "กำลังส่ง",
   },
   common: {
     copied: "คัดลอกแล้ว",

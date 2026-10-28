@@ -9,11 +9,14 @@
       <ActivityRow
         v-for="payment in paginatedPayments"
         :key="payment.id"
-        :icon="CoinsIcon"
         direction="in"
-        :label="payment.label || 'Ecash'"
+        :label="payment.label || $t('ActivityRow.received')"
         :amount="'+' + formatCurrency(payment.amount, payment.unit)"
-        :caption="formattedDate(payment.date)"
+        :caption="
+          $t('HistoryTable.row.type_label') +
+          ' · ' +
+          formattedDate(payment.date)
+        "
         @click="showTokenDialog(payment)"
       />
     </q-list>
@@ -29,13 +32,12 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, PropType, markRaw } from "vue";
+import { defineComponent, PropType } from "vue";
 import { mapWritableState } from "pinia";
 import { HistoryToken } from "src/stores/tokens";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import token from "src/js/token";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
-import { Coins as CoinsIcon } from "lucide-vue-next";
 import ActivityRow from "src/components/ActivityRow.vue";
 
 export default defineComponent({
@@ -56,7 +58,6 @@ export default defineComponent({
   data() {
     return {
       currentPage: 1,
-      CoinsIcon: markRaw(CoinsIcon),
     };
   },
   computed: {

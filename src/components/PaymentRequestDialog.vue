@@ -11,11 +11,31 @@
         :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
         class="display-token-fullscreen"
       >
-        <!-- Header -->
+        <!-- Header: close, title and "New request" (a fresh, open request). -->
         <FullscreenDialogHeader
           :title="$t('PaymentRequestDialog.payment_request.caption')"
           balanced
-        />
+        >
+          <template #actions>
+            <div class="row items-center no-wrap sheet-header-actions">
+              <q-btn
+                flat
+                round
+                class="app-icon-btn"
+                data-testid="pr-new-request"
+                :aria-label="
+                  $t('PaymentRequestDialog.actions.new_request.label')
+                "
+                @click="newRequest"
+              >
+                <RefreshCwIcon :size="20" />
+                <q-tooltip class="text-no-wrap">{{
+                  $t("PaymentRequestDialog.actions.new_request.label")
+                }}</q-tooltip>
+              </q-btn>
+            </div>
+          </template>
+        </FullscreenDialogHeader>
 
         <!-- Earlier requests: a pager under the title, only once there is more than one. -->
         <div
@@ -45,47 +65,28 @@
 
         <!-- Content -->
         <div class="content-area">
-          <q-card-section class="q-pa-none">
-            <div v-if="showPRKData" class="row justify-center q-mb-md">
-              <div class="col-12 q-px-md" style="max-width: var(--app-column)">
-                <QrBlock :value="showPRKData" />
-              </div>
-            </div>
-
-            <q-card-section class="q-pa-sm">
-              <!-- The controls describe the request in the QR: amount, mint and unit are read
-                   back from it, and each change makes a new request (old ones keep working). -->
-              <div class="pr-controls column items-center q-pt-md">
-                <div
-                  v-if="!isEditingAmount"
-                  class="row items-center no-wrap pr-amount-row"
-                >
-                  <q-btn
-                    outline
-                    rounded
-                    no-caps
-                    data-testid="pr-amount"
-                    class="pr-amount-pill"
-                    @click="startEditingAmount"
-                  >
-                    <q-icon name="edit_note" size="xs" class="q-mr-sm" />
-                    {{ amountLabel }}
-                  </q-btn>
-                  <q-btn
-                    v-if="request.amount !== undefined"
-                    flat
-                    round
-                    class="touch-target-44"
-                    data-testid="pr-amount-clear"
-                    :aria-label="
-                      $t('PaymentRequestDialog.actions.remove_amount.label')
-                    "
-                    @click="applyChanges({ amount: undefined })"
-                  >
-                    <XIcon :size="20" />
-                  </q-btn>
+          <!-- The controls describe the request in the QR: amount, mint and unit are read back
+               from it, and each change makes a new request (old ones keep working). A fixed
+               amount leads as the hero above the QR; an open request keeps the QR first so it
+               stays in view on short screens. -->
+          <div
+            class="pr-body column items-center"
+            :class="{ 'pr-body--fixed': hasAmount }"
+          >
+            <template v-for="part in layout" :key="part">
+              <div
+                v-if="part === 'amount'"
+                class="pr-amount column items-center"
+                :class="hasAmount ? 'pr-amount--hero' : 'pr-amount--open'"
+              >
+                <div class="pr-overline">
+                  {{
+                    hasAmount || isEditingAmount
+                      ? $t("PaymentRequestDialog.requesting")
+                      : $t("PaymentRequestDialog.payer_chooses_amount")
+                  }}
                 </div>
-                <div v-else class="pr-amount-editor">
+                <div v-if="isEditingAmount" class="pr-amount-editor">
                   <q-input
                     ref="amountInput"
                     v-model="amountInputValue"
@@ -101,106 +102,170 @@
                     @keyup.esc="isEditingAmount = false"
                   />
                 </div>
-
-                <div class="row no-wrap items-center pr-chip-row">
+                <div v-else-if="hasAmount" class="row items-center no-wrap">
                   <button
                     type="button"
-                    class="mint-chip"
+                    class="pr-hero-amount"
+                    data-testid="pr-amount"
+                    @click="startEditingAmount"
+                  >
+                    {{ amountLabel }}
+                  </button>
+                  <q-btn
+                    flat
+                    round
+                    class="app-icon-btn pr-amount-clear"
+                    data-testid="pr-amount-clear"
+                    :aria-label="
+                      $t('PaymentRequestDialog.actions.remove_amount.label')
+                    "
+                    @click="applyChanges({ amount: undefined })"
+                  >
+                    <XIcon :size="20" />
+                  </q-btn>
+                </div>
+                <q-btn
+                  v-else
+                  outline
+                  rounded
+                  no-caps
+                  data-testid="pr-amount"
+                  class="pr-add-amount"
+                  @click="startEditingAmount"
+                >
+                  <PlusIcon :size="18" class="q-mr-xs" />
+                  {{ $t("PaymentRequestDialog.actions.add_amount.label") }}
+                </q-btn>
+
+                <!-- Two or three units: a segmented control; more: the unit sheet. -->
+                <q-btn-toggle
+                  v-if="unitOptions.length > 1 && unitOptions.length <= 3"
+                  :model-value="request.unit"
+                  :options="
+                    unitOptions.map((unit) => ({
+                      label: unitLabel(unit),
+                      value: unit,
+                    }))
+                  "
+                  rounded
+                  unelevated
+                  no-caps
+                  toggle-color="primary"
+                  class="invoice-type-toggle pr-unit-toggle"
+                  data-testid="pr-unit"
+                  @update:model-value="chooseUnit"
+                />
+                <button
+                  v-else-if="unitOptions.length > 3"
+                  type="button"
+                  class="mint-chip pr-unit-chip"
+                  data-testid="pr-unit"
+                  aria-haspopup="listbox"
+                  :aria-expanded="showUnitSheet"
+                  @click="showUnitSheet = true"
+                >
+                  <span class="mint-chip__name">{{
+                    unitLabel(request.unit)
+                  }}</span>
+                  <ChevronDownIcon :size="16" class="mint-chip__icon" />
+                </button>
+              </div>
+
+              <div v-else class="pr-qr-group">
+                <QrBlock :value="showPRKData" />
+                <!-- One muted line: the unit, and the mint (which opens the mint sheet). -->
+                <div class="pr-meta row items-center justify-center no-wrap">
+                  <span class="pr-meta__unit">{{
+                    unitLabel(request.unit)
+                  }}</span>
+                  <span aria-hidden="true">·</span>
+                  <button
+                    type="button"
+                    class="pr-mint-link"
                     data-testid="pr-mint"
                     aria-haspopup="listbox"
                     :aria-expanded="showMintSheet"
                     @click="showMintSheet = true"
                   >
-                    <span class="mint-chip__avatar" aria-hidden="true">
+                    <span class="pr-mint-link__avatar" aria-hidden="true">
                       <img
                         v-if="requestMintIcon"
                         :src="requestMintIcon"
                         alt=""
                         class="pr-mint-icon"
                       />
-                      <LandmarkIcon v-else :size="14" class="mint-chip__icon" />
+                      <LandmarkIcon v-else :size="14" />
                     </span>
-                    <span class="mint-chip__name">{{ mintLabel }}</span>
-                    <ChevronDownIcon :size="16" class="mint-chip__icon" />
-                  </button>
-                  <button
-                    type="button"
-                    class="mint-chip"
-                    data-testid="pr-unit"
-                    aria-haspopup="listbox"
-                    :aria-expanded="showUnitSheet"
-                    :disabled="unitOptions.length <= 1"
-                    @click="showUnitSheet = true"
-                  >
-                    <span class="mint-chip__name">{{
-                      unitLabel(request.unit)
-                    }}</span>
-                    <ChevronDownIcon
-                      v-if="unitOptions.length > 1"
-                      :size="16"
-                      class="mint-chip__icon"
-                    />
+                    <span class="pr-mint-link__name">{{ mintLabel }}</span>
+                    <ChevronDownIcon :size="16" />
                   </button>
                 </div>
-              </div>
-
-              <!-- Received payments summary and list -->
-              <div
-                class="row justify-center q-pt-md q-pb-md"
-                v-if="currentPaymentRequest"
-              >
-                <div
-                  class="col-12 q-px-md"
-                  style="max-width: var(--app-column)"
-                >
-                  <div class="row q-gutter-sm items-center q-mb-sm">
-                    <span
-                      v-for="(total, unit) in totalsByUnit"
-                      :key="unit"
-                      class="app-badge"
-                    >
-                      {{ $t("PaymentRequestDialog.received_total") }}:
-                      <span class="q-ml-xs text-weight-medium">{{
-                        formatCurrency(total, unit, true)
-                      }}</span>
-                    </span>
-                  </div>
-                  <PaymentRequestPayments
-                    :payments="currentPayments"
-                    :page-size="3"
+                <div class="pr-code row items-center justify-center no-wrap">
+                  <span class="app-mono pr-code__text">{{ shortRequest }}</span>
+                  <CopyButton
+                    :value="showPRKData"
+                    :label="
+                      $t('PaymentRequestDialog.actions.copy_request.label')
+                    "
+                    class="touch-target-44"
                   />
                 </div>
               </div>
+            </template>
 
-              <!-- New request button -->
-              <div class="row justify-center q-pt-sm q-pb-md">
-                <q-btn
-                  flat
-                  size="md"
-                  rounded
-                  class="pr-new-request"
-                  @click="newRequest"
+            <!-- Received payments summary and list -->
+            <div v-if="currentPaymentRequest" class="pr-payments">
+              <div class="row q-gutter-sm items-center q-mb-sm">
+                <span
+                  v-for="(total, unit) in totalsByUnit"
+                  :key="unit"
+                  class="app-badge"
                 >
-                  <q-icon name="refresh" class="q-mr-sm" size="xs" />
-                  {{ $t("PaymentRequestDialog.actions.new_request.label") }}
-                </q-btn>
+                  {{ $t("PaymentRequestDialog.received_total") }}:
+                  <span class="q-ml-xs text-weight-medium">{{
+                    formatCurrency(total, unit, true)
+                  }}</span>
+                </span>
               </div>
-            </q-card-section>
-          </q-card-section>
+              <PaymentRequestPayments
+                :payments="currentPayments"
+                :page-size="3"
+              />
+            </div>
+          </div>
         </div>
 
-        <!-- Bottom panel action -->
+        <!-- Footer: Share (where the platform can) and Copy, an equal pair. -->
         <div class="bottom-panel">
           <div class="row justify-center q-pb-lg q-pt-sm">
-            <div class="col-12 q-px-md" style="max-width: var(--app-column)">
+            <div
+              class="col-12 q-px-md row no-wrap pr-foot"
+              style="max-width: var(--app-column)"
+            >
               <q-btn
-                class="full-width"
+                v-if="webShareSupported"
+                outline
+                rounded
+                no-caps
+                size="lg"
+                class="pr-foot__btn"
+                data-testid="pr-share"
+                @click="onSharePRKData"
+              >
+                <ShareIcon :size="20" class="q-mr-sm" />
+                {{ $t("PaymentRequestDialog.actions.share.label") }}
+              </q-btn>
+              <q-btn
                 unelevated
+                rounded
+                no-caps
                 size="lg"
                 color="primary"
-                rounded
+                class="pr-foot__btn"
+                data-testid="pr-copy"
                 @click="onCopyPRKData"
               >
+                <CopyIcon :size="20" class="q-mr-sm" />
                 {{ $t("PaymentRequestDialog.actions.copy.label") }}
               </q-btn>
             </div>
@@ -259,7 +324,11 @@
 <script lang="ts">
 import {
   ChevronDown as ChevronDownIcon,
+  Copy as CopyIcon,
   Landmark as LandmarkIcon,
+  Plus as PlusIcon,
+  RefreshCw as RefreshCwIcon,
+  Share as ShareIcon,
   X as XIcon,
 } from "lucide-vue-next";
 import { defineComponent } from "vue";
@@ -275,9 +344,12 @@ import { nip19 } from "nostr-tools";
 import { usePRStore } from "src/stores/payment-request";
 import { useMintsStore } from "src/stores/mints";
 import { useNostrStore } from "src/stores/nostr";
+import { useUiStore } from "src/stores/ui";
 import { getShortUrl } from "src/js/wallet-helpers";
+import { shortenString } from "src/js/string-utils";
 import { notifyError } from "src/js/notify";
 import BottomSheet from "src/components/BottomSheet.vue";
+import CopyButton from "src/components/ui/CopyButton.vue";
 import SheetOption from "src/components/SheetOption.vue";
 import PaymentRequestPayments from "src/components/PaymentRequestPayments.vue";
 // type hint for global mixin
@@ -299,9 +371,14 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     ChevronDownIcon,
+    CopyIcon,
     LandmarkIcon,
+    PlusIcon,
+    RefreshCwIcon,
+    ShareIcon,
     XIcon,
     QrBlock,
+    CopyButton,
     FullscreenDialogHeader,
     BottomSheet,
     SheetOption,
@@ -325,6 +402,7 @@ export default defineComponent({
     ]),
     ...mapState(useMintsStore, ["activeUnit", "mints"]),
     ...mapState(useNostrStore, ["seedSignerPublicKey"]),
+    ...mapState(useUiStore, ["webShareSupported"]),
     ...mapWritableState(usePRStore, ["showPRDialog"]),
     // What the QR encodes; the only source for the amount, mint and unit shown.
     request(): RequestFields {
@@ -348,11 +426,19 @@ export default defineComponent({
       return this.mints.find((m: any) => m.url === this.requestMint)?.info
         ?.icon_url;
     },
+    hasAmount(): boolean {
+      return this.request.amount !== undefined;
+    },
+    // A fixed amount leads above the QR; an open request shows the QR first.
+    layout(): string[] {
+      return this.hasAmount ? ["amount", "qr"] : ["qr", "amount"];
+    },
     amountLabel(): string {
-      if (this.request.amount === undefined) {
-        return this.$t("PaymentRequestDialog.actions.add_amount.label");
-      }
+      if (this.request.amount === undefined) return "";
       return this.formatCurrency(this.request.amount, this.request.unit, true);
+    },
+    shortRequest(): string {
+      return shortenString(this.showPRKData, 14, 8) || this.showPRKData;
     },
     mintLabel(): string {
       const mints = this.request.mints;
@@ -521,7 +607,9 @@ export default defineComponent({
       this.amountError = false;
       this.isEditingAmount = true;
       this.$nextTick(() => {
-        (this.$refs.amountInput as any)?.focus();
+        // Refs inside v-for (the amount block) come back as an array.
+        const input = this.$refs.amountInput as any;
+        (Array.isArray(input) ? input[0] : input)?.focus();
       });
     },
     commitAmount() {
@@ -557,32 +645,139 @@ export default defineComponent({
         (this as any).copyText(this.showPRKData);
       }
     },
+    async onSharePRKData() {
+      if (!this.showPRKData || !this.webShareSupported) return;
+      try {
+        await navigator.share({ text: this.showPRKData });
+      } catch (error: any) {
+        if (error?.name !== "AbortError") {
+          console.error("Error sharing payment request:", error);
+        }
+      }
+    },
   },
 });
 </script>
 
 <style scoped>
-.pr-controls {
-  gap: 12px;
+.pr-body {
+  gap: 16px;
+  margin: 0 auto;
+  max-width: var(--app-column);
+  padding: 0 16px 16px;
+  width: 100%;
 }
-.pr-amount-row {
-  gap: 4px;
+.pr-amount {
+  gap: 8px;
+  width: 100%;
 }
-/* 44px targets for the pill and the text button (the measured tap-target floor). */
-.pr-amount-pill,
-.pr-new-request {
+.pr-amount--hero {
+  padding-top: 4px;
+}
+.pr-overline {
+  color: var(--app-text-muted);
+  font-size: 14px;
+}
+/* The hero amount reads as editable text: a dashed underline, no button chrome. The clear
+   button hangs off its end so the figure itself stays centred. */
+.pr-hero-amount {
+  background: none;
+  border: 0;
+  border-block-end: 2px dashed var(--app-border-strong);
+  color: var(--app-text);
+  cursor: text;
+  font: inherit;
+  font-size: 40px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  min-height: 48px;
+  padding: 0 2px;
+}
+.pr-amount-clear {
+  color: var(--app-text-muted) !important;
+  margin-inline-end: -44px;
+}
+.pr-add-amount {
   min-height: 44px;
 }
 .pr-amount-editor {
-  max-width: var(--app-column);
-  padding: 0 16px;
   width: 100%;
 }
-.pr-chip-row {
-  gap: 8px;
+.pr-unit-toggle {
+  margin-top: 4px;
 }
-.pr-chip-row .mint-chip:disabled {
-  cursor: default;
+.pr-unit-chip {
+  min-height: 44px;
+}
+.pr-qr-group {
+  width: 100%;
+}
+/* The QR gives up some height on short phones so the controls under it (the mint line, the
+   amount and unit controls of an open request) stay above the footer. */
+.pr-qr-group {
+  --app-qr-size: clamp(200px, min(70vw, 34vh), 300px);
+}
+/* Under the QR: "BTC · mint", muted, the mint a quiet button that opens the mint sheet. */
+.pr-meta {
+  color: var(--app-text-muted);
+  font-size: 14px;
+  gap: 6px;
+  margin-top: 8px;
+  min-width: 0;
+}
+.pr-meta__unit {
+  flex-shrink: 0;
+}
+.pr-mint-link {
+  align-items: center;
+  background: none;
+  border: 0;
+  border-radius: var(--app-radius-sm);
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  gap: 6px;
+  min-height: 44px;
+  min-width: 0;
+  padding: 0 4px;
+}
+.pr-mint-link:hover {
+  color: var(--app-text);
+}
+.pr-mint-link__avatar {
+  align-items: center;
+  display: inline-flex;
+  flex-shrink: 0;
+  height: 18px;
+  justify-content: center;
+  width: 18px;
+}
+.pr-mint-link__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pr-code {
+  gap: 4px;
+}
+.pr-code__text {
+  color: var(--app-text-muted);
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pr-payments {
+  width: 100%;
+}
+.pr-foot {
+  gap: 10px;
+}
+.pr-foot__btn {
+  flex: 1 1 0;
 }
 /* The pager is quiet chrome under the title: muted "Request 2 of 3" between 44px arrows. */
 .pr-pager {

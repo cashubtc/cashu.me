@@ -90,7 +90,7 @@ import {
 } from "lucide-vue-next";
 
 export const toastVariants = [
-  "Current: raised card",
+  "Current (was: raised card; now ships V5)",
   "Ink capsule",
   "Top island",
   "Docked bar",

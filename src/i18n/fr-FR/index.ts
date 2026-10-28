@@ -743,7 +743,7 @@ export default {
         step2: {
           item: "2. { icon } { text }",
           text: "Appuyez sur { buttonText }",
-          buttonText: "@:AndroidPWAPrompt.buttonText",
+          buttonText: "@:PwaPrompt.android.add",
         },
       },
       ios: {
@@ -755,7 +755,7 @@ export default {
         step2: {
           item: "2. { icon } { text }",
           text: "Appuyez sur { buttonText }",
-          buttonText: "@:iOSPWAPrompt.buttonText",
+          buttonText: "@:PwaPrompt.ios.add",
         },
       },
       outro: {
@@ -771,13 +771,19 @@ export default {
       },
     },
   },
-  iOSPWAPrompt: {
-    text: "Appuyez sur { icon } et { buttonText }",
-    buttonText: "Sur l'écran d'accueil",
-  },
-  AndroidPWAPrompt: {
-    text: "Appuyez sur { icon } et { buttonText }",
-    buttonText: "Ajouter à l'écran d'accueil",
+  PwaPrompt: {
+    title: "Ajoutez Cashu à votre écran d'accueil",
+    text: "S'ouvre depuis votre écran d'accueil, sans la barre du navigateur.",
+    ios: {
+      share: "Appuyez sur Partager",
+      add: "Sur l'écran d'accueil",
+    },
+    android: {
+      menu: "Ouvrez le menu du navigateur",
+      add: "Ajouter à l'écran d'accueil",
+    },
+    install: "Installer",
+    notNow: "Pas maintenant",
   },
   WelcomeSlide3: {
     title: "Votre phrase de récupération",
@@ -1301,6 +1307,8 @@ export default {
       description: "Recevoir des paiements via Nostr",
     },
     request_index: "Demande {index} sur {total}",
+    requesting: "Montant demandé",
+    payer_chooses_amount: "Le payeur choisit le montant",
     actions: {
       copy: {
         label: "@:global.actions.copy.label",
@@ -1310,6 +1318,12 @@ export default {
       },
       new_request: {
         label: "Nouvelle demande",
+      },
+      share: {
+        label: "Partager",
+      },
+      copy_request: {
+        label: "Copier la demande",
       },
       add_amount: {
         label: "Ajouter un montant",
@@ -1669,6 +1683,12 @@ export default {
     payment_request: "Demande de paiement",
     nostr: "Nostr",
     token_copied: "Token copié dans le presse-papiers",
+  },
+  ActivityRow: {
+    received: "Reçu",
+    sent: "Envoyé",
+    receiving: "Réception en cours",
+    sending: "Envoi en cours",
   },
   common: {
     copied: "Copié",

@@ -725,7 +725,7 @@ export default {
         step2: {
           item: "2. { icon } { text }",
           text: "اضغط على { buttonText }",
-          buttonText: "@:AndroidPWAPrompt.buttonText",
+          buttonText: "@:PwaPrompt.android.add",
         },
       },
       ios: {
@@ -737,7 +737,7 @@ export default {
         step2: {
           item: "2. { icon } { text }",
           text: "اضغط على { buttonText }",
-          buttonText: "@:iOSPWAPrompt.buttonText",
+          buttonText: "@:PwaPrompt.ios.add",
         },
       },
       outro: {
@@ -753,13 +753,19 @@ export default {
       },
     },
   },
-  iOSPWAPrompt: {
-    text: "انقر على { icon } و { buttonText }",
-    buttonText: "إضافة إلى الشاشة الرئيسية",
-  },
-  AndroidPWAPrompt: {
-    text: "انقر على { icon } و { buttonText }",
-    buttonText: "إضافة إلى الشاشة الرئيسية",
+  PwaPrompt: {
+    title: "أضف Cashu إلى شاشتك الرئيسية",
+    text: "يفتح من شاشتك الرئيسية، بدون شريط المتصفح.",
+    ios: {
+      share: "انقر على مشاركة",
+      add: "إضافة إلى الشاشة الرئيسية",
+    },
+    android: {
+      menu: "افتح قائمة المتصفح",
+      add: "إضافة إلى الشاشة الرئيسية",
+    },
+    install: "تثبيت",
+    notNow: "ليس الآن",
   },
   WelcomeSlide3: {
     title: "عبارة الاستعادة الخاصة بك",
@@ -1270,6 +1276,8 @@ export default {
       description: "استلام المدفوعات عبر Nostr",
     },
     request_index: "الطلب {index} من {total}",
+    requesting: "المبلغ المطلوب",
+    payer_chooses_amount: "الدافع يختار المبلغ",
     actions: {
       copy: {
         label: "@:global.actions.copy.label",
@@ -1279,6 +1287,12 @@ export default {
       },
       new_request: {
         label: "طلب جديد",
+      },
+      share: {
+        label: "مشاركة",
+      },
+      copy_request: {
+        label: "نسخ الطلب",
       },
       add_amount: {
         label: "إضافة مبلغ",
@@ -1636,6 +1650,12 @@ export default {
     payment_request: "طلب دفع",
     nostr: "Nostr",
     token_copied: "تم نسخ الرمز المميز إلى الحافظة",
+  },
+  ActivityRow: {
+    received: "تم الاستلام",
+    sent: "تم الإرسال",
+    receiving: "جارٍ الاستلام",
+    sending: "جارٍ الإرسال",
   },
   common: {
     copied: "تم النسخ",

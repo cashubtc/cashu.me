@@ -50,6 +50,12 @@ export default {
       },
     },
   },
+  ActivityRow: {
+    received: "Received",
+    sent: "Sent",
+    receiving: "Receiving",
+    sending: "Sending",
+  },
   common: {
     copied: "Copied",
     on_chain: "On-chain",
@@ -745,7 +751,7 @@ export default {
         step2: {
           item: "2. { icon } { text }",
           text: "Press { buttonText }",
-          buttonText: "@:AndroidPWAPrompt.buttonText",
+          buttonText: "@:PwaPrompt.android.add",
         },
       },
       ios: {
@@ -757,7 +763,7 @@ export default {
         step2: {
           item: "2. { icon } { text }",
           text: "Press { buttonText }",
-          buttonText: "@:iOSPWAPrompt.buttonText",
+          buttonText: "@:PwaPrompt.ios.add",
         },
       },
       outro: {
@@ -773,13 +779,19 @@ export default {
       },
     },
   },
-  iOSPWAPrompt: {
-    text: "Tap { icon } and { buttonText }",
-    buttonText: "Add to Home Screen",
-  },
-  AndroidPWAPrompt: {
-    text: "Tap { icon } and { buttonText }",
-    buttonText: "Add to Home Screen",
+  PwaPrompt: {
+    title: "Add Cashu to your home screen",
+    text: "Opens from your home screen, without the browser bar.",
+    ios: {
+      share: "Tap Share",
+      add: "Add to Home Screen",
+    },
+    android: {
+      menu: "Open the browser menu",
+      add: "Add to Home Screen",
+    },
+    install: "Install",
+    notNow: "Not now",
   },
   WelcomeSlide3: {
     title: "Your seed phrase",
@@ -1334,6 +1346,8 @@ export default {
     received_total: "Received total",
     no_payments_yet: "No payments yet",
     request_index: "Request {index} of {total}",
+    requesting: "Requesting",
+    payer_chooses_amount: "Payer chooses the amount",
     actions: {
       copy: {
         label: "@:global.actions.copy.label",
@@ -1343,6 +1357,12 @@ export default {
       },
       new_request: {
         label: "New request",
+      },
+      share: {
+        label: "Share",
+      },
+      copy_request: {
+        label: "Copy request",
       },
       add_amount: {
         label: "Add amount",

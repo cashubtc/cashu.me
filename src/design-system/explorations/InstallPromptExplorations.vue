@@ -397,7 +397,7 @@ import {
 type Platform = "ios" | "android";
 
 export const installPromptVariants = [
-  "Current: bubble over the browser bar",
+  "Current (was: bubble over the browser bar; now ships V1)",
   "Bottom sheet with steps",
   "Slim top banner",
   "Inline wallet card",

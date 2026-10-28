@@ -1,44 +1,46 @@
-<!-- One transaction or payment in a list: a 40px icon circle with a direction disc (a clock
-     while pending), a label and
-     amount line, and a date line. Styles: src/css/elements.scss (.activity-row). -->
+<!-- One payment in a list (council exploration XV2 winner "Direction disc", 8.7/10): a 40px disc
+     with the direction arrow (tinted for money in; a cross once an invoice expired), the
+     outcome as the title ("Received", "Sending", "Invoice expired") with a Pending pill while
+     it isn't final, the method and date as the caption, and the signed amount on the end edge:
+     green when received, secondary while pending, struck through when nothing arrived.
+     Styles: src/css/elements.scss (.activity-row). -->
 <template>
   <q-item clickable v-ripple class="q-py-sm activity-row" @click="emitClick">
     <q-item-section avatar class="q-pr-md" style="min-width: 40px">
-      <q-avatar size="40px" class="activity-row__avatar">
-        <component :is="icon" class="activity-row__icon" />
-        <span
-          class="activity-row__direction"
-          :class="{
-            'activity-row__direction--in': isIn && !pending,
-            'activity-row__direction--pending': pending,
-          }"
-          aria-hidden="true"
-        >
-          <ClockIcon v-if="pending" :size="13" :stroke-width="2.75" />
-          <ArrowDownLeftIcon v-else-if="isIn" :size="13" :stroke-width="2.75" />
-          <ArrowUpRightIcon v-else :size="13" :stroke-width="2.75" />
-        </span>
+      <q-avatar
+        size="40px"
+        class="activity-row__avatar"
+        :class="{
+          'activity-row__avatar--in': isIn && !pending && !expired,
+        }"
+        aria-hidden="true"
+      >
+        <XIcon v-if="expired" :size="20" />
+        <ArrowDownLeftIcon v-else-if="isIn" :size="20" />
+        <ArrowUpRightIcon v-else :size="20" />
       </q-avatar>
     </q-item-section>
 
     <q-item-section :data-testid="detailsTestid" @click="emitDetailsClick">
-      <q-item-label class="row items-center justify-between">
-        <div class="col text-left">
-          <span class="activity-row__label">
-            {{ label }}
-          </span>
-        </div>
-        <div class="text-right">
-          <div
-            class="activity-row__amount"
-            dir="ltr"
-            :class="{
-              'activity-row__amount--in': isIn && !pending,
-              'activity-row__amount--pending': pending,
-            }"
+      <q-item-label class="row items-center justify-between no-wrap">
+        <div class="col text-left activity-row__title">
+          <span class="activity-row__label">{{ label }}</span>
+          <span
+            v-if="pending"
+            class="app-badge app-badge--warning activity-row__pill"
+            >{{ $t("common.pending") }}</span
           >
-            {{ amount }}
-          </div>
+        </div>
+        <div
+          class="activity-row__amount"
+          dir="ltr"
+          :class="{
+            'activity-row__amount--in': isIn && !pending && !expired,
+            'activity-row__amount--pending': pending,
+            'activity-row__amount--expired': expired,
+          }"
+        >
+          {{ amount }}
         </div>
       </q-item-label>
 
@@ -54,27 +56,23 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, Component } from "vue";
+import { defineComponent, PropType } from "vue";
 import {
   ArrowDownLeft as ArrowDownLeftIcon,
-  Clock as ClockIcon,
   ArrowUpRight as ArrowUpRightIcon,
+  X as XIcon,
 } from "lucide-vue-next";
 
 export default defineComponent({
   name: "ActivityRow",
-  components: { ArrowDownLeftIcon, ArrowUpRightIcon, ClockIcon },
+  components: { ArrowDownLeftIcon, ArrowUpRightIcon, XIcon },
   props: {
-    /** The kind of activity (ecash, lightning, on-chain), as a lucide icon component. */
-    icon: {
-      type: [Object, Function] as PropType<Component>,
-      required: true,
-    },
     direction: {
       type: String as PropType<"in" | "out">,
       required: true,
       validator: (value: string) => value === "in" || value === "out",
     },
+    /** The outcome in words ("Received", "Sending") or the payment's own label. */
     label: {
       type: String,
       default: "",
@@ -84,12 +82,17 @@ export default defineComponent({
       type: String,
       default: "",
     },
-    /** Not settled yet: the amount drops to secondary text. */
+    /** Not settled yet: a Pending pill, and the amount drops to secondary text. */
     pending: {
       type: Boolean,
       default: false,
     },
-    /** The date line. */
+    /** Nothing arrived (an expired invoice): a cross, and the amount struck through. */
+    expired: {
+      type: Boolean,
+      default: false,
+    },
+    /** The second line: the method and the date. */
     caption: {
       type: String,
       default: "",

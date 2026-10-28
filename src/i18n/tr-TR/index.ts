@@ -743,7 +743,7 @@ export default {
         step2: {
           item: "2. { icon } { text }",
           text: "{ buttonText }'e basın",
-          buttonText: "@:AndroidPWAPrompt.buttonText",
+          buttonText: "@:PwaPrompt.android.add",
         },
       },
       ios: {
@@ -755,7 +755,7 @@ export default {
         step2: {
           item: "2. { icon } { text }",
           text: "{ buttonText }'e basın",
-          buttonText: "@:iOSPWAPrompt.buttonText",
+          buttonText: "@:PwaPrompt.ios.add",
         },
       },
       outro: {
@@ -771,13 +771,19 @@ export default {
       },
     },
   },
-  iOSPWAPrompt: {
-    text: "{ icon } ve { buttonText }'e dokunun",
-    buttonText: "Ana Ekrana Ekle",
-  },
-  AndroidPWAPrompt: {
-    text: "{ icon } ve { buttonText }'e dokunun",
-    buttonText: "Ana Ekrana Ekle",
+  PwaPrompt: {
+    title: "Cashu'yu ana ekranınıza ekleyin",
+    text: "Ana ekranınızdan, tarayıcı çubuğu olmadan açılır.",
+    ios: {
+      share: "Paylaş'a dokunun",
+      add: "Ana Ekrana Ekle",
+    },
+    android: {
+      menu: "Tarayıcı menüsünü açın",
+      add: "Ana Ekrana Ekle",
+    },
+    install: "Yükle",
+    notNow: "Şimdi değil",
   },
   WelcomeSlide3: {
     title: "Kurtarma ifadeniz",
@@ -1294,6 +1300,8 @@ export default {
       description: "Nostr aracılığıyla ödeme al",
     },
     request_index: "İstek {index} / {total}",
+    requesting: "İstenen tutar",
+    payer_chooses_amount: "Tutarı ödeyen belirler",
     actions: {
       copy: {
         label: "@:global.actions.copy.label",
@@ -1303,6 +1311,12 @@ export default {
       },
       new_request: {
         label: "Yeni talep",
+      },
+      share: {
+        label: "Paylaş",
+      },
+      copy_request: {
+        label: "İsteği kopyala",
       },
       add_amount: {
         label: "Miktar ekle",
@@ -1661,6 +1675,12 @@ export default {
     payment_request: "Ödeme talebi",
     nostr: "Nostr",
     token_copied: "Token panoya kopyalandı",
+  },
+  ActivityRow: {
+    received: "Alındı",
+    sent: "Gönderildi",
+    receiving: "Alınıyor",
+    sending: "Gönderiliyor",
   },
   common: {
     copied: "Kopyalandı",

@@ -16,16 +16,6 @@ export const explorationScores: Record<string, VariantScore[]> = {
     { sol: 8.4, opus: 7.3 },
     { sol: 6.8, opus: 6.6 },
   ],
-  history: [
-    { sol: 6.2, opus: 6.2 },
-    { sol: 7.8, opus: 6.6 },
-    { sol: 8.7, opus: 8.6 },
-    { sol: 7.7, opus: 6.4 },
-    { sol: 7.5, opus: 7.0 },
-    { sol: 8.5, opus: 7.6 },
-    { sol: 6.4, opus: 5.4 },
-    { sol: 8.0, opus: 7.8 },
-  ],
   "payment-request": [
     { sol: 6.6, opus: 6.0 },
     { sol: 8.0, opus: 7.4 },
@@ -65,5 +55,15 @@ export const explorationScores: Record<string, VariantScore[]> = {
     { sol: 8.9, opus: 8.4 },
     { sol: 7.8, opus: 7.2 },
     { sol: 7.1, opus: 6.2 },
+  ],
+  "activity-row": [
+    { sol: 6.1, opus: 5.6 },
+    { sol: 9.0, opus: 8.4 },
+    { sol: 8.6, opus: 7.0 },
+    { sol: 8.1, opus: 7.3 },
+    { sol: 7.2, opus: 6.4 },
+    { sol: 8.3, opus: 6.9 },
+    { sol: 7.6, opus: 6.8 },
+    { sol: 8.5, opus: 7.8 },
   ],
 };
