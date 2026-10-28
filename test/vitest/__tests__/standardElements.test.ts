@@ -147,6 +147,16 @@ describe("standard elements", () => {
     ).toEqual([]);
   });
 
+  // Onboarding copy is CjkText, so a Chinese word never splits across lines (council R83).
+  it("onboarding paragraphs use CjkText", () => {
+    expect(
+      vueFiles
+        .filter(({ file }) => file.includes("pages/welcome/"))
+        .filter(({ text }) => /<p\b[^>]*>\s*\{\{\s*\$t\(/.test(text))
+        .map(({ file }) => file)
+    ).toEqual([]);
+  });
+
   it("one pending mark: no spinner outside PendingDots", () => {
     expect(
       offenders((text) => /<q-spinner/.test(text)).filter(

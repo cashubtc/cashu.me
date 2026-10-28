@@ -41,9 +41,12 @@
             {{ $t("WalletPage.install.text") }}
           </q-btn>
         </div>
-        <p v-if="!wasInstalled" class="intro-text">
-          {{ $t("WelcomeSlide2.instruction.intro.text") }}
-        </p>
+        <CjkText
+          v-if="!wasInstalled"
+          tag="p"
+          class="intro-text"
+          :text="$t('WelcomeSlide2.instruction.intro.text')"
+        />
 
         <!-- Android Instructions -->
         <div v-if="!wasInstalled && !isIos" class="platform-section">
@@ -99,9 +102,12 @@
           </div>
         </div>
 
-        <p v-if="!wasInstalled" class="outro-text">
-          {{ $t("WelcomeSlide2.instruction.outro.text") }}
-        </p>
+        <CjkText
+          v-if="!wasInstalled"
+          tag="p"
+          class="outro-text"
+          :text="$t('WelcomeSlide2.instruction.outro.text')"
+        />
       </div>
 
       <!-- Success message when PWA is installed or installation confirmed -->
@@ -111,12 +117,18 @@
             {{ $t("WelcomeSlide2.pwa.success.title") }}
           </h3>
         </transition>
-        <p v-if="isPWA()" class="success-text">
-          {{ $t("WelcomeSlide2.pwa.success.text") }}
-        </p>
-        <p v-else class="success-text">
-          {{ $t("WelcomeSlide2.pwa.success.nextSteps") }}
-        </p>
+        <CjkText
+          tag="p"
+          v-if="isPWA()"
+          class="success-text"
+          :text="$t('WelcomeSlide2.pwa.success.text')"
+        />
+        <CjkText
+          tag="p"
+          v-else
+          class="success-text"
+          :text="$t('WelcomeSlide2.pwa.success.nextSteps')"
+        />
       </div>
     </div>
 
@@ -142,6 +154,7 @@
 </template>
 
 <script lang="ts">
+import CjkText from "src/components/ui/CjkText.vue";
 import PendingDots from "src/components/ui/PendingDots.vue";
 import {
   CircleCheck as CircleCheckIcon,
@@ -155,6 +168,7 @@ import PwaPrompt from "src/components/PwaPrompt.vue";
 export default {
   name: "WelcomeSlide2",
   components: {
+    CjkText,
     PendingDots,
     CircleCheckIcon,
     SquarePlusIcon,

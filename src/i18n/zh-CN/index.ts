@@ -737,7 +737,7 @@ export default {
         },
         step2: {
           item: "2. { icon } { text }",
-          text: "按 { buttonText }",
+          text: "按{ buttonText }",
           buttonText: "@:PwaPrompt.android.add",
         },
       },
@@ -749,7 +749,7 @@ export default {
         },
         step2: {
           item: "2. { icon } { text }",
-          text: "按 { buttonText }",
+          text: "按{ buttonText }",
           buttonText: "@:PwaPrompt.ios.add",
         },
       },

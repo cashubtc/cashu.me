@@ -36,9 +36,11 @@
         </div>
       </div>
 
-      <p class="seed-caption">
-        {{ $t("WelcomeSlide3.inputs.seed_phrase.caption") }}
-      </p>
+      <CjkText
+        tag="p"
+        class="seed-caption"
+        :text="$t('WelcomeSlide3.inputs.seed_phrase.caption')"
+      />
     </div>
 
     <!-- Checkbox -->
@@ -55,6 +57,7 @@
 </template>
 
 <script lang="ts">
+import CjkText from "src/components/ui/CjkText.vue";
 import IconButton from "src/components/ui/IconButton.vue";
 import {
   Eye as EyeIcon,
@@ -71,6 +74,7 @@ import { ref, computed, onMounted } from "vue";
 export default {
   name: "WelcomeSlide3",
   components: {
+    CjkText,
     IconButton,
     EyeIcon,
     EyeOffIcon,

@@ -311,6 +311,16 @@ export const DS_ITEMS: DsItem[] = [
   },
 
   {
+    id: "cjk-text",
+    name: "CJK text",
+    group: "foundations",
+    tier: "primitive",
+    source: "src/components/ui/CjkText.vue",
+    usage: { tag: "CjkText" },
+    example: `<CjkText tag="p" :text="$t('WelcomeSlide1.text')" />`,
+    note: "Chinese and Japanese copy that only wraps between words (Intl.Segmenter). Other locales unchanged.",
+  },
+  {
     id: "flow-column",
     name: "Flow column",
     group: "layout",

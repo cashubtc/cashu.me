@@ -3,12 +3,12 @@
     :title="$t('WelcomeSlide4.title')"
     :caption="$t('WelcomeSlide4.actions.more.label')"
   >
-    <p
+    <CjkText
+      tag="p"
       v-if="!$i18n.locale.startsWith('en')"
       class="terms-english-only text-caption"
-    >
-      {{ $t("WelcomeSlide4.english_only") }}
-    </p>
+      :text="$t('WelcomeSlide4.english_only')"
+    />
     <TermsOfServiceText class="terms-body" />
     <div class="settings-card q-mt-md">
       <q-item tag="label" clickable class="terms-accept">
@@ -26,6 +26,7 @@
 </template>
 
 <script lang="ts">
+import CjkText from "src/components/ui/CjkText.vue";
 import { useWelcomeStore } from "src/stores/welcome";
 import SettingsPageShell from "src/pages/settings/SettingsPageShell.vue";
 import TermsOfServiceText from "src/components/TermsOfServiceText.vue";

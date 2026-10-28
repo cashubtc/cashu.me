@@ -41,13 +41,16 @@
     </div>
 
     <!-- Disclaimer -->
-    <p class="disclaimer">
-      {{ $t("WelcomeRecoverSeed.disclaimer") }}
-    </p>
+    <CjkText
+      tag="p"
+      class="disclaimer"
+      :text="$t('WelcomeRecoverSeed.disclaimer')"
+    />
   </WelcomeSlideScaffold>
 </template>
 
 <script lang="ts">
+import CjkText from "src/components/ui/CjkText.vue";
 import { KeyRound as KeyRoundIcon } from "lucide-vue-next";
 import WelcomeSlideScaffold from "src/components/ui/WelcomeSlideScaffold.vue";
 import { ref, computed, watch } from "vue";

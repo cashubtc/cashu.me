@@ -2,16 +2,20 @@
   <!-- A mint's identity in its own tinted card, as in the original mint details design: the
        header of the mint details, reviews and write-a-review pages, so all three read as the
        same mint. The default slot holds page extras such as the QR toggle. -->
-  <div class="mint-header">
+  <!-- `compact`: one row (icon, then name over host) for pages where the mint is context,
+       not the subject: reviews and write-a-review (council R76-R82). -->
+  <div class="mint-header" :class="{ 'mint-header--compact': compact }">
     <IconCircle
-      size="lg"
-      class="q-mb-sm"
+      :size="compact ? 'md' : 'lg'"
+      :class="compact ? '' : 'q-mb-sm'"
       :src="info?.icon_url"
       :icon="LandmarkIcon"
     />
-    <div class="mint-name">{{ displayName }}</div>
-    <div v-if="host !== displayName" class="mint-host" dir="ltr">
-      {{ host }}
+    <div class="mint-header__text">
+      <div class="mint-name">{{ displayName }}</div>
+      <div v-if="host !== displayName" class="mint-host" dir="ltr">
+        {{ host }}
+      </div>
     </div>
     <slot />
   </div>
@@ -33,6 +37,7 @@ export default defineComponent({
   props: {
     url: { type: String, required: true },
     info: { type: Object, required: false },
+    compact: { type: Boolean, default: false },
   },
   computed: {
     ...mapState(useMintsStore, ["mints"]),
@@ -83,5 +88,25 @@ export default defineComponent({
   color: var(--app-text-muted);
   font-size: 14px;
   margin-top: 2px;
+}
+.mint-header__text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+}
+.mint-header--compact {
+  flex-direction: row;
+  gap: 12px;
+  justify-content: flex-start;
+  padding: 12px 16px;
+}
+.mint-header--compact .mint-header__text {
+  align-items: flex-start;
+}
+.mint-header--compact .mint-name {
+  font-size: 17px;
+  line-height: 24px;
+  text-align: start;
 }
 </style>

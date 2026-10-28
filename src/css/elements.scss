@@ -693,3 +693,8 @@ body.body--light .activity-row__avatar--in {
   max-width: var(--app-column);
   width: 100%;
 }
+
+/* CjkText: a whole Chinese or Japanese word never wraps across lines. */
+.cjk-word {
+  white-space: nowrap;
+}

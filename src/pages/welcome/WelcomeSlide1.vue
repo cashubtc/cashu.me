@@ -12,7 +12,7 @@
     <h1 class="title">{{ $t("WelcomeSlide1.title") }}</h1>
 
     <!-- Description -->
-    <p class="description">{{ $t("WelcomeSlide1.text") }}</p>
+    <CjkText tag="p" class="description" :text="$t('WelcomeSlide1.text')" />
 
     <!-- Welcome actions -->
     <div class="welcome-actions">
@@ -92,6 +92,7 @@
 </template>
 
 <script lang="ts">
+import CjkText from "src/components/ui/CjkText.vue";
 import { LANGUAGE_OPTIONS, languageLabel } from "src/js/languages";
 import {
   ChevronDown as ChevronDownIcon,
@@ -105,6 +106,7 @@ import TermsOfServiceText from "src/components/TermsOfServiceText.vue";
 export default {
   name: "WelcomeSlide1",
   components: {
+    CjkText,
     ChevronDownIcon,
     GlobeIcon,
     BottomSheet,

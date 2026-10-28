@@ -161,6 +161,16 @@
           lnbc10u1pjxyz0pp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqypq
         </div>
       </DsEntry>
+      <DsEntry id="cjk-text">
+        <div class="ds-frame q-pa-md" style="max-width: 240px">
+          <!-- Rendered in the active locale: switch the board to 中文 to see whole words. -->
+          <CjkText
+            tag="p"
+            class="q-ma-none"
+            text="Cashu.me 是一款免费且开源的比特币钱包，使用 ecash 确保您的资金安全和隐私。"
+          />
+        </div>
+      </DsEntry>
       <h2 id="ds-group-actions" class="ds-section">Actions and buttons</h2>
       <DsEntry id="wallet-actions">
         <WalletActions />
@@ -1199,6 +1209,7 @@ import UnitToggle from "src/components/ui/UnitToggle.vue";
 import MintCardAction from "src/components/ui/MintCardAction.vue";
 import TonalChip from "src/components/ui/TonalChip.vue";
 import FlowColumn from "src/components/ui/FlowColumn.vue";
+import CjkText from "src/components/ui/CjkText.vue";
 import SettingsLinkRow from "src/components/ui/SettingsLinkRow.vue";
 import SettingsRadioRow from "src/components/ui/SettingsRadioRow.vue";
 import SettingsToggleRow from "src/components/ui/SettingsToggleRow.vue";
@@ -1298,6 +1309,7 @@ export default defineComponent({
     MintCardAction,
     TonalChip,
     FlowColumn,
+    CjkText,
     SettingsLinkRow,
     SettingsRadioRow,
     SettingsSection,

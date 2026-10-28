@@ -5,6 +5,7 @@
       v-if="mintUrl"
       :url="mintUrl"
       :info="mintInfo"
+      compact
       class="q-mb-lg"
     />
     <div class="review-form">

@@ -1,7 +1,7 @@
 <template>
   <q-card flat class="bg-transparent full-width mint-ratings-root">
     <q-card-section class="q-pa-none">
-      <MintIdentityHeader :url="url" :info="mintInfo" class="q-mb-lg" />
+      <MintIdentityHeader :url="url" :info="mintInfo" compact class="q-mb-lg" />
 
       <!-- Rating summary (app-store style), then the web-of-trust filter. While the first
            fetch runs, the same summary draws its own placeholders, so the page never claims
