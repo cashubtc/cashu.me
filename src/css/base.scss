@@ -105,8 +105,9 @@ $themes: (
     --app-accent: #{map-get($t, accent)};
     --app-on-primary: #{map-get($t, on-fill)};
     --app-surface: #{map-get($t, dark)};
-    // Raised surfaces (sheets, dialogs) lift every theme's page by the same step, in its own hue.
-    --app-raised: color-mix(in srgb, #fff 8%, #{map-get($t, dark)});
+    // Raised surfaces (sheets, dialogs, toasts) sit a clear step above cards and groups (13% over
+    // the page vs 10%), in each theme's own hue (council contrast review: 8% read as a group).
+    --app-raised: color-mix(in srgb, #fff 13%, #{map-get($t, dark)});
   }
   body.body--light[data-theme="#{$theme}"] {
     --q-primary: #{map-get($t, light)};
@@ -137,13 +138,12 @@ body {
     color-mix(in srgb, var(--q-primary) 55%, transparent);
 }
 
-// Surfaces ("Tonal", chosen at /ui and again on the design system board in round 57): cards and
+// Surfaces ("Tonal"): cards and
 // settings groups are borderless neutral fills; fields, the mint picker, outline buttons and
 // segmented controls keep a quiet edge so they still read as controls; a selected card or row
 // is a stronger neutral fill with the theme colour on its edge (same width as at rest), so a
 // selection never turns muddy in a coloured theme or reads like a warning.
-// Light mode's field edge matches dark mode's contrast. The alternatives live in
-// src/css/ui-variants.scss.
+// Light mode's field edge matches dark mode's contrast.
 body.body--dark {
   --app-card-edge: transparent;
   --app-card-edge-active: color-mix(
@@ -151,13 +151,16 @@ body.body--dark {
     var(--app-accent) 55%,
     transparent
   );
-  --app-card-fill: color-mix(in srgb, var(--app-text) 7%, transparent);
-  --app-card-fill-active: color-mix(in srgb, var(--app-text) 11%, transparent);
-  --app-field-edge: rgba(255, 255, 255, 0.4);
-  --app-field-fill: color-mix(in srgb, var(--app-text) 5%, transparent);
-  --app-outline-edge: rgba(255, 255, 255, 0.4);
+  // Dark steps over the pure-black page, about 5 points apart so each level separates on any
+  // panel: container 10% (cards and settings groups, siblings), active 15%, raised 13%. Fields
+  // keep an edge at the 3:1 control minimum (38%), softened from 40% so inputs stay quieter.
+  --app-card-fill: color-mix(in srgb, var(--app-text) 10%, transparent);
+  --app-card-fill-active: color-mix(in srgb, var(--app-text) 15%, transparent);
+  --app-field-edge: rgba(255, 255, 255, 0.38);
+  --app-field-fill: color-mix(in srgb, var(--app-text) 7%, transparent);
+  --app-outline-edge: rgba(255, 255, 255, 0.38);
   --app-group-edge: transparent;
-  --app-group-fill: color-mix(in srgb, var(--app-text) 6%, transparent);
+  --app-group-fill: color-mix(in srgb, var(--app-text) 10%, transparent);
 }
 body.body--light {
   --app-card-edge: transparent;
@@ -177,10 +180,10 @@ body.body--dark {
   --app-text-muted: rgba(255, 255, 255, 0.72);
   --app-text-subtle: rgba(255, 255, 255, 0.6);
   --app-text-disabled: rgba(255, 255, 255, 0.5);
-  --app-border: rgba(255, 255, 255, 0.14);
-  --app-tint: rgba(255, 255, 255, 0.06);
-  --app-tint-strong: rgba(255, 255, 255, 0.1);
-  --app-border-strong: rgba(255, 255, 255, 0.28);
+  --app-border: rgba(255, 255, 255, 0.16);
+  --app-tint: rgba(255, 255, 255, 0.08);
+  --app-tint-strong: rgba(255, 255, 255, 0.14);
+  --app-border-strong: rgba(255, 255, 255, 0.3);
   --q-positive: #4ade80;
   // A clear red, not a pastel: destructive actions should read as danger (was #ffa8a8).
   --q-negative: #ff6b6b;
@@ -195,7 +198,7 @@ body.body--light {
   --app-text-muted: rgba(0, 0, 0, 0.64);
   --app-text-subtle: rgba(0, 0, 0, 0.58);
   --app-text-disabled: rgba(0, 0, 0, 0.5);
-  // Light mode mirrors dark mode's steps (user direction, R46: light had been tuned less):
+  // Light mode mirrors dark mode's steps (light had been tuned less):
   // hairlines and card edges at about the same visual weight as their dark counterparts,
   // fills a touch stronger so grouped surfaces read on white. Field edges keep their own
   // 3:1 token (--app-field-edge).

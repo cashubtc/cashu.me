@@ -339,7 +339,7 @@ export default defineComponent({
 }
 
 /* Locked to your key: the success tone; locked to someone else: the warning tone. Plain
-   colour, no shimmer or glow (round 57). */
+   colour, no shimmer or glow. */
 .token-details-section :deep(.p2pk-locked-me) {
   color: var(--app-success);
   font-weight: 600;

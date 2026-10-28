@@ -53,80 +53,20 @@
         @update:model-value="toggleTerminal"
       />
 
-      <!-- keyset counters -->
-      <q-item>
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.advanced.developer.keyset_counters.title")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.advanced.developer.keyset_counters.description")
-          }}</q-item-label>
-          <div class="keyset-counters q-mt-sm">
-            <div
-              class="keyset-counter-group"
-              v-for="(mintCounter, mintUrl) in keysetCountersByMint"
-              :key="mintUrl"
-            >
-              <!-- The mint as everywhere else: its icon (or the landmark glyph) and its name. -->
-              <div class="keyset-mint-label row items-center no-wrap">
-                <span class="mint-chip__avatar" aria-hidden="true">
-                  <img
-                    v-if="mintFor(mintUrl)?.info?.icon_url"
-                    :src="mintFor(mintUrl).info.icon_url"
-                    alt=""
-                    class="keyset-mint-icon"
-                  />
-                  <LandmarkIcon v-else :size="14" class="keyset-mint-glyph" />
-                </span>
-                <span class="ellipsis">{{
-                  mintFor(mintUrl)?.nickname ||
-                  mintFor(mintUrl)?.info?.name ||
-                  shortUrl(mintUrl)
-                }}</span>
-              </div>
-              <!-- Each keyset is a stepper row: ID, its count, and the round + button that
-                   presses like the wallet's scan and menu buttons (user direction, R46). -->
-              <div class="keyset-counter-list">
-                <div
-                  v-for="(counter, id) in mintCounter"
-                  :key="id"
-                  class="keyset-counter-row"
-                  :title="counter.id"
-                  @click="increaseKeysetCounter(counter.id, 1)"
-                >
-                  <span class="keyset-id ellipsis">{{
-                    abbreviateKeysetId(counter.id)
-                  }}</span>
-                  <span class="keyset-counter-text">
-                    {{
-                      $t(
-                        "Settings.advanced.developer.keyset_counters.counter",
-                        { count: counter.counter }
-                      )
-                    }}
-                  </span>
-                  <q-btn
-                    flat
-                    dense
-                    round
-                    class="keyset-counter-plus"
-                    :aria-label="
-                      $t(
-                        'Settings.advanced.developer.keyset_counters.increase',
-                        { id: abbreviateKeysetId(counter.id) }
-                      )
-                    "
-                    @click.stop="increaseKeysetCounter(counter.id, 1)"
-                  >
-                    <PlusIcon :size="22" />
-                  </q-btn>
-                </div>
-              </div>
-            </div>
-          </div>
-        </q-item-section>
-      </q-item>
+      <!-- The design system board (development builds only, like its route). -->
+      <SettingsActionRow
+        v-if="isDev"
+        @click="$router.push('/design-system')"
+        :label="$t('Settings.advanced.developer.design_system.title')"
+        :caption="$t('Settings.advanced.developer.design_system.description')"
+      />
+
+      <!-- keyset counters: one row that opens the counters grouped by mint -->
+      <KeysetCountersRow
+        v-if="keysetGroups.length"
+        :groups="keysetGroups"
+        @increase="(id) => increaseKeysetCounter(id, 1)"
+      />
 
       <!-- unset reserved proofs -->
       <SettingsActionRow
@@ -256,6 +196,7 @@ import { useNostrUserStore } from "src/stores/nostrUser";
 import SettingsPageShell from "./SettingsPageShell.vue";
 import SettingsActionRow from "src/components/ui/SettingsActionRow.vue";
 import SettingsToggleRow from "src/components/ui/SettingsToggleRow.vue";
+import KeysetCountersRow from "src/components/KeysetCountersRow.vue";
 import InlineConfirm from "src/components/ui/InlineConfirm.vue";
 import SettingsSection from "./SettingsSection.vue";
 import {
@@ -263,8 +204,6 @@ import {
   Download as DownloadIcon,
   RefreshCw as RefreshCwIcon,
   RotateCcw as RotateCcwIcon,
-  Landmark as LandmarkIcon,
-  Plus as PlusIcon,
 } from "lucide-vue-next";
 
 export default defineComponent({
@@ -273,6 +212,7 @@ export default defineComponent({
   components: {
     SettingsActionRow,
     SettingsToggleRow,
+    KeysetCountersRow,
     InlineConfirm,
     SettingsPageShell,
     SettingsSection,
@@ -280,14 +220,13 @@ export default defineComponent({
     DownloadIcon,
     RefreshCwIcon,
     RotateCcwIcon,
-    PlusIcon,
-    LandmarkIcon,
   },
   data: function () {
     return {
       confirmMnemonic: false,
       confirmNuke: false,
       confirmImport: false,
+      isDev: Boolean(process.env.DEV),
     };
   },
   computed: {
@@ -311,6 +250,20 @@ export default defineComponent({
       }
       return keysetCountersByMint;
     },
+    // Mints that have keyset counters, for the counter sheet.
+    keysetGroups() {
+      return Object.entries(this.keysetCountersByMint)
+        .filter(([, counters]) => counters.length)
+        .map(([url, counters]) => {
+          const mint = this.mintFor(url);
+          return {
+            url,
+            name: mint?.nickname || mint?.info?.name || this.shortUrl(url),
+            iconUrl: mint?.info?.icon_url ?? null,
+            keysets: counters.map((c) => ({ id: c.id, counter: c.counter })),
+          };
+        });
+    },
   },
   methods: {
     ...mapActions(useNostrStore, ["initSigner"]),
@@ -333,13 +286,6 @@ export default defineComponent({
     },
     mintFor: function (url) {
       return this.mints.find((m) => m.url === url);
-    },
-    abbreviateKeysetId: function (id) {
-      const value = String(id || "");
-      if (value.length <= 24) {
-        return value;
-      }
-      return `${value.slice(0, 8)}…${value.slice(-8)}`;
     },
     toggleTerminal: function () {
       useUiStore().toggleDebugConsole();
@@ -438,83 +384,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style>
-.keyset-counters {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-}
-
-.keyset-counter-group {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  width: 100%;
-}
-
-.keyset-mint-label {
-  color: var(--app-text-muted);
-  flex: 0 1 100%;
-  font-size: 13px;
-  gap: 8px;
-  margin-top: 4px;
-}
-
-.keyset-mint-icon {
-  height: 100%;
-  object-fit: cover;
-  width: 100%;
-}
-
-.keyset-mint-glyph {
-  color: var(--app-text-muted);
-}
-
-/* Keysets of one mint sit in one tinted group, a hairline between rows. */
-.keyset-counter-list {
-  background: var(--app-group-fill);
-  border-radius: var(--app-radius-lg);
-  overflow: hidden;
-  width: 100%;
-}
-
-.keyset-counter-row {
-  align-items: center;
-  cursor: pointer;
-  display: flex;
-  gap: 12px;
-  min-height: 56px;
-  padding-block: 4px;
-  padding-inline: 16px 6px;
-}
-
-.keyset-counter-row + .keyset-counter-row {
-  border-top: 1px solid var(--app-border);
-}
-
-.keyset-counter-plus {
-  color: var(--app-text);
-  flex: none;
-  height: 44px;
-  width: 44px;
-}
-
-.keyset-id {
-  color: var(--app-text);
-  font-size: 15px;
-  min-width: 0;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  overflow-wrap: normal;
-}
-
-.keyset-counter-text {
-  color: var(--app-text-muted);
-  flex: none;
-  font-variant-numeric: tabular-nums;
-  margin-inline-start: auto;
-  white-space: nowrap;
-}
-</style>

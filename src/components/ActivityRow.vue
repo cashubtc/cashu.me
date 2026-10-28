@@ -1,4 +1,4 @@
-<!-- One payment in a list (council exploration XV2 winner "Direction disc", 8.7/10): a 40px disc
+<!-- One payment in a list: a 40px disc
      with the direction arrow (tinted for money in; a cross once an invoice expired), the
      outcome as the title ("Received", "Sending", "Invoice expired") with a Pending pill while
      it isn't final, the method and date as the caption, and the signed amount on the end edge:

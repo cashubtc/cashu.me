@@ -39,7 +39,7 @@
               <div v-else class="row justify-center q-pt-md">
                 <q-item-label
                   caption
-                  class="text-weight-light text-white"
+                  class="text-weight-light"
                   style="font-size: 14px"
                 >
                   {{ $t("P2PKDialog.p2pk.description") }}

@@ -556,6 +556,11 @@ export default {
           description:
             "Tar bort ecash som dina aktiva mints rapporterar som spenderad. Använd bara om plånboken har fastnat.",
         },
+        design_system: {
+          title: "Designsystem",
+          description:
+            "Varje komponent i appen, live, med källa och användning.",
+        },
         debug_console: {
           button: "Felsökningskonsol",
           description:
@@ -568,10 +573,11 @@ export default {
         },
         keyset_counters: {
           title: "Öka keyset-räknare",
-          description:
-            'Tryck på ett keyset för att öka dess räknare. Hjälper mot felet "outputs have already been signed".',
-          counter: "Räknare: {count}",
           increase: "Öka räknaren för {id}",
+          fixes: "Åtgärdar ”outputs have already been signed”",
+          keysets: "{n} keyset | {n} keysets",
+          sheet_hint: "Tryck på + för att öka en keysets räknare.",
+          column: "Räknare",
         },
         unset_reserved: {
           button: "Avboka alla reserverade tokens",
@@ -1287,14 +1293,16 @@ export default {
     },
   },
   PaymentRequestDialog: {
+    any_amount: "Valfritt belopp",
     payment_request: {
       caption: "Betalningsförfrågan",
       description: "Ta emot betalningar via Nostr",
     },
     request_index: "Begäran {index} av {total}",
-    requesting: "Begär",
-    payer_chooses_amount: "Betalaren väljer belopp",
     actions: {
+      set_amount: {
+        label: "Ange belopp",
+      },
       copy: {
         label: "@:global.actions.copy.label",
       },

@@ -583,6 +583,10 @@ export default {
           description:
             "Odstraní ecash, který vaše aktivní minty hlásí jako utracený. Použijte jen tehdy, když peněženka uvízne.",
         },
+        design_system: {
+          title: "Designový systém",
+          description: "Každá komponenta aplikace živě, se zdrojem a použitím.",
+        },
         debug_console: {
           button: "Ladicí konzole",
           description:
@@ -595,10 +599,11 @@ export default {
         },
         keyset_counters: {
           title: "Navýšit čítače keysetů",
-          description:
-            "Klepnutím na keyset zvýšíte jeho čítač. Pomáhá při chybě „outputs have already been signed“.",
-          counter: "Čítač: {count}",
           increase: "Zvýšit čítač pro {id}",
+          fixes: "Opravuje „outputs have already been signed“",
+          keysets: "{n} keyset | {n} keysety",
+          sheet_hint: "Klepnutím na + zvýšíte čítač keysetu.",
+          column: "Čítač",
         },
         unset_reserved: {
           button: "Zrušit rezervaci všech tokenů",
@@ -1363,16 +1368,18 @@ export default {
   },
 
   PaymentRequestDialog: {
+    any_amount: "Libovolná částka",
     payment_request: {
       caption: "Žádost o platbu",
       description: "Přijímat platby přes Nostr",
     },
     request_index: "Požadavek {index} z {total}",
-    requesting: "Požadováno",
-    payer_chooses_amount: "Částku zvolí plátce",
     received_total: "Celkem přijato",
     no_payments_yet: "Žádné platby dosud",
     actions: {
+      set_amount: {
+        label: "Nastavit částku",
+      },
       copy: {
         label: "@:global.actions.copy.label",
       },

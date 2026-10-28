@@ -554,6 +554,10 @@ export default {
           description:
             "ลบ ecash ที่ Mint ที่ใช้งานอยู่แจ้งว่าใช้ไปแล้ว ใช้เฉพาะเมื่อ Wallet ค้างเท่านั้น",
         },
+        design_system: {
+          title: "ระบบการออกแบบ",
+          description: "ทุกคอมโพเนนต์ของแอป แบบสด พร้อมซอร์สและการใช้งาน",
+        },
         debug_console: {
           button: "คอนโซลดีบัก",
           description:
@@ -566,10 +570,11 @@ export default {
         },
         keyset_counters: {
           title: "เพิ่มเคาน์เตอร์ keyset",
-          description:
-            'แตะ keyset เพื่อเพิ่มตัวนับ ช่วยแก้ข้อผิดพลาด "outputs have already been signed"',
-          counter: "ตัวนับ: {count}",
           increase: "เพิ่มตัวนับสำหรับ {id}",
+          fixes: "แก้ปัญหา “outputs have already been signed”",
+          keysets: "{n} คีย์เซ็ต | {n} คีย์เซ็ต",
+          sheet_hint: "แตะ + เพื่อเพิ่มตัวนับของคีย์เซ็ต",
+          column: "ตัวนับ",
         },
         unset_reserved: {
           button: "ยกเลิกการสำรองโทเค็นทั้งหมด",
@@ -1275,14 +1280,16 @@ export default {
     },
   },
   PaymentRequestDialog: {
+    any_amount: "จำนวนใดก็ได้",
     payment_request: {
       caption: "คำขอชำระเงิน",
       description: "รับการชำระเงินผ่าน Nostr",
     },
     request_index: "คำขอที่ {index} จาก {total}",
-    requesting: "จำนวนที่ขอ",
-    payer_chooses_amount: "ผู้จ่ายเลือกจำนวนเงิน",
     actions: {
+      set_amount: {
+        label: "กำหนดจำนวน",
+      },
       copy: {
         label: "@:global.actions.copy.label",
       },

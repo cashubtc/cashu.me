@@ -92,7 +92,7 @@ export default {
 };
 </script>
 <template>
-  <!-- A full-screen camera view in the app's own chrome (user direction, R46): the sheet
+  <!-- A full-screen camera view in the app's own chrome: the sheet
        header (close, centred title), the feed behind a rounded viewfinder, and Paste as the
        one bottom action, instead of a white card with Paste and Close buttons. -->
   <div class="qr-scanner">
@@ -184,7 +184,7 @@ export default {
   position: absolute;
 }
 /* A scan target: four white corner brackets around a clear square, the page dimmed
-   outside it (R48: a plain outline did not read as a target). */
+   outside it (a plain outline did not read as a target). */
 .qr-scanner__frame {
   --corner: 36px;
   --stroke: 4px;
@@ -212,7 +212,7 @@ export default {
   top: 0;
 }
 /* The scrim extends below the header row, so the row itself stays symmetric and the
-   centred close button lines up with the title (R47). */
+   centred close button lines up with the title. */
 .qr-scanner__header::before {
   background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
   content: "";

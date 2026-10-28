@@ -8,8 +8,7 @@
       class="q-mb-lg"
     />
     <div class="review-form">
-      <!-- One container level: the label, stars and text box sit straight on the page (R41:
-           the outlined text box inside a bordered card read as a box in a box). -->
+      <!-- One container level: the label, stars and text box sit straight on the page (the outlined text box inside a bordered card read as a box in a box). -->
       <div>
         <div class="text-subtitle2 text-weight-medium">
           {{ $t("CreateMintReview.inputs.rating.label") }}
@@ -34,7 +33,7 @@
       </div>
 
       <div
-        class="publisher-info row items-center no-wrap q-mt-md text-caption text-grey-6"
+        class="publisher-info row items-center no-wrap q-mt-md text-caption text-app-muted"
       >
         <q-avatar v-if="publisherPicture" size="20px" class="q-mr-xs">
           <q-img
@@ -51,15 +50,11 @@
           publisherName
         }}</span>
         <span class="monospace q-ml-xs ellipsis">{{ shortDisplayNpub }}</span>
-        <q-btn
+        <CopyButton
           v-if="displayNpub"
-          flat
-          round
           class="publisher-copy"
-          :aria-label="$t('global.actions.copy.label')"
-          @click="copyText(displayNpub)"
-          ><CopyIcon :size="20"
-        /></q-btn>
+          :value="displayNpub"
+        />
       </div>
 
       <q-btn
@@ -87,7 +82,7 @@
 
 <script lang="ts">
 import PendingDots from "src/components/ui/PendingDots.vue";
-import { Copy as CopyIcon } from "lucide-vue-next";
+import CopyButton from "src/components/ui/CopyButton.vue";
 import { defineComponent, computed, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useNostrStore } from "src/stores/nostr";
@@ -106,7 +101,7 @@ export default defineComponent({
   components: {
     PendingDots,
     AppRating,
-    CopyIcon,
+    CopyButton,
     SettingsPageShell,
     MintIdentityHeader,
   },
@@ -299,12 +294,6 @@ export default defineComponent({
       publisherPicture,
       mintUrl,
       mintInfo,
-      copyText: (t: string) => {
-        try {
-          navigator.clipboard.writeText(t);
-          notifySuccess(i18n.global.t("global.copy_to_clipboard.success"));
-        } catch {}
-      },
     };
   },
 });

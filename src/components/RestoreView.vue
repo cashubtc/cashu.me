@@ -18,7 +18,11 @@
         :error-message="mnemonicError"
       >
         <template v-slot:append>
-          <q-btn flat dense round @click="pasteMnemonic"
+          <q-btn
+            flat
+            round
+            :aria-label="$t('global.actions.paste.label')"
+            @click="pasteMnemonic"
             ><ClipboardPasteIcon :size="20"
           /></q-btn>
         </template>
@@ -26,38 +30,26 @@
     </SettingsSection>
 
     <!-- Mints to restore -->
-    <div class="settings-section">
-      <div v-if="!onboarding" class="settings-section-header">
-        <div class="settings-section-title">
-          {{ $t("RestoreView.restore_mints.label") }}
-        </div>
-        <div class="settings-section-caption">
-          {{ $t("RestoreView.restore_mints.caption") }}
-        </div>
-      </div>
-
+    <SettingsSection
+      flat
+      :title="onboarding ? '' : $t('RestoreView.restore_mints.label')"
+      :caption="onboarding ? '' : $t('RestoreView.restore_mints.caption')"
+    >
       <!-- Select All/Deselect All Buttons -->
-      <div
-        v-if="mints.length > 0 && !onboarding"
-        class="row items-center q-gutter-sm q-mb-md"
-      >
+      <div v-if="mints.length > 0 && !onboarding" class="row no-wrap q-mb-md">
         <q-btn
-          size="sm"
+          flat
           rounded
-          outline
-          color="primary"
-          class="q-px-md"
+          class="col"
           @click="selectAllMints"
           :disabled="allSelected"
         >
           {{ $t("RestoreView.actions.select_all.label") }}
         </q-btn>
         <q-btn
-          size="sm"
+          flat
           rounded
-          outline
-          color="grey"
-          class="q-px-md"
+          class="col"
           @click="deselectAllMints"
           :disabled="!anySelected"
         >
@@ -68,7 +60,7 @@
       <!-- Mints List with Card Design -->
       <div>
         <div v-for="mint in mints" :key="mint.url" class="q-mb-md">
-          <!-- The installed-mint card (user direction, R56): avatar, name and host on top
+          <!-- The installed-mint card: avatar, name and host on top
                with the selection box in the top corner, holdings and the restore action
                below on the same edges. -->
           <MintCard
@@ -116,7 +108,7 @@
             </template>
             <!-- Restore Progress -->
             <div v-if="restoringMint === mint.url">
-              <div class="text-grey-6 q-mb-xs" style="font-size: 12px">
+              <div class="text-app-muted q-mb-xs" style="font-size: 12px">
                 {{ restoreStatus }}
               </div>
               <q-linear-progress
@@ -158,7 +150,7 @@
           >
         </q-btn>
       </div>
-    </div>
+    </SettingsSection>
 
     <!-- Nostr Mint Restore Component -->
     <NostrMintRestore

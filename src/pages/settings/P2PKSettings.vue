@@ -30,7 +30,7 @@
           </div>
         </q-item-section>
       </q-item>
-      <!-- Shown once a key exists: before that the toggle could do nothing (R16). -->
+      <!-- Shown once a key exists: before that the toggle could do nothing. -->
       <SettingsToggleRow
         v-if="p2pkKeys.length"
         v-model="showP2PkButtonInDrawer"

@@ -32,14 +32,14 @@
             ' · ' +
             formattedDate(transaction.date)
           "
-          caption-class="text-grey-6"
+          caption-class="text-app-muted"
           @details-click="showTransactionDialog(transaction)"
         >
           <template #caption-end>
             <!-- Status, with the check action for pending rows -->
             <div
               v-if="transaction.status === 'pending'"
-              class="row items-center no-wrap text-grey-6 text-caption"
+              class="row items-center no-wrap text-app-muted text-caption"
             >
               <q-btn
                 flat
@@ -584,7 +584,7 @@ export default defineComponent({
 }
 
 /* Filters are toggle chips, not actions: a compact 36px pill, outlined when off and filled
-   with a check when on (R20); the hit area still reaches 44px. */
+   with a check when on; the hit area still reaches 44px. */
 .history-filter-btn {
   position: relative;
   font-size: 13px;

@@ -1,12 +1,12 @@
 <template>
-  <div class="q-pb-md">
-    <!-- Main mint selector button -->
+  <div :class="{ 'q-pb-md': !sheetOnly }">
+    <!-- Main mint selector button (none with sheetOnly: the owner opens the sheet) -->
     <div
       class="row q-mt-xs q-mb-none"
-      v-if="activeMintUrl || !requireActiveMint"
+      v-if="!sheetOnly && (activeMintUrl || !requireActiveMint)"
     >
       <div class="col-12 row">
-        <!-- One mint field in two sizes (user direction, R46), both drawn like the outlined
+        <!-- One mint field in two sizes, both drawn like the outlined
              inputs: compact (with a label: label over the name, the balance at the end) for
              forms, and normal (no label: a 40px avatar, the name, the balance under it) for
              the wallet and the amount sheets. -->
@@ -122,7 +122,7 @@
           <template v-if="showBalances" #caption>
             <span v-if="!mint.errored">
               <template v-for="(unit, i) in heldUnits(mint)" :key="unit">
-                <template v-if="i > 0"> • </template>
+                <template v-if="i > 0"> · </template>
                 <bdi dir="ltr">{{
                   formatCurrency(mint.balances[unit], unit)
                 }}</bdi>
@@ -227,6 +227,16 @@ export default defineComponent({
       type: String,
       default: "",
     },
+    // Only the sheet, opened by the owner through v-model:open (a detail row that changes the
+    // mint, for example). The field isn't drawn.
+    sheetOnly: {
+      type: Boolean,
+      default: false,
+    },
+    open: {
+      type: Boolean,
+      default: false,
+    },
     requireActiveMint: {
       type: Boolean,
       default: true,
@@ -253,7 +263,7 @@ export default defineComponent({
       default: "mint",
     },
   },
-  emits: ["update:modelValue"],
+  emits: ["update:modelValue", "update:open"],
   data: function () {
     return {
       chosenMint: null as MintOption | null,
@@ -264,6 +274,12 @@ export default defineComponent({
     this.initializeChosenMint();
   },
   watch: {
+    open(value: boolean) {
+      this.showMintSheet = value;
+    },
+    showMintSheet(value: boolean) {
+      if (value !== this.open) this.$emit("update:open", value);
+    },
     chosenMint: async function () {
       const selectedUrl = this.chosenMint?.url || "";
       if (this.dryRun || this.modelValue !== null) {
@@ -324,7 +340,7 @@ export default defineComponent({
   methods: {
     // Units this mint holds a balance in; falls back to the first unit for an empty mint.
     heldUnits(mint: { units: string[]; balances: Record<string, number> }) {
-      // sat leads on every row so balances compare down the list (R17).
+      // sat leads on every row so balances compare down the list.
       const units = [...mint.units].sort(
         (a, b) => Number(b === "sat") - Number(a === "sat")
       );

@@ -120,7 +120,7 @@
                     <QrBlock :value="qrPreview.value" />
                   </div>
                   <div
-                    class="q-mt-sm text-center text-grey-7 qr-copy-text app-mono app-mono--wrap cursor-pointer"
+                    class="q-mt-sm text-center text-app-muted qr-copy-text app-mono app-mono--wrap cursor-pointer"
                     :data-testid="
                       qrPreview.kind === 'npubcash'
                         ? 'npub-cash-lightning-address'
@@ -155,12 +155,12 @@
               class="column items-center justify-center q-pa-xl q-my-auto"
             >
               <PendingDots size="48px" />
-              <div class="text-grey-6 q-mt-md">
+              <div class="text-app-muted q-mt-md">
                 {{ $t("CreateInvoiceDialog.checking_address") }}
               </div>
             </div>
             <!-- A plain keyed wrapper: the out-in transition then leaves a DOM element it can
-                 track, so going back to the address or offer mounts its QR (R46). -->
+                 track, so going back to the address or offer mounts its QR. -->
             <div
               v-else-if="showAmountInput"
               key="amount-input"
@@ -184,7 +184,7 @@
                     <transition name="wobble" mode="out-in" appear>
                       <span
                         :key="'warn-text-' + String(invoiceData.amount ?? '')"
-                        class="text-caption text-weight-medium text-grey-6 amount-warning-text"
+                        class="text-caption text-weight-medium text-app-muted amount-warning-text"
                       >
                         {{ onchainAmountError }}
                       </span>
@@ -227,7 +227,7 @@
 
           <!-- Primary action (Add amount / Create). From an amount step opened on an address,
                offer or Lightning address, a back chevron sits before it, as in the onboarding
-               footer (user direction, R46); the header keeps its close button. -->
+               footer; the header keeps its close button. -->
           <div class="row justify-center q-pb-lg q-pt-sm">
             <div
               class="col-12 q-px-md row no-wrap items-center flow-footer"

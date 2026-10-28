@@ -575,6 +575,11 @@ export default {
           description:
             "Removes ecash your active mints report as spent. Use only if your wallet is stuck.",
         },
+        design_system: {
+          title: "Design system",
+          description:
+            "Every component of the app, live, with its source and usage.",
+        },
         debug_console: {
           button: "Debug console",
           description:
@@ -587,10 +592,11 @@ export default {
         },
         keyset_counters: {
           title: "Increment keyset counters",
-          description:
-            'Tap a keyset to increase its counter. Helps with the "outputs have already been signed" error.',
-          counter: "Counter: {count}",
           increase: "Increase counter for {id}",
+          fixes: "Fixes “outputs have already been signed”",
+          keysets: "{n} keyset | {n} keysets",
+          sheet_hint: "Tap + to increase a keyset's counter.",
+          column: "Counter",
         },
         unset_reserved: {
           button: "Unset all reserved tokens",
@@ -1343,6 +1349,7 @@ export default {
     },
   },
   PaymentRequestDialog: {
+    any_amount: "Any amount",
     payment_request: {
       caption: "Payment request",
       description: "Receive payments via Nostr",
@@ -1350,9 +1357,10 @@ export default {
     received_total: "Received total",
     no_payments_yet: "No payments yet",
     request_index: "Request {index} of {total}",
-    requesting: "Requesting",
-    payer_chooses_amount: "Payer chooses the amount",
     actions: {
+      set_amount: {
+        label: "Set amount",
+      },
       copy: {
         label: "@:global.actions.copy.label",
       },

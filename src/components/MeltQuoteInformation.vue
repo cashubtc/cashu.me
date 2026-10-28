@@ -61,17 +61,7 @@
       value-class="detail-value-with-action"
     >
       <a :href="onchainTxUrl" target="_blank">{{ shortTxid(txidValue) }}</a>
-      <q-btn
-        flat
-        dense
-        round
-        size="sm"
-        :aria-label="$t('global.actions.copy.label')"
-        @click="copyTxid"
-      >
-        <CheckIcon v-if="txidCopied" :size="16" />
-        <CopyIcon v-else :size="16" />
-      </q-btn>
+      <CopyButton :value="txidValue" :icon-size="16" />
     </DetailRow>
 
     <ChainStatusRow
@@ -124,11 +114,9 @@ import {
   type MempoolTxMetadata,
 } from "src/js/onchain";
 import {
-  Check as CheckIcon,
   CircleDollarSign as CircleDollarSignIcon,
   Clock as ClockIcon,
   Coins as CoinsIcon,
-  Copy as CopyIcon,
   Fingerprint as FingerprintIcon,
   Hash as HashIcon,
   Info as InfoIcon,
@@ -136,6 +124,7 @@ import {
   Network as NetworkIcon,
   ReceiptText as ReceiptTextIcon,
 } from "lucide-vue-next";
+import CopyButton from "src/components/ui/CopyButton.vue";
 import DetailRow from "src/components/ui/DetailRow.vue";
 import ChainStatusRow from "src/components/ChainStatusRow.vue";
 
@@ -153,7 +142,7 @@ type ExtendedMeltQuote = MeltQuoteBolt11Response & {
 export default defineComponent({
   name: "MeltQuoteInformation",
   mixins: [windowMixin],
-  components: { CheckIcon, CopyIcon, DetailRow, ChainStatusRow },
+  components: { CopyButton, DetailRow, ChainStatusRow },
   setup() {
     return {
       CircleDollarSignIcon,
@@ -171,8 +160,6 @@ export default defineComponent({
     return {
       onchainMetadata: null as MempoolTxMetadata | null,
       loadingOnchainMetadata: false,
-      txidCopied: false,
-      txidCopiedTimeout: null as any,
     };
   },
   props: {
@@ -415,19 +402,6 @@ export default defineComponent({
         this.loadingOnchainMetadata = false;
       }
     },
-    async copyTxid() {
-      if (!this.txidValue) return;
-      try {
-        await copyToClipboard(this.txidValue);
-        this.txidCopied = true;
-        if (this.txidCopiedTimeout) clearTimeout(this.txidCopiedTimeout);
-        this.txidCopiedTimeout = setTimeout(() => {
-          this.txidCopied = false;
-        }, 2000);
-      } catch (e) {
-        console.error("Failed to copy txid", e);
-      }
-    },
     async copyPreimage() {
       const pre = this.preimageValue;
       if (!pre) return;
@@ -486,9 +460,6 @@ export default defineComponent({
   },
   mounted() {
     this.loadOnchainMetadata();
-  },
-  beforeUnmount() {
-    if (this.txidCopiedTimeout) clearTimeout(this.txidCopiedTimeout);
   },
 });
 </script>

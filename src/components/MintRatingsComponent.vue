@@ -10,7 +10,6 @@
         <RatingsSummary
           :skeleton="!hasAnyReviews"
           :average="average"
-          :count="totalReviews"
           :distribution="ratingDistribution"
         />
         <!-- The page's one action, right under the score it adds to. It needs no reviews, so
@@ -554,7 +553,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-/* One surface level like mint details: no grey wrapper behind the cards (R18). */
+/* One surface level like mint details: no grey wrapper behind the cards. */
 body[data-theme] .q-card--dark.mint-ratings-root {
   background: transparent !important;
 }

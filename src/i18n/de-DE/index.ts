@@ -566,6 +566,11 @@ export default {
           description:
             "Entfernt Ecash, das Ihre aktiven Mints als ausgegeben melden. Nur verwenden, wenn Ihre Wallet hängt.",
         },
+        design_system: {
+          title: "Designsystem",
+          description:
+            "Jede Komponente der App, live, mit Quelle und Verwendung.",
+        },
         debug_console: {
           button: "Debug-Konsole",
           description:
@@ -578,10 +583,11 @@ export default {
         },
         keyset_counters: {
           title: "Keyset-Zähler erhöhen",
-          description:
-            "Tippen Sie auf ein Keyset, um seinen Zähler zu erhöhen. Hilft beim Fehler „outputs have already been signed“.",
-          counter: "Zähler: {count}",
           increase: "Zähler für {id} erhöhen",
+          fixes: "Behebt „outputs have already been signed“",
+          keysets: "{n} Keyset | {n} Keysets",
+          sheet_hint: "Tippe auf +, um den Zähler eines Keysets zu erhöhen.",
+          column: "Zähler",
         },
         unset_reserved: {
           button: "Alle reservierten Token freigeben",
@@ -1304,14 +1310,16 @@ export default {
     },
   },
   PaymentRequestDialog: {
+    any_amount: "Beliebiger Betrag",
     payment_request: {
       caption: "Zahlungsanforderung",
       description: "Zahlungen über Nostr empfangen",
     },
     request_index: "Anfrage {index} von {total}",
-    requesting: "Angefordert",
-    payer_chooses_amount: "Zahler wählt den Betrag",
     actions: {
+      set_amount: {
+        label: "Betrag festlegen",
+      },
       copy: {
         label: "@:global.actions.copy.label",
       },

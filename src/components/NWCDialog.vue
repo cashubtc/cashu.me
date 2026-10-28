@@ -18,12 +18,12 @@
             <div class="row justify-center q-pt-md">
               <q-item-label
                 caption
-                class="text-weight-light text-white"
+                class="text-weight-light"
                 style="font-size: 12px"
               >
                 {{ $t("NWCDialog.nwc.description") }}
               </q-item-label>
-              <q-item-label caption class="text-weight-bold text-white q-pt-md">
+              <q-item-label caption class="text-weight-bold q-pt-md">
                 {{ $t("NWCDialog.nwc.warning_text") }}
               </q-item-label>
             </div>

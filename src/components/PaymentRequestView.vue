@@ -1,137 +1,66 @@
-<!-- The body of a payment request (PaymentRequestDialog adds the header and the pager),
-     in three blocks: the amount as the hero, edited in place on the same dashed line; the QR
-     and its request text on one surface; then the request's settings on one shared width —
-     the unit as a segmented control and the mint as the standard mint picker. Received
-     payments follow, and Share and Copy sit in the footer. Everything shown is read back
-     from the encoded request; every change is emitted as `change` and the owner makes a
-     new request. -->
+<!-- The body of a payment request (PaymentRequestDialog adds the header and the pager), laid
+     out like the Lightning and on-chain receive screens: the QR with its request text, the
+     amount when there is one, then the detail table. The table's Amount, Unit and Mint rows
+     are buttons: each opens its picker (the amount keypad or a typed field, the units, the
+     mint sheet). Received payments follow, and Share and Copy sit in the footer. Everything
+     shown is read back from the encoded request; every change is emitted as `change` and the
+     owner makes a new request. -->
 <template>
   <div class="pr-view column">
     <div class="content-area">
       <div class="pr-body column">
-        <div class="pr-amount column items-center">
-          <!-- The line above the figure says what it means, or what's wrong with an edit. -->
-          <div
-            class="pr-overline"
-            :class="{ 'pr-overline--error': amountError }"
-            :role="amountError ? 'alert' : undefined"
-          >
-            {{
-              amountError
-                ? amountErrorText
-                : hasAmount || isEditingAmount
-                ? $t("PaymentRequestDialog.requesting")
-                : $t("PaymentRequestDialog.payer_chooses_amount")
-            }}
-          </div>
-          <div class="pr-amount__line row items-center justify-center no-wrap">
-            <!-- Editing keeps the figure where it is: same type, same dashed line. -->
-            <label
-              v-if="isEditingAmount"
-              class="pr-hero-amount pr-hero-amount--editing"
-              :class="{ 'pr-hero-amount--error': amountError }"
-            >
-              <span class="pr-hero-amount__symbol" aria-hidden="true">{{
-                unitSymbol
-              }}</span>
-              <input
-                ref="amountInput"
-                v-model="amountInputValue"
-                class="pr-hero-amount__input"
-                data-testid="pr-amount-input"
-                inputmode="decimal"
-                autocomplete="off"
-                placeholder="0"
-                :aria-label="`${$t(
-                  'PaymentRequestDialog.inputs.amount.placeholder'
-                )} (${unitLabel(fields.unit)})`"
-                :aria-invalid="amountError || undefined"
-                :style="{ width: `${inputWidth}ch` }"
-                @input="amountError = false"
-                @blur="commitAmount"
-                @keydown.enter.prevent="commitAmount"
-                @keydown.esc.prevent="cancelAmount"
-              />
-            </label>
-            <button
-              v-else
-              type="button"
-              class="pr-hero-amount"
-              :class="{ 'pr-hero-amount--empty': !hasAmount }"
-              data-testid="pr-amount"
-              @click="startEditingAmount"
-            >
-              {{
-                hasAmount
-                  ? amountLabel
-                  : $t("PaymentRequestDialog.actions.add_amount.label")
-              }}
-            </button>
-            <IconButton
-              v-if="hasAmount && !isEditingAmount"
-              :icon="XIcon"
-              class="pr-amount-clear"
-              data-testid="pr-amount-clear"
-              :label="$t('PaymentRequestDialog.actions.remove_amount.label')"
-              @click="emitChange({ amount: undefined })"
-            />
-          </div>
-        </div>
-
-        <!-- The request itself: the code and its text, as one object. -->
-        <div class="pr-card">
+        <div class="qr-container">
           <QrBlock :value="request" />
-          <div class="pr-code row items-center no-wrap">
-            <span class="app-mono pr-code__text">{{ shortRequest }}</span>
-            <CopyButton
-              :value="request"
-              :label="$t('PaymentRequestDialog.actions.copy_request.label')"
-              class="touch-target-44 pr-code__copy"
-            />
-          </div>
+        </div>
+        <!-- The request text, tap to copy, as under the on-chain address. -->
+        <button
+          type="button"
+          class="pr-code qr-copy-text app-mono"
+          :aria-label="$t('PaymentRequestDialog.actions.copy_request.label')"
+          @click="copy"
+        >
+          <CopyIcon :size="16" class="q-mr-xs qr-copy-text__icon" />{{
+            shortRequest
+          }}
+        </button>
+
+        <div v-if="hasAmount" class="amount-headline text-center">
+          {{ amountLabel }}
         </div>
 
-        <!-- The request's settings: what it is paid in, and into which mint. -->
-        <div class="pr-settings column">
-          <SegmentedControl
-            v-if="unitOptions.length > 1 && unitOptions.length <= 4"
-            block
-            data-testid="pr-unit"
-            :label="$t('MintDetailsDialog.details.currency.label')"
-            :model-value="fields.unit"
-            :options="
-              unitOptions.map((unit) => ({
-                label: unitLabel(unit),
-                value: unit,
-              }))
+        <div class="pr-table">
+          <DetailRow
+            action
+            data-testid="pr-amount"
+            :icon="CoinsIcon"
+            :label="$t('QuoteInformation.amount')"
+            :value="
+              hasAmount ? amountLabel : $t('PaymentRequestDialog.any_amount')
             "
-            @update:model-value="chooseUnit"
-          />
-          <SheetSelect
-            v-else-if="unitOptions.length > 4"
-            data-testid="pr-unit"
-            :label="$t('MintDetailsDialog.details.currency.label')"
-            :model-value="fields.unit"
-            :options="
-              unitOptions.map((unit) => ({
-                label: unitLabel(unit),
-                value: unit,
-              }))
+            :placeholder="!hasAmount"
+            :action-label="
+              hasAmount
+                ? `${$t('QuoteInformation.amount')}: ${amountLabel}`
+                : $t('PaymentRequestDialog.actions.add_amount.label')
             "
-            @update:model-value="chooseUnit"
+            @click="openAmount"
           />
-          <ChooseMint
-            test-id="pr-mint"
+          <DetailRow
+            :action="unitOptions.length > 1"
+            data-testid="pr-unit"
+            :icon="CircleDollarSignIcon"
+            :label="$t('QuoteInformation.unit')"
+            :value="unitLabel(fields.unit)"
+            @click="showUnitSheet = true"
+          />
+          <DetailRow
+            action
+            data-testid="pr-mint"
+            :icon="LandmarkIcon"
             :label="$t('QuoteInformation.mint')"
-            :any-label="
-              $t('PaymentRequestDialog.actions.use_active_mint.label')
-            "
-            :model-value="requestMint || ''"
-            :show-balances="false"
-            :require-active-mint="false"
-            dry-run
-            class="pr-mint"
-            @update:model-value="chooseMint"
+            :value="mintLabel"
+            :placeholder="!requestMint"
+            @click="showMintSheet = true"
           />
         </div>
 
@@ -178,19 +107,109 @@
         </q-btn>
       </div>
     </div>
+
+    <!-- Amount: the app's keypad where the wallet uses it (and the request is in the wallet's
+         unit), otherwise a typed field, which brings up the device's number pad. -->
+    <BottomSheet
+      v-model="showAmountSheet"
+      :title="$t('QuoteInformation.amount')"
+    >
+      <template v-if="useKeypad">
+        <AmountInputComponent
+          v-model="keypadValue"
+          :enabled="showAmountSheet"
+          :show-fiat-conversion="false"
+          @enter="commitAmount"
+        />
+        <AmountKeypadPanel v-model="keypadValue" @done="commitAmount" />
+      </template>
+      <q-input
+        v-else
+        ref="amountInput"
+        v-model="amountInputValue"
+        outlined
+        autofocus
+        inputmode="decimal"
+        autocomplete="off"
+        data-testid="pr-amount-input"
+        :label="`${$t(
+          'PaymentRequestDialog.inputs.amount.placeholder'
+        )} (${unitLabel(fields.unit)})`"
+        :error="amountError"
+        :error-message="amountErrorText"
+        @update:model-value="amountError = false"
+        @keydown.enter.prevent="commitAmount"
+      />
+      <template #actions>
+        <div class="column full-width" style="gap: 8px">
+          <q-btn
+            unelevated
+            rounded
+            color="primary"
+            class="full-width"
+            data-testid="pr-amount-set"
+            @click="commitAmount"
+          >
+            {{ $t("PaymentRequestDialog.actions.set_amount.label") }}
+          </q-btn>
+          <q-btn
+            v-if="hasAmount"
+            flat
+            rounded
+            class="full-width"
+            data-testid="pr-amount-clear"
+            @click="clearAmount"
+          >
+            {{ $t("PaymentRequestDialog.actions.remove_amount.label") }}
+          </q-btn>
+        </div>
+      </template>
+    </BottomSheet>
+
+    <BottomSheet
+      v-model="showUnitSheet"
+      :title="$t('MintDetailsDialog.details.currency.label')"
+    >
+      <div role="listbox">
+        <SheetOption
+          v-for="unit in unitOptions"
+          :key="unit"
+          :label="unitLabel(unit)"
+          :selected="fields.unit === unit"
+          @select="chooseUnit(unit)"
+        />
+      </div>
+    </BottomSheet>
+
+    <!-- The standard mint picker's sheet, opened from the Mint row. -->
+    <ChooseMint
+      v-model:open="showMintSheet"
+      sheet-only
+      :label="$t('QuoteInformation.mint')"
+      :any-label="$t('PaymentRequestDialog.actions.use_active_mint.label')"
+      :model-value="requestMint || ''"
+      :show-balances="false"
+      :require-active-mint="false"
+      dry-run
+      @update:model-value="chooseMint"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import {
+  CircleDollarSign as CircleDollarSignIcon,
+  Coins as CoinsIcon,
   Copy as CopyIcon,
+  Landmark as LandmarkIcon,
   Share as ShareIcon,
-  X as XIcon,
 } from "lucide-vue-next";
 import { defineComponent, type PropType } from "vue";
 import { mapState } from "pinia";
 import { useMintsStore } from "src/stores/mints";
 import { useUiStore } from "src/stores/ui";
+import { useSettingsStore } from "src/stores/settings";
+import { getShortUrl } from "src/js/wallet-helpers";
 import { shortenString } from "src/js/string-utils";
 import {
   requestFields,
@@ -198,12 +217,13 @@ import {
 } from "src/js/payment-request-fields";
 import QrBlock from "src/components/QrBlock.vue";
 import ChooseMint from "src/components/ChooseMint.vue";
-import SheetSelect from "src/components/SheetSelect.vue";
+import BottomSheet from "src/components/BottomSheet.vue";
+import SheetOption from "src/components/SheetOption.vue";
+import AmountInputComponent from "src/components/AmountInputComponent.vue";
+import AmountKeypadPanel from "src/components/AmountKeypadPanel.vue";
 import PaymentRequestPayments from "src/components/PaymentRequestPayments.vue";
 import AppBadge from "src/components/ui/AppBadge.vue";
-import CopyButton from "src/components/ui/CopyButton.vue";
-import IconButton from "src/components/ui/IconButton.vue";
-import SegmentedControl from "src/components/ui/SegmentedControl.vue";
+import DetailRow from "src/components/ui/DetailRow.vue";
 
 declare const windowMixin: any;
 
@@ -215,16 +235,17 @@ export default defineComponent({
   name: "PaymentRequestView",
   mixins: [windowMixin],
   components: {
+    AmountInputComponent,
+    AmountKeypadPanel,
     AppBadge,
+    BottomSheet,
     ChooseMint,
-    CopyButton,
     CopyIcon,
-    IconButton,
+    DetailRow,
     PaymentRequestPayments,
     QrBlock,
-    SegmentedControl,
     ShareIcon,
-    SheetSelect,
+    SheetOption,
   },
   props: {
     /** The encoded request (creqA…). */
@@ -234,18 +255,23 @@ export default defineComponent({
   },
   emits: ["change"],
   setup() {
-    return { XIcon };
+    return { CircleDollarSignIcon, CoinsIcon, LandmarkIcon };
   },
   data() {
     return {
-      isEditingAmount: false,
+      showAmountSheet: false,
+      showUnitSheet: false,
+      showMintSheet: false,
       amountInputValue: "",
+      // The keypad's value, in the unit's display units (₿ sats, dollars).
+      keypadValue: null as number | null,
       amountError: false,
     };
   },
   computed: {
     ...mapState(useMintsStore, ["activeUnit", "mints"]),
     ...mapState(useUiStore, ["webShareSupported"]),
+    ...mapState(useSettingsStore, ["useNumericKeyboard"]),
     fields(): RequestFields {
       return requestFields(this.request, this.activeUnit);
     },
@@ -254,16 +280,6 @@ export default defineComponent({
     },
     hasAmount(): boolean {
       return this.fields.amount !== undefined;
-    },
-    // The currency mark beside the figure while it is being edited.
-    unitSymbol(): string {
-      const unit = this.fields.unit.toLowerCase();
-      return { sat: "₿", usd: "$", eur: "€" }[unit] ?? `${unit.toUpperCase()} `;
-    },
-    // The input grows with what is typed, so the figure stays centred on its line.
-    inputWidth(): number {
-      // Tabular digits at this tracking are a little narrower than 1ch.
-      return Math.max(1, this.amountInputValue.length) * 0.92 + 0.15;
     },
     amountErrorText(): string {
       // Base units by name: "sat" (the hero shows ₿, but amounts are whole sats).
@@ -279,6 +295,23 @@ export default defineComponent({
     amountLabel(): string {
       if (this.fields.amount === undefined) return "";
       return this.formatCurrency(this.fields.amount, this.fields.unit, true);
+    },
+    // The app keypad drives the wallet's active unit, so it only edits a request in that unit.
+    useKeypad(): boolean {
+      return (
+        Boolean(this.useNumericKeyboard) && this.fields.unit === this.activeUnit
+      );
+    },
+    mintLabel(): string {
+      const mints = this.fields.mints;
+      if (!mints) {
+        return this.$t(
+          "PaymentRequestDialog.actions.use_active_mint.label"
+        ) as string;
+      }
+      const known = this.mints.find((m: any) => m.url === mints[0]);
+      const name = known?.nickname || getShortUrl(mints[0]);
+      return mints.length > 1 ? `${name} +${mints.length - 1}` : name;
     },
     shortRequest(): string {
       return shortenString(this.request, 14, 8) || this.request;
@@ -306,7 +339,6 @@ export default defineComponent({
   },
   watch: {
     request() {
-      this.isEditingAmount = false;
       this.amountError = false;
     },
   },
@@ -327,6 +359,7 @@ export default defineComponent({
       this.$emit("change", { ...this.fields, ...changes });
     },
     chooseMint(url: string) {
+      this.showMintSheet = false;
       const target = url || undefined;
       if (target === this.requestMint) return;
       const mint = this.mints.find((m: any) => m.url === target);
@@ -341,34 +374,32 @@ export default defineComponent({
       }
     },
     chooseUnit(unit: string) {
+      this.showUnitSheet = false;
       if (unit === this.fields.unit) return;
       this.emitChange({ unit, amount: undefined });
     },
-    startEditingAmount() {
+    openAmount() {
       const { amount, unit } = this.fields;
-      this.amountInputValue =
-        amount === undefined ? "" : String(amount / unitMultiplier(unit));
+      const display =
+        amount === undefined ? null : amount / unitMultiplier(unit);
+      this.amountInputValue = display === null ? "" : String(display);
+      this.keypadValue = display;
       this.amountError = false;
-      this.isEditingAmount = true;
-      this.$nextTick(() => {
-        const input = this.$refs.amountInput as HTMLInputElement | undefined;
-        input?.focus();
-        input?.select();
-      });
+      this.showAmountSheet = true;
     },
-    cancelAmount() {
-      this.amountError = false;
-      this.isEditingAmount = false;
+    clearAmount() {
+      this.showAmountSheet = false;
+      if (this.fields.amount !== undefined) {
+        this.emitChange({ amount: undefined });
+      }
     },
     commitAmount() {
-      // Enter and the blur that follows both commit: only the first one counts.
-      if (!this.isEditingAmount) return;
-      const text = this.amountInputValue.trim().replace(",", ".");
-      if (text === "") {
-        this.isEditingAmount = false;
-        if (this.fields.amount !== undefined) {
-          this.emitChange({ amount: undefined });
-        }
+      if (!this.showAmountSheet) return;
+      const text = this.useKeypad
+        ? String(this.keypadValue ?? "")
+        : this.amountInputValue.trim().replace(",", ".");
+      if (text === "" || (this.useKeypad && !this.keypadValue)) {
+        this.clearAmount();
         return;
       }
       const value = Number(text) * unitMultiplier(this.fields.unit);
@@ -382,7 +413,7 @@ export default defineComponent({
         this.amountError = true;
         return;
       }
-      this.isEditingAmount = false;
+      this.showAmountSheet = false;
       if (baseUnits !== this.fields.amount) {
         this.emitChange({ amount: baseUnits });
       }
@@ -407,120 +438,36 @@ export default defineComponent({
   flex: 1;
   min-height: 0;
 }
-/* Three blocks on the app column's 16px gutters, 20px apart. */
 .pr-body {
-  gap: 20px;
+  gap: 16px;
   margin: 0 auto;
   max-width: var(--app-column);
-  padding: 4px 16px 16px;
+  padding: 0 16px 16px;
   width: 100%;
 }
-.pr-amount {
-  gap: 6px;
-  width: 100%;
-}
-.pr-overline {
-  color: var(--app-text-muted);
-  font-size: 14px;
-  line-height: 20px;
-  min-height: 20px;
-  text-align: center;
-}
-.pr-overline--error {
-  color: var(--app-danger);
-}
-/* The clear button hangs off the figure's end, so the figure itself stays centred. */
-.pr-amount__line {
-  min-height: 52px;
-}
-/* The hero figure reads as editable text: a dashed underline, no button chrome. Shown,
-   edited and empty, it keeps the same type and the same line, so tapping it never jumps. */
-.pr-hero-amount {
-  align-items: baseline;
-  background: none;
-  border: 0;
-  border-block-end: 2px dashed var(--app-border-strong);
-  color: var(--app-text);
-  cursor: text;
-  display: inline-flex;
-  font: inherit;
-  font-size: 40px;
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 48px;
-  padding: 0 2px;
-  white-space: nowrap;
-}
-.pr-hero-amount--empty {
-  color: var(--app-text-muted);
-  font-size: 28px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-.pr-hero-amount--editing {
-  border-block-end-color: var(--q-primary);
-  border-block-end-style: solid;
-}
-.pr-hero-amount--error {
-  border-block-end-color: var(--app-danger);
-}
-.pr-hero-amount__input {
-  background: none;
-  border: 0;
-  caret-color: var(--q-primary);
-  color: inherit;
-  font: inherit;
-  letter-spacing: inherit;
-  line-height: inherit;
-  min-width: 1.4ch;
-  outline: none;
-  padding: 0;
-  text-align: start;
-}
-.pr-hero-amount__input::placeholder {
-  color: var(--app-text-subtle);
-}
-.pr-amount-clear {
-  color: var(--app-text-muted) !important;
-  margin-inline-end: -44px;
-}
-/* The QR and its request text as one surface; the QR gives up some height on short
-   phones so the settings under it stay above the footer. */
-.pr-card {
-  --app-qr-size: clamp(184px, min(64vw, 30vh), 280px);
-  align-items: center;
-  background: var(--app-group-fill);
-  border: 1px solid var(--app-group-edge);
-  border-radius: var(--app-radius-xl);
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 16px 16px 4px;
-  width: 100%;
+/* The QR gives up some height on short phones so the table under it stays in view. */
+.pr-body {
+  --app-qr-size: clamp(200px, min(70vw, 34vh), 300px);
 }
 .pr-code {
-  gap: 4px;
-  justify-content: center;
-  max-width: 100%;
-  min-width: 0;
-}
-.pr-code__text {
+  align-self: center;
+  background: none;
+  border: 0;
   color: var(--app-text-muted);
+  cursor: pointer;
   font-size: 13px;
-  min-width: 0;
+  margin-top: -8px;
+  max-width: 100%;
   overflow: hidden;
+  padding: 4px 8px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-/* Unit and mint share one width, so their edges line up with the card above. */
-.pr-settings {
-  gap: 12px;
+.pr-table {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   width: 100%;
-}
-/* ChooseMint carries its own bottom padding for forms; here the stack's gap spaces it. */
-.pr-mint {
-  padding-bottom: 0 !important;
 }
 .pr-payments {
   width: 100%;
@@ -534,10 +481,5 @@ export default defineComponent({
 }
 .pr-foot__btn {
   flex: 1 1 0;
-}
-@media (prefers-reduced-motion: no-preference) {
-  .pr-hero-amount {
-    transition: border-color 0.15s ease;
-  }
 }
 </style>

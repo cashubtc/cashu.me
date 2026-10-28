@@ -42,10 +42,18 @@ body {
   --app-text: #fff;
   --app-text-muted: rgba(255, 255, 255, 0.72);
   --app-text-subtle: rgba(255, 255, 255, 0.6);
-  --app-tint: rgba(255, 255, 255, 0.06);
-  --app-tint-strong: rgba(255, 255, 255, 0.1);
-  --app-border: rgba(255, 255, 255, 0.14);
-  --app-border-strong: rgba(255, 255, 255, 0.28);
+  --app-tint: rgba(255, 255, 255, 0.08);
+  --app-tint-strong: rgba(255, 255, 255, 0.14);
+  --app-border: rgba(255, 255, 255, 0.16);
+  --app-border-strong: rgba(255, 255, 255, 0.3);
+  // The surface tokens are resolved where they're declared (body), so a light-mode app
+  // would give onboarding's dark page light fields and cards; set the dark ones here.
+  --app-card-fill: rgba(255, 255, 255, 0.1);
+  --app-card-fill-active: rgba(255, 255, 255, 0.15);
+  --app-field-edge: rgba(255, 255, 255, 0.38);
+  --app-field-fill: rgba(255, 255, 255, 0.07);
+  --app-group-fill: rgba(255, 255, 255, 0.1);
+  --app-outline-edge: rgba(255, 255, 255, 0.38);
 }
 
 // Icon in a round slot: option rows (md), sheet rows (sm), empty states (lg), onboarding (xl).
@@ -137,27 +145,20 @@ body.body--dark {
 body.body--light {
   --app-success: #15803d;
 }
-.app-tone--neutral {
-  --tone: var(--app-text-muted);
-}
-.app-tone--info,
 .app-callout--info {
   --tone: var(--app-info);
 }
-.app-tone--success,
 .app-callout--success {
   --tone: var(--app-success);
 }
-.app-tone--warning,
 .app-callout--warning {
   --tone: var(--app-warning);
 }
-.app-tone--danger,
 .app-callout--danger {
   --tone: var(--app-danger);
 }
 
-// Callout (AppCallout.vue; council exploration XV1 winner "Soft tint", 8.75/10): the tone tints
+// Callout (AppCallout.vue): the tone tints
 // the whole rounded surface, with no edge, so warning and error read stronger than info without
 // any extra chrome; the neutral tip sits on the group fill. Text stays ink; the icon carries the
 // tone. Error and warning fills are a step stronger so they outrank info.
@@ -241,11 +242,6 @@ html[dir="rtl"] .app-callout__close {
   min-height: 24px;
   padding: 2px 9px;
   white-space: nowrap;
-}
-.app-badge--solid {
-  background: var(--app-tint-strong);
-  border-color: transparent;
-  color: var(--app-text);
 }
 // Emphasis (a chosen share, a count): the theme colour as a tint, never a solid block.
 .app-badge--primary {
@@ -451,11 +447,6 @@ body .q-skeleton--type-text {
 .amount-area {
   flex: 1;
   min-height: 0;
-  position: relative;
-}
-.amount-container {
-  display: inline-block;
-  max-width: 90vw;
   position: relative;
 }
 .keypad-wrapper {

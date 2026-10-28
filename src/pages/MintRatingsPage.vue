@@ -1,5 +1,5 @@
 <template>
-  <!-- No page title: the mint header below names the page (user direction, R46). -->
+  <!-- No page title: the mint header below names the page. -->
   <SettingsPageShell>
     <MintRatingsComponent
       v-if="mintUrl"

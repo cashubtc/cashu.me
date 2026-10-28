@@ -398,7 +398,8 @@ export const DS_ITEMS: DsItem[] = [
     tier: "composite",
     source: "src/components/ui/DetailRow.vue",
     usage: { tag: "DetailRow" },
-    example: `<DetailRow :icon="ClockIcon" label="Paid at" :value="date" />`,
+    example: `<DetailRow :icon="ClockIcon" label="Paid at" :value="date" />
+<DetailRow :icon="CoinsIcon" label="Amount" value="Any amount" placeholder action @click="editAmount" />`,
   },
   {
     id: "activity-row",
@@ -551,7 +552,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/components/PaymentRequestView.vue · PaymentRequestDialog.vue",
     usage: { tag: "PaymentRequestView" },
     example: `<PaymentRequestView :request="encoded" :payments="payments" @change="makeNewRequest" />`,
-    note: "The hero amount, the QR and its text, then the request's settings: the unit as a segmented control and the mint as the standard mint picker. The dialog adds the header and the pager.",
+    note: "The same QR and detail table as the Lightning and on-chain receive screens: Amount, Unit and Mint are tappable rows (DetailRow action) that open the amount entry, the unit sheet and the mint picker. The dialog adds the header and the pager.",
   },
   {
     id: "mint-review-summary",
@@ -569,7 +570,7 @@ export const DS_ITEMS: DsItem[] = [
     tier: "composite",
     source: "src/components/RatingsSummary.vue",
     usage: { tag: "RatingsSummary" },
-    example: `<RatingsSummary :average="4.5" :count="12" :distribution="{ 5: 8, 4: 3, 3: 1 }" />`,
+    example: `<RatingsSummary :average="4.5" :distribution="{ 5: 8, 4: 3, 3: 1 }" />`,
   },
   {
     id: "review-item",

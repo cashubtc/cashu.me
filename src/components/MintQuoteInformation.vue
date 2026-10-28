@@ -48,7 +48,7 @@
     />
 
     <!-- The deposit address always shows on an on-chain invoice, paid or pending, linked to
-         an explorer when the network has one (user report, R46: it came and went). -->
+         an explorer when the network has one (it came and went). -->
     <DetailRow
       v-if="isOnchain && invoice?.request"
       class="q-mb-md"

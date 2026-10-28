@@ -32,7 +32,7 @@
         <q-btn
           flat
           rounded
-          class="pwa-prompt__later"
+          class="full-width pwa-prompt__later"
           :label="$t('PwaPrompt.notNow')"
           @click="closePrompt"
         />

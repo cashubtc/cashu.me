@@ -553,6 +553,10 @@ export default {
           description:
             "يزيل ecash الذي تُبلغ المِنْتات النشطة أنه مُنفَق. استخدمه فقط إذا علقت محفظتك.",
         },
+        design_system: {
+          title: "نظام التصميم",
+          description: "كل مكوّنات التطبيق، مباشرةً، مع مصدرها واستخدامها.",
+        },
         debug_console: {
           button: "وحدة تحكم التصحيح",
           description:
@@ -565,10 +569,11 @@ export default {
         },
         keyset_counters: {
           title: "زيادة عدادات مجموعة المفاتيح",
-          description:
-            'اضغط على مجموعة مفاتيح لزيادة عدّادها. يساعد في حل خطأ "outputs have already been signed".',
-          counter: "العداد: {count}",
           increase: "زيادة العداد لـ {id}",
+          fixes: "يصلح خطأ “outputs have already been signed”",
+          keysets: "{n} مجموعة مفاتيح | {n} مجموعات مفاتيح",
+          sheet_hint: "اضغط + لزيادة عدّاد مجموعة المفاتيح.",
+          column: "العدّاد",
         },
         unset_reserved: {
           button: "إلغاء تعيين جميع الرموز المحجوزة",
@@ -1275,14 +1280,16 @@ export default {
     },
   },
   PaymentRequestDialog: {
+    any_amount: "أي مبلغ",
     payment_request: {
       caption: "طلب دفع",
       description: "استلام المدفوعات عبر Nostr",
     },
     request_index: "الطلب {index} من {total}",
-    requesting: "المبلغ المطلوب",
-    payer_chooses_amount: "الدافع يختار المبلغ",
     actions: {
+      set_amount: {
+        label: "تحديد المبلغ",
+      },
       copy: {
         label: "@:global.actions.copy.label",
       },

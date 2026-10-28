@@ -20,13 +20,6 @@
       <!-- Display: surface style, mode and theme for everything below. -->
       <div class="ui-kit-display" data-testid="ui-kit-switcher">
         <SheetSelect
-          :model-value="variant"
-          :options="variants.map((v) => ({ label: v.label, value: v.id }))"
-          label="Surface style"
-          class="ui-kit-display__field"
-          @update:model-value="pickVariant"
-        />
-        <SheetSelect
           :model-value="theme"
           :options="themeOptions"
           label="Theme"
@@ -412,7 +405,7 @@
       </DsEntry>
       <h2 id="ds-group-navigation" class="ds-section">Navigation</h2>
       <DsEntry id="tabs">
-        <q-tabs v-model="tab" no-caps active-color="primary">
+        <q-tabs narrow-indicator v-model="tab" no-caps active-color="primary">
           <q-tab name="history" label="History" />
           <q-tab name="mints" label="Mints" />
         </q-tabs>
@@ -604,6 +597,23 @@
           label="Explorer"
           value="mempool.space"
           href="https://mempool.space"
+        />
+        <!-- Tappable rows (the payment request's settings): the value runs to a chevron. -->
+        <DetailRow
+          class="q-mt-md"
+          :icon="CoinsIcon"
+          label="Amount"
+          value="Any amount"
+          placeholder
+          action
+          @click="toast('info')"
+        />
+        <DetailRow
+          :icon="LandmarkIcon"
+          label="Mint"
+          value="mint.example.com"
+          action
+          @click="toast('info')"
         />
       </DsEntry>
       <DsEntry id="activity-row">
@@ -891,11 +901,7 @@
         </div>
       </DsEntry>
       <DsEntry id="ratings-summary">
-        <RatingsSummary
-          :average="4.5"
-          :count="12"
-          :distribution="{ 5: 8, 4: 3, 3: 1 }"
-        />
+        <RatingsSummary :average="4.5" :distribution="{ 5: 8, 4: 3, 3: 1 }" />
         <RatingsSummary skeleton class="q-mt-lg" />
       </DsEntry>
       <DsEntry id="review-item">
@@ -953,28 +959,6 @@
           </WelcomeSlideScaffold>
         </div>
       </DsEntry>
-
-      <!-- Patterns still implemented twice (src/js/ui-audit.ts). -->
-      <h2 id="ds-group-duplicates" class="ds-section">Duplicates</h2>
-      <p class="ui-kit-body text-app-muted">
-        Patterns still implemented more than once (src/js/ui-audit.ts).
-        <template v-if="!duplicates.length">
-          None: every entry above has one implementation.
-          test/vitest/__tests__/standardElements.test.ts fails if a raw q-badge,
-          q-chip or q-banner, or a component restyling a standard element, comes
-          back.
-        </template>
-      </p>
-      <div v-for="d in duplicates" :key="d.pattern" class="ui-kit-dup">
-        <div class="ui-kit-dup__head">
-          <span class="ui-kit-item-title">{{ d.pattern }}</span>
-          <span class="ui-kit-dup__count">{{ d.places.length }}×</span>
-        </div>
-        <ul class="ui-kit-dup__places">
-          <li v-for="p in d.places" :key="p">{{ p }}</li>
-        </ul>
-        <div class="ui-kit-dup__differs">{{ d.differs }}</div>
-      </div>
     </div>
   </div>
 </template>
@@ -1034,13 +1018,6 @@ import DsEntry from "src/components/ds/DsEntry.vue";
 import DsRail from "src/components/ds/DsRail.vue";
 import type { DsBoard } from "src/components/ds/board";
 import { DS_GROUPS, DS_ITEMS } from "src/design-system/registry";
-import { UI_DUPLICATES } from "src/js/ui-audit";
-import {
-  UI_VARIANTS,
-  getUiVariant,
-  setUiVariant,
-  type UiVariantId,
-} from "src/js/ui-variant";
 import {
   notify,
   notifyError,
@@ -1298,8 +1275,6 @@ export default defineComponent({
         confirmationThreshold: 3,
         url: "",
       },
-      variants: UI_VARIANTS,
-      variant: getUiVariant() as UiVariantId,
       modes: [
         { label: "Dark", dark: true },
         { label: "Light", dark: false },
@@ -1324,7 +1299,6 @@ export default defineComponent({
         "--app-warning",
         "--app-danger",
       ],
-      duplicates: UI_DUPLICATES,
       sortOptions,
       sortSheetOptions: sortOptions.map((o) => ({ label: o, value: o })),
       sort: "Newest",
@@ -1538,10 +1512,6 @@ export default defineComponent({
       const id = decodeURIComponent(location.hash.replace(/^#ds-/, ""));
       if (id && DS_ITEMS.some((i) => i.id === id)) this.go(id);
     },
-    pickVariant(id: UiVariantId) {
-      setUiVariant(id);
-      this.variant = id;
-    },
     pickMode(dark: boolean) {
       if (this.$q.dark.isActive !== dark) this.toggleDarkMode();
     },
@@ -1733,33 +1703,9 @@ export default defineComponent({
   position: static;
   margin: 0;
 }
-.ui-kit-dup {
-  border-top: 1px solid var(--app-border);
-  padding: 14px 0;
-}
-.ui-kit-dup__head {
-  align-items: baseline;
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-}
 .ui-kit-item-title {
   font-size: 15px;
   font-weight: 600;
-}
-.ui-kit-dup__count {
-  color: var(--q-negative);
-  font-size: 13px;
-  font-weight: 700;
-}
-.ui-kit-dup__places {
-  margin: 6px 0;
-  padding-inline-start: 18px;
-  font-size: 12px;
-  color: var(--app-text-muted);
-}
-.ui-kit-dup__differs {
-  font-size: 13px;
 }
 .ds-icons {
   width: 100%;

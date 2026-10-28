@@ -10,8 +10,7 @@ import {
   X,
 } from "lucide-vue-next";
 
-// One toast for the whole app (user direction, R46; at the bottom since R50 so it never
-// covers the balance): every kind appears in one place, as a
+// One toast for the whole app, at the bottom so it never covers the balance: every kind appears in one place, as a
 // raised card with a status icon (styled in app.scss), and closes on its own or with ✕. The
 // icons are the callout's: the same glyph for the same tone.
 // Positions are no longer chosen per call: copy confirmations used to appear at the bottom.
@@ -36,7 +35,7 @@ function isolateAmounts(text: string): string {
 }
 
 // At most two toasts at once: a newer one dismisses the oldest, so a burst of messages never
-// covers the page (R48).
+// covers the page.
 const MAX_VISIBLE = 2;
 const visible: Array<() => void> = [];
 

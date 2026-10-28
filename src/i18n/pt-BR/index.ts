@@ -579,6 +579,10 @@ export default {
           description:
             "Remove o ecash que seus mints ativos informam como gasto. Use apenas se sua carteira travar.",
         },
+        design_system: {
+          title: "Sistema de design",
+          description: "Cada componente do app, ao vivo, com a origem e o uso.",
+        },
         debug_console: {
           button: "Console de depuração",
           description:
@@ -591,10 +595,11 @@ export default {
         },
         keyset_counters: {
           title: "Incrementar contadores de keyset",
-          description:
-            'Toque em um keyset para aumentar o contador dele. Ajuda com o erro "outputs have already been signed".',
-          counter: "Contador: {count}",
           increase: "Aumentar o contador de {id}",
+          fixes: "Corrige “outputs have already been signed”",
+          keysets: "{n} keyset | {n} keysets",
+          sheet_hint: "Toque em + para aumentar o contador de um keyset.",
+          column: "Contador",
         },
         unset_reserved: {
           button: "Desmarcar todos os tokens reservados",
@@ -1351,16 +1356,18 @@ export default {
     },
   },
   PaymentRequestDialog: {
+    any_amount: "Qualquer valor",
     payment_request: {
       caption: "Pedido de pagamento",
       description: "Receba pagamentos via Nostr",
     },
     request_index: "Solicitação {index} de {total}",
-    requesting: "Solicitando",
-    payer_chooses_amount: "O pagador escolhe o valor",
     received_total: "Total recebido",
     no_payments_yet: "Nenhum pagamento ainda",
     actions: {
+      set_amount: {
+        label: "Definir valor",
+      },
       copy: {
         label: "@:global.actions.copy.label",
       },

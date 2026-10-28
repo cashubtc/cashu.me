@@ -21,7 +21,7 @@
       />
     </SettingsSection>
 
-    <!-- mode: dark or light, chosen like a theme (user direction, R44: light mode had no
+    <!-- mode: dark or light, chosen like a theme (light mode had no
          control in the app) -->
     <SettingsSection :title="$t('Settings.appearance.mode.title')">
       <SettingsRadioRow
@@ -154,7 +154,7 @@ export default defineComponent({
 .mode-glyph {
   color: var(--app-text-muted);
 }
-/* A filled swatch of each theme's accent, easier to compare than a small glyph (R15). */
+/* A filled swatch of each theme's accent, easier to compare than a small glyph. */
 .theme-swatch {
   display: block;
   width: 24px;

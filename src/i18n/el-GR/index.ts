@@ -565,6 +565,11 @@ export default {
           description:
             "Αφαιρεί το ecash που τα ενεργά σας mint αναφέρουν ως δαπανημένο. Χρησιμοποιήστε το μόνο αν το πορτοφόλι κολλήσει.",
         },
+        design_system: {
+          title: "Σύστημα σχεδίασης",
+          description:
+            "Κάθε στοιχείο της εφαρμογής, ζωντανά, με την πηγή και τη χρήση του.",
+        },
         debug_console: {
           button: "Κονσόλα αποσφαλμάτωσης",
           description:
@@ -577,10 +582,11 @@ export default {
         },
         keyset_counters: {
           title: "Αύξηση μετρητών keyset",
-          description:
-            "Πατήστε ένα keyset για να αυξήσετε τον μετρητή του. Βοηθά με το σφάλμα «outputs have already been signed».",
-          counter: "Μετρητής: {count}",
           increase: "Αύξηση μετρητή για {id}",
+          fixes: "Διορθώνει το «outputs have already been signed»",
+          keysets: "{n} keyset | {n} keysets",
+          sheet_hint: "Πατήστε + για να αυξήσετε τον μετρητή ενός keyset.",
+          column: "Μετρητής",
         },
         unset_reserved: {
           button: "Κατάργηση δέσμευσης όλων των δεσμευμένων token",
@@ -1298,14 +1304,16 @@ export default {
     },
   },
   PaymentRequestDialog: {
+    any_amount: "Οποιοδήποτε ποσό",
     payment_request: {
       caption: "Αίτημα πληρωμής",
       description: "Λήψη πληρωμών μέσω Nostr",
     },
     request_index: "Αίτημα {index} από {total}",
-    requesting: "Ζητούμενο ποσό",
-    payer_chooses_amount: "Ο πληρωτής επιλέγει το ποσό",
     actions: {
+      set_amount: {
+        label: "Ορισμός ποσού",
+      },
       copy: {
         label: "@:global.actions.copy.label",
       },

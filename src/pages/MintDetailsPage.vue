@@ -134,10 +134,10 @@
               </div>
             </div>
             <div class="contact-text">{{ contactInfo.info }}</div>
-            <CopyIcon
-              @click="copyText(contactInfo.info)"
-              size="20"
-              class="copy-icon cursor-pointer"
+            <CopyButton
+              :value="contactInfo.info"
+              class="copy-icon"
+              :label="$t('global.actions.copy.label')"
             />
           </div>
         </div>
@@ -316,6 +316,7 @@ import {
   Trash2 as Trash2Icon,
 } from "lucide-vue-next";
 import MintIdentityHeader from "src/components/MintIdentityHeader.vue";
+import CopyButton from "src/components/ui/CopyButton.vue";
 import DetailRow from "src/components/ui/DetailRow.vue";
 import SectionDivider from "src/components/ui/SectionDivider.vue";
 
@@ -323,6 +324,7 @@ export default defineComponent({
   name: "MintDetailsPage",
   mixins: [windowMixin],
   components: {
+    CopyButton,
     QrCodeIcon,
     Trash2Icon,
     StarIcon,
@@ -583,8 +585,7 @@ export default defineComponent({
 }
 
 .copy-icon {
-  color: var(--app-text-muted);
-  margin-inline-start: 12px;
+  margin-inline-start: 4px;
 }
 
 /* Details, contact and actions are all flat rows on the page, like the invoice and token
@@ -636,7 +637,7 @@ export default defineComponent({
   background-color: var(--app-tint-strong);
 }
 
-/* Same icon box and label edge as the detail rows above (R15: inset ~8px further). */
+/* Same icon box and label edge as the detail rows above (inset ~8px further). */
 .action-icon {
   box-sizing: content-box;
   min-width: 20px;

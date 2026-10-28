@@ -68,7 +68,7 @@ export default defineComponent({
   justify-content: space-between;
   height: 100%;
   background: var(--app-welcome-bg);
-  color: white;
+  color: var(--app-text);
   padding: 40px 20px 20px 20px;
   box-sizing: border-box;
 }
@@ -83,7 +83,7 @@ export default defineComponent({
   }
 
   /* The carousel slide already insets 16px: the text sits on the shared 16px gutter with
-     the footer CTA (R42: 32px read as a different page). */
+     the footer CTA (32px read as a different page). */
   .welcome-scaffold--flush-mobile {
     padding: 24px 0 16px;
   }

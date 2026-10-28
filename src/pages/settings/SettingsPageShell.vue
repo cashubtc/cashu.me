@@ -3,7 +3,7 @@
     <div class="settings-view text-left">
       <div v-if="title" class="settings-page-header q-pt-sm q-pb-md">
         <div class="text-h5 text-weight-bold">{{ title }}</div>
-        <div v-if="caption" class="text-caption text-grey-6 q-mt-xs">
+        <div v-if="caption" class="text-caption text-app-muted q-mt-xs">
           {{ caption }}
         </div>
       </div>

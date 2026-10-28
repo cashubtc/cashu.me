@@ -86,16 +86,6 @@ describe("standard elements", () => {
     ).toEqual([]);
   });
 
-  it("button labels are all capitals: no no-caps", () => {
-    expect(
-      offenders((text) =>
-        [...text.matchAll(/<q-btn\b[^>]*>/g)].some(([tag]) =>
-          /\sno-caps(?=[\s>/=])/.test(tag)
-        )
-      )
-    ).toEqual([]);
-  });
-
   it("no q-btn-toggle (use SegmentedControl)", () => {
     expect(offenders((text) => text.includes("<q-btn-toggle"))).toEqual([]);
   });

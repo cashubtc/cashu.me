@@ -99,7 +99,7 @@
                         </div>
                         <div
                           v-if="payInvoiceData.fee_paid != null"
-                          class="text-subtitle2 text-grey-6"
+                          class="text-subtitle2 text-app-muted"
                         >
                           {{ $t("PayInvoiceDialog.invoice.fee") }}:
                           {{
@@ -151,7 +151,7 @@
                         </div>
                         <div
                           v-if="bitcoinPrice && activeUnit == 'sat'"
-                          class="text-subtitle2 text-grey-6 q-ml-xs"
+                          class="text-subtitle2 text-app-muted q-ml-xs"
                         >
                           {{
                             formatCurrency(
@@ -166,7 +166,7 @@
                           v-if="showOnchainFeeOptions"
                           class="onchain-fee-options q-mt-lg"
                         >
-                          <div class="text-subtitle2 text-grey-6 q-mb-sm">
+                          <div class="text-subtitle2 text-app-muted q-mb-sm">
                             {{ $t("PayInvoiceDialog.onchain.choose_speed") }}
                           </div>
                           <div class="q-gutter-y-sm">
@@ -190,7 +190,7 @@
                                       )
                                     }}
                                   </div>
-                                  <div class="text-caption text-grey-6">
+                                  <div class="text-caption text-app-muted">
                                     {{
                                       $t(
                                         "PayInvoiceDialog.onchain.estimated_confirmation"
@@ -208,7 +208,7 @@
                                       )
                                     }}
                                   </div>
-                                  <div class="text-caption text-grey-6">
+                                  <div class="text-caption text-app-muted">
                                     {{
                                       $t("PayInvoiceDialog.onchain.fee_reserve")
                                     }}

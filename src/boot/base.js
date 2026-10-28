@@ -12,10 +12,8 @@ import {
   notifyWarning,
 } from "src/js/notify";
 import { applyDeviceEffects } from "src/js/device-effects";
-import { applyUiVariant } from "src/js/ui-variant";
 window.LOCALE = "en";
 applyDeviceEffects();
-applyUiVariant();
 // window.EventHub = new Vue();
 
 // Ensure we capture the PWA install prompt as early as possible
@@ -87,7 +85,7 @@ function resolveEffectiveTopBackgroundColor() {
 
 // index.html paints the document (and the splash) black or white from the saved mode before
 // the app loads. Keep it in step with the mode: it shows behind every sheet's scrim, so a
-// stale black made light mode look broken until a reload (R46).
+// stale black made light mode look broken until a reload.
 function syncDocumentBackground(isDark) {
   const bg = isDark ? "#000000" : "#ffffff";
   document.documentElement.style.backgroundColor = bg;
@@ -140,7 +138,7 @@ window.windowMixin = {
       syncDocumentBackground(this.$q.dark.isActive);
       // The browser/PWA top bar takes its colour from the page header. Read it again once the
       // new mode has painted: read at once it could keep the old mode's colour until a reload
-      // (R46: "light theme only seems to work after refresh").
+      // ("light theme only seems to work after refresh").
       updateStatusBarMeta();
       requestAnimationFrame(() => setTimeout(updateStatusBarMeta, 300));
     },

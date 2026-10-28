@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="limitMessage"
-    class="deposit-limits-warning text-caption text-grey-6"
+    class="deposit-limits-warning text-caption text-app-muted"
   >
     <InfoIcon :size="13" class="deposit-limits-icon" />{{ limitMessage }}
   </div>

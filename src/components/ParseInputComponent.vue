@@ -151,7 +151,7 @@ export default defineComponent({
     min-height: 88px;
   }
 
-  // Room for Paste on the inline end, so in right-to-left it is kept on the left (R44).
+  // Room for Paste on the inline end, so in right-to-left it is kept on the left.
   &.has-paste-button :deep(.q-field__native) {
     padding: 0;
     padding-inline-end: 70px;

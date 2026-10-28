@@ -6,7 +6,7 @@
         :key="`primary-${fiatMode}`"
         ref="amountDisplayRef"
         class="amount-display text-weight-bold text-center"
-        :class="{ 'text-grey-6': muted }"
+        :class="{ 'text-app-muted': muted }"
       >
         {{ primaryAmountDisplay }}
       </div>
@@ -16,7 +16,7 @@
         <transition name="swap-secondary">
           <div :key="`secondary-${fiatMode}`" class="fiat-wrapper-content">
             <div
-              class="fiat-display text-grey-6"
+              class="fiat-display text-app-muted"
               :class="{ invisible: !secondaryDisplay }"
               @click="toggleFiatMode"
             >
@@ -25,7 +25,7 @@
             <ArrowDownUpIcon
               v-if="showSwap"
               :size="24"
-              class="fiat-icon text-grey-6 cursor-pointer"
+              class="fiat-icon text-app-muted cursor-pointer"
               @click="toggleFiatMode"
               :aria-label="$t('common.swap_input_mode')"
               :aria-pressed="fiatMode ? 'true' : 'false'"

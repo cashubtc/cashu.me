@@ -7,7 +7,7 @@
     <div v-else-if="mintNotAudited" class="q-mx-sm">
       <InfoIcon
         :size="20"
-        class="q-mr-sm text-grey"
+        class="q-mr-sm text-app-muted"
         style="vertical-align: -4px"
       />
       <span class="text-bold">{{ $t("MintAuditInfo.not_audited") }}</span>
@@ -86,14 +86,14 @@
       </div>
 
       <!-- Disclaimer -->
-      <div class="q-mt-md text-grey-6 text-caption">
+      <div class="q-mt-md text-app-muted text-caption">
         {{ $t("MintAuditInfo.disclaimer") }}
       </div>
       <!-- Donate ecash to the auditor -->
       <i18n-t
         keypath="MintAuditInfo.donate_text"
         tag="div"
-        class="q-mt-md text-grey-6 text-caption"
+        class="q-mt-md text-app-muted text-caption"
       >
         <template #link>
           <a :href="auditUrl">{{ auditUrlShort }}</a>
@@ -323,10 +323,12 @@ export default {
 }
 
 .stat-card {
-  background-color: #1e1e1e;
-  color: white;
+  /* The shared box surface, from the group tokens. */
+  background-color: var(--app-group-fill);
+  border: 1px solid var(--app-group-edge);
+  color: var(--app-text);
   min-height: 100px;
-  border-radius: var(--app-radius-md);
+  border-radius: var(--app-radius-lg);
   padding-top: 0px;
   padding-bottom: 0px;
   padding-left: 15px;

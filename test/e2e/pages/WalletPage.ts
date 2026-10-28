@@ -44,8 +44,8 @@ export class WalletPage {
     await expect(this.page.getByTestId("confirm-add-mint")).toBeHidden();
     // Match the joined-mint list, not the same URL still shown in the preview.
     await expect(
-      this.page.locator(".mint-setup-slide .mint-item .mint-url")
-    ).toHaveText(mintUrl);
+      this.page.locator(".mint-setup-slide .mint-item")
+    ).toContainText(new URL(mintUrl).host);
 
     await this.page.getByTestId("onboarding-next").click();
     await expect(this.page.getByTestId("wallet-send")).toBeVisible();

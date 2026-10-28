@@ -88,7 +88,7 @@
     </SettingsSection>
 
     <!-- relays: one quiet row per relay (tap to copy, trash to remove), and the add field on
-         the page under the list rather than inside the card (user direction, R44). -->
+         the page under the list rather than inside the card. -->
     <SettingsSection
       :title="$t('Settings.sections.nostr.relays.list.title')"
       :caption="$t('Settings.sections.nostr.relays.add.description')"
@@ -213,7 +213,7 @@
             color="primary"
             :value="crawlTotal > 0 ? crawlProcessed / crawlTotal : 0"
           />
-          <div class="text-caption text-grey-6 q-mt-xs">
+          <div class="text-caption text-app-muted q-mt-xs">
             {{
               $t("Settings.web_of_trust.progress", {
                 crawlProcessed: crawlProcessed,

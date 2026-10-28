@@ -181,7 +181,7 @@ export default {
   align-items: center;
   height: 100%;
   background: var(--app-welcome-bg);
-  color: white;
+  color: var(--app-text);
   padding: 40px 0 24px;
   box-sizing: border-box;
   text-align: center;
@@ -193,7 +193,7 @@ export default {
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--app-tint-strong);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -209,7 +209,7 @@ export default {
   font-size: 2.2rem;
   font-weight: 700;
   margin: 0 0 20px 0;
-  color: white;
+  color: var(--app-text);
   line-height: 1.2;
   letter-spacing: -0.02em;
 }
@@ -217,7 +217,7 @@ export default {
 .description {
   font-size: 1.1rem;
   line-height: 1.5;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--app-text-muted);
   margin: 0 auto auto;
   padding-bottom: 32px;
   max-width: 32ch;
@@ -258,7 +258,7 @@ export default {
 
 .terms-text {
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--app-text-muted);
   margin: 0;
   line-height: 1.4;
 }
@@ -284,7 +284,7 @@ export default {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--app-text-muted);
   cursor: pointer;
   transition: color 0.2s ease;
   padding: 8px 16px;
@@ -292,7 +292,7 @@ export default {
 }
 
 .language-trigger:hover {
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--app-text-muted);
 }
 
 .language-text {

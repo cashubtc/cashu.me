@@ -57,16 +57,14 @@
         class="welcome-footer welcome-surface row items-center no-wrap"
         v-if="welcomeStore.currentSlide > 0"
       >
-        <q-btn
-          flat
-          round
-          class="welcome-footer__back"
-          :aria-label="$t('WelcomePage.actions.previous.label')"
+        <IconButton
           v-if="welcomeStore.canGoPrev"
+          class="welcome-footer__back"
+          :icon="ChevronLeftIcon"
+          :icon-size="24"
+          :label="$t('WelcomePage.actions.previous.label')"
           @click="welcomeStore.goToPrevSlide"
-        >
-          <ChevronLeftIcon :size="24" />
-        </q-btn>
+        />
         <q-btn
           rounded
           unelevated
@@ -87,6 +85,7 @@
 
 <script lang="ts">
 import { ChevronLeft as ChevronLeftIcon } from "lucide-vue-next";
+import IconButton from "src/components/ui/IconButton.vue";
 import { onMounted, ref } from "vue";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useStorageStore } from "src/stores/storage";
@@ -101,7 +100,7 @@ import WelcomeRestoreEcash from "./welcome/WelcomeRestoreEcash.vue";
 export default {
   name: "WelcomePage",
   components: {
-    ChevronLeftIcon,
+    IconButton,
     WelcomeSlide1,
     WelcomeSlide2,
     WelcomeSlide3,
@@ -139,6 +138,7 @@ export default {
     });
 
     return {
+      ChevronLeftIcon,
       welcomeStore,
       fileUpload,
       onChangeFileUpload,

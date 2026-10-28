@@ -54,19 +54,23 @@ html:lang(ar) p {
   color: var(--app-text);
 }
 
-// Every button label is in capitals, as Send and Receive always were (user direction): one
-// voice for every action, primary or secondary. Nothing opts out (no-caps is banned by a
-// guard test); scripts without capitals drop the tracking.
+// Button casing follows the button's role, and buttons that sit together always match
+//: full-width actions (the flow's CTAs and anything stacked with them) are
+// in capitals, like Send and Receive; inline and paired buttons are in sentence case.
 .q-btn {
   font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.q-btn.full-width {
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
-.q-btn:lang(zh),
-.q-btn:lang(ja),
-.q-btn:lang(ko),
-.q-btn:lang(ar),
-.q-btn:lang(th) {
+.q-btn.full-width:lang(zh),
+.q-btn.full-width:lang(ja),
+.q-btn.full-width:lang(ko),
+.q-btn.full-width:lang(ar),
+.q-btn.full-width:lang(th) {
   letter-spacing: 0;
 }
 
@@ -182,7 +186,7 @@ body,
 }
 
 // Section label centred between two hairlines, in small capitals, as in the original design
-// (Mints tab: Swap and Add mint, mint details, multi-mint payments; user direction).
+// (Mints tab: Swap and Add mint, mint details, multi-mint payments).
 .section-divider {
   display: flex;
   align-items: center;
@@ -295,13 +299,15 @@ button:focus-visible {
 .q-btn[disabled]:not(.q-btn--loading) {
   opacity: 0.38 !important;
 }
-// Filled primary buttons go quiet rather than translucent: a tinted fill with a muted but
-// legible label (translucent primary read as dark text on muddy grey).
+// Filled primary buttons go quiet rather than translucent (translucent primary read as dark
+// text on muddy grey): an empty pill with a hairline and a muted label. Not a filled surface,
+// which read as one more card or field next to the cards and fields it sits with.
 .q-btn.disabled.bg-primary:not(.q-btn--loading),
 .q-btn[disabled].bg-primary:not(.q-btn--loading) {
-  opacity: 1 !important;
-  background: var(--app-tint-strong) !important;
+  background: transparent !important;
+  box-shadow: inset 0 0 0 1px var(--app-border-strong);
   color: var(--app-text-disabled) !important;
+  opacity: 1 !important;
 }
 .q-btn.disabled,
 .q-btn[disabled] {
@@ -419,7 +425,6 @@ body[data-theme] .welcome-surface,
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.mint-chip__dot,
 .mint-chip__balance {
   color: var(--app-text-muted);
   font-variant-numeric: tabular-nums;
@@ -547,18 +552,23 @@ body.body--light .q-toggle.disabled .q-toggle__inner--truthy .q-toggle__track {
   outline-offset: -6px;
 }
 .q-tab > .q-focus-helper {
-  inset: 6px;
   border-radius: var(--app-radius-sm);
-  // Quasar sizes the helper at 100% with a physical side, so an inset slid it off the tab
-  // (6px left in rtl); the inset alone sizes it.
-  height: auto;
-  width: auto;
+  // Quasar pins the helper with top/left 0 and a 100% size (and its tab rules win on
+  // specificity), so a plain inset only moved two edges: in rtl the fill slid 6px off the tab.
+  // All four edges and an auto size keep it inset evenly in both directions.
+  height: auto !important;
+  inset: 6px !important;
+  width: auto !important;
+}
+// The press ripple fills the same inset shape, so a tap shows one shape, not two.
+.q-tab > .q-ripple {
+  border-radius: var(--app-radius-sm);
+  height: auto !important;
+  inset: 6px !important;
+  width: auto !important;
 }
 
 /* A select showing its placeholder reads muted until a value is picked. */
-.select--placeholder .q-field__native {
-  color: var(--app-text-muted);
-}
 
 /* Multi-line fields grow with their content; no native resize grip (Quasar's field sets one). */
 textarea,
@@ -572,7 +582,7 @@ textarea,
   background: rgba(0, 0, 0, 0.6) !important;
 }
 // Over light pages a 60% wash reads as muddy grey; 45% still dims the dark pills behind
-// a sheet (R41) without flattening the page.
+// a sheet without flattening the page.
 body.body--light .q-dialog__backdrop {
   background: rgba(0, 0, 0, 0.45) !important;
 }
@@ -597,7 +607,7 @@ body.body--light .q-dialog__backdrop {
 }
 
 // A refresh control that is busy spins its own glyph, so it never turns into a different
-// mark (three dots read as an overflow menu, R41).
+// mark (three dots read as an overflow menu).
 .refresh-spin {
   animation: refresh-spin 1s linear infinite;
 }
@@ -620,7 +630,7 @@ body.body--light .q-dialog__backdrop {
   inset-inline-end: 6px;
 }
 // The unit switch is a 44px bare icon button like close, lock and more: one header-action
-// style on every sheet (R17). It shows the current unit (₿ or $).
+// style on every sheet. It shows the current unit (₿ or $).
 .sheet-unit-toggle {
   width: 44px;
   height: 44px;
@@ -634,9 +644,9 @@ body.body--light .q-dialog__backdrop {
 // The mint picker as a labelled full-width field (Lightning address mint, swap From/To,
 // currency): label over value, matching the outlined inputs around it, 12px corners included.
 // Inside: the field's 16px text inset, a 20px leading icon with 12px to the text, and the
-// label and value as one centred 2-line block (user direction, R41: the 16px glyph and 6px
+// label and value as one centred 2-line block (the 16px glyph and 6px
 // gap crowded the text).
-// Picker fields are drawn exactly like the outlined text fields (user direction, R44): no
+// Picker fields are drawn exactly like the outlined text fields: no
 // fill, the field edge colour, 56px tall, the edge brightening on hover as an input's does.
 .mint-chip--field {
   background: var(--app-field-fill);
@@ -745,7 +755,7 @@ body.body--light .q-dialog__backdrop {
 }
 
 // A title followed by a badge: when the badge wraps it starts on the text edge, not
-// indented by its margin (R15: the Multinut Beta badge).
+// indented by its margin (the Multinut Beta badge).
 .label-with-badge {
   display: flex;
   flex-wrap: wrap;
@@ -762,12 +772,7 @@ body .q-tab__indicator {
   border-radius: 2px;
   height: 3px;
 }
-// The underline is as wide as the label (narrow-indicator), not the 16px-padded cell.
-body .q-tabs .q-tab__indicator {
-  left: 16px;
-  right: 16px;
-  width: auto;
-}
+
 // Tooltips: a small inverse label (ink fill, page-colour text), so it never reads as a control.
 body .q-tooltip {
   background: var(--app-text);
@@ -782,9 +787,9 @@ body .q-tooltip {
 body .q-slider__track {
   background: color-mix(in srgb, var(--app-text) 38%, transparent) !important;
 }
-// Rating stars are ink, like every other glyph: no gold anywhere (round 57). Selected stars
+// Rating stars are ink, like every other glyph: no gold anywhere. Selected stars
 // are full text colour; unselected stars in an input are muted controls, not a near-invisible
-// grey on dark cards (R15).
+// grey on dark cards.
 .q-rating .q-rating__icon--active {
   color: var(--app-text) !important;
 }
@@ -800,11 +805,11 @@ body .q-slider__track {
   resize: none;
 }
 
-// Option rows on a sheet are tinted fills with no border (user direction, R56: the hairline
+// Option rows on a sheet are tinted fills with no border (the hairline
 // read as too strong); in light mode they are white cards on the grey sheet, like Settings.
 
 // Captions and body copy break evenly, without a lone word or glyph on the last line, in
-// every locale (R44: Arabic and Chinese captions ended on a single word or character).
+// every locale (Arabic and Chinese captions ended on a single word or character).
 .q-item__label--caption,
 .settings-section-caption,
 .text-caption,
@@ -814,7 +819,7 @@ p {
 }
 
 // Number fields (amounts) without the browser's spin arrows: a native white stepper inside
-// a dark outlined field (user report, R44); amounts are typed, not stepped.
+// a dark outlined field; amounts are typed, not stepped.
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
@@ -825,7 +830,7 @@ input[type="number"] {
   appearance: textfield;
 }
 
-// Relay rows: one 52px rhythm like the other list rows (R15: 68px rows with stacked gaps).
+// Relay rows: one 52px rhythm like the other list rows (68px rows with stacked gaps).
 .settings-card .q-item.relay-row {
   min-height: 52px;
   padding-top: 4px;
@@ -895,7 +900,7 @@ body .q-btn--outline:before {
 }
 
 // One field shape: every outlined text field and select uses the 12px card and row radius,
-// whether or not it was declared "rounded" (R19: pill fields next to rounded rectangles).
+// whether or not it was declared "rounded" (pill fields next to rounded rectangles).
 .q-field--outlined .q-field__control,
 .q-field--outlined .q-field__control:before,
 .q-field--outlined .q-field__control:after,
@@ -1148,8 +1153,7 @@ textarea::placeholder {
 h1,
 h2,
 h3,
-.dialog-header,
-.page-title {
+.dialog-header {
   text-wrap: balance;
 }
 // Quasar pads field prepend/append slots on a physical side; in rtl the slots swap sides, so the
@@ -1216,10 +1220,10 @@ html[dir="rtl"] .q-field__append {
 
 // Sheet option rows (Receive, Send, Receive ecash): the app's body style for the label, with
 // no extra letter-spacing (Quasar's body1 adds 0.03em), and a muted one-line caption that
-// says what each option does (R42).
+// says what each option does.
 
-// Mint cards, shared by the installed mints list and Discover mints (user direction, R46:
-// discovered mints are drawn as the same card).
+// Mint cards, shared by the installed mints list and Discover mints:
+// discovered mints are drawn as the same card.
 .mint-review {
   color: var(--app-text-muted);
   font-size: 13px;
@@ -1256,7 +1260,7 @@ html[dir="rtl"] .q-field__append {
   color: var(--app-text);
 }
 /* The active card is marked by its accent border and an "Active" badge; its text stays ink,
-   so raw accent colours never carry body text on a dark card (R42: classic and salvador
+   so raw accent colours never carry body text on a dark card (classic and salvador
    missed AA). */
 
 body .mint-card.q-item--active {
@@ -1278,7 +1282,7 @@ body .mint-card.mint-card--active {
   background: var(--app-card-fill-active);
 }
 
-/* Mint card (R41 pass): one 16px inset, the identity row with its actions centred on it,
+/* Mint card: one 16px inset, the identity row with its actions centred on it,
    the holdings and rating below on the same edges. */
 .mint-card__body {
   display: flex;
@@ -1288,7 +1292,7 @@ body .mint-card.mint-card--active {
   width: 100%;
 }
 /* The trailing menu (or add) button sits in the card's top corner rather than centred on a
-   two-line name (user direction, R56). */
+   two-line name. */
 .mint-card__head {
   align-items: flex-start;
   display: flex;
@@ -1350,7 +1354,7 @@ html[dir="rtl"] .restore-mint-check {
   font-weight: 500;
 }
 
-// Toasts (user direction, R46; council exploration XV1 winner "Icon disc card", 8.65/10): a
+// Toasts : a
 // filled card on the group fill with a thin neutral edge (it separates from black and white
 // pages alike), the kind carried by its icon in a tinted 36px disc (the app's icon-circle
 // language), medium-weight 14px text, and the dismiss on the end.
@@ -1456,7 +1460,7 @@ body.body--light .q-notification {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 // Toasts sit above the pinned bottom action (52px button + 24px inset), so they never cover
-// the balance or the primary button (user direction, R50).
+// the balance or the primary button.
 body .q-notifications__list--bottom {
   bottom: calc(env(safe-area-inset-bottom, 0px) + 84px);
 }
@@ -1485,7 +1489,7 @@ body .q-notification__progress {
   display: none;
 }
 
-// QR codes (user direction, R46): one size everywhere, weighted against the screen so the code
+// QR codes: one size everywhere, weighted against the screen so the code
 // leads without swamping the page: about 70% of the width on a phone, never more than 42% of
 // the height, between 220 and 300px.
 :root {
@@ -1499,7 +1503,7 @@ body .q-notification__progress {
   width: var(--app-qr-size);
 }
 
-// Desktop: sheets open as centred dialogs, rounded on every corner (user direction, R50);
+// Desktop: sheets open as centred dialogs, rounded on every corner;
 // phones keep the bottom sheet.
 @media (min-width: 1024px) {
   .q-dialog__inner--standard > .q-card {
@@ -1550,7 +1554,7 @@ body .q-notification__progress {
   padding-right: 16px;
 }
 
-/* Send and Receive keep the original design's capitals (user direction, R56). */
+/* Send and Receive keep the original design's capitals. */
 .wallet-action-btn {
   flex: 1 1 0;
   font-size: 1rem;
@@ -1560,7 +1564,7 @@ body .q-notification__progress {
 }
 
 .wallet-scan-btn {
-  background: var(--app-tint);
+  background: var(--app-tint-strong);
   color: var(--app-text);
   flex: 0 0 auto;
   height: 52px;

@@ -556,10 +556,11 @@ export default {
         description: "Outils de dépannage et de débogage.",
         keyset_counters: {
           title: "Incrémenter les compteurs de keyset",
-          description:
-            "Touchez un keyset pour augmenter son compteur. Utile en cas d'erreur « outputs have already been signed ».",
-          counter: "Compteur : {count}",
           increase: "Augmenter le compteur de {id}",
+          fixes: "Corrige « outputs have already been signed »",
+          keysets: "{n} keyset | {n} keysets",
+          sheet_hint: "Touchez + pour augmenter le compteur d’un keyset.",
+          column: "Compteur",
         },
         new_seed: {
           button: "Générer une nouvelle phrase de départ",
@@ -574,6 +575,11 @@ export default {
           button: "Supprimer les preuves dépensées",
           description:
             "Supprime l'ecash que vos mints actives signalent comme dépensé. À utiliser uniquement si votre portefeuille est bloqué.",
+        },
+        design_system: {
+          title: "Système de design",
+          description:
+            "Chaque composant de l’app, en direct, avec sa source et son usage.",
         },
         debug_console: {
           button: "Console de débogage",
@@ -1306,14 +1312,16 @@ export default {
     },
   },
   PaymentRequestDialog: {
+    any_amount: "Montant libre",
     payment_request: {
       caption: "Demande de paiement",
       description: "Recevoir des paiements via Nostr",
     },
     request_index: "Demande {index} sur {total}",
-    requesting: "Montant demandé",
-    payer_chooses_amount: "Le payeur choisit le montant",
     actions: {
+      set_amount: {
+        label: "Définir le montant",
+      },
       copy: {
         label: "@:global.actions.copy.label",
       },

@@ -18,19 +18,14 @@
         <FullscreenDialogHeader :title="$t('SendTokenDialog.title')" balanced>
           <template #actions>
             <div class="row items-center no-wrap sheet-header-actions">
-              <q-btn
-                flat
-                color="primary"
-                round
-                class="lock-toggle-btn touch-target-44"
-                :aria-label="$t('SendTokenDialog.actions.lock.label')"
+              <IconButton
+                class="lock-toggle-btn"
+                tooltip
+                :label="$t('SendTokenDialog.actions.lock.label')"
                 @click="showLockInput = !showLockInput"
               >
                 <LockIcon :size="20" />
-                <q-tooltip>{{
-                  $t("SendTokenDialog.actions.lock.label")
-                }}</q-tooltip>
-              </q-btn>
+              </IconButton>
               <q-btn
                 flat
                 round
@@ -155,7 +150,7 @@
                   <span
                     v-if="insufficientFunds && sendData.amount"
                     :key="'warn-text-' + String(sendData.amount ?? '')"
-                    class="text-caption text-weight-medium text-grey-6"
+                    class="text-caption text-weight-medium text-app-muted"
                     style="font-size: 16px; display: inline-block"
                   >
                     {{
@@ -235,6 +230,7 @@
   </q-dialog>
 </template>
 <script lang="ts">
+import IconButton from "src/components/ui/IconButton.vue";
 import PendingDots from "src/components/ui/PendingDots.vue";
 import AppBadge from "src/components/ui/AppBadge.vue";
 import { defineComponent } from "vue";
@@ -270,6 +266,7 @@ export default defineComponent({
   name: "SendTokenDialog",
   mixins: [windowMixin],
   components: {
+    IconButton,
     PendingDots,
     AppBadge,
     ClipboardPasteIcon,

@@ -9,7 +9,7 @@
       <!-- Only when idle with no results; while loading and once results exist, refreshing is the
            compact action in the results header, so the list never jumps when the button goes. -->
       <!-- Idle, before the first search: a designed empty state that says what discovery does,
-           with the one primary action (R42). While loading and once results exist, refreshing
+           with the one primary action. While loading and once results exist, refreshing
            is the compact action in the results header. -->
       <EmptyState
         v-if="!discovering && discoverList.length === 0"
@@ -118,14 +118,13 @@
             :key="rec.url"
             class="q-px-none q-mb-md"
           >
-            <!-- The installed mints' card (user direction, R46): identity row with its action
+            <!-- The installed mints' card: identity row with its action
                  on the right, then the rating on the card's right edge. -->
             <MintCard
               :icon-url="getMintIconUrlUrl(rec.url) || undefined"
               :name="getMintDisplayName(rec.url)"
               :url="rec.url"
               :loading="isFetchingMintInfo(rec.url)"
-              :busy="isFetchingMintInfo(rec.url)"
               :unnamed-label="$t('MintSettings.discover.unnamed')"
             >
               <template #action>

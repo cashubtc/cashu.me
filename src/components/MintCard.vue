@@ -37,7 +37,7 @@
           <template v-for="(balance, i) in balances" :key="balance">
             <!-- Several unit balances read as separate holdings, not a conversion. -->
             <span v-if="i > 0" class="mint-card__plus" aria-hidden="true"
-              >•</span
+              >·</span
             >
             <bdi dir="ltr" class="currency-unit-text">{{ balance }}</bdi>
           </template>

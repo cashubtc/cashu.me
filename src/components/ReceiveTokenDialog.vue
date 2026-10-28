@@ -45,7 +45,7 @@
                       tokenUnit == 'sat' &&
                       bitcoinPrice
                     "
-                    class="q-ml-xs text-subtitle2 text-grey-6"
+                    class="q-ml-xs text-subtitle2 text-app-muted"
                   >
                     ({{
                       formatCurrency(

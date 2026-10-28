@@ -3,7 +3,7 @@
     :title="$t('Settings.menu.privacy.title')"
     :caption="$t('Settings.menu.privacy.caption')"
   >
-    <!-- Each group names what it covers, like the other settings pages (R42). -->
+    <!-- Each group names what it covers, like the other settings pages. -->
     <SettingsSection
       :title="$t('Settings.privacy.network_title')"
       :caption="$t('Settings.privacy.description')"

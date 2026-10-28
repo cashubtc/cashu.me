@@ -5,92 +5,85 @@
     :title="$t('WelcomeMintSetup.title')"
     :text="$t('WelcomeMintSetup.text')"
   >
-    <!-- Your added mints -->
-    <div class="mints-section">
-      <div class="mints-section-header">
-        <h3 v-if="mints.mints.length > 0" class="section-title">
-          {{ $t("WelcomeMintSetup.sections.your_mints") }}
-        </h3>
+    <!-- One column at the field's width: your mints, add a mint, then discovery, each under
+         the same section divider the Mints tab uses. -->
+    <div class="mint-setup-body">
+      <section
+        v-if="
+          mints.mints.length > 0 ||
+          (welcome.onboardingPath === 'recover' && restoringMints)
+        "
+        class="mint-setup-section"
+      >
+        <SectionDivider
+          class="q-mb-md"
+          :label="$t('WelcomeMintSetup.sections.your_mints')"
+        />
         <!-- Restoring indicator during recover + Nostr search -->
         <div
           v-if="welcome.onboardingPath === 'recover' && restoringMints"
-          class="row items-center q-mb-md q-px-lg"
+          class="row items-center no-wrap q-mb-md text-app-muted"
         >
-          <PendingDots class="q-mr-sm" size="24px" />
-          <div class="text-grey-6">
-            {{ $t("WelcomeMintSetup.restoring") }}
-          </div>
+          <PendingDots class="q-mr-sm" />
+          {{ $t("WelcomeMintSetup.restoring") }}
         </div>
-      </div>
-      <div v-for="mint in mints.mints" :key="mint.url" class="mint-item">
-        <div class="mint-content">
-          <q-avatar
-            v-if="getMintIconUrlExisting(mint)"
-            size="34px"
-            class="mint-icon"
-          >
-            <q-img
-              spinner-color="white"
-              spinner-size="xs"
-              :src="getMintIconUrlExisting(mint)"
-              alt="Mint Icon"
-              style="height: 34px; max-width: 34px; font-size: 12px"
-            />
-          </q-avatar>
-          <div class="mint-info">
-            <div class="mint-name">
-              {{ mint.nickname || mint.info?.name }}
-            </div>
-            <div class="mint-url">{{ mint.url }}</div>
-          </div>
+        <div v-for="mint in mints.mints" :key="mint.url" class="mint-item">
+          <MintCard
+            :icon-url="getMintIconUrlExisting(mint)"
+            :name="mint.nickname || mint.info?.name"
+            :url="mint.url"
+          />
         </div>
-      </div>
-    </div>
+      </section>
 
-    <!-- Manual add mint -->
-    <div class="add-mint-section">
-      <h3 class="section-title">{{ $t("MintSettings.add.title") }}</h3>
-      <div class="add-mint-inputs" data-testid="onboarding-mint-url">
-        <q-input
-          outlined
-          v-model="addMintData.url"
-          :placeholder="$t('WelcomeMintSetup.placeholder.mint_url')"
-          @keydown.enter.prevent="sanitizeMintUrlAndShowAddDialog"
-          ref="mintInput"
-          class="q-mb-md mint-input url-input"
-        />
-      </div>
-      <div class="add-mint-button">
+      <!-- Manual add mint: the Mints tab's field and full-width action. -->
+      <section class="mint-setup-section">
+        <SectionDivider class="q-mb-md" :label="$t('MintSettings.add.title')" />
+        <div data-testid="onboarding-mint-url">
+          <q-input
+            outlined
+            v-model="addMintData.url"
+            :label="$t('global.inputs.mint_url.label')"
+            :placeholder="$t('WelcomeMintSetup.placeholder.mint_url')"
+            @keydown.enter.prevent="sanitizeMintUrlAndShowAddDialog"
+            ref="mintInput"
+            class="url-input"
+          />
+        </div>
         <q-btn
-          flat
+          color="primary"
           rounded
+          unelevated
           data-testid="onboarding-add-mint"
+          class="full-width q-mt-md"
           :disable="addMintData.url.length === 0"
-          @click="
-            addMintData.url.length > 0
-              ? sanitizeMintUrlAndShowAddDialog()
-              : null
-          "
-          class="add-mint-btn"
+          @click="sanitizeMintUrlAndShowAddDialog"
         >
-          <PlusIcon :size="20" class="q-mr-sm" />
-          <span>{{ $t("MintSettings.add.actions.add_mint.label") }}</span>
+          <PlusIcon :size="18" class="q-mr-sm" />
+          {{ $t("MintSettings.add.actions.add_mint.label") }}
         </q-btn>
-      </div>
-    </div>
+      </section>
 
-    <!-- Recovery-specific: search user mints on nostr using seed -->
-    <div v-if="welcome.onboardingPath === 'recover'">
-      <NostrMintRestore
-        :mnemonic="restore.mnemonicToRestore"
-        :is-mnemonic-valid="isSeedValid"
-        :auto-add="true"
-      />
-    </div>
+      <!-- Recovery-specific: search user mints on nostr using seed -->
+      <section
+        v-if="welcome.onboardingPath === 'recover'"
+        class="mint-setup-section"
+      >
+        <NostrMintRestore
+          :mnemonic="restore.mnemonicToRestore"
+          :is-mnemonic-valid="isSeedValid"
+          :auto-add="true"
+        />
+      </section>
 
-    <!-- Discover mints on nostr (global) -->
-    <div>
-      <MintDiscovery :autoDiscover="true" :allowCreateReview="false" />
+      <!-- Discover mints on nostr (global) -->
+      <section class="mint-setup-section">
+        <SectionDivider
+          class="q-mb-sm"
+          :label="$t('MintSettings.discover.title')"
+        />
+        <MintDiscovery :autoDiscover="true" :allowCreateReview="false" />
+      </section>
     </div>
 
     <AddMintDialog
@@ -107,17 +100,16 @@
 import PendingDots from "src/components/ui/PendingDots.vue";
 import { Landmark as LandmarkIcon, Plus as PlusIcon } from "lucide-vue-next";
 import WelcomeSlideScaffold from "src/components/ui/WelcomeSlideScaffold.vue";
-import { computed, ref, watch, onMounted } from "vue";
+import { computed, onMounted } from "vue";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useRestoreStore } from "src/stores/restore";
-import { useMintsStore, MintClass } from "src/stores/mints";
-import { useNostrStore } from "src/stores/nostr";
-import { useUiStore } from "src/stores/ui";
-import { notifyError, notifySuccess } from "src/js/notify";
+import { useMintsStore } from "src/stores/mints";
 import AddMintDialog from "src/components/AddMintDialog.vue";
+import MintCard from "src/components/MintCard.vue";
+import SectionDivider from "src/components/ui/SectionDivider.vue";
 import NostrMintRestore from "src/components/NostrMintRestore.vue";
 import { useNostrMintBackupStore } from "src/stores/nostrMintBackup";
-import MintDiscovery from "../../components/MintDiscovery.vue";
+import MintDiscovery from "src/components/MintDiscovery.vue";
 
 export default {
   name: "WelcomeMintSetup",
@@ -128,14 +120,14 @@ export default {
     AddMintDialog,
     NostrMintRestore,
     MintDiscovery,
+    MintCard,
+    SectionDivider,
   },
   setup() {
     const welcome = useWelcomeStore();
     const restore = useRestoreStore();
     const mints = useMintsStore();
-    const nostr = useNostrStore();
     const nostrMintBackup = useNostrMintBackupStore();
-    const ui = useUiStore();
 
     const isSeedValid = computed(() => {
       const s = restore.mnemonicToRestore?.trim() || "";
@@ -147,7 +139,9 @@ export default {
       () => isSeedValid.value && nostrMintBackup.searchInProgress
     );
 
-    const addMintData = mints.addMintData; // reactive from store
+    // Read through the store each time: adding a mint replaces the store's object, and a
+    // captured reference kept showing the added URL in the field.
+    const addMintData = computed(() => mints.addMintData);
     const showAddMintDialog = computed({
       get: () => mints.showAddMintDialog,
       set: (v: boolean) => (mints.showAddMintDialog = v),
@@ -165,15 +159,8 @@ export default {
       mints.addMintData = { url: "", nickname: "" } as any;
     };
 
-    const mintClass = (mint: any) => new MintClass(mint);
-    const formatCurrency = (amount: number, unit: string) =>
-      ui.formatCurrency(amount, unit);
     const getMintIconUrlExisting = (mint: any) =>
       mint?.info?.icon_url || undefined;
-
-    const markDone = () => {
-      welcome.mintSetupCompleted = true;
-    };
 
     // Mark mint setup as completed on mount since it's optional
     // Users can proceed with or without adding mints
@@ -192,10 +179,7 @@ export default {
       addMintBlocking,
       sanitizeMintUrlAndShowAddDialog,
       addMintInternal,
-      mintClass,
-      formatCurrency,
       getMintIconUrlExisting,
-      markDone,
       restoringMints,
     };
   },
@@ -203,106 +187,18 @@ export default {
 </script>
 
 <style scoped>
-.mints-section,
-.add-mint-section {
-  width: 100%;
-  margin-bottom: 24px;
-}
-
-.section-title {
-  font-size: 15.2px;
-  font-family: inherit;
-  font-weight: 600;
-  color: #ffffff;
-  margin: 0 0 16px 0;
-}
-
-.mint-item {
-  padding: 12px 12px 12px 0px;
-  border-radius: var(--app-radius-lg);
-  transition: all 0.2s ease;
-  margin-bottom: 8px;
-}
-
-.mint-content {
+/* The step's own content: one column, as wide as the slide's text, every block on its edges. */
+.mint-setup-body {
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 500px;
+  width: 100%;
 }
-
-.mint-icon {
-  flex-shrink: 0;
-  margin-top: 2px;
+.mint-setup-section {
+  width: 100%;
 }
-
-.mint-info {
-  flex: 1;
-}
-
-.mint-name {
-  font-size: 15.2px;
-  font-family: inherit;
-  font-weight: 600;
-  color: #ffffff;
-  margin: 0 0 4px 0;
-}
-
-.mint-url {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.8);
-  margin: 0;
-  line-height: 1.4;
-}
-
-.add-mint-inputs {
-  margin-bottom: 16px;
-}
-
-.add-mint-button {
+.mint-item + .mint-item {
   margin-top: 12px;
-}
-
-.add-mint-btn {
-  width: auto;
-  min-width: 100px;
-  height: 36px;
-  font-weight: 500;
-  text-transform: none;
-  font-size: 0.9rem;
-  border-radius: 18px;
-  color: var(--q-primary);
-  background: color-mix(in srgb, var(--q-primary) 10%, transparent);
-  transition: all 0.2s ease;
-}
-
-.add-mint-btn:hover {
-  background: color-mix(in srgb, var(--q-primary) 20%, transparent);
-  transform: translateY(-1px);
-}
-
-.add-mint-btn:disabled {
-  color: rgba(255, 255, 255, 0.3);
-  background: transparent;
-  transform: none;
-}
-
-/* Mobile adjustments */
-@media (max-width: 600px) {
-  .mints-section,
-  .add-mint-section {
-    width: 100%;
-  }
-
-  .section-title {
-    font-size: 14px;
-  }
-
-  .mint-name {
-    font-size: 14px;
-  }
-
-  .mint-url {
-    font-size: 0.85rem;
-  }
 }
 </style>

@@ -276,7 +276,7 @@ export default {
   justify-content: space-between;
   height: 100%;
   background: var(--app-welcome-bg);
-  color: white;
+  color: var(--app-text);
   padding: 40px 20px 20px 20px;
   box-sizing: border-box;
 }
@@ -334,14 +334,14 @@ export default {
 
 .installing-text {
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--app-text-muted);
 }
 
 .title {
   font-size: 1.8rem;
   font-weight: 700;
   margin: 0 0 16px 0;
-  color: white;
+  color: var(--app-text);
   line-height: 1.2;
 }
 
@@ -361,7 +361,7 @@ export default {
 .intro-text {
   font-size: 0.95rem;
   line-height: 1.5;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--app-text-muted);
   margin: 0 0 20px 0;
   text-align: start;
 }
@@ -374,7 +374,7 @@ export default {
 .platform-title {
   font-size: 1rem;
   font-weight: 600;
-  color: white;
+  color: var(--app-text);
   margin: 0 0 8px 0;
 }
 
@@ -390,7 +390,7 @@ export default {
   gap: 10px;
   font-size: 0.9rem;
   line-height: 1.4;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--app-text-muted);
 }
 
 .step-icon {
@@ -402,7 +402,7 @@ export default {
 .outro-text {
   font-size: 0.9rem;
   line-height: 1.4;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--app-text-muted);
   margin: 16px 0 0 0;
   text-align: start;
 }
@@ -422,21 +422,21 @@ export default {
 .success-title {
   font-size: 1.4rem;
   font-weight: 600;
-  color: white;
+  color: var(--app-text);
   margin: 0 0 15px 0;
 }
 
 .success-text {
   font-size: 0.95rem;
   line-height: 1.4;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--app-text-muted);
   margin: 0;
 }
 
 /* Mobile adjustments */
 @media (max-width: 600px) {
   /* The carousel slide already insets 16px: the text sits on the shared 16px gutter with
-     the footer CTA (R42: 32px read as a different page). */
+     the footer CTA (32px read as a different page). */
   .pwa-slide {
     padding: 24px 0 16px;
   }

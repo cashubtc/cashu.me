@@ -55,7 +55,7 @@
                 <QrProgress :active="runnerActive" />
                 <div
                   v-if="isOnchain"
-                  class="q-mt-sm text-center text-grey-7 qr-copy-text app-mono app-mono--wrap cursor-pointer"
+                  class="q-mt-sm text-center text-app-muted qr-copy-text app-mono app-mono--wrap cursor-pointer"
                   @click="onCopyBolt11"
                 >
                   <CheckIcon

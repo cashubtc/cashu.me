@@ -34,6 +34,7 @@
           </q-item-section>
         </template>
         <q-tabs
+          narrow-indicator
           v-model="tab"
           no-caps
           class="bg-transparent wallet-tabs"
@@ -161,14 +162,14 @@
   min-height: 44px;
 }
 
-/* On desktop history is always open, so there is no handle to show (R16). */
+/* On desktop history is always open, so there is no handle to show. */
 @media (min-width: 1024px) {
   .wallet-history-toggle {
     display: none !important;
   }
 }
 
-/* A grab handle, the usual mark for a panel that opens and closes (R15: a lone chevron
+/* A grab handle, the usual mark for a panel that opens and closes (a lone chevron
    read as nothing). */
 .wallet-history-handle {
   display: block;

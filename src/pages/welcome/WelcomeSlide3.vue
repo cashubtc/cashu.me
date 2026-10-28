@@ -27,17 +27,12 @@
             <EyeOffIcon v-else :size="18" />
             <q-tooltip>{{ hideMnemonic ? "Show" : "Hide" }}</q-tooltip>
           </q-btn>
-          <q-btn
-            flat
-            round
-            dense
-            @click="copyText(walletStore.mnemonic)"
+          <CopyButton
             class="action-btn"
-            size="sm"
-          >
-            <CopyIcon :size="18" />
-            <q-tooltip>{{ $t("global.actions.copy.label") }}</q-tooltip>
-          </q-btn>
+            :value="walletStore.mnemonic"
+            :icon-size="18"
+            :tooltip="$t('global.actions.copy.label')"
+          />
         </div>
       </div>
 
@@ -61,22 +56,20 @@
 
 <script lang="ts">
 import {
-  Copy as CopyIcon,
   Eye as EyeIcon,
   EyeOff as EyeOffIcon,
   KeyRound as KeyRoundIcon,
 } from "lucide-vue-next";
 import WelcomeSlideScaffold from "src/components/ui/WelcomeSlideScaffold.vue";
+import CopyButton from "src/components/ui/CopyButton.vue";
 declare const windowMixin: any;
 import { useWelcomeStore } from "src/stores/welcome";
-import { notifyCopied } from "src/js/notify";
 import { useWalletStore } from "src/stores/wallet";
 import { ref, computed, onMounted } from "vue";
-import { copyToClipboard } from "quasar";
 
 export default {
   name: "WelcomeSlide3",
-  components: { EyeIcon, EyeOffIcon, CopyIcon, WelcomeSlideScaffold },
+  components: { EyeIcon, EyeOffIcon, CopyButton, WelcomeSlideScaffold },
   mixins: [windowMixin],
   setup() {
     const welcomeStore = useWelcomeStore();
@@ -104,13 +97,6 @@ export default {
       hideMnemonic.value = !hideMnemonic.value;
     };
 
-    const copyText = async (text: string) => {
-      try {
-        await copyToClipboard(text);
-        notifyCopied();
-      } catch {}
-    };
-
     const proceed = () => {
       welcomeStore.seedPhraseValidated = true;
     };
@@ -123,7 +109,6 @@ export default {
       toggleMnemonicVisibility,
       hiddenMnemonic,
       hideMnemonic,
-      copyText,
     };
   },
 };
@@ -145,14 +130,14 @@ export default {
   font-size: 15.2px;
   font-family: inherit;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--app-text);
   margin-bottom: 12px;
 }
 
 .seed-box {
   position: relative;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--app-tint);
+  border: 1px solid var(--app-border);
   border-radius: var(--app-radius-lg);
   padding: 20px;
   margin-bottom: 12px;
@@ -160,15 +145,15 @@ export default {
 }
 
 .seed-box:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: var(--app-tint-strong);
+  border-color: var(--app-border-strong);
 }
 
 .seed-text {
   font-family: monospace;
   font-size: 0.9rem;
   line-height: 1.8;
-  color: white;
+  color: var(--app-text);
   word-wrap: break-word;
   padding-inline-end: 80px; /* Space for action buttons */
 }
@@ -184,18 +169,18 @@ export default {
 .action-btn {
   width: 32px;
   height: 32px;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--app-text-muted);
   transition: all 0.2s ease;
 }
 
 .action-btn:hover {
-  color: white;
-  background: rgba(255, 255, 255, 0.1);
+  color: var(--app-text);
+  background: var(--app-tint-strong);
 }
 
 .seed-caption {
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--app-text-subtle);
   margin: 0;
   line-height: 1.4;
 }
@@ -209,11 +194,11 @@ export default {
 
 .validation-checkbox {
   font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--app-text-muted);
 }
 
 .validation-checkbox :deep(.q-checkbox__label) {
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--app-text-muted);
   font-size: 0.95rem;
   line-height: 1.4;
 }

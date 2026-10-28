@@ -1,7 +1,7 @@
 <template>
   <!-- <q-card class="q-my-md q-py-sm">
     <q-card-section class="q-mt-sm q-py-xs"> -->
-  <!-- The original wallet's generous air around the balance (user direction, R41). -->
+  <!-- The original wallet's generous air around the balance. -->
   <div class="q-pt-xl q-pb-sm">
     <transition
       appear
@@ -421,7 +421,7 @@ export default defineComponent({
   outline: 2px solid currentColor;
   outline-offset: 4px;
 }
-/* The picker belongs to the balance group: no extra gap before the action row (R17). */
+/* The picker belongs to the balance group: no extra gap before the action row. */
 .wallet-mint-picker {
   margin-inline: auto;
   max-width: var(--app-column);

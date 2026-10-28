@@ -1,6 +1,6 @@
 <!-- A mint's rating summary, after the app-store pattern: the average score large on the
-     start side with "out of 5" and the number of ratings under it, then one bar per star
-     level. `skeleton` draws the same boxes with placeholders while the reviews load. -->
+     start side with "out of 5" under it, then one bar per star level. The review count is
+     the list header's (MintRatingsComponent), so it isn't repeated here. `skeleton` draws the same boxes with placeholders while the reviews load. -->
 <template>
   <div
     class="row items-start ratings-summary"
@@ -17,14 +17,9 @@
         />
         <template v-else>{{ averageDisplay }}</template>
       </div>
-      <div class="text-caption text-grey-5 ratings-summary__out-of">
+      <div class="text-caption text-app-muted ratings-summary__out-of">
         <q-skeleton v-if="skeleton" type="rect" width="48px" height="16px" />
         <template v-else>{{ $t("MintRatings.out_of") }} 5</template>
-      </div>
-      <!-- How many ratings the score stands on, read with the score itself (R56). -->
-      <div class="ratings-summary__count">
-        <q-skeleton v-if="skeleton" type="rect" width="56px" height="14px" />
-        <template v-else>{{ $t("MintRatings.ratings", count) }}</template>
       </div>
     </div>
 
@@ -43,7 +38,7 @@
             :key="i"
             :size="12"
             fill="currentColor"
-            class="text-grey-6"
+            class="text-app-muted"
           />
         </div>
         <div class="col ratings-summary__track">
@@ -74,8 +69,6 @@ export default defineComponent({
   props: {
     /** The average rating, or null when no review carries one. */
     average: { type: Number as PropType<number | null>, default: null },
-    /** Reviews shown (the "N ratings" line). */
-    count: { type: Number, default: 0 },
     /** How many ratings fall on each star level, 1 to 5. */
     distribution: {
       type: Object as PropType<Record<number, number>>,
@@ -118,12 +111,6 @@ export default defineComponent({
 .ratings-summary__out-of {
   font-weight: 400;
   margin-top: 4px;
-  min-height: 16px;
-}
-.ratings-summary__count {
-  color: var(--app-text-muted);
-  font-size: 13px;
-  line-height: 16px;
   min-height: 16px;
 }
 .ratings-summary__bars {

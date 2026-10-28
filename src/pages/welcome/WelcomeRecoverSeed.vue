@@ -199,7 +199,7 @@ export default {
 
 .word-number {
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--app-text-subtle);
   min-width: 22px;
   text-align: end;
   font-weight: 600;
@@ -221,7 +221,7 @@ export default {
 }
 
 .word-input :deep(input::placeholder) {
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--app-text-subtle);
   font-size: 0.85rem;
 }
 
@@ -251,7 +251,7 @@ export default {
 
 .disclaimer {
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--app-text-muted);
   margin: 0;
   line-height: 1.4;
   text-align: start;

@@ -127,8 +127,8 @@ const routes = [
       { path: "", component: () => import("src/pages/TermsPage.vue") },
     ],
   },
-  // The design system board: every component, live, with a surface style switcher
-  // (src/js/ui-variant.ts). Development builds only; /ui is its old address.
+  // The design system board: every component, live, with its source and usage.
+  // Development builds only.
   ...(process.env.DEV
     ? [
         {
@@ -141,7 +141,6 @@ const routes = [
             },
           ],
         },
-        { path: "/ui", redirect: "/design-system" },
       ]
     : []),
 

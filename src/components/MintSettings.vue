@@ -70,7 +70,7 @@
             </template>
             <!-- The card only knows a score from a Nostr discovery scan; reviews load on
                  the ratings page, so without a score it links there instead of claiming
-                 none (R54: "No reviews yet" sat beside a mint rated 4.7). -->
+                 none ("No reviews yet" sat beside a mint rated 4.7). -->
             <template #meta>
               <MintReviewSummary
                 v-if="!isMintExcludedFromReviews(mint.url)"
@@ -367,7 +367,7 @@ export default defineComponent({
     // Hide zero balances in units the user has never funded at this mint.
     visibleUnits(mint) {
       const mintClass = this.mintClass(mint);
-      // sat leads on every card, as in the mint picker (R20).
+      // sat leads on every card, as in the mint picker.
       const units = [...mintClass.units].sort(
         (a, b) => Number(b === "sat") - Number(a === "sat")
       );

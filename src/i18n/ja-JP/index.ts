@@ -555,6 +555,11 @@ export default {
           description:
             "使用中のミントが使用済みと報告した ecash を削除します。ウォレットが動かなくなったときだけ使ってください。",
         },
+        design_system: {
+          title: "デザインシステム",
+          description:
+            "アプリの全コンポーネントを、ソースと使用箇所つきでライブ表示します。",
+        },
         debug_console: {
           button: "デバッグコンソール",
           description:
@@ -567,10 +572,11 @@ export default {
         },
         keyset_counters: {
           title: "キーセットカウンターをインクリメント",
-          description:
-            "キーセットをタップするとカウンターが増えます。「outputs have already been signed」エラーの対処に役立ちます。",
-          counter: "カウンター: {count}",
           increase: "{id} のカウンターを増やす",
+          fixes: "「outputs have already been signed」を解消",
+          keysets: "{n} 個のキーセット | {n} 個のキーセット",
+          sheet_hint: "+ をタップするとキーセットのカウンターが増えます。",
+          column: "カウンター",
         },
         unset_reserved: {
           button: "すべての予約済みトークンを解除",
@@ -1284,14 +1290,16 @@ export default {
     },
   },
   PaymentRequestDialog: {
+    any_amount: "金額指定なし",
     payment_request: {
       caption: "支払いリクエスト",
       description: "Nostr経由で支払いを受け取る",
     },
     request_index: "リクエスト {index}/{total}",
-    requesting: "請求額",
-    payer_chooses_amount: "金額は支払者が決定",
     actions: {
+      set_amount: {
+        label: "金額を設定",
+      },
       copy: {
         label: "@:global.actions.copy.label",
       },

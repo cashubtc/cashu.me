@@ -548,6 +548,10 @@ export default {
           description:
             "移除您当前 Mint 报告为已花费的 ecash。仅在钱包卡住时使用。",
         },
+        design_system: {
+          title: "设计系统",
+          description: "应用的每个组件，实时呈现，附带源码与用法。",
+        },
         debug_console: {
           button: "调试控制台",
           description:
@@ -559,10 +563,11 @@ export default {
         },
         keyset_counters: {
           title: "增加 keyset 计数器",
-          description:
-            "点击某个 keyset 以增加其计数器。可用于解决“outputs have already been signed”错误。",
-          counter: "计数器：{count}",
           increase: "增加 {id} 的计数器",
+          fixes: "修复“outputs have already been signed”",
+          keysets: "{n} 个密钥集 | {n} 个密钥集",
+          sheet_hint: "点按 + 可增加密钥集的计数器。",
+          column: "计数器",
         },
         unset_reserved: {
           button: "取消所有保留的 token",
@@ -1263,14 +1268,16 @@ export default {
     },
   },
   PaymentRequestDialog: {
+    any_amount: "任意金额",
     payment_request: {
       caption: "付款请求",
       description: "通过 Nostr 接收支付",
     },
     request_index: "第 {index} 个，共 {total} 个请求",
-    requesting: "请求金额",
-    payer_chooses_amount: "由付款人决定金额",
     actions: {
+      set_amount: {
+        label: "设置金额",
+      },
       copy: {
         label: "@:global.actions.copy.label",
       },

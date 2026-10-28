@@ -549,6 +549,11 @@ export default {
           description:
             "Etkin mint'lerinizin harcanmış bildirdiği ecash'i kaldırır. Yalnızca cüzdanınız takılırsa kullanın.",
         },
+        design_system: {
+          title: "Tasarım sistemi",
+          description:
+            "Uygulamanın her bileşeni, canlı, kaynağı ve kullanımıyla.",
+        },
         debug_console: {
           button: "Hata ayıklama konsolu",
           description:
@@ -561,10 +566,12 @@ export default {
         },
         keyset_counters: {
           title: "Anahtar kümesi sayaçlarını artır",
-          description:
-            'Sayacını artırmak için bir keyset\'e dokunun. "outputs have already been signed" hatasına yardımcı olur.',
-          counter: "Sayaç: {count}",
           increase: "{id} için sayacı artır",
+          fixes: "“outputs have already been signed” hatasını giderir",
+          keysets: "{n} keyset | {n} keyset",
+          sheet_hint:
+            "Bir keyset'in sayacını artırmak için + simgesine dokunun.",
+          column: "Sayaç",
         },
 
         unset_reserved: {
@@ -1299,14 +1306,16 @@ export default {
     },
   },
   PaymentRequestDialog: {
+    any_amount: "Herhangi bir tutar",
     payment_request: {
       caption: "Ödeme talebi",
       description: "Nostr aracılığıyla ödeme al",
     },
     request_index: "İstek {index} / {total}",
-    requesting: "İstenen tutar",
-    payer_chooses_amount: "Tutarı ödeyen belirler",
     actions: {
+      set_amount: {
+        label: "Tutarı ayarla",
+      },
       copy: {
         label: "@:global.actions.copy.label",
       },
