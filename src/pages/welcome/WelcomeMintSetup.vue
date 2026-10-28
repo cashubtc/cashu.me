@@ -74,7 +74,7 @@
           "
           class="add-mint-btn"
         >
-          <q-icon name="add" size="18px" class="q-mr-sm" />
+          <PlusIcon :size="20" class="q-mr-sm" />
           <span>{{ $t("MintSettings.add.actions.add_mint.label") }}</span>
         </q-btn>
       </div>
@@ -105,7 +105,7 @@
 </template>
 
 <script lang="ts">
-import { Landmark as LandmarkIcon } from "lucide-vue-next";
+import { Landmark as LandmarkIcon, Plus as PlusIcon } from "lucide-vue-next";
 import WelcomeSlideScaffold from "src/components/ui/WelcomeSlideScaffold.vue";
 import { computed, ref, watch, onMounted } from "vue";
 import { useWelcomeStore } from "src/stores/welcome";
@@ -122,6 +122,7 @@ import MintDiscovery from "../../components/MintDiscovery.vue";
 export default {
   name: "WelcomeMintSetup",
   components: {
+    PlusIcon,
     WelcomeSlideScaffold,
     AddMintDialog,
     NostrMintRestore,

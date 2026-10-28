@@ -2,7 +2,7 @@
   <div class="app-option-row payment-request-info">
     <div class="row items-center no-wrap">
       <div class="app-icon-circle">
-        <SendIcon :size="20" />
+        <FileTextIcon :size="20" />
       </div>
       <div class="col q-ml-md">
         <div class="app-option-row__label">
@@ -20,12 +20,12 @@
 import { defineComponent, PropType } from "vue";
 import { PaymentRequestTransportType } from "@cashu/cashu-ts";
 import type { PaymentRequestData } from "src/stores/payment-request";
-import { Send as SendIcon } from "lucide-vue-next";
+import { FileText as FileTextIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "PaymentRequestInfo",
   components: {
-    SendIcon,
+    FileTextIcon,
   },
   props: {
     request: {

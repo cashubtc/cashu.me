@@ -113,7 +113,11 @@
       <div class="col-12">
         <span class="text-red text-weight-bold">
           {{ $t("BalanceView.mintError.label") }}
-          <q-icon name="error" class="q-ml-xs" size="xs" />
+          <CircleAlertIcon
+            :size="16"
+            class="q-ml-xs"
+            style="vertical-align: -3px"
+          />
         </span>
       </div>
     </div>
@@ -129,6 +133,7 @@
   </q-card> -->
 </template>
 <script lang="ts">
+import { CircleAlert as CircleAlertIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapState, mapWritableState, mapActions } from "pinia";
 import { useMintsStore } from "src/stores/mints";
@@ -145,10 +150,7 @@ import { useProofsStore } from "src/stores/proofs";
 export default defineComponent({
   name: "BalanceView",
   mixins: [windowMixin],
-  components: {
-    AnimatedNumber,
-    ChooseMint,
-  },
+  components: { CircleAlertIcon, AnimatedNumber, ChooseMint },
   props: {
     setTab: Function,
   },

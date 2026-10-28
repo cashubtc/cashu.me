@@ -18,7 +18,7 @@
         >
           <div class="row items-center no-wrap">
             <div class="app-icon-circle">
-              <ClipboardIcon :size="24" />
+              <ClipboardPasteIcon :size="24" />
             </div>
             <div class="col q-ml-md">
               <div class="app-option-row__label">
@@ -122,7 +122,7 @@ import PRDialog from "./PaymentRequestDialog.vue";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import {
-  Clipboard as ClipboardIcon,
+  ClipboardPaste as ClipboardPasteIcon,
   FileText as FileTextIcon,
   Lock as LockIcon,
   Nfc as NfcIcon,
@@ -140,7 +140,7 @@ export default defineComponent({
     BottomSheet,
     P2PKDialog,
     PRDialog,
-    ClipboardIcon,
+    ClipboardPasteIcon,
     FileTextIcon,
     LockIcon,
     ScanIcon,

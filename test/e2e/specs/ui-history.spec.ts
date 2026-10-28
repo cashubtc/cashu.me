@@ -131,7 +131,7 @@ test("reopens, copies, filters, reclaims and deletes unclaimed ecash history", a
   // Long press changes the check action into the existing receive/reclaim action.
   const check = row.getByTestId("history-check");
   await check.dispatchEvent("mousedown");
-  await expect(check).toContainText("arrow_circle_down");
+  await expect(check).toHaveAttribute("aria-label", "Receive");
   await check.dispatchEvent("touchend");
   await page.getByTestId("receive-ecash").click();
   await expect.poll(() => wallet.balanceSats()).toBe(100);

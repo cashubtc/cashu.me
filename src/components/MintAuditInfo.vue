@@ -5,12 +5,10 @@
       {{ $t("MintAuditInfo.loading") }}
     </div>
     <div v-else-if="mintNotAudited" class="q-mx-sm">
-      <q-icon
-        name="info_outline"
-        color="grey"
-        size="20px"
-        class="q-mr-sm"
-        style="padding-bottom: 2px; margin-bottom: 2px"
+      <InfoIcon
+        :size="20"
+        class="q-mr-sm text-grey"
+        style="vertical-align: -4px"
       />
       <span class="text-bold">{{ $t("MintAuditInfo.not_audited") }}</span>
       <br />
@@ -123,6 +121,7 @@
 </template>
 
 <script lang="ts">
+import { Info as InfoIcon } from "lucide-vue-next";
 interface MintRead {
   id: number;
   url: string;
@@ -161,10 +160,7 @@ import { getShortUrl } from "../js/wallet-helpers";
 
 export default {
   name: "MintAuditInfo",
-  components: {
-    MintAuditWarningBox,
-    MintAuditSwapsBarChart,
-  },
+  components: { InfoIcon, MintAuditWarningBox, MintAuditSwapsBarChart },
   props: {
     mintUrl: {
       type: String,

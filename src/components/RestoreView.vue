@@ -120,7 +120,7 @@
                   @click.stop="restoreMintForMint(mint.url)"
                   :disabled="!isMnemonicValid || restoringState"
                   :loading="restoringMint === mint.url"
-                  ><HistoryIcon :size="20" />
+                  ><ArchiveRestoreIcon :size="20" />
                   <q-tooltip>{{
                     $t("RestoreView.actions.restore.label")
                   }}</q-tooltip>
@@ -157,7 +157,7 @@
           :loading="restoringState"
           class="full-width"
         >
-          <HistoryIcon :size="20" class="q-mr-sm" />
+          <ArchiveRestoreIcon :size="20" class="q-mr-sm" />
           {{
             $t("RestoreView.actions.restore_selected_mints.label", {
               count: selectedMintsCount,
@@ -186,7 +186,7 @@
 <script lang="ts">
 import {
   ClipboardPaste as ClipboardPasteIcon,
-  History as HistoryIcon,
+  ArchiveRestore as ArchiveRestoreIcon,
 } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -206,7 +206,7 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     ClipboardPasteIcon,
-    HistoryIcon,
+    ArchiveRestoreIcon,
     MintInfoContainer,
     NostrMintRestore,
     SettingsSection,

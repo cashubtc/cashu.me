@@ -16,7 +16,7 @@
       :loading="isLoading"
       @click="clickPaymentRequest"
     >
-      <q-icon name="send" class="q-pr-xs" />
+      <SendIcon :size="20" class="q-mr-sm" />
       {{ resolvedLabel }}
       <template v-slot:loading
         ><q-spinner-dots size="20px" class="on-left" />{{
@@ -28,6 +28,7 @@
 </template>
 
 <script lang="ts">
+import { Send as SendIcon } from "lucide-vue-next";
 import { defineComponent, PropType } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
@@ -42,6 +43,7 @@ declare const windowMixin: any;
 
 export default defineComponent({
   name: "SendPaymentRequest",
+  components: { SendIcon },
   mixins: [windowMixin],
   props: {
     buttonLabel: {

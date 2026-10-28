@@ -16,11 +16,9 @@
           :class="{ active: messageState === 'added' }"
           :aria-hidden="messageState !== 'added'"
         >
-          <q-icon
-            name="check_circle"
-            color="positive"
-            size="18px"
-            class="q-mr-xs message-icon"
+          <CircleCheckIcon
+            :size="18"
+            class="q-mr-xs message-icon text-positive"
           />
           {{ $t("wallet.mint.notifications.already_added") }}
         </p>
@@ -29,11 +27,9 @@
           :class="{ active: messageState === 'error' }"
           :aria-hidden="messageState !== 'error'"
         >
-          <q-icon
-            name="error_outline"
-            color="negative"
-            size="18px"
-            class="q-mr-xs message-icon"
+          <CircleAlertIcon
+            :size="18"
+            class="q-mr-xs message-icon text-negative"
           />
           {{ $t("AddMintDialog.unreachable_error_text") }}
         </p>
@@ -118,12 +114,18 @@ import { getShortUrl } from "src/js/wallet-helpers";
 import BottomSheet from "./BottomSheet.vue";
 import MintAuditInfo from "./MintAuditInfo.vue";
 import MintInfoContainer from "./MintInfoContainer.vue";
-import { Info as InfoIcon } from "lucide-vue-next";
+import {
+  CircleAlert as CircleAlertIcon,
+  CircleCheck as CircleCheckIcon,
+  Info as InfoIcon,
+} from "lucide-vue-next";
 import DetailRow from "src/components/ui/DetailRow.vue";
 
 export default defineComponent({
   name: "AddMintDialog",
   components: {
+    CircleCheckIcon,
+    CircleAlertIcon,
     BottomSheet,
     MintAuditInfo,
     MintInfoContainer,

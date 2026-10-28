@@ -92,11 +92,9 @@
                                   )
                                 : ""
                             }}
-                            <q-icon
-                              color="positive"
-                              name="check_circle"
-                              size="md"
-                              class="q-mb-sm"
+                            <CircleCheckIcon
+                              :size="32"
+                              class="q-mb-sm text-positive"
                             />
                           </div>
                         </div>
@@ -217,13 +215,17 @@
                                     }}
                                   </div>
                                 </div>
-                                <q-icon
-                                  :name="
+                                <!-- The standard radio, display only: the row takes the tap. -->
+                                <q-radio
+                                  :model-value="
                                     option.fee_index === selectedOnchainFeeIndex
-                                      ? 'radio_button_checked'
-                                      : 'radio_button_unchecked'
                                   "
+                                  :val="true"
                                   color="primary"
+                                  dense
+                                  tabindex="-1"
+                                  aria-hidden="true"
+                                  style="pointer-events: none"
                                 />
                               </div>
                             </div>
@@ -733,6 +735,7 @@
   />
 </template>
 <script lang="ts">
+import { CircleCheck as CircleCheckIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
@@ -761,6 +764,7 @@ export default defineComponent({
   name: "PayInvoiceDialog",
   mixins: [windowMixin],
   components: {
+    CircleCheckIcon,
     ChooseMint,
     MultinutPaymentDialog,
     MeltQuoteInformation,

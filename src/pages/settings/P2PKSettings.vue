@@ -65,13 +65,19 @@
               $t("Settings.p2pk_features.keys_expansion.used_badge")
             }}</span>
             <CopyButton :value="key.publicKey" :icon-size="18" />
-            <q-icon
-              name="qr_code"
-              @click="showP2PKKeyEntry(key.publicKey)"
-              size="xs"
+            <q-btn
+              flat
+              dense
+              round
+              size="sm"
               color="grey"
-              class="cursor-pointer"
-            />
+              :aria-label="
+                $t('Settings.nostr_wallet_connect.connection.qr_tooltip')
+              "
+              @click="showP2PKKeyEntry(key.publicKey)"
+            >
+              <QrCodeIcon :size="18" />
+            </q-btn>
           </div>
         </q-item-section>
       </q-item>
@@ -83,6 +89,7 @@
 </template>
 
 <script lang="ts">
+import { QrCode as QrCodeIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useP2PKStore } from "src/stores/p2pk";
@@ -96,6 +103,7 @@ export default defineComponent({
   name: "P2PKSettings",
   mixins: [windowMixin],
   components: {
+    QrCodeIcon,
     CopyButton,
     SettingsToggleRow,
     SettingsPageShell,

@@ -22,10 +22,9 @@
             >
               {{ secondaryDisplay || " " }}
             </div>
-            <q-icon
+            <ArrowDownUpIcon
               v-if="showSwap"
-              name="swap_vert"
-              size="24px"
+              :size="24"
               class="fiat-icon text-grey-6 cursor-pointer"
               @click="toggleFiatMode"
               :aria-label="$t('common.swap_input_mode')"
@@ -40,6 +39,7 @@
   <!-- amount-input-root keeps structure minimal so parents can place it within their layout -->
 </template>
 <script lang="ts">
+import { ArrowDownUp as ArrowDownUpIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapState } from "pinia";
 import { useMintsStore } from "src/stores/mints";
@@ -51,6 +51,7 @@ const MAX_AMOUNT = 999_999_999;
 
 export default defineComponent({
   name: "AmountInputComponent",
+  components: { ArrowDownUpIcon },
   mixins: [windowMixin],
   props: {
     modelValue: {

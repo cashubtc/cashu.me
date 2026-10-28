@@ -53,7 +53,7 @@
         @click="toggleLanguageMenu"
       >
         <span class="language-text">{{ selectedLanguage }}</span>
-        <q-icon name="keyboard_arrow_up" class="language-icon" />
+        <ChevronUpIcon :size="16" class="language-icon" />
       </button>
     </div>
 
@@ -91,6 +91,7 @@
 </template>
 
 <script lang="ts">
+import { ChevronUp as ChevronUpIcon } from "lucide-vue-next";
 import { useWelcomeStore } from "src/stores/welcome";
 import BottomSheet from "src/components/BottomSheet.vue";
 import SheetOption from "src/components/SheetOption.vue";
@@ -98,7 +99,7 @@ import TermsOfServiceText from "src/components/TermsOfServiceText.vue";
 
 export default {
   name: "WelcomeSlide1",
-  components: { BottomSheet, SheetOption, TermsOfServiceText },
+  components: { ChevronUpIcon, BottomSheet, SheetOption, TermsOfServiceText },
   data() {
     return {
       selectedLanguage: "",
@@ -300,7 +301,6 @@ export default {
 }
 
 .language-icon {
-  font-size: 1rem;
   transition: transform 0.2s ease;
 }
 

@@ -26,7 +26,7 @@
                 :aria-label="$t('SendTokenDialog.actions.lock.label')"
                 @click="showLockInput = !showLockInput"
               >
-                <LockIcon size="1.2em" />
+                <LockIcon :size="20" />
                 <q-tooltip>{{
                   $t("SendTokenDialog.actions.lock.label")
                 }}</q-tooltip>
@@ -102,9 +102,14 @@
                       <q-btn
                         unelevated
                         v-if="canPasteFromClipboard"
-                        icon="content_paste"
+                        :aria-label="
+                          $t(
+                            'SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text'
+                          )
+                        "
                         @click="pasteToP2PKField"
                       >
+                        <ClipboardPasteIcon :size="20" />
                         <q-tooltip>{{
                           $t(
                             "SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text"
@@ -119,7 +124,7 @@
                         round
                         @click="showCamera"
                       >
-                        <ScanIcon size="1.5em" />
+                        <ScanIcon :size="20" />
                       </q-btn>
                     </div>
                   </div>
@@ -258,9 +263,7 @@ import AmountInputComponent from "components/AmountInputComponent.vue";
 import SendPaymentRequest from "components/SendPaymentRequest.vue";
 import PaymentRequestInfo from "components/PaymentRequestInfo.vue";
 import {
-  ChevronLeft as ChevronLeftIcon,
-  Clipboard as ClipboardIcon,
-  FileText as FileTextIcon,
+  ClipboardPaste as ClipboardPasteIcon,
   Lock as LockIcon,
   Scan as ScanIcon,
 } from "lucide-vue-next";
@@ -269,6 +272,7 @@ export default defineComponent({
   name: "SendTokenDialog",
   mixins: [windowMixin],
   components: {
+    ClipboardPasteIcon,
     AppCallout,
     ChooseMint,
     AmountKeypadPanel,

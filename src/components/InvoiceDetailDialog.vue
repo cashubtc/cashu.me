@@ -58,10 +58,15 @@
                   class="q-mt-sm text-center text-grey-7 qr-copy-text app-mono app-mono--wrap cursor-pointer"
                   @click="onCopyBolt11"
                 >
-                  <q-icon
-                    :name="copyButtonCopied ? 'check' : 'content_copy'"
-                    size="xs"
-                    class="q-mr-xs"
+                  <CheckIcon
+                    v-if="copyButtonCopied"
+                    :size="16"
+                    class="q-mr-xs qr-copy-text__icon"
+                  />
+                  <CopyIcon
+                    v-else
+                    :size="16"
+                    class="q-mr-xs qr-copy-text__icon"
                   />
                   {{ invoiceData.request }}
                 </div>
@@ -150,7 +155,11 @@ import QrBlock from "src/components/QrBlock.vue";
 import QrProgress from "src/components/QrProgress.vue";
 import FullscreenDialogHeader from "src/components/ui/FullscreenDialogHeader.vue";
 import { copyToClipboard } from "quasar";
-import { CircleCheck as CircleCheckIcon } from "lucide-vue-next";
+import {
+  Check as CheckIcon,
+  CircleCheck as CircleCheckIcon,
+  Copy as CopyIcon,
+} from "lucide-vue-next";
 
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
@@ -167,6 +176,8 @@ export default defineComponent({
   name: "InvoiceDetailDialog",
   mixins: [windowMixin],
   components: {
+    CheckIcon,
+    CopyIcon,
     CircleCheckIcon,
     QrBlock,
     QrProgress,

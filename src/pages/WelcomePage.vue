@@ -60,12 +60,13 @@
         <q-btn
           flat
           round
-          icon="chevron_left"
           class="welcome-footer__back"
           :aria-label="$t('WelcomePage.actions.previous.label')"
           v-if="welcomeStore.canGoPrev"
           @click="welcomeStore.goToPrevSlide"
-        />
+        >
+          <ChevronLeftIcon :size="24" />
+        </q-btn>
         <q-btn
           rounded
           unelevated
@@ -86,6 +87,7 @@
 </template>
 
 <script lang="ts">
+import { ChevronLeft as ChevronLeftIcon } from "lucide-vue-next";
 import { onMounted, ref } from "vue";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useStorageStore } from "src/stores/storage";
@@ -100,6 +102,7 @@ import WelcomeRestoreEcash from "./welcome/WelcomeRestoreEcash.vue";
 export default {
   name: "WelcomePage",
   components: {
+    ChevronLeftIcon,
     WelcomeSlide1,
     WelcomeSlide2,
     WelcomeSlide3,

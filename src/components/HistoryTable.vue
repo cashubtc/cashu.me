@@ -42,9 +42,6 @@
                 dense
                 round
                 data-testid="history-check"
-                :icon="
-                  transaction.longPressActive ? 'arrow_circle_down' : 'schedule'
-                "
                 @click.stop="
                   transaction.longPressActive
                     ? handleLongPress(transaction)
@@ -56,7 +53,17 @@
                 @touchend="endLongTap(transaction)"
                 class="cursor-pointer history-check-btn"
                 size="sm"
+                :aria-label="
+                  transaction.longPressActive
+                    ? $t('HistoryTable.actions.receive.tooltip_text')
+                    : $t('HistoryTable.actions.check_status.tooltip_text')
+                "
               >
+                <CircleArrowDownIcon
+                  v-if="transaction.longPressActive"
+                  :size="18"
+                />
+                <RefreshCwIcon v-else :size="18" />
                 <q-tooltip>{{
                   transaction.longPressActive
                     ? $t("HistoryTable.actions.receive.tooltip_text")
@@ -93,19 +100,20 @@
           :outline="!filterPending"
           :unelevated="filterPending"
           no-caps
-          :icon="filterPending ? 'check' : undefined"
           :aria-pressed="filterPending ? 'true' : 'false'"
           @click="filterPending = !filterPending"
           :color="filterPending ? 'primary' : undefined"
-          :label="
+          class="q-px-md history-filter-btn"
+        >
+          <CheckIcon v-if="filterPending" :size="20" class="q-mr-sm" />
+          {{
             $t(
               filterPending
-                ? 'HistoryTable.actions.show_all.label'
-                : 'HistoryTable.actions.filter_pending.label'
+                ? "HistoryTable.actions.show_all.label"
+                : "HistoryTable.actions.filter_pending.label"
             )
-          "
-          class="q-px-md history-filter-btn"
-        />
+          }}
+        </q-btn>
         <q-btn
           v-if="filterPending"
           rounded
@@ -155,13 +163,21 @@ import token from "../js/token";
 import { notify } from "src/js/notify";
 import ActivityRow from "src/components/ActivityRow.vue";
 import EmptyState from "src/components/ui/EmptyState.vue";
-import { History as HistoryIcon } from "lucide-vue-next";
+import {
+  Check as CheckIcon,
+  CircleArrowDown as CircleArrowDownIcon,
+  History as HistoryIcon,
+  RefreshCw as RefreshCwIcon,
+} from "lucide-vue-next";
 import { PaymentMethod, UnifiedTransactionType } from "src/stores/walletTypes";
 import { mintQuoteForHistoryInvoice } from "src/js/invoice-history";
 
 export default defineComponent({
   name: "HistoryTable",
   components: {
+    CircleArrowDownIcon,
+    RefreshCwIcon,
+    CheckIcon,
     ActivityRow,
     EmptyState,
   },

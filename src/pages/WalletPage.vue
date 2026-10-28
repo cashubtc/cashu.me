@@ -258,12 +258,7 @@ import { useWelcomeStore } from "../stores/welcome";
 import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import { notifyError, notify } from "../js/notify";
 
-import {
-  X as XIcon,
-  Banknote as BanknoteIcon,
-  Zap as ZapIcon,
-  Scan as ScanIcon,
-} from "lucide-vue-next";
+import { Scan as ScanIcon } from "lucide-vue-next";
 
 import { useMigrationsStore } from "src/stores/migrations";
 

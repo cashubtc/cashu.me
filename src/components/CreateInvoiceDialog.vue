@@ -104,11 +104,11 @@
                         dense
                         no-caps
                         color="primary"
-                        icon="refresh"
-                        :label="$t('CreateInvoiceDialog.reconnect_mint')"
                         :loading="refreshingMint"
                         @click="refreshActiveMint"
                       >
+                        <RefreshCwIcon :size="18" class="q-mr-sm" />
+                        {{ $t("CreateInvoiceDialog.reconnect_mint") }}
                         <template v-slot:loading
                           ><q-spinner-dots size="20px" class="on-left" />{{
                             $t("CreateInvoiceDialog.reconnect_mint")
@@ -134,10 +134,15 @@
                     "
                     @click="copyQrPreview"
                   >
-                    <q-icon
-                      :name="qrPreview.copied ? 'check' : 'content_copy'"
-                      size="xs"
-                      class="q-mr-xs"
+                    <CheckIcon
+                      v-if="qrPreview.copied"
+                      :size="16"
+                      class="q-mr-xs qr-copy-text__icon"
+                    />
+                    <CopyIcon
+                      v-else
+                      :size="16"
+                      class="q-mr-xs qr-copy-text__icon"
                     />
                     {{ qrPreview.text }}
                   </div>
@@ -284,7 +289,12 @@
   </q-dialog>
 </template>
 <script lang="ts">
-import { ChevronLeft as ChevronLeftIcon } from "lucide-vue-next";
+import {
+  Check as CheckIcon,
+  ChevronLeft as ChevronLeftIcon,
+  Copy as CopyIcon,
+  RefreshCw as RefreshCwIcon,
+} from "lucide-vue-next";
 import AppCallout from "src/components/AppCallout.vue";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -322,6 +332,9 @@ export default defineComponent({
   name: "CreateInvoiceDialog",
   mixins: [windowMixin],
   components: {
+    RefreshCwIcon,
+    CheckIcon,
+    CopyIcon,
     AppCallout,
     ChevronLeftIcon,
     ChooseMint,

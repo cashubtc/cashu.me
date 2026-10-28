@@ -22,7 +22,7 @@
             :aria-label="$t('global.actions.close.label')"
             @click="closeMultinutDialog"
           >
-            <XIcon :size="22" />
+            <XIcon :size="24" />
           </q-btn>
         </div>
 
@@ -173,17 +173,15 @@
                         color="primary"
                         size="24px"
                       />
-                      <q-icon
+                      <CircleCheckIcon
                         v-else-if="mintStates[mint.url] === 'success'"
-                        name="check_circle"
-                        color="positive"
-                        size="24px"
+                        :size="24"
+                        class="text-positive"
                       />
-                      <q-icon
+                      <CircleAlertIcon
                         v-else-if="mintStates[mint.url] === 'error'"
-                        name="error"
-                        color="negative"
-                        size="24px"
+                        :size="24"
+                        class="text-negative"
                       />
                     </div>
                   </div>
@@ -312,13 +310,17 @@ import { useUiStore } from "src/stores/ui";
 import { notifyError, notifySuccess } from "src/js/notify";
 import { sumProofAmounts } from "src/js/proofs";
 import { getShortUrl } from "src/js/wallet-helpers";
-import { X as XIcon } from "lucide-vue-next";
+import {
+  CircleAlert as CircleAlertIcon,
+  CircleCheck as CircleCheckIcon,
+  X as XIcon,
+} from "lucide-vue-next";
 import AppCallout from "src/components/AppCallout.vue";
 
 export default defineComponent({
   name: "MultinutPaymentDialog",
   mixins: [windowMixin],
-  components: { XIcon, AppCallout },
+  components: { CircleCheckIcon, CircleAlertIcon, XIcon, AppCallout },
   data() {
     return {
       multiMeltButtonLoading: false,

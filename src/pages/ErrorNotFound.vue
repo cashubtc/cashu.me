@@ -3,7 +3,7 @@
        page column; the body is the shared blocking state (AlreadyRunning uses it too). -->
   <q-page class="blocking-state column flex-center text-center q-pa-md">
     <div class="app-icon-circle app-icon-circle--lg blocking-state__icon">
-      <CompassIcon :size="26" />
+      <SearchXIcon :size="26" />
     </div>
     <div class="blocking-state__title q-mt-md">
       {{ $t("ErrorNotFound.text") }}
@@ -25,10 +25,10 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { Compass as CompassIcon } from "lucide-vue-next";
+import { SearchX as SearchXIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "ErrorNotFound",
-  components: { CompassIcon },
+  components: { SearchXIcon },
 });
 </script>

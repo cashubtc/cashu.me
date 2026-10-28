@@ -98,7 +98,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "lucide-vue-next (read from every import in src)",
     example: `import { Zap as ZapIcon } from "lucide-vue-next";
 <ZapIcon :size="20" />`,
-    note: "Every icon in the app, in one grid. Lucide line icons are the family; any Material names still passed to Quasar are listed apart so they can be replaced.",
+    note: "Every icon in the app, in one grid: Lucide line icons only (Quasar's own icons use the Lucide set in src/js/lucide-icons.ts, and a guard test rejects Material names). One icon per idea: Coins amount and ecash, CircleDollarSign unit, Banknote fiat, ReceiptText fee, Zap Lightning, Bitcoin on-chain, Landmark mint, FileText payment request, Hash ids and addresses, Network network, ClipboardPaste paste, Copy copy, Trash2 delete, RefreshCw refresh, ArchiveRestore restore, X close, CircleCheck / CircleAlert / TriangleAlert / Info for success, error, warning and info.",
   },
   {
     id: "machine-text",
@@ -581,7 +581,7 @@ export const DS_ITEMS: DsItem[] = [
     tier: "pattern",
     source: "src/components/ui/WelcomeSlideScaffold.vue",
     usage: { tag: "WelcomeSlideScaffold" },
-    example: `<WelcomeSlideScaffold icon="key" :title="$t('…title')" :text="$t('…text')">…</WelcomeSlideScaffold>`,
+    example: `<WelcomeSlideScaffold :icon="KeyRoundIcon" :title="$t('…title')" :text="$t('…text')">…</WelcomeSlideScaffold>`,
   },
 ];
 

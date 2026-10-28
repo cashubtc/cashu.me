@@ -13,7 +13,7 @@
       <DetailRow
         v-if="receiveFee > 0 && !hideFee"
         class="q-mb-md"
-        :icon="ArrowDownUpIcon"
+        :icon="ReceiptTextIcon"
         :label="$t('TokenInformation.fee')"
         :value="formatCurrency(receiveFee, tokenUnit, true)"
       />
@@ -22,7 +22,7 @@
       <DetailRow
         v-if="!hideUnit && tokenUnit !== 'sat'"
         class="q-mb-md"
-        :icon="CoinsIcon"
+        :icon="CircleDollarSignIcon"
         :label="$t('TokenInformation.unit')"
         :value="tokenUnit === 'sat' ? 'sat' : tokenUnit.toUpperCase()"
       />
@@ -78,7 +78,7 @@
       <!-- Payment Request (if applicable) -->
       <DetailRow
         v-if="paymentRequestId"
-        :icon="BanknoteIcon"
+        :icon="FileTextIcon"
         :label="$t('TokenInformation.payment_request')"
         :value="$t('TokenInformation.nostr')"
       />
@@ -98,12 +98,13 @@ import { usePriceStore } from "src/stores/price";
 import { useSettingsStore } from "src/stores/settings";
 import token from "src/js/token";
 import {
-  ArrowDownUp as ArrowDownUpIcon,
+  Banknote as BanknoteIcon,
+  CircleDollarSign as CircleDollarSignIcon,
+  FileText as FileTextIcon,
   Landmark as LandmarkIcon,
   Lock as LockIcon,
-  Banknote as BanknoteIcon,
-  Coins as CoinsIcon,
   MessageCircle as MessageCircleIcon,
+  ReceiptText as ReceiptTextIcon,
 } from "lucide-vue-next";
 import DetailRow from "src/components/ui/DetailRow.vue";
 
@@ -113,12 +114,13 @@ export default defineComponent({
   components: { DetailRow },
   setup() {
     return {
-      ArrowDownUpIcon,
+      BanknoteIcon,
+      CircleDollarSignIcon,
+      FileTextIcon,
       LandmarkIcon,
       LockIcon,
-      BanknoteIcon,
-      CoinsIcon,
       MessageCircleIcon,
+      ReceiptTextIcon,
     };
   },
   props: {

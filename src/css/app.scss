@@ -130,7 +130,6 @@ body,
   max-width: 650px;
 }
 
-
 .animated.tada {
   animation-duration: 1s;
 }
@@ -601,12 +600,6 @@ textarea,
   resize: none !important;
 }
 
-/* One icon language: every Material glyph renders in its outlined form, which matches the
-   stroked Lucide set used across the app. */
-.material-icons {
-  font-family: "Material Icons Outlined" !important;
-}
-
 /* Dialog scrim, one for every sheet and dialog: dark enough that the page behind recedes
    instead of reading as disabled. */
 .q-dialog__backdrop {
@@ -775,7 +768,6 @@ body.body--light .q-dialog__backdrop {
   line-height: 22px;
 }
 
-
 // Text for screen readers only.
 .visually-hidden {
   position: absolute !important;
@@ -880,7 +872,9 @@ body .q-field--outlined .q-field__control {
 body .q-field--outlined.q-field--readonly .q-field__control {
   background: var(--app-tint);
 }
-body .q-field--outlined.q-field--readonly:not(:has(.q-field__append)) .q-field__control {
+body
+  .q-field--outlined.q-field--readonly:not(:has(.q-field__append))
+  .q-field__control {
   padding-inline-end: 40px;
 }
 body .q-field--outlined.q-field--readonly .q-field__control:before {
@@ -889,7 +883,9 @@ body .q-field--outlined.q-field--readonly .q-field__control:before {
 // A lock on the end edge says "can't be edited" without relying on the surface alone. A field
 // with its own end action (Copy on the Lightning address) keeps that action instead, so the
 // lock never sits on top of it.
-body .q-field--outlined.q-field--readonly:not(:has(.q-field__append)) .q-field__control::after {
+body
+  .q-field--outlined.q-field--readonly:not(:has(.q-field__append))
+  .q-field__control::after {
   background: var(--app-text-muted);
   border: 0 !important;
   // The shared 12px field radius also lands on this pseudo-element and clipped the shackle.
@@ -969,8 +965,7 @@ html[dir="rtl"] .lucide-chevron-right-icon,
 html[dir="rtl"] .lucide-arrow-left-icon,
 html[dir="rtl"] .lucide-arrow-right-icon,
 html[dir="rtl"] .rtl-flip,
-html[dir="rtl"] .settings-menu-chevron,
-html[dir="rtl"] .welcome-footer__back .q-icon {
+html[dir="rtl"] .settings-menu-chevron {
   transform: scaleX(-1);
 }
 // "Opens elsewhere" is not a reading direction, so the external-link arrow never mirrors.
@@ -1430,6 +1425,10 @@ body .q-notification .q-notification__icon {
   margin-right: 0 !important;
   width: 36px;
 }
+body .q-notification .q-notification__icon > svg {
+  height: 20px;
+  width: 20px;
+}
 body .q-notification .q-notification__icon + .q-notification__message {
   margin-inline-start: 12px;
 }
@@ -1600,4 +1599,9 @@ body .q-notification__progress {
 // Quasar centres the 32px track in a 56px box, so the visible switch ended 29px in.
 .q-item__section--side > .q-toggle:last-child {
   margin-inline-end: -13px;
+}
+
+// The copy or check mark before a tappable address or request line sits on its text.
+.qr-copy-text__icon {
+  vertical-align: -3px;
 }

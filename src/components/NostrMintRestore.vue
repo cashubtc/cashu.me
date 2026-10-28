@@ -49,7 +49,7 @@
             font-size: 0.95rem;
           "
         >
-          <q-icon name="add" size="20px" class="q-mr-sm" />
+          <PlusIcon :size="20" class="q-mr-sm" />
           <span
             style="
               white-space: nowrap;
@@ -187,7 +187,7 @@
       v-else-if="hasSearched && !searchInProgress"
       class="q-px-xs text-center q-py-lg"
     >
-      <q-icon name="cloud_off" size="lg" color="grey-5" />
+      <CloudOffIcon :size="40" class="text-grey-5" />
       <div class="text-grey-6 q-mt-sm">
         {{ $t("RestoreView.nostr_mints.no_backups_found") }}
       </div>
@@ -199,7 +199,11 @@
 </template>
 
 <script lang="ts">
-import { Search as SearchIcon } from "lucide-vue-next";
+import {
+  CloudOff as CloudOffIcon,
+  Plus as PlusIcon,
+  Search as SearchIcon,
+} from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapState, mapActions } from "pinia";
 import { useNostrMintBackupStore } from "src/stores/nostrMintBackup";
@@ -209,7 +213,7 @@ import { notifyError } from "src/js/notify";
 import { date } from "quasar";
 
 export default defineComponent({
-  components: { SearchIcon },
+  components: { PlusIcon, CloudOffIcon, SearchIcon },
   name: "NostrMintRestore",
   props: {
     mnemonic: {

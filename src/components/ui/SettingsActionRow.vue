@@ -22,7 +22,7 @@
           class="text-negative"
           aria-hidden="true"
         />
-        <q-icon v-else name="chevron_right" class="settings-menu-chevron" />
+        <ChevronRightIcon v-else :size="18" class="settings-menu-chevron" />
       </slot>
     </q-item-section>
   </q-item>
@@ -30,11 +30,14 @@
 
 <script lang="ts">
 import { defineComponent, type Component, type PropType } from "vue";
-import { Trash2 as Trash2Icon } from "lucide-vue-next";
+import {
+  ChevronRight as ChevronRightIcon,
+  Trash2 as Trash2Icon,
+} from "lucide-vue-next";
 
 export default defineComponent({
   name: "SettingsActionRow",
-  components: { Trash2Icon },
+  components: { ChevronRightIcon, Trash2Icon },
   props: {
     /** Optional leading icon (lucide component), the same slot as SettingsLinkRow. */
     icon: {

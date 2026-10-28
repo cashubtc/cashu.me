@@ -44,17 +44,22 @@
                   $t('Settings.nostr_wallet_connect.connection.copy_tooltip')
                 "
               />
-              <q-icon
-                name="qr_code"
-                @click="showNWCEntry(connection)"
-                size="xs"
+              <q-btn
+                flat
+                dense
+                round
+                size="sm"
                 color="grey"
-                class="cursor-pointer"
+                :aria-label="
+                  $t('Settings.nostr_wallet_connect.connection.qr_tooltip')
+                "
+                @click="showNWCEntry(connection)"
               >
+                <QrCodeIcon :size="18" />
                 <q-tooltip>{{
                   $t("Settings.nostr_wallet_connect.connection.qr_tooltip")
                 }}</q-tooltip>
-              </q-icon>
+              </q-btn>
             </div>
           </q-item-section>
         </q-item>
@@ -67,6 +72,7 @@
 </template>
 
 <script lang="ts">
+import { QrCode as QrCodeIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapActions, mapWritableState } from "pinia";
 import { useNWCStore } from "src/stores/nwc";
@@ -80,6 +86,7 @@ export default defineComponent({
   name: "NwcSettings",
   mixins: [windowMixin],
   components: {
+    QrCodeIcon,
     CopyButton,
     SettingsToggleRow,
     SettingsPageShell,

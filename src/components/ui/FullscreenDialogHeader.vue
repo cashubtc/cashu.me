@@ -6,11 +6,12 @@
       v-close-popup
       flat
       round
-      icon="close"
       class="floating-close-btn app-icon-btn"
       :aria-label="$t('global.actions.close.label')"
       @click="$emit('close')"
-    />
+    >
+      <XIcon :size="24" />
+    </q-btn>
     <div class="col text-center fixed-title-height">
       <slot name="title">
         <q-item-label
@@ -26,10 +27,12 @@
 </template>
 
 <script lang="ts">
+import { X as XIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "FullscreenDialogHeader",
+  components: { XIcon },
   props: {
     title: { type: String, default: "" },
     // Balance the title's lines when it wraps (the global .dialog-header rule adds

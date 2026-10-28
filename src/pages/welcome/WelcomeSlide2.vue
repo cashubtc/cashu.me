@@ -9,7 +9,7 @@
         :class="{ centered: isInstalling || wasInstalled }"
       >
         <transition v-if="isPWA()" appear enter-active-class="animated fadeIn">
-          <q-icon name="check_circle" size="3em" color="positive" />
+          <CircleCheckIcon :size="48" class="text-positive" />
         </transition>
         <div v-else class="pwa-image-wrapper">
           <img
@@ -36,13 +36,10 @@
         :class="{ 'fade-out': isInstalling }"
       >
         <div class="q-mb-md" v-if="canPromptInstall">
-          <q-btn
-            color="primary"
-            icon="add_box"
-            :label="$t('WalletPage.install.text')"
-            rounded
-            @click="promptInstall"
-          />
+          <q-btn color="primary" rounded @click="promptInstall">
+            <SquarePlusIcon :size="20" class="q-mr-sm" />
+            {{ $t("WalletPage.install.text") }}
+          </q-btn>
         </div>
         <p v-if="!wasInstalled" class="intro-text">
           {{ $t("WelcomeSlide2.instruction.intro.text") }}
@@ -55,13 +52,13 @@
           </h3>
           <div class="instruction-steps">
             <div class="step">
-              <q-icon name="more_vert" size="1.2em" class="step-icon" />
+              <EllipsisVerticalIcon :size="18" class="step-icon" />
               <span>{{
                 $t("WelcomeSlide2.instruction.android.step1.text")
               }}</span>
             </div>
             <div class="step">
-              <q-icon name="mobile_friendly" size="1.2em" class="step-icon" />
+              <SquarePlusIcon :size="18" class="step-icon" />
               <i18n-t keypath="WelcomeSlide2.instruction.android.step2.text">
                 <template v-slot:buttonText>
                   <strong>{{
@@ -80,11 +77,11 @@
           </h3>
           <div class="instruction-steps">
             <div class="step">
-              <q-icon name="ios_share" size="1.2em" class="step-icon" />
+              <ShareIcon :size="18" class="step-icon" />
               <span>{{ $t("WelcomeSlide2.instruction.ios.step1.text") }}</span>
             </div>
             <div class="step">
-              <q-icon name="add_box_outline" size="1.2em" class="step-icon" />
+              <SquarePlusIcon :size="18" class="step-icon" />
               <i18n-t keypath="WelcomeSlide2.instruction.ios.step2.text">
                 <template v-slot:buttonText>
                   <strong>{{
@@ -139,12 +136,22 @@
 </template>
 
 <script lang="ts">
+import {
+  CircleCheck as CircleCheckIcon,
+  EllipsisVertical as EllipsisVerticalIcon,
+  Share as ShareIcon,
+  SquarePlus as SquarePlusIcon,
+} from "lucide-vue-next";
 import { ref, onMounted, onBeforeUnmount, computed } from "vue";
 import PwaPrompt from "src/components/PwaPrompt.vue";
 
 export default {
   name: "WelcomeSlide2",
   components: {
+    CircleCheckIcon,
+    SquarePlusIcon,
+    EllipsisVerticalIcon,
+    ShareIcon,
     PwaPrompt,
   },
   setup() {
@@ -388,7 +395,6 @@ export default {
   color: var(--q-primary);
   margin-top: 1px;
   flex-shrink: 0;
-  font-size: 1.05em;
 }
 
 .outro-text {

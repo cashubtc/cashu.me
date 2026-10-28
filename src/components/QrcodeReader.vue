@@ -5,14 +5,17 @@ import zxingReaderWasmUrl from "zxing-wasm/reader/zxing_reader.wasm?url";
 import { useCameraStore } from "src/stores/camera";
 import { mapActions, mapState } from "pinia";
 import { useUiStore } from "src/stores/ui";
-import { Clipboard as ClipboardIcon } from "lucide-vue-next";
+import {
+  ClipboardPaste as ClipboardPasteIcon,
+  X as XIcon,
+} from "lucide-vue-next";
 
 QrScanner.configureWasm({
   locateFile: () => zxingReaderWasmUrl,
 });
 
 export default {
-  components: { ClipboardIcon },
+  components: { XIcon, ClipboardPasteIcon },
   emits: ["decode"],
   data(): {
     qrScanner: QrScanner | null;
@@ -101,11 +104,12 @@ export default {
       <q-btn
         flat
         round
-        icon="close"
         class="floating-close-btn app-icon-btn qr-scanner__close"
         :aria-label="$t('QrcodeReader.actions.close.label')"
         @click="closeCamera"
-      />
+      >
+        <XIcon :size="24" />
+      </q-btn>
       <div class="col text-center dialog-header">
         {{ $t("ParseInputComponent.qr_scanner.title") }}
       </div>
@@ -147,7 +151,7 @@ export default {
         class="qr-scanner__paste"
         @click="pasteToParseDialog"
       >
-        <ClipboardIcon :size="20" class="q-mr-sm" />
+        <ClipboardPasteIcon :size="20" class="q-mr-sm" />
         {{ $t("QrcodeReader.actions.paste.label") }}
       </q-btn>
     </div>

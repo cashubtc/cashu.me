@@ -84,10 +84,7 @@ test("enables NWC, edits its allowance, copies and reopens the connection", asyn
   await page
     .getByRole("spinbutton", { name: "Allowance left (sat)" })
     .fill("250");
-  await page
-    .locator("i")
-    .filter({ hasText: /^qr_code$/ })
-    .click();
+  await page.getByRole("button", { name: "Show QR code" }).click();
   await page.getByRole("button", { name: "Copy", exact: true }).click();
   const connection = await page.evaluate(() => navigator.clipboard.readText());
   expect(connection).toMatch(/^nostr\+walletconnect:\/\//);

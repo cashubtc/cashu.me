@@ -64,8 +64,8 @@ module.exports = configure(function (/* ctx */) {
       // 'roboto-font-latin-ext', // this or either 'roboto-font', NEVER both!
 
       "roboto-font", // optional, you are not bound to it
-      "material-icons", // optional, you are not bound to it
-      "material-icons-outlined",
+      // No icon font: every icon is Lucide (src/boot/global-components.js swaps Quasar's
+      // own icon set for src/js/lucide-icons.ts).
     ],
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#build

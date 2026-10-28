@@ -38,11 +38,11 @@
                 class="row items-center justify-end no-wrap"
                 style="gap: 1px; width: 64px; flex: none"
               >
-                <q-icon
+                <StarIcon
                   v-for="i in star"
                   :key="i"
-                  name="star"
-                  size="12px"
+                  :size="12"
+                  fill="currentColor"
                   class="text-grey-6"
                 />
               </div>
@@ -137,7 +137,7 @@
           :text="$t('MintRatings.empty_state_subtitle')"
         >
           <template #icon>
-            <q-icon name="chat_bubble_outline" size="26px" />
+            <MessageCircleIcon :size="26" />
           </template>
           <template #actions>
             <q-btn
@@ -199,13 +199,13 @@
         @click="showSortSheet = true"
       >
         <div class="row items-center" style="gap: 8px">
-          <q-icon name="sort" size="14px" class="text-grey-7" />
+          <ArrowDownWideNarrowIcon :size="16" class="text-grey-7" />
           <span class="text-body2" style="font-weight: 600">{{
             $t("MintRatings.sort")
           }}</span>
           <span class="text-body2 text-grey-5">{{ currentSortLabel }}</span>
         </div>
-        <q-icon name="keyboard_arrow_down" size="20px" class="text-grey-5" />
+        <ChevronDownIcon :size="20" class="text-grey-5" />
       </button>
     </q-card-section>
 
@@ -271,19 +271,18 @@
                 <bdi>{{ authorLabel(r.pubkey) }}</bdi>
                 <q-tooltip>{{ $t("common.copy_npub") }}</q-tooltip>
               </button>
-              <q-icon
+              <span
                 v-if="wotHop(r.pubkey)"
-                name="verified"
-                size="14px"
                 class="review-verified"
-                :color="wotColor(wotHop(r.pubkey))"
+                :class="`text-${wotColor(wotHop(r.pubkey))}`"
               >
+                <BadgeCheckIcon :size="14" />
                 <q-tooltip>{{
                   $t("MintRatings.web_of_trust_hop", {
                     hop: wotHop(r.pubkey),
                   })
                 }}</q-tooltip>
-              </q-icon>
+              </span>
               <span
                 v-if="r.pubkey === myPubkey"
                 class="app-badge own-review-chip"
@@ -364,7 +363,14 @@
 </template>
 
 <script lang="ts">
-import { User as UserIcon } from "lucide-vue-next";
+import {
+  ArrowDownWideNarrow as ArrowDownWideNarrowIcon,
+  BadgeCheck as BadgeCheckIcon,
+  ChevronDown as ChevronDownIcon,
+  MessageCircle as MessageCircleIcon,
+  Star as StarIcon,
+  User as UserIcon,
+} from "lucide-vue-next";
 import AppRating from "src/components/ui/AppRating.vue";
 import BottomSheet from "src/components/BottomSheet.vue";
 import SheetOption from "src/components/SheetOption.vue";
@@ -389,6 +395,11 @@ export default defineComponent({
   },
   emits: ["close"],
   components: {
+    StarIcon,
+    BadgeCheckIcon,
+    MessageCircleIcon,
+    ArrowDownWideNarrowIcon,
+    ChevronDownIcon,
     AppRating,
     UserIcon,
     BottomSheet,
@@ -849,6 +860,7 @@ body[data-theme] .q-card--dark.mint-ratings-root {
 }
 
 .review-verified {
+  display: inline-flex;
   flex: none;
 }
 
@@ -907,7 +919,6 @@ body[data-theme] .q-card--dark.mint-ratings-root {
   outline: 2px solid var(--app-text);
   outline-offset: 2px;
 }
-
 
 .own-review-chip {
   flex: none;

@@ -19,22 +19,23 @@
             flat
             round
             dense
-            :icon="hideMnemonic ? 'visibility' : 'visibility_off'"
             @click="toggleMnemonicVisibility"
             class="action-btn"
             size="sm"
           >
+            <EyeIcon v-if="hideMnemonic" :size="18" />
+            <EyeOffIcon v-else :size="18" />
             <q-tooltip>{{ hideMnemonic ? "Show" : "Hide" }}</q-tooltip>
           </q-btn>
           <q-btn
             flat
             round
             dense
-            icon="content_copy"
             @click="copyText(walletStore.mnemonic)"
             class="action-btn"
             size="sm"
           >
+            <CopyIcon :size="18" />
             <q-tooltip>{{ $t("global.actions.copy.label") }}</q-tooltip>
           </q-btn>
         </div>
@@ -59,7 +60,12 @@
 </template>
 
 <script lang="ts">
-import { KeyRound as KeyRoundIcon } from "lucide-vue-next";
+import {
+  Copy as CopyIcon,
+  Eye as EyeIcon,
+  EyeOff as EyeOffIcon,
+  KeyRound as KeyRoundIcon,
+} from "lucide-vue-next";
 import WelcomeSlideScaffold from "src/components/ui/WelcomeSlideScaffold.vue";
 declare const windowMixin: any;
 import { useWelcomeStore } from "src/stores/welcome";
@@ -70,7 +76,7 @@ import { copyToClipboard } from "quasar";
 
 export default {
   name: "WelcomeSlide3",
-  components: { WelcomeSlideScaffold },
+  components: { EyeIcon, EyeOffIcon, CopyIcon, WelcomeSlideScaffold },
   mixins: [windowMixin],
   setup() {
     const welcomeStore = useWelcomeStore();

@@ -71,9 +71,8 @@
             size="0.6rem"
             class="q-mx-xs q-px-none"
             color="warning"
-            icon="upload_for_offline"
             @click="browseBackupFile"
-            >Restore<q-tooltip
+            ><ArchiveRestoreIcon :size="14" class="q-mr-xs" />Restore<q-tooltip
               >You can drag &amp; drop the wallet backup here!</q-tooltip
             ></q-btn
           >
@@ -96,6 +95,7 @@
 }
 </style>
 <script lang="ts">
+import { ArchiveRestore as ArchiveRestoreIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapActions, mapState } from "pinia";
 import { useWalletStore } from "src/stores/wallet";
@@ -103,6 +103,7 @@ import { useStorageStore } from "src/stores/storage";
 
 export default defineComponent({
   name: "WelcomeDialog",
+  components: { ArchiveRestoreIcon },
   mixins: [windowMixin],
   props: {
     welcomeDialog: Object,

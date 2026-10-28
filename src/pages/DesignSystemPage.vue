@@ -764,7 +764,9 @@
                 </div>
                 <div class="q-notification__actions row items-center">
                   <q-btn v-if="t.action" flat no-caps dense :label="t.action" />
-                  <q-btn v-else flat round dense icon="close" color="grey" />
+                  <q-btn v-else flat round dense color="grey"
+                    ><XIcon :size="16"
+                  /></q-btn>
                 </div>
               </div>
             </div>
@@ -831,7 +833,7 @@
       <DsEntry id="blocking-state">
         <div class="blocking-state column flex-center text-center q-pa-lg">
           <div class="app-icon-circle app-icon-circle--lg blocking-state__icon">
-            <CompassIcon :size="26" />
+            <SearchXIcon :size="26" />
           </div>
           <div class="blocking-state__title q-mt-md">
             This page doesn’t exist
@@ -1127,6 +1129,7 @@ import PaymentRequestExplorations, {
 } from "src/design-system/explorations/PaymentRequestExplorations.vue";
 import * as Lucide from "lucide-vue-next";
 import { lucideIcons, materialIcons } from "src/design-system/icons";
+import { lucideIcon } from "src/js/lucide-icons";
 import { explorationScores } from "src/design-system/explorations/scores";
 import CalloutExplorations, {
   calloutVariants,
@@ -1175,7 +1178,7 @@ import {
   ChevronLeft as ChevronLeftIcon,
   Clock as ClockIcon,
   Coins as CoinsIcon,
-  Compass as CompassIcon,
+  SearchX as SearchXIcon,
   Copy as CopyIcon,
   Download as DownloadIcon,
   Ellipsis as EllipsisIcon,
@@ -1253,7 +1256,7 @@ export default defineComponent({
     WelcomeSlideScaffold,
     ChevronLeftIcon,
     CoinsIcon,
-    CompassIcon,
+    SearchXIcon,
     CopyIcon,
     DownloadIcon,
     EllipsisIcon,
@@ -1345,18 +1348,30 @@ export default defineComponent({
         },
       ],
       toastSpecimen: [
-        { type: "positive", icon: "check_circle", message: "Received ₿500" },
+        {
+          type: "positive",
+          icon: lucideIcon(Lucide.CircleCheck),
+          message: "Received ₿500",
+        },
         {
           type: "negative",
-          icon: "error",
+          icon: lucideIcon(Lucide.CircleAlert),
           message: "Payment failed",
           caption: "The mint didn't respond. Try again.",
         },
-        { type: "warning", icon: "warning", message: "Mint is offline" },
-        { type: "info", icon: "info", message: "Copied to clipboard" },
+        {
+          type: "warning",
+          icon: lucideIcon(Lucide.TriangleAlert),
+          message: "Mint is offline",
+        },
+        {
+          type: "info",
+          icon: lucideIcon(Lucide.Info),
+          message: "Copied to clipboard",
+        },
         {
           type: "neutral",
-          icon: "delete",
+          icon: lucideIcon(Lucide.Trash2),
           message: "Mint removed",
           action: "Undo",
         },

@@ -196,7 +196,7 @@
           <DetailRow
             v-if="mintData.info?.currencies"
             class="q-mb-md"
-            :icon="CoinsIcon"
+            :icon="CircleDollarSignIcon"
             :label="$t('MintDetailsDialog.details.currency.label')"
             >{{ mintData.info.currencies }}</DetailRow
           >
@@ -205,7 +205,7 @@
           <DetailRow
             v-if="mintUnits && mintUnits.length > 0"
             class="q-mb-md"
-            :icon="CoinsIcon"
+            :icon="CircleDollarSignIcon"
             :label="$t('MintDetailsDialog.details.currencies.label')"
             :value="
               mintUnits
@@ -304,16 +304,10 @@ import RemoveMintDialog from "src/components/RemoveMintDialog.vue";
 import MintMotdMessage from "src/components/MintMotdMessage.vue";
 import MintAuditInfo from "src/components/MintAuditInfo.vue";
 import {
-  QrCode as QrCodeIcon,
+  CircleDollarSign as CircleDollarSignIcon,
+  Info as InfoIcon,
   Link as LinkIcon,
   Nut as NutIcon,
-  Coins as CoinsIcon,
-  Star as StarIcon,
-  Info as InfoIcon,
-  Mail as MailIcon,
-  Copy as CopyIcon,
-  Pencil as PencilIcon,
-  Trash as TrashIcon,
 } from "lucide-vue-next";
 import MintIdentityHeader from "src/components/MintIdentityHeader.vue";
 import DetailRow from "src/components/ui/DetailRow.vue";
@@ -324,12 +318,6 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     QrBlock,
-    QrCodeIcon,
-    StarIcon,
-    MailIcon,
-    CopyIcon,
-    PencilIcon,
-    TrashIcon,
     MintIdentityHeader,
     EditMintDialog,
     RemoveMintDialog,
@@ -339,13 +327,15 @@ export default defineComponent({
     SectionDivider,
   },
   setup() {
-    return { LinkIcon, NutIcon, CoinsIcon, InfoIcon };
+    return {
+      CircleDollarSignIcon,
+      InfoIcon,
+      LinkIcon,
+      NutIcon,
+    };
   },
   data: function () {
     return {
-      contactIcons: {
-        email: "mail",
-      },
       contactMethods: {
         twitter: "X",
         nostr: "Nostr",

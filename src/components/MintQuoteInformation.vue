@@ -7,7 +7,7 @@
     <DetailRow
       v-if="showAmount && hasValidAmount"
       class="q-mb-md"
-      :icon="ZapIcon"
+      :icon="CoinsIcon"
       :label="$t('QuoteInformation.amount')"
       :value="amountDisplay"
     />
@@ -15,7 +15,7 @@
     <DetailRow
       v-if="unit !== 'sat'"
       class="q-mb-md"
-      :icon="CoinsIcon"
+      :icon="CircleDollarSignIcon"
       :label="$t('QuoteInformation.unit')"
       :value="unitDisplay"
     />
@@ -34,7 +34,7 @@
 
     <DetailRow
       class="q-mb-md"
-      :icon="ZapIcon"
+      :icon="isOnchain ? BitcoinIcon : ZapIcon"
       :label="$t('QuoteInformation.method')"
       :value="methodDisplay"
     />
@@ -42,7 +42,7 @@
     <DetailRow
       v-if="networkDisplay"
       class="q-mb-md"
-      :icon="InfoIcon"
+      :icon="NetworkIcon"
       :label="$t('QuoteInformation.network')"
       :value="networkDisplay"
     />
@@ -97,12 +97,15 @@ import { mapState } from "pinia";
 import { useMintsStore } from "stores/mints";
 import { getShortUrl } from "src/js/wallet-helpers";
 import {
-  Zap as ZapIcon,
-  Coins as CoinsIcon,
-  Info as InfoIcon,
+  Bitcoin as BitcoinIcon,
+  CircleDollarSign as CircleDollarSignIcon,
   Clock as ClockIcon,
-  Landmark as LandmarkIcon,
+  Coins as CoinsIcon,
   Hash as HashIcon,
+  Info as InfoIcon,
+  Landmark as LandmarkIcon,
+  Network as NetworkIcon,
+  Zap as ZapIcon,
 } from "lucide-vue-next";
 import DetailRow from "src/components/ui/DetailRow.vue";
 import ChainStatusRow from "src/components/ChainStatusRow.vue";
@@ -133,12 +136,15 @@ export default defineComponent({
   components: { DetailRow, ChainStatusRow },
   setup() {
     return {
-      ZapIcon,
-      CoinsIcon,
-      InfoIcon,
+      BitcoinIcon,
+      CircleDollarSignIcon,
       ClockIcon,
-      LandmarkIcon,
+      CoinsIcon,
       HashIcon,
+      InfoIcon,
+      LandmarkIcon,
+      NetworkIcon,
+      ZapIcon,
     };
   },
   props: {

@@ -24,10 +24,13 @@
           flat
           round
           dense
-          icon="close"
           @click="$emit('close')"
           color="grey-6"
+          :aria-label="
+            $t('ReceiveTokenDialog.actions.cancel_swap.tooltip_text')
+          "
         >
+          <XIcon :size="20" />
           <q-tooltip>{{
             $t("ReceiveTokenDialog.actions.cancel_swap.tooltip_text")
           }}</q-tooltip>
@@ -39,11 +42,12 @@
         flat
         round
         dense
-        icon="close"
         @click="$emit('close')"
         :disable="swapBlocking"
         color="grey-6"
+        :aria-label="$t('ReceiveTokenDialog.actions.cancel_swap.tooltip_text')"
       >
+        <XIcon :size="20" />
         <q-tooltip>{{
           $t("ReceiveTokenDialog.actions.cancel_swap.tooltip_text")
         }}</q-tooltip>
@@ -119,18 +123,14 @@ import ChooseMint from "src/components/ChooseMint.vue";
 import {
   ArrowDown as ArrowDownIcon,
   Landmark as LandmarkIcon,
+  X as XIcon,
 } from "lucide-vue-next";
 import AppCallout from "src/components/AppCallout.vue";
 import { useMintsStore } from "stores/mints";
 
 export default defineComponent({
   name: "SwapIncomingTokenToKnownMint",
-  components: {
-    LandmarkIcon,
-    ChooseMint,
-    ArrowDownIcon,
-    AppCallout,
-  },
+  components: { XIcon, LandmarkIcon, ChooseMint, ArrowDownIcon, AppCallout },
   props: {
     swapProcessing: {
       type: Boolean,

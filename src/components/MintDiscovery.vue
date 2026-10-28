@@ -18,7 +18,7 @@
         :text="$t('MintSettings.discover.empty.text')"
       >
         <template #icon>
-          <q-icon name="travel_explore" size="28px" />
+          <CompassIcon :size="26" />
         </template>
         <template #actions>
           <q-btn
@@ -30,7 +30,7 @@
             @click="discover"
             class="discover-btn full-width app-empty__action"
           >
-            <q-icon name="search" size="20px" class="discover-btn__icon" />
+            <SearchIcon :size="20" class="discover-btn__icon" />
             <span>{{
               $t("MintSettings.discover.actions.discover.label")
             }}</span>
@@ -62,7 +62,7 @@
           </q-item-section>
           <q-item-section side top>
             <div class="row flex-center" style="width: 44px; height: 44px">
-              <q-icon name="refresh" size="24px" class="refresh-spin" />
+              <RefreshCwIcon :size="20" class="refresh-spin" />
             </div>
           </q-item-section>
         </q-item>
@@ -101,15 +101,15 @@
             <q-btn
               flat
               round
-              icon="refresh"
               color="primary"
               class="touch-target-44"
               :loading="busy"
               :aria-label="$t('common.refresh')"
               @click="discover"
             >
+              <RefreshCwIcon :size="20" />
               <template v-slot:loading>
-                <q-icon name="refresh" size="24px" class="refresh-spin" />
+                <RefreshCwIcon :size="20" class="refresh-spin" />
               </template>
             </q-btn>
           </q-item-section>
@@ -177,12 +177,20 @@ import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import MintInfoContainer from "./MintInfoContainer.vue";
 import MintReviewSummary from "src/components/MintReviewSummary.vue";
-import { Plus as PlusIcon } from "lucide-vue-next";
+import {
+  Compass as CompassIcon,
+  Plus as PlusIcon,
+  RefreshCw as RefreshCwIcon,
+  Search as SearchIcon,
+} from "lucide-vue-next";
 import { notifyError, notifySuccess } from "src/js/notify";
 
 export default defineComponent({
   name: "MintDiscovery",
   components: {
+    CompassIcon,
+    SearchIcon,
+    RefreshCwIcon,
     EmptyState,
     MintInfoContainer,
     MintReviewSummary,

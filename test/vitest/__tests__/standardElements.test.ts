@@ -24,6 +24,24 @@ describe("standard elements", () => {
     expect(offenders((text) => text.includes(tag))).toEqual([]);
   });
 
+  // Lucide is the one icon family, and the Material font is no longer loaded, so a Material
+  // name would render as its literal text. Quasar's own icons come from src/js/lucide-icons.ts.
+  it("no Material icon names (use a Lucide component or lucideIcon())", () => {
+    const material = (text: string) =>
+      [...text.matchAll(/<q-icon\b[^>]*>/g)].some(([tag]) =>
+        /\s:?name="[^"]*/.test(tag)
+      ) ||
+      /\s(icon|icon-right)="[a-z]/.test(text) ||
+      /\s:(icon|icon-right)="[^"]*'[a-z_]+'/.test(text);
+    expect(offenders(material)).toEqual([]);
+    const scripts = (readdirSync(SRC, { recursive: true }) as string[])
+      .filter((f) => /\.(ts|js)$/.test(f) && !f.includes("__tests__"))
+      .filter((f) =>
+        /\bicon:\s*["'][a-z_]+["']/.test(readFileSync(join(SRC, f), "utf8"))
+      );
+    expect(scripts).toEqual([]);
+  });
+
   it("no component restyles a standard element in its own styles", () => {
     expect(
       offenders((text) =>

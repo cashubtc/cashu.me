@@ -20,7 +20,7 @@
         @keydown.space.prevent="choose('new')"
       >
         <div class="app-icon-circle app-icon-circle--sm">
-          <q-icon name="auto_awesome" size="22px" />
+          <SparklesIcon :size="22" />
         </div>
         <div class="app-option-row__text">
           <div class="app-option-row__label">
@@ -30,7 +30,7 @@
             {{ $t("WelcomeSlideChoice.options.new.subtitle") }}
           </div>
         </div>
-        <q-icon name="chevron_right" size="24px" class="chevron rtl-flip" />
+        <ChevronRightIcon :size="20" class="chevron" />
       </div>
 
       <!-- Recover Option -->
@@ -44,7 +44,7 @@
         @keydown.space.prevent="choose('recover')"
       >
         <div class="app-icon-circle app-icon-circle--sm">
-          <q-icon name="history" size="22px" />
+          <KeyRoundIcon :size="22" />
         </div>
         <div class="app-option-row__text">
           <div class="app-option-row__label">
@@ -54,20 +54,30 @@
             {{ $t("WelcomeSlideChoice.options.recover.subtitle") }}
           </div>
         </div>
-        <q-icon name="chevron_right" size="24px" class="chevron rtl-flip" />
+        <ChevronRightIcon :size="20" class="chevron" />
       </div>
     </div>
   </WelcomeSlideScaffold>
 </template>
 
 <script lang="ts">
-import { Wallet as WalletIcon } from "lucide-vue-next";
+import {
+  ChevronRight as ChevronRightIcon,
+  KeyRound as KeyRoundIcon,
+  Sparkles as SparklesIcon,
+  Wallet as WalletIcon,
+} from "lucide-vue-next";
 import WelcomeSlideScaffold from "src/components/ui/WelcomeSlideScaffold.vue";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useWalletStore } from "src/stores/wallet";
 export default {
   name: "WelcomeSlideChoice",
-  components: { WelcomeSlideScaffold },
+  components: {
+    SparklesIcon,
+    KeyRoundIcon,
+    ChevronRightIcon,
+    WelcomeSlideScaffold,
+  },
   setup() {
     const welcomeStore = useWelcomeStore();
     const walletStore = useWalletStore();

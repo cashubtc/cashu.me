@@ -45,22 +45,24 @@
           <q-btn
             flat
             round
-            icon="chevron_left"
-            class="rtl-flip touch-target-44"
+            class="touch-target-44"
             color="grey"
             :aria-label="$t('PaymentRequestDialog.actions.previous.label')"
             @click="stepRequest(-1)"
-          />
+          >
+            <ChevronLeftIcon :size="24" />
+          </q-btn>
           <div class="pr-pager__label">{{ currentIndexDisplay }}</div>
           <q-btn
             flat
             round
-            icon="chevron_right"
-            class="rtl-flip touch-target-44"
+            class="touch-target-44"
             color="grey"
             :aria-label="$t('PaymentRequestDialog.actions.next.label')"
             @click="stepRequest(1)"
-          />
+          >
+            <ChevronRightIcon :size="24" />
+          </q-btn>
         </div>
 
         <!-- Content -->
@@ -324,6 +326,8 @@
 <script lang="ts">
 import {
   ChevronDown as ChevronDownIcon,
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon,
   Copy as CopyIcon,
   Landmark as LandmarkIcon,
   Plus as PlusIcon,
@@ -370,6 +374,8 @@ export default defineComponent({
   name: "PRDialog",
   mixins: [windowMixin],
   components: {
+    ChevronLeftIcon,
+    ChevronRightIcon,
     ChevronDownIcon,
     CopyIcon,
     LandmarkIcon,

@@ -35,7 +35,7 @@
                 dense
                 @click="copyUsingMixin(encodeToPeanut(sendData.tokensBase64))"
               >
-                <NutIcon :size="16" />
+                <NutIcon :size="20" />
 
                 <q-tooltip>{{
                   $t("SendTokenDialog.actions.copy_emoji.tooltip_text")
@@ -50,7 +50,7 @@
                 flat
                 @click="shareToken"
               >
-                <ShareIcon :size="16" />
+                <ShareIcon :size="20" />
                 <q-tooltip>{{
                   $t("SendTokenDialog.actions.share.tooltip_text")
                 }}</q-tooltip>
@@ -60,12 +60,11 @@
                 class="q-mx-none"
                 size="md"
                 dense
-                icon="link"
                 flat
                 @click="
                   copyUsingMixin(baseURL + '#token=' + sendData.tokensBase64)
                 "
-                ><q-tooltip>{{
+                ><LinkIcon :size="20" /><q-tooltip>{{
                   $t("SendTokenDialog.actions.copy_link.tooltip_text")
                 }}</q-tooltip></q-btn
               >
@@ -81,7 +80,7 @@
                 "
                 @click="showCamera"
               >
-                <ScanIcon :size="16" />
+                <ScanIcon :size="20" />
               </q-btn>
               <q-btn
                 unelevated
@@ -98,7 +97,7 @@
                 @click="writeTokensToCard"
                 flat
               >
-                <NfcIcon :size="16" />
+                <NfcIcon :size="20" />
                 <q-tooltip>{{
                   ndefSupported
                     ? $t(
@@ -117,14 +116,14 @@
                 dense
                 unelevated
                 data-testid="delete-token"
-                icon="delete"
-                size="sm"
+                size="md"
                 @click="
                   showDeleteDialog = true;
                   closeCardScanner();
                 "
                 flat
               >
+                <Trash2Icon :size="20" />
                 <q-tooltip>{{
                   $t("SendTokenDialog.actions.delete.tooltip_text")
                 }}</q-tooltip>
@@ -178,7 +177,7 @@
                     class="qr-control-chip"
                     @click="changeSpeed"
                   >
-                    <q-icon name="speed" size="18px" class="q-mr-xs"></q-icon>
+                    <GaugeIcon :size="18" class="q-mr-xs" />
                     {{
                       $t("DisplayTokenComponent.qr_speed", {
                         value: $t(
@@ -199,7 +198,7 @@
                     class="qr-control-chip"
                     @click="changeSize"
                   >
-                    <q-icon name="zoom_in" size="18px" class="q-mr-xs"></q-icon>
+                    <ZoomInIcon :size="18" class="q-mr-xs" />
                     {{
                       $t("DisplayTokenComponent.qr_size", {
                         value: $t(
@@ -333,11 +332,15 @@ import token from "src/js/token";
 import { notifyError, notifySuccess } from "src/js/notify";
 import { copyToClipboard } from "quasar";
 import {
-  Scan as ScanIcon,
-  Nfc as NfcIcon,
-  Share as ShareIcon,
-  Nut as NutIcon,
   Ellipsis as EllipsisIcon,
+  Gauge as GaugeIcon,
+  Link as LinkIcon,
+  Nfc as NfcIcon,
+  Nut as NutIcon,
+  Scan as ScanIcon,
+  Share as ShareIcon,
+  Trash2 as Trash2Icon,
+  ZoomIn as ZoomInIcon,
 } from "lucide-vue-next";
 
 declare const windowMixin: any;
@@ -346,6 +349,10 @@ export default defineComponent({
   name: "DisplayTokenComponent",
   mixins: [windowMixin],
   components: {
+    LinkIcon,
+    Trash2Icon,
+    GaugeIcon,
+    ZoomInIcon,
     EllipsisIcon,
     TokenInformation,
     QrBlock,

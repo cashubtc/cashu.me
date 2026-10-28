@@ -7,7 +7,7 @@
     <DetailRow
       v-if="showAmount"
       class="q-mb-md"
-      :icon="ZapIcon"
+      :icon="CoinsIcon"
       :label="$t('QuoteInformation.amount')"
       :value="amountDisplay"
     />
@@ -15,7 +15,7 @@
     <DetailRow
       v-if="hasFeeReserve && !hasFeePaid"
       class="q-mb-md"
-      :icon="ArrowDownUpIcon"
+      :icon="ReceiptTextIcon"
       :label="$t('QuoteInformation.fee_reserve')"
       :value="feeReserveDisplay"
     />
@@ -23,7 +23,7 @@
     <DetailRow
       v-if="hasFeePaid"
       class="q-mb-md"
-      :icon="ReceiptIcon"
+      :icon="ReceiptTextIcon"
       :label="$t('QuoteInformation.fee_paid')"
       :value="feePaidDisplay"
     />
@@ -31,7 +31,7 @@
     <DetailRow
       v-if="quoteUnit !== 'sat'"
       class="q-mb-md"
-      :icon="CoinsIcon"
+      :icon="CircleDollarSignIcon"
       :label="$t('QuoteInformation.unit')"
       :value="unitDisplay"
     />
@@ -48,7 +48,7 @@
     <DetailRow
       v-if="networkDisplay"
       class="q-mb-md"
-      :icon="InfoIcon"
+      :icon="NetworkIcon"
       :label="$t('QuoteInformation.network')"
       :value="networkDisplay"
     />
@@ -66,9 +66,12 @@
         dense
         round
         size="sm"
-        :icon="txidCopied ? 'check' : 'content_copy'"
+        :aria-label="$t('global.actions.copy.label')"
         @click="copyTxid"
-      />
+      >
+        <CheckIcon v-if="txidCopied" :size="16" />
+        <CopyIcon v-else :size="16" />
+      </q-btn>
     </DetailRow>
 
     <ChainStatusRow
@@ -121,15 +124,17 @@ import {
   type MempoolTxMetadata,
 } from "src/js/onchain";
 import {
-  Zap as ZapIcon,
-  ArrowDownUp as ArrowDownUpIcon,
-  ReceiptText as ReceiptIcon,
+  Check as CheckIcon,
+  CircleDollarSign as CircleDollarSignIcon,
   Clock as ClockIcon,
-  Landmark as LandmarkIcon,
   Coins as CoinsIcon,
-  Info as InfoIcon,
+  Copy as CopyIcon,
   Fingerprint as FingerprintIcon,
   Hash as HashIcon,
+  Info as InfoIcon,
+  Landmark as LandmarkIcon,
+  Network as NetworkIcon,
+  ReceiptText as ReceiptTextIcon,
 } from "lucide-vue-next";
 import DetailRow from "src/components/ui/DetailRow.vue";
 import ChainStatusRow from "src/components/ChainStatusRow.vue";
@@ -148,18 +153,18 @@ type ExtendedMeltQuote = MeltQuoteBolt11Response & {
 export default defineComponent({
   name: "MeltQuoteInformation",
   mixins: [windowMixin],
-  components: { DetailRow, ChainStatusRow },
+  components: { CheckIcon, CopyIcon, DetailRow, ChainStatusRow },
   setup() {
     return {
-      ZapIcon,
-      ArrowDownUpIcon,
-      ReceiptIcon,
+      CircleDollarSignIcon,
       ClockIcon,
-      LandmarkIcon,
       CoinsIcon,
-      InfoIcon,
       FingerprintIcon,
       HashIcon,
+      InfoIcon,
+      LandmarkIcon,
+      NetworkIcon,
+      ReceiptTextIcon,
     };
   },
   data: function () {

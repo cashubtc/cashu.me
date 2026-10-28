@@ -1,22 +1,31 @@
 import { Notify, QNotifyCreateOptions } from "quasar";
 import { i18n } from "src/boot/i18n";
 import { isolateLtr } from "src/js/format-currency";
+import { lucideIcon } from "src/js/lucide-icons";
+import {
+  CircleAlert,
+  CircleCheck,
+  Info,
+  TriangleAlert,
+  X,
+} from "lucide-vue-next";
 
 // One toast for the whole app (user direction, R46; at the bottom since R50 so it never
 // covers the balance): every kind appears in one place, as a
-// raised card with a status icon (styled in app.scss), and closes on its own or with ✕.
+// raised card with a status icon (styled in app.scss), and closes on its own or with ✕. The
+// icons are the callout's: the same glyph for the same tone.
 // Positions are no longer chosen per call: copy confirmations used to appear at the bottom.
 const POSITION: QNotifyCreateOptions["position"] = "bottom";
 const CLOSE_ACTION = [
-  { icon: "close", color: "grey", round: true, handler: () => {} },
+  { icon: lucideIcon(X), color: "grey", round: true, handler: () => {} },
 ];
 
 type ToastKind = "positive" | "negative" | "warning" | "info";
 const ICONS: Record<ToastKind, string> = {
-  positive: "check_circle",
-  negative: "error",
-  warning: "warning",
-  info: "info",
+  positive: lucideIcon(CircleCheck),
+  negative: lucideIcon(CircleAlert),
+  warning: lucideIcon(TriangleAlert),
+  info: lucideIcon(Info),
 };
 
 // Amounts keep their left-to-right order inside right-to-left toasts: each run such as

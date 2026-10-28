@@ -49,7 +49,7 @@
               <!-- New key button -->
               <div class="row justify-center q-pt-lg q-pb-md">
                 <q-btn flat size="md" rounded @click="newKeys">
-                  <q-icon name="refresh" class="q-mr-sm" size="xs" />
+                  <RefreshCwIcon :size="18" class="q-mr-sm" />
                   {{ $t("P2PKDialog.actions.new_key.label") }}
                 </q-btn>
               </div>
@@ -79,6 +79,7 @@
   </q-dialog>
 </template>
 <script lang="ts">
+import { RefreshCw as RefreshCwIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import QrBlock from "src/components/QrBlock.vue";
@@ -91,10 +92,7 @@ declare const windowMixin: any;
 export default defineComponent({
   name: "P2PKDialog",
   mixins: [windowMixin],
-  components: {
-    QrBlock,
-    FullscreenDialogHeader,
-  },
+  components: { RefreshCwIcon, QrBlock, FullscreenDialogHeader },
   data: function () {
     return {};
   },
