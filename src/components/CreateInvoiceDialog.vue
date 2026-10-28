@@ -24,39 +24,34 @@
       </FullscreenDialogHeader>
 
       <!-- Mint selection -->
-      <div class="row justify-center">
+      <FlowColumn class="q-px-md q-mb-sm">
+        <ChooseMint
+          :filter-payment-method="mintFilterMethod"
+          filter-mint-operation="mint"
+          :disable="createInvoiceButtonBlocked"
+        />
         <div
-          class="col-12 q-px-md q-mb-sm"
-          style="max-width: var(--app-column)"
+          v-if="!isOnchain && bolt11Supported && bolt12Supported"
+          class="row justify-center q-mt-sm"
         >
-          <ChooseMint
-            :filter-payment-method="mintFilterMethod"
-            filter-mint-operation="mint"
+          <SegmentedControl
+            :model-value="isBolt12"
             :disable="createInvoiceButtonBlocked"
+            :label="$t('CreateInvoiceDialog.format_label')"
+            @update:model-value="(v) => v !== isBolt12 && toggleInvoiceType()"
+            :options="[
+              {
+                label: $t('CreateInvoiceDialog.formats.bolt11'),
+                value: false,
+              },
+              {
+                label: $t('CreateInvoiceDialog.formats.bolt12'),
+                value: true,
+              },
+            ]"
           />
-          <div
-            v-if="!isOnchain && bolt11Supported && bolt12Supported"
-            class="row justify-center q-mt-sm"
-          >
-            <SegmentedControl
-              :model-value="isBolt12"
-              :disable="createInvoiceButtonBlocked"
-              :label="$t('CreateInvoiceDialog.format_label')"
-              @update:model-value="(v) => v !== isBolt12 && toggleInvoiceType()"
-              :options="[
-                {
-                  label: $t('CreateInvoiceDialog.formats.bolt11'),
-                  value: false,
-                },
-                {
-                  label: $t('CreateInvoiceDialog.formats.bolt12'),
-                  value: true,
-                },
-              ]"
-            />
-          </div>
         </div>
-      </div>
+      </FlowColumn>
 
       <!-- Amount display -->
       <div class="col column items-center q-px-lg amount-area">
@@ -178,22 +173,20 @@
           />
 
           <!-- Secondary Actions Container (Add Amount) -->
-          <div
-            class="row justify-center"
+          <FlowColumn
             v-if="isBolt12 && !showAmountInput && !showNpubCashPreview"
+            class="q-px-md"
           >
-            <div class="col-12 q-px-md" style="max-width: var(--app-column)">
-              <q-btn
-                class="full-width"
-                outline
-                rounded
-                color="primary"
-                size="lg"
-                @click="bolt12AddAmount = true"
-                :label="$t('CreateInvoiceDialog.add_amount')"
-              />
-            </div>
-          </div>
+            <q-btn
+              class="full-width"
+              outline
+              rounded
+              color="primary"
+              size="lg"
+              @click="bolt12AddAmount = true"
+              :label="$t('CreateInvoiceDialog.add_amount')"
+            />
+          </FlowColumn>
 
           <!-- Primary action (Add amount / Create). From an amount step opened on an address,
                offer or Lightning address, a back chevron sits before it, as in the onboarding
@@ -249,6 +242,7 @@
   </FlowDialog>
 </template>
 <script lang="ts">
+import FlowColumn from "src/components/ui/FlowColumn.vue";
 import FlowDialog from "src/components/ui/FlowDialog.vue";
 import BusyLabel from "src/components/ui/BusyLabel.vue";
 import FlowFooter from "src/components/ui/FlowFooter.vue";
@@ -297,6 +291,7 @@ export default defineComponent({
   name: "CreateInvoiceDialog",
   mixins: [windowMixin],
   components: {
+    FlowColumn,
     UnitToggle,
     FlowDialog,
     BusyLabel,

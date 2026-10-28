@@ -16,76 +16,67 @@
             class="q-mb-md q-pt-lg"
             :label="$t('InvoiceDetailDialog.invoice.status_paid_text')"
           />
-          <div
-            v-else-if="invoiceData.request"
-            class="row justify-center q-mb-md"
-          >
-            <div class="col-12 q-px-md" style="max-width: var(--app-column)">
-              <div class="qr-container">
-                <component
-                  :is="isOnchain ? 'div' : 'a'"
-                  class="text-secondary"
-                  :href="qrLink"
-                >
-                  <QrBlock :value="qrValue" />
-                </component>
-              </div>
-              <QrProgress :active="runnerActive" />
-              <!-- Every QR has its copy line: the full address on-chain, a shortened
-                     invoice for Lightning (the button below copies it too). -->
-              <QrCopyLine
-                :text="
-                  isOnchain
-                    ? invoiceData.request
-                    : shortenString(invoiceData.request, 14, 8) ||
-                      invoiceData.request
-                "
-                :copied="copyButtonCopied"
-                @copy="onCopyBolt11"
-              />
-              <OnchainDepositLimits
-                v-if="isOnchain && invoiceData.status !== 'paid'"
-                class="q-mt-md"
-                :mint-url="invoiceData.mint"
-                :unit="invoiceData.unit"
-              />
+          <FlowColumn v-else-if="invoiceData.request" class="q-px-md q-mb-md">
+            <div class="qr-container">
+              <component
+                :is="isOnchain ? 'div' : 'a'"
+                class="text-secondary"
+                :href="qrLink"
+              >
+                <QrBlock :value="qrValue" />
+              </component>
             </div>
-          </div>
+            <QrProgress :active="runnerActive" />
+            <!-- Every QR has its copy line: the full address on-chain, a shortened
+                     invoice for Lightning (the button below copies it too). -->
+            <QrCopyLine
+              :text="
+                isOnchain
+                  ? invoiceData.request
+                  : shortenString(invoiceData.request, 14, 8) ||
+                    invoiceData.request
+              "
+              :copied="copyButtonCopied"
+              @copy="onCopyBolt11"
+            />
+            <OnchainDepositLimits
+              v-if="isOnchain && invoiceData.status !== 'paid'"
+              class="q-mt-md"
+              :mint-url="invoiceData.mint"
+              :unit="invoiceData.unit"
+            />
+          </FlowColumn>
 
           <AmountHeadline v-if="invoiceData.amount">{{
             displayUnit
           }}</AmountHeadline>
 
           <q-card-section class="q-pa-none">
-            <div v-if="invoiceData?.mintQuote" class="row justify-center">
-              <div class="col-12 q-px-md" style="max-width: var(--app-column)">
-                <MintQuoteInformation
-                  hide-paid-status
-                  :mint-quote="invoiceData.mintQuote"
-                  :invoice="invoiceData"
-                  :mint-url="invoiceData.mint"
-                  :show-amount="!invoiceData.amount"
-                  :method="invoiceMethod"
-                  :refresh-trigger="metadataRefreshTrigger"
-                />
-              </div>
-            </div>
-            <div
+            <FlowColumn v-if="invoiceData?.mintQuote" class="q-px-md">
+              <MintQuoteInformation
+                hide-paid-status
+                :mint-quote="invoiceData.mintQuote"
+                :invoice="invoiceData"
+                :mint-url="invoiceData.mint"
+                :show-amount="!invoiceData.amount"
+                :method="invoiceMethod"
+                :refresh-trigger="metadataRefreshTrigger"
+              />
+            </FlowColumn>
+            <FlowColumn
               v-else-if="invoiceData?.meltQuote"
-              class="row justify-center q-pt-lg"
+              class="q-px-md q-pt-lg"
             >
-              <div class="col-12 q-px-md" style="max-width: var(--app-column)">
-                <MeltQuoteInformation
-                  hide-paid-status
-                  :melt-quote="invoiceData.meltQuote"
-                  :invoice="invoiceData"
-                  :mint-url="invoiceData.mint"
-                  :history-paid-at="invoiceData.paidDate"
-                  :show-amount="!invoiceData.amount"
-                  :refresh-trigger="metadataRefreshTrigger"
-                />
-              </div>
-            </div>
+              <MeltQuoteInformation
+                hide-paid-status
+                :melt-quote="invoiceData.meltQuote"
+                :invoice="invoiceData"
+                :mint-url="invoiceData.mint"
+                :history-paid-at="invoiceData.paidDate"
+                :show-amount="!invoiceData.amount"
+                :refresh-trigger="metadataRefreshTrigger"
+              />
+            </FlowColumn>
           </q-card-section>
         </q-card-section>
       </div>
@@ -113,6 +104,7 @@
   </FlowDialog>
 </template>
 <script lang="ts">
+import FlowColumn from "src/components/ui/FlowColumn.vue";
 import PaymentStatus from "src/components/ui/PaymentStatus.vue";
 import FlowDialog from "src/components/ui/FlowDialog.vue";
 import FlowFooter from "src/components/ui/FlowFooter.vue";
@@ -141,6 +133,7 @@ export default defineComponent({
   name: "InvoiceDetailDialog",
   mixins: [windowMixin],
   components: {
+    FlowColumn,
     PaymentStatus,
     FlowDialog,
     FlowFooter,

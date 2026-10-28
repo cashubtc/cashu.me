@@ -593,14 +593,15 @@ body .q-skeleton--type-text {
   background: var(--row-avatar);
   color: var(--app-text);
 }
-// Money in: the disc takes a success tint (a step stronger in light mode, where a faint tint
-// fades on white); out, pending and expired stay on the neutral disc.
+// Money in: the disc takes a light success tint (a step stronger in light mode, where a faint
+// tint fades on white), kept below the green amount (council R81); out, pending and expired
+// stay on the neutral disc.
 .activity-row__avatar--in {
-  background: color-mix(in srgb, var(--app-success) 18%, var(--row-bg));
+  background: color-mix(in srgb, var(--app-success) 13%, var(--row-bg));
   color: var(--app-success);
 }
 body.body--light .activity-row__avatar--in {
-  background: color-mix(in srgb, var(--app-success) 24%, var(--row-bg));
+  background: color-mix(in srgb, var(--app-success) 16%, var(--row-bg));
 }
 .activity-row__title {
   align-items: center;
@@ -680,4 +681,15 @@ body.body--light .activity-row__avatar--in {
 .tonal-chip__icon {
   display: inline-flex;
   margin-inline-end: 6px;
+}
+
+/* FlowColumn: a flow's content column, centred at the shared column width. */
+.flow-column {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+.flow-column__inner {
+  max-width: var(--app-column);
+  width: 100%;
 }

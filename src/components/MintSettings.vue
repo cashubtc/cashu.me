@@ -23,7 +23,6 @@
             :icon-url="getMintIconUrl(mint)"
             :name="mint.nickname || mint.info?.name"
             :url="mint.url"
-            :unnamed-label="$t('MintSettings.discover.unnamed')"
             :balances="
               visibleUnits(mint).map((unit) =>
                 formatCurrency(mintClass(mint).unitBalance(unit), unit)

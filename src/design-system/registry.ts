@@ -311,6 +311,16 @@ export const DS_ITEMS: DsItem[] = [
   },
 
   {
+    id: "flow-column",
+    name: "Flow column",
+    group: "layout",
+    tier: "primitive",
+    source: "src/components/ui/FlowColumn.vue",
+    usage: { tag: "FlowColumn" },
+    example: `<FlowColumn class="q-px-md q-mb-sm"><ChooseMint /></FlowColumn>`,
+    note: "A flow's content column: centred, full width up to --app-column. Classes land on the column.",
+  },
+  {
     id: "tonal-chip",
     name: "Tonal chip",
     group: "actions",

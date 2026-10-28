@@ -24,27 +24,20 @@
       </FullscreenDialogHeader>
 
       <!-- Payment request info -->
-      <div v-if="sendData.paymentRequest" class="row justify-center q-pt-sm">
-        <div class="col-12 q-px-lg" style="max-width: var(--app-column)">
-          <PaymentRequestInfo :request="sendData.paymentRequest" />
-        </div>
-      </div>
+      <FlowColumn v-if="sendData.paymentRequest" class="q-px-lg q-pt-sm">
+        <PaymentRequestInfo :request="sendData.paymentRequest" />
+      </FlowColumn>
 
       <!-- Mint selection -->
-      <div class="row justify-center">
-        <div
-          class="col-12 q-px-md q-mb-sm"
-          style="max-width: var(--app-column)"
-        >
-          <ChooseMint />
-          <AppCallout
-            v-if="paymentRequestMintWarning"
-            variant="danger"
-            class="q-mt-sm"
-            :text="paymentRequestMintWarning"
-          />
-        </div>
-      </div>
+      <FlowColumn class="q-px-md q-mb-sm">
+        <ChooseMint />
+        <AppCallout
+          v-if="paymentRequestMintWarning"
+          variant="danger"
+          class="q-mt-sm"
+          :text="paymentRequestMintWarning"
+        />
+      </FlowColumn>
 
       <!-- Amount display -->
       <div class="col column items-center justify-center q-px-lg amount-area">
@@ -55,53 +48,49 @@
           leave-active-class="animated fadeOut"
         >
           <div v-if="showLockInput" class="p2pk-overlay">
-            <div class="row justify-center">
-              <div class="col-12 q-px-lg" style="max-width: var(--app-column)">
-                <div class="row items-center">
-                  <div :class="!sendData.p2pkPubkey ? 'col-8' : 'col-12'">
-                    <q-input
-                      v-model="sendData.p2pkPubkey"
-                      :label="
-                        sendData.p2pkPubkey && !isLocked
-                          ? $t(
-                              'SendTokenDialog.inputs.p2pk_pubkey.label_invalid'
-                            )
-                          : $t('SendTokenDialog.inputs.p2pk_pubkey.label')
-                      "
-                      outlined
-                      clearable
-                      :color="sendData.p2pkPubkey && !isLocked ? 'red' : ''"
-                      @keyup.enter="lockTokens"
-                    />
-                  </div>
-                  <div class="col-4 q-pl-sm" v-if="!sendData.p2pkPubkey">
-                    <q-btn
-                      unelevated
-                      v-if="canPasteFromClipboard"
-                      :aria-label="
-                        $t(
-                          'SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text'
-                        )
-                      "
-                      @click="pasteToP2PKField"
-                    >
-                      <ClipboardPasteIcon :size="20" />
-                      <q-tooltip>{{
-                        $t(
-                          "SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text"
-                        )
-                      }}</q-tooltip>
-                    </q-btn>
-                    <IconButton
-                      :label="$t('global.actions.scan.label')"
-                      @click="showCamera"
-                    >
-                      <ScanIcon :size="20" />
-                    </IconButton>
-                  </div>
+            <FlowColumn class="q-px-lg">
+              <div class="row items-center">
+                <div :class="!sendData.p2pkPubkey ? 'col-8' : 'col-12'">
+                  <q-input
+                    v-model="sendData.p2pkPubkey"
+                    :label="
+                      sendData.p2pkPubkey && !isLocked
+                        ? $t('SendTokenDialog.inputs.p2pk_pubkey.label_invalid')
+                        : $t('SendTokenDialog.inputs.p2pk_pubkey.label')
+                    "
+                    outlined
+                    clearable
+                    :color="sendData.p2pkPubkey && !isLocked ? 'red' : ''"
+                    @keyup.enter="lockTokens"
+                  />
+                </div>
+                <div class="col-4 q-pl-sm" v-if="!sendData.p2pkPubkey">
+                  <q-btn
+                    unelevated
+                    v-if="canPasteFromClipboard"
+                    :aria-label="
+                      $t(
+                        'SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text'
+                      )
+                    "
+                    @click="pasteToP2PKField"
+                  >
+                    <ClipboardPasteIcon :size="20" />
+                    <q-tooltip>{{
+                      $t(
+                        "SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text"
+                      )
+                    }}</q-tooltip>
+                  </q-btn>
+                  <IconButton
+                    :label="$t('global.actions.scan.label')"
+                    @click="showCamera"
+                  >
+                    <ScanIcon :size="20" />
+                  </IconButton>
                 </div>
               </div>
-            </div>
+            </FlowColumn>
           </div>
         </transition>
         <AmountInputComponent
@@ -200,6 +189,7 @@
   </FlowDialog>
 </template>
 <script lang="ts">
+import FlowColumn from "src/components/ui/FlowColumn.vue";
 import FlowDialog from "src/components/ui/FlowDialog.vue";
 import BusyLabel from "src/components/ui/BusyLabel.vue";
 import FlowFooter from "src/components/ui/FlowFooter.vue";
@@ -239,6 +229,7 @@ export default defineComponent({
   name: "SendTokenDialog",
   mixins: [windowMixin],
   components: {
+    FlowColumn,
     UnitToggle,
     FlowDialog,
     BusyLabel,

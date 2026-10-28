@@ -13,7 +13,7 @@ export const LANGUAGE_OPTIONS: { label: string; value: string }[] = [
   { label: "Türkçe", value: "tr-TR" },
   { label: "ไทย", value: "th-TH" },
   { label: "العربية", value: "ar-SA" },
-  { label: "中文", value: "zh-CN" },
+  { label: "简体中文", value: "zh-CN" },
   { label: "日本語", value: "ja-JP" },
 ];
 

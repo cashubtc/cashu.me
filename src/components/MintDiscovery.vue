@@ -121,7 +121,6 @@
               :name="getMintDisplayName(rec.url)"
               :url="rec.url"
               :loading="isFetchingMintInfo(rec.url)"
-              :unnamed-label="$t('MintSettings.discover.unnamed')"
             >
               <template #action>
                 <!-- A labelled add, so it doesn't read as a second way into the reviews

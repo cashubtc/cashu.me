@@ -32,434 +32,409 @@
       </FullscreenDialogHeader>
 
       <!-- Mint selection -->
-      <div class="row justify-center">
-        <div class="col-12 q-px-md" style="max-width: var(--app-column)">
-          <ChooseMint
-            v-if="!showNoMintForMethodError"
-            :filter-payment-method="payPaymentMethod"
-            :filter-mint-operation="payMintOperation"
-          />
-        </div>
-      </div>
+      <FlowColumn class="q-px-md">
+        <ChooseMint
+          v-if="!showNoMintForMethodError"
+          :filter-payment-method="payPaymentMethod"
+          :filter-mint-operation="payMintOperation"
+        />
+      </FlowColumn>
 
       <!-- Content area -->
       <div
         class="col column items-center q-px-sm scroll-container invoice-scroll-area"
       >
-        <div class="row justify-center full-width invoice-main-area">
-          <div
-            class="col-12 q-px-sm q-mb-sm invoice-main-column"
-            style="max-width: var(--app-column)"
-          >
-            <!-- INVOICE CONTENT -->
-            <div v-if="payInvoiceData.invoice" class="invoice-content-fill">
-              <div
-                class="invoice-state-container"
-                :class="{
-                  'invoice-state-container--centered': showInvoiceErrorState,
-                }"
-              >
-                <transition name="slide-down">
-                  <div :key="invoiceStateKey" class="invoice-state-content">
-                    <PaymentStatus
-                      v-if="isPaid"
-                      state="paid"
-                      class="q-mb-md"
-                      :label="$t('PayInvoiceDialog.invoice.paid')"
-                      :caption="
-                        payInvoiceData.fee_paid != null
-                          ? `${$t(
-                              'PayInvoiceDialog.invoice.fee'
-                            )}: ${formatCurrency(
-                              payInvoiceData.fee_paid,
+        <FlowColumn
+          class="q-px-sm q-mb-sm invoice-main-column full-width invoice-main-area"
+        >
+          <!-- INVOICE CONTENT -->
+          <div v-if="payInvoiceData.invoice" class="invoice-content-fill">
+            <div
+              class="invoice-state-container"
+              :class="{
+                'invoice-state-container--centered': showInvoiceErrorState,
+              }"
+            >
+              <transition name="slide-down">
+                <div :key="invoiceStateKey" class="invoice-state-content">
+                  <PaymentStatus
+                    v-if="isPaid"
+                    state="paid"
+                    class="q-mb-md"
+                    :label="$t('PayInvoiceDialog.invoice.paid')"
+                    :caption="
+                      payInvoiceData.fee_paid != null
+                        ? `${$t(
+                            'PayInvoiceDialog.invoice.fee'
+                          )}: ${formatCurrency(
+                            payInvoiceData.fee_paid,
+                            activeUnit,
+                            true
+                          )}`
+                        : ''
+                    "
+                    >{{ meltAmountLabel }}</PaymentStatus
+                  >
+                  <PaymentStatus
+                    v-else-if="paymentInProgress"
+                    state="pending"
+                    class="q-mb-md"
+                    :label="$t('PayInvoiceDialog.invoice.paying')"
+                    >{{ meltAmountLabel }}</PaymentStatus
+                  >
+                  <div
+                    v-else-if="
+                      payInvoiceData.meltQuote.response &&
+                      payInvoiceData.meltQuote.response.amount > 0
+                    "
+                    class="q-mb-md"
+                  >
+                    <div class="text-h4 text-weight-bold q-mb-xs">
+                      <i18n-t keypath="PayInvoiceDialog.invoice.title">
+                        <template v-slot:value>
+                          {{
+                            formatCurrency(
+                              payInvoiceData.meltQuote.response.amount,
                               activeUnit,
                               true
-                            )}`
-                          : ''
-                      "
-                      >{{ meltAmountLabel }}</PaymentStatus
-                    >
-                    <PaymentStatus
-                      v-else-if="paymentInProgress"
-                      state="pending"
-                      class="q-mb-md"
-                      :label="$t('PayInvoiceDialog.invoice.paying')"
-                      >{{ meltAmountLabel }}</PaymentStatus
-                    >
+                            )
+                          }}
+                        </template>
+                      </i18n-t>
+                    </div>
                     <div
-                      v-else-if="
-                        payInvoiceData.meltQuote.response &&
-                        payInvoiceData.meltQuote.response.amount > 0
-                      "
-                      class="q-mb-md"
+                      v-if="bitcoinPrice && activeUnit == 'sat'"
+                      class="text-subtitle2 text-app-muted q-ml-xs"
                     >
-                      <div class="text-h4 text-weight-bold q-mb-xs">
-                        <i18n-t keypath="PayInvoiceDialog.invoice.title">
-                          <template v-slot:value>
-                            {{
-                              formatCurrency(
-                                payInvoiceData.meltQuote.response.amount,
-                                activeUnit,
-                                true
-                              )
-                            }}
-                          </template>
-                        </i18n-t>
+                      {{
+                        formatCurrency(
+                          (currentCurrencyPrice / 100000000) *
+                            payInvoiceData.meltQuote.response.amount,
+                          bitcoinPriceCurrency,
+                          true
+                        )
+                      }}
+                    </div>
+                    <div
+                      v-if="showOnchainFeeOptions"
+                      class="onchain-fee-options q-mt-lg"
+                    >
+                      <div class="text-subtitle2 text-app-muted q-mb-sm">
+                        {{ $t("PayInvoiceDialog.onchain.choose_speed") }}
                       </div>
-                      <div
-                        v-if="bitcoinPrice && activeUnit == 'sat'"
-                        class="text-subtitle2 text-app-muted q-ml-xs"
-                      >
-                        {{
-                          formatCurrency(
-                            (currentCurrencyPrice / 100000000) *
-                              payInvoiceData.meltQuote.response.amount,
-                            bitcoinPriceCurrency,
-                            true
-                          )
-                        }}
-                      </div>
-                      <div
-                        v-if="showOnchainFeeOptions"
-                        class="onchain-fee-options q-mt-lg"
-                      >
-                        <div class="text-subtitle2 text-app-muted q-mb-sm">
-                          {{ $t("PayInvoiceDialog.onchain.choose_speed") }}
-                        </div>
-                        <div class="q-gutter-y-sm">
-                          <div
-                            v-for="option in onchainFeeOptions"
-                            :key="option.fee_index"
-                            class="fee-option-row"
-                            :class="{
-                              'fee-option-row--selected':
-                                option.fee_index === selectedOnchainFeeIndex,
-                            }"
-                            @click="selectOnchainFeeOption(option)"
-                          >
-                            <div class="row items-center no-wrap">
-                              <div class="col text-left">
-                                <div class="text-weight-medium">
-                                  {{
-                                    $t(
-                                      "PayInvoiceDialog.onchain.blocks",
-                                      option.estimated_blocks
-                                    )
-                                  }}
-                                </div>
-                                <div class="text-caption text-app-muted">
-                                  {{
-                                    $t(
-                                      "PayInvoiceDialog.onchain.estimated_confirmation"
-                                    )
-                                  }}
-                                </div>
+                      <div class="q-gutter-y-sm">
+                        <div
+                          v-for="option in onchainFeeOptions"
+                          :key="option.fee_index"
+                          class="fee-option-row"
+                          :class="{
+                            'fee-option-row--selected':
+                              option.fee_index === selectedOnchainFeeIndex,
+                          }"
+                          @click="selectOnchainFeeOption(option)"
+                        >
+                          <div class="row items-center no-wrap">
+                            <div class="col text-left">
+                              <div class="text-weight-medium">
+                                {{
+                                  $t(
+                                    "PayInvoiceDialog.onchain.blocks",
+                                    option.estimated_blocks
+                                  )
+                                }}
                               </div>
-                              <div class="text-right q-mr-sm">
-                                <div class="text-weight-bold">
-                                  {{
-                                    formatCurrency(
-                                      option.fee_reserve,
-                                      activeUnit,
-                                      true
-                                    )
-                                  }}
-                                </div>
-                                <div class="text-caption text-app-muted">
-                                  {{
-                                    $t("PayInvoiceDialog.onchain.fee_reserve")
-                                  }}
-                                </div>
+                              <div class="text-caption text-app-muted">
+                                {{
+                                  $t(
+                                    "PayInvoiceDialog.onchain.estimated_confirmation"
+                                  )
+                                }}
                               </div>
-                              <!-- The standard radio, display only: the row takes the tap. -->
-                              <q-radio
-                                :model-value="
-                                  option.fee_index === selectedOnchainFeeIndex
-                                "
-                                :val="true"
-                                color="primary"
-                                dense
-                                tabindex="-1"
-                                aria-hidden="true"
-                                style="pointer-events: none"
-                              />
                             </div>
+                            <div class="text-right q-mr-sm">
+                              <div class="text-weight-bold">
+                                {{
+                                  formatCurrency(
+                                    option.fee_reserve,
+                                    activeUnit,
+                                    true
+                                  )
+                                }}
+                              </div>
+                              <div class="text-caption text-app-muted">
+                                {{ $t("PayInvoiceDialog.onchain.fee_reserve") }}
+                              </div>
+                            </div>
+                            <!-- The standard radio, display only: the row takes the tap. -->
+                            <q-radio
+                              :model-value="
+                                option.fee_index === selectedOnchainFeeIndex
+                              "
+                              :val="true"
+                              color="primary"
+                              dense
+                              tabindex="-1"
+                              aria-hidden="true"
+                              style="pointer-events: none"
+                            />
                           </div>
                         </div>
                       </div>
-                      <p
-                        class="text-wrap q-mt-xl"
-                        style="max-width: 600px; font-size: 1.1rem"
-                        v-if="
-                          payInvoiceData.invoice.description &&
-                          payInvoiceData.meltQuote.response
-                        "
-                      >
-                        <strong
-                          >{{
-                            $t("PayInvoiceDialog.invoice.memo.label")
-                          }}:</strong
-                        >
-                        {{ payInvoiceData.invoice.description }}<br />
-                      </p>
                     </div>
-                    <div
-                      v-else-if="showInvoiceErrorState"
-                      class="invoice-error-state"
+                    <p
+                      class="text-wrap q-mt-xl"
+                      style="max-width: 600px; font-size: 1.1rem"
+                      v-if="
+                        payInvoiceData.invoice.description &&
+                        payInvoiceData.meltQuote.response
+                      "
                     >
-                      <div class="text-h6 q-my-none">
-                        {{ payInvoiceData.meltQuote.error }}
-                      </div>
-                    </div>
-                    <div v-else-if="showAmountlessPaymentAmountEntry">
-                      <p
-                        v-if="payInvoiceData.invoice.description"
-                        class="text-wrap q-mb-md"
-                        style="max-width: 600px; font-size: 1.1rem"
+                      <strong
+                        >{{
+                          $t("PayInvoiceDialog.invoice.memo.label")
+                        }}:</strong
                       >
-                        <strong
-                          >{{
-                            $t("PayInvoiceDialog.invoice.memo.label")
-                          }}:</strong
-                        >
-                        {{ payInvoiceData.invoice.description }}
-                      </p>
-                      <div
-                        v-if="showAmountlessPaymentAmountKeyboard"
-                        class="column items-center justify-center q-px-lg q-py-lg amount-area"
+                      {{ payInvoiceData.invoice.description }}<br />
+                    </p>
+                  </div>
+                  <div
+                    v-else-if="showInvoiceErrorState"
+                    class="invoice-error-state"
+                  >
+                    <div class="text-h6 q-my-none">
+                      {{ payInvoiceData.meltQuote.error }}
+                    </div>
+                  </div>
+                  <div v-else-if="showAmountlessPaymentAmountEntry">
+                    <p
+                      v-if="payInvoiceData.invoice.description"
+                      class="text-wrap q-mb-md"
+                      style="max-width: 600px; font-size: 1.1rem"
+                    >
+                      <strong
+                        >{{
+                          $t("PayInvoiceDialog.invoice.memo.label")
+                        }}:</strong
                       >
-                        <AmountInputComponent
-                          v-model="payInvoiceData.input.amount"
-                          :enabled="true"
-                          :muted="insufficientFundsForAmountlessPayment"
-                          :max-amount="amountlessPaymentMaxAmountFromBalance"
-                          @enter="handleAmountlessQuote"
-                        />
-                      </div>
-                    </div>
-                    <div v-else>
-                      <div class="row">
-                        <div class="col-12 text-h4 text-weight-bold q-mb-xs">
-                          {{
-                            $t("PayInvoiceDialog.invoice.processing_info_text")
-                          }}
-                          <PendingDots />
-                        </div>
-                      </div>
+                      {{ payInvoiceData.invoice.description }}
+                    </p>
+                    <div
+                      v-if="showAmountlessPaymentAmountKeyboard"
+                      class="column items-center justify-center q-px-lg q-py-lg amount-area"
+                    >
+                      <AmountInputComponent
+                        v-model="payInvoiceData.input.amount"
+                        :enabled="true"
+                        :muted="insufficientFundsForAmountlessPayment"
+                        :max-amount="amountlessPaymentMaxAmountFromBalance"
+                        @enter="handleAmountlessQuote"
+                      />
                     </div>
                   </div>
-                </transition>
-              </div>
-              <div
-                v-if="showBottomMeltQuoteInformation"
-                class="invoice-details-bottom"
-              >
-                <MeltQuoteInformation
-                  :melt-quote="payInvoiceData.meltQuote.response"
-                  :mint-url="activeMintUrl"
-                />
-              </div>
-            </div>
-
-            <!-- LNURL PAY CONTENT -->
-            <div v-else-if="payInvoiceData.lnurlpay">
-              <!-- Fixed amount display (when maxSendable == minSendable) -->
-              <div
-                v-if="
-                  payInvoiceData.lnurlpay.maxSendable ==
-                  payInvoiceData.lnurlpay.minSendable
-                "
-              >
-                <p
-                  v-if="payInvoiceData.lnurlpay.lightningAddress"
-                  class="q-my-none text-h6 text-center"
-                  style="word-break: break-all"
-                >
-                  <i18n-t
-                    keypath="PayInvoiceDialog.lnurlpay.sending_to_lightning_address"
-                  >
-                    <template v-slot:address>
-                      <b>{{ payInvoiceData.lnurlpay.lightningAddress }}</b>
-                    </template>
-                  </i18n-t>
-                </p>
-                <p
-                  v-else
-                  class="q-my-none text-h6 text-center"
-                  style="word-break: break-all"
-                >
-                  <i18n-t
-                    keypath="PayInvoiceDialog.lnurlpay.amount_exact_label"
-                  >
-                    <template v-slot:payee>
-                      <b>{{ payInvoiceData.lnurlpay.domain }}</b>
-                    </template>
-                    <template v-slot:value>
-                      {{ payInvoiceData.lnurlpay.maxSendable / 1000 }}
-                    </template>
-                    <template v-slot:ticker>
-                      {{ tickerShort }}
-                    </template>
-                  </i18n-t>
-                </p>
-                <q-separator class="q-my-sm"></q-separator>
-                <div class="row" v-if="payInvoiceData.lnurlpay.description">
-                  <p class="col text-justify text-italic">
-                    {{ payInvoiceData.lnurlpay.description }}
-                  </p>
-                  <p class="col-4 q-pl-md" v-if="payInvoiceData.lnurlpay.image">
-                    <q-img :src="payInvoiceData.lnurlpay.image" />
-                  </p>
-                </div>
-                <!-- Comment input for fixed amount -->
-                <div
-                  class="row justify-center q-mt-md"
-                  v-if="payInvoiceData.lnurlpay.commentAllowed > 0"
-                >
-                  <div
-                    class="col-12 q-px-sm"
-                    style="max-width: var(--app-column)"
-                  >
-                    <q-input
-                      round
-                      outlined
-                      v-model="payInvoiceData.input.comment"
-                      :type="
-                        payInvoiceData.lnurlpay.commentAllowed > 64
-                          ? 'textarea'
-                          : 'text'
-                      "
-                      :label="
-                        $t('PayInvoiceDialog.lnurlpay.inputs.comment.label')
-                      "
-                      :maxlength="payInvoiceData.lnurlpay.commentAllowed"
-                    ></q-input>
+                  <div v-else>
+                    <div class="row">
+                      <div class="col-12 text-h4 text-weight-bold q-mb-xs">
+                        {{
+                          $t("PayInvoiceDialog.invoice.processing_info_text")
+                        }}
+                        <PendingDots />
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-
-              <!-- Variable amount with AmountInputComponent -->
-              <div v-else>
-                <p
-                  v-if="payInvoiceData.lnurlpay.lightningAddress"
-                  class="q-my-none text-h6 text-center"
-                  style="word-break: break-all"
-                >
-                  <i18n-t
-                    keypath="PayInvoiceDialog.lnurlpay.sending_to_lightning_address"
-                  >
-                    <template v-slot:address>
-                      <b>{{ payInvoiceData.lnurlpay.lightningAddress }}</b>
-                    </template>
-                  </i18n-t>
-                </p>
-                <p
-                  v-else
-                  class="q-my-none text-h6 text-center"
-                  style="word-break: break-all"
-                >
-                  <i18n-t
-                    keypath="PayInvoiceDialog.lnurlpay.amount_range_label"
-                  >
-                    <template v-slot:payee>
-                      <b>{{
-                        payInvoiceData.lnurlpay.targetUser ||
-                        payInvoiceData.lnurlpay.domain
-                      }}</b>
-                    </template>
-                    <template v-slot:br>
-                      <br />
-                    </template>
-                    <template v-slot:min>
-                      <b>{{ payInvoiceData.lnurlpay.minSendable / 1000 }}</b>
-                    </template>
-                    <template v-slot:max>
-                      <b>{{ payInvoiceData.lnurlpay.maxSendable / 1000 }}</b>
-                    </template>
-                    <template v-slot:ticker>
-                      {{ tickerShort }}
-                    </template>
-                  </i18n-t>
-                </p>
-
-                <div class="row" v-if="payInvoiceData.lnurlpay.description">
-                  <p class="col text-justify text-italic">
-                    {{ payInvoiceData.lnurlpay.description }}
-                  </p>
-                  <p class="col-4 q-pl-md" v-if="payInvoiceData.lnurlpay.image">
-                    <q-img :src="payInvoiceData.lnurlpay.image" />
-                  </p>
-                </div>
-
-                <!-- Amount display area -->
-                <div
-                  class="column items-center justify-center q-px-lg q-py-lg amount-area"
-                >
-                  <AmountInputComponent
-                    v-model="payInvoiceData.input.amount"
-                    :enabled="true"
-                    :muted="
-                      insufficientFunds ||
-                      (payInvoiceData.lnurlpay.minSendable &&
-                        payInvoiceData.input.amount <
-                          payInvoiceData.lnurlpay.minSendable / 1000) ||
-                      (payInvoiceData.lnurlpay.maxSendable &&
-                        payInvoiceData.input.amount >
-                          payInvoiceData.lnurlpay.maxSendable / 1000)
-                    "
-                    :max-amount="
-                      Math.min(
-                        payInvoiceData.lnurlpay.maxSendable / 1000,
-                        maxAmountFromBalance
-                      )
-                    "
-                    @enter="handleLnurlPaySecond"
-                  />
-                </div>
-
-                <!-- Comment input below amount -->
-                <div
-                  class="row justify-center q-mt-md"
-                  v-if="payInvoiceData.lnurlpay.commentAllowed > 0"
-                >
-                  <div
-                    class="col-12 q-px-sm"
-                    style="max-width: var(--app-column)"
-                  >
-                    <q-input
-                      round
-                      outlined
-                      v-model="payInvoiceData.input.comment"
-                      type="text"
-                      :label="
-                        $t('PayInvoiceDialog.lnurlpay.inputs.comment.label')
-                      "
-                      :maxlength="payInvoiceData.lnurlpay.commentAllowed"
-                    ></q-input>
-                  </div>
-                </div>
-              </div>
+              </transition>
             </div>
-
-            <!-- INPUT CONTENT -->
-            <div v-else>
-              <!-- One 16px gap under the mint picker (its own bottom inset), as between
-                     the input and the scan card. -->
-              <ParseInputComponent
-                v-if="!camera.show"
-                style="margin-top: 0"
-                v-model="payInvoiceData.input.request"
-                test-id="payment-request-input"
-                :placeholder="parseInputPlaceholder"
-                :has-camera="hasCameraAvailable"
-                :ndef-supported="false"
-                @update:model-value="decodeAndQuote($event)"
-                @paste="pasteToParseDialog"
-                @scan="showCamera"
+            <div
+              v-if="showBottomMeltQuoteInformation"
+              class="invoice-details-bottom"
+            >
+              <MeltQuoteInformation
+                :melt-quote="payInvoiceData.meltQuote.response"
+                :mint-url="activeMintUrl"
               />
             </div>
           </div>
-        </div>
+
+          <!-- LNURL PAY CONTENT -->
+          <div v-else-if="payInvoiceData.lnurlpay">
+            <!-- Fixed amount display (when maxSendable == minSendable) -->
+            <div
+              v-if="
+                payInvoiceData.lnurlpay.maxSendable ==
+                payInvoiceData.lnurlpay.minSendable
+              "
+            >
+              <p
+                v-if="payInvoiceData.lnurlpay.lightningAddress"
+                class="q-my-none text-h6 text-center"
+                style="word-break: break-all"
+              >
+                <i18n-t
+                  keypath="PayInvoiceDialog.lnurlpay.sending_to_lightning_address"
+                >
+                  <template v-slot:address>
+                    <b>{{ payInvoiceData.lnurlpay.lightningAddress }}</b>
+                  </template>
+                </i18n-t>
+              </p>
+              <p
+                v-else
+                class="q-my-none text-h6 text-center"
+                style="word-break: break-all"
+              >
+                <i18n-t keypath="PayInvoiceDialog.lnurlpay.amount_exact_label">
+                  <template v-slot:payee>
+                    <b>{{ payInvoiceData.lnurlpay.domain }}</b>
+                  </template>
+                  <template v-slot:value>
+                    {{ payInvoiceData.lnurlpay.maxSendable / 1000 }}
+                  </template>
+                  <template v-slot:ticker>
+                    {{ tickerShort }}
+                  </template>
+                </i18n-t>
+              </p>
+              <q-separator class="q-my-sm"></q-separator>
+              <div class="row" v-if="payInvoiceData.lnurlpay.description">
+                <p class="col text-justify text-italic">
+                  {{ payInvoiceData.lnurlpay.description }}
+                </p>
+                <p class="col-4 q-pl-md" v-if="payInvoiceData.lnurlpay.image">
+                  <q-img :src="payInvoiceData.lnurlpay.image" />
+                </p>
+              </div>
+              <!-- Comment input for fixed amount -->
+              <FlowColumn
+                v-if="payInvoiceData.lnurlpay.commentAllowed > 0"
+                class="q-px-sm q-mt-md"
+              >
+                <q-input
+                  round
+                  outlined
+                  v-model="payInvoiceData.input.comment"
+                  :type="
+                    payInvoiceData.lnurlpay.commentAllowed > 64
+                      ? 'textarea'
+                      : 'text'
+                  "
+                  :label="$t('PayInvoiceDialog.lnurlpay.inputs.comment.label')"
+                  :maxlength="payInvoiceData.lnurlpay.commentAllowed"
+                ></q-input>
+              </FlowColumn>
+            </div>
+
+            <!-- Variable amount with AmountInputComponent -->
+            <div v-else>
+              <p
+                v-if="payInvoiceData.lnurlpay.lightningAddress"
+                class="q-my-none text-h6 text-center"
+                style="word-break: break-all"
+              >
+                <i18n-t
+                  keypath="PayInvoiceDialog.lnurlpay.sending_to_lightning_address"
+                >
+                  <template v-slot:address>
+                    <b>{{ payInvoiceData.lnurlpay.lightningAddress }}</b>
+                  </template>
+                </i18n-t>
+              </p>
+              <p
+                v-else
+                class="q-my-none text-h6 text-center"
+                style="word-break: break-all"
+              >
+                <i18n-t keypath="PayInvoiceDialog.lnurlpay.amount_range_label">
+                  <template v-slot:payee>
+                    <b>{{
+                      payInvoiceData.lnurlpay.targetUser ||
+                      payInvoiceData.lnurlpay.domain
+                    }}</b>
+                  </template>
+                  <template v-slot:br>
+                    <br />
+                  </template>
+                  <template v-slot:min>
+                    <b>{{ payInvoiceData.lnurlpay.minSendable / 1000 }}</b>
+                  </template>
+                  <template v-slot:max>
+                    <b>{{ payInvoiceData.lnurlpay.maxSendable / 1000 }}</b>
+                  </template>
+                  <template v-slot:ticker>
+                    {{ tickerShort }}
+                  </template>
+                </i18n-t>
+              </p>
+
+              <div class="row" v-if="payInvoiceData.lnurlpay.description">
+                <p class="col text-justify text-italic">
+                  {{ payInvoiceData.lnurlpay.description }}
+                </p>
+                <p class="col-4 q-pl-md" v-if="payInvoiceData.lnurlpay.image">
+                  <q-img :src="payInvoiceData.lnurlpay.image" />
+                </p>
+              </div>
+
+              <!-- Amount display area -->
+              <div
+                class="column items-center justify-center q-px-lg q-py-lg amount-area"
+              >
+                <AmountInputComponent
+                  v-model="payInvoiceData.input.amount"
+                  :enabled="true"
+                  :muted="
+                    insufficientFunds ||
+                    (payInvoiceData.lnurlpay.minSendable &&
+                      payInvoiceData.input.amount <
+                        payInvoiceData.lnurlpay.minSendable / 1000) ||
+                    (payInvoiceData.lnurlpay.maxSendable &&
+                      payInvoiceData.input.amount >
+                        payInvoiceData.lnurlpay.maxSendable / 1000)
+                  "
+                  :max-amount="
+                    Math.min(
+                      payInvoiceData.lnurlpay.maxSendable / 1000,
+                      maxAmountFromBalance
+                    )
+                  "
+                  @enter="handleLnurlPaySecond"
+                />
+              </div>
+
+              <!-- Comment input below amount -->
+              <FlowColumn
+                v-if="payInvoiceData.lnurlpay.commentAllowed > 0"
+                class="q-px-sm q-mt-md"
+              >
+                <q-input
+                  round
+                  outlined
+                  v-model="payInvoiceData.input.comment"
+                  type="text"
+                  :label="$t('PayInvoiceDialog.lnurlpay.inputs.comment.label')"
+                  :maxlength="payInvoiceData.lnurlpay.commentAllowed"
+                ></q-input>
+              </FlowColumn>
+            </div>
+          </div>
+
+          <!-- INPUT CONTENT -->
+          <div v-else>
+            <!-- One 16px gap under the mint picker (its own bottom inset), as between
+                     the input and the scan card. -->
+            <ParseInputComponent
+              v-if="!camera.show"
+              style="margin-top: 0"
+              v-model="payInvoiceData.input.request"
+              test-id="payment-request-input"
+              :placeholder="parseInputPlaceholder"
+              :has-camera="hasCameraAvailable"
+              :ndef-supported="false"
+              @update:model-value="decodeAndQuote($event)"
+              @paste="pasteToParseDialog"
+              @scan="showCamera"
+            />
+          </div>
+        </FlowColumn>
       </div>
 
       <!-- Bottom fixed pay action -->
@@ -665,6 +640,7 @@
   />
 </template>
 <script lang="ts">
+import FlowColumn from "src/components/ui/FlowColumn.vue";
 import PaymentStatus from "src/components/ui/PaymentStatus.vue";
 import FlowDialog from "src/components/ui/FlowDialog.vue";
 import BusyLabel from "src/components/ui/BusyLabel.vue";
@@ -699,6 +675,7 @@ export default defineComponent({
   name: "PayInvoiceDialog",
   mixins: [windowMixin],
   components: {
+    FlowColumn,
     UnitToggle,
     PaymentStatus,
     FlowDialog,

@@ -136,6 +136,17 @@ describe("standard elements", () => {
     ).toEqual([]);
   });
 
+  // A flow's centred content column is FlowColumn (16 hand-built copies, council R82).
+  it("flow content columns use FlowColumn", () => {
+    expect(
+      offenders((text) =>
+        /justify-center[^"]*"[^>]*>\s*<div\s+class="col-12[^"]*"\s+style="max-width: var\(--app-column\)"/.test(
+          text
+        )
+      )
+    ).toEqual([]);
+  });
+
   it("one pending mark: no spinner outside PendingDots", () => {
     expect(
       offenders((text) => /<q-spinner/.test(text)).filter(

@@ -1084,6 +1084,13 @@
         </div>
       </DsEntry>
       <h2 id="ds-group-layout" class="ds-section">Layout and composition</h2>
+      <DsEntry id="flow-column">
+        <div class="ds-frame q-py-sm">
+          <FlowColumn class="q-px-md">
+            <div class="ds-flow-column-sample">Content at the column width</div>
+          </FlowColumn>
+        </div>
+      </DsEntry>
       <DsEntry id="welcome-slide">
         <div class="ds-contain ds-welcome welcome-surface">
           <WelcomeSlideScaffold
@@ -1191,6 +1198,7 @@ import SettingsActionRow from "src/components/ui/SettingsActionRow.vue";
 import UnitToggle from "src/components/ui/UnitToggle.vue";
 import MintCardAction from "src/components/ui/MintCardAction.vue";
 import TonalChip from "src/components/ui/TonalChip.vue";
+import FlowColumn from "src/components/ui/FlowColumn.vue";
 import SettingsLinkRow from "src/components/ui/SettingsLinkRow.vue";
 import SettingsRadioRow from "src/components/ui/SettingsRadioRow.vue";
 import SettingsToggleRow from "src/components/ui/SettingsToggleRow.vue";
@@ -1289,6 +1297,7 @@ export default defineComponent({
     UnitToggle,
     MintCardAction,
     TonalChip,
+    FlowColumn,
     SettingsLinkRow,
     SettingsRadioRow,
     SettingsSection,
@@ -1783,6 +1792,12 @@ export default defineComponent({
 .ds-radius--ring {
   border-radius: var(--app-radius-lg);
   box-shadow: var(--app-focus-ring);
+}
+.ds-flow-column-sample {
+  background: var(--app-tint);
+  border-radius: var(--app-radius-sm);
+  padding: 12px;
+  text-align: center;
 }
 .ds-frame {
   border: 1px dashed var(--app-border-strong);

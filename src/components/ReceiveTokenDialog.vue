@@ -15,12 +15,8 @@
       <div
         class="col column items-center justify-start q-px-lg scroll-container"
       >
-        <div class="row justify-center full-width">
-          <div
-            class="col-12 q-px-sm q-mb-sm"
-            style="max-width: var(--app-column)"
-          >
-            <!-- <div class="row items-center no-wrap q-pb-sm">
+        <FlowColumn class="q-px-sm q-mb-sm full-width">
+          <!-- <div class="row items-center no-wrap q-pb-sm">
                 <div class="col-12">
                   <span class="text-h6">{{
                     $t("ReceiveTokenDialog.title", {
@@ -50,100 +46,96 @@
                 </div>
               </div> -->
 
-            <transition appear enter-active-class="animated fadeIn">
-              <div v-if="tokenDecodesCorrectly" key="token-valid">
-                <!-- VALID TOKEN content -->
-                <!-- print token in fixed width font -->
-                <div class="row q-pt-md">
-                  <div class="col-12">
-                    <TokenStringRender
-                      :token-string="receiveData.tokensBase64"
-                      :max-length="maxLengthForTokenString"
-                    />
-                  </div>
-                </div>
-
-                <div class="row q-pt-md">
-                  <div class="col-12">
-                    <TokenInformation
-                      :encodedToken="receiveData.tokensBase64"
-                      :hide-amount="true"
-                      :hide-unit="true"
-                      @notLockedToUs="handleNotLockedToUs"
-                    />
-                  </div>
-                </div>
-                <div
-                  class="row q-pt-sm"
-                  v-if="!knowThisMint && !isNotLockedToUs"
-                >
-                  <div class="col-12">
-                    <AppCallout
-                      variant="info"
-                      :text="$t('ReceiveTokenDialog.unknown_mint_info_text')"
-                    />
-                  </div>
-                </div>
-                <transition name="fade">
-                  <PaymentStatus
-                    v-if="isReceiving"
-                    state="pending"
-                    class="receiving-state q-mb-md"
-                    :label="
-                      $t('ReceiveTokenDialog.receiving_amount', {
-                        amount: formatCurrency(
-                          Math.max(tokenAmount - receiveFee, 0),
-                          tokenUnit,
-                          true
-                        ),
-                      })
-                    "
+          <transition appear enter-active-class="animated fadeIn">
+            <div v-if="tokenDecodesCorrectly" key="token-valid">
+              <!-- VALID TOKEN content -->
+              <!-- print token in fixed width font -->
+              <div class="row q-pt-md">
+                <div class="col-12">
+                  <TokenStringRender
+                    :token-string="receiveData.tokensBase64"
+                    :max-length="maxLengthForTokenString"
                   />
-                </transition>
-                <transition name="fade">
-                  <AppCallout
-                    v-if="receiveError && !isReceiving"
-                    variant="danger"
-                    class="q-mb-md q-mt-xl"
-                    :text="receiveError"
-                  />
-                </transition>
-
-                <!-- swap mint selection -->
-                <SwapIncomingTokenToKnownMint
-                  v-if="swapSelected"
-                  v-model:target-mint="selectedSwapMintUrl"
-                  :swap-processing="swapProcessing"
-                  :swap-error="swapError"
-                  :swap-blocking="swapBlocking"
-                  :source-mint-info="sourceMintInfo"
-                  :source-mint="tokenMint"
-                  @close="handleSwapClose"
-                />
+                </div>
               </div>
-              <ParseInputComponent
-                v-else
-                key="token-empty"
-                v-model="receiveData.tokensBase64"
-                test-id="receive-token-input"
-                :placeholder="$t('ParseInputComponent.placeholder.receive')"
-                :has-camera="hasCamera"
-                :ndef-supported="ndefSupported"
-                :scanning-card="scanningCard"
-                :nfc-label="$t('ReceiveTokenDialog.actions.nfc.label')"
-                :nfc-tooltip="
-                  $t(
-                    'ReceiveTokenDialog.actions.nfc.tooltips.ndef_supported_text'
-                  )
-                "
-                @enter="handleReceive"
-                @paste="pasteToParseDialog(true)"
-                @scan="showCamera"
-                @nfc="toggleScanner"
+
+              <div class="row q-pt-md">
+                <div class="col-12">
+                  <TokenInformation
+                    :encodedToken="receiveData.tokensBase64"
+                    :hide-amount="true"
+                    :hide-unit="true"
+                    @notLockedToUs="handleNotLockedToUs"
+                  />
+                </div>
+              </div>
+              <div class="row q-pt-sm" v-if="!knowThisMint && !isNotLockedToUs">
+                <div class="col-12">
+                  <AppCallout
+                    variant="info"
+                    :text="$t('ReceiveTokenDialog.unknown_mint_info_text')"
+                  />
+                </div>
+              </div>
+              <transition name="fade">
+                <PaymentStatus
+                  v-if="isReceiving"
+                  state="pending"
+                  class="receiving-state q-mb-md"
+                  :label="
+                    $t('ReceiveTokenDialog.receiving_amount', {
+                      amount: formatCurrency(
+                        Math.max(tokenAmount - receiveFee, 0),
+                        tokenUnit,
+                        true
+                      ),
+                    })
+                  "
+                />
+              </transition>
+              <transition name="fade">
+                <AppCallout
+                  v-if="receiveError && !isReceiving"
+                  variant="danger"
+                  class="q-mb-md q-mt-xl"
+                  :text="receiveError"
+                />
+              </transition>
+
+              <!-- swap mint selection -->
+              <SwapIncomingTokenToKnownMint
+                v-if="swapSelected"
+                v-model:target-mint="selectedSwapMintUrl"
+                :swap-processing="swapProcessing"
+                :swap-error="swapError"
+                :swap-blocking="swapBlocking"
+                :source-mint-info="sourceMintInfo"
+                :source-mint="tokenMint"
+                @close="handleSwapClose"
               />
-            </transition>
-          </div>
-        </div>
+            </div>
+            <ParseInputComponent
+              v-else
+              key="token-empty"
+              v-model="receiveData.tokensBase64"
+              test-id="receive-token-input"
+              :placeholder="$t('ParseInputComponent.placeholder.receive')"
+              :has-camera="hasCamera"
+              :ndef-supported="ndefSupported"
+              :scanning-card="scanningCard"
+              :nfc-label="$t('ReceiveTokenDialog.actions.nfc.label')"
+              :nfc-tooltip="
+                $t(
+                  'ReceiveTokenDialog.actions.nfc.tooltips.ndef_supported_text'
+                )
+              "
+              @enter="handleReceive"
+              @paste="pasteToParseDialog(true)"
+              @scan="showCamera"
+              @nfc="toggleScanner"
+            />
+          </transition>
+        </FlowColumn>
       </div>
 
       <!-- Bottom fixed receive action -->
@@ -256,6 +248,7 @@
 </template>
 
 <script lang="ts">
+import FlowColumn from "src/components/ui/FlowColumn.vue";
 import PaymentStatus from "src/components/ui/PaymentStatus.vue";
 import FlowDialog from "src/components/ui/FlowDialog.vue";
 import BusyLabel from "src/components/ui/BusyLabel.vue";
@@ -292,6 +285,7 @@ export default defineComponent({
   name: "ReceiveTokenDialog",
   mixins: [windowMixin],
   components: {
+    FlowColumn,
     PaymentStatus,
     FlowDialog,
     BusyLabel,

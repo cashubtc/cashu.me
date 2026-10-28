@@ -209,28 +209,21 @@
               </div>
             </div>
           </div>
-          <div
-            v-if="sendData.paymentRequest"
-            class="row justify-center q-pt-md"
-          >
-            <div class="col-12 q-px-md" style="max-width: var(--app-column)">
-              <PaymentRequestInfo :request="sendData.paymentRequest" />
-            </div>
-          </div>
-          <div
+          <FlowColumn v-if="sendData.paymentRequest" class="q-px-md q-pt-md">
+            <PaymentRequestInfo :request="sendData.paymentRequest" />
+          </FlowColumn>
+          <FlowColumn
             v-if="sendData.historyToken?.meltQuote"
-            class="row justify-center q-pt-md"
+            class="q-px-md q-pt-md"
           >
-            <div class="col-12 q-px-md" style="max-width: var(--app-column)">
-              <MeltQuoteInformation
-                :melt-quote="sendData.historyToken.meltQuote"
-                :invoice="sendData.historyToken"
-                :mint-url="sendData.historyToken.mint"
-                :history-paid-at="sendData.historyToken.paidDate"
-                :show-amount="false"
-              />
-            </div>
-          </div>
+            <MeltQuoteInformation
+              :melt-quote="sendData.historyToken.meltQuote"
+              :invoice="sendData.historyToken"
+              :mint-url="sendData.historyToken.mint"
+              :history-paid-at="sendData.historyToken.paidDate"
+              :show-amount="false"
+            />
+          </FlowColumn>
           <div
             v-if="
               sendData.paymentRequest &&
@@ -298,6 +291,7 @@
   </q-dialog>
 </template>
 <script lang="ts">
+import FlowColumn from "src/components/ui/FlowColumn.vue";
 import TonalChip from "src/components/ui/TonalChip.vue";
 import FlowFooter from "src/components/ui/FlowFooter.vue";
 import PendingDots from "src/components/ui/PendingDots.vue";
@@ -344,6 +338,7 @@ export default defineComponent({
   name: "DisplayTokenComponent",
   mixins: [windowMixin],
   components: {
+    FlowColumn,
     TonalChip,
     FlowFooter,
     PendingDots,

@@ -478,7 +478,7 @@ export default defineComponent({
 
 <style scoped>
 /* One gap before every section label: each section drops its own trailing margin and the
-   label sits 32px below it (the gaps were 56px above Mint details and 24px above Audit info,
+   label sits 24px below it (the gaps were 56px above Mint details and 24px above Audit info,
    council R75). */
 .mint-content-container > :has(+ .section-divider-block) {
   margin-bottom: 0 !important;
@@ -487,7 +487,7 @@ export default defineComponent({
   margin-bottom: 0 !important;
 }
 .mint-content-container > .section-divider-block {
-  margin-top: 32px;
+  margin-top: 24px;
 }
 /* The page scrolls as a whole; no inner scroll container. */
 .mint-details-page-content {
