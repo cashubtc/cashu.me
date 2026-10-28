@@ -177,14 +177,8 @@
             >
               <div class="row justify-center items-center no-wrap">
                 <div class="row no-wrap" style="gap: 8px">
-                  <q-btn
-                    v-if="showAnimatedQR"
-                    unelevated
-                    rounded
-                    class="qr-control-chip"
-                    @click="changeSpeed"
-                  >
-                    <GaugeIcon :size="18" class="q-mr-xs" />
+                  <TonalChip v-if="showAnimatedQR" @click="changeSpeed">
+                    <template #icon><GaugeIcon :size="18" /></template>
                     {{
                       $t("DisplayTokenComponent.qr_speed", {
                         value: $t(
@@ -196,15 +190,9 @@
                         ),
                       })
                     }}
-                  </q-btn>
-                  <q-btn
-                    v-if="showAnimatedQR"
-                    unelevated
-                    rounded
-                    class="qr-control-chip"
-                    @click="changeSize"
-                  >
-                    <ZoomInIcon :size="18" class="q-mr-xs" />
+                  </TonalChip>
+                  <TonalChip v-if="showAnimatedQR" @click="changeSize">
+                    <template #icon><ZoomInIcon :size="18" /></template>
                     {{
                       $t("DisplayTokenComponent.qr_size", {
                         value: $t(
@@ -216,7 +204,7 @@
                         ),
                       })
                     }}
-                  </q-btn>
+                  </TonalChip>
                 </div>
               </div>
             </div>
@@ -310,6 +298,7 @@
   </q-dialog>
 </template>
 <script lang="ts">
+import TonalChip from "src/components/ui/TonalChip.vue";
 import FlowFooter from "src/components/ui/FlowFooter.vue";
 import PendingDots from "src/components/ui/PendingDots.vue";
 import { defineComponent } from "vue";
@@ -355,6 +344,7 @@ export default defineComponent({
   name: "DisplayTokenComponent",
   mixins: [windowMixin],
   components: {
+    TonalChip,
     FlowFooter,
     PendingDots,
     LinkIcon,
@@ -713,16 +703,6 @@ export default defineComponent({
 });
 </script>
 <style scoped>
-/* Tonal chips (a tint fill, no edge), the app's quiet option style; outlined pills were
-   the only ones of their kind. */
-.qr-control-chip {
-  background: var(--app-tint-strong);
-  color: var(--app-text);
-  font-size: 13px;
-  min-height: 44px;
-  padding: 0 14px;
-}
-
 .content-area {
   max-width: var(--app-column);
   width: 100%;

@@ -220,6 +220,12 @@ export default {
   letter-spacing: -0.02em;
 }
 
+/* Chinese: the heading's width, balanced (ch is a Latin measure and ran wide for CJK;
+   keep-all broke only at the spaces around Latin words, council R76-R80). */
+.description:lang(zh) {
+  max-width: 330px;
+  text-wrap: balance;
+}
 .description {
   font-size: 1.1rem;
   line-height: 1.5;

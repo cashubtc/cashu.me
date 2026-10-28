@@ -58,6 +58,7 @@ describe("standard elements", () => {
     ["ui/PaymentStatus.vue", /^payment-status(__[\w-]+)?$/],
     ["ui/UnitToggle.vue", /^sheet-unit-toggle(__swap)?$/],
     ["ui/MintCardAction.vue", /^mint-card-add(__icon)?$/],
+    ["ui/TonalChip.vue", /^(tonal-chip(__icon)?|qr-control-chip)$/],
     ["ui/FlowFooter.vue", /^(bottom-panel|flow-footer__(bar|col))$/],
     [
       "ui/SectionDivider.vue",

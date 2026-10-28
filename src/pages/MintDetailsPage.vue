@@ -17,27 +17,20 @@
         <!-- Mint Header Profile Name Section -->
         <div class="mint-header-container q-mb-lg">
           <MintIdentityHeader :url="mintData.url" :info="mintData.info">
-            <!-- The QR toggle as an icon, as originally, but a real labelled button. -->
+            <!-- A labelled chip: a bare QR glyph under the name read as decoration
+                 (council R76-R80). -->
             <div class="top-icons">
-              <q-btn
-                flat
-                round
-                class="qr-toggle"
-                :aria-label="
-                  showQrCode
-                    ? $t('MintDetailsDialog.qr.hide')
-                    : $t('MintDetailsDialog.qr.show')
-                "
+              <TonalChip
                 :aria-expanded="showQrCode"
                 @click="showQrCode = !showQrCode"
               >
-                <QrCodeIcon size="24" class="qr-icon" />
-                <q-tooltip>{{
+                <template #icon><QrCodeIcon :size="18" /></template>
+                {{
                   showQrCode
                     ? $t("MintDetailsDialog.qr.hide")
                     : $t("MintDetailsDialog.qr.show")
-                }}</q-tooltip>
-              </q-btn>
+                }}
+              </TonalChip>
             </div>
 
             <!-- QR Code Section (toggleable) -->
@@ -277,6 +270,7 @@
 </template>
 
 <script lang="ts">
+import TonalChip from "src/components/ui/TonalChip.vue";
 import { defineComponent } from "vue";
 import { copyToClipboard } from "quasar";
 import { notifyCopied } from "src/js/notify";
@@ -310,6 +304,7 @@ export default defineComponent({
   name: "MintDetailsPage",
   mixins: [windowMixin],
   components: {
+    TonalChip,
     SettingsActionRow,
     CopyButton,
     QrCodeIcon,
@@ -510,10 +505,6 @@ export default defineComponent({
   width: 100%;
   display: flex;
   justify-content: center;
-}
-
-.qr-toggle {
-  color: var(--app-text);
 }
 
 /* Mint Header */

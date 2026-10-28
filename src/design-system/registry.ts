@@ -311,6 +311,16 @@ export const DS_ITEMS: DsItem[] = [
   },
 
   {
+    id: "tonal-chip",
+    name: "Tonal chip",
+    group: "actions",
+    tier: "primitive",
+    source: "src/components/ui/TonalChip.vue",
+    usage: { tag: "TonalChip" },
+    example: `<TonalChip @click="showQr = !showQr"><template #icon><QrCodeIcon :size="18" /></template>Show QR code</TonalChip>`,
+    note: "A quiet secondary action: tint fill, no edge, leading glyph, 44px.",
+  },
+  {
     id: "mint-card-action",
     name: "Mint card action",
     group: "actions",

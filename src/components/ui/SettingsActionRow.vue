@@ -9,13 +9,9 @@
       </div>
     </q-item-section>
     <q-item-section>
-      <q-item-label
-        :class="[
-          labelClass,
-          { 'text-negative': danger, 'text-warning': caution && !danger },
-        ]"
-        >{{ label }}</q-item-label
-      >
+      <q-item-label :class="[labelClass, { 'text-negative': danger }]">{{
+        label
+      }}</q-item-label>
       <q-item-label v-if="caption" caption>{{ caption }}</q-item-label>
       <slot />
     </q-item-section>
@@ -75,7 +71,8 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    // Risky but not destructive (a new seed phrase): the warning colour and a triangle.
+    // Risky but not destructive (a new seed phrase): a warning triangle; the label keeps the
+    // text colour so the name reads first (council R80).
     caution: {
       type: Boolean,
       default: false,

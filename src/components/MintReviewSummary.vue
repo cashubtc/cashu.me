@@ -17,7 +17,9 @@
         {{ $t("MintSettings.reviews_text", count) }}
       </template>
       <template v-else>{{ fallbackLabel }}</template>
+      <!-- Only a score has reviews to open; "No reviews yet" carries no chevron. -->
       <ChevronRightIcon
+        v-if="average !== null"
         :size="16"
         class="mint-review__chevron"
         aria-hidden="true"

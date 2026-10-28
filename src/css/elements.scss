@@ -630,8 +630,10 @@ body.body--light .activity-row__avatar--in {
   color: var(--app-success);
 }
 // Not final yet: secondary text at full weight, so the column keeps one rhythm.
+// Pending money is still the user's money: full-strength amount; the Pending badge carries
+// the status (a muted amount read as already spent, council R77-R79).
 .activity-row__amount--pending {
-  color: var(--app-text-muted);
+  color: var(--app-text);
 }
 // Nothing arrived: muted and struck through, never green.
 .activity-row__amount--expired {
@@ -663,4 +665,19 @@ body.body--light .activity-row__avatar--in {
   .app-option-row:not([role]):hover {
     background: var(--app-tint);
   }
+}
+
+/* TonalChip: a quiet secondary action, the tint fill with no edge (outlined pills were the
+   only ones of their kind). */
+.tonal-chip {
+  background: var(--app-tint-strong);
+  color: var(--app-text);
+  font-size: 13px;
+  font-weight: 600;
+  min-height: 44px;
+  padding: 0 14px;
+}
+.tonal-chip__icon {
+  display: inline-flex;
+  margin-inline-end: 6px;
 }

@@ -237,6 +237,19 @@
           </q-item>
         </q-list>
       </DsEntry>
+      <DsEntry id="tonal-chip">
+        <div class="ds-frame row items-center q-pa-sm" style="gap: 8px">
+          <TonalChip>
+            <template #icon><QrCodeIcon :size="18" /></template>
+            Show QR code
+          </TonalChip>
+          <TonalChip>
+            <template #icon><GaugeIcon :size="18" /></template>
+            Speed: Fast
+          </TonalChip>
+          <TonalChip disable>Disabled</TonalChip>
+        </div>
+      </DsEntry>
       <DsEntry id="mint-card-action">
         <div class="ds-frame row items-center no-wrap q-pa-sm" style="gap: 8px">
           <MintCardAction label="Add">
@@ -1177,6 +1190,7 @@ import SectionDivider from "src/components/ui/SectionDivider.vue";
 import SettingsActionRow from "src/components/ui/SettingsActionRow.vue";
 import UnitToggle from "src/components/ui/UnitToggle.vue";
 import MintCardAction from "src/components/ui/MintCardAction.vue";
+import TonalChip from "src/components/ui/TonalChip.vue";
 import SettingsLinkRow from "src/components/ui/SettingsLinkRow.vue";
 import SettingsRadioRow from "src/components/ui/SettingsRadioRow.vue";
 import SettingsToggleRow from "src/components/ui/SettingsToggleRow.vue";
@@ -1214,6 +1228,8 @@ import {
   Search as SearchIcon,
   Shield as ShieldIcon,
   X as XIcon,
+  Gauge as GaugeIcon,
+  QrCode as QrCodeIcon,
   ArchiveRestore as ArchiveRestoreIcon,
   Eye as EyeIcon,
   Trash2 as Trash2Icon,
@@ -1236,6 +1252,8 @@ export default defineComponent({
   name: "DesignSystemPage",
   mixins: [windowMixin],
   components: {
+    GaugeIcon,
+    QrCodeIcon,
     ArchiveRestoreIcon,
     PaymentStatus,
     FlowDialog,
@@ -1270,6 +1288,7 @@ export default defineComponent({
     SettingsActionRow,
     UnitToggle,
     MintCardAction,
+    TonalChip,
     SettingsLinkRow,
     SettingsRadioRow,
     SettingsSection,
