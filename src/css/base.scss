@@ -288,6 +288,10 @@ body.body--dark .q-table--dark {
   background: transparent;
 }
 
+// Helper and error text under fields is 13px, readable beside 15px values.
+.q-field__bottom {
+  font-size: 13px;
+}
 // Field errors use the danger colour, the same as error callouts and toasts.
 .q-field--error {
   .text-negative,

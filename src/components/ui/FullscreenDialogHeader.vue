@@ -7,7 +7,6 @@
       flat
       round
       icon="close"
-      color="grey"
       class="floating-close-btn app-icon-btn"
       :aria-label="$t('global.actions.close.label')"
       @click="$emit('close')"

@@ -6,7 +6,12 @@
     :label="$t('QuoteInformation.chain_status')"
     value-class="detail-value-with-spinner"
   >
-    <q-spinner v-if="loading" size="14px" color="grey-6" class="q-mr-xs" />
+    <q-spinner
+      v-if="loading"
+      size="16px"
+      :thickness="4"
+      class="q-mr-xs chain-status__spinner"
+    />
     <transition name="chain-status-fade" mode="out-in">
       <span
         v-if="metadata"
@@ -59,6 +64,9 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.chain-status__spinner {
+  color: var(--app-text-muted);
+}
 /* Pending is secondary text at regular weight; only Confirmed takes a colour. */
 .chain-status--pending {
   color: var(--app-text-muted);

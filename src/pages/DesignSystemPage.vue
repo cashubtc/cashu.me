@@ -545,7 +545,10 @@
                 <EllipsisIcon v-else :size="20" />
               </q-btn>
             </div>
-            <div class="mint-card__foot">
+            <div
+              class="mint-card__foot"
+              :class="{ 'mint-card__foot--meta': !card.balances.length }"
+            >
               <div class="mint-card__balances">
                 <template v-for="(b, i) in card.balances" :key="b">
                   <span v-if="i > 0" class="mint-card__plus" aria-hidden="true"
@@ -690,7 +693,7 @@
           <q-btn rounded outline no-caps color="primary">
             Copy address
             <q-tooltip anchor="top middle" self="bottom middle" :offset="[0, 8]"
-              >Copied to clipboard</q-tooltip
+              >Copy address</q-tooltip
             >
           </q-btn>
         </div>
@@ -757,7 +760,6 @@
       <DsEntry id="empty-state">
         <EmptyState
           :icon="SearchIcon"
-          boxed
           title="No mints found"
           text="Try again, or add a mint you trust by its URL."
         >
@@ -1217,7 +1219,7 @@ export default defineComponent({
         {
           url: "https://mint-c.example.com",
           name: "Mint C",
-          balances: ["₿500", "$25.00"],
+          balances: ["₿500", "$0.50"],
           reviews: "See reviews",
         },
         {

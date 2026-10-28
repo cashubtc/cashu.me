@@ -236,7 +236,8 @@ html[dir="rtl"] .app-callout__close {
   font-weight: 500;
   gap: 4px;
   line-height: 18px;
-  padding: 1px 8px;
+  min-height: 24px;
+  padding: 2px 9px;
   white-space: nowrap;
 }
 .app-badge--solid {
@@ -356,7 +357,7 @@ button.app-badge {
 }
 .welcome-slide__icon {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   margin-bottom: 20px;
   width: 100%;
 }

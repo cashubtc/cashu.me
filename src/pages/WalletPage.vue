@@ -233,6 +233,7 @@
 }
 
 .wallet-scan-btn {
+  background: var(--app-tint);
   color: var(--app-text);
   flex: 0 0 auto;
   height: 52px;

@@ -195,19 +195,24 @@ body,
 
 // Section label centred between two hairlines, in small capitals, as in the original design
 // (Mints tab, mint details, multi-mint payments).
+// Section divider: the section title on the start edge, then a hairline to the end, so it
+// matches the left-aligned settings section headings.
 .section-divider {
   display: flex;
   align-items: center;
   width: 100%;
+}
+.section-divider > .divider-line:first-child {
+  display: none;
 }
 .divider-line {
   flex: 1;
   height: 1px;
   background-color: var(--app-border);
 }
-// One section heading style: the settings section title (13px semibold, muted, sentence case).
+// One section heading style, shared with the settings section title.
 .divider-text {
-  padding: 0 12px;
+  padding: 0 12px 0 0;
   font-size: 14px;
   font-weight: 600;
   color: var(--app-text);
@@ -408,7 +413,7 @@ body[data-theme] .welcome-surface,
     height: 0.6em;
     border-radius: 0.3em;
     opacity: 1;
-    background: var(--app-border-strong);
+    background: color-mix(in srgb, var(--app-text) 32%, transparent);
     box-shadow: none;
   }
   .q-toggle__thumb {
@@ -455,10 +460,13 @@ body.body--light
 }
 // A disabled toggle is one grey treatment whatever its value, weaker than both on and off.
 .q-toggle.disabled {
-  opacity: 0.5 !important;
+  opacity: 0.4 !important;
 }
 .q-toggle.disabled .q-toggle__inner--truthy .q-toggle__track {
-  background: var(--app-border-strong);
+  background: color-mix(in srgb, var(--app-text) 32%, transparent);
+}
+body.body--light .q-toggle.disabled .q-toggle__inner--truthy .q-toggle__track {
+  background: rgba(0, 0, 0, 0.42);
 }
 .q-toggle.disabled .q-toggle__inner--truthy .q-toggle__thumb:after {
   background-color: var(--app-text-muted);
@@ -649,17 +657,17 @@ body.body--light .q-dialog__backdrop {
   flex: 1;
 }
 // The mint's own icon in a round slot (a landmark glyph on a tint when it has none):
-// 24px in the compact field, 40px in the normal one.
+// 32px in the compact field, 40px in the normal one.
 .mint-chip__avatar {
   align-items: center;
   background: var(--app-tint-strong);
   border-radius: 50%;
   display: inline-flex;
   flex: none;
-  height: 24px;
+  height: 32px;
   justify-content: center;
   overflow: hidden;
-  width: 24px;
+  width: 32px;
 }
 .mint-chip__avatar .q-img {
   height: 100%;
@@ -747,6 +755,14 @@ body.body--light .q-dialog__backdrop {
   row-gap: 4px;
 }
 
+// Tabs sit on a hairline baseline, with a short rounded indicator on it.
+body .q-tabs {
+  box-shadow: inset 0 -1px 0 var(--app-border);
+}
+body .q-tab__indicator {
+  border-radius: 2px;
+  height: 3px;
+}
 // Tooltips: a small raised label on the card surface with a hairline, not Quasar's grey slab.
 body .q-tooltip {
   background: var(--app-raised);
@@ -756,6 +772,10 @@ body .q-tooltip {
   color: var(--app-text);
   font-size: 12px;
   padding: 6px 10px;
+}
+// Slider: the remaining track at 3:1 against the surface, the filled part in the primary.
+body .q-slider__track {
+  background: color-mix(in srgb, var(--app-text) 38%, transparent) !important;
 }
 // Rating stars are ink, like every other glyph: no gold anywhere (round 57). Selected stars
 // are full text colour; unselected stars in an input are muted controls, not a near-invisible
@@ -820,7 +840,8 @@ body .q-field--outlined.q-field--readonly .q-field__control {
   background: var(--app-tint);
 }
 body .q-field--outlined.q-field--readonly .q-field__control:before {
-  border-color: transparent;
+  border-color: var(--app-border);
+  border-style: dashed;
 }
 // Outline buttons take their edge and fill from the surface tokens (Quasar draws the edge
 // in currentColor).
@@ -1266,6 +1287,10 @@ html[dir="rtl"] .mint-card-more {
   justify-content: space-between;
   min-height: 24px;
 }
+// No balance: the review line starts on the text edge instead of floating right.
+.mint-card__foot--meta {
+  justify-content: flex-start;
+}
 .mint-card__balances {
   display: flex;
   flex-wrap: wrap;
@@ -1276,6 +1301,10 @@ html[dir="rtl"] .mint-card-more {
   font-size: 16px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+}
+.mint-card__plus ~ .currency-unit-text {
+  color: var(--app-text-muted);
+  font-weight: 400;
 }
 .mint-card__plus {
   color: var(--app-text-subtle);

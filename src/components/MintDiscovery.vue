@@ -151,7 +151,7 @@
                     <PlusIcon :size="22" />
                   </q-btn>
                 </div>
-                <div class="mint-card__foot discover-card-foot">
+                <div class="mint-card__foot mint-card__foot--meta">
                   <MintReviewSummary
                     :average="countFor(rec.url) > 0 ? avgFor(rec.url) : null"
                     :count="countFor(rec.url)"
@@ -387,9 +387,6 @@ export default defineComponent({
 }
 
 /* The rating sits on the card's end edge, where the installed cards keep it. */
-.discover-card-foot {
-  justify-content: flex-end;
-}
 
 .discover-count {
   font-size: 14px;

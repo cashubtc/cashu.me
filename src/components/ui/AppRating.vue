@@ -27,7 +27,7 @@
     >
       <StarIcon
         :size="size"
-        :stroke-width="size > 24 ? 1.5 : 2"
+        :stroke-width="1.5"
         :fill="n <= shown ? 'currentColor' : 'none'"
         aria-hidden="true"
       />
@@ -98,7 +98,7 @@ button.star-rating__star:focus-visible {
   outline: none;
 }
 .star-rating__star--on {
-  color: var(--app-text);
+  color: color-mix(in srgb, var(--app-text) 87%, transparent);
 }
 .star-rating--disabled {
   opacity: 0.5;
