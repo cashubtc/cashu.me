@@ -216,20 +216,27 @@ body.body--light {
   gap: 8px;
   margin-top: 10px;
 }
+// Dismiss: a 40px round target, pulled into the padding so the text keeps its width.
 .app-callout__close {
   color: var(--app-text-muted);
-  margin: -6px -8px -6px 0;
+  height: 40px;
+  margin: -10px -10px -10px 0;
+  min-height: 40px;
+  min-width: 40px;
+  width: 40px;
 }
 html[dir="rtl"] .app-callout__close {
-  margin: -6px 0 -6px -8px;
+  margin: -10px 0 -10px -10px;
 }
 
-// Badge (shadcn Badge): a small pill label. Outline by default; "solid" for counts and units.
+// Badge: one small pill on a subtle neutral fill (status tones and a quiet primary tint are
+// the only variants; "solid" is kept as an alias of the default).
 .app-badge {
   align-items: center;
-  border: 1px solid var(--app-border-strong);
+  background: var(--app-tint-strong);
+  border: 1px solid transparent;
   border-radius: var(--app-radius-pill);
-  color: var(--app-text-muted);
+  color: var(--app-text);
   display: inline-flex;
   flex-shrink: 0;
   font-size: 13px;
@@ -245,10 +252,11 @@ html[dir="rtl"] .app-callout__close {
   border-color: transparent;
   color: var(--app-text);
 }
+// Emphasis (a chosen share, a count): the theme colour as a tint, never a solid block.
 .app-badge--primary {
-  background: var(--q-primary);
+  background: color-mix(in srgb, var(--q-primary) 18%, transparent);
   border-color: transparent;
-  color: var(--app-on-primary, #000);
+  color: var(--app-text);
 }
 button.app-badge {
   cursor: pointer;
@@ -413,6 +421,7 @@ button.app-badge {
 // a standard row (SkeletonRow.vue) of an avatar beside lines of text.
 body .q-skeleton {
   background: var(--app-tint-strong);
+  background-image: none !important;
 }
 body.body--light .q-skeleton {
   background: rgba(0, 0, 0, 0.1);
@@ -616,7 +625,7 @@ body .q-skeleton--type-text {
 }
 // Pending amounts are not settled yet: secondary text, not full emphasis.
 .activity-row__amount--pending {
-  color: var(--app-text-muted);
+  color: var(--app-text);
 }
 
 // Pager: 44px targets, muted pages and arrows, and the current page as a quiet tinted chip
@@ -629,6 +638,6 @@ body .q-skeleton--type-text {
   color: var(--app-text-muted) !important;
 }
 .q-pagination .q-btn.bg-primary {
-  background: var(--app-tint-strong) !important;
-  color: var(--app-text) !important;
+  background: var(--q-primary) !important;
+  color: var(--app-on-primary) !important;
 }

@@ -100,6 +100,9 @@ button.star-rating__star:focus-visible {
 .star-rating__star--on {
   color: color-mix(in srgb, var(--app-text) 87%, transparent);
 }
+button.star-rating__star--on {
+  color: var(--q-primary);
+}
 .star-rating--disabled {
   opacity: 0.5;
 }

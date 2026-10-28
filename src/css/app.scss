@@ -228,8 +228,8 @@ body,
 // Checking for payment: a short 3px rail under the QR with a moving fill in muted ink.
 .qr-progress {
   height: 3px;
-  margin: 8px 0 20px;
-  padding-inline: 35%;
+  margin: 12px auto 20px;
+  max-width: var(--app-qr-size);
 }
 .qr-progress .q-linear-progress {
   border-radius: 999px;
@@ -652,22 +652,23 @@ body.body--light .q-dialog__backdrop {
 }
 .mint-chip--field > :last-child {
   margin-inline-start: auto;
+  padding-inline-start: 8px;
 }
 .mint-chip--field .mint-chip__field-text {
   flex: 1;
 }
 // The mint's own icon in a round slot (a landmark glyph on a tint when it has none):
-// 32px in the compact field, 40px in the normal one.
+// 40px in both the compact field and the card.
 .mint-chip__avatar {
   align-items: center;
   background: var(--app-tint-strong);
   border-radius: 50%;
   display: inline-flex;
   flex: none;
-  height: 32px;
+  height: 40px;
   justify-content: center;
   overflow: hidden;
-  width: 32px;
+  width: 40px;
 }
 .mint-chip__avatar .q-img {
   height: 100%;
@@ -763,13 +764,13 @@ body .q-tab__indicator {
   border-radius: 2px;
   height: 3px;
 }
-// Tooltips: a small raised label on the card surface with a hairline, not Quasar's grey slab.
+// Tooltips: a small inverse label (ink fill, page-colour text), so it never reads as a control.
 body .q-tooltip {
-  background: var(--app-raised);
-  border: 1px solid var(--app-border-strong);
-  border-radius: var(--app-radius-md);
+  background: var(--app-text);
+  border: 0;
+  border-radius: var(--app-radius-sm);
   box-shadow: var(--app-shadow-md);
-  color: var(--app-text);
+  color: var(--app-surface);
   font-size: 12px;
   padding: 6px 10px;
 }
@@ -840,8 +841,8 @@ body .q-field--outlined.q-field--readonly .q-field__control {
   background: var(--app-tint);
 }
 body .q-field--outlined.q-field--readonly .q-field__control:before {
-  border-color: var(--app-border);
-  border-style: dashed;
+  border-color: var(--app-border-strong);
+  border-style: solid;
 }
 // Outline buttons take their edge and fill from the surface tokens (Quasar draws the edge
 // in currentColor).
@@ -1243,8 +1244,9 @@ body .mint-card {
   background: var(--app-card-fill);
   box-shadow: var(--app-card-shadow);
 }
+// The active or selected card is a stronger fill; its control (the Active badge, or the
+// restore checkbox) is the one explicit signal, so there is no second coloured edge.
 body .mint-card.mint-card--active {
-  border-color: var(--app-card-edge-active);
   background: var(--app-card-fill-active);
 }
 
@@ -1298,7 +1300,7 @@ html[dir="rtl"] .mint-card-more {
   min-width: 0;
 }
 .mint-card__balances .currency-unit-text {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }

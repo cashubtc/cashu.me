@@ -20,8 +20,6 @@
       v-if="dismissible"
       flat
       round
-      dense
-      size="sm"
       class="app-callout__close"
       :aria-label="$t('global.actions.close.label')"
       @click="$emit('dismiss')"
@@ -37,6 +35,7 @@ import {
   CircleAlert as CircleAlertIcon,
   CircleCheck as CircleCheckIcon,
   Info as InfoIcon,
+  Lightbulb as LightbulbIcon,
   TriangleAlert as TriangleAlertIcon,
   X as XIcon,
 } from "lucide-vue-next";
@@ -49,7 +48,7 @@ export type CalloutVariant =
   | "danger";
 
 const ICONS = {
-  neutral: InfoIcon,
+  neutral: LightbulbIcon,
   info: InfoIcon,
   success: CircleCheckIcon,
   warning: TriangleAlertIcon,

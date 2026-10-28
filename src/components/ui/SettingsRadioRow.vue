@@ -61,6 +61,7 @@ export default defineComponent({
 /* The selected row keeps ink text; the dot carries the selection. */
 .settings-radio-row {
   min-height: 48px;
+  padding-block: 10px;
 }
 .settings-radio-row.q-item--active {
   color: inherit;

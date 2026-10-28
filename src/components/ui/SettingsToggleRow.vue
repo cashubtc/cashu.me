@@ -1,7 +1,7 @@
 <!-- A settings row whose whole label toggles a switch on the end edge (q-item tag="label"),
      with an optional caption and an optional .app-badge after the title. -->
 <template>
-  <q-item tag="label" :disable="disable">
+  <q-item tag="label" :class="{ 'settings-toggle-row--disabled': disable }">
     <q-item-section>
       <q-item-label v-if="badge" class="label-with-badge">
         {{ label }}
@@ -53,3 +53,11 @@ export default defineComponent({
   emits: ["update:modelValue"],
 });
 </script>
+
+<style scoped>
+/* Disabled: the switch dims (and stops taking taps); the label and its reason stay readable. */
+.settings-toggle-row--disabled {
+  cursor: default;
+  pointer-events: none;
+}
+</style>

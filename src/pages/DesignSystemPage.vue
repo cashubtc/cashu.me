@@ -388,16 +388,22 @@
         </q-list>
       </DsEntry>
       <DsEntry id="slider-rating">
+        <div class="row items-baseline justify-between">
+          <span class="text-app-muted">Share from this mint</span>
+          <span class="text-weight-medium">{{ slider }}%</span>
+        </div>
         <q-slider
           v-model="slider"
           :min="0"
           :max="100"
           color="primary"
-          class="q-mb-md"
+          class="q-mb-xl"
         />
-        <div class="row items-center q-gutter-md">
-          <AppRating v-model="rating" :size="32" label="Rating" />
+        <div class="text-app-muted q-mb-xs">Your rating</div>
+        <AppRating v-model="rating" :size="32" label="Rating" />
+        <div class="row items-center q-gutter-sm q-mt-lg text-app-muted">
           <AppRating :model-value="4" readonly :size="14" />
+          <span>4.0 · in a review list</span>
         </div>
       </DsEntry>
       <h2 id="ds-group-navigation" class="ds-section">Navigation</h2>
@@ -599,8 +605,8 @@
       </DsEntry>
       <DsEntry id="box">
         <div class="app-box q-pa-md">
-          <div class="text-app-muted">Summary</div>
-          <div class="text-h6">₿2,289 on 2 mints</div>
+          <div class="text-h6 text-weight-bold">₿2,289</div>
+          <div class="text-app-muted">on 2 mints</div>
         </div>
       </DsEntry>
       <DsEntry id="section-divider">
@@ -669,7 +675,7 @@
       <DsEntry id="amounts">
         <div class="column items-center q-gutter-y-sm">
           <div class="amount-headline">−₿101</div>
-          <div class="text-h4 text-weight-bold">
+          <div class="text-h6 text-app-muted">
             <AnimatedNumber
               :value="2789"
               :format="(n) => '₿' + Math.round(n).toLocaleString('en-US')"
@@ -690,8 +696,8 @@
       </DsEntry>
       <DsEntry id="tooltip">
         <div class="ds-tooltip-stage">
-          <q-btn rounded outline no-caps color="primary">
-            Copy address
+          <q-btn flat round class="app-icon-btn" aria-label="Copy address">
+            <CopyIcon :size="20" />
             <q-tooltip anchor="top middle" self="bottom middle" :offset="[0, 8]"
               >Copy address</q-tooltip
             >

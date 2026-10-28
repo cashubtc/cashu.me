@@ -1,8 +1,9 @@
-<!-- The on-chain confirmation status row in quote details: a spinner while the explorer is
-     queried, then "Confirmed/Pending (n/threshold)", fading between states. -->
+<!-- The on-chain confirmation status row in quote details. The leading icon carries the state
+     (a link while checking, a clock while pending, a check once confirmed); the value is a
+     spinner while the explorer is queried, then "Confirmed/Pending (n/threshold)". -->
 <template>
   <DetailRow
-    :icon="InfoIcon"
+    :icon="statusIcon"
     :label="$t('QuoteInformation.chain_status')"
     value-class="detail-value-with-spinner"
   >
@@ -20,7 +21,7 @@
       >
         {{ statusDisplay }}
       </span>
-      <span v-else key="loading" class="text-grey-6">{{
+      <span v-else key="loading" class="chain-status--pending">{{
         $t("QuoteInformation.fetching")
       }}</span>
     </transition>
@@ -29,7 +30,11 @@
 
 <script lang="ts">
 import { defineComponent, type PropType } from "vue";
-import { Info as InfoIcon } from "lucide-vue-next";
+import {
+  CircleCheck as CircleCheckIcon,
+  Clock as ClockIcon,
+  Link as LinkIcon,
+} from "lucide-vue-next";
 import DetailRow from "src/components/ui/DetailRow.vue";
 import type { MempoolTxMetadata } from "src/js/onchain";
 
@@ -47,9 +52,13 @@ export default defineComponent({
     },
   },
   setup() {
-    return { InfoIcon };
+    return { CircleCheckIcon, ClockIcon, LinkIcon };
   },
   computed: {
+    statusIcon() {
+      if (!this.metadata) return this.LinkIcon;
+      return this.metadata.confirmed ? this.CircleCheckIcon : this.ClockIcon;
+    },
     statusDisplay(): string {
       if (!this.metadata) return "";
       const status = this.$t(

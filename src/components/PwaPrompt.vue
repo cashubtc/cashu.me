@@ -27,10 +27,12 @@
         </i18n-t>
         <q-btn
           flat
+          round
           icon="close"
           @click="closePrompt"
           size="sm"
-          class="close-btn q-px-sm"
+          class="close-btn pwa-prompt__close"
+          :aria-label="$t('global.actions.close.label')"
         />
       </div>
 
@@ -107,6 +109,13 @@ export default defineComponent({
 
 <!-- Shared prompt styles: src/css/elements.scss (.pwa-prompt). -->
 <style scoped>
+.pwa-prompt__close {
+  color: var(--app-text-muted);
+  flex-shrink: 0;
+  margin: -8px -8px -8px 8px;
+  min-height: 40px;
+  min-width: 40px;
+}
 /* The pointer is a small square of the bubble's own surface and edge, turned 45° and tucked
    under the bubble, so bubble and pointer read as one shape. */
 .pwa-prompt-arrow {
