@@ -1,3 +1,4 @@
+import { mount, flushPromises } from "@vue/test-utils";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import { PaymentMethod } from "src/stores/walletTypes";
 
@@ -5,7 +6,19 @@ vi.mock("src/stores/mints", () => ({
   useMintsStore: () => ({ activeMintUrl: "", activeUnit: "sat", mints: [] }),
 }));
 
+const { fetchAddressTxMetadata } = vi.hoisted(() => ({
+  fetchAddressTxMetadata: vi.fn(),
+}));
+vi.mock("src/js/onchain", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("src/js/onchain")>()),
+  fetchAddressTxMetadata,
+}));
+
 let MintQuoteInformation: any;
+
+// Echoes the key and its params, so the tests read which string a state picked.
+const t = (key: string, params?: Record<string, unknown>) =>
+  params ? `${key} ${JSON.stringify(params)}` : key;
 
 beforeAll(async () => {
   (globalThis as any).windowMixin = {};
@@ -60,5 +73,108 @@ describe("MintQuoteInformation", () => {
         onchainMetadata: null,
       })
     ).toBeNull();
+  });
+
+  describe("one on-chain status (owner 2026-10-29, item 10)", () => {
+    const stateDisplay = (status: string, onchainMetadata: unknown) =>
+      MintQuoteInformation.computed.stateDisplay.call({
+        invoice: { status },
+        mintQuote: null,
+        isOnchain: true,
+        onchainMetadata,
+        $t: t,
+        $te: () => true,
+      });
+
+    it("waits while no deposit is known", () => {
+      expect(stateDisplay("pending", null)).toBe(
+        "QuoteInformation.states.waiting"
+      );
+    });
+
+    it("counts confirmations once the explorer sees the deposit", () => {
+      expect(
+        stateDisplay("pending", {
+          confirmed: false,
+          confirmations: 1,
+          confirmationThreshold: 3,
+        })
+      ).toBe('QuoteInformation.states.confirming {"count":1,"threshold":3}');
+    });
+
+    it("says the ecash is being issued once confirmed but not yet credited", () => {
+      expect(
+        stateDisplay("pending", {
+          confirmed: true,
+          confirmations: 3,
+          confirmationThreshold: 3,
+        })
+      ).toBe("QuoteInformation.states.issuing");
+    });
+
+    it("never says paid before the store does", () => {
+      expect(
+        stateDisplay("paid", {
+          confirmed: true,
+          confirmations: 3,
+          confirmationThreshold: 3,
+        })
+      ).toBe("QuoteInformation.states.paid");
+    });
+
+    const render = async (status: string, hidePaidStatus: boolean) => {
+      fetchAddressTxMetadata.mockResolvedValue({
+        confirmed: false,
+        confirmations: 1,
+        confirmationThreshold: 3,
+        txid: "a".repeat(64),
+        url: "https://mempool.space/tx/aaaa",
+      });
+      const wrapper = mount(MintQuoteInformation, {
+        props: {
+          hidePaidStatus,
+          method: PaymentMethod.Onchain,
+          mintQuote: { quote: "q1", request: "bc1qexampleaddress" },
+          invoice: { status, request: "bc1qexampleaddress", amount: 1000 },
+        },
+        global: {
+          mocks: {
+            $t: t,
+            $te: () => true,
+            $q: { dark: { isActive: true } },
+            $i18n: { locale: "en-US" },
+            $pinia: {},
+            formatCurrency: (n: number) => `${n} sat`,
+          },
+          stubs: {
+            DetailRow: {
+              props: ["label", "value"],
+              template: `<div class="row" :data-label="label">{{ value }}<slot /></div>`,
+            },
+            PendingDots: true,
+          },
+        },
+      });
+      await flushPromises();
+      return wrapper;
+    };
+
+    it("renders exactly one status row while pending, and no separate chain status", async () => {
+      const wrapper = await render("pending", true);
+      const status = wrapper.findAll('[data-label="QuoteInformation.status"]');
+      expect(status).toHaveLength(1);
+      expect(status[0].text()).toContain("states.confirming");
+      expect(wrapper.text()).not.toMatch(/chain_status|confirmations"/);
+    });
+
+    it("leaves a paid receive to the hero: no status row, no confirmations row", async () => {
+      const wrapper = await render("paid", true);
+      expect(
+        wrapper.findAll('[data-label="QuoteInformation.status"]')
+      ).toHaveLength(0);
+      expect(
+        wrapper.findAll('[data-label="QuoteInformation.confirmations"]')
+      ).toHaveLength(0);
+    });
   });
 });

@@ -161,7 +161,7 @@ export default defineComponent({
             : "ActivityRow.received"
         );
       if (this.isBolt12) return "Lightning Bolt12";
-      if (this.isOnchain) return "On-chain";
+      if (this.isOnchain) return this.$t("common.on_chain");
       return this.$t("InvoiceDetailDialog.invoice.caption");
     },
     ...mapState(useWalletStore, ["invoiceData"]),

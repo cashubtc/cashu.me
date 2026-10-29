@@ -64,7 +64,7 @@
       <CopyButton :value="txidValue" :icon-size="16" />
     </DetailRow>
 
-    <ChainStatusRow
+    <ConfirmationsRow
       v-if="hasTxid && (onchainMetadata || loadingOnchainMetadata)"
       class="q-mb-md"
       :metadata="onchainMetadata"
@@ -126,7 +126,7 @@ import {
 } from "lucide-vue-next";
 import CopyButton from "src/components/ui/CopyButton.vue";
 import DetailRow from "src/components/ui/DetailRow.vue";
-import ChainStatusRow from "src/components/ChainStatusRow.vue";
+import ConfirmationsRow from "src/components/ConfirmationsRow.vue";
 
 declare const windowMixin: any;
 declare const formatCurrency: any;
@@ -142,7 +142,7 @@ type ExtendedMeltQuote = MeltQuoteBolt11Response & {
 export default defineComponent({
   name: "MeltQuoteInformation",
   mixins: [windowMixin],
-  components: { CopyButton, DetailRow, ChainStatusRow },
+  components: { CopyButton, DetailRow, ConfirmationsRow },
   setup() {
     return {
       CircleDollarSignIcon,

@@ -436,4 +436,12 @@ describe("standard elements", () => {
         .map(({ file }) => file)
     ).toEqual([]);
   });
+
+  it("one on-chain status", () => {
+    const quote = readFileSync(
+      join(SRC, "components/MintQuoteInformation.vue"),
+      "utf8"
+    );
+    expect(quote).not.toMatch(/<ChainStatusRow|<ConfirmationsRow/);
+  });
 });

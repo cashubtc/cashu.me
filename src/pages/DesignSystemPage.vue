@@ -288,7 +288,11 @@
           </TonalChip>
           <TonalChip>
             <template #icon><GaugeIcon :size="18" /></template>
-            Speed: Fast
+            QR speed: Fast
+          </TonalChip>
+          <TonalChip>
+            <template #icon><Grid3x3Icon :size="18" /></template>
+            QR density: Medium
           </TonalChip>
           <TonalChip disable>Disabled</TonalChip>
         </div>
@@ -1424,10 +1428,24 @@
           <ReviewItem skeleton />
         </div>
       </DsEntry>
-      <DsEntry id="chain-status-row">
-        <ChainStatusRow :metadata="null" loading class="q-mb-md" />
-        <ChainStatusRow :metadata="chainPending" class="q-mb-md" />
-        <ChainStatusRow :metadata="chainConfirmed" />
+      <DsEntry id="onchain-status">
+        <!-- An on-chain receive's one Status row, in order: no deposit yet, confirming,
+             confirmed but not yet credited. Paid is the receipt's hero. -->
+        <DetailRow
+          v-for="s in onchainStates"
+          :key="s"
+          class="q-mb-md"
+          :icon="ActivityIcon"
+          label="Status"
+        >
+          <PendingDots size="16px" class="q-mr-sm" />{{ s }}
+        </DetailRow>
+        <PaymentStatus state="paid" label="Paid" />
+      </DsEntry>
+      <DsEntry id="confirmations-row">
+        <ConfirmationsRow :metadata="null" loading class="q-mb-md" />
+        <ConfirmationsRow :metadata="chainPending" class="q-mb-md" />
+        <ConfirmationsRow :metadata="chainConfirmed" />
       </DsEntry>
       <DsEntry id="pwa-prompt">
         <!-- The prompt is fixed to the viewport; each transformed frame contains one. -->
@@ -1596,7 +1614,7 @@ import { PaymentRequest, PaymentRequestTransportType } from "@cashu/cashu-ts";
 import ToggleUnit from "src/components/ToggleUnit.vue";
 import ActivityRow from "src/components/ActivityRow.vue";
 import AmountKeypadPanel from "src/components/AmountKeypadPanel.vue";
-import ChainStatusRow from "src/components/ChainStatusRow.vue";
+import ConfirmationsRow from "src/components/ConfirmationsRow.vue";
 import MintReviewSummary from "src/components/MintReviewSummary.vue";
 import PwaPrompt from "src/components/PwaPrompt.vue";
 import QrBlock from "src/components/QrBlock.vue";
@@ -1661,6 +1679,8 @@ import {
   Shield as ShieldIcon,
   X as XIcon,
   Gauge as GaugeIcon,
+  Grid3x3 as Grid3x3Icon,
+  Activity as ActivityIcon,
   QrCode as QrCodeIcon,
   ArchiveRestore as ArchiveRestoreIcon,
   Eye as EyeIcon,
@@ -1691,6 +1711,7 @@ export default defineComponent({
     MetaLine,
     RowValue,
     GaugeIcon,
+    Grid3x3Icon,
     QrCodeIcon,
     ArchiveRestoreIcon,
     PaymentStatus,
@@ -1706,7 +1727,7 @@ export default defineComponent({
     AnimatedNumber,
     AppRating,
     BottomSheet,
-    ChainStatusRow,
+    ConfirmationsRow,
     ChooseMint,
     CopyButton,
     DetailRow,
@@ -1776,6 +1797,7 @@ export default defineComponent({
       ZapIcon: markRaw(ZapIcon),
       XIcon: markRaw(XIcon),
       ChevronLeftIcon: markRaw(ChevronLeftIcon),
+      ActivityIcon: markRaw(ActivityIcon),
       MenuIcon: markRaw(MenuIcon),
       RefreshCwIcon: markRaw(RefreshCwIcon),
       EllipsisIcon: markRaw(EllipsisIcon),
@@ -1905,6 +1927,11 @@ export default defineComponent({
       groups: DS_GROUPS,
       radii: ["sm", "md", "lg", "xl", "pill"],
       keypadAmount: 1000 as number | null,
+      onchainStates: [
+        "Waiting for payment",
+        "Confirming (1/3)",
+        "Issuing ecash",
+      ],
       chainPending: {
         txid: "demo",
         confirmed: false,

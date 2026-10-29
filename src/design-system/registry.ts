@@ -761,13 +761,26 @@ export const DS_ITEMS: DsItem[] = [
 <ReviewItem skeleton />`,
   },
   {
-    id: "chain-status-row",
-    name: "Chain status row",
+    id: "onchain-status",
+    name: "On-chain status",
     group: "feature",
     tier: "feature",
-    source: "src/components/ChainStatusRow.vue",
-    usage: { tag: "ChainStatusRow" },
-    example: `<ChainStatusRow :metadata="txMetadata" :loading="fetching" />`,
+    source: "src/components/MintQuoteInformation.vue",
+    // Shown with the Status DetailRow it renders: the states need explorer data the board
+    // does not fetch.
+    usage: { tag: "DetailRow" },
+    example: `<MintQuoteInformation :mint-quote="quote" :invoice="invoice" method="onchain" hide-paid-status />`,
+    note: "One status for an on-chain receive, in the Status row: Waiting for payment, Confirming (n/m), Issuing ecash, then the receipt's Paid hero. No separate chain status.",
+  },
+  {
+    id: "confirmations-row",
+    name: "Confirmations row",
+    group: "feature",
+    tier: "feature",
+    source: "src/components/ConfirmationsRow.vue",
+    usage: { tag: "ConfirmationsRow" },
+    example: `<ConfirmationsRow :metadata="txMetadata" :loading="fetching" />`,
+    note: "An on-chain send's confirmations as a plain fact (n/m), with no state word, icon or colour; the Status row stays the one status.",
   },
 
   {

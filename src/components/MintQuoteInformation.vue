@@ -27,7 +27,8 @@
       :label="$t('QuoteInformation.status')"
       :value-class="{ 'text-positive': isPaidState }"
     >
-      <!-- The pending dots while the wallet waits for payment, so a pending invoice reads as live. -->
+      <!-- The one status (owner 2026-10-29, item 10): on-chain it moves Waiting for payment,
+           Confirming (n/m), Issuing ecash, then Paid; the dots show it is live. -->
       <PendingDots v-if="isWaitingState" size="16px" class="q-mr-sm" />
       {{ stateDisplay }}
     </DetailRow>
@@ -67,13 +68,6 @@
       ><bdi dir="ltr">{{ shortTxid(onchainMetadata.txid) }}</bdi></DetailRow
     >
 
-    <ChainStatusRow
-      v-if="isOnchain && (onchainMetadata || loadingOnchainMetadata)"
-      class="q-mb-md"
-      :metadata="onchainMetadata"
-      :loading="loadingOnchainMetadata"
-    />
-
     <DetailRow
       v-if="paidAtDisplay"
       class="q-mb-md"
@@ -109,7 +103,6 @@ import {
   Zap as ZapIcon,
 } from "lucide-vue-next";
 import DetailRow from "src/components/ui/DetailRow.vue";
-import ChainStatusRow from "src/components/ChainStatusRow.vue";
 import { PaymentMethod } from "src/stores/walletTypes";
 import {
   fetchAddressTxMetadata,
@@ -134,7 +127,7 @@ type MintQuote = {
 export default defineComponent({
   name: "MintQuoteInformation",
   mixins: [windowMixin],
-  components: { PendingDots, DetailRow, ChainStatusRow },
+  components: { PendingDots, DetailRow },
   setup() {
     return {
       BitcoinIcon,
@@ -216,7 +209,19 @@ export default defineComponent({
       if (!state) return "";
       const lower = state.toLowerCase();
       // An incoming invoice that is not paid yet is waiting on the payer, not on the wallet.
+      // On-chain, once the explorer sees the deposit, the same row counts its confirmations,
+      // then says the ecash is being issued. Paid stays the store's word (ecash credited).
       if (["pending", "unpaid"].includes(lower)) {
+        const tx = this.isOnchain ? this.onchainMetadata : null;
+        if (tx?.confirmed) {
+          return this.$t("QuoteInformation.states.issuing") as string;
+        }
+        if (tx) {
+          return this.$t("QuoteInformation.states.confirming", {
+            count: tx.confirmations,
+            threshold: tx.confirmationThreshold,
+          }) as string;
+        }
         return this.$t("QuoteInformation.states.waiting") as string;
       }
       const key = `QuoteInformation.states.${lower}`;
@@ -302,7 +307,7 @@ export default defineComponent({
     async loadOnchainMetadata() {
       if (!this.isOnchain || !this.invoice?.request) return;
       this.loadingOnchainMetadata = true;
-      this.onchainMetadata = null;
+      // A refetch keeps the last value on screen (no flash back to Waiting).
       try {
         this.onchainMetadata = await fetchAddressTxMetadata(
           this.invoice.request,
@@ -340,6 +345,8 @@ export default defineComponent({
   },
   watch: {
     "invoice.request": function () {
+      // A different address starts from Waiting, not from the last invoice's deposit.
+      this.onchainMetadata = null;
       this.loadOnchainMetadata();
     },
     "invoice.status": function (status: string) {
