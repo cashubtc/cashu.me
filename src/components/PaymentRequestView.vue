@@ -46,7 +46,8 @@
             :label="$t('QuoteInformation.unit')"
             :value="unitLabel(fields.unit)"
             @click="showUnitSheet = true"
-          />
+            ><bdi dir="ltr">{{ unitLabel(fields.unit) }}</bdi></DetailRow
+          >
           <DetailRow
             action
             data-testid="pr-mint"
@@ -167,7 +168,11 @@
           :label="unitLabel(unit)"
           :selected="fields.unit === unit"
           @select="chooseUnit(unit)"
-        />
+        >
+          <template #label
+            ><bdi dir="ltr">{{ unitLabel(unit) }}</bdi></template
+          >
+        </SheetOption>
       </div>
     </BottomSheet>
 

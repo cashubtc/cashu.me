@@ -86,7 +86,7 @@ export default {
     notifications: {
       balance_too_low: "余额不足",
       received: "已收到 {amount}",
-      fee: " (手续费: {fee})",
+      fee: "（手续费：{fee}）",
       could_not_request_mint: "无法请求铸造",
       invoice_still_pending: "发票仍在处理中",
       paid_lightning: "通过闪电网络支付了 {amount}",
@@ -384,7 +384,7 @@ export default {
       },
     },
     nostr_wallet_connect: {
-      title: "Nostr 钱包连接 (NWC)",
+      title: "Nostr 钱包连接（NWC）",
       description: "允许其他应用通过 Nostr Wallet Connect 从此钱包付款。",
       enable_toggle: "启用 Nostr Wallet Connect",
       payments_note:
@@ -392,7 +392,7 @@ export default {
       connection: {
         copy_tooltip: "复制连接字符串",
         qr_tooltip: "显示二维码",
-        allowance_label: "剩余额度 (sat)",
+        allowance_label: "剩余额度（sat）",
       },
     },
     hardware_features: {
@@ -660,7 +660,7 @@ export default {
     },
   },
   AlreadyRunning: {
-    title: "Cashu.me 已在另一个标签页中打开",
+    title: "Cashu.me 已在其他标签页中打开",
     text: "请关闭另一个标签页，然后点击“重试”。",
     actions: {
       retry: {
@@ -919,7 +919,7 @@ export default {
       deselect_all: "取消全选",
       backed_up: "已备份",
       already_added: "已添加",
-      add_selected: "添加所选 ({count})",
+      add_selected: "添加所选（{count}）",
       no_backups_found: "未找到 Mint 备份",
       no_backups_hint:
         "请确保在设置中启用 Nostr Mint 备份以自动备份您的 Mint 列表。",
@@ -943,19 +943,19 @@ export default {
       restore: {
         label: "恢复",
         in_progress: "正在恢复 Mint…",
-        error: "恢复 Mint 错误: { error }",
+        error: "恢复 Mint 错误：{ error }",
       },
       restore_all_mints: {
         label: "恢复所有 Mint",
         in_progress: "正在恢复第 { index } 个 Mint，共 { length } 个…",
         success: "恢复成功",
-        error: "恢复 Mint 错误: { error }",
+        error: "恢复 Mint 错误：{ error }",
       },
       restore_selected_mints: {
         label: "恢复所选 Mint（{count}）",
         in_progress: "正在恢复第 { index } 个 Mint，共 { length } 个…",
         success: "成功恢复 {count} 个 Mint",
-        error: "恢复所选 Mint 错误: { error }",
+        error: "恢复所选 Mint 错误：{ error }",
       },
     },
   },
@@ -1563,7 +1563,7 @@ export default {
           label: "金额（{ ticker }） *",
         },
         comment: {
-          label: "评论 (可选)",
+          label: "评论（可选）",
         },
       },
       actions: {
@@ -1651,7 +1651,7 @@ export default {
   },
   restore: {
     mnemonic_error_text: "请输入助记符",
-    restore_mint_error_text: "恢复 Mint 错误: { error }",
+    restore_mint_error_text: "恢复 Mint 错误：{ error }",
     prepare_info_text: "正在准备恢复流程…",
     restored_proofs_for_keyset_info_text:
       "已为 keyset { keysetId } 恢复 { restoreCounter } 个证明",
@@ -1733,7 +1733,7 @@ export default {
     lightning_offer: "Lightning Offer",
     states: {
       waiting: "等待付款",
-      confirming: "确认中 ({count}/{threshold})",
+      confirming: "确认中（{count}/{threshold}）",
       issuing: "正在发行 ecash",
       paid: "已付款",
       unpaid: "未付款",

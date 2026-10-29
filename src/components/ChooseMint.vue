@@ -106,14 +106,14 @@
             <MintIcon :size="20" class="mint-glyph" />
           </template>
           <template v-if="showBalances" #caption>
-            <span v-if="!mint.errored">
+            <!-- One left-to-right run for the whole sum, so "₿500 + $25.00" keeps its order
+                 in right-to-left locales (each amount alone was isolated, the sum wasn't). -->
+            <bdi v-if="!mint.errored" dir="ltr">
               <template v-for="(unit, i) in heldUnits(mint)" :key="unit">
                 <template v-if="i > 0"> + </template>
-                <bdi dir="ltr">{{
-                  formatCurrency(mint.balances[unit], unit)
-                }}</bdi>
+                {{ formatCurrency(mint.balances[unit], unit) }}
               </template>
-            </span>
+            </bdi>
             <span v-else class="text-negative">
               {{ $t("ChooseMint.badge_mint_error_text") }}
             </span>

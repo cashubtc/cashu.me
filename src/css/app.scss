@@ -59,15 +59,6 @@ html:lang(ja) .q-item__label--caption {
   line-break: strict;
   text-wrap: pretty;
 }
-// Sheet option captions balance their lines outright: "pretty" left a trailing "ecash。"
-// alone on the second line (council R77). Settings row captions don't: balanced, they
-// wrapped at about 60% of the row beside the switch (council R83); whole words come from
-// CjkText instead.
-html:lang(zh) .app-option-row__caption,
-html:lang(ja) .app-option-row__caption,
-html:lang(ar) .app-option-row__caption {
-  text-wrap: balance;
-}
 
 // Dialog header typography
 // This class provides proper letter-spacing for dialog titles
@@ -1412,17 +1403,30 @@ input::placeholder,
 textarea::placeholder {
   font-family: inherit;
 }
-// Even line endings: no single stranded word or CJK character on the last line of captions;
-// headings balance their lines. Not on every <p>: with CJK text Chrome then sized the welcome
-// slide to about 2,000px tall.
+// Even line endings app-wide (council R91): body and description text breaks "pretty", so no
+// single word or one or two CJK characters strand on the last line, while every other line
+// still fills the measure; short headings balance their lines.
 .q-item__label--caption,
-.text-caption {
+.text-caption,
+.app-empty__text,
+.blocking-state__text,
+.section-divider__caption,
+.settings-page-caption,
+.app-option-row__caption,
+.app-callout__body {
   text-wrap: pretty;
 }
 h1,
 h2,
 h3,
-.dialog-header {
+h4,
+h5,
+h6,
+.text-h5,
+.text-h6,
+.dialog-header,
+.app-empty__title,
+.blocking-state__title {
   text-wrap: balance;
 }
 // Quasar pads field prepend/append slots on a physical side; in rtl the slots swap sides, so the
@@ -1899,19 +1903,17 @@ body .q-notification__progress {
   color: var(--app-text-muted);
 }
 
+// Title and text use the column's measure (a 320px cap broke the zh-CN title inside 另一个,
+// council R91); the title balances, the text breaks evenly (text-wrap below).
 .blocking-state__title {
   font-size: 22px;
   font-weight: 700;
   line-height: 1.3;
-  max-width: 320px;
-  text-wrap: balance;
 }
 
 .blocking-state__text {
   font-size: 15px;
   color: var(--app-text-muted);
-  max-width: 320px;
-  text-wrap: balance;
 }
 
 .blocking-state__action {

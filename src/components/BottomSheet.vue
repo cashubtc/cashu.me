@@ -183,6 +183,15 @@ export default defineComponent({
   overflow-y: auto;
   padding: 4px 16px 16px;
 }
+/* Without an actions bar the list scrolls to the sheet's own bottom edge, and the bottom
+   inset (safe area included) is inside the scroll: a long list (Language) is cut by the
+   sheet's edge, which reads as scrollable, never a row clipped 8px above it (council R91). */
+.bottom-sheet:not(:has(> .bottom-sheet-actions)) {
+  padding-bottom: 0;
+}
+.bottom-sheet:not(:has(> .bottom-sheet-actions)) > .bottom-sheet-content {
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
+}
 
 /* Action buttons */
 .bottom-sheet-actions {

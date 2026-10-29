@@ -311,10 +311,11 @@ button.app-badge {
   font-weight: 600;
   line-height: 1.35;
 }
+// The help line takes the column's full measure: a 320px cap wrapped zh-CN about 40px early
+// and left "开始。" alone (council R91). Its lines break evenly (text-wrap in app.scss).
 .app-empty__text {
   color: var(--app-text-muted);
   font-size: 14px;
-  max-width: 320px;
 }
 .app-empty__action {
   margin-top: 16px;

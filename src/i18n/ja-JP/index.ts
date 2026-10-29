@@ -8,7 +8,7 @@ export default {
     understand: "理解しました",
     select_funds: "複数のミントから資金を選んで支払いを実行します。",
     pay_invoice: "請求書を支払う",
-    amount_mismatch: "金額の計算エラー: {calculated}（想定 {expected}）",
+    amount_mismatch: "金額の計算エラー：{calculated}（想定 {expected}）",
     states: {
       requesting: "リクエスト中...",
       paying: "支払い中...",
@@ -20,7 +20,7 @@ export default {
     totalSelectedBalance: "選択した残高の合計",
     multiMintPay: "複数ミントで支払う",
     balanceNotEnough: "複数ミントの残高がこの請求書を満たすには不十分です",
-    failed: "処理に失敗しました: {error}",
+    failed: "処理に失敗しました：{error}",
     paid: "Lightningで{amount}を支払いました",
   },
   global: {
@@ -85,7 +85,7 @@ export default {
     notifications: {
       balance_too_low: "残高が不足しています",
       received: "{amount}を受け取りました",
-      fee: " (手数料: {fee})",
+      fee: "（手数料：{fee}）",
       could_not_request_mint: "ミントをリクエストできませんでした",
       invoice_still_pending: "請求書はまだ処理中です",
       paid_lightning: "Lightningで{amount}を支払いました",
@@ -369,7 +369,7 @@ export default {
       },
     },
     nostr_wallet_connect: {
-      title: "Nostrウォレットコネクト (NWC)",
+      title: "Nostrウォレットコネクト（NWC）",
       description:
         "Nostr Wallet Connect で、他のアプリがこのウォレットから支払えるようにします。",
       enable_toggle: "Nostr Wallet Connect を有効にする",
@@ -378,7 +378,7 @@ export default {
       connection: {
         copy_tooltip: "接続文字列をコピー",
         qr_tooltip: "QRコードを表示",
-        allowance_label: "残りアローワンス (sat)",
+        allowance_label: "残りアローワンス（sat）",
       },
     },
     hardware_features: {
@@ -752,7 +752,7 @@ export default {
         title: "Android (Chrome)",
         step1: {
           item: "1. { icon } { text }",
-          text: "メニューをタップ (右上)",
+          text: "メニューをタップ（右上）",
         },
         step2: {
           item: "2. { icon } { text }",
@@ -764,7 +764,7 @@ export default {
         title: "iOS (Safari)",
         step1: {
           item: "1. { icon } { text }",
-          text: "共有をタップ (下)",
+          text: "共有をタップ（下）",
         },
         step2: {
           item: "2. { icon } { text }",
@@ -944,19 +944,19 @@ export default {
       restore: {
         label: "復元",
         in_progress: "ミントを復元中…",
-        error: "ミントの復元エラー: { error }",
+        error: "ミントの復元エラー：{ error }",
       },
       restore_all_mints: {
         label: "すべてのミントを復元",
         in_progress: "{ length }個のミントのうち{ index }個目を復元中…",
         success: "復元が正常に完了しました",
-        error: "ミントの復元エラー: { error }",
+        error: "ミントの復元エラー：{ error }",
       },
       restore_selected_mints: {
         label: "選択したミントを復元（{count}）",
         in_progress: "{length}個のミントのうち{index}個を復元しています…",
         success: "{count}個のミントを正常に復元しました",
-        error: "選択したミントの復元中にエラーが発生しました: {error}",
+        error: "選択したミントの復元中にエラーが発生しました：{error}",
       },
     },
     nostr_mints: {
@@ -968,7 +968,7 @@ export default {
       deselect_all: "すべて選択解除",
       backed_up: "バックアップ済み",
       already_added: "追加済み",
-      add_selected: "選択したものを追加 ({count})",
+      add_selected: "選択したものを追加（{count}）",
       no_backups_found: "ミントのバックアップが見つかりません",
       no_backups_hint:
         "ミントリストを自動的にバックアップするには、設定でNostrミントのバックアップが有効になっていることを確認してください。",
@@ -1039,7 +1039,7 @@ export default {
           label: "へ",
         },
         amount: {
-          label: "金額 ({ ticker })",
+          label: "金額（{ ticker }）",
         },
       },
       actions: {
@@ -1077,7 +1077,7 @@ export default {
     create_invoice_title: "請求書を作成",
     inputs: {
       amount: {
-        label: "金額 ({ ticker }) *",
+        label: "金額（{ ticker }）*",
       },
     },
     actions: {
@@ -1128,7 +1128,7 @@ export default {
     badge_offline_text: "オフライン",
     inputs: {
       amount: {
-        label: "金額 ({ ticker }) *",
+        label: "金額（{ ticker }）*",
         invalid_too_much_error_text: "多すぎます",
       },
       p2pk_pubkey: {
@@ -1304,7 +1304,7 @@ export default {
       caption: "ロック鍵",
       description: "このキーにロックされたecashを受け取る",
       used_warning_text:
-        "警告: このキーは以前に使用されています。プライバシー向上のため新しいキーを使用してください。",
+        "警告：このキーは以前に使用されています。プライバシー向上のため新しいキーを使用してください。",
     },
     actions: {
       copy: {
@@ -1386,7 +1386,7 @@ export default {
       description:
         "NWCを使用してリモートでウォレットを制御します。互換性のあるアプリでウォレットをリンクするには、QRコードを押してください。",
       warning_text:
-        "警告: この接続文字列にアクセスできる人は誰でもウォレットから支払いを開始できます。共有しないでください！",
+        "警告：この接続文字列にアクセスできる人は誰でもウォレットから支払いを開始できます。共有しないでください！",
     },
     actions: {
       copy: {
@@ -1449,7 +1449,7 @@ export default {
     },
   },
   ChooseMint: {
-    open_selector: "ミントを選択、現在のミント: {mint}",
+    open_selector: "ミントを選択、現在のミント：{mint}",
     open_selector_empty: "ミントを選択",
     title: "ミントを選択",
     badge_mint_error_text: "エラー",
@@ -1587,10 +1587,10 @@ export default {
       sending_to_lightning_address: "{ address }に送信中",
       inputs: {
         amount: {
-          label: "金額 ({ ticker }) *",
+          label: "金額（{ ticker }）*",
         },
         comment: {
-          label: "コメント (任意)",
+          label: "コメント（任意）",
         },
       },
       actions: {
@@ -1629,7 +1629,7 @@ export default {
     title: "ミントを編集",
     inputs: {
       nickname: {
-        placeholder: "例: Testnet",
+        placeholder: "例：Testnet",
         label: "ニックネーム（任意）",
       },
       mint_url: {
@@ -1679,7 +1679,7 @@ export default {
   },
   restore: {
     mnemonic_error_text: "ニーモニックを入力してください",
-    restore_mint_error_text: "ミントの復元エラー: { error }",
+    restore_mint_error_text: "ミントの復元エラー：{ error }",
     prepare_info_text: "復元処理を準備中…",
     restored_proofs_for_keyset_info_text:
       "{ keysetId }キーセットの{ restoreCounter }個の証明書を復元しました",
@@ -1761,7 +1761,7 @@ export default {
     lightning_offer: "Lightning オファー",
     states: {
       waiting: "支払い待ち",
-      confirming: "承認中 ({count}/{threshold})",
+      confirming: "承認中（{count}/{threshold}）",
       issuing: "ecash を発行中",
       paid: "支払い済み",
       unpaid: "未払い",
@@ -1814,9 +1814,9 @@ export default {
       today: "今日",
       yesterday: "昨日",
       invalid_date: "無効な日付",
-      swaps: "スワップ:",
-      success_rate: "成功率:",
-      time_range: "期間:",
+      swaps: "スワップ：",
+      success_rate: "成功率：",
+      time_range: "期間：",
     },
   },
   DisplayTokenComponent: {
@@ -1825,8 +1825,8 @@ export default {
       sent: "ecash 送信済み",
       received: "ecash 受信済み",
     },
-    qr_speed: "QR の速度: {value}",
-    qr_density: "QR の密度: {value}",
+    qr_speed: "QR の速度：{value}",
+    qr_density: "QR の密度：{value}",
     speed: {
       fast: "速い",
       medium: "普通",
@@ -1841,7 +1841,7 @@ export default {
       title: "ecash を削除",
       text: "この取引を履歴から削除してもよろしいですか？",
       warning:
-        "警告: この操作は元に戻せず、トークンを復元する方法はありません。",
+        "警告：この操作は元に戻せず、トークンを復元する方法はありません。",
     },
     nfc: {
       read_failed: "NFC の読み取りに失敗しました",
