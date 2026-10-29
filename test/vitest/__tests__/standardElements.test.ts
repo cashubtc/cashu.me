@@ -320,13 +320,13 @@ describe("standard elements", () => {
     expect(parse).toMatch(/\bScan as ScanIcon\b/);
   });
 
-  // Owner batch 2, item 7: the deposit range is the info callout, not a helper line.
-  it("deposit limits render the info callout", () => {
+  // Owner batch 2, item 7: the deposit range is a callout, not a helper line; batch 3, item 3: neutral.
+  it("deposit limits render the neutral callout", () => {
     const limits = readFileSync(
       join(SRC, "components/OnchainDepositLimits.vue"),
       "utf8"
     );
-    expect(limits).toMatch(/<AppCallout[^>]*variant="info"/);
+    expect(limits).toMatch(/<AppCallout[^>]*variant="neutral"/);
     expect(limits).toMatch(/<bdi dir="ltr" class="deposit-limits-range">/);
   });
 
@@ -724,6 +724,47 @@ describe("standard elements", () => {
     expect(read("pages/welcome/WelcomeSlide2.vue")).toMatch(
       /installImage[\s\S]*\$q\.dark\.isActive/
     );
+  });
+
+  // Owner batch 3, item 2: one soft control edge (rest, hover, focus) for every bordered
+  // control, defined once per mode and never re-weighted per surface. The resting edge is
+  // deliberately under 3:1; focus stays the 2px accent ring.
+  it("bordered controls share one soft edge token family", () => {
+    const base = read("css/base.scss");
+    const app = read("css/app.scss");
+    const defs = base.match(/--app-field-edge:[^;]+;/g) ?? [];
+    expect(defs).toHaveLength(2);
+    for (const d of defs) {
+      const pct = Number(/var\(--app-text\) (\d+)%/.exec(d)?.[1]);
+      expect(pct).toBeGreaterThan(0);
+      expect(pct).toBeLessThanOrEqual(15);
+    }
+    expect(base).toMatch(/--app-field-edge-focus: var\(--app-accent\)/);
+    expect(base).toMatch(
+      /--app-card-edge-active: var\(--app-field-edge-hover\)/
+    );
+    expect(base.match(/--app-card-edge-active:/g)).toHaveLength(1);
+    expect(app).toMatch(
+      /q-field--focused \.q-field__control:after \{[^}]*--app-field-edge-focus/
+    );
+    expect(app).toMatch(
+      /\.mint-picker \{[^}]*border: 1px solid var\(--app-field-edge\)/
+    );
+    expect(app).toMatch(
+      /\.mint-chip \{[^}]*border: 1px solid var\(--app-field-edge\)/
+    );
+    // Disabled drops the edge, so it never outweighs an enabled field's soft edge.
+    expect(app).toMatch(
+      /q-field--disabled \.q-field__control:before \{[^}]*transparent/
+    );
+  });
+
+  // Owner batch 3, item 1: dropdown chevrons are plain icon buttons, no disc at rest.
+  it("the mint picker chevron has no disc at rest", () => {
+    const app = read("css/app.scss");
+    const rule = /\.mint-picker__trigger \{([^}]*)\}/.exec(app)?.[1] ?? "";
+    expect(rule).not.toMatch(/background/);
+    expect(app).not.toMatch(/\.mint-picker__trigger > \.q-focus-helper/);
   });
 
   it("the welcome seed phrase is the outlined field, masked by default", () => {

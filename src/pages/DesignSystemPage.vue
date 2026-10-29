@@ -341,7 +341,7 @@
       <h2 id="ds-group-forms" class="ds-section">Form controls</h2>
       <DsEntry id="text-fields">
         <!-- One outlined field: the label floats and stays visible with content; 16px inset;
-             edge 33% on the page, 43% on sheets. Trailing actions sit inside the field. -->
+             the soft control edge, the same on page and sheet; focus 2px in the accent. Trailing actions sit inside the field. -->
         <q-input outlined v-model="url" label="Mint URL" class="q-mb-md">
           <template v-slot:append>
             <IconButton label="Scan" :icon="ScanIcon" />
@@ -368,7 +368,7 @@
           class="q-mb-md"
         />
         <!-- Read-only but still the step's field (the welcome seed phrase): it keeps the edge
-             (36% in dark, over the quieter read-only fill, to hold 3:1). A masked placeholder only, never a real phrase. -->
+             (the same control edge, over the quieter read-only fill). A masked placeholder only, never a real phrase. -->
         <q-field
           outlined
           readonly
@@ -2431,7 +2431,6 @@ export default defineComponent({
 }
 /* Light-theme variants L2 and L3: page colours to compare against L1 in light mode. */
 body.body--light .ds-light-variant--l2 {
-  --app-field-edge: color-mix(in srgb, var(--app-text) 48%, transparent);
   background: #f6f6f7;
 }
 body.body--light .ds-light-variant--l2 .ds-light-variant__card {

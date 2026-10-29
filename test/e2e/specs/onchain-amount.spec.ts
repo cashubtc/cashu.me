@@ -33,10 +33,10 @@ for (const unit of ["usd", "eur"] as const) {
     const error = page.getByTestId("onchain-amount-error");
     const symbol = unit === "usd" ? "$" : "€";
     const sentence = `Deposits outside ${symbol}1.13–${symbol}4.10 won't be credited.`;
-    // The info callout under the mint picker says the range before anything is typed.
+    // The neutral callout under the mint picker says the range before anything is typed.
     await expect(
       page.locator(
-        '.app-callout--info[data-testid="deposit-limits-picker"]:visible'
+        '.app-callout--neutral[data-testid="deposit-limits-picker"]:visible'
       )
     ).toHaveText(sentence);
     const enterCents = async (cents: number) => {
@@ -59,12 +59,12 @@ for (const unit of ["usd", "eur"] as const) {
     await expect(page.locator(".qr-copy-line:visible")).toBeVisible();
     await expect(
       page.locator(
-        '.app-callout--info[data-testid="deposit-limits-address"]:visible'
+        '.app-callout--neutral[data-testid="deposit-limits-address"]:visible'
       )
     ).toHaveText(sentence);
     await expect(
       page.locator(
-        '.app-callout--info[data-testid="deposit-limits-picker"]:visible'
+        '.app-callout--neutral[data-testid="deposit-limits-picker"]:visible'
       )
     ).toHaveCount(0);
   });
@@ -92,7 +92,7 @@ test("renders and reuses an address with an exact uint64 deposit limit", async (
   await wallet.enterAmount(1000);
   await page.getByTestId("create-payment-request").click();
   const limitsHint = page.locator(
-    '.app-callout--info[data-testid="deposit-limits-address"]:visible'
+    '.app-callout--neutral[data-testid="deposit-limits-address"]:visible'
   );
   await expect(limitsHint).toContainText("18,446,744,073,709,551,615");
   await wallet.closeFullscreenDialog();
@@ -129,10 +129,10 @@ test("validates new on-chain addresses while preserving quote reuse and history 
   const create = page.getByTestId("create-payment-request");
   const error = page.getByTestId("onchain-amount-error");
   const limitsHint = page.locator(
-    '.app-callout--info[data-testid="deposit-limits-address"]:visible'
+    '.app-callout--neutral[data-testid="deposit-limits-address"]:visible'
   );
   const pickerHint = page.locator(
-    '.app-callout--info[data-testid="deposit-limits-picker"]:visible'
+    '.app-callout--neutral[data-testid="deposit-limits-picker"]:visible'
   );
   let submissions = 0;
   page.on("request", (request) => {

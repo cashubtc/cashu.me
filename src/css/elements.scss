@@ -133,8 +133,8 @@ body {
 // Light-mode sheets are white: rows sit on the page colour so they still read as rows.
 body.body--light .q-dialog .app-option-row {
   background: var(--app-surface);
-  // A hairline, so white cards on the pale sheet keep their edge (council R85-R86).
-  border-color: var(--app-border);
+  // The control edge, so white rows on the pale sheet keep their edge (council R85-R86).
+  border-color: var(--app-field-edge);
 }
 body.body--light .q-dialog .app-option-row:active {
   background: color-mix(in srgb, var(--app-text) 6%, var(--app-surface));

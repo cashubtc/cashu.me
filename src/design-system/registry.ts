@@ -189,7 +189,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "q-input outlined · src/css/app.scss field edge and fill tokens",
     usage: { text: "<q-input" },
     example: `<q-input v-model="url" outlined label="Mint URL" />\n<q-input v-model="review" outlined type="textarea" autogrow label="Review (optional)" />`,
-    note: 'One outlined field (textarea variant: type="textarea" autogrow). The label stays visible with content; 16px inset; edge 33% on the page, 43% on sheets; focus in the accent. Paste and Clear sit inside the field; ParseInputComponent puts the labelled Scan QR code row under it when there is a camera. Read-only fields drop the edge, except a read-only value that is the step\'s field (the welcome seed phrase): class readonly-outlined keeps it (36% in dark, over the quieter read-only fill, so it still holds 3:1).',
+    note: 'One outlined field (textarea variant: type="textarea" autogrow). The label stays visible with content; 16px inset; the soft control edge (9% ink in dark, 12% in light, the same on page and sheet), 20%/24% on hover, focus 2px in the accent. Paste and Clear sit inside the field; ParseInputComponent puts the labelled Scan QR code row under it when there is a camera. Read-only fields drop the edge, except a read-only value that is the step\'s field (the welcome seed phrase): class readonly-outlined keeps it (the same control edge, over the quieter read-only fill). Disabled fields drop the edge.',
   },
   {
     id: "copy-field",
@@ -222,7 +222,7 @@ export const DS_ITEMS: DsItem[] = [
     example: `<ChooseMint :dense="false" />  <!-- the wallet -->
 <ChooseMint dense />  <!-- flows and forms -->
 <ChooseMint dense allow-empty label="From" />`,
-    note: "One recipe at two heights: normal 72px (the wallet) and dense 56px (Send, Receive, Pay, forms). Both are the outlined field with a 40px avatar, the name and its balance, and the chevron as a real 44px button (aria-haspopup listbox, aria-expanded, aria-controls its sheet) on a faint tonal disc that hover and press only deepen. The label is a line over the name and never changes the size. The field is a pointer target only; the chevron is the one focus stop.",
+    note: "One recipe at two heights: normal 72px (the wallet) and dense 56px (Send, Receive, Pay, forms). Both are the outlined field with a 40px avatar, the name and its balance, and the chevron as a real 44px button (aria-haspopup listbox, aria-expanded, aria-controls its sheet), a plain icon button: no disc at rest, the shared hover and press tints only. The label is a line over the name and never changes the size. The field is a pointer target only; the chevron is the one focus stop.",
   },
   {
     id: "amount-entry",
@@ -300,7 +300,7 @@ export const DS_ITEMS: DsItem[] = [
       "src/css/base.scss --app-field-*, --app-tonal-*, --app-disabled-fill",
     usage: { text: "--app-tonal-fill" },
     example: `<q-btn class="full-width" unelevated rounded color="primary">Add mint</q-btn>\n<q-btn class="full-width" outline rounded color="primary">Discover mints</q-btn>\n<q-input outlined label="Mint URL" />`,
-    note: "Buttons, fields, read-only, disabled and the mint picker as they stack in forms; edges hold 3:1 on page and sheet. Primary is filled; secondary is a tonal fill with no edge; disabled is quieter than tonal; fields keep a soft rim over a 10% fill.",
+    note: "Buttons, fields, read-only, disabled and the mint picker as they stack in forms; one soft control edge on page and sheet (focus is the 2px accent ring). Primary is filled; secondary is a tonal fill with no edge; disabled is quieter than tonal; fields keep a soft rim over a 10% fill.",
   },
 
   // Navigation
@@ -825,7 +825,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/components/OnchainDepositLimits.vue",
     usage: { tag: "OnchainDepositLimits" },
     example: `<OnchainDepositLimits :mint-url="activeMintUrl" :unit="activeUnit" />`,
-    note: "The mint's on-chain deposit range as one sentence in the info callout (AppCallout), under the mint picker on the amount step and under the address QR (owner batch 2, item 7, over council R92's helper text). The range is one left-to-right, non-breaking run. A typed amount outside it still gets the amount warning.",
+    note: "The mint's on-chain deposit range as one sentence in the neutral callout (AppCallout; owner batch 3, item 3), under the mint picker on the amount step and under the address QR (owner batch 2, item 7, over council R92's helper text). The range is one left-to-right, non-breaking run. A typed amount outside it still gets the amount warning.",
   },
 
   {

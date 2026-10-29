@@ -1,11 +1,11 @@
 <!-- The selected mint's on-chain deposit range as one sentence ("Deposits outside
-     {min}–{max} won't be credited.") in the info callout (owner, 2026-10-29 item 7): under the
+     {min}–{max} won't be credited.") in the neutral callout (owner, 2026-10-29 item 7; neutral tone, batch 3 item 3): under the
      mint picker on the amount step and under the address QR, the one screen a sender sees.
      The range is one left-to-right, non-breaking run, so Arabic keeps min before max and the
      sentence never splits it across lines. `limits` stands in for the mint's advertised range
      on the design-system board. -->
 <template>
-  <AppCallout v-if="parts" variant="info"
+  <AppCallout v-if="parts" variant="neutral"
     >{{ parts.before
     }}<bdi dir="ltr" class="deposit-limits-range">{{ parts.range }}</bdi
     >{{ parts.after }}</AppCallout

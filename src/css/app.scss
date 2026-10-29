@@ -491,7 +491,7 @@ body[data-theme] .welcome-surface,
 .mint-chip {
   align-items: center;
   background: var(--app-tint);
-  border: 1px solid var(--app-border-strong);
+  border: 1px solid var(--app-field-edge);
   border-radius: var(--app-radius-pill);
   color: var(--app-text);
   cursor: pointer;
@@ -811,7 +811,6 @@ body.body--light .q-dialog__backdrop {
 // fill and edge, 56px tall, the edge brightening on hover as an input's does.
 .mint-chip--field {
   background: var(--app-field-fill);
-  border-color: var(--app-field-edge);
   border-radius: var(--app-radius-lg);
   gap: 12px;
   justify-content: flex-start;
@@ -887,7 +886,7 @@ body.body--light .q-dialog__backdrop {
 }
 // One focus stop (the chevron), ringed as the whole field, like a focused input.
 .mint-picker:has(.mint-picker__trigger:focus-visible) {
-  outline: 2px solid var(--app-accent);
+  outline: 2px solid var(--app-field-edge-focus);
   outline-offset: 2px;
 }
 .mint-picker .mint-picker__trigger:focus-visible {
@@ -927,26 +926,15 @@ body.body--light .q-dialog__backdrop {
   font-weight: 400;
   line-height: 20px;
 }
-// The chevron is a round button with a faint tonal disc at rest; hover and press only
-// deepen the same disc, so touching it never pops a circle in from nothing (council R91).
+// The chevron is a plain round icon button, like every other icon button: no disc at rest;
+// the shared hover and press tints (.q-focus-helper, "Interaction states") show the disc only
+// while it's hovered or pressed (owner 2026-10-29c, item 1). Keyboard focus rings the field.
 .mint-picker__trigger {
-  background: var(--app-tonal-fill);
   color: var(--app-text-muted);
-}
-.mint-picker__trigger > .q-focus-helper {
-  display: none;
-}
-@media (hover: hover) {
-  .mint-picker__trigger:not(.disabled):hover {
-    background: var(--app-tonal-fill-hover);
-  }
-}
-.mint-picker__trigger:not(.disabled):active {
-  background: var(--app-tonal-fill-pressed);
 }
 @media (prefers-reduced-motion: no-preference) {
   .mint-picker__trigger {
-    transition: background-color 0.12s ease, scale 0.12s ease;
+    transition: scale 0.12s ease;
   }
 }
 // The chevron turns up while the sheet is open; the button itself never rotates.
@@ -1100,7 +1088,7 @@ body .q-field--outlined .q-field__control:before {
 // Focus in the accent, not the fill: the fill misses 3:1 on sheets (salvador 1.99,
 // classic 2.24).
 body .q-field--outlined.q-field--focused .q-field__control:after {
-  border-color: var(--app-accent);
+  border-color: var(--app-field-edge-focus);
 }
 // Labels are muted ink, never the theme colour: a 12px floating label in the fill or accent
 // misses 4.5:1 on sheets (classic, mint, autumn). On sheets the empty label takes full ink
@@ -1120,8 +1108,10 @@ body
 body .q-field--outlined.q-field--disabled .q-field__control {
   background: var(--app-disabled-fill);
 }
+// Disabled drops the edge: the resting edge is so soft that a hairline would outweigh it, so
+// enabled reads as "has an edge", disabled as a quieter fill with muted ink.
 body .q-field--outlined.q-field--disabled .q-field__control:before {
-  border-color: var(--app-border);
+  border-color: transparent;
 }
 // Read-only fields (a seed phrase, a relay) are values to copy, not inputs: a quiet tint
 // with no edge, so they never read as editable.

@@ -163,31 +163,35 @@ body {
   --app-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
   --app-focus-ring: 0 0 0 3px
     color-mix(in srgb, var(--q-primary) 55%, transparent);
+  // Control edges, one family for every bordered control (outlined fields, SheetSelect, the
+  // mint picker, selected cards and rows): a soft resting edge close to the control's own fill,
+  // a hover step, and focus in the accent at 2px. The resting edge is deliberately quiet
+  // (owner 2026-10-29c, item 2: about rgba(87, 87, 87, 0.33) over a dark field), well under
+  // 3:1; the fill carries the control's shape, and focus, icons and text keep full contrast.
+  // Mixed from the text ink, so it is the same subtle step in every theme's own hue, on the
+  // page and on sheets alike (no raised-surface overrides).
+  --app-field-edge-focus: var(--app-accent);
+  --app-card-edge-active: var(--app-field-edge-hover);
 }
 
 // Surfaces ("Tonal"): cards and
 // settings groups are borderless neutral fills; secondary buttons are tonal fills; fields, the mint picker and
 // segmented controls keep a quiet edge so they still read as controls; a selected card or row
-// is a stronger neutral fill with the theme colour on its edge (same width as at rest), so a
-// selection never turns muddy in a coloured theme or reads like a warning.
-// Light mode's field edge matches dark mode's contrast.
+// is a stronger fill with the control edge's hover step (same width as at rest) beside its
+// check or checkbox, so a selection reads in the same family as every control edge.
+// Light mode's control edge matches dark mode's contrast.
 body.body--dark {
   --app-card-edge: transparent;
-  --app-card-edge-active: color-mix(
-    in srgb,
-    var(--app-accent) 75%,
-    transparent
-  );
   // Dark steps over the pure-black page, about 5 points apart so each level separates on any
-  // panel: container 10% (cards and settings groups, siblings), active 15%, raised 13%. Fields
-  // keep an edge at the 3:1 control minimum over their 10% fill (33% on the page, 43% on
-  // sheets below); the fill carries the shape so the edge reads as a rim, not a bright line.
+  // panel: container 10% (cards and settings groups, siblings), active 15%, raised 13%. Control
+  // edges are a 9% rim over the 10% fill (monochrome: rgb(44) over a rgb(24) field, about
+  // 1.3:1, where the owner's reference renders rgb(45)); hover 20%.
   // Secondary buttons are tonal (a fill, no edge); disabled is quieter than tonal.
   --app-card-fill: color-mix(in srgb, var(--app-text) 10%, transparent);
   --app-card-fill-active: color-mix(in srgb, var(--app-text) 15%, transparent);
   --app-field-fill: color-mix(in srgb, var(--app-text) 10%, transparent);
-  --app-field-edge: color-mix(in srgb, var(--app-text) 33%, transparent);
-  --app-field-edge-hover: color-mix(in srgb, var(--app-text) 56%, transparent);
+  --app-field-edge: color-mix(in srgb, var(--app-text) 9%, transparent);
+  --app-field-edge-hover: color-mix(in srgb, var(--app-text) 20%, transparent);
   --app-tonal-fill: color-mix(in srgb, var(--app-text) 10%, transparent);
   --app-tonal-fill-hover: color-mix(in srgb, var(--app-text) 15%, transparent);
   --app-tonal-fill-pressed: color-mix(
@@ -204,15 +208,15 @@ body.body--dark {
 }
 body.body--light {
   --app-card-edge: transparent;
-  // 75% (was 40%): the selected edge reads in every theme, not just the strong accents.
-  --app-card-edge-active: color-mix(in srgb, var(--q-primary) 75%, transparent);
   // 4% and 7% on the white page (L1, owner 2026-10-29): quieter steps, so stacked cards,
   // tonal buttons and fields stop reading as grey slabs.
   --app-card-fill: color-mix(in srgb, var(--app-text) 4%, transparent);
   --app-card-fill-active: color-mix(in srgb, var(--app-text) 7%, transparent);
   --app-field-fill: #fff;
-  --app-field-edge: color-mix(in srgb, var(--app-text) 46%, transparent);
-  --app-field-edge-hover: color-mix(in srgb, var(--app-text) 64%, transparent);
+  // Control edges at the dark edge's contrast over its field (about 1.3:1 on the white field:
+  // 12% renders rgb(226)); hover 24%.
+  --app-field-edge: color-mix(in srgb, var(--app-text) 12%, transparent);
+  --app-field-edge-hover: color-mix(in srgb, var(--app-text) 24%, transparent);
   --app-tonal-fill: color-mix(in srgb, var(--app-text) 5%, transparent);
   --app-tonal-fill-hover: color-mix(in srgb, var(--app-text) 8%, transparent);
   --app-tonal-fill-pressed: color-mix(
@@ -227,18 +231,6 @@ body.body--light {
   --app-group-fill: color-mix(in srgb, var(--app-text) 5%, transparent);
 }
 
-// Fields on sheets and dialogs: the raised fill is lighter (dark) or greyer (light), so the
-// edge needs more weight to keep 3:1 (flamingo sheets need 43%, light sheets 49%). Flows are
-// pages (.flow-surface), and so is onboarding (.welcome-surface): both keep the page edge.
-body.body--dark
-  :is(.q-card:not(.flow-surface, .welcome-surface), .bottom-sheet, .q-menu) {
-  --app-field-edge: color-mix(in srgb, var(--app-text) 43%, transparent);
-  --app-field-edge-hover: color-mix(in srgb, var(--app-text) 64%, transparent);
-}
-body.body--light
-  :is(.q-card:not(.flow-surface, .welcome-surface), .bottom-sheet, .q-menu) {
-  --app-field-edge: color-mix(in srgb, var(--app-text) 49%, transparent);
-}
 // Secondary text on sheets and dialogs sits on a row fill over the raised surface, two
 // lifts above the page: 72% muted measured 4.04:1 there in flamingo dark (mint 4.29, autumn
 // 4.48; rendered pixels, .council/muted-contrast.mjs). 86% and 80% clear 4.5:1 in every
@@ -248,22 +240,6 @@ body.body--dark
   --app-text-muted: rgba(244, 244, 245, 0.86);
   --app-text-subtle: rgba(244, 244, 245, 0.8);
 }
-// A read-only field that keeps its edge (the welcome seed phrase) sits on the quieter 6%
-// read-only fill, so the same edge renders darker: 33% measured 2.83:1 on flamingo's dark page
-// (mint 2.92, autumn 2.99). 36% restores the page fields' 3:1 (rendered pixels,
-// .council/field-edges.mjs). Light needs nothing: its read-only fill darkens the edge.
-body.body--dark .q-field--readonly.readonly-outlined {
-  --app-field-edge: color-mix(in srgb, var(--app-text) 36%, transparent);
-}
-// Mono's selection ring: a white ring on black glared at 75%; 56% still clears 3:1.
-body[data-theme="monochrome"] {
-  --app-card-edge-active: color-mix(
-    in srgb,
-    var(--app-accent) 56%,
-    transparent
-  );
-}
-
 body.body--dark {
   --app-welcome-bg: var(--app-surface);
   // Off-white ink (zinc-100), not pure white: the balance and titles stay the brightest
@@ -292,8 +268,8 @@ body.body--light {
   --app-text-disabled: rgba(0, 0, 0, 0.5);
   // Light mode mirrors dark mode's steps (light had been tuned less):
   // hairlines and card edges at about the same visual weight as their dark counterparts,
-  // fills a touch stronger so grouped surfaces read on white. Field edges keep their own
-  // 3:1 token (--app-field-edge).
+  // fills a touch stronger so grouped surfaces read on white. Control edges have their own
+  // token (--app-field-edge).
   --app-border: rgba(0, 0, 0, 0.1);
   --app-tint: rgba(0, 0, 0, 0.04);
   --app-tint-strong: rgba(0, 0, 0, 0.075);
