@@ -1414,10 +1414,12 @@ html[dir="rtl"] .mint-card-more {
   margin-block-start: 4px;
   margin-inline-end: 4px;
 }
+// A tonal pill, so Add reads as a button beside the card's review link (council R88-R89).
 .mint-card-add {
+  background: var(--app-tint-strong);
   flex: none;
   margin-block-start: -6px;
-  margin-inline-end: -8px;
+  margin-inline-end: -4px;
   font-size: 14px;
   font-weight: 600;
   min-height: 36px;

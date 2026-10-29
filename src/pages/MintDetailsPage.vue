@@ -229,6 +229,7 @@
         <!-- Mint Audit Info Section -->
         <MintAuditInfo
           v-if="settings.auditorEnabled && mintData.url"
+          class="mint-details-section"
           :mintUrl="mintData.url"
           @close="() => {}"
         />
@@ -585,10 +586,12 @@ export default defineComponent({
   margin-inline-start: 4px;
 }
 
-/* Details, contact and actions are all flat rows on the page, like the invoice and token
-   details: no cards. */
+/* Details and audit info are flat rows on the page, like the invoice and token details, but
+   inset so their icons and values sit on the same columns as the Actions card's rows
+   (the icons were 24px apart, council R88-R89). */
 .mint-details-section {
-  padding: 4px 0 0;
+  padding-block: 4px 0;
+  padding-inline: 22px 20px;
   width: 100%;
 }
 

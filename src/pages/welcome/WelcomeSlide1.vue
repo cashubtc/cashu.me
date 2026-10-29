@@ -255,6 +255,8 @@ export default {
   width: 100%;
   max-width: 500px;
   margin-top: 12px;
+  /* Clear of the screen edge and the home indicator (council R89). */
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
 }
 
 .welcome-actions {
