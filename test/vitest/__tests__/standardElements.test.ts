@@ -60,6 +60,7 @@ describe("standard elements", () => {
     ["ui/RowValue.vue", /^row-value(__(inner|text))?$/],
     ["ui/MetaLine.vue", /^meta-line(__sep)?$/],
     ["ui/AmountWarning.vue", /^amount-warning(__text)?$/],
+    ["ui/FieldLabel.vue", /^field-label$/],
     ["ui/MintCardAction.vue", /^mint-card-add(__icon)?$/],
     ["ui/TonalChip.vue", /^(tonal-chip(__icon)?|qr-control-chip)$/],
     ["ui/FlowFooter.vue", /^(bottom-panel|flow-footer__(bar|col))$/],
@@ -176,6 +177,13 @@ describe("standard elements", () => {
       offenders((text) =>
         /class="[^"]*settings-section-(title|header|caption)/.test(text)
       )
+    ).toEqual([]);
+  });
+
+  // The label above a field is FieldLabel, not a hand-sized div.
+  it("field labels come from FieldLabel", () => {
+    expect(
+      offenders((text) => /class="text-subtitle2 text-weight-medium/.test(text))
     ).toEqual([]);
   });
 

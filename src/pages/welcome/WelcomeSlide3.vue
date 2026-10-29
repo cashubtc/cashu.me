@@ -8,9 +8,9 @@
   >
     <!-- Seed Phrase Section -->
     <div class="seed-section">
-      <div class="seed-label">
-        {{ $t("WelcomeSlide3.inputs.seed_phrase.label") }}
-      </div>
+      <FieldLabel>{{
+        $t("WelcomeSlide3.inputs.seed_phrase.label")
+      }}</FieldLabel>
 
       <div class="seed-box">
         <div class="seed-text">{{ hiddenMnemonic }}</div>
@@ -58,6 +58,7 @@
 
 <script lang="ts">
 import CjkText from "src/components/ui/CjkText.vue";
+import FieldLabel from "src/components/ui/FieldLabel.vue";
 import IconButton from "src/components/ui/IconButton.vue";
 import {
   Eye as EyeIcon,
@@ -75,6 +76,7 @@ export default {
   name: "WelcomeSlide3",
   components: {
     CjkText,
+    FieldLabel,
     IconButton,
     EyeIcon,
     EyeOffIcon,
@@ -135,14 +137,6 @@ export default {
 .seed-section,
 .checkbox-section {
   max-width: 500px;
-}
-
-.seed-label {
-  font-size: 15.2px;
-  font-family: inherit;
-  font-weight: 600;
-  color: var(--app-text);
-  margin-bottom: 12px;
 }
 
 .seed-box {

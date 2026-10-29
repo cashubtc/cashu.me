@@ -730,3 +730,13 @@ body.body--light .activity-row__avatar--in {
   font-size: 16px;
   font-weight: 500;
 }
+
+/* FieldLabel: the label above a field or control. */
+.field-label {
+  color: var(--app-text);
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 22px;
+  margin-bottom: 8px;
+}

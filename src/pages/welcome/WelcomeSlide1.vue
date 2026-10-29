@@ -226,7 +226,9 @@ export default {
 }
 
 .title {
-  font-size: 2.2rem;
+  /* A step smaller on narrow phones, so a long localized title keeps the page margins
+     (Arabic and Chinese nearly touched the edges, council R85-R87). */
+  font-size: clamp(1.75rem, 8vw, 2.2rem);
   font-weight: 700;
   margin: 0 0 20px 0;
   color: var(--app-text);

@@ -11,14 +11,14 @@
     <div class="review-form">
       <!-- One container level: the label, stars and text box sit straight on the page (the outlined text box inside a bordered card read as a box in a box). -->
       <div>
-        <div class="text-subtitle2 text-weight-medium">
-          {{ $t("CreateMintReview.inputs.rating.label") }}
-        </div>
+        <FieldLabel>{{
+          $t("CreateMintReview.inputs.rating.label")
+        }}</FieldLabel>
         <AppRating
           v-model="rating"
           :size="32"
           :label="$t('CreateMintReview.inputs.rating.label')"
-          class="q-mt-sm q-mb-md review-stars"
+          class="q-mb-md review-stars"
           :disable="prefilling || submitting"
         />
         <!-- Says why Publish is off until there is a rating. -->
@@ -26,9 +26,9 @@
           {{ $t("CreateMintReview.inputs.rating.hint") }}
         </div>
         <!-- Labelled above, like Rating: one label pattern for both fields (council R86). -->
-        <div class="text-subtitle2 text-weight-medium q-mb-sm">
-          {{ $t("CreateMintReview.inputs.review.label") }}
-        </div>
+        <FieldLabel>{{
+          $t("CreateMintReview.inputs.review.label")
+        }}</FieldLabel>
         <q-input
           v-model="review"
           type="textarea"
@@ -107,6 +107,7 @@ import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
 import { useMintsStore } from "src/stores/mints";
 import SettingsPageShell from "src/pages/settings/SettingsPageShell.vue";
 import AppRating from "src/components/ui/AppRating.vue";
+import FieldLabel from "src/components/ui/FieldLabel.vue";
 import MintIdentityHeader from "src/components/MintIdentityHeader.vue";
 
 export default defineComponent({
@@ -115,6 +116,7 @@ export default defineComponent({
     BusyLabel,
     PendingDots,
     AppRating,
+    FieldLabel,
     CopyButton,
     SettingsPageShell,
     MintIdentityHeader,
@@ -332,6 +334,6 @@ export default defineComponent({
   color: var(--app-text-muted);
   font-size: 14px;
   line-height: 20px;
-  margin: -8px 0 16px;
+  margin: -8px 0 24px;
 }
 </style>

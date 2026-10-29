@@ -33,6 +33,7 @@
          (council R83-R84). -->
     <DetailRow
       v-else-if="error"
+      class="audit-retry-row"
       :icon="InfoIcon"
       :label="
         /fetch|network/i.test(error) ? $t('MintAuditInfo.unavailable') : error
@@ -337,6 +338,11 @@ export default {
 </script>
 
 <style scoped>
+/* The 44px retry target centres its text 6px lower than a plain detail row: pull it up so
+   the gap under the Audit info heading matches Mint details' (council R87). */
+.audit-retry-row {
+  margin-top: -6px;
+}
 .mint-info {
   text-align: start;
   margin-top: 20px;

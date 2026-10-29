@@ -161,6 +161,13 @@
           lnbc10u1pjxyz0pp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqypq
         </div>
       </DsEntry>
+      <DsEntry id="field-label">
+        <!-- Over a control (stars) and over a text field, as on the review page. -->
+        <FieldLabel>Rating</FieldLabel>
+        <AppRating :model-value="0" label="Rating" class="q-mb-md" />
+        <FieldLabel>Review (optional)</FieldLabel>
+        <q-input outlined dense aria-label="Review" />
+      </DsEntry>
       <DsEntry id="cjk-text">
         <div class="ds-frame q-pa-md" style="max-width: 240px">
           <!-- Rendered in the active locale: switch the board to 中文 to see whole words. -->
@@ -1279,6 +1286,7 @@ import MintCardAction from "src/components/ui/MintCardAction.vue";
 import TonalChip from "src/components/ui/TonalChip.vue";
 import FlowColumn from "src/components/ui/FlowColumn.vue";
 import CjkText from "src/components/ui/CjkText.vue";
+import FieldLabel from "src/components/ui/FieldLabel.vue";
 import AmountWarning from "src/components/ui/AmountWarning.vue";
 import MetaLine from "src/components/ui/MetaLine.vue";
 import RowValue from "src/components/ui/RowValue.vue";
@@ -1343,6 +1351,7 @@ export default defineComponent({
   name: "DesignSystemPage",
   mixins: [windowMixin],
   components: {
+    FieldLabel,
     AmountWarning,
     MetaLine,
     RowValue,

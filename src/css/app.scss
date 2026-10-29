@@ -1408,10 +1408,11 @@ html[dir="rtl"] .mint-card-more {
 }
 /* A mint card's labelled action (MintCardAction: Discover's Add, Restore's Restore): a
    compact 36px text button (outlined pills dominated a list of five, council R77). */
+// Shaped like the "+ Add" text it stands in for: a short text bar, not a filled pill.
 .mint-card__action-skeleton {
-  border-radius: 999px;
   flex: none;
-  margin-block-start: -4px;
+  margin-block-start: 4px;
+  margin-inline-end: 4px;
 }
 .mint-card-add {
   flex: none;

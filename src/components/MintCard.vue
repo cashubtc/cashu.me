@@ -27,9 +27,8 @@
              (council R86). -->
         <q-skeleton
           v-if="skeleton && skeletonAction"
-          type="rect"
-          width="64px"
-          height="32px"
+          type="text"
+          width="48px"
           class="mint-card__action-skeleton"
         />
         <template v-if="!skeleton">

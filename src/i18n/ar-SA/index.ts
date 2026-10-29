@@ -740,7 +740,7 @@ export default {
         title: "Android (Chrome)",
         step1: {
           item: "1. { icon } { text }",
-          text: "انقر على القائمة (⋮)",
+          text: "انقر على القائمة (الزاوية العلوية)",
         },
         step2: {
           item: "2. { icon } { text }",

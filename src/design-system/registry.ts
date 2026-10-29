@@ -321,6 +321,16 @@ export const DS_ITEMS: DsItem[] = [
   },
 
   {
+    id: "field-label",
+    name: "Field label",
+    group: "foundations",
+    tier: "primitive",
+    source: "src/components/ui/FieldLabel.vue",
+    usage: { tag: "FieldLabel" },
+    example: `<FieldLabel>Rating</FieldLabel>`,
+    note: "The label above a field or control (Rating, Review, Seed phrase): 15px semibold ink, 8px above it.",
+  },
+  {
     id: "cjk-text",
     name: "CJK text",
     group: "foundations",
