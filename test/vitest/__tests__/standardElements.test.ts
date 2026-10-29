@@ -60,7 +60,8 @@ describe("standard elements", () => {
     ["ui/QrCopyLine.vue", /^qr-copy-line(__icon)?$/],
     ["ui/AmountHeadline.vue", /^amount-headline$/],
     ["ui/PaymentStatus.vue", /^payment-status(__[\w-]+)?$/],
-    ["ui/UnitToggle.vue", /^sheet-unit-toggle(__swap)?$/],
+    ["ui/UnitToggle.vue", /^unit-chip(-row|__chevron)?$/],
+    ["OnchainDepositLimits.vue", /^deposit-limits-(hint|warning|icon|range)$/],
     ["ui/RowValue.vue", /^row-value(__(inner|text))?$/],
     ["ui/MetaLine.vue", /^meta-line(__sep)?$/],
     ["ui/AmountWarning.vue", /^amount-warning(__text)?$/],
@@ -86,6 +87,15 @@ describe("standard elements", () => {
           value.split(/[\s'"`{}:,?]+/).some((token) => pattern.test(token))
         )
       ).filter((file) => !file.endsWith(owner))
+    ).toEqual([]);
+  });
+
+  // The unit switch is a chip under the amount (council R92), not a header action again.
+  it("the unit toggle sits under the amount, not in a header", () => {
+    expect(
+      offenders((text) =>
+        /<template #actions>(?:(?!<\/template>)[\s\S])*<UnitToggle/.test(text)
+      )
     ).toEqual([]);
   });
 

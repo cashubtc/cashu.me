@@ -5,7 +5,7 @@
     v-if="!camera.show"
   >
     <div class="column fit overflow-hidden pay-fullscreen">
-      <!-- Header with centered title and unit toggle on right -->
+      <!-- Header with centered title -->
       <FullscreenDialogHeader @close="closeDialog">
         <template #title>
           <div>
@@ -19,11 +19,6 @@
             >
               {{ dialogTitle }}
             </q-item-label>
-          </div>
-        </template>
-        <template #actions>
-          <div class="row items-center no-wrap sheet-header-actions">
-            <UnitToggle :label="activeUnitLabel" @toggle="toggleUnit()" />
           </div>
         </template>
       </FullscreenDialogHeader>
@@ -111,6 +106,7 @@
                         )
                       }}
                     </div>
+                    <UnitToggle align="start" @toggle="toggleUnit()" />
                     <div
                       v-if="showOnchainFeeOptions"
                       class="onchain-fee-options q-mt-lg"
@@ -219,6 +215,8 @@
                       class="column items-center justify-center q-px-lg q-py-lg amount-area"
                     >
                       <AmountInputComponent
+                        unit-toggle
+                        @toggle-unit="toggleUnit()"
                         v-model="payInvoiceData.input.amount"
                         :enabled="true"
                         :muted="insufficientFundsForAmountlessPayment"
@@ -374,6 +372,8 @@
                 class="column items-center justify-center q-px-lg q-py-lg amount-area"
               >
                 <AmountInputComponent
+                  unit-toggle
+                  @toggle-unit="toggleUnit()"
                   v-model="payInvoiceData.input.amount"
                   :enabled="true"
                   :muted="
@@ -989,10 +989,6 @@ export default defineComponent({
         this.payInvoiceData.meltQuote.response.amount > 0 &&
         totalMultinutBalance >= this.payInvoiceData.meltQuote.response.amount
       );
-    },
-    activeUnitLabel: function (): string {
-      // Access directly from store to avoid typing friction in mapState
-      return (useMintsStore() as any).activeUnitLabel;
     },
     insufficientFundsForAmountlessPayment: function (): boolean {
       if (

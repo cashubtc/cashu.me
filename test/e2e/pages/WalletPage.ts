@@ -67,6 +67,16 @@ export class WalletPage {
     }
   }
 
+  /** The amount screen's ecash unit chip, named "Unit: Bitcoin, change". */
+  unitChip() {
+    return this.page.getByRole("button", { name: /^Unit: .+, change$/ });
+  }
+
+  /** The ⇅ swap between typing the unit and typing the fiat currency. */
+  fiatEntrySwap(fiat: string) {
+    return this.page.getByRole("button", { name: `Enter amount in ${fiat}` });
+  }
+
   async closeFullscreenDialog() {
     const close = this.page.locator("button.floating-close-btn:visible");
     if (await close.count()) {

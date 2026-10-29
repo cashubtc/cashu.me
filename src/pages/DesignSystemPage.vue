@@ -860,13 +860,14 @@
         </q-list>
       </DsEntry>
       <DsEntry id="unit-toggle">
-        <!-- Beside the lock action in Send: both bare header actions. -->
-        <div class="ds-frame row items-center no-wrap q-pa-sm" style="gap: 4px">
-          <IconButton class="lock-toggle-btn" label="Lock to a key">
-            <LockIcon :size="20" />
-          </IconButton>
-          <UnitToggle label="₿" />
-          <UnitToggle label="$" />
+        <!-- Under the amount's fiat line, for a mint with two units (council R92, variant 3
+             of /design-system/explore/unit-toggle); a one-unit mint shows no chip. -->
+        <div
+          class="ds-frame row items-center justify-center q-pa-sm"
+          style="gap: 8px"
+        >
+          <UnitToggle unit="sat" :units="['sat', 'usd']" />
+          <UnitToggle unit="usd" :units="['sat', 'usd']" />
         </div>
       </DsEntry>
       <DsEntry id="fullscreen-dialog-header">
@@ -1545,6 +1546,20 @@
           <ConfirmationsRow :metadata="chainConfirmed" />
         </div>
       </DsEntry>
+      <DsEntry id="deposit-limits">
+        <!-- Under the mint picker on the amount step (council R92, variant 3 of
+             /design-system/explore/deposit-limits), then the caption under the address QR. -->
+        <div class="ds-frame q-pa-sm">
+          <OnchainDepositLimits
+            placement="picker"
+            unit="sat"
+            :limits="depositLimitsDemo"
+          />
+        </div>
+        <div class="ds-frame q-pa-md q-mt-sm">
+          <OnchainDepositLimits unit="sat" :limits="depositLimitsDemo" />
+        </div>
+      </DsEntry>
       <DsEntry id="pwa-prompt">
         <!-- The prompt is fixed to the viewport; each transformed frame contains one. -->
         <div class="ds-contain ds-phone">
@@ -1723,6 +1738,7 @@ import ToggleUnit from "src/components/ToggleUnit.vue";
 import ActivityRow from "src/components/ActivityRow.vue";
 import AmountKeypadPanel from "src/components/AmountKeypadPanel.vue";
 import ConfirmationsRow from "src/components/ConfirmationsRow.vue";
+import OnchainDepositLimits from "src/components/OnchainDepositLimits.vue";
 import MintReviewSummary from "src/components/MintReviewSummary.vue";
 import PwaPrompt from "src/components/PwaPrompt.vue";
 import QrBlock from "src/components/QrBlock.vue";
@@ -1840,6 +1856,7 @@ export default defineComponent({
     AppRating,
     BottomSheet,
     ConfirmationsRow,
+    OnchainDepositLimits,
     ChooseMint,
     CopyButton,
     DetailRow,
@@ -2054,6 +2071,10 @@ export default defineComponent({
         confirmations: 1,
         confirmationThreshold: 3,
         url: "",
+      },
+      depositLimitsDemo: {
+        minAmount: BigInt(10000),
+        maxAmount: BigInt(2000000),
       },
       chainConfirmed: {
         txid: "demo",

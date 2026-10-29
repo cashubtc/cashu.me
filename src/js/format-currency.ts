@@ -7,6 +7,15 @@ export function isolateLtr(text: string): string {
   return `\u2066${text}\u2069`;
 }
 
+/** A unit's short text code, as the balance's unit buttons and the amount's unit chip name it:
+ * BTC for sats, mSAT for millisats, otherwise the unit upper-cased (USD, EUR). */
+export function unitCode(unit: string): string {
+  const normalized = unit.toLowerCase();
+  if (normalized === "sat") return "BTC";
+  if (normalized === "msat") return "mSAT";
+  return unit.toUpperCase();
+}
+
 /** Format integer Cashu amounts without converting large values to numbers. */
 export function formatBigIntCurrency(
   value: bigint,

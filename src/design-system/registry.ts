@@ -397,7 +397,9 @@ export const DS_ITEMS: DsItem[] = [
     tier: "primitive",
     source: "src/components/ui/UnitToggle.vue",
     usage: { tag: "UnitToggle" },
-    example: `<UnitToggle :label="activeUnitLabel" @toggle="toggleUnit()" />`,
+    example: `<AmountInputComponent v-model="amount" unit-toggle @toggle-unit="toggleUnit()" />
+<UnitToggle align="start" @toggle="toggleUnit()" />`,
+    note: 'The ecash unit as a tonal chip under the amount and its fiat line (council R92 picked variant 3 of /design-system/explore/unit-toggle): the unit\'s code and a chevron, 44px, named "Unit: Bitcoin, change" apart from the ⇅ swap ("Enter amount in USD"). Follows the active mint and hides itself when the mint has one unit. Never a header action.',
   },
   {
     id: "fullscreen-dialog-header",
@@ -793,6 +795,17 @@ export const DS_ITEMS: DsItem[] = [
     usage: { tag: "ConfirmationsRow" },
     example: `<ConfirmationsRow :metadata="txMetadata" :loading="fetching" />`,
     note: "An on-chain send's confirmations as a plain fact (n/m), with no state word, icon or colour; the Status row stays the one status.",
+  },
+  {
+    id: "deposit-limits",
+    name: "On-chain deposit limits",
+    group: "feature",
+    tier: "feature",
+    source: "src/components/OnchainDepositLimits.vue",
+    usage: { tag: "OnchainDepositLimits" },
+    example: `<OnchainDepositLimits placement="picker" :mint-url="activeMintUrl" :unit="activeUnit" />
+<OnchainDepositLimits :mint-url="activeMintUrl" :unit="activeUnit" />`,
+    note: "The mint's on-chain deposit range as one sentence behind an info glyph. On the amount step it is the mint picker's helper text, 12px under the card (council R92 picked variant 3 of /design-system/explore/deposit-limits); under the address QR it stays the centred caption. The range is one left-to-right, non-breaking run.",
   },
 
   {

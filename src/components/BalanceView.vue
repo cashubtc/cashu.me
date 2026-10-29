@@ -145,6 +145,7 @@ import { usePriceStore } from "src/stores/price";
 import AnimatedNumber from "src/components/AnimatedNumber.vue";
 import ChooseMint from "src/components/ChooseMint.vue";
 import { sumProofAmounts } from "src/js/proofs";
+import { unitCode } from "src/js/format-currency";
 import { useProofsStore } from "src/stores/proofs";
 
 export default defineComponent({
@@ -252,10 +253,7 @@ export default defineComponent({
       this.hideBalance = !this.hideBalance;
     },
     unitLabel(unit: string) {
-      const normalizedUnit = unit.toLowerCase();
-      if (normalizedUnit === "sat") return "BTC";
-      if (normalizedUnit === "msat") return "mSAT";
-      return unit.toUpperCase();
+      return unitCode(unit);
     },
     totalBalanceForUnit(unit: string) {
       const normalizedUnit = unit.toLowerCase();

@@ -1462,6 +1462,10 @@ export default {
       },
     },
   },
+  UnitToggle: {
+    label: "Μονάδα: {unit}, αλλαγή",
+    bitcoin: "Bitcoin",
+  },
   ChooseMint: {
     open_selector: "Επιλογή mint, τρέχον mint: {mint}",
     open_selector_empty: "Επιλογή mint",
@@ -1735,7 +1739,7 @@ export default {
     refresh: "Ανανέωση",
     settings: "Ρυθμίσεις",
     backspace: "Διαγραφή χαρακτήρα",
-    swap_input_mode: "Εναλλαγή εισαγωγής ποσού/fiat",
+    enter_amount_in: "Εισαγωγή ποσού σε {fiat}",
     fee: "Χρέωση",
   },
   SendPaymentRequest: {

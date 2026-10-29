@@ -1,6 +1,6 @@
-<!-- Dev-only exploration (owner item 26): seven alternatives (1-7) to the unit toggle (0,
-     UnitToggle: the active unit and a chevron as a bare header action), each in context on
-     Receive Lightning ("receive", with the Invoice/Offer control) or Send ecash ("send",
+<!-- Dev-only exploration (owner item 26): seven alternatives (1-7) to the unit toggle (0, the
+     header action it was, now ExploreHeaderUnit; variant 3 shipped as UnitToggle in round
+     92), each in context on Receive Lightning ("receive", with the Invoice/Offer control) or Send ecash ("send",
      beside the lock action). The mint holds two units, ₿ (sat, shown as BTC elsewhere) and USD,
      the labels the stores give them. Static demo data, no stores. -->
 <template>
@@ -24,7 +24,7 @@
       >
         <LockIcon :size="20" />
       </IconButton>
-      <UnitToggle v-if="variant === 0" :label="active.label" />
+      <ExploreHeaderUnit v-if="variant === 0" :label="active.label" />
       <!-- 1 Header segmented: both units always visible, as a compact two-way switch. -->
       <div
         v-else-if="variant === 1"
@@ -192,7 +192,7 @@ import {
 import IconButton from "src/components/ui/IconButton.vue";
 import SegmentedControl from "src/components/ui/SegmentedControl.vue";
 import TonalChip from "src/components/ui/TonalChip.vue";
-import UnitToggle from "src/components/ui/UnitToggle.vue";
+import ExploreHeaderUnit from "src/design-system/explorations/ExploreHeaderUnit.vue";
 import ExploreAmountScreen from "src/design-system/explorations/ExploreAmountScreen.vue";
 import ExploreMintPicker from "src/design-system/explorations/ExploreMintPicker.vue";
 
@@ -217,7 +217,7 @@ export default defineComponent({
     LockIcon,
     SegmentedControl,
     TonalChip,
-    UnitToggle,
+    ExploreHeaderUnit,
   },
   props: {
     variant: { type: Number, default: 0 },

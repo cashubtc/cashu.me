@@ -75,7 +75,7 @@ export default {
     refresh: "Atualizar",
     settings: "Configurações",
     backspace: "Apagar",
-    swap_input_mode: "Alternar entre valor e moeda fiduciária",
+    enter_amount_in: "Inserir valor em {fiat}",
     fee: "Taxa",
   },
   MultinutPicker: {
@@ -1513,6 +1513,10 @@ export default {
         label: "Editar mint",
       },
     },
+  },
+  UnitToggle: {
+    label: "Unidade: {unit}, alterar",
+    bitcoin: "Bitcoin",
   },
   ChooseMint: {
     open_selector: "Selecionar mint, mint atual: {mint}",

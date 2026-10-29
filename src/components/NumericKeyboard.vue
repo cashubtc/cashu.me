@@ -149,6 +149,14 @@ export default defineComponent({
   padding: 12px 0;
 }
 
+// On short screens the keypad's top inset tightens (24px to 8px), so the amount, its unit chip
+// and the fiat line keep their room above it (council R92).
+@media (max-height: 760px) {
+  .numeric-keyboard.q-pt-lg {
+    padding-top: 8px !important;
+  }
+}
+
 // on not tall screens, make the keyboard smaller
 @media (max-height: 700px) {
   .numeric-keyboard {
@@ -163,6 +171,15 @@ export default defineComponent({
 @media (max-height: 600px) {
   .numeric-keyboard {
     max-height: 260px;
+  }
+  // A 568px phone: 44px keys (the touch target) and an 8px bottom inset leave room above the
+  // keypad for the amount, its fiat line and unit chip (council R92).
+  .numeric-keyboard.q-pb-lg {
+    padding-bottom: 8px !important;
+  }
+  .q-btn {
+    min-height: 44px;
+    padding: 6px 0;
   }
   .keyboard-grid {
     gap: 0px;

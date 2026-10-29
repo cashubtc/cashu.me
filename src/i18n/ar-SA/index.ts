@@ -1435,6 +1435,10 @@ export default {
       },
     },
   },
+  UnitToggle: {
+    label: "الوحدة: {unit}، تغيير",
+    bitcoin: "بيتكوين",
+  },
   ChooseMint: {
     open_selector: "اختر مِنْت، المِنْت الحالي: {mint}",
     open_selector_empty: "اختر مِنْت",
@@ -1707,7 +1711,7 @@ export default {
     refresh: "تحديث",
     settings: "الإعدادات",
     backspace: "حذف حرف",
-    swap_input_mode: "التبديل بين إدخال المبلغ والعملة الورقية",
+    enter_amount_in: "أدخل المبلغ بـ {fiat}",
     fee: "الرسوم",
   },
   SendPaymentRequest: {

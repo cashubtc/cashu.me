@@ -1451,6 +1451,10 @@ export default {
       },
     },
   },
+  UnitToggle: {
+    label: "Enhet: {unit}, ändra",
+    bitcoin: "Bitcoin",
+  },
   ChooseMint: {
     open_selector: "Välj mint, nuvarande mint: {mint}",
     open_selector_empty: "Välj mint",
@@ -1724,7 +1728,7 @@ export default {
     refresh: "Uppdatera",
     settings: "Inställningar",
     backspace: "Radera tecken",
-    swap_input_mode: "Växla mellan belopp och fiat",
+    enter_amount_in: "Ange belopp i {fiat}",
     fee: "Avgift",
   },
   SendPaymentRequest: {

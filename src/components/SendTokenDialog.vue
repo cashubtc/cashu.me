@@ -17,7 +17,6 @@
             >
               <LockIcon :size="20" />
             </IconButton>
-            <UnitToggle :label="activeUnitLabel" @toggle="toggleUnit()" />
           </div>
         </template>
       </FullscreenDialogHeader>
@@ -41,6 +40,8 @@
       <!-- Amount display -->
       <div class="col column items-center justify-center q-px-lg amount-area">
         <AmountInputComponent
+          unit-toggle
+          @toggle-unit="toggleUnit()"
           v-model="sendData.amount"
           :muted="insufficientFunds"
           :enabled="!sendData.tokens"
@@ -181,7 +182,6 @@ import FlowFooter from "src/components/ui/FlowFooter.vue";
 import RevealTransition from "src/components/ui/RevealTransition.vue";
 import IconButton from "src/components/ui/IconButton.vue";
 import AppBadge from "src/components/ui/AppBadge.vue";
-import UnitToggle from "src/components/ui/UnitToggle.vue";
 import { defineComponent } from "vue";
 import AppCallout from "src/components/AppCallout.vue";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
@@ -218,7 +218,6 @@ export default defineComponent({
   components: {
     AmountWarning,
     FlowColumn,
-    UnitToggle,
     FlowDialog,
     BusyLabel,
     FlowFooter,
@@ -266,7 +265,6 @@ export default defineComponent({
       "mints",
       "activeProofs",
       "activeUnit",
-      "activeUnitLabel",
       "activeUnitCurrencyMultiplyer",
       "activeMintUrl",
       "activeBalance",

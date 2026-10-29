@@ -12,13 +12,7 @@
             : $t('InvoiceDetailDialog.title')
         "
         balanced
-      >
-        <template #actions>
-          <div class="row items-center no-wrap sheet-header-actions">
-            <UnitToggle :label="activeUnitLabel" @toggle="toggleUnit()" />
-          </div>
-        </template>
-      </FullscreenDialogHeader>
+      />
 
       <!-- Mint selection -->
       <FlowColumn class="q-px-md q-mb-sm">
@@ -27,6 +21,14 @@
           :filter-payment-method="mintFilterMethod"
           filter-mint-operation="mint"
           :disable="createInvoiceButtonBlocked"
+        />
+        <!-- The mint's deposit range, as the picker's helper text while an amount is typed
+             (council R92, item 21); the address keeps its own caption under the QR. -->
+        <OnchainDepositLimits
+          v-if="isOnchain && showAmountInput"
+          placement="picker"
+          :mint-url="activeMintUrl"
+          :unit="activeUnit"
         />
         <div
           v-if="!isOnchain && bolt11Supported && bolt12Supported"
@@ -129,6 +131,8 @@
             class="amount-step column justify-center full-width q-my-auto"
           >
             <AmountInputComponent
+              unit-toggle
+              @toggle-unit="toggleUnit()"
               class="q-my-auto"
               v-model="invoiceData.amount"
               :enabled="!isOnchain || !createInvoiceButtonBlocked"
@@ -241,7 +245,6 @@ import {
   RefreshCw as RefreshCwIcon,
 } from "lucide-vue-next";
 import AppCallout from "src/components/AppCallout.vue";
-import UnitToggle from "src/components/ui/UnitToggle.vue";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { copyToClipboard } from "quasar";
@@ -280,7 +283,6 @@ export default defineComponent({
   components: {
     AmountWarning,
     FlowColumn,
-    UnitToggle,
     FlowDialog,
     BusyLabel,
     FlowFooter,
@@ -323,7 +325,6 @@ export default defineComponent({
     ...mapWritableState(useWalletStore, ["invoiceData"]),
     ...mapWritableState(useMintsStore, [
       "activeUnit",
-      "activeUnitLabel",
       "activeUnitCurrencyMultiplyer",
       "activeMintUrl",
       "mints",

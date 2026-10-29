@@ -61,6 +61,38 @@ test("falls back to a supported unit when selecting a sat-only mint", async ({
   await wallet.mintBolt11(10);
 });
 
+test("switches the ecash unit with the chip under the amount", async ({
+  page,
+}) => {
+  const wallet = new WalletUi(page);
+  await wallet.onboard(MINT_C_URL);
+  await expect(wallet.balance).toHaveAttribute("data-unit", "sat");
+  for (const open of [
+    () => wallet.openReceive("lightning"),
+    () => wallet.openSend("ecash"),
+  ]) {
+    await open();
+    const chip = wallet.unitChip();
+    await expect(chip).toHaveAccessibleName("Unit: Bitcoin, change");
+    await expect(chip).toHaveText("BTC");
+    // The unit no longer sits in the header beside close (and Send's lock).
+    await expect(
+      page.locator(".sheet-column-header:visible .unit-chip")
+    ).toHaveCount(0);
+    await chip.click();
+    await expect(chip).not.toHaveAccessibleName("Unit: Bitcoin, change");
+    await expect(page.locator(".amount-display:visible")).not.toContainText(
+      "₿"
+    );
+    await wallet.closeFullscreenDialog();
+    await expect(wallet.balance).toHaveCount(1);
+    await expect(wallet.balance).not.toHaveAttribute("data-unit", "sat");
+    await page.getByRole("button", { name: "Show BTC balance" }).click();
+    await expect(wallet.balance).toHaveCount(1);
+    await expect(wallet.balance).toHaveAttribute("data-unit", "sat");
+  }
+});
+
 test("changes fiat display currency and amount mode using deterministic prices", async ({
   page,
 }) => {
@@ -89,10 +121,10 @@ test("changes fiat display currency and amount mode using deterministic prices",
   await expect.poll(() => wallet.balanceSats()).toBe(1000);
   await wallet.openSend("ecash");
   await wallet.enterAmount(100);
-  await page.locator(".fiat-icon:visible").click();
+  await wallet.fiatEntrySwap("EUR").click();
   await expect(page.locator(".amount-display:visible")).toHaveCount(1);
   await expect(page.locator(".amount-display:visible")).toContainText("0.08");
-  await page.locator(".fiat-icon:visible").click();
+  await wallet.fiatEntrySwap("EUR").click();
   await expect(page.locator(".amount-display:visible")).toHaveCount(1);
   await expect(page.locator(".amount-display:visible")).toContainText("100");
   await wallet.closeFullscreenDialog();
@@ -202,5 +234,8 @@ test.describe("balance carousel", () => {
     await expect(
       page.getByRole("button", { name: /^Show .* balance$/ })
     ).toHaveCount(0);
+    await wallet.openReceive("lightning");
+    await expect(page.locator(".numeric-keyboard:visible")).toBeVisible();
+    await expect(wallet.unitChip()).toHaveCount(0);
   });
 });

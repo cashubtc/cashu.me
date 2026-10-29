@@ -1448,6 +1448,10 @@ export default {
       },
     },
   },
+  UnitToggle: {
+    label: "単位: {unit}、変更",
+    bitcoin: "ビットコイン",
+  },
   ChooseMint: {
     open_selector: "ミントを選択、現在のミント：{mint}",
     open_selector_empty: "ミントを選択",
@@ -1722,7 +1726,7 @@ export default {
     refresh: "更新",
     settings: "設定",
     backspace: "1文字削除",
-    swap_input_mode: "金額/法定通貨の入力を切り替え",
+    enter_amount_in: "{fiat}で金額を入力",
     fee: "手数料",
   },
   SendPaymentRequest: {

@@ -2,7 +2,8 @@
      limits notice, "Deposits outside {min}–{max} won't be credited." (0, OnchainDepositLimits),
      each shown in context on Receive on-chain. `screen` picks the amount step ("amount") or
      the reusable address QR ("address", where the notice ships today). Static demo data,
-     no stores; copy from existing keys except where a variation notes new English words. -->
+     no stores; copy from existing keys except where a variation notes new English words.
+     Variant 3 shipped in round 92 (OnchainDepositLimits placement="picker"). -->
 <template>
   <ExploreAmountScreen
     :title="$t('CreateInvoiceDialog.onchain_title')"
@@ -16,7 +17,7 @@
     :class="`xd xd--v${variant}`"
   >
     <template #actions>
-      <UnitToggle label="₿" />
+      <ExploreHeaderUnit label="₿" />
     </template>
 
     <template #picker>
@@ -151,7 +152,7 @@ import QrBlock from "src/components/QrBlock.vue";
 import DetailRow from "src/components/ui/DetailRow.vue";
 import QrCopyLine from "src/components/ui/QrCopyLine.vue";
 import TonalChip from "src/components/ui/TonalChip.vue";
-import UnitToggle from "src/components/ui/UnitToggle.vue";
+import ExploreHeaderUnit from "src/design-system/explorations/ExploreHeaderUnit.vue";
 import { isolateLtr } from "src/js/format-currency";
 import ExploreAmountScreen from "src/design-system/explorations/ExploreAmountScreen.vue";
 import ExploreMintPicker from "src/design-system/explorations/ExploreMintPicker.vue";
@@ -178,7 +179,7 @@ export default defineComponent({
     QrBlock,
     QrCopyLine,
     TonalChip,
-    UnitToggle,
+    ExploreHeaderUnit,
   },
   props: {
     variant: { type: Number, default: 0 },

@@ -750,21 +750,27 @@ body.body--light .q-dialog__backdrop {
   position: absolute;
   inset-inline-end: 6px;
 }
-// The unit switch is a bare header action like close, lock and more: the active unit (₿ or $)
-// with a small chevron after it, so it reads as "choose unit" rather than a logo in a disc
-// (council R76) or a second ⇅ amount swap (R77). At least 44px square; wider when the glyph is there.
-.sheet-unit-toggle {
-  min-height: 44px;
-  min-width: 44px;
-  padding: 0 8px;
-  font-size: 16px !important;
-  font-weight: 600;
+// The ecash unit switch on an amount screen (UnitToggle, council R92): a tonal chip on the
+// amount's axis, 12px under the fiat line so it groups with the amount, and a clear gap above
+// the keypad. The text code (BTC, USD) says which unit; the chevron says "choose".
+.unit-chip-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
 }
-.sheet-unit-toggle .q-btn__content {
+.unit-chip-row--start {
+  justify-content: flex-start;
+}
+.unit-chip {
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  min-width: 72px;
+}
+.unit-chip .q-btn__content {
   flex-wrap: nowrap;
-  gap: 2px;
+  gap: 4px;
 }
-.sheet-unit-toggle__swap {
+.unit-chip__chevron {
   opacity: 0.72;
 }
 

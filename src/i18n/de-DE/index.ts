@@ -1468,6 +1468,10 @@ export default {
       },
     },
   },
+  UnitToggle: {
+    label: "Einheit: {unit}, ändern",
+    bitcoin: "Bitcoin",
+  },
   ChooseMint: {
     open_selector: "Mint auswählen, aktuelle Mint: {mint}",
     open_selector_empty: "Mint auswählen",
@@ -1741,7 +1745,7 @@ export default {
     refresh: "Aktualisieren",
     settings: "Einstellungen",
     backspace: "Rücktaste",
-    swap_input_mode: "Zwischen Betrag und Fiat wechseln",
+    enter_amount_in: "Betrag in {fiat} eingeben",
     fee: "Gebühr",
   },
   SendPaymentRequest: {

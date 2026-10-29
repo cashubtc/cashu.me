@@ -36,7 +36,7 @@
                   :size="24"
                   class="xa-fiat__swap text-app-muted"
                   role="button"
-                  :aria-label="$t('common.swap_input_mode')"
+                  :aria-label="$t('common.enter_amount_in', { fiat: 'USD' })"
                 />
               </span>
             </div>

@@ -75,7 +75,7 @@ export default {
     refresh: "Obnovit",
     settings: "Nastavení",
     backspace: "Smazat znak",
-    swap_input_mode: "Přepnout zadávání částky/fiat",
+    enter_amount_in: "Zadat částku v {fiat}",
     fee: "Poplatek",
   },
   MultinutPicker: {
@@ -1529,6 +1529,10 @@ export default {
         label: "Upravit mint",
       },
     },
+  },
+  UnitToggle: {
+    label: "Jednotka: {unit}, změnit",
+    bitcoin: "Bitcoin",
   },
   ChooseMint: {
     open_selector: "Vyberte mint, aktuální mint: {mint}",

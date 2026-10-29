@@ -75,7 +75,7 @@ export default {
     refresh: "Refresh",
     settings: "Settings",
     backspace: "Backspace",
-    swap_input_mode: "Swap amount/fiat input mode",
+    enter_amount_in: "Enter amount in {fiat}",
     fee: "Fee",
   },
   MultinutPicker: {
@@ -1508,6 +1508,10 @@ export default {
         label: "Edit mint",
       },
     },
+  },
+  UnitToggle: {
+    label: "Unit: {unit}, change",
+    bitcoin: "Bitcoin",
   },
   ChooseMint: {
     open_selector: "Select mint, current mint: {mint}",

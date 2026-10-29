@@ -32,6 +32,11 @@ for (const unit of ["usd", "eur"] as const) {
     const create = page.getByTestId("create-payment-request");
     const error = page.getByTestId("onchain-amount-error");
     const symbol = unit === "usd" ? "$" : "€";
+    const sentence = `Deposits outside ${symbol}1.13–${symbol}4.10 won't be credited.`;
+    // The mint picker's helper text says the range before anything is typed.
+    await expect(page.locator(".deposit-limits-hint:visible")).toHaveText(
+      sentence
+    );
     const enterCents = async (cents: number) => {
       await page.locator(".amount-display:visible").click();
       for (let i = 0; i < 3; i++) await page.keyboard.press("Backspace");
@@ -51,8 +56,9 @@ for (const unit of ["usd", "eur"] as const) {
     await create.click();
     await expect(page.locator(".qr-copy-line:visible")).toBeVisible();
     await expect(page.locator(".deposit-limits-warning:visible")).toHaveText(
-      `Deposits outside ${symbol}1.13–${symbol}4.10 won't be credited.`
+      sentence
     );
+    await expect(page.locator(".deposit-limits-hint:visible")).toHaveCount(0);
   });
 }
 
@@ -113,6 +119,7 @@ test("validates new on-chain addresses while preserving quote reuse and history 
   const create = page.getByTestId("create-payment-request");
   const error = page.getByTestId("onchain-amount-error");
   const limitsHint = page.locator(".deposit-limits-warning:visible");
+  const pickerHint = page.locator(".deposit-limits-hint:visible");
   let submissions = 0;
   page.on("request", (request) => {
     if (
@@ -123,6 +130,9 @@ test("validates new on-chain addresses while preserving quote reuse and history 
   });
   await expect(create).toBeDisabled();
   await expect(limitsHint).toHaveCount(0);
+  await expect(pickerHint).toHaveText(
+    "Deposits outside ₿1,000–₿5,000 won't be credited."
+  );
   await expect(page.locator(".qr-container:visible")).toHaveCount(0);
   await wallet.enterAmount(999);
   await expect(error).toContainText("at least ₿1,000");

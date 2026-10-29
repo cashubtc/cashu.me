@@ -1422,6 +1422,10 @@ export default {
       },
     },
   },
+  UnitToggle: {
+    label: "单位：{unit}，更改",
+    bitcoin: "比特币",
+  },
   ChooseMint: {
     open_selector: "选择 Mint，当前 Mint：{mint}",
     open_selector_empty: "选择 Mint",
@@ -1694,7 +1698,7 @@ export default {
     refresh: "刷新",
     settings: "设置",
     backspace: "退格",
-    swap_input_mode: "切换金额/法币输入",
+    enter_amount_in: "以 {fiat} 输入金额",
     fee: "费用",
   },
   SendPaymentRequest: {

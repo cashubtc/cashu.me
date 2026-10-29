@@ -1435,6 +1435,10 @@ export default {
       },
     },
   },
+  UnitToggle: {
+    label: "หน่วย: {unit}, เปลี่ยน",
+    bitcoin: "บิตคอยน์",
+  },
   ChooseMint: {
     open_selector: "เลือก Mint, Mint ปัจจุบัน: {mint}",
     open_selector_empty: "เลือก Mint",
@@ -1708,7 +1712,7 @@ export default {
     refresh: "รีเฟรช",
     settings: "การตั้งค่า",
     backspace: "ลบตัวอักษร",
-    swap_input_mode: "สลับการป้อนจำนวน/สกุลเงินทั่วไป",
+    enter_amount_in: "ป้อนจำนวนเป็น {fiat}",
     fee: "ค่าธรรมเนียม",
   },
   SendPaymentRequest: {

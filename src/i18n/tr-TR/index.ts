@@ -1464,6 +1464,10 @@ export default {
       },
     },
   },
+  UnitToggle: {
+    label: "Birim: {unit}, değiştir",
+    bitcoin: "Bitcoin",
+  },
   ChooseMint: {
     open_selector: "Mint seç, geçerli mint: {mint}",
     open_selector_empty: "Mint seç",
@@ -1737,7 +1741,7 @@ export default {
     refresh: "Yenile",
     settings: "Ayarlar",
     backspace: "Geri sil",
-    swap_input_mode: "Tutar/fiat giriş modunu değiştir",
+    enter_amount_in: "Tutarı {fiat} cinsinden gir",
     fee: "Ücret",
   },
   SendPaymentRequest: {
