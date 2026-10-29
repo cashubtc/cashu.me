@@ -341,6 +341,16 @@ export const DS_ITEMS: DsItem[] = [
     note: "Chinese and Japanese copy that only wraps between words (Intl.Segmenter). Other locales unchanged.",
   },
   {
+    id: "reveal-transition",
+    name: "Reveal transition",
+    group: "layout",
+    tier: "primitive",
+    source: "src/components/ui/RevealTransition.vue",
+    usage: { tag: "RevealTransition" },
+    example: `<RevealTransition appear><QrBlock v-if="showQr" :value="url" /></RevealTransition>`,
+    note: "A block that opens and closes in place (Mint details QR, message of the day, warnings).",
+  },
+  {
     id: "flow-column",
     name: "Flow column",
     group: "layout",

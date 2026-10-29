@@ -740,3 +740,21 @@ body.body--light .activity-row__avatar--in {
   line-height: 22px;
   margin-bottom: 8px;
 }
+
+/* RevealTransition: a block that opens and closes in place. */
+.reveal-enter-active {
+  max-height: 400px;
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.reveal-leave-active {
+  max-height: 400px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.reveal-enter-from,
+.reveal-leave-to {
+  margin-bottom: 0;
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-10px);
+}

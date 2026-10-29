@@ -1170,6 +1170,13 @@
         </div>
       </DsEntry>
       <h2 id="ds-group-layout" class="ds-section">Layout and composition</h2>
+      <DsEntry id="reveal-transition">
+        <!-- Open and closed, as Mint details' QR code toggles. -->
+        <q-btn flat no-caps label="Toggle" @click="revealOpen = !revealOpen" />
+        <RevealTransition>
+          <div v-if="revealOpen" class="q-pa-md">Revealed block</div>
+        </RevealTransition>
+      </DsEntry>
       <DsEntry id="flow-column">
         <div class="ds-frame q-py-sm">
           <FlowColumn class="q-px-md">
@@ -1286,6 +1293,7 @@ import MintCardAction from "src/components/ui/MintCardAction.vue";
 import TonalChip from "src/components/ui/TonalChip.vue";
 import FlowColumn from "src/components/ui/FlowColumn.vue";
 import CjkText from "src/components/ui/CjkText.vue";
+import RevealTransition from "src/components/ui/RevealTransition.vue";
 import FieldLabel from "src/components/ui/FieldLabel.vue";
 import AmountWarning from "src/components/ui/AmountWarning.vue";
 import MetaLine from "src/components/ui/MetaLine.vue";
@@ -1351,6 +1359,7 @@ export default defineComponent({
   name: "DesignSystemPage",
   mixins: [windowMixin],
   components: {
+    RevealTransition,
     FieldLabel,
     AmountWarning,
     MetaLine,
@@ -1468,6 +1477,7 @@ export default defineComponent({
   data() {
     const sortOptions = ["Newest", "Oldest", "Highest rated", "Lowest rated"];
     return {
+      revealOpen: true,
       historySpecimen: [
         {
           dir: "in",

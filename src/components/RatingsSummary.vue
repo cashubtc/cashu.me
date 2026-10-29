@@ -11,8 +11,8 @@
         <q-skeleton
           v-if="skeleton"
           type="rect"
-          width="72px"
-          height="56px"
+          width="80px"
+          height="44px"
           class="ratings-summary__score-skeleton"
         />
         <template v-else>{{ averageDisplay }}</template>

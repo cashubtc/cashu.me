@@ -35,7 +35,7 @@
 
             <!-- QR Code Section (toggleable) -->
             <div class="qr-code-container">
-              <transition appear name="smooth-slide">
+              <RevealTransition appear>
                 <div
                   v-if="showQrCode"
                   class="qr-code-section q-my-md"
@@ -43,7 +43,7 @@
                 >
                   <QrBlock :value="mintData.url" />
                 </div>
-              </transition>
+              </RevealTransition>
             </div>
           </MintIdentityHeader>
 
@@ -58,11 +58,7 @@
             class="mint-descriptions q-mt-lg"
           >
             <!-- MOTD Component -->
-            <transition
-              appear
-              enter-active-class="animated pulse"
-              name="smooth-slide"
-            >
+            <RevealTransition appear enter-active-class="animated pulse">
               <mint-motd-message
                 v-if="mintData.info?.motd && !mintData.motdDismissed"
                 :message="mintData.info.motd"
@@ -70,7 +66,7 @@
                 :dismissed="mintData.motdDismissed"
                 @dismiss="motdDismissed = true"
               />
-            </transition>
+            </RevealTransition>
 
             <div class="mint-description" v-if="mintData.info?.description">
               {{ mintData.info.description }}
@@ -82,7 +78,7 @@
               {{ mintData.info.description_long }}
             </div>
           </div>
-          <transition name="smooth-slide">
+          <RevealTransition>
             <MintMotdMessage
               v-if="mintData.info?.motd && mintData.motdDismissed"
               :message="mintData.info.motd"
@@ -90,7 +86,7 @@
               :dismissed="mintData.motdDismissed"
               @dismiss="dismissMotd"
             />
-          </transition>
+          </RevealTransition>
         </div>
 
         <!-- Section Divider -->
@@ -218,7 +214,7 @@
           <!-- Version -->
           <DetailRow
             v-if="mintData.info?.version"
-            :icon="InfoIcon"
+            :icon="TagIcon"
             :label="$t('MintDetailsDialog.details.version.label')"
             :value="mintData.info.version"
           />
@@ -279,6 +275,7 @@
 </template>
 
 <script lang="ts">
+import RevealTransition from "src/components/ui/RevealTransition.vue";
 import TonalChip from "src/components/ui/TonalChip.vue";
 import { defineComponent } from "vue";
 import { copyToClipboard } from "quasar";
@@ -294,7 +291,7 @@ import MintAuditInfo from "src/components/MintAuditInfo.vue";
 import {
   Coins as CoinsIcon,
   Copy as CopyIcon,
-  Info as InfoIcon,
+  Tag as TagIcon,
   Link as LinkIcon,
   Mail as MailIcon,
   ListChecks as ListChecksIcon,
@@ -313,6 +310,7 @@ export default defineComponent({
   name: "MintDetailsPage",
   mixins: [windowMixin],
   components: {
+    RevealTransition,
     TonalChip,
     SettingsActionRow,
     CopyButton,
@@ -334,7 +332,7 @@ export default defineComponent({
       StarIcon,
       Trash2Icon,
       CoinsIcon,
-      InfoIcon,
+      TagIcon,
       LinkIcon,
       ListChecksIcon,
     };
@@ -614,30 +612,6 @@ export default defineComponent({
   width: 100%;
   display: flex;
   justify-content: center;
-}
-
-.smooth-slide-enter-active {
-  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-  max-height: 350px;
-  margin-bottom: 16px;
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.smooth-slide-leave-active {
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  max-height: 350px;
-  margin-bottom: 16px;
-  opacity: 1;
-}
-
-.smooth-slide-enter-from,
-.smooth-slide-leave-to {
-  max-height: 0;
-  margin-bottom: 0;
-  opacity: 0;
-  transform: translateY(-10px);
-  pointer-events: none;
 }
 
 .nuts-expanded-section {

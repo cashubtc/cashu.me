@@ -48,13 +48,9 @@
     <div v-else-if="mintInfo" class="mint-info">
       <!-- Warning Box -->
       <div style="margin-bottom: 32px">
-        <transition
-          appear
-          enter-active-class="animated pulse"
-          name="smooth-slide"
-        >
+        <RevealTransition appear enter-active-class="animated pulse">
           <MintAuditWarningBox :mint="mintInfo" :swaps="mintSwaps" />
-        </transition>
+        </RevealTransition>
       </div>
       <!-- statistics -->
       <div class="q-pb-none">
@@ -132,6 +128,7 @@
 </template>
 
 <script lang="ts">
+import RevealTransition from "src/components/ui/RevealTransition.vue";
 import PendingDots from "src/components/ui/PendingDots.vue";
 import { Info as InfoIcon, RefreshCw as RefreshCwIcon } from "lucide-vue-next";
 import { markRaw } from "vue";
@@ -175,6 +172,7 @@ import { getShortUrl } from "../js/wallet-helpers";
 export default {
   name: "MintAuditInfo",
   components: {
+    RevealTransition,
     DetailRow,
     RefreshCwIcon,
     PendingDots,

@@ -4,7 +4,8 @@
 <template>
   <q-item clickable v-ripple @click="$emit('click', $event)">
     <q-item-section v-if="icon" avatar>
-      <div class="settings-menu-icon">
+      <!-- A danger row's icon takes the label's red, not the white of every other row. -->
+      <div class="settings-menu-icon" :class="{ 'text-negative': danger }">
         <component :is="icon" :size="20" />
       </div>
     </q-item-section>

@@ -187,6 +187,11 @@ describe("standard elements", () => {
     ).toEqual([]);
   });
 
+  // A block that opens in place is RevealTransition, not another copy of the slide CSS.
+  it("reveals come from RevealTransition", () => {
+    expect(offenders((text) => /smooth-slide/.test(text))).toEqual([]);
+  });
+
   it("row captions are MetaLine parts", () => {
     expect(
       offenders((text) => /:caption="[^"]*['`] · ['`]/.test(text))

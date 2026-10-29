@@ -94,6 +94,8 @@ export default defineComponent({
   padding: 0;
 }
 button.star-rating__star {
+  /* Empty input stars at the muted ink, so the control reads as ready, not disabled. */
+  color: var(--app-text-muted);
   cursor: pointer;
   min-height: 44px;
   min-width: 44px;

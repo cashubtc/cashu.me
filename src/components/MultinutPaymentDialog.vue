@@ -45,11 +45,7 @@
           </div>
 
           <!-- Experimental Warning -->
-          <transition
-            appear
-            enter-active-class="animated pulse"
-            name="smooth-slide"
-          >
+          <RevealTransition appear enter-active-class="animated pulse">
             <div
               v-if="
                 !multinutExperimentalWarningDismissed && !isPaymentInProgress
@@ -73,7 +69,7 @@
                 </template>
               </AppCallout>
             </div>
-          </transition>
+          </RevealTransition>
         </div>
 
         <!-- Mint Selection Section -->
@@ -238,6 +234,7 @@
 </template>
 
 <script lang="ts">
+import RevealTransition from "src/components/ui/RevealTransition.vue";
 import BusyLabel from "src/components/ui/BusyLabel.vue";
 import AmountHeadline from "src/components/ui/AmountHeadline.vue";
 import MintCard from "src/components/MintCard.vue";
@@ -263,6 +260,7 @@ export default defineComponent({
   name: "MultinutPaymentDialog",
   mixins: [windowMixin],
   components: {
+    RevealTransition,
     BusyLabel,
     AmountHeadline,
     MintCard,
@@ -1180,27 +1178,4 @@ export default defineComponent({
 }
 
 /* Smooth slide animation for warning */
-.smooth-slide-enter-active {
-  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-  max-height: 200px;
-  margin-bottom: 16px;
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.smooth-slide-leave-active {
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  max-height: 200px;
-  margin-bottom: 16px;
-  opacity: 1;
-}
-
-.smooth-slide-enter-from,
-.smooth-slide-leave-to {
-  max-height: 0;
-  margin-bottom: 0;
-  opacity: 0;
-  transform: translateY(-10px);
-  pointer-events: none;
-}
 </style>
