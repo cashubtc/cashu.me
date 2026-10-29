@@ -1845,16 +1845,16 @@ export default {
       received: "Ecash reçu",
     },
     qr_speed: "Vitesse QR : {value}",
-    qr_size: "Taille QR : {value}",
+    qr_density: "Densité QR : {value}",
     speed: {
       fast: "Rapide",
       medium: "Moyenne",
       slow: "Lente",
     },
-    size: {
-      large: "Grande",
+    density: {
+      high: "Élevée",
       medium: "Moyenne",
-      small: "Petite",
+      low: "Faible",
     },
     delete_dialog: {
       title: "Supprimer l'ecash",

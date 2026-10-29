@@ -1837,16 +1837,16 @@ export default {
       received: "Ελήφθη ecash",
     },
     qr_speed: "Ταχύτητα QR: {value}",
-    qr_size: "Μέγεθος QR: {value}",
+    qr_density: "Πυκνότητα QR: {value}",
     speed: {
       fast: "Γρήγορη",
       medium: "Μεσαία",
       slow: "Αργή",
     },
-    size: {
-      large: "Μεγάλο",
-      medium: "Μεσαίο",
-      small: "Μικρό",
+    density: {
+      high: "Υψηλή",
+      medium: "Μεσαία",
+      low: "Χαμηλή",
     },
     delete_dialog: {
       title: "Διαγραφή ecash",

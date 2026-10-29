@@ -374,7 +374,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/components/ui/TonalChip.vue",
     usage: { tag: "TonalChip" },
     example: `<TonalChip @click="showQr = !showQr"><template #icon><QrCodeIcon :size="18" /></template>Show QR code</TonalChip>`,
-    note: "A quiet secondary action: tint fill, no edge, leading glyph, 44px.",
+    note: "A quiet secondary action: tint fill, no edge, leading glyph, 44px. QR speed and density sit under the QR they change.",
   },
   {
     id: "mint-card-action",

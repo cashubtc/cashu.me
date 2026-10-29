@@ -158,6 +158,40 @@
               :copied="copyButtonCopied"
               @copy="copyTokens"
             />
+            <!-- The animated QR's own settings sit with the QR they change (owner 2026-10-29,
+                 item 36), not between the details and the footer. -->
+            <div v-if="showAnimatedQR" class="qr-settings row justify-center">
+              <TonalChip @click="changeSpeed">
+                <template #icon><GaugeIcon :size="18" /></template>
+                {{
+                  $t("DisplayTokenComponent.qr_speed", {
+                    value: $t(
+                      `DisplayTokenComponent.speed.${
+                        { F: "fast", M: "medium", S: "slow" }[
+                          fragmentSpeedLabel
+                        ]
+                      }`
+                    ),
+                  })
+                }}
+              </TonalChip>
+              <!-- Density: how much of the token each animated frame carries, not the QR's
+                   size on screen. -->
+              <TonalChip @click="changeSize">
+                <template #icon><Grid3x3Icon :size="18" /></template>
+                {{
+                  $t("DisplayTokenComponent.qr_density", {
+                    value: $t(
+                      `DisplayTokenComponent.density.${
+                        { L: "high", M: "medium", S: "low" }[
+                          fragmentLengthLabel
+                        ]
+                      }`
+                    ),
+                  })
+                }}
+              </TonalChip>
+            </div>
           </div>
         </div>
         <q-card-section class="q-pa-none">
@@ -166,45 +200,6 @@
               :encodedToken="sendData.tokensBase64"
               :payment-request-id="sendData.historyToken?.paymentRequestId"
             />
-          </div>
-          <div class="row justify-center q-pt-sm q-pb-xs">
-            <div
-              class="col-12 q-px-md"
-              style="max-width: 600px; position: relative"
-            >
-              <div class="row justify-center items-center no-wrap">
-                <div class="row no-wrap" style="gap: 8px">
-                  <TonalChip v-if="showAnimatedQR" @click="changeSpeed">
-                    <template #icon><GaugeIcon :size="18" /></template>
-                    {{
-                      $t("DisplayTokenComponent.qr_speed", {
-                        value: $t(
-                          `DisplayTokenComponent.speed.${
-                            { F: "fast", M: "medium", S: "slow" }[
-                              fragmentSpeedLabel
-                            ]
-                          }`
-                        ),
-                      })
-                    }}
-                  </TonalChip>
-                  <TonalChip v-if="showAnimatedQR" @click="changeSize">
-                    <template #icon><ZoomInIcon :size="18" /></template>
-                    {{
-                      $t("DisplayTokenComponent.qr_size", {
-                        value: $t(
-                          `DisplayTokenComponent.size.${
-                            { L: "large", M: "medium", S: "small" }[
-                              fragmentLengthLabel
-                            ]
-                          }`
-                        ),
-                      })
-                    }}
-                  </TonalChip>
-                </div>
-              </div>
-            </div>
           </div>
           <FlowColumn v-if="sendData.paymentRequest" class="q-px-md q-pt-md">
             <PaymentRequestInfo :request="sendData.paymentRequest" />
@@ -325,7 +320,7 @@ import {
   ScanLine as ScanIcon,
   Share as ShareIcon,
   Trash2 as Trash2Icon,
-  ZoomIn as ZoomInIcon,
+  Grid3x3 as Grid3x3Icon,
 } from "lucide-vue-next";
 
 declare const windowMixin: any;
@@ -341,7 +336,7 @@ export default defineComponent({
     LinkIcon,
     Trash2Icon,
     GaugeIcon,
-    ZoomInIcon,
+    Grid3x3Icon,
     EllipsisIcon,
     TokenInformation,
     QrBlock,
@@ -694,6 +689,12 @@ export default defineComponent({
 });
 </script>
 <style scoped>
+/* Wraps to two centred rows in long locales. */
+.qr-settings {
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
 .content-area {
   max-width: var(--app-column);
   width: 100%;

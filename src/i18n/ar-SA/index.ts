@@ -1807,16 +1807,16 @@ export default {
       received: "تم استلام ecash",
     },
     qr_speed: "سرعة QR: {value}",
-    qr_size: "حجم QR: {value}",
+    qr_density: "كثافة QR: {value}",
     speed: {
       fast: "سريعة",
       medium: "متوسطة",
       slow: "بطيئة",
     },
-    size: {
-      large: "كبير",
-      medium: "متوسط",
-      small: "صغير",
+    density: {
+      high: "عالية",
+      medium: "متوسطة",
+      low: "منخفضة",
     },
     delete_dialog: {
       title: "حذف ecash",

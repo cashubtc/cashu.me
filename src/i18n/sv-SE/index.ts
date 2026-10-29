@@ -1825,16 +1825,16 @@ export default {
       received: "Mottagen ecash",
     },
     qr_speed: "QR-hastighet: {value}",
-    qr_size: "QR-storlek: {value}",
+    qr_density: "QR-täthet: {value}",
     speed: {
       fast: "Snabb",
       medium: "Medel",
       slow: "Långsam",
     },
-    size: {
-      large: "Stor",
+    density: {
+      high: "Hög",
       medium: "Medel",
-      small: "Liten",
+      low: "Låg",
     },
     delete_dialog: {
       title: "Radera ecash",

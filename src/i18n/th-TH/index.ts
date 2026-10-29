@@ -1807,16 +1807,16 @@ export default {
       received: "ได้รับ ecash แล้ว",
     },
     qr_speed: "ความเร็ว QR: {value}",
-    qr_size: "ขนาด QR: {value}",
+    qr_density: "ความหนาแน่น QR: {value}",
     speed: {
       fast: "เร็ว",
       medium: "ปานกลาง",
       slow: "ช้า",
     },
-    size: {
-      large: "ใหญ่",
+    density: {
+      high: "สูง",
       medium: "กลาง",
-      small: "เล็ก",
+      low: "ต่ำ",
     },
     delete_dialog: {
       title: "ลบ ecash",

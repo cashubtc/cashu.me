@@ -1852,16 +1852,16 @@ export default {
       received: "Ecash recebido",
     },
     qr_speed: "Velocidade do QR: {value}",
-    qr_size: "Tamanho do QR: {value}",
+    qr_density: "Densidade do QR: {value}",
     speed: {
       fast: "Rápida",
       medium: "Média",
       slow: "Lenta",
     },
-    size: {
-      large: "Grande",
-      medium: "Médio",
-      small: "Pequeno",
+    density: {
+      high: "Alta",
+      medium: "Média",
+      low: "Baixa",
     },
     delete_dialog: {
       title: "Excluir ecash",

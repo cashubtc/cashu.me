@@ -1836,16 +1836,16 @@ export default {
       received: "Ecash alındı",
     },
     qr_speed: "QR hızı: {value}",
-    qr_size: "QR boyutu: {value}",
+    qr_density: "QR yoğunluğu: {value}",
     speed: {
       fast: "Hızlı",
       medium: "Orta",
       slow: "Yavaş",
     },
-    size: {
-      large: "Büyük",
+    density: {
+      high: "Yüksek",
       medium: "Orta",
-      small: "Küçük",
+      low: "Düşük",
     },
     delete_dialog: {
       title: "Ecash'i sil",

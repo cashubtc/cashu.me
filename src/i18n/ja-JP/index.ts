@@ -1822,16 +1822,16 @@ export default {
       received: "ecash 受信済み",
     },
     qr_speed: "QR の速度: {value}",
-    qr_size: "QR のサイズ: {value}",
+    qr_density: "QR の密度: {value}",
     speed: {
       fast: "速い",
       medium: "普通",
       slow: "遅い",
     },
-    size: {
-      large: "大",
+    density: {
+      high: "高",
       medium: "中",
-      small: "小",
+      low: "低",
     },
     delete_dialog: {
       title: "ecash を削除",

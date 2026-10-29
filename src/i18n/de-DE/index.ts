@@ -1842,16 +1842,16 @@ export default {
       received: "Ecash empfangen",
     },
     qr_speed: "QR-Tempo: {value}",
-    qr_size: "QR-Größe: {value}",
+    qr_density: "QR-Dichte: {value}",
     speed: {
       fast: "Schnell",
       medium: "Mittel",
       slow: "Langsam",
     },
-    size: {
-      large: "Groß",
+    density: {
+      high: "Hoch",
       medium: "Mittel",
-      small: "Klein",
+      low: "Niedrig",
     },
     delete_dialog: {
       title: "Ecash löschen",

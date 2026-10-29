@@ -1792,16 +1792,16 @@ export default {
       received: "已收到 ecash",
     },
     qr_speed: "QR 速度：{value}",
-    qr_size: "QR 大小：{value}",
+    qr_density: "QR 密度：{value}",
     speed: {
       fast: "快",
       medium: "中",
       slow: "慢",
     },
-    size: {
-      large: "大",
+    density: {
+      high: "高",
       medium: "中",
-      small: "小",
+      low: "低",
     },
     delete_dialog: {
       title: "删除 ecash",

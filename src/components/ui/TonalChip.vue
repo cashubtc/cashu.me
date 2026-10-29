@@ -1,5 +1,5 @@
 <!-- A quiet secondary action as a tonal pill (src/css/elements.scss .tonal-chip): the tint
-     fill with no edge, a leading glyph and a short label, 44px tall. QR speed and size,
+     fill with no edge, a leading glyph and a short label, 44px tall. QR speed and density (under the QR),
      "Show QR code" on a mint. Pass the glyph in the `icon` slot. -->
 <template>
   <q-btn unelevated rounded no-caps class="tonal-chip">

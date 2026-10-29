@@ -1872,16 +1872,16 @@ export default {
       received: "Přijatý ecash",
     },
     qr_speed: "Rychlost QR: {value}",
-    qr_size: "Velikost QR: {value}",
+    qr_density: "Hustota QR: {value}",
     speed: {
       fast: "Rychlá",
       medium: "Střední",
       slow: "Pomalá",
     },
-    size: {
-      large: "Velká",
+    density: {
+      high: "Vysoká",
       medium: "Střední",
-      small: "Malá",
+      low: "Nízká",
     },
     delete_dialog: {
       title: "Smazat ecash",
