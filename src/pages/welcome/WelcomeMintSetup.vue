@@ -1,7 +1,7 @@
 <template>
   <WelcomeSlideScaffold
     class="mint-setup-slide"
-    :icon="LandmarkIcon"
+    :icon="MintIcon"
     :title="$t('WelcomeMintSetup.title')"
     :text="$t('WelcomeMintSetup.text')"
   >
@@ -95,7 +95,7 @@
 
 <script lang="ts">
 import PendingDots from "src/components/ui/PendingDots.vue";
-import { Landmark as LandmarkIcon, Plus as PlusIcon } from "lucide-vue-next";
+import { Building2 as MintIcon, Plus as PlusIcon } from "lucide-vue-next";
 import WelcomeSlideScaffold from "src/components/ui/WelcomeSlideScaffold.vue";
 import { computed, onMounted } from "vue";
 import { useWelcomeStore } from "src/stores/welcome";
@@ -166,7 +166,7 @@ export default {
     });
 
     return {
-      LandmarkIcon,
+      MintIcon,
       welcome,
       restore,
       mints,

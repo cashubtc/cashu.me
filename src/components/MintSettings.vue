@@ -19,6 +19,8 @@
             clickable
             class="q-mb-md cursor-pointer"
             :active="mint.url == activeMintUrl"
+            :selected="mint.url == activeMintUrl"
+            show-selection-status
             :busy="mint.url == activatingMintUrl"
             :icon-url="getMintIconUrl(mint)"
             :name="mint.nickname || mint.info?.name"
@@ -48,25 +50,14 @@
                 </div>
               </transition>
             </template>
-            <template #status>
-              <AppBadge
-                v-if="mint.url == activeMintUrl"
-                class="mint-card__status"
-                >{{ $t("MintSettings.active_badge") }}</AppBadge
-              >
-            </template>
             <template #action>
-              <q-btn
-                flat
-                round
-                dense
+              <IconButton
                 data-testid="mint-details"
                 class="mint-card-more"
-                :aria-label="$t('MintDetailsDialog.details.title')"
+                :icon="EllipsisVerticalIcon"
+                :label="$t('MintDetailsDialog.details.title')"
                 @click.stop="showMintInfo(mint)"
-              >
-                <EllipsisIcon :size="20" />
-              </q-btn>
+              />
             </template>
             <!-- The card only knows a score from a Nostr discovery scan; reviews load on
                  the ratings page, so without a score it links there instead of claiming
@@ -172,6 +163,7 @@
       <!-- From and To are the wallet's mint picker (icons, balances, the same sheet). -->
       <ChooseMint
         test-id="swap-from"
+        dense
         allow-empty
         :require-active-mint="false"
         :label="$t('MintSettings.swap.inputs.from.label')"
@@ -181,6 +173,7 @@
       />
       <ChooseMint
         test-id="swap-to"
+        dense
         allow-empty
         :require-active-mint="false"
         :label="$t('MintSettings.swap.inputs.to.label')"
@@ -239,12 +232,12 @@ import MintCard from "src/components/MintCard.vue";
 import AppBadge from "src/components/ui/AppBadge.vue";
 import {
   CircleAlert as CircleAlertIcon,
-  Ellipsis as EllipsisIcon,
+  EllipsisVertical as EllipsisVerticalIcon,
   Plus as PlusIcon,
   ScanLine as ScanIcon,
   Search as SearchIcon,
 } from "lucide-vue-next";
-import { ref, defineComponent, onMounted, onBeforeUnmount } from "vue";
+import { ref, defineComponent, markRaw, onMounted, onBeforeUnmount } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore, MintClass } from "src/stores/mints";
@@ -280,7 +273,6 @@ export default defineComponent({
     BusyLabel,
     MintCard,
     AppBadge,
-    EllipsisIcon,
     CircleAlertIcon,
     PlusIcon,
     ScanIcon,
@@ -315,6 +307,7 @@ export default defineComponent({
     });
     return {
       addMintDiv,
+      EllipsisVerticalIcon: markRaw(EllipsisVerticalIcon),
     };
   },
   data: function () {

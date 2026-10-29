@@ -72,8 +72,10 @@ describe("standard elements", () => {
     ],
     [
       "MintCard.vue",
-      /^mint-card(--active|--host-only|__(body|head|foot|foot--meta|balances|plus|action-skeleton))?$/,
+      /^mint-card(--active|--host-only|__(body|head|status|ring|check|foot|foot--meta|balances|plus|action-skeleton))?$/,
     ],
+    // The mint picker's shell, sizes and chevron button are ChooseMint's alone.
+    ["ChooseMint.vue", /^mint-picker(--[\w-]+|__[\w-]+)?$/],
   ])("only %s uses its classes", (owner, pattern) => {
     expect(
       offenders((text) =>
@@ -113,12 +115,12 @@ describe("standard elements", () => {
   });
 
   // Round icon buttons are IconButton: 44px and always labelled (hand-built ones had no name
-  // or a 24px target, council R76-R77). Allowed: the card corner menu, the callout close and
-  // the mint QR toggle, the wallet scan disc and the flow footer's back, which own their
-  // geometry.
+  // or a 24px target, council R76-R77). Allowed: the callout close and the mint QR toggle,
+  // the wallet scan disc and the flow footer's back, which own their geometry. The mint
+  // card's details button is an IconButton too.
   it("round icon buttons use IconButton", () => {
     const allowed =
-      /class="[^"]*\b(mint-card-more|app-callout__close|qr-toggle|wallet-scan-btn|flow-footer__back)\b/;
+      /class="[^"]*\b(app-callout__close|qr-toggle|wallet-scan-btn|flow-footer__back)\b/;
     expect(
       offenders((text) =>
         [...text.matchAll(/<q-btn\b[^>]*>/g)].some(
@@ -274,10 +276,69 @@ describe("standard elements", () => {
     ).toEqual([]);
   });
 
-  it("one pending mark: no spinner outside PendingDots", () => {
+  // The one exception is MintCard's ring while the wallet switches to that mint (owner
+  // 2026-10-29); busy buttons and pending rows keep the dots.
+  it("one pending mark: no spinner outside PendingDots and the mint card's switch", () => {
     expect(
       offenders((text) => /<q-spinner/.test(text)).filter(
-        (file) => !file.endsWith("ui/PendingDots.vue")
+        (file) =>
+          !file.endsWith("ui/PendingDots.vue") && !file.endsWith("MintCard.vue")
+      )
+    ).toEqual([]);
+    const card = readFileSync(join(SRC, "components/MintCard.vue"), "utf8");
+    expect(card.match(/<q-spinner\b[^>]*>/g)).toHaveLength(1);
+    expect(card).toMatch(/<q-spinner\s+v-if="busy"/);
+  });
+
+  // Owner 2026-10-29 (items 1, 13): the selected mint shows a check, not an "Active" badge,
+  // and the card's details button is vertical dots.
+  it("mint cards mark the selected mint with a check and use vertical dots", () => {
+    const settings = readFileSync(
+      join(SRC, "components/MintSettings.vue"),
+      "utf8"
+    );
+    expect(settings).not.toMatch(/MintSettings\.active_badge/);
+    expect(settings).not.toMatch(/#status/);
+    expect(settings).toMatch(/EllipsisVertical as/);
+    expect(settings).not.toMatch(/\bEllipsis as/);
+    expect(
+      offenders(
+        (text) => /<template[^>]*#status/.test(text) && /<MintCard/.test(text)
+      )
+    ).toEqual([]);
+  });
+
+  // Owner 2026-10-29 (items 3, 14): one picker recipe; density alone sets its height and the
+  // chevron is a real, labelled button that says what it opens.
+  it("the mint picker is one recipe with a real chevron button", () => {
+    const picker = readFileSync(join(SRC, "components/ChooseMint.vue"), "utf8");
+    const template = picker.slice(0, picker.indexOf("<script"));
+    // No size or surface chosen by the label.
+    expect(template).not.toMatch(/!label|label \?|"label &&/);
+    expect(template).not.toMatch(/mint-chip/);
+    expect(picker).not.toMatch(/\brounded:/);
+    // The field is not itself a control: one native button, the chevron.
+    expect(template.match(/<button\b/g)).toBeNull();
+    expect(template.match(/<IconButton\b/g)).toHaveLength(1);
+    const trigger = template.slice(template.indexOf("<IconButton"));
+    for (const attr of [
+      'aria-haspopup="listbox"',
+      ':aria-expanded="',
+      ':aria-controls="uid',
+      ":data-testid=\"testId + '-trigger'\"",
+      ':disable="disable"',
+      "@click.stop=",
+    ])
+      expect(trigger).toContain(attr);
+    expect(template).toContain(":id=\"uid + '-options'\"");
+    // Glyph: the rounder Building2, everywhere a mint has no picture.
+    expect(picker).toMatch(/Building2 as MintIcon/);
+  });
+
+  it("the mint glyph is Building2, not the sharp Landmark", () => {
+    expect(
+      offenders(
+        (text) => /\bLandmark\b/.test(text) && /lucide-vue-next/.test(text)
       )
     ).toEqual([]);
   });

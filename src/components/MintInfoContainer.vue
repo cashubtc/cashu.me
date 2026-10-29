@@ -18,7 +18,7 @@
              already covers the image download -->
         <template v-slot:loading />
       </q-img>
-      <LandmarkIcon
+      <MintIcon
         v-else-if="!loading || imgError"
         :size="fallbackIconSize"
         class="mint-avatar-fallback text-app-muted mint-glyph"
@@ -67,12 +67,12 @@
 
 <script lang="ts">
 import PendingDots from "src/components/ui/PendingDots.vue";
-import { Landmark as LandmarkIcon } from "lucide-vue-next";
+import { Building2 as MintIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "MintInfoContainer",
-  components: { PendingDots, LandmarkIcon },
+  components: { PendingDots, MintIcon },
   props: {
     url: { type: String, default: "" },
     name: { type: String, required: false },

@@ -1,6 +1,7 @@
 <!-- A mint as a card (Mints tab, Discover, Restore): the identity row (avatar, name, host)
      with a status and an action on its end, then the holdings and the review line on the
-     same edges. `skeleton` draws the same card with placeholders, so a loading list has
+     same edges. The status is the card's own: a ring while the wallet switches to this mint,
+     a check on the wallet's selected mint (owner 2026-10-29: no dots and "Active" text). `skeleton` draws the same card with placeholders, so a loading list has
      exactly the loaded list's boxes. Styles: src/css/app.scss .mint-card. -->
 <template>
   <q-item
@@ -10,6 +11,8 @@
     active-class="mint-card--active"
     :clickable="clickable && !skeleton"
     :aria-hidden="skeleton || undefined"
+    :aria-busy="busy && !skeleton ? 'true' : undefined"
+    :aria-current="selected && !skeleton ? 'true' : undefined"
   >
     <slot name="overlay" />
     <div class="mint-card__body">
@@ -32,8 +35,31 @@
           class="mint-card__action-skeleton"
         />
         <template v-if="!skeleton">
-          <PendingDots v-if="busy" class="mint-card__status" size="18px" />
-          <slot v-else name="status" />
+          <!-- One fixed 24px cell, so idle, switching and selected never move the name or
+               the menu. The ring wins over the check: never both. -->
+          <span
+            v-if="showSelectionStatus || selected || busy"
+            class="mint-card__status"
+          >
+            <q-spinner
+              v-if="busy"
+              class="mint-card__ring"
+              size="18px"
+              :thickness="4"
+              aria-hidden="true"
+            />
+            <CheckIcon
+              v-else-if="selected"
+              class="mint-card__check"
+              :size="20"
+              aria-hidden="true"
+            />
+            <span role="status" class="visually-hidden">{{
+              busy
+                ? $t("MintSettings.switching_mint", { mint: displayName })
+                : ""
+            }}</span>
+          </span>
           <slot name="action" />
         </template>
       </div>
@@ -65,28 +91,40 @@
 import { defineComponent, type PropType } from "vue";
 import MintInfoContainer from "src/components/MintInfoContainer.vue";
 import MintReviewSummary from "src/components/MintReviewSummary.vue";
-import PendingDots from "src/components/ui/PendingDots.vue";
+import { Check as CheckIcon } from "lucide-vue-next";
+import { getShortUrl } from "src/js/wallet-helpers";
 
 export default defineComponent({
   name: "MintCard",
-  components: { MintInfoContainer, MintReviewSummary, PendingDots },
+  components: { MintInfoContainer, MintReviewSummary, CheckIcon },
   props: {
     url: { type: String, default: "" },
     name: { type: String as PropType<string | null>, default: null },
     iconUrl: { type: String as PropType<string | null>, default: null },
     /** Formatted balances, one per unit held ("₿2,500", "$1.20"). */
     balances: { type: Array as PropType<string[]>, default: () => [] },
-    /** The active or selected mint: the stronger fill. */
+    /** The stronger fill: the wallet's mint, a restore pick, a payment pick. */
     active: { type: Boolean, default: false },
+    /** The wallet's selected mint: the check and aria-current. Restore and payment picks set
+     *  only `active`, since their checkbox already marks them. */
+    selected: { type: Boolean, default: false },
+    /** Reserve the status cell on every card of a switching list (the Mints tab), so the
+     *  name and menu line up whichever card holds the check. */
+    showSelectionStatus: { type: Boolean, default: false },
     clickable: { type: Boolean, default: false },
     /** The mint's info is still loading: the name line waits, the host stays. */
     loading: { type: Boolean, default: false },
-    /** Working on this mint (switching to it, fetching it): the dots take the status slot. */
+    /** The wallet is switching to this mint: a ring takes the status cell. */
     busy: { type: Boolean, default: false },
     unnamedLabel: { type: String, default: "" },
     skeleton: { type: Boolean, default: false },
     /** The skeleton reserves a trailing action (Discover's Add). */
     skeletonAction: { type: Boolean, default: false },
+  },
+  computed: {
+    displayName(): string {
+      return this.name || getShortUrl(this.url) || this.url;
+    },
   },
 });
 </script>

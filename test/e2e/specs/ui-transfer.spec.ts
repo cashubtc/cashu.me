@@ -32,26 +32,22 @@ async function chooseSwap(
   amount: string
 ) {
   await wallet.home("Mints");
-  await wallet.page
-    .getByRole("combobox", { name: "From", exact: true })
-    .click();
+  await wallet.openMintPicker("swap-from");
   await wallet.page
     .getByRole("option")
     .filter({ hasText: new URL(from).host })
     .click();
   await expect(wallet.page.getByRole("listbox")).toHaveCount(0);
-  await wallet.page.getByRole("combobox", { name: "To", exact: true }).click();
+  await wallet.openMintPicker("swap-to");
   await wallet.page
     .getByRole("option")
     .filter({ hasText: new URL(to).host })
     .click();
   await expect(wallet.page.getByRole("listbox")).toHaveCount(0);
-  await expect(
-    wallet.page.getByRole("combobox", { name: "From", exact: true })
-  ).toContainText(new URL(from).host);
-  await expect(
-    wallet.page.getByRole("combobox", { name: "To", exact: true })
-  ).toContainText(new URL(to).host);
+  await expect(wallet.mintPicker("swap-from")).toContainText(
+    new URL(from).host
+  );
+  await expect(wallet.mintPicker("swap-to")).toContainText(new URL(to).host);
   await wallet.page.getByRole("spinbutton", { name: /Amount/ }).fill(amount);
   await expect(
     wallet.page.getByRole("spinbutton", { name: /Amount/ })
@@ -91,9 +87,7 @@ test("rejects a swap larger than the source balance and remains usable", async (
       .first()
   ).toBeVisible();
   await expect.poll(() => wallet.balanceSats()).toBe(10);
-  await expect(
-    page.getByRole("combobox", { name: "From", exact: true })
-  ).toContainText("Select a mint");
+  await expect(wallet.mintPicker("swap-from")).toContainText("Select a mint");
   await wallet.mintCard(MINT_A_URL).click();
   await wallet.sendEcash(1);
   await expect.poll(() => wallet.balanceSats()).toBe(9);
@@ -155,9 +149,7 @@ test("retries a swap after the destination quote service recovers", async ({
   const swap = page.getByRole("button", { name: "Swap", exact: true });
   await swap.click();
   await failedQuote;
-  await expect(
-    page.getByRole("combobox", { name: "From", exact: true })
-  ).toContainText("Select a mint");
+  await expect(wallet.mintPicker("swap-from")).toContainText("Select a mint");
   await expect.poll(() => wallet.balanceSats()).toBe(100);
   await expect(
     wallet.mintCard(MINT_B_URL).locator(".currency-unit-text")

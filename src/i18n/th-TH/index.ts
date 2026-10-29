@@ -1041,6 +1041,7 @@ export default {
     },
     error_badge: "ข้อผิดพลาด",
     active_badge: "ใช้งานอยู่",
+    switching_mint: "กำลังสลับไปที่ {mint}",
     reviews_text: "รีวิว",
     no_reviews_yet: "ยังไม่มีรีวิว",
     discover_mints_button: "สำรวจ Mints",
@@ -1434,6 +1435,8 @@ export default {
     },
   },
   ChooseMint: {
+    open_selector: "เลือก Mint, Mint ปัจจุบัน: {mint}",
+    open_selector_empty: "เลือก Mint",
     title: "เลือก Mint",
     badge_mint_error_text: "ข้อผิดพลาด",
     badge_option_mint_error_text: "@:ChooseMint.badge_mint_error_text",

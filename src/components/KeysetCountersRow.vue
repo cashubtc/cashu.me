@@ -19,7 +19,7 @@
     <div v-for="group in groups" :key="group.url" class="keysets__group">
       <div class="keysets__mint">
         <IconCircle size="sm" class="keysets__avatar" :src="group.iconUrl">
-          <LandmarkIcon :size="16" />
+          <MintIcon :size="16" />
         </IconCircle>
         <span class="ellipsis">{{ group.name }}</span>
         <span aria-hidden="true">·</span>
@@ -57,7 +57,7 @@
 
 <script lang="ts">
 import { defineComponent, type PropType } from "vue";
-import { Landmark as LandmarkIcon, Plus as PlusIcon } from "lucide-vue-next";
+import { Building2 as MintIcon, Plus as PlusIcon } from "lucide-vue-next";
 import BottomSheet from "src/components/BottomSheet.vue";
 import IconButton from "src/components/ui/IconButton.vue";
 import IconCircle from "src/components/ui/IconCircle.vue";
@@ -76,7 +76,7 @@ export default defineComponent({
     BottomSheet,
     IconButton,
     IconCircle,
-    LandmarkIcon,
+    MintIcon,
     SettingsActionRow,
   },
   props: {

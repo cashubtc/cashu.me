@@ -117,7 +117,7 @@
           <IconCircle size="xs" src="icons/icon-128x128.png" />
           <IconCircle size="sm" src="icons/icon-128x128.png" />
           <IconCircle size="lg" src="icons/icon-128x128.png" />
-          <IconCircle size="sm" src="missing.png" :icon="LandmarkIcon" />
+          <IconCircle size="sm" src="missing.png" :icon="MintIcon" />
         </div>
       </DsEntry>
       <DsEntry id="icons">
@@ -135,6 +135,35 @@
               <component :is="lucideComponent(ic.name)" :size="20" />
               <span class="ds-icons__name">{{ ic.name }}</span>
               <span class="ds-icons__count">{{ ic.files.length }}</span>
+            </div>
+          </div>
+          <!-- The mint glyph (owner 2026-10-29, item 12: the old one was too sharp). Building2
+               ships: rounded corners, no pediment, the least detail at 20px. -->
+          <div class="ds-icons__head q-mt-lg">Mint glyph · 20, 24, 36px</div>
+          <div class="ds-mint-glyphs">
+            <div
+              v-for="glyph in mintGlyphs"
+              :key="glyph.name"
+              class="ds-mint-glyphs__row"
+              :class="{ 'ds-mint-glyphs__row--chosen': glyph.chosen }"
+            >
+              <span class="ds-mint-glyphs__name">{{ glyph.name }}</span>
+              <template v-for="size in [20, 24, 36]" :key="size">
+                <svg
+                  v-if="!glyph.icon"
+                  :width="size"
+                  :height="size"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M4 10v7h3v-7H4zm6 0v7h3v-7h-3zM2 22h19v-3H2v3zm14-12v7h3v-7h-3zm-4.5-9L2 6v2h19V6l-9.5-5z"
+                  />
+                </svg>
+                <component :is="glyph.icon" v-else :size="size" />
+              </template>
+              <IconCircle v-if="glyph.icon" size="sm" :icon="glyph.icon" />
             </div>
           </div>
           <template v-if="materialIcons.length">
@@ -393,12 +422,32 @@
         </q-list>
       </DsEntry>
       <DsEntry id="mint-picker">
-        <ChooseMint test-id="ui-kit-mint" />
+        <!-- Normal (the wallet) and dense (flows and forms) are one recipe at two heights; a
+             label adds a line in either. dry-run: picking here doesn't switch the wallet. -->
+        <div class="text-app-muted q-mb-sm">Normal</div>
+        <ChooseMint test-id="ui-kit-mint" dry-run />
+        <ChooseMint
+          test-id="ui-kit-mint-labelled"
+          dry-run
+          :require-active-mint="false"
+          label="Mint"
+        />
+        <div class="text-app-muted q-mb-sm">Dense</div>
+        <ChooseMint test-id="ui-kit-mint-dense" dense dry-run />
         <ChooseMint
           test-id="ui-kit-from"
+          dense
           allow-empty
           :require-active-mint="false"
           label="From"
+        />
+        <ChooseMint
+          test-id="ui-kit-mint-disabled"
+          dense
+          dry-run
+          disable
+          :require-active-mint="false"
+          label="To"
         />
       </DsEntry>
       <DsEntry id="amount-entry">
@@ -578,6 +627,7 @@
           />
           <ChooseMint
             test-id="ui-kit-stack-page"
+            dense
             allow-empty
             :require-active-mint="false"
             label="From"
@@ -643,6 +693,7 @@
           />
           <ChooseMint
             test-id="ui-kit-stack-sheet"
+            dense
             allow-empty
             :require-active-mint="false"
             label="From"
@@ -867,19 +918,23 @@
       </DsEntry>
       <h2 id="ds-group-containers" class="ds-section">Cards and containers</h2>
       <DsEntry id="mint-cards">
+        <!-- The Mints tab's states (a ring while switching, a check on the selected mint, the
+             vertical details button), then Discover's Add and Restore's checkbox, which set
+             only the fill. -->
         <MintCard
           v-for="card in cards"
           :key="card.url"
           class="q-mb-md"
           clickable
-          :active="card.active"
+          :active="card.active || card.check"
+          :selected="card.selected"
+          :show-selection-status="card.installed"
+          :busy="card.busy"
           :name="card.name"
+          :icon-url="card.iconUrl"
           :url="card.url"
           :balances="card.balances"
         >
-          <template v-if="card.active" #status>
-            <AppBadge class="mint-card__status">Active</AppBadge>
-          </template>
           <template #action>
             <q-checkbox
               v-if="card.check"
@@ -888,17 +943,15 @@
               class="restore-mint-check"
               aria-label="Select"
             />
-            <q-btn
+            <MintCardAction v-else-if="card.add" label="Add">
+              <template #icon><PlusIcon :size="16" /></template>
+            </MintCardAction>
+            <IconButton
               v-else
-              flat
-              round
-              dense
               class="mint-card-more"
-              :aria-label="card.add ? 'Add mint' : 'Details'"
-            >
-              <PlusIcon v-if="card.add" :size="20" />
-              <EllipsisIcon v-else :size="20" />
-            </q-btn>
+              label="Details"
+              :icon="EllipsisVerticalIcon"
+            />
           </template>
           <template #meta>
             <MintReviewSummary
@@ -999,7 +1052,7 @@
             @click="toast('info')"
           />
           <DetailRow
-            :icon="LandmarkIcon"
+            :icon="MintIcon"
             label="Mint"
             value="mint.example.com"
             action
@@ -1695,6 +1748,9 @@ import {
   Info as InfoIcon,
   KeyRound as KeyRoundIcon,
   Landmark as LandmarkIcon,
+  Building2 as MintIcon,
+  Vault as VaultIcon,
+  EllipsisVertical as EllipsisVerticalIcon,
   Lock as LockIcon,
   Menu as MenuIcon,
   Palette as PaletteIcon,
@@ -1819,6 +1875,9 @@ export default defineComponent({
       HistoryIcon: markRaw(HistoryIcon),
       KeyRoundIcon: markRaw(KeyRoundIcon),
       LandmarkIcon: markRaw(LandmarkIcon),
+      MintIcon: markRaw(MintIcon),
+      VaultIcon: markRaw(VaultIcon),
+      EllipsisVerticalIcon: markRaw(EllipsisVerticalIcon),
       InfoIcon: markRaw(InfoIcon),
       SearchIcon: markRaw(SearchIcon),
       ZapIcon: markRaw(ZapIcon),
@@ -2045,14 +2104,38 @@ export default defineComponent({
           balances: ["₿2,289"],
           average: 4.5,
           count: 2,
+          installed: true,
           active: true,
+          selected: true,
         },
         {
           url: "https://mint-c.example.com",
-          name: "Mint C",
+          name: "Mint C (switching to it)",
           balances: ["₿500", "$0.50"],
           average: null,
           count: 0,
+          installed: true,
+          busy: true,
+        },
+        {
+          url: "https://selected-busy.example.com",
+          name: "Selected and switching: the ring wins",
+          balances: ["₿21"],
+          average: null,
+          count: 0,
+          installed: true,
+          active: true,
+          selected: true,
+          busy: true,
+        },
+        {
+          url: "https://a-very-long-mint-host-name.example.com",
+          name: "A mint with a very long name that has to end in an ellipsis",
+          iconUrl: "missing.png",
+          balances: ["₿0"],
+          average: 3.5,
+          count: 4,
+          installed: true,
         },
         {
           url: "https://lantern.example.com",
@@ -2070,6 +2153,12 @@ export default defineComponent({
           count: 0,
           check: true,
         },
+      ],
+      mintGlyphs: [
+        { name: "account_balance (main)", icon: null, chosen: false },
+        { name: "Landmark", icon: markRaw(LandmarkIcon), chosen: false },
+        { name: "Building2 (ships)", icon: markRaw(MintIcon), chosen: true },
+        { name: "Vault", icon: markRaw(VaultIcon), chosen: false },
       ],
       rows: [
         {
@@ -2091,7 +2180,7 @@ export default defineComponent({
       details: [
         { name: "Fee paid", value: "₿1", icon: ReceiptTextIcon },
         { name: "Paid at", value: "Oct 27, 2026, 8:35 AM", icon: ClockIcon },
-        { name: "Mint", value: "mint.example.com", icon: LandmarkIcon },
+        { name: "Mint", value: "mint.example.com", icon: MintIcon },
       ],
     };
   },
@@ -2445,6 +2534,19 @@ body.body--light .ds-light-variant--l3 {
 }
 .ds-icons {
   width: 100%;
+}
+.ds-mint-glyphs__row {
+  align-items: center;
+  color: var(--app-text-muted);
+  display: flex;
+  gap: 16px;
+  min-height: 48px;
+}
+.ds-mint-glyphs__row--chosen {
+  color: var(--app-text);
+}
+.ds-mint-glyphs__name {
+  width: 180px;
 }
 .ds-icons__head {
   color: var(--app-text-muted);

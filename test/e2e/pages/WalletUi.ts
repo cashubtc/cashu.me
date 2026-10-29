@@ -45,8 +45,27 @@ export class WalletUi extends WalletPage {
 
   async activateMint(url: string) {
     await this.home("Mints");
-    await this.mintCard(url).click();
-    await expect(this.mintCard(url)).toHaveClass(/q-item--active/);
+    const card = this.mintCard(url);
+    await card.click();
+    // The switch ends with the ring gone and the check on this card (owner 2026-10-29).
+    await expect(card).not.toHaveAttribute("aria-busy", "true");
+    await expect(card).toHaveAttribute("aria-current", "true");
+    await expect(card.locator(".mint-card__check")).toBeVisible();
+    await expect(card).toHaveClass(/q-item--active/);
+  }
+
+  /** A mint picker's field (its name and balance), by its test id. */
+  mintPicker(testId = "choose-mint") {
+    return this.page.getByTestId(testId).filter({ visible: true });
+  }
+
+  /** Opens a mint picker's sheet with its chevron button, the picker's one control. */
+  async openMintPicker(testId = "choose-mint") {
+    await this.page
+      .getByTestId(`${testId}-trigger`)
+      .filter({ visible: true })
+      .click();
+    await expect(this.page.getByRole("listbox")).toBeVisible();
   }
 
   async details(url: string) {

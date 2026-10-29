@@ -32,6 +32,7 @@
       <FlowColumn class="q-px-md">
         <ChooseMint
           v-if="!showNoMintForMethodError"
+          dense
           :filter-payment-method="payPaymentMethod"
           :filter-mint-operation="payMintOperation"
         />

@@ -32,8 +32,7 @@
                 $t('Settings.lightning_address.mint.choose_placeholder')
               "
               :show-balances="false"
-              :dense="true"
-              :rounded="true"
+              dense
               :require-active-mint="false"
             />
           </q-item-section>

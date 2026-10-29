@@ -1055,6 +1055,7 @@ export default {
     },
     error_badge: "Fel",
     active_badge: "Aktiv",
+    switching_mint: "Byter till {mint}",
     reviews_text: "recension | recensioner",
     no_reviews_yet: "Inga recensioner ännu",
     discover_mints_button: "Upptäck mints",
@@ -1450,6 +1451,8 @@ export default {
     },
   },
   ChooseMint: {
+    open_selector: "Välj mint, nuvarande mint: {mint}",
+    open_selector_empty: "Välj mint",
     title: "Välj en mint",
     badge_mint_error_text: "Fel",
     badge_option_mint_error_text: "@:ChooseMint.badge_mint_error_text",

@@ -1092,6 +1092,7 @@ export default {
     },
     error_badge: "Erro",
     active_badge: "Ativa",
+    switching_mint: "Mudando para {mint}",
     reviews_text: "avaliação | avaliações",
     no_reviews_yet: "Ainda sem avaliações",
     discover_mints_button: "Buscar mints",
@@ -1513,6 +1514,8 @@ export default {
     },
   },
   ChooseMint: {
+    open_selector: "Selecionar mint, mint atual: {mint}",
+    open_selector_empty: "Selecionar mint",
     title: "Selecione um mint",
     placeholder: "Selecione um mint",
     available_text: "neste mint",

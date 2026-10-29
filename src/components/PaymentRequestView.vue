@@ -50,7 +50,7 @@
           <DetailRow
             action
             data-testid="pr-mint"
-            :icon="LandmarkIcon"
+            :icon="MintIcon"
             :label="$t('QuoteInformation.mint')"
             :value="mintLabel"
             :placeholder="!requestMint"
@@ -192,7 +192,7 @@ import QrCopyLine from "src/components/ui/QrCopyLine.vue";
 import {
   Banknote as BanknoteIcon,
   Coins as CoinsIcon,
-  Landmark as LandmarkIcon,
+  Building2 as MintIcon,
 } from "lucide-vue-next";
 import { defineComponent, type PropType } from "vue";
 import { mapState } from "pinia";
@@ -246,7 +246,7 @@ export default defineComponent({
   },
   emits: ["change"],
   setup() {
-    return { BanknoteIcon, CoinsIcon, LandmarkIcon };
+    return { BanknoteIcon, CoinsIcon, MintIcon };
   },
   data() {
     return {

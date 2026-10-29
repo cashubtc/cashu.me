@@ -1066,6 +1066,7 @@ export default {
     },
     error_badge: "Σφάλμα",
     active_badge: "Ενεργό",
+    switching_mint: "Εναλλαγή σε {mint}",
     reviews_text: "κριτική | κριτικές",
     no_reviews_yet: "Δεν υπάρχουν κριτικές ακόμα",
     discover_mints_button: "Ανακαλύψτε mints",
@@ -1461,6 +1462,8 @@ export default {
     },
   },
   ChooseMint: {
+    open_selector: "Επιλογή mint, τρέχον mint: {mint}",
+    open_selector_empty: "Επιλογή mint",
     title: "Επιλέξτε ένα mint",
     badge_mint_error_text: "Σφάλμα",
     badge_option_mint_error_text: "@:ChooseMint.badge_mint_error_text",

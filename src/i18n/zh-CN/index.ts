@@ -1031,6 +1031,7 @@ export default {
     },
     error_badge: "错误",
     active_badge: "当前",
+    switching_mint: "正在切换到 {mint}",
     reviews_text: "条评价",
     no_reviews_yet: "暂无评论",
     discover_mints_button: "发现 Mint",
@@ -1421,6 +1422,8 @@ export default {
     },
   },
   ChooseMint: {
+    open_selector: "选择 Mint，当前 Mint：{mint}",
+    open_selector_empty: "选择 Mint",
     title: "选择 Mint",
     badge_mint_error_text: "错误",
     badge_option_mint_error_text: "@:ChooseMint.badge_mint_error_text",

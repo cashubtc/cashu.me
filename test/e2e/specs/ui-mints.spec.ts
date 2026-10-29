@@ -258,3 +258,112 @@ test("the audit retry keeps its row and shows it is busy", async ({ page }) => {
   release!();
   await expect(retry).not.toHaveAttribute("aria-busy", "true");
 });
+
+// Owner 2026-10-29 (items 1, 13): a ring while switching, a check on the selected card, and
+// vertical details dots that open details without switching.
+test("switching shows a ring, then the check moves; details don't switch", async ({
+  page,
+}) => {
+  const wallet = new WalletUi(page);
+  await wallet.onboard(MINT_A_URL);
+  await wallet.addMint(MINT_B_URL, "Secondary");
+  await wallet.home("Mints");
+  const a = wallet.mintCard(MINT_A_URL);
+  const b = wallet.mintCard(MINT_B_URL);
+  await expect(b).toHaveAttribute("aria-current", "true");
+  await expect(page.locator(".mint-card__check")).toHaveCount(1);
+  await expect(page.getByText("Active", { exact: true })).toHaveCount(0);
+
+  // Hold the mint's replies so the switch stays visibly in progress.
+  let release = () => {};
+  const held = new Promise<void>((resolve) => (release = resolve));
+  await page.route(`${MINT_A_URL}/v1/**`, async (route) => {
+    await held;
+    await route.continue();
+  });
+  const head = await a.locator(".mint-card__head").boundingBox();
+  await a.click();
+  await expect(a).toHaveAttribute("aria-busy", "true");
+  await expect(a.locator(".mint-card__ring")).toBeVisible();
+  await expect(a.locator(".mint-card__check")).toHaveCount(0);
+  await expect(a.getByRole("status")).toHaveText(/Switching to/);
+  // The ring takes the reserved cell: nothing in the head moves.
+  expect(await a.locator(".mint-card__head").boundingBox()).toEqual(head);
+  release();
+  await page.unroute(`${MINT_A_URL}/v1/**`);
+  await expect(a).not.toHaveAttribute("aria-busy", "true");
+  await expect(a).toHaveAttribute("aria-current", "true");
+  await expect(a.locator(".mint-card__check")).toBeVisible();
+  await expect(b).not.toHaveAttribute("aria-current", "true");
+  await expect(page.locator(".mint-card__check")).toHaveCount(1);
+
+  // The details button: vertical dots, a 44px target clear of the status cell.
+  const details = b.getByTestId("mint-details");
+  await expect(details.locator(".lucide-ellipsis-vertical-icon")).toBeVisible();
+  const box = await details.boundingBox();
+  expect(box?.width).toBeGreaterThanOrEqual(44);
+  expect(box?.height).toBeGreaterThanOrEqual(44);
+  const status = await b.locator(".mint-card__status").boundingBox();
+  expect(status && box && status.x + status.width <= box.x).toBe(true);
+  await details.click();
+  await expect(page).toHaveURL(/mintdetails/);
+  await wallet.home("Mints");
+  await expect(a).toHaveAttribute("aria-current", "true");
+});
+
+// Owner 2026-10-29 (items 3, 14): one picker recipe at two heights, and the chevron as the
+// picker's one real button: keyboard opens it and closing returns focus there.
+test("mint pickers share one recipe and open from a real chevron button", async ({
+  page,
+}) => {
+  const wallet = new WalletUi(page);
+  await wallet.onboard(MINT_A_URL);
+  await wallet.addMint(MINT_B_URL, "Secondary");
+  await wallet.home();
+  const normal = wallet.mintPicker("wallet-mint-chip");
+  const normalTrigger = page.getByTestId("wallet-mint-chip-trigger");
+  await expect(normalTrigger).toHaveAttribute("aria-haspopup", "listbox");
+  await expect(normalTrigger).toHaveAttribute("aria-expanded", "false");
+  await expect(normal.locator("button")).toHaveCount(1);
+  const normalBox = await normal.boundingBox();
+  expect(normalBox?.height).toBeGreaterThanOrEqual(72);
+  const trigger = await normalTrigger.boundingBox();
+  expect(trigger?.width).toBeGreaterThanOrEqual(44);
+  expect(trigger?.height).toBeGreaterThanOrEqual(44);
+
+  await normalTrigger.focus();
+  await page.keyboard.press("Enter");
+  const listbox = page.getByRole("listbox");
+  await expect(listbox).toBeVisible();
+  await expect(normalTrigger).toHaveAttribute("aria-expanded", "true");
+  await expect(listbox).toHaveAttribute(
+    "id",
+    (await normalTrigger.getAttribute("aria-controls")) ?? "missing"
+  );
+  await page.keyboard.press("Escape");
+  await expect(listbox).toBeHidden();
+  await expect(normalTrigger).toBeFocused();
+
+  // Dense (the swap form): the same field and avatar, only shorter.
+  await wallet.home("Mints");
+  const dense = wallet.mintPicker("swap-from");
+  const denseBox = await dense.boundingBox();
+  expect(denseBox?.height).toBeGreaterThanOrEqual(56);
+  expect(denseBox?.height).toBeLessThan(normalBox?.height ?? 0);
+  const style = (sel: string) =>
+    page
+      .getByTestId(sel)
+      .filter({ visible: true })
+      .evaluate((el) => {
+        const cs = getComputedStyle(el);
+        return [cs.borderTopColor, cs.borderRadius, cs.backgroundColor];
+      });
+  await wallet.home();
+  const normalStyle = await style("wallet-mint-chip");
+  await wallet.home("Mints");
+  expect(await style("swap-from")).toEqual(normalStyle);
+  await dense.click();
+  await expect(page.getByRole("listbox")).toBeVisible();
+  await page.locator(".bottom-sheet-close:visible").click();
+  await expect(page.getByRole("listbox")).toBeHidden();
+});

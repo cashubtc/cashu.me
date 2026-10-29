@@ -124,6 +124,7 @@
       v-if="activeMintUrl"
       class="q-mt-md wallet-mint-picker"
       test-id="wallet-mint-chip"
+      :dense="false"
       :show-balances="mints.length > 1"
     />
   </div>

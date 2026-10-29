@@ -51,7 +51,7 @@
       <!-- Mint URL -->
       <DetailRow
         v-if="!hideMint"
-        :icon="LandmarkIcon"
+        :icon="MintIcon"
         :label="$t('TokenInformation.mint')"
         value-class="detail-value--inline"
       >
@@ -96,7 +96,7 @@ import {
   Banknote as BanknoteIcon,
   CircleDollarSign as CircleDollarSignIcon,
   FileText as FileTextIcon,
-  Landmark as LandmarkIcon,
+  Building2 as MintIcon,
   Lock as LockIcon,
   MessageCircle as MessageCircleIcon,
   ReceiptText as ReceiptTextIcon,
@@ -116,7 +116,7 @@ export default defineComponent({
       BanknoteIcon,
       CircleDollarSignIcon,
       FileTextIcon,
-      LandmarkIcon,
+      MintIcon,
       LockIcon,
       MessageCircleIcon,
       ReceiptTextIcon,

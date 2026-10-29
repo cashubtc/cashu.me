@@ -1041,6 +1041,7 @@ export default {
     },
     error_badge: "خطأ",
     active_badge: "نشطة",
+    switching_mint: "جارٍ التبديل إلى {mint}",
     reviews_text: "مراجعة | مراجعات",
     no_reviews_yet: "لا توجد مراجعات بعد",
     discover_mints_button: "اكتشف المِنْتات",
@@ -1434,6 +1435,8 @@ export default {
     },
   },
   ChooseMint: {
+    open_selector: "اختر مِنْت، المِنْت الحالي: {mint}",
+    open_selector_empty: "اختر مِنْت",
     title: "حدد مِنْتًا",
     badge_mint_error_text: "خطأ",
     badge_option_mint_error_text: "@:ChooseMint.badge_mint_error_text",

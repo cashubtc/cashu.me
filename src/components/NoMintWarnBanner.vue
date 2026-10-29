@@ -2,7 +2,7 @@
   <!-- The standard empty state (src/css/elements.scss): no mint yet, two ways forward. -->
   <EmptyState
     class="q-mx-md q-my-lg"
-    :icon="LandmarkIcon"
+    :icon="MintIcon"
     :title="$t('NoMintWarnBanner.title')"
     :text="$t('NoMintWarnBanner.subtitle')"
   >
@@ -27,7 +27,7 @@
   </EmptyState>
 </template>
 <script lang="ts">
-import { Landmark as LandmarkIcon } from "lucide-vue-next";
+import { Building2 as MintIcon } from "lucide-vue-next";
 import { defineComponent, markRaw } from "vue";
 import EmptyState from "src/components/ui/EmptyState.vue";
 import { getShortUrl } from "src/js/wallet-helpers";
@@ -49,7 +49,7 @@ export default defineComponent({
     activeMintUrl: String,
   },
   data() {
-    return { LandmarkIcon: markRaw(LandmarkIcon) };
+    return { MintIcon: markRaw(MintIcon) };
   },
   computed: {
     ...mapWritableState(useUiStore, [

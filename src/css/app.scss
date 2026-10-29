@@ -492,7 +492,7 @@ body[data-theme] .welcome-surface,
   background: var(--app-welcome-bg) !important;
 }
 
-// Mint picker chip, shared by the wallet home and every amount sheet.
+// The select field chip (SheetSelect); the mint picker has its own recipe (.mint-picker).
 .mint-chip {
   align-items: center;
   background: var(--app-tint);
@@ -542,10 +542,6 @@ body[data-theme] .welcome-surface,
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.mint-chip__balance {
-  color: var(--app-text-muted);
-  font-variant-numeric: tabular-nums;
 }
 
 /* Toggles (the Material 3 switch): on = a filled primary track with a large on-primary thumb on
@@ -777,13 +773,9 @@ body.body--light .q-dialog__backdrop {
   opacity: 0.72;
 }
 
-// The mint picker as a labelled full-width field (Lightning address mint, swap From/To,
-// currency): label over value, matching the outlined inputs around it, 12px corners included.
-// Inside: the field's 16px text inset, a 20px leading icon with 12px to the text, and the
-// label and value as one centred 2-line block (the 16px glyph and 6px
-// gap crowded the text).
-// Picker fields are drawn exactly like the outlined text fields: no
-// fill, the field edge colour, 56px tall, the edge brightening on hover as an input's does.
+// SheetSelect's field (currency, language): label over value, matching the outlined inputs
+// around it, 12px corners included. Drawn exactly like the outlined text fields: the field
+// fill and edge, 56px tall, the edge brightening on hover as an input's does.
 .mint-chip--field {
   background: var(--app-field-fill);
   border-color: var(--app-field-edge);
@@ -800,64 +792,14 @@ body.body--light .q-dialog__backdrop {
     background: var(--app-field-fill);
     border-color: var(--app-field-edge-hover);
   }
-  .mint-chip--card:hover {
-    background: var(--app-card-fill-active);
-    border-color: transparent;
-  }
-}
-// Pressed is a clear step past hover.
-.mint-chip--card:active {
-  background: color-mix(in srgb, var(--app-text) 20%, transparent);
 }
 .mint-chip--field > :last-child {
   margin-inline-start: auto;
   padding-inline-start: 8px;
 }
-.mint-chip--field .mint-chip__field-text {
-  flex: 1;
-}
-// The mint's own icon in a round slot (a landmark glyph on a tint when it has none):
-// 40px in both the compact field and the card.
-
-// The wallet's mint selector is a filled card, not an outlined field: an edge made it read
-// as a text input (council, R44-R68). Forms keep the outlined compact field.
-.mint-chip--card {
-  background: var(--app-card-fill);
-  border-color: transparent;
-  gap: 12px;
-  min-height: 72px;
-  padding: 12px 12px 12px 16px;
-  padding-inline: 16px 12px;
-}
-.mint-chip--card .mint-chip__name {
-  font-weight: 500;
-}
-.mint-chip__caption {
-  color: var(--app-text-muted);
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 20px;
-}
-// The compact field's balance sits at the end, before the chevron, as a quiet value.
-.mint-chip--field .mint-chip__balance {
-  flex: none;
-  font-size: 14px;
-  font-weight: 400;
-  margin-inline-start: auto;
-}
-.mint-chip--field .mint-chip__balance + .mint-chip__icon {
-  margin-inline-start: 4px;
-}
-.mint-chip--field > .mint-chip__icon:first-child,
-.mint-chip--field > .q-avatar:first-child {
-  height: 20px;
-  width: 20px;
-}
-.mint-chip--field .mint-chip__field-text {
-  min-width: 0;
-}
 .mint-chip__field-text {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 2px;
   min-width: 0;
@@ -872,6 +814,108 @@ body.body--light .q-dialog__backdrop {
   font-size: 16px;
   font-weight: 400;
   line-height: 22px;
+}
+
+// The mint picker (ChooseMint), one recipe in two sizes (owner 2026-10-29, item 3): the
+// outlined field's fill and edge, a 40px avatar, the name (and its balance) and a 44px chevron
+// button on the end. Dense only shortens it (72px to 56px); a label only adds a line over the
+// name, as an outlined field's label does. Larger text grows it rather than clipping.
+.mint-picker {
+  align-items: center;
+  background: var(--app-field-fill);
+  border: 1px solid var(--app-field-edge);
+  border-radius: var(--app-radius-lg);
+  box-sizing: border-box;
+  color: var(--app-text);
+  column-gap: 12px;
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 44px;
+  min-height: 72px;
+  min-width: 0;
+  padding-block: 12px;
+  padding-inline: 16px 8px;
+  text-align: start;
+  width: 100%;
+}
+.mint-picker--dense {
+  min-height: 56px;
+  padding-block: 4px;
+}
+@media (hover: hover) {
+  .mint-picker:not(.mint-picker--disabled):hover {
+    border-color: var(--app-field-edge-hover);
+  }
+}
+// Pressing the field fills it a step past hover; it doesn't shrink (a whole field collapsing
+// reads as broken). The chevron button sinks as every button does.
+.mint-picker:not(.mint-picker--disabled):active {
+  background: var(--app-tint-strong);
+}
+// One focus stop (the chevron), ringed as the whole field, like a focused input.
+.mint-picker:has(.mint-picker__trigger:focus-visible) {
+  outline: 2px solid var(--app-accent);
+  outline-offset: 2px;
+}
+.mint-picker .mint-picker__trigger:focus-visible {
+  outline: none !important;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .mint-picker {
+    transition: background-color 0.12s ease, border-color 0.12s ease;
+  }
+}
+.mint-picker__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.mint-picker__label {
+  color: var(--app-text-muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+}
+.mint-picker__name {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 22px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mint-picker--empty .mint-picker__name {
+  color: var(--app-text-muted);
+  font-weight: 400;
+}
+.mint-picker__caption {
+  color: var(--app-text-muted);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+}
+.mint-picker__trigger {
+  color: var(--app-text-muted);
+}
+// The chevron turns up while the sheet is open; the button itself never rotates.
+.mint-picker__chevron {
+  stroke-width: 2.25;
+}
+.mint-picker--open .mint-picker__chevron {
+  transform: rotate(180deg);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .mint-picker__chevron {
+    transition: transform 0.12s ease;
+  }
+}
+.mint-picker--disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+// The field already dims; the button inside doesn't dim a second time.
+.mint-picker--disabled .q-btn.mint-picker__trigger {
+  opacity: 1 !important;
 }
 
 // Text for screen readers only.
@@ -1362,10 +1406,7 @@ html[dir="rtl"] .q-field__append {
   line-height: 1.45 !important;
 }
 
-// A mint field with nothing chosen yet reads as a placeholder; a disabled one dims.
-.mint-chip--empty .mint-chip__name {
-  color: var(--app-text-muted);
-}
+// A disabled select field dims.
 .mint-chip:disabled {
   cursor: default;
   opacity: 0.5;
@@ -1466,9 +1507,9 @@ html[dir="rtl"] .q-field__append {
 .rating-star {
   color: var(--app-text);
 }
-/* The active card is marked by its accent border and an "Active" badge; its text stays ink,
-   so raw accent colours never carry body text on a dark card (classic and salvador
-   missed AA). */
+/* The active card is marked by its selected edge and fill, and the wallet's mint by a check;
+   its text stays ink, so raw accent colours never carry body text on a dark card (classic
+   and salvador missed AA). */
 
 body .mint-card.q-item--active {
   color: var(--app-text);
@@ -1484,7 +1525,7 @@ body .mint-card {
   box-shadow: var(--app-card-shadow);
 }
 // The active or selected card: a stronger fill and the shared selected edge, beside its
-// control (the Active badge, or the restore checkbox). The fill alone read as too faint a
+// control (the check on the wallet's mint, or the restore checkbox). The fill alone read as too faint a
 // difference in both modes (council R69-R70).
 body .mint-card.mint-card--active {
   background: var(--app-card-fill-active);
@@ -1513,22 +1554,42 @@ body.body--light .mint-card.mint-card--active {
   gap: 4px;
   min-width: 0;
 }
-/* The Active badge (24px) and the menu (40px) both centre on the mint name's line. */
+/* The selection status: one fixed 24px cell on the name's line, holding the switching ring
+   (18px) or the selected check (20px), or nothing, so switching never moves the name or the
+   menu (owner 2026-10-29: a ring while switching, a check on the selected mint). Ink, like
+   every glyph: 4.5:1 on every card fill. */
 .mint-card__status {
+  align-items: center;
+  color: var(--app-text);
+  display: inline-flex;
   flex: none;
-  margin-inline-end: 4px;
-  margin-top: -2px;
+  height: 24px;
+  justify-content: center;
+  margin: 0;
+  min-width: 24px;
+  width: 24px;
 }
-// 44px target; the negative margins keep the glyph where the 40px button had it.
+// Reduced motion: the ring stops as a three-quarter arc, still recognisably busy, and the
+// spoken status still announces the switch.
+@media (prefers-reduced-motion: reduce) {
+  .mint-card__ring,
+  .mint-card__ring .path {
+    animation: none !important;
+  }
+  // Quasar's keyframes own the dash; without them its 1px dash reads as a dot.
+  .mint-card__ring .path {
+    stroke-dasharray: 90, 200 !important;
+    stroke-dashoffset: 0 !important;
+  }
+}
+// The details button (IconButton, vertical dots): a 44px target; the negative margins keep
+// the glyph where the 40px button had it and the head one line tall.
 .mint-card-more {
-  color: var(--app-text-muted);
   flex: none;
   height: 44px;
-  margin: -12px -16px -12px 0;
+  margin-block: -12px;
+  margin-inline: 0 -16px;
   width: 44px;
-}
-html[dir="rtl"] .mint-card-more {
-  margin: -12px 0 -12px -16px;
 }
 /* A mint card's labelled action (MintCardAction: Discover's Add, Restore's Restore): a
    compact 36px text button (outlined pills dominated a list of five, council R77). */

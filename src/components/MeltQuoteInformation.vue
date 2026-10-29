@@ -79,7 +79,7 @@
 
     <DetailRow
       v-if="mintDisplay"
-      :icon="LandmarkIcon"
+      :icon="MintIcon"
       :label="$t('QuoteInformation.mint')"
       :value="mintDisplay"
     />
@@ -106,7 +106,7 @@ import {
   Fingerprint as FingerprintIcon,
   Hash as HashIcon,
   Activity as ActivityIcon,
-  Landmark as LandmarkIcon,
+  Building2 as MintIcon,
   Network as NetworkIcon,
   ReceiptText as ReceiptTextIcon,
 } from "lucide-vue-next";
@@ -136,7 +136,7 @@ export default defineComponent({
       FingerprintIcon,
       HashIcon,
       ActivityIcon,
-      LandmarkIcon,
+      MintIcon,
       NetworkIcon,
       ReceiptTextIcon,
     };

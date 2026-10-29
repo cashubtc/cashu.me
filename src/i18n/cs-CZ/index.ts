@@ -1095,6 +1095,7 @@ export default {
     },
     error_badge: "Chyba",
     active_badge: "Aktivní",
+    switching_mint: "Přepínání na {mint}",
     reviews_text: "recenze | recenze",
     no_reviews_yet: "Žádné recenze",
     discover_mints_button: "Objevovat minty",
@@ -1529,6 +1530,8 @@ export default {
     },
   },
   ChooseMint: {
+    open_selector: "Vyberte mint, aktuální mint: {mint}",
+    open_selector_empty: "Vyberte mint",
     title: "Vyberte mint",
     placeholder: "Vyberte mint",
     available_text: "v tomto mintu",

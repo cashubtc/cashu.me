@@ -64,6 +64,7 @@
       </div>
       <ChooseMint
         v-model="selectedMintUrl"
+        dense
         :dry-run="true"
         :exclude-mint="sourceMint"
       />

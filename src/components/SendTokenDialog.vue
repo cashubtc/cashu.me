@@ -29,7 +29,7 @@
 
       <!-- Mint selection -->
       <FlowColumn class="q-px-md q-mb-sm">
-        <ChooseMint />
+        <ChooseMint dense />
         <AppCallout
           v-if="paymentRequestMintWarning"
           variant="danger"

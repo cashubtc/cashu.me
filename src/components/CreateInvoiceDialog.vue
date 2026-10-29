@@ -23,6 +23,7 @@
       <!-- Mint selection -->
       <FlowColumn class="q-px-md q-mb-sm">
         <ChooseMint
+          dense
           :filter-payment-method="mintFilterMethod"
           filter-mint-operation="mint"
           :disable="createInvoiceButtonBlocked"

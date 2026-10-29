@@ -1068,6 +1068,7 @@ export default {
     },
     error_badge: "Hata",
     active_badge: "Etkin",
+    switching_mint: "Geçiliyor: {mint}",
     reviews_text: "yorum | yorum",
     no_reviews_yet: "Henüz yorum yok",
     discover_mints_button: "Mint'leri keşfet",
@@ -1463,6 +1464,8 @@ export default {
     },
   },
   ChooseMint: {
+    open_selector: "Mint seç, geçerli mint: {mint}",
+    open_selector_empty: "Mint seç",
     title: "Bir mint seçin",
     badge_mint_error_text: "Hata",
     badge_option_mint_error_text: "@:ChooseMint.badge_mint_error_text",

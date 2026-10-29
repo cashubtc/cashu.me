@@ -1072,6 +1072,7 @@ export default {
     },
     error_badge: "Fehler",
     active_badge: "Aktiv",
+    switching_mint: "Wechsel zu {mint}",
     reviews_text: "Bewertung | Bewertungen",
     no_reviews_yet: "Noch keine Bewertungen",
     discover_mints_button: "Mints entdecken",
@@ -1467,6 +1468,8 @@ export default {
     },
   },
   ChooseMint: {
+    open_selector: "Mint auswählen, aktuelle Mint: {mint}",
+    open_selector_empty: "Mint auswählen",
     title: "Wählen Sie eine Mint",
     badge_mint_error_text: "Fehler",
     badge_option_mint_error_text: "@:ChooseMint.badge_mint_error_text",

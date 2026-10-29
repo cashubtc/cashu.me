@@ -11,7 +11,7 @@
     />
     <EmptyState
       v-else
-      :icon="LandmarkIcon"
+      :icon="MintIcon"
       :title="$t('MintRatings.no_mint_url')"
     />
   </SettingsPageShell>
@@ -19,7 +19,7 @@
 
 <script lang="ts">
 import { defineComponent, markRaw } from "vue";
-import { Landmark as LandmarkIcon } from "lucide-vue-next";
+import { Building2 as MintIcon } from "lucide-vue-next";
 import EmptyState from "src/components/ui/EmptyState.vue";
 import MintRatingsComponent from "src/components/MintRatingsComponent.vue";
 import SettingsPageShell from "src/pages/settings/SettingsPageShell.vue";
@@ -39,7 +39,7 @@ export default defineComponent({
       reviews: [],
       allowCreateReview: true,
       mintInfo: null,
-      LandmarkIcon: markRaw(LandmarkIcon),
+      MintIcon: markRaw(MintIcon),
     };
   },
   methods: {

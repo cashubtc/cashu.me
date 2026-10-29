@@ -97,7 +97,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "lucide-vue-next (read from every import in src)",
     example: `import { Zap as ZapIcon } from "lucide-vue-next";
 <ZapIcon :size="20" />`,
-    note: "Every icon in the app, in one grid: Lucide line icons only (Quasar's own icons use the Lucide set in src/js/lucide-icons.ts, and a guard test rejects Material names). One icon per idea: Coins amount and ecash, CircleDollarSign unit, Banknote fiat, ReceiptText fee, Zap Lightning, Bitcoin on-chain, Landmark mint, FileText payment request, Hash ids and addresses, Network network, ClipboardPaste paste, Copy copy, Trash2 delete, RefreshCw refresh, ArchiveRestore restore, X close, CircleCheck / CircleAlert / TriangleAlert / Info for success, error, warning and info.",
+    note: "Every icon in the app, in one grid: Lucide line icons only (Quasar's own icons use the Lucide set in src/js/lucide-icons.ts, and a guard test rejects Material names). One icon per idea: Coins amount and ecash, CircleDollarSign unit, Banknote fiat, ReceiptText fee, Zap Lightning, Bitcoin on-chain, Building2 mint (rounder than Landmark at 20px; owner 2026-10-29), FileText payment request, Hash ids and addresses, Network network, ClipboardPaste paste, Copy copy, Trash2 delete, RefreshCw refresh, ArchiveRestore restore, X close, CircleCheck / CircleAlert / TriangleAlert / Info for success, error, warning and info.",
   },
   {
     id: "machine-text",
@@ -208,7 +208,10 @@ export const DS_ITEMS: DsItem[] = [
     tier: "feature",
     source: "src/components/ChooseMint.vue",
     usage: { tag: "ChooseMint" },
-    example: `<ChooseMint />`,
+    example: `<ChooseMint :dense="false" />  <!-- the wallet -->
+<ChooseMint dense />  <!-- flows and forms -->
+<ChooseMint dense allow-empty label="From" />`,
+    note: "One recipe at two heights: normal 72px (the wallet) and dense 56px (Send, Receive, Pay, forms). Both are the outlined field with a 40px avatar, the name and its balance, and the chevron as a real 44px button (aria-haspopup listbox, aria-expanded, aria-controls its sheet). The label is a line over the name and never changes the size. The field is a pointer target only; the chevron is the one focus stop.",
   },
   {
     id: "amount-entry",
@@ -443,11 +446,13 @@ export const DS_ITEMS: DsItem[] = [
     tier: "composite",
     source: "src/components/MintCard.vue",
     usage: { tag: "MintCard" },
-    example: `<MintCard :name="mint.name" :url="mint.url" :balances="['₿2,289']" active>
-  <template #status>…</template><template #action>…</template><template #meta>…</template>
+    example: `<MintCard :name="mint.name" :url="mint.url" :balances="['₿2,289']"
+  active selected show-selection-status :busy="switching">
+  <template #action><IconButton class="mint-card-more" :icon="EllipsisVerticalIcon" … /></template>
+  <template #meta>…</template>
 </MintCard>
 <MintCard skeleton />`,
-    note: "Mints, Discover and Restore. The skeleton is the same card with placeholders in its boxes.",
+    note: "Mints, Discover and Restore. `active` is the stronger fill (the wallet's mint, a restore or payment pick); `selected` is the wallet's mint only: a check and aria-current. While the wallet switches to a card, a ring takes the same 24px cell (the one place a ring is used; busy buttons keep the dots). The details button is vertical dots. The skeleton is the same card with placeholders in its boxes.",
   },
   {
     id: "mint-identity-header",
@@ -644,7 +649,7 @@ export const DS_ITEMS: DsItem[] = [
     example: `<PendingDots />
 <template #loading><BusyLabel>Creating</BusyLabel></template>
 <MintCard skeleton />  <ActivityRow skeleton />  <ReviewItem skeleton />`,
-    note: "Anything pending or busy shows the three dots, never a ring or a pulse; a busy button's label is BusyLabel (dots before the text). Loading lists render their own rows with skeleton set, so nothing moves when data arrives.",
+    note: "Anything pending or busy shows the three dots, never a pulse; the one ring is a mint card while the wallet switches to it (owner 2026-10-29). A busy button's label is BusyLabel (dots before the text). Loading lists render their own rows with skeleton set, so nothing moves when data arrives.",
   },
   {
     id: "busy-label",

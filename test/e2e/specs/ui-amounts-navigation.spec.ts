@@ -100,7 +100,7 @@ test("switching the mint in a payment dialog replaces the old quote", async ({
   });
   await wallet.openSend("lightning");
   await wallet.quoteRequest(invoice);
-  await page.getByTestId("choose-mint").filter({ visible: true }).click();
+  await wallet.openMintPicker();
   const newQuote = page.waitForResponse(
     (r) =>
       r.url() === `${MINT_B_URL}/v1/melt/quote/bolt11` &&

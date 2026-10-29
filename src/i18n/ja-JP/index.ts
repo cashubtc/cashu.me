@@ -1051,6 +1051,7 @@ export default {
     },
     error_badge: "エラー",
     active_badge: "使用中",
+    switching_mint: "{mint} に切り替え中",
     reviews_text: "件のレビュー",
     no_reviews_yet: "まだレビューはありません",
     discover_mints_button: "ミントを発見",
@@ -1447,6 +1448,8 @@ export default {
     },
   },
   ChooseMint: {
+    open_selector: "ミントを選択、現在のミント: {mint}",
+    open_selector_empty: "ミントを選択",
     title: "ミントを選択",
     badge_mint_error_text: "エラー",
     badge_option_mint_error_text: "@:ChooseMint.badge_mint_error_text",

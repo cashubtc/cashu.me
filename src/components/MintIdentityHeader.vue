@@ -8,7 +8,7 @@
       size="lg"
       class="q-mb-sm"
       :src="info?.icon_url"
-      :icon="LandmarkIcon"
+      :icon="MintIcon"
     />
     <div class="mint-header__text">
       <div class="mint-name">{{ displayName }}</div>
@@ -24,14 +24,14 @@
 import IconCircle from "src/components/ui/IconCircle.vue";
 import { defineComponent } from "vue";
 import { mapState } from "pinia";
-import { Landmark as LandmarkIcon } from "lucide-vue-next";
+import { Building2 as MintIcon } from "lucide-vue-next";
 import { useMintsStore } from "src/stores/mints";
 
 export default defineComponent({
   name: "MintIdentityHeader",
   components: { IconCircle },
   setup() {
-    return { LandmarkIcon };
+    return { MintIcon };
   },
   props: {
     url: { type: String, required: true },

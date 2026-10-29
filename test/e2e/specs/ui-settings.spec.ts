@@ -226,7 +226,7 @@ for (const directNavigation of [false, true]) {
       await expect(page.locator("input[readonly]")).toHaveValue(/@npub.cash$/, {
         timeout: 5000,
       });
-      await page.getByTestId("choose-mint").click();
+      await wallet.openMintPicker();
       await page
         .getByRole("option")
         .filter({ hasText: "Address mint" })
