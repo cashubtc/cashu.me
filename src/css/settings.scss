@@ -41,23 +41,6 @@
   margin-bottom: 24px;
 }
 
-.settings-section-header {
-  padding: 0;
-  margin-bottom: 10px;
-}
-
-/* One section heading style, shared with the section divider: 14px semibold ink. */
-// A settings-menu group's name, spaced like a section header above its card.
-.settings-menu-heading {
-  margin-bottom: 10px;
-}
-
-.settings-section-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--app-text);
-}
-
 // The page's description under its title: one step above section captions (15 vs 14), so
 // the order is title, page description, section title, section description.
 .settings-page-caption {
@@ -68,13 +51,6 @@
 
 // A section's description reads at the row-description size and colour (14/20, muted):
 // at 12px subtle it was smaller and dimmer than the rows it introduces.
-.settings-section-caption {
-  font-size: 14px;
-  line-height: 20px;
-  color: var(--app-text-muted);
-  margin-top: 4px;
-}
-
 /* Card-style groups (settings menu, about page, section content) */
 .settings-card,
 .settings-menu-group {

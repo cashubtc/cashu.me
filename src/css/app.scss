@@ -231,13 +231,15 @@ body,
 
 // Section label centred between two hairlines, in small capitals, as in the original design
 // (Mints tab: Swap and Add mint, mint details, multi-mint payments).
+// Settings groups and page sections alike: the heading sits 12px above its card.
 .section-divider-block {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 .section-divider {
-  display: flex;
-  align-items: center;
-  width: 100%;
+  color: var(--app-text);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: start;
 }
 // The description under a section label: the row-description size and colour, on the
 // text edge.
@@ -245,28 +247,8 @@ body,
   color: var(--app-text-muted);
   font-size: 14px;
   line-height: 20px;
-  margin: 12px 0 0;
+  margin: 4px 0 0;
   text-align: start;
-}
-.divider-line {
-  flex: 1;
-  height: 1px;
-  background-color: var(--app-border);
-}
-.divider-text {
-  padding: 0 12px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--app-text-muted);
-}
-// Chinese, Japanese and Korean have no capitals, and tracking only spreads the characters.
-.divider-text:lang(zh),
-.divider-text:lang(ja),
-.divider-text:lang(ko) {
-  letter-spacing: 0;
-  text-transform: none;
 }
 // Captions read evenly at body sizes without Quasar's positive tracking.
 .q-item__label--caption,
@@ -878,7 +860,6 @@ body .q-slider__track {
 // Captions and body copy break evenly, without a lone word or glyph on the last line, in
 // every locale (Arabic and Chinese captions ended on a single word or character).
 .q-item__label--caption,
-.settings-section-caption,
 .text-caption,
 .text-body2,
 p {
@@ -1427,6 +1408,11 @@ html[dir="rtl"] .mint-card-more {
 }
 /* A mint card's labelled action (MintCardAction: Discover's Add, Restore's Restore): a
    compact 36px text button (outlined pills dominated a list of five, council R77). */
+.mint-card__action-skeleton {
+  border-radius: 999px;
+  flex: none;
+  margin-block-start: -4px;
+}
 .mint-card-add {
   flex: none;
   margin-block-start: -6px;

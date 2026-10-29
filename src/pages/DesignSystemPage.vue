@@ -96,7 +96,7 @@
         <div class="ui-kit-body">
           Body text, 15px. Enter the URL of a Cashu mint.
         </div>
-        <div class="settings-section-title">Section title</div>
+        <SectionDivider label="Section title" />
         <div class="text-caption text-app-muted">
           Caption text for rows and help.
         </div>
@@ -633,6 +633,8 @@
           </template>
         </MintCard>
         <MintCard skeleton />
+        <!-- Discover's loading card keeps its Add button's footprint. -->
+        <MintCard skeleton skeleton-action />
       </DsEntry>
       <DsEntry id="mint-identity-header">
         <MintIdentityHeader

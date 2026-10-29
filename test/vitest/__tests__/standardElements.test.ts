@@ -63,13 +63,10 @@ describe("standard elements", () => {
     ["ui/MintCardAction.vue", /^mint-card-add(__icon)?$/],
     ["ui/TonalChip.vue", /^(tonal-chip(__icon)?|qr-control-chip)$/],
     ["ui/FlowFooter.vue", /^(bottom-panel|flow-footer__(bar|col))$/],
-    [
-      "ui/SectionDivider.vue",
-      /^(section-divider(-block|__caption)?|divider-(line|text))$/,
-    ],
+    ["ui/SectionDivider.vue", /^section-divider(-block|__caption)?$/],
     [
       "MintCard.vue",
-      /^mint-card(--active|--host-only|__(body|head|foot|foot--meta|balances|plus))?$/,
+      /^mint-card(--active|--host-only|__(body|head|foot|foot--meta|balances|plus|action-skeleton))?$/,
     ],
   ])("only %s uses its classes", (owner, pattern) => {
     expect(
@@ -169,6 +166,15 @@ describe("standard elements", () => {
     expect(
       offenders((text) => /name="wobble"/.test(text)).filter(
         (file) => !file.endsWith("ui/AmountWarning.vue")
+      )
+    ).toEqual([]);
+  });
+
+  // One section heading: SectionDivider, on settings pages and Mint details alike.
+  it("section headings come from SectionDivider", () => {
+    expect(
+      offenders((text) =>
+        /class="[^"]*settings-section-(title|header|caption)/.test(text)
       )
     ).toEqual([]);
   });

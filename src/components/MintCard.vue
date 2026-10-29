@@ -23,6 +23,15 @@
           :unnamed-label="unnamedLabel"
           :skeleton="skeleton"
         />
+        <!-- The action's footprint while loading, so the loaded Add button doesn't push in
+             (council R86). -->
+        <q-skeleton
+          v-if="skeleton && skeletonAction"
+          type="rect"
+          width="64px"
+          height="32px"
+          class="mint-card__action-skeleton"
+        />
         <template v-if="!skeleton">
           <PendingDots v-if="busy" class="mint-card__status" size="18px" />
           <slot v-else name="status" />
@@ -77,6 +86,8 @@ export default defineComponent({
     busy: { type: Boolean, default: false },
     unnamedLabel: { type: String, default: "" },
     skeleton: { type: Boolean, default: false },
+    /** The skeleton reserves a trailing action (Discover's Add). */
+    skeletonAction: { type: Boolean, default: false },
   },
 });
 </script>

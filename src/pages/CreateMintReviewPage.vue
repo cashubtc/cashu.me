@@ -25,12 +25,16 @@
         <div v-if="!rating" class="review-rating-hint">
           {{ $t("CreateMintReview.inputs.rating.hint") }}
         </div>
+        <!-- Labelled above, like Rating: one label pattern for both fields (council R86). -->
+        <div class="text-subtitle2 text-weight-medium q-mb-sm">
+          {{ $t("CreateMintReview.inputs.review.label") }}
+        </div>
         <q-input
           v-model="review"
           type="textarea"
           autogrow
           outlined
-          :label="$t('CreateMintReview.inputs.review.label')"
+          :aria-label="$t('CreateMintReview.inputs.review.label')"
           :disable="prefilling || submitting"
           class="review-input"
           :input-style="{ minHeight: '96px' }"

@@ -75,7 +75,7 @@
              moves as results arrive. -->
         <div class="q-pt-sm">
           <div v-for="n in 5" :key="n" class="q-mb-md">
-            <MintCard skeleton />
+            <MintCard skeleton skeleton-action />
           </div>
         </div>
       </q-list>

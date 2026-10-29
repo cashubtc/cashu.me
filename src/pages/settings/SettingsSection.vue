@@ -1,20 +1,20 @@
 <template>
   <div class="settings-section">
-    <div v-if="title || caption" class="settings-section-header">
-      <div v-if="title" class="settings-section-title">
-        {{ title }}
-        <slot name="badge" />
-      </div>
-      <AppCallout
-        v-if="caption && warning"
-        variant="warning"
-        class="q-mt-sm"
-        :text="caption"
-      />
-      <div v-else-if="caption" class="settings-section-caption">
-        {{ caption }}
-      </div>
-    </div>
+    <!-- The one section heading (SectionDivider), as on Mint details; a warning caption is a
+         callout under it. -->
+    <SectionDivider
+      v-if="title || caption"
+      :label="title"
+      :caption="warning ? '' : caption"
+    >
+      <template v-if="$slots.badge" #badge><slot name="badge" /></template>
+    </SectionDivider>
+    <AppCallout
+      v-if="caption && warning"
+      variant="warning"
+      class="q-mb-md"
+      :text="caption"
+    />
     <!-- flat: a lone field sits on the page under its header, without a card around it. -->
     <div v-if="flat" class="settings-section-flat">
       <slot />
@@ -28,10 +28,11 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import AppCallout from "src/components/AppCallout.vue";
+import SectionDivider from "src/components/ui/SectionDivider.vue";
 
 export default defineComponent({
   name: "SettingsSection",
-  components: { AppCallout },
+  components: { AppCallout, SectionDivider },
   props: {
     flat: {
       type: Boolean,

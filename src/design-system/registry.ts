@@ -76,7 +76,7 @@ export const DS_ITEMS: DsItem[] = [
     group: "foundations",
     tier: "token",
     source:
-      "app.scss .amount-headline, .sheet-title · settings.scss .settings-section-title",
+      "app.scss .amount-headline, .sheet-title · SectionDivider (section heading)",
     usage: { className: "sheet-title" },
     example: `<div class="sheet-title">Receive</div>`,
   },

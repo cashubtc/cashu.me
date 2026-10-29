@@ -1,12 +1,12 @@
-<!-- A section label centred between two hairlines, in small capitals, with the section's
-     one-line description under it when given (styled by the global .section-divider rules in
+<!-- A section label on the text edge, in the settings section heading style (centred
+     small capitals between hairlines read as a second heading system, council R83-R86), with
+     the section's one-line description under it when given (styled by the global .section-divider rules in
      app.scss). It owns its gap to the content below, so every section starts the same way. -->
 <template>
   <div class="section-divider-block">
     <div v-if="label" class="section-divider">
-      <div class="divider-line"></div>
-      <div class="divider-text">{{ label }}</div>
-      <div class="divider-line"></div>
+      {{ label }}
+      <slot name="badge" />
     </div>
     <p v-if="caption" class="section-divider__caption">{{ caption }}</p>
   </div>
