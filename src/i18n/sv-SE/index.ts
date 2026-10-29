@@ -652,6 +652,10 @@ export default {
         label: "@:global.actions.receive.label",
       },
     },
+    panel: {
+      expand: "Visa historik och mints",
+      collapse: "Dölj historik och mints",
+    },
     tabs: {
       history: {
         label: "Historik",
@@ -688,6 +692,7 @@ export default {
   },
   BalanceView: {
     total_label: "Totalt saldo",
+    show_balance: "Visa saldo i {unit}",
     mintUrl: {
       label: "Mint",
     },

@@ -25,8 +25,9 @@
           v-model="activeUnit"
           transition-prev="slide-right"
           transition-next="slide-left"
-          :swipeable="hasMultipleBalanceUnits"
+          :swipeable="false"
           :animated="hasMultipleBalanceUnits"
+          data-testid="wallet-balance-carousel"
           :height="$q.screen.width < 390 ? '118px' : '88px'"
           control-color="primary"
           class="balance-carousel bg-transparent rounded-borders"
@@ -93,7 +94,9 @@
             type="button"
             class="balance-unit-dot"
             :class="{ 'balance-unit-dot--active': activeUnit === unit }"
-            :aria-label="`Show ${unitLabel(unit)} balance`"
+            :aria-label="
+              $t('BalanceView.show_balance', { unit: unitLabel(unit) })
+            "
             :aria-pressed="activeUnit === unit"
             :tabindex="hasMultipleBalanceUnits ? 0 : -1"
             @click="setActiveUnit(unit)"
@@ -342,19 +345,26 @@ export default defineComponent({
   z-index: 1;
 }
 .balance-carousel {
-  overflow: hidden;
-  overscroll-behavior-x: contain;
+  overflow: clip;
+  overscroll-behavior-x: none;
   touch-action: pan-y;
 }
-/* Quasar wraps each slide in a ".q-panel.scroll" (overflow: auto), so a balance taller than
-   the carousel could be scrolled by hand and showed a scrollbar. Slides only move by swipe
-   or the unit dots. */
-.balance-carousel :deep(.q-panel) {
-  overflow: hidden !important;
+/* The balance never moves by hand (owner item 25): no swipe, and Quasar's ".q-panel.scroll"
+   (overflow: auto) is clipped so a wheel or trackpad can't scroll a slide. Slides move only
+   when a unit dot (or a unit change) selects them, with the carousel's own animation. */
+.balance-carousel :deep(.q-carousel__slides-container),
+.balance-carousel :deep(.q-panel),
+.balance-carousel :deep(.q-carousel__slide) {
+  overflow: clip !important;
   scrollbar-width: none;
 }
 .balance-carousel :deep(.q-panel)::-webkit-scrollbar {
   display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .balance-carousel :deep([class*="q-transition--slide-"]) {
+    transition: none !important;
+  }
 }
 .balance-slide {
   align-items: flex-start;

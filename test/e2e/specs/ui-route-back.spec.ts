@@ -51,7 +51,10 @@ async function expectWallet(page: Page) {
 
 for (const motion of ["no-preference", "reduce"] as const) {
   test.describe(`Back renders its destination (${motion} motion)`, () => {
+    // The context option alone left prefers-reduced-motion unmatched in Chromium here, so the
+    // page emulates it too.
     test.use({ reducedMotion: motion });
+    test.beforeEach(({ page }) => page.emulateMedia({ reducedMotion: motion }));
 
     test("settings, unknown route and sub-pages", async ({ page }) => {
       const wallet = new WalletUi(page);

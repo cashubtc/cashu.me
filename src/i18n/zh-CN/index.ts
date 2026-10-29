@@ -639,6 +639,10 @@ export default {
         label: "@:global.actions.receive.label",
       },
     },
+    panel: {
+      expand: "显示历史记录和 Mint",
+      collapse: "隐藏历史记录和 Mint",
+    },
     tabs: {
       history: {
         label: "历史记录",
@@ -675,6 +679,7 @@ export default {
   },
   BalanceView: {
     total_label: "总余额",
+    show_balance: "显示 {unit} 余额",
     mintUrl: {
       label: "Mint",
     },

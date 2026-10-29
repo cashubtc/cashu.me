@@ -646,6 +646,10 @@ export default {
         label: "@:global.actions.receive.label",
       },
     },
+    panel: {
+      expand: "إظهار السجل والمِنْتات",
+      collapse: "إخفاء السجل والمِنْتات",
+    },
     tabs: {
       history: {
         label: "السجل",
@@ -682,6 +686,7 @@ export default {
   },
   BalanceView: {
     total_label: "إجمالي الرصيد",
+    show_balance: "إظهار رصيد ⁨{unit}⁩",
     mintUrl: {
       label: "المِنْت",
     },

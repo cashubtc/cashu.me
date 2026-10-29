@@ -53,6 +53,7 @@ describe("standard elements", () => {
     ["ui/ConfirmDialog.vue", /^council-dialog(__[\w-]+)?$/],
     ["ui/EmptyState.vue", /^app-empty(__(title|text))?$/],
     ["WalletActions.vue", /^wallet-(actions|action-btn|scan-btn)$/],
+    ["ui/ExpansionIndicator.vue", /^expansion-indicator(__icon|--expanded)?$/],
     ["ui/QrCopyLine.vue", /^qr-copy-line(__icon)?$/],
     ["ui/AmountHeadline.vue", /^amount-headline$/],
     ["ui/PaymentStatus.vue", /^payment-status(__[\w-]+)?$/],
@@ -351,5 +352,52 @@ describe("standard elements", () => {
         /^<template>\s*<!--/.test(readFileSync(join(SRC, page), "utf8"))
       )
     ).toEqual([]);
+  });
+  // Wallet home (owner items 5, 6, 7, 24): the minimal Scan glyph, a full-width tab indicator
+  // with no baseline, the turning chevron instead of a grab handle, toasts at the top.
+  it("wallet scan keeps the minimal Scan glyph", () => {
+    const actions = readFileSync(
+      join(SRC, "components/WalletActions.vue"),
+      "utf8"
+    );
+    expect(actions).toMatch(/\bScan as ScanIcon\b/);
+    expect(actions).not.toMatch(/import[^;]*\bScanLine\b/);
+  });
+
+  it("wallet tabs use the full-width indicator", () => {
+    const files = ["pages/WalletPage.vue", "pages/DesignSystemPage.vue"].map(
+      (f) => readFileSync(join(SRC, f), "utf8")
+    );
+    for (const text of files) {
+      const tabs = [...text.matchAll(/<q-tabs\b[^>]*>/g)].map(([tag]) => tag);
+      expect(tabs.length).toBeGreaterThan(0);
+      for (const tag of tabs) {
+        expect(tag).not.toMatch(/narrow-indicator/);
+        expect(tag).toMatch(/wallet-tabs/);
+      }
+    }
+  });
+
+  it("the wallet panel toggle is the turning chevron, not a grab handle", () => {
+    expect(offenders((text) => text.includes("wallet-history-handle"))).toEqual(
+      []
+    );
+    const css = readdirSync(join(SRC, "css"))
+      .map((f) => readFileSync(join(SRC, "css", f), "utf8"))
+      .join("\n");
+    expect(css).not.toMatch(/wallet-history-handle/);
+  });
+
+  it("toasts sit at the top, with no bottom or tucked stack", () => {
+    const notify = readFileSync(join(SRC, "js/notify.ts"), "utf8");
+    expect(notify).toMatch(
+      /POSITION: QNotifyCreateOptions\["position"\] = "top"/
+    );
+    expect(notify).not.toMatch(/position:\s*"bottom/);
+    const app = readFileSync(join(SRC, "css/app.scss"), "utf8");
+    expect(app).not.toMatch(
+      /q-notifications__list--bottom|q-notification--bottom-/
+    );
+    expect(app).not.toMatch(/\.q-notification:not\(:last-child\)/);
   });
 });

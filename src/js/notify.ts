@@ -10,13 +10,20 @@ import {
   X,
 } from "lucide-vue-next";
 
-// One toast for the whole app, at the bottom so it never covers the balance: every kind appears in one place, as a
-// raised card with a status icon (styled in app.scss), and closes on its own or with ✕. The
-// icons are the callout's: the same glyph for the same tone.
-// Positions are no longer chosen per call: copy confirmations used to appear at the bottom.
-const POSITION: QNotifyCreateOptions["position"] = "bottom";
-const CLOSE_ACTION = [
-  { icon: lucideIcon(X), color: "grey", round: true, handler: () => {} },
+// One toast for the whole app, top-centre (owner item 7): every kind appears in one place, as a
+// raised card with a status icon (styled in app.scss), newest first, and closes on its own or
+// with ✕. The icons are the callout's: the same glyph for the same tone. Positions are not
+// chosen per call.
+const POSITION: QNotifyCreateOptions["position"] = "top";
+// Built per toast, so the close button's name follows the current language.
+const closeAction = () => [
+  {
+    icon: lucideIcon(X),
+    color: "grey",
+    round: true,
+    "aria-label": i18n.global.t("global.actions.close.label") as string,
+    handler: () => {},
+  },
 ];
 
 type ToastKind = "positive" | "negative" | "warning" | "info";
@@ -34,8 +41,9 @@ function isolateAmounts(text: string): string {
   return text.replace(AMOUNT_RUN, (run) => isolateLtr(run));
 }
 
-// At most two toasts at once: a newer one dismisses the oldest, so a burst of messages never
-// covers the page.
+// At most two toasts at once, both fully readable: a newer one dismisses the oldest, so a burst
+// of messages never covers the page. Ungrouped, so two identical messages are two toasts and
+// the queue matches what is on screen.
 const MAX_VISIBLE = 2;
 const visible: Array<() => void> = [];
 
@@ -52,8 +60,13 @@ function toast(
       message: isolateAmounts(message),
       caption: caption ? isolateAmounts(caption) : undefined,
       position: POSITION,
+      group: false,
       timeout,
-      actions: CLOSE_ACTION,
+      actions: closeAction(),
+      attrs: {
+        "data-testid": "app-toast",
+        role: kind === "negative" || kind === "warning" ? "alert" : "status",
+      },
       onDismiss: () => {
         const i = visible.indexOf(dismiss);
         if (i >= 0) visible.splice(i, 1);

@@ -878,6 +878,22 @@ body .q-tab__indicator {
   border-radius: 2px;
   height: 3px;
 }
+// The wallet's History / Mints tabs (owner item 5): no baseline, and the indicator spans the
+// tab cell less the tab's corner radius at each end, at every width (Quasar's narrow indicator
+// only spanned the label, so it read short on stretched phone tabs).
+body .wallet-tabs {
+  --wallet-tab-radius: 10px;
+  box-shadow: none;
+}
+body .wallet-tabs .q-tab {
+  border-radius: var(--wallet-tab-radius);
+}
+body .wallet-tabs .q-tab__indicator {
+  border-radius: 2px;
+  height: 3px;
+  inset-inline: var(--wallet-tab-radius);
+  width: auto;
+}
 
 // Tooltips: a small inverse label (ink fill, page-colour text), so it never reads as a control.
 body .q-tooltip {
@@ -1631,16 +1647,6 @@ body .q-notification .q-notification__icon {
   margin-right: 0 !important;
   width: 36px;
 }
-// Leaving: Quasar takes the toast out of flow (absolute, pinned to the list's bottom edge),
-// so it snapped to the bottom before fading. It fades and drops from where it is instead, and
-// the toasts above slide down once it's gone (the move transition below).
-body .q-notification--bottom-leave-active {
-  bottom: auto;
-  position: relative;
-}
-body .q-notification--bottom-move {
-  transition: transform 0.25s ease;
-}
 body .q-notification .q-notification__icon > svg {
   height: 20px;
   width: 20px;
@@ -1679,48 +1685,68 @@ body .q-notification .q-notification__actions .q-btn .q-icon {
   color: var(--app-text-muted) !important;
 }
 body .q-notification .q-notification__actions .q-btn {
-  min-height: 40px;
-  min-width: 40px;
+  min-height: 44px;
+  min-width: 44px;
 }
 // Light mode: a white card with a hairline and a soft shadow, as in dark mode.
 body.body--light .q-notification {
   background: var(--app-surface) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
-// Toasts sit above the pinned bottom action (52px button + 24px inset), so they never cover
-// the balance or the primary button.
-body .q-notifications__list--bottom {
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 84px);
+// Toasts sit top-centre (owner item 7), newest first, at most two (src/js/notify.ts), each one
+// fully readable with its own close button: a plain column with an 8px gap, under the status
+// bar's safe area. The list itself lets taps through; only the cards take them (Quasar).
+// The selector outranks Quasar's body.q-ios-padding top rule, so the edge gap applies there too.
+body .q-notifications > .q-notifications__list--top {
+  --toast-edge: 8px;
+  bottom: auto;
+  box-sizing: border-box;
+  gap: 8px;
+  margin: 0;
+  padding-inline: max(16px, env(safe-area-inset-left, 0px))
+    max(16px, env(safe-area-inset-right, 0px));
+  top: calc(env(safe-area-inset-top, 0px) + var(--toast-edge));
 }
-// Desktop has no pinned bottom action: toasts sit at the window's bottom edge, below the
-// wallet's history rather than over it.
-@media (min-width: 1024px) {
-  body .q-notifications__list--bottom {
-    bottom: 24px;
-  }
-}
-// Stacked toasts collapse like Sonner's: the newest (last, at the bottom) is in front and an
-// older one tucks behind it, scaled down with only its top edge showing; hovering the stack
-// fans them out again.
-body .q-notifications__list--bottom .q-notification {
-  margin-top: 8px;
+body .q-notifications__list--top .q-notification {
+  margin: 0;
+  max-width: 100%;
   position: relative;
-  z-index: 1;
+  transition: transform 180ms ease, opacity 180ms ease;
+  width: min(440px, 100%);
 }
-// The tucked toast is opaque and shows only its edge: its own content is hidden until the
-// stack fans out, so no half-covered text or icon peeks out above the front toast.
-body .q-notifications__list--bottom .q-notification:not(:last-child) {
-  transform: translateY(calc(100% - 14px)) scale(0.94);
-  z-index: 0;
+// Entering: fades in and settles down from 12px above; leaving: fades and rises from where it
+// is. The other card slides into place (move).
+body .q-notifications__list--top .q-notification--top-enter-from,
+body .q-notifications__list--top .q-notification--top-leave-to {
+  opacity: 0;
+  transform: translateY(-12px);
 }
-body .q-notifications__list--bottom .q-notification:not(:last-child) > * {
-  visibility: hidden;
+body .q-notifications__list--top .q-notification--top-move {
+  transition: transform 180ms ease;
 }
-body .q-notifications__list--bottom:hover .q-notification {
-  transform: none;
+// Quasar takes a leaving toast out of flow pinned to the list's top. That is where the first
+// card already is; the last card (the oldest, the usual one to go) stays in flow instead, so it
+// fades where it is rather than jumping up behind the newer one.
+// Out of flow its 100% is the list's padding box, so it keeps the in-flow width explicitly.
+body .q-notifications__list--top .q-notification--top-leave-active {
+  width: min(
+    440px,
+    calc(
+      100% - max(16px, env(safe-area-inset-left, 0px)) -
+        max(16px, env(safe-area-inset-right, 0px))
+    )
+  );
 }
-body .q-notifications__list--bottom:hover .q-notification > * {
-  visibility: visible;
+body .q-notifications__list--top .q-notification--top-leave-active:last-child {
+  position: relative;
+  top: auto;
+  width: min(440px, 100%);
+}
+@media (prefers-reduced-motion: reduce) {
+  body .q-notifications__list--top .q-notification,
+  body .q-notifications__list--top .q-notification--top-move {
+    transition: none;
+  }
 }
 // Toasts live outside #q-app; in right-to-left they follow the page's direction too.
 html[dir="rtl"] .q-notifications {

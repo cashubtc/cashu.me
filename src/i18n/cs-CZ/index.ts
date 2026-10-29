@@ -677,6 +677,10 @@ export default {
         label: "@:global.actions.receive.label",
       },
     },
+    panel: {
+      expand: "Zobrazit historii a minty",
+      collapse: "Skrýt historii a minty",
+    },
     tabs: {
       history: {
         label: "Historie",
@@ -713,6 +717,7 @@ export default {
   },
   BalanceView: {
     total_label: "Celkový zůstatek",
+    show_balance: "Zobrazit zůstatek v {unit}",
     mintUrl: {
       label: "Mint",
     },

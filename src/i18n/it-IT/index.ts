@@ -631,6 +631,10 @@ export default {
         label: "@:global.actions.receive.label",
       },
     },
+    panel: {
+      expand: "Mostra cronologia e mints",
+      collapse: "Nascondi cronologia e mints",
+    },
     tabs: {
       history: {
         label: "Cronologia",
@@ -667,6 +671,7 @@ export default {
   },
   BalanceView: {
     total_label: "Saldo totale",
+    show_balance: "Mostra saldo in {unit}",
     mintUrl: {
       label: "Mint",
     },

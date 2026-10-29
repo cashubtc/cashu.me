@@ -118,7 +118,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/components/WalletActions.vue",
     usage: { tag: "WalletActions" },
     example: `<WalletActions @receive="…" @scan="…" @send="…" />`,
-    note: "Caps by design: the two strategic wallet actions, with scan in a tinted circle between them.",
+    note: "Caps by design: the two strategic wallet actions, with scan in a tinted circle between them. Scan is Lucide's minimal Scan frame (the original wallet's), not ScanLine.",
   },
   {
     id: "primary-button",
@@ -293,9 +293,10 @@ export const DS_ITEMS: DsItem[] = [
     name: "Tabs",
     group: "navigation",
     tier: "primitive",
-    source: "q-tabs · src/css/app.scss .q-tab",
+    source: "q-tabs · src/css/app.scss .q-tab, .wallet-tabs",
     usage: { text: "<q-tabs" },
-    example: `<q-tabs v-model="tab" no-caps><q-tab name="history" label="History" /></q-tabs>`,
+    example: `<q-tabs v-model="tab" no-caps class="wallet-tabs" indicator-color="primary"><q-tab name="history" label="History" /></q-tabs>`,
+    note: "The wallet's tabs have no baseline; the indicator spans the tab cell less its 10px corner radius at each end, at every width (no narrow-indicator).",
   },
   {
     id: "pagination",
@@ -412,6 +413,26 @@ export const DS_ITEMS: DsItem[] = [
     usage: { text: "<q-expansion-item" },
     example: `<q-expansion-item label="Advanced" dense>…</q-expansion-item>`,
   },
+  {
+    id: "expansion-indicator",
+    name: "Expansion indicator",
+    group: "navigation",
+    tier: "primitive",
+    source: "src/components/ui/ExpansionIndicator.vue",
+    usage: { tag: "ExpansionIndicator" },
+    example: `<template #header="{ expanded }">\n  <ExpansionIndicator :expanded="expanded" :label="$t(expanded ? 'WalletPage.panel.collapse' : 'WalletPage.panel.expand')" />\n</template>`,
+    note: "One chevron that turns up while open and down while closed (no turn under reduced motion). Not a control: the expansion header around it is.",
+  },
+  {
+    id: "route-transitions",
+    name: "Page transitions",
+    group: "navigation",
+    tier: "pattern",
+    source: "src/layouts/FullscreenLayout.vue",
+    usage: { className: "fullscreen-route" },
+    example: `<transition :name="transitionName" mode="out-in">\n  <div :key="route.path" class="fullscreen-route"><component :is="Component" /></div>\n</transition>`,
+    note: "Full-screen pages slide by history direction (fade on a fresh entry, none under reduced motion). The transition animates a native wrapper, never the page itself, so Back always lands on its page.",
+  },
 
   // Cards and containers
   {
@@ -527,6 +548,16 @@ export const DS_ITEMS: DsItem[] = [
     example: `<div class="amount-headline">−₿101</div>`,
   },
   {
+    id: "balance-view",
+    name: "Wallet balance",
+    group: "data",
+    tier: "feature",
+    source: "src/components/BalanceView.vue",
+    usage: { tag: "BalanceView" },
+    example: `<BalanceView :set-tab="setTab" />`,
+    note: "The total per unit. Only the unit dots (or a unit change) move it, with the carousel's slide; no swipe, drag or scroll moves it by hand. A tap on the figure hides it.",
+  },
+  {
     id: "payment-status",
     name: "Payment status",
     group: "data",
@@ -593,6 +624,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/js/notify.ts · src/css/app.scss body .q-notification",
     usage: { text: "notifySuccess(" },
     example: `notifySuccess("Received ₿500");`,
+    note: "Top-centre, newest first, at most two fully readable cards 8px apart, each with a 44px close; a third dismisses the oldest.",
   },
   {
     id: "loading",

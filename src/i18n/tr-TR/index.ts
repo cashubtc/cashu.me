@@ -666,6 +666,10 @@ export default {
         label: "@:global.actions.receive.label",
       },
     },
+    panel: {
+      expand: "Geçmişi ve mint'leri göster",
+      collapse: "Geçmişi ve mint'leri gizle",
+    },
     tabs: {
       history: {
         label: "Geçmiş",
@@ -702,6 +706,7 @@ export default {
   },
   BalanceView: {
     total_label: "Toplam bakiye",
+    show_balance: "{unit} bakiyesini göster",
     mintUrl: {
       label: "Mint",
     },

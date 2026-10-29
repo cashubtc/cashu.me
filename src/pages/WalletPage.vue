@@ -27,29 +27,40 @@
         :model-value="$q.screen.gt.sm || expandHistory"
         @update:model-value="expandHistory = $event"
       >
-        <template v-slot:header>
+        <!-- The header's expanded state, not expandHistory: desktop forces the panel open. -->
+        <template #header="{ expanded }">
           <q-item-section class="items-center">
-            <span class="wallet-history-handle" aria-hidden="true" />
-            <span class="visually-hidden">{{
-              $t("WalletPage.tabs.history.label")
-            }}</span>
+            <ExpansionIndicator
+              :expanded="expanded"
+              :label="
+                $t(
+                  expanded
+                    ? 'WalletPage.panel.collapse'
+                    : 'WalletPage.panel.expand'
+                )
+              "
+            />
           </q-item-section>
         </template>
+        <!-- Full-width indicator: the tab cell less its corner radius at each end, no baseline
+             (src/css/app.scss .wallet-tabs). -->
         <q-tabs
-          narrow-indicator
           v-model="tab"
           no-caps
           class="bg-transparent wallet-tabs"
+          data-testid="wallet-tabs"
           active-class="wallet-tab--active"
           indicator-color="primary"
         >
           <q-tab
             name="history"
+            data-testid="wallet-tab-history"
             :label="$t('WalletPage.tabs.history.label')"
           ></q-tab>
           <!-- <q-tab name="tokens" label="Tokens"></q-tab> -->
           <q-tab
             name="mints"
+            data-testid="wallet-tab-mints"
             :label="$t('WalletPage.tabs.mints.label')"
           ></q-tab>
         </q-tabs>
@@ -164,21 +175,11 @@
   min-height: 44px;
 }
 
-/* On desktop history is always open, so there is no handle to show. */
+/* On desktop history is always open, so there is no toggle to show. */
 @media (min-width: 1024px) {
   .wallet-history-toggle {
     display: none !important;
   }
-}
-
-/* A grab handle, the usual mark for a panel that opens and closes (a lone chevron
-   read as nothing). */
-.wallet-history-handle {
-  display: block;
-  width: 36px;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--app-text-muted);
 }
 
 .row > .wallet-column {
@@ -232,6 +233,7 @@ import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import { notifyError, notify } from "../js/notify";
 
 import WalletActions from "src/components/WalletActions.vue";
+import ExpansionIndicator from "src/components/ui/ExpansionIndicator.vue";
 
 import { useMigrationsStore } from "src/stores/migrations";
 
@@ -256,6 +258,7 @@ export default {
     ReceiveDialog,
     PwaPrompt,
     WalletActions,
+    ExpansionIndicator,
   },
   data: function () {
     return {

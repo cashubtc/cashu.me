@@ -663,6 +663,10 @@ export default {
         label: "@:global.actions.receive.label",
       },
     },
+    panel: {
+      expand: "Verlauf und Mints anzeigen",
+      collapse: "Verlauf und Mints ausblenden",
+    },
     tabs: {
       history: {
         label: "Verlauf",
@@ -699,6 +703,7 @@ export default {
   },
   BalanceView: {
     total_label: "Gesamtguthaben",
+    show_balance: "{unit}-Guthaben anzeigen",
     mintUrl: {
       label: "Mint",
     },

@@ -16,6 +16,7 @@
       dense
       round
       class="wallet-scan-btn"
+      data-testid="wallet-scan"
       :aria-label="$t('global.actions.scan.label')"
       @click="$emit('scan')"
     >
@@ -36,7 +37,8 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { ScanLine as ScanIcon } from "lucide-vue-next";
+// The minimal Scan frame, as on main (owner item 24); ScanLine's bar read busier.
+import { Scan as ScanIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "WalletActions",

@@ -662,6 +662,10 @@ export default {
         label: "@:global.actions.receive.label",
       },
     },
+    panel: {
+      expand: "Εμφάνιση ιστορικού και mints",
+      collapse: "Απόκρυψη ιστορικού και mints",
+    },
     tabs: {
       history: {
         label: "Ιστορικό",
@@ -698,6 +702,7 @@ export default {
   },
   BalanceView: {
     total_label: "Συνολικό υπόλοιπο",
+    show_balance: "Εμφάνιση υπολοίπου {unit}",
     mintUrl: {
       label: "Mint",
     },

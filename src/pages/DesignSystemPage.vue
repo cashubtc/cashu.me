@@ -686,7 +686,13 @@
       </DsEntry>
       <h2 id="ds-group-navigation" class="ds-section">Navigation</h2>
       <DsEntry id="tabs">
-        <q-tabs narrow-indicator v-model="tab" no-caps active-color="primary">
+        <q-tabs
+          v-model="tab"
+          no-caps
+          class="bg-transparent wallet-tabs"
+          active-class="wallet-tab--active"
+          indicator-color="primary"
+        >
           <q-tab name="history" label="History" />
           <q-tab name="mints" label="Mints" />
         </q-tabs>
@@ -815,6 +821,45 @@
             </div>
           </q-expansion-item>
         </q-list>
+      </DsEntry>
+      <DsEntry id="expansion-indicator">
+        <div class="row q-gutter-lg items-center q-mb-md">
+          <ExpansionIndicator label="Show history and mints" />
+          <ExpansionIndicator expanded label="Hide history and mints" />
+        </div>
+        <q-expansion-item
+          dense
+          class="wallet-panel"
+          expand-icon-class="hidden"
+          header-class="wallet-history-toggle"
+          :default-opened="true"
+        >
+          <template #header="{ expanded }">
+            <q-item-section class="items-center">
+              <ExpansionIndicator
+                :expanded="expanded"
+                :label="
+                  expanded ? 'Hide history and mints' : 'Show history and mints'
+                "
+              />
+            </q-item-section>
+          </template>
+          <div class="q-pa-md text-app-muted text-center">
+            The wallet's History and Mints panel.
+          </div>
+        </q-expansion-item>
+      </DsEntry>
+      <DsEntry id="route-transitions">
+        <!-- The real thing: these leave the board through the router, and Back returns here. -->
+        <div class="row q-gutter-sm">
+          <q-btn rounded outline no-caps to="/settings">Open Settings</q-btn>
+          <q-btn rounded outline no-caps to="/no-such-page">
+            Open a missing page
+          </q-btn>
+        </div>
+        <div class="text-caption text-app-muted q-mt-sm">
+          Then use Back (the header or the browser): the page slides back in.
+        </div>
       </DsEntry>
       <h2 id="ds-group-containers" class="ds-section">Cards and containers</h2>
       <DsEntry id="mint-cards">
@@ -1027,6 +1072,12 @@
           <ToggleUnit />
         </div>
       </DsEntry>
+      <DsEntry id="balance-view">
+        <!-- The wallet's own balance, from this wallet's state: the unit dots switch it (no
+             swipe), a tap on the figure hides it. -->
+        <BalanceView v-if="mints.length" />
+        <div v-else class="text-app-muted">Add a mint to see the balance.</div>
+      </DsEntry>
       <DsEntry id="payment-status">
         <div class="row q-col-gutter-lg justify-center">
           <PaymentStatus state="paid" label="Paid" caption="Fee: ₿1"
@@ -1111,6 +1162,9 @@
           <q-btn rounded outline @click="toast('error')">Error</q-btn>
           <q-btn rounded outline @click="toast('warning')">Warning</q-btn>
           <q-btn rounded outline @click="toast('info')">Info</q-btn>
+          <q-btn rounded outline no-caps @click="toastBurst()">
+            Burst of three
+          </q-btn>
         </div>
       </DsEntry>
       <DsEntry id="loading">
@@ -1517,6 +1571,8 @@ import TonalChip from "src/components/ui/TonalChip.vue";
 import FlowColumn from "src/components/ui/FlowColumn.vue";
 import CjkText from "src/components/ui/CjkText.vue";
 import RevealTransition from "src/components/ui/RevealTransition.vue";
+import ExpansionIndicator from "src/components/ui/ExpansionIndicator.vue";
+import BalanceView from "src/components/BalanceView.vue";
 import AmountWarning from "src/components/ui/AmountWarning.vue";
 import MetaLine from "src/components/ui/MetaLine.vue";
 import RowValue from "src/components/ui/RowValue.vue";
@@ -1528,6 +1584,8 @@ import DsEntry from "src/components/ds/DsEntry.vue";
 import DsRail from "src/components/ds/DsRail.vue";
 import type { DsBoard } from "src/components/ds/board";
 import { DS_GROUPS, DS_ITEMS } from "src/design-system/registry";
+import { mapState } from "pinia";
+import { useMintsStore } from "src/stores/mints";
 import {
   notify,
   notifyError,
@@ -1582,6 +1640,8 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     RevealTransition,
+    ExpansionIndicator,
+    BalanceView,
     AmountWarning,
     MetaLine,
     RowValue,
@@ -1937,6 +1997,7 @@ export default defineComponent({
     };
   },
   computed: {
+    ...mapState(useMintsStore, ["mints"]),
     themeOptions() {
       return this.themes.map((t: string) => ({
         value: t,
@@ -2068,6 +2129,12 @@ export default defineComponent({
       else if (kind === "error") notifyError("Couldn't reach the mint");
       else if (kind === "warning") notifyWarning("This mint is offline");
       else notify("Copied");
+    },
+    // The real queue: three at once keep the newest two, newest on top.
+    toastBurst() {
+      notifySuccess("Received ₿500");
+      notifyWarning("This mint is offline");
+      notifyError("Couldn't reach the mint", "Check your connection.");
     },
   },
 });

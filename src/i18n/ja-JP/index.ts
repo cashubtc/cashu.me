@@ -650,6 +650,10 @@ export default {
         label: "@:global.actions.receive.label",
       },
     },
+    panel: {
+      expand: "履歴とミントを表示",
+      collapse: "履歴とミントを隠す",
+    },
     tabs: {
       history: {
         label: "履歴",
@@ -686,6 +690,7 @@ export default {
   },
   BalanceView: {
     total_label: "合計残高",
+    show_balance: "{unit}の残高を表示",
     mintUrl: {
       label: "ミント",
     },

@@ -37,6 +37,11 @@ export default defineComponent({
           }
           return;
         }
+        // Reduced motion: the new figure appears at once instead of counting up.
+        if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+          displayedValue.value = newValue;
+          return;
+        }
         const startTime = performance.now();
         const startValue = oldValue !== undefined ? oldValue : newValue;
         const endValue = newValue;
