@@ -621,6 +621,43 @@ describe("standard elements", () => {
       "utf8"
     );
     expect(quote).not.toMatch(/<ChainStatusRow|<ConfirmationsRow/);
+    expect(quote.match(/<QuoteStatusRow\b/g)).toHaveLength(1);
+  });
+
+  // Owner 2026-10-29b, item 10: one status, but not a colourless one. A met threshold and a
+  // paid receive read in the theme's positive colour after a check; nothing hard-codes a green.
+  it("confirmed and paid keep their check and positive colour", () => {
+    for (const file of ["ConfirmationsRow.vue", "QuoteStatusRow.vue"]) {
+      const text = readFileSync(join(SRC, "components", file), "utf8");
+      expect(text, file).toContain("CircleCheckIcon");
+      expect(text, file).toContain("text-positive");
+      expect(text, file).not.toMatch(
+        /#(?:4ade80|15803d|21ba45|5eead4|0f766e)/i
+      );
+    }
+  });
+
+  // Owner 2026-10-29b, item 2: a row's trailing glyph takes its value's colour, so it sits
+  // inside the value and no glyph rule names a colour of its own.
+  it("detail row glyphs sit in the value and take its colour", () => {
+    const row = readFileSync(join(SRC, "components/ui/DetailRow.vue"), "utf8");
+    const template = row.match(/<template>([\s\S]*)<\/template>/)![1];
+    const value = template.slice(template.indexOf('class="detail-value"'));
+    expect(value).toContain('class="detail-item__chevron"');
+    const css = row.match(/<style[^>]*>([\s\S]*?)<\/style>/)![1];
+    expect(css).not.toMatch(
+      /\.detail-(?:item__chevron|value__glyph|value__external)[^{]*\{[^}]*color:\s*var\(/
+    );
+  });
+
+  // Owner 2026-10-29b, item 5: settings row titles sit on a whole-pixel line, so the text
+  // centres on its 20px icon the same way in every browser (Quasar's 1.2em made 19.2px).
+  it("settings row titles use a whole-pixel line height", () => {
+    const css = readFileSync(join(SRC, "css/settings.scss"), "utf8");
+    const rule = css.match(
+      /\.settings-menu-group \.q-item__label:not\(\.q-item__label--caption\) \{([^}]*)\}/
+    )?.[1];
+    expect(rule).toMatch(/line-height:\s*20px/);
   });
 
   // Onboarding (owner 2026-10-29, items 16, 29, 32): one column on every step, the app's own

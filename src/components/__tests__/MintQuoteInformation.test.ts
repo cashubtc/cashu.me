@@ -122,6 +122,24 @@ describe("MintQuoteInformation", () => {
       ).toBe("QuoteInformation.states.paid");
     });
 
+    // Owner 2026-10-29b, item 10: each state keeps its own mark; only Paid is positive.
+    it.each([
+      ["pending", null, "waiting"],
+      ["pending", { confirmed: false, confirmations: 1 }, "confirming"],
+      ["pending", { confirmed: true, confirmations: 3 }, "issuing"],
+      ["paid", { confirmed: true, confirmations: 3 }, "paid"],
+      ["expired", null, "other"],
+    ])("a %s quote with %j reads as %s", (status, metadata, tone) => {
+      expect(
+        MintQuoteInformation.computed.statusTone.call({
+          isPaidState: status === "paid",
+          isWaitingState: status === "pending",
+          isOnchain: true,
+          onchainMetadata: metadata,
+        })
+      ).toBe(tone);
+    });
+
     const render = async (status: string, hidePaidStatus: boolean) => {
       fetchAddressTxMetadata.mockResolvedValue({
         confirmed: false,

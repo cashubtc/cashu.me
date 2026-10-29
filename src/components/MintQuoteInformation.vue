@@ -18,17 +18,12 @@
       :value="unitDisplay"
     />
 
-    <DetailRow
+    <!-- The one status (owner 2026-10-29, item 10). -->
+    <QuoteStatusRow
       v-if="stateDisplay && !(hidePaidStatus && isPaidState)"
-      :icon="ActivityIcon"
-      :label="$t('QuoteInformation.status')"
-      :value-class="['detail-value--inline', { 'text-positive': isPaidState }]"
-    >
-      <!-- The one status (owner 2026-10-29, item 10): on-chain it moves Waiting for payment,
-           Confirming (n/m), Issuing ecash, then Paid; the dots show it is live. -->
-      <PendingDots v-if="isWaitingState" size="16px" />
-      {{ stateDisplay }}
-    </DetailRow>
+      :tone="statusTone"
+      :text="stateDisplay"
+    />
 
     <DetailRow
       :icon="isOnchain ? BitcoinIcon : ZapIcon"
@@ -79,7 +74,9 @@
 
 <script lang="ts">
 import { unitCode } from "src/js/format-currency";
-import PendingDots from "src/components/ui/PendingDots.vue";
+import QuoteStatusRow, {
+  type QuoteStatusTone,
+} from "src/components/QuoteStatusRow.vue";
 import { defineComponent, PropType } from "vue";
 import { mapState } from "pinia";
 import { useMintsStore } from "stores/mints";
@@ -90,7 +87,6 @@ import {
   Clock as ClockIcon,
   Coins as CoinsIcon,
   Hash as HashIcon,
-  Activity as ActivityIcon,
   Building2 as MintIcon,
   Network as NetworkIcon,
   Zap as ZapIcon,
@@ -120,7 +116,7 @@ type MintQuote = {
 export default defineComponent({
   name: "MintQuoteInformation",
   mixins: [windowMixin],
-  components: { PendingDots, DetailRow },
+  components: { QuoteStatusRow, DetailRow },
   setup() {
     return {
       BitcoinIcon,
@@ -128,7 +124,6 @@ export default defineComponent({
       ClockIcon,
       CoinsIcon,
       HashIcon,
-      ActivityIcon,
       MintIcon,
       NetworkIcon,
       ZapIcon,
@@ -224,6 +219,15 @@ export default defineComponent({
     isWaitingState(): boolean {
       const state = (this.invoice?.status as string) || this.mintQuote?.state;
       return ["pending", "unpaid"].includes(state?.toLowerCase() ?? "");
+    },
+    /** The Status row's look: which mark it shows and whether it reads muted or positive. */
+    statusTone(): QuoteStatusTone {
+      if (this.isPaidState) return "paid";
+      if (!this.isWaitingState) return "other";
+      const tx = this.isOnchain ? this.onchainMetadata : null;
+      if (tx?.confirmed) return "issuing";
+      if (tx) return "confirming";
+      return "waiting";
     },
     isPaidState(): boolean {
       const state = (this.invoice?.status as string) || this.mintQuote?.state;

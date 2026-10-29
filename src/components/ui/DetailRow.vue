@@ -7,6 +7,9 @@
      - `href`: the whole row is an external link, the value underlined and ending in the
        ExternalLink glyph in the text colour;
      - `copyValue`: the whole row copies that string, the value ending in a Copy glyph.
+     A trailing glyph (chevron, external link, copy) sits inside the value and takes its colour:
+     a set value's text colour, a placeholder's muted, a disabled row's subtle (owner
+     2026-10-29b, item 2).
      Interactive rows tint their own box on hover and press (never a neighbour's) and bleed
      12px past the text, so the label and value stay on the table's edges. -->
 <template>
@@ -68,13 +71,13 @@
         class="detail-value__glyph"
         aria-hidden="true"
       />
+      <ChevronRightIcon
+        v-else-if="action && chevron && !disabled"
+        :size="18"
+        class="detail-item__chevron"
+        aria-hidden="true"
+      />
     </div>
-    <ChevronRightIcon
-      v-if="action && chevron && !disabled && !href && !copyValue"
-      :size="18"
-      class="detail-item__chevron"
-      aria-hidden="true"
-    />
   </component>
 </template>
 
@@ -241,9 +244,11 @@ export default defineComponent({
 .detail-item--action .detail-value {
   flex: 1;
   margin-inline-start: 12px;
-  /* Fill up to the chevron, so every row's value ends on the same edge. */
+  /* Fill the row, so every row's value (and its glyph) ends on the same edge. */
   max-width: none;
   min-width: 0;
+  /* The chevron's box reaches 4px past the edge (its ink does not); keep that box unclipped. */
+  overflow: visible;
 }
 /* A command row (a retry, no chevron): its one word never truncates; a long label wraps and
    the row grows instead. */
@@ -253,19 +258,17 @@ export default defineComponent({
 .detail-item--command .detail-value {
   flex: 0 0 auto;
 }
-/* Link rows: the value is underlined, and the glyph takes the value's own colour. */
+/* Link rows: the value is underlined. */
 .detail-item--link .detail-value__text {
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
 }
-.detail-value__external {
+/* Every trailing glyph takes the value's own colour. */
+.detail-value__external,
+.detail-value__glyph,
+.detail-item__chevron {
   color: currentColor;
-  flex-shrink: 0;
-}
-/* Copy reads as secondary to the value it copies. */
-.detail-value__glyph {
-  color: var(--app-text-subtle);
   flex-shrink: 0;
 }
 .detail-value--placeholder {
@@ -282,9 +285,6 @@ export default defineComponent({
 }
 /* The chevron's ink sits 6px inside its 18px box; its edge lands on the table's 12px inset. */
 .detail-item__chevron {
-  color: var(--app-text-subtle);
-  flex-shrink: 0;
   margin-inline-end: -4px;
-  margin-inline-start: 6px;
 }
 </style>

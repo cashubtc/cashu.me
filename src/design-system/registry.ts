@@ -341,7 +341,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/components/ui/RowValue.vue",
     usage: { tag: "RowValue" },
     example: `<RowValue value="English" />`,
-    note: "The end of a row that opens something: its current value, muted, and one chevron (or an external-link glyph) on one line. Used by SettingsLinkRow and SheetSelect rows.",
+    note: "The end of a row that opens something: its current value, muted, and one chevron (or an external-link glyph) on one line, in the value's muted colour; a bare chevron is subtle. Used by SettingsLinkRow and SheetSelect rows.",
     context: "settings",
   },
   {
@@ -352,7 +352,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/components/ui/SettingsActionRow.vue",
     usage: { tag: "SettingsActionRow" },
     example: `<SettingsActionRow label="Restore" caption="From a seed phrase" to="/restore" />`,
-    note: "Labels are medium weight, like the settings root rows; labelClass replaces that default.",
+    note: "Labels are medium weight, like the settings root rows; labelClass replaces that default. The title sits on a whole-pixel 20px line, so it centres on the 20px icon in every browser.",
     context: "settings",
   },
 
@@ -543,7 +543,7 @@ export const DS_ITEMS: DsItem[] = [
   <DetailRow :icon="HashIcon" label="Transaction ID" :href="explorerUrl"><bdi dir="ltr">{{ txid }}</bdi></DetailRow>
   <DetailRow icon-src="/nostr-icon.svg" label="Nostr" :copy-value="npub"><bdi dir="ltr">{{ short }}</bdi></DetailRow>
 </div>`,
-    note: "44px rows, 4px apart in a .detail-table: one 48px pitch. Interactive rows (action, link, copy) tint their own box and bleed 12px past the text. Links underline the value and end in ExternalLink in the text colour; copy rows end in Copy; busy and disabled hold an action.",
+    note: "44px rows, 4px apart in a .detail-table: one 48px pitch. Interactive rows (action, link, copy) tint their own box and bleed 12px past the text. Links underline the value and end in ExternalLink, copy rows end in Copy, action rows in a chevron; every trailing glyph takes the value's colour (text, a placeholder's muted, a disabled row's subtle). Busy and disabled hold an action.",
   },
   {
     id: "meta-line",
@@ -801,12 +801,10 @@ export const DS_ITEMS: DsItem[] = [
     name: "On-chain status",
     group: "feature",
     tier: "feature",
-    source: "src/components/MintQuoteInformation.vue",
-    // Shown with the Status DetailRow it renders: the states need explorer data the board
-    // does not fetch.
-    usage: { tag: "DetailRow" },
-    example: `<MintQuoteInformation :mint-quote="quote" :invoice="invoice" method="onchain" hide-paid-status />`,
-    note: "One status for an on-chain receive, in the Status row: Waiting for payment, Confirming (n/m), Issuing ecash, then the receipt's Paid hero. No separate chain status.",
+    source: "src/components/QuoteStatusRow.vue",
+    usage: { tag: "QuoteStatusRow" },
+    example: `<QuoteStatusRow tone="confirming" :text="$t('QuoteInformation.states.confirming', { count, threshold })" />`,
+    note: "One status for a receive, in the Status row (MintQuoteInformation picks the tone): Waiting for payment (dots, muted), Confirming (n/m) (clock, muted), Issuing ecash (dots), then Paid (check, positive) or the receipt's Paid hero. No separate chain status.",
   },
   {
     id: "confirmations-row",
@@ -816,7 +814,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/components/ConfirmationsRow.vue",
     usage: { tag: "ConfirmationsRow" },
     example: `<ConfirmationsRow :metadata="txMetadata" :loading="fetching" />`,
-    note: "An on-chain send's confirmations as a plain fact (n/m), with no state word, icon or colour; the Status row stays the one status.",
+    note: "An on-chain send's confirmations as a fact (n/m), with no state word: below the threshold a clock and a muted count, at it a check and the count in the positive colour. The Status row or the hero stays the one status.",
   },
   {
     id: "deposit-limits",

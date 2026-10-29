@@ -682,15 +682,21 @@ body.body--light .activity-row__avatar--in {
 }
 
 /* RowValue: a settings row's current value and its chevron on one line, centred on the row
-   (Quasar's side section is a column, so the value sat above the chevron, council R83). */
+   (Quasar's side section is a column, so the value sat above the chevron, council R83). The
+   chevron after a value takes the value's muted colour; a bare chevron stays subtle (owner
+   2026-10-29b, item 2). */
 .row-value__inner {
   align-items: center;
+  color: var(--app-text-muted);
   display: flex;
   flex-wrap: nowrap;
   gap: 8px;
 }
+.row-value__text + .settings-menu-chevron {
+  color: currentColor;
+}
 .row-value__text {
-  color: var(--app-text-muted);
+  color: currentColor;
   font-size: 15px;
   font-weight: 400;
   white-space: nowrap;

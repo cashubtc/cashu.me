@@ -118,10 +118,14 @@
   line-height: 1.4;
 }
 /* Row titles share the sheet option rows' 16px, in settings and in every settings-style card
-   (Mint details' actions read just like settings, owner 2026-10-29, item 18). */
+   (Mint details' actions read just like settings, owner 2026-10-29, item 18), on a whole-pixel
+   20px line: Quasar's 1.2 made a 19.2px box that sat 0.4px off the 20px icon's, so browsers
+   snapped the text a pixel away from the icon beside it (owner 2026-10-29b, item 5). Quasar
+   sets that 1.2em as !important, so this one has to be too. */
 .settings-view .q-item__label:not(.q-item__label--caption),
 .settings-menu-group .q-item__label:not(.q-item__label--caption) {
   font-size: 16px;
+  line-height: 20px !important;
 }
 
 /* On wide screens the settings column matches the wallet's content edges. */

@@ -1,6 +1,7 @@
 import { expect, test } from "../fixtures/test";
 import { MINT_A_URL, MINT_B_URL } from "../fixtures/mint";
 import { WalletUi } from "../pages/WalletUi";
+import { rowAlignment } from "../fixtures/ui";
 
 test("adds, cancels, normalizes and deduplicates mints after onboarding", async ({
   page,
@@ -174,6 +175,49 @@ test("mint details rows share one height, gap and edge", async ({ page }) => {
   await expect(
     page.getByRole("button", { name: "Copy mint URL", exact: true })
   ).toHaveCount(1);
+});
+
+// Owner 2026-10-29b, item 5: Edit, Review and Delete mint centre their icon and end glyph on
+// the label, within a pixel, on a whole-pixel title line (the same rows as settings).
+test("mint action rows centre their icon, label and end glyph", async ({
+  page,
+}) => {
+  const wallet = new WalletUi(page);
+  await wallet.onboard(MINT_A_URL);
+  await wallet.details(MINT_A_URL);
+  const actions = page.locator(".mint-details-actions");
+  await expect(actions.getByText("Delete mint")).toBeVisible();
+
+  const rows = await rowAlignment(actions);
+  expect(rows.map((r) => r.label)).toEqual(
+    expect.arrayContaining(["Edit mint", "Delete mint"])
+  );
+  for (const row of rows) {
+    expect(Math.abs(row.icon!), row.label).toBeLessThanOrEqual(1);
+    expect(Math.abs(row.end!), row.label).toBeLessThanOrEqual(1);
+    expect(Number.isInteger(row.lineHeight), row.label).toBe(true);
+  }
+});
+
+// Owner 2026-10-29b, item 2: a row's trailing glyph (the features chevron, the copy glyph)
+// is drawn in its value's colour.
+test("detail row glyphs take their value's colour", async ({ page }) => {
+  const wallet = new WalletUi(page);
+  await wallet.onboard(MINT_A_URL);
+  await wallet.details(MINT_A_URL);
+  const features = page.getByRole("button", { name: /Supported features/ });
+  const copyUrl = page.getByRole("button", {
+    name: "Copy mint URL",
+    exact: true,
+  });
+  for (const row of [features, copyUrl]) {
+    await expect(row).toBeVisible();
+    const [text, glyph] = await row.evaluate((el) => [
+      getComputedStyle(el.querySelector(".detail-value__text")!).color,
+      getComputedStyle(el.querySelector(".detail-value svg")!).color,
+    ]);
+    expect(glyph).toBe(text);
+  }
 });
 
 test("mint contacts are copy rows and an empty entry draws nothing", async ({

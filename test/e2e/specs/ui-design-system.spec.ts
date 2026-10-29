@@ -194,3 +194,62 @@ test("the board's settings rows render like the settings pages", async ({
   expectSame(await metrics(boardRow, ".q-item__label"), app.row);
   expectSame(await metrics(boardRow, ".q-item__label--caption"), app.caption);
 });
+
+// Owner 2026-10-29b, items 2 and 10: the board's rows show the real colours. Every detail row's
+// trailing glyph is its value's colour; a met threshold and Paid read in the theme's positive
+// colour after a check, the pending states stay muted after a clock or dots.
+test("the board's detail, confirmation and status rows show their colours", async ({
+  page,
+}) => {
+  await openBoard(page);
+  const positive = await page.evaluate(() => {
+    const probe = document.createElement("span");
+    probe.className = "text-positive";
+    document.body.append(probe);
+    const colour = getComputedStyle(probe).color;
+    probe.remove();
+    return colour;
+  });
+
+  const details = sample(page, "detail-row");
+  await details.scrollIntoViewIfNeeded();
+  const glyphs = await details
+    .locator(".detail-item:has(.detail-value svg)")
+    .evaluateAll((rows) =>
+      rows.map((row) => {
+        const value = row.querySelector(".detail-value")!;
+        const text = value.querySelector(".detail-value__text") ?? value;
+        return [
+          getComputedStyle(text).color,
+          getComputedStyle(value.querySelector("svg")!).color,
+        ];
+      })
+    );
+  expect(glyphs.length).toBeGreaterThanOrEqual(3);
+  for (const [text, glyph] of glyphs) expect(glyph).toBe(text);
+
+  const confirmations = sample(page, "confirmations-row").getByTestId(
+    "confirmations-value"
+  );
+  await expect(confirmations).toHaveText(["1/3", "3/3"]);
+  const colour = (l: Locator) => l.evaluate((e) => getComputedStyle(e).color);
+  expect(await colour(confirmations.nth(1))).toBe(positive);
+  expect(await colour(confirmations.nth(0))).not.toBe(positive);
+  await expect(
+    confirmations.nth(1).locator(".lucide-circle-check-icon")
+  ).toHaveCount(1);
+  await expect(confirmations.nth(0).locator(".lucide-clock-icon")).toHaveCount(
+    1
+  );
+
+  const status = sample(page, "onchain-status").getByTestId("quote-status");
+  await expect(status).toHaveText([
+    "Waiting for payment",
+    "Confirming (1/3)",
+    "Issuing ecash",
+    "Paid",
+  ]);
+  expect(await colour(status.nth(3))).toBe(positive);
+  for (const i of [0, 1, 2])
+    expect(await colour(status.nth(i))).not.toBe(positive);
+});

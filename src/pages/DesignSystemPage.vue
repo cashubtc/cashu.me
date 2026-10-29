@@ -1518,17 +1518,14 @@
       </DsEntry>
       <DsEntry id="onchain-status">
         <!-- An on-chain receive's one Status row, in order: no deposit yet, confirming,
-             confirmed but not yet credited. Paid is the receipt's hero. -->
+             confirmed but not yet credited, then paid (a receipt shows the Paid hero instead). -->
         <div class="detail-table q-mb-md">
-          <DetailRow
+          <QuoteStatusRow
             v-for="s in onchainStates"
-            :key="s"
-            :icon="ActivityIcon"
-            label="Status"
-            value-class="detail-value--inline"
-          >
-            <PendingDots size="16px" />{{ s }}
-          </DetailRow>
+            :key="s.tone"
+            :tone="s.tone"
+            :text="s.text"
+          />
         </div>
         <PaymentStatus state="paid" label="Paid" />
       </DsEntry>
@@ -1731,6 +1728,9 @@ import { PaymentRequest, PaymentRequestTransportType } from "@cashu/cashu-ts";
 import ActivityRow from "src/components/ActivityRow.vue";
 import AmountKeypadPanel from "src/components/AmountKeypadPanel.vue";
 import ConfirmationsRow from "src/components/ConfirmationsRow.vue";
+import QuoteStatusRow, {
+  type QuoteStatusTone,
+} from "src/components/QuoteStatusRow.vue";
 import OnchainDepositLimits from "src/components/OnchainDepositLimits.vue";
 import MintReviewSummary from "src/components/MintReviewSummary.vue";
 import PwaPrompt from "src/components/PwaPrompt.vue";
@@ -1801,7 +1801,6 @@ import {
   X as XIcon,
   Gauge as GaugeIcon,
   Grid3x3 as Grid3x3Icon,
-  Activity as ActivityIcon,
   QrCode as QrCodeIcon,
   ArchiveRestore as ArchiveRestoreIcon,
   Eye as EyeIcon,
@@ -1849,6 +1848,7 @@ export default defineComponent({
     AppRating,
     BottomSheet,
     ConfirmationsRow,
+    QuoteStatusRow,
     OnchainDepositLimits,
     ChooseMint,
     CopyButton,
@@ -1922,7 +1922,6 @@ export default defineComponent({
       ZapIcon: markRaw(ZapIcon),
       XIcon: markRaw(XIcon),
       ChevronLeftIcon: markRaw(ChevronLeftIcon),
-      ActivityIcon: markRaw(ActivityIcon),
       MenuIcon: markRaw(MenuIcon),
       RefreshCwIcon: markRaw(RefreshCwIcon),
       EllipsisIcon: markRaw(EllipsisIcon),
@@ -2054,10 +2053,11 @@ export default defineComponent({
       radii: ["sm", "md", "lg", "xl", "pill"],
       keypadAmount: 1000 as number | null,
       onchainStates: [
-        "Waiting for payment",
-        "Confirming (1/3)",
-        "Issuing ecash",
-      ],
+        { tone: "waiting", text: "Waiting for payment" },
+        { tone: "confirming", text: "Confirming (1/3)" },
+        { tone: "issuing", text: "Issuing ecash" },
+        { tone: "paid", text: "Paid" },
+      ] as Array<{ tone: QuoteStatusTone; text: string }>,
       chainPending: {
         txid: "demo",
         confirmed: false,

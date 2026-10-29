@@ -1,7 +1,7 @@
 import { expect, test } from "../fixtures/test";
 import { MINT_A_URL, MINT_B_URL } from "../fixtures/mint";
 import { WalletUi } from "../pages/WalletUi";
-import { disableAutomaticChecks } from "../fixtures/ui";
+import { disableAutomaticChecks, rowAlignment } from "../fixtures/ui";
 
 const privacyLabels = [
   "Check incoming invoice",
@@ -268,4 +268,33 @@ test("startup checking can be disabled and re-enabled for an unpaid invoice", as
   await wallet.home("History");
   await expect.poll(() => wallet.balanceSats()).toBe(17);
   expect(checks).toBeGreaterThan(0);
+});
+
+// Owner 2026-10-29b, item 5: the action-row fix (a whole-pixel title line) reaches every
+// settings row that shares it; none of them moves its icon or end glyph off its text.
+test("settings rows centre their icon and end glyph on their text", async ({
+  page,
+}) => {
+  const wallet = new WalletUi(page);
+  await wallet.onboard(MINT_A_URL);
+  for (const path of ["/settings", "/settings/advanced", "/settings/backup"]) {
+    await page.goto(path);
+    const view = page.locator(".settings-view").first();
+    await expect(view.locator(".q-item").first()).toBeVisible();
+    const rows = await rowAlignment(view);
+    expect(rows.length, path).toBeGreaterThan(0);
+    for (const row of rows) {
+      if (row.icon !== null)
+        expect(Math.abs(row.icon), `${path} ${row.label}`).toBeLessThanOrEqual(
+          1
+        );
+      if (row.end !== null)
+        expect(Math.abs(row.end), `${path} ${row.label}`).toBeLessThanOrEqual(
+          1
+        );
+      expect(Number.isInteger(row.lineHeight), `${path} ${row.label}`).toBe(
+        true
+      );
+    }
+  }
 });

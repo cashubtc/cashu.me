@@ -126,7 +126,11 @@ $themes: (
         map-get($t, raised),
         color-mix(in srgb, #fff 13%, map-get($t, dark))
       )};
-    @if map-has-key($t, positive) {
+  }
+  // The green themes' teal positive (council R85), stated with the mode so it outranks the
+  // mode's own green (body.body--dark sets #4ade80 later at the same specificity, and won).
+  @if map-has-key($t, positive) {
+    body.body--dark[data-theme="#{$theme}"] {
       --q-positive: #{map-get($t, positive)};
     }
   }
