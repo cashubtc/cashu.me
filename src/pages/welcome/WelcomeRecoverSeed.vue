@@ -8,8 +8,9 @@
     <!-- Seed phrase input grid -->
     <div class="input-section">
       <div class="words-grid">
+        <!-- Each word is an outlined field whose label (Word 1, Word 2…) stays visible with
+             the word in it; the words are Latin, so they read left to right in every locale. -->
         <div v-for="index in 12" :key="index" class="word-input-wrapper">
-          <span class="word-number">{{ index }}</span>
           <q-input
             :model-value="words[index - 1]"
             @update:model-value="updateWord($event, index - 1)"
@@ -17,8 +18,9 @@
             :ref="(el) => setInputRef(el, index - 1)"
             @paste="handlePaste($event, index - 1)"
             class="word-input"
-            :placeholder="$t('WelcomeRecoverSeed.inputs.word', { index })"
+            :label="$t('WelcomeRecoverSeed.inputs.word', { index })"
             :input-attrs="{
+              dir: 'ltr',
               autocapitalize: 'none',
               autocorrect: 'off',
               autocomplete: 'off',
@@ -60,11 +62,11 @@ import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 import { validateMnemonic as validateBip39Mnemonic } from "@scure/bip39";
 import { wordlist } from "@scure/bip39/wordlists/english";
-import { i18n } from "../../boot/i18n";
+import { i18n } from "src/boot/i18n";
 
 export default {
   name: "WelcomeRecoverSeed",
-  components: { WelcomeSlideScaffold },
+  components: { CjkText, WelcomeSlideScaffold },
   setup() {
     const welcome = useWelcomeStore();
     const restore = useRestoreStore();
@@ -132,7 +134,9 @@ export default {
     const errorMsg = computed(() => {
       if (filledWords.value === 0) return "";
       if (filledWords.value < 12)
-        return `${filledWords.value}/12 words entered`;
+        return i18n.global.t("WelcomeRecoverSeed.progress.words_entered", {
+          count: filledWords.value,
+        });
       if (!validateBip39Mnemonic(mnemonic.value, wordlist)) {
         return i18n.global.t("RestoreView.actions.validate.error");
       }
@@ -182,111 +186,56 @@ export default {
 
 <style scoped>
 .input-section {
-  width: 100%;
-  max-width: 500px; /* unified */
   margin-bottom: 16px;
+  width: 100%;
 }
 
+/* Three words a row, two on phones; minmax(0, 1fr) keeps a long word inside its cell. */
 .words-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  margin-bottom: 20px;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 12px;
 }
 
 .word-input-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.word-number {
-  font-size: 0.75rem;
-  color: var(--app-text-subtle);
-  min-width: 22px;
-  text-align: end;
-  font-weight: 600;
-}
-
-.word-input {
-  flex: 1;
-  font-family: monospace;
-  font-size: 0.9rem;
-}
-
-.word-input :deep(.q-field__native) {
-  padding: 0 12px;
+  min-width: 0;
 }
 
 .word-input :deep(input) {
   font-family: monospace;
-  font-size: 0.9rem;
-}
-
-.word-input :deep(input::placeholder) {
-  color: var(--app-text-subtle);
-  font-size: 0.85rem;
 }
 
 .error-msg {
-  font-size: 0.85rem;
   color: var(--app-danger);
-  margin: 8px 0 0 0;
+  font-size: 0.85rem;
   line-height: 1.4;
+  margin: 8px 0 0;
 }
 
+/* Paste all: a 44px text action in the accent, underlined on hover. */
 .paste-btn {
-  width: auto;
-  height: auto;
-  font-weight: 500;
-  text-transform: none;
-  font-size: 0.9rem;
-  color: var(--q-primary);
-  background: transparent;
-  padding: 8px 0;
-  transition: color 0.2s ease;
+  color: var(--app-accent);
+  min-height: 44px;
+  padding: 0 4px;
 }
 
 .paste-btn:hover {
-  color: color-mix(in srgb, var(--q-primary) 80%, transparent);
-  background: transparent;
+  text-decoration: underline;
 }
 
 .disclaimer {
-  font-size: 0.85rem;
   color: var(--app-text-muted);
-  margin: 0;
+  font-size: 0.85rem;
   line-height: 1.4;
+  margin: 0;
   text-align: start;
 }
 
-/* Mobile adjustments */
 @media (max-width: 600px) {
-  .input-section {
-    max-width: 100%;
-  }
-
   .words-grid {
-    grid-template-columns: repeat(2, 1fr);
     gap: 10px;
-  }
-
-  .word-number {
-    font-size: 0.7rem;
-    min-width: 18px;
-  }
-
-  .word-input {
-    font-size: 0.85rem;
-  }
-
-  .word-input :deep(input) {
-    font-size: 0.85rem;
-  }
-
-  .paste-btn {
-    font-size: 0.85rem;
-    padding: 6px 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .disclaimer {

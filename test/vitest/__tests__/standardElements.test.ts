@@ -206,7 +206,7 @@ describe("standard elements", () => {
         [...text.matchAll(/<q-(input|field)\b(?:[^>"]|"[^"]*")*>/g)].some(
           ([tag]) => !/\s:?label=/.test(tag)
         )
-      ).filter((f) => !f.endsWith("welcome/WelcomeRecoverSeed.vue"))
+      )
     ).toEqual([]);
   });
 
@@ -570,5 +570,57 @@ describe("standard elements", () => {
       "utf8"
     );
     expect(quote).not.toMatch(/<ChainStatusRow|<ConfirmationsRow/);
+  });
+
+  // Onboarding (owner 2026-10-29, items 16, 29, 32): one column on every step, the app's own
+  // mode, and the standard outlined field.
+  const welcomeFiles = vueFiles.filter(
+    ({ file }) =>
+      file.includes("pages/welcome/") || file.endsWith("pages/WelcomePage.vue")
+  );
+  const read = (f: string) => readFileSync(join(SRC, f), "utf8");
+
+  it("welcome steps set no width or gutter of their own", () => {
+    expect(
+      welcomeFiles
+        .filter(({ text }) => /max-width:\s*(500px|32ch)|\.spacer\b/.test(text))
+        .map(({ file }) => file)
+    ).toEqual([]);
+    expect(
+      offenders((t) => /mobile-?[gG]utter|themed-?[tT]ext/.test(t))
+    ).toEqual([]);
+    expect(read("css/elements.scss")).not.toMatch(
+      /\.welcome-slide__(title|description)\s*\{[^}]*max-width/
+    );
+    const scaffold = read("components/ui/WelcomeSlideScaffold.vue");
+    expect(scaffold).toMatch(/<FlowColumn[^>]*class="q-px-md/);
+    expect(scaffold).toContain("<FlowFooter");
+    expect(read("pages/WelcomePage.vue")).toContain("<FlowFooter");
+  });
+
+  it("onboarding follows the app's mode", () => {
+    expect(read("css/base.scss")).not.toMatch(/--app-welcome-bg:\s*#/);
+    expect(read("css/elements.scss")).not.toMatch(
+      /\.welcome-surface\s*\{[^}]*--app-text/
+    );
+    expect(offenders((t) => /<BottomSheet\b[^>]*\sdark[\s>]/.test(t))).toEqual(
+      []
+    );
+    expect(read("components/BottomSheet.vue")).not.toContain(
+      "bottom-sheet--dark"
+    );
+    expect(read("pages/welcome/WelcomeSlide2.vue")).toMatch(
+      /installImage[\s\S]*\$q\.dark\.isActive/
+    );
+  });
+
+  it("the welcome seed phrase is the outlined field, masked by default", () => {
+    const seed = read("pages/welcome/WelcomeSlide3.vue");
+    expect(seed).toMatch(/<q-field\b[^>]*\soutlined[^>]*readonly-outlined/);
+    expect(seed).toContain("{{ hiddenMnemonic }}");
+    expect(seed).toMatch(/const hideMnemonic = ref\(true\)/);
+    expect(read("css/app.scss")).toMatch(
+      /readonly-outlined\s+\.q-field__control:before \{[^}]*var\(--app-field-edge\)/
+    );
   });
 });

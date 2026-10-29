@@ -854,6 +854,7 @@ export default {
     text: "Klistra in eller skriv din 12 ord långa fras för att återställa.",
     inputs: { word: "Ord { index }" },
     actions: { paste_all: "Klistra in alla" },
+    progress: { words_entered: "{count}/12 ord angivna" },
     disclaimer:
       "Din fras används endast lokalt för att härleda dina plånboksnycklar.",
   },

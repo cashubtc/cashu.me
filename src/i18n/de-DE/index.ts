@@ -865,6 +865,7 @@ export default {
     text: "Fügen Sie Ihre 12 Wörter ein oder tippen Sie sie ein, um wiederherzustellen.",
     inputs: { word: "Wort { index }" },
     actions: { paste_all: "Alle einfügen" },
+    progress: { words_entered: "{count}/12 Wörter eingegeben" },
     disclaimer:
       "Ihre Seed-Phrase wird nur lokal verwendet, um Ihre Wallet-Schlüssel abzuleiten.",
   },

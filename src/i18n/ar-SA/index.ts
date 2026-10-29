@@ -848,6 +848,7 @@ export default {
     text: "الصق أو اكتب عبارة من 12 كلمة للاستعادة.",
     inputs: { word: "الكلمة { index }" },
     actions: { paste_all: "لصق الكل" },
+    progress: { words_entered: "تم إدخال {count}/12 كلمة" },
     disclaimer: "تُستخدم عبارة الاستعادة محليًا فقط لاشتقاق مفاتيح محفظتك.",
   },
   WelcomeRestoreEcash: {

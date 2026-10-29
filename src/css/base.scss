@@ -222,12 +222,14 @@ body.body--light {
 
 // Fields on sheets and dialogs: the raised fill is lighter (dark) or greyer (light), so the
 // edge needs more weight to keep 3:1 (flamingo sheets need 43%, light sheets 49%). Flows are
-// pages (.flow-surface), so they keep the page edge.
-body.body--dark :is(.q-card:not(.flow-surface), .bottom-sheet, .q-menu) {
+// pages (.flow-surface), and so is onboarding (.welcome-surface): both keep the page edge.
+body.body--dark
+  :is(.q-card:not(.flow-surface, .welcome-surface), .bottom-sheet, .q-menu) {
   --app-field-edge: color-mix(in srgb, var(--app-text) 43%, transparent);
   --app-field-edge-hover: color-mix(in srgb, var(--app-text) 64%, transparent);
 }
-body.body--light :is(.q-card:not(.flow-surface), .bottom-sheet, .q-menu) {
+body.body--light
+  :is(.q-card:not(.flow-surface, .welcome-surface), .bottom-sheet, .q-menu) {
   --app-field-edge: color-mix(in srgb, var(--app-text) 49%, transparent);
 }
 // Mono's selection ring: a white ring on black glared at 75%; 56% still clears 3:1.
@@ -259,8 +261,8 @@ body.body--dark {
   --app-negative-text: color-mix(in srgb, #ff6b6b 60%, #fff);
 }
 body.body--light {
-  // Onboarding is designed dark (its slides use white text) in every mode.
-  --app-welcome-bg: #1d1d1d;
+  // Onboarding follows the app mode like every page (owner 2026-10-29, item 29).
+  --app-welcome-bg: var(--app-surface);
   --app-text: #111;
   --app-text-muted: rgba(0, 0, 0, 0.64);
   --app-text-subtle: rgba(0, 0, 0, 0.58);

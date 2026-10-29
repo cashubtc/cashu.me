@@ -39,32 +39,6 @@ body {
   --q-warning: var(--app-warning);
 }
 
-// Onboarding is dark in every app mode: give it the dark neutral tokens, so standard elements
-// inside it never fall back to light-mode ink.
-.welcome-surface {
-  --app-text: #fff;
-  --app-text-muted: rgba(255, 255, 255, 0.72);
-  --app-text-subtle: rgba(255, 255, 255, 0.6);
-  --app-text-disabled: rgba(255, 255, 255, 0.5);
-  --app-tint: rgba(255, 255, 255, 0.08);
-  --app-tint-strong: rgba(255, 255, 255, 0.14);
-  --app-border: rgba(255, 255, 255, 0.16);
-  --app-border-strong: rgba(255, 255, 255, 0.3);
-  // The surface tokens are resolved where they're declared (body), so a light-mode app
-  // would give onboarding's dark page light fields and cards; set the dark ones here.
-  --app-card-fill: rgba(255, 255, 255, 0.1);
-  --app-card-fill-active: rgba(255, 255, 255, 0.15);
-  --app-field-fill: rgba(255, 255, 255, 0.1);
-  --app-field-edge: rgba(255, 255, 255, 0.33);
-  --app-field-edge-hover: rgba(255, 255, 255, 0.56);
-  --app-tonal-fill: rgba(255, 255, 255, 0.1);
-  --app-tonal-fill-hover: rgba(255, 255, 255, 0.15);
-  --app-tonal-fill-pressed: rgba(255, 255, 255, 0.2);
-  --app-disabled-fill: rgba(255, 255, 255, 0.05);
-  --app-readonly-fill: rgba(255, 255, 255, 0.06);
-  --app-group-fill: rgba(255, 255, 255, 0.1);
-}
-
 // Icon in a round slot: option rows (md), sheet rows (sm), empty states (lg), onboarding (xl).
 .app-icon-circle {
   align-items: center;
@@ -386,10 +360,11 @@ button.app-badge {
   z-index: 1;
 }
 
-// Onboarding slide scaffold: a large icon in a round slot, a title and a description on the
-// slide gutter, shared by every welcome slide.
+// Onboarding slide scaffold: a large icon in a round slot, a title and a description, on the
+// one onboarding column (FlowColumn with its 16px inset), shared by every welcome slide.
+// Every block spans the column (a short paragraph never shrinks to its text and centres).
 .welcome-slide__content {
-  align-items: center;
+  align-items: stretch;
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -409,7 +384,7 @@ button.app-badge {
   font-weight: 700;
   line-height: 1.2;
   margin: 0 0 16px;
-  max-width: 500px;
+  min-width: 0;
   text-align: center;
   text-wrap: balance;
   width: 100%;
@@ -419,7 +394,7 @@ button.app-badge {
   font-size: 0.95rem;
   line-height: 1.5;
   margin: 0 0 32px;
-  max-width: 500px;
+  min-width: 0;
   text-align: center;
   text-wrap: pretty;
   width: 100%;

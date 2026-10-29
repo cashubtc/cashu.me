@@ -883,6 +883,9 @@ export default {
     actions: {
       paste_all: "Paste all",
     },
+    progress: {
+      words_entered: "{count}/12 words entered",
+    },
     disclaimer:
       "Your seed phrase is only used locally to derive your wallet keys.",
   },

@@ -848,6 +848,7 @@ export default {
     text: "วางหรือพิมพ์วลี 12 คำเพื่อกู้คืน",
     inputs: { word: "คำ { index }" },
     actions: { paste_all: "วางทั้งหมด" },
+    progress: { words_entered: "ป้อนแล้ว {count}/12 คำ" },
     disclaimer:
       "วลีสำหรับกู้คืนใช้เฉพาะในเครื่องเพื่อสร้างคีย์กระเป๋าเงินของคุณ",
   },

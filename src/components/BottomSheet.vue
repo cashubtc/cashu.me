@@ -8,7 +8,7 @@
     v-bind="inline ? { class: 'bottom-sheet--inline' } : dialogProps"
     @keydown.enter.prevent="$emit('enter')"
   >
-    <q-card class="bottom-sheet" :class="{ 'bottom-sheet--dark': dark }">
+    <q-card class="bottom-sheet">
       <!-- Header -->
       <div v-if="title" class="bottom-sheet-header">
         <IconButton
@@ -70,11 +70,6 @@ export default defineComponent({
   name: "BottomSheet",
   components: { IconButton, ChevronLeftIcon, XIcon },
   props: {
-    // Onboarding is designed dark in every mode; its sheets follow it.
-    dark: {
-      type: Boolean,
-      default: false,
-    },
     modelValue: {
       type: Boolean,
       default: false,
@@ -156,17 +151,6 @@ export default defineComponent({
 .bottom-sheet--inline .bottom-sheet {
   border-radius: 20px;
   max-height: none;
-}
-
-/* Onboarding sheets: the dark tokens in every app mode. */
-.bottom-sheet--dark {
-  --app-text: #fff;
-  --app-text-muted: rgba(255, 255, 255, 0.72);
-  --app-tint: rgba(255, 255, 255, 0.06);
-  --app-tint-strong: rgba(255, 255, 255, 0.1);
-  --app-border-strong: rgba(255, 255, 255, 0.28);
-  background: #1f1f1f;
-  color: #fff;
 }
 
 /* Header */

@@ -868,6 +868,7 @@ export default {
     text: "Kurtarmak için 12 kelimelik seed ifadenizi yapıştırın veya yazın.",
     inputs: { word: "Kelime { index }" },
     actions: { paste_all: "Tümünü yapıştır" },
+    progress: { words_entered: "{count}/12 kelime girildi" },
     disclaimer:
       "Seed ifadeniz yalnızca yerelde cüzdan anahtarlarını türetmek için kullanılır.",
   },

@@ -9,13 +9,15 @@
     @drop.prevent="dragFile"
     @dragover.prevent
   >
-    <q-card class="q-pa-none welcome-surface" style="height: 100%">
+    <!-- One shell for every step: the full screen on phones, the app column on wider screens
+         (owner 2026-10-29, item 16). Slides carry no padding; each step's column is the
+         scaffold's FlowColumn, and the footer's is FlowFooter's, so both share one edge. -->
+    <q-card class="q-pa-none welcome-shell welcome-surface">
       <q-carousel
         v-model="welcomeStore.currentSlide"
         animated
         control-color="primary"
-        class="flex-1 welcome-surface"
-        style="height: 100%"
+        class="welcome-carousel welcome-surface"
       >
         <q-carousel-slide :name="0">
           <WelcomeSlide1 />
@@ -53,53 +55,52 @@
         </q-carousel-slide>
       </q-carousel>
 
-      <div
-        class="welcome-footer welcome-surface row items-center no-wrap"
-        v-if="welcomeStore.currentSlide > 0"
-      >
-        <IconButton
-          v-if="welcomeStore.canGoPrev"
-          class="welcome-footer__back"
-          :icon="ChevronLeftIcon"
-          :icon-size="24"
-          :label="$t('WelcomePage.actions.previous.label')"
-          @click="welcomeStore.goToPrevSlide"
-        />
-        <q-btn
-          rounded
-          unelevated
-          color="primary"
-          class="welcome-footer__next btn-caps"
-          data-testid="onboarding-next"
-          :label="$t('WelcomePage.actions.next.label')"
-          :disable="!welcomeStore.canProceed"
-          @click="welcomeStore.goToNextSlide"
-          v-if="
-            welcomeStore.currentSlide > 0 && welcomeStore.currentSlide !== 2
-          "
-        />
-      </div>
+      <FlowFooter v-if="welcomeStore.currentSlide > 0" class="welcome-footer">
+        <div class="welcome-footer__row">
+          <IconButton
+            v-if="welcomeStore.canGoPrev"
+            class="welcome-footer__back"
+            :icon="ChevronLeftIcon"
+            :icon-size="24"
+            :label="$t('WelcomePage.actions.previous.label')"
+            @click="welcomeStore.goToPrevSlide"
+          />
+          <q-btn
+            rounded
+            unelevated
+            color="primary"
+            class="welcome-footer__next"
+            data-testid="onboarding-next"
+            :label="$t('WelcomePage.actions.next.label')"
+            :disable="!welcomeStore.canProceed"
+            @click="welcomeStore.goToNextSlide"
+            v-if="welcomeStore.currentSlide !== 2"
+          />
+        </div>
+      </FlowFooter>
     </q-card>
   </q-dialog>
 </template>
 
 <script lang="ts">
 import { ChevronLeft as ChevronLeftIcon } from "lucide-vue-next";
+import FlowFooter from "src/components/ui/FlowFooter.vue";
 import IconButton from "src/components/ui/IconButton.vue";
 import { onMounted, ref } from "vue";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useStorageStore } from "src/stores/storage";
-import WelcomeSlide1 from "./welcome/WelcomeSlide1.vue";
-import WelcomeSlide2 from "./welcome/WelcomeSlide2.vue";
-import WelcomeSlide3 from "./welcome/WelcomeSlide3.vue";
-import WelcomeSlideChoice from "./welcome/WelcomeSlideChoice.vue";
-import WelcomeRecoverSeed from "./welcome/WelcomeRecoverSeed.vue";
-import WelcomeMintSetup from "./welcome/WelcomeMintSetup.vue";
-import WelcomeRestoreEcash from "./welcome/WelcomeRestoreEcash.vue";
+import WelcomeSlide1 from "src/pages/welcome/WelcomeSlide1.vue";
+import WelcomeSlide2 from "src/pages/welcome/WelcomeSlide2.vue";
+import WelcomeSlide3 from "src/pages/welcome/WelcomeSlide3.vue";
+import WelcomeSlideChoice from "src/pages/welcome/WelcomeSlideChoice.vue";
+import WelcomeRecoverSeed from "src/pages/welcome/WelcomeRecoverSeed.vue";
+import WelcomeMintSetup from "src/pages/welcome/WelcomeMintSetup.vue";
+import WelcomeRestoreEcash from "src/pages/welcome/WelcomeRestoreEcash.vue";
 
 export default {
   name: "WelcomePage",
   components: {
+    FlowFooter,
     IconButton,
     WelcomeSlide1,
     WelcomeSlide2,
@@ -149,29 +150,44 @@ export default {
 </script>
 
 <style scoped>
-.q-card {
+/* Phones: the whole screen. Wider: the app column (560px, 640px from 1024px) less a 24px
+   margin each side, whatever the step holds, so no step is narrower than another. */
+.q-card.welcome-shell {
   display: flex;
   flex-direction: column;
   height: 100%;
+  max-width: none;
+  width: 100%;
+}
+@media (min-width: 600px) {
+  .q-card.welcome-shell {
+    width: min(calc(100vw - 48px), var(--app-column));
+  }
 }
 
-.q-carousel {
+.welcome-carousel {
   flex: 1;
+  height: auto;
+  min-height: 0;
+}
+.welcome-carousel :deep(.q-carousel__slide) {
+  padding: 0;
 }
 
-.welcome-footer {
+/* Back and Next on the footer's column: Back 48px, then Next takes the rest. */
+.welcome-footer__row {
+  align-items: center;
+  display: flex;
   gap: 12px;
-  padding: 12px 16px 24px;
 }
-
 .welcome-footer__back {
-  width: 48px;
+  flex-shrink: 0;
   height: 48px;
+  width: 48px;
 }
-
 .welcome-footer__next {
   flex: 1;
-  max-width: 500px;
   min-height: 52px;
+  min-width: 0;
 }
 </style>

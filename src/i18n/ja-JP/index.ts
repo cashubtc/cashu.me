@@ -851,6 +851,7 @@ export default {
     text: "復元のために12語のシードフレーズを貼り付けるか入力してください。",
     inputs: { word: "単語 { index }" },
     actions: { paste_all: "すべて貼り付け" },
+    progress: { words_entered: "{count}/12 語を入力済み" },
     disclaimer:
       "シードフレーズはローカルでのみ使用され、ウォレットの鍵を導出します。",
   },

@@ -486,10 +486,13 @@ button:focus-visible {
   min-width: 44px !important;
 }
 
-// Onboarding surface: the theme surface in dark mode, a fixed dark grey in light mode.
+// Onboarding surface: the page surface of the current theme and mode; its text and fields
+// take the body's tokens like any page.
 body[data-theme] .welcome-surface,
 .welcome-surface {
+  --flow-surface: var(--app-welcome-bg);
   background: var(--app-welcome-bg) !important;
+  color: var(--app-text);
 }
 
 // The select field chip (SheetSelect); the mint picker has its own recipe (.mint-picker).
@@ -1054,7 +1057,7 @@ body .q-field--outlined:not(.q-field--error) .q-field__label {
   color: var(--app-text-muted);
 }
 body.body--dark
-  :is(.q-card:not(.flow-surface), .bottom-sheet, .q-menu)
+  :is(.q-card:not(.flow-surface, .welcome-surface), .bottom-sheet, .q-menu)
   .q-field--outlined:not(.q-field--error)
   .q-field__label,
 body
@@ -1080,6 +1083,14 @@ body
 }
 body .q-field--outlined.q-field--readonly .q-field__control:before {
   border-color: transparent;
+}
+// A read-only value that is still the step's field (the welcome seed phrase): it keeps the
+// field's edge, over the quieter read-only fill (owner 2026-10-29, item 32).
+body
+  .q-field--outlined.q-field--readonly.readonly-outlined
+  .q-field__control:before {
+  border-color: var(--app-field-edge);
+  border-style: solid;
 }
 // A lock on the end edge says "can't be edited" without relying on the surface alone. A field
 // with its own end action (Copy on the Lightning address) keeps that action instead, so the

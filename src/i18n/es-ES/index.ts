@@ -860,6 +860,7 @@ export default {
     text: "Pega o escribe tu frase semilla de 12 palabras para recuperar.",
     inputs: { word: "Palabra { index }" },
     actions: { paste_all: "Pegar todo" },
+    progress: { words_entered: "{count}/12 palabras introducidas" },
     disclaimer:
       "Tu frase semilla solo se usa localmente para derivar las claves de tu billetera.",
   },

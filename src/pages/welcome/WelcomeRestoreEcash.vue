@@ -31,7 +31,6 @@ export default {
 <style scoped>
 .restore-content {
   width: 100%;
-  max-width: 500px;
 }
 
 /* Override RestoreView component padding to align with title */
@@ -50,12 +49,5 @@ export default {
 
 .restore-content :deep(.q-item__section) {
   padding: 0 !important;
-}
-
-/* Mobile adjustments */
-@media (max-width: 600px) {
-  .restore-content {
-    width: 100%;
-  }
 }
 </style>

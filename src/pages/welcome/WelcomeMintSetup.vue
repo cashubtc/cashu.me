@@ -184,12 +184,11 @@ export default {
 </script>
 
 <style scoped>
-/* The step's own content: one column, as wide as the slide's text, every block on its edges. */
+/* The step's own content: the slide's column, every block on its edges. */
 .mint-setup-body {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  max-width: 500px;
   width: 100%;
 }
 .mint-setup-section {

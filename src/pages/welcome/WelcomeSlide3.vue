@@ -8,17 +8,28 @@
   >
     <!-- Seed Phrase Section -->
     <div class="seed-section">
-      <!-- The outlined field, read-only, with its label floating above the words (owner,
-           2026-10-29); its own Show and Copy actions stand in for the lock glyph. -->
+      <!-- The outlined field, read-only but keeping its edge (readonly-outlined), with its
+           label floating above the words (owner, 2026-10-29); its own Show and Copy actions
+           stand in for the lock glyph. The words show masked until Show. -->
       <q-field
         outlined
         readonly
         stack-label
-        class="seed-field"
+        class="seed-field readonly-outlined"
         :label="$t('WelcomeSlide3.inputs.seed_phrase.label')"
       >
         <template #control>
-          <div class="seed-text">{{ hiddenMnemonic }}</div>
+          <div
+            class="seed-text"
+            dir="ltr"
+            role="textbox"
+            aria-readonly="true"
+            aria-multiline="true"
+            :aria-label="$t('WelcomeSlide3.inputs.seed_phrase.label')"
+            aria-describedby="welcome-seed-caption"
+          >
+            {{ hiddenMnemonic }}
+          </div>
         </template>
         <template #append>
           <IconButton
@@ -34,6 +45,7 @@
             <EyeOffIcon v-else :size="20" />
           </IconButton>
           <CopyButton
+            class="touch-target-44"
             :value="walletStore.mnemonic"
             :tooltip="$t('global.actions.copy.label')"
           />
@@ -41,6 +53,7 @@
       </q-field>
 
       <CjkText
+        id="welcome-seed-caption"
         tag="p"
         class="seed-caption"
         :text="$t('WelcomeSlide3.inputs.seed_phrase.caption')"
@@ -135,12 +148,6 @@ export default {
   margin-bottom: 24px;
 }
 
-/* Unified content width */
-.seed-section,
-.checkbox-section {
-  max-width: 500px;
-}
-
 .seed-field {
   margin-bottom: 12px;
 }
@@ -180,21 +187,9 @@ export default {
   line-height: 1.4;
 }
 
-/* Mobile adjustments */
 @media (max-width: 600px) {
   .seed-text {
     font-size: 0.85rem;
-    padding-inline-end: 50px;
-  }
-
-  .seed-actions {
-    top: 12px;
-    inset-inline-end: 8px;
-  }
-
-  .action-btn {
-    width: 28px;
-    height: 28px;
   }
 }
 </style>

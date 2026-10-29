@@ -887,6 +887,7 @@ export default {
     actions: {
       paste_all: "Colar tudo",
     },
+    progress: { words_entered: "{count}/12 palavras inseridas" },
     disclaimer:
       "Sua frase de recuperação é usada apenas localmente para derivar as chaves da sua carteira.",
   },

@@ -1,22 +1,26 @@
 <!-- src/components/WelcomeSlide1.vue -->
 <template>
-  <div class="welcome-slide">
-    <!-- Logo -->
-    <div class="logo">
-      <transition appear enter-active-class="animated fadeIn">
-        <img src="/clean.png" alt="Cashu Logo" class="logo-image" />
-      </transition>
-    </div>
+  <WelcomeSlideScaffold
+    class="welcome-start"
+    :title="$t('WelcomeSlide1.title')"
+    :text="$t('WelcomeSlide1.text')"
+  >
+    <template #hero>
+      <div class="logo">
+        <transition appear enter-active-class="animated fadeIn">
+          <img
+            src="/clean.png"
+            alt="Cashu Logo"
+            class="logo-image"
+            width="80"
+            height="80"
+          />
+        </transition>
+      </div>
+    </template>
 
-    <!-- Title -->
-    <h1 class="title">{{ $t("WelcomeSlide1.title") }}</h1>
-
-    <!-- Description -->
-    <CjkText tag="p" class="description" :text="$t('WelcomeSlide1.text')" />
-
-    <!-- Welcome actions -->
-    <div class="welcome-actions">
-      <!-- Next button -->
+    <template #footer>
+      <!-- Start, the terms it agrees to, then the language: on the footer's column. -->
       <q-btn
         color="primary"
         rounded
@@ -24,44 +28,39 @@
         data-testid="onboarding-start"
         :label="$t('WelcomePage.actions.next.label')"
         @click="goToNext"
-        class="welcome-next-btn"
+        class="full-width welcome-next-btn"
       />
 
-      <!-- Terms agreement -->
-      <div class="terms-agreement">
-        <i18n-t
-          keypath="WelcomeSlide1.terms_agreement"
-          tag="p"
-          class="terms-text"
-        >
-          <template #terms>
-            <span class="terms-link" @click="showTermsSheet">{{
-              $t("WelcomeSlide4.title")
-            }}</span>
-          </template>
-        </i18n-t>
-      </div>
-    </div>
-
-    <!-- Language selector at bottom -->
-    <div class="language-section">
-      <button
-        type="button"
-        class="language-trigger"
-        aria-haspopup="listbox"
-        :aria-expanded="showLanguageMenu"
-        @click="toggleLanguageMenu"
+      <i18n-t
+        keypath="WelcomeSlide1.terms_agreement"
+        tag="p"
+        class="terms-text"
       >
-        <GlobeIcon :size="16" class="language-icon" />
-        <span class="language-text">{{ selectedLanguage }}</span>
-        <ChevronDownIcon :size="16" class="language-icon" />
-      </button>
-    </div>
+        <template #terms>
+          <button type="button" class="terms-link" @click="showTermsSheet">
+            {{ $t("WelcomeSlide4.title") }}
+          </button>
+        </template>
+      </i18n-t>
 
-    <!-- Language picker: the shared sheet, in the onboarding's dark palette. -->
+      <div class="language-section">
+        <button
+          type="button"
+          class="language-trigger"
+          aria-haspopup="listbox"
+          :aria-expanded="showLanguageMenu"
+          @click="toggleLanguageMenu"
+        >
+          <GlobeIcon :size="16" class="language-icon" />
+          <span class="language-text">{{ selectedLanguage }}</span>
+          <ChevronDownIcon :size="16" class="language-icon" />
+        </button>
+      </div>
+    </template>
+
+    <!-- Language picker: the shared sheet (teleported), in the app's own mode. -->
     <BottomSheet
       v-model="showLanguageMenu"
-      dark
       :title="$t('Settings.language.title')"
     >
       <div
@@ -82,17 +81,17 @@
       </div>
     </BottomSheet>
 
-    <!-- Terms of Service: the shared sheet, in the onboarding's dark palette. -->
-    <BottomSheet v-model="showTerms" dark :title="$t('WelcomeSlide4.title')">
+    <!-- Terms of Service: the shared sheet (teleported), in the app's own mode. -->
+    <BottomSheet v-model="showTerms" :title="$t('WelcomeSlide4.title')">
       <div class="terms-content">
         <TermsOfServiceText class="terms-text-content" />
       </div>
     </BottomSheet>
-  </div>
+  </WelcomeSlideScaffold>
 </template>
 
 <script lang="ts">
-import CjkText from "src/components/ui/CjkText.vue";
+import WelcomeSlideScaffold from "src/components/ui/WelcomeSlideScaffold.vue";
 import { LANGUAGE_OPTIONS, languageLabel } from "src/js/languages";
 import {
   ChevronDown as ChevronDownIcon,
@@ -106,7 +105,7 @@ import TermsOfServiceText from "src/components/TermsOfServiceText.vue";
 export default {
   name: "WelcomeSlide1",
   components: {
-    CjkText,
+    WelcomeSlideScaffold,
     ChevronDownIcon,
     GlobeIcon,
     BottomSheet,
@@ -194,129 +193,102 @@ export default {
 </script>
 
 <style scoped>
-.welcome-slide {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  height: 100%;
-  background: var(--app-welcome-bg);
-  color: var(--app-text);
-  padding: 40px 0 24px;
-  box-sizing: border-box;
-  text-align: center;
+/* The first step's hero sits in the middle of the screen, above its own footer. */
+.welcome-start :deep(.welcome-slide__content) {
+  justify-content: center;
+}
+.welcome-start :deep(.welcome-slide__title) {
+  /* A step larger than later steps' titles, and smaller on narrow phones, so a long
+     localized title keeps the page margins (council R85-R87). */
+  font-size: clamp(1.75rem, 8vw, 2.2rem);
+  letter-spacing: -0.02em;
+}
+.welcome-start :deep(.welcome-slide__description) {
+  font-size: 1.1rem;
+  hyphens: manual;
+  margin-bottom: 0;
 }
 
 .logo {
-  margin-top: auto;
-  margin-bottom: 30px;
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background: var(--app-tint-strong);
-  display: flex;
-  justify-content: center;
   align-items: center;
+  background: var(--app-tint-strong);
+  border-radius: 50%;
+  display: flex;
+  height: 120px;
+  justify-content: center;
+  margin-bottom: 10px;
+  width: 120px;
 }
 
 .logo-image {
-  width: 80px;
-  height: 80px;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
-}
-
-.title {
-  /* A step smaller on narrow phones, so a long localized title keeps the page margins
-     (Arabic and Chinese nearly touched the edges, council R85-R87). */
-  font-size: clamp(1.75rem, 8vw, 2.2rem);
-  font-weight: 700;
-  margin: 0 0 20px 0;
-  color: var(--app-text);
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-}
-
-.description {
-  font-size: 1.1rem;
-  line-height: 1.5;
-  color: var(--app-text-muted);
-  margin: 0 auto auto;
-  padding-bottom: 32px;
-  max-width: 32ch;
-  text-align: center;
-  hyphens: manual;
-  text-wrap: pretty;
-}
-
-/* Unified content width */
-.title,
-.welcome-actions,
-.language-section {
-  width: 100%;
-  max-width: 500px;
-  margin-top: 12px;
-  /* Clear of the screen edge and the home indicator (council R89). */
-  padding-bottom: max(12px, env(safe-area-inset-bottom));
-}
-
-.welcome-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  width: 100%;
+  height: 80px;
+  width: 80px;
 }
 
 .welcome-next-btn {
-  width: 100%;
-  height: 52px;
-  font-weight: 600;
-  text-transform: none;
-  font-size: 1.0625rem;
-  border-radius: 26px;
-}
-
-.terms-agreement {
-  margin-top: 16px;
-  text-align: center;
+  min-height: 52px;
 }
 
 .terms-text {
-  font-size: 0.85rem;
   color: var(--app-text-muted);
-  margin: 0;
+  font-size: 0.85rem;
   line-height: 1.4;
+  margin: 16px 0 0;
+  text-align: center;
 }
 
+/* The terms opener is a button that reads as an inline link: the accent, underlined. */
 .terms-link {
+  background: none;
+  border: 0;
+  border-radius: 2px;
   color: var(--app-accent);
   cursor: pointer;
+  font: inherit;
+  padding: 0;
   text-decoration: underline;
-  transition: color 0.2s ease;
+  text-underline-offset: 2px;
 }
 
 .terms-link:hover {
-  color: color-mix(in srgb, var(--q-primary) 80%, transparent);
+  text-decoration-thickness: 2px;
 }
 
-/* Language trigger button */
+.terms-link:focus-visible {
+  outline: 2px solid var(--app-accent);
+  outline-offset: 2px;
+}
+
+.language-section {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+/* Language trigger: a 44px target in muted ink. */
 .language-trigger {
+  align-items: center;
   background: none;
   border: 0;
-  font: inherit;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  border-radius: var(--app-radius-md);
   color: var(--app-text-muted);
   cursor: pointer;
-  transition: color 0.2s ease;
+  display: flex;
+  font: inherit;
+  gap: 8px;
+  justify-content: center;
+  min-height: 44px;
   padding: 8px 16px;
-  border-radius: var(--app-radius-md);
 }
 
 .language-trigger:hover {
-  color: var(--app-text-muted);
+  color: var(--app-text);
+}
+
+.language-trigger:focus-visible {
+  outline: 2px solid var(--app-accent);
+  outline-offset: 2px;
 }
 
 .language-text {
@@ -340,19 +312,5 @@ export default {
 
 .terms-text-content {
   padding: 0 4px;
-}
-
-.language-section {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 10px 0;
-  flex-shrink: 0;
-}
-
-/* Animation */
-.animated.bounce {
-  animation-duration: 0.8s;
-  animation-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 </style>

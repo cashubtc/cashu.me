@@ -1,9 +1,9 @@
 <!-- src/components/WelcomeSlide2.vue -->
 <template>
-  <div class="pwa-slide">
-    <!-- Main content area -->
-    <div class="content">
-      <!-- Header Image -->
+  <WelcomeSlideScaffold class="pwa-slide" :title="$t('WelcomeSlide2.title')">
+    <!-- The hero: the installed check, or the photograph in a full-column frame 200px tall
+         (the whole 3:2 picture contained, never cropped), in the app's mode. -->
+    <template #hero>
       <div
         class="header-image"
         :class="{ centered: isInstalling || wasInstalled }"
@@ -11,11 +11,13 @@
         <transition v-if="isPWA()" appear enter-active-class="animated fadeIn">
           <CircleCheckIcon :size="48" class="text-positive" />
         </transition>
-        <div v-else class="pwa-image-wrapper">
+        <div v-else class="pwa-image-frame">
           <img
-            src="/pwa-example.jpg"
+            :src="installImage"
             :alt="$t('WelcomeSlide2.alt.pwa_example')"
             class="pwa-image"
+            width="1200"
+            height="800"
           />
           <div v-if="isInstalling" class="installing-overlay">
             <PendingDots size="48px" />
@@ -25,115 +27,109 @@
           </div>
         </div>
       </div>
+    </template>
 
-      <!-- Title -->
-      <h1 class="title">{{ $t("WelcomeSlide2.title") }}</h1>
+    <!-- Content based on PWA status -->
+    <div
+      v-if="!isPWA()"
+      class="instructions"
+      :class="{ 'fade-out': isInstalling }"
+    >
+      <div class="q-mb-md" v-if="canPromptInstall">
+        <q-btn color="primary" rounded @click="promptInstall">
+          <SquarePlusIcon :size="20" class="q-mr-sm" />
+          {{ $t("WalletPage.install.text") }}
+        </q-btn>
+      </div>
+      <CjkText
+        v-if="!wasInstalled"
+        tag="p"
+        class="intro-text"
+        :text="$t('WelcomeSlide2.instruction.intro.text')"
+      />
 
-      <!-- Content based on PWA status -->
-      <div
-        v-if="!isPWA()"
-        class="instructions"
-        :class="{ 'fade-out': isInstalling }"
-      >
-        <div class="q-mb-md" v-if="canPromptInstall">
-          <q-btn color="primary" rounded @click="promptInstall">
-            <SquarePlusIcon :size="20" class="q-mr-sm" />
-            {{ $t("WalletPage.install.text") }}
-          </q-btn>
-        </div>
-        <CjkText
-          v-if="!wasInstalled"
-          tag="p"
-          class="intro-text"
-          :text="$t('WelcomeSlide2.instruction.intro.text')"
-        />
-
-        <!-- Android Instructions -->
-        <div v-if="!wasInstalled && !isIos" class="platform-section">
-          <h3 class="platform-title">
-            {{ $t("WelcomeSlide2.instruction.android.title") }}
-          </h3>
-          <div class="instruction-steps">
-            <div class="step">
-              <EllipsisVerticalIcon :size="18" class="step-icon" />
-              <span>{{
-                $t("WelcomeSlide2.instruction.android.step1.text")
-              }}</span>
-            </div>
-            <div class="step">
-              <SquarePlusIcon :size="18" class="step-icon" />
-              <i18n-t
-                keypath="WelcomeSlide2.instruction.android.step2.text"
-                tag="span"
-              >
-                <template v-slot:buttonText>
-                  <strong>{{
-                    $t("WelcomeSlide2.instruction.android.step2.buttonText")
-                  }}</strong>
-                </template>
-              </i18n-t>
-            </div>
+      <!-- Android Instructions -->
+      <div v-if="!wasInstalled && !isIos" class="platform-section">
+        <h3 class="platform-title">
+          {{ $t("WelcomeSlide2.instruction.android.title") }}
+        </h3>
+        <div class="instruction-steps">
+          <div class="step">
+            <EllipsisVerticalIcon :size="18" class="step-icon" />
+            <span>{{
+              $t("WelcomeSlide2.instruction.android.step1.text")
+            }}</span>
+          </div>
+          <div class="step">
+            <SquarePlusIcon :size="18" class="step-icon" />
+            <i18n-t
+              keypath="WelcomeSlide2.instruction.android.step2.text"
+              tag="span"
+            >
+              <template v-slot:buttonText>
+                <strong>{{
+                  $t("WelcomeSlide2.instruction.android.step2.buttonText")
+                }}</strong>
+              </template>
+            </i18n-t>
           </div>
         </div>
+      </div>
 
-        <!-- iOS Instructions -->
-        <div v-if="!wasInstalled && !isAndroid" class="platform-section">
-          <h3 class="platform-title">
-            {{ $t("WelcomeSlide2.instruction.ios.title") }}
-          </h3>
-          <div class="instruction-steps">
-            <div class="step">
-              <ShareIcon :size="18" class="step-icon" />
-              <span>{{ $t("WelcomeSlide2.instruction.ios.step1.text") }}</span>
-            </div>
-            <div class="step">
-              <SquarePlusIcon :size="18" class="step-icon" />
-              <i18n-t
-                keypath="WelcomeSlide2.instruction.ios.step2.text"
-                tag="span"
-              >
-                <template v-slot:buttonText>
-                  <strong>{{
-                    $t("WelcomeSlide2.instruction.ios.step2.buttonText")
-                  }}</strong>
-                </template>
-              </i18n-t>
-            </div>
+      <!-- iOS Instructions -->
+      <div v-if="!wasInstalled && !isAndroid" class="platform-section">
+        <h3 class="platform-title">
+          {{ $t("WelcomeSlide2.instruction.ios.title") }}
+        </h3>
+        <div class="instruction-steps">
+          <div class="step">
+            <ShareIcon :size="18" class="step-icon" />
+            <span>{{ $t("WelcomeSlide2.instruction.ios.step1.text") }}</span>
+          </div>
+          <div class="step">
+            <SquarePlusIcon :size="18" class="step-icon" />
+            <i18n-t
+              keypath="WelcomeSlide2.instruction.ios.step2.text"
+              tag="span"
+            >
+              <template v-slot:buttonText>
+                <strong>{{
+                  $t("WelcomeSlide2.instruction.ios.step2.buttonText")
+                }}</strong>
+              </template>
+            </i18n-t>
           </div>
         </div>
-
-        <CjkText
-          v-if="!wasInstalled"
-          tag="p"
-          class="outro-text"
-          :text="$t('WelcomeSlide2.instruction.outro.text')"
-        />
       </div>
 
-      <!-- Success message when PWA is installed or installation confirmed -->
-      <div v-if="isPWA() || wasInstalled" class="success-message">
-        <transition appear enter-active-class="animated fadeIn">
-          <h3 class="success-title">
-            {{ $t("WelcomeSlide2.pwa.success.title") }}
-          </h3>
-        </transition>
-        <CjkText
-          tag="p"
-          v-if="isPWA()"
-          class="success-text"
-          :text="$t('WelcomeSlide2.pwa.success.text')"
-        />
-        <CjkText
-          tag="p"
-          v-else
-          class="success-text"
-          :text="$t('WelcomeSlide2.pwa.success.nextSteps')"
-        />
-      </div>
+      <CjkText
+        v-if="!wasInstalled"
+        tag="p"
+        class="outro-text"
+        :text="$t('WelcomeSlide2.instruction.outro.text')"
+      />
     </div>
 
-    <!-- Spacer to match step 1's controls height -->
-    <div class="spacer"></div>
+    <!-- Success message when PWA is installed or installation confirmed -->
+    <div v-if="isPWA() || wasInstalled" class="success-message">
+      <transition appear enter-active-class="animated fadeIn">
+        <h3 class="success-title">
+          {{ $t("WelcomeSlide2.pwa.success.title") }}
+        </h3>
+      </transition>
+      <CjkText
+        tag="p"
+        v-if="isPWA()"
+        class="success-text"
+        :text="$t('WelcomeSlide2.pwa.success.text')"
+      />
+      <CjkText
+        tag="p"
+        v-else
+        class="success-text"
+        :text="$t('WelcomeSlide2.pwa.success.nextSteps')"
+      />
+    </div>
 
     <!-- PWA Prompts -->
     <PwaPrompt
@@ -150,7 +146,7 @@
         !isIos
       "
     />
-  </div>
+  </WelcomeSlideScaffold>
 </template>
 
 <script lang="ts">
@@ -163,7 +159,9 @@ import {
   SquarePlus as SquarePlusIcon,
 } from "lucide-vue-next";
 import { ref, onMounted, onBeforeUnmount, computed } from "vue";
+import { useQuasar } from "quasar";
 import PwaPrompt from "src/components/PwaPrompt.vue";
+import WelcomeSlideScaffold from "src/components/ui/WelcomeSlideScaffold.vue";
 
 export default {
   name: "WelcomeSlide2",
@@ -175,8 +173,16 @@ export default {
     EllipsisVerticalIcon,
     ShareIcon,
     PwaPrompt,
+    WelcomeSlideScaffold,
   },
   setup() {
+    const $q = useQuasar();
+    // The app's mode, not the OS's: the two can differ.
+    // The dark and light photographs are not in public/ yet; both modes show the one we have.
+    const installImage = computed(() =>
+      $q.dark.isActive ? "/pwa-example.jpg" : "/pwa-example.jpg"
+    );
+
     const isPWA = () => {
       return (
         window.matchMedia("(display-mode: standalone)").matches ||
@@ -277,6 +283,7 @@ export default {
     });
 
     return {
+      installImage,
       isPWA,
       canPromptInstall,
       promptInstall,
@@ -290,117 +297,85 @@ export default {
 </script>
 
 <style scoped>
-.pwa-slide {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
-  background: var(--app-welcome-bg);
-  color: var(--app-text);
-  padding: 40px 20px 20px 20px;
-  box-sizing: border-box;
-}
-
-.content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  flex: 1;
-}
-
-.spacer {
-  height: 76px; /* Height of controls (36px) + padding (20px) + gap (20px) */
-  flex-shrink: 0;
-}
-
 .header-image {
-  margin-bottom: 20px;
   display: flex;
   justify-content: center;
-  align-items: center;
-}
-
-.header-image {
   transition: margin-top 0.45s ease-in-out;
+  width: 100%;
 }
 
 .header-image.centered {
   margin-top: 15vh;
 }
 
-.pwa-image {
-  max-width: 100%;
-  max-height: 200px;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-}
-
-.pwa-image-wrapper {
+/* The photograph's frame: the full column, 200px tall, reserved before the image decodes. */
+.pwa-image-frame {
+  display: flex;
+  height: 200px;
+  justify-content: center;
   position: relative;
+  width: 100%;
 }
 
+.pwa-image {
+  height: 100%;
+  object-fit: contain;
+  width: 100%;
+}
+
+/* "Installing" over the photograph: on its own opaque page-coloured backing, never on bare
+   photo pixels. */
 .installing-overlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -65%);
+  align-items: center;
+  background: var(--app-welcome-bg);
+  border-radius: var(--app-radius-lg);
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 8px;
+  left: 50%;
+  padding: 16px 24px;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .installing-text {
+  color: var(--app-text);
   font-size: 0.9rem;
-  color: var(--app-text-muted);
 }
 
-/* The title shares the instructions' start edge (a centred title over start-aligned body
-   read as two layouts on one screen). */
-.title {
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin: 0 0 16px 0;
-  color: var(--app-text);
-  line-height: 1.2;
-  max-width: 500px;
+/* Instructions and the success message sit on the column's start edge. */
+.instructions,
+.success-message {
   text-align: start;
   width: 100%;
 }
 
-.instructions {
-  max-width: 500px;
-  width: 100%;
-}
-
 .instructions.fade-out {
-  opacity: 0;
   height: 0;
   margin: 0;
+  opacity: 0;
   overflow: hidden;
   transition: opacity 0.3s ease, height 0.3s ease, margin 0.3s ease;
 }
 
 .intro-text {
+  color: var(--app-text-muted);
   font-size: 0.95rem;
   line-height: 1.5;
-  color: var(--app-text-muted);
-  margin: 0 0 20px 0;
-  text-align: start;
+  margin: 0 0 20px;
 }
 
 .platform-section {
   margin-bottom: 16px;
-  text-align: start;
 }
 
 .platform-title {
+  color: var(--app-text);
   font-size: 1rem;
   font-weight: 600;
-  color: var(--app-text);
-  margin: 0 0 8px 0;
+  line-height: 1.4;
+  margin: 0 0 8px;
 }
 
 .instruction-steps {
@@ -410,70 +385,42 @@ export default {
 }
 
 .step {
-  display: flex;
   align-items: flex-start;
-  gap: 10px;
-  font-size: 0.9rem;
-  line-height: 1.4;
   color: var(--app-text-muted);
+  display: flex;
+  font-size: 0.9rem;
+  gap: 10px;
+  line-height: 1.4;
 }
 
 .step-icon {
-  color: var(--q-primary);
-  margin-top: 1px;
+  color: var(--app-accent);
   flex-shrink: 0;
+  margin-top: 1px;
 }
 
 .outro-text {
+  color: var(--app-text-muted);
   font-size: 0.9rem;
   line-height: 1.4;
-  color: var(--app-text-muted);
-  margin: 16px 0 0 0;
-  text-align: start;
-}
-
-.success-message {
-  max-width: 500px;
-}
-
-/* Unified content width */
-.title,
-.instructions,
-.success-message {
-  width: 100%;
-  max-width: 500px;
+  margin: 16px 0 0;
 }
 
 .success-title {
+  color: var(--app-text);
   font-size: 1.4rem;
   font-weight: 600;
-  color: var(--app-text);
-  margin: 0 0 15px 0;
+  margin: 0 0 15px;
 }
 
 .success-text {
+  color: var(--app-text-muted);
   font-size: 0.95rem;
   line-height: 1.4;
-  color: var(--app-text-muted);
   margin: 0;
 }
 
-/* Mobile adjustments */
 @media (max-width: 600px) {
-  /* The carousel slide already insets 16px: the text sits on the shared 16px gutter with
-     the footer CTA (32px read as a different page). */
-  .pwa-slide {
-    padding: 24px 0 16px;
-  }
-
-  .title {
-    font-size: 1.6rem;
-  }
-
-  .instructions {
-    max-width: 100%;
-  }
-
   .intro-text,
   .outro-text {
     font-size: 0.9rem;
@@ -488,7 +435,6 @@ export default {
   }
 }
 
-/* Animations */
 .animated.bounceIn {
   animation-duration: 0.8s;
 }

@@ -889,6 +889,7 @@ export default {
     actions: {
       paste_all: "Vložit vše",
     },
+    progress: { words_entered: "Zadáno slov: {count}/12" },
     disclaimer:
       "Vaše seed fráze se používá pouze lokálně pro odvození klíčů peněženky.",
   },

@@ -840,6 +840,7 @@ export default {
     text: "粘贴或输入您的 12 个词种子短语以进行恢复。",
     inputs: { word: "第 { index } 个词" },
     actions: { paste_all: "全部粘贴" },
+    progress: { words_entered: "已输入 {count}/12 个词" },
     disclaimer: "您的种子短语仅在本地使用，用于派生您的钱包密钥。",
   },
   WelcomeRestoreEcash: {

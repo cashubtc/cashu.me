@@ -4,8 +4,6 @@
     :icon="WalletIcon"
     :title="$t('WelcomeSlideChoice.title')"
     :text="$t('WelcomeSlideChoice.text')"
-    themed-text
-    :mobile-gutter="false"
   >
     <!-- Options -->
     <div class="options">
@@ -84,7 +82,8 @@ export default {
 </script>
 
 <style scoped>
-/* Both choices are the same height whether or not a caption wraps (council R80). */
+/* Both choices are the same height whether or not a caption wraps (council R80); larger
+   text grows them. */
 .welcome-option {
   min-height: 88px;
 }
@@ -94,7 +93,6 @@ export default {
   flex-direction: column;
   gap: 12px;
   width: 100%;
-  max-width: 500px;
 }
 
 .chevron {

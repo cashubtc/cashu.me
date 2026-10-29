@@ -368,6 +368,26 @@
           label="Relay"
           class="q-mb-md"
         />
+        <!-- Read-only but still the step's field (the welcome seed phrase): it keeps the edge.
+             A masked placeholder only, never a real phrase. -->
+        <q-field
+          outlined
+          readonly
+          stack-label
+          label="Seed phrase"
+          class="readonly-outlined q-mb-md"
+        >
+          <template #control>
+            <div class="ds-seed-mask" dir="ltr">
+              ****** ****** ****** ****** ****** ****** ****** ****** ******
+              ****** ****** ******
+            </div>
+          </template>
+          <template #append>
+            <IconButton label="Show seed phrase" :icon="EyeIcon" />
+            <CopyButton class="touch-target-44" value="" tooltip="Copy" />
+          </template>
+        </q-field>
         <q-input
           outlined
           disable
@@ -1558,14 +1578,24 @@
       </DsEntry>
       <DsEntry id="welcome-slide">
         <div class="ds-contain ds-welcome welcome-surface">
+          <!-- One column for the body and the footer (16px each side), in the app's mode. -->
           <WelcomeSlideScaffold
             :icon="KeyRoundIcon"
             title="Back up your seed phrase"
-            text="Write these words down and keep them somewhere safe."
+            text="Write these words down and keep them somewhere safe. Anyone with them can spend your funds, so never share them or type them into a website."
           >
-            <q-btn rounded unelevated color="primary" class="full-width"
-              >Continue</q-btn
+            <OptionRow
+              icon-size="sm"
+              label="Restore a wallet"
+              caption="From a 12 word seed phrase"
             >
+              <template #icon><ZapIcon :size="20" /></template>
+            </OptionRow>
+            <template #footer>
+              <q-btn rounded unelevated color="primary" class="full-width"
+                >Next</q-btn
+              >
+            </template>
           </WelcomeSlideScaffold>
         </div>
       </DsEntry>
@@ -2430,7 +2460,12 @@ body.body--light .ds-light-variant--l3 {
   transform: translateZ(0);
 }
 .ds-welcome {
-  height: 460px;
+  height: 560px;
+}
+.ds-seed-mask {
+  font-family: monospace;
+  line-height: 1.8;
+  padding: 2px 0 12px;
 }
 /* Scrolling text fades out at the bottom edge, so a cut line reads as "more below". */
 .ds-scroll {

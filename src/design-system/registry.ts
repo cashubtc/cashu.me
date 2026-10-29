@@ -179,7 +179,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "q-input outlined · src/css/app.scss field edge and fill tokens",
     usage: { text: "<q-input" },
     example: `<q-input v-model="url" outlined label="Mint URL" />\n<q-input v-model="review" outlined type="textarea" autogrow label="Review (optional)" />`,
-    note: 'One outlined field (textarea variant: type="textarea" autogrow). The label stays visible with content; 16px inset; edge 33% on the page, 43% on sheets; focus in the accent. Paste, Scan and Clear sit inside the field (ParseInputComponent).',
+    note: 'One outlined field (textarea variant: type="textarea" autogrow). The label stays visible with content; 16px inset; edge 33% on the page, 43% on sheets; focus in the accent. Paste, Scan and Clear sit inside the field (ParseInputComponent). Read-only fields drop the edge, except a read-only value that is the step\'s field (the welcome seed phrase): class readonly-outlined keeps it.',
   },
   {
     id: "copy-field",
@@ -824,6 +824,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/components/ui/WelcomeSlideScaffold.vue",
     usage: { tag: "WelcomeSlideScaffold" },
     example: `<WelcomeSlideScaffold :icon="KeyRoundIcon" :title="$t('…title')" :text="$t('…text')">…</WelcomeSlideScaffold>`,
+    note: "Every onboarding step: one column (FlowColumn with its 16px inset) for the body and the same column for the footer (FlowFooter), full screen on phones and the app column on wider screens; no step sets its own width or gutter. A hero slot takes artwork in place of the icon; the footer slot holds the first step's own actions (later steps share the page's Back and Next, caps). Onboarding follows the app's mode and theme like any page, its sheets included.",
   },
   {
     id: "flow-footer",

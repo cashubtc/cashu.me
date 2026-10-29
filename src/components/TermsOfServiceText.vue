@@ -318,7 +318,8 @@ export default defineComponent({
   margin-top: 20px;
 }
 .terms__updated {
-  color: var(--app-text-subtle);
+  /* Muted, not subtle: 12px subtle ink missed 4.5:1 on the raised sheet (flamingo, mint). */
+  color: var(--app-text-muted);
   font-size: 12px;
 }
 .terms__notice {

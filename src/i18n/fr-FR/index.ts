@@ -868,6 +868,7 @@ export default {
     text: "Collez ou saisissez votre phrase de 12 mots pour restaurer.",
     inputs: { word: "Mot { index }" },
     actions: { paste_all: "Tout coller" },
+    progress: { words_entered: "{count}/12 mots saisis" },
     disclaimer:
       "Votre phrase de récupération est uniquement utilisée localement pour dériver les clés de votre portefeuille.",
   },
