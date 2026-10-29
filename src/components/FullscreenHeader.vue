@@ -1,7 +1,11 @@
 <template>
   <q-header class="bg-dark">
     <q-toolbar class="app-toolbar">
-      <IconButton @click="goBack" :label="$t('common.back')">
+      <IconButton
+        data-testid="fullscreen-back"
+        :label="$t('common.back')"
+        @click="goBack"
+      >
         <ChevronLeftIcon :size="24" />
       </IconButton>
     </q-toolbar>

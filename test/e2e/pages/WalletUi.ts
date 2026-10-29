@@ -1,4 +1,4 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 import { WalletPage } from "./WalletPage";
 
 /** All mutations under test go through visible controls. Storage reads are oracles only. */
@@ -139,6 +139,34 @@ export class WalletUi extends WalletPage {
         .getByRole("button", { name: "Lock", exact: true })
         .click();
     await field.fill(pubkey);
+  }
+
+  /** Wallet home's scanner button (the minimal Scan glyph). */
+  get walletScan() {
+    return this.page.getByTestId("wallet-scan");
+  }
+
+  /** The shared full-screen header's Back: client navigation, never page.goto. */
+  async fullscreenBack() {
+    await this.page.getByTestId("fullscreen-back").click();
+  }
+
+  /**
+   * After client navigation to a full-screen page: the URL, the destination's own content and a
+   * usable control, one settled route wrapper for `path` and no leftover page transition classes.
+   * A URL check alone passes while the page is blank.
+   */
+  async expectFullscreenPage(path: string, anchor: Locator) {
+    await expect.poll(() => new URL(this.page.url()).pathname).toBe(path);
+    await expect(anchor).toBeVisible();
+    const routes = this.page.getByTestId("fullscreen-route");
+    await expect(routes).toHaveCount(1);
+    await expect(routes).toHaveAttribute("data-route-path", path);
+    await expect(
+      this.page.locator('[class*="page-slide-"], [class*="page-fade-"]')
+    ).toHaveCount(0);
+    // Trial click: the control is the hit target (no lingering backdrop or placeholder over it).
+    await anchor.click({ trial: true });
   }
 
   async stored(key: string) {

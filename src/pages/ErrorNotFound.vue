@@ -1,7 +1,7 @@
 <template>
-  <!-- Under the full-screen layout, so the back button sits in the shared header inside the
-       page column; the body is the shared blocking state (AlreadyRunning uses it too). -->
   <q-page class="column">
+    <!-- Under the full-screen layout, so the back button sits in the shared header inside the
+         page column; the body is the shared blocking state (AlreadyRunning uses it too). -->
     <BlockingState
       class="col"
       :icon="SearchXIcon"

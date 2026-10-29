@@ -326,4 +326,30 @@ describe("standard elements", () => {
       )
     ).toEqual([]);
   });
+  // Owner item 17: a route transition around the page component itself never finished leaving a
+  // fragment-root page, so Back showed a blank screen. Route transitions animate a native wrapper.
+  it("route transitions wrap the page in a native element", () => {
+    expect(
+      offenders((text) =>
+        /<transition\b[^>]*>\s*<component\b/.test(
+          text.replace(/<!--[\s\S]*?-->/g, "")
+        )
+      )
+    ).toEqual([]);
+    const app = readFileSync(join(SRC, "App.vue"), "utf8");
+    expect(app).not.toMatch(/<transition\b/);
+  });
+
+  it("routed pages keep their comments inside the root element", () => {
+    const routes = readFileSync(join(SRC, "router/routes.js"), "utf8");
+    const pages = [...routes.matchAll(/src\/(pages\/[\w/]+\.vue)/g)].map(
+      ([, page]) => page
+    );
+    expect(pages.length).toBeGreaterThan(10);
+    expect(
+      pages.filter((page) =>
+        /^<template>\s*<!--/.test(readFileSync(join(SRC, page), "utf8"))
+      )
+    ).toEqual([]);
+  });
 });

@@ -1,12 +1,12 @@
 <template>
-  <!-- The design system board (dev builds only): every canonical component in the app, rendered
-       live from the real component or shared class, in the order of src/design-system/registry.ts.
-       Each <DsEntry id> reads its name, source, usage and props from the registry and the code,
-       so only the sample is written here. A rail on the far left jumps between components. -->
   <div
     ref="page"
     class="settings-sub-page bg-dark text-white q-pa-md ui-kit-page ds-page"
   >
+    <!-- The design system board (dev builds only): every canonical component in the app, rendered
+         live from the real component or shared class, in the order of src/design-system/registry.ts.
+         Each <DsEntry id> reads its name, source, usage and props from the registry and the code,
+         so only the sample is written here. A rail on the far left jumps between components. -->
     <DsRail :groups="railGroups" :active="active" :matches="matches" @go="go" />
     <div class="settings-view text-left ui-kit-main">
       <div class="settings-page-header q-pt-sm q-pb-md">

@@ -65,7 +65,11 @@ test("opens mint deep links and cancels without spending or adding", async ({
   await page.getByText("Privacy", { exact: true }).click();
   await expect(page).toHaveURL(/settings\/privacy/);
   await page.goBack();
-  await expect(page).toHaveURL(/\/settings$/);
+  // Settings itself renders and is usable after Back, not just its URL.
+  await wallet.expectFullscreenPage(
+    "/settings",
+    page.getByText("Privacy", { exact: true })
+  );
 });
 
 test("opens and closes QR scanner when camera access is unavailable", async ({

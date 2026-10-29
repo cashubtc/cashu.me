@@ -1,6 +1,6 @@
 <template>
-  <!-- No page title: the mint header below names the page. -->
   <SettingsPageShell>
+    <!-- No page title: the mint header below names the page. -->
     <MintRatingsComponent
       v-if="mintUrl"
       :url="mintUrl"
