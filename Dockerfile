@@ -23,6 +23,9 @@ FROM nginx
 # Copy the built PWA files from the builder stage
 COPY --from=builder /app/dist/pwa /usr/share/nginx/html
 
+# Before/after screenshots (scripts/side-by-side), a static page at /side-by-side
+COPY deploy/side-by-side /usr/share/nginx/html/side-by-side
+
 # History-mode routing: serve the app for any path that isn't a file
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 

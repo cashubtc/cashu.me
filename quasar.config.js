@@ -179,7 +179,10 @@ module.exports = configure(function (/* ctx */) {
         clientsClaim: true,
       },
       // useFilenameHashes: true,
-      // extendGenerateSWOptions (cfg) {}
+      // Static pages served beside the app (the deploy's /side-by-side) are not app routes.
+      extendGenerateSWOptions(cfg) {
+        cfg.navigateFallbackDenylist?.push(/^\/side-by-side/);
+      },
       // extendInjectManifestOptions (cfg) {},
       // extendManifestJson (json) {}
       // extendPWACustomSWConf (esbuildConf) {}
