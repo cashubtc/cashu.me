@@ -6,8 +6,11 @@ import { describe, expect, it } from "vitest";
 // checks keep second copies from coming back; the design system board (src/pages/DesignSystemPage.vue) shows each one.
 
 const SRC = join(__dirname, "../../../src");
+// Dev-only design explorations (src/design-system/explorations) draw static lookalikes of
+// store-bound components (ChooseMint, a flow's surface) with their real classes; they ship nowhere.
 const vueFiles = (readdirSync(SRC, { recursive: true }) as string[])
   .filter((f) => f.endsWith(".vue") && !f.endsWith("DesignSystemPage.vue"))
+  .filter((f) => !f.startsWith("design-system/explorations/"))
   .map((f) => ({ file: f, text: readFileSync(join(SRC, f), "utf8") }));
 
 const offenders = (match: (text: string) => boolean) =>

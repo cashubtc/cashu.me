@@ -141,6 +141,13 @@ const routes = [
             },
           ],
         },
+        // One design exploration full-screen as a phone screen, for the design council:
+        // /design-system/explore/:name?v=0-7&dark=1&theme=monochrome.
+        {
+          path: "/design-system/explore/:name?",
+          component: () =>
+            import("src/design-system/explorations/ExplorePage.vue"),
+        },
       ]
     : []),
 
