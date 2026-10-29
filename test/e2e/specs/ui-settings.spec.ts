@@ -88,7 +88,10 @@ test("enables NWC, edits its allowance, copies and reopens the connection", asyn
   await page.getByRole("button", { name: "Copy", exact: true }).click();
   const connection = await page.evaluate(() => navigator.clipboard.readText());
   expect(connection).toMatch(/^nostr\+walletconnect:\/\//);
-  await page.getByRole("button", { name: "Close", exact: true }).click();
+  await page
+    .locator(".q-dialog:visible")
+    .getByRole("button", { name: "Close", exact: true })
+    .click();
   await page.reload();
   await expect(
     page.getByRole("spinbutton", { name: "Allowance left (sat)" })

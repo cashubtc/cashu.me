@@ -41,6 +41,10 @@ async function stack(page: Page) {
   );
 }
 
+// The list's top edge: under the 56px header below desktop (so a toast never covers the back
+// or close button), 16px from the top on desktop.
+const topEdge = (page: Page) => (page.viewportSize()!.width >= 1024 ? 16 : 60);
+
 test.describe("toasts", () => {
   test.use({ reducedMotion: "no-preference" });
   test.beforeEach(({ page }) =>
@@ -56,9 +60,9 @@ test.describe("toasts", () => {
     await toast(page, ["success", "First message"]);
     await expect(toasts(page)).toHaveCount(1);
     let cards = await stack(page);
-    // Top-centre: 8px under the (here zero) safe area, centred in the viewport.
+    // Top-centre: the edge gap under the (here zero) safe area, centred in the viewport.
     const viewport = page.viewportSize()!;
-    expect(Math.round(cards[0].box.y)).toBe(8);
+    expect(Math.round(cards[0].box.y)).toBe(topEdge(page));
     expect(
       Math.abs(cards[0].box.x + cards[0].box.width / 2 - viewport.width / 2)
     ).toBeLessThanOrEqual(1);
@@ -119,7 +123,7 @@ test.describe("toasts", () => {
     // The survivor moves up into the vacated place.
     await expect
       .poll(async () => Math.round((await stack(page))[0].box.y))
-      .toBe(8);
+      .toBe(topEdge(page));
 
     await toast(page, ["info", "Newest"]);
     await expect(toasts(page)).toHaveCount(2);
@@ -166,6 +170,8 @@ test.describe("toasts", () => {
     await toast(page, ["error", long], ["success", "₿500"]);
     const cards = await stack(page);
     expect(cards).toHaveLength(2);
+    // On a phone the stack starts under the header, clear of its buttons.
+    expect(Math.round(cards[0].box.y)).toBe(60);
     for (const c of cards) {
       expect(c.box.x).toBeGreaterThanOrEqual(16 - 1);
       expect(c.box.x + c.box.width).toBeLessThanOrEqual(320 - 16 + 1);

@@ -1699,8 +1699,11 @@ body.body--light .q-notification {
 // fully readable with its own close button: a plain column with an 8px gap, under the status
 // bar's safe area. The list itself lets taps through; only the cards take them (Quasar).
 // The selector outranks Quasar's body.q-ios-padding top rule, so the edge gap applies there too.
+// Below desktop a full-width toast would sit on the header's back and close buttons, so it
+// starts under the header (56px) instead; on desktop the 440px card clears the column's
+// header buttons and sits 16px from the top.
 body .q-notifications > .q-notifications__list--top {
-  --toast-edge: 8px;
+  --toast-edge: 60px;
   bottom: auto;
   box-sizing: border-box;
   gap: 8px;
@@ -1708,6 +1711,11 @@ body .q-notifications > .q-notifications__list--top {
   padding-inline: max(16px, env(safe-area-inset-left, 0px))
     max(16px, env(safe-area-inset-right, 0px));
   top: calc(env(safe-area-inset-top, 0px) + var(--toast-edge));
+}
+@media (min-width: 1024px) {
+  body .q-notifications > .q-notifications__list--top {
+    --toast-edge: 16px;
+  }
 }
 body .q-notifications__list--top .q-notification {
   margin: 0;
