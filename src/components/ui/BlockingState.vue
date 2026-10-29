@@ -3,8 +3,13 @@
 <template>
   <div class="blocking-state column flex-center text-center q-pa-lg">
     <IconCircle :icon="icon" size="lg" class="blocking-state__icon" />
-    <div class="blocking-state__title q-mt-md">{{ title }}</div>
-    <div v-if="text" class="blocking-state__text q-mt-sm">{{ text }}</div>
+    <CjkText class="blocking-state__title q-mt-md" tag="div" :text="title" />
+    <CjkText
+      v-if="text"
+      class="blocking-state__text q-mt-sm"
+      tag="div"
+      :text="text"
+    />
     <q-btn
       v-if="action"
       unelevated
@@ -21,11 +26,12 @@
 
 <script lang="ts">
 import { defineComponent, type Component, type PropType } from "vue";
+import CjkText from "src/components/ui/CjkText.vue";
 import IconCircle from "src/components/ui/IconCircle.vue";
 
 export default defineComponent({
   name: "BlockingState",
-  components: { IconCircle },
+  components: { CjkText, IconCircle },
   props: {
     icon: { type: [Object, Function] as PropType<Component>, required: true },
     title: { type: String, required: true },

@@ -19,18 +19,13 @@
     >
       <q-item-section>
         <q-item-label>{{ label }}</q-item-label>
-        <q-item-label v-if="caption" caption>{{ caption }}</q-item-label>
+        <q-item-label v-if="caption" caption
+          ><CjkText :text="caption"
+        /></q-item-label>
       </q-item-section>
-      <q-item-section side class="row no-wrap items-center sheet-select__side">
-        <span class="sheet-select__value">{{
-          selectedOption?.short ?? selectedOption?.label ?? placeholder
-        }}</span>
-        <ChevronRightIcon
-          :size="18"
-          class="settings-menu-chevron"
-          aria-hidden="true"
-        />
-      </q-item-section>
+      <RowValue
+        :value="selectedOption?.short ?? selectedOption?.label ?? placeholder"
+      />
     </q-item>
     <button
       v-else
@@ -81,11 +76,10 @@
 </template>
 
 <script lang="ts">
+import CjkText from "src/components/ui/CjkText.vue";
 import { defineComponent, type PropType } from "vue";
-import {
-  ChevronDown as ChevronDownIcon,
-  ChevronRight as ChevronRightIcon,
-} from "lucide-vue-next";
+import { ChevronDown as ChevronDownIcon } from "lucide-vue-next";
+import RowValue from "src/components/ui/RowValue.vue";
 import BottomSheet from "src/components/BottomSheet.vue";
 import SheetOption from "src/components/SheetOption.vue";
 
@@ -99,7 +93,7 @@ export type SheetSelectOption = {
 
 export default defineComponent({
   name: "SheetSelect",
-  components: { BottomSheet, SheetOption, ChevronDownIcon, ChevronRightIcon },
+  components: { CjkText, BottomSheet, SheetOption, ChevronDownIcon, RowValue },
   props: {
     /** Draw as a settings row (name and caption, value and chevron) instead of a field. */
     row: { type: Boolean, default: false },
@@ -142,13 +136,6 @@ export default defineComponent({
 }
 .sheet-select__field--empty .mint-chip__name {
   color: var(--app-text-muted);
-}
-.sheet-select__side {
-  gap: 4px;
-}
-.sheet-select__value {
-  color: var(--app-text-muted);
-  font-size: 15px;
 }
 .sheet-select__icon {
   display: inline-flex;

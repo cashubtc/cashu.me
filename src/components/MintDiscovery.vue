@@ -61,9 +61,14 @@
             </q-item-label>
           </q-item-section>
           <q-item-section side top>
-            <div class="row flex-center" style="width: 44px; height: 44px">
-              <RefreshCwIcon :size="20" class="refresh-spin" />
-            </div>
+            <!-- The loaded header's IconButton, busy, so the glyph doesn't move 6px when
+                 results arrive (council R83). -->
+            <IconButton :label="$t('common.refresh')" loading tabindex="-1">
+              <RefreshCwIcon :size="20" />
+              <template #loading>
+                <RefreshCwIcon :size="20" class="refresh-spin" />
+              </template>
+            </IconButton>
           </q-item-section>
         </q-item>
         <!-- The loaded card itself in its skeleton form, in the same wrappers, so nothing

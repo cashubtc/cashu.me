@@ -102,9 +102,11 @@
     <!-- Add mint section -->
     <div class="q-pt-xs q-px-sm" ref="addMintDiv">
       <div class="add-mint-container">
+        <!-- With no mint yet, the wallet's empty state above already says "Add a mint": the
+             form keeps only its description, so the label doesn't repeat (council R83). -->
         <SectionDivider
           class="q-mt-sm"
-          :label="$t('MintSettings.add.title')"
+          :label="mints.length ? $t('MintSettings.add.title') : ''"
           :caption="$t('MintSettings.add.description')"
         />
 

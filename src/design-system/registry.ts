@@ -301,6 +301,16 @@ export const DS_ITEMS: DsItem[] = [
     example: `<SettingsLinkRow :icon="ShieldIcon" label="Privacy" caption="Network checks" to="/settings/privacy" />`,
   },
   {
+    id: "row-value",
+    name: "Row value",
+    group: "navigation",
+    tier: "primitive",
+    source: "src/components/ui/RowValue.vue",
+    usage: { tag: "RowValue" },
+    example: `<RowValue value="English" />`,
+    note: "The end of a row that opens something: its current value, muted, and one chevron (or an external-link glyph) on one line. Used by SettingsLinkRow and SheetSelect rows.",
+  },
+  {
     id: "settings-action-row",
     name: "Settings action row",
     group: "navigation",

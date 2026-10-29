@@ -8,7 +8,9 @@
         <AppBadge>{{ badge }}</AppBadge>
       </q-item-label>
       <q-item-label v-else>{{ label }}</q-item-label>
-      <q-item-label v-if="caption" caption>{{ caption }}</q-item-label>
+      <q-item-label v-if="caption" caption
+        ><CjkText :text="caption"
+      /></q-item-label>
       <slot />
     </q-item-section>
     <q-item-section side>
@@ -23,12 +25,13 @@
 </template>
 
 <script lang="ts">
+import CjkText from "src/components/ui/CjkText.vue";
 import AppBadge from "src/components/ui/AppBadge.vue";
 import { defineComponent, type PropType } from "vue";
 
 export default defineComponent({
   name: "SettingsToggleRow",
-  components: { AppBadge },
+  components: { CjkText, AppBadge },
   props: {
     modelValue: {
       type: Boolean as PropType<boolean>,

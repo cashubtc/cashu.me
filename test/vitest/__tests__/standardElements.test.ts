@@ -57,6 +57,7 @@ describe("standard elements", () => {
     ["ui/AmountHeadline.vue", /^amount-headline$/],
     ["ui/PaymentStatus.vue", /^payment-status(__[\w-]+)?$/],
     ["ui/UnitToggle.vue", /^sheet-unit-toggle(__swap)?$/],
+    ["ui/RowValue.vue", /^row-value(__(inner|text))?$/],
     ["ui/MintCardAction.vue", /^mint-card-add(__icon)?$/],
     ["ui/TonalChip.vue", /^(tonal-chip(__icon)?|qr-control-chip)$/],
     ["ui/FlowFooter.vue", /^(bottom-panel|flow-footer__(bar|col))$/],
@@ -66,7 +67,7 @@ describe("standard elements", () => {
     ],
     [
       "MintCard.vue",
-      /^mint-card(--active|__(body|head|foot|foot--meta|balances|plus))?$/,
+      /^mint-card(--active|--host-only|__(body|head|foot|foot--meta|balances|plus))?$/,
     ],
   ])("only %s uses its classes", (owner, pattern) => {
     expect(
@@ -154,6 +155,18 @@ describe("standard elements", () => {
         .filter(({ file }) => file.includes("pages/welcome/"))
         .filter(({ text }) => /<p\b[^>]*>\s*\{\{\s*\$t\(/.test(text))
         .map(({ file }) => file)
+    ).toEqual([]);
+  });
+
+  // A row's value and chevron are one RowValue, never a hand-built side section with a
+  // chevron in it (the side section is a column, so the value stacked above it, council R83).
+  it("settings chevrons come from RowValue", () => {
+    expect(
+      offenders((text) => /class="settings-menu-chevron"/.test(text)).filter(
+        (file) =>
+          !file.endsWith("ui/RowValue.vue") &&
+          !file.endsWith("ui/SettingsActionRow.vue")
+      )
     ).toEqual([]);
   });
 

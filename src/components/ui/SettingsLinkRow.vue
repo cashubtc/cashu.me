@@ -10,37 +10,21 @@
     <q-item-section>
       <q-item-label class="text-weight-medium">{{ label }}</q-item-label>
       <q-item-label caption
-        ><slot name="caption">{{ caption }}</slot></q-item-label
-      >
+        ><slot name="caption"><CjkText :text="caption" /></slot
+      ></q-item-label>
     </q-item-section>
-    <q-item-section
-      side
-      class="row no-wrap items-center settings-link-row__side"
-    >
-      <!-- The setting's current value, muted, before the chevron (council R79). -->
-      <span v-if="value" class="settings-link-row__value" dir="auto">{{
-        value
-      }}</span>
-      <ArrowUpRightIcon
-        v-if="external"
-        :size="18"
-        class="settings-menu-chevron"
-      />
-      <ChevronRightIcon v-else :size="18" class="settings-menu-chevron" />
-    </q-item-section>
+    <RowValue :value="value" :external="external" />
   </q-item>
 </template>
 
 <script lang="ts">
+import CjkText from "src/components/ui/CjkText.vue";
 import { defineComponent, type Component, type PropType } from "vue";
-import {
-  ChevronRight as ChevronRightIcon,
-  ArrowUpRight as ArrowUpRightIcon,
-} from "lucide-vue-next";
+import RowValue from "src/components/ui/RowValue.vue";
 
 export default defineComponent({
   name: "SettingsLinkRow",
-  components: { ChevronRightIcon, ArrowUpRightIcon },
+  components: { CjkText, RowValue },
   props: {
     /** The setting's current value, shown muted before the chevron. */
     value: { type: String, default: "" },
@@ -64,13 +48,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style scoped>
-.settings-link-row__side {
-  gap: 8px;
-}
-.settings-link-row__value {
-  color: var(--app-text-muted);
-  font-size: 15px;
-}
-</style>

@@ -698,3 +698,18 @@ body.body--light .activity-row__avatar--in {
 .cjk-word {
   white-space: nowrap;
 }
+
+/* RowValue: a settings row's current value and its chevron on one line, centred on the row
+   (Quasar's side section is a column, so the value sat above the chevron, council R83). */
+.row-value__inner {
+  align-items: center;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+.row-value__text {
+  color: var(--app-text-muted);
+  font-size: 15px;
+  font-weight: 400;
+  white-space: nowrap;
+}

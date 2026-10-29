@@ -12,7 +12,9 @@
       <q-item-label :class="[labelClass, { 'text-negative': danger }]">{{
         label
       }}</q-item-label>
-      <q-item-label v-if="caption" caption>{{ caption }}</q-item-label>
+      <q-item-label v-if="caption" caption
+        ><CjkText :text="caption"
+      /></q-item-label>
       <slot />
     </q-item-section>
     <q-item-section side>
@@ -36,6 +38,7 @@
 </template>
 
 <script lang="ts">
+import CjkText from "src/components/ui/CjkText.vue";
 import { defineComponent, type Component, type PropType } from "vue";
 import {
   ChevronRight as ChevronRightIcon,
@@ -45,7 +48,7 @@ import {
 
 export default defineComponent({
   name: "SettingsActionRow",
-  components: { ChevronRightIcon, Trash2Icon, TriangleAlertIcon },
+  components: { CjkText, ChevronRightIcon, Trash2Icon, TriangleAlertIcon },
   props: {
     /** Optional leading icon (lucide component), the same slot as SettingsLinkRow. */
     icon: {

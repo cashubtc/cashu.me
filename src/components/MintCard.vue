@@ -5,6 +5,7 @@
 <template>
   <q-item
     class="mint-card"
+    :class="{ 'mint-card--host-only': !name && !loading && !skeleton }"
     :active="active"
     active-class="mint-card--active"
     :clickable="clickable && !skeleton"
@@ -33,7 +34,8 @@
         class="mint-card__foot"
         :class="{ 'mint-card__foot--meta': !balances.length }"
       >
-        <div v-if="balances.length" class="mint-card__balances">
+        <!-- One order for several holdings in every direction ("₿500 + $25.00"). -->
+        <div v-if="balances.length" class="mint-card__balances" dir="ltr">
           <template v-for="(balance, i) in balances" :key="balance">
             <!-- Several unit balances read as separate holdings joined by a plus; a middle dot
                  read as "₿500, worth $25.00" (council R68-R69). -->

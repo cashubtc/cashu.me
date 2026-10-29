@@ -501,6 +501,35 @@
           />
         </q-list>
       </DsEntry>
+      <DsEntry id="row-value">
+        <!-- Every form in use: a value with a chevron, a chevron alone, and an external link. -->
+        <q-list class="settings-menu-group settings-view">
+          <q-item clickable>
+            <q-item-section
+              ><q-item-label>Language</q-item-label></q-item-section
+            >
+            <RowValue value="English" />
+          </q-item>
+          <q-item clickable>
+            <q-item-section
+              ><q-item-label>Fiat currency</q-item-label></q-item-section
+            >
+            <RowValue value="USD" />
+          </q-item>
+          <q-item clickable>
+            <q-item-section
+              ><q-item-label>Privacy</q-item-label></q-item-section
+            >
+            <RowValue />
+          </q-item>
+          <q-item clickable>
+            <q-item-section
+              ><q-item-label>Source code</q-item-label></q-item-section
+            >
+            <RowValue external />
+          </q-item>
+        </q-list>
+      </DsEntry>
       <DsEntry id="settings-action-row">
         <q-list class="settings-menu-group settings-view">
           <SettingsActionRow label="Restore" caption="From a seed phrase" />
@@ -1210,6 +1239,7 @@ import MintCardAction from "src/components/ui/MintCardAction.vue";
 import TonalChip from "src/components/ui/TonalChip.vue";
 import FlowColumn from "src/components/ui/FlowColumn.vue";
 import CjkText from "src/components/ui/CjkText.vue";
+import RowValue from "src/components/ui/RowValue.vue";
 import SettingsLinkRow from "src/components/ui/SettingsLinkRow.vue";
 import SettingsRadioRow from "src/components/ui/SettingsRadioRow.vue";
 import SettingsToggleRow from "src/components/ui/SettingsToggleRow.vue";
@@ -1271,6 +1301,7 @@ export default defineComponent({
   name: "DesignSystemPage",
   mixins: [windowMixin],
   components: {
+    RowValue,
     GaugeIcon,
     QrCodeIcon,
     ArchiveRestoreIcon,

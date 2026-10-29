@@ -10,7 +10,9 @@
   >
     <CheckIcon v-if="copied" :size="16" class="qr-copy-line__icon" />
     <CopyIcon v-else :size="16" class="qr-copy-line__icon" />
-    {{ shown }}
+    <!-- Machine text runs left to right in every locale (in Arabic the trailing "==" of a
+         request jumped to its front, council R83). -->
+    <bdi dir="ltr">{{ shown }}</bdi>
   </button>
 </template>
 

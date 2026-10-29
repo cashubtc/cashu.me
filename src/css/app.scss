@@ -59,10 +59,10 @@ html:lang(ja) .q-item__label--caption {
   line-break: strict;
   text-wrap: pretty;
 }
-// Short captions (option and settings rows) balance their lines outright: "pretty" left a
-// trailing "ecash。" alone on the second line (council R77).
-html:lang(zh) .q-item__label--caption,
-html:lang(ja) .q-item__label--caption,
+// Sheet option captions balance their lines outright: "pretty" left a trailing "ecash。"
+// alone on the second line (council R77). Settings row captions don't: balanced, they
+// wrapped at about 60% of the row beside the switch (council R83); whole words come from
+// CjkText instead.
 html:lang(zh) .app-option-row__caption,
 html:lang(ja) .app-option-row__caption,
 html:lang(ar) .app-option-row__caption {
@@ -1009,6 +1009,8 @@ html[dir="rtl"] .lucide-chevron-right-icon,
 html[dir="rtl"] .lucide-arrow-left-icon,
 html[dir="rtl"] .lucide-arrow-right-icon,
 html[dir="rtl"] .rtl-flip,
+html[dir="rtl"] .lucide-delete-icon,
+html[dir="rtl"] .lucide-clipboard-paste-icon,
 html[dir="rtl"] .settings-menu-chevron {
   transform: scaleX(-1);
 }
@@ -1459,6 +1461,11 @@ html[dir="rtl"] .restore-mint-check {
 .mint-card__foot--meta {
   justify-content: flex-start;
   margin-top: -8px;
+}
+// A host-only mint has one identity line, centred on the 40px avatar: its review line comes
+// up to the same 24px pitch as a named card's host line (council R83).
+.mint-card--host-only .mint-card__foot--meta {
+  margin-top: -18px;
 }
 .mint-card__balances {
   display: flex;

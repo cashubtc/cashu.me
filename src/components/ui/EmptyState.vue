@@ -5,19 +5,20 @@
     <IconCircle :icon="icon" size="lg">
       <slot name="icon" />
     </IconCircle>
-    <div v-if="title" class="app-empty__title">{{ title }}</div>
-    <div v-if="text" class="app-empty__text">{{ text }}</div>
+    <CjkText v-if="title" class="app-empty__title" tag="div" :text="title" />
+    <CjkText v-if="text" class="app-empty__text" tag="div" :text="text" />
     <slot name="actions" />
   </div>
 </template>
 
 <script lang="ts">
+import CjkText from "src/components/ui/CjkText.vue";
 import IconCircle from "src/components/ui/IconCircle.vue";
 import { defineComponent, PropType, Component } from "vue";
 
 export default defineComponent({
   name: "EmptyState",
-  components: { IconCircle },
+  components: { CjkText, IconCircle },
   props: {
     /** A lucide icon component, rendered at 26px. Use the icon slot for anything else. */
     icon: {

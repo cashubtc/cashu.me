@@ -25,7 +25,8 @@ export default defineComponent({
   },
   computed: {
     words(): string[] | null {
-      const locale = this.$i18n.locale;
+      // No i18n (a bare unit mount) reads as a non-CJK locale.
+      const locale: string = (this as any).$i18n?.locale ?? "";
       if (!/^(zh|ja)/.test(locale) || typeof Intl === "undefined") return null;
       const Segmenter = (Intl as any).Segmenter;
       if (!Segmenter) return null;
