@@ -179,7 +179,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "q-input outlined · src/css/app.scss field edge and fill tokens",
     usage: { text: "<q-input" },
     example: `<q-input v-model="url" outlined label="Mint URL" />\n<q-input v-model="review" outlined type="textarea" autogrow label="Review (optional)" />`,
-    note: 'One outlined field (textarea variant: type="textarea" autogrow). The label stays visible with content; 16px inset; edge 33% on the page, 43% on sheets; focus in the accent. Paste, Scan and Clear sit inside the field (ParseInputComponent). Read-only fields drop the edge, except a read-only value that is the step\'s field (the welcome seed phrase): class readonly-outlined keeps it.',
+    note: 'One outlined field (textarea variant: type="textarea" autogrow). The label stays visible with content; 16px inset; edge 33% on the page, 43% on sheets; focus in the accent. Paste, Scan and Clear sit inside the field (ParseInputComponent). Read-only fields drop the edge, except a read-only value that is the step\'s field (the welcome seed phrase): class readonly-outlined keeps it (36% in dark, over the quieter read-only fill, so it still holds 3:1).',
   },
   {
     id: "copy-field",

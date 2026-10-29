@@ -368,8 +368,8 @@
           label="Relay"
           class="q-mb-md"
         />
-        <!-- Read-only but still the step's field (the welcome seed phrase): it keeps the edge.
-             A masked placeholder only, never a real phrase. -->
+        <!-- Read-only but still the step's field (the welcome seed phrase): it keeps the edge
+             (36% in dark, over the quieter read-only fill, to hold 3:1). A masked placeholder only, never a real phrase. -->
         <q-field
           outlined
           readonly
