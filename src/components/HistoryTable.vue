@@ -184,6 +184,11 @@ export default defineComponent({
   props: {
     /** Show placeholder rows while the history is being read. */
     skeleton: { type: Boolean, default: false },
+    /**
+     * Show these payments instead of the wallet's (the design system board's in-memory
+     * fixtures). The rows are inert: Check status and the details do nothing.
+     */
+    transactions: { type: Array, default: null },
   },
   components: {
     CircleArrowDownIcon,
@@ -223,6 +228,9 @@ export default defineComponent({
       },
       deep: true,
       immediate: true,
+    },
+    transactions: function () {
+      this.updateUnifiedTransactions();
     },
     // Watch for any changes in invoiceHistory (additions, updates, deletions)
     invoiceHistory: {
@@ -317,7 +325,7 @@ export default defineComponent({
     },
 
     startLongPress(transaction) {
-      if (this.isEcashTransaction(transaction)) {
+      if (!this.transactions && this.isEcashTransaction(transaction)) {
         transaction.longPressActive = false;
         this.longPressTimeout = setTimeout(() => {
           transaction.longPressActive = true;
@@ -413,6 +421,7 @@ export default defineComponent({
     },
 
     checkTransactionStatus(transaction) {
+      if (this.transactions) return;
       if (transaction.type === UnifiedTransactionType.Ecash) {
         // If it's an incoming ecash transaction, open receive dialog
         if (transaction.amount > 0) {
@@ -451,6 +460,7 @@ export default defineComponent({
     },
 
     showTransactionDialog(transaction) {
+      if (this.transactions) return;
       if (transaction.type === UnifiedTransactionType.Ecash) {
         // For pending incoming tokens, open receive dialog instead
         if (transaction.status === "pending" && transaction.amount > 0) {
@@ -536,6 +546,10 @@ export default defineComponent({
 
     // Efficiently update and sort unified transactions only when needed
     updateUnifiedTransactions() {
+      if (this.transactions) {
+        this.cachedUnifiedTransactions = this.transactions;
+        return;
+      }
       const transactions = [];
 
       // Add token transactions (ecash)

@@ -23,6 +23,14 @@ export type DsTier =
   | "feature"
   | "pattern";
 
+/**
+ * The app context a sample needs around it, as in the app. Settings components read their row
+ * type and wrapping from the settings column (`.settings-view`, src/css/settings.scss), so their
+ * samples get it; everything else renders with no page ancestor, like the wallet and the flows.
+ * The board itself never carries a page's class (test/vitest/__tests__/designSystem.test.ts).
+ */
+export type DsContext = "settings";
+
 export type DsItem = {
   id: string;
   name: string;
@@ -34,6 +42,7 @@ export type DsItem = {
   usage?: { tag?: string; className?: string; text?: string };
   example?: string;
   note?: string;
+  context?: DsContext;
 };
 
 export const DS_GROUPS: Array<{ id: DsGroupId; title: string }> = [
@@ -168,6 +177,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/components/ui/InlineConfirm.vue",
     usage: { tag: "InlineConfirm" },
     example: `<InlineConfirm question="Remove all proofs?" cancel-label="Cancel" confirm-label="Remove"\n  @confirm="remove" @cancel="confirming = false" />`,
+    context: "settings",
   },
 
   // Form controls
@@ -200,6 +210,7 @@ export const DS_ITEMS: DsItem[] = [
     usage: { tag: "SheetSelect" },
     example: `<SheetSelect v-model="sort" :options="options" label="Sort" />`,
     note: "Every choice from a list opens this bottom sheet; there are no popover menus.",
+    context: "settings",
   },
   {
     id: "mint-picker",
@@ -250,6 +261,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/components/ui/SettingsToggleRow.vue",
     usage: { tag: "SettingsToggleRow" },
     example: `<SettingsToggleRow v-model="checkIncoming" :label="$t('…toggle')" :caption="$t('…description')" />`,
+    context: "settings",
   },
   {
     id: "checkbox-radio",
@@ -268,6 +280,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/components/ui/SettingsRadioRow.vue",
     usage: { tag: "SettingsRadioRow" },
     example: `<SettingsRadioRow :selected="lang === 'en'" label="English" @select="lang = 'en'" />`,
+    context: "settings",
   },
   {
     id: "slider-rating",
@@ -318,6 +331,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/components/ui/SettingsLinkRow.vue",
     usage: { tag: "SettingsLinkRow" },
     example: `<SettingsLinkRow :icon="ShieldIcon" label="Privacy" caption="Network checks" to="/settings/privacy" />`,
+    context: "settings",
   },
   {
     id: "row-value",
@@ -328,6 +342,7 @@ export const DS_ITEMS: DsItem[] = [
     usage: { tag: "RowValue" },
     example: `<RowValue value="English" />`,
     note: "The end of a row that opens something: its current value, muted, and one chevron (or an external-link glyph) on one line. Used by SettingsLinkRow and SheetSelect rows.",
+    context: "settings",
   },
   {
     id: "settings-action-row",
@@ -338,6 +353,7 @@ export const DS_ITEMS: DsItem[] = [
     usage: { tag: "SettingsActionRow" },
     example: `<SettingsActionRow label="Restore" caption="From a seed phrase" to="/restore" />`,
     note: "Labels are medium weight, like the settings root rows; labelClass replaces that default.",
+    context: "settings",
   },
 
   {
@@ -418,6 +434,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "q-expansion-item",
     usage: { text: "<q-expansion-item" },
     example: `<q-expansion-item label="Advanced" dense>…</q-expansion-item>`,
+    context: "settings",
   },
   {
     id: "expansion-indicator",
@@ -476,6 +493,7 @@ export const DS_ITEMS: DsItem[] = [
     usage: { tag: "SettingsSection" },
     example: `<SettingsSection title="Locked ecash" caption="…" warning>…</SettingsSection>`,
     note: "The section title is the start-aligned caps SectionDivider, as main's sub-page titles were.",
+    context: "settings",
   },
   {
     id: "box",

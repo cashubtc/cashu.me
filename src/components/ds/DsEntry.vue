@@ -42,7 +42,13 @@
 
       <div class="ds-entry__card">
         <div class="ds-entry__stage">
-          <div class="ds-entry__sample">
+          <!-- The sample gets the app context its registry entry names (the settings column
+               for settings components), and nothing else from the board. -->
+          <div
+            class="ds-entry__sample"
+            :class="{ 'settings-view': item.context === 'settings' }"
+            :data-ds-context="item.context || 'app'"
+          >
             <slot />
           </div>
         </div>
@@ -265,13 +271,20 @@ export default defineComponent({
   min-height: 280px;
   padding: 64px 48px;
 }
-/* The sample column: block samples fill it; anything narrower (a lone button, a segmented
-   control, a row of chips) is centred in the stage instead of hugging its start edge. */
+/* On a phone the stage keeps a thin margin, so samples get close to the app's own width. */
+@media (max-width: 599px) {
+  .ds-entry__stage {
+    padding: 40px 12px;
+  }
+}
+/* The sample column, at the app's content width: block samples fill it; anything narrower (a
+   lone button, a segmented control, a row of chips) is centred in the stage instead of hugging
+   its start edge. The settings context keeps this width (its own max-width is the app column). */
 .ds-entry__sample {
   align-items: center;
   display: flex;
   flex-direction: column;
-  max-width: 480px;
+  max-width: var(--app-content);
   width: 100%;
 }
 /* The sample is slot content, so these rules need :slotted() to reach it (a plain scoped

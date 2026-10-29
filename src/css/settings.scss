@@ -14,26 +14,38 @@
 .settings-view,
 .settings-view * {
   box-sizing: border-box;
+}
+
+/* Long text (URLs, keys, long translations) wraps inside rows and fields instead of pushing
+   them wider than the column. These rules name the parts they are for: a rule on every
+   descendant also let buttons and pagination cells shrink below their content, so an icon and
+   its label split onto two lines (owner 2026-10-29b, item 9). Buttons keep their min-content
+   width and break a word only when it can't fit a line on its own. */
+.settings-view .q-item,
+.settings-view .q-item__section,
+.settings-view .q-item__label,
+.settings-view .q-field,
+.settings-view .q-field__control-container,
+.settings-view .q-field__native,
+.settings-view .q-field__input {
   min-width: 0;
 }
 
 .settings-view .q-item,
 .settings-view .q-item__section,
 .settings-view .q-field,
-.settings-view .q-btn,
-.settings-view .q-btn__content {
+.settings-view .q-btn {
   max-width: 100%;
 }
 
 .settings-view .q-item__label,
 .settings-view .q-field__native,
-.settings-view .q-field__input,
-.settings-view .q-btn__content {
+.settings-view .q-field__input {
   overflow-wrap: anywhere;
 }
 
 .settings-view .q-btn__content {
-  white-space: normal;
+  overflow-wrap: break-word;
 }
 
 /* A logical section: header + card */

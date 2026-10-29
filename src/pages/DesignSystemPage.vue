@@ -1,15 +1,14 @@
 <template>
-  <div
-    ref="page"
-    class="settings-sub-page bg-dark text-white q-pa-md ui-kit-page ds-page"
-  >
+  <div ref="page" class="bg-dark text-white q-pa-md ui-kit-page ds-page">
     <!-- The design system board (dev builds only): every canonical component in the app, rendered
          live from the real component or shared class, in the order of src/design-system/registry.ts.
          Each <DsEntry id> reads its name, source, usage and props from the registry and the code,
          so only the sample is written here. A rail on the far left jumps between components. -->
     <DsRail :groups="railGroups" :active="active" :matches="matches" @go="go" />
-    <div class="settings-view text-left ui-kit-main">
-      <div class="settings-page-header q-pt-sm q-pb-md">
+    <!-- The board's own shell, not a settings page: samples get the app's context (for
+         example the settings column) from their registry entry, through DsEntry. -->
+    <div class="text-left ui-kit-main">
+      <div class="q-pt-sm q-pb-md">
         <h1 class="text-h5 text-weight-bold q-my-none">Design system</h1>
         <div class="text-caption text-grey-6 q-mt-xs">
           The app's component library: each element once, rendered live, with
@@ -294,7 +293,7 @@
         </div>
       </DsEntry>
       <DsEntry id="inline-confirm">
-        <q-list class="settings-menu-group settings-view">
+        <q-list class="settings-menu-group">
           <q-item>
             <q-item-section>
               <q-item-label>Remove spent proofs</q-item-label>
@@ -431,7 +430,7 @@
       <DsEntry id="select">
         <SheetSelect v-model="sort" :options="sortSheetOptions" label="Sort" />
         <!-- The settings-row variant (Privacy → Fiat currency). -->
-        <q-list class="settings-menu-group settings-view q-mt-md">
+        <q-list class="settings-menu-group q-mt-md">
           <SheetSelect
             row
             v-model="sort"
@@ -523,7 +522,7 @@
         </div>
       </DsEntry>
       <DsEntry id="settings-toggle-row">
-        <q-list class="settings-menu-group settings-view">
+        <q-list class="settings-menu-group">
           <SettingsToggleRow
             v-model="toggleOn"
             label="Check incoming invoice"
@@ -554,7 +553,7 @@
         </div>
       </DsEntry>
       <DsEntry id="settings-radio-row">
-        <q-list class="settings-menu-group settings-view">
+        <q-list class="settings-menu-group">
           <SettingsRadioRow
             v-for="o in ['Dark', 'Light', 'System']"
             :key="o"
@@ -787,7 +786,7 @@
         />
       </DsEntry>
       <DsEntry id="settings-link-row">
-        <q-list class="settings-menu-group settings-view">
+        <q-list class="settings-menu-group">
           <SettingsLinkRow
             v-for="row in rows"
             :key="row.title"
@@ -811,7 +810,7 @@
       </DsEntry>
       <DsEntry id="row-value">
         <!-- Every form in use: a value with a chevron, a chevron alone, and an external link. -->
-        <q-list class="settings-menu-group settings-view">
+        <q-list class="settings-menu-group">
           <q-item clickable>
             <q-item-section
               ><q-item-label>Language</q-item-label></q-item-section
@@ -839,7 +838,7 @@
         </q-list>
       </DsEntry>
       <DsEntry id="settings-action-row">
-        <q-list class="settings-menu-group settings-view">
+        <q-list class="settings-menu-group">
           <SettingsActionRow label="Restore" caption="From a seed phrase" />
           <SettingsActionRow
             label="Export proofs"
@@ -885,7 +884,7 @@
         </div>
       </DsEntry>
       <DsEntry id="expansion-row">
-        <q-list class="settings-menu-group settings-view">
+        <q-list class="settings-menu-group">
           <SettingsToggleRow
             v-model="toggleOn"
             label="Lightning address"
@@ -1454,29 +1453,10 @@
       </DsEntry>
       <h2 id="ds-group-feature" class="ds-section">Feature components</h2>
       <DsEntry id="history">
-        <!-- The current rows (ActivityRow, as HistoryTable draws them) with the same seven
-             payments as the variations, then the real empty state. -->
-        <q-list class="full-width">
-          <ActivityRow
-            v-for="h in historySpecimen"
-            :key="h.caption + h.amount"
-            :direction="h.dir"
-            :label="h.label"
-            :amount="h.amount"
-            :caption="h.caption"
-            :pending="h.pending"
-            :expired="h.expired"
-          />
-        </q-list>
-        <q-pagination
-          :model-value="1"
-          :max="7"
-          :max-pages="5"
-          direction-links
-          boundary-numbers
-          class="q-mt-md"
-        />
-        <div class="full-width q-mt-lg"><HistoryTable /></div>
+        <!-- The real HistoryTable on in-memory payments (three pages, two pending), then its
+             empty state. Fixture rows are inert: Check status and the details do nothing. -->
+        <HistoryTable :transactions="historyFixture" />
+        <HistoryTable :transactions="[]" class="q-mt-lg" />
       </DsEntry>
       <DsEntry id="payment-request">
         <!-- The real request body, on a fixed demo request (no store state). -->
@@ -1712,6 +1692,7 @@ import AppCallout from "src/components/AppCallout.vue";
 import BottomSheet from "src/components/BottomSheet.vue";
 import ChooseMint from "src/components/ChooseMint.vue";
 import HistoryTable from "src/components/HistoryTable.vue";
+import { dsHistoryTransactions } from "src/design-system/fixtures";
 import MintIdentityHeader from "src/components/MintIdentityHeader.vue";
 import MintInfoContainer from "src/components/MintInfoContainer.vue";
 import * as Lucide from "lucide-vue-next";
@@ -1960,6 +1941,7 @@ export default defineComponent({
     const sortOptions = ["Newest", "Oldest", "Highest rated", "Lowest rated"];
     return {
       revealOpen: true,
+      historyFixture: dsHistoryTransactions(),
       historySpecimen: [
         {
           dir: "in",
@@ -2399,6 +2381,9 @@ export default defineComponent({
 .ds-page .ui-kit-main {
   margin: 0 auto;
   max-width: 920px;
+  /* Wide board chrome (the section badges, props tables) never scrolls the page sideways. A
+     clip, not a scroll container, so the sticky search bar still sticks. */
+  overflow-x: clip;
 }
 .ds-section {
   color: var(--app-text-muted);

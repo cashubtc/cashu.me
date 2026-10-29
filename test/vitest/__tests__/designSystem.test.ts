@@ -70,6 +70,45 @@ describe("design system board", () => {
     ).toEqual([]);
   });
 
+  // Samples render like the app only in the app's own context. The board's shell is not a
+  // settings page: a settings ancestor's rules reached every sample and broke ones that never
+  // sit in settings (History's Check status split under its icon). Settings components get the
+  // settings column from their registry context, through DsEntry, and nothing else does.
+  it("gives a sample the settings context only through its registry entry", () => {
+    expect(board).not.toMatch(/settings-view|settings-sub-page/);
+    const entry = readFileSync(join(SRC, "components/ds/DsEntry.vue"), "utf8");
+    expect(entry).toMatch(
+      /class="ds-entry__sample"\s+:class="\{ 'settings-view': item\.context === 'settings' \}"/
+    );
+  });
+
+  it("declares the settings context for exactly the settings components", () => {
+    const settingsTag = (i: (typeof DS_ITEMS)[number]) =>
+      /^Settings/.test(i.usage?.tag ?? "");
+    expect(
+      DS_ITEMS.filter((i) => settingsTag(i) && i.context !== "settings").map(
+        (i) => i.id
+      )
+    ).toEqual([]);
+    expect(
+      DS_ITEMS.filter(
+        (i) => i.context === "settings" && ["feature", "token"].includes(i.tier)
+      ).map((i) => i.id)
+    ).toEqual([]);
+  });
+
+  // Feature samples run on in-memory fixtures, never the wallet's own stores.
+  it("renders History on fixture payments, not the live wallet", () => {
+    const block = board.match(
+      /<DsEntry\s+id="history">[\s\S]*?<\/DsEntry>/
+    )![0];
+    const tables = [...block.matchAll(/<HistoryTable\b[^>]*>/g)].map(
+      (m) => m[0]
+    );
+    expect(tables.length).toBeGreaterThan(0);
+    expect(tables.filter((t) => !t.includes(':transactions="'))).toEqual([]);
+  });
+
   it("has unique ids", () => {
     const ids = DS_ITEMS.map((i) => i.id);
     expect(new Set(ids).size).toBe(ids.length);
