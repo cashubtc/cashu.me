@@ -334,6 +334,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/components/ui/SettingsActionRow.vue",
     usage: { tag: "SettingsActionRow" },
     example: `<SettingsActionRow label="Restore" caption="From a seed phrase" to="/restore" />`,
+    note: "Labels are medium weight, like the settings root rows; labelClass replaces that default.",
   },
 
   {
@@ -455,7 +456,8 @@ export const DS_ITEMS: DsItem[] = [
     tier: "feature",
     source: "src/components/MintIdentityHeader.vue",
     usage: { tag: "MintIdentityHeader" },
-    example: `<MintIdentityHeader :mint="mint" />`,
+    example: `<MintIdentityHeader :url="mint.url" :info="mint.info" />`,
+    note: "One centred header on mint details, reviews and write-a-review (owner 2026-10-29, item 20).",
   },
   {
     id: "settings-section",
@@ -505,8 +507,13 @@ export const DS_ITEMS: DsItem[] = [
     tier: "composite",
     source: "src/components/ui/DetailRow.vue",
     usage: { tag: "DetailRow" },
-    example: `<DetailRow :icon="ClockIcon" label="Paid at" :value="date" />
-<DetailRow :icon="CoinsIcon" label="Amount" value="Any amount" placeholder action @click="editAmount" />`,
+    example: `<div class="detail-table">
+  <DetailRow :icon="ClockIcon" label="Paid at" :value="date" />
+  <DetailRow :icon="CoinsIcon" label="Amount" value="Any amount" placeholder action @click="editAmount" />
+  <DetailRow :icon="HashIcon" label="Transaction ID" :href="explorerUrl"><bdi dir="ltr">{{ txid }}</bdi></DetailRow>
+  <DetailRow icon-src="/nostr-icon.svg" label="Nostr" :copy-value="npub"><bdi dir="ltr">{{ short }}</bdi></DetailRow>
+</div>`,
+    note: "44px rows, 4px apart in a .detail-table: one 48px pitch. Interactive rows (action, link, copy) tint their own box and bleed 12px past the text. Links underline the value and end in ExternalLink in the text colour; copy rows end in Copy; busy and disabled hold an action.",
   },
   {
     id: "meta-line",

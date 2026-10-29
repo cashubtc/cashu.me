@@ -105,8 +105,10 @@
   font-size: 14px;
   line-height: 1.4;
 }
-/* Row titles share the sheet option rows' 16px. */
-.settings-view .q-item__label:not(.q-item__label--caption) {
+/* Row titles share the sheet option rows' 16px, in settings and in every settings-style card
+   (Mint details' actions read just like settings, owner 2026-10-29, item 18). */
+.settings-view .q-item__label:not(.q-item__label--caption),
+.settings-menu-group .q-item__label:not(.q-item__label--caption) {
   font-size: 16px;
 }
 

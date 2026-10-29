@@ -10,9 +10,13 @@
       </div>
     </q-item-section>
     <q-item-section>
-      <q-item-label :class="[labelClass, { 'text-negative': danger }]">{{
-        label
-      }}</q-item-label>
+      <q-item-label
+        :class="[
+          labelClass || 'text-weight-medium',
+          { 'text-negative': danger },
+        ]"
+        >{{ label }}</q-item-label
+      >
       <q-item-label v-if="caption" caption
         ><CjkText :text="caption"
       /></q-item-label>
@@ -60,7 +64,8 @@ export default defineComponent({
       type: String,
       required: true,
     },
-    /** Extra classes on the label (Backup's restore row keeps the regular weight). */
+    /** Replaces the default medium weight, the settings rows' (Backup's restore row is
+     *  regular). */
     labelClass: {
       type: String,
       default: "",
