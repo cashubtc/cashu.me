@@ -1,9 +1,10 @@
 <template>
   <div class="settings-section">
-    <!-- The one section heading (SectionDivider), as on Mint details; a warning caption is a
-         callout under it. -->
+    <!-- The one section heading (SectionDivider) on the start edge, as main's sub-page
+         section titles were; a warning caption is a callout under it. -->
     <SectionDivider
       v-if="title || caption"
+      align="start"
       :label="title"
       :caption="warning ? '' : caption"
     >

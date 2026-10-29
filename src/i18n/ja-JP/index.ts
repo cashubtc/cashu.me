@@ -61,6 +61,9 @@ export default {
       scan: {
         label: "スキャン",
       },
+      clear: {
+        label: "クリア",
+      },
       send: {
         label: "送る",
       },
@@ -1124,6 +1127,7 @@ export default {
       p2pk_pubkey: {
         label: "受信者の公開鍵",
         label_invalid: "受信者の公開鍵",
+        invalid: "有効な公開鍵（hex または npub）を入力してください",
       },
     },
     actions: {

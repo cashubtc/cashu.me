@@ -123,6 +123,24 @@ export class WalletUi extends WalletPage {
     await expect(toggle).toHaveAttribute("aria-checked", String(enabled));
   }
 
+  /** Paste and Scan sit inside the Pay / Receive field as labelled icon buttons. */
+  async payInputAction(name: "Paste" | "Scan") {
+    await this.page
+      .locator(".q-dialog:visible .q-field")
+      .getByRole("button", { name, exact: true })
+      .click();
+  }
+
+  /** Lock mode on the Send ecash amount step, with the receiver's key typed in. */
+  async lockSendTo(pubkey: string) {
+    const field = this.page.getByTestId("send-p2pk-pubkey").locator("input");
+    if (!(await field.isVisible()))
+      await this.page
+        .getByRole("button", { name: "Lock", exact: true })
+        .click();
+    await field.fill(pubkey);
+  }
+
   async stored(key: string) {
     return this.page.evaluate((name) => localStorage.getItem(name), key);
   }

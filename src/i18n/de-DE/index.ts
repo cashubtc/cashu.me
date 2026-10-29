@@ -66,6 +66,9 @@ export default {
       scan: {
         label: "Scannen",
       },
+      clear: {
+        label: "Löschen",
+      },
       send: {
         label: "Senden",
       },
@@ -1145,6 +1148,7 @@ export default {
       p2pk_pubkey: {
         label: "Öffentlicher Schlüssel des Empfängers",
         label_invalid: "Öffentlicher Schlüssel des Empfängers",
+        invalid: "Gültigen öffentlichen Schlüssel eingeben (hex oder npub)",
       },
     },
     actions: {

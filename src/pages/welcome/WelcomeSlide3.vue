@@ -8,13 +8,19 @@
   >
     <!-- Seed Phrase Section -->
     <div class="seed-section">
-      <FieldLabel>{{
-        $t("WelcomeSlide3.inputs.seed_phrase.label")
-      }}</FieldLabel>
-
-      <div class="seed-box">
-        <div class="seed-text">{{ hiddenMnemonic }}</div>
-        <div class="seed-actions">
+      <!-- The outlined field, read-only, with its label floating above the words (owner,
+           2026-10-29); its own Show and Copy actions stand in for the lock glyph. -->
+      <q-field
+        outlined
+        readonly
+        stack-label
+        class="seed-field"
+        :label="$t('WelcomeSlide3.inputs.seed_phrase.label')"
+      >
+        <template #control>
+          <div class="seed-text">{{ hiddenMnemonic }}</div>
+        </template>
+        <template #append>
           <IconButton
             :label="
               hideMnemonic
@@ -28,13 +34,11 @@
             <EyeOffIcon v-else :size="20" />
           </IconButton>
           <CopyButton
-            class="action-btn"
             :value="walletStore.mnemonic"
-            :icon-size="18"
             :tooltip="$t('global.actions.copy.label')"
           />
-        </div>
-      </div>
+        </template>
+      </q-field>
 
       <CjkText
         tag="p"
@@ -58,7 +62,6 @@
 
 <script lang="ts">
 import CjkText from "src/components/ui/CjkText.vue";
-import FieldLabel from "src/components/ui/FieldLabel.vue";
 import IconButton from "src/components/ui/IconButton.vue";
 import {
   Eye as EyeIcon,
@@ -76,7 +79,6 @@ export default {
   name: "WelcomeSlide3",
   components: {
     CjkText,
-    FieldLabel,
     IconButton,
     EyeIcon,
     EyeOffIcon,
@@ -139,19 +141,8 @@ export default {
   max-width: 500px;
 }
 
-.seed-box {
-  position: relative;
-  background: var(--app-tint);
-  border: 1px solid var(--app-border);
-  border-radius: var(--app-radius-lg);
-  padding: 20px;
+.seed-field {
   margin-bottom: 12px;
-  transition: all 0.2s ease;
-}
-
-.seed-box:hover {
-  background: var(--app-tint-strong);
-  border-color: var(--app-border-strong);
 }
 
 .seed-text {
@@ -160,27 +151,8 @@ export default {
   line-height: 1.8;
   color: var(--app-text);
   word-wrap: break-word;
-  padding-inline-end: 80px; /* Space for action buttons */
-}
-
-.seed-actions {
-  position: absolute;
-  top: 16px;
-  inset-inline-end: 12px;
-  display: flex;
-  gap: 4px;
-}
-
-.action-btn {
-  width: 32px;
-  height: 32px;
-  color: var(--app-text-muted);
-  transition: all 0.2s ease;
-}
-
-.action-btn:hover {
-  color: var(--app-text);
-  background: var(--app-tint-strong);
+  padding: 2px 0 12px;
+  width: 100%;
 }
 
 .seed-caption {

@@ -46,6 +46,7 @@ export default {
         label: "Nascondi frase seed",
       },
       scan: { label: "Scansiona" },
+      clear: { label: "Cancella" },
       send: { label: "Invia" },
       swap: { label: "Scambia" },
       update: { label: "Aggiorna" },
@@ -1109,6 +1110,7 @@ export default {
       p2pk_pubkey: {
         label: "Chiave pubblica ricevitore",
         label_invalid: "Chiave pubblica ricevitore non valida",
+        invalid: "Inserisci una chiave pubblica valida (hex o npub)",
       },
     },
     actions: {

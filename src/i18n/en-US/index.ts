@@ -37,6 +37,9 @@ export default {
       scan: {
         label: "Scan",
       },
+      clear: {
+        label: "Clear",
+      },
       send: {
         label: "Send",
       },
@@ -1158,6 +1161,7 @@ export default {
       p2pk_pubkey: {
         label: "Receiver public key",
         label_invalid: "Receiver public key",
+        invalid: "Enter a valid public key (hex or npub)",
       },
     },
     actions: {

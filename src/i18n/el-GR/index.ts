@@ -64,6 +64,9 @@ export default {
       scan: {
         label: "Σάρωση",
       },
+      clear: {
+        label: "Εκκαθάριση",
+      },
       send: {
         label: "Αποστολή",
       },
@@ -1139,6 +1142,7 @@ export default {
       p2pk_pubkey: {
         label: "Δημόσιο κλειδί παραλήπτη",
         label_invalid: "Μη έγκυρο δημόσιο κλειδί παραλήπτη",
+        invalid: "Εισαγάγετε έγκυρο δημόσιο κλειδί (hex ή npub)",
       },
     },
     actions: {

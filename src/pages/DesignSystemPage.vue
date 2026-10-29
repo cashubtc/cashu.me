@@ -161,13 +161,6 @@
           lnbc10u1pjxyz0pp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqypq
         </div>
       </DsEntry>
-      <DsEntry id="field-label">
-        <!-- Over a control (stars) and over a text field, as on the review page. -->
-        <FieldLabel>Rating</FieldLabel>
-        <AppRating :model-value="0" label="Rating" class="q-mb-md" />
-        <FieldLabel>Review (optional)</FieldLabel>
-        <q-input outlined dense aria-label="Review" />
-      </DsEntry>
       <DsEntry id="cjk-text">
         <div class="ds-frame q-pa-md" style="max-width: 240px">
           <!-- Rendered in the active locale: switch the board to 中文 to see whole words. -->
@@ -194,6 +187,28 @@
         >
           <PlusIcon :size="18" class="q-mr-sm" /> Add mint
         </q-btn>
+        <q-btn
+          rounded
+          unelevated
+          color="primary"
+          class="full-width q-mt-sm q-mb-sm"
+          disable
+          >Add mint</q-btn
+        >
+        <q-btn rounded unelevated color="primary" class="full-width" loading
+          >Add mint<template #loading
+            ><BusyLabel>Adding mint</BusyLabel></template
+          ></q-btn
+        >
+        <!-- zh, ja, ko, ar and th keep their text as written (no forced capitals). -->
+        <q-btn
+          rounded
+          unelevated
+          color="primary"
+          class="full-width q-mt-sm"
+          lang="zh-CN"
+          >添加 Mint</q-btn
+        >
       </DsEntry>
       <DsEntry id="secondary-buttons">
         <q-btn rounded outline color="primary" class="full-width q-mb-sm">
@@ -201,18 +216,29 @@
         </q-btn>
         <q-btn
           rounded
-          unelevated
+          outline
+          color="primary"
+          class="full-width q-mb-sm"
+          disable
+          >Search for mint backups</q-btn
+        >
+        <q-btn
+          rounded
+          outline
           color="primary"
           class="full-width q-mb-sm"
           loading
+          >Search for mint backups<template #loading
+            ><BusyLabel>Searching</BusyLabel></template
+          ></q-btn
         >
-          Create invoice
-          <template v-slot:loading>
-            <PendingDots class="on-left" /> Creating
-          </template>
-        </q-btn>
+        <!-- Sentence case (15/600) for paired and dialog actions. -->
+        <div class="row q-gutter-sm q-mb-sm">
+          <q-btn rounded outline color="primary">Cancel</q-btn>
+          <q-btn rounded unelevated color="primary">Confirm</q-btn>
+        </div>
         <div class="row q-gutter-sm">
-          <q-btn rounded outline color="primary">Outline</q-btn>
+          <q-btn rounded outline color="primary">Tonal</q-btn>
           <q-btn rounded flat color="primary">Flat</q-btn>
           <q-btn rounded unelevated color="primary" disable>Disabled</q-btn>
           <q-btn rounded unelevated class="app-btn-danger">Remove mint</q-btn>
@@ -282,29 +308,18 @@
       </DsEntry>
       <h2 id="ds-group-forms" class="ds-section">Form controls</h2>
       <DsEntry id="text-fields">
+        <!-- One outlined field: the label floats and stays visible with content; 16px inset;
+             edge 33% on the page, 43% on sheets. Trailing actions sit inside the field. -->
         <q-input outlined v-model="url" label="Mint URL" class="q-mb-md">
           <template v-slot:append>
-            <q-btn flat round class="touch-target-44" aria-label="Scan"
-              ><ScanIcon :size="20"
-            /></q-btn>
+            <IconButton label="Scan" :icon="ScanIcon" />
           </template>
         </q-input>
-        <q-input
-          rounded
-          outlined
-          v-model="nickname"
-          label="Nickname (optional)"
-          class="q-mb-md"
-        />
-        <q-input outlined v-model="filled" label="Mint URL" class="q-mb-md" />
-        <q-input
-          outlined
-          autogrow
-          v-model="memo"
-          type="textarea"
-          label="Paste a token or invoice"
-          class="q-mb-md"
-        />
+        <q-input outlined v-model="filled" label="Mint URL" class="q-mb-md">
+          <template v-slot:append>
+            <IconButton label="Clear" :icon="XIcon" @click="filled = ''" />
+          </template>
+        </q-input>
         <q-input
           outlined
           v-model="bad"
@@ -317,7 +332,39 @@
           outlined
           readonly
           model-value="wss://relay.example.com"
-          label="Read-only"
+          label="Relay"
+          class="q-mb-md"
+        />
+        <q-input
+          outlined
+          disable
+          model-value="Testnet"
+          label="Nickname"
+          class="q-mb-md"
+        />
+        <q-input
+          outlined
+          autogrow
+          v-model="memo"
+          type="textarea"
+          label="Review (optional)"
+          class="q-mb-md"
+        />
+        <q-input
+          outlined
+          autogrow
+          v-model="longInvoice"
+          type="textarea"
+          label="Lightning invoice or address"
+          class="q-mb-md"
+        />
+        <!-- The parse field (Pay, Receive): Paste and Scan inside, Clear once filled. -->
+        <ParseInputComponent
+          v-model="parseText"
+          test-id="ui-kit-parse"
+          placeholder="Paste a token or invoice"
+          has-camera
+          :autofocus="false"
         />
       </DsEntry>
       <DsEntry id="copy-field">
@@ -462,6 +509,179 @@
         <div class="row items-center q-gutter-sm q-mt-lg text-app-muted">
           <AppRating :model-value="4" readonly :size="14" />
           <span>4.0 · in a review list</span>
+        </div>
+      </DsEntry>
+      <!-- Buttons, fields, read-only, disabled and the mint picker as they stack in forms,
+           on the page and on a sheet (owner, 2026-10-29: they sit under each other). -->
+      <DsEntry id="control-stack">
+        <div class="q-mb-lg">
+          <q-btn class="full-width q-mb-md" unelevated rounded color="primary"
+            >Add mint</q-btn
+          >
+          <q-btn class="full-width q-mb-md" outline rounded color="primary"
+            ><SearchIcon :size="18" class="q-mr-sm" />Discover mints</q-btn
+          >
+          <q-btn
+            class="full-width q-mb-md"
+            unelevated
+            rounded
+            color="primary"
+            disable
+            >Add mint</q-btn
+          >
+          <q-btn
+            class="full-width q-mb-md"
+            unelevated
+            rounded
+            color="primary"
+            loading
+            >Add mint<template #loading
+              ><BusyLabel>Adding mint</BusyLabel></template
+            ></q-btn
+          >
+          <q-input outlined v-model="url" label="Mint URL" class="q-mb-md">
+            <template v-slot:append>
+              <IconButton label="Scan" :icon="ScanIcon" />
+            </template>
+          </q-input>
+          <q-input
+            outlined
+            model-value="https://mint.example.com"
+            label="Mint URL"
+            class="q-mb-md"
+          />
+          <q-input
+            outlined
+            v-model="bad"
+            label="Amount"
+            error
+            error-message="More than this mint's balance"
+            class="q-mb-md"
+          />
+          <q-input
+            outlined
+            readonly
+            model-value="wss://relay.example.com"
+            label="Relay"
+            class="q-mb-md"
+          />
+          <q-input
+            outlined
+            disable
+            model-value="Testnet"
+            label="Nickname"
+            class="q-mb-md"
+          />
+          <ChooseMint
+            test-id="ui-kit-stack-page"
+            allow-empty
+            :require-active-mint="false"
+            label="From"
+          />
+        </div>
+        <q-card flat class="ds-frame ds-raised q-pa-md">
+          <q-btn class="full-width q-mb-md" unelevated rounded color="primary"
+            >Add mint</q-btn
+          >
+          <q-btn class="full-width q-mb-md" outline rounded color="primary"
+            ><SearchIcon :size="18" class="q-mr-sm" />Discover mints</q-btn
+          >
+          <q-btn
+            class="full-width q-mb-md"
+            unelevated
+            rounded
+            color="primary"
+            disable
+            >Add mint</q-btn
+          >
+          <q-btn
+            class="full-width q-mb-md"
+            unelevated
+            rounded
+            color="primary"
+            loading
+            >Add mint<template #loading
+              ><BusyLabel>Adding mint</BusyLabel></template
+            ></q-btn
+          >
+          <q-input outlined v-model="url" label="Mint URL" class="q-mb-md">
+            <template v-slot:append>
+              <IconButton label="Scan" :icon="ScanIcon" />
+            </template>
+          </q-input>
+          <q-input
+            outlined
+            model-value="https://mint.example.com"
+            label="Mint URL"
+            class="q-mb-md"
+          />
+          <q-input
+            outlined
+            v-model="bad"
+            label="Amount"
+            error
+            error-message="More than this mint's balance"
+            class="q-mb-md"
+          />
+          <q-input
+            outlined
+            readonly
+            model-value="wss://relay.example.com"
+            label="Relay"
+            class="q-mb-md"
+          />
+          <q-input
+            outlined
+            disable
+            model-value="Testnet"
+            label="Nickname"
+            class="q-mb-md"
+          />
+          <ChooseMint
+            test-id="ui-kit-stack-sheet"
+            allow-empty
+            :require-active-mint="false"
+            label="From"
+          />
+        </q-card>
+        <!-- Light theme (owner, 2026-10-29): L1 (white page) ships; L2 and L3 are shown here
+             only, to judge in light mode. L2 would need light-2 #9a2fe0 (classic) and #b34700
+             (bitcoin) to keep AA, and a 48% field edge on its page. -->
+        <div class="ds-light-variants q-mt-lg">
+          <div class="text-app-muted q-mb-sm">
+            L2 (board only): #f6f6f7 page, white cards and fields
+          </div>
+          <div
+            class="ds-frame q-pa-md q-mb-md ds-light-variant ds-light-variant--l2"
+          >
+            <q-btn class="full-width q-mb-md" unelevated rounded color="primary"
+              >Add mint</q-btn
+            >
+            <q-btn class="full-width q-mb-md" outline rounded color="primary"
+              >Discover mints</q-btn
+            >
+            <q-input outlined model-value="" label="Mint URL" class="q-mb-md" />
+            <div class="ds-light-variant__card q-pa-md">
+              ₿2,289 on this mint
+            </div>
+          </div>
+          <div class="text-app-muted q-mb-sm">
+            L3 (board only): warm #faf9f7 page
+          </div>
+          <div
+            class="ds-frame q-pa-md q-mb-md ds-light-variant ds-light-variant--l3"
+          >
+            <q-btn class="full-width q-mb-md" unelevated rounded color="primary"
+              >Add mint</q-btn
+            >
+            <q-btn class="full-width q-mb-md" outline rounded color="primary"
+              >Discover mints</q-btn
+            >
+            <q-input outlined model-value="" label="Mint URL" class="q-mb-md" />
+            <div class="ds-light-variant__card q-pa-md">
+              ₿2,289 on this mint
+            </div>
+          </div>
         </div>
       </DsEntry>
       <h2 id="ds-group-navigation" class="ds-section">Navigation</h2>
@@ -688,6 +908,15 @@
           label="Swap"
           caption="Move funds between your mints over Lightning. Fees may apply."
         />
+        <SectionDivider
+          caption="The caption alone, where the page already titles the section."
+        />
+        <SectionDivider
+          align="start"
+          label="Network checks"
+          caption="Settings sub-page groups: the same label on the start edge."
+        />
+        <SectionDivider label="Mints you have added and can swap between" />
       </DsEntry>
       <h2 id="ds-group-data" class="ds-section">Data display</h2>
       <DsEntry id="badges">
@@ -906,18 +1135,12 @@
       </DsEntry>
       <DsEntry id="busy-label">
         <div class="column q-gutter-y-sm">
-          <q-btn
-            class="full-width"
-            unelevated
-            rounded
-            size="lg"
-            color="primary"
-            loading
+          <q-btn class="full-width" unelevated rounded color="primary" loading
             >Create invoice<template #loading
               ><BusyLabel>Creating invoice</BusyLabel></template
             ></q-btn
           >
-          <q-btn class="full-width" outline rounded size="lg" loading
+          <q-btn class="full-width" outline rounded loading
             >Search for mint backups<template #loading
               ><BusyLabel>Searching</BusyLabel></template
             ></q-btn
@@ -976,7 +1199,6 @@
               <q-btn
                 class="full-width"
                 unelevated
-                size="lg"
                 color="primary"
                 rounded
                 @click="flowOpen = false"
@@ -1200,33 +1422,33 @@
       <DsEntry id="flow-footer">
         <div class="column q-gutter-y-md">
           <FlowFooter>
-            <q-btn
-              class="full-width"
-              unelevated
-              size="lg"
-              color="primary"
-              rounded
+            <q-btn class="full-width" unelevated color="primary" rounded
               >Copy invoice</q-btn
             >
           </FlowFooter>
           <FlowFooter>
-            <q-btn
-              class="full-width"
-              unelevated
-              size="lg"
-              color="primary"
-              rounded
-              disable
+            <q-btn class="full-width" unelevated color="primary" rounded disable
               >Send</q-btn
             >
           </FlowFooter>
           <FlowFooter>
             <div class="row no-wrap" style="gap: 10px">
-              <q-btn class="col" outline rounded size="lg">Share</q-btn>
-              <q-btn class="col" unelevated rounded size="lg" color="primary"
-                >Copy</q-btn
-              >
+              <q-btn class="col" outline rounded>Share</q-btn>
+              <q-btn class="col" unelevated rounded color="primary">Copy</q-btn>
             </div>
+          </FlowFooter>
+          <FlowFooter>
+            <q-btn class="full-width q-mb-sm" flat rounded>Later</q-btn>
+            <q-btn class="full-width" unelevated rounded color="primary"
+              >Continue</q-btn
+            >
+          </FlowFooter>
+          <FlowFooter>
+            <q-btn class="full-width" unelevated rounded color="primary" loading
+              >Pay<template #loading
+                ><BusyLabel>Paying</BusyLabel></template
+              ></q-btn
+            >
           </FlowFooter>
         </div>
       </DsEntry>
@@ -1240,6 +1462,7 @@ import FlowDialog from "src/components/ui/FlowDialog.vue";
 import BusyLabel from "src/components/ui/BusyLabel.vue";
 import FlowFooter from "src/components/ui/FlowFooter.vue";
 import AmountInputComponent from "src/components/AmountInputComponent.vue";
+import ParseInputComponent from "src/components/ParseInputComponent.vue";
 import AmountHeadline from "src/components/ui/AmountHeadline.vue";
 import { defineComponent, markRaw, reactive } from "vue";
 import SettingsSection from "src/pages/settings/SettingsSection.vue";
@@ -1294,7 +1517,6 @@ import TonalChip from "src/components/ui/TonalChip.vue";
 import FlowColumn from "src/components/ui/FlowColumn.vue";
 import CjkText from "src/components/ui/CjkText.vue";
 import RevealTransition from "src/components/ui/RevealTransition.vue";
-import FieldLabel from "src/components/ui/FieldLabel.vue";
 import AmountWarning from "src/components/ui/AmountWarning.vue";
 import MetaLine from "src/components/ui/MetaLine.vue";
 import RowValue from "src/components/ui/RowValue.vue";
@@ -1360,7 +1582,6 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     RevealTransition,
-    FieldLabel,
     AmountWarning,
     MetaLine,
     RowValue,
@@ -1373,6 +1594,7 @@ export default defineComponent({
     FlowFooter,
     AmountHeadline,
     AmountInputComponent,
+    ParseInputComponent,
     AppCallout,
     ActivityRow,
     AmountKeypadPanel,
@@ -1628,6 +1850,9 @@ export default defineComponent({
       filled: "https://mint.example.com",
       memo: "",
       bad: "₿5,000",
+      parseText: "",
+      longInvoice:
+        "lnbc10u1pjxyz0pp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqypqdq5xysxxatsyp3k7enxv4jsxqzpusp5zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zygs",
       toggleOn: true,
       toggleOff: false,
       checkOn: true,
@@ -1909,6 +2134,26 @@ export default defineComponent({
   border: 1px dashed var(--app-border-strong);
   border-radius: var(--app-radius-lg);
   position: relative;
+}
+/* Light-theme variants L2 and L3: page colours to compare against L1 in light mode. */
+body.body--light .ds-light-variant--l2 {
+  --app-field-edge: color-mix(in srgb, var(--app-text) 48%, transparent);
+  background: #f6f6f7;
+}
+body.body--light .ds-light-variant--l2 .ds-light-variant__card {
+  background: #fff;
+}
+body.body--light .ds-light-variant--l3 {
+  background: #faf9f7;
+}
+.ds-light-variant__card {
+  background: var(--app-card-fill);
+  border-radius: var(--app-radius-lg);
+}
+/* A sample on the raised (sheet) surface, where fields take the stronger sheet edge. */
+.ds-raised {
+  background: var(--app-raised) !important;
+  box-shadow: none;
 }
 .ds-keypad {
   max-width: 360px;

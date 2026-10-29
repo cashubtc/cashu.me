@@ -151,7 +151,6 @@
             <q-btn
               class="full-width"
               unelevated
-              size="lg"
               @click="handleSwapToTrustedMint"
               color="primary"
               rounded
@@ -211,7 +210,6 @@
             <q-btn
               class="full-width"
               unelevated
-              size="lg"
               data-testid="receive-ecash"
               @click="handleReceive"
               color="primary"

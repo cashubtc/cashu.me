@@ -65,6 +65,9 @@ export default {
       scan: {
         label: "Scanner",
       },
+      clear: {
+        label: "Effacer",
+      },
       send: {
         label: "Envoyer",
       },
@@ -1147,6 +1150,7 @@ export default {
       p2pk_pubkey: {
         label: "Clé publique du destinataire",
         label_invalid: "Clé publique du destinataire",
+        invalid: "Saisissez une clé publique valide (hex ou npub)",
       },
     },
     actions: {

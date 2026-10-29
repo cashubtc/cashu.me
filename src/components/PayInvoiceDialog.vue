@@ -41,11 +41,9 @@
       </FlowColumn>
 
       <!-- Content area -->
-      <div
-        class="col column items-center q-px-sm scroll-container invoice-scroll-area"
-      >
+      <div class="col column items-center scroll-container invoice-scroll-area">
         <FlowColumn
-          class="q-px-sm q-mb-sm invoice-main-column full-width invoice-main-area"
+          class="q-px-md q-mb-sm invoice-main-column full-width invoice-main-area"
         >
           <!-- INVOICE CONTENT -->
           <div v-if="payInvoiceData.invoice" class="invoice-content-fill">
@@ -306,10 +304,9 @@
               <!-- Comment input for fixed amount -->
               <FlowColumn
                 v-if="payInvoiceData.lnurlpay.commentAllowed > 0"
-                class="q-px-sm q-mt-md"
+                class="q-mt-md"
               >
                 <q-input
-                  round
                   outlined
                   v-model="payInvoiceData.input.comment"
                   :type="
@@ -403,10 +400,9 @@
               <!-- Comment input below amount -->
               <FlowColumn
                 v-if="payInvoiceData.lnurlpay.commentAllowed > 0"
-                class="q-px-sm q-mt-md"
+                class="q-mt-md"
               >
                 <q-input
-                  round
                   outlined
                   v-model="payInvoiceData.input.comment"
                   type="text"
@@ -419,11 +415,10 @@
 
           <!-- INPUT CONTENT -->
           <div v-else>
-            <!-- One 16px gap under the mint picker (its own bottom inset), as between
-                     the input and the scan card. -->
+            <!-- One 16px gap under the mint picker (its own bottom inset); picker, field
+                 and NFC button share the column's 16px edge. -->
             <ParseInputComponent
               v-if="!camera.show"
-              style="margin-top: 0"
               v-model="payInvoiceData.input.request"
               test-id="payment-request-input"
               :placeholder="parseInputPlaceholder"
@@ -449,7 +444,6 @@
           <q-btn
             class="full-width"
             unelevated
-            size="lg"
             color="primary"
             rounded
             @click="closeDialog"
@@ -468,7 +462,6 @@
           <q-btn
             class="full-width"
             unelevated
-            size="lg"
             color="primary"
             rounded
             data-testid="pay-payment-request"
@@ -489,7 +482,6 @@
             v-if="hasMultinutSupport && multinutEnabled"
             class="full-width q-mt-sm"
             flat
-            size="md"
             color="primary"
             rounded
             @click="openMultinutDialog"
@@ -498,14 +490,7 @@
         </template>
         <!-- Balance too low -->
         <template v-else>
-          <q-btn
-            class="full-width"
-            unelevated
-            size="lg"
-            color="primary"
-            rounded
-            disabled
-          >
+          <q-btn class="full-width" unelevated color="primary" rounded disabled>
             {{ $t("PayInvoiceDialog.invoice.balance_too_low_warning_text") }}
           </q-btn>
         </template>
@@ -524,7 +509,6 @@
         <q-btn
           class="full-width"
           unelevated
-          size="lg"
           color="primary"
           rounded
           data-testid="quote-payment-request"
@@ -566,7 +550,6 @@
         <q-btn
           class="full-width"
           unelevated
-          size="lg"
           color="primary"
           rounded
           @click="handleLnurlPaySecond"
@@ -609,7 +592,6 @@
         <q-btn
           class="full-width"
           unelevated
-          size="lg"
           color="primary"
           rounded
           @click="handleLnurlPaySecond"

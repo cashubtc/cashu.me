@@ -43,7 +43,7 @@
 
               <!-- New key button -->
               <div class="row justify-center q-pt-sm q-pb-md">
-                <q-btn flat size="md" rounded @click="newKeys">
+                <q-btn flat rounded @click="newKeys">
                   <RefreshCwIcon :size="18" class="q-mr-sm" />
                   {{ $t("P2PKDialog.actions.new_key.label") }}
                 </q-btn>
@@ -57,7 +57,6 @@
           <q-btn
             class="full-width"
             unelevated
-            size="lg"
             color="primary"
             rounded
             @click="onCopyPublicKey"

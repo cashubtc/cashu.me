@@ -62,6 +62,9 @@ export default {
       scan: {
         label: "สแกน",
       },
+      clear: {
+        label: "ล้าง",
+      },
       send: {
         label: "ส่ง",
       },
@@ -1114,6 +1117,7 @@ export default {
       p2pk_pubkey: {
         label: "คีย์สาธารณะของผู้รับ",
         label_invalid: "คีย์สาธารณะของผู้รับ",
+        invalid: "ป้อนกุญแจสาธารณะที่ถูกต้อง (hex หรือ npub)",
       },
     },
     actions: {

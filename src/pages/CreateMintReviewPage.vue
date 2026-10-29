@@ -11,9 +11,10 @@
     <div class="review-form">
       <!-- One container level: the label, stars and text box sit straight on the page (the outlined text box inside a bordered card read as a box in a box). -->
       <div>
-        <FieldLabel>{{
-          $t("CreateMintReview.inputs.rating.label")
-        }}</FieldLabel>
+        <SectionDivider
+          align="start"
+          :label="$t('CreateMintReview.inputs.rating.label')"
+        />
         <AppRating
           v-model="rating"
           :size="32"
@@ -25,19 +26,17 @@
         <div v-if="!rating" class="review-rating-hint">
           {{ $t("CreateMintReview.inputs.rating.hint") }}
         </div>
-        <!-- Labelled above, like Rating: one label pattern for both fields (council R86). -->
-        <FieldLabel>{{
-          $t("CreateMintReview.inputs.review.label")
-        }}</FieldLabel>
+        <!-- The outlined field carries its own label, which stays visible with content
+             (owner, 2026-10-29). -->
         <q-input
           v-model="review"
           type="textarea"
           autogrow
           outlined
-          :aria-label="$t('CreateMintReview.inputs.review.label')"
+          :label="$t('CreateMintReview.inputs.review.label')"
           :disable="prefilling || submitting"
           class="review-input"
-          :input-style="{ minHeight: '96px' }"
+          :input-style="{ minHeight: '72px' }"
         />
       </div>
 
@@ -107,7 +106,7 @@ import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
 import { useMintsStore } from "src/stores/mints";
 import SettingsPageShell from "src/pages/settings/SettingsPageShell.vue";
 import AppRating from "src/components/ui/AppRating.vue";
-import FieldLabel from "src/components/ui/FieldLabel.vue";
+import SectionDivider from "src/components/ui/SectionDivider.vue";
 import MintIdentityHeader from "src/components/MintIdentityHeader.vue";
 
 export default defineComponent({
@@ -116,7 +115,7 @@ export default defineComponent({
     BusyLabel,
     PendingDots,
     AppRating,
-    FieldLabel,
+    SectionDivider,
     CopyButton,
     SettingsPageShell,
     MintIdentityHeader,

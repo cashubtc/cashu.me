@@ -233,7 +233,7 @@
             "
             class="row justify-center q-pt-sm"
           >
-            <SendPaymentRequest />
+            <FlowColumn class="q-px-md"><SendPaymentRequest /></FlowColumn>
           </div>
         </q-card-section>
       </q-card-section>
@@ -243,7 +243,6 @@
       <q-btn
         class="full-width"
         unelevated
-        size="lg"
         color="primary"
         rounded
         data-testid="copy-ecash-token"

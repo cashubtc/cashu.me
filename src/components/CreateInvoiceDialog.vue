@@ -173,7 +173,6 @@
               outline
               rounded
               color="primary"
-              size="lg"
               @click="bolt12AddAmount = true"
               :label="$t('CreateInvoiceDialog.add_amount')"
             />
@@ -201,7 +200,6 @@
             unelevated
             rounded
             color="primary"
-            size="lg"
             data-testid="npub-cash-add-amount"
             :label="$t('PaymentRequestDialog.actions.add_amount.label')"
             @click="enterNpubCashAmountMode"
@@ -211,7 +209,6 @@
             class="full-width"
             unelevated
             data-testid="create-payment-request"
-            size="lg"
             :disable="!canCreate"
             @click="requestMintButton"
             color="primary"

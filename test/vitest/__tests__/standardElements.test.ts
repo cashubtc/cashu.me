@@ -60,11 +60,13 @@ describe("standard elements", () => {
     ["ui/RowValue.vue", /^row-value(__(inner|text))?$/],
     ["ui/MetaLine.vue", /^meta-line(__sep)?$/],
     ["ui/AmountWarning.vue", /^amount-warning(__text)?$/],
-    ["ui/FieldLabel.vue", /^field-label$/],
     ["ui/MintCardAction.vue", /^mint-card-add(__icon)?$/],
     ["ui/TonalChip.vue", /^(tonal-chip(__icon)?|qr-control-chip)$/],
     ["ui/FlowFooter.vue", /^(bottom-panel|flow-footer__(bar|col))$/],
-    ["ui/SectionDivider.vue", /^section-divider(-block|__caption)?$/],
+    [
+      "ui/SectionDivider.vue",
+      /^(section-divider(-block|-block--start|--start|__caption)?|divider-(line|text))$/,
+    ],
     [
       "MintCard.vue",
       /^mint-card(--active|--host-only|__(body|head|foot|foot--meta|balances|plus|action-skeleton))?$/,
@@ -180,11 +182,72 @@ describe("standard elements", () => {
     ).toEqual([]);
   });
 
-  // The label above a field is FieldLabel, not a hand-sized div.
-  it("field labels come from FieldLabel", () => {
+  // Fields carry their own label (the outlined field's label stays visible with content),
+  // owner 2026-10-29.
+  it("no label sits above a field", () => {
     expect(
-      offenders((text) => /class="text-subtitle2 text-weight-medium/.test(text))
+      offenders((text) =>
+        /<FieldLabel|class="(field-label|seed-label)|class="text-subtitle2 text-weight-medium/.test(
+          text
+        )
+      )
     ).toEqual([]);
+  });
+
+  it("every text field shows its label", () => {
+    expect(
+      offenders((text) =>
+        // Quoted attribute values may hold ">" (a :type ternary).
+        [...text.matchAll(/<q-(input|field)\b(?:[^>"]|"[^"]*")*>/g)].some(
+          ([tag]) => !/\s:?label=/.test(tag)
+        )
+      ).filter((f) => !f.endsWith("welcome/WelcomeRecoverSeed.vue"))
+    ).toEqual([]);
+  });
+
+  // Owner 2026-10-29 (item 31): the centred caps label between two hairlines stays.
+  it("section divider keeps its centred caps label between hairlines", () => {
+    const sfc = readFileSync(
+      join(SRC, "components/ui/SectionDivider.vue"),
+      "utf8"
+    );
+    const css = readFileSync(join(SRC, "css/app.scss"), "utf8");
+    expect(sfc.match(/class="divider-line"/g)?.length).toBe(2);
+    expect(css).toMatch(/\.divider-text \{[^}]*text-transform: uppercase/);
+    expect(css).toMatch(/\.section-divider \{[^}]*display: flex/);
+  });
+
+  it("content sections use the centred divider", () => {
+    expect(
+      offenders((text) =>
+        /<SectionDivider[^>]*align="start"/.test(text)
+      ).filter(
+        (f) =>
+          !/settings\/SettingsSection\.vue$|CreateMintReviewPage\.vue$/.test(f)
+      )
+    ).toEqual([]);
+  });
+
+  // Two button text standards; Quasar's size writes an inline font-size. Dense chips-style
+  // buttons (the history row's Check status) own their size.
+  it("pill buttons never set a size", () => {
+    expect(
+      offenders((t) =>
+        [...t.matchAll(/<q-btn\b[^>]*>/g)].some(
+          ([tag]) =>
+            /\srounded\b/.test(tag) &&
+            !/\sdense\b/.test(tag) &&
+            /\s:?size=/.test(tag)
+        )
+      )
+    ).toEqual([]);
+    expect(
+      readFileSync(join(SRC, "components/SendPaymentRequest.vue"), "utf8")
+    ).not.toMatch(/buttonSize/);
+  });
+
+  it("paste and scan sit inside their field", () => {
+    expect(offenders((t) => /paste-text-btn/.test(t))).toEqual([]);
   });
 
   // A block that opens in place is RevealTransition, not another copy of the slide CSS.
@@ -233,21 +296,21 @@ describe("standard elements", () => {
 
   // The field's shape, fill and edge come from app.scss alone; a component that resets the
   // control's radius or fill paints a second shape inside the first (a pill fill inside a
-  // rounded border). The paste box is its own borderless pattern.
+  // rounded border).
   it("no component restyles a field's control", () => {
     expect(
       offenders((text) =>
         [...text.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].some(([, css]) =>
           css.includes("q-field__control")
         )
-      ).filter((file) => !file.endsWith("ParseInputComponent.vue"))
+      )
     ).toEqual([]);
   });
 
   it("text fields are the one outlined style", () => {
     expect(
       offenders((text) =>
-        [...text.matchAll(/<q-input\b[^>]*>/g)].some(([tag]) =>
+        [...text.matchAll(/<q-(input|field)\b[^>]*>/g)].some(([tag]) =>
           /\s(dense|rounded|filled|standout|borderless)(?=[\s>/=])/.test(tag)
         )
       )

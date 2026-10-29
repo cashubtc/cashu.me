@@ -62,6 +62,9 @@ export default {
       scan: {
         label: "مسح ضوئي",
       },
+      clear: {
+        label: "محو",
+      },
       send: {
         label: "إرسال",
       },
@@ -1114,6 +1117,7 @@ export default {
       p2pk_pubkey: {
         label: "المفتاح العام للمستلم",
         label_invalid: "المفتاح العام للمستلم",
+        invalid: "أدخل مفتاحًا عامًا صالحًا (hex أو npub)",
       },
     },
     actions: {

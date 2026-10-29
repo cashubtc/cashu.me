@@ -62,6 +62,9 @@ export default {
       scan: {
         label: "扫描",
       },
+      clear: {
+        label: "清除",
+      },
       send: {
         label: "发送",
       },
@@ -1104,6 +1107,7 @@ export default {
       p2pk_pubkey: {
         label: "接收者公钥",
         label_invalid: "接收者公钥",
+        invalid: "请输入有效的公钥（hex 或 npub）",
       },
     },
     actions: {

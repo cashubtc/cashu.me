@@ -66,6 +66,9 @@ export default {
       scan: {
         label: "Tara",
       },
+      clear: {
+        label: "Temizle",
+      },
       send: {
         label: "Gönder",
       },
@@ -1141,6 +1144,7 @@ export default {
       p2pk_pubkey: {
         label: "Alıcının genel anahtarı",
         label_invalid: "Alıcının genel anahtarı",
+        invalid: "Geçerli bir açık anahtar girin (hex veya npub)",
       },
     },
     actions: {

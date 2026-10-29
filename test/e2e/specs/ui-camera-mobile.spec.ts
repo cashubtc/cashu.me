@@ -23,10 +23,7 @@ test("decodes a camera QR frame into a payable invoice", async ({
   );
   await wallet.mintBolt11(50);
   await wallet.openSend("lightning");
-  await page
-    .locator(".q-dialog:visible")
-    .getByText("Scan QR code", { exact: true })
-    .click();
+  await wallet.payInputAction("Scan");
   await expect(page.getByTestId("pay-payment-request")).toBeVisible();
   await expect(page.locator(".pay-fullscreen")).toContainText("11");
   await page.getByTestId("pay-payment-request").click();
@@ -110,10 +107,7 @@ test("scans a QR code without fetching decoder code from a public CDN", async ({
       decoderRequests.push(new URL(request.url()).hostname);
   });
   await wallet.openSend("lightning");
-  await page
-    .locator(".q-dialog:visible")
-    .getByText("Scan QR code", { exact: true })
-    .click();
+  await wallet.payInputAction("Scan");
   await expect(page.locator("video")).toBeVisible();
   test.fail(true, "UI-007: scanner still loads decoder WASM from a public CDN");
   await expect(page.getByTestId("pay-payment-request")).toBeVisible({

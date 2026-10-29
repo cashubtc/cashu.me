@@ -81,21 +81,19 @@ $themes: (
     dark: #4a2d36,
     info: #56353a,
   ),
-  // Dark mode on a charcoal page with zinc steps, not pure black: the council's colour vote
-  // (xv-3) put black under near-white pills last for comfort; fills stay bright (#e4e4e7,
-  // never below #d4d4d8, where pills start to read as disabled) and raised surfaces sit a
-  // small step above the page so sheets don't glare.
+  // Dark mono is the original's pure black page under near-white pills (owner, 2026-10-29,
+  // item 30). Softening comes from the control tokens, never from lifting the page.
   "monochrome":
     (
-      fill: #e4e4e7,
-      on-fill: #18181b,
-      accent: #e4e4e7,
+      fill: #ededed,
+      on-fill: #0a0a0a,
+      accent: #ededed,
       accent-2: #d4d4d8,
-      light: #111111,
+      light: #18181b,
       light-2: #3d3d3d,
-      dark: #151518,
-      raised: #222226,
-      info: #27272a,
+      dark: #000,
+      raised: #161618,
+      info: #1b1b1b,
     ),
   // Cyber's green is pulled back from pure #00ff00, so the large fills and the selected
   // edge stop glaring while the neon look stays (council R75).
@@ -150,8 +148,7 @@ body {
   --app-hover-opacity: 0.12;
   --app-pressed-opacity: 0.24;
   --app-card-shadow: none;
-  --app-outline-fill: transparent;
-  --app-segment-edge: var(--app-outline-edge);
+  --app-segment-edge: var(--app-field-edge);
   // Shape and depth, the same in every mode and theme. Radii: small controls 6, inner
   // surfaces 8, cards and rows 12, sheets 20, pills 999.
   --app-radius-sm: 6px;
@@ -165,7 +162,7 @@ body {
 }
 
 // Surfaces ("Tonal"): cards and
-// settings groups are borderless neutral fills; fields, the mint picker, outline buttons and
+// settings groups are borderless neutral fills; secondary buttons are tonal fills; fields, the mint picker and
 // segmented controls keep a quiet edge so they still read as controls; a selected card or row
 // is a stronger neutral fill with the theme colour on its edge (same width as at rest), so a
 // selection never turns muddy in a coloured theme or reads like a warning.
@@ -179,12 +176,23 @@ body.body--dark {
   );
   // Dark steps over the pure-black page, about 5 points apart so each level separates on any
   // panel: container 10% (cards and settings groups, siblings), active 15%, raised 13%. Fields
-  // keep an edge at the 3:1 control minimum (38%), softened from 40% so inputs stay quieter.
+  // keep an edge at the 3:1 control minimum over their 10% fill (33% on the page, 43% on
+  // sheets below); the fill carries the shape so the edge reads as a rim, not a bright line.
+  // Secondary buttons are tonal (a fill, no edge); disabled is quieter than tonal.
   --app-card-fill: color-mix(in srgb, var(--app-text) 10%, transparent);
   --app-card-fill-active: color-mix(in srgb, var(--app-text) 15%, transparent);
-  --app-field-edge: rgba(255, 255, 255, 0.38);
-  --app-field-fill: color-mix(in srgb, var(--app-text) 7%, transparent);
-  --app-outline-edge: rgba(255, 255, 255, 0.38);
+  --app-field-fill: color-mix(in srgb, var(--app-text) 10%, transparent);
+  --app-field-edge: color-mix(in srgb, var(--app-text) 33%, transparent);
+  --app-field-edge-hover: color-mix(in srgb, var(--app-text) 56%, transparent);
+  --app-tonal-fill: color-mix(in srgb, var(--app-text) 10%, transparent);
+  --app-tonal-fill-hover: color-mix(in srgb, var(--app-text) 15%, transparent);
+  --app-tonal-fill-pressed: color-mix(
+    in srgb,
+    var(--app-text) 20%,
+    transparent
+  );
+  --app-disabled-fill: color-mix(in srgb, var(--app-text) 5%, transparent);
+  --app-readonly-fill: color-mix(in srgb, var(--app-text) 6%, transparent);
   --app-group-edge: transparent;
   --app-group-fill: color-mix(in srgb, var(--app-text) 10%, transparent);
 }
@@ -192,15 +200,55 @@ body.body--light {
   --app-card-edge: transparent;
   // 75% (was 40%): the selected edge reads in every theme, not just the strong accents.
   --app-card-edge-active: color-mix(in srgb, var(--q-primary) 75%, transparent);
-  // 5% and 9%: on white, 4% cards (the wallet's mint card, settings groups) read as barely
-  // there next to dark mode's steps (council R69-R70).
-  --app-card-fill: color-mix(in srgb, var(--app-text) 5%, transparent);
-  --app-card-fill-active: color-mix(in srgb, var(--app-text) 9%, transparent);
-  --app-field-edge: rgba(0, 0, 0, 0.46);
+  // 4% and 7% on the white page (L1, owner 2026-10-29): quieter steps, so stacked cards,
+  // tonal buttons and fields stop reading as grey slabs.
+  --app-card-fill: color-mix(in srgb, var(--app-text) 4%, transparent);
+  --app-card-fill-active: color-mix(in srgb, var(--app-text) 7%, transparent);
   --app-field-fill: #fff;
-  --app-outline-edge: rgba(0, 0, 0, 0.46);
+  --app-field-edge: color-mix(in srgb, var(--app-text) 46%, transparent);
+  --app-field-edge-hover: color-mix(in srgb, var(--app-text) 64%, transparent);
+  --app-tonal-fill: color-mix(in srgb, var(--app-text) 5%, transparent);
+  --app-tonal-fill-hover: color-mix(in srgb, var(--app-text) 8%, transparent);
+  --app-tonal-fill-pressed: color-mix(
+    in srgb,
+    var(--app-text) 12%,
+    transparent
+  );
+  --app-disabled-fill: color-mix(in srgb, var(--app-text) 3%, transparent);
+  --app-readonly-fill: color-mix(in srgb, var(--app-text) 4%, transparent);
   --app-group-edge: transparent;
   --app-group-fill: color-mix(in srgb, var(--app-text) 5%, transparent);
+}
+
+// Fields on sheets and dialogs: the raised fill is lighter (dark) or greyer (light), so the
+// edge needs more weight to keep 3:1 (flamingo sheets need 43%, light sheets 49%). Desktop
+// flows still sit on the raised colour until they take the page background (item 28).
+body.body--dark
+  :is(
+    .q-card,
+    .bottom-sheet,
+    .q-menu,
+    .q-dialog__inner--maximized .display-token-fullscreen
+  ) {
+  --app-field-edge: color-mix(in srgb, var(--app-text) 43%, transparent);
+  --app-field-edge-hover: color-mix(in srgb, var(--app-text) 64%, transparent);
+}
+body.body--light
+  :is(
+    .q-card,
+    .bottom-sheet,
+    .q-menu,
+    .q-dialog__inner--maximized .display-token-fullscreen
+  ) {
+  --app-field-edge: color-mix(in srgb, var(--app-text) 49%, transparent);
+}
+// Mono's selection ring: a white ring on black glared at 75%; 56% still clears 3:1.
+body[data-theme="monochrome"] {
+  --app-card-edge-active: color-mix(
+    in srgb,
+    var(--app-accent) 56%,
+    transparent
+  );
 }
 
 body.body--dark {

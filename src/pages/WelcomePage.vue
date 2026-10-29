@@ -69,7 +69,7 @@
           rounded
           unelevated
           color="primary"
-          class="welcome-footer__next"
+          class="welcome-footer__next btn-caps"
           data-testid="onboarding-next"
           :label="$t('WelcomePage.actions.next.label')"
           :disable="!welcomeStore.canProceed"
@@ -173,7 +173,5 @@ export default {
   flex: 1;
   max-width: 500px;
   min-height: 52px;
-  font-size: 16px;
-  font-weight: 600;
 }
 </style>

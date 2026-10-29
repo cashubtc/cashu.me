@@ -62,6 +62,9 @@ export default {
       scan: {
         label: "Skanna",
       },
+      clear: {
+        label: "Rensa",
+      },
       send: {
         label: "Skicka",
       },
@@ -1128,6 +1131,7 @@ export default {
       p2pk_pubkey: {
         label: "Mottagarens publika nyckel",
         label_invalid: "Mottagarens publika nyckel",
+        invalid: "Ange en giltig publik nyckel (hex eller npub)",
       },
     },
     actions: {

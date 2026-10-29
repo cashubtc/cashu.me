@@ -74,10 +74,7 @@ test("opens and closes QR scanner when camera access is unavailable", async ({
   const wallet = new WalletUi(page);
   await wallet.onboard(MINT_A_URL);
   await wallet.openSend("lightning");
-  await page
-    .locator(".q-dialog:visible")
-    .getByText("Scan QR code", { exact: true })
-    .click();
+  await wallet.payInputAction("Scan");
   await expect(page.locator(".q-dialog:visible").last()).toBeVisible();
   await page.getByRole("button", { name: "Close", exact: true }).last().click();
   await expect(page.getByTestId("payment-request-input")).toBeVisible();
@@ -146,10 +143,7 @@ test("clipboard denial leaves manual payment entry usable", async ({
     }
   });
   await wallet.openSend("lightning");
-  await page
-    .locator(".q-dialog:visible")
-    .getByText("Paste", { exact: true })
-    .click();
+  await wallet.payInputAction("Paste");
   const invoice = await counterpartyRequest(request, "bolt11", 10);
   await wallet.quoteRequest(invoice);
   await expect(page.getByTestId("pay-payment-request")).toBeEnabled();

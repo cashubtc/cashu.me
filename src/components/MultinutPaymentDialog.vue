@@ -218,7 +218,6 @@
             @click="executeMultinutPayment"
             :loading="multiMeltButtonLoading"
             class="pay-button-fixed"
-            size="lg"
           >
             {{ $t("MultinutPicker.pay_invoice") }}
             <template #loading

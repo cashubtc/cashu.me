@@ -125,18 +125,21 @@ export const DS_ITEMS: DsItem[] = [
     name: "Full-width primary",
     group: "actions",
     tier: "primitive",
-    source: "src/css/app.scss .q-btn--rounded.full-width (52px)",
+    source: "src/css/app.scss .q-btn.full-width (52px, caps 16/600/.06em)",
     usage: { text: "full-width" },
-    example: `<q-btn rounded unelevated color="primary" class="full-width" :loading="busy">\n  Continue\n  <template #loading><q-spinner-dots size="20px" class="on-left" />Continue</template>\n</q-btn>`,
+    example: `<q-btn rounded unelevated color="primary" class="full-width" :loading="busy">\n  Continue\n  <template #loading><BusyLabel>Continuing</BusyLabel></template>\n</q-btn>`,
+    note: "Caps standard: 16/600 with 0.06em tracking for every full-width action and FlowFooter button. Disabled is a quiet 5% pill; busy keeps the enabled look with BusyLabel. Scripts without capitals (zh, ja, ko, ar, th) keep their text as written.",
   },
   {
     id: "secondary-buttons",
-    name: "Secondary, flat, disabled, danger",
+    name: "Secondary (tonal), flat, disabled, danger",
     group: "actions",
     tier: "primitive",
-    source: "q-btn outline / flat · src/css/elements.scss busy state",
+    source:
+      "q-btn outline (tonal: --app-tonal-fill, no edge) / flat · src/css/app.scss",
     usage: { text: "<q-btn" },
-    example: `<q-btn rounded outline no-caps color="primary">Cancel</q-btn>`,
+    example: `<q-btn rounded outline color="primary">Cancel</q-btn>`,
+    note: "Two text standards: sentence case 15/600 for inline, paired and dialog actions; caps 16/600/.06em for full-width and FlowFooter actions. Secondary buttons are a tonal fill without an edge. Chips (TonalChip, filters, MintCardAction) are not buttons and keep 14/500.",
   },
   {
     id: "icon-buttons",
@@ -175,7 +178,8 @@ export const DS_ITEMS: DsItem[] = [
     tier: "primitive",
     source: "q-input outlined · src/css/app.scss field edge and fill tokens",
     usage: { text: "<q-input" },
-    example: `<q-input v-model="url" outlined label="Mint URL" />`,
+    example: `<q-input v-model="url" outlined label="Mint URL" />\n<q-input v-model="review" outlined type="textarea" autogrow label="Review (optional)" />`,
+    note: 'One outlined field (textarea variant: type="textarea" autogrow). The label stays visible with content; 16px inset; edge 33% on the page, 43% on sheets; focus in the accent. Paste, Scan and Clear sit inside the field (ParseInputComponent).',
   },
   {
     id: "copy-field",
@@ -271,6 +275,17 @@ export const DS_ITEMS: DsItem[] = [
     usage: { tag: "AppRating" },
     example: `<AppRating v-model="rating" :size="32" :label="$t('…rating.label')" />`,
   },
+  {
+    id: "control-stack",
+    name: "Controls together",
+    group: "forms",
+    tier: "pattern",
+    source:
+      "src/css/base.scss --app-field-*, --app-tonal-*, --app-disabled-fill",
+    usage: { text: "--app-tonal-fill" },
+    example: `<q-btn class="full-width" unelevated rounded color="primary">Add mint</q-btn>\n<q-btn class="full-width" outline rounded color="primary">Discover mints</q-btn>\n<q-input outlined label="Mint URL" />`,
+    note: "Buttons, fields, read-only, disabled and the mint picker as they stack in forms; edges hold 3:1 on page and sheet. Primary is filled; secondary is a tonal fill with no edge; disabled is quieter than tonal; fields keep a soft rim over a 10% fill.",
+  },
 
   // Navigation
   {
@@ -320,16 +335,6 @@ export const DS_ITEMS: DsItem[] = [
     example: `<SettingsActionRow label="Restore" caption="From a seed phrase" to="/restore" />`,
   },
 
-  {
-    id: "field-label",
-    name: "Field label",
-    group: "foundations",
-    tier: "primitive",
-    source: "src/components/ui/FieldLabel.vue",
-    usage: { tag: "FieldLabel" },
-    example: `<FieldLabel>Rating</FieldLabel>`,
-    note: "The label above a field or control (Rating, Review, Seed phrase): 15px semibold ink, 8px above it.",
-  },
   {
     id: "cjk-text",
     name: "CJK text",
@@ -440,6 +445,7 @@ export const DS_ITEMS: DsItem[] = [
       "src/pages/settings/SettingsSection.vue · settings.scss .settings-menu-group",
     usage: { tag: "SettingsSection" },
     example: `<SettingsSection title="Locked ecash" caption="…" warning>…</SettingsSection>`,
+    note: "The section title is the start-aligned caps SectionDivider, as main's sub-page titles were.",
   },
   {
     id: "box",
@@ -458,6 +464,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/components/ui/SectionDivider.vue",
     usage: { tag: "SectionDivider" },
     example: `<SectionDivider :label="$t('MintSettings.add.title')" />`,
+    note: 'Centred caps between hairlines on content pages; align="start" for settings sub-page groups (owner, 2026-10-29).',
   },
 
   // Data display
@@ -768,7 +775,7 @@ export const DS_ITEMS: DsItem[] = [
     tier: "pattern",
     source: "src/components/ui/FlowFooter.vue",
     usage: { tag: "FlowFooter" },
-    example: `<FlowFooter>\n  <q-btn class="full-width" unelevated rounded size="lg" color="primary">…</q-btn>\n</FlowFooter>`,
+    example: `<FlowFooter>\n  <q-btn class="full-width" unelevated rounded color="primary">…</q-btn>\n</FlowFooter>`,
     note: "The main action pinned under a full-screen flow, in the app column. The above slot holds the keypad on amount steps.",
   },
 ];

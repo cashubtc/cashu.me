@@ -92,7 +92,6 @@
           class="full-width"
           :unelevated="invoiceData.status !== 'paid'"
           :outline="invoiceData.status === 'paid'"
-          size="lg"
           :color="invoiceData.status === 'paid' ? undefined : 'primary'"
           rounded
           @click="onCopyBolt11"

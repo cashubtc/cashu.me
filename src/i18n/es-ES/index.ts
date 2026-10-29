@@ -37,6 +37,9 @@ export default {
       scan: {
         label: "Escanear",
       },
+      clear: {
+        label: "Borrar",
+      },
       send: {
         label: "Enviar",
       },
@@ -1135,6 +1138,7 @@ export default {
       p2pk_pubkey: {
         label: "Clave pública del receptor",
         label_invalid: "Clave pública del receptor inválida",
+        invalid: "Introduce una clave pública válida (hex o npub)",
       },
     },
     actions: {

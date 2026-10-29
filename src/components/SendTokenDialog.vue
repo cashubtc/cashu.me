@@ -132,7 +132,6 @@
           :button-rounded="true"
           :button-dense="false"
           :button-unelevated="true"
-          button-size="lg"
           button-color="primary"
           :button-class="[]"
           :prepare-token="preparePaymentRequestTokens"
@@ -142,7 +141,6 @@
           v-else
           class="full-width"
           unelevated
-          size="lg"
           :disable="
             sendingEcash ||
             sendData.amount == null ||

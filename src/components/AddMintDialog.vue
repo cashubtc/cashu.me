@@ -87,7 +87,6 @@
       <q-btn
         class="full-width"
         unelevated
-        size="lg"
         color="primary"
         rounded
         data-testid="confirm-add-mint"

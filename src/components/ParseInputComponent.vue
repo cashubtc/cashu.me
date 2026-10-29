@@ -1,43 +1,49 @@
 <template>
-  <div class="column q-mt-md">
-    <!-- Input field with paste button -->
-    <div class="input-with-paste-wrapper" :data-testid="testId">
-      <q-input
-        ref="inputRef"
-        :aria-label="computedPlaceholder"
-        :class="[
-          'parse-input',
-          { 'has-paste-button': canPasteFromClipboard && !modelValue },
-        ]"
-        spellcheck="false"
-        autocorrect="off"
-        autocapitalize="off"
-        :model-value="modelValue"
-        @update:model-value="$emit('update:modelValue', $event)"
-        type="textarea"
-        :placeholder="computedPlaceholder"
-        :autofocus="autofocus"
-        @keyup.enter="$emit('enter')"
-      />
-      <div
-        v-if="canPasteFromClipboard && !modelValue"
-        class="paste-text-btn"
-        @click="$emit('paste')"
-      >
-        {{ $t("ParseInputComponent.paste_button.label") }}
-      </div>
-    </div>
-
-    <!-- QR Scanner row -->
-    <OptionRow v-if="hasCamera" @click="$emit('scan')" class="q-mt-md">
-      <template #icon><ScanIcon :size="24" /></template>
-      <template #label>{{
-        $t("ParseInputComponent.qr_scanner.title")
-      }}</template>
-      <template #caption>{{
-        $t("ParseInputComponent.qr_scanner.description")
-      }}</template>
-    </OptionRow>
+  <div class="column" :data-testid="testId">
+    <!-- The outlined text field (textarea variant): its label stays visible with content,
+         and Paste and Scan sit inside it, replaced by Clear once there is text (owner,
+         2026-10-29). -->
+    <q-input
+      ref="inputRef"
+      outlined
+      type="textarea"
+      autogrow
+      hide-bottom-space
+      :label="computedPlaceholder"
+      spellcheck="false"
+      autocorrect="off"
+      autocapitalize="off"
+      :model-value="modelValue"
+      @update:model-value="$emit('update:modelValue', $event)"
+      :autofocus="autofocus"
+      @keyup.enter="$emit('enter')"
+    >
+      <template #append>
+        <template v-if="!modelValue">
+          <IconButton
+            v-if="canPasteFromClipboard"
+            :label="$t('ParseInputComponent.paste_button.label')"
+            @click="$emit('paste')"
+          >
+            <ClipboardPasteIcon :size="20" />
+          </IconButton>
+          <IconButton
+            v-if="hasCamera"
+            :label="$t('global.actions.scan.label')"
+            @click="$emit('scan')"
+          >
+            <ScanIcon :size="20" />
+          </IconButton>
+        </template>
+        <IconButton
+          v-else
+          :label="$t('global.actions.clear.label')"
+          @click="$emit('update:modelValue', '')"
+        >
+          <XIcon :size="20" />
+        </IconButton>
+      </template>
+    </q-input>
 
     <!-- NFC button (if supported) -->
     <q-btn
@@ -60,17 +66,24 @@
 
 <script lang="ts">
 import BusyLabel from "src/components/ui/BusyLabel.vue";
-import OptionRow from "src/components/ui/OptionRow.vue";
+import IconButton from "src/components/ui/IconButton.vue";
 import { defineComponent } from "vue";
-import { ScanLine as ScanIcon, Nfc as NfcIcon } from "lucide-vue-next";
+import {
+  ClipboardPaste as ClipboardPasteIcon,
+  Nfc as NfcIcon,
+  ScanLine as ScanIcon,
+  X as XIcon,
+} from "lucide-vue-next";
 
 export default defineComponent({
   name: "ParseInputComponent",
   components: {
     BusyLabel,
-    OptionRow,
-    ScanIcon,
+    ClipboardPasteIcon,
+    IconButton,
     NfcIcon,
+    ScanIcon,
+    XIcon,
   },
   props: {
     modelValue: {
@@ -127,68 +140,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style lang="scss" scoped>
-/* Input area styles */
-.input-with-paste-wrapper {
-  position: relative;
-}
-
-.parse-input {
-  :deep(.q-field__control) {
-    border-radius: var(--app-radius-lg);
-    background: var(--app-tint);
-    min-height: 120px;
-    max-height: 120px;
-    padding: 16px;
-
-    &:before,
-    &:after {
-      border: none !important;
-    }
-  }
-
-  :deep(.q-field__native) {
-    padding: 0;
-    font-size: 16px;
-    color: var(--app-text);
-    min-height: 88px;
-  }
-
-  // Room for Paste on the inline end, so in right-to-left it is kept on the left.
-  &.has-paste-button :deep(.q-field__native) {
-    padding: 0;
-    padding-inline-end: 70px;
-  }
-
-  :deep(.q-placeholder) {
-    color: var(--app-text-muted);
-    font-size: 16px;
-  }
-
-  :deep(.q-field__control:before),
-  :deep(.q-field__control:after) {
-    display: none !important;
-  }
-
-  :deep(.q-field__bottom) {
-    display: none;
-  }
-}
-
-.paste-text-btn {
-  position: absolute;
-  inset-inline-end: 20px;
-  top: 16px;
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--q-primary);
-  cursor: pointer;
-  user-select: none;
-  line-height: 1.5;
-
-  &:active {
-    opacity: 0.7;
-  }
-}
-</style>

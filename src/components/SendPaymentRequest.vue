@@ -1,15 +1,10 @@
 <template>
-  <div
-    v-if="sendData.paymentRequest"
-    class="col-12 q-px-md"
-    style="max-width: var(--app-column)"
-  >
+  <div v-if="sendData.paymentRequest" class="col-12">
     <q-btn
       class="full-width"
       :rounded="buttonRounded"
       :dense="buttonDense"
       :unelevated="buttonUnelevated"
-      :size="buttonSize"
       :color="buttonColor"
       :class="computedButtonClasses"
       :disable="disable || !sendData.paymentRequest"
@@ -89,10 +84,6 @@ export default defineComponent({
     buttonUnelevated: {
       type: Boolean,
       default: false,
-    },
-    buttonSize: {
-      type: String,
-      default: "md",
     },
   },
   emits: ["success"],

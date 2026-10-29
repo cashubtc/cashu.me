@@ -45,6 +45,7 @@ body {
   --app-text: #fff;
   --app-text-muted: rgba(255, 255, 255, 0.72);
   --app-text-subtle: rgba(255, 255, 255, 0.6);
+  --app-text-disabled: rgba(255, 255, 255, 0.5);
   --app-tint: rgba(255, 255, 255, 0.08);
   --app-tint-strong: rgba(255, 255, 255, 0.14);
   --app-border: rgba(255, 255, 255, 0.16);
@@ -53,10 +54,15 @@ body {
   // would give onboarding's dark page light fields and cards; set the dark ones here.
   --app-card-fill: rgba(255, 255, 255, 0.1);
   --app-card-fill-active: rgba(255, 255, 255, 0.15);
-  --app-field-edge: rgba(255, 255, 255, 0.38);
-  --app-field-fill: rgba(255, 255, 255, 0.07);
+  --app-field-fill: rgba(255, 255, 255, 0.1);
+  --app-field-edge: rgba(255, 255, 255, 0.33);
+  --app-field-edge-hover: rgba(255, 255, 255, 0.56);
+  --app-tonal-fill: rgba(255, 255, 255, 0.1);
+  --app-tonal-fill-hover: rgba(255, 255, 255, 0.15);
+  --app-tonal-fill-pressed: rgba(255, 255, 255, 0.2);
+  --app-disabled-fill: rgba(255, 255, 255, 0.05);
+  --app-readonly-fill: rgba(255, 255, 255, 0.06);
   --app-group-fill: rgba(255, 255, 255, 0.1);
-  --app-outline-edge: rgba(255, 255, 255, 0.38);
 }
 
 // Icon in a round slot: option rows (md), sheet rows (sm), empty states (lg), onboarding (xl).
@@ -729,16 +735,6 @@ body.body--light .activity-row__avatar--in {
   display: inline-block;
   font-size: 16px;
   font-weight: 500;
-}
-
-/* FieldLabel: the label above a field or control. */
-.field-label {
-  color: var(--app-text);
-  display: block;
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 22px;
-  margin-bottom: 8px;
 }
 
 /* RevealTransition: a block that opens and closes in place. */

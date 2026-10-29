@@ -79,7 +79,6 @@
           v-if="webShareSupported"
           outline
           rounded
-          size="lg"
           class="full-width pr-foot__btn"
           data-testid="pr-share"
           @click="share"
@@ -89,7 +88,6 @@
         <q-btn
           unelevated
           rounded
-          size="lg"
           color="primary"
           class="full-width pr-foot__btn"
           data-testid="pr-copy"

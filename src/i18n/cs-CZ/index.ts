@@ -37,6 +37,9 @@ export default {
       scan: {
         label: "Skenovat",
       },
+      clear: {
+        label: "Vymazat",
+      },
       send: {
         label: "Odeslat",
       },
@@ -1172,6 +1175,7 @@ export default {
       p2pk_pubkey: {
         label: "Veřejný klíč příjemce",
         label_invalid: "Neplatný veřejný klíč příjemce",
+        invalid: "Zadejte platný veřejný klíč (hex nebo npub)",
       },
     },
     actions: {

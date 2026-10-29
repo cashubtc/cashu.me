@@ -142,7 +142,6 @@
         <q-item-section>
           <div class="row items-center q-gutter-sm">
             <q-btn
-              size="sm"
               rounded
               outline
               color="primary"
@@ -169,7 +168,6 @@
             </q-btn>
             <q-btn
               v-if="wotLoading"
-              size="sm"
               rounded
               outline
               class="q-px-md"
