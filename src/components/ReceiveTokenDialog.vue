@@ -118,6 +118,7 @@
               test-id="receive-token-input"
               :placeholder="$t('ParseInputComponent.placeholder.receive')"
               :has-camera="hasCamera"
+              :scan-caption="$t('ParseInputComponent.qr_scanner.caption_token')"
               :ndef-supported="ndefSupported"
               :scanning-card="scanningCard"
               :nfc-label="$t('ReceiveTokenDialog.actions.nfc.label')"

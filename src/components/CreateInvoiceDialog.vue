@@ -28,11 +28,12 @@
           filter-mint-operation="mint"
           :disable="createInvoiceButtonBlocked"
         />
-        <!-- The mint's deposit range, as the picker's helper text while an amount is typed
-             (council R92, item 21); the address keeps its own caption under the QR. -->
+        <!-- The mint's deposit range, the info callout under the picker while an amount is
+             typed (owner item 7); the address step repeats it under the QR. -->
         <OnchainDepositLimits
           v-if="isOnchain && showAmountInput"
-          placement="picker"
+          class="picker-limits"
+          data-testid="deposit-limits-picker"
           :mint-url="activeMintUrl"
           :unit="activeUnit"
         />
@@ -113,6 +114,7 @@
                 <OnchainDepositLimits
                   v-if="isOnchain"
                   class="q-mt-md"
+                  data-testid="deposit-limits-address"
                   :mint-url="activeMintUrl"
                   :unit="activeUnit"
                 />
@@ -901,6 +903,16 @@ export default defineComponent({
   .receive-content-enter-active,
   .receive-content-leave-active {
     transition: none;
+  }
+}
+/* 12px under the mint card (ChooseMint keeps a 16px bottom inset), so the amount and its fiat
+   line still clear the keypad on a 568px or 667px phone. */
+.picker-limits {
+  margin-top: -4px;
+}
+@media (max-height: 700px) {
+  .picker-limits {
+    padding-block: 8px;
   }
 }
 .mint-error-warning {

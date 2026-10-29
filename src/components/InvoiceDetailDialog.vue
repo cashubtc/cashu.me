@@ -39,6 +39,7 @@
             <OnchainDepositLimits
               v-if="isOnchain && invoiceData.status !== 'paid'"
               class="q-mt-md"
+              data-testid="deposit-limits-address"
               :mint-url="invoiceData.mint"
               :unit="invoiceData.unit"
             />

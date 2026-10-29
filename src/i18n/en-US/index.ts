@@ -1601,6 +1601,8 @@ export default {
     qr_scanner: {
       title: "Scan QR code",
       description: "Point your camera at a QR code",
+      caption_address: "Tap to scan an address",
+      caption_token: "Tap to scan a token",
     },
     paste_button: {
       label: "@:global.actions.paste.label",

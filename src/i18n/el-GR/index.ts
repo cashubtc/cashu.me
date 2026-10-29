@@ -1554,6 +1554,8 @@ export default {
     qr_scanner: {
       title: "Σάρωση κωδικού QR",
       description: "Στρέψτε την κάμερα σε έναν κωδικό QR",
+      caption_address: "Πατήστε για σάρωση διεύθυνσης",
+      caption_token: "Πατήστε για σάρωση token",
     },
     paste_button: {
       label: "@:global.actions.paste.label",

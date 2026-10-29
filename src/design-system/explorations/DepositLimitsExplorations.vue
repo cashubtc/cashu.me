@@ -3,7 +3,8 @@
      each shown in context on Receive on-chain. `screen` picks the amount step ("amount") or
      the reusable address QR ("address", where the notice ships today). Static demo data,
      no stores; copy from existing keys except where a variation notes new English words.
-     Variant 3 shipped in round 92 (OnchainDepositLimits placement="picker"). -->
+     Variant 3 shipped in round 92; the owner then chose variant 2's info callout (2026-10-29b
+     item 7), which OnchainDepositLimits now renders. Variant 0 is the pre-R92 caption. -->
 <template>
   <ExploreAmountScreen
     :title="$t('CreateInvoiceDialog.onchain_title')"

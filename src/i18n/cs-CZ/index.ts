@@ -1626,6 +1626,8 @@ export default {
     qr_scanner: {
       title: "Naskenovat QR kód",
       description: "Namiřte fotoaparát na QR kód",
+      caption_address: "Klikněte pro skenování adresy",
+      caption_token: "Klikněte pro skenování tokenu",
     },
     paste_button: {
       label: "@:global.actions.paste.label",

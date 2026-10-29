@@ -23,7 +23,7 @@ test("decodes a camera QR frame into a payable invoice", async ({
   );
   await wallet.mintBolt11(50);
   await wallet.openSend("lightning");
-  await wallet.payInputAction("Scan");
+  await wallet.scanQrCode();
   await expect(page.getByTestId("pay-payment-request")).toBeVisible();
   await expect(page.locator(".pay-fullscreen")).toContainText("11");
   await page.getByTestId("pay-payment-request").click();
@@ -71,6 +71,36 @@ test.describe("touch viewport", () => {
   });
 });
 
+// Owner batch 2, item 3: the labelled scan row is the one scan affordance on Pay Lightning
+// and Pay on-chain (Paste stays in the field), and Receive ecash names a token.
+test("Pay and Receive ecash show the labelled scan row, not an in-field Scan", async ({
+  page,
+}) => {
+  await installCamera(page, null);
+  const wallet = new WalletUi(page);
+  await wallet.onboard(MINT_A_URL);
+  const field = page.locator(".q-dialog:visible .q-field");
+  for (const method of ["lightning", "onchain"] as const) {
+    await wallet.openSend(method);
+    await expect(wallet.scanRow).toBeVisible();
+    await expect(wallet.scanRow).toContainText("Tap to scan an address");
+    await expect(
+      field.getByRole("button", { name: "Scan", exact: true })
+    ).toHaveCount(0);
+    await wallet.scanQrCode();
+    await page
+      .getByRole("button", { name: "Close", exact: true })
+      .last()
+      .click();
+    await expect(page.getByTestId("payment-request-input")).toBeVisible();
+    await wallet.closeFullscreenDialog();
+  }
+  // An empty clipboard opens Receive ecash on its empty field.
+  await wallet.pasteEcash("");
+  await expect(page.getByTestId("receive-token-input")).toBeVisible();
+  await expect(wallet.scanRow).toContainText("Tap to scan a token");
+});
+
 test("scans a QR code without fetching decoder code from a public CDN", async ({
   page,
   request,
@@ -89,7 +119,7 @@ test("scans a QR code without fetching decoder code from a public CDN", async ({
       decoderRequests.push(new URL(request.url()).hostname);
   });
   await wallet.openSend("lightning");
-  await wallet.payInputAction("Scan");
+  await wallet.scanQrCode();
   await expect(page.locator("video")).toBeVisible();
   test.fail(true, "UI-007: scanner still loads decoder WASM from a public CDN");
   await expect(page.getByTestId("pay-payment-request")).toBeVisible({

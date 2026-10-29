@@ -1,8 +1,8 @@
 <template>
   <div class="column" :data-testid="testId">
     <!-- The outlined text field (textarea variant): its label stays visible with content,
-         and Paste and Scan sit inside it, replaced by Clear once there is text (owner,
-         2026-10-29). -->
+         and Paste sits inside it, replaced by Clear once there is text (owner, 2026-10-29).
+         Scanning is the labelled row under the field (owner batch 2, item 3). -->
     <q-input
       ref="inputRef"
       outlined
@@ -19,24 +19,15 @@
       @keyup.enter="$emit('enter')"
     >
       <template #append>
-        <template v-if="!modelValue">
-          <IconButton
-            v-if="canPasteFromClipboard"
-            :label="$t('ParseInputComponent.paste_button.label')"
-            @click="$emit('paste')"
-          >
-            <ClipboardPasteIcon :size="20" />
-          </IconButton>
-          <IconButton
-            v-if="hasCamera"
-            :label="$t('global.actions.scan.label')"
-            @click="$emit('scan')"
-          >
-            <ScanIcon :size="20" />
-          </IconButton>
-        </template>
         <IconButton
-          v-else
+          v-if="!modelValue && canPasteFromClipboard"
+          :label="$t('ParseInputComponent.paste_button.label')"
+          @click="$emit('paste')"
+        >
+          <ClipboardPasteIcon :size="20" />
+        </IconButton>
+        <IconButton
+          v-else-if="modelValue"
           :label="$t('global.actions.clear.label')"
           @click="$emit('update:modelValue', '')"
         >
@@ -44,6 +35,20 @@
         </IconButton>
       </template>
     </q-input>
+
+    <!-- The one scan affordance, as on main: hidden without a camera. -->
+    <OptionRow
+      v-if="hasCamera"
+      class="q-mt-md"
+      data-testid="parse-input-scan"
+      @click="$emit('scan')"
+    >
+      <template #icon><ScanIcon :size="24" /></template>
+      <template #label>{{
+        $t("ParseInputComponent.qr_scanner.title")
+      }}</template>
+      <template #caption>{{ computedScanCaption }}</template>
+    </OptionRow>
 
     <!-- NFC button (if supported) -->
     <q-btn
@@ -67,11 +72,12 @@
 <script lang="ts">
 import BusyLabel from "src/components/ui/BusyLabel.vue";
 import IconButton from "src/components/ui/IconButton.vue";
+import OptionRow from "src/components/ui/OptionRow.vue";
 import { defineComponent } from "vue";
 import {
   ClipboardPaste as ClipboardPasteIcon,
   Nfc as NfcIcon,
-  ScanLine as ScanIcon,
+  Scan as ScanIcon,
   X as XIcon,
 } from "lucide-vue-next";
 
@@ -82,6 +88,7 @@ export default defineComponent({
     ClipboardPasteIcon,
     IconButton,
     NfcIcon,
+    OptionRow,
     ScanIcon,
     XIcon,
   },
@@ -101,6 +108,11 @@ export default defineComponent({
     testId: {
       type: String,
       default: "parse-input",
+    },
+    /** The scan row's caption; Pay's "Tap to scan an address" by default. */
+    scanCaption: {
+      type: String,
+      default: "",
     },
     hasCamera: {
       type: Boolean,
@@ -130,6 +142,12 @@ export default defineComponent({
         window.isSecureContext &&
         navigator.clipboard &&
         navigator.clipboard.readText
+      );
+    },
+    computedScanCaption(): string {
+      return (
+        this.scanCaption ||
+        (this.$t("ParseInputComponent.qr_scanner.caption_address") as string)
       );
     },
     computedPlaceholder() {

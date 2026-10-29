@@ -1514,6 +1514,8 @@ export default {
     qr_scanner: {
       title: "扫描二维码",
       description: "将相机对准二维码",
+      caption_address: "点击扫描地址",
+      caption_token: "点击扫描代币",
     },
     paste_button: {
       label: "@:global.actions.paste.label",

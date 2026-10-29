@@ -1540,6 +1540,8 @@ export default {
     qr_scanner: {
       title: "QR コードをスキャン",
       description: "カメラを QR コードに向けてください",
+      caption_address: "タップしてアドレスをスキャン",
+      caption_token: "タップしてトークンをスキャン",
     },
     paste_button: {
       label: "@:global.actions.paste.label",

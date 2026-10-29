@@ -33,10 +33,12 @@ for (const unit of ["usd", "eur"] as const) {
     const error = page.getByTestId("onchain-amount-error");
     const symbol = unit === "usd" ? "$" : "€";
     const sentence = `Deposits outside ${symbol}1.13–${symbol}4.10 won't be credited.`;
-    // The mint picker's helper text says the range before anything is typed.
-    await expect(page.locator(".deposit-limits-hint:visible")).toHaveText(
-      sentence
-    );
+    // The info callout under the mint picker says the range before anything is typed.
+    await expect(
+      page.locator(
+        '.app-callout--info[data-testid="deposit-limits-picker"]:visible'
+      )
+    ).toHaveText(sentence);
     const enterCents = async (cents: number) => {
       await page.locator(".amount-display:visible").click();
       for (let i = 0; i < 3; i++) await page.keyboard.press("Backspace");
@@ -55,10 +57,16 @@ for (const unit of ["usd", "eur"] as const) {
     await expect(create).toBeEnabled();
     await create.click();
     await expect(page.locator(".qr-copy-line:visible")).toBeVisible();
-    await expect(page.locator(".deposit-limits-warning:visible")).toHaveText(
-      sentence
-    );
-    await expect(page.locator(".deposit-limits-hint:visible")).toHaveCount(0);
+    await expect(
+      page.locator(
+        '.app-callout--info[data-testid="deposit-limits-address"]:visible'
+      )
+    ).toHaveText(sentence);
+    await expect(
+      page.locator(
+        '.app-callout--info[data-testid="deposit-limits-picker"]:visible'
+      )
+    ).toHaveCount(0);
   });
 }
 
@@ -83,7 +91,9 @@ test("renders and reuses an address with an exact uint64 deposit limit", async (
   await wallet.openReceive("onchain");
   await wallet.enterAmount(1000);
   await page.getByTestId("create-payment-request").click();
-  const limitsHint = page.locator(".deposit-limits-warning:visible");
+  const limitsHint = page.locator(
+    '.app-callout--info[data-testid="deposit-limits-address"]:visible'
+  );
   await expect(limitsHint).toContainText("18,446,744,073,709,551,615");
   await wallet.closeFullscreenDialog();
   await page.reload();
@@ -118,8 +128,12 @@ test("validates new on-chain addresses while preserving quote reuse and history 
   await wallet.openReceive("onchain");
   const create = page.getByTestId("create-payment-request");
   const error = page.getByTestId("onchain-amount-error");
-  const limitsHint = page.locator(".deposit-limits-warning:visible");
-  const pickerHint = page.locator(".deposit-limits-hint:visible");
+  const limitsHint = page.locator(
+    '.app-callout--info[data-testid="deposit-limits-address"]:visible'
+  );
+  const pickerHint = page.locator(
+    '.app-callout--info[data-testid="deposit-limits-picker"]:visible'
+  );
   let submissions = 0;
   page.on("request", (request) => {
     if (

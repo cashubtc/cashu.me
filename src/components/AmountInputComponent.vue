@@ -484,9 +484,10 @@ export default defineComponent({
   width: 100%;
   min-height: 120px; /* Ensure enough space for both displays */
 }
-/* A 568px phone: the fiat line moves up (40px to 20px under the amount) rather than the
-   amount or the keypad digits shrinking. */
-@media (max-height: 600px) {
+/* A 568px or 667px phone: the fiat line moves up (40px to 20px under the amount) rather than
+   the amount or the keypad digits shrinking, so a notice above the amount (Receive on-chain's
+   deposit limits) still fits. */
+@media (max-height: 700px) {
   .amount-input-root {
     min-height: 100px;
   }

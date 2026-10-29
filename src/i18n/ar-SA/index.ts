@@ -1527,6 +1527,8 @@ export default {
     qr_scanner: {
       title: "مسح رمز QR",
       description: "وجّه الكاميرا نحو رمز QR",
+      caption_address: "اضغط لمسح عنوان",
+      caption_token: "اضغط لمسح رمز مميز",
     },
     paste_button: {
       label: "@:global.actions.paste.label",

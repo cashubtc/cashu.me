@@ -1521,6 +1521,8 @@ export default {
     qr_scanner: {
       title: "Scansiona codice QR",
       description: "Inquadra un codice QR con la fotocamera",
+      caption_address: "Tocca per scansionare un indirizzo",
+      caption_token: "Tocca per scansionare un token",
     },
     paste_button: {
       label: "@:global.actions.paste.label",

@@ -1543,6 +1543,8 @@ export default {
     qr_scanner: {
       title: "Skanna QR-kod",
       description: "Rikta kameran mot en QR-kod",
+      caption_address: "Tryck för att skanna en adress",
+      caption_token: "Tryck för att skanna en token",
     },
     paste_button: {
       label: "@:global.actions.paste.label",

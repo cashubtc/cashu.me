@@ -1,36 +1,21 @@
 <!-- The selected mint's on-chain deposit range as one sentence ("Deposits outside
-     {min}–{max} won't be credited.") behind an info glyph. `placement` picks where it sits:
-     "picker", helper text under the mint picker on the amount step (council R92, item 21),
-     start-aligned at body size; "address", the centred caption under the address QR, the one
-     screen a sender sees. The range is one left-to-right, non-breaking run, so Arabic keeps
-     min before max and the sentence never splits it across lines. `limits` stands in for the
-     mint's advertised range on the design-system board. -->
+     {min}–{max} won't be credited.") in the info callout (owner, 2026-10-29 item 7): under the
+     mint picker on the amount step and under the address QR, the one screen a sender sees.
+     The range is one left-to-right, non-breaking run, so Arabic keeps min before max and the
+     sentence never splits it across lines. `limits` stands in for the mint's advertised range
+     on the design-system board. -->
 <template>
-  <div
-    v-if="parts"
-    :class="
-      placement === 'picker'
-        ? 'deposit-limits-hint'
-        : 'deposit-limits-warning text-caption'
-    "
+  <AppCallout v-if="parts" variant="info"
+    >{{ parts.before
+    }}<bdi dir="ltr" class="deposit-limits-range">{{ parts.range }}</bdi
+    >{{ parts.after }}</AppCallout
   >
-    <InfoIcon
-      :size="placement === 'picker' ? 16 : 13"
-      class="deposit-limits-icon"
-      aria-hidden="true"
-    />
-    <span
-      >{{ parts.before
-      }}<bdi dir="ltr" class="deposit-limits-range">{{ parts.range }}</bdi
-      >{{ parts.after }}</span
-    >
-  </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, type PropType } from "vue";
 import { mapState } from "pinia";
-import { Info as InfoIcon } from "lucide-vue-next";
+import AppCallout from "src/components/AppCallout.vue";
 import { useMintsStore } from "src/stores/mints";
 import { PaymentMethod } from "src/stores/walletTypes";
 import {
@@ -49,7 +34,7 @@ export default defineComponent({
   name: "OnchainDepositLimits",
   mixins: [windowMixin],
   components: {
-    InfoIcon,
+    AppCallout,
   },
   props: {
     mintUrl: {
@@ -59,10 +44,6 @@ export default defineComponent({
     unit: {
       type: String,
       required: true,
-    },
-    placement: {
-      type: String as PropType<"picker" | "address">,
-      default: "address",
     },
     limits: {
       type: Object as PropType<PaymentMethodLimits | null>,
@@ -126,32 +107,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.deposit-limits-warning {
-  color: var(--app-text-muted);
-  line-height: 1.4;
-  text-align: center;
-  text-wrap: balance;
-}
-.deposit-limits-warning .deposit-limits-icon {
-  margin-inline-end: 6px;
-  vertical-align: -2px;
-}
-/* Helper text under the mint card: 12px below it (ChooseMint keeps a 16px bottom inset), inset
-   to the card's content, body size in the secondary-text token. */
-.deposit-limits-hint {
-  align-items: flex-start;
-  color: var(--app-text-muted);
-  display: flex;
-  font-size: 14px;
-  gap: 8px;
-  line-height: 20px;
-  margin-top: -4px;
-  padding-inline: 16px;
-}
-.deposit-limits-hint .deposit-limits-icon {
-  flex: none;
-  margin-top: 2px;
-}
 .deposit-limits-range {
   white-space: nowrap;
 }

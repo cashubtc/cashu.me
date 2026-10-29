@@ -142,12 +142,23 @@ export class WalletUi extends WalletPage {
     await expect(toggle).toHaveAttribute("aria-checked", String(enabled));
   }
 
-  /** Paste and Scan sit inside the Pay / Receive field as labelled icon buttons. */
-  async payInputAction(name: "Paste" | "Scan") {
+  /** Paste (and Clear, once filled) sit inside the Pay / Receive field as labelled icon buttons. */
+  async payInputAction(name: "Paste" | "Clear") {
     await this.page
       .locator(".q-dialog:visible .q-field")
       .getByRole("button", { name, exact: true })
       .click();
+  }
+
+  /** The labelled "Scan QR code" row under the Pay / Receive field (owner batch 2, item 3). */
+  get scanRow() {
+    return this.page
+      .locator(".q-dialog:visible")
+      .getByRole("button", { name: /^Scan QR code\b/ });
+  }
+
+  async scanQrCode() {
+    await this.scanRow.click();
   }
 
   /** Lock mode on the Send ecash amount step, with the receiver's key typed in. */

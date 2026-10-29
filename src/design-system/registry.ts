@@ -189,7 +189,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "q-input outlined · src/css/app.scss field edge and fill tokens",
     usage: { text: "<q-input" },
     example: `<q-input v-model="url" outlined label="Mint URL" />\n<q-input v-model="review" outlined type="textarea" autogrow label="Review (optional)" />`,
-    note: 'One outlined field (textarea variant: type="textarea" autogrow). The label stays visible with content; 16px inset; edge 33% on the page, 43% on sheets; focus in the accent. Paste, Scan and Clear sit inside the field (ParseInputComponent). Read-only fields drop the edge, except a read-only value that is the step\'s field (the welcome seed phrase): class readonly-outlined keeps it (36% in dark, over the quieter read-only fill, so it still holds 3:1).',
+    note: 'One outlined field (textarea variant: type="textarea" autogrow). The label stays visible with content; 16px inset; edge 33% on the page, 43% on sheets; focus in the accent. Paste and Clear sit inside the field; ParseInputComponent puts the labelled Scan QR code row under it when there is a camera. Read-only fields drop the edge, except a read-only value that is the step\'s field (the welcome seed phrase): class readonly-outlined keeps it (36% in dark, over the quieter read-only fill, so it still holds 3:1).',
   },
   {
     id: "copy-field",
@@ -823,9 +823,8 @@ export const DS_ITEMS: DsItem[] = [
     tier: "feature",
     source: "src/components/OnchainDepositLimits.vue",
     usage: { tag: "OnchainDepositLimits" },
-    example: `<OnchainDepositLimits placement="picker" :mint-url="activeMintUrl" :unit="activeUnit" />
-<OnchainDepositLimits :mint-url="activeMintUrl" :unit="activeUnit" />`,
-    note: "The mint's on-chain deposit range as one sentence behind an info glyph. On the amount step it is the mint picker's helper text, 12px under the card (council R92 picked variant 3 of /design-system/explore/deposit-limits); under the address QR it stays the centred caption. The range is one left-to-right, non-breaking run.",
+    example: `<OnchainDepositLimits :mint-url="activeMintUrl" :unit="activeUnit" />`,
+    note: "The mint's on-chain deposit range as one sentence in the info callout (AppCallout), under the mint picker on the amount step and under the address QR (owner batch 2, item 7, over council R92's helper text). The range is one left-to-right, non-breaking run. A typed amount outside it still gets the amount warning.",
   },
 
   {

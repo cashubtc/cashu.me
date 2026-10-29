@@ -1527,6 +1527,8 @@ export default {
     qr_scanner: {
       title: "สแกนคิวอาร์โค้ด",
       description: "หันกล้องไปที่คิวอาร์โค้ด",
+      caption_address: "แตะเพื่อสแกนที่อยู่",
+      caption_token: "แตะเพื่อสแกนโทเค็น",
     },
     paste_button: {
       label: "@:global.actions.paste.label",

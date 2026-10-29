@@ -1556,6 +1556,8 @@ export default {
     qr_scanner: {
       title: "QR kodu tara",
       description: "Kameranızı bir QR koduna doğrultun",
+      caption_address: "Bir adresi taramak için dokunun",
+      caption_token: "Bir token taramak için dokunun",
     },
     paste_button: {
       label: "@:global.actions.paste.label",

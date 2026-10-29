@@ -410,7 +410,8 @@
           label="Lightning invoice or address"
           class="q-mb-md"
         />
-        <!-- The parse field (Pay, Receive): Paste and Scan inside, Clear once filled. -->
+        <!-- The parse field (Pay, Receive): Paste inside, Clear once filled, and the labelled
+             Scan row under it when there is a camera. -->
         <ParseInputComponent
           v-model="parseText"
           test-id="ui-kit-parse"
@@ -1537,18 +1538,9 @@
         </div>
       </DsEntry>
       <DsEntry id="deposit-limits">
-        <!-- Under the mint picker on the amount step (council R92, variant 3 of
-             /design-system/explore/deposit-limits), then the caption under the address QR. -->
-        <div class="ds-frame q-pa-sm">
-          <OnchainDepositLimits
-            placement="picker"
-            unit="sat"
-            :limits="depositLimitsDemo"
-          />
-        </div>
-        <div class="ds-frame q-pa-md q-mt-sm">
-          <OnchainDepositLimits unit="sat" :limits="depositLimitsDemo" />
-        </div>
+        <!-- The info callout, the same under the mint picker on the amount step and under
+             the address QR (owner batch 2, item 7). -->
+        <OnchainDepositLimits unit="sat" :limits="depositLimitsDemo" />
       </DsEntry>
       <DsEntry id="pwa-prompt">
         <!-- The prompt is fixed to the viewport; each transformed frame contains one. -->

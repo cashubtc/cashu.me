@@ -61,7 +61,7 @@ describe("standard elements", () => {
     ["ui/AmountHeadline.vue", /^amount-headline$/],
     ["ui/PaymentStatus.vue", /^payment-status(__[\w-]+)?$/],
     ["ui/UnitToggle.vue", /^sheet-unit-toggle(__chevron)?$/],
-    ["OnchainDepositLimits.vue", /^deposit-limits-(hint|warning|icon|range)$/],
+    ["OnchainDepositLimits.vue", /^deposit-limits-range$/],
     ["ui/RowValue.vue", /^row-value(__(inner|text))?$/],
     ["ui/MetaLine.vue", /^meta-line(__sep)?$/],
     ["ui/AmountWarning.vue", /^amount-warning(__text)?$/],
@@ -302,8 +302,32 @@ describe("standard elements", () => {
     ).not.toMatch(/buttonSize/);
   });
 
-  it("paste and scan sit inside their field", () => {
+  // Owner batch 2, item 3: Paste (and Clear) inside the field, and one scan affordance, the
+  // labelled "Scan QR code" OptionRow under it, shown only with a camera.
+  it("paste sits inside its field, scan is the one row under it", () => {
     expect(offenders((t) => /paste-text-btn/.test(t))).toEqual([]);
+    const parse = readFileSync(
+      join(SRC, "components/ParseInputComponent.vue"),
+      "utf8"
+    );
+    const field = parse.slice(
+      parse.indexOf("<q-input"),
+      parse.indexOf("</q-input>")
+    );
+    expect(field).not.toMatch(/\$emit\('scan'\)/);
+    expect(parse.match(/\$emit\('scan'\)/g)).toHaveLength(1);
+    expect(parse).toMatch(/<OptionRow\s+v-if="hasCamera"/);
+    expect(parse).toMatch(/\bScan as ScanIcon\b/);
+  });
+
+  // Owner batch 2, item 7: the deposit range is the info callout, not a helper line.
+  it("deposit limits render the info callout", () => {
+    const limits = readFileSync(
+      join(SRC, "components/OnchainDepositLimits.vue"),
+      "utf8"
+    );
+    expect(limits).toMatch(/<AppCallout[^>]*variant="info"/);
+    expect(limits).toMatch(/<bdi dir="ltr" class="deposit-limits-range">/);
   });
 
   // A block that opens in place is RevealTransition, not another copy of the slide CSS.

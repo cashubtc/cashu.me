@@ -78,7 +78,7 @@ test("opens and closes QR scanner when camera access is unavailable", async ({
   const wallet = new WalletUi(page);
   await wallet.onboard(MINT_A_URL);
   await wallet.openSend("lightning");
-  await wallet.payInputAction("Scan");
+  await wallet.scanQrCode();
   await expect(page.locator(".q-dialog:visible").last()).toBeVisible();
   await page.getByRole("button", { name: "Close", exact: true }).last().click();
   await expect(page.getByTestId("payment-request-input")).toBeVisible();
