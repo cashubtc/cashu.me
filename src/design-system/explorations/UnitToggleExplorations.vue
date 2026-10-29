@@ -1,6 +1,6 @@
 <!-- Dev-only exploration (owner item 26): seven alternatives (1-7) to the unit toggle (0, the
-     header action it was, now ExploreHeaderUnit; variant 3 shipped as UnitToggle in round
-     92), each in context on Receive Lightning ("receive", with the Invoice/Offer control) or Send ecash ("send",
+     header action it was, now ExploreHeaderUnit; variant 3 shipped in round 92, and the
+     owner then moved the switch back to the header, UnitToggle), each in context on Receive Lightning ("receive", with the Invoice/Offer control) or Send ecash ("send",
      beside the lock action). The mint holds two units, ₿ (sat, shown as BTC elsewhere) and USD,
      the labels the stores give them. Static demo data, no stores. -->
 <template>

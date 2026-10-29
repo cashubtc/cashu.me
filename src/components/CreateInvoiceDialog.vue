@@ -12,7 +12,13 @@
             : $t('InvoiceDetailDialog.title')
         "
         balanced
-      />
+      >
+        <template v-if="showAmountInput" #actions>
+          <div class="row items-center no-wrap sheet-header-actions">
+            <UnitToggle @toggle="toggleUnit()" />
+          </div>
+        </template>
+      </FullscreenDialogHeader>
 
       <!-- Mint selection -->
       <FlowColumn class="q-px-md q-mb-sm">
@@ -131,8 +137,6 @@
             class="amount-step column justify-center full-width q-my-auto"
           >
             <AmountInputComponent
-              unit-toggle
-              @toggle-unit="toggleUnit()"
               class="q-my-auto"
               v-model="invoiceData.amount"
               :enabled="!isOnchain || !createInvoiceButtonBlocked"
@@ -245,6 +249,7 @@ import {
   RefreshCw as RefreshCwIcon,
 } from "lucide-vue-next";
 import AppCallout from "src/components/AppCallout.vue";
+import UnitToggle from "src/components/ui/UnitToggle.vue";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { copyToClipboard } from "quasar";
@@ -283,6 +288,7 @@ export default defineComponent({
   components: {
     AmountWarning,
     FlowColumn,
+    UnitToggle,
     FlowDialog,
     BusyLabel,
     FlowFooter,

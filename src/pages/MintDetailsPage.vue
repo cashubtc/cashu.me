@@ -169,13 +169,7 @@
             v-if="mintUnits && mintUnits.length > 0"
             :icon="CoinsIcon"
             :label="$t('MintDetailsDialog.details.currencies.label')"
-            :value="
-              mintUnits
-                .map((unit) =>
-                  unit === 'sat' ? '\u2066₿ (sat)\u2069' : unit.toUpperCase()
-                )
-                .join(', ')
-            "
+            :value="mintUnits.map(unitCode).join(', ')"
           />
 
           <!-- Version -->
@@ -235,6 +229,7 @@
 </template>
 
 <script lang="ts">
+import { unitCode } from "src/js/format-currency";
 import RevealTransition from "src/components/ui/RevealTransition.vue";
 import TonalChip from "src/components/ui/TonalChip.vue";
 import { defineComponent } from "vue";
@@ -367,6 +362,7 @@ export default defineComponent({
     },
   },
   methods: {
+    unitCode,
     ...mapActions(useMintsStore, [
       "removeMint",
       "fetchMintInfo",

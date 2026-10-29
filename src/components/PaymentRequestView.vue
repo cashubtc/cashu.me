@@ -44,9 +44,9 @@
             data-testid="pr-unit"
             :icon="CoinsIcon"
             :label="$t('QuoteInformation.unit')"
-            :value="unitLabel(fields.unit)"
+            :value="unitCode(fields.unit)"
             @click="showUnitSheet = true"
-            ><bdi dir="ltr">{{ unitLabel(fields.unit) }}</bdi></DetailRow
+            ><bdi dir="ltr">{{ unitCode(fields.unit) }}</bdi></DetailRow
           >
           <DetailRow
             action
@@ -125,7 +125,7 @@
         data-testid="pr-amount-input"
         :label="`${$t(
           'PaymentRequestDialog.inputs.amount.placeholder'
-        )} (${unitLabel(fields.unit)})`"
+        )} (${unitQuantityWord(fields.unit)})`"
         :error="amountError"
         :error-message="amountErrorText"
         @update:model-value="amountError = false"
@@ -165,12 +165,12 @@
         <SheetOption
           v-for="unit in unitOptions"
           :key="unit"
-          :label="unitLabel(unit)"
+          :label="unitCode(unit)"
           :selected="fields.unit === unit"
           @select="chooseUnit(unit)"
         >
           <template #label
-            ><bdi dir="ltr">{{ unitLabel(unit) }}</bdi></template
+            ><bdi dir="ltr">{{ unitCode(unit) }}</bdi></template
           >
         </SheetOption>
       </div>
@@ -206,6 +206,7 @@ import { useUiStore } from "src/stores/ui";
 import { useSettingsStore } from "src/stores/settings";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { shortenString } from "src/js/string-utils";
+import { unitCode, unitQuantityWord } from "src/js/format-currency";
 import {
   requestFields,
   type RequestFields,
@@ -280,9 +281,8 @@ export default defineComponent({
       return this.fields.amount !== undefined;
     },
     amountErrorText(): string {
-      // Base units by name: "sat" (the hero shows ₿, but amounts are whole sats).
-      const unit =
-        this.fields.unit === "sat" ? "sat" : this.fields.unit.toUpperCase();
+      // The number's own unit: whole sats, not BTC (src/js/format-currency.ts).
+      const unit = unitQuantityWord(this.fields.unit);
       return this.$t(
         unitMultiplier(this.fields.unit) === 1
           ? "CreateInvoiceDialog.amount_errors.positive_whole"
@@ -341,11 +341,8 @@ export default defineComponent({
     },
   },
   methods: {
-    // Sats are named as the amounts show them (₿, BIP-177), not "BTC", which read as whole
-    // bitcoin next to ₿2,100.
-    unitLabel(unit: string) {
-      return unit === "sat" ? "₿ (sat)" : unit.toUpperCase();
-    },
+    unitCode,
+    unitQuantityWord,
     mintUnits(mint: any): string[] {
       const keysets = mint.keysets || [];
       const active = keysets.filter((k: any) => k.active);

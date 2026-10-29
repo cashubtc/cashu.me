@@ -424,12 +424,6 @@ button.app-badge {
   font-size: clamp(56px, 11vw, 80px);
   line-height: 1.1;
 }
-// A 568px-tall phone keeps the amount, its unit chip and the keypad on one screen.
-@media (max-height: 600px) {
-  .amount-display {
-    font-size: 44px;
-  }
-}
 .fiat-display {
   font-size: 16px;
   text-align: center;

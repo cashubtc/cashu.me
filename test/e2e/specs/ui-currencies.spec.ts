@@ -61,7 +61,7 @@ test("falls back to a supported unit when selecting a sat-only mint", async ({
   await wallet.mintBolt11(10);
 });
 
-test("switches the ecash unit with the chip under the amount", async ({
+test("switches the ecash unit from the header's unit switch", async ({
   page,
 }) => {
   const wallet = new WalletUi(page);
@@ -72,15 +72,22 @@ test("switches the ecash unit with the chip under the amount", async ({
     () => wallet.openSend("ecash"),
   ]) {
     await open();
-    const chip = wallet.unitChip();
-    await expect(chip).toHaveAccessibleName("Unit: Bitcoin, change");
-    await expect(chip).toHaveText("BTC");
-    // The unit no longer sits in the header beside close (and Send's lock).
+    const toggle = wallet.unitToggle();
+    await expect(toggle).toHaveAccessibleName("Unit: Bitcoin, change");
+    await expect(toggle).toHaveText("BTC");
+    // The unit is a header action (owner 2026-10-29b, item 11), never beside the amount and
+    // its ⇅ fiat swap.
     await expect(
-      page.locator(".sheet-column-header:visible .unit-chip")
+      page.locator(".amount-input-root:visible").getByRole("button", {
+        name: /^Unit: /,
+      })
     ).toHaveCount(0);
-    await chip.click();
-    await expect(chip).not.toHaveAccessibleName("Unit: Bitcoin, change");
+    const box = await toggle.boundingBox();
+    expect(box!.height).toBeGreaterThanOrEqual(44);
+    expect(box!.width).toBeGreaterThanOrEqual(44);
+    await toggle.click();
+    await expect(toggle).not.toHaveAccessibleName("Unit: Bitcoin, change");
+    await expect(toggle).toHaveText(/^(USD|EUR)$/);
     await expect(page.locator(".amount-display:visible")).not.toContainText(
       "₿"
     );
@@ -236,6 +243,6 @@ test.describe("balance carousel", () => {
     ).toHaveCount(0);
     await wallet.openReceive("lightning");
     await expect(page.locator(".numeric-keyboard:visible")).toBeVisible();
-    await expect(wallet.unitChip()).toHaveCount(0);
+    await expect(wallet.unitToggle()).toHaveCount(0);
   });
 });

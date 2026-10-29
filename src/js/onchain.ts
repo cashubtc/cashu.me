@@ -1,5 +1,5 @@
 import type { PaymentMethodLimits } from "src/js/mint-payment-methods";
-import { formatBigIntCurrency } from "src/js/format-currency";
+import { formatBigIntCurrency, unitQuantityWord } from "src/js/format-currency";
 
 export function onchainDepositAmountInBaseUnits(
   amount: number,
@@ -46,8 +46,8 @@ export function onchainDepositAmountError(
       : englishAmountErrors[key](named);
   if (!Number.isSafeInteger(amount) || amount <= 0) {
     return unit === "usd" || unit === "eur"
-      ? message("positive_decimal", { unit: unit.toUpperCase() })
-      : message("positive_whole", { unit });
+      ? message("positive_decimal", { unit: unitQuantityWord(unit) })
+      : message("positive_whole", { unit: unitQuantityWord(unit) });
   }
   if (limits?.minAmount != null && amount < limits.minAmount) {
     return message("min", {

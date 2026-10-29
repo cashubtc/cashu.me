@@ -160,6 +160,8 @@ test("payment request rows never overlap", async ({ page }) => {
     page.getByTestId(id).filter({ visible: true })
   );
   await expect(rows[0]).toBeVisible();
+  // One unit code app-wide (owner 2026-10-29b, item 1): sats are BTC, not "₿ (sat)".
+  await expect(rows[1]).toContainText("BTC");
   await rows[0].hover();
   const boxes = [];
   for (const row of rows) boxes.push((await row.boundingBox())!);

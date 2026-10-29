@@ -2,8 +2,8 @@
      design council. /design-system/explore/:name?v=0-7&dark=1&theme=monochrome. dark and
      theme apply to this visit only (nothing is stored); the language comes from settings,
      as everywhere. Round 92 shipped variant 3 of both (deposit limits under the mint picker,
-     OnchainDepositLimits placement="picker"; the unit chip under the amount, UnitToggle); the
-     other variants stay here for reference. -->
+     OnchainDepositLimits placement="picker"; a unit chip under the amount, since moved back to
+     the header by the owner, 2026-10-29b item 11); the variants stay here for reference. -->
 <template>
   <component
     :is="entry.component"

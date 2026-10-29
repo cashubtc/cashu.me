@@ -1,6 +1,8 @@
 <!-- Dev-only: the header unit switch as it was before round 92 (a bare header action: the
      unit's symbol and a chevron), kept so the explorations still show the "Current" variant
-     the council judged. The app ships UnitToggle, the chip under the amount (variant 3). -->
+     the council judged. Round 92 shipped variant 3 (a chip under the amount); the owner moved
+     the switch back to the header (2026-10-29b, item 11), the app's UnitToggle, with the
+     unit's code (BTC) instead of ₿. -->
 <template>
   <q-btn
     flat

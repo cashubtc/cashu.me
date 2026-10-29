@@ -5,7 +5,7 @@
     v-if="!camera.show"
   >
     <div class="column fit overflow-hidden pay-fullscreen">
-      <!-- Header with centered title -->
+      <!-- Header: centred title, the unit switch trailing -->
       <FullscreenDialogHeader @close="closeDialog">
         <template #title>
           <div>
@@ -19,6 +19,11 @@
             >
               {{ dialogTitle }}
             </q-item-label>
+          </div>
+        </template>
+        <template v-if="unitCanChange" #actions>
+          <div class="row items-center no-wrap sheet-header-actions">
+            <UnitToggle @toggle="toggleUnit()" />
           </div>
         </template>
       </FullscreenDialogHeader>
@@ -106,7 +111,6 @@
                         )
                       }}
                     </div>
-                    <UnitToggle align="start" @toggle="toggleUnit()" />
                     <div
                       v-if="showOnchainFeeOptions"
                       class="onchain-fee-options q-mt-lg"
@@ -215,8 +219,6 @@
                       class="column items-center justify-center q-px-lg q-py-lg amount-area"
                     >
                       <AmountInputComponent
-                        unit-toggle
-                        @toggle-unit="toggleUnit()"
                         v-model="payInvoiceData.input.amount"
                         :enabled="true"
                         :muted="insufficientFundsForAmountlessPayment"
@@ -372,8 +374,6 @@
                 class="column items-center justify-center q-px-lg q-py-lg amount-area"
               >
                 <AmountInputComponent
-                  unit-toggle
-                  @toggle-unit="toggleUnit()"
                   v-model="payInvoiceData.input.amount"
                   :enabled="true"
                   :muted="
@@ -988,6 +988,23 @@ export default defineComponent({
         this.multiMints.length > 1 &&
         this.payInvoiceData.meltQuote.response.amount > 0 &&
         totalMultinutBalance >= this.payInvoiceData.meltQuote.response.amount
+      );
+    },
+    // The unit switch sits in the header while a quote or an amount is on screen, the steps
+    // where switching the unit re-quotes or re-enters it (not once paying or paid).
+    unitCanChange: function (): boolean {
+      const data = this.payInvoiceData;
+      if (data.invoice) {
+        if (this.isPaid || this.paymentInProgress) return false;
+        if (data.meltQuote.response?.amount > 0) return true;
+        return (
+          !!this.showAmountlessPaymentAmountEntry &&
+          !!this.showAmountlessPaymentAmountKeyboard
+        );
+      }
+      return (
+        !!data.lnurlpay &&
+        data.lnurlpay.maxSendable != data.lnurlpay.minSendable
       );
     },
     insufficientFundsForAmountlessPayment: function (): boolean {

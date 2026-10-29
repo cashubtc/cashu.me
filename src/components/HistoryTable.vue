@@ -30,7 +30,7 @@
           :caption="[
             getDefaultLabel(transaction),
             transaction.unit && transaction.unit !== 'sat'
-              ? transaction.unit.toUpperCase()
+              ? unitCode(transaction.unit)
               : '',
             formattedDate(transaction.date),
           ]"
@@ -155,6 +155,7 @@
   </div>
 </template>
 <script lang="ts">
+import { unitCode } from "src/js/format-currency";
 import * as _ from "underscore";
 import { defineComponent, markRaw } from "vue";
 import { shortenString } from "src/js/string-utils";
@@ -302,6 +303,7 @@ export default defineComponent({
     },
   },
   methods: {
+    unitCode,
     ...mapActions(useWalletStore, [
       "checkTokenSpendable",
       "checkInvoiceBolt11",

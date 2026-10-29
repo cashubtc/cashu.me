@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { formatBigIntCurrency, isolateLtr } from "src/js/format-currency";
+import {
+  formatBigIntCurrency,
+  isolateLtr,
+  unitCode,
+  unitQuantityWord,
+} from "src/js/format-currency";
 
 describe("exact integer currency formatting", () => {
   it.each([
@@ -44,5 +49,27 @@ describe("isolateLtr", () => {
   it("isolates amounts on a right-to-left page so the sign stays in front", () => {
     document.documentElement.dir = "rtl";
     expect(isolateLtr("-₿101")).toBe("⁦-₿101⁩");
+  });
+});
+
+describe("unit names", () => {
+  it.each([
+    ["sat", "BTC"],
+    ["SAT", "BTC"],
+    ["msat", "MSAT"],
+    ["usd", "USD"],
+    ["eur", "EUR"],
+    ["auth", "AUTH"],
+  ])("names %s as %s", (unit, code) => {
+    expect(unitCode(unit)).toBe(code);
+  });
+
+  it.each([
+    ["sat", "sat"],
+    ["msat", "msat"],
+    ["usd", "USD"],
+    ["eur", "EUR"],
+  ])("counts typed %s amounts in %s", (unit, word) => {
+    expect(unitQuantityWord(unit)).toBe(word);
   });
 });

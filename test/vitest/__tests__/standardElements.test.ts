@@ -60,7 +60,7 @@ describe("standard elements", () => {
     ["ui/QrCopyLine.vue", /^qr-copy-line(__icon)?$/],
     ["ui/AmountHeadline.vue", /^amount-headline$/],
     ["ui/PaymentStatus.vue", /^payment-status(__[\w-]+)?$/],
-    ["ui/UnitToggle.vue", /^unit-chip(-row|__chevron)?$/],
+    ["ui/UnitToggle.vue", /^sheet-unit-toggle(__chevron)?$/],
     ["OnchainDepositLimits.vue", /^deposit-limits-(hint|warning|icon|range)$/],
     ["ui/RowValue.vue", /^row-value(__(inner|text))?$/],
     ["ui/MetaLine.vue", /^meta-line(__sep)?$/],
@@ -90,11 +90,50 @@ describe("standard elements", () => {
     ).toEqual([]);
   });
 
-  // The unit switch is a chip under the amount (council R92), not a header action again.
-  it("the unit toggle sits under the amount, not in a header", () => {
+  // The unit switch is a header action (owner 2026-10-29b, item 11): inside a
+  // FullscreenDialogHeader's #actions, never next to the amount and its ⇅ fiat swap.
+  it("the unit toggle sits in a header's actions, not with the amount", () => {
+    expect(offenders((text) => /<UnitToggle\b/.test(text)).sort()).toEqual([
+      "components/CreateInvoiceDialog.vue",
+      "components/PayInvoiceDialog.vue",
+      "components/SendTokenDialog.vue",
+    ]);
+    expect(
+      offenders(
+        (text) =>
+          [...text.matchAll(/<UnitToggle\b/g)].some(({ index }) => {
+            const before = text.slice(0, index);
+            return (
+              before.lastIndexOf("#actions>") <=
+              before.lastIndexOf("</template>")
+            );
+          }) ||
+          /(?<![\w-])unit-toggle\b|unitToggle|toggle-unit|unit-chip/.test(text)
+      )
+    ).toEqual([]);
+  });
+
+  // One unit code (src/js/format-currency.ts unitCode): no hand-made unit names elsewhere.
+  it("units are named by unitCode", () => {
+    expect(
+      offenders(
+        (text) =>
+          text.includes("₿ (sat)") ||
+          // price-feed keys (prices[unit.toUpperCase()]) are data, not names
+          /(?<!\[)\b[\w.]*[uU]nit\??\.toUpperCase\(/.test(text) ||
+          /activeUnitLabel/.test(text)
+      )
+    ).toEqual([]);
+  });
+
+  // Quasar's type classes lose to the global button standard (src/css/app.scss .q-btn), so a
+  // q-btn that needs its own size owns a class for it (the keypad's .keypad-key).
+  it("buttons carry no Quasar type classes", () => {
     expect(
       offenders((text) =>
-        /<template #actions>(?:(?!<\/template>)[\s\S])*<UnitToggle/.test(text)
+        /<q-btn\b[^>]*\sclass="[^"]*\btext-(h[1-6]|subtitle[12]|body[12])\b/.test(
+          text
+        )
       )
     ).toEqual([]);
   });

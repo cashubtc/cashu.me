@@ -750,27 +750,22 @@ body.body--light .q-dialog__backdrop {
   position: absolute;
   inset-inline-end: 6px;
 }
-// The ecash unit switch on an amount screen (UnitToggle, council R92): a tonal chip on the
-// amount's axis, 12px under the fiat line so it groups with the amount, and a clear gap above
-// the keypad. The text code (BTC, USD) says which unit; the chevron says "choose".
-.unit-chip-row {
-  display: flex;
-  justify-content: center;
-  margin-top: 12px;
-}
-.unit-chip-row--start {
-  justify-content: flex-start;
-}
-.unit-chip {
-  font-size: 14px;
+// The ecash unit switch (UnitToggle), the outermost header action: the unit's code and a small
+// chevron, so it reads as "choose unit", not a logo or a second ⇅ amount swap. Header ink, like
+// close and lock; at least 44px square, wider for the code.
+.sheet-unit-toggle {
+  color: var(--app-text) !important;
+  font-size: 16px;
   letter-spacing: 0.02em;
-  min-width: 72px;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 8px;
 }
-.unit-chip .q-btn__content {
+.sheet-unit-toggle .q-btn__content {
   flex-wrap: nowrap;
-  gap: 4px;
+  gap: 2px;
 }
-.unit-chip__chevron {
+.sheet-unit-toggle__chevron {
   opacity: 0.72;
 }
 

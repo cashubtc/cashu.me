@@ -78,6 +78,7 @@
 </template>
 
 <script lang="ts">
+import { unitCode } from "src/js/format-currency";
 import PendingDots from "src/components/ui/PendingDots.vue";
 import { defineComponent, PropType } from "vue";
 import { mapState } from "pinia";
@@ -177,7 +178,7 @@ export default defineComponent({
       return "sat";
     },
     unitDisplay(): string {
-      return this.unit === "sat" ? "sat" : this.unit?.toUpperCase?.() || "";
+      return this.unit ? unitCode(this.unit) : "";
     },
     hasValidAmount(): boolean {
       const amount =

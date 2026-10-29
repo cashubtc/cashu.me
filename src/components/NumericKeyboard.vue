@@ -6,29 +6,27 @@
       v-if="forceVisible || showNumericKeyboard"
     >
       <div class="keyboard-grid">
-        <q-btn flat class="text-h5" @click="addDigit('1')">1</q-btn>
-        <q-btn flat class="text-h5" @click="addDigit('2')">2</q-btn>
-        <q-btn flat class="text-h5" @click="addDigit('3')">3</q-btn>
+        <q-btn flat class="keypad-key" @click="addDigit('1')">1</q-btn>
+        <q-btn flat class="keypad-key" @click="addDigit('2')">2</q-btn>
+        <q-btn flat class="keypad-key" @click="addDigit('3')">3</q-btn>
 
-        <q-btn flat :ripple="true" class="text-h5" @click="addDigit('4')"
-          >4</q-btn
-        >
-        <q-btn flat class="text-h5" @click="addDigit('5')">5</q-btn>
-        <q-btn flat class="text-h5" @click="addDigit('6')">6</q-btn>
+        <q-btn flat class="keypad-key" @click="addDigit('4')">4</q-btn>
+        <q-btn flat class="keypad-key" @click="addDigit('5')">5</q-btn>
+        <q-btn flat class="keypad-key" @click="addDigit('6')">6</q-btn>
 
-        <q-btn flat class="text-h5" @click="addDigit('7')">7</q-btn>
-        <q-btn flat class="text-h5" @click="addDigit('8')">8</q-btn>
-        <q-btn flat class="text-h5" @click="addDigit('9')">9</q-btn>
+        <q-btn flat class="keypad-key" @click="addDigit('7')">7</q-btn>
+        <q-btn flat class="keypad-key" @click="addDigit('8')">8</q-btn>
+        <q-btn flat class="keypad-key" @click="addDigit('9')">9</q-btn>
 
-        <q-btn flat class="text-h5 invisible" disable>•</q-btn>
-        <q-btn flat class="text-h5" @click="addDigit('0')">0</q-btn>
+        <q-btn flat class="keypad-key invisible" disable>•</q-btn>
+        <q-btn flat class="keypad-key" @click="addDigit('0')">0</q-btn>
         <q-btn
           flat
-          class="text-h5"
+          class="keypad-key"
           :aria-label="$t('common.backspace')"
           @click="backspace"
         >
-          <DeleteIcon :size="26" />
+          <DeleteIcon :size="24" />
         </q-btn>
         <q-btn v-if="!hideClose" flat @click="closeKeyboard">{{
           $t("NumericKeyboard.actions.close.label")
@@ -149,12 +147,17 @@ export default defineComponent({
   padding: 12px 0;
 }
 
-// On short screens the keypad's top inset tightens (24px to 8px), so the amount, its unit chip
-// and the fiat line keep their room above it (council R92).
-@media (max-height: 760px) {
-  .numeric-keyboard.q-pt-lg {
-    padding-top: 8px !important;
-  }
+// The digits are a numeric role of their own, not button text: the global .q-btn standard
+// (15px, src/css/app.scss) loads after Quasar's text-h5 and shrank them (owner 2026-10-29b,
+// item 4). Scoped, so it beats that rule without !important; the same size on every screen
+// height, where only the gaps and insets tighten.
+.q-btn.keypad-key {
+  font-size: 26px;
+  font-variant-numeric: tabular-nums lining-nums;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 32px;
+  text-transform: none;
 }
 
 // on not tall screens, make the keyboard smaller
@@ -167,17 +170,20 @@ export default defineComponent({
   }
 }
 
-// on even smaller screens, make the keyboard even smaller
+// on even smaller screens, make the keyboard even smaller: a 568px phone closes the keypad's
+// insets (24px to 8px) and its keys are 44px, the touch target (the digits keep their size), so the amount, its
+// fiat line and Send's lock field still fit.
 @media (max-height: 600px) {
   .numeric-keyboard {
     max-height: 260px;
   }
-  // A 568px phone: 44px keys (the touch target) and an 8px bottom inset leave room above the
-  // keypad for the amount, its fiat line and unit chip (council R92).
+  .numeric-keyboard.q-pt-lg {
+    padding-top: 8px !important;
+  }
   .numeric-keyboard.q-pb-lg {
     padding-bottom: 8px !important;
   }
-  .q-btn {
+  .q-btn.keypad-key {
     min-height: 44px;
     padding: 6px 0;
   }

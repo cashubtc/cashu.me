@@ -95,7 +95,7 @@
             class="balance-unit-dot"
             :class="{ 'balance-unit-dot--active': activeUnit === unit }"
             :aria-label="
-              $t('BalanceView.show_balance', { unit: unitLabel(unit) })
+              $t('BalanceView.show_balance', { unit: unitCode(unit) })
             "
             :aria-pressed="activeUnit === unit"
             :tabindex="hasMultipleBalanceUnits ? 0 : -1"
@@ -205,7 +205,7 @@ export default defineComponent({
     },
     balancesOptions: function () {
       return this.balanceUnits.map((unit) => ({
-        label: this.unitLabel(unit),
+        label: unitCode(unit),
         value: unit,
       }));
     },
@@ -252,9 +252,7 @@ export default defineComponent({
     toggleHideBalance() {
       this.hideBalance = !this.hideBalance;
     },
-    unitLabel(unit: string) {
-      return unitCode(unit);
-    },
+    unitCode,
     totalBalanceForUnit(unit: string) {
       const normalizedUnit = unit.toLowerCase();
       const keysetIds = new Set(

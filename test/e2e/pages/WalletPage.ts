@@ -67,9 +67,11 @@ export class WalletPage {
     }
   }
 
-  /** The amount screen's ecash unit chip, named "Unit: Bitcoin, change". */
-  unitChip() {
-    return this.page.getByRole("button", { name: /^Unit: .+, change$/ });
+  /** The amount screen's ecash unit switch, a header action named "Unit: Bitcoin, change". */
+  unitToggle() {
+    return this.page
+      .locator(".sheet-column-header:visible")
+      .getByRole("button", { name: /^Unit: .+, change$/ });
   }
 
   /** The ⇅ swap between typing the unit and typing the fiat currency. */

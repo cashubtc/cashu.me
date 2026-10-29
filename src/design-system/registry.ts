@@ -413,9 +413,14 @@ export const DS_ITEMS: DsItem[] = [
     tier: "primitive",
     source: "src/components/ui/UnitToggle.vue",
     usage: { tag: "UnitToggle" },
-    example: `<AmountInputComponent v-model="amount" unit-toggle @toggle-unit="toggleUnit()" />
-<UnitToggle align="start" @toggle="toggleUnit()" />`,
-    note: 'The ecash unit as a tonal chip under the amount and its fiat line (council R92 picked variant 3 of /design-system/explore/unit-toggle): the unit\'s code and a chevron, 44px, named "Unit: Bitcoin, change" apart from the ⇅ swap ("Enter amount in USD"). Follows the active mint and hides itself when the mint has one unit. Never a header action.',
+    example: `<FullscreenDialogHeader :title="title" balanced>
+  <template #actions>
+    <div class="row items-center no-wrap sheet-header-actions">
+      <UnitToggle @toggle="toggleUnit()" />
+    </div>
+  </template>
+</FullscreenDialogHeader>`,
+    note: 'The ecash unit switch, the outermost header action on Receive Lightning, Send ecash (after the lock) and Pay while a quote or amount is on screen (owner 2026-10-29b, item 11; the logical end in right-to-left). The unit\'s code from unitCode (BTC for sats, MSAT, USD, EUR) and a chevron in the header ink, 44px, named "Unit: Bitcoin, change", apart from the amount\'s ⇅ swap ("Enter amount in USD"). Follows the active mint and hides itself when the mint has one unit. Never beside the amount.',
   },
   {
     id: "fullscreen-dialog-header",
@@ -574,8 +579,7 @@ export const DS_ITEMS: DsItem[] = [
     name: "Amounts",
     group: "data",
     tier: "primitive",
-    source:
-      "src/components/ui/AmountHeadline.vue · AnimatedNumber.vue · ToggleUnit.vue",
+    source: "src/components/ui/AmountHeadline.vue · AnimatedNumber.vue",
     usage: { tag: "AmountHeadline" },
     example: `<div class="amount-headline">−₿101</div>`,
   },

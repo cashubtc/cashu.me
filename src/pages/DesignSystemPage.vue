@@ -859,14 +859,28 @@
         </q-list>
       </DsEntry>
       <DsEntry id="unit-toggle">
-        <!-- Under the amount's fiat line, for a mint with two units (council R92, variant 3
-             of /design-system/explore/unit-toggle); a one-unit mint shows no chip. -->
-        <div
-          class="ds-frame row items-center justify-center q-pa-sm"
-          style="gap: 8px"
-        >
-          <UnitToggle unit="sat" :units="['sat', 'usd']" />
-          <UnitToggle unit="usd" :units="['sat', 'usd']" />
+        <!-- The header's outermost action, as on Send ecash (after the lock) and Receive
+             Lightning, for a mint with two units; a one-unit mint shows none. -->
+        <div class="ds-frame">
+          <FullscreenDialogHeader title="Send ecash" balanced>
+            <template #actions>
+              <div class="row items-center no-wrap sheet-header-actions">
+                <IconButton label="Lock to a key">
+                  <LockIcon :size="20" />
+                </IconButton>
+                <UnitToggle unit="sat" :units="['sat', 'usd']" />
+              </div>
+            </template>
+          </FullscreenDialogHeader>
+        </div>
+        <div class="ds-frame q-mt-sm">
+          <FullscreenDialogHeader title="Lightning invoice" balanced>
+            <template #actions>
+              <div class="row items-center no-wrap sheet-header-actions">
+                <UnitToggle unit="usd" :units="['sat', 'usd']" />
+              </div>
+            </template>
+          </FullscreenDialogHeader>
         </div>
       </DsEntry>
       <DsEntry id="fullscreen-dialog-header">
@@ -1167,7 +1181,6 @@
               :format="(n) => '₿' + Math.round(n).toLocaleString('en-US')"
             />
           </div>
-          <ToggleUnit />
         </div>
       </DsEntry>
       <DsEntry id="balance-view">
@@ -1715,7 +1728,6 @@ import OptionRow from "src/components/ui/OptionRow.vue";
 import PendingDots from "src/components/ui/PendingDots.vue";
 import SegmentedControl from "src/components/ui/SegmentedControl.vue";
 import { PaymentRequest, PaymentRequestTransportType } from "@cashu/cashu-ts";
-import ToggleUnit from "src/components/ToggleUnit.vue";
 import ActivityRow from "src/components/ActivityRow.vue";
 import AmountKeypadPanel from "src/components/AmountKeypadPanel.vue";
 import ConfirmationsRow from "src/components/ConfirmationsRow.vue";
@@ -1888,7 +1900,6 @@ export default defineComponent({
     ZapIcon,
     CoinsIcon,
     TermsOfServiceText,
-    ToggleUnit,
     WelcomeSlideScaffold,
     DownloadIcon,
     LockIcon,

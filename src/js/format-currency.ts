@@ -7,13 +7,22 @@ export function isolateLtr(text: string): string {
   return `\u2066${text}\u2069`;
 }
 
-/** A unit's short text code, as the balance's unit buttons and the amount's unit chip name it:
- * BTC for sats, mSAT for millisats, otherwise the unit upper-cased (USD, EUR). */
+/** The one name for a unit wherever the app says *which* unit it is (the header's unit switch,
+ * Unit rows, the payment request's unit sheet, history captions, the balance's unit dots):
+ * BTC for sats, MSAT for millisats, otherwise the ISO code upper-cased (USD, EUR). A label only;
+ * amounts stay with formatCurrency (₿2,100 or 2,100 sat), wire values stay lower-case. */
 export function unitCode(unit: string): string {
   const normalized = unit.toLowerCase();
   if (normalized === "sat") return "BTC";
-  if (normalized === "msat") return "mSAT";
-  return unit.toUpperCase();
+  return normalized.toUpperCase();
+}
+
+/** The unit a typed number counts, for entry labels and "whole amount in …" errors: sat and
+ * msat by name (the field takes whole sats, not BTC), otherwise the unit's code (USD). */
+export function unitQuantityWord(unit: string): string {
+  const normalized = unit.toLowerCase();
+  if (normalized === "sat" || normalized === "msat") return normalized;
+  return unitCode(normalized);
 }
 
 /** Format integer Cashu amounts without converting large values to numbers. */

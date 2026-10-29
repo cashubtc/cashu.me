@@ -87,6 +87,7 @@
 </template>
 
 <script lang="ts">
+import { unitCode } from "src/js/format-currency";
 import { defineComponent, PropType } from "vue";
 import { mapState } from "pinia";
 import { getShortUrl } from "src/js/wallet-helpers";
@@ -204,9 +205,7 @@ export default defineComponent({
       return "sat";
     },
     unitDisplay(): string {
-      return this.quoteUnit === "sat"
-        ? "sat"
-        : this.quoteUnit?.toUpperCase?.() || "";
+      return this.quoteUnit ? unitCode(this.quoteUnit) : "";
     },
     amountDisplay(): string {
       const amount =

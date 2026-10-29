@@ -20,7 +20,7 @@
         v-if="!hideUnit && tokenUnit !== 'sat'"
         :icon="CircleDollarSignIcon"
         :label="$t('TokenInformation.unit')"
-        :value="tokenUnit === 'sat' ? 'sat' : tokenUnit.toUpperCase()"
+        :value="unitCode(tokenUnit)"
       />
 
       <!-- Fiat -->
@@ -79,6 +79,7 @@
   </div>
 </template>
 <script lang="ts">
+import { unitCode } from "src/js/format-currency";
 import AmountHeadline from "src/components/ui/AmountHeadline.vue";
 import PendingDots from "src/components/ui/PendingDots.vue";
 import { defineComponent } from "vue";
@@ -252,6 +253,7 @@ export default defineComponent({
     },
   },
   methods: {
+    unitCode,
     ...mapActions(useP2PKStore, ["isLocked", "isLockedToUs"]),
     getProofsMint: function (proofs) {
       // unique keyset IDs of proofs

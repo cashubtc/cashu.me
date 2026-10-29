@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="amount-input-root"
-    :class="{ 'amount-input-root--unit': showUnitToggle }"
-  >
+  <div class="amount-input-root">
     <slot name="overlay" />
     <transition name="swap-primary">
       <div
@@ -14,14 +11,10 @@
         {{ primaryAmountDisplay }}
       </div>
     </transition>
-    <div v-if="showFiatConversion || showUnitToggle" class="fiat-container">
-      <div class="fiat-wrapper" :class="{ 'fiat-wrapper--bare': !hasFiatLine }">
+    <div v-if="showFiatConversion" class="fiat-container">
+      <div class="fiat-wrapper">
         <transition name="swap-secondary">
-          <div
-            v-if="showFiatConversion"
-            :key="`secondary-${fiatMode}`"
-            class="fiat-wrapper-content"
-          >
+          <div :key="`secondary-${fiatMode}`" class="fiat-wrapper-content">
             <div
               class="fiat-display text-app-muted"
               :class="{ invisible: !secondaryDisplay }"
@@ -42,11 +35,6 @@
             />
           </div>
         </transition>
-        <!-- The ecash unit chip (council R92): under the fiat line, or on it, after the swap,
-             where the screen is short. -->
-        <div v-if="showUnitToggle" class="amount-unit">
-          <UnitToggle @toggle="$emit('toggle-unit')" />
-        </div>
       </div>
     </div>
   </div>
@@ -56,8 +44,7 @@
 import { ArrowDownUp as ArrowDownUpIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapState } from "pinia";
-import UnitToggle from "src/components/ui/UnitToggle.vue";
-import { MintClass, useMintsStore } from "src/stores/mints";
+import { useMintsStore } from "src/stores/mints";
 import { useSettingsStore } from "src/stores/settings";
 import { usePriceStore } from "src/stores/price";
 declare const windowMixin: any;
@@ -66,7 +53,7 @@ const MAX_AMOUNT = 999_999_999;
 
 export default defineComponent({
   name: "AmountInputComponent",
-  components: { ArrowDownUpIcon, UnitToggle },
+  components: { ArrowDownUpIcon },
   mixins: [windowMixin],
   props: {
     modelValue: {
@@ -97,13 +84,8 @@ export default defineComponent({
       type: Number,
       default: null,
     },
-    // show the ecash unit chip (UnitToggle) with the amount; it emits toggle-unit
-    unitToggle: {
-      type: Boolean,
-      default: false,
-    },
   },
-  emits: ["update:modelValue", "enter", "fiat-mode-changed", "toggle-unit"],
+  emits: ["update:modelValue", "enter", "fiat-mode-changed"],
   data() {
     return {
       amountEditBuffer: "" as string,
@@ -115,13 +97,7 @@ export default defineComponent({
   computed: {
     ...mapState(
       useMintsStore as any,
-      [
-        "activeUnit",
-        "activeUnitLabel",
-        "activeUnitCurrencyMultiplyer",
-        "activeMintUrl",
-        "mints",
-      ] as any
+      ["activeUnit", "activeUnitCurrencyMultiplyer"] as any
     ),
     ...mapState(useSettingsStore, ["bitcoinPriceCurrency"]),
     ...mapState(usePriceStore, ["bitcoinPrice", "currentCurrencyPrice"]),
@@ -170,17 +146,6 @@ export default defineComponent({
         );
       }
       return this.secondaryFiatDisplay;
-    },
-    // The chip only shows for a mint with more than one unit, as UnitToggle itself decides.
-    showUnitToggle(): boolean {
-      if (!this.unitToggle) return false;
-      const mint = (this.mints as any[]).find(
-        (m) => m.url === this.activeMintUrl
-      );
-      return !!mint && new MintClass(mint).units.length > 1;
-    },
-    hasFiatLine(): boolean {
-      return this.showFiatConversion && !!this.secondaryDisplay;
     },
     showSwap(): boolean {
       // Show when fiat pricing is available and unit is sats (or currently in fiat mode)
@@ -519,6 +484,13 @@ export default defineComponent({
   width: 100%;
   min-height: 120px; /* Ensure enough space for both displays */
 }
+/* A 568px phone: the fiat line moves up (40px to 20px under the amount) rather than the
+   amount or the keypad digits shrinking. */
+@media (max-height: 600px) {
+  .amount-input-root {
+    min-height: 100px;
+  }
+}
 .amount-display {
   position: absolute;
   top: 0;
@@ -537,19 +509,18 @@ export default defineComponent({
   align-items: center;
   height: 18px;
 }
-/* The fiat line's two copies stack in one grid cell while they swap, so the line keeps the
-   width of its text and the unit chip can sit after it. */
 .fiat-wrapper {
-  display: grid;
-  height: 18px;
-  min-width: 1px;
   position: relative;
+  width: 100%;
+  height: 18px;
 }
 .fiat-wrapper-content {
-  align-items: center;
+  position: absolute;
+  left: 50%;
+  top: 50%;
   display: inline-flex;
-  grid-area: 1 / 1;
-  position: relative;
+  align-items: center;
+  transform: translate(-50%, -50%);
 }
 .fiat-icon {
   position: absolute;
@@ -557,52 +528,6 @@ export default defineComponent({
   margin-inline-start: -6px;
   padding: 10px;
   box-sizing: content-box;
-}
-/* With the unit chip: the fiat line keeps its place (102px down) and the 44px chip sits 12px
-   under it, centred on the amount. */
-.amount-input-root--unit {
-  min-height: 176px;
-}
-.amount-input-root--unit .fiat-container {
-  bottom: 56px;
-}
-.amount-unit {
-  left: 50%;
-  position: absolute;
-  top: calc(100% + 12px);
-  transform: translateX(-50%);
-}
-.amount-unit :deep(.unit-chip-row) {
-  margin-top: 0;
-}
-/* Short screens (a 667px phone, a 720px desktop window): the chip joins the fiat line, after
-   the swap, and the 40px between amount and fiat line closes, so the amount, its unit and the
-   keypad still fit. Without a fiat line the chip takes the line's place. */
-@media (max-height: 760px) {
-  .amount-input-root--unit {
-    min-height: calc(clamp(56px, 11vw, 80px) * 1.1 + 44px);
-  }
-  .amount-input-root--unit .fiat-container {
-    bottom: 13px;
-  }
-  .amount-unit {
-    left: auto;
-    right: auto;
-    inset-inline-start: calc(100% + 40px);
-    top: 50%;
-    transform: translateY(-50%);
-  }
-  .fiat-wrapper--bare .amount-unit {
-    left: 50%;
-    right: auto;
-    transform: translate(-50%, -50%);
-  }
-}
-/* The amount is 44px there (src/css/elements.scss). */
-@media (max-height: 600px) {
-  .amount-input-root--unit {
-    min-height: calc(44px * 1.1 + 44px);
-  }
 }
 .invisible {
   visibility: hidden;
@@ -640,15 +565,15 @@ export default defineComponent({
 }
 .swap-secondary-leave-to {
   opacity: 0;
-  transform: translateY(-40px) scale(0.85);
+  transform: translate(-50%, calc(-50% - 40px)) scale(0.85);
 }
 .swap-secondary-enter-from {
   opacity: 0;
-  transform: translateY(40px) scale(0.85);
+  transform: translate(-50%, calc(-50% + 40px)) scale(0.85);
 }
 .swap-secondary-enter-to,
 .swap-secondary-leave-from {
   opacity: 1;
-  transform: none;
+  transform: translate(-50%, -50%) scale(1);
 }
 </style>
