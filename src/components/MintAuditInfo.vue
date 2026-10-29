@@ -1,9 +1,15 @@
 <template>
-  <div class="q-mt-lg q-mb-lg">
-    <div class="text-caption q-mx-sm" v-if="loading">
-      <PendingDots class="q-mr-sm" />
-      {{ $t("MintAuditInfo.loading") }}
-    </div>
+  <!-- Loading, unavailable and retrying are one row on the detail grid, so nothing jumps
+       between them (owner 2026-10-29, items 19 and 23). -->
+  <div class="detail-table q-mb-lg">
+    <DetailRow
+      v-if="loading"
+      :icon="InfoIcon"
+      :label="$t('MintAuditInfo.loading')"
+      value-class="detail-value--inline"
+    >
+      <PendingDots />
+    </DetailRow>
     <div v-else-if="mintNotAudited" class="q-mx-sm">
       <InfoIcon
         :size="20"
@@ -29,21 +35,22 @@
         </template>
       </i18n-t>
     </div>
-    <!-- On the Mint details row grid, with its icon, not a loose line under a centred label
-         (council R83-R84). -->
+    <!-- Unavailable: the row is the retry, its value the word Refresh; while it runs the
+         same word follows the busy dots and a second tap is ignored. -->
     <DetailRow
       v-else-if="error"
-      class="audit-retry-row"
       :icon="InfoIcon"
       :label="
         /fetch|network/i.test(error) ? $t('MintAuditInfo.unavailable') : error
       "
-      :action="!mintNotAudited"
+      action
+      :busy="retrying"
       :action-label="$t('common.refresh')"
       :chevron="false"
-      @click="load"
+      @click="retry"
     >
-      <RefreshCwIcon v-if="!mintNotAudited" :size="18" aria-hidden="true" />
+      <BusyLabel v-if="retrying">{{ $t("common.refresh") }}</BusyLabel>
+      <template v-else>{{ $t("common.refresh") }}</template>
     </DetailRow>
     <div v-else-if="mintInfo" class="mint-info">
       <!-- Warning Box -->
@@ -130,7 +137,8 @@
 <script lang="ts">
 import RevealTransition from "src/components/ui/RevealTransition.vue";
 import PendingDots from "src/components/ui/PendingDots.vue";
-import { Info as InfoIcon, RefreshCw as RefreshCwIcon } from "lucide-vue-next";
+import BusyLabel from "src/components/ui/BusyLabel.vue";
+import { Info as InfoIcon } from "lucide-vue-next";
 import { markRaw } from "vue";
 interface MintRead {
   id: number;
@@ -174,7 +182,7 @@ export default {
   components: {
     RevealTransition,
     DetailRow,
-    RefreshCwIcon,
+    BusyLabel,
     PendingDots,
     InfoIcon,
     MintAuditWarningBox,
@@ -195,6 +203,7 @@ export default {
       auditUrlShort: getShortUrl(settingsStore.auditorUrl),
       mintNotAudited: false,
       loading: true,
+      retrying: false,
       error: null,
       couldFetchInfo: true,
       mints: [] as MintRead[],
@@ -230,20 +239,37 @@ export default {
     this.load();
   },
   methods: {
-    // The first load, and the unavailable row's retry.
+    // The first load: the loading row until the auditor answers.
     async load() {
       try {
         this.error = "";
         this.loading = true;
-        await this.getMintInfo();
-        if (this.mintInfo && this.mintInfo.id) {
-          await this.getMintSwaps(this.mintInfo.id);
-        }
+        await this.fetchAll();
       } catch (err: any) {
         this.error =
           err.message || (this.$t("MintAuditInfo.load_failed") as string);
       } finally {
         this.loading = false;
+      }
+    },
+    // The unavailable row's retry: the row stays and shows it is busy.
+    async retry() {
+      if (this.retrying) return;
+      this.retrying = true;
+      try {
+        await this.fetchAll();
+        this.error = null;
+      } catch (err: any) {
+        this.error =
+          err.message || (this.$t("MintAuditInfo.load_failed") as string);
+      } finally {
+        this.retrying = false;
+      }
+    },
+    async fetchAll() {
+      await this.getMintInfo();
+      if (this.mintInfo && this.mintInfo.id) {
+        await this.getMintSwaps(this.mintInfo.id);
       }
     },
     async getMintInfo() {
@@ -336,14 +362,10 @@ export default {
 </script>
 
 <style scoped>
-/* The 44px retry target centres its text 6px lower than a plain detail row: pull it up so
-   the gap under the Audit info heading matches Mint details' (council R87). */
-.audit-retry-row {
-  margin-top: -6px;
-}
+/* The warning box starts where a first row's text would. */
 .mint-info {
+  margin-top: 8px;
   text-align: start;
-  margin-top: 20px;
 }
 
 .stat-card {

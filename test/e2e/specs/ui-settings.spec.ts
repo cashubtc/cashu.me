@@ -143,6 +143,34 @@ test("enables ecash payment requests and edits the request amount", async ({
   );
 });
 
+// Owner 2026-10-29, item 11: the request's rows are 44px boxes 4px apart, so a hovered tint
+// never touches the next row.
+test("payment request rows never overlap", async ({ page }) => {
+  const wallet = new WalletUi(page);
+  await wallet.onboard(MINT_A_URL);
+  await wallet.settings("payment-requests");
+  await wallet.toggleSetting("Enable payment requests", true);
+  await wallet.home();
+  await wallet.openReceive("ecash");
+  await page.getByText("Request ecash", { exact: true }).click();
+  const rows = ["pr-amount", "pr-unit", "pr-mint"].map((id) =>
+    page.getByTestId(id).filter({ visible: true })
+  );
+  await expect(rows[0]).toBeVisible();
+  await rows[0].hover();
+  const boxes = [];
+  for (const row of rows) boxes.push((await row.boundingBox())!);
+  for (const b of boxes) expect(Math.abs(b.height - 44)).toBeLessThan(0.6);
+  for (let i = 1; i < boxes.length; i++) {
+    const gap = boxes[i].y - (boxes[i - 1].y + boxes[i - 1].height);
+    expect(Math.abs(gap - 4)).toBeLessThan(0.6);
+  }
+  const inset = await rows[0].evaluate(
+    (el) => getComputedStyle(el, "::before").inset
+  );
+  expect(inset).toBe("0px");
+});
+
 for (const directNavigation of [false, true]) {
   test(
     directNavigation

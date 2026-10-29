@@ -1415,6 +1415,7 @@ export default {
     },
     contact: {
       title: "Contacto",
+      email: "Correo electrónico",
     },
     details: {
       title: "Detalles del mint",

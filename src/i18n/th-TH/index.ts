@@ -1392,6 +1392,7 @@ export default {
     },
     contact: {
       title: "ติดต่อ",
+      email: "อีเมล",
     },
     details: {
       title: "รายละเอียด Mint",

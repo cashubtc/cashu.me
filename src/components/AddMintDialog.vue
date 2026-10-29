@@ -58,6 +58,7 @@
       <!-- Audit Info Section -->
       <div v-if="mintUrl" class="q-mb-lg">
         <DetailRow
+          action
           :icon="InfoIcon"
           :label="$t('AddMintDialog.audit_info.label')"
           :value="
@@ -65,8 +66,8 @@
               ? $t('AddMintDialog.audit_info.actions.hide.label')
               : $t('AddMintDialog.audit_info.actions.show.label')
           "
-          value-class="audit-toggle"
-          @value-click="showAuditInfo = !showAuditInfo"
+          :aria-expanded="showAuditInfo"
+          @click="showAuditInfo = !showAuditInfo"
         />
 
         <!-- Audit Info Component -->
@@ -77,7 +78,7 @@
           <MintAuditInfo
             v-if="showAuditInfo"
             :mintUrl="mintUrl"
-            class="q-mt-md"
+            class="q-mt-xs"
           />
         </transition>
       </div>
@@ -335,12 +336,5 @@ export default defineComponent({
 
 .mint-preview-pill :deep(.q-avatar) {
   margin-inline-end: 16px !important;
-}
-
-/* Audit info rows use the shared detail rows (src/css/app.scss); the value element belongs
-   to DetailRow, so it is reached through the row's root. */
-:deep(.audit-toggle) {
-  cursor: pointer;
-  user-select: none;
 }
 </style>

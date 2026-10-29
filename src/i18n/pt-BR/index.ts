@@ -1471,6 +1471,7 @@ export default {
     },
     contact: {
       title: "Contato",
+      email: "E-mail",
     },
     details: {
       title: "Detalhes do mint",

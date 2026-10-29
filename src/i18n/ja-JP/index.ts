@@ -1405,6 +1405,7 @@ export default {
     },
     contact: {
       title: "連絡先",
+      email: "メール",
     },
     details: {
       title: "ミント詳細",

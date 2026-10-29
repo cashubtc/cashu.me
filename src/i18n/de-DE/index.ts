@@ -1425,6 +1425,7 @@ export default {
     },
     contact: {
       title: "Kontakt",
+      email: "E-Mail",
     },
     details: {
       title: "Mint Details",

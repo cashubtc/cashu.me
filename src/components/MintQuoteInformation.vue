@@ -1,12 +1,11 @@
 <template>
   <div
     v-if="hasQuote"
-    class="mint-quote-information q-mt-md"
+    class="mint-quote-information detail-table q-mt-md"
     :class="containerTextClass"
   >
     <DetailRow
       v-if="showAmount && hasValidAmount"
-      class="q-mb-md"
       :icon="CoinsIcon"
       :label="$t('QuoteInformation.amount')"
       :value="amountDisplay"
@@ -14,7 +13,6 @@
 
     <DetailRow
       v-if="unit !== 'sat'"
-      class="q-mb-md"
       :icon="CircleDollarSignIcon"
       :label="$t('QuoteInformation.unit')"
       :value="unitDisplay"
@@ -22,19 +20,17 @@
 
     <DetailRow
       v-if="stateDisplay && !(hidePaidStatus && isPaidState)"
-      class="q-mb-md"
       :icon="ActivityIcon"
       :label="$t('QuoteInformation.status')"
-      :value-class="{ 'text-positive': isPaidState }"
+      :value-class="['detail-value--inline', { 'text-positive': isPaidState }]"
     >
       <!-- The one status (owner 2026-10-29, item 10): on-chain it moves Waiting for payment,
            Confirming (n/m), Issuing ecash, then Paid; the dots show it is live. -->
-      <PendingDots v-if="isWaitingState" size="16px" class="q-mr-sm" />
+      <PendingDots v-if="isWaitingState" size="16px" />
       {{ stateDisplay }}
     </DetailRow>
 
     <DetailRow
-      class="q-mb-md"
       :icon="isOnchain ? BitcoinIcon : ZapIcon"
       :label="$t('QuoteInformation.method')"
       :value="methodDisplay"
@@ -42,7 +38,6 @@
 
     <DetailRow
       v-if="networkDisplay"
-      class="q-mb-md"
       :icon="NetworkIcon"
       :label="$t('QuoteInformation.network')"
       :value="networkDisplay"
@@ -52,7 +47,6 @@
          an explorer when the network has one (it came and went). -->
     <DetailRow
       v-if="isOnchain && invoice?.request"
-      class="q-mb-md"
       :icon="HashIcon"
       :label="$t('QuoteInformation.address')"
       :href="addressExplorerUrl"
@@ -61,7 +55,6 @@
 
     <DetailRow
       v-if="isOnchain && onchainMetadata"
-      class="q-mb-md"
       :icon="HashIcon"
       :label="$t('QuoteInformation.transaction_id')"
       :href="onchainMetadata.url"
@@ -70,7 +63,6 @@
 
     <DetailRow
       v-if="paidAtDisplay"
-      class="q-mb-md"
       :icon="ClockIcon"
       :label="$t('QuoteInformation.paid_at')"
       :value="paidAtDisplay"

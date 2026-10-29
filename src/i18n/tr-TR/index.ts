@@ -1421,6 +1421,7 @@ export default {
     },
     contact: {
       title: "İletişim",
+      email: "E-posta",
     },
     details: {
       title: "Mint detayları",

@@ -1379,6 +1379,7 @@ export default {
     },
     contact: {
       title: "联系",
+      email: "电子邮件",
     },
     details: {
       title: "Mint 详情",

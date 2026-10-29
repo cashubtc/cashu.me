@@ -437,6 +437,72 @@ describe("standard elements", () => {
     ).toEqual([]);
   });
 
+  // Detail rows (owner 2026-10-29, items 11, 20, 22, 34, 35): one 44px row 4px apart, the
+  // spacing owned by .detail-table, links and copies being the row itself.
+  const openingTags = (text: string, tag: string) =>
+    [
+      ...text.matchAll(
+        new RegExp(`<${tag}\\b(?:[^>"']|"[^"]*"|'[^']*')*>`, "g")
+      ),
+    ].map(([t]) => t);
+
+  it("detail rows are spaced by .detail-table, not their own margins", () => {
+    expect(
+      offenders((text) =>
+        ["DetailRow", "ConfirmationsRow"].some((tag) =>
+          openingTags(text, tag).some((t) =>
+            /\sclass="[^"]*\bq-m[tby]-/.test(t)
+          )
+        )
+      )
+    ).toEqual([]);
+  });
+
+  it("links in detail rows use DetailRow href", () => {
+    expect(
+      offenders((text) =>
+        [...text.matchAll(/<DetailRow\b[\s\S]*?<\/DetailRow>/g)].some(
+          ([block]) => /<a\s/.test(block)
+        )
+      )
+    ).toEqual([]);
+  });
+
+  it("no value-click on DetailRow (use action, href or copy-value)", () => {
+    expect(offenders((text) => text.includes("@value-click"))).toEqual([]);
+  });
+
+  it("one mint header: no compact MintIdentityHeader", () => {
+    expect(
+      offenders((text) =>
+        openingTags(text, "MintIdentityHeader").some((t) =>
+          /\scompact[\s>/=]/.test(t)
+        )
+      )
+    ).toEqual([]);
+  });
+
+  it("mint contacts are DetailRows", () => {
+    const page = readFileSync(join(SRC, "pages/MintDetailsPage.vue"), "utf8");
+    expect(page).not.toContain("contact-item");
+    expect(page).not.toContain("<CopyButton");
+  });
+
+  it("mint details rows are not indented (owner 2026-10-29, item 34)", () => {
+    const page = readFileSync(join(SRC, "pages/MintDetailsPage.vue"), "utf8");
+    const css = page.match(/<style[^>]*>([\s\S]*?)<\/style>/)?.[1] ?? "";
+    expect(css).not.toMatch(/padding-inline/);
+  });
+
+  it("the audit retry is a busy row, not a refresh glyph", () => {
+    const audit = readFileSync(
+      join(SRC, "components/MintAuditInfo.vue"),
+      "utf8"
+    );
+    expect(audit).not.toContain("<RefreshCwIcon");
+    expect(audit).toMatch(/:busy="retrying"/);
+  });
+
   it("one on-chain status", () => {
     const quote = readFileSync(
       join(SRC, "components/MintQuoteInformation.vue"),

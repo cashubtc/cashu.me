@@ -120,3 +120,141 @@ test("rejects malformed mint input without adding a mint", async ({ page }) => {
   await page.locator(".bottom-sheet-close:visible").click();
   await expect(page.getByTestId("mint-card")).toHaveCount(1);
 });
+
+// Owner 2026-10-29, items 8, 11, 19, 23, 34, 35: every detail row is one 44px box 4px from
+// the next, on the page edge, its tint inside its own box; contacts are copy rows with no
+// row for an empty entry; the audit retry keeps its row while busy. The page blocks outside
+// requests, so the auditor is unavailable unless a test routes it.
+const AUDITOR = "https://api.audit.8333.space";
+
+async function rowBoxes(table: import("@playwright/test").Locator) {
+  return table.locator(":scope > .detail-item").evaluateAll((rows) =>
+    rows.map((r) => {
+      const b = r.getBoundingClientRect();
+      return { top: b.top, bottom: b.bottom, height: b.height };
+    })
+  );
+}
+
+test("mint details rows share one height, gap and edge", async ({ page }) => {
+  const wallet = new WalletUi(page);
+  await wallet.onboard(MINT_A_URL);
+  await wallet.details(MINT_A_URL);
+
+  const features = page.getByRole("button", { name: /Supported features/ });
+  const table = page.locator(".detail-table").filter({ has: features });
+  await expect(features).toBeVisible();
+
+  const boxes = await rowBoxes(table);
+  expect(boxes.length).toBeGreaterThanOrEqual(3);
+  for (const b of boxes) expect(Math.abs(b.height - 44)).toBeLessThan(0.6);
+  for (let i = 1; i < boxes.length; i++) {
+    expect(Math.abs(boxes[i].top - boxes[i - 1].bottom - 4)).toBeLessThan(0.6);
+  }
+
+  // The rows' text sits on the page's 16px edge, the same as the section heading's line.
+  const heading = page.locator(".section-divider-block").filter({
+    hasText: "Mint details",
+  });
+  const headingX = (await heading.boundingBox())!.x;
+  const urlIcon = table.locator(".detail-item").first().locator(".detail-icon");
+  const iconX = (await urlIcon.boundingBox())!.x;
+  expect(Math.abs(iconX - headingX)).toBeLessThan(0.6);
+
+  // The hover tint is the row's own box.
+  await features.hover();
+  const before = (prop: "inset" | "backgroundColor") =>
+    features.evaluate((el, p) => getComputedStyle(el, "::before")[p], prop);
+  expect(await before("inset")).toBe("0px");
+  await expect
+    .poll(() => before("backgroundColor"))
+    .not.toBe("rgba(0, 0, 0, 0)");
+
+  // Copy mint URL appears once: as the URL row.
+  await expect(
+    page.getByRole("button", { name: "Copy mint URL", exact: true })
+  ).toHaveCount(1);
+});
+
+test("mint contacts are copy rows and an empty entry draws nothing", async ({
+  page,
+}) => {
+  const wallet = new WalletUi(page);
+  await wallet.onboard(MINT_A_URL);
+  const npub =
+    "npub1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqxyz789";
+  await page.route(`${MINT_A_URL}/v1/info`, async (route) => {
+    const response = await route.fetch();
+    const info = await response.json();
+    info.contact = [
+      { method: "email", info: "ops@mint.example" },
+      { method: "nostr", info: "" },
+      { method: "nostr", info: npub },
+    ];
+    await route.fulfill({ response, json: info });
+  });
+  await wallet.details(MINT_A_URL);
+
+  const email = page.getByRole("button", { name: "Email: ops@mint.example" });
+  const nostr = page.getByRole("button", { name: `Nostr: ${npub}` });
+  await expect(email).toBeVisible();
+  await expect(nostr).toBeVisible();
+  await expect(nostr).toContainText("npub1qqqqq…xyz789");
+  await expect(page.getByRole("button", { name: /^Nostr:/ })).toHaveCount(1);
+  for (const row of [email, nostr]) {
+    expect(Math.abs((await row.boundingBox())!.height - 44)).toBeLessThan(0.6);
+  }
+});
+
+test("mints without contacts show no contact section", async ({ page }) => {
+  const wallet = new WalletUi(page);
+  await wallet.onboard(MINT_A_URL);
+  await page.route(`${MINT_A_URL}/v1/info`, async (route) => {
+    const response = await route.fetch();
+    const info = await response.json();
+    info.contact = [{ method: "nostr", info: "" }];
+    await route.fulfill({ response, json: info });
+  });
+  await wallet.details(MINT_A_URL);
+  await expect(
+    page.getByRole("button", { name: /Supported features/ })
+  ).toBeVisible();
+  await expect(
+    page.locator(".section-divider-block").filter({ hasText: "Contact" })
+  ).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /^Nostr:/ })).toHaveCount(0);
+});
+
+test("the audit retry keeps its row and shows it is busy", async ({ page }) => {
+  const wallet = new WalletUi(page);
+  let release: (() => void) | undefined;
+  let calls = 0;
+  await wallet.onboard(MINT_A_URL);
+  // After onboarding, so it wins over the page's block on every outside request.
+  await page.route(`${AUDITOR}/mints/url**`, async (route) => {
+    calls += 1;
+    if (calls === 1) return route.abort();
+    await new Promise<void>((resolve) => (release = resolve));
+    await route.abort();
+  });
+  await wallet.details(MINT_A_URL);
+
+  const retry = page.getByRole("button", { name: "Refresh", exact: true });
+  await expect(retry).toBeVisible();
+  await expect(retry).toContainText("Audit info is unavailable right now.");
+  const before = (await retry.boundingBox())!;
+  expect(Math.abs(before.height - 44)).toBeLessThan(0.6);
+
+  await retry.click();
+  await expect(retry).toHaveAttribute("aria-busy", "true");
+  await expect(retry.locator(".busy-label")).toContainText("Refresh");
+  const busy = (await retry.boundingBox())!;
+  expect(Math.abs(busy.y - before.y)).toBeLessThan(0.6);
+  expect(Math.abs(busy.height - before.height)).toBeLessThan(0.6);
+  await retry.click({ force: true });
+  expect(calls).toBe(2);
+
+  await expect.poll(() => Boolean(release)).toBe(true);
+  release!();
+  await expect(retry).not.toHaveAttribute("aria-busy", "true");
+});

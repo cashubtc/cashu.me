@@ -210,15 +210,39 @@ body,
   color: var(--app-on-primary);
 }
 
-// Label/value rows in quote, token and mint detail views.
-// Every detail row takes the same 32px in the flow; editable rows are 48px buttons that
-// reach 8px into the gaps above and below, so a table of mixed rows keeps one rhythm.
+// Label/value rows (DetailRow) in quote, token, request and mint detail views. Every row is
+// 44px (a full touch target) and rows sit 4px apart in a .detail-table, so plain and
+// interactive rows share one 48px pitch and a hover tint never reaches a neighbour
+// (owner 2026-10-29, item 11). Rows never set their own margins (guard in
+// standardElements.test.ts).
+.detail-table {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
 .detail-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  min-height: 32px;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding-block: 4px;
   width: 100%;
+}
+// A value with glyphs (dots, link, copy): text and glyph centred on one line.
+.detail-value.detail-value--inline {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  min-width: 0;
+}
+.detail-value__text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .detail-label {
   display: flex;

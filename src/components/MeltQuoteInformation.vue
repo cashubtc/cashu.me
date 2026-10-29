@@ -1,12 +1,11 @@
 <template>
   <div
     v-if="hasQuote"
-    class="melt-quote-information q-mt-md"
+    class="melt-quote-information detail-table q-mt-md"
     :class="containerTextClass"
   >
     <DetailRow
       v-if="showAmount"
-      class="q-mb-md"
       :icon="CoinsIcon"
       :label="$t('QuoteInformation.amount')"
       :value="amountDisplay"
@@ -14,7 +13,6 @@
 
     <DetailRow
       v-if="hasFeeReserve && !hasFeePaid"
-      class="q-mb-md"
       :icon="ReceiptTextIcon"
       :label="$t('QuoteInformation.fee_reserve')"
       :value="feeReserveDisplay"
@@ -22,7 +20,6 @@
 
     <DetailRow
       v-if="hasFeePaid"
-      class="q-mb-md"
       :icon="ReceiptTextIcon"
       :label="$t('QuoteInformation.fee_paid')"
       :value="feePaidDisplay"
@@ -30,7 +27,6 @@
 
     <DetailRow
       v-if="quoteUnit !== 'sat'"
-      class="q-mb-md"
       :icon="CircleDollarSignIcon"
       :label="$t('QuoteInformation.unit')"
       :value="unitDisplay"
@@ -38,7 +34,6 @@
 
     <DetailRow
       v-if="stateDisplay && !(hidePaidStatus && isPaidState)"
-      class="q-mb-md"
       :icon="ActivityIcon"
       :label="$t('QuoteInformation.status')"
       :value="stateDisplay"
@@ -47,7 +42,6 @@
 
     <DetailRow
       v-if="networkDisplay"
-      class="q-mb-md"
       :icon="NetworkIcon"
       :label="$t('QuoteInformation.network')"
       :value="networkDisplay"
@@ -55,25 +49,20 @@
 
     <DetailRow
       v-if="hasTxid"
-      class="q-mb-md"
       :icon="HashIcon"
       :label="$t('QuoteInformation.transaction_id')"
-      value-class="detail-value-with-action"
+      :href="onchainTxUrl"
+      ><bdi dir="ltr">{{ shortTxid(txidValue) }}</bdi></DetailRow
     >
-      <a :href="onchainTxUrl" target="_blank">{{ shortTxid(txidValue) }}</a>
-      <CopyButton :value="txidValue" :icon-size="16" />
-    </DetailRow>
 
     <ConfirmationsRow
       v-if="hasTxid && (onchainMetadata || loadingOnchainMetadata)"
-      class="q-mb-md"
       :metadata="onchainMetadata"
       :loading="loadingOnchainMetadata"
     />
 
     <DetailRow
       v-if="paidAtDisplay"
-      class="q-mb-md"
       :icon="ClockIcon"
       :label="$t('QuoteInformation.paid_at')"
       :value="paidAtDisplay"
@@ -81,12 +70,11 @@
 
     <DetailRow
       v-if="hasPreimage"
-      class="q-mb-md"
       :icon="FingerprintIcon"
       :label="$t('QuoteInformation.preimage')"
       :value="preimageValue"
-      value-class="cursor-pointer"
-      @value-click="copyPreimage"
+      :copy-value="preimageValue"
+      :copied-message="$t('QuoteInformation.preimage_copied')"
     />
 
     <DetailRow
@@ -100,12 +88,10 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { notifyCopied } from "src/js/notify";
 import { mapState } from "pinia";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useMintsStore } from "stores/mints";
 import { MeltQuoteBolt11Response } from "@cashu/cashu-ts";
-import { copyToClipboard } from "quasar";
 import { PaymentMethod } from "src/stores/walletTypes";
 import {
   fetchTxMetadata,
@@ -124,7 +110,6 @@ import {
   Network as NetworkIcon,
   ReceiptText as ReceiptTextIcon,
 } from "lucide-vue-next";
-import CopyButton from "src/components/ui/CopyButton.vue";
 import DetailRow from "src/components/ui/DetailRow.vue";
 import ConfirmationsRow from "src/components/ConfirmationsRow.vue";
 
@@ -142,7 +127,7 @@ type ExtendedMeltQuote = MeltQuoteBolt11Response & {
 export default defineComponent({
   name: "MeltQuoteInformation",
   mixins: [windowMixin],
-  components: { CopyButton, DetailRow, ConfirmationsRow },
+  components: { DetailRow, ConfirmationsRow },
   setup() {
     return {
       CircleDollarSignIcon,
@@ -400,16 +385,6 @@ export default defineComponent({
         console.error("Could not fetch on-chain metadata", error);
       } finally {
         this.loadingOnchainMetadata = false;
-      }
-    },
-    async copyPreimage() {
-      const pre = this.preimageValue;
-      if (!pre) return;
-      try {
-        await copyToClipboard(pre);
-        notifyCopied(this.$t("QuoteInformation.preimage_copied") as string);
-      } catch (e) {
-        console.error("Failed to copy preimage", e);
       }
     },
     normalizeToTimestamp(

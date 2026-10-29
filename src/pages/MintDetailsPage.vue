@@ -89,76 +89,45 @@
           </RevealTransition>
         </div>
 
-        <!-- Section Divider -->
+        <!-- Contacts: one copy row per entry that has something to copy (an empty entry drew
+             an icon and a copy button for nothing, owner 2026-10-29, items 8 and 35). -->
         <SectionDivider
-          v-if="mintData.info?.contact?.length > 0"
+          v-if="contacts.length"
           :label="$t('MintDetailsDialog.contact.title')"
         />
-
-        <!-- Contact Info Section -->
-        <div class="contact-section q-mb-lg">
-          <div
-            v-for="contactInfo in mintData.info?.contact"
-            :key="contactInfo.method"
-            class="contact-item q-mb-md"
+        <div v-if="contacts.length" class="detail-table q-mb-lg">
+          <DetailRow
+            v-for="c in contacts"
+            :key="`${c.method}:${c.info}`"
+            :icon="contactIcon(c.method)"
+            :icon-src="contactIconSrc(c.method)"
+            :label="contactLabel(c.method)"
+            :copy-value="c.info"
+            :action-label="`${contactLabel(c.method)}: ${c.info}`"
+            ><bdi dir="ltr">{{
+              c.method === "nostr" ? shortenMiddle(c.info) : c.info
+            }}</bdi></DetailRow
           >
-            <div class="contact-icon-container">
-              <MailIcon
-                v-if="contactInfo.method === 'email'"
-                size="20"
-                class="contact-icon"
-              />
-              <img
-                v-else-if="contactInfo.method === 'nostr'"
-                src="nostr-icon.svg"
-                class="contact-icon"
-                alt=""
-              />
-              <img
-                v-else-if="contactInfo.method === 'twitter'"
-                src="/x-logo.svg"
-                class="contact-icon"
-                alt=""
-              />
-              <img
-                v-else-if="contactInfo.method === 'telegram'"
-                src="/telegram-icon.svg"
-                class="contact-icon"
-                alt=""
-              />
-              <div v-else class="contact-text q-ml-xs">
-                {{ contactInfo.method }}
-              </div>
-            </div>
-            <div class="contact-text">{{ contactInfo.info }}</div>
-            <CopyButton
-              :value="contactInfo.info"
-              class="copy-icon"
-              :label="$t('global.actions.copy.label')"
-            />
-          </div>
         </div>
 
         <!-- Section Divider -->
         <SectionDivider :label="$t('MintDetailsDialog.details.title')" />
 
         <!-- Mint Details Section -->
-        <div class="mint-details-section q-mb-lg">
-          <!-- URL -->
+        <div class="detail-table q-mb-lg">
+          <!-- URL: the one way to copy it (owner 2026-10-29). -->
           <DetailRow
-            class="q-mb-md"
             :icon="LinkIcon"
             :label="$t('MintDetailsDialog.details.url.label')"
             :value="mintData.url"
-            value-class="items-center"
-            @value-click="copyText(mintData.url)"
+            :copy-value="mintData.url"
+            :action-label="$t('MintDetailsDialog.actions.copy_mint_url.label')"
           />
 
           <!-- Nuts -->
           <DetailRow
             v-if="mintData.info?.nuts"
             action
-            class="q-mb-md"
             :icon="ListChecksIcon"
             :label="$t('MintDetailsDialog.details.nuts.label')"
             :value="
@@ -190,7 +159,6 @@
           <!-- Currency (if available) -->
           <DetailRow
             v-if="mintData.info?.currencies"
-            class="q-mb-md"
             :icon="CoinsIcon"
             :label="$t('MintDetailsDialog.details.currency.label')"
             >{{ mintData.info.currencies }}</DetailRow
@@ -199,7 +167,6 @@
           <!-- Currency Units (if available) -->
           <DetailRow
             v-if="mintUnits && mintUnits.length > 0"
-            class="q-mb-md"
             :icon="CoinsIcon"
             :label="$t('MintDetailsDialog.details.currencies.label')"
             :value="
@@ -229,7 +196,6 @@
         <!-- Mint Audit Info Section -->
         <MintAuditInfo
           v-if="settings.auditorEnabled && mintData.url"
-          class="mint-details-section"
           :mintUrl="mintData.url"
           @close="() => {}"
         />
@@ -246,13 +212,6 @@
             :label="$t('MintDetailsDialog.actions.edit.label')"
             @click="openEditMintDialog"
           />
-          <SettingsActionRow
-            :icon="CopyIcon"
-            :label="$t('MintDetailsDialog.actions.copy_mint_url.label')"
-            @click="copyText(mintData.url)"
-          >
-            <template #side><span /></template>
-          </SettingsActionRow>
           <SettingsActionRow
             :icon="StarIcon"
             :label="$t('CreateMintReview.title')"
@@ -279,8 +238,7 @@
 import RevealTransition from "src/components/ui/RevealTransition.vue";
 import TonalChip from "src/components/ui/TonalChip.vue";
 import { defineComponent } from "vue";
-import { copyToClipboard } from "quasar";
-import { notifyCopied } from "src/js/notify";
+import { displayContacts, shortenMiddle } from "src/js/mintContacts";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import QrBlock from "src/components/QrBlock.vue";
 import { useMintsStore, MintClass } from "src/stores/mints";
@@ -291,7 +249,6 @@ import MintMotdMessage from "src/components/MintMotdMessage.vue";
 import MintAuditInfo from "src/components/MintAuditInfo.vue";
 import {
   Coins as CoinsIcon,
-  Copy as CopyIcon,
   Tag as TagIcon,
   Link as LinkIcon,
   Mail as MailIcon,
@@ -302,10 +259,17 @@ import {
   Trash2 as Trash2Icon,
 } from "lucide-vue-next";
 import MintIdentityHeader from "src/components/MintIdentityHeader.vue";
-import CopyButton from "src/components/ui/CopyButton.vue";
 import DetailRow from "src/components/ui/DetailRow.vue";
 import SectionDivider from "src/components/ui/SectionDivider.vue";
 import SettingsActionRow from "src/components/ui/SettingsActionRow.vue";
+
+// Picture icons for the contact methods that have no Lucide glyph, and their proper names.
+const CONTACT_ICONS = {
+  nostr: "/nostr-icon.svg",
+  twitter: "/x-logo.svg",
+  telegram: "/telegram-icon.svg",
+};
+const CONTACT_NAMES = { nostr: "Nostr", twitter: "X", telegram: "Telegram" };
 
 export default defineComponent({
   name: "MintDetailsPage",
@@ -314,9 +278,7 @@ export default defineComponent({
     RevealTransition,
     TonalChip,
     SettingsActionRow,
-    CopyButton,
     QrCodeIcon,
-    MailIcon,
     QrBlock,
     MintIdentityHeader,
     EditMintDialog,
@@ -328,7 +290,6 @@ export default defineComponent({
   },
   setup() {
     return {
-      CopyIcon,
       PencilIcon,
       StarIcon,
       Trash2Icon,
@@ -340,10 +301,6 @@ export default defineComponent({
   },
   data: function () {
     return {
-      contactMethods: {
-        twitter: "X",
-        nostr: "Nostr",
-      },
       showQrCode: false,
       showAllNuts: false,
       nutNames: {
@@ -398,6 +355,9 @@ export default defineComponent({
       }
       return result;
     },
+    contacts() {
+      return displayContacts(this.mintData.info?.contact);
+    },
     mintUnits() {
       if (this.mintData) {
         const mintClassInstance = new MintClass(this.mintData);
@@ -412,14 +372,16 @@ export default defineComponent({
       "fetchMintInfo",
       "triggerMintInfoMotdChanged",
     ]),
-    shortenText: function (text, maxLength) {
-      if (text.length > maxLength) {
-        return text.substring(0, maxLength) + "...";
-      }
-      return text;
+    shortenMiddle,
+    contactIcon(method) {
+      return method === "email" ? MailIcon : null;
     },
-    copyText(text) {
-      copyToClipboard(text).then(() => notifyCopied());
+    contactIconSrc(method) {
+      return CONTACT_ICONS[method] || null;
+    },
+    contactLabel(method) {
+      if (method === "email") return this.$t("MintDetailsDialog.contact.email");
+      return CONTACT_NAMES[method] || method;
     },
     openEditMintDialog() {
       this.mintToEdit = Object.assign({}, this.mintData);
@@ -547,54 +509,9 @@ export default defineComponent({
   font-weight: 500;
 }
 
-/* Contact Section */
-.contact-section {
-  width: 100%;
-}
-
-.contact-item {
-  display: flex;
-  align-items: center;
-  width: 100%;
-}
-
-/* Contact rows share the detail rows' icon slot, gap and text size (app.scss .detail-*). */
-.contact-icon-container {
-  width: 24px;
-  display: flex;
-  justify-content: center;
-  margin-inline-end: 12px;
-}
-
-.contact-icon {
-  width: 20px;
-  height: 20px;
-  color: var(--app-text-muted);
-}
-
-/* Contact values read like the detail rows: regular weight on the text colour. */
-.contact-text {
-  flex: 1;
-  font-size: 15px;
-  font-weight: 400;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.copy-icon {
-  margin-inline-start: 4px;
-}
-
-/* Details and audit info are flat rows on the page, like the invoice and token details, but
-   inset so their icons and values sit on the same columns as the Actions card's rows
-   (the icons were 24px apart, council R88-R89). */
-.mint-details-section {
-  padding-block: 4px 0;
-  padding-inline: 22px 20px;
-  width: 100%;
-}
-
+/* Details, contacts and audit are flat rows on the 16px page edge; interactive rows bleed
+   their tint 12px into the gutter (DetailRow), so nothing is indented to match the Actions
+   card (owner 2026-10-29, item 34). */
 .mint-details-actions {
   margin-bottom: 32px;
 }
@@ -619,7 +536,7 @@ export default defineComponent({
 
 .nuts-expanded-section {
   width: 100%;
-  margin-bottom: 16px;
+  margin-block: 0 8px;
 }
 
 .nuts-grid {

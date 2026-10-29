@@ -22,7 +22,7 @@
 
         <AmountHeadline v-if="hasAmount">{{ amountLabel }}</AmountHeadline>
 
-        <div class="pr-table">
+        <div class="detail-table">
           <DetailRow
             action
             data-testid="pr-amount"
@@ -448,12 +448,6 @@ export default defineComponent({
 /* The QR gives up some height on short phones so the table under it stays in view. */
 .pr-body {
   --app-qr-size: clamp(200px, min(70vw, 34vh), 300px);
-}
-.pr-table {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  width: 100%;
 }
 .pr-payments {
   width: 100%;

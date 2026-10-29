@@ -1427,6 +1427,7 @@ export default {
     },
     contact: {
       title: "Contact",
+      email: "E-mail",
     },
     details: {
       title: "Détails de la mint",

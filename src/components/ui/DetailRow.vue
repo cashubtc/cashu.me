@@ -1,38 +1,76 @@
 <!-- A label/value row in quote, token, request and mint detail views: icon and muted name on
      the start edge, value on the end edge (styled by the global .detail-* rules in app.scss).
-     With `action`, the whole row is a button that changes the value: the value reads as the
-     current choice, a chevron says it opens something, and the row takes the tap. -->
+     Every row is a 44px box, 4px from the next in a .detail-table (one 48px pitch). Four kinds:
+     - static (default): a plain fact;
+     - `action`: the whole row is a button that changes the value (a chevron says it opens
+       something; `busy` and `disabled` hold it);
+     - `href`: the whole row is an external link, the value underlined and ending in the
+       ExternalLink glyph in the text colour;
+     - `copyValue`: the whole row copies that string, the value ending in a Copy glyph.
+     Interactive rows tint their own box on hover and press (never a neighbour's) and bleed
+     12px past the text, so the label and value stay on the table's edges. -->
 <template>
   <component
-    :is="action ? 'button' : 'div'"
+    :is="href ? 'a' : action || copyValue ? 'button' : 'div'"
     class="detail-item"
-    :class="{ 'detail-item--action': action }"
-    :type="action ? 'button' : undefined"
-    :aria-label="action ? actionLabel || `${label}: ${value}` : undefined"
-    @click="action && $emit('click', $event)"
+    :class="{
+      'detail-item--action': interactive,
+      'detail-item--link': !!href,
+      'detail-item--command': action && !chevron && !href && !copyValue,
+    }"
+    :href="href || undefined"
+    :target="href ? '_blank' : undefined"
+    :rel="href ? 'noopener noreferrer' : undefined"
+    :type="!href && interactive ? 'button' : undefined"
+    :aria-label="
+      !href && interactive
+        ? actionLabel || `${label}: ${value || copyValue}`
+        : undefined
+    "
+    :aria-busy="busy || undefined"
+    :aria-disabled="busy || disabled || undefined"
+    @click="onClick"
   >
     <div class="detail-label">
       <component :is="icon" v-if="icon" :size="20" class="detail-icon" />
+      <span
+        v-else-if="iconSrc"
+        class="detail-icon detail-icon--mask"
+        aria-hidden="true"
+        :style="{ '--detail-icon-src': `url(${iconSrc})` }"
+      />
       <div class="detail-name">{{ label }}</div>
     </div>
-    <component
-      :is="href && !action ? 'a' : 'div'"
+    <div
       class="detail-value"
-      :class="[valueClass, { 'detail-value--placeholder': placeholder }]"
-      :href="href && !action ? href : undefined"
-      :target="href && !action ? '_blank' : undefined"
-      @click="!action && $emit('value-click', $event)"
+      :class="[
+        valueClass,
+        {
+          'detail-value--placeholder': placeholder,
+          'detail-value--inline': interactive,
+        },
+      ]"
     >
-      <slot>{{ value }}</slot>
-      <ArrowUpRightIcon
-        v-if="href && !action"
-        :size="14"
+      <span v-if="interactive" class="detail-value__text"
+        ><slot>{{ value }}</slot></span
+      >
+      <slot v-else>{{ value }}</slot>
+      <ExternalLinkIcon
+        v-if="href"
+        :size="16"
         class="detail-value__external"
         aria-hidden="true"
       />
-    </component>
+      <component
+        :is="copied ? CheckIcon : CopyIcon"
+        v-else-if="copyValue"
+        :size="16"
+        class="detail-value__glyph"
+        aria-hidden="true"
+      />
+    </div>
     <ChevronRightIcon
-      v-if="action && chevron"
+      v-if="action && chevron && !disabled && !href && !copyValue"
       :size="18"
       class="detail-item__chevron"
       aria-hidden="true"
@@ -42,21 +80,32 @@
 
 <script lang="ts">
 import { defineComponent, type Component, type PropType } from "vue";
+import { copyToClipboard } from "quasar";
 import {
-  ArrowUpRight as ArrowUpRightIcon,
+  Check as CheckIcon,
   ChevronRight as ChevronRightIcon,
+  Copy as CopyIcon,
+  ExternalLink as ExternalLinkIcon,
 } from "lucide-vue-next";
+import { notifyCopied } from "src/js/notify";
+
+const COPIED_MS = 1500;
 
 export default defineComponent({
   name: "DetailRow",
-  components: { ArrowUpRightIcon, ChevronRightIcon },
+  components: { ChevronRightIcon, ExternalLinkIcon },
+  setup() {
+    return { CheckIcon, CopyIcon };
+  },
   props: {
-    /** An action row's chevron; off when the value slot already shows the action's glyph. */
+    /** An action row's chevron; off when the row is a retry rather than a picker. */
     chevron: { type: Boolean, default: true },
     icon: {
       type: [Object, Function] as PropType<Component>,
       default: null,
     },
+    /** An image icon (nostr, X, Telegram), drawn as a mask in the icon colour; `icon` wins. */
+    iconSrc: { type: String as PropType<string | null>, default: null },
     label: {
       type: String,
       required: true,
@@ -71,74 +120,123 @@ export default defineComponent({
       >,
       default: "",
     },
-    // When set, the value is an external link opened in a new tab.
+    /** The whole row is an external link opened in a new tab. */
     href: {
       type: String as PropType<string | null>,
       default: null,
     },
+    /** The whole row copies this string (emits `copied`). */
+    copyValue: { type: String, default: "" },
+    /** The toast after copying; defaults to "Copied". */
+    copiedMessage: { type: String, default: "" },
     /** The row is a button that changes this value (emits `click`). */
     action: { type: Boolean, default: false },
     /** The button's accessible name; defaults to "Label: value". */
     actionLabel: { type: String, default: "" },
     /** The value is an unset default ("Any amount"): muted, like a placeholder. */
     placeholder: { type: Boolean, default: false },
+    /** The action is running (the caller shows BusyLabel in the slot); taps are ignored. */
+    busy: { type: Boolean, default: false },
+    /** The action is unavailable: still focusable and announced, but taps are ignored. */
+    disabled: { type: Boolean, default: false },
   },
-  emits: ["value-click", "click"],
+  emits: ["click", "copied"],
+  data() {
+    return {
+      copied: false,
+      timer: undefined as ReturnType<typeof setTimeout> | undefined,
+    };
+  },
+  computed: {
+    interactive(): boolean {
+      return Boolean(this.href || this.copyValue || this.action);
+    },
+  },
+  beforeUnmount() {
+    clearTimeout(this.timer);
+  },
+  methods: {
+    onClick(event: MouseEvent) {
+      if (!this.interactive) return;
+      if (this.busy || this.disabled) {
+        event.preventDefault();
+        return;
+      }
+      if (this.href) return;
+      if (this.copyValue) {
+        this.copy();
+        return;
+      }
+      this.$emit("click", event);
+    },
+    async copy() {
+      try {
+        await copyToClipboard(this.copyValue);
+      } catch (e) {
+        console.error("Copy failed", e);
+        return;
+      }
+      notifyCopied(this.copiedMessage || undefined);
+      this.copied = true;
+      clearTimeout(this.timer);
+      this.timer = setTimeout(() => {
+        this.copied = false;
+      }, COPIED_MS);
+      this.$emit("copied", this.copyValue);
+    },
+  },
 });
 </script>
 
 <style scoped>
-/* External links: no underline, a trailing link glyph, like the settings link rows. */
-a.detail-value {
-  align-items: center;
-  display: inline-flex;
-  gap: 4px;
-  text-decoration: none;
-}
-.detail-value__external {
-  color: var(--app-text-subtle);
-  flex-shrink: 0;
-  margin-inline-start: 2px;
-}
-/* An editable row: the same 32px row in the flow (so mixed tables keep one rhythm), made a
-   button whose 48px hit area and tint reach 8px above and below and past the text by the
-   row's own inset, so the label and value stay on the table's edges. */
+/* An interactive row: a button or link in the same 44px box as a plain row, reaching 12px past
+   the text on both sides, so the label and value stay on the table's edges. */
 .detail-item--action {
   background: none;
   border: 0;
   color: inherit;
   cursor: pointer;
   font: inherit;
-  margin-inline: -12px;
-  /* A 44px target (32px rows were below the minimum, council R84-R86). */
-  min-height: 44px;
   isolation: isolate;
-  padding: 0 12px;
+  margin-inline: -12px;
+  padding: 4px 12px;
   position: relative;
   text-align: start;
+  text-decoration: none;
   width: calc(100% + 24px);
 }
+/* The tint is the row's own box: the 4px gap stays clear between two rows' tints. */
 .detail-item--action::before {
   border-radius: var(--app-radius-md);
   content: "";
-  inset: -2px 0;
+  inset: 0;
   position: absolute;
   z-index: -1;
   transition: background 0.15s ease;
 }
 @media (hover: hover) {
-  .detail-item--action:hover::before {
+  .detail-item--action:not([aria-disabled="true"]):hover::before {
     background: var(--app-tint);
   }
 }
-.detail-item--action:active::before {
-  background: var(--app-tint);
+.detail-item--action:not([aria-disabled="true"]):active::before {
+  background: var(--app-tint-strong);
 }
 .detail-item--action:focus-visible {
   outline: none;
 }
 .detail-item--action:focus-visible::before {
   box-shadow: var(--app-focus-ring);
+}
+.detail-item--action[aria-busy="true"] {
+  cursor: progress;
+}
+.detail-item--action[aria-disabled="true"]:not([aria-busy="true"]) {
+  cursor: default;
+}
+.detail-item--action[aria-disabled="true"]:not([aria-busy="true"])
+  .detail-value {
+  color: var(--app-text-subtle);
 }
 .detail-item--action .detail-value {
   flex: 1;
@@ -147,8 +245,40 @@ a.detail-value {
   max-width: none;
   min-width: 0;
 }
+/* A command row (a retry, no chevron): its one word never truncates; a long label wraps and
+   the row grows instead. */
+.detail-item--command .detail-label {
+  min-width: 0;
+}
+.detail-item--command .detail-value {
+  flex: 0 0 auto;
+}
+/* Link rows: the value is underlined, and the glyph takes the value's own colour. */
+.detail-item--link .detail-value__text {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.detail-value__external {
+  color: currentColor;
+  flex-shrink: 0;
+}
+/* Copy reads as secondary to the value it copies. */
+.detail-value__glyph {
+  color: var(--app-text-subtle);
+  flex-shrink: 0;
+}
 .detail-value--placeholder {
   color: var(--app-text-muted);
+}
+/* A picture icon takes the icon colour of every other row (the SVGs are a fixed grey). */
+.detail-icon--mask {
+  background: currentColor;
+  display: inline-block;
+  height: 20px;
+  width: 20px;
+  -webkit-mask: var(--detail-icon-src) center / contain no-repeat content-box;
+  mask: var(--detail-icon-src) center / contain no-repeat content-box;
 }
 /* The chevron's ink sits 6px inside its 18px box; its edge lands on the table's 12px inset. */
 .detail-item__chevron {

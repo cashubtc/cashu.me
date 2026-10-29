@@ -1419,6 +1419,7 @@ export default {
     },
     contact: {
       title: "Επαφή",
+      email: "Email",
     },
     details: {
       title: "Λεπτομέρειες mint",

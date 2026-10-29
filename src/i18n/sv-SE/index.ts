@@ -1408,6 +1408,7 @@ export default {
     },
     contact: {
       title: "Kontakt",
+      email: "E-post",
     },
     details: {
       title: "Mintdetaljer",

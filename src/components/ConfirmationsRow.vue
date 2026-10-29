@@ -5,7 +5,7 @@
   <DetailRow
     :icon="LinkIcon"
     :label="$t('QuoteInformation.confirmations')"
-    value-class="confirmations-row__value"
+    value-class="detail-value--inline"
   >
     <PendingDots v-if="loading && !metadata" size="16px" />
     <bdi v-else-if="metadata" dir="ltr">{{ countDisplay }}</bdi>
@@ -43,12 +43,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style scoped>
-/* The value element belongs to DetailRow, so it is reached through this row's root. */
-:deep(.confirmations-row__value) {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
-</style>

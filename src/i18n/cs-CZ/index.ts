@@ -1487,6 +1487,7 @@ export default {
     },
     contact: {
       title: "Kontakt",
+      email: "E-mail",
     },
     details: {
       title: "Detaily mintu",

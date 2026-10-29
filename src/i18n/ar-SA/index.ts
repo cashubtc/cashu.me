@@ -1392,6 +1392,7 @@ export default {
     },
     contact: {
       title: "جهة الاتصال",
+      email: "البريد الإلكتروني",
     },
     details: {
       title: "تفاصيل المِنْت",

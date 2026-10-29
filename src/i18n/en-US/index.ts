@@ -1464,6 +1464,7 @@ export default {
     },
     contact: {
       title: "Contact",
+      email: "Email",
     },
     details: {
       title: "Mint details",

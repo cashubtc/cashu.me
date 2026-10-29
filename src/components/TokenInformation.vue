@@ -6,11 +6,10 @@
     </div>
 
     <!-- Token Details Section -->
-    <div class="token-details-section q-mt-md q-mb-lg">
+    <div class="token-details-section detail-table q-mt-md q-mb-lg">
       <!-- Fee (if applicable) -->
       <DetailRow
         v-if="receiveFee > 0 && !hideFee"
-        class="q-mb-md"
         :icon="ReceiptTextIcon"
         :label="$t('TokenInformation.fee')"
         :value="formatCurrency(receiveFee, tokenUnit, true)"
@@ -19,7 +18,6 @@
       <!-- Unit -->
       <DetailRow
         v-if="!hideUnit && tokenUnit !== 'sat'"
-        class="q-mb-md"
         :icon="CircleDollarSignIcon"
         :label="$t('TokenInformation.unit')"
         :value="tokenUnit === 'sat' ? 'sat' : tokenUnit.toUpperCase()"
@@ -28,7 +26,6 @@
       <!-- Fiat -->
       <DetailRow
         v-if="showFiat && !hideFiat"
-        class="q-mb-md"
         :icon="BanknoteIcon"
         :label="$t('TokenInformation.fiat')"
         :value="formatCurrency(fiatAmount, bitcoinPriceCurrency, true)"
@@ -37,7 +34,6 @@
       <!-- P2PK Lock Status (if locked) -->
       <DetailRow
         v-if="isLocked(proofsToShow) && !hideP2PK"
-        class="q-mb-md"
         :icon="LockIcon"
         :label="$t('TokenInformation.p2pk')"
         :value="
@@ -55,18 +51,17 @@
       <!-- Mint URL -->
       <DetailRow
         v-if="!hideMint"
-        class="q-mb-md"
         :icon="LandmarkIcon"
         :label="$t('TokenInformation.mint')"
+        value-class="detail-value--inline"
       >
         {{ tokenMintUrl }}
-        <PendingDots v-if="addMintBlocking" class="q-ml-xs" />
+        <PendingDots v-if="addMintBlocking" />
       </DetailRow>
 
       <!-- Memo (if available) -->
       <DetailRow
         v-if="displayMemo && !hideMemo"
-        class="q-mb-md"
         :icon="MessageCircleIcon"
         :label="$t('TokenInformation.memo')"
         :value="displayMemo"

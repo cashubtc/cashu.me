@@ -1386,6 +1386,7 @@ export default {
     },
     contact: {
       title: "Contatto",
+      email: "Email",
     },
     details: {
       title: "Dettagli mint",

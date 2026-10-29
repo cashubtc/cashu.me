@@ -979,49 +979,70 @@
         </div>
       </DsEntry>
       <DsEntry id="detail-row">
-        <DetailRow
-          v-for="d in details"
-          :key="d.name"
-          class="q-mb-md"
-          :icon="d.icon"
-          :label="d.name"
-          :value="d.value"
-        />
-        <DetailRow
-          :icon="GlobeIcon"
-          label="Explorer"
-          value="mempool.space"
-          href="https://mempool.space"
-        />
-        <!-- Tappable rows (the payment request's settings): the value runs to a chevron. -->
-        <DetailRow
-          class="q-mt-md"
-          :icon="CoinsIcon"
-          label="Amount"
-          value="Any amount"
-          placeholder
-          action
-          @click="toast('info')"
-        />
-        <DetailRow
-          :icon="LandmarkIcon"
-          label="Mint"
-          value="mint.example.com"
-          action
-          @click="toast('info')"
-        />
-        <!-- A retry row (Mint details' unavailable audit info): its glyph, no chevron. -->
-        <DetailRow
-          class="q-mt-md"
-          :icon="CoinsIcon"
-          label="Audit info is unavailable right now."
-          action
-          action-label="Refresh"
-          :chevron="false"
-          @click="toast('info')"
-        >
-          <component :is="RefreshCwIcon" :size="18" aria-hidden="true" />
-        </DetailRow>
+        <!-- 44px rows 4px apart in a .detail-table. Static facts, then the interactive kinds,
+             each tinting only its own box: action (placeholder, set, disabled), link, copy,
+             and the audit retry idle and busy. -->
+        <div class="detail-table">
+          <DetailRow
+            v-for="d in details"
+            :key="d.name"
+            :icon="d.icon"
+            :label="d.name"
+            :value="d.value"
+          />
+          <DetailRow
+            :icon="CoinsIcon"
+            label="Amount"
+            value="Any amount"
+            placeholder
+            action
+            @click="toast('info')"
+          />
+          <DetailRow
+            :icon="LandmarkIcon"
+            label="Mint"
+            value="mint.example.com"
+            action
+            @click="toast('info')"
+          />
+          <DetailRow
+            :icon="CoinsIcon"
+            label="Unit"
+            value="sat"
+            action
+            disabled
+          />
+          <DetailRow
+            :icon="GlobeIcon"
+            label="Explorer"
+            value="mempool.space"
+            href="https://mempool.space"
+          />
+          <DetailRow
+            icon-src="/nostr-icon.svg"
+            label="Nostr"
+            value="npub1qqqq…xyz789"
+            copy-value="npub1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqxyz789"
+          />
+          <DetailRow
+            :icon="InfoIcon"
+            label="Audit info is unavailable right now."
+            value="Refresh"
+            action
+            action-label="Refresh"
+            :chevron="false"
+            @click="toast('info')"
+          />
+          <DetailRow
+            :icon="InfoIcon"
+            label="Audit info is unavailable right now."
+            action
+            busy
+            action-label="Refresh"
+            :chevron="false"
+            ><BusyLabel>Refresh</BusyLabel></DetailRow
+          >
+        </div>
       </DsEntry>
       <DsEntry id="meta-line">
         <!-- Two and three parts, an empty part skipped, and Arabic beside Latin parts. -->
@@ -1431,21 +1452,25 @@
       <DsEntry id="onchain-status">
         <!-- An on-chain receive's one Status row, in order: no deposit yet, confirming,
              confirmed but not yet credited. Paid is the receipt's hero. -->
-        <DetailRow
-          v-for="s in onchainStates"
-          :key="s"
-          class="q-mb-md"
-          :icon="ActivityIcon"
-          label="Status"
-        >
-          <PendingDots size="16px" class="q-mr-sm" />{{ s }}
-        </DetailRow>
+        <div class="detail-table q-mb-md">
+          <DetailRow
+            v-for="s in onchainStates"
+            :key="s"
+            :icon="ActivityIcon"
+            label="Status"
+            value-class="detail-value--inline"
+          >
+            <PendingDots size="16px" />{{ s }}
+          </DetailRow>
+        </div>
         <PaymentStatus state="paid" label="Paid" />
       </DsEntry>
       <DsEntry id="confirmations-row">
-        <ConfirmationsRow :metadata="null" loading class="q-mb-md" />
-        <ConfirmationsRow :metadata="chainPending" class="q-mb-md" />
-        <ConfirmationsRow :metadata="chainConfirmed" />
+        <div class="detail-table">
+          <ConfirmationsRow :metadata="null" loading />
+          <ConfirmationsRow :metadata="chainPending" />
+          <ConfirmationsRow :metadata="chainConfirmed" />
+        </div>
       </DsEntry>
       <DsEntry id="pwa-prompt">
         <!-- The prompt is fixed to the viewport; each transformed frame contains one. -->
@@ -1667,6 +1692,7 @@ import {
   Code as CodeIcon,
   Globe as GlobeIcon,
   History as HistoryIcon,
+  Info as InfoIcon,
   KeyRound as KeyRoundIcon,
   Landmark as LandmarkIcon,
   Lock as LockIcon,
@@ -1793,6 +1819,7 @@ export default defineComponent({
       HistoryIcon: markRaw(HistoryIcon),
       KeyRoundIcon: markRaw(KeyRoundIcon),
       LandmarkIcon: markRaw(LandmarkIcon),
+      InfoIcon: markRaw(InfoIcon),
       SearchIcon: markRaw(SearchIcon),
       ZapIcon: markRaw(ZapIcon),
       XIcon: markRaw(XIcon),
