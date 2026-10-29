@@ -1,10 +1,7 @@
 <template>
   <FlowDialog v-model="showReceiveTokens">
     <!-- full-screen receive flow -->
-    <div
-      class="column fit overflow-hidden receive-fullscreen"
-      :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
-    >
+    <div class="column fit overflow-hidden receive-fullscreen">
       <!-- Header -->
       <FullscreenDialogHeader
         :title="$t('ReceiveTokenDialog.title')"

@@ -1242,7 +1242,7 @@
           Open a full-screen flow
         </q-btn>
         <FlowDialog v-model="flowOpen">
-          <div class="display-token-fullscreen bg-dark">
+          <div class="display-token-fullscreen">
             <FullscreenDialogHeader title="Lightning invoice" />
             <div class="content-area q-px-md">
               <QrBlock value="lnbc1demo" />
@@ -1381,7 +1381,7 @@
       </DsEntry>
       <DsEntry id="payment-request">
         <!-- The real request body, on a fixed demo request (no store state). -->
-        <div class="ds-frame ds-frame--screen">
+        <div class="flow-surface ds-frame ds-frame--screen">
           <PaymentRequestView :request="demoRequest" />
         </div>
       </DsEntry>
@@ -1474,36 +1474,81 @@
         </div>
       </DsEntry>
       <DsEntry id="flow-footer">
+        <!-- Each sample on the flow surface, as in a real flow: one colour, no band. -->
         <div class="column q-gutter-y-md">
-          <FlowFooter>
-            <q-btn class="full-width" unelevated color="primary" rounded
-              >Copy invoice</q-btn
-            >
-          </FlowFooter>
-          <FlowFooter>
-            <q-btn class="full-width" unelevated color="primary" rounded disable
-              >Send</q-btn
-            >
-          </FlowFooter>
-          <FlowFooter>
-            <div class="row no-wrap" style="gap: 10px">
-              <q-btn class="col" outline rounded>Share</q-btn>
-              <q-btn class="col" unelevated rounded color="primary">Copy</q-btn>
-            </div>
-          </FlowFooter>
-          <FlowFooter>
-            <q-btn class="full-width q-mb-sm" flat rounded>Later</q-btn>
-            <q-btn class="full-width" unelevated rounded color="primary"
-              >Continue</q-btn
-            >
-          </FlowFooter>
-          <FlowFooter>
-            <q-btn class="full-width" unelevated rounded color="primary" loading
-              >Pay<template #loading
-                ><BusyLabel>Paying</BusyLabel></template
-              ></q-btn
-            >
-          </FlowFooter>
+          <div class="flow-surface ds-frame">
+            <FlowFooter>
+              <q-btn class="full-width" unelevated color="primary" rounded
+                >Copy invoice</q-btn
+              >
+            </FlowFooter>
+          </div>
+          <div class="flow-surface ds-frame">
+            <FlowFooter>
+              <q-btn
+                class="full-width"
+                unelevated
+                color="primary"
+                rounded
+                disable
+                >Send</q-btn
+              >
+            </FlowFooter>
+          </div>
+          <div class="flow-surface ds-frame">
+            <FlowFooter>
+              <q-btn
+                class="full-width"
+                unelevated
+                rounded
+                color="primary"
+                loading
+                >Pay<template #loading
+                  ><BusyLabel>Paying</BusyLabel></template
+                ></q-btn
+              >
+            </FlowFooter>
+          </div>
+          <div class="flow-surface ds-frame">
+            <FlowFooter>
+              <!-- The payment request's pair: both full-width halves, both caps. -->
+              <div class="row no-wrap" style="gap: 10px">
+                <q-btn class="full-width" outline rounded>Share</q-btn>
+                <q-btn class="full-width" unelevated rounded color="primary"
+                  >Copy</q-btn
+                >
+              </div>
+            </FlowFooter>
+          </div>
+          <div class="flow-surface ds-frame">
+            <FlowFooter>
+              <!-- An amount step opened from a preview: back chevron, then the action. -->
+              <div class="row no-wrap items-center" style="gap: 8px">
+                <q-btn flat round aria-label="Back">
+                  <component
+                    :is="ChevronLeftIcon"
+                    :size="24"
+                    class="rtl-flip"
+                  />
+                </q-btn>
+                <q-btn class="full-width" unelevated rounded color="primary"
+                  >Create</q-btn
+                >
+              </div>
+            </FlowFooter>
+          </div>
+          <div class="flow-surface ds-frame">
+            <FlowFooter>
+              <!-- Receive ecash: later, swap, then receive, stacked. -->
+              <q-btn class="full-width q-mb-sm" flat rounded>Later</q-btn>
+              <q-btn class="full-width q-mb-sm" outline rounded color="primary"
+                >Swap</q-btn
+              >
+              <q-btn class="full-width" unelevated rounded color="primary"
+                >Receive</q-btn
+              >
+            </FlowFooter>
+          </div>
         </div>
       </DsEntry>
     </div>

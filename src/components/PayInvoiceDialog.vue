@@ -4,10 +4,7 @@
     @hide="closeParseDialog"
     v-if="!camera.show"
   >
-    <div
-      class="column fit overflow-hidden pay-fullscreen"
-      :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
-    >
+    <div class="column fit overflow-hidden pay-fullscreen">
       <!-- Header with centered title and unit toggle on right -->
       <FullscreenDialogHeader @close="closeDialog">
         <template #title>

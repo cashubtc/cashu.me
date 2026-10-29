@@ -221,25 +221,13 @@ body.body--light {
 }
 
 // Fields on sheets and dialogs: the raised fill is lighter (dark) or greyer (light), so the
-// edge needs more weight to keep 3:1 (flamingo sheets need 43%, light sheets 49%). Desktop
-// flows still sit on the raised colour until they take the page background (item 28).
-body.body--dark
-  :is(
-    .q-card,
-    .bottom-sheet,
-    .q-menu,
-    .q-dialog__inner--maximized .display-token-fullscreen
-  ) {
+// edge needs more weight to keep 3:1 (flamingo sheets need 43%, light sheets 49%). Flows are
+// pages (.flow-surface), so they keep the page edge.
+body.body--dark :is(.q-card:not(.flow-surface), .bottom-sheet, .q-menu) {
   --app-field-edge: color-mix(in srgb, var(--app-text) 43%, transparent);
   --app-field-edge-hover: color-mix(in srgb, var(--app-text) 64%, transparent);
 }
-body.body--light
-  :is(
-    .q-card,
-    .bottom-sheet,
-    .q-menu,
-    .q-dialog__inner--maximized .display-token-fullscreen
-  ) {
+body.body--light :is(.q-card:not(.flow-surface), .bottom-sheet, .q-menu) {
   --app-field-edge: color-mix(in srgb, var(--app-text) 49%, transparent);
 }
 // Mono's selection ring: a white ring on black glared at 75%; 56% still clears 3:1.
@@ -301,6 +289,13 @@ body[data-theme] .bg-dark {
 body[data-theme] .q-card--dark,
 body[data-theme] .q-stepper--dark {
   background: var(--app-raised) !important;
+}
+// A full-screen flow is a page, not a raised sheet: its card, content and FlowFooter all
+// paint one token, the page surface, in every theme and mode (owner 2026-10-29, item 28).
+body[data-theme] .flow-surface {
+  --flow-surface: var(--app-surface);
+  background: var(--flow-surface) !important;
+  color: var(--app-text);
 }
 body.body--light .bg-dark {
   color: var(--app-text);

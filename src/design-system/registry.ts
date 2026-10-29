@@ -676,7 +676,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/components/ui/FlowDialog.vue",
     usage: { tag: "FlowDialog" },
     example: `<FlowDialog v-model="show">\n  <FullscreenDialogHeader :title="…" />\n  …\n  <FlowFooter>…</FlowFooter>\n</FlowDialog>`,
-    note: "Pay, receive, send, invoice, lock key and payment request: full screen on phones, the centred 560px dialog on desktop. Closes on Escape, not on a backdrop tap.",
+    note: "Pay, receive, send, invoice, lock key and payment request: a full-window page on every viewport, on the page surface; content and footer keep the app column. Closes on Escape, not on a backdrop tap.",
   },
   {
     id: "bottom-sheet",
@@ -808,7 +808,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/components/ui/FlowFooter.vue",
     usage: { tag: "FlowFooter" },
     example: `<FlowFooter>\n  <q-btn class="full-width" unelevated rounded color="primary">…</q-btn>\n</FlowFooter>`,
-    note: "The main action pinned under a full-screen flow, in the app column. The above slot holds the keypad on amount steps.",
+    note: "The main action under a full-screen flow, in the app column, on the flow's surface (--flow-surface), never a second colour; buttons use the caps standard, with no size or icon. Pinned on keypad flows; on desktop QR and receipt screens it follows the details. The above slot holds the keypad on amount steps.",
   },
 ];
 

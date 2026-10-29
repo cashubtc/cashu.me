@@ -11,7 +11,7 @@
       :loading="isLoading"
       @click="clickPaymentRequest"
     >
-      <SendIcon :size="20" class="q-mr-sm" />
+      <SendIcon v-if="!hideIcon" :size="20" class="q-mr-sm" />
       {{ resolvedLabel }}
       <template #loading
         ><BusyLabel>{{ resolvedLabel }}</BusyLabel></template
@@ -82,6 +82,11 @@ export default defineComponent({
       default: true,
     },
     buttonUnelevated: {
+      type: Boolean,
+      default: false,
+    },
+    // FlowFooter actions are text only (one caps standard), so the footer hides the glyph.
+    hideIcon: {
       type: Boolean,
       default: false,
     },

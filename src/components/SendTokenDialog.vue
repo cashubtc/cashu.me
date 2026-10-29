@@ -4,7 +4,6 @@
     <div
       v-if="!sendData.tokens"
       class="column fit overflow-hidden send-fullscreen"
-      :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
     >
       <!-- Header -->
       <FullscreenDialogHeader :title="$t('SendTokenDialog.title')" balanced>
@@ -139,6 +138,7 @@
           :button-unelevated="true"
           button-color="primary"
           :button-class="[]"
+          hide-icon
           :prepare-token="preparePaymentRequestTokens"
           @success="handlePaymentRequestSuccess"
         />

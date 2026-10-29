@@ -64,6 +64,8 @@ describe("standard elements", () => {
     ["ui/MintCardAction.vue", /^mint-card-add(__icon)?$/],
     ["ui/TonalChip.vue", /^(tonal-chip(__icon)?|qr-control-chip)$/],
     ["ui/FlowFooter.vue", /^(bottom-panel|flow-footer__(bar|col))$/],
+    // The flow surface (base.scss) is FlowDialog's card; no page paints it again.
+    ["ui/FlowDialog.vue", /^flow-surface$/],
     [
       "ui/SectionDivider.vue",
       /^(section-divider(-block|-block--start|--start|__caption)?|divider-(line|text))$/,
@@ -93,7 +95,7 @@ describe("standard elements", () => {
     ]);
   });
 
-  // Full-screen flows are FlowDialog (one shell: fade, Escape closes, the desktop dialog).
+  // Full-screen flows are FlowDialog (one shell: fade, Escape closes, full window).
   it("full-screen flows use FlowDialog", () => {
     expect(
       offenders((text) => /<q-dialog\b[^>]*\smaximized[\s>]/.test(text)).filter(
@@ -399,5 +401,39 @@ describe("standard elements", () => {
       /q-notifications__list--bottom|q-notification--bottom-/
     );
     expect(app).not.toMatch(/\.q-notification:not\(:last-child\)/);
+  });
+
+  it("desktop flows fill the window (owner 2026-10-29, item 28)", () => {
+    const app = readFileSync(join(SRC, "css/app.scss"), "utf8");
+    expect(app).not.toMatch(
+      /\.q-dialog__inner--maximized\s*>\s*\.q-card\s*\{[^}]*\b(max-)?width\s*:/
+    );
+    expect(app).not.toMatch(
+      /\.q-dialog__inner--maximized\s*\{[^}]*align-items:\s*center/
+    );
+  });
+
+  it("flows paint one surface", () => {
+    expect(offenders((t) => /'bg-dark'\s*:\s*'bg-white'/.test(t))).toEqual([]);
+    expect(
+      readFileSync(join(SRC, "components/ui/FlowDialog.vue"), "utf8")
+    ).toContain("flow-surface");
+    const app = readFileSync(join(SRC, "css/app.scss"), "utf8");
+    const panel = app.match(/\n\.bottom-panel\s*\{[^}]*\}/)?.[0] ?? "";
+    expect(panel).toContain("var(--flow-surface");
+  });
+
+  it("FlowFooter buttons use the caps standard", () => {
+    const blocks = vueFiles.flatMap(({ file, text }) =>
+      [...text.matchAll(/<FlowFooter[\s\S]*?<\/FlowFooter>/g)].map(
+        ([block]) => ({ file, block })
+      )
+    );
+    expect(blocks.length).toBeGreaterThan(0);
+    expect(
+      blocks
+        .filter(({ block }) => /size="lg"|button-size=|no-caps/.test(block))
+        .map(({ file }) => file)
+    ).toEqual([]);
   });
 });

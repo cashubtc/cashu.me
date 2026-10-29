@@ -1,10 +1,7 @@
 <template>
   <FlowDialog v-model="showP2PKDialog">
     <template v-if="p2pkData.publicKey">
-      <div
-        :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
-        class="display-token-fullscreen"
-      >
+      <div class="display-token-fullscreen">
         <!-- Header -->
         <FullscreenDialogHeader :title="$t('P2PKDialog.p2pk.caption')" />
 

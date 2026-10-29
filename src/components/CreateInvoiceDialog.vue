@@ -1,10 +1,7 @@
 <template>
   <FlowDialog v-model="showCreateInvoiceDialog">
     <!-- enter invoice amount (full-screen) -->
-    <div
-      class="column fit overflow-hidden send-fullscreen"
-      :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
-    >
+    <div class="column fit overflow-hidden send-fullscreen">
       <!-- Header -->
       <FullscreenDialogHeader
         :title="

@@ -1,10 +1,7 @@
 <template>
   <FlowDialog v-model="showPRDialog">
     <template v-if="showPRKData">
-      <div
-        :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
-        class="display-token-fullscreen"
-      >
+      <div class="display-token-fullscreen">
         <!-- Header: close, title and "New request" (a fresh, open request). -->
         <FullscreenDialogHeader
           :title="$t('PaymentRequestDialog.payment_request.caption')"

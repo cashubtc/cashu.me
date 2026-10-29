@@ -1,7 +1,8 @@
 <!-- A full-screen flow (pay, receive, send, invoice, lock key, payment request): a maximized
-     dialog that fades in, closes on Escape but not on a backdrop tap, and holds one card. On
-     desktop app.scss draws it as the centred 560px dialog over the dimmed wallet. Other
-     q-dialog attributes and listeners (@hide) pass through. -->
+     dialog that fades in, closes on Escape but not on a backdrop tap, and holds one card on
+     the flow surface (the page colour, base.scss). Full window on every viewport; on desktop
+     the content keeps the app column. Other q-dialog attributes and listeners (@hide) pass
+     through. -->
 <template>
   <q-dialog
     v-bind="$attrs"
@@ -13,7 +14,7 @@
     @update:model-value="$emit('update:modelValue', $event)"
     @keydown.esc="$emit('update:modelValue', false)"
   >
-    <q-card class="q-pa-none q-pt-none qcard">
+    <q-card class="q-pa-none q-pt-none qcard flow-surface">
       <slot />
     </q-card>
   </q-dialog>

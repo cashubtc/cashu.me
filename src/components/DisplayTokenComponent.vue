@@ -1,8 +1,5 @@
 <template>
-  <div
-    :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
-    class="display-token-fullscreen"
-  >
+  <div class="display-token-fullscreen">
     <!-- Header -->
     <FullscreenDialogHeader @close="closeCardScanner">
       <template #title>
