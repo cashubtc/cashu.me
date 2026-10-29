@@ -171,14 +171,14 @@ body {
   // Mixed from the text ink, so it is the same subtle step in every theme's own hue, on the
   // page and on sheets alike (no raised-surface overrides).
   --app-field-edge-focus: var(--app-accent);
-  --app-card-edge-active: var(--app-field-edge-hover);
+  --app-card-edge-active: var(--app-field-edge);
 }
 
 // Surfaces ("Tonal"): cards and
 // settings groups are borderless neutral fills; secondary buttons are tonal fills; fields, the mint picker and
 // segmented controls keep a quiet edge so they still read as controls; a selected card or row
-// is a stronger fill with the control edge's hover step (same width as at rest) beside its
-// check or checkbox, so a selection reads in the same family as every control edge.
+// is a stronger fill with the same quiet control edge beside its check or checkbox, so a
+// selection reads in the same family as every control edge.
 // Light mode's control edge matches dark mode's contrast.
 body.body--dark {
   --app-card-edge: transparent;

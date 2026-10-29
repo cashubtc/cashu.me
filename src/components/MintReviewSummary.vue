@@ -17,9 +17,9 @@
         {{ $t("MintSettings.reviews_text", count) }}
       </template>
       <template v-else>{{ fallbackLabel }}</template>
-      <!-- Only a score has reviews to open; "No reviews yet" carries no chevron. -->
+      <!-- Both forms open the ratings page ("See reviews" links there too), so both carry the
+           chevron, and every card's chevron sits under the menu dots. -->
       <ChevronRightIcon
-        v-if="average !== null"
         :size="16"
         class="mint-review__chevron"
         aria-hidden="true"
@@ -63,8 +63,9 @@ export default defineComponent({
 .mint-review__chevron {
   color: var(--app-text-muted);
   flex-shrink: 0;
-  /* The 16px chevron's ink sits 6px inside its box: pull it onto the card's 16px guideline,
-     under the menu dots. (It mirrors in rtl through the global chevron rule.) */
-  margin-inline-end: -6px;
+  /* Centre the chevron's ink on the menu dots above it (owner 2026-10-29c): the dots' ink is
+     the centre of their 20px glyph, the chevron's sits 2px past the centre of its 16px box.
+     (It mirrors in rtl through the global chevron rule.) */
+  margin-inline-end: -2px;
 }
 </style>

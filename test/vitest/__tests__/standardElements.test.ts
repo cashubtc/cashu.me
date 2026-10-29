@@ -740,9 +740,9 @@ describe("standard elements", () => {
       expect(pct).toBeLessThanOrEqual(15);
     }
     expect(base).toMatch(/--app-field-edge-focus: var\(--app-accent\)/);
-    expect(base).toMatch(
-      /--app-card-edge-active: var\(--app-field-edge-hover\)/
-    );
+    // Selected cards and rows use the same quiet edge as every control (owner 2026-10-29c);
+    // the stronger fill and the check carry the selection.
+    expect(base).toMatch(/--app-card-edge-active: var\(--app-field-edge\)/);
     expect(base.match(/--app-card-edge-active:/g)).toHaveLength(1);
     expect(app).toMatch(
       /q-field--focused \.q-field__control:after \{[^}]*--app-field-edge-focus/

@@ -1739,8 +1739,9 @@ body .q-notification {
   --tone: var(--app-text-muted);
   align-items: center;
   background: var(--app-raised) !important;
-  // A hairline in every mode: on the charcoal page the raised fill alone barely separated.
-  border: 1px solid var(--app-border);
+  // The same quiet edge as every control (owner 2026-10-29c): on the charcoal page the raised
+  // fill alone barely separated.
+  border: 1px solid var(--app-field-edge);
   border-radius: var(--app-radius-xl);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
   color: var(--app-text) !important;
