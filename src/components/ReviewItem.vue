@@ -73,19 +73,19 @@
         {{ $t("MintRatings.no_rating") }}
       </div>
 
-      <!-- Two comment lines, as most loaded reviews have, so rows don't grow when text lands. -->
-      <div v-if="skeleton" class="review-comment column" style="gap: 6px">
-        <q-skeleton
-          type="rect"
-          :width="skeletonLines > 1 ? '92%' : '72%'"
-          height="14px"
-        />
-        <q-skeleton
-          v-if="skeletonLines > 1"
-          type="rect"
-          width="64%"
-          height="14px"
-        />
+      <!-- Each placeholder bar sits in a full comment line box (15px at 1.5), so a one- or
+           two-line skeleton is exactly as tall as the review that replaces it (council R91). -->
+      <div v-if="skeleton" class="review-comment">
+        <div class="review-skeleton-line">
+          <q-skeleton
+            type="rect"
+            :width="skeletonLines > 1 ? '92%' : '72%'"
+            height="14px"
+          />
+        </div>
+        <div v-if="skeletonLines > 1" class="review-skeleton-line">
+          <q-skeleton type="rect" width="64%" height="14px" />
+        </div>
       </div>
       <div v-else-if="comment" class="review-comment" dir="auto">
         {{ comment }}
@@ -217,5 +217,10 @@ export default defineComponent({
   margin-top: 8px;
   text-align: start;
   white-space: pre-wrap;
+}
+.review-skeleton-line {
+  align-items: center;
+  display: flex;
+  height: 1.5em;
 }
 </style>

@@ -1628,10 +1628,15 @@ body.body--light .mint-card.mint-card--active {
 /* A mint card's labelled action (MintCardAction: Discover's Add, Restore's Restore): a
    compact 36px text button (outlined pills dominated a list of five, council R77). */
 // Shaped like the "+ Add" text it stands in for: a short text bar, not a filled pill.
+// The loaded Add pill's box (44px tall, about 72px wide, the same offsets), not a text bar,
+// so the action reads the same before and after results arrive (council R91).
 .mint-card__action-skeleton {
+  border-radius: var(--app-radius-pill);
   flex: none;
-  margin-block-start: 4px;
-  margin-inline-end: 4px;
+  height: 44px;
+  margin-block-start: -6px;
+  margin-inline-end: -4px;
+  width: 72px;
 }
 // A tonal pill, so Add reads as a button beside the card's review link (council R88-R89).
 .mint-card-add {

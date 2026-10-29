@@ -89,7 +89,7 @@
           v-for="n in 3"
           :key="n"
           skeleton
-          :skeleton-lines="n === 2 ? 1 : 2"
+          :skeleton-lines="n === 2 ? 2 : 1"
         />
       </div>
       <div v-else class="column">
