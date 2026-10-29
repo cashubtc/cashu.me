@@ -97,3 +97,65 @@ test("the seed phrase is an outlined field, masked until Show", async ({
   expect(edge).toBe("solid");
   await expect(page.getByTestId("onboarding-next")).toBeDisabled();
 });
+
+// Owner 2026-10-29b, item 6: onboarding scrolls the window, never a box inside it, so on a
+// wide screen the scrollbar and the wheel area are the window's (no 640px inner scroller).
+test("welcome steps scroll the window, with no nested scroller", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 560 });
+  const wallet = new WalletPage(page);
+  await wallet.goto();
+  await expect(page.getByTestId("onboarding-start")).toBeVisible();
+
+  const scrollers = () =>
+    page.evaluate(() => {
+      const se = document.scrollingElement!;
+      const nested = [...document.querySelectorAll("body *")]
+        .filter((e) => {
+          // Text areas and menus may scroll themselves; nothing else may.
+          if (e.matches("textarea") || e.closest(".q-menu")) return false;
+          const overflow = getComputedStyle(e).overflowY;
+          return (
+            /auto|scroll/.test(overflow) && e.scrollHeight > e.clientHeight + 1
+          );
+        })
+        .map((e) => String(e.className));
+      return { nested, documentRange: se.scrollHeight - se.clientHeight };
+    });
+
+  const expectWindowScroll = async (step: string) => {
+    await page.waitForTimeout(150);
+    const { nested } = await scrollers();
+    expect(nested, step).toEqual([]);
+  };
+
+  await expectWindowScroll("start");
+  await page.getByTestId("onboarding-start").click();
+  await expectWindowScroll("install");
+  // The install step outgrows a 560px window: the document scrolls, also from the gutter.
+  expect((await scrollers()).documentRange).toBeGreaterThan(0);
+  await page.mouse.move(80, 280);
+  await page.mouse.wheel(0, 200);
+  await expect
+    .poll(() => page.evaluate(() => window.scrollY))
+    .toBeGreaterThan(0);
+  await expect(page.getByTestId("onboarding-next")).toBeInViewport();
+
+  await page.getByTestId("onboarding-next").click();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+  await expectWindowScroll("choice");
+  await page.getByTestId("onboarding-create-wallet").click();
+  await expectWindowScroll("seed");
+  await page.getByTestId("onboarding-seed-confirmed").click();
+  await page.getByTestId("onboarding-next").click();
+  await expect(page.getByTestId("onboarding-mint-url")).toBeVisible();
+  await expectWindowScroll("mints");
+
+  const back = page.getByRole("button", { name: "Previous" });
+  await back.click();
+  await back.click();
+  await page.getByTestId("onboarding-recover-wallet").click();
+  await expect(page.locator(".words-grid")).toBeVisible();
+  await expectWindowScroll("recover");
+});

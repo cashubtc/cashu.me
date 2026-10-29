@@ -166,6 +166,25 @@ test("the wallet Scan button opens the scanner and returns to the wallet", async
   await expect(wallet.walletScan.locator("svg")).toHaveClass(
     /\blucide-scan-icon\b/
   );
+  // It rests on the page with no disc (owner 2026-10-29b, item 8), a 44px+ target that
+  // still shows hover and the focus ring.
+  const scan = wallet.walletScan;
+  await page.mouse.move(0, 0);
+  await expect(scan).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  const box = (await scan.boundingBox())!;
+  expect(Math.min(box.width, box.height)).toBeGreaterThanOrEqual(44);
+  const helperOpacity = () =>
+    scan
+      .locator(".q-focus-helper")
+      .evaluate((e) => Number(getComputedStyle(e).opacity));
+  expect(await helperOpacity()).toBe(0);
+  await scan.hover();
+  await expect.poll(helperOpacity).toBeGreaterThan(0);
+  await page.mouse.move(0, 0);
+  await scan.focus();
+  await page.keyboard.press("Shift+Tab");
+  await page.keyboard.press("Tab");
+  await expect(scan).toHaveCSS("outline-style", "solid");
   await wallet.walletScan.click();
   await expect(page.locator(".q-dialog:visible").last()).toBeVisible();
   await page.getByRole("button", { name: "Close", exact: true }).last().click();

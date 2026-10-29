@@ -2,10 +2,11 @@
      title and a description (src/css/elements.scss .welcome-slide__*), then the slide's own
      content. Every step shares one column: the app column (FlowColumn) with one 16px inset,
      the same as the footer's (FlowFooter), so nothing on a step sets its own width or gutter.
-     The body scrolls above the footer when a step outgrows the screen. -->
+     The step grows with its content and the window scrolls it (WelcomePage); the footer
+     sticks to the window's bottom. -->
 <template>
   <div class="welcome-scaffold">
-    <div class="welcome-scaffold__scroll">
+    <div class="welcome-scaffold__body">
       <FlowColumn class="q-px-md welcome-slide__content" data-welcome-column>
         <div v-if="icon || $slots.hero" class="welcome-slide__icon">
           <slot name="hero">
@@ -68,27 +69,30 @@ export default defineComponent({
   box-sizing: border-box;
   color: var(--app-text);
   display: flex;
+  flex: 1 0 auto;
   flex-direction: column;
-  height: 100%;
 }
 
 /* Vertical rhythm only: the side gutter is the column's own 16px inset. */
-.welcome-scaffold__scroll {
+.welcome-scaffold__body {
   display: flex;
-  flex: 1;
+  flex: 1 0 auto;
   flex-direction: column;
-  min-height: 0;
-  overflow-y: auto;
   padding: 40px 0 20px;
-  scroll-padding-block: 24px;
 }
 
-.welcome-scaffold__scroll > .flow-column {
+.welcome-scaffold > .bottom-panel {
+  bottom: 0;
+  position: sticky;
+  z-index: 1;
+}
+
+.welcome-scaffold__body > .flow-column {
   flex: 1 0 auto;
 }
 
 @media (max-width: 600px) {
-  .welcome-scaffold__scroll {
+  .welcome-scaffold__body {
     padding: 24px 0 16px;
   }
 }

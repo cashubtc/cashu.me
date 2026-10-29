@@ -745,10 +745,47 @@ body.body--light .q-dialog__backdrop {
 
 // Sheet header trailing slot: 44px buttons, outermost is the unit toggle, same glyph size on
 // every sheet (amount entry, receive and pay).
-.sheet-header-actions {
-  gap: 0;
+.sheet-header__actions {
   position: absolute;
   inset-inline-end: 6px;
+}
+.sheet-header-actions {
+  gap: 0;
+}
+// The header title's clearance. Each side of the title is a flexible spacer with equal
+// growth, so the title stays centred; each spacer's minimum is the button(s) on its side
+// plus 8px (the close button 6 + 44, the trailing group 6 + its width, less the header's
+// 16px padding). When the wider side's minimum binds, the title moves toward the other side,
+// and only if it still doesn't fit does it end in an ellipsis (320px, two actions, long
+// translations: Send ecash in Greek).
+.sheet-header__title {
+  --sheet-header-lead: 42px;
+  --sheet-header-trail: max(
+    var(--sheet-header-lead),
+    calc(var(--sheet-header-actions, 0px) - 2px)
+  );
+  min-width: 0;
+}
+.sheet-header__title::before,
+.sheet-header__title::after {
+  content: "";
+  flex: 1 1 0;
+}
+.sheet-header__title::before {
+  min-width: var(--sheet-header-lead);
+}
+.sheet-header__title::after {
+  min-width: var(--sheet-header-trail);
+}
+.sheet-header__title > * {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+.sheet-header__text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 // The ecash unit switch (UnitToggle), the outermost header action: the unit's code and a small
 // chevron, so it reads as "choose unit", not a logo or a second ⇅ amount swap. Header ink, like
@@ -1940,8 +1977,11 @@ body .q-notification__progress {
   min-height: 52px;
 }
 
+// Scan rests on the page with no disc, as on the original wallet (owner 2026-10-29b, item 8):
+// page ink on the page. Hover, press and focus are the shared button states (the focus
+// helper's tint and the accent ring).
 .wallet-scan-btn {
-  background: var(--app-tint-strong);
+  background: transparent;
   color: var(--app-text);
   flex: 0 0 auto;
   height: 52px;

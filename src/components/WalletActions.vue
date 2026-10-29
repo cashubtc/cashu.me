@@ -1,5 +1,5 @@
 <!-- The wallet's two strategic actions, Receive and Send, as equal capitalised pills with scan
-     in a tinted circle between them (styles in src/css/app.scss .wallet-actions). -->
+     resting on the page between them (styles in src/css/app.scss .wallet-actions). -->
 <template>
   <div class="wallet-actions">
     <q-btn
@@ -20,7 +20,7 @@
       :aria-label="$t('global.actions.scan.label')"
       @click="$emit('scan')"
     >
-      <ScanIcon :size="26" />
+      <ScanIcon :size="28" />
     </q-btn>
     <q-btn
       unelevated

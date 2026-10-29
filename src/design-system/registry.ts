@@ -127,7 +127,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/components/WalletActions.vue",
     usage: { tag: "WalletActions" },
     example: `<WalletActions @receive="…" @scan="…" @send="…" />`,
-    note: "Caps by design: the two strategic wallet actions, with scan in a tinted circle between them. Scan is Lucide's minimal Scan frame (the original wallet's), not ScanLine.",
+    note: "Caps by design: the two strategic wallet actions, with scan between them on the page itself (no disc, as on the original wallet; hover, press and focus keep their states). Scan is Lucide's minimal Scan frame (the original wallet's), not ScanLine.",
   },
   {
     id: "primary-button",
@@ -430,6 +430,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/components/ui/FullscreenDialogHeader.vue",
     usage: { tag: "FullscreenDialogHeader" },
     example: `<FullscreenDialogHeader :title="$t('ReceiveTokenDialog.title')" balanced />`,
+    note: "Close on the leading edge, the centred title, trailing actions on the end edge, on the app column. The title keeps 8px clear of both sides: centred while it fits, it moves away from the wider side when the actions are wide (Send ecash's lock and unit toggle at 320px) and only then ends in an ellipsis.",
   },
   {
     id: "expansion-row",
@@ -856,7 +857,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/components/ui/WelcomeSlideScaffold.vue",
     usage: { tag: "WelcomeSlideScaffold" },
     example: `<WelcomeSlideScaffold :icon="KeyRoundIcon" :title="$t('…title')" :text="$t('…text')">…</WelcomeSlideScaffold>`,
-    note: "Every onboarding step: one column (FlowColumn with its 16px inset) for the body and the same column for the footer (FlowFooter), full screen on phones and the app column on wider screens; no step sets its own width or gutter. A hero slot takes artwork in place of the icon; the footer slot holds the first step's own actions (later steps share the page's Back and Next, caps). Onboarding follows the app's mode and theme like any page, its sheets included.",
+    note: "Every onboarding step: one column (FlowColumn with its 16px inset) for the body and the same column for the footer (FlowFooter), on a page that fills the window and grows with the step, so the window is the one scroller (no inner scroll box) and the footer sticks to its bottom; no step sets its own width or gutter. A hero slot takes artwork in place of the icon; the footer slot holds the first step's own actions (later steps share the page's Back and Next, caps). Onboarding follows the app's mode and theme like any page, its sheets included.",
   },
   {
     id: "flow-footer",

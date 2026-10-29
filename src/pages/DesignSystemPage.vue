@@ -2469,7 +2469,9 @@ body.body--light .ds-light-variant--l3 {
   transform: translateZ(0);
 }
 .ds-welcome {
-  height: 560px;
+  display: flex;
+  flex-direction: column;
+  min-height: 560px;
 }
 .ds-seed-mask {
   font-family: monospace;

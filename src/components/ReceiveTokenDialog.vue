@@ -9,10 +9,9 @@
       />
 
       <!-- Content area -->
-      <div
-        class="col column items-center justify-start q-px-lg scroll-container"
-      >
-        <FlowColumn class="q-px-sm q-mb-sm full-width">
+      <!-- The 16px flow column, the same edge as Pay's field and the footer (round 91). -->
+      <div class="col column items-center justify-start scroll-container">
+        <FlowColumn class="q-px-md q-mb-sm full-width">
           <!-- <div class="row items-center no-wrap q-pb-sm">
                 <div class="col-12">
                   <span class="text-h6">{{
