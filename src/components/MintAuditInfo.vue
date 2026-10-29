@@ -29,11 +29,15 @@
         </template>
       </i18n-t>
     </div>
-    <div v-else-if="error" class="text-app-muted">
-      {{
-        /fetch|network/i.test(error) ? $t("MintAuditInfo.unavailable") : error
-      }}
-    </div>
+    <!-- On the Mint details row grid, with its icon, not a loose line under a centred label
+         (council R83-R84). -->
+    <DetailRow
+      v-else-if="error"
+      :icon="InfoIcon"
+      :label="
+        /fetch|network/i.test(error) ? $t('MintAuditInfo.unavailable') : error
+      "
+    />
     <div v-else-if="mintInfo" class="mint-info">
       <!-- Warning Box -->
       <div style="margin-bottom: 32px">
@@ -123,6 +127,7 @@
 <script lang="ts">
 import PendingDots from "src/components/ui/PendingDots.vue";
 import { Info as InfoIcon } from "lucide-vue-next";
+import { markRaw } from "vue";
 interface MintRead {
   id: number;
   url: string;
@@ -153,6 +158,7 @@ interface SwapEventRead {
 }
 
 import MintAuditWarningBox from "./MintAuditWarningBox.vue";
+import DetailRow from "src/components/ui/DetailRow.vue";
 import MintAuditSwapsBarChart from "./MintAuditSwapsBarChart.vue";
 import { useWalletStore } from "../stores/wallet";
 import { useMintsStore } from "../stores/mints";
@@ -162,6 +168,7 @@ import { getShortUrl } from "../js/wallet-helpers";
 export default {
   name: "MintAuditInfo",
   components: {
+    DetailRow,
     PendingDots,
     InfoIcon,
     MintAuditWarningBox,
@@ -176,6 +183,7 @@ export default {
   data() {
     const settingsStore = useSettingsStore();
     return {
+      InfoIcon: markRaw(InfoIcon),
       auditorApiUrl: settingsStore.auditorApiUrl,
       auditUrl: settingsStore.auditorUrl,
       auditUrlShort: getShortUrl(settingsStore.auditorUrl),

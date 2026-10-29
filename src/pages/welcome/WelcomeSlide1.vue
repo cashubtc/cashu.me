@@ -171,11 +171,23 @@ export default {
     // Open the sheet with the current language in view (it can sit below the fold).
     showLanguageMenu(open: boolean) {
       if (!open) return;
-      this.$nextTick(() =>
-        document
-          .querySelector('.language-options [aria-selected="true"]')
-          ?.scrollIntoView({ block: "center" })
-      );
+      this.$nextTick(() => {
+        const selected = document.querySelector(
+          '.language-options [aria-selected="true"]'
+        );
+        if (!selected) return;
+        selected.scrollIntoView({ block: "center" });
+        // Then settle on a whole row, so no sliver of a row peeks out under the sheet
+        // header (council R83-R84).
+        const box = selected.closest(".bottom-sheet-content");
+        if (!box) return;
+        const boxTop = box.getBoundingClientRect().top;
+        const first = Array.from(box.querySelectorAll("[aria-selected]")).find(
+          (row) => row.getBoundingClientRect().bottom > boxTop + 1
+        );
+        if (first)
+          box.scrollTop += first.getBoundingClientRect().top - boxTop - 4;
+      });
     },
   },
 };

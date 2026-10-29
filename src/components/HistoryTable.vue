@@ -27,14 +27,13 @@
             formatCurrency(Math.abs(transaction.amount), transaction.unit)
           "
           :pending="transaction.status === 'pending'"
-          :caption="
-            getDefaultLabel(transaction) +
-            (transaction.unit && transaction.unit !== 'sat'
-              ? ' · ' + transaction.unit.toUpperCase()
-              : '') +
-            ' · ' +
-            formattedDate(transaction.date)
-          "
+          :caption="[
+            getDefaultLabel(transaction),
+            transaction.unit && transaction.unit !== 'sat'
+              ? transaction.unit.toUpperCase()
+              : '',
+            formattedDate(transaction.date),
+          ]"
           caption-class="text-app-muted"
           @details-click="showTransactionDialog(transaction)"
         >

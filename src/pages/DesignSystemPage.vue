@@ -724,6 +724,15 @@
           @click="toast('info')"
         />
       </DsEntry>
+      <DsEntry id="meta-line">
+        <!-- Two and three parts, an empty part skipped, and Arabic beside Latin parts. -->
+        <div class="column q-gutter-y-sm text-app-muted">
+          <MetaLine :parts="['Lightning', 'Today, 14:02']" />
+          <MetaLine :parts="['Lightning', 'USD', '5 minutes ago']" />
+          <MetaLine :parts="['Ecash', '', 'Yesterday']" />
+          <MetaLine :parts="['قبل 5 دقائق', 'Lightning', 'USD']" dir="rtl" />
+        </div>
+      </DsEntry>
       <DsEntry id="activity-row">
         <q-list class="full-width">
           <ActivityRow
@@ -1239,6 +1248,7 @@ import MintCardAction from "src/components/ui/MintCardAction.vue";
 import TonalChip from "src/components/ui/TonalChip.vue";
 import FlowColumn from "src/components/ui/FlowColumn.vue";
 import CjkText from "src/components/ui/CjkText.vue";
+import MetaLine from "src/components/ui/MetaLine.vue";
 import RowValue from "src/components/ui/RowValue.vue";
 import SettingsLinkRow from "src/components/ui/SettingsLinkRow.vue";
 import SettingsRadioRow from "src/components/ui/SettingsRadioRow.vue";
@@ -1301,6 +1311,7 @@ export default defineComponent({
   name: "DesignSystemPage",
   mixins: [windowMixin],
   components: {
+    MetaLine,
     RowValue,
     GaugeIcon,
     QrCodeIcon,
@@ -1420,45 +1431,45 @@ export default defineComponent({
           dir: "in",
           label: "Received",
           amount: "+₿5,000",
-          caption: "Lightning · Today, 14:02",
+          caption: ["Lightning", "Today, 14:02"],
         },
         {
           dir: "out",
           label: "Sending",
           amount: "−₿210",
-          caption: "Ecash · Today, 13:40",
+          caption: ["Ecash", "Today, 13:40"],
           pending: true,
         },
         {
           dir: "out",
           label: "Sent",
           amount: "−₿101",
-          caption: "Lightning · Yesterday",
+          caption: ["Lightning", "Yesterday"],
         },
         {
           dir: "in",
           label: "Received",
           amount: "+₿500",
-          caption: "Ecash · Yesterday",
+          caption: ["Ecash", "Yesterday"],
         },
         {
           dir: "in",
           label: "Invoice expired",
           amount: "₿1,000",
-          caption: "Lightning · Mon",
+          caption: ["Lightning", "Mon"],
           expired: true,
         },
         {
           dir: "in",
           label: "Received",
           amount: "+₿2,289",
-          caption: "Lightning · 12 Oct",
+          caption: ["Lightning", "12 Oct"],
         },
         {
           dir: "out",
           label: "Sent",
           amount: "−₿42",
-          caption: "Ecash · 10 Oct",
+          caption: ["Ecash", "10 Oct"],
         },
       ],
       calloutSpecimen: [

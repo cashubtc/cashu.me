@@ -461,6 +461,16 @@ export const DS_ITEMS: DsItem[] = [
 <DetailRow :icon="CoinsIcon" label="Amount" value="Any amount" placeholder action @click="editAmount" />`,
   },
   {
+    id: "meta-line",
+    name: "Meta line",
+    group: "data",
+    tier: "primitive",
+    source: "src/components/ui/MetaLine.vue",
+    usage: { tag: "MetaLine" },
+    example: `<MetaLine :parts="['Lightning', 'USD', '5 minutes ago']" />`,
+    note: "A row's secondary facts joined by middle dots, each part its own bidi island so the order holds in right-to-left locales. ActivityRow takes its caption as parts.",
+  },
+  {
     id: "activity-row",
     name: "Activity row",
     group: "data",

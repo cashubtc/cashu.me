@@ -7,6 +7,11 @@
       'star-rating--readonly': readonly,
       'star-rating--disabled': disable,
     }"
+    :style="
+      readonly
+        ? undefined
+        : { '--star-inset': `${Math.max(0, (44 - size) / 2)}px` }
+    "
     :role="readonly ? undefined : 'radiogroup'"
     :aria-label="readonly ? undefined : label"
   >
@@ -92,6 +97,10 @@ button.star-rating__star {
   cursor: pointer;
   min-height: 44px;
   min-width: 44px;
+}
+/* The first star's glyph sits on the text edge, not inset by its 44px target (council R84). */
+button.star-rating__star:first-child {
+  margin-inline-start: calc(var(--star-inset, 0px) * -1);
 }
 button.star-rating__star:focus-visible {
   box-shadow: var(--app-focus-ring);

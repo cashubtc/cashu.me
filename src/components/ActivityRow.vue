@@ -60,6 +60,7 @@
       <q-item-label caption class="q-mt-none row items-center justify-between">
         <div :class="captionClass">
           <q-skeleton v-if="skeleton" type="text" width="140px" />
+          <MetaLine v-else-if="Array.isArray(caption)" :parts="caption" />
           <template v-else>{{ caption }}</template>
         </div>
         <slot name="caption-end" />
@@ -71,6 +72,7 @@
 
 <script lang="ts">
 import AppBadge from "src/components/ui/AppBadge.vue";
+import MetaLine from "src/components/ui/MetaLine.vue";
 import { defineComponent, PropType } from "vue";
 import {
   ArrowDownLeft as ArrowDownLeftIcon,
@@ -80,7 +82,13 @@ import {
 
 export default defineComponent({
   name: "ActivityRow",
-  components: { AppBadge, ArrowDownLeftIcon, ArrowUpRightIcon, XIcon },
+  components: {
+    AppBadge,
+    MetaLine,
+    ArrowDownLeftIcon,
+    ArrowUpRightIcon,
+    XIcon,
+  },
   props: {
     /** The same row with placeholders in its boxes, while the list loads. */
     skeleton: { type: Boolean, default: false },
@@ -109,9 +117,9 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    /** The second line: the method and the date. */
+    /** The second line: the method and the date, as text or as MetaLine parts. */
     caption: {
-      type: String,
+      type: [String, Array] as PropType<string | string[]>,
       default: "",
     },
     /** Extra classes for the date text. */

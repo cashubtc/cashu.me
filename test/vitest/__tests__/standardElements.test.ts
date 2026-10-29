@@ -58,6 +58,7 @@ describe("standard elements", () => {
     ["ui/PaymentStatus.vue", /^payment-status(__[\w-]+)?$/],
     ["ui/UnitToggle.vue", /^sheet-unit-toggle(__swap)?$/],
     ["ui/RowValue.vue", /^row-value(__(inner|text))?$/],
+    ["ui/MetaLine.vue", /^meta-line(__sep)?$/],
     ["ui/MintCardAction.vue", /^mint-card-add(__icon)?$/],
     ["ui/TonalChip.vue", /^(tonal-chip(__icon)?|qr-control-chip)$/],
     ["ui/FlowFooter.vue", /^(bottom-panel|flow-footer__(bar|col))$/],
@@ -160,6 +161,14 @@ describe("standard elements", () => {
 
   // A row's value and chevron are one RowValue, never a hand-built side section with a
   // chevron in it (the side section is a column, so the value stacked above it, council R83).
+  // Captions of facts are MetaLine parts, never strings glued with " · " (in Arabic the
+  // glued Latin parts merged into one run and read out of order, council R84).
+  it("row captions are MetaLine parts", () => {
+    expect(
+      offenders((text) => /:caption="[^"]*['`] · ['`]/.test(text))
+    ).toEqual([]);
+  });
+
   it("settings chevrons come from RowValue", () => {
     expect(
       offenders((text) => /class="settings-menu-chevron"/.test(text)).filter(

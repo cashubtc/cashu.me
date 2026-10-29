@@ -47,7 +47,16 @@
             </div>
           </MintIdentityHeader>
 
-          <div class="mint-descriptions q-mt-lg">
+          <!-- Only when there is something to say: empty, its 24px top margin doubled the gap
+               above Mint details (council R84). -->
+          <div
+            v-if="
+              (mintData.info?.motd && !mintData.motdDismissed) ||
+              mintData.info?.description ||
+              mintData.info?.description_long
+            "
+            class="mint-descriptions q-mt-lg"
+          >
             <!-- MOTD Component -->
             <transition
               appear

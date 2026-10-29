@@ -12,11 +12,10 @@
         direction="in"
         :label="payment.label || $t('ActivityRow.received')"
         :amount="'+' + formatCurrency(payment.amount, payment.unit)"
-        :caption="
-          $t('HistoryTable.row.type_label') +
-          ' · ' +
-          formattedDate(payment.date)
-        "
+        :caption="[
+          $t('HistoryTable.row.type_label'),
+          formattedDate(payment.date),
+        ]"
         @click="showTokenDialog(payment)"
       />
     </q-list>
