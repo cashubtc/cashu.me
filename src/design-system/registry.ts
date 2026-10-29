@@ -222,7 +222,7 @@ export const DS_ITEMS: DsItem[] = [
     example: `<ChooseMint :dense="false" />  <!-- the wallet -->
 <ChooseMint dense />  <!-- flows and forms -->
 <ChooseMint dense allow-empty label="From" />`,
-    note: "One recipe at two heights: normal 72px (the wallet) and dense 56px (Send, Receive, Pay, forms). Both are the outlined field with a 40px avatar, the name and its balance, and the chevron as a real 44px button (aria-haspopup listbox, aria-expanded, aria-controls its sheet), a plain icon button: no disc at rest, the shared hover and press tints only. The label is a line over the name and never changes the size. The field is a pointer target only; the chevron is the one focus stop.",
+    note: "One recipe at two heights, both with 16px padding over and under the text: 78px with a balance line; a one-line picker is 72px normal (the wallet) or 56px dense (Send, Receive, Pay, forms). Both are the outlined field with a 40px avatar, the name and its balance, and the chevron as a real 44px button (aria-haspopup listbox, aria-expanded, aria-controls its sheet), a plain icon button: no disc at rest, the shared hover and press tints only. The label is a line over the name and never changes the size. The field is a pointer target only; the chevron is the one focus stop.",
   },
   {
     id: "amount-entry",

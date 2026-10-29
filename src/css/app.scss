@@ -850,7 +850,9 @@ body.body--light .q-dialog__backdrop {
 
 // The mint picker (ChooseMint), one recipe in two sizes (owner 2026-10-29, item 3): the
 // outlined field's fill and edge, a 40px avatar, the name (and its balance) and a 44px chevron
-// button on the end. Dense only shortens it (72px to 56px); a label only adds a line over the
+// button on the end. Both keep main's 16px of padding over and under the text (owner
+// 2026-10-29, "too squashed" at 4px), so with a balance line both are 78px (main: 82px); dense only lets a
+// one-line picker (no balance) drop to 56px instead of 72px. A label only adds a line over the
 // name, as an outlined field's label does. Larger text grows it rather than clipping.
 .mint-picker {
   align-items: center;
@@ -865,14 +867,13 @@ body.body--light .q-dialog__backdrop {
   grid-template-columns: 40px minmax(0, 1fr) 44px;
   min-height: 72px;
   min-width: 0;
-  padding-block: 12px;
+  padding-block: 16px;
   padding-inline: 16px 8px;
   text-align: start;
   width: 100%;
 }
 .mint-picker--dense {
   min-height: 56px;
-  padding-block: 4px;
 }
 @media (hover: hover) {
   .mint-picker:not(.mint-picker--disabled):hover {

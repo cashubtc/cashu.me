@@ -5,8 +5,9 @@
       class="row q-mt-xs q-mb-none"
       v-if="!sheetOnly && (activeMintUrl || !requireActiveMint)"
     >
-      <!-- One mint picker in two sizes (owner 2026-10-29, item 3): normal (72px, the wallet)
-           and dense (56px, flows and forms) differ only in height. Both are the outlined
+      <!-- One mint picker in two sizes (owner 2026-10-29, item 3): normal (the wallet) and
+           dense (flows and forms) share 16px padding, 78px with a balance line; dense only
+           lets a one-line picker drop to 56px. Both are the outlined
            field with a 40px avatar, the name with its balance under it, and the chevron as a
            real button on the end. A label sits over the name, like an outlined field's.
            The shell is a pointer target only; the chevron is the one keyboard stop. -->
@@ -175,7 +176,7 @@ export default defineComponent({
       type: String,
       default: "choose-mint",
     },
-    // 56px instead of 72px; nothing else changes.
+    // A one-line picker (no balance) may be 56px instead of 72px; nothing else changes.
     dense: {
       type: Boolean,
       default: false,
