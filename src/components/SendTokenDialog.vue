@@ -41,60 +41,7 @@
 
       <!-- Amount display -->
       <div class="col column items-center justify-center q-px-lg amount-area">
-        <!-- Floating P2PK input overlay -->
-        <transition
-          appear
-          enter-active-class="animated fadeIn"
-          leave-active-class="animated fadeOut"
-        >
-          <div v-if="showLockInput" class="p2pk-overlay">
-            <FlowColumn class="q-px-lg">
-              <div class="row items-center">
-                <div :class="!sendData.p2pkPubkey ? 'col-8' : 'col-12'">
-                  <q-input
-                    v-model="sendData.p2pkPubkey"
-                    :label="
-                      sendData.p2pkPubkey && !isLocked
-                        ? $t('SendTokenDialog.inputs.p2pk_pubkey.label_invalid')
-                        : $t('SendTokenDialog.inputs.p2pk_pubkey.label')
-                    "
-                    outlined
-                    clearable
-                    :color="sendData.p2pkPubkey && !isLocked ? 'red' : ''"
-                    @keyup.enter="lockTokens"
-                  />
-                </div>
-                <div class="col-4 q-pl-sm" v-if="!sendData.p2pkPubkey">
-                  <q-btn
-                    unelevated
-                    v-if="canPasteFromClipboard"
-                    :aria-label="
-                      $t(
-                        'SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text'
-                      )
-                    "
-                    @click="pasteToP2PKField"
-                  >
-                    <ClipboardPasteIcon :size="20" />
-                    <q-tooltip>{{
-                      $t(
-                        "SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text"
-                      )
-                    }}</q-tooltip>
-                  </q-btn>
-                  <IconButton
-                    :label="$t('global.actions.scan.label')"
-                    @click="showCamera"
-                  >
-                    <ScanIcon :size="20" />
-                  </IconButton>
-                </div>
-              </div>
-            </FlowColumn>
-          </div>
-        </transition>
         <AmountInputComponent
-          v-if="!showLockInput"
           v-model="sendData.amount"
           :muted="insufficientFunds"
           :enabled="!sendData.tokens"
@@ -102,7 +49,7 @@
           @enter="sendTokens"
         >
           <template #overlay>
-            <AppBadge v-if="isLocked && !showLockInput" class="locked-badge">
+            <AppBadge v-if="isLocked" class="locked-badge">
               <LockIcon :size="14" aria-hidden="true" />
               {{ $t("SendTokenDialog.badge_locked") }}
             </AppBadge>
@@ -120,9 +67,67 @@
       <!-- Numeric keypad -->
       <FlowFooter>
         <template #above>
-          <AmountKeypadPanel v-model="sendData.amount" @done="sendTokens" />
-          <!-- Send action below keyboard -->
+          <!-- While the key is typed on a phone or a short screen, the keypad steps aside so
+               the amount, key and SEND still fit (375x667; the system keyboard is up). -->
+          <AmountKeypadPanel
+            v-show="!keypadCollapsed"
+            v-model="sendData.amount"
+            @done="sendTokens"
+          />
         </template>
+        <!-- Lock mode: the receiver's key sits right above SEND, with Paste and Scan inside
+             the field; the amount stays editable (owner, 2026-10-29, item 27). -->
+        <RevealTransition>
+          <div
+            v-if="showLockInput"
+            class="send-lock-field"
+            data-testid="send-p2pk-pubkey"
+          >
+            <q-input
+              v-model="sendData.p2pkPubkey"
+              outlined
+              hide-bottom-space
+              :label="$t('SendTokenDialog.inputs.p2pk_pubkey.label')"
+              :error="pubkeyShowError"
+              :error-message="$t('SendTokenDialog.inputs.p2pk_pubkey.invalid')"
+              spellcheck="false"
+              autocapitalize="off"
+              autocorrect="off"
+              @focus="pubkeyFocused = true"
+              @blur="onPubkeyBlur"
+              @keyup.enter="sendTokens"
+            >
+              <template #append>
+                <template v-if="!sendData.p2pkPubkey">
+                  <IconButton
+                    v-if="canPasteFromClipboard"
+                    :label="
+                      $t(
+                        'SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text'
+                      )
+                    "
+                    @click="pasteToP2PKField"
+                  >
+                    <ClipboardPasteIcon :size="20" />
+                  </IconButton>
+                  <IconButton
+                    :label="$t('global.actions.scan.label')"
+                    @click="showCamera"
+                  >
+                    <ScanIcon :size="20" />
+                  </IconButton>
+                </template>
+                <IconButton
+                  v-else
+                  :label="$t('global.actions.clear.label')"
+                  @click="sendData.p2pkPubkey = ''"
+                >
+                  <XIcon :size="20" />
+                </IconButton>
+              </template>
+            </q-input>
+          </div>
+        </RevealTransition>
         <SendPaymentRequest
           v-if="sendData.paymentRequest"
           :button-label="$t('SendTokenDialog.actions.pay.label')"
@@ -141,13 +146,7 @@
           v-else
           class="full-width"
           unelevated
-          :disable="
-            sendingEcash ||
-            sendData.amount == null ||
-            sendData.amount <= 0 ||
-            insufficientFunds ||
-            (sendData.p2pkPubkey != '' && !isValidPubkey(sendData.p2pkPubkey))
-          "
+          :disable="sendDisabled"
           data-testid="send-ecash"
           @click="sendTokens"
           color="primary"
@@ -179,6 +178,7 @@ import FlowColumn from "src/components/ui/FlowColumn.vue";
 import FlowDialog from "src/components/ui/FlowDialog.vue";
 import BusyLabel from "src/components/ui/BusyLabel.vue";
 import FlowFooter from "src/components/ui/FlowFooter.vue";
+import RevealTransition from "src/components/ui/RevealTransition.vue";
 import IconButton from "src/components/ui/IconButton.vue";
 import AppBadge from "src/components/ui/AppBadge.vue";
 import UnitToggle from "src/components/ui/UnitToggle.vue";
@@ -209,6 +209,7 @@ import {
   ClipboardPaste as ClipboardPasteIcon,
   Lock as LockIcon,
   ScanLine as ScanIcon,
+  X as XIcon,
 } from "lucide-vue-next";
 declare const windowMixin: any;
 export default defineComponent({
@@ -221,6 +222,7 @@ export default defineComponent({
     FlowDialog,
     BusyLabel,
     FlowFooter,
+    RevealTransition,
     IconButton,
     AppBadge,
     ClipboardPasteIcon,
@@ -234,11 +236,15 @@ export default defineComponent({
     PaymentRequestInfo,
     ScanIcon,
     LockIcon,
+    XIcon,
   },
   props: {},
   data: function () {
     return {
       sendingEcash: false as boolean,
+      // The key field shows its error only once it has been left or pasted into.
+      pubkeyTouched: false as boolean,
+      pubkeyFocused: false as boolean,
     };
   },
   computed: {
@@ -320,10 +326,41 @@ export default defineComponent({
     //     return false;
     //   }
     // },
+    // The store's npub decode throws on a malformed npub1…, so a typo never breaks render.
+    pubkeyValid: function (): boolean {
+      try {
+        return Boolean(
+          this.sendData.p2pkPubkey &&
+            this.isValidPubkey(this.sendData.p2pkPubkey)
+        );
+      } catch {
+        return false;
+      }
+    },
     isLocked: function (): boolean {
-      return Boolean(
-        this.sendData.p2pkPubkey != "" &&
-          this.isValidPubkey(this.sendData.p2pkPubkey)
+      return this.pubkeyValid;
+    },
+    keypadCollapsed: function (): boolean {
+      return (
+        this.pubkeyFocused &&
+        (this.$q.platform.is.mobile === true || this.$q.screen.height < 760)
+      );
+    },
+    pubkeyShowError: function (): boolean {
+      return (
+        this.pubkeyTouched && !!this.sendData.p2pkPubkey && !this.pubkeyValid
+      );
+    },
+    // SEND, the keypad's Done and Enter all go through this: lock mode never sends an
+    // unlocked token, and a typed key that isn't valid never sends either.
+    sendDisabled: function (): boolean {
+      return (
+        this.sendingEcash ||
+        this.sendData.amount == null ||
+        this.sendData.amount <= 0 ||
+        this.insufficientFunds ||
+        (this.showLockInput && !this.pubkeyValid) ||
+        (!!this.sendData.p2pkPubkey && !this.pubkeyValid)
       );
     },
     // NUT-18's `m` field is mandatory today (cashu-ts `PaymentRequest.mints`
@@ -582,6 +619,7 @@ export default defineComponent({
       /*
       calls send, displays token and kicks off the spendableWorker
       */
+      if (this.sendDisabled) return;
       if (this.sendingEcash) return;
 
       const uiStore = useUiStore();
@@ -646,10 +684,15 @@ export default defineComponent({
         uiStore.endForegroundPayment();
       }
     },
+    onPubkeyBlur: function () {
+      this.pubkeyFocused = false;
+      this.pubkeyTouched = true;
+    },
     pasteToP2PKField: async function () {
       console.log("pasteToParseDialog");
       const text = await useUiStore().pasteFromClipboard();
       this.sendData.p2pkPubkey = text.trim();
+      this.pubkeyTouched = true;
     },
     shareToken: async function () {
       if (!this.webShareSupported) {
@@ -674,12 +717,8 @@ export default defineComponent({
 });
 </script>
 <style scoped>
-.p2pk-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 3;
+.send-lock-field {
+  padding-bottom: 16px;
 }
 .locked-badge {
   position: absolute;
@@ -687,5 +726,13 @@ export default defineComponent({
   left: 50%;
   transform: translateX(-50%);
   z-index: 2;
+}
+/* On short phones (375x667) the amount has no room above it once the key field is open, and
+   the badge would sit on the mint picker; the valid key in the field and an enabled SEND say
+   the same there. */
+@media (max-height: 700px) {
+  .locked-badge {
+    display: none;
+  }
 }
 </style>
