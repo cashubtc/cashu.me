@@ -86,11 +86,15 @@
 
       <!-- Mint discovery -->
       <div class="q-mb-md row justify-center">
+        <!-- One filled action at a time (owner 2026-10-29, item 2): Discover leads until a
+             mint URL is typed, then Add mint takes the fill. -->
         <q-btn
-          outline
+          :outline="hasManualMintUrl"
+          :unelevated="!hasManualMintUrl"
           rounded
           color="primary"
           class="discover-mints-btn full-width"
+          data-testid="discover-mints"
           @click="$router.push('/discoverMints')"
         >
           <SearchIcon :size="20" class="q-mr-sm" />
@@ -144,8 +148,10 @@
         <q-btn
           color="primary"
           rounded
-          unelevated
+          :outline="!hasManualMintUrl"
+          :unelevated="hasManualMintUrl"
           class="full-width add-mint-submit q-mt-md"
+          data-testid="add-mint-submit"
           :disable="addMintData.url.length === 0"
           @click="sanitizeMintUrlAndShowAddDialog"
         >
@@ -332,6 +338,10 @@ export default defineComponent({
     };
   },
   computed: {
+    // Presentation only: which of Discover and Add mint is the filled action.
+    hasManualMintUrl(): boolean {
+      return this.addMintData.url.trim().length > 0;
+    },
     ...mapWritableState(useSettingsStore, ["getBitcoinPrice"]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapState(useMintsStore, [
