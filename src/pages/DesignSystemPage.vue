@@ -723,6 +723,18 @@
           action
           @click="toast('info')"
         />
+        <!-- A retry row (Mint details' unavailable audit info): its glyph, no chevron. -->
+        <DetailRow
+          class="q-mt-md"
+          :icon="CoinsIcon"
+          label="Audit info is unavailable right now."
+          action
+          action-label="Refresh"
+          :chevron="false"
+          @click="toast('info')"
+        >
+          <component :is="RefreshCwIcon" :size="18" aria-hidden="true" />
+        </DetailRow>
       </DsEntry>
       <DsEntry id="meta-line">
         <!-- Two and three parts, an empty part skipped, and Arabic beside Latin parts. -->
@@ -731,6 +743,23 @@
           <MetaLine :parts="['Lightning', 'USD', '5 minutes ago']" />
           <MetaLine :parts="['Ecash', '', 'Yesterday']" />
           <MetaLine :parts="['قبل 5 دقائق', 'Lightning', 'USD']" dir="rtl" />
+        </div>
+      </DsEntry>
+      <DsEntry id="amount-warning">
+        <!-- Both uses: the send balance check and the on-chain minimum, each under an amount. -->
+        <div class="row q-col-gutter-md">
+          <div class="col-12 col-sm-6">
+            <div class="relative-position text-center q-pb-lg">
+              <div class="text-h4 text-weight-bold">₿9,000</div>
+              <AmountWarning text="Balance too low" amount-key="9000" />
+            </div>
+          </div>
+          <div class="col-12 col-sm-6">
+            <div class="relative-position text-center q-pb-lg">
+              <div class="text-h4 text-weight-bold">₿500</div>
+              <AmountWarning text="Minimum ₿25,000" amount-key="500" />
+            </div>
+          </div>
         </div>
       </DsEntry>
       <DsEntry id="activity-row">
@@ -1248,6 +1277,7 @@ import MintCardAction from "src/components/ui/MintCardAction.vue";
 import TonalChip from "src/components/ui/TonalChip.vue";
 import FlowColumn from "src/components/ui/FlowColumn.vue";
 import CjkText from "src/components/ui/CjkText.vue";
+import AmountWarning from "src/components/ui/AmountWarning.vue";
 import MetaLine from "src/components/ui/MetaLine.vue";
 import RowValue from "src/components/ui/RowValue.vue";
 import SettingsLinkRow from "src/components/ui/SettingsLinkRow.vue";
@@ -1311,6 +1341,7 @@ export default defineComponent({
   name: "DesignSystemPage",
   mixins: [windowMixin],
   components: {
+    AmountWarning,
     MetaLine,
     RowValue,
     GaugeIcon,

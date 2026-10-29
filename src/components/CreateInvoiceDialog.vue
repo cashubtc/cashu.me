@@ -139,21 +139,12 @@
               @enter="requestMintButton"
             >
               <template #overlay>
-                <div
+                <AmountWarning
                   v-if="showOnchainAmountWarning"
-                  class="amount-warning-badge"
-                  role="status"
                   data-testid="onchain-amount-error"
-                >
-                  <transition name="wobble" mode="out-in" appear>
-                    <span
-                      :key="'warn-text-' + String(invoiceData.amount ?? '')"
-                      class="text-caption text-weight-medium text-app-muted amount-warning-text"
-                    >
-                      {{ onchainAmountError }}
-                    </span>
-                  </transition>
-                </div>
+                  :text="onchainAmountError"
+                  :amount-key="invoiceData.amount ?? ''"
+                />
               </template>
             </AmountInputComponent>
           </div>
@@ -242,6 +233,7 @@
   </FlowDialog>
 </template>
 <script lang="ts">
+import AmountWarning from "src/components/ui/AmountWarning.vue";
 import FlowColumn from "src/components/ui/FlowColumn.vue";
 import FlowDialog from "src/components/ui/FlowDialog.vue";
 import BusyLabel from "src/components/ui/BusyLabel.vue";
@@ -291,6 +283,7 @@ export default defineComponent({
   name: "CreateInvoiceDialog",
   mixins: [windowMixin],
   components: {
+    AmountWarning,
     FlowColumn,
     UnitToggle,
     FlowDialog,
@@ -912,18 +905,5 @@ export default defineComponent({
   align-items: center;
   display: flex;
   min-height: 260px;
-}
-.amount-warning-badge {
-  position: absolute;
-  top: calc(100% - 20px);
-  left: 0;
-  right: 0;
-  z-index: 2;
-  pointer-events: none;
-  text-align: center;
-}
-.amount-warning-text {
-  display: inline-block;
-  font-size: 16px;
 }
 </style>

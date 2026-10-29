@@ -37,7 +37,13 @@
       :label="
         /fetch|network/i.test(error) ? $t('MintAuditInfo.unavailable') : error
       "
-    />
+      :action="!mintNotAudited"
+      :action-label="$t('common.refresh')"
+      :chevron="false"
+      @click="load"
+    >
+      <RefreshCwIcon v-if="!mintNotAudited" :size="18" aria-hidden="true" />
+    </DetailRow>
     <div v-else-if="mintInfo" class="mint-info">
       <!-- Warning Box -->
       <div style="margin-bottom: 32px">
@@ -126,7 +132,7 @@
 
 <script lang="ts">
 import PendingDots from "src/components/ui/PendingDots.vue";
-import { Info as InfoIcon } from "lucide-vue-next";
+import { Info as InfoIcon, RefreshCw as RefreshCwIcon } from "lucide-vue-next";
 import { markRaw } from "vue";
 interface MintRead {
   id: number;
@@ -169,6 +175,7 @@ export default {
   name: "MintAuditInfo",
   components: {
     DetailRow,
+    RefreshCwIcon,
     PendingDots,
     InfoIcon,
     MintAuditWarningBox,
@@ -220,21 +227,26 @@ export default {
       return totalTime / successfulSwapsWithTime.length;
     },
   },
-  async mounted() {
-    try {
-      this.loading = true;
-      await this.getMintInfo();
-      if (this.mintInfo && this.mintInfo.id) {
-        await this.getMintSwaps(this.mintInfo.id);
-      }
-    } catch (err: any) {
-      this.error =
-        err.message || (this.$t("MintAuditInfo.load_failed") as string);
-    } finally {
-      this.loading = false;
-    }
+  mounted() {
+    this.load();
   },
   methods: {
+    // The first load, and the unavailable row's retry.
+    async load() {
+      try {
+        this.error = "";
+        this.loading = true;
+        await this.getMintInfo();
+        if (this.mintInfo && this.mintInfo.id) {
+          await this.getMintSwaps(this.mintInfo.id);
+        }
+      } catch (err: any) {
+        this.error =
+          err.message || (this.$t("MintAuditInfo.load_failed") as string);
+      } finally {
+        this.loading = false;
+      }
+    },
     async getMintInfo() {
       try {
         const response = await fetch(

@@ -174,11 +174,9 @@ body.body--light .q-dialog .app-option-row:active {
 }
 
 // Status tones, shared by callouts and toasts: one colour per meaning, darker in light mode.
-body.body--dark {
-  --app-success: #4ade80;
-}
-body.body--light {
-  --app-success: #15803d;
+// Success follows the theme's positive token (teal in the green themes, council R85).
+body {
+  --app-success: var(--q-positive);
 }
 .app-callout--info {
   --tone: var(--app-info);
@@ -712,4 +710,21 @@ body.body--light .activity-row__avatar--in {
   font-size: 15px;
   font-weight: 400;
   white-space: nowrap;
+}
+
+/* AmountWarning: the muted line under a typed amount, centred on it, over the fiat slot. */
+.amount-warning {
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  text-align: center;
+  top: calc(100% - 20px);
+  z-index: 2;
+}
+.amount-warning__text {
+  color: var(--app-text-muted);
+  display: inline-block;
+  font-size: 16px;
+  font-weight: 500;
 }

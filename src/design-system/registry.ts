@@ -471,6 +471,16 @@ export const DS_ITEMS: DsItem[] = [
     note: "A row's secondary facts joined by middle dots, each part its own bidi island so the order holds in right-to-left locales. ActivityRow takes its caption as parts.",
   },
   {
+    id: "amount-warning",
+    name: "Amount warning",
+    group: "data",
+    tier: "primitive",
+    source: "src/components/ui/AmountWarning.vue",
+    usage: { tag: "AmountWarning" },
+    example: `<AmountWarning :text="$t('PayInvoiceDialog.invoice.balance_too_low_warning_text')" :amount-key="amount" />`,
+    note: "The muted line under a typed amount (balance too low, an on-chain minimum) that wobbles when the amount changes. Used in Send ecash and Create invoice.",
+  },
+  {
     id: "activity-row",
     name: "Activity row",
     group: "data",

@@ -32,7 +32,7 @@
       />
     </component>
     <ChevronRightIcon
-      v-if="action"
+      v-if="action && chevron"
       :size="18"
       class="detail-item__chevron"
       aria-hidden="true"
@@ -51,6 +51,8 @@ export default defineComponent({
   name: "DetailRow",
   components: { ArrowUpRightIcon, ChevronRightIcon },
   props: {
+    /** An action row's chevron; off when the value slot already shows the action's glyph. */
+    chevron: { type: Boolean, default: true },
     icon: {
       type: [Object, Function] as PropType<Component>,
       default: null,
@@ -108,7 +110,8 @@ a.detail-value {
   cursor: pointer;
   font: inherit;
   margin-inline: -12px;
-  min-height: 32px;
+  /* A 44px target (32px rows were below the minimum, council R84-R86). */
+  min-height: 44px;
   isolation: isolate;
   padding: 0 12px;
   position: relative;
@@ -118,7 +121,7 @@ a.detail-value {
 .detail-item--action::before {
   border-radius: var(--app-radius-md);
   content: "";
-  inset: -8px 0;
+  inset: -2px 0;
   position: absolute;
   z-index: -1;
   transition: background 0.15s ease;

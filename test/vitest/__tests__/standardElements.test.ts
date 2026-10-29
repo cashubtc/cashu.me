@@ -59,6 +59,7 @@ describe("standard elements", () => {
     ["ui/UnitToggle.vue", /^sheet-unit-toggle(__swap)?$/],
     ["ui/RowValue.vue", /^row-value(__(inner|text))?$/],
     ["ui/MetaLine.vue", /^meta-line(__sep)?$/],
+    ["ui/AmountWarning.vue", /^amount-warning(__text)?$/],
     ["ui/MintCardAction.vue", /^mint-card-add(__icon)?$/],
     ["ui/TonalChip.vue", /^(tonal-chip(__icon)?|qr-control-chip)$/],
     ["ui/FlowFooter.vue", /^(bottom-panel|flow-footer__(bar|col))$/],
@@ -163,6 +164,15 @@ describe("standard elements", () => {
   // chevron in it (the side section is a column, so the value stacked above it, council R83).
   // Captions of facts are MetaLine parts, never strings glued with " · " (in Arabic the
   // glued Latin parts merged into one run and read out of order, council R84).
+  // The wobbling warning under an amount is AmountWarning, not a hand-keyed transition.
+  it("amount warnings come from AmountWarning", () => {
+    expect(
+      offenders((text) => /name="wobble"/.test(text)).filter(
+        (file) => !file.endsWith("ui/AmountWarning.vue")
+      )
+    ).toEqual([]);
+  });
+
   it("row captions are MetaLine parts", () => {
     expect(
       offenders((text) => /:caption="[^"]*['`] · ['`]/.test(text))

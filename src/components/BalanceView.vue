@@ -408,14 +408,19 @@ export default defineComponent({
 }
 .balance-unit-dot::after {
   background: currentColor;
-  border-radius: 50%;
+  border-radius: 999px;
   content: "";
-  height: 7px;
-  width: 7px;
+  height: 6px;
+  transition: width 0.2s ease;
+  width: 6px;
 }
+/* The active unit is a short pill, not a dot a little larger: a 15% scale read as all
+   dots alike (council R85). */
 .balance-unit-dot--active {
-  color: var(--app-accent);
-  transform: scale(1.15);
+  color: var(--app-text);
+}
+.balance-unit-dot--active::after {
+  width: 18px;
 }
 .balance-unit-dot:focus-visible {
   outline: 2px solid currentColor;

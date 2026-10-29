@@ -18,7 +18,7 @@
                 tooltip
                 @click="newRequest"
               >
-                <RefreshCwIcon :size="20" />
+                <PlusIcon :size="20" />
               </IconButton>
             </div>
           </template>
@@ -61,7 +61,7 @@ import FlowDialog from "src/components/ui/FlowDialog.vue";
 import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
-  RefreshCw as RefreshCwIcon,
+  Plus as PlusIcon,
 } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -91,7 +91,7 @@ export default defineComponent({
     FlowDialog,
     ChevronLeftIcon,
     ChevronRightIcon,
-    RefreshCwIcon,
+    PlusIcon,
     FullscreenDialogHeader,
     IconButton,
     PaymentRequestView,

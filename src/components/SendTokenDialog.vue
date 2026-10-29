@@ -106,26 +106,13 @@
               <LockIcon :size="14" aria-hidden="true" />
               {{ $t("SendTokenDialog.badge_locked") }}
             </AppBadge>
-            <div
+            <AmountWarning
               v-if="insufficientFunds && sendData.amount"
-              outline
-              rounded
-              size="md"
-              class="amount-warning-badge"
-            >
-              <transition name="wobble" mode="out-in" appear>
-                <span
-                  v-if="insufficientFunds && sendData.amount"
-                  :key="'warn-text-' + String(sendData.amount ?? '')"
-                  class="text-caption text-weight-medium text-app-muted"
-                  style="font-size: 16px; display: inline-block"
-                >
-                  {{
-                    $t("PayInvoiceDialog.invoice.balance_too_low_warning_text")
-                  }}
-                </span>
-              </transition>
-            </div>
+              :text="
+                $t('PayInvoiceDialog.invoice.balance_too_low_warning_text')
+              "
+              :amount-key="sendData.amount ?? ''"
+            />
           </template>
         </AmountInputComponent>
       </div>
@@ -189,6 +176,7 @@
   </FlowDialog>
 </template>
 <script lang="ts">
+import AmountWarning from "src/components/ui/AmountWarning.vue";
 import FlowColumn from "src/components/ui/FlowColumn.vue";
 import FlowDialog from "src/components/ui/FlowDialog.vue";
 import BusyLabel from "src/components/ui/BusyLabel.vue";
@@ -229,6 +217,7 @@ export default defineComponent({
   name: "SendTokenDialog",
   mixins: [windowMixin],
   components: {
+    AmountWarning,
     FlowColumn,
     UnitToggle,
     FlowDialog,
@@ -700,15 +689,5 @@ export default defineComponent({
   left: 50%;
   transform: translateX(-50%);
   z-index: 2;
-}
-.amount-warning-badge {
-  position: absolute;
-  top: calc(100% - 20px);
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 2;
-  pointer-events: none;
-  font-size: 16px;
-  white-space: nowrap;
 }
 </style>

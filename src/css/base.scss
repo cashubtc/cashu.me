@@ -50,6 +50,10 @@ $themes: (
     fill: #3ab77d,
     on-fill: #0b0b0b,
     accent: #3ab77d,
+    // Green themes take a teal success colour, so +₿ amounts and paid checks stay apart from
+    // the green buttons (council R84-R85).
+    positive: #5eead4,
+    positive-light: #0f766e,
     accent-2: #2fbf70,
     light: #23774f,
     light-2: #1d7a47,
@@ -99,6 +103,8 @@ $themes: (
     (
       fill: #22e55a,
       on-fill: #0b0b0b,
+      positive: #5eead4,
+      positive-light: #0f766e,
       accent: #3df06f,
       accent-2: #3df06f,
       light: #007a00,
@@ -122,6 +128,9 @@ $themes: (
         map-get($t, raised),
         color-mix(in srgb, #fff 13%, map-get($t, dark))
       )};
+    @if map-has-key($t, positive) {
+      --q-positive: #{map-get($t, positive)};
+    }
   }
   body.body--light[data-theme="#{$theme}"] {
     --q-primary: #{map-get($t, light)};
@@ -130,6 +139,9 @@ $themes: (
     --app-on-primary: #fff;
     --app-surface: #fff;
     --app-raised: #f4f4f5;
+    @if map-has-key($t, positive-light) {
+      --q-positive: #{map-get($t, positive-light)};
+    }
   }
 }
 
