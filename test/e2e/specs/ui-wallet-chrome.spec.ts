@@ -71,6 +71,16 @@ test("tab indicator spans the tab less its radius at every width, with no baseli
           .getByTestId("wallet-tabs")
           .evaluate((el) => getComputedStyle(el).boxShadow)
       ).toBe("none");
+      // The bar sits on the 16px content gutter of its column, not the column's edge.
+      const inset = await page.getByTestId("wallet-tabs").evaluate((el) => {
+        const bar = el.getBoundingClientRect();
+        const col = el.parentElement!.getBoundingClientRect();
+        return [
+          Math.round(bar.left - col.left),
+          Math.round(col.right - bar.right),
+        ];
+      });
+      expect(inset, `${dir} ${width}px gutter`).toEqual([16, 16]);
     }
   }
 });

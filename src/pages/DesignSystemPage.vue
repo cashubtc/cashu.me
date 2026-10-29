@@ -1035,8 +1035,8 @@
         />
         <SectionDivider
           align="start"
-          label="Network checks"
-          caption="Settings sub-page groups: the same label on the start edge."
+          label="Rating"
+          caption="A single field's label: the same label on the start edge."
         />
         <SectionDivider label="Mints you have added and can swap between" />
       </DsEntry>

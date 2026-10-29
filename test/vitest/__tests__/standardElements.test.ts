@@ -222,14 +222,13 @@ describe("standard elements", () => {
     expect(css).toMatch(/\.section-divider \{[^}]*display: flex/);
   });
 
+  // Settings sub-pages included (council R91): only a field label (the review rating) sits
+  // on the start edge.
   it("content sections use the centred divider", () => {
     expect(
       offenders((text) =>
         /<SectionDivider[^>]*align="start"/.test(text)
-      ).filter(
-        (f) =>
-          !/settings\/SettingsSection\.vue$|CreateMintReviewPage\.vue$/.test(f)
-      )
+      ).filter((f) => !/CreateMintReviewPage\.vue$/.test(f))
     ).toEqual([]);
   });
 

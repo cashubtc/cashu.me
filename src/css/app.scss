@@ -272,8 +272,9 @@ body,
 }
 
 // Section label centred between two hairlines, in small capitals, as in the original design
-// (owner, 2026-10-29: keep it; guard in standardElements.test.ts). Settings sub-page groups
-// put the same label on the start edge without hairlines (align="start"), as on main.
+// (owner, 2026-10-29: keep it; guard in standardElements.test.ts), settings sub-pages included.
+// A label for a single field (the review rating) sits on the start edge without hairlines
+// (align="start").
 .section-divider-block {
   margin-bottom: 16px;
 }
@@ -897,8 +898,27 @@ body.body--light .q-dialog__backdrop {
   font-weight: 400;
   line-height: 20px;
 }
+// The chevron is a round button with a faint tonal disc at rest; hover and press only
+// deepen the same disc, so touching it never pops a circle in from nothing (council R91).
 .mint-picker__trigger {
+  background: var(--app-tonal-fill);
   color: var(--app-text-muted);
+}
+.mint-picker__trigger > .q-focus-helper {
+  display: none;
+}
+@media (hover: hover) {
+  .mint-picker__trigger:not(.disabled):hover {
+    background: var(--app-tonal-fill-hover);
+  }
+}
+.mint-picker__trigger:not(.disabled):active {
+  background: var(--app-tonal-fill-pressed);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .mint-picker__trigger {
+    transition: background-color 0.12s ease, scale 0.12s ease;
+  }
 }
 // The chevron turns up while the sheet is open; the button itself never rotates.
 .mint-picker__chevron {
@@ -952,9 +972,12 @@ body .q-tab__indicator {
 // The wallet's History / Mints tabs (owner item 5): no baseline, and the indicator spans the
 // tab cell less the tab's corner radius at each end, at every width (Quasar's narrow indicator
 // only spanned the label, so it read short on stretched phone tabs).
+// The bar sits on the 16px content gutter like every page's content, so the tabs and the
+// indicator stay inside the column instead of running to the window edge (council R91).
 body .wallet-tabs {
   --wallet-tab-radius: 10px;
   box-shadow: none;
+  margin-inline: 16px;
 }
 body .wallet-tabs .q-tab {
   border-radius: var(--wallet-tab-radius);

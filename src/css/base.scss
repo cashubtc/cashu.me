@@ -191,7 +191,9 @@ body.body--dark {
     var(--app-text) 20%,
     transparent
   );
-  --app-disabled-fill: color-mix(in srgb, var(--app-text) 5%, transparent);
+  // Disabled: 8%, a clear pill shape on every dark page yet under tonal's 10% (5% nearly
+  // vanished: Publish review, Create address; council R91).
+  --app-disabled-fill: color-mix(in srgb, var(--app-text) 8%, transparent);
   --app-readonly-fill: color-mix(in srgb, var(--app-text) 6%, transparent);
   --app-group-edge: transparent;
   --app-group-fill: color-mix(in srgb, var(--app-text) 10%, transparent);
@@ -214,7 +216,8 @@ body.body--light {
     var(--app-text) 12%,
     transparent
   );
-  --app-disabled-fill: color-mix(in srgb, var(--app-text) 3%, transparent);
+  // 4% under tonal's 5%; the muted label is what sets disabled apart from tonal ink.
+  --app-disabled-fill: color-mix(in srgb, var(--app-text) 4%, transparent);
   --app-readonly-fill: color-mix(in srgb, var(--app-text) 4%, transparent);
   --app-group-edge: transparent;
   --app-group-fill: color-mix(in srgb, var(--app-text) 5%, transparent);
@@ -231,6 +234,15 @@ body.body--dark
 body.body--light
   :is(.q-card:not(.flow-surface, .welcome-surface), .bottom-sheet, .q-menu) {
   --app-field-edge: color-mix(in srgb, var(--app-text) 49%, transparent);
+}
+// Secondary text on sheets and dialogs sits on a row fill over the raised surface, two
+// lifts above the page: 72% muted measured 4.04:1 there in flamingo dark (mint 4.29, autumn
+// 4.48; rendered pixels, .council/muted-contrast.mjs). 86% and 80% clear 4.5:1 in every
+// theme; the page keeps the quieter steps, where they already pass.
+body.body--dark
+  :is(.q-card:not(.flow-surface, .welcome-surface), .bottom-sheet, .q-menu) {
+  --app-text-muted: rgba(244, 244, 245, 0.86);
+  --app-text-subtle: rgba(244, 244, 245, 0.8);
 }
 // A read-only field that keeps its edge (the welcome seed phrase) sits on the quieter 6%
 // read-only fill, so the same edge renders darker: 33% measured 2.83:1 on flamingo's dark page
@@ -372,6 +384,12 @@ body.body--light .text-grey-6 {
 
 body.body--dark .q-table--dark {
   background: transparent;
+}
+
+// Destructive text (Delete mint) takes the text-safe red in dark mode: the full red measured
+// 4.40:1 on flamingo's page. Filled danger controls keep the full red.
+body.body--dark .text-negative {
+  color: var(--app-negative-text) !important;
 }
 
 // Helper and error text under fields is 13px, readable beside 15px values.

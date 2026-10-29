@@ -1,8 +1,8 @@
-<!-- A section label in small capitals. Centred between two hairlines on content pages (the
-     original design; owner 2026-10-29: keep it), or on the start edge without hairlines for
-     settings sub-page groups, as on main. The section's one-line description sits under it
-     when given (styled by the global .section-divider rules in app.scss). It owns its gap to
-     the content below, so every section starts the same way. -->
+<!-- A section label in small capitals. Centred between two hairlines on every page, settings
+     sub-pages included (the original design; owner 2026-10-29: keep it), or on the start edge
+     without hairlines where it labels a single field (the review rating). The section's
+     one-line description sits under it when given (styled by the global .section-divider rules
+     in app.scss). It owns its gap to the content below, so every section starts the same way. -->
 <template>
   <div
     class="section-divider-block"
@@ -17,15 +17,22 @@
       <div class="divider-text">{{ label }}<slot name="badge" /></div>
       <div v-if="align !== 'start'" class="divider-line"></div>
     </div>
-    <p v-if="caption" class="section-divider__caption">{{ caption }}</p>
+    <CjkText
+      v-if="caption"
+      tag="p"
+      class="section-divider__caption"
+      :text="caption"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
+import CjkText from "src/components/ui/CjkText.vue";
 
 export default defineComponent({
   name: "SectionDivider",
+  components: { CjkText },
   props: {
     /** Empty: the caption alone, where the page already titles the section. */
     label: {
@@ -37,7 +44,7 @@ export default defineComponent({
       type: String,
       default: "",
     },
-    /** "start": the settings sub-page heading on the text edge, without hairlines. */
+    /** "start": a field's label on the text edge, without hairlines (the review rating). */
     align: {
       type: String as PropType<"center" | "start">,
       default: "center",

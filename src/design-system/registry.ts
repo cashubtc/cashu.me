@@ -211,7 +211,7 @@ export const DS_ITEMS: DsItem[] = [
     example: `<ChooseMint :dense="false" />  <!-- the wallet -->
 <ChooseMint dense />  <!-- flows and forms -->
 <ChooseMint dense allow-empty label="From" />`,
-    note: "One recipe at two heights: normal 72px (the wallet) and dense 56px (Send, Receive, Pay, forms). Both are the outlined field with a 40px avatar, the name and its balance, and the chevron as a real 44px button (aria-haspopup listbox, aria-expanded, aria-controls its sheet). The label is a line over the name and never changes the size. The field is a pointer target only; the chevron is the one focus stop.",
+    note: "One recipe at two heights: normal 72px (the wallet) and dense 56px (Send, Receive, Pay, forms). Both are the outlined field with a 40px avatar, the name and its balance, and the chevron as a real 44px button (aria-haspopup listbox, aria-expanded, aria-controls its sheet) on a faint tonal disc that hover and press only deepen. The label is a line over the name and never changes the size. The field is a pointer target only; the chevron is the one focus stop.",
   },
   {
     id: "amount-entry",
@@ -492,7 +492,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/components/ui/SectionDivider.vue",
     usage: { tag: "SectionDivider" },
     example: `<SectionDivider :label="$t('MintSettings.add.title')" />`,
-    note: 'Centred caps between hairlines on content pages; align="start" for settings sub-page groups (owner, 2026-10-29).',
+    note: 'Centred caps between hairlines on every page, settings sub-pages included (owner, 2026-10-29, item 31); align="start" only for a single field\'s label (the review rating).',
   },
 
   // Data display
