@@ -215,7 +215,7 @@ export default {
       },
       lightning_address: {
         title: "Lightning adresi",
-        caption: "isim@alanadi adresinden ödeme alın",
+        caption: "isim{'@'}alanadi adresinden ödeme alın",
       },
       nostr: {
         title: "Nostr",

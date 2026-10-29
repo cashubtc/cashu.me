@@ -78,7 +78,9 @@ module.exports = configure(function (/* ctx */) {
 
       // publicPath: '/',
       // analyze: true,
-      // env: {},
+      // DESIGN_SYSTEM=1 at build time ships the dev-only design system board
+      // (/design-system) in a production build, e.g. for a staging deploy.
+      env: { DESIGN_SYSTEM: process.env.DESIGN_SYSTEM === "1" ? "1" : "" },
       // rawDefine: {}
       // ignorePublicFolder: true,
       // minify: false,

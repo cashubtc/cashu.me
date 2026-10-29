@@ -228,7 +228,7 @@ export default {
       },
       lightning_address: {
         title: "Lightning adresa",
-        caption: "Přijímejte platby na jmeno@domena",
+        caption: "Přijímejte platby na jmeno{'@'}domena",
       },
       nostr: {
         title: "Nostr",

@@ -128,8 +128,8 @@ const routes = [
     ],
   },
   // The design system board: every component, live, with its source and usage.
-  // Development builds only.
-  ...(process.env.DEV
+  // Development builds only, unless built with DESIGN_SYSTEM=1.
+  ...(process.env.DEV || process.env.DESIGN_SYSTEM
     ? [
         {
           path: "/design-system",

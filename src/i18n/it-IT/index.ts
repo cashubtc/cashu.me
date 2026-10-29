@@ -181,7 +181,7 @@ export default {
       },
       lightning_address: {
         title: "Indirizzo Lightning",
-        caption: "Ricevi pagamenti su nome@dominio",
+        caption: "Ricevi pagamenti su nome{'@'}dominio",
       },
       nostr: {
         title: "Nostr",

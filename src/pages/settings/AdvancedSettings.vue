@@ -227,7 +227,7 @@ export default defineComponent({
       confirmMnemonic: false,
       confirmNuke: false,
       confirmImport: false,
-      isDev: Boolean(process.env.DEV),
+      isDev: Boolean(process.env.DEV || process.env.DESIGN_SYSTEM),
     };
   },
   computed: {

@@ -207,7 +207,7 @@ export default {
       },
       lightning_address: {
         title: "ライトニングアドレス",
-        caption: "name@domain で支払いを受け取る",
+        caption: "name{'@'}domain で支払いを受け取る",
       },
       nostr: {
         title: "Nostr",

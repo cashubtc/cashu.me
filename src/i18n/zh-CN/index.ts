@@ -207,7 +207,7 @@ export default {
       },
       lightning_address: {
         title: "闪电地址",
-        caption: "通过 name@domain 收款",
+        caption: "通过 name{'@'}domain 收款",
       },
       nostr: {
         title: "Nostr",

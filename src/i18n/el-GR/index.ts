@@ -210,7 +210,7 @@ export default {
       },
       lightning_address: {
         title: "Διεύθυνση Lightning",
-        caption: "Λάβετε πληρωμές στο όνομα@domain",
+        caption: "Λάβετε πληρωμές στο όνομα{'@'}domain",
       },
       nostr: {
         title: "Nostr",

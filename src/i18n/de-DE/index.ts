@@ -212,7 +212,7 @@ export default {
       },
       lightning_address: {
         title: "Lightning-Adresse",
-        caption: "Zahlungen an name@domain empfangen",
+        caption: "Zahlungen an name{'@'}domain empfangen",
       },
       nostr: {
         title: "Nostr",

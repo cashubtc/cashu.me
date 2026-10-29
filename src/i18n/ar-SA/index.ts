@@ -206,7 +206,7 @@ export default {
       },
       lightning_address: {
         title: "عنوان Lightning",
-        caption: "استقبل المدفوعات على name@domain",
+        caption: "استقبل المدفوعات على name{'@'}domain",
       },
       nostr: {
         title: "Nostr",
