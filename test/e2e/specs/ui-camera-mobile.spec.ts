@@ -37,37 +37,19 @@ test.describe("touch viewport", () => {
     hasTouch: true,
   });
 
-  test("switches currency with a swipe and keeps payment controls reachable", async ({
+  // Owner item 25: the balance never moves under a finger; the unit control switches it.
+  test("switches currency with the unit control and keeps payment controls reachable", async ({
     page,
-    context,
   }) => {
     const wallet = new WalletUi(page);
     await wallet.onboard(MINT_C_URL);
     await wallet.mintBolt11(20);
-    const slide = page.locator(".balance-carousel");
-    await slide.scrollIntoViewIfNeeded();
-    const box = await slide.boundingBox();
-    const cdp = await context.newCDPSession(page);
-    const y = box!.y + box!.height / 2;
-    await cdp.send("Input.dispatchTouchEvent", {
-      type: "touchStart",
-      touchPoints: [{ x: box!.x + box!.width - 30, y }],
-    });
-    for (let step = 1; step <= 8; step++) {
-      await cdp.send("Input.dispatchTouchEvent", {
-        type: "touchMove",
-        touchPoints: [
-          { x: box!.x + box!.width - 30 - ((box!.width - 60) * step) / 8, y },
-        ],
-      });
-    }
-    await cdp.send("Input.dispatchTouchEvent", {
-      type: "touchEnd",
-      touchPoints: [],
-    });
+    await page.getByRole("button", { name: "Show USD balance" }).tap();
     await expect(wallet.balance).toHaveCount(1);
-    await expect(wallet.balance).not.toHaveAttribute("data-unit", "sat");
+    await expect(wallet.balance).toHaveAttribute("data-unit", "usd");
     await page.getByRole("button", { name: "Show BTC balance" }).tap();
+    await expect(wallet.balance).toHaveCount(1);
+    await expect(wallet.balance).toHaveAttribute("data-unit", "sat");
     await wallet.openSend("ecash");
     await wallet.enterAmount(5);
     await expect(page.getByTestId("send-ecash")).toBeInViewport();
