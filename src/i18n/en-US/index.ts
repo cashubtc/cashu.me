@@ -1,5 +1,6 @@
 export default {
   global: {
+    notifications: "Notifications",
     copy_to_clipboard: {
       success: "Copied to clipboard!",
     },
@@ -36,6 +37,9 @@ export default {
       },
       scan: {
         label: "Scan",
+      },
+      more_options: {
+        label: "More options",
       },
       clear: {
         label: "Clear",
@@ -1526,25 +1530,34 @@ export default {
   HistoryTable: {
     empty_text: "No history yet",
     empty_hint: "Payments you send and receive appear here.",
+    filters: {
+      title: "Filter history",
+      direction: "Direction",
+      type: "Type",
+      all: "All",
+      all_mints: "All mints",
+      completed: "Completed",
+      received: "Received",
+      sent: "Sent",
+      show_results: "Show results ({count})",
+      reset: "Reset",
+      clear_all: "Clear all",
+      remove: "Remove filter: {label}",
+      empty_title: "No payments match these filters",
+      clear: "Clear filters",
+      count: "{shown} of {total}",
+      active: "Filter history, {count} active",
+    },
     row: {
       type_label: "Ecash",
       date_label: "{ value } ago",
     },
     actions: {
-      filter_ecash_only: {
-        label: "Ecash only",
-      },
       check_status: {
         tooltip_text: "Check status",
       },
       receive: {
         tooltip_text: "Receive",
-      },
-      filter_pending: {
-        label: "Show pending only",
-      },
-      show_all: {
-        label: "Show all",
       },
     },
     old_token_not_found_error_text: "Old token not found",
@@ -1761,6 +1774,7 @@ export default {
   },
   TokenInformation: {
     fee: "Fee",
+    token: "Token",
     unit: "Unit",
     fiat: "Fiat",
     p2pk: "P2PK",
@@ -1774,6 +1788,8 @@ export default {
   },
   QuoteInformation: {
     address: "Address",
+    invoice: "Invoice",
+    request: "Request",
     amount: "Amount",
     fee_reserve: "Fee reserve",
     fee_paid: "Fee paid",

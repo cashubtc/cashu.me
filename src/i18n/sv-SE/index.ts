@@ -25,6 +25,7 @@ export default {
   },
 
   global: {
+    notifications: "Aviseringar",
     copy_to_clipboard: {
       success: "Kopierat till urklipp!",
     },
@@ -61,6 +62,9 @@ export default {
       },
       scan: {
         label: "Skanna",
+      },
+      more_options: {
+        label: "Fler alternativ",
       },
       clear: {
         label: "Rensa",
@@ -1468,25 +1472,34 @@ export default {
   HistoryTable: {
     empty_text: "Ingen historik än",
     empty_hint: "Betalningar du skickar och tar emot visas här.",
+    filters: {
+      title: "Filtrera historik",
+      direction: "Riktning",
+      type: "Typ",
+      all: "Alla",
+      all_mints: "Alla mintar",
+      completed: "Slutförd",
+      received: "Mottagen",
+      sent: "Skickad",
+      show_results: "Visa resultat ({count})",
+      reset: "Återställ",
+      clear_all: "Rensa alla",
+      remove: "Ta bort filter: {label}",
+      empty_title: "Inga betalningar matchar filtren",
+      clear: "Rensa filter",
+      count: "{shown} av {total}",
+      active: "Filtrera historik, {count} aktiva",
+    },
     row: {
       type_label: "Ecash",
       date_label: "{ value } sedan",
     },
     actions: {
-      filter_ecash_only: {
-        label: "Bara ecash",
-      },
       check_status: {
         tooltip_text: "Kontrollera status",
       },
       receive: {
         tooltip_text: "Ta emot",
-      },
-      filter_pending: {
-        label: "Visa bara väntande",
-      },
-      show_all: {
-        label: "Visa alla",
       },
     },
     old_token_not_found_error_text: "Gammal token hittades inte",
@@ -1703,6 +1716,7 @@ export default {
   },
   TokenInformation: {
     fee: "Avgift",
+    token: "Token",
     unit: "Enhet",
     fiat: "Fiat",
     p2pk: "P2PK",
@@ -1753,6 +1767,8 @@ export default {
   },
   QuoteInformation: {
     address: "Adress",
+    invoice: "Faktura",
+    request: "Begäran",
     amount: "Belopp",
     fee_reserve: "Avgiftsreserv",
     fee_paid: "Betald avgift",

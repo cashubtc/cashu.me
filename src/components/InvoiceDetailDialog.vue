@@ -4,16 +4,18 @@
       <!-- Header -->
       <FullscreenDialogHeader :title="headerTitle" />
 
-      <!-- Content -->
+      <!-- Content: one stack with one gap (QR, deposit note, amount, table), so no two
+           neighbours sit further apart than any others (owner 2026-11-01). What the payer
+           pays, the invoice or address, is a copy row in the table. -->
       <div class="content-area">
-        <q-card-section class="q-pa-none">
+        <FlowColumn class="q-px-md flow-stack">
           <PaymentStatus
             v-if="invoiceData.status === 'paid'"
             state="paid"
-            class="q-mb-md q-pt-lg"
+            class="q-pt-lg"
             :label="$t('InvoiceDetailDialog.invoice.status_paid_text')"
           />
-          <FlowColumn v-else-if="invoiceData.request" class="q-px-md q-mb-md">
+          <div v-else-if="invoiceData.request">
             <div class="qr-container">
               <component
                 :is="isOnchain ? 'div' : 'a'"
@@ -24,59 +26,39 @@
               </component>
             </div>
             <QrProgress :active="runnerActive" />
-            <!-- Every QR has its copy line: the full address on-chain, a shortened
-                     invoice for Lightning (the button below copies it too). -->
-            <QrCopyLine
-              :text="
-                isOnchain
-                  ? invoiceData.request
-                  : shortenString(invoiceData.request, 14, 8) ||
-                    invoiceData.request
-              "
-              :copied="copyButtonCopied"
-              @copy="onCopyBolt11"
-            />
-            <OnchainDepositLimits
-              v-if="isOnchain && invoiceData.status !== 'paid'"
-              class="q-mt-md"
-              data-testid="deposit-limits-address"
-              :mint-url="invoiceData.mint"
-              :unit="invoiceData.unit"
-            />
-          </FlowColumn>
-
+          </div>
+          <OnchainDepositLimits
+            v-if="
+              isOnchain && invoiceData.request && invoiceData.status !== 'paid'
+            "
+            data-testid="deposit-limits-address"
+            :mint-url="invoiceData.mint"
+            :unit="invoiceData.unit"
+          />
           <AmountHeadline v-if="invoiceData.amount">{{
             displayUnit
           }}</AmountHeadline>
-
-          <q-card-section class="q-pa-none">
-            <FlowColumn v-if="invoiceData?.mintQuote" class="q-px-md">
-              <MintQuoteInformation
-                hide-paid-status
-                :mint-quote="invoiceData.mintQuote"
-                :invoice="invoiceData"
-                :mint-url="invoiceData.mint"
-                :show-amount="!invoiceData.amount"
-                :method="invoiceMethod"
-                :refresh-trigger="metadataRefreshTrigger"
-              />
-            </FlowColumn>
-            <FlowColumn
-              v-else-if="invoiceData?.meltQuote"
-              class="q-px-md q-pt-lg"
-            >
-              <MeltQuoteInformation
-                hide-paid-status
-                :melt-quote="invoiceData.meltQuote"
-                :invoice="invoiceData"
-                :mint-url="invoiceData.mint"
-                :history-paid-at="invoiceData.paidDate"
-                :show-amount="!invoiceData.amount"
-                :refresh-trigger="metadataRefreshTrigger"
-              />
-            </FlowColumn>
-          </q-card-section>
-        </q-card-section>
+          <MintQuoteInformation
+            v-if="invoiceData?.mintQuote"
+            hide-paid-status
+            :mint-quote="invoiceData.mintQuote"
+            :invoice="invoiceData"
+            :mint-url="invoiceData.mint"
+            :show-amount="!invoiceData.amount"
+            :method="invoiceMethod"
+            :refresh-trigger="metadataRefreshTrigger"
+          />
+          <MeltQuoteInformation
+            v-else-if="invoiceData?.meltQuote"
+            hide-paid-status
+            :melt-quote="invoiceData.meltQuote"
+            :invoice="invoiceData"
+            :mint-url="invoiceData.mint"
+            :history-paid-at="invoiceData.paidDate"
+            :show-amount="!invoiceData.amount"
+            :refresh-trigger="metadataRefreshTrigger"
+          />
+        </FlowColumn>
       </div>
 
       <!-- Bottom panel action -->
@@ -106,14 +88,13 @@ import PaymentStatus from "src/components/ui/PaymentStatus.vue";
 import FlowDialog from "src/components/ui/FlowDialog.vue";
 import FlowFooter from "src/components/ui/FlowFooter.vue";
 import AmountHeadline from "src/components/ui/AmountHeadline.vue";
-import QrCopyLine from "src/components/ui/QrCopyLine.vue";
-import { shortenString } from "src/js/string-utils";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import QrBlock from "src/components/QrBlock.vue";
 import QrProgress from "src/components/QrProgress.vue";
 import FullscreenDialogHeader from "src/components/ui/FullscreenDialogHeader.vue";
 import { copyToClipboard } from "quasar";
+import { notifyCopied } from "src/js/notify";
 
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
@@ -135,7 +116,6 @@ export default defineComponent({
     FlowDialog,
     FlowFooter,
     AmountHeadline,
-    QrCopyLine,
     QrBlock,
     QrProgress,
     FullscreenDialogHeader,
@@ -236,12 +216,12 @@ export default defineComponent({
     },
   },
   methods: {
-    shortenString,
     onCopyBolt11: async function () {
       const request = this.invoiceData?.request;
       if (request) {
         try {
           await copyToClipboard(request);
+          notifyCopied();
           this.copyButtonCopied = true;
           // Clear any existing timeout
           if (this.copyButtonTimeout) {

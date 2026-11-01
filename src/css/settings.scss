@@ -8,7 +8,10 @@
   width: 100%;
   max-width: var(--app-column);
   margin: 0 auto;
-  overflow-x: hidden;
+  // clip, not hidden: hidden on one axis makes the column a scroll box clipping all four
+  // sides, which cut 4px off the focus rings of its full-width controls (hover audit F4).
+  overflow-x: clip;
+  overflow-clip-margin: 6px;
 }
 
 .settings-view,

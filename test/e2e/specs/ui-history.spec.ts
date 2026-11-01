@@ -90,9 +90,7 @@ for (const method of ["bolt11", "bolt12", "onchain"] as const) {
     await page.getByTestId("pay-payment-request").click();
     await expect(page.locator(".pay-fullscreen")).toBeHidden();
     await wallet.home("History");
-    await page
-      .getByRole("button", { name: "Show pending only", exact: true })
-      .click();
+    await wallet.filterHistory(["Pending"]);
     const row = page.getByTestId("history-row").first();
     await expect(row).toContainText("Pending");
     await page.unroute(`${MINT_A_URL}/v1/melt/quote/${method}/**`);
@@ -116,10 +114,7 @@ test("reopens, copies, filters, reclaims and deletes unclaimed ecash history", a
   const token = await wallet.sendEcash(25);
   await wallet.closeFullscreenDialog();
   await wallet.home("History");
-  await page
-    .getByRole("button", { name: "Show pending only", exact: true })
-    .click();
-  await page.getByRole("button", { name: "Ecash only", exact: true }).click();
+  await wallet.filterHistory(["Pending", "Ecash"]);
   const row = page.getByTestId("history-row").first();
   await expect(page.getByTestId("history-row")).toHaveCount(1);
   await row.getByTestId("history-details").click();
@@ -147,6 +142,7 @@ test("reopens, copies, filters, reclaims and deletes unclaimed ecash history", a
   await page.getByTestId("delete-token").click();
   await page.getByRole("button", { name: "Cancel", exact: true }).click();
   await expect(page.getByTestId("copy-ecash-token")).toBeVisible();
+  await page.getByTestId("token-more").click();
   await page.getByTestId("delete-token").click();
   await page.getByRole("button", { name: "Delete", exact: true }).click();
   await wallet.home();
@@ -166,10 +162,8 @@ test("paginates history and resets correctly when filtering an empty result", as
     .getByRole("button", { name: "2", exact: true })
     .click();
   await expect(page.getByTestId("history-row")).toHaveCount(1);
-  await page
-    .getByRole("button", { name: "Show pending only", exact: true })
-    .click();
-  await expect(page.getByText("No history yet", { exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "Show all", exact: true }).click();
+  await wallet.filterHistory(["Pending"]);
+  await expect(page.getByTestId("history-filter-empty")).toBeVisible();
+  await page.getByTestId("history-filter-clear").click();
   await expect(page.getByTestId("history-row")).toHaveCount(5);
 });

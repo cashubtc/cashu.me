@@ -15,24 +15,29 @@
       <div class="fiat-wrapper">
         <transition name="swap-secondary">
           <div :key="`secondary-${fiatMode}`" class="fiat-wrapper-content">
-            <div
-              class="fiat-display text-app-muted"
-              :class="{ invisible: !secondaryDisplay }"
-              @click="toggleFiatMode"
-            >
-              {{ secondaryDisplay || " " }}
-            </div>
-            <ArrowDownUpIcon
+            <!-- The other unit and its ⇅ are one centred pill, so the pair sits square under
+                 the amount (owner 2026-11-01: the hanging ⇅ read as off-centre). -->
+            <button
               v-if="showSwap"
-              :size="24"
-              class="fiat-icon text-app-muted cursor-pointer"
-              @click="toggleFiatMode"
+              type="button"
+              class="fiat-toggle fiat-display"
+              :class="{ invisible: !secondaryDisplay }"
               :aria-label="
                 $t('common.enter_amount_in', { fiat: bitcoinPriceCurrency })
               "
               :aria-pressed="fiatMode ? 'true' : 'false'"
-              role="button"
-            />
+              @click="toggleFiatMode"
+            >
+              <span>{{ secondaryDisplay || " " }}</span>
+              <ArrowDownUpIcon :size="16" aria-hidden="true" />
+            </button>
+            <div
+              v-else
+              class="fiat-display text-app-muted"
+              :class="{ invisible: !secondaryDisplay }"
+            >
+              {{ secondaryDisplay || " " }}
+            </div>
           </div>
         </transition>
       </div>
@@ -523,12 +528,33 @@ export default defineComponent({
   align-items: center;
   transform: translate(-50%, -50%);
 }
-.fiat-icon {
-  position: absolute;
-  inset-inline-start: 100%;
-  margin-inline-start: -6px;
-  padding: 10px;
-  box-sizing: content-box;
+.fiat-toggle {
+  align-items: center;
+  background: none;
+  border: 0;
+  border-radius: var(--app-radius-pill);
+  color: var(--app-text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  font-family: inherit;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 14px;
+  transition: background 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+@media (hover: hover) {
+  .fiat-toggle:hover {
+    background: var(--app-tint);
+    color: var(--app-text);
+  }
+}
+.fiat-toggle:active {
+  background: var(--app-tint-strong);
+}
+.fiat-toggle:focus-visible {
+  box-shadow: var(--app-focus-ring);
+  outline: none;
 }
 .invisible {
   visibility: hidden;

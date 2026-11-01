@@ -124,6 +124,16 @@ export default defineComponent({
   transition: color 0.2s ease;
   white-space: nowrap;
 }
+/* Block: equal shares of a full-width track, so a long label (Arabic "on-chain", German
+   "Abgeschlossen") gets a tighter inset and then wraps to a second line in its pill rather
+   than spilling into the next option. */
+.segmented--block .segmented__option {
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  padding: 4px 8px;
+  text-wrap: balance;
+  white-space: normal;
+}
 .segmented__option--on {
   color: var(--app-on-primary);
   font-weight: 600;

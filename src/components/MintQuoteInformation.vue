@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="hasQuote"
-    class="mint-quote-information detail-table q-mt-md"
+    class="mint-quote-information detail-table"
     :class="containerTextClass"
   >
     <DetailRow
@@ -38,13 +38,23 @@
       :value="networkDisplay"
     />
 
-    <!-- The deposit address always shows on an on-chain invoice, paid or pending, linked to
-         an explorer when the network has one (it came and went). -->
+    <!-- What the payer pays lives in the table, not as a line under the QR (owner
+         2026-11-01): a Lightning invoice copies; the deposit address always shows, paid or
+         pending, copying while it waits and linking to an explorer once paid (it came and
+         went). -->
+    <DetailRow
+      v-if="!isOnchain && invoice?.request"
+      :icon="ReceiptTextIcon"
+      :label="$t('QuoteInformation.invoice')"
+      :copy-value="invoice.request"
+      ><bdi dir="ltr">{{ shortAddress(invoice.request) }}</bdi></DetailRow
+    >
     <DetailRow
       v-if="isOnchain && invoice?.request"
       :icon="HashIcon"
       :label="$t('QuoteInformation.address')"
-      :href="addressExplorerUrl"
+      :href="isPaidState ? addressExplorerUrl : null"
+      :copy-value="isPaidState && addressExplorerUrl ? '' : invoice.request"
       ><bdi dir="ltr">{{ shortAddress(invoice.request) }}</bdi></DetailRow
     >
 
@@ -89,6 +99,7 @@ import {
   Hash as HashIcon,
   Building2 as MintIcon,
   Network as NetworkIcon,
+  ReceiptText as ReceiptTextIcon,
   Zap as ZapIcon,
 } from "lucide-vue-next";
 import DetailRow from "src/components/ui/DetailRow.vue";
@@ -126,6 +137,7 @@ export default defineComponent({
       HashIcon,
       MintIcon,
       NetworkIcon,
+      ReceiptTextIcon,
       ZapIcon,
     };
   },

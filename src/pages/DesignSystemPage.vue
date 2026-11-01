@@ -285,6 +285,15 @@
           <IconButton label="Delete" :icon="Trash2Icon" tooltip />
         </div>
       </DsEntry>
+      <DsEntry id="app-menu">
+        <div class="ds-frame row justify-end q-pa-sm">
+          <AppMenu
+            label="More options"
+            :items="menuSample"
+            @select="toast('info')"
+          />
+        </div>
+      </DsEntry>
       <DsEntry id="copy-button">
         <div class="row items-center q-gutter-md">
           <CopyButton value="lnurl1example" tooltip="Copy" />
@@ -891,9 +900,7 @@
         <div class="ds-frame q-mt-sm">
           <FullscreenDialogHeader title="Lightning invoice">
             <template #actions>
-              <div class="sheet-header-actions">
-                <IconButton label="More" :icon="EllipsisIcon" />
-              </div>
+              <AppMenu label="More options" :items="menuSample" />
             </template>
           </FullscreenDialogHeader>
         </div>
@@ -1208,7 +1215,10 @@
           :copied="qrCopied"
           @copy="qrCopied = !qrCopied"
         />
-        <QrCopyLine text="creqApGF0gaNhd...dWNzYXQ=" copied />
+        <QrCopyLine
+          text="npub18875ua0xq02vsu9f7vzd06e8tsknvdeseequ0l34glkgxsudyhnsem37pe@npub.cash"
+          copied
+        />
       </DsEntry>
       <DsEntry id="qr-progress">
         <div class="ds-qr-progress q-mx-auto">
@@ -1238,37 +1248,7 @@
         />
       </DsEntry>
       <DsEntry id="toasts">
-        <!-- The real toast classes, static: the same five messages as the variations. -->
-        <div class="ds-toast-stack q-mb-md">
-          <div
-            v-for="t in toastSpecimen"
-            :key="t.message"
-            class="q-notification row items-stretch q-notification--standard ui-kit-toast"
-            :class="`bg-${t.type}`"
-          >
-            <div
-              class="row items-center no-wrap q-notification__wrapper full-width"
-            >
-              <q-icon
-                :name="t.icon"
-                size="18px"
-                class="q-notification__icon q-mr-sm"
-              />
-              <div class="q-notification__message col">
-                {{ t.message }}
-                <div v-if="t.caption" class="q-notification__caption">
-                  {{ t.caption }}
-                </div>
-              </div>
-              <div class="q-notification__actions row items-center">
-                <q-btn v-if="t.action" flat :label="t.action" />
-                <q-btn v-else flat round dense color="grey"
-                  ><XIcon :size="16"
-                /></q-btn>
-              </div>
-            </div>
-          </div>
-        </div>
+        <!-- Live: each button sends a real toast (top-centre, Sonner). -->
         <div class="row q-gutter-sm">
           <q-btn rounded outline @click="toast('success')">Success</q-btn>
           <q-btn rounded outline @click="toast('error')">Error</q-btn>
@@ -1298,6 +1278,12 @@
           Loading: the component draws itself as a skeleton
         </div>
         <MintCard skeleton />
+      </DsEntry>
+      <DsEntry id="mint-switch-ring">
+        <div class="row items-center q-gutter-md">
+          <MintSwitchRing />
+          <span class="text-app-muted">The wallet is switching mint.</span>
+        </div>
       </DsEntry>
       <DsEntry id="busy-label">
         <div class="column q-gutter-y-sm">
@@ -1699,7 +1685,6 @@ import MintIdentityHeader from "src/components/MintIdentityHeader.vue";
 import MintInfoContainer from "src/components/MintInfoContainer.vue";
 import * as Lucide from "lucide-vue-next";
 import { lucideIcons, materialIcons } from "src/design-system/icons";
-import { lucideIcon } from "src/js/lucide-icons";
 import SheetOption from "src/components/SheetOption.vue";
 import SheetSelect from "src/components/SheetSelect.vue";
 import MintCard from "src/components/MintCard.vue";
@@ -1712,6 +1697,8 @@ import BlockingState from "src/components/ui/BlockingState.vue";
 import ConfirmDialog from "src/components/ui/ConfirmDialog.vue";
 import CopyField from "src/components/ui/CopyField.vue";
 import IconButton from "src/components/ui/IconButton.vue";
+import AppMenu from "src/components/ui/AppMenu.vue";
+import MintSwitchRing from "src/components/ui/MintSwitchRing.vue";
 import IconCircle from "src/components/ui/IconCircle.vue";
 import OptionRow from "src/components/ui/OptionRow.vue";
 import PendingDots from "src/components/ui/PendingDots.vue";
@@ -1797,6 +1784,8 @@ import {
   ArchiveRestore as ArchiveRestoreIcon,
   Eye as EyeIcon,
   Trash2 as Trash2Icon,
+  Nfc as NfcIcon,
+  Share as ShareIcon,
   Zap as ZapIcon,
 } from "lucide-vue-next";
 
@@ -1881,6 +1870,8 @@ export default defineComponent({
     ConfirmDialog,
     CopyField,
     IconButton,
+    AppMenu,
+    MintSwitchRing,
     IconCircle,
     OptionRow,
     PendingDots,
@@ -1923,6 +1914,27 @@ export default defineComponent({
       PlusIconRaw: markRaw(PlusIcon),
       EyeIcon: markRaw(EyeIcon),
       Trash2Icon: markRaw(Trash2Icon),
+      menuSample: [
+        {
+          key: "emoji",
+          icon: markRaw(CopyIcon),
+          label: "Copy emoji",
+          grid: ["🥜", "🌰", "🍫", "🍪", "🎁", "🚀"].map((glyph) => ({
+            key: glyph,
+            glyph,
+            label: glyph,
+          })),
+        },
+        { key: "copy", icon: markRaw(CopyIcon), label: "Copy link" },
+        { key: "share", icon: markRaw(ShareIcon), label: "Share ecash" },
+        { key: "nfc", icon: markRaw(NfcIcon), label: "Flash to NFC card" },
+        {
+          key: "delete",
+          icon: markRaw(Trash2Icon),
+          label: "Delete from history",
+          danger: true,
+        },
+      ],
     };
   },
   provide() {
@@ -2005,35 +2017,6 @@ export default defineComponent({
           title: "Mint message",
           text: "Maintenance tonight from 22:00 UTC.",
           dismissible: true,
-        },
-      ],
-      toastSpecimen: [
-        {
-          type: "positive",
-          icon: lucideIcon(Lucide.CircleCheck),
-          message: "Received ₿500",
-        },
-        {
-          type: "negative",
-          icon: lucideIcon(Lucide.CircleAlert),
-          message: "Payment failed",
-          caption: "The mint didn't respond. Try again.",
-        },
-        {
-          type: "warning",
-          icon: lucideIcon(Lucide.TriangleAlert),
-          message: "Mint is offline",
-        },
-        {
-          type: "info",
-          icon: lucideIcon(Lucide.Info),
-          message: "Copied to clipboard",
-        },
-        {
-          type: "neutral",
-          icon: lucideIcon(Lucide.Trash2),
-          message: "Mint removed",
-          action: "Undo",
         },
       ],
       lucideIcons,
@@ -2354,7 +2337,7 @@ export default defineComponent({
       else if (kind === "warning") notifyWarning("This mint is offline");
       else notify("Copied");
     },
-    // The real queue: three at once keep the newest two, newest on top.
+    // The real stack: the newest in front, the older two tucked behind; hover fans them out.
     toastBurst() {
       notifySuccess("Received ₿500");
       notifyWarning("This mint is offline");
@@ -2569,10 +2552,6 @@ body.body--light .ds-light-variant--l3 {
   border-radius: 12px;
   overflow: hidden;
 }
-.ui-kit-toast {
-  position: static;
-  margin: 0;
-}
 .ui-kit-item-title {
   font-size: 15px;
   font-weight: 600;
@@ -2635,13 +2614,6 @@ body.body--light .ds-light-variant--l3 {
   inset-inline-end: 6px;
   position: absolute;
   top: 4px;
-}
-.ds-toast-stack {
-  align-items: center;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
 }
 .ds-phone {
   background: var(--app-surface);

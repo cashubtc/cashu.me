@@ -28,6 +28,7 @@ export default {
     paid: "Payé {amount} via Lightning",
   },
   global: {
+    notifications: "Notifications",
     copy_to_clipboard: {
       success: "Copié dans le presse-papiers !",
     },
@@ -64,6 +65,9 @@ export default {
       },
       scan: {
         label: "Scanner",
+      },
+      more_options: {
+        label: "Plus d'options",
       },
       clear: {
         label: "Effacer",
@@ -1487,25 +1491,34 @@ export default {
   HistoryTable: {
     empty_text: "Aucun historique pour l'instant",
     empty_hint: "Les paiements envoyés et reçus apparaissent ici.",
+    filters: {
+      title: "Filtrer l'historique",
+      direction: "Sens",
+      type: "Type",
+      all: "Tout",
+      all_mints: "Tous les mints",
+      completed: "Terminé",
+      received: "Reçu",
+      sent: "Envoyé",
+      show_results: "Voir les résultats ({count})",
+      reset: "Réinitialiser",
+      clear_all: "Tout effacer",
+      remove: "Retirer le filtre : {label}",
+      empty_title: "Aucun paiement ne correspond à ces filtres",
+      clear: "Effacer les filtres",
+      count: "{shown} sur {total}",
+      active: "Filtrer l'historique, {count} actifs",
+    },
     row: {
       type_label: "Ecash",
       date_label: "Il y a { value }",
     },
     actions: {
-      filter_ecash_only: {
-        label: "Ecash uniquement",
-      },
       check_status: {
         tooltip_text: "Vérifier le statut",
       },
       receive: {
         tooltip_text: "Recevoir",
-      },
-      filter_pending: {
-        label: "Afficher uniquement en attente",
-      },
-      show_all: {
-        label: "Tout afficher",
       },
     },
     old_token_not_found_error_text: "Ancien jeton introuvable",
@@ -1723,6 +1736,7 @@ export default {
   },
   TokenInformation: {
     fee: "Frais",
+    token: "Token",
     unit: "Unité",
     fiat: "Fiat",
     p2pk: "P2PK",
@@ -1773,6 +1787,8 @@ export default {
   },
   QuoteInformation: {
     address: "Adresse",
+    invoice: "Facture",
+    request: "Demande",
     amount: "Montant",
     fee_reserve: "Réserve de frais",
     fee_paid: "Frais payés",

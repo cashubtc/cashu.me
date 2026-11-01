@@ -1,5 +1,6 @@
 export default {
   global: {
+    notifications: "Oznámení",
     copy_to_clipboard: {
       success: "Zkopírováno do schránky!",
     },
@@ -36,6 +37,9 @@ export default {
       },
       scan: {
         label: "Skenovat",
+      },
+      more_options: {
+        label: "Další možnosti",
       },
       clear: {
         label: "Vymazat",
@@ -1548,25 +1552,34 @@ export default {
   HistoryTable: {
     empty_text: "Žádná historie zatím",
     empty_hint: "Zde se zobrazí platby, které odešlete a přijmete.",
+    filters: {
+      title: "Filtrovat historii",
+      direction: "Směr",
+      type: "Typ",
+      all: "Vše",
+      all_mints: "Všechny minty",
+      completed: "Dokončeno",
+      received: "Přijato",
+      sent: "Odesláno",
+      show_results: "Zobrazit výsledky ({count})",
+      reset: "Obnovit",
+      clear_all: "Zrušit vše",
+      remove: "Odebrat filtr: {label}",
+      empty_title: "Žádné platby neodpovídají filtrům",
+      clear: "Zrušit filtry",
+      count: "{shown} z {total}",
+      active: "Filtrovat historii, aktivní: {count}",
+    },
     row: {
       type_label: "Ecash",
       date_label: "před { value }",
     },
     actions: {
-      filter_ecash_only: {
-        label: "Jen ecash",
-      },
       check_status: {
         tooltip_text: "Zkontrolovat stav",
       },
       receive: {
         tooltip_text: "Přijmout",
-      },
-      filter_pending: {
-        label: "Jen čekající",
-      },
-      show_all: {
-        label: "Zobrazit vše",
       },
     },
     old_token_not_found_error_text: "Starý token nenalezen",
@@ -1788,6 +1801,7 @@ export default {
   },
   TokenInformation: {
     fee: "Poplatek",
+    token: "Token",
     unit: "Jednotka",
     fiat: "Fiat",
     p2pk: "P2PK",
@@ -1801,6 +1815,8 @@ export default {
   },
   QuoteInformation: {
     address: "Adresa",
+    invoice: "Faktura",
+    request: "Požadavek",
     amount: "Částka",
     fee_reserve: "Rezerva na poplatek",
     fee_paid: "Zaplacený poplatek",

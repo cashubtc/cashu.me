@@ -325,7 +325,6 @@ export default defineComponent({
         },
         amount: undefined,
       },
-      activatingMintUrl: "",
       mintInfoCache: new Map(),
       fetchingMintInfo: new Set(),
     };
@@ -343,6 +342,7 @@ export default defineComponent({
       "mints",
       "activeProofs",
       "addMintBlocking",
+      "activatingMintUrl",
     ]),
     ...mapState(useNostrStore, ["pubkey"]),
     ...mapState(useMintRecommendationsStore, ["recommendations"]),
@@ -410,14 +410,11 @@ export default defineComponent({
       });
     },
     activateMintUrlInternal: async function (mintUrl) {
-      this.activatingMintUrl = mintUrl;
-      console.log(`Activating mint ${this.activatingMintUrl}`);
+      console.log(`Activating mint ${mintUrl}`);
       try {
         await this.activateMintUrl(mintUrl, false, true);
       } catch (e) {
         console.log("#### Error activating mint:", e);
-      } finally {
-        this.activatingMintUrl = "";
       }
     },
     validateMintUrl: function (url) {

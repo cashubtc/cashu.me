@@ -66,7 +66,7 @@
           <div
             v-if="qrPreview"
             :key="qrPreview.key"
-            class="row justify-center full-width q-mt-lg q-mb-auto"
+            class="row justify-center full-width receive-qr-preview q-mb-auto"
           >
             <div class="col-12" style="max-width: 400px">
               <div
@@ -277,7 +277,7 @@ import {
   onchainDepositAmountInBaseUnits,
   onchainDepositQrValue,
 } from "src/js/onchain";
-import { notifyError } from "src/js/notify";
+import { notifyCopied, notifyError } from "src/js/notify";
 import { i18n } from "src/boot/i18n";
 import { useNpubCashStore } from "src/stores/npubcash";
 import { lightningAddressToLnurl } from "src/js/lnurl";
@@ -671,6 +671,7 @@ export default defineComponent({
       if (!this.npubCashAddress) return;
       try {
         await copyToClipboard(this.npubCashAddress);
+        notifyCopied();
         this.npubCashAddressCopied = true;
         if (this.npubCashCopyTimeout) {
           clearTimeout(this.npubCashCopyTimeout);
@@ -807,6 +808,7 @@ export default defineComponent({
       if (request) {
         try {
           await copyToClipboard(request);
+          notifyCopied();
           this.copyButtonCopied = true;
           if (this.copyButtonTimeout) {
             clearTimeout(this.copyButtonTimeout);
@@ -884,6 +886,11 @@ export default defineComponent({
   width: 48px;
 }
 
+/* The picker's own 16px and its column's 8px already sit above: the QR lands one 16px step
+   under the picker, like every gap in the stack below it (council 2026-11-01). */
+.receive-qr-preview {
+  margin-top: -8px;
+}
 .qr-container {
   position: relative;
   border-radius: var(--app-radius-md);

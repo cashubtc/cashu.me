@@ -120,7 +120,9 @@ export default defineComponent({
 .q-header {
   position: relative;
   z-index: auto;
-  overflow-x: hidden;
+  /* clip, not hidden: hidden made the header a scroll box that cut 1px off the top and
+     bottom of its buttons' focus rings (hover audit F6). */
+  overflow-x: clip;
 }
 
 .q-toolbar {

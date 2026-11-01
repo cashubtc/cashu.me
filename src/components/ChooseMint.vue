@@ -60,6 +60,7 @@
           class="mint-picker__trigger"
           :data-testid="testId + '-trigger'"
           :label="triggerLabel"
+          :aria-busy="switching || undefined"
           :disable="disable"
           aria-haspopup="listbox"
           :aria-expanded="showMintSheet ? 'true' : 'false'"
@@ -67,7 +68,11 @@
           :aria-describedby="describedBy"
           @click.stop="openSheet"
         >
+          <!-- While the wallet switches mint, the mint card's ring takes the chevron's
+               place: the same event, the same mark. -->
+          <MintSwitchRing v-if="switching" />
           <ChevronDownIcon
+            v-else
             :size="20"
             class="mint-picker__chevron"
             aria-hidden="true"
@@ -128,6 +133,7 @@
 <script lang="ts">
 import IconCircle from "src/components/ui/IconCircle.vue";
 import IconButton from "src/components/ui/IconButton.vue";
+import MintSwitchRing from "src/components/ui/MintSwitchRing.vue";
 import {
   Building2 as MintIcon,
   ChevronDown as ChevronDownIcon,
@@ -167,6 +173,7 @@ export default defineComponent({
     IconButton,
     MintIcon,
     ChevronDownIcon,
+    MintSwitchRing,
     BottomSheet,
     SheetOption,
   },
@@ -311,7 +318,17 @@ export default defineComponent({
     },
   },
   computed: {
-    ...mapState(useMintsStore, ["activeProofs", "mints", "activeUnit"]),
+    ...mapState(useMintsStore, [
+      "activeProofs",
+      "mints",
+      "activeUnit",
+      "activatingMintUrl",
+    ]),
+    // The wallet is switching mint and this picker shows the wallet's mint (not a dry-run
+    // choice such as a payment request's).
+    switching(): boolean {
+      return Boolean(this.activatingMintUrl) && !this.dryRun;
+    },
     ...mapWritableState(useMintsStore, ["activeMintUrl"]),
     chosenName(): string {
       return (

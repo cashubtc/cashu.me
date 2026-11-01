@@ -82,7 +82,7 @@ test("rejects a swap larger than the source balance and remains usable", async (
   await page.getByRole("button", { name: "Swap", exact: true }).click();
   await expect(
     page
-      .locator(".q-notification")
+      .locator("[data-sonner-toast]")
       .filter({ hasText: /balance|funds|enough/i })
       .first()
   ).toBeVisible();

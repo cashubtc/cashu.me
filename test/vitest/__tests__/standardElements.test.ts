@@ -353,16 +353,25 @@ describe("standard elements", () => {
 
   // The one exception is MintCard's ring while the wallet switches to that mint (owner
   // 2026-10-29); busy buttons and pending rows keep the dots.
-  it("one pending mark: no spinner outside PendingDots and the mint card's switch", () => {
+  // The ring means one thing, the wallet switching mint (MintSwitchRing): the mint card being
+  // switched to and the mint picker under the balance (owner 2026-11-01). Everything else that
+  // waits shows PendingDots.
+  it("one pending mark: no spinner outside PendingDots and the mint switch ring", () => {
     expect(
       offenders((text) => /<q-spinner/.test(text)).filter(
         (file) =>
-          !file.endsWith("ui/PendingDots.vue") && !file.endsWith("MintCard.vue")
+          !file.endsWith("ui/PendingDots.vue") &&
+          !file.endsWith("ui/MintSwitchRing.vue")
       )
     ).toEqual([]);
+    expect(offenders((text) => /<MintSwitchRing\b/.test(text)).sort()).toEqual(
+      expect.arrayContaining([
+        "components/ChooseMint.vue",
+        "components/MintCard.vue",
+      ])
+    );
     const card = readFileSync(join(SRC, "components/MintCard.vue"), "utf8");
-    expect(card.match(/<q-spinner\b[^>]*>/g)).toHaveLength(1);
-    expect(card).toMatch(/<q-spinner\s+v-if="busy"/);
+    expect(card).toMatch(/<MintSwitchRing\s+v-if="busy"/);
   });
 
   // Owner 2026-10-29 (items 1, 13): the selected mint shows a check, not an "Active" badge,
@@ -526,17 +535,12 @@ describe("standard elements", () => {
     expect(css).not.toMatch(/wallet-history-handle/);
   });
 
-  it("toasts sit at the top, with no bottom or tucked stack", () => {
+  it("toasts sit at the top centre, in one Toaster", () => {
+    const app = readFileSync(join(SRC, "App.vue"), "utf8");
+    expect(app.match(/<Toaster\b/g)?.length).toBe(1);
+    expect(app).toMatch(/<Toaster[^>]*position="top-center"/);
     const notify = readFileSync(join(SRC, "js/notify.ts"), "utf8");
-    expect(notify).toMatch(
-      /POSITION: QNotifyCreateOptions\["position"\] = "top"/
-    );
-    expect(notify).not.toMatch(/position:\s*"bottom/);
-    const app = readFileSync(join(SRC, "css/app.scss"), "utf8");
-    expect(app).not.toMatch(
-      /q-notifications__list--bottom|q-notification--bottom-/
-    );
-    expect(app).not.toMatch(/\.q-notification:not\(:last-child\)/);
+    expect(notify).not.toMatch(/position:/);
   });
 
   it("desktop flows fill the window (owner 2026-10-29, item 28)", () => {

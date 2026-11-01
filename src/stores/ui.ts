@@ -1,4 +1,8 @@
 import { defineStore } from "pinia";
+import {
+  DEFAULT_HISTORY_FILTERS,
+  type HistoryFilters,
+} from "src/js/history-filters";
 import { useMintsStore } from "./mints";
 import { useLocalStorage } from "@vueuse/core";
 import {
@@ -61,6 +65,9 @@ const unitTickerShortMap = {
 export const useUiStore = defineStore("ui", {
   state: () => ({
     hideBalance: useLocalStorage<boolean>("cashu.ui.hideBalance", false),
+    // The history list's filters: kept while the app runs (switching to Mints and back keeps
+    // them), never across launches, so the list always opens unfiltered.
+    historyFilters: { ...DEFAULT_HISTORY_FILTERS } as HistoryFilters,
     tickerLong: "Satoshis",
     showInvoiceDetails: false,
     showCreateInvoiceDialog: false,

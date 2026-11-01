@@ -81,7 +81,7 @@ test("rejects a structurally invalid backup before writing wallet state", async 
       async () =>
         loaded ||
         (await page
-          .locator(".q-notification")
+          .locator("[data-sonner-toast]")
           .filter({ hasText: /invalid|unrecognized/i })
           .isVisible())
     )

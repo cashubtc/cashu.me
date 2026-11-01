@@ -25,6 +25,7 @@ export default {
   },
 
   global: {
+    notifications: "การแจ้งเตือน",
     copy_to_clipboard: {
       success: "คัดลอกไปยังคลิปบอร์ดแล้ว!",
     },
@@ -61,6 +62,9 @@ export default {
       },
       scan: {
         label: "สแกน",
+      },
+      more_options: {
+        label: "ตัวเลือกเพิ่มเติม",
       },
       clear: {
         label: "ล้าง",
@@ -1452,25 +1456,34 @@ export default {
   HistoryTable: {
     empty_text: "ยังไม่มีประวัติ",
     empty_hint: "การชำระเงินที่คุณส่งและรับจะแสดงที่นี่",
+    filters: {
+      title: "กรองประวัติ",
+      direction: "ทิศทาง",
+      type: "ประเภท",
+      all: "ทั้งหมด",
+      all_mints: "มินต์ทั้งหมด",
+      completed: "เสร็จสิ้น",
+      received: "ได้รับ",
+      sent: "ส่งแล้ว",
+      show_results: "แสดงผลลัพธ์ ({count})",
+      reset: "รีเซ็ต",
+      clear_all: "ล้างทั้งหมด",
+      remove: "ลบตัวกรอง: {label}",
+      empty_title: "ไม่มีการชำระเงินที่ตรงกับตัวกรอง",
+      clear: "ล้างตัวกรอง",
+      count: "{shown} จาก {total}",
+      active: "กรองประวัติ ใช้งาน {count} รายการ",
+    },
     row: {
       type_label: "Ecash",
       date_label: "{ value } ที่ผ่านมา",
     },
     actions: {
-      filter_ecash_only: {
-        label: "เฉพาะ ecash",
-      },
       check_status: {
         tooltip_text: "ตรวจสอบสถานะ",
       },
       receive: {
         tooltip_text: "รับ",
-      },
-      filter_pending: {
-        label: "แสดงเฉพาะที่รอดำเนินการ",
-      },
-      show_all: {
-        label: "แสดงทั้งหมด",
       },
     },
     old_token_not_found_error_text: "ไม่พบโทเค็นเก่า",
@@ -1687,6 +1700,7 @@ export default {
   },
   TokenInformation: {
     fee: "ค่าธรรมเนียม",
+    token: "โทเค็น",
     unit: "หน่วย",
     fiat: "สกุลเงิน",
     p2pk: "P2PK",
@@ -1737,6 +1751,8 @@ export default {
   },
   QuoteInformation: {
     address: "ที่อยู่",
+    invoice: "ใบแจ้งหนี้",
+    request: "คำขอ",
     amount: "จำนวน",
     fee_reserve: "ค่าธรรมเนียมสำรอง",
     fee_paid: "ค่าธรรมเนียมที่จ่าย",

@@ -161,6 +161,19 @@ export const DS_ITEMS: DsItem[] = [
     note: "Always labelled. Close, back and menu at 24px; actions at 20px. Busy shows the pending dots.",
   },
   {
+    id: "app-menu",
+    name: "Overflow menu",
+    group: "actions",
+    tier: "primitive",
+    source: "src/components/ui/AppMenu.vue",
+    usage: { tag: "AppMenu" },
+    example: `<AppMenu :label="$t('global.actions.more_options.label')" :items="[
+  { key: 'link', icon: LinkIcon, label: 'Copy link' },
+  { key: 'delete', icon: Trash2Icon, label: 'Delete from history', danger: true },
+]" @select="onMenuSelect" />`,
+    note: "The header's ⋯: labelled actions, destructive ones last under a hairline. Desktop: an anchored list on Reka UI's DropdownMenu (keyboard, focus return, collision placement, right-to-left; inside a dialog it mounts in the dialog). Phones (under 600px): the same actions as option rows in a bottom sheet. A grid item (the emoji picker) opens as a second page in either.",
+  },
+  {
     id: "copy-button",
     name: "Copy button",
     group: "actions",
@@ -621,7 +634,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/components/ui/QrCopyLine.vue",
     usage: { tag: "QrCopyLine" },
     example: `<QrCopyLine :text="address" :copied="copied" @copy="copyAddress" />`,
-    note: "The tap-to-copy text under every QR (on-chain address, Lightning address, payment request): the copy glyph turns into a check once copied.",
+    note: "The tap-to-copy text under a QR that has no detail table (the Lightning address preview, a P2PK key): the copy glyph turns into a check once copied. Where a table follows the QR (invoices, payment requests, tokens), the text is a copy row in it instead.",
   },
   {
     id: "qr-progress",
@@ -658,10 +671,11 @@ export const DS_ITEMS: DsItem[] = [
     name: "Toast",
     group: "feedback",
     tier: "primitive",
-    source: "src/js/notify.ts · src/css/app.scss body .q-notification",
+    source:
+      "src/js/notify.ts · src/App.vue Toaster · src/css/app.scss [data-sonner-toaster]",
     usage: { text: "notifySuccess(" },
     example: `notifySuccess("Received ₿500");`,
-    note: "Top-centre, newest first, at most two fully readable cards 8px apart, each with a 44px close; a third dismisses the oldest.",
+    note: "shadcn's Sonner (vue-sonner) on our tokens: top-centre, sliding in from the edge; older toasts tuck behind the newest and fan out on hover; ✕, swipe or time closes one. The tone is the icon's colour, the callout's glyph.",
   },
   {
     id: "loading",
@@ -674,7 +688,17 @@ export const DS_ITEMS: DsItem[] = [
     example: `<PendingDots />
 <template #loading><BusyLabel>Creating</BusyLabel></template>
 <MintCard skeleton />  <ActivityRow skeleton />  <ReviewItem skeleton />`,
-    note: "Anything pending or busy shows the three dots, never a pulse; the one ring is a mint card while the wallet switches to it (owner 2026-10-29). A busy button's label is BusyLabel (dots before the text). Loading lists render their own rows with skeleton set, so nothing moves when data arrives.",
+    note: "Anything pending or busy shows the three dots, never a pulse; the one ring is the mint switch (MintSwitchRing). A busy button's label is BusyLabel (dots before the text). Loading lists render their own rows with skeleton set, so nothing moves when data arrives.",
+  },
+  {
+    id: "mint-switch-ring",
+    name: "Mint switch ring",
+    group: "feedback",
+    tier: "primitive",
+    source: "src/components/ui/MintSwitchRing.vue",
+    usage: { tag: "MintSwitchRing" },
+    example: `<MintSwitchRing v-if="switching" />`,
+    note: "The one ring, for one event: the wallet switching mint. The mint card being switched to shows it in its status cell, and the mint picker under the balance in place of its chevron (owner 2026-10-29, 2026-11-01). Everything else that waits shows the pending dots.",
   },
   {
     id: "busy-label",

@@ -85,22 +85,19 @@
                     "
                     class="q-mb-md"
                   >
-                    <div class="text-h4 text-weight-bold q-mb-xs">
-                      <i18n-t keypath="PayInvoiceDialog.invoice.title">
-                        <template v-slot:value>
-                          {{
-                            formatCurrency(
-                              payInvoiceData.meltQuote.response.amount,
-                              activeUnit,
-                              true
-                            )
-                          }}
-                        </template>
-                      </i18n-t>
-                    </div>
+                    <!-- The amount as on every payment screen (owner 2026-11-01: the
+                         confirm step is redesigned to match Receive): centred, its fiat
+                         under it; the details follow in one table. -->
+                    <AmountHeadline>{{
+                      formatCurrency(
+                        payInvoiceData.meltQuote.response.amount,
+                        activeUnit,
+                        true
+                      )
+                    }}</AmountHeadline>
                     <div
                       v-if="bitcoinPrice && activeUnit == 'sat'"
-                      class="text-subtitle2 text-app-muted q-ml-xs"
+                      class="pay-fiat text-app-muted"
                     >
                       {{
                         formatCurrency(
@@ -177,21 +174,6 @@
                         </div>
                       </div>
                     </div>
-                    <p
-                      class="text-wrap q-mt-xl"
-                      style="max-width: 600px; font-size: 1.1rem"
-                      v-if="
-                        payInvoiceData.invoice.description &&
-                        payInvoiceData.meltQuote.response
-                      "
-                    >
-                      <strong
-                        >{{
-                          $t("PayInvoiceDialog.invoice.memo.label")
-                        }}:</strong
-                      >
-                      {{ payInvoiceData.invoice.description }}<br />
-                    </p>
                   </div>
                   <div
                     v-else-if="showInvoiceErrorState"
@@ -247,6 +229,9 @@
               <MeltQuoteInformation
                 :melt-quote="payInvoiceData.meltQuote.response"
                 :mint-url="activeMintUrl"
+                :show-amount="false"
+                hide-status
+                :memo="payInvoiceData.invoice.description || ''"
               />
             </div>
           </div>
@@ -622,6 +607,7 @@
 <script lang="ts">
 import FlowColumn from "src/components/ui/FlowColumn.vue";
 import PaymentStatus from "src/components/ui/PaymentStatus.vue";
+import AmountHeadline from "src/components/ui/AmountHeadline.vue";
 import FlowDialog from "src/components/ui/FlowDialog.vue";
 import BusyLabel from "src/components/ui/BusyLabel.vue";
 import FlowFooter from "src/components/ui/FlowFooter.vue";
@@ -655,6 +641,7 @@ export default defineComponent({
   name: "PayInvoiceDialog",
   mixins: [windowMixin],
   components: {
+    AmountHeadline,
     FlowColumn,
     UnitToggle,
     PaymentStatus,
@@ -1209,11 +1196,17 @@ export default defineComponent({
   width: 100%;
 }
 
+/* The details follow the amount, as on Receive; they no longer sink to the footer across an
+   empty gap (owner 2026-11-01). */
 .invoice-details-bottom {
   width: 100%;
-  margin-top: auto;
-  padding-top: 16px;
+  padding-top: 8px;
   padding-bottom: clamp(20px, 4vh, 36px);
+}
+.pay-fiat {
+  font-size: 16px;
+  margin-top: 4px;
+  text-align: center;
 }
 
 .invoice-state-container {

@@ -24,6 +24,7 @@ export default {
     paid: "Lightningで{amount}を支払いました",
   },
   global: {
+    notifications: "通知",
     copy_to_clipboard: {
       success: "クリップボードにコピーしました！",
     },
@@ -60,6 +61,9 @@ export default {
       },
       scan: {
         label: "スキャン",
+      },
+      more_options: {
+        label: "その他のオプション",
       },
       clear: {
         label: "クリア",
@@ -1465,25 +1469,34 @@ export default {
   HistoryTable: {
     empty_text: "履歴はまだありません",
     empty_hint: "送受信した支払いがここに表示されます。",
+    filters: {
+      title: "履歴を絞り込む",
+      direction: "方向",
+      type: "種類",
+      all: "すべて",
+      all_mints: "すべてのミント",
+      completed: "完了",
+      received: "受け取り",
+      sent: "送金",
+      show_results: "結果を表示（{count}）",
+      reset: "リセット",
+      clear_all: "すべて解除",
+      remove: "フィルターを解除: {label}",
+      empty_title: "条件に一致する支払いはありません",
+      clear: "フィルターを解除",
+      count: "{shown} / {total}",
+      active: "履歴を絞り込む（{count} 件適用中）",
+    },
     row: {
       type_label: "Ecash",
       date_label: "{ value }前",
     },
     actions: {
-      filter_ecash_only: {
-        label: "ecash のみ",
-      },
       check_status: {
         tooltip_text: "ステータスを確認",
       },
       receive: {
         tooltip_text: "受け取る",
-      },
-      filter_pending: {
-        label: "保留中のみ表示",
-      },
-      show_all: {
-        label: "すべて表示",
       },
     },
     old_token_not_found_error_text: "古いトークンが見つかりません",
@@ -1701,6 +1714,7 @@ export default {
   },
   TokenInformation: {
     fee: "手数料",
+    token: "トークン",
     unit: "単位",
     fiat: "フィアット",
     p2pk: "P2PK",
@@ -1751,6 +1765,8 @@ export default {
   },
   QuoteInformation: {
     address: "アドレス",
+    invoice: "請求書",
+    request: "リクエスト",
     amount: "金額",
     fee_reserve: "手数料の予備",
     fee_paid: "支払った手数料",

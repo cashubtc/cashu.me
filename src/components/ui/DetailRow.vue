@@ -273,6 +273,7 @@ export default defineComponent({
 }
 .detail-value--placeholder {
   color: var(--app-text-muted);
+  font-weight: 400;
 }
 /* A picture icon takes the icon colour of every other row (the SVGs are a fixed grey). */
 .detail-icon--mask {

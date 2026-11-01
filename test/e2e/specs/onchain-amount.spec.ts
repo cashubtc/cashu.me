@@ -179,7 +179,8 @@ test("validates new on-chain addresses while preserving quote reuse and history 
   await create.click();
   const quote = await (await created).json();
   const addressText = page.locator(".qr-copy-line:visible");
-  await expect(addressText).toContainText(quote.request);
+  // Shown shortened in the middle; the whole address is its tooltip and accessible name.
+  await expect(addressText).toHaveAttribute("title", quote.request);
   await expect(limitsHint).toBeVisible();
   await expect(addressText).not.toContainText("bitcoin:");
   await expect(page.locator(".qr-container:visible a")).toHaveCount(0);
@@ -190,7 +191,8 @@ test("validates new on-chain addresses while preserving quote reuse and history 
   expect(submissions).toBe(1);
   await wallet.closeFullscreenDialog();
   await wallet.openReceive("onchain");
-  await expect(addressText).toContainText(quote.request);
+  // Shown shortened in the middle; the whole address is its tooltip and accessible name.
+  await expect(addressText).toHaveAttribute("title", quote.request);
   await expect(addressText).not.toContainText("bitcoin:");
   await expect(limitsHint).toBeVisible();
   await expect(error).toHaveCount(0);
@@ -226,7 +228,8 @@ test("validates new on-chain addresses while preserving quote reuse and history 
   await wallet.home("History");
   const oldRow = page.getByTestId("history-row").last();
   await oldRow.getByTestId("history-details").click();
-  await expect(addressText).toContainText(quote.request);
+  // Shown shortened in the middle; the whole address is its tooltip and accessible name.
+  await expect(addressText).toHaveAttribute("title", quote.request);
   await expect(addressText).not.toContainText("bitcoin:");
   await wallet.closeFullscreenDialog();
   await expect

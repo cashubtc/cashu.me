@@ -251,9 +251,16 @@ body,
   font-weight: 400;
   color: var(--app-text-muted);
 }
+// A value made of controls (the payment request pager): nothing to truncate, so the box lets
+// their hover and focus shapes show whole instead of clipping them to the text line.
+.detail-value.detail-value--controls {
+  overflow: visible;
+}
+// Values are bold, as in the original design (owner, 2026-11-01); an unset placeholder
+// stays regular and muted.
 .detail-value {
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--app-text);
   text-align: end;
   max-width: 60%;
@@ -393,6 +400,12 @@ button:focus-visible {
 .q-tab.q-focusable:focus-visible {
   outline-offset: -2px;
   border-radius: 10px;
+}
+// Anything else focusable inside a clipped card (a button placed in a settings card or a
+// dialog summary) draws its ring inside too, so the card's rounded clip never cuts it.
+.settings-card :focus-visible,
+.council-dialog__summary :focus-visible {
+  outline-offset: -2px !important;
 }
 
 // One disabled treatment for every button.
@@ -1639,12 +1652,12 @@ body.body--light .mint-card.mint-card--active {
 // Reduced motion: the ring stops as a three-quarter arc, still recognisably busy, and the
 // spoken status still announces the switch.
 @media (prefers-reduced-motion: reduce) {
-  .mint-card__ring,
-  .mint-card__ring .path {
+  .mint-switch-ring,
+  .mint-switch-ring .path {
     animation: none !important;
   }
   // Quasar's keyframes own the dash; without them its 1px dash reads as a dot.
-  .mint-card__ring .path {
+  .mint-switch-ring .path {
     stroke-dasharray: 90, 200 !important;
     stroke-dashoffset: 0 !important;
   }
@@ -1732,172 +1745,52 @@ html[dir="rtl"] .restore-mint-check {
   font-weight: 500;
 }
 
-// Toasts : a
-// filled card on the group fill with a thin neutral edge (it separates from black and white
-// pages alike), the kind carried by its icon in a tinted 36px disc (the app's icon-circle
-// language), medium-weight 14px text, and the dismiss on the end.
-body .q-notification {
-  --tone: var(--app-text-muted);
-  align-items: center;
-  background: var(--app-raised) !important;
-  // The same quiet edge as every control (owner 2026-10-29c): on the charcoal page the raised
-  // fill alone barely separated.
-  border: 1px solid var(--app-field-edge);
-  border-radius: var(--app-radius-xl);
+// Toasts: Sonner as on kelbie.dev (owner 2026-11-01), on our tokens: a raised card with the
+// quiet control edge and 16px corners, 13px medium text with a muted description, a 16px icon
+// on the first line carrying the tone. No close button: a toast goes on its own, with a
+// swipe, or stays while hovered. Sonner owns the motion (slide in from the top, the stack
+// behind the newest, fan-out on hover). Stated with body and the theme attribute, so ours
+// outrank Sonner's own colours, whose stylesheet loads after this one.
+body [data-sonner-toaster][data-sonner-theme] {
+  --normal-bg: var(--app-raised);
+  --normal-border: var(--app-field-edge);
+  --normal-text: var(--app-text);
+  --border-radius: 16px;
+  --width: min(400px, calc(100vw - 32px));
+  font-family: inherit;
+}
+body.body--light [data-sonner-toaster][data-sonner-theme] {
+  --normal-bg: var(--app-surface);
+  --normal-border: var(--app-border);
+}
+[data-sonner-toaster] [data-sonner-toast][data-styled="true"] {
+  align-items: flex-start;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-  color: var(--app-text) !important;
-  font-size: 14px;
-  font-weight: 500;
-  max-width: none;
-  min-height: 56px;
-  // One width for every toast: the content column inside its 16px gutters.
-  width: min(440px, calc(100vw - 32px));
-  padding: 10px 6px 10px 10px;
-  padding-inline: 10px 6px;
-  transition: transform 0.25s ease, opacity 0.25s ease;
-}
-body .q-notification.bg-positive {
-  --tone: var(--app-success);
-}
-body .q-notification.bg-negative {
-  --tone: var(--app-danger);
-}
-body .q-notification.bg-warning {
-  --tone: var(--app-warning);
-}
-body .q-notification.bg-info {
-  --tone: var(--app-info);
-}
-body .q-notification .q-notification__icon {
-  align-items: center;
-  background: color-mix(in srgb, var(--tone) 16%, transparent);
-  border-radius: 50%;
-  color: var(--tone);
-  display: inline-flex;
-  // Quasar sizes the icon with flex: 0 0 1em, which squeezed the disc into an oval.
-  flex: 0 0 36px;
-  font-size: 20px;
-  height: 36px;
-  justify-content: center;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  width: 36px;
-}
-body .q-notification .q-notification__icon > svg {
-  height: 20px;
-  width: 20px;
-}
-body .q-notification .q-notification__icon + .q-notification__message {
-  margin-inline-start: 12px;
-}
-body .q-notification .q-notification__caption {
-  color: var(--app-text-muted);
   font-size: 13px;
-  font-weight: 400;
-  opacity: 1;
+  font-weight: 500;
+  gap: 10px;
 }
-// The close button centres on the message, in one-line and two-line toasts alike.
-body .q-notification .q-notification__wrapper {
-  align-items: center !important;
-}
-body .q-notification .q-notification__actions {
-  align-self: center;
-  padding-bottom: 0 !important;
-  padding-top: 0 !important;
-}
-// Quasar pulls the close button to the card edge with a physical right margin, so in rtl it
-// sat 16px further in than in ltr; the logical sides keep the inset the same both ways.
-body .q-notification--standard .q-notification__actions {
-  margin-right: 0;
-  margin-inline-end: -8px;
-  padding-left: 0;
-  padding-inline-start: 8px;
-}
-body .q-notification .q-notification__actions .q-icon {
-  font-size: 16px;
-}
-body .q-notification .q-notification__actions .q-btn,
-body .q-notification .q-notification__actions .q-btn .q-icon {
-  color: var(--app-text-muted) !important;
-}
-body .q-notification .q-notification__actions .q-btn {
-  min-height: 44px;
-  min-width: 44px;
-}
-// Light mode: a white card with a hairline and a soft shadow, as in dark mode.
-body.body--light .q-notification {
-  background: var(--app-surface) !important;
+body.body--light [data-sonner-toaster] [data-sonner-toast][data-styled="true"] {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
-// Toasts sit top-centre (owner item 7), newest first, at most two (src/js/notify.ts), each one
-// fully readable with its own close button: a plain column with an 8px gap, under the status
-// bar's safe area. The list itself lets taps through; only the cards take them (Quasar).
-// The selector outranks Quasar's body.q-ios-padding top rule, so the edge gap applies there too.
-// Below desktop a full-width toast would sit on the header's back and close buttons, so it
-// starts under the header (56px) instead; on desktop the 440px card clears the column's
-// header buttons and sits 16px from the top.
-body .q-notifications > .q-notifications__list--top {
-  --toast-edge: 60px;
-  bottom: auto;
-  box-sizing: border-box;
-  gap: 8px;
-  margin: 0;
-  padding-inline: max(16px, env(safe-area-inset-left, 0px))
-    max(16px, env(safe-area-inset-right, 0px));
-  top: calc(env(safe-area-inset-top, 0px) + var(--toast-edge));
+[data-sonner-toast] [data-description] {
+  color: var(--app-text-muted);
+  font-weight: 400;
 }
-@media (min-width: 1024px) {
-  body .q-notifications > .q-notifications__list--top {
-    --toast-edge: 16px;
-  }
+[data-sonner-toast] [data-icon] {
+  margin-top: 2px;
 }
-body .q-notifications__list--top .q-notification {
-  margin: 0;
-  max-width: 100%;
-  position: relative;
-  transition: transform 180ms ease, opacity 180ms ease;
-  width: min(440px, 100%);
+[data-sonner-toast][data-type="success"] [data-icon] {
+  color: var(--app-success);
 }
-// Entering: fades in and settles down from 12px above; leaving: fades and rises from where it
-// is. The other card slides into place (move).
-body .q-notifications__list--top .q-notification--top-enter-from,
-body .q-notifications__list--top .q-notification--top-leave-to {
-  opacity: 0;
-  transform: translateY(-12px);
+[data-sonner-toast][data-type="error"] [data-icon] {
+  color: var(--app-danger);
 }
-body .q-notifications__list--top .q-notification--top-move {
-  transition: transform 180ms ease;
+[data-sonner-toast][data-type="warning"] [data-icon] {
+  color: var(--app-warning);
 }
-// Quasar takes a leaving toast out of flow pinned to the list's top. That is where the first
-// card already is; the last card (the oldest, the usual one to go) stays in flow instead, so it
-// fades where it is rather than jumping up behind the newer one.
-// Out of flow its 100% is the list's padding box, so it keeps the in-flow width explicitly.
-body .q-notifications__list--top .q-notification--top-leave-active {
-  width: min(
-    440px,
-    calc(
-      100% - max(16px, env(safe-area-inset-left, 0px)) -
-        max(16px, env(safe-area-inset-right, 0px))
-    )
-  );
-}
-body .q-notifications__list--top .q-notification--top-leave-active:last-child {
-  position: relative;
-  top: auto;
-  width: min(440px, 100%);
-}
-@media (prefers-reduced-motion: reduce) {
-  body .q-notifications__list--top .q-notification,
-  body .q-notifications__list--top .q-notification--top-move {
-    transition: none;
-  }
-}
-// Toasts live outside #q-app; in right-to-left they follow the page's direction too.
-html[dir="rtl"] .q-notifications {
-  direction: rtl;
-}
-body .q-notification__progress {
-  display: none;
+[data-sonner-toast][data-type="info"] [data-icon] {
+  color: var(--app-info);
 }
 
 // QR codes: one size everywhere, weighted against the screen so the code
@@ -1912,6 +1805,16 @@ body .q-notification__progress {
   margin-inline: auto !important;
   max-width: 100%;
   width: var(--app-qr-size);
+}
+// Light mode: the white plate on a white page keeps a hairline edge, so the QR still reads as
+// one object with the copy pill under it (council 2026-11-01).
+body.body--light .app-qr::after {
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px var(--app-border);
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
 }
 
 // Desktop: sheets open as centred dialogs, rounded on every corner;
@@ -1972,12 +1875,13 @@ body .q-notification__progress {
 // Scan rests on the page with no disc, as on the original wallet (owner 2026-10-29b, item 8):
 // page ink on the page. Hover, press and focus are the shared button states (the focus
 // helper's tint and the accent ring).
+// The scan glyph reads at the pills' weight (owner, 2026-11-01: bigger than 28px).
 .wallet-scan-btn {
   background: transparent;
   color: var(--app-text);
   flex: 0 0 auto;
-  height: 52px;
-  width: 52px;
+  height: 56px;
+  width: 56px;
 }
 
 // Trailing guideline: whatever ends a row, card or field (switch, chevron, copy, scan, check,

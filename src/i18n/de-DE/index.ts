@@ -29,6 +29,7 @@ export default {
   },
 
   global: {
+    notifications: "Benachrichtigungen",
     copy_to_clipboard: {
       success: "In die Zwischenablage kopiert!",
     },
@@ -65,6 +66,9 @@ export default {
       },
       scan: {
         label: "Scannen",
+      },
+      more_options: {
+        label: "Weitere Optionen",
       },
       clear: {
         label: "Löschen",
@@ -1485,25 +1489,34 @@ export default {
   HistoryTable: {
     empty_text: "Noch kein Verlauf vorhanden",
     empty_hint: "Zahlungen, die du sendest und empfängst, erscheinen hier.",
+    filters: {
+      title: "Verlauf filtern",
+      direction: "Richtung",
+      type: "Art",
+      all: "Alle",
+      all_mints: "Alle Mints",
+      completed: "Abgeschlossen",
+      received: "Empfangen",
+      sent: "Gesendet",
+      show_results: "Ergebnisse anzeigen ({count})",
+      reset: "Zurücksetzen",
+      clear_all: "Alle entfernen",
+      remove: "Filter entfernen: {label}",
+      empty_title: "Keine Zahlungen passen zu diesen Filtern",
+      clear: "Filter entfernen",
+      count: "{shown} von {total}",
+      active: "Verlauf filtern, {count} aktiv",
+    },
     row: {
       type_label: "Ecash",
       date_label: "Vor { value }",
     },
     actions: {
-      filter_ecash_only: {
-        label: "Nur Ecash",
-      },
       check_status: {
         tooltip_text: "Status prüfen",
       },
       receive: {
         tooltip_text: "Empfangen",
-      },
-      filter_pending: {
-        label: "Nur ausstehende zeigen",
-      },
-      show_all: {
-        label: "Alle anzeigen",
       },
     },
     old_token_not_found_error_text: "Alter Token nicht gefunden",
@@ -1720,6 +1733,7 @@ export default {
   },
   TokenInformation: {
     fee: "Gebühr",
+    token: "Token",
     unit: "Einheit",
     fiat: "Fiat",
     p2pk: "P2PK",
@@ -1770,6 +1784,8 @@ export default {
   },
   QuoteInformation: {
     address: "Adresse",
+    invoice: "Rechnung",
+    request: "Anfrage",
     amount: "Betrag",
     fee_reserve: "Gebührenreserve",
     fee_paid: "Gezahlte Gebühr",

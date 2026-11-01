@@ -27,6 +27,7 @@ export default {
     paid: "Πληρώθηκε {amount} μέσω Lightning",
   },
   global: {
+    notifications: "Ειδοποιήσεις",
     copy_to_clipboard: {
       success: "Αντιγράφηκε στο πρόχειρο!",
     },
@@ -63,6 +64,9 @@ export default {
       },
       scan: {
         label: "Σάρωση",
+      },
+      more_options: {
+        label: "Περισσότερες επιλογές",
       },
       clear: {
         label: "Εκκαθάριση",
@@ -1479,25 +1483,34 @@ export default {
   HistoryTable: {
     empty_text: "Δεν υπάρχει ακόμη ιστορικό",
     empty_hint: "Οι πληρωμές που στέλνετε και λαμβάνετε εμφανίζονται εδώ.",
+    filters: {
+      title: "Φιλτράρισμα ιστορικού",
+      direction: "Κατεύθυνση",
+      type: "Τύπος",
+      all: "Όλα",
+      all_mints: "Όλα τα mint",
+      completed: "Ολοκληρώθηκε",
+      received: "Ελήφθη",
+      sent: "Στάλθηκε",
+      show_results: "Εμφάνιση αποτελεσμάτων ({count})",
+      reset: "Επαναφορά",
+      clear_all: "Καθαρισμός όλων",
+      remove: "Αφαίρεση φίλτρου: {label}",
+      empty_title: "Καμία πληρωμή δεν ταιριάζει με τα φίλτρα",
+      clear: "Καθαρισμός φίλτρων",
+      count: "{shown} από {total}",
+      active: "Φιλτράρισμα ιστορικού, {count} ενεργά",
+    },
     row: {
       type_label: "Ecash",
       date_label: "πριν από { value }",
     },
     actions: {
-      filter_ecash_only: {
-        label: "Μόνο ecash",
-      },
       check_status: {
         tooltip_text: "Έλεγχος κατάστασης",
       },
       receive: {
         tooltip_text: "Λήψη",
-      },
-      filter_pending: {
-        label: "Μόνο εκκρεμή",
-      },
-      show_all: {
-        label: "Εμφάνιση όλων",
       },
     },
     old_token_not_found_error_text: "Παλιό token δεν βρέθηκε",
@@ -1714,6 +1727,7 @@ export default {
   },
   TokenInformation: {
     fee: "Χρέωση",
+    token: "Token",
     unit: "Μονάδα",
     fiat: "Fiat",
     p2pk: "P2PK",
@@ -1764,6 +1778,8 @@ export default {
   },
   QuoteInformation: {
     address: "Διεύθυνση",
+    invoice: "Τιμολόγιο",
+    request: "Αίτημα",
     amount: "Ποσό",
     fee_reserve: "Αποθεματικό τελών",
     fee_paid: "Τέλος που πληρώθηκε",

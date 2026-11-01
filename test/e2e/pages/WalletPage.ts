@@ -75,6 +75,15 @@ export class WalletPage {
   }
 
   /** The ⇅ swap between typing the unit and typing the fiat currency. */
+  // History's filter sheet: pick each named choice (one per group), then show the results.
+  async filterHistory(choices: string[]) {
+    await this.page.getByTestId("history-filter").click();
+    const sheet = this.page.locator(".q-dialog").last();
+    for (const name of choices)
+      await sheet.getByRole("radio", { name, exact: true }).click();
+    await this.page.getByTestId("history-filter-apply").click();
+  }
+
   fiatEntrySwap(fiat: string) {
     return this.page.getByRole("button", { name: `Enter amount in ${fiat}` });
   }

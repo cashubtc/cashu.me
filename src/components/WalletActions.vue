@@ -20,7 +20,7 @@
       :aria-label="$t('global.actions.scan.label')"
       @click="$emit('scan')"
     >
-      <ScanIcon :size="28" />
+      <ScanIcon :size="36" />
     </q-btn>
     <q-btn
       unelevated

@@ -111,6 +111,9 @@ export const useMintsStore = defineStore("mints", {
     const activeProofs = ref<WalletProof[]>([]);
     const activeUnit = useLocalStorage<string>("cashu.activeUnit", "sat");
     const activeMintUrl = useLocalStorage<string>("cashu.activeMintUrl", "");
+    // The mint the wallet is switching to (activateMintUrl), "" otherwise: the Mints tab's
+    // card and the picker under the balance both show it busy.
+    const activatingMintUrl = ref("");
     const addMintData = ref({
       url: "",
       nickname: "",
@@ -139,6 +142,7 @@ export const useMintsStore = defineStore("mints", {
       activeProofs,
       activeUnit,
       activeMintUrl,
+      activatingMintUrl,
       addMintData,
       mints,
       showAddMintDialog,
@@ -375,9 +379,14 @@ export const useMintsStore = defineStore("mints", {
     ) {
       const mint = this.mints.filter((m) => m.url === url)[0];
       if (mint) {
-        await this.activateMint(mint, verbose, force);
-        if (unit) {
-          await this.activateUnit(unit, verbose);
+        this.activatingMintUrl = url;
+        try {
+          await this.activateMint(mint, verbose, force);
+          if (unit) {
+            await this.activateUnit(unit, verbose);
+          }
+        } finally {
+          if (this.activatingMintUrl === url) this.activatingMintUrl = "";
         }
       } else {
         notifyError(

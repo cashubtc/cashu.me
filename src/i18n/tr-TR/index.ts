@@ -29,6 +29,7 @@ export default {
   },
 
   global: {
+    notifications: "Bildirimler",
     copy_to_clipboard: {
       success: "Panoya kopyalandı!",
     },
@@ -65,6 +66,9 @@ export default {
       },
       scan: {
         label: "Tara",
+      },
+      more_options: {
+        label: "Diğer seçenekler",
       },
       clear: {
         label: "Temizle",
@@ -1481,25 +1485,34 @@ export default {
   HistoryTable: {
     empty_text: "Henüz geçmiş yok",
     empty_hint: "Gönderdiğin ve aldığın ödemeler burada görünür.",
+    filters: {
+      title: "Geçmişi filtrele",
+      direction: "Yön",
+      type: "Tür",
+      all: "Tümü",
+      all_mints: "Tüm mint'ler",
+      completed: "Tamamlandı",
+      received: "Alındı",
+      sent: "Gönderildi",
+      show_results: "Sonuçları göster ({count})",
+      reset: "Sıfırla",
+      clear_all: "Tümünü temizle",
+      remove: "Filtreyi kaldır: {label}",
+      empty_title: "Bu filtrelere uyan ödeme yok",
+      clear: "Filtreleri temizle",
+      count: "{shown} / {total}",
+      active: "Geçmişi filtrele, {count} etkin",
+    },
     row: {
       type_label: "Ecash",
       date_label: "{ value } önce",
     },
     actions: {
-      filter_ecash_only: {
-        label: "Yalnızca ecash",
-      },
       check_status: {
         tooltip_text: "Durumu kontrol et",
       },
       receive: {
         tooltip_text: "Al",
-      },
-      filter_pending: {
-        label: "Yalnızca bekleyenleri göster",
-      },
-      show_all: {
-        label: "Tümünü göster",
       },
     },
     old_token_not_found_error_text: "Eski token bulunamadı",
@@ -1716,6 +1729,7 @@ export default {
   },
   TokenInformation: {
     fee: "Ücret",
+    token: "Token",
     unit: "Birim",
     fiat: "Fiat",
     p2pk: "P2PK",
@@ -1766,6 +1780,8 @@ export default {
   },
   QuoteInformation: {
     address: "Adres",
+    invoice: "Fatura",
+    request: "İstek",
     amount: "Tutar",
     fee_reserve: "Ücret rezervi",
     fee_paid: "Ödenen ücret",

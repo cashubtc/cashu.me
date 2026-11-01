@@ -40,13 +40,7 @@
             v-if="showSelectionStatus || selected || busy"
             class="mint-card__status"
           >
-            <q-spinner
-              v-if="busy"
-              class="mint-card__ring"
-              size="18px"
-              :thickness="4"
-              aria-hidden="true"
-            />
+            <MintSwitchRing v-if="busy" />
             <CheckIcon
               v-else-if="selected"
               class="mint-card__check"
@@ -90,12 +84,18 @@
 import { defineComponent, type PropType } from "vue";
 import MintInfoContainer from "src/components/MintInfoContainer.vue";
 import MintReviewSummary from "src/components/MintReviewSummary.vue";
+import MintSwitchRing from "src/components/ui/MintSwitchRing.vue";
 import { Check as CheckIcon } from "lucide-vue-next";
 import { getShortUrl } from "src/js/wallet-helpers";
 
 export default defineComponent({
   name: "MintCard",
-  components: { MintInfoContainer, MintReviewSummary, CheckIcon },
+  components: {
+    MintInfoContainer,
+    MintReviewSummary,
+    MintSwitchRing,
+    CheckIcon,
+  },
   props: {
     url: { type: String, default: "" },
     name: { type: String as PropType<string | null>, default: null },

@@ -25,6 +25,7 @@ export default {
   },
 
   global: {
+    notifications: "الإشعارات",
     copy_to_clipboard: {
       success: "تم النسخ إلى الحافظة!",
     },
@@ -61,6 +62,9 @@ export default {
       },
       scan: {
         label: "مسح ضوئي",
+      },
+      more_options: {
+        label: "خيارات إضافية",
       },
       clear: {
         label: "محو",
@@ -1452,25 +1456,34 @@ export default {
   HistoryTable: {
     empty_text: "لا يوجد سجل حتى الآن",
     empty_hint: "ستظهر هنا المدفوعات التي ترسلها وتستلمها.",
+    filters: {
+      title: "تصفية السجل",
+      direction: "الاتجاه",
+      type: "النوع",
+      all: "الكل",
+      all_mints: "كل المِنْتات",
+      completed: "مكتمل",
+      received: "مستلَم",
+      sent: "مُرسَل",
+      show_results: "عرض النتائج ({count})",
+      reset: "إعادة تعيين",
+      clear_all: "مسح الكل",
+      remove: "إزالة عامل التصفية: {label}",
+      empty_title: "لا توجد مدفوعات تطابق عوامل التصفية",
+      clear: "مسح عوامل التصفية",
+      count: "{shown} من {total}",
+      active: "تصفية السجل، {count} مفعّلة",
+    },
     row: {
       type_label: "Ecash",
       date_label: "منذ { value }",
     },
     actions: {
-      filter_ecash_only: {
-        label: "ecash فقط",
-      },
       check_status: {
         tooltip_text: "التحقق من الحالة",
       },
       receive: {
         tooltip_text: "استلام",
-      },
-      filter_pending: {
-        label: "إظهار المعلقة فقط",
-      },
-      show_all: {
-        label: "عرض الكل",
       },
     },
     old_token_not_found_error_text: "لم يتم العثور على الرمز القديم",
@@ -1686,6 +1699,7 @@ export default {
   },
   TokenInformation: {
     fee: "الرسوم",
+    token: "الرمز المميز",
     unit: "الوحدة",
     fiat: "العملة الورقية",
     p2pk: "P2PK",
@@ -1736,6 +1750,8 @@ export default {
   },
   QuoteInformation: {
     address: "العنوان",
+    invoice: "الفاتورة",
+    request: "الطلب",
     amount: "المبلغ",
     fee_reserve: "احتياطي الرسوم",
     fee_paid: "الرسوم المدفوعة",

@@ -1,37 +1,18 @@
-import { Notify, QNotifyCreateOptions } from "quasar";
+import { toast as sonner } from "vue-sonner";
 import { i18n } from "src/boot/i18n";
 import { isolateLtr } from "src/js/format-currency";
-import { lucideIcon } from "src/js/lucide-icons";
-import {
-  CircleAlert,
-  CircleCheck,
-  Info,
-  TriangleAlert,
-  X,
-} from "lucide-vue-next";
 
-// One toast for the whole app, top-centre (owner item 7): every kind appears in one place, as a
-// raised card with a status icon (styled in app.scss), newest first, and closes on its own or
-// with ✕. The icons are the callout's: the same glyph for the same tone. Positions are not
-// chosen per call.
-const POSITION: QNotifyCreateOptions["position"] = "top";
-// Built per toast, so the close button's name follows the current language.
-const closeAction = () => [
-  {
-    icon: lucideIcon(X),
-    color: "grey",
-    round: true,
-    "aria-label": i18n.global.t("global.actions.close.label") as string,
-    handler: () => {},
-  },
-];
+// One toast for the whole app, shadcn's (Sonner, through vue-sonner; the Toaster sits in
+// App.vue, styled in app.scss): top-centre, a neutral raised card with the tone in its icon,
+// sliding in from the edge; older toasts tuck behind the newest as a stack that fans out on
+// hover, and each closes on its own, with ✕, or with a swipe.
 
 type ToastKind = "positive" | "negative" | "warning" | "info";
-const ICONS: Record<ToastKind, string> = {
-  positive: lucideIcon(CircleCheck),
-  negative: lucideIcon(CircleAlert),
-  warning: lucideIcon(TriangleAlert),
-  info: lucideIcon(Info),
+const SHOW: Record<ToastKind, typeof sonner.success> = {
+  positive: sonner.success,
+  negative: sonner.error,
+  warning: sonner.warning,
+  info: sonner.info,
 };
 
 // Amounts keep their left-to-right order inside right-to-left toasts: each run such as
@@ -41,42 +22,16 @@ function isolateAmounts(text: string): string {
   return text.replace(AMOUNT_RUN, (run) => isolateLtr(run));
 }
 
-// At most two toasts at once, both fully readable: a newer one dismisses the oldest, so a burst
-// of messages never covers the page. Ungrouped, so two identical messages are two toasts and
-// the queue matches what is on screen.
-const MAX_VISIBLE = 2;
-const visible: Array<() => void> = [];
-
 function toast(
   kind: ToastKind,
   message: string,
   caption?: string,
-  timeout = 5000
+  duration = 5000
 ) {
-  try {
-    const dismiss: () => void = Notify.create({
-      type: kind,
-      icon: ICONS[kind],
-      message: isolateAmounts(message),
-      caption: caption ? isolateAmounts(caption) : undefined,
-      position: POSITION,
-      group: false,
-      timeout,
-      actions: closeAction(),
-      attrs: {
-        "data-testid": "app-toast",
-        role: kind === "negative" || kind === "warning" ? "alert" : "status",
-      },
-      onDismiss: () => {
-        const i = visible.indexOf(dismiss);
-        if (i >= 0) visible.splice(i, 1);
-      },
-    });
-    visible.push(dismiss);
-    while (visible.length > MAX_VISIBLE) visible.shift()?.();
-  } catch {
-    // no Quasar app (unit tests)
-  }
+  SHOW[kind](isolateAmounts(message), {
+    description: caption ? isolateAmounts(caption) : undefined,
+    duration,
+  });
 }
 
 async function notifyApiError(error: Error, caption: string = "") {

@@ -26,6 +26,7 @@ export default {
     paid: "Pagato {amount} via Lightning",
   },
   global: {
+    notifications: "Notifiche",
     // merged global keys
     copy_to_clipboard: {
       success: "Copiato negli appunti!",
@@ -46,6 +47,7 @@ export default {
         label: "Nascondi frase seed",
       },
       scan: { label: "Scansiona" },
+      more_options: { label: "Altre opzioni" },
       clear: { label: "Cancella" },
       send: { label: "Invia" },
       swap: { label: "Scambia" },
@@ -1446,25 +1448,34 @@ export default {
   HistoryTable: {
     empty_text: "Nessuna cronologia ancora",
     empty_hint: "Qui compaiono i pagamenti che invii e ricevi.",
+    filters: {
+      title: "Filtra cronologia",
+      direction: "Direzione",
+      type: "Tipo",
+      all: "Tutti",
+      all_mints: "Tutte le mint",
+      completed: "Completato",
+      received: "Ricevuto",
+      sent: "Inviato",
+      show_results: "Mostra risultati ({count})",
+      reset: "Reimposta",
+      clear_all: "Rimuovi tutto",
+      remove: "Rimuovi filtro: {label}",
+      empty_title: "Nessun pagamento corrisponde ai filtri",
+      clear: "Rimuovi filtri",
+      count: "{shown} di {total}",
+      active: "Filtra cronologia, {count} attivi",
+    },
     row: {
       type_label: "Ecash",
       date_label: "{ value } fa",
     },
     actions: {
-      filter_ecash_only: {
-        label: "Solo ecash",
-      },
       check_status: {
         tooltip_text: "Verifica stato",
       },
       receive: {
         tooltip_text: "Ricevi",
-      },
-      filter_pending: {
-        label: "Mostra solo in sospeso",
-      },
-      show_all: {
-        label: "Mostra tutto",
       },
     },
     old_token_not_found_error_text: "Vecchio token non trovato",
@@ -1681,6 +1692,7 @@ export default {
   },
   TokenInformation: {
     fee: "Commissione",
+    token: "Token",
     unit: "Unità",
     fiat: "Fiat",
     p2pk: "P2PK",
@@ -1731,6 +1743,8 @@ export default {
   },
   QuoteInformation: {
     address: "Indirizzo",
+    invoice: "Fattura",
+    request: "Richiesta",
     amount: "Importo",
     fee_reserve: "Riserva commissioni",
     fee_paid: "Commissione pagata",

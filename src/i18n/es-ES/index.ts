@@ -1,5 +1,6 @@
 export default {
   global: {
+    notifications: "Notificaciones",
     copy_to_clipboard: {
       success: "¡Copiado al portapapeles!",
     },
@@ -36,6 +37,9 @@ export default {
       },
       scan: {
         label: "Escanear",
+      },
+      more_options: {
+        label: "Más opciones",
       },
       clear: {
         label: "Borrar",
@@ -1475,25 +1479,34 @@ export default {
   HistoryTable: {
     empty_text: "Aún no hay historial",
     empty_hint: "Aquí aparecerán los pagos que envíes y recibas.",
+    filters: {
+      title: "Filtrar historial",
+      direction: "Dirección",
+      type: "Tipo",
+      all: "Todo",
+      all_mints: "Todas las mints",
+      completed: "Completado",
+      received: "Recibido",
+      sent: "Enviado",
+      show_results: "Ver resultados ({count})",
+      reset: "Restablecer",
+      clear_all: "Quitar todo",
+      remove: "Quitar filtro: {label}",
+      empty_title: "Ningún pago coincide con estos filtros",
+      clear: "Quitar filtros",
+      count: "{shown} de {total}",
+      active: "Filtrar historial, {count} activos",
+    },
     row: {
       type_label: "Ecash",
       date_label: "hace { value }",
     },
     actions: {
-      filter_ecash_only: {
-        label: "Solo ecash",
-      },
       check_status: {
         tooltip_text: "Verificar estado",
       },
       receive: {
         tooltip_text: "Recibir",
-      },
-      filter_pending: {
-        label: "Mostrar solo pendientes",
-      },
-      show_all: {
-        label: "Mostrar todo",
       },
     },
     old_token_not_found_error_text: "Token antiguo no encontrado",
@@ -1710,6 +1723,7 @@ export default {
   },
   TokenInformation: {
     fee: "Tarifa",
+    token: "Token",
     unit: "Unidad",
     fiat: "Fiat",
     p2pk: "P2PK",
@@ -1760,6 +1774,8 @@ export default {
   },
   QuoteInformation: {
     address: "Dirección",
+    invoice: "Factura",
+    request: "Solicitud",
     amount: "Importe",
     fee_reserve: "Reserva de comisión",
     fee_paid: "Comisión pagada",

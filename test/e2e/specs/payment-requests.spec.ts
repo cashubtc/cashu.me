@@ -60,7 +60,9 @@ test("Cashu payment request retries failed delivery from history without spendin
   await enterRequest(wallet, cashuRequest(["unknown", "post"]));
   await page.getByRole("button", { name: "Pay", exact: true }).click();
   await expect(
-    page.locator(".q-notification").filter({ hasText: "Could not pay request" })
+    page
+      .locator("[data-sonner-toast]")
+      .filter({ hasText: "Could not pay request" })
   ).toBeVisible();
   await wallet.closeFullscreenDialog();
   await wallet.home("History");
@@ -73,7 +75,7 @@ test("Cashu payment request retries failed delivery from history without spendin
   await row.getByTestId("history-details").click();
   await page.getByRole("button", { name: "Pay via HTTP", exact: true }).click();
   await expect(
-    page.locator(".q-notification").filter({ hasText: "Payment sent" })
+    page.locator("[data-sonner-toast]").filter({ hasText: "Payment sent" })
   ).toBeVisible();
   expect(payloads).toHaveLength(2);
   expect(payloads[1]).toEqual(payloads[0]);
@@ -102,7 +104,7 @@ test("Cashu payment request persists pending and redeemed outgoing history", asy
   await enterRequest(sender, cashuRequest());
   await page.getByRole("button", { name: "Pay", exact: true }).click();
   await expect(
-    page.locator(".q-notification").filter({ hasText: "Payment sent" })
+    page.locator("[data-sonner-toast]").filter({ hasText: "Payment sent" })
   ).toBeVisible();
   expect(payload?.id).toBe("e2e-cashu-request");
   await expect(page.locator("button.floating-close-btn:visible")).toHaveCount(
@@ -162,7 +164,7 @@ for (const types of [["unknown"], []]) {
     await enterRequest(wallet, cashuRequest(types));
     await expect(
       page
-        .locator(".q-notification")
+        .locator("[data-sonner-toast]")
         .filter({ hasText: /unsupported.*transport/i })
     ).toBeVisible();
     await expect(

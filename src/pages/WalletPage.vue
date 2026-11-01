@@ -171,8 +171,19 @@
   }
 }
 
+/* Its hover and focus fill is a rounded shape like the rows and the ring, not an
+   edge-to-edge slab (hover audit F7). */
 .wallet-history-toggle {
+  border-radius: var(--app-radius-md);
   min-height: 44px;
+}
+.wallet-history-toggle :deep(.q-focus-helper) {
+  border-radius: inherit;
+}
+@media (max-width: 599.98px) {
+  .wallet-history-toggle {
+    margin-inline: 4px;
+  }
 }
 
 /* On desktop history is always open, so there is no toggle to show. */

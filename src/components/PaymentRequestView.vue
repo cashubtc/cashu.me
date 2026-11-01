@@ -1,10 +1,10 @@
-<!-- The body of a payment request (PaymentRequestDialog adds the header and the pager), laid
-     out like the Lightning and on-chain receive screens: the QR with its request text, the
-     amount when there is one, then the detail table. The table's Amount, Unit and Mint rows
-     are buttons: each opens its picker (the amount keypad or a typed field, the units, the
-     mint sheet). Received payments follow, and Share and Copy sit in the footer. Everything
-     shown is read back from the encoded request; every change is emitted as `change` and the
-     owner makes a new request. -->
+<!-- The body of a payment request (PaymentRequestDialog adds the header, the pager row and
+     New request), laid out like the Lightning and on-chain receive screens: the QR, the
+     amount when there is one, then the detail table, where the request text is a copy row.
+     The table's Amount, Unit and Mint rows are buttons: each opens its picker (the amount
+     keypad or a typed field, the units, the mint sheet). Received payments follow, and Share
+     and Copy sit in the footer. Everything shown is read back from the encoded request; every
+     change is emitted as `change` and the owner makes a new request. -->
 <template>
   <div class="pr-view column">
     <div class="content-area">
@@ -12,13 +12,6 @@
         <div class="qr-container">
           <QrBlock :value="request" />
         </div>
-        <!-- The request text, tap to copy: the same line as under the invoice QRs. -->
-        <QrCopyLine
-          :text="shortRequest"
-          :copied="copied"
-          :label="$t('PaymentRequestDialog.actions.copy_request.label')"
-          @copy="copy"
-        />
 
         <AmountHeadline v-if="hasAmount">{{ amountLabel }}</AmountHeadline>
 
@@ -48,6 +41,18 @@
             @click="showUnitSheet = true"
             ><bdi dir="ltr">{{ unitCode(fields.unit) }}</bdi></DetailRow
           >
+          <!-- The request text lives in the table, a copy row, like an invoice's. It shows the
+               request's id: every encoded request starts and ends alike, so a shortened text
+               looked unchanged after New request. -->
+          <DetailRow
+            data-testid="pr-request"
+            :icon="ReceiptTextIcon"
+            :label="$t('QuoteInformation.request')"
+            :copy-value="request"
+            ><bdi dir="ltr">{{
+              fields.id ? `#${fields.id}` : shortRequest
+            }}</bdi></DetailRow
+          >
           <DetailRow
             action
             data-testid="pr-mint"
@@ -57,6 +62,8 @@
             :placeholder="!requestMint"
             @click="showMintSheet = true"
           />
+          <!-- The owner's last row (PaymentRequestDialog: the pager over earlier requests). -->
+          <slot name="rows" />
         </div>
 
         <div v-if="payments.length" class="pr-payments">
@@ -73,8 +80,10 @@
       </div>
     </div>
 
-    <!-- Footer: Share (where the platform can) and Copy, an equal pair. -->
+    <!-- Footer: the owner's secondary action (New request) over Share (where the platform
+         can) and Copy, an equal pair. -->
     <FlowFooter>
+      <slot name="footer" />
       <div class="pr-foot row no-wrap">
         <q-btn
           v-if="webShareSupported"
@@ -193,11 +202,11 @@
 <script lang="ts">
 import FlowFooter from "src/components/ui/FlowFooter.vue";
 import AmountHeadline from "src/components/ui/AmountHeadline.vue";
-import QrCopyLine from "src/components/ui/QrCopyLine.vue";
 import {
   Banknote as BanknoteIcon,
   Coins as CoinsIcon,
   Building2 as MintIcon,
+  ReceiptText as ReceiptTextIcon,
 } from "lucide-vue-next";
 import { defineComponent, type PropType } from "vue";
 import { mapState } from "pinia";
@@ -233,7 +242,6 @@ export default defineComponent({
   components: {
     FlowFooter,
     AmountHeadline,
-    QrCopyLine,
     AmountInputComponent,
     AmountKeypadPanel,
     AppBadge,
@@ -252,12 +260,10 @@ export default defineComponent({
   },
   emits: ["change"],
   setup() {
-    return { BanknoteIcon, CoinsIcon, MintIcon };
+    return { BanknoteIcon, CoinsIcon, MintIcon, ReceiptTextIcon };
   },
   data() {
     return {
-      copied: false,
-      copiedTimer: undefined as ReturnType<typeof setTimeout> | undefined,
       showAmountSheet: false,
       showUnitSheet: false,
       showMintSheet: false,
@@ -312,7 +318,7 @@ export default defineComponent({
       return mints.length > 1 ? `${name} +${mints.length - 1}` : name;
     },
     shortRequest(): string {
-      return shortenString(this.request, 14, 8) || this.request;
+      return shortenString(this.request, 8, 8) || this.request;
     },
     // Units the request can be in: the chosen mint's, or any of the wallet's mints'.
     unitOptions(): string[] {
@@ -418,10 +424,6 @@ export default defineComponent({
     copy() {
       if (!this.request) return;
       (this as any).copyText(this.request);
-      // The copy glyph turns into a check for a moment, as under the invoice QRs.
-      this.copied = true;
-      clearTimeout(this.copiedTimer);
-      this.copiedTimer = setTimeout(() => (this.copied = false), 3000);
     },
     async share() {
       if (!this.request || !this.webShareSupported) return;

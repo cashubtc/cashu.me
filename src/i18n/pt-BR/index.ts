@@ -1,5 +1,6 @@
 export default {
   global: {
+    notifications: "Notificações",
     copy_to_clipboard: {
       success: "Copiado para a área de transferência!",
     },
@@ -36,6 +37,9 @@ export default {
       },
       scan: {
         label: "Escanear",
+      },
+      more_options: {
+        label: "Mais opções",
       },
       clear: {
         label: "Limpar",
@@ -1531,25 +1535,34 @@ export default {
   HistoryTable: {
     empty_text: "Nenhum histórico ainda",
     empty_hint: "Os pagamentos que você envia e recebe aparecem aqui.",
+    filters: {
+      title: "Filtrar histórico",
+      direction: "Direção",
+      type: "Tipo",
+      all: "Todos",
+      all_mints: "Todas as mints",
+      completed: "Concluído",
+      received: "Recebido",
+      sent: "Enviado",
+      show_results: "Ver resultados ({count})",
+      reset: "Redefinir",
+      clear_all: "Limpar tudo",
+      remove: "Remover filtro: {label}",
+      empty_title: "Nenhum pagamento corresponde a esses filtros",
+      clear: "Limpar filtros",
+      count: "{shown} de {total}",
+      active: "Filtrar histórico, {count} ativos",
+    },
     row: {
       type_label: "Ecash",
       date_label: "há { value }",
     },
     actions: {
-      filter_ecash_only: {
-        label: "Só ecash",
-      },
       check_status: {
         tooltip_text: "Verificar status",
       },
       receive: {
         tooltip_text: "Receber",
-      },
-      filter_pending: {
-        label: "Mostrar só pendentes",
-      },
-      show_all: {
-        label: "Mostrar todos",
       },
     },
     old_token_not_found_error_text: "Token antigo não encontrado",
@@ -1766,6 +1779,7 @@ export default {
   },
   TokenInformation: {
     fee: "Taxa",
+    token: "Token",
     unit: "Unidade",
     fiat: "Moeda fiduciária",
     p2pk: "P2PK",
@@ -1779,6 +1793,8 @@ export default {
   },
   QuoteInformation: {
     address: "Endereço",
+    invoice: "Fatura",
+    request: "Solicitação",
     amount: "Valor",
     fee_reserve: "Reserva de taxa",
     fee_paid: "Taxa paga",

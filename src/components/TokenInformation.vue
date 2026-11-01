@@ -31,6 +31,18 @@
         :value="formatCurrency(fiatAmount, bitcoinPriceCurrency, true)"
       />
 
+      <!-- The token text, a copy row: where a QR shows the token, its text lives in the
+           table rather than as a line under the QR (owner 2026-11-01). -->
+      <DetailRow
+        v-if="showToken && encodedToken"
+        data-testid="token-copy-row"
+        :icon="NutIcon"
+        :label="$t('TokenInformation.token')"
+        :copy-value="encodedToken"
+        :copied-message="$t('TokenInformation.token_copied')"
+        ><bdi dir="ltr">{{ shortToken }}</bdi></DetailRow
+      >
+
       <!-- P2PK Lock Status (if locked) -->
       <DetailRow
         v-if="isLocked(proofsToShow) && !hideP2PK"
@@ -100,6 +112,7 @@ import {
   Building2 as MintIcon,
   Lock as LockIcon,
   MessageCircle as MessageCircleIcon,
+  Nut as NutIcon,
   ReceiptText as ReceiptTextIcon,
 } from "lucide-vue-next";
 import DetailRow from "src/components/ui/DetailRow.vue";
@@ -120,11 +133,17 @@ export default defineComponent({
       MintIcon,
       LockIcon,
       MessageCircleIcon,
+      NutIcon,
       ReceiptTextIcon,
     };
   },
   props: {
     encodedToken: String,
+    /** A copy row for the token itself (the token view, where the QR shows it). */
+    showToken: {
+      type: Boolean,
+      default: false,
+    },
     paymentRequestId: {
       type: String,
       required: false,
@@ -198,6 +217,10 @@ export default defineComponent({
     },
   },
   computed: {
+    shortToken(): string {
+      const t = this.encodedToken || "";
+      return t.length > 20 ? `${t.slice(0, 10)}…${t.slice(-8)}` : t;
+    },
     ...mapState(useMintsStore, [
       "activeMintUrl",
       "activeProofs",

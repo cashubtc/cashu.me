@@ -1,5 +1,5 @@
 <!-- Dev-only: one design exploration full-screen, as a phone screen, for captures and the
-     design council. /design-system/explore/:name?v=0-7&dark=1&theme=monochrome. dark and
+     design council. /design-system/explore/:name?v=0-10&dark=1&theme=monochrome. dark and
      theme apply to this visit only (nothing is stored); the language comes from settings,
      as everywhere. Round 92 shipped variant 3 of both (deposit limits as helper text under the mint
      picker, since made the info callout, variant 2's component, by the owner, 2026-10-29b
@@ -26,6 +26,8 @@
 import { defineComponent, markRaw, type Component } from "vue";
 import DepositLimitsExplorations from "src/design-system/explorations/DepositLimitsExplorations.vue";
 import UnitToggleExplorations from "src/design-system/explorations/UnitToggleExplorations.vue";
+import QrReceiveExplorations from "src/design-system/explorations/QrReceiveExplorations.vue";
+import HistoryFilterExplorations from "src/design-system/explorations/HistoryFilterExplorations.vue";
 
 declare const windowMixin: any;
 
@@ -46,6 +48,18 @@ const explorations: Record<string, { component: Component; screen: string }> = {
     component: markRaw(UnitToggleExplorations),
     screen: "send",
   },
+  "qr-receive": {
+    component: markRaw(QrReceiveExplorations),
+    screen: "lightning",
+  },
+  "qr-receive-onchain": {
+    component: markRaw(QrReceiveExplorations),
+    screen: "onchain",
+  },
+  "history-filter": {
+    component: markRaw(HistoryFilterExplorations),
+    screen: "list",
+  },
 };
 
 export default defineComponent({
@@ -63,7 +77,7 @@ export default defineComponent({
     },
     variant(): number {
       const v = Number(this.$route.query.v ?? 0);
-      return Number.isInteger(v) && v >= 0 && v <= 7 ? v : 0;
+      return Number.isInteger(v) && v >= 0 && v <= 10 ? v : 0;
     },
   },
   // After windowMixin's created(), which applies the stored mode and theme.

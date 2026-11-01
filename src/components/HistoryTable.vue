@@ -1,9 +1,22 @@
 <template>
   <div class="history-table">
-    <!-- Loading: the rows themselves as skeletons, so the list doesn't move when it fills. -->
-    <q-list v-if="skeleton" aria-hidden="true">
-      <ActivityRow v-for="n in 5" :key="n" skeleton />
-    </q-list>
+    <!-- Loading: the filter row and the rows themselves as skeletons, so the list doesn't
+         move when it fills (the 44px filter row arriving with the payments pushed every row
+         down). -->
+    <div v-if="skeleton" aria-hidden="true">
+      <div class="history-toolbar">
+        <IconButton
+          class="history-filter-btn"
+          :icon="ListFilterIcon"
+          :label="$t('HistoryTable.filters.title')"
+          disable
+          tabindex="-1"
+        />
+      </div>
+      <q-list>
+        <ActivityRow v-for="n in 5" :key="n" skeleton />
+      </q-list>
+    </div>
     <!-- A wallet with no history at all gets the shared empty state, with nothing to filter. -->
     <EmptyState
       v-else-if="unifiedTransactions.length === 0"
@@ -14,7 +27,78 @@
       class="history-empty-state"
     />
     <template v-else>
-      <q-list>
+      <!-- Filters: what is filtered, as removable chips that wrap, how many of all payments
+           show, and Clear all once two are on; the filter button on the end opens the sheet.
+           Nothing filtered, the button stands alone. Council 2026-11-01: the shipped row and
+           its "Clear all" variant tied; both reviewers asked for this merge. -->
+      <div class="history-toolbar">
+        <div v-if="activeGroups.length" class="history-chips">
+          <button
+            v-for="group in activeGroups"
+            :key="group"
+            type="button"
+            class="history-chip"
+            data-testid="history-filter-chip"
+            :aria-label="
+              $t('HistoryTable.filters.remove', { label: chipLabel(group) })
+            "
+            @click="clearFilter(group)"
+          >
+            <span class="history-chip__label">{{ chipLabel(group) }}</span>
+            <XIcon :size="14" aria-hidden="true" />
+          </button>
+          <span class="history-count">{{
+            $t("HistoryTable.filters.count", {
+              shown: filteredTransactions.length,
+              total: unifiedTransactions.length,
+            })
+          }}</span>
+          <button
+            v-if="activeGroups.length >= 2"
+            type="button"
+            class="history-clear-all"
+            data-testid="history-filter-clear-all"
+            @click="clearAllFilters"
+          >
+            {{ $t("HistoryTable.filters.clear_all") }}
+          </button>
+        </div>
+        <IconButton
+          class="history-filter-btn"
+          data-testid="history-filter"
+          :icon="ListFilterIcon"
+          :label="
+            activeGroups.length
+              ? $t('HistoryTable.filters.active', {
+                  count: activeGroups.length,
+                })
+              : $t('HistoryTable.filters.title')
+          "
+          @click="showFilterSheet = true"
+        />
+      </div>
+      <!-- Nothing matches: say so, and offer the way back (not "No history yet"). -->
+      <EmptyState
+        v-if="filteredTransactions.length === 0"
+        :icon="ListFilterIcon"
+        :boxed="false"
+        :title="$t('HistoryTable.filters.empty_title')"
+        class="history-empty-state"
+        data-testid="history-filter-empty"
+      >
+        <template #actions>
+          <q-btn
+            outline
+            rounded
+            class="q-mt-md"
+            data-testid="history-filter-clear"
+            @click="clearAllFilters"
+          >
+            {{ $t("HistoryTable.filters.clear") }}
+          </q-btn>
+        </template>
+      </EmptyState>
+      <q-list v-else>
         <ActivityRow
           v-for="transaction in paginatedTransactions"
           :key="getTransactionKey(transaction)"
@@ -82,15 +166,6 @@
             </div>
           </template>
         </ActivityRow>
-        <!-- Nothing matches: one row-height message in the list. -->
-        <div
-          v-if="paginatedTransactions.length === 0"
-          class="activity-row activity-row--placeholder history-empty row items-center justify-center"
-        >
-          <q-item-label caption>{{
-            $t("HistoryTable.empty_text")
-          }}</q-item-label>
-        </div>
         <!-- Hold the list at a full page while paging or filtering, so the filters and
            pagination below never move. -->
         <div
@@ -100,38 +175,6 @@
           aria-hidden="true"
         />
       </q-list>
-
-      <!-- Filters sit under the list, above pagination (as on main). The list above keeps its
-         full height while filtering, so these buttons never move. -->
-      <div class="history-filters row justify-center items-center q-mt-md">
-        <q-btn
-          rounded
-          :outline="!filterPending"
-          :unelevated="filterPending"
-          :aria-pressed="filterPending ? 'true' : 'false'"
-          @click="filterPending = !filterPending"
-          :color="filterPending ? 'primary' : undefined"
-          class="q-px-md history-filter-btn"
-        >
-          <CheckIcon v-if="filterPending" :size="20" class="q-mr-sm" />
-          {{
-            $t(
-              filterPending
-                ? "HistoryTable.actions.show_all.label"
-                : "HistoryTable.actions.filter_pending.label"
-            )
-          }}
-        </q-btn>
-        <q-btn
-          v-if="filterPending"
-          rounded
-          outline
-          @click="filterPendingEcash = !filterPendingEcash"
-          :color="filterPendingEcash ? 'primary' : 'grey'"
-          :label="$t('HistoryTable.actions.filter_ecash_only.label')"
-          class="q-ml-sm q-px-md history-filter-btn"
-        />
-      </div>
 
       <!-- Pagination -->
       <div v-if="maxPages > 1" class="text-center q-mt-md">
@@ -151,6 +194,10 @@
           />
         </div>
       </div>
+      <HistoryFilterSheet
+        v-model="showFilterSheet"
+        :transactions="unifiedTransactions"
+      />
     </template>
   </div>
 </template>
@@ -171,11 +218,22 @@ import token from "../js/token";
 import { notify } from "src/js/notify";
 import ActivityRow from "src/components/ActivityRow.vue";
 import EmptyState from "src/components/ui/EmptyState.vue";
+import IconButton from "src/components/ui/IconButton.vue";
+import HistoryFilterSheet from "src/components/HistoryFilterSheet.vue";
+import { useMintsStore } from "src/stores/mints";
 import {
-  Check as CheckIcon,
+  activeFilterGroups,
+  DEFAULT_HISTORY_FILTERS,
+  HISTORY_FILTER_LABEL_KEYS,
+  historyMintLabel,
+  matchesHistoryFilters,
+} from "src/js/history-filters";
+import {
   CircleArrowDown as CircleArrowDownIcon,
   History as HistoryIcon,
+  ListFilter as ListFilterIcon,
   RefreshCw as RefreshCwIcon,
+  X as XIcon,
 } from "lucide-vue-next";
 import { PaymentMethod, UnifiedTransactionType } from "src/stores/walletTypes";
 import { mintQuoteForHistoryInvoice } from "src/js/invoice-history";
@@ -194,33 +252,33 @@ export default defineComponent({
   components: {
     CircleArrowDownIcon,
     RefreshCwIcon,
-    CheckIcon,
+    XIcon,
     ActivityRow,
     EmptyState,
+    IconButton,
+    HistoryFilterSheet,
   },
   setup() {
-    return { HistoryIcon: markRaw(HistoryIcon) };
+    return {
+      HistoryIcon: markRaw(HistoryIcon),
+      ListFilterIcon: markRaw(ListFilterIcon),
+    };
   },
   mixins: [windowMixin],
   data: function () {
     return {
       currentPage: 1,
       pageSize: 5,
-      filterPending: false,
-      filterPendingEcash: false,
+      showFilterSheet: false,
       cachedUnifiedTransactions: [],
     };
   },
   watch: {
-    filterPending: function () {
-      this.currentPage = 1;
-      // Reset ecash filter when pending filter is turned off
-      if (!this.filterPending) {
-        this.filterPendingEcash = false;
-      }
-    },
-    filterPendingEcash: function () {
-      this.currentPage = 1;
+    historyFilters: {
+      handler: function () {
+        this.currentPage = 1;
+      },
+      deep: true,
     },
     // Watch for any changes in historyTokens (additions, updates, deletions)
     historyTokens: {
@@ -260,7 +318,8 @@ export default defineComponent({
       "sendData",
       "showLockInput",
     ]),
-    ...mapWritableState(useUiStore, ["showInvoiceDetails"]),
+    ...mapWritableState(useUiStore, ["showInvoiceDetails", "historyFilters"]),
+    ...mapState(useMintsStore, ["mints"]),
     ...mapWritableState(useWalletStore, ["invoiceData", "payInvoiceData"]),
 
     // Use cached unified transactions for better performance
@@ -270,19 +329,13 @@ export default defineComponent({
 
     // Filter transactions first, then paginate
     filteredTransactions() {
-      if (this.filterPendingEcash) {
-        return this.unifiedTransactions.filter(
-          (transaction) =>
-            transaction.status === "pending" &&
-            transaction.type === UnifiedTransactionType.Ecash
-        );
-      }
-      if (this.filterPending) {
-        return this.unifiedTransactions.filter(
-          (transaction) => transaction.status === "pending"
-        );
-      }
-      return this.unifiedTransactions;
+      return this.unifiedTransactions.filter((transaction) =>
+        matchesHistoryFilters(transaction, this.historyFilters)
+      );
+    },
+
+    activeGroups() {
+      return activeFilterGroups(this.historyFilters);
     },
 
     maxPages() {
@@ -304,6 +357,18 @@ export default defineComponent({
   },
   methods: {
     unitCode,
+    chipLabel(group) {
+      const value = this.historyFilters[group];
+      if (group === "mint") return historyMintLabel(value, this.mints);
+      if (group === "unit") return unitCode(value);
+      return this.$t(HISTORY_FILTER_LABEL_KEYS[group][value]);
+    },
+    clearFilter(group) {
+      this.historyFilters[group] = DEFAULT_HISTORY_FILTERS[group];
+    },
+    clearAllFilters() {
+      this.historyFilters = { ...DEFAULT_HISTORY_FILTERS };
+    },
     ...mapActions(useWalletStore, [
       "checkTokenSpendable",
       "checkInvoiceBolt11",
@@ -600,37 +665,100 @@ export default defineComponent({
   max-width: 100%;
 }
 
-.history-empty .q-item__label {
-  color: var(--app-text-muted);
+/* The filter row over the list: chips on the start edge, the filter button on the end
+   edge, its glyph's ink on the list's 16px inset like every other trailing control. */
+.history-toolbar {
+  align-items: flex-start;
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+  min-height: 44px;
 }
-
-/* Filters are toggle chips, not actions: a compact 36px pill, outlined when off and filled
-   with a check when on; the hit area still reaches 44px. */
-.history-filter-btn {
-  position: relative;
-  font-size: 13px;
-  min-height: 36px;
-  padding: 0 14px;
+/* The chips wrap rather than scroll, so every active filter stays in view (long German or
+   Thai labels, a mint and a unit included); the row grows a line instead. */
+.history-chips {
+  align-items: center;
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+  padding-block: 6px;
+}
+.history-clear-all {
+  background: none;
+  border: 0;
+  border-radius: var(--app-radius-sm);
   color: var(--app-text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  min-height: 32px;
+  padding: 0 6px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
-/* Secondary-control outline: muted, like the mint chip; full white is kept for focus. */
-.history-filter-btn.q-btn--outline:before {
-  border-color: var(--app-text-muted);
+.history-chip {
+  align-items: center;
+  background: var(--app-tint);
+  border: 0;
+  border-radius: var(--app-radius-pill);
+  color: var(--app-text);
+  cursor: pointer;
+  display: inline-flex;
+  flex-shrink: 0;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  gap: 4px;
+  min-height: 32px;
+  padding: 0 10px 0 12px;
+  transition: background 0.15s ease;
 }
-.history-filter-btn::after {
-  content: "";
-  position: absolute;
-  inset: -4px 0;
+@media (hover: hover) {
+  .history-chip:hover {
+    background: var(--app-tint-strong);
+  }
+}
+.history-chip:focus-visible {
+  box-shadow: var(--app-focus-ring);
+  outline: none;
+}
+.history-chip__label {
+  max-width: 14em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.history-count {
+  color: var(--app-text-muted);
+  flex-shrink: 0;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  padding-inline-start: 4px;
+  white-space: nowrap;
+}
+.history-filter-btn {
+  margin-inline: auto -10px;
+  position: relative;
 }
 
 .history-check-btn {
   color: var(--app-text-muted);
   font-size: 14px !important;
   font-weight: 500;
-  margin-block: -13px;
+  /* The 44px target reaches a little past its row: it paints above the next row (whose fill
+     hid its tint and ring, hover audit F3) and draws its ring inside. */
+  margin-block: -10px;
   margin-inline-end: -8px;
   min-height: 44px;
   padding: 0 8px;
+  position: relative;
+  z-index: 1;
+}
+.history-check-btn:focus-visible {
+  outline-offset: -2px !important;
 }
 .history-check-btn__label {
   margin-inline-start: 6px;

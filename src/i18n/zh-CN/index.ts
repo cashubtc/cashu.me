@@ -25,6 +25,7 @@ export default {
   },
 
   global: {
+    notifications: "通知",
     copy_to_clipboard: {
       success: "已复制到剪贴板！",
     },
@@ -61,6 +62,9 @@ export default {
       },
       scan: {
         label: "扫描",
+      },
+      more_options: {
+        label: "更多选项",
       },
       clear: {
         label: "清除",
@@ -1439,25 +1443,34 @@ export default {
   HistoryTable: {
     empty_text: "暂无历史记录",
     empty_hint: "你发送和收到的付款会显示在这里。",
+    filters: {
+      title: "筛选记录",
+      direction: "方向",
+      type: "类型",
+      all: "全部",
+      all_mints: "全部 Mint",
+      completed: "已完成",
+      received: "已收到",
+      sent: "已发送",
+      show_results: "显示结果（{count}）",
+      reset: "重置",
+      clear_all: "全部清除",
+      remove: "移除筛选：{label}",
+      empty_title: "没有符合筛选条件的付款",
+      clear: "清除筛选",
+      count: "{shown} / {total}",
+      active: "筛选记录，已启用 {count} 项",
+    },
     row: {
       type_label: "Ecash",
       date_label: "{ value } 前",
     },
     actions: {
-      filter_ecash_only: {
-        label: "仅 ecash",
-      },
       check_status: {
         tooltip_text: "检查状态",
       },
       receive: {
         tooltip_text: "接收",
-      },
-      filter_pending: {
-        label: "仅显示待处理",
-      },
-      show_all: {
-        label: "显示全部",
       },
     },
     old_token_not_found_error_text: "未找到旧 token",
@@ -1673,6 +1686,7 @@ export default {
   },
   TokenInformation: {
     fee: "费用",
+    token: "令牌",
     unit: "单位",
     fiat: "法币",
     p2pk: "P2PK",
@@ -1723,6 +1737,8 @@ export default {
   },
   QuoteInformation: {
     address: "地址",
+    invoice: "发票",
+    request: "请求",
     amount: "金额",
     fee_reserve: "预留手续费",
     fee_paid: "已付手续费",

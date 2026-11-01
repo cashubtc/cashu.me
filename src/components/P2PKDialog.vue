@@ -12,7 +12,7 @@
               <div class="col-12 q-px-md p2pk-qr">
                 <QrBlock :value="p2pkData.publicKey" />
                 <QrCopyLine
-                  :text="shortKey(p2pkData.publicKey)"
+                  :text="p2pkData.publicKey"
                   @copy="onCopyPublicKey"
                 />
               </div>
@@ -101,9 +101,6 @@ export default defineComponent({
     },
   },
   methods: {
-    shortKey(key: string) {
-      return key.length > 20 ? `${key.slice(0, 10)}…${key.slice(-8)}` : key;
-    },
     ...mapActions(useP2PKStore, [
       "generateKeypair",
       "showKeyDetails",

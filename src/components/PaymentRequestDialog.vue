@@ -2,52 +2,55 @@
   <FlowDialog v-model="showPRDialog">
     <template v-if="showPRKData">
       <div class="display-token-fullscreen">
-        <!-- Header: close, title and "New request" (a fresh, open request). -->
         <FullscreenDialogHeader
           :title="$t('PaymentRequestDialog.payment_request.caption')"
           balanced
-        >
-          <template #actions>
-            <div class="row items-center no-wrap sheet-header-actions">
-              <IconButton
-                data-testid="pr-new-request"
-                :label="$t('PaymentRequestDialog.actions.new_request.label')"
-                tooltip
-                @click="newRequest"
-              >
-                <PlusIcon :size="20" />
-              </IconButton>
-            </div>
-          </template>
-        </FullscreenDialogHeader>
-
-        <!-- Earlier requests: a pager under the title, only once there is more than one. -->
-        <div
-          v-if="ownRequestIndices.length > 1"
-          class="row items-center justify-center no-wrap pr-pager"
-        >
-          <IconButton
-            :label="$t('PaymentRequestDialog.actions.previous.label')"
-            :disable="requestPosition <= 0"
-            @click="stepRequest(-1)"
-          >
-            <ChevronLeftIcon :size="24" />
-          </IconButton>
-          <div class="pr-pager__label">{{ currentIndexDisplay }}</div>
-          <IconButton
-            :label="$t('PaymentRequestDialog.actions.next.label')"
-            :disable="requestPosition >= ownRequestIndices.length - 1"
-            @click="stepRequest(1)"
-          >
-            <ChevronRightIcon :size="24" />
-          </IconButton>
-        </div>
-
+        />
         <PaymentRequestView
           :request="showPRKData"
           :payments="currentPayments"
           @change="applyChanges"
-        />
+        >
+          <!-- Earlier requests: the table's last row, once there is more than one. -->
+          <template v-if="ownRequestIndices.length > 1" #rows>
+            <DetailRow
+              data-testid="pr-pager"
+              :icon="HistoryIcon"
+              :label="currentIndexDisplay"
+              value-class="detail-value--controls"
+            >
+              <span class="pr-pager">
+                <IconButton
+                  :label="$t('PaymentRequestDialog.actions.previous.label')"
+                  :icon="ChevronLeftIcon"
+                  :icon-size="18"
+                  :disable="requestPosition <= 0"
+                  @click="stepRequest(-1)"
+                />
+                <IconButton
+                  :label="$t('PaymentRequestDialog.actions.next.label')"
+                  :icon="ChevronRightIcon"
+                  :icon-size="18"
+                  :disable="requestPosition >= ownRequestIndices.length - 1"
+                  @click="stepRequest(1)"
+                />
+              </span>
+            </DetailRow>
+          </template>
+          <!-- A fresh, open request: the secondary action over Share and Copy. -->
+          <template #footer>
+            <q-btn
+              flat
+              rounded
+              color="primary"
+              class="full-width q-mb-sm"
+              data-testid="pr-new-request"
+              @click="newRequest"
+            >
+              {{ $t("PaymentRequestDialog.actions.new_request.label") }}
+            </q-btn>
+          </template>
+        </PaymentRequestView>
       </div>
     </template>
   </FlowDialog>
@@ -58,7 +61,7 @@ import FlowDialog from "src/components/ui/FlowDialog.vue";
 import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
-  Plus as PlusIcon,
+  History as HistoryIcon,
 } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -77,18 +80,21 @@ import {
 } from "src/js/payment-request-fields";
 import FullscreenDialogHeader from "src/components/ui/FullscreenDialogHeader.vue";
 import IconButton from "src/components/ui/IconButton.vue";
+import DetailRow from "src/components/ui/DetailRow.vue";
 import PaymentRequestView from "src/components/PaymentRequestView.vue";
 
-// The payment request screen: the header (close, title, New request), a pager over this
-// wallet's earlier requests, and the request itself (PaymentRequestView). Every change the
+// The payment request screen: the header, the request itself (PaymentRequestView), a pager
+// row over this wallet's earlier requests at the end of its table, and New request over its
+// footer. Every change the
 // view asks for becomes a new request with its own id, so one already shared keeps working.
 export default defineComponent({
   name: "PRDialog",
+  setup() {
+    return { ChevronLeftIcon, ChevronRightIcon, HistoryIcon };
+  },
   components: {
     FlowDialog,
-    ChevronLeftIcon,
-    ChevronRightIcon,
-    PlusIcon,
+    DetailRow,
     FullscreenDialogHeader,
     IconButton,
     PaymentRequestView,
@@ -196,17 +202,25 @@ export default defineComponent({
 </script>
 
 <style scoped>
-/* The pager is quiet chrome under the title: muted "Request 2 of 3" between 44px arrows. */
+/* The pager row's arrows are the rows' 18px chevrons; the last one's box ends where theirs
+   does, 4px past the value edge (13px of the 44px target lies beyond its glyph). */
 .pr-pager {
-  gap: 4px;
-  margin-top: -8px;
-  padding-bottom: 8px;
+  display: inline-flex;
+  margin-block: -8px;
+  margin-inline-end: -17px;
 }
-.pr-pager__label {
-  color: var(--app-text-muted);
-  font-size: 13px;
-  font-variant-numeric: tabular-nums;
-  min-width: 96px;
-  text-align: center;
+/* Hover and focus stay inside the 44px row: a 36px disc, the ring drawn just inside it. */
+.pr-pager :deep(.q-focus-helper) {
+  border-radius: 50%;
+  height: auto !important;
+  inset: 4px !important;
+  width: auto !important;
+}
+.pr-pager :deep(.q-btn:focus-visible) {
+  outline-offset: -4px !important;
+}
+/* Right to left, "previous" sits on the right and points that way. */
+[dir="rtl"] .pr-pager :deep(svg) {
+  transform: scaleX(-1);
 }
 </style>

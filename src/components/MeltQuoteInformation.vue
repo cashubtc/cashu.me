@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="hasQuote"
-    class="melt-quote-information detail-table q-mt-md"
+    class="melt-quote-information detail-table"
     :class="containerTextClass"
   >
     <DetailRow
@@ -33,7 +33,7 @@
     />
 
     <DetailRow
-      v-if="stateDisplay && !(hidePaidStatus && isPaidState)"
+      v-if="stateDisplay && !hideStatus && !(hidePaidStatus && isPaidState)"
       :icon="ActivityIcon"
       :label="$t('QuoteInformation.status')"
       :value="stateDisplay"
@@ -78,6 +78,13 @@
     />
 
     <DetailRow
+      v-if="memo"
+      :icon="MessageCircleIcon"
+      :label="$t('PayInvoiceDialog.invoice.memo.label')"
+      :value="memo"
+    />
+
+    <DetailRow
       v-if="mintDisplay"
       :icon="MintIcon"
       :label="$t('QuoteInformation.mint')"
@@ -108,6 +115,7 @@ import {
   Hash as HashIcon,
   Activity as ActivityIcon,
   Building2 as MintIcon,
+  MessageCircle as MessageCircleIcon,
   Network as NetworkIcon,
   ReceiptText as ReceiptTextIcon,
 } from "lucide-vue-next";
@@ -137,6 +145,7 @@ export default defineComponent({
       FingerprintIcon,
       HashIcon,
       ActivityIcon,
+      MessageCircleIcon,
       MintIcon,
       NetworkIcon,
       ReceiptTextIcon,
@@ -152,6 +161,16 @@ export default defineComponent({
     hidePaidStatus: {
       type: Boolean,
       default: false,
+    },
+    /** No status row: a quote still being confirmed (Pay), where "Unpaid" says nothing. */
+    hideStatus: {
+      type: Boolean,
+      default: false,
+    },
+    /** The invoice's description, as a row before the mint. */
+    memo: {
+      type: String,
+      default: "",
     },
     meltQuote: {
       type: Object as PropType<ExtendedMeltQuote | null>,
