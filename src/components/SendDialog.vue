@@ -49,13 +49,11 @@ import IconButton from "src/components/ui/IconButton.vue";
 import OptionRow from "src/components/ui/OptionRow.vue";
 import { defineComponent } from "vue";
 import BottomSheet from "src/components/BottomSheet.vue";
-import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useUiStore } from "src/stores/ui";
 import { useWalletStore } from "src/stores/wallet";
 import { useCameraStore } from "src/stores/camera";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
-import { useSettingsStore } from "../stores/settings";
 import { useMintsStore } from "src/stores/mints";
 import {
   Zap as ZapIcon,
@@ -83,25 +81,10 @@ export default defineComponent({
   },
   mixins: [windowMixin],
   props: {},
-  data: function () {
-    return {
-      currentPage: 1,
-      pageSize: 5,
-    };
-  },
   computed: {
     ...mapState(useMintsStore, ["mints", "activeMintUrl", "activeUnit"]),
-    ...mapWritableState(useUiStore, [
-      "showInvoiceDetails",
-      "tab",
-      "showSendDialog",
-      "showReceiveDialog",
-    ]),
-    ...mapWritableState(useWalletStore, [
-      "invoiceHistory",
-      "invoiceData",
-      "payInvoiceData",
-    ]),
+    ...mapWritableState(useUiStore, ["showSendDialog"]),
+    ...mapWritableState(useWalletStore, ["payInvoiceData"]),
     ...mapWritableState(useCameraStore, ["camera"]),
     ...mapWritableState(useSendTokensStore, [
       "showSendTokens",
@@ -140,7 +123,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(useMintsStore, ["selectMintUrl"]),
-    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+    ...mapActions(useCameraStore, ["showCamera"]),
     showParseDialog: async function () {
       const mintResult = await ensurePaymentMintActive(
         this.mints as any,

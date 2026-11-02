@@ -6,6 +6,7 @@ import { date } from "quasar";
 import { nip19 } from "nostr-tools";
 import { markRaw } from "vue";
 import { notifyApiError, notifyError } from "src/js/notify";
+import { i18n } from "src/boot/i18n";
 import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import { useMintsStore } from "src/stores/mints";
 import { useNostrStore } from "src/stores/nostr";
@@ -266,6 +267,17 @@ export const useNpubCashStore = defineStore("npubCash", {
       quoteResumeHandler: null as (() => void) | null,
     };
   },
+  getters: {
+    // Enabled, with an address, on a mint the wallet still has.
+    hasConfiguredAddress(state): boolean {
+      return Boolean(
+        state.enabled &&
+          state.address &&
+          state.mintUrl &&
+          useMintsStore().mints.some((mint) => mint.url === state.mintUrl)
+      );
+    },
+  },
   actions: {
     initializeNpubCash: async function () {
       if (!this.enabled) {
@@ -358,8 +370,10 @@ export const useNpubCashStore = defineStore("npubCash", {
       const mintsStore = useMintsStore();
       if (!mintsStore.mints.find((mint) => mint.url === mintUrl)) {
         notifyError(
-          `Please make sure ${mintUrl} is added to your wallet first!`,
-          "Could not update npub.cash mint"
+          i18n.global.t("npubcash.notifications.could_not_update_mint"),
+          i18n.global.t("npubcash.notifications.add_mint_first", {
+            mint: mintUrl,
+          })
         );
         return;
       }
@@ -388,7 +402,7 @@ export const useNpubCashStore = defineStore("npubCash", {
         if (error instanceof Error) {
           notifyError(error.message);
         } else {
-          notifyError("Something went wrong!");
+          notifyError(i18n.global.t("common.something_went_wrong"));
         }
       } finally {
         this.loading = false;

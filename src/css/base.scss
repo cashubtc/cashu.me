@@ -152,7 +152,6 @@ body {
   --app-hover-opacity: 0.12;
   --app-pressed-opacity: 0.24;
   --app-card-shadow: none;
-  --app-segment-edge: var(--app-field-edge);
   // Shape and depth, the same in every mode and theme. Radii: small controls 6, inner
   // surfaces 8, cards and rows 12, sheets 20, pills 999.
   --app-radius-sm: 6px;
@@ -442,11 +441,6 @@ video {
     0 3px 1px -2px rgba(0, 0, 0, 0.12);
   border-radius: 4px;
   vertical-align: top;
-}
-
-.shadow-2 {
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2), 0 2px 2px rgba(0, 0, 0, 0.14),
-    0 3px 1px -2px rgba(0, 0, 0, 0.12);
 }
 
 ::-webkit-scrollbar {

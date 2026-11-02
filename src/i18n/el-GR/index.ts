@@ -16,21 +16,10 @@ export default {
       success: "Επιτυχία",
       failed: "Απέτυχε",
     },
-    payment: "Πληρωμή Multinut",
-    selectMints:
-      "Επιλέξτε ένα ή περισσότερα mints για να εκτελέσετε μια πληρωμή.",
-    totalSelectedBalance: "Συνολικό επιλεγμένο υπόλοιπο",
-    multiMintPay: "Πληρωμή από πολλά mint",
-    balanceNotEnough:
-      "Το υπόλοιπο πολλών νομισματοκοπείων δεν επαρκεί για την κάλυψη αυτού του τιμολογίου",
-    failed: "Η επεξεργασία απέτυχε: {error}",
     paid: "Πληρώθηκε {amount} μέσω Lightning",
   },
   global: {
     notifications: "Ειδοποιήσεις",
-    copy_to_clipboard: {
-      success: "Αντιγράφηκε στο πρόχειρο!",
-    },
     actions: {
       add_mint: {
         label: "Προσθήκη mint",
@@ -96,8 +85,6 @@ export default {
       could_not_request_mint: "Δεν ήταν δυνατή η αίτηση στο mint",
       invoice_still_pending: "Το τιμολόγιο εκκρεμεί ακόμα",
       paid_lightning: "Πληρώθηκε {amount} μέσω Lightning",
-      payment_pending_refresh:
-        "Πληρωμή σε εκκρεμότητα. Ανανεώστε το τιμολόγιο χειροκίνητα.",
       sent: "Στάλθηκε {amount}",
       token_still_pending: "Το token εκκρεμεί ακόμα",
       received_lightning: "Λήφθηκε {amount} μέσω Lightning",
@@ -108,13 +95,22 @@ export default {
       no_amount: "Δεν υπάρχει ποσό",
       no_lnurl_data: "Δεν υπάρχουν δεδομένα LNURL",
       no_price_data: "Δεν υπάρχουν δεδομένα τιμής.",
-      please_try_again: "Παρακαλώ προσπαθήστε ξανά.",
       trying_again: "Γίνεται νέα προσπάθεια...",
       unsupported_legacy_qr: "Μη υποστηριζόμενος παλαιός κωδικός QR",
       legacy_qr_not_supported:
         "Αυτός ο παλαιός κωδικός QR δεν προέρχεται από υποστηριζόμενο έμπορο",
       no_bolt12_mint: "Κανένα από τα mint σας δεν υποστηρίζει προσφορές BOLT12",
       no_bolt11_mint: "Κανένα από τα mint σας δεν υποστηρίζει τιμολόγια BOLT11",
+      address_not_paid: "Η διεύθυνση δεν έχει πληρωθεί",
+      payment_pending: "Πληρωμή σε εκκρεμότητα",
+      invoice_already_paid: "Το τιμολόγιο έχει ήδη πληρωθεί",
+      payment_sent: "Η πληρωμή στάλθηκε",
+      payment_failed: "Η πληρωμή απέτυχε",
+      could_not_pay_request: "Δεν ήταν δυνατή η πληρωμή του αιτήματος",
+      request_unit_unsupported:
+        "Το mint δεν υποστηρίζει τη μονάδα αυτού του αιτήματος πληρωμής: {unit}",
+      no_onchain_mint:
+        "Κανένα από τα mint σας δεν υποστηρίζει πληρωμές on-chain",
     },
     mint: {
       notifications: {
@@ -127,9 +123,6 @@ export default {
         unit_not_supported: "Η μονάδα δεν υποστηρίζεται από το mint",
         activated: "Το mint ενεργοποιήθηκε",
         could_not_connect: "Δεν ήταν δυνατή η σύνδεση στο mint",
-        could_not_get_info: "Δεν ήταν δυνατή η λήψη πληροφοριών mint",
-        could_not_get_keys: "Δεν ήταν δυνατή η λήψη κλειδιών mint",
-        could_not_get_keysets: "Δεν ήταν δυνατή η λήψη συνόλων κλειδιών mint",
         mint_validation_error: "Σφάλμα επικύρωσης Mint",
         removed: "Το mint αφαιρέθηκε",
         error: "Σφάλμα mint",
@@ -138,22 +131,13 @@ export default {
   },
   MainHeader: {
     menu: {
-      settings: {
-        title: "Ρυθμίσεις",
-        settings: {
-          title: "Ρυθμίσεις",
-          caption: "Διαμόρφωση πορτοφολιού",
-        },
-      },
       terms: {
-        title: "Όροι",
         terms: {
           title: "Όροι",
           caption: "Τι αποδέχεστε χρησιμοποιώντας το Cashu.me",
         },
       },
       links: {
-        title: "Σύνδεσμοι",
         cashuSpace: {
           title: "Cashu.space",
           caption: "cashu.space",
@@ -189,13 +173,6 @@ export default {
     staging: {
       warning: {
         text: "Staging – μην το χρησιμοποιείτε με πραγματικά κεφάλαια!",
-      },
-    },
-  },
-  FullscreenHeader: {
-    actions: {
-      back: {
-        label: "Πορτοφόλι",
       },
     },
   },
@@ -263,18 +240,11 @@ export default {
     },
     language: {
       title: "Γλώσσα",
-      description:
-        "Παρακαλώ επιλέξτε την προτιμώμενη γλώσσα σας από την παρακάτω λίστα.",
     },
     sections: {
-      backup_restore: "ΑΝΤΙΓΡΑΦΟ ΑΣΦΑΛΕΙΑΣ & ΕΠΑΝΑΦΟΡΑ",
-      lightning_address: "ΔΙΕΥΘΥΝΣΗ LIGHTNING",
-      nostr_keys: "ΚΛΕΙΔΙΑ NOSTR",
       nostr: {
-        title: "NOSTR",
         relays: {
           already_added: "Ο αναμεταδότης έχει ήδη προστεθεί",
-          expand_label: "Κάντε κλικ για να επεξεργαστείτε τα relays",
           add: {
             title: "Προσθήκη relay",
             description:
@@ -282,19 +252,11 @@ export default {
           },
           list: {
             title: "Relays",
-            description: "Το πορτοφόλι σας θα συνδεθεί σε αυτά τα relays.",
             copy_tooltip: "Αντιγραφή relay",
             remove_tooltip: "Κατάργηση relay",
           },
         },
       },
-      payment_requests: "ΑΙΤΗΜΑΤΑ ΠΛΗΡΩΜΗΣ",
-      nostr_wallet_connect: "NOSTR WALLET CONNECT",
-      hardware_features: "ΧΑΡΑΚΤΗΡΙΣΤΙΚΑ ΥΛΙΚΟΥ",
-      p2pk_features: "ΧΑΡΑΚΤΗΡΙΣΤΙΚΑ P2PK",
-      privacy: "ΑΠΟΡΡΗΤΟ",
-      experimental: "ΠΕΙΡΑΜΑΤΙΚΟ",
-      appearance: "ΕΜΦΑΝΙΣΗ",
     },
     backup_restore: {
       backup_seed: {
@@ -307,7 +269,6 @@ export default {
         title: "Επαναφορά ecash",
         description:
           "Ανακτήστε ecash από άλλη φράση seed. Η τρέχουσα φράση seed σας μένει ως έχει.",
-        button: "Επαναφορά",
       },
     },
     lightning_address: {
@@ -317,7 +278,6 @@ export default {
         invalid: "Εισαγάγετε έγκυρο URL διακομιστή HTTPS",
       },
       title: "Διεύθυνση Lightning",
-      description: "Λάβετε πληρωμές στη διεύθυνση Lightning σας.",
       enable: {
         toggle: "Χρήση διεύθυνσης Lightning",
         description: "Λάβετε πληρωμές σε διεύθυνση από το npub.cash",
@@ -368,7 +328,6 @@ export default {
       },
     },
     payment_requests: {
-      title: "Αιτήματα πληρωμής",
       description:
         "Πληρωθείτε μέσω Nostr. Όταν είναι ενεργό, το πορτοφόλι σας ακούει στα relays Nostr σας.",
       enable_toggle: "Ενεργοποίηση αιτημάτων πληρωμής",
@@ -379,7 +338,6 @@ export default {
       },
     },
     nostr_wallet_connect: {
-      title: "Nostr Wallet Connect (NWC)",
       description:
         "Επιτρέπει σε άλλες εφαρμογές να πληρώνουν από αυτό το πορτοφόλι μέσω Nostr Wallet Connect.",
       enable_toggle: "Ενεργοποίηση Nostr Wallet Connect",
@@ -415,7 +373,6 @@ export default {
       },
     },
     p2pk_features: {
-      title: "Κλειδωμένο ecash",
       description:
         "Πειραματικό. Χρησιμοποιήστε μικρά ποσά: αν χάσετε το ιδιωτικό κλειδί, κανείς δεν μπορεί να ξεκλειδώσει το ecash που είναι κλειδωμένο σε αυτό.",
       generate_button: "Δημιουργία κλειδιού",
@@ -431,7 +388,6 @@ export default {
       },
     },
     privacy: {
-      title: "Απόρρητο",
       network_title: "Έλεγχοι δικτύου",
       description: "Αυτές οι ρυθμίσεις επηρεάζουν το απόρρητό σας.",
       check_incoming: {
@@ -471,8 +427,6 @@ export default {
       },
     },
     experimental: {
-      title: "Πειραματικό",
-      description: "Αυτές οι δυνατότητες είναι πειραματικές.",
       receive_swaps: {
         toggle: "Λήψη ανταλλαγών",
         badge: "Beta",
@@ -493,7 +447,6 @@ export default {
         api_url_label: "URL API Ελεγκτή",
       },
       multinut: {
-        toggle: "Ενεργοποίηση Multinut",
         description: "Πληρώνει τιμολόγια από πολλά mint ταυτόχρονα.",
       },
       nostr_mint_backup: {
@@ -515,8 +468,6 @@ export default {
       },
       keyboard: {
         title: "Πληκτρολόγιο οθόνης",
-        description:
-          "Χρησιμοποιήστε το αριθμητικό πληκτρολόγιο για την εισαγωγή ποσών.",
         toggle: "Χρήση αριθμητικού πληκτρολογίου",
         toggle_description:
           "Χρησιμοποιεί το αριθμητικό πληκτρολόγιο για την εισαγωγή ποσών.",
@@ -552,9 +503,6 @@ export default {
       reset: "Επαναφορά",
       progress: "{crawlProcessed} / {crawlTotal}",
     },
-    npub_cash: {
-      copy_lightning_address: "Αντιγραφή διεύθυνσης Lightning",
-    },
     multinut: {
       use_multinut: "Πληρωμές από πολλά mint",
     },
@@ -568,7 +516,6 @@ export default {
         invalid_backup: "Μη έγκυρη μορφή αρχείου αντιγράφου ασφαλείας",
         read_error: "Σφάλμα ανάγνωσης αρχείου",
       },
-      title: "Για προχωρημένους",
       developer: {
         title: "Ρυθμίσεις προγραμματιστή",
         description: "Εργαλεία αντιμετώπισης προβλημάτων και αποσφαλμάτωσης.",
@@ -674,9 +621,6 @@ export default {
       history: {
         label: "Ιστορικό",
       },
-      invoices: {
-        label: "Τιμολόγια",
-      },
       mints: {
         label: "Mints",
       },
@@ -707,18 +651,8 @@ export default {
   BalanceView: {
     total_label: "Συνολικό υπόλοιπο",
     show_balance: "Εμφάνιση υπολοίπου {unit}",
-    mintUrl: {
-      label: "Mint",
-    },
-    mintBalance: {
-      label: "Υπόλοιπο",
-    },
     mintError: {
       label: "Σφάλμα mint",
-    },
-    pending: {
-      label: "Εκκρεμεί",
-      tooltip: "Έλεγχος όλων των εκκρεμών token",
     },
   },
   WelcomePage: {
@@ -735,26 +669,6 @@ export default {
     terms_agreement: "Συνεχίζοντας, αποδέχεστε τους {terms}",
     title: "Καλώς ήρθατε στο Cashu.me",
     text: "Το Cashu.me είναι ένα δωρεάν και ανοιχτού κώδικα πορτοφόλι Bitcoin που χρησιμοποιεί ecash για να διατηρεί τα κεφάλαιά σας ασφαλή και ιδιωτικά.",
-    actions: {
-      more: {
-        label: "Κάντε κλικ για να μάθετε περισσότερα",
-      },
-    },
-    p1: {
-      text: "Το Cashu είναι ένα δωρεάν και ανοιχτού κώδικα πρωτόκολλο ecash για Bitcoin. Μπορείτε να μάθετε περισσότερα γι' αυτό στο { link }.",
-      link: {
-        text: "cashu.space",
-      },
-    },
-    p2: {
-      text: "Αυτό το πορτοφόλι δεν είναι συνδεδεμένο με κανένα mint. Για να χρησιμοποιήσετε αυτό το πορτοφόλι, πρέπει να συνδεθείτε σε ένα ή περισσότερα Cashu mints που εμπιστεύεστε.",
-    },
-    p3: {
-      text: "Αυτό το πορτοφόλι αποθηκεύει ecash στο οποίο έχετε πρόσβαση μόνο εσείς. Εάν διαγράψετε τα δεδομένα του προγράμματος περιήγησής σας χωρίς αντίγραφο ασφαλείας της φράσης seed, θα χάσετε τα token σας.",
-    },
-    p4: {
-      text: "Αυτό το πορτοφόλι βρίσκεται σε έκδοση beta. Δεν φέρουμε καμία ευθύνη για άτομα που χάνουν την πρόσβαση στα κεφάλαιά τους. Χρησιμοποιήστε το με δική σας ευθύνη! Αυτός ο κώδικας είναι ανοιχτού κώδικα και διατίθεται με άδεια MIT.",
-    },
   },
   WelcomeSlide2: {
     title: "Εγκατάσταση του Cashu.me",
@@ -767,11 +681,9 @@ export default {
       android: {
         title: "Android (Chrome)",
         step1: {
-          item: "1. { icon } { text }",
           text: "Πατήστε το μενού (πάνω δεξιά)",
         },
         step2: {
-          item: "2. { icon } { text }",
           text: "Πατήστε { buttonText }",
           buttonText: "@:PwaPrompt.android.add",
         },
@@ -779,11 +691,9 @@ export default {
       ios: {
         title: "iOS (Safari)",
         step1: {
-          item: "1. { icon } { text }",
           text: "Πατήστε κοινοποίηση (κάτω)",
         },
         step2: {
-          item: "2. { icon } { text }",
           text: "Πατήστε { buttonText }",
           buttonText: "@:PwaPrompt.ios.add",
         },
@@ -884,16 +794,12 @@ export default {
       "Μέτρηση μόνο κριτικών από άτομα του δικτύου εμπιστοσύνης σας",
     web_of_trust_hop: "Στο δίκτυο εμπιστοσύνης σας (βήμα {hop})",
     no_mint_url: "Δεν δόθηκε URL mint",
-    title: "Κριτικές mint",
     reviews: "κριτικές",
-    ratings: "{n} βαθμολογία | {n} βαθμολογίες",
     no_reviews: "Δεν υπάρχουν ακόμα κριτικές",
     your_review: "Η κριτική σας",
-    no_reviews_to_display: "Καμία κριτική προς εμφάνιση.",
     no_rating: "Χωρίς βαθμολογία",
     stars_label: "{rating} από 5 αστέρια",
-    out_of: "από",
-    rows: "Reviews",
+    out_of: "από {max}",
     sort: "Ταξινόμηση",
     sort_options: {
       newest: "Νεότερες",
@@ -932,14 +838,8 @@ export default {
       inputs: {
         seed_phrase: {
           label: "Φράση seed",
-          caption: "Μπορείτε να δείτε τη φράση seed σας στις ρυθμίσεις.",
         },
       },
-    },
-    information: {
-      label: "Πληροφορίες",
-      caption:
-        "Ο οδηγός θα επαναφέρει μόνο ecash από μια άλλη φράση seed, δεν θα μπορείτε να χρησιμοποιήσετε αυτήν τη φράση seed ή να αλλάξετε τη φράση seed του πορτοφολιού που χρησιμοποιείτε αυτήν τη στιγμή. Αυτό σημαίνει ότι το επαναφερμένο ecash δεν θα προστατεύεται από την τρέχουσα φράση seed σας εφόσον δεν στείλετε το ecash στον εαυτό σας μία φορά.",
     },
     restore_mints: {
       label: "Επαναφορά mint",
@@ -961,18 +861,10 @@ export default {
       },
       restore: {
         label: "Επαναφορά",
-        in_progress: "Επαναφορά mint…",
         error: "Σφάλμα κατά την επαναφορά του mint: { error }",
-      },
-      restore_all_mints: {
-        label: "Επαναφορά όλων των mint",
-        in_progress: "Επαναφορά mint { index } από { length }…",
-        success: "Η επαναφορά ολοκληρώθηκε με επιτυχία",
-        error: "Σφάλμα κατά την επαναφορά των mints: { error }",
       },
       restore_selected_mints: {
         label: "Επαναφορά επιλεγμένων mint ({count})",
-        in_progress: "Επαναφορά mint { index } από { length }…",
         success: "Επιτυχής επαναφορά {count} mint(s)",
         error: "Σφάλμα κατά την επαναφορά των mints: { error }",
       },
@@ -985,7 +877,6 @@ export default {
       select_all: "Επιλογή όλων",
       deselect_all: "Αποεπιλογή όλων",
       backed_up: "Δημιουργήθηκαν αντίγραφα ασφαλείας",
-      already_added: "Έχει ήδη προστεθεί",
       add_selected: "Προσθήκη επιλεγμένων ({count})",
       no_backups_found: "Δεν βρέθηκαν αντίγραφα ασφαλείας mint",
       no_backups_hint:
@@ -1002,11 +893,6 @@ export default {
       title: "Προσθήκη mint",
       description:
         "Εισαγάγετε το URL ενός Cashu mint για να συνδεθείτε σε αυτό. Αυτό το πορτοφόλι δεν είναι συνδεδεμένο με κανένα mint.",
-      inputs: {
-        nickname: {
-          placeholder: "Ψευδώνυμο (π.χ. Testnet)",
-        },
-      },
       actions: {
         add_mint: {
           label: "@:global.actions.add_mint.label",
@@ -1019,18 +905,14 @@ export default {
     },
     discover: {
       title: "Ανακάλυψη mints",
-      overline: "Ανακάλυψη",
       caption: "Mint που προτείνουν άλλοι στο Nostr.",
       actions: {
         discover: {
           label: "Ανακάλυψη mints",
           in_progress: "Φόρτωση…",
-          error_no_mints: "Δεν βρέθηκαν mints",
-          success: "Βρέθηκαν { length } mints",
         },
       },
       add: "Προσθήκη",
-      unnamed: "Mint χωρίς όνομα",
       empty: {
         title: "Βρείτε ένα mint",
         text: "Το Cashu.me ρωτά τα relays του Nostr για mints που προτείνουν άλλοι, με βαθμολογίες και κριτικές.",
@@ -1038,16 +920,10 @@ export default {
       recommendations: {
         overline: "Βρέθηκαν { length } mints",
         caption: "Κάντε τη δική σας έρευνα πριν χρησιμοποιήσετε ένα mint.",
-        actions: {
-          browse: {
-            label: "Κάντε κλικ για περιήγηση στα mints",
-          },
-        },
       },
     },
     swap: {
       title: "Ανταλλαγή",
-      overline: "Ανταλλαγές μεταξύ mint",
       caption:
         "Μεταφέρετε χρήματα μεταξύ των mint σας μέσω Lightning. Ενδέχεται να ισχύουν χρεώσεις.",
       inputs: {
@@ -1066,11 +942,9 @@ export default {
           label: "@:global.actions.swap.label",
           in_progress: "@:MintSettings.swap.actions.swap.label",
         },
-        receove_to_trusted_mint: { label: "Λήψη σε αξιόπιστο mint" },
       },
     },
     error_badge: "Σφάλμα",
-    active_badge: "Ενεργό",
     switching_mint: "Εναλλαγή σε {mint}",
     reviews_text: "κριτική | κριτικές",
     no_reviews_yet: "Δεν υπάρχουν κριτικές ακόμα",
@@ -1093,29 +967,16 @@ export default {
   },
   InvoiceDetailDialog: {
     title: "Λήψη Lightning",
-    create_invoice_title: "Δημιουργία τιμολογίου",
-    inputs: {
-      amount: {
-        label: "Ποσό ({ ticker }) *",
-      },
-    },
     actions: {
-      close: {
-        label: "@:global.actions.close.label",
-      },
       create: {
         label: "Δημιουργία τιμολογίου",
         label_blocked: "Δημιουργία τιμολογίου",
-        in_progress: "Δημιουργία",
       },
     },
     invoice: {
       caption: "Τιμολόγιο Lightning",
       status_paid_text: "Πληρώθηκε",
       actions: {
-        close: {
-          label: "@:global.actions.close.label",
-        },
         copy: {
           label: "Αντιγραφή τιμολογίου",
         },
@@ -1143,28 +1004,14 @@ export default {
   SendTokenDialog: {
     badge_locked: "κλειδωμένο",
     title: "Αποστολή ecash",
-    title_ecash_text: "Ecash",
-    badge_offline_text: "Εκτός σύνδεσης",
     inputs: {
-      amount: {
-        label: "Ποσό ({ ticker }) *",
-        invalid_too_much_error_text: "Πάρα πολύ",
-      },
       p2pk_pubkey: {
         label: "Δημόσιο κλειδί παραλήπτη",
-        label_invalid: "Μη έγκυρο δημόσιο κλειδί παραλήπτη",
         invalid: "Εισαγάγετε έγκυρο δημόσιο κλειδί (hex ή npub)",
       },
     },
     actions: {
-      close: {
-        label: "@:global.actions.close.label",
-      },
-      close_card_scanner: {
-        label: "@:global.actions.close.label",
-      },
       copy_emoji: {
-        label: "🥜",
         tooltip_text: "Αντιγραφή emoji",
       },
       copy_tokens: {
@@ -1192,7 +1039,6 @@ export default {
       write_tokens_to_card: {
         tooltips: {
           ndef_supported_text: "Εγγραφή στην κάρτα NFC",
-          ndef_unsupported_text: "Το NDEF δεν υποστηρίζεται",
         },
       },
       pay: { label: "@:global.actions.pay.label" },
@@ -1247,12 +1093,6 @@ export default {
   ReceiveTokenDialog: {
     receiving_amount: "Λήψη {amount}",
     title: "Λήψη ecash",
-    title_ecash_text: "Ecash",
-    inputs: {
-      tokens_base64: {
-        label: "Επικολλήστε το token Cashu",
-      },
-    },
     errors: {
       invalid_token: {
         label: "Μη έγκυρο token",
@@ -1263,15 +1103,6 @@ export default {
       },
     },
     actions: {
-      paste: {
-        label: "@:global.actions.paste.label",
-      },
-      close: {
-        label: "@:global.actions.close.label",
-      },
-      scan: {
-        label: "@:global.actions.scan.label",
-      },
       receive: {
         label: "@:global.actions.receive.label",
         label_known_mint: "@:ReceiveTokenDialog.actions.receive.label",
@@ -1280,18 +1111,15 @@ export default {
       swap: {
         label: "@:global.actions.swap.label",
         tooltip_text: "Ανταλλαγή σε αξιόπιστο mint",
-        caption: "Ανταλλαγή { value }",
         processing: "Ανταλλαγή σε εξέλιξη…",
         failed: "Η ανταλλαγή απέτυχε",
       },
       cancel_swap: {
-        label: "@:global.actions.cancel.label",
         tooltip_text: "Ακύρωση ανταλλαγής",
       },
       confirm_swap: {
         label: "@:ReceiveTokenDialog.actions.swap.label",
         tooltip_text: "@:ReceiveTokenDialog.actions.swap.tooltip_text",
-        in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
       later: {
         label: "Λήψη αργότερα",
@@ -1303,7 +1131,6 @@ export default {
         label: "NFC",
         tooltips: {
           ndef_supported_text: "Ανάγνωση από κάρτα NFC",
-          ndef_unsupported_text: "Το NDEF δεν υποστηρίζεται",
         },
       },
       receive_to_selected_mint: { label: "Λήψη στο επιλεγμένο mint" },
@@ -1328,9 +1155,6 @@ export default {
       copy: {
         label: "Αντιγραφή δημόσιου κλειδιού",
       },
-      close: {
-        label: "@:global.actions.close.label",
-      },
       new_key: {
         label: "Δημιουργία νέου κλειδιού",
       },
@@ -1340,7 +1164,6 @@ export default {
     any_amount: "Οποιοδήποτε ποσό",
     payment_request: {
       caption: "Αίτημα πληρωμής",
-      description: "Λήψη πληρωμών μέσω Nostr",
     },
     request_index: "Αίτημα {index} από {total}",
     actions: {
@@ -1350,17 +1173,11 @@ export default {
       copy: {
         label: "@:global.actions.copy.label",
       },
-      close: {
-        label: "@:global.actions.close.label",
-      },
       new_request: {
         label: "Νέο αίτημα",
       },
       share: {
         label: "Κοινοποίηση",
-      },
-      copy_request: {
-        label: "Αντιγραφή αιτήματος",
       },
       add_amount: {
         label: "Προσθήκη ποσού",
@@ -1385,18 +1202,6 @@ export default {
     },
     received_total: "Σύνολο ληφθέντων",
     no_payments_yet: "Δεν υπάρχουν ακόμα πληρωμές",
-  },
-  NumericKeyboard: {
-    actions: {
-      close: {
-        label: "@:global.actions.close.label",
-        closed_info_text:
-          "Πληκτρολόγιο απενεργοποιημένο. Μπορείτε να ενεργοποιήσετε ξανά το πληκτρολόγιο στις ρυθμίσεις.",
-      },
-      enter: {
-        label: "@:global.actions.enter.label",
-      },
-    },
   },
   NWCDialog: {
     nwc: {
@@ -1465,6 +1270,24 @@ export default {
         label: "Επεξεργασία mint",
       },
     },
+    nuts: {
+      nut7: "Έλεγχος κατάστασης token",
+      nut8: "Υπερπληρωμένα τέλη Lightning",
+      nut9: "Επαναφορά υπογραφών",
+      nut10: "Συνθήκες δαπάνης",
+      nut11: "Pay-to-Pubkey (P2PK)",
+      nut12: "Αποδείξεις DLEQ",
+      nut13: "Ντετερμινιστικά μυστικά",
+      nut14: "Συμβόλαια κατακερματισμένου χρονοκλειδώματος (HTLC)",
+      nut15: "Μερικές πληρωμές πολλαπλών διαδρομών",
+      nut16: "Κινούμενοι κωδικοί QR",
+      nut17: "Συνδρομές WebSocket",
+      nut18: "Αιτήματα πληρωμής",
+      nut19: "Αποθηκευμένες αποκρίσεις",
+      nut20: "Υπογραφή στην προσφορά mint",
+      nut21: "Ανοιχτός έλεγχος ταυτότητας",
+      nut22: "Τυφλός έλεγχος ταυτότητας",
+    },
   },
   UnitToggle: {
     label: "Μονάδα: {unit}, αλλαγή",
@@ -1475,7 +1298,6 @@ export default {
     open_selector_empty: "Επιλογή mint",
     title: "Επιλέξτε ένα mint",
     badge_mint_error_text: "Σφάλμα",
-    badge_option_mint_error_text: "@:ChooseMint.badge_mint_error_text",
     available_text: "σε αυτό το mint",
     sheet_title: "Επιλογή mint",
     placeholder: "Επιλέξτε ένα mint",
@@ -1503,7 +1325,6 @@ export default {
     },
     row: {
       type_label: "Ecash",
-      date_label: "πριν από { value }",
     },
     actions: {
       check_status: {
@@ -1514,24 +1335,14 @@ export default {
       },
     },
     old_token_not_found_error_text: "Παλιό token δεν βρέθηκε",
+    labels: {
+      onchain_subpayment: "Υποπληρωμή on-chain",
+      bolt12_subpayment: "Υποπληρωμή BOLT12",
+    },
   },
   InvoiceTable: {
-    empty_text: "Δεν υπάρχουν ακόμη τιμολόγια",
     row: {
       type_label: "Lightning",
-      type_tooltip_text: "Κάντε κλικ για αντιγραφή",
-      date_label: "πριν από { value }",
-    },
-    actions: {
-      check_status: {
-        tooltip_text: "Έλεγχος κατάστασης",
-      },
-      filter_pending: {
-        label: "Μόνο εκκρεμή",
-      },
-      show_all: {
-        label: "Εμφάνιση όλων",
-      },
     },
   },
   RemoveMintDialog: {
@@ -1591,25 +1402,6 @@ export default {
     },
     input_data: {
       title: "Πληρωμή με Lightning",
-      inputs: {
-        invoice_data: {
-          label: "Τιμολόγιο ή διεύθυνση Lightning",
-        },
-      },
-      actions: {
-        close: {
-          label: "@:global.actions.close.label",
-        },
-        enter: {
-          label: "@:global.actions.enter.label",
-        },
-        paste: {
-          label: "@:global.actions.paste.label",
-        },
-        scan: {
-          label: "@:global.actions.scan.label",
-        },
-      },
       title_bolt12: "Πληρωμή προσφοράς Lightning",
     },
     lnurlpay: {
@@ -1618,24 +1410,18 @@ export default {
         "Ο { payee } ζητά{br}μεταξύ { min } και { max } { ticker }",
       sending_to_lightning_address: "Αποστολή σε { address }",
       inputs: {
-        amount: {
-          label: "Ποσό ({ ticker }) *",
-        },
         comment: {
           label: "Σχόλιο (προαιρετικό)",
         },
       },
       actions: {
-        close: {
-          label: "@:global.actions.close.label",
-        },
         send: {
           label: "@:global.actions.send.label",
+          in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
         },
       },
     },
     invoice: {
-      title: "Πληρωμή { value }",
       paying: "Πληρώνεται",
       paid: "Πληρώθηκε",
       fee: "Χρέωση",
@@ -1652,7 +1438,6 @@ export default {
           label: "Πληρωμή",
           in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
           waiting_for_wallet: "Αναμονή για το πορτοφόλι…",
-          error: "Σφάλμα",
         },
       },
     },
@@ -1661,7 +1446,6 @@ export default {
     title: "Επεξεργασία mint",
     inputs: {
       nickname: {
-        placeholder: "π.χ. Testnet",
         label: "Ψευδώνυμο (προαιρετικό)",
       },
       mint_url: {
@@ -1669,9 +1453,6 @@ export default {
       },
     },
     actions: {
-      cancel: {
-        label: "@:global.actions.cancel.label",
-      },
       update: {
         label: "@:global.actions.update.label",
       },
@@ -1681,15 +1462,7 @@ export default {
     title: "Εμπιστεύεστε αυτό το mint;",
     description:
       "Συνδεθείτε σε αυτό το mint μόνο αν το εμπιστεύεστε. Αν σταματήσει να λειτουργεί, το ecash που έχετε σε αυτό χάνεται.",
-    inputs: {
-      mint_url: {
-        label: "@:global.inputs.mint_url.label",
-      },
-    },
     actions: {
-      cancel: {
-        label: "@:global.actions.cancel.label",
-      },
       add_mint: {
         label: "@:global.actions.add_mint.label",
         in_progress: "Προσθήκη mint",
@@ -1756,7 +1529,7 @@ export default {
     settings: "Ρυθμίσεις",
     backspace: "Διαγραφή χαρακτήρα",
     enter_amount_in: "Εισαγωγή ποσού σε {fiat}",
-    fee: "Χρέωση",
+    something_went_wrong: "Κάτι πήγε στραβά",
   },
   SendPaymentRequest: {
     actions: {
@@ -1765,8 +1538,7 @@ export default {
     },
     info: {
       pay_failed: "Δεν ήταν δυνατή η πληρωμή του αιτήματος",
-      pay_to: "Πληρωμή σε {target}",
-      invalid_url: "Μη έγκυρο URL",
+      no_ecash: "Δεν υπάρχει διαθέσιμο ecash για αυτό το αίτημα πληρωμής",
     },
   },
   PaymentRequestInfo: {
@@ -1921,6 +1693,67 @@ export default {
       positive_whole: "Εισαγάγετε θετικό ακέραιο ποσό σε {unit}.",
       min: "Εισαγάγετε τουλάχιστον {amount}.",
       max: "Εισαγάγετε έως {amount}.",
+    },
+  },
+  storage: {
+    notifications: {
+      unrecognized_backup: "Μη αναγνωρισμένη μορφή αντιγράφου ασφαλείας",
+      backup_restored: "Το αντίγραφο ασφαλείας επαναφέρθηκε",
+      backup_exported: "Το αντίγραφο ασφαλείας του πορτοφολιού εξήχθη",
+      quota_exceeded:
+        "Ο τοπικός χώρος αποθήκευσης είναι πλήρης. Καθαρίστε τον τοπικό χώρο αποθήκευσης.",
+      cleaned_up: "Απελευθερώθηκαν {size} byte",
+    },
+  },
+  receiveTokens: {
+    notifications: {
+      already_in_history: "Το token υπάρχει ήδη στο ιστορικό",
+      nfc_read_failed:
+        "Δεν είναι δυνατή η ανάγνωση δεδομένων από την ετικέτα NFC",
+      scan_error: "Σφάλμα σάρωσης",
+      nfc_error: "Σφάλμα NFC",
+    },
+  },
+  nostrMintBackup: {
+    notifications: {
+      no_relays: "Δεν έχουν ρυθμιστεί relays Nostr",
+      backup_failed:
+        "Δεν ήταν δυνατή η δημιουργία αντιγράφου της λίστας mint σας στο Nostr",
+      backed_up: "Δημιουργήθηκε αντίγραφο της λίστας mint στο Nostr",
+      found:
+        "Βρέθηκε {count} mint στα αντίγραφα ασφαλείας Nostr | Βρέθηκαν {count} mint στα αντίγραφα ασφαλείας Nostr",
+      none_found:
+        "Δεν βρέθηκαν αντίγραφα ασφαλείας mint στο Nostr για αυτή τη φράση seed",
+      search_failed: "Δεν ήταν δυνατή η αναζήτηση αντιγράφων ασφαλείας mint",
+      add_mint_failed: "Δεν ήταν δυνατή η προσθήκη του {mint}",
+      added:
+        "Προστέθηκε {count} mint στο πορτοφόλι σας | Προστέθηκαν {count} mint στο πορτοφόλι σας",
+      none_added: "Δεν προστέθηκαν νέα mint",
+      add_selected_failed: "Δεν ήταν δυνατή η προσθήκη των επιλεγμένων mint",
+    },
+  },
+  nostr: {
+    notifications: {
+      nip04_published: "Το συμβάν NIP-04 δημοσιεύτηκε",
+      nip04_failed: "Δεν ήταν δυνατή η δημοσίευση συμβάντος NIP-04",
+      nip17_failed: "Δεν ήταν δυνατή η δημοσίευση συμβάντος NIP-17",
+      receive_failed: "Δεν ήταν δυνατή η λήψη της εισερχόμενης πληρωμής",
+      ecash_already_in_history: "Το ecash υπάρχει ήδη στο ιστορικό",
+      ecash_added: "Το ecash προστέθηκε στο ιστορικό",
+    },
+  },
+  nwc: {
+    notifications: {
+      melt_quote_failed: "NWC: Δεν ήταν δυνατό το αίτημα προσφοράς melt",
+      unit_must_be_sat: "NWC: Η ενεργή μονάδα πρέπει να είναι sats",
+      allowance_exceeded: "NWC: Υπέρβαση ορίου",
+    },
+  },
+  npubcash: {
+    notifications: {
+      could_not_update_mint:
+        "Δεν ήταν δυνατή η ενημέρωση του mint του npub.cash",
+      add_mint_first: "Προσθέστε πρώτα το {mint} στο πορτοφόλι σας",
     },
   },
 };

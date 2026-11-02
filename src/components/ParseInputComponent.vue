@@ -74,6 +74,8 @@ import BusyLabel from "src/components/ui/BusyLabel.vue";
 import IconButton from "src/components/ui/IconButton.vue";
 import OptionRow from "src/components/ui/OptionRow.vue";
 import { defineComponent } from "vue";
+import { mapState } from "pinia";
+import { useUiStore } from "src/stores/ui";
 import {
   ClipboardPaste as ClipboardPasteIcon,
   Nfc as NfcIcon,
@@ -137,13 +139,7 @@ export default defineComponent({
   },
   emits: ["update:modelValue", "enter", "paste", "scan", "nfc"],
   computed: {
-    canPasteFromClipboard() {
-      return (
-        window.isSecureContext &&
-        navigator.clipboard &&
-        navigator.clipboard.readText
-      );
-    },
+    ...mapState(useUiStore, ["canPasteFromClipboard"]),
     computedScanCaption(): string {
       return (
         this.scanCaption ||

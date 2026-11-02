@@ -434,12 +434,4 @@ export default {
     font-size: 0.95rem;
   }
 }
-
-.animated.bounceIn {
-  animation-duration: 0.8s;
-}
-
-.animated.tada {
-  animation-duration: 1s;
-}
 </style>

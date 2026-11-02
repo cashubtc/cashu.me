@@ -25,7 +25,7 @@
           height="14px"
           class="q-my-xs"
         />
-        <template v-else>{{ $t("MintRatings.out_of") }} 5</template>
+        <template v-else>{{ $t("MintRatings.out_of", { max: 5 }) }}</template>
       </div>
     </div>
 
@@ -77,6 +77,7 @@
 <script lang="ts">
 import { defineComponent, type PropType } from "vue";
 import { Star as StarIcon } from "lucide-vue-next";
+import { formatRating } from "src/js/format-currency";
 
 export default defineComponent({
   name: "RatingsSummary",
@@ -93,7 +94,7 @@ export default defineComponent({
   },
   computed: {
     averageDisplay(): string {
-      return this.average !== null ? this.average.toFixed(1) : "n/a";
+      return this.average !== null ? formatRating(this.average) : "–";
     },
     rated(): number {
       return Object.values(this.distribution).reduce((a, b) => a + b, 0);

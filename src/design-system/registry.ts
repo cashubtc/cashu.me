@@ -245,7 +245,7 @@ export const DS_ITEMS: DsItem[] = [
     source:
       "src/components/AmountKeypadPanel.vue · NumericKeyboard.vue · elements.scss .amount-display",
     usage: { tag: "AmountKeypadPanel" },
-    example: `<AmountKeypadPanel v-model="sendData.amount" :busy="sending" />`,
+    example: `<AmountKeypadPanel :busy="sending" />`,
   },
   {
     id: "segmented-control",
@@ -604,7 +604,7 @@ export const DS_ITEMS: DsItem[] = [
     tier: "feature",
     source: "src/components/BalanceView.vue",
     usage: { tag: "BalanceView" },
-    example: `<BalanceView :set-tab="setTab" />`,
+    example: `<BalanceView />`,
     note: "The total per unit. Only the unit dots (or a unit change) move it, with the carousel's slide; no swipe, drag or scroll moves it by hand. A tap on the figure hides it.",
   },
   {

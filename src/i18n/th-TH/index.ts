@@ -15,20 +15,11 @@ export default {
       success: "สำเร็จ",
       failed: "ล้มเหลว",
     },
-    payment: "การชำระเงิน Multinut",
-    selectMints: "เลือกหนึ่งหรือหลาย mint เพื่อทำการชำระเงิน",
-    totalSelectedBalance: "ยอดรวมที่เลือก",
-    multiMintPay: "จ่ายจากหลาย Mint",
-    balanceNotEnough: "ยอดหลาย mint ไม่เพียงพอสำหรับใบแจ้งหนี้นี้",
-    failed: "ไม่สามารถประมวลผล: {error}",
     paid: "จ่าย {amount} ผ่าน Lightning",
   },
 
   global: {
     notifications: "การแจ้งเตือน",
-    copy_to_clipboard: {
-      success: "คัดลอกไปยังคลิปบอร์ดแล้ว!",
-    },
     actions: {
       add_mint: {
         label: "เพิ่ม Mint",
@@ -94,8 +85,6 @@ export default {
       could_not_request_mint: "ไม่สามารถขอ mint ได้",
       invoice_still_pending: "ใบแจ้งหนี้ยังอยู่ระหว่างดำเนินการ",
       paid_lightning: "จ่าย {amount} ผ่าน Lightning",
-      payment_pending_refresh:
-        "การชำระเงินอยู่ระหว่างดำเนินการ รีเฟรชใบแจ้งหนี้ด้วยตนเอง",
       sent: "ส่ง {amount}",
       token_still_pending: "โทเค็นยังอยู่ระหว่างดำเนินการ",
       received_lightning: "ได้รับ {amount} ผ่าน Lightning",
@@ -106,13 +95,20 @@ export default {
       no_amount: "ไม่มียอดเงิน",
       no_lnurl_data: "ไม่มีข้อมูล LNURL",
       no_price_data: "ไม่มีข้อมูลราคา",
-      please_try_again: "โปรดลองอีกครั้ง",
       trying_again: "กำลังลองอีกครั้ง...",
       unsupported_legacy_qr: "ไม่รองรับคิวอาร์โค้ดแบบเก่า",
       legacy_qr_not_supported:
         "คิวอาร์โค้ดแบบเก่านี้ไม่ได้มาจากร้านค้าที่รองรับ",
       no_bolt12_mint: "ไม่มี Mint ของคุณที่รองรับ BOLT12 Offer",
       no_bolt11_mint: "ไม่มี Mint ของคุณที่รองรับใบแจ้งหนี้ BOLT11",
+      address_not_paid: "ที่อยู่นี้ยังไม่ได้รับการชำระเงิน",
+      payment_pending: "การชำระเงินอยู่ระหว่างดำเนินการ",
+      invoice_already_paid: "ใบแจ้งหนี้ชำระแล้ว",
+      payment_sent: "ส่งการชำระเงินแล้ว",
+      payment_failed: "การชำระเงินล้มเหลว",
+      could_not_pay_request: "ไม่สามารถชำระคำขอได้",
+      request_unit_unsupported: "Mint ไม่รองรับหน่วยในคำขอชำระเงินนี้: {unit}",
+      no_onchain_mint: "ไม่มี Mint ของคุณที่รองรับการชำระเงินแบบออนเชน",
     },
     mint: {
       notifications: {
@@ -125,9 +121,6 @@ export default {
         unit_not_supported: "หน่วยไม่รองรับโดย Mint",
         activated: "เปิดใช้งาน Mint แล้ว",
         could_not_connect: "ไม่สามารถเชื่อมต่อกับ Mint ได้",
-        could_not_get_info: "ไม่สามารถดึงข้อมูล Mint ได้",
-        could_not_get_keys: "ไม่สามารถดึงคีย์ Mint ได้",
-        could_not_get_keysets: "ไม่สามารถดึงชุดคีย์ Mint ได้",
         mint_validation_error: "ข้อผิดพลาดในการตรวจสอบ mint",
         removed: "ลบ Mint แล้ว",
         error: "ข้อผิดพลาด Mint",
@@ -136,22 +129,13 @@ export default {
   },
   MainHeader: {
     menu: {
-      settings: {
-        title: "การตั้งค่า",
-        settings: {
-          title: "การตั้งค่า",
-          caption: "การกำหนดค่า Wallet",
-        },
-      },
       terms: {
-        title: "เงื่อนไข",
         terms: {
           title: "เงื่อนไข",
           caption: "สิ่งที่คุณยอมรับเมื่อใช้ Cashu.me",
         },
       },
       links: {
-        title: "ลิงก์",
         cashuSpace: {
           title: "Cashu.space",
           caption: "cashu.space",
@@ -187,13 +171,6 @@ export default {
     staging: {
       warning: {
         text: "กำลังทดสอบ – ห้ามใช้กับเงินจริง!",
-      },
-    },
-  },
-  FullscreenHeader: {
-    actions: {
-      back: {
-        label: "Wallet",
       },
     },
   },
@@ -269,25 +246,16 @@ export default {
       reset: "รีเซ็ต",
       progress: "{crawlProcessed} / {crawlTotal}",
     },
-    npub_cash: {
-      copy_lightning_address: "คัดลอกที่อยู่ Lightning",
-    },
     multinut: {
       use_multinut: "การชำระเงินจากหลาย Mint",
     },
     language: {
       title: "ภาษา",
-      description: "โปรดเลือกภาษาที่คุณต้องการจากรายการด้านล่าง",
     },
     sections: {
-      backup_restore: "สำรองข้อมูล & กู้คืน",
-      lightning_address: "ที่อยู่ LIGHTNING",
-      nostr_keys: "คีย์ NOSTR",
       nostr: {
-        title: "NOSTR",
         relays: {
           already_added: "เพิ่มรีเลย์นี้แล้ว",
-          expand_label: "คลิกเพื่อแก้ไขรีเลย์",
           add: {
             title: "เพิ่มรีเลย์",
             description:
@@ -295,19 +263,11 @@ export default {
           },
           list: {
             title: "รีเลย์",
-            description: "กระเป๋าเงินของคุณจะเชื่อมต่อกับรีเลย์เหล่านี้",
             copy_tooltip: "คัดลอกรีเลย์",
             remove_tooltip: "ลบรีเลย์",
           },
         },
       },
-      payment_requests: "คำขอชำระเงิน",
-      nostr_wallet_connect: "NOSTR WALLET CONNECT",
-      hardware_features: "คุณสมบัติฮาร์ดแวร์",
-      p2pk_features: "คุณสมบัติ P2PK",
-      privacy: "ความเป็นส่วนตัว",
-      experimental: "ทดลอง",
-      appearance: "รูปลักษณ์",
     },
     backup_restore: {
       backup_seed: {
@@ -320,7 +280,6 @@ export default {
         title: "กู้คืน ecash",
         description:
           "กู้คืน ecash จากวลีสำหรับกู้คืนชุดอื่น วลีสำหรับกู้คืนปัจจุบันของคุณจะไม่เปลี่ยนแปลง",
-        button: "กู้คืน",
       },
     },
     lightning_address: {
@@ -330,7 +289,6 @@ export default {
         invalid: "ป้อน URL เซิร์ฟเวอร์ HTTPS ที่ถูกต้อง",
       },
       title: "ที่อยู่ Lightning",
-      description: "รับการชำระเงินไปยังที่อยู่ Lightning ของคุณ",
       enable: {
         toggle: "ใช้ Lightning Address",
         description: "รับเงินที่ที่อยู่จาก npub.cash",
@@ -379,7 +337,6 @@ export default {
       },
     },
     payment_requests: {
-      title: "คำขอชำระเงิน",
       description:
         "รับเงินผ่าน Nostr เมื่อเปิดไว้ Wallet จะคอยรับข้อมูลจากรีเลย์ Nostr ของคุณ",
       enable_toggle: "เปิดใช้คำขอชำระเงิน",
@@ -390,7 +347,6 @@ export default {
       },
     },
     nostr_wallet_connect: {
-      title: "Nostr Wallet Connect (NWC)",
       description: "ให้แอปอื่นจ่ายเงินจาก Wallet นี้ผ่าน Nostr Wallet Connect",
       enable_toggle: "เปิดใช้ Nostr Wallet Connect",
       payments_note:
@@ -424,7 +380,6 @@ export default {
       },
     },
     p2pk_features: {
-      title: "ecash ที่ล็อกไว้",
       description:
         "ฟีเจอร์ทดลอง ใช้กับจำนวนเงินน้อยๆ เท่านั้น หากคุณทำกุญแจส่วนตัวหาย จะไม่มีใครปลดล็อก ecash ที่ล็อกไว้กับกุญแจนั้นได้",
       generate_button: "สร้างคีย์",
@@ -440,7 +395,6 @@ export default {
       },
     },
     privacy: {
-      title: "ความเป็นส่วนตัว",
       network_title: "การตรวจสอบเครือข่าย",
       description: "การตั้งค่าเหล่านี้ส่งผลต่อความเป็นส่วนตัวของคุณ",
       check_incoming: {
@@ -479,8 +433,6 @@ export default {
       },
     },
     experimental: {
-      title: "ทดลอง",
-      description: "คุณสมบัติเหล่านี้เป็นคุณสมบัติทดลอง",
       receive_swaps: {
         toggle: "รับ swaps",
         badge: "เบต้า",
@@ -500,7 +452,6 @@ export default {
         api_url_label: "URL API ผู้ตรวจสอบ",
       },
       multinut: {
-        toggle: "เปิดใช้งาน Multinut",
         description: "จ่ายใบแจ้งหนี้จากหลาย Mint พร้อมกัน",
       },
       nostr_mint_backup: {
@@ -522,7 +473,6 @@ export default {
       },
       keyboard: {
         title: "แป้นพิมพ์บนหน้าจอ",
-        description: "ใช้แป้นพิมพ์ตัวเลขสำหรับการป้อนจำนวนเงิน",
         toggle: "ใช้แป้นพิมพ์ตัวเลข",
         toggle_description: "ใช้แป้นตัวเลขสำหรับป้อนจำนวนเงิน",
       },
@@ -557,7 +507,6 @@ export default {
         invalid_backup: "รูปแบบไฟล์สำรองข้อมูลไม่ถูกต้อง",
         read_error: "อ่านไฟล์ผิดพลาด",
       },
-      title: "ขั้นสูง",
       developer: {
         title: "การตั้งค่าสำหรับนักพัฒนา",
         description: "เครื่องมือสำหรับแก้ไขปัญหาและดีบัก",
@@ -659,9 +608,6 @@ export default {
       history: {
         label: "ประวัติ",
       },
-      invoices: {
-        label: "ใบแจ้งหนี้",
-      },
       mints: {
         label: "Mints",
       },
@@ -692,18 +638,8 @@ export default {
   BalanceView: {
     total_label: "ยอดคงเหลือรวม",
     show_balance: "แสดงยอดคงเหลือ {unit}",
-    mintUrl: {
-      label: "Mint",
-    },
-    mintBalance: {
-      label: "ยอดเงินคงเหลือ",
-    },
     mintError: {
       label: "ข้อผิดพลาด Mint",
-    },
-    pending: {
-      label: "รอดำเนินการ",
-      tooltip: "ตรวจสอบโทเค็นที่รอดำเนินการทั้งหมด",
     },
   },
   WelcomePage: {
@@ -720,26 +656,6 @@ export default {
     terms_agreement: "เมื่อดำเนินการต่อ ถือว่าคุณยอมรับ{terms}",
     title: "ยินดีต้อนรับสู่ Cashu.me",
     text: "Cashu.me คือ Wallet Bitcoin ที่ฟรีและเป็นโอเพนซอร์ส ซึ่งใช้ ecash เพื่อรักษาความปลอดภัยและความเป็นส่วนตัวของเงินของคุณ",
-    actions: {
-      more: {
-        label: "คลิกเพื่อเรียนรู้เพิ่มเติม",
-      },
-    },
-    p1: {
-      text: "Cashu เป็นโปรโตคอล ecash ที่ฟรีและเป็นโอเพนซอร์สสำหรับ Bitcoin คุณสามารถเรียนรู้เพิ่มเติมได้ที่ { link }",
-      link: {
-        text: "cashu.space",
-      },
-    },
-    p2: {
-      text: "Wallet นี้ไม่มีส่วนเกี่ยวข้องกับ Mint ใด ๆ ในการใช้ Wallet นี้ คุณต้องเชื่อมต่อกับ Mint Cashu ที่คุณเชื่อถืออย่างน้อยหนึ่งแห่ง",
-    },
-    p3: {
-      text: "Wallet นี้จัดเก็บ ecash ที่มีเพียงคุณเท่านั้นที่เข้าถึงได้ หากคุณลบข้อมูลเบราว์เซอร์ของคุณโดยไม่มีการสำรองวลีสำหรับกู้คืน คุณจะสูญเสียโทเค็นของคุณ",
-    },
-    p4: {
-      text: "Wallet นี้อยู่ในช่วงเบต้า เราไม่รับผิดชอบต่อบุคคลที่สูญเสียการเข้าถึงเงินทุน ใช้งานด้วยความเสี่ยงของคุณเอง! รหัสนี้เป็นโอเพนซอร์สและได้รับอนุญาตภายใต้ใบอนุญาต MIT",
-    },
   },
   WelcomeSlide2: {
     title: "ติดตั้ง Cashu.me",
@@ -752,11 +668,9 @@ export default {
       android: {
         title: "Android (Chrome)",
         step1: {
-          item: "1. { icon } { text }",
           text: "แตะเมนู (มุมขวาบน)",
         },
         step2: {
-          item: "2. { icon } { text }",
           text: "กด { buttonText }",
           buttonText: "@:PwaPrompt.android.add",
         },
@@ -764,11 +678,9 @@ export default {
       ios: {
         title: "iOS (Safari)",
         step1: {
-          item: "1. { icon } { text }",
           text: "แตะ แชร์ (ด้านล่าง)",
         },
         step2: {
-          item: "2. { icon } { text }",
           text: "กด { buttonText }",
           buttonText: "@:PwaPrompt.ios.add",
         },
@@ -867,16 +779,12 @@ export default {
     web_of_trust_caption: "นับเฉพาะรีวิวจากคนในเครือข่ายความไว้วางใจของคุณ",
     web_of_trust_hop: "อยู่ในเครือข่ายความเชื่อถือของคุณ (ลำดับ {hop})",
     no_mint_url: "ไม่ได้ระบุ URL ของ Mint",
-    title: "รีวิว Mint",
     reviews: "รีวิว",
-    ratings: "{n} คะแนน",
     no_reviews: "ยังไม่มีรีวิว",
     your_review: "รีวิวของคุณ",
-    no_reviews_to_display: "ไม่มีรีวิวที่จะแสดง",
     no_rating: "ไม่มีคะแนน",
     stars_label: "{rating} จาก 5 ดาว",
-    out_of: "จาก",
-    rows: "Reviews",
+    out_of: "จาก {max}",
     sort: "เรียงลำดับ",
     sort_options: {
       newest: "ใหม่ที่สุด",
@@ -910,14 +818,8 @@ export default {
       inputs: {
         seed_phrase: {
           label: "วลีสำหรับกู้คืน",
-          caption: "คุณสามารถดูวลีสำหรับกู้คืนของคุณได้ในการตั้งค่า",
         },
       },
-    },
-    information: {
-      label: "ข้อมูล",
-      caption:
-        "วิซาร์ดจะกู้คืน ecash จากวลีสำหรับกู้คืนอื่นเท่านั้น คุณจะไม่สามารถใช้วลีสำหรับกู้คืนนี้หรือเปลี่ยนวลีสำหรับกู้คืนของ Wallet ที่คุณกำลังใช้อยู่ได้ ซึ่งหมายความว่า ecash ที่กู้คืนจะไม่ได้รับการป้องกันโดยวลีสำหรับกู้คืนปัจจุบันของคุณ ตราบใดที่คุณยังไม่ได้ส่ง ecash ให้ตัวเองหนึ่งครั้ง",
     },
     restore_mints: {
       label: "กู้คืน Mint",
@@ -938,18 +840,10 @@ export default {
       },
       restore: {
         label: "กู้คืน",
-        in_progress: "กำลังกู้คืน Mint…",
         error: "ข้อผิดพลาดในการกู้คืน Mint: { error }",
-      },
-      restore_all_mints: {
-        label: "กู้คืน Mint ทั้งหมด",
-        in_progress: "กำลังกู้คืน Mint { index } จาก { length }…",
-        success: "กู้คืนสำเร็จ",
-        error: "ข้อผิดพลาดในการกู้คืน Mints: { error }",
       },
       restore_selected_mints: {
         label: "กู้คืน Mint ที่เลือก ({count})",
-        in_progress: "กำลังกู้คืน Mint {index} จาก {length} ...",
         success: "กู้คืน {count} Mint(s) สำเร็จ",
         error: "ข้อผิดพลาดในการกู้คืน Mint ที่เลือก: {error}",
       },
@@ -962,7 +856,6 @@ export default {
       select_all: "เลือกทั้งหมด",
       deselect_all: "ยกเลิกการเลือกทั้งหมด",
       backed_up: "สำรองแล้ว",
-      already_added: "เพิ่มแล้ว",
       add_selected: "เพิ่มที่เลือก ({count})",
       no_backups_found: "ไม่พบการสำรองข้อมูล Mint",
       no_backups_hint:
@@ -978,11 +871,6 @@ export default {
       title: "เพิ่ม Mint",
       description:
         "ป้อน URL ของ Cashu mint เพื่อเชื่อมต่อ Wallet นี้ไม่มีส่วนเกี่ยวข้องกับ Mint ใดๆ",
-      inputs: {
-        nickname: {
-          placeholder: "ชื่อเล่น (เช่น Testnet)",
-        },
-      },
       actions: {
         add_mint: {
           label: "@:global.actions.add_mint.label",
@@ -995,18 +883,14 @@ export default {
     },
     discover: {
       title: "สำรวจ Mints",
-      overline: "สำรวจ",
       caption: "Mint ที่คนอื่นแนะนำบน Nostr",
       actions: {
         discover: {
           label: "สำรวจ Mints",
           in_progress: "กำลังโหลด…",
-          error_no_mints: "ไม่พบ Mints",
-          success: "พบ { length } Mints",
         },
       },
       add: "เพิ่ม",
-      unnamed: "Mint ไม่มีชื่อ",
       empty: {
         title: "ค้นหามินต์",
         text: "Cashu.me จะสอบถามรีเลย์ Nostr เพื่อหามินต์ที่ผู้อื่นแนะนำ พร้อมคะแนนและรีวิว",
@@ -1014,16 +898,10 @@ export default {
       recommendations: {
         overline: "พบ { length } Mints",
         caption: "ศึกษาข้อมูลด้วยตัวเองก่อนใช้ Mint",
-        actions: {
-          browse: {
-            label: "คลิกเพื่อเรียกดู Mints",
-          },
-        },
       },
     },
     swap: {
       title: "แลกเปลี่ยน",
-      overline: "สลับระหว่าง Mint",
       caption: "ย้ายเงินระหว่าง Mint ของคุณผ่าน Lightning อาจมีค่าธรรมเนียม",
       inputs: {
         from: {
@@ -1041,11 +919,9 @@ export default {
           label: "@:global.actions.swap.label",
           in_progress: "@:MintSettings.swap.actions.swap.label",
         },
-        receove_to_trusted_mint: { label: "รับไปยัง Mint ที่เชื่อถือได้" },
       },
     },
     error_badge: "ข้อผิดพลาด",
-    active_badge: "ใช้งานอยู่",
     switching_mint: "กำลังสลับไปที่ {mint}",
     reviews_text: "รีวิว",
     no_reviews_yet: "ยังไม่มีรีวิว",
@@ -1068,29 +944,16 @@ export default {
   },
   InvoiceDetailDialog: {
     title: "รับ Lightning",
-    create_invoice_title: "สร้างใบแจ้งหนี้",
-    inputs: {
-      amount: {
-        label: "จำนวน ({ ticker }) *",
-      },
-    },
     actions: {
-      close: {
-        label: "@:global.actions.close.label",
-      },
       create: {
         label: "สร้างใบแจ้งหนี้",
         label_blocked: "กำลังสร้างใบแจ้งหนี้",
-        in_progress: "กำลังสร้าง",
       },
     },
     invoice: {
       caption: "ใบแจ้งหนี้ Lightning",
       status_paid_text: "ชำระแล้ว",
       actions: {
-        close: {
-          label: "@:global.actions.close.label",
-        },
         copy: {
           label: "คัดลอกใบแจ้งหนี้",
         },
@@ -1118,28 +981,14 @@ export default {
   SendTokenDialog: {
     badge_locked: "ล็อกแล้ว",
     title: "ส่ง ecash",
-    title_ecash_text: "Ecash",
-    badge_offline_text: "ออฟไลน์",
     inputs: {
-      amount: {
-        label: "จำนวน ({ ticker }) *",
-        invalid_too_much_error_text: "มากเกินไป",
-      },
       p2pk_pubkey: {
         label: "คีย์สาธารณะของผู้รับ",
-        label_invalid: "คีย์สาธารณะของผู้รับ",
         invalid: "ป้อนกุญแจสาธารณะที่ถูกต้อง (hex หรือ npub)",
       },
     },
     actions: {
-      close: {
-        label: "@:global.actions.close.label",
-      },
-      close_card_scanner: {
-        label: "@:global.actions.close.label",
-      },
       copy_emoji: {
-        label: "🥜",
         tooltip_text: "คัดลอกอีโมจิ",
       },
       copy_tokens: {
@@ -1167,7 +1016,6 @@ export default {
       write_tokens_to_card: {
         tooltips: {
           ndef_supported_text: "แฟลชไปยังการ์ด NFC",
-          ndef_unsupported_text: "ไม่รองรับ NDEF",
         },
       },
       pay: { label: "@:global.actions.pay.label" },
@@ -1220,12 +1068,6 @@ export default {
   ReceiveTokenDialog: {
     receiving_amount: "กำลังรับ {amount}",
     title: "รับ ecash",
-    title_ecash_text: "Ecash",
-    inputs: {
-      tokens_base64: {
-        label: "วางโทเค็น Cashu",
-      },
-    },
     errors: {
       invalid_token: {
         label: "โทเค็นไม่ถูกต้อง",
@@ -1236,15 +1078,6 @@ export default {
       },
     },
     actions: {
-      paste: {
-        label: "@:global.actions.paste.label",
-      },
-      close: {
-        label: "@:global.actions.close.label",
-      },
-      scan: {
-        label: "@:global.actions.scan.label",
-      },
       receive: {
         label: "@:global.actions.receive.label",
         label_known_mint: "@:ReceiveTokenDialog.actions.receive.label",
@@ -1253,18 +1086,15 @@ export default {
       swap: {
         label: "@:global.actions.swap.label",
         tooltip_text: "แลกเปลี่ยนไปยัง Mint ที่เชื่อถือได้",
-        caption: "แลกเปลี่ยน { value }",
         processing: "กำลังสลับ…",
         failed: "สลับไม่สำเร็จ",
       },
       cancel_swap: {
-        label: "@:global.actions.cancel.label",
         tooltip_text: "ยกเลิกการแลกเปลี่ยน",
       },
       confirm_swap: {
         label: "@:ReceiveTokenDialog.actions.swap.label",
         tooltip_text: "@:ReceiveTokenDialog.actions.swap.tooltip_text",
-        in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
       later: {
         label: "รับภายหลัง",
@@ -1276,7 +1106,6 @@ export default {
         label: "NFC",
         tooltips: {
           ndef_supported_text: "อ่านจากการ์ด NFC",
-          ndef_unsupported_text: "ไม่รองรับ NDEF",
         },
       },
       receive_to_selected_mint: { label: "รับไปยัง Mint ที่เลือก" },
@@ -1301,9 +1130,6 @@ export default {
       copy: {
         label: "คัดลอกกุญแจสาธารณะ",
       },
-      close: {
-        label: "@:global.actions.close.label",
-      },
       new_key: {
         label: "สร้างคีย์ใหม่",
       },
@@ -1313,7 +1139,6 @@ export default {
     any_amount: "จำนวนใดก็ได้",
     payment_request: {
       caption: "คำขอชำระเงิน",
-      description: "รับการชำระเงินผ่าน Nostr",
     },
     request_index: "คำขอที่ {index} จาก {total}",
     actions: {
@@ -1323,17 +1148,11 @@ export default {
       copy: {
         label: "@:global.actions.copy.label",
       },
-      close: {
-        label: "@:global.actions.close.label",
-      },
       new_request: {
         label: "คำขอใหม่",
       },
       share: {
         label: "แชร์",
-      },
-      copy_request: {
-        label: "คัดลอกคำขอ",
       },
       add_amount: {
         label: "เพิ่มจำนวนเงิน",
@@ -1358,18 +1177,6 @@ export default {
     },
     received_total: "ยอดรับรวม",
     no_payments_yet: "ยังไม่มีการชำระเงิน",
-  },
-  NumericKeyboard: {
-    actions: {
-      close: {
-        label: "@:global.actions.close.label",
-        closed_info_text:
-          "ปิดใช้งานแป้นพิมพ์แล้ว คุณสามารถเปิดใช้งานแป้นพิมพ์ได้อีกครั้งในการตั้งค่า",
-      },
-      enter: {
-        label: "@:global.actions.enter.label",
-      },
-    },
   },
   NWCDialog: {
     nwc: {
@@ -1438,6 +1245,24 @@ export default {
         label: "แก้ไข Mint",
       },
     },
+    nuts: {
+      nut7: "ตรวจสอบสถานะโทเค็น",
+      nut8: "ค่าธรรมเนียม Lightning ที่จ่ายเกิน",
+      nut9: "กู้คืนลายเซ็น",
+      nut10: "เงื่อนไขการใช้จ่าย",
+      nut11: "จ่ายไปยังกุญแจสาธารณะ (P2PK)",
+      nut12: "หลักฐาน DLEQ",
+      nut13: "ความลับแบบกำหนดได้",
+      nut14: "สัญญาล็อกเวลาแบบแฮช (HTLC)",
+      nut15: "การชำระเงินหลายเส้นทางบางส่วน",
+      nut16: "QR โค้ดแบบเคลื่อนไหว",
+      nut17: "การสมัครรับข้อมูล WebSocket",
+      nut18: "คำขอชำระเงิน",
+      nut19: "การตอบกลับที่แคชไว้",
+      nut20: "ลายเซ็นบนใบเสนอราคา mint",
+      nut21: "การยืนยันตัวตนแบบเปิดเผย",
+      nut22: "การยืนยันตัวตนแบบบลายด์",
+    },
   },
   UnitToggle: {
     label: "หน่วย: {unit}, เปลี่ยน",
@@ -1448,7 +1273,6 @@ export default {
     open_selector_empty: "เลือก Mint",
     title: "เลือก Mint",
     badge_mint_error_text: "ข้อผิดพลาด",
-    badge_option_mint_error_text: "@:ChooseMint.badge_mint_error_text",
     available_text: "ใน Mint นี้",
     sheet_title: "เลือก Mint",
     placeholder: "เลือก Mint",
@@ -1476,7 +1300,6 @@ export default {
     },
     row: {
       type_label: "Ecash",
-      date_label: "{ value } ที่ผ่านมา",
     },
     actions: {
       check_status: {
@@ -1487,24 +1310,14 @@ export default {
       },
     },
     old_token_not_found_error_text: "ไม่พบโทเค็นเก่า",
+    labels: {
+      onchain_subpayment: "การชำระเงินย่อยแบบออนเชน",
+      bolt12_subpayment: "การชำระเงินย่อย BOLT12",
+    },
   },
   InvoiceTable: {
-    empty_text: "ยังไม่มีใบแจ้งหนี้",
     row: {
       type_label: "Lightning",
-      type_tooltip_text: "คลิกเพื่อคัดลอก",
-      date_label: "{ value } ที่ผ่านมา",
-    },
-    actions: {
-      check_status: {
-        tooltip_text: "ตรวจสอบสถานะ",
-      },
-      filter_pending: {
-        label: "แสดงเฉพาะที่รอดำเนินการ",
-      },
-      show_all: {
-        label: "แสดงทั้งหมด",
-      },
     },
   },
   RemoveMintDialog: {
@@ -1564,25 +1377,6 @@ export default {
     },
     input_data: {
       title: "จ่ายด้วย Lightning",
-      inputs: {
-        invoice_data: {
-          label: "ใบแจ้งหนี้หรือที่อยู่ Lightning",
-        },
-      },
-      actions: {
-        close: {
-          label: "@:global.actions.close.label",
-        },
-        enter: {
-          label: "@:global.actions.enter.label",
-        },
-        paste: {
-          label: "@:global.actions.paste.label",
-        },
-        scan: {
-          label: "@:global.actions.scan.label",
-        },
-      },
       title_bolt12: "จ่าย Lightning Offer",
     },
     lnurlpay: {
@@ -1591,24 +1385,18 @@ export default {
         "{ payee } กำลังขอ{br}ระหว่าง { min } และ { max } { ticker }",
       sending_to_lightning_address: "กำลังส่งไปยัง { address }",
       inputs: {
-        amount: {
-          label: "จำนวน ({ ticker }) *",
-        },
         comment: {
           label: "ความคิดเห็น (ไม่บังคับ)",
         },
       },
       actions: {
-        close: {
-          label: "@:global.actions.close.label",
-        },
         send: {
           label: "@:global.actions.send.label",
+          in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
         },
       },
     },
     invoice: {
-      title: "ชำระเงิน { value }",
       paying: "กำลังชำระเงิน",
       paid: "ชำระแล้ว",
       fee: "ค่าธรรมเนียม",
@@ -1625,7 +1413,6 @@ export default {
           label: "ชำระเงิน",
           in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
           waiting_for_wallet: "กำลังรอกระเป๋าเงิน…",
-          error: "ข้อผิดพลาด",
         },
       },
     },
@@ -1634,7 +1421,6 @@ export default {
     title: "แก้ไข Mint",
     inputs: {
       nickname: {
-        placeholder: "เช่น Testnet",
         label: "ชื่อเล่น (ไม่บังคับ)",
       },
       mint_url: {
@@ -1642,9 +1428,6 @@ export default {
       },
     },
     actions: {
-      cancel: {
-        label: "@:global.actions.cancel.label",
-      },
       update: {
         label: "@:global.actions.update.label",
       },
@@ -1654,15 +1437,7 @@ export default {
     title: "คุณเชื่อถือ Mint นี้หรือไม่?",
     description:
       "เข้าร่วม Mint นี้เฉพาะเมื่อคุณไว้ใจเท่านั้น หาก Mint หยุดให้บริการ ecash ที่คุณถืออยู่ที่นั่นจะสูญหาย",
-    inputs: {
-      mint_url: {
-        label: "@:global.inputs.mint_url.label",
-      },
-    },
     actions: {
-      cancel: {
-        label: "@:global.actions.cancel.label",
-      },
       add_mint: {
         label: "@:global.actions.add_mint.label",
         in_progress: "กำลังเพิ่ม Mint",
@@ -1729,7 +1504,7 @@ export default {
     settings: "การตั้งค่า",
     backspace: "ลบตัวอักษร",
     enter_amount_in: "ป้อนจำนวนเป็น {fiat}",
-    fee: "ค่าธรรมเนียม",
+    something_went_wrong: "เกิดข้อผิดพลาดบางอย่าง",
   },
   SendPaymentRequest: {
     actions: {
@@ -1738,8 +1513,7 @@ export default {
     },
     info: {
       pay_failed: "ชำระคำขอไม่สำเร็จ",
-      pay_to: "จ่ายให้ {target}",
-      invalid_url: "URL ไม่ถูกต้อง",
+      no_ecash: "ไม่มี ecash สำหรับคำขอชำระเงินนี้",
     },
   },
   PaymentRequestInfo: {
@@ -1888,6 +1662,63 @@ export default {
       positive_whole: "ป้อนจำนวนเต็มบวกเป็น {unit}",
       min: "ป้อนอย่างน้อย {amount}",
       max: "ป้อนไม่เกิน {amount}",
+    },
+  },
+  storage: {
+    notifications: {
+      unrecognized_backup: "ไม่รู้จักรูปแบบข้อมูลสำรอง",
+      backup_restored: "กู้คืนข้อมูลสำรองแล้ว",
+      backup_exported: "ส่งออกข้อมูลสำรอง Wallet แล้ว",
+      quota_exceeded:
+        "พื้นที่จัดเก็บในเครื่องเต็ม โปรดล้างพื้นที่จัดเก็บในเครื่อง",
+      cleaned_up: "ล้างข้อมูลแล้ว {size} ไบต์",
+    },
+  },
+  receiveTokens: {
+    notifications: {
+      already_in_history: "โทเค็นอยู่ในประวัติแล้ว",
+      nfc_read_failed: "ไม่สามารถอ่านข้อมูลจากแท็ก NFC ได้",
+      scan_error: "ข้อผิดพลาดในการสแกน",
+      nfc_error: "ข้อผิดพลาด NFC",
+    },
+  },
+  nostrMintBackup: {
+    notifications: {
+      no_relays: "ยังไม่ได้ตั้งค่ารีเลย์ Nostr",
+      backup_failed: "ไม่สามารถสำรองรายการ Mint ไปยัง Nostr ได้",
+      backed_up: "สำรองรายการ Mint ไปยัง Nostr แล้ว",
+      found:
+        "พบ {count} Mint ในข้อมูลสำรอง Nostr | พบ {count} Mint ในข้อมูลสำรอง Nostr",
+      none_found: "ไม่พบข้อมูลสำรอง Mint บน Nostr สำหรับวลีกู้คืนนี้",
+      search_failed: "ไม่สามารถค้นหาข้อมูลสำรอง Mint ได้",
+      add_mint_failed: "ไม่สามารถเพิ่ม {mint} ได้",
+      added:
+        "เพิ่ม {count} Mint ลงใน Wallet ของคุณแล้ว | เพิ่ม {count} Mint ลงใน Wallet ของคุณแล้ว",
+      none_added: "ไม่มีการเพิ่ม Mint ใหม่",
+      add_selected_failed: "ไม่สามารถเพิ่ม Mint ที่เลือกได้",
+    },
+  },
+  nostr: {
+    notifications: {
+      nip04_published: "เผยแพร่อีเวนต์ NIP-04 แล้ว",
+      nip04_failed: "ไม่สามารถเผยแพร่อีเวนต์ NIP-04 ได้",
+      nip17_failed: "ไม่สามารถเผยแพร่อีเวนต์ NIP-17 ได้",
+      receive_failed: "ไม่สามารถรับการชำระเงินขาเข้าได้",
+      ecash_already_in_history: "ecash อยู่ในประวัติแล้ว",
+      ecash_added: "เพิ่ม ecash ลงในประวัติแล้ว",
+    },
+  },
+  nwc: {
+    notifications: {
+      melt_quote_failed: "NWC: ไม่สามารถขอใบเสนอราคา melt ได้",
+      unit_must_be_sat: "NWC: หน่วยที่ใช้งานต้องเป็น sats",
+      allowance_exceeded: "NWC: เกินวงเงินที่อนุญาต",
+    },
+  },
+  npubcash: {
+    notifications: {
+      could_not_update_mint: "ไม่สามารถอัปเดต npub.cash mint ได้",
+      add_mint_first: "เพิ่ม {mint} ลงใน Wallet ของคุณก่อน",
     },
   },
 };

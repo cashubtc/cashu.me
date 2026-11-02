@@ -484,10 +484,7 @@
         v-if="showAmountlessPaymentAmountKeyboard && payInvoiceData.invoice"
       >
         <template #above>
-          <AmountKeypadPanel
-            v-model="payInvoiceData.input.amount"
-            @done="handleAmountlessQuote"
-          />
+          <AmountKeypadPanel />
         </template>
         <q-btn
           class="full-width"
@@ -523,11 +520,7 @@
         "
       >
         <template #above>
-          <AmountKeypadPanel
-            v-if="showNumericKeyboard"
-            v-model="payInvoiceData.input.amount"
-            @done="handleLnurlPaySecond"
-          />
+          <AmountKeypadPanel v-if="showNumericKeyboard" />
           <!-- LNURL pay action below keyboard -->
         </template>
         <q-btn
@@ -632,8 +625,6 @@ import AmountInputComponent from "components/AmountInputComponent.vue";
 import ParseInputComponent from "components/ParseInputComponent.vue";
 import { mintsSupportingPaymentMethod } from "src/js/mint-payment-methods";
 import { PaymentMethod } from "src/stores/walletTypes";
-
-import * as _ from "underscore";
 
 declare const windowMixin: any;
 
@@ -768,14 +759,11 @@ export default defineComponent({
     },
     ...mapState(useUiStore, ["tickerShort"]),
     ...mapState(useSettingsStore, ["multinutEnabled"]),
-    ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
+    ...mapWritableState(useCameraStore, ["camera"]),
     ...mapWritableState(useUiStore, ["showNumericKeyboard"]),
     // mints store via direct getters to avoid strict typing issues
     activeMintUrl: function (): any {
       return (useMintsStore() as any).activeMintUrl;
-    },
-    activeProofs: function (): any {
-      return (useMintsStore() as any).activeProofs;
     },
     mints: function (): any {
       return (useMintsStore() as any).mints;
@@ -786,20 +774,13 @@ export default defineComponent({
     activeUnitCurrencyMultiplyer: function (): any {
       return (useMintsStore() as any).activeUnitCurrencyMultiplyer;
     },
-    totalUnitBalance: function (): any {
-      return (useMintsStore() as any).totalUnitBalance;
-    },
     activeBalance: function (): any {
       return (useMintsStore() as any).activeBalance;
     },
     multiMints: function (): any {
       return (useMintsStore() as any).multiMints;
     },
-    ...mapState(usePriceStore, [
-      "bitcoinPrice",
-      "bitcoinPrices",
-      "currentCurrencyPrice",
-    ]),
+    ...mapState(usePriceStore, ["bitcoinPrice", "currentCurrencyPrice"]),
     ...mapState(useSettingsStore, ["bitcoinPriceCurrency"]),
     payInvoiceData: function (): any {
       return (useWalletStore() as any).payInvoiceData;
@@ -1052,15 +1033,7 @@ export default defineComponent({
       "lnurlPaySecond",
     ]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
-    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
-    canPay: function () {
-      if (!this.payInvoiceData.invoice) return false;
-      return (
-        this.payInvoiceData.meltQuote.response.amount +
-          this.payInvoiceData.meltQuote.response.fee_reserve <=
-        this.totalUnitBalance
-      );
-    },
+    ...mapActions(useCameraStore, ["showCamera"]),
     closeParseDialog: function () {},
     closeDialog: function () {
       // Clear any pending auto-close timeout

@@ -29,11 +29,6 @@ export default defineComponent({
       type: String,
       required: true,
     },
-    maxLength: {
-      type: Number,
-      required: false,
-      default: 200,
-    },
   },
   setup(props) {
     const mintsStore = useMintsStore();

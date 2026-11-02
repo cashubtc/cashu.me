@@ -19,4 +19,9 @@ function getShortUrl(url) {
   return url;
 }
 
-export { getShortUrl };
+// A mint's icon from its NUT-06 info, or undefined when it has none.
+function mintIconUrl(mint) {
+  return mint.info?.icon_url || undefined;
+}
+
+export { getShortUrl, mintIconUrl };

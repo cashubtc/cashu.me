@@ -318,12 +318,7 @@ export default defineComponent({
     },
   },
   computed: {
-    ...mapState(useMintsStore, [
-      "activeProofs",
-      "mints",
-      "activeUnit",
-      "activatingMintUrl",
-    ]),
+    ...mapState(useMintsStore, ["mints", "activeUnit", "activatingMintUrl"]),
     // The wallet is switching mint and this picker shows the wallet's mint (not a dry-run
     // choice such as a payment request's).
     switching(): boolean {

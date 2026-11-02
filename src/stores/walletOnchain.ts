@@ -25,6 +25,18 @@ import { type AppMeltQuote, normalizeMeltQuote } from "./walletMelt";
 import { createSubpaymentHistoryQuote } from "src/js/invoice-history";
 import { usePaymentHistoryStore } from "./paymentHistory";
 
+// Expected on-chain states, told apart by code rather than by message text: the message is
+// for logs, the toast comes from the locale files.
+export class OnchainStatusError extends Error {
+  constructor(public code: "address_not_paid" | "payment_pending") {
+    super(code === "address_not_paid" ? "Address not paid" : "Payment pending");
+  }
+}
+const isOnchainStatus = (
+  error: unknown,
+  code: OnchainStatusError["code"]
+): boolean => error instanceof OnchainStatusError && error.code === code;
+
 type AppMintQuote = Omit<
   MintQuoteOnchainResponse,
   "amount_paid" | "amount_issued"
@@ -85,7 +97,7 @@ export async function requestMintOnchain(
 
     return data;
   } catch (error: any) {
-    if (error?.message !== "Address not paid") {
+    if (!isOnchainStatus(error, "address_not_paid")) {
       console.error(error);
     }
     notifyApiError(
@@ -177,7 +189,7 @@ export async function checkOnchainAndMint(
     }
 
     if (delta <= 0) {
-      throw new Error("Address not paid");
+      throw new OnchainStatusError("address_not_paid");
     }
 
     const proofs = await this.retryOnceOnRecoverableError(
@@ -246,8 +258,8 @@ export async function checkOnchainAndMint(
       console.error(error);
     }
     if (verbose) {
-      if (error?.message === "Address not paid") {
-        notify("Address not paid");
+      if (isOnchainStatus(error, "address_not_paid")) {
+        notify(this.t("wallet.notifications.address_not_paid"));
       } else {
         notifyApiError(error);
       }
@@ -367,8 +379,8 @@ export async function checkOutgoingOnchain(
     await this.updateOutgoingInvoiceInHistory(meltQuote);
 
     if (meltQuote.state === MeltQuoteState.PENDING) {
-      if (verbose) notify("Payment pending");
-      throw new Error("Payment pending");
+      if (verbose) notify(this.t("wallet.notifications.payment_pending"));
+      throw new OnchainStatusError("payment_pending");
     }
 
     if (meltQuote.state === MeltQuoteState.UNPAID) {
@@ -395,7 +407,7 @@ export async function checkOutgoingOnchain(
       useTransactionWorkerStore().removeOutgoingInvoiceFromChecker?.(quote);
     }
   } catch (error: any) {
-    if (verbose && error?.message !== "Payment pending") {
+    if (verbose && !isOnchainStatus(error, "payment_pending")) {
       notifyApiError(error);
     }
     console.log("Could not check on-chain quote", invoice.quote, error);

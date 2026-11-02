@@ -1,84 +1,40 @@
 <!-- NumericKeyboard.vue -->
 <template>
-  <transition name="slide-up-fade">
-    <div
-      class="numeric-keyboard q-pa-md q-pb-lg q-pt-lg"
-      v-if="forceVisible || showNumericKeyboard"
-    >
-      <div class="keyboard-grid">
-        <q-btn flat class="keypad-key" @click="addDigit('1')">1</q-btn>
-        <q-btn flat class="keypad-key" @click="addDigit('2')">2</q-btn>
-        <q-btn flat class="keypad-key" @click="addDigit('3')">3</q-btn>
+  <div class="numeric-keyboard q-pa-md q-pb-lg q-pt-lg">
+    <div class="keyboard-grid">
+      <q-btn flat class="keypad-key" @click="addDigit('1')">1</q-btn>
+      <q-btn flat class="keypad-key" @click="addDigit('2')">2</q-btn>
+      <q-btn flat class="keypad-key" @click="addDigit('3')">3</q-btn>
 
-        <q-btn flat class="keypad-key" @click="addDigit('4')">4</q-btn>
-        <q-btn flat class="keypad-key" @click="addDigit('5')">5</q-btn>
-        <q-btn flat class="keypad-key" @click="addDigit('6')">6</q-btn>
+      <q-btn flat class="keypad-key" @click="addDigit('4')">4</q-btn>
+      <q-btn flat class="keypad-key" @click="addDigit('5')">5</q-btn>
+      <q-btn flat class="keypad-key" @click="addDigit('6')">6</q-btn>
 
-        <q-btn flat class="keypad-key" @click="addDigit('7')">7</q-btn>
-        <q-btn flat class="keypad-key" @click="addDigit('8')">8</q-btn>
-        <q-btn flat class="keypad-key" @click="addDigit('9')">9</q-btn>
+      <q-btn flat class="keypad-key" @click="addDigit('7')">7</q-btn>
+      <q-btn flat class="keypad-key" @click="addDigit('8')">8</q-btn>
+      <q-btn flat class="keypad-key" @click="addDigit('9')">9</q-btn>
 
-        <q-btn flat class="keypad-key invisible" disable>•</q-btn>
-        <q-btn flat class="keypad-key" @click="addDigit('0')">0</q-btn>
-        <q-btn
-          flat
-          class="keypad-key"
-          :aria-label="$t('common.backspace')"
-          @click="backspace"
-        >
-          <DeleteIcon :size="24" />
-        </q-btn>
-        <q-btn v-if="!hideClose" flat @click="closeKeyboard">{{
-          $t("NumericKeyboard.actions.close.label")
-        }}</q-btn>
-        <br v-if="!hideClose || !hideEnter" />
-        <q-btn v-if="!hideEnter" flat @click="emitDone">{{
-          $t("NumericKeyboard.actions.enter.label")
-        }}</q-btn>
-      </div>
+      <q-btn flat class="keypad-key invisible" disable>•</q-btn>
+      <q-btn flat class="keypad-key" @click="addDigit('0')">0</q-btn>
+      <q-btn
+        flat
+        class="keypad-key"
+        :aria-label="$t('common.backspace')"
+        @click="backspace"
+      >
+        <DeleteIcon :size="24" />
+      </q-btn>
     </div>
-  </transition>
+  </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { useUiStore } from "../stores/ui";
-import { mapWritableState } from "pinia";
-import { useSettingsStore } from "../stores/settings";
-import { notify } from "src/js/notify";
 import { Delete as DeleteIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "NumericKeyboard",
   components: { DeleteIcon },
-  props: {
-    modelValue: {
-      type: String,
-      default: "0",
-    },
-    forceVisible: {
-      type: Boolean,
-      default: false,
-    },
-    hideClose: {
-      type: Boolean,
-      default: false,
-    },
-    hideEnter: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  emits: ["update:modelValue", "done"],
-  data() {
-    return {
-      // Decimal handling for fiat-style input
-    };
-  },
-  computed: {
-    ...mapWritableState(useUiStore, ["showNumericKeyboard"]),
-    ...mapWritableState(useSettingsStore, ["useNumericKeyboard"]),
-  },
   methods: {
     sendKey(key: string) {
       // Delegate input handling to the global keyboard listener in AmountInputComponent
@@ -89,17 +45,6 @@ export default defineComponent({
     },
     backspace() {
       this.sendKey("Backspace");
-    },
-    closeKeyboard() {
-      (this as any).useNumericKeyboard = false;
-      (this as any).showNumericKeyboard = false;
-      notify(
-        this.$t("NumericKeyboard.actions.close.closed_info_text") as any,
-        "bottom"
-      );
-    },
-    emitDone() {
-      this.sendKey("Enter");
     },
   },
 });
@@ -200,16 +145,5 @@ export default defineComponent({
 
 .invisible {
   visibility: hidden;
-}
-
-/* Transition styles */
-.slide-up-fade-enter-active,
-.slide-up-fade-leave-active {
-  transition: transform 0.3s ease, opacity 0.3s ease;
-}
-.slide-up-fade-enter-from,
-.slide-up-fade-leave-to {
-  transform: translateY(100%);
-  opacity: 0;
 }
 </style>

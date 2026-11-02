@@ -10,7 +10,7 @@
         <transition appear enter-active-class="animated fadeIn">
           <img
             src="/clean.png"
-            alt="Cashu Logo"
+            alt="Cashu.me"
             class="logo-image"
             width="80"
             height="80"
@@ -116,7 +116,6 @@ export default {
     return {
       showLanguageMenu: false,
       showTerms: false,
-      termsAccepted: true,
       languageOptions: LANGUAGE_OPTIONS,
     };
   },
@@ -154,10 +153,6 @@ export default {
     },
     showTermsSheet() {
       this.showTerms = true;
-    },
-    closeTermsSheet() {
-      this.showTerms = false;
-      this.termsAccepted = true;
     },
   },
   computed: {

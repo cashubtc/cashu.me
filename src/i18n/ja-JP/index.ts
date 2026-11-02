@@ -15,19 +15,10 @@ export default {
       success: "成功",
       failed: "失敗",
     },
-    payment: "マルチナット支払い",
-    selectMints: "支払いに使用するミントを一つ以上選択してください。",
-    totalSelectedBalance: "選択した残高の合計",
-    multiMintPay: "複数ミントで支払う",
-    balanceNotEnough: "複数ミントの残高がこの請求書を満たすには不十分です",
-    failed: "処理に失敗しました：{error}",
     paid: "Lightningで{amount}を支払いました",
   },
   global: {
     notifications: "通知",
-    copy_to_clipboard: {
-      success: "クリップボードにコピーしました！",
-    },
     actions: {
       add_mint: {
         label: "ミントを追加",
@@ -93,8 +84,6 @@ export default {
       could_not_request_mint: "ミントをリクエストできませんでした",
       invoice_still_pending: "請求書はまだ処理中です",
       paid_lightning: "Lightningで{amount}を支払いました",
-      payment_pending_refresh:
-        "支払いは保留中です。請求書を手動で更新してください。",
       sent: "{amount}を送信しました",
       token_still_pending: "トークンはまだ処理中です",
       received_lightning: "Lightningで{amount}を受け取りました",
@@ -105,13 +94,21 @@ export default {
       no_amount: "金額がありません",
       no_lnurl_data: "LNURLデータがありません",
       no_price_data: "価格データがありません。",
-      please_try_again: "もう一度お試しください。",
       trying_again: "再試行中...",
       unsupported_legacy_qr: "サポートされていない旧形式の QR コード",
       legacy_qr_not_supported:
         "この旧形式の QR コードは対応している加盟店のものではありません",
       no_bolt12_mint: "BOLT12 オファーに対応しているミントがありません",
       no_bolt11_mint: "BOLT11 請求書に対応しているミントがありません",
+      address_not_paid: "アドレスへの支払いはまだありません",
+      payment_pending: "支払いは処理中です",
+      invoice_already_paid: "請求書はすでに支払われています",
+      payment_sent: "支払いを送信しました",
+      payment_failed: "支払いに失敗しました",
+      could_not_pay_request: "リクエストを支払えませんでした",
+      request_unit_unsupported:
+        "この支払いリクエストの単位はミントでサポートされていません：{unit}",
+      no_onchain_mint: "オンチェーン支払いに対応しているミントがありません",
     },
     mint: {
       notifications: {
@@ -124,9 +121,6 @@ export default {
         unit_not_supported: "この単位はミントでサポートされていません",
         activated: "ミントが有効化されました",
         could_not_connect: "ミントに接続できませんでした",
-        could_not_get_info: "ミント情報を取得できませんでした",
-        could_not_get_keys: "ミントキーを取得できませんでした",
-        could_not_get_keysets: "ミントキーセットを取得できませんでした",
         mint_validation_error: "ミントの検証エラー",
         removed: "ミントが削除されました",
         error: "ミントエラー",
@@ -135,22 +129,13 @@ export default {
   },
   MainHeader: {
     menu: {
-      settings: {
-        title: "設定",
-        settings: {
-          title: "設定",
-          caption: "ウォレット構成",
-        },
-      },
       terms: {
-        title: "規約",
         terms: {
           title: "規約",
           caption: "Cashu.me の利用で同意する内容",
         },
       },
       links: {
-        title: "リンク集",
         cashuSpace: {
           title: "Cashu.space",
           caption: "cashu.space",
@@ -186,13 +171,6 @@ export default {
     staging: {
       warning: {
         text: "ステージング環境 – 実際の資金では使用しないでください！",
-      },
-    },
-  },
-  FullscreenHeader: {
-    actions: {
-      back: {
-        label: "ウォレット",
       },
     },
   },
@@ -260,17 +238,11 @@ export default {
     },
     language: {
       title: "言語",
-      description: "以下のリストから希望の言語を選択してください。",
     },
     sections: {
-      backup_restore: "バックアップと復元",
-      lightning_address: "ライトニングアドレス",
-      nostr_keys: "ノストルキー",
       nostr: {
-        title: "NOSTR",
         relays: {
           already_added: "リレーはすでに追加されています",
-          expand_label: "クリックしてリレーを編集",
           add: {
             title: "リレーを追加",
             description:
@@ -278,19 +250,11 @@ export default {
           },
           list: {
             title: "リレー",
-            description: "あなたのウォレットはこれらのリレーに接続します。",
             copy_tooltip: "リレーをコピー",
             remove_tooltip: "リレーを削除",
           },
         },
       },
-      payment_requests: "支払いリクエスト",
-      nostr_wallet_connect: "ノストルウォレットコネクト",
-      hardware_features: "ハードウェア機能",
-      p2pk_features: "P2PK機能",
-      privacy: "プライバシー",
-      experimental: "実験的な機能",
-      appearance: "外観",
     },
     backup_restore: {
       backup_seed: {
@@ -303,7 +267,6 @@ export default {
         title: "ecashを復元",
         description:
           "別のシードフレーズから ecash を復元します。現在のシードフレーズは変わりません。",
-        button: "復元",
       },
     },
     lightning_address: {
@@ -313,7 +276,6 @@ export default {
         invalid: "有効な HTTPS サーバー URL を入力してください",
       },
       title: "ライトニングアドレス",
-      description: "Lightningアドレスで支払いを受け取ります。",
       enable: {
         toggle: "ライトニングアドレスを使う",
         description: "npub.cash のアドレスで支払いを受け取る",
@@ -362,7 +324,6 @@ export default {
       },
     },
     payment_requests: {
-      title: "支払いリクエスト",
       description:
         "Nostr 経由で支払いを受け取ります。オンにすると、ウォレットが Nostr リレーを監視します。",
       enable_toggle: "支払いリクエストを有効にする",
@@ -373,7 +334,6 @@ export default {
       },
     },
     nostr_wallet_connect: {
-      title: "Nostrウォレットコネクト（NWC）",
       description:
         "Nostr Wallet Connect で、他のアプリがこのウォレットから支払えるようにします。",
       enable_toggle: "Nostr Wallet Connect を有効にする",
@@ -409,7 +369,6 @@ export default {
       },
     },
     p2pk_features: {
-      title: "ロックされた ecash",
       description:
         "試験的な機能です。少額で使ってください。秘密鍵をなくすと、その鍵でロックされた ecash は誰も開けられなくなります。",
       generate_button: "キーを生成",
@@ -425,7 +384,6 @@ export default {
       },
     },
     privacy: {
-      title: "プライバシー",
       network_title: "ネットワーク確認",
       description: "これらの設定はプライバシーに影響します。",
       check_incoming: {
@@ -464,8 +422,6 @@ export default {
       },
     },
     experimental: {
-      title: "実験的な機能",
-      description: "これらの機能は実験的です。",
       receive_swaps: {
         toggle: "スワップを受け取る",
         badge: "ベータ",
@@ -486,7 +442,6 @@ export default {
         api_url_label: "監査人API URL",
       },
       multinut: {
-        toggle: "マルチナットを有効にする",
         description: "複数のミントから同時に請求書を支払います。",
       },
       nostr_mint_backup: {
@@ -508,7 +463,6 @@ export default {
       },
       keyboard: {
         title: "オンスクリーンキーボード",
-        description: "金額入力に数字キーボードを使用します。",
         toggle: "数字キーボードを使用",
         toggle_description: "金額の入力に数字キーパッドを使います。",
       },
@@ -543,9 +497,6 @@ export default {
       reset: "リセット",
       progress: "{crawlProcessed} / {crawlTotal}",
     },
-    npub_cash: {
-      copy_lightning_address: "Lightningアドレスをコピー",
-    },
     multinut: {
       use_multinut: "複数ミントでの支払い",
     },
@@ -559,7 +510,6 @@ export default {
         invalid_backup: "バックアップファイルの形式が無効です",
         read_error: "ファイルの読み込みエラー",
       },
-      title: "高度な設定",
       developer: {
         title: "開発者設定",
         description: "トラブルシューティングとデバッグ用のツールです。",
@@ -662,9 +612,6 @@ export default {
       history: {
         label: "履歴",
       },
-      invoices: {
-        label: "請求書",
-      },
       mints: {
         label: "ミント",
       },
@@ -695,18 +642,8 @@ export default {
   BalanceView: {
     total_label: "合計残高",
     show_balance: "{unit}の残高を表示",
-    mintUrl: {
-      label: "ミント",
-    },
-    mintBalance: {
-      label: "残高",
-    },
     mintError: {
       label: "ミントエラー",
-    },
-    pending: {
-      label: "保留中",
-      tooltip: "すべての保留中のトークンを確認",
     },
   },
   WelcomePage: {
@@ -723,26 +660,6 @@ export default {
     terms_agreement: "続行すると、{terms}に同意したことになります",
     title: "Cashu.me へようこそ",
     text: "Cashu.meは、ecashを使用して資金を安全かつプライベートに保つための無料のオープンソースBitcoinウォレットです。",
-    actions: {
-      more: {
-        label: "もっと詳しく",
-      },
-    },
-    p1: {
-      text: "CashuはBitcoinのための無料のオープンソースecashプロトコルです。{ link }で詳しく知ることができます。",
-      link: {
-        text: "cashu.space",
-      },
-    },
-    p2: {
-      text: "このウォレットはどのミントにも関連付けられていません。このウォレットを使用するには、信頼する1つ以上のCashuミントに接続する必要があります。",
-    },
-    p3: {
-      text: "このウォレットは、あなただけがアクセスできるecashを保存します。シードフレーズのバックアップなしにブラウザデータを削除すると、トークンを失います。",
-    },
-    p4: {
-      text: "このウォレットはベータ版です。資金へのアクセスを失うことについて、当社は一切の責任を負いません。ご自身の責任で使用してください！このコードはオープンソースであり、MITライセンスの下でライセンスされています。",
-    },
   },
   WelcomeSlide2: {
     title: "Cashu.me をインストール",
@@ -755,11 +672,9 @@ export default {
       android: {
         title: "Android (Chrome)",
         step1: {
-          item: "1. { icon } { text }",
           text: "メニューをタップ（右上）",
         },
         step2: {
-          item: "2. { icon } { text }",
           text: "{ buttonText }を押す",
           buttonText: "@:PwaPrompt.android.add",
         },
@@ -767,11 +682,9 @@ export default {
       ios: {
         title: "iOS (Safari)",
         step1: {
-          item: "1. { icon } { text }",
           text: "共有をタップ（下）",
         },
         step2: {
-          item: "2. { icon } { text }",
           text: "{ buttonText }を押す",
           buttonText: "@:PwaPrompt.ios.add",
         },
@@ -870,16 +783,12 @@ export default {
     web_of_trust_caption: "信頼の輪の人のレビューだけを数える",
     web_of_trust_hop: "あなたの信頼の輪の中（{hop} ホップ）",
     no_mint_url: "ミントの URL が指定されていません",
-    title: "ミントのレビュー",
     reviews: "レビュー",
-    ratings: "{n} 件の評価",
     no_reviews: "まだレビューはありません",
     your_review: "あなたのレビュー",
-    no_reviews_to_display: "表示するレビューはありません。",
     no_rating: "評価なし",
     stars_label: "5つ星中{rating}",
-    out_of: "のうち",
-    rows: "Reviews",
+    out_of: "{max}点中",
     sort: "並び替え",
     sort_options: {
       newest: "新しい順",
@@ -918,14 +827,8 @@ export default {
       inputs: {
         seed_phrase: {
           label: "シードフレーズ",
-          caption: "設定でシードフレーズを確認できます。",
         },
       },
-    },
-    information: {
-      label: "情報",
-      caption:
-        "ウィザードは別のシードフレーズからのみecashを復元し、現在使用しているウォレットのシードフレーズを使用したり変更したりすることはできません。これは、一度ecashを自分自身に送金しない限り、復元されたecashが現在のシードフレーズによって保護されないことを意味します。",
     },
     restore_mints: {
       label: "ミントを復元",
@@ -947,18 +850,10 @@ export default {
       },
       restore: {
         label: "復元",
-        in_progress: "ミントを復元中…",
-        error: "ミントの復元エラー：{ error }",
-      },
-      restore_all_mints: {
-        label: "すべてのミントを復元",
-        in_progress: "{ length }個のミントのうち{ index }個目を復元中…",
-        success: "復元が正常に完了しました",
         error: "ミントの復元エラー：{ error }",
       },
       restore_selected_mints: {
         label: "選択したミントを復元（{count}）",
-        in_progress: "{length}個のミントのうち{index}個を復元しています…",
         success: "{count}個のミントを正常に復元しました",
         error: "選択したミントの復元中にエラーが発生しました：{error}",
       },
@@ -971,7 +866,6 @@ export default {
       select_all: "すべて選択",
       deselect_all: "すべて選択解除",
       backed_up: "バックアップ済み",
-      already_added: "追加済み",
       add_selected: "選択したものを追加（{count}）",
       no_backups_found: "ミントのバックアップが見つかりません",
       no_backups_hint:
@@ -987,11 +881,6 @@ export default {
       title: "ミントを追加",
       description:
         "接続するCashuミントのURLを入力します。このウォレットはどのミントにも関連付けられていません。",
-      inputs: {
-        nickname: {
-          placeholder: "ニックネーム（例：Testnet）",
-        },
-      },
       actions: {
         add_mint: {
           label: "@:global.actions.add_mint.label",
@@ -1004,18 +893,14 @@ export default {
     },
     discover: {
       title: "ミントを発見",
-      overline: "発見",
       caption: "Nostr で他の人がおすすめしているミント。",
       actions: {
         discover: {
           label: "ミントを発見",
           in_progress: "読み込み中…",
-          error_no_mints: "ミントが見つかりませんでした",
-          success: "{ length }個のミントが見つかりました",
         },
       },
       add: "追加",
-      unnamed: "名前のないミント",
       empty: {
         title: "ミントを探す",
         text: "Cashu.me は Nostr リレーに、ほかの人がおすすめするミントを評価やレビューと一緒に問い合わせます。",
@@ -1023,16 +908,10 @@ export default {
       recommendations: {
         overline: "{ length }個のミントが見つかりました",
         caption: "ミントを使う前に自分で調べてください。",
-        actions: {
-          browse: {
-            label: "ミントをブラウズするにはクリック",
-          },
-        },
       },
     },
     swap: {
       title: "スワップ",
-      overline: "ミント間スワップ",
       caption:
         "ライトニング経由でミント間の資金を移動します。手数料がかかる場合があります。",
       inputs: {
@@ -1051,11 +930,9 @@ export default {
           label: "@:global.actions.swap.label",
           in_progress: "@:MintSettings.swap.actions.swap.label",
         },
-        receove_to_trusted_mint: { label: "信頼できるミントで受け取る" },
       },
     },
     error_badge: "エラー",
-    active_badge: "使用中",
     switching_mint: "{mint} に切り替え中",
     reviews_text: "件のレビュー",
     no_reviews_yet: "まだレビューはありません",
@@ -1078,29 +955,16 @@ export default {
   },
   InvoiceDetailDialog: {
     title: "Lightningを受け取る",
-    create_invoice_title: "請求書を作成",
-    inputs: {
-      amount: {
-        label: "金額（{ ticker }）*",
-      },
-    },
     actions: {
-      close: {
-        label: "@:global.actions.close.label",
-      },
       create: {
         label: "請求書を作成",
         label_blocked: "請求書作成中",
-        in_progress: "作成中",
       },
     },
     invoice: {
       caption: "Lightning請求書",
       status_paid_text: "支払い済み",
       actions: {
-        close: {
-          label: "@:global.actions.close.label",
-        },
         copy: {
           label: "請求書をコピー",
         },
@@ -1128,28 +992,14 @@ export default {
   SendTokenDialog: {
     badge_locked: "ロック済み",
     title: "ecash を送る",
-    title_ecash_text: "Ecash",
-    badge_offline_text: "オフライン",
     inputs: {
-      amount: {
-        label: "金額（{ ticker }）*",
-        invalid_too_much_error_text: "多すぎます",
-      },
       p2pk_pubkey: {
         label: "受信者の公開鍵",
-        label_invalid: "受信者の公開鍵",
         invalid: "有効な公開鍵（hex または npub）を入力してください",
       },
     },
     actions: {
-      close: {
-        label: "@:global.actions.close.label",
-      },
-      close_card_scanner: {
-        label: "@:global.actions.close.label",
-      },
       copy_emoji: {
-        label: "🥜",
         tooltip_text: "絵文字をコピー",
       },
       copy_tokens: {
@@ -1177,7 +1027,6 @@ export default {
       write_tokens_to_card: {
         tooltips: {
           ndef_supported_text: "NFCカードに書き込み",
-          ndef_unsupported_text: "NDEF非対応",
         },
       },
       pay: { label: "@:global.actions.pay.label" },
@@ -1232,12 +1081,6 @@ export default {
   ReceiveTokenDialog: {
     receiving_amount: "{amount} を受け取り中",
     title: "ecash を受け取る",
-    title_ecash_text: "Ecash",
-    inputs: {
-      tokens_base64: {
-        label: "Cashuトークンを貼り付け",
-      },
-    },
     errors: {
       invalid_token: {
         label: "無効なトークン",
@@ -1248,15 +1091,6 @@ export default {
       },
     },
     actions: {
-      paste: {
-        label: "@:global.actions.paste.label",
-      },
-      close: {
-        label: "@:global.actions.close.label",
-      },
-      scan: {
-        label: "@:global.actions.scan.label",
-      },
       receive: {
         label: "@:global.actions.receive.label",
         label_known_mint: "@:ReceiveTokenDialog.actions.receive.label",
@@ -1265,18 +1099,15 @@ export default {
       swap: {
         label: "@:global.actions.swap.label",
         tooltip_text: "信頼できるミントにスワップ",
-        caption: "{ value }をスワップ",
         processing: "スワップ中…",
         failed: "スワップに失敗しました",
       },
       cancel_swap: {
-        label: "@:global.actions.cancel.label",
         tooltip_text: "スワップをキャンセル",
       },
       confirm_swap: {
         label: "@:ReceiveTokenDialog.actions.swap.label",
         tooltip_text: "@:ReceiveTokenDialog.actions.swap.tooltip_text",
-        in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
       later: {
         label: "後で受け取る",
@@ -1288,7 +1119,6 @@ export default {
         label: "NFC",
         tooltips: {
           ndef_supported_text: "NFCカードから読み取り",
-          ndef_unsupported_text: "NDEF非対応",
         },
       },
       receive_to_selected_mint: { label: "選択したミントで受け取る" },
@@ -1314,9 +1144,6 @@ export default {
       copy: {
         label: "公開鍵をコピー",
       },
-      close: {
-        label: "@:global.actions.close.label",
-      },
       new_key: {
         label: "新しいキーを生成",
       },
@@ -1326,7 +1153,6 @@ export default {
     any_amount: "金額指定なし",
     payment_request: {
       caption: "支払いリクエスト",
-      description: "Nostr経由で支払いを受け取る",
     },
     request_index: "リクエスト {index}/{total}",
     actions: {
@@ -1336,17 +1162,11 @@ export default {
       copy: {
         label: "@:global.actions.copy.label",
       },
-      close: {
-        label: "@:global.actions.close.label",
-      },
       new_request: {
         label: "新しいリクエスト",
       },
       share: {
         label: "共有",
-      },
-      copy_request: {
-        label: "リクエストをコピー",
       },
       add_amount: {
         label: "金額を追加",
@@ -1371,18 +1191,6 @@ export default {
     },
     received_total: "受け取り合計",
     no_payments_yet: "まだ支払いはありません",
-  },
-  NumericKeyboard: {
-    actions: {
-      close: {
-        label: "@:global.actions.close.label",
-        closed_info_text:
-          "キーボードが無効になりました。設定でキーボードを再度有効にできます。",
-      },
-      enter: {
-        label: "@:global.actions.enter.label",
-      },
-    },
   },
   NWCDialog: {
     nwc: {
@@ -1451,6 +1259,24 @@ export default {
         label: "ミントを編集",
       },
     },
+    nuts: {
+      nut7: "トークン状態の確認",
+      nut8: "Lightning 手数料の過払い分",
+      nut9: "署名の復元",
+      nut10: "支出条件",
+      nut11: "公開鍵への支払い（P2PK）",
+      nut12: "DLEQ 証明",
+      nut13: "決定的シークレット",
+      nut14: "ハッシュタイムロック契約（HTLC）",
+      nut15: "部分マルチパス支払い",
+      nut16: "アニメーション QR コード",
+      nut17: "WebSocket サブスクリプション",
+      nut18: "支払いリクエスト",
+      nut19: "キャッシュされたレスポンス",
+      nut20: "ミント見積もりへの署名",
+      nut21: "クリア認証",
+      nut22: "ブラインド認証",
+    },
   },
   UnitToggle: {
     label: "単位: {unit}、変更",
@@ -1461,7 +1287,6 @@ export default {
     open_selector_empty: "ミントを選択",
     title: "ミントを選択",
     badge_mint_error_text: "エラー",
-    badge_option_mint_error_text: "@:ChooseMint.badge_mint_error_text",
     available_text: "（このミント）",
     sheet_title: "ミントを選択",
     placeholder: "ミントを選択",
@@ -1489,7 +1314,6 @@ export default {
     },
     row: {
       type_label: "Ecash",
-      date_label: "{ value }前",
     },
     actions: {
       check_status: {
@@ -1500,24 +1324,14 @@ export default {
       },
     },
     old_token_not_found_error_text: "古いトークンが見つかりません",
+    labels: {
+      onchain_subpayment: "オンチェーンの部分支払い",
+      bolt12_subpayment: "BOLT12 の部分支払い",
+    },
   },
   InvoiceTable: {
-    empty_text: "請求書はまだありません",
     row: {
       type_label: "Lightning",
-      type_tooltip_text: "クリックしてコピー",
-      date_label: "{ value }前",
-    },
-    actions: {
-      check_status: {
-        tooltip_text: "ステータスを確認",
-      },
-      filter_pending: {
-        label: "保留中のみ表示",
-      },
-      show_all: {
-        label: "すべて表示",
-      },
     },
   },
   RemoveMintDialog: {
@@ -1577,25 +1391,6 @@ export default {
     },
     input_data: {
       title: "ライトニングで支払う",
-      inputs: {
-        invoice_data: {
-          label: "Lightning請求書またはアドレス",
-        },
-      },
-      actions: {
-        close: {
-          label: "@:global.actions.close.label",
-        },
-        enter: {
-          label: "@:global.actions.enter.label",
-        },
-        paste: {
-          label: "@:global.actions.paste.label",
-        },
-        scan: {
-          label: "@:global.actions.scan.label",
-        },
-      },
       title_bolt12: "ライトニングのオファーを支払う",
     },
     lnurlpay: {
@@ -1605,24 +1400,18 @@ export default {
         "{ payee }が{ min }から{ max } { ticker }の間をリクエストしています",
       sending_to_lightning_address: "{ address }に送信中",
       inputs: {
-        amount: {
-          label: "金額（{ ticker }）*",
-        },
         comment: {
           label: "コメント（任意）",
         },
       },
       actions: {
-        close: {
-          label: "@:global.actions.close.label",
-        },
         send: {
           label: "@:global.actions.send.label",
+          in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
         },
       },
     },
     invoice: {
-      title: "{ value }を支払う",
       paying: "支払い中",
       paid: "支払い済み",
       fee: "手数料",
@@ -1639,7 +1428,6 @@ export default {
           label: "支払う",
           in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
           waiting_for_wallet: "ウォレットを待機中…",
-          error: "エラー",
         },
       },
     },
@@ -1648,7 +1436,6 @@ export default {
     title: "ミントを編集",
     inputs: {
       nickname: {
-        placeholder: "例：Testnet",
         label: "ニックネーム（任意）",
       },
       mint_url: {
@@ -1656,9 +1443,6 @@ export default {
       },
     },
     actions: {
-      cancel: {
-        label: "@:global.actions.cancel.label",
-      },
       update: {
         label: "@:global.actions.update.label",
       },
@@ -1668,15 +1452,7 @@ export default {
     title: "このミントを信頼しますか？",
     description:
       "信頼できる場合にのみこのミントに参加してください。運営が止まると、そこで保有している ecash は失われます。",
-    inputs: {
-      mint_url: {
-        label: "@:global.inputs.mint_url.label",
-      },
-    },
     actions: {
-      cancel: {
-        label: "@:global.actions.cancel.label",
-      },
       add_mint: {
         label: "@:global.actions.add_mint.label",
         in_progress: "ミントを追加中",
@@ -1743,7 +1519,7 @@ export default {
     settings: "設定",
     backspace: "1文字削除",
     enter_amount_in: "{fiat}で金額を入力",
-    fee: "手数料",
+    something_went_wrong: "問題が発生しました",
   },
   SendPaymentRequest: {
     actions: {
@@ -1752,8 +1528,7 @@ export default {
     },
     info: {
       pay_failed: "リクエストを支払えませんでした",
-      pay_to: "{target} に支払う",
-      invalid_url: "無効な URL",
+      no_ecash: "この支払いリクエストに使える ecash がありません",
     },
   },
   PaymentRequestInfo: {
@@ -1905,6 +1680,64 @@ export default {
       positive_whole: "{unit} で正の整数の金額を入力してください。",
       min: "{amount} 以上を入力してください。",
       max: "{amount} 以下を入力してください。",
+    },
+  },
+  storage: {
+    notifications: {
+      unrecognized_backup: "認識できないバックアップ形式です",
+      backup_restored: "バックアップを復元しました",
+      backup_exported: "ウォレットのバックアップをエクスポートしました",
+      quota_exceeded:
+        "ローカルストレージがいっぱいです。ローカルストレージを整理してください。",
+      cleaned_up: "{size} バイトを整理しました",
+    },
+  },
+  receiveTokens: {
+    notifications: {
+      already_in_history: "トークンはすでに履歴にあります",
+      nfc_read_failed: "NFC タグからデータを読み取れません",
+      scan_error: "スキャンエラー",
+      nfc_error: "NFC エラー",
+    },
+  },
+  nostrMintBackup: {
+    notifications: {
+      no_relays: "Nostr リレーが設定されていません",
+      backup_failed: "ミント一覧を Nostr にバックアップできませんでした",
+      backed_up: "ミント一覧を Nostr にバックアップしました",
+      found:
+        "Nostr バックアップで {count} 件のミントが見つかりました | Nostr バックアップで {count} 件のミントが見つかりました",
+      none_found:
+        "このシードフレーズのミントバックアップは Nostr に見つかりませんでした",
+      search_failed: "ミントバックアップを検索できませんでした",
+      add_mint_failed: "{mint} を追加できませんでした",
+      added:
+        "{count} 件のミントをウォレットに追加しました | {count} 件のミントをウォレットに追加しました",
+      none_added: "新しいミントは追加されませんでした",
+      add_selected_failed: "選択したミントを追加できませんでした",
+    },
+  },
+  nostr: {
+    notifications: {
+      nip04_published: "NIP-04 イベントを公開しました",
+      nip04_failed: "NIP-04 イベントを公開できませんでした",
+      nip17_failed: "NIP-17 イベントを公開できませんでした",
+      receive_failed: "着信した支払いを受け取れませんでした",
+      ecash_already_in_history: "ecash はすでに履歴にあります",
+      ecash_added: "ecash を履歴に追加しました",
+    },
+  },
+  nwc: {
+    notifications: {
+      melt_quote_failed: "NWC：メルト見積もりをリクエストできませんでした",
+      unit_must_be_sat: "NWC：使用中の単位は sats である必要があります",
+      allowance_exceeded: "NWC：アローワンスを超えました",
+    },
+  },
+  npubcash: {
+    notifications: {
+      could_not_update_mint: "npub.cash のミントを更新できませんでした",
+      add_mint_first: "先に {mint} をウォレットに追加してください",
     },
   },
 };

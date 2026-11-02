@@ -89,7 +89,7 @@ import FlowDialog from "src/components/ui/FlowDialog.vue";
 import FlowFooter from "src/components/ui/FlowFooter.vue";
 import AmountHeadline from "src/components/ui/AmountHeadline.vue";
 import { defineComponent } from "vue";
-import { mapActions, mapState, mapWritableState } from "pinia";
+import { mapState, mapWritableState } from "pinia";
 import QrBlock from "src/components/QrBlock.vue";
 import QrProgress from "src/components/QrProgress.vue";
 import FullscreenDialogHeader from "src/components/ui/FullscreenDialogHeader.vue";
@@ -159,9 +159,6 @@ export default defineComponent({
     },
     runnerActive: function () {
       return this.invoiceWorkerRunning;
-    },
-    isSmallScreen() {
-      return this.$q.screen.lt.sm;
     },
     invoiceMethod(): PaymentMethod {
       const method =

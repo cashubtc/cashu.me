@@ -65,7 +65,7 @@
             class="cursor-pointer"
             :active="selectedMints.has(mint.url)"
             :disable="restoringState"
-            :icon-url="getMintIconUrl(mint)"
+            :icon-url="mintIconUrl(mint)"
             :name="mint.nickname || mint.info?.name"
             :url="mint.url"
             :balances="
@@ -163,6 +163,7 @@ import {
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore, MintClass } from "src/stores/mints";
+import { mintIconUrl } from "src/js/wallet-helpers";
 import { useRestoreStore } from "src/stores/restore";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
@@ -190,9 +191,6 @@ export default defineComponent({
   },
   data() {
     return {
-      restoreAllMintsText: this.$i18n.t(
-        "RestoreView.actions.restore_all_mints.label"
-      ),
       selectedMints: new Set(), // Track selected mint URLs
     };
   },
@@ -255,9 +253,6 @@ export default defineComponent({
         this.mints.every((mint) => this.selectedMints.has(mint.url))
       );
     },
-    anySelected() {
-      return this.selectedMints.size > 0;
-    },
     selectedMintsCount() {
       return this.selectedMints.size;
     },
@@ -293,17 +288,7 @@ export default defineComponent({
     mintClass(mint) {
       return new MintClass(mint);
     },
-    getMintIconUrl: function (mint) {
-      if (mint.info) {
-        if (mint.info.icon_url) {
-          return mint.info.icon_url;
-        } else {
-          return undefined;
-        }
-      } else {
-        return undefined;
-      }
-    },
+    mintIconUrl,
     toggleMintSelection(mintUrl) {
       if (this.selectedMints.has(mintUrl)) {
         this.selectedMints.delete(mintUrl);
@@ -330,17 +315,9 @@ export default defineComponent({
       }
 
       const selectedMintUrls = Array.from(this.selectedMints);
-      let i = 0;
 
       try {
         for (const mintUrl of selectedMintUrls) {
-          this.restoreAllMintsText = this.$i18n.t(
-            "RestoreView.actions.restore_selected_mints.in_progress",
-            {
-              index: ++i,
-              length: selectedMintUrls.length,
-            }
-          );
           await this.restoreMint(mintUrl);
         }
         notifySuccess(
@@ -357,10 +334,6 @@ export default defineComponent({
             error: error.message || error,
           })
         );
-      } finally {
-        this.restoreAllMintsText = this.$i18n.t(
-          "RestoreView.actions.restore_all_mints.label"
-        );
       }
     },
     async restoreMintForMint(mintUrl) {
@@ -370,9 +343,6 @@ export default defineComponent({
       }
 
       try {
-        this.restoreAllMintsText = this.$i18n.t(
-          "RestoreView.actions.restore.in_progress"
-        );
         await this.restoreMint(mintUrl);
       } catch (error) {
         console.error("Error restoring mint:", error);
@@ -380,10 +350,6 @@ export default defineComponent({
           this.$i18n.t("RestoreView.actions.restore.error", {
             error: error.message || error,
           })
-        );
-      } finally {
-        this.restoreAllMintsText = this.$i18n.t(
-          "RestoreView.actions.restore_all_mints.label"
         );
       }
     },
@@ -399,52 +365,12 @@ export default defineComponent({
         notifyError(this.$i18n.t("RestoreView.actions.paste.error"));
       }
     },
-    async restoreAllMints() {
-      let i = 0;
-      if (!this.onboarding) {
-        if (!this.isMnemonicValid) return;
-        this.mnemonicToRestore = this.normalisedMnemonic;
-      }
-      try {
-        for (const mint of this.mints) {
-          this.restoreAllMintsText = this.$i18n.t(
-            "RestoreView.actions.restore_all_mints.in_progress",
-            {
-              index: ++i,
-              length: this.mints.length,
-            }
-          );
-          await this.restoreMint(mint.url);
-        }
-        notifySuccess(
-          this.$i18n.t("RestoreView.actions.restore_all_mints.success")
-        );
-      } catch (error) {
-        console.error("Error restoring mints:", error);
-        notifyError(
-          this.$i18n.t("RestoreView.actions.restore_all_mints.error", {
-            error: error.message || error,
-          })
-        );
-      } finally {
-        this.restoreAllMintsText = this.$i18n.t(
-          "RestoreView.actions.restore_all_mints.label"
-        );
-      }
-    },
   },
 });
 </script>
 
 <style>
 @import "src/css/mintlist.css";
-
-/* Fallback action section - specific to RestoreView */
-.fallback-action-section {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-}
 
 /* Primary action section */
 .primary-action-section {

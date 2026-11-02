@@ -46,24 +46,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, onMounted, watch } from "vue";
+import { defineComponent, ref, computed, onMounted } from "vue";
 import { i18n } from "src/boot/i18n";
+import type { SwapEventRead } from "src/js/mint-audit";
 
 const t = i18n.global.t;
-
-interface SwapEventRead {
-  id: number;
-  from_id: number;
-  to_id: number;
-  from_url: string;
-  to_url: string;
-  amount: number;
-  fee: number;
-  created_at: string;
-  time_taken: number;
-  state: string;
-  error: string;
-}
 
 interface SwapBucket {
   swaps: SwapEventRead[];
@@ -346,13 +333,13 @@ export default defineComponent({
       } else if (isYesterday) {
         dateStr = t("MintAuditInfo.chart.yesterday");
       } else {
-        dateStr = date.toLocaleDateString(undefined, {
+        dateStr = date.toLocaleDateString(String(i18n.global.locale), {
           month: "short",
           day: "numeric",
         });
       }
 
-      return `${dateStr} ${date.toLocaleTimeString(undefined, {
+      return `${dateStr} ${date.toLocaleTimeString(String(i18n.global.locale), {
         hour: "2-digit",
         minute: "2-digit",
         hour12: false,
@@ -384,17 +371,20 @@ export default defineComponent({
       } else if (isYesterday) {
         formattedDate = t("MintAuditInfo.chart.yesterday");
       } else {
-        formattedDate = dateObj.toLocaleDateString(undefined, {
+        formattedDate = dateObj.toLocaleDateString(String(i18n.global.locale), {
           month: "short",
           day: "numeric",
         });
       }
 
-      return `${formattedDate} ${dateObj.toLocaleTimeString(undefined, {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      })}`;
+      return `${formattedDate} ${dateObj.toLocaleTimeString(
+        String(i18n.global.locale),
+        {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        }
+      )}`;
     };
 
     const showBucketTooltip = (event: MouseEvent, bucket: SwapBucket) => {
@@ -459,11 +449,6 @@ export default defineComponent({
   padding-right: 20px;
   position: relative;
   width: 100%;
-}
-
-.chart-title {
-  color: white;
-  text-align: center;
 }
 
 .chart-wrapper {

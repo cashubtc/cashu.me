@@ -15,7 +15,7 @@
 
       <div class="mint-content-container q-px-md">
         <!-- Mint Header Profile Name Section -->
-        <div class="mint-header-container q-mb-lg">
+        <div class="column items-center full-width q-mb-lg">
           <MintIdentityHeader :url="mintData.url" :info="mintData.info">
             <!-- A labelled chip: a bare QR glyph under the name read as decoration
                  (council R76-R80). -->
@@ -150,7 +150,8 @@
                 class="nut-pill"
               >
                 <div class="nut-content">
-                  <span class="nut-number">{{ nutNumber }}:</span> {{ nutName }}
+                  <span class="nut-number">{{ nutNumber }}:</span>
+                  {{ $t(nutName) }}
                 </div>
               </div>
             </div>
@@ -234,7 +235,7 @@ import RevealTransition from "src/components/ui/RevealTransition.vue";
 import TonalChip from "src/components/ui/TonalChip.vue";
 import { defineComponent } from "vue";
 import { displayContacts, shortenMiddle } from "src/js/mintContacts";
-import { mapActions, mapState, mapWritableState } from "pinia";
+import { mapActions, mapWritableState } from "pinia";
 import QrBlock from "src/components/QrBlock.vue";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import { useSettingsStore } from "src/stores/settings";
@@ -298,23 +299,24 @@ export default defineComponent({
     return {
       showQrCode: false,
       showAllNuts: false,
+      // NUT number → its name in the locale files.
       nutNames: {
-        7: "Token state check",
-        8: "Overpaid Lightning fees",
-        9: "Signature restore",
-        10: "Spending conditions",
-        11: "Pay-To-Pubkey (P2PK)",
-        12: "DLEQ proofs",
-        13: "Deterministic secrets",
-        14: "Hashed Timelock Contracts",
-        15: "Partial multi-path payments",
-        16: "Animated QR codes",
-        17: "WebSocket subscriptions",
-        18: "Payment requests",
-        19: "Cached Responses",
-        20: "Signature on Mint Quote",
-        21: "Clear authentication",
-        22: "Blind authentication",
+        7: "MintDetailsDialog.nuts.nut7",
+        8: "MintDetailsDialog.nuts.nut8",
+        9: "MintDetailsDialog.nuts.nut9",
+        10: "MintDetailsDialog.nuts.nut10",
+        11: "MintDetailsDialog.nuts.nut11",
+        12: "MintDetailsDialog.nuts.nut12",
+        13: "MintDetailsDialog.nuts.nut13",
+        14: "MintDetailsDialog.nuts.nut14",
+        15: "MintDetailsDialog.nuts.nut15",
+        16: "MintDetailsDialog.nuts.nut16",
+        17: "MintDetailsDialog.nuts.nut17",
+        18: "MintDetailsDialog.nuts.nut18",
+        19: "MintDetailsDialog.nuts.nut19",
+        20: "MintDetailsDialog.nuts.nut20",
+        21: "MintDetailsDialog.nuts.nut21",
+        22: "MintDetailsDialog.nuts.nut22",
       },
       motdDismissed: false,
       settings: useSettingsStore(),
@@ -474,13 +476,6 @@ export default defineComponent({
 }
 
 /* Mint Header */
-.mint-header-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-
 .mint-descriptions {
   width: 100%;
   display: flex;

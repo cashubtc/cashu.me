@@ -7,7 +7,6 @@
       :reviews="reviews"
       :allowCreateReview="allowCreateReview"
       :mintInfo="mintInfo"
-      @close="goBack"
     />
     <EmptyState
       v-else
@@ -43,10 +42,6 @@ export default defineComponent({
     };
   },
   methods: {
-    goBack() {
-      // Navigate back to the previous page
-      this.$router.back();
-    },
     loadMintInfo() {
       // Try to get mint info from the recommendations store first
       const recsStore = useMintRecommendationsStore();

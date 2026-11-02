@@ -1,7 +1,5 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
-import { generateSecretKey, getPublicKey } from "nostr-tools";
-import { bytesToHex } from "@noble/hashes/utils"; // already an installed dependency
 import { useWalletStore } from "./wallet";
 import { Mint, Wallet, CheckStateEnum, Proof } from "@cashu/cashu-ts";
 import { useMintsStore } from "./mints";

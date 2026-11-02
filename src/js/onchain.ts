@@ -116,7 +116,7 @@ export type MempoolTxMetadata = {
 
 export type OnchainNetwork = "bitcoin" | "mutinynet";
 
-export function normalizeBitcoinAddress(value: string): string {
+function normalizeBitcoinAddress(value: string): string {
   const trimmed = value.trim();
   if (!trimmed.toLowerCase().startsWith("bitcoin:")) return trimmed;
   const withoutScheme = trimmed.replace(/^bitcoin:/i, "");

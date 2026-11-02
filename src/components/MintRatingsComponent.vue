@@ -192,7 +192,6 @@ export default defineComponent({
     allowCreateReview: { type: Boolean, default: false },
     mintInfo: { type: Object, required: false },
   },
-  emits: ["close"],
   components: {
     MessageCircleIcon,
     ListFilterIcon,
@@ -207,19 +206,10 @@ export default defineComponent({
     EmptyState,
   },
   methods: {
-    formatDate(ts: number) {
-      try {
-        return new Date(ts * 1000).toLocaleString(this.$i18n.locale, {
-          numberingSystem: "latn",
-        });
-      } catch {
-        return "";
-      }
-    },
     formatDateOnly(ts: number) {
       try {
         const date = new Date(ts * 1000);
-        return date.toLocaleDateString(undefined, {
+        return date.toLocaleDateString(this.$i18n.locale, {
           year: "numeric",
           month: "short",
           day: "numeric",
@@ -350,10 +340,6 @@ export default defineComponent({
       onlyWithComment: false,
       filterByWoT: false, // Default: show all reviews
       rowsPerPage: 10,
-      rowsPerPageOptions: [5, 10, 20, 50].map((v) => ({
-        label: String(v),
-        value: v,
-      })),
       page: 1,
       profiles: {} as Record<string, { name?: string; picture?: string }>,
       loadingProfiles: new Set<string>(),
@@ -391,10 +377,6 @@ export default defineComponent({
     },
     hasAnyReviews(): boolean {
       return Array.isArray(this.allReviews) && this.allReviews.length > 0;
-    },
-    totalReviews(): number {
-      // Show count based on current filter state
-      return this.filtered?.length || 0;
     },
     ratingsOnly(): any[] {
       // Use filtered reviews instead of all reviews

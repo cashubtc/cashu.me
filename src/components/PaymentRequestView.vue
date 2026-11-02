@@ -121,7 +121,7 @@
           :show-fiat-conversion="false"
           @enter="commitAmount"
         />
-        <AmountKeypadPanel v-model="keypadValue" @done="commitAmount" />
+        <AmountKeypadPanel />
       </template>
       <q-input
         v-else

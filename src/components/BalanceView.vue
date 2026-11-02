@@ -138,9 +138,7 @@ import { defineComponent } from "vue";
 import { mapState, mapWritableState, mapActions } from "pinia";
 import { useMintsStore } from "src/stores/mints";
 import { useSettingsStore } from "src/stores/settings";
-import { useTokensStore } from "src/stores/tokens";
 import { useUiStore } from "src/stores/ui";
-import { useWalletStore } from "src/stores/wallet";
 import { usePriceStore } from "src/stores/price";
 import AnimatedNumber from "src/components/AnimatedNumber.vue";
 import ChooseMint from "src/components/ChooseMint.vue";
@@ -152,36 +150,14 @@ export default defineComponent({
   name: "BalanceView",
   mixins: [windowMixin],
   components: { PendingDots, CircleAlertIcon, AnimatedNumber, ChooseMint },
-  props: {
-    setTab: Function,
-  },
   computed: {
-    ...mapState(useMintsStore, [
-      "activeMintUrl",
-      "activeProofs",
-      "activeBalance",
-      "mints",
-      "totalUnitBalance",
-      "activeUnit",
-      "activeMint",
-    ]),
-    ...mapState(useTokensStore, ["historyTokens"]),
+    ...mapState(useMintsStore, ["activeMintUrl", "mints", "activeMint"]),
     ...mapState(useProofsStore, ["proofs"]),
     ...mapState(useUiStore, ["globalMutexLock"]),
-    ...mapState(usePriceStore, [
-      "bitcoinPrice",
-      "bitcoinPrices",
-      "currentCurrencyPrice",
-    ]),
+    ...mapState(usePriceStore, ["bitcoinPrices", "currentCurrencyPrice"]),
     ...mapState(useSettingsStore, ["bitcoinPriceCurrency"]),
     ...mapWritableState(useMintsStore, ["activeUnit"]),
-    ...mapWritableState(useUiStore, ["hideBalance", "lastBalanceCached"]),
-    pendingBalance: function () {
-      return -this.historyTokens
-        .filter((t) => t.status == "pending")
-        .filter((t) => t.unit == this.activeUnit)
-        .reduce((sum, el) => (sum += el.amount), 0);
-    },
+    ...mapWritableState(useUiStore, ["hideBalance"]),
     balanceUnits: function () {
       const mint = this.activeMint();
       const nut4Methods = mint.mint.info?.nuts?.[4]?.methods || [];
@@ -203,26 +179,6 @@ export default defineComponent({
     hasMultipleBalanceUnits: function () {
       return this.balanceUnits.length > 1;
     },
-    balancesOptions: function () {
-      return this.balanceUnits.map((unit) => ({
-        label: unitCode(unit),
-        value: unit,
-      }));
-    },
-    allMintKeysets: function () {
-      return [].concat(...this.mints.map((m) => m.keysets));
-    },
-    getTotalBalance: function () {
-      return this.totalUnitBalance;
-    },
-    getBalance: function () {
-      return sumProofAmounts(this.activeProofs.flat());
-    },
-  },
-  data() {
-    return {
-      priceLabel: null,
-    };
   },
   mounted() {
     this.fetchBitcoinPrice();
@@ -238,16 +194,9 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useWalletStore, ["checkPendingTokens"]),
     ...mapActions(usePriceStore, ["fetchBitcoinPrice"]),
     setActiveUnit(unit: string) {
       this.activeUnit = unit;
-    },
-    toggleUnit: function () {
-      const units = this.activeMint().units;
-      this.activeUnit =
-        units[(units.indexOf(this.activeUnit) + 1) % units.length];
-      return this.activeUnit;
     },
     toggleHideBalance() {
       this.hideBalance = !this.hideBalance;
@@ -266,9 +215,6 @@ export default defineComponent({
           (proof) => keysetIds.has(proof.id) && !proof.reserved
         )
       );
-    },
-    activeBalanceForUnit(unit: string) {
-      return this.activeMint().unitBalance(unit);
     },
     isSatUnit(unit: string) {
       return unit.toLowerCase() === "sat";

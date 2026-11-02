@@ -22,7 +22,7 @@
             :selected="mint.url == activeMintUrl"
             show-selection-status
             :busy="mint.url == activatingMintUrl"
-            :icon-url="getMintIconUrl(mint)"
+            :icon-url="mintIconUrl(mint)"
             :name="mint.nickname || mint.info?.name"
             :url="mint.url"
             :balances="
@@ -238,20 +238,14 @@ import {
   Search as SearchIcon,
 } from "lucide-vue-next";
 import { ref, defineComponent, markRaw, onMounted, onBeforeUnmount } from "vue";
-import { getShortUrl } from "src/js/wallet-helpers";
+import { getShortUrl, mintIconUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore, MintClass } from "src/stores/mints";
-import { useWalletStore } from "src/stores/wallet";
 import { useCameraStore } from "src/stores/camera";
-import { map } from "underscore";
-import { currentDateStr } from "src/js/utils";
-import { useSettingsStore } from "src/stores/settings";
-import { useNostrStore } from "src/stores/nostr";
-import { useP2PKStore } from "src/stores/p2pk";
 import { useWorkersStore } from "src/stores/workers";
 import { useSwapStore } from "src/stores/swap";
 import { useUiStore } from "src/stores/ui";
-import { notifyError, notifyWarning } from "src/js/notify";
+import { notifyError } from "src/js/notify";
 import { EventBus } from "../js/eventBus";
 import AddMintDialog from "src/components/AddMintDialog.vue";
 import ChooseMint from "src/components/ChooseMint.vue";
@@ -312,8 +306,6 @@ export default defineComponent({
   },
   data: function () {
     return {
-      discoveringMints: false,
-      addingMint: false,
       swapData: {
         fromUrl: {
           url: "",
@@ -325,8 +317,6 @@ export default defineComponent({
         },
         amount: undefined,
       },
-      mintInfoCache: new Map(),
-      fetchingMintInfo: new Set(),
     };
   },
   computed: {
@@ -334,26 +324,18 @@ export default defineComponent({
     hasManualMintUrl(): boolean {
       return this.addMintData.url.trim().length > 0;
     },
-    ...mapWritableState(useSettingsStore, ["getBitcoinPrice"]),
-    ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapState(useMintsStore, [
       "activeMintUrl",
-      "activeUnit",
       "mints",
-      "activeProofs",
       "addMintBlocking",
       "activatingMintUrl",
     ]),
-    ...mapState(useNostrStore, ["pubkey"]),
     ...mapState(useMintRecommendationsStore, ["recommendations"]),
     ...mapState(useWorkersStore, ["invoiceWorkerRunning"]),
     ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
     ...mapState(useUiStore, ["tickerShort"]),
     ...mapState(useSwapStore, ["swapAmountData"]),
     ...mapWritableState(useSwapStore, ["swapBlocking"]),
-    discoverList() {
-      return this.recommendations.filter((r) => !this.isExistingMint(r.url));
-    },
     getRecommendation() {
       return (url) => this.recommendations.find((r) => r.url === url);
     },
@@ -377,28 +359,8 @@ export default defineComponent({
       const funded = units.filter((unit) => mintClass.unitBalance(unit) > 0);
       return funded.length ? funded : units.slice(0, 1);
     },
-    ...mapActions(useNostrStore, [
-      "init",
-      "initNdkReadOnly",
-      "getUserPubkey",
-      "fetchEventsFromUser",
-    ]),
-    ...mapActions(useMintRecommendationsStore, [
-      "discover",
-      "startSubscriptions",
-    ]),
-    ...mapActions(useP2PKStore, ["generateKeypair", "showKeyDetails"]),
-    ...mapActions(useMintsStore, [
-      "addMint",
-      "removeMint",
-      "activateMintUrl",
-      "updateMint",
-      "triggerMintInfoMotdChanged",
-      "fetchMintInfo",
-    ]),
-    ...mapActions(useWalletStore, ["decodeRequest", "mintOnPaid"]),
-    ...mapActions(useWorkersStore, ["clearAllWorkers"]),
-    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+    ...mapActions(useMintsStore, ["addMint", "activateMintUrl"]),
+    ...mapActions(useCameraStore, ["showCamera"]),
     ...mapActions(useSwapStore, ["mintAmountSwap"]),
     isMintExcludedFromReviews: function (mintUrl) {
       // Check if mint URL should be excluded from reviews using regex matching
@@ -443,13 +405,8 @@ export default defineComponent({
       this.showAddMintDialog = true;
     },
     addMintInternal: function (mintToAdd, verbose) {
-      this.addingMint = true;
-      try {
-        this.addMint(mintToAdd, verbose);
-        this.addMintData = { url: "", nickname: "" };
-      } finally {
-        this.addingMint = false;
-      }
+      this.addMint(mintToAdd, verbose);
+      this.addMintData = { url: "", nickname: "" };
     },
     mintClass(mint) {
       return new MintClass(mint);
@@ -483,28 +440,6 @@ export default defineComponent({
       await this.mintAmountSwap(swapAmountData);
       this.clearSwapData();
     },
-    fetchMintsFromNdk: async function () {
-      this.discoveringMints = true;
-      try {
-        const recs = await this.discover();
-        if (!recs || recs.length === 0) {
-          this.notifyError(
-            this.$i18n.t(
-              "MintSettings.discover.actions.discover.error_no_mints"
-            )
-          );
-        } else {
-          this.notifySuccess(
-            this.$i18n.t("MintSettings.discover.actions.discover.success", {
-              length: recs.length,
-            })
-          );
-        }
-        this.startSubscriptions();
-      } finally {
-        this.discoveringMints = false;
-      }
-    },
     showMintInfo: async function (mint) {
       // Navigate to mint details page with mint URL as query parameter
       this.$router.push({
@@ -512,28 +447,7 @@ export default defineComponent({
         query: { mintUrl: mint.url },
       });
     },
-    getMintIconUrl: function (mint) {
-      if (mint.info) {
-        if (mint.info.icon_url) {
-          return mint.info.icon_url;
-        } else {
-          return undefined;
-        }
-      } else {
-        return undefined;
-      }
-    },
-    // Discovery helpers
-    isExistingMint(url) {
-      return this.mints.some((m) => m.url === url);
-    },
-    async addDiscoveredMint(url) {
-      try {
-        await this.addMint({ url }, true);
-      } catch (e) {
-        console.error(e);
-      }
-    },
+    mintIconUrl,
     openReviews(url, mint) {
       // Navigate to ratings page
       this.$router.push({
@@ -542,42 +456,6 @@ export default defineComponent({
           mintUrl: url,
           allowCreateReview: "true",
         },
-      });
-    },
-    getMintInfoFromCache(url) {
-      return this.mintInfoCache.get(url);
-    },
-    getMintIconUrlUrl(url) {
-      const info = this.getMintInfoFromCache(url);
-      return info && info.icon_url ? info.icon_url : null;
-    },
-    getMintDisplayName(url) {
-      const info = this.getMintInfoFromCache(url);
-      return info && info.name ? info.name : url.replace(/^https?:\/\//, "");
-    },
-    isFetchingMintInfo(url) {
-      return this.fetchingMintInfo.has(url);
-    },
-    async fetchMintInfoForUrl(url) {
-      try {
-        const tempMint = { url, keys: [], keysets: [] };
-        const info = await new MintClass(tempMint).api.getInfo();
-        this.mintInfoCache.set(url, info);
-      } catch (e) {
-        this.mintInfoCache.set(url, null);
-      } finally {
-        this.fetchingMintInfo.delete(url);
-      }
-    },
-    fetchMintInfoForDiscoverList() {
-      this.discoverList.forEach((rec) => {
-        if (
-          !this.mintInfoCache.has(rec.url) &&
-          !this.fetchingMintInfo.has(rec.url)
-        ) {
-          this.fetchingMintInfo.add(rec.url);
-          this.fetchMintInfoForUrl(rec.url);
-        }
       });
     },
   },
@@ -613,13 +491,7 @@ export default defineComponent({
 }
 
 .mint-input .q-field__native,
-.mint-input .q-field__input,
-.mint-input .q-placeholder {
+.mint-input .q-field__input {
   font-family: inherit;
-}
-
-.add-mint-actions {
-  width: 100%;
-  margin-top: 16px;
 }
 </style>

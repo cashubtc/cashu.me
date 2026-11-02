@@ -22,20 +22,33 @@ function isolateAmounts(text: string): string {
   return text.replace(AMOUNT_RUN, (run) => isolateLtr(run));
 }
 
+// In a right-to-left page each line also takes its direction from its own first letter
+// (Unicode first-strong isolate, FSI…PDI): a raw English error from a mint under an Arabic
+// title reads "mint returned 500", not "500 mint returned".
+function isolateLine(text: string): string {
+  if (typeof document === "undefined" || document.documentElement.dir !== "rtl")
+    return text;
+  return `\u2068${text}\u2069`;
+}
+
 function toast(
   kind: ToastKind,
   message: string,
   caption?: string,
   duration = 5000
 ) {
-  SHOW[kind](isolateAmounts(message), {
-    description: caption ? isolateAmounts(caption) : undefined,
+  SHOW[kind](isolateLine(isolateAmounts(message)), {
+    description: caption ? isolateLine(isolateAmounts(caption)) : undefined,
     duration,
   });
 }
 
+// A library or mint error: when the caller says what failed (translated), that is the title
+// and the raw message, which is often English from the mint, drops to the second line.
 async function notifyApiError(error: Error, caption: string = "") {
-  toast("warning", error.message, caption);
+  const detail = error?.message ?? String(error);
+  if (caption) toast("warning", caption, detail === caption ? "" : detail);
+  else toast("warning", detail);
 }
 
 async function notifySuccess(message: string) {

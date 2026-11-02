@@ -486,7 +486,7 @@
             class="q-mb-md"
             :model-value="keypadAmount ?? 0"
           />
-          <AmountKeypadPanel v-model="keypadAmount" />
+          <AmountKeypadPanel />
         </div>
       </DsEntry>
       <DsEntry id="segmented-control">
@@ -1682,7 +1682,6 @@ import ChooseMint from "src/components/ChooseMint.vue";
 import HistoryTable from "src/components/HistoryTable.vue";
 import { dsHistoryTransactions } from "src/design-system/fixtures";
 import MintIdentityHeader from "src/components/MintIdentityHeader.vue";
-import MintInfoContainer from "src/components/MintInfoContainer.vue";
 import * as Lucide from "lucide-vue-next";
 import { lucideIcons, materialIcons } from "src/design-system/icons";
 import SheetOption from "src/components/SheetOption.vue";
@@ -1841,7 +1840,6 @@ export default defineComponent({
     HistoryTable,
     InlineConfirm,
     MintIdentityHeader,
-    MintInfoContainer,
     MintReviewSummary,
     PwaPrompt,
     QrBlock,
@@ -2051,10 +2049,6 @@ export default defineComponent({
         confirmationThreshold: 3,
         url: "",
       },
-      modes: [
-        { label: "Dark", dark: true },
-        { label: "Light", dark: false },
-      ],
       themes: THEMES,
       theme: this.$q.localStorage.getItem("cashu.theme") || "monochrome",
       tokens: [
@@ -2083,7 +2077,6 @@ export default defineComponent({
       confirmOpen: false,
       invoiceType: "bolt11",
       url: "",
-      nickname: "",
       filled: "https://mint.example.com",
       memo: "",
       bad: "₿5,000",
@@ -2498,15 +2491,6 @@ body.body--light .ds-light-variant--l3 {
   flex: none;
   text-decoration: none;
 }
-.ui-kit-section {
-  margin: 40px 0 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--app-border);
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1.3;
-  scroll-margin-top: 120px;
-}
 .ui-kit-body {
   font-size: 15px;
 }
@@ -2541,20 +2525,6 @@ body.body--light .ds-light-variant--l3 {
   flex-shrink: 0;
   height: 24px;
   width: 24px;
-}
-.ui-kit-48 {
-  min-height: 48px;
-  font-size: 15px;
-  font-weight: 600;
-}
-.ui-kit-frame {
-  border: 1px dashed var(--app-border);
-  border-radius: 12px;
-  overflow: hidden;
-}
-.ui-kit-item-title {
-  font-size: 15px;
-  font-weight: 600;
 }
 .ds-icons {
   width: 100%;

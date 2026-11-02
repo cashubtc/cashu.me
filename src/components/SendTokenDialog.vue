@@ -68,11 +68,7 @@
         <template #above>
           <!-- While the key is typed on a phone or a short screen, the keypad steps aside so
                the amount, key and SEND still fit (375x667; the system keyboard is up). -->
-          <AmountKeypadPanel
-            v-show="!keypadCollapsed"
-            v-model="sendData.amount"
-            @done="sendTokens"
-          />
+          <AmountKeypadPanel v-show="!keypadCollapsed" />
         </template>
         <!-- Lock mode: the receiver's key sits right above SEND, with Paste and Scan inside
              the field; the amount stays editable (owner, 2026-10-29, item 27). -->
@@ -131,7 +127,6 @@
           v-if="sendData.paymentRequest"
           :button-label="$t('SendTokenDialog.actions.pay.label')"
           :disable="paymentRequestButtonDisabled"
-          :show-details="false"
           :full-width="true"
           :button-rounded="true"
           :button-dense="false"
@@ -191,10 +186,8 @@ import { type MutexPriority, useUiStore } from "src/stores/ui";
 import { useProofsStore } from "src/stores/proofs";
 import { useMintsStore } from "src/stores/mints";
 import { useTokensStore } from "src/stores/tokens";
-import { getShortUrl } from "src/js/wallet-helpers";
 import { useSettingsStore } from "src/stores/settings";
 import { useTransactionWorkerStore } from "src/stores/transactionWorker";
-import { usePriceStore } from "src/stores/price";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -253,17 +246,9 @@ export default defineComponent({
       "showLockInput",
       "sendData",
     ]),
-    ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
-    ...mapState(useUiStore, [
-      "tickerShort",
-      "canPasteFromClipboard",
-      "globalMutexLock",
-      "ndefSupported",
-      "webShareSupported",
-    ]),
+    ...mapState(useUiStore, ["canPasteFromClipboard", "globalMutexLock"]),
     ...mapWritableState(useUiStore, ["showNumericKeyboard"]),
     ...mapState(useMintsStore, [
-      "mints",
       "activeProofs",
       "activeUnit",
       "activeUnitCurrencyMultiplyer",
@@ -273,15 +258,7 @@ export default defineComponent({
     ...mapState(useSettingsStore, [
       "checkSentTokens",
       "includeFeesInSendAmount",
-      "nfcEncoding",
-      "useNumericKeyboard",
     ]),
-    ...mapState(usePriceStore, [
-      "bitcoinPrice",
-      "bitcoinPrices",
-      "currentCurrencyPrice",
-    ]),
-    ...mapState(useSettingsStore, ["bitcoinPriceCurrency"]),
     insufficientFunds: function (): boolean {
       if (this.sendData.amount == null) return false;
       return (
@@ -289,42 +266,6 @@ export default defineComponent({
         this.sendData.amount * this.activeUnitCurrencyMultiplyer
       );
     },
-    // canSpendOffline: function (): boolean {
-    //   if (!this.sendData.amount) {
-    //     return false;
-    //   }
-    //   // check if entered amount is the same as the result of coinSelect(spendableProofs(activeProofs), amount)
-    //   try {
-    //     let spendableProofs = this.spendableProofs(
-    //       this.activeProofs,
-    //       this.sendData.amount * this.activeUnitCurrencyMultiplyer
-    //     );
-    //     const mints = useMintsStore() as any;
-    //     const mintWallet = this.mintWalletSync(
-    //       mints.activeMintUrl,
-    //       mints.activeUnit
-    //     );
-    //     let selectedProofs = this.coinSelect(
-    //       spendableProofs,
-    //       mintWallet,
-    //       this.sendData.amount * this.activeUnitCurrencyMultiplyer,
-    //       this.includeFeesInSendAmount
-    //     );
-    //     const feesToAdd = this.includeFeesInSendAmount
-    //       ? this.getFeesForProofs(selectedProofs)
-    //       : 0;
-    //     const sumSelectedProofs = selectedProofs
-    //       .flat()
-    //       .reduce((sum: number, el: any) => (sum += el.amount), 0);
-    //     return (
-    //       sumSelectedProofs ==
-    //       this.sendData.amount * this.activeUnitCurrencyMultiplyer + feesToAdd
-    //     );
-    //   } catch (error: any) {
-    //     console.error(error);
-    //     return false;
-    //   }
-    // },
     // The store's npub decode throws on a malformed npub1…, so a typo never breaks render.
     pubkeyValid: function (): boolean {
       try {
@@ -479,21 +420,13 @@ export default defineComponent({
     ...mapActions(useWalletStore, [
       "send",
       "sendToLock",
-      "coinSelect",
-      "spendableProofs",
-      "getFeesForProofs",
       "onTokenPaid",
       "mintWallet",
-      "checkTokenSpendable",
     ]),
     ...mapActions(useProofsStore, ["serializeProofs"]),
-    ...mapActions(useTokensStore, [
-      "addPendingToken",
-      "setTokenPaid",
-      "deleteToken",
-    ]),
+    ...mapActions(useTokensStore, ["addPendingToken"]),
     ...mapActions(useP2PKStore, ["isValidPubkey", "maybeConvertNpub"]),
-    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+    ...mapActions(useCameraStore, ["showCamera"]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
     handlePaymentRequestSuccess: function () {
       this.showSendTokens = false;
@@ -692,25 +625,6 @@ export default defineComponent({
       const text = await useUiStore().pasteFromClipboard();
       this.sendData.p2pkPubkey = text.trim();
       this.pubkeyTouched = true;
-    },
-    shareToken: async function () {
-      if (!this.webShareSupported) {
-        console.log("Web Share API not supported");
-        return;
-      }
-
-      const shareData = {
-        text: `cashu:${this.sendData.tokensBase64}`,
-      };
-
-      try {
-        await navigator.share(shareData);
-        console.log("Token shared successfully");
-      } catch (error: any) {
-        if ((error as any).name !== "AbortError") {
-          console.error("Error sharing token:", error);
-        }
-      }
     },
   },
 });

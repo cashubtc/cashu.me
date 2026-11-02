@@ -1,11 +1,6 @@
 <template>
   <div class="discover-section">
     <div class="discover-card">
-      <!-- <div class="discover-header">
-        <p class="discover-subtitle">
-          {{ $t("MintSettings.discover.caption") }}
-        </p>
-      </div> -->
       <!-- Only when idle with no results; while loading and once results exist, refreshing is the
            compact action in the results header, so the list never jumps when the button goes. -->
       <!-- Idle, before the first search: a designed empty state that says what discovery does,
@@ -164,7 +159,7 @@ import { defineComponent, ref, computed, watch, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import EmptyState from "src/components/ui/EmptyState.vue";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
-import { useMintsStore, MintClass } from "src/stores/mints";
+import { useMintsStore } from "src/stores/mints";
 import MintReviewSummary from "src/components/MintReviewSummary.vue";
 import {
   Compass as CompassIcon,
@@ -172,7 +167,6 @@ import {
   RefreshCw as RefreshCwIcon,
   Search as SearchIcon,
 } from "lucide-vue-next";
-import { notifyError, notifySuccess } from "src/js/notify";
 
 export default defineComponent({
   name: "MintDiscovery",
@@ -326,26 +320,6 @@ export default defineComponent({
    caption. */
 .discover-card {
   padding: 0;
-}
-
-.discover-header {
-  margin-bottom: 20px;
-}
-
-.discover-title {
-  font-size: 15.2px;
-  font-family: inherit;
-  font-weight: 600;
-  color: var(--app-text);
-  margin: 0 0 8px 0;
-  text-transform: none;
-}
-
-.discover-subtitle {
-  font-size: 0.9rem;
-  color: var(--app-text-muted);
-  margin: 0;
-  line-height: 1.4;
 }
 
 .discover-empty {

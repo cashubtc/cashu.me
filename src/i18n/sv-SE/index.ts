@@ -15,20 +15,11 @@ export default {
       success: "Klart",
       failed: "Misslyckades",
     },
-    payment: "Multinut-betalning",
-    selectMints: "Välj en eller flera mints att betala från.",
-    totalSelectedBalance: "Totalt valt saldo",
-    multiMintPay: "Betala från flera mints",
-    balanceNotEnough: "Multi-mint-saldo räcker inte för denna faktura",
-    failed: "Misslyckades att behandla: {error}",
     paid: "Betalat {amount} via Lightning",
   },
 
   global: {
     notifications: "Aviseringar",
-    copy_to_clipboard: {
-      success: "Kopierat till urklipp!",
-    },
     actions: {
       add_mint: {
         label: "Lägg till mint",
@@ -94,7 +85,6 @@ export default {
       could_not_request_mint: "Kunde inte begära prägling",
       invoice_still_pending: "Fakturan väntar fortfarande",
       paid_lightning: "Betalat {amount} via Lightning",
-      payment_pending_refresh: "Betalning väntar. Uppdatera fakturan manuellt.",
       sent: "Skickat {amount}",
       token_still_pending: "Token väntar fortfarande",
       received_lightning: "Mottaget {amount} via Lightning",
@@ -105,13 +95,21 @@ export default {
       no_amount: "Inget belopp",
       no_lnurl_data: "Ingen LNURL-data",
       no_price_data: "Ingen prisdata.",
-      please_try_again: "Försök igen.",
       trying_again: "Försöker igen...",
       unsupported_legacy_qr: "QR-kod av äldre typ stöds inte",
       legacy_qr_not_supported:
         "Den här äldre QR-koden kommer inte från en handlare som stöds",
       no_bolt12_mint: "Ingen av dina mints stöder BOLT12-erbjudanden",
       no_bolt11_mint: "Ingen av dina mints stöder BOLT11-fakturor",
+      address_not_paid: "Adressen har inte betalats",
+      payment_pending: "Betalning väntar",
+      invoice_already_paid: "Fakturan är redan betald",
+      payment_sent: "Betalning skickad",
+      payment_failed: "Betalningen misslyckades",
+      could_not_pay_request: "Kunde inte betala begäran",
+      request_unit_unsupported:
+        "Minten stöder inte enheten i denna betalningsförfrågan: {unit}",
+      no_onchain_mint: "Ingen av dina mints stöder on-chain-betalningar",
     },
     mint: {
       notifications: {
@@ -124,9 +122,6 @@ export default {
         unit_not_supported: "Enheten stöds inte av mint",
         activated: "Mint aktiverad",
         could_not_connect: "Kunde inte ansluta till mint",
-        could_not_get_info: "Kunde inte hämta mint-information",
-        could_not_get_keys: "Kunde inte hämta mint-nycklar",
-        could_not_get_keysets: "Kunde inte hämta mint-nyckeluppsättningar",
         mint_validation_error: "Mint-valideringsfel",
         removed: "Mint borttagen",
         error: "Mint-fel",
@@ -135,22 +130,13 @@ export default {
   },
   MainHeader: {
     menu: {
-      settings: {
-        title: "Inställningar",
-        settings: {
-          title: "Inställningar",
-          caption: "Plånboksinställningar",
-        },
-      },
       terms: {
-        title: "Villkor",
         terms: {
           title: "Villkor",
           caption: "Det här godkänner du genom att använda Cashu.me",
         },
       },
       links: {
-        title: "Länkar",
         cashuSpace: {
           title: "Cashu.space",
           caption: "cashu.space",
@@ -186,13 +172,6 @@ export default {
     staging: {
       warning: {
         text: "Staging – använd inte med riktiga pengar!",
-      },
-    },
-  },
-  FullscreenHeader: {
-    actions: {
-      back: {
-        label: "Plånbok",
       },
     },
   },
@@ -268,25 +247,16 @@ export default {
       reset: "Återställ",
       progress: "{crawlProcessed} / {crawlTotal}",
     },
-    npub_cash: {
-      copy_lightning_address: "Kopiera Lightning-adress",
-    },
     multinut: {
       use_multinut: "Betalningar från flera mints",
     },
     language: {
       title: "Språk",
-      description: "Välj önskat språk från listan nedan.",
     },
     sections: {
-      backup_restore: "SÄKERHETSKOPIERING & ÅTERSTÄLLNING",
-      lightning_address: "LIGHTNING ADRESS",
-      nostr_keys: "NOSTR NYCKLAR",
       nostr: {
-        title: "NOSTR",
         relays: {
           already_added: "Reläet är redan tillagt",
-          expand_label: "Klicka för att redigera reläer",
           add: {
             title: "Lägg till relä",
             description:
@@ -294,19 +264,11 @@ export default {
           },
           list: {
             title: "Reläer",
-            description: "Din plånbok kommer att ansluta till dessa reläer.",
             copy_tooltip: "Kopiera relä",
             remove_tooltip: "Ta bort relä",
           },
         },
       },
-      payment_requests: "BETALNINGSFÖRFRÅGNINGAR",
-      nostr_wallet_connect: "NOSTR PLÅNBOKSANSLUTNING",
-      hardware_features: "MASKINVARA FUNKTIONER",
-      p2pk_features: "P2PK FUNKTIONER",
-      privacy: "INTEGRITET",
-      experimental: "EXPERIMENTELLA",
-      appearance: "UTSEENDE",
     },
     backup_restore: {
       backup_seed: {
@@ -319,7 +281,6 @@ export default {
         title: "Återställ ecash",
         description:
           "Återställ ecash från en annan återställningsfras. Din nuvarande fras påverkas inte.",
-        button: "Återställ",
       },
     },
     lightning_address: {
@@ -329,7 +290,6 @@ export default {
         invalid: "Ange en giltig HTTPS-server-URL",
       },
       title: "Lightning-adress",
-      description: "Ta emot betalningar till din Lightning-adress.",
       enable: {
         toggle: "Använd en Lightning-adress",
         description: "Ta emot betalningar på en adress från npub.cash",
@@ -378,7 +338,6 @@ export default {
       },
     },
     payment_requests: {
-      title: "Betalningsförfrågningar",
       description:
         "Få betalt via Nostr. När det är på lyssnar plånboken på dina Nostr-reläer.",
       enable_toggle: "Aktivera betalningsförfrågningar",
@@ -389,7 +348,6 @@ export default {
       },
     },
     nostr_wallet_connect: {
-      title: "Nostr Plånboksanslutning (NWC)",
       description:
         "Låter andra appar betala från den här plånboken via Nostr Wallet Connect.",
       enable_toggle: "Aktivera Nostr Wallet Connect",
@@ -425,7 +383,6 @@ export default {
       },
     },
     p2pk_features: {
-      title: "Låst ecash",
       description:
         "Experimentellt. Använd små belopp: om du förlorar den privata nyckeln kan ingen låsa upp ecash som är låst till den.",
       generate_button: "Generera nyckel",
@@ -441,7 +398,6 @@ export default {
       },
     },
     privacy: {
-      title: "Integritet",
       network_title: "Nätverkskontroller",
       description: "Dessa inställningar påverkar din integritet.",
       check_incoming: {
@@ -480,8 +436,6 @@ export default {
       },
     },
     experimental: {
-      title: "Experimentella",
-      description: "Dessa funktioner är experimentella.",
       receive_swaps: {
         toggle: "Ta emot byten",
         badge: "Beta",
@@ -501,7 +455,6 @@ export default {
         api_url_label: "Revisor API URL",
       },
       multinut: {
-        toggle: "Aktivera Multinut",
         description: "Betalar fakturor från flera mints samtidigt.",
       },
       nostr_mint_backup: {
@@ -523,7 +476,6 @@ export default {
       },
       keyboard: {
         title: "Skärmtangentbord",
-        description: "Använd det numeriska tangentbordet för att ange belopp.",
         toggle: "Använd numeriskt tangentbord",
         toggle_description:
           "Använder det numeriska tangentbordet för att ange belopp.",
@@ -559,7 +511,6 @@ export default {
         invalid_backup: "Ogiltigt format på säkerhetskopian",
         read_error: "Fel vid läsning av fil",
       },
-      title: "Avancerade",
       developer: {
         title: "Utvecklarinställningar",
         description: "Verktyg för felsökning.",
@@ -664,9 +615,6 @@ export default {
       history: {
         label: "Historik",
       },
-      invoices: {
-        label: "Fakturor",
-      },
       mints: {
         label: "Mints",
       },
@@ -697,18 +645,8 @@ export default {
   BalanceView: {
     total_label: "Totalt saldo",
     show_balance: "Visa saldo i {unit}",
-    mintUrl: {
-      label: "Mint",
-    },
-    mintBalance: {
-      label: "Saldo",
-    },
     mintError: {
       label: "Mint fel",
-    },
-    pending: {
-      label: "Väntande",
-      tooltip: "Kontrollera alla väntande tokens",
     },
   },
   WelcomePage: {
@@ -725,26 +663,6 @@ export default {
     terms_agreement: "Genom att fortsätta godkänner du {terms}",
     title: "Välkommen till Cashu.me",
     text: "Cashu.me är en gratis och öppen källkods Bitcoin-plånbok som använder ecash för att hålla dina pengar säkra och privata.",
-    actions: {
-      more: {
-        label: "Klicka för att lära dig mer",
-      },
-    },
-    p1: {
-      text: "Cashu är ett gratis och öppet källkods ecash-protokoll för Bitcoin. Du kan lära dig mer om det på { link }.",
-      link: {
-        text: "cashu.space",
-      },
-    },
-    p2: {
-      text: "Denna plånbok är inte ansluten till någon mint. För att använda denna plånbok måste du ansluta till en eller flera Cashu mints som du litar på.",
-    },
-    p3: {
-      text: "Denna plånbok lagrar ecash som endast du har åtkomst till. Om du raderar dina webbläsardata utan en säkerhetskopia av återställningsfrasen kommer du att förlora dina tokens.",
-    },
-    p4: {
-      text: "Denna plånbok är i beta. Vi tar inget ansvar för att personer förlorar åtkomst till medel. Använd på egen risk! Denna kod är öppen källkod och licensierad under MIT-licensen.",
-    },
   },
   WelcomeSlide2: {
     title: "Installera Cashu.me",
@@ -757,11 +675,9 @@ export default {
       android: {
         title: "Android (Chrome)",
         step1: {
-          item: "1. { icon } { text }",
           text: "Tryck på menyn (uppe till höger)",
         },
         step2: {
-          item: "2. { icon } { text }",
           text: "Tryck på { buttonText }",
           buttonText: "@:PwaPrompt.android.add",
         },
@@ -769,11 +685,9 @@ export default {
       ios: {
         title: "iOS (Safari)",
         step1: {
-          item: "1. { icon } { text }",
           text: "Tryck på dela (nere)",
         },
         step2: {
-          item: "2. { icon } { text }",
           text: "Tryck på { buttonText }",
           buttonText: "@:PwaPrompt.ios.add",
         },
@@ -874,16 +788,12 @@ export default {
       "Räkna bara recensioner från personer i ditt förtroendenätverk",
     web_of_trust_hop: "I ditt förtroendenätverk (steg {hop})",
     no_mint_url: "Ingen mint-URL angiven",
-    title: "Mint-recensioner",
     reviews: "recensioner",
-    ratings: "{n} betyg | {n} betyg",
     no_reviews: "Inga recensioner än",
     your_review: "Din recension",
-    no_reviews_to_display: "Inga recensioner att visa.",
     no_rating: "Ingen betygsättning",
     stars_label: "{rating} av 5 stjärnor",
-    out_of: "av",
-    rows: "Reviews",
+    out_of: "av {max}",
     sort: "Sortera",
     sort_options: {
       newest: "Nyaste",
@@ -922,14 +832,8 @@ export default {
       inputs: {
         seed_phrase: {
           label: "Återställningsfras",
-          caption: "Du kan se din återställningsfras i inställningarna.",
         },
       },
-    },
-    information: {
-      label: "Information",
-      caption:
-        "Guiden kommer endast att återställa ecash från en annan återställningsfras, du kommer inte att kunna använda denna återställningsfras eller ändra återställningsfrasen för plånboken du för närvarande använder. Detta innebär att återställd ecash inte kommer att skyddas av din nuvarande återställningsfras så länge du inte skickar ecash till dig själv en gång.",
     },
     restore_mints: {
       label: "Återställ mints",
@@ -951,18 +855,10 @@ export default {
       },
       restore: {
         label: "Återställ",
-        in_progress: "Återställer mint…",
         error: "Fel vid återställning av mint: { error }",
-      },
-      restore_all_mints: {
-        label: "Återställ alla mints",
-        in_progress: "Återställer mint { index } av { length } …",
-        success: "Återställning slutfördes framgångsrikt",
-        error: "Fel vid återställning av mints: { error }",
       },
       restore_selected_mints: {
         label: "Återställ valda mints ({count})",
-        in_progress: "Återställer mint {index} av {length} ...",
         success: "Lyckades återställa {count} mint(s)",
         error: "Fel vid återställning av valda mints: {error}",
       },
@@ -975,7 +871,6 @@ export default {
       select_all: "Markera alla",
       deselect_all: "Avmarkera alla",
       backed_up: "Säkerhetskopierad",
-      already_added: "Redan tillagd",
       add_selected: "Lägg till valda ({count})",
       no_backups_found: "Inga mint-säkerhetskopior hittades",
       no_backups_hint:
@@ -991,11 +886,6 @@ export default {
       title: "Lägg till mint",
       description:
         "Ange URL:en för en Cashu mint för att ansluta till den. Denna plånbok är inte ansluten till någon mint.",
-      inputs: {
-        nickname: {
-          placeholder: "Smeknamn (t.ex. Testnet)",
-        },
-      },
       actions: {
         add_mint: {
           label: "@:global.actions.add_mint.label",
@@ -1008,18 +898,14 @@ export default {
     },
     discover: {
       title: "Upptäck mints",
-      overline: "Upptäck",
       caption: "Mints som andra rekommenderar på Nostr.",
       actions: {
         discover: {
           label: "Upptäck mints",
           in_progress: "Laddar…",
-          error_no_mints: "Inga mints hittades",
-          success: "{ length } mints hittades",
         },
       },
       add: "Lägg till",
-      unnamed: "Namnlös mint",
       empty: {
         title: "Hitta en mint",
         text: "Cashu.me frågar Nostr-reläer efter mintar som andra rekommenderar, med betyg och recensioner.",
@@ -1027,16 +913,10 @@ export default {
       recommendations: {
         overline: "{ length } mints hittades",
         caption: "Gör din egen research innan du använder en mint.",
-        actions: {
-          browse: {
-            label: "Klicka för att bläddra bland mints",
-          },
-        },
       },
     },
     swap: {
       title: "Byt",
-      overline: "Växling mellan mints",
       caption:
         "Flytta pengar mellan dina mints via Lightning. Avgifter kan tillkomma.",
       inputs: {
@@ -1055,11 +935,9 @@ export default {
           label: "@:global.actions.swap.label",
           in_progress: "@:MintSettings.swap.actions.swap.label",
         },
-        receove_to_trusted_mint: { label: "Ta emot till betrodd mint" },
       },
     },
     error_badge: "Fel",
-    active_badge: "Aktiv",
     switching_mint: "Byter till {mint}",
     reviews_text: "recension | recensioner",
     no_reviews_yet: "Inga recensioner ännu",
@@ -1082,29 +960,16 @@ export default {
   },
   InvoiceDetailDialog: {
     title: "Ta emot Lightning",
-    create_invoice_title: "Skapa faktura",
-    inputs: {
-      amount: {
-        label: "Belopp ({ ticker }) *",
-      },
-    },
     actions: {
-      close: {
-        label: "@:global.actions.close.label",
-      },
       create: {
         label: "Skapa faktura",
         label_blocked: "Skapar faktura",
-        in_progress: "Skapar",
       },
     },
     invoice: {
       caption: "Lightning-faktura",
       status_paid_text: "Betald",
       actions: {
-        close: {
-          label: "@:global.actions.close.label",
-        },
         copy: {
           label: "Kopiera faktura",
         },
@@ -1132,28 +997,14 @@ export default {
   SendTokenDialog: {
     badge_locked: "låst",
     title: "Skicka ecash",
-    title_ecash_text: "Ecash",
-    badge_offline_text: "Offline",
     inputs: {
-      amount: {
-        label: "Belopp ({ ticker }) *",
-        invalid_too_much_error_text: "För mycket",
-      },
       p2pk_pubkey: {
         label: "Mottagarens publika nyckel",
-        label_invalid: "Mottagarens publika nyckel",
         invalid: "Ange en giltig publik nyckel (hex eller npub)",
       },
     },
     actions: {
-      close: {
-        label: "@:global.actions.close.label",
-      },
-      close_card_scanner: {
-        label: "@:global.actions.close.label",
-      },
       copy_emoji: {
-        label: "🥜",
         tooltip_text: "Kopiera emoji",
       },
       copy_tokens: {
@@ -1181,7 +1032,6 @@ export default {
       write_tokens_to_card: {
         tooltips: {
           ndef_supported_text: "Flash till NFC-kort",
-          ndef_unsupported_text: "NDEF stöds inte",
         },
       },
       pay: { label: "@:global.actions.pay.label" },
@@ -1236,12 +1086,6 @@ export default {
   ReceiveTokenDialog: {
     receiving_amount: "Tar emot {amount}",
     title: "Ta emot ecash",
-    title_ecash_text: "Ecash",
-    inputs: {
-      tokens_base64: {
-        label: "Klistra in Cashu token",
-      },
-    },
     errors: {
       invalid_token: {
         label: "Ogiltig token",
@@ -1252,15 +1096,6 @@ export default {
       },
     },
     actions: {
-      paste: {
-        label: "@:global.actions.paste.label",
-      },
-      close: {
-        label: "@:global.actions.close.label",
-      },
-      scan: {
-        label: "@:global.actions.scan.label",
-      },
       receive: {
         label: "@:global.actions.receive.label",
         label_known_mint: "@:ReceiveTokenDialog.actions.receive.label",
@@ -1269,18 +1104,15 @@ export default {
       swap: {
         label: "@:global.actions.swap.label",
         tooltip_text: "Byt till en betrodd mint",
-        caption: "Byt { value }",
         processing: "Växlar…",
         failed: "Växlingen misslyckades",
       },
       cancel_swap: {
-        label: "@:global.actions.cancel.label",
         tooltip_text: "Avbryt byte",
       },
       confirm_swap: {
         label: "@:ReceiveTokenDialog.actions.swap.label",
         tooltip_text: "@:ReceiveTokenDialog.actions.swap.tooltip_text",
-        in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
       later: {
         label: "Ta emot senare",
@@ -1292,7 +1124,6 @@ export default {
         label: "NFC",
         tooltips: {
           ndef_supported_text: "Läs från NFC-kort",
-          ndef_unsupported_text: "NDEF stöds inte",
         },
       },
       receive_to_selected_mint: { label: "Ta emot till vald mint" },
@@ -1317,9 +1148,6 @@ export default {
       copy: {
         label: "Kopiera publik nyckel",
       },
-      close: {
-        label: "@:global.actions.close.label",
-      },
       new_key: {
         label: "Generera ny nyckel",
       },
@@ -1329,7 +1157,6 @@ export default {
     any_amount: "Valfritt belopp",
     payment_request: {
       caption: "Betalningsförfrågan",
-      description: "Ta emot betalningar via Nostr",
     },
     request_index: "Begäran {index} av {total}",
     actions: {
@@ -1339,17 +1166,11 @@ export default {
       copy: {
         label: "@:global.actions.copy.label",
       },
-      close: {
-        label: "@:global.actions.close.label",
-      },
       new_request: {
         label: "Ny förfrågan",
       },
       share: {
         label: "Dela",
-      },
-      copy_request: {
-        label: "Kopiera begäran",
       },
       add_amount: {
         label: "Lägg till belopp",
@@ -1374,18 +1195,6 @@ export default {
     },
     received_total: "Totalt mottaget",
     no_payments_yet: "Inga betalningar än",
-  },
-  NumericKeyboard: {
-    actions: {
-      close: {
-        label: "@:global.actions.close.label",
-        closed_info_text:
-          "Tangentbordet inaktiverat. Du kan återaktivera tangentbordet i inställningarna.",
-      },
-      enter: {
-        label: "@:global.actions.enter.label",
-      },
-    },
   },
   NWCDialog: {
     nwc: {
@@ -1454,6 +1263,24 @@ export default {
         label: "Redigera mint",
       },
     },
+    nuts: {
+      nut7: "Kontroll av token-status",
+      nut8: "Överbetalda Lightning-avgifter",
+      nut9: "Återställning av signaturer",
+      nut10: "Spenderingsvillkor",
+      nut11: "Pay-to-Pubkey (P2PK)",
+      nut12: "DLEQ-bevis",
+      nut13: "Deterministiska hemligheter",
+      nut14: "Hashade tidslåskontrakt (HTLC)",
+      nut15: "Partiella flervägsbetalningar",
+      nut16: "Animerade QR-koder",
+      nut17: "WebSocket-prenumerationer",
+      nut18: "Betalningsförfrågningar",
+      nut19: "Cachade svar",
+      nut20: "Signatur på mint-offert",
+      nut21: "Öppen autentisering",
+      nut22: "Blind autentisering",
+    },
   },
   UnitToggle: {
     label: "Enhet: {unit}, ändra",
@@ -1464,7 +1291,6 @@ export default {
     open_selector_empty: "Välj mint",
     title: "Välj en mint",
     badge_mint_error_text: "Fel",
-    badge_option_mint_error_text: "@:ChooseMint.badge_mint_error_text",
     available_text: "på den här minten",
     sheet_title: "Välj mint",
     placeholder: "Välj en mint",
@@ -1492,7 +1318,6 @@ export default {
     },
     row: {
       type_label: "Ecash",
-      date_label: "{ value } sedan",
     },
     actions: {
       check_status: {
@@ -1503,24 +1328,14 @@ export default {
       },
     },
     old_token_not_found_error_text: "Gammal token hittades inte",
+    labels: {
+      onchain_subpayment: "On-chain-delbetalning",
+      bolt12_subpayment: "BOLT12-delbetalning",
+    },
   },
   InvoiceTable: {
-    empty_text: "Inga fakturor än",
     row: {
       type_label: "Lightning",
-      type_tooltip_text: "Klicka för att kopiera",
-      date_label: "{ value } sedan",
-    },
-    actions: {
-      check_status: {
-        tooltip_text: "Kontrollera status",
-      },
-      filter_pending: {
-        label: "Visa bara väntande",
-      },
-      show_all: {
-        label: "Visa alla",
-      },
     },
   },
   RemoveMintDialog: {
@@ -1580,25 +1395,6 @@ export default {
     },
     input_data: {
       title: "Betala med Lightning",
-      inputs: {
-        invoice_data: {
-          label: "Lightning-faktura eller adress",
-        },
-      },
-      actions: {
-        close: {
-          label: "@:global.actions.close.label",
-        },
-        enter: {
-          label: "@:global.actions.enter.label",
-        },
-        paste: {
-          label: "@:global.actions.paste.label",
-        },
-        scan: {
-          label: "@:global.actions.scan.label",
-        },
-      },
       title_bolt12: "Betala Lightning-erbjudande",
     },
     lnurlpay: {
@@ -1607,24 +1403,18 @@ export default {
         "{ payee } begär{br}mellan { min } och { max } { ticker }",
       sending_to_lightning_address: "Skickar till { address }",
       inputs: {
-        amount: {
-          label: "Belopp ({ ticker }) *",
-        },
         comment: {
           label: "Kommentar (valfritt)",
         },
       },
       actions: {
-        close: {
-          label: "@:global.actions.close.label",
-        },
         send: {
           label: "@:global.actions.send.label",
+          in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
         },
       },
     },
     invoice: {
-      title: "Betala { value }",
       paying: "Betalar",
       paid: "Betald",
       fee: "Avgift",
@@ -1641,7 +1431,6 @@ export default {
           label: "Betala",
           in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
           waiting_for_wallet: "Väntar på plånboken…",
-          error: "Fel",
         },
       },
     },
@@ -1650,7 +1439,6 @@ export default {
     title: "Redigera mint",
     inputs: {
       nickname: {
-        placeholder: "t.ex. Testnet",
         label: "Smeknamn (valfritt)",
       },
       mint_url: {
@@ -1658,9 +1446,6 @@ export default {
       },
     },
     actions: {
-      cancel: {
-        label: "@:global.actions.cancel.label",
-      },
       update: {
         label: "@:global.actions.update.label",
       },
@@ -1670,15 +1455,7 @@ export default {
     title: "Litar du på denna mint?",
     description:
       "Gå bara med i den här minten om du litar på den. Om den slutar fungera förloras den ecash du har hos den.",
-    inputs: {
-      mint_url: {
-        label: "@:global.inputs.mint_url.label",
-      },
-    },
     actions: {
-      cancel: {
-        label: "@:global.actions.cancel.label",
-      },
       add_mint: {
         label: "@:global.actions.add_mint.label",
         in_progress: "Lägger till mint",
@@ -1745,7 +1522,7 @@ export default {
     settings: "Inställningar",
     backspace: "Radera tecken",
     enter_amount_in: "Ange belopp i {fiat}",
-    fee: "Avgift",
+    something_went_wrong: "Något gick fel",
   },
   SendPaymentRequest: {
     actions: {
@@ -1754,8 +1531,7 @@ export default {
     },
     info: {
       pay_failed: "Kunde inte betala begäran",
-      pay_to: "Betala till {target}",
-      invalid_url: "Ogiltig URL",
+      no_ecash: "Ingen ecash tillgänglig för denna betalningsförfrågan",
     },
   },
   PaymentRequestInfo: {
@@ -1909,6 +1685,63 @@ export default {
       positive_whole: "Ange ett positivt heltal i {unit}.",
       min: "Ange minst {amount}.",
       max: "Ange högst {amount}.",
+    },
+  },
+  storage: {
+    notifications: {
+      unrecognized_backup: "Okänt format på säkerhetskopian",
+      backup_restored: "Säkerhetskopian återställd",
+      backup_exported: "Plånbokens säkerhetskopia exporterad",
+      quota_exceeded: "Den lokala lagringen är full. Rensa din lokala lagring.",
+      cleaned_up: "Rensade {size} byte",
+    },
+  },
+  receiveTokens: {
+    notifications: {
+      already_in_history: "Token finns redan i historiken",
+      nfc_read_failed: "Kan inte läsa data från NFC-taggen",
+      scan_error: "Skanningsfel",
+      nfc_error: "NFC-fel",
+    },
+  },
+  nostrMintBackup: {
+    notifications: {
+      no_relays: "Inga Nostr-reläer har konfigurerats",
+      backup_failed: "Kunde inte säkerhetskopiera din mintlista till Nostr",
+      backed_up: "Mintlistan säkerhetskopierad till Nostr",
+      found:
+        "Hittade {count} mint i Nostr-säkerhetskopior | Hittade {count} mints i Nostr-säkerhetskopior",
+      none_found:
+        "Inga mint-säkerhetskopior hittades på Nostr för denna återställningsfras",
+      search_failed: "Kunde inte söka efter mint-säkerhetskopior",
+      add_mint_failed: "Kunde inte lägga till {mint}",
+      added:
+        "Lade till {count} mint i din plånbok | Lade till {count} mints i din plånbok",
+      none_added: "Inga nya mints lades till",
+      add_selected_failed: "Kunde inte lägga till de valda mintsen",
+    },
+  },
+  nostr: {
+    notifications: {
+      nip04_published: "NIP-04-händelse publicerad",
+      nip04_failed: "Kunde inte publicera NIP-04-händelse",
+      nip17_failed: "Kunde inte publicera NIP-17-händelse",
+      receive_failed: "Kunde inte ta emot inkommande betalning",
+      ecash_already_in_history: "Ecash finns redan i historiken",
+      ecash_added: "Ecash tillagd i historiken",
+    },
+  },
+  nwc: {
+    notifications: {
+      melt_quote_failed: "NWC: Kunde inte begära en melt-offert",
+      unit_must_be_sat: "NWC: Den aktiva enheten måste vara sats",
+      allowance_exceeded: "NWC: Tillåtelsen har överskridits",
+    },
+  },
+  npubcash: {
+    notifications: {
+      could_not_update_mint: "Kunde inte uppdatera npub.cash-minten",
+      add_mint_first: "Lägg först till {mint} i din plånbok",
     },
   },
 };

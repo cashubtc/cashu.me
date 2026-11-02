@@ -92,47 +92,20 @@ export default defineComponent({
   },
   mixins: [windowMixin],
   props: {},
-  data: function () {
-    return {
-      currentPage: 1,
-      pageSize: 5,
-    };
-  },
   computed: {
     ...mapWritableState(useUiStore, [
-      "showInvoiceDetails",
-      "showBolt12OfferDetails",
       "showReceiveDialog",
       "showReceiveEcashDrawer",
       "showCreateInvoiceDialog",
     ]),
-    ...mapWritableState(useReceiveTokensStore, [
-      "showReceiveTokens",
-      "receiveData",
-    ]),
+    ...mapWritableState(useReceiveTokensStore, ["showReceiveTokens"]),
     ...mapWritableState(useWalletStore, ["invoiceData"]),
     ...mapState(useMintsStore, ["mints", "activeMintUrl", "activeUnit"]),
     ...mapState(useNpubCashStore, {
-      npubCashEnabled: "enabled",
-      npubCashAddress: "address",
       npubCashMintUrl: "mintUrl",
       showAddressOnReceive: "showAddressOnReceive",
+      hasConfiguredNpubCashAddress: "hasConfiguredAddress",
     }),
-    hasConfiguredNpubCashAddress: function (): boolean {
-      return Boolean(
-        this.npubCashEnabled &&
-          this.npubCashAddress &&
-          this.npubCashMintUrl &&
-          this.mints.some((mint: any) => mint.url === this.npubCashMintUrl)
-      );
-    },
-    canReceivePayments: function () {
-      if (!this.mints.length) {
-        return false;
-      } else {
-        return true;
-      }
-    },
     canReceiveLightning: function (): boolean {
       return Boolean(
         firstMintSupportingPaymentMethods(
@@ -163,11 +136,6 @@ export default defineComponent({
       this.showReceiveDialog = false;
       this.showReceiveTokens = false;
       this.showReceiveEcashDrawer = true;
-    },
-    showReceiveTokensDialog: function () {
-      this.receiveData.tokensBase64 = "";
-      this.showReceiveTokens = true;
-      this.showReceiveDialog = false;
     },
     showInvoiceCreateDialog: async function () {
       if (
@@ -216,7 +184,7 @@ export default defineComponent({
       this.showCreateInvoiceDialog = true;
       this.showReceiveDialog = false;
     },
-    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+    ...mapActions(useCameraStore, ["showCamera"]),
   },
   created: function () {},
 });

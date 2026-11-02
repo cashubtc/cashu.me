@@ -1,6 +1,6 @@
+import { i18n } from "src/boot/i18n";
 import { defineStore } from "pinia";
 import { useWalletStore } from "./wallet";
-import { useMintsStore } from "./mints";
 import { useLocalStorage } from "@vueuse/core";
 import { notifyError, notifySuccess } from "../js/notify";
 import { HistoryToken, useTokensStore } from "./tokens";
@@ -42,7 +42,7 @@ export const useStorageStore = defineStore("storage", {
     restoreFromBackup: async function (backup: any) {
       const proofsStore = useProofsStore();
       if (!backup) {
-        notifyError("Unrecognized Backup Format!");
+        notifyError(i18n.global.t("storage.notifications.unrecognized_backup"));
       } else {
         const keys = Object.keys(backup);
         for (const key of keys) {
@@ -97,7 +97,7 @@ export const useStorageStore = defineStore("storage", {
             localStorage.setItem(key, backup[key]);
           }
         }
-        notifySuccess("Backup restored");
+        notifySuccess(i18n.global.t("storage.notifications.backup_restored"));
         window.location.reload();
       }
     },
@@ -144,7 +144,7 @@ export const useStorageStore = defineStore("storage", {
       downloadLink.style.display = "none";
       document.body.appendChild(downloadLink);
       downloadLink.click();
-      notifySuccess("Wallet backup exported");
+      notifySuccess(i18n.global.t("storage.notifications.backup_exported"));
     },
     checkLocalStorage: async function () {
       const needsCleanup = this.checkLocalStorageQuota();
@@ -166,9 +166,7 @@ export const useStorageStore = defineStore("storage", {
         return false;
       } catch (e) {
         console.log("Local storage quota exceeded");
-        notifyError(
-          "Local storage quota exceeded. Clean up your local storage."
-        );
+        notifyError(i18n.global.t("storage.notifications.quota_exceeded"));
         return true;
       }
     },
@@ -205,18 +203,13 @@ export const useStorageStore = defineStore("storage", {
         localStorageSizeBefore - localStorageSizeAfter;
       console.log(`Cleaned up ${localStorageSizeDiff} bytes of local storage`);
       if (localStorageSizeDiff > 0 && verbose) {
-        notifySuccess(`Cleaned up ${localStorageSizeDiff} bytes`);
+        notifySuccess(
+          i18n.global.t("storage.notifications.cleaned_up", {
+            size: localStorageSizeDiff,
+          })
+        );
       }
       this.lastLocalStorageCleanUp = new Date();
-    },
-  },
-  getters: {
-    canPasteFromClipboard() {
-      return (
-        window.isSecureContext &&
-        navigator.clipboard &&
-        navigator.clipboard.readText
-      );
     },
   },
 });

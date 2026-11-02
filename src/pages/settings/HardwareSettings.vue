@@ -41,9 +41,8 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapState, mapWritableState } from "pinia";
+import { mapWritableState } from "pinia";
 import { useSettingsStore } from "src/stores/settings";
-import { useUiStore } from "src/stores/ui";
 import SettingsPageShell from "./SettingsPageShell.vue";
 import SettingsRadioRow from "src/components/ui/SettingsRadioRow.vue";
 import SettingsToggleRow from "src/components/ui/SettingsToggleRow.vue";
@@ -63,7 +62,6 @@ export default defineComponent({
       "nfcEncoding",
       "showNfcButtonInDrawer",
     ]),
-    ...mapState(useUiStore, ["ndefSupported"]),
   },
 });
 </script>

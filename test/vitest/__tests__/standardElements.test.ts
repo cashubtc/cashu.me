@@ -144,7 +144,6 @@ describe("standard elements", () => {
     expect(offenders((text) => text.includes("<q-avatar")).sort()).toEqual([
       "components/ActivityRow.vue",
       "components/MintInfoContainer.vue",
-      "components/WelcomeDialog.vue",
       "pages/CreateMintReviewPage.vue",
     ]);
   });

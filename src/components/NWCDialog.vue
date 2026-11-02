@@ -47,7 +47,7 @@
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapActions, mapState, mapWritableState } from "pinia";
+import { mapState, mapWritableState } from "pinia";
 import QrBlock from "src/components/QrBlock.vue";
 
 import { useNWCStore } from "src/stores/nwc";

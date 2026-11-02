@@ -131,7 +131,6 @@ import { useNostrMintBackupStore } from "src/stores/nostrMintBackup";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { notifyError } from "src/js/notify";
-import { date } from "quasar";
 
 export default defineComponent({
   components: {
@@ -292,7 +291,11 @@ export default defineComponent({
     },
 
     formatDate(timestamp) {
-      return date.formatDate(timestamp * 1000, "MMM DD, YYYY");
+      return new Intl.DateTimeFormat(this.$i18n.locale, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      }).format(new Date(timestamp * 1000));
     },
 
     // Fetch mint information for all discovered mints in the background

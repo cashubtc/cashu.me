@@ -94,18 +94,14 @@ export default defineComponent({
     return {};
   },
   computed: {
-    ...mapState(useP2PKStore, ["p2pkKeys", "showP2PKData"]),
+    ...mapState(useP2PKStore, ["showP2PKData"]),
     ...mapWritableState(useP2PKStore, ["showP2PKDialog"]),
     p2pkData() {
       return this.showP2PKData as any;
     },
   },
   methods: {
-    ...mapActions(useP2PKStore, [
-      "generateKeypair",
-      "showKeyDetails",
-      "showLastKey",
-    ]),
+    ...mapActions(useP2PKStore, ["generateKeypair", "showLastKey"]),
     newKeys: function () {
       this.generateKeypair();
       this.showLastKey();

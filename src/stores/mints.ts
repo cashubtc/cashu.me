@@ -14,7 +14,6 @@ import { useUiStore } from "./ui";
 import { ref, watch } from "vue";
 import { useProofsStore } from "./proofs";
 import { i18n } from "src/boot/i18n";
-import { useSettingsStore } from "./settings";
 import { useNostrMintBackupStore } from "./nostrMintBackup";
 import { bytesToHex } from "@noble/hashes/utils"; // already an installed dependency
 import { PaymentMethod } from "src/stores/walletTypes";
@@ -126,7 +125,6 @@ export const useMintsStore = defineStore("mints", {
     const showEditMintDialog = ref(false);
 
     const uiStoreGlobal: any = useUiStore();
-    const settingsStoreGlobal: any = useSettingsStore();
 
     // Watch for changes in activeMintUrl and activeUnit
     watch([activeMintUrl, activeUnit], async () => {
@@ -151,7 +149,6 @@ export const useMintsStore = defineStore("mints", {
       showMintInfoDialog,
       showEditMintDialog,
       uiStoreGlobal,
-      settingsStoreGlobal,
     };
   },
   getters: {
@@ -218,23 +215,6 @@ export const useMintsStore = defineStore("mints", {
         this.mints.find((m) => m.url === activeMintUrl)?.info ||
         ({} as GetInfoResponse)
       );
-    },
-    activeUnitLabel({ activeUnit }): string {
-      if (activeUnit == "sat") {
-        if (this.settingsStoreGlobal.bip177BitcoinSymbol) {
-          return "₿";
-        } else {
-          return "SAT";
-        }
-      } else if (activeUnit == "usd") {
-        return "USD";
-      } else if (activeUnit == "eur") {
-        return "EUR";
-      } else if (activeUnit == "msat") {
-        return "mSAT";
-      } else {
-        return activeUnit;
-      }
     },
     activeUnitCurrencyMultiplyer({ activeUnit }): number {
       if (activeUnit == "usd") {
@@ -535,9 +515,6 @@ export const useMintsStore = defineStore("mints", {
         return data;
       } catch (error: any) {
         console.error(error);
-        try {
-          // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_info"));
-        } catch {}
         throw error;
       }
     },
@@ -605,9 +582,6 @@ export const useMintsStore = defineStore("mints", {
         return this.mints.filter((m) => m.url === mint.url)[0];
       } catch (error: any) {
         console.error(error);
-        try {
-          // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_keys"));
-        } catch {}
         throw error;
       }
     },

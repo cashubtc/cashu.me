@@ -141,11 +141,10 @@ export default defineComponent({
       try {
         this.serverUrlError = "";
         this.serverUrlInput = await this.setBaseHost(this.serverUrlInput);
-      } catch (error) {
-        this.serverUrlError =
-          error instanceof Error
-            ? error.message
-            : this.$t("Settings.lightning_address.server_url.invalid");
+      } catch {
+        this.serverUrlError = this.$t(
+          "Settings.lightning_address.server_url.invalid"
+        );
       }
     },
   },

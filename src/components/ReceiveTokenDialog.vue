@@ -12,46 +12,13 @@
       <!-- The 16px flow column, the same edge as Pay's field and the footer (round 91). -->
       <div class="col column items-center justify-start scroll-container">
         <FlowColumn class="q-px-md q-mb-sm full-width">
-          <!-- <div class="row items-center no-wrap q-pb-sm">
-                <div class="col-12">
-                  <span class="text-h6">{{
-                    $t("ReceiveTokenDialog.title", {
-                      value:
-                        tokenAmount && tokenUnit
-                          ? formatCurrency(tokenAmount - receiveFee, tokenUnit)
-                          : $t("ReceiveTokenDialog.title_ecash_text"),
-                    })
-                  }}</span>
-                  <span
-                    v-if="
-                      tokenAmount &&
-                      tokenUnit &&
-                      tokenUnit == 'sat' &&
-                      bitcoinPrice
-                    "
-                    class="q-ml-xs text-subtitle2 text-app-muted"
-                  >
-                    ({{
-                      formatCurrency(
-                        (currentCurrencyPrice / 100000000) * tokenAmount,
-                        bitcoinPriceCurrency,
-                        true
-                      )
-                    }})
-                  </span>
-                </div>
-              </div> -->
-
           <transition appear enter-active-class="animated fadeIn">
             <div v-if="tokenDecodesCorrectly" key="token-valid">
               <!-- VALID TOKEN content -->
               <!-- print token in fixed width font -->
               <div class="row q-pt-md">
                 <div class="col-12">
-                  <TokenStringRender
-                    :token-string="receiveData.tokensBase64"
-                    :max-length="maxLengthForTokenString"
-                  />
+                  <TokenStringRender :token-string="receiveData.tokensBase64" />
                 </div>
               </div>
 
@@ -256,9 +223,6 @@ import { useUiStore } from "src/stores/ui";
 import { useMintsStore } from "src/stores/mints";
 import { useTokensStore } from "src/stores/tokens";
 import { useCameraStore } from "src/stores/camera";
-import { useP2PKStore } from "src/stores/p2pk";
-import { usePRStore } from "src/stores/payment-request";
-import { usePriceStore } from "src/stores/price";
 import { useSwapStore } from "src/stores/swap";
 import { useSettingsStore } from "src/stores/settings";
 import token from "src/js/token";
@@ -294,7 +258,6 @@ export default defineComponent({
   },
   data: function () {
     return {
-      showP2PKDialog: false,
       swapSelected: false,
       untrustedMintInfo: null as GetInfoResponse | null,
       swapProcessing: false,
@@ -373,28 +336,11 @@ export default defineComponent({
       "receiveData",
       "scanningCard",
     ]),
-    ...mapState(useUiStore, ["tickerShort", "ndefSupported"]),
-    ...mapState(usePriceStore, [
-      "bitcoinPrice",
-      "bitcoinPrices",
-      "currentCurrencyPrice",
-    ]),
-    ...mapState(useSettingsStore, ["bitcoinPriceCurrency"]),
-    ...mapState(useMintsStore, [
-      "activeMintUrl",
-      "activeProofs",
-      "activeUnit",
-      "addMintBlocking",
-      "mints",
-    ]),
+    ...mapState(useUiStore, ["ndefSupported"]),
+    ...mapState(useMintsStore, ["activeMintUrl", "addMintBlocking", "mints"]),
     ...mapState(useSettingsStore, ["enableReceiveSwaps"]),
-    ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
-    ...mapWritableState(usePRStore, ["showPRDialog"]),
     ...mapState(useCameraStore, ["hasCamera"]),
-    ...mapState(useP2PKStore, ["p2pkKeys"]),
-    ...mapState(usePRStore, ["enablePaymentRequest"]),
     ...mapState(useSwapStore, ["swapBlocking"]),
-    ...mapWritableState(useUiStore, ["showReceiveDialog"]),
     tokenDecodesCorrectly: function () {
       // Try decoding token directly
       if (this.decodeToken(this.receiveData.tokensBase64) !== undefined) {
@@ -446,9 +392,6 @@ export default defineComponent({
       const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
       return decodedToken ? this.getMint(decodedToken) : "";
     },
-    maxLengthForTokenString: function () {
-      return Math.floor(this.$q.screen.height / 3.5);
-    },
     sourceMintInfo: function () {
       if (!this.tokenMint) {
         return null;
@@ -460,7 +403,7 @@ export default defineComponent({
         // Use untrusted mint info if available
         return {
           nickname: this.untrustedMintInfo?.name || null,
-          shorturl: this.getShortUrl(this.tokenMint),
+          shorturl: this.mintHostname(this.tokenMint),
           iconUrl: this.untrustedMintInfo?.icon_url || null,
         };
       }
@@ -469,7 +412,7 @@ export default defineComponent({
       const mintIconUrl = mint.info?.icon_url;
       return {
         nickname: mintNickname || this.untrustedMintInfo?.name || null,
-        shorturl: this.getShortUrl(mint.url),
+        shorturl: this.mintHostname(mint.url),
         iconUrl: mintIconUrl || this.untrustedMintInfo?.icon_url || null,
       };
     },
@@ -493,15 +436,8 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useWalletStore, ["redeem", "getFeesForProofs"]),
-    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
-    ...mapActions(useTokensStore, ["addPendingToken"]),
-    ...mapActions(useP2PKStore, [
-      "getPrivateKeyForP2PKEncodedToken",
-      "generateKeypair",
-      "showLastKey",
-    ]),
-    ...mapActions(useMintsStore, ["addMint"]),
+    ...mapActions(useWalletStore, ["getFeesForProofs"]),
+    ...mapActions(useCameraStore, ["showCamera"]),
     ...mapActions(useReceiveTokensStore, [
       "decodeToken",
       "knowThisMintOfTokenJson",
@@ -547,7 +483,7 @@ export default defineComponent({
         this.isReceiving = false;
       }
     },
-    getShortUrl: function (url: string) {
+    mintHostname: function (url: string) {
       try {
         const urlObj = new URL(url);
         return urlObj.hostname;

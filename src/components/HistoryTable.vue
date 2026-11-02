@@ -205,8 +205,15 @@
 import { unitCode } from "src/js/format-currency";
 import * as _ from "underscore";
 import { defineComponent, markRaw } from "vue";
-import { shortenString } from "src/js/string-utils";
-import { parseISO } from "date-fns";
+import { formatRelativeDate } from "src/js/relative-time";
+
+// History labels the stores save as English text (walletOnchain, walletBolt12), shown through
+// the locale files instead. Labels a user typed are shown as typed.
+const GENERATED_LABEL_KEYS: Record<string, string> = {
+  "On-chain": "common.on_chain",
+  "On-chain Subpayment": "HistoryTable.labels.onchain_subpayment",
+  "Bolt12 Subpayment": "HistoryTable.labels.bolt12_subpayment",
+};
 import { useTokensStore } from "src/stores/tokens";
 import { mapState, mapWritableState, mapActions } from "pinia";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
@@ -301,26 +308,16 @@ export default defineComponent({
     },
   },
   computed: {
-    relativeTime() {
-      return new Intl.RelativeTimeFormat(this.$i18n.locale, {
-        numeric: "auto",
-        numberingSystem: "latn", // amounts use Latin digits in every locale
-      });
-    },
     ...mapState(useTokensStore, ["historyTokens"]),
     ...mapState(useWalletStore, ["invoiceHistory"]),
     ...mapWritableState(useReceiveTokensStore, [
       "showReceiveTokens",
       "receiveData",
     ]),
-    ...mapWritableState(useSendTokensStore, [
-      "showSendTokens",
-      "sendData",
-      "showLockInput",
-    ]),
+    ...mapWritableState(useSendTokensStore, ["showSendTokens", "sendData"]),
     ...mapWritableState(useUiStore, ["showInvoiceDetails", "historyFilters"]),
     ...mapState(useMintsStore, ["mints"]),
-    ...mapWritableState(useWalletStore, ["invoiceData", "payInvoiceData"]),
+    ...mapWritableState(useWalletStore, ["invoiceData"]),
 
     // Use cached unified transactions for better performance
     unifiedTransactions() {
@@ -413,29 +410,8 @@ export default defineComponent({
       }
     },
 
-    // One locale-formatted phrase ("5 minutes ago", "منذ 5 دقائق", "5分钟前"), so the number,
-    // unit and direction words never come from different languages.
     formattedDate(date_str) {
-      const seconds = (parseISO(date_str).getTime() - Date.now()) / 1000;
-      const steps = [
-        ["second", 60],
-        ["minute", 60],
-        ["hour", 24],
-        ["day", 30],
-        ["month", 12],
-      ];
-      let value = seconds;
-      for (const [unit, size] of steps) {
-        if (Math.abs(value) < size) {
-          return this.relativeTime.format(Math.round(value), unit);
-        }
-        value /= size;
-      }
-      return this.relativeTime.format(Math.round(value), "year");
-    },
-
-    shortenString: function (s) {
-      return shortenString(s, 20, 10);
+      return formatRelativeDate(date_str, this.$i18n.locale);
     },
 
     handlePageChange(page) {
@@ -455,14 +431,6 @@ export default defineComponent({
       return transaction.type === UnifiedTransactionType.Ecash;
     },
 
-    isLightningTransaction(transaction) {
-      return transaction.type === UnifiedTransactionType.Lightning;
-    },
-
-    isOnchainTransaction(transaction) {
-      return transaction.type === UnifiedTransactionType.Onchain;
-    },
-
     getDefaultLabel(transaction) {
       if (transaction.type === UnifiedTransactionType.Onchain) {
         return this.$t("common.on_chain");
@@ -473,7 +441,10 @@ export default defineComponent({
     },
 
     // The row's title: the payment's own label, or what happened ("Received", "Sending").
+    // Labels the wallet itself stored in English show in the app's language.
     getTransactionTitle(transaction) {
+      const generated = GENERATED_LABEL_KEYS[transaction.label];
+      if (generated) return this.$t(generated);
       if (transaction.label) return transaction.label;
       const incoming = transaction.amount >= 0;
       const key =

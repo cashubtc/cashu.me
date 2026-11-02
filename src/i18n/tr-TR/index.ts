@@ -15,24 +15,11 @@ export default {
       success: "Başarılı",
       failed: "Başarısız",
     },
-    payment: "Multinut ödeme",
-    selectMints: "Ödeme yapmak için bir veya birden fazla mint seçin.",
-    totalSelectedBalance: "Seçilen toplam bakiye",
-    multiMintPay: "Birden çok mint ile ödeme",
-    balanceNotEnough: "Çoklu mint bakiyesi bu faturayı karşılamaya yetmiyor",
-    failed: "İşlenemedi: {error}",
     paid: "Lightning ile {amount} ödendi",
-  },
-  // merged into single Settings block above
-  advanced: {
-    developer: {},
   },
 
   global: {
     notifications: "Bildirimler",
-    copy_to_clipboard: {
-      success: "Panoya kopyalandı!",
-    },
     actions: {
       add_mint: {
         label: "Mint ekle",
@@ -98,8 +85,6 @@ export default {
       could_not_request_mint: "Mint isteği yapılamadı",
       invoice_still_pending: "Fatura hala beklemede",
       paid_lightning: "Lightning üzerinden {amount} ödendi",
-      payment_pending_refresh:
-        "Ödeme beklemede. Faturayı manuel olarak yenileyin.",
       sent: "{amount} gönderildi",
       token_still_pending: "Token hala beklemede",
       received_lightning: "Lightning üzerinden {amount} alındı",
@@ -111,7 +96,6 @@ export default {
       no_amount: "Tutar yok",
       no_lnurl_data: "LNURL verisi yok",
       no_price_data: "Fiyat verisi yok.",
-      please_try_again: "Lütfen tekrar deneyin.",
       trying_again: "Tekrar deneniyor...",
       unsupported_legacy_qr: "Desteklenmeyen eski tip QR kodu",
       legacy_qr_not_supported:
@@ -120,6 +104,16 @@ export default {
         "Mint'lerinizin hiçbiri BOLT12 tekliflerini desteklemiyor",
       no_bolt11_mint:
         "Mint'lerinizin hiçbiri BOLT11 faturalarını desteklemiyor",
+      address_not_paid: "Adrese ödeme yapılmadı",
+      payment_pending: "Ödeme beklemede",
+      invoice_already_paid: "Fatura zaten ödenmiş",
+      payment_sent: "Ödeme gönderildi",
+      payment_failed: "Ödeme başarısız oldu",
+      could_not_pay_request: "İstek ödenemedi",
+      request_unit_unsupported:
+        "Mint, bu ödeme talebindeki birimi desteklemiyor: {unit}",
+      no_onchain_mint:
+        "Mint'lerinizin hiçbiri zincir üstü ödemeleri desteklemiyor",
     },
     mint: {
       notifications: {
@@ -132,9 +126,6 @@ export default {
         unit_not_supported: "Birim mint tarafından desteklenmiyor",
         activated: "Mint etkinleştirildi",
         could_not_connect: "Mint'e bağlanılamadı",
-        could_not_get_info: "Mint bilgisi alınamadı",
-        could_not_get_keys: "Mint anahtarları alınamadı",
-        could_not_get_keysets: "Mint anahtar setleri alınamadı",
         removed: "Mint kaldırıldı",
         error: "Mint hatası",
         mint_validation_error: "Mint doğrulama hatası",
@@ -143,22 +134,13 @@ export default {
   },
   MainHeader: {
     menu: {
-      settings: {
-        title: "Ayarlar",
-        settings: {
-          title: "Ayarlar",
-          caption: "Cüzdan yapılandırması",
-        },
-      },
       terms: {
-        title: "Şartlar",
         terms: {
           title: "Şartlar",
           caption: "Cashu.me'yi kullanarak kabul ettikleriniz",
         },
       },
       links: {
-        title: "Bağlantılar",
         cashuSpace: {
           title: "Cashu.space",
           caption: "cashu.space",
@@ -194,13 +176,6 @@ export default {
     staging: {
       warning: {
         text: "Hazırlık aşaması – gerçek fonlarla kullanmayın!",
-      },
-    },
-  },
-  FullscreenHeader: {
-    actions: {
-      back: {
-        label: "Cüzdan",
       },
     },
   },
@@ -268,17 +243,11 @@ export default {
     },
     language: {
       title: "Dil",
-      description: "Lütfen aşağıdaki listeden tercih ettiğiniz dili seçin.",
     },
     sections: {
-      backup_restore: "YEDEKLE & GERİ YÜKLE",
-      lightning_address: "LIGHTNING ADRESİ",
-      nostr_keys: "NOSTR ANAHTARLARI",
       nostr: {
-        title: "NOSTR",
         relays: {
           already_added: "Röle zaten eklendi",
-          expand_label: "Röleleri düzenlemek için tıklayın",
           add: {
             title: "Röle ekle",
             description:
@@ -286,20 +255,11 @@ export default {
           },
           list: {
             title: "Röleler",
-            description: "Cüzdanınız bu rölelere bağlanacak.",
             copy_tooltip: "Röleyi kopyala",
             remove_tooltip: "Röleyi kaldır",
           },
         },
       },
-
-      payment_requests: "ÖDEME TALEPLERİ",
-      nostr_wallet_connect: "NOSTR CÜZDAN BAĞLANTISI",
-      hardware_features: "DONANIM ÖZELLİKLERİ",
-      p2pk_features: "P2PK ÖZELLİKLERİ",
-      privacy: "GİZLİLİK",
-      experimental: "DENEYSEL",
-      appearance: "GÖRÜNÜM",
     },
     backup_restore: {
       backup_seed: {
@@ -312,7 +272,6 @@ export default {
         title: "Ecash'i geri yükle",
         description:
           "Başka bir kurtarma ifadesinden ecash kurtarın. Mevcut kurtarma ifadeniz değişmez.",
-        button: "Geri Yükle",
       },
     },
     lightning_address: {
@@ -322,7 +281,6 @@ export default {
         invalid: "Geçerli bir HTTPS sunucu URL'si girin",
       },
       title: "Lightning adresi",
-      description: "Lightning adresinize ödeme alın.",
       enable: {
         toggle: "Lightning adresi kullan",
         description: "npub.cash'ten alınan bir adresle ödeme alın",
@@ -372,7 +330,6 @@ export default {
     },
 
     payment_requests: {
-      title: "Ödeme talepleri",
       description:
         "Nostr üzerinden ödeme alın. Açıkken cüzdanınız Nostr rölelerinizi dinler.",
       enable_toggle: "Ödeme taleplerini etkinleştir",
@@ -383,7 +340,6 @@ export default {
       },
     },
     nostr_wallet_connect: {
-      title: "Nostr Cüzdan Bağlantısı (NWC)",
       description:
         "Diğer uygulamaların Nostr Wallet Connect ile bu cüzdandan ödeme yapmasını sağlar.",
       enable_toggle: "Nostr Wallet Connect'i etkinleştir",
@@ -419,7 +375,6 @@ export default {
       },
     },
     p2pk_features: {
-      title: "Kilitli ecash",
       description:
         "Deneysel. Küçük tutarlar kullanın: özel anahtarı kaybederseniz, ona kilitli ecash'i kimse açamaz.",
       generate_button: "Anahtar oluştur",
@@ -435,7 +390,6 @@ export default {
       },
     },
     privacy: {
-      title: "Gizlilik",
       network_title: "Ağ kontrolleri",
       description: "Bu ayarlar gizliliğinizi etkiler.",
       check_incoming: {
@@ -474,8 +428,6 @@ export default {
       },
     },
     experimental: {
-      title: "Deneysel",
-      description: "Bu özellikler deneyseldir.",
       receive_swaps: {
         toggle: "Takasları al",
         badge: "Beta",
@@ -495,7 +447,6 @@ export default {
         api_url_label: "Denetleyici API URL'si",
       },
       multinut: {
-        toggle: "Multinut'u Etkinleştir",
         description: "Faturaları aynı anda birden çok mint'ten öder.",
       },
       nostr_mint_backup: {
@@ -522,7 +473,6 @@ export default {
       },
       keyboard: {
         title: "Ekran klavyesi",
-        description: "Miktarları girmek için sayısal klavyeyi kullanın.",
         toggle: "Sayısal klavye kullan",
         toggle_description: "Tutar girmek için sayısal tuş takımını kullanır.",
       },
@@ -552,7 +502,6 @@ export default {
         invalid_backup: "Geçersiz yedek dosyası biçimi",
         read_error: "Dosya okunurken hata oluştu",
       },
-      title: "Gelişmiş",
       developer: {
         title: "Geliştirici ayarları",
         description: "Sorun giderme ve hata ayıklama araçları.",
@@ -641,9 +590,6 @@ export default {
       reset: "Sıfırla",
       progress: "{crawlProcessed} / {crawlTotal}",
     },
-    npub_cash: {
-      copy_lightning_address: "Lightning adresini kopyala",
-    },
     multinut: {
       use_multinut: "Birden çok mint ile ödemeler",
     },
@@ -678,9 +624,6 @@ export default {
       history: {
         label: "Geçmiş",
       },
-      invoices: {
-        label: "Faturalar",
-      },
       mints: {
         label: "Mint'ler",
       },
@@ -711,18 +654,8 @@ export default {
   BalanceView: {
     total_label: "Toplam bakiye",
     show_balance: "{unit} bakiyesini göster",
-    mintUrl: {
-      label: "Mint",
-    },
-    mintBalance: {
-      label: "Bakiye",
-    },
     mintError: {
       label: "Mint hatası",
-    },
-    pending: {
-      label: "Beklemede",
-      tooltip: "Tüm bekleyen token'ları kontrol et",
     },
   },
   WelcomePage: {
@@ -739,26 +672,6 @@ export default {
     terms_agreement: "Devam ederek {terms} kabul etmiş olursunuz",
     title: "Cashu.me'ye hoş geldiniz",
     text: "Cashu.me, fonlarınızı güvenli ve gizli tutmak için ecash kullanan ücretsiz ve açık kaynaklı bir Bitcoin cüzdanıdır.",
-    actions: {
-      more: {
-        label: "Daha fazla bilgi edinmek için tıklayın",
-      },
-    },
-    p1: {
-      text: "Cashu, Bitcoin için ücretsiz ve açık kaynaklı bir ecash protokolüdür. { link } adresinden daha fazla bilgi edinebilirsiniz.",
-      link: {
-        text: "cashu.space",
-      },
-    },
-    p2: {
-      text: "Bu cüzdan herhangi bir mint'e bağlı değildir. Bu cüzdanı kullanmak için güvendiğiniz bir veya daha fazla Cashu mint'ine bağlanmanız gerekir.",
-    },
-    p3: {
-      text: "Bu cüzdan, yalnızca sizin erişiminiz olan ecash'i saklar. Kurtarma kelimeleri yedeklemesi olmadan tarayıcı verilerinizi silerseniz, token'larınızı kaybedersiniz.",
-    },
-    p4: {
-      text: "Bu cüzdan beta aşamasındadır. Fonlara erişimini kaybeden kişilerden sorumlu değiliz. Kendi sorumluluğunuzda kullanın! Bu kod açık kaynaklıdır ve MIT lisansı altında lisanslanmıştır.",
-    },
   },
   WelcomeSlide2: {
     title: "Cashu.me'yi yükleyin",
@@ -771,11 +684,9 @@ export default {
       android: {
         title: "Android (Chrome)",
         step1: {
-          item: "1. { icon } { text }",
           text: "Menüye dokunun (sağ üst)",
         },
         step2: {
-          item: "2. { icon } { text }",
           text: "{ buttonText }'e basın",
           buttonText: "@:PwaPrompt.android.add",
         },
@@ -783,11 +694,9 @@ export default {
       ios: {
         title: "iOS (Safari)",
         step1: {
-          item: "1. { icon } { text }",
           text: "Paylaş'a dokunun (alt)",
         },
         step2: {
-          item: "2. { icon } { text }",
           text: "{ buttonText }'e basın",
           buttonText: "@:PwaPrompt.ios.add",
         },
@@ -887,16 +796,12 @@ export default {
     web_of_trust_caption: "Yalnızca güven ağındaki kişilerin yorumlarını say",
     web_of_trust_hop: "Güven ağınızda ({hop}. adım)",
     no_mint_url: "Mint URL'si belirtilmedi",
-    title: "Mint yorumları",
     reviews: "yorum",
-    ratings: "{n} puan | {n} puan",
     no_reviews: "Henüz yorum yok",
     your_review: "Yorumunuz",
-    no_reviews_to_display: "Gösterilecek yorum yok.",
     no_rating: "Puan yok",
     stars_label: "5 yıldızdan {rating}",
-    out_of: "üzerinden",
-    rows: "Reviews",
+    out_of: "{max} üzerinden",
     sort: "Sırala",
     sort_options: {
       newest: "En yeni",
@@ -935,14 +840,8 @@ export default {
       inputs: {
         seed_phrase: {
           label: "Kurtarma kelimeleri",
-          caption: "Kurtarma kelimelerinizi ayarlarda görebilirsiniz.",
         },
       },
-    },
-    information: {
-      label: "Bilgi",
-      caption:
-        "Sihirbaz yalnızca başka bir kurtarma kelimesinden ecash'i geri yükleyecektir, şu anda kullandığınız cüzdanın kurtarma kelimesini kullanamayacak veya değiştiremeyeceksiniz. Bu, geri yüklenen ecash'in bir kez kendinize göndermediğiniz sürece mevcut kurtarma kelimeniz tarafından korunmayacağı anlamına gelir.",
     },
     restore_mints: {
       label: "Mint'leri geri yükle",
@@ -957,7 +856,6 @@ export default {
       select_all: "Tümünü seç",
       deselect_all: "Seçimi kaldır",
       backed_up: "Yedeklendi",
-      already_added: "Zaten eklendi",
       add_selected: "Seçileni Ekle ({count})",
       no_backups_found: "Mint yedeği bulunamadı",
       no_backups_hint:
@@ -981,18 +879,10 @@ export default {
       },
       restore: {
         label: "Geri Yükle",
-        in_progress: "Mint geri yükleniyor…",
         error: "Mint geri yükleme hatası: { error }",
-      },
-      restore_all_mints: {
-        label: "Tüm mint'leri geri yükle",
-        in_progress: "{ length } mint'ten { index } geri yükleniyor…",
-        success: "Geri yükleme başarıyla tamamlandı",
-        error: "Mint'leri geri yükleme hatası: { error }",
       },
       restore_selected_mints: {
         label: "Seçili mint'leri geri yükle ({count})",
-        in_progress: "{ length } mint'ten { index } geri yükleniyor…",
         success: "{count} mint başarıyla geri yüklendi",
         error: "Seçili mint'leri geri yükleme hatası: { error }",
       },
@@ -1004,11 +894,6 @@ export default {
       title: "Mint ekle",
       description:
         "Bağlanmak için bir Cashu mint'inin URL'sini girin. Bu cüzdan herhangi bir mint'e bağlı değildir.",
-      inputs: {
-        nickname: {
-          placeholder: "Takma ad (örneğin Testnet)",
-        },
-      },
       actions: {
         add_mint: {
           label: "@:global.actions.add_mint.label",
@@ -1021,18 +906,14 @@ export default {
     },
     discover: {
       title: "Mint'leri keşfet",
-      overline: "Keşfet",
       caption: "Başkalarının Nostr'da önerdiği mint'ler.",
       actions: {
         discover: {
           label: "Mint'leri keşfet",
           in_progress: "Yükleniyor…",
-          error_no_mints: "Mint bulunamadı",
-          success: "{ length } mint bulundu",
         },
       },
       add: "Ekle",
-      unnamed: "Adsız mint",
       empty: {
         title: "Bir mint bulun",
         text: "Cashu.me, başkalarının önerdiği mint'leri puanları ve yorumlarıyla birlikte Nostr relay'lerinden sorgular.",
@@ -1040,16 +921,10 @@ export default {
       recommendations: {
         overline: "{ length } mint bulundu",
         caption: "Bir mint'i kullanmadan önce kendi araştırmanı yap.",
-        actions: {
-          browse: {
-            label: "Mint'lere göz atmak için tıklayın",
-          },
-        },
       },
     },
     swap: {
       title: "Değiştir",
-      overline: "Mint'ler arası takas",
       caption:
         "Lightning ile mint'leriniz arasında para taşıyın. Ücret alınabilir.",
       inputs: {
@@ -1068,11 +943,9 @@ export default {
           label: "@:global.actions.swap.label",
           in_progress: "@:MintSettings.swap.actions.swap.label",
         },
-        receove_to_trusted_mint: { label: "Güvenilen mint'e al" },
       },
     },
     error_badge: "Hata",
-    active_badge: "Etkin",
     switching_mint: "Geçiliyor: {mint}",
     reviews_text: "yorum | yorum",
     no_reviews_yet: "Henüz yorum yok",
@@ -1095,29 +968,16 @@ export default {
   },
   InvoiceDetailDialog: {
     title: "Lightning Al",
-    create_invoice_title: "Fatura oluştur",
-    inputs: {
-      amount: {
-        label: "Miktar ({ ticker }) *",
-      },
-    },
     actions: {
-      close: {
-        label: "@:global.actions.close.label",
-      },
       create: {
         label: "Fatura oluştur",
         label_blocked: "Fatura oluşturuluyor",
-        in_progress: "Oluşturuluyor",
       },
     },
     invoice: {
       caption: "Lightning faturası",
       status_paid_text: "Ödendi",
       actions: {
-        close: {
-          label: "@:global.actions.close.label",
-        },
         copy: {
           label: "Faturayı kopyala",
         },
@@ -1145,28 +1005,14 @@ export default {
   SendTokenDialog: {
     badge_locked: "kilitli",
     title: "Ecash gönder",
-    title_ecash_text: "Ecash",
-    badge_offline_text: "Çevrimdışı",
     inputs: {
-      amount: {
-        label: "Miktar ({ ticker }) *",
-        invalid_too_much_error_text: "Çok fazla",
-      },
       p2pk_pubkey: {
         label: "Alıcının genel anahtarı",
-        label_invalid: "Alıcının genel anahtarı",
         invalid: "Geçerli bir açık anahtar girin (hex veya npub)",
       },
     },
     actions: {
-      close: {
-        label: "@:global.actions.close.label",
-      },
-      close_card_scanner: {
-        label: "@:global.actions.close.label",
-      },
       copy_emoji: {
-        label: "🥜",
         tooltip_text: "Emojiyi kopyala",
       },
       copy_tokens: {
@@ -1194,7 +1040,6 @@ export default {
       write_tokens_to_card: {
         tooltips: {
           ndef_supported_text: "NFC kartına flaşla",
-          ndef_unsupported_text: "NDEF desteklenmiyor",
         },
       },
       pay: { label: "@:global.actions.pay.label" },
@@ -1249,12 +1094,6 @@ export default {
   ReceiveTokenDialog: {
     receiving_amount: "{amount} alınıyor",
     title: "Ecash al",
-    title_ecash_text: "Ecash",
-    inputs: {
-      tokens_base64: {
-        label: "Cashu token'ını yapıştır",
-      },
-    },
     errors: {
       invalid_token: {
         label: "Geçersiz token",
@@ -1265,15 +1104,6 @@ export default {
       },
     },
     actions: {
-      paste: {
-        label: "@:global.actions.paste.label",
-      },
-      close: {
-        label: "@:global.actions.close.label",
-      },
-      scan: {
-        label: "@:global.actions.scan.label",
-      },
       receive: {
         label: "@:global.actions.receive.label",
         label_known_mint: "@:ReceiveTokenDialog.actions.receive.label",
@@ -1282,18 +1112,15 @@ export default {
       swap: {
         label: "@:global.actions.swap.label",
         tooltip_text: "Güvenilen bir mint'e takas et",
-        caption: "{ value } takas et",
         processing: "Takas yapılıyor…",
         failed: "Takas başarısız",
       },
       cancel_swap: {
-        label: "@:global.actions.cancel.label",
         tooltip_text: "Takası iptal et",
       },
       confirm_swap: {
         label: "@:ReceiveTokenDialog.actions.swap.label",
         tooltip_text: "@:ReceiveTokenDialog.actions.swap.tooltip_text",
-        in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
       later: {
         label: "Daha sonra al",
@@ -1305,7 +1132,6 @@ export default {
         label: "NFC",
         tooltips: {
           ndef_supported_text: "NFC kartından oku",
-          ndef_unsupported_text: "NDEF desteklenmiyor",
         },
       },
       receive_to_selected_mint: { label: "Seçili mint'e al" },
@@ -1330,9 +1156,6 @@ export default {
       copy: {
         label: "Açık anahtarı kopyala",
       },
-      close: {
-        label: "@:global.actions.close.label",
-      },
       new_key: {
         label: "Yeni anahtar oluştur",
       },
@@ -1342,7 +1165,6 @@ export default {
     any_amount: "Herhangi bir tutar",
     payment_request: {
       caption: "Ödeme talebi",
-      description: "Nostr aracılığıyla ödeme al",
     },
     request_index: "İstek {index} / {total}",
     actions: {
@@ -1352,17 +1174,11 @@ export default {
       copy: {
         label: "@:global.actions.copy.label",
       },
-      close: {
-        label: "@:global.actions.close.label",
-      },
       new_request: {
         label: "Yeni talep",
       },
       share: {
         label: "Paylaş",
-      },
-      copy_request: {
-        label: "İsteği kopyala",
       },
       add_amount: {
         label: "Miktar ekle",
@@ -1387,18 +1203,6 @@ export default {
     },
     received_total: "Alınan toplam",
     no_payments_yet: "Henüz ödeme yok",
-  },
-  NumericKeyboard: {
-    actions: {
-      close: {
-        label: "@:global.actions.close.label",
-        closed_info_text:
-          "Klavye devre dışı bırakıldı. Klavyeyi ayarlardan yeniden etkinleştirebilirsiniz.",
-      },
-      enter: {
-        label: "@:global.actions.enter.label",
-      },
-    },
   },
   NWCDialog: {
     nwc: {
@@ -1467,6 +1271,24 @@ export default {
         label: "Mint'i düzenle",
       },
     },
+    nuts: {
+      nut7: "Token durumu kontrolü",
+      nut8: "Fazla ödenen Lightning ücretleri",
+      nut9: "İmza geri yükleme",
+      nut10: "Harcama koşulları",
+      nut11: "Pay-to-Pubkey (P2PK)",
+      nut12: "DLEQ kanıtları",
+      nut13: "Deterministik sırlar",
+      nut14: "Hash'li zaman kilitli sözleşmeler (HTLC)",
+      nut15: "Kısmi çok yollu ödemeler",
+      nut16: "Animasyonlu QR kodları",
+      nut17: "WebSocket abonelikleri",
+      nut18: "Ödeme talepleri",
+      nut19: "Önbelleğe alınmış yanıtlar",
+      nut20: "Mint teklifinde imza",
+      nut21: "Açık kimlik doğrulama",
+      nut22: "Kör kimlik doğrulama",
+    },
   },
   UnitToggle: {
     label: "Birim: {unit}, değiştir",
@@ -1477,7 +1299,6 @@ export default {
     open_selector_empty: "Mint seç",
     title: "Bir mint seçin",
     badge_mint_error_text: "Hata",
-    badge_option_mint_error_text: "@:ChooseMint.badge_mint_error_text",
     available_text: "bu mint'te",
     sheet_title: "Mint seç",
     placeholder: "Bir mint seçin",
@@ -1505,7 +1326,6 @@ export default {
     },
     row: {
       type_label: "Ecash",
-      date_label: "{ value } önce",
     },
     actions: {
       check_status: {
@@ -1516,24 +1336,14 @@ export default {
       },
     },
     old_token_not_found_error_text: "Eski token bulunamadı",
+    labels: {
+      onchain_subpayment: "Zincir üstü alt ödeme",
+      bolt12_subpayment: "BOLT12 alt ödemesi",
+    },
   },
   InvoiceTable: {
-    empty_text: "Henüz fatura yok",
     row: {
       type_label: "Lightning",
-      type_tooltip_text: "Kopyalamak için tıklayın",
-      date_label: "{ value } önce",
-    },
-    actions: {
-      check_status: {
-        tooltip_text: "Durumu kontrol et",
-      },
-      filter_pending: {
-        label: "Yalnızca bekleyenleri göster",
-      },
-      show_all: {
-        label: "Tümünü göster",
-      },
     },
   },
   RemoveMintDialog: {
@@ -1593,25 +1403,6 @@ export default {
     },
     input_data: {
       title: "Lightning ile öde",
-      inputs: {
-        invoice_data: {
-          label: "Lightning faturası veya adresi",
-        },
-      },
-      actions: {
-        close: {
-          label: "@:global.actions.close.label",
-        },
-        enter: {
-          label: "@:global.actions.enter.label",
-        },
-        paste: {
-          label: "@:global.actions.paste.label",
-        },
-        scan: {
-          label: "@:global.actions.scan.label",
-        },
-      },
       title_bolt12: "Lightning teklifini öde",
     },
     lnurlpay: {
@@ -1620,24 +1411,18 @@ export default {
         "{ payee }{br} { min } ile { max } { ticker } arasında talep ediyor",
       sending_to_lightning_address: "{ address } adresine gönderiliyor",
       inputs: {
-        amount: {
-          label: "Miktar ({ ticker }) *",
-        },
         comment: {
           label: "Yorum (isteğe bağlı)",
         },
       },
       actions: {
-        close: {
-          label: "@:global.actions.close.label",
-        },
         send: {
           label: "@:global.actions.send.label",
+          in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
         },
       },
     },
     invoice: {
-      title: "{ value } öde",
       paying: "Ödeniyor",
       paid: "Ödendi",
       fee: "Ücret",
@@ -1654,7 +1439,6 @@ export default {
           label: "Öde",
           in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
           waiting_for_wallet: "Cüzdan bekleniyor…",
-          error: "Hata",
         },
       },
     },
@@ -1663,7 +1447,6 @@ export default {
     title: "Mint'i düzenle",
     inputs: {
       nickname: {
-        placeholder: "ör. Testnet",
         label: "Takma ad (isteğe bağlı)",
       },
       mint_url: {
@@ -1671,9 +1454,6 @@ export default {
       },
     },
     actions: {
-      cancel: {
-        label: "@:global.actions.cancel.label",
-      },
       update: {
         label: "@:global.actions.update.label",
       },
@@ -1683,15 +1463,7 @@ export default {
     title: "Bu mint'e güveniyor musunuz?",
     description:
       "Bu mint'e yalnızca güveniyorsanız katılın. Faaliyetini durdurursa, onda tuttuğunuz ecash kaybolur.",
-    inputs: {
-      mint_url: {
-        label: "@:global.inputs.mint_url.label",
-      },
-    },
     actions: {
-      cancel: {
-        label: "@:global.actions.cancel.label",
-      },
       add_mint: {
         label: "@:global.actions.add_mint.label",
         in_progress: "Mint ekleniyor",
@@ -1758,7 +1530,7 @@ export default {
     settings: "Ayarlar",
     backspace: "Geri sil",
     enter_amount_in: "Tutarı {fiat} cinsinden gir",
-    fee: "Ücret",
+    something_went_wrong: "Bir şeyler ters gitti",
   },
   SendPaymentRequest: {
     actions: {
@@ -1767,8 +1539,7 @@ export default {
     },
     info: {
       pay_failed: "İstek ödenemedi",
-      pay_to: "{target} adresine öde",
-      invalid_url: "Geçersiz URL",
+      no_ecash: "Bu ödeme talebi için kullanılabilir ecash yok",
     },
   },
   PaymentRequestInfo: {
@@ -1918,6 +1689,62 @@ export default {
       positive_whole: "{unit} cinsinden pozitif bir tam sayı girin.",
       min: "En az {amount} girin.",
       max: "En fazla {amount} girin.",
+    },
+  },
+  storage: {
+    notifications: {
+      unrecognized_backup: "Tanınmayan yedek biçimi",
+      backup_restored: "Yedek geri yüklendi",
+      backup_exported: "Cüzdan yedeği dışa aktarıldı",
+      quota_exceeded: "Yerel depolama dolu. Yerel depolamanızı temizleyin.",
+      cleaned_up: "{size} bayt temizlendi",
+    },
+  },
+  receiveTokens: {
+    notifications: {
+      already_in_history: "Token zaten geçmişte",
+      nfc_read_failed: "NFC etiketinden veri okunamıyor",
+      scan_error: "Tarama hatası",
+      nfc_error: "NFC hatası",
+    },
+  },
+  nostrMintBackup: {
+    notifications: {
+      no_relays: "Yapılandırılmış Nostr rölesi yok",
+      backup_failed: "Mint listeniz Nostr'a yedeklenemedi",
+      backed_up: "Mint listesi Nostr'a yedeklendi",
+      found:
+        "Nostr yedeklerinde {count} mint bulundu | Nostr yedeklerinde {count} mint bulundu",
+      none_found: "Bu seed ifadesi için Nostr'da mint yedeği bulunamadı",
+      search_failed: "Mint yedekleri aranamadı",
+      add_mint_failed: "{mint} eklenemedi",
+      added:
+        "Cüzdanınıza {count} mint eklendi | Cüzdanınıza {count} mint eklendi",
+      none_added: "Yeni mint eklenmedi",
+      add_selected_failed: "Seçili mint'ler eklenemedi",
+    },
+  },
+  nostr: {
+    notifications: {
+      nip04_published: "NIP-04 olayı yayınlandı",
+      nip04_failed: "NIP-04 olayı yayınlanamadı",
+      nip17_failed: "NIP-17 olayı yayınlanamadı",
+      receive_failed: "Gelen ödeme alınamadı",
+      ecash_already_in_history: "Ecash zaten geçmişte",
+      ecash_added: "Ecash geçmişe eklendi",
+    },
+  },
+  nwc: {
+    notifications: {
+      melt_quote_failed: "NWC: Melt teklifi istenemedi",
+      unit_must_be_sat: "NWC: Etkin birim sat olmalıdır",
+      allowance_exceeded: "NWC: Ödenek aşıldı",
+    },
+  },
+  npubcash: {
+    notifications: {
+      could_not_update_mint: "npub.cash mint'i güncellenemedi",
+      add_mint_first: "Önce {mint} öğesini cüzdanınıza ekleyin",
     },
   },
 };

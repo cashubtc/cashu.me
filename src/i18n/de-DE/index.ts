@@ -17,22 +17,11 @@ export default {
       success: "Erfolgreich",
       failed: "Fehlgeschlagen",
     },
-    payment: "Multinut-Zahlung",
-    selectMints:
-      "Wählen Sie eine oder mehrere Mints aus, um eine Zahlung auszuführen.",
-    totalSelectedBalance: "Ausgewähltes Gesamtguthaben",
-    multiMintPay: "Mit mehreren Mints zahlen",
-    balanceNotEnough:
-      "Das Multi-Mint-Guthaben reicht nicht aus, um diese Rechnung zu begleichen",
-    failed: "Verarbeitung fehlgeschlagen: {error}",
     paid: "{amount} über Lightning bezahlt",
   },
 
   global: {
     notifications: "Benachrichtigungen",
-    copy_to_clipboard: {
-      success: "In die Zwischenablage kopiert!",
-    },
     actions: {
       add_mint: {
         label: "Mint hinzufügen",
@@ -98,8 +87,6 @@ export default {
       could_not_request_mint: "Mint konnte nicht angefordert werden",
       invoice_still_pending: "Rechnung noch ausstehend",
       paid_lightning: "{amount} über Lightning bezahlt",
-      payment_pending_refresh:
-        "Zahlung ausstehend. Rechnung manuell aktualisieren.",
       sent: "{amount} gesendet",
       token_still_pending: "Token noch ausstehend",
       received_lightning: "{amount} über Lightning empfangen",
@@ -110,13 +97,21 @@ export default {
       no_amount: "Kein Betrag",
       no_lnurl_data: "Keine LNURL-Daten",
       no_price_data: "Keine Preisdaten.",
-      please_try_again: "Bitte versuchen Sie es erneut.",
       trying_again: "Wird erneut versucht...",
       unsupported_legacy_qr: "Nicht unterstützter alter QR-Code",
       legacy_qr_not_supported:
         "Dieser alte QR-Code stammt nicht von einem unterstützten Händler",
       no_bolt12_mint: "Keine Ihrer Mints unterstützt BOLT12-Angebote",
       no_bolt11_mint: "Keine Ihrer Mints unterstützt BOLT11-Rechnungen",
+      address_not_paid: "Adresse nicht bezahlt",
+      payment_pending: "Zahlung ausstehend",
+      invoice_already_paid: "Rechnung bereits bezahlt",
+      payment_sent: "Zahlung gesendet",
+      payment_failed: "Zahlung fehlgeschlagen",
+      could_not_pay_request: "Anforderung konnte nicht bezahlt werden",
+      request_unit_unsupported:
+        "Die Mint unterstützt die Einheit dieser Zahlungsanforderung nicht: {unit}",
+      no_onchain_mint: "Keine Ihrer Mints unterstützt On-Chain-Zahlungen",
     },
     mint: {
       notifications: {
@@ -129,9 +124,6 @@ export default {
         unit_not_supported: "Einheit wird von Mint nicht unterstützt",
         activated: "Mint aktiviert",
         could_not_connect: "Verbindung zum Mint nicht möglich",
-        could_not_get_info: "Mint-Information konnte nicht abgerufen werden",
-        could_not_get_keys: "Mint-Schlüssel konnten nicht abgerufen werden",
-        could_not_get_keysets: "Mint-Keysets konnten nicht abgerufen werden",
         mint_validation_error: "Mint-Validierungsfehler",
         removed: "Mint entfernt",
         error: "Mint-Fehler",
@@ -140,22 +132,13 @@ export default {
   },
   MainHeader: {
     menu: {
-      settings: {
-        title: "Einstellungen",
-        settings: {
-          title: "Einstellungen",
-          caption: "Wallet-Konfiguration",
-        },
-      },
       terms: {
-        title: "Bedingungen",
         terms: {
           title: "Bedingungen",
           caption: "Dem stimmen Sie mit der Nutzung von Cashu.me zu",
         },
       },
       links: {
-        title: "Links",
         cashuSpace: {
           title: "Cashu.space",
           caption: "cashu.space",
@@ -191,13 +174,6 @@ export default {
     staging: {
       warning: {
         text: "Staging – nicht mit echten Geldern verwenden!",
-      },
-    },
-  },
-  FullscreenHeader: {
-    actions: {
-      back: {
-        label: "Wallet",
       },
     },
   },
@@ -265,18 +241,11 @@ export default {
     },
     language: {
       title: "Sprache",
-      description:
-        "Bitte wählen Sie Ihre bevorzugte Sprache aus der Liste unten.",
     },
     sections: {
-      backup_restore: "SICHERUNG & WIEDERHERSTELLUNG",
-      lightning_address: "LIGHTNING ADRESSE",
-      nostr_keys: "NOSTR SCHLÜSSEL",
       nostr: {
-        title: "NOSTR",
         relays: {
           already_added: "Relay bereits hinzugefügt",
-          expand_label: "Klicken, um Relays zu bearbeiten",
           add: {
             title: "Relay hinzufügen",
             description:
@@ -284,19 +253,11 @@ export default {
           },
           list: {
             title: "Relays",
-            description: "Ihre Wallet verbindet sich mit diesen Relays.",
             copy_tooltip: "Relay kopieren",
             remove_tooltip: "Relay entfernen",
           },
         },
       },
-      payment_requests: "ZAHLUNGSANFORDERUNGEN",
-      nostr_wallet_connect: "NOSTR WALLET CONNECT",
-      hardware_features: "HARDWARE FUNKTIONEN",
-      p2pk_features: "P2PK FUNKTIONEN",
-      privacy: "DATENSCHUTZ",
-      experimental: "EXPERIMENTELL",
-      appearance: "AUSSEHEN",
     },
     backup_restore: {
       backup_seed: {
@@ -309,7 +270,6 @@ export default {
         title: "Ecash wiederherstellen",
         description:
           "Ecash aus einer anderen Seed-Phrase wiederherstellen. Ihre aktuelle Seed-Phrase bleibt unverändert.",
-        button: "Wiederherstellen",
       },
     },
     lightning_address: {
@@ -319,7 +279,6 @@ export default {
         invalid: "Gib eine gültige HTTPS-Server-URL ein",
       },
       title: "Lightning Adresse",
-      description: "Zahlungen an Ihre Lightning Adresse empfangen.",
       enable: {
         toggle: "Lightning-Adresse verwenden",
         description: "Zahlungen an eine Adresse von npub.cash empfangen",
@@ -352,9 +311,6 @@ export default {
       reset: "Zurücksetzen",
       progress: "{crawlProcessed} / {crawlTotal}",
     },
-    npub_cash: {
-      copy_lightning_address: "Lightning-Adresse kopieren",
-    },
     multinut: {
       use_multinut: "Zahlungen aus mehreren Mints",
     },
@@ -384,7 +340,6 @@ export default {
       },
     },
     payment_requests: {
-      title: "Zahlungsanforderungen",
       description:
         "Zahlungen über Nostr empfangen. Wenn aktiv, lauscht Ihre Wallet auf Ihren Nostr-Relays.",
       enable_toggle: "Zahlungsanforderungen aktivieren",
@@ -395,7 +350,6 @@ export default {
       },
     },
     nostr_wallet_connect: {
-      title: "Nostr Wallet Connect (NWC)",
       description:
         "Erlaubt anderen Apps, über Nostr Wallet Connect aus dieser Wallet zu bezahlen.",
       enable_toggle: "Nostr Wallet Connect aktivieren",
@@ -432,7 +386,6 @@ export default {
       },
     },
     p2pk_features: {
-      title: "Gesperrtes Ecash",
       description:
         "Experimentell. Nur kleine Beträge verwenden: Wenn Sie den privaten Schlüssel verlieren, kann niemand das damit gesperrte Ecash entsperren.",
       generate_button: "Schlüssel generieren",
@@ -448,7 +401,6 @@ export default {
       },
     },
     privacy: {
-      title: "Datenschutz",
       network_title: "Netzwerkabfragen",
       description: "Diese Einstellungen beeinflussen Ihren Datenschutz.",
       check_incoming: {
@@ -488,8 +440,6 @@ export default {
       },
     },
     experimental: {
-      title: "Experimentell",
-      description: "Diese Funktionen sind experimentell.",
       receive_swaps: {
         toggle: "Swaps empfangen",
         badge: "Beta",
@@ -510,7 +460,6 @@ export default {
         api_url_label: "Auditor API URL",
       },
       multinut: {
-        toggle: "Multinut aktivieren",
         description: "Bezahlt Rechnungen aus mehreren Mints gleichzeitig.",
       },
       nostr_mint_backup: {
@@ -532,8 +481,6 @@ export default {
       },
       keyboard: {
         title: "Bildschirmtastatur",
-        description:
-          "Verwenden Sie die Zifferntastatur zur Eingabe von Beträgen.",
         toggle: "Numerische Tastatur verwenden",
         toggle_description:
           "Verwendet den Ziffernblock zur Eingabe von Beträgen.",
@@ -569,7 +516,6 @@ export default {
         invalid_backup: "Ungültiges Format der Sicherungsdatei",
         read_error: "Fehler beim Lesen der Datei",
       },
-      title: "Erweitert",
       developer: {
         title: "Entwickler-Einstellungen",
         description: "Werkzeuge zur Fehlersuche und Fehlerbehebung.",
@@ -675,9 +621,6 @@ export default {
       history: {
         label: "Verlauf",
       },
-      invoices: {
-        label: "Rechnungen",
-      },
       mints: {
         label: "Mints",
       },
@@ -708,18 +651,8 @@ export default {
   BalanceView: {
     total_label: "Gesamtguthaben",
     show_balance: "{unit}-Guthaben anzeigen",
-    mintUrl: {
-      label: "Mint",
-    },
-    mintBalance: {
-      label: "Guthaben",
-    },
     mintError: {
       label: "Mint-Fehler",
-    },
-    pending: {
-      label: "Ausstehend",
-      tooltip: "Alle ausstehenden Token prüfen",
     },
   },
   WelcomePage: {
@@ -736,26 +669,6 @@ export default {
     terms_agreement: "Wenn du fortfährst, stimmst du den {terms} zu",
     title: "Willkommen bei Cashu.me",
     text: "Cashu.me ist eine kostenlose und quelloffene Bitcoin-Wallet, die Ecash verwendet, um Ihre Gelder sicher und privat zu halten.",
-    actions: {
-      more: {
-        label: "Klicken, um mehr zu erfahren",
-      },
-    },
-    p1: {
-      text: "Cashu ist ein kostenloses und quelloffenes Ecash-Protokoll für Bitcoin. Mehr dazu erfahren Sie unter { link }.",
-      link: {
-        text: "cashu.space",
-      },
-    },
-    p2: {
-      text: "Diese Wallet ist nicht mit einer Mint affiliiert. Um diese Wallet zu nutzen, müssen Sie sich mit einer oder mehreren Cashu Mints verbinden, denen Sie vertrauen.",
-    },
-    p3: {
-      text: "Diese Wallet speichert Ecash, auf das nur Sie Zugriff haben. Wenn Sie Ihre Browserdaten ohne Seed-Phrase-Sicherung löschen, verlieren Sie Ihre Token.",
-    },
-    p4: {
-      text: "Diese Wallet ist in Beta. Wir übernehmen keine Verantwortung für den Verlust des Zugangs zu Geldern. Nutzung auf eigenes Risiko! Dieser Code ist quelloffen und unter der MIT-Lizenz lizenziert.",
-    },
   },
   WelcomeSlide2: {
     title: "Cashu.me installieren",
@@ -768,11 +681,9 @@ export default {
       android: {
         title: "Android (Chrome)",
         step1: {
-          item: "1. { icon } { text }",
           text: "Tippen Sie auf das Menü (oben rechts)",
         },
         step2: {
-          item: "2. { icon } { text }",
           text: "Drücken Sie { buttonText }",
           buttonText: "@:PwaPrompt.android.add",
         },
@@ -780,11 +691,9 @@ export default {
       ios: {
         title: "iOS (Safari)",
         step1: {
-          item: "1. { icon } { text }",
           text: "Tippen Sie auf Teilen (unten)",
         },
         step2: {
-          item: "2. { icon } { text }",
           text: "Drücken Sie { buttonText }",
           buttonText: "@:PwaPrompt.ios.add",
         },
@@ -885,16 +794,12 @@ export default {
       "Nur Bewertungen von Personen in deinem Web of Trust zählen",
     web_of_trust_hop: "In deinem Vertrauensnetz (Hop {hop})",
     no_mint_url: "Keine Mint-URL angegeben",
-    title: "Mint-Bewertungen",
     reviews: "Bewertungen",
-    ratings: "{n} Bewertung | {n} Bewertungen",
     no_reviews: "Noch keine Bewertungen",
     your_review: "Ihre Bewertung",
-    no_reviews_to_display: "Keine Bewertungen anzuzeigen.",
     no_rating: "Keine Bewertung",
     stars_label: "{rating} von 5 Sternen",
-    out_of: "von",
-    rows: "Reviews",
+    out_of: "von {max}",
     sort: "Sortieren",
     sort_options: {
       newest: "Neueste",
@@ -936,14 +841,8 @@ export default {
       inputs: {
         seed_phrase: {
           label: "Seed-Phrase",
-          caption: "Sie können Ihre Seed-Phrase in den Einstellungen sehen.",
         },
       },
-    },
-    information: {
-      label: "Information",
-      caption:
-        "Der Assistent stellt nur Ecash von einer anderen Seed-Phrase wieder her. Sie können diese Seed-Phrase nicht verwenden oder die Seed-Phrase der aktuell verwendeten Wallet ändern. Das bedeutet, dass wiederhergestellter Ecash nicht durch Ihre aktuelle Seed-Phrase geschützt ist, solange Sie den Ecash nicht einmal an sich selbst senden.",
     },
     restore_mints: {
       label: "Mints wiederherstellen",
@@ -965,18 +864,10 @@ export default {
       },
       restore: {
         label: "Wiederherstellen",
-        in_progress: "Mint wird wiederhergestellt…",
         error: "Fehler beim Wiederherstellen der Mint: { error }",
-      },
-      restore_all_mints: {
-        label: "Alle Mints wiederherstellen",
-        in_progress: "Mint { index } von { length } wird wiederhergestellt…",
-        success: "Wiederherstellung erfolgreich abgeschlossen",
-        error: "Fehler beim Wiederherstellen der Mints: { error }",
       },
       restore_selected_mints: {
         label: "Ausgewählte Mints wiederherstellen ({count})",
-        in_progress: "Mint { index } von { length } wird wiederhergestellt…",
         success: "{count} Mint(s) erfolgreich wiederhergestellt",
         error: "Fehler beim Wiederherstellen ausgewählter Mints: { error }",
       },
@@ -989,7 +880,6 @@ export default {
       select_all: "Alle auswählen",
       deselect_all: "Auswahl aufheben",
       backed_up: "Gesichert",
-      already_added: "Bereits hinzugefügt",
       add_selected: "Ausgewählte hinzufügen ({count})",
       no_backups_found: "Keine Mint-Backups gefunden",
       no_backups_hint:
@@ -1006,11 +896,6 @@ export default {
       title: "Mint hinzufügen",
       description:
         "Geben Sie die URL einer Cashu Mint ein, um sich mit ihr zu verbinden. Diese Wallet ist nicht mit einer Mint affiliiert.",
-      inputs: {
-        nickname: {
-          placeholder: "Spitzname (z.B. Testnet)",
-        },
-      },
       actions: {
         add_mint: {
           label: "@:global.actions.add_mint.label",
@@ -1023,18 +908,14 @@ export default {
     },
     discover: {
       title: "Mints entdecken",
-      overline: "Entdecken",
       caption: "Mints, die andere auf Nostr empfehlen.",
       actions: {
         discover: {
           label: "Mints entdecken",
           in_progress: "Lädt…",
-          error_no_mints: "Keine Mints gefunden",
-          success: "{ length } Mints gefunden",
         },
       },
       add: "Hinzufügen",
-      unnamed: "Mint ohne Namen",
       empty: {
         title: "Eine Mint finden",
         text: "Cashu.me fragt Nostr-Relays nach Mints, die andere empfehlen, mit Bewertungen und Rezensionen.",
@@ -1042,16 +923,10 @@ export default {
       recommendations: {
         overline: "{ length } Mints gefunden",
         caption: "Prüfe eine Mint selbst, bevor du sie nutzt.",
-        actions: {
-          browse: {
-            label: "Klicken, um Mints zu durchsuchen",
-          },
-        },
       },
     },
     swap: {
       title: "Tauschen",
-      overline: "Tausch zwischen Mints",
       caption:
         "Guthaben über Lightning zwischen Ihren Mints verschieben. Es können Gebühren anfallen.",
       inputs: {
@@ -1070,13 +945,9 @@ export default {
           label: "@:global.actions.swap.label",
           in_progress: "@:MintSettings.swap.actions.swap.label",
         },
-        receove_to_trusted_mint: {
-          label: "Auf vertrauenswürdige Mint empfangen",
-        },
       },
     },
     error_badge: "Fehler",
-    active_badge: "Aktiv",
     switching_mint: "Wechsel zu {mint}",
     reviews_text: "Bewertung | Bewertungen",
     no_reviews_yet: "Noch keine Bewertungen",
@@ -1099,29 +970,16 @@ export default {
   },
   InvoiceDetailDialog: {
     title: "Lightning empfangen",
-    create_invoice_title: "Rechnung erstellen",
-    inputs: {
-      amount: {
-        label: "Betrag ({ ticker }) *",
-      },
-    },
     actions: {
-      close: {
-        label: "@:global.actions.close.label",
-      },
       create: {
         label: "Rechnung erstellen",
         label_blocked: "Rechnung wird erstellt",
-        in_progress: "Erstellt",
       },
     },
     invoice: {
       caption: "Lightning Rechnung",
       status_paid_text: "Bezahlt",
       actions: {
-        close: {
-          label: "@:global.actions.close.label",
-        },
         copy: {
           label: "Rechnung kopieren",
         },
@@ -1149,28 +1007,14 @@ export default {
   SendTokenDialog: {
     badge_locked: "gesperrt",
     title: "Ecash senden",
-    title_ecash_text: "Ecash",
-    badge_offline_text: "Offline",
     inputs: {
-      amount: {
-        label: "Betrag ({ ticker }) *",
-        invalid_too_much_error_text: "Zu viel",
-      },
       p2pk_pubkey: {
         label: "Öffentlicher Schlüssel des Empfängers",
-        label_invalid: "Öffentlicher Schlüssel des Empfängers",
         invalid: "Gültigen öffentlichen Schlüssel eingeben (hex oder npub)",
       },
     },
     actions: {
-      close: {
-        label: "@:global.actions.close.label",
-      },
-      close_card_scanner: {
-        label: "@:global.actions.close.label",
-      },
       copy_emoji: {
-        label: "🥜",
         tooltip_text: "Emoji kopieren",
       },
       copy_tokens: {
@@ -1198,7 +1042,6 @@ export default {
       write_tokens_to_card: {
         tooltips: {
           ndef_supported_text: "Auf NFC-Karte schreiben",
-          ndef_unsupported_text: "NDEF nicht unterstützt",
         },
       },
       pay: { label: "@:global.actions.pay.label" },
@@ -1253,12 +1096,6 @@ export default {
   ReceiveTokenDialog: {
     receiving_amount: "Empfange {amount}",
     title: "Ecash empfangen",
-    title_ecash_text: "Ecash",
-    inputs: {
-      tokens_base64: {
-        label: "Cashu Token einfügen",
-      },
-    },
     errors: {
       invalid_token: {
         label: "Ungültiger Token",
@@ -1269,15 +1106,6 @@ export default {
       },
     },
     actions: {
-      paste: {
-        label: "@:global.actions.paste.label",
-      },
-      close: {
-        label: "@:global.actions.close.label",
-      },
-      scan: {
-        label: "@:global.actions.scan.label",
-      },
       receive: {
         label: "@:global.actions.receive.label",
         label_known_mint: "@:ReceiveTokenDialog.actions.receive.label",
@@ -1286,18 +1114,15 @@ export default {
       swap: {
         label: "@:global.actions.swap.label",
         tooltip_text: "Zu einer vertrauenswürdigen Mint tauschen",
-        caption: "Tauschen { value }",
         processing: "Tausch läuft…",
         failed: "Tausch fehlgeschlagen",
       },
       cancel_swap: {
-        label: "@:global.actions.cancel.label",
         tooltip_text: "Swap abbrechen",
       },
       confirm_swap: {
         label: "@:ReceiveTokenDialog.actions.swap.label",
         tooltip_text: "@:ReceiveTokenDialog.actions.swap.tooltip_text",
-        in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
       later: {
         label: "Später empfangen",
@@ -1309,7 +1134,6 @@ export default {
         label: "NFC",
         tooltips: {
           ndef_supported_text: "Von NFC-Karte lesen",
-          ndef_unsupported_text: "NDEF nicht unterstützt",
         },
       },
       receive_to_selected_mint: { label: "Auf ausgewählte Mint empfangen" },
@@ -1334,9 +1158,6 @@ export default {
       copy: {
         label: "Öffentlichen Schlüssel kopieren",
       },
-      close: {
-        label: "@:global.actions.close.label",
-      },
       new_key: {
         label: "Neuen Schlüssel generieren",
       },
@@ -1346,7 +1167,6 @@ export default {
     any_amount: "Beliebiger Betrag",
     payment_request: {
       caption: "Zahlungsanforderung",
-      description: "Zahlungen über Nostr empfangen",
     },
     request_index: "Anfrage {index} von {total}",
     actions: {
@@ -1356,17 +1176,11 @@ export default {
       copy: {
         label: "@:global.actions.copy.label",
       },
-      close: {
-        label: "@:global.actions.close.label",
-      },
       new_request: {
         label: "Neue Anforderung",
       },
       share: {
         label: "Teilen",
-      },
-      copy_request: {
-        label: "Anfrage kopieren",
       },
       add_amount: {
         label: "Betrag hinzufügen",
@@ -1391,18 +1205,6 @@ export default {
     },
     received_total: "Insgesamt empfangen",
     no_payments_yet: "Noch keine Zahlungen",
-  },
-  NumericKeyboard: {
-    actions: {
-      close: {
-        label: "@:global.actions.close.label",
-        closed_info_text:
-          "Tastatur deaktiviert. Sie können die Tastatur in den Einstellungen wieder aktivieren.",
-      },
-      enter: {
-        label: "@:global.actions.enter.label",
-      },
-    },
   },
   NWCDialog: {
     nwc: {
@@ -1471,6 +1273,24 @@ export default {
         label: "Mint bearbeiten",
       },
     },
+    nuts: {
+      nut7: "Token-Statusprüfung",
+      nut8: "Überzahlte Lightning-Gebühren",
+      nut9: "Signatur-Wiederherstellung",
+      nut10: "Ausgabebedingungen",
+      nut11: "Pay-to-Pubkey (P2PK)",
+      nut12: "DLEQ-Nachweise",
+      nut13: "Deterministische Secrets",
+      nut14: "Hashed Timelock Contracts (HTLC)",
+      nut15: "Partielle Multi-Path-Zahlungen",
+      nut16: "Animierte QR-Codes",
+      nut17: "WebSocket-Abonnements",
+      nut18: "Zahlungsanforderungen",
+      nut19: "Zwischengespeicherte Antworten",
+      nut20: "Signatur auf Mint-Angebot",
+      nut21: "Klare Authentifizierung",
+      nut22: "Blinde Authentifizierung",
+    },
   },
   UnitToggle: {
     label: "Einheit: {unit}, ändern",
@@ -1481,7 +1301,6 @@ export default {
     open_selector_empty: "Mint auswählen",
     title: "Wählen Sie eine Mint",
     badge_mint_error_text: "Fehler",
-    badge_option_mint_error_text: "@:ChooseMint.badge_mint_error_text",
     available_text: "bei dieser Mint",
     sheet_title: "Mint auswählen",
     placeholder: "Mint auswählen",
@@ -1509,7 +1328,6 @@ export default {
     },
     row: {
       type_label: "Ecash",
-      date_label: "Vor { value }",
     },
     actions: {
       check_status: {
@@ -1520,24 +1338,14 @@ export default {
       },
     },
     old_token_not_found_error_text: "Alter Token nicht gefunden",
+    labels: {
+      onchain_subpayment: "On-Chain-Teilzahlung",
+      bolt12_subpayment: "BOLT12-Teilzahlung",
+    },
   },
   InvoiceTable: {
-    empty_text: "Noch keine Rechnungen vorhanden",
     row: {
       type_label: "Lightning",
-      type_tooltip_text: "Zum Kopieren klicken",
-      date_label: "Vor { value }",
-    },
-    actions: {
-      check_status: {
-        tooltip_text: "Status prüfen",
-      },
-      filter_pending: {
-        label: "Nur ausstehende zeigen",
-      },
-      show_all: {
-        label: "Alle anzeigen",
-      },
     },
   },
   RemoveMintDialog: {
@@ -1597,25 +1405,6 @@ export default {
     },
     input_data: {
       title: "Mit Lightning bezahlen",
-      inputs: {
-        invoice_data: {
-          label: "Lightning-Rechnung oder Adresse",
-        },
-      },
-      actions: {
-        close: {
-          label: "@:global.actions.close.label",
-        },
-        enter: {
-          label: "@:global.actions.enter.label",
-        },
-        paste: {
-          label: "@:global.actions.paste.label",
-        },
-        scan: {
-          label: "@:global.actions.scan.label",
-        },
-      },
       title_bolt12: "Lightning-Angebot bezahlen",
     },
     lnurlpay: {
@@ -1624,24 +1413,18 @@ export default {
         "{ payee } fordert{br}zwischen { min } und { max } { ticker } an",
       sending_to_lightning_address: "Senden an { address }",
       inputs: {
-        amount: {
-          label: "Betrag ({ ticker }) *",
-        },
         comment: {
           label: "Kommentar (optional)",
         },
       },
       actions: {
-        close: {
-          label: "@:global.actions.close.label",
-        },
         send: {
           label: "@:global.actions.send.label",
+          in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
         },
       },
     },
     invoice: {
-      title: "{ value } bezahlen",
       paying: "Wird bezahlt",
       paid: "Bezahlt",
       fee: "Gebühr",
@@ -1658,7 +1441,6 @@ export default {
           label: "Bezahlen",
           in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
           waiting_for_wallet: "Warte auf Wallet…",
-          error: "Fehler",
         },
       },
     },
@@ -1667,7 +1449,6 @@ export default {
     title: "Mint bearbeiten",
     inputs: {
       nickname: {
-        placeholder: "z. B. Testnet",
         label: "Spitzname (optional)",
       },
       mint_url: {
@@ -1675,9 +1456,6 @@ export default {
       },
     },
     actions: {
-      cancel: {
-        label: "@:global.actions.cancel.label",
-      },
       update: {
         label: "@:global.actions.update.label",
       },
@@ -1687,15 +1465,7 @@ export default {
     title: "Vertrauen Sie dieser Mint?",
     description:
       "Treten Sie dieser Mint nur bei, wenn Sie ihr vertrauen. Stellt sie den Betrieb ein, ist Ihr Ecash bei ihr verloren.",
-    inputs: {
-      mint_url: {
-        label: "@:global.inputs.mint_url.label",
-      },
-    },
     actions: {
-      cancel: {
-        label: "@:global.actions.cancel.label",
-      },
       add_mint: {
         label: "@:global.actions.add_mint.label",
         in_progress: "Mint wird hinzugefügt",
@@ -1762,7 +1532,7 @@ export default {
     settings: "Einstellungen",
     backspace: "Rücktaste",
     enter_amount_in: "Betrag in {fiat} eingeben",
-    fee: "Gebühr",
+    something_went_wrong: "Etwas ist schiefgelaufen",
   },
   SendPaymentRequest: {
     actions: {
@@ -1771,8 +1541,7 @@ export default {
     },
     info: {
       pay_failed: "Anfrage konnte nicht bezahlt werden",
-      pay_to: "An {target} zahlen",
-      invalid_url: "Ungültige URL",
+      no_ecash: "Kein Ecash für diese Zahlungsanforderung verfügbar",
     },
   },
   PaymentRequestInfo: {
@@ -1927,6 +1696,65 @@ export default {
       positive_whole: "Gib einen positiven ganzzahligen Betrag in {unit} ein.",
       min: "Gib mindestens {amount} ein.",
       max: "Gib höchstens {amount} ein.",
+    },
+  },
+  storage: {
+    notifications: {
+      unrecognized_backup: "Unbekanntes Backup-Format",
+      backup_restored: "Backup wiederhergestellt",
+      backup_exported: "Wallet-Backup exportiert",
+      quota_exceeded:
+        "Der lokale Speicher ist voll. Bereinigen Sie Ihren lokalen Speicher.",
+      cleaned_up: "{size} Bytes bereinigt",
+    },
+  },
+  receiveTokens: {
+    notifications: {
+      already_in_history: "Token bereits im Verlauf",
+      nfc_read_failed: "Daten vom NFC-Tag können nicht gelesen werden",
+      scan_error: "Scanfehler",
+      nfc_error: "NFC-Fehler",
+    },
+  },
+  nostrMintBackup: {
+    notifications: {
+      no_relays: "Keine Nostr-Relays konfiguriert",
+      backup_failed: "Ihre Mint-Liste konnte nicht auf Nostr gesichert werden",
+      backed_up: "Mint-Liste auf Nostr gesichert",
+      found:
+        "{count} Mint in Nostr-Backups gefunden | {count} Mints in Nostr-Backups gefunden",
+      none_found: "Keine Mint-Backups auf Nostr für diese Seed-Phrase gefunden",
+      search_failed: "Suche nach Mint-Backups fehlgeschlagen",
+      add_mint_failed: "{mint} konnte nicht hinzugefügt werden",
+      added:
+        "{count} Mint zu Ihrer Wallet hinzugefügt | {count} Mints zu Ihrer Wallet hinzugefügt",
+      none_added: "Keine neuen Mints hinzugefügt",
+      add_selected_failed:
+        "Die ausgewählten Mints konnten nicht hinzugefügt werden",
+    },
+  },
+  nostr: {
+    notifications: {
+      nip04_published: "NIP-04-Ereignis veröffentlicht",
+      nip04_failed: "NIP-04-Ereignis konnte nicht veröffentlicht werden",
+      nip17_failed: "NIP-17-Ereignis konnte nicht veröffentlicht werden",
+      receive_failed: "Eingehende Zahlung konnte nicht empfangen werden",
+      ecash_already_in_history: "Ecash bereits im Verlauf",
+      ecash_added: "Ecash zum Verlauf hinzugefügt",
+    },
+  },
+  nwc: {
+    notifications: {
+      melt_quote_failed: "NWC: Melt-Angebot konnte nicht angefordert werden",
+      unit_must_be_sat: "NWC: Die aktive Einheit muss sats sein",
+      allowance_exceeded: "NWC: Limit überschritten",
+    },
+  },
+  npubcash: {
+    notifications: {
+      could_not_update_mint:
+        "Die npub.cash-Mint konnte nicht aktualisiert werden",
+      add_mint_first: "Fügen Sie zuerst {mint} zu Ihrer Wallet hinzu",
     },
   },
 };

@@ -7,11 +7,6 @@
   transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
-.mint-card.q-loading {
-  opacity: 0.5;
-  pointer-events: none;
-}
-
 /* Mint information container */
 .mint-info-container {
   display: flex;
@@ -55,26 +50,12 @@
   font-weight: 500;
 }
 
-/* Loading spinner positioning */
-.mint-loading-spinner {
-  position: absolute;
-  top: 12px;
-  right: 30px;
-  z-index: 10;
-}
-
 /* Error badge positioning */
 .error-badge {
   position: absolute;
   top: 4px;
   right: 30px;
   z-index: 10;
-}
-
-/* Transition animations */
-.fade-enter-active,
-.fade-leave-active {
-  transition: transform 1s ease, opacity 1s ease;
 }
 
 /* Selection buttons styling */
@@ -89,23 +70,6 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-}
-
-/* Clickable checkbox */
-.clickable-checkbox {
-  cursor: pointer;
-}
-
-/* Selectable mint rows (Nostr mint restore): the standard surface and selected tokens. */
-.mint-select-row {
-  background: var(--app-card-fill);
-  border: 1px solid var(--app-card-edge);
-  border-radius: var(--app-radius-lg);
-  transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-.mint-select-row--selected {
-  background: var(--app-card-fill-active);
-  border-color: var(--app-card-edge-active) !important;
 }
 
 /* Ensure text alignment is consistent */

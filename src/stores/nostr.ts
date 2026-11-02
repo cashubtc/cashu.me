@@ -1,3 +1,4 @@
+import { i18n } from "src/boot/i18n";
 import { defineStore } from "pinia";
 import NDK, {
   NDKEvent,
@@ -8,9 +9,6 @@ import NDK, {
   NDKPrivateKeySigner,
   NostrEvent,
   NDKKind,
-  NDKRelaySet,
-  NDKRelay,
-  NDKTag,
   ProfilePointer,
 } from "@nostr-dev-kit/ndk";
 import { nip04, nip19, nip44 } from "nostr-tools";
@@ -27,17 +25,10 @@ import {
   Token,
 } from "@cashu/cashu-ts";
 import { useTokensStore } from "./tokens";
-import {
-  notifyApiError,
-  notifyError,
-  notifySuccess,
-  notifyWarning,
-  notify,
-} from "../js/notify";
+import { notifyError, notifySuccess, notifyWarning } from "../js/notify";
 import { useSendTokensStore } from "./sendTokensStore";
 import { usePRStore } from "./payment-request";
 import token from "../js/token";
-import { HistoryToken } from "./tokens";
 
 type NostrEventLog = {
   id: string;
@@ -271,10 +262,10 @@ export const useNostrStore = defineStore("nostr", {
       event.sign();
       try {
         await event.publish();
-        notifySuccess("NIP-04 event published");
+        notifySuccess(i18n.global.t("nostr.notifications.nip04_published"));
       } catch (e) {
         console.error(e);
-        notifyError("Could not publish NIP-04 event");
+        notifyError(i18n.global.t("nostr.notifications.nip04_failed"));
       }
     },
     subscribeToNip04DirectMessages: async function () {
@@ -391,7 +382,7 @@ export const useNostrStore = defineStore("nostr", {
         await wrapEvent.publish();
       } catch (e) {
         console.error(e);
-        notifyError("Could not publish NIP-17 event");
+        notifyError(i18n.global.t("nostr.notifications.nip17_failed"));
       }
     },
     subscribeToNip17DirectMessages: async function () {
@@ -519,7 +510,9 @@ export const useNostrStore = defineStore("nostr", {
             if (success) {
               prStore.showPRDialog = false;
             } else {
-              notifyWarning("Could not receive incoming payment");
+              notifyWarning(
+                i18n.global.t("nostr.notifications.receive_failed")
+              );
             }
           } else {
             prStore.showPRDialog = false;
@@ -552,7 +545,9 @@ export const useNostrStore = defineStore("nostr", {
       const receiveStore = useReceiveTokensStore();
       const tokensStore = useTokensStore();
       if (tokensStore.tokenAlreadyInHistory(tokenStr)) {
-        notifySuccess("Ecash already in history");
+        notifySuccess(
+          i18n.global.t("nostr.notifications.ecash_already_in_history")
+        );
         receiveStore.showReceiveTokens = false;
         return undefined;
       }
@@ -570,7 +565,7 @@ export const useNostrStore = defineStore("nostr", {
       receiveStore.showReceiveTokens = false;
       // show success notification
       if (verbose) {
-        notifySuccess("Ecash added to history.");
+        notifySuccess(i18n.global.t("nostr.notifications.ecash_added"));
       }
       return id;
     },

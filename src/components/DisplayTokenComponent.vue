@@ -156,7 +156,6 @@ import MeltQuoteInformation from "components/MeltQuoteInformation.vue";
 import SendPaymentRequest from "./SendPaymentRequest.vue";
 import PaymentRequestInfo from "./PaymentRequestInfo.vue";
 import { getDecodedToken, getEncodedTokenBinary } from "@cashu/cashu-ts";
-import { sumProofAmounts } from "src/js/proofs";
 import token from "src/js/token";
 import { notifyCopied, notifyError, notifySuccess } from "src/js/notify";
 import { copyToClipboard } from "quasar";
@@ -301,21 +300,6 @@ export default defineComponent({
       ];
       return items.filter((item): item is AppMenuItem => Boolean(item));
     },
-    // display helpers
-    sumProofs: function () {
-      return token.decodeMeta(this.sendData.tokensBase64)?.amount ?? 0;
-    },
-    displayUnit: function () {
-      const display = this.formatCurrency(this.sumProofs, this.tokenUnit);
-      return display;
-    },
-    tokenUnit: function () {
-      const decoded = token.decodeMeta(this.sendData.tokensBase64);
-      return decoded ? token.getUnit(decoded) : "";
-    },
-    paidFees: function () {
-      return this.sumProofs - Math.abs(this.sendData.historyAmount ?? 0);
-    },
     runnerActive: function () {
       return this.outgoingPayments.some(
         (entry) =>
@@ -420,9 +404,6 @@ export default defineComponent({
         this.qrCodeFragment = this.encoder.nextPart();
       }, this.currentFragmentInterval);
     },
-    updateQrCode: function () {
-      this.qrCodeFragment = this.encoder.nextPart();
-    },
     changeSpeed: function () {
       if (this.currentFragmentInterval == this.fragmentIntervalMedium) {
         this.currentFragmentInterval = this.framentInervalSlow;
@@ -497,8 +478,8 @@ export default defineComponent({
               this.ndef.onreadingerror = (error: any) => {
                 console.error(`NFC read failed: ${error}`);
                 notifyError(
-                  `${error?.message || error}`,
-                  this.$t("DisplayTokenComponent.nfc.read_failed")
+                  this.$t("DisplayTokenComponent.nfc.read_failed"),
+                  `${error?.message || error}`
                 );
                 this.controller.abort();
                 this.scanningCard = false;
@@ -569,8 +550,8 @@ export default defineComponent({
                 } catch (err: any) {
                   console.error(`NFC error: ${err?.message}`);
                   notifyError(
-                    `${err?.message}`,
-                    this.$t("DisplayTokenComponent.nfc.error")
+                    this.$t("DisplayTokenComponent.nfc.error"),
+                    `${err?.message}`
                   );
                 }
               };
@@ -579,16 +560,16 @@ export default defineComponent({
             .catch((error: any) => {
               console.error(`NFC error: ${error?.message}`);
               notifyError(
-                `${error?.message}`,
-                this.$t("DisplayTokenComponent.nfc.error")
+                this.$t("DisplayTokenComponent.nfc.error"),
+                `${error?.message}`
               );
               this.scanningCard = false;
             });
         } catch (error: any) {
           console.error(`NFC error: ${error?.message}`);
           notifyError(
-            `${error?.message}`,
-            this.$t("DisplayTokenComponent.nfc.error")
+            this.$t("DisplayTokenComponent.nfc.error"),
+            `${error?.message}`
           );
           this.scanningCard = false;
         }

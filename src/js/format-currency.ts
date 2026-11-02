@@ -25,6 +25,69 @@ export function unitQuantityWord(unit: string): string {
   return unitCode(normalized);
 }
 
+let activeNumberLocale = "en-US";
+
+/** Numbers follow the app's language (grouping and decimal marks: 1,000 in English, 1.000 in
+ * German) but always in Latin digits, so amounts read the same in every locale and stay
+ * left-to-right runs in Arabic. Set from src/boot/i18n.js whenever the language changes. */
+export function setNumberLocale(locale: string): void {
+  try {
+    activeNumberLocale = new Intl.Locale(locale || "en-US", {
+      numberingSystem: "latn",
+    }).toString();
+  } catch {
+    activeNumberLocale = "en-US";
+  }
+}
+
+/** The locale tag for Intl number formatting (see setNumberLocale). */
+function numberLocale(): string {
+  return activeNumberLocale;
+}
+
+/** A star rating to one decimal, with the locale's decimal mark (4.5, 4,5). */
+export function formatRating(value: number): string {
+  return new Intl.NumberFormat(activeNumberLocale, {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  }).format(value);
+}
+
+/** An amount of a Cashu unit as text: sat as "2,100 sat" (or "₿2,100" with the BIP-177
+ * symbol), msat as "2,100 msat", usd and eur from cents ("$12.34"), any other ISO code as that
+ * currency, and an unknown unit as "12 unit". Bigints keep every digit. Hiding the balance and
+ * right-to-left isolation are the callers' (stores/ui.ts formatCurrency, boot/base.js). */
+export function formatUnitAmount(
+  value: number | bigint,
+  currency: string | undefined,
+  bitcoinSymbol: boolean
+): string {
+  if (currency == undefined) {
+    currency = "sat";
+  }
+  if (typeof value === "bigint") {
+    return formatBigIntCurrency(value, currency, numberLocale(), bitcoinSymbol);
+  }
+  const numberFormat = new Intl.NumberFormat(numberLocale());
+  if (currency == "sat") {
+    if (!bitcoinSymbol) return numberFormat.format(value) + " sat";
+    return value >= 0
+      ? "₿" + numberFormat.format(value)
+      : "-₿" + numberFormat.format(Math.abs(value));
+  }
+  if (currency == "msat") return numberFormat.format(value) + " msat";
+  if (currency == "usd") value = value / 100;
+  if (currency == "eur") value = value / 100;
+  try {
+    return new Intl.NumberFormat(numberLocale(), {
+      style: "currency",
+      currency: currency,
+    }).format(value);
+  } catch {
+    return numberFormat.format(value) + " " + String(currency);
+  }
+}
+
 /** Format integer Cashu amounts without converting large values to numbers. */
 export function formatBigIntCurrency(
   value: bigint,

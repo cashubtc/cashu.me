@@ -51,10 +51,6 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    showDetails: {
-      type: Boolean,
-      default: true,
-    },
     fullWidth: {
       type: Boolean,
       default: false,
@@ -99,11 +95,7 @@ export default defineComponent({
   },
   watch: {},
   computed: {
-    ...mapWritableState(useSendTokensStore, [
-      "showSendTokens",
-      "showLockInput",
-      "sendData",
-    ]),
+    ...mapWritableState(useSendTokensStore, ["sendData"]),
     ...mapState(useUiStore, ["globalMutexLock"]),
     isLoading(): boolean {
       return this.loading || this.globalMutexLock;
@@ -120,15 +112,6 @@ export default defineComponent({
       }
       return this.$t("SendPaymentRequest.actions.pay_via.label", {
         transport,
-      }) as string;
-    },
-    detailText(): string {
-      const target = this.getPaymentRequestTarget(this.sendData.paymentRequest);
-      if (!target) {
-        return "";
-      }
-      return this.$t("SendPaymentRequest.info.pay_to", {
-        target,
       }) as string;
     },
     computedButtonClasses():
@@ -172,7 +155,9 @@ export default defineComponent({
           }
         }
         if (!tokenStr) {
-          throw new Error("No ecash available for payment request.");
+          throw new Error(
+            i18n.global.t("SendPaymentRequest.info.no_ecash") as string
+          );
         }
         const success = await this.parseAndPayPaymentRequest(
           this.sendData.paymentRequest,
@@ -184,8 +169,8 @@ export default defineComponent({
       } catch (error: any) {
         console.error("Error paying payment request:", error);
         notifyError(
-          `${error?.message ?? error}`,
-          i18n.global.t("SendPaymentRequest.info.pay_failed")
+          i18n.global.t("SendPaymentRequest.info.pay_failed"),
+          `${error?.message ?? error}`
         );
       } finally {
         this.loading = false;
@@ -202,32 +187,6 @@ export default defineComponent({
         }
         if (transport.type == PaymentRequestTransportType.POST) {
           return "HTTP";
-        }
-      }
-      return "";
-    },
-    getPaymentRequestTarget(request?: PaymentRequestData) {
-      if (!request || !request.transport) {
-        return "";
-      }
-      const transports = request.transport;
-      for (const transport of transports) {
-        if (transport.type == PaymentRequestTransportType.NOSTR) {
-          return `${transport.target.slice(0, 20)}..${transport.target.slice(
-            -10
-          )}`;
-        }
-        if (transport.type == PaymentRequestTransportType.POST) {
-          try {
-            const url = new URL(transport.target);
-            return url.hostname;
-          } catch (error) {
-            console.error(
-              `Invalid URL in transport.target: ${transport.target}`,
-              error
-            );
-            return this.$t("SendPaymentRequest.info.invalid_url") as string;
-          }
         }
       }
       return "";

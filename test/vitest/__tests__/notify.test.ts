@@ -55,6 +55,16 @@ describe("notify", () => {
     document.documentElement.dir = "rtl";
     n.notifySuccess("Received ₿500");
     document.documentElement.dir = "ltr";
-    expect(sent[0].message).toBe("Received ⁦₿500⁩");
+    // The line in a first-strong isolate, the amount in a left-to-right one.
+    expect(sent[0].message).toBe("\u2068Received \u2066₿500\u2069\u2069");
+  });
+
+  it("titles an API error with the translated caption, the raw message below", async () => {
+    const n = await notifyModule();
+    n.notifyApiError(new Error("mint returned 500"), "Payment failed");
+    n.notifyApiError(new Error("Payment failed"), "Payment failed");
+    expect(sent[0].message).toBe("Payment failed");
+    expect(sent[0].options.description).toBe("mint returned 500");
+    expect(sent[1].options.description).toBeUndefined();
   });
 });

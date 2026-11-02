@@ -2,7 +2,7 @@
 // iPhones. Browsers without backdrop-filter skip it in CSS (@supports); this flags the devices
 // that support it but can't afford it, so they keep the plain dimmed scrim.
 
-export const REDUCED_EFFECTS_CLASS = "reduced-effects";
+const REDUCED_EFFECTS_CLASS = "reduced-effects";
 
 type DeviceHints = {
   userAgent: string;

@@ -32,24 +32,14 @@
 import { Building2 as MintIcon } from "lucide-vue-next";
 import { defineComponent, markRaw } from "vue";
 import EmptyState from "src/components/ui/EmptyState.vue";
-import { getShortUrl } from "src/js/wallet-helpers";
 import { useUiStore } from "src/stores/ui";
 import { mapWritableState } from "pinia";
-import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { EventBus } from "../js/eventBus";
-import { sumProofAmounts } from "src/js/proofs";
 
 export default defineComponent({
   name: "NoMintWarnBanner",
   components: { EmptyState },
   mixins: [windowMixin],
-  props: {
-    proofs: Array,
-    activeProofs: Array,
-    mints: Array,
-    tickerShort: String,
-    activeMintUrl: String,
-  },
   data() {
     return { MintIcon: markRaw(MintIcon) };
   },
@@ -59,25 +49,8 @@ export default defineComponent({
       "expandHistory",
       "showReceiveEcashDrawer",
     ]),
-    ...mapWritableState(useReceiveTokensStore, [
-      "showReceiveTokens",
-      "receiveData",
-    ]),
-    balance: function () {
-      return sumProofAmounts(this.activeProofs.flat());
-    },
-    getActiveMintUrlShort: function () {
-      return getShortUrl(this.activeMintUrl);
-    },
-    getBalance: function () {
-      return sumProofAmounts(this.activeProofs.flat());
-    },
   },
   methods: {
-    // showReceiveTokensDialog: function () {
-    //   this.receiveData.tokensBase64 = "";
-    //   this.showReceiveTokens = true;
-    // },
     handleReceiveEcash: function () {
       this.showReceiveEcashDrawer = true;
     },

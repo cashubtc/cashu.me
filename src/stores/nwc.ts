@@ -1,3 +1,4 @@
+import { i18n } from "src/boot/i18n";
 import { defineStore } from "pinia";
 import NDK, {
   NDKEvent,
@@ -139,7 +140,7 @@ export const useNWCStore = defineStore("nwc", {
         walletStore.payInvoiceData.meltQuote.response.amount == 0 ||
         walletStore.payInvoiceData.meltQuote.error
       ) {
-        notifyWarning("NWC: Error requesting melt quote");
+        notifyWarning(i18n.global.t("nwc.notifications.melt_quote_failed"));
         return {
           result_type: nwcCommand.method,
           error: { code: "INTERNAL", message: "Error requesting melt quote" },
@@ -149,14 +150,14 @@ export const useNWCStore = defineStore("nwc", {
         walletStore.payInvoiceData.meltQuote.response.amount +
         walletStore.payInvoiceData.meltQuote.response.fee_reserve;
       if (mintStore.activeUnit != "sat") {
-        notifyWarning("NWC: Active unit must be sats");
+        notifyWarning(i18n.global.t("nwc.notifications.unit_must_be_sat"));
         return {
           result_type: nwcCommand.method,
-          error: { code: "INTERNAL", message: "Your active must be sats" },
+          error: { code: "INTERNAL", message: "Your active unit must be sats" },
         } as NWCError;
       }
       if (maximumAmount > this.connections[0].allowanceLeft) {
-        notifyWarning("NWC: Allowance exceeded");
+        notifyWarning(i18n.global.t("nwc.notifications.allowance_exceeded"));
         return {
           result_type: nwcCommand.method,
           error: { code: "QUOTA_EXCEEDED", message: "Your quota has exceeded" },
@@ -464,9 +465,6 @@ export const useNWCStore = defineStore("nwc", {
       }
     },
     listenToNWCCommands: async function () {
-      // if (!this.connections.length) {
-      //   await this.generateNWCConnection()
-      // }
       await this.generateNWCConnection();
       // we only support one connection for now
       const conn = this.connections[0];

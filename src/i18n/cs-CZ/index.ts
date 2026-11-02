@@ -1,9 +1,6 @@
 export default {
   global: {
     notifications: "Oznámení",
-    copy_to_clipboard: {
-      success: "Zkopírováno do schránky!",
-    },
     actions: {
       add_mint: {
         label: "Přidat mint",
@@ -80,7 +77,7 @@ export default {
     settings: "Nastavení",
     backspace: "Smazat znak",
     enter_amount_in: "Zadat částku v {fiat}",
-    fee: "Poplatek",
+    something_went_wrong: "Něco se pokazilo",
   },
   MultinutPicker: {
     dialog_title: "Platba Multinut",
@@ -98,13 +95,6 @@ export default {
       success: "Hotovo",
       failed: "Selhalo",
     },
-    payment: "Platba Multinut",
-    selectMints:
-      "Vyberte jeden nebo více mintů, ze kterých se má platba provést.",
-    totalSelectedBalance: "Celkový vybraný zůstatek",
-    multiMintPay: "Platba z více mintů",
-    balanceNotEnough: "Zůstatek napříč minty nestačí k uhrazení této faktury",
-    failed: "Zpracování selhalo: {error}",
     paid: "Zaplaceno {amount} přes Lightning",
   },
   wallet: {
@@ -115,7 +105,6 @@ export default {
       could_not_request_mint: "Nepodařilo se požádat mint",
       invoice_still_pending: "Faktura zatím nevyřízena",
       paid_lightning: "Zaplaceno {amount} přes Lightning",
-      payment_pending_refresh: "Platba nevyřízena. Obnovte fakturu ručně.",
       sent: "Odesláno {amount}",
       token_still_pending: "Token stále nevyřízen",
       received_lightning: "Přijato {amount} přes Lightning",
@@ -126,13 +115,21 @@ export default {
       no_amount: "Nebyla zadána částka",
       no_lnurl_data: "Žádná LNURL data",
       no_price_data: "Žádná cenová data.",
-      please_try_again: "Zkuste to prosím znovu.",
       trying_again: "Zkouší se znovu...",
       unsupported_legacy_qr: "Nepodporovaný starší QR kód",
       legacy_qr_not_supported:
         "Tento starší QR kód nepochází od podporovaného obchodníka",
       no_bolt12_mint: "Žádný z vašich mintů nepodporuje BOLT12 nabídky",
       no_bolt11_mint: "Žádný z vašich mintů nepodporuje BOLT11 faktury",
+      address_not_paid: "Adresa nebyla zaplacena",
+      payment_pending: "Platba nevyřízena",
+      invoice_already_paid: "Faktura už byla zaplacena",
+      payment_sent: "Platba odeslána",
+      payment_failed: "Platba selhala",
+      could_not_pay_request: "Požadavek se nepodařilo zaplatit",
+      request_unit_unsupported:
+        "Mint nepodporuje jednotku v tomto platebním požadavku: {unit}",
+      no_onchain_mint: "Žádný z vašich mintů nepodporuje on-chain platby",
     },
     mint: {
       notifications: {
@@ -145,9 +142,6 @@ export default {
         unit_not_supported: "Jednotka není mintem podporována",
         activated: "Mint aktivován",
         could_not_connect: "Nelze se připojit k mintu",
-        could_not_get_info: "Nelze získat informace o mintu",
-        could_not_get_keys: "Nelze získat klíče mintu",
-        could_not_get_keysets: "Nelze získat keysety mintu",
         mint_validation_error: "Chyba ověření mintu",
         removed: "Mint odebrán",
         error: "Chyba mintu",
@@ -156,22 +150,13 @@ export default {
   },
   MainHeader: {
     menu: {
-      settings: {
-        title: "Nastavení",
-        settings: {
-          title: "Nastavení",
-          caption: "Nastavení peněženky",
-        },
-      },
       terms: {
-        title: "Podmínky",
         terms: {
           title: "Podmínky",
           caption: "S čím souhlasíte používáním Cashu.me",
         },
       },
       links: {
-        title: "Odkazy",
         cashuSpace: {
           title: "Cashu.space",
           caption: "cashu.space",
@@ -207,13 +192,6 @@ export default {
     staging: {
       warning: {
         text: "Staging – nepoužívejte se skutečnými prostředky!",
-      },
-    },
-  },
-  FullscreenHeader: {
-    actions: {
-      back: {
-        label: "Peněženka",
       },
     },
   },
@@ -281,17 +259,11 @@ export default {
     },
     language: {
       title: "Jazyk",
-      description: "Vyberte si preferovaný jazyk ze seznamu níže.",
     },
     sections: {
-      backup_restore: "ZÁLOHA A OBNOVA",
-      lightning_address: "LIGHTNING ADRESA",
-      nostr_keys: "NOSTR KLÍČE",
       nostr: {
-        title: "NOSTR",
         relays: {
           already_added: "Relay už je přidán",
-          expand_label: "Klikněte pro úpravu relayů",
           add: {
             title: "Přidat relay",
             description:
@@ -299,19 +271,11 @@ export default {
           },
           list: {
             title: "Relaye",
-            description: "Vaše peněženka se připojí k těmto relayům.",
             copy_tooltip: "Kopírovat relay",
             remove_tooltip: "Odebrat relay",
           },
         },
       },
-      payment_requests: "ŽÁDOSTI O PLATBU",
-      nostr_wallet_connect: "NOSTR WALLET CONNECT",
-      hardware_features: "HARDWAROVÉ FUNKCE",
-      p2pk_features: "P2PK FUNKCE",
-      privacy: "SOUKROMÍ",
-      experimental: "EXPERIMENTÁLNÍ",
-      appearance: "VZHLED",
     },
     backup_restore: {
       backup_seed: {
@@ -324,7 +288,6 @@ export default {
         title: "Obnovit ecash",
         description:
           "Obnovte ecash z jiné seed fráze. Vaše současná seed fráze zůstane beze změny.",
-        button: "Obnovit",
       },
     },
     lightning_address: {
@@ -334,7 +297,6 @@ export default {
         invalid: "Zadejte platnou HTTPS URL serveru",
       },
       title: "Lightning adresa",
-      description: "Přijímejte platby na svou Lightning adresu.",
       enable: {
         toggle: "Používat Lightning adresu",
         description: "Přijímejte platby na adresu od npub.cash",
@@ -385,7 +347,6 @@ export default {
     },
 
     payment_requests: {
-      title: "Žádosti o platbu",
       description:
         "Přijímejte platby přes Nostr. Když je zapnuto, peněženka naslouchá na vašich Nostr relayích.",
       enable_toggle: "Zapnout žádosti o platbu",
@@ -397,7 +358,6 @@ export default {
     },
 
     nostr_wallet_connect: {
-      title: "Nostr Wallet Connect (NWC)",
       description:
         "Umožní jiným aplikacím platit z této peněženky přes Nostr Wallet Connect.",
       enable_toggle: "Zapnout Nostr Wallet Connect",
@@ -435,7 +395,6 @@ export default {
     },
 
     p2pk_features: {
-      title: "Uzamčený ecash",
       description:
         "Experimentální. Používejte malé částky: pokud ztratíte soukromý klíč, nikdo už ecash jím uzamčený neodemkne.",
       generate_button: "Vygenerovat klíč",
@@ -452,7 +411,6 @@ export default {
     },
 
     privacy: {
-      title: "Soukromí",
       network_title: "Síťové kontroly",
       description: "Tato nastavení ovlivňují vaše soukromí.",
       check_incoming: {
@@ -492,8 +450,6 @@ export default {
     },
 
     experimental: {
-      title: "Experimentální",
-      description: "Tyto funkce jsou experimentální.",
       receive_swaps: {
         toggle: "Přijímat swapy",
         badge: "Beta",
@@ -514,7 +470,6 @@ export default {
         api_url_label: "API URL auditora",
       },
       multinut: {
-        toggle: "Povolit Multinut",
         description: "Platí faktury z více mintů najednou.",
       },
       nostr_mint_backup: {
@@ -536,7 +491,6 @@ export default {
       },
       keyboard: {
         title: "Klávesnice na obrazovce",
-        description: "Použít číselnou klávesnici pro zadávání částek.",
         toggle: "Použít číselnou klávesnici",
         toggle_description: "Pro zadávání částek použije číselnou klávesnici.",
       },
@@ -571,9 +525,6 @@ export default {
       reset: "Resetovat",
       progress: "{crawlProcessed} / {crawlTotal}",
     },
-    npub_cash: {
-      copy_lightning_address: "Kopírovat Lightning adresu",
-    },
     multinut: {
       use_multinut: "Platby z více mintů",
     },
@@ -587,7 +538,6 @@ export default {
         invalid_backup: "Neplatný formát souboru zálohy",
         read_error: "Chyba při čtení souboru",
       },
-      title: "Pokročilé",
       developer: {
         title: "Vývojářská nastavení",
         description: "Nástroje pro řešení problémů a ladění.",
@@ -689,9 +639,6 @@ export default {
       history: {
         label: "Historie",
       },
-      invoices: {
-        label: "Faktury",
-      },
       mints: {
         label: "Minty",
       },
@@ -722,18 +669,8 @@ export default {
   BalanceView: {
     total_label: "Celkový zůstatek",
     show_balance: "Zobrazit zůstatek v {unit}",
-    mintUrl: {
-      label: "Mint",
-    },
-    mintBalance: {
-      label: "Zůstatek",
-    },
     mintError: {
       label: "Chyba mintu",
-    },
-    pending: {
-      label: "Čekající",
-      tooltip: "Zkontrolovat všechny čekající tokeny",
     },
   },
   WelcomePage: {
@@ -750,26 +687,6 @@ export default {
     terms_agreement: "Pokračováním souhlasíte s {terms}",
     title: "Vítejte v Cashu.me",
     text: "Cashu.me je bezplatná a open-source bitcoinová peněženka, která používá ecash pro bezpečné a soukromé uchování vašich prostředků.",
-    actions: {
-      more: {
-        label: "Klikněte pro více informací",
-      },
-    },
-    p1: {
-      text: "Cashu je bezplatný a open-source ecash protokol pro Bitcoin. Více informací najdete na { link }.",
-      link: {
-        text: "cashu.space",
-      },
-    },
-    p2: {
-      text: "Tato peněženka není spojena s žádným mintem. Chcete-li ji používat, musíte se připojit k jednomu nebo více Cashu mintům, kterým důvěřujete.",
-    },
-    p3: {
-      text: "Tato peněženka uchovává ecash, ke kterému máte přístup pouze vy. Pokud smažete data prohlížeče bez zálohy seed fráze, ztratíte své tokeny.",
-    },
-    p4: {
-      text: "Tato peněženka je v beta verzi. Nenese odpovědnost za ztrátu přístupu k prostředkům. Používejte na vlastní riziko! Tento kód je open-source a licencován pod licencí MIT.",
-    },
   },
   WelcomeSlide2: {
     title: "Nainstalujte Cashu.me",
@@ -784,11 +701,9 @@ export default {
       android: {
         title: "Android (Chrome)",
         step1: {
-          item: "1. { icon } { text }",
           text: "Klepněte na menu (vpravo nahoře)",
         },
         step2: {
-          item: "2. { icon } { text }",
           text: "Stiskněte { buttonText }",
           buttonText: "@:PwaPrompt.android.add",
         },
@@ -796,11 +711,9 @@ export default {
       ios: {
         title: "iOS (Safari)",
         step1: {
-          item: "1. { icon } { text }",
           text: "Klepněte na sdílení (dole)",
         },
         step2: {
-          item: "2. { icon } { text }",
           text: "Stiskněte { buttonText }",
           buttonText: "@:PwaPrompt.ios.add",
         },
@@ -908,16 +821,12 @@ export default {
     web_of_trust_caption: "Počítat jen recenze od lidí z vaší sítě důvěry",
     web_of_trust_hop: "Ve vaší síti důvěry (skok {hop})",
     no_mint_url: "Nebyla zadána URL mintu",
-    title: "Recenze mintu",
     reviews: "recenze",
-    ratings: "{n} hodnocení | {n} hodnocení",
     no_reviews: "Zatím žádné recenze",
     your_review: "Vaše recenze",
-    no_reviews_to_display: "Žádné recenze k zobrazení.",
     no_rating: "Bez hodnocení",
     stars_label: "{rating} z 5 hvězdiček",
-    out_of: "z",
-    rows: "Recenze",
+    out_of: "z {max}",
     sort: "Třídit",
     sort_options: {
       newest: "Nejnovější",
@@ -959,14 +868,8 @@ export default {
       inputs: {
         seed_phrase: {
           label: "Seed fráze",
-          caption: "Seed frázi najdete v nastavení.",
         },
       },
-    },
-    information: {
-      label: "Informace",
-      caption:
-        "Tento průvodce obnoví pouze ecash z jiné seed fráze, nebudete moci tuto seed frázi používat ani měnit seed frázi aktuální peněženky. Obnovený ecash tak nebude chráněn vaší aktuální seed frází, dokud ho jednou nepošlete sami sobě.",
     },
     restore_mints: {
       label: "Obnovit minty",
@@ -988,18 +891,10 @@ export default {
       },
       restore: {
         label: "Obnovit",
-        in_progress: "Obnovuje se mint …",
         error: "Chyba při obnově mintu: { error }",
-      },
-      restore_all_mints: {
-        label: "Obnovit všechny minty",
-        in_progress: "Obnovuje se mint { index } z { length } …",
-        success: "Obnova dokončena úspěšně",
-        error: "Chyba při obnově mintů: { error }",
       },
       restore_selected_mints: {
         label: "Obnovit vybrané minty ({count})",
-        in_progress: "Obnovuje se mint { index } z { length } …",
         success: "Úspěšně obnoven(a) {count} mint(y)",
         error: "Chyba při obnově vybraných mintů: { error }",
       },
@@ -1012,7 +907,6 @@ export default {
       select_all: "Vybrat vše",
       deselect_all: "Zrušit výběr",
       backed_up: "Zálohováno",
-      already_added: "Již přidáno",
       add_selected: "Přidat vybrané ({count})",
       no_backups_found: "Nenalezeny žádné zálohy mintů",
       no_backups_hint:
@@ -1029,11 +923,6 @@ export default {
       title: "Přidat mint",
       description:
         "Zadejte URL Cashu mintu, ke kterému se chcete připojit. Tato peněženka není spojena s žádným mintem.",
-      inputs: {
-        nickname: {
-          placeholder: "Přezdívka (např. Testnet)",
-        },
-      },
       actions: {
         add_mint: {
           label: "@:global.actions.add_mint.label",
@@ -1046,18 +935,14 @@ export default {
     },
     discover: {
       title: "Objevte minty",
-      overline: "Objevovat",
       caption: "Minty, které ostatní doporučují na Nostru.",
       actions: {
         discover: {
           label: "Objevovat minty",
           in_progress: "Načítá se…",
-          error_no_mints: "Nenalezeny žádné minty",
-          success: "Nalezeno { length } mintů",
         },
       },
       add: "Přidat",
-      unnamed: "Mint bez názvu",
       empty: {
         title: "Najít mint",
         text: "Cashu.me se zeptá Nostr relayů na minty, které doporučují ostatní, včetně hodnocení a recenzí.",
@@ -1065,20 +950,11 @@ export default {
       recommendations: {
         overline: "Nalezeno { length } mintů",
         caption: "Než mint použijete, prověřte si ho.",
-        actions: {
-          browse: {
-            label: "Klikněte pro prohlížení mintů",
-          },
-        },
       },
     },
     swap: {
       title: "Swap",
-      overline: "Výměny mezi minty",
       actions: {
-        receove_to_trusted_mint: {
-          label: "Přijmout do důvěryhodného mintu",
-        },
         swap: {
           label: "@:global.actions.swap.label",
           in_progress: "@:MintSettings.swap.actions.swap.label",
@@ -1099,7 +975,6 @@ export default {
       },
     },
     error_badge: "Chyba",
-    active_badge: "Aktivní",
     switching_mint: "Přepínání na {mint}",
     reviews_text: "recenze | recenze",
     no_reviews_yet: "Žádné recenze",
@@ -1124,29 +999,16 @@ export default {
 
   InvoiceDetailDialog: {
     title: "Přijmout Lightning",
-    create_invoice_title: "Vytvořit fakturu",
-    inputs: {
-      amount: {
-        label: "Částka ({ ticker }) *",
-      },
-    },
     actions: {
-      close: {
-        label: "@:global.actions.close.label",
-      },
       create: {
         label: "Vytvořit fakturu",
         label_blocked: "Vytváří se faktura",
-        in_progress: "Vytváří se",
       },
     },
     invoice: {
       caption: "Faktura Lightning",
       status_paid_text: "Zaplaceno",
       actions: {
-        close: {
-          label: "@:global.actions.close.label",
-        },
         copy: {
           label: "Kopírovat fakturu",
         },
@@ -1176,28 +1038,14 @@ export default {
   SendTokenDialog: {
     badge_locked: "zamčeno",
     title: "Odeslat ecash",
-    title_ecash_text: "Ecash",
-    badge_offline_text: "Offline",
     inputs: {
-      amount: {
-        label: "Částka ({ ticker }) *",
-        invalid_too_much_error_text: "Příliš mnoho",
-      },
       p2pk_pubkey: {
         label: "Veřejný klíč příjemce",
-        label_invalid: "Neplatný veřejný klíč příjemce",
         invalid: "Zadejte platný veřejný klíč (hex nebo npub)",
       },
     },
     actions: {
-      close: {
-        label: "@:global.actions.close.label",
-      },
-      close_card_scanner: {
-        label: "@:global.actions.close.label",
-      },
       copy_emoji: {
-        label: "🥜",
         tooltip_text: "Kopírovat emoji",
       },
       copy_tokens: {
@@ -1228,7 +1076,6 @@ export default {
       write_tokens_to_card: {
         tooltips: {
           ndef_supported_text: "Zapsat na NFC kartu",
-          ndef_unsupported_text: "NDEF není podporováno",
         },
       },
     },
@@ -1251,8 +1098,7 @@ export default {
     },
     info: {
       pay_failed: "Požadavek se nepodařilo zaplatit",
-      pay_to: "Zaplatit {target}",
-      invalid_url: "Neplatná URL",
+      no_ecash: "Pro tento platební požadavek není k dispozici žádný ecash",
     },
   },
 
@@ -1307,12 +1153,6 @@ export default {
   ReceiveTokenDialog: {
     receiving_amount: "Přijímání {amount}",
     title: "Přijmout ecash",
-    title_ecash_text: "Ecash",
-    inputs: {
-      tokens_base64: {
-        label: "Vložit Cashu token",
-      },
-    },
     errors: {
       invalid_token: {
         label: "Neplatný token",
@@ -1331,15 +1171,6 @@ export default {
       fee_info: "Tento swap podléhá poplatkům Lightning sítě.",
     },
     actions: {
-      paste: {
-        label: "@:global.actions.paste.label",
-      },
-      close: {
-        label: "@:global.actions.close.label",
-      },
-      scan: {
-        label: "@:global.actions.scan.label",
-      },
       receive: {
         label: "@:global.actions.receive.label",
         label_known_mint: "@:ReceiveTokenDialog.actions.receive.label",
@@ -1348,18 +1179,15 @@ export default {
       swap: {
         label: "Přijmout do důvěryhodného mintu",
         tooltip_text: "Swap do důvěryhodného mintu",
-        caption: "Swap { value }",
         processing: "Probíhá swap…",
         failed: "Swap selhal",
       },
       cancel_swap: {
-        label: "@:global.actions.cancel.label",
         tooltip_text: "Zrušit swap",
       },
       confirm_swap: {
         label: "@:ReceiveTokenDialog.actions.swap.label",
         tooltip_text: "@:ReceiveTokenDialog.actions.swap.tooltip_text",
-        in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
       receive_to_selected_mint: {
         label: "Přijmout do vybraného mintu",
@@ -1374,7 +1202,6 @@ export default {
         label: "NFC",
         tooltips: {
           ndef_supported_text: "Přečíst z NFC karty",
-          ndef_unsupported_text: "NDEF není podporováno",
         },
       },
     },
@@ -1391,9 +1218,6 @@ export default {
       copy: {
         label: "Kopírovat veřejný klíč",
       },
-      close: {
-        label: "@:global.actions.close.label",
-      },
       new_key: {
         label: "Vygenerovat nový klíč",
       },
@@ -1404,7 +1228,6 @@ export default {
     any_amount: "Libovolná částka",
     payment_request: {
       caption: "Žádost o platbu",
-      description: "Přijímat platby přes Nostr",
     },
     request_index: "Požadavek {index} z {total}",
     received_total: "Celkem přijato",
@@ -1416,17 +1239,11 @@ export default {
       copy: {
         label: "@:global.actions.copy.label",
       },
-      close: {
-        label: "@:global.actions.close.label",
-      },
       new_request: {
         label: "Nový požadavek",
       },
       share: {
         label: "Sdílet",
-      },
-      copy_request: {
-        label: "Kopírovat žádost",
       },
       add_amount: {
         label: "Přidat částku",
@@ -1447,19 +1264,6 @@ export default {
     inputs: {
       amount: {
         placeholder: "Zadejte částku",
-      },
-    },
-  },
-
-  NumericKeyboard: {
-    actions: {
-      close: {
-        label: "@:global.actions.close.label",
-        closed_info_text:
-          "Klávesnice zakázána. Opět ji můžete povolit v nastavení.",
-      },
-      enter: {
-        label: "@:global.actions.enter.label",
       },
     },
   },
@@ -1533,6 +1337,24 @@ export default {
         label: "Upravit mint",
       },
     },
+    nuts: {
+      nut7: "Kontrola stavu tokenů",
+      nut8: "Přeplacené Lightning poplatky",
+      nut9: "Obnova podpisů",
+      nut10: "Podmínky utracení",
+      nut11: "Pay-to-Pubkey (P2PK)",
+      nut12: "DLEQ důkazy",
+      nut13: "Deterministická tajemství",
+      nut14: "Hashované časové zámky (HTLC)",
+      nut15: "Částečné vícecestné platby",
+      nut16: "Animované QR kódy",
+      nut17: "WebSocket odběry",
+      nut18: "Platební požadavky",
+      nut19: "Odpovědi v mezipaměti",
+      nut20: "Podpis mint nabídky",
+      nut21: "Otevřená autentizace",
+      nut22: "Slepá autentizace",
+    },
   },
   UnitToggle: {
     label: "Jednotka: {unit}, změnit",
@@ -1546,7 +1368,6 @@ export default {
     available_text: "v tomto mintu",
     sheet_title: "Vyberte mint",
     badge_mint_error_text: "Chyba",
-    badge_option_mint_error_text: "@:ChooseMint.badge_mint_error_text",
   },
 
   HistoryTable: {
@@ -1572,7 +1393,6 @@ export default {
     },
     row: {
       type_label: "Ecash",
-      date_label: "před { value }",
     },
     actions: {
       check_status: {
@@ -1583,25 +1403,15 @@ export default {
       },
     },
     old_token_not_found_error_text: "Starý token nenalezen",
+    labels: {
+      onchain_subpayment: "On-chain dílčí platba",
+      bolt12_subpayment: "BOLT12 dílčí platba",
+    },
   },
 
   InvoiceTable: {
-    empty_text: "Žádné faktury zatím",
     row: {
       type_label: "Lightning",
-      type_tooltip_text: "Klikněte pro kopírování",
-      date_label: "před { value }",
-    },
-    actions: {
-      check_status: {
-        tooltip_text: "Zkontrolovat stav",
-      },
-      filter_pending: {
-        label: "Jen čekající",
-      },
-      show_all: {
-        label: "Zobrazit vše",
-      },
     },
   },
 
@@ -1664,25 +1474,6 @@ export default {
     },
     input_data: {
       title: "Zaplatit přes Lightning",
-      inputs: {
-        invoice_data: {
-          label: "Lightning faktura nebo adresa",
-        },
-      },
-      actions: {
-        close: {
-          label: "@:global.actions.close.label",
-        },
-        enter: {
-          label: "@:global.actions.enter.label",
-        },
-        paste: {
-          label: "@:global.actions.paste.label",
-        },
-        scan: {
-          label: "@:global.actions.scan.label",
-        },
-      },
       title_bolt12: "Zaplatit Lightning nabídku",
     },
     lnurlpay: {
@@ -1691,24 +1482,18 @@ export default {
         "{ payee } požaduje{br}mezi { min } a { max } { ticker }",
       sending_to_lightning_address: "Odesílám na { address }",
       inputs: {
-        amount: {
-          label: "Částka ({ ticker }) *",
-        },
         comment: {
           label: "Komentář (volitelné)",
         },
       },
       actions: {
-        close: {
-          label: "@:global.actions.close.label",
-        },
         send: {
           label: "@:global.actions.send.label",
+          in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
         },
       },
     },
     invoice: {
-      title: "Zaplatit { value }",
       paying: "Probíhá platba",
       paid: "Zaplaceno",
       fee: "Poplatek",
@@ -1725,7 +1510,6 @@ export default {
           label: "Zaplatit",
           in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
           waiting_for_wallet: "Čekání na peněženku…",
-          error: "Chyba",
         },
       },
     },
@@ -1735,7 +1519,6 @@ export default {
     title: "Upravit mint",
     inputs: {
       nickname: {
-        placeholder: "např. Testnet",
         label: "Přezdívka (nepovinné)",
       },
       mint_url: {
@@ -1743,9 +1526,6 @@ export default {
       },
     },
     actions: {
-      cancel: {
-        label: "@:global.actions.cancel.label",
-      },
       update: {
         label: "@:global.actions.update.label",
       },
@@ -1755,15 +1535,7 @@ export default {
     title: "Důvěřujete tomuto mintu?",
     description:
       "Připojte se k tomuto mintu, jen pokud mu důvěřujete. Pokud ukončí provoz, ecash, který u něj máte, je ztracen.",
-    inputs: {
-      mint_url: {
-        label: "@:global.inputs.mint_url.label",
-      },
-    },
     actions: {
-      cancel: {
-        label: "@:global.actions.cancel.label",
-      },
       add_mint: {
         label: "@:global.actions.add_mint.label",
         in_progress: "Přidává se mint",
@@ -1955,6 +1727,63 @@ export default {
       positive_whole: "Zadejte kladnou celou částku v {unit}.",
       min: "Zadejte alespoň {amount}.",
       max: "Zadejte nejvýše {amount}.",
+    },
+  },
+  storage: {
+    notifications: {
+      unrecognized_backup: "Nerozpoznaný formát zálohy",
+      backup_restored: "Záloha obnovena",
+      backup_exported: "Záloha peněženky exportována",
+      quota_exceeded: "Místní úložiště je plné. Uvolněte v něm místo.",
+      cleaned_up: "Uvolněno {size} bajtů",
+    },
+  },
+  receiveTokens: {
+    notifications: {
+      already_in_history: "Token už je v historii",
+      nfc_read_failed: "Z NFC čipu nelze načíst data",
+      scan_error: "Chyba skenování",
+      nfc_error: "Chyba NFC",
+    },
+  },
+  nostrMintBackup: {
+    notifications: {
+      no_relays: "Nejsou nastaveny žádné Nostr relaye",
+      backup_failed: "Seznam mintů se nepodařilo zálohovat na Nostr",
+      backed_up: "Seznam mintů zálohován na Nostr",
+      found:
+        "V Nostr zálohách nalezen {count} mint | Počet nalezených mintů v Nostr zálohách: {count}",
+      none_found:
+        "Pro tuto seed frázi nebyly na Nostru nalezeny žádné zálohy mintů",
+      search_failed: "Zálohy mintů se nepodařilo vyhledat",
+      add_mint_failed: "Nepodařilo se přidat {mint}",
+      added:
+        "Do peněženky přidán {count} mint | Počet mintů přidaných do peněženky: {count}",
+      none_added: "Nebyly přidány žádné nové minty",
+      add_selected_failed: "Vybrané minty se nepodařilo přidat",
+    },
+  },
+  nostr: {
+    notifications: {
+      nip04_published: "Událost NIP-04 zveřejněna",
+      nip04_failed: "Událost NIP-04 se nepodařilo zveřejnit",
+      nip17_failed: "Událost NIP-17 se nepodařilo zveřejnit",
+      receive_failed: "Příchozí platbu se nepodařilo přijmout",
+      ecash_already_in_history: "Ecash už je v historii",
+      ecash_added: "Ecash přidán do historie",
+    },
+  },
+  nwc: {
+    notifications: {
+      melt_quote_failed: "NWC: Nepodařilo se vyžádat melt nabídku",
+      unit_must_be_sat: "NWC: Aktivní jednotka musí být sat",
+      allowance_exceeded: "NWC: Limit překročen",
+    },
+  },
+  npubcash: {
+    notifications: {
+      could_not_update_mint: "Mint pro npub.cash se nepodařilo aktualizovat",
+      add_mint_first: "Nejdřív přidejte {mint} do peněženky",
     },
   },
 };

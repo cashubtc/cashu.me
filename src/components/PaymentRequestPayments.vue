@@ -34,7 +34,9 @@
 import { defineComponent, PropType } from "vue";
 import { mapWritableState } from "pinia";
 import { HistoryToken } from "src/stores/tokens";
-import { formatDistanceToNow, parseISO } from "date-fns";
+import { formatRelativeDate } from "src/js/relative-time";
+import { isolateLtr } from "src/js/format-currency";
+import { useUiStore } from "src/stores/ui";
 import token from "src/js/token";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import ActivityRow from "src/components/ActivityRow.vue";
@@ -72,23 +74,11 @@ export default defineComponent({
   },
   methods: {
     formattedDate(date_str: string) {
-      const date = parseISO(date_str);
-      return formatDistanceToNow(date, { addSuffix: false });
+      return formatRelativeDate(date_str, this.$i18n.locale);
     },
+    // The same text as windowMixin's formatCurrency (this component has no windowMixin).
     formatCurrency(amount: number, unit: string) {
-      // delegate to global mixin formatter if available
-      try {
-        // @ts-ignore
-        return this.$root?.$?.appContext.config.globalProperties.formatCurrency
-          ? // @ts-ignore
-            this.$root.$.appContext.config.globalProperties.formatCurrency(
-              amount,
-              unit
-            )
-          : `${amount} ${unit}`;
-      } catch {
-        return `${amount} ${unit}`;
-      }
+      return isolateLtr(useUiStore().formatCurrency(amount, unit));
     },
     showTokenDialog(historyToken: HistoryToken) {
       if (historyToken.token === undefined) {

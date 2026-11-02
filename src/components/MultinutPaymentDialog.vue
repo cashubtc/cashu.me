@@ -25,7 +25,7 @@
         </div>
 
         <!-- Header Section -->
-        <div class="multinut-header-container q-mb-lg">
+        <div class="column items-center full-width q-mb-lg">
           <div class="multinut-header app-box q-pa-md q-py-lg">
             <div class="multinut-title q-mb-xs">
               {{ $t("MultinutPicker.dialog_title") }}
@@ -93,7 +93,7 @@
                 :clickable="!isPaymentInProgress"
                 :class="{ 'cursor-not-allowed': isPaymentInProgress }"
                 :active="isSelected(mint)"
-                :icon-url="getMintIconUrl(mint) || undefined"
+                :icon-url="mintIconUrl(mint)"
                 :name="mint.nickname || mint.info?.name"
                 :url="mint.url"
                 :balances="
@@ -247,7 +247,7 @@ import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 import { notifyError, notifySuccess } from "src/js/notify";
 import { sumProofAmounts } from "src/js/proofs";
-import { getShortUrl } from "src/js/wallet-helpers";
+import { mintIconUrl } from "src/js/wallet-helpers";
 import {
   CircleAlert as CircleAlertIcon,
   CircleCheck as CircleCheckIcon,
@@ -286,7 +286,7 @@ export default defineComponent({
   computed: {
     ...mapWritableState(useWalletStore, ["payInvoiceData"]),
     ...mapWritableState(useUiStore, ["multinutExperimentalWarningDismissed"]),
-    ...mapState(useMintsStore, ["mints", "activeUnit", "multiMints"]),
+    ...mapState(useMintsStore, ["activeUnit", "multiMints"]),
     totalSelectedBalance() {
       return this.selectedMints.reduce((total, mint) => {
         const mintInstance = this.mintClass(mint);
@@ -313,16 +313,11 @@ export default defineComponent({
     },
   },
   methods: {
+    mintIconUrl,
     ...mapActions(useWalletStore, ["meltQuote", "melt"]),
-    ...mapActions(useMintsStore, [
-      "activateMintUrl",
-      "updateMintMultinutSelection",
-    ]),
+    ...mapActions(useMintsStore, ["updateMintMultinutSelection"]),
     mintClass(mint) {
       return new MintClass(mint);
-    },
-    getShortUrl(url) {
-      return getShortUrl(url);
     },
     isSelected(mint) {
       return this.selectedMints.some((selected) => selected.url === mint.url);
@@ -414,17 +409,6 @@ export default defineComponent({
       const totalAmount = this.payInvoiceData.meltQuote.response.amount;
       const mintBalance = this.mintClass(mint).unitBalance(this.activeUnit);
       return Math.min(100, (mintBalance / totalAmount) * 100);
-    },
-    getMintIconUrl(mint) {
-      if (mint.info) {
-        if (mint.info.icon_url) {
-          return mint.info.icon_url;
-        } else {
-          return undefined;
-        }
-      } else {
-        return undefined;
-      }
     },
     updateMintProportion(mint, newPercentage) {
       if (this.selectedMints.length <= 1) return;
@@ -1004,14 +988,6 @@ export default defineComponent({
   justify-content: flex-start;
 }
 
-/* Header Section */
-.multinut-header-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-
 .multinut-header {
   width: 100%;
   display: flex;
@@ -1069,12 +1045,6 @@ export default defineComponent({
 }
 
 /* Balance and Slider Sections */
-.mint-balance-section {
-  display: flex;
-  justify-content: flex-end;
-  width: 100%;
-}
-
 .mint-slider-section {
   width: 100%;
 }

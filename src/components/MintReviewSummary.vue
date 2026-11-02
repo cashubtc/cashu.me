@@ -11,7 +11,7 @@
     >
       <template v-if="average !== null">
         <StarIcon :size="14" fill="currentColor" class="rating-star" />
-        <span class="mint-review__score">{{ average.toFixed(1) }}</span>
+        <span class="mint-review__score">{{ formatRating(average) }}</span>
         <span aria-hidden="true">·</span>
         {{ count }}
         {{ $t("MintSettings.reviews_text", count) }}
@@ -34,6 +34,7 @@ import {
   ChevronRight as ChevronRightIcon,
   Star as StarIcon,
 } from "lucide-vue-next";
+import { formatRating } from "src/js/format-currency";
 
 export default defineComponent({
   name: "MintReviewSummary",
@@ -56,6 +57,7 @@ export default defineComponent({
     },
   },
   emits: ["open"],
+  methods: { formatRating },
 });
 </script>
 

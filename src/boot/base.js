@@ -2,8 +2,7 @@ import { copyToClipboard } from "quasar";
 import { useUiStore } from "stores/ui";
 import { Clipboard } from "@capacitor/clipboard";
 import { SafeArea } from "capacitor-plugin-safe-area";
-import { useSettingsStore } from "stores/settings";
-import { formatBigIntCurrency, isolateLtr } from "src/js/format-currency";
+import { isolateLtr } from "src/js/format-currency";
 import {
   notify,
   notifyCopied,
@@ -12,7 +11,6 @@ import {
   notifyWarning,
 } from "src/js/notify";
 import { applyDeviceEffects } from "src/js/device-effects";
-window.LOCALE = "en";
 applyDeviceEffects();
 // window.EventHub = new Vue();
 
@@ -158,61 +156,16 @@ window.windowMixin = {
       }
       return text;
     },
-    // Every amount reads left to right, also inside Arabic text.
+    // Every amount reads left to right, also inside Arabic text. Sat and msat amounts show
+    // whole units here (the parseInt), where the store's formatCurrency keeps any fraction.
     formatCurrency: function (value, currency, showBalance = false) {
-      return isolateLtr(this.formatCurrencyText(value, currency, showBalance));
-    },
-    formatCurrencyText: function (value, currency, showBalance = false) {
-      if (currency == undefined) {
-        currency = "sat";
+      const unit = currency == undefined ? "sat" : currency;
+      if (typeof value !== "bigint" && (unit == "sat" || unit == "msat")) {
+        value = parseInt(value);
       }
-      if (useUiStore().hideBalance && !showBalance) {
-        return "****";
-      }
-      if (typeof value === "bigint") {
-        return formatBigIntCurrency(
-          value,
-          currency,
-          window.LOCALE,
-          useSettingsStore().bip177BitcoinSymbol
-        );
-      }
-      if (currency == "sat") return this.formatSat(value);
-      if (currency == "msat") return this.fromMsat(value);
-      if (currency == "usd") value = value / 100;
-      if (currency == "eur") value = value / 100;
-      try {
-        return new Intl.NumberFormat(window.LOCALE, {
-          style: "currency",
-          currency: currency,
-        }).format(value);
-      } catch {
-        return (
-          new Intl.NumberFormat(window.LOCALE).format(value) +
-          " " +
-          String(currency)
-        );
-      }
-      // + " " +
-      // currency.toUpperCase()
-    },
-    formatSat: function (value) {
-      // convert value to integer
-      value = parseInt(value);
-      if (useSettingsStore().bip177BitcoinSymbol) {
-        if (value >= 0) {
-          return "₿" + new Intl.NumberFormat(window.LOCALE).format(value);
-        } else {
-          return (
-            "-₿" + new Intl.NumberFormat(window.LOCALE).format(Math.abs(value))
-          );
-        }
-      }
-      return new Intl.NumberFormat(window.LOCALE).format(value) + " sat";
-    },
-    fromMsat: function (value) {
-      value = parseInt(value);
-      return new Intl.NumberFormat(window.LOCALE).format(value) + " msat";
+      return isolateLtr(
+        useUiStore().formatCurrency(value, currency, showBalance)
+      );
     },
     notifyApiError: function (error) {
       const message =
@@ -227,9 +180,6 @@ window.windowMixin = {
       else notifyWarning(message, caption);
     },
     notifySuccess: async function (message) {
-      notifySuccess(message);
-    },
-    notifyRefreshed: async function (message) {
       notifySuccess(message);
     },
     notifyError: async function (message, caption = null) {
@@ -261,13 +211,6 @@ window.windowMixin = {
     addEventListener("online", (event) => {
       this.g.offline = false;
     });
-
-    // addEventListener("beforeunload", (event) => {
-    //   event.preventDefault();
-    //   const dialogText = "Are you sure about this?";
-    //   event.returnValue = dialogText;
-    //   return dialogText;
-    // });
 
     if (this.$q.localStorage.getItem("cashu.theme")) {
       document.body.setAttribute(

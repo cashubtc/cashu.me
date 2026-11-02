@@ -1,7 +1,7 @@
 <template>
   <div class="token-information-container q-px-md">
     <!-- Amount Header -->
-    <div v-if="!hideAmount" class="token-header-container">
+    <div v-if="!hideAmount" class="column items-center full-width">
       <AmountHeadline>{{ displayUnit }}</AmountHeadline>
     </div>
 
@@ -95,7 +95,6 @@ import { unitCode } from "src/js/format-currency";
 import AmountHeadline from "src/components/ui/AmountHeadline.vue";
 import PendingDots from "src/components/ui/PendingDots.vue";
 import { defineComponent } from "vue";
-import { notifyCopied } from "src/js/notify";
 import { type Token } from "@cashu/cashu-ts";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState } from "pinia";
@@ -221,13 +220,7 @@ export default defineComponent({
       const t = this.encodedToken || "";
       return t.length > 20 ? `${t.slice(0, 10)}…${t.slice(-8)}` : t;
     },
-    ...mapState(useMintsStore, [
-      "activeMintUrl",
-      "activeProofs",
-      "mints",
-      "activeUnit",
-      "addMintBlocking",
-    ]),
+    ...mapState(useMintsStore, ["addMintBlocking"]),
     ...mapState(usePriceStore, ["bitcoinPrice", "currentCurrencyPrice"]),
     ...mapState(useSettingsStore, ["bitcoinPriceCurrency"]),
     proofsToShow: function () {
@@ -278,55 +271,6 @@ export default defineComponent({
   methods: {
     unitCode,
     ...mapActions(useP2PKStore, ["isLocked", "isLockedToUs"]),
-    getProofsMint: function (proofs) {
-      // unique keyset IDs of proofs
-      const uniqueIds = [...new Set(proofs.map((p) => p.id))];
-      // mints that have any of the keyset IDs
-      const mints_keysets = this.mints.filter((m) =>
-        m.keysets.some((r) => uniqueIds.indexOf(r) >= 0)
-      );
-      // what we put into the JSON
-      const mints = mints_keysets.map(
-        (m) => [{ url: m.url, ids: m.keysets }][0]
-      );
-      if (mints.length == 0) {
-        return "";
-      } else {
-        return getShortUrl(mints[0].url);
-      }
-    },
-    mintKnownToUs: function (proofs) {
-      // unique keyset IDs of proofs
-      const uniqueIds = [...new Set(proofs.map((p) => p.id))];
-      // mints that have any of the keyset IDs
-      return (
-        this.mints.filter((m) =>
-          m.keysets.some((r) => uniqueIds.indexOf(r.id) >= 0)
-        ).length > 0
-      );
-    },
-    shareToken: async function () {
-      if (navigator.share) {
-        const shareData = {
-          text: this.encodedToken,
-        };
-        try {
-          await navigator.share(shareData);
-        } catch (error: any) {
-          if (error?.name !== "AbortError") {
-            console.error("Error sharing token:", error);
-          }
-        }
-      }
-    },
-    copyToken: async function () {
-      try {
-        await navigator.clipboard.writeText(this.encodedToken);
-        notifyCopied(this.$t("TokenInformation.token_copied") as string);
-      } catch (error) {
-        console.error("Failed to copy to clipboard:", error);
-      }
-    },
   },
 });
 </script>
@@ -335,14 +279,6 @@ export default defineComponent({
 .token-information-container {
   width: 100%;
   color: var(--app-text);
-}
-
-/* Token Header - matches mint-header-container from MintDetailsPage */
-.token-header-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
 }
 
 /* Action Buttons Section */

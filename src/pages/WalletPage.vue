@@ -3,7 +3,7 @@
     <div class="col-12 text-center q-gutter-y-md wallet-column">
       <div class="wallet-hero q-gutter-y-md">
         <NoMintWarnBanner v-if="mints.length == 0" />
-        <BalanceView v-else :set-tab="setTab" />
+        <BalanceView v-else />
         <!-- With no mint yet the empty state's Add mint and Receive ecash are the only
              actions; Receive, Scan and Send join once there is a mint to use. -->
         <WalletActions
@@ -123,15 +123,6 @@
       <QrcodeReader @decode="decodeQR" />
     </q-dialog>
 
-    <!-- WELCOME DIALOG  -->
-    <WelcomeDialog
-      :welcome-dialog="welcomeDialog"
-      :trigger-pwa-install="triggerPwaInstall"
-      :set-tab="setTab"
-      :get-pwa-display-mode="getPwaDisplayMode"
-      :set-welcome-dialog-seen="setWelcomeDialogSeen"
-    />
-
     <!-- INVOICE DETAILS  -->
     <CreateInvoiceDialog v-model="showCreateInvoiceDialog" />
     <InvoiceDetailDialog v-model="showInvoiceDetails" />
@@ -146,21 +137,6 @@
 <style>
 * {
   touch-action: manipulation;
-}
-
-.keypad {
-  display: grid;
-  grid-gap: 8px;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(4, 1fr);
-}
-
-.keypad .btn {
-  height: 100%;
-}
-
-.keypad .btn-confirm {
-  grid-area: 1 / 4 / 5 / 4;
 }
 
 /* Full-bleed tabs on phones; on wider screens they sit on the content edges. */
@@ -198,18 +174,11 @@
 }
 </style>
 <script lang="ts">
-import { date } from "quasar";
-import * as _ from "underscore";
-import { shortenString } from "src/js/string-utils";
-import { sumProofAmounts } from "src/js/proofs";
-import token from "src/js/token";
-
 // Vue components
 import BalanceView from "components/BalanceView.vue";
 import MintSettings from "components/MintSettings.vue";
 import HistoryTable from "components/HistoryTable.vue";
 import NoMintWarnBanner from "components/NoMintWarnBanner.vue";
-import WelcomeDialog from "components/WelcomeDialog.vue";
 import SendTokenDialog from "components/SendTokenDialog.vue";
 import PayInvoiceDialog from "components/PayInvoiceDialog.vue";
 import InvoiceDetailDialog from "components/InvoiceDetailDialog.vue";
@@ -227,9 +196,7 @@ import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { useTokensStore } from "src/stores/tokens";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
-import { useProofsStore } from "src/stores/proofs";
 import { useCameraStore } from "src/stores/camera";
-import { useP2PKStore } from "src/stores/p2pk";
 import { useNWCStore } from "src/stores/nwc";
 // @ts-ignore
 import { useNpubCashStore } from "src/stores/npubcash";
@@ -241,7 +208,6 @@ import { useStorageStore } from "src/stores/storage";
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
 import { useWelcomeStore } from "../stores/welcome";
 import { useTransactionWorkerStore } from "src/stores/transactionWorker";
-import { notifyError, notify } from "../js/notify";
 
 import WalletActions from "src/components/WalletActions.vue";
 import ExpansionIndicator from "src/components/ui/ExpansionIndicator.vue";
@@ -258,7 +224,6 @@ export default {
     MintSettings,
     HistoryTable,
     NoMintWarnBanner,
-    WelcomeDialog,
     SendTokenDialog,
     ReceiveTokenDialog,
     PayInvoiceDialog,
@@ -273,30 +238,13 @@ export default {
   },
   data: function () {
     return {
-      name: "",
-      mintId: "",
-      mintName: "",
       deferredPWAInstallPrompt: null as any,
-      action: "main",
-      payments: [] as any[],
-      paymentsChart: {
-        show: false,
-      },
       historyHydrated: false,
-      welcomeDialog: {
-        show: false,
-      },
-      baseHost: location.protocol + "//" + location.host,
-      baseURL: location.protocol + "//" + location.host + location.pathname,
-      credit: 0,
-      newName: "",
     };
   },
   computed: {
-    ...mapState(useUiStore, ["tickerShort"]),
     ...mapWritableState(useUiStore, [
       "showInvoiceDetails",
-      "showBolt12OfferDetails",
       "showCreateInvoiceDialog",
       "tab",
       "showSendDialog",
@@ -307,111 +255,35 @@ export default {
       "showReceiveTokens",
       "receiveData",
     ]),
-    ...mapWritableState(useSendTokensStore, ["showSendTokens", "sendData"]),
-    ...mapState(useMintsStore, [
-      "activeMintUrl",
-      "activeProofs",
-      "keys",
-      "mints",
-      "activeMint",
-    ]),
-    ...mapWritableState(useWalletStore, [
-      "invoiceHistory",
-      "invoiceData",
-      "payInvoiceData",
-    ]),
+    ...mapWritableState(useSendTokensStore, ["showSendTokens"]),
+    ...mapState(useMintsStore, ["activeMintUrl", "mints"]),
+    ...mapWritableState(useWalletStore, ["payInvoiceData"]),
     ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
     ...mapState(useTokensStore, ["historyTokens"]),
     ...mapState(usePRStore, ["enablePaymentRequest"]),
-    ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
-    ...mapWritableState(useP2PKStore, ["showP2PKDialog"]),
-    ...mapWritableState(useNWCStore, ["showNWCDialog", "nwcEnabled"]),
-    pendingPaymentsExist: function () {
-      return this.payments.findIndex((payment) => payment.pending) !== -1;
-    },
-
-    balance: function () {
-      return sumProofAmounts(this.activeProofs.flat());
-    },
+    ...mapWritableState(useCameraStore, ["camera"]),
+    ...mapWritableState(useNWCStore, ["nwcEnabled"]),
   },
   methods: {
-    ...mapActions(useProofsStore, [
-      "serializeProofs",
-      "getProofsMint",
-      "serializeProofsV2",
-      "sumProofs",
-      "deleteProofs",
-    ]),
-    ...mapActions(useMintsStore, [
-      "activateMintUrl",
-      "addMint",
-      "assertMintError",
-      "getBalance",
-      "setActiveProofs",
-      "setProofs",
-      "getKeysForKeyset",
-    ]),
-    ...mapActions(useTokensStore, ["setTokenPaid", "initEcashHistory"]),
+    ...mapActions(useTokensStore, ["initEcashHistory"]),
     ...mapActions(useWalletStore, [
-      "setInvoicePaid",
-      "mint",
-      "checkPendingTokens",
       "decodeRequest",
       "initializeMnemonic",
       "initPaymentHistory",
     ]),
-    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+    ...mapActions(useCameraStore, ["showCamera"]),
     ...mapActions(useNWCStore, ["listenToNWCCommands"]),
     ...mapActions(useNpubCashStore, ["initializeNpubCash"]),
     ...mapActions(useNostrStore, [
-      "sendNip04DirectMessage",
-      "sendNip17DirectMessage",
-      "subscribeToNip04DirectMessages",
       "subscribeToNip17DirectMessages",
-      "sendNip17DirectMessageToNprofile",
       "initSigner",
     ]),
     ...mapActions(useDexieStore, ["migrateToDexie"]),
     ...mapActions(useStorageStore, ["checkLocalStorage"]),
-    ...mapActions(usePRStore, ["createPaymentRequest"]),
     ...mapActions(useTransactionWorkerStore, [
       "startTransactionWorker",
       "checkPendingTransactions",
     ]),
-    // TOKEN METHODS
-    getProofs: function (decoded_token) {
-      return token.getProofs(decoded_token);
-    },
-    getMint: function (decoded_token) {
-      return token.getMint(decoded_token);
-    },
-    //
-    shortenString: function (s) {
-      return shortenString(s, 20, 10);
-    },
-    getTokenList: function () {
-      const amounts = this.activeProofs.map((t) => t.amount);
-      const counts = {} as any;
-
-      for (const num of amounts) {
-        counts[num] = counts[num] ? counts[num] + 1 : 1;
-      }
-      return Object.keys(counts).map((k) => ({
-        value: parseInt(k),
-        count: parseInt(counts[k]),
-        sum: Number(k) * counts[k],
-      }));
-    },
-
-    paymentTableRowKey: function (row) {
-      return row.payment_hash + row.amount;
-    },
-    showChart: function () {
-      this.paymentsChart.show = true;
-      this.$nextTick(() => {
-        // generateChart(this.$refs.canvas, this.payments);
-      });
-    },
     focusInput(el) {
       // TODO: fix this
       // this.$nextTick(() => this.$refs[el].focus());
@@ -446,29 +318,6 @@ export default {
       this.decodeRequest(res);
     },
     /////////////////////////////////// WALLET ///////////////////////////////////
-    showInvoiceCreateDialog: async function () {
-      console.log("##### showInvoiceCreateDialog");
-      this.invoiceData.amount = "";
-      this.invoiceData.request = "";
-      this.invoiceData.hash = "";
-      this.invoiceData.memo = "";
-      this.showCreateInvoiceDialog = true;
-    },
-    showSendTokensDialog: function () {
-      console.log("##### showSendTokensDialog");
-      this.sendData.tokens = "";
-      this.sendData.tokensBase64 = "";
-      this.sendData.amount = null;
-      this.sendData.memo = "";
-      this.showSendTokens = true;
-    },
-    hideSendTokensDialog: function () {
-      this.showSendTokens = false;
-    },
-    showReceiveTokensDialog: function () {
-      this.receiveData.tokensBase64 = "";
-      this.showReceiveTokens = true;
-    },
 
     //////////////////////// MINT //////////////////////////////////////////
 
@@ -510,8 +359,6 @@ export default {
       this.deferredPWAInstallPrompt.userChoice.then((choiceResult) => {
         if (choiceResult.outcome === "accepted") {
           console.log("User accepted the install prompt");
-          // @ts-ignore
-          this.setWelcomeDialogSeen();
         } else {
           console.log("User dismissed the install prompt");
         }
@@ -623,7 +470,6 @@ export default {
     }
 
     console.log("Mint URL " + this.activeMintUrl);
-    console.log("Wallet URL " + this.baseURL);
 
     // get token to receive tokens from a link
     if (params.get("token") || hash.includes("token")) {

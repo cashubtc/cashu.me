@@ -50,17 +50,10 @@ export default {
     this.urDecoder = new URDecoder();
   },
   computed: {
-    ...mapState(useCameraStore, ["camera", "hasCamera"]),
-    canPasteFromClipboard: function () {
-      return (
-        window.isSecureContext &&
-        navigator.clipboard &&
-        navigator.clipboard.readText
-      );
-    },
+    ...mapState(useUiStore, ["canPasteFromClipboard"]),
   },
   methods: {
-    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+    ...mapActions(useCameraStore, ["closeCamera"]),
     handleResult(result: ScanResult) {
       // if this is a multipart-qr code, do not yet emit
       if (result.data.toLowerCase().startsWith("ur:")) {

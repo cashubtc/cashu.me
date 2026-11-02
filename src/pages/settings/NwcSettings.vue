@@ -113,7 +113,6 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(useNWCStore, [
-      "generateNWCConnection",
       "listenToNWCCommands",
       "unsubscribeNWC",
       "getConnectionString",

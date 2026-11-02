@@ -41,7 +41,9 @@
       v-else-if="error"
       :icon="InfoIcon"
       :label="
-        /fetch|network/i.test(error) ? $t('MintAuditInfo.unavailable') : error
+        /fetch|network/i.test(error)
+          ? $t('MintAuditInfo.unavailable')
+          : $t('MintAuditInfo.load_failed')
       "
       action
       :busy="retrying"
@@ -140,35 +142,7 @@ import PendingDots from "src/components/ui/PendingDots.vue";
 import BusyLabel from "src/components/ui/BusyLabel.vue";
 import { Info as InfoIcon } from "lucide-vue-next";
 import { markRaw } from "vue";
-interface MintRead {
-  id: number;
-  url: string;
-  info?: string;
-  name?: string;
-  balance: number;
-  sum_donations?: number;
-  updated_at: string;
-  next_update?: string;
-  state: string;
-  n_errors: number;
-  n_mints: number;
-  n_melts: number;
-}
-
-interface SwapEventRead {
-  id: number;
-  from_id: number;
-  to_id: number;
-  from_url: string;
-  to_url: string;
-  amount: number;
-  fee: number;
-  created_at: string;
-  time_taken: number;
-  state: string;
-  error: string;
-}
-
+import type { MintRead, SwapEventRead } from "src/js/mint-audit";
 import MintAuditWarningBox from "./MintAuditWarningBox.vue";
 import DetailRow from "src/components/ui/DetailRow.vue";
 import MintAuditSwapsBarChart from "./MintAuditSwapsBarChart.vue";
@@ -205,14 +179,9 @@ export default {
       loading: true,
       retrying: false,
       error: null,
-      couldFetchInfo: true,
       mints: [] as MintRead[],
       mintInfo: null as MintRead | null,
       mintSwaps: [] as SwapEventRead[],
-      limit: 100,
-      skip: 0,
-      allLoaded: false,
-      loadingMore: false,
     };
   },
   computed: {
@@ -295,24 +264,16 @@ export default {
         throw err;
       }
     },
-    async getMintSwaps(mintId: number, skip = 0, limit = 100) {
+    // The latest 100 swaps.
+    async getMintSwaps(mintId: number) {
       try {
         const response = await fetch(
-          `${this.auditorApiUrl}/swaps/mint/${mintId}?skip=${skip}&limit=${limit}`
+          `${this.auditorApiUrl}/swaps/mint/${mintId}?skip=0&limit=100`
         );
         if (!response.ok) {
           throw new Error(`API error: ${response.status}`);
         }
-        const fetchedSwaps = (await response.json()) as SwapEventRead[];
-
-        if (skip === 0) {
-          this.mintSwaps = fetchedSwaps;
-        } else {
-          this.mintSwaps = [...this.mintSwaps, ...fetchedSwaps];
-        }
-
-        this.skip += limit;
-        this.allLoaded = fetchedSwaps.length < limit;
+        this.mintSwaps = (await response.json()) as SwapEventRead[];
       } catch (err) {
         console.error("Error fetching mint swaps:", err);
         throw err;
@@ -338,18 +299,8 @@ export default {
         console.error("Error fetching auditor payment requests:", err);
       }
     },
-    async loadMoreSwaps() {
-      if (this.allLoaded || this.loadingMore || !this.mintInfo) return;
-
-      this.loadingMore = true;
-      try {
-        await this.getMintSwaps(this.mintInfo.id, this.skip, this.limit);
-      } finally {
-        this.loadingMore = false;
-      }
-    },
     formatTime(milliseconds: number) {
-      if (milliseconds === 0) return "N/A";
+      if (milliseconds === 0) return "–";
       const seconds = milliseconds / 1000;
       if (seconds < 10) {
         return `${milliseconds.toFixed(0)} ms`;

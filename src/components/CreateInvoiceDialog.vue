@@ -166,9 +166,7 @@
           <!-- While the invoice is being created, only the busy button reads as active. -->
           <AmountKeypadPanel
             v-if="showAmountInput"
-            v-model="invoiceData.amount"
             :busy="createInvoiceButtonBlocked"
-            @done="requestMintButton"
           />
 
           <!-- Secondary Actions Container (Add Amount) -->
@@ -265,7 +263,6 @@ import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 import { useMintsStore } from "src/stores/mints";
 import { useSettingsStore } from "src/stores/settings";
-import { usePriceStore } from "src/stores/price";
 import type { InvoiceHistory } from "src/stores/wallet";
 import { PaymentMethod } from "src/stores/walletTypes";
 import {
@@ -337,17 +334,12 @@ export default defineComponent({
       "activeMintUrl",
       "mints",
     ]),
-    ...mapState(useSettingsStore, [
-      "bitcoinPriceCurrency",
-      "useNumericKeyboard",
-      "bip177BitcoinSymbol",
-    ]),
-    ...mapState(usePriceStore, ["bitcoinPrice", "currentCurrencyPrice"]),
+    ...mapState(useSettingsStore, ["bip177BitcoinSymbol"]),
     ...mapState(useNpubCashStore, {
-      npubCashEnabled: "enabled",
       npubCashAddress: "address",
       npubCashMintUrl: "mintUrl",
       showAddressOnReceive: "showAddressOnReceive",
+      hasConfiguredNpubCashAddress: "hasConfiguredAddress",
     }),
     isBolt12(): boolean {
       return this.invoiceData.type === PaymentMethod.Bolt12;
@@ -414,14 +406,6 @@ export default defineComponent({
     },
     activeMintErrored(): boolean {
       return Boolean(this.activeMint?.errored);
-    },
-    hasConfiguredNpubCashAddress(): boolean {
-      return Boolean(
-        this.npubCashEnabled &&
-          this.npubCashAddress &&
-          this.npubCashMintUrl &&
-          this.mints.some((mint: any) => mint.url === this.npubCashMintUrl)
-      );
     },
     showNpubCashPreview(): boolean {
       return Boolean(

@@ -91,7 +91,6 @@ html:lang(ja) .q-item__label--caption {
   text-transform: none;
 }
 .q-btn.full-width,
-.q-btn.btn-caps,
 .flow-footer__col .q-btn:not(.q-btn--round),
 .wallet-action-btn {
   font-size: 16px !important;
@@ -105,11 +104,6 @@ html:lang(ja) .q-item__label--caption {
 .q-btn.full-width:lang(ko),
 .q-btn.full-width:lang(ar),
 .q-btn.full-width:lang(th),
-.q-btn.btn-caps:lang(zh),
-.q-btn.btn-caps:lang(ja),
-.q-btn.btn-caps:lang(ko),
-.q-btn.btn-caps:lang(ar),
-.q-btn.btn-caps:lang(th),
 .flow-footer__col .q-btn:lang(zh),
 .flow-footer__col .q-btn:lang(ja),
 .flow-footer__col .q-btn:lang(ko),
@@ -183,16 +177,6 @@ body,
   border-bottom-right-radius: 20px;
   border-bottom-left-radius: 20px;
   max-width: 650px;
-}
-
-.animated.tada {
-  animation-duration: 1s;
-}
-.animated.bounceIn {
-  animation-duration: 1s;
-}
-.animated.bounce {
-  animation-duration: 1s;
 }
 
 // The tick is drawn in the on-primary ink, so a checked box shows a tick in every theme and
