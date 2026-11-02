@@ -313,8 +313,7 @@ export default {
       },
       use_nsec: {
         title: "自分の秘密鍵を使う",
-        description:
-          "Nostr の秘密鍵（nsec）をこのウォレットに貼り付けます。おすすめしません。",
+        description: "この方法は危険であり推奨されません",
         delete_tooltip: "秘密鍵を削除",
       },
       signing_extension: {
@@ -552,7 +551,7 @@ export default {
         unset_reserved: {
           button: "すべての予約済みトークンを解除",
           description:
-            "保留中の送金のために確保された ecash を解放し、再び使えるようにします。その後「使用済み証明書を削除」を実行してください。",
+            "このウォレットは、二重支払いを防ぐために、保留中の出金ecashを予約済みとしてマークします（そして残高から差し引きます）。このボタンはすべての予約済みトークンを解除し、再び使用できるようにします。これを行うと、ウォレットに消費済みの証明書が含まれる可能性があります。「消費済み証明書を削除」ボタンを押してそれらを取り除いてください。",
         },
         show_onboarding: {
           button: "オンボーディングを表示",
@@ -561,7 +560,7 @@ export default {
         reset_wallet: {
           button: "ウォレットデータをリセット",
           description:
-            "このデバイス上のウォレットデータをすべて削除します。先にバックアップをエクスポートしてください。",
+            "ウォレットデータをリセットします。警告: これによりすべてが削除されます！まずバックアップを作成してください。",
           confirm_question: "ウォレットデータを削除してもよろしいですか？",
           cancel: "キャンセル",
           confirm: "ウォレットを削除",
@@ -829,6 +828,10 @@ export default {
           label: "シードフレーズ",
         },
       },
+    },
+    information: {
+      caption:
+        "ウィザードは別のシードフレーズからのみecashを復元し、現在使用しているウォレットのシードフレーズを使用したり変更したりすることはできません。これは、一度ecashを自分自身に送金しない限り、復元されたecashが現在のシードフレーズによって保護されないことを意味します。",
     },
     restore_mints: {
       label: "ミントを復元",
@@ -1549,6 +1552,7 @@ export default {
     status: "ステータス",
     network: "ネットワーク",
     transaction_id: "トランザクション ID",
+    explorer: "Explorer",
     confirmations: "承認数",
     paid_at: "支払日時",
     preimage: "プリイメージ",

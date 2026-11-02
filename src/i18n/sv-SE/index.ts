@@ -327,8 +327,7 @@ export default {
       },
       use_nsec: {
         title: "Använd din egen privata nyckel",
-        description:
-          "Klistra in din privata Nostr-nyckel (nsec) i den här plånboken. Rekommenderas inte.",
+        description: "Denna metod är farlig och rekommenderas inte",
         delete_tooltip: "Radera privat nyckel",
       },
       signing_extension: {
@@ -554,7 +553,7 @@ export default {
         unset_reserved: {
           button: "Avboka alla reserverade tokens",
           description:
-            'Frigör ecash som hålls för väntande sändningar så att den kan spenderas igen. Kör sedan "Ta bort spenderade proofs".',
+            'Denna plånbok markerar väntande utgående ecash som reserverad (och drar av den från ditt saldo) för att förhindra försök till dubbelspending. Den här knappen kommer att avboka alla reserverade tokens så att de kan användas igen. Om du gör detta kan din plånbok inkludera spenderade proofs. Tryck på knappen "Ta bort spenderade proofs" för att bli av med dem.',
         },
         show_onboarding: {
           button: "Visa introduktion",
@@ -563,7 +562,7 @@ export default {
         reset_wallet: {
           button: "Återställ plånboksdata",
           description:
-            "Raderar all plånboksdata på den här enheten. Exportera en säkerhetskopia först.",
+            "Återställ dina plånboksdata. Varning: Detta kommer att radera allt! Se till att du skapar en säkerhetskopia först.",
           confirm_question:
             "Är du säker på att du vill radera din plånboksdata?",
           cancel: "Avbryt",
@@ -834,6 +833,10 @@ export default {
           label: "Återställningsfras",
         },
       },
+    },
+    information: {
+      caption:
+        "Guiden kommer endast att återställa ecash från en annan återställningsfras, du kommer inte att kunna använda denna återställningsfras eller ändra återställningsfrasen för plånboken du för närvarande använder. Detta innebär att återställd ecash inte kommer att skyddas av din nuvarande återställningsfras så länge du inte skickar ecash till dig själv en gång.",
     },
     restore_mints: {
       label: "Återställ mints",
@@ -1552,6 +1555,7 @@ export default {
     status: "Status",
     network: "Nätverk",
     transaction_id: "Transaktions-ID",
+    explorer: "Explorer",
     confirmations: "Bekräftelser",
     paid_at: "Betald",
     preimage: "Preimage",

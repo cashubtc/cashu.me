@@ -33,7 +33,7 @@ import TermsOfServiceText from "src/components/TermsOfServiceText.vue";
 
 export default {
   name: "WelcomeSlide4",
-  components: { SettingsPageShell, TermsOfServiceText },
+  components: { CjkText, SettingsPageShell, TermsOfServiceText },
   setup() {
     const welcomeStore = useWelcomeStore();
 

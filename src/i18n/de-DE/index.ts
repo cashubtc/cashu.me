@@ -329,8 +329,7 @@ export default {
       },
       use_nsec: {
         title: "Eigenen privaten Schlüssel verwenden",
-        description:
-          "Fügen Sie Ihren privaten Nostr-Schlüssel (nsec) in diese Wallet ein. Nicht empfohlen.",
+        description: "Diese Methode ist gefährlich und wird nicht empfohlen",
         delete_tooltip: "Privaten Schlüssel löschen",
       },
       signing_extension: {
@@ -559,7 +558,7 @@ export default {
         unset_reserved: {
           button: "Alle reservierten Token freigeben",
           description:
-            "Gibt für ausstehende Sendungen reserviertes Ecash wieder frei. Führen Sie danach „Ausgegebene Nachweise entfernen“ aus.",
+            'Diese Wallet markiert ausstehenden ausgehenden Ecash als reserviert (und zieht es von Ihrem Guthaben ab), um Double-Spend-Versuche zu verhindern. Dieser Button gibt alle reservierten Token frei, damit sie wieder verwendet werden können. Wenn Sie dies tun, könnte Ihre Wallet ausgegebene Nachweise enthalten. Drücken Sie auf den Button "Ausgegebene Nachweise entfernen", um sie loszuwerden.',
         },
         show_onboarding: {
           button: "Onboarding anzeigen",
@@ -568,7 +567,7 @@ export default {
         reset_wallet: {
           button: "Wallet-Daten zurücksetzen",
           description:
-            "Löscht alle Wallet-Daten auf diesem Gerät. Exportieren Sie vorher ein Backup.",
+            "Setzen Sie Ihre Wallet-Daten zurück. Warnung: Dies löscht alles! Stellen Sie sicher, dass Sie vorher eine Sicherung erstellen.",
           confirm_question:
             "Sind Sie sicher, dass Sie Ihre Wallet-Daten löschen möchten?",
           cancel: "Abbrechen",
@@ -843,6 +842,10 @@ export default {
           label: "Seed-Phrase",
         },
       },
+    },
+    information: {
+      caption:
+        "Der Assistent stellt nur Ecash von einer anderen Seed-Phrase wieder her. Sie können diese Seed-Phrase nicht verwenden oder die Seed-Phrase der aktuell verwendeten Wallet ändern. Das bedeutet, dass wiederhergestellter Ecash nicht durch Ihre aktuelle Seed-Phrase geschützt ist, solange Sie den Ecash nicht einmal an sich selbst senden.",
     },
     restore_mints: {
       label: "Mints wiederherstellen",
@@ -1562,6 +1565,7 @@ export default {
     status: "Status",
     network: "Netzwerk",
     transaction_id: "Transaktions-ID",
+    explorer: "Explorer",
     confirmations: "Bestätigungen",
     paid_at: "Bezahlt am",
     preimage: "Preimage",

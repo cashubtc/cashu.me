@@ -325,7 +325,7 @@ export default {
       },
       use_nsec: {
         title: "使用您自己的私钥",
-        description: "将您的 Nostr 私钥（nsec）粘贴到此钱包。不推荐。",
+        description: "这种方法很危险，不建议使用",
         delete_tooltip: "删除私钥",
       },
       signing_extension: {
@@ -542,7 +542,7 @@ export default {
         unset_reserved: {
           button: "取消所有保留的 token",
           description:
-            "释放为待处理发送而保留的 ecash，使其可以再次使用。之后请运行“删除已花费的证明”。",
+            "此钱包会将待处理的传出 ecash 标记为已保留（并从您的余额中扣除），以防止双重支付尝试。此按钮将取消所有保留的 token，以便可以再次使用它们。如果您执行此操作，您的钱包可能会包含已花费的证明。按删除已花费的证明按钮以清除它们。",
         },
         show_onboarding: {
           button: "显示入门指南",
@@ -550,7 +550,8 @@ export default {
         },
         reset_wallet: {
           button: "重置钱包数据",
-          description: "删除此设备上的所有钱包数据。请先导出备份。",
+          description:
+            "重置您的钱包数据。警告：这将删除所有内容！请务必先创建备份。",
           confirm_question: "您确定要删除您的钱包数据吗？",
           cancel: "取消",
           confirm: "删除钱包",
@@ -811,6 +812,10 @@ export default {
           label: "种子短语",
         },
       },
+    },
+    information: {
+      caption:
+        "该向导仅从另一个种子短语恢复 ecash，您将无法使用此种子短语或更改您当前使用的钱包的种子短语。这意味着，除非您将 ecash 发送给自己一次，否则恢复的 ecash 将不会受到您当前种子短语的保护。",
     },
     restore_mints: {
       label: "恢复 Mint",
@@ -1521,6 +1526,7 @@ export default {
     status: "状态",
     network: "网络",
     transaction_id: "交易 ID",
+    explorer: "Explorer",
     confirmations: "确认数",
     paid_at: "支付时间",
     preimage: "原像",

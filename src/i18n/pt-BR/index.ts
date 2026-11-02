@@ -335,8 +335,7 @@ export default {
       },
       use_nsec: {
         title: "Usar sua própria chave privada",
-        description:
-          "Cole sua chave privada Nostr (nsec) nesta carteira. Não recomendado.",
+        description: "Este método é perigoso e não recomendado",
         delete_tooltip: "Excluir chave privada",
       },
       signing_extension: {
@@ -574,7 +573,7 @@ export default {
         unset_reserved: {
           button: "Desmarcar todos os tokens reservados",
           description:
-            'Libera o ecash reservado para envios pendentes para que possa ser gasto de novo. Depois, use "Remover provas gastas".',
+            'Esta carteira marca o ecash sainte pendente como reservado (e o subtrai do seu saldo) para evitar tentativas de gasto duplo. Este botão desmarcará todos os tokens reservados para que possam ser usados novamente. Se fizer isso, sua carteira pode incluir provas gastas. Pressione o botão "Remover provas gastas" para eliminá-las.',
         },
         show_onboarding: {
           button: "Mostrar integração",
@@ -583,7 +582,7 @@ export default {
         reset_wallet: {
           button: "Redefinir dados da carteira",
           description:
-            "Exclui todos os dados da carteira neste dispositivo. Exporte um backup antes.",
+            "Redefina os dados da sua carteira. Aviso: Isso apagará tudo! Certifique-se de criar um backup primeiro.",
           confirm_question:
             "Tem certeza de que deseja excluir os dados da sua carteira?",
           cancel: "Cancelar",
@@ -867,6 +866,10 @@ export default {
           label: "Frase de recuperação",
         },
       },
+    },
+    information: {
+      caption:
+        "O assistente só restaurará ecash de outra frase de recuperação; você não poderá usar esta frase de recuperação nem alterar a frase de recuperação da carteira que está usando atualmente. Isso significa que o ecash restaurado não estará protegido pela sua frase de recuperação atual enquanto você não o enviar para si mesmo uma vez.",
     },
     restore_mints: {
       label: "Restaurar mints",
@@ -1574,6 +1577,7 @@ export default {
     status: "Status",
     network: "Rede",
     transaction_id: "ID da transação",
+    explorer: "Explorer",
     confirmations: "Confirmações",
     paid_at: "Pago em",
     preimage: "Pré-imagem",

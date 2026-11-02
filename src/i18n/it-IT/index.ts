@@ -285,8 +285,7 @@ export default {
       },
       use_nsec: {
         title: "Usa la tua chiave privata",
-        description:
-          "Incolla la tua chiave privata Nostr (nsec) in questo portafoglio. Sconsigliato.",
+        description: "Questo metodo è pericoloso e non raccomandato",
         delete_tooltip: "Elimina chiave privata",
       },
       signing_extension: {
@@ -528,7 +527,7 @@ export default {
         unset_reserved: {
           button: "Annulla prenotazione tutti i token riservati",
           description:
-            'Libera l\'ecash riservato agli invii in sospeso, così puoi spenderlo di nuovo. Poi esegui "Rimuovi prove spese".',
+            'Questo portafoglio marca l\'ecash in uscita pendente come riservato (e lo sottrae dal tuo saldo) per prevenire tentativi di doppia spesa. Questo pulsante annullerà la prenotazione di tutti i token riservati così potranno essere usati di nuovo. Se fai questo, il tuo portafoglio potrebbe includere prove spese. Premi il pulsante "Rimuovi prove spese" per eliminarle.',
         },
         show_onboarding: {
           button: "Mostra onboarding",
@@ -537,7 +536,7 @@ export default {
         reset_wallet: {
           button: "Resetta dati portafoglio",
           description:
-            "Elimina tutti i dati del portafoglio su questo dispositivo. Esporta prima un backup.",
+            "Resetta i dati del tuo portafoglio. Attenzione: Questo eliminerà tutto! Assicurati di creare prima un backup.",
           confirm_question:
             "Sei sicuro di voler eliminare i dati del tuo portafoglio?",
           cancel: "Annulla",
@@ -808,6 +807,10 @@ export default {
           label: "Frase seed",
         },
       },
+    },
+    information: {
+      caption:
+        "L'assistente ripristinerà solo ecash da un'altra frase seed, non potrai usare questa frase seed o cambiare la frase seed del portafoglio che stai usando attualmente. Ciò significa che l'ecash ripristinato non sarà protetto dalla tua frase seed attuale finché non invii l'ecash a te stesso una volta.",
     },
     restore_mints: {
       label: "Ripristina mint",
@@ -1525,6 +1528,7 @@ export default {
     status: "Stato",
     network: "Rete",
     transaction_id: "ID transazione",
+    explorer: "Explorer",
     confirmations: "Conferme",
     paid_at: "Pagato il",
     preimage: "Preimmagine",

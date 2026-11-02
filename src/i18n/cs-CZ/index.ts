@@ -335,8 +335,7 @@ export default {
       },
       use_nsec: {
         title: "Použít vlastní soukromý klíč",
-        description:
-          "Vložte svůj soukromý Nostr klíč (nsec) do této peněženky. Nedoporučujeme.",
+        description: "Tato metoda je nebezpečná a nedoporučuje se",
         delete_tooltip: "Smazat soukromý klíč",
       },
       signing_extension: {
@@ -579,7 +578,7 @@ export default {
         unset_reserved: {
           button: "Zrušit rezervaci všech tokenů",
           description:
-            "Uvolní ecash držený pro čekající odeslání, aby šel znovu utratit. Poté spusťte „Odstranit utracené proofy“.",
+            "Tato peněženka označuje čekající odchozí ecash jako rezervovaný (a odečítá jej ze zůstatku), aby zabránila pokusům o double-spend. Toto tlačítko zruší rezervaci všech tokenů, aby je bylo možné znovu použít. Pokud tak učiníte, peněženka může obsahovat utracené proofy. Pro jejich odstranění použijte tlačítko „Odstranit utracené proofy“.",
         },
         show_onboarding: {
           button: "Zobrazit onboarding",
@@ -588,7 +587,7 @@ export default {
         reset_wallet: {
           button: "Resetovat data peněženky",
           description:
-            "Smaže všechna data peněženky v tomto zařízení. Nejdřív exportujte zálohu.",
+            "Resetuje data vaší peněženky. Varování: Tímto dojde ke smazání všeho! Nezapomeňte si nejprve vytvořit zálohu.",
           confirm_question: "Opravdu chcete smazat data peněženky?",
           cancel: "Zrušit",
           confirm: "Smazat peněženku",
@@ -870,6 +869,10 @@ export default {
           label: "Seed fráze",
         },
       },
+    },
+    information: {
+      caption:
+        "Tento průvodce obnoví pouze ecash z jiné seed fráze, nebudete moci tuto seed frázi používat ani měnit seed frázi aktuální peněženky. Obnovený ecash tak nebude chráněn vaší aktuální seed frází, dokud ho jednou nepošlete sami sobě.",
     },
     restore_mints: {
       label: "Obnovit minty",
@@ -1596,6 +1599,7 @@ export default {
     status: "Stav",
     network: "Síť",
     transaction_id: "ID transakce",
+    explorer: "Explorer",
     confirmations: "Potvrzení",
     paid_at: "Zaplaceno",
     preimage: "Preimage",

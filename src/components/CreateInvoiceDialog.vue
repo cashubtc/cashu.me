@@ -13,7 +13,9 @@
         "
         balanced
       >
-        <template v-if="showAmountInput" #actions>
+        <!-- The unit switch stays while the Lightning address QR shows (UnitToggle hides
+             itself when the mint offers a single unit). -->
+        <template v-if="showAmountInput || showNpubCashPreview" #actions>
           <div class="row items-center no-wrap sheet-header-actions">
             <UnitToggle @toggle="toggleUnit()" />
           </div>

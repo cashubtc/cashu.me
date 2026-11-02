@@ -320,8 +320,7 @@ export default {
       },
       use_nsec: {
         title: "Utiliser votre propre clé privée",
-        description:
-          "Collez votre clé privée Nostr (nsec) dans ce portefeuille. Déconseillé.",
+        description: "Cette méthode est dangereuse et non recommandée",
         delete_tooltip: "Supprimer la clé privée",
       },
       signing_extension: {
@@ -563,7 +562,7 @@ export default {
         unset_reserved: {
           button: "Annuler la réservation de tous les jetons réservés",
           description:
-            "Libère l'ecash réservé aux envois en attente pour pouvoir le dépenser à nouveau. Lancez ensuite « Supprimer les preuves dépensées ».",
+            "Ce portefeuille marque l'ecash sortant en attente comme réservé (et le soustrait de votre solde) pour éviter les tentatives de double dépense. Ce bouton annulera la réservation de tous les jetons réservés afin qu'ils puissent être utilisés à nouveau. Si vous faites cela, votre portefeuille pourrait inclure des preuves dépensées. Appuyez sur le bouton \"Supprimer les preuves dépensées\" pour vous en débarrasser.",
         },
         show_onboarding: {
           button: "Afficher l'accueil",
@@ -572,7 +571,7 @@ export default {
         reset_wallet: {
           button: "Réinitialiser les données du portefeuille",
           description:
-            "Supprime toutes les données du portefeuille sur cet appareil. Exportez d'abord une sauvegarde.",
+            "Réinitialisez les données de votre portefeuille. Attention : Cela supprimera tout ! Assurez-vous de faire une sauvegarde d'abord.",
           confirm_question:
             "Êtes-vous sûr de vouloir supprimer les données de votre portefeuille ?",
           cancel: "Annuler",
@@ -845,6 +844,10 @@ export default {
           label: "Phrase de départ",
         },
       },
+    },
+    information: {
+      caption:
+        "L'assistant ne restaurera que l'ecash d'une autre phrase de départ, vous ne pourrez pas utiliser cette phrase de départ ni changer la phrase de départ du portefeuille que vous utilisez actuellement. Cela signifie que l'ecash restauré ne sera pas protégé par votre phrase de départ actuelle tant que vous ne vous enverrez pas l'ecash une fois.",
     },
     restore_mints: {
       label: "Restaurer les mints",
@@ -1566,6 +1569,7 @@ export default {
     status: "Statut",
     network: "Réseau",
     transaction_id: "ID de transaction",
+    explorer: "Explorer",
     confirmations: "Confirmations",
     paid_at: "Payé le",
     preimage: "Préimage",

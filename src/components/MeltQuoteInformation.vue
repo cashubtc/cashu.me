@@ -47,12 +47,20 @@
       :value="networkDisplay"
     />
 
+    <!-- Tapping the transaction ID copies all of it; the explorer is its own row. -->
     <DetailRow
       v-if="hasTxid"
       :icon="HashIcon"
       :label="$t('QuoteInformation.transaction_id')"
-      :href="onchainTxUrl"
+      :copy-value="txidValue"
       ><bdi dir="ltr">{{ shortTxid(txidValue) }}</bdi></DetailRow
+    >
+    <DetailRow
+      v-if="hasTxid"
+      :icon="GlobeIcon"
+      :label="$t('QuoteInformation.explorer')"
+      :href="onchainTxUrl"
+      ><bdi dir="ltr">{{ explorerHost(onchainTxUrl) }}</bdi></DetailRow
     >
 
     <ConfirmationsRow
@@ -102,6 +110,7 @@ import { useMintsStore } from "stores/mints";
 import { MeltQuoteBolt11Response } from "@cashu/cashu-ts";
 import { PaymentMethod } from "src/stores/walletTypes";
 import {
+  explorerHost,
   fetchTxMetadata,
   onchainNetwork,
   onchainNetworkDisplay,
@@ -112,6 +121,7 @@ import {
   Clock as ClockIcon,
   Coins as CoinsIcon,
   Fingerprint as FingerprintIcon,
+  Globe as GlobeIcon,
   Hash as HashIcon,
   Activity as ActivityIcon,
   Building2 as MintIcon,
@@ -143,6 +153,7 @@ export default defineComponent({
       ClockIcon,
       CoinsIcon,
       FingerprintIcon,
+      GlobeIcon,
       HashIcon,
       ActivityIcon,
       MessageCircleIcon,
@@ -372,6 +383,7 @@ export default defineComponent({
     },
   },
   methods: {
+    explorerHost,
     shortTxid(txid: string): string {
       return `${txid.slice(0, 8)}...${txid.slice(-8)}`;
     },

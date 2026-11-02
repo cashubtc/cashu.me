@@ -25,6 +25,13 @@
           /></IconButton>
         </template>
       </q-input>
+      <!-- Restored ecash is not covered by this wallet's seed until sent to yourself. -->
+      <AppCallout
+        variant="warning"
+        class="q-mt-md"
+        data-testid="restore-seed-warning"
+        :text="$t('RestoreView.information.caption')"
+      />
     </SettingsSection>
 
     <!-- Mints to restore -->
@@ -156,6 +163,7 @@ import MintCardAction from "src/components/ui/MintCardAction.vue";
 import IconButton from "src/components/ui/IconButton.vue";
 import BusyLabel from "src/components/ui/BusyLabel.vue";
 import MintCard from "src/components/MintCard.vue";
+import AppCallout from "src/components/AppCallout.vue";
 import {
   ClipboardPaste as ClipboardPasteIcon,
   ArchiveRestore as ArchiveRestoreIcon,
@@ -181,6 +189,7 @@ export default defineComponent({
     IconButton,
     BusyLabel,
     MintCard,
+    AppCallout,
     ClipboardPasteIcon,
     ArchiveRestoreIcon,
     NostrMintRestore,

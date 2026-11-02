@@ -31,9 +31,9 @@
           </div>
         </q-item-section>
       </q-item>
-      <!-- Shown once a key exists: before that the toggle could do nothing. -->
+      <!-- Shown once a key exists, or while it is on so it can be switched off. -->
       <SettingsToggleRow
-        v-if="p2pkKeys.length"
+        v-if="p2pkKeys.length || showP2PkButtonInDrawer"
         v-model="showP2PkButtonInDrawer"
         :label="$t('Settings.p2pk_features.quick_access.toggle')"
         :caption="$t('Settings.p2pk_features.quick_access.description')"

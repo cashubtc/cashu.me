@@ -318,8 +318,7 @@ export default {
       },
       use_nsec: {
         title: "Kendi özel anahtarınızı kullanın",
-        description:
-          "Nostr özel anahtarınızı (nsec) bu cüzdana yapıştırın. Önerilmez.",
+        description: "Bu yöntem tehlikelidir ve önerilmez",
         delete_tooltip: "Özel anahtarı sil",
       },
       signing_extension: {
@@ -547,7 +546,7 @@ export default {
         unset_reserved: {
           button: "Tüm ayrılmış token'ları kaldır",
           description:
-            'Bekleyen gönderimler için ayrılan ecash\'i yeniden harcanabilmesi için serbest bırakır. Ardından "Harcanmış kanıtları kaldır"ı çalıştırın.',
+            "Bu cüzdan, çifte harcama girişimlerini önlemek için bekleyen giden ecash'i ayrılmış olarak işaretler (ve bakiyenizden düşer). Bu düğme tüm ayrılmış token'ları kaldıracaktır, böylece tekrar kullanılabilirler. Bunu yaparsanız, cüzdanınız harcanmış kanıtlar içerebilir. Onlardan kurtulmak için Harcanmış kanıtları kaldır düğmesine basın.",
         },
         show_onboarding: {
           button: "Başlangıç ekranını göster",
@@ -556,7 +555,7 @@ export default {
         reset_wallet: {
           button: "Cüzdan verilerini sıfırla",
           description:
-            "Bu cihazdaki tüm cüzdan verilerini siler. Önce bir yedek dışa aktarın.",
+            "Cüzdan verilerinizi sıfırlayın. Uyarı: Bu her şeyi siler! Önce bir yedek oluşturduğunuzdan emin olun.",
           confirm_question:
             "Cüzdan verilerinizi silmek istediğinizden emin misiniz?",
           cancel: "İptal",
@@ -842,6 +841,10 @@ export default {
           label: "Kurtarma kelimeleri",
         },
       },
+    },
+    information: {
+      caption:
+        "Sihirbaz yalnızca başka bir kurtarma kelimesinden ecash'i geri yükleyecektir, şu anda kullandığınız cüzdanın kurtarma kelimesini kullanamayacak veya değiştiremeyeceksiniz. Bu, geri yüklenen ecash'in bir kez kendinize göndermediğiniz sürece mevcut kurtarma kelimeniz tarafından korunmayacağı anlamına gelir.",
     },
     restore_mints: {
       label: "Mint'leri geri yükle",
@@ -1560,6 +1563,7 @@ export default {
     status: "Durum",
     network: "Ağ",
     transaction_id: "İşlem kimliği",
+    explorer: "Explorer",
     confirmations: "Onaylar",
     paid_at: "Ödeme zamanı",
     preimage: "Ön görüntü",

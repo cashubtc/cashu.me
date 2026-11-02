@@ -216,12 +216,12 @@ test("validates new on-chain addresses while preserving quote reuse and history 
   await create.click();
   const nextQuote = await (await nextCreated).json();
   expect(nextQuote.quote).not.toBe(quote.quote);
-  await expect(addressText).toContainText(nextQuote.request);
+  await expect(addressText).toHaveAttribute("title", nextQuote.request);
   expect(submissions).toBe(2);
   await wallet.closeFullscreenDialog();
   await page.reload();
   await wallet.openReceive("onchain");
-  await expect(addressText).toContainText(nextQuote.request);
+  await expect(addressText).toHaveAttribute("title", nextQuote.request);
   await expect(create).toHaveText("Create new address");
   expect(submissions).toBe(2);
   await wallet.closeFullscreenDialog();

@@ -40,8 +40,8 @@
 
     <!-- What the payer pays lives in the table, not as a line under the QR (owner
          2026-11-01): a Lightning invoice copies; the deposit address always shows, paid or
-         pending, copying while it waits and linking to an explorer once paid (it came and
-         went). -->
+         pending, copying while it waits (an explorer row beside it) and linking to an
+         explorer once paid (it came and went). -->
     <DetailRow
       v-if="!isOnchain && invoice?.request"
       :icon="ReceiptTextIcon"
@@ -56,6 +56,13 @@
       :href="isPaidState ? addressExplorerUrl : null"
       :copy-value="isPaidState && addressExplorerUrl ? '' : invoice.request"
       ><bdi dir="ltr">{{ shortAddress(invoice.request) }}</bdi></DetailRow
+    >
+    <DetailRow
+      v-if="!isPaidState && addressExplorerUrl"
+      :icon="GlobeIcon"
+      :label="$t('QuoteInformation.explorer')"
+      :href="addressExplorerUrl"
+      ><bdi dir="ltr">{{ explorerHost(addressExplorerUrl) }}</bdi></DetailRow
     >
 
     <DetailRow
@@ -96,6 +103,7 @@ import {
   CircleDollarSign as CircleDollarSignIcon,
   Clock as ClockIcon,
   Coins as CoinsIcon,
+  Globe as GlobeIcon,
   Hash as HashIcon,
   Building2 as MintIcon,
   Network as NetworkIcon,
@@ -105,6 +113,7 @@ import {
 import DetailRow from "src/components/ui/DetailRow.vue";
 import { PaymentMethod } from "src/stores/walletTypes";
 import {
+  explorerHost,
   fetchAddressTxMetadata,
   onchainAddressExplorerUrl,
   onchainNetwork,
@@ -134,6 +143,7 @@ export default defineComponent({
       CircleDollarSignIcon,
       ClockIcon,
       CoinsIcon,
+      GlobeIcon,
       HashIcon,
       MintIcon,
       NetworkIcon,
@@ -297,6 +307,7 @@ export default defineComponent({
     },
   },
   methods: {
+    explorerHost,
     shortTxid(txid: string): string {
       return `${txid.slice(0, 8)}…${txid.slice(-8)}`;
     },

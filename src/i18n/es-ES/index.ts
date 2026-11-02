@@ -315,8 +315,7 @@ export default {
       },
       use_nsec: {
         title: "Usar tu propia clave privada",
-        description:
-          "Pega tu clave privada de Nostr (nsec) en esta billetera. No recomendado.",
+        description: "Este método es peligroso y no se recomienda",
         delete_tooltip: "Eliminar clave privada",
       },
       signing_extension: {
@@ -556,7 +555,7 @@ export default {
         unset_reserved: {
           button: "Desmarcar todos los tokens reservados",
           description:
-            'Libera el ecash reservado para envíos pendientes para poder gastarlo de nuevo. Después, ejecuta "Eliminar pruebas gastadas".',
+            'Esta billetera marca el ecash saliente pendiente como reservado (y lo resta de tu saldo) para prevenir intentos de doble gasto. Este botón desmarcará todos los tokens reservados para que puedan usarse de nuevo. Si haces esto, tu billetera podría incluir pruebas gastadas. Presiona el botón "Eliminar pruebas gastadas" para deshacerte de ellas.',
         },
         show_onboarding: {
           button: "Mostrar bienvenida",
@@ -565,7 +564,7 @@ export default {
         reset_wallet: {
           button: "Restablecer datos de la billetera",
           description:
-            "Elimina todos los datos de la billetera en este dispositivo. Exporta antes una copia de seguridad.",
+            "Restablece los datos de tu billetera. Advertencia: ¡Esto borrará todo! Asegúrate de crear una copia de seguridad primero.",
           confirm_question:
             "¿Estás seguro de que quieres eliminar los datos de tu billetera?",
           cancel: "Cancelar",
@@ -837,6 +836,10 @@ export default {
           label: "Frase semilla",
         },
       },
+    },
+    information: {
+      caption:
+        "El asistente solo restaurará ecash desde otra frase semilla, no podrás usar esta frase semilla ni cambiar la frase semilla de la billetera que estás usando actualmente. Esto significa que el ecash restaurado no estará protegido por tu frase semilla actual mientras no te envíes el ecash a ti mismo una vez.",
     },
     restore_mints: {
       label: "Restaurar mints",
@@ -1556,6 +1559,7 @@ export default {
     status: "Estado",
     network: "Red",
     transaction_id: "ID de transacción",
+    explorer: "Explorer",
     confirmations: "Confirmaciones",
     paid_at: "Pagado el",
     preimage: "Preimagen",

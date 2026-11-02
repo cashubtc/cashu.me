@@ -152,6 +152,15 @@ function mempoolWebBase(apiBase: string): string {
   return apiBase.replace(/\/api$/, "");
 }
 
+/** An explorer link's host ("mempool.space"), the value of an explorer row. */
+export function explorerHost(url: string): string {
+  try {
+    return new URL(url).host;
+  } catch {
+    return url;
+  }
+}
+
 export function onchainAddressExplorerUrl(address: string): string | null {
   const normalizedAddress = normalizeBitcoinAddress(address);
   const apiBase = mempoolBaseForAddress(normalizedAddress);

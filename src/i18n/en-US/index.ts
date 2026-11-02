@@ -334,8 +334,7 @@ export default {
       },
       use_nsec: {
         title: "Use your own private key",
-        description:
-          "Paste your Nostr private key (nsec) into this wallet. Not recommended.",
+        description: "This method is dangerous and not recommended",
         delete_tooltip: "Delete private key",
       },
       signing_extension: {
@@ -573,7 +572,7 @@ export default {
         unset_reserved: {
           button: "Unset all reserved tokens",
           description:
-            'Releases ecash held for pending sends so it can be spent again. Run "Remove spent proofs" afterwards.',
+            'This wallet marks pending outgoing ecash as reserved (and subtracts it from your balance) to prevent double-spend attempts. This button will unset all reserved tokens so they can be used again. If you do this, your wallet might include spent proofs. Press the "Remove spent proofs" button to get rid of them.',
         },
         show_onboarding: {
           button: "Show onboarding",
@@ -582,7 +581,7 @@ export default {
         reset_wallet: {
           button: "Reset wallet data",
           description:
-            "Deletes all wallet data on this device. Export a backup first.",
+            "Reset your wallet data. Warning: This will delete everything! Make sure you create a backup first.",
           confirm_question: "Are you sure you want to delete your wallet data?",
           cancel: "Cancel",
           confirm: "Delete wallet",
@@ -865,6 +864,10 @@ export default {
           label: "Seed phrase",
         },
       },
+    },
+    information: {
+      caption:
+        "The wizard will only restore ecash from another seed phrase, you will not be able to use this seed phrase or change the seed phrase of the wallet that you're currently using. This means that restored ecash will not be protected by your current seed phrase as long as you don't send the ecash to yourself once.",
     },
     restore_mints: {
       label: "Restore mints",
@@ -1571,6 +1574,7 @@ export default {
     status: "Status",
     network: "Network",
     transaction_id: "Transaction ID",
+    explorer: "Explorer",
     confirmations: "Confirmations",
     paid_at: "Paid at",
     preimage: "Preimage",
