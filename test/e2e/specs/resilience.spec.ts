@@ -159,7 +159,13 @@ test.describe("outgoing quote recovery", () => {
       await page.getByTestId("pay-payment-request").click();
       await (await meltResponse).finished();
 
-      await expect(page.getByText("Unpaid", { exact: true })).toBeVisible();
+      // The failure is reported, and the confirm step stays open so the payment can be retried.
+      await expect(
+        page
+          .getByRole("region", { name: /^Notifications/ })
+          .getByText("Payment failed", { exact: true })
+      ).toBeVisible();
+      await expect(page.getByTestId("pay-payment-request")).toBeEnabled();
       await expect.poll(() => wallet.balanceSats()).toBe(before);
     });
 

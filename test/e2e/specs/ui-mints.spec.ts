@@ -325,10 +325,14 @@ test("switching shows a ring, then the check moves; details don't switch", async
     await held;
     await route.continue();
   });
+  // Bring the whole card into view first: the click would otherwise scroll the page to it
+  // after the head was measured.
+  await a.scrollIntoViewIfNeeded();
   const head = await a.locator(".mint-card__head").boundingBox();
   await a.click();
   await expect(a).toHaveAttribute("aria-busy", "true");
-  await expect(a.locator(".mint-card__ring")).toBeVisible();
+  // The shared switching ring (MintSwitchRing), as on the picker under the balance.
+  await expect(a.locator(".mint-switch-ring")).toBeVisible();
   await expect(a.locator(".mint-card__check")).toHaveCount(0);
   await expect(a.getByRole("status")).toHaveText(/Switching to/);
   // The ring takes the reserved cell: nothing in the head moves.
@@ -388,19 +392,30 @@ test("mint pickers share one recipe and open from a real chevron button", async 
   await expect(listbox).toBeHidden();
   await expect(normalTrigger).toBeFocused();
 
-  // Dense (the swap form): the same field and avatar, only shorter.
+  // Dense (the swap form): the same field and avatar. Both keep 16px over and under the
+  // text (owner 2026-10-29: 4px read as squashed), so a two-line dense picker, here the From
+  // label over the name, is the wallet's height; only a one-line dense picker drops to 56px.
   await wallet.home("Mints");
   const dense = wallet.mintPicker("swap-from");
+  await expect(dense).toContainText(/^From/);
   const denseBox = await dense.boundingBox();
   expect(denseBox?.height).toBeGreaterThanOrEqual(56);
-  expect(denseBox?.height).toBeLessThan(normalBox?.height ?? 0);
+  expect(
+    Math.abs((denseBox?.height ?? 0) - (normalBox?.height ?? 0))
+  ).toBeLessThan(0.6);
   const style = (sel: string) =>
     page
       .getByTestId(sel)
       .filter({ visible: true })
       .evaluate((el) => {
         const cs = getComputedStyle(el);
-        return [cs.borderTopColor, cs.borderRadius, cs.backgroundColor];
+        return [
+          cs.borderTopColor,
+          cs.borderRadius,
+          cs.backgroundColor,
+          cs.paddingTop,
+          cs.paddingBottom,
+        ];
       });
   await wallet.home();
   const normalStyle = await style("wallet-mint-chip");

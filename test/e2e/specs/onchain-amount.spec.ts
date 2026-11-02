@@ -56,7 +56,10 @@ for (const unit of ["usd", "eur"] as const) {
     await enterCents(113);
     await expect(create).toBeEnabled();
     await create.click();
-    await expect(page.locator(".qr-copy-line:visible")).toBeVisible();
+    // The new address is a copy row in the invoice's detail table.
+    await expect(
+      page.getByRole("button", { name: /^Address: / })
+    ).toBeVisible();
     await expect(
       page.locator(
         '.app-callout--neutral[data-testid="deposit-limits-address"]:visible'
@@ -178,21 +181,26 @@ test("validates new on-chain addresses while preserving quote reuse and history 
   );
   await create.click();
   const quote = await (await created).json();
+  // A new address shows as a copy row in the invoice's detail table; reopening Receive
+  // previews the reusable address as the copy line under its QR. Both show the address
+  // shortened in the middle and carry the whole of it in their accessible name.
+  const addressRow = page.getByRole("button", { name: /^Address: / });
   const addressText = page.locator(".qr-copy-line:visible");
-  // Shown shortened in the middle; the whole address is its tooltip and accessible name.
-  await expect(addressText).toHaveAttribute("title", quote.request);
+  await expect(addressRow).toHaveAttribute(
+    "aria-label",
+    `Address: ${quote.request}`
+  );
   await expect(limitsHint).toBeVisible();
-  await expect(addressText).not.toContainText("bitcoin:");
+  await expect(addressRow).not.toContainText("bitcoin:");
   await expect(page.locator(".qr-container:visible a")).toHaveCount(0);
-  await page.locator(".qr-copy-line:visible").click();
+  await addressRow.click();
   await expect
     .poll(() => page.evaluate(() => navigator.clipboard.readText()))
     .toBe(quote.request);
   expect(submissions).toBe(1);
   await wallet.closeFullscreenDialog();
   await wallet.openReceive("onchain");
-  // Shown shortened in the middle; the whole address is its tooltip and accessible name.
-  await expect(addressText).toHaveAttribute("title", quote.request);
+  await expect(addressText).toHaveAttribute("aria-label", quote.request);
   await expect(addressText).not.toContainText("bitcoin:");
   await expect(limitsHint).toBeVisible();
   await expect(error).toHaveCount(0);
@@ -216,21 +224,26 @@ test("validates new on-chain addresses while preserving quote reuse and history 
   await create.click();
   const nextQuote = await (await nextCreated).json();
   expect(nextQuote.quote).not.toBe(quote.quote);
-  await expect(addressText).toHaveAttribute("title", nextQuote.request);
+  await expect(addressRow).toHaveAttribute(
+    "aria-label",
+    `Address: ${nextQuote.request}`
+  );
   expect(submissions).toBe(2);
   await wallet.closeFullscreenDialog();
   await page.reload();
   await wallet.openReceive("onchain");
-  await expect(addressText).toHaveAttribute("title", nextQuote.request);
+  await expect(addressText).toHaveAttribute("aria-label", nextQuote.request);
   await expect(create).toHaveText("Create new address");
   expect(submissions).toBe(2);
   await wallet.closeFullscreenDialog();
   await wallet.home("History");
   const oldRow = page.getByTestId("history-row").last();
   await oldRow.getByTestId("history-details").click();
-  // Shown shortened in the middle; the whole address is its tooltip and accessible name.
-  await expect(addressText).toHaveAttribute("title", quote.request);
-  await expect(addressText).not.toContainText("bitcoin:");
+  await expect(addressRow).toHaveAttribute(
+    "aria-label",
+    `Address: ${quote.request}`
+  );
+  await expect(addressRow).not.toContainText("bitcoin:");
   await wallet.closeFullscreenDialog();
   await expect
     .poll(async () => {

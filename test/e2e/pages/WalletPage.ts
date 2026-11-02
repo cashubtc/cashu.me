@@ -154,17 +154,17 @@ export class WalletPage {
     await expect(pay).toBeEnabled();
     await pay.click();
     // The dialog's own paid state, not the "Paid" toast, which appears while the wallet is
-    // still finishing the payment (closing then raced the dialog's reset).
-    await expect(
-      this.page.getByRole("dialog").last().getByText("Paid", { exact: false })
-    ).toBeVisible();
-    // The Send sheet stays open under the payment dialog and has its own Close; close the
-    // payment dialog (the topmost one).
-    await this.page
-      .getByRole("dialog")
-      .last()
+    // still finishing the payment (closing then raced the dialog's reset). Exact, so the
+    // quote's "Unpaid" status can never stand in for it.
+    const dialog = this.page.getByRole("dialog").last();
+    await expect(dialog.getByText("Paid", { exact: true })).toBeVisible();
+    // The Send sheet stays open under the payment dialog; close the payment dialog (the
+    // topmost one) with the paid screen's own Close action, not the header's ✕.
+    await dialog
+      .locator(".flow-footer__bar")
       .getByRole("button", { name: "Close", exact: true })
       .click();
+    await expect(dialog.getByText("Paid", { exact: true })).toBeHidden();
   }
 
   async quoteRequest(request: string, amount?: number, expectPayButton = true) {

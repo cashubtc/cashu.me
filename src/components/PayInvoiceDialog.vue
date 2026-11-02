@@ -625,6 +625,7 @@ import AmountInputComponent from "components/AmountInputComponent.vue";
 import ParseInputComponent from "components/ParseInputComponent.vue";
 import { mintsSupportingPaymentMethod } from "src/js/mint-payment-methods";
 import { PaymentMethod } from "src/stores/walletTypes";
+import { notifyApiError } from "src/js/notify";
 
 declare const windowMixin: any;
 
@@ -1083,9 +1084,17 @@ export default defineComponent({
         console.log("### fee_paid", this.payInvoiceData.fee_paid);
         // Success state and closing is handled by the watcher on payInvoiceData.show
       } catch (error) {
-        // Error handling is done in the store, but we ensure isPaying is reset
         console.error("Payment error:", error);
         this.isPaying = false;
+        // The wallet pays silently here (the paid screen is the confirmation), so a payment
+        // that failed and left the confirm step open says so. Pending and paid payments
+        // close the dialog or show the paid screen instead.
+        if (this.payInvoiceData.show && !this.isPaid) {
+          notifyApiError(
+            error as Error,
+            this.$t("wallet.notifications.payment_failed")
+          );
+        }
       } finally {
         this.waitingForWallet = false;
         uiStore.endForegroundPayment();

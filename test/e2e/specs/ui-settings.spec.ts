@@ -156,7 +156,8 @@ test("payment request rows never overlap", async ({ page }) => {
   await wallet.home();
   await wallet.openReceive("ecash");
   await page.getByText("Request ecash", { exact: true }).click();
-  const rows = ["pr-amount", "pr-unit", "pr-mint"].map((id) =>
+  // Every row of the table, in order: the request text is a copy row between Unit and Mint.
+  const rows = ["pr-amount", "pr-unit", "pr-request", "pr-mint"].map((id) =>
     page.getByTestId(id).filter({ visible: true })
   );
   await expect(rows[0]).toBeVisible();

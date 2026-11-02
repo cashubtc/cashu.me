@@ -110,9 +110,15 @@ test.describe("toasts", () => {
     const long =
       "تعذّر الاتصال بالمِنْت. تحقق من اتصالك بالإنترنت ثم حاول مرة أخرى بعد قليل.";
     await toast(page, ["error", long]);
-    const box = (await front(page).boundingBox())!;
-    expect(box.x).toBeGreaterThanOrEqual(16 - 1);
-    expect(box.x + box.width).toBeLessThanOrEqual(320 - 16 + 1);
+    // Shrinking the viewport past Sonner's 600px breakpoint slides the stack from its centred
+    // desktop place to the phone insets (Sonner's own 400ms transform transition), so measure
+    // where it settles.
+    await expect
+      .poll(async () => {
+        const box = (await front(page).boundingBox())!;
+        return [Math.round(box.x), Math.round(box.x + box.width)];
+      })
+      .toEqual([16, 320 - 16]);
     await expect(front(page)).toContainText("مرة أخرى بعد قليل");
   });
 });
