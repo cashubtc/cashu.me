@@ -107,6 +107,46 @@ describe("SendTokenDialog", () => {
     }
   );
 
+  it.each([
+    { activeMintUrl: "https://other.example", methods: ["bolt11"], fee: 2 },
+    { activeMintUrl: "https://mint.example", methods: ["bolt11"], fee: 0 },
+    { activeMintUrl: "https://other.example", methods: undefined, fee: 0 },
+  ])(
+    "prices the request's method fee from $activeMintUrl: $fee",
+    ({ activeMintUrl, methods, fee }) => {
+      const request = new PaymentRequest(
+        undefined,
+        "pr1",
+        21,
+        "sat",
+        ["https://mint.example"],
+        undefined,
+        false,
+        undefined,
+        true,
+        methods?.map((method) => ({ method, fee: 2 }))
+      );
+      const context = {
+        sendData: {
+          paymentRequest: JSONInt.parse(JSONInt.stringify(request)!),
+        },
+        activeMintUrl,
+        activeUnit: "sat",
+        mintWalletSync: vi.fn(() => ({
+          getMintInfo: () => ({
+            isSupported: () => ({
+              disabled: false,
+              params: [{ method: "bolt11", unit: "sat" }],
+            }),
+          }),
+        })),
+      };
+      expect(
+        SendTokenDialog.computed.paymentRequestMethodFee.call(context)
+      ).toBe(fee);
+    }
+  );
+
   it("queues an ecash send as foreground work after the user taps Send", async () => {
     const uiStore = useUiStore();
     let rejectSend!: (error: Error) => void;
