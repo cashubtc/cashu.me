@@ -514,9 +514,14 @@ export const useNostrStore = defineStore("nostr", {
           receiveStore.receiveData.tokensBase64 = tokenStr;
           sendTokensStore.showSendTokens = false;
           const knowThisMint = receiveStore.knowThisMintOfTokenJson(token);
+          // Only payments to a request stored here can be checked (eg not one made on another device).
+          const ours = prStore.ourPaymentRequests.some(
+            (r) => r.id === payload.id
+          );
           const satisfied =
-            knowThisMint && (await prStore.paymentSatisfiesRequest(payload));
-          if (knowThisMint && !satisfied) {
+            knowThisMint &&
+            (!ours || (await prStore.paymentSatisfiesRequest(payload)));
+          if (ours && knowThisMint && !satisfied) {
             notifyWarning("Payment does not match the request");
           }
           if (prStore.receivePaymentRequestsAutomatically && satisfied) {
