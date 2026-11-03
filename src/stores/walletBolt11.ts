@@ -8,8 +8,9 @@ import {
   MeltQuoteBolt11Request,
   MintQuoteBolt11Response,
   MintQuoteState,
+  createRandomSecretKey,
+  getPubKeyFromPrivKey,
 } from "@cashu/cashu-ts";
-import * as nobleSecp256k1 from "@noble/secp256k1";
 import { bytesToHex } from "@noble/hashes/utils.js";
 import {
   notifyApiError,
@@ -56,11 +57,10 @@ export async function requestMintBolt11(
     const { supported: nut20supported } = mintWallet
       .getMintInfo()
       .isSupported(20);
-    const privkey = nut20supported
-      ? bytesToHex(nobleSecp256k1.utils.randomPrivateKey())
-      : undefined;
-    const pubkey = nut20supported
-      ? bytesToHex(nobleSecp256k1.getPublicKey(privkey!!, true))
+    const secretKey = nut20supported ? createRandomSecretKey() : undefined;
+    const privkey = secretKey ? bytesToHex(secretKey) : undefined;
+    const pubkey = secretKey
+      ? bytesToHex(getPubKeyFromPrivKey(secretKey))
       : undefined;
     const data = pubkey
       ? await mintWallet.createLockedMintQuote(amount, pubkey)
