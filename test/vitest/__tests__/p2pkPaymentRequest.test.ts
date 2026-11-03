@@ -13,62 +13,6 @@ import { useProofsStore } from "src/stores/proofs";
 
 const PUBKEY =
   "02a9acc1e48c25eeeb9289b5031cc57da9fe72f3fe2861d264bdc074209b107ba2";
-const HASH = "e0d21f5a0158ee5eafcd25f31036ff2b9ea23bda56c81b883c5b41d3d9b56b39";
-
-const makePr = (nut10?: { kind: string; data: string; tags: string[][] }) =>
-  new PaymentRequest(
-    undefined,
-    "pr1",
-    21,
-    "sat",
-    undefined,
-    undefined,
-    false,
-    nut10
-  );
-
-describe("PaymentRequest.toP2PKOptions (NUT-18 lock contract)", () => {
-  // SendTokenDialog.payPaymentRequest branches on this contract: options
-  // returned -> sendToLock, undefined -> plain send.
-  test("returns undefined when the request has no nut10 lock", () => {
-    expect(makePr().toP2PKOptions()).toBeUndefined();
-  });
-
-  test("returns undefined for an unsupported lock kind", () => {
-    expect(
-      makePr({ kind: "DLC", data: "deadbeef", tags: [] }).toP2PKOptions()
-    ).toBeUndefined();
-  });
-
-  test("builds P2PK options from a P2PK lock", () => {
-    const opts = makePr({
-      kind: "P2PK",
-      data: PUBKEY,
-      tags: [["locktime", "1750000000"]],
-    }).toP2PKOptions();
-    expect(opts).toMatchObject({ pubkey: PUBKEY, locktime: 1750000000 });
-    expect(opts?.hashlock).toBeUndefined();
-  });
-
-  test("builds HTLC options from an HTLC lock", () => {
-    const opts = makePr({
-      kind: "HTLC",
-      data: HASH,
-      tags: [["pubkeys", PUBKEY]],
-    }).toP2PKOptions();
-    expect(opts).toMatchObject({ hashlock: HASH, pubkey: [PUBKEY] });
-  });
-
-  test("survives a creqA encode/decode round-trip", () => {
-    const encoded = makePr({
-      kind: "P2PK",
-      data: PUBKEY,
-      tags: [],
-    }).toEncodedCreqA();
-    const decoded = PaymentRequest.fromEncodedRequest(encoded);
-    expect(decoded.toP2PKOptions()).toMatchObject({ pubkey: PUBKEY });
-  });
-});
 
 describe("walletStore.sendToLock pubkey normalization", () => {
   const setup = () => {
@@ -78,10 +22,10 @@ describe("walletStore.sendToLock pubkey normalization", () => {
       { id: "ks1", amount: 21, secret: "s1", C: "c1", reserved: false },
     ] as any[];
     const sendProofs = [{ id: "ks1", amount: 21, secret: "s2", C: "c2" }];
-    const asP2PK = vi.fn().mockReturnValue({
+    const asLocked = vi.fn().mockReturnValue({
       run: vi.fn().mockResolvedValue({ keep: [], send: sendProofs }),
     });
-    const keyset = vi.fn().mockReturnValue({ asP2PK });
+    const keyset = vi.fn().mockReturnValue({ asLocked });
     const mockWallet = {
       unit: "sat",
       keysetId: "ks1",
@@ -95,26 +39,15 @@ describe("walletStore.sendToLock pubkey normalization", () => {
     wallet.getKeyset = vi.fn().mockReturnValue("ks1");
     proofs.removeProofs = vi.fn().mockResolvedValue(undefined);
     proofs.addProofs = vi.fn().mockResolvedValue(undefined);
-    return { wallet, mockWallet, keyset, asP2PK, sendProofs, walletProofs };
+    return { wallet, mockWallet, keyset, asLocked, sendProofs, walletProofs };
   };
 
   test("wraps a bare pubkey string in P2PKOptions", async () => {
-    const { wallet, mockWallet, keyset, asP2PK, sendProofs } = setup();
+    const { wallet, mockWallet, keyset, asLocked, sendProofs } = setup();
     const result = await wallet.sendToLock([], mockWallet, 21, PUBKEY);
     expect(keyset).toHaveBeenCalledWith("ks1");
-    expect(asP2PK).toHaveBeenCalledWith({ pubkey: PUBKEY });
+    expect(asLocked).toHaveBeenCalledWith({ pubkey: PUBKEY });
     expect(result.sendProofs).toEqual(sendProofs);
-  });
-
-  test("passes full P2PKOptions through untouched", async () => {
-    const { wallet, mockWallet, asP2PK } = setup();
-    const lockOptions = {
-      pubkey: [PUBKEY],
-      hashlock: HASH,
-      locktime: 1750000000,
-    };
-    await wallet.sendToLock([], mockWallet, 21, lockOptions);
-    expect(asP2PK).toHaveBeenCalledWith(lockOptions);
   });
 
   test("removes inputs and keeps change, but not the locked sendProofs", async () => {
@@ -123,5 +56,99 @@ describe("walletStore.sendToLock pubkey normalization", () => {
     await wallet.sendToLock([], mockWallet, 21, PUBKEY);
     expect(proofs.removeProofs).toHaveBeenCalledWith(walletProofs);
     expect(proofs.addProofs).toHaveBeenCalledWith([]);
+  });
+});
+
+describe("walletStore.sendToRequest", () => {
+  const dleq = { e: "e", s: "s", r: "r" };
+  const setup = (exactMatch: any[] = []) => {
+    const wallet = useWalletStore();
+    const proofs = useProofsStore();
+    const walletProofs = [
+      { id: "ks1", amount: 16, secret: "s1", C: "c1", dleq, reserved: false },
+      { id: "ks1", amount: 8, secret: "s2", C: "c2", reserved: false },
+      { id: "ks1", amount: 4, secret: "s3", C: "c3", dleq, reserved: false },
+    ] as any[];
+    // s3 passes through unselected; s1 and s2 are swapped
+    const keep = [
+      { id: "ks1", amount: 4, secret: "s3", C: "c3" },
+      { id: "ks1", amount: 2, secret: "k1", C: "ck" },
+    ];
+    const send = [{ id: "ks1", amount: 22, secret: "x1", C: "cx" }];
+    const builder: any = {
+      keyset: vi.fn(() => builder),
+      proofsWeHave: vi.fn(() => builder),
+      asDeterministic: vi.fn(() => builder),
+      offlineExactOnly: vi.fn(() => ({
+        run: vi.fn().mockResolvedValue({ keep: [], send: exactMatch }),
+      })),
+      run: vi.fn().mockResolvedValue({ keep, send }),
+    };
+    const mockWallet = {
+      keysetId: "ks1",
+      ops: { sendToRequest: vi.fn(() => builder) },
+    } as any;
+    wallet.spendableProofs = vi.fn().mockReturnValue(walletProofs);
+    proofs.removeProofs = vi.fn().mockResolvedValue(undefined);
+    proofs.addProofs = vi.fn().mockResolvedValue(undefined);
+    return { wallet, proofs, mockWallet, builder, send };
+  };
+
+  test("swaps, keeps fresh change and drops the swapped inputs", async () => {
+    const { wallet, proofs, mockWallet, builder, send } = setup();
+    const pr = new PaymentRequest(undefined, "pr1", 21, "sat");
+    const result = await wallet.sendToRequest([], mockWallet, pr);
+    expect(wallet.spendableProofs).toHaveBeenCalledWith([], 21);
+    expect(mockWallet.ops.sendToRequest).toHaveBeenCalledWith(
+      pr,
+      expect.any(Array),
+      undefined
+    );
+    expect(builder.asDeterministic).toHaveBeenCalled();
+    expect(proofs.removeProofs).toHaveBeenCalledWith([
+      expect.objectContaining({ secret: "s1" }),
+      expect.objectContaining({ secret: "s2" }),
+    ]);
+    expect(proofs.addProofs).toHaveBeenCalledWith([
+      expect.objectContaining({ secret: "k1" }),
+    ]);
+    expect(result.sendProofs).toEqual(send);
+  });
+
+  test("hands over an exact match, with DLEQ, without a swap", async () => {
+    // cashu-ts returns offline matches without their DLEQ
+    const { wallet, proofs, mockWallet, builder } = setup([
+      { id: "ks1", amount: 16, secret: "s1", C: "c1" },
+      { id: "ks1", amount: 4, secret: "s3", C: "c3" },
+    ]);
+    const pr = new PaymentRequest(undefined, "pr1", 20, "sat");
+    const result = await wallet.sendToRequest([], mockWallet, pr);
+    expect(builder.run).not.toHaveBeenCalled();
+    expect(proofs.removeProofs).toHaveBeenCalledWith(result.sendProofs);
+    expect(proofs.addProofs).not.toHaveBeenCalled();
+    expect(result.sendProofs.map((p) => p.secret)).toEqual(["s1", "s3"]);
+    expect(result.sendProofs.every((p) => p.dleq === dleq)).toBe(true);
+  });
+
+  test("leaves a locked request's send outputs to cashu-ts", async () => {
+    const { wallet, mockWallet, builder } = setup();
+    const pr = new PaymentRequest(
+      undefined,
+      "pr1",
+      undefined,
+      "sat",
+      undefined,
+      undefined,
+      false,
+      { kind: "P2PK", data: PUBKEY, tags: [] }
+    );
+    await wallet.sendToRequest([], mockWallet, pr, 21);
+    expect(mockWallet.ops.sendToRequest).toHaveBeenCalledWith(
+      pr,
+      expect.any(Array),
+      21
+    );
+    expect(builder.asDeterministic).not.toHaveBeenCalled();
+    expect(builder.offlineExactOnly).not.toHaveBeenCalled();
   });
 });
