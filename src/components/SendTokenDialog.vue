@@ -149,7 +149,7 @@
             v-if="!showLockInput"
             v-model="sendData.amount"
             :muted="insufficientFunds"
-            :enabled="!sendData.tokens"
+            :enabled="!sendData.tokens && !paymentRequestAmountFixed"
             :show-fiat-conversion="!insufficientFunds"
             @enter="sendTokens"
             @fiat-mode-changed="fiatKeyboardMode = $event"
@@ -199,7 +199,7 @@
 
         <!-- Numeric keypad -->
         <div class="bottom-panel">
-          <div class="keypad-wrapper">
+          <div v-if="!paymentRequestAmountFixed" class="keypad-wrapper">
             <NumericKeyboard
               :force-visible="true"
               :hide-close="true"
@@ -277,7 +277,8 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
-import { PaymentRequest } from "@cashu/cashu-ts";
+import { toPaymentRequest } from "src/stores/payment-request";
+import { sumProofAmounts } from "src/js/proofs";
 import { useWalletStore } from "src/stores/wallet";
 import { type MutexPriority, useUiStore } from "src/stores/ui";
 import { useProofsStore } from "src/stores/proofs";
@@ -409,33 +410,18 @@ export default defineComponent({
           this.isValidPubkey(this.sendData.p2pkPubkey)
       );
     },
-    // NUT-18's `m` field is mandatory today (cashu-ts `PaymentRequest.mints`
-    // is a plain `string[]`). This constraint helper wraps that so when the
-    // spec change at https://github.com/cashubtc/nuts/pull/381 lands we can
-    // also return `{ kind: "preferred", allowed }` without touching callers:
-    // the button disable + warning logic just keys off `kind`.
-    paymentRequestMintConstraint(): {
-      kind: "mandatory";
-      allowed: string[];
-    } | null {
-      const allowed =
-        this.sendData.paymentRequest?.mints?.filter((m): m is string => !!m) ??
-        [];
-      if (allowed.length === 0) return null;
-      return { kind: "mandatory", allowed };
+    paymentRequestAmountFixed(): boolean {
+      return this.sendData.paymentRequest?.amount != null;
     },
+    // Only a strict mint list blocks the send; a preferred one (NUT-18 `mp`) does not.
     selectedMintViolatesRequest(): boolean {
-      const c = this.paymentRequestMintConstraint;
-      if (!c) return false;
-      if (!this.activeMintUrl) return true;
-      return !c.allowed.includes(this.activeMintUrl);
+      if (!this.sendData.paymentRequest) return false;
+      const request = toPaymentRequest(this.sendData.paymentRequest);
+      return (
+        !!request.isMintListStrict && !request.includesMint(this.activeMintUrl)
+      );
     },
     paymentRequestMintWarning(): string {
-      // Only block (and warn) for mandatory constraints. Preferred-mint
-      // copy can be added later as a separate i18n key without reshaping
-      // this method.
-      const c = this.paymentRequestMintConstraint;
-      if (!c || c.kind !== "mandatory") return "";
       if (!this.selectedMintViolatesRequest) return "";
       return this.$t(
         "SendTokenDialog.errors.mint_not_allowed_by_request"
@@ -455,11 +441,7 @@ export default defineComponent({
       if (this.globalMutexLock) {
         return true;
       }
-      const c = this.paymentRequestMintConstraint;
-      if (c && c.kind === "mandatory" && this.selectedMintViolatesRequest) {
-        return true;
-      }
-      return false;
+      return this.selectedMintViolatesRequest;
     },
   },
   watch: {
@@ -526,6 +508,7 @@ export default defineComponent({
     ...mapActions(useWalletStore, [
       "send",
       "sendToLock",
+      "sendToRequest",
       "coinSelect",
       "spendableProofs",
       "getFeesForProofs",
@@ -572,28 +555,16 @@ export default defineComponent({
         this.activeUnit,
         true
       );
-      // NUT-18 payment requests may require the proofs to be locked with a
-      // NUT-10 spending condition. PaymentRequest.toP2PKOptions() builds the
-      // P2PK/HTLC lock cashu-ts can honour, or returns undefined for any other
-      // kind, in which case we fall back to a normal unlocked send.
-      // History contains plain request data, so build the SDK lock converter here.
-      const lockRequest = new PaymentRequest();
-      lockRequest.nut10 = this.sendData.paymentRequest.nut10;
-      const lockOptions = lockRequest.toP2PKOptions();
-      const { sendProofs } = lockOptions
-        ? await this.sendToLock(
-            this.activeProofs,
-            mintWallet,
-            sendAmount,
-            lockOptions
-          )
-        : await this.send(
-            this.activeProofs,
-            mintWallet,
-            sendAmount,
-            true,
-            this.includeFeesInSendAmount
-          );
+      const request = toPaymentRequest(this.sendData.paymentRequest);
+      const { sendProofs } = await this.sendToRequest(
+        this.activeProofs,
+        mintWallet,
+        request,
+        request.amount == null ? sendAmount : undefined
+      );
+      // History keeps the requested amount, as for ecash sends; the request's fees go in `fee`.
+      const requestedAmount = request.amount?.toNumber() ?? sendAmount;
+      const fee = sumProofAmounts(sendProofs) - requestedAmount;
       const serialized = this.serializeProofs(sendProofs);
       if (!serialized) {
         throw new Error(
@@ -602,9 +573,10 @@ export default defineComponent({
       }
       this.sendData.tokens = "";
       this.sendData.tokensBase64 = serialized;
-      this.sendData.historyAmount = -sendAmount;
+      this.sendData.historyAmount = -requestedAmount;
       const historyToken = {
-        amount: -sendAmount,
+        amount: -requestedAmount,
+        fee,
         token: serialized,
         unit: this.activeUnit,
         mint: this.activeMintUrl,

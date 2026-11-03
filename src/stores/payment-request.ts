@@ -3,10 +3,8 @@ import {
   Amount,
   type AmountLike,
   decodePaymentRequest,
-  JSONInt,
   normalizeProofAmounts,
   PaymentRequest,
-  PaymentRequestPayload,
   PaymentRequestTransport,
   PaymentRequestTransportType,
 } from "@cashu/cashu-ts";
@@ -23,8 +21,33 @@ import { v4 as uuidv4 } from "uuid";
 // Request fields used by the UI and delivery; history stores these as plain data.
 export type PaymentRequestData = Pick<
   PaymentRequest,
-  "transport" | "id" | "unit" | "mints" | "description" | "singleUse" | "nut10"
-> & { amount?: AmountLike };
+  | "transport"
+  | "id"
+  | "unit"
+  | "mints"
+  | "description"
+  | "singleUse"
+  | "nut10"
+  | "mintsPreferred"
+> & {
+  amount?: AmountLike;
+  supportedMethods?: Array<{ method: string; fee?: AmountLike }>;
+};
+
+export function toPaymentRequest(data: PaymentRequestData): PaymentRequest {
+  return new PaymentRequest(
+    data.transport,
+    data.id,
+    data.amount,
+    data.unit,
+    data.mints,
+    data.description,
+    data.singleUse,
+    data.nut10,
+    data.mintsPreferred,
+    data.supportedMethods
+  );
+}
 
 export type OurPaymentRequest = {
   id: string; // UUID from PaymentRequest
@@ -189,18 +212,17 @@ export const usePRStore = defineStore("payment-request", {
       this.getPaymentRequestTransport(request);
       console.log("decodePaymentRequest", request);
       const mintsStore = useMintsStore();
-      // activate the mint in the payment request
-      if (request.mints && request.mints.length > 0) {
-        let foundMint = false;
-        for (const mint of request.mints) {
-          if (mintsStore.mints.find((m) => m.url == mint)) {
-            // await mintsStore.activateMintUrl(mint, false, false, request.unit);
-            mintsStore.activeMintUrl = mint;
-            foundMint = true;
-            break;
-          }
-        }
-        if (!foundMint) {
+      // switch to a listed mint unless the active one is listed already
+      if (
+        request.mints?.length &&
+        !request.includesMint(mintsStore.activeMintUrl)
+      ) {
+        const listed = mintsStore.mints.find((m) =>
+          request.includesMint(m.url)
+        );
+        if (listed) {
+          mintsStore.activeMintUrl = listed.url;
+        } else if (request.isMintListStrict) {
           throw new Error(
             `This payment requires using the mint: ${request.mints}`
           );
@@ -281,15 +303,11 @@ export const usePRStore = defineStore("payment-request", {
         console.error("could not decode token");
         throw new Error("Could not decode ecash token.");
       }
-      const proofs = token.getProofs(decodedToken);
-      const mint = token.getMint(decodedToken);
-      const paymentPayload: PaymentRequestPayload = {
-        id: request.id,
-        mint: mint,
-        unit: request.unit || "",
-        proofs: normalizeProofAmounts(proofs),
-      };
-      const paymentPayloadString = JSONInt.stringify(paymentPayload)!;
+      const paymentPayloadString = toPaymentRequest(request).encodePayload(
+        token.getMint(decodedToken),
+        normalizeProofAmounts(token.getProofs(decodedToken)),
+        { unit: token.getUnit(decodedToken) }
+      );
       try {
         await nostrStore.sendNip17DirectMessageToNprofile(
           transport.target,
@@ -314,16 +332,11 @@ export const usePRStore = defineStore("payment-request", {
         console.error("could not decode token");
         throw new Error("Could not decode ecash token.");
       }
-      const proofs = token.getProofs(decodedToken);
-      const unit = token.getUnit(decodedToken);
-      const mint = token.getMint(decodedToken);
-      const paymentPayload: PaymentRequestPayload = {
-        id: request.id,
-        mint: mint,
-        unit: unit,
-        proofs: normalizeProofAmounts(proofs),
-      };
-      const paymentPayloadString = JSONInt.stringify(paymentPayload)!;
+      const paymentPayloadString = toPaymentRequest(request).encodePayload(
+        token.getMint(decodedToken),
+        normalizeProofAmounts(token.getProofs(decodedToken)),
+        { unit: token.getUnit(decodedToken) }
+      );
       try {
         const response = await fetch(transport.target, {
           headers: {
