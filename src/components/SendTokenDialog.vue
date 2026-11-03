@@ -85,6 +85,16 @@
             >
               {{ paymentRequestMintWarning }}
             </q-banner>
+            <div
+              v-if="paymentRequestMethodFee > 0"
+              class="text-caption text-grey-6 text-center q-mt-xs"
+            >
+              {{
+                $t("SendTokenDialog.payment_request.method_fee", {
+                  fee: formatCurrency(paymentRequestMethodFee, activeUnit),
+                })
+              }}
+            </div>
           </div>
         </div>
 
@@ -365,7 +375,8 @@ export default defineComponent({
       if (this.sendData.amount == null) return false;
       return (
         this.activeBalance <
-        this.sendData.amount * this.activeUnitCurrencyMultiplyer
+        this.sendData.amount * this.activeUnitCurrencyMultiplyer +
+          this.paymentRequestMethodFee
       );
     },
     // canSpendOffline: function (): boolean {
@@ -409,6 +420,24 @@ export default defineComponent({
         this.sendData.p2pkPubkey != "" &&
           this.isValidPubkey(this.sendData.p2pkPubkey)
       );
+    },
+    // The fee a request adds when paid from a mint off its list (NUT-18 `mf`).
+    paymentRequestMethodFee(): number {
+      if (!this.sendData.paymentRequest?.supportedMethods?.length) return 0;
+      try {
+        const wallet = this.mintWalletSync(this.activeMintUrl, this.activeUnit);
+        const { disabled, params } = wallet.getMintInfo().isSupported(5);
+        const meltMethods = disabled
+          ? []
+          : params
+              .filter((m) => m.unit === this.activeUnit)
+              .map((m) => m.method);
+        return toPaymentRequest(this.sendData.paymentRequest)
+          .feesFor(this.activeMintUrl, meltMethods)
+          .toNumber();
+      } catch {
+        return 0;
+      }
     },
     paymentRequestAmountFixed(): boolean {
       return this.sendData.paymentRequest?.amount != null;
@@ -509,6 +538,7 @@ export default defineComponent({
       "send",
       "sendToLock",
       "sendToRequest",
+      "mintWalletSync",
       "coinSelect",
       "spendableProofs",
       "getFeesForProofs",
@@ -524,6 +554,7 @@ export default defineComponent({
     ]),
     ...mapActions(useP2PKStore, ["isValidPubkey", "maybeConvertNpub"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+    ...mapActions(useUiStore, ["formatCurrency"]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
     handlePaymentRequestSuccess: function () {
       this.showSendTokens = false;
