@@ -94,7 +94,7 @@ import { date } from "quasar";
 // import { Buffer } from 'buffer';
 // window.Buffer = Buffer;
 import { generateMnemonic, mnemonicToSeedSync } from "@scure/bip39";
-import { wordlist } from "@scure/bip39/wordlists/english";
+import { wordlist } from "@scure/bip39/wordlists/english.js";
 import { useSettingsStore } from "./settings";
 import { usePriceStore } from "./price";
 import { usePaymentHistoryStore } from "./paymentHistory";

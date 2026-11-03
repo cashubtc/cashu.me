@@ -7,7 +7,7 @@ import NDK, {
   NDKSubscription,
 } from "@nostr-dev-kit/ndk";
 import { useLocalStorage } from "@vueuse/core";
-import { bytesToHex } from "@noble/hashes/utils"; // already an installed dependency
+import { bytesToHex } from "@noble/hashes/utils.js"; // already an installed dependency
 import { nip04, generateSecretKey, getPublicKey } from "nostr-tools";
 import { useMintsStore } from "./mints";
 import { useWalletStore, InvoiceHistory } from "./wallet";

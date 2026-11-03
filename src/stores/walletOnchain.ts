@@ -9,7 +9,7 @@ import {
   MeltQuoteState,
 } from "@cashu/cashu-ts";
 import * as nobleSecp256k1 from "@noble/secp256k1";
-import { bytesToHex } from "@noble/hashes/utils";
+import { bytesToHex } from "@noble/hashes/utils.js";
 import {
   notifyApiError,
   notify,

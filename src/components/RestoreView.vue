@@ -253,7 +253,7 @@ import { notifyError, notifySuccess } from "src/js/notify";
 import NostrMintRestore from "./NostrMintRestore.vue";
 import SettingsSection from "src/pages/settings/SettingsSection.vue";
 import { validateMnemonic as validateBip39Mnemonic } from "@scure/bip39";
-import { wordlist } from "@scure/bip39/wordlists/english";
+import { wordlist } from "@scure/bip39/wordlists/english.js";
 
 export default defineComponent({
   name: "RestoreView",
