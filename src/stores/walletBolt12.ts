@@ -2,8 +2,13 @@ import { currentDateStr } from "src/js/utils";
 import { useMintsStore, WalletProof } from "./mints";
 import { useProofsStore } from "./proofs";
 import { type MutexPriority, useUiStore } from "src/stores/ui";
-import { Amount, Wallet, MintQuoteBolt12Response } from "@cashu/cashu-ts";
-import * as nobleSecp256k1 from "@noble/secp256k1";
+import {
+  Amount,
+  Wallet,
+  MintQuoteBolt12Response,
+  createRandomSecretKey,
+  getPubKeyFromPrivKey,
+} from "@cashu/cashu-ts";
 import { bytesToHex } from "@noble/hashes/utils.js";
 import { notifyApiError, notify, notifySuccess } from "src/js/notify";
 import type { InvoiceHistory } from "./wallet";
@@ -48,8 +53,9 @@ export async function requestMintBolt12(
 ) {
   try {
     // Generate new keypair (required for Bolt12 quotes in cashu-ts)
-    const privkey = bytesToHex(nobleSecp256k1.utils.randomPrivateKey());
-    const pubkey = bytesToHex(nobleSecp256k1.getPublicKey(privkey, true));
+    const secretKey = createRandomSecretKey();
+    const privkey = bytesToHex(secretKey);
+    const pubkey = bytesToHex(getPubKeyFromPrivKey(secretKey));
 
     const data = await mintWallet.createMintQuoteBolt12(pubkey, {
       amount: amount || undefined,

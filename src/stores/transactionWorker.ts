@@ -1,8 +1,12 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
-import { Amount, MintInfo, MintQuoteState } from "@cashu/cashu-ts";
-import * as nobleSecp256k1 from "@noble/secp256k1";
-import { bytesToHex } from "@noble/hashes/utils.js";
+import {
+  Amount,
+  MintInfo,
+  MintQuoteState,
+  getPubKeyFromPrivKey,
+} from "@cashu/cashu-ts";
+import { bytesToHex, hexToBytes } from "@noble/hashes/utils.js";
 import { useWalletStore } from "src/stores/wallet";
 import { useSettingsStore } from "src/stores/settings";
 import { PaymentMethod } from "src/stores/walletTypes";
@@ -1237,7 +1241,7 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
             {
               privKey,
               pubkey: bytesToHex(
-                nobleSecp256k1.getPublicKey(privKey, true)
+                getPubKeyFromPrivKey(hexToBytes(privKey))
               ).toLowerCase(),
             },
           ];

@@ -7,8 +7,9 @@ import {
   Wallet,
   MintQuoteOnchainResponse,
   MeltQuoteState,
+  createRandomSecretKey,
+  getPubKeyFromPrivKey,
 } from "@cashu/cashu-ts";
-import * as nobleSecp256k1 from "@noble/secp256k1";
 import { bytesToHex } from "@noble/hashes/utils.js";
 import {
   notifyApiError,
@@ -54,8 +55,9 @@ export async function requestMintOnchain(
   requestedAmount?: number
 ) {
   try {
-    const privkey = bytesToHex(nobleSecp256k1.utils.randomPrivateKey());
-    const pubkey = bytesToHex(nobleSecp256k1.getPublicKey(privkey, true));
+    const secretKey = createRandomSecretKey();
+    const privkey = bytesToHex(secretKey);
+    const pubkey = bytesToHex(getPubKeyFromPrivKey(secretKey));
     const data = await mintWallet.createMintQuoteOnchain(pubkey);
 
     const invoice: InvoiceHistory = {
