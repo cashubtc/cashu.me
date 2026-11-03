@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { Amount, MintInfo, MintQuoteState } from "@cashu/cashu-ts";
 import * as nobleSecp256k1 from "@noble/secp256k1";
-import { bytesToHex } from "@noble/hashes/utils";
+import { bytesToHex } from "@noble/hashes/utils.js";
 import { useWalletStore } from "src/stores/wallet";
 import { useSettingsStore } from "src/stores/settings";
 import { PaymentMethod } from "src/stores/walletTypes";

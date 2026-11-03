@@ -16,7 +16,7 @@ import { useProofsStore } from "./proofs";
 import { i18n } from "src/boot/i18n";
 import { useSettingsStore } from "./settings";
 import { useNostrMintBackupStore } from "./nostrMintBackup";
-import { bytesToHex } from "@noble/hashes/utils"; // already an installed dependency
+import { bytesToHex } from "@noble/hashes/utils.js"; // already an installed dependency
 import { PaymentMethod } from "src/stores/walletTypes";
 import { sumProofAmounts } from "src/js/proofs";
 

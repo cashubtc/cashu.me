@@ -4,7 +4,7 @@ import { useProofsStore } from "./proofs";
 import { type MutexPriority, useUiStore } from "src/stores/ui";
 import { Amount, Wallet, MintQuoteBolt12Response } from "@cashu/cashu-ts";
 import * as nobleSecp256k1 from "@noble/secp256k1";
-import { bytesToHex } from "@noble/hashes/utils";
+import { bytesToHex } from "@noble/hashes/utils.js";
 import { notifyApiError, notify, notifySuccess } from "src/js/notify";
 import type { InvoiceHistory } from "./wallet";
 import { mintOnPaidGeneric } from "./walletWebsocket";

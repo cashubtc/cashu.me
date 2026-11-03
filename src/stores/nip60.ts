@@ -16,7 +16,7 @@ import NDK, {
 import NDKCashuWallet from "@nostr-dev-kit/ndk-wallet";
 
 import { nip04, nip19, nip44 } from "nostr-tools";
-import { bytesToHex, hexToBytes } from "@noble/hashes/utils"; // already an installed dependency
+import { bytesToHex, hexToBytes } from "@noble/hashes/utils.js"; // already an installed dependency
 import { useWalletStore } from "./wallet";
 import { generateSecretKey, getPublicKey } from "nostr-tools";
 import { useLocalStorage } from "@vueuse/core";

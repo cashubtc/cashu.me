@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { generateSecretKey, getPublicKey, nip19 } from "nostr-tools";
-import { bytesToHex } from "@noble/hashes/utils"; // already an installed dependency
+import { bytesToHex } from "@noble/hashes/utils.js"; // already an installed dependency
 import { WalletProof } from "stores/mints";
 import token from "src/js/token";
 
