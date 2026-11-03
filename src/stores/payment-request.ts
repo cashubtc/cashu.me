@@ -5,6 +5,7 @@ import {
   decodePaymentRequest,
   normalizeProofAmounts,
   PaymentRequest,
+  type PaymentRequestPayload,
   PaymentRequestTransport,
   PaymentRequestTransportType,
 } from "@cashu/cashu-ts";
@@ -12,6 +13,8 @@ import { useMintsStore } from "./mints";
 import { useSendTokensStore } from "./sendTokensStore";
 import { useNostrStore } from "./nostr";
 import { useTokensStore } from "./tokens";
+import { useWalletStore } from "./wallet";
+import { useP2PKStore } from "./p2pk";
 import type { HistoryToken } from "./tokens";
 import token from "src/js/token";
 import { notifySuccess, notifyWarning } from "src/js/notify";
@@ -196,6 +199,31 @@ export const usePRStore = defineStore("payment-request", {
       if (!pr) return;
       if (!pr.receivedPaymentIds.includes(historyTokenId)) {
         pr.receivedPaymentIds.push(historyTokenId);
+      }
+    },
+    // Whether a payment pays one of our requests in full (NUT-18); false if we can't tell.
+    async paymentSatisfiesRequest(
+      payload: PaymentRequestPayload
+    ): Promise<boolean> {
+      const ours = this.ourPaymentRequests.find((r) => r.id === payload.id);
+      if (!ours) return false;
+      try {
+        const wallet = await useWalletStore().mintWallet(
+          payload.mint,
+          payload.unit,
+          true
+        );
+        const privkeys = useP2PKStore().p2pkKeys.map((k) => k.privateKey);
+        // 0 is the floor for an amountless request; ignored when it sets one
+        return wallet.isPaymentRequestSatisfied(
+          decodePaymentRequest(ours.encoded),
+          payload.proofs,
+          0,
+          { privkeys }
+        );
+      } catch (e) {
+        console.warn("Could not check payment against request:", e);
+        return false;
       }
     },
     getPaymentsForRequest(requestId: string) {
