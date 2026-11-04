@@ -6,6 +6,7 @@ import {
   MintQuoteState,
   getPubKeyFromPrivKey,
 } from "@cashu/cashu-ts";
+import { cashuAmountOrZero } from "src/js/cashu-amount";
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils.js";
 import { useWalletStore } from "src/stores/wallet";
 import { useSettingsStore } from "src/stores/settings";
@@ -109,11 +110,6 @@ function queueOrder(entry: InvoiceQuote) {
 
 function compareQueueEntries(left: InvoiceQuote, right: InvoiceQuote) {
   return queueOrder(left) - queueOrder(right);
-}
-
-function amountToNumber(value: any) {
-  if (value === undefined || value === null) return 0;
-  return Amount.from(value).toNumber();
 }
 
 export const useTransactionWorkerStore = defineStore("transactionWorker", {
@@ -821,7 +817,8 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
           ? await mintWallet.checkMintQuoteBolt12(job.entry.queueEntry.quote)
           : await mintWallet.checkMintQuoteOnchain(job.entry.queueEntry.quote);
       const delta =
-        amountToNumber(quote.amount_paid) - amountToNumber(quote.amount_issued);
+        cashuAmountOrZero(quote.amount_paid) -
+        cashuAmountOrZero(quote.amount_issued);
 
       if (delta <= 0) {
         await this.persistCheckedMintQuote(
@@ -867,12 +864,13 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
     mintableAmount(method: IncomingPaymentMethod, quote: Record<string, any>) {
       if (method === PaymentMethod.Bolt11) {
         return quote.state === MintQuoteState.PAID
-          ? amountToNumber(quote.amount)
+          ? cashuAmountOrZero(quote.amount)
           : 0;
       }
       return Math.max(
         0,
-        amountToNumber(quote.amount_paid) - amountToNumber(quote.amount_issued)
+        cashuAmountOrZero(quote.amount_paid) -
+          cashuAmountOrZero(quote.amount_issued)
       );
     },
 
