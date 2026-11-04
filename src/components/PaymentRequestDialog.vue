@@ -267,13 +267,14 @@ export default defineComponent({
   methods: {
     ...mapActions(usePRStore, [
       "newPaymentRequest",
+      "updatePaymentRequest",
       "selectPrevRequest",
       "selectNextRequest",
     ]),
     toggleUnit() {
       this.paymentRequestAmount = undefined;
       this.amountLabel = this.amountLabelDefault;
-      this.newPaymentRequest(
+      this.updatePaymentRequest(
         this.paymentRequestAmount,
         this.memo,
         this.chosenMintUrl
@@ -298,7 +299,7 @@ export default defineComponent({
         return;
       }
       this.chosenMintUrl = this.activeMintUrl;
-      this.newPaymentRequest(
+      this.updatePaymentRequest(
         this.paymentRequestAmount,
         this.memo,
         this.chosenMintUrl
@@ -330,7 +331,7 @@ export default defineComponent({
           this.activeUnit
         );
       }
-      this.newPaymentRequest(
+      this.updatePaymentRequest(
         this.paymentRequestAmount,
         this.memo,
         this.chosenMintUrl

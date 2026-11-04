@@ -20,6 +20,7 @@ import token from "src/js/token";
 import { notifySuccess, notifyWarning } from "src/js/notify";
 import { useLocalStorage } from "@vueuse/core";
 import { v4 as uuidv4 } from "uuid";
+import { nip19 } from "nostr-tools";
 
 // Request fields used by the UI and delivery; history stores these as plain data.
 export type PaymentRequestData = Pick<
@@ -94,6 +95,7 @@ export const usePRStore = defineStore("payment-request", {
       mintUrl?: string,
       forceNew: boolean = false
     ) {
+      this.pruneOurPaymentRequests();
       // If not forcing a new request and we already have at least one,
       // do not auto-create a new one; just show the currently selected.
       if (!forceNew && this.ourPaymentRequests.length > 0) {
@@ -103,6 +105,42 @@ export const usePRStore = defineStore("payment-request", {
         return;
       }
       this.showPRKData = this.createPaymentRequest(amount, memo, mintUrl);
+    },
+    // Replaces the shown request unless it has been paid, then a new one is added.
+    updatePaymentRequest(amount?: number, memo?: string, mintUrl?: string) {
+      const current = this.currentPaymentRequest;
+      if (current && current.receivedPaymentIds.length === 0) {
+        this.ourPaymentRequests.splice(
+          this.ourPaymentRequests.indexOf(current),
+          1
+        );
+      }
+      this.showPRKData = this.createPaymentRequest(amount, memo, mintUrl);
+    },
+    // Keeps requests addressed to this wallet's nostr key, plus any that were paid.
+    pruneOurPaymentRequests() {
+      const ourPubkey = useNostrStore().seedSignerPublicKey;
+      if (!ourPubkey) return;
+      const addressedToUs = (encoded: string) => {
+        try {
+          const target = decodePaymentRequest(encoded).getTransport(
+            PaymentRequestTransportType.NOSTR
+          )?.target;
+          if (!target) return false;
+          const decoded = nip19.decode(target);
+          return decoded.type === "nprofile"
+            ? decoded.data.pubkey === ourPubkey
+            : decoded.type === "npub" && decoded.data === ourPubkey;
+        } catch {
+          return false;
+        }
+      };
+      const kept = this.ourPaymentRequests.filter(
+        (r) => r.receivedPaymentIds.length > 0 || addressedToUs(r.encoded)
+      );
+      if (kept.length === this.ourPaymentRequests.length) return;
+      this.ourPaymentRequests = kept;
+      this.selectedPRIndex = Math.max(0, kept.length - 1);
     },
     createPaymentRequest: function (
       amount?: number,
@@ -277,14 +315,6 @@ export const usePRStore = defineStore("payment-request", {
         sendTokenStore.sendData.amount =
           Amount.from(request.amount).toNumber() /
           mintsStore.activeUnitCurrencyMultiplyer;
-      }
-      // Also make sure this decoded request gets stored (e.g., if user pasted an older one)
-      try {
-        const encoded = pr;
-        this.ensureStoredRequest(request, encoded);
-        this.showPRKData = encoded;
-      } catch (e) {
-        // noop
       }
       sendTokenStore.sendData.paymentRequest = request;
       if (!sendTokenStore.showSendTokens) {
