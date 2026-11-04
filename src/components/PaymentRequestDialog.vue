@@ -126,6 +126,36 @@
                 </div>
               </div>
 
+              <!-- Description and lock -->
+              <div class="row justify-center q-pt-md">
+                <div
+                  class="col-12 col-sm-8 col-md-6 q-px-md"
+                  style="max-width: 400px"
+                >
+                  <q-input
+                    v-model="memo"
+                    dense
+                    outlined
+                    rounded
+                    maxlength="140"
+                    input-class="text-center"
+                    :placeholder="
+                      $t('PaymentRequestDialog.inputs.description.placeholder')
+                    "
+                    @blur="onDetailsChanged"
+                    @keyup.enter="onDetailsChanged"
+                  />
+                  <div class="row justify-center q-pt-sm">
+                    <q-toggle
+                      v-model="locked"
+                      dense
+                      :label="$t('PaymentRequestDialog.inputs.lock.label')"
+                      @update:model-value="onDetailsChanged"
+                    />
+                  </div>
+                </div>
+              </div>
+
               <!-- Received payments summary and list -->
               <div
                 class="row justify-center q-pt-md q-pb-md"
@@ -158,10 +188,20 @@
               </div>
 
               <!-- New request button -->
-              <div class="row justify-center q-pt-lg q-pb-md">
+              <div class="row justify-center q-pt-lg q-pb-md q-gutter-sm">
                 <q-btn flat size="md" rounded @click="newRequest">
                   <q-icon name="refresh" class="q-pr-sm" size="xs" />
                   {{ $t("PaymentRequestDialog.actions.new_request.label") }}
+                </q-btn>
+                <q-btn
+                  flat
+                  size="md"
+                  rounded
+                  color="grey"
+                  @click="showDeleteDialog = true"
+                >
+                  <q-icon name="delete_outline" class="q-pr-sm" size="xs" />
+                  {{ $t("PaymentRequestDialog.actions.delete.label") }}
                 </q-btn>
               </div>
             </q-card-section>
@@ -190,6 +230,31 @@
         </div>
       </div>
     </q-card>
+    <q-dialog v-model="showDeleteDialog">
+      <q-card class="q-pa-lg q-pt-md qcard">
+        <q-card-section class="q-pa-none">
+          <div class="text-h6 q-mb-sm">
+            {{ $t("PaymentRequestDialog.delete_dialog.title") }}
+          </div>
+          <q-item-label>
+            {{ $t("PaymentRequestDialog.delete_dialog.text") }}
+          </q-item-label>
+          <div class="row q-mt-lg">
+            <q-btn
+              color="negative"
+              rounded
+              class="q-mr-sm"
+              @click="deleteCurrentRequest"
+            >
+              {{ $t("PaymentRequestDialog.actions.delete.label") }}
+            </q-btn>
+            <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto">
+              {{ $t("PaymentRequestDialog.actions.cancel.label") }}
+            </q-btn>
+          </div>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
   </q-dialog>
 </template>
 
@@ -197,6 +262,7 @@
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import VueQrcode from "@chenfengyuan/vue-qrcode";
+import { decodePaymentRequest, type PaymentRequest } from "@cashu/cashu-ts";
 
 import { usePRStore } from "src/stores/payment-request";
 import { useMintsStore } from "../stores/mints";
@@ -230,6 +296,8 @@ export default defineComponent({
       ),
       chosenMintUrl: undefined as string | undefined,
       memo: "",
+      locked: false,
+      showDeleteDialog: false,
     };
   },
   computed: {
@@ -244,6 +312,15 @@ export default defineComponent({
       return (useMintsStore() as any).activeUnitCurrencyMultiplyer;
     },
     ...mapWritableState(usePRStore, ["showPRDialog"]),
+    shownRequest(): PaymentRequest | undefined {
+      try {
+        return this.showPRKData
+          ? decodePaymentRequest(this.showPRKData)
+          : undefined;
+      } catch {
+        return undefined;
+      }
+    },
     currentIndexDisplay(): string {
       const total = this.ourPaymentRequests.length || 0;
       if (!total) return "0/0";
@@ -264,10 +341,32 @@ export default defineComponent({
       return totals;
     },
   },
+  watch: {
+    // Show the terms of the displayed request, eg after paging or deleting.
+    shownRequest: {
+      immediate: true,
+      handler(request: PaymentRequest | undefined) {
+        if (!request) return;
+        const amount = request.amount?.toNumber();
+        this.paymentRequestAmount = amount;
+        this.amountLabel =
+          amount == null
+            ? this.amountLabelDefault
+            : useUiStore().formatCurrency(
+                amount,
+                request.unit ?? this.activeUnit
+              );
+        this.chosenMintUrl = request.mints?.[0];
+        this.memo = request.description ?? "";
+        this.locked = !!request.nut10;
+      },
+    },
+  },
   methods: {
     ...mapActions(usePRStore, [
       "newPaymentRequest",
       "updatePaymentRequest",
+      "deletePaymentRequest",
       "selectPrevRequest",
       "selectNextRequest",
     ]),
@@ -277,7 +376,8 @@ export default defineComponent({
       this.updatePaymentRequest(
         this.paymentRequestAmount,
         this.memo,
-        this.chosenMintUrl
+        this.chosenMintUrl,
+        this.locked
       );
     },
     newRequest() {
@@ -285,8 +385,31 @@ export default defineComponent({
         this.paymentRequestAmount,
         this.memo,
         this.chosenMintUrl,
-        true
+        true,
+        this.locked
       );
+    },
+    onDetailsChanged() {
+      const shown = this.shownRequest;
+      if (
+        shown &&
+        (shown.description ?? "") === this.memo &&
+        !!shown.nut10 === this.locked
+      ) {
+        return;
+      }
+      this.updatePaymentRequest(
+        this.paymentRequestAmount,
+        this.memo,
+        this.chosenMintUrl,
+        this.locked
+      );
+    },
+    deleteCurrentRequest() {
+      if (this.currentPaymentRequest) {
+        this.deletePaymentRequest(this.currentPaymentRequest.id);
+      }
+      this.showDeleteDialog = false;
     },
     getShortUrl(url: string | undefined) {
       if (!url) {
@@ -302,7 +425,8 @@ export default defineComponent({
       this.updatePaymentRequest(
         this.paymentRequestAmount,
         this.memo,
-        this.chosenMintUrl
+        this.chosenMintUrl,
+        this.locked
       );
     },
     startEditingAmount() {
@@ -334,7 +458,8 @@ export default defineComponent({
       this.updatePaymentRequest(
         this.paymentRequestAmount,
         this.memo,
-        this.chosenMintUrl
+        this.chosenMintUrl,
+        this.locked
       );
       this.isEditingAmount = false;
       this.amountInputValue = "";

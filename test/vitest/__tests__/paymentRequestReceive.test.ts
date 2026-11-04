@@ -213,3 +213,54 @@ describe("prStore request list", () => {
     expect(prStore.ourPaymentRequests).toHaveLength(3);
   });
 });
+
+describe("prStore request tools", () => {
+  const OUR_PUBKEY =
+    "a9acc1e48c25eeeb9289b5031cc57da9fe72f3fe2861d264bdc074209b107ba2";
+
+  test("locks a request to the newest P2PK key, creating one if needed", () => {
+    useNostrStore().seedSignerPublicKey = OUR_PUBKEY;
+    const prStore = usePRStore();
+    const p2pk = useP2PKStore();
+    prStore.ourPaymentRequests = [];
+    p2pk.p2pkKeys = [];
+    const first = decodePaymentRequest(
+      prStore.createPaymentRequest(21, "coffee", undefined, true)
+    );
+    expect(p2pk.p2pkKeys).toHaveLength(1);
+    expect(first.nut10).toEqual({
+      kind: "P2PK",
+      data: p2pk.p2pkKeys[0].publicKey,
+      tags: [],
+    });
+    expect(first.description).toBe("coffee");
+    expect(first.toP2PKOptions()).toMatchObject({
+      pubkey: p2pk.p2pkKeys[0].publicKey,
+    });
+
+    p2pk.generateKeypair();
+    const second = decodePaymentRequest(
+      prStore.createPaymentRequest(undefined, "", undefined, true)
+    );
+    expect(second.nut10?.data).toBe(p2pk.p2pkKeys[1].publicKey);
+    expect(second.description).toBeUndefined();
+    const unlocked = decodePaymentRequest(prStore.createPaymentRequest());
+    expect(unlocked.nut10).toBeUndefined();
+  });
+
+  test("deletes a request and keeps one on screen", () => {
+    useNostrStore().seedSignerPublicKey = OUR_PUBKEY;
+    const prStore = usePRStore();
+    prStore.ourPaymentRequests = [];
+    prStore.createPaymentRequest(1);
+    prStore.createPaymentRequest(2);
+    const [a, b] = prStore.ourPaymentRequests.map((r) => r.id);
+    prStore.deletePaymentRequest(b);
+    expect(prStore.ourPaymentRequests.map((r) => r.id)).toEqual([a]);
+    expect(prStore.showPRKData).toBe(prStore.ourPaymentRequests[0].encoded);
+    prStore.deletePaymentRequest(a);
+    expect(prStore.ourPaymentRequests).toHaveLength(1);
+    expect(prStore.ourPaymentRequests[0].id).not.toBe(a);
+    expect(prStore.showPRKData).toBe(prStore.ourPaymentRequests[0].encoded);
+  });
+});
