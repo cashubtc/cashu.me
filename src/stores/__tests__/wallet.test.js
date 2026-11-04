@@ -226,6 +226,8 @@ vi.mock("@cashu/cashu-ts", () => ({
     cacheToMintDTO: (...args) => h.keychainCacheToMintDTO(...args),
   },
   StaleKeysetError: h.StaleKeysetErrorMock,
+  createRandomSecretKey: () => new Uint8Array(32).fill(1),
+  getPubKeyFromPrivKey: () => new Uint8Array(33).fill(2),
   CheckStateEnum: { SPENT: "SPENT" },
   MeltQuoteState: { PAID: "PAID", PENDING: "PENDING", UNPAID: "UNPAID" },
   MintQuoteState: { PAID: "PAID", ISSUED: "ISSUED", PENDING: "PENDING" },

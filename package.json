@@ -28,12 +28,13 @@
     "@capacitor/clipboard": "^6.0.2",
     "@capacitor/core": "^6.2.0",
     "@capacitor/haptics": "^6.0.2",
-    "@cashu/cashu-ts": "^4.9.0",
+    "@cashu/cashu-ts": "^4.13.0",
     "@chenfengyuan/vue-qrcode": "^2.0.0",
     "@gandlaf21/bc-ur": "^1.1.12",
+    "@noble/hashes": "^2.4.0",
     "@nostr-dev-kit/ndk": "^2.8.1",
     "@quasar/extras": "^1.17.0",
-    "@scure/bip39": "^1.4.0",
+    "@scure/bip39": "^2.4.0",
     "@vueuse/core": "^10.9.0",
     "axios": "^1.6.8",
     "bech32": "^2.0.0",
@@ -44,7 +45,7 @@
     "dexie": "^4.0.9",
     "light-bolt11-decoder": "^3.1.1",
     "lucide-vue-next": "^0.453.0",
-    "nostr-tools": "^2.5.2",
+    "nostr-tools": "^2.25.5",
     "pinia": "^2.1.7",
     "qrcode": "^1.5.3",
     "quasar": "^2.18.2",
@@ -91,5 +92,17 @@
     "node": ">=22.4.0",
     "npm": ">= 6.13.4",
     "yarn": ">= 1.21.1"
+  },
+  "overrides": {
+    "@noble/hashes@^1": "^1.8.0",
+    "@noble/curves@^1": "^1.9.7",
+    "@scure/base@^1": "^1.2.6",
+    "@scure/bip32@^1": "^1.7.0",
+    "@scure/bip39@^1": "^1.6.0",
+    "@noble/hashes@^2": "$@noble/hashes",
+    "@noble/curves@^2": "^2.4.0",
+    "@scure/base@^2": "^2.4.0",
+    "@scure/bip32@^2": "^2.4.0",
+    "@scure/bip39@^2": "$@scure/bip39"
   }
 }

@@ -1,7 +1,6 @@
 import {
   Amount,
   type Token,
-  type Proof,
   getDecodedToken,
   getTokenMetadata,
   Mint,
@@ -19,14 +18,10 @@ export default {
   getMemo,
 };
 
-// getTokenMetadata returns proofs without `id` (keyset ID) and with Amount.
-// This type narrows that to number amounts for the rest of the app.
-type MetadataProof = Omit<Proof, "amount" | "id"> & { amount: number };
+// Metadata decoding has no keysets, so it yields per-proof amounts only.
+type MetadataProof = { amount: number };
 
-type DecodedTokenMetadata = Omit<
-  TokenMetadata,
-  "amount" | "incompleteProofs"
-> & {
+type DecodedTokenMetadata = Pick<TokenMetadata, "unit" | "memo" | "mint"> & {
   amount: number;
   proofs: MetadataProof[];
 };
@@ -36,15 +31,14 @@ type DecodedTokenMetadata = Omit<
  */
 function decodeMeta(encoded_token: string): DecodedTokenMetadata | undefined {
   if (!encoded_token || encoded_token === "") return;
-  const { incompleteProofs, amount, ...rest } = getTokenMetadata(encoded_token);
+  const { unit, memo, mint, amount, proofAmounts } =
+    getTokenMetadata(encoded_token);
   return {
-    ...rest,
+    unit,
+    memo,
+    mint,
     amount: Amount.from(amount).toNumber(),
-    proofs:
-      incompleteProofs?.map((proof) => ({
-        ...proof,
-        amount: Amount.from(proof.amount).toNumber(),
-      })) ?? [],
+    proofs: proofAmounts.map((a) => ({ amount: a.toNumber() })),
   };
 }
 

@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
-import { bytesToHex } from "@noble/hashes/utils";
-import { sha256 } from "@noble/hashes/sha256";
+import { bytesToHex, hexToBytes } from "@noble/hashes/utils.js";
+import { sha256 } from "@noble/hashes/sha2.js";
 import { getPublicKey } from "nostr-tools";
 import { mnemonicToSeedSync } from "@scure/bip39";
 import NDK, {
@@ -86,7 +86,7 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
       if (!state.mintBackupPrivateKey || !state.mintBackupPublicKey)
         return null;
       return nip44.v2.utils.getConversationKey(
-        state.mintBackupPrivateKey,
+        hexToBytes(state.mintBackupPrivateKey),
         state.mintBackupPublicKey
       );
     },
@@ -174,7 +174,7 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
 
         // Encrypt the backup data
         const conversationKey = nip44.v2.utils.getConversationKey(
-          this.mintBackupPrivateKey,
+          hexToBytes(this.mintBackupPrivateKey),
           this.mintBackupPublicKey
         );
         const encryptedContent = nip44.v2.encrypt(
@@ -265,7 +265,7 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
             const { privateKeyHex } =
               await this.initializeBackupKeysFromMnemonic(mnemonic);
             const conversationKey = nip44.v2.utils.getConversationKey(
-              privateKeyHex,
+              hexToBytes(privateKeyHex),
               publicKeyHex
             );
             const decryptedContent = nip44.v2.decrypt(

@@ -14,7 +14,7 @@ import NDK, {
   ProfilePointer,
 } from "@nostr-dev-kit/ndk";
 import { nip04, nip19, nip44 } from "nostr-tools";
-import { bytesToHex, hexToBytes } from "@noble/hashes/utils"; // already an installed dependency
+import { bytesToHex, hexToBytes } from "@noble/hashes/utils.js"; // already an installed dependency
 import { useWalletStore } from "./wallet";
 import { generateSecretKey, getPublicKey } from "nostr-tools";
 import { useLocalStorage } from "@vueuse/core";
@@ -23,7 +23,7 @@ import { useReceiveTokensStore } from "./receiveTokensStore";
 import {
   getEncodedToken,
   normalizeProofAmounts,
-  PaymentRequestPayload,
+  PaymentRequest,
   Token,
 } from "@cashu/cashu-ts";
 import { useTokensStore } from "./tokens";
@@ -299,19 +299,22 @@ export const useNostrStore = defineStore("nostr", {
         );
         sub.on("event", (event: NDKEvent) => {
           console.log("event");
-          nip04
-            .decrypt(
+          let content: string;
+          try {
+            content = nip04.decrypt(
               hexToBytes(this.seedSignerPrivateKey),
               event.pubkey,
               event.content
-            )
-            .then((content) => {
-              console.log("NIP-04 DM from", event.pubkey);
-              console.log("Content:", content);
-              nip04DirectMessageEvents.add(event);
-              this.lastEventTimestamp = Math.floor(Date.now() / 1000);
-              this.parseMessageForEcash(content);
-            });
+            );
+          } catch (e) {
+            console.error("Could not decrypt NIP-04 DM:", e);
+            return;
+          }
+          console.log("NIP-04 DM from", event.pubkey);
+          console.log("Content:", content);
+          nip04DirectMessageEvents.add(event);
+          this.lastEventTimestamp = Math.floor(Date.now() / 1000);
+          this.parseMessageForEcash(content);
         });
       });
       try {
@@ -359,7 +362,10 @@ export const useNostrStore = defineStore("nostr", {
       sealEvent.kind = 13;
       sealEvent.content = nip44.v2.encrypt(
         dmEventString,
-        nip44.v2.utils.getConversationKey(this.seedSignerPrivateKey, recipient)
+        nip44.v2.utils.getConversationKey(
+          hexToBytes(this.seedSignerPrivateKey),
+          recipient
+        )
       );
       sealEvent.created_at = this.randomTimeUpTo2DaysInThePast();
       sealEvent.pubkey = this.seedSignerPublicKey;
@@ -376,10 +382,7 @@ export const useNostrStore = defineStore("nostr", {
       wrapEvent.tags = [["p", recipient]];
       wrapEvent.content = nip44.v2.encrypt(
         sealEventString,
-        nip44.v2.utils.getConversationKey(
-          bytesToHex(randomPrivateKey),
-          recipient
-        )
+        nip44.v2.utils.getConversationKey(randomPrivateKey, recipient)
       );
       wrapEvent.created_at = this.randomTimeUpTo2DaysInThePast();
       wrapEvent.pubkey = randomPublicKey;
@@ -440,7 +443,7 @@ export const useNostrStore = defineStore("nostr", {
             const wappedContent = nip44.v2.decrypt(
               wrapEvent.content,
               nip44.v2.utils.getConversationKey(
-                this.seedSignerPrivateKey,
+                hexToBytes(this.seedSignerPrivateKey),
                 wrapEvent.pubkey
               )
             );
@@ -448,7 +451,7 @@ export const useNostrStore = defineStore("nostr", {
             const dmEventString = nip44.v2.decrypt(
               sealEvent.content,
               nip44.v2.utils.getConversationKey(
-                this.seedSignerPrivateKey,
+                hexToBytes(this.seedSignerPrivateKey),
                 sealEvent.pubkey
               )
             );
@@ -472,9 +475,9 @@ export const useNostrStore = defineStore("nostr", {
       }
     },
     parseMessageForEcash: async function (message: string) {
-      // first check if the message can be converted to a json and then to a PaymentRequestPayload
+      // first check if the message is a NUT-18 payment payload
       try {
-        const payload = JSON.parse(message) as PaymentRequestPayload;
+        const payload = PaymentRequest.decodePayload(message);
         if (payload) {
           const receiveStore = useReceiveTokensStore();
           const prStore = usePRStore();
@@ -514,7 +517,17 @@ export const useNostrStore = defineStore("nostr", {
           receiveStore.receiveData.tokensBase64 = tokenStr;
           sendTokensStore.showSendTokens = false;
           const knowThisMint = receiveStore.knowThisMintOfTokenJson(token);
-          if (prStore.receivePaymentRequestsAutomatically && knowThisMint) {
+          // Only payments to a request stored here can be checked (eg not one made on another device).
+          const ours = prStore.ourPaymentRequests.some(
+            (r) => r.id === payload.id
+          );
+          const satisfied =
+            knowThisMint &&
+            (!ours || (await prStore.paymentSatisfiesRequest(payload)));
+          if (ours && knowThisMint && !satisfied) {
+            notifyWarning("Payment does not match the request");
+          }
+          if (prStore.receivePaymentRequestsAutomatically && satisfied) {
             const success = await receiveStore.receiveIfDecodes();
             if (success) {
               prStore.showPRDialog = false;

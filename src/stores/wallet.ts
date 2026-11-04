@@ -78,13 +78,12 @@ import {
   decodePaymentRequest,
   ProofState,
   KeyChain,
-  type AmountLike,
-  type P2PKOptions,
   type CounterSource,
   createEphemeralCounterSource,
   StaleKeysetError,
   // ConsoleLogger,
 } from "@cashu/cashu-ts";
+import { cashuAmountOrZero } from "src/js/cashu-amount";
 // @ts-ignore
 import * as bolt11Decoder from "light-bolt11-decoder";
 import { bech32 } from "bech32";
@@ -95,7 +94,7 @@ import { date } from "quasar";
 // import { Buffer } from 'buffer';
 // window.Buffer = Buffer;
 import { generateMnemonic, mnemonicToSeedSync } from "@scure/bip39";
-import { wordlist } from "@scure/bip39/wordlists/english";
+import { wordlist } from "@scure/bip39/wordlists/english.js";
 import { useSettingsStore } from "./settings";
 import { usePriceStore } from "./price";
 import { usePaymentHistoryStore } from "./paymentHistory";
@@ -180,10 +179,6 @@ const tokenStore = useTokensStore();
 const proofsStore = useProofsStore();
 const RECEIVE_SUCCESS_HIDE_DELAY_MS = 5000;
 
-function amountToNumber(value: AmountLike | undefined): number {
-  if (value === undefined) return 0;
-  return Amount.from(value).toNumber();
-}
 function normalizeMintQuote(
   quote:
     | MintQuoteBolt11Response
@@ -195,12 +190,12 @@ function normalizeMintQuote(
   delete rest.amount;
   return {
     ...rest,
-    amount: amount === null ? null : amountToNumber(amount),
+    amount: amount === null ? null : cashuAmountOrZero(amount),
     amount_paid:
-      "amount_paid" in quote ? amountToNumber(quote.amount_paid) : undefined,
+      "amount_paid" in quote ? cashuAmountOrZero(quote.amount_paid) : undefined,
     amount_issued:
       "amount_issued" in quote
-        ? amountToNumber(quote.amount_issued)
+        ? cashuAmountOrZero(quote.amount_issued)
         : undefined,
   };
 }
@@ -614,7 +609,7 @@ export const useWalletStore = defineStore("wallet", {
       const selectedWalletProofs = selectedProofs.map((p) => {
         return {
           ...p,
-          amount: amountToNumber(p.amount),
+          amount: cashuAmountOrZero(p.amount),
           reserved: false,
         } as WalletProof;
       });
@@ -641,26 +636,18 @@ export const useWalletStore = defineStore("wallet", {
         mintUrl ?? mints.activeMintUrl,
         unit ?? mints.activeUnit
       );
-      return amountToNumber(wallet.getFeesForProofs(proofs));
+      return cashuAmountOrZero(wallet.getFeesForProofs(proofs));
     },
     sendToLock: async function (
       proofs: WalletProof[],
       wallet: Wallet,
       amount: number,
-      receiverPubkey: string | P2PKOptions,
+      receiverPubkey: string,
       mutexPriority: MutexPriority = "normal"
     ) {
-      // Accept a bare pubkey (manual lock flow) or a full P2PKOptions so a
-      // NUT-18 payment request can reproduce its requested NUT-10 condition
-      // (P2PK or HTLC). Going through the `.asP2PK()` builder keeps the
-      // blinding keyset-aware (for upcoming cashu-ts v5).
       const uiStore = useUiStore();
       await uiStore.lockMutex(mutexPriority);
       try {
-        const p2pkOptions: P2PKOptions =
-          typeof receiverPubkey === "string"
-            ? { pubkey: receiverPubkey }
-            : receiverPubkey;
         const spendableProofs = this.spendableProofs(proofs, amount);
         const proofsToSend = this.coinSelect(
           spendableProofs,
@@ -673,7 +660,7 @@ export const useWalletStore = defineStore("wallet", {
             wallet.ops
               .send(amount, toProofs(proofsToSend))
               .keyset(wallet.keysetId)
-              .asP2PK(p2pkOptions)
+              .asLocked({ pubkey: receiverPubkey })
               .run()
           );
         const proofsStore = useProofsStore();
@@ -682,6 +669,69 @@ export const useWalletStore = defineStore("wallet", {
         // expect from the caller to store it in the history
         await proofsStore.addProofs(keepProofs);
         return { keepProofs, sendProofs };
+      } finally {
+        uiStore.unlockMutex();
+      }
+    },
+    sendToRequest: async function (
+      proofs: WalletProof[],
+      wallet: Wallet,
+      request: PaymentRequest,
+      amount?: number,
+      mutexPriority: MutexPriority = "normal"
+    ): Promise<{ keepProofs: ProofLike[]; sendProofs: ProofLike[] }> {
+      // cashu-ts applies the request's mint, unit, fee and lock terms (NUT-18).
+      // Pass `amount` only for amountless requests; the caller owns sendProofs.
+      const uiStore = useUiStore();
+      await uiStore.lockMutex(mutexPriority);
+      try {
+        const spendableProofs = toProofs(
+          this.spendableProofs(
+            proofs,
+            amount ?? cashuAmountOrZero(request.amount)
+          )
+        );
+        const proofsStore = useProofsStore();
+        // Hand over an exact match without a swap, as send() does. A lock always needs a swap.
+        if (!request.nut10) {
+          const exact = wallet.ops
+            .sendToRequest(request, spendableProofs, amount)
+            .offlineExactOnly();
+          let matched = new Set<string>();
+          try {
+            matched = new Set((await exact.run()).send.map((p) => p.secret));
+          } catch {
+            // exact-match search timed out; the swap will handle it
+          }
+          // Send our stored proofs, as the offline result drops their DLEQ.
+          const exactMatch = spendableProofs.filter((p) =>
+            matched.has(p.secret)
+          );
+          if (exactMatch.length > 0) {
+            await proofsStore.removeProofs(exactMatch);
+            return { keepProofs: [], sendProofs: exactMatch };
+          }
+        }
+        const { keep, send } = await this.retryOnceOnRecoverableError(
+          wallet.keysetId,
+          async () => {
+            const builder = wallet.ops
+              .sendToRequest(request, spendableProofs, amount)
+              .keyset(wallet.keysetId)
+              .proofsWeHave(spendableProofs);
+            // A locked request fixes its own send outputs.
+            return (request.nut10 ? builder : builder.asDeterministic()).run();
+          }
+        );
+        // keep mixes fresh proofs with un-selected passthrough proofs.
+        const spendableSecrets = new Set(spendableProofs.map((p) => p.secret));
+        const keptSecrets = new Set(keep.map((p) => p.secret));
+        const keepProofs = keep.filter((p) => !spendableSecrets.has(p.secret));
+        await proofsStore.addProofs(keepProofs);
+        await proofsStore.removeProofs(
+          spendableProofs.filter((p) => !keptSecrets.has(p.secret))
+        );
+        return { keepProofs, sendProofs: send };
       } finally {
         uiStore.unlockMutex();
       }
