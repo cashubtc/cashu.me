@@ -9,7 +9,6 @@ import {
   type SerializedBlindedSignature,
   type ProofLike,
   Wallet,
-  type AmountLike,
 } from "@cashu/cashu-ts";
 import {
   notify,
@@ -23,7 +22,7 @@ import { useMintsStore, WalletProof } from "./mints";
 import { usePaymentHistoryStore } from "./paymentHistory";
 import { useProofsStore } from "./proofs";
 import { type MutexPriority, useUiStore } from "src/stores/ui";
-import { cashuAmountToNumber } from "src/js/cashu-amount";
+import { cashuAmountOrZero } from "src/js/cashu-amount";
 
 let isUnloading = false;
 if (typeof window !== "undefined") {
@@ -77,11 +76,6 @@ export type CheckOutgoingMeltQuoteFn = (
 
 const proofsStore = useProofsStore();
 
-function amountToNumber(value: AmountLike | undefined): number {
-  if (value === undefined) return 0;
-  return cashuAmountToNumber(value);
-}
-
 export function normalizeMeltQuote(
   quote:
     | MeltQuoteBolt11Response
@@ -91,11 +85,11 @@ export function normalizeMeltQuote(
   const { change, ...rest } = quote as any;
   const normalized: AppMeltQuote = {
     ...(rest as any),
-    amount: amountToNumber(quote.amount),
+    amount: cashuAmountOrZero(quote.amount),
     fee_reserve:
       "fee_reserve" in quote
-        ? amountToNumber(quote.fee_reserve)
-        : amountToNumber(
+        ? cashuAmountOrZero(quote.fee_reserve)
+        : cashuAmountOrZero(
             quote.fee_options.find(
               (option) => option.fee_index === quote.selected_fee_index
             )?.fee_reserve ?? quote.fee_options[0]?.fee_reserve
@@ -106,13 +100,13 @@ export function normalizeMeltQuote(
   if (change) {
     normalized.change = change.map((signature) => ({
       ...signature,
-      amount: amountToNumber(signature.amount),
+      amount: cashuAmountOrZero(signature.amount),
     }));
   }
   if ("fee_options" in quote) {
     normalized.fee_options = quote.fee_options.map((option) => ({
       ...option,
-      fee_reserve: amountToNumber(option.fee_reserve),
+      fee_reserve: cashuAmountOrZero(option.fee_reserve),
     }));
     normalized.selected_fee_index = quote.selected_fee_index;
     normalized.outpoint = quote.outpoint;

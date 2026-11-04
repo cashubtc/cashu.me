@@ -3,7 +3,6 @@ import { useMintsStore, WalletProof } from "./mints";
 import { useProofsStore } from "./proofs";
 import { type MutexPriority, useUiStore } from "src/stores/ui";
 import {
-  Amount,
   Wallet,
   MeltQuoteBolt11Request,
   MintQuoteBolt11Response,
@@ -11,6 +10,7 @@ import {
   createRandomSecretKey,
   getPubKeyFromPrivKey,
 } from "@cashu/cashu-ts";
+import { cashuAmountToNumber } from "src/js/cashu-amount";
 import { bytesToHex } from "@noble/hashes/utils.js";
 import {
   notifyApiError,
@@ -39,12 +39,8 @@ type AppMintQuote = Omit<MintQuoteBolt11Response, "amount"> & {
   amount: number;
 };
 
-function amountToNumber(value: any): number {
-  return Amount.from(value).toNumber();
-}
-
 function normalizeMintQuote(quote: MintQuoteBolt11Response): AppMintQuote {
-  return { ...quote, amount: amountToNumber(quote.amount) };
+  return { ...quote, amount: cashuAmountToNumber(quote.amount) };
 }
 
 export async function requestMintBolt11(

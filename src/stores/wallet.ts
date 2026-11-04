@@ -78,12 +78,12 @@ import {
   decodePaymentRequest,
   ProofState,
   KeyChain,
-  type AmountLike,
   type CounterSource,
   createEphemeralCounterSource,
   StaleKeysetError,
   // ConsoleLogger,
 } from "@cashu/cashu-ts";
+import { cashuAmountOrZero } from "src/js/cashu-amount";
 // @ts-ignore
 import * as bolt11Decoder from "light-bolt11-decoder";
 import { bech32 } from "bech32";
@@ -179,10 +179,6 @@ const tokenStore = useTokensStore();
 const proofsStore = useProofsStore();
 const RECEIVE_SUCCESS_HIDE_DELAY_MS = 5000;
 
-function amountToNumber(value: AmountLike | undefined): number {
-  if (value === undefined) return 0;
-  return Amount.from(value).toNumber();
-}
 function normalizeMintQuote(
   quote:
     | MintQuoteBolt11Response
@@ -194,12 +190,12 @@ function normalizeMintQuote(
   delete rest.amount;
   return {
     ...rest,
-    amount: amount === null ? null : amountToNumber(amount),
+    amount: amount === null ? null : cashuAmountOrZero(amount),
     amount_paid:
-      "amount_paid" in quote ? amountToNumber(quote.amount_paid) : undefined,
+      "amount_paid" in quote ? cashuAmountOrZero(quote.amount_paid) : undefined,
     amount_issued:
       "amount_issued" in quote
-        ? amountToNumber(quote.amount_issued)
+        ? cashuAmountOrZero(quote.amount_issued)
         : undefined,
   };
 }
@@ -613,7 +609,7 @@ export const useWalletStore = defineStore("wallet", {
       const selectedWalletProofs = selectedProofs.map((p) => {
         return {
           ...p,
-          amount: amountToNumber(p.amount),
+          amount: cashuAmountOrZero(p.amount),
           reserved: false,
         } as WalletProof;
       });
@@ -640,7 +636,7 @@ export const useWalletStore = defineStore("wallet", {
         mintUrl ?? mints.activeMintUrl,
         unit ?? mints.activeUnit
       );
-      return amountToNumber(wallet.getFeesForProofs(proofs));
+      return cashuAmountOrZero(wallet.getFeesForProofs(proofs));
     },
     sendToLock: async function (
       proofs: WalletProof[],
@@ -690,7 +686,10 @@ export const useWalletStore = defineStore("wallet", {
       await uiStore.lockMutex(mutexPriority);
       try {
         const spendableProofs = toProofs(
-          this.spendableProofs(proofs, amount ?? amountToNumber(request.amount))
+          this.spendableProofs(
+            proofs,
+            amount ?? cashuAmountOrZero(request.amount)
+          )
         );
         const proofsStore = useProofsStore();
         // Hand over an exact match without a swap, as send() does. A lock always needs a swap.

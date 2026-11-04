@@ -3,12 +3,12 @@ import { useMintsStore, WalletProof } from "./mints";
 import { useProofsStore } from "./proofs";
 import { type MutexPriority, useUiStore } from "src/stores/ui";
 import {
-  Amount,
   Wallet,
   MintQuoteBolt12Response,
   createRandomSecretKey,
   getPubKeyFromPrivKey,
 } from "@cashu/cashu-ts";
+import { cashuAmountToNumber } from "src/js/cashu-amount";
 import { bytesToHex } from "@noble/hashes/utils.js";
 import { notifyApiError, notify, notifySuccess } from "src/js/notify";
 import type { InvoiceHistory } from "./wallet";
@@ -31,17 +31,13 @@ type AppMintQuote = Omit<
   amount_issued: number;
 };
 
-function amountToNumber(value: any): number {
-  return Amount.from(value).toNumber();
-}
-
 function normalizeMintQuote(quote: MintQuoteBolt12Response): AppMintQuote {
   const { amount, amount_paid, amount_issued, ...rest } = quote;
   return {
     ...rest,
-    amount: amount === null ? null : amountToNumber(amount),
-    amount_paid: amountToNumber(amount_paid),
-    amount_issued: amountToNumber(amount_issued),
+    amount: amount === null ? null : cashuAmountToNumber(amount),
+    amount_paid: cashuAmountToNumber(amount_paid),
+    amount_issued: cashuAmountToNumber(amount_issued),
   };
 }
 
@@ -145,8 +141,8 @@ export async function checkOfferAndMintBolt12(
   try {
     const updated = await mintWallet.checkMintQuoteBolt12(quoteId);
 
-    const paid = amountToNumber(updated.amount_paid);
-    const issued = amountToNumber(updated.amount_issued);
+    const paid = cashuAmountToNumber(updated.amount_paid);
+    const issued = cashuAmountToNumber(updated.amount_issued);
     const delta = paid - issued;
     // Nothing new to mint
     if (delta <= 0) {
