@@ -15,6 +15,7 @@ describe("token", () => {
       expect(decoded.proofs.length).toEqual(1);
       expect(decoded.mint).toEqual("https://mint.minibits.cash/Bitcoin");
       expect(decoded.proofs.length).toEqual(1);
+      expect(decoded.proofs.map((p) => p.amount)).toEqual([decoded.amount]);
     });
 
     it("should properly decode a V3 token", () => {
