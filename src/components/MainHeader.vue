@@ -77,6 +77,7 @@
 import { defineComponent, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useUiStore } from "src/stores/ui";
+import { notifyApiError } from "src/js/notify";
 
 export default defineComponent({
   name: "MainHeader",
@@ -95,7 +96,7 @@ export default defineComponent({
       return location.host.includes("staging");
     };
 
-    const reload = () => {
+    const reload = async () => {
       if (countdown.value > 0) {
         uiStore.unlockMutex();
         clearInterval(countdownInterval);
@@ -103,7 +104,12 @@ export default defineComponent({
         return;
       }
       if (uiStore.globalMutexLock) return;
-      uiStore.lockMutex();
+      try {
+        await uiStore.lockMutex();
+      } catch (error) {
+        notifyApiError(error as Error);
+        return;
+      }
       countdown.value = 3;
       countdownInterval = setInterval(() => {
         countdown.value--;

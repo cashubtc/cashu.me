@@ -10,6 +10,7 @@ import {
 import { Clipboard } from "@capacitor/clipboard";
 import { Haptics, ImpactStyle } from "@capacitor/haptics";
 import { formatBigIntCurrency } from "src/js/format-currency";
+import { requestWalletLock, type ReleaseWalletLock } from "src/js/walletMutex";
 
 import ts from "typescript";
 import { useSettingsStore } from "./settings";
@@ -19,11 +20,13 @@ export type MutexPriority = "foreground" | "normal" | "background";
 type MutexWaiter = {
   priority: MutexPriority;
   resolve: () => void;
+  reject: (error: unknown) => void;
 };
 
 // This is intentionally module-local: waiting promises are ephemeral and must
 // never be persisted with UI state.
 const mutexWaiters: MutexWaiter[] = [];
+let webLockRequest: Promise<ReleaseWalletLock> | undefined;
 
 const mutexPriorityRank: Record<MutexPriority, number> = {
   foreground: 2,
@@ -105,16 +108,28 @@ export const useUiStore = defineStore("ui", {
       this.closeLocalSheetsSignal = Date.now();
     },
     async lockMutex(priority: MutexPriority = "normal") {
-      await new Promise<void>((resolve) => {
-        mutexWaiters.push({ priority, resolve });
+      await new Promise<void>((resolve, reject) => {
+        mutexWaiters.push({ priority, resolve, reject });
         this.dispatchMutexWaiters();
       });
     },
-    unlockMutex() {
-      this.globalMutexLock = false;
-      this.dispatchMutexWaiters();
+    async unlockMutex() {
+      const request = webLockRequest;
+      try {
+        if (request) {
+          const release = await request;
+          await release();
+        }
+      } finally {
+        // A repeated unlock must not clear the next native lock's ownership.
+        if (webLockRequest === request) {
+          webLockRequest = undefined;
+          this.globalMutexLock = false;
+          this.dispatchMutexWaiters();
+        }
+      }
     },
-    dispatchMutexWaiters() {
+    async dispatchMutexWaiters() {
       if (this.globalMutexLock) return;
 
       const nextIndex = nextEligibleMutexWaiterIndex(
@@ -124,7 +139,16 @@ export const useUiStore = defineStore("ui", {
 
       const [next] = mutexWaiters.splice(nextIndex, 1);
       this.globalMutexLock = true;
-      next.resolve();
+      try {
+        webLockRequest = requestWalletLock();
+        if (webLockRequest) await webLockRequest;
+        next.resolve();
+      } catch (error) {
+        webLockRequest = undefined;
+        this.globalMutexLock = false;
+        next.reject(error);
+        this.dispatchMutexWaiters();
+      }
     },
     beginForegroundPayment() {
       this.foregroundPaymentRequests += 1;
