@@ -1,117 +1,100 @@
 <!-- src/components/WelcomePage.vue -->
 <template>
-  <q-dialog
-    v-model="welcomeStore.showWelcome"
-    persistent
-    transition-show="slide-up"
-    transition-hide="fadeOut"
-    full-screen
+  <!-- A page, not a dialog: the window is the one scroller, so on a wide screen the scrollbar
+       and the wheel area are the window's, not a 640px card's.
+       Every step keeps one column: the scaffold's FlowColumn and FlowFooter's
+       column share one edge; slides carry no padding. -->
+  <div
+    v-if="welcomeStore.showWelcome"
+    class="welcome-page welcome-surface"
     @drop.prevent="dragFile"
     @dragover.prevent
   >
-    <q-card class="q-pa-none" style="height: 100%">
-      <q-carousel
-        v-model="welcomeStore.currentSlide"
-        animated
-        control-color="primary"
-        class="flex-1"
-        style="height: 100%"
+    <q-carousel
+      v-model="welcomeStore.currentSlide"
+      animated
+      control-color="primary"
+      class="welcome-carousel welcome-surface"
+    >
+      <q-carousel-slide :name="0">
+        <WelcomeSlide1 />
+      </q-carousel-slide>
+      <q-carousel-slide :name="1">
+        <WelcomeSlide2 />
+      </q-carousel-slide>
+      <q-carousel-slide :name="2">
+        <WelcomeSlideChoice />
+      </q-carousel-slide>
+      <!-- New wallet flow: seed display at slide 3 -->
+      <q-carousel-slide :name="3" v-if="welcomeStore.onboardingPath === 'new'">
+        <WelcomeSlide3 />
+      </q-carousel-slide>
+      <!-- Recover flow: seed input at slide 3 -->
+      <q-carousel-slide
+        :name="3"
+        v-else-if="welcomeStore.onboardingPath === 'recover'"
       >
-        <q-carousel-slide :name="0">
-          <WelcomeSlide1 />
-        </q-carousel-slide>
-        <q-carousel-slide :name="1">
-          <WelcomeSlide2 />
-        </q-carousel-slide>
-        <q-carousel-slide :name="2">
-          <WelcomeSlideChoice />
-        </q-carousel-slide>
-        <!-- New wallet flow: seed display at slide 3 -->
-        <q-carousel-slide
-          :name="3"
-          v-if="welcomeStore.onboardingPath === 'new'"
-        >
-          <WelcomeSlide3 />
-        </q-carousel-slide>
-        <!-- Recover flow: seed input at slide 3 -->
-        <q-carousel-slide
-          :name="3"
-          v-else-if="welcomeStore.onboardingPath === 'recover'"
-        >
-          <WelcomeRecoverSeed />
-        </q-carousel-slide>
-        <!-- Mints setup at slide 4 (both paths) -->
-        <q-carousel-slide :name="4" v-if="welcomeStore.onboardingPath">
-          <WelcomeMintSetup />
-        </q-carousel-slide>
-        <!-- Recover flow: restore ecash at slide 5 -->
-        <q-carousel-slide
-          :name="5"
-          v-if="welcomeStore.onboardingPath === 'recover'"
-        >
-          <WelcomeRestoreEcash />
-        </q-carousel-slide>
-      </q-carousel>
+        <WelcomeRecoverSeed />
+      </q-carousel-slide>
+      <!-- Mints setup at slide 4 (both paths) -->
+      <q-carousel-slide :name="4" v-if="welcomeStore.onboardingPath">
+        <WelcomeMintSetup />
+      </q-carousel-slide>
+      <!-- Recover flow: restore ecash at slide 5 -->
+      <q-carousel-slide
+        :name="5"
+        v-if="welcomeStore.onboardingPath === 'recover'"
+      >
+        <WelcomeRestoreEcash />
+      </q-carousel-slide>
+    </q-carousel>
 
-      <div
-        class="q-pa-md flex justify-between"
-        v-if="welcomeStore.currentSlide > 0"
-      >
-        <q-btn
-          flat
-          icon="arrow_left"
-          :label="$t('WelcomePage.actions.previous.label')"
+    <FlowFooter v-if="welcomeStore.currentSlide > 0" class="welcome-footer">
+      <div class="welcome-footer__row">
+        <IconButton
           v-if="welcomeStore.canGoPrev"
+          class="welcome-footer__back"
+          :icon="ChevronLeftIcon"
+          :icon-size="24"
+          :label="$t('WelcomePage.actions.previous.label')"
           @click="welcomeStore.goToPrevSlide"
         />
-        <!-- language selector (hidden on first slide since it's now in the slide itself) -->
-        <div
-          class="q-ml-md"
-          v-if="!welcomeStore.canGoPrev && welcomeStore.currentSlide > 0"
-          style="position: relative; top: -5px"
-        >
-          <q-select
-            v-model="selectedLanguage"
-            :options="languageOptions"
-            emit-value
-            dense
-            map-options
-            @update:model-value="changeLanguage"
-            style="max-width: 200px; max-height: 20px"
-          />
-        </div>
-        <q-space />
         <q-btn
-          flat
-          icon="arrow_right"
+          rounded
+          unelevated
+          color="primary"
+          class="welcome-footer__next"
           data-testid="onboarding-next"
           :label="$t('WelcomePage.actions.next.label')"
           :disable="!welcomeStore.canProceed"
           @click="welcomeStore.goToNextSlide"
-          v-if="
-            welcomeStore.currentSlide > 0 && welcomeStore.currentSlide !== 2
-          "
+          v-if="welcomeStore.currentSlide !== 2"
         />
       </div>
-    </q-card>
-  </q-dialog>
+    </FlowFooter>
+  </div>
 </template>
 
 <script lang="ts">
-import { onMounted, ref } from "vue";
+import { ChevronLeft as ChevronLeftIcon } from "lucide-vue-next";
+import FlowFooter from "src/components/ui/FlowFooter.vue";
+import IconButton from "src/components/ui/IconButton.vue";
+import { onMounted, ref, watch } from "vue";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useStorageStore } from "src/stores/storage";
-import WelcomeSlide1 from "./welcome/WelcomeSlide1.vue";
-import WelcomeSlide2 from "./welcome/WelcomeSlide2.vue";
-import WelcomeSlide3 from "./welcome/WelcomeSlide3.vue";
-import WelcomeSlideChoice from "./welcome/WelcomeSlideChoice.vue";
-import WelcomeRecoverSeed from "./welcome/WelcomeRecoverSeed.vue";
-import WelcomeMintSetup from "./welcome/WelcomeMintSetup.vue";
-import WelcomeRestoreEcash from "./welcome/WelcomeRestoreEcash.vue";
+import WelcomeSlide1 from "src/pages/welcome/WelcomeSlide1.vue";
+import WelcomeSlide2 from "src/pages/welcome/WelcomeSlide2.vue";
+import WelcomeSlide3 from "src/pages/welcome/WelcomeSlide3.vue";
+import WelcomeSlideChoice from "src/pages/welcome/WelcomeSlideChoice.vue";
+import WelcomeRecoverSeed from "src/pages/welcome/WelcomeRecoverSeed.vue";
+import WelcomeMintSetup from "src/pages/welcome/WelcomeMintSetup.vue";
+import WelcomeRestoreEcash from "src/pages/welcome/WelcomeRestoreEcash.vue";
 
 export default {
   name: "WelcomePage",
   components: {
+    FlowFooter,
+    IconButton,
     WelcomeSlide1,
     WelcomeSlide2,
     WelcomeSlide3,
@@ -119,43 +102,6 @@ export default {
     WelcomeRecoverSeed,
     WelcomeMintSetup,
     WelcomeRestoreEcash,
-  },
-  data() {
-    return {
-      selectedLanguage: "",
-      languageOptions: [
-        { label: "English", value: "en-US" },
-        { label: "Español", value: "es-ES" },
-        { label: "Italiano", value: "it-IT" },
-        { label: "Deutsch", value: "de-DE" },
-        { label: "Français", value: "fr-FR" },
-        { label: "Čeština", value: "cs-CZ" },
-        { label: "Português (Brasil)", value: "pt-BR" },
-        { label: "Svenska", value: "sv-SE" },
-        { label: "Ελληνικά", value: "el-GR" },
-        { label: "Türkçe", value: "tr-TR" },
-        { label: "ไทย", value: "th-TH" },
-        { label: "العربية", value: "ar-SA" },
-        { label: "中文", value: "zh-CN" },
-        { label: "日本語", value: "ja-JP" },
-      ],
-    };
-  },
-  methods: {
-    changeLanguage(locale) {
-      // Set the i18n locale
-      this.$i18n.locale = locale;
-
-      // Store the selected language in localStorage
-      localStorage.setItem("cashu.language", locale);
-    },
-  },
-  created() {
-    // Set the initial selected language based on the current locale or from storage
-    this.selectedLanguage =
-      this.languageOptions.find(
-        (option) => option.value === this.$i18n.locale || navigator.language
-      )?.label || "Language";
   },
   setup() {
     const welcomeStore = useWelcomeStore();
@@ -185,7 +131,14 @@ export default {
       welcomeStore.initializeWelcome();
     });
 
+    // Each step starts at its top: the window keeps its scroll position across steps.
+    watch(
+      () => welcomeStore.currentSlide,
+      () => window.scrollTo({ top: 0 })
+    );
+
     return {
+      ChevronLeftIcon,
       welcomeStore,
       fileUpload,
       onChangeFileUpload,
@@ -196,25 +149,59 @@ export default {
 </script>
 
 <style scoped>
-.q-dialog__inner {
-  height: 100%;
-  width: 100%;
-  margin: 0; /* Align dialog to cover the entire viewport */
-}
-
-.q-card {
+/* The page fills the window and grows with its step; the window scrolls it. */
+.welcome-page {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
-.q-carousel {
-  flex: 1;
-}
-
-.custom-navigation {
+/* The carousel and its panels grow with the step instead of holding a fixed height with
+   their own scroller (Quasar's 400px carousel and .scroll panel). clip, not hidden, so the
+   slide transition stays clipped without making the carousel a scroll container, and the
+   footers can stick to the window's bottom. */
+.welcome-carousel,
+.welcome-carousel :deep(.q-carousel__slides-container),
+.welcome-carousel :deep(.q-panel),
+.welcome-carousel :deep(.q-carousel__slide) {
   display: flex;
-  justify-content: space-between;
-  padding: 16px;
+  flex: 1 0 auto;
+  flex-direction: column;
+  height: auto;
+  min-height: 0;
+}
+.welcome-carousel {
+  overflow: clip;
+}
+.welcome-carousel :deep(.q-panel) {
+  overflow: visible;
+}
+.welcome-carousel :deep(.q-carousel__slide) {
+  padding: 0;
+}
+
+/* Back and Next stay at the bottom of the window while the step scrolls under them. */
+.welcome-footer {
+  bottom: 0;
+  position: sticky;
+  z-index: 1;
+}
+
+/* Back and Next on the footer's column: Back 48px, then Next takes the rest. */
+.welcome-footer__row {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+}
+.welcome-footer__back {
+  flex-shrink: 0;
+  height: 48px;
+  width: 48px;
+}
+.welcome-footer__next {
+  flex: 1;
+  min-height: 52px;
+  min-width: 0;
 }
 </style>

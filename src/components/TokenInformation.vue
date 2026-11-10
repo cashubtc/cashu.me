@@ -1,110 +1,99 @@
 <template>
   <div class="token-information-container q-px-md">
     <!-- Amount Header -->
-    <div v-if="!hideAmount" class="token-header-container">
-      <div class="token-amount">
-        {{ displayUnit }}
-      </div>
+    <div v-if="!hideAmount" class="column items-center full-width">
+      <AmountHeadline>{{ displayUnit }}</AmountHeadline>
     </div>
 
     <!-- Token Details Section -->
-    <div class="token-details-section q-mt-md q-mb-lg">
+    <div class="token-details-section detail-table q-mt-md q-mb-lg">
       <!-- Fee (if applicable) -->
-      <div v-if="receiveFee > 0 && !hideFee" class="detail-item q-mb-md">
-        <div class="detail-label">
-          <arrow-down-up-icon size="20" color="#9E9E9E" class="detail-icon" />
-          <div class="detail-name">{{ $t("TokenInformation.fee") }}</div>
-        </div>
-        <div class="detail-value">
-          {{ formatCurrency(receiveFee, tokenUnit, true) }}
-        </div>
-      </div>
+      <DetailRow
+        v-if="receiveFee > 0 && !hideFee"
+        :icon="ReceiptTextIcon"
+        :label="$t('TokenInformation.fee')"
+        :value="formatCurrency(receiveFee, tokenUnit, true)"
+      />
 
       <!-- Unit -->
-      <div v-if="!hideUnit" class="detail-item q-mb-md">
-        <div class="detail-label">
-          <banknote-icon size="20" color="#9E9E9E" class="detail-icon" />
-          <div class="detail-name">{{ $t("TokenInformation.unit") }}</div>
-        </div>
-        <div class="detail-value">{{ tokenUnit.toUpperCase() }}</div>
-      </div>
+      <DetailRow
+        v-if="!hideUnit && tokenUnit !== 'sat'"
+        :icon="CircleDollarSignIcon"
+        :label="$t('TokenInformation.unit')"
+        :value="unitCode(tokenUnit)"
+      />
 
       <!-- Fiat -->
-      <div v-if="showFiat && !hideFiat" class="detail-item q-mb-md">
-        <div class="detail-label">
-          <banknote-icon size="20" color="#9E9E9E" class="detail-icon" />
-          <div class="detail-name">{{ $t("TokenInformation.fiat") }}</div>
-        </div>
-        <div class="detail-value">
-          {{ formatCurrency(fiatAmount, bitcoinPriceCurrency, true) }}
-        </div>
-      </div>
+      <DetailRow
+        v-if="showFiat && !hideFiat"
+        :icon="BanknoteIcon"
+        :label="$t('TokenInformation.fiat')"
+        :value="formatCurrency(fiatAmount, bitcoinPriceCurrency, true)"
+      />
+
+      <!-- The token text, a copy row: where a QR shows the token, its text lives in the
+           table rather than as a line under the QR. -->
+      <DetailRow
+        v-if="showToken && encodedToken"
+        data-testid="token-copy-row"
+        :icon="NutIcon"
+        :label="$t('TokenInformation.token')"
+        :copy-value="encodedToken"
+        :copied-message="$t('TokenInformation.token_copied')"
+        ><bdi dir="ltr">{{ shortToken }}</bdi></DetailRow
+      >
 
       <!-- P2PK Lock Status (if locked) -->
-      <div
+      <DetailRow
         v-if="isLocked(proofsToShow) && !hideP2PK"
-        class="detail-item q-mb-md"
-      >
-        <div class="detail-label">
-          <lock-icon size="20" color="#9E9E9E" class="detail-icon" />
-          <div class="detail-name">{{ $t("TokenInformation.p2pk") }}</div>
-        </div>
-        <div
-          class="detail-value"
-          :class="{
-            'p2pk-locked-me': isLockedToUs(proofsToShow),
-            'p2pk-locked-warning':
-              isLocked(proofsToShow) && !isLockedToUs(proofsToShow),
-          }"
-        >
-          {{
-            isLockedToUs(proofsToShow)
-              ? $t("TokenInformation.locked_to_you")
-              : $t("TokenInformation.locked")
-          }}
-        </div>
-      </div>
+        :icon="LockIcon"
+        :label="$t('TokenInformation.p2pk')"
+        :value="
+          isLockedToUs(proofsToShow)
+            ? $t('TokenInformation.locked_to_you')
+            : $t('TokenInformation.locked')
+        "
+        :value-class="{
+          'p2pk-locked-me': isLockedToUs(proofsToShow),
+          'p2pk-locked-warning':
+            isLocked(proofsToShow) && !isLockedToUs(proofsToShow),
+        }"
+      />
 
       <!-- Mint URL -->
-      <div v-if="!hideMint" class="detail-item q-mb-md">
-        <div class="detail-label">
-          <building-icon size="20" color="#9E9E9E" class="detail-icon" />
-          <div class="detail-name">{{ $t("TokenInformation.mint") }}</div>
-        </div>
-        <div class="detail-value">
-          {{ tokenMintUrl }}
-          <q-spinner v-if="addMintBlocking" size="sm" class="q-ml-xs" />
-        </div>
-      </div>
+      <DetailRow
+        v-if="!hideMint"
+        :icon="MintIcon"
+        :label="$t('TokenInformation.mint')"
+        value-class="detail-value--inline"
+      >
+        {{ tokenMintUrl }}
+        <PendingDots v-if="addMintBlocking" />
+      </DetailRow>
 
       <!-- Memo (if available) -->
-      <div v-if="displayMemo && !hideMemo" class="detail-item q-mb-md">
-        <div class="detail-label">
-          <message-circle-icon size="20" color="#9E9E9E" class="detail-icon" />
-          <div class="detail-name">{{ $t("TokenInformation.memo") }}</div>
-        </div>
-        <div
-          class="detail-value"
-          style="max-width: 60%; word-break: break-word; white-space: normal"
-        >
-          {{ displayMemo }}
-        </div>
-      </div>
+      <DetailRow
+        v-if="displayMemo && !hideMemo"
+        :icon="MessageCircleIcon"
+        :label="$t('TokenInformation.memo')"
+        :value="displayMemo"
+        value-class="token-memo-value"
+      />
 
       <!-- Payment Request (if applicable) -->
-      <div v-if="paymentRequestId" class="detail-item">
-        <div class="detail-label">
-          <banknote-icon size="20" color="#9E9E9E" class="detail-icon" />
-          <div class="detail-name">
-            {{ $t("TokenInformation.payment_request") }}
-          </div>
-        </div>
-        <div class="detail-value">{{ $t("TokenInformation.nostr") }}</div>
-      </div>
+      <DetailRow
+        v-if="paymentRequestId"
+        :icon="FileTextIcon"
+        :label="$t('TokenInformation.payment_request')"
+        :value="$t('TokenInformation.nostr')"
+      />
     </div>
   </div>
 </template>
 <script lang="ts">
+import { unitCode } from "src/js/format-currency";
+import AmountHeadline from "src/components/ui/AmountHeadline.vue";
+import PendingDots from "src/components/ui/PendingDots.vue";
 import { defineComponent } from "vue";
 import { type Token } from "@cashu/cashu-ts";
 import { getShortUrl } from "src/js/wallet-helpers";
@@ -116,25 +105,44 @@ import { usePriceStore } from "src/stores/price";
 import { useSettingsStore } from "src/stores/settings";
 import token from "src/js/token";
 import {
-  ArrowDownUp as ArrowDownUpIcon,
-  Building as BuildingIcon,
-  Lock as LockIcon,
   Banknote as BanknoteIcon,
+  CircleDollarSign as CircleDollarSignIcon,
+  FileText as FileTextIcon,
+  Building2 as MintIcon,
+  Lock as LockIcon,
   MessageCircle as MessageCircleIcon,
+  Nut as NutIcon,
+  ReceiptText as ReceiptTextIcon,
 } from "lucide-vue-next";
+import DetailRow from "src/components/ui/DetailRow.vue";
 
 export default defineComponent({
   name: "TokenInformation",
   mixins: [windowMixin],
   components: {
-    ArrowDownUpIcon,
-    BuildingIcon,
-    LockIcon,
-    BanknoteIcon,
-    MessageCircleIcon,
+    AmountHeadline,
+    PendingDots,
+    DetailRow,
+  },
+  setup() {
+    return {
+      BanknoteIcon,
+      CircleDollarSignIcon,
+      FileTextIcon,
+      MintIcon,
+      LockIcon,
+      MessageCircleIcon,
+      NutIcon,
+      ReceiptTextIcon,
+    };
   },
   props: {
     encodedToken: String,
+    /** A copy row for the token itself (the token view, where the QR shows it). */
+    showToken: {
+      type: Boolean,
+      default: false,
+    },
     paymentRequestId: {
       type: String,
       required: false,
@@ -208,13 +216,11 @@ export default defineComponent({
     },
   },
   computed: {
-    ...mapState(useMintsStore, [
-      "activeMintUrl",
-      "activeProofs",
-      "mints",
-      "activeUnit",
-      "addMintBlocking",
-    ]),
+    shortToken(): string {
+      const t = this.encodedToken || "";
+      return t.length > 20 ? `${t.slice(0, 10)}…${t.slice(-8)}` : t;
+    },
+    ...mapState(useMintsStore, ["addMintBlocking"]),
     ...mapState(usePriceStore, ["bitcoinPrice", "currentCurrencyPrice"]),
     ...mapState(useSettingsStore, ["bitcoinPriceCurrency"]),
     proofsToShow: function () {
@@ -263,61 +269,8 @@ export default defineComponent({
     },
   },
   methods: {
+    unitCode,
     ...mapActions(useP2PKStore, ["isLocked", "isLockedToUs"]),
-    getProofsMint: function (proofs) {
-      // unique keyset IDs of proofs
-      const uniqueIds = [...new Set(proofs.map((p) => p.id))];
-      // mints that have any of the keyset IDs
-      const mints_keysets = this.mints.filter((m) =>
-        m.keysets.some((r) => uniqueIds.indexOf(r) >= 0)
-      );
-      // what we put into the JSON
-      const mints = mints_keysets.map(
-        (m) => [{ url: m.url, ids: m.keysets }][0]
-      );
-      if (mints.length == 0) {
-        return "";
-      } else {
-        return getShortUrl(mints[0].url);
-      }
-    },
-    mintKnownToUs: function (proofs) {
-      // unique keyset IDs of proofs
-      const uniqueIds = [...new Set(proofs.map((p) => p.id))];
-      // mints that have any of the keyset IDs
-      return (
-        this.mints.filter((m) =>
-          m.keysets.some((r) => uniqueIds.indexOf(r.id) >= 0)
-        ).length > 0
-      );
-    },
-    shareToken: async function () {
-      if (navigator.share) {
-        const shareData = {
-          text: this.encodedToken,
-        };
-        try {
-          await navigator.share(shareData);
-        } catch (error: any) {
-          if (error?.name !== "AbortError") {
-            console.error("Error sharing token:", error);
-          }
-        }
-      }
-    },
-    copyToken: async function () {
-      try {
-        await navigator.clipboard.writeText(this.encodedToken);
-        this.$q.notify({
-          message: this.$t("TokenInformation.token_copied"),
-          color: "positive",
-          position: "top",
-          timeout: 1000,
-        });
-      } catch (error) {
-        console.error("Failed to copy to clipboard:", error);
-      }
-    },
   },
 });
 </script>
@@ -325,21 +278,7 @@ export default defineComponent({
 <style scoped>
 .token-information-container {
   width: 100%;
-  color: white;
-}
-
-/* Token Header - matches mint-header-container from MintDetailsPage */
-.token-header-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-
-.token-amount {
-  font-size: 36px;
-  font-weight: 700;
-  text-align: center;
+  color: var(--app-text);
 }
 
 /* Action Buttons Section */
@@ -352,68 +291,20 @@ export default defineComponent({
   width: 100%;
 }
 
-.detail-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
+/* The value elements belong to DetailRow, so they are reached through the section. */
+.token-details-section :deep(.token-memo-value) {
+  word-break: break-word;
+  white-space: normal;
 }
 
-.detail-label {
-  display: flex;
-  align-items: center;
-}
-
-.detail-icon {
-  margin-right: 10px;
-}
-
-.detail-name {
-  font-size: 16px;
+/* Locked to your key: the success tone; locked to someone else: the warning tone. Plain
+   colour, no shimmer or glow. */
+.token-details-section :deep(.p2pk-locked-me) {
+  color: var(--app-success);
   font-weight: 600;
-  color: #9e9e9e;
 }
-
-.detail-value {
-  font-size: 16px;
+.token-details-section :deep(.p2pk-locked-warning) {
+  color: var(--app-warning);
   font-weight: 600;
-  color: white;
-  text-align: right;
-  max-width: 60%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Golden shine for P2PK locked-to-you */
-.p2pk-locked-me {
-  color: #ffd700;
-  background: linear-gradient(
-    90deg,
-    #b8860b 0%,
-    #ffd700 40%,
-    #fff6b7 50%,
-    #ffd700 60%,
-    #b8860b 100%
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shine 2.5s linear infinite;
-  text-shadow: 0 0 6px rgba(255, 215, 0, 0.35);
-}
-
-/* Warning colors for P2PK locked (not to us) */
-.p2pk-locked-warning {
-  color: #ff9800;
-  text-shadow: 0 0 6px rgba(255, 152, 0, 0.4);
-}
-
-@keyframes shine {
-  0% {
-    background-position: -200px 0;
-  }
-  100% {
-    background-position: 200px 0;
-  }
 }
 </style>

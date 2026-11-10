@@ -1,3 +1,4 @@
+import { i18n } from "src/boot/i18n";
 import { defineStore } from "pinia";
 import { StoredMint, useMintsStore } from "./mints";
 import { useUiStore } from "./ui";
@@ -5,12 +6,7 @@ import { useP2PKStore } from "./p2pk";
 import { useWalletStore } from "./wallet";
 import token from "src/js/token";
 import { useTokensStore } from "./tokens";
-import {
-  notifyError,
-  notifySuccess,
-  notify,
-  notifyWarning,
-} from "../js/notify";
+import { notifyError, notify } from "../js/notify";
 import { getDecodedTokenBinary, getEncodedToken } from "@cashu/cashu-ts";
 import { useSwapStore } from "./swap";
 
@@ -113,7 +109,10 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
           historyToken &&
           (historyToken.amount > 0 || historyToken.status === "paid")
         ) {
-          if (verbose) notify("Token already in history.");
+          if (verbose)
+            notify(
+              i18n.global.t("receiveTokens.notifications.already_in_history")
+            );
           return false;
         }
         this.receiveData.tokensBase64 = text;
@@ -139,7 +138,9 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
 
               this.ndef.addEventListener("readingerror", () => {
                 console.error("Cannot read data from the NFC tag.");
-                notifyError("Cannot read data from the NFC tag.");
+                notifyError(
+                  i18n.global.t("receiveTokens.notifications.nfc_read_failed")
+                );
                 this.controller.abort();
                 this.scanningCard = false;
               });
@@ -196,11 +197,18 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
                       receiveStore.showReceiveTokens = true;
                       uiStore.closeDialogs();
                     } else {
-                      notify("Token already in history.");
+                      notify(
+                        i18n.global.t(
+                          "receiveTokens.notifications.already_in_history"
+                        )
+                      );
                     }
                   } catch (err) {
                     console.error(`Something went wrong! ${err}`);
-                    notifyError(`Something went wrong! ${err}`);
+                    notifyError(
+                      i18n.global.t("common.something_went_wrong"),
+                      String(err)
+                    );
                   }
                   this.controller.abort();
                   this.scanningCard = false;
@@ -210,11 +218,17 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
             })
             .catch((error) => {
               console.error(`Scan error: ${error.message}`);
-              notifyError(`Scan error: ${error.message}`);
+              notifyError(
+                i18n.global.t("receiveTokens.notifications.scan_error"),
+                error.message
+              );
             });
         } catch (error) {
           console.error(`NFC error: ${error.message}`);
-          notifyError(`NFC error: ${error.message}`);
+          notifyError(
+            i18n.global.t("receiveTokens.notifications.nfc_error"),
+            error.message
+          );
         }
       } else {
         this.controller.abort();

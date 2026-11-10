@@ -1,51 +1,54 @@
 <template>
-  <div class="column q-mt-md">
-    <!-- Input field with paste button -->
-    <div class="input-with-paste-wrapper" :data-testid="testId">
-      <q-input
-        ref="inputRef"
-        :aria-label="computedPlaceholder"
-        filled
-        borderless
-        :class="[
-          'parse-input',
-          { 'has-paste-button': canPasteFromClipboard && !modelValue },
-        ]"
-        spellcheck="false"
-        autocorrect="off"
-        autocapitalize="off"
-        :model-value="modelValue"
-        @update:model-value="$emit('update:modelValue', $event)"
-        type="textarea"
-        :placeholder="computedPlaceholder"
-        :autofocus="autofocus"
-        @keyup.enter="$emit('enter')"
-      />
-      <div
-        v-if="canPasteFromClipboard && !modelValue"
-        class="paste-text-btn"
-        @click="$emit('paste')"
-      >
-        {{ $t("ParseInputComponent.paste_button.label") }}
-      </div>
-    </div>
+  <div class="column" :data-testid="testId">
+    <!-- The outlined text field (textarea variant): its label stays visible with content,
+         and Paste sits inside it, replaced by Clear once there is text. Scanning is the
+         labelled row under the field. -->
+    <q-input
+      ref="inputRef"
+      outlined
+      type="textarea"
+      autogrow
+      hide-bottom-space
+      :label="computedPlaceholder"
+      spellcheck="false"
+      autocorrect="off"
+      autocapitalize="off"
+      :model-value="modelValue"
+      @update:model-value="$emit('update:modelValue', $event)"
+      :autofocus="autofocus"
+      @keyup.enter="$emit('enter')"
+    >
+      <template #append>
+        <IconButton
+          v-if="!modelValue && canPasteFromClipboard"
+          :label="$t('ParseInputComponent.paste_button.label')"
+          @click="$emit('paste')"
+        >
+          <ClipboardPasteIcon :size="20" />
+        </IconButton>
+        <IconButton
+          v-else-if="modelValue"
+          :label="$t('global.actions.clear.label')"
+          @click="$emit('update:modelValue', '')"
+        >
+          <XIcon :size="20" />
+        </IconButton>
+      </template>
+    </q-input>
 
-    <!-- QR Scanner row -->
-    <div v-if="hasCamera" class="qr-scanner-row q-mt-md" @click="$emit('scan')">
-      <div class="row items-center no-wrap">
-        <div class="qr-icon-circle">
-          <ScanIcon :size="24" />
-        </div>
-        <div class="col q-ml-md">
-          <div class="text-body1 text-weight-medium">
-            {{ $t("ParseInputComponent.qr_scanner.title") }}
-          </div>
-          <div class="text-caption text-grey-6">
-            {{ $t("ParseInputComponent.qr_scanner.description") }}
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- The one scan affordance: hidden without a camera. -->
+    <OptionRow
+      v-if="hasCamera"
+      class="q-mt-md"
+      data-testid="parse-input-scan"
+      @click="$emit('scan')"
+    >
+      <template #icon><ScanIcon :size="24" /></template>
+      <template #label>{{
+        $t("ParseInputComponent.qr_scanner.title")
+      }}</template>
+      <template #caption>{{ computedScanCaption }}</template>
+    </OptionRow>
 
     <!-- NFC button (if supported) -->
     <q-btn
@@ -59,22 +62,37 @@
       <NfcIcon class="q-mr-sm" :size="20" />
       {{ nfcLabel }}
       <q-tooltip>{{ nfcTooltip }}</q-tooltip>
-      <template v-slot:loading>
-        <q-spinner />
-      </template>
+      <template #loading
+        ><BusyLabel>{{ nfcLabel }}</BusyLabel></template
+      >
     </q-btn>
   </div>
 </template>
 
 <script lang="ts">
+import BusyLabel from "src/components/ui/BusyLabel.vue";
+import IconButton from "src/components/ui/IconButton.vue";
+import OptionRow from "src/components/ui/OptionRow.vue";
 import { defineComponent } from "vue";
-import { Scan as ScanIcon, Nfc as NfcIcon } from "lucide-vue-next";
+import { mapState } from "pinia";
+import { useUiStore } from "src/stores/ui";
+import {
+  ClipboardPaste as ClipboardPasteIcon,
+  Nfc as NfcIcon,
+  Scan as ScanIcon,
+  X as XIcon,
+} from "lucide-vue-next";
 
 export default defineComponent({
   name: "ParseInputComponent",
   components: {
-    ScanIcon,
+    BusyLabel,
+    ClipboardPasteIcon,
+    IconButton,
     NfcIcon,
+    OptionRow,
+    ScanIcon,
+    XIcon,
   },
   props: {
     modelValue: {
@@ -92,6 +110,11 @@ export default defineComponent({
     testId: {
       type: String,
       default: "parse-input",
+    },
+    /** The scan row's caption; Pay's "Tap to scan an address" by default. */
+    scanCaption: {
+      type: String,
+      default: "",
     },
     hasCamera: {
       type: Boolean,
@@ -116,11 +139,11 @@ export default defineComponent({
   },
   emits: ["update:modelValue", "enter", "paste", "scan", "nfc"],
   computed: {
-    canPasteFromClipboard() {
+    ...mapState(useUiStore, ["canPasteFromClipboard"]),
+    computedScanCaption(): string {
       return (
-        window.isSecureContext &&
-        navigator.clipboard &&
-        navigator.clipboard.readText
+        this.scanCaption ||
+        (this.$t("ParseInputComponent.qr_scanner.caption_address") as string)
       );
     },
     computedPlaceholder() {
@@ -131,89 +154,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style lang="scss" scoped>
-/* Input area styles */
-.input-with-paste-wrapper {
-  position: relative;
-}
-
-.parse-input {
-  :deep(.q-field__control) {
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.06);
-    min-height: 120px;
-    max-height: 120px;
-    padding: 16px;
-
-    &:before,
-    &:after {
-      border: none !important;
-    }
-  }
-
-  :deep(.q-field__native) {
-    padding: 0;
-    font-size: 16px;
-    color: white;
-    min-height: 88px;
-  }
-
-  &.has-paste-button :deep(.q-field__native) {
-    padding: 0 70px 0 0;
-  }
-
-  :deep(.q-placeholder) {
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 16px;
-  }
-
-  :deep(.q-field__control:before),
-  :deep(.q-field__control:after) {
-    display: none !important;
-  }
-
-  :deep(.q-field__bottom) {
-    display: none;
-  }
-}
-
-.paste-text-btn {
-  position: absolute;
-  right: 20px;
-  top: 16px;
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--q-primary);
-  cursor: pointer;
-  user-select: none;
-  line-height: 1.5;
-
-  &:active {
-    opacity: 0.7;
-  }
-}
-
-.qr-scanner-row {
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
-  padding: 12px 16px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-
-  &:active {
-    background: rgba(255, 255, 255, 0.1);
-  }
-}
-
-.qr-icon-circle {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-</style>

@@ -6,7 +6,7 @@
         :key="`primary-${fiatMode}`"
         ref="amountDisplayRef"
         class="amount-display text-weight-bold text-center"
-        :class="{ 'text-grey-6': muted }"
+        :class="{ 'text-app-muted': muted }"
       >
         {{ primaryAmountDisplay }}
       </div>
@@ -15,23 +15,29 @@
       <div class="fiat-wrapper">
         <transition name="swap-secondary">
           <div :key="`secondary-${fiatMode}`" class="fiat-wrapper-content">
-            <div
-              class="fiat-display text-grey-6"
+            <!-- The other unit and its ⇅ are one centred pill, so the pair sits square under
+                 the amount. -->
+            <button
+              v-if="showSwap"
+              type="button"
+              class="fiat-toggle fiat-display"
               :class="{ invisible: !secondaryDisplay }"
+              :aria-label="
+                $t('common.enter_amount_in', { fiat: bitcoinPriceCurrency })
+              "
+              :aria-pressed="fiatMode ? 'true' : 'false'"
               @click="toggleFiatMode"
+            >
+              <span>{{ secondaryDisplay || " " }}</span>
+              <ArrowDownUpIcon :size="16" aria-hidden="true" />
+            </button>
+            <div
+              v-else
+              class="fiat-display text-app-muted"
+              :class="{ invisible: !secondaryDisplay }"
             >
               {{ secondaryDisplay || " " }}
             </div>
-            <q-icon
-              v-if="showSwap"
-              name="swap_vert"
-              size="24px"
-              class="fiat-icon text-grey-6 cursor-pointer"
-              @click="toggleFiatMode"
-              aria-label="Swap amount/fiat input mode"
-              :aria-pressed="fiatMode ? 'true' : 'false'"
-              role="button"
-            />
           </div>
         </transition>
       </div>
@@ -40,6 +46,7 @@
   <!-- amount-input-root keeps structure minimal so parents can place it within their layout -->
 </template>
 <script lang="ts">
+import { ArrowDownUp as ArrowDownUpIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapState } from "pinia";
 import { useMintsStore } from "src/stores/mints";
@@ -51,6 +58,7 @@ const MAX_AMOUNT = 999_999_999;
 
 export default defineComponent({
   name: "AmountInputComponent",
+  components: { ArrowDownUpIcon },
   mixins: [windowMixin],
   props: {
     modelValue: {
@@ -94,7 +102,7 @@ export default defineComponent({
   computed: {
     ...mapState(
       useMintsStore as any,
-      ["activeUnit", "activeUnitLabel", "activeUnitCurrencyMultiplyer"] as any
+      ["activeUnit", "activeUnitCurrencyMultiplyer"] as any
     ),
     ...mapState(useSettingsStore, ["bitcoinPriceCurrency"]),
     ...mapState(usePriceStore, ["bitcoinPrice", "currentCurrencyPrice"]),
@@ -375,6 +383,8 @@ export default defineComponent({
         }
         handled = true;
       } else if (key === "Enter") {
+        // A focused button or link takes Enter itself (the fiat switch, a segment).
+        if (ae?.closest?.("button, a, [role=button]")) return;
         if (this.modelValue != null && this.modelValue > 0) {
           this.$emit("enter");
         }
@@ -481,13 +491,19 @@ export default defineComponent({
   width: 100%;
   min-height: 120px; /* Ensure enough space for both displays */
 }
+/* A 568px or 667px phone: the fiat line moves up (40px to 20px under the amount) rather than
+   the amount or the keypad digits shrinking, so a notice above the amount (Receive on-chain's
+   deposit limits) still fits. */
+@media (max-height: 700px) {
+  .amount-input-root {
+    min-height: 100px;
+  }
+}
 .amount-display {
   position: absolute;
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  font-size: clamp(56px, 11vw, 80px);
-  line-height: 1.1;
   white-space: nowrap;
   max-width: 90vw;
 }
@@ -514,14 +530,33 @@ export default defineComponent({
   align-items: center;
   transform: translate(-50%, -50%);
 }
-.fiat-display {
-  font-size: 20px;
-  text-align: center;
+.fiat-toggle {
+  align-items: center;
+  background: none;
+  border: 0;
+  border-radius: var(--app-radius-pill);
+  color: var(--app-text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  font-family: inherit;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 14px;
+  transition: background 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
 }
-.fiat-icon {
-  position: absolute;
-  left: 100%;
-  margin-left: 4px;
+@media (hover: hover) {
+  .fiat-toggle:hover {
+    background: var(--app-tint);
+    color: var(--app-text);
+  }
+}
+.fiat-toggle:active {
+  background: var(--app-tint-strong);
+}
+.fiat-toggle:focus-visible {
+  box-shadow: var(--app-focus-ring);
+  outline: none;
 }
 .invisible {
   visibility: hidden;

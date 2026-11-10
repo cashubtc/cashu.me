@@ -1,13 +1,8 @@
-import { date } from "quasar";
+import { currentDateStr } from "src/js/utils";
 import { defineStore } from "pinia";
 import { liveQuery } from "dexie";
 import { cashuDb } from "./dexie";
-import {
-  JSONInt,
-  Proof,
-  Token,
-  MeltQuoteBolt11Response,
-} from "@cashu/cashu-ts";
+import { JSONInt, MeltQuoteBolt11Response } from "@cashu/cashu-ts";
 import token from "src/js/token";
 import type { PaymentRequestData } from "src/stores/payment-request";
 import { v4 as uuidv4 } from "uuid";
@@ -257,7 +252,3 @@ export const useTokensStore = defineStore("tokens", {
     },
   },
 });
-
-function currentDateStr() {
-  return date.formatDate(new Date(), "YYYY-MM-DD HH:mm:ss");
-}

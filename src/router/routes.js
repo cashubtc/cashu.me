@@ -127,12 +127,31 @@ const routes = [
       { path: "", component: () => import("src/pages/TermsPage.vue") },
     ],
   },
+  // The design system board: every component, live, with its source and usage.
+  // Development builds only, unless built with DESIGN_SYSTEM=1.
+  ...(process.env.DEV || process.env.DESIGN_SYSTEM
+    ? [
+        {
+          path: "/design-system",
+          component: () => import("layouts/FullscreenLayout.vue"),
+          children: [
+            {
+              path: "",
+              component: () => import("src/pages/DesignSystemPage.vue"),
+            },
+          ],
+        },
+      ]
+    : []),
 
   // Always leave this as last one,
   // but you can also remove it
   {
     path: "/:pathMatch(.*)*",
-    component: () => import("src/pages/ErrorNotFound.vue"),
+    component: () => import("layouts/FullscreenLayout.vue"),
+    children: [
+      { path: "", component: () => import("src/pages/ErrorNotFound.vue") },
+    ],
   },
 ];
 

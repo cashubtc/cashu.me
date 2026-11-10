@@ -44,8 +44,8 @@ export class WalletPage {
     await expect(this.page.getByTestId("confirm-add-mint")).toBeHidden();
     // Match the joined-mint list, not the same URL still shown in the preview.
     await expect(
-      this.page.locator(".mint-setup-slide .mint-item .mint-url")
-    ).toHaveText(mintUrl);
+      this.page.locator(".mint-setup-slide .mint-item")
+    ).toContainText(new URL(mintUrl).host);
 
     await this.page.getByTestId("onboarding-next").click();
     await expect(this.page.getByTestId("wallet-send")).toBeVisible();
@@ -65,6 +65,28 @@ export class WalletPage {
     for (const digit of String(amount)) {
       await keyboard.getByRole("button", { name: digit, exact: true }).click();
     }
+  }
+
+  /** The amount screen's ecash unit switch, a header action named "Unit: Bitcoin, change". */
+  unitToggle() {
+    return this.page
+      .locator(".sheet-column-header:visible")
+      .getByRole("button", { name: /^Unit: .+, change$/ });
+  }
+
+  /** The ⇅ swap between typing the unit and typing the fiat currency. */
+  // History's filter sheet: press each named choice (one per group; each applies at once),
+  // then close the sheet.
+  async filterHistory(choices: string[]) {
+    await this.page.getByTestId("history-filter").click();
+    const sheet = this.page.locator(".q-dialog").last();
+    for (const name of choices)
+      await sheet.getByRole("button", { name, exact: true }).click();
+    await sheet.getByRole("button", { name: "Close", exact: true }).click();
+  }
+
+  fiatEntrySwap(fiat: string) {
+    return this.page.getByRole("button", { name: `Enter amount in ${fiat}` });
   }
 
   async closeFullscreenDialog() {
@@ -101,9 +123,9 @@ export class WalletPage {
   async mintBolt12(amount: number) {
     const before = await this.balanceSats();
     await this.openReceive("lightning");
-    await this.page.getByRole("button", { name: "B11", exact: true }).click();
+    await this.page.getByRole("radio", { name: "Offer", exact: true }).click();
     await expect(
-      this.page.getByText("Receive Bolt12", { exact: true })
+      this.page.getByText("Receive Lightning offer", { exact: true })
     ).toBeVisible();
     await this.page
       .getByRole("button", { name: "Add amount", exact: true })
@@ -118,7 +140,7 @@ export class WalletPage {
     const before = await this.balanceSats();
     await this.openReceive("onchain");
     await expect(
-      this.page.getByText("Receive On-chain", { exact: true })
+      this.page.getByText("Receive on-chain", { exact: true })
     ).toBeVisible();
     await this.enterAmount(expectedAmount);
     await this.page.getByTestId("create-payment-request").click();
@@ -132,8 +154,18 @@ export class WalletPage {
     const pay = this.page.getByTestId("pay-payment-request");
     await expect(pay).toBeEnabled();
     await pay.click();
-    await expect(this.page.getByText("Paid", { exact: false })).toBeVisible();
-    await this.page.getByRole("button", { name: "Close", exact: true }).click();
+    // The dialog's own paid state, not the "Paid" toast, which appears while the wallet is
+    // still finishing the payment (closing then raced the dialog's reset). Exact, so the
+    // quote's "Unpaid" status can never stand in for it.
+    const dialog = this.page.getByRole("dialog").last();
+    await expect(dialog.getByText("Paid", { exact: true })).toBeVisible();
+    // The Send sheet stays open under the payment dialog; close the payment dialog (the
+    // topmost one) with the paid screen's own Close action, not the header's ✕.
+    await dialog
+      .locator(".flow-footer__bar")
+      .getByRole("button", { name: "Close", exact: true })
+      .click();
+    await expect(dialog.getByText("Paid", { exact: true })).toBeHidden();
   }
 
   async quoteRequest(request: string, amount?: number, expectPayButton = true) {

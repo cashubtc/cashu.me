@@ -1,62 +1,47 @@
 <template>
-  <q-card class="q-ma-lg bg-dark q-pa-md">
-    <q-card-section>
-      <div class="row items-center justify-center">
-        <q-icon
-          color="primary"
-          class="q-pb-md"
-          name="account_balance"
-          size="50px"
-        />
-      </div>
-      <div class="row items-center justify-center">
-        <div class="text-h6">{{ $t("NoMintWarnBanner.title") }}</div>
-      </div>
-      <div class="row items-center justify-center">
-        <div class="text-subtitle2">
-          {{ $t("NoMintWarnBanner.subtitle") }}
-        </div>
-      </div>
-      <div class="row items-center justify-center q-pt-lg">
-        <q-btn
-          rounded
-          color="primary"
-          class="q-px-md"
-          :label="$t('NoMintWarnBanner.actions.add_mint.label')"
-          @click="handleAddMintClick"
-        />
-      </div>
-      <div class="row items-center justify-center q-pt-md">
-        <q-btn
-          outline
-          rounded
-          color="primary"
-          class="q-px-md"
-          :label="$t('NoMintWarnBanner.actions.receive.label')"
-          @click="handleReceiveEcash"
-        />
-      </div>
-    </q-card-section>
-  </q-card>
+  <!-- The standard empty state (src/css/elements.scss): no mint yet, two ways forward.
+       Add mint is tonal: it leads to the Mints form below, where Discover mints is the one
+       filled action while the URL is empty. -->
+  <EmptyState
+    class="q-mx-md q-my-lg"
+    :icon="MintIcon"
+    :title="$t('NoMintWarnBanner.title')"
+    :text="$t('NoMintWarnBanner.subtitle')"
+  >
+    <template #actions>
+      <q-btn
+        outline
+        rounded
+        color="primary"
+        class="full-width app-empty__action"
+        :label="$t('NoMintWarnBanner.actions.add_mint.label')"
+        @click="handleAddMintClick"
+      />
+      <q-btn
+        flat
+        rounded
+        color="primary"
+        class="full-width"
+        :label="$t('NoMintWarnBanner.actions.receive.label')"
+        @click="handleReceiveEcash"
+      />
+    </template>
+  </EmptyState>
 </template>
 <script lang="ts">
-import { defineComponent, ref } from "vue";
-import { getShortUrl } from "src/js/wallet-helpers";
+import { Building2 as MintIcon } from "lucide-vue-next";
+import { defineComponent, markRaw } from "vue";
+import EmptyState from "src/components/ui/EmptyState.vue";
 import { useUiStore } from "src/stores/ui";
 import { mapWritableState } from "pinia";
-import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { EventBus } from "../js/eventBus";
-import { sumProofAmounts } from "src/js/proofs";
 
 export default defineComponent({
   name: "NoMintWarnBanner",
+  components: { EmptyState },
   mixins: [windowMixin],
-  props: {
-    proofs: Array,
-    activeProofs: Array,
-    mints: Array,
-    tickerShort: String,
-    activeMintUrl: String,
+  data() {
+    return { MintIcon: markRaw(MintIcon) };
   },
   computed: {
     ...mapWritableState(useUiStore, [
@@ -64,25 +49,8 @@ export default defineComponent({
       "expandHistory",
       "showReceiveEcashDrawer",
     ]),
-    ...mapWritableState(useReceiveTokensStore, [
-      "showReceiveTokens",
-      "receiveData",
-    ]),
-    balance: function () {
-      return sumProofAmounts(this.activeProofs.flat());
-    },
-    getActiveMintUrlShort: function () {
-      return getShortUrl(this.activeMintUrl);
-    },
-    getBalance: function () {
-      return sumProofAmounts(this.activeProofs.flat());
-    },
   },
   methods: {
-    // showReceiveTokensDialog: function () {
-    //   this.receiveData.tokensBase64 = "";
-    //   this.showReceiveTokens = true;
-    // },
     handleReceiveEcash: function () {
       this.showReceiveEcashDrawer = true;
     },
@@ -94,17 +62,3 @@ export default defineComponent({
   },
 });
 </script>
-<style scoped>
-.q-dialog__inner {
-  height: 100%;
-  width: 100%;
-  margin: 0; /* Align dialog to cover the entire viewport */
-}
-
-.q-card {
-  border-radius: 20px;
-  display: flex;
-  flex-direction: column;
-  border: 2px solid var(--q-primary);
-}
-</style>

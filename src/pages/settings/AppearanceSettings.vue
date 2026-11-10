@@ -4,74 +4,70 @@
     :caption="$t('Settings.menu.appearance.caption')"
   >
     <!-- keyboard -->
-    <SettingsSection
-      :title="$t('Settings.appearance.keyboard.title')"
-      :caption="$t('Settings.appearance.keyboard.description')"
-    >
-      <q-item tag="label">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.appearance.keyboard.toggle")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.appearance.keyboard.toggle_description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-toggle v-model="useNumericKeyboard" color="primary" />
-        </q-item-section>
-      </q-item>
+    <SettingsSection :title="$t('Settings.appearance.keyboard.title')">
+      <SettingsToggleRow
+        v-model="useNumericKeyboard"
+        :label="$t('Settings.appearance.keyboard.toggle')"
+        :caption="$t('Settings.appearance.keyboard.toggle_description')"
+      />
     </SettingsSection>
 
     <!-- bip177 -->
-    <SettingsSection
-      :title="$t('Settings.appearance.bip177.title')"
-      :caption="$t('Settings.appearance.bip177.description')"
-    >
-      <q-item tag="label">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.appearance.bip177.toggle")
+    <SettingsSection :title="$t('Settings.appearance.bip177.title')">
+      <SettingsToggleRow
+        v-model="bip177BitcoinSymbol"
+        :label="$t('Settings.appearance.bip177.toggle')"
+        :caption="$t('Settings.appearance.bip177.description')"
+      />
+    </SettingsSection>
+
+    <!-- mode: dark or light, chosen like a theme (light mode had no
+         control in the app) -->
+    <SettingsSection radiogroup :title="$t('Settings.appearance.mode.title')">
+      <SettingsRadioRow
+        v-for="mode in modeOptions"
+        :key="mode.name"
+        data-testid="appearance-mode"
+        :data-mode="mode.name"
+        :selected="$q.dark.isActive === mode.dark"
+        @select="selectMode(mode.dark)"
+      >
+        <template #label>
+          <q-item-label class="theme-option-label">{{
+            $t(`Settings.appearance.mode.${mode.name}`)
           }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-toggle v-model="bip177BitcoinSymbol" color="primary" />
-        </q-item-section>
-      </q-item>
+        </template>
+        <template #side>
+          <component :is="mode.icon" :size="20" class="mode-glyph" />
+        </template>
+      </SettingsRadioRow>
     </SettingsSection>
 
     <!-- theme -->
     <SettingsSection
+      radiogroup
       :title="$t('Settings.appearance.theme.title')"
       :caption="$t('Settings.appearance.theme.description')"
     >
-      <q-item
+      <SettingsRadioRow
         v-for="theme in visibleThemeOptions"
         :key="theme.name"
-        clickable
-        @click="selectTheme(theme.name)"
-        :active="activeTheme === theme.name"
-        active-class="text-weight-bold text-primary"
+        :selected="activeTheme === theme.name"
+        @select="selectTheme(theme.name)"
       >
-        <q-item-section avatar>
-          <q-icon
-            :color="activeTheme === theme.name ? 'primary' : 'grey'"
-            :name="
-              activeTheme === theme.name
-                ? 'check_circle'
-                : 'radio_button_unchecked'
-            "
-          />
-        </q-item-section>
-        <q-item-section>
-          <q-item-label>{{
+        <template #label>
+          <q-item-label class="theme-option-label">{{
             $t(`Settings.appearance.theme.tooltips.${theme.tooltip}`)
           }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-icon name="format_color_fill" :color="theme.color" size="sm" />
-        </q-item-section>
-      </q-item>
+        </template>
+        <template #side>
+          <span
+            class="theme-swatch"
+            :class="`bg-${theme.color}`"
+            aria-hidden="true"
+          />
+        </template>
+      </SettingsRadioRow>
     </SettingsSection>
   </SettingsPageShell>
 </template>
@@ -81,18 +77,29 @@ import { defineComponent } from "vue";
 import { mapWritableState } from "pinia";
 import { useSettingsStore } from "src/stores/settings";
 import SettingsPageShell from "./SettingsPageShell.vue";
+import SettingsRadioRow from "src/components/ui/SettingsRadioRow.vue";
+import SettingsToggleRow from "src/components/ui/SettingsToggleRow.vue";
 import SettingsSection from "./SettingsSection.vue";
+import { Moon as MoonIcon, Sun as SunIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "AppearanceSettings",
   mixins: [windowMixin],
   components: {
+    SettingsRadioRow,
+    SettingsToggleRow,
     SettingsPageShell,
     SettingsSection,
+    MoonIcon,
+    SunIcon,
   },
   data: function () {
     return {
       activeTheme: "monochrome",
+      modeOptions: [
+        { name: "dark", dark: true, icon: "MoonIcon" },
+        { name: "light", dark: false, icon: "SunIcon" },
+      ],
       themes: [
         "monochrome",
         "classic",
@@ -129,6 +136,9 @@ export default defineComponent({
     },
   },
   methods: {
+    selectMode: function (dark: boolean) {
+      if (this.$q.dark.isActive !== dark) this.toggleDarkMode();
+    },
     selectTheme: function (themeName) {
       this.changeColor(themeName);
       this.activeTheme = themeName;
@@ -140,3 +150,20 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.mode-glyph {
+  color: var(--app-text-muted);
+}
+/* A filled swatch of each theme's accent, easier to compare than a small glyph. */
+.theme-swatch {
+  display: block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px var(--app-border-strong);
+}
+.theme-option-label {
+  color: var(--app-text);
+}
+</style>

@@ -1,33 +1,36 @@
 <template>
-  <div class="bg-dark text-white q-pa-md flex flex-center">
-    <div class="mint-ratings-page-content">
-      <div class="mint-content-container">
-        <MintRatingsComponent
-          v-if="mintUrl"
-          :url="mintUrl"
-          :reviews="reviews"
-          :allowCreateReview="allowCreateReview"
-          :mintInfo="mintInfo"
-          @close="goBack"
-        />
-        <div v-else class="text-center q-pa-lg">
-          <div class="text-h6 text-grey-5">No mint URL provided</div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <SettingsPageShell>
+    <!-- No page title: the mint header below names the page. -->
+    <MintRatingsComponent
+      v-if="mintUrl"
+      :url="mintUrl"
+      :reviews="reviews"
+      :allowCreateReview="allowCreateReview"
+      :mintInfo="mintInfo"
+    />
+    <EmptyState
+      v-else
+      :icon="MintIcon"
+      :title="$t('MintRatings.no_mint_url')"
+    />
+  </SettingsPageShell>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, markRaw } from "vue";
+import { Building2 as MintIcon } from "lucide-vue-next";
+import EmptyState from "src/components/ui/EmptyState.vue";
 import MintRatingsComponent from "src/components/MintRatingsComponent.vue";
+import SettingsPageShell from "src/pages/settings/SettingsPageShell.vue";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
 import { useMintsStore } from "src/stores/mints";
 
 export default defineComponent({
   name: "MintRatingsPage",
   components: {
+    SettingsPageShell,
     MintRatingsComponent,
+    EmptyState,
   },
   data() {
     return {
@@ -35,13 +38,10 @@ export default defineComponent({
       reviews: [],
       allowCreateReview: true,
       mintInfo: null,
+      MintIcon: markRaw(MintIcon),
     };
   },
   methods: {
-    goBack() {
-      // Navigate back to the previous page
-      this.$router.back();
-    },
     loadMintInfo() {
       // Try to get mint info from the recommendations store first
       const recsStore = useMintRecommendationsStore();
@@ -76,25 +76,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style scoped>
-.mint-ratings-page-content {
-  max-width: 820px;
-  margin: 0 auto;
-  color: white;
-  height: 100%;
-  overflow-y: auto;
-  position: absolute;
-  top: 0;
-  width: 100%;
-}
-
-.mint-content-container {
-  max-width: 820px;
-  margin: 0 auto;
-  color: white;
-  height: 100%;
-  overflow-y: auto;
-  position: relative;
-}
-</style>

@@ -359,16 +359,6 @@ export const usePaymentHistoryStore = defineStore("paymentHistory", {
       ]);
       this.setCache(payments, mintQuotes, meltQuotes);
     },
-    setInvoiceHistoryForTests(invoices: LegacyInvoiceHistory[]) {
-      const rows = invoices.map((invoice) =>
-        buildPaymentRowsFromLegacyInvoice(invoice)
-      );
-      this.setCache(
-        rows.map((row) => row.payment),
-        rows.flatMap((row) => (row.mintQuote ? [row.mintQuote] : [])),
-        rows.flatMap((row) => (row.meltQuote ? [row.meltQuote] : []))
-      );
-    },
     async addPayment(invoice: LegacyInvoiceHistory) {
       const { payment, mintQuote, meltQuote } =
         buildPaymentRowsFromLegacyInvoice(invoice);

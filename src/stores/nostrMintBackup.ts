@@ -1,3 +1,4 @@
+import { i18n } from "src/boot/i18n";
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { bytesToHex } from "@noble/hashes/utils";
@@ -12,7 +13,6 @@ import NDK, {
 import { nip44 } from "nostr-tools";
 import { useWalletStore } from "./wallet";
 import { useMintsStore } from "./mints";
-import { useNostrStore } from "./nostr";
 import { notify, notifyError, notifySuccess } from "../js/notify";
 import { useSettingsStore } from "./settings";
 
@@ -151,10 +151,15 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
           !settingsStore.defaultNostrRelays ||
           settingsStore.defaultNostrRelays.length === 0
         ) {
-          const errorMsg = "No Nostr relays configured";
+          const errorMsg = i18n.global.t(
+            "nostrMintBackup.notifications.no_relays"
+          );
           console.error(errorMsg);
           if (verbose) {
-            notifyError(`Failed to backup mint list to Nostr: ${errorMsg}`);
+            notifyError(
+              i18n.global.t("nostrMintBackup.notifications.backup_failed"),
+              errorMsg
+            );
           }
           throw new Error(errorMsg);
         }
@@ -207,7 +212,9 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
 
         this.lastBackupTimestamp = backupData.timestamp;
         if (verbose) {
-          notifySuccess("Mint list backed up to Nostr successfully");
+          notifySuccess(
+            i18n.global.t("nostrMintBackup.notifications.backed_up")
+          );
         }
 
         console.log("Mint backup published to Nostr:", event.id);
@@ -217,7 +224,8 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
         // This prevents showing errors for automatic backups that fail silently
         if (verbose) {
           notifyError(
-            "Failed to backup mint list to Nostr: " + (error as Error).message
+            i18n.global.t("nostrMintBackup.notifications.backup_failed"),
+            (error as Error).message
           );
         }
         throw error;
@@ -301,16 +309,22 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
         this.discoveredMints = allDiscoveredMints;
 
         if (allDiscoveredMints.length > 0) {
-          notify(`Found ${allDiscoveredMints.length} mint(s) in Nostr backups`);
+          notify(
+            i18n.global.t(
+              "nostrMintBackup.notifications.found",
+              allDiscoveredMints.length
+            )
+          );
         } else {
-          notify("No mint backups found on Nostr for this seed phrase");
+          notify(i18n.global.t("nostrMintBackup.notifications.none_found"));
         }
 
         return allDiscoveredMints;
       } catch (error) {
         console.error("Failed to search mints on Nostr:", error);
         notifyError(
-          "Failed to search for mint backups: " + (error as Error).message
+          i18n.global.t("nostrMintBackup.notifications.search_failed"),
+          (error as Error).message
         );
         throw error;
       } finally {
@@ -344,20 +358,26 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
           } catch (error) {
             console.error(`Failed to add mint ${mint.url}:`, error);
             notifyError(
-              `Failed to add mint ${mint.url}: ${(error as Error).message}`
+              i18n.global.t("nostrMintBackup.notifications.add_mint_failed", {
+                mint: mint.url,
+              }),
+              (error as Error).message
             );
           }
         }
 
         if (addedCount > 0) {
-          notifySuccess(`Added ${addedCount} mint(s) to your wallet`);
+          notifySuccess(
+            i18n.global.t("nostrMintBackup.notifications.added", addedCount)
+          );
         } else {
-          notify("No new mints were added");
+          notify(i18n.global.t("nostrMintBackup.notifications.none_added"));
         }
       } catch (error) {
         console.error("Failed to add selected mints:", error);
         notifyError(
-          "Failed to add selected mints: " + (error as Error).message
+          i18n.global.t("nostrMintBackup.notifications.add_selected_failed"),
+          (error as Error).message
         );
         throw error;
       }

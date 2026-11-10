@@ -3,148 +3,74 @@
     :title="$t('Settings.menu.privacy.title')"
     :caption="$t('Settings.menu.privacy.caption')"
   >
+    <!-- Each group names what it covers, like the other settings pages. -->
     <SettingsSection
-      :title="$t('Settings.privacy.title')"
+      :title="$t('Settings.privacy.network_title')"
       :caption="$t('Settings.privacy.description')"
     >
       <!-- nostr mint backup -->
-      <q-item tag="label">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.experimental.nostr_mint_backup.toggle")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.experimental.nostr_mint_backup.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-toggle
-            v-model="nostrMintBackupEnabled"
-            color="primary"
-            @update:model-value="onNostrMintBackupToggle"
-          />
-        </q-item-section>
-      </q-item>
+      <SettingsToggleRow
+        v-model="nostrMintBackupEnabled"
+        :label="$t('Settings.experimental.nostr_mint_backup.toggle')"
+        :caption="$t('Settings.experimental.nostr_mint_backup.description')"
+        @update:model-value="onNostrMintBackupToggle"
+      />
 
       <!-- check incoming invoices -->
-      <q-item tag="label">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.privacy.check_incoming.toggle")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.privacy.check_incoming.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-toggle v-model="checkIncomingInvoices" color="primary" />
-        </q-item-section>
-      </q-item>
+      <SettingsToggleRow
+        v-model="checkIncomingInvoices"
+        :label="$t('Settings.privacy.check_incoming.toggle')"
+        :caption="$t('Settings.privacy.check_incoming.description')"
+      />
 
       <!-- check pending invoices on startup -->
-      <q-item tag="label">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.privacy.check_startup.toggle")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.privacy.check_startup.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-toggle v-model="checkInvoicesOnStartup" color="primary" />
-        </q-item-section>
-      </q-item>
+      <SettingsToggleRow
+        v-model="checkInvoicesOnStartup"
+        :label="$t('Settings.privacy.check_startup.toggle')"
+        :caption="$t('Settings.privacy.check_startup.description')"
+      />
 
       <!-- periodically check incoming invoices -->
-      <q-item tag="label">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.privacy.check_all.toggle")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.privacy.check_all.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-toggle
-            v-model="periodicallyCheckIncomingInvoices"
-            color="primary"
-          />
-        </q-item-section>
-      </q-item>
+      <SettingsToggleRow
+        v-model="periodicallyCheckIncomingInvoices"
+        :label="$t('Settings.privacy.check_all.toggle')"
+        :caption="$t('Settings.privacy.check_all.description')"
+      />
 
       <!-- check outgoing token state -->
-      <q-item tag="label">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.privacy.check_sent.toggle")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.privacy.check_sent.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-toggle v-model="checkSentTokens" color="primary" />
-        </q-item-section>
-      </q-item>
+      <SettingsToggleRow
+        v-model="checkSentTokens"
+        :label="$t('Settings.privacy.check_sent.toggle')"
+        :caption="$t('Settings.privacy.check_sent.description')"
+      />
 
       <!-- websockets -->
-      <q-item tag="label" v-if="checkIncomingInvoices || checkSentTokens">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.privacy.websockets.toggle")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.privacy.websockets.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-toggle v-model="useWebsockets" color="primary" />
-        </q-item-section>
-      </q-item>
+      <SettingsToggleRow
+        v-if="checkIncomingInvoices || checkSentTokens"
+        v-model="useWebsockets"
+        :label="$t('Settings.privacy.websockets.toggle')"
+        :caption="$t('Settings.privacy.websockets.description')"
+      />
     </SettingsSection>
 
     <!-- bitcoin price -->
     <SettingsSection
-      :title="$t('Settings.privacy.bitcoin_price.toggle')"
+      :title="$t('Settings.privacy.bitcoin_price.title')"
       :caption="$t('Settings.privacy.bitcoin_price.description')"
     >
-      <q-item tag="label">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.privacy.bitcoin_price.toggle")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-toggle v-model="getBitcoinPrice" color="primary" />
-        </q-item-section>
-      </q-item>
+      <SettingsToggleRow
+        v-model="getBitcoinPrice"
+        :label="$t('Settings.privacy.bitcoin_price.toggle')"
+      />
       <template v-if="getBitcoinPrice">
-        <q-item>
-          <q-item-section>
-            <q-item-label>{{
-              $t("Settings.privacy.bitcoin_price.currency.title")
-            }}</q-item-label>
-            <q-item-label caption>{{
-              $t("Settings.privacy.bitcoin_price.currency.description")
-            }}</q-item-label>
-          </q-item-section>
-        </q-item>
-        <q-item class="settings-control-item">
-          <q-item-section>
-            <q-select
-              v-model="bitcoinPriceCurrency"
-              :options="currencyOptions"
-              rounded
-              outlined
-              dense
-              emit-value
-              map-options
-              @update:model-value="onCurrencyChange"
-            />
-          </q-item-section>
-        </q-item>
+        <SheetSelect
+          row
+          v-model="bitcoinPriceCurrency"
+          :options="currencyOptions"
+          :label="$t('Settings.privacy.bitcoin_price.currency.title')"
+          :caption="$t('Settings.privacy.bitcoin_price.currency.description')"
+          @update:model-value="onCurrencyChange"
+        />
       </template>
     </SettingsSection>
   </SettingsPageShell>
@@ -157,49 +83,63 @@ import { useSettingsStore } from "src/stores/settings";
 import { useNostrMintBackupStore } from "src/stores/nostrMintBackup";
 import { usePriceStore } from "src/stores/price";
 import SettingsPageShell from "./SettingsPageShell.vue";
+import SettingsToggleRow from "src/components/ui/SettingsToggleRow.vue";
 import SettingsSection from "./SettingsSection.vue";
+import SheetSelect from "src/components/SheetSelect.vue";
 
 export default defineComponent({
   name: "PrivacySettings",
   mixins: [windowMixin],
   components: {
+    SettingsToggleRow,
     SettingsPageShell,
     SettingsSection,
+    SheetSelect,
   },
   data: function () {
     return {
-      currencyOptions: [
-        { label: "US Dollar (USD)", value: "USD" },
-        { label: "Euro (EUR)", value: "EUR" },
-
-        { label: "Australian Dollar (AUD)", value: "AUD" },
-        { label: "Brazilian Real (BRL)", value: "BRL" },
-        { label: "Canadian Dollar (CAD)", value: "CAD" },
-        { label: "Swiss Franc (CHF)", value: "CHF" },
-        { label: "Chinese Yuan (CNY)", value: "CNY" },
-        { label: "Czech Koruna (CZK)", value: "CZK" },
-        { label: "Danish Krone (DKK)", value: "DKK" },
-        { label: "British Pound (GBP)", value: "GBP" },
-        { label: "Hong Kong Dollar (HKD)", value: "HKD" },
-        { label: "Hungarian Forint (HUF)", value: "HUF" },
-        { label: "Israeli Shekel (ILS)", value: "ILS" },
-        { label: "Indian Rupee (INR)", value: "INR" },
-        { label: "Japanese Yen (JPY)", value: "JPY" },
-        { label: "South Korean Won (KRW)", value: "KRW" },
-        { label: "Mexican Peso (MXN)", value: "MXN" },
-        { label: "New Zealand Dollar (NZD)", value: "NZD" },
-        { label: "Norwegian Krone (NOK)", value: "NOK" },
-        { label: "Polish Zloty (PLN)", value: "PLN" },
-        { label: "Russian Ruble (RUB)", value: "RUB" },
-        { label: "Swedish Krona (SEK)", value: "SEK" },
-        { label: "Singapore Dollar (SGD)", value: "SGD" },
-        { label: "Thai Baht (THB)", value: "THB" },
-        { label: "Turkish Lira (TRY)", value: "TRY" },
-        { label: "South African Rand (ZAR)", value: "ZAR" },
+      currencyCodes: [
+        "USD",
+        "EUR",
+        "AUD",
+        "BRL",
+        "CAD",
+        "CHF",
+        "CNY",
+        "CZK",
+        "DKK",
+        "GBP",
+        "HKD",
+        "HUF",
+        "ILS",
+        "INR",
+        "JPY",
+        "KRW",
+        "MXN",
+        "NZD",
+        "NOK",
+        "PLN",
+        "RUB",
+        "SEK",
+        "SGD",
+        "THB",
+        "TRY",
+        "ZAR",
       ],
     };
   },
   computed: {
+    // Currency names in the app's language (e.g. "美元 (USD)"), from the browser's CLDR data.
+    currencyOptions() {
+      const names = new Intl.DisplayNames([this.$i18n.locale, "en"], {
+        type: "currency",
+      });
+      return this.currencyCodes.map((code) => ({
+        label: `${names.of(code) ?? code} (${code})`,
+        short: code,
+        value: code,
+      }));
+    },
     ...mapWritableState(useSettingsStore, [
       "getBitcoinPrice",
       "bitcoinPriceCurrency",

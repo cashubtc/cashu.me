@@ -3,36 +3,20 @@
     :title="$t('Settings.menu.payment_requests.title')"
     :caption="$t('Settings.menu.payment_requests.caption')"
   >
-    <SettingsSection
-      :title="$t('Settings.payment_requests.title')"
-      :caption="$t('Settings.payment_requests.description')"
-    >
-      <q-item tag="label">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.payment_requests.enable_toggle")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-toggle v-model="enablePaymentRequest" color="primary" />
-        </q-item-section>
-      </q-item>
-      <q-item tag="label" v-if="enablePaymentRequest">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.payment_requests.claim_automatically.toggle")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.payment_requests.claim_automatically.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-toggle
-            v-model="receivePaymentRequestsAutomatically"
-            color="primary"
-          />
-        </q-item-section>
-      </q-item>
+    <SettingsSection>
+      <SettingsToggleRow
+        v-model="enablePaymentRequest"
+        :label="$t('Settings.payment_requests.enable_toggle')"
+        :caption="$t('Settings.payment_requests.description')"
+      />
+      <SettingsToggleRow
+        v-if="enablePaymentRequest"
+        v-model="receivePaymentRequestsAutomatically"
+        :label="$t('Settings.payment_requests.claim_automatically.toggle')"
+        :caption="
+          $t('Settings.payment_requests.claim_automatically.description')
+        "
+      />
     </SettingsSection>
   </SettingsPageShell>
 </template>
@@ -43,6 +27,7 @@ import { mapWritableState } from "pinia";
 import { usePRStore } from "src/stores/payment-request";
 import SettingsPageShell from "./SettingsPageShell.vue";
 import SettingsSection from "./SettingsSection.vue";
+import SettingsToggleRow from "src/components/ui/SettingsToggleRow.vue";
 
 export default defineComponent({
   name: "PaymentRequestsSettings",
@@ -50,6 +35,7 @@ export default defineComponent({
   components: {
     SettingsPageShell,
     SettingsSection,
+    SettingsToggleRow,
   },
   computed: {
     ...mapWritableState(usePRStore, [

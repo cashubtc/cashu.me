@@ -1,107 +1,62 @@
 <template>
-  <q-dialog
-    v-model="showReceiveDialog"
-    position="bottom"
-    :maximized="$q.screen.lt.sm"
-    transition-show="slide-up"
-    transition-hide="slide-down"
-  >
-    <q-card class="drawer-card text-white full-width-card q-pb-lg">
-      <q-card-section class="row items-center q-pb-sm">
-        <q-btn flat round dense v-close-popup class="q-ml-sm" color="primary">
-          <XIcon />
-        </q-btn>
-        <div class="col text-center">
-          <span class="text-h6">{{ $t("ReceiveDialog.title") }}</span>
-        </div>
-        <q-btn
-          flat
-          round
-          dense
-          class="q-mr-sm"
-          @click="showCamera"
-          color="primary"
+  <BottomSheet v-model="showReceiveDialog" :title="$t('ReceiveDialog.title')">
+    <template #trailing>
+      <IconButton :label="$t('global.actions.scan.label')" @click="showCamera">
+        <ScanIcon :size="20" />
+      </IconButton>
+    </template>
+    <div>
+      <div class="q-gutter-y-md">
+        <!-- Ecash Option -->
+        <OptionRow
+          data-testid="receive-ecash-option"
+          @click="toggleReceiveEcashDrawer"
         >
-          <ScanIcon />
-        </q-btn>
-      </q-card-section>
+          <template #icon><CoinsIcon :size="24" /></template>
+          <template #label>{{
+            $t("ReceiveDialog.actions.ecash.label")
+          }}</template>
+          <template #caption>{{ $t("ReceiveDialog.captions.ecash") }}</template>
+        </OptionRow>
 
-      <q-card-section class="q-pa-md">
-        <div class="q-gutter-y-md">
-          <!-- Ecash Option -->
-          <div
-            class="action-row"
-            role="button"
-            tabindex="0"
-            data-testid="receive-ecash-option"
-            @click="toggleReceiveEcashDrawer"
-            @keydown.enter.prevent="toggleReceiveEcashDrawer"
-            @keydown.space.prevent="toggleReceiveEcashDrawer"
-          >
-            <div class="row items-center no-wrap">
-              <div class="icon-circle">
-                <CoinsIcon :size="24" />
-              </div>
-              <div class="col q-ml-md">
-                <div class="text-body1 text-weight-medium">
-                  {{ $t("ReceiveDialog.actions.ecash.label") }}
-                </div>
-              </div>
-            </div>
-          </div>
+        <!-- Lightning Invoice Option -->
+        <OptionRow
+          v-if="canReceiveLightning"
+          data-testid="receive-lightning-option"
+          @click="showInvoiceCreateDialog"
+        >
+          <template #icon><ZapIcon :size="24" /></template>
+          <template #label>{{
+            $t("ReceiveDialog.actions.lightning.label")
+          }}</template>
+          <template #caption>{{
+            $t("ReceiveDialog.captions.lightning")
+          }}</template>
+        </OptionRow>
 
-          <!-- Lightning Invoice Option -->
-          <div
-            v-if="canReceiveLightning"
-            class="action-row"
-            role="button"
-            tabindex="0"
-            data-testid="receive-lightning-option"
-            @click="showInvoiceCreateDialog"
-            @keydown.enter.prevent="showInvoiceCreateDialog"
-            @keydown.space.prevent="showInvoiceCreateDialog"
-          >
-            <div class="row items-center no-wrap">
-              <div class="icon-circle">
-                <ZapIcon :size="24" />
-              </div>
-              <div class="col q-ml-md">
-                <div class="text-body1 text-weight-medium">
-                  {{ $t("ReceiveDialog.actions.lightning.label") }}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- On-chain Option -->
-          <div
-            v-if="canReceiveOnchain"
-            class="action-row"
-            role="button"
-            tabindex="0"
-            data-testid="receive-onchain-option"
-            @click="showOnchainCreateDialog"
-            @keydown.enter.prevent="showOnchainCreateDialog"
-            @keydown.space.prevent="showOnchainCreateDialog"
-          >
-            <div class="row items-center no-wrap">
-              <div class="icon-circle">
-                <BitcoinIcon :size="24" />
-              </div>
-              <div class="col q-ml-md">
-                <div class="text-body1 text-weight-medium">On-chain</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </q-card-section>
-    </q-card>
-  </q-dialog>
+        <!-- On-chain Option -->
+        <OptionRow
+          v-if="canReceiveOnchain"
+          data-testid="receive-onchain-option"
+          @click="showOnchainCreateDialog"
+        >
+          <template #icon><BitcoinIcon :size="24" /></template>
+          <template #label>{{ $t("common.on_chain") }}</template>
+          <template #caption>{{
+            $t("ReceiveDialog.captions.onchain")
+          }}</template>
+        </OptionRow>
+      </div>
+    </div>
+  </BottomSheet>
   <ReceiveEcashDrawer />
 </template>
 
 <script lang="ts">
+import IconButton from "src/components/ui/IconButton.vue";
+import OptionRow from "src/components/ui/OptionRow.vue";
 import { defineComponent } from "vue";
+import BottomSheet from "src/components/BottomSheet.vue";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useUiStore } from "src/stores/ui";
@@ -111,10 +66,9 @@ import ReceiveEcashDrawer from "src/components/ReceiveEcashDrawer.vue";
 import { useMintsStore } from "src/stores/mints";
 import { notifyWarning } from "src/js/notify.ts";
 import {
-  X as XIcon,
   Coins as CoinsIcon,
   Zap as ZapIcon,
-  Scan as ScanIcon,
+  ScanLine as ScanIcon,
   Bitcoin as BitcoinIcon,
 } from "lucide-vue-next";
 import { PaymentMethod } from "src/stores/walletTypes";
@@ -127,7 +81,9 @@ import {
 export default defineComponent({
   name: "ReceiveDialog",
   components: {
-    XIcon,
+    IconButton,
+    OptionRow,
+    BottomSheet,
     CoinsIcon,
     ZapIcon,
     ScanIcon,
@@ -136,47 +92,20 @@ export default defineComponent({
   },
   mixins: [windowMixin],
   props: {},
-  data: function () {
-    return {
-      currentPage: 1,
-      pageSize: 5,
-    };
-  },
   computed: {
     ...mapWritableState(useUiStore, [
-      "showInvoiceDetails",
-      "showBolt12OfferDetails",
       "showReceiveDialog",
       "showReceiveEcashDrawer",
       "showCreateInvoiceDialog",
     ]),
-    ...mapWritableState(useReceiveTokensStore, [
-      "showReceiveTokens",
-      "receiveData",
-    ]),
+    ...mapWritableState(useReceiveTokensStore, ["showReceiveTokens"]),
     ...mapWritableState(useWalletStore, ["invoiceData"]),
     ...mapState(useMintsStore, ["mints", "activeMintUrl", "activeUnit"]),
     ...mapState(useNpubCashStore, {
-      npubCashEnabled: "enabled",
-      npubCashAddress: "address",
       npubCashMintUrl: "mintUrl",
       showAddressOnReceive: "showAddressOnReceive",
+      hasConfiguredNpubCashAddress: "hasConfiguredAddress",
     }),
-    hasConfiguredNpubCashAddress: function (): boolean {
-      return Boolean(
-        this.npubCashEnabled &&
-          this.npubCashAddress &&
-          this.npubCashMintUrl &&
-          this.mints.some((mint: any) => mint.url === this.npubCashMintUrl)
-      );
-    },
-    canReceivePayments: function () {
-      if (!this.mints.length) {
-        return false;
-      } else {
-        return true;
-      }
-    },
     canReceiveLightning: function (): boolean {
       return Boolean(
         firstMintSupportingPaymentMethods(
@@ -207,11 +136,6 @@ export default defineComponent({
       this.showReceiveDialog = false;
       this.showReceiveTokens = false;
       this.showReceiveEcashDrawer = true;
-    },
-    showReceiveTokensDialog: function () {
-      this.receiveData.tokensBase64 = "";
-      this.showReceiveTokens = true;
-      this.showReceiveDialog = false;
     },
     showInvoiceCreateDialog: async function () {
       if (
@@ -252,7 +176,7 @@ export default defineComponent({
         this.activeUnit as string
       );
       if (!mintResult.ok) {
-        notifyWarning("No mints available");
+        notifyWarning(this.$t("ReceiveDialog.actions.ecash.error_no_mints"));
         this.showReceiveDialog = false;
         return;
       }
@@ -260,60 +184,8 @@ export default defineComponent({
       this.showCreateInvoiceDialog = true;
       this.showReceiveDialog = false;
     },
-    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+    ...mapActions(useCameraStore, ["showCamera"]),
   },
   created: function () {},
 });
 </script>
-
-<style lang="scss" scoped>
-:deep(.q-dialog__backdrop) {
-  backdrop-filter: blur(8px);
-  background: rgba(0, 0, 0, 0.4) !important;
-}
-
-.q-dialog__inner > div {
-  border-top-left-radius: 20px !important;
-  border-top-right-radius: 20px !important;
-  border-bottom-left-radius: 0px !important;
-  border-bottom-right-radius: 0px !important;
-}
-
-.drawer-card {
-  background: #1a1a1a;
-}
-
-.action-row {
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
-  padding: 12px 16px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-
-  &:active {
-    background: rgba(255, 255, 255, 0.1);
-  }
-}
-
-.icon-circle {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.lucide {
-  width: 24px;
-  height: 24px;
-  color: white;
-}
-
-.qcard {
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-}
-</style>

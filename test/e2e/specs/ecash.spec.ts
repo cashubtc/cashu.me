@@ -1,6 +1,12 @@
 import { expect, test, type Video } from "@playwright/test";
 import { MINT_A_URL, rotateMintAKeyset } from "../fixtures/mint";
 import { WalletPage } from "../pages/WalletPage";
+import { WalletUi } from "../pages/WalletUi";
+import { getDecodedToken } from "@cashu/cashu-ts";
+
+// The secp256k1 generator point: a real compressed public key nobody here holds.
+const LOCK_PUBKEY =
+  "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798";
 
 test("sends ecash between two isolated browser wallets and rejects replay", async ({
   browser,
@@ -196,5 +202,71 @@ test("recovers when a mint rotates its keyset before receiving old ecash", async
     expect(swapOutputKeysets.at(-1)).toContain(newActiveKeyset.id);
   } finally {
     await Promise.allSettled([senderContext.close(), receiverContext.close()]);
+  }
+});
+
+// Lock mode never sends an unlocked token: SEND (and Enter) stay off until the receiver's
+// key is valid, and the token that goes out is P2PK-locked to it.
+test("lock mode gates SEND on a valid receiver key and sends a locked token", async ({
+  browser,
+  request,
+}) => {
+  const context = await browser.newContext({
+    permissions: ["clipboard-read", "clipboard-write"],
+    reducedMotion: "reduce",
+    serviceWorkers: "block",
+  });
+  try {
+    const page = await context.newPage();
+    const wallet = new WalletUi(page);
+    await wallet.onboard(MINT_A_URL);
+    await wallet.mintBolt11(100);
+
+    await wallet.openSend("ecash");
+    await wallet.enterAmount(21);
+    const send = page.getByTestId("send-ecash");
+    await expect(send).toBeEnabled();
+
+    // Lock on with an empty key: SEND is off and Enter does nothing.
+    await page.getByRole("button", { name: "Lock", exact: true }).click();
+    const keyField = page.getByTestId("send-p2pk-pubkey").locator("input");
+    await expect(keyField).toBeVisible();
+    await expect(send).toBeDisabled();
+    await page.locator("body").click({ position: { x: 5, y: 5 } });
+    await page.keyboard.press("Enter");
+    await expect(send).toBeVisible();
+    await expect.poll(() => wallet.balanceSats()).toBe(100);
+
+    // An invalid key: the field says so and SEND stays off.
+    await keyField.fill("not-a-key");
+    await keyField.blur();
+    await expect(
+      page.getByText("Enter a valid public key (hex or npub)")
+    ).toBeVisible();
+    await expect(send).toBeDisabled();
+
+    // A valid key: SEND turns on, the amount shows Locked, and the token is locked to it.
+    await wallet.lockSendTo(LOCK_PUBKEY);
+    await expect(send).toBeEnabled();
+    await expect(page.locator(".locked-badge")).toBeVisible();
+    await send.click();
+    await page.getByTestId("copy-ecash-token").click();
+    const token = await page.evaluate(() => navigator.clipboard.readText());
+    const { keysets } = await (
+      await request.get(`${MINT_A_URL}/v1/keysets`)
+    ).json();
+    const { proofs } = getDecodedToken(
+      token,
+      keysets.map((keyset: { id: string }) => keyset.id)
+    );
+    expect(proofs.length).toBeGreaterThan(0);
+    for (const proof of proofs) {
+      const [kind, condition] = JSON.parse(proof.secret);
+      expect(kind).toBe("P2PK");
+      expect(condition.data).toBe(LOCK_PUBKEY);
+    }
+    await expect.poll(() => wallet.balanceSats()).toBe(79);
+  } finally {
+    await context.close();
   }
 });

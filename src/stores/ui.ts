@@ -1,17 +1,14 @@
 import { defineStore } from "pinia";
+import {
+  DEFAULT_HISTORY_FILTERS,
+  type HistoryFilters,
+} from "src/js/history-filters";
 import { useMintsStore } from "./mints";
 import { useLocalStorage } from "@vueuse/core";
-import {
-  notifyApiError,
-  notifyError,
-  notifySuccess,
-  notifyWarning,
-} from "../js/notify";
 import { Clipboard } from "@capacitor/clipboard";
-import { Haptics, ImpactStyle } from "@capacitor/haptics";
-import { formatBigIntCurrency } from "src/js/format-currency";
+import { Haptics } from "@capacitor/haptics";
+import { formatUnitAmount } from "src/js/format-currency";
 
-import ts from "typescript";
 import { useSettingsStore } from "./settings";
 
 export type MutexPriority = "foreground" | "normal" | "background";
@@ -61,7 +58,9 @@ const unitTickerShortMap = {
 export const useUiStore = defineStore("ui", {
   state: () => ({
     hideBalance: useLocalStorage<boolean>("cashu.ui.hideBalance", false),
-    tickerLong: "Satoshis",
+    // The history list's filters: kept while the app runs (switching to Mints and back keeps
+    // them), never across launches, so the list always opens unfiltered.
+    historyFilters: { ...DEFAULT_HISTORY_FILTERS } as HistoryFilters,
     showInvoiceDetails: false,
     showCreateInvoiceDialog: false,
     showSendDialog: false,
@@ -139,60 +138,19 @@ export const useUiStore = defineStore("ui", {
     setTab(tab: string) {
       this.tab = tab;
     },
-    formatSat: function (value: number) {
-      // convert value to integer
-      if (useSettingsStore().bip177BitcoinSymbol) {
-        if (value >= 0) {
-          return "₿" + new Intl.NumberFormat(navigator.language).format(value);
-        } else {
-          return (
-            "-₿" +
-            new Intl.NumberFormat(navigator.language).format(Math.abs(value))
-          );
-        }
-      }
-      return new Intl.NumberFormat(navigator.language).format(value) + " sat";
-    },
-    fromMsat: function (value: number) {
-      return new Intl.NumberFormat(navigator.language).format(value) + " msat";
-    },
     formatCurrency: function (
       value: number | bigint,
       currency: string,
       showBalance = false
     ) {
-      if (currency == undefined) {
-        currency = "sat";
-      }
-      if (useUiStore().hideBalance && !showBalance) {
+      if (this.hideBalance && !showBalance) {
         return "****";
       }
-      if (typeof value === "bigint") {
-        return formatBigIntCurrency(
-          value,
-          currency,
-          navigator.language,
-          useSettingsStore().bip177BitcoinSymbol
-        );
-      }
-      if (currency == "sat") return this.formatSat(value);
-      if (currency == "msat") return this.fromMsat(value);
-      if (currency == "usd") value = value / 100;
-      if (currency == "eur") value = value / 100;
-      try {
-        return new Intl.NumberFormat(navigator.language, {
-          style: "currency",
-          currency: currency,
-        }).format(value);
-      } catch {
-        return (
-          new Intl.NumberFormat(navigator.language).format(value) +
-          " " +
-          String(currency)
-        );
-      }
-      // + " " +
-      // currency.toUpperCase()
+      return formatUnitAmount(
+        value,
+        currency,
+        useSettingsStore().bip177BitcoinSymbol
+      );
     },
     toggleDebugConsole() {
       this.showDebugConsole = !this.showDebugConsole;

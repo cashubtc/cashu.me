@@ -2,9 +2,20 @@
   <q-layout view="lHh Lpr lFf">
     <FullscreenHeader />
     <q-page-container>
-      <router-view v-slot="{ Component }">
+      <!-- The transition animates a native wrapper, never the page component itself: a page whose
+           template compiles to a fragment (a leading comment in dev builds) never finishes its
+           out-in leave, and Back would land on the empty placeholder. -->
+      <router-view v-slot="{ Component, route }">
         <transition :name="transitionName" mode="out-in">
-          <component :is="Component" :key="$route.path" />
+          <div
+            v-if="Component"
+            :key="route.path"
+            class="fullscreen-route"
+            data-testid="fullscreen-route"
+            :data-route-path="route.path"
+          >
+            <component :is="Component" />
+          </div>
         </transition>
       </router-view>
     </q-page-container>
@@ -13,7 +24,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import FullscreenHeader from "components/FullscreenHeader.vue";
+import FullscreenHeader from "src/components/FullscreenHeader.vue";
 
 const historyPosition = () =>
   typeof window.history.state?.position === "number"
@@ -51,6 +62,11 @@ export default defineComponent({
 </script>
 
 <style>
+.fullscreen-route {
+  min-width: 0;
+  width: 100%;
+}
+
 .page-slide-left-enter-active,
 .page-slide-left-leave-active,
 .page-slide-right-enter-active,
@@ -83,5 +99,26 @@ export default defineComponent({
 .page-fade-enter-from,
 .page-fade-leave-to {
   opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-slide-left-enter-active,
+  .page-slide-left-leave-active,
+  .page-slide-right-enter-active,
+  .page-slide-right-leave-active,
+  .page-fade-enter-active,
+  .page-fade-leave-active {
+    transition: none;
+  }
+
+  .page-slide-left-enter-from,
+  .page-slide-left-leave-to,
+  .page-slide-right-enter-from,
+  .page-slide-right-leave-to,
+  .page-fade-enter-from,
+  .page-fade-leave-to {
+    opacity: 1;
+    transform: none;
+  }
 }
 </style>

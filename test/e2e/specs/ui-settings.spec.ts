@@ -1,7 +1,7 @@
 import { expect, test } from "../fixtures/test";
 import { MINT_A_URL, MINT_B_URL } from "../fixtures/mint";
 import { WalletUi } from "../pages/WalletUi";
-import { disableAutomaticChecks } from "../fixtures/ui";
+import { disableAutomaticChecks, rowAlignment } from "../fixtures/ui";
 
 const privacyLabels = [
   "Check incoming invoice",
@@ -51,9 +51,12 @@ test("changes theme, bitcoin symbol, keyboard preference and language persistent
   await wallet.settings("appearance");
   await wallet.toggleSetting("Use ₿ symbol", false);
   await wallet.toggleSetting("Use numeric keyboard", true);
-  await page.getByText("bitcoin", { exact: true }).click();
+  await page.getByText("Bitcoin", { exact: true }).click();
   await page.reload();
-  await expect(page.locator(".q-item--active")).toContainText("bitcoin");
+  // The theme list's active row (the Mode list above it has its own active row).
+  await expect(
+    page.locator('.q-item--active:not([data-testid="appearance-mode"])')
+  ).toContainText("Bitcoin");
   await wallet.home();
   await expect(wallet.balance).toContainText("sat");
   await wallet.openSend("ecash");
@@ -77,23 +80,23 @@ test("enables NWC, edits its allowance, copies and reopens the connection", asyn
   const wallet = new WalletUi(page);
   await wallet.onboard(MINT_A_URL);
   await wallet.settings("nwc");
-  await wallet.toggleSetting("Enable NWC", true);
+  await wallet.toggleSetting("Enable Nostr Wallet Connect", true);
   await page
     .getByRole("spinbutton", { name: "Allowance left (sat)" })
     .fill("250");
-  await page
-    .locator("i")
-    .filter({ hasText: /^qr_code$/ })
-    .click();
+  await page.getByRole("button", { name: "Show QR code" }).click();
   await page.getByRole("button", { name: "Copy", exact: true }).click();
   const connection = await page.evaluate(() => navigator.clipboard.readText());
   expect(connection).toMatch(/^nostr\+walletconnect:\/\//);
-  await page.getByRole("button", { name: "Close", exact: true }).click();
+  await page
+    .locator(".q-dialog:visible")
+    .getByRole("button", { name: "Close", exact: true })
+    .click();
   await page.reload();
   await expect(
     page.getByRole("spinbutton", { name: "Allowance left (sat)" })
   ).toHaveValue("250");
-  await wallet.toggleSetting("Enable NWC", false);
+  await wallet.toggleSetting("Enable Nostr Wallet Connect", false);
   await expect(page.getByRole("spinbutton")).toHaveCount(0);
 });
 
@@ -111,10 +114,11 @@ test("generates and browses P2PK keys and enables quick access", async ({
   await expect(publicKey).toBeVisible();
   const key = await publicKey.innerText();
   await publicKey.click();
-  await page.getByRole("button", { name: /Copy/i }).click();
+  // The key list's own copy buttons are also named "Copy"; use the dialog's.
+  await page.getByRole("button", { name: "Copy public key" }).click();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(key);
   await wallet.closeFullscreenDialog();
-  await wallet.toggleSetting("Quick access to lock", true);
+  await wallet.toggleSetting("Show Lock button in Receive ecash", true);
   await page.reload();
   await expect(publicKey).toHaveText(key);
   await wallet.home();
@@ -128,18 +132,49 @@ test("enables ecash payment requests and edits the request amount", async ({
   const wallet = new WalletUi(page);
   await wallet.onboard(MINT_A_URL);
   await wallet.settings("payment-requests");
-  await wallet.toggleSetting("Enable Payment Requests", true);
+  await wallet.toggleSetting("Enable payment requests", true);
   await wallet.home();
   await wallet.openReceive("ecash");
-  await page.getByText("Request", { exact: true }).click();
+  await page.getByText("Request ecash", { exact: true }).click();
   await page.getByRole("button", { name: /Add amount/i }).click();
-  await page.getByPlaceholder("Enter amount", { exact: true }).fill("15");
-  await page.getByPlaceholder("Enter amount", { exact: true }).press("Enter");
+  await page.getByLabel(/^Enter amount/).fill("15");
+  await page.getByLabel(/^Enter amount/).press("Enter");
   await expect(page.getByRole("button", { name: /15/ })).toBeVisible();
   await page.getByRole("button", { name: "Copy", exact: true }).click();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toMatch(
     /^creq/
   );
+});
+
+// Owner 2026-10-29, item 11: the request's rows are 44px boxes 4px apart, so a hovered tint
+// never touches the next row.
+test("payment request rows never overlap", async ({ page }) => {
+  const wallet = new WalletUi(page);
+  await wallet.onboard(MINT_A_URL);
+  await wallet.settings("payment-requests");
+  await wallet.toggleSetting("Enable payment requests", true);
+  await wallet.home();
+  await wallet.openReceive("ecash");
+  await page.getByText("Request ecash", { exact: true }).click();
+  // Every row of the table, in order: the request text is a copy row between Unit and Mint.
+  const rows = ["pr-amount", "pr-unit", "pr-request", "pr-mint"].map((id) =>
+    page.getByTestId(id).filter({ visible: true })
+  );
+  await expect(rows[0]).toBeVisible();
+  // One unit code app-wide: sats are BTC, not "₿ (sat)".
+  await expect(rows[1]).toContainText("BTC");
+  await rows[0].hover();
+  const boxes = [];
+  for (const row of rows) boxes.push((await row.boundingBox())!);
+  for (const b of boxes) expect(Math.abs(b.height - 44)).toBeLessThan(0.6);
+  for (let i = 1; i < boxes.length; i++) {
+    const gap = boxes[i].y - (boxes[i - 1].y + boxes[i - 1].height);
+    expect(Math.abs(gap - 4)).toBeLessThan(0.6);
+  }
+  const inset = await rows[0].evaluate(
+    (el) => getComputedStyle(el, "::before").inset
+  );
+  expect(inset).toBe("0px");
 });
 
 for (const directNavigation of [false, true]) {
@@ -183,9 +218,9 @@ for (const directNavigation of [false, true]) {
         await page
           .getByRole("button", { name: "Settings", exact: true })
           .click();
-        await page.getByText("Lightning Address", { exact: true }).click();
+        await page.getByText("Lightning address", { exact: true }).click();
       }
-      await wallet.toggleSetting("Enable", true);
+      await wallet.toggleSetting("Use a Lightning address", true);
       if (directNavigation)
         test.fail(
           true,
@@ -194,13 +229,13 @@ for (const directNavigation of [false, true]) {
       await expect(page.locator("input[readonly]")).toHaveValue(/@npub.cash$/, {
         timeout: 5000,
       });
-      await page.getByTestId("choose-mint").click();
+      await wallet.openMintPicker();
       await page
-        .locator(".mint-option")
+        .getByRole("option")
         .filter({ hasText: "Address mint" })
         .click();
       await expect.poll(() => selectedMint).toBe(MINT_B_URL);
-      await wallet.toggleSetting("Enable", false);
+      await wallet.toggleSetting("Use a Lightning address", false);
       await expect(page.getByTestId("choose-mint")).toBeHidden();
     }
   );
@@ -234,4 +269,33 @@ test("startup checking can be disabled and re-enabled for an unpaid invoice", as
   await wallet.home("History");
   await expect.poll(() => wallet.balanceSats()).toBe(17);
   expect(checks).toBeGreaterThan(0);
+});
+
+// Owner 2026-10-29b, item 5: the action-row fix (a whole-pixel title line) reaches every
+// settings row that shares it; none of them moves its icon or end glyph off its text.
+test("settings rows centre their icon and end glyph on their text", async ({
+  page,
+}) => {
+  const wallet = new WalletUi(page);
+  await wallet.onboard(MINT_A_URL);
+  for (const path of ["/settings", "/settings/advanced", "/settings/backup"]) {
+    await page.goto(path);
+    const view = page.locator(".settings-view").first();
+    await expect(view.locator(".q-item").first()).toBeVisible();
+    const rows = await rowAlignment(view);
+    expect(rows.length, path).toBeGreaterThan(0);
+    for (const row of rows) {
+      if (row.icon !== null)
+        expect(Math.abs(row.icon), `${path} ${row.label}`).toBeLessThanOrEqual(
+          1
+        );
+      if (row.end !== null)
+        expect(Math.abs(row.end), `${path} ${row.label}`).toBeLessThanOrEqual(
+          1
+        );
+      expect(Number.isInteger(row.lineHeight), `${path} ${row.label}`).toBe(
+        true
+      );
+    }
+  }
 });

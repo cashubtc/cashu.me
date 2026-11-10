@@ -61,6 +61,45 @@ test("falls back to a supported unit when selecting a sat-only mint", async ({
   await wallet.mintBolt11(10);
 });
 
+test("switches the ecash unit from the header's unit switch", async ({
+  page,
+}) => {
+  const wallet = new WalletUi(page);
+  await wallet.onboard(MINT_C_URL);
+  await expect(wallet.balance).toHaveAttribute("data-unit", "sat");
+  for (const open of [
+    () => wallet.openReceive("lightning"),
+    () => wallet.openSend("ecash"),
+  ]) {
+    await open();
+    const toggle = wallet.unitToggle();
+    await expect(toggle).toHaveAccessibleName("Unit: Bitcoin, change");
+    await expect(toggle).toHaveText("BTC");
+    // The unit is a header action, never beside the amount and
+    // its ⇅ fiat swap.
+    await expect(
+      page.locator(".amount-input-root:visible").getByRole("button", {
+        name: /^Unit: /,
+      })
+    ).toHaveCount(0);
+    const box = await toggle.boundingBox();
+    expect(box!.height).toBeGreaterThanOrEqual(44);
+    expect(box!.width).toBeGreaterThanOrEqual(44);
+    await toggle.click();
+    await expect(toggle).not.toHaveAccessibleName("Unit: Bitcoin, change");
+    await expect(toggle).toHaveText(/^(USD|EUR)$/);
+    await expect(page.locator(".amount-display:visible")).not.toContainText(
+      "₿"
+    );
+    await wallet.closeFullscreenDialog();
+    await expect(wallet.balance).toHaveCount(1);
+    await expect(wallet.balance).not.toHaveAttribute("data-unit", "sat");
+    await page.getByRole("button", { name: "Show BTC balance" }).click();
+    await expect(wallet.balance).toHaveCount(1);
+    await expect(wallet.balance).toHaveAttribute("data-unit", "sat");
+  }
+});
+
 test("changes fiat display currency and amount mode using deterministic prices", async ({
   page,
 }) => {
@@ -89,10 +128,10 @@ test("changes fiat display currency and amount mode using deterministic prices",
   await expect.poll(() => wallet.balanceSats()).toBe(1000);
   await wallet.openSend("ecash");
   await wallet.enterAmount(100);
-  await page.locator(".fiat-icon:visible").click();
+  await wallet.fiatEntrySwap("EUR").click();
   await expect(page.locator(".amount-display:visible")).toHaveCount(1);
   await expect(page.locator(".amount-display:visible")).toContainText("0.08");
-  await page.locator(".fiat-icon:visible").click();
+  await wallet.fiatEntrySwap("EUR").click();
   await expect(page.locator(".amount-display:visible")).toHaveCount(1);
   await expect(page.locator(".amount-display:visible")).toContainText("100");
   await wallet.closeFullscreenDialog();
@@ -119,4 +158,91 @@ test("hides balances across units and persists the privacy preference", async ({
   await expect(wallet.balance).toHaveCount(1);
   await wallet.balance.click();
   await expect.poll(() => wallet.balanceSats()).toBe(123);
+});
+
+// Owner item 25: the balance only moves when a unit is chosen; no hand gesture moves it.
+test.describe("balance carousel", () => {
+  test.use({ hasTouch: true, viewport: { width: 390, height: 640 } });
+
+  test("ignores swipes, drags and sideways scrolling; unit dots still switch", async ({
+    page,
+  }) => {
+    const wallet = new WalletUi(page);
+    await wallet.onboard(MINT_C_URL);
+    const carousel = page.getByTestId("wallet-balance-carousel");
+    await expect(wallet.balance).toHaveAttribute("data-unit", "sat");
+    const box = (await carousel.boundingBox())!;
+    const y = box.y + box.height / 2;
+    const panelScroll = () =>
+      carousel.evaluate((el) =>
+        [...el.querySelectorAll(".q-panel, .q-carousel__slide")].map(
+          (p) => `${p.scrollLeft},${p.scrollTop}`
+        )
+      );
+    const before = await panelScroll();
+
+    // A real touch swipe each way (CDP touch events, as a finger sends them).
+    const cdp = await page.context().newCDPSession(page);
+    for (const [from, to] of [
+      [box.x + box.width * 0.85, box.x + box.width * 0.1],
+      [box.x + box.width * 0.1, box.x + box.width * 0.85],
+    ]) {
+      await cdp.send("Input.dispatchTouchEvent", {
+        type: "touchStart",
+        touchPoints: [{ x: from, y }],
+      });
+      for (let i = 1; i <= 8; i++)
+        await cdp.send("Input.dispatchTouchEvent", {
+          type: "touchMove",
+          touchPoints: [{ x: from + ((to - from) * i) / 8, y }],
+        });
+      await cdp.send("Input.dispatchTouchEvent", {
+        type: "touchEnd",
+        touchPoints: [],
+      });
+      await page.waitForTimeout(400);
+      await expect(wallet.balance).toHaveAttribute("data-unit", "sat");
+    }
+
+    // A mouse drag.
+    await page.mouse.move(box.x + box.width * 0.85, y);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * 0.1, y, { steps: 8 });
+    await page.mouse.up();
+    await page.waitForTimeout(400);
+    await expect(wallet.balance).toHaveAttribute("data-unit", "sat");
+
+    // Sideways wheel or trackpad over the balance scrolls nothing inside it.
+    await page.mouse.move(box.x + box.width / 2, y);
+    await page.mouse.wheel(240, 0);
+    await page.mouse.wheel(0, 60);
+    await page.waitForTimeout(200);
+    expect(await panelScroll()).toEqual(before);
+    // …while a vertical wheel still scrolls the page.
+    await page.mouse.wheel(0, 300);
+    await expect
+      .poll(() => page.evaluate(() => document.scrollingElement!.scrollTop))
+      .toBeGreaterThan(0);
+    await page.evaluate(() => document.scrollingElement!.scrollTo(0, 0));
+
+    // A unit dot still switches the balance, and the amount still hides on tap.
+    await page.getByRole("button", { name: "Show USD balance" }).click();
+    await expect(wallet.balance).toHaveCount(1);
+    await expect(wallet.balance).toHaveAttribute("data-unit", "usd");
+    await expect(wallet.balance).toContainText("$");
+    await wallet.balance.click();
+    await expect(wallet.balance).not.toContainText("0.00");
+  });
+
+  test("a single-unit wallet exposes no unit controls", async ({ page }) => {
+    const wallet = new WalletUi(page);
+    await wallet.onboard(MINT_B_URL);
+    await expect(wallet.balance).toHaveAttribute("data-unit", "sat");
+    await expect(
+      page.getByRole("button", { name: /^Show .* balance$/ })
+    ).toHaveCount(0);
+    await wallet.openReceive("lightning");
+    await expect(page.locator(".numeric-keyboard:visible")).toBeVisible();
+    await expect(wallet.unitToggle()).toHaveCount(0);
+  });
 });

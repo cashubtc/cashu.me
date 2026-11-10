@@ -12,7 +12,8 @@ async function importBackup(
   await wallet.page.getByText("Import wallet backup", { exact: true }).click();
   const chooser = wallet.page.waitForEvent("filechooser");
   await wallet.page
-    .getByRole("button", { name: "IMPORT WALLET BACKUP", exact: true })
+    .getByRole("button", { name: "Import wallet backup", exact: true })
+    .last()
     .click();
   const reloaded = expectReload
     ? wallet.page.waitForEvent("load")
@@ -110,16 +111,17 @@ test("reveals and copies a seed and restores spendable funds in a fresh wallet",
   await wallet.onboard(MINT_B_URL);
   await wallet.mintBolt11(64);
   await wallet.settings("backup");
-  await expect(page.locator("textarea")).toHaveValue(/\*/);
+  await expect(page.locator(".seed-text")).toHaveText(/\*/);
   await page.getByTestId("reveal-seed").click();
-  const mnemonic = await page.locator("textarea").inputValue();
+  await expect(page.locator(".seed-text")).not.toHaveText(/\*/);
+  const mnemonic = (await page.locator(".seed-text").innerText()).trim();
   expect(mnemonic.split(" ")).toHaveLength(12);
   await page.getByTestId("copy-seed").click();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
     mnemonic
   );
   await page.reload();
-  await expect(page.locator("textarea")).toHaveValue(/\*/);
+  await expect(page.locator(".seed-text")).toHaveText(/\*/);
   const context = await browser.newContext({
     permissions: ["clipboard-read", "clipboard-write"],
     serviceWorkers: "block",
@@ -134,14 +136,14 @@ test("reveals and copies a seed and restores spendable funds in a fresh wallet",
     ).toBeDisabled();
     await restored.page.locator("textarea").fill(mnemonic);
     await restored.page
-      .getByRole("button", { name: "Select All", exact: true })
+      .getByRole("button", { name: "Select all", exact: true })
       .click();
     await restored.page
       .getByRole("button", { name: /Restore.*mint/i })
       .first()
       .click();
     await expect(
-      restored.page.getByText("Successfully restored 1 mint(s)", {
+      restored.page.getByText("Mints restored: 1", {
         exact: true,
       })
     ).toBeVisible({ timeout: 60000 });

@@ -126,7 +126,7 @@ describe("CreateInvoiceDialog", () => {
       text: quote.request,
     });
     expect(CreateInvoiceDialog.computed.createButtonLabel.call(context)).toBe(
-      "Create New Address"
+      "Create new address"
     );
 
     await CreateInvoiceDialog.methods.requestMintButton.call(context);

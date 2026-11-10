@@ -45,8 +45,8 @@ describe("SendPaymentRequest", () => {
     try {
       await SendPaymentRequest.methods.clickPaymentRequest.call(context);
       expect(notifyError).toHaveBeenCalledWith(
-        "Unsupported payment request transport.",
-        "Could not pay request"
+        "Could not pay request",
+        "Unsupported payment request transport."
       );
       expect(context.prepareToken).not.toHaveBeenCalled();
       expect(context.parseAndPayPaymentRequest).not.toHaveBeenCalled();

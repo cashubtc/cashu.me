@@ -1,0 +1,983 @@
+// Standard elements: one implementation of each repeated pattern, shown at /design-system. Visual
+// language after shadcn/ui: neutral tokens, one 12px radius for boxes, 1px hairlines, a muted
+// caption under a medium label, and colour only where it carries meaning (info, warning,
+// danger). Components use these classes instead of their own copies.
+
+// Colours that carry meaning, for callouts and status text, in both modes.
+body.body--dark {
+  --app-info: #60a5fa;
+  // amber-400: the same amber family as light mode's amber-800 (yellow-400 read as a
+  // different colour from mode to mode).
+  --app-warning: #fbbf24;
+  --app-danger: var(--q-negative);
+  // A filled destructive button: a deep red with white text (red-600, 4.8:1), as shadcn's
+  // destructive button; the coral with black text read as a warning chip.
+  --app-danger-fill: #dc2626;
+  --app-on-danger: #fff;
+}
+body.body--light {
+  --app-info: #2563eb;
+  // amber-800: clears 4.5:1 as badge text on its own 16% tint (a16207 was ~3.9:1).
+  --app-warning: #854d0e;
+  --app-danger: var(--q-negative);
+  --app-danger-fill: #c42b2b;
+  --app-on-danger: #fff;
+}
+// Checkboxes take the small control radius, like the rest of the kit.
+.q-checkbox__bg {
+  border-radius: var(--app-radius-sm) !important;
+}
+// Destructive button: the one filled danger treatment (Remove mint, inline Remove), at AA.
+.app-btn-danger.q-btn:not(.q-btn--dense) {
+  min-height: 44px;
+}
+.app-btn-danger.q-btn {
+  background: var(--app-danger-fill) !important;
+  color: var(--app-on-danger) !important;
+}
+// Quasar's own warning colour (text-warning, color="warning") is the same single yellow.
+body {
+  --q-warning: var(--app-warning);
+}
+
+// Icon in a round slot: option rows (md), sheet rows (sm), empty states (lg), onboarding (xl).
+.app-icon-circle {
+  align-items: center;
+  background: var(--app-tint-strong);
+  border-radius: 50%;
+  color: var(--app-text);
+  display: inline-flex;
+  flex-shrink: 0;
+  height: 48px;
+  justify-content: center;
+  overflow: hidden;
+  width: 48px;
+}
+.app-icon-circle__img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+.app-icon-circle--xs {
+  height: 36px;
+  width: 36px;
+}
+.app-icon-circle--sm {
+  height: 40px;
+  width: 40px;
+}
+.app-icon-circle--lg {
+  height: 56px;
+  width: 56px;
+}
+.app-icon-circle--xl {
+  height: 80px;
+  width: 80px;
+}
+
+// Tappable option row: an icon, a label and a caption on a tinted fill (Send, Receive, sheet
+// pickers, payment requests, onboarding choices). Selected rows use the selected tokens.
+// Its fills are custom properties: a context (light sheets, a grouped list, selected) sets
+// the values, and rest, hover and press read them in one place, so no context's own
+// background can cancel the hover again.
+.app-option-row {
+  --option-bg: var(--app-tint);
+  --option-hover: var(--app-tint-strong);
+  --option-press: var(--app-tint-strong);
+  align-items: center;
+  background: var(--option-bg);
+  border: 1px solid transparent;
+  border-radius: var(--app-radius-lg);
+  color: var(--app-text);
+  cursor: pointer;
+  display: flex;
+  gap: 16px;
+  min-height: 56px;
+  padding: 12px 16px;
+  text-align: start;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+@media (hover: hover) {
+  .app-option-row:not([aria-disabled="true"]):hover {
+    background: var(--option-hover);
+  }
+}
+.app-option-row:not([aria-disabled="true"]):active {
+  background: var(--option-press);
+}
+.app-option-row:focus-visible {
+  outline: 2px solid var(--app-text);
+  outline-offset: 2px;
+}
+.app-option-row--selected {
+  --option-bg: var(--app-card-fill-active);
+  --option-hover: var(--app-card-fill-active);
+  border-color: var(--app-card-edge-active);
+  box-shadow: inset 0 0 0 0.5px var(--app-card-edge-active);
+}
+// Light-mode sheets are white: rows sit on the page colour so they still read as rows.
+body.body--light :where(.q-dialog) .app-option-row {
+  --option-bg: var(--app-surface);
+  --option-hover: color-mix(in srgb, var(--app-text) 4%, var(--app-surface));
+  --option-press: color-mix(in srgb, var(--app-text) 6%, var(--app-surface));
+  // The control edge, so white rows on the pale sheet keep their edge.
+  border-color: var(--app-field-edge);
+}
+/* SheetSelect: a long list (30-odd currencies) reads as one grouped list with hairline dividers, not a
+   stack of separate cards. */
+.sheet-select__list--grouped {
+  background: var(--app-tint);
+  border-radius: var(--app-radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 0 !important;
+  overflow: hidden;
+}
+body .sheet-select__list--grouped .app-option-row {
+  --option-bg: transparent;
+  --option-hover: var(--app-tint);
+  border-radius: 0;
+  margin: 0 !important;
+  min-height: 52px;
+}
+.sheet-select__list--grouped .app-option-row + .app-option-row {
+  box-shadow: inset 0 1px 0 var(--app-border);
+}
+// Inside the clipped group, the focus ring is drawn inside the row.
+.sheet-select__list--grouped .app-option-row:focus-visible {
+  outline-offset: -2px;
+}
+body .sheet-select__list--grouped .app-option-row--selected {
+  --option-bg: var(--app-card-fill-active);
+  --option-hover: var(--app-card-fill-active);
+  box-shadow: inset 0 0 0 1px var(--app-card-edge-active);
+}
+.app-option-row__text {
+  flex: 1;
+  min-width: 0;
+}
+.app-option-row__label {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 22px;
+}
+.app-option-row__caption {
+  color: var(--app-text-muted);
+  font-size: 13px;
+  line-height: 18px;
+  margin-top: 2px;
+}
+
+// Status tones, shared by callouts and toasts: one colour per meaning, darker in light mode.
+// Success follows the theme's positive token (teal in the green themes).
+body {
+  --app-success: var(--q-positive);
+}
+.app-callout--info {
+  --tone: var(--app-info);
+}
+.app-callout--success {
+  --tone: var(--app-success);
+}
+.app-callout--warning {
+  --tone: var(--app-warning);
+}
+.app-callout--danger {
+  --tone: var(--app-danger);
+}
+
+// Callout (AppCallout.vue): the tone tints
+// the whole rounded surface, with no edge, so warning and error read stronger than info without
+// any extra chrome; the neutral tip sits on the group fill. Text stays ink; the icon carries the
+// tone. Error and warning fills are a step stronger so they outrank info.
+.app-callout {
+  align-items: flex-start;
+  background: color-mix(in srgb, var(--tone) 12%, var(--app-surface));
+  border-radius: var(--app-radius-lg);
+  color: var(--app-text);
+  display: flex;
+  font-size: 14px;
+  gap: 10px;
+  line-height: 1.45;
+  padding: 12px 14px;
+  text-align: start;
+  width: 100%;
+}
+// A callout arrives rather than pops: a short fade and rise as it mounts (shadcn's alert
+// motion), held still under reduced motion.
+@media (prefers-reduced-motion: no-preference) {
+  .app-callout {
+    animation: app-callout-in 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+@keyframes app-callout-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+.app-callout--neutral {
+  background: var(--app-group-fill);
+}
+// Light mode: the neutral tip's grey fill nearly vanishes on white, so it keeps a hairline.
+body.body--light .app-callout--neutral {
+  box-shadow: inset 0 0 0 1px var(--app-border);
+}
+.app-callout--warning,
+.app-callout--danger {
+  background: color-mix(in srgb, var(--tone) 16%, var(--app-surface));
+}
+.app-callout__icon {
+  color: var(--tone, var(--app-text-muted));
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.app-callout__body {
+  flex: 1;
+  min-width: 0;
+}
+.app-callout__title {
+  color: var(--app-text);
+  font-weight: 600;
+}
+
+.app-callout__text {
+  color: color-mix(in srgb, var(--app-text) 80%, transparent);
+}
+.app-callout__title + .app-callout__text {
+  margin-top: 2px;
+}
+.app-callout__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+// Dismiss: a 40px round target, pulled into the padding so the text keeps its width.
+.app-callout__close {
+  color: var(--app-text-muted);
+  height: 40px;
+  margin: -10px -14px -10px 0;
+  min-height: 40px;
+  min-width: 40px;
+  width: 40px;
+}
+html[dir="rtl"] .app-callout__close {
+  margin: -10px 0 -10px -14px;
+}
+
+// Badge: one small pill on a subtle neutral fill (status tones and a quiet primary tint are
+// the only variants; "solid" is kept as an alias of the default).
+.app-badge {
+  align-items: center;
+  background: var(--app-tint-strong);
+  border: 1px solid transparent;
+  border-radius: var(--app-radius-pill);
+  color: var(--app-text);
+  display: inline-flex;
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 500;
+  gap: 4px;
+  line-height: 18px;
+  min-height: 24px;
+  padding: 2px 9px;
+  white-space: nowrap;
+}
+// Emphasis (a chosen share, a count): the theme colour as a tint, never a solid block.
+.app-badge--primary {
+  background: color-mix(in srgb, var(--q-primary) 18%, transparent);
+  border-color: transparent;
+  color: var(--app-text);
+}
+button.app-badge {
+  cursor: pointer;
+  font-family: inherit;
+}
+// Status badges take the callout tones: a tinted fill, a tone edge and tone-mixed text.
+.app-badge--success {
+  --tone: var(--app-success);
+}
+.app-badge--warning {
+  --tone: var(--app-warning);
+}
+.app-badge--danger {
+  --tone: var(--app-danger);
+}
+.app-badge--success,
+.app-badge--warning,
+.app-badge--danger {
+  background: color-mix(in srgb, var(--tone) 16%, transparent);
+  border-color: transparent;
+  color: var(--tone);
+}
+
+// Box: a grouped surface (summaries, counters, previews), on the group tokens.
+.app-box {
+  background: var(--app-group-fill);
+  border: 1px solid var(--app-group-edge);
+  border-radius: var(--app-radius-lg);
+}
+
+// Empty state: an icon in a round slot, a title, one line of help and an optional action.
+.app-empty {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 32px 16px;
+  text-align: center;
+}
+.app-empty .app-icon-circle {
+  color: var(--app-text-muted);
+  margin-bottom: 4px;
+}
+.app-empty__title {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+// The help line takes the column's full measure: a 320px cap wrapped zh-CN about 40px early
+// and left "开始。" alone. Its lines break evenly (text-wrap in app.scss).
+.app-empty__text {
+  color: var(--app-text-muted);
+  font-size: 14px;
+}
+.app-empty__action {
+  margin-top: 16px;
+}
+
+// Machine text: tokens, keys, invoices, keyset ids.
+.app-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+// Long machine strings that wrap anywhere, without hyphens.
+.app-mono--wrap {
+  hyphens: none;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
+// Sheet title row height, shared by every full-screen sheet header.
+.fixed-title-height {
+  align-items: center;
+  display: flex;
+  height: 24px;
+  justify-content: center;
+}
+
+// Icon button: the 44px ink icon button in every header and sheet (back, close, menu,
+// refresh), never the theme colour or grey. .floating-close-btn pins one to the header's
+// leading edge, centred on the title.
+.app-icon-btn {
+  color: var(--app-text) !important;
+  height: 44px;
+  min-height: 44px;
+  min-width: 44px;
+  width: 44px;
+}
+.floating-close-btn {
+  inset-inline-start: 6px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+// Onboarding slide scaffold: a large icon in a round slot, a title and a description, on the
+// one onboarding column (FlowColumn with its 16px inset), shared by every welcome slide.
+// Every block spans the column (a short paragraph never shrinks to its text and centres).
+.welcome-slide__content {
+  align-items: stretch;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  text-align: start;
+}
+// The slide's hero (icon, title, description) is centred, like the empty and blocking states;
+// the slide's own content below keeps its layout.
+.welcome-slide__icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  width: 100%;
+}
+.welcome-slide__title {
+  color: var(--app-text);
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0 0 16px;
+  min-width: 0;
+  text-align: center;
+  text-wrap: balance;
+  width: 100%;
+}
+.welcome-slide__description {
+  color: var(--app-text-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0 0 32px;
+  min-width: 0;
+  text-align: center;
+  text-wrap: pretty;
+  width: 100%;
+}
+@media (max-width: 600px) {
+  .welcome-slide__title {
+    font-size: 1.6rem;
+  }
+  .welcome-slide__description {
+    font-size: 0.9rem;
+    margin-bottom: 28px;
+  }
+}
+
+// Top toolbar (wallet header and full-screen pages): kept over the page column on wide
+// screens, with 44px icon buttons in ink.
+.app-toolbar {
+  margin: 0 auto;
+  max-width: var(--app-column);
+  padding: 0 6px;
+}
+
+// Amount entry: the big amount and the fiat line under it, the same size on every amount
+// screen (Receive Lightning, Send ecash, the amount sheet). Position stays with each screen.
+.amount-display {
+  font-size: clamp(56px, 11vw, 80px);
+  line-height: 1.1;
+}
+.fiat-display {
+  font-size: 16px;
+  text-align: center;
+}
+
+// Loading placeholders (shadcn Skeleton): one muted fill and radius for every q-skeleton, and
+// a standard row (SkeletonRow.vue) of an avatar beside lines of text.
+// No sweeping highlight: Quasar's wave drew a bright gradient across every bar. Loading is a
+// slow, shallow pulse of the fill instead, and holds still under reduced motion.
+body .q-skeleton::after {
+  display: none;
+}
+body .q-skeleton {
+  background: var(--app-tint-strong);
+  background-image: none !important;
+  animation: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  body .q-skeleton {
+    animation: app-skeleton-pulse 1.8s ease-in-out infinite;
+  }
+}
+@keyframes app-skeleton-pulse {
+  50% {
+    opacity: 0.6;
+  }
+}
+body.body--light .q-skeleton {
+  background: rgba(0, 0, 0, 0.1);
+}
+body .q-skeleton--type-rect,
+body .q-skeleton--type-text {
+  border-radius: var(--app-radius-sm);
+}
+
+// Amount entry layout (Receive Lightning, Send ecash, Pay): the amount area fills the space
+// above the keypad; an amount that is too large shakes once (not with reduced motion).
+.amount-area {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+.keypad-wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+.wobble-enter-active {
+  animation: wobble-keyframes 600ms ease-out;
+  transform-origin: center;
+  will-change: transform;
+}
+.wobble-leave-active {
+  animation: none !important;
+}
+@keyframes wobble-keyframes {
+  0%,
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  15% {
+    transform: translateX(-8px) rotate(-3deg);
+  }
+  30% {
+    transform: translateX(8px) rotate(3deg);
+  }
+  45% {
+    transform: translateX(-6px) rotate(-2deg);
+  }
+  60% {
+    transform: translateX(6px) rotate(2deg);
+  }
+  75% {
+    transform: translateX(-3px) rotate(-1deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wobble-enter-active {
+    animation: none;
+  }
+}
+
+// Busy buttons: the dots and the busy label replace the label in the button's own layout, on
+// one line, so a longer busy label ("Swapping…") widens the button instead of spilling out.
+// (Quasar marks the busy state only by hiding the label, so the rules key off that.)
+.q-btn > .q-btn__content--hidden {
+  display: none !important;
+}
+.q-btn > .q-btn__content--hidden + .absolute-full {
+  flex: 1 1 auto;
+  flex-wrap: nowrap;
+  gap: 2px;
+  position: static;
+  white-space: nowrap;
+}
+
+// Activity row: one transaction or payment in a list (History, payment request payments). A
+// 40px icon circle with a direction disc, a label and amount line, and a date line. The row
+// keeps 12px inner padding for its hover and pressed shape, with a negative margin so the
+// content stays on the page gutter.
+.activity-row {
+  --row-bg: var(--app-surface);
+  --row-avatar: var(--app-tint-strong);
+  background: var(--row-bg);
+  border-radius: var(--app-radius-lg);
+  margin: 0 -12px;
+  min-height: 64px;
+  padding-inline: 12px;
+}
+// The row's own helper only: a button inside the row (Check status) keeps its tint.
+.activity-row > .q-focus-helper {
+  display: none;
+}
+.activity-row .q-item__label--caption {
+  color: var(--app-text-muted);
+  font-size: 13px;
+}
+@media (hover: hover) {
+  .activity-row.q-item--clickable:hover {
+    --row-bg: color-mix(
+      in srgb,
+      var(--app-text) calc(var(--app-hover-opacity) * 100%),
+      var(--app-surface)
+    );
+    // The disc stays a fixed step above the row in every state (it vanished on press, R79).
+    --row-avatar: color-mix(
+      in srgb,
+      var(--app-text) calc(var(--app-hover-opacity) * 100% + 10%),
+      var(--app-surface)
+    );
+  }
+}
+.activity-row.q-item--clickable:active {
+  --row-bg: color-mix(
+    in srgb,
+    var(--app-text) calc(var(--app-pressed-opacity) * 100%),
+    var(--app-surface)
+  );
+  --row-avatar: color-mix(
+    in srgb,
+    var(--app-text) calc(var(--app-pressed-opacity) * 100% + 10%),
+    var(--app-surface)
+  );
+}
+.activity-row--placeholder {
+  background: transparent;
+  pointer-events: none;
+}
+.activity-row__avatar {
+  background: var(--row-avatar);
+  color: var(--app-text);
+}
+// Money in: the disc takes a light success tint (a step stronger in light mode, where a faint
+// tint fades on white), kept below the green amount; out, pending and expired
+// stay on the neutral disc.
+.activity-row__avatar--in {
+  background: color-mix(in srgb, var(--app-success) 13%, var(--row-bg));
+  color: var(--app-success);
+}
+body.body--light .activity-row__avatar--in {
+  background: color-mix(in srgb, var(--app-success) 16%, var(--row-bg));
+}
+.activity-row__title {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+}
+.activity-row__label {
+  font-size: 1rem;
+  font-weight: 500;
+  // The ellipsis needs overflow hidden, which cut descenders (the g of "Sending") at the
+  // foot of the label's tight line box: the box reaches 3px lower without moving anything.
+  margin-bottom: -3px;
+  overflow: hidden;
+  padding-bottom: 3px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.activity-row__pill {
+  flex-shrink: 0;
+}
+.activity-row__amount {
+  flex-shrink: 0;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-inline-start: 12px;
+}
+.activity-row__amount--in {
+  color: var(--app-success);
+}
+// Not final yet: secondary text at full weight, so the column keeps one rhythm.
+// Pending money is still the user's money: full-strength amount; the Pending badge carries
+// the status (a muted amount read as already spent).
+.activity-row__amount--pending {
+  color: var(--app-text);
+}
+// Nothing arrived: muted and struck through, never green.
+.activity-row__amount--expired {
+  color: var(--app-text-muted);
+  font-weight: 500;
+  text-decoration: line-through;
+}
+
+// Pager: 44px targets, muted pages and arrows, and the current page as a quiet tinted chip
+// rather than a filled pill competing with the screen's primary action.
+.q-pagination .q-btn {
+  min-height: 44px !important;
+  min-width: 44px !important;
+}
+.q-pagination .q-btn:not(.bg-primary) {
+  color: var(--app-text-muted) !important;
+}
+.q-pagination .q-btn.bg-primary {
+  background: var(--app-tint-strong) !important;
+  color: var(--app-text) !important;
+  font-weight: 600;
+}
+
+// An option row that only informs (OptionRow static): no pointer, no hover fill.
+.app-option-row:not([role]) {
+  cursor: default;
+}
+.app-option-row:not([role]) {
+  --option-hover: var(--option-bg);
+  --option-press: var(--option-bg);
+}
+
+/* TonalChip: a quiet secondary action, the tint fill with no edge (outlined pills were the
+   only ones of their kind). */
+.tonal-chip {
+  background: var(--app-tint-strong);
+  color: var(--app-text);
+  font-size: 13px;
+  font-weight: 600;
+  min-height: 44px;
+  padding: 0 14px;
+}
+.tonal-chip__icon {
+  display: inline-flex;
+  margin-inline-end: 6px;
+}
+
+/* FlowColumn: a flow's content column, centred at the shared column width. */
+.flow-column {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+.flow-column__inner {
+  max-width: var(--app-column);
+  width: 100%;
+}
+// A flow's stack (QR, callout, amount, table…): one 16px gap between neighbours, so spacing
+// is the stack's and never a child's own margin.
+.flow-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.flow-stack .qr-progress {
+  margin-bottom: 0;
+}
+// Beat 3 of a paid outcome (ui/PaymentStatus.vue): what follows it in the stack, the amount
+// and the receipt table, rises 6px into place after the check and the words.
+@media (prefers-reduced-motion: no-preference) {
+  .flow-stack > .payment-status--paid ~ * {
+    animation: flow-stack-receipt 0.3s 0.3s cubic-bezier(0.2, 0, 0, 1) both;
+  }
+}
+@keyframes flow-stack-receipt {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* CjkText: a whole Chinese or Japanese word never wraps across lines. */
+.cjk-word {
+  white-space: nowrap;
+}
+
+/* RowValue: a settings row's current value and its chevron on one line, centred on the row
+   (Quasar's side section is a column, so the value sat above the chevron). The
+   chevron after a value takes the value's muted colour; a bare chevron stays subtle. */
+.row-value__inner {
+  align-items: center;
+  color: var(--app-text-muted);
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+.row-value__text + .settings-menu-chevron {
+  color: currentColor;
+}
+.row-value__text {
+  color: currentColor;
+  font-size: 15px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+/* AmountWarning: the muted line under a typed amount, centred on it, over the fiat slot. */
+.amount-warning {
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  text-align: center;
+  top: calc(100% - 20px);
+  z-index: 2;
+}
+.amount-warning__text {
+  color: var(--app-text-muted);
+  display: inline-block;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* RevealTransition: a block that opens and closes in place. */
+.reveal-enter-active {
+  max-height: 400px;
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.reveal-leave-active {
+  max-height: 400px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.reveal-enter-from,
+.reveal-leave-to {
+  margin-bottom: 0;
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-10px);
+}
+
+// AppMenu: the overflow menu's list, anchored under its ⋯ (ui/AppMenu.vue). A raised card
+// with the dialogs' hairline and shadow; 44px rows that tint on hover, keyboard highlight and
+// press; destructive rows last in the danger ink. It grows from the trigger's corner.
+.app-menu {
+  background: var(--app-raised);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow-md);
+  color: var(--app-text);
+  max-width: min(320px, calc(100vw - 24px));
+  min-width: 220px;
+  outline: none;
+  padding: 4px;
+  transform-origin: var(--reka-dropdown-menu-content-transform-origin);
+  z-index: 7000;
+}
+body.body--light .app-menu {
+  background: var(--app-surface);
+}
+// Inside a dialog the menu's positioner is a direct child of .q-dialog__inner, which Quasar
+// sizes (a maximized dialog's child fills the screen, every child scrolls and is rounded):
+// the 100%-wide positioner pinned the menu to the left edge on desktop.
+.q-dialog__inner > [data-reka-popper-content-wrapper] {
+  border-radius: 0;
+  height: auto;
+  max-height: none;
+  max-width: none;
+  overflow: visible;
+  width: auto;
+}
+.app-menu__item {
+  align-items: center;
+  border-radius: var(--app-radius-md);
+  cursor: pointer;
+  display: flex;
+  font-size: 15px;
+  font-weight: 500;
+  gap: 12px;
+  min-height: 44px;
+  outline: none;
+  padding: 0 12px;
+  user-select: none;
+}
+.app-menu__item[data-highlighted] {
+  background: var(--app-tint);
+}
+.app-menu__item:active {
+  background: var(--app-tint-strong);
+}
+.app-menu__item[data-disabled] {
+  color: var(--app-text-disabled);
+  cursor: default;
+}
+.app-menu__item--danger {
+  color: var(--app-negative-text);
+}
+.app-menu__icon {
+  color: var(--app-text-muted);
+  flex-shrink: 0;
+}
+.app-menu__item--danger .app-menu__icon {
+  color: currentColor;
+}
+.app-menu__label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.app-menu__sub-chevron {
+  margin-inline-start: auto;
+}
+[dir="rtl"] .app-menu__sub-chevron {
+  transform: scaleX(-1);
+}
+// AppMenu on a phone: the same actions as option rows in a bottom sheet, 8px apart, the
+// destructive one after a hairline in the danger ink; a grid item's page as 48px cells.
+.app-menu-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.app-menu-sheet__separator {
+  background: var(--app-border);
+  height: 1px;
+  margin: 4px 0;
+}
+.app-menu-sheet__row--danger .app-option-row__label,
+.app-menu-sheet__row--danger .app-icon-circle {
+  color: var(--app-negative-text);
+}
+.app-menu-sheet__row--danger .app-icon-circle {
+  background: color-mix(in srgb, var(--app-danger) 14%, transparent);
+}
+.app-menu-sheet__grid {
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(6, 1fr);
+  padding-bottom: 8px;
+}
+// The emoji are the colour: no tile at rest, only the tint under a finger or pointer.
+.app-menu-sheet__cell {
+  aspect-ratio: 1;
+  background: none;
+  border: 0;
+  border-radius: var(--app-radius-lg);
+  cursor: pointer;
+  font-size: 28px;
+  line-height: 1;
+  transition: background 0.15s ease;
+}
+@media (hover: hover) {
+  .app-menu-sheet__cell:hover {
+    background: var(--app-tint);
+  }
+}
+.app-menu-sheet__cell:active {
+  background: var(--app-tint-strong);
+}
+.app-menu-sheet__cell:focus-visible {
+  outline-offset: -2px !important;
+}
+// A grid page (the emoji picker): six 40px cells to a row, in the list's place.
+.app-menu__grid {
+  display: grid;
+  gap: 2px;
+  grid-template-columns: repeat(6, 40px);
+  padding-top: 2px;
+}
+[dir="rtl"] .app-menu__back-chevron {
+  transform: scaleX(-1);
+}
+.app-menu__cell {
+  align-items: center;
+  border-radius: var(--app-radius-md);
+  cursor: pointer;
+  display: flex;
+  font-size: 22px;
+  height: 40px;
+  justify-content: center;
+  line-height: 1;
+  outline: none;
+  user-select: none;
+}
+.app-menu__cell[data-highlighted] {
+  background: var(--app-tint);
+}
+.app-menu__cell:active {
+  background: var(--app-tint-strong);
+}
+.app-menu__separator {
+  background: var(--app-border);
+  height: 1px;
+  margin: 4px -4px;
+}
+// The trigger keeps a tint while its menu is open.
+.app-menu-trigger--open.q-btn {
+  background: var(--app-tint);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .app-menu[data-state="open"] {
+    animation: app-menu-in 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .app-menu[data-state="closed"] {
+    animation: app-menu-out 0.1s ease-in;
+  }
+}
+@keyframes app-menu-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+@keyframes app-menu-out {
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+// Keep the action's label and icon width while the loading dots replace their ink.
+.mint-card-add.q-btn--loading .q-btn__content {
+  display: flex !important;
+  visibility: hidden;
+}
+.mint-card-add.q-btn--loading > .q-btn__content--hidden + .absolute-full {
+  position: absolute;
+  inset: 0;
+}
+
+.app-option-row[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: default;
+}

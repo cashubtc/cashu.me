@@ -1,33 +1,73 @@
 <template>
   <div class="discover-section">
     <div class="discover-card">
-      <!-- <div class="discover-header">
-        <p class="discover-subtitle">
-          {{ $t("MintSettings.discover.caption") }}
-        </p>
-      </div> -->
-      <div class="discover-button">
-        <q-btn
-          color="primary"
-          size="lg"
-          rounded
-          :loading="discovering"
-          @click="discover"
-          class="discover-btn full-width"
-          style="
-            min-height: 48px;
-            font-weight: 500;
-            text-transform: none;
-            font-size: 0.95rem;
-          "
-        >
-          <q-icon name="search" size="20px" class="q-mr-sm" />
-          <span>{{ $t("MintSettings.discover.actions.discover.label") }}</span>
-          <template v-slot:loading>
-            <q-spinner class="on-left" />
-            {{ $t("MintSettings.discover.actions.discover.in_progress") }}
-          </template>
-        </q-btn>
+      <!-- Idle, before the first search: a designed empty state that says what discovery does,
+           with the one primary action. While loading and once results exist, refreshing
+           is the compact action in the results header. -->
+      <EmptyState
+        v-if="!discovering && discoverList.length === 0"
+        class="discover-empty"
+        :title="$t('MintSettings.discover.empty.title')"
+        :text="$t('MintSettings.discover.empty.text')"
+      >
+        <template #icon>
+          <CompassIcon :size="26" />
+        </template>
+        <template #actions>
+          <q-btn
+            color="primary"
+            rounded
+            unelevated
+            @click="discover"
+            class="discover-btn full-width app-empty__action"
+          >
+            <SearchIcon :size="20" class="discover-btn__icon" />
+            <span>{{
+              $t("MintSettings.discover.actions.discover.label")
+            }}</span>
+          </q-btn>
+        </template>
+      </EmptyState>
+    </div>
+
+    <div
+      v-if="discovering && discoverList.length === 0"
+      class="discover-skeleton"
+    >
+      <!-- Same list, item and gap structure as the loaded results below, so the heading,
+           note and cards land exactly where they will stay. -->
+      <q-list padding aria-hidden="true">
+        <q-item class="q-px-none">
+          <q-item-section>
+            <!-- The heading says what is happening instead of a placeholder bar. -->
+            <q-item-label class="discover-count">
+              {{ $t("MintSettings.discover.actions.discover.in_progress") }}
+            </q-item-label>
+            <q-item-label caption>
+              {{ $t("MintSettings.discover.recommendations.caption") }}
+            </q-item-label>
+          </q-item-section>
+          <q-item-section side top>
+            <!-- The loaded header's IconButton, busy, so the glyph doesn't move 6px when
+                 results arrive. -->
+            <IconButton :label="$t('common.refresh')" loading tabindex="-1">
+              <RefreshCwIcon :size="20" />
+              <template #loading>
+                <RefreshCwIcon :size="20" class="refresh-spin" />
+              </template>
+            </IconButton>
+          </q-item-section>
+        </q-item>
+        <!-- The loaded card itself in its skeleton form, in the same wrappers, so nothing
+             moves as results arrive. -->
+        <div class="q-pt-sm">
+          <div v-for="n in 5" :key="n" class="q-mb-md">
+            <MintCard skeleton skeleton-action />
+          </div>
+        </div>
+      </q-list>
+      <div class="visually-hidden" role="status">
+        {{ $t("MintSettings.discover.actions.discover.in_progress") }}
       </div>
     </div>
 
@@ -35,7 +75,7 @@
       <q-list padding>
         <q-item class="q-px-none">
           <q-item-section>
-            <q-item-label overline>
+            <q-item-label class="discover-count">
               {{
                 $t("MintSettings.discover.recommendations.overline", {
                   length: discoverList.length,
@@ -46,6 +86,19 @@
               {{ $t("MintSettings.discover.recommendations.caption") }}
             </q-item-label>
           </q-item-section>
+          <!-- Busy until every card has its mint info. -->
+          <q-item-section side top>
+            <IconButton
+              :label="$t('common.refresh')"
+              :loading="busy"
+              @click="discover"
+            >
+              <RefreshCwIcon :size="20" />
+              <template #loading>
+                <RefreshCwIcon :size="20" class="refresh-spin" />
+              </template>
+            </IconButton>
+          </q-item-section>
         </q-item>
         <TransitionGroup name="mint" tag="div" class="q-pt-sm">
           <div
@@ -53,67 +106,34 @@
             :key="rec.url"
             class="q-px-none q-mb-md"
           >
-            <q-item
-              class="mint-card"
-              :class="{ dimmed: isFetchingMintInfo(rec.url) }"
-              :style="{
-                'border-radius': '10px',
-                border: '1px solid rgba(128,128,128,0.2)',
-                padding: '0px',
-                position: 'relative',
-              }"
+            <!-- The installed mints' card: identity row with its action
+                 on the right, then the rating on the card's right edge. -->
+            <MintCard
+              :icon-url="getMintIconUrlUrl(rec.url) || undefined"
+              :name="getMintDisplayName(rec.url)"
+              :url="rec.url"
+              :loading="isFetchingMintInfo(rec.url)"
             >
-              <div class="full-width" style="position: relative">
-                <!-- Centered spinner overlay -->
-                <div v-if="isFetchingMintInfo(rec.url)" class="spinner-overlay">
-                  <q-spinner-dots size="34px" color="grey-5" />
-                </div>
-
-                <div class="row items-center q-pa-md">
-                  <div class="col">
-                    <div class="row items-center">
-                      <MintInfoContainer
-                        :iconUrl="getMintIconUrlUrl(rec.url) || undefined"
-                        :name="getMintDisplayName(rec.url)"
-                        :url="rec.url"
-                      />
-                    </div>
-                    <div class="row">
-                      <div
-                        class="text-grey-5 q-mt-xs"
-                        v-if="avgFor(rec.url) !== null && countFor(rec.url) > 0"
-                      >
-                        <span>
-                          ⭐ {{ (avgFor(rec.url) ?? 0).toFixed(1) }} ·
-                          {{ countFor(rec.url) }}
-                          <span
-                            class="text-primary cursor-pointer"
-                            style="text-decoration: underline"
-                            @click.stop="openReviews(rec.url)"
-                            >{{ $t("MintSettings.reviews_text") }}</span
-                          >
-                        </span>
-                      </div>
-                      <div class="text-grey-7 q-mt-xs" v-else>
-                        <span>{{ $t("MintRatings.no_reviews") }}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-auto">
-                    <q-btn
-                      dense
-                      round
-                      flat
-                      icon="add"
-                      @click="addDiscovered(rec.url)"
-                      :disable="
-                        isFetchingMintInfo(rec.url) || isExistingMint(rec.url)
-                      "
-                    />
-                  </div>
-                </div>
-              </div>
-            </q-item>
+              <template #action>
+                <!-- A labelled add, so it doesn't read as a second way into the reviews. -->
+                <MintCardAction
+                  v-if="!isFetchingMintInfo(rec.url)"
+                  :label="$t('MintSettings.discover.add')"
+                  :disable="isExistingMint(rec.url)"
+                  @click="addDiscovered(rec.url)"
+                >
+                  <template #icon><PlusIcon :size="16" /></template>
+                </MintCardAction>
+              </template>
+              <template #meta>
+                <MintReviewSummary
+                  :average="countFor(rec.url) > 0 ? avgFor(rec.url) : null"
+                  :count="countFor(rec.url)"
+                  :fallback-label="$t('MintSettings.no_reviews_yet')"
+                  @open="openReviews(rec.url)"
+                />
+              </template>
+            </MintCard>
           </div>
         </TransitionGroup>
       </q-list>
@@ -122,16 +142,35 @@
 </template>
 
 <script lang="ts">
+import MintCardAction from "src/components/ui/MintCardAction.vue";
+import IconButton from "src/components/ui/IconButton.vue";
+import MintCard from "src/components/MintCard.vue";
 import { defineComponent, ref, computed, watch, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import EmptyState from "src/components/ui/EmptyState.vue";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
-import { useMintsStore, MintClass } from "src/stores/mints";
-import MintInfoContainer from "./MintInfoContainer.vue";
-import { notifyError, notifySuccess } from "src/js/notify";
+import { useMintsStore } from "src/stores/mints";
+import MintReviewSummary from "src/components/MintReviewSummary.vue";
+import {
+  Compass as CompassIcon,
+  Plus as PlusIcon,
+  RefreshCw as RefreshCwIcon,
+  Search as SearchIcon,
+} from "lucide-vue-next";
 
 export default defineComponent({
   name: "MintDiscovery",
-  components: { MintInfoContainer },
+  components: {
+    MintCardAction,
+    IconButton,
+    MintCard,
+    CompassIcon,
+    SearchIcon,
+    RefreshCwIcon,
+    EmptyState,
+    MintReviewSummary,
+    PlusIcon,
+  },
   props: {
     infoTimeoutMs: { type: Number, default: 5000 },
     autoDiscover: { type: Boolean, default: false },
@@ -142,25 +181,23 @@ export default defineComponent({
     const recsStore = useMintRecommendationsStore();
     const mints = useMintsStore();
 
-    const discovering = ref(false);
+    // Starts busy when discovery runs on mount, so the first frame is already the skeleton.
+    const discovering = ref(props.autoDiscover);
 
     const recommendations = computed(() => recsStore.recommendations);
     const isExistingMint = (url: string) =>
       mints.mints.some((m) => m.url === url);
+    // Each card keeps the position it first appeared at: the store re-sorts recommendations as
+    // reviews and mint info arrive, which inserted new cards above ones already on screen.
+    const firstSeen = new Map<string, number>();
     const discoverList = computed(() =>
       recommendations.value
         .filter((r) => !isExistingMint(r.url) && !r.error)
-        .sort((a, b) => {
-          const aFetching = isFetchingMintInfo(a.url);
-          const bFetching = isFetchingMintInfo(b.url);
-
-          // If one is fetching and the other isn't, put the fetching one at the bottom
-          if (aFetching && !bFetching) return 1;
-          if (!aFetching && bFetching) return -1;
-
-          // If both are in the same state, maintain original order
-          return 0;
+        .map((r) => {
+          if (!firstSeen.has(r.url)) firstSeen.set(r.url, firstSeen.size);
+          return r;
         })
+        .sort((a, b) => firstSeen.get(a.url)! - firstSeen.get(b.url)!)
     );
 
     // Use store-managed HTTP info (Dexie + in-memory), persist only error in localStorage
@@ -170,7 +207,7 @@ export default defineComponent({
     const getMintIconUrlUrl = (url: string) =>
       recsStore.getHttpInfoForUrl(url)?.icon_url || null;
     const getMintDisplayName = (url: string) =>
-      recsStore.getHttpInfoForUrl(url)?.name || url.replace(/^https?:\/\//, "");
+      recsStore.getHttpInfoForUrl(url)?.name;
     const isFetchingMintInfo = (url: string) => {
       const rec = getRec(url);
       return rec
@@ -194,12 +231,20 @@ export default defineComponent({
       immediate: true,
     });
 
+    // Discovery stays busy while any found mint is still fetching its info.
+    const busy = computed(
+      () =>
+        discovering.value ||
+        discoverList.value.some((rec) => isFetchingMintInfo(rec.url))
+    );
+
     const discover = async () => {
       discovering.value = true;
       try {
         // ensure cached reviews from IndexedDB are visible immediately
         await (recsStore as any).hydrateFromDb?.();
         recsStore.clearDiscoveryCaches();
+        firstSeen.clear();
         // recsStore.clearRecommendations();
         // Start live updates immediately
         recsStore.startSubscriptions();
@@ -233,6 +278,7 @@ export default defineComponent({
     };
 
     return {
+      busy,
       discovering,
       discover,
       discoverList,
@@ -250,65 +296,37 @@ export default defineComponent({
 </script>
 
 <style scoped>
-@import "src/css/mintlist.css";
-
 .discover-section {
   width: 100%;
   margin-bottom: 24px;
 }
 
+/* The gap belongs to the idle button; once results show, the count sits right under the page
+   caption. */
 .discover-card {
   padding: 0;
+}
+
+.discover-empty {
   margin-bottom: 24px;
 }
 
-.discover-header {
-  margin-bottom: 20px;
-}
-
-.discover-title {
-  font-size: 15.2px;
-  font-family: Inter, -apple-system, "system-ui", "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-  font-weight: 600;
-  color: #ffffff;
-  margin: 0 0 8px 0;
-  text-transform: none;
-}
-
-.discover-subtitle {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.8);
-  margin: 0;
-  line-height: 1.4;
-}
-
-.discover-button {
-  margin-top: 16px;
-}
-
+/* The shared 52px height of the page's full-width actions. */
 .discover-btn {
+  min-height: 52px;
   width: 100%;
 }
-
-.mint-card {
-  border: 1px solid rgba(128, 128, 128, 0.2);
-  border-radius: 10px;
+.discover-btn__icon {
+  margin-inline-end: 8px;
+}
+.discover-btn :deep(.q-btn__content) {
+  flex-wrap: nowrap;
+  line-height: 20px;
 }
 
-.mint-card.dimmed {
-  opacity: 0.5;
-}
-
-.spinner-overlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.discover-count {
+  font-size: 14px;
+  font-weight: 600;
 }
 
 /* Smooth list animations for discovered mints */

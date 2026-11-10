@@ -1,299 +1,228 @@
 <template>
-  <q-dialog
-    v-model="showReceiveTokens"
-    maximized
-    backdrop-filter="blur(2px) brightness(60%)"
-    transition-show="fade"
-    transition-hide="fade"
-    no-backdrop-dismiss
-    @keydown.esc="showReceiveTokens = false"
-  >
-    <q-card class="q-pa-none q-pt-none qcard">
-      <!-- full-screen receive flow -->
-      <div
-        class="column fit receive-fullscreen"
-        :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
-      >
-        <!-- Header -->
-        <div class="row items-center q-pa-md" style="position: relative">
-          <q-btn
-            v-close-popup
-            flat
-            round
-            icon="close"
-            color="grey"
-            class="floating-close-btn"
-          />
-          <div class="col text-center fixed-title-height">
-            <q-item-label
-              class="dialog-header q-mt-sm"
-              :class="$q.dark.isActive ? 'text-white' : 'text-black'"
-            >
-              {{ $t("ReceiveTokenDialog.title") }}
-            </q-item-label>
-          </div>
-        </div>
+  <FlowDialog v-model="showReceiveTokens">
+    <!-- full-screen receive flow -->
+    <div class="column fit overflow-hidden receive-fullscreen">
+      <!-- Header -->
+      <FullscreenDialogHeader
+        :title="$t('ReceiveTokenDialog.title')"
+        balanced
+      />
 
-        <!-- Content area -->
-        <div
-          class="col column items-center justify-start q-px-lg scroll-container"
-        >
-          <div class="row justify-center full-width">
-            <div
-              class="col-12 col-sm-11 col-md-8 q-px-sm q-mb-sm"
-              style="max-width: 600px"
-            >
-              <!-- <div class="row items-center no-wrap q-pb-sm">
+      <!-- Content area -->
+      <!-- The 16px flow column, the same edge as Pay's field and the footer. -->
+      <div class="col column items-center justify-start scroll-container">
+        <FlowColumn class="q-px-md q-mb-sm full-width">
+          <transition appear enter-active-class="animated fadeIn">
+            <div v-if="tokenDecodesCorrectly" key="token-valid">
+              <!-- VALID TOKEN content -->
+              <!-- print token in fixed width font -->
+              <div class="row q-pt-md">
                 <div class="col-12">
-                  <span class="text-h6">{{
-                    $t("ReceiveTokenDialog.title", {
-                      value:
-                        tokenAmount && tokenUnit
-                          ? formatCurrency(tokenAmount - receiveFee, tokenUnit)
-                          : $t("ReceiveTokenDialog.title_ecash_text"),
-                    })
-                  }}</span>
-                  <span
-                    v-if="
-                      tokenAmount &&
-                      tokenUnit &&
-                      tokenUnit == 'sat' &&
-                      bitcoinPrice
-                    "
-                    class="q-ml-xs text-subtitle2 text-grey-6"
-                  >
-                    ({{
-                      formatCurrency(
-                        (currentCurrencyPrice / 100000000) * tokenAmount,
-                        bitcoinPriceCurrency,
-                        true
-                      )
-                    }})
-                  </span>
+                  <TokenStringRender :token-string="receiveData.tokensBase64" />
                 </div>
-              </div> -->
+              </div>
 
-              <transition appear enter-active-class="animated fadeIn">
-                <div v-if="tokenDecodesCorrectly" key="token-valid">
-                  <!-- VALID TOKEN content -->
-                  <!-- print token in fixed width font -->
-                  <div class="row q-pt-md">
-                    <div class="col-12">
-                      <TokenStringRender
-                        :token-string="receiveData.tokensBase64"
-                        :max-length="maxLengthForTokenString"
-                      />
-                    </div>
-                  </div>
-
-                  <div class="row q-pt-md">
-                    <div class="col-12">
-                      <TokenInformation
-                        :encodedToken="receiveData.tokensBase64"
-                        :hide-amount="true"
-                        :hide-unit="true"
-                        @notLockedToUs="handleNotLockedToUs"
-                      />
-                    </div>
-                  </div>
-                  <div
-                    class="row q-pt-sm"
-                    v-if="!knowThisMint && !isNotLockedToUs"
-                  >
-                    <div class="col-12">
-                      <ToolTipInfo
-                        :text="$t('ReceiveTokenDialog.unknown_mint_info_text')"
-                      />
-                    </div>
-                  </div>
-                  <transition name="fade">
-                    <div v-if="isReceiving" class="receiving-state q-mb-md">
-                      <div class="row items-center no-wrap">
-                        <div class="col-auto text-h5 text-weight-bold">
-                          Receiving
-                          {{
-                            formatCurrency(
-                              Math.max(tokenAmount - receiveFee, 0),
-                              tokenUnit,
-                              true
-                            )
-                          }}
-                        </div>
-                        <div class="col-auto">
-                          <q-spinner size="sm" class="q-ml-sm" />
-                        </div>
-                      </div>
-                    </div>
-                  </transition>
-                  <transition name="fade">
-                    <div
-                      v-if="receiveError && !isReceiving"
-                      class="receive-error text-negative q-mb-md q-mt-xl text-subtitle2"
-                    >
-                      {{ receiveError }}
-                    </div>
-                  </transition>
-
-                  <!-- swap mint selection -->
-                  <SwapIncomingTokenToKnownMint
-                    v-if="swapSelected"
-                    v-model:target-mint="selectedSwapMintUrl"
-                    :swap-processing="swapProcessing"
-                    :swap-error="swapError"
-                    :swap-blocking="swapBlocking"
-                    :source-mint-info="sourceMintInfo"
-                    :source-mint="tokenMint"
-                    @close="handleSwapClose"
+              <div class="row q-pt-md">
+                <div class="col-12">
+                  <TokenInformation
+                    :encodedToken="receiveData.tokensBase64"
+                    :hide-amount="true"
+                    :hide-unit="true"
+                    @notLockedToUs="handleNotLockedToUs"
                   />
                 </div>
-                <ParseInputComponent
-                  v-else
-                  key="token-empty"
-                  v-model="receiveData.tokensBase64"
-                  test-id="receive-token-input"
-                  :placeholder="$t('ParseInputComponent.placeholder.receive')"
-                  :has-camera="hasCamera"
-                  :ndef-supported="ndefSupported"
-                  :scanning-card="scanningCard"
-                  :nfc-label="$t('ReceiveTokenDialog.actions.nfc.label')"
-                  :nfc-tooltip="
-                    $t(
-                      'ReceiveTokenDialog.actions.nfc.tooltips.ndef_supported_text'
-                    )
+              </div>
+              <div class="row q-pt-sm" v-if="!knowThisMint && !isNotLockedToUs">
+                <div class="col-12">
+                  <AppCallout
+                    variant="info"
+                    :text="$t('ReceiveTokenDialog.unknown_mint_info_text')"
+                  />
+                </div>
+              </div>
+              <transition name="fade">
+                <PaymentStatus
+                  v-if="isReceiving"
+                  state="pending"
+                  class="receiving-state q-mb-md"
+                  :label="
+                    $t('ReceiveTokenDialog.receiving_amount', {
+                      amount: formatCurrency(
+                        Math.max(tokenAmount - receiveFee, 0),
+                        tokenUnit,
+                        true
+                      ),
+                    })
                   "
-                  @enter="handleReceive"
-                  @paste="pasteToParseDialog(true)"
-                  @scan="showCamera"
-                  @nfc="toggleScanner"
                 />
               </transition>
-            </div>
-          </div>
-        </div>
+              <transition name="fade">
+                <AppCallout
+                  v-if="receiveError && !isReceiving"
+                  variant="danger"
+                  class="q-mb-md q-mt-xl"
+                  :text="receiveError"
+                />
+              </transition>
 
-        <!-- Bottom fixed receive action -->
-        <transition appear enter-active-class="animated fadeIn">
-          <div class="bottom-panel" v-if="tokenDecodesCorrectly">
-            <div class="row justify-center q-pb-lg q-pt-sm">
-              <div
-                class="col-12 col-sm-11 col-md-8 q-px-md"
-                style="max-width: 600px"
-              >
-                <template v-if="isNotLockedToUs">
-                  <div
-                    class="receive-error text-negative text-subtitle2 text-left"
-                  >
-                    {{
-                      $t("ReceiveTokenDialog.errors.p2pk_lock_mismatch.label")
-                    }}
-                  </div>
-                </template>
-                <template v-else-if="swapSelected">
-                  <q-btn
-                    class="full-width"
-                    unelevated
-                    size="lg"
-                    @click="handleSwapToTrustedMint"
-                    color="primary"
-                    rounded
-                    :loading="swapProcessing || swapBlocking"
-                    :disabled="!canConfirmSwap"
-                  >
-                    {{
-                      $t(
-                        "ReceiveTokenDialog.actions.receive_to_selected_mint.label"
-                      )
-                    }}
-                    <template v-slot:loading>
-                      <q-spinner size="xs" />
-                    </template>
-                    <q-tooltip>{{
-                      $t("ReceiveTokenDialog.actions.confirm_swap.tooltip_text")
-                    }}</q-tooltip>
-                  </q-btn>
-                </template>
-                <template v-else>
-                  <q-btn
-                    @click="addPendingTokenToHistory(receiveData.tokensBase64)"
-                    color="primary"
-                    rounded
-                    flat
-                    class="full-width q-mb-md"
-                  >
-                    {{ $t("ReceiveTokenDialog.actions.later.label") }}
-                    <q-tooltip>{{
-                      $t("ReceiveTokenDialog.actions.later.tooltip_text")
-                    }}</q-tooltip>
-                  </q-btn>
-                  <q-btn
-                    v-if="
-                      enableReceiveSwaps &&
-                      activeMintUrl &&
-                      mints.length > 0 &&
-                      !(
-                        mints.length === 1 &&
-                        tokenMint &&
-                        mints[0]?.url === tokenMint
-                      )
-                    "
-                    @click="openSwap"
-                    color="primary"
-                    rounded
-                    outline
-                    class="full-width q-mb-md"
-                  >
-                    {{ $t("ReceiveTokenDialog.actions.swap.label") }}
-                    <q-tooltip>{{
-                      $t("ReceiveTokenDialog.actions.swap.tooltip_text")
-                    }}</q-tooltip>
-                  </q-btn>
-                  <q-btn
-                    class="full-width"
-                    unelevated
-                    size="lg"
-                    data-testid="receive-ecash"
-                    @click="handleReceive"
-                    color="primary"
-                    rounded
-                    :disabled="addMintBlocking || isReceiving"
-                    :loading="swapBlocking || isReceiving"
-                  >
-                    {{
-                      knowThisMint
-                        ? addMintBlocking
-                          ? $t(
-                              "ReceiveTokenDialog.actions.receive.label_adding_mint"
-                            )
-                          : $t(
-                              "ReceiveTokenDialog.actions.receive.label_known_mint"
-                            )
-                        : $t("ReceiveTokenDialog.actions.receive.label")
-                    }}
-                    <template v-slot:loading>
-                      <q-spinner />
-                    </template>
-                  </q-btn>
-                </template>
-              </div>
+              <!-- swap mint selection -->
+              <SwapIncomingTokenToKnownMint
+                v-if="swapSelected"
+                v-model:target-mint="selectedSwapMintUrl"
+                :swap-processing="swapProcessing"
+                :swap-error="swapError"
+                :swap-blocking="swapBlocking"
+                :source-mint-info="sourceMintInfo"
+                :source-mint="tokenMint"
+                @close="handleSwapClose"
+              />
             </div>
-          </div>
-        </transition>
+            <ParseInputComponent
+              v-else
+              key="token-empty"
+              v-model="receiveData.tokensBase64"
+              test-id="receive-token-input"
+              :placeholder="$t('ParseInputComponent.placeholder.receive')"
+              :has-camera="hasCamera"
+              :scan-caption="$t('ParseInputComponent.qr_scanner.caption_token')"
+              :ndef-supported="ndefSupported"
+              :scanning-card="scanningCard"
+              :nfc-label="$t('ReceiveTokenDialog.actions.nfc.label')"
+              :nfc-tooltip="
+                $t(
+                  'ReceiveTokenDialog.actions.nfc.tooltips.ndef_supported_text'
+                )
+              "
+              @enter="handleReceive"
+              @paste="pasteToParseDialog(true)"
+              @scan="showCamera"
+              @nfc="toggleScanner"
+            />
+          </transition>
+        </FlowColumn>
       </div>
-    </q-card>
-  </q-dialog>
+
+      <!-- Bottom fixed receive action -->
+      <transition appear enter-active-class="animated fadeIn">
+        <FlowFooter v-if="tokenDecodesCorrectly">
+          <template v-if="isNotLockedToUs">
+            <AppCallout
+              variant="danger"
+              :text="$t('ReceiveTokenDialog.errors.p2pk_lock_mismatch.label')"
+            />
+          </template>
+          <template v-else-if="swapSelected">
+            <q-btn
+              class="full-width"
+              unelevated
+              @click="handleSwapToTrustedMint"
+              color="primary"
+              rounded
+              :loading="swapProcessing || swapBlocking"
+              :disabled="!canConfirmSwap"
+            >
+              {{
+                $t("ReceiveTokenDialog.actions.receive_to_selected_mint.label")
+              }}
+              <template #loading
+                ><BusyLabel>{{
+                  $t(
+                    "ReceiveTokenDialog.actions.receive_to_selected_mint.label"
+                  )
+                }}</BusyLabel></template
+              >
+              <q-tooltip>{{
+                $t("ReceiveTokenDialog.actions.confirm_swap.tooltip_text")
+              }}</q-tooltip>
+            </q-btn>
+          </template>
+          <template v-else>
+            <q-btn
+              @click="addPendingTokenToHistory(receiveData.tokensBase64)"
+              color="primary"
+              rounded
+              flat
+              class="full-width q-mb-md"
+            >
+              {{ $t("ReceiveTokenDialog.actions.later.label") }}
+              <q-tooltip>{{
+                $t("ReceiveTokenDialog.actions.later.tooltip_text")
+              }}</q-tooltip>
+            </q-btn>
+            <q-btn
+              v-if="
+                enableReceiveSwaps &&
+                activeMintUrl &&
+                mints.length > 0 &&
+                !(
+                  mints.length === 1 &&
+                  tokenMint &&
+                  mints[0]?.url === tokenMint
+                )
+              "
+              @click="openSwap"
+              color="primary"
+              rounded
+              outline
+              class="full-width q-mb-md"
+            >
+              {{ $t("ReceiveTokenDialog.actions.swap.label") }}
+              <q-tooltip>{{
+                $t("ReceiveTokenDialog.actions.swap.tooltip_text")
+              }}</q-tooltip>
+            </q-btn>
+            <q-btn
+              class="full-width"
+              unelevated
+              data-testid="receive-ecash"
+              @click="handleReceive"
+              color="primary"
+              rounded
+              :disabled="addMintBlocking || isReceiving"
+              :loading="swapBlocking || isReceiving"
+            >
+              {{
+                knowThisMint
+                  ? addMintBlocking
+                    ? $t("ReceiveTokenDialog.actions.receive.label_adding_mint")
+                    : $t("ReceiveTokenDialog.actions.receive.label_known_mint")
+                  : $t("ReceiveTokenDialog.actions.receive.label")
+              }}
+              <template #loading
+                ><BusyLabel>{{
+                  knowThisMint
+                    ? addMintBlocking
+                      ? $t(
+                          "ReceiveTokenDialog.actions.receive.label_adding_mint"
+                        )
+                      : $t(
+                          "ReceiveTokenDialog.actions.receive.label_known_mint"
+                        )
+                    : $t("ReceiveTokenDialog.actions.receive.label")
+                }}</BusyLabel></template
+              >
+            </q-btn>
+          </template>
+        </FlowFooter>
+      </transition>
+    </div>
+  </FlowDialog>
 </template>
 
 <script lang="ts">
+import FlowColumn from "src/components/ui/FlowColumn.vue";
+import PaymentStatus from "src/components/ui/PaymentStatus.vue";
+import FlowDialog from "src/components/ui/FlowDialog.vue";
+import BusyLabel from "src/components/ui/BusyLabel.vue";
+import FlowFooter from "src/components/ui/FlowFooter.vue";
 import { defineComponent } from "vue";
+import AppCallout from "src/components/AppCallout.vue";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 import { useMintsStore } from "src/stores/mints";
 import { useTokensStore } from "src/stores/tokens";
 import { useCameraStore } from "src/stores/camera";
-import { useP2PKStore } from "src/stores/p2pk";
-import { usePRStore } from "src/stores/payment-request";
-import { usePriceStore } from "src/stores/price";
 import { useSwapStore } from "src/stores/swap";
 import { useSettingsStore } from "src/stores/settings";
 import token from "src/js/token";
@@ -304,7 +233,7 @@ import type { StoredMint } from "src/stores/mints";
 import TokenInformation from "components/TokenInformation.vue";
 import TokenStringRender from "components/TokenStringRender.vue";
 import SwapIncomingTokenToKnownMint from "src/components/SwapIncomingTokenToKnownMint.vue";
-import ToolTipInfo from "src/components/ToolTipInfo.vue";
+import FullscreenDialogHeader from "src/components/ui/FullscreenDialogHeader.vue";
 import ParseInputComponent from "components/ParseInputComponent.vue";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -315,15 +244,20 @@ export default defineComponent({
   name: "ReceiveTokenDialog",
   mixins: [windowMixin],
   components: {
+    FlowColumn,
+    PaymentStatus,
+    FlowDialog,
+    BusyLabel,
+    FlowFooter,
+    AppCallout,
     TokenInformation,
     TokenStringRender,
     SwapIncomingTokenToKnownMint,
-    ToolTipInfo,
+    FullscreenDialogHeader,
     ParseInputComponent,
   },
   data: function () {
     return {
-      showP2PKDialog: false,
       swapSelected: false,
       untrustedMintInfo: null as GetInfoResponse | null,
       swapProcessing: false,
@@ -402,28 +336,11 @@ export default defineComponent({
       "receiveData",
       "scanningCard",
     ]),
-    ...mapState(useUiStore, ["tickerShort", "ndefSupported"]),
-    ...mapState(usePriceStore, [
-      "bitcoinPrice",
-      "bitcoinPrices",
-      "currentCurrencyPrice",
-    ]),
-    ...mapState(useSettingsStore, ["bitcoinPriceCurrency"]),
-    ...mapState(useMintsStore, [
-      "activeMintUrl",
-      "activeProofs",
-      "activeUnit",
-      "addMintBlocking",
-      "mints",
-    ]),
+    ...mapState(useUiStore, ["ndefSupported"]),
+    ...mapState(useMintsStore, ["activeMintUrl", "addMintBlocking", "mints"]),
     ...mapState(useSettingsStore, ["enableReceiveSwaps"]),
-    ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
-    ...mapWritableState(usePRStore, ["showPRDialog"]),
     ...mapState(useCameraStore, ["hasCamera"]),
-    ...mapState(useP2PKStore, ["p2pkKeys"]),
-    ...mapState(usePRStore, ["enablePaymentRequest"]),
     ...mapState(useSwapStore, ["swapBlocking"]),
-    ...mapWritableState(useUiStore, ["showReceiveDialog"]),
     tokenDecodesCorrectly: function () {
       // Try decoding token directly
       if (this.decodeToken(this.receiveData.tokensBase64) !== undefined) {
@@ -475,9 +392,6 @@ export default defineComponent({
       const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
       return decodedToken ? this.getMint(decodedToken) : "";
     },
-    maxLengthForTokenString: function () {
-      return Math.floor(this.$q.screen.height / 3.5);
-    },
     sourceMintInfo: function () {
       if (!this.tokenMint) {
         return null;
@@ -489,7 +403,7 @@ export default defineComponent({
         // Use untrusted mint info if available
         return {
           nickname: this.untrustedMintInfo?.name || null,
-          shorturl: this.getShortUrl(this.tokenMint),
+          shorturl: this.mintHostname(this.tokenMint),
           iconUrl: this.untrustedMintInfo?.icon_url || null,
         };
       }
@@ -498,7 +412,7 @@ export default defineComponent({
       const mintIconUrl = mint.info?.icon_url;
       return {
         nickname: mintNickname || this.untrustedMintInfo?.name || null,
-        shorturl: this.getShortUrl(mint.url),
+        shorturl: this.mintHostname(mint.url),
         iconUrl: mintIconUrl || this.untrustedMintInfo?.icon_url || null,
       };
     },
@@ -522,15 +436,8 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useWalletStore, ["redeem", "getFeesForProofs"]),
-    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
-    ...mapActions(useTokensStore, ["addPendingToken"]),
-    ...mapActions(useP2PKStore, [
-      "getPrivateKeyForP2PKEncodedToken",
-      "generateKeypair",
-      "showLastKey",
-    ]),
-    ...mapActions(useMintsStore, ["addMint"]),
+    ...mapActions(useWalletStore, ["getFeesForProofs"]),
+    ...mapActions(useCameraStore, ["showCamera"]),
     ...mapActions(useReceiveTokensStore, [
       "decodeToken",
       "knowThisMintOfTokenJson",
@@ -538,9 +445,6 @@ export default defineComponent({
       "pasteToParseDialog",
       "receiveToken",
     ]),
-    formatCurrency(value: number, currency: string, showBalance = false) {
-      return useUiStore().formatCurrency(value, currency, showBalance);
-    },
     handleReceive: async function () {
       if (this.isReceiving) {
         return;
@@ -579,7 +483,7 @@ export default defineComponent({
         this.isReceiving = false;
       }
     },
-    getShortUrl: function (url: string) {
+    mintHostname: function (url: string) {
       try {
         const urlObj = new URL(url);
         return urlObj.hostname;
@@ -773,206 +677,13 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.custom-btn {
-  background: $grey-9;
-  color: white;
-  border-radius: 8px;
-  height: 60px;
-  box-shadow: none;
-  font-size: 14px;
-}
-
-.full-width-card {
-  width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.q-dialog__inner > div {
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-}
-
-.icon-background {
-  background-color: $grey-10;
-  border-radius: 8px;
-  padding: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.lucide {
-  width: 24px;
-  height: 24px;
-}
-
-.close-btn-position {
-  position: absolute;
-  right: 16px;
-  bottom: 22px;
-  z-index: 100;
-}
-
-.q-card-top {
-  border-top-left-radius: 0px !important;
-  border-top-right-radius: 0px !important;
-}
-
-.cashub-nowrap {
-  word-break: break-all;
-  -webkit-hyphens: none;
-  -moz-hyphens: none;
-  hyphens: none;
-  font-size: 0.9em;
-  font-family: monospace;
-}
-
-.relative-container {
-  position: relative;
-}
-
-.floating-button {
-  position: absolute;
-  top: 10px;
-  right: 0px;
-  z-index: 100;
-  padding: 1px;
-  background-color: var(--q-primary);
-  border-radius: 50%;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.receive-fullscreen {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
 .scroll-container {
   overflow-y: auto;
   overflow-x: hidden;
 }
-.floating-close-btn {
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 1;
-}
-.fixed-title-height {
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.bottom-panel {
-  margin-top: auto;
-  background: var(--q-color-grey-1);
-  box-shadow: 0 -8px 16px rgba(0, 0, 0, 0.05);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-}
-
-.token-input {
-  // rounded input border
-  height: 180px;
-  border-radius: 10px;
-  border: 1px solid $grey-2;
-  padding: 10px 20px;
-  font-size: 14px;
-  font-family: monospace;
-  background-color: var(--q-background);
-  color: var(--q-text);
-  text-decoration: none !important;
-  &:focus {
-    border-color: $primary;
-  }
-  // hide inner border from q-input
-  &::before {
-    display: none;
-  }
-  &::after {
-    display: none;
-  }
-  &:disabled {
-    background-color: var(--q-background-disabled);
-    color: var(--q-text-disabled);
-  }
-  &:hover {
-    background-color: var(--q-background-hover);
-    color: var(--q-text-hover);
-  }
-}
-
-/* Swap Section Styles */
-.swap-section {
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.swap-mint-info {
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.swap-mint-name {
-  font-size: 16px;
-  font-weight: 500;
-  color: white;
-  line-height: 1.3;
-}
-
-.swap-mint-url {
-  font-size: 14px;
-  line-height: 1.3;
-  margin-top: 2px;
-}
-
-.swap-arrow-icon {
-  width: 24px;
-  height: 24px;
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.swap-destination-section {
-  margin-top: 8px;
-}
-
-.swap-section-label {
-  font-size: 14px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.swap-info-tip {
-  display: flex;
-  align-items: center;
-  padding: 12px;
-  background: rgba(33, 150, 243, 0.1);
-  border-radius: 8px;
-  border: 1px solid rgba(33, 150, 243, 0.2);
-}
-
-.swap-info-text {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.8);
-  line-height: 1.4;
-}
 
 .receiving-state {
   position: relative;
-}
-
-.receive-error {
-  padding: 12px;
-  border-radius: 8px;
-  background-color: rgba(244, 67, 54, 0.1);
 }
 
 .fade-enter-active,

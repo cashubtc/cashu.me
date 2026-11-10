@@ -176,7 +176,8 @@ export async function meltGeneric(
     }
   } catch (error: any) {
     console.error(error);
-    if (!silent) notifyApiError(error, "Payment failed");
+    if (!silent)
+      notifyApiError(error, this.t("wallet.notifications.payment_failed"));
     throw error;
   }
 
@@ -271,20 +272,14 @@ export async function meltGeneric(
       meltQuote.state == MeltQuoteState.PAID ||
       meltQuote.state == MeltQuoteState.PENDING
     ) {
-      // if (meltQuote.state == MeltQuoteState.PENDING) {
-      //   this.payInvoiceData.meltQuote.error = this.t(
-      //     "wallet.notifications.payment_pending_refresh"
-      //   );
-      // }
       this.payInvoiceData.show = false;
-      // comment out "pending" notification now that we have onchain
-      // notify(this.t("wallet.notifications.payment_pending_refresh"));
       throw error;
     }
     await proofsStore.setReserved(sendProofs, false);
     await this.removeOutgoingInvoiceFromHistory(quote.quote);
     console.error(error);
-    if (!silent) notifyApiError(error, "Payment failed");
+    if (!silent)
+      notifyApiError(error, this.t("wallet.notifications.payment_failed"));
     throw error;
   } finally {
     this.payInvoiceData.paying = false;

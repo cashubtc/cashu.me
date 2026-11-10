@@ -53,7 +53,9 @@ describe("LightningAddressSettings", () => {
     const advanced = wrapper.get(".advanced-settings");
     expect(advanced.element).toBeInstanceOf(HTMLDetailsElement);
     expect((advanced.element as HTMLDetailsElement).open).toBe(false);
-    expect(advanced.text()).toContain("npub.cash hostname");
+    expect(advanced.text()).toContain(
+      "Settings.lightning_address.server_url.label"
+    );
     expect(advanced.text()).toContain(
       "Settings.lightning_address.automatic_claim.toggle"
     );

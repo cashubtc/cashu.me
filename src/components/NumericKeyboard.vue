@@ -1,79 +1,40 @@
 <!-- NumericKeyboard.vue -->
 <template>
-  <transition name="slide-up-fade">
-    <div
-      class="numeric-keyboard q-pa-md q-pb-lg q-pt-lg"
-      v-if="forceVisible || showNumericKeyboard"
-    >
-      <div class="keyboard-grid">
-        <q-btn flat class="text-h5" @click="addDigit('1')">1</q-btn>
-        <q-btn flat class="text-h5" @click="addDigit('2')">2</q-btn>
-        <q-btn flat class="text-h5" @click="addDigit('3')">3</q-btn>
+  <div class="numeric-keyboard q-pa-md q-pb-lg q-pt-lg">
+    <div class="keyboard-grid">
+      <q-btn flat class="keypad-key" @click="addDigit('1')">1</q-btn>
+      <q-btn flat class="keypad-key" @click="addDigit('2')">2</q-btn>
+      <q-btn flat class="keypad-key" @click="addDigit('3')">3</q-btn>
 
-        <q-btn flat :ripple="true" class="text-h5" @click="addDigit('4')"
-          >4</q-btn
-        >
-        <q-btn flat class="text-h5" @click="addDigit('5')">5</q-btn>
-        <q-btn flat class="text-h5" @click="addDigit('6')">6</q-btn>
+      <q-btn flat class="keypad-key" @click="addDigit('4')">4</q-btn>
+      <q-btn flat class="keypad-key" @click="addDigit('5')">5</q-btn>
+      <q-btn flat class="keypad-key" @click="addDigit('6')">6</q-btn>
 
-        <q-btn flat class="text-h5" @click="addDigit('7')">7</q-btn>
-        <q-btn flat class="text-h5" @click="addDigit('8')">8</q-btn>
-        <q-btn flat class="text-h5" @click="addDigit('9')">9</q-btn>
+      <q-btn flat class="keypad-key" @click="addDigit('7')">7</q-btn>
+      <q-btn flat class="keypad-key" @click="addDigit('8')">8</q-btn>
+      <q-btn flat class="keypad-key" @click="addDigit('9')">9</q-btn>
 
-        <q-btn flat class="text-h5 invisible" disable>•</q-btn>
-        <q-btn flat class="text-h5" @click="addDigit('0')">0</q-btn>
-        <q-btn flat class="text-h5" @click="backspace">
-          <q-icon name="chevron_left" size="md" />
-        </q-btn>
-        <q-btn v-if="!hideClose" flat @click="closeKeyboard">{{
-          $t("NumericKeyboard.actions.close.label")
-        }}</q-btn>
-        <br v-if="!hideClose || !hideEnter" />
-        <q-btn v-if="!hideEnter" flat @click="emitDone">{{
-          $t("NumericKeyboard.actions.enter.label")
-        }}</q-btn>
-      </div>
+      <q-btn flat class="keypad-key invisible" disable>•</q-btn>
+      <q-btn flat class="keypad-key" @click="addDigit('0')">0</q-btn>
+      <q-btn
+        flat
+        class="keypad-key"
+        :aria-label="$t('common.backspace')"
+        @click="backspace"
+      >
+        <DeleteIcon :size="24" />
+      </q-btn>
     </div>
-  </transition>
+  </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { useUiStore } from "../stores/ui";
-import { mapWritableState } from "pinia";
-import { useSettingsStore } from "../stores/settings";
-import { notify } from "src/js/notify";
+import { Delete as DeleteIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "NumericKeyboard",
-  props: {
-    modelValue: {
-      type: String,
-      default: "0",
-    },
-    forceVisible: {
-      type: Boolean,
-      default: false,
-    },
-    hideClose: {
-      type: Boolean,
-      default: false,
-    },
-    hideEnter: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  emits: ["update:modelValue", "done"],
-  data() {
-    return {
-      // Decimal handling for fiat-style input
-    };
-  },
-  computed: {
-    ...mapWritableState(useUiStore, ["showNumericKeyboard"]),
-    ...mapWritableState(useSettingsStore, ["useNumericKeyboard"]),
-  },
+  components: { DeleteIcon },
   methods: {
     sendKey(key: string) {
       // Delegate input handling to the global keyboard listener in AmountInputComponent
@@ -84,17 +45,6 @@ export default defineComponent({
     },
     backspace() {
       this.sendKey("Backspace");
-    },
-    closeKeyboard() {
-      (this as any).useNumericKeyboard = false;
-      (this as any).showNumericKeyboard = false;
-      notify(
-        this.$t("NumericKeyboard.actions.close.closed_info_text") as any,
-        "bottom"
-      );
-    },
-    emitDone() {
-      this.sendKey("Enter");
     },
   },
 });
@@ -122,6 +72,7 @@ export default defineComponent({
 }
 
 .keyboard-grid {
+  direction: ltr; /* keypads keep 1-2-3 order in right-to-left locales */
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
@@ -131,7 +82,7 @@ export default defineComponent({
 }
 
 .q-btn {
-  border-radius: 8px;
+  border-radius: var(--app-radius-md);
   font-weight: 600;
   text-transform: capitalize;
   transition: none;
@@ -139,6 +90,19 @@ export default defineComponent({
   color: var(--q-color-grey-10);
   min-height: 56px;
   padding: 12px 0;
+}
+
+// The digits are a numeric role of their own, not button text: the global .q-btn standard
+// (15px, src/css/app.scss) loads after Quasar's text-h5 and would shrink them. Scoped, so it
+// beats that rule without !important; the same size on every screen height, where only the
+// gaps and insets tighten.
+.q-btn.keypad-key {
+  font-size: 26px;
+  font-variant-numeric: tabular-nums lining-nums;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 32px;
+  text-transform: none;
 }
 
 // on not tall screens, make the keyboard smaller
@@ -151,10 +115,22 @@ export default defineComponent({
   }
 }
 
-// on even smaller screens, make the keyboard even smaller
+// on even smaller screens, make the keyboard even smaller: a 568px phone closes the keypad's
+// insets (24px to 8px) and its keys are 44px, the touch target (the digits keep their size), so the amount, its
+// fiat line and Send's lock field still fit.
 @media (max-height: 600px) {
   .numeric-keyboard {
     max-height: 260px;
+  }
+  .numeric-keyboard.q-pt-lg {
+    padding-top: 8px !important;
+  }
+  .numeric-keyboard.q-pb-lg {
+    padding-bottom: 8px !important;
+  }
+  .q-btn.keypad-key {
+    min-height: 44px;
+    padding: 6px 0;
   }
   .keyboard-grid {
     gap: 0px;
@@ -169,16 +145,5 @@ export default defineComponent({
 
 .invisible {
   visibility: hidden;
-}
-
-/* Transition styles */
-.slide-up-fade-enter-active,
-.slide-up-fade-leave-active {
-  transition: transform 0.3s ease, opacity 0.3s ease;
-}
-.slide-up-fade-enter-from,
-.slide-up-fade-leave-to {
-  transform: translateY(100%);
-  opacity: 0;
 }
 </style>

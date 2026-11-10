@@ -77,7 +77,7 @@ export function mintsSupportingPaymentMethod(
   );
 }
 
-export function mintSupportsAnyPaymentMethod(
+function mintSupportsAnyPaymentMethod(
   mint: StoredMint,
   methods: PaymentMethod[],
   operation: MintOperation = "mint",
@@ -88,7 +88,7 @@ export function mintSupportsAnyPaymentMethod(
   );
 }
 
-export function firstSupportedPaymentMethod(
+function firstSupportedPaymentMethod(
   mint: StoredMint,
   methods: PaymentMethod[],
   operation: MintOperation = "mint",
@@ -153,7 +153,7 @@ export async function ensurePaymentMintActive(
   return { ok: true, mint, method };
 }
 
-export function paymentMethodNoMintErrorKey(method: PaymentMethod): string {
+function paymentMethodNoMintErrorKey(method: PaymentMethod): string {
   return method === PaymentMethod.Bolt12
     ? "wallet.notifications.no_bolt12_mint"
     : "wallet.notifications.no_bolt11_mint";

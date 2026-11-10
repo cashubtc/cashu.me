@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { useUiStore } from "src/stores/ui";
+import { useSettingsStore } from "src/stores/settings";
+import "src/boot/base";
 
 describe("ui store", () => {
   it("formats custom Cashu units without throwing", () => {
@@ -19,6 +21,33 @@ describe("ui store", () => {
       useUiStore().formatCurrency(18446744073709551615n, "usd", true)
     ).toBe("$184,467,440,737,095,516.15");
   });
+
+  it.each([true, false])(
+    "gives components the store's amount text (bitcoin symbol %s)",
+    (bitcoinSymbol) => {
+      useSettingsStore().bip177BitcoinSymbol = bitcoinSymbol;
+      const mixinFormat = (value, unit) =>
+        window.windowMixin.methods.formatCurrency.call({}, value, unit);
+      for (const [value, unit] of [
+        [2100, "sat"],
+        [-101, "sat"],
+        [2100, undefined],
+        [2100, "msat"],
+        [1234, "usd"],
+        [113, "eur"],
+        [12, "unit"],
+        [18446744073709551615n, "sat"],
+      ]) {
+        expect(mixinFormat(value, unit)).toBe(
+          useUiStore().formatCurrency(value, unit)
+        );
+      }
+      // Components show whole sats; the store keeps a fraction.
+      expect(mixinFormat(2.7, "sat")).toBe(
+        useUiStore().formatCurrency(2, "sat")
+      );
+    }
+  );
 
   it("runs a queued foreground payment before background work", async () => {
     const ui = useUiStore();

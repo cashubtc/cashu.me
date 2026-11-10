@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-dark text-white q-pa-md flex flex-center">
+  <div class="q-pt-md">
     <div class="mint-details-page-content">
       <EditMintDialog
         :mint="mintToEdit"
@@ -15,55 +15,49 @@
 
       <div class="mint-content-container q-px-md">
         <!-- Mint Header Profile Name Section -->
-        <div class="mint-header-container q-mb-lg">
-          <div class="mint-header q-pa-md">
-            <!-- Mint Profile Name Section -->
-            <q-avatar size="56px" class="mint-profile-icon q-mb-sm">
-              <img
-                v-if="mintData.info?.icon_url"
-                :src="mintData.info.icon_url"
-                alt="Mint Profile"
-              />
-              <building-icon v-else size="36" />
-            </q-avatar>
-            <div class="mint-name q-mb-xs">
-              {{ mintData.info?.name || "Mint" }}
-            </div>
-
-            <!-- QR Code Icon -->
+        <div class="column items-center full-width q-mb-lg">
+          <MintIdentityHeader :url="mintData.url" :info="mintData.info">
+            <!-- A labelled chip: a bare QR glyph under the name reads as decoration. -->
             <div class="top-icons">
-              <qr-code-icon
-                size="24"
-                class="qr-icon cursor-pointer text-white"
+              <TonalChip
+                :aria-expanded="showQrCode"
                 @click="showQrCode = !showQrCode"
-              />
+              >
+                <template #icon><QrCodeIcon :size="18" /></template>
+                {{
+                  showQrCode
+                    ? $t("MintDetailsDialog.qr.hide")
+                    : $t("MintDetailsDialog.qr.show")
+                }}
+              </TonalChip>
             </div>
 
             <!-- QR Code Section (toggleable) -->
             <div class="qr-code-container">
-              <transition appear name="smooth-slide">
+              <RevealTransition appear>
                 <div
                   v-if="showQrCode"
                   class="qr-code-section q-my-md"
                   key="qr-code"
                 >
-                  <vue-qrcode
-                    :value="mintData.url"
-                    :options="{ width: 300 }"
-                    class="rounded-borders"
-                  />
+                  <QrBlock :value="mintData.url" />
                 </div>
-              </transition>
+              </RevealTransition>
             </div>
-          </div>
+          </MintIdentityHeader>
 
-          <div class="mint-descriptions q-mt-lg">
+          <!-- Only when there is something to say: empty, its 24px top margin doubles the gap
+               above Mint details. -->
+          <div
+            v-if="
+              (mintData.info?.motd && !mintData.motdDismissed) ||
+              mintData.info?.description ||
+              mintData.info?.description_long
+            "
+            class="mint-descriptions q-mt-lg"
+          >
             <!-- MOTD Component -->
-            <transition
-              appear
-              enter-active-class="animated pulse"
-              name="smooth-slide"
-            >
+            <RevealTransition appear enter-active-class="animated pulse">
               <mint-motd-message
                 v-if="mintData.info?.motd && !mintData.motdDismissed"
                 :message="mintData.info.motd"
@@ -71,7 +65,7 @@
                 :dismissed="mintData.motdDismissed"
                 @dismiss="motdDismissed = true"
               />
-            </transition>
+            </RevealTransition>
 
             <div class="mint-description" v-if="mintData.info?.description">
               {{ mintData.info.description }}
@@ -83,7 +77,7 @@
               {{ mintData.info.description_long }}
             </div>
           </div>
-          <transition name="smooth-slide">
+          <RevealTransition>
             <MintMotdMessage
               v-if="mintData.info?.motd && mintData.motdDismissed"
               :message="mintData.info.motd"
@@ -91,113 +85,57 @@
               :dismissed="mintData.motdDismissed"
               @dismiss="dismissMotd"
             />
-          </transition>
+          </RevealTransition>
         </div>
 
-        <!-- Section Divider -->
-        <div
-          class="section-divider q-mb-md"
-          v-if="mintData.info?.contact?.length > 0"
-        >
-          <div class="divider-line"></div>
-          <div class="divider-text">
-            {{ $t("MintDetailsDialog.contact.title") }}
-          </div>
-          <div class="divider-line"></div>
-        </div>
-
-        <!-- Contact Info Section -->
-        <div class="contact-section q-mb-lg">
-          <div
-            v-for="contactInfo in mintData.info?.contact"
-            :key="contactInfo.method"
-            class="contact-item q-mb-md"
+        <!-- Contacts: one copy row per entry that has something to copy (an empty entry would
+             draw an icon and a copy button for nothing). -->
+        <SectionDivider
+          v-if="contacts.length"
+          :label="$t('MintDetailsDialog.contact.title')"
+        />
+        <div v-if="contacts.length" class="detail-table q-mb-lg">
+          <DetailRow
+            v-for="c in contacts"
+            :key="`${c.method}:${c.info}`"
+            :icon="contactIcon(c.method)"
+            :icon-src="contactIconSrc(c.method)"
+            :label="contactLabel(c.method)"
+            :copy-value="c.info"
+            :action-label="`${contactLabel(c.method)}: ${c.info}`"
+            ><bdi dir="ltr">{{
+              c.method === "nostr" ? shortenMiddle(c.info) : c.info
+            }}</bdi></DetailRow
           >
-            <div class="contact-icon-container">
-              <mail-icon
-                v-if="contactInfo.method === 'email'"
-                size="20"
-                color="#9E9E9E"
-                class="contact-icon"
-              />
-              <img
-                v-else-if="contactInfo.method === 'nostr'"
-                src="nostr-icon.svg"
-                class="contact-icon"
-                alt=""
-              />
-              <img
-                v-else-if="contactInfo.method === 'twitter'"
-                src="/x-logo.svg"
-                class="contact-icon"
-                alt=""
-              />
-              <img
-                v-else-if="contactInfo.method === 'telegram'"
-                src="/telegram-icon.svg"
-                class="contact-icon"
-                alt=""
-              />
-              <div v-else class="contact-text q-ml-xs">
-                {{ contactInfo.method }}
-              </div>
-            </div>
-            <div class="contact-text">{{ contactInfo.info }}</div>
-            <copy-icon
-              @click="copyText(contactInfo.info)"
-              size="20"
-              color="#9E9E9E"
-              class="copy-icon cursor-pointer"
-            />
-          </div>
         </div>
 
         <!-- Section Divider -->
-        <div class="section-divider q-mb-md">
-          <div class="divider-line"></div>
-          <div class="divider-text">
-            {{ $t("MintDetailsDialog.details.title") }}
-          </div>
-          <div class="divider-line"></div>
-        </div>
+        <SectionDivider :label="$t('MintDetailsDialog.details.title')" />
 
         <!-- Mint Details Section -->
-        <div class="mint-details-section q-mb-lg">
-          <!-- URL -->
-          <div class="detail-item q-mb-md">
-            <div class="detail-label">
-              <link-icon size="20" color="#9E9E9E" class="detail-icon" />
-              <div class="detail-name">
-                {{ $t("MintDetailsDialog.details.url.label") }}
-              </div>
-            </div>
-            <div
-              class="detail-value items-center"
-              @click="copyText(mintData.url)"
-            >
-              {{ mintData.url }}
-            </div>
-          </div>
+        <div class="detail-table q-mb-lg">
+          <!-- URL: the one way to copy it. -->
+          <DetailRow
+            :icon="LinkIcon"
+            :label="$t('MintDetailsDialog.details.url.label')"
+            :value="mintData.url"
+            :copy-value="mintData.url"
+            :action-label="$t('MintDetailsDialog.actions.copy_mint_url.label')"
+          />
 
           <!-- Nuts -->
-          <div class="detail-item q-mb-md" v-if="mintData.info?.nuts">
-            <div class="detail-label">
-              <nut-icon size="20" color="#9E9E9E" class="detail-icon" />
-              <div class="detail-name">
-                {{ $t("MintDetailsDialog.details.nuts.label") }}
-              </div>
-            </div>
-            <div
-              class="detail-value"
-              v-if="!showAllNuts"
-              @click="showAllNuts = true"
-            >
-              {{ $t("MintDetailsDialog.details.nuts.actions.show.label") }}
-            </div>
-            <div class="detail-value" v-else @click="showAllNuts = false">
-              {{ $t("MintDetailsDialog.details.nuts.actions.hide.label") }}
-            </div>
-          </div>
+          <DetailRow
+            v-if="mintData.info?.nuts"
+            action
+            :icon="ListChecksIcon"
+            :label="$t('MintDetailsDialog.details.nuts.label')"
+            :value="
+              showAllNuts
+                ? $t('MintDetailsDialog.details.nuts.actions.hide.label')
+                : $t('MintDetailsDialog.details.nuts.actions.show.label')
+            "
+            @click="showAllNuts = !showAllNuts"
+          />
 
           <!-- Expanded Nuts Section (when showAllNuts is true) -->
           <div
@@ -211,57 +149,43 @@
                 class="nut-pill"
               >
                 <div class="nut-content">
-                  <span class="nut-number">{{ nutNumber }}:</span> {{ nutName }}
+                  <span class="nut-number">{{ nutNumber }}:</span>
+                  {{ $t(nutName) }}
                 </div>
               </div>
             </div>
           </div>
 
           <!-- Currency (if available) -->
-          <div class="detail-item q-mb-md" v-if="mintData.info?.currencies">
-            <div class="detail-label">
-              <currency-icon size="20" color="#9E9E9E" class="detail-icon" />
-              <div class="detail-name">
-                {{ $t("MintDetailsDialog.details.currency.label") }}
-              </div>
-            </div>
-            <div class="detail-value">{{ mintData.info.currencies }}</div>
-          </div>
+          <DetailRow
+            v-if="mintData.info?.currencies"
+            :icon="CoinsIcon"
+            :label="$t('MintDetailsDialog.details.currency.label')"
+            >{{ mintData.info.currencies }}</DetailRow
+          >
 
           <!-- Currency Units (if available) -->
-          <div
-            class="detail-item q-mb-md"
+          <DetailRow
             v-if="mintUnits && mintUnits.length > 0"
-          >
-            <div class="detail-label">
-              <banknote-icon size="20" color="#9E9E9E" class="detail-icon" />
-              <div class="detail-name">
-                {{ $t("MintDetailsDialog.details.currencies.label") }}
-              </div>
-            </div>
-            <div class="detail-value">
-              {{ mintUnits.map((unit) => unit.toUpperCase()).join(", ") }}
-            </div>
-          </div>
+            :icon="CoinsIcon"
+            :label="$t('MintDetailsDialog.details.currencies.label')"
+            :value="mintUnits.map(unitCode).join(', ')"
+          />
 
           <!-- Version -->
-          <div class="detail-item" v-if="mintData.info?.version">
-            <div class="detail-label">
-              <info-icon size="20" color="#9E9E9E" class="detail-icon" />
-              <div class="detail-name">
-                {{ $t("MintDetailsDialog.details.version.label") }}
-              </div>
-            </div>
-            <div class="detail-value">{{ mintData.info.version }}</div>
-          </div>
+          <DetailRow
+            v-if="mintData.info?.version"
+            :icon="TagIcon"
+            :label="$t('MintDetailsDialog.details.version.label')"
+            :value="mintData.info.version"
+          />
         </div>
 
         <!-- Section Divider for Audit Info -->
-        <div v-if="settings.auditorEnabled" class="section-divider q-mb-md">
-          <div class="divider-line"></div>
-          <div class="divider-text">AUDIT INFO</div>
-          <div class="divider-line"></div>
-        </div>
+        <SectionDivider
+          v-if="settings.auditorEnabled"
+          :label="$t('MintAuditInfo.title')"
+        />
 
         <!-- Mint Audit Info Section -->
         <MintAuditInfo
@@ -271,65 +195,49 @@
         />
 
         <!-- Section Divider -->
-        <div class="section-divider q-mb-md">
-          <div class="divider-line"></div>
-          <div class="divider-text">
-            {{ $t("MintDetailsDialog.actions.title") }}
-          </div>
-          <div class="divider-line"></div>
-        </div>
+        <SectionDivider :label="$t('MintDetailsDialog.actions.title')" />
 
-        <!-- Action Buttons -->
-        <div class="action-buttons-section">
-          <div class="action-buttons-container">
-            <div
-              class="action-button cursor-pointer"
-              @click="openEditMintDialog"
-            >
-              <pencil-icon size="20" color="#9E9E9E" class="action-icon" />
-              <div class="action-label">
-                {{ $t("MintDetailsDialog.actions.edit.label") }}
-              </div>
-            </div>
-
-            <div
-              class="action-button cursor-pointer"
-              @click="copyText(mintData.url)"
-            >
-              <copy-icon size="20" color="#9E9E9E" class="action-icon" />
-              <div class="action-label">
-                {{ $t("MintDetailsDialog.actions.copy_mint_url.label") }}
-              </div>
-            </div>
-
-            <div
-              class="action-button cursor-pointer"
-              @click="openCreateReviewDialog"
-            >
-              <q-icon name="rate_review" size="20px" class="action-icon" />
-              <div class="action-label">Review Mint</div>
-            </div>
-
-            <div
-              class="action-button delete-button cursor-pointer"
-              @click="openRemoveMintDialog"
-            >
-              <trash-icon size="20" color="#FF453A" class="action-icon" />
-              <div class="action-label">
-                {{ $t("MintDetailsDialog.actions.delete.label") }}
-              </div>
-            </div>
-          </div>
-        </div>
+        <!-- Actions: everyday actions in one group, the destructive one on its own below,
+             as real buttons (SettingsActionRow) with the shared row hover and focus. -->
+        <q-list class="settings-menu-group mint-details-actions">
+          <SettingsActionRow
+            :icon="PencilIcon"
+            data-testid="mint-edit"
+            :label="$t('MintDetailsDialog.actions.edit.label')"
+            @click="openEditMintDialog"
+          />
+          <SettingsActionRow
+            :icon="StarIcon"
+            :label="$t('CreateMintReview.title')"
+            @click="openCreateReviewDialog"
+          />
+        </q-list>
+        <q-list class="settings-menu-group mint-details-actions">
+          <SettingsActionRow
+            :icon="Trash2Icon"
+            data-testid="mint-delete"
+            :label="$t('MintDetailsDialog.actions.delete.label')"
+            danger
+            @click="openRemoveMintDialog"
+          >
+            <!-- An empty side slot leaves out the row's trailing trash: the leading icon
+                 already says delete. -->
+            <template #side><span /></template>
+          </SettingsActionRow>
+        </q-list>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
+import { unitCode } from "src/js/format-currency";
+import RevealTransition from "src/components/ui/RevealTransition.vue";
+import TonalChip from "src/components/ui/TonalChip.vue";
 import { defineComponent } from "vue";
-import { mapActions, mapState, mapWritableState } from "pinia";
-import VueQrcode from "@chenfengyuan/vue-qrcode";
+import { displayContacts, shortenMiddle } from "src/js/mintContacts";
+import { mapActions, mapWritableState } from "pinia";
+import QrBlock from "src/components/QrBlock.vue";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import { useSettingsStore } from "src/stores/settings";
 import EditMintDialog from "src/components/EditMintDialog.vue";
@@ -337,68 +245,79 @@ import RemoveMintDialog from "src/components/RemoveMintDialog.vue";
 import MintMotdMessage from "src/components/MintMotdMessage.vue";
 import MintAuditInfo from "src/components/MintAuditInfo.vue";
 import {
-  QrCode as QrCodeIcon,
+  Coins as CoinsIcon,
+  Tag as TagIcon,
   Link as LinkIcon,
-  Nut as NutIcon,
-  DollarSign as CurrencyIcon,
-  Info as InfoIcon,
   Mail as MailIcon,
-  Copy as CopyIcon,
+  ListChecks as ListChecksIcon,
   Pencil as PencilIcon,
-  Trash as TrashIcon,
-  Building as BuildingIcon,
-  Banknote as BanknoteIcon,
+  QrCode as QrCodeIcon,
+  Star as StarIcon,
+  Trash2 as Trash2Icon,
 } from "lucide-vue-next";
+import MintIdentityHeader from "src/components/MintIdentityHeader.vue";
+import DetailRow from "src/components/ui/DetailRow.vue";
+import SectionDivider from "src/components/ui/SectionDivider.vue";
+import SettingsActionRow from "src/components/ui/SettingsActionRow.vue";
+
+// Picture icons for the contact methods that have no Lucide glyph, and their proper names.
+const CONTACT_ICONS = {
+  nostr: "/nostr-icon.svg",
+  twitter: "/x-logo.svg",
+  telegram: "/telegram-icon.svg",
+};
+const CONTACT_NAMES = { nostr: "Nostr", twitter: "X", telegram: "Telegram" };
 
 export default defineComponent({
   name: "MintDetailsPage",
   mixins: [windowMixin],
   components: {
-    VueQrcode,
+    RevealTransition,
+    TonalChip,
+    SettingsActionRow,
     QrCodeIcon,
-    LinkIcon,
-    NutIcon,
-    CurrencyIcon,
-    InfoIcon,
-    MailIcon,
-    CopyIcon,
-    PencilIcon,
-    TrashIcon,
-    BuildingIcon,
-    BanknoteIcon,
+    QrBlock,
+    MintIdentityHeader,
     EditMintDialog,
     RemoveMintDialog,
     MintMotdMessage,
     MintAuditInfo,
+    DetailRow,
+    SectionDivider,
+  },
+  setup() {
+    return {
+      PencilIcon,
+      StarIcon,
+      Trash2Icon,
+      CoinsIcon,
+      TagIcon,
+      LinkIcon,
+      ListChecksIcon,
+    };
   },
   data: function () {
     return {
-      contactIcons: {
-        email: "mail",
-      },
-      contactMethods: {
-        twitter: "X",
-        nostr: "Nostr",
-      },
       showQrCode: false,
       showAllNuts: false,
+      // NUT number → its name in the locale files.
       nutNames: {
-        7: "Token state check",
-        8: "Overpaid Lightning fees",
-        9: "Signature restore",
-        10: "Spending conditions",
-        11: "Pay-To-Pubkey (P2PK)",
-        12: "DLEQ proofs",
-        13: "Deterministic secrets",
-        14: "Hashed Timelock Contracts",
-        15: "Partial multi-path payments",
-        16: "Animated QR codes",
-        17: "WebSocket subscriptions",
-        18: "Payment requests",
-        19: "Cached Responses",
-        20: "Signature on Mint Quote",
-        21: "Clear authentication",
-        22: "Blind authentication",
+        7: "MintDetailsDialog.nuts.nut7",
+        8: "MintDetailsDialog.nuts.nut8",
+        9: "MintDetailsDialog.nuts.nut9",
+        10: "MintDetailsDialog.nuts.nut10",
+        11: "MintDetailsDialog.nuts.nut11",
+        12: "MintDetailsDialog.nuts.nut12",
+        13: "MintDetailsDialog.nuts.nut13",
+        14: "MintDetailsDialog.nuts.nut14",
+        15: "MintDetailsDialog.nuts.nut15",
+        16: "MintDetailsDialog.nuts.nut16",
+        17: "MintDetailsDialog.nuts.nut17",
+        18: "MintDetailsDialog.nuts.nut18",
+        19: "MintDetailsDialog.nuts.nut19",
+        20: "MintDetailsDialog.nuts.nut20",
+        21: "MintDetailsDialog.nuts.nut21",
+        22: "MintDetailsDialog.nuts.nut22",
       },
       motdDismissed: false,
       settings: useSettingsStore(),
@@ -434,6 +353,9 @@ export default defineComponent({
       }
       return result;
     },
+    contacts() {
+      return displayContacts(this.mintData.info?.contact);
+    },
     mintUnits() {
       if (this.mintData) {
         const mintClassInstance = new MintClass(this.mintData);
@@ -443,25 +365,22 @@ export default defineComponent({
     },
   },
   methods: {
+    unitCode,
     ...mapActions(useMintsStore, [
       "removeMint",
       "fetchMintInfo",
       "triggerMintInfoMotdChanged",
     ]),
-    shortenText: function (text, maxLength) {
-      if (text.length > maxLength) {
-        return text.substring(0, maxLength) + "...";
-      }
-      return text;
+    shortenMiddle,
+    contactIcon(method) {
+      return method === "email" ? MailIcon : null;
     },
-    copyText(text) {
-      navigator.clipboard.writeText(text);
-      this.$q.notify({
-        message: this.$i18n.t("global.copy_to_clipboard.success"),
-        color: "positive",
-        position: "top",
-        timeout: 1000,
-      });
+    contactIconSrc(method) {
+      return CONTACT_ICONS[method] || null;
+    },
+    contactLabel(method) {
+      if (method === "email") return this.$t("MintDetailsDialog.contact.email");
+      return CONTACT_NAMES[method] || method;
     },
     openEditMintDialog() {
       this.mintToEdit = Object.assign({}, this.mintData);
@@ -527,24 +446,25 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.mint-details-page-content {
-  max-width: 600px;
-  margin: 0 auto;
-  color: white;
-  height: 100%;
-  overflow-y: auto;
-  position: absolute;
-  top: 0;
-  width: 100%;
+/* One gap before every section label: each section drops its own trailing margin and the
+   label sits 24px below it (left to themselves the gaps are 56px above Mint details and 24px
+   above Audit info). */
+.mint-content-container > :has(+ .section-divider-block) {
+  margin-bottom: 0 !important;
 }
-
-.mint-content-container {
-  max-width: 600px;
+.mint-content-container > :has(+ .section-divider-block) > :deep(:last-child) {
+  margin-bottom: 0 !important;
+}
+.mint-content-container > .section-divider-block {
+  margin-top: 24px;
+}
+/* The page scrolls as a whole; no inner scroll container. */
+.mint-details-page-content {
+  max-width: var(--app-column);
   margin: 0 auto;
-  color: white;
-  height: 100%;
-  overflow-y: auto;
-  position: relative;
+  color: var(--app-text);
+  width: 100%;
+  padding-bottom: 32px;
 }
 
 /* Top Icons */
@@ -557,36 +477,6 @@ export default defineComponent({
 }
 
 /* Mint Header */
-.mint-header-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  margin-top: 50px;
-}
-
-.mint-header {
-  width: 100%;
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(255, 255, 255, 0.05);
-}
-
-.mint-name {
-  font-size: 24px;
-  font-weight: 600;
-  text-align: center;
-}
-
-.mint-balance {
-  font-size: 20px;
-  font-weight: 600;
-  text-align: center;
-}
-
 .mint-descriptions {
   width: 100%;
   display: flex;
@@ -606,163 +496,19 @@ export default defineComponent({
   position: relative;
   font-size: 14px;
   line-height: 20px;
-  color: #9e9e9e;
+  color: var(--app-text-muted);
   width: 100%;
   font-weight: 500;
 }
 
-/* Section Divider */
-.section-divider {
-  display: flex;
-  align-items: center;
-  width: 100%;
-}
-
-.divider-line {
-  flex: 1;
-  height: 1px;
-  background-color: #333;
-}
-
-.divider-text {
-  padding: 0 10px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #ffffff;
-  text-transform: uppercase;
-}
-
-/* Contact Section */
-.contact-section {
-  width: 100%;
-}
-
-.contact-item {
-  display: flex;
-  align-items: center;
-  width: 100%;
-}
-
-.contact-icon-container {
-  width: 24px;
-  display: flex;
-  justify-content: center;
-  margin-right: 10px;
-}
-
-.contact-icon {
-  width: 20px;
-  height: 20px;
-  color: #636366;
-}
-
-.contact-text {
-  flex: 1;
-  font-size: 16px;
-  font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.copy-icon {
-  color: #636366;
-  margin-left: 10px;
-}
-
-/* Mint Details Section */
-.mint-details-section {
-  width: 100%;
-}
-
-.detail-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
-.detail-label {
-  display: flex;
-  align-items: center;
-}
-
-.detail-icon {
-  margin-right: 10px;
-}
-
-.detail-name {
-  font-size: 16px;
-  font-weight: 600;
-  color: #9e9e9e;
-}
-
-.detail-value {
-  font-size: 16px;
-  font-weight: 600;
-  color: white;
-  text-align: right;
-  max-width: 60%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Action Buttons */
-.action-buttons-section {
-  width: 100%;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  margin-top: 16px;
-  margin-bottom: 32px;
-}
-
-.action-buttons-container {
-  align-self: stretch;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  width: 100%;
-}
-
-.action-button {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 16px;
-  padding: 8px;
-  border-radius: 8px;
-  transition: background-color 0.3s;
-  width: 100%;
+/* Details, contacts and audit are flat rows on the 16px page edge; interactive rows bleed
+   their tint 12px into the gutter (DetailRow), so nothing is indented to match the Actions
+   card. The destructive group sits 16px under the everyday one, and 32px closes the page. */
+.mint-details-actions {
   margin-bottom: 16px;
 }
-
-.action-button:last-child {
-  margin-bottom: 0;
-}
-
-.action-button:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.action-icon {
-  min-width: 20px;
-}
-
-.action-label {
-  position: relative;
-  line-height: 24px;
-  font-weight: 500;
-  font-size: 16px;
-}
-
-.delete-button {
-  color: #ff453a;
+.mint-details-actions:last-child {
+  margin-bottom: 32px;
 }
 
 /* QR Code Container and Animation */
@@ -780,33 +526,9 @@ export default defineComponent({
   justify-content: center;
 }
 
-.smooth-slide-enter-active {
-  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-  max-height: 350px;
-  margin-bottom: 16px;
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.smooth-slide-leave-active {
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  max-height: 350px;
-  margin-bottom: 16px;
-  opacity: 1;
-}
-
-.smooth-slide-enter-from,
-.smooth-slide-leave-to {
-  max-height: 0;
-  margin-bottom: 0;
-  opacity: 0;
-  transform: translateY(-10px);
-  pointer-events: none;
-}
-
 .nuts-expanded-section {
   width: 100%;
-  margin-bottom: 16px;
+  margin-block: 0 8px;
 }
 
 .nuts-grid {
@@ -826,36 +548,10 @@ export default defineComponent({
   font-size: 14px;
   font-weight: 600;
   line-height: 24px;
-  color: white;
+  color: var(--app-text);
 }
 
 .nut-number {
-  color: #9e9e9e;
-}
-
-/* Make "View all" and "Hide" text clickable */
-.detail-value[v-if="!showAllNuts"],
-.detail-value[v-else] {
-  cursor: pointer;
-  color: white;
-  font-weight: 600;
-}
-
-/* Currency Units */
-.currency-units-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: flex-end;
-}
-
-.currency-unit-pill {
-  border-radius: 4px;
-  background-color: #1d1d1d;
-  padding: 4px 8px;
-  font-size: 14px;
-  font-weight: 600;
-  color: white;
-  display: inline-block;
+  color: var(--app-text-muted);
 }
 </style>

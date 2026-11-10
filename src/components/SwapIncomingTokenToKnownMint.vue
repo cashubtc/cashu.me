@@ -18,36 +18,26 @@
               : $t("ReceiveTokenDialog.actions.swap.processing")
           }}
         </span>
-        <q-spinner v-if="swapProcessing" color="primary" size="20px" />
-        <q-btn
+        <PendingDots v-if="swapProcessing" />
+        <IconButton
           v-if="swapError"
-          flat
-          round
-          dense
-          icon="close"
+          :label="$t('ReceiveTokenDialog.actions.cancel_swap.tooltip_text')"
+          tooltip
           @click="$emit('close')"
-          color="grey-6"
         >
-          <q-tooltip>{{
-            $t("ReceiveTokenDialog.actions.cancel_swap.tooltip_text")
-          }}</q-tooltip>
-        </q-btn>
+          <XIcon :size="20" />
+        </IconButton>
       </div>
       <!-- Normal close button (hidden during processing) -->
-      <q-btn
+      <IconButton
         v-else
-        flat
-        round
-        dense
-        icon="close"
-        @click="$emit('close')"
+        :label="$t('ReceiveTokenDialog.actions.cancel_swap.tooltip_text')"
+        tooltip
         :disable="swapBlocking"
-        color="grey-6"
+        @click="$emit('close')"
       >
-        <q-tooltip>{{
-          $t("ReceiveTokenDialog.actions.cancel_swap.tooltip_text")
-        }}</q-tooltip>
-      </q-btn>
+        <XIcon :size="20" />
+      </IconButton>
     </div>
 
     <!-- Source Mint (Token Origin) -->
@@ -55,36 +45,11 @@
       <div class="swap-section-label q-mb-sm">
         {{ $t("ReceiveTokenDialog.swap_section.source_label") }}
       </div>
-      <div class="swap-mint-info">
-        <div class="row items-center no-wrap">
-          <!-- Mint Icon -->
-          <q-avatar size="48px" class="q-mr-md">
-            <q-img
-              v-if="sourceMintInfo?.iconUrl"
-              :src="sourceMintInfo.iconUrl"
-              spinner-color="white"
-              spinner-size="xs"
-            >
-              <template v-slot:error>
-                <div class="row items-center justify-center full-height">
-                  <q-icon name="account_balance" color="grey-7" size="24px" />
-                </div>
-              </template>
-            </q-img>
-            <q-icon v-else name="account_balance" color="grey-7" size="24px" />
-          </q-avatar>
-
-          <!-- Mint Info -->
-          <div class="col text-left">
-            <div class="swap-mint-name">
-              {{ sourceMintInfo?.nickname || sourceMintInfo?.shorturl }}
-            </div>
-            <div class="swap-mint-url text-grey-6">
-              {{ sourceMintInfo?.shorturl }}
-            </div>
-          </div>
-        </div>
-      </div>
+      <MintCard
+        :url="sourceMint"
+        :name="sourceMintInfo?.nickname || null"
+        :icon-url="sourceMintInfo?.iconUrl || null"
+      />
     </div>
 
     <!-- Arrow Indicator -->
@@ -99,13 +64,15 @@
       </div>
       <ChooseMint
         v-model="selectedMintUrl"
+        dense
         :dry-run="true"
         :exclude-mint="sourceMint"
       />
     </div>
 
     <!-- Info Tip about fees -->
-    <ToolTipInfo
+    <AppCallout
+      variant="info"
       class="q-mt-md"
       :text="$t('ReceiveTokenDialog.swap_section.fee_info')"
     />
@@ -113,18 +80,25 @@
 </template>
 
 <script lang="ts">
+import IconButton from "src/components/ui/IconButton.vue";
+import MintCard from "src/components/MintCard.vue";
+import PendingDots from "src/components/ui/PendingDots.vue";
 import { defineComponent, PropType } from "vue";
 import ChooseMint from "src/components/ChooseMint.vue";
-import { ArrowDown as ArrowDownIcon } from "lucide-vue-next";
-import ToolTipInfo from "src/components/ToolTipInfo.vue";
+import { ArrowDown as ArrowDownIcon, X as XIcon } from "lucide-vue-next";
+import AppCallout from "src/components/AppCallout.vue";
 import { useMintsStore } from "stores/mints";
 
 export default defineComponent({
   name: "SwapIncomingTokenToKnownMint",
   components: {
+    IconButton,
+    MintCard,
+    PendingDots,
+    XIcon,
     ChooseMint,
     ArrowDownIcon,
-    ToolTipInfo,
+    AppCallout,
   },
   props: {
     swapProcessing: {
@@ -210,35 +184,15 @@ export default defineComponent({
 /* Swap Section Styles */
 .swap-section {
   padding: 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.swap-mint-info {
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.swap-mint-name {
-  font-size: 16px;
-  font-weight: 500;
-  color: white;
-  line-height: 1.3;
-}
-
-.swap-mint-url {
-  font-size: 14px;
-  line-height: 1.3;
-  margin-top: 2px;
+  background: var(--app-tint);
+  border-radius: var(--app-radius-lg);
+  border: 1px solid var(--app-border);
 }
 
 .swap-arrow-icon {
   width: 24px;
   height: 24px;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--app-text-muted);
 }
 
 .swap-destination-section {
@@ -248,21 +202,6 @@ export default defineComponent({
 .swap-section-label {
   font-size: 14px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.swap-info-tip {
-  display: flex;
-  align-items: center;
-  padding: 12px;
-  background: rgba(33, 150, 243, 0.1);
-  border-radius: 8px;
-  border: 1px solid rgba(33, 150, 243, 0.2);
-}
-
-.swap-info-text {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.8);
-  line-height: 1.4;
+  color: var(--app-text-muted);
 }
 </style>

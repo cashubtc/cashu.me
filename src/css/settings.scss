@@ -6,34 +6,49 @@
 
 .settings-view {
   width: 100%;
-  max-width: 800px;
+  max-width: var(--app-column);
   margin: 0 auto;
-  overflow-x: hidden;
+  // clip, not hidden: hidden on one axis makes the column a scroll box clipping all four
+  // sides, which cut 4px off the focus rings of its full-width controls.
+  overflow-x: clip;
+  overflow-clip-margin: 6px;
 }
 
 .settings-view,
 .settings-view * {
   box-sizing: border-box;
+}
+
+/* Long text (URLs, keys, long translations) wraps inside rows and fields instead of pushing
+   them wider than the column. These rules name the parts they are for: a rule on every
+   descendant also let buttons and pagination cells shrink below their content, so an icon and
+   its label split onto two lines. Buttons keep their min-content
+   width and break a word only when it can't fit a line on its own. */
+.settings-view .q-item,
+.settings-view .q-item__section,
+.settings-view .q-item__label,
+.settings-view .q-field,
+.settings-view .q-field__control-container,
+.settings-view .q-field__native,
+.settings-view .q-field__input {
   min-width: 0;
 }
 
 .settings-view .q-item,
 .settings-view .q-item__section,
 .settings-view .q-field,
-.settings-view .q-btn,
-.settings-view .q-btn__content {
+.settings-view .q-btn {
   max-width: 100%;
 }
 
 .settings-view .q-item__label,
 .settings-view .q-field__native,
-.settings-view .q-field__input,
-.settings-view .q-btn__content {
+.settings-view .q-field__input {
   overflow-wrap: anywhere;
 }
 
 .settings-view .q-btn__content {
-  white-space: normal;
+  overflow-wrap: break-word;
 }
 
 /* A logical section: header + card */
@@ -41,33 +56,23 @@
   margin-bottom: 24px;
 }
 
-.settings-section-header {
-  padding: 0 6px;
-  margin-bottom: 10px;
+// The page's description under its title: one step above section captions (15 vs 14), so
+// the order is title, page description, section title, section description.
+.settings-page-caption {
+  color: var(--app-text-muted);
+  font-size: 15px;
+  line-height: 22px;
 }
 
-.settings-section-title {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.55);
-}
-
-.settings-section-caption {
-  font-size: 12px;
-  line-height: 1.4;
-  color: rgba(255, 255, 255, 0.45);
-  margin-top: 4px;
-}
-
+// A section's description reads at the row-description size and colour (14/20, muted):
+// at 12px subtle it was smaller and dimmer than the rows it introduces.
 /* Card-style groups (settings menu, about page, section content) */
 .settings-card,
 .settings-menu-group {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--app-group-fill);
+  border: 1px solid var(--app-group-edge);
   border-radius: 14px;
-  padding: 4px 0;
+  padding: 0;
   overflow: hidden;
 }
 
@@ -91,6 +96,12 @@
   padding: 10px 16px;
 }
 
+/* The chevron needs 8px from the text, not Quasar's 16px: the caption gets the rest of the
+   row, so a one-line description stays on one line on a 390px phone. */
+.settings-menu-item .row-value {
+  padding-inline: 8px 0;
+}
+
 .settings-menu-icon {
   width: 36px;
   height: 36px;
@@ -98,9 +109,77 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--q-primary);
+  color: var(--app-accent);
 }
 
-.settings-menu-chevron {
-  color: rgba(255, 255, 255, 0.35);
+.settings-menu-chevron,
+.settings-menu-action {
+  color: var(--app-text-subtle);
+}
+/* The chevron's ink sits 6px inside its 18px box; pull it onto the 16px trailing guideline. */
+.lucide-chevron-right-icon.settings-menu-chevron {
+  margin-inline-end: -6px;
+}
+
+/* Wrapped row captions keep a readable line pitch. */
+.settings-view .q-item__label--caption {
+  font-size: 14px;
+  line-height: 1.4;
+}
+/* Row titles share the sheet option rows' 16px, in settings and in every settings-style card
+   (Mint details' actions read just like settings), on a whole-pixel
+   20px line: Quasar's 1.2 made a 19.2px box that sat 0.4px off the 20px icon's, so browsers
+   snapped the text a pixel away from the icon beside it. Quasar
+   sets that 1.2em as !important, so this one has to be too. */
+.settings-view .q-item__label:not(.q-item__label--caption),
+.settings-menu-group .q-item__label:not(.q-item__label--caption) {
+  font-size: 16px;
+  line-height: 20px !important;
+}
+
+/* On wide screens the settings column matches the wallet's content edges. */
+@media (min-width: 600px) {
+  .settings-view {
+    max-width: var(--app-content);
+  }
+}
+
+/* Inline settings actions share one secondary button: 44px tall, 14px label. */
+.settings-view .q-btn--outline:not(.q-btn--round):not(.full-width),
+.settings-view .settings-primary-action {
+  min-height: 44px;
+  font-size: 14px !important;
+  font-weight: 600;
+  padding: 0 16px;
+}
+
+/* Expandable settings rows ("Advanced"): the same row as the other settings rows. Inside a
+   group card the header is square-cornered like its sibling rows, so its pressed fill runs to
+   the card's edges and the card's own corners clip it. The chevron is the Lucide line chevron
+   (Quasar's icon set is Lucide), in the row glyph colour, on the 16px trailing line. */
+.settings-view .q-expansion-item .q-item {
+  border-radius: var(--app-radius-lg);
+  min-height: 56px;
+}
+.settings-menu-group .q-expansion-item .q-item {
+  border-radius: 0;
+}
+/* The same 18px line chevron as the row chevrons; its ink sits 4.5px inside the box. */
+.q-expansion-item__toggle-icon {
+  color: var(--app-text-subtle);
+  font-size: 18px !important;
+  margin-inline-end: -4px;
+}
+
+/* Relay URLs are content: body size and colour, left to right in every locale. */
+.relay-url {
+  color: var(--app-text);
+  font-size: 14px;
+  text-align: start;
+  word-break: break-all;
+}
+
+// Relay URLs read left to right but hug the start edge of an rtl row.
+html[dir="rtl"] .relay-url {
+  text-align: right;
 }

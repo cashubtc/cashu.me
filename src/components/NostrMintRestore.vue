@@ -1,244 +1,149 @@
 <template>
-  <div v-if="!autoAdd" class="nostr-mint-restore">
-    <!-- Header -->
-    <div class="q-px-xs text-left q-mt-lg">
-      <q-list padding>
-        <q-item>
-          <q-item-section>
-            <q-item-label
-              overline
-              class="text-weight-bold"
-              style="
-                font-size: 15.2px;
-                font-family: Inter, -apple-system, 'system-ui', 'Segoe UI',
-                  Roboto, 'Helvetica Neue', Arial, sans-serif;
-                font-weight: 600;
-                color: #ffffff;
-                text-transform: none;
-                margin-bottom: 8px;
-              "
-            >
-              {{ $t("RestoreView.nostr_mints.label") }}
-            </q-item-label>
-            <q-item-label
-              caption
-              style="
-                font-size: 0.9rem;
-                color: rgba(255, 255, 255, 0.8);
-                line-height: 1.4;
-              "
-            >
-              {{ $t("RestoreView.nostr_mints.caption") }}
-            </q-item-label>
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </div>
-
-    <!-- Search Button -->
-    <div class="q-pb-lg q-pt-md q-px-xs text-left">
-      <q-btn
-        class="full-width"
-        color="primary"
-        size="lg"
-        rounded
-        @click="searchForMints"
-        :disabled="!isMnemonicValid || searchInProgress"
-        :loading="searchInProgress"
-        style="
-          min-height: 48px;
-          font-weight: 500;
-          text-transform: none;
-          font-size: 0.95rem;
-        "
+  <SettingsSection
+    v-if="!autoAdd"
+    flat
+    class="nostr-mint-restore"
+    :title="$t('RestoreView.nostr_mints.label')"
+    :caption="$t('RestoreView.nostr_mints.caption')"
+  >
+    <q-btn
+      class="full-width"
+      color="primary"
+      outline
+      rounded
+      @click="searchForMints"
+      :disabled="!isMnemonicValid || searchInProgress"
+      :loading="searchInProgress"
+    >
+      <SearchIcon :size="20" class="q-mr-sm" />
+      {{ $t("RestoreView.nostr_mints.search_button") }}
+      <template #loading
+        ><BusyLabel>{{
+          $t("RestoreView.nostr_mints.search_button")
+        }}</BusyLabel></template
       >
-        <q-icon name="search" size="20px" class="q-mr-sm" />
-        {{ $t("RestoreView.nostr_mints.search_button") }}
-      </q-btn>
-    </div>
+    </q-btn>
 
-    <!-- Discovered Mints List -->
-    <div v-if="availableMints.length > 0" class="q-px-xs">
-      <!-- Add Selected Button (Primary Action) -->
-      <div class="primary-action-section q-pb-lg q-pt-md">
-        <q-btn
-          color="primary"
-          size="lg"
-          rounded
-          @click="addSelectedMints"
-          :loading="addingMints"
-          :disabled="addingMints || selectedMints.length === 0"
-          class="full-width"
-          style="
-            min-height: 48px;
-            font-weight: 500;
-            text-transform: none;
-            font-size: 0.95rem;
-          "
+    <!-- Discovered mints: the standard mint card, selected with its checkbox. -->
+    <div v-if="availableMints.length > 0" class="q-mt-lg">
+      <q-btn
+        color="primary"
+        unelevated
+        rounded
+        @click="addSelectedMints"
+        :loading="addingMints"
+        :disabled="addingMints || selectedMints.length === 0"
+        class="full-width"
+      >
+        <PlusIcon :size="20" class="q-mr-sm" />
+        {{
+          $t("RestoreView.nostr_mints.add_selected", {
+            count: selectedMints.length,
+          })
+        }}
+        <template #loading
+          ><BusyLabel>{{
+            $t("RestoreView.nostr_mints.add_selected", {
+              count: selectedMints.length,
+            })
+          }}</BusyLabel></template
         >
-          <q-icon name="add" size="20px" class="q-mr-sm" />
-          <span
-            style="
-              white-space: nowrap;
-              overflow: hidden;
-              text-overflow: ellipsis;
-            "
-          >
-            {{
-              $t("RestoreView.nostr_mints.add_selected", {
-                count: selectedMints.length,
-              })
-            }}
-          </span>
-        </q-btn>
-      </div>
+      </q-btn>
 
-      <!-- Select All/Deselect All -->
-      <div class="selection-buttons q-pb-lg" style="display: flex; gap: 16px">
+      <div class="row no-wrap q-my-md selection-buttons">
         <q-btn
           flat
-          size="md"
-          color="primary"
+          rounded
+          class="col"
           @click="selectAllMints"
           :disabled="allSelected"
-          style="
-            flex: 1;
-            min-height: 40px;
-            font-weight: 500;
-            text-transform: none;
-          "
         >
           {{ $t("RestoreView.nostr_mints.select_all") }}
         </q-btn>
         <q-btn
           flat
-          size="md"
-          color="grey"
+          rounded
+          class="col"
           @click="deselectAllMints"
           :disabled="!anySelected"
-          style="
-            flex: 1;
-            min-height: 40px;
-            font-weight: 500;
-            text-transform: none;
-          "
         >
           {{ $t("RestoreView.nostr_mints.deselect_all") }}
         </q-btn>
       </div>
 
-      <!-- Mints List -->
-      <q-list padding class="discovered-mints-list">
-        <q-item
-          v-for="mint in availableMints"
-          :key="mint.url"
+      <div
+        v-for="mint in availableMints"
+        :key="mint.url"
+        class="discovered-mint"
+      >
+        <MintCard
           clickable
+          :active="mint.selected"
+          :icon-url="getMintIconUrl(mint.url) || undefined"
+          :name="getMintDisplayName(mint.url)"
+          :url="mint.url"
+          :loading="isFetchingMintInfo(mint.url)"
           @click="toggleMintSelection(mint.url)"
-          class="mint-item"
-          :class="{ 'mint-item-selected': mint.selected }"
-          :style="{
-            'border-radius': '12px',
-            border: mint.selected
-              ? '2px solid var(--q-primary)'
-              : '1px solid rgba(128, 128, 128, 0.2)',
-            'background-color': mint.selected
-              ? 'rgba(var(--q-primary-rgb), 0.1)'
-              : 'transparent',
-            padding: '16px',
-            'margin-bottom': '12px',
-            transition: 'all 0.2s ease',
-          }"
         >
-          <q-item-section avatar>
+          <template #action>
             <q-checkbox
               :model-value="mint.selected"
               @update:model-value="toggleMintSelection(mint.url)"
               @click.stop
               color="primary"
-              class="clickable-checkbox"
+              dense
+              class="restore-mint-check"
+              :aria-label="getMintDisplayName(mint.url)"
             />
-          </q-item-section>
-          <q-item-section class="text-left">
-            <div class="row items-center">
-              <!-- Mint Avatar -->
-              <q-avatar
-                v-if="getMintIconUrl(mint.url)"
-                size="34px"
-                class="q-mr-sm"
-              >
-                <q-img
-                  spinner-color="white"
-                  spinner-size="xs"
-                  :src="getMintIconUrl(mint.url)"
-                  alt="Mint Icon"
-                  style="height: 34px; max-width: 34px; font-size: 12px"
-                />
-              </q-avatar>
-
-              <!-- Loading spinner for mint info -->
-              <q-spinner-dots
-                v-else-if="isFetchingMintInfo(mint.url)"
-                size="34px"
-                color="grey-5"
-                class="q-mr-sm"
-              />
-
-              <div class="mint-info-container">
-                <!-- Mint Name -->
-                <q-item-label
-                  lines="1"
-                  class="text-weight-medium text-left mint-name"
-                >
-                  {{ getMintDisplayName(mint.url) }}
-                </q-item-label>
-
-                <!-- Mint URL -->
-                <q-item-label
-                  caption
-                  lines="2"
-                  class="text-grey-6 text-left mint-url"
-                >
-                  {{ mint.url }}
-                </q-item-label>
-
-                <!-- Backup timestamp -->
-                <q-item-label caption class="text-grey-5 q-pt-xs text-left">
-                  {{ $t("RestoreView.nostr_mints.backed_up") }}:
-                  {{ formatDate(mint.timestamp) }}
-                </q-item-label>
-              </div>
-            </div>
-          </q-item-section>
-        </q-item>
-      </q-list>
+          </template>
+          <template #meta>
+            <span class="text-caption text-app-muted">
+              {{ $t("RestoreView.nostr_mints.backed_up") }}:
+              {{ formatDate(mint.timestamp) }}
+            </span>
+          </template>
+        </MintCard>
+      </div>
     </div>
 
-    <!-- Empty State -->
-    <div
+    <EmptyState
       v-else-if="hasSearched && !searchInProgress"
-      class="q-px-xs text-center q-py-lg"
-    >
-      <q-icon name="cloud_off" size="lg" color="grey-5" />
-      <div class="text-grey-6 q-mt-sm">
-        {{ $t("RestoreView.nostr_mints.no_backups_found") }}
-      </div>
-      <div class="text-grey-5 caption q-mt-xs">
-        {{ $t("RestoreView.nostr_mints.no_backups_hint") }}
-      </div>
-    </div>
-  </div>
+      :icon="CloudOffIcon"
+      :title="$t('RestoreView.nostr_mints.no_backups_found')"
+      :text="$t('RestoreView.nostr_mints.no_backups_hint')"
+    />
+  </SettingsSection>
 </template>
 
 <script lang="ts">
+import BusyLabel from "src/components/ui/BusyLabel.vue";
+import EmptyState from "src/components/ui/EmptyState.vue";
+import MintCard from "src/components/MintCard.vue";
+import SettingsSection from "src/pages/settings/SettingsSection.vue";
+import {
+  CloudOff as CloudOffIcon,
+  Plus as PlusIcon,
+  Search as SearchIcon,
+} from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapState, mapActions } from "pinia";
 import { useNostrMintBackupStore } from "src/stores/nostrMintBackup";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { notifyError } from "src/js/notify";
-import { date } from "quasar";
 
 export default defineComponent({
+  components: {
+    BusyLabel,
+    EmptyState,
+    MintCard,
+    PlusIcon,
+    SearchIcon,
+    SettingsSection,
+  },
+  setup() {
+    return { CloudOffIcon };
+  },
   name: "NostrMintRestore",
   props: {
     mnemonic: {
@@ -386,7 +291,11 @@ export default defineComponent({
     },
 
     formatDate(timestamp) {
-      return date.formatDate(timestamp * 1000, "MMM DD, YYYY");
+      return new Intl.DateTimeFormat(this.$i18n.locale, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      }).format(new Date(timestamp * 1000));
     },
 
     // Fetch mint information for all discovered mints in the background
@@ -484,43 +393,10 @@ export default defineComponent({
 </script>
 
 <style scoped>
-@import "src/css/mintlist.css";
-
-.discovered-mints-list {
-  max-height: 500px;
-  overflow-y: auto;
-  padding: 0 !important;
-}
-
 .nostr-mint-restore {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  margin-top: 2rem;
-  padding-top: 1rem;
+  margin-top: 24px;
 }
-
-/* Mint item styling - specific to NostrMintRestore */
-.mint-item {
-  text-align: left;
-}
-
-.mint-item:hover {
-  transform: translateY(-2px);
-}
-
-/* Primary action section */
-.primary-action-section {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-/* Clickable checkbox */
-.clickable-checkbox {
-  cursor: pointer;
-}
-
-/* Ensure all text aligns to the left */
-.text-left {
-  text-align: left !important;
+.discovered-mint + .discovered-mint {
+  margin-top: 12px;
 }
 </style>

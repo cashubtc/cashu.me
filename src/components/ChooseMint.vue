@@ -1,150 +1,160 @@
 <template>
-  <div class="q-pb-md">
-    <!-- Main mint selector button -->
+  <div :class="{ 'q-pb-md': !sheetOnly }">
+    <!-- Main mint selector button (none with sheetOnly: the owner opens the sheet) -->
     <div
       class="row q-mt-xs q-mb-none"
-      v-if="activeMintUrl || !requireActiveMint"
+      v-if="!sheetOnly && (activeMintUrl || !requireActiveMint)"
     >
-      <div class="col-12">
-        <div
-          data-testid="choose-mint"
-          class="mint-selector-btn"
-          :class="{ 'mint-selector-dense': dense }"
-          :style="style"
-          @click="showMintSheet = true"
+      <!-- One mint picker in two sizes: normal (the wallet) and
+           dense (flows and forms) share 16px padding, 78px with a balance line; dense only
+           lets a one-line picker drop to 56px. Both are the outlined
+           field with a 40px avatar, the name with its balance under it, and the chevron as a
+           real button on the end. A label sits over the name, like an outlined field's.
+           The shell is a pointer target only; the chevron is the one keyboard stop. -->
+      <div
+        :data-testid="testId"
+        class="col-12 mint-picker"
+        :class="{
+          'mint-picker--dense': dense,
+          'mint-picker--empty': !chosenMint,
+          'mint-picker--disabled': disable,
+          'mint-picker--open': showMintSheet,
+        }"
+        :style="style"
+        :aria-disabled="disable ? 'true' : undefined"
+        @click="openSheet"
+      >
+        <IconCircle
+          size="sm"
+          class="mint-picker__avatar"
+          aria-hidden="true"
+          :src="chosenMint?.iconUrl"
         >
-          <div class="row items-center full-width no-wrap">
-            <!-- Mint Icon -->
-            <q-avatar
-              :size="dense ? '40px' : '48px'"
-              class="q-mr-md mint-icon-avatar"
+          <MintIcon :size="20" class="mint-glyph" />
+        </IconCircle>
+        <span class="mint-picker__text">
+          <span v-if="label" :id="uid + '-label'" class="mint-picker__label">{{
+            label
+          }}</span>
+          <span :id="uid + '-name'" class="mint-picker__name ellipsis">{{
+            chosenName
+          }}</span>
+          <span
+            v-if="showBalances && chosenMint"
+            :id="uid + '-caption'"
+            class="mint-picker__caption"
+          >
+            <span v-if="!chosenMint.errored"
+              ><bdi dir="ltr">{{
+                formatCurrency(selectedMintBalance, activeUnit)
+              }}</bdi>
+              {{ $t("ChooseMint.available_text") }}</span
             >
-              <q-img
-                v-if="chosenMint?.iconUrl"
-                :src="chosenMint.iconUrl"
-                spinner-color="white"
-                spinner-size="xs"
-              >
-                <template v-slot:error>
-                  <div class="row items-center justify-center full-height">
-                    <q-icon name="account_balance" color="grey-7" size="24px" />
-                  </div>
-                </template>
-              </q-img>
-              <q-icon
-                v-else
-                name="account_balance"
-                color="grey-7"
-                size="24px"
-              />
-            </q-avatar>
-
-            <!-- Mint Info -->
-            <div class="col text-left mint-info-section">
-              <div class="mint-name-label">
-                {{
-                  chosenMint?.nickname ||
-                  chosenMint?.shorturl ||
-                  placeholder ||
-                  $t("ChooseMint.placeholder")
-                }}
-              </div>
-              <div v-if="showBalances && chosenMint" class="mint-balance-label">
-                <span v-if="!chosenMint.errored" class="text-grey-6">
-                  {{ formatCurrency(selectedMintBalance, activeUnit) }}
-                  {{ $t("ChooseMint.available_text") }}
-                </span>
-                <span v-else class="text-red">
-                  {{ $t("ChooseMint.badge_mint_error_text") }}
-                </span>
-              </div>
-            </div>
-
-            <!-- Chevron -->
-            <q-icon name="expand_more" color="grey-6" size="20px" />
-          </div>
-        </div>
+            <span v-else class="text-negative">{{
+              $t("ChooseMint.badge_mint_error_text")
+            }}</span>
+          </span>
+        </span>
+        <IconButton
+          type="button"
+          class="mint-picker__trigger"
+          :data-testid="testId + '-trigger'"
+          :label="triggerLabel"
+          :aria-busy="switching || undefined"
+          :disable="disable"
+          aria-haspopup="listbox"
+          :aria-expanded="showMintSheet ? 'true' : 'false'"
+          :aria-controls="uid + '-options'"
+          :aria-describedby="describedBy"
+          @click.stop="openSheet"
+        >
+          <!-- While the wallet switches mint, the mint card's ring takes the chevron's
+               place: the same event, the same mark. -->
+          <MintSwitchRing v-if="switching" />
+          <ChevronDownIcon
+            v-else
+            :size="20"
+            class="mint-picker__chevron"
+            aria-hidden="true"
+          />
+        </IconButton>
       </div>
     </div>
 
     <!-- Bottom Sheet for Mint Selection -->
-    <BottomSheet v-model="showMintSheet" :title="$t('ChooseMint.sheet_title')">
-      <div class="mint-options">
-        <div
+    <BottomSheet
+      v-model="showMintSheet"
+      :title="label || $t('ChooseMint.sheet_title')"
+    >
+      <div
+        :id="uid + '-options'"
+        role="listbox"
+        :aria-label="$t('ChooseMint.sheet_title')"
+        class="mint-options"
+      >
+        <SheetOption
+          v-if="anyLabel"
+          :label="anyLabel"
+          :selected="!chosenMint"
+          @select="selectAny"
+        >
+          <template #icon><MintIcon :size="20" class="mint-glyph" /></template>
+        </SheetOption>
+        <SheetOption
           v-for="mint in chooseMintOptions()"
           :key="mint.url"
-          class="mint-option"
-          :class="{ active: chosenMint?.url === mint.url }"
-          @click="selectMint(mint)"
+          :label="mint.nickname || mint.shorturl"
+          :selected="chosenMint?.url === mint.url"
+          :icon-src="mint.iconUrl"
+          @select="selectMint(mint)"
         >
-          <div class="row items-center full-width no-wrap">
-            <!-- Mint Icon -->
-            <q-avatar size="48px" class="q-mr-md">
-              <q-img
-                v-if="mint.iconUrl"
-                :src="mint.iconUrl"
-                spinner-color="white"
-                spinner-size="xs"
-              >
-                <template v-slot:error>
-                  <div class="row items-center justify-center full-height">
-                    <q-icon name="account_balance" color="grey-7" size="24px" />
-                  </div>
-                </template>
-              </q-img>
-              <q-icon
-                v-else
-                name="account_balance"
-                color="grey-7"
-                size="24px"
-              />
-            </q-avatar>
-
-            <!-- Mint Info -->
-            <div class="col text-left">
-              <div class="mint-option-name">
-                {{ mint.nickname || mint.shorturl }}
-              </div>
-              <div v-if="showBalances" class="mint-option-balance">
-                <span v-if="!mint.errored" class="text-grey-6">
-                  <span v-for="unit in mint.units" :key="unit" class="q-mr-sm">
-                    {{ formatCurrency(mint.balances[unit], unit) }}
-                  </span>
-                </span>
-                <span v-else class="text-red">
-                  {{ $t("ChooseMint.badge_mint_error_text") }}
-                </span>
-              </div>
-            </div>
-
-            <!-- Selection Indicator -->
-            <q-icon
-              v-if="chosenMint?.url === mint.url"
-              name="check_circle"
-              color="primary"
-              size="24px"
-            />
-          </div>
-        </div>
+          <template #icon>
+            <MintIcon :size="20" class="mint-glyph" />
+          </template>
+          <template v-if="showBalances" #caption>
+            <!-- One left-to-right run for the whole sum, so "₿500 + $25.00" keeps its order
+                 in right-to-left locales (each amount alone was isolated, the sum wasn't). -->
+            <bdi v-if="!mint.errored" dir="ltr">
+              <template v-for="(unit, i) in heldUnits(mint)" :key="unit">
+                <template v-if="i > 0"> + </template>
+                {{ formatCurrency(mint.balances[unit], unit) }}
+              </template>
+            </bdi>
+            <span v-else class="text-negative">
+              {{ $t("ChooseMint.badge_mint_error_text") }}
+            </span>
+          </template>
+        </SheetOption>
       </div>
     </BottomSheet>
   </div>
 </template>
 
 <script lang="ts">
+import IconCircle from "src/components/ui/IconCircle.vue";
+import IconButton from "src/components/ui/IconButton.vue";
+import MintSwitchRing from "src/components/ui/MintSwitchRing.vue";
+import {
+  Building2 as MintIcon,
+  ChevronDown as ChevronDownIcon,
+} from "lucide-vue-next";
 import { defineComponent, type PropType } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "stores/mints";
 import { MintClass } from "stores/mints";
 import type { StoredMint } from "stores/mints";
-import { useUiStore } from "stores/ui";
 import { i18n } from "../boot/i18n";
 import { mintSupportsPaymentMethod } from "src/js/mint-payment-methods";
 import { PaymentMethod } from "src/stores/walletTypes";
 import BottomSheet from "./BottomSheet.vue";
+import SheetOption from "src/components/SheetOption.vue";
 
 declare const windowMixin: any;
+
+// Each picker's sheet gets its own listbox id: several pickers can be mounted at once
+// (swap From and To, a dialog over the wallet).
+let nextPickerId = 0;
 
 type MintOption = {
   nickname?: string | null;
@@ -158,13 +168,22 @@ type MintOption = {
 
 export default defineComponent({
   name: "ChooseMint",
-  components: { BottomSheet },
+  components: {
+    IconCircle,
+    IconButton,
+    MintIcon,
+    ChevronDownIcon,
+    MintSwitchRing,
+    BottomSheet,
+    SheetOption,
+  },
   mixins: [windowMixin],
   props: {
-    rounded: {
-      type: Boolean,
-      default: false,
+    testId: {
+      type: String,
+      default: "choose-mint",
     },
+    // A one-line picker (no balance) may be 56px instead of 72px; nothing else changes.
     dense: {
       type: Boolean,
       default: false,
@@ -181,9 +200,41 @@ export default defineComponent({
       type: String,
       default: "",
     },
+    // Shown over the mint's name, like an outlined field's label. It names the field only:
+    // the size comes from `dense`.
+    label: {
+      type: String,
+      default: "",
+    },
     showBalances: {
       type: Boolean,
       default: true,
+    },
+    // Start (and stay) with no mint chosen until the user picks one, instead of falling back
+    // to the first mint. Used by fields such as swap From/To.
+    allowEmpty: {
+      type: Boolean,
+      default: false,
+    },
+    disable: {
+      type: Boolean,
+      default: false,
+    },
+    // A first option meaning "no particular mint" (a payment request any mint can pay),
+    // chosen by an empty value. Implies allowEmpty.
+    anyLabel: {
+      type: String,
+      default: "",
+    },
+    // Only the sheet, opened by the owner through v-model:open (a detail row that changes the
+    // mint, for example). The field isn't drawn.
+    sheetOnly: {
+      type: Boolean,
+      default: false,
+    },
+    open: {
+      type: Boolean,
+      default: false,
     },
     requireActiveMint: {
       type: Boolean,
@@ -211,17 +262,28 @@ export default defineComponent({
       default: "mint",
     },
   },
-  emits: ["update:modelValue"],
+  emits: ["update:modelValue", "update:open"],
   data: function () {
     return {
       chosenMint: null as MintOption | null,
       showMintSheet: false,
+      uid: `choose-mint-${++nextPickerId}`,
     };
   },
   mounted() {
     this.initializeChosenMint();
   },
   watch: {
+    open: {
+      // immediate: a picker can be mounted with its sheet already open.
+      handler(value: boolean) {
+        this.showMintSheet = value;
+      },
+      immediate: true,
+    },
+    showMintSheet(value: boolean) {
+      if (value !== this.open) this.$emit("update:open", value);
+    },
     chosenMint: async function () {
       const selectedUrl = this.chosenMint?.url || "";
       if (this.dryRun || this.modelValue !== null) {
@@ -260,8 +322,36 @@ export default defineComponent({
     },
   },
   computed: {
-    ...mapState(useMintsStore, ["activeProofs", "mints", "activeUnit"]),
+    ...mapState(useMintsStore, ["mints", "activeUnit", "activatingMintUrl"]),
+    // The wallet is switching mint and this picker shows the wallet's mint (not a dry-run
+    // choice such as a payment request's).
+    switching(): boolean {
+      return Boolean(this.activatingMintUrl) && !this.dryRun;
+    },
     ...mapWritableState(useMintsStore, ["activeMintUrl"]),
+    chosenName(): string {
+      return (
+        this.chosenMint?.nickname ||
+        this.chosenMint?.shorturl ||
+        this.anyLabel ||
+        this.placeholder ||
+        this.$t("ChooseMint.placeholder")
+      );
+    },
+    triggerLabel(): string {
+      const mint = this.chosenMint?.nickname || this.chosenMint?.shorturl;
+      return mint
+        ? this.$t("ChooseMint.open_selector", { mint })
+        : this.$t("ChooseMint.open_selector_empty");
+    },
+    // The field's label and the balance line, read after the button's name.
+    describedBy(): string | undefined {
+      const ids = [
+        this.label ? `${this.uid}-label` : "",
+        this.showBalances && this.chosenMint ? `${this.uid}-caption` : "",
+      ].filter(Boolean);
+      return ids.length ? ids.join(" ") : undefined;
+    },
     selectedMintBalance(): number {
       const unit = this.activeUnit;
       if (!this.chosenMint || !unit) {
@@ -280,10 +370,16 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useMintsStore, ["selectMintUrl"]),
-    formatCurrency(value: number, currency: string) {
-      return useUiStore().formatCurrency(value, currency);
+    // Units this mint holds a balance in; falls back to the first unit for an empty mint.
+    heldUnits(mint: { units: string[]; balances: Record<string, number> }) {
+      // sat leads on every row so balances compare down the list.
+      const units = [...mint.units].sort(
+        (a, b) => Number(b === "sat") - Number(a === "sat")
+      );
+      const held = units.filter((unit) => (mint.balances[unit] ?? 0) > 0);
+      return held.length ? held : units.slice(0, 1);
     },
+    ...mapActions(useMintsStore, ["selectMintUrl"]),
     applyChosenMint(option: MintOption | null) {
       if (!option) {
         this.chosenMint = null;
@@ -319,11 +415,21 @@ export default defineComponent({
           return;
         }
       }
-      if (options.length) {
+      if (this.allowEmpty || this.anyLabel) {
+        this.applyChosenMint(null);
+      } else if (options.length) {
         this.applyChosenMint(options[0]);
       } else {
         this.applyChosenMint(null);
       }
+    },
+    openSheet() {
+      if (this.disable) return;
+      this.showMintSheet = true;
+    },
+    selectAny() {
+      this.applyChosenMint(null);
+      this.showMintSheet = false;
     },
     selectMint(mint: MintOption) {
       if (this.excludeMint && mint.url === this.excludeMint) {
@@ -373,79 +479,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.mint-selector-btn {
-  width: 100%;
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.2);
-  }
-
-  &.mint-selector-dense {
-    padding: 12px;
-  }
-}
-
-.mint-icon-avatar {
-  flex-shrink: 0;
-}
-
-.mint-info-section {
-  min-width: 0;
-}
-
-.mint-name-label {
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 1.3;
-  color: white;
-}
-
-.mint-balance-label {
-  font-size: 14px;
-  line-height: 1.3;
-  margin-top: 4px;
-}
-
-/* Mint options list inside the shared BottomSheet */
-.mint-option {
-  padding: 16px 24px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border-bottom: 1px solid rgba(128, 128, 128, 0.15);
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.08);
-  }
-
-  &.active {
-    background: rgba(var(--q-primary-rgb), 0.2);
-  }
-
-  &:last-child {
-    border-bottom: none;
-  }
-}
-
-.body--light .mint-option:hover {
-  background: rgba(0, 0, 0, 0.04);
-}
-
-.mint-option-name {
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 1.3;
-}
-
-.mint-option-balance {
-  font-size: 14px;
-  line-height: 1.3;
-  margin-top: 4px;
+/* Mint rows inside the shared BottomSheet use SheetOption. */
+.mint-glyph {
+  color: var(--app-text-muted);
 }
 </style>

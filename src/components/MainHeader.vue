@@ -1,85 +1,80 @@
 <template>
   <q-header class="bg-transparent">
-    <q-toolbar>
-      <q-btn
-        flat
-        dense
-        round
-        icon="menu"
-        color="primary"
-        aria-label="Settings"
+    <q-toolbar class="app-toolbar">
+      <IconButton
+        :label="$t('common.settings')"
         @click="goToSettings"
         :disable="uiStore.globalMutexLock"
-      />
+      >
+        <MenuIcon :size="24" />
+      </IconButton>
       <q-toolbar-title></q-toolbar-title>
       <transition
         appear
-        enter-active-class="animated wobble"
+        enter-active-class="animated fadeIn"
         leave-active-class="animated fadeOut"
       >
-        <q-badge
-          v-if="g.offline"
-          color="red"
-          text-color="black"
-          class="q-mr-sm"
-        >
+        <AppBadge v-if="g.offline" tone="danger" class="q-mr-sm">
           <span>{{ $t("MainHeader.offline.warning.text") }}</span>
-        </q-badge>
+        </AppBadge>
       </transition>
-      <q-badge
-        v-if="isStaging()"
-        color="yellow"
-        text-color="black"
-        class="q-mr-sm"
-      >
+      <AppBadge v-if="isStaging()" tone="warning" class="q-mr-sm">
         <span>{{ $t("MainHeader.staging.warning.text") }}</span>
-      </q-badge>
-      <!-- <q-badge color="yellow" text-color="black" class="q-mr-sm">
-        <span v-if="!isStaging()">Beta</span>
-        <span v-else>Staging – don't use with real funds!</span>
-      </q-badge> -->
+      </AppBadge>
       <transition-group appear enter-active-class="animated pulse">
-        <q-badge
+        <AppBadge
           v-if="countdown > 0"
-          color="negative"
-          text-color="white"
+          key="reload"
+          tag="button"
+          tone="danger"
           class="q-mr-sm"
           @click="reload"
         >
           {{ $t("MainHeader.reload.warning.text", { countdown }) }}
-          <q-spinner
-            v-if="countdown > 0"
-            size="0.8em"
-            :thickness="10"
-            class="q-ml-sm"
-            color="white"
-          />
-        </q-badge>
+          <PendingDots size="14px" />
+        </AppBadge>
       </transition-group>
-      <q-btn
-        flat
-        dense
-        round
-        size="0.8em"
-        :icon="countdown > 0 ? 'close' : 'refresh'"
-        :color="countdown > 0 ? 'negative' : 'primary'"
-        aria-label="Refresh"
+      <IconButton
+        :class="countdown > 0 ? 'text-negative' : ''"
+        :label="
+          countdown > 0
+            ? $t('global.actions.cancel.label')
+            : $t('common.refresh')
+        "
         @click="reload"
         :disable="uiStore.globalMutexLock && countdown === 0"
       >
-      </q-btn>
+        <XIcon v-if="countdown > 0" :size="20" />
+        <RefreshCwIcon v-else :size="20" />
+      </IconButton>
     </q-toolbar>
   </q-header>
 </template>
 
 <script lang="ts">
+import IconButton from "src/components/ui/IconButton.vue";
+import AppBadge from "src/components/ui/AppBadge.vue";
+import PendingDots from "src/components/ui/PendingDots.vue";
 import { defineComponent, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useUiStore } from "src/stores/ui";
+import {
+  Menu as MenuIcon,
+  RefreshCw as RefreshCwIcon,
+  X as XIcon,
+} from "lucide-vue-next";
 
 export default defineComponent({
   name: "MainHeader",
   mixins: [windowMixin],
+  components: {
+    PendingDots,
+    IconButton,
+    AppBadge,
+    MenuIcon,
+    RefreshCwIcon,
+    XIcon,
+  },
   setup() {
     const uiStore = useUiStore();
     const router = useRouter();
@@ -124,11 +119,14 @@ export default defineComponent({
   },
 });
 </script>
+
 <style scoped>
 .q-header {
   position: relative;
   z-index: auto;
-  overflow-x: hidden;
+  /* clip, not hidden: hidden made the header a scroll box that cut 1px off the top and
+     bottom of its buttons' focus rings. */
+  overflow-x: clip;
 }
 
 .q-toolbar {
@@ -138,10 +136,5 @@ export default defineComponent({
 
 .q-toolbar-title {
   flex: 0 1 auto; /* Allow title to shrink */
-}
-
-/* Make badges container handle overflow properly */
-.q-toolbar > .q-badge {
-  flex-shrink: 0;
 }
 </style>

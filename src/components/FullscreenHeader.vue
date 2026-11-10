@@ -1,24 +1,25 @@
 <template>
   <q-header class="bg-dark">
-    <q-toolbar>
-      <q-btn
-        flat
-        dense
-        round
-        icon="arrow_back_ios_new"
+    <q-toolbar class="app-toolbar">
+      <IconButton
+        data-testid="fullscreen-back"
+        :label="$t('common.back')"
         @click="goBack"
-        color="primary"
-        aria-label="Back"
-      />
+      >
+        <ChevronLeftIcon :size="24" />
+      </IconButton>
     </q-toolbar>
   </q-header>
 </template>
 <script lang="ts">
+import IconButton from "src/components/ui/IconButton.vue";
 import { defineComponent } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { ChevronLeft as ChevronLeftIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "FullscreenHeader",
+  components: { IconButton, ChevronLeftIcon },
   mixins: [windowMixin],
   setup() {
     const router = useRouter();

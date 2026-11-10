@@ -1,5 +1,5 @@
 import type { PaymentMethodLimits } from "src/js/mint-payment-methods";
-import { formatBigIntCurrency } from "src/js/format-currency";
+import { formatBigIntCurrency, unitQuantityWord } from "src/js/format-currency";
 
 export function onchainDepositAmountInBaseUnits(
   amount: number,
@@ -16,32 +16,58 @@ export function onchainDepositAmountInBaseUnits(
   return amount * currencyMultiplier;
 }
 
+type Translate = (key: string, named: Record<string, string>) => string;
+
+const englishAmountErrors: Record<
+  string,
+  (p: Record<string, string>) => string
+> = {
+  positive_decimal: (p) =>
+    `Enter a positive amount with at most two decimal places in ${p.unit}.`,
+  positive_whole: (p) => `Enter a positive whole amount in ${p.unit}.`,
+  min: (p) => `Enter at least ${p.amount}.`,
+  max: (p) => `Enter no more than ${p.amount}.`,
+};
+
+/**
+ * Validate an on-chain deposit amount. Pass the app's translator to get a
+ * localized message; without it the message is English.
+ */
 export function onchainDepositAmountError(
   amount: number,
   unit: string,
   limits: PaymentMethodLimits | null,
-  bitcoinSymbol = false
+  bitcoinSymbol = false,
+  t?: Translate
 ): string {
+  const message = (key: string, named: Record<string, string>) =>
+    t
+      ? t(`CreateInvoiceDialog.amount_errors.${key}`, named)
+      : englishAmountErrors[key](named);
   if (!Number.isSafeInteger(amount) || amount <= 0) {
     return unit === "usd" || unit === "eur"
-      ? `Enter a positive amount with at most two decimal places in ${unit.toUpperCase()}.`
-      : `Enter a positive whole amount in ${unit}.`;
+      ? message("positive_decimal", { unit: unitQuantityWord(unit) })
+      : message("positive_whole", { unit: unitQuantityWord(unit) });
   }
   if (limits?.minAmount != null && amount < limits.minAmount) {
-    return `Enter at least ${formatBigIntCurrency(
-      limits.minAmount,
-      unit,
-      undefined,
-      bitcoinSymbol
-    )}.`;
+    return message("min", {
+      amount: formatBigIntCurrency(
+        limits.minAmount,
+        unit,
+        undefined,
+        bitcoinSymbol
+      ),
+    });
   }
   if (limits?.maxAmount != null && amount > limits.maxAmount) {
-    return `Enter no more than ${formatBigIntCurrency(
-      limits.maxAmount,
-      unit,
-      undefined,
-      bitcoinSymbol
-    )}.`;
+    return message("max", {
+      amount: formatBigIntCurrency(
+        limits.maxAmount,
+        unit,
+        undefined,
+        bitcoinSymbol
+      ),
+    });
   }
   return "";
 }
@@ -90,7 +116,7 @@ export type MempoolTxMetadata = {
 
 export type OnchainNetwork = "bitcoin" | "mutinynet";
 
-export function normalizeBitcoinAddress(value: string): string {
+function normalizeBitcoinAddress(value: string): string {
   const trimmed = value.trim();
   if (!trimmed.toLowerCase().startsWith("bitcoin:")) return trimmed;
   const withoutScheme = trimmed.replace(/^bitcoin:/i, "");
@@ -124,6 +150,15 @@ function mempoolBaseForAddress(value: string): string | null {
 
 function mempoolWebBase(apiBase: string): string {
   return apiBase.replace(/\/api$/, "");
+}
+
+/** An explorer link's host ("mempool.space"), the value of an explorer row. */
+export function explorerHost(url: string): string {
+  try {
+    return new URL(url).host;
+  } catch {
+    return url;
+  }
 }
 
 export function onchainAddressExplorerUrl(address: string): string | null {

@@ -1,24 +1,121 @@
 // app global css in SCSS form
 
-// Import Inter font from Google Fonts
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+// Import Inter font from Google Fonts, with Noto Sans Arabic for Arabic script. Google
+// Fonts serves Noto Sans Arabic with an Arabic-only unicode-range, so it only downloads when
+// Arabic text is on screen, and Latin text always stays Inter.
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap");
 
 // Apply Inter as the primary font throughout the application
 body {
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+  font-family: "Inter", "Noto Sans Arabic", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif;
+}
+// Form controls don't inherit the page font by default, so Arabic in inputs and their
+// placeholders fell back to a different system face; they use the app's stack too.
+input,
+textarea,
+select,
+button {
+  font-family: inherit;
+}
+// Arabic script needs no letter-spacing (it breaks joining).
+:lang(ar) * {
+  letter-spacing: 0 !important;
+}
+// Noto Sans Arabic sits optically smaller than Inter, and its marks above and below the
+// letters need taller lines: Arabic body text is a pixel larger, and captions and
+// paragraphs get looser lines.
+html:lang(ar) body {
+  font-size: 15px;
+}
+html:lang(ar) .q-item__label--caption,
+html:lang(ar) .text-caption,
+html:lang(ar) .text-body2,
+html:lang(ar) p {
+  line-height: 1.6;
+}
+// Chinese: a named CJK face after Inter (Latin stays Inter), bold drawn at 600 because CJK
+// glyphs at 700 look heavier than the Latin beside them, and roomier paragraph lines.
+html:lang(zh) body {
+  font-family: "Inter", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC",
+    "Microsoft YaHei", sans-serif;
+}
+html:lang(zh) .text-weight-bold,
+html:lang(zh) .text-h5,
+html:lang(zh) .sheet-title {
+  font-weight: 600 !important;
+}
+html:lang(zh) p,
+html:lang(zh) .q-item__label--caption {
+  line-height: 1.6;
+}
+// Strict CJK line breaking (no line opens with "，" or "。"), and lines balanced so a short
+// word or a trailing "ecash。" doesn't sit alone on the last line.
+html:lang(zh) p,
+html:lang(zh) .q-item__label--caption,
+html:lang(ja) p,
+html:lang(ja) .q-item__label--caption {
+  line-break: strict;
+  text-wrap: pretty;
 }
 
 // Dialog header typography
 // This class provides proper letter-spacing for dialog titles
 // The default Quasar 'overline' class has excessive letter-spacing for headers
-.dialog-header {
-  font-size: 1.2rem; // 16px
-  font-weight: 500; // Medium weight for headers
-  letter-spacing: -0.01em; // Tight letter spacing for better readability on headers
-  text-transform: none; // No uppercase transformation
-  line-height: 1.5; // Good line height for readability
+// One title style for every dialog and sheet header.
+.dialog-header,
+.sheet-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  font-size: 1.0625rem; // 17px
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  line-height: 1.5;
+  color: var(--app-text);
+}
+
+// Two button text standards. Sentence case: 15/600, no tracking (inline,
+// paired, compact and dialog actions). Caps: 16/600, 0.06em, uppercase (every full-width
+// action, everything in a FlowFooter, the wallet's Receive and Send, hero actions). Quasar's
+// `size` writes an inline font-size, so pill buttons never set it (guard in
+// standardElements.test.ts).
+.q-btn {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 20px;
+  text-transform: none;
+}
+.q-btn.full-width,
+.flow-footer__col .q-btn:not(.q-btn--round),
+.wallet-action-btn {
+  font-size: 16px !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+// Scripts without capitals keep the Latin words inside them (Mint, ecash) as written:
+// forced capitals turned 添加 Mint into 添加 MINT beside a heading that says Mint.
+.q-btn.full-width:lang(zh),
+.q-btn.full-width:lang(ja),
+.q-btn.full-width:lang(ko),
+.q-btn.full-width:lang(ar),
+.q-btn.full-width:lang(th),
+.flow-footer__col .q-btn:lang(zh),
+.flow-footer__col .q-btn:lang(ja),
+.flow-footer__col .q-btn:lang(ko),
+.flow-footer__col .q-btn:lang(ar),
+.flow-footer__col .q-btn:lang(th),
+.wallet-action-btn:lang(zh),
+.wallet-action-btn:lang(ja),
+.wallet-action-btn:lang(ko),
+.wallet-action-btn:lang(ar),
+.wallet-action-btn:lang(th) {
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 // Native-app feel: disable text selection across the UI
@@ -39,6 +136,15 @@ body {
 // Map CSS env() safe area to our custom variable for PWA iOS
 :root {
   --safe-area-inset-top: env(safe-area-inset-top);
+  // The one content column every page, sheet and QR screen shares: the column with its 16px
+  // gutters, and the content inside them. A little wider on desktop.
+  --app-column: 560px;
+  --app-content: calc(var(--app-column) - 32px);
+}
+@media (min-width: 1024px) {
+  :root {
+    --app-column: 640px;
+  }
 }
 
 // margin for top elements for ios safe area
@@ -61,6 +167,10 @@ body,
   border-top-right-radius: 20px;
 }
 
+.q-dialog__inner--maximized > div {
+  border-radius: 0 !important;
+}
+
 .q-dialog__inner--minimized > div {
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
@@ -69,41 +179,1718 @@ body,
   max-width: 650px;
 }
 
-.custom-btn {
-  background: $grey-9;
-  color: white;
-  border-radius: 8px;
-  height: 80px;
-  box-shadow: none;
-  font-size: 18px;
+// The tick is drawn in the on-primary ink, so a checked box shows a tick in every theme and
+// mode (a dark tick on the black light-mode fill read as a solid square).
+.q-checkbox__svg {
+  color: var(--app-on-primary);
 }
 
-.custom-btn:hover {
-  background: $grey-8;
-}
-
-.custom-btn-text {
-  font-size: 18px !important;
-  color: white;
-  padding-top: 2px;
-}
-
-.full-width-card {
+// Label/value rows (DetailRow) in quote, token, request and mint detail views. Every row is
+// 44px (a full touch target) and rows sit 4px apart in a .detail-table, so plain and
+// interactive rows share one 48px pitch and a hover tint never reaches a neighbour
+//. Rows never set their own margins (guard in
+// standardElements.test.ts).
+.detail-table {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   width: 100%;
-  max-width: 600px;
+}
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding-block: 4px;
+  width: 100%;
+}
+// A value with glyphs (dots, link, copy): text and glyph centred on one line.
+.detail-value.detail-value--inline {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  min-width: 0;
+}
+.detail-value__text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.detail-label {
+  display: flex;
+  align-items: center;
+}
+.detail-icon {
+  box-sizing: content-box;
+  flex-shrink: 0;
+  margin-inline-end: 12px;
+  padding: 2px;
+  color: var(--app-text-muted);
+}
+.detail-name {
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--app-text-muted);
+}
+// A value made of controls (the payment request pager): nothing to truncate, so the box lets
+// their hover and focus shapes show whole instead of clipping them to the text line.
+.detail-value.detail-value--controls {
+  overflow: visible;
+}
+// Values are bold, as in the original design; an unset placeholder
+// stays regular and muted.
+.detail-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--app-text);
+  text-align: end;
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Section label in small capitals: centred between two hairlines over the open sections of
+// the mint pages, as in the original design, or on the start edge without hairlines
+// (align="start") in settings, sheets and over a single field.
+.section-divider-block {
+  margin-bottom: 16px;
+}
+.section-divider {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+.section-divider--start {
+  gap: 0;
+}
+.divider-line {
+  background: var(--app-border);
+  flex: 1;
+  height: 1px;
+}
+.divider-text {
+  align-items: center;
+  color: var(--app-text-muted);
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 600;
+  gap: 6px;
+  letter-spacing: 0.06em;
+  line-height: 16px;
+  text-transform: uppercase;
+}
+.divider-text:lang(zh),
+.divider-text:lang(ja),
+.divider-text:lang(ko),
+.divider-text:lang(ar),
+.divider-text:lang(th) {
+  letter-spacing: 0;
+  text-transform: none;
+}
+// The description under a section label: the row-description size and colour, on the
+// text edge.
+.section-divider__caption {
+  color: var(--app-text-muted);
+  font-size: 14px;
+  line-height: 20px;
+  margin: 12px 0 0;
+  text-align: start;
+}
+.section-divider-block--start .section-divider__caption {
+  margin-top: 4px;
+}
+// Japanese descriptions wrap between phrases where the browser can tell them apart, not
+// inside a word (ビット / コイン).
+.q-item__label--caption:lang(ja),
+.section-divider__caption:lang(ja),
+.settings-page-caption:lang(ja) {
+  word-break: auto-phrase;
+}
+// Captions read evenly at body sizes without Quasar's positive tracking.
+.q-item__label--caption,
+.text-caption {
+  letter-spacing: 0;
+}
+
+// QR sheets (send, receive): QR, a thin activity track, then the amount.
+// Checking for payment: a short 3px rail under the QR with a moving fill in muted ink.
+.qr-progress {
+  height: 3px;
+  margin: 12px auto 20px;
+  max-width: var(--app-qr-size);
+}
+.qr-progress .q-linear-progress {
+  border-radius: var(--app-radius-pill);
+  color: var(--app-text-muted) !important;
+}
+// Under reduced motion the sweep freezes mid-track: a solid centre segment on a faint rail,
+// so it still reads as "working" (a bare rail read as a divider) without moving.
+@media (prefers-reduced-motion: reduce) {
+  .qr-progress .q-linear-progress__model {
+    display: none;
+  }
+  .qr-progress .q-linear-progress__track {
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, currentColor 30%, transparent) 35%,
+      currentColor 35% 65%,
+      color-mix(in srgb, currentColor 30%, transparent) 65%
+    ) !important;
+    opacity: 1 !important;
+  }
+}
+
+// The amount a sheet is about (send, receive), shown under its QR.
+.amount-headline {
+  font-variant-numeric: tabular-nums;
+  color: var(--app-text);
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  text-align: center;
+}
+
+// Interaction states, one system for every control. Quasar draws hover and
+// focus as a currentColor tint (.q-focus-helper); we keep that tint faint for
+// hover, make pressed clearly stronger (touch included), and carry keyboard
+// focus with a ring instead of a tint.
+.q-hoverable:hover > .q-focus-helper,
+.q-focusable:focus > .q-focus-helper {
+  background: currentColor;
+  opacity: var(--app-hover-opacity) !important;
+}
+@media (hover: none) {
+  .q-hoverable:hover > .q-focus-helper {
+    opacity: 0 !important;
+  }
+}
+.q-focusable:focus:not(:focus-visible) > .q-focus-helper {
+  opacity: 0 !important;
+}
+.q-hoverable:active > .q-focus-helper,
+.q-hoverable:active:hover > .q-focus-helper {
+  background: currentColor;
+  opacity: var(--app-pressed-opacity) !important;
+}
+// Quasar's .no-outline sets outline:0 !important on buttons, hence !important.
+.q-focusable:focus-visible,
+.mint-chip:focus-visible,
+button:focus-visible,
+.detail-item--link:focus-visible {
+  box-shadow: none !important;
+  outline: 2px solid var(--app-text) !important;
+  outline-offset: 2px;
+}
+// Rows and tabs sit in overflow-clipped containers: draw the ring inside.
+.q-item.q-focusable:focus-visible,
+.q-tab.q-focusable:focus-visible {
+  outline-offset: -2px;
+  border-radius: 10px;
+}
+// Anything else focusable inside a clipped card (a button placed in a settings card or a
+// dialog summary) draws its ring inside too, so the card's rounded clip never cuts it.
+.settings-card :focus-visible,
+.confirm-dialog__summary :focus-visible {
+  outline-offset: -2px !important;
+}
+
+// One disabled treatment for every button.
+// A loading button keeps its full look so the spinner reads as busy, not as disabled.
+.q-btn.disabled:not(.q-btn--loading),
+.q-btn[disabled]:not(.q-btn--loading) {
+  opacity: 0.38 !important;
+}
+// Disabled filled and tonal buttons use a quiet ink fill (8% dark, 4% light),
+// a muted label and no edge. Loading buttons keep their enabled appearance.
+.q-btn.disabled.bg-primary:not(.q-btn--loading),
+.q-btn[disabled].bg-primary:not(.q-btn--loading),
+.q-btn--outline.disabled:not(.q-btn--loading),
+.q-btn--outline[disabled]:not(.q-btn--loading) {
+  background: var(--app-disabled-fill) !important;
+  box-shadow: none;
+  color: var(--app-text-disabled) !important;
+  opacity: 1 !important;
+}
+.q-btn--outline.disabled:not(.q-btn--loading):before,
+.q-btn--outline[disabled]:not(.q-btn--loading):before {
+  border-color: transparent !important;
+}
+.q-btn.disabled,
+.q-btn[disabled] {
+  cursor: not-allowed !important;
+}
+
+// Pressed buttons also sink slightly, so pressed reads apart from hover on filled pills
+// where a tint alone barely shows. `scale` composes with any positioning `transform`
+// (centred close buttons use translateY), so a press never moves the button.
+.q-btn:not(.disabled):active {
+  scale: 0.97;
+}
+// Full-width buttons press with their fill only: 3% of a 480px button is a 14px jump, and
+// Safari clipped the outline's end edge mid-scale (Discover mints).
+.q-btn.full-width:not(.disabled):active {
+  scale: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .q-btn {
+    transition: scale 0.08s ease;
+  }
+}
+
+// Full-width sheet CTAs (Copy, Send, Create invoice) share one size. Quasar's
+// `size` prop writes an inline font-size, hence the override.
+// Two button heights: 52px for full-width and hero actions, 44px for every other pill.
+.q-btn.q-btn--rounded.full-width {
+  min-height: 52px;
+}
+.q-btn.q-btn--rounded:not(.q-btn--dense):not(.full-width):not(.q-btn--round) {
+  min-height: 44px;
+}
+// Hero actions (empty and blocking states) share one size: sized to the message at 320px,
+// at the full-width height. Quasar's .full-width sets max-width with !important.
+.q-btn.app-empty__action,
+.q-btn.blocking-state__action {
+  font-size: 16px !important;
+  max-width: 320px !important;
+  min-height: 52px !important;
+  width: 100% !important;
+}
+
+// Fullscreen sheet header: bound to the same app column as the sheet content, so the close
+// button and trailing actions sit on the content edges on desktop instead of the window edges.
+.sheet-column-header {
+  position: relative;
+  width: 100%;
+  max-width: var(
+    --app-column
+  ); // the page column: close and trailing buttons share its edges
   margin: 0 auto;
 }
 
-.animated.tada {
-  animation-duration: 1s;
-}
-.animated.bounceIn {
-  animation-duration: 1s;
-}
-.animated.bounce {
-  animation-duration: 1s;
+// Small icon controls keep a 44px touch target without growing visually.
+.touch-target-44 {
+  min-height: 44px !important;
+  min-width: 44px !important;
 }
 
-.q-checkbox__svg {
-  color: var(--q-dark);
+// Onboarding surface: the page surface of the current theme and mode; its text and fields
+// take the body's tokens like any page.
+body[data-theme] .welcome-surface,
+.welcome-surface {
+  --flow-surface: var(--app-welcome-bg);
+  background: var(--app-welcome-bg) !important;
+  color: var(--app-text);
+}
+
+// The select field chip (SheetSelect); the mint picker has its own recipe (.mint-picker).
+.mint-chip {
+  align-items: center;
+  background: var(--app-tint);
+  border: 1px solid var(--app-field-edge);
+  border-radius: var(--app-radius-pill);
+  color: var(--app-text);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  gap: 6px;
+  max-width: 100%;
+  min-height: 44px;
+  padding: 8px 14px;
+}
+@media (hover: hover) {
+  .mint-chip:hover {
+    background: var(--app-tint-strong);
+  }
+}
+// Pickers and fields press with a fill only: shrinking a full-width field reads as the whole
+// control collapsing, unlike a pill button sinking.
+.mint-chip:active {
+  background: color-mix(in srgb, var(--app-text) 16%, transparent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .mint-chip {
+    transition: background-color 0.12s ease;
+  }
+}
+.mint-chip__icon {
+  color: var(--app-text-muted);
+  flex-shrink: 0;
+}
+// Lucide's chevron-down only fills the middle half of its box, so at 20px it reads as 10px
+// beside the 20px scan and lock glyphs; 24px with a heavier stroke matches their weight.
+// Its ink ends on the shared 16px trailing guideline (see "Trailing guideline").
+.mint-chip__icon.lucide-chevron-down-icon {
+  height: 24px;
+  margin-block: -2px;
+  margin-inline-end: -2px;
+  stroke-width: 2.25;
+  width: 24px;
+}
+.mint-chip__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Toggles (the Material 3 switch): on = a filled primary track with a large on-primary thumb on
+   the end side; off = an empty outlined track with a small ink thumb on the start side. On and
+   off differ in fill, thumb size and position, not just in which grey is lighter. */
+.q-toggle:not(.q-toggle--dense) {
+  --toggle-off-ink: color-mix(in srgb, var(--app-text) 60%, transparent);
+  .q-toggle__inner {
+    padding: 0.2em 0.3em;
+  }
+  .q-toggle__track {
+    height: 0.6em;
+    border-radius: 0.3em;
+    opacity: 1;
+    background: transparent;
+    box-shadow: inset 0 0 0 0.05em var(--toggle-off-ink);
+  }
+  .q-toggle__thumb {
+    top: 0.35em;
+    left: 0.45em;
+    width: 0.3em;
+    height: 0.3em;
+  }
+  .q-toggle__thumb:after {
+    background-color: var(--toggle-off-ink);
+    box-shadow: none;
+  }
+  .q-toggle__inner--truthy {
+    .q-toggle__track {
+      background: currentColor;
+      box-shadow: none;
+    }
+    .q-toggle__thumb {
+      top: 0.28em;
+      left: 0.58em;
+      width: 0.44em;
+      height: 0.44em;
+    }
+    .q-toggle__thumb:after {
+      background-color: var(--app-on-primary);
+    }
+  }
+}
+// A disabled toggle is one grey treatment whatever its value, weaker than both on and off.
+.q-toggle.disabled {
+  opacity: 0.4 !important;
+}
+.q-toggle.disabled .q-toggle__inner--truthy .q-toggle__track {
+  background: color-mix(in srgb, var(--app-text) 32%, transparent);
+}
+body.body--light .q-toggle.disabled .q-toggle__inner--truthy .q-toggle__track {
+  background: rgba(0, 0, 0, 0.42);
+}
+.q-toggle.disabled .q-toggle__inner--truthy .q-toggle__thumb:after {
+  background-color: var(--app-text-muted);
+}
+
+/* Centred confirmation and edit dialogs (edit mint, remove mint): one title, one list or form,
+   then a Cancel / confirm pair of equal pills. */
+.confirm-dialog {
+  width: 100%;
+  max-width: 420px;
+  border-radius: var(--app-radius-xl);
+  padding: 24px 16px 16px;
+}
+.confirm-dialog__title {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 16px;
+}
+.confirm-dialog__summary {
+  background: var(--app-group-fill);
+  border: 1px solid var(--app-group-edge);
+  border-radius: var(--app-radius-lg) !important;
+  overflow: hidden;
+  padding: 4px 0;
+}
+.confirm-dialog__summary .q-item {
+  min-height: 56px;
+}
+.confirm-dialog__note {
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--app-text-muted);
+  margin: 16px 0 0;
+}
+.confirm-dialog__actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+.confirm-dialog__actions .q-btn {
+  min-height: 44px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* Tab hover/pressed fills share the control radius instead of a hard rectangle. The fill
+   inherits the tab's radius (Quasar's body.desktop rule), so round the tab itself. */
+.q-tab {
+  border-radius: 10px;
+}
+/* Tab hover, pressed and focus share one inset shape that ends above the active underline:
+   the fill and the ring both sit 6px inside the cell. */
+// The ring is drawn on that inset fill, so it has the fill's rounded corners (an outline at
+// a -6px offset shrank its radius and read square).
+.q-tab.q-focusable:focus-visible {
+  outline: none !important;
+}
+.q-tab.q-focusable:focus-visible::after {
+  border-radius: var(--app-radius-sm);
+  box-shadow: 0 0 0 2px var(--app-accent);
+  content: "";
+  inset: 6px;
+  pointer-events: none;
+  position: absolute;
+}
+.q-tab > .q-focus-helper {
+  border-radius: var(--app-radius-sm);
+  // Quasar pins the helper with top/left 0 and a 100% size (and its tab rules win on
+  // specificity), so a plain inset only moved two edges: in rtl the fill slid 6px off the tab.
+  // All four edges and an auto size keep it inset evenly in both directions.
+  height: auto !important;
+  inset: 6px !important;
+  width: auto !important;
+}
+// A tab chosen with the pointer is marked by its underline alone: Quasar keeps the focus fill
+// on a clicked tab until focus moves, which read as a second, competing selection. The fill
+// stays for hover and for keyboard focus.
+body.desktop
+  .q-tab.q-focusable:focus:not(:focus-visible):not(:hover)
+  > .q-focus-helper {
+  opacity: 0;
+}
+// The press ripple fills the same inset shape, so a tap shows one shape, not two.
+.q-tab > .q-ripple {
+  border-radius: var(--app-radius-sm);
+  height: auto !important;
+  inset: 6px !important;
+  width: auto !important;
+}
+
+/* Multi-line fields grow with their content; no native resize grip (Quasar's field sets one). */
+textarea,
+.q-textarea .q-field__native {
+  resize: none !important;
+}
+// Long values (an invoice, a token) scroll inside the field instead of growing past a sheet;
+// the trailing actions stay on the first line.
+.q-textarea.q-field--autogrow .q-field__native {
+  max-height: 160px;
+  overflow-y: auto;
+}
+.q-textarea .q-field__marginal {
+  align-self: flex-start;
+  height: 56px;
+}
+
+/* Dialog scrim, one for every sheet and dialog: dark enough that the page behind recedes
+   instead of reading as disabled. */
+.q-dialog__backdrop {
+  background: rgba(0, 0, 0, 0.6) !important;
+}
+// Over light pages a 60% wash reads as muddy grey; 45% still dims the dark pills behind
+// a sheet without flattening the page.
+body.body--light .q-dialog__backdrop {
+  background: rgba(0, 0, 0, 0.45) !important;
+}
+// A centred desktop flow keeps more of the page legible behind it.
+@media (min-width: 1024px) {
+  body.body--dark .q-dialog__backdrop {
+    background: rgba(0, 0, 0, 0.5) !important;
+  }
+}
+// A light, static blur on top of the dim, set here once rather than per dialog. Browsers
+// without backdrop-filter (older Android WebViews, Firefox before 103) skip it and keep the
+// dim. Low-end and old devices (src/js/device-effects.ts) and people who ask for less
+// transparency skip it too. Quasar only fades the backdrop's opacity, so the blur radius is
+// never animated.
+@supports (
+  (-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))
+) {
+  html:not(.reduced-effects) .q-dialog__backdrop {
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .q-dialog__backdrop {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}
+
+// A refresh control that is busy spins its own glyph, so it never turns into a different
+// mark (three dots read as an overflow menu).
+.refresh-spin {
+  animation: refresh-spin 1s linear infinite;
+}
+@keyframes refresh-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .refresh-spin {
+    animation-duration: 3s;
+  }
+}
+
+// Sheet header trailing slot: 44px buttons, outermost is the unit toggle, same glyph size on
+// every sheet (amount entry, receive and pay).
+.sheet-header__actions {
+  position: absolute;
+  inset-inline-end: 6px;
+}
+// The header title's clearance. Each side of the title is a flexible spacer with equal
+// growth, so the title stays centred; each spacer's minimum is the button(s) on its side
+// plus 8px (the close button 6 + 44, the trailing group 6 + its width, less the header's
+// 16px padding). When the wider side's minimum binds, the title moves toward the other side,
+// and only if it still doesn't fit does it end in an ellipsis (320px, two actions, long
+// translations: Send ecash in Greek).
+.sheet-header__title {
+  --sheet-header-lead: 42px;
+  --sheet-header-trail: max(
+    var(--sheet-header-lead),
+    calc(var(--sheet-header-actions, 0px) - 2px)
+  );
+  min-width: 0;
+}
+.sheet-header__title::before,
+.sheet-header__title::after {
+  content: "";
+  flex: 1 1 0;
+}
+.sheet-header__title::before {
+  min-width: var(--sheet-header-lead);
+}
+.sheet-header__title::after {
+  min-width: var(--sheet-header-trail);
+}
+.sheet-header__title > * {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+.sheet-header__text {
+  // 2px more clip box under the 20px line, so the ellipsis' overflow never trims a
+  // descender; nothing moves.
+  margin-bottom: -2px;
+  min-width: 0;
+  overflow: hidden;
+  padding-bottom: 2px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+// The ecash unit switch (UnitToggle), the outermost header action: the unit's code and a small
+// chevron, so it reads as "choose unit", not a logo or a second ⇅ amount swap. Header ink, like
+// close and lock; at least 44px square, wider for the code.
+.sheet-unit-toggle {
+  color: var(--app-text) !important;
+  font-size: 16px;
+  letter-spacing: 0.02em;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 8px;
+}
+.sheet-unit-toggle .q-btn__content {
+  flex-wrap: nowrap;
+  gap: 2px;
+}
+.sheet-unit-toggle__chevron {
+  opacity: 0.72;
+}
+
+// SheetSelect's field (currency, language): label over value, matching the outlined inputs
+// around it, 12px corners included. Drawn exactly like the outlined text fields: the field
+// fill and edge, 56px tall, the edge brightening on hover as an input's does.
+.mint-chip--field {
+  background: var(--app-field-fill);
+  border-radius: var(--app-radius-lg);
+  gap: 12px;
+  justify-content: flex-start;
+  min-height: 56px;
+  padding: 6px 16px;
+  text-align: start;
+  width: 100%;
+}
+@media (hover: hover) {
+  .mint-chip--field:hover {
+    background: var(--app-field-fill);
+    border-color: var(--app-field-edge-hover);
+  }
+}
+.mint-chip--field > :last-child {
+  margin-inline-start: auto;
+  padding-inline-start: 8px;
+}
+.mint-chip__field-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.mint-chip__label {
+  color: var(--app-text-muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+}
+.mint-chip--field .mint-chip__name {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 22px;
+}
+
+// The mint picker (ChooseMint), one recipe in two sizes: the
+// outlined field's fill and edge, a 40px avatar, the name (and its balance) and a 44px chevron
+// button on the end. Both keep main's 16px of padding over and under the text, so with a balance line both are 78px (main: 82px); dense only lets a
+// one-line picker (no balance) drop to 56px instead of 72px. A label only adds a line over the
+// name, as an outlined field's label does. Larger text grows it rather than clipping.
+.mint-picker {
+  align-items: center;
+  background: var(--app-field-fill);
+  border: 1px solid var(--app-field-edge);
+  border-radius: var(--app-radius-lg);
+  box-sizing: border-box;
+  color: var(--app-text);
+  column-gap: 12px;
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 44px;
+  min-height: 72px;
+  min-width: 0;
+  padding-block: 16px;
+  padding-inline: 16px 8px;
+  text-align: start;
+  width: 100%;
+}
+.mint-picker--dense {
+  min-height: 56px;
+}
+@media (hover: hover) {
+  .mint-picker:not(.mint-picker--disabled):hover {
+    border-color: var(--app-field-edge-hover);
+  }
+}
+// Pressing the field fills it a step past hover; it doesn't shrink (a whole field collapsing
+// reads as broken). The chevron button sinks as every button does.
+.mint-picker:not(.mint-picker--disabled):active {
+  background: var(--app-tint-strong);
+}
+// One focus stop (the chevron), ringed as the whole field, like a focused input.
+.mint-picker:has(.mint-picker__trigger:focus-visible) {
+  outline: 2px solid var(--app-field-edge-focus);
+  outline-offset: 2px;
+}
+.mint-picker .mint-picker__trigger:focus-visible {
+  outline: none !important;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .mint-picker {
+    transition: background-color 0.12s ease, border-color 0.12s ease;
+  }
+}
+.mint-picker__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.mint-picker__label {
+  color: var(--app-text-muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+}
+.mint-picker__name {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 22px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mint-picker--empty .mint-picker__name {
+  color: var(--app-text-muted);
+  font-weight: 400;
+}
+.mint-picker__caption {
+  color: var(--app-text-muted);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+}
+// The chevron is a plain round icon button, like every other icon button: no disc at rest;
+// the shared hover and press tints (.q-focus-helper, "Interaction states") show the disc only
+// while it's hovered or pressed. Keyboard focus rings the field.
+.mint-picker__trigger {
+  color: var(--app-text-muted);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .mint-picker__trigger {
+    transition: scale 0.12s ease;
+  }
+}
+// The chevron turns up while the sheet is open; the button itself never rotates.
+.mint-picker__chevron {
+  stroke-width: 2.25;
+}
+.mint-picker--open .mint-picker__chevron {
+  transform: rotate(180deg);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .mint-picker__chevron {
+    transition: transform 0.12s ease;
+  }
+}
+.mint-picker--disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+// The field already dims; the button inside doesn't dim a second time.
+.mint-picker--disabled .q-btn .mint-picker__trigger {
+  opacity: 1 !important;
+}
+
+// Text for screen readers only.
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+// A title followed by a badge: when the badge wraps it starts on the text edge, not
+// indented by its margin (the Multinut Beta badge).
+.label-with-badge {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 8px;
+  row-gap: 4px;
+}
+
+// Tabs sit on a hairline baseline, with a short rounded indicator on it.
+body .q-tabs {
+  box-shadow: inset 0 -1px 0 var(--app-border);
+}
+body .q-tab__indicator {
+  border-radius: 2px;
+  height: 3px;
+}
+// The wallet's History / Mints tabs: no baseline, and the indicator spans the
+// tab cell less the tab's corner radius at each end, at every width (Quasar's narrow indicator
+// only spanned the label, so it read short on stretched phone tabs).
+// The bar sits on the 16px content gutter like every page's content, so the tabs and the
+// indicator stay inside the column instead of running to the window edge.
+body .wallet-tabs {
+  --wallet-tab-radius: 10px;
+  box-shadow: none;
+  margin-inline: 16px;
+}
+body .wallet-tabs .q-tab {
+  border-radius: var(--wallet-tab-radius);
+}
+body .wallet-tabs .q-tab__indicator {
+  border-radius: 2px;
+  height: 3px;
+  inset-inline: var(--wallet-tab-radius);
+  width: auto;
+}
+
+// Tooltips: a small inverse label (ink fill, page-colour text), so it never reads as a control.
+body .q-tooltip {
+  background: var(--app-text);
+  border: 0;
+  border-radius: var(--app-radius-sm);
+  box-shadow: var(--app-shadow-md);
+  color: var(--app-surface);
+  font-size: 12px;
+  padding: 6px 10px;
+}
+// Slider: the remaining track at 3:1 against the surface, the filled part in the primary.
+body .q-slider__track {
+  background: color-mix(in srgb, var(--app-text) 38%, transparent) !important;
+}
+// Captions and body copy break evenly, without a lone word or glyph on the last line, in
+// every locale (Arabic and Chinese captions ended on a single word or character).
+.q-item__label--caption,
+.text-caption,
+.text-body2,
+p {
+  text-wrap: pretty;
+}
+
+// Number fields (amounts) without the browser's spin arrows: a native white stepper inside
+// a dark outlined field; amounts are typed, not stepped.
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+// Relay rows: one 52px rhythm like the other list rows (68px rows with stacked gaps).
+.settings-card .q-item.relay-row {
+  min-height: 52px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+// Outlined fields and picker fields take their edge and fill from the surface tokens, with
+// a 16px text inset (Quasar's is 12) so the label lines up with cards and the picker.
+body .q-field--outlined .q-field__control {
+  background: var(--app-field-fill);
+  padding: 0 16px;
+}
+body .q-field--outlined .q-field__control:before {
+  border-color: var(--app-field-edge);
+}
+@media (hover: hover) {
+  body
+    .q-field--outlined:not(.q-field--readonly):not(.q-field--disabled):hover
+    .q-field__control:before {
+    border-color: var(--app-field-edge-hover);
+  }
+}
+// Focus in the accent, not the fill: the fill misses 3:1 on sheets (salvador 1.99,
+// classic 2.24).
+body .q-field--outlined.q-field--focused .q-field__control:after {
+  border-color: var(--app-field-edge-focus);
+}
+// Labels are muted ink, never the theme colour: a 12px floating label in the fill or accent
+// misses 4.5:1 on sheets (classic, mint, autumn). On sheets the empty label takes full ink
+// (flamingo's muted label over a 10% fill measured 4.07). Errors keep the danger colour.
+body .q-field--outlined:not(.q-field--error) .q-field__label {
+  color: var(--app-text-muted);
+}
+body.body--dark
+  :is(.q-card:not(.flow-surface, .welcome-surface), .bottom-sheet, .q-menu)
+  .q-field--outlined:not(.q-field--error)
+  .q-field__label,
+body
+  .q-field--outlined.q-field--highlighted:not(.q-field--error)
+  .q-field__label {
+  color: var(--app-text);
+}
+body .q-field--outlined.q-field--disabled .q-field__control {
+  background: var(--app-disabled-fill);
+}
+// Disabled drops the edge: the resting edge is so soft that a hairline would outweigh it, so
+// enabled reads as "has an edge", disabled as a quieter fill with muted ink.
+body .q-field--outlined.q-field--disabled .q-field__control:before {
+  border-color: transparent;
+}
+// Read-only fields (a seed phrase, a relay) are values to copy, not inputs: a quiet tint
+// with no edge, so they never read as editable.
+body .q-field--outlined.q-field--readonly .q-field__control {
+  background: var(--app-readonly-fill);
+}
+body
+  .q-field--outlined.q-field--readonly:not(:has(.q-field__append))
+  .q-field__control {
+  padding-inline-end: 40px;
+}
+body .q-field--outlined.q-field--readonly .q-field__control:before {
+  border-color: transparent;
+}
+// A read-only value that is still the step's field (the welcome seed phrase): it keeps the
+// field's edge, over the quieter read-only fill.
+body
+  .q-field--outlined.q-field--readonly.readonly-outlined
+  .q-field__control:before {
+  border-color: var(--app-field-edge);
+  border-style: solid;
+}
+// A lock on the end edge says "can't be edited" without relying on the surface alone. A field
+// with its own end action (Copy on the Lightning address) keeps that action instead, so the
+// lock never sits on top of it.
+body
+  .q-field--outlined.q-field--readonly:not(:has(.q-field__append))
+  .q-field__control::after {
+  background: var(--app-text-muted);
+  border: 0 !important;
+  // The shared 12px field radius also lands on this pseudo-element and clipped the shackle.
+  border-radius: 0 !important;
+  content: "";
+  height: 16px;
+  inset: 50% 16px auto auto !important;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='18' height='11' x='3' y='11' rx='2'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='18' height='11' x='3' y='11' rx='2'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  opacity: 1 !important;
+  pointer-events: none;
+  position: absolute;
+  transform: translateY(-50%) !important;
+  width: 16px;
+}
+html[dir="rtl"]
+  body
+  .q-field--outlined.q-field--readonly:not(:has(.q-field__append))
+  .q-field__control::after {
+  inset: 50% auto auto 16px !important;
+}
+// Secondary buttons are tonal: a neutral fill, no edge, an ink label. The label names the
+// button (WCAG 1.4.11 needs no boundary for a text button); an edge made every stack read as
+// boxes. The theme colour is kept for filled primaries and selection.
+// Quasar clears an outline button's background with !important.
+body .q-btn--outline {
+  background: var(--app-tonal-fill) !important;
+}
+body .q-btn--outline.text-primary {
+  color: var(--app-text) !important;
+}
+body .q-btn--outline:before {
+  border-color: transparent;
+}
+@media (hover: hover) {
+  body .q-btn--outline:not(.disabled):hover {
+    background: var(--app-tonal-fill-hover) !important;
+  }
+}
+body .q-btn--outline:not(.disabled):active {
+  background: var(--app-tonal-fill-pressed) !important;
+}
+
+// One field shape: every outlined text field and select uses the 12px card and row radius,
+// whether or not it was declared "rounded" (pill fields next to rounded rectangles).
+.q-field--outlined .q-field__control,
+.q-field--outlined .q-field__control:before,
+.q-field--outlined .q-field__control:after,
+.q-field--outlined.q-field--rounded .q-field__control,
+.q-field--outlined.q-field--rounded .q-field__control:before,
+.q-field--outlined.q-field--rounded .q-field__control:after {
+  border-radius: var(--app-radius-lg);
+}
+
+/* Right-to-left locales: Quasar pins html, body and #q-app to ltr; follow <html dir> instead,
+   so rows, tabs and text alignment mirror. Amounts and addresses stay left to right. */
+html[dir="rtl"] body,
+html[dir="rtl"] #q-app {
+  direction: rtl;
+}
+html[dir="rtl"] .activity-row__amount,
+html[dir="rtl"] .amount-headline,
+html[dir="rtl"] .amount-display,
+html[dir="rtl"] .balance-amount {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+// Truncated single-line values (URLs, names) take their direction from their own text, but
+// still sit on the rtl start edge. Field labels also carry .ellipsis and stay rtl.
+html[dir="rtl"] .ellipsis:not(.q-field__label) {
+  unicode-bidi: plaintext;
+  text-align: right;
+}
+// Quasar's alignment utilities are physical; in rtl they swap so "left" means the start edge.
+html[dir="rtl"] .text-left {
+  text-align: right !important;
+}
+html[dir="rtl"] .text-right {
+  text-align: left !important;
+}
+// Directional glyphs point the other way in rtl (back is →, forward is ←).
+html[dir="rtl"] .lucide-chevron-left-icon,
+html[dir="rtl"] .lucide-chevron-right-icon,
+html[dir="rtl"] .lucide-arrow-left-icon,
+html[dir="rtl"] .lucide-arrow-right-icon,
+html[dir="rtl"] .rtl-flip,
+html[dir="rtl"] .lucide-delete-icon,
+html[dir="rtl"] .lucide-clipboard-paste-icon,
+html[dir="rtl"] .settings-menu-chevron {
+  transform: scaleX(-1);
+}
+// "Opens elsewhere" is not a reading direction, so the external-link arrow never mirrors.
+html[dir="rtl"] .detail-value__external,
+html[dir="rtl"] .settings-menu-chevron.lucide-arrow-up-right-icon,
+html[dir="rtl"] .lucide-external-link-icon {
+  transform: none;
+}
+
+// Quasar spacing utilities are physical; in rtl the inline-start/end margins swap sides.
+// Quasar padding utilities likewise: q-pl/q-pr swap sides in rtl.
+html[dir="rtl"] .q-pr-xs {
+  padding-right: 0 !important;
+  padding-left: 4px !important;
+}
+html[dir="rtl"] .q-pl-xs {
+  padding-left: 0 !important;
+  padding-right: 4px !important;
+}
+html[dir="rtl"] .q-pr-sm {
+  padding-right: 0 !important;
+  padding-left: 8px !important;
+}
+html[dir="rtl"] .q-pl-sm {
+  padding-left: 0 !important;
+  padding-right: 8px !important;
+}
+html[dir="rtl"] .q-pr-md {
+  padding-right: 0 !important;
+  padding-left: 16px !important;
+}
+html[dir="rtl"] .q-pl-md {
+  padding-left: 0 !important;
+  padding-right: 16px !important;
+}
+html[dir="rtl"] .q-pr-lg {
+  padding-right: 0 !important;
+  padding-left: 24px !important;
+}
+html[dir="rtl"] .q-pl-lg {
+  padding-left: 0 !important;
+  padding-right: 24px !important;
+}
+html[dir="rtl"] .q-pr-xl {
+  padding-right: 0 !important;
+  padding-left: 48px !important;
+}
+html[dir="rtl"] .q-pl-xl {
+  padding-left: 0 !important;
+  padding-right: 48px !important;
+}
+html[dir="rtl"] .q-pl-lg.q-pr-md {
+  padding-left: 16px !important;
+  padding-right: 24px !important;
+}
+html[dir="rtl"] .q-mr-xs {
+  margin-right: 0 !important;
+  margin-left: 4px !important;
+}
+html[dir="rtl"] .q-ml-xs {
+  margin-left: 0 !important;
+  margin-right: 4px !important;
+}
+html[dir="rtl"] .q-mr-sm {
+  margin-right: 0 !important;
+  margin-left: 8px !important;
+}
+html[dir="rtl"] .q-ml-sm {
+  margin-left: 0 !important;
+  margin-right: 8px !important;
+}
+html[dir="rtl"] .q-mr-md {
+  margin-right: 0 !important;
+  margin-left: 16px !important;
+}
+html[dir="rtl"] .q-ml-md {
+  margin-left: 0 !important;
+  margin-right: 16px !important;
+}
+html[dir="rtl"] .q-mr-lg {
+  margin-right: 0 !important;
+  margin-left: 24px !important;
+}
+html[dir="rtl"] .q-ml-lg {
+  margin-left: 0 !important;
+  margin-right: 24px !important;
+}
+html[dir="rtl"] .q-mr-xl {
+  margin-right: 0 !important;
+  margin-left: 48px !important;
+}
+html[dir="rtl"] .q-ml-xl {
+  margin-left: 0 !important;
+  margin-right: 48px !important;
+}
+html[dir="rtl"] .on-left {
+  margin-right: 0;
+  margin-left: 12px;
+}
+html[dir="rtl"] .on-right {
+  margin-left: 0;
+  margin-right: 12px;
+}
+// URLs, addresses and amounts typed into fields stay left to right inside an rtl form.
+html[dir="rtl"] .url-input input,
+html[dir="rtl"] .url-input textarea,
+html[dir="rtl"] input[type="url"],
+html[dir="rtl"] input[type="number"] {
+  direction: ltr;
+  text-align: right;
+}
+// Switches and radios follow the reading direction: the "on" end and the label gap mirror.
+html[dir="rtl"] .q-toggle__inner {
+  transform: scaleX(-1);
+}
+html[dir="rtl"] .q-radio__label,
+html[dir="rtl"] .q-checkbox__label,
+html[dir="rtl"] .q-toggle__label {
+  padding-left: 0;
+  padding-right: 12px;
+}
+// Quasar list sections pad on the physical right; in rtl the leading section pads the left.
+html[dir="rtl"] .q-item__section--side {
+  padding-right: 0;
+  padding-left: 16px;
+}
+html[dir="rtl"] .q-item__section--main ~ .q-item__section--side {
+  padding-left: 0;
+  padding-right: 16px;
+}
+
+// Pager buttons space evenly in both directions, and its arrows point the reading way.
+.q-pagination .q-btn {
+  margin-inline: 1px !important;
+}
+html[dir="rtl"] .q-pagination .q-icon {
+  transform: scaleX(-1);
+}
+
+// Quasar gutters, rating stars and field icons space with physical left margins; mirror them.
+html[dir="rtl"] .q-gutter-xs,
+html[dir="rtl"] .q-gutter-x-xs {
+  margin-left: 0;
+  margin-right: -4px;
+}
+html[dir="rtl"] .q-gutter-xs > *,
+html[dir="rtl"] .q-gutter-x-xs > * {
+  margin-left: 0;
+  margin-right: 4px;
+}
+html[dir="rtl"] .q-gutter-sm,
+html[dir="rtl"] .q-gutter-x-sm {
+  margin-left: 0;
+  margin-right: -8px;
+}
+html[dir="rtl"] .q-gutter-sm > *,
+html[dir="rtl"] .q-gutter-x-sm > * {
+  margin-left: 0;
+  margin-right: 8px;
+}
+html[dir="rtl"] .q-gutter-md,
+html[dir="rtl"] .q-gutter-x-md {
+  margin-left: 0;
+  margin-right: -16px;
+}
+html[dir="rtl"] .q-gutter-md > *,
+html[dir="rtl"] .q-gutter-x-md > * {
+  margin-left: 0;
+  margin-right: 16px;
+}
+html[dir="rtl"] .q-gutter-lg,
+html[dir="rtl"] .q-gutter-x-lg {
+  margin-left: 0;
+  margin-right: -24px;
+}
+html[dir="rtl"] .q-gutter-lg > *,
+html[dir="rtl"] .q-gutter-x-lg > * {
+  margin-left: 0;
+  margin-right: 24px;
+}
+html[dir="rtl"] .q-field__marginal > * + * {
+  margin-left: 0;
+  margin-right: 2px;
+}
+
+// Floating field labels sit at the start edge (right) in rtl, above the value.
+html[dir="rtl"] .q-field__label {
+  left: auto;
+  right: 0;
+  transform-origin: right top;
+}
+// Placeholders use the app font (and its Arabic fallback), not the UA default.
+input::placeholder,
+textarea::placeholder {
+  font-family: inherit;
+}
+// Even line endings app-wide: body and description text breaks "pretty", so no
+// single word or one or two CJK characters strand on the last line, while every other line
+// still fills the measure; short headings balance their lines.
+.q-item__label--caption,
+.text-caption,
+.app-empty__text,
+.blocking-state__text,
+.section-divider__caption,
+.settings-page-caption,
+.app-option-row__caption,
+.app-callout__body {
+  text-wrap: pretty;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.text-h5,
+.text-h6,
+.dialog-header,
+.app-empty__title,
+.blocking-state__title {
+  text-wrap: balance;
+}
+// Quasar pads field prepend/append slots on a physical side; in rtl the slots swap sides, so the
+// gap between an icon and the text has to swap with them.
+html[dir="rtl"] .q-field__prepend {
+  padding-right: 0;
+  padding-left: 12px;
+}
+html[dir="rtl"] .q-field__append {
+  padding-left: 0;
+  padding-right: 12px;
+}
+// Wrapped secondary text needs room for Arabic marks and dense CJK.
+.q-item__label--caption {
+  line-height: 1.45 !important;
+}
+
+// A disabled select field dims.
+.mint-chip:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+// Full-screen QR and receipt screens (send ecash, invoices, P2PK key, payment requests): header,
+// content, then the primary action. On phones and tablets the action is pinned to the bottom,
+// in reach of the thumb, and the content scrolls above it. On desktop the page scrolls as one
+// and the action follows the details, so a short receipt has no gap above a far-off button.
+.display-token-fullscreen {
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.display-token-fullscreen .content-area {
+  flex: 1;
+  overflow-y: auto;
+}
+// Every full-screen flow's action footer (QR screens, send, receive, pay): pushed to the bottom
+// of its flex column, on the flow's own surface (never a second colour), clear of the home
+// indicator.
+.bottom-panel {
+  margin-top: auto;
+  background: var(--flow-surface, var(--app-surface));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+// FlowFooter's action bar: the app column, 16px sides, 8px above and 24px below.
+.flow-footer__bar {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0 24px;
+}
+.flow-footer__col {
+  max-width: var(--app-column);
+  padding: 0 16px;
+  width: 100%;
+}
+.display-token-fullscreen .bottom-panel {
+  z-index: 2;
+}
+// On desktop a flow fills the window like any page. Its header, content and footer keep the app column (--app-column, 640px). QR and
+// receipt screens scroll as one and the action follows the details, so a short receipt has
+// no gap above a far-off button. Keypad flows keep the footer pinned.
+@media (min-width: 1024px) {
+  .display-token-fullscreen {
+    overflow-y: auto;
+  }
+  .display-token-fullscreen .content-area {
+    flex: none;
+    overflow: visible;
+  }
+  .display-token-fullscreen .bottom-panel {
+    margin-top: 16px;
+  }
+}
+
+// Sheet option rows (Receive, Send, Receive ecash): the app's body style for the label, with
+// no extra letter-spacing (Quasar's body1 adds 0.03em), and a muted one-line caption that
+// says what each option does.
+
+// Mint cards, shared by the installed mints list and Discover mints:
+// discovered mints are drawn as the same card.
+.mint-review {
+  color: var(--app-text-muted);
+  font-size: 13px;
+}
+
+.mint-review-link {
+  align-items: center;
+  background: none;
+  border: 0;
+  border-radius: var(--app-radius-sm);
+  color: var(--app-text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 14px;
+  gap: 4px;
+  min-height: 40px;
+  margin: -8px -8px;
+  padding: 8px 8px;
+  white-space: nowrap;
+}
+@media (hover: hover) {
+  .mint-review-link:hover {
+    background: var(--app-tint);
+    color: var(--app-text);
+  }
+}
+.mint-review-link:focus-visible {
+  outline: 2px solid var(--app-text);
+  outline-offset: 2px;
+}
+/* Rating stars use the text colour, like every other glyph (no emoji gold). */
+.rating-star {
+  color: var(--app-text);
+}
+/* The active card is marked by its selected edge and fill, and the wallet's mint by a check;
+   its text stays ink, so raw accent colours never carry body text on a dark card (classic
+   and salvador missed AA). */
+
+body .mint-card.q-item--active {
+  color: var(--app-text);
+}
+
+// Every mint card (Mints tab, Discover, Restore): edge, fill and shadow from the surface
+// tokens; the active or selected card swaps to the active edge and fill.
+body .mint-card {
+  border: 1px solid var(--app-card-edge);
+  border-radius: var(--app-radius-lg);
+  padding: 0;
+  background: var(--app-card-fill);
+  box-shadow: none;
+}
+// The active or selected card: a stronger fill and the shared selected edge, beside its
+// control (the check on the wallet's mint, or the restore checkbox). The fill alone read as too faint a
+// difference in both modes.
+body .mint-card.mint-card--active {
+  background: var(--app-card-fill-active);
+  border-color: var(--app-card-edge-active);
+}
+// In light mode a grey fill and a 1px edge read faint on pale themes: the selected card takes
+// a light tint of the theme colour instead, so every theme marks it alike.
+body.body--light .mint-card.mint-card--active {
+  background: color-mix(in srgb, var(--q-primary) 9%, transparent);
+}
+
+/* Mint card: one 16px inset, the identity row with its actions centred on it,
+   the holdings and rating below on the same edges. */
+.mint-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  width: 100%;
+}
+/* The trailing menu (or add) button sits in the card's top corner rather than centred on a
+   two-line name. */
+.mint-card__head {
+  align-items: flex-start;
+  display: flex;
+  gap: 4px;
+  min-width: 0;
+}
+/* The selection status: one fixed 24px cell on the name's line, holding the switching ring
+   (18px) or the selected check (20px), or nothing, so switching never moves the name or the
+   menu. Ink, like
+   every glyph: 4.5:1 on every card fill. */
+.mint-card__status {
+  align-items: center;
+  color: var(--app-text);
+  display: inline-flex;
+  flex: none;
+  height: 24px;
+  justify-content: center;
+  margin: 0;
+  min-width: 24px;
+  width: 24px;
+}
+// Reduced motion: the ring stops as a three-quarter arc, still recognisably busy, and the
+// spoken status still announces the switch.
+@media (prefers-reduced-motion: reduce) {
+  .mint-switch-ring,
+  .mint-switch-ring .path {
+    animation: none !important;
+  }
+  // Quasar's keyframes own the dash; without them its 1px dash reads as a dot.
+  .mint-switch-ring .path {
+    stroke-dasharray: 90, 200 !important;
+    stroke-dashoffset: 0 !important;
+  }
+}
+// The details button (IconButton, vertical dots): a 44px target; the negative margins keep
+// the glyph where the 40px button had it and the head one line tall.
+.mint-card-more {
+  flex: none;
+  height: 44px;
+  margin-block: -12px;
+  margin-inline: 0 -16px;
+  width: 44px;
+}
+// The skeleton reserves the Add pill's 44px height and approximate 72px width.
+.mint-card__action-skeleton {
+  border-radius: var(--app-radius-pill);
+  flex: none;
+  height: 44px;
+  margin-block-start: -6px;
+  margin-inline-end: -4px;
+  width: 72px;
+}
+// A tonal pill, so Add reads as a button beside the card's review link.
+.mint-card-add {
+  background: var(--app-tint-strong);
+  flex: none;
+  margin-block-start: -6px;
+  margin-inline-end: -4px;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 0 12px;
+}
+.mint-card-add__icon {
+  display: inline-flex;
+  margin-inline-end: 4px;
+}
+/* Restore's selection box sits where an installed mint shows its menu, on the same line. */
+.restore-mint-check {
+  flex: none;
+  margin: -4px -4px 0 0;
+}
+html[dir="rtl"] .restore-mint-check {
+  margin: -4px 0 0 -4px;
+}
+.mint-card__foot {
+  padding-inline-start: 50px;
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  min-height: 24px;
+}
+// No balance (Discover): the review line reads as the identity's third line, under the host
+// on the text edge, so the card has no empty band between them.
+.mint-card__foot--meta {
+  justify-content: flex-start;
+  margin-top: -8px;
+}
+// A host-only mint has one identity line, centred on the 40px avatar: its review line comes
+// up to the same 24px pitch as a named card's host line.
+.mint-card--host-only .mint-card__foot--meta {
+  margin-top: -18px;
+}
+.mint-card__balances {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  min-width: 0;
+}
+.mint-card__balances .currency-unit-text {
+  font-size: 17px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.mint-card__plus {
+  color: var(--app-text-subtle);
+}
+.mint-review__score {
+  color: var(--app-text);
+  font-weight: 500;
+}
+
+// Toasts: Sonner as on kelbie.dev, on our tokens: a raised card with the
+// quiet control edge and 16px corners, 13px medium text with a muted description, a 16px icon
+// on the first line carrying the tone. A toast goes on its own, with a swipe or its close
+// button, and stays while hovered. Sonner owns the motion (slide in from the top, the stack
+// behind the newest, fan-out on hover). Stated with body and the theme attribute, so ours
+// outrank Sonner's own colours, whose stylesheet loads after this one.
+body [data-sonner-toaster][data-sonner-theme] {
+  --normal-bg: var(--app-raised);
+  --normal-border: var(--app-field-edge);
+  --normal-text: var(--app-text);
+  --border-radius: 16px;
+  --width: min(400px, calc(100vw - 32px));
+  font-family: inherit;
+}
+body.body--light [data-sonner-toaster][data-sonner-theme] {
+  --normal-bg: var(--app-surface);
+  --normal-border: var(--app-border);
+}
+[data-sonner-toaster] [data-sonner-toast][data-styled="true"] {
+  align-items: flex-start;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  font-size: 13px;
+  font-weight: 500;
+  gap: 10px;
+}
+body.body--light [data-sonner-toaster] [data-sonner-toast][data-styled="true"] {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+[data-sonner-toast] [data-description] {
+  color: var(--app-text-muted);
+  font-weight: 400;
+}
+[data-sonner-toast] [data-icon] {
+  margin-top: 2px;
+}
+[data-sonner-toast][data-type="success"] [data-icon] {
+  color: var(--app-success);
+}
+[data-sonner-toast][data-type="error"] [data-icon] {
+  color: var(--app-danger);
+}
+[data-sonner-toast][data-type="warning"] [data-icon] {
+  color: var(--app-warning);
+}
+[data-sonner-toast][data-type="info"] [data-icon] {
+  color: var(--app-info);
+}
+
+// QR codes: one size everywhere, weighted against the screen so the code
+// leads without swamping the page: about 70% of the width on a phone, never more than 42% of
+// the height, between 220 and 300px.
+:root {
+  --app-qr-size: clamp(220px, min(70vw, 42vh), 300px);
+}
+.app-qr {
+  border-radius: var(--app-radius-lg);
+  overflow: hidden;
+  margin-inline: auto !important;
+  max-width: 100%;
+  width: var(--app-qr-size);
+}
+// Light mode: the white plate on a white page keeps a hairline edge, so the QR still reads as
+// one object with the copy pill under it.
+body.body--light .app-qr::after {
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px var(--app-border);
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+// Desktop: sheets open as centred dialogs, rounded on every corner;
+// phones keep the bottom sheet.
+@media (min-width: 1024px) {
+  .q-dialog__inner--standard > .q-card {
+    border-radius: var(--app-radius-xl) !important;
+  }
+}
+
+// Blocking states (already running, 404): one icon or code, a title, a line of text and one
+// full-width action, centred on the page surface.
+.blocking-state {
+  background: var(--app-surface, #000);
+  color: var(--app-text);
+}
+
+.blocking-state__icon {
+  color: var(--app-text-muted);
+}
+
+// Title and text use the column's measure; the title balances and the text breaks evenly.
+.blocking-state__title {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.blocking-state__text {
+  font-size: 15px;
+  color: var(--app-text-muted);
+}
+
+.blocking-state__action {
+  font-weight: 600;
+}
+
+// Wallet actions: Receive and Send as equal pills with the scan action between them in a
+// 52px tinted circle. Global so the design system board renders the real pattern.
+.wallet-actions {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+/* Send and Receive keep the original design's capitals. */
+// Equal shares whatever the label: a long one (EMPFANGEN) gives up padding rather than
+// taking width from its twin, which pushed scan off the centre line.
+.wallet-action-btn {
+  flex: 1 1 0;
+  min-height: 52px;
+  min-width: 0;
+  padding-inline: 8px;
+  white-space: nowrap;
+}
+
+// Scan rests on the page with no disc, as on the original wallet:
+// page ink on the page. Hover, press and focus are the shared button states (the focus
+// helper's tint and the accent ring).
+// The scan glyph reads at the pills' weight.
+.wallet-scan-btn {
+  background: transparent;
+  color: var(--app-text);
+  flex: 0 0 auto;
+  height: 56px;
+  width: 56px;
+}
+
+// Trailing guideline: whatever ends a row, card or field (switch, chevron, copy, scan, check,
+// close, menu) puts its visible ink 16px from the container's end edge, the same line as the
+// switch track. Icon buttons carry their 40px target past the glyph, so each pulls its end
+// margin in by the glyph's own inset.
+// A field's trailing button (copy, paste, scan, reveal) is always the 44px target with its
+// 20px glyph centred, whatever size the button was declared at, so the glyph sits on the
+// guideline instead of a dense 24px button jammed against the edge.
+.q-field__append > .q-btn--round {
+  height: 44px;
+  min-height: 44px;
+  min-width: 44px;
+  width: 44px;
+}
+// With the 16px field inset the last glyph ends 16px from the edge.
+.q-field--outlined .q-field__append > .q-btn:last-child {
+  margin-inline-end: -12px;
+}
+.q-item__section--side > .q-btn--round:last-child {
+  margin-inline-end: -3px;
+}
+.q-item__section--side > .q-checkbox:last-child {
+  margin-inline-end: -4px;
+}
+// Quasar centres the 32px track in a 56px box, so the visible switch ended 29px in.
+.q-item__section--side > .q-toggle:last-child {
+  margin-inline-end: -13px;
+}
+
+// Shared mint card positioning, balance text and error marker.
+.mint-card {
+  position: relative;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.currency-unit-text {
+  color: var(--app-text);
+  font-size: 14px;
+  font-weight: 500;
+}
+.error-badge {
+  position: absolute;
+  top: 4px;
+  inset-inline-end: 30px;
+  z-index: 10;
 }

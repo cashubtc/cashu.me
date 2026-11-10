@@ -1,254 +1,109 @@
 <template>
-  <div
-    :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
-    class="display-token-fullscreen"
-  >
+  <div class="display-token-fullscreen">
     <!-- Header -->
-    <div class="row items-center q-pa-md" style="position: relative">
-      <q-btn
-        v-close-popup
-        flat
-        round
-        icon="close"
-        color="grey"
-        class="floating-close-btn"
-        @click="closeCardScanner"
-      />
-      <div class="col text-center fixed-title-height">
-        <div v-show="!showExpandedButtons">
-          <q-item-label
-            overline
-            class="q-mt-sm text-white"
-            style="font-size: 1rem"
-          >
-            {{
+    <FullscreenDialogHeader @close="closeCardScanner">
+      <template #title>
+        <q-item-label class="sheet-title">
+          {{
+            $t(
               sendData.historyToken.amount && sendData.historyToken.amount < 0
                 ? sendData.historyToken.status === "paid"
-                  ? "Sent"
-                  : "Pending"
-                : "Received"
-            }}
-            Ecash</q-item-label
-          >
-        </div>
-      </div>
-      <!-- Floating actions (expandable) -->
-      <div class="floating-actions">
-        <div class="row no-wrap items-center">
-          <div
-            v-if="showExpandedButtons"
-            class="row no-wrap items-center q-gutter-xs justify-end q-mr-sm"
-          >
-            <q-btn
-              class="q-mx-xs q-pb-sm"
-              size="md"
-              flat
-              dense
-              @click="copyUsingMixin(encodeToPeanut(sendData.tokensBase64))"
-            >
-              <NutIcon :size="16" />
-
-              <q-tooltip>{{
-                $t("SendTokenDialog.actions.copy_emoji.tooltip_text")
-              }}</q-tooltip>
-            </q-btn>
-
-            <q-btn
-              v-if="webShareSupported"
-              class="q-mx-xs q-pb-sm"
-              size="md"
-              dense
-              flat
-              @click="shareToken"
-            >
-              <ShareIcon :size="16" />
-              <q-tooltip>{{
-                $t("SendTokenDialog.actions.share.tooltip_text")
-              }}</q-tooltip>
-            </q-btn>
-
-            <q-btn
-              class="q-mx-none"
-              size="md"
-              dense
-              icon="link"
-              flat
-              @click="
-                copyUsingMixin(baseURL + '#token=' + sendData.tokensBase64)
-              "
-              ><q-tooltip>{{
-                $t("SendTokenDialog.actions.copy_link.tooltip_text")
-              }}</q-tooltip></q-btn
-            >
-            <q-btn
-              unelevated
-              dense
-              size="md"
-              class="q-mx-xs"
-              v-if="
-                hasCamera &&
-                !sendData.paymentRequest &&
-                sendData.historyAmount < 0
-              "
-              @click="showCamera"
-            >
-              <ScanIcon :size="16" />
-            </q-btn>
-            <q-btn
-              unelevated
-              dense
-              v-if="
-                ndefSupported &&
-                !sendData.paymentRequest &&
-                sendData.historyAmount < 0
-              "
-              :disabled="scanningCard"
-              :loading="scanningCard"
-              class="q-mx-xs"
-              size="md"
-              @click="writeTokensToCard"
-              flat
-            >
-              <NfcIcon :size="16" />
-              <q-tooltip>{{
-                ndefSupported
-                  ? $t(
-                      "SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_supported_text"
-                    )
-                  : $t(
-                      "SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_unsupported_text"
-                    )
-              }}</q-tooltip>
-              <template v-slot:loading>
-                <q-spinner @click="closeCardScanner" />
-              </template>
-            </q-btn>
-            <q-btn
-              class="q-mx-none"
-              dense
-              color="negative"
-              data-testid="delete-token"
-              icon="delete"
-              size="sm"
-              @click="
-                showDeleteDialog = true;
-                closeCardScanner();
-              "
-              flat
-            >
-              <q-tooltip>{{
-                $t("SendTokenDialog.actions.delete.tooltip_text")
-              }}</q-tooltip>
-            </q-btn>
-          </div>
-          <q-btn
-            class="q-mx-none"
-            size="md"
-            flat
-            dense
-            data-testid="token-more"
-            @click="toggleExpandButtons"
-          >
-            <q-icon
-              name="more_horiz"
-              :color="showExpandedButtons ? 'primary' : 'grey'"
-            />
-          </q-btn>
-        </div>
-      </div>
-    </div>
+                  ? "DisplayTokenComponent.title.sent"
+                  : "DisplayTokenComponent.title.send"
+                : "DisplayTokenComponent.title.received"
+            )
+          }}</q-item-label
+        >
+      </template>
+      <template #actions>
+        <AppMenu
+          testid="token-more"
+          :label="$t('global.actions.more_options.label')"
+          :items="menuItems"
+          @select="onMenuSelect"
+        />
+      </template>
+    </FullscreenDialogHeader>
     <!-- Content area -->
     <div class="content-area">
       <q-card-section class="q-pa-none">
         <div v-if="qrCodeFragment" class="row justify-center q-mb-md">
-          <div class="col-12 col-sm-11 col-md-8 q-px-md">
-            <q-responsive :ratio="1" class="q-mx-none">
-              <vue-qrcode
-                :value="qrCodeFragment"
-                :options="{ width: 600, height: 600 }"
-                class="rounded-borders"
-                style="width: 100%; height: 100%"
-                @click="copyTokens"
-              >
-              </vue-qrcode>
-            </q-responsive>
-            <div style="height: 2px">
-              <q-linear-progress
-                v-if="runnerActive"
-                indeterminate
-                color="primary"
-              />
+          <div class="col-12 q-px-md">
+            <QrBlock :value="qrCodeFragment" :width="600" @click="copyTokens" />
+            <QrProgress :active="runnerActive" />
+            <!-- The animated QR's own settings sit with the QR they change, not between the
+                 details and the footer. -->
+            <div v-if="showAnimatedQR" class="qr-settings row justify-center">
+              <TonalChip @click="changeSpeed">
+                <template #icon><GaugeIcon :size="18" /></template>
+                {{
+                  $t("DisplayTokenComponent.qr_speed", {
+                    value: $t(
+                      `DisplayTokenComponent.speed.${
+                        { F: "fast", M: "medium", S: "slow" }[
+                          fragmentSpeedLabel
+                        ]
+                      }`
+                    ),
+                  })
+                }}
+              </TonalChip>
+              <!-- Density: how much of the token each animated frame carries, not the QR's
+                   size on screen. -->
+              <TonalChip @click="changeSize">
+                <template #icon><Grid3x3Icon :size="18" /></template>
+                {{
+                  $t("DisplayTokenComponent.qr_density", {
+                    value: $t(
+                      `DisplayTokenComponent.density.${
+                        { L: "high", M: "medium", S: "low" }[
+                          fragmentLengthLabel
+                        ]
+                      }`
+                    ),
+                  })
+                }}
+              </TonalChip>
             </div>
           </div>
         </div>
-        <div class="row justify-center q-pb-xs q-ba-none">
-          <div
-            class="col-12 col-sm-11 col-md-8 q-px-md"
-            style="max-width: 600px; position: relative"
-          >
-            <div class="row justify-center items-center no-wrap">
-              <div class="q-gutter-sm">
-                <q-btn
-                  v-if="showAnimatedQR"
-                  flat
-                  style="font-size: 10px"
-                  color="grey"
-                  class="q-ma-none"
-                  @click="changeSpeed"
-                >
-                  <q-icon name="speed" style="margin-right: 8px"></q-icon>
-                  Speed: {{ fragmentSpeedLabel }}
-                </q-btn>
-                <q-btn
-                  v-if="showAnimatedQR"
-                  flat
-                  style="font-size: 10px"
-                  class="q-ma-none"
-                  color="grey"
-                  @click="changeSize"
-                >
-                  <q-icon name="zoom_in" style="margin-right: 8px"></q-icon>
-                  Size: {{ fragmentLengthLabel }}
-                </q-btn>
-              </div>
-            </div>
-          </div>
+        <!-- While the NFC writer waits for a card: what it is waiting to do, and the way out. -->
+        <div
+          v-if="scanningCard"
+          class="nfc-busy row items-center justify-center q-px-md q-mb-md"
+        >
+          <BusyLabel class="text-app-muted" role="status">{{
+            $t(
+              "SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_supported_text"
+            )
+          }}</BusyLabel>
+          <TonalChip data-testid="cancel-nfc-write" @click="closeCardScanner">
+            {{ $t("global.actions.cancel.label") }}
+          </TonalChip>
         </div>
-        <q-card-section class="q-pa-sm">
-          <div class="row justify-center q-pt-lg">
+        <q-card-section class="q-pa-none">
+          <div class="row justify-center q-pt-none">
             <TokenInformation
+              show-token
               :encodedToken="sendData.tokensBase64"
               :payment-request-id="sendData.historyToken?.paymentRequestId"
             />
           </div>
-          <div
-            v-if="sendData.paymentRequest"
-            class="row justify-center q-pt-md"
-          >
-            <div
-              class="col-12 col-sm-11 col-md-8 q-px-md"
-              style="max-width: 600px"
-            >
-              <PaymentRequestInfo :request="sendData.paymentRequest" />
-            </div>
-          </div>
-          <div
+          <FlowColumn v-if="sendData.paymentRequest" class="q-px-md q-pt-md">
+            <PaymentRequestInfo :request="sendData.paymentRequest" />
+          </FlowColumn>
+          <FlowColumn
             v-if="sendData.historyToken?.meltQuote"
-            class="row justify-center q-pt-md"
+            class="q-px-md q-pt-md"
           >
-            <div
-              class="col-12 col-sm-11 col-md-8 q-px-md"
-              style="max-width: 600px"
-            >
-              <MeltQuoteInformation
-                :melt-quote="sendData.historyToken.meltQuote"
-                :invoice="sendData.historyToken"
-                :mint-url="sendData.historyToken.mint"
-                :history-paid-at="sendData.historyToken.paidDate"
-                :show-amount="false"
-              />
-            </div>
-          </div>
+            <MeltQuoteInformation
+              :melt-quote="sendData.historyToken.meltQuote"
+              :invoice="sendData.historyToken"
+              :mint-url="sendData.historyToken.mint"
+              :history-paid-at="sendData.historyToken.paidDate"
+              :show-amount="false"
+            />
+          </FlowColumn>
           <div
             v-if="
               sendData.paymentRequest &&
@@ -258,68 +113,45 @@
             "
             class="row justify-center q-pt-sm"
           >
-            <SendPaymentRequest />
+            <FlowColumn class="q-px-md"><SendPaymentRequest /></FlowColumn>
           </div>
         </q-card-section>
       </q-card-section>
     </div>
     <!-- Fixed bottom panel with copy button -->
-    <div class="bottom-panel">
-      <div class="row justify-center q-pb-md q-pt-sm">
-        <div class="col-12 col-sm-11 col-md-8 q-px-md" style="max-width: 600px">
-          <q-btn
-            class="full-width"
-            unelevated
-            size="lg"
-            color="primary"
-            rounded
-            data-testid="copy-ecash-token"
-            @click="copyTokens"
-          >
-            {{ copyButtonLabel }}
-          </q-btn>
-        </div>
-      </div>
-    </div>
+    <FlowFooter>
+      <q-btn
+        class="full-width"
+        unelevated
+        color="primary"
+        rounded
+        data-testid="copy-ecash-token"
+        @click="copyTokens"
+      >
+        {{ copyButtonLabel }}
+      </q-btn>
+    </FlowFooter>
   </div>
-  <!-- popup dialog to confirm deletion -->
-  <q-dialog v-model="showDeleteDialog">
-    <q-card class="q-pa-lg q-pt-md qcard">
-      <q-card-section class="q-pa-none">
-        <div class="row items-center no-wrap q-mb-sm">
-          <div class="col-12">
-            <span class="text-h6">Delete Ecash</span>
-          </div>
-        </div>
-        <div class="row items-center no-wrap q-my-sm q-py-none">
-          <div class="col-12">
-            <q-item-label>
-              Are you sure you want to delete this transaction from your
-              history?
-            </q-item-label>
-            <q-item-label class="q-pt-md text-weight-bold">
-              Warning: This action cannot be undone and there is no way to
-              recover the token.
-            </q-item-label>
-          </div>
-        </div>
-        <div class="row q-mt-lg">
-          <q-btn
-            @click="deleteThisToken"
-            color="negative"
-            rounded
-            class="q-mr-sm"
-            >Delete</q-btn
-          >
-          <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto"
-            >Cancel</q-btn
-          >
-        </div>
-      </q-card-section>
-    </q-card>
-  </q-dialog>
+  <ConfirmDialog
+    v-model="showDeleteDialog"
+    danger
+    :title="$t('DisplayTokenComponent.delete_dialog.title')"
+    :note="
+      $t('DisplayTokenComponent.delete_dialog.text') +
+      ' ' +
+      $t('DisplayTokenComponent.delete_dialog.warning')
+    "
+    :confirm-label="$t('common.delete')"
+    @confirm="deleteThisToken"
+  />
 </template>
 <script lang="ts">
+import FlowColumn from "src/components/ui/FlowColumn.vue";
+import TonalChip from "src/components/ui/TonalChip.vue";
+import BusyLabel from "src/components/ui/BusyLabel.vue";
+import FlowFooter from "src/components/ui/FlowFooter.vue";
+import AppMenu, { type AppMenuItem } from "src/components/ui/AppMenu.vue";
+import ConfirmDialog from "src/components/ui/ConfirmDialog.vue";
 import { defineComponent } from "vue";
 import { Buffer } from "buffer";
 import { UR, UREncoder } from "@gandlaf21/bc-ur";
@@ -332,35 +164,77 @@ import { useSettingsStore } from "src/stores/settings";
 import { useTokensStore } from "src/stores/tokens";
 import { useMintsStore } from "src/stores/mints";
 import TokenInformation from "components/TokenInformation.vue";
+import QrBlock from "src/components/QrBlock.vue";
+import QrProgress from "src/components/QrProgress.vue";
+import FullscreenDialogHeader from "src/components/ui/FullscreenDialogHeader.vue";
 import MeltQuoteInformation from "components/MeltQuoteInformation.vue";
 import SendPaymentRequest from "./SendPaymentRequest.vue";
 import PaymentRequestInfo from "./PaymentRequestInfo.vue";
 import { getDecodedToken, getEncodedTokenBinary } from "@cashu/cashu-ts";
-import { sumProofAmounts } from "src/js/proofs";
 import token from "src/js/token";
-import { notifyError, notifySuccess } from "src/js/notify";
+import { notifyCopied, notifyError, notifySuccess } from "src/js/notify";
 import { copyToClipboard } from "quasar";
 import {
-  Scan as ScanIcon,
+  Gauge as GaugeIcon,
+  Link as LinkIcon,
   Nfc as NfcIcon,
-  Share as ShareIcon,
   Nut as NutIcon,
+  ScanLine as ScanIcon,
+  Share as ShareIcon,
+  Trash2 as Trash2Icon,
+  Grid3x3 as Grid3x3Icon,
 } from "lucide-vue-next";
 
 declare const windowMixin: any;
+
+// Emoji a token can be copied inside. Each is a single code point with emoji presentation
+// on its own: one that carries its own variation selector (❤️) would add a byte to the token.
+const TOKEN_EMOJIS = [
+  "🥜",
+  "🌰",
+  "🥥",
+  "🍫",
+  "🍪",
+  "🍩",
+  "🍿",
+  "🍕",
+  "🌮",
+  "🍺",
+  "🎁",
+  "🎉",
+  "💸",
+  "💰",
+  "🪙",
+  "🧡",
+  "🔥",
+  "🚀",
+  "⚡",
+  "🍀",
+  "🌈",
+  "🦄",
+  "🐸",
+  "👻",
+];
 
 export default defineComponent({
   name: "DisplayTokenComponent",
   mixins: [windowMixin],
   components: {
+    FlowColumn,
+    TonalChip,
+    BusyLabel,
+    FlowFooter,
+    AppMenu,
+    ConfirmDialog,
+    GaugeIcon,
+    Grid3x3Icon,
     TokenInformation,
+    QrBlock,
+    QrProgress,
+    FullscreenDialogHeader,
     MeltQuoteInformation,
     SendPaymentRequest,
     PaymentRequestInfo,
-    ScanIcon,
-    NfcIcon,
-    ShareIcon,
-    NutIcon,
   },
   data: function () {
     return {
@@ -381,7 +255,6 @@ export default defineComponent({
       framentInervalSlow: 500,
       fragmentSpeedLabel: "F",
       scanningCard: false,
-      showExpandedButtons: false,
       showDeleteDialog: false,
       copyButtonCopied: false,
       copyButtonTimeout: null as any,
@@ -393,20 +266,58 @@ export default defineComponent({
     ...mapState(useUiStore, ["ndefSupported", "webShareSupported"]),
     ...mapState(useTransactionWorkerStore, ["outgoingPayments"]),
     ...mapState(useSettingsStore, ["nfcEncoding"]),
-    // display helpers
-    sumProofs: function () {
-      return token.decodeMeta(this.sendData.tokensBase64)?.amount ?? 0;
-    },
-    displayUnit: function () {
-      const display = this.formatCurrency(this.sumProofs, this.tokenUnit);
-      return display;
-    },
-    tokenUnit: function () {
-      const decoded = token.decodeMeta(this.sendData.tokensBase64);
-      return decoded ? token.getUnit(decoded) : "";
-    },
-    paidFees: function () {
-      return this.sumProofs - Math.abs(this.sendData.historyAmount ?? 0);
+    menuItems(): AppMenuItem[] {
+      const outgoing =
+        !this.sendData.paymentRequest && this.sendData.historyAmount < 0;
+      const items: (AppMenuItem | false)[] = [
+        {
+          key: "emoji",
+          icon: NutIcon,
+          label: this.$t("SendTokenDialog.actions.copy_emoji.tooltip_text"),
+          testid: "copy-emoji",
+          // The screen reader speaks each emoji's own name in the reader's language.
+          grid: TOKEN_EMOJIS.map((glyph) => ({
+            key: glyph,
+            glyph,
+            label: glyph,
+          })),
+        },
+        this.webShareSupported && {
+          key: "share",
+          icon: ShareIcon,
+          label: this.$t("SendTokenDialog.actions.share.tooltip_text"),
+        },
+        {
+          key: "link",
+          icon: LinkIcon,
+          label: this.$t("SendTokenDialog.actions.copy_link.tooltip_text"),
+        },
+        this.hasCamera &&
+          outgoing && {
+            key: "scan",
+            icon: ScanIcon,
+            label: this.$t("global.actions.scan.label"),
+          },
+        this.ndefSupported &&
+          outgoing && {
+            key: "nfc",
+            icon: NfcIcon,
+            // A second tap on the item cancels the write it started.
+            label: this.scanningCard
+              ? this.$t("global.actions.cancel.label")
+              : this.$t(
+                  "SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_supported_text"
+                ),
+          },
+        {
+          key: "delete",
+          icon: Trash2Icon,
+          danger: true,
+          testid: "delete-token",
+          label: this.$t("SendTokenDialog.actions.delete.tooltip_text"),
+        },
+      ];
+      return items.filter((item): item is AppMenuItem => Boolean(item));
     },
     runnerActive: function () {
       return this.outgoingPayments.some(
@@ -416,7 +327,7 @@ export default defineComponent({
     },
     copyButtonLabel: function () {
       if (this.copyButtonCopied) {
-        return "Copied";
+        return this.$t("common.copied");
       }
       return this.$t("SendTokenDialog.actions.copy_tokens.label");
     },
@@ -449,8 +360,34 @@ export default defineComponent({
     copyUsingMixin(text: string) {
       (this as any).copyText(text);
     },
-    toggleExpandButtons() {
-      this.showExpandedButtons = !this.showExpandedButtons;
+    onMenuSelect(key: string) {
+      if (key.startsWith("emoji:")) {
+        this.copyUsingMixin(
+          this.encodeToEmoji(this.sendData.tokensBase64, key.slice(6))
+        );
+        return;
+      }
+      switch (key) {
+        case "share":
+          this.shareToken();
+          break;
+        case "link":
+          this.copyUsingMixin(
+            this.baseURL + "#token=" + this.sendData.tokensBase64
+          );
+          break;
+        case "scan":
+          this.showCamera();
+          break;
+        case "nfc":
+          if (this.scanningCard) this.closeCardScanner();
+          else this.writeTokensToCard();
+          break;
+        case "delete":
+          this.closeCardScanner();
+          this.showDeleteDialog = true;
+          break;
+      }
     },
     initQr: function () {
       const val = this.sendData?.tokensBase64;
@@ -481,12 +418,10 @@ export default defineComponent({
       const firstSeqNum = 0;
       this.encoder = new UREncoder(ur, this.currentFragmentLength, firstSeqNum);
       clearInterval(this.qrInterval);
+      this.qrCodeFragment = this.encoder.nextPart();
       this.qrInterval = setInterval(() => {
         this.qrCodeFragment = this.encoder.nextPart();
       }, this.currentFragmentInterval);
-    },
-    updateQrCode: function () {
-      this.qrCodeFragment = this.encoder.nextPart();
     },
     changeSpeed: function () {
       if (this.currentFragmentInterval == this.fragmentIntervalMedium) {
@@ -514,9 +449,11 @@ export default defineComponent({
       }
       this.startQrCodeLoop();
     },
-    encodeToPeanut: function (tokenStr: string) {
+    // The token rides on the emoji as variation selectors (any emoji works, the receiver
+    // reads only the selectors), one per byte.
+    encodeToEmoji: function (tokenStr: string, emoji = "🥜") {
       return (
-        "🥜" +
+        emoji +
         Array.from(tokenStr)
           .map((char) => {
             const byteValue = char.charCodeAt(0);
@@ -559,7 +496,10 @@ export default defineComponent({
             .then(() => {
               this.ndef.onreadingerror = (error: any) => {
                 console.error(`NFC read failed: ${error}`);
-                notifyError(`${error?.message || error}`, "NFC read failed");
+                notifyError(
+                  this.$t("DisplayTokenComponent.nfc.read_failed"),
+                  `${error?.message || error}`
+                );
                 this.controller.abort();
                 this.scanningCard = false;
               };
@@ -607,36 +547,49 @@ export default defineComponent({
                         `Unknown NFC encoding: ${this.nfcEncoding}`
                       );
                   }
-                  notifySuccess("Writing to NFC card...");
+                  notifySuccess(this.$t("DisplayTokenComponent.nfc.writing"));
                   this.ndef
                     .write({ records: records }, { overwrite: true })
                     .then(() => {
-                      notifySuccess("Successfully flashed token to card!");
+                      notifySuccess(
+                        this.$t("DisplayTokenComponent.nfc.success")
+                      );
                     })
                     .catch((err: any) => {
                       console.error(
                         `NFC write failed: The card may not have enough capacity (needed ${records[0].data.length} bytes).`
                       );
                       notifyError(
-                        `The card may not have enough capacity (needed ${records[0].data.length} bytes).`,
-                        "NFC write failed"
+                        this.$t("DisplayTokenComponent.nfc.write_failed"),
+                        this.$t("DisplayTokenComponent.nfc.capacity", {
+                          bytes: records[0].data.length,
+                        })
                       );
                     });
                 } catch (err: any) {
                   console.error(`NFC error: ${err?.message}`);
-                  notifyError(`${err?.message}`, "NFC error");
+                  notifyError(
+                    this.$t("DisplayTokenComponent.nfc.error"),
+                    `${err?.message}`
+                  );
                 }
               };
               this.scanningCard = true;
             })
             .catch((error: any) => {
               console.error(`NFC error: ${error?.message}`);
-              notifyError(`${error?.message}`, "NFC error");
+              notifyError(
+                this.$t("DisplayTokenComponent.nfc.error"),
+                `${error?.message}`
+              );
               this.scanningCard = false;
             });
         } catch (error: any) {
           console.error(`NFC error: ${error?.message}`);
-          notifyError(`${error?.message}`, "NFC error");
+          notifyError(
+            this.$t("DisplayTokenComponent.nfc.error"),
+            `${error?.message}`
+          );
           this.scanningCard = false;
         }
       }
@@ -656,6 +609,7 @@ export default defineComponent({
     copyTokens: async function () {
       try {
         await copyToClipboard(this.sendData.tokensBase64);
+        notifyCopied();
         this.copyButtonCopied = true;
         // Clear any existing timeout
         if (this.copyButtonTimeout) {
@@ -682,47 +636,18 @@ export default defineComponent({
 });
 </script>
 <style scoped>
-.display-token-fullscreen {
-  height: 100vh; /* fallback */
-  height: 100dvh; /* account for mobile browser UI */
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+/* Wraps to two centred rows in long locales. */
+.qr-settings {
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.nfc-busy {
+  gap: 12px;
 }
 .content-area {
-  flex: 1;
-  overflow-y: auto;
-  max-width: 600px;
+  max-width: var(--app-column);
   width: 100%;
   margin: 0 auto;
-}
-.floating-close-btn {
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 1;
-}
-.floating-actions {
-  position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 2;
-}
-.fixed-title-height {
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.bottom-panel {
-  margin-top: auto;
-  background: var(--q-color-grey-1);
-  box-shadow: 0 -8px 16px rgba(0, 0, 0, 0.05);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  position: sticky;
-  bottom: 0;
-  z-index: 2;
 }
 </style>

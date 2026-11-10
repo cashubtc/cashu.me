@@ -1,6 +1,12 @@
 <template>
   <div class="row items-center">
-    <q-avatar :size="avatarSize" class="q-mr-sm mint-avatar">
+    <q-skeleton
+      v-if="skeleton"
+      type="QAvatar"
+      :size="avatarSize"
+      class="q-mr-md"
+    />
+    <q-avatar v-else :size="avatarSize" class="q-mr-md mint-avatar">
       <q-img
         v-if="iconUrl && !imgError"
         :src="iconUrl"
@@ -12,12 +18,10 @@
              already covers the image download -->
         <template v-slot:loading />
       </q-img>
-      <q-icon
+      <MintIcon
         v-else-if="!loading || imgError"
-        name="account_balance"
-        color="grey-7"
         :size="fallbackIconSize"
-        class="mint-avatar-fallback"
+        class="mint-avatar-fallback text-app-muted mint-glyph"
       />
       <!-- Single spinner for the whole network chain: mint info fetch
            and icon image download. The transition wraps a plain div on
@@ -25,29 +29,59 @@
            transition timing because of its infinite CSS animation. -->
       <transition name="mint-avatar-fade">
         <div v-if="showSpinner" class="mint-avatar-spinner">
-          <q-spinner color="grey-5" :size="fallbackIconSize" />
+          <PendingDots :size="fallbackIconSize" />
         </div>
       </transition>
     </q-avatar>
 
     <div class="mint-info-container">
-      <div v-if="name" class="mint-name">{{ name }}</div>
-      <div class="text-grey-6 mint-url">{{ url }}</div>
+      <!-- While the mint's info loads, a placeholder holds the name line and the host stays on
+           its own line, so the card keeps one height and the title fills in instead of changing. -->
+      <template v-if="skeleton">
+        <div class="mint-name"><q-skeleton type="text" width="96px" /></div>
+        <div class="mint-url"><q-skeleton type="text" width="140px" /></div>
+      </template>
+      <div v-else-if="loading && !name" class="mint-name">
+        <q-skeleton type="text" width="96px" />
+      </div>
+      <!-- Every mint has the same two lines in lists that pass unnamedLabel: a mint without
+           its own name takes its host as the title (in the normal colour, so it never reads
+           as disabled) over a muted "unnamed" line. -->
+      <div v-else class="mint-name">{{ name || host }}</div>
+      <div
+        v-if="
+          !skeleton &&
+          ((loading && !name) ||
+            (name && name !== host) ||
+            (unnamedLabel && (!name || name === host)))
+        "
+        class="mint-url"
+      >
+        {{
+          (loading && !name) || (name && name !== host) ? host : unnamedLabel
+        }}
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
+import PendingDots from "src/components/ui/PendingDots.vue";
+import { Building2 as MintIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "MintInfoContainer",
+  components: { PendingDots, MintIcon },
   props: {
-    url: { type: String, required: true },
+    url: { type: String, default: "" },
     name: { type: String, required: false },
     iconUrl: { type: String, required: false },
     avatarSize: { type: String, default: "34px" },
     loading: { type: Boolean, default: false },
+    unnamedLabel: { type: String, default: "" },
+    /** A placeholder in the same boxes: avatar, name line and host line. */
+    skeleton: { type: Boolean, default: false },
   },
   data() {
     return {
@@ -56,6 +90,9 @@ export default defineComponent({
     };
   },
   computed: {
+    host(): string {
+      return this.url.replace(/^https?:\/\//, "");
+    },
     fallbackIconSize(): string {
       // pick a slightly smaller icon inside the avatar
       const n = parseInt(String(this.avatarSize).replace(/px$/, "")) || 34;
@@ -79,6 +116,10 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.mint-avatar {
+  background: var(--app-tint-strong);
+}
+
 /* Self-contained styles (mirrors src/css/mintlist.css) so this component
    renders correctly even when that global stylesheet is not loaded. */
 .mint-info-container {
@@ -90,7 +131,7 @@ export default defineComponent({
 }
 
 .mint-name {
-  text-align: left;
+  text-align: start;
   font-size: 16px;
   font-weight: 600;
   line-height: 20px;
@@ -102,10 +143,10 @@ export default defineComponent({
 }
 
 .mint-url {
-  text-align: left;
-  font-size: 12px;
-  line-height: 16px;
-  font-family: monospace !important;
+  text-align: start;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--app-text-muted);
   margin-top: 4px;
   word-wrap: break-word;
   overflow-wrap: break-word;

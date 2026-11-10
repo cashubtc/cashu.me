@@ -255,7 +255,7 @@ export async function meltInvoiceDataBolt11(
         i.request === request && i.amount < 0 && i.status === "paid"
     )
   ) {
-    notifyError("Invoice already paid.");
+    notifyError(this.t("wallet.notifications.invoice_already_paid"));
     throw new Error("invoice already paid.");
   }
 

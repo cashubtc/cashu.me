@@ -1,7 +1,6 @@
 // src/stores/welcome.ts
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
-import { computed } from "vue";
 
 export type WelcomeState = {
   showWelcome: boolean;

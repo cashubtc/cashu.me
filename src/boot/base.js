@@ -1,11 +1,17 @@
-import { copyToClipboard } from "quasar";
+import { copyText } from "src/js/copy";
 import { useUiStore } from "stores/ui";
 import { Clipboard } from "@capacitor/clipboard";
 import { SafeArea } from "capacitor-plugin-safe-area";
-import { useSettingsStore } from "stores/settings";
-import { formatBigIntCurrency } from "src/js/format-currency";
-window.LOCALE = "en";
-// window.EventHub = new Vue();
+import { isolateLtr } from "src/js/format-currency";
+import {
+  notify,
+  notifyError,
+  notifySuccess,
+  notifyWarning,
+} from "src/js/notify";
+import { applyDeviceEffects } from "src/js/device-effects";
+applyDeviceEffects();
+// window.EventHub = new Vue(                                    );
 
 // Ensure we capture the PWA install prompt as early as possible
 if (typeof window !== "undefined") {
@@ -67,8 +73,23 @@ function resolveEffectiveTopBackgroundColor() {
     if (isTransparent(color)) {
       color = getBg(document.body);
     }
+    if (isTransparent(color)) {
+      color = getBg(document.documentElement);
+    }
   }
-  return color || "#000000";
+  return isTransparent(color) ? "#000000" : color;
+}
+
+// index.html paints the document (and the splash) black or white from the saved mode before
+// the app loads. Keep it in step with the mode: it shows behind every sheet's scrim, so a
+// stale black made light mode look broken until a reload.
+function syncDocumentBackground(isDark) {
+  const surface = getComputedStyle(document.body)
+    .getPropertyValue("--app-surface")
+    .trim();
+  const bg = isDark ? surface || "#000000" : "#ffffff";
+  document.documentElement.style.backgroundColor = bg;
+  document.documentElement.style.setProperty("--cashu-splash-bg", bg);
 }
 
 function updateStatusBarMeta() {
@@ -114,20 +135,15 @@ window.windowMixin = {
     toggleDarkMode: function () {
       this.$q.dark.toggle();
       this.$q.localStorage.set("cashu.darkMode", this.$q.dark.isActive);
+      syncDocumentBackground(this.$q.dark.isActive);
+      // The browser/PWA top bar takes its colour from the page header. Read it again once the
+      // new mode has painted: read at once it could keep the old mode's colour until a reload
+      // ("light theme only seems to work after refresh").
       updateStatusBarMeta();
+      requestAnimationFrame(() => setTimeout(updateStatusBarMeta, 300));
     },
-    copyText: function (text, message, position) {
-      const notify = this.$q.notify;
-      const i18n = this.$i18n;
-      copyToClipboard(text).then(function () {
-        notify({
-          message:
-            message ||
-            (i18n && i18n.t("global.copy_to_clipboard.success")) ||
-            "Copied to clipboard!",
-          position: position || "bottom",
-        });
-      });
+    copyText: function (text, message) {
+      return copyText(text, message);
     },
     pasteFromClipboard: async function () {
       let text = "";
@@ -139,165 +155,40 @@ window.windowMixin = {
       }
       return text;
     },
+    // Every amount reads left to right, also inside Arabic text. Sat and msat amounts show
+    // whole units here (the parseInt), where the store's formatCurrency keeps any fraction.
     formatCurrency: function (value, currency, showBalance = false) {
-      if (currency == undefined) {
-        currency = "sat";
+      const unit = currency == undefined ? "sat" : currency;
+      if (typeof value !== "bigint" && (unit == "sat" || unit == "msat")) {
+        value = parseInt(value);
       }
-      if (useUiStore().hideBalance && !showBalance) {
-        return "****";
-      }
-      if (typeof value === "bigint") {
-        return formatBigIntCurrency(
-          value,
-          currency,
-          window.LOCALE,
-          useSettingsStore().bip177BitcoinSymbol
-        );
-      }
-      if (currency == "sat") return this.formatSat(value);
-      if (currency == "msat") return this.fromMsat(value);
-      if (currency == "usd") value = value / 100;
-      if (currency == "eur") value = value / 100;
-      try {
-        return new Intl.NumberFormat(window.LOCALE, {
-          style: "currency",
-          currency: currency,
-        }).format(value);
-      } catch {
-        return (
-          new Intl.NumberFormat(window.LOCALE).format(value) +
-          " " +
-          String(currency)
-        );
-      }
-      // + " " +
-      // currency.toUpperCase()
-    },
-    formatSat: function (value) {
-      // convert value to integer
-      value = parseInt(value);
-      if (useSettingsStore().bip177BitcoinSymbol) {
-        if (value >= 0) {
-          return "₿" + new Intl.NumberFormat(window.LOCALE).format(value);
-        } else {
-          return (
-            "-₿" + new Intl.NumberFormat(window.LOCALE).format(Math.abs(value))
-          );
-        }
-      }
-      return new Intl.NumberFormat(window.LOCALE).format(value) + " sat";
-    },
-    fromMsat: function (value) {
-      value = parseInt(value);
-      return new Intl.NumberFormat(window.LOCALE).format(value) + " msat";
+      return isolateLtr(
+        useUiStore().formatCurrency(value, currency, showBalance)
+      );
     },
     notifyApiError: function (error) {
-      const types = {
-        400: "warning",
-        401: "warning",
-        500: "negative",
-      };
-      this.$q.notify({
-        timeout: 5000,
-        type: types[error.response.status] || "warning",
-        message:
-          error.message ||
-          error.response.data.message ||
-          error.response.data.detail ||
-          null,
-        caption:
-          [error.response.status, " ", error.response.statusText]
-            .join("")
-            .toUpperCase() || null,
-        icon: null,
-      });
+      const message =
+        error.message ||
+        error.response?.data?.message ||
+        error.response?.data?.detail ||
+        "";
+      const caption = error.response
+        ? `${error.response.status} ${error.response.statusText}`.toUpperCase()
+        : undefined;
+      if (error.response?.status >= 500) notifyError(message, caption);
+      else notifyWarning(message, caption);
     },
-    notifySuccess: async function (message, position = "top") {
-      this.$q.notify({
-        timeout: 5000,
-        type: "positive",
-        message: message,
-        position: position,
-        progress: true,
-        actions: [
-          {
-            icon: "close",
-            color: "white",
-            handler: () => {},
-          },
-        ],
-      });
-    },
-    notifyRefreshed: async function (message, position = "top") {
-      this.$q.notify({
-        timeout: 500,
-        type: "positive",
-        message: message,
-        position: position,
-        actions: [
-          {
-            color: "white",
-            handler: () => {},
-          },
-        ],
-      });
+    notifySuccess: async function (message) {
+      notifySuccess(message);
     },
     notifyError: async function (message, caption = null) {
-      this.$q.notify({
-        color: "red",
-        message: message,
-        caption: caption,
-        position: "top",
-        progress: true,
-        actions: [
-          {
-            icon: "close",
-            color: "white",
-            handler: () => {},
-          },
-        ],
-      });
+      notifyError(message, caption || undefined);
     },
     notifyWarning: async function (message, caption = null, timeout = 5000) {
-      this.$q.notify({
-        timeout: timeout,
-        type: "warning",
-        message: message,
-        caption: caption,
-        position: "top",
-        progress: true,
-        actions: [
-          {
-            icon: "close",
-            color: "black",
-            handler: () => {},
-          },
-        ],
-      });
+      notifyWarning(message, caption || undefined, timeout);
     },
-    notify: async function (
-      message,
-      type = "null",
-      position = "top",
-      caption = null,
-      color = null
-    ) {
-      // failure
-      this.$q.notify({
-        timeout: 5000,
-        type: "nuill",
-        color: "grey",
-        message: message,
-        caption: null,
-        position: "top",
-        actions: [
-          {
-            icon: "close",
-            color: "white",
-            handler: () => {},
-          },
-        ],
-      });
+    notify: async function (message) {
+      notify(message);
     },
   },
   created: function () {
@@ -309,6 +200,7 @@ window.windowMixin = {
     } else {
       this.$q.dark.set(true);
     }
+    syncDocumentBackground(this.$q.dark.isActive);
     this.g.allowedThemes = window.allowedThemes ?? ["classic"];
 
     addEventListener("offline", (event) => {
@@ -318,13 +210,6 @@ window.windowMixin = {
     addEventListener("online", (event) => {
       this.g.offline = false;
     });
-
-    // addEventListener("beforeunload", (event) => {
-    //   event.preventDefault();
-    //   const dialogText = "Are you sure about this?";
-    //   event.returnValue = dialogText;
-    //   return dialogText;
-    // });
 
     if (this.$q.localStorage.getItem("cashu.theme")) {
       document.body.setAttribute(

@@ -1,236 +1,103 @@
 <template>
-  <q-dialog
-    v-model="showPRDialog"
-    maximized
-    backdrop-filter="blur(2px) brightness(60%)"
-    transition-show="fade"
-    transition-hide="fade"
-    no-backdrop-dismiss
-  >
-    <q-card v-if="showPRKData" class="q-pa-none qcard">
-      <div
-        :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
-        class="display-token-fullscreen"
-      >
-        <!-- Header -->
-        <div class="row items-center q-pa-md" style="position: relative">
-          <q-btn
-            v-close-popup
-            flat
-            round
-            icon="close"
-            color="grey"
-            class="floating-close-btn"
-          />
-          <div class="col text-center fixed-title-height">
-            <q-item-label class="dialog-header q-mt-sm text-white">
-              {{ $t("PaymentRequestDialog.payment_request.caption") }}
-            </q-item-label>
-          </div>
-          <div
-            class="row items-center no-wrap"
-            style="position: absolute; right: 12px"
-          >
-            <q-btn
-              flat
-              dense
-              round
-              icon="chevron_left"
-              color="grey"
-              @click="selectPrevRequest"
-              :disable="ourPaymentRequests.length <= 1"
-            />
-            <div class="q-mx-sm text-caption text-grey-6">
-              {{ currentIndexDisplay }}
-            </div>
-            <q-btn
-              flat
-              dense
-              round
-              icon="chevron_right"
-              color="grey"
-              @click="selectNextRequest"
-              :disable="ourPaymentRequests.length <= 1"
-            />
-          </div>
-        </div>
-
-        <!-- Content -->
-        <div class="content-area">
-          <q-card-section class="q-pa-none">
-            <div v-if="showPRKData" class="row justify-center q-mb-md">
-              <div
-                class="col-12 col-sm-11 col-md-8 q-px-md"
-                style="max-width: 600px"
-              >
-                <q-responsive :ratio="1" class="q-mx-none">
-                  <vue-qrcode
-                    :value="showPRKData"
-                    :options="{ width: 400 }"
-                    class="rounded-borders"
-                    style="width: 100%"
-                  >
-                  </vue-qrcode>
-                </q-responsive>
-              </div>
-            </div>
-
-            <q-card-section class="q-pa-sm">
-              <!-- Amount display/edit -->
-              <div class="row justify-center q-pt-md">
-                <div v-if="!isEditingAmount">
-                  <q-btn
-                    color="primary"
-                    rounded
-                    size="md"
-                    @click="startEditingAmount"
-                  >
-                    <q-icon name="edit_note" size="xs" class="q-mr-sm" />
-                    {{ amountLabel }}
-                  </q-btn>
-                </div>
-                <div v-else class="col-12 col-sm-8 col-md-6">
-                  <q-input
-                    ref="amountInput"
-                    v-model="amountInputValue"
-                    type="number"
-                    :placeholder="
-                      $t('PaymentRequestDialog.inputs.amount.placeholder')
-                    "
-                    @blur="finishEditingAmount"
-                    @keyup.enter="finishEditingAmount"
-                  ></q-input>
-                </div>
-              </div>
-
-              <!-- Mint selection and unit toggle -->
-              <div class="row justify-center q-pt-md">
-                <div class="row no-wrap items-center q-gutter-sm">
-                  <q-chip
-                    outline
-                    clickable
-                    class="q-pa-md"
-                    :style="
-                      chosenMintUrl == undefined
-                        ? ''
-                        : 'height: 36px; font-family: monospace'
-                    "
-                    @click="setActiveMintUrl"
-                  >
-                    <q-icon name="account_balance" size="xs" class="q-mr-sm" />
-                    {{ getShortUrl(chosenMintUrl) }}
-                  </q-chip>
-                  <div @click="toggleUnit">
-                    <ToggleUnit class="q-py-none" color="white" />
-                  </div>
-                </div>
-              </div>
-
-              <!-- Received payments summary and list -->
-              <div
-                class="row justify-center q-pt-md q-pb-md"
-                v-if="currentPaymentRequest"
-              >
-                <div
-                  class="col-12 col-sm-11 col-md-8 q-px-md"
-                  style="max-width: 600px"
-                >
-                  <div class="row q-gutter-sm items-center q-mb-sm">
-                    <q-chip
-                      outline
-                      v-for="(total, unit) in totalsByUnit"
-                      :key="unit"
-                      color="primary"
-                      text-color="primary"
-                    >
-                      {{ $t("PaymentRequestDialog.received_total") }}:
-                      <span class="q-ml-xs text-weight-medium">{{
-                        total
-                      }}</span>
-                      <span class="q-ml-xs">{{ unit }}</span>
-                    </q-chip>
-                  </div>
-                  <PaymentRequestPayments
-                    :payments="currentPayments"
-                    :page-size="3"
-                  />
-                </div>
-              </div>
-
-              <!-- New request button -->
-              <div class="row justify-center q-pt-lg q-pb-md">
-                <q-btn flat size="md" rounded @click="newRequest">
-                  <q-icon name="refresh" class="q-pr-sm" size="xs" />
-                  {{ $t("PaymentRequestDialog.actions.new_request.label") }}
-                </q-btn>
-              </div>
-            </q-card-section>
-          </q-card-section>
-        </div>
-
-        <!-- Bottom panel action -->
-        <div class="bottom-panel">
-          <div class="row justify-center q-pb-lg q-pt-sm">
-            <div
-              class="col-12 col-sm-11 col-md-8 q-px-md"
-              style="max-width: 600px"
+  <FlowDialog v-model="showPRDialog">
+    <template v-if="showPRKData">
+      <div class="display-token-fullscreen">
+        <FullscreenDialogHeader
+          :title="$t('PaymentRequestDialog.payment_request.caption')"
+          balanced
+        />
+        <PaymentRequestView
+          :request="showPRKData"
+          :payments="currentPayments"
+          @change="applyChanges"
+        >
+          <!-- Earlier requests: the table's last row, once there is more than one. -->
+          <template v-if="ownRequestIndices.length > 1" #rows>
+            <DetailRow
+              data-testid="pr-pager"
+              :icon="HistoryIcon"
+              :label="currentIndexDisplay"
+              value-class="detail-value--controls"
             >
-              <q-btn
-                class="full-width"
-                unelevated
-                size="lg"
-                color="primary"
-                rounded
-                @click="onCopyPRKData"
-              >
-                {{ $t("PaymentRequestDialog.actions.copy.label") }}
-              </q-btn>
-            </div>
-          </div>
-        </div>
+              <span class="pr-pager">
+                <IconButton
+                  :label="$t('PaymentRequestDialog.actions.previous.label')"
+                  :icon="ChevronLeftIcon"
+                  :icon-size="18"
+                  :disable="requestPosition <= 0"
+                  @click="stepRequest(-1)"
+                />
+                <IconButton
+                  :label="$t('PaymentRequestDialog.actions.next.label')"
+                  :icon="ChevronRightIcon"
+                  :icon-size="18"
+                  :disable="requestPosition >= ownRequestIndices.length - 1"
+                  @click="stepRequest(1)"
+                />
+              </span>
+            </DetailRow>
+          </template>
+          <!-- A fresh, open request: the secondary action over Share and Copy. -->
+          <template #footer>
+            <q-btn
+              flat
+              rounded
+              color="primary"
+              class="full-width q-mb-sm"
+              data-testid="pr-new-request"
+              @click="newRequest"
+            >
+              {{ $t("PaymentRequestDialog.actions.new_request.label") }}
+            </q-btn>
+          </template>
+        </PaymentRequestView>
       </div>
-    </q-card>
-  </q-dialog>
+    </template>
+  </FlowDialog>
 </template>
 
 <script lang="ts">
+import FlowDialog from "src/components/ui/FlowDialog.vue";
+import {
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon,
+  History as HistoryIcon,
+} from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
-import VueQrcode from "@chenfengyuan/vue-qrcode";
-
+import {
+  decodePaymentRequest,
+  PaymentRequestTransportType,
+} from "@cashu/cashu-ts";
+import { nip19 } from "nostr-tools";
 import { usePRStore } from "src/stores/payment-request";
-import { useMintsStore } from "../stores/mints";
-import { getShortUrl } from "src/js/wallet-helpers";
-import { useUiStore } from "../stores/ui";
-import ToggleUnit from "./ToggleUnit.vue";
-import PaymentRequestPayments from "./PaymentRequestPayments.vue";
-// type hint for global mixin
-declare const windowMixin: any;
+import { useMintsStore } from "src/stores/mints";
+import { useNostrStore } from "src/stores/nostr";
+import { notifyError } from "src/js/notify";
+import {
+  requestFields,
+  type RequestFields,
+} from "src/js/payment-request-fields";
+import FullscreenDialogHeader from "src/components/ui/FullscreenDialogHeader.vue";
+import IconButton from "src/components/ui/IconButton.vue";
+import DetailRow from "src/components/ui/DetailRow.vue";
+import PaymentRequestView from "src/components/PaymentRequestView.vue";
 
+// The payment request screen: the header, the request itself (PaymentRequestView), a pager
+// row over this wallet's earlier requests at the end of its table, and New request over its
+// footer. Every change the
+// view asks for becomes a new request with its own id, so one already shared keeps working.
 export default defineComponent({
   name: "PRDialog",
-  mixins: [windowMixin],
-  components: {
-    VueQrcode,
-    ToggleUnit,
-    PaymentRequestPayments,
+  setup() {
+    return { ChevronLeftIcon, ChevronRightIcon, HistoryIcon };
   },
-  data() {
-    const amountLabelDefault = (this as any).$i18n.t(
-      "PaymentRequestDialog.actions.add_amount.label"
-    );
-    return {
-      paymentRequestAmount: undefined as number | undefined,
-      isEditingAmount: false,
-      amountInputValue: "",
-      amountLabelDefault,
-      amountLabel: amountLabelDefault,
-      defaultAnyMint: (this as any).$i18n.t(
-        "PaymentRequestDialog.actions.use_active_mint.label"
-      ),
-      chosenMintUrl: undefined as string | undefined,
-      memo: "",
-    };
+  components: {
+    FlowDialog,
+    DetailRow,
+    FullscreenDialogHeader,
+    IconButton,
+    PaymentRequestView,
   },
   computed: {
     ...mapState(usePRStore, [
@@ -239,145 +106,121 @@ export default defineComponent({
       "selectedPRIndex",
       "currentPaymentRequest",
     ]),
-    ...mapState(useMintsStore, ["activeMintUrl", "activeUnit"]),
-    activeUnitCurrencyMultiplyer() {
-      return (useMintsStore() as any).activeUnitCurrencyMultiplyer;
-    },
+    ...mapState(useMintsStore, ["activeUnit"]),
+    ...mapState(useNostrStore, ["seedSignerPublicKey"]),
     ...mapWritableState(usePRStore, ["showPRDialog"]),
+    // Requests this wallet receives on. Older versions also stored requests the user paid,
+    // which carry someone else's address; those are never shown or copied here.
+    ownRequestIndices(): number[] {
+      return this.ourPaymentRequests
+        .map((entry: any, index: number) => ({ entry, index }))
+        .filter(({ entry }) => this.isOwnRequest(entry.encoded))
+        .map(({ index }) => index);
+    },
+    // The shown request's place among them (the newest when none is selected).
+    requestPosition(): number {
+      const own = this.ownRequestIndices;
+      const position = own.indexOf(this.selectedPRIndex as number);
+      return position < 0 ? own.length - 1 : position;
+    },
     currentIndexDisplay(): string {
-      const total = this.ourPaymentRequests.length || 0;
-      if (!total) return "0/0";
-      return `${(this.selectedPRIndex as number) + 1}/${total}`;
+      const own = this.ownRequestIndices;
+      if (!own.length) return "0/0";
+      return this.$t("PaymentRequestDialog.request_index", {
+        index: this.requestPosition + 1,
+        total: own.length,
+      }) as string;
     },
     currentPayments(): any[] {
       const prStore = usePRStore();
       if (!this.currentPaymentRequest) return [];
       return prStore.getPaymentsForRequest(this.currentPaymentRequest.id);
     },
-    totalsByUnit(): Record<string, number> {
-      const totals: Record<string, number> = {};
-      for (const p of this.currentPayments) {
-        if (p.amount > 0) {
-          totals[p.unit] = (totals[p.unit] ?? 0) + p.amount;
-        }
-      }
-      return totals;
+  },
+  watch: {
+    showPRDialog: {
+      handler(open: boolean) {
+        if (open) this.showOwnRequest();
+      },
+      immediate: true,
     },
   },
   methods: {
-    ...mapActions(usePRStore, [
-      "newPaymentRequest",
-      "selectPrevRequest",
-      "selectNextRequest",
-    ]),
-    toggleUnit() {
-      this.paymentRequestAmount = undefined;
-      this.amountLabel = this.amountLabelDefault;
-      this.newPaymentRequest(
-        this.paymentRequestAmount,
-        this.memo,
-        this.chosenMintUrl
-      );
-    },
-    newRequest() {
-      this.newPaymentRequest(
-        this.paymentRequestAmount,
-        this.memo,
-        this.chosenMintUrl,
-        true
-      );
-    },
-    getShortUrl(url: string | undefined) {
-      if (!url) {
-        return this.defaultAnyMint;
-      }
-      return getShortUrl(url);
-    },
-    setActiveMintUrl() {
-      if (this.activeMintUrl == this.chosenMintUrl) {
-        return;
-      }
-      this.chosenMintUrl = this.activeMintUrl;
-      this.newPaymentRequest(
-        this.paymentRequestAmount,
-        this.memo,
-        this.chosenMintUrl
-      );
-    },
-    startEditingAmount() {
-      this.isEditingAmount = true;
-      this.$nextTick(() => {
-        const input = this.$refs.amountInput as any;
-        if (input) {
-          input.focus();
-        }
-      });
-    },
-    onCopyPRKData() {
-      if (this.showPRKData) {
-        (this as any).copyText(this.showPRKData);
+    ...mapActions(usePRStore, ["createPaymentRequest", "selectRequestByIndex"]),
+    isOwnRequest(encoded: string): boolean {
+      if (!this.seedSignerPublicKey) return true;
+      try {
+        return (decodePaymentRequest(encoded).transport || []).some((t) => {
+          if (t.type !== PaymentRequestTransportType.NOSTR) return false;
+          const target = nip19.decode(t.target);
+          return (
+            target.type === "nprofile" &&
+            target.data.pubkey === this.seedSignerPublicKey
+          );
+        });
+      } catch {
+        return false;
       }
     },
-    finishEditingAmount() {
-      const amount = parseFloat(this.amountInputValue);
-      if (isNaN(amount) || amount <= 0 || this.amountInputValue == "") {
-        this.paymentRequestAmount = undefined;
-        this.amountLabel = this.amountLabelDefault;
+    showOwnRequest() {
+      const own = this.ownRequestIndices;
+      if (own.includes(this.selectedPRIndex as number)) {
+        this.selectRequestByIndex(this.selectedPRIndex as number);
+      } else if (own.length) {
+        this.selectRequestByIndex(own[own.length - 1]);
       } else {
-        this.paymentRequestAmount = amount * this.activeUnitCurrencyMultiplyer;
-        this.amountLabel = useUiStore().formatCurrency(
-          amount * this.activeUnitCurrencyMultiplyer,
-          this.activeUnit
-        );
+        this.newRequest();
       }
-      this.newPaymentRequest(
-        this.paymentRequestAmount,
-        this.memo,
-        this.chosenMintUrl
-      );
-      this.isEditingAmount = false;
-      this.amountInputValue = "";
+    },
+    stepRequest(step: number) {
+      const own = this.ownRequestIndices;
+      if (own.length <= 1) return;
+      // The pager stops at the first and last request (its arrows disable there).
+      const next = this.requestPosition + step;
+      if (next < 0 || next >= own.length) return;
+      this.selectRequestByIndex(own[next]);
+    },
+    applyChanges(next: RequestFields) {
+      try {
+        this.createPaymentRequest(
+          next.amount,
+          next.description,
+          next.mints?.[0],
+          next.unit
+        );
+      } catch (error) {
+        notifyError(String(error));
+      }
+    },
+    // A fresh, open request: no amount, any mint, in the current request's unit.
+    newRequest() {
+      const { unit } = requestFields(this.showPRKData, this.activeUnit);
+      this.applyChanges({ unit });
     },
   },
 });
 </script>
 
 <style scoped>
-.display-token-fullscreen {
-  height: 100vh;
-  height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+/* The pager row's arrows are the rows' 18px chevrons; the last one's box ends where theirs
+   does, 4px past the value edge (13px of the 44px target lies beyond its glyph). */
+.pr-pager {
+  display: inline-flex;
+  margin-block: -8px;
+  margin-inline-end: -17px;
 }
-.content-area {
-  flex: 1;
-  overflow-y: auto;
+/* Hover and focus stay inside the 44px row: a 36px disc, the ring drawn just inside it. */
+.pr-pager :deep(.q-focus-helper) {
+  border-radius: 50%;
+  height: auto !important;
+  inset: 4px !important;
+  width: auto !important;
 }
-.floating-close-btn {
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 1;
+.pr-pager :deep(.q-btn:focus-visible) {
+  outline-offset: -4px !important;
 }
-.fixed-title-height {
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.bottom-panel {
-  margin-top: auto;
-  background: var(--q-color-grey-1);
-  box-shadow: 0 -8px 16px rgba(0, 0, 0, 0.05);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  position: sticky;
-  bottom: 0;
-  z-index: 2;
-}
-.qcard {
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
+/* Right to left, "previous" sits on the right and points that way. */
+[dir="rtl"] .pr-pager :deep(svg) {
+  transform: scaleX(-1);
 }
 </style>

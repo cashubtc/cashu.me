@@ -1,32 +1,33 @@
 <template>
   <!-- <q-card class="q-my-md q-py-sm">
     <q-card-section class="q-mt-sm q-py-xs"> -->
-  <div class="q-pt-xl q-pb-md">
+  <!-- The original wallet's generous air around the balance. -->
+  <div class="q-pt-xl q-pb-sm">
     <transition
       appear
       enter-active-class="animated fadeInDown"
       leave-active-class="animated fadeInDown"
       mode="out-in"
     >
-      <div class="balance-carousel-shell q-mt-lg q-mb-xl text-primary">
+      <div class="balance-carousel-shell q-mt-lg q-mb-lg text-primary">
         <transition
           appear
           enter-active-class="animated pulse"
           leave-active-class="animated fadeOut"
         >
-          <q-spinner
-            v-if="globalMutexLock"
-            class="balance-lock-spinner"
-            size="sm"
-            color="primary"
-          />
+          <PendingDots v-if="globalMutexLock" class="balance-lock-spinner" />
         </transition>
+        <!-- Names the hero figure, so it reads apart from the selected mint's own balance. -->
+        <div class="balance-total-label">
+          {{ $t("BalanceView.total_label") }}
+        </div>
         <q-carousel
           v-model="activeUnit"
           transition-prev="slide-right"
           transition-next="slide-left"
-          :swipeable="hasMultipleBalanceUnits"
+          :swipeable="false"
           :animated="hasMultipleBalanceUnits"
+          data-testid="wallet-balance-carousel"
           :height="$q.screen.width < 390 ? '118px' : '88px'"
           control-color="primary"
           class="balance-carousel bg-transparent rounded-borders"
@@ -60,7 +61,7 @@
                   </strong>
                 </h3>
                 <div class="balance-secondary-line q-mt-sm">
-                  <strong v-if="showSecondaryBalance(unit)">
+                  <span v-if="showSecondaryBalance(unit)">
                     <AnimatedNumber
                       :value="secondaryBalanceValue(unit)"
                       :format="
@@ -76,7 +77,7 @@
                         )
                       }}
                     </q-tooltip>
-                  </strong>
+                  </span>
                 </div>
               </div>
             </div>
@@ -93,7 +94,9 @@
             type="button"
             class="balance-unit-dot"
             :class="{ 'balance-unit-dot--active': activeUnit === unit }"
-            :aria-label="`Show ${unitLabel(unit)} balance`"
+            :aria-label="
+              $t('BalanceView.show_balance', { unit: unitCode(unit) })
+            "
             :aria-pressed="activeUnit === unit"
             :tabindex="hasMultipleBalanceUnits ? 0 : -1"
             @click="setActiveUnit(unit)"
@@ -108,87 +111,53 @@
       <div class="col-12">
         <span class="text-red text-weight-bold">
           {{ $t("BalanceView.mintError.label") }}
-          <q-icon name="error" class="q-ml-xs" size="xs" />
+          <CircleAlertIcon
+            :size="16"
+            class="q-ml-xs"
+            style="vertical-align: -3px"
+          />
         </span>
       </div>
     </div>
-    <!-- mint url -->
-    <div class="row q-mt-md q-mb-none text-secondary" v-if="activeMintUrl">
-      <div class="col-12 cursor-pointer">
-        <span class="text-weight-light" @click="setTab('mints')">
-          {{ $t("BalanceView.mintUrl.label") }}: <b>{{ activeMintLabel }}</b>
-        </span>
-      </div>
-    </div>
-    <!-- mint balance -->
-    <div class="row q-mb-none text-secondary" v-if="mints.length > 1">
-      <div class="col-12">
-        <span class="q-my-none q-py-none text-weight-regular">
-          {{ $t("BalanceView.mintBalance.label") }}:
-          <b>
-            <AnimatedNumber
-              :value="getActiveBalance"
-              :format="(val) => formatCurrency(val, activeUnit)"
-              class="q-my-none q-py-none cursor-pointer"
-            />
-          </b>
-        </span>
-      </div>
-    </div>
+    <!-- active mint: tap to manage mints -->
+    <ChooseMint
+      v-if="activeMintUrl"
+      class="q-mt-md wallet-mint-picker"
+      test-id="wallet-mint-chip"
+      :dense="false"
+      :show-balances="mints.length > 1"
+    />
   </div>
   <!-- </q-card-section>
   </q-card> -->
 </template>
 <script lang="ts">
+import PendingDots from "src/components/ui/PendingDots.vue";
+import { CircleAlert as CircleAlertIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
-import { getShortUrl } from "src/js/wallet-helpers";
 import { mapState, mapWritableState, mapActions } from "pinia";
 import { useMintsStore } from "src/stores/mints";
 import { useSettingsStore } from "src/stores/settings";
-import { useTokensStore } from "src/stores/tokens";
 import { useUiStore } from "src/stores/ui";
-import { useWalletStore } from "src/stores/wallet";
 import { usePriceStore } from "src/stores/price";
 import AnimatedNumber from "src/components/AnimatedNumber.vue";
+import ChooseMint from "src/components/ChooseMint.vue";
 import { sumProofAmounts } from "src/js/proofs";
+import { unitCode } from "src/js/format-currency";
 import { useProofsStore } from "src/stores/proofs";
 
 export default defineComponent({
   name: "BalanceView",
   mixins: [windowMixin],
-  components: {
-    AnimatedNumber,
-  },
-  props: {
-    setTab: Function,
-  },
+  components: { PendingDots, CircleAlertIcon, AnimatedNumber, ChooseMint },
   computed: {
-    ...mapState(useMintsStore, [
-      "activeMintUrl",
-      "activeProofs",
-      "activeBalance",
-      "mints",
-      "totalUnitBalance",
-      "activeUnit",
-      "activeMint",
-    ]),
-    ...mapState(useTokensStore, ["historyTokens"]),
+    ...mapState(useMintsStore, ["activeMintUrl", "mints", "activeMint"]),
     ...mapState(useProofsStore, ["proofs"]),
     ...mapState(useUiStore, ["globalMutexLock"]),
-    ...mapState(usePriceStore, [
-      "bitcoinPrice",
-      "bitcoinPrices",
-      "currentCurrencyPrice",
-    ]),
+    ...mapState(usePriceStore, ["bitcoinPrices", "currentCurrencyPrice"]),
     ...mapState(useSettingsStore, ["bitcoinPriceCurrency"]),
     ...mapWritableState(useMintsStore, ["activeUnit"]),
-    ...mapWritableState(useUiStore, ["hideBalance", "lastBalanceCached"]),
-    pendingBalance: function () {
-      return -this.historyTokens
-        .filter((t) => t.status == "pending")
-        .filter((t) => t.unit == this.activeUnit)
-        .reduce((sum, el) => (sum += el.amount), 0);
-    },
+    ...mapWritableState(useUiStore, ["hideBalance"]),
     balanceUnits: function () {
       const mint = this.activeMint();
       const nut4Methods = mint.mint.info?.nuts?.[4]?.methods || [];
@@ -210,38 +179,6 @@ export default defineComponent({
     hasMultipleBalanceUnits: function () {
       return this.balanceUnits.length > 1;
     },
-    balancesOptions: function () {
-      return this.balanceUnits.map((unit) => ({
-        label: this.unitLabel(unit),
-        value: unit,
-      }));
-    },
-    allMintKeysets: function () {
-      return [].concat(...this.mints.map((m) => m.keysets));
-    },
-    getTotalBalance: function () {
-      return this.totalUnitBalance;
-    },
-    getActiveBalance: function () {
-      return this.activeBalance;
-    },
-    activeMintLabel: function () {
-      const mintClass = this.activeMint();
-
-      return (
-        mintClass.mint.nickname ||
-        mintClass.mint.info?.name ||
-        getShortUrl(this.activeMintUrl)
-      );
-    },
-    getBalance: function () {
-      return sumProofAmounts(this.activeProofs.flat());
-    },
-  },
-  data() {
-    return {
-      priceLabel: null,
-    };
   },
   mounted() {
     this.fetchBitcoinPrice();
@@ -257,26 +194,14 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useWalletStore, ["checkPendingTokens"]),
     ...mapActions(usePriceStore, ["fetchBitcoinPrice"]),
     setActiveUnit(unit: string) {
       this.activeUnit = unit;
     },
-    toggleUnit: function () {
-      const units = this.activeMint().units;
-      this.activeUnit =
-        units[(units.indexOf(this.activeUnit) + 1) % units.length];
-      return this.activeUnit;
-    },
     toggleHideBalance() {
       this.hideBalance = !this.hideBalance;
     },
-    unitLabel(unit: string) {
-      const normalizedUnit = unit.toLowerCase();
-      if (normalizedUnit === "sat") return "BTC";
-      if (normalizedUnit === "msat") return "mSAT";
-      return unit.toUpperCase();
-    },
+    unitCode,
     totalBalanceForUnit(unit: string) {
       const normalizedUnit = unit.toLowerCase();
       const keysetIds = new Set(
@@ -290,9 +215,6 @@ export default defineComponent({
           (proof) => keysetIds.has(proof.id) && !proof.reserved
         )
       );
-    },
-    activeBalanceForUnit(unit: string) {
-      return this.activeMint().unitBalance(unit);
     },
     isSatUnit(unit: string) {
       return unit.toLowerCase() === "sat";
@@ -339,14 +261,23 @@ export default defineComponent({
 });
 </script>
 <style scoped>
+.balance-total-label {
+  color: var(--app-text-muted);
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+}
+
 .animated.pulse {
   animation-duration: 0.5s;
 }
 .animated.fadeInDown {
   animation-duration: 0.3s;
 }
+/* clip, not hidden: "overflow-x: hidden" computes overflow-y to auto, which made the whole
+   balance a scroll container (the unit dots' 44px targets overhang it by 13px). */
 .balance-carousel-shell {
-  overflow-x: hidden;
+  overflow-x: clip;
   overscroll-behavior-x: contain;
   position: relative;
   touch-action: pan-y;
@@ -359,16 +290,36 @@ export default defineComponent({
   z-index: 1;
 }
 .balance-carousel {
-  overflow: hidden;
-  overscroll-behavior-x: contain;
+  overflow: clip;
+  overscroll-behavior-x: none;
   touch-action: pan-y;
+}
+/* The balance never moves by hand: no swipe, and Quasar's ".q-panel.scroll"
+   (overflow: auto) is clipped so a wheel or trackpad can't scroll a slide. Slides move only
+   when a unit dot (or a unit change) selects them, with the carousel's own animation. */
+.balance-carousel :deep(.q-carousel__slides-container),
+.balance-carousel :deep(.q-panel),
+.balance-carousel :deep(.q-carousel__slide) {
+  overflow: clip !important;
+  scrollbar-width: none;
+}
+.balance-carousel :deep(.q-panel)::-webkit-scrollbar {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .balance-carousel :deep([class*="q-transition--slide-"]) {
+    transition: none !important;
+  }
 }
 .balance-slide {
   align-items: flex-start;
   display: flex;
   justify-content: center;
 }
+/* The balance is content, not an action: ink colour in every theme and mode (an accent
+   balance read as debt in red-accent themes). */
 .balance-amount {
+  color: var(--app-text);
   align-items: center;
   display: flex;
   justify-content: center;
@@ -377,6 +328,9 @@ export default defineComponent({
   white-space: nowrap;
 }
 .balance-secondary-line {
+  color: var(--app-text-muted);
+  font-size: 1rem;
+  font-weight: 500;
   align-items: center;
   display: flex;
   justify-content: center;
@@ -397,29 +351,41 @@ export default defineComponent({
   align-items: center;
   background: transparent;
   border: 0;
-  color: var(--q-primary);
+  color: var(--app-text-subtle);
   cursor: pointer;
   display: flex;
-  height: 18px;
+  height: 44px;
   justify-content: center;
-  opacity: 0.28;
+  margin: -13px 0;
   padding: 0;
   transition: opacity 0.2s ease, transform 0.2s ease;
-  width: 14px;
+  width: 24px;
 }
 .balance-unit-dot::after {
   background: currentColor;
-  border-radius: 50%;
+  border-radius: 999px;
   content: "";
-  height: 7px;
-  width: 7px;
+  height: 6px;
+  transition: width 0.2s ease;
+  width: 6px;
 }
+/* The active unit is a short pill, not a dot a little larger: a 15% scale read as all
+   dots alike. */
 .balance-unit-dot--active {
-  opacity: 0.9;
-  transform: scale(1.15);
+  color: var(--app-text);
+}
+.balance-unit-dot--active::after {
+  width: 18px;
 }
 .balance-unit-dot:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 4px;
+}
+/* The picker belongs to the balance group: no extra gap before the action row. */
+.wallet-mint-picker {
+  margin-inline: auto;
+  max-width: var(--app-column);
+  padding-bottom: 0 !important;
+  padding-inline: 16px;
 }
 </style>

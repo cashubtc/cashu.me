@@ -4,46 +4,38 @@
     :caption="$t('Settings.menu.p2pk.caption')"
   >
     <SettingsSection
-      :title="$t('Settings.p2pk_features.title')"
+      warning
       :caption="$t('Settings.p2pk_features.description')"
     >
       <q-item>
         <q-item-section>
-          <div class="row items-center q-gutter-sm">
+          <!-- Two equal choices, one filled and one outlined, sharing the row (a full button
+               beside a small one reads as unrelated). -->
+          <div class="row no-wrap p2pk-setup-actions">
             <q-btn
-              class="q-px-md"
               color="primary"
-              size="sm"
               rounded
-              outline
+              unelevated
+              class="col settings-primary-action"
               @click="generateKeypair"
               >{{ $t("Settings.p2pk_features.generate_button") }}</q-btn
             >
             <q-btn
-              class="q-px-md"
               color="primary"
-              size="sm"
               rounded
               outline
+              class="col"
               @click="importNsec"
               >{{ $t("Settings.p2pk_features.import_button") }}</q-btn
             >
           </div>
         </q-item-section>
       </q-item>
-      <q-item tag="label">
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.p2pk_features.quick_access.toggle")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.p2pk_features.quick_access.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-toggle v-model="showP2PkButtonInDrawer" color="primary" />
-        </q-item-section>
-      </q-item>
+      <SettingsToggleRow
+        v-model="showP2PkButtonInDrawer"
+        :label="$t('Settings.p2pk_features.quick_access.toggle')"
+        :caption="$t('Settings.p2pk_features.quick_access.description')"
+      />
     </SettingsSection>
 
     <!-- keys -->
@@ -67,25 +59,17 @@
         </q-item-section>
         <q-item-section side>
           <div class="row items-center no-wrap q-gutter-sm">
-            <q-badge
-              v-if="key.used"
-              :label="$t('Settings.p2pk_features.keys_expansion.used_badge')"
-              color="primary"
-            />
-            <q-icon
-              name="content_copy"
-              @click="copyText(key.publicKey)"
-              size="xs"
-              color="grey"
-              class="cursor-pointer"
-            />
-            <q-icon
-              name="qr_code"
+            <AppBadge v-if="key.used">{{
+              $t("Settings.p2pk_features.keys_expansion.used_badge")
+            }}</AppBadge>
+            <CopyButton :value="key.publicKey" />
+            <IconButton
+              :label="$t('global.actions.show_qr.label')"
+              tooltip
               @click="showP2PKKeyEntry(key.publicKey)"
-              size="xs"
-              color="grey"
-              class="cursor-pointer"
-            />
+            >
+              <QrCodeIcon :size="20" />
+            </IconButton>
           </div>
         </q-item-section>
       </q-item>
@@ -97,17 +81,27 @@
 </template>
 
 <script lang="ts">
+import IconButton from "src/components/ui/IconButton.vue";
+import AppBadge from "src/components/ui/AppBadge.vue";
+import { QrCode as QrCodeIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useP2PKStore } from "src/stores/p2pk";
 import P2PKDialog from "src/components/P2PKDialog.vue";
 import SettingsPageShell from "./SettingsPageShell.vue";
+import CopyButton from "src/components/ui/CopyButton.vue";
+import SettingsToggleRow from "src/components/ui/SettingsToggleRow.vue";
 import SettingsSection from "./SettingsSection.vue";
 
 export default defineComponent({
   name: "P2PKSettings",
   mixins: [windowMixin],
   components: {
+    IconButton,
+    AppBadge,
+    QrCodeIcon,
+    CopyButton,
+    SettingsToggleRow,
     SettingsPageShell,
     SettingsSection,
     P2PKDialog,
@@ -132,3 +126,9 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.p2pk-setup-actions {
+  gap: 12px;
+}
+</style>

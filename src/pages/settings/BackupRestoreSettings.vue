@@ -5,66 +5,24 @@
   >
     <!-- seed phrase -->
     <SettingsSection
+      flat
       :title="$t('Settings.backup_restore.backup_seed.title')"
       :caption="$t('Settings.backup_restore.backup_seed.description')"
     >
-      <q-item class="settings-control-item">
-        <q-item-section>
-          <q-input
-            outlined
-            readonly
-            v-model="hiddenMnemonic"
-            :label="$t('Settings.backup_restore.backup_seed.seed_phrase_label')"
-            autogrow
-          >
-            <template v-slot:append>
-              <q-btn
-                flat
-                dense
-                round
-                icon="visibility"
-                color="primary"
-                data-testid="reveal-seed"
-                @click="toggleMnemonicVisibility"
-              ></q-btn>
-              <q-btn
-                flat
-                dense
-                round
-                icon="content_copy"
-                color="primary"
-                data-testid="copy-seed"
-                @click="copyText(mnemonic)"
-              ></q-btn>
-            </template>
-          </q-input>
-        </q-item-section>
-      </q-item>
+      <SeedPhraseField
+        :mnemonic="mnemonic"
+        :label="$t('Settings.backup_restore.backup_seed.seed_phrase_label')"
+      />
     </SettingsSection>
 
     <!-- restore -->
-    <SettingsSection
-      :title="$t('Settings.backup_restore.restore_ecash.title')"
-      :caption="$t('Settings.backup_restore.restore_ecash.description')"
-    >
-      <q-item>
-        <q-item-section>
-          <q-item-label>{{
-            $t("Settings.backup_restore.restore_ecash.title")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-btn
-            class="q-px-md"
-            color="primary"
-            size="sm"
-            rounded
-            outline
-            to="/restore"
-            >{{ $t("Settings.backup_restore.restore_ecash.button") }}</q-btn
-          >
-        </q-item-section>
-      </q-item>
+    <SettingsSection>
+      <SettingsActionRow
+        to="/restore"
+        label-class="text-weight-regular"
+        :label="$t('Settings.backup_restore.restore_ecash.title')"
+        :caption="$t('Settings.backup_restore.restore_ecash.description')"
+      />
     </SettingsSection>
   </SettingsPageShell>
 </template>
@@ -75,36 +33,20 @@ import { mapState } from "pinia";
 import { useWalletStore } from "src/stores/wallet";
 import SettingsPageShell from "./SettingsPageShell.vue";
 import SettingsSection from "./SettingsSection.vue";
+import SeedPhraseField from "src/components/ui/SeedPhraseField.vue";
+import SettingsActionRow from "src/components/ui/SettingsActionRow.vue";
 
 export default defineComponent({
   name: "BackupRestoreSettings",
   mixins: [windowMixin],
   components: {
+    SeedPhraseField,
+    SettingsActionRow,
     SettingsPageShell,
     SettingsSection,
   },
-  data: function () {
-    return {
-      hideMnemonic: true,
-    };
-  },
   computed: {
     ...mapState(useWalletStore, ["mnemonic"]),
-    hiddenMnemonic() {
-      if (this.hideMnemonic) {
-        return this.mnemonic
-          .split(" ")
-          .map((w) => "*".repeat(6))
-          .join(" ");
-      } else {
-        return this.mnemonic;
-      }
-    },
-  },
-  methods: {
-    toggleMnemonicVisibility: function () {
-      this.hideMnemonic = !this.hideMnemonic;
-    },
   },
 });
 </script>

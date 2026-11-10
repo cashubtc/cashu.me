@@ -1,16 +1,22 @@
 <script lang="ts">
+import IconButton from "src/components/ui/IconButton.vue";
 import QrScanner, { type ScanResult } from "@agicash/qr-scanner";
 import { URDecoder } from "@gandlaf21/bc-ur";
 import zxingReaderWasmUrl from "zxing-wasm/reader/zxing_reader.wasm?url";
 import { useCameraStore } from "src/stores/camera";
 import { mapActions, mapState } from "pinia";
 import { useUiStore } from "src/stores/ui";
+import {
+  ClipboardPaste as ClipboardPasteIcon,
+  X as XIcon,
+} from "lucide-vue-next";
 
 QrScanner.configureWasm({
   locateFile: () => zxingReaderWasmUrl,
 });
 
 export default {
+  components: { IconButton, XIcon, ClipboardPasteIcon },
   emits: ["decode"],
   data(): {
     qrScanner: QrScanner | null;
@@ -44,17 +50,10 @@ export default {
     this.urDecoder = new URDecoder();
   },
   computed: {
-    ...mapState(useCameraStore, ["camera", "hasCamera"]),
-    canPasteFromClipboard: function () {
-      return (
-        window.isSecureContext &&
-        navigator.clipboard &&
-        navigator.clipboard.readText
-      );
-    },
+    ...mapState(useUiStore, ["canPasteFromClipboard"]),
   },
   methods: {
-    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+    ...mapActions(useCameraStore, ["closeCamera"]),
     handleResult(result: ScanResult) {
       // if this is a multipart-qr code, do not yet emit
       if (result.data.toLowerCase().startsWith("ur:")) {
@@ -86,57 +85,164 @@ export default {
 };
 </script>
 <template>
-  <q-card>
-    <div class="text-center">
-      <div>
-        <video ref="cameraEl" style="width: 100%"></video>
-      </div>
-      <div>
-        <div class="row q-justify-center">
-          <q-linear-progress
-            rounded
-            size="30px"
-            v-if="urDecoderProgress > 0"
-            :value="urDecoderProgress"
-            :indeterminate="urDecoderProgress === 0"
-            class="q-mt-none"
-            color="secondary"
-          >
-            <div class="absolute-full flex flex-center">
-              <q-badge
-                color="white"
-                text-color="secondary"
-                style="font-size: 1rem; padding: 5px"
-                class="text-weight-bold"
-                :label="
-                  $t('QrcodeReader.progress.text', {
-                    percentage: $t('QrcodeReader.progress.percentage', {
-                      percentage: Math.round(urDecoderProgress * 100),
-                    }),
-                    addon:
-                      urDecoderProgress > 0.9
-                        ? $t('QrcodeReader.progress.keep_scanning_text')
-                        : '',
-                  })
-                "
-              />
-            </div>
-          </q-linear-progress>
-        </div>
+  <!-- A full-screen camera view in the app's own chrome: the sheet
+       header (close, centred title), the feed behind a rounded viewfinder, and Paste as the
+       one bottom action, instead of a white card with Paste and Close buttons. -->
+  <div class="qr-scanner">
+    <video ref="cameraEl" class="qr-scanner__video" playsinline muted></video>
+    <div class="qr-scanner__shade" aria-hidden="true">
+      <div class="qr-scanner__frame"></div>
+    </div>
+
+    <div class="row items-center sheet-column-header qr-scanner__header">
+      <IconButton
+        :label="$t('QrcodeReader.actions.close.label')"
+        @click="closeCamera"
+        floating
+        class="qr-scanner__close"
+      >
+        <XIcon :size="24" />
+      </IconButton>
+      <div class="col text-center dialog-header">
+        {{ $t("ParseInputComponent.qr_scanner.title") }}
       </div>
     </div>
-    <div class="row q-my-sm">
+
+    <div class="qr-scanner__footer column items-center">
+      <div class="qr-scanner__hint">
+        <template v-if="urDecoderProgress > 0">
+          {{
+            $t("QrcodeReader.progress.text", {
+              percentage: $t("QrcodeReader.progress.percentage", {
+                percentage: Math.round(urDecoderProgress * 100),
+              }),
+              addon:
+                urDecoderProgress > 0.9
+                  ? $t("QrcodeReader.progress.keep_scanning_text")
+                  : "",
+            })
+          }}
+        </template>
+        <template v-else>
+          {{ $t("ParseInputComponent.qr_scanner.description") }}
+        </template>
+      </div>
+      <q-linear-progress
+        v-if="urDecoderProgress > 0"
+        rounded
+        size="4px"
+        :value="urDecoderProgress"
+        color="white"
+        track-color="grey-8"
+        class="qr-scanner__progress"
+      />
       <q-btn
-        unelevated
         v-if="canPasteFromClipboard"
+        rounded
+        unelevated
+        class="qr-scanner__paste"
         @click="pasteToParseDialog"
       >
-        <q-icon name="content_paste" class="q-mr-sm" />
-        {{ $t("QrcodeReader.actions.paste.label") }}</q-btn
-      >
-      <q-btn @click="closeCamera" flat color="grey" class="q-ml-auto">{{
-        $t("QrcodeReader.actions.close.label")
-      }}</q-btn>
+        <ClipboardPasteIcon :size="20" class="q-mr-sm" />
+        {{ $t("QrcodeReader.actions.paste.label") }}
+      </q-btn>
     </div>
-  </q-card>
+  </div>
 </template>
+
+<style scoped>
+/* The camera always sits on black, in every theme and mode, like the onboarding. */
+.qr-scanner {
+  background: #000;
+  color: #fff;
+  height: 100%;
+  inset: 0;
+  overflow: hidden;
+  position: fixed;
+}
+.qr-scanner__video {
+  height: 100%;
+  inset: 0;
+  object-fit: cover;
+  position: absolute;
+  width: 100%;
+}
+/* Dim everything outside a square viewfinder with 24px corners. */
+.qr-scanner__shade {
+  align-items: center;
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  pointer-events: none;
+  position: absolute;
+}
+/* A scan target: four white corner brackets around a clear square, the page dimmed
+   outside it (a plain outline did not read as a target). */
+.qr-scanner__frame {
+  --corner: 36px;
+  --stroke: 4px;
+  aspect-ratio: 1;
+  background: linear-gradient(#fff, #fff) top left / var(--corner) var(--stroke),
+    linear-gradient(#fff, #fff) top left / var(--stroke) var(--corner),
+    linear-gradient(#fff, #fff) top right / var(--corner) var(--stroke),
+    linear-gradient(#fff, #fff) top right / var(--stroke) var(--corner),
+    linear-gradient(#fff, #fff) bottom left / var(--corner) var(--stroke),
+    linear-gradient(#fff, #fff) bottom left / var(--stroke) var(--corner),
+    linear-gradient(#fff, #fff) bottom right / var(--corner) var(--stroke),
+    linear-gradient(#fff, #fff) bottom right / var(--stroke) var(--corner);
+  background-repeat: no-repeat;
+  border-radius: var(--app-radius-sm);
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.55);
+  width: min(72vw, 280px);
+}
+/* The header is the sheets' header (16px inset, 44px close on the 6px toolbar inset) on a
+   dark gradient, with fixed white ink, so it reads over any camera image in every theme. */
+.qr-scanner__header {
+  left: 0;
+  padding: max(16px, env(safe-area-inset-top)) 16px 16px;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+/* The scrim extends below the header row, so the row itself stays symmetric and the
+   centred close button lines up with the title. */
+.qr-scanner__header::before {
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
+  content: "";
+  height: calc(100% + 32px);
+  inset: 0 0 auto;
+  pointer-events: none;
+  position: absolute;
+  z-index: -1;
+}
+.qr-scanner__header,
+.qr-scanner__header .dialog-header,
+.qr-scanner__close {
+  color: #fff !important;
+}
+.qr-scanner__footer {
+  bottom: 0;
+  gap: 16px;
+  left: 0;
+  padding: 16px 16px max(24px, env(safe-area-inset-bottom));
+  position: absolute;
+  right: 0;
+}
+.qr-scanner__hint {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  text-align: center;
+}
+.qr-scanner__progress {
+  max-width: 280px;
+}
+.qr-scanner__paste {
+  background: #fff;
+  color: #111;
+  font-size: 16px;
+  font-weight: 600;
+  max-width: var(--app-column);
+  min-height: 52px;
+  width: 100%;
+}
+</style>

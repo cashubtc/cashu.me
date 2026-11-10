@@ -1,115 +1,63 @@
 <template>
-  <q-dialog
-    v-model="showSendDialog"
-    position="bottom"
-    :maximized="$q.screen.lt.sm"
-    transition-show="slide-up"
-    transition-hide="slide-down"
-  >
-    <q-card class="drawer-card text-white full-width-card q-pb-lg">
-      <q-card-section class="row items-center q-pb-sm">
-        <q-btn flat round dense v-close-popup class="q-ml-sm" color="primary">
-          <XIcon />
-        </q-btn>
-        <div class="col text-center">
-          <span class="text-h6">{{ $t("SendDialog.title") }}</span>
-        </div>
-        <q-btn
-          flat
-          round
-          dense
-          class="q-mr-sm"
-          @click="showCamera"
-          color="primary"
+  <BottomSheet v-model="showSendDialog" :title="$t('SendDialog.title')">
+    <template #trailing>
+      <IconButton :label="$t('global.actions.scan.label')" @click="showCamera">
+        <ScanIcon :size="20" />
+      </IconButton>
+    </template>
+    <div>
+      <div class="q-gutter-y-md">
+        <OptionRow
+          data-testid="send-ecash-option"
+          @click="showSendTokensDialog"
         >
-          <ScanIcon />
-        </q-btn>
-      </q-card-section>
+          <template #icon><CoinsIcon :size="24" /></template>
+          <template #label>{{ $t("SendDialog.actions.ecash.label") }}</template>
+          <template #caption>{{ $t("SendDialog.captions.ecash") }}</template>
+        </OptionRow>
 
-      <q-card-section class="q-pa-md">
-        <div class="q-gutter-y-md">
-          <div
-            class="action-row"
-            role="button"
-            tabindex="0"
-            data-testid="send-ecash-option"
-            @click="showSendTokensDialog"
-            @keydown.enter.prevent="showSendTokensDialog"
-            @keydown.space.prevent="showSendTokensDialog"
-          >
-            <div class="row items-center no-wrap">
-              <div class="icon-circle">
-                <CoinsIcon :size="24" />
-              </div>
-              <div class="col q-ml-md">
-                <div class="text-body1 text-weight-medium">
-                  {{ $t("SendDialog.actions.ecash.label") }}
-                </div>
-              </div>
-            </div>
-          </div>
+        <OptionRow
+          v-if="canSendLightning"
+          data-testid="send-lightning-option"
+          @click="showParseDialog"
+        >
+          <template #icon><ZapIcon :size="24" /></template>
+          <template #label>{{
+            $t("SendDialog.actions.lightning.label")
+          }}</template>
+          <template #caption>{{
+            $t("SendDialog.captions.lightning")
+          }}</template>
+        </OptionRow>
 
-          <div
-            v-if="canSendLightning"
-            class="action-row"
-            role="button"
-            tabindex="0"
-            data-testid="send-lightning-option"
-            @click="showParseDialog"
-            @keydown.enter.prevent="showParseDialog"
-            @keydown.space.prevent="showParseDialog"
-          >
-            <div class="row items-center no-wrap">
-              <div class="icon-circle">
-                <ZapIcon :size="24" />
-              </div>
-              <div class="col q-ml-md">
-                <div class="text-body1 text-weight-medium">
-                  {{ $t("SendDialog.actions.lightning.label") }}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            v-if="canSendOnchain"
-            class="action-row"
-            role="button"
-            tabindex="0"
-            data-testid="send-onchain-option"
-            @click="showOnchainPayDialog"
-            @keydown.enter.prevent="showOnchainPayDialog"
-            @keydown.space.prevent="showOnchainPayDialog"
-          >
-            <div class="row items-center no-wrap">
-              <div class="icon-circle">
-                <BitcoinIcon :size="24" />
-              </div>
-              <div class="col q-ml-md">
-                <div class="text-body1 text-weight-medium">On-chain</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </q-card-section>
-    </q-card>
-  </q-dialog>
+        <OptionRow
+          v-if="canSendOnchain"
+          data-testid="send-onchain-option"
+          @click="showOnchainPayDialog"
+        >
+          <template #icon><BitcoinIcon :size="24" /></template>
+          <template #label>{{ $t("common.on_chain") }}</template>
+          <template #caption>{{ $t("SendDialog.captions.onchain") }}</template>
+        </OptionRow>
+      </div>
+    </div>
+  </BottomSheet>
 </template>
 
 <script lang="ts">
+import IconButton from "src/components/ui/IconButton.vue";
+import OptionRow from "src/components/ui/OptionRow.vue";
 import { defineComponent } from "vue";
-import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
+import BottomSheet from "src/components/BottomSheet.vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useUiStore } from "src/stores/ui";
 import { useWalletStore } from "src/stores/wallet";
 import { useCameraStore } from "src/stores/camera";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
-import { useSettingsStore } from "../stores/settings";
 import { useMintsStore } from "src/stores/mints";
 import {
-  X as XIcon,
   Zap as ZapIcon,
-  Scan as ScanIcon,
+  ScanLine as ScanIcon,
   Coins as CoinsIcon,
   Bitcoin as BitcoinIcon,
 } from "lucide-vue-next";
@@ -123,7 +71,9 @@ import {
 export default defineComponent({
   name: "SendDialog",
   components: {
-    XIcon,
+    IconButton,
+    OptionRow,
+    BottomSheet,
     CoinsIcon,
     ZapIcon,
     ScanIcon,
@@ -131,25 +81,10 @@ export default defineComponent({
   },
   mixins: [windowMixin],
   props: {},
-  data: function () {
-    return {
-      currentPage: 1,
-      pageSize: 5,
-    };
-  },
   computed: {
     ...mapState(useMintsStore, ["mints", "activeMintUrl", "activeUnit"]),
-    ...mapWritableState(useUiStore, [
-      "showInvoiceDetails",
-      "tab",
-      "showSendDialog",
-      "showReceiveDialog",
-    ]),
-    ...mapWritableState(useWalletStore, [
-      "invoiceHistory",
-      "invoiceData",
-      "payInvoiceData",
-    ]),
+    ...mapWritableState(useUiStore, ["showSendDialog"]),
+    ...mapWritableState(useWalletStore, ["payInvoiceData"]),
     ...mapWritableState(useCameraStore, ["camera"]),
     ...mapWritableState(useSendTokensStore, [
       "showSendTokens",
@@ -188,7 +123,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(useMintsStore, ["selectMintUrl"]),
-    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+    ...mapActions(useCameraStore, ["showCamera"]),
     showParseDialog: async function () {
       const mintResult = await ensurePaymentMintActive(
         this.mints as any,
@@ -226,7 +161,7 @@ export default defineComponent({
         this.activeUnit as string
       );
       if (!mintResult.ok) {
-        notifyWarning("No mints available");
+        notifyWarning(this.$t("SendDialog.actions.lightning.error_no_mints"));
         this.showSendDialog = false;
         return;
       }
@@ -263,50 +198,3 @@ export default defineComponent({
   created: function () {},
 });
 </script>
-
-<style lang="scss" scoped>
-:deep(.q-dialog__backdrop) {
-  backdrop-filter: blur(8px);
-  background: rgba(0, 0, 0, 0.4) !important;
-}
-
-.q-dialog__inner > div {
-  border-top-left-radius: 20px !important;
-  border-top-right-radius: 20px !important;
-  border-bottom-left-radius: 0px !important;
-  border-bottom-right-radius: 0px !important;
-}
-
-.drawer-card {
-  background: #1a1a1a;
-}
-
-.action-row {
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
-  padding: 12px 16px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-
-  &:active {
-    background: rgba(255, 255, 255, 0.1);
-  }
-}
-
-.icon-circle {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.lucide {
-  width: 24px;
-  height: 24px;
-  color: white;
-}
-</style>

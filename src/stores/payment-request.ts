@@ -17,6 +17,7 @@ import { useTokensStore } from "./tokens";
 import type { HistoryToken } from "./tokens";
 import token from "src/js/token";
 import { notifySuccess, notifyWarning } from "src/js/notify";
+import { i18n } from "src/boot/i18n";
 import { useLocalStorage } from "@vueuse/core";
 import { v4 as uuidv4 } from "uuid";
 
@@ -81,7 +82,8 @@ export const usePRStore = defineStore("payment-request", {
     createPaymentRequest: function (
       amount?: number,
       memo?: string,
-      mintUrl?: string
+      mintUrl?: string,
+      unit?: string
     ) {
       const nostrStore = useNostrStore();
       const mintStore = useMintsStore();
@@ -98,12 +100,8 @@ export const usePRStore = defineStore("payment-request", {
         transport,
         uuid,
         amount,
-        mintStore.activeUnit,
-        mintUrl?.length
-          ? mintStore.activeMintUrl
-            ? [mintStore.activeMintUrl]
-            : undefined
-          : undefined,
+        unit ?? mintStore.activeUnit,
+        mintUrl ? [mintUrl] : undefined,
         memo
       );
       const encoded = paymentRequest.toEncodedRequest();
@@ -132,29 +130,20 @@ export const usePRStore = defineStore("payment-request", {
         receivedPaymentIds: [],
       };
       if (existIdx >= 0) {
-        // Update encoded/memo/unit/mints in case changed
+        // Update encoded/memo/unit/mints in case changed, keeping the payments already
+        // received against this request and when it was first made.
+        const existing = this.ourPaymentRequests[existIdx];
         this.ourPaymentRequests[existIdx] = {
-          ...this.ourPaymentRequests[existIdx],
+          ...existing,
           ...entry,
+          createdAt: existing.createdAt,
+          receivedPaymentIds: existing.receivedPaymentIds,
         };
         this.selectedPRIndex = existIdx;
       } else {
         this.ourPaymentRequests.push(entry);
         this.selectedPRIndex = this.ourPaymentRequests.length - 1;
       }
-    },
-    selectPrevRequest() {
-      if (!this.ourPaymentRequests.length) return;
-      this.selectedPRIndex =
-        (this.selectedPRIndex - 1 + this.ourPaymentRequests.length) %
-        this.ourPaymentRequests.length;
-      this.showPRKData = this.ourPaymentRequests[this.selectedPRIndex].encoded;
-    },
-    selectNextRequest() {
-      if (!this.ourPaymentRequests.length) return;
-      this.selectedPRIndex =
-        (this.selectedPRIndex + 1) % this.ourPaymentRequests.length;
-      this.showPRKData = this.ourPaymentRequests[this.selectedPRIndex].encoded;
     },
     selectRequestByIndex(index: number) {
       if (!this.ourPaymentRequests.length) return;
@@ -214,7 +203,9 @@ export const usePRStore = defineStore("payment-request", {
           mintsStore.activeUnit = request.unit;
         } else {
           notifyWarning(
-            `The mint does not support the unit in the payment request: ${request.unit}`
+            i18n.global.t("wallet.notifications.request_unit_unsupported", {
+              unit: request.unit,
+            })
           );
         }
       }
@@ -228,14 +219,8 @@ export const usePRStore = defineStore("payment-request", {
           Amount.from(request.amount).toNumber() /
           mintsStore.activeUnitCurrencyMultiplyer;
       }
-      // Also make sure this decoded request gets stored (e.g., if user pasted an older one)
-      try {
-        const encoded = pr;
-        this.ensureStoredRequest(request, encoded);
-        this.showPRKData = encoded;
-      } catch (e) {
-        // noop
-      }
+      // A request being paid belongs to its recipient: it is never added to the requests this
+      // wallet receives on, so it can't be shown or copied from Receive.
       sendTokenStore.sendData.paymentRequest = request;
       if (!sendTokenStore.showSendTokens) {
         // show the send dialog
@@ -299,7 +284,7 @@ export const usePRStore = defineStore("payment-request", {
         console.error("Error paying payment request:", error);
         throw error;
       }
-      notifySuccess("Payment sent");
+      notifySuccess(i18n.global.t("wallet.notifications.payment_sent"));
       return true;
     },
     async payPostPaymentRequest(
@@ -336,7 +321,7 @@ export const usePRStore = defineStore("payment-request", {
           console.error("Error paying payment request:", response.statusText);
           throw new Error(response.statusText);
         }
-        notifySuccess("Payment sent");
+        notifySuccess(i18n.global.t("wallet.notifications.payment_sent"));
       } catch (error) {
         console.error("Error paying payment request:", error);
         throw error;

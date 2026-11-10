@@ -1,4 +1,4 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 import { WalletPage } from "./WalletPage";
 
 /** All mutations under test go through visible controls. Storage reads are oracles only. */
@@ -9,7 +9,8 @@ export class WalletUi extends WalletPage {
 
   async home(tab?: "Mints" | "History") {
     await this.page.goto("/");
-    await expect(this.page.getByTestId("wallet-send")).toBeVisible();
+    // The wallet's hero (Receive and Send only show once the wallet has a mint).
+    await expect(this.page.locator(".wallet-hero")).toBeVisible();
     if (tab)
       await this.page.getByRole("tab", { name: tab, exact: true }).click();
   }
@@ -44,8 +45,27 @@ export class WalletUi extends WalletPage {
 
   async activateMint(url: string) {
     await this.home("Mints");
-    await this.mintCard(url).click();
-    await expect(this.mintCard(url)).toHaveClass(/q-item--active/);
+    const card = this.mintCard(url);
+    await card.click();
+    // The switch ends with the ring gone and the check on this card.
+    await expect(card).not.toHaveAttribute("aria-busy", "true");
+    await expect(card).toHaveAttribute("aria-current", "true");
+    await expect(card.locator(".mint-card__check")).toBeVisible();
+    await expect(card).toHaveClass(/q-item--active/);
+  }
+
+  /** A mint picker's field (its name and balance), by its test id. */
+  mintPicker(testId = "choose-mint") {
+    return this.page.getByTestId(testId).filter({ visible: true });
+  }
+
+  /** Opens a mint picker's sheet with its chevron button, the picker's one control. */
+  async openMintPicker(testId = "choose-mint") {
+    await this.page
+      .getByTestId(`${testId}-trigger`)
+      .filter({ visible: true })
+      .click();
+    await expect(this.page.getByRole("listbox")).toBeVisible();
   }
 
   async details(url: string) {
@@ -56,7 +76,7 @@ export class WalletUi extends WalletPage {
 
   async removeMint(url: string, confirm = true) {
     await this.details(url);
-    await this.page.locator(".delete-button").click();
+    await this.page.getByTestId("mint-delete").click();
     const dialog = this.page.locator(".remove-mint-dialog");
     await expect(dialog).toBeVisible();
     await dialog
@@ -78,9 +98,14 @@ export class WalletUi extends WalletPage {
     await this.page.getByText("Edit mint", { exact: true }).click();
     const dialog = this.page.locator(".edit-mint-dialog");
     await dialog.locator("textarea").nth(0).fill(replacementUrl);
-    await dialog.locator("textarea").nth(1).fill(nickname);
     await dialog
-      .getByRole("button", { name: save ? "Update" : "Cancel", exact: true })
+      .getByLabel("Nickname (optional)", { exact: true })
+      .fill(nickname);
+    // The sheet has one Update action; dismissing uses the header close.
+    await this.page
+      .getByRole("button", { name: save ? "Update" : "Close", exact: true })
+      .filter({ visible: true })
+      .last()
       .click();
     await expect(dialog).toBeHidden();
   }
@@ -115,6 +140,63 @@ export class WalletUi extends WalletPage {
     if ((await toggle.getAttribute("aria-checked")) !== String(enabled))
       await toggle.click();
     await expect(toggle).toHaveAttribute("aria-checked", String(enabled));
+  }
+
+  /** Paste (and Clear, once filled) sit inside the Pay / Receive field as labelled icon buttons. */
+  async payInputAction(name: "Paste" | "Clear") {
+    await this.page
+      .locator(".q-dialog:visible .q-field")
+      .getByRole("button", { name, exact: true })
+      .click();
+  }
+
+  /** The labelled "Scan QR code" row under the Pay / Receive field. */
+  get scanRow() {
+    return this.page
+      .locator(".q-dialog:visible")
+      .getByRole("button", { name: /^Scan QR code\b/ });
+  }
+
+  async scanQrCode() {
+    await this.scanRow.click();
+  }
+
+  /** Lock mode on the Send ecash amount step, with the receiver's key typed in. */
+  async lockSendTo(pubkey: string) {
+    const field = this.page.getByTestId("send-p2pk-pubkey").locator("input");
+    if (!(await field.isVisible()))
+      await this.page
+        .getByRole("button", { name: "Lock", exact: true })
+        .click();
+    await field.fill(pubkey);
+  }
+
+  /** Wallet home's scanner button (the minimal Scan glyph). */
+  get walletScan() {
+    return this.page.getByTestId("wallet-scan");
+  }
+
+  /** The shared full-screen header's Back: client navigation, never page.goto. */
+  async fullscreenBack() {
+    await this.page.getByTestId("fullscreen-back").click();
+  }
+
+  /**
+   * After client navigation to a full-screen page: the URL, the destination's own content and a
+   * usable control, one settled route wrapper for `path` and no leftover page transition classes.
+   * A URL check alone passes while the page is blank.
+   */
+  async expectFullscreenPage(path: string, anchor: Locator) {
+    await expect.poll(() => new URL(this.page.url()).pathname).toBe(path);
+    await expect(anchor).toBeVisible();
+    const routes = this.page.getByTestId("fullscreen-route");
+    await expect(routes).toHaveCount(1);
+    await expect(routes).toHaveAttribute("data-route-path", path);
+    await expect(
+      this.page.locator('[class*="page-slide-"], [class*="page-fade-"]')
+    ).toHaveCount(0);
+    // Trial click: the control is the hit target (no lingering backdrop or placeholder over it).
+    await anchor.click({ trial: true });
   }
 
   async stored(key: string) {

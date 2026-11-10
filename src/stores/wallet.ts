@@ -65,16 +65,11 @@ import {
   Wallet,
   Proof,
   type ProofLike,
-  MintQuoteBolt11Request,
   MeltQuoteBolt11Request,
   MintQuoteBolt11Response,
   MintQuoteBolt12Response,
   MintQuoteOnchainResponse,
   CheckStateEnum,
-  MintQuoteState,
-  PaymentRequest,
-  PaymentRequestTransportType,
-  PaymentRequestTransport,
   decodePaymentRequest,
   ProofState,
   KeyChain,
@@ -83,10 +78,7 @@ import {
   type CounterSource,
   createEphemeralCounterSource,
   StaleKeysetError,
-  // ConsoleLogger,
 } from "@cashu/cashu-ts";
-// @ts-ignore
-import * as bolt11Decoder from "light-bolt11-decoder";
 import { bech32 } from "bech32";
 import axios from "axios";
 import { date } from "quasar";
@@ -1404,7 +1396,10 @@ export const useWalletStore = defineStore("wallet", {
         await prStore.decodePaymentRequest(req);
         this.payInvoiceData.show = false;
       } catch (error: any) {
-        notifyError(`${error?.message ?? error}`, "Could not pay request");
+        notifyError(
+          this.t("wallet.notifications.could_not_pay_request"),
+          `${error?.message ?? error}`
+        );
       }
     },
     handleBolt12Offer: async function (offer: string) {
@@ -1505,8 +1500,9 @@ export const useWalletStore = defineStore("wallet", {
         mintStore.activeUnit
       );
       if (!mintResult.ok) {
-        this.payInvoiceData.meltQuote.error =
-          "None of your mints support on-chain payments";
+        this.payInvoiceData.meltQuote.error = this.t(
+          "wallet.notifications.no_onchain_mint"
+        );
         this.payInvoiceData.invoice = Object.freeze(cleanAddress);
         return;
       }

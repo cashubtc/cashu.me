@@ -1,99 +1,75 @@
 <template>
-  <div class="row q-col-gutter-y-md justify-center q-pt-sm q-pb-md">
-    <div class="col-12 col-sm-11 col-md-8 text-center q-gutter-y-md">
-      <NoMintWarnBanner v-if="mints.length == 0" />
-      <BalanceView v-else :set-tab="setTab" />
-      <div
-        class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-lg q-pb-md position-relative"
-      >
-        <div class="col-6 q-mb-md flex justify-center items-center">
-          <q-btn
-            rounded
-            dense
-            data-testid="wallet-receive"
-            class="q-px-md q-mr-md wallet-action-btn"
-            color="primary"
-            @click="showReceiveDialog = true"
-          >
-            <div class="button-content">
-              <span>{{ $t("WalletPage.actions.receive.label") }}</span>
-            </div>
-          </q-btn>
-        </div>
-
-        <transition appear enter-active-class="animated pulse">
-          <div class="scan-button-container">
-            <q-btn size="lg" outline color="primary" flat @click="showCamera">
-              <ScanIcon size="2em" />
-            </q-btn>
-          </div>
-        </transition>
-
-        <!-- button to showSendDialog -->
-        <div class="col-6 q-mb-md flex justify-center items-center">
-          <q-btn
-            rounded
-            dense
-            data-testid="wallet-send"
-            class="q-px-md q-ml-md wallet-action-btn"
-            color="primary"
-            @click="showSendDialog = true"
-          >
-            <div class="button-content">
-              <span>{{ $t("WalletPage.actions.send.label") }}</span>
-            </div>
-          </q-btn>
-        </div>
+  <div class="row q-col-gutter-y-md justify-center q-pt-none q-pb-md">
+    <div class="col-12 text-center q-gutter-y-md wallet-column">
+      <div class="wallet-hero q-gutter-y-md">
+        <NoMintWarnBanner v-if="mints.length == 0" />
+        <BalanceView v-else />
+        <!-- With no mint yet the empty state's Add mint and Receive ecash are the only
+             actions; Receive, Scan and Send join once there is a mint to use. -->
+        <WalletActions
+          v-if="mints.length > 0"
+          class="q-pt-lg q-pb-md"
+          @receive="showReceiveDialog = true"
+          @scan="showCamera"
+          @send="showSendDialog = true"
+        />
         <ReceiveDialog v-model="showReceiveDialog" />
         <SendDialog v-model="showSendDialog" />
       </div>
       <!-- ///////////////////////////////////////////
       ////////////////// TABLES /////////////////
       /////////////////////////////////////////// -->
-      <q-expansion-item expand-icon-class="hidden" v-model="expandHistory">
-        <template v-slot:header="{ expanded }">
-          <q-item-section class="item-center text-center">
-            <span
-              ><q-icon
-                color="primary"
-                :name="expanded ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"
-            /></span>
+      <q-expansion-item
+        dense
+        class="wallet-panel"
+        expand-icon-class="hidden"
+        header-class="wallet-history-toggle"
+        :model-value="$q.screen.gt.sm || expandHistory"
+        @update:model-value="expandHistory = $event"
+      >
+        <!-- The header's expanded state, not expandHistory: desktop forces the panel open. -->
+        <template #header="{ expanded }">
+          <q-item-section class="items-center">
+            <ExpansionIndicator
+              :expanded="expanded"
+              :label="
+                $t(
+                  expanded
+                    ? 'WalletPage.panel.collapse'
+                    : 'WalletPage.panel.expand'
+                )
+              "
+            />
           </q-item-section>
         </template>
+        <!-- Full-width indicator: the tab cell less its corner radius at each end, no baseline
+             (src/css/app.scss .wallet-tabs). -->
         <q-tabs
           v-model="tab"
           no-caps
-          :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
+          class="bg-transparent wallet-tabs"
+          data-testid="wallet-tabs"
+          active-class="wallet-tab--active"
+          indicator-color="primary"
         >
           <q-tab
             name="history"
-            class="text-secondary"
+            data-testid="wallet-tab-history"
             :label="$t('WalletPage.tabs.history.label')"
           ></q-tab>
           <!-- <q-tab name="tokens" label="Tokens"></q-tab> -->
           <q-tab
             name="mints"
-            class="text-secondary"
+            data-testid="wallet-tab-mints"
             :label="$t('WalletPage.tabs.mints.label')"
           ></q-tab>
         </q-tabs>
 
-        <q-tab-panels
-          :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
-          v-model="tab"
-          animated
-        >
+        <q-tab-panels class="bg-dark" v-model="tab" animated>
           <!-- ////////////////// UNIFIED HISTORY LIST ///////////////// -->
 
           <q-tab-panel name="history">
-            <HistoryTable v-if="historyHydrated" />
-            <q-skeleton
-              v-else
-              type="rect"
-              height="260px"
-              class="q-mx-auto"
-              style="max-width: 500px"
-            />
+            <HistoryTable :skeleton="!historyHydrated" />
           </q-tab-panel>
 
           <!-- ////////////////////// SETTINGS ////////////////// -->
@@ -104,30 +80,30 @@
         </q-tab-panels>
       </q-expansion-item>
 
-      <div style="margin-bottom: 0rem">
-        <div class="row q-pt-sm">
-          <div class="col-12 q-pt-xs">
-            <q-btn
-              class="q-mx-xs q-px-sm q-my-sm"
-              outline
-              size="0.6rem"
-              v-if="
-                getPwaDisplayMode() == 'browser' &&
-                deferredPWAInstallPrompt != null
-              "
-              color="primary"
-              @click="triggerPwaInstall()"
-              ><b>{{ $t("WalletPage.install.text") }}</b
-              ><q-tooltip>{{
-                $t("WalletPage.install.tooltip")
-              }}</q-tooltip></q-btn
-            >
-          </div>
+      <!-- The browser's own install flow, wherever the browser offers it: desktop browsers
+           and a phone whose install sheet was closed get no PwaPrompt. -->
+      <div class="row q-pt-sm">
+        <div class="col-12 q-pt-xs">
+          <q-btn
+            v-if="
+              getPwaDisplayMode() == 'browser' &&
+              deferredPWAInstallPrompt != null
+            "
+            flat
+            rounded
+            color="primary"
+            class="touch-target-44 q-px-md"
+            :label="$t('WalletPage.install.text')"
+            @click="triggerPwaInstall()"
+            ><q-tooltip>{{
+              $t("WalletPage.install.tooltip")
+            }}</q-tooltip></q-btn
+          >
         </div>
       </div>
 
-      <iOSPWAPrompt />
-      <AndroidPWAPrompt />
+      <PwaPrompt platform="ios" />
+      <PwaPrompt platform="android" />
     </div>
 
     <!-- BOTTOM LIGHTNING BUTTONS -->
@@ -138,18 +114,14 @@
     <PayInvoiceDialog v-model="payInvoiceData.show" />
 
     <!-- QR CODE SCANNER  -->
-    <q-dialog v-model="camera.show" backdrop-filter="blur(2px) brightness(60%)">
+    <q-dialog
+      v-model="camera.show"
+      maximized
+      transition-show="fade"
+      transition-hide="fade"
+    >
       <QrcodeReader @decode="decodeQR" />
     </q-dialog>
-
-    <!-- WELCOME DIALOG  -->
-    <WelcomeDialog
-      :welcome-dialog="welcomeDialog"
-      :trigger-pwa-install="triggerPwaInstall"
-      :set-tab="setTab"
-      :get-pwa-display-mode="getPwaDisplayMode"
-      :set-welcome-dialog-seen="setWelcomeDialogSeen"
-    />
 
     <!-- INVOICE DETAILS  -->
     <CreateInvoiceDialog v-model="showCreateInvoiceDialog" />
@@ -167,59 +139,43 @@
   touch-action: manipulation;
 }
 
-.keypad {
-  display: grid;
-  grid-gap: 8px;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(4, 1fr);
+/* Full-bleed tabs on phones; on wider screens they sit on the content edges. */
+@media (min-width: 600px) {
+  .wallet-tabs,
+  .wallet-history-toggle {
+    margin: 0 16px;
+  }
 }
 
-.keypad .btn {
-  height: 100%;
+/* Its hover and focus fill is a rounded shape like the rows and the ring, not an
+   edge-to-edge slab. */
+.wallet-history-toggle {
+  border-radius: var(--app-radius-md);
+  min-height: 44px;
+}
+@media (max-width: 599.98px) {
+  .wallet-history-toggle {
+    margin-inline: 4px;
+  }
 }
 
-.keypad .btn-confirm {
-  grid-area: 1 / 4 / 5 / 4;
+/* On desktop history is always open, so there is no toggle to show. */
+@media (min-width: 1024px) {
+  .wallet-history-toggle {
+    display: none !important;
+  }
 }
 
-.wallet-action-btn {
-  min-width: 140px;
-  width: auto;
-  white-space: nowrap;
-  font-size: 1.2rem;
-}
-
-.button-content {
-  display: flex;
-  align-items: center;
-  white-space: nowrap;
-}
-
-/* Apply equal widths to wallet action buttons after render */
-.equal-width-buttons {
-  display: flex;
-  justify-content: space-between;
-}
-
-.scan-button-container {
-  position: absolute;
-  z-index: 1;
-  padding-bottom: 15px;
+.row > .wallet-column {
+  max-width: var(--app-column);
 }
 </style>
 <script lang="ts">
-import { date } from "quasar";
-import * as _ from "underscore";
-import { shortenString } from "src/js/string-utils";
-import { sumProofAmounts } from "src/js/proofs";
-import token from "src/js/token";
-
 // Vue components
 import BalanceView from "components/BalanceView.vue";
 import MintSettings from "components/MintSettings.vue";
 import HistoryTable from "components/HistoryTable.vue";
 import NoMintWarnBanner from "components/NoMintWarnBanner.vue";
-import WelcomeDialog from "components/WelcomeDialog.vue";
 import SendTokenDialog from "components/SendTokenDialog.vue";
 import PayInvoiceDialog from "components/PayInvoiceDialog.vue";
 import InvoiceDetailDialog from "components/InvoiceDetailDialog.vue";
@@ -227,8 +183,7 @@ import CreateInvoiceDialog from "components/CreateInvoiceDialog.vue";
 import SendDialog from "components/SendDialog.vue";
 import ReceiveDialog from "components/ReceiveDialog.vue";
 import QrcodeReader from "components/QrcodeReader.vue";
-import iOSPWAPrompt from "components/iOSPWAPrompt.vue";
-import AndroidPWAPrompt from "components/AndroidPWAPrompt.vue";
+import PwaPrompt from "src/components/PwaPrompt.vue";
 
 // pinia stores
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -238,9 +193,7 @@ import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { useTokensStore } from "src/stores/tokens";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
-import { useProofsStore } from "src/stores/proofs";
 import { useCameraStore } from "src/stores/camera";
-import { useP2PKStore } from "src/stores/p2pk";
 import { useNWCStore } from "src/stores/nwc";
 // @ts-ignore
 import { useNpubCashStore } from "src/stores/npubcash";
@@ -252,14 +205,9 @@ import { useStorageStore } from "src/stores/storage";
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
 import { useWelcomeStore } from "../stores/welcome";
 import { useTransactionWorkerStore } from "src/stores/transactionWorker";
-import { notifyError, notify } from "../js/notify";
 
-import {
-  X as XIcon,
-  Banknote as BanknoteIcon,
-  Zap as ZapIcon,
-  Scan as ScanIcon,
-} from "lucide-vue-next";
+import WalletActions from "src/components/WalletActions.vue";
+import ExpansionIndicator from "src/components/ui/ExpansionIndicator.vue";
 
 import { useMigrationsStore } from "src/stores/migrations";
 
@@ -273,7 +221,6 @@ export default {
     MintSettings,
     HistoryTable,
     NoMintWarnBanner,
-    WelcomeDialog,
     SendTokenDialog,
     ReceiveTokenDialog,
     PayInvoiceDialog,
@@ -282,36 +229,19 @@ export default {
     QrcodeReader,
     SendDialog,
     ReceiveDialog,
-    iOSPWAPrompt,
-    AndroidPWAPrompt,
-    ScanIcon,
+    PwaPrompt,
+    WalletActions,
+    ExpansionIndicator,
   },
   data: function () {
     return {
-      name: "",
-      mintId: "",
-      mintName: "",
       deferredPWAInstallPrompt: null as any,
-      action: "main",
-      payments: [] as any[],
-      paymentsChart: {
-        show: false,
-      },
       historyHydrated: false,
-      welcomeDialog: {
-        show: false,
-      },
-      baseHost: location.protocol + "//" + location.host,
-      baseURL: location.protocol + "//" + location.host + location.pathname,
-      credit: 0,
-      newName: "",
     };
   },
   computed: {
-    ...mapState(useUiStore, ["tickerShort"]),
     ...mapWritableState(useUiStore, [
       "showInvoiceDetails",
-      "showBolt12OfferDetails",
       "showCreateInvoiceDialog",
       "tab",
       "showSendDialog",
@@ -322,111 +252,35 @@ export default {
       "showReceiveTokens",
       "receiveData",
     ]),
-    ...mapWritableState(useSendTokensStore, ["showSendTokens", "sendData"]),
-    ...mapState(useMintsStore, [
-      "activeMintUrl",
-      "activeProofs",
-      "keys",
-      "mints",
-      "activeMint",
-    ]),
-    ...mapWritableState(useWalletStore, [
-      "invoiceHistory",
-      "invoiceData",
-      "payInvoiceData",
-    ]),
+    ...mapWritableState(useSendTokensStore, ["showSendTokens"]),
+    ...mapState(useMintsStore, ["activeMintUrl", "mints"]),
+    ...mapWritableState(useWalletStore, ["payInvoiceData"]),
     ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
     ...mapState(useTokensStore, ["historyTokens"]),
     ...mapState(usePRStore, ["enablePaymentRequest"]),
-    ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
-    ...mapWritableState(useP2PKStore, ["showP2PKDialog"]),
-    ...mapWritableState(useNWCStore, ["showNWCDialog", "nwcEnabled"]),
-    pendingPaymentsExist: function () {
-      return this.payments.findIndex((payment) => payment.pending) !== -1;
-    },
-
-    balance: function () {
-      return sumProofAmounts(this.activeProofs.flat());
-    },
+    ...mapWritableState(useCameraStore, ["camera"]),
+    ...mapWritableState(useNWCStore, ["nwcEnabled"]),
   },
   methods: {
-    ...mapActions(useProofsStore, [
-      "serializeProofs",
-      "getProofsMint",
-      "serializeProofsV2",
-      "sumProofs",
-      "deleteProofs",
-    ]),
-    ...mapActions(useMintsStore, [
-      "activateMintUrl",
-      "addMint",
-      "assertMintError",
-      "getBalance",
-      "setActiveProofs",
-      "setProofs",
-      "getKeysForKeyset",
-    ]),
-    ...mapActions(useTokensStore, ["setTokenPaid", "initEcashHistory"]),
+    ...mapActions(useTokensStore, ["initEcashHistory"]),
     ...mapActions(useWalletStore, [
-      "setInvoicePaid",
-      "mint",
-      "checkPendingTokens",
       "decodeRequest",
       "initializeMnemonic",
       "initPaymentHistory",
     ]),
-    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+    ...mapActions(useCameraStore, ["showCamera"]),
     ...mapActions(useNWCStore, ["listenToNWCCommands"]),
     ...mapActions(useNpubCashStore, ["initializeNpubCash"]),
     ...mapActions(useNostrStore, [
-      "sendNip04DirectMessage",
-      "sendNip17DirectMessage",
-      "subscribeToNip04DirectMessages",
       "subscribeToNip17DirectMessages",
-      "sendNip17DirectMessageToNprofile",
       "initSigner",
     ]),
     ...mapActions(useDexieStore, ["migrateToDexie"]),
     ...mapActions(useStorageStore, ["checkLocalStorage"]),
-    ...mapActions(usePRStore, ["createPaymentRequest"]),
     ...mapActions(useTransactionWorkerStore, [
       "startTransactionWorker",
       "checkPendingTransactions",
     ]),
-    // TOKEN METHODS
-    getProofs: function (decoded_token) {
-      return token.getProofs(decoded_token);
-    },
-    getMint: function (decoded_token) {
-      return token.getMint(decoded_token);
-    },
-    //
-    shortenString: function (s) {
-      return shortenString(s, 20, 10);
-    },
-    getTokenList: function () {
-      const amounts = this.activeProofs.map((t) => t.amount);
-      const counts = {} as any;
-
-      for (const num of amounts) {
-        counts[num] = counts[num] ? counts[num] + 1 : 1;
-      }
-      return Object.keys(counts).map((k) => ({
-        value: parseInt(k),
-        count: parseInt(counts[k]),
-        sum: Number(k) * counts[k],
-      }));
-    },
-
-    paymentTableRowKey: function (row) {
-      return row.payment_hash + row.amount;
-    },
-    showChart: function () {
-      this.paymentsChart.show = true;
-      this.$nextTick(() => {
-        // generateChart(this.$refs.canvas, this.payments);
-      });
-    },
     focusInput(el) {
       // TODO: fix this
       // this.$nextTick(() => this.$refs[el].focus());
@@ -461,29 +315,6 @@ export default {
       this.decodeRequest(res);
     },
     /////////////////////////////////// WALLET ///////////////////////////////////
-    showInvoiceCreateDialog: async function () {
-      console.log("##### showInvoiceCreateDialog");
-      this.invoiceData.amount = "";
-      this.invoiceData.request = "";
-      this.invoiceData.hash = "";
-      this.invoiceData.memo = "";
-      this.showCreateInvoiceDialog = true;
-    },
-    showSendTokensDialog: function () {
-      console.log("##### showSendTokensDialog");
-      this.sendData.tokens = "";
-      this.sendData.tokensBase64 = "";
-      this.sendData.amount = null;
-      this.sendData.memo = "";
-      this.showSendTokens = true;
-    },
-    hideSendTokensDialog: function () {
-      this.showSendTokens = false;
-    },
-    showReceiveTokensDialog: function () {
-      this.receiveData.tokensBase64 = "";
-      this.showReceiveTokens = true;
-    },
 
     //////////////////////// MINT //////////////////////////////////////////
 
@@ -519,14 +350,12 @@ export default {
     },
     triggerPwaInstall: function () {
       // Show the install prompt
-      // Note: this doesn't work with IOS, we do it with iOSPWAPrompt
+      // Note: this doesn't work with IOS, we do it with PwaPrompt
       this.deferredPWAInstallPrompt.prompt();
       // Wait for the user to respond to the prompt
       this.deferredPWAInstallPrompt.userChoice.then((choiceResult) => {
         if (choiceResult.outcome === "accepted") {
           console.log("User accepted the install prompt");
-          // @ts-ignore
-          this.setWelcomeDialogSeen();
         } else {
           console.log("User dismissed the install prompt");
         }
@@ -556,28 +385,6 @@ export default {
         }
       };
     },
-    equalizeButtonWidths: function () {
-      this.$nextTick(() => {
-        const actionBtns = document.querySelectorAll(".wallet-action-btn");
-        if (actionBtns.length >= 2) {
-          // Reset widths first
-          actionBtns.forEach((btn) => {
-            (btn as HTMLElement).style.width = "auto";
-          });
-
-          // Get the maximum width
-          let maxWidth = 0;
-          actionBtns.forEach((btn) => {
-            maxWidth = Math.max(maxWidth, (btn as HTMLElement).offsetWidth);
-          });
-
-          // Apply the maximum width to all buttons
-          actionBtns.forEach((btn) => {
-            (btn as HTMLElement).style.width = `${maxWidth}px`;
-          });
-        }
-      });
-    },
     handleVisibilityChange: function () {
       if (document.visibilityState === "visible") {
         console.log("### App brought to foreground, checking NWC...");
@@ -591,16 +398,10 @@ export default {
 
   mounted: function () {
     this.initializeNpubCash();
-    // Ensure wallet action buttons have equal width
-    this.$nextTick(this.equalizeButtonWidths);
-    // Add window resize listener to handle responsive layouts
-    window.addEventListener("resize", this.equalizeButtonWidths);
     document.addEventListener("visibilitychange", this.handleVisibilityChange);
   },
 
   beforeUnmount: function () {
-    // Remove event listener when component is destroyed
-    window.removeEventListener("resize", this.equalizeButtonWidths);
     document.removeEventListener(
       "visibilitychange",
       this.handleVisibilityChange
@@ -638,7 +439,6 @@ export default {
     }
 
     console.log("Mint URL " + this.activeMintUrl);
-    console.log("Wallet URL " + this.baseURL);
 
     // get token to receive tokens from a link
     if (params.get("token") || hash.includes("token")) {

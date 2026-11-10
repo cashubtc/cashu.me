@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <% if (sideBySide) { %>
+    <script src="/side-by-side/shim.js"></script>
+    <% } %>
     <title><%= productName %></title>
 
     <meta charset="utf-8" />
@@ -73,7 +76,22 @@
             var v = String(raw).replace(/^__q_[a-z]+\|/i, "");
             isDark = v === "1" || v === "true";
           }
-          var bg = isDark ? "#000000" : "#ffffff";
+          // Each theme's dark page (src/css/base.scss), so the first paint matches the app.
+          var pages = {
+            classic: "#1f2234",
+            bitcoin: "#232325",
+            freedom: "#000000",
+            salvador: "#242424",
+            mint: "#1f342b",
+            autumn: "#34291f",
+            flamingo: "#4a2d36",
+            monochrome: "#000000",
+            cyber: "#000000",
+          };
+          var theme = String(
+            window.localStorage.getItem("cashu.theme") || ""
+          ).replace(/^__q_[a-z]+\|/i, "");
+          var bg = isDark ? pages[theme] || pages.monochrome : "#ffffff";
           document.documentElement.style.backgroundColor = bg;
           document.documentElement.style.setProperty("--cashu-splash-bg", bg);
         } catch (e) {}

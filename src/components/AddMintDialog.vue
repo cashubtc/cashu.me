@@ -4,7 +4,7 @@
     :title="$t('AddMintDialog.title')"
     @enter="addMintLocal"
   >
-    <div class="q-px-lg">
+    <div>
       <!--
         Status messages are stacked in the same grid cell, so the stack is
         always as tall as the tallest message and the sheet never resizes
@@ -16,11 +16,9 @@
           :class="{ active: messageState === 'added' }"
           :aria-hidden="messageState !== 'added'"
         >
-          <q-icon
-            name="check_circle"
-            color="positive"
-            size="18px"
-            class="q-mr-xs message-icon"
+          <CircleCheckIcon
+            :size="18"
+            class="q-mr-xs message-icon text-positive"
           />
           {{ $t("wallet.mint.notifications.already_added") }}
         </p>
@@ -29,11 +27,9 @@
           :class="{ active: messageState === 'error' }"
           :aria-hidden="messageState !== 'error'"
         >
-          <q-icon
-            name="error_outline"
-            color="negative"
-            size="18px"
-            class="q-mr-xs message-icon"
+          <CircleAlertIcon
+            :size="18"
+            class="q-mr-xs message-icon text-negative"
           />
           {{ $t("AddMintDialog.unreachable_error_text") }}
         </p>
@@ -49,7 +45,7 @@
       </div>
 
       <!-- Mint preview pill -->
-      <div class="mint-preview-pill q-mb-lg">
+      <div class="app-box mint-preview-pill q-mb-lg">
         <MintInfoContainer
           :url="mintUrl"
           :name="mintDisplayName"
@@ -61,24 +57,18 @@
 
       <!-- Audit Info Section -->
       <div v-if="mintUrl" class="q-mb-lg">
-        <div class="detail-item">
-          <div class="detail-label">
-            <info-icon size="20" color="#9E9E9E" class="detail-icon" />
-            <div class="detail-name">
-              {{ $t("AddMintDialog.audit_info.label") }}
-            </div>
-          </div>
-          <div
-            class="detail-value audit-toggle"
-            @click="showAuditInfo = !showAuditInfo"
-          >
-            {{
-              showAuditInfo
-                ? $t("AddMintDialog.audit_info.actions.hide.label")
-                : $t("AddMintDialog.audit_info.actions.show.label")
-            }}
-          </div>
-        </div>
+        <DetailRow
+          action
+          :icon="InfoIcon"
+          :label="$t('AddMintDialog.audit_info.label')"
+          :value="
+            showAuditInfo
+              ? $t('AddMintDialog.audit_info.actions.hide.label')
+              : $t('AddMintDialog.audit_info.actions.show.label')
+          "
+          :aria-expanded="showAuditInfo"
+          @click="showAuditInfo = !showAuditInfo"
+        />
 
         <!-- Audit Info Component -->
         <transition
@@ -88,7 +78,7 @@
           <MintAuditInfo
             v-if="showAuditInfo"
             :mintUrl="mintUrl"
-            class="q-mt-md"
+            class="q-mt-xs"
           />
         </transition>
       </div>
@@ -98,7 +88,6 @@
       <q-btn
         class="full-width"
         unelevated
-        size="lg"
         color="primary"
         rounded
         data-testid="confirm-add-mint"
@@ -108,16 +97,20 @@
         :disable="addMintDisabled"
       >
         {{ $t("AddMintDialog.actions.add_mint.label") }}
-        <template v-slot:loading>
-          <q-spinner class="q-mr-sm" />
-          <span>{{ $t("AddMintDialog.actions.add_mint.in_progress") }}</span>
-        </template>
+        <template #loading
+          ><BusyLabel
+            ><span>{{
+              $t("AddMintDialog.actions.add_mint.in_progress")
+            }}</span></BusyLabel
+          ></template
+        >
       </q-btn>
     </template>
   </BottomSheet>
 </template>
 
 <script lang="ts">
+import BusyLabel from "src/components/ui/BusyLabel.vue";
 import { defineComponent, computed, ref, watch } from "vue";
 import { useMintsStore } from "src/stores/mints";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
@@ -125,15 +118,23 @@ import { getShortUrl } from "src/js/wallet-helpers";
 import BottomSheet from "./BottomSheet.vue";
 import MintAuditInfo from "./MintAuditInfo.vue";
 import MintInfoContainer from "./MintInfoContainer.vue";
-import { Info as InfoIcon } from "lucide-vue-next";
+import {
+  CircleAlert as CircleAlertIcon,
+  CircleCheck as CircleCheckIcon,
+  Info as InfoIcon,
+} from "lucide-vue-next";
+import DetailRow from "src/components/ui/DetailRow.vue";
 
 export default defineComponent({
   name: "AddMintDialog",
   components: {
+    BusyLabel,
+    CircleCheckIcon,
+    CircleAlertIcon,
     BottomSheet,
     MintAuditInfo,
     MintInfoContainer,
-    InfoIcon,
+    DetailRow,
   },
   props: {
     addMintData: {
@@ -276,6 +277,7 @@ export default defineComponent({
       messageState,
       addMintDisabled,
       showAuditInfo,
+      InfoIcon,
     };
   },
 });
@@ -295,7 +297,7 @@ export default defineComponent({
   font-size: 15px;
   line-height: 1.5;
   font-weight: 400;
-  font-family: "Inter", sans-serif;
+  font-family: inherit;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.25s ease, visibility 0s linear 0.25s;
@@ -328,58 +330,11 @@ export default defineComponent({
 
 /* Mint preview pill (styled like the mint selector pill, but static) */
 .mint-preview-pill {
-  width: 100%;
   padding: 16px;
-  border-radius: 12px;
-  border: 1px solid rgba(128, 128, 128, 0.25);
-  background-color: rgba(128, 128, 128, 0.08);
-}
-
-.body--dark .mint-preview-pill {
-  border-color: rgba(255, 255, 255, 0.1);
-  background-color: rgba(255, 255, 255, 0.05);
-}
-
-.body--light .mint-preview-pill {
-  border-color: rgba(0, 0, 0, 0.12);
-  background-color: rgba(0, 0, 0, 0.03);
+  width: 100%;
 }
 
 .mint-preview-pill :deep(.q-avatar) {
-  margin-right: 16px !important;
-}
-
-/* Audit info row (styled like the detail rows on the mint details page) */
-.detail-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
-.detail-label {
-  display: flex;
-  align-items: center;
-}
-
-.detail-icon {
-  margin-right: 10px;
-}
-
-.detail-name {
-  font-size: 16px;
-  font-weight: 600;
-  color: #9e9e9e;
-}
-
-.detail-value {
-  font-size: 16px;
-  font-weight: 600;
-  text-align: right;
-}
-
-.audit-toggle {
-  cursor: pointer;
-  user-select: none;
+  margin-inline-end: 16px !important;
 }
 </style>

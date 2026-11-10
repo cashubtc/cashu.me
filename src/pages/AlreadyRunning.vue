@@ -1,29 +1,24 @@
 <template>
-  <div
-    class="fullscreen bg-dark text-white text-center q-pa-md flex flex-center"
-  >
-    <div>
-      <div class="text-h3">{{ $t("AlreadyRunning.title") }}</div>
-      <div class="text-h5 q-ma-lg text-grey">
-        {{ $t("AlreadyRunning.text") }}
-      </div>
-      <q-btn
-        rounded
-        class="q-mt-md"
-        color="white"
-        text-color="black"
-        unelevated
-        to="/"
-        :label="$t('AlreadyRunning.actions.retry.label')"
-      />
-    </div>
-  </div>
+  <BlockingState
+    class="fullscreen"
+    :icon="AppWindowIcon"
+    :title="$t('AlreadyRunning.title')"
+    :text="$t('AlreadyRunning.text')"
+    :action="$t('AlreadyRunning.actions.retry.label')"
+    to="/"
+  />
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import { AppWindow as AppWindowIcon } from "lucide-vue-next";
+import BlockingState from "src/components/ui/BlockingState.vue";
 
 export default defineComponent({
   name: "AlreadyRunning",
+  components: { BlockingState },
+  setup() {
+    return { AppWindowIcon };
+  },
 });
 </script>

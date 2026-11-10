@@ -1,9 +1,9 @@
 <template>
   <div class="settings-sub-page bg-dark text-white q-pa-md">
     <div class="settings-view text-left">
-      <div v-if="title" class="settings-page-header q-px-xs q-pt-sm q-pb-md">
+      <div v-if="title" class="settings-page-header q-pt-sm q-pb-md">
         <div class="text-h5 text-weight-bold">{{ title }}</div>
-        <div v-if="caption" class="text-caption text-grey-6 q-mt-xs">
+        <div v-if="caption" class="settings-page-caption q-mt-xs">
           {{ caption }}
         </div>
       </div>

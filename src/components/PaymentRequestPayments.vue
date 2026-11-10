@@ -1,42 +1,23 @@
 <template>
   <div class="q-pa-none">
     <div v-if="payments.length === 0" class="text-center q-mt-sm">
-      <q-item-label caption class="text-grey-6">
+      <q-item-label caption>
         {{ $t("PaymentRequestDialog.no_payments_yet") }}
       </q-item-label>
     </div>
     <q-list v-else>
-      <q-item
+      <ActivityRow
         v-for="payment in paginatedPayments"
         :key="payment.id"
-        clickable
-        v-ripple
-        class="q-px-md q-py-md"
+        direction="in"
+        :label="payment.label || $t('ActivityRow.received')"
+        :amount="'+' + formatCurrency(payment.amount, payment.unit)"
+        :caption="[
+          $t('HistoryTable.row.type_label'),
+          formattedDate(payment.date),
+        ]"
         @click="showTokenDialog(payment)"
-      >
-        <q-item-section avatar class="q-pr-md" style="min-width: 40px">
-          <q-avatar size="28px">
-            <CoinsIcon class="transaction-icon" />
-          </q-avatar>
-        </q-item-section>
-        <q-item-section>
-          <q-item-label class="row items-center justify-between">
-            <div class="col text-left">
-              <span class="transaction-label text-weight-medium">
-                {{ payment.label || "Ecash" }}
-              </span>
-            </div>
-            <div class="text-right">
-              <div class="amount-text text-weight-bold">
-                +{{ formatCurrency(payment.amount, payment.unit) }}
-              </div>
-            </div>
-          </q-item-label>
-          <q-item-label caption class="text-grey-6">
-            {{ formattedDate(payment.date) }}
-          </q-item-label>
-        </q-item-section>
-      </q-item>
+      />
     </q-list>
     <div v-if="maxPages > 1" class="text-center q-mt-sm">
       <q-pagination
@@ -53,14 +34,16 @@
 import { defineComponent, PropType } from "vue";
 import { mapWritableState } from "pinia";
 import { HistoryToken } from "src/stores/tokens";
-import { formatDistanceToNow, parseISO } from "date-fns";
+import { formatRelativeDate } from "src/js/relative-time";
+import { isolateLtr } from "src/js/format-currency";
+import { useUiStore } from "src/stores/ui";
 import token from "src/js/token";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
-import { Coins as CoinsIcon } from "lucide-vue-next";
+import ActivityRow from "src/components/ActivityRow.vue";
 
 export default defineComponent({
   name: "PaymentRequestPayments",
-  components: { CoinsIcon },
+  components: { ActivityRow },
   props: {
     payments: {
       type: Array as PropType<HistoryToken[]>,
@@ -91,23 +74,11 @@ export default defineComponent({
   },
   methods: {
     formattedDate(date_str: string) {
-      const date = parseISO(date_str);
-      return formatDistanceToNow(date, { addSuffix: false });
+      return formatRelativeDate(date_str, this.$i18n.locale);
     },
+    // The same text as windowMixin's formatCurrency (this component has no windowMixin).
     formatCurrency(amount: number, unit: string) {
-      // delegate to global mixin formatter if available
-      try {
-        // @ts-ignore
-        return this.$root?.$?.appContext.config.globalProperties.formatCurrency
-          ? // @ts-ignore
-            this.$root.$.appContext.config.globalProperties.formatCurrency(
-              amount,
-              unit
-            )
-          : `${amount} ${unit}`;
-      } catch {
-        return `${amount} ${unit}`;
-      }
+      return isolateLtr(useUiStore().formatCurrency(amount, unit));
     },
     showTokenDialog(historyToken: HistoryToken) {
       if (historyToken.token === undefined) {
@@ -125,18 +96,3 @@ export default defineComponent({
   },
 });
 </script>
-<style scoped>
-.transaction-label {
-  border-radius: 4px;
-  font-size: 0.95rem;
-}
-.transaction-icon {
-  width: 18px;
-  height: 18px;
-  color: var(--q-primary);
-}
-.amount-text {
-  font-size: 0.95rem;
-  line-height: 1.2;
-}
-</style>

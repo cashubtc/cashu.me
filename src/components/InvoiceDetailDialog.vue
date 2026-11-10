@@ -1,182 +1,100 @@
 <template>
-  <q-dialog
-    v-model="showInvoiceDetails"
-    maximized
-    backdrop-filter="blur(2px) brightness(60%)"
-    transition-show="fade"
-    transition-hide="fade"
-    no-backdrop-dismiss
-  >
-    <q-card class="q-pa-none qcard">
-      <div
-        :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
-        class="display-token-fullscreen"
-      >
-        <!-- Header -->
-        <div class="row items-center q-pa-md" style="position: relative">
-          <q-btn
-            v-close-popup
-            flat
-            round
-            icon="close"
-            color="grey"
-            class="floating-close-btn"
+  <FlowDialog v-model="showInvoiceDetails">
+    <div class="display-token-fullscreen">
+      <!-- Header -->
+      <FullscreenDialogHeader :title="headerTitle" />
+
+      <!-- Content: one stack with one gap (QR, deposit note, amount, table), so no two
+           neighbours sit further apart than any others. What the payer
+           pays, the invoice or address, is a copy row in the table. -->
+      <div class="content-area">
+        <FlowColumn class="q-px-md flow-stack">
+          <PaymentStatus
+            v-if="invoiceData.status === 'paid'"
+            state="paid"
+            class="q-pt-lg"
+            :label="$t('InvoiceDetailDialog.invoice.status_paid_text')"
           />
-          <div class="col text-center fixed-title-height">
-            <q-item-label
-              overline
-              class="q-mt-sm text-white"
-              style="font-size: 1rem"
-            >
-              {{
-                isBolt12
-                  ? "Lightning Bolt12"
-                  : isOnchain
-                  ? "On-chain"
-                  : $t("InvoiceDetailDialog.invoice.caption")
-              }}
-            </q-item-label>
-          </div>
-        </div>
-
-        <!-- Content -->
-        <div class="content-area">
-          <q-card-section class="q-pa-none">
-            <div v-if="invoiceData.request" class="row justify-center q-mb-md">
-              <div
-                class="col-12 col-sm-11 col-md-8 q-px-md"
-                style="max-width: 600px"
+          <div v-else-if="invoiceData.request">
+            <div class="qr-container">
+              <component
+                :is="isOnchain ? 'div' : 'a'"
+                class="text-secondary"
+                :href="qrLink"
               >
-                <div class="qr-container">
-                  <component
-                    :is="isOnchain ? 'div' : 'a'"
-                    class="text-secondary"
-                    :href="qrLink"
-                  >
-                    <q-responsive :ratio="1" class="q-mx-none">
-                      <vue-qrcode
-                        :value="qrValue"
-                        :options="{ width: 400 }"
-                        class="rounded-borders"
-                        style="width: 100%"
-                      >
-                      </vue-qrcode>
-                    </q-responsive>
-                  </component>
-                  <!-- Checkmark overlay when paid -->
-                  <div
-                    v-if="invoiceData.status === 'paid'"
-                    class="checkmark-overlay"
-                    :class="$q.dark.isActive ? 'checkmark-overlay--dark' : ''"
-                  >
-                    <transition appear enter-active-class="animated tada">
-                      <q-icon
-                        name="check_circle"
-                        color="positive"
-                        class="checkmark-icon"
-                      />
-                    </transition>
-                  </div>
-                </div>
-                <div style="height: 2px">
-                  <q-linear-progress
-                    v-if="runnerActive"
-                    indeterminate
-                    color="primary"
-                  />
-                </div>
-                <div
-                  v-if="isOnchain"
-                  class="q-mt-sm text-center text-grey-7 qr-copy-text cursor-pointer"
-                  @click="onCopyBolt11"
-                >
-                  <q-icon
-                    :name="copyButtonCopied ? 'check' : 'content_copy'"
-                    size="xs"
-                    class="q-mr-xs"
-                  />
-                  {{ invoiceData.request }}
-                </div>
-                <OnchainDepositLimits
-                  v-if="isOnchain && invoiceData.status !== 'paid'"
-                  class="q-mt-md"
-                  :mint-url="invoiceData.mint"
-                  :unit="invoiceData.unit"
-                />
-              </div>
+                <QrBlock :value="qrValue" />
+              </component>
             </div>
-
-            <q-card-section class="q-pa-sm">
-              <div
-                v-if="invoiceData?.mintQuote"
-                class="row justify-center q-pt-md"
-              >
-                <div
-                  class="col-12 col-sm-11 col-md-8 q-px-md"
-                  style="max-width: 600px"
-                >
-                  <MintQuoteInformation
-                    :mint-quote="invoiceData.mintQuote"
-                    :invoice="invoiceData"
-                    :mint-url="invoiceData.mint"
-                    :show-amount="true"
-                    :method="invoiceMethod"
-                    :refresh-trigger="metadataRefreshTrigger"
-                  />
-                </div>
-              </div>
-              <div
-                v-else-if="invoiceData?.meltQuote"
-                class="row justify-center q-pt-lg"
-              >
-                <div
-                  class="col-12 col-sm-11 col-md-8 q-px-md"
-                  style="max-width: 600px"
-                >
-                  <MeltQuoteInformation
-                    :melt-quote="invoiceData.meltQuote"
-                    :invoice="invoiceData"
-                    :mint-url="invoiceData.mint"
-                    :history-paid-at="invoiceData.paidDate"
-                    :show-amount="true"
-                    :refresh-trigger="metadataRefreshTrigger"
-                  />
-                </div>
-              </div>
-            </q-card-section>
-          </q-card-section>
-        </div>
-
-        <!-- Bottom panel action -->
-        <div class="bottom-panel">
-          <div class="row justify-center q-pb-lg q-pt-sm">
-            <div
-              class="col-12 col-sm-11 col-md-8 q-px-md"
-              style="max-width: 600px"
-            >
-              <q-btn
-                v-if="invoiceData.request"
-                class="full-width"
-                unelevated
-                size="lg"
-                color="primary"
-                rounded
-                @click="onCopyBolt11"
-              >
-                {{ copyButtonLabel }}
-              </q-btn>
-            </div>
+            <QrProgress :active="runnerActive" />
           </div>
-        </div>
+          <OnchainDepositLimits
+            v-if="
+              isOnchain && invoiceData.request && invoiceData.status !== 'paid'
+            "
+            data-testid="deposit-limits-address"
+            :mint-url="invoiceData.mint"
+            :unit="invoiceData.unit"
+          />
+          <AmountHeadline v-if="invoiceData.amount">{{
+            displayUnit
+          }}</AmountHeadline>
+          <MintQuoteInformation
+            v-if="invoiceData?.mintQuote"
+            hide-paid-status
+            :mint-quote="invoiceData.mintQuote"
+            :invoice="invoiceData"
+            :mint-url="invoiceData.mint"
+            :show-amount="!invoiceData.amount"
+            :method="invoiceMethod"
+            :refresh-trigger="metadataRefreshTrigger"
+          />
+          <MeltQuoteInformation
+            v-else-if="invoiceData?.meltQuote"
+            hide-paid-status
+            :melt-quote="invoiceData.meltQuote"
+            :invoice="invoiceData"
+            :mint-url="invoiceData.mint"
+            :history-paid-at="invoiceData.paidDate"
+            :show-amount="!invoiceData.amount"
+            :refresh-trigger="metadataRefreshTrigger"
+          />
+        </FlowColumn>
       </div>
-    </q-card>
-  </q-dialog>
+
+      <!-- Bottom panel action -->
+      <FlowFooter>
+        <!-- Always rendered (disabled until the request arrives), so the footer never
+               appears late and shifts the screen. -->
+        <!-- Once paid there is nothing left to do, so copying is a secondary (outline)
+               action; while waiting it is the screen's primary action. -->
+        <q-btn
+          :disable="!invoiceData.request"
+          class="full-width"
+          :unelevated="invoiceData.status !== 'paid'"
+          :outline="invoiceData.status === 'paid'"
+          :color="invoiceData.status === 'paid' ? undefined : 'primary'"
+          rounded
+          @click="onCopyBolt11"
+        >
+          {{ copyButtonLabel }}
+        </q-btn>
+      </FlowFooter>
+    </div>
+  </FlowDialog>
 </template>
 <script lang="ts">
+import FlowColumn from "src/components/ui/FlowColumn.vue";
+import PaymentStatus from "src/components/ui/PaymentStatus.vue";
+import FlowDialog from "src/components/ui/FlowDialog.vue";
+import FlowFooter from "src/components/ui/FlowFooter.vue";
+import AmountHeadline from "src/components/ui/AmountHeadline.vue";
 import { defineComponent } from "vue";
-import { mapActions, mapState, mapWritableState } from "pinia";
-import VueQrcode from "@chenfengyuan/vue-qrcode";
+import { mapState, mapWritableState } from "pinia";
+import QrBlock from "src/components/QrBlock.vue";
+import QrProgress from "src/components/QrProgress.vue";
+import FullscreenDialogHeader from "src/components/ui/FullscreenDialogHeader.vue";
 import { copyToClipboard } from "quasar";
+import { notifyCopied } from "src/js/notify";
 
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
@@ -193,7 +111,14 @@ export default defineComponent({
   name: "InvoiceDetailDialog",
   mixins: [windowMixin],
   components: {
-    VueQrcode,
+    FlowColumn,
+    PaymentStatus,
+    FlowDialog,
+    FlowFooter,
+    AmountHeadline,
+    QrBlock,
+    QrProgress,
+    FullscreenDialogHeader,
     MeltQuoteInformation,
     MintQuoteInformation,
     OnchainDepositLimits,
@@ -207,6 +132,19 @@ export default defineComponent({
     };
   },
   computed: {
+    // A settled payment is titled by what happened (Sent, Received), as its history row is;
+    // an open one by what it is (the invoice, the address).
+    headerTitle(): string {
+      if (this.invoiceData.status === "paid")
+        return this.$t(
+          (this.invoiceData.amount ?? 0) < 0
+            ? "ActivityRow.sent"
+            : "ActivityRow.received"
+        );
+      if (this.isBolt12) return this.$t("QuoteInformation.lightning_offer");
+      if (this.isOnchain) return this.$t("common.on_chain");
+      return this.$t("InvoiceDetailDialog.invoice.caption");
+    },
     ...mapState(useWalletStore, ["invoiceData"]),
     ...mapState(useWorkersStore, ["invoiceWorkerRunning"]),
     ...mapWritableState(useUiStore, ["showInvoiceDetails"]),
@@ -216,13 +154,11 @@ export default defineComponent({
         this.invoiceData.unit,
         true
       );
-      return display;
+      // Same true minus sign as the history list.
+      return display.replace(/^(\u2066?)-\s*/, "$1\u2212");
     },
     runnerActive: function () {
       return this.invoiceWorkerRunning;
-    },
-    isSmallScreen() {
-      return this.$q.screen.lt.sm;
     },
     invoiceMethod(): PaymentMethod {
       const method =
@@ -236,9 +172,13 @@ export default defineComponent({
     },
     copyButtonLabel: function () {
       if (this.copyButtonCopied) {
-        return "Copied";
+        return this.$t("common.copied");
       }
-      return this.$t("InvoiceDetailDialog.invoice.actions.copy.label");
+      // "Copy invoice" names a Lightning invoice; an offer or an on-chain address is just
+      // copied.
+      return this.invoiceMethod === PaymentMethod.Bolt11
+        ? this.$t("InvoiceDetailDialog.invoice.actions.copy.label")
+        : this.$t("global.actions.copy.label");
     },
     isBolt12(): boolean {
       return (
@@ -282,6 +222,7 @@ export default defineComponent({
       if (request) {
         try {
           await copyToClipboard(request);
+          notifyCopied();
           this.copyButtonCopied = true;
           // Clear any existing timeout
           if (this.copyButtonTimeout) {
@@ -306,80 +247,10 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.display-token-fullscreen {
-  height: 100vh;
-  height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-.content-area {
-  flex: 1;
-  overflow-y: auto;
-}
-.floating-close-btn {
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 1;
-}
-.fixed-title-height {
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.bottom-panel {
-  margin-top: auto;
-  background: var(--q-color-grey-1);
-  box-shadow: 0 -8px 16px rgba(0, 0, 0, 0.05);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  position: sticky;
-  bottom: 0;
-  z-index: 2;
-}
-.qcard {
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-}
-
-/* QR Code with checkmark overlay */
+/* The QR's rounded frame. */
 .qr-container {
   position: relative;
-  border-radius: 8px;
+  border-radius: var(--app-radius-md);
   overflow: hidden;
-}
-
-.qr-copy-text {
-  overflow-wrap: anywhere;
-  word-break: break-all;
-  -webkit-hyphens: none;
-  -moz-hyphens: none;
-  hyphens: none;
-  font-size: 0.9em;
-  font-family: monospace;
-}
-
-.checkmark-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.94);
-  border-radius: 8px;
-  z-index: 1;
-}
-
-.checkmark-overlay--dark {
-  background: rgba(30, 30, 30, 0.94);
-}
-
-.checkmark-icon {
-  font-size: clamp(100px, 35vw, 200px);
 }
 </style>

@@ -1,158 +1,134 @@
 <template>
   <div
     v-if="hasQuote"
-    class="melt-quote-information q-mt-md"
+    class="melt-quote-information detail-table"
     :class="containerTextClass"
   >
-    <div v-if="showAmount" class="detail-item q-mb-md">
-      <div class="detail-label">
-        <ZapIcon :size="20" :color="iconColor" class="detail-icon" />
-        <div class="detail-name">Amount</div>
-      </div>
-      <div class="detail-value">{{ amountDisplay }}</div>
-    </div>
+    <DetailRow
+      v-if="showAmount"
+      :icon="CoinsIcon"
+      :label="$t('QuoteInformation.amount')"
+      :value="amountDisplay"
+    />
 
-    <div v-if="hasFeeReserve && !hasFeePaid" class="detail-item q-mb-md">
-      <div class="detail-label">
-        <ArrowDownUpIcon :size="20" :color="iconColor" class="detail-icon" />
-        <div class="detail-name">Fee Reserve</div>
-      </div>
-      <div class="detail-value">{{ feeReserveDisplay }}</div>
-    </div>
+    <DetailRow
+      v-if="hasFeeReserve && !hasFeePaid"
+      :icon="ReceiptTextIcon"
+      :label="$t('QuoteInformation.fee_reserve')"
+      :value="feeReserveDisplay"
+    />
 
-    <div v-if="hasFeePaid" class="detail-item q-mb-md">
-      <div class="detail-label">
-        <BadgeCheckIcon :size="20" :color="iconColor" class="detail-icon" />
-        <div class="detail-name">Fee Paid</div>
-      </div>
-      <div class="detail-value">{{ feePaidDisplay }}</div>
-    </div>
+    <DetailRow
+      v-if="hasFeePaid"
+      :icon="ReceiptTextIcon"
+      :label="$t('QuoteInformation.fee_paid')"
+      :value="feePaidDisplay"
+    />
 
-    <div class="detail-item q-mb-md">
-      <div class="detail-label">
-        <BanknoteIcon :size="20" :color="iconColor" class="detail-icon" />
-        <div class="detail-name">Unit</div>
-      </div>
-      <div class="detail-value">{{ unitDisplay }}</div>
-    </div>
+    <DetailRow
+      v-if="quoteUnit !== 'sat'"
+      :icon="CircleDollarSignIcon"
+      :label="$t('QuoteInformation.unit')"
+      :value="unitDisplay"
+    />
 
-    <div v-if="stateDisplay" class="detail-item q-mb-md">
-      <div class="detail-label">
-        <InfoIcon :size="20" :color="iconColor" class="detail-icon" />
-        <div class="detail-name">State</div>
-      </div>
-      <div class="detail-value" :class="{ 'text-positive': isPaidState }">
-        {{ stateDisplay }}
-      </div>
-    </div>
+    <QuoteStatusRow
+      v-if="stateDisplay && !hideStatus && !(hidePaidStatus && isPaidState)"
+      :tone="isPaidState ? 'paid' : 'other'"
+      :text="stateDisplay"
+    />
 
-    <div v-if="networkDisplay" class="detail-item q-mb-md">
-      <div class="detail-label">
-        <InfoIcon :size="20" :color="iconColor" class="detail-icon" />
-        <div class="detail-name">Network</div>
-      </div>
-      <div class="detail-value">{{ networkDisplay }}</div>
-    </div>
+    <DetailRow
+      v-if="networkDisplay"
+      :icon="NetworkIcon"
+      :label="$t('QuoteInformation.network')"
+      :value="networkDisplay"
+    />
 
-    <div v-if="hasTxid" class="detail-item q-mb-md">
-      <div class="detail-label">
-        <HashIcon :size="20" :color="iconColor" class="detail-icon" />
-        <div class="detail-name">Transaction ID</div>
-      </div>
-      <div class="detail-value detail-value-with-action">
-        <a :href="onchainTxUrl" target="_blank">{{ shortTxid(txidValue) }}</a>
-        <q-btn
-          flat
-          dense
-          round
-          size="sm"
-          :icon="txidCopied ? 'check' : 'content_copy'"
-          @click="copyTxid"
-        />
-      </div>
-    </div>
-
-    <div
-      v-if="hasTxid && (onchainMetadata || loadingOnchainMetadata)"
-      class="detail-item q-mb-md"
+    <!-- Tapping the transaction ID copies all of it; the explorer is its own row. -->
+    <DetailRow
+      v-if="hasTxid"
+      :icon="HashIcon"
+      :label="$t('QuoteInformation.transaction_id')"
+      :copy-value="txidValue"
+      ><bdi dir="ltr">{{ shortTxid(txidValue) }}</bdi></DetailRow
     >
-      <div class="detail-label">
-        <InfoIcon :size="20" :color="iconColor" class="detail-icon" />
-        <div class="detail-name">Chain Status</div>
-      </div>
-      <div class="detail-value detail-value-with-spinner">
-        <q-spinner
-          v-if="loadingOnchainMetadata"
-          size="14px"
-          color="grey-6"
-          class="q-mr-xs"
-        />
-        <transition name="chain-status-fade" mode="out-in">
-          <span
-            v-if="onchainMetadata"
-            :key="onchainStatusDisplay"
-            :class="{ 'text-positive': onchainMetadata.confirmed }"
-          >
-            {{ onchainStatusDisplay }}
-          </span>
-          <span v-else key="loading" class="text-grey-6">Fetching</span>
-        </transition>
-      </div>
-    </div>
+    <DetailRow
+      v-if="hasTxid"
+      :icon="GlobeIcon"
+      :label="$t('QuoteInformation.explorer')"
+      :href="onchainTxUrl"
+      ><bdi dir="ltr">{{ explorerHost(onchainTxUrl) }}</bdi></DetailRow
+    >
 
-    <div v-if="paidAtDisplay" class="detail-item q-mb-md">
-      <div class="detail-label">
-        <ClockIcon :size="20" :color="iconColor" class="detail-icon" />
-        <div class="detail-name">Time Paid</div>
-      </div>
-      <div class="detail-value">{{ paidAtDisplay }}</div>
-    </div>
+    <ConfirmationsRow
+      v-if="hasTxid && (onchainMetadata || loadingOnchainMetadata)"
+      :metadata="onchainMetadata"
+      :loading="loadingOnchainMetadata"
+    />
 
-    <div v-if="hasPreimage" class="detail-item q-mb-md">
-      <div class="detail-label">
-        <FingerprintIcon :size="20" :color="iconColor" class="detail-icon" />
-        <div class="detail-name">Preimage</div>
-      </div>
-      <div class="detail-value" @click="copyPreimage" style="cursor: pointer">
-        {{ preimageValue }}
-      </div>
-    </div>
+    <DetailRow
+      v-if="paidAtDisplay"
+      :icon="ClockIcon"
+      :label="$t('QuoteInformation.paid_at')"
+      :value="paidAtDisplay"
+    />
 
-    <div v-if="mintDisplay" class="detail-item">
-      <div class="detail-label">
-        <BuildingIcon :size="20" :color="iconColor" class="detail-icon" />
-        <div class="detail-name">Mint</div>
-      </div>
-      <div class="detail-value">{{ mintDisplay }}</div>
-    </div>
+    <DetailRow
+      v-if="hasPreimage"
+      :icon="FingerprintIcon"
+      :label="$t('QuoteInformation.preimage')"
+      :value="preimageValue"
+      :copy-value="preimageValue"
+      :copied-message="$t('QuoteInformation.preimage_copied')"
+    />
+
+    <DetailRow
+      v-if="memo"
+      :icon="MessageCircleIcon"
+      :label="$t('PayInvoiceDialog.invoice.memo.label')"
+      :value="memo"
+    />
+
+    <DetailRow
+      v-if="mintDisplay"
+      :icon="MintIcon"
+      :label="$t('QuoteInformation.mint')"
+      :value="mintDisplay"
+    />
   </div>
 </template>
 
 <script lang="ts">
+import { unitCode } from "src/js/format-currency";
 import { defineComponent, PropType } from "vue";
 import { mapState } from "pinia";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useMintsStore } from "stores/mints";
 import { MeltQuoteBolt11Response } from "@cashu/cashu-ts";
-import { copyToClipboard } from "quasar";
 import { PaymentMethod } from "src/stores/walletTypes";
 import {
+  explorerHost,
   fetchTxMetadata,
   onchainNetwork,
   onchainNetworkDisplay,
   type MempoolTxMetadata,
 } from "src/js/onchain";
 import {
-  Zap as ZapIcon,
-  ArrowDownUp as ArrowDownUpIcon,
-  BadgeCheck as BadgeCheckIcon,
+  CircleDollarSign as CircleDollarSignIcon,
   Clock as ClockIcon,
-  Building as BuildingIcon,
-  Banknote as BanknoteIcon,
-  Info as InfoIcon,
+  Coins as CoinsIcon,
   Fingerprint as FingerprintIcon,
+  Globe as GlobeIcon,
   Hash as HashIcon,
+  Building2 as MintIcon,
+  MessageCircle as MessageCircleIcon,
+  Network as NetworkIcon,
+  ReceiptText as ReceiptTextIcon,
 } from "lucide-vue-next";
+import DetailRow from "src/components/ui/DetailRow.vue";
+import ConfirmationsRow from "src/components/ConfirmationsRow.vue";
+import QuoteStatusRow from "src/components/QuoteStatusRow.vue";
 
 declare const windowMixin: any;
 declare const formatCurrency: any;
@@ -168,26 +144,42 @@ type ExtendedMeltQuote = MeltQuoteBolt11Response & {
 export default defineComponent({
   name: "MeltQuoteInformation",
   mixins: [windowMixin],
-  components: {
-    ZapIcon,
-    ArrowDownUpIcon,
-    BadgeCheckIcon,
-    ClockIcon,
-    BuildingIcon,
-    BanknoteIcon,
-    InfoIcon,
-    FingerprintIcon,
-    HashIcon,
+  components: { DetailRow, ConfirmationsRow, QuoteStatusRow },
+  setup() {
+    return {
+      CircleDollarSignIcon,
+      ClockIcon,
+      CoinsIcon,
+      FingerprintIcon,
+      GlobeIcon,
+      HashIcon,
+      MessageCircleIcon,
+      MintIcon,
+      NetworkIcon,
+      ReceiptTextIcon,
+    };
   },
   data: function () {
     return {
       onchainMetadata: null as MempoolTxMetadata | null,
       loadingOnchainMetadata: false,
-      txidCopied: false,
-      txidCopiedTimeout: null as any,
     };
   },
   props: {
+    hidePaidStatus: {
+      type: Boolean,
+      default: false,
+    },
+    /** No status row: a quote still being confirmed (Pay), where "Unpaid" says nothing. */
+    hideStatus: {
+      type: Boolean,
+      default: false,
+    },
+    /** The invoice's description, as a row before the mint. */
+    memo: {
+      type: String,
+      default: "",
+    },
     meltQuote: {
       type: Object as PropType<ExtendedMeltQuote | null>,
       default: null,
@@ -224,9 +216,6 @@ export default defineComponent({
     hasQuote(): boolean {
       return Boolean(this.meltQuote && this.meltQuote.quote);
     },
-    iconColor(): string {
-      return this.$q.dark.isActive ? "#9E9E9E" : "#616161";
-    },
     containerTextClass(): string {
       return this.$q.dark.isActive ? "text-white" : "text-dark";
     },
@@ -243,7 +232,7 @@ export default defineComponent({
       return "sat";
     },
     unitDisplay(): string {
-      return this.quoteUnit?.toUpperCase?.() || "";
+      return this.quoteUnit ? unitCode(this.quoteUnit) : "";
     },
     amountDisplay(): string {
       const amount =
@@ -307,6 +296,8 @@ export default defineComponent({
         return "";
       }
       const lower = state.toLowerCase();
+      const key = `QuoteInformation.states.${lower}`;
+      if (this.$te(key)) return this.$t(key) as string;
       return lower.charAt(0).toUpperCase() + lower.slice(1);
     },
     isPaidState(): boolean {
@@ -346,7 +337,8 @@ export default defineComponent({
       if (!this.paidAtTimestamp) {
         return "";
       }
-      return new Intl.DateTimeFormat(undefined, {
+      return new Intl.DateTimeFormat(this.$i18n.locale, {
+        numberingSystem: "latn",
         dateStyle: "medium",
         timeStyle: "short",
       }).format(new Date(this.paidAtTimestamp));
@@ -386,15 +378,11 @@ export default defineComponent({
       if (!this.isMutinynet) return "";
       return onchainNetworkDisplay("mutinynet");
     },
-    onchainStatusDisplay(): string {
-      if (!this.onchainMetadata) return "";
-      const status = this.onchainMetadata.confirmed ? "Confirmed" : "Pending";
-      return `${status} (${this.onchainMetadata.confirmations}/${this.onchainMetadata.confirmationThreshold})`;
-    },
   },
   methods: {
+    explorerHost,
     shortTxid(txid: string): string {
-      return `${txid.slice(0, 8)}...${txid.slice(-8)}`;
+      return `${txid.slice(0, 8)}…${txid.slice(-8)}`;
     },
     onchainConfirmations(): number {
       const mintStore = useMintsStore();
@@ -410,7 +398,7 @@ export default defineComponent({
     async loadOnchainMetadata() {
       if (!this.hasTxid) return;
       this.loadingOnchainMetadata = true;
-      this.onchainMetadata = null;
+      // A refetch keeps the known count on screen (no blink back to the dots).
       try {
         const addressHint =
           this.meltQuote?.request ||
@@ -424,38 +412,6 @@ export default defineComponent({
         console.error("Could not fetch on-chain metadata", error);
       } finally {
         this.loadingOnchainMetadata = false;
-      }
-    },
-    async copyTxid() {
-      if (!this.txidValue) return;
-      try {
-        await copyToClipboard(this.txidValue);
-        this.txidCopied = true;
-        if (this.txidCopiedTimeout) clearTimeout(this.txidCopiedTimeout);
-        this.txidCopiedTimeout = setTimeout(() => {
-          this.txidCopied = false;
-        }, 2000);
-      } catch (e) {
-        console.error("Failed to copy txid", e);
-      }
-    },
-    async copyPreimage() {
-      const pre = this.preimageValue;
-      if (!pre) return;
-      try {
-        if (navigator?.clipboard?.writeText) {
-          await navigator.clipboard.writeText(pre);
-        } else {
-          (this as any).copyText?.(pre);
-        }
-        this.$q.notify({
-          message: "Preimage copied",
-          color: "positive",
-          position: "top",
-          timeout: 1000,
-        });
-      } catch (e) {
-        console.error("Failed to copy preimage", e);
       }
     },
     normalizeToTimestamp(
@@ -498,6 +454,8 @@ export default defineComponent({
   },
   watch: {
     txidValue: function () {
+      // Another transaction: the count on screen belongs to the previous one.
+      this.onchainMetadata = null;
       this.loadOnchainMetadata();
     },
     refreshTrigger: function () {
@@ -507,63 +465,11 @@ export default defineComponent({
   mounted() {
     this.loadOnchainMetadata();
   },
-  beforeUnmount() {
-    if (this.txidCopiedTimeout) clearTimeout(this.txidCopiedTimeout);
-  },
 });
 </script>
 
 <style scoped>
 .melt-quote-information {
   width: 100%;
-}
-
-.detail-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
-.detail-label {
-  display: flex;
-  align-items: center;
-}
-
-.detail-icon {
-  margin-right: 10px;
-}
-
-.detail-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--q-color-grey-6);
-}
-
-.detail-value {
-  font-size: 16px;
-  font-weight: 600;
-  color: inherit;
-  text-align: right;
-  max-width: 60%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.detail-value-with-spinner {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
-
-.chain-status-fade-enter-active,
-.chain-status-fade-leave-active {
-  transition: opacity 0.2s ease;
-}
-
-.chain-status-fade-enter-from,
-.chain-status-fade-leave-to {
-  opacity: 0;
 }
 </style>

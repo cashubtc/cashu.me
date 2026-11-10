@@ -1,35 +1,35 @@
 <template>
-  <div
-    v-if="sendData.paymentRequest"
-    class="col-12 col-sm-11 col-md-8 q-px-md"
-    style="max-width: 600px"
-  >
+  <div v-if="sendData.paymentRequest" class="col-12">
     <q-btn
       class="full-width"
       :rounded="buttonRounded"
       :dense="buttonDense"
       :unelevated="buttonUnelevated"
-      :size="buttonSize"
       :color="buttonColor"
       :class="computedButtonClasses"
       :disable="disable || !sendData.paymentRequest"
       :loading="isLoading"
       @click="clickPaymentRequest"
     >
-      <q-icon v-if="!isLoading" name="send" class="q-pr-xs" />
-      <q-spinner v-else size="1em" class="q-mr-md" />
+      <SendIcon v-if="!hideIcon" :size="20" class="q-mr-sm" />
       {{ resolvedLabel }}
+      <template #loading
+        ><BusyLabel>{{ resolvedLabel }}</BusyLabel></template
+      >
     </q-btn>
   </div>
 </template>
 
 <script lang="ts">
+import BusyLabel from "src/components/ui/BusyLabel.vue";
+import { Send as SendIcon } from "lucide-vue-next";
 import { defineComponent, PropType } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { usePRStore } from "src/stores/payment-request";
 import { useUiStore } from "src/stores/ui";
 import { notifyError } from "src/js/notify";
+import { i18n } from "src/boot/i18n";
 import { PaymentRequestTransportType } from "@cashu/cashu-ts";
 import type { PaymentRequestData } from "src/stores/payment-request";
 
@@ -37,6 +37,10 @@ declare const windowMixin: any;
 
 export default defineComponent({
   name: "SendPaymentRequest",
+  components: {
+    BusyLabel,
+    SendIcon,
+  },
   mixins: [windowMixin],
   props: {
     buttonLabel: {
@@ -46,10 +50,6 @@ export default defineComponent({
     disable: {
       type: Boolean,
       default: false,
-    },
-    showDetails: {
-      type: Boolean,
-      default: true,
     },
     fullWidth: {
       type: Boolean,
@@ -81,9 +81,10 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
-    buttonSize: {
-      type: String,
-      default: "md",
+    // FlowFooter actions are text only (one caps standard), so the footer hides the glyph.
+    hideIcon: {
+      type: Boolean,
+      default: false,
     },
   },
   emits: ["success"],
@@ -94,11 +95,7 @@ export default defineComponent({
   },
   watch: {},
   computed: {
-    ...mapWritableState(useSendTokensStore, [
-      "showSendTokens",
-      "showLockInput",
-      "sendData",
-    ]),
+    ...mapWritableState(useSendTokensStore, ["sendData"]),
     ...mapState(useUiStore, ["globalMutexLock"]),
     isLoading(): boolean {
       return this.loading || this.globalMutexLock;
@@ -115,15 +112,6 @@ export default defineComponent({
       }
       return this.$t("SendPaymentRequest.actions.pay_via.label", {
         transport,
-      }) as string;
-    },
-    detailText(): string {
-      const target = this.getPaymentRequestTarget(this.sendData.paymentRequest);
-      if (!target) {
-        return "";
-      }
-      return this.$t("SendPaymentRequest.info.pay_to", {
-        target,
       }) as string;
     },
     computedButtonClasses():
@@ -167,7 +155,9 @@ export default defineComponent({
           }
         }
         if (!tokenStr) {
-          throw new Error("No ecash available for payment request.");
+          throw new Error(
+            i18n.global.t("SendPaymentRequest.info.no_ecash") as string
+          );
         }
         const success = await this.parseAndPayPaymentRequest(
           this.sendData.paymentRequest,
@@ -178,7 +168,10 @@ export default defineComponent({
         }
       } catch (error: any) {
         console.error("Error paying payment request:", error);
-        notifyError(`${error?.message ?? error}`, "Could not pay request");
+        notifyError(
+          i18n.global.t("SendPaymentRequest.info.pay_failed"),
+          `${error?.message ?? error}`
+        );
       } finally {
         this.loading = false;
       }
@@ -194,32 +187,6 @@ export default defineComponent({
         }
         if (transport.type == PaymentRequestTransportType.POST) {
           return "HTTP";
-        }
-      }
-      return "";
-    },
-    getPaymentRequestTarget(request?: PaymentRequestData) {
-      if (!request || !request.transport) {
-        return "";
-      }
-      const transports = request.transport;
-      for (const transport of transports) {
-        if (transport.type == PaymentRequestTransportType.NOSTR) {
-          return `${transport.target.slice(0, 20)}..${transport.target.slice(
-            -10
-          )}`;
-        }
-        if (transport.type == PaymentRequestTransportType.POST) {
-          try {
-            const url = new URL(transport.target);
-            return url.hostname;
-          } catch (error) {
-            console.error(
-              `Invalid URL in transport.target: ${transport.target}`,
-              error
-            );
-            return this.$t("SendPaymentRequest.info.invalid_url") as string;
-          }
         }
       }
       return "";

@@ -3,213 +3,135 @@
     :title="$t('Settings.menu.nostr.title')"
     :caption="$t('Settings.menu.nostr.caption')"
   >
-    <!-- keys -->
+    <!-- keys: one single-choice group. A key's own action (copy, delete) is a button beside
+         or under its radio row, never inside it. -->
     <SettingsSection
+      radiogroup
       :title="$t('Settings.nostr_keys.title')"
       :caption="$t('Settings.nostr_keys.description')"
     >
       <!-- initWalletSeedPrivateKeySigner -->
-      <q-item
-        :active="signerType === 'SEED'"
-        active-class="text-weight-bold text-primary"
-        clickable
-        @click="handleSeedClick"
+      <SettingsRadioRow
+        :selected="signerType === 'SEED'"
+        :label="$t('Settings.nostr_keys.wallet_seed.title')"
+        :caption="$t('Settings.nostr_keys.wallet_seed.description')"
+        top
+        @select="handleSeedClick"
+      />
+      <div
+        v-if="signerType === 'SEED' && seedSignerPrivateKeyNsec"
+        class="nostr-key-action"
       >
-        <q-item-section avatar>
-          <q-icon
-            :color="signerType === 'SEED' ? 'primary' : 'grey'"
-            :name="
-              signerType === 'SEED' ? 'check_circle' : 'radio_button_unchecked'
-            "
-          />
-        </q-item-section>
-        <q-item-section style="word-break: break-word">
-          <q-item-label>{{
-            $t("Settings.nostr_keys.wallet_seed.title")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.nostr_keys.wallet_seed.description")
-          }}</q-item-label>
-          <q-item-label
-            caption
-            v-if="signerType === 'SEED' && seedSignerPrivateKeyNsec"
-          >
-            <q-badge
-              class="cursor-pointer q-mt-xs"
-              @click.stop="copyText(seedSignerPrivateKeyNsec)"
-              outline
-              color="grey"
-            >
-              <q-icon
-                name="content_copy"
-                size="0.8em"
-                color="grey"
-                class="q-mr-xs"
-              ></q-icon
-              >{{ $t("Settings.nostr_keys.wallet_seed.copy_nsec") }}
-            </q-badge>
-          </q-item-label>
-        </q-item-section>
-      </q-item>
+        <q-btn outline rounded @click="copyText(seedSignerPrivateKeyNsec)">
+          <CopyIcon :size="18" class="q-mr-sm" />
+          <span>{{ $t("Settings.nostr_keys.wallet_seed.copy_nsec") }}</span>
+        </q-btn>
+      </div>
       <!-- Nip46Signer -->
-      <q-item
-        :active="signerType === 'NIP46'"
-        active-class="text-weight-bold text-primary"
-        clickable
-        @click="handleBunkerClick"
-        v-if="false"
-      >
-        <q-item-section avatar>
-          <q-icon
-            :color="signerType === 'NIP46' ? 'primary' : 'grey'"
-            :name="
-              signerType === 'NIP46' ? 'check_circle' : 'radio_button_unchecked'
-            "
-          />
-        </q-item-section>
-        <q-item-section style="word-break: break-word">
-          <q-item-label>{{
-            $t("Settings.nostr_keys.nsec_bunker.title")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.nostr_keys.nsec_bunker.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side v-if="signerType === 'NIP46'">
-          <q-icon
-            name="delete_outline"
-            @click.stop="handleResetNip46Signer"
-            class="cursor-pointer"
-            ><q-tooltip>{{
-              $t("Settings.nostr_keys.nsec_bunker.delete_tooltip")
-            }}</q-tooltip>
-          </q-icon>
-        </q-item-section>
-      </q-item>
+      <div v-if="false" class="row no-wrap items-center">
+        <SettingsRadioRow
+          class="col"
+          :selected="signerType === 'NIP46'"
+          :label="$t('Settings.nostr_keys.nsec_bunker.title')"
+          :caption="$t('Settings.nostr_keys.nsec_bunker.description')"
+          top
+          @select="handleBunkerClick"
+        />
+        <IconButton
+          v-if="signerType === 'NIP46'"
+          class="nostr-key-remove"
+          :label="$t('Settings.nostr_keys.nsec_bunker.delete_tooltip')"
+          tooltip
+          @click="handleResetNip46Signer"
+          ><Trash2Icon :size="20"
+        /></IconButton>
+      </div>
       <!-- PrivateKeySigner -->
-      <q-item
-        :active="signerType === 'PRIVATEKEY'"
-        active-class="text-weight-bold text-primary"
-        clickable
-        @click="handleNsecClick"
-      >
-        <q-item-section avatar>
-          <q-icon
-            :color="signerType === 'PRIVATEKEY' ? 'primary' : 'grey'"
-            :name="
-              signerType === 'PRIVATEKEY'
-                ? 'check_circle'
-                : 'radio_button_unchecked'
-            "
-          />
-        </q-item-section>
-        <q-item-section style="word-break: break-word">
-          <q-item-label>{{
-            $t("Settings.nostr_keys.use_nsec.title")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("Settings.nostr_keys.use_nsec.description")
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side v-if="signerType === 'PRIVATEKEY'">
-          <q-icon
-            name="delete_outline"
-            @click.stop="handleResetPrivateKeySigner"
-            class="cursor-pointer"
-            ><q-tooltip>{{
-              $t("Settings.nostr_keys.use_nsec.delete_tooltip")
-            }}</q-tooltip></q-icon
-          >
-        </q-item-section>
-      </q-item>
+      <div class="row no-wrap items-center">
+        <SettingsRadioRow
+          class="col"
+          :selected="signerType === 'PRIVATEKEY'"
+          :label="$t('Settings.nostr_keys.use_nsec.title')"
+          :caption="$t('Settings.nostr_keys.use_nsec.description')"
+          top
+          @select="handleNsecClick"
+        />
+        <IconButton
+          v-if="signerType === 'PRIVATEKEY'"
+          class="nostr-key-remove"
+          :label="$t('Settings.nostr_keys.use_nsec.delete_tooltip')"
+          tooltip
+          @click="handleResetPrivateKeySigner"
+          ><Trash2Icon :size="20"
+        /></IconButton>
+      </div>
       <!-- Nip07Signer -->
-      <q-item
-        :active="signerType === 'NIP07'"
-        active-class="text-weight-bold text-primary"
-        clickable
-        @click="handleExtensionClick"
+      <SettingsRadioRow
         v-if="nip07SignerAvailable"
-      >
-        <q-item-section avatar>
-          <q-icon
-            :color="signerType === 'NIP07' ? 'primary' : 'grey'"
-            :name="
-              signerType === 'NIP07' ? 'check_circle' : 'radio_button_unchecked'
-            "
-          />
-        </q-item-section>
-        <q-item-section style="word-break: break-word">
-          <q-item-label>{{
-            $t("Settings.nostr_keys.signing_extension.title")
-          }}</q-item-label>
-          <q-item-label caption v-if="nip07SignerAvailable">{{
-            $t("Settings.nostr_keys.signing_extension.description")
-          }}</q-item-label>
-          <q-item-label caption v-else>{{
-            $t("Settings.nostr_keys.signing_extension.not_found")
-          }}</q-item-label>
-        </q-item-section>
-      </q-item>
+        :selected="signerType === 'NIP07'"
+        :label="$t('Settings.nostr_keys.signing_extension.title')"
+        :caption="
+          nip07SignerAvailable
+            ? $t('Settings.nostr_keys.signing_extension.description')
+            : $t('Settings.nostr_keys.signing_extension.not_found')
+        "
+        top
+        @select="handleExtensionClick"
+      />
     </SettingsSection>
 
-    <!-- relays -->
+    <!-- relays: a card with one quiet row per relay (its address is a button that copies it,
+         the trash beside it removes it), then the add field on the page. With no relays
+         there is no card, only the field. -->
     <SettingsSection
+      flat
       :title="$t('Settings.sections.nostr.relays.list.title')"
       :caption="$t('Settings.sections.nostr.relays.add.description')"
     >
-      <q-item class="settings-control-item">
-        <q-item-section>
-          <q-input
-            outlined
-            rounded
-            dense
-            v-model="newRelay"
-            :label="$t('Settings.sections.nostr.relays.add.title')"
-          >
-            <template v-slot:append>
-              <q-btn
-                flat
-                dense
-                round
-                icon="add"
-                color="primary"
-                @click="addRelay"
-              ></q-btn>
-            </template>
-          </q-input>
-        </q-item-section>
-      </q-item>
-      <q-item v-for="relay in relays" :key="relay">
-        <q-item-section>
-          <q-item-label caption style="word-break: break-all">{{
-            relay
-          }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <div class="row items-center no-wrap q-gutter-sm">
-            <q-icon
-              name="content_copy"
+      <q-list v-if="displayRelays.length" class="settings-card relay-list">
+        <q-item v-for="relay in displayRelays" :key="relay" class="relay-row">
+          <q-item-section>
+            <button
+              type="button"
+              class="relay-copy"
+              :aria-label="`${$t(
+                'Settings.sections.nostr.relays.list.copy_tooltip'
+              )}: ${relay}`"
               @click="copyText(relay)"
-              size="xs"
-              color="grey"
-              class="cursor-pointer"
-              ><q-tooltip>{{
-                $t("Settings.sections.nostr.relays.list.copy_tooltip")
-              }}</q-tooltip></q-icon
             >
-            <q-icon
-              name="delete_outline"
+              <span class="relay-url ellipsis" dir="ltr"
+                ><span class="relay-scheme">{{ relayScheme(relay) }}</span
+                >{{ relayHost(relay) }}</span
+              >
+            </button>
+          </q-item-section>
+          <q-item-section side>
+            <IconButton
+              class="relay-remove"
+              :label="$t('Settings.sections.nostr.relays.list.remove_tooltip')"
+              tooltip
               @click="removeRelay(relay)"
-              size="xs"
-              color="grey"
-              class="cursor-pointer"
-              ><q-tooltip>{{
-                $t("Settings.sections.nostr.relays.list.remove_tooltip")
-              }}</q-tooltip></q-icon
-            >
-          </div>
-        </q-item-section>
-      </q-item>
+              ><Trash2Icon :size="20"
+            /></IconButton>
+          </q-item-section>
+        </q-item>
+      </q-list>
+      <q-input
+        outlined
+        v-model="newRelay"
+        dir="ltr"
+        :label="$t('Settings.sections.nostr.relays.add.title')"
+        @keydown.enter.prevent="addRelay"
+      >
+        <template v-slot:append>
+          <IconButton
+            :disable="!newRelay.trim()"
+            :label="$t('Settings.sections.nostr.relays.add.title')"
+            @click="addRelay"
+            ><PlusIcon :size="20"
+          /></IconButton>
+        </template>
+      </q-input>
     </SettingsSection>
 
     <!-- web of trust -->
@@ -221,7 +143,6 @@
         <q-item-section>
           <div class="row items-center q-gutter-sm">
             <q-btn
-              size="sm"
               rounded
               outline
               color="primary"
@@ -236,10 +157,18 @@
                   ? $t("Settings.web_of_trust.crawl_odell")
                   : $t("Settings.web_of_trust.crawl_wot")
               }}
+              <template #loading
+                ><BusyLabel>{{
+                  hasCrawlCheckpoint && !wotLoading
+                    ? $t("Settings.web_of_trust.continue_crawl")
+                    : signerType === "SEED"
+                    ? $t("Settings.web_of_trust.crawl_odell")
+                    : $t("Settings.web_of_trust.crawl_wot")
+                }}</BusyLabel></template
+              >
             </q-btn>
             <q-btn
               v-if="wotLoading"
-              size="sm"
               rounded
               outline
               class="q-px-md"
@@ -249,13 +178,11 @@
               {{ $t("Settings.web_of_trust.pause") }}
             </q-btn>
             <q-btn
-              v-if="!wotLoading"
-              size="sm"
+              v-if="!wotLoading && wotCount > 0"
+              flat
               rounded
-              outline
               class="q-px-md"
-              color="grey"
-              :disable="wotLoading"
+              color="negative"
               @click="resetWebOfTrust"
             >
               {{ $t("Settings.web_of_trust.reset") }}
@@ -271,7 +198,7 @@
             color="primary"
             :value="crawlTotal > 0 ? crawlProcessed / crawlTotal : 0"
           />
-          <div class="text-caption text-grey-6 q-mt-xs">
+          <div class="text-caption text-app-muted q-mt-xs">
             {{
               $t("Settings.web_of_trust.progress", {
                 crawlProcessed: crawlProcessed,
@@ -286,18 +213,32 @@
 </template>
 
 <script lang="ts">
+import IconButton from "src/components/ui/IconButton.vue";
+import BusyLabel from "src/components/ui/BusyLabel.vue";
+import {
+  Copy as CopyIcon,
+  Plus as PlusIcon,
+  Trash2 as Trash2Icon,
+} from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useNostrStore } from "src/stores/nostr";
 import { useNostrUserStore } from "src/stores/nostrUser";
 import { useNpubCashStore } from "src/stores/npubcash";
 import SettingsPageShell from "./SettingsPageShell.vue";
+import SettingsRadioRow from "src/components/ui/SettingsRadioRow.vue";
 import SettingsSection from "./SettingsSection.vue";
 
 export default defineComponent({
   name: "NostrSettings",
   mixins: [windowMixin],
   components: {
+    IconButton,
+    BusyLabel,
+    SettingsRadioRow,
+    CopyIcon,
+    PlusIcon,
+    Trash2Icon,
     SettingsPageShell,
     SettingsSection,
   },
@@ -309,6 +250,10 @@ export default defineComponent({
   },
   computed: {
     ...mapWritableState(useNostrStore, ["relays"]),
+    // One row per relay: stored lists can hold the same URL twice (e.g. with a trailing space).
+    displayRelays() {
+      return [...new Set(this.relays.map((r) => r.trim()))];
+    },
     ...mapState(useNostrStore, [
       "pubkey",
       "signerType",
@@ -395,15 +340,23 @@ export default defineComponent({
         this.newRelay = this.newRelay.trim();
         // if relay is already in relays, don't add it, send notification
         if (this.relays.includes(this.newRelay)) {
-          this.notifyWarning("Relay already added");
+          this.notifyWarning(
+            this.$t("Settings.sections.nostr.relays.already_added")
+          );
         } else {
           this.relays.push(this.newRelay);
           this.newRelay = "";
         }
       }
     },
+    relayScheme: function (relay) {
+      return relay.match(/^[a-z]+:\/\//i)?.[0] ?? "";
+    },
+    relayHost: function (relay) {
+      return relay.slice(this.relayScheme(relay).length);
+    },
     removeRelay: function (relay) {
-      this.relays = this.relays.filter((r) => r !== relay);
+      this.relays = this.relays.filter((r) => r.trim() !== relay);
     },
   },
   created: async function () {
@@ -411,3 +364,56 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+/* A key's copy action sits under its row's caption, on the label's edge (the row's 16px
+   inset and 56px radio column), in the caption's muted ink. */
+.nostr-key-action {
+  color: var(--app-text-muted);
+  padding: 2px 16px 10px;
+  padding-inline-start: 72px;
+}
+/* A key's delete button ends on the card's 16px edge, beside its row. */
+.nostr-key-remove {
+  margin-inline-end: 16px;
+}
+/* The add field sits 12px under the relay card. */
+.relay-list {
+  margin-bottom: 12px;
+}
+/* The relay's address is a button filling the row's 44px box. It tints on hover and press
+   and reaches 12px past the text, so the address stays on the card's 16px edge. */
+.relay-copy {
+  background: none;
+  border: 0;
+  border-radius: var(--app-radius-md);
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  margin-inline: -12px;
+  min-height: 44px;
+  padding: 0 12px;
+  text-align: start;
+  transition: background 0.15s ease;
+  width: calc(100% + 24px);
+}
+@media (hover: hover) {
+  .relay-copy:hover {
+    background: var(--app-tint);
+  }
+}
+.relay-copy:active {
+  background: var(--app-tint-strong);
+}
+.relay-url {
+  display: block;
+  font-size: 16px;
+  line-height: 20px;
+}
+.relay-scheme {
+  color: var(--app-text-muted);
+}
+.relay-remove {
+  color: var(--app-text-muted);
+}
+</style>

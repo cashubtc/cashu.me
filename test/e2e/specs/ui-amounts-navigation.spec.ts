@@ -65,7 +65,11 @@ test("opens mint deep links and cancels without spending or adding", async ({
   await page.getByText("Privacy", { exact: true }).click();
   await expect(page).toHaveURL(/settings\/privacy/);
   await page.goBack();
-  await expect(page).toHaveURL(/\/settings$/);
+  // Settings itself renders and is usable after Back, not just its URL.
+  await wallet.expectFullscreenPage(
+    "/settings",
+    page.getByText("Privacy", { exact: true })
+  );
 });
 
 test("opens and closes QR scanner when camera access is unavailable", async ({
@@ -74,10 +78,7 @@ test("opens and closes QR scanner when camera access is unavailable", async ({
   const wallet = new WalletUi(page);
   await wallet.onboard(MINT_A_URL);
   await wallet.openSend("lightning");
-  await page
-    .locator(".q-dialog:visible")
-    .getByText("Scan QR Code", { exact: true })
-    .click();
+  await wallet.scanQrCode();
   await expect(page.locator(".q-dialog:visible").last()).toBeVisible();
   await page.getByRole("button", { name: "Close", exact: true }).last().click();
   await expect(page.getByTestId("payment-request-input")).toBeVisible();
@@ -99,16 +100,13 @@ test("switching the mint in a payment dialog replaces the old quote", async ({
   });
   await wallet.openSend("lightning");
   await wallet.quoteRequest(invoice);
-  await page.getByTestId("choose-mint").filter({ visible: true }).click();
+  await wallet.openMintPicker();
   const newQuote = page.waitForResponse(
     (r) =>
       r.url() === `${MINT_B_URL}/v1/melt/quote/bolt11` &&
       r.request().method() === "POST"
   );
-  await page
-    .locator(".mint-option")
-    .filter({ hasText: "Payment mint" })
-    .click();
+  await page.getByRole("option").filter({ hasText: "Payment mint" }).click();
   expect((await newQuote).ok()).toBe(true);
   const paid = page.waitForRequest(
     (r) => r.url() === `${MINT_B_URL}/v1/melt/bolt11` && r.method() === "POST"
@@ -149,10 +147,7 @@ test("clipboard denial leaves manual payment entry usable", async ({
     }
   });
   await wallet.openSend("lightning");
-  await page
-    .locator(".q-dialog:visible")
-    .getByText("Paste", { exact: true })
-    .click();
+  await wallet.payInputAction("Paste");
   const invoice = await counterpartyRequest(request, "bolt11", 10);
   await wallet.quoteRequest(invoice);
   await expect(page.getByTestId("pay-payment-request")).toBeEnabled();

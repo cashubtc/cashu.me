@@ -42,10 +42,10 @@ module.exports = configure(function (/* ctx */) {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli/boot-files
-    boot: ["base", "global-components", "i18n"],
+    boot: ["base", "global-components", "i18n", "password-manager-ignore"],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
-    css: ["app.scss", "base.scss", "settings.scss"],
+    css: ["app.scss", "base.scss", "settings.scss", "elements.scss"],
 
     // https://github.com/quasarframework/quasar/tree/dev/extras
     extras: [
@@ -58,7 +58,8 @@ module.exports = configure(function (/* ctx */) {
       // 'roboto-font-latin-ext', // this or either 'roboto-font', NEVER both!
 
       "roboto-font", // optional, you are not bound to it
-      "material-icons", // optional, you are not bound to it
+      // No icon font: every icon is Lucide (src/boot/global-components.js swaps Quasar's
+      // own icon set for src/js/lucide-icons.ts).
     ],
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#build
@@ -77,7 +78,9 @@ module.exports = configure(function (/* ctx */) {
 
       // publicPath: '/',
       // analyze: true,
-      // env: {},
+      // DESIGN_SYSTEM=1 at build time ships the dev-only design system board
+      // (/design-system) in a production build, e.g. for a staging deploy.
+      env: { DESIGN_SYSTEM: process.env.DESIGN_SYSTEM === "1" ? "1" : "" },
       // rawDefine: {}
       // ignorePublicFolder: true,
       // minify: false,
@@ -102,6 +105,10 @@ module.exports = configure(function (/* ctx */) {
       // ]
     },
 
+    // SIDE_BY_SIDE=1 (staging only) loads the comparison deck's storage shim first, so the
+    // deck can frame this build with a demo wallet of its own (scripts/side-by-side).
+    htmlVariables: { sideBySide: process.env.SIDE_BY_SIDE === "1" },
+
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
     devServer: {
       https: process.env.E2E !== "true",
@@ -124,7 +131,7 @@ module.exports = configure(function (/* ctx */) {
       // directives: [],
 
       // Quasar plugins
-      plugins: ["LocalStorage", "Notify"],
+      plugins: ["LocalStorage"],
     },
 
     animations: "all", // --- includes all animations
@@ -176,7 +183,10 @@ module.exports = configure(function (/* ctx */) {
         clientsClaim: true,
       },
       // useFilenameHashes: true,
-      // extendGenerateSWOptions (cfg) {}
+      // Static pages served beside the app (the deploy's /side-by-side) are not app routes.
+      extendGenerateSWOptions(cfg) {
+        cfg.navigateFallbackDenylist?.push(/^\/side-by-side/);
+      },
       // extendInjectManifestOptions (cfg) {},
       // extendManifestJson (json) {}
       // extendPWACustomSWConf (esbuildConf) {}

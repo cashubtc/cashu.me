@@ -1,148 +1,348 @@
+// Theme tokens. Each theme keeps its brand fill and gets mode-aware tokens that
+// meet WCAG AA: `accent` is the brand colour as text on that mode's surfaces,
+// `on-fill` is the label colour on a filled primary control.
+//   fill / on-fill   filled primary controls (dark mode)
+//   accent / accent-2  .text-primary / .text-secondary (dark mode)
+//   light / light-2    fill and text accents in light mode (label is white)
+//   dark               dark-mode page and surface (`.bg-dark`)
 $themes: (
   "classic": (
-    primary: #935af5,
-    secondary: #b45af5,
+    fill: #8b4ef4,
+    on-fill: #fff,
+    accent: #a77af7,
+    accent-2: #b864f6,
+    light: #8544f3,
+    light-2: #a63bf3,
     dark: #1f2234,
-    info: #333646,
-    marginal-bg: #1f2234,
-    marginal-text: #fff,
   ),
   "bitcoin": (
-    primary: #ff9853,
-    secondary: #ff8753,
-    dark: #2d293b,
-    info: #333646,
-    marginal-bg: #2d293b,
-    marginal-text: #fff,
+    fill: #ff9853,
+    on-fill: #0b0b0b,
+    accent: #ff9853,
+    accent-2: #ff8753,
+    light: #bc4b00,
+    light-2: #c64f00,
+    dark: #232325,
   ),
   "freedom": (
-    primary: #e22156,
-    secondary: #b91a45,
+    fill: #e22156,
+    on-fill: #fff,
+    accent: #e8436f,
+    accent-2: #e8436f,
+    light: #d81b50,
+    light-2: #b91a45,
     dark: #000,
-    info: #1b1b1b,
-    marginal-bg: #000,
-    marginal-text: #fff,
   ),
   "salvador": (
-    primary: #2d68d5,
-    secondary: #1366cb,
+    fill: #2d68d5,
+    on-fill: #fff,
+    accent: #6a95e3,
+    accent-2: #4a92ed,
+    light: #2d68d5,
+    light-2: #1366cb,
     dark: #242424,
-    info: #333646,
-    marginal-bg: #242424,
-    marginal-text: #fff,
   ),
   "mint": (
-    primary: #3ab77d,
-    secondary: #27b065,
+    fill: #3ab77d,
+    on-fill: #0b0b0b,
+    accent: #3ab77d,
+    // Green themes take a teal success colour, so +₿ amounts and paid checks stay apart from
+    // the green buttons.
+    positive: #5eead4,
+    positive-light: #0f766e,
+    accent-2: #2fbf70,
+    light: #23774f,
+    light-2: #1d7a47,
     dark: #1f342b,
-    info: #334642,
-    marginal-bg: #1f342b,
-    marginal-text: #fff,
   ),
   "autumn": (
-    primary: #b7763a,
-    secondary: #b07927,
+    fill: #b7763a,
+    on-fill: #0b0b0b,
+    accent: #cc8d52,
+    accent-2: #c98d33,
+    light: #9a612e,
+    light-2: #94651f,
     dark: #34291f,
-    info: #463f33,
-    marginal-bg: #342a1f,
-    marginal-text: rgb(255, 255, 255),
   ),
   "flamingo": (
-    primary: #ff64b4,
-    secondary: #ff61b3,
-    dark: #56353f,
-    info: #56353a,
-    marginal-bg: #56353a,
-    marginal-text: rgb(255, 255, 255),
+    fill: #ff64b4,
+    on-fill: #0b0b0b,
+    accent: #ff8dc9,
+    accent-2: #ff85c5,
+    light: #d1006b,
+    light-2: #d1006b,
+    // A deeper plum page: captions on the raised sheets clear 4.5:1 (#56353f left them ~3.9).
+    dark: #4a2d36,
   ),
-  "monochrome": (
-    primary: #ededed,
-    secondary: #d5d5d5,
-    dark: #000,
-    info: rgb(39, 39, 39),
-    marginal-bg: #000,
-    marginal-text: rgb(255, 255, 255),
-  ),
-  "cyber": (
-    primary: #00ff00,
-    secondary: #00ff00,
-    dark: #000,
-    info: #1b1b1b,
-    marginal-bg: #000,
-    marginal-text: rgb(255, 255, 255),
-  ),
+  // Dark mono is the original's pure black page under near-white pills. Softening comes from the control tokens, never from lifting the page.
+  "monochrome":
+    (
+      fill: #ededed,
+      on-fill: #0a0a0a,
+      accent: #ededed,
+      accent-2: #d4d4d8,
+      light: #18181b,
+      light-2: #3d3d3d,
+      dark: #000,
+      raised: #161618,
+    ),
+  // Cyber's green is pulled back from pure #00ff00, so the large fills and the selected
+  // edge stop glaring while the neon look stays.
+  "cyber":
+    (
+      fill: #22e55a,
+      on-fill: #0b0b0b,
+      positive: #5eead4,
+      positive-light: #0f766e,
+      accent: #3df06f,
+      accent-2: #3df06f,
+      light: #007a00,
+      light-2: #007a00,
+      dark: #000,
+    ),
 );
-@each $theme, $colors in $themes {
-  @each $name, $color in $colors {
-    @if $name== "dark" {
-      [data-theme="#{$theme}"] .q-drawer--dark,
-      body[data-theme="#{$theme}"].body--dark,
-      [data-theme="#{$theme}"] .q-menu--dark {
-        background: $color !important;
-      }
-      // set a darker body bg for all themes, when in "dark mode"
-      body[data-theme="#{$theme}"].body--dark {
-        background: scale-color($color, $lightness: -60%);
-      }
-    }
-    @if $name== "info" {
-      [data-theme="#{$theme}"] .q-card--dark,
-      [data-theme="#{$theme}"] .q-stepper--dark {
-        background: $color !important;
-      }
-    }
-  }
-  [data-theme="#{$theme}"] {
-    @each $name, $color in $colors {
-      .bg-#{$name} {
-        background: $color !important;
-      }
-      .text-#{$name} {
-        color: $color !important;
-      }
-    }
-  }
-}
 
-@each $theme, $colors in $themes {
-  [data-theme="#{$theme}"] {
-    @each $name, $color in $colors {
-      @if $name == "primary" {
-        --q-primary: #{$color};
-      }
-      @if $name == "secondary" {
-        --q-secondary: #{$color};
-      }
+@each $theme, $t in $themes {
+  body[data-theme="#{$theme}"] {
+    --q-primary: #{map-get($t, fill)};
+    --q-secondary: #{map-get($t, accent-2)};
+    --app-accent: #{map-get($t, accent)};
+    --app-on-primary: #{map-get($t, on-fill)};
+    --app-surface: #{map-get($t, dark)};
+    // Raised surfaces (sheets, dialogs, toasts) sit a clear step above cards and groups (13% over
+    // the page vs 10%), in each theme's own hue.
+    --app-raised: #{if(
+        map-has-key($t, raised),
+        map-get($t, raised),
+        color-mix(in srgb, #fff 13%, map-get($t, dark))
+      )};
+  }
+  // The green themes' teal positive, stated with the mode so it outranks the
+  // mode's own green (body.body--dark sets #4ade80 later at the same specificity, and won).
+  @if map-has-key($t, positive) {
+    body.body--dark[data-theme="#{$theme}"] {
+      --q-positive: #{map-get($t, positive)};
     }
-    @each $name, $color in $colors {
-      .bg-#{$name} {
-        background: $color !important;
-      }
-      .text-#{$name} {
-        color: $color !important;
-      }
+  }
+  body.body--light[data-theme="#{$theme}"] {
+    --q-primary: #{map-get($t, light)};
+    --q-secondary: #{map-get($t, light-2)};
+    --app-accent: #{map-get($t, light)};
+    --app-on-primary: #fff;
+    --app-surface: #fff;
+    --app-raised: #f4f4f5;
+    @if map-has-key($t, positive-light) {
+      --q-positive: #{map-get($t, positive-light)};
     }
   }
 }
 
-[data-theme="monochrome"] .q-badge.bg-primary,
-[data-theme="cyber"] .q-badge.bg-primary {
-  background: primary !important;
-  color: #0a0a0a !important;
+// Neutral, semantic tokens per mode.
+body {
+  --app-hover-opacity: 0.12;
+  --app-pressed-opacity: 0.24;
+  // Shape and depth, the same in every mode and theme. Radii: small controls 6, inner
+  // surfaces 8, cards and rows 12, sheets 20, pills 999.
+  --app-radius-sm: 6px;
+  --app-radius-md: 8px;
+  --app-radius-lg: 12px;
+  --app-radius-xl: 20px;
+  --app-radius-pill: 999px;
+  --app-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --app-focus-ring: 0 0 0 2px var(--app-text);
+  // Control edges, one family for every bordered control (outlined fields, SheetSelect, the
+  // mint picker, selected cards and rows): a soft resting edge close to the control's own fill,
+  // a hover step, and focus in the accent at 2px. The resting edge is deliberately quiet
+  // over a dark field, well under
+  // 3:1; the fill carries the control's shape, and focus, icons and text keep full contrast.
+  // Mixed from the text ink, so it is the same subtle step in every theme's own hue, on the
+  // page and on sheets alike (no raised-surface overrides).
+  --app-field-edge-focus: var(--app-accent);
+  --app-card-edge-active: var(--app-field-edge);
 }
 
-[data-theme="monochrome"] .q-btn.bg-primary,
-[data-theme="cyber"] .q-btn.bg-primary {
-  background: primary !important;
-  color: #0a0a0a !important;
+// Surfaces ("Tonal"): cards and
+// settings groups are borderless neutral fills; secondary buttons are tonal fills; fields, the mint picker and
+// segmented controls keep a quiet edge so they still read as controls; a selected card or row
+// is a stronger fill with the same quiet control edge beside its check or checkbox, so a
+// selection reads in the same family as every control edge.
+// Light mode's control edge matches dark mode's contrast.
+body.body--dark {
+  --app-card-edge: transparent;
+  // Dark steps over the pure-black page, about 5 points apart so each level separates on any
+  // panel: container 10% (cards and settings groups, siblings), active 15%, raised 13%. Control
+  // edges are a 9% rim over the 10% fill (monochrome: rgb(44) over a rgb(24) field, about
+  // 1.3:1, where the owner's reference renders rgb(45)); hover 20%.
+  // Secondary buttons are tonal (a fill, no edge); disabled is quieter than tonal.
+  --app-card-fill: color-mix(in srgb, var(--app-text) 10%, transparent);
+  --app-card-fill-active: color-mix(in srgb, var(--app-text) 15%, transparent);
+  --app-field-fill: color-mix(in srgb, var(--app-text) 10%, transparent);
+  --app-field-edge: color-mix(in srgb, var(--app-text) 9%, transparent);
+  --app-field-edge-hover: color-mix(in srgb, var(--app-text) 20%, transparent);
+  --app-tonal-fill: color-mix(in srgb, var(--app-text) 10%, transparent);
+  --app-tonal-fill-hover: color-mix(in srgb, var(--app-text) 15%, transparent);
+  --app-tonal-fill-pressed: color-mix(
+    in srgb,
+    var(--app-text) 20%,
+    transparent
+  );
+  // Disabled: 8%, a clear pill shape on every dark page yet under tonal's 10% (5% nearly
+  // vanished: Publish review, Create address).
+  --app-disabled-fill: color-mix(in srgb, var(--app-text) 8%, transparent);
+  --app-readonly-fill: color-mix(in srgb, var(--app-text) 6%, transparent);
+  --app-group-edge: transparent;
+  --app-group-fill: color-mix(in srgb, var(--app-text) 10%, transparent);
+}
+body.body--light {
+  --app-card-edge: transparent;
+  // 4% and 7% on the white page (L1): quieter steps, so stacked cards,
+  // tonal buttons and fields stop reading as grey slabs.
+  --app-card-fill: color-mix(in srgb, var(--app-text) 4%, transparent);
+  --app-card-fill-active: color-mix(in srgb, var(--app-text) 7%, transparent);
+  --app-field-fill: #fff;
+  // Control edges at the dark edge's contrast over its field (about 1.3:1 on the white field:
+  // 12% renders rgb(226)); hover 24%.
+  --app-field-edge: color-mix(in srgb, var(--app-text) 12%, transparent);
+  --app-field-edge-hover: color-mix(in srgb, var(--app-text) 24%, transparent);
+  --app-tonal-fill: color-mix(in srgb, var(--app-text) 5%, transparent);
+  --app-tonal-fill-hover: color-mix(in srgb, var(--app-text) 8%, transparent);
+  --app-tonal-fill-pressed: color-mix(
+    in srgb,
+    var(--app-text) 12%,
+    transparent
+  );
+  // 4% under tonal's 5%; the muted label is what sets disabled apart from tonal ink.
+  --app-disabled-fill: color-mix(in srgb, var(--app-text) 4%, transparent);
+  --app-readonly-fill: color-mix(in srgb, var(--app-text) 4%, transparent);
+  --app-group-edge: transparent;
+  --app-group-fill: color-mix(in srgb, var(--app-text) 5%, transparent);
 }
 
-[data-theme="freedom"] .q-drawer--dark {
-  background: #0a0a0a !important;
+// Secondary text on sheets and dialogs sits on a row fill over the raised surface, two
+// lifts above the page: 72% muted measured 4.04:1 there in flamingo dark (mint 4.29, autumn
+// 4.48; measured pixels). 86% and 80% clear 4.5:1 in every
+// theme; the page keeps the quieter steps, where they already pass.
+body.body--dark
+  :is(.q-card:not(.flow-surface, .welcome-surface), .bottom-sheet, .q-menu) {
+  --app-text-muted: rgba(244, 244, 245, 0.86);
+  --app-text-subtle: rgba(244, 244, 245, 0.8);
+}
+body.body--dark {
+  --app-welcome-bg: var(--app-surface);
+  // Off-white ink (zinc-100), not pure white: the balance and titles stay the brightest
+  // thing on screen without the glare of #fff on dark pages.
+  --app-text: #f4f4f5;
+  --app-text-muted: rgba(244, 244, 245, 0.72);
+  --app-text-subtle: rgba(244, 244, 245, 0.64);
+  --app-text-disabled: rgba(244, 244, 245, 0.5);
+  --app-border: rgba(255, 255, 255, 0.16);
+  --app-tint: rgba(255, 255, 255, 0.08);
+  --app-tint-strong: rgba(255, 255, 255, 0.14);
+  --app-border-strong: rgba(255, 255, 255, 0.3);
+  --q-positive: #4ade80;
+  // A clear red, not a pastel: destructive actions should read as danger (was #ffa8a8).
+  --q-negative: #ff6b6b;
+  // Destructive text on raised surfaces: lifted toward white so it clears 4.5:1 on the
+  // lighter tinted surfaces (flamingo, autumn); fills and icons keep the full red.
+  --app-negative-text: color-mix(in srgb, #ff6b6b 60%, #fff);
+}
+body.body--light {
+  // Onboarding follows the app mode like every page.
+  --app-welcome-bg: var(--app-surface);
+  --app-text: #111;
+  --app-text-muted: rgba(0, 0, 0, 0.64);
+  --app-text-subtle: rgba(0, 0, 0, 0.58);
+  --app-text-disabled: rgba(0, 0, 0, 0.5);
+  // Light mode mirrors dark mode's steps (light had been tuned less):
+  // hairlines and card edges at about the same visual weight as their dark counterparts,
+  // fills a touch stronger so grouped surfaces read on white. Control edges have their own
+  // token (--app-field-edge).
+  --app-border: rgba(0, 0, 0, 0.1);
+  --app-tint: rgba(0, 0, 0, 0.04);
+  --app-tint-strong: rgba(0, 0, 0, 0.075);
+  --app-border-strong: rgba(0, 0, 0, 0.22);
+  --q-positive: #15803d;
+  --q-negative: #c10015;
+  --app-negative-text: #c10015;
 }
 
-[data-theme="freedom"] .q-header {
-  background: #0a0a0a !important;
+body.body--dark[data-theme] {
+  background: var(--app-surface);
+}
+body[data-theme] .q-drawer--dark,
+body[data-theme] .bg-dark {
+  background: var(--app-surface) !important;
+}
+// Cards and steppers float above the page, so they take the raised surface like sheets.
+body[data-theme] .q-card--dark,
+body[data-theme] .q-stepper--dark {
+  background: var(--app-raised) !important;
+}
+// A full-screen flow is a page, not a raised sheet: its card, content and FlowFooter all
+// paint one token, the page surface, in every theme and mode.
+body[data-theme] .flow-surface {
+  --flow-surface: var(--app-surface);
+  background: var(--flow-surface) !important;
+  color: var(--app-text);
+}
+body.body--light .bg-dark {
+  color: var(--app-text);
+}
+body.body--light .bg-dark.text-white {
+  color: var(--app-text) !important;
+}
+
+// The brand colour as text uses the text-safe accent; fills keep the brand
+// colour and label with the theme's on-fill ink.
+body .text-primary {
+  color: var(--app-accent) !important;
+}
+body .bg-primary {
+  background: var(--q-primary) !important;
+}
+body .bg-primary.text-white,
+body .q-btn.bg-primary {
+  color: var(--app-on-primary) !important;
+}
+
+// Captions and muted text share one AA-safe token per mode.
+body .q-item__label--caption {
+  color: var(--app-text-muted);
+}
+.text-app-muted {
+  color: var(--app-text-muted) !important;
+}
+
+// Tabs: inactive in the muted token, active in full text over the accent bar.
+body .q-tab {
+  color: var(--app-text-muted);
+}
+body .q-tab--inactive {
+  opacity: 1;
+}
+body .q-tab--active {
+  color: var(--app-text);
+}
+
+body .q-item--active {
+  color: var(--app-accent);
+}
+body .q-field__focusable-action {
+  color: var(--app-text-subtle);
+  opacity: 1;
+}
+
+// Quasar's mid greys miss AA on near-black; route them to the muted token.
+body.body--dark .text-grey,
+body.body--dark .text-grey-6,
+body.body--dark .text-grey-7,
+body.body--dark .text-grey-8 {
+  color: var(--app-text-muted) !important;
+}
+body.body--light .text-grey,
+body.body--light .text-grey-5,
+body.body--light .text-grey-6 {
+  color: var(--app-text-muted) !important;
 }
 
 [v-cloak] {
@@ -153,10 +353,26 @@ body.body--dark .q-table--dark {
   background: transparent;
 }
 
-body.body--dark .q-field--error {
+// Destructive text (Delete mint) takes the text-safe red in dark mode: the full red measured
+// 4.40:1 on flamingo's page. Filled danger controls keep the full red.
+body.body--dark .text-negative {
+  color: var(--app-negative-text) !important;
+}
+
+// Helper and error text under fields is 13px, readable beside 15px values.
+.q-field__bottom {
+  font-size: 13px;
+}
+// Field errors use the danger colour, the same as error callouts and toasts.
+.q-field--error {
   .text-negative,
-  .q-field__messages {
-    color: yellow !important;
+  .q-field__messages,
+  .q-field__label,
+  .q-field__marginal {
+    color: var(--app-danger) !important;
+  }
+  .q-field__control:after {
+    border-color: var(--app-danger) !important;
   }
 }
 
@@ -168,12 +384,12 @@ body.body--dark .q-field--error {
   th:first-child,
   td:first-child,
   .q-table__bottom {
-    padding-left: 6px !important;
+    padding-inline-start: 6px !important;
   }
   th:last-child,
   td:last-child,
   .q-table__bottom {
-    padding-right: 6px !important;
+    padding-inline-end: 6px !important;
   }
 }
 
@@ -191,31 +407,6 @@ a.inherit {
 // QR video
 video {
   border-radius: 3px;
-}
-
-// Material icons font
-@font-face {
-  font-family: "Material Icons";
-  font-style: normal;
-  font-weight: 400;
-  src: url(../fonts/material-icons-v50.woff2) format("woff2");
-}
-
-.material-icons {
-  font-family: "Material Icons";
-  font-weight: normal;
-  font-style: normal;
-  font-size: 24px;
-  line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
-  display: inline-block;
-  white-space: nowrap;
-  word-wrap: normal;
-  direction: ltr;
-  -moz-font-feature-settings: "liga";
-  font-feature-settings: "liga";
-  -moz-osx-font-smoothing: grayscale;
 }
 
 .q-rating__icon {
@@ -238,11 +429,6 @@ video {
     0 3px 1px -2px rgba(0, 0, 0, 0.12);
   border-radius: 4px;
   vertical-align: top;
-}
-
-.shadow-2 {
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2), 0 2px 2px rgba(0, 0, 0, 0.14),
-    0 3px 1px -2px rgba(0, 0, 0, 0.12);
 }
 
 ::-webkit-scrollbar {

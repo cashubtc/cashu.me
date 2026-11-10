@@ -32,6 +32,13 @@ for (const unit of ["usd", "eur"] as const) {
     const create = page.getByTestId("create-payment-request");
     const error = page.getByTestId("onchain-amount-error");
     const symbol = unit === "usd" ? "$" : "€";
+    const sentence = `Deposits outside ${symbol}1.13–${symbol}4.10 won't be credited.`;
+    // The neutral callout under the mint picker says the range before anything is typed.
+    await expect(
+      page.locator(
+        '.app-callout--neutral[data-testid="deposit-limits-picker"]:visible'
+      )
+    ).toHaveText(sentence);
     const enterCents = async (cents: number) => {
       await page.locator(".amount-display:visible").click();
       for (let i = 0; i < 3; i++) await page.keyboard.press("Backspace");
@@ -49,10 +56,20 @@ for (const unit of ["usd", "eur"] as const) {
     await enterCents(113);
     await expect(create).toBeEnabled();
     await create.click();
-    await expect(page.locator(".qr-copy-text:visible")).toBeVisible();
-    await expect(page.locator(".deposit-limits-warning:visible")).toHaveText(
-      `Deposits outside ${symbol}1.13–${symbol}4.10 won't be credited.`
-    );
+    // The new address is a copy row in the invoice's detail table.
+    await expect(
+      page.getByRole("button", { name: /^Address: / })
+    ).toBeVisible();
+    await expect(
+      page.locator(
+        '.app-callout--neutral[data-testid="deposit-limits-address"]:visible'
+      )
+    ).toHaveText(sentence);
+    await expect(
+      page.locator(
+        '.app-callout--neutral[data-testid="deposit-limits-picker"]:visible'
+      )
+    ).toHaveCount(0);
   });
 }
 
@@ -77,13 +94,15 @@ test("renders and reuses an address with an exact uint64 deposit limit", async (
   await wallet.openReceive("onchain");
   await wallet.enterAmount(1000);
   await page.getByTestId("create-payment-request").click();
-  const limitsHint = page.locator(".deposit-limits-warning:visible");
+  const limitsHint = page.locator(
+    '.app-callout--neutral[data-testid="deposit-limits-address"]:visible'
+  );
   await expect(limitsHint).toContainText("18,446,744,073,709,551,615");
   await wallet.closeFullscreenDialog();
   await page.reload();
   await wallet.openReceive("onchain");
   await expect(page.getByTestId("create-payment-request")).toHaveText(
-    "Create New Address"
+    "Create new address"
   );
   await expect(limitsHint).toContainText("18,446,744,073,709,551,615");
 });
@@ -112,7 +131,12 @@ test("validates new on-chain addresses while preserving quote reuse and history 
   await wallet.openReceive("onchain");
   const create = page.getByTestId("create-payment-request");
   const error = page.getByTestId("onchain-amount-error");
-  const limitsHint = page.locator(".deposit-limits-warning:visible");
+  const limitsHint = page.locator(
+    '.app-callout--neutral[data-testid="deposit-limits-address"]:visible'
+  );
+  const pickerHint = page.locator(
+    '.app-callout--neutral[data-testid="deposit-limits-picker"]:visible'
+  );
   let submissions = 0;
   page.on("request", (request) => {
     if (
@@ -123,6 +147,9 @@ test("validates new on-chain addresses while preserving quote reuse and history 
   });
   await expect(create).toBeDisabled();
   await expect(limitsHint).toHaveCount(0);
+  await expect(pickerHint).toHaveText(
+    "Deposits outside ₿1,000–₿5,000 won't be credited."
+  );
   await expect(page.locator(".qr-container:visible")).toHaveCount(0);
   await wallet.enterAmount(999);
   await expect(error).toContainText("at least ₿1,000");
@@ -154,23 +181,30 @@ test("validates new on-chain addresses while preserving quote reuse and history 
   );
   await create.click();
   const quote = await (await created).json();
-  const addressText = page.locator(".qr-copy-text:visible");
-  await expect(addressText).toContainText(quote.request);
+  // A new address shows as a copy row in the invoice's detail table; reopening Receive
+  // previews the reusable address as the copy line under its QR. Both show the address
+  // shortened in the middle and carry the whole of it in their accessible name.
+  const addressRow = page.getByRole("button", { name: /^Address: / });
+  const addressText = page.locator(".qr-copy-line:visible");
+  await expect(addressRow).toHaveAttribute(
+    "aria-label",
+    `Address: ${quote.request}`
+  );
   await expect(limitsHint).toBeVisible();
-  await expect(addressText).not.toContainText("bitcoin:");
+  await expect(addressRow).not.toContainText("bitcoin:");
   await expect(page.locator(".qr-container:visible a")).toHaveCount(0);
-  await page.locator(".qr-copy-text:visible").click();
+  await addressRow.click();
   await expect
     .poll(() => page.evaluate(() => navigator.clipboard.readText()))
     .toBe(quote.request);
   expect(submissions).toBe(1);
   await wallet.closeFullscreenDialog();
   await wallet.openReceive("onchain");
-  await expect(addressText).toContainText(quote.request);
+  await expect(addressText).toHaveAttribute("aria-label", quote.request);
   await expect(addressText).not.toContainText("bitcoin:");
   await expect(limitsHint).toBeVisible();
   await expect(error).toHaveCount(0);
-  await expect(create).toHaveText("Create New Address");
+  await expect(create).toHaveText("Create new address");
   expect(submissions).toBe(1);
   await addressText.click();
   await expect
@@ -190,20 +224,26 @@ test("validates new on-chain addresses while preserving quote reuse and history 
   await create.click();
   const nextQuote = await (await nextCreated).json();
   expect(nextQuote.quote).not.toBe(quote.quote);
-  await expect(addressText).toContainText(nextQuote.request);
+  await expect(addressRow).toHaveAttribute(
+    "aria-label",
+    `Address: ${nextQuote.request}`
+  );
   expect(submissions).toBe(2);
   await wallet.closeFullscreenDialog();
   await page.reload();
   await wallet.openReceive("onchain");
-  await expect(addressText).toContainText(nextQuote.request);
-  await expect(create).toHaveText("Create New Address");
+  await expect(addressText).toHaveAttribute("aria-label", nextQuote.request);
+  await expect(create).toHaveText("Create new address");
   expect(submissions).toBe(2);
   await wallet.closeFullscreenDialog();
   await wallet.home("History");
   const oldRow = page.getByTestId("history-row").last();
   await oldRow.getByTestId("history-details").click();
-  await expect(addressText).toContainText(quote.request);
-  await expect(addressText).not.toContainText("bitcoin:");
+  await expect(addressRow).toHaveAttribute(
+    "aria-label",
+    `Address: ${quote.request}`
+  );
+  await expect(addressRow).not.toContainText("bitcoin:");
   await wallet.closeFullscreenDialog();
   await expect
     .poll(async () => {

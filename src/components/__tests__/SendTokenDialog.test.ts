@@ -150,4 +150,70 @@ describe("SendTokenDialog", () => {
     expect(context.sendingEcash).toBe(false);
     expect(uiStore.foregroundPaymentRequests).toBe(0);
   });
+
+  describe("lock mode", () => {
+    const HEX = "02" + "ab".repeat(32);
+    const NPUB = "npub1valid";
+    // Mirrors the store's check: a 66-char hex key or an npub; a malformed npub1… throws.
+    const isValidPubkey = (key: string) => {
+      if (key === NPUB || key === HEX) return true;
+      if (key.startsWith("npub1")) throw new Error("bad npub");
+      return false;
+    };
+    const sendDisabled = (showLockInput: boolean, p2pkPubkey: string) => {
+      const ctx: any = {
+        sendData: { amount: 21, p2pkPubkey },
+        isValidPubkey,
+      };
+      ctx.pubkeyValid = SendTokenDialog.computed.pubkeyValid.call(ctx);
+      return SendTokenDialog.computed.sendDisabled.call({
+        ...ctx,
+        sendingEcash: false,
+        insufficientFunds: false,
+        showLockInput,
+      });
+    };
+
+    it.each([
+      { lock: true, key: "", disabled: true },
+      { lock: true, key: "not-a-key", disabled: true },
+      { lock: true, key: "npub1typo", disabled: true },
+      { lock: false, key: "not-a-key", disabled: true },
+      { lock: true, key: HEX, disabled: false },
+      { lock: true, key: NPUB, disabled: false },
+      { lock: false, key: "", disabled: false },
+    ])(
+      "SEND is disabled=$disabled with lock $lock and key '$key'",
+      ({ lock, key, disabled }) => {
+        expect(sendDisabled(lock, key)).toBe(disabled);
+      }
+    );
+
+    it("treats a key the store cannot decode as invalid instead of throwing", () => {
+      expect(
+        SendTokenDialog.computed.pubkeyValid.call({
+          sendData: { p2pkPubkey: "npub1typo" },
+          isValidPubkey,
+        })
+      ).toBe(false);
+    });
+
+    it("never sends from the keypad or Enter while SEND is disabled", async () => {
+      const context = {
+        sendDisabled: true,
+        sendingEcash: false,
+        sendData: { amount: 21, p2pkPubkey: "" },
+        maybeConvertNpub: vi.fn((k: string) => k),
+        isValidPubkey: vi.fn(() => false),
+        lockTokens: vi.fn(),
+        mintWallet: vi.fn(),
+        send: vi.fn(),
+      };
+      await SendTokenDialog.methods.sendTokens.call(context);
+      expect(context.lockTokens).not.toHaveBeenCalled();
+      expect(context.mintWallet).not.toHaveBeenCalled();
+      expect(context.send).not.toHaveBeenCalled();
+      expect(context.sendingEcash).toBe(false);
+    });
+  });
 });

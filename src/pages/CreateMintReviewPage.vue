@@ -1,140 +1,120 @@
 <template>
-  <div class="bg-dark text-white q-pa-md flex flex-center">
-    <div class="review-page-content">
-      <div class="review-content-container">
-        <!-- Mint Header - Matching MintDetailsPage and MintRatingsPage style -->
-        <div class="mint-header-container q-mb-lg">
-          <div class="mint-header q-pa-md">
-            <q-avatar size="56px" class="q-mb-sm">
-              <img
-                v-if="mintInfo?.icon_url"
-                :src="mintInfo.icon_url"
-                alt="Mint Profile"
-              />
-              <q-icon
-                v-else
-                name="account_balance"
-                size="36px"
-                color="grey-7"
-              />
-            </q-avatar>
-            <div class="mint-name q-mb-xs">
-              {{ mintInfo?.name || "Mint" }}
-            </div>
-            <div class="mint-url text-grey-6">
-              {{ mintUrl }}
-            </div>
-          </div>
+  <SettingsPageShell :title="$t('CreateMintReview.title')">
+    <!-- The same mint header as the reviews page. -->
+    <MintIdentityHeader
+      v-if="mintUrl"
+      :url="mintUrl"
+      :info="mintInfo"
+      class="q-mb-lg"
+    />
+    <div class="review-form">
+      <!-- One container level: the label, stars and text box sit straight on the page (the outlined text box inside a bordered card read as a box in a box). -->
+      <div>
+        <SectionDivider
+          align="start"
+          :label="$t('CreateMintReview.inputs.rating.label')"
+        />
+        <AppRating
+          v-model="rating"
+          :size="32"
+          :label="$t('CreateMintReview.inputs.rating.label')"
+          class="q-mb-md"
+          :disable="prefilling || submitting"
+        />
+        <!-- Says why Publish is off until there is a rating. -->
+        <div v-if="!rating" class="review-rating-hint">
+          {{ $t("CreateMintReview.inputs.rating.hint") }}
         </div>
-
-        <!-- Rating Section -->
-        <div class="rating-section q-mb-lg">
-          <div class="section-card q-pa-lg">
-            <div class="text-body1 text-grey-5 q-mb-md text-center">
-              {{ $t("CreateMintReview.inputs.rating.label") }}
-            </div>
-            <div class="row justify-center">
-              <q-rating
-                v-model="rating"
-                max="5"
-                size="42px"
-                color="amber"
-                icon-half="star_half"
-                icon="star"
-                icon-selected="star"
-                :disable="prefilling || submitting"
-              />
-            </div>
-          </div>
-        </div>
-
-        <!-- Review Text Section -->
-        <div class="review-text-section q-mb-lg">
-          <div class="section-card q-pa-lg">
-            <div class="text-body1 text-weight-medium q-mb-md">
-              Write a public review (optional)
-            </div>
-            <q-input
-              v-model="review"
-              type="textarea"
-              autogrow
-              outlined
-              placeholder="Share your experience with this mint..."
-              :disable="prefilling || submitting"
-              class="review-input"
-              :input-style="{ minHeight: '120px' }"
-            />
-          </div>
-        </div>
-
-        <!-- Publishing Info -->
-        <div class="publisher-info q-mb-lg text-center">
-          <div class="row items-center justify-center text-caption text-grey-6">
-            <q-avatar v-if="publisherPicture" size="20px" class="q-mr-xs">
-              <q-img
-                :src="publisherPicture"
-                spinner-color="white"
-                spinner-size="xs"
-              />
-            </q-avatar>
-            <span>{{ $t("CreateMintReview.publishing_as") }}:</span>
-            <span v-if="publisherName" class="text-white q-ml-xs">{{
-              publisherName
-            }}</span>
-            <span class="monospace q-ml-xs">{{ shortDisplayNpub }}</span>
-            <q-icon
-              v-if="displayNpub"
-              name="content_copy"
-              size="14px"
-              class="q-ml-xs cursor-pointer"
-              @click="copyText(displayNpub)"
-            />
-          </div>
-        </div>
-
-        <!-- Submit Button -->
-        <div class="submit-section">
-          <q-btn
-            color="primary"
-            size="lg"
-            rounded
-            unelevated
-            :disable="!canPublish || prefilling"
-            :loading="submitting"
-            @click="publishReview"
-            class="full-width submit-btn"
-            style="min-height: 56px; font-size: 1rem; font-weight: 600"
-          >
-            <span>{{ $t("CreateMintReview.actions.publish.label") }}</span>
-            <template v-slot:loading>
-              <q-spinner class="on-left" />
-              <span>{{
-                $t("CreateMintReview.actions.publish.in_progress")
-              }}</span>
-            </template>
-          </q-btn>
-        </div>
+        <!-- The outlined field carries its own label, which stays visible with content. -->
+        <q-input
+          v-model="review"
+          type="textarea"
+          autogrow
+          outlined
+          :label="$t('CreateMintReview.inputs.review.label')"
+          :disable="prefilling || submitting"
+          class="review-input"
+          :input-style="{ minHeight: '72px' }"
+        />
       </div>
 
+      <div
+        class="publisher-info row items-center no-wrap q-mt-md text-body2 text-app-muted"
+      >
+        <q-avatar v-if="publisherPicture" size="20px" class="q-mr-xs">
+          <q-img
+            :src="publisherPicture"
+            spinner-color="white"
+            spinner-size="xs"
+          />
+        </q-avatar>
+        <span>{{ $t("CreateMintReview.publishing_as") }}</span>
+        <span v-if="publisherName" class="publisher-name q-ml-xs">{{
+          publisherName
+        }}</span>
+        <span class="q-ml-xs ellipsis">{{ shortDisplayNpub }}</span>
+        <CopyButton
+          v-if="displayNpub"
+          class="publisher-copy"
+          :value="displayNpub"
+        />
+      </div>
+
+      <q-btn
+        color="primary"
+        rounded
+        unelevated
+        :disable="!canPublish || prefilling"
+        :loading="submitting"
+        @click="publishReview"
+        class="full-width submit-btn q-mt-lg"
+      >
+        <span>{{ $t("CreateMintReview.actions.publish.label") }}</span>
+        <template #loading
+          ><BusyLabel
+            ><span>{{
+              $t("CreateMintReview.actions.publish.in_progress")
+            }}</span></BusyLabel
+          ></template
+        >
+      </q-btn>
+
       <q-inner-loading :showing="prefilling">
-        <q-spinner size="32px" color="primary" />
+        <PendingDots size="32px" />
       </q-inner-loading>
     </div>
-  </div>
+  </SettingsPageShell>
 </template>
 
 <script lang="ts">
+import BusyLabel from "src/components/ui/BusyLabel.vue";
+import PendingDots from "src/components/ui/PendingDots.vue";
+import CopyButton from "src/components/ui/CopyButton.vue";
 import { defineComponent, computed, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useNostrStore } from "src/stores/nostr";
 import NDK, { NDKEvent, NDKKind } from "@nostr-dev-kit/ndk";
 import { notifyError, notifySuccess } from "src/js/notify";
+import { i18n } from "src/boot/i18n";
 import { nip19 } from "nostr-tools";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
 import { useMintsStore } from "src/stores/mints";
+import SettingsPageShell from "src/pages/settings/SettingsPageShell.vue";
+import AppRating from "src/components/ui/AppRating.vue";
+import SectionDivider from "src/components/ui/SectionDivider.vue";
+import MintIdentityHeader from "src/components/MintIdentityHeader.vue";
 
 export default defineComponent({
   name: "CreateMintReviewPage",
+  components: {
+    BusyLabel,
+    PendingDots,
+    AppRating,
+    SectionDivider,
+    CopyButton,
+    SettingsPageShell,
+    MintIdentityHeader,
+  },
   setup() {
     const router = useRouter();
     const nostr = useNostrStore();
@@ -191,9 +171,7 @@ export default defineComponent({
       try {
         await ensureNdk();
         if (!nostr.signer) {
-          notifyError(
-            "Please connect a Nostr account in Settings to publish a review."
-          );
+          notifyError(i18n.global.t("CreateMintReview.connect_nostr"));
           return;
         }
         const ndk: NDK = nostr.ndk as any;
@@ -217,11 +195,11 @@ export default defineComponent({
           // @ts-ignore NDKEvent
           recs.handleReviewEvent(event as any);
         } catch {}
-        notifySuccess("Review published");
+        notifySuccess(i18n.global.t("CreateMintReview.published"));
         router.back();
       } catch (e) {
         console.error(e);
-        notifyError("Failed to publish review");
+        notifyError(i18n.global.t("CreateMintReview.publish_failed"));
       } finally {
         submitting.value = false;
       }
@@ -326,111 +304,35 @@ export default defineComponent({
       publisherPicture,
       mintUrl,
       mintInfo,
-      copyText: (t: string) => {
-        try {
-          navigator.clipboard.writeText(t);
-          notifySuccess("Copied to clipboard");
-        } catch {}
-      },
     };
   },
 });
 </script>
 
 <style scoped>
-.review-page-content {
-  max-width: 640px;
-  margin: 0 auto;
-  width: 100%;
-  height: 100%;
-  overflow-y: auto;
-  position: absolute;
-  top: 0;
-}
-
-.review-content-container {
-  max-width: 640px;
-  margin: 0 auto;
-  padding: 0 16px;
+.review-form {
   position: relative;
 }
 
-/* Mint Header - Matching MintDetailsPage and MintRatingsPage exactly */
-.mint-header-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  margin-top: 50px;
+/* The name reads in ink beside the muted caption, in both modes. */
+.publisher-name {
+  color: var(--app-text);
 }
 
-.mint-header {
-  width: 100%;
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(255, 255, 255, 0.05);
-}
-
-.mint-name {
-  font-size: 24px;
-  font-weight: 600;
-  text-align: center;
-  color: white;
-}
-
-.mint-url {
-  font-size: 14px;
-  font-weight: 500;
-  text-align: center;
-  word-break: break-all;
-}
-
-/* Section Cards */
-.section-card {
-  background-color: rgba(255, 255, 255, 0.03);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.rating-section,
-.review-text-section {
-  width: 100%;
-}
-
-/* Review Input - Less rounded, more elegant */
-.review-input :deep(.q-field__control) {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 8px;
-}
-
-.review-input :deep(.q-field__control-container) {
-  border-radius: 8px;
+/* A 44px copy target that doesn't push the caption line taller. */
+.publisher-copy {
+  height: 44px;
+  margin-block: -12px;
+  width: 44px;
 }
 
 .review-input :deep(.q-field__native) {
-  color: white;
+  color: var(--app-text);
 }
-
-/* Publisher Info */
-.publisher-info {
-  opacity: 0.8;
-}
-
-.monospace {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    "Liberation Mono", "Courier New", monospace;
-}
-
-/* Submit Button */
-.submit-section {
-  width: 100%;
-  padding-bottom: 32px;
-}
-
-.submit-btn {
-  text-transform: none;
+.review-rating-hint {
+  color: var(--app-text-muted);
+  font-size: 14px;
+  line-height: 20px;
+  margin: -8px 0 24px;
 }
 </style>

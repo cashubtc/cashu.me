@@ -56,6 +56,8 @@ describe("AdvancedSettings", () => {
             QItemSection: { template: "<div><slot /></div>" },
             QItemLabel: { template: "<div><slot /></div>" },
             QBtn: { template: "<button><slot /></button>" },
+            QIcon: true,
+            QToggle: true,
           },
         },
       });

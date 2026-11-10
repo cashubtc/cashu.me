@@ -1,42 +1,67 @@
 <template>
-  <div class="q-mt-lg q-mb-lg">
-    <div class="text-caption q-mx-sm" v-if="loading">
-      <q-spinner color="grey" size="20px" class="q-mr-sm" />
-      Loading audit info...
-    </div>
+  <!-- Loading, unavailable and retrying are one row on the detail grid, so nothing jumps
+       between them. -->
+  <div class="detail-table q-mb-lg">
+    <DetailRow
+      v-if="loading"
+      :icon="InfoIcon"
+      :label="$t('MintAuditInfo.loading')"
+      value-class="detail-value--inline"
+    >
+      <PendingDots />
+    </DetailRow>
     <div v-else-if="mintNotAudited" class="q-mx-sm">
-      <q-icon
-        name="info_outline"
-        color="grey"
-        size="20px"
-        class="q-mr-sm"
-        style="padding-bottom: 2px; margin-bottom: 2px"
+      <InfoIcon
+        :size="20"
+        class="q-mr-sm text-app-muted"
+        style="vertical-align: -4px"
       />
-      <span class="text-bold">This mint has not been audited yet.</span>
+      <span class="text-bold">{{ $t("MintAuditInfo.not_audited") }}</span>
       <br />
-      <span class="text-caption">
-        To learn more about the auditor or support a future audit, visit
-        <a :href="auditUrl">audit.8333.space</a> or click
-        <span
-          class="text-bold cursor-pointer text-primary"
-          @click="getAuditorPaymentRequestsAndHandle"
-        >
-          here
-        </span>
-        to donate ecash and help initiate an audit of this mint.
-      </span>
+      <i18n-t
+        keypath="MintAuditInfo.not_audited_text"
+        tag="span"
+        class="text-caption"
+      >
+        <template #link>
+          <a :href="auditUrl">audit.8333.space</a>
+        </template>
+        <template #here>
+          <button
+            type="button"
+            class="inline-link-button text-primary"
+            @click="getAuditorPaymentRequestsAndHandle"
+          >
+            {{ $t("MintAuditInfo.here") }}
+          </button>
+        </template>
+      </i18n-t>
     </div>
-    <div v-else-if="error" class="q-mx-sm text-bold">Error: {{ error }}</div>
+    <!-- Unavailable: the row is the retry, its value the word Refresh; while it runs the
+         same word follows the busy dots and a second tap is ignored. -->
+    <DetailRow
+      v-else-if="error"
+      :icon="InfoIcon"
+      :label="
+        /fetch|network/i.test(error)
+          ? $t('MintAuditInfo.unavailable')
+          : $t('MintAuditInfo.load_failed')
+      "
+      action
+      :busy="retrying"
+      :action-label="$t('common.refresh')"
+      :chevron="false"
+      @click="retry"
+    >
+      <BusyLabel v-if="retrying">{{ $t("common.refresh") }}</BusyLabel>
+      <template v-else>{{ $t("common.refresh") }}</template>
+    </DetailRow>
     <div v-else-if="mintInfo" class="mint-info">
       <!-- Warning Box -->
       <div style="margin-bottom: 32px">
-        <transition
-          appear
-          enter-active-class="animated pulse"
-          name="smooth-slide"
-        >
+        <RevealTransition appear enter-active-class="animated pulse">
           <MintAuditWarningBox :mint="mintInfo" :swaps="mintSwaps" />
-        </transition>
+        </RevealTransition>
       </div>
       <!-- statistics -->
       <div class="q-pb-none">
@@ -44,19 +69,30 @@
           <!-- Success Rate Card -->
           <div class="col-6 stat-card">
             <div class="q-pa-md">
-              <div class="text-subtitle1">Success Rate</div>
+              <div class="text-subtitle1">
+                {{ $t("MintAuditInfo.success_rate") }}
+              </div>
               <div class="text-h5">{{ successRate }}%</div>
               <div class="text-caption">
-                {{ successfulSwaps }} of {{ mintSwaps.length }} swaps
+                {{
+                  $t("MintAuditInfo.swaps_count", {
+                    successful: successfulSwaps,
+                    total: mintSwaps.length,
+                  })
+                }}
               </div>
             </div>
           </div>
           <!-- Average Time Card -->
           <div class="col-6 stat-card q-ml-md">
             <div class="q-pa-md">
-              <div class="text-subtitle1">Average Time</div>
+              <div class="text-subtitle1">
+                {{ $t("MintAuditInfo.average_time") }}
+              </div>
               <div class="text-h5">{{ formatTime(averageTime) }}</div>
-              <div class="text-caption">For successful swaps</div>
+              <div class="text-caption">
+                {{ $t("MintAuditInfo.average_time_caption") }}
+              </div>
             </div>
           </div>
         </div>
@@ -68,65 +104,51 @@
       </div>
 
       <!-- Disclaimer -->
-      <div class="q-mt-md text-grey-6 text-caption">
-        Audit data is provided by independent third parties to help assess a
-        mint’s reliability over time. However, these results are informational
-        only and do not guarantee the safety, solvency, or trustworthiness of
-        any mint. Always conduct your own research and ensure you trust the mint
-        operator before using their services.
+      <div class="q-mt-md text-app-muted text-caption">
+        {{ $t("MintAuditInfo.disclaimer") }}
       </div>
       <!-- Donate ecash to the auditor -->
-      <div class="q-mt-md text-grey-6 text-caption">
-        Audit information is made available by
-        <a :href="auditUrl">{{ auditUrlShort }}</a
-        >. The current balance held by the auditor for this mint is
-        <span class="text-bold">{{ mintInfo.balance }} sats</span>, with a total
-        of
-        <span class="text-bold">{{ mintInfo.sum_donations }} sats</span>
-        donated so far. To support continued auditing, you can
-        <span
-          class="text-bold cursor-pointer text-primary"
-          @click="getAuditorPaymentRequestsAndHandle"
-        >
-          press here
-        </span>
-        to donate ecash to the auditor.
-      </div>
+      <i18n-t
+        keypath="MintAuditInfo.donate_text"
+        tag="div"
+        class="q-mt-md text-app-muted text-caption"
+      >
+        <template #link>
+          <a :href="auditUrl">{{ auditUrlShort }}</a>
+        </template>
+        <template #balance>
+          <span class="text-bold">{{
+            $t("MintAuditInfo.sats_amount", { amount: mintInfo.balance })
+          }}</span>
+        </template>
+        <template #donations>
+          <span class="text-bold">{{
+            $t("MintAuditInfo.sats_amount", { amount: mintInfo.sum_donations })
+          }}</span>
+        </template>
+        <template #press_here>
+          <button
+            type="button"
+            class="inline-link-button text-primary"
+            @click="getAuditorPaymentRequestsAndHandle"
+          >
+            {{ $t("MintAuditInfo.press_here") }}
+          </button>
+        </template>
+      </i18n-t>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-interface MintRead {
-  id: number;
-  url: string;
-  info?: string;
-  name?: string;
-  balance: number;
-  sum_donations?: number;
-  updated_at: string;
-  next_update?: string;
-  state: string;
-  n_errors: number;
-  n_mints: number;
-  n_melts: number;
-}
-
-interface SwapEventRead {
-  id: number;
-  from_id: number;
-  to_id: number;
-  from_url: string;
-  to_url: string;
-  amount: number;
-  fee: number;
-  created_at: string;
-  time_taken: number;
-  state: string;
-  error: string;
-}
-
+import RevealTransition from "src/components/ui/RevealTransition.vue";
+import PendingDots from "src/components/ui/PendingDots.vue";
+import BusyLabel from "src/components/ui/BusyLabel.vue";
+import { Info as InfoIcon } from "lucide-vue-next";
+import { markRaw } from "vue";
+import type { MintRead, SwapEventRead } from "src/js/mint-audit";
 import MintAuditWarningBox from "./MintAuditWarningBox.vue";
+import DetailRow from "src/components/ui/DetailRow.vue";
 import MintAuditSwapsBarChart from "./MintAuditSwapsBarChart.vue";
 import { useWalletStore } from "../stores/wallet";
 import { useMintsStore } from "../stores/mints";
@@ -136,6 +158,11 @@ import { getShortUrl } from "../js/wallet-helpers";
 export default {
   name: "MintAuditInfo",
   components: {
+    RevealTransition,
+    DetailRow,
+    BusyLabel,
+    PendingDots,
+    InfoIcon,
     MintAuditWarningBox,
     MintAuditSwapsBarChart,
   },
@@ -148,20 +175,17 @@ export default {
   data() {
     const settingsStore = useSettingsStore();
     return {
+      InfoIcon: markRaw(InfoIcon),
       auditorApiUrl: settingsStore.auditorApiUrl,
       auditUrl: settingsStore.auditorUrl,
       auditUrlShort: getShortUrl(settingsStore.auditorUrl),
       mintNotAudited: false,
       loading: true,
+      retrying: false,
       error: null,
-      couldFetchInfo: true,
       mints: [] as MintRead[],
       mintInfo: null as MintRead | null,
       mintSwaps: [] as SwapEventRead[],
-      limit: 100,
-      skip: 0,
-      allLoaded: false,
-      loadingMore: false,
     };
   },
   computed: {
@@ -184,20 +208,43 @@ export default {
       return totalTime / successfulSwapsWithTime.length;
     },
   },
-  async mounted() {
-    try {
-      this.loading = true;
+  mounted() {
+    this.load();
+  },
+  methods: {
+    // The first load: the loading row until the auditor answers.
+    async load() {
+      try {
+        this.error = "";
+        this.loading = true;
+        await this.fetchAll();
+      } catch (err: any) {
+        this.error =
+          err.message || (this.$t("MintAuditInfo.load_failed") as string);
+      } finally {
+        this.loading = false;
+      }
+    },
+    // The unavailable row's retry: the row stays and shows it is busy.
+    async retry() {
+      if (this.retrying) return;
+      this.retrying = true;
+      try {
+        await this.fetchAll();
+        this.error = null;
+      } catch (err: any) {
+        this.error =
+          err.message || (this.$t("MintAuditInfo.load_failed") as string);
+      } finally {
+        this.retrying = false;
+      }
+    },
+    async fetchAll() {
       await this.getMintInfo();
       if (this.mintInfo && this.mintInfo.id) {
         await this.getMintSwaps(this.mintInfo.id);
       }
-    } catch (err: any) {
-      this.error = err.message || "Failed to load mint data";
-    } finally {
-      this.loading = false;
-    }
-  },
-  methods: {
+    },
     async getMintInfo() {
       try {
         const response = await fetch(
@@ -221,24 +268,16 @@ export default {
         throw err;
       }
     },
-    async getMintSwaps(mintId: number, skip = 0, limit = 100) {
+    // The latest 100 swaps.
+    async getMintSwaps(mintId: number) {
       try {
         const response = await fetch(
-          `${this.auditorApiUrl}/swaps/mint/${mintId}?skip=${skip}&limit=${limit}`
+          `${this.auditorApiUrl}/swaps/mint/${mintId}?skip=0&limit=100`
         );
         if (!response.ok) {
           throw new Error(`API error: ${response.status}`);
         }
-        const fetchedSwaps = (await response.json()) as SwapEventRead[];
-
-        if (skip === 0) {
-          this.mintSwaps = fetchedSwaps;
-        } else {
-          this.mintSwaps = [...this.mintSwaps, ...fetchedSwaps];
-        }
-
-        this.skip += limit;
-        this.allLoaded = fetchedSwaps.length < limit;
+        this.mintSwaps = (await response.json()) as SwapEventRead[];
       } catch (err) {
         console.error("Error fetching mint swaps:", err);
         throw err;
@@ -264,18 +303,8 @@ export default {
         console.error("Error fetching auditor payment requests:", err);
       }
     },
-    async loadMoreSwaps() {
-      if (this.allLoaded || this.loadingMore || !this.mintInfo) return;
-
-      this.loadingMore = true;
-      try {
-        await this.getMintSwaps(this.mintInfo.id, this.skip, this.limit);
-      } finally {
-        this.loadingMore = false;
-      }
-    },
     formatTime(milliseconds: number) {
-      if (milliseconds === 0) return "N/A";
+      if (milliseconds === 0) return "–";
       const seconds = milliseconds / 1000;
       if (seconds < 10) {
         return `${milliseconds.toFixed(0)} ms`;
@@ -288,16 +317,29 @@ export default {
 </script>
 
 <style scoped>
+/* The warning box starts where a first row's text would. */
 .mint-info {
-  text-align: left;
-  margin-top: 20px;
+  margin-top: 8px;
+  text-align: start;
+}
+
+/* The donate actions sit inside a sentence: real buttons, drawn as bold inline links. */
+.inline-link-button {
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  padding: 0;
 }
 
 .stat-card {
-  background-color: #1e1e1e;
-  color: white;
+  /* The shared box surface, from the group tokens. */
+  background-color: var(--app-group-fill);
+  border: 1px solid var(--app-group-edge);
+  color: var(--app-text);
   min-height: 100px;
-  border-radius: 8px;
+  border-radius: var(--app-radius-lg);
   padding-top: 0px;
   padding-bottom: 0px;
   padding-left: 15px;
@@ -306,7 +348,7 @@ export default {
 
 .text-subtitle1 {
   font-size: 14px;
-  color: #9e9e9e;
+  color: var(--app-text-muted);
   margin-bottom: 8px;
 }
 
@@ -318,7 +360,7 @@ export default {
 
 .text-caption {
   font-size: 12px;
-  color: #9e9e9e;
+  color: var(--app-text-muted);
 }
 
 .row {
@@ -336,7 +378,7 @@ export default {
 }
 
 .q-ml-md {
-  margin-left: 16px;
+  margin-inline-start: 16px;
 }
 
 .q-pa-md {

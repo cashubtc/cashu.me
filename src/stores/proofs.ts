@@ -1,9 +1,8 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
 import { useMintsStore, WalletProof } from "./mints";
-import { cashuDb, CashuDexie, useDexieStore } from "./dexie";
+import { cashuDb } from "./dexie";
 import {
-  Amount,
   Proof,
   type ProofLike,
   getEncodedToken,
@@ -182,14 +181,6 @@ export const useProofsStore = defineStore("proofs", {
         unit: unit,
       } as Token;
       return getEncodedToken(token);
-
-      // // what we put into the JSON
-      // let mintsJson = mints.map((m) => [{ url: m.url, ids: m.keysets }][0]);
-      // let tokenV3 = {
-      //   token: [{ proofs: proofs, mint: mintsJson[0].url }],
-      //   unit: unit,
-      // };
-      // return "cashuA" + btoa(JSON.stringify(tokenV3));
     },
     getProofsMint: function (proofs: WalletProof[]) {
       const mintStore = useMintsStore();

@@ -21,7 +21,6 @@ import { computed, defineComponent, onBeforeUnmount, ref, watch } from "vue";
 import token from "src/js/token";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useMintsStore } from "src/stores/mints";
-import { useUiStore } from "src/stores/ui";
 
 export default defineComponent({
   name: "TokenStringRender",
@@ -30,15 +29,9 @@ export default defineComponent({
       type: String,
       required: true,
     },
-    maxLength: {
-      type: Number,
-      required: false,
-      default: 200,
-    },
   },
   setup(props) {
     const mintsStore = useMintsStore();
-    const uiStore = useUiStore();
     const displayedToken = ref("");
 
     // Decode token and extract data
@@ -90,7 +83,12 @@ export default defineComponent({
 
     const displayAmount = computed(() => {
       if (!tokenAmount.value || !tokenUnit.value) return "";
-      return uiStore.formatCurrency(tokenAmount.value, tokenUnit.value, true);
+      return window.windowMixin.methods.formatCurrency.call(
+        window.windowMixin.methods,
+        tokenAmount.value,
+        tokenUnit.value,
+        true
+      );
     });
 
     // Animation for truncated token string
@@ -185,14 +183,13 @@ export default defineComponent({
 .token-card {
   background: linear-gradient(
     135deg,
-    rgba(var(--q-primary-rgb), 0.18) 0%,
-    rgba(var(--q-primary-rgb), 0.08) 40%,
+    color-mix(in srgb, var(--q-primary) 18%, transparent) 0%,
+    color-mix(in srgb, var(--q-primary) 8%, transparent) 40%,
     rgba(0, 0, 0, 0.15) 100%
   ) !important;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--app-border);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
-  backdrop-filter: blur(10px);
   position: relative;
   overflow: hidden;
   min-height: 200px;
@@ -277,13 +274,13 @@ export default defineComponent({
 
 .mint-name {
   font-weight: 400;
-  color: white;
+  color: var(--app-text);
   font-size: 14px;
 }
 
 .token-amount {
   font-weight: 700;
-  color: white;
+  color: var(--app-text);
   line-height: 1.2;
 }
 </style>

@@ -46,21 +46,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, onMounted, watch } from "vue";
+import { defineComponent, ref, computed, onMounted } from "vue";
+import { i18n } from "src/boot/i18n";
+import type { SwapEventRead } from "src/js/mint-audit";
 
-interface SwapEventRead {
-  id: number;
-  from_id: number;
-  to_id: number;
-  from_url: string;
-  to_url: string;
-  amount: number;
-  fee: number;
-  created_at: string;
-  time_taken: number;
-  state: string;
-  error: string;
-}
+const t = i18n.global.t;
 
 interface SwapBucket {
   swaps: SwapEventRead[];
@@ -327,7 +317,7 @@ export default defineComponent({
         ).getTime();
         if (Math.abs(date.getTime() - latestSwapTime) < 1000) {
           // Within 1 second
-          return "Now";
+          return t("MintAuditInfo.chart.now");
         }
       }
 
@@ -339,17 +329,17 @@ export default defineComponent({
 
       let dateStr = "";
       if (isToday) {
-        dateStr = "Today";
+        dateStr = t("MintAuditInfo.chart.today");
       } else if (isYesterday) {
-        dateStr = "Yesterday";
+        dateStr = t("MintAuditInfo.chart.yesterday");
       } else {
-        dateStr = date.toLocaleDateString(undefined, {
+        dateStr = date.toLocaleDateString(String(i18n.global.locale), {
           month: "short",
           day: "numeric",
         });
       }
 
-      return `${dateStr} ${date.toLocaleTimeString(undefined, {
+      return `${dateStr} ${date.toLocaleTimeString(String(i18n.global.locale), {
         hour: "2-digit",
         minute: "2-digit",
         hour12: false,
@@ -366,7 +356,7 @@ export default defineComponent({
 
       const dateObj = new Date(utcDateStr);
       if (isNaN(dateObj.getTime())) {
-        return "Invalid Date";
+        return t("MintAuditInfo.chart.invalid_date");
       }
 
       const today = new Date();
@@ -377,21 +367,24 @@ export default defineComponent({
 
       let formattedDate = "";
       if (isToday) {
-        formattedDate = "Today";
+        formattedDate = t("MintAuditInfo.chart.today");
       } else if (isYesterday) {
-        formattedDate = "Yesterday";
+        formattedDate = t("MintAuditInfo.chart.yesterday");
       } else {
-        formattedDate = dateObj.toLocaleDateString(undefined, {
+        formattedDate = dateObj.toLocaleDateString(String(i18n.global.locale), {
           month: "short",
           day: "numeric",
         });
       }
 
-      return `${formattedDate} ${dateObj.toLocaleTimeString(undefined, {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      })}`;
+      return `${formattedDate} ${dateObj.toLocaleTimeString(
+        String(i18n.global.locale),
+        {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        }
+      )}`;
     };
 
     const showBucketTooltip = (event: MouseEvent, bucket: SwapBucket) => {
@@ -414,9 +407,11 @@ export default defineComponent({
         x: event.clientX + 10,
         y: event.clientY + 10,
         content: `
-          <div><b>Swaps:</b> ${bucket.count}</div>
-          <div><b>Success rate:</b> ${successRate}% (${bucket.successCount}/${bucket.count})</div>
-          <div><b>Time range:</b> ${timeRange}</div>
+          <div><b>${t("MintAuditInfo.chart.swaps")}</b> ${bucket.count}</div>
+          <div><b>${t(
+            "MintAuditInfo.chart.success_rate"
+          )}</b> ${successRate}% (${bucket.successCount}/${bucket.count})</div>
+          <div><b>${t("MintAuditInfo.chart.time_range")}</b> ${timeRange}</div>
         `,
       };
     };
@@ -445,20 +440,18 @@ export default defineComponent({
 </script>
 
 <style scoped>
+/* The chart sits on the group surface, like the stat cards beside it, so the muted axis
+   labels read in both themes. */
 .bar-chart-container {
-  background-color: #1e1e1e;
-  border-radius: 8px;
+  background-color: var(--app-group-fill);
+  border: 1px solid var(--app-group-edge);
+  border-radius: var(--app-radius-md);
   padding-bottom: 6px;
   padding-top: 20px;
   padding-left: 20px;
   padding-right: 20px;
   position: relative;
   width: 100%;
-}
-
-.chart-title {
-  color: white;
-  text-align: center;
 }
 
 .chart-wrapper {
@@ -471,7 +464,7 @@ export default defineComponent({
   display: flex;
   align-items: flex-end;
   height: 40px;
-  background-color: #2d2d2d;
+  background-color: var(--app-tint-strong);
   border-radius: 4px;
   padding: 4px;
   position: relative;
@@ -504,7 +497,7 @@ export default defineComponent({
 .time-tick {
   position: absolute;
   transform: translateX(-50%);
-  color: #888;
+  color: var(--app-text-muted);
   font-size: 10px;
   white-space: nowrap;
 }
@@ -523,7 +516,7 @@ export default defineComponent({
 
 .bar.placeholder {
   background-color: transparent;
-  border: 1px solid #444;
+  border: 1px solid var(--app-tint-strong);
 }
 
 .bar.placeholder:hover {
