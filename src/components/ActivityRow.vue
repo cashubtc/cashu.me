@@ -24,13 +24,13 @@
         aria-hidden="true"
       >
         <XIcon v-if="expired" :size="20" />
-        <!-- Direction glyphs follow the reading direction (council R78). -->
+        <!-- Direction glyphs follow the reading direction. -->
         <ArrowDownLeftIcon v-else-if="isIn" :size="20" class="rtl-flip" />
         <ArrowUpRightIcon v-else :size="20" class="rtl-flip" />
       </q-avatar>
     </q-item-section>
 
-    <q-item-section :data-testid="detailsTestid" @click="emitDetailsClick">
+    <q-item-section :data-testid="detailsTestid">
       <q-item-label class="row items-center justify-between no-wrap">
         <div class="col text-left activity-row__title">
           <span class="activity-row__label"
@@ -133,8 +133,8 @@ export default defineComponent({
       default: undefined,
     },
   },
-  // click: the whole row; details-click: the main section only (not the icon).
-  emits: ["click", "details-click"],
+  // click: the whole row, by pointer or by Enter and Space on the focused row.
+  emits: ["click"],
   computed: {
     isIn(): boolean {
       return this.direction === "in";
@@ -143,9 +143,6 @@ export default defineComponent({
   methods: {
     emitClick(event: Event) {
       this.$emit("click", event);
-    },
-    emitDetailsClick(event: Event) {
-      this.$emit("details-click", event);
     },
   },
 });

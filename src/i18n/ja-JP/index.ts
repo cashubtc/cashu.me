@@ -1,17 +1,17 @@
 export default {
   MultinutPicker: {
-    dialog_title: "マルチナット支払い",
+    dialog_title: "複数のミントで支払い",
     pay_using_multiple: "複数のミントを使って支払う",
     experimental_title: "試験的な機能",
     experimental_text:
       "この機能は非常に試験的で、期待どおりに動作しない場合があります。すでに支払い済みの請求書を支払おうとしないでください。資金を失う可能性があります。",
     understand: "理解しました",
-    select_funds: "複数のミントから資金を選んで支払いを実行します。",
+    select_funds: "支払いに使うミントを選んでください。",
     pay_invoice: "請求書を支払う",
     amount_mismatch: "金額の計算エラー：{calculated}（想定 {expected}）",
     states: {
-      requesting: "リクエスト中...",
-      paying: "支払い中...",
+      requesting: "リクエスト中…",
+      paying: "支払い中…",
       success: "成功",
       failed: "失敗",
     },
@@ -43,6 +43,9 @@ export default {
       },
       receive: {
         label: "受け取る",
+      },
+      show_qr: {
+        label: "QRコードを表示",
       },
       show_seed: {
         label: "シードフレーズを表示",
@@ -203,7 +206,7 @@ export default {
       },
       p2pk: {
         title: "ロックされた ecash",
-        caption: "自分の鍵でしか開けられない ecash を受け取る",
+        caption: "自分の鍵にロックされた ecash を受け取る",
       },
       privacy: {
         title: "プライバシー",
@@ -265,7 +268,7 @@ export default {
     },
     lightning_address: {
       server_url: {
-        label: "npub.cash のホスト名",
+        label: "npub.cash サーバー",
         hint: "ホスト名または HTTPS URL を入力",
         invalid: "有効な HTTPS サーバー URL を入力してください",
       },
@@ -298,7 +301,7 @@ export default {
       wallet_seed: {
         title: "ウォレットシードフレーズ",
         description: "ウォレットのシードから Nostr 鍵ペアを生成",
-        copy_nsec: "秘密鍵をコピー",
+        copy_nsec: "秘密鍵をコピー（nsec）",
       },
       nsec_bunker: {
         title: "リモート署名",
@@ -306,7 +309,7 @@ export default {
         delete_tooltip: "接続を削除",
       },
       use_nsec: {
-        title: "自分の秘密鍵を使う",
+        title: "自分の Nostr 秘密鍵を使う（nsec）",
         description: "この方法は危険であり推奨されません",
         delete_tooltip: "秘密鍵を削除",
       },
@@ -323,12 +326,12 @@ export default {
       claim_automatically: {
         toggle: "自動的に請求",
         description:
-          "受け取った支払いを確認なしで残高に追加します。オフのときは 1 件ずつ受け取ります。",
+          "すでに利用しているミントから届いた支払いを、確認なしで残高に追加します。それ以外の場合は 1 件ずつ確認します。",
       },
     },
     nostr_wallet_connect: {
       description:
-        "Nostr Wallet Connect で、他のアプリがこのウォレットから支払えるようにします。",
+        "Nostr Wallet Connect（NWC）を通じて、他のアプリがこのウォレットから支払い、請求書を作成し、残高と履歴を確認できるようにします。",
       enable_toggle: "Nostr Wallet Connect を有効にする",
       payments_note:
         "NWCはBitcoin残高からの支払いにのみ使用できます。支払いはアクティブなミントから行われます。",
@@ -363,16 +366,16 @@ export default {
     },
     p2pk_features: {
       description:
-        "試験的な機能です。少額で使ってください。秘密鍵をなくすと、その鍵でロックされた ecash は誰も開けられなくなります。",
+        "鍵を生成またはインポートして、ロックされた ecash（P2PK）を受け取ります。試験的な機能なので、少額で使ってください。秘密鍵をなくすと、その鍵にロックされた ecash を使えなくなる可能性があります。",
       generate_button: "キーを生成",
-      import_button: "秘密鍵をインポート",
+      import_button: "秘密鍵をインポート（nsec）",
       quick_access: {
-        toggle: "受け取り画面にロック鍵を表示",
+        toggle: "「ecash を受け取る」にロックボタンを表示",
         description:
-          "「ecash を受け取る」画面にロック鍵を表示し、送信者があなた宛てに ecash をロックできるようにします。",
+          "「ecash を受け取る」にロックボタンを追加します。開いて公開鍵を共有すると、送信者があなた宛てに ecash をロックできます。",
       },
       keys_expansion: {
-        label: "{count}個のキーをブラウズするにはクリック",
+        label: "公開鍵（{count}）",
         used_badge: "使用済み",
       },
     },
@@ -382,7 +385,7 @@ export default {
       check_incoming: {
         toggle: "着信請求書をチェック",
         description:
-          "最新の請求書をバックグラウンドで確認します。更新は速くなりますが、フィンガープリントされやすくなります。",
+          "最新の請求書をバックグラウンドで確認します。更新は速くなりますが、フィンガープリントされやすくなります。オフのときは履歴で請求書を自分で確認してください。",
       },
       check_startup: {
         toggle: "起動時に保留中の請求書をチェック",
@@ -391,7 +394,7 @@ export default {
       check_all: {
         toggle: "すべての請求書をチェック",
         description:
-          "未払いの請求書を最大 2 週間バックグラウンドで確認します。オンラインでの活動が増え、フィンガープリントされやすくなります。",
+          "未払いの請求書を最大 2 週間バックグラウンドで確認します。オンラインでの活動が増え、フィンガープリントされやすくなります。オフのときは履歴で請求書を自分で確認してください。",
       },
       check_sent: {
         toggle: "送信されたecashをチェック",
@@ -401,7 +404,7 @@ export default {
       websockets: {
         toggle: "WebSocketsを使用",
         description:
-          "ミントと常時接続し、支払いの状況をすぐに受け取ります。速くなりますが、フィンガープリントされやすくなります。",
+          "ミントと常時接続し、支払いと使用済み ecash の更新情報を受け取ります。速くなりますが、フィンガープリントされやすくなります。",
       },
       bitcoin_price: {
         title: "ビットコイン価格",
@@ -424,7 +427,7 @@ export default {
       auto_paste: {
         toggle: "ecash を自動で貼り付け",
         description:
-          "「ecash を受け取る」を開くと、クリップボードの ecash を貼り付けます。iOS で表示が乱れる場合はオフにしてください。",
+          "「トークンを貼り付け」をタップすると、クリップボードの ecash を貼り付けます。iOS で不具合が起きる場合はオフにしてください。",
       },
       auditor: {
         toggle: "監査人を有効にする",
@@ -435,7 +438,8 @@ export default {
         api_url_label: "監査人API URL",
       },
       multinut: {
-        description: "複数のミントから同時に請求書を支払います。",
+        description:
+          "Lightning の請求書を支払うときに「複数のミントで支払う」オプションを追加します。",
       },
       nostr_mint_backup: {
         toggle: "ミント一覧を Nostr にバックアップ",
@@ -484,7 +488,7 @@ export default {
       title: "信頼のウェブ",
       known_pubkeys: "既知の公開鍵：{wotCount}",
       continue_crawl: "クロールを続行",
-      crawl_odell: "Odell の信頼の輪をインポート",
+      crawl_odell: "Odell の信頼のウェブをクロール",
       crawl_wot: "信頼のウェブをクロール",
       pause: "一時停止",
       reset: "リセット",
@@ -497,8 +501,8 @@ export default {
       backup_files_title: "バックアップファイル",
       danger_zone_title: "危険ゾーン",
       notifications: {
-        reserved_unset: "予約済みのプルーフをすべて解除しました",
-        removed_spent: "使用済みのプルーフを {count} 件削除しました",
+        reserved_unset: "証明書の予約をすべて解除しました",
+        removed_spent: "削除した使用済み証明書：{count}",
         no_spent: "使用済みの証明書は見つかりませんでした",
         invalid_backup: "バックアップファイルの形式が無効です",
         read_error: "ファイルの読み込みエラー",
@@ -509,7 +513,7 @@ export default {
         new_seed: {
           button: "新しいシードフレーズを生成",
           description:
-            "新しいシードフレーズを作成します。その後、新しいシードで復元できるよう残高を自分宛てに送ってください。",
+            "新しいシードフレーズを作成します。現在の ecash は古いシードフレーズに紐づいたままです。作成後に残高の全額を自分宛てに送らないと、新しいシードフレーズでは復元できません。",
           confirm_question: "新しいシードフレーズを生成してもよろしいですか？",
           cancel: "キャンセル",
           confirm: "確認",
@@ -517,7 +521,7 @@ export default {
         remove_spent: {
           button: "使用済み証明書を削除",
           description:
-            "使用中のミントが使用済みと報告した ecash を削除します。ウォレットが動かなくなったときだけ使ってください。",
+            "選択した単位の ecash のうち、使用中のミントが使用済みと報告したものを削除します。ウォレットが動かなくなったときだけ使ってください。",
         },
         design_system: {
           title: "デザインシステム",
@@ -532,12 +536,13 @@ export default {
         export_proofs: {
           button: "アクティブな証明書をエクスポート",
           description:
-            "使用中のミントの選択した単位の残高を、1 つの ecash トークンとしてコピーします。",
+            "使用中のミントの選択した単位の残高を、1 つの ecash トークンとしてクリップボードにコピーします。残りはミントや単位を切り替えて、再度エクスポートしてください。",
         },
         keyset_counters: {
           title: "キーセットカウンターをインクリメント",
           increase: "{id} のカウンターを増やす",
-          fixes: "「outputs have already been signed」を解消",
+          fixes:
+            "「outputs have already been signed」の解消に役立つ場合があります",
           keysets: "{n} 個のキーセット | {n} 個のキーセット",
           sheet_hint: "+ をタップするとキーセットのカウンターが増えます。",
           column: "カウンター",
@@ -562,15 +567,16 @@ export default {
         export_wallet: {
           button: "ウォレットデータをエクスポート",
           description:
-            "ようこそ画面でインポートできるバックアップファイルをダウンロードします。ウォレットを使い続けると内容が古くなります。",
+            "ようこそ画面でインポートできるバックアップファイルをダウンロードします。ウォレットを再び使った時点で、ファイルの内容は最新ではなくなります。",
         },
         import_wallet: {
           description:
-            "このウォレットのデータを、エクスポートしたバックアップファイルで置き換えます。",
+            "エクスポートしたバックアップファイルをインポートします。バックアップ内の設定と記録が、このウォレットの対応するデータを上書きします。バックアップに含まれていないデータはそのまま残ります。",
           button: "ウォレットのバックアップをインポート",
-          confirm_question: "ウォレットデータを復元してもよろしいですか？",
+          confirm_question:
+            "このバックアップをウォレットにインポートしますか？",
           cancel: "キャンセル",
-          confirm: "バックアップをインポート",
+          confirm: "ウォレットのバックアップをインポート",
         },
       },
     },
@@ -611,7 +617,7 @@ export default {
     },
     install: {
       text: "インストール",
-      tooltip: "Cashuをインストール",
+      tooltip: "Cashu.me をインストール",
     },
   },
   AlreadyRunning: {
@@ -624,8 +630,8 @@ export default {
     },
   },
   ErrorNotFound: {
-    title: "404",
-    text: "このページは存在しません",
+    title: "このページは存在しません",
+    text: "404",
     actions: {
       home: {
         label: "ホームに戻る",
@@ -689,13 +695,13 @@ export default {
     pwa: {
       success: {
         title: "成功！",
-        text: "CashuをPWAとして使用しています。他の開いているブラウザウィンドウをすべて閉じ、ホーム画面からアプリを使用してください。",
+        text: "Cashu.me を PWA として使用しています。他に開いているブラウザーウィンドウをすべて閉じ、ホーム画面からアプリを使用してください。",
         nextSteps: "このブラウザタブを閉じて、ホーム画面からアプリを開けます。",
       },
     },
   },
   PwaPrompt: {
-    title: "Cashuをインストール",
+    title: "Cashu.me をインストール",
     text: "ホーム画面から、ブラウザのバーなしで開けます。",
     ios: {
       share: "共有をタップ",
@@ -767,17 +773,17 @@ export default {
   },
   WelcomeRestoreEcash: {
     title: "ecash を復元",
-    text: "設定済みミントで未使用のproofをスキャンし、ウォレットに追加します。",
+    text: "追加済みのミントで未使用の ecash を探し、ウォレットに復元します。",
   },
   MintRatings: {
     sort_and_filter: "並べ替えとフィルター",
     reviews_title: "レビュー",
     reviews_count: "{n} 件のレビュー | {n} 件のレビュー",
-    web_of_trust_caption: "信頼の輪の人のレビューだけを数える",
+    web_of_trust_caption: "自分の信頼のウェブからのレビューのみ表示",
     web_of_trust_hop: "あなたの信頼のウェブ内（{hop} ホップ）",
     no_mint_url: "ミントの URL が指定されていません",
     reviews: "レビュー",
-    no_reviews: "まだレビューはありません",
+    no_reviews: "レビューが見つかりません",
     your_review: "あなたのレビュー",
     no_rating: "評価なし",
     stars_label: "5つ星中{rating}",
@@ -791,7 +797,7 @@ export default {
     },
     actions: { write_review: "レビューを書く" },
     empty_state_subtitle:
-      "このミントの最初のレビューを書きましょう。あなたの体験が他の人の選択に役立ちます。",
+      "このミントでの体験を共有して、他の人の選択に役立てましょう。",
     range: "{total} 件中 {from}–{to} 件",
   },
   CreateMintReview: {
@@ -800,7 +806,7 @@ export default {
     published: "レビューを公開しました",
     publish_failed: "レビューを公開できませんでした",
     title: "ミントをレビュー",
-    publishing_as: "次として公開",
+    publishing_as: "次として公開：",
     inputs: {
       rating: {
         label: "評価",
@@ -851,7 +857,7 @@ export default {
       },
       restore_selected_mints: {
         label: "選択したミントを復元（{count}）",
-        success: "{count}個のミントを正常に復元しました",
+        success: "復元したミント：{count}",
         error: "選択したミントの復元中にエラーが発生しました：{error}",
       },
     },
@@ -866,7 +872,7 @@ export default {
       add_selected: "選択したものを追加（{count}）",
       no_backups_found: "ミントのバックアップが見つかりません",
       no_backups_hint:
-        "ミントリストを自動的にバックアップするには、設定でNostrミントのバックアップが有効になっていることを確認してください。",
+        "ミントリストを復元するには、このシードフレーズで以前に作成したバックアップが必要です。今後の変更を保存するには、設定で Nostr のミントバックアップをオンにしてください。",
       invalid_mnemonic: "検索する前に有効なシードフレーズを入力してください。",
       search_error: "ミントのバックアップの検索に失敗しました。",
       add_error: "選択したミントの追加に失敗しました。",
@@ -910,7 +916,7 @@ export default {
     swap: {
       title: "スワップ",
       caption:
-        "ライトニング経由でミント間の資金を移動します。手数料がかかる場合があります。",
+        "Lightning 経由でミント間の資金を移動します。Lightning 手数料の分を残してください。資金が届かない場合は、履歴で保留中の請求書を確認してください。",
       inputs: {
         from: {
           label: "から",
@@ -955,7 +961,7 @@ export default {
     actions: {
       create: {
         label: "請求書を作成",
-        label_blocked: "請求書作成中",
+        label_blocked: "作成中…",
       },
     },
     invoice: {
@@ -1000,7 +1006,7 @@ export default {
         tooltip_text: "絵文字をコピー",
       },
       copy_tokens: {
-        label: "ecash をコピー",
+        label: "トークンをコピー",
       },
       copy_link: {
         tooltip_text: "リンクをコピー",
@@ -1132,7 +1138,7 @@ export default {
   },
   P2PKDialog: {
     p2pk: {
-      caption: "ロック鍵",
+      caption: "あなたのロック鍵",
       description: "このキーにロックされたecashを受け取る",
       used_warning_text:
         "警告：このキーは以前に使用されています。プライバシー向上のため新しいキーを使用してください。",
@@ -1445,7 +1451,7 @@ export default {
   AddMintDialog: {
     title: "このミントを信頼しますか？",
     description:
-      "信頼できる場合にのみこのミントに参加してください。運営が止まると、そこで保有している ecash は失われます。",
+      "信頼できる場合にのみこのミントを追加してください。いつ運営が停止するかわからず、そこで保有している ecash を失う可能性があります。",
     actions: {
       add_mint: {
         label: "@:global.actions.add_mint.label",
@@ -1565,8 +1571,8 @@ export default {
   },
   MintAuditInfo: {
     title: "監査情報",
-    loading: "監査情報を読み込み中...",
-    not_audited: "このミントはまだ監査されていません。",
+    loading: "監査情報を読み込み中…",
+    not_audited: "この監査者には、このミントのデータがありません。",
     not_audited_text:
       "監査者について詳しく知る、または今後の監査を支援するには、{link} にアクセスするか、{here} をクリックして ecash を寄付し、このミントの監査開始を支援してください。",
     here: "こちら",
@@ -1630,7 +1636,7 @@ export default {
       low: "低",
     },
     delete_dialog: {
-      title: "ecash を削除",
+      title: "履歴から削除しますか？",
       text: "この取引を履歴から削除してもよろしいですか？",
       warning:
         "警告：この操作は元に戻せず、トークンを復元する方法はありません。",
@@ -1639,8 +1645,8 @@ export default {
       read_failed: "NFC の読み取りに失敗しました",
       write_failed: "NFC の書き込みに失敗しました",
       error: "NFC エラー",
-      writing: "NFC カードに書き込み中...",
-      success: "トークンをカードに書き込みました！",
+      writing: "NFC カードに書き込み中…",
+      success: "トークンを NFC カードに書き込みました",
       capacity:
         "カードの容量が不足している可能性があります（{bytes} バイト必要）。",
     },
@@ -1652,11 +1658,11 @@ export default {
       bolt12: "オファー",
     },
     onchain_title: "オンチェーンで受け取る",
-    bolt12_title: "Bolt12 で受け取る",
+    bolt12_title: "Lightning オファーで受け取る",
     mint_unreachable: "ミントに接続できません",
     mint_unreachable_text: "支払いを受け取るにはミントに再接続してください。",
     reconnect_mint: "ミントに再接続",
-    checking_address: "アドレスを確認中...",
+    checking_address: "アドレスを確認中…",
     add_amount: "金額を追加",
     new_offer: "新しいオファー",
     create_offer: "オファーを作成",
@@ -1683,13 +1689,13 @@ export default {
       backup_restored: "バックアップを復元しました",
       backup_exported: "ウォレットのバックアップをエクスポートしました",
       quota_exceeded:
-        "ローカルストレージがいっぱいです。ローカルストレージを整理してください。",
+        "ブラウザーの保存領域がいっぱいか、利用できません。新しいウォレットデータが保存されない可能性があります。今すぐウォレットをバックアップしてください。",
       cleaned_up: "{size} バイトを整理しました",
     },
   },
   receiveTokens: {
     notifications: {
-      already_in_history: "トークンはすでに履歴にあります",
+      already_in_history: "ecash はすでに履歴にあります",
       nfc_read_failed: "NFC タグからデータを読み取れません",
       scan_error: "スキャンエラー",
       nfc_error: "NFC エラー",
@@ -1714,9 +1720,9 @@ export default {
   },
   nostr: {
     notifications: {
-      nip04_published: "NIP-04 イベントを公開しました",
-      nip04_failed: "NIP-04 イベントを公開できませんでした",
-      nip17_failed: "NIP-17 イベントを公開できませんでした",
+      nip04_published: "Nostr にメッセージを公開しました",
+      nip04_failed: "Nostr にメッセージを公開できませんでした",
+      nip17_failed: "Nostr にメッセージを公開できませんでした",
       receive_failed: "着信した支払いを受け取れませんでした",
       ecash_already_in_history: "ecash はすでに履歴にあります",
       ecash_added: "ecash を履歴に追加しました",
@@ -1724,7 +1730,8 @@ export default {
   },
   nwc: {
     notifications: {
-      melt_quote_failed: "NWC：メルト見積もりをリクエストできませんでした",
+      melt_quote_failed:
+        "NWC：ミントから支払いの見積もりを取得できませんでした",
       unit_must_be_sat: "NWC：使用中の単位は sats である必要があります",
       allowance_exceeded: "NWC：アローワンスを超えました",
     },

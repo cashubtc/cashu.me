@@ -3,7 +3,7 @@ import { expect, test } from "../fixtures/test";
 import { MINT_A_URL } from "../fixtures/mint";
 import { WalletUi } from "../pages/WalletUi";
 
-// Wallet home chrome: the History / Mints tabs (owner item 5), the panel's turning chevron
+// Wallet home chrome: the History / Mints tabs, the panel's turning chevron
 // (item 6) and the minimal Scan button (item 24).
 
 test.use({ reducedMotion: "no-preference" });
@@ -166,7 +166,7 @@ test("the wallet Scan button opens the scanner and returns to the wallet", async
   await expect(wallet.walletScan.locator("svg")).toHaveClass(
     /\blucide-scan-icon\b/
   );
-  // It rests on the page with no disc (owner 2026-10-29b, item 8), a 44px+ target that
+  // It rests on the page with no disc, a 44px+ target that
   // still shows hover and the focus ring.
   const scan = wallet.walletScan;
   await page.mouse.move(0, 0);

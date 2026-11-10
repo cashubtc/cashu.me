@@ -75,7 +75,7 @@ describe("MintQuoteInformation", () => {
     ).toBeNull();
   });
 
-  describe("one on-chain status (owner 2026-10-29, item 10)", () => {
+  describe("one on-chain status", () => {
     const stateDisplay = (status: string, onchainMetadata: unknown) =>
       MintQuoteInformation.computed.stateDisplay.call({
         invoice: { status },

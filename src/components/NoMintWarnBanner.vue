@@ -1,7 +1,7 @@
 <template>
   <!-- The standard empty state (src/css/elements.scss): no mint yet, two ways forward.
        Add mint is tonal: it leads to the Mints form below, where Discover mints is the one
-       filled action while the URL is empty (owner 2026-10-29, item 2; council R91). -->
+       filled action while the URL is empty. -->
   <EmptyState
     class="q-mx-md q-my-lg"
     :icon="MintIcon"

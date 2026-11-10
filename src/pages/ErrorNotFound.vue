@@ -5,8 +5,8 @@
     <BlockingState
       class="col"
       :icon="SearchXIcon"
-      :title="$t('ErrorNotFound.text')"
-      :text="$t('ErrorNotFound.title')"
+      :title="$t('ErrorNotFound.title')"
+      :text="$t('ErrorNotFound.text')"
       :action="$t('ErrorNotFound.actions.home.label')"
       to="/"
     />

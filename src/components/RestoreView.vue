@@ -41,7 +41,7 @@
       :caption="onboarding ? '' : $t('RestoreView.restore_mints.caption')"
     >
       <!-- One select-all toggle on the list's end edge (two far-apart links read as a
-           segmented control with a dead half, council R77-R78). -->
+           segmented control with a dead half). -->
       <div
         v-if="mints.length > 0 && !onboarding"
         class="row justify-end q-mb-sm restore-select-toggle"
@@ -379,8 +379,6 @@ export default defineComponent({
 </script>
 
 <style>
-@import "src/css/mintlist.css";
-
 /* Primary action section */
 .primary-action-section {
   display: flex;

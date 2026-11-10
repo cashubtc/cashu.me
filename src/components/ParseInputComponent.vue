@@ -1,8 +1,8 @@
 <template>
   <div class="column" :data-testid="testId">
     <!-- The outlined text field (textarea variant): its label stays visible with content,
-         and Paste sits inside it, replaced by Clear once there is text (owner, 2026-10-29).
-         Scanning is the labelled row under the field (owner batch 2, item 3). -->
+         and Paste sits inside it, replaced by Clear once there is text. Scanning is the
+         labelled row under the field. -->
     <q-input
       ref="inputRef"
       outlined
@@ -36,7 +36,7 @@
       </template>
     </q-input>
 
-    <!-- The one scan affordance, as on main: hidden without a camera. -->
+    <!-- The one scan affordance: hidden without a camera. -->
     <OptionRow
       v-if="hasCamera"
       class="q-mt-md"

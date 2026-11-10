@@ -18,15 +18,14 @@
           v-model="rating"
           :size="32"
           :label="$t('CreateMintReview.inputs.rating.label')"
-          class="q-mb-md review-stars"
+          class="q-mb-md"
           :disable="prefilling || submitting"
         />
         <!-- Says why Publish is off until there is a rating. -->
         <div v-if="!rating" class="review-rating-hint">
           {{ $t("CreateMintReview.inputs.rating.hint") }}
         </div>
-        <!-- The outlined field carries its own label, which stays visible with content
-             (owner, 2026-10-29). -->
+        <!-- The outlined field carries its own label, which stays visible with content. -->
         <q-input
           v-model="review"
           type="textarea"
@@ -49,14 +48,11 @@
             spinner-size="xs"
           />
         </q-avatar>
-        <span
-          >{{ $t("CreateMintReview.publishing_as")
-          }}{{ /^(zh|ja)/.test($i18n.locale) ? "：" : ":" }}</span
-        >
-        <span v-if="publisherName" class="text-white q-ml-xs">{{
+        <span>{{ $t("CreateMintReview.publishing_as") }}</span>
+        <span v-if="publisherName" class="publisher-name q-ml-xs">{{
           publisherName
         }}</span>
-        <span class="monospace q-ml-xs ellipsis">{{ shortDisplayNpub }}</span>
+        <span class="q-ml-xs ellipsis">{{ shortDisplayNpub }}</span>
         <CopyButton
           v-if="displayNpub"
           class="publisher-copy"
@@ -316,6 +312,11 @@ export default defineComponent({
 <style scoped>
 .review-form {
   position: relative;
+}
+
+/* The name reads in ink beside the muted caption, in both modes. */
+.publisher-name {
+  color: var(--app-text);
 }
 
 /* A 44px copy target that doesn't push the caption line taller. */

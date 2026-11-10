@@ -9,8 +9,8 @@
     >
       <q-item>
         <q-item-section>
-          <!-- Two equal choices, one filled and one outlined, sharing the row (council
-               R75: a full button beside a small one read as unrelated). -->
+          <!-- Two equal choices, one filled and one outlined, sharing the row (a full button
+               beside a small one reads as unrelated). -->
           <div class="row no-wrap p2pk-setup-actions">
             <q-btn
               color="primary"
@@ -31,9 +31,7 @@
           </div>
         </q-item-section>
       </q-item>
-      <!-- Shown once a key exists, or while it is on so it can be switched off. -->
       <SettingsToggleRow
-        v-if="p2pkKeys.length || showP2PkButtonInDrawer"
         v-model="showP2PkButtonInDrawer"
         :label="$t('Settings.p2pk_features.quick_access.toggle')"
         :caption="$t('Settings.p2pk_features.quick_access.description')"
@@ -64,9 +62,10 @@
             <AppBadge v-if="key.used">{{
               $t("Settings.p2pk_features.keys_expansion.used_badge")
             }}</AppBadge>
-            <CopyButton :value="key.publicKey" :icon-size="18" />
+            <CopyButton :value="key.publicKey" />
             <IconButton
-              :label="$t('Settings.nostr_wallet_connect.connection.qr_tooltip')"
+              :label="$t('global.actions.show_qr.label')"
+              tooltip
               @click="showP2PKKeyEntry(key.publicKey)"
             >
               <QrCodeIcon :size="20" />

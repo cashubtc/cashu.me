@@ -2,7 +2,7 @@
 <template>
   <WelcomeSlideScaffold class="pwa-slide" :title="$t('WelcomeSlide2.title')">
     <!-- The hero: the installed check, or the photograph in a full-column frame 200px tall
-         (the whole 3:2 picture contained, never cropped), in the app's mode. -->
+         (the whole 3:2 picture contained, never cropped). -->
     <template #hero>
       <div
         class="header-image"
@@ -13,7 +13,7 @@
         </transition>
         <div v-else class="pwa-image-frame">
           <img
-            :src="installImage"
+            src="/pwa-example.jpg"
             :alt="$t('WelcomeSlide2.alt.pwa_example')"
             class="pwa-image"
             width="1200"
@@ -159,7 +159,6 @@ import {
   SquarePlus as SquarePlusIcon,
 } from "lucide-vue-next";
 import { ref, onMounted, onBeforeUnmount, computed } from "vue";
-import { useQuasar } from "quasar";
 import PwaPrompt from "src/components/PwaPrompt.vue";
 import WelcomeSlideScaffold from "src/components/ui/WelcomeSlideScaffold.vue";
 
@@ -176,13 +175,6 @@ export default {
     WelcomeSlideScaffold,
   },
   setup() {
-    const $q = useQuasar();
-    // The app's mode, not the OS's: the two can differ.
-    // The dark and light photographs are not in public/ yet; both modes show the one we have.
-    const installImage = computed(() =>
-      $q.dark.isActive ? "/pwa-example.jpg" : "/pwa-example.jpg"
-    );
-
     const isPWA = () => {
       return (
         window.matchMedia("(display-mode: standalone)").matches ||
@@ -283,7 +275,6 @@ export default {
     });
 
     return {
-      installImage,
       isPWA,
       canPromptInstall,
       promptInstall,

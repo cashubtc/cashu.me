@@ -71,7 +71,7 @@
           <AmountKeypadPanel v-show="!keypadCollapsed" />
         </template>
         <!-- Lock mode: the receiver's key sits right above SEND, with Paste and Scan inside
-             the field; the amount stays editable (owner, 2026-10-29, item 27). -->
+             the field; the amount stays editable. -->
         <RevealTransition>
           <div
             v-if="showLockInput"

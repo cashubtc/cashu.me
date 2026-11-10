@@ -1,18 +1,17 @@
-import { copyToClipboard } from "quasar";
+import { copyText } from "src/js/copy";
 import { useUiStore } from "stores/ui";
 import { Clipboard } from "@capacitor/clipboard";
 import { SafeArea } from "capacitor-plugin-safe-area";
 import { isolateLtr } from "src/js/format-currency";
 import {
   notify,
-  notifyCopied,
   notifyError,
   notifySuccess,
   notifyWarning,
 } from "src/js/notify";
 import { applyDeviceEffects } from "src/js/device-effects";
 applyDeviceEffects();
-// window.EventHub = new Vue();
+// window.EventHub = new Vue(                                    );
 
 // Ensure we capture the PWA install prompt as early as possible
 if (typeof window !== "undefined") {
@@ -88,7 +87,7 @@ function syncDocumentBackground(isDark) {
   const surface = getComputedStyle(document.body)
     .getPropertyValue("--app-surface")
     .trim();
-  const bg = isDark ? surface || "#151518" : "#ffffff";
+  const bg = isDark ? surface || "#000000" : "#ffffff";
   document.documentElement.style.backgroundColor = bg;
   document.documentElement.style.setProperty("--cashu-splash-bg", bg);
 }
@@ -144,7 +143,7 @@ window.windowMixin = {
       requestAnimationFrame(() => setTimeout(updateStatusBarMeta, 300));
     },
     copyText: function (text, message) {
-      copyToClipboard(text).then(() => notifyCopied(message));
+      return copyText(text, message);
     },
     pasteFromClipboard: async function () {
       let text = "";

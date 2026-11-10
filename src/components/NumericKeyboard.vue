@@ -93,9 +93,9 @@ export default defineComponent({
 }
 
 // The digits are a numeric role of their own, not button text: the global .q-btn standard
-// (15px, src/css/app.scss) loads after Quasar's text-h5 and shrank them (owner 2026-10-29b,
-// item 4). Scoped, so it beats that rule without !important; the same size on every screen
-// height, where only the gaps and insets tighten.
+// (15px, src/css/app.scss) loads after Quasar's text-h5 and would shrink them. Scoped, so it
+// beats that rule without !important; the same size on every screen height, where only the
+// gaps and insets tighten.
 .q-btn.keypad-key {
   font-size: 26px;
   font-variant-numeric: tabular-nums lining-nums;

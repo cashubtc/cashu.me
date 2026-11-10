@@ -1,9 +1,8 @@
 <!-- An on-chain send's confirmations: a fact row, "Confirmations n/threshold". Once the
      threshold is reached the count reads in the positive colour after a check; below it, muted
      after a clock (the icon, not the colour alone, tells them apart). No state word: the Status
-     row or the hero stays the one payment status (owner 2026-10-29, item 10; the green is back,
-     2026-10-29b, item 10). Busy dots alone until the explorer first answers; a refetch keeps the
-     known count. -->
+     row or the hero stays the one payment status. Busy dots alone until the explorer first
+     answers; a refetch keeps the known count. -->
 <template>
   <DetailRow
     :icon="LinkIcon"

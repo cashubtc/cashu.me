@@ -1,6 +1,6 @@
 <!-- The "working on it" mark: three dots, for anything pending or busy (a button that is
      sending, a payment waiting to settle, a row that is checking). Never a pulse; the one ring
-     is MintCard's while the wallet switches to that mint (owner 2026-10-29). -->
+     is MintCard's while the wallet switches to that mint. -->
 <template>
   <q-spinner-dots
     class="pending-dots"

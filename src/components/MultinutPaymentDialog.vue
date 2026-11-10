@@ -958,8 +958,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "src/css/mintlist.css";
-
 .fullscreen {
   position: fixed;
   top: 0;

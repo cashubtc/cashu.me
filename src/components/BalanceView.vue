@@ -294,7 +294,7 @@ export default defineComponent({
   overscroll-behavior-x: none;
   touch-action: pan-y;
 }
-/* The balance never moves by hand (owner item 25): no swipe, and Quasar's ".q-panel.scroll"
+/* The balance never moves by hand: no swipe, and Quasar's ".q-panel.scroll"
    (overflow: auto) is clipped so a wheel or trackpad can't scroll a slide. Slides move only
    when a unit dot (or a unit change) selects them, with the carousel's own animation. */
 .balance-carousel :deep(.q-carousel__slides-container),
@@ -370,7 +370,7 @@ export default defineComponent({
   width: 6px;
 }
 /* The active unit is a short pill, not a dot a little larger: a 15% scale read as all
-   dots alike (council R85). */
+   dots alike. */
 .balance-unit-dot--active {
   color: var(--app-text);
 }

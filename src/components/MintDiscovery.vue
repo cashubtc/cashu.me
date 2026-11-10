@@ -1,8 +1,6 @@
 <template>
   <div class="discover-section">
     <div class="discover-card">
-      <!-- Only when idle with no results; while loading and once results exist, refreshing is the
-           compact action in the results header, so the list never jumps when the button goes. -->
       <!-- Idle, before the first search: a designed empty state that says what discovery does,
            with the one primary action. While loading and once results exist, refreshing
            is the compact action in the results header. -->
@@ -20,7 +18,6 @@
             color="primary"
             rounded
             unelevated
-            :loading="discovering"
             @click="discover"
             class="discover-btn full-width app-empty__action"
           >
@@ -28,11 +25,6 @@
             <span>{{
               $t("MintSettings.discover.actions.discover.label")
             }}</span>
-            <template #loading
-              ><BusyLabel>{{
-                $t("MintSettings.discover.actions.discover.label")
-              }}</BusyLabel></template
-            >
           </q-btn>
         </template>
       </EmptyState>
@@ -57,7 +49,7 @@
           </q-item-section>
           <q-item-section side top>
             <!-- The loaded header's IconButton, busy, so the glyph doesn't move 6px when
-                 results arrive (council R83). -->
+                 results arrive. -->
             <IconButton :label="$t('common.refresh')" loading tabindex="-1">
               <RefreshCwIcon :size="20" />
               <template #loading>
@@ -74,7 +66,7 @@
           </div>
         </div>
       </q-list>
-      <div class="discover-skeleton__label visually-hidden" role="status">
+      <div class="visually-hidden" role="status">
         {{ $t("MintSettings.discover.actions.discover.in_progress") }}
       </div>
     </div>
@@ -123,8 +115,7 @@
               :loading="isFetchingMintInfo(rec.url)"
             >
               <template #action>
-                <!-- A labelled add, so it doesn't read as a second way into the reviews
-                     (council R76). -->
+                <!-- A labelled add, so it doesn't read as a second way into the reviews. -->
                 <MintCardAction
                   v-if="!isFetchingMintInfo(rec.url)"
                   :label="$t('MintSettings.discover.add')"
@@ -153,7 +144,6 @@
 <script lang="ts">
 import MintCardAction from "src/components/ui/MintCardAction.vue";
 import IconButton from "src/components/ui/IconButton.vue";
-import BusyLabel from "src/components/ui/BusyLabel.vue";
 import MintCard from "src/components/MintCard.vue";
 import { defineComponent, ref, computed, watch, onMounted } from "vue";
 import { useRouter } from "vue-router";
@@ -173,7 +163,6 @@ export default defineComponent({
   components: {
     MintCardAction,
     IconButton,
-    BusyLabel,
     MintCard,
     CompassIcon,
     SearchIcon,
@@ -307,10 +296,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-/* Avatar (34px) plus its 16px gap. */
-
-@import "src/css/mintlist.css";
-
 .discover-section {
   width: 100%;
   margin-bottom: 24px;
@@ -326,17 +311,7 @@ export default defineComponent({
   margin-bottom: 24px;
 }
 
-/* Skeleton rows match the loaded mint cards: same height, gap, radius and outline, no fill. */
-
-.discover-skeleton__label {
-  font-size: 13px;
-  color: var(--app-text-muted);
-  text-align: center;
-  margin-top: 8px;
-}
-
-/* One exact height in every state, and a spinner the size of the search icon, so pressing
-   Discover never shifts the page. */
+/* The shared 52px height of the page's full-width actions. */
 .discover-btn {
   min-height: 52px;
   width: 100%;
@@ -349,16 +324,10 @@ export default defineComponent({
   line-height: 20px;
 }
 
-/* The rating sits on the card's end edge, where the installed cards keep it. */
-
 .discover-count {
   font-size: 14px;
   font-weight: 600;
 }
-
-/* A row still fetching its mint info reads as loading, not disabled. */
-
-/* Per-row loading sits in the trailing slot, clear of the mint name and URL. */
 
 /* Smooth list animations for discovered mints */
 .mint-move {

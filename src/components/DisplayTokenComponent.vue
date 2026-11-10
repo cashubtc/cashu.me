@@ -31,8 +31,8 @@
           <div class="col-12 q-px-md">
             <QrBlock :value="qrCodeFragment" :width="600" @click="copyTokens" />
             <QrProgress :active="runnerActive" />
-            <!-- The animated QR's own settings sit with the QR they change (owner 2026-10-29,
-                 item 36), not between the details and the footer. -->
+            <!-- The animated QR's own settings sit with the QR they change, not between the
+                 details and the footer. -->
             <div v-if="showAnimatedQR" class="qr-settings row justify-center">
               <TonalChip @click="changeSpeed">
                 <template #icon><GaugeIcon :size="18" /></template>
@@ -66,6 +66,20 @@
               </TonalChip>
             </div>
           </div>
+        </div>
+        <!-- While the NFC writer waits for a card: what it is waiting to do, and the way out. -->
+        <div
+          v-if="scanningCard"
+          class="nfc-busy row items-center justify-center q-px-md q-mb-md"
+        >
+          <BusyLabel class="text-app-muted" role="status">{{
+            $t(
+              "SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_supported_text"
+            )
+          }}</BusyLabel>
+          <TonalChip data-testid="cancel-nfc-write" @click="closeCardScanner">
+            {{ $t("global.actions.cancel.label") }}
+          </TonalChip>
         </div>
         <q-card-section class="q-pa-none">
           <div class="row justify-center q-pt-none">
@@ -134,6 +148,7 @@
 <script lang="ts">
 import FlowColumn from "src/components/ui/FlowColumn.vue";
 import TonalChip from "src/components/ui/TonalChip.vue";
+import BusyLabel from "src/components/ui/BusyLabel.vue";
 import FlowFooter from "src/components/ui/FlowFooter.vue";
 import AppMenu, { type AppMenuItem } from "src/components/ui/AppMenu.vue";
 import ConfirmDialog from "src/components/ui/ConfirmDialog.vue";
@@ -207,6 +222,7 @@ export default defineComponent({
   components: {
     FlowColumn,
     TonalChip,
+    BusyLabel,
     FlowFooter,
     AppMenu,
     ConfirmDialog,
@@ -286,9 +302,12 @@ export default defineComponent({
           outgoing && {
             key: "nfc",
             icon: NfcIcon,
-            label: this.$t(
-              "SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_supported_text"
-            ),
+            // A second tap on the item cancels the write it started.
+            label: this.scanningCard
+              ? this.$t("global.actions.cancel.label")
+              : this.$t(
+                  "SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_supported_text"
+                ),
           },
         {
           key: "delete",
@@ -541,10 +560,10 @@ export default defineComponent({
                         `NFC write failed: The card may not have enough capacity (needed ${records[0].data.length} bytes).`
                       );
                       notifyError(
+                        this.$t("DisplayTokenComponent.nfc.write_failed"),
                         this.$t("DisplayTokenComponent.nfc.capacity", {
                           bytes: records[0].data.length,
-                        }),
-                        this.$t("DisplayTokenComponent.nfc.write_failed")
+                        })
                       );
                     });
                 } catch (err: any) {
@@ -622,6 +641,9 @@ export default defineComponent({
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 8px;
+}
+.nfc-busy {
+  gap: 12px;
 }
 .content-area {
   max-width: var(--app-column);

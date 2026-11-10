@@ -16,7 +16,7 @@
         <transition name="swap-secondary">
           <div :key="`secondary-${fiatMode}`" class="fiat-wrapper-content">
             <!-- The other unit and its ⇅ are one centred pill, so the pair sits square under
-                 the amount (owner 2026-11-01: the hanging ⇅ read as off-centre). -->
+                 the amount. -->
             <button
               v-if="showSwap"
               type="button"
@@ -383,6 +383,8 @@ export default defineComponent({
         }
         handled = true;
       } else if (key === "Enter") {
+        // A focused button or link takes Enter itself (the fiat switch, a segment).
+        if (ae?.closest?.("button, a, [role=button]")) return;
         if (this.modelValue != null && this.modelValue > 0) {
           this.$emit("enter");
         }

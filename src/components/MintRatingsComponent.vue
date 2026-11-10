@@ -92,6 +92,16 @@
           :skeleton-lines="n === 2 ? 2 : 1"
         />
       </div>
+      <!-- The filters leave nothing: say so in the list's place, under the open control. -->
+      <EmptyState
+        v-else-if="!sorted.length"
+        :title="$t('MintRatings.no_reviews')"
+        data-testid="reviews-filter-empty"
+      >
+        <template #icon>
+          <ListFilterIcon :size="26" />
+        </template>
+      </EmptyState>
       <div v-else class="column">
         <ReviewItem
           v-for="r in paged"
@@ -345,6 +355,8 @@ export default defineComponent({
       loadingProfiles: new Set<string>(),
       showSortSheet: false,
       fetchingReviews: true,
+      // Ends the skeleton when relays never answer; cleared when the page leaves first.
+      fetchTimeout: undefined as ReturnType<typeof setTimeout> | undefined,
     };
   },
   computed: {
@@ -486,11 +498,14 @@ export default defineComponent({
       const recs = useMintRecommendationsStore();
       // Stop showing the skeleton after the fetch, or after 8s if relays never answer.
       const done = () => (this.fetchingReviews = false);
-      setTimeout(done, 8000);
+      this.fetchTimeout = setTimeout(done, 8000);
       Promise.resolve(recs.fetchReviewsForUrl(this.url)).finally(done);
     } catch {
       this.fetchingReviews = false;
     }
+  },
+  beforeUnmount() {
+    clearTimeout(this.fetchTimeout);
   },
 
   watch: {
@@ -541,7 +556,9 @@ export default defineComponent({
 </script>
 
 <style scoped>
-/* One surface level like mint details: no grey wrapper behind the cards. */
+/* One surface level like mint details: no grey wrapper behind the cards. The global dark-card
+   rule (src/css/base.scss) sets its raised fill with !important and outranks Quasar's
+   bg-transparent, so this states the page's own with the same weight. */
 body[data-theme] .q-card--dark.mint-ratings-root {
   background: transparent !important;
 }

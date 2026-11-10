@@ -75,7 +75,7 @@ test("switches the ecash unit from the header's unit switch", async ({
     const toggle = wallet.unitToggle();
     await expect(toggle).toHaveAccessibleName("Unit: Bitcoin, change");
     await expect(toggle).toHaveText("BTC");
-    // The unit is a header action (owner 2026-10-29b, item 11), never beside the amount and
+    // The unit is a header action, never beside the amount and
     // its ⇅ fiat swap.
     await expect(
       page.locator(".amount-input-root:visible").getByRole("button", {

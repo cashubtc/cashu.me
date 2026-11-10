@@ -37,7 +37,8 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-// The minimal Scan frame, as on main (owner item 24); ScanLine's bar read busier.
+// The wallet's large scan mark is the minimal Scan frame: ScanLine's bar reads busier at
+// this size.
 import { Scan as ScanIcon } from "lucide-vue-next";
 
 export default defineComponent({

@@ -36,7 +36,11 @@
       </transition-group>
       <IconButton
         :class="countdown > 0 ? 'text-negative' : ''"
-        :label="$t('common.refresh')"
+        :label="
+          countdown > 0
+            ? $t('global.actions.cancel.label')
+            : $t('common.refresh')
+        "
         @click="reload"
         :disable="uiStore.globalMutexLock && countdown === 0"
       >
@@ -121,7 +125,7 @@ export default defineComponent({
   position: relative;
   z-index: auto;
   /* clip, not hidden: hidden made the header a scroll box that cut 1px off the top and
-     bottom of its buttons' focus rings (hover audit F6). */
+     bottom of its buttons' focus rings. */
   overflow-x: clip;
 }
 

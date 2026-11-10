@@ -1,8 +1,8 @@
 <!-- src/components/WelcomePage.vue -->
 <template>
   <!-- A page, not a dialog: the window is the one scroller, so on a wide screen the scrollbar
-       and the wheel area are the window's, not a 640px card's (owner 2026-10-29b, item 6).
-       Every step keeps one column (item 16): the scaffold's FlowColumn and FlowFooter's
+       and the wheel area are the window's, not a 640px card's.
+       Every step keeps one column: the scaffold's FlowColumn and FlowFooter's
        column share one edge; slides carry no padding. -->
   <div
     v-if="welcomeStore.showWelcome"

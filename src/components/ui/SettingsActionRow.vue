@@ -81,7 +81,7 @@ export default defineComponent({
       default: false,
     },
     // Risky but not destructive (a new seed phrase): a warning triangle; the label keeps the
-    // text colour so the name reads first (council R80).
+    // text colour so the name reads first.
     caution: {
       type: Boolean,
       default: false,

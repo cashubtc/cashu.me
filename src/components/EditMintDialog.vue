@@ -1,9 +1,11 @@
 <template>
   <!-- A form, so the shared bottom sheet like Add mint and the pickers; only confirmations
-       (remove mint) stay centred dialogs. -->
+       (remove mint) stay centred dialogs. Enter in either field is Update; the URL field
+       takes it itself, so the key never adds a line break to the URL. -->
   <BottomSheet
     v-model="showEditMintDialogLocal"
     :title="$t('EditMintDialog.title')"
+    @enter="submit"
   >
     <div class="edit-mint-dialog">
       <q-input
@@ -13,6 +15,7 @@
         autogrow
         :label="$t('EditMintDialog.inputs.mint_url.label')"
         class="q-mb-md url-input"
+        @keydown.enter.prevent="submit"
       />
       <q-input
         v-model="editMintData.nickname"
@@ -38,7 +41,6 @@
 <script lang="ts">
 import { defineComponent, ref, watch, computed } from "vue";
 import { useMintsStore } from "src/stores/mints";
-import { useQuasar } from "quasar";
 import BottomSheet from "src/components/BottomSheet.vue";
 
 export default defineComponent({
@@ -55,7 +57,6 @@ export default defineComponent({
     },
   },
   setup(props, { emit }) {
-    const $q = useQuasar();
     const editMintData = ref({
       url: "",
       nickname: "",
@@ -89,13 +90,18 @@ export default defineComponent({
           ((mintToEdit.value as any).nickname || "")
     );
 
+    // Enter does what the Update button does, and nothing while it is disabled.
+    const submit = () => {
+      if (hasChanges.value) updateMintLocal();
+    };
+
     return {
+      submit,
       hasChanges,
       editMintData,
       mintToEdit,
       updateMintLocal,
       showEditMintDialogLocal,
-      isDark: computed(() => $q.dark.isActive),
     };
   },
 });

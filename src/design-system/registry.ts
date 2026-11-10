@@ -106,7 +106,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "lucide-vue-next (read from every import in src)",
     example: `import { Zap as ZapIcon } from "lucide-vue-next";
 <ZapIcon :size="20" />`,
-    note: "Every icon in the app, in one grid: Lucide line icons only (Quasar's own icons use the Lucide set in src/js/lucide-icons.ts, and a guard test rejects Material names). One icon per idea: Coins amount and ecash, CircleDollarSign unit, Banknote fiat, ReceiptText fee, Zap Lightning, Bitcoin on-chain, Building2 mint (rounder than Landmark at 20px; owner 2026-10-29), FileText payment request, Hash ids and addresses, Network network, ClipboardPaste paste, Copy copy, Trash2 delete, RefreshCw refresh, ArchiveRestore restore, X close, CircleCheck / CircleAlert / TriangleAlert / Info for success, error, warning and info.",
+    note: "Every icon in the app, in one grid: Lucide line icons only (Quasar's own icons use the Lucide set in src/js/lucide-icons.ts, and a guard test rejects Material names). One icon per idea: Coins amount and ecash, CircleDollarSign unit, Banknote fiat, ReceiptText fee, Zap Lightning, Bitcoin on-chain, Building2 mint (rounder than Landmark at 20px), FileText payment request, Hash ids and addresses, Network network, ClipboardPaste paste, Copy copy, Trash2 delete, RefreshCw refresh, ArchiveRestore restore, X close, CircleCheck / CircleAlert / TriangleAlert / Info for success, error, warning and info.",
   },
   {
     id: "machine-text",
@@ -137,7 +137,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/css/app.scss .q-btn.full-width (52px, caps 16/600/.06em)",
     usage: { text: "full-width" },
     example: `<q-btn rounded unelevated color="primary" class="full-width" :loading="busy">\n  Continue\n  <template #loading><BusyLabel>Continuing</BusyLabel></template>\n</q-btn>`,
-    note: "Caps standard: 16/600 with 0.06em tracking for every full-width action and FlowFooter button. Disabled is a quiet 5% pill; busy keeps the enabled look with BusyLabel. Scripts without capitals (zh, ja, ko, ar, th) keep their text as written.",
+    note: "Caps standard: 16/600 with 0.06em tracking for every full-width action and FlowFooter button. Disabled uses an 8% ink fill in dark mode and 4% in light mode; busy keeps the enabled look with BusyLabel. Scripts without capitals (zh, ja, ko, ar, th) keep their text as written.",
   },
   {
     id: "secondary-buttons",
@@ -148,7 +148,7 @@ export const DS_ITEMS: DsItem[] = [
       "q-btn outline (tonal: --app-tonal-fill, no edge) / flat · src/css/app.scss",
     usage: { text: "<q-btn" },
     example: `<q-btn rounded outline color="primary">Cancel</q-btn>`,
-    note: "Two text standards: sentence case 15/600 for inline, paired and dialog actions; caps 16/600/.06em for full-width and FlowFooter actions. Secondary buttons are a tonal fill without an edge. Chips (TonalChip, filters, MintCardAction) are not buttons and keep 14/500.",
+    note: "Two text standards: sentence case 15/600 for inline, paired and dialog actions; caps 16/600/.06em for full-width and FlowFooter actions. Secondary buttons are a tonal fill without an edge. Compact controls keep their own type: TonalChip uses 13/600, filters use 14/500, and MintCardAction uses 14/600.",
   },
   {
     id: "icon-buttons",
@@ -215,6 +215,16 @@ export const DS_ITEMS: DsItem[] = [
     note: "A read-only value to copy: the standard field's read-only look, with the copy button in the lock's place.",
   },
   {
+    id: "seed-phrase-field",
+    name: "Seed phrase field",
+    group: "forms",
+    tier: "composite",
+    source: "src/components/ui/SeedPhraseField.vue",
+    usage: { tag: "SeedPhraseField" },
+    example: `<SeedPhraseField :mnemonic="mnemonic" :label="$t('WelcomeSlide3.inputs.seed_phrase.label')" />`,
+    note: "The seed phrase on the welcome step and in Backup settings: masked until Show, with Show/Hide and Copy in the lock's place. It keeps the field's edge (readonly-outlined) and its words can be reached from the keyboard.",
+  },
+  {
     id: "select",
     name: "Select",
     group: "forms",
@@ -222,7 +232,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/components/SheetSelect.vue",
     usage: { tag: "SheetSelect" },
     example: `<SheetSelect v-model="sort" :options="options" label="Sort" />`,
-    note: "Every choice from a list opens this bottom sheet; there are no popover menus.",
+    note: "Select fields open this bottom sheet; AppMenu uses a popover on desktop and a sheet on mobile.",
     context: "settings",
   },
   {
@@ -443,7 +453,7 @@ export const DS_ITEMS: DsItem[] = [
     </div>
   </template>
 </FullscreenDialogHeader>`,
-    note: 'The ecash unit switch, the outermost header action on Receive Lightning, Send ecash (after the lock) and Pay while a quote or amount is on screen (owner 2026-10-29b, item 11; the logical end in right-to-left). The unit\'s code from unitCode (BTC for sats, MSAT, USD, EUR) and a chevron in the header ink, 44px, named "Unit: Bitcoin, change", apart from the amount\'s ⇅ swap ("Enter amount in USD"). Follows the active mint and hides itself when the mint has one unit. Never beside the amount.',
+    note: 'The ecash unit switch, the outermost header action on Receive Lightning, Send ecash (after the lock) and Pay while a quote or amount is on screen. The unit\'s code from unitCode (BTC for sats, MSAT, USD, EUR) and a chevron in the header ink, 44px, named "Unit: Bitcoin, change", apart from the amount\'s ⇅ swap ("Enter amount in USD"). Follows the active mint and hides itself when the mint has one unit. Never beside the amount.',
   },
   {
     id: "fullscreen-dialog-header",
@@ -510,7 +520,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/components/MintIdentityHeader.vue",
     usage: { tag: "MintIdentityHeader" },
     example: `<MintIdentityHeader :url="mint.url" :info="mint.info" />`,
-    note: "One centred header on mint details, reviews and write-a-review (owner 2026-10-29, item 20).",
+    note: "One centred header on mint details, reviews and write-a-review.",
   },
   {
     id: "settings-section",
@@ -541,7 +551,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/components/ui/SectionDivider.vue",
     usage: { tag: "SectionDivider" },
     example: `<SectionDivider :label="$t('MintSettings.add.title')" />`,
-    note: 'Centred caps between hairlines on every page, settings sub-pages included (owner, 2026-10-29, item 31); align="start" only for a single field\'s label (the review rating).',
+    note: 'Centred caps between hairlines on every page, settings sub-pages included; align="start" only for a single field\'s label (the review rating).',
   },
 
   // Data display
@@ -685,7 +695,7 @@ export const DS_ITEMS: DsItem[] = [
       "src/js/notify.ts · src/App.vue Toaster · src/css/app.scss [data-sonner-toaster]",
     usage: { text: "notifySuccess(" },
     example: `notifySuccess("Received ₿500");`,
-    note: "shadcn's Sonner (vue-sonner) on our tokens: top-centre, sliding in from the edge; older toasts tuck behind the newest and fan out on hover; ✕, swipe or time closes one. The tone is the icon's colour, the callout's glyph.",
+    note: "shadcn's Sonner (vue-sonner) on our tokens: top-centre, sliding in from the edge; older toasts tuck behind the newest and fan out on hover; swipe or time closes one. The tone is the icon's colour, the callout's glyph.",
   },
   {
     id: "loading",
@@ -708,7 +718,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/components/ui/MintSwitchRing.vue",
     usage: { tag: "MintSwitchRing" },
     example: `<MintSwitchRing v-if="switching" />`,
-    note: "The one ring, for one event: the wallet switching mint. The mint card being switched to shows it in its status cell, and the mint picker under the balance in place of its chevron (owner 2026-10-29, 2026-11-01). Everything else that waits shows the pending dots.",
+    note: "The one ring, for one event: the wallet switching mint. The mint card being switched to shows it in its status cell, and the mint picker under the balance in place of its chevron. Everything else that waits shows the pending dots.",
   },
   {
     id: "busy-label",
@@ -859,7 +869,7 @@ export const DS_ITEMS: DsItem[] = [
     source: "src/components/OnchainDepositLimits.vue",
     usage: { tag: "OnchainDepositLimits" },
     example: `<OnchainDepositLimits :mint-url="activeMintUrl" :unit="activeUnit" />`,
-    note: "The mint's on-chain deposit range as one sentence in the neutral callout (AppCallout; owner batch 3, item 3), under the mint picker on the amount step and under the address QR (owner batch 2, item 7, over council R92's helper text). The range is one left-to-right, non-breaking run. A typed amount outside it still gets the amount warning.",
+    note: "The mint's on-chain deposit range as one sentence in the neutral callout (AppCallout), under the mint picker on the amount step and under the address QR. The range is one left-to-right, non-breaking run. A typed amount outside it still gets the amount warning.",
   },
 
   {

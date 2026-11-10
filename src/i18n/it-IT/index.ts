@@ -1,18 +1,18 @@
 export default {
   MultinutPicker: {
-    dialog_title: "Pagamento Multinut",
+    dialog_title: "Pagamento da più mint",
     pay_using_multiple: "Paga usando più mint",
     experimental_title: "Funzione sperimentale",
     experimental_text:
       "Questa funzione è altamente sperimentale e potrebbe non funzionare come previsto. Non tentare di pagare una fattura già pagata. Potresti perdere fondi.",
     understand: "Ho capito",
-    select_funds: "Seleziona fondi da più mint per eseguire il pagamento.",
+    select_funds: "Scegli da quali mint pagare.",
     pay_invoice: "Paga fattura",
     amount_mismatch:
       "Errore nel calcolo dell'importo: {calculated} invece di {expected}",
     states: {
-      requesting: "Richiesta...",
-      paying: "Pagamento...",
+      requesting: "Richiesta…",
+      paying: "Pagamento…",
       success: "Riuscito",
       failed: "Non riuscito",
     },
@@ -29,6 +29,9 @@ export default {
       lock: { label: "Blocca" },
       paste: { label: "Incolla" },
       receive: { label: "Ricevi" },
+      show_qr: {
+        label: "Mostra codice QR",
+      },
       show_seed: {
         label: "Mostra frase seed",
       },
@@ -70,7 +73,7 @@ export default {
         "Questo codice QR legacy non proviene da un esercente supportato",
       no_bolt12_mint: "Nessuno dei tuoi mint supporta le offerte BOLT12",
       no_bolt11_mint: "Nessuno dei tuoi mint supporta le fatture BOLT11",
-      address_not_paid: "Indirizzo non pagato",
+      address_not_paid: "Nessun pagamento ancora ricevuto a questo indirizzo",
       payment_pending: "Pagamento in attesa",
       invoice_already_paid: "Fattura già pagata",
       payment_sent: "Pagamento inviato",
@@ -173,7 +176,7 @@ export default {
       },
       p2pk: {
         title: "Ecash bloccato",
-        caption: "Ricevi ecash che solo la tua chiave può sbloccare",
+        caption: "Ricevi ecash bloccato con la tua chiave",
       },
       privacy: {
         title: "Privacy",
@@ -235,7 +238,7 @@ export default {
     },
     lightning_address: {
       server_url: {
-        label: "Nome host npub.cash",
+        label: "Server npub.cash",
         hint: "Inserisci un nome host o un URL HTTPS",
         invalid: "Inserisci un URL del server HTTPS valido",
       },
@@ -270,7 +273,7 @@ export default {
         title: "Frase seed del portafoglio",
         description:
           "Genera una coppia di chiavi Nostr dalla seed del tuo portafoglio",
-        copy_nsec: "Copia chiave privata",
+        copy_nsec: "Copia chiave privata (nsec)",
       },
       nsec_bunker: {
         title: "Firmatario remoto",
@@ -278,7 +281,7 @@ export default {
         delete_tooltip: "Elimina connessione",
       },
       use_nsec: {
-        title: "Usa la tua chiave privata",
+        title: "Usa la tua chiave privata Nostr (nsec)",
         description: "Questo metodo è pericoloso e non raccomandato",
         delete_tooltip: "Elimina chiave privata",
       },
@@ -295,12 +298,12 @@ export default {
       claim_automatically: {
         toggle: "Richiedi automaticamente",
         description:
-          "Aggiunge i pagamenti in arrivo al saldo senza chiedere. Se disattivato, li riscuoti uno per uno.",
+          "Aggiunge al saldo i pagamenti in arrivo dai mint che già usi senza chiedere. Altrimenti confermi ogni pagamento.",
       },
     },
     nostr_wallet_connect: {
       description:
-        "Permette ad altre app di pagare da questo portafoglio tramite Nostr Wallet Connect.",
+        "Permette ad altre app di pagare da questo portafoglio, creare fatture e vedere il tuo saldo e la cronologia tramite Nostr Wallet Connect (NWC).",
       enable_toggle: "Attiva Nostr Wallet Connect",
       payments_note:
         "Puoi usare NWC solo per pagamenti dal tuo saldo Bitcoin. I pagamenti verranno effettuati dal tuo mint attivo.",
@@ -335,16 +338,16 @@ export default {
     },
     p2pk_features: {
       description:
-        "Sperimentale. Usa piccoli importi: se perdi la chiave privata, nessuno potrà sbloccare l'ecash bloccato con essa.",
+        "Genera o importa una chiave per ricevere ecash bloccato (P2PK). Sperimentale: usa piccoli importi. Se perdi la chiave privata, puoi perdere l'accesso all'ecash bloccato con essa.",
       generate_button: "Genera chiave",
-      import_button: "Importa chiave privata",
+      import_button: "Importa chiave privata (nsec)",
       quick_access: {
-        toggle: "Mostra la chiave di blocco in Ricevi",
+        toggle: "Mostra il pulsante Blocca in Ricevi ecash",
         description:
-          "Mostra la tua chiave di blocco nella schermata Ricevi ecash, così chi invia può bloccare ecash per te.",
+          "Aggiunge il pulsante Blocca a Ricevi ecash. Aprilo per condividere la tua chiave pubblica, così chi invia può bloccare ecash per te.",
       },
       keys_expansion: {
-        label: "Clicca per sfogliare {count} chiavi",
+        label: "Chiavi pubbliche ({count})",
         used_badge: "usata",
       },
     },
@@ -354,7 +357,7 @@ export default {
       check_incoming: {
         toggle: "Verifica fattura in entrata",
         description:
-          "Controlla la tua ultima fattura in background. Aggiornamenti più rapidi, ma fingerprinting più facile.",
+          "Controlla la tua ultima fattura in background. Aggiornamenti più rapidi, ma fingerprinting più facile. Quando la funzione è disattivata, controlla le fatture nella Cronologia.",
       },
       check_startup: {
         toggle: "Verifica fatture pendenti all'avvio",
@@ -364,7 +367,7 @@ export default {
       check_all: {
         toggle: "Verifica tutte le fatture",
         description:
-          "Controlla le fatture non pagate in background per un massimo di due settimane. Più attività online rende più facile il fingerprinting.",
+          "Controlla le fatture non pagate in background per un massimo di due settimane. Più attività online rende più facile il fingerprinting. Quando la funzione è disattivata, controlla le fatture nella Cronologia.",
       },
       check_sent: {
         toggle: "Verifica ecash inviato",
@@ -374,7 +377,7 @@ export default {
       websockets: {
         toggle: "Usa WebSockets",
         description:
-          "Mantiene una connessione attiva con i mint per aggiornamenti istantanei sui pagamenti. Più veloce, ma fingerprinting più facile.",
+          "Mantiene una connessione attiva con i mint per aggiornamenti sui pagamenti e sull'ecash speso. Più veloce, ma fingerprinting più facile.",
       },
       bitcoin_price: {
         title: "Prezzo del bitcoin",
@@ -398,7 +401,7 @@ export default {
       auto_paste: {
         toggle: "Incolla ecash automaticamente",
         description:
-          "Incolla l'ecash dagli appunti quando apri Ricevi ecash. Disattivalo se causa problemi di visualizzazione su iOS.",
+          "Incolla l'ecash dagli appunti quando tocchi «Incolla token». Disattivalo se causa problemi di visualizzazione su iOS.",
       },
       auditor: {
         toggle: "Abilita revisore",
@@ -409,7 +412,8 @@ export default {
         api_url_label: "URL API Revisore",
       },
       multinut: {
-        description: "Paga le fatture da più mint contemporaneamente.",
+        description:
+          "Aggiunge l'opzione «Paga con più mint» quando paghi una fattura Lightning.",
       },
       nostr_mint_backup: {
         toggle: "Backup dell'elenco mint su Nostr",
@@ -459,7 +463,7 @@ export default {
       title: "Rete di fiducia",
       known_pubkeys: "Chiavi pubbliche note: {wotCount}",
       continue_crawl: "Continua scansione",
-      crawl_odell: "Importa la rete di fiducia di Odell",
+      crawl_odell: "Scansiona la rete di fiducia di Odell",
       crawl_wot: "Scansiona web of trust",
       pause: "Pausa",
       reset: "Reset",
@@ -472,8 +476,9 @@ export default {
       backup_files_title: "File di backup",
       danger_zone_title: "Zona pericolosa",
       notifications: {
-        reserved_unset: "Tutte le prove riservate sono state liberate",
-        removed_spent: "Rimosse {count} prove spese",
+        reserved_unset:
+          "Tutte le prenotazioni delle prove sono state annullate",
+        removed_spent: "Prove spese rimosse: {count}",
         no_spent: "Nessuna prova spesa trovata",
         invalid_backup: "Formato del file di backup non valido",
         read_error: "Errore durante la lettura del file",
@@ -484,7 +489,7 @@ export default {
         new_seed: {
           button: "Genera nuova frase seed",
           description:
-            "Crea una nuova frase seed. Poi invia il saldo a te stesso, così il nuovo seed potrà ripristinarlo.",
+            "Crea una nuova frase seed. L'ecash attuale resta legato alla precedente: invia poi l'intero saldo a te stesso, altrimenti la nuova seed non potrà ripristinarlo.",
           confirm_question:
             "Sei sicuro di voler generare una nuova frase seed?",
           cancel: "Annulla",
@@ -493,7 +498,7 @@ export default {
         remove_spent: {
           button: "Rimuovi prove spese",
           description:
-            "Rimuove l'ecash che i tuoi mint attivi segnalano come speso. Usalo solo se il portafoglio è bloccato.",
+            "Rimuove l'ecash che il mint attivo segnala come speso, nell'unità selezionata. Usalo solo se il portafoglio è bloccato.",
         },
         design_system: {
           title: "Design system",
@@ -508,12 +513,12 @@ export default {
         export_proofs: {
           button: "Esporta prove attive",
           description:
-            "Copia il saldo del mint attivo nell'unità selezionata come un unico token ecash.",
+            "Copia negli appunti il saldo del mint attivo nell'unità selezionata come un unico token ecash. Cambia mint o unità ed esporta di nuovo per includere il resto.",
         },
         keyset_counters: {
           title: "Incrementa contatori keyset",
           increase: "Aumenta il contatore di {id}",
-          fixes: "Risolve «outputs have already been signed»",
+          fixes: "Può aiutare a risolvere «outputs have already been signed»",
           keysets: "{n} keyset | {n} keyset",
           sheet_hint: "Tocca + per aumentare il contatore di un keyset.",
           column: "Contatore",
@@ -539,15 +544,15 @@ export default {
         export_wallet: {
           button: "Esporta dati portafoglio",
           description:
-            "Scarica un file di backup da importare nella schermata di benvenuto. Diventa obsoleto man mano che usi il portafoglio.",
+            "Scarica un file di backup da importare nella schermata di benvenuto. Diventa obsoleto non appena usi di nuovo il portafoglio.",
         },
         import_wallet: {
           description:
-            "Sostituisce i dati di questo portafoglio con un file di backup esportato.",
+            "Importa un file di backup esportato. Le impostazioni e i record nel backup sovrascrivono quelli corrispondenti nel portafoglio; tutto ciò che non è nel backup rimane.",
           button: "Importa backup del portafoglio",
-          confirm_question: "Vuoi davvero ripristinare i dati del portafoglio?",
+          confirm_question: "Importare questo backup nel portafoglio?",
           cancel: "Annulla",
-          confirm: "IMPORTA BACKUP DEL PORTAFOGLIO",
+          confirm: "Importa backup del portafoglio",
         },
       },
     },
@@ -588,7 +593,7 @@ export default {
     },
     install: {
       text: "Installa",
-      tooltip: "Installa Cashu",
+      tooltip: "Installa Cashu.me",
     },
   },
   AlreadyRunning: {
@@ -601,8 +606,8 @@ export default {
     },
   },
   ErrorNotFound: {
-    title: "404",
-    text: "Questa pagina non esiste",
+    title: "Questa pagina non esiste",
+    text: "404",
     actions: {
       home: {
         label: "Torna alla home",
@@ -666,14 +671,14 @@ export default {
     pwa: {
       success: {
         title: "Successo!",
-        text: "Stai usando Cashu come PWA. Chiudi qualsiasi altra finestra del browser aperta e usa l'app dalla tua schermata home.",
+        text: "Stai usando Cashu.me come PWA. Chiudi qualsiasi altra finestra del browser aperta e usa l'app dalla tua schermata home.",
         nextSteps:
           "Ora puoi chiudere questa scheda del browser e aprire l’app dalla schermata Home.",
       },
     },
   },
   PwaPrompt: {
-    title: "Installa Cashu",
+    title: "Installa Cashu.me",
     text: "Si apre dalla schermata Home, senza la barra del browser.",
     ios: {
       share: "Tocca Condividi",
@@ -745,18 +750,17 @@ export default {
   },
   WelcomeRestoreEcash: {
     title: "Ripristina il tuo ecash",
-    text: "Scansiona le proofs non spese sui mints configurati e aggiungile al tuo portafoglio.",
+    text: "Trova l'ecash non speso sui mint che hai aggiunto e ripristinalo nel tuo portafoglio.",
   },
   MintRatings: {
     sort_and_filter: "Ordina e filtra",
     reviews_title: "Recensioni",
     reviews_count: "{n} recensione | {n} recensioni",
-    web_of_trust_caption:
-      "Conta solo le recensioni delle persone nella tua rete di fiducia",
+    web_of_trust_caption: "Mostra solo le recensioni della tua rete di fiducia",
     web_of_trust_hop: "Nella tua rete di fiducia (salto {hop})",
     no_mint_url: "Nessun URL del mint fornito",
     reviews: "recensioni",
-    no_reviews: "Ancora nessuna recensione",
+    no_reviews: "Nessuna recensione trovata",
     your_review: "La tua recensione",
     no_rating: "Nessuna valutazione",
     stars_label: "{rating} su 5 stelle",
@@ -770,7 +774,7 @@ export default {
     },
     actions: { write_review: "Scrivi una recensione" },
     empty_state_subtitle:
-      "Scrivi la prima recensione di questo mint. La tua esperienza aiuta gli altri a scegliere.",
+      "Condividi la tua esperienza con questo mint per aiutare gli altri a scegliere.",
     range: "{from}–{to} di {total}",
   },
   CreateMintReview: {
@@ -779,7 +783,7 @@ export default {
     published: "Recensione pubblicata",
     publish_failed: "Impossibile pubblicare la recensione",
     title: "Recensisci il mint",
-    publishing_as: "Pubblicazione come",
+    publishing_as: "Pubblicazione come:",
     inputs: {
       rating: {
         label: "Valutazione",
@@ -830,7 +834,7 @@ export default {
       },
       restore_selected_mints: {
         label: "Ripristina i mint selezionati ({count})",
-        success: "{count} mint(s) ripristinati con successo",
+        success: "Mint ripristinati: {count}",
         error: "Errore nel ripristino dei mints selezionati: { error }",
       },
     },
@@ -845,7 +849,7 @@ export default {
       add_selected: "Aggiungi selezionati ({count})",
       no_backups_found: "Nessun backup mint trovato",
       no_backups_hint:
-        "Assicurati che il backup mint Nostr sia abilitato nelle impostazioni per eseguire automaticamente il backup della tua lista mint.",
+        "Una lista di mint può essere ripristinata solo da un backup creato in precedenza con questa frase seed. Attiva il backup dei mint su Nostr nelle Impostazioni per salvare le modifiche future.",
       invalid_mnemonic: "Inserisci una frase seed valida prima di cercare.",
       search_error: "Impossibile cercare i backup dei mints.",
       add_error: "Impossibile aggiungere i mints selezionati.",
@@ -889,7 +893,7 @@ export default {
     swap: {
       title: "Scambia",
       caption:
-        "Sposta fondi tra i tuoi mint tramite Lightning. Potrebbero esserci commissioni.",
+        "Sposta fondi tra i tuoi mint tramite Lightning. Lascia un margine per le commissioni Lightning. Se i fondi non arrivano, controlla la fattura in attesa nella Cronologia.",
       inputs: {
         from: {
           label: "Da",
@@ -934,7 +938,7 @@ export default {
     actions: {
       create: {
         label: "Crea fattura",
-        label_blocked: "Creazione fattura",
+        label_blocked: "Creazione…",
       },
     },
     invoice: {
@@ -979,7 +983,7 @@ export default {
         tooltip_text: "Copia emoji",
       },
       copy_tokens: {
-        label: "Copia ecash",
+        label: "Copia token",
       },
       copy_link: {
         tooltip_text: "Copia link",
@@ -1109,7 +1113,7 @@ export default {
   },
   P2PKDialog: {
     p2pk: {
-      caption: "Chiave di blocco",
+      caption: "La tua chiave di blocco",
       description: "Ricevi ecash bloccato su questa chiave",
       used_warning_text:
         "Attenzione: Questa chiave è stata usata prima. Usa una chiave nuova per maggiore privacy.",
@@ -1227,7 +1231,7 @@ export default {
         label: "Copia URL mint",
       },
       delete: {
-        label: "Elimina mint",
+        label: "Rimuovi mint",
       },
       edit: {
         label: "Modifica mint",
@@ -1421,7 +1425,7 @@ export default {
   AddMintDialog: {
     title: "Ti fidi di questo mint?",
     description:
-      "Unisciti a questo mint solo se ti fidi. Se smette di operare, l'ecash che hai presso di esso va perso.",
+      "Aggiungi questo mint solo se ti fidi. Può smettere di operare in qualsiasi momento e potresti perdere l'ecash che hai presso di esso.",
     actions: {
       add_mint: {
         label: "@:global.actions.add_mint.label",
@@ -1541,8 +1545,8 @@ export default {
   },
   MintAuditInfo: {
     title: "Info di audit",
-    loading: "Caricamento info audit...",
-    not_audited: "Questo mint non è ancora stato verificato.",
+    loading: "Caricamento info di audit…",
+    not_audited: "Questo revisore non ha dati su questo mint.",
     not_audited_text:
       "Per saperne di più sul revisore o sostenere una futura verifica, visita {link} oppure fai clic {here} per donare ecash e aiutare ad avviare la verifica di questo mint.",
     here: "qui",
@@ -1608,7 +1612,7 @@ export default {
       low: "Bassa",
     },
     delete_dialog: {
-      title: "Elimina ecash",
+      title: "Eliminare dalla cronologia?",
       text: "Vuoi davvero eliminare questa transazione dalla cronologia?",
       warning:
         "Attenzione: questa azione non può essere annullata e non sarà possibile recuperare il token.",
@@ -1617,8 +1621,8 @@ export default {
       read_failed: "Lettura NFC non riuscita",
       write_failed: "Scrittura NFC non riuscita",
       error: "Errore NFC",
-      writing: "Scrittura sulla carta NFC...",
-      success: "Token scritto sulla carta con successo!",
+      writing: "Scrittura sulla carta NFC…",
+      success: "Token scritto sulla carta NFC",
       capacity:
         "La carta potrebbe non avere capacità sufficiente (servono {bytes} byte).",
     },
@@ -1630,11 +1634,11 @@ export default {
       bolt12: "Offerta",
     },
     onchain_title: "Ricevi on-chain",
-    bolt12_title: "Ricevi Bolt12",
+    bolt12_title: "Ricevi offerta Lightning",
     mint_unreachable: "Mint irraggiungibile",
     mint_unreachable_text: "Riconnettiti al mint per ricevere pagamenti.",
     reconnect_mint: "Riconnetti mint",
-    checking_address: "Verifica dell'indirizzo...",
+    checking_address: "Verifica dell'indirizzo…",
     add_amount: "Aggiungi importo",
     new_offer: "Nuova offerta",
     create_offer: "Crea offerta",
@@ -1662,13 +1666,13 @@ export default {
       backup_restored: "Backup ripristinato",
       backup_exported: "Backup del portafoglio esportato",
       quota_exceeded:
-        "La memoria locale è piena. Libera spazio nella memoria locale.",
+        "Lo spazio di archiviazione del browser è pieno o non disponibile. I nuovi dati del portafoglio potrebbero non essere salvati. Esegui subito un backup del portafoglio.",
       cleaned_up: "Liberati {size} byte",
     },
   },
   receiveTokens: {
     notifications: {
-      already_in_history: "Token già nella cronologia",
+      already_in_history: "Ecash già nella cronologia",
       nfc_read_failed: "Impossibile leggere i dati dal tag NFC",
       scan_error: "Errore di scansione",
       nfc_error: "Errore NFC",
@@ -1693,9 +1697,9 @@ export default {
   },
   nostr: {
     notifications: {
-      nip04_published: "Evento NIP-04 pubblicato",
-      nip04_failed: "Impossibile pubblicare l'evento NIP-04",
-      nip17_failed: "Impossibile pubblicare l'evento NIP-17",
+      nip04_published: "Messaggio pubblicato su Nostr",
+      nip04_failed: "Impossibile pubblicare il messaggio su Nostr",
+      nip17_failed: "Impossibile pubblicare il messaggio su Nostr",
       receive_failed: "Impossibile ricevere il pagamento in arrivo",
       ecash_already_in_history: "Ecash già nella cronologia",
       ecash_added: "Ecash aggiunto alla cronologia",
@@ -1703,7 +1707,8 @@ export default {
   },
   nwc: {
     notifications: {
-      melt_quote_failed: "NWC: impossibile richiedere un preventivo di melt",
+      melt_quote_failed:
+        "NWC: impossibile ottenere un preventivo di pagamento dal mint",
       unit_must_be_sat: "NWC: l'unità attiva deve essere sats",
       allowance_exceeded: "NWC: limite superato",
     },

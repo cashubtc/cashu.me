@@ -1,7 +1,7 @@
 <!-- A row's secondary line of short facts ("Lightning · USD · 5 minutes ago"), joined by
      middle dots. Each part is its own bidi island, so in right-to-left locales the parts keep
      their order instead of adjacent Latin parts merging into one left-to-right run
-     (council R84). -->
+. -->
 <template>
   <span class="meta-line">
     <template v-for="(part, i) in shown" :key="i">

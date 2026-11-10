@@ -1,17 +1,17 @@
 export default {
   MultinutPicker: {
-    dialog_title: "Multinut ödeme",
+    dialog_title: "Birden çok mint ile ödeme",
     pay_using_multiple: "Birden çok mint kullanarak öde",
     experimental_title: "Deneysel özellik",
     experimental_text:
       "Bu özellik oldukça deneyseldir ve beklendiği gibi çalışmayabilir. Daha önce ödenmiş bir faturayı ödemeye çalışmayın. Fon kaybedebilirsiniz.",
     understand: "Anladım",
-    select_funds: "Ödemeyi gerçekleştirmek için birden çok mint'ten fon seçin.",
+    select_funds: "Hangi mint'lerden ödeneceğini seçin.",
     pay_invoice: "Faturayı öde",
     amount_mismatch: "Tutar hesaplama hatası: {calculated} / {expected}",
     states: {
-      requesting: "İsteniyor...",
-      paying: "Ödeniyor...",
+      requesting: "İsteniyor…",
+      paying: "Ödeniyor…",
       success: "Başarılı",
       failed: "Başarısız",
     },
@@ -44,6 +44,9 @@ export default {
       },
       receive: {
         label: "Al",
+      },
+      show_qr: {
+        label: "QR kodunu göster",
       },
       show_seed: {
         label: "Kurtarma ifadesini göster",
@@ -104,7 +107,7 @@ export default {
         "Mint'lerinizin hiçbiri BOLT12 tekliflerini desteklemiyor",
       no_bolt11_mint:
         "Mint'lerinizin hiçbiri BOLT11 faturalarını desteklemiyor",
-      address_not_paid: "Adrese ödeme yapılmadı",
+      address_not_paid: "Bu adrese henüz ödeme gelmedi",
       payment_pending: "Ödeme beklemede",
       invoice_already_paid: "Fatura zaten ödenmiş",
       payment_sent: "Ödeme gönderildi",
@@ -208,7 +211,7 @@ export default {
       },
       p2pk: {
         title: "Kilitli ecash",
-        caption: "Yalnızca anahtarınızın açabileceği ecash alın",
+        caption: "Anahtarınıza kilitli ecash alın",
       },
       privacy: {
         title: "Gizlilik",
@@ -270,7 +273,7 @@ export default {
     },
     lightning_address: {
       server_url: {
-        label: "npub.cash ana makine adı",
+        label: "npub.cash sunucusu",
         hint: "Bir ana makine adı veya HTTPS URL'si girin",
         invalid: "Geçerli bir HTTPS sunucu URL'si girin",
       },
@@ -303,8 +306,8 @@ export default {
       wallet_seed: {
         title: "Cüzdan kurtarma kelimeleri",
         description:
-          "Cüzdanınızın kurtarma ifadesinden bir Nostr anahtar çifti oluşturun",
-        copy_nsec: "Özel anahtarı kopyala",
+          "Cüzdanınızın kurtarma kelimelerinden bir Nostr anahtar çifti oluşturun",
+        copy_nsec: "Özel anahtarı kopyala (nsec)",
       },
       nsec_bunker: {
         title: "Uzak imzalayıcı",
@@ -312,7 +315,7 @@ export default {
         delete_tooltip: "Bağlantıyı sil",
       },
       use_nsec: {
-        title: "Kendi özel anahtarınızı kullanın",
+        title: "Nostr özel anahtarınızı (nsec) kullanın",
         description: "Bu yöntem tehlikelidir ve önerilmez",
         delete_tooltip: "Özel anahtarı sil",
       },
@@ -330,12 +333,12 @@ export default {
       claim_automatically: {
         toggle: "Otomatik olarak talep et",
         description:
-          "Gelen ödemeleri sormadan bakiyenize ekler. Kapalıyken her birini siz alırsınız.",
+          "Zaten kullandığınız mint'lerden gelen ödemeleri sormadan bakiyenize ekler. Diğer durumlarda her birini siz onaylarsınız.",
       },
     },
     nostr_wallet_connect: {
       description:
-        "Diğer uygulamaların Nostr Wallet Connect ile bu cüzdandan ödeme yapmasını sağlar.",
+        "Diğer uygulamaların Nostr Wallet Connect (NWC) ile bu cüzdandan ödeme yapmasını, fatura oluşturmasını ve bakiyenizle geçmişinizi görmesini sağlar.",
       enable_toggle: "Nostr Wallet Connect'i etkinleştir",
       payments_note:
         "NWC'yi yalnızca Bitcoin bakiyenizden ödemeler için kullanabilirsiniz. Ödemeler etkin mint'inizden yapılacaktır.",
@@ -370,16 +373,16 @@ export default {
     },
     p2pk_features: {
       description:
-        "Deneysel. Küçük tutarlar kullanın: özel anahtarı kaybederseniz, ona kilitli ecash'i kimse açamaz.",
+        "Kilitli ecash (P2PK) almak için bir anahtar oluşturun veya içe aktarın. Deneysel: küçük tutarlar kullanın. Özel anahtarı kaybederseniz, ona kilitli ecash'e erişiminizi kaybedebilirsiniz.",
       generate_button: "Anahtar oluştur",
-      import_button: "Özel anahtarı içe aktar",
+      import_button: "Özel anahtarı içe aktar (nsec)",
       quick_access: {
-        toggle: "Kilit anahtarını Al ekranında göster",
+        toggle: "Ecash al ekranında Kilitle düğmesini göster",
         description:
-          "Kilit anahtarınızı Ecash al ekranında gösterir, böylece gönderenler ecash'i size kilitleyebilir.",
+          "Ecash al ekranına bir Kilitle düğmesi ekler. Gönderenlerin ecash'i size kilitleyebilmesi için bu düğmeyle açık anahtarınızı paylaşın.",
       },
       keys_expansion: {
-        label: "{count} anahtara göz atmak için tıklayın",
+        label: "Açık anahtarlar ({count})",
         used_badge: "kullanıldı",
       },
     },
@@ -389,7 +392,7 @@ export default {
       check_incoming: {
         toggle: "Gelen faturayı kontrol et",
         description:
-          "En son faturanızı arka planda kontrol eder. Daha hızlı güncellemeler, ama parmak izi çıkarmak kolaylaşır.",
+          "En son faturanızı arka planda kontrol eder. Daha hızlı güncellemeler, ama parmak izi çıkarmak kolaylaşır. Kapalıyken faturaları Geçmiş'ten kendiniz kontrol edin.",
       },
       check_startup: {
         toggle: "Başlangıçta bekleyen faturaları kontrol et",
@@ -398,7 +401,7 @@ export default {
       check_all: {
         toggle: "Tüm faturaları kontrol et",
         description:
-          "Ödenmemiş faturaları iki haftaya kadar arka planda kontrol eder. Daha fazla çevrimiçi etkinlik parmak izinizi çıkarmayı kolaylaştırır.",
+          "Ödenmemiş faturaları iki haftaya kadar arka planda kontrol eder. Daha fazla çevrimiçi etkinlik parmak izinizi çıkarmayı kolaylaştırır. Kapalıyken faturaları Geçmiş'ten kendiniz kontrol edin.",
       },
       check_sent: {
         toggle: "Gönderilen ecash'i kontrol et",
@@ -408,7 +411,7 @@ export default {
       websockets: {
         toggle: "WebSockets kullan",
         description:
-          "Anlık ödeme güncellemeleri için mint'lerle canlı bağlantı tutar. Daha hızlı, ama parmak izi çıkarmak kolaylaşır.",
+          "Ödemeler ve harcanan ecash ile ilgili güncellemeler için mint'lerle canlı bağlantı tutar. Daha hızlı, ama parmak izi çıkarmak kolaylaşır.",
       },
       bitcoin_price: {
         title: "Bitcoin fiyatı",
@@ -417,7 +420,7 @@ export default {
           "Bakiyenizi itibari parayla göstermek için bitcoin fiyatını coinbase.com'dan alır.",
         currency: {
           title: "İtibari para birimi",
-          description: "Bitcoin fiyat gösterimi için fiat para birimini seçin.",
+          description: "Bitcoin fiyatı için fiat para birimini seçin.",
         },
       },
     },
@@ -430,7 +433,7 @@ export default {
       auto_paste: {
         toggle: "Ecash'i otomatik yapıştır",
         description:
-          "Ecash al ekranını açtığınızda panodaki ecash'i yapıştırır. iOS'ta görüntü sorunlarına yol açarsa kapatın.",
+          "Token yapıştır'a dokunduğunuzda panodaki ecash'i yapıştırır. iOS'ta görüntü sorunlarına yol açarsa kapatın.",
       },
       auditor: {
         toggle: "Denetleyiciyi etkinleştir",
@@ -441,7 +444,8 @@ export default {
         api_url_label: "Denetleyici API URL'si",
       },
       multinut: {
-        description: "Faturaları aynı anda birden çok mint'ten öder.",
+        description:
+          "Lightning faturası öderken “Birden çok mint ile öde” seçeneğini ekler.",
       },
       nostr_mint_backup: {
         toggle: "Mint listesini Nostr'a yedekle",
@@ -490,8 +494,8 @@ export default {
       backup_files_title: "Yedek dosyaları",
       danger_zone_title: "Tehlikeli bölge",
       notifications: {
-        reserved_unset: "Tüm ayrılmış kanıtlar serbest bırakıldı",
-        removed_spent: "{count} harcanmış kanıt kaldırıldı",
+        reserved_unset: "Tüm kanıt ayırmaları kaldırıldı",
+        removed_spent: "Kaldırılan harcanmış kanıt sayısı: {count}",
         no_spent: "Harcanmış kanıt bulunamadı",
         invalid_backup: "Geçersiz yedek dosyası biçimi",
         read_error: "Dosya okunurken hata oluştu",
@@ -502,7 +506,7 @@ export default {
         new_seed: {
           button: "Yeni kurtarma kelimeleri oluştur",
           description:
-            "Yeni bir kurtarma ifadesi oluşturur. Ardından yeni seed'in geri yükleyebilmesi için bakiyenizi kendinize gönderin.",
+            "Yeni kurtarma kelimeleri oluşturur. Mevcut ecash'iniz eskilerine bağlı kalır: ardından tüm bakiyenizi kendinize gönderin, yoksa yeni kelimeler onu geri yükleyemez.",
           confirm_question:
             "Yeni bir kurtarma kelimesi oluşturmak istediğinizden emin misiniz?",
           cancel: "İptal",
@@ -511,7 +515,7 @@ export default {
         remove_spent: {
           button: "Harcanmış kanıtları kaldır",
           description:
-            "Etkin mint'lerinizin harcanmış bildirdiği ecash'i kaldırır. Yalnızca cüzdanınız takılırsa kullanın.",
+            "Etkin mint'in harcanmış bildirdiği, seçili birimdeki ecash'i kaldırır. Yalnızca cüzdanınız takılırsa kullanın.",
         },
         design_system: {
           title: "Tasarım sistemi",
@@ -526,12 +530,13 @@ export default {
         export_proofs: {
           button: "Aktif kanıtları dışa aktar",
           description:
-            "Etkin mint'in seçili birimdeki bakiyesini tek bir ecash token'ı olarak kopyalar.",
+            "Etkin mint'in seçili birimdeki bakiyesini tek bir ecash token'ı olarak panoya kopyalar. Kalanı için mint'i veya birimi değiştirip yeniden dışa aktarın.",
         },
         keyset_counters: {
           title: "Anahtar kümesi sayaçlarını artır",
           increase: "{id} için sayacı artır",
-          fixes: "“outputs have already been signed” hatasını giderir",
+          fixes:
+            "“outputs have already been signed” hatasını gidermeye yardımcı olabilir",
           keysets: "{n} keyset | {n} keyset",
           sheet_hint:
             "Bir keyset'in sayacını artırmak için + simgesine dokunun.",
@@ -559,16 +564,15 @@ export default {
         export_wallet: {
           button: "Cüzdan verilerini dışa aktar",
           description:
-            "Karşılama ekranında içe aktarabileceğiniz bir yedek dosyası indirir. Cüzdanı kullanmaya devam ettikçe eskir.",
+            "Karşılama ekranında içe aktarabileceğiniz bir yedek dosyası indirir. Cüzdanı yeniden kullandığınız anda güncelliğini yitirir.",
         },
         import_wallet: {
           description:
-            "Bu cüzdanın verilerini dışa aktarılmış bir yedek dosyasıyla değiştirir.",
+            "Dışa aktarılmış bir yedek dosyasını içe aktarır. Yedekteki ayarlar ve kayıtlar bu cüzdandakilerin üzerine yazılır; yedekte olmayanlar olduğu gibi kalır.",
           button: "Cüzdan yedeğini içe aktar",
-          confirm_question:
-            "Cüzdan verilerinizi geri yüklemek istediğinizden emin misiniz?",
+          confirm_question: "Bu yedek cüzdana aktarılsın mı?",
           cancel: "İptal",
-          confirm: "CÜZDAN YEDEĞİNİ İÇE AKTAR",
+          confirm: "Cüzdan yedeğini içe aktar",
         },
       },
     },
@@ -578,7 +582,7 @@ export default {
       known_pubkeys: "Bilinen açık anahtarlar: {wotCount}",
 
       continue_crawl: "Taramaya devam et",
-      crawl_odell: "Odell'in güven ağını içe aktar",
+      crawl_odell: "Odell'in güven ağını tara",
       crawl_wot: "Web of trust tara",
       pause: "Duraklat",
       reset: "Sıfırla",
@@ -624,7 +628,7 @@ export default {
     },
     install: {
       text: "Yükle",
-      tooltip: "Cashu'yu Yükle",
+      tooltip: "Cashu.me'yi yükle",
     },
   },
   AlreadyRunning: {
@@ -637,8 +641,8 @@ export default {
     },
   },
   ErrorNotFound: {
-    title: "404",
-    text: "Bu sayfa mevcut değil",
+    title: "Bu sayfa mevcut değil",
+    text: "404",
     actions: {
       home: {
         label: "Ana sayfaya geri dön",
@@ -702,14 +706,14 @@ export default {
     pwa: {
       success: {
         title: "Başarılı!",
-        text: "Cashu'yu PWA olarak kullanıyorsunuz. Diğer açık tarayıcı pencerelerini kapatın ve uygulamayı ana ekranınızdan kullanın.",
+        text: "Cashu.me'yi PWA olarak kullanıyorsunuz. Diğer açık tarayıcı pencerelerini kapatın ve uygulamayı ana ekranınızdan kullanın.",
         nextSteps:
           "Artık bu sekmeyi kapatıp uygulamayı ana ekranınızdan açabilirsiniz.",
       },
     },
   },
   PwaPrompt: {
-    title: "Cashu'yu yükle",
+    title: "Cashu.me'yi yükle",
     text: "Ana ekranınızdan, tarayıcı çubuğu olmadan açılır.",
     ios: {
       share: "Paylaş'a dokunun",
@@ -781,17 +785,17 @@ export default {
   },
   WelcomeRestoreEcash: {
     title: "Ecash'inizi geri yükleyin",
-    text: "Yapılandırılmış mintlerinizde harcanmamış kanıtları tarayın ve cüzdanınıza ekleyin.",
+    text: "Eklediğiniz mint'lerde harcanmamış ecash'i bulun ve cüzdanınıza geri yükleyin.",
   },
   MintRatings: {
     sort_and_filter: "Sırala ve filtrele",
     reviews_title: "Yorumlar",
     reviews_count: "{n} yorum | {n} yorum",
-    web_of_trust_caption: "Yalnızca güven ağındaki kişilerin yorumlarını say",
+    web_of_trust_caption: "Yalnızca güven ağınızdaki yorumları göster",
     web_of_trust_hop: "Güven ağınızda ({hop}. adım)",
     no_mint_url: "Mint URL'si belirtilmedi",
     reviews: "yorum",
-    no_reviews: "Henüz yorum yok",
+    no_reviews: "Yorum bulunamadı",
     your_review: "Yorumunuz",
     no_rating: "Puan yok",
     stars_label: "5 yıldızdan {rating}",
@@ -805,7 +809,7 @@ export default {
     },
     actions: { write_review: "Yorum yaz" },
     empty_state_subtitle:
-      "Bu mint'i ilk siz değerlendirin. Deneyiminiz başkalarının seçim yapmasına yardımcı olur.",
+      "Başkalarının seçim yapmasına yardımcı olmak için bu mint'le ilgili deneyiminizi paylaşın.",
     range: "{from}–{to} / {total}",
   },
   CreateMintReview: {
@@ -814,7 +818,7 @@ export default {
     published: "Değerlendirme yayımlandı",
     publish_failed: "Değerlendirme yayımlanamadı",
     title: "Mint'i değerlendir",
-    publishing_as: "Şu kişi olarak yayımlanıyor",
+    publishing_as: "Şu kişi olarak yayımlanıyor:",
     inputs: {
       rating: {
         label: "Puan",
@@ -854,10 +858,10 @@ export default {
       select_all: "Tümünü seç",
       deselect_all: "Seçimi kaldır",
       backed_up: "Yedeklendi",
-      add_selected: "Seçileni Ekle ({count})",
+      add_selected: "Seçilenleri ekle ({count})",
       no_backups_found: "Mint yedeği bulunamadı",
       no_backups_hint:
-        "Mint listenizi otomatik olarak yedeklemek için ayarlarda Nostr mint yedeğinin etkinleştirildiğinden emin olun.",
+        "Mint listesi yalnızca bu kurtarma ifadesiyle daha önce alınmış bir yedekten geri yüklenebilir. Sonraki değişiklikleri kaydetmek için Ayarlar'da Nostr mint yedeğini açın.",
       invalid_mnemonic: "Lütfen aramadan önce geçerli bir seed ifadesi girin.",
       search_error: "Mint yedekleri aranırken hata oluştu.",
       add_error: "Seçilen mint'ler eklenirken hata oluştu.",
@@ -881,7 +885,7 @@ export default {
       },
       restore_selected_mints: {
         label: "Seçili mint'leri geri yükle ({count})",
-        success: "{count} mint başarıyla geri yüklendi",
+        success: "Geri yüklenen mint sayısı: {count}",
         error: "Seçili mint'leri geri yükleme hatası: { error }",
       },
     },
@@ -924,7 +928,7 @@ export default {
     swap: {
       title: "Değiştir",
       caption:
-        "Lightning ile mint'leriniz arasında para taşıyın. Ücret alınabilir.",
+        "Lightning ile mint'leriniz arasında para taşıyın. Lightning ücretleri için pay bırakın. Para ulaşmazsa Geçmiş'teki bekleyen faturayı kontrol edin.",
       inputs: {
         from: {
           label: "Kimden",
@@ -969,7 +973,7 @@ export default {
     actions: {
       create: {
         label: "Fatura oluştur",
-        label_blocked: "Fatura oluşturuluyor",
+        label_blocked: "Oluşturuluyor…",
       },
     },
     invoice: {
@@ -985,7 +989,7 @@ export default {
   SendDialog: {
     captions: {
       ecash: "Token veya QR kod paylaşın",
-      lightning: "Fatura ödeyin veya bir adrese ödeme yapın",
+      lightning: "Faturaya veya adrese ödeme yapın",
       onchain: "Bitcoin adresine gönderin",
     },
     title: "Gönder",
@@ -1014,7 +1018,7 @@ export default {
         tooltip_text: "Emojiyi kopyala",
       },
       copy_tokens: {
-        label: "Ecash'i kopyala",
+        label: "Token'ı kopyala",
       },
       copy_link: {
         tooltip_text: "Bağlantıyı kopyala",
@@ -1037,7 +1041,7 @@ export default {
       },
       write_tokens_to_card: {
         tooltips: {
-          ndef_supported_text: "NFC kartına flaşla",
+          ndef_supported_text: "NFC karta yaz",
         },
       },
       pay: { label: "@:global.actions.pay.label" },
@@ -1145,7 +1149,7 @@ export default {
   },
   P2PKDialog: {
     p2pk: {
-      caption: "Kilit anahtarı",
+      caption: "Kilit anahtarınız",
       description: "Bu anahtara kilitlenmiş ecash al",
       used_warning_text:
         "Uyarı: Bu anahtar daha önce kullanıldı. Daha iyi gizlilik için yeni bir anahtar kullanın.",
@@ -1263,7 +1267,7 @@ export default {
         label: "Mint URL'sini kopyala",
       },
       delete: {
-        label: "Mint'i sil",
+        label: "Mint'i kaldır",
       },
       edit: {
         label: "Mint'i düzenle",
@@ -1457,7 +1461,7 @@ export default {
   AddMintDialog: {
     title: "Bu mint'e güveniyor musunuz?",
     description:
-      "Bu mint'e yalnızca güveniyorsanız katılın. Faaliyetini durdurursa, onda tuttuğunuz ecash kaybolur.",
+      "Bu mint'i yalnızca güveniyorsanız ekleyin. Faaliyetini her an durdurabilir ve onda tuttuğunuz ecash'i kaybedebilirsiniz.",
     actions: {
       add_mint: {
         label: "@:global.actions.add_mint.label",
@@ -1577,8 +1581,8 @@ export default {
   },
   MintAuditInfo: {
     title: "Denetim bilgisi",
-    loading: "Denetim bilgisi yükleniyor...",
-    not_audited: "Bu mint henüz denetlenmedi.",
+    loading: "Denetim bilgisi yükleniyor…",
+    not_audited: "Bu denetçinin bu mint hakkında verisi yok.",
     not_audited_text:
       "Denetçi hakkında daha fazla bilgi almak veya gelecekteki bir denetimi desteklemek için {link} adresini ziyaret edin ya da {here} tıklayarak ecash bağışlayın ve bu mint'in denetiminin başlatılmasına yardım edin.",
     here: "buraya",
@@ -1642,7 +1646,7 @@ export default {
       low: "Düşük",
     },
     delete_dialog: {
-      title: "Ecash'i sil",
+      title: "Geçmişten silinsin mi?",
       text: "Bu işlemi geçmişinizden silmek istediğinizden emin misiniz?",
       warning:
         "Uyarı: Bu işlem geri alınamaz ve token'ı kurtarmanın bir yolu yoktur.",
@@ -1651,8 +1655,8 @@ export default {
       read_failed: "NFC okuma başarısız",
       write_failed: "NFC yazma başarısız",
       error: "NFC hatası",
-      writing: "NFC karta yazılıyor...",
-      success: "Token karta başarıyla yazıldı!",
+      writing: "NFC karta yazılıyor…",
+      success: "Token NFC karta yazıldı",
       capacity: "Kartın kapasitesi yetersiz olabilir ({bytes} bayt gerekli).",
     },
   },
@@ -1663,11 +1667,11 @@ export default {
       bolt12: "Teklif",
     },
     onchain_title: "Zincir üstü al",
-    bolt12_title: "Bolt12 al",
+    bolt12_title: "Lightning teklifi al",
     mint_unreachable: "Mint'e ulaşılamıyor",
     mint_unreachable_text: "Ödeme almak için mint'e yeniden bağlanın.",
     reconnect_mint: "Mint'e yeniden bağlan",
-    checking_address: "Adres kontrol ediliyor...",
+    checking_address: "Adres kontrol ediliyor…",
     add_amount: "Tutar ekle",
     new_offer: "Yeni teklif",
     create_offer: "Teklif oluştur",
@@ -1693,13 +1697,14 @@ export default {
       unrecognized_backup: "Tanınmayan yedek biçimi",
       backup_restored: "Yedek geri yüklendi",
       backup_exported: "Cüzdan yedeği dışa aktarıldı",
-      quota_exceeded: "Yerel depolama dolu. Yerel depolamanızı temizleyin.",
+      quota_exceeded:
+        "Tarayıcı depolaması dolu veya kullanılamıyor. Yeni cüzdan verileri kaydedilmeyebilir. Cüzdanınızı şimdi yedekleyin.",
       cleaned_up: "{size} bayt temizlendi",
     },
   },
   receiveTokens: {
     notifications: {
-      already_in_history: "Token zaten geçmişte",
+      already_in_history: "Ecash zaten geçmişte",
       nfc_read_failed: "NFC etiketinden veri okunamıyor",
       scan_error: "Tarama hatası",
       nfc_error: "NFC hatası",
@@ -1723,9 +1728,9 @@ export default {
   },
   nostr: {
     notifications: {
-      nip04_published: "NIP-04 olayı yayınlandı",
-      nip04_failed: "NIP-04 olayı yayınlanamadı",
-      nip17_failed: "NIP-17 olayı yayınlanamadı",
+      nip04_published: "Mesaj Nostr'da yayımlandı",
+      nip04_failed: "Mesaj Nostr'da yayımlanamadı",
+      nip17_failed: "Mesaj Nostr'da yayımlanamadı",
       receive_failed: "Gelen ödeme alınamadı",
       ecash_already_in_history: "Ecash zaten geçmişte",
       ecash_added: "Ecash geçmişe eklendi",
@@ -1733,7 +1738,7 @@ export default {
   },
   nwc: {
     notifications: {
-      melt_quote_failed: "NWC: Melt teklifi istenemedi",
+      melt_quote_failed: "NWC: Mint'ten ödeme teklifi alınamadı",
       unit_must_be_sat: "NWC: Etkin birim sat olmalıdır",
       allowance_exceeded: "NWC: Ödenek aşıldı",
     },

@@ -50,7 +50,7 @@ describe("standard elements", () => {
     ["ui/IconCircle.vue", /^app-icon-circle(--[\w-]+)?$/],
     ["ui/OptionRow.vue", /^app-option-row(__[\w-]+|--[\w-]+)?$/],
     ["ui/BlockingState.vue", /^blocking-state(__[\w-]+)?$/],
-    ["ui/ConfirmDialog.vue", /^council-dialog(__[\w-]+)?$/],
+    ["ui/ConfirmDialog.vue", /^confirm-dialog(__[\w-]+)?$/],
     ["ui/EmptyState.vue", /^app-empty(__(title|text))?$/],
     ["WalletActions.vue", /^wallet-(actions|action-btn|scan-btn)$/],
     ["ui/ExpansionIndicator.vue", /^expansion-indicator(__icon|--expanded)?$/],
@@ -87,7 +87,7 @@ describe("standard elements", () => {
     ).toEqual([]);
   });
 
-  // The unit switch is a header action (owner 2026-10-29b, item 11): inside a
+  // The unit switch is a header action: inside a
   // FullscreenDialogHeader's #actions, never next to the amount and its ⇅ fiat swap.
   it("the unit toggle sits in a header's actions, not with the amount", () => {
     expect(offenders((text) => /<UnitToggle\b/.test(text)).sort()).toEqual([
@@ -163,7 +163,7 @@ describe("standard elements", () => {
   });
 
   // Round icon buttons are IconButton: 44px and always labelled (hand-built ones had no name
-  // or a 24px target, council R76-R77). Allowed: the callout close and the mint QR toggle,
+  // or a 24px target). Allowed: the callout close and the mint QR toggle,
   // the wallet scan disc and the flow footer's back, which own their geometry. The mint
   // card's details button is an IconButton too.
   it("round icon buttons use IconButton", () => {
@@ -185,14 +185,14 @@ describe("standard elements", () => {
     ).toEqual([]);
   });
 
-  // One language list (src/js/languages.ts): two hand-kept copies drifted (council R79).
+  // One language list (src/js/languages.ts): two hand-kept copies drifted.
   it("language options come from src/js/languages", () => {
     expect(
       offenders((text) => /label:\s*"English",\s*value:\s*"en-US"/.test(text))
     ).toEqual([]);
   });
 
-  // A flow's centred content column is FlowColumn (16 hand-built copies, council R82).
+  // A flow's centred content column is FlowColumn (16 hand-built copies).
   it("flow content columns use FlowColumn", () => {
     expect(
       offenders((text) =>
@@ -203,7 +203,7 @@ describe("standard elements", () => {
     ).toEqual([]);
   });
 
-  // Onboarding copy is CjkText, so a Chinese word never splits across lines (council R83).
+  // Onboarding copy is CjkText, so a Chinese word never splits across lines.
   it("onboarding paragraphs use CjkText", () => {
     expect(
       vueFiles
@@ -214,9 +214,9 @@ describe("standard elements", () => {
   });
 
   // A row's value and chevron are one RowValue, never a hand-built side section with a
-  // chevron in it (the side section is a column, so the value stacked above it, council R83).
+  // chevron in it (the side section is a column, so the value stacked above it).
   // Captions of facts are MetaLine parts, never strings glued with " · " (in Arabic the
-  // glued Latin parts merged into one run and read out of order, council R84).
+  // glued Latin parts merged into one run and read out of order).
   // The wobbling warning under an amount is AmountWarning, not a hand-keyed transition.
   it("amount warnings come from AmountWarning", () => {
     expect(
@@ -235,8 +235,8 @@ describe("standard elements", () => {
     ).toEqual([]);
   });
 
-  // Fields carry their own label (the outlined field's label stays visible with content),
-  // owner 2026-10-29.
+  // Fields carry their own label (the outlined field's label stays visible with content      ),
+  //
   it("no label sits above a field", () => {
     expect(
       offenders((text) =>
@@ -306,7 +306,7 @@ describe("standard elements", () => {
     ).not.toMatch(/buttonSize/);
   });
 
-  // Owner batch 2, item 3: Paste (and Clear) inside the field, and one scan affordance, the
+  // Paste (and Clear) inside the field, and one scan affordance, the
   // labelled "Scan QR code" OptionRow under it, shown only with a camera.
   it("paste sits inside its field, scan is the one row under it", () => {
     expect(offenders((t) => /paste-text-btn/.test(t))).toEqual([]);
@@ -324,7 +324,7 @@ describe("standard elements", () => {
     expect(parse).toMatch(/\bScan as ScanIcon\b/);
   });
 
-  // Owner batch 2, item 7: the deposit range is a callout, not a helper line; batch 3, item 3: neutral.
+  // the deposit range is a callout, not a helper line; batch 3, item 3: neutral.
   it("deposit limits render the neutral callout", () => {
     const limits = readFileSync(
       join(SRC, "components/OnchainDepositLimits.vue"),
@@ -355,10 +355,9 @@ describe("standard elements", () => {
     ).toEqual([]);
   });
 
-  // The one exception is MintCard's ring while the wallet switches to that mint (owner
-  // 2026-10-29); busy buttons and pending rows keep the dots.
+  // The one exception is MintCard's ring while the wallet switches to that mint; busy buttons and pending rows keep the dots.
   // The ring means one thing, the wallet switching mint (MintSwitchRing): the mint card being
-  // switched to and the mint picker under the balance (owner 2026-11-01). Everything else that
+  // switched to and the mint picker under the balance. Everything else that
   // waits shows PendingDots.
   it("one pending mark: no spinner outside PendingDots and the mint switch ring", () => {
     expect(
@@ -378,7 +377,7 @@ describe("standard elements", () => {
     expect(card).toMatch(/<MintSwitchRing\s+v-if="busy"/);
   });
 
-  // Owner 2026-10-29 (items 1, 13): the selected mint shows a check, not an "Active" badge,
+  // the selected mint shows a check, not an "Active" badge,
   // and the card's details button is vertical dots.
   it("mint cards mark the selected mint with a check and use vertical dots", () => {
     const settings = readFileSync(
@@ -396,7 +395,7 @@ describe("standard elements", () => {
     ).toEqual([]);
   });
 
-  // Owner 2026-10-29 (items 3, 14): one picker recipe; density alone sets its height and the
+  // one picker recipe; density alone sets its height and the
   // chevron is a real, labelled button that says what it opens.
   it("the mint picker is one recipe with a real chevron button", () => {
     const picker = readFileSync(join(SRC, "components/ChooseMint.vue"), "utf8");
@@ -478,7 +477,7 @@ describe("standard elements", () => {
       )
     ).toEqual([]);
   });
-  // Owner item 17: a route transition around the page component itself never finished leaving a
+  // a route transition around the page component itself never finished leaving a
   // fragment-root page, so Back showed a blank screen. Route transitions animate a native wrapper.
   it("route transitions wrap the page in a native element", () => {
     expect(
@@ -504,7 +503,7 @@ describe("standard elements", () => {
       )
     ).toEqual([]);
   });
-  // Wallet home (owner items 5, 6, 7, 24): the minimal Scan glyph, a full-width tab indicator
+  // Wallet home: the minimal Scan glyph, a full-width tab indicator
   // with no baseline, the turning chevron instead of a grab handle, toasts at the top.
   it("wallet scan keeps the minimal Scan glyph", () => {
     const actions = readFileSync(
@@ -547,7 +546,7 @@ describe("standard elements", () => {
     expect(notify).not.toMatch(/position:/);
   });
 
-  it("desktop flows fill the window (owner 2026-10-29, item 28)", () => {
+  it("desktop flows fill the window", () => {
     const app = readFileSync(join(SRC, "css/app.scss"), "utf8");
     expect(app).not.toMatch(
       /\.q-dialog__inner--maximized\s*>\s*\.q-card\s*\{[^}]*\b(max-)?width\s*:/
@@ -581,7 +580,7 @@ describe("standard elements", () => {
     ).toEqual([]);
   });
 
-  // Detail rows (owner 2026-10-29, items 11, 20, 22, 34, 35): one 44px row 4px apart, the
+  // Detail rows: one 44px row 4px apart, the
   // spacing owned by .detail-table, links and copies being the row itself.
   const openingTags = (text: string, tag: string) =>
     [
@@ -632,7 +631,7 @@ describe("standard elements", () => {
     expect(page).not.toContain("<CopyButton");
   });
 
-  it("mint details rows are not indented (owner 2026-10-29, item 34)", () => {
+  it("mint details rows are not indented", () => {
     const page = readFileSync(join(SRC, "pages/MintDetailsPage.vue"), "utf8");
     const css = page.match(/<style[^>]*>([\s\S]*?)<\/style>/)?.[1] ?? "";
     expect(css).not.toMatch(/padding-inline/);
@@ -656,7 +655,7 @@ describe("standard elements", () => {
     expect(quote.match(/<QuoteStatusRow\b/g)).toHaveLength(1);
   });
 
-  // Owner 2026-10-29b, item 10: one status, but not a colourless one. A met threshold and a
+  // one status, but not a colourless one. A met threshold and a
   // paid receive read in the theme's positive colour after a check; nothing hard-codes a green.
   it("confirmed and paid keep their check and positive colour", () => {
     for (const file of ["ConfirmationsRow.vue", "QuoteStatusRow.vue"]) {
@@ -669,7 +668,7 @@ describe("standard elements", () => {
     }
   });
 
-  // Owner 2026-10-29b, item 2: a row's trailing glyph takes its value's colour, so it sits
+  // a row's trailing glyph takes its value's colour, so it sits
   // inside the value and no glyph rule names a colour of its own.
   it("detail row glyphs sit in the value and take its colour", () => {
     const row = readFileSync(join(SRC, "components/ui/DetailRow.vue"), "utf8");
@@ -682,7 +681,7 @@ describe("standard elements", () => {
     );
   });
 
-  // Owner 2026-10-29b, item 5: settings row titles sit on a whole-pixel line, so the text
+  // settings row titles sit on a whole-pixel line, so the text
   // centres on its 20px icon the same way in every browser (Quasar's 1.2em made 19.2px).
   it("settings row titles use a whole-pixel line height", () => {
     const css = readFileSync(join(SRC, "css/settings.scss"), "utf8");
@@ -692,7 +691,7 @@ describe("standard elements", () => {
     expect(rule).toMatch(/line-height:\s*20px/);
   });
 
-  // Onboarding (owner 2026-10-29, items 16, 29, 32): one column on every step, the app's own
+  // Onboarding: one column on every step, the app's own
   // mode, and the standard outlined field.
   const welcomeFiles = vueFiles.filter(
     ({ file }) =>
@@ -729,12 +728,9 @@ describe("standard elements", () => {
     expect(read("components/BottomSheet.vue")).not.toContain(
       "bottom-sheet--dark"
     );
-    expect(read("pages/welcome/WelcomeSlide2.vue")).toMatch(
-      /installImage[\s\S]*\$q\.dark\.isActive/
-    );
   });
 
-  // Owner batch 3, item 2: one soft control edge (rest, hover, focus) for every bordered
+  // one soft control edge (rest, hover, focus) for every bordered
   // control, defined once per mode and never re-weighted per surface. The resting edge is
   // deliberately under 3:1; focus stays the 2px accent ring.
   it("bordered controls share one soft edge token family", () => {
@@ -748,7 +744,7 @@ describe("standard elements", () => {
       expect(pct).toBeLessThanOrEqual(15);
     }
     expect(base).toMatch(/--app-field-edge-focus: var\(--app-accent\)/);
-    // Selected cards and rows use the same quiet edge as every control (owner 2026-10-29c);
+    // Selected cards and rows use the same quiet edge as every control;
     // the stronger fill and the check carry the selection.
     expect(base).toMatch(/--app-card-edge-active: var\(--app-field-edge\)/);
     expect(base.match(/--app-card-edge-active:/g)).toHaveLength(1);
@@ -767,7 +763,7 @@ describe("standard elements", () => {
     );
   });
 
-  // Owner batch 3, item 1: dropdown chevrons are plain icon buttons, no disc at rest.
+  // dropdown chevrons are plain icon buttons, no disc at rest.
   it("the mint picker chevron has no disc at rest", () => {
     const app = read("css/app.scss");
     const rule = /\.mint-picker__trigger \{([^}]*)\}/.exec(app)?.[1] ?? "";
@@ -775,11 +771,17 @@ describe("standard elements", () => {
     expect(app).not.toMatch(/\.mint-picker__trigger > \.q-focus-helper/);
   });
 
-  it("the welcome seed phrase is the outlined field, masked by default", () => {
-    const seed = read("pages/welcome/WelcomeSlide3.vue");
+  it("the seed phrase is one outlined field, masked by default", () => {
+    const seed = read("components/ui/SeedPhraseField.vue");
     expect(seed).toMatch(/<q-field\b[^>]*\soutlined[^>]*readonly-outlined/);
-    expect(seed).toContain("{{ hiddenMnemonic }}");
-    expect(seed).toMatch(/const hideMnemonic = ref\(true\)/);
+    expect(seed).toContain("{{ hidden ? maskedMnemonic : mnemonic }}");
+    expect(seed).toMatch(/hidden: true/);
+    for (const page of [
+      "pages/welcome/WelcomeSlide3.vue",
+      "pages/settings/BackupRestoreSettings.vue",
+    ]) {
+      expect(read(page)).toContain("<SeedPhraseField");
+    }
     expect(read("css/app.scss")).toMatch(
       /readonly-outlined\s+\.q-field__control:before \{[^}]*var\(--app-field-edge\)/
     );

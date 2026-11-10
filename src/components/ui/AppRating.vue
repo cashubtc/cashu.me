@@ -87,7 +87,7 @@ export default defineComponent({
   align-items: center;
   background: none;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--app-radius-sm);
   color: var(--app-text-subtle);
   display: inline-flex;
   justify-content: center;
@@ -100,19 +100,15 @@ button.star-rating__star {
   min-height: 44px;
   min-width: 44px;
 }
-/* The first star's glyph sits on the text edge, not inset by its 44px target (council R84). */
+/* The first star's glyph sits on the text edge, not inset by its 44px target. */
 button.star-rating__star:first-child {
   margin-inline-start: calc(var(--star-inset, 0px) * -1);
-}
-button.star-rating__star:focus-visible {
-  box-shadow: var(--app-focus-ring);
-  outline: none;
 }
 .star-rating__star--on {
   color: color-mix(in srgb, var(--app-text) 87%, transparent);
 }
 button.star-rating__star--on {
-  color: var(--q-primary);
+  color: var(--app-text);
 }
 .star-rating--disabled {
   opacity: 0.5;

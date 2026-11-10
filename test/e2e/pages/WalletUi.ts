@@ -47,7 +47,7 @@ export class WalletUi extends WalletPage {
     await this.home("Mints");
     const card = this.mintCard(url);
     await card.click();
-    // The switch ends with the ring gone and the check on this card (owner 2026-10-29).
+    // The switch ends with the ring gone and the check on this card.
     await expect(card).not.toHaveAttribute("aria-busy", "true");
     await expect(card).toHaveAttribute("aria-current", "true");
     await expect(card.locator(".mint-card__check")).toBeVisible();
@@ -150,7 +150,7 @@ export class WalletUi extends WalletPage {
       .click();
   }
 
-  /** The labelled "Scan QR code" row under the Pay / Receive field (owner batch 2, item 3). */
+  /** The labelled "Scan QR code" row under the Pay / Receive field. */
   get scanRow() {
     return this.page
       .locator(".q-dialog:visible")

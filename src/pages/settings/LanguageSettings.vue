@@ -3,7 +3,7 @@
     :title="$t('Settings.menu.language.title')"
     :caption="$t('Settings.menu.language.caption')"
   >
-    <SettingsSection>
+    <SettingsSection :radiogroup="$t('Settings.menu.language.title')">
       <SettingsRadioRow
         v-for="option in languageOptions"
         :key="option.value"

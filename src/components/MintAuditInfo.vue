@@ -1,6 +1,6 @@
 <template>
   <!-- Loading, unavailable and retrying are one row on the detail grid, so nothing jumps
-       between them (owner 2026-10-29, items 19 and 23). -->
+       between them. -->
   <div class="detail-table q-mb-lg">
     <DetailRow
       v-if="loading"
@@ -27,11 +27,13 @@
           <a :href="auditUrl">audit.8333.space</a>
         </template>
         <template #here>
-          <span
-            class="text-bold cursor-pointer text-primary"
+          <button
+            type="button"
+            class="inline-link-button text-primary"
             @click="getAuditorPaymentRequestsAndHandle"
-            >{{ $t("MintAuditInfo.here") }}</span
           >
+            {{ $t("MintAuditInfo.here") }}
+          </button>
         </template>
       </i18n-t>
     </div>
@@ -125,11 +127,13 @@
           }}</span>
         </template>
         <template #press_here>
-          <span
-            class="text-bold cursor-pointer text-primary"
+          <button
+            type="button"
+            class="inline-link-button text-primary"
             @click="getAuditorPaymentRequestsAndHandle"
-            >{{ $t("MintAuditInfo.press_here") }}</span
           >
+            {{ $t("MintAuditInfo.press_here") }}
+          </button>
         </template>
       </i18n-t>
     </div>
@@ -317,6 +321,16 @@ export default {
 .mint-info {
   margin-top: 8px;
   text-align: start;
+}
+
+/* The donate actions sit inside a sentence: real buttons, drawn as bold inline links. */
+.inline-link-button {
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  padding: 0;
 }
 
 .stat-card {

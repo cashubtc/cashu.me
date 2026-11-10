@@ -4,7 +4,7 @@
     <q-page-container>
       <!-- The transition animates a native wrapper, never the page component itself: a page whose
            template compiles to a fragment (a leading comment in dev builds) never finishes its
-           out-in leave, so Back used to land on the empty placeholder (owner item 17). -->
+           out-in leave, and Back would land on the empty placeholder. -->
       <router-view v-slot="{ Component, route }">
         <transition :name="transitionName" mode="out-in">
           <div

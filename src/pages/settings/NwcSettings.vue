@@ -37,7 +37,6 @@
             <div class="row items-center no-wrap q-gutter-sm">
               <CopyButton
                 :value="getConnectionString(connection)"
-                :icon-size="18"
                 :tooltip="
                   $t('Settings.nostr_wallet_connect.connection.copy_tooltip')
                 "

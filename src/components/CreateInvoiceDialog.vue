@@ -13,9 +13,10 @@
         "
         balanced
       >
-        <!-- The unit switch stays while the Lightning address QR shows (UnitToggle hides
-             itself when the mint offers a single unit). -->
-        <template v-if="showAmountInput || showNpubCashPreview" #actions>
+        <!-- The unit switch stays on every step: an address, an offer and the Lightning
+             address each belong to one unit, so switching loads the other unit's
+             (UnitToggle hides itself when the mint offers a single unit). -->
+        <template #actions>
           <div class="row items-center no-wrap sheet-header-actions">
             <UnitToggle @toggle="toggleUnit()" />
           </div>
@@ -31,7 +32,7 @@
           :disable="createInvoiceButtonBlocked"
         />
         <!-- The mint's deposit range, the info callout under the picker while an amount is
-             typed (owner item 7); the address step repeats it under the QR. -->
+             typed; the address step repeats it under the QR. -->
         <OnchainDepositLimits
           v-if="isOnchain && showAmountInput"
           class="picker-limits"
@@ -873,7 +874,7 @@ export default defineComponent({
 }
 
 /* The picker's own 16px and its column's 8px already sit above: the QR lands one 16px step
-   under the picker, like every gap in the stack below it (council 2026-11-01). */
+   under the picker, like every gap in the stack below it. */
 .receive-qr-preview {
   margin-top: -8px;
 }

@@ -14,7 +14,6 @@ $themes: (
     light: #8544f3,
     light-2: #a63bf3,
     dark: #1f2234,
-    info: #333646,
   ),
   "bitcoin": (
     fill: #ff9853,
@@ -24,7 +23,6 @@ $themes: (
     light: #bc4b00,
     light-2: #c64f00,
     dark: #232325,
-    info: #333646,
   ),
   "freedom": (
     fill: #e22156,
@@ -34,7 +32,6 @@ $themes: (
     light: #d81b50,
     light-2: #b91a45,
     dark: #000,
-    info: #1b1b1b,
   ),
   "salvador": (
     fill: #2d68d5,
@@ -44,21 +41,19 @@ $themes: (
     light: #2d68d5,
     light-2: #1366cb,
     dark: #242424,
-    info: #333646,
   ),
   "mint": (
     fill: #3ab77d,
     on-fill: #0b0b0b,
     accent: #3ab77d,
     // Green themes take a teal success colour, so +₿ amounts and paid checks stay apart from
-    // the green buttons (council R84-R85).
+    // the green buttons.
     positive: #5eead4,
     positive-light: #0f766e,
     accent-2: #2fbf70,
     light: #23774f,
     light-2: #1d7a47,
     dark: #1f342b,
-    info: #334642,
   ),
   "autumn": (
     fill: #b7763a,
@@ -68,7 +63,6 @@ $themes: (
     light: #9a612e,
     light-2: #94651f,
     dark: #34291f,
-    info: #463f33,
   ),
   "flamingo": (
     fill: #ff64b4,
@@ -79,10 +73,8 @@ $themes: (
     light-2: #d1006b,
     // A deeper plum page: captions on the raised sheets clear 4.5:1 (#56353f left them ~3.9).
     dark: #4a2d36,
-    info: #56353a,
   ),
-  // Dark mono is the original's pure black page under near-white pills (owner, 2026-10-29,
-  // item 30). Softening comes from the control tokens, never from lifting the page.
+  // Dark mono is the original's pure black page under near-white pills. Softening comes from the control tokens, never from lifting the page.
   "monochrome":
     (
       fill: #ededed,
@@ -93,10 +85,9 @@ $themes: (
       light-2: #3d3d3d,
       dark: #000,
       raised: #161618,
-      info: #1b1b1b,
     ),
   // Cyber's green is pulled back from pure #00ff00, so the large fills and the selected
-  // edge stop glaring while the neon look stays (council R75).
+  // edge stop glaring while the neon look stays.
   "cyber":
     (
       fill: #22e55a,
@@ -108,7 +99,6 @@ $themes: (
       light: #007a00,
       light-2: #007a00,
       dark: #000,
-      info: #1b1b1b,
     ),
 );
 
@@ -120,14 +110,14 @@ $themes: (
     --app-on-primary: #{map-get($t, on-fill)};
     --app-surface: #{map-get($t, dark)};
     // Raised surfaces (sheets, dialogs, toasts) sit a clear step above cards and groups (13% over
-    // the page vs 10%), in each theme's own hue (council contrast review: 8% read as a group).
+    // the page vs 10%), in each theme's own hue.
     --app-raised: #{if(
         map-has-key($t, raised),
         map-get($t, raised),
         color-mix(in srgb, #fff 13%, map-get($t, dark))
       )};
   }
-  // The green themes' teal positive (council R85), stated with the mode so it outranks the
+  // The green themes' teal positive, stated with the mode so it outranks the
   // mode's own green (body.body--dark sets #4ade80 later at the same specificity, and won).
   @if map-has-key($t, positive) {
     body.body--dark[data-theme="#{$theme}"] {
@@ -151,7 +141,6 @@ $themes: (
 body {
   --app-hover-opacity: 0.12;
   --app-pressed-opacity: 0.24;
-  --app-card-shadow: none;
   // Shape and depth, the same in every mode and theme. Radii: small controls 6, inner
   // surfaces 8, cards and rows 12, sheets 20, pills 999.
   --app-radius-sm: 6px;
@@ -160,12 +149,11 @@ body {
   --app-radius-xl: 20px;
   --app-radius-pill: 999px;
   --app-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
-  --app-focus-ring: 0 0 0 3px
-    color-mix(in srgb, var(--q-primary) 55%, transparent);
+  --app-focus-ring: 0 0 0 2px var(--app-text);
   // Control edges, one family for every bordered control (outlined fields, SheetSelect, the
   // mint picker, selected cards and rows): a soft resting edge close to the control's own fill,
   // a hover step, and focus in the accent at 2px. The resting edge is deliberately quiet
-  // (owner 2026-10-29c, item 2: about rgba(87, 87, 87, 0.33) over a dark field), well under
+  // over a dark field, well under
   // 3:1; the fill carries the control's shape, and focus, icons and text keep full contrast.
   // Mixed from the text ink, so it is the same subtle step in every theme's own hue, on the
   // page and on sheets alike (no raised-surface overrides).
@@ -199,7 +187,7 @@ body.body--dark {
     transparent
   );
   // Disabled: 8%, a clear pill shape on every dark page yet under tonal's 10% (5% nearly
-  // vanished: Publish review, Create address; council R91).
+  // vanished: Publish review, Create address).
   --app-disabled-fill: color-mix(in srgb, var(--app-text) 8%, transparent);
   --app-readonly-fill: color-mix(in srgb, var(--app-text) 6%, transparent);
   --app-group-edge: transparent;
@@ -207,7 +195,7 @@ body.body--dark {
 }
 body.body--light {
   --app-card-edge: transparent;
-  // 4% and 7% on the white page (L1, owner 2026-10-29): quieter steps, so stacked cards,
+  // 4% and 7% on the white page (L1): quieter steps, so stacked cards,
   // tonal buttons and fields stop reading as grey slabs.
   --app-card-fill: color-mix(in srgb, var(--app-text) 4%, transparent);
   --app-card-fill-active: color-mix(in srgb, var(--app-text) 7%, transparent);
@@ -232,7 +220,7 @@ body.body--light {
 
 // Secondary text on sheets and dialogs sits on a row fill over the raised surface, two
 // lifts above the page: 72% muted measured 4.04:1 there in flamingo dark (mint 4.29, autumn
-// 4.48; rendered pixels, .council/muted-contrast.mjs). 86% and 80% clear 4.5:1 in every
+// 4.48; measured pixels). 86% and 80% clear 4.5:1 in every
 // theme; the page keeps the quieter steps, where they already pass.
 body.body--dark
   :is(.q-card:not(.flow-surface, .welcome-surface), .bottom-sheet, .q-menu) {
@@ -259,7 +247,7 @@ body.body--dark {
   --app-negative-text: color-mix(in srgb, #ff6b6b 60%, #fff);
 }
 body.body--light {
-  // Onboarding follows the app mode like every page (owner 2026-10-29, item 29).
+  // Onboarding follows the app mode like every page.
   --app-welcome-bg: var(--app-surface);
   --app-text: #111;
   --app-text-muted: rgba(0, 0, 0, 0.64);
@@ -291,7 +279,7 @@ body[data-theme] .q-stepper--dark {
   background: var(--app-raised) !important;
 }
 // A full-screen flow is a page, not a raised sheet: its card, content and FlowFooter all
-// paint one token, the page surface, in every theme and mode (owner 2026-10-29, item 28).
+// paint one token, the page surface, in every theme and mode.
 body[data-theme] .flow-surface {
   --flow-surface: var(--app-surface);
   background: var(--flow-surface) !important;

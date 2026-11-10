@@ -393,7 +393,7 @@ test("mint pickers share one recipe and open from a real chevron button", async 
   await expect(normalTrigger).toBeFocused();
 
   // Dense (the swap form): the same field and avatar. Both keep 16px over and under the
-  // text (owner 2026-10-29: 4px read as squashed), so a two-line dense picker, here the From
+  // text (4px read as squashed), so a two-line dense picker, here the From
   // label over the name, is the wallet's height; only a one-line dense picker drops to 56px.
   await wallet.home("Mints");
   const dense = wallet.mintPicker("swap-from");

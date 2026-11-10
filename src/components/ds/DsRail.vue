@@ -95,7 +95,9 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   inset-inline-start: 0;
-  justify-content: center;
+  justify-content: flex-start;
+  overflow-y: auto;
+  scrollbar-width: none;
   padding: 24px 0;
   position: fixed;
   top: 0;
@@ -119,16 +121,11 @@ export default defineComponent({
   position: absolute;
   width: 1px;
 }
-/* Each tick is a 44px wide target up to 9px tall; on a short screen the ticks share the height
-   left after the group gaps, so a long inventory never scrolls or clips the names. */
+/* Each link is a full touch target; the inventory scrolls when it exceeds the viewport. */
 .ds-rail__tick {
   align-items: center;
   display: flex;
-  height: clamp(
-    3px,
-    calc((100vh - 48px - var(--ds-groups) * 10px) / var(--ds-ticks)),
-    9px
-  );
+  height: 44px;
   outline: none;
   padding-inline-start: 14px;
   position: relative;
@@ -182,14 +179,14 @@ export default defineComponent({
 }
 @media (max-width: 599px) {
   .ds-rail {
-    width: 28px;
+    width: 44px;
   }
   .ds-rail__tick {
     padding-inline-start: 8px;
-    width: 28px;
+    width: 44px;
   }
   .ds-rail__label {
-    inset-inline-start: 28px;
+    inset-inline-start: 40px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

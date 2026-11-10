@@ -1,6 +1,8 @@
 <!-- A mint's rating summary, after the app-store pattern: the average score large on the
-     start side with "out of 5" under it, then one bar per star level, without per-level counts (owner 2026-11-01: too much). The review count is
-     the list header's (MintRatingsComponent), so it isn't repeated here. `skeleton` draws the same boxes with placeholders while the reviews load. -->
+     start side with "out of 5" under it, then one bar per star level, without visible
+     per-level counts; each level's share is spoken instead ("5 of 5 stars 40%"). The review
+     count is the list header's (MintRatingsComponent), so it isn't repeated here. `skeleton`
+     draws the same boxes with placeholders while the reviews load. -->
 <template>
   <div
     class="row items-start ratings-summary"
@@ -35,12 +37,18 @@
         :key="star"
         class="row items-center no-wrap ratings-summary__bar-row"
       >
+        <!-- The level and its share in words: the stars and the bar say it by size alone. -->
+        <span v-if="!skeleton" class="visually-hidden"
+          >{{ $t("MintRatings.stars_label", { rating: star }) }}
+          {{ percentageLabel(star) }}</span
+        >
         <!-- Only as many stars as the level, end-aligned so all five bars start together. -->
         <div
           class="row items-center justify-end no-wrap ratings-summary__stars"
+          aria-hidden="true"
         >
           <!-- Loading: the star labels are placeholders too, so the empty tracks don't
-               read as a finished chart with no ratings (council R75). -->
+               read as a finished chart with no ratings. -->
           <q-skeleton
             v-if="skeleton"
             type="rect"
@@ -56,7 +64,7 @@
             class="text-app-muted"
           />
         </div>
-        <div class="col ratings-summary__track">
+        <div class="col ratings-summary__track" aria-hidden="true">
           <q-skeleton
             v-if="skeleton"
             type="rect"
@@ -104,6 +112,13 @@ export default defineComponent({
     percentage(star: number): number {
       if (!this.rated) return 0;
       return ((this.distribution[star] || 0) / this.rated) * 100;
+    },
+    percentageLabel(star: number): string {
+      return new Intl.NumberFormat(this.$i18n.locale, {
+        numberingSystem: "latn",
+        style: "percent",
+        maximumFractionDigits: 0,
+      }).format(this.percentage(star) / 100);
     },
   },
 });

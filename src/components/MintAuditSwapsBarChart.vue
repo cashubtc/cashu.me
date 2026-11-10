@@ -440,8 +440,11 @@ export default defineComponent({
 </script>
 
 <style scoped>
+/* The chart sits on the group surface, like the stat cards beside it, so the muted axis
+   labels read in both themes. */
 .bar-chart-container {
-  background-color: #1e1e1e;
+  background-color: var(--app-group-fill);
+  border: 1px solid var(--app-group-edge);
   border-radius: var(--app-radius-md);
   padding-bottom: 6px;
   padding-top: 20px;
@@ -461,7 +464,7 @@ export default defineComponent({
   display: flex;
   align-items: flex-end;
   height: 40px;
-  background-color: #2d2d2d;
+  background-color: var(--app-tint-strong);
   border-radius: 4px;
   padding: 4px;
   position: relative;
@@ -513,7 +516,7 @@ export default defineComponent({
 
 .bar.placeholder {
   background-color: transparent;
-  border: 1px solid #444;
+  border: 1px solid var(--app-tint-strong);
 }
 
 .bar.placeholder:hover {

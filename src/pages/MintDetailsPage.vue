@@ -17,8 +17,7 @@
         <!-- Mint Header Profile Name Section -->
         <div class="column items-center full-width q-mb-lg">
           <MintIdentityHeader :url="mintData.url" :info="mintData.info">
-            <!-- A labelled chip: a bare QR glyph under the name read as decoration
-                 (council R76-R80). -->
+            <!-- A labelled chip: a bare QR glyph under the name reads as decoration. -->
             <div class="top-icons">
               <TonalChip
                 :aria-expanded="showQrCode"
@@ -47,8 +46,8 @@
             </div>
           </MintIdentityHeader>
 
-          <!-- Only when there is something to say: empty, its 24px top margin doubled the gap
-               above Mint details (council R84). -->
+          <!-- Only when there is something to say: empty, its 24px top margin doubles the gap
+               above Mint details. -->
           <div
             v-if="
               (mintData.info?.motd && !mintData.motdDismissed) ||
@@ -89,8 +88,8 @@
           </RevealTransition>
         </div>
 
-        <!-- Contacts: one copy row per entry that has something to copy (an empty entry drew
-             an icon and a copy button for nothing, owner 2026-10-29, items 8 and 35). -->
+        <!-- Contacts: one copy row per entry that has something to copy (an empty entry would
+             draw an icon and a copy button for nothing). -->
         <SectionDivider
           v-if="contacts.length"
           :label="$t('MintDetailsDialog.contact.title')"
@@ -115,7 +114,7 @@
 
         <!-- Mint Details Section -->
         <div class="detail-table q-mb-lg">
-          <!-- URL: the one way to copy it (owner 2026-10-29). -->
+          <!-- URL: the one way to copy it. -->
           <DetailRow
             :icon="LinkIcon"
             :label="$t('MintDetailsDialog.details.url.label')"
@@ -213,7 +212,7 @@
             @click="openCreateReviewDialog"
           />
         </q-list>
-        <q-list class="settings-menu-group mint-details-actions q-mt-md">
+        <q-list class="settings-menu-group mint-details-actions">
           <SettingsActionRow
             :icon="Trash2Icon"
             data-testid="mint-delete"
@@ -221,6 +220,8 @@
             danger
             @click="openRemoveMintDialog"
           >
+            <!-- An empty side slot leaves out the row's trailing trash: the leading icon
+                 already says delete. -->
             <template #side><span /></template>
           </SettingsActionRow>
         </q-list>
@@ -446,8 +447,8 @@ export default defineComponent({
 
 <style scoped>
 /* One gap before every section label: each section drops its own trailing margin and the
-   label sits 24px below it (the gaps were 56px above Mint details and 24px above Audit info,
-   council R75). */
+   label sits 24px below it (left to themselves the gaps are 56px above Mint details and 24px
+   above Audit info). */
 .mint-content-container > :has(+ .section-divider-block) {
   margin-bottom: 0 !important;
 }
@@ -502,12 +503,12 @@ export default defineComponent({
 
 /* Details, contacts and audit are flat rows on the 16px page edge; interactive rows bleed
    their tint 12px into the gutter (DetailRow), so nothing is indented to match the Actions
-   card (owner 2026-10-29, item 34). */
+   card. The destructive group sits 16px under the everyday one, and 32px closes the page. */
 .mint-details-actions {
-  margin-bottom: 32px;
+  margin-bottom: 16px;
 }
-.mint-details-actions + .mint-details-actions {
-  margin-top: -16px;
+.mint-details-actions:last-child {
+  margin-bottom: 32px;
 }
 
 /* QR Code Container and Animation */

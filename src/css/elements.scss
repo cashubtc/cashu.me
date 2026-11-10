@@ -1,4 +1,4 @@
-// Standard elements: one implementation of each repeated pattern, shown at /ui. Visual
+// Standard elements: one implementation of each repeated pattern, shown at /design-system. Visual
 // language after shadcn/ui: neutral tokens, one 12px radius for boxes, 1px hairlines, a muted
 // caption under a medium label, and colour only where it carries meaning (info, warning,
 // danger). Components use these classes instead of their own copies.
@@ -7,11 +7,11 @@
 body.body--dark {
   --app-info: #60a5fa;
   // amber-400: the same amber family as light mode's amber-800 (yellow-400 read as a
-  // different colour from mode to mode, council R79).
+  // different colour from mode to mode).
   --app-warning: #fbbf24;
   --app-danger: var(--q-negative);
   // A filled destructive button: a deep red with white text (red-600, 4.8:1), as shadcn's
-  // destructive button; the coral with black text read as a warning chip (owner 2026-11-01).
+  // destructive button; the coral with black text read as a warning chip.
   --app-danger-fill: #dc2626;
   --app-on-danger: #fff;
 }
@@ -79,7 +79,7 @@ body {
 // pickers, payment requests, onboarding choices). Selected rows use the selected tokens.
 // Its fills are custom properties: a context (light sheets, a grouped list, selected) sets
 // the values, and rest, hover and press read them in one place, so no context's own
-// background can cancel the hover again (hover audit F1, F2).
+// background can cancel the hover again.
 .app-option-row {
   --option-bg: var(--app-tint);
   --option-hover: var(--app-tint-strong);
@@ -98,11 +98,11 @@ body {
   transition: background 0.2s ease, border-color 0.2s ease;
 }
 @media (hover: hover) {
-  .app-option-row:hover {
+  .app-option-row:not([aria-disabled="true"]):hover {
     background: var(--option-hover);
   }
 }
-.app-option-row:active {
+.app-option-row:not([aria-disabled="true"]):active {
   background: var(--option-press);
 }
 .app-option-row:focus-visible {
@@ -120,11 +120,11 @@ body.body--light :where(.q-dialog) .app-option-row {
   --option-bg: var(--app-surface);
   --option-hover: color-mix(in srgb, var(--app-text) 4%, var(--app-surface));
   --option-press: color-mix(in srgb, var(--app-text) 6%, var(--app-surface));
-  // The control edge, so white rows on the pale sheet keep their edge (council R85-R86).
+  // The control edge, so white rows on the pale sheet keep their edge.
   border-color: var(--app-field-edge);
 }
 /* SheetSelect: a long list (30-odd currencies) reads as one grouped list with hairline dividers, not a
-   stack of separate cards (council R76-R79). */
+   stack of separate cards. */
 .sheet-select__list--grouped {
   background: var(--app-tint);
   border-radius: var(--app-radius-lg);
@@ -169,7 +169,7 @@ body .sheet-select__list--grouped .app-option-row--selected {
 }
 
 // Status tones, shared by callouts and toasts: one colour per meaning, darker in light mode.
-// Success follows the theme's positive token (teal in the green themes, council R85).
+// Success follows the theme's positive token (teal in the green themes).
 body {
   --app-success: var(--q-positive);
 }
@@ -338,7 +338,7 @@ button.app-badge {
   line-height: 1.35;
 }
 // The help line takes the column's full measure: a 320px cap wrapped zh-CN about 40px early
-// and left "开始。" alone (council R91). Its lines break evenly (text-wrap in app.scss).
+// and left "开始。" alone. Its lines break evenly (text-wrap in app.scss).
 .app-empty__text {
   color: var(--app-text-muted);
   font-size: 14px;
@@ -603,7 +603,7 @@ body .q-skeleton--type-text {
   color: var(--app-text);
 }
 // Money in: the disc takes a light success tint (a step stronger in light mode, where a faint
-// tint fades on white), kept below the green amount (council R81); out, pending and expired
+// tint fades on white), kept below the green amount; out, pending and expired
 // stay on the neutral disc.
 .activity-row__avatar--in {
   background: color-mix(in srgb, var(--app-success) 13%, var(--row-bg));
@@ -641,7 +641,7 @@ body.body--light .activity-row__avatar--in {
 }
 // Not final yet: secondary text at full weight, so the column keeps one rhythm.
 // Pending money is still the user's money: full-strength amount; the Pending badge carries
-// the status (a muted amount read as already spent, council R77-R79).
+// the status (a muted amount read as already spent).
 .activity-row__amount--pending {
   color: var(--app-text);
 }
@@ -702,8 +702,7 @@ body.body--light .activity-row__avatar--in {
   width: 100%;
 }
 // A flow's stack (QR, callout, amount, table…): one 16px gap between neighbours, so spacing
-// is the stack's and never a child's own margin (owner 2026-11-01: the on-chain note and the
-// table sat further apart than anything else).
+// is the stack's and never a child's own margin.
 .flow-stack {
   display: flex;
   flex-direction: column;
@@ -732,9 +731,8 @@ body.body--light .activity-row__avatar--in {
 }
 
 /* RowValue: a settings row's current value and its chevron on one line, centred on the row
-   (Quasar's side section is a column, so the value sat above the chevron, council R83). The
-   chevron after a value takes the value's muted colour; a bare chevron stays subtle (owner
-   2026-10-29b, item 2). */
+   (Quasar's side section is a column, so the value sat above the chevron). The
+   chevron after a value takes the value's muted colour; a bare chevron stays subtle. */
 .row-value__inner {
   align-items: center;
   color: var(--app-text-muted);
@@ -963,4 +961,19 @@ body.body--light .app-menu {
     opacity: 0;
     transform: scale(0.96);
   }
+}
+
+// Keep the action's label and icon width while the loading dots replace their ink.
+.mint-card-add.q-btn--loading .q-btn__content {
+  display: flex !important;
+  visibility: hidden;
+}
+.mint-card-add.q-btn--loading > .q-btn__content--hidden + .absolute-full {
+  position: absolute;
+  inset: 0;
+}
+
+.app-option-row[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: default;
 }

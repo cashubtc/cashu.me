@@ -4,7 +4,10 @@
          Lightning address mint picker and the same sheet as Send and Receive. -->
     <!-- As a settings row: the setting's name and description on the start side, the current
          value's short form (an option's `short`, e.g. "USD") muted beside one centred chevron
-         on the end side, like platform settings (council R75-R79). -->
+         on the end side, like platform settings. -->
+    <!-- Both triggers are comboboxes tied to the sheet's listbox: the arrow keys open it, and
+         inside it they move through the options (Home and End jump to the ends), starting
+         from the selected one. -->
     <q-item
       v-if="row"
       clickable
@@ -14,8 +17,11 @@
       :aria-label="label"
       aria-haspopup="listbox"
       :aria-expanded="open"
+      :aria-controls="listId"
       :disable="disable"
       @click="open = true"
+      @keydown.down.prevent="openFromKey"
+      @keydown.up.prevent="openFromKey"
     >
       <q-item-section>
         <q-item-label>{{ label }}</q-item-label>
@@ -36,8 +42,11 @@
       :aria-label="label"
       aria-haspopup="listbox"
       :aria-expanded="open"
+      :aria-controls="listId"
       :disabled="disable"
       @click="open = true"
+      @keydown.down.prevent="openFromKey"
+      @keydown.up.prevent="openFromKey"
     >
       <span v-if="$slots.icon" class="sheet-select__icon">
         <slot name="icon" :option="selectedOption" />
@@ -53,10 +62,12 @@
 
     <BottomSheet v-model="open" :title="title || label">
       <div
+        :id="listId"
         role="listbox"
         :aria-label="title || label"
         class="sheet-select__list"
         :class="{ 'sheet-select__list--grouped': options.length > 8 }"
+        @keydown="onListKeydown"
       >
         <SheetOption
           v-for="option in options"
@@ -64,6 +75,7 @@
           :label="option.label"
           :caption="option.caption"
           :selected="option.value === modelValue"
+          :data-autofocus="option.value === modelValue ? '' : undefined"
           @select="choose(option)"
         >
           <template v-if="$slots.icon" #icon>
@@ -91,6 +103,9 @@ export type SheetSelectOption = {
   caption?: string;
 };
 
+// Each select's listbox needs its own id for the trigger's aria-controls.
+let nextSelectId = 0;
+
 export default defineComponent({
   name: "SheetSelect",
   components: { CjkText, BottomSheet, SheetOption, ChevronDownIcon, RowValue },
@@ -113,7 +128,7 @@ export default defineComponent({
   },
   emits: ["update:modelValue"],
   data() {
-    return { open: false };
+    return { open: false, listId: `sheet-select-${++nextSelectId}-options` };
   },
   computed: {
     selectedOption(): SheetSelectOption | undefined {
@@ -121,6 +136,32 @@ export default defineComponent({
     },
   },
   methods: {
+    openFromKey() {
+      if (!this.disable) this.open = true;
+    },
+    // The listbox's keys: the arrows step through the options, Home and End reach the ends.
+    onListKeydown(event: KeyboardEvent) {
+      const steps: Record<string, number> = { ArrowDown: 1, ArrowUp: -1 };
+      const step = steps[event.key];
+      if (step === undefined && event.key !== "Home" && event.key !== "End")
+        return;
+      const rows = Array.from(
+        (event.currentTarget as HTMLElement).querySelectorAll<HTMLElement>(
+          '[role="option"]'
+        )
+      );
+      if (!rows.length) return;
+      const at = rows.indexOf(document.activeElement as HTMLElement);
+      const last = rows.length - 1;
+      const next =
+        event.key === "Home"
+          ? 0
+          : event.key === "End"
+          ? last
+          : Math.min(last, Math.max(0, at + (step ?? 0)));
+      event.preventDefault();
+      rows[next].focus();
+    },
     choose(option: SheetSelectOption) {
       this.$emit("update:modelValue", option.value);
       this.open = false;

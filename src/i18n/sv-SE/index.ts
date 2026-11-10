@@ -1,17 +1,17 @@
 export default {
   MultinutPicker: {
-    dialog_title: "Multinut-betalning",
+    dialog_title: "Betalning från flera mints",
     pay_using_multiple: "Betala med flera mints",
     experimental_title: "Experimentell funktion",
     experimental_text:
       "Den här funktionen är mycket experimentell och fungerar kanske inte som väntat. Försök inte betala en faktura som redan har betalats. Du kan förlora pengar.",
     understand: "Jag förstår",
-    select_funds: "Välj medel från flera mints för att genomföra betalningen.",
+    select_funds: "Välj vilka mints du vill betala från.",
     pay_invoice: "Betala faktura",
     amount_mismatch: "Fel vid beloppsberäkning: {calculated} mot {expected}",
     states: {
-      requesting: "Begär...",
-      paying: "Betalar...",
+      requesting: "Begär…",
+      paying: "Betalar…",
       success: "Klart",
       failed: "Misslyckades",
     },
@@ -44,6 +44,9 @@ export default {
       },
       receive: {
         label: "Ta emot",
+      },
+      show_qr: {
+        label: "Visa QR-kod",
       },
       show_seed: {
         label: "Visa återställningsfras",
@@ -101,7 +104,8 @@ export default {
         "Den här äldre QR-koden kommer inte från en handlare som stöds",
       no_bolt12_mint: "Ingen av dina mints stöder BOLT12-erbjudanden",
       no_bolt11_mint: "Ingen av dina mints stöder BOLT11-fakturor",
-      address_not_paid: "Adressen har inte betalats",
+      address_not_paid:
+        "Ingen betalning har tagits emot på den här adressen ännu",
       payment_pending: "Betalning väntar",
       invoice_already_paid: "Fakturan är redan betald",
       payment_sent: "Betalning skickad",
@@ -204,7 +208,7 @@ export default {
       },
       p2pk: {
         title: "Låst ecash",
-        caption: "Ta emot ecash som bara din nyckel kan låsa upp",
+        caption: "Ta emot ecash låst till din nyckel",
       },
       privacy: {
         title: "Integritet",
@@ -235,7 +239,7 @@ export default {
       title: "Förtroendenätverk",
       known_pubkeys: "Kända publika nycklar: {wotCount}",
       continue_crawl: "Fortsätt genomsökning",
-      crawl_odell: "Importera Odells tillitsnätverk",
+      crawl_odell: "Genomsök Odells förtroendenätverk",
       crawl_wot: "Genomsök web of trust",
       pause: "Pausa",
       reset: "Återställ",
@@ -279,7 +283,7 @@ export default {
     },
     lightning_address: {
       server_url: {
-        label: "Värdnamn för npub.cash",
+        label: "npub.cash-server",
         hint: "Ange ett värdnamn eller en HTTPS-URL",
         invalid: "Ange en giltig HTTPS-server-URL",
       },
@@ -313,7 +317,7 @@ export default {
         title: "Plånbokens återställningsfras",
         description:
           "Skapa ett Nostr-nyckelpar från plånbokens återställningsfras",
-        copy_nsec: "Kopiera privat nyckel",
+        copy_nsec: "Kopiera privat nyckel (nsec)",
       },
       nsec_bunker: {
         title: "Fjärrsignerare",
@@ -321,7 +325,7 @@ export default {
         delete_tooltip: "Radera anslutning",
       },
       use_nsec: {
-        title: "Använd din egen privata nyckel",
+        title: "Använd din privata Nostr-nyckel (nsec)",
         description: "Denna metod är farlig och rekommenderas inte",
         delete_tooltip: "Radera privat nyckel",
       },
@@ -338,12 +342,12 @@ export default {
       claim_automatically: {
         toggle: "Hämta automatiskt",
         description:
-          "Lägger till inkommande betalningar i saldot utan att fråga. När det är av hämtar du varje själv.",
+          "Lägger till inkommande betalningar från mints som du redan använder i saldot utan att fråga. Annars bekräftar du varje betalning själv.",
       },
     },
     nostr_wallet_connect: {
       description:
-        "Låter andra appar betala från den här plånboken via Nostr Wallet Connect.",
+        "Låter andra appar betala från den här plånboken, skapa fakturor och se ditt saldo och din historik via Nostr Wallet Connect (NWC).",
       enable_toggle: "Aktivera Nostr Wallet Connect",
       payments_note:
         "Du kan endast använda NWC för betalningar från ditt Bitcoin-saldo. Betalningar kommer att göras från din aktiva mint.",
@@ -378,16 +382,16 @@ export default {
     },
     p2pk_features: {
       description:
-        "Experimentellt. Använd små belopp: om du förlorar den privata nyckeln kan ingen låsa upp ecash som är låst till den.",
+        "Skapa eller importera en nyckel för att ta emot låst ecash (P2PK). Experimentellt: använd små belopp. Om du förlorar den privata nyckeln kan du förlora åtkomsten till ecash som är låst till den.",
       generate_button: "Generera nyckel",
-      import_button: "Importera privat nyckel",
+      import_button: "Importera privat nyckel (nsec)",
       quick_access: {
-        toggle: "Visa låsnyckel under Ta emot",
+        toggle: "Visa knappen Lås i Ta emot ecash",
         description:
-          "Visar din låsnyckel på skärmen Ta emot ecash, så att avsändare kan låsa ecash till dig.",
+          "Lägger till knappen Lås i Ta emot ecash. Öppna den för att dela din publika nyckel så att avsändare kan låsa ecash till dig.",
       },
       keys_expansion: {
-        label: "Klicka för att bläddra bland {count} nycklar",
+        label: "Publika nycklar ({count})",
         used_badge: "använd",
       },
     },
@@ -397,7 +401,7 @@ export default {
       check_incoming: {
         toggle: "Kontrollera inkommande faktura",
         description:
-          "Kontrollerar din senaste faktura i bakgrunden. Snabbare uppdateringar, men lättare att fingeravtrycka.",
+          "Kontrollerar din senaste faktura i bakgrunden. Snabbare uppdateringar, men underlättar fingeravtryckning. När funktionen är avstängd kontrollerar du själv fakturor under Historik.",
       },
       check_startup: {
         toggle: "Kontrollera väntande fakturor vid start",
@@ -406,7 +410,7 @@ export default {
       check_all: {
         toggle: "Kontrollera alla fakturor",
         description:
-          "Kontrollerar obetalda fakturor i bakgrunden i upp till två veckor. Mer aktivitet online gör dig lättare att fingeravtrycka.",
+          "Kontrollerar obetalda fakturor i bakgrunden i upp till två veckor. Mer aktivitet online underlättar fingeravtryckning. När funktionen är avstängd kontrollerar du själv fakturor under Historik.",
       },
       check_sent: {
         toggle: "Kontrollera skickad ecash",
@@ -416,7 +420,7 @@ export default {
       websockets: {
         toggle: "Använd WebSockets",
         description:
-          "Håller en liveanslutning till mints för direkta betalningsuppdateringar. Snabbare, men lättare att fingeravtrycka.",
+          "Håller en liveanslutning till mints för uppdateringar om betalningar och spenderad ecash. Snabbare, men underlättar fingeravtryckning.",
       },
       bitcoin_price: {
         title: "Bitcoinpris",
@@ -438,7 +442,7 @@ export default {
       auto_paste: {
         toggle: "Klistra in ecash automatiskt",
         description:
-          "Klistrar in ecash från urklipp när du öppnar Ta emot ecash. Stäng av om det orsakar visningsfel på iOS.",
+          "Klistrar in ecash från urklipp när du trycker på ”Klistra in token”. Stäng av om det orsakar visningsfel på iOS.",
       },
       auditor: {
         toggle: "Aktivera revisor",
@@ -449,7 +453,8 @@ export default {
         api_url_label: "Revisor API URL",
       },
       multinut: {
-        description: "Betalar fakturor från flera mints samtidigt.",
+        description:
+          "Lägger till alternativet ”Betala med flera mints” när du betalar en Lightning-faktura.",
       },
       nostr_mint_backup: {
         toggle: "Säkerhetskopiera mintlistan till Nostr",
@@ -499,8 +504,8 @@ export default {
       backup_files_title: "Säkerhetskopior",
       danger_zone_title: "Riskzon",
       notifications: {
-        reserved_unset: "Alla reserverade bevis frigjorda",
-        removed_spent: "Tog bort {count} spenderade bevis",
+        reserved_unset: "Alla reservationer av proofs har tagits bort",
+        removed_spent: "Borttagna spenderade proofs: {count}",
         no_spent: "Inga spenderade proofs hittades",
         invalid_backup: "Ogiltigt format på säkerhetskopian",
         read_error: "Fel vid läsning av fil",
@@ -511,7 +516,7 @@ export default {
         new_seed: {
           button: "Generera ny återställningsfras",
           description:
-            "Skapar en ny återställningsfras. Skicka sedan ditt saldo till dig själv så att det nya seedet kan återställa det.",
+            "Skapar en ny återställningsfras. Din nuvarande ecash är fortfarande knuten till den gamla: skicka hela ditt saldo till dig själv efteråt, annars kan den nya återställningsfrasen inte återställa det.",
           confirm_question:
             "Är du säker på att du vill generera en ny återställningsfras?",
           cancel: "Avbryt",
@@ -520,7 +525,7 @@ export default {
         remove_spent: {
           button: "Ta bort spenderade proofs",
           description:
-            "Tar bort ecash som dina aktiva mints rapporterar som spenderad. Använd bara om plånboken har fastnat.",
+            "Tar bort ecash i den valda enheten som den aktiva minten rapporterar som spenderad. Använd bara om plånboken har fastnat.",
         },
         design_system: {
           title: "Designsystem",
@@ -535,12 +540,12 @@ export default {
         export_proofs: {
           button: "Exportera aktiva proofs",
           description:
-            "Kopierar den aktiva mintens saldo i vald enhet som en enda ecash-token.",
+            "Kopierar den aktiva mintens saldo i den valda enheten till urklipp som en enda ecash-token. Byt mint eller enhet och exportera igen för att få med resten.",
         },
         keyset_counters: {
           title: "Öka keyset-räknare",
           increase: "Öka räknaren för {id}",
-          fixes: "Åtgärdar ”outputs have already been signed”",
+          fixes: "Kan hjälpa till att lösa ”outputs have already been signed”",
           keysets: "{n} keyset | {n} keysets",
           sheet_hint: "Tryck på + för att öka en keysets räknare.",
           column: "Räknare",
@@ -566,15 +571,15 @@ export default {
         export_wallet: {
           button: "Exportera plånboksdata",
           description:
-            "Laddar ner en säkerhetskopia som du kan importera på välkomstskärmen. Den blir inaktuell när du fortsätter använda plånboken.",
+            "Laddar ner en säkerhetskopia som du kan importera på välkomstskärmen. Den blir inaktuell så fort du använder plånboken igen.",
         },
         import_wallet: {
           description:
-            "Ersätter plånbokens data med en exporterad säkerhetskopia.",
+            "Importerar en exporterad säkerhetskopia. Inställningar och poster i säkerhetskopian skriver över motsvarande data i plånboken; allt som inte finns i säkerhetskopian behålls.",
           button: "Importera säkerhetskopia",
-          confirm_question: "Vill du verkligen återställa plånbokens data?",
+          confirm_question: "Importera den här säkerhetskopian till plånboken?",
           cancel: "Avbryt",
-          confirm: "IMPORTERA SÄKERHETSKOPIA",
+          confirm: "Importera säkerhetskopia av plånboken",
         },
       },
     },
@@ -615,7 +620,7 @@ export default {
     },
     install: {
       text: "Installera",
-      tooltip: "Installera Cashu",
+      tooltip: "Installera Cashu.me",
     },
   },
   AlreadyRunning: {
@@ -628,8 +633,8 @@ export default {
     },
   },
   ErrorNotFound: {
-    title: "404",
-    text: "Sidan finns inte",
+    title: "Sidan finns inte",
+    text: "404",
     actions: {
       home: {
         label: "Gå tillbaka hem",
@@ -693,14 +698,14 @@ export default {
     pwa: {
       success: {
         title: "Klart!",
-        text: "Du använder Cashu som en PWA. Stäng alla andra öppna webbläsarfönster och använd appen från din startskärm.",
+        text: "Du använder Cashu.me som en PWA. Stäng alla andra öppna webbläsarfönster och använd appen från din startskärm.",
         nextSteps:
           "Du kan nu stänga denna flik och öppna appen från hemskärmen.",
       },
     },
   },
   PwaPrompt: {
-    title: "Installera Cashu",
+    title: "Installera Cashu.me",
     text: "Öppnas från hemskärmen, utan webbläsarens adressfält.",
     ios: {
       share: "Tryck på Dela",
@@ -772,18 +777,17 @@ export default {
   },
   WelcomeRestoreEcash: {
     title: "Återställ ditt ecash",
-    text: "Sök efter ospenderade proofs på dina konfigurerade mints och lägg till dem i plånboken.",
+    text: "Hitta ospenderad ecash hos de mints du har lagt till och återställ den till din plånbok.",
   },
   MintRatings: {
     sort_and_filter: "Sortera och filtrera",
     reviews_title: "Recensioner",
     reviews_count: "{n} recension | {n} recensioner",
-    web_of_trust_caption:
-      "Räkna bara recensioner från personer i ditt förtroendenätverk",
+    web_of_trust_caption: "Visa bara recensioner från ditt förtroendenätverk",
     web_of_trust_hop: "I ditt förtroendenätverk (steg {hop})",
     no_mint_url: "Ingen mint-URL angiven",
     reviews: "recensioner",
-    no_reviews: "Inga recensioner än",
+    no_reviews: "Inga recensioner hittades",
     your_review: "Din recension",
     no_rating: "Ingen betygsättning",
     stars_label: "{rating} av 5 stjärnor",
@@ -797,7 +801,7 @@ export default {
     },
     actions: { write_review: "Skriv en recension" },
     empty_state_subtitle:
-      "Bli först med att recensera den här minten. Din erfarenhet hjälper andra att välja.",
+      "Dela din erfarenhet av den här minten för att hjälpa andra att välja.",
     range: "{from}–{to} av {total}",
   },
   CreateMintReview: {
@@ -806,7 +810,7 @@ export default {
     published: "Recension publicerad",
     publish_failed: "Kunde inte publicera recensionen",
     title: "Recensera mint",
-    publishing_as: "Publicerar som",
+    publishing_as: "Publicerar som:",
     inputs: {
       rating: {
         label: "Betyg",
@@ -857,7 +861,7 @@ export default {
       },
       restore_selected_mints: {
         label: "Återställ valda mints ({count})",
-        success: "Lyckades återställa {count} mint(s)",
+        success: "Återställda mints: {count}",
         error: "Fel vid återställning av valda mints: {error}",
       },
     },
@@ -872,7 +876,7 @@ export default {
       add_selected: "Lägg till valda ({count})",
       no_backups_found: "Inga mint-säkerhetskopior hittades",
       no_backups_hint:
-        "Se till att Nostr mint-säkerhetskopiering är aktiverat i inställningarna för att automatiskt säkerhetskopiera din mintlista.",
+        "En mintlista kan bara återställas från en säkerhetskopia som tidigare skapats med den här återställningsfrasen. Aktivera säkerhetskopiering av mints via Nostr i Inställningar för att spara framtida ändringar.",
       invalid_mnemonic: "Ange en giltig återställningsfras innan du söker.",
       search_error: "Misslyckades att söka efter mint-säkerhetskopior.",
       add_error: "Misslyckades att lägga till valda mints.",
@@ -916,7 +920,7 @@ export default {
     swap: {
       title: "Byt",
       caption:
-        "Flytta pengar mellan dina mints via Lightning. Avgifter kan tillkomma.",
+        "Flytta pengar mellan dina mints via Lightning. Lämna utrymme för Lightning-avgifter. Om pengarna inte kommer fram, kontrollera den väntande fakturan under Historik.",
       inputs: {
         from: {
           label: "Från",
@@ -961,7 +965,7 @@ export default {
     actions: {
       create: {
         label: "Skapa faktura",
-        label_blocked: "Skapar faktura",
+        label_blocked: "Skapar…",
       },
     },
     invoice: {
@@ -1006,7 +1010,7 @@ export default {
         tooltip_text: "Kopiera emoji",
       },
       copy_tokens: {
-        label: "Kopiera ecash",
+        label: "Kopiera token",
       },
       copy_link: {
         tooltip_text: "Kopiera länk",
@@ -1029,7 +1033,7 @@ export default {
       },
       write_tokens_to_card: {
         tooltips: {
-          ndef_supported_text: "Flash till NFC-kort",
+          ndef_supported_text: "Skriv till NFC-kort",
         },
       },
       pay: { label: "@:global.actions.pay.label" },
@@ -1137,7 +1141,7 @@ export default {
   },
   P2PKDialog: {
     p2pk: {
-      caption: "Låsnyckel",
+      caption: "Din låsnyckel",
       description: "Ta emot ecash låst till denna nyckel",
       used_warning_text:
         "Varning: Denna nyckel användes tidigare. Använd en ny nyckel för bättre integritet.",
@@ -1255,7 +1259,7 @@ export default {
         label: "Kopiera mint URL",
       },
       delete: {
-        label: "Radera mint",
+        label: "Ta bort mint",
       },
       edit: {
         label: "Redigera mint",
@@ -1449,7 +1453,7 @@ export default {
   AddMintDialog: {
     title: "Litar du på denna mint?",
     description:
-      "Gå bara med i den här minten om du litar på den. Om den slutar fungera förloras den ecash du har hos den.",
+      "Lägg bara till den här minten om du litar på den. Den kan sluta fungera när som helst, och du kan förlora den ecash du har hos den.",
     actions: {
       add_mint: {
         label: "@:global.actions.add_mint.label",
@@ -1569,8 +1573,8 @@ export default {
   },
   MintAuditInfo: {
     title: "Granskningsinfo",
-    loading: "Läser in granskningsinfo...",
-    not_audited: "Denna mint har inte granskats ännu.",
+    loading: "Läser in granskningsinfo…",
+    not_audited: "Den här granskaren har inga data om den här minten.",
     not_audited_text:
       "Läs mer om granskaren eller stöd en framtida granskning på {link}, eller klicka {here} för att donera ecash och hjälpa till att starta en granskning av denna mint.",
     here: "här",
@@ -1635,7 +1639,7 @@ export default {
       low: "Låg",
     },
     delete_dialog: {
-      title: "Radera ecash",
+      title: "Radera från historiken?",
       text: "Vill du verkligen radera denna transaktion från historiken?",
       warning:
         "Varning: Åtgärden kan inte ångras och token kan inte återställas.",
@@ -1644,8 +1648,8 @@ export default {
       read_failed: "NFC-läsning misslyckades",
       write_failed: "NFC-skrivning misslyckades",
       error: "NFC-fel",
-      writing: "Skriver till NFC-kort...",
-      success: "Token skrevs till kortet!",
+      writing: "Skriver till NFC-kort…",
+      success: "Token skriven till NFC-kort",
       capacity:
         "Kortet kanske inte har tillräcklig kapacitet ({bytes} byte krävs).",
     },
@@ -1657,12 +1661,12 @@ export default {
       bolt12: "Erbjudande",
     },
     onchain_title: "Ta emot on-chain",
-    bolt12_title: "Ta emot Bolt12",
+    bolt12_title: "Ta emot Lightning-erbjudande",
     mint_unreachable: "Minten går inte att nå",
     mint_unreachable_text:
       "Anslut till minten igen för att ta emot betalningar.",
     reconnect_mint: "Återanslut minten",
-    checking_address: "Kontrollerar adress...",
+    checking_address: "Kontrollerar adress…",
     add_amount: "Lägg till belopp",
     new_offer: "Nytt erbjudande",
     create_offer: "Skapa erbjudande",
@@ -1688,13 +1692,14 @@ export default {
       unrecognized_backup: "Okänt format på säkerhetskopian",
       backup_restored: "Säkerhetskopian återställd",
       backup_exported: "Plånbokens säkerhetskopia exporterad",
-      quota_exceeded: "Den lokala lagringen är full. Rensa din lokala lagring.",
+      quota_exceeded:
+        "Webbläsarens lagring är full eller otillgänglig. Nya plånboksdata kanske inte sparas. Säkerhetskopiera din plånbok nu.",
       cleaned_up: "Rensade {size} byte",
     },
   },
   receiveTokens: {
     notifications: {
-      already_in_history: "Token finns redan i historiken",
+      already_in_history: "Ecash finns redan i historiken",
       nfc_read_failed: "Kan inte läsa data från NFC-taggen",
       scan_error: "Skanningsfel",
       nfc_error: "NFC-fel",
@@ -1714,14 +1719,14 @@ export default {
       added:
         "Lade till {count} mint i din plånbok | Lade till {count} mints i din plånbok",
       none_added: "Inga nya mints lades till",
-      add_selected_failed: "Kunde inte lägga till de valda mints",
+      add_selected_failed: "Kunde inte lägga till valda mints",
     },
   },
   nostr: {
     notifications: {
-      nip04_published: "NIP-04-händelse publicerad",
-      nip04_failed: "Kunde inte publicera NIP-04-händelse",
-      nip17_failed: "Kunde inte publicera NIP-17-händelse",
+      nip04_published: "Meddelande publicerat på Nostr",
+      nip04_failed: "Kunde inte publicera meddelandet på Nostr",
+      nip17_failed: "Kunde inte publicera meddelandet på Nostr",
       receive_failed: "Kunde inte ta emot inkommande betalning",
       ecash_already_in_history: "Ecash finns redan i historiken",
       ecash_added: "Ecash tillagd i historiken",
@@ -1729,7 +1734,8 @@ export default {
   },
   nwc: {
     notifications: {
-      melt_quote_failed: "NWC: Kunde inte begära en melt-offert",
+      melt_quote_failed:
+        "NWC: Kunde inte hämta en betalningsoffert från minten",
       unit_must_be_sat: "NWC: Den aktiva enheten måste vara sats",
       allowance_exceeded: "NWC: Tillåtelsen har överskridits",
     },

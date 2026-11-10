@@ -1,6 +1,6 @@
 <!-- A mint card's labelled action on the name's line (src/css/app.scss .mint-card-add): a
-     compact 36px text button with a leading glyph, e.g. Discover's "Add" and Restore's
-     "Restore". Labelled, so it never reads as a second way into the card (council R76-R78).
+     44px tonal button with a leading glyph, e.g. Discover's "Add" and Restore's
+     "Restore". Labelled, so it never reads as a second way into the card.
      `loading` shows the pending dots in place. Emits `click` without opening the card. -->
 <template>
   <q-btn

@@ -5,7 +5,7 @@
       <FullscreenDialogHeader :title="headerTitle" />
 
       <!-- Content: one stack with one gap (QR, deposit note, amount, table), so no two
-           neighbours sit further apart than any others (owner 2026-11-01). What the payer
+           neighbours sit further apart than any others. What the payer
            pays, the invoice or address, is a copy row in the table. -->
       <div class="content-area">
         <FlowColumn class="q-px-md flow-stack">
@@ -141,7 +141,7 @@ export default defineComponent({
             ? "ActivityRow.sent"
             : "ActivityRow.received"
         );
-      if (this.isBolt12) return "Lightning Bolt12";
+      if (this.isBolt12) return this.$t("QuoteInformation.lightning_offer");
       if (this.isOnchain) return this.$t("common.on_chain");
       return this.$t("InvoiceDetailDialog.invoice.caption");
     },
@@ -243,7 +243,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-/* QR Code with checkmark overlay */
+/* The QR's rounded frame. */
 .qr-container {
   position: relative;
   border-radius: var(--app-radius-md);

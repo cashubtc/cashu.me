@@ -51,7 +51,7 @@ html:lang(zh) .q-item__label--caption {
   line-height: 1.6;
 }
 // Strict CJK line breaking (no line opens with "，" or "。"), and lines balanced so a short
-// word or a trailing "ecash。" doesn't sit alone on the last line (council R68-R76).
+// word or a trailing "ecash。" doesn't sit alone on the last line.
 html:lang(zh) p,
 html:lang(zh) .q-item__label--caption,
 html:lang(ja) p,
@@ -78,7 +78,7 @@ html:lang(ja) .q-item__label--caption {
   color: var(--app-text);
 }
 
-// Two button text standards (owner, 2026-10-29). Sentence case: 15/600, no tracking (inline,
+// Two button text standards. Sentence case: 15/600, no tracking (inline,
 // paired, compact and dialog actions). Caps: 16/600, 0.06em, uppercase (every full-width
 // action, everything in a FlowFooter, the wallet's Receive and Send, hero actions). Quasar's
 // `size` writes an inline font-size, so pill buttons never set it (guard in
@@ -188,7 +188,7 @@ body,
 // Label/value rows (DetailRow) in quote, token, request and mint detail views. Every row is
 // 44px (a full touch target) and rows sit 4px apart in a .detail-table, so plain and
 // interactive rows share one 48px pitch and a hover tint never reaches a neighbour
-// (owner 2026-10-29, item 11). Rows never set their own margins (guard in
+//. Rows never set their own margins (guard in
 // standardElements.test.ts).
 .detail-table {
   display: flex;
@@ -240,7 +240,7 @@ body,
 .detail-value.detail-value--controls {
   overflow: visible;
 }
-// Values are bold, as in the original design (owner, 2026-11-01); an unset placeholder
+// Values are bold, as in the original design; an unset placeholder
 // stays regular and muted.
 .detail-value {
   font-size: 15px;
@@ -318,7 +318,7 @@ body,
   max-width: var(--app-qr-size);
 }
 .qr-progress .q-linear-progress {
-  border-radius: 999px;
+  border-radius: var(--app-radius-pill);
   color: var(--app-text-muted) !important;
 }
 // Under reduced motion the sweep freezes mid-track: a solid centre segment on a faint rail,
@@ -374,8 +374,10 @@ body,
 // Quasar's .no-outline sets outline:0 !important on buttons, hence !important.
 .q-focusable:focus-visible,
 .mint-chip:focus-visible,
-button:focus-visible {
-  outline: 2px solid var(--app-accent) !important;
+button:focus-visible,
+.detail-item--link:focus-visible {
+  box-shadow: none !important;
+  outline: 2px solid var(--app-text) !important;
   outline-offset: 2px;
 }
 // Rows and tabs sit in overflow-clipped containers: draw the ring inside.
@@ -387,7 +389,7 @@ button:focus-visible {
 // Anything else focusable inside a clipped card (a button placed in a settings card or a
 // dialog summary) draws its ring inside too, so the card's rounded clip never cuts it.
 .settings-card :focus-visible,
-.council-dialog__summary :focus-visible {
+.confirm-dialog__summary :focus-visible {
   outline-offset: -2px !important;
 }
 
@@ -397,12 +399,8 @@ button:focus-visible {
 .q-btn[disabled]:not(.q-btn--loading) {
   opacity: 0.38 !important;
 }
-// Filled primary buttons go quiet rather than translucent (translucent primary read as dark
-// text on muddy grey): an empty pill with a hairline and a muted label. Not a filled surface,
-// which read as one more card or field next to the cards and fields it sits with.
-// Filled and tonal buttons that are disabled become one flat pill, quieter than a tonal
-// secondary (5% fill against 10%), with a muted label and no edge (council R68: Publish
-// review, Update, Add mint; owner 2026-10-29: no grey slab of disabled buttons).
+// Disabled filled and tonal buttons use a quiet ink fill (8% dark, 4% light),
+// a muted label and no edge. Loading buttons keep their enabled appearance.
 .q-btn.disabled.bg-primary:not(.q-btn--loading),
 .q-btn[disabled].bg-primary:not(.q-btn--loading),
 .q-btn--outline.disabled:not(.q-btn--loading),
@@ -537,8 +535,7 @@ body[data-theme] .welcome-surface,
 
 /* Toggles (the Material 3 switch): on = a filled primary track with a large on-primary thumb on
    the end side; off = an empty outlined track with a small ink thumb on the start side. On and
-   off differ in fill, thumb size and position, not just in which grey is lighter (council R68:
-   a light track with a dark thumb next to a grey track with a light thumb read as inverted). */
+   off differ in fill, thumb size and position, not just in which grey is lighter. */
 .q-toggle:not(.q-toggle--dense) {
   --toggle-off-ink: color-mix(in srgb, var(--app-text) 60%, transparent);
   .q-toggle__inner {
@@ -593,41 +590,41 @@ body.body--light .q-toggle.disabled .q-toggle__inner--truthy .q-toggle__track {
 
 /* Centred confirmation and edit dialogs (edit mint, remove mint): one title, one list or form,
    then a Cancel / confirm pair of equal pills. */
-.council-dialog {
+.confirm-dialog {
   width: 100%;
   max-width: 420px;
   border-radius: var(--app-radius-xl);
   padding: 24px 16px 16px;
 }
-.council-dialog__title {
+.confirm-dialog__title {
   font-size: 20px;
   font-weight: 700;
   line-height: 1.3;
   margin-bottom: 16px;
 }
-.council-dialog__summary {
+.confirm-dialog__summary {
   background: var(--app-group-fill);
   border: 1px solid var(--app-group-edge);
   border-radius: var(--app-radius-lg) !important;
   overflow: hidden;
   padding: 4px 0;
 }
-.council-dialog__summary .q-item {
+.confirm-dialog__summary .q-item {
   min-height: 56px;
 }
-.council-dialog__note {
+.confirm-dialog__note {
   font-size: 14px;
   line-height: 1.45;
   color: var(--app-text-muted);
   margin: 16px 0 0;
 }
-.council-dialog__actions {
+.confirm-dialog__actions {
   display: flex;
   gap: 12px;
   margin-top: 24px;
 }
-.council-dialog__actions .q-btn {
-  min-height: 48px;
+.confirm-dialog__actions .q-btn {
+  min-height: 44px;
   font-size: 15px;
   font-weight: 600;
 }
@@ -640,7 +637,7 @@ body.body--light .q-toggle.disabled .q-toggle__inner--truthy .q-toggle__track {
 /* Tab hover, pressed and focus share one inset shape that ends above the active underline:
    the fill and the ring both sit 6px inside the cell. */
 // The ring is drawn on that inset fill, so it has the fill's rounded corners (an outline at
-// a -6px offset shrank its radius and read square, council R75).
+// a -6px offset shrank its radius and read square).
 .q-tab.q-focusable:focus-visible {
   outline: none !important;
 }
@@ -669,8 +666,6 @@ body.body--light .q-toggle.disabled .q-toggle__inner--truthy .q-toggle__track {
   width: auto !important;
 }
 
-/* A select showing its placeholder reads muted until a value is picked. */
-
 /* Multi-line fields grow with their content; no native resize grip (Quasar's field sets one). */
 textarea,
 .q-textarea .q-field__native {
@@ -697,7 +692,7 @@ textarea,
 body.body--light .q-dialog__backdrop {
   background: rgba(0, 0, 0, 0.45) !important;
 }
-// A centred desktop flow keeps more of the page legible behind it (council R77).
+// A centred desktop flow keeps more of the page legible behind it.
 @media (min-width: 1024px) {
   body.body--dark .q-dialog__backdrop {
     background: rgba(0, 0, 0, 0.5) !important;
@@ -744,9 +739,6 @@ body.body--light .q-dialog__backdrop {
 .sheet-header__actions {
   position: absolute;
   inset-inline-end: 6px;
-}
-.sheet-header-actions {
-  gap: 0;
 }
 // The header title's clearance. Each side of the title is a flexible spacer with equal
 // growth, so the title stays centred; each spacer's minimum is the button(s) on its side
@@ -844,10 +836,9 @@ body.body--light .q-dialog__backdrop {
   line-height: 22px;
 }
 
-// The mint picker (ChooseMint), one recipe in two sizes (owner 2026-10-29, item 3): the
+// The mint picker (ChooseMint), one recipe in two sizes: the
 // outlined field's fill and edge, a 40px avatar, the name (and its balance) and a 44px chevron
-// button on the end. Both keep main's 16px of padding over and under the text (owner
-// 2026-10-29, "too squashed" at 4px), so with a balance line both are 78px (main: 82px); dense only lets a
+// button on the end. Both keep main's 16px of padding over and under the text, so with a balance line both are 78px (main: 82px); dense only lets a
 // one-line picker (no balance) drop to 56px instead of 72px. A label only adds a line over the
 // name, as an outlined field's label does. Larger text grows it rather than clipping.
 .mint-picker {
@@ -925,7 +916,7 @@ body.body--light .q-dialog__backdrop {
 }
 // The chevron is a plain round icon button, like every other icon button: no disc at rest;
 // the shared hover and press tints (.q-focus-helper, "Interaction states") show the disc only
-// while it's hovered or pressed (owner 2026-10-29c, item 1). Keyboard focus rings the field.
+// while it's hovered or pressed. Keyboard focus rings the field.
 .mint-picker__trigger {
   color: var(--app-text-muted);
 }
@@ -951,7 +942,7 @@ body.body--light .q-dialog__backdrop {
   opacity: 0.5;
 }
 // The field already dims; the button inside doesn't dim a second time.
-.mint-picker--disabled .q-btn.mint-picker__trigger {
+.mint-picker--disabled .q-btn .mint-picker__trigger {
   opacity: 1 !important;
 }
 
@@ -983,11 +974,11 @@ body .q-tab__indicator {
   border-radius: 2px;
   height: 3px;
 }
-// The wallet's History / Mints tabs (owner item 5): no baseline, and the indicator spans the
+// The wallet's History / Mints tabs: no baseline, and the indicator spans the
 // tab cell less the tab's corner radius at each end, at every width (Quasar's narrow indicator
 // only spanned the label, so it read short on stretched phone tabs).
 // The bar sits on the 16px content gutter like every page's content, so the tabs and the
-// indicator stay inside the column instead of running to the window edge (council R91).
+// indicator stay inside the column instead of running to the window edge.
 body .wallet-tabs {
   --wallet-tab-radius: 10px;
   box-shadow: none;
@@ -1017,27 +1008,6 @@ body .q-tooltip {
 body .q-slider__track {
   background: color-mix(in srgb, var(--app-text) 38%, transparent) !important;
 }
-// Rating stars are ink, like every other glyph: no gold anywhere. Selected stars
-// are full text colour; unselected stars in an input are muted controls, not a near-invisible
-// grey on dark cards.
-.q-rating .q-rating__icon--active {
-  color: var(--app-text) !important;
-}
-.q-rating .q-rating__icon:not(.q-rating__icon--active) {
-  color: var(--app-text-subtle) !important;
-}
-.review-stars .q-rating__icon:not(.q-rating__icon--active) {
-  color: var(--app-text-muted) !important;
-  opacity: 1; // Quasar dims unselected stars to 40%, which made them look disabled
-}
-
-.q-textarea textarea {
-  resize: none;
-}
-
-// Option rows on a sheet are tinted fills with no border (the hairline
-// read as too strong); in light mode they are white cards on the grey sheet, like Settings.
-
 // Captions and body copy break evenly, without a lone word or glyph on the last line, in
 // every locale (Arabic and Chinese captions ended on a single word or character).
 .q-item__label--caption,
@@ -1124,7 +1094,7 @@ body .q-field--outlined.q-field--readonly .q-field__control:before {
   border-color: transparent;
 }
 // A read-only value that is still the step's field (the welcome seed phrase): it keeps the
-// field's edge, over the quieter read-only fill (owner 2026-10-29, item 32).
+// field's edge, over the quieter read-only fill.
 body
   .q-field--outlined.q-field--readonly.readonly-outlined
   .q-field__control:before {
@@ -1162,7 +1132,7 @@ html[dir="rtl"]
 }
 // Secondary buttons are tonal: a neutral fill, no edge, an ink label. The label names the
 // button (WCAG 1.4.11 needs no boundary for a text button); an edge made every stack read as
-// boxes (owner, 2026-10-29). The theme colour is kept for filled primaries and selection.
+// boxes. The theme colour is kept for filled primaries and selection.
 // Quasar clears an outline button's background with !important.
 body .q-btn--outline {
   background: var(--app-tonal-fill) !important;
@@ -1408,10 +1378,6 @@ html[dir="rtl"] .q-gutter-x-lg > * {
   margin-left: 0;
   margin-right: 24px;
 }
-html[dir="rtl"] .q-rating__icon-container + .q-rating__icon-container {
-  margin-left: 0;
-  margin-right: 2px;
-}
 html[dir="rtl"] .q-field__marginal > * + * {
   margin-left: 0;
   margin-right: 2px;
@@ -1428,7 +1394,7 @@ input::placeholder,
 textarea::placeholder {
   font-family: inherit;
 }
-// Even line endings app-wide (council R91): body and description text breaks "pretty", so no
+// Even line endings app-wide: body and description text breaks "pretty", so no
 // single word or one or two CJK characters strand on the last line, while every other line
 // still fills the measure; short headings balance their lines.
 .q-item__label--caption,
@@ -1512,10 +1478,9 @@ html[dir="rtl"] .q-field__append {
 .display-token-fullscreen .bottom-panel {
   z-index: 2;
 }
-// On desktop a flow fills the window like any page (owner 2026-10-29: no small centred
-// cards). Its header, content and footer keep the app column (--app-column, 640px). QR and
+// On desktop a flow fills the window like any page. Its header, content and footer keep the app column (--app-column, 640px). QR and
 // receipt screens scroll as one and the action follows the details, so a short receipt has
-// no gap above a far-off button (round 40). Keypad flows keep the footer pinned.
+// no gap above a far-off button. Keypad flows keep the footer pinned.
 @media (min-width: 1024px) {
   .display-token-fullscreen {
     overflow-y: auto;
@@ -1585,17 +1550,17 @@ body .mint-card {
   border-radius: var(--app-radius-lg);
   padding: 0;
   background: var(--app-card-fill);
-  box-shadow: var(--app-card-shadow);
+  box-shadow: none;
 }
 // The active or selected card: a stronger fill and the shared selected edge, beside its
 // control (the check on the wallet's mint, or the restore checkbox). The fill alone read as too faint a
-// difference in both modes (council R69-R70).
+// difference in both modes.
 body .mint-card.mint-card--active {
   background: var(--app-card-fill-active);
   border-color: var(--app-card-edge-active);
 }
 // In light mode a grey fill and a 1px edge read faint on pale themes: the selected card takes
-// a light tint of the theme colour instead, so every theme marks it alike (council R75-R76).
+// a light tint of the theme colour instead, so every theme marks it alike.
 body.body--light .mint-card.mint-card--active {
   background: color-mix(in srgb, var(--q-primary) 9%, transparent);
 }
@@ -1619,7 +1584,7 @@ body.body--light .mint-card.mint-card--active {
 }
 /* The selection status: one fixed 24px cell on the name's line, holding the switching ring
    (18px) or the selected check (20px), or nothing, so switching never moves the name or the
-   menu (owner 2026-10-29: a ring while switching, a check on the selected mint). Ink, like
+   menu. Ink, like
    every glyph: 4.5:1 on every card fill. */
 .mint-card__status {
   align-items: center;
@@ -1654,11 +1619,7 @@ body.body--light .mint-card.mint-card--active {
   margin-inline: 0 -16px;
   width: 44px;
 }
-/* A mint card's labelled action (MintCardAction: Discover's Add, Restore's Restore): a
-   compact 36px text button (outlined pills dominated a list of five, council R77). */
-// Shaped like the "+ Add" text it stands in for: a short text bar, not a filled pill.
-// The loaded Add pill's box (44px tall, about 72px wide, the same offsets), not a text bar,
-// so the action reads the same before and after results arrive (council R91).
+// The skeleton reserves the Add pill's 44px height and approximate 72px width.
 .mint-card__action-skeleton {
   border-radius: var(--app-radius-pill);
   flex: none;
@@ -1667,7 +1628,7 @@ body.body--light .mint-card.mint-card--active {
   margin-inline-end: -4px;
   width: 72px;
 }
-// A tonal pill, so Add reads as a button beside the card's review link (council R88-R89).
+// A tonal pill, so Add reads as a button beside the card's review link.
 .mint-card-add {
   background: var(--app-tint-strong);
   flex: none;
@@ -1675,7 +1636,6 @@ body.body--light .mint-card.mint-card--active {
   margin-inline-end: -4px;
   font-size: 14px;
   font-weight: 600;
-  min-height: 36px;
   padding: 0 12px;
 }
 .mint-card-add__icon {
@@ -1699,13 +1659,13 @@ html[dir="rtl"] .restore-mint-check {
   min-height: 24px;
 }
 // No balance (Discover): the review line reads as the identity's third line, under the host
-// on the text edge, so the card has no empty band between them (council R68-R76).
+// on the text edge, so the card has no empty band between them.
 .mint-card__foot--meta {
   justify-content: flex-start;
   margin-top: -8px;
 }
 // A host-only mint has one identity line, centred on the 40px avatar: its review line comes
-// up to the same 24px pitch as a named card's host line (council R83).
+// up to the same 24px pitch as a named card's host line.
 .mint-card--host-only .mint-card__foot--meta {
   margin-top: -18px;
 }
@@ -1728,10 +1688,10 @@ html[dir="rtl"] .restore-mint-check {
   font-weight: 500;
 }
 
-// Toasts: Sonner as on kelbie.dev (owner 2026-11-01), on our tokens: a raised card with the
+// Toasts: Sonner as on kelbie.dev, on our tokens: a raised card with the
 // quiet control edge and 16px corners, 13px medium text with a muted description, a 16px icon
-// on the first line carrying the tone. No close button: a toast goes on its own, with a
-// swipe, or stays while hovered. Sonner owns the motion (slide in from the top, the stack
+// on the first line carrying the tone. A toast goes on its own, with a swipe or its close
+// button, and stays while hovered. Sonner owns the motion (slide in from the top, the stack
 // behind the newest, fan-out on hover). Stated with body and the theme attribute, so ours
 // outrank Sonner's own colours, whose stylesheet loads after this one.
 body [data-sonner-toaster][data-sonner-theme] {
@@ -1790,7 +1750,7 @@ body.body--light [data-sonner-toaster] [data-sonner-toast][data-styled="true"] {
   width: var(--app-qr-size);
 }
 // Light mode: the white plate on a white page keeps a hairline edge, so the QR still reads as
-// one object with the copy pill under it (council 2026-11-01).
+// one object with the copy pill under it.
 body.body--light .app-qr::after {
   border-radius: inherit;
   box-shadow: inset 0 0 0 1px var(--app-border);
@@ -1819,8 +1779,7 @@ body.body--light .app-qr::after {
   color: var(--app-text-muted);
 }
 
-// Title and text use the column's measure (a 320px cap broke the zh-CN title inside 另一个,
-// council R91); the title balances, the text breaks evenly (text-wrap below).
+// Title and text use the column's measure; the title balances and the text breaks evenly.
 .blocking-state__title {
   font-size: 22px;
   font-weight: 700;
@@ -1855,10 +1814,10 @@ body.body--light .app-qr::after {
   min-height: 52px;
 }
 
-// Scan rests on the page with no disc, as on the original wallet (owner 2026-10-29b, item 8):
+// Scan rests on the page with no disc, as on the original wallet:
 // page ink on the page. Hover, press and focus are the shared button states (the focus
 // helper's tint and the accent ring).
-// The scan glyph reads at the pills' weight (owner, 2026-11-01: bigger than 28px).
+// The scan glyph reads at the pills' weight.
 .wallet-scan-btn {
   background: transparent;
   color: var(--app-text);
@@ -1893,4 +1852,21 @@ body.body--light .app-qr::after {
 // Quasar centres the 32px track in a 56px box, so the visible switch ended 29px in.
 .q-item__section--side > .q-toggle:last-child {
   margin-inline-end: -13px;
+}
+
+// Shared mint card positioning, balance text and error marker.
+.mint-card {
+  position: relative;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.currency-unit-text {
+  color: var(--app-text);
+  font-size: 14px;
+  font-weight: 500;
+}
+.error-badge {
+  position: absolute;
+  top: 4px;
+  inset-inline-end: 30px;
+  z-index: 10;
 }

@@ -3,7 +3,9 @@
   <ConfigProvider :dir="dir">
     <router-view />
     <!-- Every toast (src/js/notify.ts): Sonner as on kelbie.dev, top-centre, our icons and tokens.
-         On a phone it starts under the 56px header, clear of its back and close buttons. -->
+         On a phone it starts under the 56px header, clear of its back and close buttons.
+         Each toast carries a close button on its trailing top corner (the left one in a
+         right-to-left locale), which hangs off the card's edge, clear of the text. -->
     <Toaster
       position="top-center"
       :theme="$q.dark.isActive ? 'dark' : 'light'"
@@ -11,7 +13,13 @@
       :offset="{ top: 'calc(16px + env(safe-area-inset-top))' }"
       :mobile-offset="{ top: 'calc(60px + env(safe-area-inset-top))' }"
       :container-aria-label="$t('global.notifications')"
+      close-button
+      :close-button-position="dir === 'rtl' ? 'top-left' : 'top-right'"
+      :toast-options="{
+        closeButtonAriaLabel: $t('global.actions.close.label'),
+      }"
     >
+      <template #close-icon><XIcon :size="12" /></template>
       <template #success-icon><CircleCheckIcon :size="16" /></template>
       <template #error-icon><CircleAlertIcon :size="16" /></template>
       <template #warning-icon><TriangleAlertIcon :size="16" /></template>
@@ -31,12 +39,13 @@ import {
   CircleCheck as CircleCheckIcon,
   Info as InfoIcon,
   TriangleAlert as TriangleAlertIcon,
+  X as XIcon,
 } from "lucide-vue-next";
 import { localeDir } from "src/boot/i18n";
 
 // No layout-level transition: FullscreenLayout owns the page transition (on a native wrapper);
 // a second out-in handshake around whole layouts only adds a way for Back to land on an empty
-// placeholder (owner item 17).
+// placeholder.
 export default defineComponent({
   name: "App",
   components: {
@@ -46,6 +55,7 @@ export default defineComponent({
     CircleCheckIcon,
     InfoIcon,
     TriangleAlertIcon,
+    XIcon,
   },
   computed: {
     dir(): "ltr" | "rtl" {

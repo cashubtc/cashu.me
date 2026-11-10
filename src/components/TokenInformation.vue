@@ -32,7 +32,7 @@
       />
 
       <!-- The token text, a copy row: where a QR shows the token, its text lives in the
-           table rather than as a line under the QR (owner 2026-11-01). -->
+           table rather than as a line under the QR. -->
       <DetailRow
         v-if="showToken && encodedToken"
         data-testid="token-copy-row"

@@ -9,7 +9,7 @@
       />
 
       <!-- Content area -->
-      <!-- The 16px flow column, the same edge as Pay's field and the footer (round 91). -->
+      <!-- The 16px flow column, the same edge as Pay's field and the footer. -->
       <div class="col column items-center justify-start scroll-container">
         <FlowColumn class="q-px-md q-mb-sm full-width">
           <transition appear enter-active-class="animated fadeIn">

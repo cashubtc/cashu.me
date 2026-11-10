@@ -18,7 +18,7 @@
       :value="unitDisplay"
     />
 
-    <!-- The one status (owner 2026-10-29, item 10). -->
+    <!-- The one status. -->
     <QuoteStatusRow
       v-if="stateDisplay && !(hidePaidStatus && isPaidState)"
       :tone="statusTone"
@@ -38,10 +38,10 @@
       :value="networkDisplay"
     />
 
-    <!-- What the payer pays lives in the table, not as a line under the QR (owner
-         2026-11-01): a Lightning invoice copies; the deposit address always shows, paid or
-         pending, copying while it waits (an explorer row beside it) and linking to an
-         explorer once paid (it came and went). -->
+    <!-- What the payer pays lives in the table, not as a line under the QR: a Lightning
+         invoice copies; the deposit address always shows, paid or pending, copying while it
+         waits (an explorer row beside it) and linking to an explorer once paid (it came and
+         went). -->
     <DetailRow
       v-if="!isOnchain && invoice?.request"
       :icon="ReceiptTextIcon"
@@ -269,7 +269,7 @@ export default defineComponent({
       ) {
         return this.$t("QuoteInformation.lightning_offer") as string;
       }
-      return "Lightning";
+      return this.$t("InvoiceTable.row.type_label") as string;
     },
     isOnchain(): boolean {
       return (
@@ -326,7 +326,6 @@ export default defineComponent({
     },
     async loadOnchainMetadata() {
       if (!this.isOnchain || !this.invoice?.request) return;
-      this.loadingOnchainMetadata = true;
       // A refetch keeps the last value on screen (no flash back to Waiting).
       try {
         this.onchainMetadata = await fetchAddressTxMetadata(
@@ -335,8 +334,6 @@ export default defineComponent({
         );
       } catch (error) {
         console.error("Could not fetch on-chain metadata", error);
-      } finally {
-        this.loadingOnchainMetadata = false;
       }
     },
     normalizeToTimestamp(value: string | number | Date | null | undefined) {
@@ -360,7 +357,6 @@ export default defineComponent({
   data: function () {
     return {
       onchainMetadata: null as MempoolTxMetadata | null,
-      loadingOnchainMetadata: false,
     };
   },
   watch: {

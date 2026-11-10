@@ -13,7 +13,7 @@
     @click="$emit('copy')"
   >
     <!-- Machine text runs left to right in every locale (in Arabic the trailing "==" of a
-         request jumped to its front, council R83). -->
+         request jumped to its front). -->
     <bdi dir="ltr" class="qr-copy-line__text">{{ shown }}</bdi>
     <CheckIcon v-if="copied" :size="16" class="qr-copy-line__icon" />
     <CopyIcon v-else :size="16" class="qr-copy-line__icon" />
@@ -73,7 +73,7 @@ export default defineComponent({
   /* It always sits under its QR: the stack's 16px gap above, the same as the note below. */
   margin: 16px auto 0;
   max-width: 100%;
-  /* The 44px tap target (council 2026-11-01). */
+  /* The 44px tap target. */
   min-height: 44px;
   padding: 0 14px 0 16px;
   transition: background 0.15s ease;
@@ -85,10 +85,6 @@ export default defineComponent({
 }
 .qr-copy-line:active {
   background: var(--app-tint-strong);
-}
-.qr-copy-line:focus-visible {
-  box-shadow: var(--app-focus-ring);
-  outline: none;
 }
 .qr-copy-line__text {
   min-width: 0;

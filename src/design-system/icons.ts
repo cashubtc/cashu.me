@@ -1,7 +1,7 @@
 // Every icon the app uses, read from the source at build time (dev only, like usage.ts): Lucide
 // icons by their imports, and any Material icon names still passed to Quasar (`name="…"`,
 // `icon="…"`, or quoted names inside a `:name`/`:icon` binding). The board shows them in one
-// grid so the council can check they read as one family.
+// grid to check they read as one family.
 
 const VUE = import.meta.globEager("/src/**/*.vue", { as: "raw" });
 const TS = import.meta.globEager("/src/**/*.ts", { as: "raw" });

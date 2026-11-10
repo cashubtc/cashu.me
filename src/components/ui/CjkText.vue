@@ -1,5 +1,5 @@
 <!-- Text that never breaks inside a Chinese or Japanese word. CJK text may wrap between any
-     two characters, so a short word like 钱包 split across lines (council R76-R82); here each
+     two characters, so a short word like 钱包 split across lines; here each
      word from Intl.Segmenter is kept whole (src/css/elements.scss .cjk-word), so lines break
      only between words. Other locales, and browsers without Intl.Segmenter, render the text
      unchanged. -->

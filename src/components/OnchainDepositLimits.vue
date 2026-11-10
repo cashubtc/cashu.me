@@ -1,6 +1,6 @@
 <!-- The selected mint's on-chain deposit range as one sentence ("Deposits outside
-     {min}–{max} won't be credited.") in the neutral callout (owner, 2026-10-29 item 7; neutral tone, batch 3 item 3): under the
-     mint picker on the amount step and under the address QR, the one screen a sender sees.
+     {min}–{max} won't be credited.") in the neutral callout: under the mint picker on the
+     amount step and under the address QR, the one screen a sender sees.
      The range is one left-to-right, non-breaking run, so Arabic keeps min before max and the
      sentence never splits it across lines. `limits` stands in for the mint's advertised range
      on the design-system board. -->
@@ -27,8 +27,8 @@ declare const windowMixin: any;
 
 // Private-use markers stand in for the amounts, so the sentence can be cut around the range
 // whatever order or punctuation a locale gives it.
-const MIN_MARK = "";
-const MAX_MARK = "";
+const MIN_MARK = "\uE000";
+const MAX_MARK = "\uE001";
 
 export default defineComponent({
   name: "OnchainDepositLimits",
@@ -83,7 +83,7 @@ export default defineComponent({
       } else {
         return null;
       }
-      const marks = [...template.matchAll(/[]/g)];
+      const marks = [...template.matchAll(/[\uE000\uE001]/g)];
       if (!marks.length) return { before: template, range: "", after: "" };
       const start = marks[0].index ?? 0;
       const end = (marks[marks.length - 1].index ?? 0) + 1;

@@ -85,9 +85,9 @@
                     "
                     class="q-mb-md"
                   >
-                    <!-- The amount as on every payment screen (owner 2026-11-01: the
-                         confirm step is redesigned to match Receive): centred, its fiat
-                         under it; the details follow in one table. -->
+                    <!-- The amount as on every payment screen, the confirm step matching
+                         Receive: centred, its fiat under it; the details follow in one
+                         table. -->
                     <AmountHeadline>{{
                       formatCurrency(
                         payInvoiceData.meltQuote.response.amount,
@@ -959,22 +959,11 @@ export default defineComponent({
         totalMultinutBalance >= this.payInvoiceData.meltQuote.response.amount
       );
     },
-    // The unit switch sits in the header while a quote or an amount is on screen, the steps
-    // where switching the unit re-quotes or re-enters it (not once paying or paid).
+    // The unit switch sits in the header on every idle step, the input and a failed or
+    // unsupported quote included: switching the unit re-quotes, which is the way out of a
+    // quote the current unit cannot serve. It leaves while a payment runs and once it is paid.
     unitCanChange: function (): boolean {
-      const data = this.payInvoiceData;
-      if (data.invoice) {
-        if (this.isPaid || this.paymentInProgress) return false;
-        if (data.meltQuote.response?.amount > 0) return true;
-        return (
-          !!this.showAmountlessPaymentAmountEntry &&
-          !!this.showAmountlessPaymentAmountKeyboard
-        );
-      }
-      return (
-        !!data.lnurlpay &&
-        data.lnurlpay.maxSendable != data.lnurlpay.minSendable
-      );
+      return !this.isPaid && !this.paymentInProgress;
     },
     insufficientFundsForAmountlessPayment: function (): boolean {
       if (
@@ -1178,8 +1167,8 @@ export default defineComponent({
   width: 100%;
 }
 
-/* The details follow the amount, as on Receive; they no longer sink to the footer across an
-   empty gap (owner 2026-11-01). */
+/* The details follow the amount, as on Receive, instead of sinking to the footer across an
+   empty gap. */
 .invoice-details-bottom {
   width: 100%;
   padding-top: 8px;

@@ -1,6 +1,6 @@
 // A mint's /v1/info contact list, cleaned up for display: the mint details page shows one
 // copy row per entry that has something to copy (an entry with an empty `info` drew an icon
-// and a copy button for nothing, owner 2026-10-29, item 8).
+// and a copy button for nothing).
 
 export type DisplayContact = { method: string; info: string };
 

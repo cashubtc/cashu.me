@@ -1,7 +1,7 @@
-<!-- A receive's one Status row (owner 2026-10-29, item 10). On-chain it moves Waiting for
-     payment (dots, muted), Confirming (n/m) (a clock, muted), Issuing ecash (dots), then Paid (a
-     check, in the positive colour; the green is back, 2026-10-29b, item 10). The mark, not the
-     colour alone, tells the states apart; the text carries the state for screen readers. -->
+<!-- A quote's one Status row, on a receive and on a payment. An on-chain receive moves
+     Waiting for payment (dots, muted), Confirming (n/m) (a clock, muted), Issuing ecash (dots),
+     then Paid (a check, in the positive colour). The mark, not the colour alone, tells the
+     states apart; the text carries the state for screen readers. -->
 <template>
   <DetailRow
     :icon="ActivityIcon"

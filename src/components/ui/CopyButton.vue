@@ -1,31 +1,28 @@
 <!-- A round icon button that copies a value with the app's copyText helper, showing a
      check for a moment afterwards. Labelled for screen readers; tooltip optional. -->
 <template>
-  <q-btn
-    flat
-    dense
-    round
-    :size="size"
-    :color="color"
-    :aria-label="label || tooltip || $t('global.actions.copy.label')"
+  <IconButton
+    :label="label || tooltip || $t('global.actions.copy.label')"
     @click="copy"
   >
     <CheckIcon v-if="copied" :size="iconSize" />
     <CopyIcon v-else :size="iconSize" />
     <q-tooltip v-if="tooltip">{{ tooltip }}</q-tooltip>
-  </q-btn>
+  </IconButton>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import { Check as CheckIcon, Copy as CopyIcon } from "lucide-vue-next";
 
+import IconButton from "src/components/ui/IconButton.vue";
+import { copyText } from "src/js/copy";
+
 const COPIED_MS = 1500;
 
 export default defineComponent({
   name: "CopyButton",
-  mixins: [windowMixin],
-  components: { CheckIcon, CopyIcon },
+  components: { CheckIcon, CopyIcon, IconButton },
   props: {
     value: {
       type: String,
@@ -39,14 +36,6 @@ export default defineComponent({
     tooltip: {
       type: String,
       default: "",
-    },
-    color: {
-      type: String,
-      default: "grey",
-    },
-    size: {
-      type: String,
-      default: "sm",
     },
     iconSize: {
       type: Number,
@@ -63,8 +52,8 @@ export default defineComponent({
     clearTimeout(this.timer);
   },
   methods: {
-    copy: function () {
-      this.copyText(this.value);
+    copy: async function () {
+      if (!(await copyText(this.value))) return;
       this.copied = true;
       clearTimeout(this.timer);
       this.timer = setTimeout(() => {

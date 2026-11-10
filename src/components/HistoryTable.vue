@@ -29,8 +29,7 @@
     <template v-else>
       <!-- Filters: what is filtered, as removable chips that wrap, how many of all payments
            show, and Clear all once two are on; the filter button on the end opens the sheet.
-           Nothing filtered, the button stands alone. Council 2026-11-01: the shipped row and
-           its "Clear all" variant tied; both reviewers asked for this merge. -->
+           Nothing filtered, the button stands alone. -->
       <div class="history-toolbar">
         <div v-if="activeGroups.length" class="history-chips">
           <FilterChip
@@ -117,7 +116,7 @@
             formattedDate(transaction.date),
           ]"
           caption-class="text-app-muted"
-          @details-click="showTransactionDialog(transaction)"
+          @click="showTransactionDialog(transaction)"
         >
           <template #caption-end>
             <!-- Status, with the check action for pending rows -->
@@ -126,7 +125,7 @@
               class="row items-center no-wrap text-app-muted text-caption"
             >
               <!-- A labelled action ("Check status"), not a bare refresh glyph that read as
-                   the wallet-wide refresh (council R68-R70). -->
+                   the wallet-wide refresh. -->
               <q-btn
                 flat
                 dense
@@ -686,7 +685,7 @@ export default defineComponent({
   font-size: 14px !important;
   font-weight: 500;
   /* The 44px target reaches a little past its row: it paints above the next row (whose fill
-     hid its tint and ring, hover audit F3) and draws its ring inside. */
+     would hide its tint and ring) and draws its ring inside. */
   margin-block: -10px;
   margin-inline-end: -8px;
   min-height: 44px;

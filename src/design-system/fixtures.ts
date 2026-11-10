@@ -1,6 +1,5 @@
-// In-memory sample data for the design system board (/design-system, dev builds only). Plain
-// objects handed to real components as props: nothing here touches a store, the database or
-// local storage, so the board is the same for everyone and never shows the wallet's own data.
+// In-memory sample props for the dev-only design system board. These fixtures do not
+// access storage; the board also renders live components that read wallet stores.
 
 import { UnifiedTransactionType } from "src/stores/walletTypes";
 

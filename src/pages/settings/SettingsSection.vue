@@ -20,7 +20,14 @@
     <div v-if="flat" class="settings-section-flat">
       <slot />
     </div>
-    <q-list v-else class="settings-card">
+    <!-- radiogroup: the card is one single-choice group (its rows are SettingsRadioRow),
+         named by the section title or by the string passed in. -->
+    <q-list
+      v-else
+      class="settings-card"
+      :role="radiogroup ? 'radiogroup' : undefined"
+      :aria-label="radiogroup ? groupLabel : undefined"
+    >
       <slot />
     </q-list>
   </div>
@@ -50,6 +57,17 @@ export default defineComponent({
     warning: {
       type: Boolean,
       default: false,
+    },
+    /** The card holds one single-choice group. True names the group by the section title;
+     *  a string names a group whose section has no title. */
+    radiogroup: {
+      type: [Boolean, String],
+      default: false,
+    },
+  },
+  computed: {
+    groupLabel(): string {
+      return typeof this.radiogroup === "string" ? this.radiogroup : this.title;
     },
   },
 });

@@ -5,7 +5,7 @@
       class="row q-mt-xs q-mb-none"
       v-if="!sheetOnly && (activeMintUrl || !requireActiveMint)"
     >
-      <!-- One mint picker in two sizes (owner 2026-10-29, item 3): normal (the wallet) and
+      <!-- One mint picker in two sizes: normal (the wallet) and
            dense (flows and forms) share 16px padding, 78px with a balance line; dense only
            lets a one-line picker drop to 56px. Both are the outlined
            field with a 40px avatar, the name with its balance under it, and the chevron as a
@@ -274,8 +274,12 @@ export default defineComponent({
     this.initializeChosenMint();
   },
   watch: {
-    open(value: boolean) {
-      this.showMintSheet = value;
+    open: {
+      // immediate: a picker can be mounted with its sheet already open.
+      handler(value: boolean) {
+        this.showMintSheet = value;
+      },
+      immediate: true,
     },
     showMintSheet(value: boolean) {
       if (value !== this.open) this.$emit("update:open", value);

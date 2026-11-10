@@ -8,8 +8,7 @@
        ExternalLink glyph in the text colour;
      - `copyValue`: the whole row copies that string, the value ending in a Copy glyph.
      A trailing glyph (chevron, external link, copy) sits inside the value and takes its colour:
-     a set value's text colour, a placeholder's muted, a disabled row's subtle (owner
-     2026-10-29b, item 2).
+     a set value's text colour, a placeholder's muted, a disabled row's subtle.
      Interactive rows tint their own box on hover and press (never a neighbour's) and bleed
      12px past the text, so the label and value stay on the table's edges. -->
 <template>
@@ -83,14 +82,13 @@
 
 <script lang="ts">
 import { defineComponent, type Component, type PropType } from "vue";
-import { copyToClipboard } from "quasar";
+import { copyText } from "src/js/copy";
 import {
   Check as CheckIcon,
   ChevronRight as ChevronRightIcon,
   Copy as CopyIcon,
   ExternalLink as ExternalLinkIcon,
 } from "lucide-vue-next";
-import { notifyCopied } from "src/js/notify";
 
 const COPIED_MS = 1500;
 
@@ -173,13 +171,8 @@ export default defineComponent({
       this.$emit("click", event);
     },
     async copy() {
-      try {
-        await copyToClipboard(this.copyValue);
-      } catch (e) {
-        console.error("Copy failed", e);
+      if (!(await copyText(this.copyValue, this.copiedMessage || undefined)))
         return;
-      }
-      notifyCopied(this.copiedMessage || undefined);
       this.copied = true;
       clearTimeout(this.timer);
       this.timer = setTimeout(() => {
@@ -224,12 +217,6 @@ export default defineComponent({
 }
 .detail-item--action:not([aria-disabled="true"]):active::before {
   background: var(--app-tint-strong);
-}
-.detail-item--action:focus-visible {
-  outline: none;
-}
-.detail-item--action:focus-visible::before {
-  box-shadow: var(--app-focus-ring);
 }
 .detail-item--action[aria-busy="true"] {
   cursor: progress;

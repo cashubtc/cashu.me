@@ -3,7 +3,7 @@ import { expect, test } from "../fixtures/test";
 import { MINT_A_URL } from "../fixtures/mint";
 import { WalletUi } from "../pages/WalletUi";
 
-// Toasts are Sonner as on kelbie.dev (owner 2026-11-01): top-centre, the newest in front with older
+// Toasts are Sonner as on kelbie.dev: top-centre, the newest in front with older
 // ones tucked behind, each leaving on its own, never blocking taps outside the cards.
 // The toasts come from the app's real helpers (src/js/notify.ts), loaded by the dev server.
 

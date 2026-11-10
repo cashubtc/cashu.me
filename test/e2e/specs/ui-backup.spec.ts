@@ -110,16 +110,17 @@ test("reveals and copies a seed and restores spendable funds in a fresh wallet",
   await wallet.onboard(MINT_B_URL);
   await wallet.mintBolt11(64);
   await wallet.settings("backup");
-  await expect(page.locator("textarea")).toHaveValue(/\*/);
+  await expect(page.locator(".seed-text")).toHaveText(/\*/);
   await page.getByTestId("reveal-seed").click();
-  const mnemonic = await page.locator("textarea").inputValue();
+  await expect(page.locator(".seed-text")).not.toHaveText(/\*/);
+  const mnemonic = (await page.locator(".seed-text").innerText()).trim();
   expect(mnemonic.split(" ")).toHaveLength(12);
   await page.getByTestId("copy-seed").click();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
     mnemonic
   );
   await page.reload();
-  await expect(page.locator("textarea")).toHaveValue(/\*/);
+  await expect(page.locator(".seed-text")).toHaveText(/\*/);
   const context = await browser.newContext({
     permissions: ["clipboard-read", "clipboard-write"],
     serviceWorkers: "block",

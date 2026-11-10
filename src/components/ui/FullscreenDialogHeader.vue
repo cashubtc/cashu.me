@@ -26,11 +26,7 @@
         </q-item-label>
       </slot>
     </div>
-    <div
-      v-if="$slots.actions"
-      ref="actions"
-      class="row items-center no-wrap sheet-header__actions"
-    >
+    <div ref="actions" class="row items-center no-wrap sheet-header__actions">
       <slot name="actions" />
     </div>
   </div>

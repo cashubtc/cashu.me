@@ -65,7 +65,7 @@ export default defineComponent({
 .mint-review__chevron {
   color: var(--app-text-muted);
   flex-shrink: 0;
-  /* Centre the chevron's ink on the menu dots above it (owner 2026-10-29c): the dots' ink is
+  /* Centre the chevron's ink on the menu dots above it: the dots' ink is
      the centre of their 20px glyph, the chevron's sits 2px past the centre of its 16px box.
      (It mirrors in rtl through the global chevron rule.) */
   margin-inline-end: -2px;

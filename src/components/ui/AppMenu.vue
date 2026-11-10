@@ -47,6 +47,7 @@
               icon-size="sm"
               :icon="item.icon"
               :label="item.label"
+              :disabled="item.disabled"
               :class="{ 'app-menu-sheet__row--danger': item.danger }"
               :data-testid="item.testid || undefined"
               @click="onSheetSelect(item)"

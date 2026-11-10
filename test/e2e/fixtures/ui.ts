@@ -52,7 +52,7 @@ export type RowAlignment = {
 
 /**
  * Every visible settings-style row (SettingsActionRow, SettingsLinkRow, toggles) under `root`:
- * where its icon and end glyph sit against its text (owner 2026-10-29b, item 5).
+ * where its icon and end glyph sit against its text.
  */
 export async function rowAlignment(root: Locator): Promise<RowAlignment[]> {
   return root.locator(".q-item:has(.q-item__label)").evaluateAll((items) =>

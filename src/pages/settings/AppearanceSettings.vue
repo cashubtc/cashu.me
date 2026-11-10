@@ -23,7 +23,7 @@
 
     <!-- mode: dark or light, chosen like a theme (light mode had no
          control in the app) -->
-    <SettingsSection :title="$t('Settings.appearance.mode.title')">
+    <SettingsSection radiogroup :title="$t('Settings.appearance.mode.title')">
       <SettingsRadioRow
         v-for="mode in modeOptions"
         :key="mode.name"
@@ -45,6 +45,7 @@
 
     <!-- theme -->
     <SettingsSection
+      radiogroup
       :title="$t('Settings.appearance.theme.title')"
       :caption="$t('Settings.appearance.theme.description')"
     >

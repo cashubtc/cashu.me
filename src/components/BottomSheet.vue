@@ -6,7 +6,7 @@
   <component
     :is="inline ? 'div' : QDialog"
     v-bind="inline ? { class: 'bottom-sheet--inline' } : dialogProps"
-    @keydown.enter.prevent="$emit('enter')"
+    @keydown.enter="onEnter"
   >
     <q-card class="bottom-sheet">
       <!-- Header -->
@@ -124,6 +124,21 @@ export default defineComponent({
       }
     },
   },
+  methods: {
+    // Enter anywhere in the sheet is its primary action (the "enter" event), except on a
+    // control that Enter activates itself: there the key keeps its own meaning.
+    onEnter(event: KeyboardEvent) {
+      const target = event.target as HTMLElement | null;
+      if (
+        target?.closest?.(
+          "button, a, [role=button], [role=option], [role=radio], summary, select, textarea"
+        )
+      )
+        return;
+      event.preventDefault();
+      this.$emit("enter");
+    },
+  },
   beforeUnmount() {
     if (this.modelValue && !this.inline) {
       const ui = useUiStore();
@@ -185,7 +200,7 @@ export default defineComponent({
 }
 /* Without an actions bar the list scrolls to the sheet's own bottom edge, and the bottom
    inset (safe area included) is inside the scroll: a long list (Language) is cut by the
-   sheet's edge, which reads as scrollable, never a row clipped 8px above it (council R91). */
+   sheet's edge, which reads as scrollable, never a row clipped 8px above it. */
 .bottom-sheet:not(:has(> .bottom-sheet-actions)) {
   padding-bottom: 0;
 }

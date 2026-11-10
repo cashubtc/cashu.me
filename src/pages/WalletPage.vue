@@ -80,25 +80,25 @@
         </q-tab-panels>
       </q-expansion-item>
 
-      <div style="margin-bottom: 0rem">
-        <div class="row q-pt-sm">
-          <div class="col-12 q-pt-xs">
-            <q-btn
-              class="q-mx-xs q-px-sm q-my-sm"
-              outline
-              size="0.6rem"
-              v-if="
-                getPwaDisplayMode() == 'browser' &&
-                deferredPWAInstallPrompt != null
-              "
-              color="primary"
-              @click="triggerPwaInstall()"
-              ><b>{{ $t("WalletPage.install.text") }}</b
-              ><q-tooltip>{{
-                $t("WalletPage.install.tooltip")
-              }}</q-tooltip></q-btn
-            >
-          </div>
+      <!-- The browser's own install flow, wherever the browser offers it: desktop browsers
+           and a phone whose install sheet was closed get no PwaPrompt. -->
+      <div class="row q-pt-sm">
+        <div class="col-12 q-pt-xs">
+          <q-btn
+            v-if="
+              getPwaDisplayMode() == 'browser' &&
+              deferredPWAInstallPrompt != null
+            "
+            flat
+            rounded
+            color="primary"
+            class="touch-target-44 q-px-md"
+            :label="$t('WalletPage.install.text')"
+            @click="triggerPwaInstall()"
+            ><q-tooltip>{{
+              $t("WalletPage.install.tooltip")
+            }}</q-tooltip></q-btn
+          >
         </div>
       </div>
 
@@ -148,13 +148,10 @@
 }
 
 /* Its hover and focus fill is a rounded shape like the rows and the ring, not an
-   edge-to-edge slab (hover audit F7). */
+   edge-to-edge slab. */
 .wallet-history-toggle {
   border-radius: var(--app-radius-md);
   min-height: 44px;
-}
-.wallet-history-toggle :deep(.q-focus-helper) {
-  border-radius: inherit;
 }
 @media (max-width: 599.98px) {
   .wallet-history-toggle {
@@ -388,28 +385,6 @@ export default {
         }
       };
     },
-    equalizeButtonWidths: function () {
-      this.$nextTick(() => {
-        const actionBtns = document.querySelectorAll(".wallet-action-btn");
-        if (actionBtns.length >= 2) {
-          // Reset widths first
-          actionBtns.forEach((btn) => {
-            (btn as HTMLElement).style.width = "auto";
-          });
-
-          // Get the maximum width
-          let maxWidth = 0;
-          actionBtns.forEach((btn) => {
-            maxWidth = Math.max(maxWidth, (btn as HTMLElement).offsetWidth);
-          });
-
-          // Apply the maximum width to all buttons
-          actionBtns.forEach((btn) => {
-            (btn as HTMLElement).style.width = `${maxWidth}px`;
-          });
-        }
-      });
-    },
     handleVisibilityChange: function () {
       if (document.visibilityState === "visible") {
         console.log("### App brought to foreground, checking NWC...");
@@ -423,16 +398,10 @@ export default {
 
   mounted: function () {
     this.initializeNpubCash();
-    // Ensure wallet action buttons have equal width
-    this.$nextTick(this.equalizeButtonWidths);
-    // Add window resize listener to handle responsive layouts
-    window.addEventListener("resize", this.equalizeButtonWidths);
     document.addEventListener("visibilitychange", this.handleVisibilityChange);
   },
 
   beforeUnmount: function () {
-    // Remove event listener when component is destroyed
-    window.removeEventListener("resize", this.equalizeButtonWidths);
     document.removeEventListener(
       "visibilitychange",
       this.handleVisibilityChange

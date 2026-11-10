@@ -8,7 +8,7 @@ import { disableAutomaticChecks, holdIncomingQuote } from "../fixtures/ui";
 // that sits under the wrong ancestor (once, the settings column around every sample) or rebuilds
 // a component from parts drifts from the app while looking plausible. These pairs measure the
 // same real element in the app and on the board and require the same computed geometry, type
-// and colour (owner 2026-10-29b, item 9).
+// and colour.
 
 /** An element's box, and the type and colour of the text inside it. */
 type Metrics = {

@@ -5,39 +5,14 @@
   >
     <!-- seed phrase -->
     <SettingsSection
+      flat
       :title="$t('Settings.backup_restore.backup_seed.title')"
       :caption="$t('Settings.backup_restore.backup_seed.description')"
     >
-      <q-item class="settings-control-item">
-        <q-item-section>
-          <q-input
-            readonly
-            v-model="hiddenMnemonic"
-            :label="$t('Settings.backup_restore.backup_seed.seed_phrase_label')"
-            :input-style="{ direction: 'ltr', textAlign: 'left' }"
-            autogrow
-          >
-            <template v-slot:append>
-              <IconButton
-                :label="
-                  hideMnemonic
-                    ? $t('global.actions.show_seed.label')
-                    : $t('global.actions.hide_seed.label')
-                "
-                data-testid="reveal-seed"
-                @click="toggleMnemonicVisibility"
-                ><EyeIcon :size="20"
-              /></IconButton>
-              <CopyButton
-                :value="mnemonic"
-                color="primary"
-                size="md"
-                data-testid="copy-seed"
-              />
-            </template>
-          </q-input>
-        </q-item-section>
-      </q-item>
+      <SeedPhraseField
+        :mnemonic="mnemonic"
+        :label="$t('Settings.backup_restore.backup_seed.seed_phrase_label')"
+      />
     </SettingsSection>
 
     <!-- restore -->
@@ -53,49 +28,25 @@
 </template>
 
 <script lang="ts">
-import IconButton from "src/components/ui/IconButton.vue";
-import { Eye as EyeIcon } from "lucide-vue-next";
 import { defineComponent } from "vue";
 import { mapState } from "pinia";
 import { useWalletStore } from "src/stores/wallet";
 import SettingsPageShell from "./SettingsPageShell.vue";
 import SettingsSection from "./SettingsSection.vue";
-import CopyButton from "src/components/ui/CopyButton.vue";
+import SeedPhraseField from "src/components/ui/SeedPhraseField.vue";
 import SettingsActionRow from "src/components/ui/SettingsActionRow.vue";
 
 export default defineComponent({
   name: "BackupRestoreSettings",
   mixins: [windowMixin],
   components: {
-    IconButton,
-    CopyButton,
-    EyeIcon,
+    SeedPhraseField,
     SettingsActionRow,
     SettingsPageShell,
     SettingsSection,
   },
-  data: function () {
-    return {
-      hideMnemonic: true,
-    };
-  },
   computed: {
     ...mapState(useWalletStore, ["mnemonic"]),
-    hiddenMnemonic() {
-      if (this.hideMnemonic) {
-        return this.mnemonic
-          .split(" ")
-          .map((w) => "*".repeat(6))
-          .join(" ");
-      } else {
-        return this.mnemonic;
-      }
-    },
-  },
-  methods: {
-    toggleMnemonicVisibility: function () {
-      this.hideMnemonic = !this.hideMnemonic;
-    },
   },
 });
 </script>

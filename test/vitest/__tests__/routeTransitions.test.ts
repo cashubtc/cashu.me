@@ -11,7 +11,7 @@ import {
 import { createMemoryHistory, createRouter } from "vue-router";
 import { describe, expect, it, vi } from "vitest";
 
-// The real FullscreenLayout and real <transition> (owner item 17): Back to or from a page whose
+// The real FullscreenLayout and real <transition>: Back to or from a page whose
 // template compiles to a fragment (a leading comment in dev builds) must still render the
 // destination, never an empty placeholder. The browser spec (ui-route-back) covers the CSS.
 
@@ -76,10 +76,16 @@ function mountLayout() {
   const wrapper = mount(FullscreenLayout, {
     global: {
       plugins: [router],
-      stubs: { FullscreenHeader: true, QLayout: Shell, QPageContainer: Shell },
+      stubs: {
+        transition: false,
+        FullscreenHeader: true,
+        QLayout: Shell,
+        QPageContainer: Shell,
+      },
     },
     attachTo: document.body,
   });
+  expect(wrapper.find("transition-stub").exists()).toBe(false);
   return { router, wrapper };
 }
 

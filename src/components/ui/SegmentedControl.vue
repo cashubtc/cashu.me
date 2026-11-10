@@ -126,10 +126,6 @@ export default defineComponent({
     color: var(--app-text);
   }
 }
-.segmented__option:focus-visible {
-  box-shadow: var(--app-focus-ring);
-  outline: none;
-}
 /* Disabled: the same control, selection included, dimmed as a whole like the keypad beside
    it (an outlined thumb read as a different, deselected state). */
 .segmented--disabled {

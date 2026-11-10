@@ -77,8 +77,8 @@
 
       <!-- Mint discovery -->
       <div class="q-mb-md row justify-center">
-        <!-- One filled action at a time (owner 2026-10-29, item 2): Discover leads until a
-             mint URL is typed, then Add mint takes the fill. -->
+        <!-- One filled action at a time: Discover leads until a mint URL is typed, then Add
+             mint takes the fill. -->
         <q-btn
           :outline="hasManualMintUrl"
           :unelevated="!hasManualMintUrl"
@@ -98,7 +98,7 @@
     <div class="q-pt-xs q-px-sm" ref="addMintDiv">
       <div class="add-mint-container">
         <!-- With no mint yet, the wallet's empty state above already says "Add a mint": the
-             form keeps only its description, so the label doesn't repeat (council R83). -->
+             form keeps only its description, so the label doesn't repeat. -->
         <SectionDivider
           class="q-mt-sm"
           :label="mints.length ? $t('MintSettings.add.title') : ''"
@@ -160,7 +160,8 @@
         :label="$t('MintSettings.swap.title')"
         :caption="$t('MintSettings.swap.caption')"
       />
-      <!-- From and To are the wallet's mint picker (icons, balances, the same sheet). -->
+      <!-- From and To are the wallet's mint picker (icons, balances, the same sheet). The
+           amount and Swap stay off until the two sides name different mints. -->
       <ChooseMint
         test-id="swap-from"
         dense
@@ -196,7 +197,7 @@
           :disable="
             !swapData.fromUrl ||
             !swapData.toUrl ||
-            swapData.fromUrl == swapData.toUrl ||
+            swapData.fromUrl?.url === swapData.toUrl?.url ||
             swapBlocking
           "
         ></q-input>
@@ -210,7 +211,7 @@
             !swapData.fromUrl ||
             !swapData.toUrl ||
             !(swapData.amount > 0) ||
-            swapData.fromUrl == swapData.toUrl
+            swapData.fromUrl?.url === swapData.toUrl?.url
           "
           :loading="swapBlocking"
         >
@@ -464,12 +465,6 @@ export default defineComponent({
 </script>
 
 <style>
-@import "src/css/mintlist.css";
-
-/* Swap sits beside the 56px amount field, with the 1rem label of the other mint actions. */
-
-/* Add mint matches the height and label size of Discover mints and Swap. */
-/* Discover mints, Add mint and Swap are full-width actions: the shared 52px height. */
 /* Add Mint Section Styles */
 .add-mint-container {
   width: 100%;

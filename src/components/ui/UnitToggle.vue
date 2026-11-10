@@ -1,5 +1,5 @@
 <!-- The ecash unit switch, a trailing action of an amount screen's FullscreenDialogHeader
-     (owner 2026-10-29b, item 11): the unit's code (BTC, USD, from unitCode) and a chevron, 44px,
+: the unit's code (BTC, USD, from unitCode) and a chevron, 44px,
      in the header ink (src/css/app.scss .sheet-unit-toggle). Named "Unit: Bitcoin, change", apart
      from the amount's ⇅ swap ("Enter amount in USD"), which stays with the amount. It follows the
      active mint and unit and renders nothing when the mint offers a single unit; `unit` and

@@ -206,7 +206,7 @@ test("recovers when a mint rotates its keyset before receiving old ecash", async
 });
 
 // Lock mode never sends an unlocked token: SEND (and Enter) stay off until the receiver's
-// key is valid, and the token that goes out is P2PK-locked to it (owner, 2026-10-29).
+// key is valid, and the token that goes out is P2PK-locked to it.
 test("lock mode gates SEND on a valid receiver key and sends a locked token", async ({
   browser,
   request,

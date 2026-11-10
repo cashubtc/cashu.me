@@ -7,7 +7,8 @@
     class="app-option-row"
     :class="{ 'app-option-row--selected': selected }"
     :role="static ? undefined : role"
-    :tabindex="static ? undefined : 0"
+    :tabindex="static || disabled ? undefined : 0"
+    :aria-disabled="disabled || undefined"
     :aria-selected="role === 'option' ? selected : undefined"
     @click="activate"
     @keydown.enter.prevent="activate"
@@ -52,13 +53,14 @@ export default defineComponent({
     caption: { type: String, default: "" },
     selected: { type: Boolean, default: false },
     role: { type: String as PropType<"button" | "option">, default: "button" },
+    disabled: { type: Boolean, default: false },
     static: { type: Boolean, default: false },
     labelClass: { type: String, default: "" },
   },
   emits: ["click"],
   methods: {
     activate(event: Event) {
-      if (!this.static) this.$emit("click", event);
+      if (!this.static && !this.disabled) this.$emit("click", event);
     },
   },
 });

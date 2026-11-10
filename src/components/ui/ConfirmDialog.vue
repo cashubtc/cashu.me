@@ -1,7 +1,7 @@
 <!-- A decision that needs a yes: a title, what it applies to (label and value rows), one note
      on the consequence, then Cancel and the confirming pill (the danger pill when it
      destroys something). `inline` draws the card in place, for the design system board.
-     Styles: src/css/app.scss .council-dialog. -->
+     Styles: src/css/app.scss.confirm-dialog. -->
 <template>
   <component
     :is="inline ? 'div' : QDialog"
@@ -16,9 +16,9 @@
           }
     "
   >
-    <q-card class="council-dialog">
-      <div class="council-dialog__title">{{ title }}</div>
-      <q-list v-if="summary.length" class="council-dialog__summary">
+    <q-card class="confirm-dialog">
+      <div class="confirm-dialog__title">{{ title }}</div>
+      <q-list v-if="summary.length" class="confirm-dialog__summary">
         <q-item v-for="row in summary" :key="row.label">
           <q-item-section>
             <q-item-label caption>{{ row.label }}</q-item-label>
@@ -26,8 +26,8 @@
           </q-item-section>
         </q-item>
       </q-list>
-      <p v-if="note" class="council-dialog__note">{{ note }}</p>
-      <div class="council-dialog__actions">
+      <p v-if="note" class="confirm-dialog__note">{{ note }}</p>
+      <div class="confirm-dialog__actions">
         <q-btn flat rounded class="col" @click="close">
           {{ cancelLabel || $t("global.actions.cancel.label") }}
         </q-btn>

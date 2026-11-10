@@ -1,7 +1,7 @@
 import { mount } from "@vue/test-utils";
 import { describe, expect, it, vi } from "vitest";
 
-// ExpansionIndicator (owner item 6) and WalletActions' Scan (item 24).
+// ExpansionIndicator  and WalletActions' Scan (item 24).
 
 vi.hoisted(() => {
   (globalThis as unknown as { windowMixin: object }).windowMixin = {};

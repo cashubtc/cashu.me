@@ -74,7 +74,7 @@
       </div>
 
       <!-- Each placeholder bar sits in a full comment line box (15px at 1.5), so a one- or
-           two-line skeleton is exactly as tall as the review that replaces it (council R91). -->
+           two-line skeleton is exactly as tall as the review that replaces it. -->
       <div v-if="skeleton" class="review-comment">
         <div class="review-skeleton-line">
           <q-skeleton

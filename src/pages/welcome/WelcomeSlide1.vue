@@ -132,17 +132,6 @@ export default {
     },
     toggleLanguageMenu() {
       this.showLanguageMenu = !this.showLanguageMenu;
-      if (this.showLanguageMenu) {
-        // Open on the current language, which can sit below the fold in a long list.
-        // The sheet is teleported to <body>, so look it up there once it has mounted.
-        this.$nextTick(() => {
-          requestAnimationFrame(() => {
-            document
-              .querySelector(".language-options .sheet-option--selected")
-              ?.scrollIntoView({ block: "nearest" });
-          });
-        });
-      }
     },
     closeLanguageMenu() {
       this.showLanguageMenu = false;
@@ -172,7 +161,7 @@ export default {
         if (!selected) return;
         selected.scrollIntoView({ block: "center" });
         // Then settle on a whole row, so no sliver of a row peeks out under the sheet
-        // header (council R83-R84).
+        // header.
         const box = selected.closest(".bottom-sheet-content");
         if (!box) return;
         const boxTop = box.getBoundingClientRect().top;
@@ -194,7 +183,7 @@ export default {
 }
 .welcome-start :deep(.welcome-slide__title) {
   /* A step larger than later steps' titles, and smaller on narrow phones, so a long
-     localized title keeps the page margins (council R85-R87). */
+     localized title keeps the page margins. */
   font-size: clamp(1.75rem, 8vw, 2.2rem);
   letter-spacing: -0.02em;
 }
@@ -246,13 +235,10 @@ export default {
   text-underline-offset: 2px;
 }
 
-.terms-link:hover {
-  text-decoration-thickness: 2px;
-}
-
-.terms-link:focus-visible {
-  outline: 2px solid var(--app-accent);
-  outline-offset: 2px;
+@media (hover: hover) {
+  .terms-link:hover {
+    text-decoration-thickness: 2px;
+  }
 }
 
 .language-section {
@@ -261,7 +247,8 @@ export default {
   margin-top: 8px;
 }
 
-/* Language trigger: a 44px target in muted ink. */
+/* Language trigger: a 44px target in muted ink. Like the terms link it is a native button, so
+   keyboard focus draws the app's shared ring (src/css/app.scss, "Interaction states"). */
 .language-trigger {
   align-items: center;
   background: none;
@@ -277,13 +264,13 @@ export default {
   padding: 8px 16px;
 }
 
-.language-trigger:hover {
-  color: var(--app-text);
-}
-
-.language-trigger:focus-visible {
-  outline: 2px solid var(--app-accent);
-  outline-offset: 2px;
+@media (hover: hover) {
+  .language-trigger:hover {
+    color: var(--app-text);
+  }
+  .language-trigger:hover .language-icon {
+    transform: scale(1.1);
+  }
 }
 
 .language-text {
@@ -293,10 +280,6 @@ export default {
 
 .language-icon {
   transition: transform 0.2s ease;
-}
-
-.language-trigger:hover .language-icon {
-  transform: scale(1.1);
 }
 
 /* The language and terms lists sit inside the shared BottomSheet. */

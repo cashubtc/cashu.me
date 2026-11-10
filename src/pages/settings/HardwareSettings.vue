@@ -4,6 +4,7 @@
     :caption="$t('Settings.menu.hardware.caption')"
   >
     <SettingsSection
+      radiogroup
       :title="$t('Settings.hardware_features.webnfc.title')"
       :caption="$t('Settings.hardware_features.webnfc.description')"
     >

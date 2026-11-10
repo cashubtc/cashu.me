@@ -1,6 +1,6 @@
 <!-- The end side of a settings row that opens something: the current value, muted, then one
      chevron (or an external-link glyph), on one line and centred on the row. Quasar's side
-     section is a column, so the value used to sit above the chevron (council R83). -->
+     section is a column, so the value used to sit above the chevron. -->
 <template>
   <q-item-section side class="row-value">
     <div class="row-value__inner">

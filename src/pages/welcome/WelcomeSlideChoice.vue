@@ -82,8 +82,8 @@ export default {
 </script>
 
 <style scoped>
-/* Both choices are the same height whether or not a caption wraps (council R80); larger
-   text grows them. */
+/* Both choices are the same height whether or not a caption wraps; larger text grows
+   them. */
 .welcome-option {
   min-height: 88px;
 }

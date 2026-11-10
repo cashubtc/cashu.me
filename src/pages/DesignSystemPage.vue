@@ -136,8 +136,8 @@
               <span class="ds-icons__count">{{ ic.files.length }}</span>
             </div>
           </div>
-          <!-- The mint glyph (owner 2026-10-29, item 12: the old one was too sharp). Building2
-               ships: rounded corners, no pediment, the least detail at 20px. -->
+          <!-- The mint glyph. Building2 ships: rounded corners, no pediment, the least detail
+               at 20px. -->
           <div class="ds-icons__head q-mt-lg">Mint glyph · 20, 24, 36px</div>
           <div class="ds-mint-glyphs">
             <div
@@ -400,7 +400,7 @@
           </template>
           <template #append>
             <IconButton label="Show seed phrase" :icon="EyeIcon" />
-            <CopyButton class="touch-target-44" value="" tooltip="Copy" />
+            <CopyButton value="" tooltip="Copy" />
           </template>
         </q-field>
         <q-input
@@ -443,6 +443,12 @@
           copy-label="Copy Lightning address"
         />
         <CopyField class="q-mt-md" value="" label="Your address" loading />
+      </DsEntry>
+      <DsEntry id="seed-phrase-field">
+        <SeedPhraseField
+          mnemonic="apple banana cherry damson elder fig grape hazel iris juniper kiwi lemon"
+          label="Seed phrase"
+        />
       </DsEntry>
       <DsEntry id="select">
         <SheetSelect v-model="sort" :options="sortSheetOptions" label="Sort" />
@@ -601,7 +607,7 @@
         </div>
       </DsEntry>
       <!-- Buttons, fields, read-only, disabled and the mint picker as they stack in forms,
-           on the page and on a sheet (owner, 2026-10-29: they sit under each other). -->
+           on the page and on a sheet (they sit under each other). -->
       <DsEntry id="control-stack">
         <div class="q-mb-lg">
           <q-btn class="full-width q-mb-md" unelevated rounded color="primary"
@@ -735,7 +741,7 @@
             label="From"
           />
         </q-card>
-        <!-- Light theme (owner, 2026-10-29): L1 (white page) ships; L2 and L3 are shown here
+        <!-- Light theme: L1 (white page) ships; L2 and L3 are shown here
              only, to judge in light mode. L2 would need light-2 #9a2fe0 (classic) and #b34700
              (bitcoin) to keep AA, and a 48% field edge on its page. -->
         <div class="ds-light-variants q-mt-lg">
@@ -1532,7 +1538,7 @@
       </DsEntry>
       <DsEntry id="deposit-limits">
         <!-- The info callout, the same under the mint picker on the amount step and under
-             the address QR (owner batch 2, item 7). -->
+             the address QR. -->
         <OnchainDepositLimits unit="sat" :limits="depositLimitsDemo" />
       </DsEntry>
       <DsEntry id="pwa-prompt">
@@ -1702,6 +1708,7 @@ import AppBadge from "src/components/ui/AppBadge.vue";
 import BlockingState from "src/components/ui/BlockingState.vue";
 import ConfirmDialog from "src/components/ui/ConfirmDialog.vue";
 import CopyField from "src/components/ui/CopyField.vue";
+import SeedPhraseField from "src/components/ui/SeedPhraseField.vue";
 import IconButton from "src/components/ui/IconButton.vue";
 import AppMenu from "src/components/ui/AppMenu.vue";
 import MintSwitchRing from "src/components/ui/MintSwitchRing.vue";
@@ -1876,6 +1883,7 @@ export default defineComponent({
     BlockingState,
     ConfirmDialog,
     CopyField,
+    SeedPhraseField,
     IconButton,
     AppMenu,
     MintSwitchRing,
@@ -2350,9 +2358,7 @@ export default defineComponent({
 </script>
 
 <!-- Unscoped, as in MintSettings: the shared mint list styles (unit badges, mint names). -->
-<style>
-@import "src/css/mintlist.css";
-</style>
+<style></style>
 
 <style scoped>
 /* Layout: the board keeps the app's page column, clear of the rail on the far left. */

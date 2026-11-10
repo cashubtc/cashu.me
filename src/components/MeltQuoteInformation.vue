@@ -32,12 +32,10 @@
       :value="unitDisplay"
     />
 
-    <DetailRow
+    <QuoteStatusRow
       v-if="stateDisplay && !hideStatus && !(hidePaidStatus && isPaidState)"
-      :icon="ActivityIcon"
-      :label="$t('QuoteInformation.status')"
-      :value="stateDisplay"
-      :value-class="{ 'text-positive': isPaidState }"
+      :tone="isPaidState ? 'paid' : 'other'"
+      :text="stateDisplay"
     />
 
     <DetailRow
@@ -123,7 +121,6 @@ import {
   Fingerprint as FingerprintIcon,
   Globe as GlobeIcon,
   Hash as HashIcon,
-  Activity as ActivityIcon,
   Building2 as MintIcon,
   MessageCircle as MessageCircleIcon,
   Network as NetworkIcon,
@@ -131,6 +128,7 @@ import {
 } from "lucide-vue-next";
 import DetailRow from "src/components/ui/DetailRow.vue";
 import ConfirmationsRow from "src/components/ConfirmationsRow.vue";
+import QuoteStatusRow from "src/components/QuoteStatusRow.vue";
 
 declare const windowMixin: any;
 declare const formatCurrency: any;
@@ -146,7 +144,7 @@ type ExtendedMeltQuote = MeltQuoteBolt11Response & {
 export default defineComponent({
   name: "MeltQuoteInformation",
   mixins: [windowMixin],
-  components: { DetailRow, ConfirmationsRow },
+  components: { DetailRow, ConfirmationsRow, QuoteStatusRow },
   setup() {
     return {
       CircleDollarSignIcon,
@@ -155,7 +153,6 @@ export default defineComponent({
       FingerprintIcon,
       GlobeIcon,
       HashIcon,
-      ActivityIcon,
       MessageCircleIcon,
       MintIcon,
       NetworkIcon,
@@ -385,7 +382,7 @@ export default defineComponent({
   methods: {
     explorerHost,
     shortTxid(txid: string): string {
-      return `${txid.slice(0, 8)}...${txid.slice(-8)}`;
+      return `${txid.slice(0, 8)}…${txid.slice(-8)}`;
     },
     onchainConfirmations(): number {
       const mintStore = useMintsStore();
@@ -401,7 +398,7 @@ export default defineComponent({
     async loadOnchainMetadata() {
       if (!this.hasTxid) return;
       this.loadingOnchainMetadata = true;
-      this.onchainMetadata = null;
+      // A refetch keeps the known count on screen (no blink back to the dots).
       try {
         const addressHint =
           this.meltQuote?.request ||
@@ -457,6 +454,8 @@ export default defineComponent({
   },
   watch: {
     txidValue: function () {
+      // Another transaction: the count on screen belongs to the previous one.
+      this.onchainMetadata = null;
       this.loadOnchainMetadata();
     },
     refreshTrigger: function () {

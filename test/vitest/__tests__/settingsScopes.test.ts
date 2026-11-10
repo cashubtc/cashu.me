@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 // src/css/settings.scss styles the settings column (.settings-view). Its defensive wrapping
 // rules name the parts they are for. A rule on every descendant, or on button content, lets
 // buttons and pagination cells shrink below their content, so an icon and its label split
-// across two lines wherever the settings column is an ancestor (owner 2026-10-29b, item 9).
+// across two lines wherever the settings column is an ancestor.
 
 const css = readFileSync(
   join(__dirname, "../../../src/css/settings.scss"),

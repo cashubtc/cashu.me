@@ -1,8 +1,9 @@
 <!-- A mint as a card (Mints tab, Discover, Restore): the identity row (avatar, name, host)
      with a status and an action on its end, then the holdings and the review line on the
      same edges. The status is the card's own: a ring while the wallet switches to this mint,
-     a check on the wallet's selected mint (owner 2026-10-29: no dots and "Active" text). `skeleton` draws the same card with placeholders, so a loading list has
-     exactly the loaded list's boxes. Styles: src/css/app.scss .mint-card. -->
+     a check on the wallet's selected mint (no dots and no "Active" text). `skeleton` draws the
+     same card with placeholders, so a loading list has exactly the loaded list's boxes.
+     Styles: src/css/app.scss .mint-card. -->
 <template>
   <q-item
     class="mint-card"
@@ -26,8 +27,7 @@
           :unnamed-label="unnamedLabel"
           :skeleton="skeleton"
         />
-        <!-- The action's footprint while loading, so the loaded Add button doesn't push in
-             (council R86). -->
+        <!-- The action's footprint while loading, so the loaded Add button doesn't push in. -->
         <q-skeleton
           v-if="skeleton && skeletonAction"
           type="rect"
@@ -63,9 +63,9 @@
       >
         <!-- One order for several holdings in every direction ("₿500 + $25.00"). -->
         <div v-if="balances.length" class="mint-card__balances" dir="ltr">
-          <template v-for="(balance, i) in balances" :key="balance">
+          <template v-for="(balance, i) in balances" :key="i">
             <!-- Several unit balances read as separate holdings joined by a plus; a middle dot
-                 read as "₿500, worth $25.00" (council R68-R69). -->
+                 read as "₿500, worth $25.00". -->
             <span v-if="i > 0" class="mint-card__plus" aria-hidden="true"
               >+</span
             >

@@ -6,12 +6,12 @@ export default {
     experimental_text:
       "هذه الميزة تجريبية جدًا وقد لا تعمل كما هو متوقع. تأكد من عدم محاولة دفع فاتورة سبق دفعها، فقد تفقد أموالك.",
     understand: "فهمت",
-    select_funds: "اختر أموالًا من عدة مِنْتات لتنفيذ الدفع.",
+    select_funds: "اختر المِنْتات التي تريد الدفع منها.",
     pay_invoice: "دفع الفاتورة",
     amount_mismatch: "خطأ في حساب المبلغ: {calculated} مقابل {expected}",
     states: {
-      requesting: "جارٍ الطلب...",
-      paying: "جارٍ الدفع...",
+      requesting: "جارٍ الطلب…",
+      paying: "جارٍ الدفع…",
       success: "نجح",
       failed: "فشل",
     },
@@ -44,6 +44,9 @@ export default {
       },
       receive: {
         label: "استلام",
+      },
+      show_qr: {
+        label: "إظهار رمز QR",
       },
       show_seed: {
         label: "إظهار عبارة الاستعادة",
@@ -100,7 +103,7 @@ export default {
       legacy_qr_not_supported: "رمز QR القديم هذا ليس من تاجر مدعوم",
       no_bolt12_mint: "لا يدعم أي من مِنْتاتك عروض BOLT12",
       no_bolt11_mint: "لا يدعم أي من مِنْتاتك فواتير BOLT11",
-      address_not_paid: "لم يُدفع إلى العنوان",
+      address_not_paid: "لم تصل أي دفعة إلى هذا العنوان بعد",
       payment_pending: "الدفع معلق",
       invoice_already_paid: "الفاتورة مدفوعة بالفعل",
       payment_sent: "تم إرسال الدفعة",
@@ -203,7 +206,7 @@ export default {
       },
       p2pk: {
         title: "ecash مقفل",
-        caption: "استقبل ecash لا يفتحه إلا مفتاحك",
+        caption: "استقبل ecash مقفلًا بمفتاحك",
       },
       privacy: {
         title: "الخصوصية",
@@ -265,7 +268,7 @@ export default {
     },
     lightning_address: {
       server_url: {
-        label: "اسم مضيف npub.cash",
+        label: "خادم npub.cash",
         hint: "أدخل اسم مضيف أو عنوان HTTPS",
         invalid: "أدخل عنوان URL صالحًا لخادم HTTPS",
       },
@@ -298,7 +301,7 @@ export default {
       wallet_seed: {
         title: "عبارة استعادة المحفظة",
         description: "إنشاء زوج مفاتيح Nostr من عبارة استعادة محفظتك",
-        copy_nsec: "نسخ المفتاح الخاص",
+        copy_nsec: "نسخ المفتاح الخاص (nsec)",
       },
       nsec_bunker: {
         title: "موقّع عن بُعد",
@@ -306,7 +309,7 @@ export default {
         delete_tooltip: "حذف الاتصال",
       },
       use_nsec: {
-        title: "استخدام مفتاحك الخاص",
+        title: "استخدام مفتاح Nostr الخاص بك (nsec)",
         description: "هذه الطريقة خطيرة ولا ينصح بها",
         delete_tooltip: "حذف المفتاح الخاص",
       },
@@ -323,12 +326,12 @@ export default {
       claim_automatically: {
         toggle: "المطالبة تلقائيًا",
         description:
-          "أضف المدفوعات الواردة إلى رصيدك دون سؤال. عند الإيقاف، تستلم كل دفعة بنفسك.",
+          "يضيف المدفوعات الواردة من المِنْتات التي تستخدمها بالفعل إلى رصيدك دون سؤال. في غير ذلك، تؤكد كل دفعة بنفسك.",
       },
     },
     nostr_wallet_connect: {
       description:
-        "يتيح للتطبيقات الأخرى الدفع من هذه المحفظة عبر Nostr Wallet Connect.",
+        "يتيح للتطبيقات الأخرى الدفع من هذه المحفظة وإنشاء الفواتير والاطلاع على رصيدك وسجلك عبر Nostr Wallet Connect (NWC).",
       enable_toggle: "تفعيل Nostr Wallet Connect",
       payments_note:
         "يمكنك فقط استخدام NWC للمدفوعات من رصيد Bitcoin الخاص بك. ستتم المدفوعات من مِنْتك النشط.",
@@ -362,16 +365,16 @@ export default {
     },
     p2pk_features: {
       description:
-        "ميزة تجريبية. استخدم مبالغ صغيرة: إذا فقدت المفتاح الخاص، فلن يستطيع أحد فتح ecash المقفل به.",
+        "أنشئ مفتاحًا أو استورده لاستلام ecash مقفل (P2PK). ميزة تجريبية: استخدم مبالغ صغيرة. إذا فقدت المفتاح الخاص، فقد تفقد إمكانية الوصول إلى ecash المقفل به.",
       generate_button: "إنشاء مفتاح",
-      import_button: "استيراد مفتاح خاص",
+      import_button: "استيراد مفتاح خاص (nsec)",
       quick_access: {
-        toggle: "إظهار مفتاح القفل في شاشة الاستلام",
+        toggle: "إظهار زر القفل في استلام ecash",
         description:
-          "يعرض مفتاح القفل في شاشة استلام ecash، ليتمكن المرسلون من قفل ecash لك.",
+          "يضيف زر القفل إلى شاشة استلام ecash. افتحه لمشاركة مفتاحك العام ليتمكن المرسلون من قفل ecash لك.",
       },
       keys_expansion: {
-        label: "انقر لاستعراض {count} مفتاح",
+        label: "المفاتيح العامة ({count})",
         used_badge: "مستخدم",
       },
     },
@@ -381,7 +384,7 @@ export default {
       check_incoming: {
         toggle: "التحقق من الفاتورة الواردة",
         description:
-          "يفحص أحدث فاتورة لك في الخلفية. تحديثات أسرع، لكن يسهل تتبّع بصمتك.",
+          "يفحص أحدث فاتورة لك في الخلفية. تحديثات أسرع، لكن يسهل تتبّع بصمتك. عند الإيقاف، تحقق من الفواتير بنفسك في السجل.",
       },
       check_startup: {
         toggle: "التحقق من الفواتير المعلقة عند بدء التشغيل",
@@ -390,7 +393,7 @@ export default {
       check_all: {
         toggle: "التحقق من جميع الفواتير",
         description:
-          "يفحص الفواتير غير المدفوعة في الخلفية لمدة تصل إلى أسبوعين. زيادة النشاط عبر الإنترنت تسهّل تتبّع بصمتك.",
+          "يفحص الفواتير غير المدفوعة في الخلفية لمدة تصل إلى أسبوعين. زيادة النشاط عبر الإنترنت تسهّل تتبّع بصمتك. عند الإيقاف، تحقق من الفواتير بنفسك في السجل.",
       },
       check_sent: {
         toggle: "التحقق من ecash المرسلة",
@@ -400,7 +403,7 @@ export default {
       websockets: {
         toggle: "استخدام WebSockets",
         description:
-          "يحافظ على اتصال مباشر بالمِنْتات لتحديثات فورية عن المدفوعات. أسرع، لكن يسهل تتبّع بصمتك.",
+          "يحافظ على اتصال مباشر بالمِنْتات لتحديثات عن المدفوعات وecash المُنفَق. أسرع، لكن يسهل تتبّع بصمتك.",
       },
       bitcoin_price: {
         title: "سعر البيتكوين",
@@ -422,7 +425,7 @@ export default {
       auto_paste: {
         toggle: "لصق ecash تلقائيًا",
         description:
-          "يلصق ecash من الحافظة عند فتح استلام ecash. أوقفه إذا سبّب مشاكل في العرض على iOS.",
+          "يلصق ecash من الحافظة عند الضغط على «لصق الرمز». أوقفه إذا سبّب مشاكل على iOS.",
       },
       auditor: {
         toggle: "تمكين المدقق",
@@ -433,7 +436,8 @@ export default {
         api_url_label: "عنوان URL لواجهة برمجة تطبيقات المدقق",
       },
       multinut: {
-        description: "يدفع الفواتير من عدة مِنْتات في آنٍ واحد.",
+        description:
+          "يضيف خيار «الدفع من عدة مِنْتات» عند دفع فاتورة Lightning.",
       },
       nostr_mint_backup: {
         toggle: "نسخ قائمة المِنْتات احتياطيًا إلى Nostr",
@@ -483,7 +487,7 @@ export default {
       title: "شبكة الثقة",
       known_pubkeys: "المفاتيح العامة المعروفة: {wotCount}",
       continue_crawl: "متابعة الزحف",
-      crawl_odell: "استيراد شبكة ثقة Odell",
+      crawl_odell: "الزحف إلى شبكة ثقة Odell",
       crawl_wot: "الزحف إلى شبكة الثقة",
       pause: "إيقاف مؤقت",
       reset: "إعادة تعيين",
@@ -497,7 +501,7 @@ export default {
       danger_zone_title: "منطقة الخطر",
       notifications: {
         reserved_unset: "أُلغي حجز جميع البراهين",
-        removed_spent: "أُزيلت {count} من البراهين المُنفَقة",
+        removed_spent: "البراهين المُنفَقة التي أُزيلت: {count}",
         no_spent: "لم يُعثر على براهين مُنفَقة",
         invalid_backup: "تنسيق ملف النسخة الاحتياطية غير صالح",
         read_error: "خطأ في قراءة الملف",
@@ -508,7 +512,7 @@ export default {
         new_seed: {
           button: "إنشاء عبارة استعادة جديدة",
           description:
-            "ينشئ عبارة استعادة جديدة. أرسل رصيدك إلى نفسك بعد ذلك لتتمكن العبارة الجديدة من استعادته.",
+            "ينشئ عبارة استعادة جديدة. يظل ecash الحالي مرتبطًا بالعبارة القديمة: أرسل رصيدك بالكامل إلى نفسك بعد ذلك، وإلا فلن تتمكن العبارة الجديدة من استعادته.",
           confirm_question: "هل أنت متأكد أنك تريد إنشاء عبارة استعادة جديدة؟",
           cancel: "إلغاء",
           confirm: "تأكيد",
@@ -516,7 +520,7 @@ export default {
         remove_spent: {
           button: "إزالة البراهين المستخدمة",
           description:
-            "يزيل ecash الذي تُبلغ المِنْتات النشطة أنه مُنفَق. استخدمه فقط إذا علقت محفظتك.",
+            "يزيل ecash الذي يُبلغ المِنْت النشط أنه مُنفَق، بالوحدة المحددة. استخدمه فقط إذا علقت محفظتك.",
         },
         design_system: {
           title: "نظام التصميم",
@@ -530,12 +534,12 @@ export default {
         export_proofs: {
           button: "تصدير البراهين النشطة",
           description:
-            "ينسخ رصيد المِنْت النشط بالوحدة المحددة كرمز ecash واحد.",
+            "ينسخ رصيد المِنْت النشط بالوحدة المحددة إلى الحافظة كرمز ecash واحد. بدّل المِنْت أو الوحدة وصدّر مجددًا لتصدير الباقي.",
         },
         keyset_counters: {
           title: "زيادة عدادات مجموعة المفاتيح",
           increase: "زيادة العداد لـ {id}",
-          fixes: "يصلح خطأ “outputs have already been signed”",
+          fixes: "قد يساعد في حل خطأ «outputs have already been signed»",
           keysets: "{n} مجموعة مفاتيح | {n} مجموعات مفاتيح",
           sheet_hint: "اضغط + لزيادة عدّاد مجموعة المفاتيح.",
           column: "العدّاد",
@@ -560,14 +564,15 @@ export default {
         export_wallet: {
           button: "تصدير بيانات المحفظة",
           description:
-            "ينزّل ملف نسخة احتياطية يمكنك استيراده في شاشة الترحيب. يصبح قديمًا كلما واصلت استخدام المحفظة.",
+            "ينزّل ملف نسخة احتياطية يمكنك استيراده في شاشة الترحيب. يصبح غير محدّث بمجرد استخدام المحفظة مجددًا.",
         },
         import_wallet: {
-          description: "يستبدل بيانات هذه المحفظة بملف نسخة احتياطية مُصدَّر.",
+          description:
+            "يستورد ملف نسخة احتياطية مُصدَّرًا. تحل الإعدادات والسجلات الموجودة في النسخة محل نظيراتها في هذه المحفظة؛ وكل ما ليس في النسخة يبقى كما هو.",
           button: "استيراد نسخة احتياطية للمحفظة",
-          confirm_question: "هل تريد بالتأكيد استعادة بيانات محفظتك؟",
+          confirm_question: "استيراد هذه النسخة الاحتياطية إلى المحفظة؟",
           cancel: "إلغاء",
-          confirm: "استيراد النسخة الاحتياطية",
+          confirm: "استيراد نسخة المحفظة الاحتياطية",
         },
       },
     },
@@ -608,7 +613,7 @@ export default {
     },
     install: {
       text: "تثبيت",
-      tooltip: "تثبيت Cashu",
+      tooltip: "تثبيت Cashu.me",
     },
   },
   AlreadyRunning: {
@@ -621,8 +626,8 @@ export default {
     },
   },
   ErrorNotFound: {
-    title: "404",
-    text: "هذه الصفحة غير موجودة",
+    title: "هذه الصفحة غير موجودة",
+    text: "404",
     actions: {
       home: {
         label: "العودة إلى الصفحة الرئيسية",
@@ -686,14 +691,14 @@ export default {
     pwa: {
       success: {
         title: "نجاح!",
-        text: "أنت تستخدم Cashu كتطبيق PWA. أغلق أي نوافذ متصفح أخرى مفتوحة واستخدم التطبيق من شاشتك الرئيسية.",
+        text: "أنت تستخدم Cashu.me كتطبيق PWA. أغلق أي نوافذ متصفح أخرى مفتوحة واستخدم التطبيق من شاشتك الرئيسية.",
         nextSteps:
           "يمكنك الآن إغلاق هذا اللسان وفتح التطبيق من الشاشة الرئيسية.",
       },
     },
   },
   PwaPrompt: {
-    title: "تثبيت Cashu",
+    title: "تثبيت Cashu.me",
     text: "يفتح من شاشتك الرئيسية، بدون شريط المتصفح.",
     ios: {
       share: "انقر على مشاركة",
@@ -764,17 +769,17 @@ export default {
   },
   WelcomeRestoreEcash: {
     title: "استعد ecash الخاصة بك",
-    text: "ابحث عن البراهين غير المصروفة على المِنْت المُكوَّنة لديك وأضِفها إلى محفظتك.",
+    text: "ابحث عن ecash غير المُنفَق لدى المِنْتات التي أضفتها واستعده إلى محفظتك.",
   },
   MintRatings: {
     sort_and_filter: "الترتيب والتصفية",
     reviews_title: "المراجعات",
     reviews_count: "{n} مراجعة | {n} مراجعات",
-    web_of_trust_caption: "احتساب مراجعات الأشخاص في شبكة ثقتك فقط",
+    web_of_trust_caption: "إظهار مراجعات الأشخاص في شبكة ثقتك فقط",
     web_of_trust_hop: "ضمن شبكة الثقة الخاصة بك (القفزة {hop})",
     no_mint_url: "لم يُقدَّم عنوان URL للمِنْت",
     reviews: "مراجعات",
-    no_reviews: "لا توجد مراجعات بعد",
+    no_reviews: "لم يتم العثور على مراجعات",
     your_review: "مراجعتك",
     no_rating: "لا يوجد تقييم",
     stars_label: "{rating} من 5 نجوم",
@@ -788,7 +793,7 @@ export default {
     },
     actions: { write_review: "اكتب مراجعة" },
     empty_state_subtitle:
-      "كن أول من يراجع هذا المِنْت. تجربتك تساعد الآخرين على الاختيار.",
+      "شارك تجربتك مع هذا المِنْت لمساعدة الآخرين على الاختيار.",
     range: "{from}–{to} من {total}",
   },
   CreateMintReview: {
@@ -796,7 +801,7 @@ export default {
     published: "تم نشر المراجعة",
     publish_failed: "تعذّر نشر المراجعة",
     title: "مراجعة المِنْت",
-    publishing_as: "النشر باسم",
+    publishing_as: "النشر باسم:",
     inputs: {
       rating: { label: "التقييم", hint: "اختر تقييمًا لنشر مراجعتك." },
       review: { label: "مراجعة (اختياري)" },
@@ -843,7 +848,7 @@ export default {
       },
       restore_selected_mints: {
         label: "استعادة المِنْتات المحددة ({count})",
-        success: "تمت استعادة {count} من المِنْتات بنجاح",
+        success: "المِنْتات المستعادة: {count}",
         error: "خطأ في استعادة المِنْتات المحددة: { error }",
       },
     },
@@ -858,7 +863,7 @@ export default {
       add_selected: "إضافة المحدد ({count})",
       no_backups_found: "لم يتم العثور على نسخ احتياطية للمِنْتات",
       no_backups_hint:
-        "تأكد من تمكين نسخ المِنْتات احتياطيًا إلى Nostr في الإعدادات لنسخ قائمة مِنْتاتك احتياطيًا تلقائيًا.",
+        "لا يمكن استعادة قائمة المِنْتات إلا من نسخة احتياطية أُنشئت سابقًا بعبارة الاستعادة هذه. فعّل النسخ الاحتياطي للمِنْتات على Nostr في الإعدادات لحفظ التغييرات المستقبلية.",
       invalid_mnemonic: "الرجاء إدخال عبارة استعادة صالحة قبل البحث.",
       search_error: "فشل البحث عن نسخ احتياطية للمِنْتات.",
       add_error: "فشل إضافة المِنْتات المحددة.",
@@ -901,7 +906,8 @@ export default {
     },
     swap: {
       title: "تبديل",
-      caption: "انقل الأموال بين مِنْتاتك عبر Lightning. قد تُطبَّق رسوم.",
+      caption:
+        "انقل الأموال بين مِنْتاتك عبر Lightning. اترك مبلغًا لتغطية رسوم Lightning. إذا لم تصل الأموال، فتحقق من الفاتورة المعلّقة في السجل.",
       inputs: {
         from: {
           label: "من",
@@ -946,7 +952,7 @@ export default {
     actions: {
       create: {
         label: "إنشاء فاتورة",
-        label_blocked: "جارٍ إنشاء الفاتورة",
+        label_blocked: "جارٍ الإنشاء…",
       },
     },
     invoice: {
@@ -991,7 +997,7 @@ export default {
         tooltip_text: "نسخ الرمز التعبيري",
       },
       copy_tokens: {
-        label: "نسخ ecash",
+        label: "نسخ الرمز",
       },
       copy_link: {
         tooltip_text: "نسخ الرابط",
@@ -1014,7 +1020,7 @@ export default {
       },
       write_tokens_to_card: {
         tooltips: {
-          ndef_supported_text: "فلاش إلى بطاقة NFC",
+          ndef_supported_text: "كتابة على بطاقة NFC",
         },
       },
       pay: { label: "@:global.actions.pay.label" },
@@ -1120,7 +1126,7 @@ export default {
   },
   P2PKDialog: {
     p2pk: {
-      caption: "مفتاح القفل",
+      caption: "مفتاح القفل الخاص بك",
       description: "استلام ecash مقفلة بهذا المفتاح",
       used_warning_text:
         "تحذير: تم استخدام هذا المفتاح من قبل. استخدم مفتاحًا جديدًا لخصوصية أفضل.",
@@ -1238,7 +1244,7 @@ export default {
         label: "نسخ عنوان URL للمِنْت",
       },
       delete: {
-        label: "حذف المِنْت",
+        label: "إزالة المِنْت",
       },
       edit: {
         label: "تعديل المِنْت",
@@ -1431,7 +1437,7 @@ export default {
   AddMintDialog: {
     title: "هل تثق في هذا المِنْت؟",
     description:
-      "انضم إلى هذا المِنْت فقط إذا كنت تثق به. إذا توقف عن العمل، تضيع ecash التي تحملها لديه.",
+      "أضف هذا المِنْت فقط إذا كنت تثق به. قد يتوقف عن العمل في أي وقت، وقد تفقد ecash الذي تحتفظ به لديه.",
     actions: {
       add_mint: {
         label: "@:global.actions.add_mint.label",
@@ -1551,8 +1557,8 @@ export default {
   },
   MintAuditInfo: {
     title: "معلومات التدقيق",
-    loading: "جارٍ تحميل معلومات التدقيق...",
-    not_audited: "لم يُدقَّق هذا المِنْت بعد.",
+    loading: "جارٍ تحميل معلومات التدقيق…",
+    not_audited: "لا تتوفر لدى هذا المدقق بيانات عن هذا المِنْت.",
     not_audited_text:
       "لمعرفة المزيد عن المدقق أو دعم تدقيق مستقبلي، زُر {link} أو انقر {here} للتبرع بـ ecash والمساعدة في بدء تدقيق هذا المِنْت.",
     here: "هنا",
@@ -1616,7 +1622,7 @@ export default {
       low: "منخفضة",
     },
     delete_dialog: {
-      title: "حذف ecash",
+      title: "حذف من السجل؟",
       text: "هل أنت متأكد من حذف هذه المعاملة من سجلك؟",
       warning:
         "تحذير: لا يمكن التراجع عن هذا الإجراء، ولا توجد طريقة لاستعادة الرمز.",
@@ -1625,8 +1631,8 @@ export default {
       read_failed: "فشلت قراءة NFC",
       write_failed: "فشلت الكتابة على NFC",
       error: "خطأ في NFC",
-      writing: "جارٍ الكتابة على بطاقة NFC...",
-      success: "تمت كتابة الرمز على البطاقة بنجاح!",
+      writing: "جارٍ الكتابة على بطاقة NFC…",
+      success: "تمت كتابة الرمز على بطاقة NFC",
       capacity: "قد لا تكفي سعة البطاقة (المطلوب {bytes} بايت).",
     },
   },
@@ -1637,11 +1643,11 @@ export default {
       bolt12: "عرض",
     },
     onchain_title: "الاستلام على السلسلة",
-    bolt12_title: "استلام Bolt12",
+    bolt12_title: "استلام عرض Lightning",
     mint_unreachable: "تعذّر الوصول إلى المِنْت",
     mint_unreachable_text: "أعد الاتصال بالمِنْت لاستلام المدفوعات.",
     reconnect_mint: "إعادة الاتصال بالمِنْت",
-    checking_address: "جارٍ التحقق من العنوان...",
+    checking_address: "جارٍ التحقق من العنوان…",
     add_amount: "إضافة مبلغ",
     new_offer: "عرض جديد",
     create_offer: "إنشاء عرض",
@@ -1667,13 +1673,14 @@ export default {
       unrecognized_backup: "تنسيق نسخة احتياطية غير معروف",
       backup_restored: "تمت استعادة النسخة الاحتياطية",
       backup_exported: "تم تصدير النسخة الاحتياطية للمحفظة",
-      quota_exceeded: "التخزين المحلي ممتلئ. نظّف التخزين المحلي.",
+      quota_exceeded:
+        "مساحة تخزين المتصفح ممتلئة أو غير متاحة. قد لا تُحفظ بيانات المحفظة الجديدة. انسخ محفظتك احتياطيًا الآن.",
       cleaned_up: "تم تنظيف {size} بايت",
     },
   },
   receiveTokens: {
     notifications: {
-      already_in_history: "الرمز موجود بالفعل في السجل",
+      already_in_history: "ecash موجود بالفعل في السجل",
       nfc_read_failed: "تعذرت قراءة البيانات من بطاقة NFC",
       scan_error: "خطأ في المسح",
       nfc_error: "خطأ في NFC",
@@ -1698,9 +1705,9 @@ export default {
   },
   nostr: {
     notifications: {
-      nip04_published: "تم نشر حدث NIP-04",
-      nip04_failed: "تعذر نشر حدث NIP-04",
-      nip17_failed: "تعذر نشر حدث NIP-17",
+      nip04_published: "تم نشر الرسالة على Nostr",
+      nip04_failed: "تعذر نشر الرسالة على Nostr",
+      nip17_failed: "تعذر نشر الرسالة على Nostr",
       receive_failed: "تعذر استلام الدفعة الواردة",
       ecash_already_in_history: "ecash موجود بالفعل في السجل",
       ecash_added: "تمت إضافة ecash إلى السجل",
@@ -1708,7 +1715,7 @@ export default {
   },
   nwc: {
     notifications: {
-      melt_quote_failed: "NWC: تعذر طلب عرض سعر للدفع",
+      melt_quote_failed: "NWC: تعذر الحصول على عرض سعر للدفع من المِنْت",
       unit_must_be_sat: "NWC: يجب أن تكون الوحدة النشطة sats",
       allowance_exceeded: "NWC: تم تجاوز المبلغ المسموح به",
     },

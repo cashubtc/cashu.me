@@ -26,6 +26,9 @@ export default {
       receive: {
         label: "Receive",
       },
+      show_qr: {
+        label: "Show QR code",
+      },
       show_seed: {
         label: "Show seed phrase",
       },
@@ -646,8 +649,8 @@ export default {
     },
   },
   ErrorNotFound: {
-    title: "404",
-    text: "This page doesn’t exist",
+    title: "This page doesn’t exist",
+    text: "404",
     actions: {
       home: {
         label: "Go back home",
@@ -837,7 +840,7 @@ export default {
     published: "Review published",
     publish_failed: "Failed to publish review",
     title: "Review mint",
-    publishing_as: "Publishing as",
+    publishing_as: "Publishing as:",
     inputs: {
       rating: {
         label: "Rating",
