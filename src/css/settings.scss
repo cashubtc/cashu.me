@@ -96,6 +96,12 @@
   padding: 10px 16px;
 }
 
+/* The chevron needs 8px from the text, not Quasar's 16px: the caption gets the rest of the
+   row, so a one-line description stays on one line on a 390px phone. */
+.settings-menu-item .row-value {
+  padding-inline: 8px 0;
+}
+
 .settings-menu-icon {
   width: 36px;
   height: 36px;

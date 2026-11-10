@@ -384,7 +384,7 @@ export default {
       description:
         "Erstellen oder importieren Sie einen Schlüssel, um gesperrtes Ecash zu empfangen (P2PK). Experimentell: Nur kleine Beträge verwenden. Wenn Sie den privaten Schlüssel verlieren, können Sie den Zugriff auf das daran gesperrte Ecash verlieren.",
       generate_button: "Schlüssel generieren",
-      import_button: "Privaten Schlüssel importieren (nsec)",
+      import_button: "nsec importieren",
       quick_access: {
         toggle: "Schaltfläche „Sperren“ in „Ecash empfangen“ anzeigen",
         description:
@@ -397,11 +397,11 @@ export default {
     },
     privacy: {
       network_title: "Netzwerkabfragen",
-      description: "Diese Einstellungen beeinflussen Ihren Datenschutz.",
+      description:
+        "Diese Prüfungen laufen im Hintergrund. Sie halten Zahlungen aktuell, aber mehr Online-Aktivität erleichtert das Fingerprinting Ihrer Wallet. Ist eine Prüfung deaktiviert, können Sie Rechnungen selbst im Verlauf prüfen.",
       check_incoming: {
         toggle: "Eingehende Rechnung prüfen",
-        description:
-          "Prüft Ihre neueste Rechnung im Hintergrund. Schnellere Updates, aber leichteres Fingerprinting. Wenn deaktiviert, prüfen Sie Rechnungen selbst im Verlauf.",
+        description: "Prüft Ihre neueste Rechnung im Hintergrund.",
       },
       check_startup: {
         toggle: "Ausstehende Rechnungen beim Start prüfen",
@@ -410,17 +410,17 @@ export default {
       check_all: {
         toggle: "Alle Rechnungen prüfen",
         description:
-          "Prüft unbezahlte Rechnungen bis zu zwei Wochen lang im Hintergrund. Mehr Online-Aktivität erleichtert Fingerprinting. Wenn deaktiviert, prüfen Sie Rechnungen selbst im Verlauf.",
+          "Prüft unbezahlte Rechnungen bis zu zwei Wochen lang im Hintergrund.",
       },
       check_sent: {
         toggle: "Gesendeten Ecash prüfen",
         description:
-          "Prüft im Hintergrund, ob gesendetes Ecash eingelöst wurde. Mehr Online-Aktivität erleichtert Fingerprinting.",
+          "Prüft im Hintergrund, ob gesendetes Ecash eingelöst wurde.",
       },
       websockets: {
         toggle: "WebSockets verwenden",
         description:
-          "Hält eine Live-Verbindung zu Mints für Updates zu Zahlungen und ausgegebenem Ecash. Schneller, aber leichteres Fingerprinting.",
+          "Hält eine Live-Verbindung zu Mints für Updates zu Zahlungen und ausgegebenem Ecash.",
       },
       bitcoin_price: {
         title: "Bitcoin-Kurs",
@@ -556,7 +556,7 @@ export default {
         unset_reserved: {
           button: "Alle reservierten Token freigeben",
           description:
-            'Diese Wallet markiert ausstehenden ausgehenden Ecash als reserviert (und zieht es von Ihrem Guthaben ab), um Double-Spend-Versuche zu verhindern. Dieser Button gibt alle reservierten Token frei, damit sie wieder verwendet werden können. Wenn Sie dies tun, könnte Ihre Wallet ausgegebene Nachweise enthalten. Drücken Sie auf den Button "Ausgegebene Nachweise entfernen", um sie loszuwerden.',
+            "Gibt Ecash frei, das für ausstehende Sendungen reserviert ist, damit es wieder ausgegeben werden kann. Ihre Wallet kann danach ausgegebenes Ecash enthalten: Führen Sie anschließend „Ausgegebene Nachweise entfernen“ aus.",
         },
         show_onboarding: {
           button: "Onboarding anzeigen",
@@ -565,7 +565,7 @@ export default {
         reset_wallet: {
           button: "Wallet-Daten zurücksetzen",
           description:
-            "Setzen Sie Ihre Wallet-Daten zurück. Warnung: Dies löscht alles! Stellen Sie sicher, dass Sie vorher eine Sicherung erstellen.",
+            "Löscht alles in dieser Wallet, einschließlich Ihres Ecash. Erstellen Sie vorher eine Sicherung.",
           confirm_question:
             "Sind Sie sicher, dass Sie Ihre Wallet-Daten löschen möchten?",
           cancel: "Abbrechen",
@@ -841,7 +841,7 @@ export default {
     },
     information: {
       caption:
-        "Der Assistent stellt nur Ecash von einer anderen Seed-Phrase wieder her. Sie können diese Seed-Phrase nicht verwenden oder die Seed-Phrase der aktuell verwendeten Wallet ändern. Das bedeutet, dass wiederhergestellter Ecash nicht durch Ihre aktuelle Seed-Phrase geschützt ist, solange Sie den Ecash nicht einmal an sich selbst senden.",
+        "Dies stellt nur Ecash aus einer anderen Seed-Phrase wieder her; die Seed-Phrase dieser Wallet wird dadurch nicht geändert. Um das wiederhergestellte Ecash mit Ihrer aktuellen Seed-Phrase zu schützen, senden Sie es anschließend einmal an sich selbst.",
     },
     restore_mints: {
       label: "Mints wiederherstellen",

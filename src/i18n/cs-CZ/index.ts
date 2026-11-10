@@ -394,7 +394,7 @@ export default {
       description:
         "Vygenerujte nebo importujte klíč pro příjem uzamčeného ecash (P2PK). Experimentální: používejte malé částky. Pokud ztratíte soukromý klíč, můžete ztratit přístup k ecash, který je na něj uzamčený.",
       generate_button: "Vygenerovat klíč",
-      import_button: "Importovat soukromý klíč (nsec)",
+      import_button: "Importovat nsec",
       quick_access: {
         toggle: "Zobrazit tlačítko Uzamknout v Přijmout ecash",
         description:
@@ -408,11 +408,11 @@ export default {
 
     privacy: {
       network_title: "Síťové kontroly",
-      description: "Tato nastavení ovlivňují vaše soukromí.",
+      description:
+        "Tyto kontroly běží na pozadí. Udržují platby aktuální, ale víc aktivity online usnadňuje fingerprinting vaší peněženky. Když je kontrola vypnutá, můžete faktury kontrolovat sami v Historii.",
       check_incoming: {
         toggle: "Kontrolovat příchozí faktury",
-        description:
-          "Kontroluje vaši poslední fakturu na pozadí. Rychlejší aktualizace, ale snazší fingerprinting. Když je funkce vypnutá, kontrolujte faktury sami v Historii.",
+        description: "Kontroluje vaši poslední fakturu na pozadí.",
       },
       check_startup: {
         toggle: "Kontrolovat čekající faktury při spuštění",
@@ -420,18 +420,16 @@ export default {
       },
       check_all: {
         toggle: "Kontrolovat všechny faktury",
-        description:
-          "Kontroluje nezaplacené faktury na pozadí až dva týdny. Víc aktivity online usnadňuje fingerprinting. Když je funkce vypnutá, kontrolujte faktury sami v Historii.",
+        description: "Kontroluje nezaplacené faktury na pozadí až dva týdny.",
       },
       check_sent: {
         toggle: "Kontrolovat odeslaný ecash",
-        description:
-          "Na pozadí kontroluje, zda byl odeslaný ecash přijat. Víc aktivity online usnadňuje fingerprinting.",
+        description: "Na pozadí kontroluje, zda byl odeslaný ecash přijat.",
       },
       websockets: {
         toggle: "Používat WebSockety",
         description:
-          "Udržuje živé spojení s minty pro informace o platbách a utraceném ecash. Rychlejší, ale snazší fingerprinting.",
+          "Udržuje živé spojení s minty pro informace o platbách a utraceném ecash.",
       },
       bitcoin_price: {
         title: "Cena bitcoinu",
@@ -575,7 +573,7 @@ export default {
         unset_reserved: {
           button: "Zrušit rezervaci všech tokenů",
           description:
-            "Tato peněženka označuje čekající odchozí ecash jako rezervovaný (a odečítá jej ze zůstatku), aby zabránila pokusům o double-spend. Toto tlačítko zruší rezervaci všech tokenů, aby je bylo možné znovu použít. Pokud tak učiníte, peněženka může obsahovat utracené proofy. Pro jejich odstranění použijte tlačítko „Odstranit utracené proofy“.",
+            "Uvolní ecash rezervovaný pro čekající odeslání, aby jej bylo možné znovu utratit. Peněženka pak může obsahovat utracený ecash: poté spusťte „Odstranit utracené proofy“.",
         },
         show_onboarding: {
           button: "Zobrazit onboarding",
@@ -584,7 +582,7 @@ export default {
         reset_wallet: {
           button: "Resetovat data peněženky",
           description:
-            "Resetuje data vaší peněženky. Varování: Tímto dojde ke smazání všeho! Nezapomeňte si nejprve vytvořit zálohu.",
+            "Smaže vše v této peněžence, včetně vašeho ecash. Nejprve si vytvořte zálohu.",
           confirm_question: "Opravdu chcete smazat data peněženky?",
           cancel: "Zrušit",
           confirm: "Smazat peněženku",
@@ -869,7 +867,7 @@ export default {
     },
     information: {
       caption:
-        "Tento průvodce obnoví pouze ecash z jiné seed fráze, nebudete moci tuto seed frázi používat ani měnit seed frázi aktuální peněženky. Obnovený ecash tak nebude chráněn vaší aktuální seed frází, dokud ho jednou nepošlete sami sobě.",
+        "Tímto se pouze obnoví ecash z jiné seed fráze; seed fráze této peněženky se nezmění. Chcete-li obnovený ecash chránit svou aktuální seed frází, pošlete ho poté jednou sami sobě.",
     },
     restore_mints: {
       label: "Obnovit minty",

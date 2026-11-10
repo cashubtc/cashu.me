@@ -169,14 +169,28 @@ export function buildShots(mint) {
     steps: [RECEIVE, click("Ecash"), request, wait(2000)],
   });
   tn("tn-receive-request-amount", "Payment request, 1,000 typed", {
-    steps: [
-      RECEIVE,
-      click("Ecash"),
-      request,
-      wait(1500),
-      type("1000"),
-      wait(1000),
-    ],
+    before: {
+      steps: [
+        RECEIVE,
+        click("Ecash"),
+        request,
+        wait(1500),
+        btn("add amount"),
+        type("1000"),
+        wait(1000),
+      ],
+    },
+    after: {
+      steps: [
+        RECEIVE,
+        click("Ecash"),
+        request,
+        wait(1500),
+        click("Amount"),
+        type("1000"),
+        wait(1000),
+      ],
+    },
   });
   tn("tn-receive-token", "Receive a testnut token", {
     steps: [RECEIVE, click("Ecash"), ["paste", "testnutToken"]],

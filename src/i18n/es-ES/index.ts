@@ -370,7 +370,7 @@ export default {
       description:
         "Genera o importa una clave para recibir ecash bloqueado (P2PK). Experimental: usa cantidades pequeñas. Si pierdes la clave privada, puedes perder el acceso al ecash bloqueado con ella.",
       generate_button: "Generar clave",
-      import_button: "Importar clave privada (nsec)",
+      import_button: "Importar nsec",
       quick_access: {
         toggle: "Mostrar el botón Bloquear en Recibir ecash",
         description:
@@ -383,11 +383,11 @@ export default {
     },
     privacy: {
       network_title: "Comprobaciones de red",
-      description: "Estas configuraciones afectan tu privacidad.",
+      description:
+        "Estas comprobaciones se ejecutan en segundo plano. Mantienen los pagos al día, pero más actividad en línea hace que tu billetera sea más fácil de rastrear. Con una comprobación desactivada, puedes comprobar tú mismo las facturas en Historial.",
       check_incoming: {
         toggle: "Verificar factura entrante",
-        description:
-          "Comprueba tu última factura en segundo plano. Actualizaciones más rápidas, pero más fácil de rastrear. Si está desactivado, comprueba tú mismo las facturas en Historial.",
+        description: "Comprueba tu última factura en segundo plano.",
       },
       check_startup: {
         toggle: "Verificar facturas pendientes al inicio",
@@ -396,17 +396,17 @@ export default {
       check_all: {
         toggle: "Verificar todas las facturas",
         description:
-          "Comprueba las facturas sin pagar en segundo plano durante hasta dos semanas. Más actividad en línea te hace más fácil de rastrear. Si está desactivado, comprueba tú mismo las facturas en Historial.",
+          "Comprueba las facturas sin pagar en segundo plano durante hasta dos semanas.",
       },
       check_sent: {
         toggle: "Verificar ecash enviado",
         description:
-          "Comprueba en segundo plano si el ecash enviado fue reclamado. Más actividad en línea te hace más fácil de rastrear.",
+          "Comprueba en segundo plano si el ecash enviado fue reclamado.",
       },
       websockets: {
         toggle: "Usar WebSockets",
         description:
-          "Mantiene una conexión en vivo con los mints para recibir novedades sobre pagos y ecash gastado. Más rápido, pero más fácil de rastrear.",
+          "Mantiene una conexión en vivo con los mints para recibir novedades sobre pagos y ecash gastado.",
       },
       bitcoin_price: {
         title: "Precio de bitcoin",
@@ -552,7 +552,7 @@ export default {
         unset_reserved: {
           button: "Desmarcar todos los tokens reservados",
           description:
-            'Esta billetera marca el ecash saliente pendiente como reservado (y lo resta de tu saldo) para prevenir intentos de doble gasto. Este botón desmarcará todos los tokens reservados para que puedan usarse de nuevo. Si haces esto, tu billetera podría incluir pruebas gastadas. Presiona el botón "Eliminar pruebas gastadas" para deshacerte de ellas.',
+            "Libera el ecash reservado para envíos pendientes para que pueda gastarse de nuevo. Tu billetera podría contener entonces ecash gastado: ejecuta «Eliminar pruebas gastadas» después.",
         },
         show_onboarding: {
           button: "Mostrar bienvenida",
@@ -561,7 +561,7 @@ export default {
         reset_wallet: {
           button: "Restablecer datos de la billetera",
           description:
-            "Restablece los datos de tu billetera. Advertencia: ¡Esto borrará todo! Asegúrate de crear una copia de seguridad primero.",
+            "Borra todo lo que hay en esta billetera, incluido tu ecash. Crea primero una copia de seguridad.",
           confirm_question:
             "¿Estás seguro de que quieres eliminar los datos de tu billetera?",
           cancel: "Cancelar",
@@ -835,7 +835,7 @@ export default {
     },
     information: {
       caption:
-        "El asistente solo restaurará ecash desde otra frase semilla, no podrás usar esta frase semilla ni cambiar la frase semilla de la billetera que estás usando actualmente. Esto significa que el ecash restaurado no estará protegido por tu frase semilla actual mientras no te envíes el ecash a ti mismo una vez.",
+        "Esto solo recupera ecash de otra frase semilla; no cambia la frase semilla de esta billetera. Para proteger el ecash restaurado con tu frase semilla actual, envíatelo a ti mismo una vez después.",
     },
     restore_mints: {
       label: "Restaurar mints",

@@ -390,7 +390,7 @@ export default {
       description:
         "Gere ou importe uma chave para receber ecash bloqueado (P2PK). Experimental: use valores pequenos. Se você perder a chave privada, pode perder o acesso ao ecash bloqueado a ela.",
       generate_button: "Gerar chave",
-      import_button: "Importar chave privada (nsec)",
+      import_button: "Importar nsec",
       quick_access: {
         toggle: "Mostrar o botão Bloquear em Receber ecash",
         description:
@@ -403,11 +403,11 @@ export default {
     },
     privacy: {
       network_title: "Verificações de rede",
-      description: "Estas configurações afetam sua privacidade.",
+      description:
+        "Estas verificações são executadas em segundo plano. Elas mantêm os pagamentos atualizados, mas mais atividade online deixa sua carteira mais fácil de rastrear. Com uma verificação desativada, você mesmo pode verificar as faturas em Histórico.",
       check_incoming: {
         toggle: "Verificar fatura recebida",
-        description:
-          "Verifica sua fatura mais recente em segundo plano. Atualizações mais rápidas, mas mais fácil de rastrear. Quando desativado, verifique você mesmo as faturas em Histórico.",
+        description: "Verifica sua fatura mais recente em segundo plano.",
       },
       check_startup: {
         toggle: "Verificar faturas pendentes na inicialização",
@@ -416,17 +416,17 @@ export default {
       check_all: {
         toggle: "Verificar todas as faturas",
         description:
-          "Verifica faturas não pagas em segundo plano por até duas semanas. Mais atividade online deixa você mais fácil de rastrear. Quando desativado, verifique você mesmo as faturas em Histórico.",
+          "Verifica faturas não pagas em segundo plano por até duas semanas.",
       },
       check_sent: {
         toggle: "Verificar ecash enviado",
         description:
-          "Verifica em segundo plano se o ecash enviado foi resgatado. Mais atividade online deixa você mais fácil de rastrear.",
+          "Verifica em segundo plano se o ecash enviado foi resgatado.",
       },
       websockets: {
         toggle: "Usar WebSockets",
         description:
-          "Mantém uma conexão ao vivo com os mints para atualizações sobre pagamentos e ecash gasto. Mais rápido, mas mais fácil de rastrear.",
+          "Mantém uma conexão ao vivo com os mints para atualizações sobre pagamentos e ecash gasto.",
       },
       bitcoin_price: {
         title: "Preço do bitcoin",
@@ -571,7 +571,7 @@ export default {
         unset_reserved: {
           button: "Desmarcar todos os tokens reservados",
           description:
-            'Esta carteira marca o ecash sainte pendente como reservado (e o subtrai do seu saldo) para evitar tentativas de gasto duplo. Este botão desmarcará todos os tokens reservados para que possam ser usados novamente. Se fizer isso, sua carteira pode incluir provas gastas. Pressione o botão "Remover provas gastas" para eliminá-las.',
+            "Libera o ecash reservado para envios pendentes para que possa ser gasto novamente. Sua carteira pode então conter ecash gasto: execute “Remover provas gastas” em seguida.",
         },
         show_onboarding: {
           button: "Mostrar integração",
@@ -580,7 +580,7 @@ export default {
         reset_wallet: {
           button: "Redefinir dados da carteira",
           description:
-            "Redefina os dados da sua carteira. Aviso: Isso apagará tudo! Certifique-se de criar um backup primeiro.",
+            "Apaga tudo nesta carteira, incluindo o seu ecash. Crie um backup primeiro.",
           confirm_question:
             "Tem certeza de que deseja excluir os dados da sua carteira?",
           cancel: "Cancelar",
@@ -865,7 +865,7 @@ export default {
     },
     information: {
       caption:
-        "O assistente só restaurará ecash de outra frase de recuperação; você não poderá usar esta frase de recuperação nem alterar a frase de recuperação da carteira que está usando atualmente. Isso significa que o ecash restaurado não estará protegido pela sua frase de recuperação atual enquanto você não o enviar para si mesmo uma vez.",
+        "Isto só recupera ecash de outra frase de recuperação; não altera a frase de recuperação desta carteira. Para proteger o ecash restaurado com a sua frase de recuperação atual, envie-o para si mesmo uma vez em seguida.",
     },
     restore_mints: {
       label: "Restaurar mints",

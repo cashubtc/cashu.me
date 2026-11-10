@@ -125,7 +125,7 @@ export class WalletPage {
     await this.openReceive("lightning");
     await this.page.getByRole("radio", { name: "Offer", exact: true }).click();
     await expect(
-      this.page.getByText("Receive Bolt12", { exact: true })
+      this.page.getByText("Receive Lightning offer", { exact: true })
     ).toBeVisible();
     await this.page
       .getByRole("button", { name: "Add amount", exact: true })

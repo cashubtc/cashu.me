@@ -375,7 +375,7 @@ export default {
       description:
         "Kilitli ecash (P2PK) almak için bir anahtar oluşturun veya içe aktarın. Deneysel: küçük tutarlar kullanın. Özel anahtarı kaybederseniz, ona kilitli ecash'e erişiminizi kaybedebilirsiniz.",
       generate_button: "Anahtar oluştur",
-      import_button: "Özel anahtarı içe aktar (nsec)",
+      import_button: "nsec içe aktar",
       quick_access: {
         toggle: "Ecash al ekranında Kilitle düğmesini göster",
         description:
@@ -388,11 +388,11 @@ export default {
     },
     privacy: {
       network_title: "Ağ kontrolleri",
-      description: "Bu ayarlar gizliliğinizi etkiler.",
+      description:
+        "Bu kontroller arka planda çalışır. Ödemeleri güncel tutarlar, ama daha fazla çevrimiçi etkinlik cüzdanınızın parmak izini çıkarmayı kolaylaştırır. Bir kontrol kapalıyken faturaları Geçmiş'ten kendiniz kontrol edebilirsiniz.",
       check_incoming: {
         toggle: "Gelen faturayı kontrol et",
-        description:
-          "En son faturanızı arka planda kontrol eder. Daha hızlı güncellemeler, ama parmak izi çıkarmak kolaylaşır. Kapalıyken faturaları Geçmiş'ten kendiniz kontrol edin.",
+        description: "En son faturanızı arka planda kontrol eder.",
       },
       check_startup: {
         toggle: "Başlangıçta bekleyen faturaları kontrol et",
@@ -401,17 +401,17 @@ export default {
       check_all: {
         toggle: "Tüm faturaları kontrol et",
         description:
-          "Ödenmemiş faturaları iki haftaya kadar arka planda kontrol eder. Daha fazla çevrimiçi etkinlik parmak izinizi çıkarmayı kolaylaştırır. Kapalıyken faturaları Geçmiş'ten kendiniz kontrol edin.",
+          "Ödenmemiş faturaları iki haftaya kadar arka planda kontrol eder.",
       },
       check_sent: {
         toggle: "Gönderilen ecash'i kontrol et",
         description:
-          "Gönderilen ecash'in alınıp alınmadığını arka planda kontrol eder. Daha fazla çevrimiçi etkinlik parmak izinizi çıkarmayı kolaylaştırır.",
+          "Gönderilen ecash'in alınıp alınmadığını arka planda kontrol eder.",
       },
       websockets: {
         toggle: "WebSockets kullan",
         description:
-          "Ödemeler ve harcanan ecash ile ilgili güncellemeler için mint'lerle canlı bağlantı tutar. Daha hızlı, ama parmak izi çıkarmak kolaylaşır.",
+          "Ödemeler ve harcanan ecash ile ilgili güncellemeler için mint'lerle canlı bağlantı tutar.",
       },
       bitcoin_price: {
         title: "Bitcoin fiyatı",
@@ -546,7 +546,7 @@ export default {
         unset_reserved: {
           button: "Tüm ayrılmış token'ları kaldır",
           description:
-            "Bu cüzdan, çifte harcama girişimlerini önlemek için bekleyen giden ecash'i ayrılmış olarak işaretler (ve bakiyenizden düşer). Bu düğme tüm ayrılmış token'ları kaldıracaktır, böylece tekrar kullanılabilirler. Bunu yaparsanız, cüzdanınız harcanmış kanıtlar içerebilir. Onlardan kurtulmak için Harcanmış kanıtları kaldır düğmesine basın.",
+            "Bekleyen gönderimler için ayrılmış ecash'i serbest bırakır, böylece tekrar harcanabilir. Cüzdanınız bunun ardından harcanmış ecash içerebilir: sonrasında “Harcanmış kanıtları kaldır” işlemini çalıştırın.",
         },
         show_onboarding: {
           button: "Başlangıç ekranını göster",
@@ -555,7 +555,7 @@ export default {
         reset_wallet: {
           button: "Cüzdan verilerini sıfırla",
           description:
-            "Cüzdan verilerinizi sıfırlayın. Uyarı: Bu her şeyi siler! Önce bir yedek oluşturduğunuzdan emin olun.",
+            "Ecash'iniz dahil bu cüzdandaki her şeyi siler. Önce bir yedek oluşturun.",
           confirm_question:
             "Cüzdan verilerinizi silmek istediğinizden emin misiniz?",
           cancel: "İptal",
@@ -843,7 +843,7 @@ export default {
     },
     information: {
       caption:
-        "Sihirbaz yalnızca başka bir kurtarma kelimesinden ecash'i geri yükleyecektir, şu anda kullandığınız cüzdanın kurtarma kelimesini kullanamayacak veya değiştiremeyeceksiniz. Bu, geri yüklenen ecash'in bir kez kendinize göndermediğiniz sürece mevcut kurtarma kelimeniz tarafından korunmayacağı anlamına gelir.",
+        "Bu işlem yalnızca başka bir kurtarma kelimesinden ecash kurtarır; bu cüzdanın kurtarma kelimesini değiştirmez. Geri yüklenen ecash'i mevcut kurtarma kelimenizle korumak için sonrasında onu bir kez kendinize gönderin.",
     },
     restore_mints: {
       label: "Mint'leri geri yükle",

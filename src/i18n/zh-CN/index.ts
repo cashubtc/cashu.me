@@ -379,7 +379,7 @@ export default {
       description:
         "生成或导入密钥，以接收锁定的 ecash（P2PK）。实验性功能，请仅用于小额。如果丢失私钥，您可能无法再使用锁定到该密钥的 ecash。",
       generate_button: "生成密钥",
-      import_button: "导入私钥（nsec）",
+      import_button: "导入 nsec",
       quick_access: {
         toggle: "在“接收 ecash”中显示锁定按钮",
         description:
@@ -392,11 +392,11 @@ export default {
     },
     privacy: {
       network_title: "网络检查",
-      description: "这些设置会影响您的隐私。",
+      description:
+        "这些检查在后台运行，使付款状态保持最新，但在线活动越多，您的钱包就越容易被识别指纹。关闭某项检查后，您可以自行在历史记录中检查发票。",
       check_incoming: {
         toggle: "检查收到的发票",
-        description:
-          "在后台检查您最新的发票。更新更快，但更容易被识别指纹。关闭时，请自行在历史记录中检查发票。",
+        description: "在后台检查您最新的发票。",
       },
       check_startup: {
         toggle: "启动时检查待处理发票",
@@ -404,18 +404,15 @@ export default {
       },
       check_all: {
         toggle: "检查所有发票",
-        description:
-          "在后台检查未付款的发票，最长两周。在线活动越多，越容易被识别指纹。关闭时，请自行在历史记录中检查发票。",
+        description: "在后台检查未付款的发票，最长两周。",
       },
       check_sent: {
         toggle: "检查已发送的 ecash",
-        description:
-          "在后台检查已发送的 ecash 是否已被领取。在线活动越多，越容易被识别指纹。",
+        description: "在后台检查已发送的 ecash 是否已被领取。",
       },
       websockets: {
         toggle: "使用 WebSockets",
-        description:
-          "与 Mint 保持实时连接，获取付款和已花费 ecash 的更新。更快，但更容易被识别指纹。",
+        description: "与 Mint 保持实时连接，获取付款和已花费 ecash 的更新。",
       },
       bitcoin_price: {
         title: "比特币价格",
@@ -542,7 +539,7 @@ export default {
         unset_reserved: {
           button: "取消所有保留的 token",
           description:
-            "此钱包会将待处理的传出 ecash 标记为已保留（并从您的余额中扣除），以防止双重支付尝试。此按钮将取消所有保留的 token，以便可以再次使用它们。如果您执行此操作，您的钱包可能会包含已花费的证明。按删除已花费的证明按钮以清除它们。",
+            "释放为待处理的发送操作保留的 ecash，使其可以再次花费。此后钱包中可能会包含已花费的 ecash，请接着执行“删除已花费的证明”。",
         },
         show_onboarding: {
           button: "显示入门指南",
@@ -550,8 +547,7 @@ export default {
         },
         reset_wallet: {
           button: "重置钱包数据",
-          description:
-            "重置您的钱包数据。警告：这将删除所有内容！请务必先创建备份。",
+          description: "删除此钱包中的所有内容，包括您的 ecash。请先创建备份。",
           confirm_question: "您确定要删除您的钱包数据吗？",
           cancel: "取消",
           confirm: "删除钱包",
@@ -815,7 +811,7 @@ export default {
     },
     information: {
       caption:
-        "该向导仅从另一个种子短语恢复 ecash，您将无法使用此种子短语或更改您当前使用的钱包的种子短语。这意味着，除非您将 ecash 发送给自己一次，否则恢复的 ecash 将不会受到您当前种子短语的保护。",
+        "此操作仅从另一个种子短语恢复 ecash，不会更改此钱包的种子短语。要让恢复的 ecash 受到当前种子短语的保护，请在恢复后将其发送给自己一次。",
     },
     restore_mints: {
       label: "恢复 Mint",

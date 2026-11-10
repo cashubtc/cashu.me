@@ -384,7 +384,7 @@ export default {
       description:
         "Skapa eller importera en nyckel för att ta emot låst ecash (P2PK). Experimentellt: använd små belopp. Om du förlorar den privata nyckeln kan du förlora åtkomsten till ecash som är låst till den.",
       generate_button: "Generera nyckel",
-      import_button: "Importera privat nyckel (nsec)",
+      import_button: "Importera nsec",
       quick_access: {
         toggle: "Visa knappen Lås i Ta emot ecash",
         description:
@@ -397,11 +397,11 @@ export default {
     },
     privacy: {
       network_title: "Nätverkskontroller",
-      description: "Dessa inställningar påverkar din integritet.",
+      description:
+        "Dessa kontroller körs i bakgrunden. De håller betalningar uppdaterade, men mer aktivitet online underlättar fingeravtryckning av din plånbok. När en kontroll är avstängd kan du själv kontrollera fakturor under Historik.",
       check_incoming: {
         toggle: "Kontrollera inkommande faktura",
-        description:
-          "Kontrollerar din senaste faktura i bakgrunden. Snabbare uppdateringar, men underlättar fingeravtryckning. När funktionen är avstängd kontrollerar du själv fakturor under Historik.",
+        description: "Kontrollerar din senaste faktura i bakgrunden.",
       },
       check_startup: {
         toggle: "Kontrollera väntande fakturor vid start",
@@ -410,17 +410,16 @@ export default {
       check_all: {
         toggle: "Kontrollera alla fakturor",
         description:
-          "Kontrollerar obetalda fakturor i bakgrunden i upp till två veckor. Mer aktivitet online underlättar fingeravtryckning. När funktionen är avstängd kontrollerar du själv fakturor under Historik.",
+          "Kontrollerar obetalda fakturor i bakgrunden i upp till två veckor.",
       },
       check_sent: {
         toggle: "Kontrollera skickad ecash",
-        description:
-          "Kontrollerar i bakgrunden om skickad ecash har hämtats. Mer aktivitet online underlättar fingeravtryckning.",
+        description: "Kontrollerar i bakgrunden om skickad ecash har hämtats.",
       },
       websockets: {
         toggle: "Använd WebSockets",
         description:
-          "Håller en liveanslutning till mints för uppdateringar om betalningar och spenderad ecash. Snabbare, men underlättar fingeravtryckning.",
+          "Håller en liveanslutning till mints för uppdateringar om betalningar och spenderad ecash.",
       },
       bitcoin_price: {
         title: "Bitcoinpris",
@@ -553,7 +552,7 @@ export default {
         unset_reserved: {
           button: "Avboka alla reserverade tokens",
           description:
-            'Denna plånbok markerar väntande utgående ecash som reserverad (och drar av den från ditt saldo) för att förhindra försök till dubbelspending. Den här knappen kommer att avboka alla reserverade tokens så att de kan användas igen. Om du gör detta kan din plånbok inkludera spenderade proofs. Tryck på knappen "Ta bort spenderade proofs" för att bli av med dem.',
+            "Frigör ecash som reserverats för väntande sändningar så att den kan spenderas igen. Din plånbok kan därefter innehålla spenderad ecash: kör ”Ta bort spenderade proofs” efteråt.",
         },
         show_onboarding: {
           button: "Visa introduktion",
@@ -562,7 +561,7 @@ export default {
         reset_wallet: {
           button: "Återställ plånboksdata",
           description:
-            "Återställ dina plånboksdata. Varning: Detta kommer att radera allt! Se till att du skapar en säkerhetskopia först.",
+            "Raderar allt i den här plånboken, inklusive din ecash. Skapa en säkerhetskopia först.",
           confirm_question:
             "Är du säker på att du vill radera din plånboksdata?",
           cancel: "Avbryt",
@@ -835,7 +834,7 @@ export default {
     },
     information: {
       caption:
-        "Guiden kommer endast att återställa ecash från en annan återställningsfras, du kommer inte att kunna använda denna återställningsfras eller ändra återställningsfrasen för plånboken du för närvarande använder. Detta innebär att återställd ecash inte kommer att skyddas av din nuvarande återställningsfras så länge du inte skickar ecash till dig själv en gång.",
+        "Detta återställer endast ecash från en annan återställningsfras; det ändrar inte den här plånbokens återställningsfras. För att skydda återställd ecash med din nuvarande återställningsfras skickar du den till dig själv en gång efteråt.",
     },
     restore_mints: {
       label: "Återställ mints",

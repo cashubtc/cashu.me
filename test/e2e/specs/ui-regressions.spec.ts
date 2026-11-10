@@ -64,7 +64,8 @@ test("rejects a structurally invalid backup before writing wallet state", async 
   await page.getByText("Import wallet backup", { exact: true }).click();
   const chooser = page.waitForEvent("filechooser");
   await page
-    .getByRole("button", { name: "IMPORT WALLET BACKUP", exact: true })
+    .getByRole("button", { name: "Import wallet backup", exact: true })
+    .last()
     .click();
   let loaded = false;
   page.once("load", () => {

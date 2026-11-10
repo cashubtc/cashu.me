@@ -621,7 +621,11 @@ body.body--light .activity-row__avatar--in {
 .activity-row__label {
   font-size: 1rem;
   font-weight: 500;
+  // The ellipsis needs overflow hidden, which cut descenders (the g of "Sending") at the
+  // foot of the label's tight line box: the box reaches 3px lower without moving anything.
+  margin-bottom: -3px;
   overflow: hidden;
+  padding-bottom: 3px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

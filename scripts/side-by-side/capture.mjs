@@ -291,20 +291,26 @@ async function capture(shot, v) {
     if (shot.testnut) {
       const proofs = await mintProofs(shot.testnut);
       await page.evaluate(
-        async ({ TESTNUT, proofs }) => {
+        async ({ TESTNUT, proofs, fake }) => {
           const st =
             document.querySelector("#q-app").__vue_app__.config.globalProperties
               .$pinia._s;
           await st.get("mints").activateMintUrl(TESTNUT);
+          // When the demo wallet itself sits on testnut, its fake balance would be picked
+          // for a real send and refused: these flows run on the minted proofs alone.
+          if (fake)
+            await st.get("proofs").removeProofs([...st.get("proofs").proofs]);
           await st.get("proofs").addProofs(proofs);
         },
-        { TESTNUT, proofs }
+        { TESTNUT, proofs, fake: MINT === TESTNUT }
       );
       await page.waitForTimeout(1000);
       await page.reload();
       await page.waitForTimeout(2500);
     }
     for (const step of steps) await runStep(page, step, values);
+    // The resting state: no hover fill under a pointer left on the last thing it pressed.
+    await page.mouse.move(0, 0);
     await page.waitForTimeout(700);
   } catch (e) {
     error = String(e.message).split("\n")[0];

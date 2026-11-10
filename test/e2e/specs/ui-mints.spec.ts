@@ -177,7 +177,7 @@ test("mint details rows share one height, gap and edge", async ({ page }) => {
   ).toHaveCount(1);
 });
 
-// Owner 2026-10-29b, item 5: Edit, Review and Delete mint centre their icon and end glyph on
+// Edit, Review and Remove mint centre their icon and end glyph on
 // the label, within a pixel, on a whole-pixel title line (the same rows as settings).
 test("mint action rows centre their icon, label and end glyph", async ({
   page,
@@ -186,11 +186,11 @@ test("mint action rows centre their icon, label and end glyph", async ({
   await wallet.onboard(MINT_A_URL);
   await wallet.details(MINT_A_URL);
   const actions = page.locator(".mint-details-actions");
-  await expect(actions.getByText("Delete mint")).toBeVisible();
+  await expect(actions.getByText("Remove mint")).toBeVisible();
 
   const rows = await rowAlignment(actions);
   expect(rows.map((r) => r.label)).toEqual(
-    expect.arrayContaining(["Edit mint", "Delete mint"])
+    expect.arrayContaining(["Edit mint", "Remove mint"])
   );
   for (const row of rows) {
     expect(Math.abs(row.icon!), row.label).toBeLessThanOrEqual(1);

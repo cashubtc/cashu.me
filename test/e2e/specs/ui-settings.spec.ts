@@ -118,7 +118,7 @@ test("generates and browses P2PK keys and enables quick access", async ({
   await page.getByRole("button", { name: "Copy public key" }).click();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(key);
   await wallet.closeFullscreenDialog();
-  await wallet.toggleSetting("Show lock key on Receive", true);
+  await wallet.toggleSetting("Show Lock button in Receive ecash", true);
   await page.reload();
   await expect(publicKey).toHaveText(key);
   await wallet.home();

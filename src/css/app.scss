@@ -304,6 +304,13 @@ body,
 .section-divider-block--start .section-divider__caption {
   margin-top: 4px;
 }
+// Japanese descriptions wrap between phrases where the browser can tell them apart, not
+// inside a word (ビット / コイン).
+.q-item__label--caption:lang(ja),
+.section-divider__caption:lang(ja),
+.settings-page-caption:lang(ja) {
+  word-break: auto-phrase;
+}
 // Captions read evenly at body sizes without Quasar's positive tracking.
 .q-item__label--caption,
 .text-caption {
@@ -658,6 +665,14 @@ body.body--light .q-toggle.disabled .q-toggle__inner--truthy .q-toggle__track {
   inset: 6px !important;
   width: auto !important;
 }
+// A tab chosen with the pointer is marked by its underline alone: Quasar keeps the focus fill
+// on a clicked tab until focus moves, which read as a second, competing selection. The fill
+// stays for hover and for keyboard focus.
+body.desktop
+  .q-tab.q-focusable:focus:not(:focus-visible):not(:hover)
+  > .q-focus-helper {
+  opacity: 0;
+}
 // The press ripple fills the same inset shape, so a tap shows one shape, not two.
 .q-tab > .q-ripple {
   border-radius: var(--app-radius-sm);
@@ -770,8 +785,12 @@ body.body--light .q-dialog__backdrop {
   min-width: 0;
 }
 .sheet-header__text {
+  // 2px more clip box under the 20px line, so the ellipsis' overflow never trims a
+  // descender; nothing moves.
+  margin-bottom: -2px;
   min-width: 0;
   overflow: hidden;
+  padding-bottom: 2px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1809,9 +1828,14 @@ body.body--light .app-qr::after {
 }
 
 /* Send and Receive keep the original design's capitals. */
+// Equal shares whatever the label: a long one (EMPFANGEN) gives up padding rather than
+// taking width from its twin, which pushed scan off the centre line.
 .wallet-action-btn {
   flex: 1 1 0;
   min-height: 52px;
+  min-width: 0;
+  padding-inline: 8px;
+  white-space: nowrap;
 }
 
 // Scan rests on the page with no disc, as on the original wallet:

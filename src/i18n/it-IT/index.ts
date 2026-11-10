@@ -340,7 +340,7 @@ export default {
       description:
         "Genera o importa una chiave per ricevere ecash bloccato (P2PK). Sperimentale: usa piccoli importi. Se perdi la chiave privata, puoi perdere l'accesso all'ecash bloccato con essa.",
       generate_button: "Genera chiave",
-      import_button: "Importa chiave privata (nsec)",
+      import_button: "Importa nsec",
       quick_access: {
         toggle: "Mostra il pulsante Blocca in Ricevi ecash",
         description:
@@ -353,11 +353,11 @@ export default {
     },
     privacy: {
       network_title: "Controlli di rete",
-      description: "Queste impostazioni influenzano la tua privacy.",
+      description:
+        "Questi controlli vengono eseguiti in background. Mantengono aggiornati i pagamenti, ma più attività online rende più facile il fingerprinting del tuo portafoglio. Con un controllo disattivato, puoi controllare tu stesso le fatture nella Cronologia.",
       check_incoming: {
         toggle: "Verifica fattura in entrata",
-        description:
-          "Controlla la tua ultima fattura in background. Aggiornamenti più rapidi, ma fingerprinting più facile. Quando la funzione è disattivata, controlla le fatture nella Cronologia.",
+        description: "Controlla la tua ultima fattura in background.",
       },
       check_startup: {
         toggle: "Verifica fatture pendenti all'avvio",
@@ -367,17 +367,17 @@ export default {
       check_all: {
         toggle: "Verifica tutte le fatture",
         description:
-          "Controlla le fatture non pagate in background per un massimo di due settimane. Più attività online rende più facile il fingerprinting. Quando la funzione è disattivata, controlla le fatture nella Cronologia.",
+          "Controlla le fatture non pagate in background per un massimo di due settimane.",
       },
       check_sent: {
         toggle: "Verifica ecash inviato",
         description:
-          "Controlla in background se l'ecash inviato è stato riscattato. Più attività online rende più facile il fingerprinting.",
+          "Controlla in background se l'ecash inviato è stato riscattato.",
       },
       websockets: {
         toggle: "Usa WebSockets",
         description:
-          "Mantiene una connessione attiva con i mint per aggiornamenti sui pagamenti e sull'ecash speso. Più veloce, ma fingerprinting più facile.",
+          "Mantiene una connessione attiva con i mint per aggiornamenti sui pagamenti e sull'ecash speso.",
       },
       bitcoin_price: {
         title: "Prezzo del bitcoin",
@@ -526,7 +526,7 @@ export default {
         unset_reserved: {
           button: "Annulla prenotazione tutti i token riservati",
           description:
-            'Questo portafoglio marca l\'ecash in uscita pendente come riservato (e lo sottrae dal tuo saldo) per prevenire tentativi di doppia spesa. Questo pulsante annullerà la prenotazione di tutti i token riservati così potranno essere usati di nuovo. Se fai questo, il tuo portafoglio potrebbe includere prove spese. Premi il pulsante "Rimuovi prove spese" per eliminarle.',
+            "Libera l'ecash riservato agli invii in sospeso così può essere speso di nuovo. Il portafoglio potrebbe poi contenere ecash già speso: esegui «Rimuovi prove spese» subito dopo.",
         },
         show_onboarding: {
           button: "Mostra onboarding",
@@ -535,7 +535,7 @@ export default {
         reset_wallet: {
           button: "Resetta dati portafoglio",
           description:
-            "Resetta i dati del tuo portafoglio. Attenzione: Questo eliminerà tutto! Assicurati di creare prima un backup.",
+            "Elimina tutto ciò che è in questo portafoglio, compreso il tuo ecash. Crea prima un backup.",
           confirm_question:
             "Sei sicuro di voler eliminare i dati del tuo portafoglio?",
           cancel: "Annulla",
@@ -808,7 +808,7 @@ export default {
     },
     information: {
       caption:
-        "L'assistente ripristinerà solo ecash da un'altra frase seed, non potrai usare questa frase seed o cambiare la frase seed del portafoglio che stai usando attualmente. Ciò significa che l'ecash ripristinato non sarà protetto dalla tua frase seed attuale finché non invii l'ecash a te stesso una volta.",
+        "Questa procedura recupera solo ecash da un'altra frase seed; non cambia la frase seed di questo portafoglio. Per proteggere l'ecash ripristinato con la tua frase seed attuale, invialo a te stesso una volta al termine.",
     },
     restore_mints: {
       label: "Ripristina mint",

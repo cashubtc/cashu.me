@@ -174,7 +174,11 @@ export default defineComponent({
       if (this.copyButtonCopied) {
         return this.$t("common.copied");
       }
-      return this.$t("InvoiceDetailDialog.invoice.actions.copy.label");
+      // "Copy invoice" names a Lightning invoice; an offer or an on-chain address is just
+      // copied.
+      return this.invoiceMethod === PaymentMethod.Bolt11
+        ? this.$t("InvoiceDetailDialog.invoice.actions.copy.label")
+        : this.$t("global.actions.copy.label");
     },
     isBolt12(): boolean {
       return (

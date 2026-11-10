@@ -12,7 +12,8 @@ async function importBackup(
   await wallet.page.getByText("Import wallet backup", { exact: true }).click();
   const chooser = wallet.page.waitForEvent("filechooser");
   await wallet.page
-    .getByRole("button", { name: "IMPORT WALLET BACKUP", exact: true })
+    .getByRole("button", { name: "Import wallet backup", exact: true })
+    .last()
     .click();
   const reloaded = expectReload
     ? wallet.page.waitForEvent("load")
@@ -142,7 +143,7 @@ test("reveals and copies a seed and restores spendable funds in a fresh wallet",
       .first()
       .click();
     await expect(
-      restored.page.getByText("Successfully restored 1 mint(s)", {
+      restored.page.getByText("Mints restored: 1", {
         exact: true,
       })
     ).toBeVisible({ timeout: 60000 });

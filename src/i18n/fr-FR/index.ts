@@ -374,7 +374,7 @@ export default {
       description:
         "Générez ou importez une clé pour recevoir de l'ecash verrouillé (P2PK). Expérimental : utilisez de petits montants. Si vous perdez la clé privée, vous pouvez perdre l'accès à l'ecash verrouillé sur cette clé.",
       generate_button: "Générer une clé",
-      import_button: "Importer une clé privée (nsec)",
+      import_button: "Importer un nsec",
       quick_access: {
         toggle: "Afficher le bouton Verrouiller dans Recevoir de l'ecash",
         description:
@@ -387,11 +387,11 @@ export default {
     },
     privacy: {
       network_title: "Vérifications réseau",
-      description: "Ces paramètres affectent votre confidentialité.",
+      description:
+        "Ces vérifications s'exécutent en arrière-plan. Elles gardent les paiements à jour, mais plus d'activité en ligne rend l'empreinte de votre portefeuille plus facile à relever. Lorsqu'une vérification est désactivée, vous pouvez vérifier vous-même les factures dans Historique.",
       check_incoming: {
         toggle: "Vérifier la facture entrante",
-        description:
-          "Vérifie votre dernière facture en arrière-plan. Mises à jour plus rapides, mais empreinte plus facile à relever. Désactivé, vérifiez vous-même les factures dans Historique.",
+        description: "Vérifie votre dernière facture en arrière-plan.",
       },
       check_startup: {
         toggle: "Vérifier les factures en attente au démarrage",
@@ -401,17 +401,16 @@ export default {
       check_all: {
         toggle: "Vérifier toutes les factures",
         description:
-          "Vérifie les factures impayées en arrière-plan pendant deux semaines maximum. Plus d'activité en ligne rend votre empreinte plus facile à relever. Désactivé, vérifiez vous-même les factures dans Historique.",
+          "Vérifie les factures impayées en arrière-plan pendant deux semaines maximum.",
       },
       check_sent: {
         toggle: "Vérifier l'ecash envoyé",
-        description:
-          "Vérifie en arrière-plan si l'ecash envoyé a été réclamé. Plus d'activité en ligne rend votre empreinte plus facile à relever.",
+        description: "Vérifie en arrière-plan si l'ecash envoyé a été réclamé.",
       },
       websockets: {
         toggle: "Utiliser les WebSockets",
         description:
-          "Garde une connexion active avec les mints pour suivre les paiements et l'ecash dépensé. Plus rapide, mais empreinte plus facile à relever.",
+          "Garde une connexion active avec les mints pour suivre les paiements et l'ecash dépensé.",
       },
       bitcoin_price: {
         title: "Prix du bitcoin",
@@ -558,7 +557,7 @@ export default {
         unset_reserved: {
           button: "Annuler la réservation de tous les jetons réservés",
           description:
-            "Ce portefeuille marque l'ecash sortant en attente comme réservé (et le soustrait de votre solde) pour éviter les tentatives de double dépense. Ce bouton annulera la réservation de tous les jetons réservés afin qu'ils puissent être utilisés à nouveau. Si vous faites cela, votre portefeuille pourrait inclure des preuves dépensées. Appuyez sur le bouton \"Supprimer les preuves dépensées\" pour vous en débarrasser.",
+            "Libère l'ecash réservé aux envois en attente afin qu'il puisse être dépensé à nouveau. Votre portefeuille peut alors contenir de l'ecash déjà dépensé : lancez ensuite « Supprimer les preuves dépensées ».",
         },
         show_onboarding: {
           button: "Afficher l'accueil",
@@ -567,7 +566,7 @@ export default {
         reset_wallet: {
           button: "Réinitialiser les données du portefeuille",
           description:
-            "Réinitialisez les données de votre portefeuille. Attention : Cela supprimera tout ! Assurez-vous de faire une sauvegarde d'abord.",
+            "Supprime tout le contenu de ce portefeuille, y compris votre ecash. Faites d'abord une sauvegarde.",
           confirm_question:
             "Êtes-vous sûr de vouloir supprimer les données de votre portefeuille ?",
           cancel: "Annuler",
@@ -842,7 +841,7 @@ export default {
     },
     information: {
       caption:
-        "L'assistant ne restaurera que l'ecash d'une autre phrase de départ, vous ne pourrez pas utiliser cette phrase de départ ni changer la phrase de départ du portefeuille que vous utilisez actuellement. Cela signifie que l'ecash restauré ne sera pas protégé par votre phrase de départ actuelle tant que vous ne vous enverrez pas l'ecash une fois.",
+        "Ceci récupère uniquement l'ecash d'une autre phrase de départ ; la phrase de départ de ce portefeuille n'est pas modifiée. Pour protéger l'ecash restauré avec votre phrase de départ actuelle, envoyez-le-vous une fois ensuite.",
     },
     restore_mints: {
       label: "Restaurer les mints",

@@ -7,7 +7,10 @@
            fetch runs, the same summary draws its own placeholders, so the page never claims
            "No reviews yet" before it knows and nothing moves when the reviews arrive. -->
       <div v-if="hasAnyReviews || fetchingReviews" class="q-mb-lg">
+        <!-- Reviews that carry no rating have no score to chart: a dash over five empty bars
+             read as a broken summary. -->
         <RatingsSummary
+          v-if="!hasAnyReviews || average !== null"
           :skeleton="!hasAnyReviews"
           :average="average"
           :distribution="ratingDistribution"

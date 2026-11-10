@@ -389,7 +389,7 @@ export default {
       description:
         "Generate or import a key to receive locked ecash (P2PK). Experimental: use small amounts. If you lose the private key, you can lose access to the ecash locked to it.",
       generate_button: "Generate key",
-      import_button: "Import private key (nsec)",
+      import_button: "Import nsec",
       quick_access: {
         toggle: "Show Lock button in Receive ecash",
         description:
@@ -402,11 +402,11 @@ export default {
     },
     privacy: {
       network_title: "Network checks",
-      description: "These settings affect your privacy.",
+      description:
+        "These checks run in the background. They keep payments up to date, but more online activity makes your wallet easier to fingerprint. With a check off, you can check invoices yourself in History.",
       check_incoming: {
         toggle: "Check incoming invoice",
-        description:
-          "Checks your latest invoice in the background. Faster updates, but easier to fingerprint. When off, check invoices yourself in History.",
+        description: "Checks your latest invoice in the background.",
       },
       check_startup: {
         toggle: "Check pending invoices on startup",
@@ -415,17 +415,16 @@ export default {
       check_all: {
         toggle: "Check all invoices",
         description:
-          "Checks unpaid invoices in the background for up to two weeks. More online activity makes you easier to fingerprint. When off, check invoices yourself in History.",
+          "Checks unpaid invoices in the background for up to two weeks.",
       },
       check_sent: {
         toggle: "Check sent ecash",
-        description:
-          "Checks in the background whether sent ecash was claimed. More online activity makes you easier to fingerprint.",
+        description: "Checks in the background whether sent ecash was claimed.",
       },
       websockets: {
         toggle: "Use WebSockets",
         description:
-          "Keeps a live connection to mints for updates on payments and spent ecash. Faster, but easier to fingerprint.",
+          "Keeps a live connection to mints for updates on payments and spent ecash.",
       },
       bitcoin_price: {
         title: "Bitcoin price",
@@ -570,7 +569,7 @@ export default {
         unset_reserved: {
           button: "Unset all reserved tokens",
           description:
-            'This wallet marks pending outgoing ecash as reserved (and subtracts it from your balance) to prevent double-spend attempts. This button will unset all reserved tokens so they can be used again. If you do this, your wallet might include spent proofs. Press the "Remove spent proofs" button to get rid of them.',
+            "Releases ecash reserved for pending sends so it can be spent again. Your wallet may then hold spent ecash: run Remove spent proofs afterwards.",
         },
         show_onboarding: {
           button: "Show onboarding",
@@ -579,7 +578,7 @@ export default {
         reset_wallet: {
           button: "Reset wallet data",
           description:
-            "Reset your wallet data. Warning: This will delete everything! Make sure you create a backup first.",
+            "Deletes everything in this wallet, including your ecash. Create a backup first.",
           confirm_question: "Are you sure you want to delete your wallet data?",
           cancel: "Cancel",
           confirm: "Delete wallet",
@@ -864,7 +863,7 @@ export default {
     },
     information: {
       caption:
-        "The wizard will only restore ecash from another seed phrase, you will not be able to use this seed phrase or change the seed phrase of the wallet that you're currently using. This means that restored ecash will not be protected by your current seed phrase as long as you don't send the ecash to yourself once.",
+        "This only recovers ecash from another seed phrase; it does not change this wallet's seed phrase. To protect the restored ecash with your current seed phrase, send it to yourself once afterwards.",
     },
     restore_mints: {
       label: "Restore mints",
