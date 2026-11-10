@@ -293,6 +293,12 @@ async function showLive(pane, slide) {
       () => mirrorScroll(pane.version, win.scrollY),
       { passive: true }
     );
+    // Capturing, so the app's own arrow-key handling (its tab bar) never takes the key
+    // first; then the deck takes focus back, so every shortcut works until a pane is
+    // clicked into.
+    win.addEventListener("keydown", (e) => onKey(e, true), true);
+    win.document.activeElement?.blur?.();
+    window.focus();
     pane.iframe.classList.add("is-ready");
     set("Live");
   } catch (error) {
@@ -429,30 +435,37 @@ const flip = () => {
 stage.addEventListener("click", (e) => {
   if (state.view === "flip" && e.target.closest(".pane__label")) flip();
 });
-addEventListener("keydown", (e) => {
-  if (e.metaKey || e.ctrlKey || e.altKey || e.target.closest("select, dialog"))
+const KEYS = {
+  ArrowRight: () => go(state.index + 1),
+  ArrowLeft: () => go(state.index - 1),
+  PageDown: () => go(state.index + 1),
+  PageUp: () => go(state.index - 1),
+  ArrowDown: () => goSection(1),
+  ArrowUp: () => goSection(-1),
+  Home: () => go(0),
+  End: () => go(slides.length - 1),
+  " ": () => (state.view === "flip" ? flip() : toggle("view", "flip")),
+  v: () => toggle("view", state.view === "side" ? "flip" : "side"),
+  l: () => slides[state.index].live && toggle("live", !state.live),
+  s: () => toggle("sync", !state.sync),
+  f: () => $("full").click(),
+  "?": () => $("keys").showModal(),
+};
+// Inside a live pane the app keeps its own keys; only left and right, which move between
+// slides, are taken from it, and never from a field being typed in.
+const PANE_KEYS = ["ArrowLeft", "ArrowRight"];
+function onKey(e, inPane = false) {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.target.closest?.("input, textarea, select, dialog, [contenteditable]"))
     return;
-  const keys = {
-    ArrowRight: () => go(state.index + 1),
-    ArrowLeft: () => go(state.index - 1),
-    PageDown: () => go(state.index + 1),
-    PageUp: () => go(state.index - 1),
-    ArrowDown: () => goSection(1),
-    ArrowUp: () => goSection(-1),
-    Home: () => go(0),
-    End: () => go(slides.length - 1),
-    " ": () => (state.view === "flip" ? flip() : toggle("view", "flip")),
-    v: () => toggle("view", state.view === "side" ? "flip" : "side"),
-    l: () => slides[state.index].live && toggle("live", !state.live),
-    s: () => toggle("sync", !state.sync),
-    f: () => $("full").click(),
-    "?": () => $("keys").showModal(),
-  };
-  const action = keys[e.key] ?? keys[e.key.toLowerCase()];
+  if (inPane && !PANE_KEYS.includes(e.key)) return;
+  const action = KEYS[e.key] ?? KEYS[e.key.toLowerCase()];
   if (!action) return;
   e.preventDefault();
+  e.stopPropagation();
   action();
-});
+}
+addEventListener("keydown", (e) => onKey(e));
 addEventListener("hashchange", () => {
   const index = slides.findIndex((s) => s.id === location.hash.slice(1));
   if (index >= 0) go(index);
