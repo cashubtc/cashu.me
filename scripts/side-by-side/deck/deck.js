@@ -247,6 +247,19 @@ async function showLive(pane, slide) {
     pane.iframe = document.createElement("iframe");
     pane.iframe.name = frame;
     pane.iframe.title = `${pane.version}: live app`;
+    // Every document the frame loads hands left and right to the deck, capturing, so the
+    // app's own arrow-key handling (its tab bar) never takes them first.
+    pane.iframe.addEventListener("load", () => {
+      try {
+        pane.iframe.contentWindow.addEventListener(
+          "keydown",
+          (e) => onKey(e, true),
+          true
+        );
+      } catch (e) {
+        /* about:blank between slides */
+      }
+    });
     pane.frame.append(pane.iframe);
   }
   set("Loading…");
@@ -293,10 +306,7 @@ async function showLive(pane, slide) {
       () => mirrorScroll(pane.version, win.scrollY),
       { passive: true }
     );
-    // Capturing, so the app's own arrow-key handling (its tab bar) never takes the key
-    // first; then the deck takes focus back, so every shortcut works until a pane is
-    // clicked into.
-    win.addEventListener("keydown", (e) => onKey(e, true), true);
+    // The deck takes focus back, so every shortcut works until a pane is clicked into.
     win.document.activeElement?.blur?.();
     window.focus();
     pane.iframe.classList.add("is-ready");
