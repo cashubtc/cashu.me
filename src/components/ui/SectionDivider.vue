@@ -1,8 +1,9 @@
-<!-- A section label in small capitals. Centred between two hairlines on every page, settings
-     sub-pages included (the original design; owner 2026-10-29: keep it), or on the start edge
-     without hairlines where it labels a single field (the review rating). The section's
-     one-line description sits under it when given (styled by the global .section-divider rules
-     in app.scss). It owns its gap to the content below, so every section starts the same way. -->
+<!-- A section label in small capitals. Centred between two hairlines where the sections
+     are open lists under a centred header (mint details, the mints tab), or on the start edge
+     without hairlines (align="start") where the page reads down the text edge: settings
+     pages, sheets, a single field's label. The section's one-line description sits under it
+     when given (styled by the global .section-divider rules in app.scss). It owns its gap to
+     the content below, so every section starts the same way. -->
 <template>
   <div
     class="section-divider-block"
@@ -44,7 +45,7 @@ export default defineComponent({
       type: String,
       default: "",
     },
-    /** "start": a field's label on the text edge, without hairlines (the review rating). */
+    /** "start": on the text edge, without hairlines (settings, sheets, a field's label). */
     align: {
       type: String as PropType<"center" | "start">,
       default: "center",

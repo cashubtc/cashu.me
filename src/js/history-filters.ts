@@ -62,20 +62,18 @@ export function matchesHistoryFilters(
   return true;
 }
 
-/** The i18n key naming each fixed choice (mint and unit name themselves). */
+/** The i18n key naming each fixed choice; "all" is no choice, and mint and unit name
+ * themselves. */
 export const HISTORY_FILTER_LABEL_KEYS = {
   status: {
-    all: "HistoryTable.filters.all",
     pending: "common.pending",
     paid: "HistoryTable.filters.completed",
   },
   direction: {
-    all: "HistoryTable.filters.all",
     in: "HistoryTable.filters.received",
     out: "HistoryTable.filters.sent",
   },
   type: {
-    all: "HistoryTable.filters.all",
     ecash: "HistoryTable.row.type_label",
     lightning: "InvoiceTable.row.type_label",
     onchain: "common.on_chain",

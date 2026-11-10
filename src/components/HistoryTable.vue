@@ -33,20 +33,18 @@
            its "Clear all" variant tied; both reviewers asked for this merge. -->
       <div class="history-toolbar">
         <div v-if="activeGroups.length" class="history-chips">
-          <button
+          <FilterChip
             v-for="group in activeGroups"
             :key="group"
-            type="button"
-            class="history-chip"
+            removable
             data-testid="history-filter-chip"
             :aria-label="
               $t('HistoryTable.filters.remove', { label: chipLabel(group) })
             "
             @click="clearFilter(group)"
           >
-            <span class="history-chip__label">{{ chipLabel(group) }}</span>
-            <XIcon :size="14" aria-hidden="true" />
-          </button>
+            {{ chipLabel(group) }}
+          </FilterChip>
           <span class="history-count">{{
             $t("HistoryTable.filters.count", {
               shown: filteredTransactions.length,
@@ -240,8 +238,8 @@ import {
   History as HistoryIcon,
   ListFilter as ListFilterIcon,
   RefreshCw as RefreshCwIcon,
-  X as XIcon,
 } from "lucide-vue-next";
+import FilterChip from "src/components/ui/FilterChip.vue";
 import { PaymentMethod, UnifiedTransactionType } from "src/stores/walletTypes";
 import { mintQuoteForHistoryInvoice } from "src/js/invoice-history";
 
@@ -257,9 +255,9 @@ export default defineComponent({
     transactions: { type: Array, default: null },
   },
   components: {
+    FilterChip,
     CircleArrowDownIcon,
     RefreshCwIcon,
-    XIcon,
     ActivityRow,
     EmptyState,
     IconButton,
@@ -669,38 +667,6 @@ export default defineComponent({
   padding: 0 6px;
   text-decoration: underline;
   text-underline-offset: 3px;
-}
-.history-chip {
-  align-items: center;
-  background: var(--app-tint);
-  border: 0;
-  border-radius: var(--app-radius-pill);
-  color: var(--app-text);
-  cursor: pointer;
-  display: inline-flex;
-  flex-shrink: 0;
-  font: inherit;
-  font-size: 14px;
-  font-weight: 500;
-  gap: 4px;
-  min-height: 32px;
-  padding: 0 10px 0 12px;
-  transition: background 0.15s ease;
-}
-@media (hover: hover) {
-  .history-chip:hover {
-    background: var(--app-tint-strong);
-  }
-}
-.history-chip:focus-visible {
-  box-shadow: var(--app-focus-ring);
-  outline: none;
-}
-.history-chip__label {
-  max-width: 14em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 .history-count {
   color: var(--app-text-muted);

@@ -69,7 +69,7 @@ export default {
   common: {
     copied: "Zkopírováno",
     on_chain: "On-chain",
-    pending: "Čeká",
+    pending: "Čekající",
     delete: "Smazat",
     copy_npub: "Kopírovat npub",
     back: "Zpět",
@@ -197,12 +197,6 @@ export default {
   },
   Settings: {
     menu: {
-      groups: {
-        wallet: "Peněženka",
-        connections: "Připojení",
-        preferences: "Předvolby",
-        more: "Další",
-      },
       title: "Nastavení",
       backup: {
         title: "Záloha a obnova",
@@ -214,7 +208,7 @@ export default {
       },
       nostr: {
         title: "Nostr",
-        caption: "Klíče, relaye a síť důvěry",
+        caption: "Klíče, relaye a Web of Trust",
       },
       payment_requests: {
         title: "Žádosti o platbu",
@@ -452,8 +446,7 @@ export default {
       receive_swaps: {
         toggle: "Přijímat swapy",
         badge: "Beta",
-        description:
-          "Nabídne výměnu přijatého ecash do vašeho aktivního mintu.",
+        description: "Nabídne swap přijatého ecash do vašeho aktivního mintu.",
       },
       auto_paste: {
         toggle: "Automaticky vkládat ecash",
@@ -571,7 +564,7 @@ export default {
           title: "Navýšit čítače keysetů",
           increase: "Zvýšit čítač pro {id}",
           fixes: "Opravuje „outputs have already been signed“",
-          keysets: "{n} keyset | {n} keysety",
+          keysets: "{n} keyset | Počet keysetů: {n}",
           sheet_hint: "Klepnutím na + zvýšíte čítač keysetu.",
           column: "Čítač",
         },
@@ -683,7 +676,7 @@ export default {
     },
   },
   WelcomeSlide1: {
-    terms_agreement: "Pokračováním souhlasíte s {terms}",
+    terms_agreement: "Pokračováním přijímáte {terms}",
     title: "Vítejte v Cashu.me",
     text: "Cashu.me je bezplatná a open-source bitcoinová peněženka, která používá ecash pro bezpečné a soukromé uchování vašich prostředků.",
   },
@@ -816,9 +809,9 @@ export default {
   MintRatings: {
     sort_and_filter: "Řazení a filtr",
     reviews_title: "Recenze",
-    reviews_count: "{n} recenze | {n} recenzí",
+    reviews_count: "{n} recenze | Počet recenzí: {n}",
     web_of_trust_caption: "Počítat jen recenze od lidí z vaší sítě důvěry",
-    web_of_trust_hop: "Ve vaší síti důvěry (skok {hop})",
+    web_of_trust_hop: "Ve vašem Web of Trust (skok {hop})",
     no_mint_url: "Nebyla zadána URL mintu",
     reviews: "recenze",
     no_reviews: "Zatím žádné recenze",
@@ -1230,7 +1223,7 @@ export default {
   PaymentRequestDialog: {
     any_amount: "Libovolná částka",
     payment_request: {
-      caption: "Žádost o platbu",
+      caption: "Platební požadavek",
     },
     request_index: "Požadavek {index} z {total}",
     received_total: "Celkem přijato",
@@ -1380,12 +1373,9 @@ export default {
       title: "Filtrovat historii",
       direction: "Směr",
       type: "Typ",
-      all: "Vše",
-      all_mints: "Všechny minty",
       completed: "Dokončeno",
       received: "Přijato",
       sent: "Odesláno",
-      show_results: "Zobrazit výsledky ({count})",
       reset: "Obnovit",
       clear_all: "Zrušit vše",
       remove: "Odebrat filtr: {label}",
@@ -1465,7 +1455,7 @@ export default {
       title: "Platit on-chain",
       address_placeholder: "Bitcoinová adresa",
       choose_speed: "Zvolte rychlost potvrzení",
-      blocks: "{n} blok | {n} bloků",
+      blocks: "{n} blok | Počet bloků: {n}",
       estimated_confirmation: "Odhadované potvrzení",
       fee_reserve: "rezerva na poplatek",
     },
@@ -1613,7 +1603,7 @@ export default {
       issuing: "Vydává se ecash",
       paid: "Zaplaceno",
       unpaid: "Nezaplaceno",
-      pending: "Čeká",
+      pending: "Čekající",
       issued: "Vydáno",
       expired: "Vypršelo",
       failed: "Selhalo",
@@ -1629,9 +1619,9 @@ export default {
     unavailable: "Informace o auditu nejsou momentálně k dispozici.",
     load_failed: "Nepodařilo se načíst data mintu",
     success_rate: "Úspěšnost",
-    swaps_count: "{successful} z {total} výměn",
+    swaps_count: "{successful} z {total} swapů",
     average_time: "Průměrná doba",
-    average_time_caption: "U úspěšných výměn",
+    average_time_caption: "U úspěšných swapů",
     disclaimer:
       "Data auditu poskytují nezávislé třetí strany, aby pomohla v čase posoudit spolehlivost mintu. Tyto výsledky jsou však pouze informativní a nezaručují bezpečnost, solventnost ani důvěryhodnost žádného mintu. Vždy si udělejte vlastní průzkum a před použitím služeb se ujistěte, že provozovateli mintu důvěřujete.",
     donate_text:
@@ -1640,29 +1630,29 @@ export default {
     sats_amount: "{amount} sats",
     warnings_title: "Upozornění auditora",
     warnings: {
-      last_swap_failed: "Poslední pokus o výměnu selhal.",
+      last_swap_failed: "Poslední pokus o swap selhal.",
       recent_success:
-        "Za posledních {days} dní uspělo {successful} z {total} výměn.",
+        "Za posledních {days} dní uspělo {successful} z {total} swapů.",
       reliable:
         "{base} Nicméně {success} Tento mint se zdá spolehlivý, selhání mohou být způsobena přijímajícím mintem.",
       unreliable: "{base} Pouze {success} Tento mint může být nespolehlivý.",
       unknown: "Auditor zatím nedokázal určit kvalitu tohoto mintu.",
       not_enough_data:
-        "Auditor nemá o tomto mintu dostatek nedávných dat. Za posledních {days} dní proběhlo jen {count} úspěšných výměn.",
+        "Auditor nemá o tomto mintu dostatek nedávných dat. Za posledních {days} dní proběhl jen {count} úspěšný swap. | Auditor nemá o tomto mintu dostatek nedávných dat. Počet úspěšných swapů za posledních {days} dní: {count}.",
       low_success:
         "Za posledních {days} dní měl tento mint úspěšnost {rate} %, což je pod doporučenými {threshold} %.",
       inactive:
-        "Tento mint neměl žádné výměny {days} dní. Může být nedostupný.",
+        "Tento mint neměl žádné swapy po dobu {days} dne. Může být nedostupný. | Tento mint neměl žádné swapy po dobu {days} dní. Může být nedostupný.",
       slow: "Tento mint je pomalý. Platby z něj trvaly v průměru {seconds} s.",
       no_successful:
-        "U tohoto mintu nebyla zaznamenána žádná úspěšná výměna. Může být nedostupný.",
+        "U tohoto mintu nebyl zaznamenán žádný úspěšný swap. Může být nedostupný.",
     },
     chart: {
       now: "Nyní",
       today: "Dnes",
       yesterday: "Včera",
       invalid_date: "Neplatné datum",
-      swaps: "Výměny:",
+      swaps: "Swapy:",
       success_rate: "Úspěšnost:",
       time_range: "Časové rozmezí:",
     },

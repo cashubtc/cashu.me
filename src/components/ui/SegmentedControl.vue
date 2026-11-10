@@ -4,7 +4,7 @@
 <template>
   <div
     class="segmented"
-    :class="{ 'segmented--disabled': disable, 'segmented--block': block }"
+    :class="{ 'segmented--disabled': disable }"
     role="radiogroup"
     :aria-label="label || undefined"
     :aria-disabled="disable || undefined"
@@ -51,8 +51,6 @@ export default defineComponent({
     /** The group's accessible name. */
     label: { type: String, default: "" },
     disable: { type: Boolean, default: false },
-    /** Fill the container, with equal segments, to share edges with fields around it. */
-    block: { type: Boolean, default: false },
   },
   emits: ["update:modelValue"],
   computed: {
@@ -90,11 +88,6 @@ export default defineComponent({
   padding: 3px;
   position: relative;
 }
-.segmented--block {
-  display: grid;
-  grid-auto-columns: minmax(0, 1fr);
-  width: 100%;
-}
 /* The thumb sits under the chosen option and slides to the next one. */
 .segmented__thumb {
   background: var(--q-primary);
@@ -123,16 +116,6 @@ export default defineComponent({
   position: relative;
   transition: color 0.2s ease;
   white-space: nowrap;
-}
-/* Block: equal shares of a full-width track, so a long label (Arabic "on-chain", German
-   "Abgeschlossen") gets a tighter inset and then wraps to a second line in its pill rather
-   than spilling into the next option. */
-.segmented--block .segmented__option {
-  line-height: 1.2;
-  overflow-wrap: anywhere;
-  padding: 4px 8px;
-  text-wrap: balance;
-  white-space: normal;
 }
 .segmented__option--on {
   color: var(--app-on-primary);

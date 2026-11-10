@@ -46,10 +46,10 @@ export default {
         label: "接收",
       },
       show_seed: {
-        label: "显示助记词",
+        label: "显示种子短语",
       },
       hide_seed: {
-        label: "隐藏助记词",
+        label: "隐藏种子短语",
       },
       scan: {
         label: "扫描",
@@ -107,7 +107,7 @@ export default {
       payment_sent: "付款已发送",
       payment_failed: "付款失败",
       could_not_pay_request: "无法支付请求",
-      request_unit_unsupported: "Mint 不支持此支付请求中的单位：{unit}",
+      request_unit_unsupported: "Mint 不支持此付款请求中的单位：{unit}",
       no_onchain_mint: "您的 Mint 都不支持链上支付",
     },
     mint: {
@@ -176,12 +176,6 @@ export default {
   },
   Settings: {
     menu: {
-      groups: {
-        wallet: "钱包",
-        connections: "连接",
-        preferences: "偏好设置",
-        more: "更多",
-      },
       title: "设置",
       backup: {
         title: "备份与恢复",
@@ -293,7 +287,7 @@ export default {
         description: "通过 npub.cash 提供的地址收款",
       },
       address: {
-        label: "你的地址",
+        label: "您的地址",
         copy_tooltip: "复制 Lightning 地址",
       },
       show_on_receive: {
@@ -536,7 +530,7 @@ export default {
           increase: "增加 {id} 的计数器",
           fixes: "修复“outputs have already been signed”",
           keysets: "{n} 个密钥集 | {n} 个密钥集",
-          sheet_hint: "点按 + 可增加密钥集的计数器。",
+          sheet_hint: "点击 + 可增加密钥集的计数器。",
           column: "计数器",
         },
         unset_reserved: {
@@ -694,7 +688,7 @@ export default {
     title: "安装 Cashu",
     text: "从主屏幕打开，不显示浏览器地址栏。",
     ios: {
-      share: "点击“共享”",
+      share: "点击“分享”",
       add: "添加到主屏幕",
     },
     android: {
@@ -957,7 +951,7 @@ export default {
   },
   SendDialog: {
     captions: {
-      ecash: "分享代币或二维码",
+      ecash: "分享 token 或二维码",
       lightning: "支付发票或地址",
       onchain: "发送到比特币地址",
     },
@@ -1023,7 +1017,7 @@ export default {
   },
   ReceiveDialog: {
     captions: {
-      ecash: "粘贴、扫描或请求代币",
+      ecash: "粘贴、扫描或请求 token",
       lightning: "创建发票以收款",
       onchain: "获取比特币地址",
     },
@@ -1043,10 +1037,10 @@ export default {
     title: "接收 ecash",
     actions: {
       paste: {
-        label: "粘贴代币",
+        label: "粘贴 token",
       },
       scan: {
-        label: "扫描代币",
+        label: "扫描 token",
       },
       request: {
         label: "请求 ecash",
@@ -1239,18 +1233,18 @@ export default {
       },
     },
     nuts: {
-      nut7: "代币状态检查",
-      nut8: "多付的 Lightning 手续费",
+      nut7: "token 状态检查",
+      nut8: "多付的闪电手续费",
       nut9: "签名恢复",
       nut10: "花费条件",
       nut11: "支付到公钥（P2PK）",
       nut12: "DLEQ 证明",
-      nut13: "确定性密钥",
+      nut13: "确定性秘密",
       nut14: "哈希时间锁合约（HTLC）",
       nut15: "部分多路径支付",
-      nut16: "动态 QR 码",
+      nut16: "动态二维码",
       nut17: "WebSocket 订阅",
-      nut18: "支付请求",
+      nut18: "付款请求",
       nut19: "缓存响应",
       nut20: "铸造报价签名",
       nut21: "明文认证",
@@ -1272,17 +1266,14 @@ export default {
   },
   HistoryTable: {
     empty_text: "暂无历史记录",
-    empty_hint: "你发送和收到的付款会显示在这里。",
+    empty_hint: "您发送和收到的付款会显示在这里。",
     filters: {
       title: "筛选记录",
       direction: "方向",
       type: "类型",
-      all: "全部",
-      all_mints: "全部 Mint",
       completed: "已完成",
       received: "已收到",
       sent: "已发送",
-      show_results: "显示结果（{count}）",
       reset: "重置",
       clear_all: "全部清除",
       remove: "移除筛选：{label}",
@@ -1347,7 +1338,7 @@ export default {
       title: "扫描二维码",
       description: "将相机对准二维码",
       caption_address: "点击扫描地址",
-      caption_token: "点击扫描代币",
+      caption_token: "点击扫描 token",
     },
     paste_button: {
       label: "@:global.actions.paste.label",
@@ -1505,7 +1496,7 @@ export default {
     },
     info: {
       pay_failed: "无法支付请求",
-      no_ecash: "没有可用于此支付请求的 ecash",
+      no_ecash: "没有可用于此付款请求的 ecash",
     },
   },
   PaymentRequestInfo: {
@@ -1526,14 +1517,14 @@ export default {
     status: "状态",
     network: "网络",
     transaction_id: "交易 ID",
-    explorer: "Explorer",
+    explorer: "区块浏览器",
     confirmations: "确认数",
     paid_at: "支付时间",
     preimage: "原像",
     preimage_copied: "原像已复制",
     mint: "Mint",
     method: "方式",
-    lightning_offer: "Lightning Offer",
+    lightning_offer: "闪电 Offer",
     states: {
       waiting: "等待付款",
       confirming: "确认中（{count}/{threshold}）",
@@ -1598,8 +1589,8 @@ export default {
       sent: "已发送 ecash",
       received: "已收到 ecash",
     },
-    qr_speed: "QR 速度：{value}",
-    qr_density: "QR 密度：{value}",
+    qr_speed: "二维码速度：{value}",
+    qr_density: "二维码密度：{value}",
     speed: {
       fast: "快",
       medium: "中",
@@ -1628,7 +1619,7 @@ export default {
     format_label: "请求类型",
     formats: {
       bolt11: "发票",
-      bolt12: "要约",
+      bolt12: "Offer",
     },
     onchain_title: "链上接收",
     bolt12_title: "接收 Bolt12",

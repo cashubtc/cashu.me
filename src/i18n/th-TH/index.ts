@@ -46,10 +46,10 @@ export default {
         label: "รับ",
       },
       show_seed: {
-        label: "แสดงวลี seed",
+        label: "แสดงวลีสำหรับกู้คืน",
       },
       hide_seed: {
-        label: "ซ่อนวลี seed",
+        label: "ซ่อนวลีสำหรับกู้คืน",
       },
       scan: {
         label: "สแกน",
@@ -96,10 +96,9 @@ export default {
       no_lnurl_data: "ไม่มีข้อมูล LNURL",
       no_price_data: "ไม่มีข้อมูลราคา",
       trying_again: "กำลังลองอีกครั้ง...",
-      unsupported_legacy_qr: "ไม่รองรับคิวอาร์โค้ดแบบเก่า",
-      legacy_qr_not_supported:
-        "คิวอาร์โค้ดแบบเก่านี้ไม่ได้มาจากร้านค้าที่รองรับ",
-      no_bolt12_mint: "ไม่มี Mint ของคุณที่รองรับ BOLT12 Offer",
+      unsupported_legacy_qr: "ไม่รองรับรหัส QR แบบเก่า",
+      legacy_qr_not_supported: "รหัส QR แบบเก่านี้ไม่ได้มาจากร้านค้าที่รองรับ",
+      no_bolt12_mint: "ไม่มี Mint ของคุณที่รองรับข้อเสนอ BOLT12",
       no_bolt11_mint: "ไม่มี Mint ของคุณที่รองรับใบแจ้งหนี้ BOLT11",
       address_not_paid: "ที่อยู่นี้ยังไม่ได้รับการชำระเงิน",
       payment_pending: "การชำระเงินอยู่ระหว่างดำเนินการ",
@@ -176,12 +175,6 @@ export default {
   },
   Settings: {
     menu: {
-      groups: {
-        wallet: "กระเป๋าเงิน",
-        connections: "การเชื่อมต่อ",
-        preferences: "การตั้งค่า",
-        more: "เพิ่มเติม",
-      },
       title: "การตั้งค่า",
       backup: {
         title: "สำรองและกู้คืน",
@@ -193,7 +186,7 @@ export default {
       },
       nostr: {
         title: "Nostr",
-        caption: "กุญแจ, รีเลย์ และเครือข่ายความไว้วางใจ",
+        caption: "กุญแจ, รีเลย์ และเครือข่ายที่เชื่อถือได้",
       },
       payment_requests: {
         title: "คำขอชำระเงิน",
@@ -213,7 +206,7 @@ export default {
       },
       privacy: {
         title: "ความเป็นส่วนตัว",
-        caption: "การตรวจสอบเครือข่ายและราคาบิตคอยน์",
+        caption: "การตรวจสอบเครือข่ายและราคา Bitcoin",
       },
       experimental: {
         title: "ทดลอง",
@@ -316,7 +309,7 @@ export default {
       description: "กุญแจ Nostr ของคุณเป็นตัวกำหนด Lightning Address ของคุณ",
       wallet_seed: {
         title: "วลีสำหรับกู้คืน Wallet",
-        description: "สร้างคู่กุญแจ Nostr จาก seed ของ Wallet",
+        description: "สร้างคู่กุญแจ Nostr จากวลีสำหรับกู้คืนของ Wallet",
         copy_nsec: "คัดลอกกุญแจส่วนตัว",
       },
       nsec_bunker: {
@@ -421,12 +414,12 @@ export default {
           "เชื่อมต่อกับ Mint ตลอดเวลาเพื่อรับสถานะการชำระเงินทันที เร็วขึ้น แต่ถูกระบุตัวตนได้ง่ายขึ้น",
       },
       bitcoin_price: {
-        title: "ราคาบิตคอยน์",
+        title: "ราคา Bitcoin",
         toggle: "รับอัตราแลกเปลี่ยนจาก Coinbase",
         description:
-          "ดึงราคาบิตคอยน์จาก coinbase.com เพื่อแสดงยอดเงินของคุณเป็นสกุลเงินทั่วไป",
+          "ดึงราคา Bitcoin จาก coinbase.com เพื่อแสดงยอดเงินของคุณเป็นสกุลเงินเฟียต",
         currency: {
-          title: "สกุลเงินทั่วไป",
+          title: "สกุลเงินเฟียต",
           description: "เลือกสกุลเงินเฟียตสำหรับการแสดงราคา Bitcoin",
         },
       },
@@ -435,7 +428,8 @@ export default {
       receive_swaps: {
         toggle: "รับ swaps",
         badge: "เบต้า",
-        description: "เสนอให้สลับ ecash ที่ได้รับไปยัง Mint ที่ใช้งานอยู่",
+        description:
+          "เสนอให้แลกเปลี่ยน ecash ที่ได้รับไปยัง Mint ที่ใช้งานอยู่",
       },
       auto_paste: {
         toggle: "วาง ecash อัตโนมัติ",
@@ -483,7 +477,7 @@ export default {
           cyber: "ไซเบอร์",
           freedom: "อิสรภาพ",
           nostr: "Nostr",
-          bitcoin: "บิตคอยน์",
+          bitcoin: "Bitcoin",
           mint: "มินต์",
           nut: "ถั่ว",
           blu: "น้ำเงิน",
@@ -776,7 +770,7 @@ export default {
     reviews_title: "รีวิว",
     reviews_count: "{n} รีวิว | {n} รีวิว",
     web_of_trust_caption: "นับเฉพาะรีวิวจากคนในเครือข่ายความไว้วางใจของคุณ",
-    web_of_trust_hop: "อยู่ในเครือข่ายความเชื่อถือของคุณ (ลำดับ {hop})",
+    web_of_trust_hop: "อยู่ในเครือข่ายที่เชื่อถือได้ของคุณ (ลำดับ {hop})",
     no_mint_url: "ไม่ได้ระบุ URL ของ Mint",
     reviews: "รีวิว",
     no_reviews: "ยังไม่มีรีวิว",
@@ -813,7 +807,7 @@ export default {
   RestoreView: {
     seed_phrase: {
       label: "กู้คืนจากวลีสำหรับกู้คืน",
-      caption: "เพิ่มทุก Mint ที่คุณเคยใช้กับ seed นี้ก่อนกู้คืน",
+      caption: "เพิ่มทุก Mint ที่คุณเคยใช้กับวลีสำหรับกู้คืนนี้ก่อนกู้คืน",
       inputs: {
         seed_phrase: {
           label: "วลีสำหรับกู้คืน",
@@ -880,7 +874,7 @@ export default {
           error_invalid_url: "URL ไม่ถูกต้อง",
         },
         scan: {
-          label: "สแกนคิวอาร์โค้ด",
+          label: "สแกนรหัส QR",
         },
       },
     },
@@ -895,8 +889,8 @@ export default {
       },
       add: "เพิ่ม",
       empty: {
-        title: "ค้นหามินต์",
-        text: "Cashu.me จะสอบถามรีเลย์ Nostr เพื่อหามินต์ที่ผู้อื่นแนะนำ พร้อมคะแนนและรีวิว",
+        title: "ค้นหา Mint",
+        text: "Cashu.me จะสอบถามรีเลย์ Nostr เพื่อหา Mint ที่ผู้อื่นแนะนำ พร้อมคะแนนและรีวิว",
       },
       recommendations: {
         overline: "พบ { length } Mints",
@@ -965,9 +959,9 @@ export default {
   },
   SendDialog: {
     captions: {
-      ecash: "แชร์โทเค็นหรือ QR โค้ด",
+      ecash: "แชร์โทเค็นหรือรหัส QR",
       lightning: "ชำระใบแจ้งหนี้หรือที่อยู่",
-      onchain: "ส่งไปยังที่อยู่บิตคอยน์",
+      onchain: "ส่งไปยังที่อยู่ Bitcoin",
     },
     title: "ส่ง",
     actions: {
@@ -1033,7 +1027,7 @@ export default {
     captions: {
       ecash: "วาง สแกน หรือขอโทเค็น",
       lightning: "สร้างใบแจ้งหนี้เพื่อรับเงิน",
-      onchain: "รับที่อยู่บิตคอยน์",
+      onchain: "รับที่อยู่ Bitcoin",
     },
     title: "รับ",
     actions: {
@@ -1089,8 +1083,8 @@ export default {
       swap: {
         label: "@:global.actions.swap.label",
         tooltip_text: "แลกเปลี่ยนไปยัง Mint ที่เชื่อถือได้",
-        processing: "กำลังสลับ…",
-        failed: "สลับไม่สำเร็จ",
+        processing: "กำลังแลกเปลี่ยน…",
+        failed: "แลกเปลี่ยนไม่สำเร็จ",
       },
       cancel_swap: {
         tooltip_text: "ยกเลิกการแลกเปลี่ยน",
@@ -1116,10 +1110,10 @@ export default {
     unknown_mint_info_text:
       "Mint ที่ไม่รู้จัก จะถูกเพิ่มหลังจากคุณรับโทเค็นนี้",
     swap_section: {
-      title: "สลับ",
+      title: "แลกเปลี่ยน",
       source_label: "จาก",
       destination_label: "ไปยัง",
-      fee_info: "การสลับนี้มีค่าธรรมเนียมเครือข่าย Lightning",
+      fee_info: "การแลกเปลี่ยนนี้มีค่าธรรมเนียมเครือข่าย Lightning",
     },
   },
   P2PKDialog: {
@@ -1258,7 +1252,7 @@ export default {
       nut13: "ความลับแบบกำหนดได้",
       nut14: "สัญญาล็อกเวลาแบบแฮช (HTLC)",
       nut15: "การชำระเงินหลายเส้นทางบางส่วน",
-      nut16: "QR โค้ดแบบเคลื่อนไหว",
+      nut16: "รหัส QR แบบเคลื่อนไหว",
       nut17: "การสมัครรับข้อมูล WebSocket",
       nut18: "คำขอชำระเงิน",
       nut19: "การตอบกลับที่แคชไว้",
@@ -1269,7 +1263,7 @@ export default {
   },
   UnitToggle: {
     label: "หน่วย: {unit}, เปลี่ยน",
-    bitcoin: "บิตคอยน์",
+    bitcoin: "Bitcoin",
   },
   ChooseMint: {
     open_selector: "เลือก Mint, Mint ปัจจุบัน: {mint}",
@@ -1287,12 +1281,9 @@ export default {
       title: "กรองประวัติ",
       direction: "ทิศทาง",
       type: "ประเภท",
-      all: "ทั้งหมด",
-      all_mints: "มินต์ทั้งหมด",
       completed: "เสร็จสิ้น",
       received: "ได้รับ",
       sent: "ส่งแล้ว",
-      show_results: "แสดงผลลัพธ์ ({count})",
       reset: "รีเซ็ต",
       clear_all: "ล้างทั้งหมด",
       remove: "ลบตัวกรอง: {label}",
@@ -1354,8 +1345,8 @@ export default {
       pay: "ที่อยู่ Lightning หรือใบแจ้งหนี้",
     },
     qr_scanner: {
-      title: "สแกนคิวอาร์โค้ด",
-      description: "หันกล้องไปที่คิวอาร์โค้ด",
+      title: "สแกนรหัส QR",
+      description: "หันกล้องไปที่รหัส QR",
       caption_address: "แตะเพื่อสแกนที่อยู่",
       caption_token: "แตะเพื่อสแกนโทเค็น",
     },
@@ -1380,7 +1371,7 @@ export default {
     },
     input_data: {
       title: "จ่ายด้วย Lightning",
-      title_bolt12: "จ่าย Lightning Offer",
+      title_bolt12: "จ่ายข้อเสนอ Lightning",
     },
     lnurlpay: {
       amount_exact_label: "{ payee } กำลังขอ { value } { ticker }",
@@ -1567,9 +1558,9 @@ export default {
     unavailable: "ข้อมูลการตรวจสอบไม่พร้อมใช้งานในขณะนี้",
     load_failed: "โหลดข้อมูล Mint ไม่สำเร็จ",
     success_rate: "อัตราความสำเร็จ",
-    swaps_count: "{successful} จาก {total} การสลับ",
+    swaps_count: "แลกเปลี่ยนสำเร็จ {successful} จาก {total} ครั้ง",
     average_time: "เวลาเฉลี่ย",
-    average_time_caption: "สำหรับการสลับที่สำเร็จ",
+    average_time_caption: "สำหรับการแลกเปลี่ยนที่สำเร็จ",
     disclaimer:
       "ข้อมูลการตรวจสอบจัดทำโดยบุคคลที่สามที่เป็นอิสระ เพื่อช่วยประเมินความน่าเชื่อถือของ Mint เมื่อเวลาผ่านไป อย่างไรก็ตาม ผลลัพธ์เหล่านี้มีไว้เพื่อเป็นข้อมูลเท่านั้น และไม่รับประกันความปลอดภัย ความสามารถในการชำระหนี้ หรือความน่าเชื่อถือของ Mint ใด ๆ โปรดศึกษาด้วยตนเองเสมอ และตรวจสอบให้แน่ใจว่าคุณไว้วางใจผู้ดำเนินการ Mint ก่อนใช้บริการ",
     donate_text:
@@ -1578,28 +1569,29 @@ export default {
     sats_amount: "{amount} sats",
     warnings_title: "คำเตือนจากผู้ตรวจสอบ",
     warnings: {
-      last_swap_failed: "การสลับครั้งล่าสุดล้มเหลว",
+      last_swap_failed: "การแลกเปลี่ยนครั้งล่าสุดล้มเหลว",
       recent_success:
-        "การสลับ {successful} จาก {total} ครั้งในช่วง {days} วันที่ผ่านมาสำเร็จ",
+        "การแลกเปลี่ยน {successful} จาก {total} ครั้งในช่วง {days} วันที่ผ่านมาสำเร็จ",
       reliable:
         "{base} อย่างไรก็ตาม {success} Mint นี้ดูน่าเชื่อถือ ความล้มเหลวอาจเกิดจาก Mint ปลายทาง",
       unreliable: "{base} มีเพียง {success} Mint นี้อาจไม่น่าเชื่อถือ",
       unknown: "ผู้ตรวจสอบยังไม่สามารถประเมินคุณภาพของ Mint นี้ได้",
       not_enough_data:
-        "ผู้ตรวจสอบมีข้อมูลล่าสุดของ Mint นี้ไม่เพียงพอ ในช่วง {days} วันที่ผ่านมามีการสลับที่สำเร็จเพียง {count} ครั้ง",
+        "ผู้ตรวจสอบมีข้อมูลล่าสุดของ Mint นี้ไม่เพียงพอ ในช่วง {days} วันที่ผ่านมามีการแลกเปลี่ยนที่สำเร็จเพียง {count} ครั้ง",
       low_success:
         "ในช่วง {days} วันที่ผ่านมา Mint นี้มีอัตราความสำเร็จ {rate}% ต่ำกว่าที่แนะนำ {threshold}%",
-      inactive: "Mint นี้ไม่มีการสลับมา {days} วันแล้ว อาจไม่สามารถเข้าถึงได้",
+      inactive:
+        "Mint นี้ไม่มีการแลกเปลี่ยนมา {days} วันแล้ว อาจไม่สามารถเข้าถึงได้",
       slow: "Mint นี้ทำงานช้า การชำระเงินจาก Mint นี้ใช้เวลาเฉลี่ย {seconds} วินาที",
       no_successful:
-        "ไม่มีการบันทึกการสลับที่สำเร็จสำหรับ Mint นี้ อาจไม่สามารถเข้าถึงได้",
+        "ไม่มีการบันทึกการแลกเปลี่ยนที่สำเร็จสำหรับ Mint นี้ อาจไม่สามารถเข้าถึงได้",
     },
     chart: {
       now: "ตอนนี้",
       today: "วันนี้",
       yesterday: "เมื่อวาน",
       invalid_date: "วันที่ไม่ถูกต้อง",
-      swaps: "การสลับ:",
+      swaps: "การแลกเปลี่ยน:",
       success_rate: "อัตราความสำเร็จ:",
       time_range: "ช่วงเวลา:",
     },

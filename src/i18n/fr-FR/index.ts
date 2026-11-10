@@ -181,12 +181,6 @@ export default {
   },
   Settings: {
     menu: {
-      groups: {
-        wallet: "Portefeuille",
-        connections: "Connexions",
-        preferences: "Préférences",
-        more: "Plus",
-      },
       title: "Paramètres",
       backup: {
         title: "Sauvegarde et restauration",
@@ -310,7 +304,7 @@ export default {
       wallet_seed: {
         title: "Phrase de départ du portefeuille",
         description:
-          "Générer une paire de clés Nostr à partir de la graine de votre portefeuille",
+          "Générer une paire de clés Nostr à partir de la phrase de récupération de votre portefeuille",
         copy_nsec: "Copier la clé privée",
       },
       nsec_bunker: {
@@ -928,7 +922,7 @@ export default {
       },
       recommendations: {
         overline: "{ length } mints trouvées",
-        caption: "Renseignez-vous avant d’utiliser un mint.",
+        caption: "Renseignez-vous avant d’utiliser une mint.",
       },
     },
     swap: {
@@ -1318,12 +1312,9 @@ export default {
       title: "Filtrer l'historique",
       direction: "Sens",
       type: "Type",
-      all: "Tout",
-      all_mints: "Tous les mints",
       completed: "Terminé",
       received: "Reçu",
       sent: "Envoyé",
-      show_results: "Voir les résultats ({count})",
       reset: "Réinitialiser",
       clear_all: "Tout effacer",
       remove: "Retirer le filtre : {label}",
@@ -1510,7 +1501,7 @@ export default {
   },
   TokenInformation: {
     fee: "Frais",
-    token: "Token",
+    token: "Jeton",
     unit: "Unité",
     fiat: "Fiat",
     p2pk: "P2PK",
@@ -1569,7 +1560,7 @@ export default {
     status: "Statut",
     network: "Réseau",
     transaction_id: "ID de transaction",
-    explorer: "Explorer",
+    explorer: "Explorateur",
     confirmations: "Confirmations",
     paid_at: "Payé le",
     preimage: "Préimage",
@@ -1594,18 +1585,18 @@ export default {
     loading: "Chargement des infos d'audit...",
     not_audited: "Ce mint n'a pas encore été audité.",
     not_audited_text:
-      "Pour en savoir plus sur l'auditeur ou soutenir un futur audit, visitez {link} ou cliquez {here} pour donner de l'ecash et aider à lancer un audit de ce mint.",
+      "Pour en savoir plus sur l'auditeur ou soutenir un futur audit, visitez {link} ou cliquez {here} pour donner de l'ecash et aider à lancer un audit de cette mint.",
     here: "ici",
     unavailable: "Les infos d'audit sont indisponibles pour le moment.",
-    load_failed: "Impossible de charger les données du mint",
+    load_failed: "Impossible de charger les données de la mint",
     success_rate: "Taux de réussite",
     swaps_count: "{successful} sur {total} échanges",
     average_time: "Temps moyen",
     average_time_caption: "Pour les échanges réussis",
     disclaimer:
-      "Les données d'audit sont fournies par des tiers indépendants pour aider à évaluer la fiabilité d'un mint dans le temps. Ces résultats sont toutefois purement informatifs et ne garantissent ni la sécurité, ni la solvabilité, ni la fiabilité d'un mint. Faites toujours vos propres recherches et assurez-vous de faire confiance à l'opérateur du mint avant d'utiliser ses services.",
+      "Les données d'audit sont fournies par des tiers indépendants pour aider à évaluer la fiabilité d'une mint dans le temps. Ces résultats sont toutefois purement informatifs et ne garantissent ni la sécurité, ni la solvabilité, ni la fiabilité d'une mint. Faites toujours vos propres recherches et assurez-vous de faire confiance à l'opérateur de la mint avant d'utiliser ses services.",
     donate_text:
-      "Les informations d'audit sont fournies par {link}. Le solde actuel détenu par l'auditeur pour ce mint est de {balance}, pour un total de {donations} donnés à ce jour. Pour soutenir la poursuite des audits, vous pouvez {press_here} afin de donner de l'ecash à l'auditeur.",
+      "Les informations d'audit sont fournies par {link}. Le solde actuel détenu par l'auditeur pour cette mint est de {balance}, pour un total de {donations} donnés à ce jour. Pour soutenir la poursuite des audits, vous pouvez {press_here} afin de donner de l'ecash à l'auditeur.",
     press_here: "appuyer ici",
     sats_amount: "{amount} sats",
     warnings_title: "Avertissements de l'auditeur",
@@ -1614,19 +1605,20 @@ export default {
       recent_success:
         "{successful} échanges sur {total} ont réussi au cours des {days} derniers jours.",
       reliable:
-        "{base} Cependant, {success} Ce mint semble fiable, les échecs pourraient venir du mint destinataire.",
+        "{base} Cependant, {success} Cette mint semble fiable, les échecs pourraient venir de la mint destinataire.",
       unreliable:
-        "{base} Seulement {success} Ce mint pourrait ne pas être fiable.",
-      unknown: "L'auditeur n'a pas encore pu déterminer la qualité de ce mint.",
+        "{base} Seulement {success} Cette mint pourrait ne pas être fiable.",
+      unknown:
+        "L'auditeur n'a pas encore pu déterminer la qualité de cette mint.",
       not_enough_data:
-        "L'auditeur ne dispose pas d'assez de données récentes sur ce mint. Il n'y a eu que {count} échange réussi au cours des {days} derniers jours. | L'auditeur ne dispose pas d'assez de données récentes sur ce mint. Il n'y a eu que {count} échanges réussis au cours des {days} derniers jours.",
+        "L'auditeur ne dispose pas d'assez de données récentes sur cette mint. Il n'y a eu que {count} échange réussi au cours des {days} derniers jours. | L'auditeur ne dispose pas d'assez de données récentes sur cette mint. Il n'y a eu que {count} échanges réussis au cours des {days} derniers jours.",
       low_success:
-        "Au cours des {days} derniers jours, ce mint a eu un taux de réussite de {rate} %, inférieur aux {threshold} % recommandés.",
+        "Au cours des {days} derniers jours, cette mint a eu un taux de réussite de {rate} %, inférieur aux {threshold} % recommandés.",
       inactive:
-        "Ce mint n'a eu aucun échange depuis {days} jour. Il est peut-être injoignable. | Ce mint n'a eu aucun échange depuis {days} jours. Il est peut-être injoignable.",
-      slow: "Ce mint est lent. Les paiements depuis ce mint ont pris {seconds} secondes en moyenne.",
+        "Cette mint n'a eu aucun échange depuis {days} jour. Elle est peut-être injoignable. | Cette mint n'a eu aucun échange depuis {days} jours. Elle est peut-être injoignable.",
+      slow: "Cette mint est lente. Les paiements depuis cette mint ont pris {seconds} secondes en moyenne.",
       no_successful:
-        "Aucun échange réussi enregistré pour ce mint. Il est peut-être injoignable.",
+        "Aucun échange réussi enregistré pour cette mint. Elle est peut-être injoignable.",
     },
     chart: {
       now: "Maintenant",
@@ -1682,8 +1674,8 @@ export default {
     bolt12_title: "Recevoir Bolt12",
     mint_unreachable: "Mint injoignable",
     mint_unreachable_text:
-      "Reconnectez-vous au mint pour recevoir des paiements.",
-    reconnect_mint: "Reconnecter le mint",
+      "Reconnectez-vous à la mint pour recevoir des paiements.",
+    reconnect_mint: "Reconnecter la mint",
     checking_address: "Vérification de l'adresse...",
     add_amount: "Ajouter un montant",
     new_offer: "Nouvelle offre",
@@ -1691,7 +1683,7 @@ export default {
     create_new_address: "Créer une nouvelle adresse",
     create_address: "Créer une adresse",
     onchain_unsupported:
-      "Ce mint ne prend pas en charge les dépôts on-chain dans cette unité.",
+      "Cette mint ne prend pas en charge les dépôts on-chain dans cette unité.",
     deposit_limits: {
       outside: "Les dépôts hors de {min}–{max} ne seront pas crédités.",
       below: "Les dépôts inférieurs à {min} ne seront pas crédités.",
@@ -1731,7 +1723,7 @@ export default {
       found:
         "{count} mint trouvée dans les sauvegardes Nostr | {count} mints trouvées dans les sauvegardes Nostr",
       none_found:
-        "Aucune sauvegarde de mint trouvée sur Nostr pour cette phrase de départ",
+        "Aucune sauvegarde de mint trouvée sur Nostr pour cette phrase de récupération",
       search_failed: "Impossible de rechercher les sauvegardes de mints",
       add_mint_failed: "Impossible d'ajouter {mint}",
       added:

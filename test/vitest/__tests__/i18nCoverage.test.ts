@@ -8,7 +8,7 @@ import { describe, expect, it } from "vitest";
 import messages from "src/i18n";
 
 const SRC = join(__dirname, "../../../src");
-// The design-system board and its explorations are developer-only and English on purpose.
+// The design-system board is developer-only and English on purpose.
 const SKIP = /(^|\/)(design-system|ds|__tests__|i18n)\/|DesignSystemPage\.vue$/;
 
 function sourceFiles(dir: string): string[] {

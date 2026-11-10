@@ -274,8 +274,10 @@ export default defineComponent({
 .animated.fadeInDown {
   animation-duration: 0.3s;
 }
+/* clip, not hidden: "overflow-x: hidden" computes overflow-y to auto, which made the whole
+   balance a scroll container (the unit dots' 44px targets overhang it by 13px). */
 .balance-carousel-shell {
-  overflow-x: hidden;
+  overflow-x: clip;
   overscroll-behavior-x: contain;
   position: relative;
   touch-action: pan-y;

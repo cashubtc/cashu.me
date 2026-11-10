@@ -253,10 +253,9 @@ body,
   white-space: nowrap;
 }
 
-// Section label centred between two hairlines, in small capitals, as in the original design
-// (owner, 2026-10-29: keep it; guard in standardElements.test.ts), settings sub-pages included.
-// A label for a single field (the review rating) sits on the start edge without hairlines
-// (align="start").
+// Section label in small capitals: centred between two hairlines over the open sections of
+// the mint pages, as in the original design, or on the start edge without hairlines
+// (align="start") in settings, sheets and over a single field.
 .section-divider-block {
   margin-bottom: 16px;
 }

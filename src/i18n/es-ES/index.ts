@@ -177,12 +177,6 @@ export default {
   },
   Settings: {
     menu: {
-      groups: {
-        wallet: "Cartera",
-        connections: "Conexiones",
-        preferences: "Preferencias",
-        more: "Más",
-      },
       title: "Ajustes",
       backup: {
         title: "Copia de seguridad y restauración",
@@ -243,7 +237,7 @@ export default {
     sections: {
       nostr: {
         relays: {
-          already_added: "El relé ya está añadido",
+          already_added: "El relay ya está añadido",
           add: {
             title: "Añadir relay",
             description:
@@ -502,7 +496,7 @@ export default {
       use_multinut: "Pagos con varios mints",
     },
     advanced: {
-      backup_files_title: "Archivos de respaldo",
+      backup_files_title: "Archivos de copia de seguridad",
       danger_zone_title: "Zona de peligro",
       notifications: {
         reserved_unset: "Todas las pruebas reservadas liberadas",
@@ -914,8 +908,8 @@ export default {
       },
       add: "Añadir",
       empty: {
-        title: "Encuentra una mint",
-        text: "Cashu.me consulta a los relays de Nostr las mints que otras personas recomiendan, con sus valoraciones y reseñas.",
+        title: "Encuentra un mint",
+        text: "Cashu.me consulta a los relays de Nostr los mints que otras personas recomiendan, con sus valoraciones y reseñas.",
       },
       recommendations: {
         overline: "Encontrados { length } mints",
@@ -1309,12 +1303,9 @@ export default {
       title: "Filtrar historial",
       direction: "Dirección",
       type: "Tipo",
-      all: "Todo",
-      all_mints: "Todas las mints",
       completed: "Completado",
       received: "Recibido",
       sent: "Enviado",
-      show_results: "Ver resultados ({count})",
       reset: "Restablecer",
       clear_all: "Quitar todo",
       remove: "Quitar filtro: {label}",
@@ -1559,7 +1550,7 @@ export default {
     status: "Estado",
     network: "Red",
     transaction_id: "ID de transacción",
-    explorer: "Explorer",
+    explorer: "Explorador",
     confirmations: "Confirmaciones",
     paid_at: "Pagado el",
     preimage: "Preimagen",

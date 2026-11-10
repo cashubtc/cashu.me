@@ -181,12 +181,6 @@ export default {
   },
   Settings: {
     menu: {
-      groups: {
-        wallet: "Cüzdan",
-        connections: "Bağlantılar",
-        preferences: "Tercihler",
-        more: "Daha fazla",
-      },
       title: "Ayarlar",
       backup: {
         title: "Yedekleme ve geri yükleme",
@@ -286,7 +280,7 @@ export default {
         description: "npub.cash'ten alınan bir adresle ödeme alın",
       },
       address: {
-        label: "Adresin",
+        label: "Adresiniz",
         copy_tooltip: "Lightning adresini kopyala",
       },
       show_on_receive: {
@@ -308,7 +302,8 @@ export default {
       description: "Nostr anahtarlarınız Lightning adresinizi belirler.",
       wallet_seed: {
         title: "Cüzdan kurtarma kelimeleri",
-        description: "Cüzdan seed'inizden bir Nostr anahtar çifti oluşturun",
+        description:
+          "Cüzdanınızın kurtarma ifadesinden bir Nostr anahtar çifti oluşturun",
         copy_nsec: "Özel anahtarı kopyala",
       },
       nsec_bunker: {
@@ -668,7 +663,7 @@ export default {
     },
   },
   WelcomeSlide1: {
-    terms_agreement: "Devam ederek {terms} kabul etmiş olursunuz",
+    terms_agreement: "Devam ederek {terms} metnini kabul etmiş olursunuz.",
     title: "Cashu.me'ye hoş geldiniz",
     text: "Cashu.me, fonlarınızı güvenli ve gizli tutmak için ecash kullanan ücretsiz ve açık kaynaklı bir Bitcoin cüzdanıdır.",
   },
@@ -823,7 +818,7 @@ export default {
     inputs: {
       rating: {
         label: "Puan",
-        hint: "İncelemenizi yayınlamak için bir puan seçin.",
+        hint: "Yorumunuzu yayımlamak için bir puan seçin.",
       },
       review: { label: "Yorum (isteğe bağlı)" },
     },
@@ -835,7 +830,7 @@ export default {
     seed_phrase: {
       label: "Kurtarma ifadesinden geri yükle",
       caption:
-        "Geri yüklemeden önce bu seed ile kullandığınız tüm mint'leri ekleyin.",
+        "Geri yüklemeden önce bu kurtarma ifadesiyle kullandığınız tüm mint'leri ekleyin.",
       inputs: {
         seed_phrase: {
           label: "Kurtarma kelimeleri",
@@ -919,11 +914,11 @@ export default {
       add: "Ekle",
       empty: {
         title: "Bir mint bulun",
-        text: "Cashu.me, başkalarının önerdiği mint'leri puanları ve yorumlarıyla birlikte Nostr relay'lerinden sorgular.",
+        text: "Cashu.me, başkalarının önerdiği mint'leri puanları ve yorumlarıyla birlikte Nostr rölelerinden sorgular.",
       },
       recommendations: {
         overline: "{ length } mint bulundu",
-        caption: "Bir mint'i kullanmadan önce kendi araştırmanı yap.",
+        caption: "Bir mint'i kullanmadan önce kendi araştırmanızı yapın.",
       },
     },
     swap: {
@@ -990,7 +985,7 @@ export default {
   SendDialog: {
     captions: {
       ecash: "Token veya QR kod paylaşın",
-      lightning: "Fatura ya da adres ödeyin",
+      lightning: "Fatura ödeyin veya bir adrese ödeme yapın",
       onchain: "Bitcoin adresine gönderin",
     },
     title: "Gönder",
@@ -1308,17 +1303,14 @@ export default {
   },
   HistoryTable: {
     empty_text: "Henüz geçmiş yok",
-    empty_hint: "Gönderdiğin ve aldığın ödemeler burada görünür.",
+    empty_hint: "Gönderdiğiniz ve aldığınız ödemeler burada görünür.",
     filters: {
       title: "Geçmişi filtrele",
       direction: "Yön",
       type: "Tür",
-      all: "Tümü",
-      all_mints: "Tüm mint'ler",
       completed: "Tamamlandı",
       received: "Alındı",
       sent: "Gönderildi",
-      show_results: "Sonuçları göster ({count})",
       reset: "Sıfırla",
       clear_all: "Tümünü temizle",
       remove: "Filtreyi kaldır: {label}",
@@ -1394,7 +1386,7 @@ export default {
       title: "Zincir üstü öde",
       address_placeholder: "Bitcoin adresi",
       choose_speed: "Onay hızını seçin",
-      blocks: "{n} blok",
+      blocks: "{n} blok | {n} blok",
       estimated_confirmation: "Tahmini onay",
       fee_reserve: "ücret rezervi",
     },
@@ -1563,7 +1555,7 @@ export default {
     status: "Durum",
     network: "Ağ",
     transaction_id: "İşlem kimliği",
-    explorer: "Explorer",
+    explorer: "Blok gezgini",
     confirmations: "Onaylar",
     paid_at: "Ödeme zamanı",
     preimage: "Ön görüntü",
@@ -1612,10 +1604,11 @@ export default {
       unreliable: "{base} Yalnızca {success} Bu mint güvenilir olmayabilir.",
       unknown: "Denetçi bu mint'in kalitesini henüz belirleyemedi.",
       not_enough_data:
-        "Denetçinin bu mint hakkında yeterli güncel verisi yok. Son {days} günde yalnızca {count} başarılı takas oldu.",
+        "Denetçinin bu mint hakkında yeterli güncel verisi yok. Son {days} günde yalnızca {count} başarılı takas oldu. | Denetçinin bu mint hakkında yeterli güncel verisi yok. Son {days} günde yalnızca {count} başarılı takas oldu.",
       low_success:
         "Son {days} günde bu mint'in başarı oranı yüzde {rate} oldu; bu, önerilen yüzde {threshold} oranının altında.",
-      inactive: "Bu mint'te {days} gündür takas olmadı. Erişilemiyor olabilir.",
+      inactive:
+        "Bu mint'te {days} gündür takas olmadı. Erişilemiyor olabilir. | Bu mint'te {days} gündür takas olmadı. Erişilemiyor olabilir.",
       slow: "Bu mint yavaş. Bu mint'ten yapılan ödemeler ortalama {seconds} saniye sürdü.",
       no_successful:
         "Bu mint için kayıtlı başarılı takas yok. Erişilemiyor olabilir.",
@@ -1719,7 +1712,7 @@ export default {
       backed_up: "Mint listesi Nostr'a yedeklendi",
       found:
         "Nostr yedeklerinde {count} mint bulundu | Nostr yedeklerinde {count} mint bulundu",
-      none_found: "Bu seed ifadesi için Nostr'da mint yedeği bulunamadı",
+      none_found: "Bu kurtarma ifadesi için Nostr'da mint yedeği bulunamadı",
       search_failed: "Mint yedekleri aranamadı",
       add_mint_failed: "{mint} eklenemedi",
       added:

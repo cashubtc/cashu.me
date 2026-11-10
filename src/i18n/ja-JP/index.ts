@@ -176,12 +176,6 @@ export default {
   },
   Settings: {
     menu: {
-      groups: {
-        wallet: "ウォレット",
-        connections: "接続",
-        preferences: "環境設定",
-        more: "その他",
-      },
       title: "設定",
       backup: {
         title: "バックアップと復元",
@@ -193,7 +187,7 @@ export default {
       },
       nostr: {
         title: "Nostr",
-        caption: "鍵、リレー、信頼の輪",
+        caption: "鍵、リレー、信頼のウェブ",
       },
       payment_requests: {
         title: "支払いリクエスト",
@@ -505,7 +499,7 @@ export default {
       notifications: {
         reserved_unset: "予約済みのプルーフをすべて解除しました",
         removed_spent: "使用済みのプルーフを {count} 件削除しました",
-        no_spent: "使用済みのプルーフは見つかりませんでした",
+        no_spent: "使用済みの証明書は見つかりませんでした",
         invalid_backup: "バックアップファイルの形式が無効です",
         read_error: "ファイルの読み込みエラー",
       },
@@ -780,14 +774,14 @@ export default {
     reviews_title: "レビュー",
     reviews_count: "{n} 件のレビュー | {n} 件のレビュー",
     web_of_trust_caption: "信頼の輪の人のレビューだけを数える",
-    web_of_trust_hop: "あなたの信頼の輪の中（{hop} ホップ）",
+    web_of_trust_hop: "あなたの信頼のウェブ内（{hop} ホップ）",
     no_mint_url: "ミントの URL が指定されていません",
     reviews: "レビュー",
     no_reviews: "まだレビューはありません",
     your_review: "あなたのレビュー",
     no_rating: "評価なし",
     stars_label: "5つ星中{rating}",
-    out_of: "{max}点中",
+    out_of: "{max}点満点",
     sort: "並び替え",
     sort_options: {
       newest: "新しい順",
@@ -1070,7 +1064,7 @@ export default {
         label: "トークンをスキャン",
       },
       request: {
-        label: "ecashをリクエスト",
+        label: "ecash をリクエスト",
       },
       lock: {
         label: "@:global.actions.lock.label",
@@ -1264,12 +1258,12 @@ export default {
     },
     nuts: {
       nut7: "トークン状態の確認",
-      nut8: "Lightning 手数料の過払い分",
+      nut8: "ライトニング手数料の過払い分",
       nut9: "署名の復元",
       nut10: "支出条件",
       nut11: "公開鍵への支払い（P2PK）",
       nut12: "DLEQ 証明",
-      nut13: "決定的シークレット",
+      nut13: "決定論的シークレット",
       nut14: "ハッシュタイムロック契約（HTLC）",
       nut15: "部分マルチパス支払い",
       nut16: "アニメーション QR コード",
@@ -1282,7 +1276,7 @@ export default {
     },
   },
   UnitToggle: {
-    label: "単位: {unit}、変更",
+    label: "単位：{unit}、変更",
     bitcoin: "ビットコイン",
   },
   ChooseMint: {
@@ -1301,15 +1295,12 @@ export default {
       title: "履歴を絞り込む",
       direction: "方向",
       type: "種類",
-      all: "すべて",
-      all_mints: "すべてのミント",
       completed: "完了",
       received: "受け取り",
       sent: "送金",
-      show_results: "結果を表示（{count}）",
       reset: "リセット",
       clear_all: "すべて解除",
-      remove: "フィルターを解除: {label}",
+      remove: "フィルターを解除：{label}",
       empty_title: "条件に一致する支払いはありません",
       clear: "フィルターを解除",
       count: "{shown} / {total}",
@@ -1380,7 +1371,7 @@ export default {
   PayInvoiceDialog: {
     onchain: {
       title: "オンチェーンで支払う",
-      address_placeholder: "Bitcoin アドレス",
+      address_placeholder: "ビットコインアドレス",
       choose_speed: "承認速度を選択",
       blocks: "{n} ブロック",
       estimated_confirmation: "推定承認時間",
@@ -1552,14 +1543,14 @@ export default {
     status: "ステータス",
     network: "ネットワーク",
     transaction_id: "トランザクション ID",
-    explorer: "Explorer",
+    explorer: "エクスプローラー",
     confirmations: "承認数",
     paid_at: "支払日時",
     preimage: "プリイメージ",
     preimage_copied: "プリイメージをコピーしました",
     mint: "ミント",
     method: "方法",
-    lightning_offer: "Lightning オファー",
+    lightning_offer: "ライトニングオファー",
     states: {
       waiting: "支払い待ち",
       confirming: "承認中（{count}/{threshold}）",
@@ -1584,7 +1575,7 @@ export default {
     success_rate: "成功率",
     swaps_count: "{total} 件中 {successful} 件のスワップ",
     average_time: "平均時間",
-    average_time_caption: "成功したスワップ",
+    average_time_caption: "成功したスワップが対象",
     disclaimer:
       "監査データは、ミントの信頼性を長期的に評価するために独立した第三者によって提供されています。ただし、これらの結果は参考情報にすぎず、いかなるミントの安全性、支払能力、信頼性も保証するものではありません。サービスを利用する前に、必ずご自身で調査し、ミント運営者を信頼できることを確認してください。",
     donate_text:
@@ -1657,7 +1648,7 @@ export default {
   CreateInvoiceDialog: {
     format_label: "リクエストの種類",
     formats: {
-      bolt11: "インボイス",
+      bolt11: "請求書",
       bolt12: "オファー",
     },
     onchain_title: "オンチェーンで受け取る",

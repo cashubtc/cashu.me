@@ -1,9 +1,10 @@
 <template>
   <div class="settings-section">
-    <!-- The one section heading: the centred caps divider, as on the Settings menu (owner
-         2026-10-29, item 31; council R91). A warning caption is a callout under it. -->
+    <!-- The section heading sits on the text edge, as in the original settings. A warning
+         caption is a callout under it. -->
     <SectionDivider
       v-if="title || caption"
+      align="start"
       :label="title"
       :caption="warning ? '' : caption"
     >

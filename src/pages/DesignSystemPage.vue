@@ -334,6 +334,13 @@
           <TonalChip disable>Disabled</TonalChip>
         </div>
       </DsEntry>
+      <DsEntry id="filter-chip">
+        <div class="ds-frame row items-center q-pa-sm" style="gap: 8px">
+          <FilterChip>Pending</FilterChip>
+          <FilterChip selected>Completed</FilterChip>
+          <FilterChip removable>Ecash</FilterChip>
+        </div>
+      </DsEntry>
       <DsEntry id="mint-card-action">
         <div class="ds-frame row items-center no-wrap q-pa-sm" style="gap: 8px">
           <MintCardAction label="Add">
@@ -1726,6 +1733,7 @@ import SettingsActionRow from "src/components/ui/SettingsActionRow.vue";
 import UnitToggle from "src/components/ui/UnitToggle.vue";
 import MintCardAction from "src/components/ui/MintCardAction.vue";
 import TonalChip from "src/components/ui/TonalChip.vue";
+import FilterChip from "src/components/ui/FilterChip.vue";
 import FlowColumn from "src/components/ui/FlowColumn.vue";
 import CjkText from "src/components/ui/CjkText.vue";
 import RevealTransition from "src/components/ui/RevealTransition.vue";
@@ -1850,6 +1858,7 @@ export default defineComponent({
     UnitToggle,
     MintCardAction,
     TonalChip,
+    FilterChip,
     FlowColumn,
     CjkText,
     SettingsLinkRow,

@@ -7,7 +7,7 @@ const VUE = import.meta.globEager("/src/**/*.vue", { as: "raw" });
 const TS = import.meta.globEager("/src/**/*.ts", { as: "raw" });
 const SOURCES = { ...VUE, ...TS } as unknown as Record<string, string>;
 
-// The board and its explorations would add every icon they demo; leave them out.
+// The board would add every icon it demos; leave it out.
 const IGNORED =
   /\/(DesignSystemPage\.vue|design-system\/|components\/ds\/)|\.test\.ts$/;
 

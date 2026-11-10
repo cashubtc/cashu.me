@@ -75,13 +75,14 @@ export class WalletPage {
   }
 
   /** The ⇅ swap between typing the unit and typing the fiat currency. */
-  // History's filter sheet: pick each named choice (one per group), then show the results.
+  // History's filter sheet: press each named choice (one per group; each applies at once),
+  // then close the sheet.
   async filterHistory(choices: string[]) {
     await this.page.getByTestId("history-filter").click();
     const sheet = this.page.locator(".q-dialog").last();
     for (const name of choices)
-      await sheet.getByRole("radio", { name, exact: true }).click();
-    await this.page.getByTestId("history-filter-apply").click();
+      await sheet.getByRole("button", { name, exact: true }).click();
+    await sheet.getByRole("button", { name: "Close", exact: true }).click();
   }
 
   fiatEntrySwap(fiat: string) {

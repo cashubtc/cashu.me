@@ -46,10 +46,10 @@ export default {
         label: "Ta emot",
       },
       show_seed: {
-        label: "Visa seedfras",
+        label: "Visa återställningsfras",
       },
       hide_seed: {
-        label: "Dölj seedfras",
+        label: "Dölj återställningsfras",
       },
       scan: {
         label: "Skanna",
@@ -106,7 +106,7 @@ export default {
       invoice_already_paid: "Fakturan är redan betald",
       payment_sent: "Betalning skickad",
       payment_failed: "Betalningen misslyckades",
-      could_not_pay_request: "Kunde inte betala begäran",
+      could_not_pay_request: "Kunde inte betala förfrågan",
       request_unit_unsupported:
         "Minten stöder inte enheten i denna betalningsförfrågan: {unit}",
       no_onchain_mint: "Ingen av dina mints stöder on-chain-betalningar",
@@ -177,12 +177,6 @@ export default {
   },
   Settings: {
     menu: {
-      groups: {
-        wallet: "Plånbok",
-        connections: "Anslutningar",
-        preferences: "Inställningar",
-        more: "Mer",
-      },
       title: "Inställningar",
       backup: {
         title: "Säkerhetskopiering och återställning",
@@ -194,7 +188,7 @@ export default {
       },
       nostr: {
         title: "Nostr",
-        caption: "Nycklar, reläer och tillitsnätverk",
+        caption: "Nycklar, reläer och förtroendenätverk",
       },
       payment_requests: {
         title: "Betalningsförfrågningar",
@@ -317,7 +311,8 @@ export default {
       description: "Dina Nostr-nycklar avgör din Lightning-adress.",
       wallet_seed: {
         title: "Plånbokens återställningsfras",
-        description: "Skapa ett Nostr-nyckelpar från plånbokens seed",
+        description:
+          "Skapa ett Nostr-nyckelpar från plånbokens återställningsfras",
         copy_nsec: "Kopiera privat nyckel",
       },
       nsec_bunker: {
@@ -416,7 +411,7 @@ export default {
       check_sent: {
         toggle: "Kontrollera skickad ecash",
         description:
-          "Kontrollerar i bakgrunden om skickad ecash har hämtats. Mer aktivitet online gör dig lättare att fingeravtrycka.",
+          "Kontrollerar i bakgrunden om skickad ecash har hämtats. Mer aktivitet online underlättar fingeravtryckning.",
       },
       websockets: {
         toggle: "Använd WebSockets",
@@ -506,7 +501,7 @@ export default {
       notifications: {
         reserved_unset: "Alla reserverade bevis frigjorda",
         removed_spent: "Tog bort {count} spenderade bevis",
-        no_spent: "Inga spenderade bevis hittades",
+        no_spent: "Inga spenderade proofs hittades",
         invalid_backup: "Ogiltigt format på säkerhetskopian",
         read_error: "Fel vid läsning av fil",
       },
@@ -659,7 +654,7 @@ export default {
     },
   },
   WelcomeSlide1: {
-    terms_agreement: "Genom att fortsätta godkänner du {terms}",
+    terms_agreement: "Genom att fortsätta godkänner du våra {terms}",
     title: "Välkommen till Cashu.me",
     text: "Cashu.me är en gratis och öppen källkods Bitcoin-plånbok som använder ecash för att hålla dina pengar säkra och privata.",
   },
@@ -781,8 +776,8 @@ export default {
   },
   MintRatings: {
     sort_and_filter: "Sortera och filtrera",
-    reviews_title: "Omdömen",
-    reviews_count: "{n} omdöme | {n} omdömen",
+    reviews_title: "Recensioner",
+    reviews_count: "{n} recension | {n} recensioner",
     web_of_trust_caption:
       "Räkna bara recensioner från personer i ditt förtroendenätverk",
     web_of_trust_hop: "I ditt förtroendenätverk (steg {hop})",
@@ -807,9 +802,9 @@ export default {
   },
   CreateMintReview: {
     connect_nostr:
-      "Anslut ett Nostr-konto under Inställningar för att publicera ett omdöme.",
-    published: "Omdöme publicerat",
-    publish_failed: "Kunde inte publicera omdömet",
+      "Anslut ett Nostr-konto under Inställningar för att publicera en recension.",
+    published: "Recension publicerad",
+    publish_failed: "Kunde inte publicera recensionen",
     title: "Recensera mint",
     publishing_as: "Publicerar som",
     inputs: {
@@ -911,7 +906,7 @@ export default {
       add: "Lägg till",
       empty: {
         title: "Hitta en mint",
-        text: "Cashu.me frågar Nostr-reläer efter mintar som andra rekommenderar, med betyg och recensioner.",
+        text: "Cashu.me frågar Nostr-reläer efter mints som andra rekommenderar, med betyg och recensioner.",
       },
       recommendations: {
         overline: "{ length } mints hittades",
@@ -1161,7 +1156,7 @@ export default {
     payment_request: {
       caption: "Betalningsförfrågan",
     },
-    request_index: "Begäran {index} av {total}",
+    request_index: "Förfrågan {index} av {total}",
     actions: {
       set_amount: {
         label: "Ange belopp",
@@ -1185,10 +1180,10 @@ export default {
         label: "Ta bort belopp",
       },
       previous: {
-        label: "Föregående begäran",
+        label: "Föregående förfrågan",
       },
       next: {
-        label: "Nästa begäran",
+        label: "Nästa förfrågan",
       },
     },
     inputs: {
@@ -1305,12 +1300,9 @@ export default {
       title: "Filtrera historik",
       direction: "Riktning",
       type: "Typ",
-      all: "Alla",
-      all_mints: "Alla mintar",
       completed: "Slutförd",
       received: "Mottagen",
       sent: "Skickad",
-      show_results: "Visa resultat ({count})",
       reset: "Återställ",
       clear_all: "Rensa alla",
       remove: "Ta bort filter: {label}",
@@ -1533,7 +1525,7 @@ export default {
       pay_via: { label: "Betala via {transport}" },
     },
     info: {
-      pay_failed: "Kunde inte betala begäran",
+      pay_failed: "Kunde inte betala förfrågan",
       no_ecash: "Ingen ecash tillgänglig för denna betalningsförfrågan",
     },
   },
@@ -1722,7 +1714,7 @@ export default {
       added:
         "Lade till {count} mint i din plånbok | Lade till {count} mints i din plånbok",
       none_added: "Inga nya mints lades till",
-      add_selected_failed: "Kunde inte lägga till de valda mintsen",
+      add_selected_failed: "Kunde inte lägga till de valda mints",
     },
   },
   nostr: {

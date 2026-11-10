@@ -46,10 +46,10 @@ export default {
         label: "استلام",
       },
       show_seed: {
-        label: "إظهار عبارة الاسترداد",
+        label: "إظهار عبارة الاستعادة",
       },
       hide_seed: {
-        label: "إخفاء عبارة الاسترداد",
+        label: "إخفاء عبارة الاستعادة",
       },
       scan: {
         label: "مسح ضوئي",
@@ -176,12 +176,6 @@ export default {
   },
   Settings: {
     menu: {
-      groups: {
-        wallet: "المحفظة",
-        connections: "الاتصالات",
-        preferences: "التفضيلات",
-        more: "المزيد",
-      },
       title: "الإعدادات",
       backup: {
         title: "النسخ الاحتياطي والاستعادة",
@@ -531,7 +525,7 @@ export default {
         debug_console: {
           button: "وحدة تحكم التصحيح",
           description:
-            "يفتح وحدة تحكم JavaScript. لا تلصق أبدًا رمزًا لا تفهمه؛ يستخدمه المحتالون لسرقة الأموال.",
+            "يفتح وحدة تحكم JavaScript. لا تلصق أبدًا شيفرة برمجية لا تفهمها؛ يستخدمها المحتالون لسرقة الأموال.",
         },
         export_proofs: {
           button: "تصدير البراهين النشطة",
@@ -579,9 +573,9 @@ export default {
     },
   },
   NoMintWarnBanner: {
-    title: "أضف مِنْت",
+    title: "أضف مِنْتًا",
     subtitle:
-      "المِنْتات تُصدر ecash الذي تحمله هذه المحفظة. أضف مِنْت، أو استلم ecash من أحدها، للبدء.",
+      "المِنْتات تُصدر ecash الذي تحمله هذه المحفظة. أضف مِنْتًا، أو استلم ecash من أحدها، للبدء.",
     actions: {
       add_mint: {
         label: "@:global.actions.add_mint.label",
@@ -1256,7 +1250,7 @@ export default {
       nut9: "استعادة التواقيع",
       nut10: "شروط الإنفاق",
       nut11: "الدفع إلى مفتاح عام (P2PK)",
-      nut12: "إثباتات DLEQ",
+      nut12: "براهين DLEQ",
       nut13: "أسرار حتمية",
       nut14: "عقود القفل الزمني المجزّأة (HTLC)",
       nut15: "مدفوعات جزئية متعددة المسارات",
@@ -1265,7 +1259,7 @@ export default {
       nut18: "طلبات الدفع",
       nut19: "الاستجابات المخزنة مؤقتًا",
       nut20: "توقيع على عرض سعر الإنشاء",
-      nut21: "مصادقة واضحة",
+      nut21: "مصادقة مكشوفة",
       nut22: "مصادقة عمياء",
     },
   },
@@ -1274,13 +1268,13 @@ export default {
     bitcoin: "بيتكوين",
   },
   ChooseMint: {
-    open_selector: "اختر مِنْت، المِنْت الحالي: {mint}",
-    open_selector_empty: "اختر مِنْت",
+    open_selector: "اختر مِنْتًا، المِنْت الحالي: {mint}",
+    open_selector_empty: "اختر مِنْتًا",
     title: "حدد مِنْتًا",
     badge_mint_error_text: "خطأ",
     available_text: "في هذا المِنْت",
-    sheet_title: "اختر مِنْت",
-    placeholder: "اختر مِنْت",
+    sheet_title: "اختر مِنْتًا",
+    placeholder: "اختر مِنْتًا",
   },
   HistoryTable: {
     empty_text: "لا يوجد سجل حتى الآن",
@@ -1289,12 +1283,9 @@ export default {
       title: "تصفية السجل",
       direction: "الاتجاه",
       type: "النوع",
-      all: "الكل",
-      all_mints: "كل المِنْتات",
       completed: "مكتمل",
       received: "مستلَم",
       sent: "مُرسَل",
-      show_results: "عرض النتائج ({count})",
       reset: "إعادة تعيين",
       clear_all: "مسح الكل",
       remove: "إزالة عامل التصفية: {label}",
@@ -1368,9 +1359,9 @@ export default {
   PayInvoiceDialog: {
     onchain: {
       title: "الدفع على السلسلة",
-      address_placeholder: "عنوان Bitcoin",
+      address_placeholder: "عنوان بيتكوين",
       choose_speed: "اختر سرعة التأكيد",
-      blocks: "{n} كتلة",
+      blocks: "الكتل: {n}",
       estimated_confirmation: "التأكيد المتوقع",
       fee_reserve: "احتياطي الرسوم",
     },
@@ -1538,7 +1529,7 @@ export default {
     status: "الحالة",
     network: "الشبكة",
     transaction_id: "معرّف المعاملة",
-    explorer: "Explorer",
+    explorer: "المستكشف",
     confirmations: "التأكيدات",
     paid_at: "وقت الدفع",
     preimage: "الصورة الأولية",
@@ -1576,7 +1567,7 @@ export default {
     donate_text:
       "يوفّر {link} معلومات التدقيق. الرصيد الحالي الذي يحتفظ به المدقق لهذا المِنْت هو {balance}، وبلغ إجمالي التبرعات حتى الآن {donations}. لدعم استمرار التدقيق، يمكنك {press_here} للتبرع بـ ecash للمدقق.",
     press_here: "الضغط هنا",
-    sats_amount: "{amount} ساتوشي",
+    sats_amount: "{amount} sats",
     warnings_title: "تحذيرات المدقق",
     warnings: {
       last_swap_failed: "فشلت آخر محاولة تبديل.",

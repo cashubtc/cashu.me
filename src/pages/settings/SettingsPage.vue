@@ -1,8 +1,7 @@
 <template>
   <SettingsPageShell :title="$t('Settings.menu.title')">
     <template v-for="group in visibleGroups" :key="group.name">
-      <!-- Every group is named (council R75); the last gathers the rest. -->
-      <SectionDivider :label="$t(`Settings.menu.groups.${group.name}`)" />
+      <!-- Unnamed groups, told apart by the gap between their cards. -->
       <q-list class="settings-menu-group q-mb-lg">
         <SettingsLinkRow
           v-for="entry in group.entries"
@@ -19,7 +18,6 @@
 </template>
 
 <script lang="ts">
-import SectionDivider from "src/components/ui/SectionDivider.vue";
 import { languageLabel } from "src/js/languages";
 import { defineComponent, markRaw } from "vue";
 import { mapState } from "pinia";
@@ -46,7 +44,6 @@ export default defineComponent({
   name: "SettingsMenuPage",
   mixins: [windowMixin],
   components: {
-    SectionDivider,
     SettingsPageShell,
     SettingsLinkRow,
   },

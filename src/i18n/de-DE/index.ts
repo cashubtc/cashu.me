@@ -4,7 +4,7 @@ export default {
     pay_using_multiple: "Mit mehreren Mints bezahlen",
     experimental_title: "Experimentelle Funktion",
     experimental_text:
-      "Diese Funktion ist sehr experimentell und funktioniert möglicherweise nicht wie erwartet. Versuche nicht, eine bereits bezahlte Rechnung erneut zu bezahlen. Du könntest Guthaben verlieren.",
+      "Diese Funktion ist sehr experimentell und funktioniert möglicherweise nicht wie erwartet. Versuchen Sie nicht, eine bereits bezahlte Rechnung erneut zu bezahlen. Sie könnten Guthaben verlieren.",
     understand: "Verstanden",
     select_funds:
       "Wähle Guthaben aus mehreren Mints, um die Zahlung auszuführen.",
@@ -179,15 +179,9 @@ export default {
   },
   Settings: {
     menu: {
-      groups: {
-        wallet: "Wallet",
-        connections: "Verbindungen",
-        preferences: "Einstellungen",
-        more: "Mehr",
-      },
       title: "Einstellungen",
       backup: {
-        title: "Sichern & Wiederherstellen",
+        title: "Backup & Wiederherstellung",
         caption: "Seed-Phrase und Ecash-Wiederherstellung",
       },
       lightning_address: {
@@ -275,8 +269,8 @@ export default {
     lightning_address: {
       server_url: {
         label: "npub.cash-Hostname",
-        hint: "Gib einen Hostnamen oder eine HTTPS-URL ein",
-        invalid: "Gib eine gültige HTTPS-Server-URL ein",
+        hint: "Hostnamen oder HTTPS-URL eingeben",
+        invalid: "Gültige HTTPS-Server-URL eingeben",
       },
       title: "Lightning Adresse",
       enable: {
@@ -284,7 +278,7 @@ export default {
         description: "Zahlungen an eine Adresse von npub.cash empfangen",
       },
       address: {
-        label: "Deine Adresse",
+        label: "Ihre Adresse",
         copy_tooltip: "Lightning Adresse kopieren",
       },
       show_on_receive: {
@@ -506,13 +500,13 @@ export default {
       },
     },
     advanced: {
-      backup_files_title: "Sicherungsdateien",
+      backup_files_title: "Backup-Dateien",
       danger_zone_title: "Gefahrenbereich",
       notifications: {
         reserved_unset: "Alle reservierten Proofs freigegeben",
         removed_spent: "{count} ausgegebene Proofs entfernt",
-        no_spent: "Keine ausgegebenen Proofs gefunden",
-        invalid_backup: "Ungültiges Format der Sicherungsdatei",
+        no_spent: "Keine ausgegebenen Nachweise gefunden",
+        invalid_backup: "Ungültiges Format der Backup-Datei",
         read_error: "Fehler beim Lesen der Datei",
       },
       developer: {
@@ -552,7 +546,8 @@ export default {
           increase: "Zähler für {id} erhöhen",
           fixes: "Behebt „outputs have already been signed“",
           keysets: "{n} Keyset | {n} Keysets",
-          sheet_hint: "Tippe auf +, um den Zähler eines Keysets zu erhöhen.",
+          sheet_hint:
+            "Tippen Sie auf +, um den Zähler eines Keysets zu erhöhen.",
           column: "Zähler",
         },
         unset_reserved: {
@@ -665,7 +660,7 @@ export default {
     },
   },
   WelcomeSlide1: {
-    terms_agreement: "Wenn du fortfährst, stimmst du den {terms} zu",
+    terms_agreement: "Wenn Sie fortfahren, stimmen Sie den {terms} zu",
     title: "Willkommen bei Cashu.me",
     text: "Cashu.me ist eine kostenlose und quelloffene Bitcoin-Wallet, die Ecash verwendet, um Ihre Gelder sicher und privat zu halten.",
   },
@@ -791,7 +786,7 @@ export default {
     reviews_count: "{n} Bewertung | {n} Bewertungen",
     web_of_trust_caption:
       "Nur Bewertungen von Personen in deinem Web of Trust zählen",
-    web_of_trust_hop: "In deinem Vertrauensnetz (Hop {hop})",
+    web_of_trust_hop: "In Ihrem Web of Trust (Hop {hop})",
     no_mint_url: "Keine Mint-URL angegeben",
     reviews: "Bewertungen",
     no_reviews: "Noch keine Bewertungen",
@@ -813,7 +808,7 @@ export default {
   },
   CreateMintReview: {
     connect_nostr:
-      "Bitte verbinde in den Einstellungen ein Nostr-Konto, um eine Bewertung zu veröffentlichen.",
+      "Bitte verbinden Sie in den Einstellungen ein Nostr-Konto, um eine Bewertung zu veröffentlichen.",
     published: "Bewertung veröffentlicht",
     publish_failed: "Bewertung konnte nicht veröffentlicht werden",
     title: "Mint bewerten",
@@ -821,7 +816,7 @@ export default {
     inputs: {
       rating: {
         label: "Bewertung",
-        hint: "Wähle eine Bewertung, um deine Rezension zu veröffentlichen.",
+        hint: "Wählen Sie eine Bewertung, um Ihre Rezension zu veröffentlichen.",
       },
       review: { label: "Rezension (optional)" },
     },
@@ -925,7 +920,7 @@ export default {
       },
       recommendations: {
         overline: "{ length } Mints gefunden",
-        caption: "Prüfe eine Mint selbst, bevor du sie nutzt.",
+        caption: "Prüfen Sie eine Mint selbst, bevor Sie sie nutzen.",
       },
     },
     swap: {
@@ -1171,7 +1166,7 @@ export default {
     payment_request: {
       caption: "Zahlungsanforderung",
     },
-    request_index: "Anfrage {index} von {total}",
+    request_index: "Anforderung {index} von {total}",
     actions: {
       set_amount: {
         label: "Betrag festlegen",
@@ -1195,10 +1190,10 @@ export default {
         label: "Betrag entfernen",
       },
       previous: {
-        label: "Vorherige Anfrage",
+        label: "Vorherige Anforderung",
       },
       next: {
-        label: "Nächste Anfrage",
+        label: "Nächste Anforderung",
       },
     },
     inputs: {
@@ -1291,7 +1286,7 @@ export default {
       nut18: "Zahlungsanforderungen",
       nut19: "Zwischengespeicherte Antworten",
       nut20: "Signatur auf Mint-Angebot",
-      nut21: "Klare Authentifizierung",
+      nut21: "Klartext-Authentifizierung",
       nut22: "Blinde Authentifizierung",
     },
   },
@@ -1310,17 +1305,14 @@ export default {
   },
   HistoryTable: {
     empty_text: "Noch kein Verlauf vorhanden",
-    empty_hint: "Zahlungen, die du sendest und empfängst, erscheinen hier.",
+    empty_hint: "Zahlungen, die Sie senden und empfangen, erscheinen hier.",
     filters: {
       title: "Verlauf filtern",
       direction: "Richtung",
       type: "Art",
-      all: "Alle",
-      all_mints: "Alle Mints",
       completed: "Abgeschlossen",
       received: "Empfangen",
       sent: "Gesendet",
-      show_results: "Ergebnisse anzeigen ({count})",
       reset: "Zurücksetzen",
       clear_all: "Alle entfernen",
       remove: "Filter entfernen: {label}",
@@ -1543,7 +1535,7 @@ export default {
       pay_via: { label: "Über {transport} bezahlen" },
     },
     info: {
-      pay_failed: "Anfrage konnte nicht bezahlt werden",
+      pay_failed: "Anforderung konnte nicht bezahlt werden",
       no_ecash: "Kein Ecash für diese Zahlungsanforderung verfügbar",
     },
   },
@@ -1590,7 +1582,7 @@ export default {
     loading: "Audit-Infos werden geladen...",
     not_audited: "Diese Mint wurde noch nicht geprüft.",
     not_audited_text:
-      "Mehr über den Prüfer erfahren oder eine künftige Prüfung unterstützen: Besuche {link} oder klicke {here}, um ecash zu spenden und eine Prüfung dieser Mint anzustoßen.",
+      "Mehr über den Auditor erfahren oder ein künftiges Audit unterstützen: Besuchen Sie {link} oder klicken Sie {here}, um Ecash zu spenden und ein Audit dieser Mint anzustoßen.",
     here: "hier",
     unavailable: "Audit-Infos sind gerade nicht verfügbar.",
     load_failed: "Mint-Daten konnten nicht geladen werden",
@@ -1599,9 +1591,9 @@ export default {
     average_time: "Durchschnittliche Zeit",
     average_time_caption: "Für erfolgreiche Swaps",
     disclaimer:
-      "Prüfdaten werden von unabhängigen Dritten bereitgestellt, um die Zuverlässigkeit einer Mint über die Zeit einzuschätzen. Die Ergebnisse dienen jedoch nur zur Information und garantieren weder Sicherheit, Zahlungsfähigkeit noch Vertrauenswürdigkeit einer Mint. Recherchiere immer selbst und stelle sicher, dass du dem Betreiber vertraust, bevor du seine Dienste nutzt.",
+      "Audit-Daten werden von unabhängigen Dritten bereitgestellt, um die Zuverlässigkeit einer Mint über die Zeit einzuschätzen. Die Ergebnisse dienen jedoch nur zur Information und garantieren weder Sicherheit, Zahlungsfähigkeit noch Vertrauenswürdigkeit einer Mint. Recherchieren Sie immer selbst und stellen Sie sicher, dass Sie dem Betreiber vertrauen, bevor Sie seine Dienste nutzen.",
     donate_text:
-      "Audit-Infos werden von {link} bereitgestellt. Der aktuelle Saldo des Prüfers für diese Mint beträgt {balance}, insgesamt wurden bisher {donations} gespendet. Um weitere Prüfungen zu unterstützen, kannst du {press_here}, um dem Prüfer ecash zu spenden.",
+      "Audit-Infos werden von {link} bereitgestellt. Das aktuelle Guthaben des Auditors für diese Mint beträgt {balance}, insgesamt wurden bisher {donations} gespendet. Um weitere Audits zu unterstützen, können Sie {press_here}, um dem Auditor Ecash zu spenden.",
     press_here: "hier tippen",
     sats_amount: "{amount} sats",
     warnings_title: "Prüfer-Warnungen",
@@ -1613,9 +1605,9 @@ export default {
         "{base} Allerdings: {success} Diese Mint scheint zuverlässig, Fehler könnten an der empfangenden Mint liegen.",
       unreliable: "{base} Nur {success} Diese Mint könnte unzuverlässig sein.",
       unknown:
-        "Der Prüfer konnte die Qualität dieser Mint noch nicht bestimmen.",
+        "Der Auditor konnte die Qualität dieser Mint noch nicht bestimmen.",
       not_enough_data:
-        "Der Prüfer hat nicht genug aktuelle Daten zu dieser Mint. In den letzten {days} Tagen gab es nur {count} erfolgreichen Swap. | Der Prüfer hat nicht genug aktuelle Daten zu dieser Mint. In den letzten {days} Tagen gab es nur {count} erfolgreiche Swaps.",
+        "Der Auditor hat nicht genug aktuelle Daten zu dieser Mint. In den letzten {days} Tagen gab es nur {count} erfolgreichen Swap. | Der Auditor hat nicht genug aktuelle Daten zu dieser Mint. In den letzten {days} Tagen gab es nur {count} erfolgreiche Swaps.",
       low_success:
         "In den letzten {days} Tagen hatte diese Mint eine Erfolgsquote von {rate} %, unter den empfohlenen {threshold} %.",
       inactive:
@@ -1637,8 +1629,8 @@ export default {
   DisplayTokenComponent: {
     title: {
       send: "Ecash senden",
-      sent: "Ecash gesendet",
-      received: "Ecash empfangen",
+      sent: "Gesendetes Ecash",
+      received: "Empfangenes Ecash",
     },
     qr_speed: "QR-Tempo: {value}",
     qr_density: "QR-Dichte: {value}",
@@ -1654,7 +1646,7 @@ export default {
     },
     delete_dialog: {
       title: "Ecash löschen",
-      text: "Möchtest du diese Transaktion wirklich aus deinem Verlauf löschen?",
+      text: "Möchten Sie diese Transaktion wirklich aus Ihrem Verlauf löschen?",
       warning:
         "Warnung: Diese Aktion kann nicht rückgängig gemacht werden, und der Token lässt sich nicht wiederherstellen.",
     },
@@ -1678,7 +1670,7 @@ export default {
     bolt12_title: "Bolt12 empfangen",
     mint_unreachable: "Mint nicht erreichbar",
     mint_unreachable_text:
-      "Verbinde dich erneut mit der Mint, um Zahlungen zu empfangen.",
+      "Verbinden Sie sich erneut mit der Mint, um Zahlungen zu empfangen.",
     reconnect_mint: "Mint neu verbinden",
     checking_address: "Adresse wird geprüft...",
     add_amount: "Betrag hinzufügen",
@@ -1696,10 +1688,11 @@ export default {
     },
     amount_errors: {
       positive_decimal:
-        "Gib einen positiven Betrag in {unit} mit höchstens zwei Nachkommastellen ein.",
-      positive_whole: "Gib einen positiven ganzzahligen Betrag in {unit} ein.",
-      min: "Gib mindestens {amount} ein.",
-      max: "Gib höchstens {amount} ein.",
+        "Geben Sie einen positiven Betrag in {unit} mit höchstens zwei Nachkommastellen ein.",
+      positive_whole:
+        "Geben Sie einen positiven ganzzahligen Betrag in {unit} ein.",
+      min: "Geben Sie mindestens {amount} ein.",
+      max: "Geben Sie höchstens {amount} ein.",
     },
   },
   storage: {

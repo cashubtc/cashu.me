@@ -410,6 +410,16 @@ export const DS_ITEMS: DsItem[] = [
     note: "A quiet secondary action: tint fill, no edge, leading glyph, 44px. QR speed and density sit under the QR they change.",
   },
   {
+    id: "filter-chip",
+    name: "Filter chip",
+    group: "actions",
+    tier: "primitive",
+    source: "src/components/ui/FilterChip.vue",
+    usage: { tag: "FilterChip" },
+    example: `<FilterChip :selected="filters.status === 'pending'" @click="toggle('status', 'pending')">Pending</FilterChip>`,
+    note: "A filter choice: muted on the tint until chosen, then ink with a hairline edge and a check. Pressing the chosen chip clears it. `removable` is the applied filter over the list, with a trailing ×.",
+  },
+  {
     id: "mint-card-action",
     name: "Mint card action",
     group: "actions",

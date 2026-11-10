@@ -146,12 +146,6 @@ export default {
   },
   Settings: {
     menu: {
-      groups: {
-        wallet: "Portafoglio",
-        connections: "Connessioni",
-        preferences: "Preferenze",
-        more: "Altro",
-      },
       title: "Impostazioni",
       backup: {
         title: "Backup e ripristino",
@@ -275,7 +269,7 @@ export default {
       wallet_seed: {
         title: "Frase seed del portafoglio",
         description:
-          "Genera una coppia di chiavi Nostr dal seed del tuo portafoglio",
+          "Genera una coppia di chiavi Nostr dalla seed del tuo portafoglio",
         copy_nsec: "Copia chiave privata",
       },
       nsec_bunker: {
@@ -365,7 +359,7 @@ export default {
       check_startup: {
         toggle: "Verifica fatture pendenti all'avvio",
         description:
-          "Controlla le fatture in sospeso all'apertura del portafoglio.",
+          "Controlla le fatture in attesa all'apertura del portafoglio.",
       },
       check_all: {
         toggle: "Verifica tutte le fatture",
@@ -801,7 +795,7 @@ export default {
     seed_phrase: {
       label: "Ripristina da frase seed",
       caption:
-        "Prima di ripristinare, aggiungi tutti i mint che hai usato con questo seed.",
+        "Prima di ripristinare, aggiungi tutti i mint che hai usato con questa seed.",
       inputs: {
         seed_phrase: {
           label: "Frase seed",
@@ -884,8 +878,8 @@ export default {
       },
       add: "Aggiungi",
       empty: {
-        title: "Trova una mint",
-        text: "Cashu.me chiede ai relay Nostr le mint consigliate da altre persone, con valutazioni e recensioni.",
+        title: "Trova un mint",
+        text: "Cashu.me chiede ai relay Nostr i mint consigliati da altre persone, con valutazioni e recensioni.",
       },
       recommendations: {
         overline: "Trovati { length } mints",
@@ -1278,12 +1272,9 @@ export default {
       title: "Filtra cronologia",
       direction: "Direzione",
       type: "Tipo",
-      all: "Tutti",
-      all_mints: "Tutte le mint",
       completed: "Completato",
       received: "Ricevuto",
       sent: "Inviato",
-      show_results: "Mostra risultati ({count})",
       reset: "Reimposta",
       clear_all: "Rimuovi tutto",
       remove: "Rimuovi filtro: {label}",
@@ -1415,7 +1406,7 @@ export default {
     title: "Modifica mint",
     inputs: {
       nickname: {
-        label: "Soprannome (facoltativo)",
+        label: "Nickname (facoltativo)",
       },
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1490,7 +1481,7 @@ export default {
   common: {
     copied: "Copiato",
     on_chain: "On-chain",
-    pending: "In sospeso",
+    pending: "In attesa",
     delete: "Elimina",
     copy_npub: "Copia npub",
     back: "Indietro",
@@ -1542,20 +1533,20 @@ export default {
       issuing: "Emissione ecash",
       paid: "Pagata",
       unpaid: "Non pagata",
-      pending: "In sospeso",
+      pending: "In attesa",
       issued: "Emessa",
       expired: "Scaduta",
       failed: "Non riuscita",
     },
   },
   MintAuditInfo: {
-    title: "Info audit",
+    title: "Info di audit",
     loading: "Caricamento info audit...",
     not_audited: "Questo mint non è ancora stato verificato.",
     not_audited_text:
       "Per saperne di più sul revisore o sostenere una futura verifica, visita {link} oppure fai clic {here} per donare ecash e aiutare ad avviare la verifica di questo mint.",
     here: "qui",
-    unavailable: "Le info audit non sono disponibili al momento.",
+    unavailable: "Le info di audit non sono disponibili al momento.",
     load_failed: "Impossibile caricare i dati del mint",
     success_rate: "Tasso di successo",
     swaps_count: "{successful} su {total} scambi",

@@ -6,11 +6,8 @@ import { describe, expect, it } from "vitest";
 // checks keep second copies from coming back; the design system board (src/pages/DesignSystemPage.vue) shows each one.
 
 const SRC = join(__dirname, "../../../src");
-// Dev-only design explorations (src/design-system/explorations) draw static lookalikes of
-// store-bound components (ChooseMint, a flow's surface) with their real classes; they ship nowhere.
 const vueFiles = (readdirSync(SRC, { recursive: true }) as string[])
   .filter((f) => f.endsWith(".vue") && !f.endsWith("DesignSystemPage.vue"))
-  .filter((f) => !f.startsWith("design-system/explorations/"))
   .map((f) => ({ file: f, text: readFileSync(join(SRC, f), "utf8") }));
 
 const offenders = (match: (text: string) => boolean) =>
@@ -261,7 +258,7 @@ describe("standard elements", () => {
     ).toEqual([]);
   });
 
-  // Owner 2026-10-29 (item 31): the centred caps label between two hairlines stays.
+  // The centred caps label between two hairlines heads the open sections of the mint pages.
   it("section divider keeps its centred caps label between hairlines", () => {
     const sfc = readFileSync(
       join(SRC, "components/ui/SectionDivider.vue"),
@@ -273,14 +270,22 @@ describe("standard elements", () => {
     expect(css).toMatch(/\.section-divider \{[^}]*display: flex/);
   });
 
-  // Settings sub-pages included (council R91): only a field label (the review rating) sits
-  // on the start edge.
-  it("content sections use the centred divider", () => {
+  // Settings and sheets are read down the text edge: their section headings sit on it,
+  // without hairlines, and the settings menu's groups carry no heading at all.
+  it("settings and sheet sections head on the text edge", () => {
+    for (const file of [
+      "pages/settings/SettingsSection.vue",
+      "components/HistoryFilterSheet.vue",
+    ]) {
+      const tags = readFileSync(join(SRC, file), "utf8").match(
+        /<SectionDivider\b[^>]*>/g
+      );
+      expect(tags?.length).toBeGreaterThan(0);
+      expect(tags?.every((tag) => /align="start"/.test(tag))).toBe(true);
+    }
     expect(
-      offenders((text) =>
-        /<SectionDivider[^>]*align="start"/.test(text)
-      ).filter((f) => !/CreateMintReviewPage\.vue$/.test(f))
-    ).toEqual([]);
+      readFileSync(join(SRC, "pages/settings/SettingsPage.vue"), "utf8")
+    ).not.toMatch(/<SectionDivider/);
   });
 
   // Two button text standards; Quasar's size writes an inline font-size. Dense chips-style

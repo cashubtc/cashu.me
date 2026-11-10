@@ -27,10 +27,10 @@ export default {
         label: "Receber",
       },
       show_seed: {
-        label: "Mostrar frase-semente",
+        label: "Mostrar frase de recuperação",
       },
       hide_seed: {
-        label: "Ocultar frase-semente",
+        label: "Ocultar frase de recuperação",
       },
       scan: {
         label: "Escanear",
@@ -197,12 +197,6 @@ export default {
   },
   Settings: {
     menu: {
-      groups: {
-        wallet: "Carteira",
-        connections: "Conexões",
-        preferences: "Preferências",
-        more: "Mais",
-      },
       title: "Configurações",
       backup: {
         title: "Backup e restauração",
@@ -217,7 +211,7 @@ export default {
         caption: "Chaves, relays e rede de confiança",
       },
       payment_requests: {
-        title: "Pedidos de pagamento",
+        title: "Solicitações de pagamento",
         caption: "Receba pagamentos em ecash pelo Nostr",
       },
       nwc: {
@@ -267,7 +261,7 @@ export default {
           add: {
             title: "Adicionar relay",
             description:
-              "Sua carteira usa estes relays para recursos do Nostr, como pedidos de pagamento, Nostr Wallet Connect e backups.",
+              "Sua carteira usa estes relays para recursos do Nostr, como solicitações de pagamento, Nostr Wallet Connect e backups.",
           },
           list: {
             title: "Relays",
@@ -325,7 +319,7 @@ export default {
       wallet_seed: {
         title: "Frase de recuperação da carteira",
         description:
-          "Gerar um par de chaves Nostr a partir da seed da sua carteira",
+          "Gerar um par de chaves Nostr a partir da frase de recuperação da sua carteira",
         copy_nsec: "Copiar chave privada",
       },
       nsec_bunker: {
@@ -347,7 +341,7 @@ export default {
     payment_requests: {
       description:
         "Receba pagamentos pelo Nostr. Quando ativado, sua carteira escuta seus relays Nostr.",
-      enable_toggle: "Ativar pedidos de pagamento",
+      enable_toggle: "Ativar solicitações de pagamento",
       claim_automatically: {
         toggle: "Reivindicar automaticamente",
         description:
@@ -550,7 +544,8 @@ export default {
         },
         design_system: {
           title: "Sistema de design",
-          description: "Cada componente do app, ao vivo, com a origem e o uso.",
+          description:
+            "Cada componente do app, ao vivo, com seu código-fonte e exemplos de uso.",
         },
         debug_console: {
           button: "Console de depuração",
@@ -860,7 +855,7 @@ export default {
     seed_phrase: {
       label: "Restaurar pela frase de recuperação",
       caption:
-        "Adicione todos os mints que você usou com esta seed antes de restaurar.",
+        "Adicione todos os mints que você usou com esta frase de recuperação antes de restaurar.",
       inputs: {
         seed_phrase: {
           label: "Frase de recuperação",
@@ -944,8 +939,8 @@ export default {
       },
       add: "Adicionar",
       empty: {
-        title: "Encontre uma mint",
-        text: "O Cashu.me consulta relays Nostr em busca de mints recomendadas por outras pessoas, com notas e avaliações.",
+        title: "Encontre um mint",
+        text: "O Cashu.me consulta relays Nostr em busca de mints recomendados por outras pessoas, com notas e avaliações.",
       },
       recommendations: {
         overline: "Encontrado(s) { length } mint(s)",
@@ -1217,7 +1212,7 @@ export default {
   PaymentRequestDialog: {
     any_amount: "Qualquer valor",
     payment_request: {
-      caption: "Pedido de pagamento",
+      caption: "Solicitação de pagamento",
     },
     request_index: "Solicitação {index} de {total}",
     received_total: "Total recebido",
@@ -1363,12 +1358,9 @@ export default {
       title: "Filtrar histórico",
       direction: "Direção",
       type: "Tipo",
-      all: "Todos",
-      all_mints: "Todas as mints",
       completed: "Concluído",
       received: "Recebido",
       sent: "Enviado",
-      show_results: "Ver resultados ({count})",
       reset: "Redefinir",
       clear_all: "Limpar tudo",
       remove: "Remover filtro: {label}",
@@ -1577,7 +1569,7 @@ export default {
     status: "Status",
     network: "Rede",
     transaction_id: "ID da transação",
-    explorer: "Explorer",
+    explorer: "Explorador",
     confirmations: "Confirmações",
     paid_at: "Pago em",
     preimage: "Pré-imagem",

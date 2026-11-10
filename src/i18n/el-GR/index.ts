@@ -4,7 +4,7 @@ export default {
     pay_using_multiple: "Πληρωμή με πολλά mints",
     experimental_title: "Πειραματική λειτουργία",
     experimental_text:
-      "Αυτή η λειτουργία είναι εντελώς πειραματική και ίσως δεν λειτουργεί όπως αναμένεται. Μην προσπαθήσετε να πληρώσετε τιμολόγιο που έχει ήδη πληρωθεί. Μπορεί να χάσετε κεφάλαια.",
+      "Αυτή η λειτουργία είναι άκρως πειραματική και ίσως δεν λειτουργεί όπως αναμένεται. Μην προσπαθήσετε να πληρώσετε τιμολόγιο που έχει ήδη πληρωθεί. Μπορεί να χάσετε κεφάλαια.",
     understand: "Κατανοώ",
     select_funds:
       "Επιλέξτε κεφάλαια από πολλά mints για να εκτελέσετε την πληρωμή.",
@@ -178,12 +178,6 @@ export default {
   },
   Settings: {
     menu: {
-      groups: {
-        wallet: "Πορτοφόλι",
-        connections: "Συνδέσεις",
-        preferences: "Προτιμήσεις",
-        more: "Περισσότερα",
-      },
       title: "Ρυθμίσεις",
       backup: {
         title: "Αντίγραφα ασφαλείας και επαναφορά",
@@ -191,7 +185,7 @@ export default {
       },
       lightning_address: {
         title: "Διεύθυνση Lightning",
-        caption: "Λάβετε πληρωμές στο όνομα{'@'}domain",
+        caption: "Λάβετε πληρωμές στο όνομα{'@'}τομέας",
       },
       nostr: {
         title: "Nostr",
@@ -244,7 +238,7 @@ export default {
     sections: {
       nostr: {
         relays: {
-          already_added: "Ο αναμεταδότης έχει ήδη προστεθεί",
+          already_added: "Το relay έχει ήδη προστεθεί",
           add: {
             title: "Προσθήκη relay",
             description:
@@ -307,7 +301,7 @@ export default {
       wallet_seed: {
         title: "Φράση seed πορτοφολιού",
         description:
-          "Δημιουργία ζεύγους κλειδιών Nostr από το seed του πορτοφολιού σας",
+          "Δημιουργία ζεύγους κλειδιών Nostr από τη seed του πορτοφολιού σας",
         copy_nsec: "Αντιγραφή ιδιωτικού κλειδιού",
       },
       nsec_bunker: {
@@ -665,7 +659,7 @@ export default {
     },
   },
   WelcomeSlide1: {
-    terms_agreement: "Συνεχίζοντας, αποδέχεστε τους {terms}",
+    terms_agreement: "Αν συνεχίσετε, ισχύουν οι {terms}",
     title: "Καλώς ήρθατε στο Cashu.me",
     text: "Το Cashu.me είναι ένα δωρεάν και ανοιχτού κώδικα πορτοφόλι Bitcoin που χρησιμοποιεί ecash για να διατηρεί τα κεφάλαιά σας ασφαλή και ιδιωτικά.",
   },
@@ -813,9 +807,9 @@ export default {
   },
   CreateMintReview: {
     connect_nostr:
-      "Συνδέστε έναν λογαριασμό Nostr στις Ρυθμίσεις για να δημοσιεύσετε αξιολόγηση.",
-    published: "Η αξιολόγηση δημοσιεύτηκε",
-    publish_failed: "Αποτυχία δημοσίευσης αξιολόγησης",
+      "Συνδέστε έναν λογαριασμό Nostr στις Ρυθμίσεις για να δημοσιεύσετε κριτική.",
+    published: "Η κριτική δημοσιεύτηκε",
+    publish_failed: "Αποτυχία δημοσίευσης κριτικής",
     title: "Κριτική mint",
     publishing_as: "Δημοσίευση ως",
     inputs: {
@@ -833,7 +827,7 @@ export default {
     seed_phrase: {
       label: "Επαναφορά από φράση seed",
       caption:
-        "Προσθέστε κάθε mint που χρησιμοποιήσατε με αυτό το seed πριν από την επαναφορά.",
+        "Προσθέστε κάθε mint που χρησιμοποιήσατε με αυτή τη seed πριν από την επαναφορά.",
       inputs: {
         seed_phrase: {
           label: "Φράση seed",
@@ -1275,7 +1269,7 @@ export default {
     },
     nuts: {
       nut7: "Έλεγχος κατάστασης token",
-      nut8: "Υπερπληρωμένα τέλη Lightning",
+      nut8: "Υπερπληρωμένες χρεώσεις Lightning",
       nut9: "Επαναφορά υπογραφών",
       nut10: "Συνθήκες δαπάνης",
       nut11: "Pay-to-Pubkey (P2PK)",
@@ -1312,12 +1306,9 @@ export default {
       title: "Φιλτράρισμα ιστορικού",
       direction: "Κατεύθυνση",
       type: "Τύπος",
-      all: "Όλα",
-      all_mints: "Όλα τα mint",
       completed: "Ολοκληρώθηκε",
       received: "Ελήφθη",
       sent: "Στάλθηκε",
-      show_results: "Εμφάνιση αποτελεσμάτων ({count})",
       reset: "Επαναφορά",
       clear_all: "Καθαρισμός όλων",
       remove: "Αφαίρεση φίλτρου: {label}",
@@ -1395,7 +1386,7 @@ export default {
       choose_speed: "Επιλέξτε ταχύτητα επιβεβαίωσης",
       blocks: "{n} μπλοκ | {n} μπλοκ",
       estimated_confirmation: "Εκτιμώμενη επιβεβαίωση",
-      fee_reserve: "αποθεματικό τελών",
+      fee_reserve: "αποθεματικό χρεώσεων",
     },
     multinut: {
       label: "Πληρωμή με πολλά mints",
@@ -1556,8 +1547,8 @@ export default {
     invoice: "Τιμολόγιο",
     request: "Αίτημα",
     amount: "Ποσό",
-    fee_reserve: "Αποθεματικό τελών",
-    fee_paid: "Τέλος που πληρώθηκε",
+    fee_reserve: "Αποθεματικό χρεώσεων",
+    fee_paid: "Χρέωση που πληρώθηκε",
     unit: "Μονάδα",
     status: "Κατάσταση",
     network: "Δίκτυο",
