@@ -23,6 +23,7 @@ body {
   display: grid;
   font: 14px/1.4 -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI",
     sans-serif;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto minmax(0, 1fr) auto;
   margin: 0;
   overflow: hidden;
@@ -79,6 +80,10 @@ select {
   display: flex;
   flex: 1;
   flex-direction: column;
+  min-width: 0;
+}
+.title strong,
+.title span {
   min-width: 0;
 }
 .title strong {
