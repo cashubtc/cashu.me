@@ -105,6 +105,10 @@ module.exports = configure(function (/* ctx */) {
       // ]
     },
 
+    // SIDE_BY_SIDE=1 (staging only) loads the comparison deck's storage shim first, so the
+    // deck can frame this build with a demo wallet of its own (scripts/side-by-side).
+    htmlVariables: { sideBySide: process.env.SIDE_BY_SIDE === "1" },
+
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
     devServer: {
       https: process.env.E2E !== "true",

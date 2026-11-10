@@ -1,230 +1,364 @@
-// Capture every shot in both versions at the same viewport. Writes /tmp/sbs/shots/<id>-<version>.png
-// and /tmp/sbs/shots/manifest.json. Run: node capture.mjs [--only id,id]
+// Captures every slide (shots.mjs) in both versions at the same viewport, full length, from
+// the same seeded demo wallet, and saves that wallet as the snapshot the deck's live panes
+// start from.
+//
+//   node scripts/side-by-side/capture.mjs [--only id,id] [--root http://127.0.0.1:5100] [--out DIR]
+//
+// --root serves the deploy as nginx does (serve.mjs): the branch at / and the base build at
+// /side-by-side/before/. Writes DIR/<id>-<version>.png, DIR/manifest.json, DIR/seed-<version>.json.
 import { chromium } from "playwright";
 import fs from "node:fs";
-import { seed, VERSIONS, MINT } from "./setup.mjs";
 import { generateMnemonic } from "@scure/bip39";
 import { wordlist } from "@scure/bip39/wordlists/english";
-import { TESTNUT, mintProofs, token as testnutToken, invoice } from "./testnut.mjs";
+import { getEncodedToken } from "@cashu/cashu-ts";
+import { buildShots, TESTNUT } from "./shots.mjs";
+import { mintProofs, token as testnutToken, invoice } from "./testnut.mjs";
 
-const OUT = "/tmp/sbs/shots";
+const arg = (name, fallback) =>
+  process.argv.includes(name)
+    ? process.argv[process.argv.indexOf(name) + 1]
+    : fallback;
+const ROOT = arg("--root", "http://127.0.0.1:5100");
+const OUT = arg("--out", "/tmp/sbs/shots");
+const only = arg("--only", "")?.split(",").filter(Boolean);
+const BASES = { before: ROOT + "/side-by-side/before", after: ROOT };
+const PREFERRED_MINT = "https://mint.minibits.cash/Bitcoin";
 fs.mkdirSync(OUT, { recursive: true });
-const TOKEN = fs.readFileSync("/tmp/sbs/token.txt", "utf8").trim();
-const PHONE = { width: 390, height: 844 };
-const DESKTOP = { width: 1280, height: 832 };
-const only = process.argv.includes("--only") ? process.argv[process.argv.indexOf("--only") + 1].split(",") : null;
-const MINT_Q = "?mintUrl=" + encodeURIComponent(MINT);
 
-const TESTIDS = { RECEIVE: "wallet-receive", SEND: "wallet-send" };
-const click = (text) => async (p) => {
-  if (Array.isArray(text)) {
-    for (const t of text) if (await p.getByText(t, { exact: true }).locator("visible=true").count()) return click(t)(p);
-    throw new Error("none of " + text.join(" / ") + " visible");
-  }
-  const loc = TESTIDS[text]
-    ? p.getByTestId(TESTIDS[text]).locator("visible=true").first()
-    : p.getByText(text, { exact: true }).locator("visible=true").last();
-  await loc.click({ timeout: 6000, force: true });
-  await p.waitForTimeout(1000);
+const hex = (n) =>
+  [...crypto.getRandomValues(new Uint8Array(n))]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+const G = "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798";
+const fakeProofs = (amounts, id) =>
+  amounts.map((amount) => ({ amount, id, secret: hex(32), C: G }));
+const ago = (hours) => new Date(Date.now() - hours * 36e5).toISOString();
+const HISTORY = [
+  { amount: 2500, date: ago(0.4), status: "paid", label: "" },
+  { amount: -210, date: ago(3), status: "paid", label: "" },
+  { amount: -1000, date: ago(26), status: "pending", label: "" },
+  { amount: 5000, date: ago(50), status: "paid", label: "Coffee fund" },
+  { amount: -2600, date: ago(4 * 24 + 2), status: "paid", label: "" },
+  { amount: 21, date: ago(9 * 24 + 5), status: "paid", label: "" },
+].map((h, i) => ({ id: `sbs-${i}`, unit: "sat", token: "", ...h }));
+
+// The base build keeps its storage under a prefix (deck/shim.js); init scripts run before
+// the shim, so they write the prefixed key themselves.
+const setStorage = (entries) => {
+  const P = location.pathname.startsWith("/side-by-side/before")
+    ? "sbs-before:"
+    : "";
+  for (const [k, v] of Object.entries(entries)) localStorage.setItem(P + k, v);
 };
-const tab = (name) => async (p) => {
-  const tabs = p.locator(".q-tab");
-  await (typeof name === "number" ? tabs.nth(name) : tabs.filter({ hasText: name }).first()).click({ timeout: 6000 });
-  await p.waitForTimeout(800);
-};
-const fill = (text) => async (p) => {
-  const f = p.locator(".q-dialog textarea, .q-dialog input[type=text], .q-dialog input:not([type])").locator("visible=true").first();
-  await f.fill(text, { timeout: 6000 });
-  await p.waitForTimeout(1500);
-};
-const paste = (text) => async (p) => {
-  await p.evaluate((t) => navigator.clipboard.writeText(t), text);
-  await click(["Paste", "Paste token"])(p);
-  await p.waitForTimeout(2000);
-};
-const type = (text) => async (p) => {
-  await p.keyboard.type(text, { delay: 60 });
-  await p.waitForTimeout(800);
-};
-// A button by its accessible name, inside the open dialog when there is one.
-const btn = (re, settle = 1500) => async (p) => {
-  const scope = (await p.locator(".q-dialog").count()) ? p.locator(".q-dialog").last() : p;
-  await scope.getByRole("button", { name: re }).locator("visible=true").last().click({ timeout: 8000 });
-  await p.waitForTimeout(settle);
-};
-const pasteLater = (make) => async (p) => paste(await make())(p);
-const fillLater = (make) => async (p) => fill(await make())(p);
-const wait = (ms) => async (p) => p.waitForTimeout(ms);
-const scrollEnd = async (p) => {
-  await p.evaluate(() => {
-    const els = [document.scrollingElement, ...document.querySelectorAll(".q-page-container, .q-page, .scroll, .q-dialog .q-card")];
-    for (const e of els) if (e) e.scrollTop = e.scrollHeight;
-  });
-  await p.waitForTimeout(600);
-};
+const appReady = () =>
+  document
+    .querySelector("#q-app")
+    ?.__vue_app__?.config.globalProperties.$pinia?._s.has("mints");
 
-const shots = [];
-const add = (section, id, title, o = {}) => shots.push({ section, id, title, path: "/", theme: "monochrome", dark: true, lang: "en-US", viewport: PHONE, steps: [], ...o });
-
-// Onboarding (fresh wallet, nothing seeded)
-const next = [click("Next")];
-add("Onboarding", "welcome-1", "Welcome", { fresh: true, path: "/welcome" });
-add("Onboarding", "welcome-2", "Welcome, step 2", { fresh: true, path: "/welcome", steps: [...next] });
-add("Onboarding", "welcome-3", "Welcome, step 3", { fresh: true, path: "/welcome", steps: [...next, ...next] });
-add("Onboarding", "welcome-light", "Welcome, light", { fresh: true, path: "/welcome", dark: false });
-add("Onboarding", "terms", "Terms of service", { path: "/terms" });
-
-// Wallet
-add("Wallet", "wallet-history", "Wallet, history tab", { steps: [tab("History")] });
-add("Wallet", "wallet-mints", "Wallet, mints tab", { steps: [tab("Mints")] });
-add("Wallet", "wallet-history-light", "Wallet, light", { dark: false, steps: [tab("History")] });
-add("Wallet", "wallet-mints-light", "Mints tab, light", { dark: false, steps: [tab("Mints")] });
-
-// Receive and send
-add("Receive", "receive-chooser", "Receive options", { steps: [click("RECEIVE")] });
-add("Receive", "receive-ecash", "Receive ecash", { steps: [click("RECEIVE"), click("Ecash")] });
-add("Receive", "receive-ecash-token", "Receive ecash, token pasted", { steps: [click("RECEIVE"), click("Ecash"), paste(TOKEN)] });
-add("Receive", "receive-lightning", "Receive Lightning, amount", { steps: [click("RECEIVE"), click("Lightning")] });
-add("Receive", "receive-lightning-typed", "Receive Lightning, 2,100 typed", { steps: [click("RECEIVE"), click("Lightning"), type("2100")] });
-add("Receive", "receive-onchain", "Receive on-chain", { steps: [click("RECEIVE"), click("On-chain")] });
-add("Receive", "receive-chooser-light", "Receive options, light", { dark: false, steps: [click("RECEIVE")] });
-add("Send", "send-chooser", "Send options", { steps: [click("SEND")] });
-add("Send", "send-ecash", "Send ecash, amount", { steps: [click("SEND"), click("Ecash")] });
-add("Send", "send-ecash-typed", "Send ecash, 500 typed", { steps: [click("SEND"), click("Ecash"), type("500")] });
-add("Send", "send-lightning", "Pay Lightning", { steps: [click("SEND"), click("Lightning")] });
-add("Send", "send-onchain", "Send on-chain", { steps: [click("SEND"), click("On-chain")] });
-add("Send", "send-ecash-light", "Send ecash, light", { dark: false, steps: [click("SEND"), click("Ecash"), type("500")] });
-
-// Real flows on testnut (fake funds; it pays its own invoices). Every shot mints fresh ecash.
-const T = { section: "Testnut flows", testnut: 4000 };
-const tn = (id, title, o) => add(T.section, id, title, { testnut: T.testnut, ...o });
-tn("tn-wallet", "Wallet on testnut", { steps: [tab("History")] });
-tn("tn-receive-invoice", "Receive Lightning, invoice created", { steps: [click("RECEIVE"), click("Lightning"), type("2100"), btn(/create invoice/i, 250)] });
-tn("tn-receive-invoice-paid", "Receive Lightning, invoice paid", { steps: [click("RECEIVE"), click("Lightning"), type("2100"), btn(/create invoice/i), wait(8000)] });
-tn("tn-receive-onchain", "Receive on-chain, address created", { steps: [click("RECEIVE"), click("On-chain"), type("50000"), btn(/create address/i), wait(1500)] });
-tn("tn-receive-request", "Receive ecash, payment request", { steps: [click("RECEIVE"), click("Ecash"), click(["Request", "Request ecash"]), wait(2000)] });
-tn("tn-receive-request-amount", "Payment request, 1,000 typed", { steps: [click("RECEIVE"), click("Ecash"), click(["Request", "Request ecash"]), wait(1500), type("1000"), wait(1000)] });
-tn("tn-receive-token", "Receive a testnut token", { steps: [click("RECEIVE"), click("Ecash"), pasteLater(() => testnutToken(1500, "Pizza split"))] });
-tn("tn-receive-token-done", "Testnut token received", { steps: [click("RECEIVE"), click("Ecash"), pasteLater(() => testnutToken(1500, "Pizza split")), btn(/^receive$/i), wait(4000)] });
-tn("tn-send-token", "Send ecash, token created", { steps: [click("SEND"), click("Ecash"), type("500"), btn(/^send$/i), wait(2500)] });
-tn("tn-pay-invoice", "Pay Lightning, real invoice", { steps: [click("SEND"), click("Lightning"), fillLater(() => invoice(1210)), wait(3000)] });
-tn("tn-send-onchain", "Send on-chain", { steps: [click("SEND"), click("On-chain")] });
-tn("tn-mint-details", "Testnut mint details", { path: "/mintdetails?mintUrl=" + encodeURIComponent(TESTNUT), steps: [wait(2500)] });
-tn("tn-receive-invoice-light", "Receive Lightning invoice, light", { dark: false, steps: [click("RECEIVE"), click("Lightning"), type("2100"), btn(/create invoice/i, 250)] });
-tn("tn-send-token-light", "Send ecash token, light", { dark: false, steps: [click("SEND"), click("Ecash"), type("500"), btn(/^send$/i), wait(2500)] });
-
-// Mints
-add("Mints", "mint-details", "Mint details (Minibits)", { path: "/mintdetails" + MINT_Q, steps: [wait(2500)] });
-add("Mints", "mint-details-scrolled", "Mint details, scrolled", { path: "/mintdetails" + MINT_Q, steps: [wait(2500), scrollEnd] });
-add("Mints", "mint-details-light", "Mint details, light", { dark: false, path: "/mintdetails" + MINT_Q, steps: [wait(2500)] });
-add("Mints", "mint-ratings", "Mint reviews", { path: "/mintratings" + MINT_Q, steps: [wait(4000)] });
-add("Mints", "discover-mints", "Discover mints", { path: "/discoverMints", steps: [wait(6000)] });
-add("Mints", "restore", "Restore from seed", { path: "/restore" });
-
-// Settings
-const SETTINGS = ["", "backup", "lightning-address", "nostr", "payment-requests", "nwc", "p2pk", "privacy", "experimental", "appearance", "language", "advanced", "about"];
-for (const s of SETTINGS) {
-  const name = s ? s.replace(/-/g, " ").replace(/^./, (c) => c.toUpperCase()) : "Settings menu";
-  add("Settings", "settings-" + (s || "menu"), name, { path: "/settings" + (s ? "/" + s : "") });
-  if (["", "advanced", "nostr", "privacy"].includes(s))
-    add("Settings", "settings-" + (s || "menu") + "-scrolled", name + ", scrolled", { path: "/settings" + (s ? "/" + s : ""), steps: [scrollEnd] });
-}
-add("Settings", "settings-menu-light", "Settings menu, light", { dark: false, path: "/settings" });
-add("Settings", "settings-appearance-light", "Appearance, light", { dark: false, path: "/settings/appearance" });
-
-// Themes
-for (const theme of ["monochrome", "classic", "bitcoin", "mint", "autumn", "salvador", "freedom", "cyber", "flamingo"]) {
-  add("Themes", `theme-${theme}-dark`, `${theme}, dark`, { theme, steps: [tab("History")] });
-  add("Themes", `theme-${theme}-light`, `${theme}, light`, { theme, dark: false, steps: [tab("History")] });
-}
-
-// Languages
-for (const lang of ["en-US", "de-DE", "es-ES", "fr-FR", "it-IT", "pt-BR", "sv-SE", "cs-CZ", "el-GR", "tr-TR", "ar-SA", "th-TH", "ja-JP", "zh-CN"]) {
-  add("Languages", `lang-${lang}-wallet`, `${lang}: wallet`, { lang, steps: [tab(0)] });
-  add("Languages", `lang-${lang}-settings`, `${lang}: settings`, { lang, path: "/settings" });
-  add("Languages", `lang-${lang}-receive`, `${lang}: receive options`, { lang, steps: [click("RECEIVE")] });
-}
-
-// Desktop
-add("Desktop", "desktop-wallet", "Desktop wallet", { viewport: DESKTOP, steps: [tab("History")] });
-add("Desktop", "desktop-settings", "Desktop settings", { viewport: DESKTOP, path: "/settings" });
-add("Desktop", "desktop-receive", "Desktop receive Lightning", { viewport: DESKTOP, steps: [click("RECEIVE"), click("Lightning")] });
-add("Desktop", "desktop-mint-details", "Desktop mint details", { viewport: DESKTOP, path: "/mintdetails" + MINT_Q, steps: [wait(2500)] });
-add("Desktop", "desktop-light", "Desktop wallet, light", { viewport: DESKTOP, dark: false, steps: [tab("History")] });
-
-const todo = only ? shots.filter((s) => only.includes(s.id)) : shots;
-const browser = await chromium.launch();
-const states = {};
-for (const v of Object.keys(VERSIONS)) states[v] = await seed(browser, v);
-console.log("seeded", todo.length, "shots");
-
-const results = {};
-async function run(shot, v) {
+// Seed one wallet per version: the test mint and the demo mint, a fake balance and a history.
+async function seed(browser, version) {
   const context = await browser.newContext({
-    storageState: shot.fresh ? undefined : states[v],
-    viewport: shot.viewport, deviceScaleFactor: 2, serviceWorkers: "block", reducedMotion: "reduce", permissions: ["clipboard-read", "clipboard-write"],
-    locale: shot.lang, colorScheme: shot.dark ? "dark" : "light",
+    viewport: { width: 390, height: 844 },
+    serviceWorkers: "block",
   });
   const page = await context.newPage();
+  await page.addInitScript(setStorage, {
+    "cashu.welcome.showWelcome": "false",
+    "cashu.welcome.termsAccepted": "true",
+    "cashu.welcome.seedPhraseValidated": "true",
+    "cashu.language": "en-US",
+  });
+  await page.goto(BASES[version] + "/");
+  await page.waitForFunction(appReady, null, { timeout: 30000 });
+  const seeded = await page.evaluate(
+    async ({ TESTNUT, PREFERRED_MINT }) => {
+      const s =
+        document.querySelector("#q-app").__vue_app__.config.globalProperties
+          .$pinia._s;
+      await s.get("mints").addMint({ url: TESTNUT });
+      let url = PREFERRED_MINT;
+      try {
+        await s.get("mints").addMint({ url });
+      } catch (e) {
+        url = TESTNUT;
+      }
+      const mint = s
+        .get("mints")
+        .mints.find((m) => m.url === url && m.keysets?.length);
+      if (!mint) url = TESTNUT;
+      await s.get("mints").activateMintUrl(url);
+      const keyset = s
+        .get("mints")
+        .mints.find((m) => m.url === url)
+        .keysets.find((k) => k.unit === "sat" && k.active !== false);
+      return { mint: url, keyset: keyset.id };
+    },
+    { TESTNUT, PREFERRED_MINT }
+  );
+  const proofs = fakeProofs([2048, 512, 128, 64, 32, 4, 1], seeded.keyset);
+  const history = HISTORY.map((h) => ({ ...h, mint: seeded.mint }));
+  await page.evaluate(
+    async ({ proofs, history }) => {
+      const s =
+        document.querySelector("#q-app").__vue_app__.config.globalProperties
+          .$pinia._s;
+      await s.get("proofs").addProofs(proofs);
+      for (const h of history) s.get("tokens").persistHistoryToken(h);
+    },
+    { proofs, history }
+  );
+  await page.waitForTimeout(1500);
+  await page.reload();
+  await page.waitForTimeout(2500);
+  // What the deck writes before it frames this version: the app's own storage, then the
+  // proofs and history through the app's stores.
+  const stored = await page.evaluate(() => {
+    const out = {};
+    for (const k of Object.keys(localStorage))
+      if (k.startsWith("cashu.")) out[k] = localStorage.getItem(k);
+    return out;
+  });
+  fs.writeFileSync(
+    `${OUT}/seed-${version}.json`,
+    JSON.stringify({ localStorage: stored, proofs, history })
+  );
+  const state = await context.storageState({ indexedDB: true });
+  await context.close();
+  return { state, ...seeded };
+}
+
+const visible = (loc) => loc.locator("visible=true");
+async function runStep(page, [kind, value, settle], values) {
+  if (kind === "tab") {
+    const tabs = page.locator(".q-tab");
+    await (typeof value === "number"
+      ? tabs.nth(value)
+      : tabs.filter({ hasText: value }).first()
+    ).click({ timeout: 6000 });
+  } else if (kind === "click") {
+    const texts = [value].flat();
+    let hit = false;
+    for (const text of texts) {
+      const loc = visible(page.getByText(text, { exact: true }));
+      if (await loc.count()) {
+        await loc.last().click({ timeout: 6000, force: true });
+        hit = true;
+        break;
+      }
+    }
+    if (!hit) throw new Error("none of " + texts.join(" / ") + " visible");
+  } else if (kind === "testid") {
+    await visible(page.getByTestId(value)).first().click({ timeout: 6000 });
+  } else if (kind === "css") {
+    await visible(page.locator(value)).first().click({ timeout: 6000 });
+  } else if (kind === "btn") {
+    const scope = (await page.locator(".q-dialog").count())
+      ? page.locator(".q-dialog").last()
+      : page;
+    await visible(scope.getByRole("button", { name: new RegExp(value, "i") }))
+      .last()
+      .click({ timeout: 8000 });
+  } else if (kind === "type") {
+    await page.keyboard.type(value, { delay: 60 });
+  } else if (kind === "paste") {
+    await page.evaluate(
+      (t) => navigator.clipboard.writeText(t),
+      await values[value]()
+    );
+    await runStep(page, ["click", ["Paste", "Paste token"]], values);
+    await page.waitForTimeout(1000);
+  } else if (kind === "fill") {
+    const field = visible(
+      page.locator(
+        ".q-dialog textarea, .q-dialog input[type=text], .q-dialog input:not([type])"
+      )
+    ).first();
+    await field.fill(await values[value](), { timeout: 6000 });
+  } else if (kind === "scrollEnd") {
+    await page.evaluate(() => {
+      const els = [
+        document.scrollingElement,
+        ...document.querySelectorAll(
+          ".q-page-container, .q-page, .scroll, .q-dialog .q-card"
+        ),
+      ];
+      for (const e of els) if (e) e.scrollTop = e.scrollHeight;
+    });
+  } else if (kind === "wait") {
+    await page.waitForTimeout(value);
+    return;
+  } else throw new Error("unknown step " + kind);
+  await page.waitForTimeout(
+    settle ?? (kind === "type" || kind === "tab" ? 800 : 1000)
+  );
+}
+
+const browser = await chromium.launch();
+const seeds = {};
+for (const v of Object.keys(BASES)) seeds[v] = await seed(browser, v);
+const MINT = seeds.after.mint;
+console.log("seeded on", MINT);
+const shots = buildShots(MINT);
+const todo = only?.length ? shots.filter((s) => only.includes(s.id)) : shots;
+const values = {
+  token: async () =>
+    getEncodedToken({
+      mint: MINT,
+      unit: "sat",
+      memo: "Thanks for lunch",
+      proofs: fakeProofs([500, 250, 250], seeds.after.keyset),
+    }),
+  testnutToken: () => testnutToken(1500, "Pizza split"),
+  invoice: () => invoice(1210),
+};
+
+// --probe: list boxes that scroll by a few pixels without meaning to (a scroll container
+// whose content overhangs it by less than a row), which reads as a page that wobbles under
+// a finger. Written to DIR/accidental-scroll.json.
+const PROBE = process.argv.includes("--probe");
+const probes = {};
+const accidentalScrollers = () =>
+  [...document.querySelectorAll("body *")].flatMap((el) => {
+    const style = getComputedStyle(el);
+    const y = /auto|scroll/.test(style.overflowY)
+      ? el.scrollHeight - el.clientHeight
+      : 0;
+    const x = /auto|scroll/.test(style.overflowX)
+      ? el.scrollWidth - el.clientWidth
+      : 0;
+    if (
+      !el.getClientRects().length ||
+      !((y > 0 && y <= 40) || (x > 0 && x <= 40))
+    )
+      return [];
+    return [
+      `${el.tagName.toLowerCase()}.${String(el.className)
+        .trim()
+        .split(/\s+/)
+        .slice(0, 3)
+        .join(".")} y+${y} x+${x}`,
+    ];
+  });
+
+const results = {};
+async function capture(shot, v) {
+  const context = await browser.newContext({
+    storageState: shot.fresh ? undefined : seeds[v].state,
+    viewport: shot.viewport,
+    deviceScaleFactor: 2,
+    serviceWorkers: "block",
+    reducedMotion: "reduce",
+    permissions: ["clipboard-read", "clipboard-write"],
+    locale: shot.lang,
+    colorScheme: shot.dark ? "dark" : "light",
+  });
+  const page = await context.newPage();
+  const settings = {
+    "cashu.theme": shot.theme,
+    "cashu.darkMode": shot.dark ? "__q_bool|1" : "__q_bool|0",
+    "cashu.language": shot.lang,
+  };
+  if (shot.fresh) settings["cashu.welcome.showWelcome"] = "true";
   // Testnut flows mint and swap for real: each needs its own seed, or the deterministic
   // outputs repeat across shots and the mint rejects them as duplicates.
-  if (shot.testnut) {
-    await page.addInitScript((m) => {
-      localStorage.setItem("cashu.mnemonic", m);
-      localStorage.setItem("cashu.keysetCounters", "[]");
-    }, generateMnemonic(wordlist));
-  }
-  await page.addInitScript(({ theme, dark, lang, fresh }) => {
-    localStorage.setItem("cashu.theme", theme);
-    localStorage.setItem("cashu.darkMode", dark ? "__q_bool|1" : "__q_bool|0");
-    localStorage.setItem("cashu.language", lang);
-    if (fresh) localStorage.setItem("cashu.welcome.showWelcome", "true");
-  }, shot);
-  await page.addStyleTag?.({ content: "" }).catch(() => {});
+  if (shot.testnut)
+    Object.assign(settings, {
+      "cashu.mnemonic": generateMnemonic(wordlist),
+      "cashu.keysetCounters": "[]",
+    });
+  await page.addInitScript(setStorage, settings);
+  const { path, steps } = { path: shot.path, steps: shot.steps, ...shot[v] };
   let error = null;
   try {
-    // Start at the wallet like a user, then route inside the app: main only applies its
-    // stored theme and mode from the wallet page.
-    await page.goto(VERSIONS[v] + (shot.fresh ? shot.path : "/"));
+    // Start at the wallet like a user, then route inside the app: the base build only
+    // applies its stored theme and mode from the wallet page.
+    await page.goto(BASES[v] + (shot.fresh ? path : "/"));
     await page.waitForTimeout(2500);
-    if (!shot.fresh && shot.path !== "/") {
-      await page.evaluate((to) => document.querySelector("#q-app").__vue_app__.config.globalProperties.$router.push(to), shot.path);
+    if (!shot.fresh && path !== "/") {
+      await page.evaluate(
+        (to) =>
+          document
+            .querySelector("#q-app")
+            .__vue_app__.config.globalProperties.$router.push(to),
+        path
+      );
       await page.waitForTimeout(2000);
     }
-    await page.addStyleTag({ content: "*,*::before,*::after{caret-color:transparent!important;transition:none!important;animation-duration:0s!important}.q-notifications__list{display:none!important}" });
+    await page.addStyleTag({
+      content:
+        "*,*::before,*::after{caret-color:transparent!important;transition:none!important;animation-duration:0s!important}.q-notifications__list,[data-sonner-toaster]{display:none!important}",
+    });
     if (shot.testnut) {
       const proofs = await mintProofs(shot.testnut);
-      await page.evaluate(async ({ TESTNUT, proofs }) => {
-        const st = document.querySelector("#q-app").__vue_app__.config.globalProperties.$pinia._s;
-        await st.get("mints").activateMintUrl(TESTNUT);
-        await st.get("proofs").addProofs(proofs);
-      }, { TESTNUT, proofs });
+      await page.evaluate(
+        async ({ TESTNUT, proofs }) => {
+          const st =
+            document.querySelector("#q-app").__vue_app__.config.globalProperties
+              .$pinia._s;
+          await st.get("mints").activateMintUrl(TESTNUT);
+          await st.get("proofs").addProofs(proofs);
+        },
+        { TESTNUT, proofs }
+      );
       await page.waitForTimeout(1000);
       await page.reload();
       await page.waitForTimeout(2500);
     }
-    for (const step of shot.steps) await step(page);
+    for (const step of steps) await runStep(page, step, values);
     await page.waitForTimeout(700);
   } catch (e) {
     error = String(e.message).split("\n")[0];
   }
-  await page.screenshot({ path: `${OUT}/${shot.id}-${v}.png` });
+  if (PROBE && !error)
+    probes[`${shot.id}-${v}`] = await page.evaluate(accidentalScrollers);
+  // The whole page, unless a dialog or sheet is open: those belong to the window, and a
+  // full-length capture would move them to the foot of the document.
+  const overlay = await visible(page.locator(".q-dialog")).count();
+  await page.screenshot({
+    path: `${OUT}/${shot.id}-${v}.png`,
+    fullPage: !overlay,
+  });
   await context.close();
   return error;
 }
 
-const queue = todo.flatMap((s) => Object.keys(VERSIONS).map((v) => [s, v]));
-await Promise.all(Array.from({ length: 5 }, async () => {
-  while (queue.length) {
-    const [s, v] = queue.shift();
-    const err = await run(s, v);
-    (results[s.id] ??= {})[v] = err;
-    if (err) console.log("step failed", s.id, v, err);
-  }
-}));
-const manifest = shots.map(({ section, id, title, viewport, theme, dark, lang }) => ({ section, id, title, viewport, theme, dark, lang, errors: results[id] ?? null }));
-const prev = fs.existsSync(`${OUT}/manifest.json`) && only ? JSON.parse(fs.readFileSync(`${OUT}/manifest.json`)) : [];
-if (only) for (const m of manifest) if (!results[m.id]) m.errors = prev.find((x) => x.id === m.id)?.errors ?? null;
+const queue = todo.flatMap((s) => Object.keys(BASES).map((v) => [s, v]));
+await Promise.all(
+  Array.from({ length: 4 }, async () => {
+    while (queue.length) {
+      const [s, v] = queue.shift();
+      const error = await capture(s, v);
+      (results[s.id] ??= {})[v] = error;
+      if (error) console.log("step failed", s.id, v, error);
+    }
+  })
+);
+const previous = fs.existsSync(`${OUT}/manifest.json`)
+  ? JSON.parse(fs.readFileSync(`${OUT}/manifest.json`)).shots
+  : [];
+const manifest = {
+  mint: MINT,
+  capturedAt: new Date().toISOString(),
+  shots: shots.map((s) => ({
+    ...s,
+    errors:
+      results[s.id] ?? previous.find((p) => p.id === s.id)?.errors ?? null,
+  })),
+};
 fs.writeFileSync(`${OUT}/manifest.json`, JSON.stringify(manifest, null, 1));
-console.log("done", todo.length * 2, "screenshots");
+if (PROBE)
+  fs.writeFileSync(
+    `${OUT}/accidental-scroll.json`,
+    JSON.stringify(probes, null, 1)
+  );
+const failed = manifest.shots.filter(
+  (s) => s.errors && (s.errors.before || s.errors.after)
+);
+console.log(
+  "done",
+  todo.length * 2,
+  "captures;",
+  failed.length,
+  "slides with a failed step"
+);
 await browser.close();

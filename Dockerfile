@@ -13,7 +13,8 @@ RUN npm install
 COPY . .
 
 ARG DESIGN_SYSTEM
-# SIDE_BY_SIDE=1 (staging only) ships the before/after screenshots at /side-by-side
+# SIDE_BY_SIDE=1 (staging only) ships the before/after deck at /side-by-side (built by
+# scripts/side-by-side into deploy/side-by-side before the image is built)
 ARG SIDE_BY_SIDE
 
 # Build the PWA (replace 'npm run build' with your actual build command)

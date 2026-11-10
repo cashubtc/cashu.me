@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Cashu.me: before and after</title>
+    <link rel="stylesheet" href="/side-by-side/deck.css" />
+  </head>
+  <body>
+    <header class="bar">
+      <h1>Cashu.me <span>before / after</span></h1>
+      <label class="pick">
+        <span class="sr">Section</span>
+        <select id="section"></select>
+      </label>
+      <div class="title">
+        <strong id="title"></strong>
+        <span id="note"></span>
+      </div>
+      <div class="tools">
+        <div class="seg" role="group" aria-label="Pane content">
+          <button
+            id="mode-live"
+            type="button"
+            aria-pressed="false"
+            title="Both app versions, running (L)"
+          >
+            Live
+          </button>
+          <button
+            id="mode-image"
+            type="button"
+            aria-pressed="true"
+            title="Full-length captures (L)"
+          >
+            Capture
+          </button>
+        </div>
+        <div class="seg" role="group" aria-label="Layout">
+          <button
+            id="view-side"
+            type="button"
+            aria-pressed="true"
+            title="Before and after side by side (V)"
+          >
+            Side by side
+          </button>
+          <button
+            id="view-flip"
+            type="button"
+            aria-pressed="false"
+            title="One pane: Space swaps before and after in place (V)"
+          >
+            Flip
+          </button>
+        </div>
+        <button
+          id="sync"
+          class="tool"
+          type="button"
+          aria-pressed="true"
+          title="Scroll both panes together (S)"
+        >
+          Sync scroll
+        </button>
+        <button id="full" class="tool" type="button" title="Full screen (F)">
+          Full screen
+        </button>
+        <button
+          id="help"
+          class="tool tool--icon"
+          type="button"
+          aria-label="Keyboard shortcuts"
+          title="Keyboard shortcuts (?)"
+        >
+          ?
+        </button>
+      </div>
+    </header>
+
+    <main id="stage" class="stage">
+      <section class="pane" data-version="before">
+        <header class="pane__label">
+          <i></i><b>Before</b><span class="pane__ref"></span
+          ><span class="pane__state"></span>
+        </header>
+        <div class="pane__box">
+          <div class="pane__frame">
+            <div class="pane__scroll"><img alt="" /></div>
+          </div>
+        </div>
+      </section>
+      <section class="pane" data-version="after">
+        <header class="pane__label">
+          <i></i><b>After</b><span class="pane__ref"></span
+          ><span class="pane__state"></span>
+        </header>
+        <div class="pane__box">
+          <div class="pane__frame">
+            <div class="pane__scroll"><img alt="" /></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="strip">
+      <button id="prev" class="near near--prev" type="button">
+        <span class="near__thumbs"><img alt="" /><img alt="" /></span>
+        <span class="near__text"><small>← Previous</small><b></b></span>
+      </button>
+      <div class="progress">
+        <div id="sections" class="progress__sections"></div>
+        <div id="count" class="progress__count"></div>
+      </div>
+      <button id="next" class="near near--next" type="button">
+        <span class="near__text"><small>Next →</small><b></b></span>
+        <span class="near__thumbs"><img alt="" /><img alt="" /></span>
+      </button>
+    </footer>
+
+    <dialog id="keys" class="keys">
+      <h2>Keyboard</h2>
+      <dl>
+        <dt>← →</dt>
+        <dd>Previous and next slide</dd>
+        <dt>↑ ↓</dt>
+        <dd>Previous and next section</dd>
+        <dt>Space</dt>
+        <dd>In Flip: swap before and after in place</dd>
+        <dt>V</dt>
+        <dd>Side by side or Flip</dd>
+        <dt>L</dt>
+        <dd>Live apps or captures</dd>
+        <dt>S</dt>
+        <dd>Scroll both panes together</dd>
+        <dt>F</dt>
+        <dd>Full screen</dd>
+        <dt>Home End</dt>
+        <dd>First and last slide</dd>
+      </dl>
+      <p>
+        Live panes run both builds of the app in this page, each with its own
+        demo wallet (fake balance and history) that is kept apart from any
+        wallet you use on this site. Slides that need freshly minted test ecash
+        show captures only.
+      </p>
+      <form method="dialog"><button type="submit">Close</button></form>
+    </dialog>
+    <script type="module" src="/side-by-side/deck.js"></script>
+  </body>
+</html>
