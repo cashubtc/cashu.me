@@ -347,6 +347,7 @@ export default defineComponent({
       immediate: true,
       handler(request: PaymentRequest | undefined) {
         if (!request) return;
+        if (request.unit) useMintsStore().activeUnit = request.unit;
         const amount = request.amount?.toNumber();
         this.paymentRequestAmount = amount;
         this.amountLabel =
