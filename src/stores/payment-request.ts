@@ -194,11 +194,7 @@ export const usePRStore = defineStore("payment-request", {
         uuid,
         amount,
         mintStore.activeUnit,
-        mintUrl?.length
-          ? mintStore.activeMintUrl
-            ? [mintStore.activeMintUrl]
-            : undefined
-          : undefined,
+        mintUrl?.length ? [mintUrl] : undefined,
         memo || undefined,
         false,
         nut10
