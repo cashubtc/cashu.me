@@ -64,7 +64,14 @@ export default {
         if (this.urDecoder?.isComplete() && this.urDecoder?.isSuccess()) {
           const ur = this.urDecoder?.resultUR();
           const decoded = ur.decodeCBOR();
-          this.$emit("decode", decoded.toString());
+          let text;
+          if (typeof decoded === "string") {
+            text = decoded;
+          } else {
+            // Buffer or Uint8Array
+            text = new TextDecoder().decode(decoded);
+          }
+          this.$emit("decode", text);
           this.qrScanner?.stop();
           this.urDecoderProgress = 0;
         }
