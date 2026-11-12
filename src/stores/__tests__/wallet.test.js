@@ -1725,6 +1725,52 @@ describe("wallet store", () => {
     });
   });
 
+  it.each([true, false])(
+    "cleans up when the second mutex acquisition fails (silent=%s)",
+    async (silent) => {
+      const wallet = useWalletStore();
+      wallet.invoiceHistory = [];
+      const proofs = [{ id: "00aa", amount: 105, secret: "s1" }];
+      const quote = {
+        quote: "bolt11-melt-q",
+        amount: 100,
+        fee_reserve: 5,
+        state: "UNPAID",
+      };
+      const mintWallet = {
+        mint: { mintUrl: "https://mint-a.example" },
+        unit: "sat",
+        selectProofsToSend: vi.fn(() => ({ send: proofs, keep: [] })),
+        prepareMelt: vi.fn(),
+        completeMelt: vi.fn(),
+      };
+      const error = new Error("Lock acquisition failed");
+      const checkQuote = vi.fn();
+      h.uiStore.lockMutex.mockResolvedValueOnce().mockRejectedValueOnce(error);
+
+      await expect(
+        wallet.meltGeneric(proofs, quote, mintWallet, silent, checkQuote)
+      ).rejects.toBe(error);
+
+      expect(h.uiStore.lockMutex).toHaveBeenCalledTimes(2);
+      expect(h.uiStore.unlockMutex).toHaveBeenCalledTimes(1);
+      expect(h.proofsStore.setReserved.mock.calls).toEqual([
+        [proofs, true],
+        [proofs, false],
+      ]);
+      expect(wallet.payInvoiceData.paying).toBe(false);
+      expect(wallet.invoiceHistory).toEqual([]);
+      expect(checkQuote).not.toHaveBeenCalled();
+      expect(mintWallet.prepareMelt).not.toHaveBeenCalled();
+      expect(mintWallet.completeMelt).not.toHaveBeenCalled();
+      if (silent) {
+        expect(h.notifyApiError).not.toHaveBeenCalled();
+      } else {
+        expect(h.notifyApiError).toHaveBeenCalledWith(error, "Payment failed");
+      }
+    }
+  );
+
   it("persists melt change output data before completing a melt", async () => {
     const wallet = useWalletStore();
     const proofs = [{ id: "00aa", amount: 105, secret: "s1" }];

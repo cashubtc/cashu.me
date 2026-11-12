@@ -181,7 +181,18 @@ export async function meltGeneric(
   }
 
   this.payInvoiceData.paying = true;
-  await uIStore.lockMutex(mutexPriority);
+  try {
+    await uIStore.lockMutex(mutexPriority);
+  } catch (error: any) {
+    try {
+      await proofsStore.setReserved(sendProofs, false);
+    } finally {
+      this.payInvoiceData.paying = false;
+    }
+    console.error(error);
+    if (!silent) notifyApiError(error, "Payment failed");
+    throw error;
+  }
   try {
     await this.addOutgoingPendingInvoiceToHistory(
       quote,
