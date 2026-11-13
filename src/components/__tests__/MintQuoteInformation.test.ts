@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { PaymentMethod } from "src/stores/walletTypes";
 
 vi.mock("src/stores/mints", () => ({
@@ -12,7 +12,51 @@ beforeAll(async () => {
   MintQuoteInformation = (await import("../MintQuoteInformation.vue")).default;
 });
 
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
+
 describe("MintQuoteInformation", () => {
+  it("shows a pending chain status when the tip height is unavailable", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => [
+            {
+              txid: "example-tx",
+              status: { confirmed: true, block_height: 100 },
+              vout: [{ scriptpubkey_address: "bc1qexample", value: 1000 }],
+            },
+          ],
+        })
+        .mockResolvedValueOnce({ ok: false })
+    );
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    const context: any = {
+      isOnchain: true,
+      invoice: { request: "bc1qexample" },
+      mintConfirmations: () => 3,
+      loadingOnchainMetadata: false,
+      onchainMetadata: null,
+    };
+    await MintQuoteInformation.methods.loadOnchainMetadata.call(context);
+
+    expect(context.loadingOnchainMetadata).toBe(false);
+    expect(context.onchainMetadata).toMatchObject({
+      confirmed: false,
+      confirmations: 1,
+      confirmationThreshold: 3,
+    });
+    expect(
+      MintQuoteInformation.computed.onchainStatusDisplay.call(context)
+    ).toBe("Pending (1/3)");
+  });
+
   it("uses the address explorer page until a transaction is available", () => {
     const onchainExplorerUrl = MintQuoteInformation.computed.onchainExplorerUrl;
     const context: any = {
