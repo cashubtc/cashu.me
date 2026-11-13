@@ -23,7 +23,7 @@ import { useReceiveTokensStore } from "./receiveTokensStore";
 import {
   getEncodedToken,
   normalizeProofAmounts,
-  PaymentRequestPayload,
+  PaymentRequest,
   Token,
 } from "@cashu/cashu-ts";
 import { useTokensStore } from "./tokens";
@@ -472,9 +472,9 @@ export const useNostrStore = defineStore("nostr", {
       }
     },
     parseMessageForEcash: async function (message: string) {
-      // first check if the message can be converted to a json and then to a PaymentRequestPayload
+      // first check if the message is a NUT-18 payment payload
       try {
-        const payload = JSON.parse(message) as PaymentRequestPayload;
+        const payload = PaymentRequest.decodePayload(message);
         if (payload) {
           const receiveStore = useReceiveTokensStore();
           const prStore = usePRStore();
@@ -514,7 +514,17 @@ export const useNostrStore = defineStore("nostr", {
           receiveStore.receiveData.tokensBase64 = tokenStr;
           sendTokensStore.showSendTokens = false;
           const knowThisMint = receiveStore.knowThisMintOfTokenJson(token);
-          if (prStore.receivePaymentRequestsAutomatically && knowThisMint) {
+          // Only payments to a request stored here can be checked (eg not one made on another device).
+          const ours = prStore.ourPaymentRequests.some(
+            (r) => r.id === payload.id
+          );
+          const satisfied =
+            knowThisMint &&
+            (!ours || (await prStore.paymentSatisfiesRequest(payload)));
+          if (ours && knowThisMint && !satisfied) {
+            notifyWarning("Payment does not match the request");
+          }
+          if (prStore.receivePaymentRequestsAutomatically && satisfied) {
             const success = await receiveStore.receiveIfDecodes();
             if (success) {
               prStore.showPRDialog = false;

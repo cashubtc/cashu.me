@@ -1104,6 +1104,9 @@ export default {
       mint_not_allowed_by_request:
         "The selected mint is not accepted by this payment request.",
     },
+    payment_request: {
+      method_fee: "Plus a {fee} fee to pay from this mint",
+    },
   },
   SendPaymentRequest: {
     actions: {
@@ -1277,11 +1280,27 @@ export default {
       use_active_mint: {
         label: "Any mint",
       },
+      delete: {
+        label: "Delete",
+      },
+      cancel: {
+        label: "@:global.actions.cancel.label",
+      },
     },
     inputs: {
       amount: {
         placeholder: "Enter amount",
       },
+      description: {
+        placeholder: "Add a description",
+      },
+      lock: {
+        label: "Lock to my key",
+      },
+    },
+    delete_dialog: {
+      title: "Delete request",
+      text: "Remove this request from the list? Payments already received stay in your history, and later payments to it will still arrive.",
     },
   },
   NumericKeyboard: {

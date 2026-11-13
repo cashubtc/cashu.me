@@ -3,10 +3,10 @@ import {
   Amount,
   type AmountLike,
   decodePaymentRequest,
-  JSONInt,
   normalizeProofAmounts,
   PaymentRequest,
-  PaymentRequestPayload,
+  type NUT10Option,
+  type PaymentRequestPayload,
   PaymentRequestTransport,
   PaymentRequestTransportType,
 } from "@cashu/cashu-ts";
@@ -14,17 +14,45 @@ import { useMintsStore } from "./mints";
 import { useSendTokensStore } from "./sendTokensStore";
 import { useNostrStore } from "./nostr";
 import { useTokensStore } from "./tokens";
+import { useWalletStore } from "./wallet";
+import { useP2PKStore } from "./p2pk";
 import type { HistoryToken } from "./tokens";
 import token from "src/js/token";
 import { notifySuccess, notifyWarning } from "src/js/notify";
 import { useLocalStorage } from "@vueuse/core";
 import { v4 as uuidv4 } from "uuid";
+import { nip19 } from "nostr-tools";
 
 // Request fields used by the UI and delivery; history stores these as plain data.
 export type PaymentRequestData = Pick<
   PaymentRequest,
-  "transport" | "id" | "unit" | "mints" | "description" | "singleUse" | "nut10"
-> & { amount?: AmountLike };
+  | "transport"
+  | "id"
+  | "unit"
+  | "mints"
+  | "description"
+  | "singleUse"
+  | "nut10"
+  | "mintsPreferred"
+> & {
+  amount?: AmountLike;
+  supportedMethods?: Array<{ method: string; fee?: AmountLike }>;
+};
+
+export function toPaymentRequest(data: PaymentRequestData): PaymentRequest {
+  return new PaymentRequest(
+    data.transport,
+    data.id,
+    data.amount,
+    data.unit,
+    data.mints,
+    data.description,
+    data.singleUse,
+    data.nut10,
+    data.mintsPreferred,
+    data.supportedMethods
+  );
+}
 
 export type OurPaymentRequest = {
   id: string; // UUID from PaymentRequest
@@ -66,8 +94,11 @@ export const usePRStore = defineStore("payment-request", {
       amount?: number,
       memo?: string,
       mintUrl?: string,
-      forceNew: boolean = false
+      forceNew: boolean = false,
+      lock: boolean = false,
+      unit?: string
     ) {
+      this.pruneOurPaymentRequests();
       // If not forcing a new request and we already have at least one,
       // do not auto-create a new one; just show the currently selected.
       if (!forceNew && this.ourPaymentRequests.length > 0) {
@@ -76,12 +107,84 @@ export const usePRStore = defineStore("payment-request", {
         this.showPRKData = current.encoded;
         return;
       }
-      this.showPRKData = this.createPaymentRequest(amount, memo, mintUrl);
+      this.showPRKData = this.createPaymentRequest(
+        amount,
+        memo,
+        mintUrl,
+        lock,
+        unit
+      );
     },
+    // Replaces the shown request unless it has been paid, then a new one is added.
+    updatePaymentRequest(
+      amount?: number,
+      memo?: string,
+      mintUrl?: string,
+      lock: boolean = false,
+      unit?: string
+    ) {
+      const current = this.currentPaymentRequest;
+      if (current && current.receivedPaymentIds.length === 0) {
+        this.ourPaymentRequests.splice(
+          this.ourPaymentRequests.indexOf(current),
+          1
+        );
+      }
+      this.showPRKData = this.createPaymentRequest(
+        amount,
+        memo,
+        mintUrl,
+        lock,
+        unit
+      );
+    },
+    // Payments to a deleted request stay in history and are still received.
+    deletePaymentRequest(id: string) {
+      this.ourPaymentRequests = this.ourPaymentRequests.filter(
+        (r) => r.id !== id
+      );
+      if (!this.ourPaymentRequests.length) {
+        this.createPaymentRequest();
+        return;
+      }
+      this.selectedPRIndex = Math.min(
+        this.selectedPRIndex,
+        this.ourPaymentRequests.length - 1
+      );
+      this.showPRKData = this.currentPaymentRequest?.encoded ?? "";
+    },
+    // Keeps requests addressed to this wallet's nostr key, plus any that were paid.
+    pruneOurPaymentRequests() {
+      const ourPubkey = useNostrStore().seedSignerPublicKey;
+      if (!ourPubkey) return;
+      const addressedToUs = (encoded: string) => {
+        try {
+          const target = decodePaymentRequest(encoded).getTransport(
+            PaymentRequestTransportType.NOSTR
+          )?.target;
+          if (!target) return false;
+          const decoded = nip19.decode(target);
+          return decoded.type === "nprofile"
+            ? decoded.data.pubkey === ourPubkey
+            : decoded.type === "npub" && decoded.data === ourPubkey;
+        } catch {
+          return false;
+        }
+      };
+      const kept = this.ourPaymentRequests.filter(
+        (r) => r.receivedPaymentIds.length > 0 || addressedToUs(r.encoded)
+      );
+      if (kept.length === this.ourPaymentRequests.length) return;
+      this.ourPaymentRequests = kept;
+      this.selectedPRIndex = Math.max(0, kept.length - 1);
+    },
+    // The unit defaults to the wallet's active unit.
     createPaymentRequest: function (
       amount?: number,
       memo?: string,
-      mintUrl?: string
+      mintUrl?: string,
+      lock: boolean = false,
+      unit?: string
     ) {
       const nostrStore = useNostrStore();
       const mintStore = useMintsStore();
@@ -94,17 +197,23 @@ export const usePRStore = defineStore("payment-request", {
         },
       ] as PaymentRequestTransport[];
       const uuid = uuidv4().split("-")[0];
+      // Lock payments to this wallet's newest P2PK key (NUT-11)
+      let nut10: NUT10Option | undefined;
+      if (lock) {
+        const p2pkStore = useP2PKStore();
+        if (!p2pkStore.p2pkKeys.length) p2pkStore.generateKeypair();
+        const key = p2pkStore.p2pkKeys[p2pkStore.p2pkKeys.length - 1];
+        nut10 = { kind: "P2PK", data: key.publicKey, tags: [] };
+      }
       const paymentRequest = new PaymentRequest(
         transport,
         uuid,
         amount,
-        mintStore.activeUnit,
-        mintUrl?.length
-          ? mintStore.activeMintUrl
-            ? [mintStore.activeMintUrl]
-            : undefined
-          : undefined,
-        memo
+        unit ?? mintStore.activeUnit,
+        mintUrl?.length ? [mintUrl] : undefined,
+        memo || undefined,
+        false,
+        nut10
       );
       const encoded = paymentRequest.toEncodedRequest();
       this.ensureStoredRequest(paymentRequest, encoded, memo);
@@ -175,6 +284,31 @@ export const usePRStore = defineStore("payment-request", {
         pr.receivedPaymentIds.push(historyTokenId);
       }
     },
+    // Whether a payment pays one of our requests in full (NUT-18); false if we can't tell.
+    async paymentSatisfiesRequest(
+      payload: PaymentRequestPayload
+    ): Promise<boolean> {
+      const ours = this.ourPaymentRequests.find((r) => r.id === payload.id);
+      if (!ours) return false;
+      try {
+        const wallet = await useWalletStore().mintWallet(
+          payload.mint,
+          payload.unit,
+          true
+        );
+        const privkeys = useP2PKStore().p2pkKeys.map((k) => k.privateKey);
+        // 0 is the floor for an amountless request; ignored when it sets one
+        return wallet.isPaymentRequestSatisfied(
+          decodePaymentRequest(ours.encoded),
+          payload.proofs,
+          0,
+          { privkeys }
+        );
+      } catch (e) {
+        console.warn("Could not check payment against request:", e);
+        return false;
+      }
+    },
     getPaymentsForRequest(requestId: string) {
       const tokensStore = useTokensStore();
       const pr = this.ourPaymentRequests.find((r) => r.id === requestId);
@@ -189,18 +323,17 @@ export const usePRStore = defineStore("payment-request", {
       this.getPaymentRequestTransport(request);
       console.log("decodePaymentRequest", request);
       const mintsStore = useMintsStore();
-      // activate the mint in the payment request
-      if (request.mints && request.mints.length > 0) {
-        let foundMint = false;
-        for (const mint of request.mints) {
-          if (mintsStore.mints.find((m) => m.url == mint)) {
-            // await mintsStore.activateMintUrl(mint, false, false, request.unit);
-            mintsStore.activeMintUrl = mint;
-            foundMint = true;
-            break;
-          }
-        }
-        if (!foundMint) {
+      // switch to a listed mint unless the active one is listed already
+      if (
+        request.mints?.length &&
+        !request.includesMint(mintsStore.activeMintUrl)
+      ) {
+        const listed = mintsStore.mints.find((m) =>
+          request.includesMint(m.url)
+        );
+        if (listed) {
+          mintsStore.activeMintUrl = listed.url;
+        } else if (request.isMintListStrict) {
           throw new Error(
             `This payment requires using the mint: ${request.mints}`
           );
@@ -227,14 +360,6 @@ export const usePRStore = defineStore("payment-request", {
         sendTokenStore.sendData.amount =
           Amount.from(request.amount).toNumber() /
           mintsStore.activeUnitCurrencyMultiplyer;
-      }
-      // Also make sure this decoded request gets stored (e.g., if user pasted an older one)
-      try {
-        const encoded = pr;
-        this.ensureStoredRequest(request, encoded);
-        this.showPRKData = encoded;
-      } catch (e) {
-        // noop
       }
       sendTokenStore.sendData.paymentRequest = request;
       if (!sendTokenStore.showSendTokens) {
@@ -281,15 +406,11 @@ export const usePRStore = defineStore("payment-request", {
         console.error("could not decode token");
         throw new Error("Could not decode ecash token.");
       }
-      const proofs = token.getProofs(decodedToken);
-      const mint = token.getMint(decodedToken);
-      const paymentPayload: PaymentRequestPayload = {
-        id: request.id,
-        mint: mint,
-        unit: request.unit || "",
-        proofs: normalizeProofAmounts(proofs),
-      };
-      const paymentPayloadString = JSONInt.stringify(paymentPayload)!;
+      const paymentPayloadString = toPaymentRequest(request).encodePayload(
+        token.getMint(decodedToken),
+        normalizeProofAmounts(token.getProofs(decodedToken)),
+        { unit: token.getUnit(decodedToken) }
+      );
       try {
         await nostrStore.sendNip17DirectMessageToNprofile(
           transport.target,
@@ -314,16 +435,11 @@ export const usePRStore = defineStore("payment-request", {
         console.error("could not decode token");
         throw new Error("Could not decode ecash token.");
       }
-      const proofs = token.getProofs(decodedToken);
-      const unit = token.getUnit(decodedToken);
-      const mint = token.getMint(decodedToken);
-      const paymentPayload: PaymentRequestPayload = {
-        id: request.id,
-        mint: mint,
-        unit: unit,
-        proofs: normalizeProofAmounts(proofs),
-      };
-      const paymentPayloadString = JSONInt.stringify(paymentPayload)!;
+      const paymentPayloadString = toPaymentRequest(request).encodePayload(
+        token.getMint(decodedToken),
+        normalizeProofAmounts(token.getProofs(decodedToken)),
+        { unit: token.getUnit(decodedToken) }
+      );
       try {
         const response = await fetch(transport.target, {
           headers: {

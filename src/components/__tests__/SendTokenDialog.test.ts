@@ -15,24 +15,22 @@ beforeAll(async () => {
 
 describe("SendTokenDialog", () => {
   it.each([
-    { nut10: undefined, expected: undefined },
-    {
-      nut10: {
-        kind: "P2PK",
-        data: "pubkey",
-        tags: [["locktime", "1750000000"]],
-      },
-      expected: { pubkey: "pubkey", locktime: 1750000000 },
-    },
-    {
-      nut10: { kind: "HTLC", data: "hash", tags: [["pubkeys", "pubkey"]] },
-      expected: { hashlock: "hash", pubkey: ["pubkey"] },
-    },
+    { requestAmount: 21, expectedAmount: undefined },
+    { requestAmount: undefined, expectedAmount: 21 },
   ])(
-    "prepares the requested spending condition from plain history data: $nut10",
-    async ({ nut10, expected }) => {
-      const request = new PaymentRequest();
-      request.nut10 = nut10;
+    "pays a request rebuilt from plain history data: amount $requestAmount",
+    async ({ requestAmount, expectedAmount }) => {
+      const request = new PaymentRequest(
+        undefined,
+        "pr1",
+        requestAmount,
+        "sat",
+        ["https://mint.example"],
+        undefined,
+        false,
+        { kind: "P2PK", data: "pubkey", tags: [] },
+        true
+      );
       const context = {
         sendData: {
           paymentRequest: JSONInt.parse(JSONInt.stringify(request)!),
@@ -44,8 +42,10 @@ describe("SendTokenDialog", () => {
         activeUnit: "sat",
         activeProofs: [],
         mintWallet: vi.fn(async () => ({})),
-        send: vi.fn(async () => ({ sendProofs: [] })),
-        sendToLock: vi.fn(async () => ({ sendProofs: [] })),
+        // 21 requested plus 1 to cover the payee's input fee
+        sendToRequest: vi.fn(async () => ({
+          sendProofs: [{ amount: 16 }, { amount: 4 }, { amount: 2 }],
+        })),
         serializeProofs: vi.fn(() => "cashuA"),
         addPendingToken: vi.fn(() => "history-id"),
         g: { offline: true },
@@ -53,18 +53,97 @@ describe("SendTokenDialog", () => {
       await expect(
         SendTokenDialog.methods.preparePaymentRequestTokens.call(context)
       ).resolves.toBe("cashuA");
-      if (expected) {
-        expect(context.sendToLock).toHaveBeenCalledWith(
-          [],
-          {},
-          21,
-          expect.objectContaining(expected)
-        );
-        expect(context.send).not.toHaveBeenCalled();
-      } else {
-        expect(context.send).toHaveBeenCalledOnce();
-        expect(context.sendToLock).not.toHaveBeenCalled();
-      }
+      const [, , sdkRequest, amount] = context.sendToRequest.mock
+        .calls[0] as any[];
+      expect(sdkRequest).toBeInstanceOf(PaymentRequest);
+      expect(sdkRequest.nut10).toEqual(request.nut10);
+      expect(sdkRequest.isMintListStrict).toBe(false);
+      expect(amount).toBe(expectedAmount);
+      expect(context.addPendingToken).toHaveBeenCalledWith(
+        expect.objectContaining({ amount: -21, fee: 1 })
+      );
+    }
+  );
+
+  it.each([
+    {
+      mintsPreferred: undefined,
+      activeMintUrl: "https://other.example",
+      blocked: true,
+    },
+    {
+      mintsPreferred: undefined,
+      activeMintUrl: "https://mint.example/",
+      blocked: false,
+    },
+    {
+      mintsPreferred: true,
+      activeMintUrl: "https://other.example",
+      blocked: false,
+    },
+  ])(
+    "blocks an unlisted mint only for a strict list: mp=$mintsPreferred, $activeMintUrl",
+    ({ mintsPreferred, activeMintUrl, blocked }) => {
+      const request = new PaymentRequest(
+        undefined,
+        "pr1",
+        21,
+        "sat",
+        ["https://mint.example"],
+        undefined,
+        false,
+        undefined,
+        mintsPreferred
+      );
+      const context = {
+        sendData: {
+          paymentRequest: JSONInt.parse(JSONInt.stringify(request)!),
+        },
+        activeMintUrl,
+      };
+      expect(
+        SendTokenDialog.computed.selectedMintViolatesRequest.call(context)
+      ).toBe(blocked);
+    }
+  );
+
+  it.each([
+    { activeMintUrl: "https://other.example", methods: ["bolt11"], fee: 2 },
+    { activeMintUrl: "https://mint.example", methods: ["bolt11"], fee: 0 },
+    { activeMintUrl: "https://other.example", methods: undefined, fee: 0 },
+  ])(
+    "prices the request's method fee from $activeMintUrl: $fee",
+    ({ activeMintUrl, methods, fee }) => {
+      const request = new PaymentRequest(
+        undefined,
+        "pr1",
+        21,
+        "sat",
+        ["https://mint.example"],
+        undefined,
+        false,
+        undefined,
+        true,
+        methods?.map((method) => ({ method, fee: 2 }))
+      );
+      const context = {
+        sendData: {
+          paymentRequest: JSONInt.parse(JSONInt.stringify(request)!),
+        },
+        activeMintUrl,
+        activeUnit: "sat",
+        mintWalletSync: vi.fn(() => ({
+          getMintInfo: () => ({
+            isSupported: () => ({
+              disabled: false,
+              params: [{ method: "bolt11", unit: "sat" }],
+            }),
+          }),
+        })),
+      };
+      expect(
+        SendTokenDialog.computed.paymentRequestMethodFee.call(context)
+      ).toBe(fee);
     }
   );
 

@@ -120,8 +120,43 @@
                     <q-icon name="account_balance" size="xs" class="q-mr-sm" />
                     {{ getShortUrl(chosenMintUrl) }}
                   </q-chip>
-                  <div @click="toggleUnit">
-                    <ToggleUnit class="q-py-none" color="white" />
+                  <q-btn
+                    rounded
+                    outline
+                    color="white"
+                    class="q-py-none"
+                    :label="unitLabel"
+                    @click="toggleUnit"
+                  />
+                </div>
+              </div>
+
+              <!-- Description and lock -->
+              <div class="row justify-center q-pt-md">
+                <div
+                  class="col-12 col-sm-8 col-md-6 q-px-md"
+                  style="max-width: 400px"
+                >
+                  <q-input
+                    v-model="memo"
+                    dense
+                    outlined
+                    rounded
+                    maxlength="140"
+                    input-class="text-center"
+                    :placeholder="
+                      $t('PaymentRequestDialog.inputs.description.placeholder')
+                    "
+                    @blur="onDetailsChanged"
+                    @keyup.enter="onDetailsChanged"
+                  />
+                  <div class="row justify-center q-pt-sm">
+                    <q-toggle
+                      v-model="locked"
+                      dense
+                      :label="$t('PaymentRequestDialog.inputs.lock.label')"
+                      @update:model-value="onDetailsChanged"
+                    />
                   </div>
                 </div>
               </div>
@@ -158,10 +193,20 @@
               </div>
 
               <!-- New request button -->
-              <div class="row justify-center q-pt-lg q-pb-md">
+              <div class="row justify-center q-pt-lg q-pb-md q-gutter-sm">
                 <q-btn flat size="md" rounded @click="newRequest">
                   <q-icon name="refresh" class="q-pr-sm" size="xs" />
                   {{ $t("PaymentRequestDialog.actions.new_request.label") }}
+                </q-btn>
+                <q-btn
+                  flat
+                  size="md"
+                  rounded
+                  color="grey"
+                  @click="showDeleteDialog = true"
+                >
+                  <q-icon name="delete_outline" class="q-pr-sm" size="xs" />
+                  {{ $t("PaymentRequestDialog.actions.delete.label") }}
                 </q-btn>
               </div>
             </q-card-section>
@@ -190,6 +235,31 @@
         </div>
       </div>
     </q-card>
+    <q-dialog v-model="showDeleteDialog">
+      <q-card class="q-pa-lg q-pt-md qcard">
+        <q-card-section class="q-pa-none">
+          <div class="text-h6 q-mb-sm">
+            {{ $t("PaymentRequestDialog.delete_dialog.title") }}
+          </div>
+          <q-item-label>
+            {{ $t("PaymentRequestDialog.delete_dialog.text") }}
+          </q-item-label>
+          <div class="row q-mt-lg">
+            <q-btn
+              color="negative"
+              rounded
+              class="q-mr-sm"
+              @click="deleteCurrentRequest"
+            >
+              {{ $t("PaymentRequestDialog.actions.delete.label") }}
+            </q-btn>
+            <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto">
+              {{ $t("PaymentRequestDialog.actions.cancel.label") }}
+            </q-btn>
+          </div>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
   </q-dialog>
 </template>
 
@@ -197,12 +267,12 @@
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import VueQrcode from "@chenfengyuan/vue-qrcode";
+import { decodePaymentRequest, type PaymentRequest } from "@cashu/cashu-ts";
 
 import { usePRStore } from "src/stores/payment-request";
-import { useMintsStore } from "../stores/mints";
+import { MintClass, useMintsStore } from "../stores/mints";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useUiStore } from "../stores/ui";
-import ToggleUnit from "./ToggleUnit.vue";
 import PaymentRequestPayments from "./PaymentRequestPayments.vue";
 // type hint for global mixin
 declare const windowMixin: any;
@@ -212,7 +282,6 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     VueQrcode,
-    ToggleUnit,
     PaymentRequestPayments,
   },
   data() {
@@ -229,7 +298,11 @@ export default defineComponent({
         "PaymentRequestDialog.actions.use_active_mint.label"
       ),
       chosenMintUrl: undefined as string | undefined,
+      // The request's own unit, kept apart from the wallet's active unit.
+      unit: useMintsStore().activeUnit,
       memo: "",
+      locked: false,
+      showDeleteDialog: false,
     };
   },
   computed: {
@@ -240,10 +313,25 @@ export default defineComponent({
       "currentPaymentRequest",
     ]),
     ...mapState(useMintsStore, ["activeMintUrl", "activeUnit"]),
-    activeUnitCurrencyMultiplyer() {
-      return (useMintsStore() as any).activeUnitCurrencyMultiplyer;
+    // Units of the request's mint, or of the active mint when any mint will do.
+    mintUnits(): string[] {
+      const url = this.chosenMintUrl ?? this.activeMintUrl;
+      const mint = useMintsStore().mints.find((m) => m.url === url);
+      return mint ? new MintClass(mint).units : [];
+    },
+    unitLabel(): string {
+      return this.unit === "sat" ? "BTC" : this.unit.toUpperCase();
     },
     ...mapWritableState(usePRStore, ["showPRDialog"]),
+    shownRequest(): PaymentRequest | undefined {
+      try {
+        return this.showPRKData
+          ? decodePaymentRequest(this.showPRKData)
+          : undefined;
+      } catch {
+        return undefined;
+      }
+    },
     currentIndexDisplay(): string {
       const total = this.ourPaymentRequests.length || 0;
       if (!total) return "0/0";
@@ -264,28 +352,81 @@ export default defineComponent({
       return totals;
     },
   },
+  watch: {
+    // Show the terms of the displayed request, eg after paging or deleting.
+    shownRequest: {
+      immediate: true,
+      handler(request: PaymentRequest | undefined) {
+        if (!request) return;
+        this.unit = request.unit ?? this.activeUnit;
+        const amount = request.amount?.toNumber();
+        this.paymentRequestAmount = amount;
+        this.amountLabel =
+          amount == null
+            ? this.amountLabelDefault
+            : useUiStore().formatCurrency(amount, this.unit);
+        this.chosenMintUrl = request.mints?.[0];
+        this.memo = request.description ?? "";
+        this.locked = !!request.nut10;
+      },
+    },
+  },
   methods: {
     ...mapActions(usePRStore, [
       "newPaymentRequest",
+      "updatePaymentRequest",
+      "deletePaymentRequest",
       "selectPrevRequest",
       "selectNextRequest",
     ]),
     toggleUnit() {
+      const units = this.mintUnits;
+      const next = units[(units.indexOf(this.unit) + 1) % units.length];
+      if (!next || next === this.unit) return;
+      this.unit = next;
       this.paymentRequestAmount = undefined;
       this.amountLabel = this.amountLabelDefault;
-      this.newPaymentRequest(
+      this.updatePaymentRequest(
         this.paymentRequestAmount,
         this.memo,
-        this.chosenMintUrl
+        this.chosenMintUrl,
+        this.locked,
+        this.unit
       );
     },
+    // A new request starts on any mint; the chip pins it to the active one.
     newRequest() {
       this.newPaymentRequest(
         this.paymentRequestAmount,
         this.memo,
-        this.chosenMintUrl,
-        true
+        undefined,
+        true,
+        this.locked,
+        this.unit
       );
+    },
+    onDetailsChanged() {
+      const shown = this.shownRequest;
+      if (
+        shown &&
+        (shown.description ?? "") === this.memo &&
+        !!shown.nut10 === this.locked
+      ) {
+        return;
+      }
+      this.updatePaymentRequest(
+        this.paymentRequestAmount,
+        this.memo,
+        this.chosenMintUrl,
+        this.locked,
+        this.unit
+      );
+    },
+    deleteCurrentRequest() {
+      if (this.currentPaymentRequest) {
+        this.deletePaymentRequest(this.currentPaymentRequest.id);
+      }
+      this.showDeleteDialog = false;
     },
     getShortUrl(url: string | undefined) {
       if (!url) {
@@ -298,10 +439,19 @@ export default defineComponent({
         return;
       }
       this.chosenMintUrl = this.activeMintUrl;
-      this.newPaymentRequest(
+      // Move to a unit this mint has; the amount was in the old one.
+      if (this.mintUnits.length && !this.mintUnits.includes(this.unit)) {
+        this.unit = this.mintUnits.includes(this.activeUnit)
+          ? this.activeUnit
+          : this.mintUnits[0];
+        this.paymentRequestAmount = undefined;
+      }
+      this.updatePaymentRequest(
         this.paymentRequestAmount,
         this.memo,
-        this.chosenMintUrl
+        this.chosenMintUrl,
+        this.locked,
+        this.unit
       );
     },
     startEditingAmount() {
@@ -324,16 +474,20 @@ export default defineComponent({
         this.paymentRequestAmount = undefined;
         this.amountLabel = this.amountLabelDefault;
       } else {
-        this.paymentRequestAmount = amount * this.activeUnitCurrencyMultiplyer;
+        // usd and eur amounts are entered in whole units and stored in cents
+        this.paymentRequestAmount =
+          amount * (["usd", "eur"].includes(this.unit) ? 100 : 1);
         this.amountLabel = useUiStore().formatCurrency(
-          amount * this.activeUnitCurrencyMultiplyer,
-          this.activeUnit
+          this.paymentRequestAmount,
+          this.unit
         );
       }
-      this.newPaymentRequest(
+      this.updatePaymentRequest(
         this.paymentRequestAmount,
         this.memo,
-        this.chosenMintUrl
+        this.chosenMintUrl,
+        this.locked,
+        this.unit
       );
       this.isEditingAmount = false;
       this.amountInputValue = "";
