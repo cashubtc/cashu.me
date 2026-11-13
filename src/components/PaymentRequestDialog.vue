@@ -120,9 +120,14 @@
                     <q-icon name="account_balance" size="xs" class="q-mr-sm" />
                     {{ getShortUrl(chosenMintUrl) }}
                   </q-chip>
-                  <div @click="toggleUnit">
-                    <ToggleUnit class="q-py-none" color="white" />
-                  </div>
+                  <q-btn
+                    rounded
+                    outline
+                    color="white"
+                    class="q-py-none"
+                    :label="unitLabel"
+                    @click="toggleUnit"
+                  />
                 </div>
               </div>
 
@@ -265,10 +270,9 @@ import VueQrcode from "@chenfengyuan/vue-qrcode";
 import { decodePaymentRequest, type PaymentRequest } from "@cashu/cashu-ts";
 
 import { usePRStore } from "src/stores/payment-request";
-import { useMintsStore } from "../stores/mints";
+import { MintClass, useMintsStore } from "../stores/mints";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useUiStore } from "../stores/ui";
-import ToggleUnit from "./ToggleUnit.vue";
 import PaymentRequestPayments from "./PaymentRequestPayments.vue";
 // type hint for global mixin
 declare const windowMixin: any;
@@ -278,7 +282,6 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     VueQrcode,
-    ToggleUnit,
     PaymentRequestPayments,
   },
   data() {
@@ -295,6 +298,8 @@ export default defineComponent({
         "PaymentRequestDialog.actions.use_active_mint.label"
       ),
       chosenMintUrl: undefined as string | undefined,
+      // The request's own unit, kept apart from the wallet's active unit.
+      unit: useMintsStore().activeUnit,
       memo: "",
       locked: false,
       showDeleteDialog: false,
@@ -308,8 +313,14 @@ export default defineComponent({
       "currentPaymentRequest",
     ]),
     ...mapState(useMintsStore, ["activeMintUrl", "activeUnit"]),
-    activeUnitCurrencyMultiplyer() {
-      return (useMintsStore() as any).activeUnitCurrencyMultiplyer;
+    // Units of the request's mint, or of the active mint when any mint will do.
+    mintUnits(): string[] {
+      const url = this.chosenMintUrl ?? this.activeMintUrl;
+      const mint = useMintsStore().mints.find((m) => m.url === url);
+      return mint ? new MintClass(mint).units : [];
+    },
+    unitLabel(): string {
+      return this.unit === "sat" ? "BTC" : this.unit.toUpperCase();
     },
     ...mapWritableState(usePRStore, ["showPRDialog"]),
     shownRequest(): PaymentRequest | undefined {
@@ -347,16 +358,13 @@ export default defineComponent({
       immediate: true,
       handler(request: PaymentRequest | undefined) {
         if (!request) return;
-        if (request.unit) useMintsStore().activeUnit = request.unit;
+        this.unit = request.unit ?? this.activeUnit;
         const amount = request.amount?.toNumber();
         this.paymentRequestAmount = amount;
         this.amountLabel =
           amount == null
             ? this.amountLabelDefault
-            : useUiStore().formatCurrency(
-                amount,
-                request.unit ?? this.activeUnit
-              );
+            : useUiStore().formatCurrency(amount, this.unit);
         this.chosenMintUrl = request.mints?.[0];
         this.memo = request.description ?? "";
         this.locked = !!request.nut10;
@@ -372,13 +380,18 @@ export default defineComponent({
       "selectNextRequest",
     ]),
     toggleUnit() {
+      const units = this.mintUnits;
+      const next = units[(units.indexOf(this.unit) + 1) % units.length];
+      if (!next || next === this.unit) return;
+      this.unit = next;
       this.paymentRequestAmount = undefined;
       this.amountLabel = this.amountLabelDefault;
       this.updatePaymentRequest(
         this.paymentRequestAmount,
         this.memo,
         this.chosenMintUrl,
-        this.locked
+        this.locked,
+        this.unit
       );
     },
     newRequest() {
@@ -387,7 +400,8 @@ export default defineComponent({
         this.memo,
         this.chosenMintUrl,
         true,
-        this.locked
+        this.locked,
+        this.unit
       );
     },
     onDetailsChanged() {
@@ -403,7 +417,8 @@ export default defineComponent({
         this.paymentRequestAmount,
         this.memo,
         this.chosenMintUrl,
-        this.locked
+        this.locked,
+        this.unit
       );
     },
     deleteCurrentRequest() {
@@ -423,11 +438,19 @@ export default defineComponent({
         return;
       }
       this.chosenMintUrl = this.activeMintUrl;
+      // Move to a unit this mint has; the amount was in the old one.
+      if (this.mintUnits.length && !this.mintUnits.includes(this.unit)) {
+        this.unit = this.mintUnits.includes(this.activeUnit)
+          ? this.activeUnit
+          : this.mintUnits[0];
+        this.paymentRequestAmount = undefined;
+      }
       this.updatePaymentRequest(
         this.paymentRequestAmount,
         this.memo,
         this.chosenMintUrl,
-        this.locked
+        this.locked,
+        this.unit
       );
     },
     startEditingAmount() {
@@ -450,17 +473,20 @@ export default defineComponent({
         this.paymentRequestAmount = undefined;
         this.amountLabel = this.amountLabelDefault;
       } else {
-        this.paymentRequestAmount = amount * this.activeUnitCurrencyMultiplyer;
+        // usd and eur amounts are entered in whole units and stored in cents
+        this.paymentRequestAmount =
+          amount * (["usd", "eur"].includes(this.unit) ? 100 : 1);
         this.amountLabel = useUiStore().formatCurrency(
-          amount * this.activeUnitCurrencyMultiplyer,
-          this.activeUnit
+          this.paymentRequestAmount,
+          this.unit
         );
       }
       this.updatePaymentRequest(
         this.paymentRequestAmount,
         this.memo,
         this.chosenMintUrl,
-        this.locked
+        this.locked,
+        this.unit
       );
       this.isEditingAmount = false;
       this.amountInputValue = "";
