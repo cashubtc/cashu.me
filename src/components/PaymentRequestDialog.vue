@@ -394,11 +394,12 @@ export default defineComponent({
         this.unit
       );
     },
+    // A new request starts on any mint; the chip pins it to the active one.
     newRequest() {
       this.newPaymentRequest(
         this.paymentRequestAmount,
         this.memo,
-        this.chosenMintUrl,
+        undefined,
         true,
         this.locked,
         this.unit
