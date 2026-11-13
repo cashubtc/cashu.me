@@ -67,9 +67,24 @@ describe("PaymentRequestDialog", () => {
   const mintA = "https://mint-a.example";
   const mintB = "https://mint-b.example";
 
-  function savedRequest(unit: string) {
+  const storedMint = (url: string, units: string[]) => ({
+    url,
+    keys: [],
+    keysets: units.map((unit, i) => ({
+      id: `00${unit}${i}`,
+      unit,
+      active: true,
+    })),
+  });
+
+  // Saves a request for mint A, then makes mint B and sats active.
+  function savedRequest(unit: string, mintBUnits = ["sat", "usd"]) {
     useNostrStore().seedSignerPublicKey = "11".repeat(32);
     const mints = useMintsStore();
+    mints.mints = [
+      storedMint(mintA, ["sat", "usd"]),
+      storedMint(mintB, mintBUnits),
+    ];
     mints.$patch({ activeUnit: unit, activeMintUrl: mintA });
     const requests = usePRStore();
     requests.ourPaymentRequests = [];
@@ -90,57 +105,103 @@ describe("PaymentRequestDialog", () => {
     return wrapper;
   }
 
-  function editDetails(wrapper: VueWrapper, detail: string) {
-    const dialog = wrapper.vm as any;
-    if (detail === "description") dialog.memo = "updated";
-    else dialog.locked = true;
-    dialog.onDetailsChanged();
-  }
+  const shown = (requests: ReturnType<typeof usePRStore>) =>
+    decodePaymentRequest(requests.showPRKData);
 
-  it.each(["description", "lock"])(
-    "preserves a saved request's unit when editing its %s",
-    async (detail) => {
-      const { requests } = savedRequest("usd");
-      const wrapper = mountDialog();
-      editDetails(wrapper, detail);
+  it.each(["description", "lock", "new request"])(
+    "keeps a saved request's unit and mint (%s)",
+    async (action) => {
+      const { mints, requests } = savedRequest("usd", ["sat"]);
+      const dialog = mountDialog().vm as any;
+      if (action === "new request") dialog.newRequest();
+      else {
+        if (action === "description") dialog.memo = "updated";
+        else dialog.locked = true;
+        dialog.onDetailsChanged();
+      }
       await nextTick();
 
-      const updated = decodePaymentRequest(requests.showPRKData);
-      expect(updated.unit).toBe("usd");
-      expect(updated.amount?.toNumber()).toBe(100);
-      expect((wrapper.vm as any).activeUnit).toBe("usd");
-    }
-  );
-
-  it.each(["description", "lock"])(
-    "preserves a saved request's mint when editing its %s",
-    async (detail) => {
-      const { mints, requests } = savedRequest("sat");
-      const wrapper = mountDialog();
-      editDetails(wrapper, detail);
-      await nextTick();
-
-      const updated = decodePaymentRequest(requests.showPRKData);
-      expect(updated.mints).toEqual([mintA]);
-      expect((wrapper.vm as any).chosenMintUrl).toBe(mintA);
+      expect(shown(requests).unit).toBe("usd");
+      expect(shown(requests).amount?.toNumber()).toBe(100);
+      expect(shown(requests).mints).toEqual([mintA]);
+      expect(dialog.unit).toBe("usd");
+      expect(dialog.chosenMintUrl).toBe(mintA);
+      expect(mints.activeUnit).toBe("sat");
       expect(mints.activeMintUrl).toBe(mintB);
     }
   );
 
   it.each(["paging", "deleting"])(
-    "syncs the unit control after %s to a saved request",
+    "shows a saved request's unit and mint after %s",
     async (action) => {
-      const { requests } = savedRequest("usd");
+      const { mints, requests } = savedRequest("usd");
       requests.createPaymentRequest(21, "newer", mintB);
-      const wrapper = mountDialog();
-      expect((wrapper.vm as any).activeUnit).toBe("sat");
+      const dialog = mountDialog().vm as any;
+      expect(dialog.unit).toBe("sat");
 
       if (action === "paging") requests.selectPrevRequest();
       else requests.deletePaymentRequest(requests.currentPaymentRequest!.id);
       await nextTick();
 
-      expect((wrapper.vm as any).activeUnit).toBe("usd");
-      expect((wrapper.vm as any).chosenMintUrl).toBe(mintA);
+      expect(dialog.unit).toBe("usd");
+      expect(dialog.chosenMintUrl).toBe(mintA);
+      expect(mints.activeUnit).toBe("sat");
     }
   );
+
+  it("enters an amount in the request's unit", async () => {
+    const { requests } = savedRequest("usd");
+    const dialog = mountDialog().vm as any;
+    dialog.amountInputValue = "5";
+    dialog.finishEditingAmount();
+    await nextTick();
+
+    expect(shown(requests).unit).toBe("usd");
+    expect(shown(requests).amount?.toNumber()).toBe(500);
+  });
+
+  it("toggles through the units of the request's mint", async () => {
+    const { mints, requests } = savedRequest("sat", ["sat", "eur"]);
+    const dialog = mountDialog().vm as any;
+    dialog.toggleUnit();
+    await nextTick();
+
+    expect(shown(requests).unit).toBe("usd");
+    expect(shown(requests).amount).toBeUndefined();
+    expect(shown(requests).mints).toEqual([mintA]);
+    expect(mints.activeUnit).toBe("sat");
+  });
+
+  it("leaves the request alone when its mint has one unit", async () => {
+    const { mints, requests } = savedRequest("sat");
+    mints.mints = [storedMint(mintA, ["sat"])];
+    const dialog = mountDialog().vm as any;
+    const before = requests.showPRKData;
+    dialog.toggleUnit();
+    await nextTick();
+
+    expect(requests.showPRKData).toBe(before);
+  });
+
+  it("drops the amount when the active mint lacks the request's unit", async () => {
+    const { requests } = savedRequest("usd", ["sat"]);
+    const dialog = mountDialog().vm as any;
+    dialog.setActiveMintUrl();
+    await nextTick();
+
+    expect(shown(requests).mints).toEqual([mintB]);
+    expect(shown(requests).unit).toBe("sat");
+    expect(shown(requests).amount).toBeUndefined();
+  });
+
+  it("keeps the amount when the active mint has the request's unit", async () => {
+    const { requests } = savedRequest("usd");
+    const dialog = mountDialog().vm as any;
+    dialog.setActiveMintUrl();
+    await nextTick();
+
+    expect(shown(requests).mints).toEqual([mintB]);
+    expect(shown(requests).unit).toBe("usd");
+    expect(shown(requests).amount?.toNumber()).toBe(100);
+  });
 });

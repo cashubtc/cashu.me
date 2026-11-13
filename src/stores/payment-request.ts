@@ -123,7 +123,8 @@ export const usePRStore = defineStore("payment-request", {
       memo?: string,
       mintUrl?: string,
       forceNew: boolean = false,
-      lock: boolean = false
+      lock: boolean = false,
+      unit?: string
     ) {
       this.pruneForeignRequests();
       // If not forcing a new request and we already have at least one,
@@ -134,14 +135,21 @@ export const usePRStore = defineStore("payment-request", {
         this.showPRKData = current.encoded;
         return;
       }
-      this.showPRKData = this.createPaymentRequest(amount, memo, mintUrl, lock);
+      this.showPRKData = this.createPaymentRequest(
+        amount,
+        memo,
+        mintUrl,
+        lock,
+        unit
+      );
     },
     // Replaces the shown request unless it has been paid, then a new one is added.
     updatePaymentRequest(
       amount?: number,
       memo?: string,
       mintUrl?: string,
-      lock: boolean = false
+      lock: boolean = false,
+      unit?: string
     ) {
       const current = this.currentPaymentRequest;
       const replaceIdx =
@@ -149,7 +157,13 @@ export const usePRStore = defineStore("payment-request", {
           ? this.ourPaymentRequests.indexOf(current)
           : -1;
       const prevLen = this.ourPaymentRequests.length;
-      const encoded = this.createPaymentRequest(amount, memo, mintUrl, lock);
+      const encoded = this.createPaymentRequest(
+        amount,
+        memo,
+        mintUrl,
+        lock,
+        unit
+      );
       if (replaceIdx >= 0 && this.ourPaymentRequests.length > prevLen) {
         this.ourPaymentRequests.splice(replaceIdx, 1);
         this.selectedPRIndex = this.ourPaymentRequests.length - 1;
@@ -171,11 +185,13 @@ export const usePRStore = defineStore("payment-request", {
       );
       this.showPRKData = this.currentPaymentRequest?.encoded ?? "";
     },
+    // The unit defaults to the wallet's active unit.
     createPaymentRequest: function (
       amount?: number,
       memo?: string,
       mintUrl?: string,
-      lock: boolean = false
+      lock: boolean = false,
+      unit?: string
     ) {
       const nostrStore = useNostrStore();
       const mintStore = useMintsStore();
@@ -200,7 +216,7 @@ export const usePRStore = defineStore("payment-request", {
         transport,
         uuid,
         amount,
-        mintStore.activeUnit,
+        unit ?? mintStore.activeUnit,
         mintUrl?.length ? [mintUrl] : undefined,
         memo || undefined,
         false,
