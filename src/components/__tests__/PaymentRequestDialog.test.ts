@@ -108,17 +108,14 @@ describe("PaymentRequestDialog", () => {
   const shown = (requests: ReturnType<typeof usePRStore>) =>
     decodePaymentRequest(requests.showPRKData);
 
-  it.each(["description", "lock", "new request"])(
+  it.each(["description", "lock"])(
     "keeps a saved request's unit and mint (%s)",
     async (action) => {
       const { mints, requests } = savedRequest("usd", ["sat"]);
       const dialog = mountDialog().vm as any;
-      if (action === "new request") dialog.newRequest();
-      else {
-        if (action === "description") dialog.memo = "updated";
-        else dialog.locked = true;
-        dialog.onDetailsChanged();
-      }
+      if (action === "description") dialog.memo = "updated";
+      else dialog.locked = true;
+      dialog.onDetailsChanged();
       await nextTick();
 
       expect(shown(requests).unit).toBe("usd");
@@ -130,6 +127,18 @@ describe("PaymentRequestDialog", () => {
       expect(mints.activeMintUrl).toBe(mintB);
     }
   );
+
+  it("starts a new request on any mint, in the same unit", async () => {
+    const { requests } = savedRequest("usd", ["sat"]);
+    const dialog = mountDialog().vm as any;
+    dialog.newRequest();
+    await nextTick();
+
+    expect(shown(requests).mints).toBeUndefined();
+    expect(shown(requests).unit).toBe("usd");
+    expect(dialog.chosenMintUrl).toBeUndefined();
+    expect(requests.ourPaymentRequests).toHaveLength(2);
+  });
 
   it.each(["paging", "deleting"])(
     "shows a saved request's unit and mint after %s",
