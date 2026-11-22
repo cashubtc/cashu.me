@@ -228,14 +228,6 @@ export const usePRStore = defineStore("payment-request", {
           Amount.from(request.amount).toNumber() /
           mintsStore.activeUnitCurrencyMultiplyer;
       }
-      // Also make sure this decoded request gets stored (e.g., if user pasted an older one)
-      try {
-        const encoded = pr;
-        this.ensureStoredRequest(request, encoded);
-        this.showPRKData = encoded;
-      } catch (e) {
-        // noop
-      }
       sendTokenStore.sendData.paymentRequest = request;
       if (!sendTokenStore.showSendTokens) {
         // show the send dialog
