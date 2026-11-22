@@ -101,6 +101,7 @@
 import { onMounted, ref } from "vue";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useStorageStore } from "src/stores/storage";
+import { notifyError } from "src/js/notify";
 import WelcomeSlide1 from "./welcome/WelcomeSlide1.vue";
 import WelcomeSlide2 from "./welcome/WelcomeSlide2.vue";
 import WelcomeSlide3 from "./welcome/WelcomeSlide3.vue";
@@ -169,10 +170,19 @@ export default {
 
     const readFile = (file) => {
       const reader = new FileReader();
-      reader.onload = (f) => {
-        const backup = JSON.parse(f.target.result);
-        storageStore.restoreFromBackup(backup);
+      reader.onload = async (f) => {
+        try {
+          const backup = JSON.parse(f.target.result);
+          await storageStore.restoreFromBackup(backup);
+        } catch (error) {
+          notifyError(
+            error instanceof SyntaxError
+              ? "Invalid backup file format"
+              : "Could not restore wallet backup"
+          );
+        }
       };
+      reader.onerror = () => notifyError("Error reading file");
       reader.readAsText(file);
     };
 

@@ -1,4 +1,6 @@
 import { defineStore } from "pinia";
+import { sha256 } from "@noble/hashes/sha256";
+import { bytesToHex } from "@noble/hashes/utils";
 import { useWalletStore } from "./wallet";
 import { useMintsStore } from "./mints";
 import { useLocalStorage } from "@vueuse/core";
@@ -12,8 +14,11 @@ import {
   usePaymentHistoryStore,
 } from "./paymentHistory";
 import { cashuDb } from "./dexie";
-import { deserializeProofs, JSONInt } from "@cashu/cashu-ts";
-import { normalizeCashuQuoteAmounts } from "src/js/cashu-amount";
+import { deserializeProofs, JSONInt, type ProofLike } from "@cashu/cashu-ts";
+import {
+  cashuAmountToNumber,
+  normalizeCashuQuoteAmounts,
+} from "src/js/cashu-amount";
 
 export function stringifyBackupTable(rows: unknown[]): string {
   const serialized = JSONInt.stringify(rows);
@@ -44,12 +49,36 @@ export const useStorageStore = defineStore("storage", {
       if (!backup) {
         notifyError("Unrecognized Backup Format!");
       } else {
+        const proofKeys = ["cashu.dexie.db.proofs", "cashu.proofs"];
+        const proofs = proofKeys.flatMap((key) =>
+          backup[key] ? deserializeProofs(backup[key]) : []
+        );
+        // Compare immutable proof data before writing any backup settings.
+        const existing = await cashuDb.proofs.bulkGet(
+          proofs.map((p) => p.secret)
+        );
+        const bySecret = new Map<string, ProofLike>();
+        for (const proof of [...existing, ...proofs]) {
+          if (!proof) continue;
+          const previous = bySecret.get(proof.secret);
+          if (
+            previous &&
+            (previous.id !== proof.id ||
+              previous.C !== proof.C ||
+              cashuAmountToNumber(previous.amount) !==
+                cashuAmountToNumber(proof.amount))
+          ) {
+            throw new Error("Conflicting proof in wallet backup");
+          }
+          bySecret.set(proof.secret, proof);
+        }
+        await proofsStore.addMissingProofs(proofs);
         const keys = Object.keys(backup);
         for (const key of keys) {
           // we treat some keys differently *magic*
-          if (key === "cashu.dexie.db.proofs") {
-            const proofs = deserializeProofs(backup[key]);
-            await proofsStore.addProofs(proofs);
+          if (proofKeys.includes(key)) {
+            // Proofs were imported above, including legacy localStorage backups.
+            continue;
           } else if (key === "cashu.dexie.db.paymentHistory") {
             await cashuDb.paymentHistory.bulkPut(parseBackupTable(backup[key]));
           } else if (key === "cashu.dexie.db.mintQuotes") {
@@ -88,9 +117,7 @@ export const useStorageStore = defineStore("storage", {
               ...historyToken,
               id:
                 historyToken.id ||
-                (globalThis.crypto?.randomUUID
-                  ? globalThis.crypto.randomUUID()
-                  : `${Date.now()}-${Math.random()}`),
+                `legacy-${bytesToHex(sha256(JSON.stringify(historyToken)))}`,
             }));
             await cashuDb.ecashHistory.bulkPut(historyTokens);
           } else {

@@ -101,6 +101,7 @@ import { defineComponent } from "vue";
 import { mapActions, mapState } from "pinia";
 import { useWalletStore } from "src/stores/wallet";
 import { useStorageStore } from "src/stores/storage";
+import { notifyError } from "src/js/notify";
 
 export default defineComponent({
   name: "WelcomeDialog",
@@ -123,12 +124,19 @@ export default defineComponent({
     ...mapActions(useStorageStore, ["restoreFromBackup"]),
     readFile(file) {
       const reader = new FileReader();
-      reader.onload = (f) => {
-        const content = f.target.result;
-        const backup = JSON.parse(content);
-
-        this.restoreFromBackup(backup);
+      reader.onload = async (f) => {
+        try {
+          const backup = JSON.parse(f.target.result);
+          await this.restoreFromBackup(backup);
+        } catch (error) {
+          notifyError(
+            error instanceof SyntaxError
+              ? "Invalid backup file format"
+              : "Could not restore wallet backup"
+          );
+        }
       };
+      reader.onerror = () => notifyError("Error reading file");
       reader.readAsText(file);
     },
     dragFile(ev) {

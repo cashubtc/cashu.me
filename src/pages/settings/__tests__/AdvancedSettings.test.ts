@@ -76,6 +76,28 @@ describe("AdvancedSettings", () => {
     }
   );
 
+  it("handles asynchronous backup import failures from the file reader", async () => {
+    const notifyError = vi.fn();
+    const restoreFromBackup = vi
+      .fn()
+      .mockRejectedValue(new Error("Persistence failed"));
+    const logged = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      AdvancedSettings.methods.readBackupFile.call(
+        { restoreFromBackup, notifyError },
+        new File(['{"cashu.dexie.db.proofs":"[]"}'], "backup.json")
+      );
+      await vi.waitFor(() =>
+        expect(notifyError).toHaveBeenCalledWith(
+          "Could not restore wallet backup"
+        )
+      );
+      expect(restoreFromBackup).toHaveBeenCalledOnce();
+    } finally {
+      logged.mockRestore();
+    }
+  });
+
   it("waits for wallet databases to clear before clearing local storage", async () => {
     let resolveDexieClear!: () => void;
     let resolveNostrClear!: () => void;
