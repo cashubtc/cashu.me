@@ -161,6 +161,7 @@ describe("PaymentRequestDialog", () => {
   it("enters an amount in the request's unit", async () => {
     const { requests } = savedRequest("usd");
     const dialog = mountDialog().vm as any;
+    dialog.isEditingAmount = true;
     dialog.amountInputValue = "5";
     dialog.finishEditingAmount();
     await nextTick();
@@ -212,5 +213,92 @@ describe("PaymentRequestDialog", () => {
     expect(shown(requests).mints).toEqual([mintB]);
     expect(shown(requests).unit).toBe("usd");
     expect(shown(requests).amount?.toNumber()).toBe(100);
+  });
+
+  it("rounds floating-point fiat amounts to integer cents without throwing", async () => {
+    const { requests } = savedRequest("usd");
+    const dialog = mountDialog().vm as any;
+    dialog.isEditingAmount = true;
+    dialog.amountInputValue = "19.99";
+    dialog.finishEditingAmount();
+    await nextTick();
+
+    expect(shown(requests).unit).toBe("usd");
+    expect(shown(requests).amount?.toNumber()).toBe(1999);
+    expect(requests.ourPaymentRequests).toHaveLength(1);
+    expect(dialog.isEditingAmount).toBe(false);
+
+    // A trailing blur after Enter must not wipe the amount
+    dialog.finishEditingAmount();
+    await nextTick();
+    expect(shown(requests).amount?.toNumber()).toBe(1999);
+  });
+
+  it("updates description live without blur and deletes the targeted paid request", async () => {
+    const { requests } = savedRequest("sat");
+    const paidId = requests.ourPaymentRequests[0].id;
+    requests.ourPaymentRequests[0].receivedPaymentIds.push("tx-1");
+
+    const wrapper = shallowMount(PaymentRequestDialog, {
+      global: {
+        plugins: [getActivePinia()!],
+        mocks: {
+          $i18n: { t: (key: string) => key },
+          $t: (key: string) => key,
+          $q: { dark: { isActive: true } },
+        },
+        stubs: {
+          QDialog: { template: "<div><slot /></div>" },
+          QCard: { template: "<div><slot /></div>" },
+          QCardSection: { template: "<div><slot /></div>" },
+          QResponsive: { template: "<div><slot /></div>" },
+          QItemLabel: { template: "<div><slot /></div>" },
+          QInput: {
+            props: ["modelValue"],
+            emits: ["update:modelValue", "blur"],
+            template:
+              '<input class="desc-input" :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" @blur="$emit(\'blur\')" />',
+          },
+          QBtn: {
+            emits: ["click"],
+            template: "<button @click=\"$emit('click')\"><slot /></button>",
+          },
+          QIcon: {
+            props: ["name"],
+            template: '<span :data-icon="name" />',
+          },
+          QChip: true,
+          QToggle: true,
+          VueQrcode: true,
+          PaymentRequestPayments: true,
+        },
+      },
+    });
+    wrappers.push(wrapper);
+
+    // 1. Typing description updates the displayed request QR immediately without blur
+    const descInput = wrapper.find("input.desc-input");
+    expect(descInput.exists()).toBe(true);
+    await descInput.setValue("updated note");
+    await nextTick();
+    expect(shown(requests).description).toBe("updated note");
+    expect(requests.ourPaymentRequests).toHaveLength(2);
+
+    // 2. Selecting the paid request and clicking Delete (even if blur fires first) deletes the paid request
+    requests.selectRequestByIndex(0);
+    await nextTick();
+    expect(requests.currentPaymentRequest?.id).toBe(paidId);
+    const dialog = wrapper.vm as any;
+    dialog.memo = "uncommitted change";
+    await descInput.trigger("blur");
+    const deleteBtn = wrapper
+      .findAll("button")
+      .find((b) => b.html().includes("delete_outline"));
+    expect(deleteBtn).toBeTruthy();
+    await deleteBtn!.trigger("click");
+    dialog.deleteCurrentRequest();
+    await nextTick();
+
+    expect(requests.ourPaymentRequests.map((r) => r.id)).not.toContain(paidId);
   });
 });

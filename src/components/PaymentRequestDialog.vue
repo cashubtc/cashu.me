@@ -147,7 +147,7 @@
                     :placeholder="
                       $t('PaymentRequestDialog.inputs.description.placeholder')
                     "
-                    @blur="onDetailsChanged"
+                    @update:model-value="onDetailsChanged"
                     @keyup.enter="onDetailsChanged"
                   />
                   <div class="row justify-center q-pt-sm">
@@ -203,7 +203,7 @@
                   size="md"
                   rounded
                   color="grey"
-                  @click="showDeleteDialog = true"
+                  @click="openDeleteDialog"
                 >
                   <q-icon name="delete_outline" class="q-pr-sm" size="xs" />
                   {{ $t("PaymentRequestDialog.actions.delete.label") }}
@@ -303,6 +303,7 @@ export default defineComponent({
       memo: "",
       locked: false,
       showDeleteDialog: false,
+      deleteRequestId: null as string | null,
     };
   },
   computed: {
@@ -422,10 +423,16 @@ export default defineComponent({
         this.unit
       );
     },
+    openDeleteDialog() {
+      this.deleteRequestId = this.currentPaymentRequest?.id ?? null;
+      this.showDeleteDialog = true;
+    },
     deleteCurrentRequest() {
-      if (this.currentPaymentRequest) {
-        this.deletePaymentRequest(this.currentPaymentRequest.id);
+      const id = this.deleteRequestId ?? this.currentPaymentRequest?.id;
+      if (id) {
+        this.deletePaymentRequest(id);
       }
+      this.deleteRequestId = null;
       this.showDeleteDialog = false;
     },
     getShortUrl(url: string | undefined) {

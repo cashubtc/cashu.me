@@ -239,10 +239,12 @@ describe("prStore request list", () => {
       amountLabelDefault: "Add amount",
       amountLabel: "Add amount",
       paymentRequestAmount: undefined,
+      unit: "usd",
       activeUnit: "usd",
       activeUnitCurrencyMultiplyer: 100,
       memo: "",
       chosenMintUrl: undefined,
+      locked: false,
       updatePaymentRequest: (...args: any[]) =>
         (prStore.updatePaymentRequest as any)(...args),
     };
