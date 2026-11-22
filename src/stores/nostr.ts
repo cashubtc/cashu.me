@@ -496,23 +496,6 @@ export const useNostrStore = defineStore("nostr", {
             console.log("### incoming token already in history");
             return;
           }
-          const historyId = await this.addPendingTokenToHistory(
-            tokenStr,
-            false,
-            payload.id
-          );
-          try {
-            if (historyId) {
-              prStore.registerIncomingPaymentForRequest(
-                payload.id ?? "",
-                historyId
-              );
-            }
-          } catch (e) {
-            console.error("Failed to register incoming payment to PR:", e);
-          }
-          receiveStore.receiveData.tokensBase64 = tokenStr;
-          sendTokensStore.showSendTokens = false;
           const knowThisMint = receiveStore.knowThisMintOfTokenJson(token);
           // Only payments to a request stored here can be checked (eg not one made on another device).
           const ours = prStore.ourPaymentRequests.some(
@@ -524,6 +507,24 @@ export const useNostrStore = defineStore("nostr", {
           if (ours && knowThisMint && !satisfied) {
             notifyWarning("Payment does not match the request");
           }
+          const registerOnRequest = !ours || satisfied;
+          const historyId = await this.addPendingTokenToHistory(
+            tokenStr,
+            false,
+            registerOnRequest ? payload.id : undefined
+          );
+          try {
+            if (historyId && registerOnRequest) {
+              prStore.registerIncomingPaymentForRequest(
+                payload.id ?? "",
+                historyId
+              );
+            }
+          } catch (e) {
+            console.error("Failed to register incoming payment to PR:", e);
+          }
+          receiveStore.receiveData.tokensBase64 = tokenStr;
+          sendTokensStore.showSendTokens = false;
           if (prStore.receivePaymentRequestsAutomatically && satisfied) {
             const success = await receiveStore.receiveIfDecodes();
             if (success) {

@@ -137,13 +137,17 @@ export const usePRStore = defineStore("payment-request", {
     // Replaces the shown request unless it has been paid, then a new one is added.
     updatePaymentRequest(amount?: number, memo?: string, mintUrl?: string) {
       const current = this.currentPaymentRequest;
-      if (current && current.receivedPaymentIds.length === 0) {
-        this.ourPaymentRequests.splice(
-          this.ourPaymentRequests.indexOf(current),
-          1
-        );
+      const replaceIdx =
+        current && current.receivedPaymentIds.length === 0
+          ? this.ourPaymentRequests.indexOf(current)
+          : -1;
+      const prevLen = this.ourPaymentRequests.length;
+      const encoded = this.createPaymentRequest(amount, memo, mintUrl);
+      if (replaceIdx >= 0 && this.ourPaymentRequests.length > prevLen) {
+        this.ourPaymentRequests.splice(replaceIdx, 1);
+        this.selectedPRIndex = this.ourPaymentRequests.length - 1;
       }
-      this.showPRKData = this.createPaymentRequest(amount, memo, mintUrl);
+      this.showPRKData = encoded;
     },
     createPaymentRequest: function (
       amount?: number,

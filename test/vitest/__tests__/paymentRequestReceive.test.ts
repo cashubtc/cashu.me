@@ -107,7 +107,9 @@ describe("nostrStore.parseMessageForEcash with a payment payload", () => {
       .spyOn(receiveStore, "receiveIfDecodes")
       .mockResolvedValue(true);
     const nostr = useNostrStore();
-    vi.spyOn(nostr, "addPendingTokenToHistory").mockReturnValue("history-id");
+    const addPending = vi
+      .spyOn(nostr, "addPendingTokenToHistory")
+      .mockReturnValue("history-id");
     const message = new PaymentRequest(
       undefined,
       requestId,
@@ -117,22 +119,38 @@ describe("nostrStore.parseMessageForEcash with a payment payload", () => {
       { id: "009a1f293253e41e", amount: 21 as any, secret: "s1", C },
     ]);
     await nostr.parseMessageForEcash(message);
-    return { check, autoReceive, receiveStore };
+    return { check, autoReceive, receiveStore, prStore, addPending };
   };
 
   test("auto-receives a payment that satisfies our request", async () => {
-    const { check, autoReceive } = await receive("ours", true);
+    const { check, autoReceive, prStore, addPending } = await receive(
+      "ours",
+      true
+    );
     expect(check).toHaveBeenCalled();
     expect(autoReceive).toHaveBeenCalled();
     expect(notifyWarning).not.toHaveBeenCalled();
+    expect(prStore.ourPaymentRequests[0].receivedPaymentIds).toEqual([
+      "history-id",
+    ]);
+    expect(addPending).toHaveBeenCalledWith(expect.any(String), false, "ours");
   });
 
-  test("warns and leaves a mismatched payment for manual receive", async () => {
-    const { autoReceive, receiveStore } = await receive("ours", false);
+  test("warns and leaves a mismatched payment for manual receive without marking the request paid", async () => {
+    const { autoReceive, receiveStore, prStore, addPending } = await receive(
+      "ours",
+      false
+    );
     expect(autoReceive).not.toHaveBeenCalled();
     expect(receiveStore.showReceiveTokens).toBe(true);
     expect(notifyWarning).toHaveBeenCalledWith(
       "Payment does not match the request"
+    );
+    expect(prStore.ourPaymentRequests[0].receivedPaymentIds).toEqual([]);
+    expect(addPending).toHaveBeenCalledWith(
+      expect.any(String),
+      false,
+      undefined
     );
   });
 
@@ -188,5 +206,59 @@ describe("prStore request list", () => {
     prStore.updatePaymentRequest(60);
     expect(prStore.ourPaymentRequests.map((r) => r.id)).toContain("paid");
     expect(prStore.ourPaymentRequests).toHaveLength(3);
+  });
+
+  test("keeps the current unpaid request if replacement creation fails", () => {
+    useNostrStore().seedSignerPublicKey = OUR_PUBKEY;
+    const prStore = usePRStore();
+    const draft = stored(requestTo(OUR_PUBKEY, "draft"), "draft");
+    prStore.ourPaymentRequests = [draft];
+    prStore.selectedPRIndex = 0;
+    prStore.showPRKData = draft.encoded;
+
+    expect(() => prStore.updatePaymentRequest(19.99 * 100)).toThrow();
+    expect(prStore.ourPaymentRequests.map((r) => r.id)).toEqual(["draft"]);
+    expect(prStore.showPRKData).toBe(draft.encoded);
+  });
+
+  test("rounds float amounts and ignores redundant blur after Enter in finishEditingAmount", async () => {
+    (globalThis as any).windowMixin = {};
+    const PaymentRequestDialog = (
+      await import("src/components/PaymentRequestDialog.vue")
+    ).default;
+    useNostrStore().seedSignerPublicKey = OUR_PUBKEY;
+    const prStore = usePRStore();
+    prStore.ourPaymentRequests = [
+      stored(requestTo(OUR_PUBKEY, "draft"), "draft"),
+    ];
+    prStore.selectedPRIndex = 0;
+
+    const context: any = {
+      isEditingAmount: true,
+      amountInputValue: "19.99",
+      amountLabelDefault: "Add amount",
+      amountLabel: "Add amount",
+      paymentRequestAmount: undefined,
+      activeUnit: "usd",
+      activeUnitCurrencyMultiplyer: 100,
+      memo: "",
+      chosenMintUrl: undefined,
+      updatePaymentRequest: (...args: any[]) =>
+        (prStore.updatePaymentRequest as any)(...args),
+    };
+
+    PaymentRequestDialog.methods.finishEditingAmount.call(context);
+    expect(context.paymentRequestAmount).toBe(1999);
+    expect(context.isEditingAmount).toBe(false);
+    expect(decodePaymentRequest(prStore.showPRKData).amount?.toNumber()).toBe(
+      1999
+    );
+
+    // Simulates blur firing right after keyup.enter with cleared input
+    PaymentRequestDialog.methods.finishEditingAmount.call(context);
+    expect(context.paymentRequestAmount).toBe(1999);
+    expect(decodePaymentRequest(prStore.showPRKData).amount?.toNumber()).toBe(
+      1999
+    );
   });
 });
