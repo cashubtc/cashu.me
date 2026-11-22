@@ -5,7 +5,14 @@ import * as nobleSecp256k1 from "@noble/secp256k1";
 import { bytesToHex } from "@noble/hashes/utils";
 import { useWalletStore } from "src/stores/wallet";
 import { useSettingsStore } from "src/stores/settings";
-import { PaymentMethod } from "src/stores/walletTypes";
+import {
+  PaymentMethod,
+  type PaymentMethodId,
+  basePaymentMethod,
+  isCustomPaymentMethod,
+  subpaymentMethod,
+} from "src/stores/walletTypes";
+import { paymentMethodDisplayName } from "src/js/mint-payment-methods";
 import { useTokensStore } from "src/stores/tokens";
 import { useMintsStore, type StoredMint } from "src/stores/mints";
 import {
@@ -17,10 +24,7 @@ import { useUiStore } from "src/stores/ui";
 import { currentDateStr } from "src/js/utils";
 import { createSubpaymentHistoryQuote } from "src/js/invoice-history";
 
-type IncomingPaymentMethod =
-  | PaymentMethod.Bolt11
-  | PaymentMethod.Bolt12
-  | PaymentMethod.Onchain;
+type IncomingPaymentMethod = PaymentMethodId;
 
 interface InvoiceQuote {
   quote: string;
@@ -146,6 +150,11 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
     onchainQuotes: useLocalStorage<InvoiceQuote[]>(
       "cashu.worker.invoices.onchainQuotesQueue",
       []
+    ),
+    // Queues for custom (generic) payment methods, keyed by method name.
+    customQuotes: useLocalStorage<Record<string, InvoiceQuote[]>>(
+      "cashu.worker.invoices.customQuotesQueue",
+      {}
     ),
     outgoingPayments: useLocalStorage<OutgoingPaymentCheck[]>(
       "cashu.worker.outgoing.queue",
@@ -280,6 +289,12 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
     mintQuoteQueue(method: IncomingPaymentMethod): InvoiceQuote[] {
       if (method === PaymentMethod.Bolt12) return this.bolt12Quotes;
       if (method === PaymentMethod.Onchain) return this.onchainQuotes;
+      if (isCustomPaymentMethod(method)) {
+        if (!Object.prototype.hasOwnProperty.call(this.customQuotes, method)) {
+          this.customQuotes = { ...this.customQuotes, [method]: [] };
+        }
+        return this.customQuotes[method];
+      }
       return this.quotes;
     },
 
@@ -415,6 +430,14 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
         return age <= this.maxAge && invoice.amount >= 0;
       }
       if (invoice.type === PaymentMethod.OnchainSubpayment) return false;
+      if (isCustomPaymentMethod(invoice.type)) {
+        // Melts and subpayments are not incoming mint quotes.
+        if (invoice.amount < 0 || invoice.meltQuote) return false;
+        if (basePaymentMethod(invoice.type) !== invoice.type) return false;
+        if (age > this.maxAge) return false;
+        const quote = invoice.mintQuote as any;
+        return !(quote?.amount > 0 && quote.amount_issued >= quote.amount);
+      }
       return invoice.status === "pending" && invoice.amount > 0;
     },
 
@@ -476,6 +499,20 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
           this.shouldCheckInvoice(invoice)
         );
       });
+      for (const [method, queue] of Object.entries(this.customQuotes)) {
+        const filtered = queue.filter((entry) => {
+          if (now - entry.addedAt >= this.maxAge) return false;
+          const invoice = invoices.find(
+            (item: any) => item.quote === entry.quote
+          );
+          return invoice?.type === method && this.shouldCheckInvoice(invoice);
+        });
+        if (filtered.length === 0) {
+          delete this.customQuotes[method];
+        } else if (filtered.length !== queue.length) {
+          this.customQuotes[method] = filtered;
+        }
+      }
       this.outgoingPayments = this.outgoingPayments.filter((entry) => {
         if (now - entry.addedAt >= this.maxAge) return false;
         if (entry.type === "invoice") {
@@ -498,6 +535,7 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
           ...this.quotes,
           ...this.bolt12Quotes,
           ...this.onchainQuotes,
+          ...Object.values(this.customQuotes).flat(),
         ]) {
           const mintUrl = invoices.find(
             (invoice: any) => invoice.quote === entry.quote
@@ -636,6 +674,10 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
         { method: PaymentMethod.Bolt11, queue: this.quotes },
         { method: PaymentMethod.Bolt12, queue: this.bolt12Quotes },
         { method: PaymentMethod.Onchain, queue: this.onchainQuotes },
+        ...Object.entries(this.customQuotes).map(([method, queue]) => ({
+          method,
+          queue,
+        })),
       ] as Array<{
         method: IncomingPaymentMethod;
         queue: InvoiceQuote[];
@@ -815,9 +857,13 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
       const quote =
         job.method === PaymentMethod.Bolt12
           ? await mintWallet.checkMintQuoteBolt12(job.entry.queueEntry.quote)
-          : await mintWallet.checkMintQuoteOnchain(job.entry.queueEntry.quote);
-      const delta =
-        amountToNumber(quote.amount_paid) - amountToNumber(quote.amount_issued);
+          : job.method === PaymentMethod.Onchain
+          ? await mintWallet.checkMintQuoteOnchain(job.entry.queueEntry.quote)
+          : await mintWallet.checkMintQuote(
+              job.method,
+              job.entry.queueEntry.quote
+            );
+      const delta = this.mintableAmount(job.method, quote);
 
       if (delta <= 0) {
         await this.persistCheckedMintQuote(
@@ -836,11 +882,13 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
           job.entry.queueEntry.quote,
           false
         );
-      } else {
+      } else if (job.method === PaymentMethod.Onchain) {
         await walletStore.checkOnchainAndMint(
           job.entry.queueEntry.quote,
           false
         );
+      } else {
+        await walletStore.checkCustomAndMint(job.entry.queueEntry.quote, false);
       }
       job.entry.queueEntry.lastChecked = now;
       job.entry.queueEntry.checkCount = 0;
@@ -863,6 +911,15 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
     mintableAmount(method: IncomingPaymentMethod, quote: Record<string, any>) {
       if (method === PaymentMethod.Bolt11) {
         return quote.state === MintQuoteState.PAID
+          ? amountToNumber(quote.amount)
+          : 0;
+      }
+      if (
+        quote.amount_paid === undefined &&
+        quote.amount_issued === undefined
+      ) {
+        // Mint predates the NUT-04 accounting fields: fall back to state.
+        return String(quote.state).toUpperCase() === "PAID"
           ? amountToNumber(quote.amount)
           : 0;
       }
@@ -1073,7 +1130,7 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
     },
 
     async finalizeReusableBatchMint(
-      method: PaymentMethod.Bolt12 | PaymentMethod.Onchain,
+      method: IncomingPaymentMethod,
       entries: MintableQuote[],
       mintWallet: any,
       walletStore: any,
@@ -1110,14 +1167,18 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
           walletStore
         );
         const paidAt = currentDateStr();
-        const subpaymentType =
-          method === PaymentMethod.Bolt12
-            ? PaymentMethod.Bolt12Subpayment
-            : PaymentMethod.OnchainSubpayment;
+        const subpaymentType = subpaymentMethod(method);
         const label =
           method === PaymentMethod.Bolt12
             ? "Bolt12 Subpayment"
-            : "On-chain Subpayment";
+            : method === PaymentMethod.Onchain
+            ? "On-chain Subpayment"
+            : `${paymentMethodDisplayName(
+                useMintsStore().mints.find((m) => m.url === entry.invoice.mint),
+                method,
+                "mint",
+                entry.invoice.unit
+              )} Subpayment`;
 
         if (entry.invoice.status === "paid") {
           await walletStore.addPaymentHistory({
@@ -1429,6 +1490,12 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
     invoicePaymentMethod(invoice: any): IncomingPaymentMethod {
       if (invoice.type === PaymentMethod.Bolt12) return PaymentMethod.Bolt12;
       if (invoice.type === PaymentMethod.Onchain) return PaymentMethod.Onchain;
+      if (
+        isCustomPaymentMethod(invoice.type) &&
+        basePaymentMethod(invoice.type) === invoice.type
+      ) {
+        return invoice.type;
+      }
       return PaymentMethod.Bolt11;
     },
 
@@ -1459,6 +1526,13 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
       }
       if (method === PaymentMethod.Onchain) {
         return walletStore.mintOnPaidOnchain(quote, false, false);
+      }
+      if (isCustomPaymentMethod(method)) {
+        return walletStore.mintOnPaidGeneric(quote, {
+          type: method,
+          verbose: false,
+          kickOffInvoiceChecker: false,
+        });
       }
       return walletStore.mintOnPaidBolt11(quote, false, false);
     },

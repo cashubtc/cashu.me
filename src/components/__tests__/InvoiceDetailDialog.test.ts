@@ -20,6 +20,23 @@ afterEach(() => {
 });
 
 describe("InvoiceDetailDialog payment display", () => {
+  it.each(["provider:payment-request", ""])(
+    "renders custom requests with a quote fallback and copies the quote ID",
+    async (request) => {
+      vi.useFakeTimers();
+      const context = {
+        isCustom: true,
+        invoiceData: { request, quote: "custom-quote" },
+      };
+      expect(InvoiceDetailDialog.computed.qrLink.call(context)).toBeUndefined();
+      expect(InvoiceDetailDialog.computed.qrValue.call(context)).toBe(
+        request || "custom-quote"
+      );
+      await InvoiceDetailDialog.methods.onCopyBolt11.call(context);
+      expect(copyToClipboard).toHaveBeenCalledWith("custom-quote");
+    }
+  );
+
   it("uses a bare on-chain address for the QR and clipboard", async () => {
     vi.useFakeTimers();
     const context: any = {

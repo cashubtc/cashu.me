@@ -30,6 +30,14 @@
       </div>
     </div>
 
+    <div v-if="amountPaidDisplay" class="detail-item q-mb-md">
+      <div class="detail-label">
+        <ZapIcon :size="20" :color="iconColor" class="detail-icon" />
+        <div class="detail-name">Paid so far</div>
+      </div>
+      <div class="detail-value">{{ amountPaidDisplay }}</div>
+    </div>
+
     <div class="detail-item q-mb-md">
       <div class="detail-label">
         <QrCodeIcon :size="20" :color="iconColor" class="detail-icon" />
@@ -122,7 +130,8 @@ import {
   QrCode as QrCodeIcon,
   Hash as HashIcon,
 } from "lucide-vue-next";
-import { PaymentMethod } from "src/stores/walletTypes";
+import { PaymentMethod, isCustomPaymentMethod } from "src/stores/walletTypes";
+import { paymentMethodDisplayName } from "src/js/mint-payment-methods";
 import {
   fetchAddressTxMetadata,
   onchainAddressExplorerUrl,
@@ -241,7 +250,19 @@ export default defineComponent({
       ) {
         return "Bolt12";
       }
+      if (isCustomPaymentMethod(method)) {
+        const mint = useMintsStore().mints.find(
+          (m: any) => m.url === this.mintUrl
+        );
+        return paymentMethodDisplayName(mint, method, "mint", this.unit);
+      }
       return "Bolt11";
+    },
+    amountPaidDisplay(): string {
+      if (!isCustomPaymentMethod(this.method)) return "";
+      const paid = (this.mintQuote as any)?.amount_paid;
+      if (typeof paid !== "number" || paid <= 0) return "";
+      return (this as any).formatCurrency(paid, this.unit);
     },
     isOnchain(): boolean {
       return (

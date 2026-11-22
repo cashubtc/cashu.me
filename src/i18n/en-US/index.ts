@@ -999,6 +999,10 @@ export default {
   },
   InvoiceDetailDialog: {
     title: "Receive Lightning",
+    custom: {
+      receive_title: "Receive { method }",
+      quote_id: "Quote ID",
+    },
     create_invoice_title: "Create Invoice",
     inputs: {
       amount: {
@@ -1447,6 +1451,11 @@ export default {
     },
   },
   PayInvoiceDialog: {
+    custom: {
+      title: "Withdraw { method }",
+      quote_id_hint: "Quote ID \u2014 share this with the payment provider",
+      memo_label: "Memo (optional)",
+    },
     input_data: {
       title: "Pay Lightning",
       title_bolt12: "Pay Lightning Bolt12",

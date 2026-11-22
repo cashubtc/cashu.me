@@ -49,6 +49,13 @@ import {
   meltGeneric,
   setMeltChangeOutputData,
 } from "./walletMelt";
+import {
+  requestMintCustom,
+  checkCustomAndMint,
+  meltQuoteCustomData,
+  meltInvoiceDataCustom,
+} from "./walletCustom";
+import { mintOnPaidGeneric } from "./walletWebsocket";
 
 import _ from "underscore";
 import token from "src/js/token";
@@ -107,14 +114,19 @@ import {
   translateLegacyQRToLightningAddress,
 } from "src/js/legacy-qr";
 import { onchainNetwork } from "src/js/onchain";
-import { PaymentMethod } from "src/stores/walletTypes";
+import {
+  PaymentMethod,
+  type PaymentMethodId,
+  basePaymentMethod,
+  isCustomPaymentMethod,
+} from "src/stores/walletTypes";
 
 type Invoice = {
   amount: number;
   request: string;
   quote: string;
   memo: string;
-  type?: PaymentMethod;
+  type?: PaymentMethodId;
 };
 
 const activeSentTokenSubscriptions = new Set<string>();
@@ -148,12 +160,12 @@ export type InvoiceHistory = Invoice & {
   // Amount entered when creating an on-chain address, in `unit`.
   requestedAmount?: number;
   parentQuote?: string;
-  method?: PaymentMethod;
+  method?: PaymentMethodId;
   direction?: "mint" | "melt";
 };
 
 function createIncomingInvoiceDraft(
-  method: PaymentMethod = PaymentMethod.Bolt11
+  method: PaymentMethodId = PaymentMethod.Bolt11
 ): InvoiceHistory {
   return {
     amount: 0,
@@ -262,6 +274,7 @@ export const useWalletStore = defineStore("wallet", {
           memo: string;
           request: string;
           bolt12?: string;
+          custom?: string;
         } | null,
         lnurlpay: {
           domain: "",
@@ -286,7 +299,7 @@ export const useWalletStore = defineStore("wallet", {
           comment: string;
           quote: string;
         },
-        paymentMethod: null as PaymentMethod | null,
+        paymentMethod: null as PaymentMethodId | null,
       },
     };
   },
@@ -314,7 +327,7 @@ export const useWalletStore = defineStore("wallet", {
       this.invoiceHistory =
         paymentHistoryStore.invoiceHistory as InvoiceHistory[];
     },
-    resetInvoiceData(method: PaymentMethod = PaymentMethod.Bolt11) {
+    resetInvoiceData(method: PaymentMethodId = PaymentMethod.Bolt11) {
       this.invoiceData = createIncomingInvoiceDraft(method);
     },
     async addPaymentHistory(invoice: InvoiceHistory) {
@@ -902,7 +915,9 @@ export const useWalletStore = defineStore("wallet", {
     mint: mintBolt11,
     // Dispatch to Bolt11 or Bolt12 depending on parsed input
     meltQuoteInvoiceData: async function () {
-      if (
+      if (this.payInvoiceData?.invoice?.custom) {
+        return await meltQuoteCustomData.call(this);
+      } else if (
         this.payInvoiceData?.invoice &&
         (this.payInvoiceData.invoice as any).onchain
       ) {
@@ -921,7 +936,9 @@ export const useWalletStore = defineStore("wallet", {
       silent?: boolean,
       mutexPriority: MutexPriority = "normal"
     ) {
-      if (
+      if (this.payInvoiceData?.invoice?.custom) {
+        return await meltInvoiceDataCustom.call(this, silent, mutexPriority);
+      } else if (
         this.payInvoiceData?.invoice &&
         (this.payInvoiceData.invoice as any).onchain
       ) {
@@ -957,6 +974,10 @@ export const useWalletStore = defineStore("wallet", {
     meltInvoiceDataOnchain: meltInvoiceDataOnchain,
     meltOnchain: meltOnchain,
     mintOnPaidOnchain: mintOnPaidOnchain,
+    // Custom (generic) payment method actions
+    requestMintCustom: requestMintCustom,
+    mintOnPaidGeneric: mintOnPaidGeneric,
+    checkCustomAndMint: checkCustomAndMint,
     // /check
     checkProofsSpendable: async function (
       proofs: WalletProof[],
@@ -1122,6 +1143,15 @@ export const useWalletStore = defineStore("wallet", {
       if (invoice.type === PaymentMethod.Bolt12) {
         return await this.checkOutgoingInvoiceBolt12(quote, verbose);
       }
+      if (isCustomPaymentMethod(invoice.type)) {
+        const method = basePaymentMethod(invoice.type);
+        return await this.checkOutgoingInvoiceGeneric(
+          quote,
+          verbose,
+          (wallet: Wallet, quoteId: string) =>
+            wallet.mint.checkMeltQuote(method, quoteId)
+        );
+      }
       return await this.checkOutgoingInvoiceBolt11(quote, verbose);
     },
     checkOfferAndMintBolt12: async function (
@@ -1275,7 +1305,7 @@ export const useWalletStore = defineStore("wallet", {
       quote: AppMeltQuote,
       mint: string,
       unit: string,
-      method: PaymentMethod = PaymentMethod.Bolt11
+      method: PaymentMethodId = PaymentMethod.Bolt11
     ) {
       const invoice = {
         amount: -(quote.amount + quote.fee_reserve),
