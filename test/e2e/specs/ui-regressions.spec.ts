@@ -24,24 +24,66 @@ test("removing an inactive mint preserves the active mint", async ({
   });
 });
 
-test("editing a mint rejects a duplicate URL", async ({ page }) => {
-  const wallet = new WalletUi(page);
-  await wallet.onboard(MINT_A_URL);
-  await wallet.addMint(MINT_B_URL);
-  await wallet.editMint(MINT_B_URL, "Duplicate", MINT_A_URL);
-  const mints = JSON.parse((await wallet.stored("cashu.mints"))!);
-  test.fail(true, "UI-002: mint URL edits accept duplicates");
-  expect(new Set(mints.map((mint: { url: string }) => mint.url)).size).toBe(2);
-});
+async function mintEntries(wallet: WalletUi) {
+  return JSON.parse((await wallet.stored("cashu.mints"))!).map(
+    ({
+      url,
+      nickname,
+      keys,
+      keysets,
+    }: {
+      url: string;
+      nickname?: string;
+      keys: unknown;
+      keysets: unknown;
+    }) => ({ url, nickname, keys, keysets })
+  );
+}
 
-test("editing a mint rejects a malformed URL", async ({ page }) => {
-  const wallet = new WalletUi(page);
-  await wallet.onboard(MINT_A_URL);
-  await wallet.editMint(MINT_A_URL, "Invalid", "not a mint url");
-  const mints = JSON.parse((await wallet.stored("cashu.mints"))!);
-  test.fail(true, "UI-003: mint URL edits accept malformed URLs");
-  expect(mints[0].url).toBe(MINT_A_URL);
-});
+for (const suffix of ["", "/"]) {
+  test(`editing a mint rejects a duplicate URL${
+    suffix ? " after normalization" : ""
+  }`, async ({ page }) => {
+    const wallet = new WalletUi(page);
+    await wallet.onboard(MINT_A_URL);
+    await wallet.addMint(MINT_B_URL);
+    const before = await mintEntries(wallet);
+    await wallet.editMint(
+      MINT_B_URL,
+      "Duplicate",
+      ` ${MINT_A_URL}${suffix} `,
+      true,
+      false
+    );
+    await expect(
+      page.getByRole("alert").filter({ hasText: "Mint already added" })
+    ).toBeVisible();
+    expect(await mintEntries(wallet)).toEqual(before);
+    await page.getByRole("button", { name: "Cancel", exact: true }).click();
+    await page.reload();
+    expect(await mintEntries(wallet)).toEqual(before);
+  });
+}
+
+for (const url of [
+  "not a mint url",
+  "https://not%20a%20mint",
+  "ftp://mint.example",
+  "",
+]) {
+  test(`editing a mint rejects a malformed URL: ${url || "empty"}`, async ({
+    page,
+  }) => {
+    const wallet = new WalletUi(page);
+    await wallet.onboard(MINT_A_URL);
+    const before = await mintEntries(wallet);
+    await wallet.editMint(MINT_A_URL, "Invalid", url, true, false);
+    await expect(
+      page.getByRole("alert").filter({ hasText: "Invalid URL" })
+    ).toBeVisible();
+    expect(await mintEntries(wallet)).toEqual(before);
+  });
+}
 
 test("rejects a structurally invalid backup before writing wallet state", async ({
   page,

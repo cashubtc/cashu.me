@@ -68,6 +68,9 @@ and reports the defects; it does not silently change wallet behavior.
 
 ### UI-002 — Mint URL editing permits duplicate entries
 
+- Fixed: mint edits validate normalized HTTP(S) URLs and reject duplicates before
+  saving. Rejected edits leave the dialog open and the original entry intact.
+
 - Severity: medium; duplicate entries make mint selection ambiguous.
 - Reproduce: add two mints; edit the second mint's URL to the first mint's URL.
 - Expected: reject the duplicate and preserve both original entries.
@@ -76,6 +79,9 @@ and reports the defects; it does not silently change wallet behavior.
 - Regression: `editing a mint rejects a duplicate URL`.
 
 ### UI-003 — Mint URL editing accepts malformed URLs
+
+- Fixed: mint edits validate normalized HTTP(S) URLs and reject duplicates before
+  saving. Rejected edits leave the dialog open and the original entry intact.
 
 - Severity: medium; the configured mint can become unusable.
 - Reproduce: edit a mint URL to `not a mint url` and save.
