@@ -19,6 +19,35 @@ import token from "src/js/token";
 import { notifySuccess, notifyWarning } from "src/js/notify";
 import { useLocalStorage } from "@vueuse/core";
 import { v4 as uuidv4 } from "uuid";
+import { nip19 } from "nostr-tools";
+
+// Returns the hex pubkey of a nostr nprofile/npub transport target, if any.
+function nostrTargetPubkey(target: string): string | undefined {
+  try {
+    const decoded = nip19.decode(target);
+    if (decoded.type === "nprofile") return decoded.data.pubkey;
+    if (decoded.type === "npub") return decoded.data;
+  } catch (e) {
+    // not a nostr identifier
+  }
+  return undefined;
+}
+
+// A request belongs to this wallet only if it delivers to our own nostr key.
+export function isOwnPaymentRequest(
+  request: Pick<PaymentRequest, "transport">,
+  ownPubkey: string
+): boolean {
+  if (!ownPubkey) return false;
+  return (
+    !!request.transport?.length &&
+    request.transport.every(
+      (t) =>
+        t.type === PaymentRequestTransportType.NOSTR &&
+        nostrTargetPubkey(t.target) === ownPubkey
+    )
+  );
+}
 
 // Request fields used by the UI and delivery; history stores these as plain data.
 export type PaymentRequestData = Pick<
@@ -68,6 +97,7 @@ export const usePRStore = defineStore("payment-request", {
       mintUrl?: string,
       forceNew: boolean = false
     ) {
+      this.pruneForeignRequests();
       // If not forcing a new request and we already have at least one,
       // do not auto-create a new one; just show the currently selected.
       if (!forceNew && this.ourPaymentRequests.length > 0) {
@@ -119,6 +149,10 @@ export const usePRStore = defineStore("payment-request", {
       // PaymentRequest.id is optional in v4; we key OurPaymentRequest by id,
       // so a request without one can't be tracked.
       if (!request.id) return;
+      // Only ever store requests that pay to this wallet.
+      if (!isOwnPaymentRequest(request, useNostrStore().seedSignerPublicKey)) {
+        return;
+      }
       const existIdx = this.ourPaymentRequests.findIndex(
         (r) => r.id === request.id
       );
@@ -142,6 +176,27 @@ export const usePRStore = defineStore("payment-request", {
         this.ourPaymentRequests.push(entry);
         this.selectedPRIndex = this.ourPaymentRequests.length - 1;
       }
+    },
+    // Drop stored entries that do not pay to this wallet.
+    pruneForeignRequests() {
+      const ownPubkey = useNostrStore().seedSignerPublicKey;
+      // Without our key we cannot tell; leave the list untouched.
+      if (!ownPubkey) return;
+      const current = this.currentPaymentRequest;
+      const kept = this.ourPaymentRequests.filter((r) => {
+        try {
+          return isOwnPaymentRequest(
+            decodePaymentRequest(r.encoded),
+            ownPubkey
+          );
+        } catch (e) {
+          return false;
+        }
+      });
+      if (kept.length === this.ourPaymentRequests.length) return;
+      this.ourPaymentRequests = kept;
+      const idx = current ? kept.findIndex((r) => r.id === current.id) : -1;
+      this.selectedPRIndex = idx >= 0 ? idx : Math.max(0, kept.length - 1);
     },
     selectPrevRequest() {
       if (!this.ourPaymentRequests.length) return;
@@ -227,14 +282,6 @@ export const usePRStore = defineStore("payment-request", {
         sendTokenStore.sendData.amount =
           Amount.from(request.amount).toNumber() /
           mintsStore.activeUnitCurrencyMultiplyer;
-      }
-      // Also make sure this decoded request gets stored (e.g., if user pasted an older one)
-      try {
-        const encoded = pr;
-        this.ensureStoredRequest(request, encoded);
-        this.showPRKData = encoded;
-      } catch (e) {
-        // noop
       }
       sendTokenStore.sendData.paymentRequest = request;
       if (!sendTokenStore.showSendTokens) {
