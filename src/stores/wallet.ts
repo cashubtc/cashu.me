@@ -78,6 +78,7 @@ import {
   decodePaymentRequest,
   ProofState,
   KeyChain,
+  type SendResponse,
   type AmountLike,
   type P2PKOptions,
   type CounterSource,
@@ -108,6 +109,7 @@ import {
 } from "src/js/legacy-qr";
 import { onchainNetwork } from "src/js/onchain";
 import { PaymentMethod } from "src/stores/walletTypes";
+import { isTokenAlreadySpentError } from "src/js/errors";
 
 type Invoice = {
   amount: number;
@@ -209,7 +211,13 @@ function normalizeMintQuote(
  * require Proof[] (e.g. selectProofsToSend). Strips app-local fields
  * (`reserved`, `quote`) so the result is a clean Proof.
  */
-function toProofs(proofs: WalletProof[]): Proof[] {
+// Accepts both store proofs (WalletProof, with app-local `reserved`/`quote`
+// fields) and bare cashu-ts proofs: send() callers hand around ProofLike[]
+// after selection, and mint operations that don't require the store metadata
+// can pass either shape.
+type StoreProofLike = ProofLike & { reserved?: boolean; quote?: string };
+
+function toProofs(proofs: StoreProofLike[]): Proof[] {
   return proofs.map(({ reserved, quote, amount, ...rest }) => ({
     ...rest,
     amount: Amount.from(amount),
@@ -735,17 +743,29 @@ export const useWalletStore = defineStore("wallet", {
           );
           // includeFees=true inflates send outputs so sendProofs sum to
           // amount + fees(sendProofs): required for melt and includeFees sends.
-          const swapResult = await this.retryOnceOnRecoverableError(
-            swapWallet.keysetId,
-            async () =>
-              swapWallet.ops
-                .send(amount, spendableProofs)
-                .asDeterministic()
-                .keyset(swapWallet.keysetId)
-                .proofsWeHave(spendableProofs)
-                .includeFees(includeFees)
-                .run()
-          );
+          let swapResult: SendResponse;
+          try {
+            swapResult = await this.retryOnceOnRecoverableError(
+              swapWallet.keysetId,
+              async () =>
+                swapWallet.ops
+                  .send(amount, spendableProofs)
+                  .asDeterministic()
+                  .keyset(swapWallet.keysetId)
+                  .proofsWeHave(spendableProofs)
+                  .includeFees(includeFees)
+                  .run()
+            );
+          } catch (error) {
+            // The mint invalidated these proofs but our store still counts
+            // them as balance (eg. a previous spend settled while we missed
+            // its response). Drop the spent ones so the next attempt can
+            // succeed. See #614.
+            if (isTokenAlreadySpentError(error)) {
+              await this.removeSpentProofs(spendableProofs, swapWallet);
+            }
+            throw error;
+          }
           // swapResult.keep mixes fresh proofs (new secrets) with any
           // un-selected passthrough proofs (already in spendableProofs).
           const spendableSecrets = new Set(
@@ -959,7 +979,7 @@ export const useWalletStore = defineStore("wallet", {
     mintOnPaidOnchain: mintOnPaidOnchain,
     // /check
     checkProofsSpendable: async function (
-      proofs: WalletProof[],
+      proofs: ProofLike[],
       wallet: Wallet,
       update_history = false
     ) {
@@ -1000,6 +1020,35 @@ export const useWalletStore = defineStore("wallet", {
         notifyApiError(error);
         throw error;
       }
+    },
+    // Removes the spent proofs among `proofs` from the store (see #614) and
+    // tells the user how many were dropped, so they know to retry the
+    // payment instead of failing on every subsequent attempt.
+    removeSpentProofs: async function (
+      proofs: ProofLike[],
+      wallet: Wallet
+    ): Promise<ProofLike[]> {
+      let spentProofs: ProofLike[] | undefined;
+      try {
+        spentProofs = await this.checkProofsSpendable(proofs, wallet, false);
+      } catch (error) {
+        // The check is best-effort; the original payment error matters more.
+        console.error(error);
+        return [];
+      }
+      if (!spentProofs?.length) {
+        console.warn(
+          "token-already-spent error but no spent proofs found",
+          proofs.length
+        );
+        return [];
+      }
+      notifyWarning(
+        this.t("wallet.notifications.spent_proofs_removed", {
+          count: spentProofs.length,
+        })
+      );
+      return spentProofs;
     },
     checkTokenSpendable: async function (
       historyToken: HistoryToken,

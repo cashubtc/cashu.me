@@ -19,6 +19,7 @@ import {
 } from "src/js/notify";
 import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import { PaymentMethod } from "src/stores/walletTypes";
+import { isTokenAlreadySpentError } from "src/js/errors";
 import { useMintsStore, WalletProof } from "./mints";
 import { usePaymentHistoryStore } from "./paymentHistory";
 import { useProofsStore } from "./proofs";
@@ -221,6 +222,27 @@ export async function meltGeneric(
         await this.setMeltChangeOutputData(quote.quote, data.outputData);
       }
     } catch (error) {
+      // The mint invalidated these proofs but our store still counts them as
+      // balance (eg. a previous spend settled while we missed its response).
+      // Drop the spent ones so the next attempt can succeed. See #614.
+      if (isTokenAlreadySpentError(error)) {
+        // Only prune when this melt quote is still unpaid: otherwise this
+        // very payment consumed the proofs and the outer catch will settle
+        // the invoice as paid. Telling the user to retry a settled payment
+        // could double-pay it.
+        let spentElsewhere = false;
+        try {
+          const state = normalizeMeltQuote(await checkQuote(quote.quote)).state;
+          spentElsewhere = state == MeltQuoteState.UNPAID;
+        } catch (checkError) {
+          // If the quote state can't be verified, assume the melt consumed
+          // the proofs: pruning them could hide a successful payment.
+          console.error(checkError);
+        }
+        if (spentElsewhere) {
+          await this.removeSpentProofs(sendProofs, mintWallet);
+        }
+      }
       throw error;
     } finally {
       if (releaseMutex) {
