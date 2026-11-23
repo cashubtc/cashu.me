@@ -196,8 +196,13 @@ describe("prStore request list", () => {
     prStore.selectedPRIndex = 1;
     prStore.updatePaymentRequest(50);
     expect(prStore.ourPaymentRequests).toHaveLength(2);
-    expect(prStore.ourPaymentRequests[0].id).toBe("paid");
+    // The request keeps its id and place, so a payment of the old terms is still checked
+    expect(prStore.ourPaymentRequests.map((r) => r.id)).toEqual([
+      "paid",
+      "draft",
+    ]);
     const shown = decodePaymentRequest(prStore.showPRKData);
+    expect(shown.id).toBe("draft");
     expect(shown.amount?.toNumber()).toBe(50);
     expect(prStore.currentPaymentRequest?.encoded).toBe(prStore.showPRKData);
 
@@ -206,6 +211,7 @@ describe("prStore request list", () => {
     prStore.updatePaymentRequest(60);
     expect(prStore.ourPaymentRequests.map((r) => r.id)).toContain("paid");
     expect(prStore.ourPaymentRequests).toHaveLength(3);
+    expect(decodePaymentRequest(prStore.showPRKData).id).not.toBe("paid");
   });
 
   test("keeps the current unpaid request if replacement creation fails", () => {
@@ -313,5 +319,19 @@ describe("prStore request tools", () => {
     expect(prStore.ourPaymentRequests).toHaveLength(1);
     expect(prStore.ourPaymentRequests[0].id).not.toBe(a);
     expect(prStore.showPRKData).toBe(prStore.ourPaymentRequests[0].encoded);
+  });
+
+  test("keeps showing the same request when an earlier one is deleted", () => {
+    useNostrStore().seedSignerPublicKey = OUR_PUBKEY;
+    const prStore = usePRStore();
+    prStore.ourPaymentRequests = [];
+    prStore.createPaymentRequest(1);
+    prStore.createPaymentRequest(2);
+    prStore.createPaymentRequest(3);
+    const [a, b] = prStore.ourPaymentRequests.map((r) => r.id);
+    prStore.selectRequestByIndex(1);
+    prStore.deletePaymentRequest(a);
+    expect(prStore.currentPaymentRequest?.id).toBe(b);
+    expect(prStore.showPRKData).toBe(prStore.currentPaymentRequest?.encoded);
   });
 });
