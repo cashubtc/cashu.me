@@ -449,7 +449,7 @@ export default {
       if (useWelcomeStore().showWelcome) {
         const currentQuery = window.location.search;
         const currentHash = window.location.hash;
-        this.$router.push("/welcome" + currentQuery + currentHash);
+        this.$router.replace("/welcome" + currentQuery + currentHash);
       }
     },
     setTab: function (to) {
