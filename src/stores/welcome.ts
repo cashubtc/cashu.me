@@ -87,7 +87,8 @@ export const useWelcomeStore = defineStore("welcome", {
      */
     initializeWelcome() {
       if (!this.showWelcome) {
-        window.location.href = "/";
+        // replace, so the welcome page does not stay in the history
+        window.location.replace("/");
       }
     },
 
@@ -98,9 +99,11 @@ export const useWelcomeStore = defineStore("welcome", {
       this.showWelcome = false;
       // Reset the slide to the beginning for next time (if welcome is ever shown again)
       this.currentSlide = 0;
-      // Redirect to home or desired route
-      window.location.href =
-        "/" + window.location.search + window.location.hash;
+      // Redirect to home or desired route. Replace, so Back on home leaves
+      // the wallet instead of landing on the welcome page again.
+      window.location.replace(
+        "/" + window.location.search + window.location.hash
+      );
     },
     setPath(path: "new" | "recover") {
       this.onboardingPath = path;
