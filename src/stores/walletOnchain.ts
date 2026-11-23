@@ -3,13 +3,14 @@ import { useMintsStore, WalletProof } from "./mints";
 import { useProofsStore } from "./proofs";
 import { type MutexPriority, useUiStore } from "src/stores/ui";
 import {
-  Amount,
   Wallet,
   MintQuoteOnchainResponse,
   MeltQuoteState,
+  createRandomSecretKey,
+  getPubKeyFromPrivKey,
 } from "@cashu/cashu-ts";
-import * as nobleSecp256k1 from "@noble/secp256k1";
-import { bytesToHex } from "@noble/hashes/utils";
+import { cashuAmountToNumber } from "src/js/cashu-amount";
+import { bytesToHex } from "@noble/hashes/utils.js";
 import {
   notifyApiError,
   notify,
@@ -34,17 +35,13 @@ type AppMintQuote = Omit<
   amount_issued: number;
 };
 
-function amountToNumber(value: any): number {
-  return Amount.from(value).toNumber();
-}
-
 function normalizeMintQuote(quote: MintQuoteOnchainResponse): AppMintQuote {
   const { amount_paid, amount_issued, ...rest } = quote;
   return {
     ...rest,
     amount: null,
-    amount_paid: amountToNumber(amount_paid),
-    amount_issued: amountToNumber(amount_issued),
+    amount_paid: cashuAmountToNumber(amount_paid),
+    amount_issued: cashuAmountToNumber(amount_issued),
   };
 }
 
@@ -54,8 +51,9 @@ export async function requestMintOnchain(
   requestedAmount?: number
 ) {
   try {
-    const privkey = bytesToHex(nobleSecp256k1.utils.randomPrivateKey());
-    const pubkey = bytesToHex(nobleSecp256k1.getPublicKey(privkey, true));
+    const secretKey = createRandomSecretKey();
+    const privkey = bytesToHex(secretKey);
+    const pubkey = bytesToHex(getPubKeyFromPrivKey(secretKey));
     const data = await mintWallet.createMintQuoteOnchain(pubkey);
 
     const invoice: InvoiceHistory = {
@@ -157,8 +155,8 @@ export async function checkOnchainAndMint(
   }
   try {
     const updated = await mintWallet.checkMintQuoteOnchain(quoteId);
-    const paid = amountToNumber(updated.amount_paid);
-    const issued = amountToNumber(updated.amount_issued);
+    const paid = cashuAmountToNumber(updated.amount_paid);
+    const issued = cashuAmountToNumber(updated.amount_issued);
     const delta = paid - issued;
 
     invoice.mintQuote = normalizeMintQuote(updated);

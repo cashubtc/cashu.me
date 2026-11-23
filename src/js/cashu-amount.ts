@@ -32,6 +32,11 @@ export function cashuAmountToNumber(value: unknown): number {
   return Amount.from(amountLike as AmountLike).toNumber();
 }
 
+/** As cashuAmountToNumber, but a missing amount reads as 0. */
+export function cashuAmountOrZero(value: unknown): number {
+  return value === undefined || value === null ? 0 : cashuAmountToNumber(value);
+}
+
 /** Keep metadata limits exact even when they exceed the wallet's number range. */
 export function cashuAmountToBigInt(value: unknown): bigint {
   const amountLike = isStructuredClonedAmount(value) ? value.value : value;

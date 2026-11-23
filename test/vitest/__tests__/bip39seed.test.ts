@@ -4,7 +4,7 @@ import {
   validateMnemonic,
   mnemonicToSeed,
 } from "@scure/bip39";
-import { wordlist } from "@scure/bip39/wordlists/english";
+import { wordlist } from "@scure/bip39/wordlists/english.js";
 
 describe("mnemonicToSeedSync", () => {
   test("converts same mnemonic consistently", () => {
