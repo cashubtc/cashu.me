@@ -98,7 +98,7 @@ import { wordlist } from "@scure/bip39/wordlists/english.js";
 import { useSettingsStore } from "./settings";
 import { usePriceStore } from "./price";
 import { usePaymentHistoryStore } from "./paymentHistory";
-import { useI18n } from "vue-i18n";
+import { i18n } from "src/boot/i18n";
 import { decodeBolt12Offer } from "src/js/bolt12";
 import { ensurePaymentMethodMintActive } from "src/js/mint-payment-methods";
 import {
@@ -213,9 +213,10 @@ function toProofs(proofs: WalletProof[]): Proof[] {
 
 export const useWalletStore = defineStore("wallet", {
   state: () => {
-    const { t } = useI18n();
     return {
-      t: t,
+      // the app-wide translator: useI18n() only works inside a component's
+      // setup, and this store is also first created from event handlers
+      t: i18n.global.t,
       mnemonic: useLocalStorage("cashu.mnemonic", ""),
       invoiceHistory: [] as InvoiceHistory[],
       paymentHistoryUnsubscribe: null as null | (() => void),
