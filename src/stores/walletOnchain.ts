@@ -22,7 +22,11 @@ import { PaymentMethod } from "src/stores/walletTypes";
 import { mintOnPaidGeneric } from "./walletWebsocket";
 import { useTransactionWorkerStore } from "./transactionWorker";
 import { onchainNetwork } from "src/js/onchain";
-import { type AppMeltQuote, normalizeMeltQuote } from "./walletMelt";
+import {
+  type AppMeltQuote,
+  isMeltInFlight,
+  normalizeMeltQuote,
+} from "./walletMelt";
 import { createSubpaymentHistoryQuote } from "src/js/invoice-history";
 import { usePaymentHistoryStore } from "./paymentHistory";
 
@@ -364,7 +368,10 @@ export async function checkOutgoingOnchain(
     );
     await this.updateOutgoingInvoiceInHistory(meltQuote);
 
-    if (meltQuote.state === MeltQuoteState.PENDING) {
+    if (
+      meltQuote.state === MeltQuoteState.PENDING ||
+      (meltQuote.state === MeltQuoteState.UNPAID && isMeltInFlight(quote))
+    ) {
       if (verbose) notify("Payment pending");
       throw new Error("Payment pending");
     }
