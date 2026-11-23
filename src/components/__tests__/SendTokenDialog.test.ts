@@ -8,6 +8,17 @@ vi.mock("components/DisplayTokenComponent.vue", () => ({
 
 let SendTokenDialog: any;
 
+// A stored mint whose /v1/info offers the given melt methods (NUT-05)
+const storedMint = (url: string, melt: { method: string; unit: string }[]) => ({
+  url,
+  info: {
+    nuts: {
+      4: { methods: [], disabled: false },
+      5: { methods: melt, disabled: false },
+    },
+  },
+});
+
 beforeAll(async () => {
   (globalThis as any).windowMixin = {};
   SendTokenDialog = (await import("../SendTokenDialog.vue")).default;
@@ -131,21 +142,83 @@ describe("SendTokenDialog", () => {
           paymentRequest: JSONInt.parse(JSONInt.stringify(request)!),
         },
         activeMintUrl,
-        activeUnit: "sat",
-        mintWalletSync: vi.fn(() => ({
-          getMintInfo: () => ({
-            isSupported: () => ({
-              disabled: false,
-              params: [{ method: "bolt11", unit: "sat" }],
-            }),
+        activeMintMeltMethods:
+          SendTokenDialog.computed.activeMintMeltMethods.call({
+            mints: [
+              storedMint(activeMintUrl, [{ method: "bolt11", unit: "sat" }]),
+            ],
+            activeMintUrl,
+            activeUnit: "sat",
           }),
-        })),
       };
       expect(
         SendTokenDialog.computed.paymentRequestMethodFee.call(context)
       ).toBe(fee);
     }
   );
+
+  it.each([
+    { name: "matching unit and method", unit: "sat", sm: ["bolt11"], key: "" },
+    {
+      name: "another unit",
+      unit: "usd",
+      sm: undefined,
+      key: "SendTokenDialog.errors.unit_not_matching_request",
+    },
+    {
+      name: "a method the mint lacks",
+      unit: "sat",
+      sm: ["bolt12"],
+      key: "SendTokenDialog.errors.mint_lacks_request_methods",
+    },
+    { name: "no method list", unit: "sat", sm: undefined, key: "" },
+  ])("blocks Pay for a request with $name: '$key'", ({ unit, sm, key }) => {
+    const request = new PaymentRequest(
+      undefined,
+      "pr1",
+      21,
+      unit,
+      undefined,
+      undefined,
+      false,
+      undefined,
+      undefined,
+      sm?.map((method) => ({ method }))
+    );
+    const activeMintUrl = "https://mint.example";
+    const context = {
+      sendData: {
+        paymentRequest: JSONInt.parse(JSONInt.stringify(request)!),
+        amount: 21,
+      },
+      insufficientFunds: false,
+      globalMutexLock: false,
+      selectedMintViolatesRequest: false,
+      activeUnit: "sat",
+      // the mint melts bolt12 too, but only in usd
+      activeMintMeltMethods:
+        SendTokenDialog.computed.activeMintMeltMethods.call({
+          mints: [
+            storedMint(activeMintUrl, [
+              { method: "bolt11", unit: "sat" },
+              { method: "bolt12", unit: "usd" },
+            ]),
+          ],
+          activeMintUrl,
+          activeUnit: "sat",
+        }),
+      $t: (k: string) => k,
+    };
+    const warning =
+      SendTokenDialog.computed.paymentRequestMintWarning.call(context);
+    expect(warning).toBe(key);
+    expect(
+      SendTokenDialog.computed.paymentRequestButtonDisabled.call({
+        ...context,
+        paymentRequestMintWarning: warning,
+      })
+    ).toBe(!!key);
+  });
 
   it("queues an ecash send as foreground work after the user taps Send", async () => {
     const uiStore = useUiStore();
