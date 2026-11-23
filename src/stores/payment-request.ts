@@ -5,6 +5,7 @@ import {
   decodePaymentRequest,
   normalizeProofAmounts,
   PaymentRequest,
+  type NUT10Option,
   type PaymentRequestPayload,
   PaymentRequestTransport,
   PaymentRequestTransportType,
@@ -121,7 +122,9 @@ export const usePRStore = defineStore("payment-request", {
       amount?: number,
       memo?: string,
       mintUrl?: string,
-      forceNew: boolean = false
+      forceNew: boolean = false,
+      lock: boolean = false,
+      unit?: string
     ) {
       this.pruneForeignRequests();
       // If not forcing a new request and we already have at least one,
@@ -132,27 +135,63 @@ export const usePRStore = defineStore("payment-request", {
         this.showPRKData = current.encoded;
         return;
       }
-      this.showPRKData = this.createPaymentRequest(amount, memo, mintUrl);
+      this.showPRKData = this.createPaymentRequest(
+        amount,
+        memo,
+        mintUrl,
+        lock,
+        unit
+      );
     },
     // Replaces the shown request unless it has been paid, then a new one is added.
-    updatePaymentRequest(amount?: number, memo?: string, mintUrl?: string) {
+    updatePaymentRequest(
+      amount?: number,
+      memo?: string,
+      mintUrl?: string,
+      lock: boolean = false,
+      unit?: string
+    ) {
       const current = this.currentPaymentRequest;
       const replaceIdx =
         current && current.receivedPaymentIds.length === 0
           ? this.ourPaymentRequests.indexOf(current)
           : -1;
       const prevLen = this.ourPaymentRequests.length;
-      const encoded = this.createPaymentRequest(amount, memo, mintUrl);
+      const encoded = this.createPaymentRequest(
+        amount,
+        memo,
+        mintUrl,
+        lock,
+        unit
+      );
       if (replaceIdx >= 0 && this.ourPaymentRequests.length > prevLen) {
         this.ourPaymentRequests.splice(replaceIdx, 1);
         this.selectedPRIndex = this.ourPaymentRequests.length - 1;
       }
       this.showPRKData = encoded;
     },
+    // Payments to a deleted request stay in history and are still received.
+    deletePaymentRequest(id: string) {
+      this.ourPaymentRequests = this.ourPaymentRequests.filter(
+        (r) => r.id !== id
+      );
+      if (!this.ourPaymentRequests.length) {
+        this.createPaymentRequest();
+        return;
+      }
+      this.selectedPRIndex = Math.min(
+        this.selectedPRIndex,
+        this.ourPaymentRequests.length - 1
+      );
+      this.showPRKData = this.currentPaymentRequest?.encoded ?? "";
+    },
+    // The unit defaults to the wallet's active unit.
     createPaymentRequest: function (
       amount?: number,
       memo?: string,
-      mintUrl?: string
+      mintUrl?: string,
+      lock: boolean = false,
+      unit?: string
     ) {
       const nostrStore = useNostrStore();
       const mintStore = useMintsStore();
@@ -165,17 +204,23 @@ export const usePRStore = defineStore("payment-request", {
         },
       ] as PaymentRequestTransport[];
       const uuid = uuidv4().split("-")[0];
+      // Lock payments to this wallet's newest P2PK key (NUT-11)
+      let nut10: NUT10Option | undefined;
+      if (lock) {
+        const p2pkStore = useP2PKStore();
+        if (!p2pkStore.p2pkKeys.length) p2pkStore.generateKeypair();
+        const key = p2pkStore.p2pkKeys[p2pkStore.p2pkKeys.length - 1];
+        nut10 = { kind: "P2PK", data: key.publicKey, tags: [] };
+      }
       const paymentRequest = new PaymentRequest(
         transport,
         uuid,
         amount,
-        mintStore.activeUnit,
-        mintUrl?.length
-          ? mintStore.activeMintUrl
-            ? [mintStore.activeMintUrl]
-            : undefined
-          : undefined,
-        memo
+        unit ?? mintStore.activeUnit,
+        mintUrl?.length ? [mintUrl] : undefined,
+        memo || undefined,
+        false,
+        nut10
       );
       const encoded = paymentRequest.toEncodedRequest();
       this.ensureStoredRequest(paymentRequest, encoded, memo);
