@@ -1104,6 +1104,9 @@ export default {
       mint_not_allowed_by_request:
         "The selected mint is not accepted by this payment request.",
     },
+    payment_request: {
+      method_fee: "Plus a {fee} fee to pay from this mint",
+    },
   },
   SendPaymentRequest: {
     actions: {

@@ -267,13 +267,14 @@ export default defineComponent({
   methods: {
     ...mapActions(usePRStore, [
       "newPaymentRequest",
+      "updatePaymentRequest",
       "selectPrevRequest",
       "selectNextRequest",
     ]),
     toggleUnit() {
       this.paymentRequestAmount = undefined;
       this.amountLabel = this.amountLabelDefault;
-      this.newPaymentRequest(
+      this.updatePaymentRequest(
         this.paymentRequestAmount,
         this.memo,
         this.chosenMintUrl
@@ -298,7 +299,7 @@ export default defineComponent({
         return;
       }
       this.chosenMintUrl = this.activeMintUrl;
-      this.newPaymentRequest(
+      this.updatePaymentRequest(
         this.paymentRequestAmount,
         this.memo,
         this.chosenMintUrl
@@ -319,24 +320,31 @@ export default defineComponent({
       }
     },
     finishEditingAmount() {
+      if (!this.isEditingAmount) return;
       const amount = parseFloat(this.amountInputValue);
-      if (isNaN(amount) || amount <= 0 || this.amountInputValue == "") {
+      const rawAmount = Math.round(amount * this.activeUnitCurrencyMultiplyer);
+      if (
+        isNaN(amount) ||
+        amount <= 0 ||
+        this.amountInputValue == "" ||
+        rawAmount <= 0
+      ) {
         this.paymentRequestAmount = undefined;
         this.amountLabel = this.amountLabelDefault;
       } else {
-        this.paymentRequestAmount = amount * this.activeUnitCurrencyMultiplyer;
+        this.paymentRequestAmount = rawAmount;
         this.amountLabel = useUiStore().formatCurrency(
-          amount * this.activeUnitCurrencyMultiplyer,
+          rawAmount,
           this.activeUnit
         );
       }
-      this.newPaymentRequest(
+      this.isEditingAmount = false;
+      this.amountInputValue = "";
+      this.updatePaymentRequest(
         this.paymentRequestAmount,
         this.memo,
         this.chosenMintUrl
       );
-      this.isEditingAmount = false;
-      this.amountInputValue = "";
     },
   },
 });
