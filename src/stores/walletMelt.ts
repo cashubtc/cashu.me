@@ -154,6 +154,23 @@ export async function meltGeneric(
   const uIStore = useUiStore();
   const amount = quote.amount + quote.fee_reserve;
 
+  // Record the pending payment before any ecash is set aside for it, and
+  // reserve that ecash under the quote. If the app is closed or reloaded
+  // before the melt finishes, the pending-payment check finds the quote and
+  // releases the ecash instead of leaving it reserved for good.
+  const recordedHere = !this.invoiceHistory.some(
+    (i: any) => i.quote === quote.quote
+  );
+  if (recordedHere) {
+    await this.addOutgoingPendingInvoiceToHistory(
+      quote,
+      mintWallet.mint.mintUrl,
+      mintWallet.unit,
+      method,
+      false
+    );
+  }
+
   let sendProofs: ProofLike[] = [];
   try {
     const { sendProofs: _sendProofs } = await this.send(
@@ -162,13 +179,17 @@ export async function meltGeneric(
       amount,
       false,
       true,
-      mutexPriority
+      mutexPriority,
+      quote.quote
     );
     sendProofs = _sendProofs;
     if (sendProofs.length == 0) {
       throw new Error("could not split proofs.");
     }
   } catch (error: any) {
+    if (recordedHere) {
+      await this.removeOutgoingInvoiceFromHistory(quote.quote);
+    }
     console.error(error);
     if (!silent) notifyApiError(error, "Payment failed");
     throw error;
@@ -177,11 +198,9 @@ export async function meltGeneric(
   this.payInvoiceData.paying = true;
   await uIStore.lockMutex(mutexPriority);
   try {
-    await this.addOutgoingPendingInvoiceToHistory(
-      quote,
-      mintWallet.mint.mintUrl,
-      mintWallet.unit,
-      method
+    useTransactionWorkerStore().addOutgoingInvoiceToChecker?.(
+      quote.quote,
+      true
     );
     await proofsStore.setReserved(sendProofs, true, quote.quote);
 

@@ -580,6 +580,45 @@ describe("wallet store", () => {
     expect(wallet.invoiceHistory).toEqual([]);
   });
 
+  it("records a melt as pending and ties its ecash to the quote before swapping", async () => {
+    // If the app is closed mid-payment, the pending-payment check can only
+    // release ecash it can find by quote, and only for payments it knows of.
+    const wallet = useWalletStore();
+    wallet.payInvoiceData.input.request = "lnbc123";
+    const quote = { quote: "melt-q-early", amount: 101, fee_reserve: 4 };
+    const mintWallet = {
+      mint: { mintUrl: "https://mint-a.example" },
+      unit: "sat",
+      keysetId: "00aa",
+    };
+    let pendingAtSwap;
+    const send = vi.spyOn(wallet, "send").mockImplementation(async () => {
+      pendingAtSwap = wallet.invoiceHistory.find(
+        (i) => i.quote === "melt-q-early"
+      );
+      throw new Error("swap failed");
+    });
+
+    await expect(
+      wallet.meltGeneric([], quote, mintWallet, true, vi.fn())
+    ).rejects.toThrow("swap failed");
+
+    expect(send).toHaveBeenCalledWith(
+      [],
+      mintWallet,
+      105,
+      false,
+      true,
+      "normal",
+      "melt-q-early"
+    );
+    expect(pendingAtSwap).toMatchObject({ status: "pending", amount: -105 });
+    // Nothing was set aside, so the pending entry is taken back out.
+    expect(
+      wallet.invoiceHistory.find((i) => i.quote === "melt-q-early")
+    ).toBeUndefined();
+  });
+
   it("records Bolt12 outgoing invoice type for recovery", async () => {
     const wallet = useWalletStore();
     wallet.payInvoiceData.input.request = "lno1offer";
