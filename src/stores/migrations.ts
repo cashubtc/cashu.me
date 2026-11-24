@@ -269,6 +269,19 @@ export const useMigrationsStore = defineStore("migrations", {
         },
       });
 
+      this.registerMigration({
+        version: 8,
+        name: "Move transaction worker queues to Dexie",
+        description:
+          "Moves the incoming quote and outgoing payment check queues to the workerQueue table",
+        execute: async () => {
+          const { importLegacyWorkerQueues } = await import(
+            "./workerQueueStorage"
+          );
+          await importLegacyWorkerQueues();
+        },
+      });
+
       // Add more migrations here in the future
     },
   },

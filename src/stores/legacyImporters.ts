@@ -3,6 +3,10 @@ import { moveLocalStorageKey } from "./legacyStorage";
 import { toMirrorRows } from "./tableMirror";
 import type { SeenEventRow } from "./seenEvents";
 import { importLegacyMints } from "./mintStorage";
+import {
+  importLegacyWorkerQueues,
+  LEGACY_WORKER_QUEUE_KEYS,
+} from "./workerQueueStorage";
 
 /**
  * localStorage keys whose data now lives in IndexedDB, with the function
@@ -86,6 +90,10 @@ export async function importLegacyPaymentRequests() {
 
 export { importLegacyMints };
 
+// ---- Phase 3 ---------------------------------------------------------------
+
+export { importLegacyWorkerQueues };
+
 export const LEGACY_KEY_IMPORTERS: LegacyKeyImporter[] = [
   {
     key: "cashu.ndk.mintRecommendations",
@@ -98,6 +106,10 @@ export const LEGACY_KEY_IMPORTERS: LegacyKeyImporter[] = [
   { key: "cashu.nwc.connections", run: importLegacyNwcProcessedRequestIds },
   { key: "cashu.pr.ours", run: importLegacyPaymentRequests },
   { key: "cashu.mints", run: importLegacyMints },
+  ...Object.values(LEGACY_WORKER_QUEUE_KEYS).map((key) => ({
+    key,
+    run: importLegacyWorkerQueues,
+  })),
 ];
 
 export async function importLegacyLocalStorageKeys() {

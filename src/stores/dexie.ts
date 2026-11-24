@@ -28,6 +28,7 @@ export class CashuDexie extends Dexie {
   paymentRequests!: Table<any, string>;
   mints!: Table<any, string>;
   mintKeys!: Table<any, [string, string]>;
+  workerQueue!: Table<any, [string, string]>;
 
   constructor(databaseName = "db") {
     super(databaseName);
@@ -90,6 +91,10 @@ export class CashuDexie extends Dexie {
       mints: "url",
       mintKeys: "[mintUrl+id], mintUrl",
     });
+    // v7: transaction worker queues (kind: bolt11 | bolt12 | onchain | outgoing)
+    this.version(7).stores({
+      workerQueue: "[kind+ref], kind",
+    });
   }
 }
 
@@ -125,6 +130,8 @@ export const WALLET_TABLES: WalletTableSpec[] = [
   { name: "paymentRequests", backup: true },
   { name: "mints", backup: true },
   { name: "mintKeys", backup: true },
+  // pending payments to check, so a restored wallet still claims them
+  { name: "workerQueue", backup: true },
 ];
 
 export function walletTableSpec(name: string): WalletTableSpec | undefined {

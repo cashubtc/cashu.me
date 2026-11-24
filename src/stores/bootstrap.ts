@@ -41,16 +41,22 @@ async function loadWalletData() {
   const { useMintsStore } = await import("./mints");
   await useMintsStore().init();
 
-  const [{ useWalletStore }, { useTokensStore }, { usePRStore }] =
-    await Promise.all([
-      import("./wallet"),
-      import("./tokens"),
-      import("./payment-request"),
-    ]);
+  const [
+    { useWalletStore },
+    { useTokensStore },
+    { usePRStore },
+    { useTransactionWorkerStore },
+  ] = await Promise.all([
+    import("./wallet"),
+    import("./tokens"),
+    import("./payment-request"),
+    import("./transactionWorker"),
+  ]);
   await Promise.all([
     useWalletStore().initPaymentHistory(),
     useTokensStore().initEcashHistory(),
     usePRStore().init(),
+    useTransactionWorkerStore().init(),
   ]);
 
   void requestPersistentStorage();

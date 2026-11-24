@@ -21,6 +21,8 @@ import { useProofsStore } from "src/stores/proofs";
 import { useUiStore } from "src/stores/ui";
 import { currentDateStr } from "src/js/utils";
 import { createSubpaymentHistoryQuote } from "src/js/invoice-history";
+import { markRaw } from "vue";
+import { createWorkerQueueTable } from "src/stores/workerQueueStorage";
 
 type IncomingPaymentMethod =
   | PaymentMethod.Bolt11
@@ -113,60 +115,65 @@ function compareQueueEntries(left: InvoiceQuote, right: InvoiceQuote) {
 }
 
 export const useTransactionWorkerStore = defineStore("transactionWorker", {
-  state: () => ({
-    // Requests are rate-limited independently for every mint URL.
-    checkInterval: 5_000,
-    workerTickInterval: 1_000,
-    offlineRetryBaseInterval: 60_000,
-    maxInterval: 24 * 60 * 60 * 1_000,
-    keepIntervalConstantForNChecks: 5,
-    maxLength: 50,
-    maxAge: 14 * 24 * 60 * 60 * 1_000,
-    maxBatchQuoteAge: 7 * 24 * 60 * 60 * 1_000,
-    oneHour: 60 * 60 * 1_000,
+  state: () => {
+    // The four queues live in the workerQueue table, one slice per kind;
+    // init() loads them at startup.
+    const quotesTable = createWorkerQueueTable<InvoiceQuote>("bolt11");
+    const bolt12QuotesTable = createWorkerQueueTable<InvoiceQuote>("bolt12");
+    const onchainQuotesTable = createWorkerQueueTable<InvoiceQuote>("onchain");
+    const outgoingPaymentsTable =
+      createWorkerQueueTable<OutgoingPaymentCheck>("outgoing");
+    return {
+      // Requests are rate-limited independently for every mint URL.
+      checkInterval: 5_000,
+      workerTickInterval: 1_000,
+      offlineRetryBaseInterval: 60_000,
+      maxInterval: 24 * 60 * 60 * 1_000,
+      keepIntervalConstantForNChecks: 5,
+      maxLength: 50,
+      maxAge: 14 * 24 * 60 * 60 * 1_000,
+      maxBatchQuoteAge: 7 * 24 * 60 * 60 * 1_000,
+      oneHour: 60 * 60 * 1_000,
 
-    transactionCheckListener: null as NodeJS.Timeout | null,
-    transactionWorkerRunning: false,
+      transactionCheckListener: null as NodeJS.Timeout | null,
+      transactionWorkerRunning: false,
 
-    // Lane state is ephemeral so a restart immediately retries pending work.
-    mintLaneInFlight: {} as Record<string, boolean>,
-    mintLastRequestAt: {} as Record<string, number>,
-    mintQuoteClaims: {} as Record<string, boolean>,
+      // Lane state is ephemeral so a restart immediately retries pending work.
+      mintLaneInFlight: {} as Record<string, boolean>,
+      mintLastRequestAt: {} as Record<string, number>,
+      mintQuoteClaims: {} as Record<string, boolean>,
 
-    // These keys intentionally retain their old names so existing queues
-    // survive the store rename.
-    quotes: useLocalStorage<InvoiceQuote[]>(
-      "cashu.worker.invoices.quotesQueue",
-      []
-    ),
-    bolt12Quotes: useLocalStorage<InvoiceQuote[]>(
-      "cashu.worker.invoices.bolt12QuotesQueue",
-      []
-    ),
-    onchainQuotes: useLocalStorage<InvoiceQuote[]>(
-      "cashu.worker.invoices.onchainQuotesQueue",
-      []
-    ),
-    outgoingPayments: useLocalStorage<OutgoingPaymentCheck[]>(
-      "cashu.worker.outgoing.queue",
-      []
-    ),
+      quotes: quotesTable.items,
+      bolt12Quotes: bolt12QuotesTable.items,
+      onchainQuotes: onchainQuotesTable.items,
+      outgoingPayments: outgoingPaymentsTable.items,
+      queueTables: markRaw([
+        quotesTable,
+        bolt12QuotesTable,
+        onchainQuotesTable,
+        outgoingPaymentsTable,
+      ]),
 
-    // Keep the existing key so offline-mint backoff survives upgrades.
-    reusableMintCooldowns: useLocalStorage<Record<string, MintCooldown>>(
-      "cashu.worker.invoices.reusableMintCooldowns",
-      {}
-    ),
-    batchPathCooldowns: useLocalStorage<Record<string, MintCooldown>>(
-      "cashu.worker.invoices.batchPathCooldowns",
-      {}
-    ),
+      // Keep the existing key so offline-mint backoff survives upgrades.
+      reusableMintCooldowns: useLocalStorage<Record<string, MintCooldown>>(
+        "cashu.worker.invoices.reusableMintCooldowns",
+        {}
+      ),
+      batchPathCooldowns: useLocalStorage<Record<string, MintCooldown>>(
+        "cashu.worker.invoices.batchPathCooldowns",
+        {}
+      ),
 
-    maxSingleBolt11QuotesToCheckOnStartup: 10,
-    maxOutgoingPaymentsToCheckOnStartup: 10,
-  }),
+      maxSingleBolt11QuotesToCheckOnStartup: 10,
+      maxOutgoingPaymentsToCheckOnStartup: 10,
+    };
+  },
 
   actions: {
+    async init() {
+      await Promise.all(this.queueTables.map((table) => table.hydrate()));
+    },
+
     startTransactionWorker(force = false) {
       const settingsStore = useSettingsStore();
       if (

@@ -46,6 +46,11 @@ export type TableMirrorOptions<T> = {
   toRow?: (item: T) => any;
   /** Turn a stored row back into an item (the position field is removed). */
   fromRow?: (row: any) => T;
+  /**
+   * Rows this mirror owns (defaults to the whole table). Several mirrors can
+   * share a table when each loads a disjoint slice of it.
+   */
+  load?: (table: Table<any, any>) => Promise<any[]>;
 };
 
 /** Plain, structured-clone-safe copy of an item (strips Vue proxies). */
@@ -127,7 +132,9 @@ export function createTableMirror<T>(
     if (isHydrated) return Promise.resolve();
     if (!hydrating) {
       hydrating = (async () => {
-        const rows = await table.toArray();
+        const rows = options.load
+          ? await options.load(table)
+          : await table.toArray();
         rows.sort(
           (a, b) =>
             (a[MIRROR_POSITION_FIELD] ?? 0) - (b[MIRROR_POSITION_FIELD] ?? 0)
