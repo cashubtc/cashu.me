@@ -18,7 +18,7 @@
           icon="close"
           @click="closePrompt"
           size="sm"
-          class="close-btn q-px-sm"
+          class="close-btn tap-target q-px-sm"
         />
       </div>
 
