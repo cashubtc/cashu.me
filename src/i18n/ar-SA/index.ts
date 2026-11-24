@@ -1057,6 +1057,11 @@ export default {
         },
       },
     },
+    errors: {
+      unit_not_matching_request: "يجب سداد طلب الدفع هذا بوحدة {unit}.",
+      mint_lacks_request_methods:
+        "لا يدعم الـ Mint المحدد طرق الدفع التي يتطلبها هذا الطلب.",
+    },
   },
   ReceiveDialog: {
     title: "استلام",

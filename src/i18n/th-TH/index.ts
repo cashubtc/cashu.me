@@ -1059,6 +1059,11 @@ export default {
         },
       },
     },
+    errors: {
+      unit_not_matching_request: "ต้องชำระคำขอนี้ด้วยหน่วย {unit}",
+      mint_lacks_request_methods:
+        "Mint ที่เลือกไม่รองรับวิธีการชำระเงินที่คำขอนี้ต้องการ",
+    },
   },
   ReceiveDialog: {
     title: "รับ",

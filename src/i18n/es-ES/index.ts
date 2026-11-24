@@ -1066,6 +1066,12 @@ export default {
         },
       },
     },
+    errors: {
+      unit_not_matching_request:
+        "Esta solicitud de pago debe pagarse en {unit}.",
+      mint_lacks_request_methods:
+        "El mint seleccionado no admite los métodos de pago que requiere esta solicitud.",
+    },
   },
   ReceiveDialog: {
     title: "Recibir",

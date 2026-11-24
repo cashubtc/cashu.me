@@ -1058,6 +1058,12 @@ export default {
         },
       },
     },
+    errors: {
+      unit_not_matching_request:
+        "この支払いリクエストは {unit} で支払う必要があります。",
+      mint_lacks_request_methods:
+        "選択したミントは、このリクエストに必要な支払い方法に対応していません。",
+    },
   },
   ReceiveDialog: {
     title: "受け取る",
