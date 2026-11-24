@@ -6,13 +6,13 @@ Status: proposal · Scope: `src/stores/*`, `src/stores/dexie.ts`, `src/stores/st
 
 There are three generations of migration in the codebase. The newest is the one to keep using.
 
-| Data | Where it lives now | How it got there |
-| --- | --- | --- |
-| Proofs (`cashu.proofs`) | `db.proofs` | `useDexieStore().migrateToDexie()` gated by the `cashu.dexie.migrated` flag, called from `WalletPage.created` |
+| Data                                               | Where it lives now                                    | How it got there                                                                                               |
+| -------------------------------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Proofs (`cashu.proofs`)                            | `db.proofs`                                           | `useDexieStore().migrateToDexie()` gated by the `cashu.dexie.migrated` flag, called from `WalletPage.created`  |
 | Lightning payment history (`cashu.invoiceHistory`) | `db.paymentHistory`, `db.mintQuotes`, `db.meltQuotes` | Versioned migration **v4** in `migrations.ts` → `paymentHistory.migrateLegacyInvoiceHistoryFromLocalStorage()` |
-| Ecash history (`cashu.historyTokens`) | `db.ecashHistory` | Versioned migration **v5** → `tokens.migrateHistoryTokensFromLocalStorage()` |
-| Mint reviews, NIP-87 infos, HTTP info cache | separate `mintReviews` DB | Created fresh, no migration (caches) |
-| Web-of-trust crawl | separate `nostrUserDB` DB | Created fresh, no migration (cache) |
+| Ecash history (`cashu.historyTokens`)              | `db.ecashHistory`                                     | Versioned migration **v5** → `tokens.migrateHistoryTokensFromLocalStorage()`                                   |
+| Mint reviews, NIP-87 infos, HTTP info cache        | separate `mintReviews` DB                             | Created fresh, no migration (caches)                                                                           |
+| Web-of-trust crawl                                 | separate `nostrUserDB` DB                             | Created fresh, no migration (cache)                                                                            |
 
 The v4/v5 pattern, which is the one to repeat:
 
@@ -36,16 +36,16 @@ I listed every `cashu.*` key and sorted them by whether they grow.
 
 ### Moving to IndexedDB (dynamic or large)
 
-| Key | Store | Why it should move |
-| --- | --- | --- |
-| `cashu.mints` | `mints.ts` | **Largest remaining blob.** Each mint embeds `keys[]` for every keyset it has ever had (~64 pubkeys, ≈5–6 KB per keyset), plus `info` and `keysets`. The array only grows as mints rotate keysets, and `useLocalStorage` re-serializes all of it on every small change (`motdDismissed`, `lastInfoUpdated`, `multinutSelected`, …). |
-| `cashu.pr.ours` | `payment-request.ts` | A new entry is appended per payment request and pruned only for foreign keys. `receivedPaymentIds[]` inside each entry also grows. |
-| `cashu.worker.invoices.quotesQueue`, `…bolt12QuotesQueue`, `…onchainQuotesQueue`, `cashu.worker.outgoing.queue` | `transactionWorker.ts` | Capped at 50 entries / 14 days, but `lastChecked` and `checkCount` change on every worker tick, so the whole array is re-stringified many times a minute. Most of the data duplicates `mintQuotes`/`meltQuotes`. |
-| `cashu.nwc.connections` (`processedRequestIds`) | `nwc.ts` | Up to 1,000 event ids per connection, kept inside the connection object, which also holds that connection's secret. |
-| `cashu.ndk.nip17EventIdsWeHaveSeen` | `nostr.ts` | Seen-event log with a 10-day window, checked with a linear `find` on every incoming event. Same job as NWC's `processedRequestIds`. |
-| `cashu.ndk.mintRecommendations` | `mintRecommendations.ts` | Derived from the `mintReviews` DB, so it belongs there. It's a cache, so it can be rebuilt instead of migrated. |
-| `cashu.keysetCounters`, `cashu.oldMnemonicCounters` | `wallet.ts` | Small, and grows once per keyset and per mnemonic rotation. The real reason to move it is **atomicity**: the counter bump can then commit in the same transaction as the proofs and quotes it produced. It needs care (see Phase 4). |
-| `cashu.P2PKKeys` | `p2pk.ts` | Grows with every generated key. Losing it means losing access to ecash locked to those keys. Low volume, high stakes. |
+| Key                                                                                                             | Store                    | Why it should move                                                                                                                                                                                                                                                                                                                  |
+| --------------------------------------------------------------------------------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `cashu.mints`                                                                                                   | `mints.ts`               | **Largest remaining blob.** Each mint embeds `keys[]` for every keyset it has ever had (~64 pubkeys, ≈5–6 KB per keyset), plus `info` and `keysets`. The array only grows as mints rotate keysets, and `useLocalStorage` re-serializes all of it on every small change (`motdDismissed`, `lastInfoUpdated`, `multinutSelected`, …). |
+| `cashu.pr.ours`                                                                                                 | `payment-request.ts`     | A new entry is appended per payment request and pruned only for foreign keys. `receivedPaymentIds[]` inside each entry also grows.                                                                                                                                                                                                  |
+| `cashu.worker.invoices.quotesQueue`, `…bolt12QuotesQueue`, `…onchainQuotesQueue`, `cashu.worker.outgoing.queue` | `transactionWorker.ts`   | Capped at 50 entries / 14 days, but `lastChecked` and `checkCount` change on every worker tick, so the whole array is re-stringified many times a minute. Most of the data duplicates `mintQuotes`/`meltQuotes`.                                                                                                                    |
+| `cashu.nwc.connections` (`processedRequestIds`)                                                                 | `nwc.ts`                 | Up to 1,000 event ids per connection, kept inside the connection object, which also holds that connection's secret.                                                                                                                                                                                                                 |
+| `cashu.ndk.nip17EventIdsWeHaveSeen`                                                                             | `nostr.ts`               | Seen-event log with a 10-day window, checked with a linear `find` on every incoming event. Same job as NWC's `processedRequestIds`.                                                                                                                                                                                                 |
+| `cashu.ndk.mintRecommendations`                                                                                 | `mintRecommendations.ts` | Derived from the `mintReviews` DB, so it belongs there. It's a cache, so it can be rebuilt instead of migrated.                                                                                                                                                                                                                     |
+| `cashu.keysetCounters`, `cashu.oldMnemonicCounters`                                                             | `wallet.ts`              | Small, and grows once per keyset and per mnemonic rotation. The real reason to move it is **atomicity**: the counter bump can then commit in the same transaction as the proofs and quotes it produced. It needs care (see Phase 4).                                                                                                |
+| `cashu.P2PKKeys`                                                                                                | `p2pk.ts`                | Grows with every generated key. Losing it means losing access to ecash locked to those keys. Low volume, high stakes.                                                                                                                                                                                                               |
 
 ### Staying in localStorage
 
@@ -66,7 +66,11 @@ Add one list in `dexie.ts` that every whole-database operation iterates over:
 ```ts
 // dexie.ts
 export const BACKED_UP_TABLES = [
-  "proofs", "paymentHistory", "mintQuotes", "meltQuotes", "ecashHistory",
+  "proofs",
+  "paymentHistory",
+  "mintQuotes",
+  "meltQuotes",
+  "ecashHistory",
   // new tables are added here, and nowhere else
 ] as const;
 ```
@@ -83,19 +87,19 @@ This replaces the hand-written migration bodies:
 ```ts
 async function moveLocalStorageKey<T, R>(opts: {
   key: string;
-  tables: Table[];                        // the tables the write touches
-  parse?: (raw: string) => T;             // default JSON.parse
-  write: (value: T) => Promise<number>;   // runs inside the rw transaction, returns rows written
-  verify?: () => Promise<boolean>;        // e.g. row count >= source length
+  tables: Table[]; // the tables the write touches
+  parse?: (raw: string) => T; // default JSON.parse
+  write: (value: T) => Promise<number>; // runs inside the rw transaction, returns rows written
+  verify?: () => Promise<boolean>; // e.g. row count >= source length
 }) {
   const raw = localStorage.getItem(opts.key);
-  if (raw == null) return;                // already moved, or never existed
+  if (raw == null) return; // already moved, or never existed
   const value = (opts.parse ?? JSON.parse)(raw);
   await cashuDb.transaction("rw", opts.tables, () => opts.write(value));
   if (opts.verify && !(await opts.verify())) {
     throw new Error(`verification failed for ${opts.key}`); // key stays, migration retries
   }
-  localStorage.removeItem(opts.key);      // only after commit + verify
+  localStorage.removeItem(opts.key); // only after commit + verify
 }
 ```
 
@@ -187,7 +191,7 @@ p2pkKeys:       "publicKey, used",
 
 - **Before any destructive migration**, the first migration downloaded a backup file. Don't do that on every upgrade, because it's surprising. Instead, keep a copy of the legacy value under `cashu.legacy.<key>` for one release after a successful move, then delete those copies in a later migration. This gives us a rollback path without user interaction.
 - **Downgrades**: a user who loads an older build after migrating will see empty mints, because Dexie upgrades are one-way and the old code reads localStorage. The `cashu.legacy.*` copy plus a short release gap between the "write to Dexie" release and the "delete legacy copies" release covers this.
-- **Multiple tabs**: `registerBroadcastChannel` sends a second tab to `/already-running`, but `WalletPage.created` registers it *after* `runMigrations()`. A second tab opened during an upgrade can therefore start the same migration. The migrations are idempotent (`bulkPut`, and the key is removed after commit), so this is mostly harmless. Still, wrap `walletDataReady()` in `navigator.locks.request("cashu-migrations", …)` so that only one tab migrates at a time. `liveQuery` already propagates changes across tabs.
+- **Multiple tabs**: `registerBroadcastChannel` sends a second tab to `/already-running`, but `WalletPage.created` registers it _after_ `runMigrations()`. A second tab opened during an upgrade can therefore start the same migration. The migrations are idempotent (`bulkPut`, and the key is removed after commit), so this is mostly harmless. Still, wrap `walletDataReady()` in `navigator.locks.request("cashu-migrations", …)` so that only one tab migrates at a time. `liveQuery` already propagates changes across tabs.
 - **Electron and Capacitor**: both use Chromium/WebKit IndexedDB, as `proofs` already does. Nothing platform-specific.
 - **Observability**: log the bytes moved per migration (`JSON.stringify(localStorage).length` before and after), like `cleanUpLocalStorage` does today.
 
