@@ -156,6 +156,7 @@ import { mapActions, mapWritableState } from "pinia";
 import { useSettingsStore } from "src/stores/settings";
 import { useNostrMintBackupStore } from "src/stores/nostrMintBackup";
 import { usePriceStore } from "src/stores/price";
+import { i18n } from "src/boot/i18n";
 import SettingsPageShell from "./SettingsPageShell.vue";
 import SettingsSection from "./SettingsSection.vue";
 
@@ -218,21 +219,20 @@ export default defineComponent({
     ]),
     onNostrMintBackupToggle: async function (enabled) {
       const nostrMintBackupStore = useNostrMintBackupStore();
+      // The user may leave this page before enabling finishes, and vue-i18n
+      // removes $t from unmounted components, so use the global instance.
+      const t = i18n.global.t;
 
       if (enabled) {
         try {
           await nostrMintBackupStore.enableBackup();
           this.notifySuccess(
-            this.$t(
-              "Settings.experimental.nostr_mint_backup.notifications.enabled"
-            )
+            t("Settings.experimental.nostr_mint_backup.notifications.enabled")
           );
         } catch (error) {
           console.error("Failed to enable Nostr mint backup:", error);
           this.notifyError(
-            this.$t(
-              "Settings.experimental.nostr_mint_backup.notifications.failed"
-            )
+            t("Settings.experimental.nostr_mint_backup.notifications.failed")
           );
           // Revert the toggle
           this.nostrMintBackupEnabled = false;
@@ -240,9 +240,7 @@ export default defineComponent({
       } else {
         nostrMintBackupStore.disableBackup();
         this.notifySuccess(
-          this.$t(
-            "Settings.experimental.nostr_mint_backup.notifications.disabled"
-          )
+          t("Settings.experimental.nostr_mint_backup.notifications.disabled")
         );
       }
     },
