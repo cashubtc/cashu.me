@@ -298,14 +298,11 @@ export default {
     padding-right: 50px;
   }
 
+  /* Two 32px buttons in the same 68px the text leaves free */
   .seed-actions {
-    top: 12px;
-    right: 8px;
-  }
-
-  .action-btn {
-    width: 28px;
-    height: 28px;
+    top: 10px;
+    right: 4px;
+    gap: 0;
   }
 }
 </style>

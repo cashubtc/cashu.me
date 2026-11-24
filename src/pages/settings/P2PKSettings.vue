@@ -11,7 +11,7 @@
         <q-item-section>
           <div class="row items-center q-gutter-sm">
             <q-btn
-              class="q-px-md"
+              class="q-px-md tap-target"
               color="primary"
               size="sm"
               rounded
@@ -20,7 +20,7 @@
               >{{ $t("Settings.p2pk_features.generate_button") }}</q-btn
             >
             <q-btn
-              class="q-px-md"
+              class="q-px-md tap-target"
               color="primary"
               size="sm"
               rounded
@@ -77,14 +77,14 @@
               @click="copyText(key.publicKey)"
               size="xs"
               color="grey"
-              class="cursor-pointer"
+              class="cursor-pointer tap-target"
             />
             <q-icon
               name="qr_code"
               @click="showP2PKKeyEntry(key.publicKey)"
               size="xs"
               color="grey"
-              class="cursor-pointer"
+              class="cursor-pointer tap-target"
             />
           </div>
         </q-item-section>

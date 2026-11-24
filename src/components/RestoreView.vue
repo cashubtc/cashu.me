@@ -88,7 +88,7 @@
           rounded
           outline
           color="primary"
-          class="q-px-md"
+          class="q-px-md tap-target"
           @click="selectAllMints"
           :disabled="allSelected"
         >
@@ -99,7 +99,7 @@
           rounded
           outline
           color="grey"
-          class="q-px-md"
+          class="q-px-md tap-target"
           @click="deselectAllMints"
           :disabled="!anySelected"
         >
@@ -219,7 +219,7 @@
                     :disabled="!isMnemonicValid || restoringState"
                     :loading="restoringMint === mint.url"
                     icon="restore"
-                    class="q-px-sm"
+                    class="q-px-sm tap-target"
                   >
                     <q-tooltip>{{
                       $t("RestoreView.actions.restore.label")

@@ -180,8 +180,10 @@ export default defineComponent({
 
 .paste-text-btn {
   position: absolute;
-  right: 20px;
-  top: 16px;
+  // Padding grows the hit area; the offsets keep the label in place.
+  right: 12px;
+  top: 8px;
+  padding: 8px;
   font-size: 16px;
   font-weight: 500;
   color: var(--q-primary);

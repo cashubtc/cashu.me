@@ -19,7 +19,7 @@
           icon="close"
           @click="closePrompt"
           size="sm"
-          class="close-btn q-px-sm"
+          class="close-btn tap-target q-px-sm"
         />
       </div>
 
@@ -81,7 +81,7 @@ export default defineComponent({
 
 .pwa-prompt {
   position: fixed;
-  top: 20px;
+  top: 8px;
   right: 20px;
   margin: 0 auto;
   z-index: 9999;
@@ -107,15 +107,15 @@ export default defineComponent({
 }
 
 .pwa-prompt-arrow {
+  order: -1;
   position: relative;
   width: 0;
   height: 0;
-  bottom: 60px;
   left: 45%;
   border-left: 10px solid transparent;
   border-right: 10px solid transparent;
   border-bottom: 10px solid white;
   text-align: center;
-  margin: 0 auto;
+  margin: 0 auto 2px;
 }
 </style>

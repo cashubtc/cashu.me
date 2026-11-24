@@ -49,6 +49,7 @@
               dense
               size="lg"
               color="primary"
+              class="tap-target"
               @click="toggleUnit()"
               :label="activeUnitLabel"
             />

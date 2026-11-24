@@ -55,7 +55,7 @@
         </q-item-section>
         <q-item-section side>
           <q-btn
-            class="q-px-md"
+            class="q-px-md tap-target"
             color="primary"
             size="sm"
             rounded

@@ -50,7 +50,7 @@
                 @click="copyText(getConnectionString(connection))"
                 size="xs"
                 color="grey"
-                class="cursor-pointer"
+                class="cursor-pointer tap-target"
                 ><q-tooltip>{{
                   $t("Settings.nostr_wallet_connect.connection.copy_tooltip")
                 }}</q-tooltip></q-icon
@@ -60,7 +60,7 @@
                 @click="showNWCEntry(connection)"
                 size="xs"
                 color="grey"
-                class="cursor-pointer"
+                class="cursor-pointer tap-target"
               >
                 <q-tooltip>{{
                   $t("Settings.nostr_wallet_connect.connection.qr_tooltip")
