@@ -110,11 +110,11 @@ describe("seen event pruning", () => {
       vi.setSystemTime(Date.now() + 2 * 60 * 60 * 1000);
       log.markSeen("new", Math.floor(Date.now() / 1000));
       await vi.waitFor(async () => {
-        expect(await cashuDb.seenEvents.get(["prune-test", "old"])).toBe(
-          undefined
-        );
+        expect(log.has("old")).toBe(false);
+        expect(
+          await cashuDb.seenEvents.get(["prune-test", "old"])
+        ).toBeUndefined();
       });
-      expect(log.has("old")).toBe(false);
       expect(log.has("new")).toBe(true);
     } finally {
       vi.useRealTimers();

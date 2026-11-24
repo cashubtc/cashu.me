@@ -633,6 +633,9 @@ export default {
     backup_unsaved: "Some changes could not be saved, so no backup was made.",
     export_partial:
       "Backup exported, but some recent changes could not be saved and are missing from it.",
+    wipe_busy: "Payments are still being checked. Try again in a moment.",
+    wipe_failed: "Could not delete the wallet completely. The app will reload.",
+    backup_failed: "Could not create the backup.",
   },
   ErrorNotFound: {
     title: "404",

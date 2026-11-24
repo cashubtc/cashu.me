@@ -622,6 +622,11 @@ export default {
       "Algunos cambios no se pudieron guardar, así que no se creó ninguna copia de seguridad.",
     export_partial:
       "Copia de seguridad exportada, pero algunos cambios recientes no se pudieron guardar y faltan en ella.",
+    wipe_busy:
+      "Todavía se están comprobando pagos. Vuelve a intentarlo en un momento.",
+    wipe_failed:
+      "No se pudo eliminar la billetera por completo. La aplicación se recargará.",
+    backup_failed: "No se pudo crear la copia de seguridad.",
   },
   ErrorNotFound: {
     title: "404",

@@ -11,7 +11,11 @@ import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { usePRStore } from "./payment-request";
 import { useTransactionWorkerStore } from "./transactionWorker";
 import { markRaw } from "vue";
-import { cashuDb, putKeysetCountersMax } from "src/stores/dexie";
+import {
+  cashuDb,
+  putKeysetCountersMax,
+  type KeysetCounter,
+} from "src/stores/dexie";
 import { createTableMirror } from "src/stores/tableMirror";
 import { importLegacyKeysetCounters } from "src/stores/counterStorage";
 
@@ -172,11 +176,6 @@ function createIncomingInvoiceDraft(
     direction: "mint",
   };
 }
-
-type KeysetCounter = {
-  id: string;
-  counter: number;
-};
 
 const receiveStore = useReceiveTokensStore();
 const tokenStore = useTokensStore();

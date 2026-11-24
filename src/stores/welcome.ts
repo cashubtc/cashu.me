@@ -86,13 +86,14 @@ export const useWelcomeStore = defineStore("welcome", {
      * Closes the welcome dialog and marks it as seen.
      */
     closeWelcome() {
-      this.showWelcome = false;
-      // Reset the slide to the beginning for next time (if welcome is ever shown again)
-      this.currentSlide = 0;
-      // Redirect to home or desired route, once onboarding data is stored
-      // (a failed write has been reported; stay so nothing is lost)
-      flushPendingWrites().then(
+      // Onboarding only completes once the data it created is stored; after a
+      // failed save (already reported) it stays open so the user can retry.
+      return flushPendingWrites().then(
         () => {
+          this.showWelcome = false;
+          // Reset the slide to the beginning for next time (if welcome is
+          // ever shown again)
+          this.currentSlide = 0;
           window.location.href =
             "/" + window.location.search + window.location.hash;
         },

@@ -581,7 +581,9 @@ export default {
       if (document.visibilityState === "visible") {
         console.log("### App brought to foreground, checking NWC...");
         if (this.nwcEnabled) {
-          this.listenToNWCCommands();
+          this.listenToNWCCommands().catch((error) =>
+            console.error("Could not listen to NWC commands", error)
+          );
         }
       }
     },
@@ -720,11 +722,15 @@ export default {
 
     // listen to NWC commands if enabled
     if (this.nwcEnabled) {
-      this.listenToNWCCommands();
+      this.listenToNWCCommands().catch((error) =>
+        console.error("Could not listen to NWC commands", error)
+      );
     }
 
     if (this.enablePaymentRequest && hasSeed) {
-      this.subscribeToNip17DirectMessages();
+      this.subscribeToNip17DirectMessages().catch((error) =>
+        console.error("Could not subscribe to NIP-17 messages", error)
+      );
     }
 
     // Start background transaction reconciliation.

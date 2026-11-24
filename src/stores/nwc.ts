@@ -521,8 +521,10 @@ export const useNWCStore = defineStore("nwc", {
           return;
         }
         if (
+          // measured now, not at subscribe time: seen ids are forgotten
+          // after twice the window, so older requests must stay ignored
           event.created_at <
-          currentUnitTime - NWC_SUBSCRIPTION_WINDOW_SECONDS
+          Math.floor(Date.now() / 1000) - NWC_SUBSCRIPTION_WINDOW_SECONDS
         ) {
           return; // ignore events older than 24 hours
         }

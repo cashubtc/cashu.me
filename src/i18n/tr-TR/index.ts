@@ -628,6 +628,9 @@ export default {
       "Bazı değişiklikler kaydedilemediği için yedek oluşturulmadı.",
     export_partial:
       "Yedek dışa aktarıldı, ancak bazı son değişiklikler kaydedilemedi ve yedekte yok.",
+    wipe_busy: "Ödemeler hâlâ kontrol ediliyor. Birazdan tekrar deneyin.",
+    wipe_failed: "Cüzdan tamamen silinemedi. Uygulama yeniden yüklenecek.",
+    backup_failed: "Yedek oluşturulamadı.",
   },
   ErrorNotFound: {
     title: "404",

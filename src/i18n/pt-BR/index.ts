@@ -639,6 +639,11 @@ export default {
       "Algumas alterações não puderam ser salvas, então nenhum backup foi criado.",
     export_partial:
       "Backup exportado, mas algumas alterações recentes não puderam ser salvas e não estão nele.",
+    wipe_busy:
+      "Ainda há pagamentos sendo verificados. Tente novamente em instantes.",
+    wipe_failed:
+      "Não foi possível excluir a carteira por completo. O app será recarregado.",
+    backup_failed: "Não foi possível criar o backup.",
   },
   ErrorNotFound: {
     title: "404",

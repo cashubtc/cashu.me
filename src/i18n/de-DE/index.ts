@@ -625,6 +625,10 @@ export default {
       "Einige Änderungen konnten nicht gespeichert werden, daher wurde kein Backup erstellt.",
     export_partial:
       "Backup exportiert, aber einige letzte Änderungen konnten nicht gespeichert werden und fehlen darin.",
+    wipe_busy: "Zahlungen werden noch geprüft. Versuche es gleich noch einmal.",
+    wipe_failed:
+      "Die Wallet konnte nicht vollständig gelöscht werden. Die App wird neu geladen.",
+    backup_failed: "Das Backup konnte nicht erstellt werden.",
   },
   ErrorNotFound: {
     title: "404",

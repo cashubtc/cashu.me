@@ -18,6 +18,12 @@ import {
 //   quote?: string
 // }
 
+/** The next deterministic secret counter for one keyset (NUT-13). */
+export type KeysetCounter = {
+  id: string;
+  counter: number;
+};
+
 export class CashuDexie extends Dexie {
   proofs!: Table<WalletProof>;
   paymentHistory!: Table<any>;
@@ -29,7 +35,7 @@ export class CashuDexie extends Dexie {
   mints!: Table<any, string>;
   mintKeys!: Table<any, [string, string]>;
   workerQueue!: Table<any, [string, string]>;
-  keysetCounters!: Table<{ id: string; counter: number }, string>;
+  keysetCounters!: Table<KeysetCounter, string>;
   p2pkKeys!: Table<any, string>;
 
   constructor(databaseName = "db") {
@@ -129,9 +135,7 @@ export type WalletTableSpec = {
  * Store keyset counters, never lowering one that is already stored: a counter
  * that goes backwards re-derives outputs the mint has already signed.
  */
-export async function putKeysetCountersMax(
-  counters: { id: string; counter: number }[]
-) {
+export async function putKeysetCountersMax(counters: KeysetCounter[]) {
   const valid = counters.filter(
     (entry) => entry && entry.id && Number.isFinite(entry.counter)
   );

@@ -325,6 +325,10 @@ export default defineComponent({
     ]),
     ...mapActions(useProofsStore, ["serializeProofs"]),
     ...mapActions(useDexieStore, ["deleteAllTables"]),
+    ...mapActions(useTransactionWorkerStore, [
+      "stopTransactionWorkerAndWait",
+      "startTransactionWorker",
+    ]),
     ...mapActions(useStorageStore, ["restoreFromBackup", "exportWalletState"]),
     generateNewMnemonic: async function () {
       this.newMnemonic();
@@ -385,27 +389,43 @@ export default defineComponent({
       this.$router.push("/welcome");
     },
     nukeWallet: async function () {
-      // stop background work that would write to the tables being wiped, and
-      // let checks already in flight finish
-      await useTransactionWorkerStore().stopTransactionWorkerAndWait();
+      // Stop background work that writes to the tables being wiped and wait
+      // for checks in flight (they can write proofs); refuse while they run.
+      if (!(await this.stopTransactionWorkerAndWait())) {
+        this.notifyError(this.$t("WalletStorage.wipe_busy"));
+        this.startTransactionWorker();
+        return;
+      }
       // create a backup just in case; refused (and the wipe stopped) when
       // some changes could not be saved, so the backup is never incomplete
-      await this.exportWalletState({ requireSaved: true });
-      // nothing may write after this point, or it would survive the wipe;
-      // let writes that were already queued finish before clearing
-      suspendPendingWrites();
-      await flushPendingWrites().catch(() => {});
-      // clear dexie tables
-      await this.deleteAllTables();
-      // clear nostr user databases
-      await useNostrUserStore().clearAllDatabases();
-      // clear mint reviews database
       try {
-        const { useMintRecommendationsStore } = await import(
-          "src/stores/mintRecommendations"
-        );
-        await useMintRecommendationsStore().clearAllDatabases();
-      } catch {}
+        await this.exportWalletState({ requireSaved: true });
+      } catch {
+        // reported by exportWalletState
+        this.startTransactionWorker();
+        return;
+      }
+      // nothing may write after this point, or it would survive the wipe
+      suspendPendingWrites();
+      try {
+        // let writes that were already queued finish before clearing
+        await flushPendingWrites().catch(() => {});
+        await this.deleteAllTables();
+        await useNostrUserStore().clearAllDatabases();
+        try {
+          const { useMintRecommendationsStore } = await import(
+            "src/stores/mintRecommendations"
+          );
+          await useMintRecommendationsStore().clearAllDatabases();
+        } catch {}
+      } catch (error) {
+        // Writes are suspended, so this tab must not keep running: reload and
+        // continue from whatever is stored.
+        console.error("Could not wipe the wallet", error);
+        this.notifyError(this.$t("WalletStorage.wipe_failed"));
+        window.location.reload();
+        return;
+      }
       localStorage.clear();
       window.location.href = "/";
     },

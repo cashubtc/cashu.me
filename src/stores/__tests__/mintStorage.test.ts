@@ -1,5 +1,5 @@
 import "fake-indexeddb/auto";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 // wallet.ts creates stores at import time; load it first
 import "src/stores/wallet";
 import { createPinia, setActivePinia } from "pinia";
@@ -153,5 +153,61 @@ describe("mints storage", () => {
       "https://stablenut.cashu.network",
     ]);
     expect(store.mints[0].keys).toHaveLength(1);
+  });
+
+  it("merges legacy entries with the same URL instead of dropping keysets", async () => {
+    localStorage.setItem(
+      "cashu.mints",
+      JSON.stringify([
+        mint("https://dup", ["00f1"]),
+        mint("https://dup", ["00f2"]),
+      ])
+    );
+    await importLegacyMints();
+
+    const store = await reloadedMints();
+    expect(store.mints).toHaveLength(1);
+    expect(store.mints[0].keysets.map((k) => k.id)).toEqual(["00f1", "00f2"]);
+    expect(store.mints[0].keys.map((k) => k.id)).toEqual(["00f1", "00f2"]);
+  });
+
+  it("merges a duplicate URL created at runtime", async () => {
+    const store = useMintsStore();
+    await store.init();
+    store.mints.push(mint("https://a", ["00a1"]), mint("https://b", ["00b1"]));
+    await store.mintsTable.flush();
+    store.mints[1].url = "https://a";
+    await store.mintsTable.flush();
+
+    const reloaded = await reloadedMints();
+    expect(reloaded.mints).toHaveLength(1);
+    expect(reloaded.mints[0].keysets.map((k) => k.id)).toEqual([
+      "00a1",
+      "00b1",
+    ]);
+  });
+
+  it("commits a mint row and its keys together", async () => {
+    const store = useMintsStore();
+    await store.init();
+    store.mints.push(mint("https://old", ["00c1"]));
+    await store.mintsTable.flush();
+
+    const failKeys = vi
+      .spyOn(cashuDb.mintKeys, "bulkPut")
+      .mockRejectedValue(new Error("quota"));
+    store.mints[0].url = "https://new";
+    await expect(store.mintsTable.flush()).rejects.toThrow("quota");
+    failKeys.mockRestore();
+
+    // nothing of the rename committed: the old row still has its keys
+    expect(await cashuDb.mints.get("https://old")).toBeTruthy();
+    expect(await cashuDb.mints.get("https://new")).toBeUndefined();
+    expect(await cashuDb.mintKeys.get(["https://old", "00c1"])).toBeTruthy();
+
+    await store.mintsTable.flush();
+    const reloaded = await reloadedMints();
+    expect(reloaded.mints.map((m) => m.url)).toEqual(["https://new"]);
+    expect(reloaded.mints[0].keys.map((k) => k.id)).toEqual(["00c1"]);
   });
 });

@@ -21,6 +21,8 @@ export const MIRROR_POSITION_FIELD = "_pos";
 
 export type TableMirror<T> = {
   items: Ref<T[]>;
+  /** Queue a write even when `items` did not change (see writeExtra). */
+  touch: () => void;
   hydrated: () => boolean;
   /** Load the table into `items`. Safe to call more than once. */
   hydrate: () => Promise<void>;
@@ -141,6 +143,19 @@ export type TableMirrorOptions<T> = {
   /** Writes changed rows inside the transaction (defaults to bulkPut). */
   writeRows?: (rows: any[]) => Promise<void>;
   /**
+   * Combines two items with the same key (e.g. duplicate mint URLs) instead
+   * of letting the later one overwrite the earlier one. The merged item takes
+   * the first one's position.
+   */
+  mergeDuplicates?: (first: T, later: T) => T;
+  /**
+   * Further writes committed in the same transaction as the rows (over
+   * `extraTables`). Returns a callback that runs once the transaction has
+   * committed.
+   */
+  extraTables?: Table<any, any>[];
+  writeExtra?: () => Promise<(() => void) | void>;
+  /**
    * How an item added before hydration combines with a stored item of the
    * same key. Defaults to the in-memory item.
    */
@@ -185,12 +200,28 @@ export function createTableMirror<T>(
     return row[keyPath as string];
   };
 
+  const uniqueItems = () => {
+    const byKey = new Map<string, T>();
+    for (const item of items.value) {
+      const key = keyString(options.keyOf(item));
+      const previous = byKey.get(key);
+      byKey.set(
+        key,
+        previous !== undefined && options.mergeDuplicates
+          ? options.mergeDuplicates(previous, item)
+          : item
+      );
+    }
+    return [...byKey.values()];
+  };
+
   const write = async () => {
-    const rows = toMirrorRows(items.value, options.toRow);
+    const unique = uniqueItems();
+    const rows = toMirrorRows(unique, options.toRow);
     const next = new Map<string, string>();
     const puts: any[] = [];
     rows.forEach((row, index) => {
-      const key = keyString(options.keyOf(items.value[index]));
+      const key = keyString(options.keyOf(unique[index]));
       const serialized = JSONInt.stringify(row) as string;
       next.set(key, serialized);
       if (persisted.get(key) !== serialized) puts.push(row);
@@ -198,15 +229,24 @@ export function createTableMirror<T>(
     const deletes = [...persisted.keys()]
       .filter((key) => !next.has(key))
       .map((key) => JSONInt.parse(key) as IndexableType);
-    if (puts.length || deletes.length) {
-      await table.db.transaction("rw", table, async () => {
-        if (deletes.length) await table.bulkDelete(deletes);
-        if (puts.length) {
-          if (options.writeRows) await options.writeRows(puts);
-          else await table.bulkPut(puts);
+    let afterCommit: (() => void) | undefined;
+    if (puts.length || deletes.length || options.writeExtra) {
+      await table.db.transaction(
+        "rw",
+        [table, ...(options.extraTables || [])],
+        async () => {
+          if (deletes.length) await table.bulkDelete(deletes);
+          if (puts.length) {
+            if (options.writeRows) await options.writeRows(puts);
+            else await table.bulkPut(puts);
+          }
+          if (options.writeExtra) {
+            afterCommit = (await options.writeExtra()) || undefined;
+          }
         }
-      });
+      );
     }
+    afterCommit?.();
     // only after the commit, so a failed write is retried with the next change
     persisted = next;
   };
@@ -265,6 +305,7 @@ export function createTableMirror<T>(
 
   return {
     items,
+    touch: writer.schedule,
     hydrated: () => isHydrated,
     hydrate,
     // a change schedules its write synchronously, so flushing covers every

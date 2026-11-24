@@ -169,6 +169,15 @@ export const useStorageStore = defineStore("storage", {
         }
         complete = false;
       }
+      try {
+        await this.downloadBackup(complete);
+      } catch (error) {
+        console.error("Could not create backup", error);
+        notifyError(i18n.global.t("WalletStorage.backup_failed"));
+        throw error;
+      }
+    },
+    downloadBackup: async function (complete: boolean) {
       const jsonToSave: any = {};
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);

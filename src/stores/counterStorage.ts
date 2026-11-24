@@ -1,4 +1,8 @@
-import { cashuDb, putKeysetCountersMax } from "src/stores/dexie";
+import {
+  cashuDb,
+  putKeysetCountersMax,
+  type KeysetCounter,
+} from "src/stores/dexie";
 import { moveLocalStorageKey } from "src/stores/legacyStorage";
 
 /**
@@ -10,7 +14,7 @@ import { moveLocalStorageKey } from "src/stores/legacyStorage";
  * scope for this migration.
  */
 export async function importLegacyKeysetCounters() {
-  await moveLocalStorageKey<{ id: string; counter: number }[]>({
+  await moveLocalStorageKey<KeysetCounter[]>({
     key: "cashu.keysetCounters",
     tables: [cashuDb.keysetCounters],
     write: async (counters) => {

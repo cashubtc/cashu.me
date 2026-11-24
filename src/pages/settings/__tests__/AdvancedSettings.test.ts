@@ -95,6 +95,8 @@ describe("AdvancedSettings", () => {
     const clearLocalStorage = vi.spyOn(localStorage, "clear");
 
     const nukePromise = AdvancedSettings.methods.nukeWallet.call({
+      stopTransactionWorkerAndWait: vi.fn().mockResolvedValue(true),
+      startTransactionWorker: vi.fn(),
       exportWalletState: vi.fn().mockResolvedValue(undefined),
       deleteAllTables,
     });
@@ -114,5 +116,38 @@ describe("AdvancedSettings", () => {
 
     expect(storeMocks.clearMintDatabases).toHaveBeenCalledOnce();
     expect(clearLocalStorage).toHaveBeenCalledOnce();
+  });
+
+  it("does not wipe while payment checks are still running", async () => {
+    const context = {
+      stopTransactionWorkerAndWait: vi.fn().mockResolvedValue(false),
+      startTransactionWorker: vi.fn(),
+      exportWalletState: vi.fn(),
+      deleteAllTables: vi.fn(),
+      notifyError: vi.fn(),
+      $t: (key: string) => key,
+    };
+    await AdvancedSettings.methods.nukeWallet.call(context);
+    expect(context.notifyError).toHaveBeenCalledWith("WalletStorage.wipe_busy");
+    expect(context.startTransactionWorker).toHaveBeenCalled();
+    expect(context.exportWalletState).not.toHaveBeenCalled();
+    expect(context.deleteAllTables).not.toHaveBeenCalled();
+  });
+
+  it("does not wipe when the backup cannot be completed", async () => {
+    const context = {
+      stopTransactionWorkerAndWait: vi.fn().mockResolvedValue(true),
+      startTransactionWorker: vi.fn(),
+      exportWalletState: vi.fn().mockRejectedValue(new Error("quota")),
+      deleteAllTables: vi.fn(),
+      notifyError: vi.fn(),
+      $t: (key: string) => key,
+    };
+    await AdvancedSettings.methods.nukeWallet.call(context);
+    expect(context.exportWalletState).toHaveBeenCalledWith({
+      requireSaved: true,
+    });
+    expect(context.deleteAllTables).not.toHaveBeenCalled();
+    expect(context.startTransactionWorker).toHaveBeenCalled();
   });
 });

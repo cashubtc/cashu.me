@@ -592,6 +592,10 @@ export default {
       "Alcune modifiche non sono state salvate, quindi non è stato creato alcun backup.",
     export_partial:
       "Backup esportato, ma alcune modifiche recenti non sono state salvate e mancano.",
+    wipe_busy: "I pagamenti sono ancora in verifica. Riprova tra un momento.",
+    wipe_failed:
+      "Impossibile eliminare completamente il portafoglio. L'app verrà ricaricata.",
+    backup_failed: "Impossibile creare il backup.",
   },
   ErrorNotFound: {
     title: "404",

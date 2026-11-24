@@ -127,6 +127,11 @@ export const usePRStore = defineStore("payment-request", {
   },
   actions: {
     async init() {
+      // move a legacy cashu.pr.ours first, so a failed move stops startup
+      const { importLegacyPaymentRequests } = await import(
+        "src/stores/legacyImporters"
+      );
+      await importLegacyPaymentRequests();
       await this.ourPaymentRequestsTable.hydrate();
     },
     newPaymentRequest(

@@ -636,6 +636,10 @@ export default {
       "Některé změny se nepodařilo uložit, proto nebyla vytvořena záloha.",
     export_partial:
       "Záloha byla exportována, ale některé nedávné změny se nepodařilo uložit a v záloze chybí.",
+    wipe_busy: "Platby se stále ověřují. Zkuste to za chvíli znovu.",
+    wipe_failed:
+      "Peněženku se nepodařilo smazat celou. Aplikace se znovu načte.",
+    backup_failed: "Zálohu se nepodařilo vytvořit.",
   },
   ErrorNotFound: {
     title: "404",

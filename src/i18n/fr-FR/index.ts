@@ -623,6 +623,11 @@ export default {
       "Certaines modifications n'ont pas pu être enregistrées, aucune sauvegarde n'a donc été créée.",
     export_partial:
       "Sauvegarde exportée, mais certaines modifications récentes n'ont pas pu être enregistrées et n'y figurent pas.",
+    wipe_busy:
+      "Des paiements sont encore en cours de vérification. Réessayez dans un instant.",
+    wipe_failed:
+      "Impossible de supprimer entièrement le portefeuille. L'application va se recharger.",
+    backup_failed: "Impossible de créer la sauvegarde.",
   },
   ErrorNotFound: {
     title: "404",

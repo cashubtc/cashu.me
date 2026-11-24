@@ -22,7 +22,10 @@ import { useUiStore } from "src/stores/ui";
 import { currentDateStr } from "src/js/utils";
 import { createSubpaymentHistoryQuote } from "src/js/invoice-history";
 import { markRaw } from "vue";
-import { createWorkerQueueTable } from "src/stores/workerQueueStorage";
+import {
+  createWorkerQueueTable,
+  importLegacyWorkerQueues,
+} from "src/stores/workerQueueStorage";
 
 type IncomingPaymentMethod =
   | PaymentMethod.Bolt11
@@ -171,6 +174,9 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
 
   actions: {
     async init() {
+      // move legacy localStorage queues first, so a failed move stops startup
+      // instead of running the worker without them
+      await importLegacyWorkerQueues();
       await Promise.all(this.queueTables.map((table) => table.hydrate()));
     },
 
@@ -201,16 +207,18 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
       this.transactionWorkerRunning = false;
     },
 
-    /** Stop the worker and wait until checks already in flight have finished. */
-    async stopTransactionWorkerAndWait(timeoutMs = 15_000) {
+    /**
+     * Stop the worker and wait until checks already in flight have finished.
+     * Resolves false when some are still running after `timeoutMs`.
+     */
+    async stopTransactionWorkerAndWait(timeoutMs = 15_000): Promise<boolean> {
       this.stopTransactionWorker();
+      const busy = () => Object.values(this.mintLaneInFlight).some(Boolean);
       const deadline = Date.now() + timeoutMs;
-      while (
-        Object.values(this.mintLaneInFlight).some(Boolean) &&
-        Date.now() < deadline
-      ) {
+      while (busy() && Date.now() < deadline) {
         await new Promise((resolve) => setTimeout(resolve, 100));
       }
+      return !busy();
     },
 
     addInvoiceToChecker(quote: string, forceStart = false) {

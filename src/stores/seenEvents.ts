@@ -1,10 +1,7 @@
 import { cashuDb } from "src/stores/dexie";
 import { i18n } from "src/boot/i18n";
 import { notifyError } from "src/js/notify";
-import {
-  registerPendingWrites,
-  reportWriteFailure,
-} from "src/stores/tableMirror";
+import { createSerialWriter, reportWriteFailure } from "src/stores/tableMirror";
 
 /**
  * Nostr event ids we already handled, per scope ("nip17", "nwc:<pubkey>").
@@ -13,7 +10,8 @@ import {
  * in quick succession, and an async lookup would let two copies through
  * before either is recorded. So the ids of a scope are loaded into a Set once
  * (`load()`), `markSeen()` checks and records in that Set synchronously, and
- * the row is written to IndexedDB in the background.
+ * the row is written to IndexedDB in the background through a serial writer
+ * (so failures are reported, retried, and make flushPendingWrites reject).
  */
 export type SeenEventRow = {
   scope: string;
@@ -23,21 +21,34 @@ export type SeenEventRow = {
 
 const PRUNE_INTERVAL_MS = 60 * 60 * 1000;
 
-// Seen-event rows are written directly (not through a table mirror); track
-// them so flushPendingWrites/suspendPendingWrites cover them as well.
-const pendingPuts = new Set<Promise<unknown>>();
-let writesSuspended = false;
-registerPendingWrites({
-  flush: async () => {
-    await Promise.all([...pendingPuts]);
+// rows recorded in memory but not yet committed, keyed by "scope\nid"
+const unsaved = new Map<string, SeenEventRow>();
+const seenEventsWriter = createSerialWriter(
+  "seenEvents",
+  async () => {
+    const rows = [...unsaved.entries()];
+    if (!rows.length) return;
+    await cashuDb.seenEvents.bulkPut(rows.map(([, row]) => row));
+    // only forget rows that were not recorded again meanwhile
+    for (const [key, row] of rows) {
+      if (unsaved.get(key) === row) unsaved.delete(key);
+    }
   },
-  suspend: () => {
-    writesSuspended = true;
-  },
-  resume: () => {
-    writesSuspended = false;
-  },
-});
+  () => true
+);
+
+/**
+ * Moves the legacy localStorage ids of a scope into the table before they are
+ * loaded, so a failed move stops the listener instead of letting it handle
+ * old events again.
+ */
+async function importLegacySeenEvents(scope: string) {
+  const legacy = await import("src/stores/legacyImporters");
+  if (scope === "nip17") await legacy.importLegacyNip17SeenEvents();
+  if (scope.startsWith("nwc:")) {
+    await legacy.importLegacyNwcProcessedRequestIds();
+  }
+}
 
 export class SeenEventLog {
   private ids = new Set<string>();
@@ -53,6 +64,7 @@ export class SeenEventLog {
   load(): Promise<void> {
     if (!this.loaded) {
       this.loaded = (async () => {
+        await importLegacySeenEvents(this.scope);
         await this.prune();
         const rows = await cashuDb.seenEvents
           .where("scope")
@@ -83,18 +95,17 @@ export class SeenEventLog {
       id,
       created_at: createdAt ?? Math.floor(Date.now() / 1000),
     };
-    if (!writesSuspended) {
-      const put: Promise<unknown> = cashuDb.seenEvents
-        .put(row)
-        .catch((error) => reportWriteFailure("seenEvents", error))
-        .finally(() => pendingPuts.delete(put));
-      pendingPuts.add(put);
-    }
+    unsaved.set(`${this.scope}\n${id}`, row);
+    seenEventsWriter.schedule();
     // long-running sessions keep forgetting expired ids, not only on load
     if (Date.now() - this.lastPrunedAt > PRUNE_INTERVAL_MS) {
-      this.prune().catch((error) =>
-        console.error("Could not prune seen events", error)
-      );
+      this.lastPrunedAt = Date.now();
+      // prune after pending writes, so it also sees the rows just recorded
+      seenEventsWriter
+        .flush()
+        .catch(() => {})
+        .then(() => this.prune())
+        .catch((error) => reportWriteFailure("seenEvents", error));
     }
     return true;
   }
