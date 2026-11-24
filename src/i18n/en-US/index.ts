@@ -988,6 +988,12 @@ export default {
       percentage: "{ percentage }%",
       keep_scanning_text: " - Keep scanning",
     },
+    errors: {
+      camera_permission:
+        "Camera access was denied. Allow camera access in your browser or device settings to scan QR codes.",
+      camera_not_found: "No camera found on this device.",
+      camera_unavailable: "Could not start the camera.",
+    },
     actions: {
       paste: {
         label: "@:global.actions.paste.label",
