@@ -1069,6 +1069,12 @@ export default {
         },
       },
     },
+    errors: {
+      unit_not_matching_request:
+        "Αυτό το αίτημα πληρωμής πρέπει να εξοφληθεί σε {unit}.",
+      mint_lacks_request_methods:
+        "Το επιλεγμένο mint δεν υποστηρίζει τις μεθόδους πληρωμής που απαιτεί αυτό το αίτημα.",
+    },
   },
   ReceiveDialog: {
     title: "Λήψη",

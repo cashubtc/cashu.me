@@ -1111,6 +1111,10 @@ export default {
       serialization_failed: "Nepodařilo se připravit ecash token.",
       mint_not_allowed_by_request:
         "Vybraný mint není tímto platebním požadavkem přijímán.",
+      unit_not_matching_request:
+        "Tento platební požadavek je nutné uhradit v jednotce {unit}.",
+      mint_lacks_request_methods:
+        "Vybraný mint nepodporuje platební metody požadované pro tuto platbu.",
     },
   },
 
