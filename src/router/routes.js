@@ -119,10 +119,19 @@ const routes = [
     path: "/welcome",
     component: () => import("layouts/BlankLayout.vue"),
     // Once onboarding is done (e.g. the user pressed Back from the wallet),
-    // redirect in-app instead of reloading the page.
+    // redirect in-app instead of reloading the page. `replace` overwrites the
+    // /welcome history entry instead of pushing a new one, and `force` makes
+    // the redirect run even when the wallet is already the current route (on
+    // Back from "/"), so the address bar doesn't stay on /welcome.
     beforeEnter: (to) => {
       if (!useWelcomeStore().showWelcome) {
-        return { path: "/", query: to.query, hash: to.hash };
+        return {
+          path: "/",
+          query: to.query,
+          hash: to.hash,
+          replace: true,
+          force: true,
+        };
       }
     },
     children: [
