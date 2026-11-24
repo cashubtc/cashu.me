@@ -252,10 +252,15 @@ export const useMintsStore = defineStore("mints", {
         return new MintClass(mint);
       } else {
         if (this.mints.length) {
-          console.error(
-            "No active mint. This should not happen. switching to first one."
-          );
-          this.activateMintUrl(this.mints[0].url, false, true);
+          // While addMint() is running, the new mint is already listed but
+          // only becomes active once its info and keys are fetched. That
+          // activation is in flight, so don't start another one.
+          if (!this.addMintBlocking) {
+            console.error(
+              "No active mint. This should not happen. switching to first one."
+            );
+            this.activateMintUrl(this.mints[0].url, false, true);
+          }
           return new MintClass(this.mints[0]);
         }
         throw new Error("No active mint");
