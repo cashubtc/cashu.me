@@ -203,7 +203,7 @@ All phases are implemented (Dexie `version(5)` to `version(8)`, `migrations.ts` 
 - **Importers double as restore paths.** Each moved key has an idempotent importer in `src/stores/legacyImporters.ts`. Migrations call them, and `restoreFromBackup` runs them after writing an old backup's keys, so old backup files land in the new tables.
 - **Startup gate.** `walletDataReady()` (`src/stores/bootstrap.ts`) runs from a router `beforeEach` guard, inside `navigator.locks.request("cashu-migrations")`. Every route, not just the wallet page, waits for it.
 - **`flushPendingWrites()`** is awaited before the app reloads or navigates away: backup restore, finishing onboarding, MOTD navigation and wallet wipe.
-- **Phase 1:** `receivedPaymentIds` and `selectedPRIndex` are kept as they were. The `ecashHistory.paymentRequestId` index doesn't cover incoming payments, so dropping them would have changed behaviour. NWC seen ids are pruned by age (twice the 24 h subscription window) instead of the 1,000-id cap.
+- **Phase 1:** `receivedPaymentIds` and `selectedPRIndex` are kept as they were. Incoming payments already carry `paymentRequestId`, so the list could be derived from `ecashHistory` instead. Both fields are part of the store's tested behaviour (the dialog's "paid" state, request replacement), so that change is left as a follow-up. NWC seen ids are pruned by age (twice the 24 h subscription window) instead of the 1,000-id cap.
 - **Phase 2:** `mintKeys` is keyed by `[mintUrl+id]`. Keys for inactive keysets are not loaded lazily yet.
 - **Phase 3:** no `nextCheckAt` index. The queue entries were already references (quote id plus scheduling fields), not copies.
 - **Phase 4:**
