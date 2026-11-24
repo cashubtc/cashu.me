@@ -5,11 +5,10 @@
     persistent
     transition-show="slide-up"
     transition-hide="fadeOut"
-    full-screen
     @drop.prevent="dragFile"
     @dragover.prevent
   >
-    <q-card class="q-pa-none" style="height: 100%">
+    <q-card class="q-pa-none" style="width: 100%; height: 100%">
       <q-carousel
         v-model="welcomeStore.currentSlide"
         animated
