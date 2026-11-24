@@ -1,5 +1,9 @@
 <script lang="ts">
-import QrScanner, { type ScanResult } from "@agicash/qr-scanner";
+import QrScanner, {
+  CameraNotFoundError,
+  CameraPermissionError,
+  type ScanResult,
+} from "@agicash/qr-scanner";
 import { URDecoder } from "@gandlaf21/bc-ur";
 import zxingReaderWasmUrl from "zxing-wasm/reader/zxing_reader.wasm?url";
 import { useCameraStore } from "src/stores/camera";
@@ -16,11 +20,13 @@ export default {
     qrScanner: QrScanner | null;
     urDecoder: URDecoder | null;
     urDecoderProgress: number;
+    cameraErrorKey: string | null;
   } {
     return {
       qrScanner: null,
       urDecoder: null,
       urDecoderProgress: 0,
+      cameraErrorKey: null,
     };
   },
   mounted() {
@@ -40,7 +46,16 @@ export default {
         onDecodeError: () => {},
       }
     );
-    this.qrScanner.start();
+    this.qrScanner.start().catch((error: unknown) => {
+      console.error("Could not start QR scanner:", error);
+      if (error instanceof CameraPermissionError) {
+        this.cameraErrorKey = "QrcodeReader.errors.camera_permission";
+      } else if (error instanceof CameraNotFoundError) {
+        this.cameraErrorKey = "QrcodeReader.errors.camera_not_found";
+      } else {
+        this.cameraErrorKey = "QrcodeReader.errors.camera_unavailable";
+      }
+    });
     this.urDecoder = new URDecoder();
   },
   computed: {
@@ -88,8 +103,12 @@ export default {
 <template>
   <q-card>
     <div class="text-center">
-      <div>
+      <!-- v-show, not v-if: the scanner needs the video element on mount -->
+      <div v-show="!cameraErrorKey">
         <video ref="cameraEl" style="width: 100%"></video>
+      </div>
+      <div v-if="cameraErrorKey" class="q-pa-md text-body2">
+        {{ $t(cameraErrorKey) }}
       </div>
       <div>
         <div class="row q-justify-center">
