@@ -67,7 +67,16 @@ export const useTokensStore = defineStore("tokens", {
         (await cashuDb.ecashHistory.toArray()) as HistoryToken[]
       );
     },
-    async persistHistoryToken(historyToken: HistoryToken): Promise<void> {
+    /**
+     * Writes a history token to IndexedDB. On failure, the optimistic in-memory
+     * change is undone (restored to `previous`, or removed if it was new) so the
+     * cache does not claim a row that IndexedDB does not have, and the error is
+     * rethrown.
+     */
+    async persistHistoryToken(
+      historyToken: HistoryToken,
+      previous?: HistoryToken
+    ): Promise<void> {
       // Strip nested Vue proxies and normalize SDK Amount values before IndexedDB.
       try {
         await cashuDb.ecashHistory.put(
@@ -75,6 +84,16 @@ export const useTokensStore = defineStore("tokens", {
         );
       } catch (error) {
         console.error("Could not persist ecash history token", error);
+        const index = this.historyTokens.findIndex(
+          (t) => t.id === historyToken.id
+        );
+        if (index >= 0) {
+          if (previous) {
+            this.historyTokens.splice(index, 1, previous);
+          } else {
+            this.historyTokens.splice(index, 1);
+          }
+        }
         throw error;
       }
     },
@@ -185,6 +204,7 @@ export const useTokensStore = defineStore("tokens", {
         (t) => t.token === tokenToEdit
       );
       if (index >= 0) {
+        const previous = { ...this.historyTokens[index] };
         if (options) {
           if (options.newToken) {
             this.historyTokens[index].token = options.newToken;
@@ -209,7 +229,7 @@ export const useTokensStore = defineStore("tokens", {
         }
 
         const historyToken = this.historyTokens[index];
-        await this.persistHistoryToken(historyToken);
+        await this.persistHistoryToken(historyToken, previous);
         return historyToken;
       }
 
@@ -220,9 +240,10 @@ export const useTokensStore = defineStore("tokens", {
         (t) => t.token === token && t.status == "pending"
       );
       if (index >= 0) {
+        const previous = { ...this.historyTokens[index] };
         this.historyTokens[index].status = "paid";
         this.historyTokens[index].paidDate = currentDateStr();
-        await this.persistHistoryToken(this.historyTokens[index]);
+        await this.persistHistoryToken(this.historyTokens[index], previous);
       }
     },
     deleteToken(token: string) {

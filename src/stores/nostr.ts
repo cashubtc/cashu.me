@@ -574,13 +574,21 @@ export const useNostrStore = defineStore("nostr", {
       if (decodedToken == undefined) {
         throw Error("could not decode token");
       }
-      const id = await tokensStore.addPendingToken({
-        amount: decodedToken.amount,
-        token: tokenStr,
-        mint: token.getMint(decodedToken),
-        unit: token.getUnit(decodedToken),
-        paymentRequestId,
-      });
+      let id: string;
+      try {
+        id = await tokensStore.addPendingToken({
+          amount: decodedToken.amount,
+          token: tokenStr,
+          mint: token.getMint(decodedToken),
+          unit: token.getUnit(decodedToken),
+          paymentRequestId,
+        });
+      } catch (error: any) {
+        // Keep the incoming token reachable (receive dialog / auto-receive)
+        // even though it could not be saved to history.
+        notifyApiError(error, "Could not save ecash to history");
+        return undefined;
+      }
       receiveStore.showReceiveTokens = false;
       // show success notification
       if (verbose) {

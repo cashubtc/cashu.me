@@ -220,7 +220,7 @@ describe("tokens store", () => {
     );
   });
 
-  it("rejects when the history write fails and keeps the in-memory entry", async () => {
+  it("rejects when the history write fails and drops the unsaved entry", async () => {
     const store = useTokensStore();
     const writeError = new Error("quota exceeded");
     vi.spyOn(console, "error").mockImplementation(() => {});
@@ -235,10 +235,46 @@ describe("tokens store", () => {
       })
     ).rejects.toBe(writeError);
 
-    expect(store.tokenAlreadyInHistory("cashuFails")).toEqual(
-      expect.objectContaining({ status: "pending", amount: -3 })
-    );
+    expect(store.tokenAlreadyInHistory("cashuFails")).toBeUndefined();
     expect(await readEcashHistory()).toEqual([]);
+  });
+
+  it("restores the cached entry when a status or edit write fails", async () => {
+    const store = useTokensStore();
+    const id = await store.addPendingToken({
+      amount: -4,
+      token: "cashuPending",
+      mint: "https://mint.example",
+      unit: "sat",
+    });
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const put = vi.spyOn(cashuDb.ecashHistory, "put");
+
+    put.mockRejectedValueOnce(new Error("write failed"));
+    await expect(store.setTokenPaid("cashuPending")).rejects.toThrow(
+      "write failed"
+    );
+    expect(store.tokenAlreadyInHistory("cashuPending")).toEqual(
+      expect.objectContaining({ id, status: "pending" })
+    );
+    expect(
+      store.tokenAlreadyInHistory("cashuPending")?.paidDate
+    ).toBeUndefined();
+
+    put.mockRejectedValueOnce(new Error("write failed"));
+    await expect(
+      store.editHistoryToken("cashuPending", { newToken: "cashuEdited" })
+    ).rejects.toThrow("write failed");
+    expect(store.tokenAlreadyInHistory("cashuEdited")).toBeUndefined();
+    expect(store.tokenAlreadyInHistory("cashuPending")).toEqual(
+      expect.objectContaining({ id, status: "pending" })
+    );
+
+    // A retry after the failure still works.
+    await store.setTokenPaid("cashuPending");
+    expect(await cashuDb.ecashHistory.get(id)).toEqual(
+      expect.objectContaining({ status: "paid" })
+    );
   });
 
   it("redacts old paid token payloads from ecashHistory", async () => {

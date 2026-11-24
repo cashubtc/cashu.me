@@ -616,8 +616,13 @@ export default defineComponent({
         paymentRequest: this.sendData.paymentRequest,
         status: "pending",
       };
-      const _id = await this.addPendingToken(historyToken);
-      (historyToken as any).id = _id;
+      // The proofs have already left the wallet: a failed history write must
+      // not stop the payment from being delivered.
+      try {
+        (historyToken as any).id = await this.addPendingToken(historyToken);
+      } catch (error: any) {
+        notifyApiError(error, "Could not save token to history");
+      }
       if (!this.g.offline) {
         this.onTokenPaid(historyToken);
       }
@@ -645,9 +650,6 @@ export default defineComponent({
           this.sendData.p2pkPubkey,
           mutexPriority
         );
-        // update UI
-        this.sendData.tokens = sendProofs;
-
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
         const historyToken = {
           amount: -this.sendData.amount,
@@ -655,14 +657,18 @@ export default defineComponent({
           unit: this.activeUnit,
           mint: this.activeMintUrl,
         };
-        const _id = await this.addPendingToken(historyToken as any).catch(
-          (error: any) => {
-            notifyApiError(error, "Could not save token to history");
-            throw error;
-          }
-        );
-        (historyToken as any).id = _id;
+        // The proofs have already left the wallet: the token must still be
+        // shown if the history write fails.
+        try {
+          (historyToken as any).id = await this.addPendingToken(
+            historyToken as any
+          );
+        } catch (error: any) {
+          notifyApiError(error, "Could not save token to history");
+        }
         this.sendData.historyToken = historyToken as any;
+        // update UI (shows the token, which needs sendData.historyToken)
+        this.sendData.tokens = sendProofs;
 
         if (!this.g.offline) {
           this.onTokenPaid(historyToken);
@@ -711,8 +717,6 @@ export default defineComponent({
           "foreground"
         );
 
-        // update UI
-        this.sendData.tokens = sendProofs;
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
         this.sendData.historyAmount =
           -this.sendData.amount * this.activeUnitCurrencyMultiplyer;
@@ -725,14 +729,18 @@ export default defineComponent({
           paymentRequest: this.sendData.paymentRequest,
           status: "pending",
         };
-        const _id = await this.addPendingToken(historyToken as any).catch(
-          (error: any) => {
-            notifyApiError(error, "Could not save token to history");
-            throw error;
-          }
-        );
-        (historyToken as any).id = _id;
+        // The proofs have already left the wallet: the token must still be
+        // shown if the history write fails.
+        try {
+          (historyToken as any).id = await this.addPendingToken(
+            historyToken as any
+          );
+        } catch (error: any) {
+          notifyApiError(error, "Could not save token to history");
+        }
         this.sendData.historyToken = historyToken as any;
+        // update UI (shows the token, which needs sendData.historyToken)
+        this.sendData.tokens = sendProofs;
 
         if (!this.g.offline) {
           this.onTokenPaid(historyToken);

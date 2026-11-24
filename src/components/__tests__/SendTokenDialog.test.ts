@@ -47,7 +47,7 @@ describe("SendTokenDialog", () => {
           sendProofs: [{ amount: 16 }, { amount: 4 }, { amount: 2 }],
         })),
         serializeProofs: vi.fn(() => "cashuA"),
-        addPendingToken: vi.fn(() => "history-id"),
+        addPendingToken: vi.fn(async () => "history-id"),
         g: { offline: true },
       };
       await expect(
@@ -169,7 +169,7 @@ describe("SendTokenDialog", () => {
       mintWallet: vi.fn(async () => ({ id: "wallet" })),
       send,
       serializeProofs: vi.fn(),
-      addPendingToken: vi.fn(),
+      addPendingToken: vi.fn(async () => "history-id"),
       g: { offline: true },
     };
     const consoleError = vi
@@ -198,6 +198,47 @@ describe("SendTokenDialog", () => {
     expect(uiStore.foregroundPaymentRequests).toBe(0);
 
     consoleError.mockRestore();
+  });
+
+  it("still shows a sent token when saving it to history fails", async () => {
+    let historyTokenWhenShown: unknown = "not shown";
+    const sendData: any = { amount: 21, p2pkPubkey: "" };
+    Object.defineProperty(sendData, "tokens", {
+      get: () => sendData._tokens,
+      set: (value) => {
+        historyTokenWhenShown = sendData.historyToken;
+        sendData._tokens = value;
+      },
+    });
+    const sendProofs = [{ amount: 21 }];
+    const context = {
+      sendingEcash: false,
+      sendData,
+      maybeConvertNpub: vi.fn(() => ""),
+      isValidPubkey: vi.fn(() => false),
+      activeUnitCurrencyMultiplyer: 1,
+      activeMintUrl: "https://mint.example",
+      activeUnit: "sat",
+      activeProofs: [],
+      includeFeesInSendAmount: false,
+      mintWallet: vi.fn(async () => ({ id: "wallet" })),
+      send: vi.fn(async () => ({ sendProofs })),
+      serializeProofs: vi.fn(() => "cashuSent"),
+      addPendingToken: vi.fn(async () => {
+        throw new Error("history write failed");
+      }),
+      onTokenPaid: vi.fn(),
+      g: { offline: false },
+    };
+
+    await SendTokenDialog.methods.sendTokens.call(context);
+
+    expect(sendData.tokens).toBe(sendProofs);
+    expect(sendData.tokensBase64).toBe("cashuSent");
+    expect(historyTokenWhenShown).toEqual(
+      expect.objectContaining({ amount: -21, token: "cashuSent" })
+    );
+    expect(context.onTokenPaid).toHaveBeenCalledWith(sendData.historyToken);
   });
 
   it("uses foreground priority for a locked ecash send", async () => {

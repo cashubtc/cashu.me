@@ -900,31 +900,40 @@ export const useWalletStore = defineStore("wallet", {
 
         const outputAmount = proofsStore.sumProofs(proofs);
 
-        // if token is already in history, set to paid, else add to history
-        if (
-          tokenStore.historyTokens.find(
-            (t) =>
-              t.token === receiveStore.receiveData.tokensBase64 && t.amount > 0
-          )
-        ) {
-          await tokenStore.setTokenPaid(receiveStore.receiveData.tokensBase64);
-        } else {
-          // if this is a self-sent token, we will find an outgoing token with the inverse amount
+        // The proofs are already stored, so a failed history write must not
+        // report the receive as failed.
+        try {
+          // if token is already in history, set to paid, else add to history
           if (
             tokenStore.historyTokens.find(
               (t) =>
                 t.token === receiveStore.receiveData.tokensBase64 &&
-                t.amount < 0
+                t.amount > 0
             )
           ) {
             await tokenStore.setTokenPaid(
               receiveStore.receiveData.tokensBase64
             );
+          } else {
+            // if this is a self-sent token, we will find an outgoing token with the inverse amount
+            if (
+              tokenStore.historyTokens.find(
+                (t) =>
+                  t.token === receiveStore.receiveData.tokensBase64 &&
+                  t.amount < 0
+              )
+            ) {
+              await tokenStore.setTokenPaid(
+                receiveStore.receiveData.tokensBase64
+              );
+            }
+            fee = inputAmount - outputAmount;
+            historyToken.fee = fee;
+            historyToken.amount = outputAmount;
+            await tokenStore.addPaidToken(historyToken);
           }
-          fee = inputAmount - outputAmount;
-          historyToken.fee = fee;
-          historyToken.amount = outputAmount;
-          await tokenStore.addPaidToken(historyToken);
+        } catch (error: any) {
+          notifyApiError(error, "Could not save ecash to history");
         }
         useUiStore().vibrate();
         let message = this.t("wallet.notifications.received", {

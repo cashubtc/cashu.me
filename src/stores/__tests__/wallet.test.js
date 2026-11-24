@@ -2132,8 +2132,7 @@ describe("wallet store", () => {
     expect(wallet.handlePaymentRequest).toHaveBeenCalledWith("CREQB1UPPERCASE");
   });
 
-  it("redeem shows the normalized received amount for v4 proofs", async () => {
-    const wallet = useWalletStore();
+  function mockV4Redeem(wallet) {
     h.receiveTokensStore.receiveData.tokensBase64 = "cashuB500";
 
     const decodedToken = { mint: "https://mint-a.example", unit: "sat" };
@@ -2165,6 +2164,11 @@ describe("wallet store", () => {
         })),
       },
     });
+  }
+
+  it("redeem shows the normalized received amount for v4 proofs", async () => {
+    const wallet = useWalletStore();
+    mockV4Redeem(wallet);
 
     await wallet.redeem();
 
@@ -2175,5 +2179,24 @@ describe("wallet store", () => {
     expect(h.tokensStore.addPaidToken).toHaveBeenCalledWith(
       expect.objectContaining({ amount: 500, fee: 0, unit: "sat" })
     );
+  });
+
+  it("redeem still succeeds when only the history write fails", async () => {
+    const wallet = useWalletStore();
+    mockV4Redeem(wallet);
+    const writeError = new Error("history write failed");
+    h.tokensStore.addPaidToken.mockRejectedValueOnce(writeError);
+
+    await expect(wallet.redeem()).resolves.toBeUndefined();
+
+    expect(h.proofsStore.addProofs).toHaveBeenCalled();
+    expect(h.notifyApiError).toHaveBeenCalledWith(
+      writeError,
+      "Could not save ecash to history"
+    );
+    expect(h.notifySuccess).toHaveBeenCalledWith(
+      "wallet.notifications.received"
+    );
+    expect(h.uiStore.unlockMutex).toHaveBeenCalled();
   });
 });
