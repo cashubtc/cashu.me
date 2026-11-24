@@ -1,5 +1,6 @@
 // src/stores/welcome.ts
 import { defineStore } from "pinia";
+import { flushPendingWrites } from "./tableMirror";
 import { useLocalStorage } from "@vueuse/core";
 import { computed } from "vue";
 
@@ -88,9 +89,11 @@ export const useWelcomeStore = defineStore("welcome", {
       this.showWelcome = false;
       // Reset the slide to the beginning for next time (if welcome is ever shown again)
       this.currentSlide = 0;
-      // Redirect to home or desired route
-      window.location.href =
-        "/" + window.location.search + window.location.hash;
+      // Redirect to home or desired route, once onboarding data is stored
+      void flushPendingWrites().finally(() => {
+        window.location.href =
+          "/" + window.location.search + window.location.hash;
+      });
     },
     setPath(path: "new" | "recover") {
       this.onboardingPath = path;

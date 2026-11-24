@@ -68,6 +68,8 @@ export const useMigrationsStore = defineStore("migrations", {
     async migrateStablenutsToCash() {
       const { useMintsStore } = await import("./mints");
       const mintStore = useMintsStore();
+      // mints live in IndexedDB now; load them (moving cashu.mints first)
+      await mintStore.init();
       let updated = false;
 
       for (let i = 0; i < mintStore.mints.length; i++) {
@@ -254,6 +256,17 @@ export const useMigrationsStore = defineStore("migrations", {
           "Moves NIP-17 and NWC seen event ids to seenEvents, our payment requests to paymentRequests, and drops the cached mint recommendations",
         execute: async () =>
           await this.migrateNostrStateAndPaymentRequestsToDexie(),
+      });
+
+      this.registerMigration({
+        version: 7,
+        name: "Move mints and mint keys to Dexie",
+        description: "Splits cashu.mints into the mints and mintKeys tables",
+        execute: async () => {
+          const { useMintsStore } = await import("./mints");
+          await useMintsStore().init();
+          await useMintsStore().mintsTable.flush();
+        },
       });
 
       // Add more migrations here in the future

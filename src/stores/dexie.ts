@@ -26,6 +26,8 @@ export class CashuDexie extends Dexie {
   ecashHistory!: Table<any>;
   seenEvents!: Table<SeenEventRow, [string, string]>;
   paymentRequests!: Table<any, string>;
+  mints!: Table<any, string>;
+  mintKeys!: Table<any, [string, string]>;
 
   constructor(databaseName = "db") {
     super(databaseName);
@@ -83,6 +85,11 @@ export class CashuDexie extends Dexie {
       seenEvents: "[scope+id], scope, created_at",
       paymentRequests: "id",
     });
+    // v6: mints split into mint rows and their (large, immutable) keys
+    this.version(6).stores({
+      mints: "url",
+      mintKeys: "[mintUrl+id], mintUrl",
+    });
   }
 }
 
@@ -116,6 +123,8 @@ export const WALLET_TABLES: WalletTableSpec[] = [
   // backed up so a restored wallet does not handle old DMs and NWC requests again
   { name: "seenEvents", backup: true },
   { name: "paymentRequests", backup: true },
+  { name: "mints", backup: true },
+  { name: "mintKeys", backup: true },
 ];
 
 export function walletTableSpec(name: string): WalletTableSpec | undefined {

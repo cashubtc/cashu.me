@@ -2,6 +2,7 @@ import { cashuDb } from "./dexie";
 import { moveLocalStorageKey } from "./legacyStorage";
 import { toMirrorRows } from "./tableMirror";
 import type { SeenEventRow } from "./seenEvents";
+import { importLegacyMints } from "./mintStorage";
 
 /**
  * localStorage keys whose data now lives in IndexedDB, with the function
@@ -81,6 +82,10 @@ export async function importLegacyPaymentRequests() {
   });
 }
 
+// ---- Phase 2 ---------------------------------------------------------------
+
+export { importLegacyMints };
+
 export const LEGACY_KEY_IMPORTERS: LegacyKeyImporter[] = [
   {
     key: "cashu.ndk.mintRecommendations",
@@ -92,6 +97,7 @@ export const LEGACY_KEY_IMPORTERS: LegacyKeyImporter[] = [
   },
   { key: "cashu.nwc.connections", run: importLegacyNwcProcessedRequestIds },
   { key: "cashu.pr.ours", run: importLegacyPaymentRequests },
+  { key: "cashu.mints", run: importLegacyMints },
 ];
 
 export async function importLegacyLocalStorageKeys() {

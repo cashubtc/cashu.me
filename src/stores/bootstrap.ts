@@ -37,6 +37,10 @@ async function loadWalletData() {
     await migrations.runMigrations();
   });
 
+  // mints first: proofs, history and payment requests resolve against them
+  const { useMintsStore } = await import("./mints");
+  await useMintsStore().init();
+
   const [{ useWalletStore }, { useTokensStore }, { usePRStore }] =
     await Promise.all([
       import("./wallet"),

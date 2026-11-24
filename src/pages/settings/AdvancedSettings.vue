@@ -271,6 +271,7 @@ import { useProofsStore } from "src/stores/proofs";
 import { useDexieStore } from "src/stores/dexie";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useStorageStore } from "src/stores/storage";
+import { flushPendingWrites } from "src/stores/tableMirror";
 import { useNostrUserStore } from "src/stores/nostrUser";
 import SettingsPageShell from "./SettingsPageShell.vue";
 import SettingsSection from "./SettingsSection.vue";
@@ -382,6 +383,8 @@ export default defineComponent({
     nukeWallet: async function () {
       // create a backup just in case
       await this.exportWalletState();
+      // let in-flight writes land first so none of them comes back after the wipe
+      await flushPendingWrites();
       // clear dexie tables
       await this.deleteAllTables();
       // clear nostr user databases

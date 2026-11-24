@@ -18,6 +18,7 @@ import {
   walletTableSpec,
 } from "./dexie";
 import { importLegacyLocalStorageKeys } from "./legacyImporters";
+import { flushPendingWrites } from "./tableMirror";
 import { deserializeProofs, JSONInt } from "@cashu/cashu-ts";
 
 export function stringifyBackupTable(rows: unknown[]): string {
@@ -130,6 +131,7 @@ export const useStorageStore = defineStore("storage", {
         // live in IndexedDB; move them into their tables.
         await importLegacyLocalStorageKeys();
         notifySuccess("Backup restored");
+        await flushPendingWrites();
         window.location.reload();
       }
     },

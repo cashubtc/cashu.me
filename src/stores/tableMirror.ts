@@ -26,9 +26,24 @@ export type TableMirror<T> = {
   flush: () => Promise<void>;
 };
 
+// Every live mirror's flush, so code that is about to reload or navigate
+// away can wait for pending writes (see flushPendingWrites).
+const pendingWriteFlushers = new Set<() => Promise<void>>();
+
+export function registerPendingWrites(flush: () => Promise<void>) {
+  pendingWriteFlushers.add(flush);
+}
+
+/** Wait until every change made so far is in IndexedDB. */
+export async function flushPendingWrites() {
+  await Promise.all([...pendingWriteFlushers].map((flush) => flush()));
+}
+
 export type TableMirrorOptions<T> = {
   /** The row's primary key; must match the table's primary key. */
   keyOf: (item: T) => IndexableType;
+  /** Turn an item into the stored row (defaults to the item itself). */
+  toRow?: (item: T) => any;
   /** Turn a stored row back into an item (the position field is removed). */
   fromRow?: (row: any) => T;
 };
@@ -39,9 +54,12 @@ export function toPlainRow<T>(item: T): any {
 }
 
 /** Rows as a table mirror stores them, for migrations and restores. */
-export function toMirrorRows<T>(items: T[]): any[] {
+export function toMirrorRows<T>(
+  items: T[],
+  toRow: (item: T) => any = (item) => item
+): any[] {
   return items.map((item, index) => ({
-    ...toPlainRow(item),
+    ...toPlainRow(toRow(item)),
     [MIRROR_POSITION_FIELD]: index,
   }));
 }
@@ -73,7 +91,7 @@ export function createTableMirror<T>(
 
   const write = async () => {
     scheduled = false;
-    const rows = toMirrorRows(items.value);
+    const rows = toMirrorRows(items.value, options.toRow);
     const next = new Map<string, string>();
     const puts: any[] = [];
     rows.forEach((row, index) => {
@@ -145,12 +163,15 @@ export function createTableMirror<T>(
     return hydrating;
   };
 
+  const flush = () => chain;
+  registerPendingWrites(flush);
+
   return {
     items,
     hydrated: () => isHydrated,
     hydrate,
     // a change schedules its write synchronously, so awaiting the chain
     // covers every change made before this call
-    flush: () => chain,
+    flush,
   };
 }
