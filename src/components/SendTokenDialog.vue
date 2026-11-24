@@ -688,11 +688,13 @@ export default defineComponent({
         };
         // The proofs have already left the wallet: the token must still be
         // shown if the history write fails.
+        let savedToHistory = true;
         try {
           (historyToken as any).id = await this.addPendingToken(
             historyToken as any
           );
         } catch (error: any) {
+          savedToHistory = false;
           notifyApiError(
             error,
             this.$t("wallet.notifications.history_save_failed") as string
@@ -704,6 +706,9 @@ export default defineComponent({
         this.sendData.tokensBase64 = tokensBase64;
         this.sendData.historyToken = historyToken as any;
         this.sendData.tokens = sendProofs;
+        // History has no copy of this token, so keep it on screen even if the
+        // dialog was closed while it was being saved.
+        if (!savedToHistory) this.showSendTokens = true;
 
         if (!this.g.offline) {
           this.onTokenPaid(historyToken);
@@ -766,11 +771,13 @@ export default defineComponent({
         };
         // The proofs have already left the wallet: the token must still be
         // shown if the history write fails.
+        let savedToHistory = true;
         try {
           (historyToken as any).id = await this.addPendingToken(
             historyToken as any
           );
         } catch (error: any) {
+          savedToHistory = false;
           notifyApiError(
             error,
             this.$t("wallet.notifications.history_save_failed") as string
@@ -783,6 +790,9 @@ export default defineComponent({
         this.sendData.historyAmount = historyAmount;
         this.sendData.historyToken = historyToken as any;
         this.sendData.tokens = sendProofs;
+        // History has no copy of this token, so keep it on screen even if the
+        // dialog was closed while it was being saved.
+        if (!savedToHistory) this.showSendTokens = true;
 
         if (!this.g.offline) {
           this.onTokenPaid(historyToken);

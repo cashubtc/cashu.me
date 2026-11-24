@@ -2,6 +2,7 @@ import "fake-indexeddb/auto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { reactive } from "vue";
 import { PaymentRequest, PaymentRequestTransportType } from "@cashu/cashu-ts";
+import Dexie from "dexie";
 import { cashuDb } from "src/stores/dexie";
 import { HistoryToken, useTokensStore } from "src/stores/tokens";
 
@@ -420,6 +421,83 @@ describe("tokens store", () => {
     expect(store.historyTokens).toEqual([
       expect.objectContaining({ id, status: "pending", token: "cashuAll" }),
     ]);
+  });
+
+  it("does not overwrite a committed split with a full-spend status change", async () => {
+    const store = useTokensStore();
+    const id = await store.addPendingToken({
+      amount: -10,
+      token: "cashuAll",
+      mint: "https://mint.example",
+      unit: "sat",
+    });
+    // A full-spend check reads the unsplit cache while the split's transaction
+    // is open, so its write runs after the split commits.
+    const transaction = cashuDb.transaction;
+    let settingPaid!: Promise<unknown>;
+    vi.spyOn(cashuDb, "transaction").mockImplementationOnce(function (
+      this: any,
+      mode: any,
+      table: any,
+      scope: () => Promise<unknown>
+    ) {
+      return (transaction as any).call(this, mode, table, async () => {
+        settingPaid = Dexie.ignoreTransaction(() =>
+          store.setTokenPaid("cashuAll")
+        );
+        return scope();
+      });
+    } as any);
+
+    const remainder = await store.splitHistoryToken(
+      "cashuAll",
+      { amount: 6, token: "cashuSpent" },
+      { amount: 4, token: "cashuUnspent" }
+    );
+    await settingPaid;
+
+    expect(await cashuDb.ecashHistory.get(id)).toEqual(
+      expect.objectContaining({
+        status: "paid",
+        amount: -6,
+        token: "cashuSpent",
+      })
+    );
+    expect(await cashuDb.ecashHistory.get(remainder!.id)).toEqual(
+      expect.objectContaining({ status: "pending", amount: -4 })
+    );
+  });
+
+  it("keeps an entry in the cache until its delete commits", async () => {
+    const store = useTokensStore();
+    await store.addPendingToken({
+      amount: -2,
+      token: "cashuDelete",
+      mint: "https://mint.example",
+      unit: "sat",
+    });
+    const table = cashuDb.ecashHistory;
+    const remove = table.delete;
+    let releaseDelete!: () => void;
+    const deleteReleased = new Promise<void>((resolve) => {
+      releaseDelete = resolve;
+    });
+    vi.spyOn(table, "delete").mockImplementationOnce(async function (
+      this: any,
+      ...args: any[]
+    ) {
+      await deleteReleased;
+      return remove.apply(this, args as any);
+    } as any);
+
+    const deleting = store.deleteToken("cashuDelete");
+    await Promise.resolve();
+    // The transaction worker drops tokens missing from this cache.
+    expect(store.tokenAlreadyInHistory("cashuDelete")).toBeDefined();
+
+    releaseDelete();
+    await deleting;
+    expect(store.tokenAlreadyInHistory("cashuDelete")).toBeUndefined();
   });
 
   it("waits for deletes and restores the entry when one fails", async () => {

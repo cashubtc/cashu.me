@@ -286,6 +286,8 @@ describe("SendTokenDialog", () => {
     const sendProofs = [{ amount: 21 }];
     const context = {
       sendingEcash: false,
+      // the dialog was closed while the history write was pending
+      showSendTokens: false,
       sendData,
       maybeConvertNpub: vi.fn(() => ""),
       isValidPubkey: vi.fn(() => false),
@@ -313,6 +315,8 @@ describe("SendTokenDialog", () => {
       expect.objectContaining({ amount: -21, token: "cashuSent" })
     );
     expect(context.onTokenPaid).toHaveBeenCalledWith(sendData.historyToken);
+    // History has no copy of the token, so the dialog is shown again.
+    expect(context.showSendTokens).toBe(true);
   });
 
   it("shows the whole sent token even if the dialog was cleared during the history write", async () => {

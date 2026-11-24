@@ -1105,9 +1105,24 @@ export const useWalletStore = defineStore("wallet", {
         throw new Error("mint not found");
       }
       const spentProofs = await this.checkProofsSpendable(proofs, mintWallet);
+      // Report a failed history write here (checks the user started are
+      // verbose), then rethrow so the transaction worker retries the token.
+      const saveToHistory = async (write: () => Promise<unknown>) => {
+        try {
+          await write();
+        } catch (error: any) {
+          if (verbose) {
+            notifyApiError(
+              error,
+              this.t("wallet.notifications.history_save_failed")
+            );
+          }
+          throw error;
+        }
+      };
       if (spentProofs != undefined && spentProofs.length == proofs.length) {
         // all proofs are spent, set token to paid
-        await tokenStore.setTokenPaid(historyToken.token);
+        await saveToHistory(() => tokenStore.setTokenPaid(historyToken.token));
       } else if (
         spentProofs != undefined &&
         spentProofs.length &&
@@ -1126,10 +1141,12 @@ export const useWalletStore = defineStore("wallet", {
         if (serializedSpentProofs && serializedUnspentProofs) {
           // mark the spent part as paid and add the unspent proofs back to the
           // history as a pending entry, in one write
-          await tokenStore.splitHistoryToken(
-            historyToken.token,
-            { amount: spentAmount, token: serializedSpentProofs },
-            { amount: unspentAmount, token: serializedUnspentProofs }
+          await saveToHistory(() =>
+            tokenStore.splitHistoryToken(
+              historyToken.token,
+              { amount: spentAmount, token: serializedSpentProofs },
+              { amount: unspentAmount, token: serializedUnspentProofs }
+            )
           );
         }
       }

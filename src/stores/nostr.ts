@@ -593,7 +593,11 @@ export const useNostrStore = defineStore("nostr", {
         );
         return undefined;
       }
-      receiveStore.showReceiveTokens = false;
+      // Overlapping messages share the receive dialog: close it only if it
+      // still shows this token, not one a later message opened meanwhile.
+      if (receiveStore.receiveData.tokensBase64 === tokenStr) {
+        receiveStore.showReceiveTokens = false;
+      }
       // show success notification
       if (verbose) {
         notifySuccess("Ecash added to history.");

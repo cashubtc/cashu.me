@@ -101,7 +101,9 @@ export const useTokensStore = defineStore("tokens", {
     /**
      * Writes changes to an existing entry and applies them to the cache only
      * once IndexedDB has committed them, so nothing (such as the transaction
-     * worker) acts on a change that may still fail.
+     * worker) acts on a change that may still fail. The stored row must still
+     * hold the token the cache had; if another write (such as a split) changed
+     * it meanwhile, nothing is written and undefined is returned.
      */
     async updateHistoryToken(
       id: string,
@@ -109,7 +111,26 @@ export const useTokensStore = defineStore("tokens", {
     ): Promise<HistoryToken | undefined> {
       const cached = this.historyTokens.find((t) => t.id === id);
       if (!cached) return undefined;
-      await this.persistHistoryToken({ ...cached, ...changes });
+      const expectedToken = cached.token;
+      let updated: boolean;
+      try {
+        updated = await cashuDb.transaction(
+          "rw",
+          cashuDb.ecashHistory,
+          async () => {
+            const stored = await cashuDb.ecashHistory.get(id);
+            if (!stored || stored.token !== expectedToken) return false;
+            await cashuDb.ecashHistory.put(
+              toStorable({ ...stored, ...changes })
+            );
+            return true;
+          }
+        );
+      } catch (error) {
+        console.error("Could not persist ecash history token", error);
+        throw error;
+      }
+      if (!updated) return undefined;
       // The liveQuery may already have replaced the cached object.
       const current = this.historyTokens.find((t) => t.id === id);
       if (current) Object.assign(current, changes);
@@ -317,18 +338,17 @@ export const useTokensStore = defineStore("tokens", {
     async deleteToken(token: string) {
       const index = this.historyTokens.findIndex((t) => t.token === token);
       if (index >= 0) {
-        const historyToken = this.historyTokens[index];
-        this.historyTokens.splice(index, 1);
+        const id = this.historyTokens[index].id;
+        // Remove the entry from the cache only once the delete has committed:
+        // the transaction worker drops tokens that are missing from the cache.
         try {
-          await cashuDb.ecashHistory.delete(historyToken.id);
+          await cashuDb.ecashHistory.delete(id);
         } catch (error) {
           console.error("Could not delete ecash history token", error);
-          // Put the entry back so the cache matches IndexedDB.
-          if (!this.historyTokens.some((t) => t.id === historyToken.id)) {
-            this.historyTokens.splice(index, 0, historyToken);
-          }
           throw error;
         }
+        const current = this.historyTokens.findIndex((t) => t.id === id);
+        if (current >= 0) this.historyTokens.splice(current, 1);
       }
     },
     tokenAlreadyInHistory(tokenStr: string): HistoryToken | undefined {

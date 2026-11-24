@@ -2300,6 +2300,41 @@ describe("wallet store", () => {
     );
   });
 
+  it("checkTokenSpendable reports a failed history write only when verbose", async () => {
+    const wallet = useWalletStore();
+    const proofs = [{ id: "00aa", amount: 2, secret: "s-sent" }];
+    h.mintsStore.mints = [{ url: "https://mint-a.example" }];
+    h.tokenModule.decodeFull.mockResolvedValue({ proofs });
+    h.tokenModule.getProofs.mockReturnValue(proofs);
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue({});
+    vi.spyOn(wallet, "checkProofsSpendable").mockResolvedValue(proofs);
+    const writeError = new Error("status write failed");
+    const historyToken = {
+      token: "cashuSent",
+      amount: -2,
+      mint: "https://mint-a.example",
+      unit: "sat",
+      status: "pending",
+    };
+
+    h.tokensStore.setTokenPaid.mockRejectedValueOnce(writeError);
+    await expect(wallet.checkTokenSpendable(historyToken)).rejects.toBe(
+      writeError
+    );
+    expect(h.notifyApiError).toHaveBeenCalledWith(
+      writeError,
+      "wallet.notifications.history_save_failed"
+    );
+
+    h.notifyApiError.mockClear();
+    h.tokensStore.setTokenPaid.mockRejectedValueOnce(writeError);
+    // The transaction worker checks quietly and retries on the rejection.
+    await expect(wallet.checkTokenSpendable(historyToken, false)).rejects.toBe(
+      writeError
+    );
+    expect(h.notifyApiError).not.toHaveBeenCalled();
+  });
+
   it("redeem still succeeds when only the history write fails", async () => {
     const wallet = useWalletStore();
     mockV4Redeem(wallet);
