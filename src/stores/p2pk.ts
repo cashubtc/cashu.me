@@ -41,6 +41,12 @@ const witnessSatisfiesLock = (secret: string, witness: Proof["witness"]) => {
   }
 };
 
+// A proof whose own witness already meets its P2PK lock (NUT-11) can be
+// swapped as-is, so the wallet needs none of its keys. SIG_ALL witnesses sign
+// the original outputs and cannot be reused; verification throws for them.
+const proofsNeedingSignature = (proofs: WalletProof[]) =>
+  proofs.filter((p) => !witnessSatisfiesLock(p.secret, p.witness));
+
 export const useP2PKStore = defineStore("p2pk", {
   state: () => ({
     p2pkKeys: useLocalStorage<P2PKKey[]>("cashu.P2PKKeys", []),
@@ -184,7 +190,7 @@ export const useP2PKStore = defineStore("p2pk", {
       return ""; // Token is not locked / secret is not P2PK
     },
     isLocked: function (proofs: WalletProof[]) {
-      const secrets = proofs.map((p) => p.secret);
+      const secrets = proofsNeedingSignature(proofs).map((p) => p.secret);
       for (const secret of secrets) {
         try {
           if (this.getSecretP2PKPubkey(secret)) {
@@ -195,7 +201,7 @@ export const useP2PKStore = defineStore("p2pk", {
       return false;
     },
     isLockedToUs: function (proofs: WalletProof[]) {
-      for (const proof of proofs) {
+      for (const proof of proofsNeedingSignature(proofs)) {
         const pubkey = this.getSecretP2PKPubkey(proof.secret, proof.witness);
         if (pubkey) {
           return this.haveThisKey(pubkey);
@@ -214,7 +220,7 @@ export const useP2PKStore = defineStore("p2pk", {
         return "";
       }
 
-      for (const proof of proofs) {
+      for (const proof of proofsNeedingSignature(proofs)) {
         const pubkey = this.getSecretP2PKPubkey(proof.secret, proof.witness);
         const key = pubkey ? this.findKey(pubkey) : undefined;
         // NOTE: we assume all tokens are locked to the same key here!
