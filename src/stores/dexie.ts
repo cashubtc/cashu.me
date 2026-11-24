@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import Dexie, { Table } from "dexie";
 import { useLocalStorage } from "@vueuse/core";
+import { moveLocalStorageKey } from "./legacyStorage";
 import type { WalletProof } from "./mints";
 import {
   cashuAmountToNumber,
@@ -79,6 +80,37 @@ export class CashuDexie extends Dexie {
 
 export const cashuDb = new CashuDexie();
 
+/**
+ * Every table in `cashuDb` must be listed here. Wallet backup, restore and
+ * wipe all iterate over this list, so adding a table here is the only step
+ * needed for it to be backed up.
+ *
+ * - `backup: true` tables are exported as `cashu.dexie.db.<name>` and
+ *   restored with `bulkPut`. `normalize` runs on each restored row.
+ * - `backup: false` tables are caches that can be rebuilt; they are only
+ *   cleared on wipe.
+ */
+export type WalletTableSpec = {
+  name: string;
+  backup: boolean;
+  normalize?: (row: any) => any;
+};
+
+export const BACKUP_TABLE_KEY_PREFIX = "cashu.dexie.db.";
+
+export const WALLET_TABLES: WalletTableSpec[] = [
+  // proofs are exported and restored through the proofs store (see storage.ts)
+  { name: "proofs", backup: true },
+  { name: "paymentHistory", backup: true },
+  { name: "mintQuotes", backup: true, normalize: normalizeCashuQuoteAmounts },
+  { name: "meltQuotes", backup: true, normalize: normalizeCashuQuoteAmounts },
+  { name: "ecashHistory", backup: true },
+];
+
+export function walletTableSpec(name: string): WalletTableSpec | undefined {
+  return WALLET_TABLES.find((spec) => spec.name === name);
+}
+
 export const useDexieStore = defineStore("dexie", {
   state: () => ({
     migratedToDexie: useLocalStorage<boolean>("cashu.dexie.migrated", false),
@@ -108,31 +140,33 @@ export const useDexieStore = defineStore("dexie", {
       // start migration
       const { useStorageStore } = await import("./storage");
       await useStorageStore().exportWalletState();
-      parsedProofs.forEach((proof) => {
-        cashuDb.proofs.add(proof);
+      // Commit every proof before the legacy key is removed.
+      await moveLocalStorageKey<WalletProof[]>({
+        key: "cashu.proofs",
+        tables: [cashuDb.proofs],
+        write: async (rows) => {
+          await cashuDb.proofs.bulkPut(rows);
+        },
+        verify: async (rows) => {
+          const stored = await cashuDb.proofs.bulkGet(
+            rows.map((proof) => proof.secret)
+          );
+          return stored.every(Boolean);
+        },
       });
+      const migrated = await proofsStore.getProofs();
       console.log(
-        `Migrated ${cashuDb.proofs.count()} proofs. Before: ${
-          parsedProofs.length
-        } proofs, After: ${(await proofsStore.getProofs()).length} proofs`
+        `Migrated proofs. Before: ${parsedProofs.length} proofs, After: ${migrated.length} proofs`
       );
       console.log(
         `Proofs sum before: ${proofsStore.sumProofs(
           parsedProofs
-        )}, after: ${proofsStore.sumProofs(await proofsStore.getProofs())}`
+        )}, after: ${proofsStore.sumProofs(migrated)}`
       );
       this.migratedToDexie = true;
-      // remove proofs from localstorage
-      localStorage.removeItem("cashu.proofs");
     },
     deleteAllTables: async function () {
-      await Promise.all([
-        cashuDb.proofs.clear(),
-        cashuDb.paymentHistory.clear(),
-        cashuDb.mintQuotes.clear(),
-        cashuDb.meltQuotes.clear(),
-        cashuDb.ecashHistory.clear(),
-      ]);
+      await Promise.all(cashuDb.tables.map((table) => table.clear()));
     },
   },
 });

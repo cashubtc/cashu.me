@@ -11,9 +11,14 @@ import {
   LegacyInvoiceHistory,
   usePaymentHistoryStore,
 } from "./paymentHistory";
-import { cashuDb } from "./dexie";
+import {
+  BACKUP_TABLE_KEY_PREFIX,
+  cashuDb,
+  WALLET_TABLES,
+  walletTableSpec,
+} from "./dexie";
+import { importLegacyLocalStorageKeys } from "./legacyStorage";
 import { deserializeProofs, JSONInt } from "@cashu/cashu-ts";
-import { normalizeCashuQuoteAmounts } from "src/js/cashu-amount";
 
 export function stringifyBackupTable(rows: unknown[]): string {
   const serialized = JSONInt.stringify(rows);
@@ -29,6 +34,37 @@ export function parseBackupTable(value: string): any[] {
     throw new Error("Invalid wallet backup table");
   }
   return parsed;
+}
+
+/** Serialize every backed-up Dexie table as `cashu.dexie.db.<name>`. */
+export async function exportBackupTables(): Promise<Record<string, string>> {
+  const tables: Record<string, string> = {};
+  for (const spec of WALLET_TABLES) {
+    if (!spec.backup) continue;
+    const key = `${BACKUP_TABLE_KEY_PREFIX}${spec.name}`;
+    if (spec.name === "proofs") {
+      // proofs table *magic*
+      const proofs = await useProofsStore().getProofs();
+      tables[key] = JSONInt.stringify(proofs) as string;
+    } else {
+      tables[key] = stringifyBackupTable(
+        await cashuDb.table(spec.name).toArray()
+      );
+    }
+  }
+  return tables;
+}
+
+export async function restoreBackupTable(name: string, value: string) {
+  const spec = walletTableSpec(name);
+  if (!spec || !spec.backup) {
+    console.warn(`Skipping unknown backup table ${name}`);
+    return;
+  }
+  const rows = parseBackupTable(value);
+  await cashuDb
+    .table(name)
+    .bulkPut(spec.normalize ? rows.map(spec.normalize) : rows);
 }
 
 export const useStorageStore = defineStore("storage", {
@@ -47,21 +83,14 @@ export const useStorageStore = defineStore("storage", {
         const keys = Object.keys(backup);
         for (const key of keys) {
           // we treat some keys differently *magic*
-          if (key === "cashu.dexie.db.proofs") {
+          if (key === `${BACKUP_TABLE_KEY_PREFIX}proofs`) {
             const proofs = deserializeProofs(backup[key]);
             await proofsStore.addProofs(proofs);
-          } else if (key === "cashu.dexie.db.paymentHistory") {
-            await cashuDb.paymentHistory.bulkPut(parseBackupTable(backup[key]));
-          } else if (key === "cashu.dexie.db.mintQuotes") {
-            await cashuDb.mintQuotes.bulkPut(
-              parseBackupTable(backup[key]).map(normalizeCashuQuoteAmounts)
+          } else if (key.startsWith(BACKUP_TABLE_KEY_PREFIX)) {
+            await restoreBackupTable(
+              key.slice(BACKUP_TABLE_KEY_PREFIX.length),
+              backup[key]
             );
-          } else if (key === "cashu.dexie.db.meltQuotes") {
-            await cashuDb.meltQuotes.bulkPut(
-              parseBackupTable(backup[key]).map(normalizeCashuQuoteAmounts)
-            );
-          } else if (key === "cashu.dexie.db.ecashHistory") {
-            await cashuDb.ecashHistory.bulkPut(parseBackupTable(backup[key]));
           } else if (key === "cashu.invoiceHistory") {
             const rows = (
               JSON.parse(backup[key]) as LegacyInvoiceHistory[]
@@ -97,6 +126,9 @@ export const useStorageStore = defineStore("storage", {
             localStorage.setItem(key, backup[key]);
           }
         }
+        // Backups from older versions carry data in localStorage keys that now
+        // live in IndexedDB; move them into their tables.
+        await importLegacyLocalStorageKeys();
         notifySuccess("Backup restored");
         window.location.reload();
       }
@@ -111,21 +143,7 @@ export const useStorageStore = defineStore("storage", {
         const v = localStorage.getItem(k);
         jsonToSave[k] = v;
       }
-      // proofs table *magic*
-      const proofs = await useProofsStore().getProofs();
-      jsonToSave["cashu.dexie.db.proofs"] = JSONInt.stringify(proofs);
-      jsonToSave["cashu.dexie.db.paymentHistory"] = stringifyBackupTable(
-        await cashuDb.paymentHistory.toArray()
-      );
-      jsonToSave["cashu.dexie.db.mintQuotes"] = stringifyBackupTable(
-        await cashuDb.mintQuotes.toArray()
-      );
-      jsonToSave["cashu.dexie.db.meltQuotes"] = stringifyBackupTable(
-        await cashuDb.meltQuotes.toArray()
-      );
-      jsonToSave["cashu.dexie.db.ecashHistory"] = stringifyBackupTable(
-        await cashuDb.ecashHistory.toArray()
-      );
+      Object.assign(jsonToSave, await exportBackupTables());
 
       const textToSave = JSON.stringify(jsonToSave);
       const textToSaveAsBlob = new Blob([textToSave], {

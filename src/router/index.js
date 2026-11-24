@@ -6,6 +6,7 @@ import {
   createWebHashHistory,
 } from "vue-router";
 import routes from "./routes";
+import { walletDataReady } from "src/stores/bootstrap";
 
 /*
  * If not building with SSR mode, you can
@@ -31,6 +32,12 @@ export default route(function (/* { store, ssrContext } */) {
     // quasar.conf.js -> build -> vueRouterMode
     // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.VUE_ROUTER_BASE),
+  });
+
+  // Persisted wallet data lives partly in IndexedDB, which loads
+  // asynchronously. Wait for it before any page renders.
+  Router.beforeEach(async () => {
+    await walletDataReady();
   });
 
   return Router;
