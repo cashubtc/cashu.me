@@ -154,7 +154,7 @@ export const usePRStore = defineStore("payment-request", {
         unit
       );
     },
-    // Replaces the shown request unless it has been paid, then a new one is added.
+    // Updates the shown request in place unless it has been paid, then a new one is added.
     updatePaymentRequest(
       amount?: number,
       memo?: string,
@@ -163,26 +163,21 @@ export const usePRStore = defineStore("payment-request", {
       unit?: string
     ) {
       const current = this.currentPaymentRequest;
-      const replaceIdx =
-        current && current.receivedPaymentIds.length === 0
-          ? this.ourPaymentRequests.indexOf(current)
-          : -1;
-      const prevLen = this.ourPaymentRequests.length;
-      const encoded = this.createPaymentRequest(
+      // An unpaid request keeps its id, so a payment of its old terms is still checked.
+      const id =
+        current?.receivedPaymentIds.length === 0 ? current.id : undefined;
+      this.showPRKData = this.createPaymentRequest(
         amount,
         memo,
         mintUrl,
         lock,
-        unit
+        unit,
+        id
       );
-      if (replaceIdx >= 0 && this.ourPaymentRequests.length > prevLen) {
-        this.ourPaymentRequests.splice(replaceIdx, 1);
-        this.selectedPRIndex = this.ourPaymentRequests.length - 1;
-      }
-      this.showPRKData = encoded;
     },
     // Payments to a deleted request stay in history and are still received.
     deletePaymentRequest(id: string) {
+      const shownId = this.currentPaymentRequest?.id;
       this.ourPaymentRequests = this.ourPaymentRequests.filter(
         (r) => r.id !== id
       );
@@ -190,10 +185,13 @@ export const usePRStore = defineStore("payment-request", {
         this.createPaymentRequest();
         return;
       }
-      this.selectedPRIndex = Math.min(
-        this.selectedPRIndex,
-        this.ourPaymentRequests.length - 1
+      const shownIdx = this.ourPaymentRequests.findIndex(
+        (r) => r.id === shownId
       );
+      this.selectedPRIndex =
+        shownIdx >= 0
+          ? shownIdx
+          : Math.min(this.selectedPRIndex, this.ourPaymentRequests.length - 1);
       this.showPRKData = this.currentPaymentRequest?.encoded ?? "";
     },
     // The unit defaults to the wallet's active unit.
@@ -202,7 +200,8 @@ export const usePRStore = defineStore("payment-request", {
       memo?: string,
       mintUrl?: string,
       lock: boolean = false,
-      unit?: string
+      unit?: string,
+      id?: string
     ) {
       const nostrStore = useNostrStore();
       const mintStore = useMintsStore();
@@ -214,7 +213,7 @@ export const usePRStore = defineStore("payment-request", {
           tags: tags,
         },
       ] as PaymentRequestTransport[];
-      const uuid = uuidv4().split("-")[0];
+      const uuid = id ?? uuidv4().split("-")[0];
       // Lock payments to this wallet's newest P2PK key (NUT-11)
       let nut10: NUT10Option | undefined;
       if (lock) {

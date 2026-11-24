@@ -346,7 +346,7 @@ export default defineComponent({
     totalsByUnit(): Record<string, number> {
       const totals: Record<string, number> = {};
       for (const p of this.currentPayments) {
-        if (p.amount > 0) {
+        if (p.amount > 0 && p.status === "paid") {
           totals[p.unit] = (totals[p.unit] ?? 0) + p.amount;
         }
       }

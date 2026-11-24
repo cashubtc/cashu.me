@@ -56,6 +56,7 @@
               color="primary"
               class="tap-target"
               @click="toggleUnit()"
+              :disable="sendData.paymentRequest?.unit === activeUnit"
               :label="activeUnitLabel"
             />
           </div>
@@ -287,6 +288,7 @@
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
+import { MintInfo } from "@cashu/cashu-ts";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { toPaymentRequest } from "src/stores/payment-request";
 import { sumProofAmounts } from "src/js/proofs";
@@ -422,19 +424,27 @@ export default defineComponent({
           this.isValidPubkey(this.sendData.p2pkPubkey)
       );
     },
-    // The fee a request adds when paid from a mint off its list (NUT-18 `mf`).
-    paymentRequestMethodFee(): number {
-      if (!this.sendData.paymentRequest?.supportedMethods?.length) return 0;
+    // Melt methods the selected mint offers in the active unit (NUT-05).
+    activeMintMeltMethods(): string[] {
+      const info = this.mints.find((m) => m.url === this.activeMintUrl)?.info;
+      if (!info) return [];
       try {
-        const wallet = this.mintWalletSync(this.activeMintUrl, this.activeUnit);
-        const { disabled, params } = wallet.getMintInfo().isSupported(5);
-        const meltMethods = disabled
+        const { disabled, params } = new MintInfo(info).isSupported(5);
+        return disabled
           ? []
           : params
               .filter((m) => m.unit === this.activeUnit)
               .map((m) => m.method);
+      } catch {
+        return [];
+      }
+    },
+    // The fee a request adds when paid from a mint off its list (NUT-18 `mf`).
+    paymentRequestMethodFee(): number {
+      if (!this.sendData.paymentRequest?.supportedMethods?.length) return 0;
+      try {
         return toPaymentRequest(this.sendData.paymentRequest)
-          .feesFor(this.activeMintUrl, meltMethods)
+          .feesFor(this.activeMintUrl, this.activeMintMeltMethods)
           .toNumber();
       } catch {
         return 0;
@@ -451,11 +461,28 @@ export default defineComponent({
         !!request.isMintListStrict && !request.includesMint(this.activeMintUrl)
       );
     },
+    // Why the selected mint or unit cannot pay the request; cashu-ts rejects the same cases.
     paymentRequestMintWarning(): string {
-      if (!this.selectedMintViolatesRequest) return "";
-      return this.$t(
-        "SendTokenDialog.errors.mint_not_allowed_by_request"
-      ) as string;
+      const request = this.sendData.paymentRequest;
+      if (!request) return "";
+      let error = "";
+      if (this.selectedMintViolatesRequest) {
+        error = "mint_not_allowed_by_request";
+      } else if (request.unit && request.unit !== this.activeUnit) {
+        error = "unit_not_matching_request";
+      } else if (
+        request.supportedMethods?.length &&
+        !request.supportedMethods.some((m) =>
+          this.activeMintMeltMethods.includes(m.method)
+        )
+      ) {
+        error = "mint_lacks_request_methods";
+      }
+      return error
+        ? (this.$t(`SendTokenDialog.errors.${error}`, {
+            unit: request.unit?.toUpperCase(),
+          }) as string)
+        : "";
     },
     paymentRequestButtonDisabled(): boolean {
       if (!this.sendData.paymentRequest) {
@@ -471,7 +498,7 @@ export default defineComponent({
       if (this.globalMutexLock) {
         return true;
       }
-      return this.selectedMintViolatesRequest;
+      return !!this.paymentRequestMintWarning;
     },
   },
   watch: {
@@ -539,7 +566,6 @@ export default defineComponent({
       "send",
       "sendToLock",
       "sendToRequest",
-      "mintWalletSync",
       "coinSelect",
       "spendableProofs",
       "getFeesForProofs",

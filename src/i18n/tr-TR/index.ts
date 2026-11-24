@@ -1073,6 +1073,12 @@ export default {
         },
       },
     },
+    errors: {
+      unit_not_matching_request:
+        "Bu ödeme talebi {unit} cinsinden ödenmelidir.",
+      mint_lacks_request_methods:
+        "Seçili mint, bu talebin gerektirdiği ödeme yöntemlerini desteklemiyor.",
+    },
   },
   ReceiveDialog: {
     title: "Al",

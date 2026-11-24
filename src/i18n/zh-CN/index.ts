@@ -1055,6 +1055,10 @@ export default {
         },
       },
     },
+    errors: {
+      unit_not_matching_request: "此支付请求必须以 {unit} 支付。",
+      mint_lacks_request_methods: "所选 Mint 不支持此请求所需的支付方式。",
+    },
   },
   ReceiveDialog: {
     title: "接收",

@@ -1072,6 +1072,12 @@ export default {
         },
       },
     },
+    errors: {
+      unit_not_matching_request:
+        "Diese Zahlungsanforderung muss in {unit} bezahlt werden.",
+      mint_lacks_request_methods:
+        "Die ausgewählte Mint unterstützt die für diese Anforderung erforderlichen Zahlungsmethoden nicht.",
+    },
   },
   ReceiveDialog: {
     title: "Empfangen",
