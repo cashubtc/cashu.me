@@ -537,6 +537,22 @@ describe("payment history store", () => {
       expect(await cashuDb.meltQuotes.get("shared-melt-q")).toBeDefined();
     });
 
+    it("an update that overlaps removePaymentByQuote does not recreate the quote", async () => {
+      const store = usePaymentHistoryStore();
+      await store.addPayment(bolt11Melt("racing-melt-q"));
+
+      // A status check starts its update, then the failed-melt cleanup runs
+      // before the update writes.
+      const update = store.updatePayment("racing-melt-q", {
+        meltQuote: { quote: "racing-melt-q", amount: 101, state: "PENDING" },
+      });
+      await store.removePaymentByQuote("racing-melt-q");
+      await update;
+
+      expect(await cashuDb.paymentHistory.count()).toBe(0);
+      expect(await cashuDb.meltQuotes.count()).toBe(0);
+    });
+
     it("removePaymentByQuote keeps a quote with a reserved proof", async () => {
       const store = usePaymentHistoryStore();
       await store.addPayment(bolt11Melt("reserved-melt-q"));

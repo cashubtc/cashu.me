@@ -421,19 +421,19 @@ export const usePaymentHistoryStore = defineStore("paymentHistory", {
         meltQuote?: Record<string, any>;
       }
     ) {
-      const payments = await cashuDb.paymentHistory
-        .where("quote")
-        .equals(quote)
-        .toArray();
-      if (payments.length === 0) {
-        return false;
-      }
-      await cashuDb.transaction(
+      // Read inside the transaction so an update that overlaps
+      // removePaymentByQuote cannot write back a quote row it just deleted.
+      const updated = await cashuDb.transaction(
         "rw",
         cashuDb.paymentHistory,
         cashuDb.mintQuotes,
         cashuDb.meltQuotes,
         async () => {
+          const payments = await cashuDb.paymentHistory
+            .where("quote")
+            .equals(quote)
+            .toArray();
+          if (payments.length === 0) return false;
           for (const payment of payments) {
             const { mintQuote, meltQuote, ...paymentUpdates } = updates;
             await cashuDb.paymentHistory.update(payment.id, paymentUpdates);
@@ -448,10 +448,11 @@ export const usePaymentHistoryStore = defineStore("paymentHistory", {
               );
             }
           }
+          return true;
         }
       );
-      await this.refreshFromDexie();
-      return true;
+      if (updated) await this.refreshFromDexie();
+      return updated;
     },
     /**
      * Delete the payment rows of `quote` and the quote row they referenced,
@@ -473,12 +474,12 @@ export const usePaymentHistoryStore = defineStore("paymentHistory", {
             .toArray();
           if (rows.length === 0) return false;
           await cashuDb.paymentHistory.bulkDelete(rows.map((row) => row.id));
+          // Every row with this `quote` is gone, so only a `parentQuote`
+          // reference can remain.
           const stillReferenced =
             (await cashuDb.paymentHistory
-              .filter(
-                (payment) =>
-                  payment.quote === quote || payment.parentQuote === quote
-              )
+              .where("parentQuote")
+              .equals(quote)
               .count()) > 0 ||
             (await cashuDb.proofs.where("quote").equals(quote).count()) > 0;
           if (stillReferenced) return true;
