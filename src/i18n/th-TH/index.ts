@@ -69,6 +69,8 @@ export default {
         "การชำระเงินอยู่ระหว่างดำเนินการ รีเฟรชใบแจ้งหนี้ด้วยตนเอง",
       sent: "ส่ง {amount}",
       token_still_pending: "โทเค็นยังอยู่ระหว่างดำเนินการ",
+      history_save_failed: "ไม่สามารถบันทึกลงในประวัติได้",
+      history_delete_failed: "ไม่สามารถลบออกจากประวัติได้",
       received_lightning: "ได้รับ {amount} ผ่าน Lightning",
       lightning_payment_failed: "การชำระเงิน Lightning ล้มเหลว",
       failed_to_decode_invoice: "ไม่สามารถถอดรหัสใบแจ้งหนี้",

@@ -68,6 +68,8 @@ export default {
       payment_pending_refresh: "付款正在处理。请手动刷新发票。",
       sent: "已发送 {amount}",
       token_still_pending: "代币仍在处理中",
+      history_save_failed: "无法保存到历史记录",
+      history_delete_failed: "无法从历史记录中删除",
       received_lightning: "通过闪电网络收到 {amount}",
       lightning_payment_failed: "闪电网络支付失败",
       failed_to_decode_invoice: "无法解码发票",

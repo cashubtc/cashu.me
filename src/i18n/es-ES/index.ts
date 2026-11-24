@@ -70,6 +70,8 @@ export default {
         "Pago pendiente. Actualice la factura manualmente.",
       sent: "Enviado {amount}",
       token_still_pending: "Token aún pendiente",
+      history_save_failed: "No se pudo guardar en el historial",
+      history_delete_failed: "No se pudo eliminar del historial",
       received_lightning: "Recibido {amount} a través de Lightning",
       lightning_payment_failed: "Pago Lightning fallido",
       failed_to_decode_invoice: "No se pudo decodificar la factura",

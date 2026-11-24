@@ -68,6 +68,8 @@ export default {
         "支払いは保留中です。請求書を手動で更新してください。",
       sent: "{amount}を送信しました",
       token_still_pending: "トークンはまだ処理中です",
+      history_save_failed: "履歴に保存できませんでした",
+      history_delete_failed: "履歴から削除できませんでした",
       received_lightning: "Lightningで{amount}を受け取りました",
       lightning_payment_failed: "Lightning支払いに失敗しました",
       failed_to_decode_invoice: "請求書をデコードできませんでした",

@@ -480,6 +480,133 @@ describe("payment history store", () => {
       ).toEqual(["orphan-pending-melt-q", "orphan-reserved-melt-q"]);
     });
 
+    function bolt11Melt(quote: string, state = "UNPAID") {
+      return {
+        quote,
+        amount: -105,
+        request: `lnbc-${quote}`,
+        memo: "Outgoing invoice",
+        date: "2026-03-01T00:00:00.000Z",
+        status: "pending",
+        mint,
+        unit: "sat",
+        type: PaymentMethod.Bolt11,
+        meltQuote: { quote, amount: 101, fee_reserve: 4, state },
+      };
+    }
+
+    it("removePaymentByQuote deletes the removed payment's quote row", async () => {
+      const store = usePaymentHistoryStore();
+      await store.addPayment(bolt11Melt("failed-melt-q"));
+      await store.addPayment(bolt11Melt("other-melt-q", "PENDING"));
+      await store.addPayment(
+        bolt11Mint("mint-q", "2026-03-01T00:00:00.000Z", "pending", "UNPAID")
+      );
+
+      expect(await store.removePaymentByQuote("failed-melt-q")).toBe(true);
+      expect(await store.removePaymentByQuote("mint-q")).toBe(true);
+
+      expect(
+        (await cashuDb.paymentHistory.toArray()).map((p) => p.quote)
+      ).toEqual(["other-melt-q"]);
+      expect((await cashuDb.meltQuotes.toArray()).map((q) => q.quote)).toEqual([
+        "other-melt-q",
+      ]);
+      expect(await cashuDb.mintQuotes.count()).toBe(0);
+      expect(store.meltQuotes.map((q) => q.quote)).toEqual(["other-melt-q"]);
+      expect(store.mintQuotes).toHaveLength(0);
+      expect(await store.removePaymentByQuote("unknown-q")).toBe(false);
+    });
+
+    it("removePaymentByQuote keeps a quote another payment references", async () => {
+      const store = usePaymentHistoryStore();
+      await store.addPayment(bolt11Melt("shared-melt-q"));
+      const [payment] = await cashuDb.paymentHistory.toArray();
+      await cashuDb.paymentHistory.put({
+        ...payment,
+        id: "melt:child",
+        quote: "child-melt-q",
+        parentQuote: "shared-melt-q",
+      });
+
+      await store.removePaymentByQuote("shared-melt-q");
+
+      expect((await cashuDb.paymentHistory.toArray()).map((p) => p.id)).toEqual(
+        ["melt:child"]
+      );
+      expect(await cashuDb.meltQuotes.get("shared-melt-q")).toBeDefined();
+    });
+
+    it("an update that overlaps removePaymentByQuote does not recreate the quote", async () => {
+      const store = usePaymentHistoryStore();
+      await store.addPayment(bolt11Melt("racing-melt-q"));
+
+      // A status check starts its update, then the failed-melt cleanup runs
+      // before the update writes.
+      const update = store.updatePayment("racing-melt-q", {
+        meltQuote: { quote: "racing-melt-q", amount: 101, state: "PENDING" },
+      });
+      await store.removePaymentByQuote("racing-melt-q");
+      await update;
+
+      expect(await cashuDb.paymentHistory.count()).toBe(0);
+      expect(await cashuDb.meltQuotes.count()).toBe(0);
+    });
+
+    it("removePaymentByQuote keeps a quote with a reserved proof", async () => {
+      const store = usePaymentHistoryStore();
+      await store.addPayment(bolt11Melt("reserved-melt-q"));
+      await cashuDb.proofs.put({
+        secret: "s",
+        id: "keyset",
+        C: "c",
+        amount: 105,
+        reserved: true,
+        quote: "reserved-melt-q",
+      } as any);
+
+      await store.removePaymentByQuote("reserved-melt-q");
+
+      expect(await cashuDb.paymentHistory.count()).toBe(0);
+      expect(await cashuDb.meltQuotes.get("reserved-melt-q")).toBeDefined();
+    });
+
+    it("sweeps orphaned unpaid melt quotes left by failed sends", async () => {
+      const store = usePaymentHistoryStore();
+      await store.addPayment(bolt11Melt("in-flight-melt-q"));
+      await cashuDb.meltQuotes.bulkPut([
+        {
+          quote: "failed-melt-q",
+          method: PaymentMethod.Bolt11,
+          state: "UNPAID",
+        },
+        {
+          quote: "queued-melt-q",
+          method: PaymentMethod.Bolt11,
+          state: "UNPAID",
+        },
+        {
+          quote: "reserved-melt-q",
+          method: PaymentMethod.Bolt11,
+          state: "UNPAID",
+        },
+      ]);
+      await cashuDb.proofs.put({
+        secret: "s",
+        id: "keyset",
+        C: "c",
+        amount: 1,
+        reserved: true,
+        quote: "reserved-melt-q",
+      } as any);
+
+      await store.deleteOldPaidPayments(200, ["queued-melt-q"]);
+
+      expect(
+        (await cashuDb.meltQuotes.toArray()).map((q) => q.quote).sort()
+      ).toEqual(["in-flight-melt-q", "queued-melt-q", "reserved-melt-q"]);
+    });
+
     it("sweeps settled orphans even when no payment needs pruning", async () => {
       const store = usePaymentHistoryStore();
       await store.addPayment(

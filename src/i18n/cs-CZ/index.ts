@@ -74,6 +74,8 @@ export default {
       payment_pending_refresh: "Platba nevyřízena. Obnovte fakturu ručně.",
       sent: "Odesláno {amount}",
       token_still_pending: "Token stále nevyřízen",
+      history_save_failed: "Nepodařilo se uložit do historie",
+      history_delete_failed: "Nepodařilo se smazat z historie",
       received_lightning: "Přijato {amount} přes Lightning",
       lightning_payment_failed: "Lightning platba selhala",
       failed_to_decode_invoice: "Nepodařilo se dekódovat fakturu",

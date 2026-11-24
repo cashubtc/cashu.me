@@ -70,6 +70,8 @@ export default {
         "Πληρωμή σε εκκρεμότητα. Ανανεώστε το τιμολόγιο χειροκίνητα.",
       sent: "Στάλθηκε {amount}",
       token_still_pending: "Το token εκκρεμεί ακόμα",
+      history_save_failed: "Δεν ήταν δυνατή η αποθήκευση στο ιστορικό",
+      history_delete_failed: "Δεν ήταν δυνατή η διαγραφή από το ιστορικό",
       received_lightning: "Λήφθηκε {amount} μέσω Lightning",
       lightning_payment_failed: "Η πληρωμή Lightning απέτυχε",
       failed_to_decode_invoice: "Αποτυχία αποκωδικοποίησης τιμολογίου",

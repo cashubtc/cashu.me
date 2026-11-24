@@ -68,6 +68,8 @@ export default {
       payment_pending_refresh: "الدفع معلق. قم بتحديث الفاتورة يدويًا.",
       sent: "تم إرسال {amount}",
       token_still_pending: "الرمز لا يزال معلقًا",
+      history_save_failed: "تعذّر الحفظ في السجل",
+      history_delete_failed: "تعذّر الحذف من السجل",
       received_lightning: "تم استلام {amount} عبر شبكة لايتنينج",
       lightning_payment_failed: "فشل الدفع عبر لايتنينج",
       failed_to_decode_invoice: "فشل فك ترميز الفاتورة",

@@ -70,6 +70,8 @@ export default {
         "Paiement en attente. Rafraîchissez la facture manuellement.",
       sent: "Envoyé {amount}",
       token_still_pending: "Token toujours en attente",
+      history_save_failed: "Impossible d'enregistrer dans l'historique",
+      history_delete_failed: "Impossible de supprimer de l'historique",
       received_lightning: "Reçu {amount} via Lightning",
       lightning_payment_failed: "Paiement Lightning échoué",
       failed_to_decode_invoice: "Impossible de décoder la facture",

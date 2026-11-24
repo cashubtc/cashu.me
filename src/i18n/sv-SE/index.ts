@@ -68,6 +68,8 @@ export default {
       payment_pending_refresh: "Betalning väntar. Uppdatera fakturan manuellt.",
       sent: "Skickat {amount}",
       token_still_pending: "Token väntar fortfarande",
+      history_save_failed: "Kunde inte spara i historiken",
+      history_delete_failed: "Kunde inte ta bort från historiken",
       received_lightning: "Mottaget {amount} via Lightning",
       lightning_payment_failed: "Lightning-betalning misslyckades",
       failed_to_decode_invoice: "Kunde inte avkoda fakturan",

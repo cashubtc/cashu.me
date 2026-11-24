@@ -73,6 +73,8 @@ export default {
       payment_pending_refresh: "Payment pending. Refresh invoice manually.",
       sent: "Sent {amount}",
       token_still_pending: "Token still pending",
+      history_save_failed: "Could not save to history",
+      history_delete_failed: "Could not delete from history",
       received_lightning: "Received {amount} via Lightning",
       lightning_payment_failed: "Lightning payment failed",
       failed_to_decode_invoice: "Failed to decode invoice",
