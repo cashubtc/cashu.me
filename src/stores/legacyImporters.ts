@@ -1,3 +1,4 @@
+import type { IndexableType, Table } from "dexie";
 import { cashuDb } from "src/stores/dexie";
 import { moveLocalStorageKey } from "src/stores/legacyStorage";
 import { toMirrorRows } from "src/stores/tableMirror";
@@ -26,6 +27,15 @@ export type LegacyKeyImporter = {
 
 const nowSeconds = () => Math.floor(Date.now() / 1000);
 
+/** Whether every key is present in the table (migration verification). */
+export async function allStored(
+  table: Table<any, any>,
+  keys: IndexableType[]
+): Promise<boolean> {
+  if (!keys.length) return true;
+  return (await table.bulkGet(keys)).every(Boolean);
+}
+
 // ---- Phase 1 ---------------------------------------------------------------
 
 /** A cache; rebuilt from the mintReviews DB. */
@@ -34,6 +44,10 @@ export async function importLegacyMintRecommendations() {
 }
 
 export async function importLegacyNip17SeenEvents() {
+  const validIds = (events: { id: string }[]) =>
+    (events || [])
+      .filter((event) => event && typeof event.id === "string")
+      .map((event) => event.id);
   await moveLocalStorageKey<{ id: string; created_at: number }[]>({
     key: "cashu.ndk.nip17EventIdsWeHaveSeen",
     tables: [cashuDb.seenEvents],
@@ -47,6 +61,11 @@ export async function importLegacyNip17SeenEvents() {
         }));
       await cashuDb.seenEvents.bulkPut(rows);
     },
+    verify: async (events) =>
+      allStored(
+        cashuDb.seenEvents,
+        validIds(events).map((id) => ["nip17", id])
+      ),
   });
 }
 
@@ -69,6 +88,15 @@ export async function importLegacyNwcProcessedRequestIds() {
     }))
   );
   await cashuDb.seenEvents.bulkPut(rows);
+  // strip the ids from the connections only once every one is stored
+  if (
+    !(await allStored(
+      cashuDb.seenEvents,
+      rows.map((row) => [row.scope, row.id])
+    ))
+  ) {
+    throw new Error("Verification failed while moving NWC request ids");
+  }
   // Write through the store so its in-memory copy drops the ids as well.
   const { useNWCStore } = await import("src/stores/nwc");
   useNWCStore().connections = connections.map(
@@ -85,6 +113,13 @@ export async function importLegacyPaymentRequests() {
         toMirrorRows((requests || []).filter((request) => request?.id))
       );
     },
+    verify: async (requests) =>
+      allStored(
+        cashuDb.paymentRequests,
+        (requests || [])
+          .filter((request) => request?.id)
+          .map((request) => request.id)
+      ),
   });
 }
 

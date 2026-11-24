@@ -157,7 +157,13 @@ export const useP2PKStore = defineStore("p2pk", {
       };
       this.p2pkKeys = this.p2pkKeys.concat(keyPair);
     },
-    generateKeypair: function () {
+    /**
+     * Create a key and resolve once it is stored. Ecash locked to a key that
+     * is lost can't be spent, so callers show or share the key only after
+     * this resolves; if it can't be saved (reported to the user), the key is
+     * dropped again and the promise rejects.
+     */
+    generateKeypair: async function (): Promise<P2PKKey> {
       const sk = generateSecretKey(); // `sk` is a Uint8Array
       const pk = "02" + getPublicKey(sk); // `pk` is a hex string
       const skHex = bytesToHex(sk);
@@ -168,6 +174,13 @@ export const useP2PKStore = defineStore("p2pk", {
         usedCount: 0,
       };
       this.p2pkKeys = this.p2pkKeys.concat(keyPair);
+      try {
+        await this.p2pkKeysTable.flush();
+      } catch (error) {
+        this.p2pkKeys = this.p2pkKeys.filter((key) => key.publicKey !== pk);
+        throw error;
+      }
+      return keyPair;
     },
     getSecretP2PKPubkey: function (
       secret: string,

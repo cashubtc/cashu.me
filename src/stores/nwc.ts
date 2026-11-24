@@ -478,6 +478,9 @@ export const useNWCStore = defineStore("nwc", {
       }
     },
     listenToNWCCommands: async function () {
+      // also reached from NWC settings: only listen against loaded wallet data
+      const { walletDataReady } = await import("src/stores/bootstrap");
+      await walletDataReady();
       // if (!this.connections.length) {
       //   await this.generateNWCConnection()
       // }

@@ -223,7 +223,11 @@ export const usePRStore = defineStore("payment-request", {
       let nut10: NUT10Option | undefined;
       if (lock) {
         const p2pkStore = useP2PKStore();
-        if (!p2pkStore.p2pkKeys.length) p2pkStore.generateKeypair();
+        // The dialog stores a key before it enables locking; this fallback
+        // only covers callers that lock without one.
+        if (!p2pkStore.p2pkKeys.length) {
+          p2pkStore.generateKeypair().catch(() => {});
+        }
         const key = p2pkStore.p2pkKeys[p2pkStore.p2pkKeys.length - 1];
         nut10 = { kind: "P2PK", data: key.publicKey, tags: [] };
       }

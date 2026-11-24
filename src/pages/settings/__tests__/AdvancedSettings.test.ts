@@ -97,6 +97,8 @@ describe("AdvancedSettings", () => {
     const nukePromise = AdvancedSettings.methods.nukeWallet.call({
       stopTransactionWorkerAndWait: vi.fn().mockResolvedValue(true),
       startTransactionWorker: vi.fn(),
+      lockMutex: vi.fn().mockResolvedValue(undefined),
+      unlockMutex: vi.fn(),
       exportWalletState: vi.fn().mockResolvedValue(undefined),
       deleteWalletDatabase,
     });
@@ -122,6 +124,8 @@ describe("AdvancedSettings", () => {
     const context = {
       stopTransactionWorkerAndWait: vi.fn().mockResolvedValue(false),
       startTransactionWorker: vi.fn(),
+      lockMutex: vi.fn().mockResolvedValue(undefined),
+      unlockMutex: vi.fn(),
       exportWalletState: vi.fn(),
       deleteWalletDatabase: vi.fn(),
       notifyError: vi.fn(),
@@ -138,6 +142,8 @@ describe("AdvancedSettings", () => {
     const context = {
       stopTransactionWorkerAndWait: vi.fn().mockResolvedValue(true),
       startTransactionWorker: vi.fn(),
+      lockMutex: vi.fn().mockResolvedValue(undefined),
+      unlockMutex: vi.fn(),
       exportWalletState: vi.fn().mockRejectedValue(new Error("quota")),
       deleteWalletDatabase: vi.fn(),
       notifyError: vi.fn(),

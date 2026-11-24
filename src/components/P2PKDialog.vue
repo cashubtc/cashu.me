@@ -139,8 +139,13 @@ export default defineComponent({
       "showKeyDetails",
       "showLastKey",
     ]),
-    newKeys: function () {
-      this.generateKeypair();
+    newKeys: async function () {
+      try {
+        // show the key only once it is stored (a failure is reported)
+        await this.generateKeypair();
+      } catch {
+        return;
+      }
       this.showLastKey();
     },
     onCopyPublicKey() {

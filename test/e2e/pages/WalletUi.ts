@@ -151,14 +151,20 @@ export class WalletUi extends WalletPage {
     );
   }
 
-  /** Stored mints once pending writes have landed (two equal reads). */
-  async settledStoredMints() {
-    let previous = JSON.stringify(await this.storedMints());
-    for (;;) {
-      await this.page.waitForTimeout(200);
-      const current = await this.storedMints();
-      if (JSON.stringify(current) === previous) return current;
-      previous = JSON.stringify(current);
+  /**
+   * Stored mints once `landed` holds (the edit under test was written), or
+   * after `timeoutMs` when it never does (e.g. the edit was rejected).
+   */
+  async storedMintsAfter(
+    landed: (mints: { url: string; nickname?: string }[]) => boolean,
+    timeoutMs = 5000
+  ) {
+    const deadline = Date.now() + timeoutMs;
+    let mints = await this.storedMints();
+    while (!landed(mints) && Date.now() < deadline) {
+      await this.page.waitForTimeout(100);
+      mints = await this.storedMints();
     }
+    return mints;
   }
 }

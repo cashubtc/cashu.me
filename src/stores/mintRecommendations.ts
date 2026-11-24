@@ -76,8 +76,8 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
         new NDK({ explicitRelayUrls: settings.defaultNostrRelays });
       this.ndk.connect();
       this.connected = true;
-      this.ensureDbInitialized();
-      this.hydrateFromDb();
+      // hydrateFromDb opens the DB itself and reports a failure
+      void this.hydrateFromDb();
     },
     // Load all reviews from DB into a lightweight cache for instant UI and build aggregates
     hydrateFromDb: async function () {
@@ -184,6 +184,10 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
     discover: async function (): Promise<MintRecommendation[]> {
       await this.fetchMintInfos();
       await this.fetchReviews();
+      // the list is rebuilt from the reviews DB; don't present stale results
+      if (!(await this.rebuildAggregates())) {
+        throw new Error("Could not load mint recommendations");
+      }
       return this.recommendations;
     },
     startSubscriptions: function () {

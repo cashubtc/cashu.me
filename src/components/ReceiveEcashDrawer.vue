@@ -236,13 +236,19 @@ export default defineComponent({
         this.watchClipboardPaste = true;
       }
     },
-    handleLockBtn: function () {
+    handleLockBtn: async function () {
       this.showP2PKDialog = !this.showP2PKDialog;
+      this.showReceiveEcashDrawer = false;
       if (!this.p2pkKeys.length || !this.showP2PKDialog) {
-        this.generateKeypair();
+        try {
+          // show the key only once it is stored (a failure is reported)
+          await this.generateKeypair();
+        } catch {
+          this.showP2PKDialog = false;
+          return;
+        }
       }
       this.showLastKey();
-      this.showReceiveEcashDrawer = false;
     },
     handlePaymentRequestBtn: function () {
       const prStore = usePRStore();

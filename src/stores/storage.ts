@@ -18,7 +18,10 @@ import {
   walletTableSpec,
 } from "src/stores/dexie";
 import { importLegacyLocalStorageKeys } from "src/stores/legacyImporters";
-import { flushPendingWrites } from "src/stores/tableMirror";
+import {
+  flushPendingWrites,
+  suspendPendingWrites,
+} from "src/stores/tableMirror";
 import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import { deserializeProofs, JSONInt } from "@cashu/cashu-ts";
 import { i18n } from "src/boot/i18n";
@@ -95,18 +98,40 @@ export const useStorageStore = defineStore("storage", {
   }),
   actions: {
     restoreFromBackup: async function (backup: any) {
+      if (!backup) {
+        notifyError("Unrecognized Backup Format!");
+        return;
+      }
+      // Land this tab's pending changes, then stop the in-memory stores from
+      // writing: restored rows go straight into the tables, and a store's
+      // older copy must not overwrite them. The page reloads afterwards
+      // (also after a failure), so every store loads the restored data.
+      await flushPendingWrites().catch((error) => {
+        console.error("Restoring with unsaved changes", error);
+      });
+      suspendPendingWrites();
       try {
         await this.restoreFromBackupUnchecked(backup);
+        notifySuccess("Backup restored");
       } catch (error) {
         console.error("Could not restore backup", error);
         notifyError(i18n.global.t("WalletStorage.restore_failed"));
       }
+      window.location.reload();
     },
     restoreFromBackupUnchecked: async function (backup: any) {
       const proofsStore = useProofsStore();
-      if (!backup) {
-        notifyError("Unrecognized Backup Format!");
-      } else {
+      {
+        // Keyset counters belong to one mnemonic. When the backup brings a
+        // different one, start from the backup's counters only; merging by
+        // max would carry this wallet's counters over to the restored seed.
+        const backupMnemonic = backup["cashu.mnemonic"];
+        if (
+          typeof backupMnemonic === "string" &&
+          backupMnemonic !== (localStorage.getItem("cashu.mnemonic") ?? "")
+        ) {
+          await cashuDb.keysetCounters.clear();
+        }
         const keys = Object.keys(backup);
         for (const key of keys) {
           // we treat some keys differently *magic*
@@ -157,10 +182,6 @@ export const useStorageStore = defineStore("storage", {
         // Backups from older versions carry data in localStorage keys that now
         // live in IndexedDB; move them into their tables.
         await importLegacyLocalStorageKeys();
-        // only report success once everything is stored
-        await flushPendingWrites();
-        notifySuccess("Backup restored");
-        window.location.reload();
       }
     },
     /**

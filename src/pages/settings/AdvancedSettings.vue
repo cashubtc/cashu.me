@@ -325,6 +325,7 @@ export default defineComponent({
     ]),
     ...mapActions(useProofsStore, ["serializeProofs"]),
     ...mapActions(useDexieStore, ["deleteAllTables", "deleteWalletDatabase"]),
+    ...mapActions(useUiStore, ["lockMutex", "unlockMutex"]),
     ...mapActions(useTransactionWorkerStore, [
       "stopTransactionWorkerAndWait",
       "startTransactionWorker",
@@ -396,12 +397,17 @@ export default defineComponent({
         this.startTransactionWorker();
         return;
       }
+      // Hold the wallet mutex from the backup to the deletion: mint, melt
+      // and swap (also when started by a quote websocket or NWC) take it, so
+      // no payment can complete after the backup snapshot.
+      await this.lockMutex();
       // create a backup just in case; refused (and the wipe stopped) when
       // some changes could not be saved, so the backup is never incomplete
       try {
         await this.exportWalletState({ requireSaved: true });
       } catch {
         // reported by exportWalletState
+        this.unlockMutex();
         this.startTransactionWorker();
         return;
       }

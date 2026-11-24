@@ -95,9 +95,13 @@ export const useMigrationsStore = defineStore("migrations", {
       // commit before the migration counts as done, and before the active
       // mint points at the new URL
       await mintStore.mintsTable.flush();
+      // independent of `updated`: a retry in the same tab finds the URL
+      // already renamed in memory but the pointer still on the old one
       if (
-        updated &&
-        mintStore.activeMintUrl === "https://stablenut.umint.cash"
+        mintStore.activeMintUrl === "https://stablenut.umint.cash" &&
+        mintStore.mints.some(
+          (mint) => mint.url === "https://stablenut.cashu.network"
+        )
       ) {
         mintStore.activeMintUrl = "https://stablenut.cashu.network";
       }

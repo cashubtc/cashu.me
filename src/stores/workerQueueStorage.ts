@@ -74,6 +74,15 @@ export async function importLegacyWorkerQueues() {
         );
         await cashuDb.workerQueue.bulkPut(workerQueueRows(kind, valid));
       },
+      verify: async (entries) => {
+        const valid = (entries || []).filter(
+          (entry) => entry && typeof rawId(entry) === "string" && rawId(entry)
+        );
+        const stored = await cashuDb.workerQueue.bulkGet(
+          valid.map((entry) => [kind, queueRef(entry)])
+        );
+        return stored.every(Boolean);
+      },
     });
   }
 }

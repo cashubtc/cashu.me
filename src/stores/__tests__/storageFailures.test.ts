@@ -166,6 +166,8 @@ describe("backup restore failures", () => {
       })
     ).resolves.toBeUndefined();
     expect(notifyError).toHaveBeenCalled();
+    // restore suspends writers until the page reloads; undo that here
+    resumePendingWritesForTests();
   });
 });
 
@@ -368,5 +370,118 @@ describe("round 4 failure handling", () => {
     expect(store.dbHydrated).toBe(false);
     expect(notifyError).toHaveBeenCalled();
     read.mockRestore();
+  });
+});
+
+describe("round 5 failure handling", () => {
+  beforeEach(async () => {
+    localStorage.clear();
+    vi.mocked(notifyError).mockClear();
+    await cashuDb.keysetCounters.clear();
+    await cashuDb.paymentRequests.clear();
+  });
+
+  const counters = (counter: number) =>
+    JSON.stringify([{ id: "ks1", counter, _pos: 0 }]);
+
+  it("replaces counters when the backup belongs to another mnemonic", async () => {
+    localStorage.setItem("cashu.mnemonic", "current words");
+    await cashuDb.keysetCounters.put({ id: "ks1", counter: 500 });
+    await useStorageStore().restoreFromBackup({
+      "cashu.mnemonic": "other words",
+      "cashu.dexie.db.keysetCounters": counters(3),
+    });
+    resumePendingWritesForTests();
+    expect((await cashuDb.keysetCounters.get("ks1"))?.counter).toBe(3);
+  });
+
+  it("keeps the higher counter when the backup has the same mnemonic", async () => {
+    localStorage.setItem("cashu.mnemonic", "same words");
+    await cashuDb.keysetCounters.put({ id: "ks1", counter: 500 });
+    await useStorageStore().restoreFromBackup({
+      "cashu.mnemonic": "same words",
+      "cashu.dexie.db.keysetCounters": counters(3),
+    });
+    resumePendingWritesForTests();
+    expect((await cashuDb.keysetCounters.get("ks1"))?.counter).toBe(500);
+  });
+
+  it("does not let a pending store write overwrite restored rows", async () => {
+    const mirror = createTableMirror<Item>(cashuDb.paymentRequests, {
+      keyOf: (item) => item.id,
+    });
+    await mirror.hydrate();
+    const fail = vi
+      .spyOn(cashuDb.paymentRequests, "bulkPut")
+      .mockRejectedValueOnce(new Error("quota"))
+      .mockRejectedValueOnce(new Error("quota"));
+    mirror.items.value.push({ id: "pr", value: 1 });
+
+    await useStorageStore().restoreFromBackup({
+      "cashu.dexie.db.paymentRequests": JSON.stringify([
+        { id: "pr", value: 2, _pos: 0 },
+      ]),
+    });
+    await mirror.flush().catch(() => {});
+    fail.mockRestore();
+    expect(await cashuDb.paymentRequests.get("pr")).toMatchObject({
+      value: 2,
+    });
+    resumePendingWritesForTests();
+    mirror.items.value = [];
+  });
+
+  it("drops a P2PK key that could not be saved", async () => {
+    const { useP2PKStore } = await import("src/stores/p2pk");
+    await cashuDb.p2pkKeys.clear();
+    const store = useP2PKStore();
+    await store.init();
+    const fail = vi
+      .spyOn(cashuDb.p2pkKeys, "bulkPut")
+      .mockRejectedValue(new Error("quota"));
+    await expect(store.generateKeypair()).rejects.toThrow("quota");
+    expect(store.p2pkKeys).toHaveLength(0);
+    fail.mockRestore();
+
+    const key = await store.generateKeypair();
+    expect(await cashuDb.p2pkKeys.get(key.publicKey)).toBeTruthy();
+  });
+
+  it("keeps a legacy key when its rows did not all land", async () => {
+    const { importLegacyPaymentRequests } = await import(
+      "src/stores/legacyImporters"
+    );
+    localStorage.setItem(
+      "cashu.pr.ours",
+      JSON.stringify([{ id: "x", encoded: "creqX", receivedPaymentIds: [] }])
+    );
+    const lose = vi
+      .spyOn(cashuDb.paymentRequests, "bulkPut")
+      .mockResolvedValueOnce(undefined as any);
+    await expect(importLegacyPaymentRequests()).rejects.toThrow(
+      "Verification failed"
+    );
+    lose.mockRestore();
+    expect(localStorage.getItem("cashu.pr.ours")).not.toBeNull();
+  });
+
+  it("moves the active mint pointer on a retry of migration v1", async () => {
+    const { useMigrationsStore } = await import("src/stores/migrations");
+    const { useMintsStore } = await import("src/stores/mints");
+    await cashuDb.mints.clear();
+    const mints = useMintsStore();
+    await mints.init();
+    // state after a first attempt whose write failed: renamed in memory,
+    // pointer still on the old URL
+    mints.mints.push({
+      url: "https://stablenut.cashu.network",
+      keys: [],
+      keysets: [],
+    } as any);
+    mints.activeMintUrl = "https://stablenut.umint.cash";
+    await useMigrationsStore().migrateStablenutsToCash();
+    expect(mints.activeMintUrl).toBe("https://stablenut.cashu.network");
+    mints.mints = [];
+    await mints.mintsTable.flush();
   });
 });

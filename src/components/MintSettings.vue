@@ -582,6 +582,9 @@ export default defineComponent({
           );
         }
         this.startSubscriptions();
+      } catch (error) {
+        console.error("Mint discovery failed", error);
+        this.notifyError(this.$i18n.t("WalletStorage.load_failed"));
       } finally {
         this.discoveringMints = false;
       }

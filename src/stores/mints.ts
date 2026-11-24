@@ -134,6 +134,16 @@ export const useMintsStore = defineStore("mints", {
     const uiStoreGlobal: any = useUiStore();
     const settingsStoreGlobal: any = useSettingsStore();
 
+    // Keysets can change without the active mint changing (a duplicate URL
+    // merged in, a keyset added): refresh the active proofs then too.
+    watch(
+      () =>
+        mints.value
+          .map((m) => `${m.url}:${(m.keysets || []).map((k) => k.id).join()}`)
+          .join("|"),
+      () => useProofsStore().updateActiveProofs()
+    );
+
     // Watch for changes in activeMintUrl and activeUnit
     watch([activeMintUrl, activeUnit], async () => {
       const proofsStore = useProofsStore();

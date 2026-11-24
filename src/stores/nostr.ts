@@ -394,6 +394,9 @@ export const useNostrStore = defineStore("nostr", {
       }
     },
     subscribeToNip17DirectMessages: async function () {
+      // only receive payments against loaded wallet data
+      const { walletDataReady } = await import("src/stores/bootstrap");
+      await walletDataReady();
       await nip17SeenEvents.load();
       await this.walletSeedGenerateKeyPair();
       await this.initNdkReadOnly();
