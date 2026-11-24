@@ -13,6 +13,8 @@ describe("wallet store initialisation", () => {
     const wallet = useWalletStore();
 
     expect(wallet.payInvoiceData.show).toBe(false);
-    expect(typeof wallet.t).toBe("function");
+    expect(wallet.t("wallet.notifications.trying_again")).toBe(
+      "Trying again..."
+    );
   });
 });
