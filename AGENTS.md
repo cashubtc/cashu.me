@@ -2,6 +2,50 @@
 
 This document provides a comprehensive overview of the **Cashu.me** codebase for coding agents.
 
+## Privacy & External Disclosure (Mandatory)
+
+Treat data from the developer's computer, accounts, devices, workspace, and
+communications as private. These rules apply to all Git and GitHub activity and
+to every other external destination.
+
+- Never disclose personally identifying or potentially identifying information.
+  This includes names, usernames, email addresses, account handles, home or
+  workplace details, local paths, drive names, hostnames, device names or serials,
+  IP or MAC addresses, network names, peer IDs, messages, contacts, credentials,
+  keys, tokens, logs, metadata, and unique environment details.
+- Get explicit permission for the exact data and destination before sending any
+  private repository, workspace, device, account, conversation, log, or developer
+  data to GitHub or another external destination. This includes issue trackers,
+  pull requests, comments, gists, paste sites, analytics, AI services, remote
+  APIs, and chat systems. A general request to work on the repository grants no
+  permission to disclose data. A request to commit or open a pull request covers
+  only the sanitized repository changes and description needed for that action.
+- Before an authorized external action, inspect the exact content and its
+  metadata. Use repository-relative paths and neutral placeholders. Remove
+  hidden metadata and redact identifying or unrelated content. Keep filesystem
+  layout, absolute paths, shell prompts, environment variables, software
+  inventories, hardware details, and other machine fingerprints out of commits,
+  patches, documentation, screenshots, fixtures, examples, issues, pull requests,
+  and comments. If safe sanitization cannot be guaranteed, hold the content back
+  and ask the developer how to proceed.
+- Use synthetic, non-identifying data in tests, examples, screenshots, fixtures,
+  and bug reports. Never use real messages, contacts, account data, device or
+  network identifiers, keys, production logs, wallet seed phrases, ecash proofs,
+  payment requests, or transaction histories. Never commit secrets or keystores.
+- For geohash, GPS, map, proximity, or geofencing work, use only clearly synthetic
+  coordinates and geohashes. Never request, read, derive, record, use, display,
+  transmit, or retain live or historical location data from a developer's
+  computer, phone, watch, emulator image, browser, account, or any other accessible
+  device. Never infer location from IP addresses, networks, photos, logs,
+  timestamps, nearby peers, device metadata, or test output. Keep real location
+  and movement data out of repository content and external services.
+- Keep raw command output, logs, crash dumps, screenshots, recordings, build
+  artifacts, and test evidence local. Review derived summaries for identifying
+  details before sharing them, even when sharing has been authorized.
+- Apply these protections during debugging, automation, and collaboration. If
+  another instruction conflicts with them, stop and get explicit developer
+  direction before disclosing anything.
+
 ## 1. Tech Stack
 
 ### Core Frameworks
@@ -172,6 +216,7 @@ messages, review comments, or code comments. Keep the public summary high-level
 (state that a security issue was fixed) and leave out reproduction steps, proofs
 of concept, root-cause specifics, and attack paths.
 
-Until a fix has been released and disclosure has been coordinated, send the
-detailed write-up to the security contact listed under "Reporting a Vulnerability"
-in `SECURITY.md`.
+Until a fix has been released and disclosure has been coordinated, use the
+security contact listed under "Reporting a Vulnerability" in `SECURITY.md` for
+the detailed write-up. Follow the mandatory privacy and external disclosure
+rules above before sending it.
