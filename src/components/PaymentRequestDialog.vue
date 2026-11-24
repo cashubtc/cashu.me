@@ -155,7 +155,7 @@
                       v-model="locked"
                       dense
                       :label="$t('PaymentRequestDialog.inputs.lock.label')"
-                      @update:model-value="onDetailsChanged"
+                      @update:model-value="onLockChanged"
                     />
                   </div>
                 </div>
@@ -270,6 +270,7 @@ import VueQrcode from "@chenfengyuan/vue-qrcode";
 import { decodePaymentRequest, type PaymentRequest } from "@cashu/cashu-ts";
 
 import { usePRStore } from "src/stores/payment-request";
+import { useP2PKStore } from "src/stores/p2pk";
 import { MintClass, useMintsStore } from "../stores/mints";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useUiStore } from "../stores/ui";
@@ -314,6 +315,7 @@ export default defineComponent({
       "currentPaymentRequest",
     ]),
     ...mapState(useMintsStore, ["activeMintUrl", "activeUnit"]),
+    ...mapState(useP2PKStore, ["p2pkKeys"]),
     // Units of the request's mint, or of the active mint when any mint will do.
     mintUnits(): string[] {
       const url = this.chosenMintUrl ?? this.activeMintUrl;
@@ -373,6 +375,7 @@ export default defineComponent({
     },
   },
   methods: {
+    ...mapActions(useP2PKStore, ["generateKeypair"]),
     ...mapActions(usePRStore, [
       "newPaymentRequest",
       "updatePaymentRequest",
@@ -405,6 +408,19 @@ export default defineComponent({
         this.locked,
         this.unit
       );
+    },
+    // A locked request names a P2PK key; make sure one is stored first.
+    async onLockChanged(locked: boolean) {
+      if (locked && !this.p2pkKeys.length) {
+        try {
+          await this.generateKeypair();
+        } catch {
+          // reported by the store; stay unlocked
+          this.locked = false;
+          return;
+        }
+      }
+      this.onDetailsChanged();
     },
     onDetailsChanged() {
       const shown = this.shownRequest;

@@ -246,7 +246,6 @@ import { useNWCStore } from "src/stores/nwc";
 import { useNpubCashStore } from "src/stores/npubcash";
 import { useNostrStore } from "src/stores/nostr";
 import { usePRStore } from "src/stores/payment-request";
-import { useDexieStore } from "src/stores/dexie";
 
 import { useStorageStore } from "src/stores/storage";
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
@@ -261,7 +260,7 @@ import {
   Scan as ScanIcon,
 } from "lucide-vue-next";
 
-import { useMigrationsStore } from "src/stores/migrations";
+import { walletDataReady } from "src/stores/bootstrap";
 
 declare const windowMixin: any;
 declare const GIT_COMMIT: string;
@@ -298,6 +297,7 @@ export default {
         show: false,
       },
       historyHydrated: false,
+      unmounted: false,
       welcomeDialog: {
         show: false,
       },
@@ -367,14 +367,13 @@ export default {
       "setProofs",
       "getKeysForKeyset",
     ]),
-    ...mapActions(useTokensStore, ["setTokenPaid", "initEcashHistory"]),
+    ...mapActions(useTokensStore, ["setTokenPaid"]),
     ...mapActions(useWalletStore, [
       "setInvoicePaid",
       "mint",
       "checkPendingTokens",
       "decodeRequest",
       "initializeMnemonic",
-      "initPaymentHistory",
     ]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useNWCStore, ["listenToNWCCommands"]),
@@ -387,7 +386,6 @@ export default {
       "sendNip17DirectMessageToNprofile",
       "initSigner",
     ]),
-    ...mapActions(useDexieStore, ["migrateToDexie"]),
     ...mapActions(useStorageStore, ["checkLocalStorage"]),
     ...mapActions(usePRStore, ["createPaymentRequest"]),
     ...mapActions(useTransactionWorkerStore, [
@@ -583,23 +581,33 @@ export default {
       if (document.visibilityState === "visible") {
         console.log("### App brought to foreground, checking NWC...");
         if (this.nwcEnabled) {
-          this.listenToNWCCommands();
+          this.listenToNWCCommands().catch((error) =>
+            console.error("Could not listen to NWC commands", error)
+          );
         }
       }
     },
   },
   watch: {},
 
-  mounted: function () {
-    this.initializeNpubCash();
+  mounted: async function () {
     // Ensure wallet action buttons have equal width
     this.$nextTick(this.equalizeButtonWidths);
     // Add window resize listener to handle responsive layouts
     window.addEventListener("resize", this.equalizeButtonWidths);
+    // Background work only runs against loaded wallet data (see created).
+    try {
+      await walletDataReady();
+    } catch {
+      return;
+    }
+    if (this.unmounted) return;
+    this.initializeNpubCash();
     document.addEventListener("visibilitychange", this.handleVisibilityChange);
   },
 
   beforeUnmount: function () {
+    this.unmounted = true;
     // Remove event listener when component is destroyed
     window.removeEventListener("resize", this.equalizeButtonWidths);
     document.removeEventListener(
@@ -614,11 +622,15 @@ export default {
       console.log(`Git commit: ${GIT_COMMIT}`);
     }
 
-    // Initialize and run migrations
-    const migrationsStore = useMigrationsStore();
-    migrationsStore.initMigrations();
-    await migrationsStore.runMigrations();
-    await Promise.all([this.initPaymentHistory(), this.initEcashHistory()]);
+    // Run migrations and load IndexedDB-backed stores (the router already
+    // awaited this; it resolves immediately here).
+    try {
+      await walletDataReady();
+    } catch {
+      // Stores that failed to load must not be used: don't start workers,
+      // listeners or history (the user has been notified).
+      return;
+    }
     this.historyHydrated = true;
 
     // check if another tab is open
@@ -681,9 +693,6 @@ export default {
     // debug console
     useUiStore().enableDebugConsole();
 
-    // migrate to dexie
-    await this.migrateToDexie();
-
     // check local storage
     this.checkLocalStorage();
 
@@ -713,11 +722,15 @@ export default {
 
     // listen to NWC commands if enabled
     if (this.nwcEnabled) {
-      this.listenToNWCCommands();
+      this.listenToNWCCommands().catch((error) =>
+        console.error("Could not listen to NWC commands", error)
+      );
     }
 
     if (this.enablePaymentRequest && hasSeed) {
-      this.subscribeToNip17DirectMessages();
+      this.subscribeToNip17DirectMessages().catch((error) =>
+        console.error("Could not subscribe to NIP-17 messages", error)
+      );
     }
 
     // Start background transaction reconciliation.

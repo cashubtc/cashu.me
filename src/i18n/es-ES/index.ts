@@ -612,6 +612,24 @@ export default {
       },
     },
   },
+  WalletStorage: {
+    load_failed:
+      "No se pudieron cargar los datos de la billetera. Recarga la aplicación para intentarlo de nuevo.",
+    migration_failed:
+      "No se pudieron actualizar los datos de la billetera (paso {version}). Se volverá a intentar en el próximo inicio.",
+    save_failed: "No se pudieron guardar los datos de la billetera ({name}).",
+    restore_failed:
+      "No se pudo restaurar la copia de seguridad por completo. Los datos restaurados se conservan; inténtalo de nuevo.",
+    backup_unsaved:
+      "Algunos cambios no se pudieron guardar, así que no se creó ninguna copia de seguridad.",
+    export_partial:
+      "Copia de seguridad exportada, pero algunos cambios recientes no se pudieron guardar y faltan en ella.",
+    wipe_busy:
+      "Todavía se están comprobando pagos. Vuelve a intentarlo en un momento.",
+    wipe_failed:
+      "No se pudo eliminar la billetera por completo. La aplicación se recargará.",
+    backup_failed: "No se pudo crear la copia de seguridad.",
+  },
   ErrorNotFound: {
     title: "404",
     text: "Oops. Nada por aquí…",

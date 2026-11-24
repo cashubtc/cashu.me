@@ -5,16 +5,26 @@ import { useLocalStorage } from "@vueuse/core";
 import { notifyError, notifySuccess } from "../js/notify";
 import { HistoryToken, useTokensStore } from "./tokens";
 import { currentDateStr } from "src/js/utils";
-import { useProofsStore } from "./proofs";
+import { coerceWalletProofs, useProofsStore } from "src/stores/proofs";
 import {
   buildPaymentRowsFromLegacyInvoice,
   LegacyInvoiceHistory,
   usePaymentHistoryStore,
 } from "./paymentHistory";
-import { cashuDb } from "./dexie";
+import {
+  BACKUP_TABLE_KEY_PREFIX,
+  cashuDb,
+  WALLET_TABLES,
+  walletTableSpec,
+} from "src/stores/dexie";
+import { importLegacyLocalStorageKeys } from "src/stores/legacyImporters";
+import {
+  flushPendingWrites,
+  suspendPendingWrites,
+} from "src/stores/tableMirror";
 import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import { deserializeProofs, JSONInt } from "@cashu/cashu-ts";
-import { normalizeCashuQuoteAmounts } from "src/js/cashu-amount";
+import { i18n } from "src/boot/i18n";
 
 export function stringifyBackupTable(rows: unknown[]): string {
   const serialized = JSONInt.stringify(rows);
@@ -32,6 +42,53 @@ export function parseBackupTable(value: string): any[] {
   return parsed;
 }
 
+/**
+ * Serialize every backed-up Dexie table as `cashu.dexie.db.<name>`. All
+ * tables are read in one read-only transaction, so the backup is a single
+ * consistent snapshot (e.g. a mint rename can't split mint rows and keys).
+ */
+export async function exportBackupTables(): Promise<Record<string, string>> {
+  const specs = WALLET_TABLES.filter((spec) => spec.backup);
+  const rowsByTable = await cashuDb.transaction(
+    "r",
+    specs.map((spec) => cashuDb.table(spec.name)),
+    async () => {
+      const result: Record<string, unknown[]> = {};
+      for (const spec of specs) {
+        result[spec.name] = await cashuDb.table(spec.name).toArray();
+      }
+      return result;
+    }
+  );
+  const tables: Record<string, string> = {};
+  for (const spec of specs) {
+    const key = `${BACKUP_TABLE_KEY_PREFIX}${spec.name}`;
+    if (spec.name === "proofs") {
+      // proofs table *magic*: exported as plain proofs with number amounts
+      const proofs = coerceWalletProofs(rowsByTable[spec.name] as any[]);
+      tables[key] = JSONInt.stringify(proofs) as string;
+    } else {
+      tables[key] = stringifyBackupTable(rowsByTable[spec.name]);
+    }
+  }
+  return tables;
+}
+
+export async function restoreBackupTable(name: string, value: string) {
+  const spec = walletTableSpec(name);
+  if (!spec || !spec.backup) {
+    console.warn(`Skipping unknown backup table ${name}`);
+    return;
+  }
+  const parsed = parseBackupTable(value);
+  const rows = spec.normalize ? parsed.map(spec.normalize) : parsed;
+  if (spec.restore) {
+    await spec.restore(rows);
+  } else {
+    await cashuDb.table(name).bulkPut(rows);
+  }
+}
+
 export const useStorageStore = defineStore("storage", {
   state: () => ({
     lastLocalStorageCleanUp: useLocalStorage(
@@ -41,28 +98,52 @@ export const useStorageStore = defineStore("storage", {
   }),
   actions: {
     restoreFromBackup: async function (backup: any) {
-      const proofsStore = useProofsStore();
       if (!backup) {
         notifyError("Unrecognized Backup Format!");
-      } else {
+        return;
+      }
+      // Land this tab's pending changes, then stop the in-memory stores from
+      // writing: restored rows go straight into the tables, and a store's
+      // older copy must not overwrite them. The page reloads afterwards
+      // (also after a failure), so every store loads the restored data.
+      await flushPendingWrites().catch((error) => {
+        console.error("Restoring with unsaved changes", error);
+      });
+      suspendPendingWrites();
+      try {
+        await this.restoreFromBackupUnchecked(backup);
+        notifySuccess("Backup restored");
+      } catch (error) {
+        console.error("Could not restore backup", error);
+        notifyError(i18n.global.t("WalletStorage.restore_failed"));
+      }
+      window.location.reload();
+    },
+    restoreFromBackupUnchecked: async function (backup: any) {
+      const proofsStore = useProofsStore();
+      {
+        // Keyset counters belong to one mnemonic. When the backup brings a
+        // different one, start from the backup's counters only; merging by
+        // max would carry this wallet's counters over to the restored seed.
+        const backupMnemonic = backup["cashu.mnemonic"];
+        if (
+          typeof backupMnemonic === "string" &&
+          backupMnemonic !== (localStorage.getItem("cashu.mnemonic") ?? "")
+        ) {
+          await cashuDb.keysetCounters.clear();
+        }
         const keys = Object.keys(backup);
         for (const key of keys) {
           // we treat some keys differently *magic*
-          if (key === "cashu.dexie.db.proofs") {
+          if (key === `${BACKUP_TABLE_KEY_PREFIX}proofs`) {
             const proofs = deserializeProofs(backup[key]);
-            await proofsStore.addProofs(proofs);
-          } else if (key === "cashu.dexie.db.paymentHistory") {
-            await cashuDb.paymentHistory.bulkPut(parseBackupTable(backup[key]));
-          } else if (key === "cashu.dexie.db.mintQuotes") {
-            await cashuDb.mintQuotes.bulkPut(
-              parseBackupTable(backup[key]).map(normalizeCashuQuoteAmounts)
+            // restoring the same backup twice must not fail on known proofs
+            await proofsStore.addMissingProofs(proofs);
+          } else if (key.startsWith(BACKUP_TABLE_KEY_PREFIX)) {
+            await restoreBackupTable(
+              key.slice(BACKUP_TABLE_KEY_PREFIX.length),
+              backup[key]
             );
-          } else if (key === "cashu.dexie.db.meltQuotes") {
-            await cashuDb.meltQuotes.bulkPut(
-              parseBackupTable(backup[key]).map(normalizeCashuQuoteAmounts)
-            );
-          } else if (key === "cashu.dexie.db.ecashHistory") {
-            await cashuDb.ecashHistory.bulkPut(parseBackupTable(backup[key]));
           } else if (key === "cashu.invoiceHistory") {
             const rows = (
               JSON.parse(backup[key]) as LegacyInvoiceHistory[]
@@ -98,11 +179,39 @@ export const useStorageStore = defineStore("storage", {
             localStorage.setItem(key, backup[key]);
           }
         }
-        notifySuccess("Backup restored");
-        window.location.reload();
+        // Backups from older versions carry data in localStorage keys that now
+        // live in IndexedDB; move them into their tables.
+        await importLegacyLocalStorageKeys();
       }
     },
-    exportWalletState: async function () {
+    /**
+     * Download a backup file. Pending writes are flushed first. If some could
+     * not be saved, the backup is still exported (it is the user's safety net)
+     * but flagged as incomplete; with `requireSaved` it is refused instead.
+     */
+    exportWalletState: async function (
+      options: { requireSaved?: boolean } = {}
+    ) {
+      let complete = true;
+      try {
+        await flushPendingWrites();
+      } catch (error) {
+        console.error("Exporting with unsaved changes", error);
+        if (options.requireSaved) {
+          notifyError(i18n.global.t("WalletStorage.backup_unsaved"));
+          throw error;
+        }
+        complete = false;
+      }
+      try {
+        await this.downloadBackup(complete);
+      } catch (error) {
+        console.error("Could not create backup", error);
+        notifyError(i18n.global.t("WalletStorage.backup_failed"));
+        throw error;
+      }
+    },
+    downloadBackup: async function (complete: boolean) {
       const jsonToSave: any = {};
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
@@ -112,21 +221,7 @@ export const useStorageStore = defineStore("storage", {
         const v = localStorage.getItem(k);
         jsonToSave[k] = v;
       }
-      // proofs table *magic*
-      const proofs = await useProofsStore().getProofs();
-      jsonToSave["cashu.dexie.db.proofs"] = JSONInt.stringify(proofs);
-      jsonToSave["cashu.dexie.db.paymentHistory"] = stringifyBackupTable(
-        await cashuDb.paymentHistory.toArray()
-      );
-      jsonToSave["cashu.dexie.db.mintQuotes"] = stringifyBackupTable(
-        await cashuDb.mintQuotes.toArray()
-      );
-      jsonToSave["cashu.dexie.db.meltQuotes"] = stringifyBackupTable(
-        await cashuDb.meltQuotes.toArray()
-      );
-      jsonToSave["cashu.dexie.db.ecashHistory"] = stringifyBackupTable(
-        await cashuDb.ecashHistory.toArray()
-      );
+      Object.assign(jsonToSave, await exportBackupTables());
 
       const textToSave = JSON.stringify(jsonToSave);
       const textToSaveAsBlob = new Blob([textToSave], {
@@ -145,7 +240,11 @@ export const useStorageStore = defineStore("storage", {
       downloadLink.style.display = "none";
       document.body.appendChild(downloadLink);
       downloadLink.click();
-      notifySuccess("Wallet backup exported");
+      if (complete) {
+        notifySuccess("Wallet backup exported");
+      } else {
+        notifyError(i18n.global.t("WalletStorage.export_partial"));
+      }
     },
     checkLocalStorage: async function () {
       const needsCleanup = this.checkLocalStorageQuota();

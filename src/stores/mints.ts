@@ -11,7 +11,7 @@ import {
   GetInfoResponse,
 } from "@cashu/cashu-ts";
 import { useUiStore } from "./ui";
-import { ref, watch } from "vue";
+import { markRaw, ref, watch } from "vue";
 import { useProofsStore } from "./proofs";
 import { i18n } from "src/boot/i18n";
 import { useSettingsStore } from "./settings";
@@ -19,6 +19,8 @@ import { useNostrMintBackupStore } from "./nostrMintBackup";
 import { bytesToHex } from "@noble/hashes/utils.js"; // already an installed dependency
 import { PaymentMethod } from "src/stores/walletTypes";
 import { sumProofAmounts } from "src/js/proofs";
+import { createMintsTable, importLegacyMints } from "src/stores/mintStorage";
+import { flushPendingWrites } from "src/stores/tableMirror";
 
 export type StoredMint = {
   url: string;
@@ -120,7 +122,9 @@ export const useMintsStore = defineStore("mints", {
       url: "",
       nickname: "",
     });
-    const mints = useLocalStorage("cashu.mints", [] as StoredMint[]);
+    // Stored in the mints and mintKeys tables; loaded by init() at startup.
+    const mintsTable = createMintsTable();
+    const mints = mintsTable.items;
     const showAddMintDialog = ref(false);
     const addMintBlocking = ref(false);
     const showRemoveMintDialog = ref(false);
@@ -129,6 +133,16 @@ export const useMintsStore = defineStore("mints", {
 
     const uiStoreGlobal: any = useUiStore();
     const settingsStoreGlobal: any = useSettingsStore();
+
+    // Keysets can change without the active mint changing (a duplicate URL
+    // merged in, a keyset added): refresh the active proofs then too.
+    watch(
+      () =>
+        mints.value
+          .map((m) => `${m.url}:${(m.keysets || []).map((k) => k.id).join()}`)
+          .join("|"),
+      () => useProofsStore().updateActiveProofs()
+    );
 
     // Watch for changes in activeMintUrl and activeUnit
     watch([activeMintUrl, activeUnit], async () => {
@@ -146,6 +160,7 @@ export const useMintsStore = defineStore("mints", {
       activeMintUrl,
       addMintData,
       mints,
+      mintsTable: markRaw(mintsTable),
       showAddMintDialog,
       addMintBlocking,
       showRemoveMintDialog,
@@ -251,6 +266,12 @@ export const useMintsStore = defineStore("mints", {
     },
   },
   actions: {
+    async init() {
+      // Older wallets (and restored old backups) still have cashu.mints.
+      await importLegacyMints();
+      await this.mintsTable.hydrate();
+      useProofsStore().updateActiveProofs();
+    },
     activeMint() {
       const mint = this.mints.find((m) => m.url === this.activeMintUrl);
       if (mint) {
@@ -519,9 +540,15 @@ export const useMintsStore = defineStore("mints", {
 
       // Navigate to mint details page with mint URL as query parameter
       if (navigate) {
-        window.location.href = `/mintdetails?mintUrl=${encodeURIComponent(
-          mint.url
-        )}`;
+        // (a failed write has been reported; stay so nothing is lost)
+        flushPendingWrites().then(
+          () => {
+            window.location.href = `/mintdetails?mintUrl=${encodeURIComponent(
+              mint.url
+            )}`;
+          },
+          () => {}
+        );
       }
     },
     fetchMintInfo: async function (mint: StoredMint) {

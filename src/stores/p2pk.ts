@@ -4,13 +4,42 @@ import { generateSecretKey, getPublicKey, nip19 } from "nostr-tools";
 import { bytesToHex } from "@noble/hashes/utils.js"; // already an installed dependency
 import { WalletProof } from "stores/mints";
 import token from "src/js/token";
+import { markRaw } from "vue";
+import { cashuDb } from "src/stores/dexie";
+import { moveLocalStorageKey } from "src/stores/legacyStorage";
+import { createTableMirror, toMirrorRows } from "src/stores/tableMirror";
 import {
   Amount,
   verifyP2PKSpendingConditions,
   type Proof,
 } from "@cashu/cashu-ts";
 
-type P2PKKey = {
+/** Moves `cashu.P2PKKeys` into the p2pkKeys table. */
+export async function importLegacyP2PKKeys() {
+  await moveLocalStorageKey<P2PKKey[]>({
+    key: "cashu.P2PKKeys",
+    tables: [cashuDb.p2pkKeys],
+    write: async (keys) => {
+      const valid = (keys || []).filter((key) => key && key.publicKey);
+      // keys already in the table keep their stored row
+      const existing = await cashuDb.p2pkKeys.bulkGet(
+        valid.map((key) => key.publicKey)
+      );
+      await cashuDb.p2pkKeys.bulkPut(
+        toMirrorRows(valid.filter((_key, index) => !existing[index]))
+      );
+    },
+    verify: async (keys) => {
+      const valid = (keys || []).filter((key) => key && key.publicKey);
+      const stored = await cashuDb.p2pkKeys.bulkGet(
+        valid.map((key) => key.publicKey)
+      );
+      return stored.every(Boolean);
+    },
+  });
+}
+
+export type P2PKKey = {
   publicKey: string;
   privateKey: string;
   used: boolean;
@@ -42,17 +71,29 @@ const witnessSatisfiesLock = (secret: string, witness: Proof["witness"]) => {
 };
 
 export const useP2PKStore = defineStore("p2pk", {
-  state: () => ({
-    p2pkKeys: useLocalStorage<P2PKKey[]>("cashu.P2PKKeys", []),
-    showP2PkButtonInDrawer: useLocalStorage<boolean>(
-      "cashu.p2pk.showP2PkButtonInDrawer",
-      false
-    ),
-    showP2PKDialog: false,
-    showP2PKData: {} as P2PKKey,
-  }),
+  state: () => {
+    // Stored in the p2pkKeys table; loaded by init() at startup.
+    const p2pkKeysTable = createTableMirror<P2PKKey>(cashuDb.p2pkKeys, {
+      keyOf: (key) => key.publicKey,
+    });
+    return {
+      p2pkKeys: p2pkKeysTable.items,
+      p2pkKeysTable: markRaw(p2pkKeysTable),
+      showP2PkButtonInDrawer: useLocalStorage<boolean>(
+        "cashu.p2pk.showP2PkButtonInDrawer",
+        false
+      ),
+      showP2PKDialog: false,
+      showP2PKData: {} as P2PKKey,
+    };
+  },
   getters: {},
   actions: {
+    async init() {
+      // Older wallets (and restored old backups) still have cashu.P2PKKeys.
+      await importLegacyP2PKKeys();
+      await this.p2pkKeysTable.hydrate();
+    },
     findKey: function (pubkey: string) {
       return this.p2pkKeys.find((m) => sameXOnlyKey(m.publicKey, pubkey));
     },
@@ -116,7 +157,13 @@ export const useP2PKStore = defineStore("p2pk", {
       };
       this.p2pkKeys = this.p2pkKeys.concat(keyPair);
     },
-    generateKeypair: function () {
+    /**
+     * Create a key and resolve once it is stored. Ecash locked to a key that
+     * is lost can't be spent, so callers show or share the key only after
+     * this resolves; if it can't be saved (reported to the user), the key is
+     * dropped again and the promise rejects.
+     */
+    generateKeypair: async function (): Promise<P2PKKey> {
       const sk = generateSecretKey(); // `sk` is a Uint8Array
       const pk = "02" + getPublicKey(sk); // `pk` is a hex string
       const skHex = bytesToHex(sk);
@@ -127,6 +174,13 @@ export const useP2PKStore = defineStore("p2pk", {
         usedCount: 0,
       };
       this.p2pkKeys = this.p2pkKeys.concat(keyPair);
+      try {
+        await this.p2pkKeysTable.flush();
+      } catch (error) {
+        this.p2pkKeys = this.p2pkKeys.filter((key) => key.publicKey !== pk);
+        throw error;
+      }
+      return keyPair;
     },
     getSecretP2PKPubkey: function (
       secret: string,

@@ -115,20 +115,6 @@ and reports the defects; it does not silently change wallet behavior.
   fixture, so decoder/parser coverage remains independent of CDN availability.
 - Regression: `scans a QR code without fetching decoder code from a public CDN`.
 
-### UI-008 — Reimporting a backup throws an unhandled duplicate-proof error
-
-- Severity: medium; repeating an import leaves the recovery operation unfinished.
-- Reproduce: export a funded wallet, import into a fresh wallet, then import the
-  same file again.
-- Expected: complete without duplicating funds or history, or show a clear
-  rejection before changing state.
-- Actual: the second import raises an unhandled IndexedDB `ConstraintError` and
-  never completes the import/reload. The first import succeeds.
-- Cause: `restoreFromBackup` calls `addProofs`, which uses `proofs.add` even for
-  existing proof secrets. The asynchronous rejection is not handled by the file
-  reader's synchronous `try/catch`.
-- Regression: `reimporting the same backup preserves funds without an unhandled error`.
-
 ### UI-011 — Clipboard permission errors are unhandled
 
 - Severity: low; manual payment entry still works.

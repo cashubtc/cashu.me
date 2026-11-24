@@ -618,6 +618,22 @@ export default {
       },
     },
   },
+  WalletStorage: {
+    load_failed:
+      "Cüzdan verileri yüklenemedi. Tekrar denemek için uygulamayı yeniden yükleyin.",
+    migration_failed:
+      "Cüzdan verileri güncellenemedi (adım {version}). Bir sonraki başlatmada tekrar denenecek.",
+    save_failed: "Cüzdan verileri kaydedilemedi ({name}).",
+    restore_failed:
+      "Yedek tamamen geri yüklenemedi. Geri yüklenen veriler korunur; tekrar deneyin.",
+    backup_unsaved:
+      "Bazı değişiklikler kaydedilemediği için yedek oluşturulmadı.",
+    export_partial:
+      "Yedek dışa aktarıldı, ancak bazı son değişiklikler kaydedilemedi ve yedekte yok.",
+    wipe_busy: "Ödemeler hâlâ kontrol ediliyor. Birazdan tekrar deneyin.",
+    wipe_failed: "Cüzdan tamamen silinemedi. Uygulama yeniden yüklenecek.",
+    backup_failed: "Yedek oluşturulamadı.",
+  },
   ErrorNotFound: {
     title: "404",
     text: "Oops. Burada bir şey yok…",

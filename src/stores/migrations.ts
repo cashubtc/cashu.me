@@ -1,5 +1,7 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
+import { notifyError } from "src/js/notify";
+import { i18n } from "src/boot/i18n";
 
 // Define the migration version type
 export type Migration = {
@@ -24,7 +26,8 @@ export const useMigrationsStore = defineStore("migrations", {
       }
     },
 
-    async runMigrations() {
+    /** Resolves false when a migration failed (it is retried later). */
+    async runMigrations(): Promise<boolean> {
       // Get migrations that need to be run (newer than current version)
       const pendingMigrations = this.migrations.filter(
         (m) => m.version > this.currentVersion
@@ -32,7 +35,7 @@ export const useMigrationsStore = defineStore("migrations", {
 
       if (pendingMigrations.length === 0) {
         console.log("No migrations to run");
-        return;
+        return true;
       }
 
       console.log(`Running ${pendingMigrations.length} migrations...`);
@@ -41,6 +44,7 @@ export const useMigrationsStore = defineStore("migrations", {
       const { useUiStore } = await import("./ui");
       const uIStore = useUiStore();
       await uIStore.lockMutex();
+      let succeeded = true;
       try {
         for (const migration of pendingMigrations) {
           console.log(
@@ -55,35 +59,52 @@ export const useMigrationsStore = defineStore("migrations", {
             );
           } catch (error) {
             console.error(`Migration ${migration.version} failed:`, error);
+            // Data moves are idempotent and retried on the next start.
+            notifyError(
+              i18n.global.t("WalletStorage.migration_failed", {
+                version: migration.version,
+              })
+            ).catch(() => {});
             // Stop running migrations if one fails
+            succeeded = false;
             break;
           }
         }
       } finally {
         await uIStore.unlockMutex();
       }
+      return succeeded;
     },
 
     // First migration: Update mint URL from stablenuts.cash to umint.cash
     async migrateStablenutsToCash() {
       const { useMintsStore } = await import("./mints");
       const mintStore = useMintsStore();
+      // mints live in IndexedDB now; load them (moving cashu.mints first)
+      await mintStore.init();
       let updated = false;
 
       for (let i = 0; i < mintStore.mints.length; i++) {
         if (mintStore.mints[i].url === "https://stablenut.umint.cash") {
           console.log("Updating mint URL from stablenuts.cash to umint.cash");
           mintStore.mints[i].url = "https://stablenut.cashu.network";
-
-          // If this was the active mint, update the active mint URL as well
-          if (mintStore.activeMintUrl === "https://stablenut.umint.cash") {
-            mintStore.activeMintUrl = "https://stablenut.cashu.network";
-          }
-
           updated = true;
         }
       }
 
+      // commit before the migration counts as done, and before the active
+      // mint points at the new URL
+      await mintStore.mintsTable.flush();
+      // independent of `updated`: a retry in the same tab finds the URL
+      // already renamed in memory but the pointer still on the old one
+      if (
+        mintStore.activeMintUrl === "https://stablenut.umint.cash" &&
+        mintStore.mints.some(
+          (mint) => mint.url === "https://stablenut.cashu.network"
+        )
+      ) {
+        mintStore.activeMintUrl = "https://stablenut.cashu.network";
+      }
       if (updated) {
         console.log("Successfully updated mint URL");
       } else {
@@ -195,6 +216,14 @@ export const useMigrationsStore = defineStore("migrations", {
       console.log("Migrated historyTokens to Dexie ecashHistory");
     },
 
+    async migrateNostrStateAndPaymentRequestsToDexie() {
+      const legacy = await import("src/stores/legacyImporters");
+      await legacy.importLegacyMintRecommendations();
+      await legacy.importLegacyNip17SeenEvents();
+      await legacy.importLegacyNwcProcessedRequestIds();
+      await legacy.importLegacyPaymentRequests();
+    },
+
     // Initialize migrations
     initMigrations() {
       // Register the first migration
@@ -237,6 +266,52 @@ export const useMigrationsStore = defineStore("migrations", {
         name: "Migrate historyTokens to Dexie ecashHistory",
         description: "Moves ecash history from localStorage to Dexie",
         execute: async () => await this.migrateHistoryTokensToEcashHistory(),
+      });
+
+      this.registerMigration({
+        version: 6,
+        name: "Move seen events, payment requests and mint recs to Dexie",
+        description:
+          "Moves NIP-17 and NWC seen event ids to seenEvents, our payment requests to paymentRequests, and drops the cached mint recommendations",
+        execute: async () =>
+          await this.migrateNostrStateAndPaymentRequestsToDexie(),
+      });
+
+      this.registerMigration({
+        version: 7,
+        name: "Move mints and mint keys to Dexie",
+        description: "Splits cashu.mints into the mints and mintKeys tables",
+        execute: async () => {
+          const { useMintsStore } = await import("src/stores/mints");
+          await useMintsStore().init();
+          await useMintsStore().mintsTable.flush();
+        },
+      });
+
+      this.registerMigration({
+        version: 8,
+        name: "Move transaction worker queues to Dexie",
+        description:
+          "Moves the incoming quote and outgoing payment check queues to the workerQueue table",
+        execute: async () => {
+          const { importLegacyWorkerQueues } = await import(
+            "src/stores/workerQueueStorage"
+          );
+          await importLegacyWorkerQueues();
+        },
+      });
+
+      this.registerMigration({
+        version: 9,
+        name: "Move keyset counters and P2PK keys to Dexie",
+        description:
+          "Moves cashu.keysetCounters (never lowering a counter) and cashu.P2PKKeys to IndexedDB",
+        execute: async () => {
+          const { importLegacyKeysetCounters, importLegacyP2PKKeys } =
+            await import("src/stores/legacyImporters");
+          await importLegacyKeysetCounters();
+          await importLegacyP2PKKeys();
+        },
       });
 
       // Add more migrations here in the future

@@ -10,6 +10,14 @@ import { useP2PKStore } from "src/stores/p2pk";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { usePRStore } from "./payment-request";
 import { useTransactionWorkerStore } from "./transactionWorker";
+import { markRaw } from "vue";
+import {
+  cashuDb,
+  putKeysetCountersMax,
+  type KeysetCounter,
+} from "src/stores/dexie";
+import { createTableMirror } from "src/stores/tableMirror";
+import { importLegacyKeysetCounters } from "src/stores/counterStorage";
 
 import {
   requestMintBolt11,
@@ -169,11 +177,6 @@ function createIncomingInvoiceDraft(
   };
 }
 
-type KeysetCounter = {
-  id: string;
-  counter: number;
-};
-
 const receiveStore = useReceiveTokensStore();
 const tokenStore = useTokensStore();
 const proofsStore = useProofsStore();
@@ -213,6 +216,21 @@ function toProofs(proofs: WalletProof[]): Proof[] {
 
 export const useWalletStore = defineStore("wallet", {
   state: () => {
+    // Counters of the current mnemonic, stored in the keysetCounters table
+    // and loaded by initKeysetCounters() at startup. They only ever grow, so
+    // a counter changed before loading is merged with the stored one by max.
+    const keysetCountersTable = createTableMirror<KeysetCounter>(
+      cashuDb.keysetCounters,
+      {
+        keyOf: (entry) => entry.id,
+        merge: (stored, early) => ({
+          ...early,
+          counter: Math.max(stored.counter, early.counter),
+        }),
+        // never lower a counter that is already stored
+        writeRows: (rows) => putKeysetCountersMax(rows),
+      }
+    );
     return {
       // Use the global i18n instance: useI18n() only works inside a component
       // setup, and this store may first be created from another store's action.
@@ -220,10 +238,8 @@ export const useWalletStore = defineStore("wallet", {
       mnemonic: useLocalStorage("cashu.mnemonic", ""),
       invoiceHistory: [] as InvoiceHistory[],
       paymentHistoryUnsubscribe: null as null | (() => void),
-      keysetCounters: useLocalStorage(
-        "cashu.keysetCounters",
-        [] as KeysetCounter[]
-      ),
+      keysetCounters: keysetCountersTable.items,
+      keysetCountersTable: markRaw(keysetCountersTable),
       oldMnemonicCounters: useLocalStorage(
         "cashu.oldMnemonicCounters",
         [] as { mnemonic: string; keysetCounters: KeysetCounter[] }[]
@@ -376,6 +392,19 @@ export const useWalletStore = defineStore("wallet", {
         throw new Error("mint not found");
       }
       return this.createWalletInstance(storedMint, url, unit);
+    },
+    async initKeysetCounters() {
+      // Older wallets (and restored old backups) still have the counters in
+      // localStorage.
+      await importLegacyKeysetCounters();
+      await this.keysetCountersTable.hydrate();
+      // A counter source created before loading started from lower values;
+      // move it up so no output is derived twice.
+      if (this.sharedCounterSource) {
+        for (const { id, counter } of this.keysetCounters) {
+          await this.sharedCounterSource.advanceToAtLeast(id, counter);
+        }
+      }
     },
     getOrCreateCounterSource(): CounterSource {
       if (!this.sharedCounterSource) {

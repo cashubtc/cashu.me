@@ -1,7 +1,9 @@
 import { defineStore } from "pinia";
 import Dexie, { Table } from "dexie";
 import { useLocalStorage } from "@vueuse/core";
+import { moveLocalStorageKey } from "src/stores/legacyStorage";
 import type { WalletProof } from "./mints";
+import type { SeenEventRow } from "src/stores/seenEvents";
 import {
   cashuAmountToNumber,
   normalizeCashuQuoteAmounts,
@@ -16,12 +18,25 @@ import {
 //   quote?: string
 // }
 
+/** The next deterministic secret counter for one keyset (NUT-13). */
+export type KeysetCounter = {
+  id: string;
+  counter: number;
+};
+
 export class CashuDexie extends Dexie {
   proofs!: Table<WalletProof>;
   paymentHistory!: Table<any>;
   mintQuotes!: Table<any>;
   meltQuotes!: Table<any>;
   ecashHistory!: Table<any>;
+  seenEvents!: Table<SeenEventRow, [string, string]>;
+  paymentRequests!: Table<any, string>;
+  mints!: Table<any, string>;
+  mintKeys!: Table<any, [string, string]>;
+  workerQueue!: Table<any, [string, string]>;
+  keysetCounters!: Table<KeysetCounter, string>;
+  p2pkKeys!: Table<any, string>;
 
   constructor(databaseName = "db") {
     super(databaseName);
@@ -74,10 +89,103 @@ export class CashuDexie extends Dexie {
             Object.assign(quote, normalizeCashuQuoteAmounts(quote));
           });
       });
+    // v5: data moved out of localStorage (see migrations.ts v6)
+    this.version(5).stores({
+      seenEvents: "[scope+id], scope, created_at",
+      paymentRequests: "id",
+    });
+    // v6: mints split into mint rows and their (large, immutable) keys
+    this.version(6).stores({
+      mints: "url",
+      mintKeys: "[mintUrl+id], mintUrl",
+    });
+    // v7: transaction worker queues (kind: bolt11 | bolt12 | onchain | outgoing)
+    this.version(7).stores({
+      workerQueue: "[kind+ref], kind",
+    });
+    // v8: deterministic secret counters (current mnemonic) and P2PK keys
+    this.version(8).stores({
+      keysetCounters: "id",
+      p2pkKeys: "publicKey",
+    });
   }
 }
 
 export const cashuDb = new CashuDexie();
+
+/**
+ * Every table in `cashuDb` must be listed here. Wallet backup, restore and
+ * wipe all iterate over this list, so adding a table here is the only step
+ * needed for it to be backed up.
+ *
+ * - `backup: true` tables are exported as `cashu.dexie.db.<name>` and
+ *   restored with `bulkPut`. `normalize` runs on each restored row.
+ * - `backup: false` tables are caches that can be rebuilt; they are only
+ *   cleared on wipe.
+ */
+export type WalletTableSpec = {
+  name: string;
+  backup: boolean;
+  normalize?: (row: any) => any;
+  /** Custom restore instead of bulkPut (e.g. merge without going backwards). */
+  restore?: (rows: any[]) => Promise<void>;
+};
+
+/**
+ * Store keyset counters, never lowering one that is already stored: a counter
+ * that goes backwards re-derives outputs the mint has already signed.
+ */
+export async function putKeysetCountersMax(counters: KeysetCounter[]) {
+  const valid = counters.filter(
+    (entry) => entry && entry.id && Number.isFinite(entry.counter)
+  );
+  await cashuDb.transaction("rw", cashuDb.keysetCounters, async () => {
+    const existing = await cashuDb.keysetCounters.bulkGet(
+      valid.map((entry) => entry.id)
+    );
+    const rows = new Map<string, any>();
+    valid.forEach((entry, index) => {
+      const stored = existing[index];
+      const previous = rows.get(entry.id);
+      const counter = Math.max(
+        entry.counter,
+        stored?.counter ?? 0,
+        previous?.counter ?? 0
+      );
+      rows.set(entry.id, { ...(stored || {}), ...entry, counter });
+    });
+    await cashuDb.keysetCounters.bulkPut([...rows.values()]);
+  });
+}
+
+export const BACKUP_TABLE_KEY_PREFIX = "cashu.dexie.db.";
+
+export const WALLET_TABLES: WalletTableSpec[] = [
+  // proofs are exported and restored through the proofs store (see storage.ts)
+  { name: "proofs", backup: true },
+  { name: "paymentHistory", backup: true },
+  { name: "mintQuotes", backup: true, normalize: normalizeCashuQuoteAmounts },
+  { name: "meltQuotes", backup: true, normalize: normalizeCashuQuoteAmounts },
+  { name: "ecashHistory", backup: true },
+  // backed up so a restored wallet does not handle old DMs and NWC requests again
+  { name: "seenEvents", backup: true },
+  { name: "paymentRequests", backup: true },
+  { name: "mints", backup: true },
+  { name: "mintKeys", backup: true },
+  // pending payments to check, so a restored wallet still claims them
+  { name: "workerQueue", backup: true },
+  {
+    name: "keysetCounters",
+    backup: true,
+    restore: (rows) => putKeysetCountersMax(rows),
+  },
+  // losing these loses access to ecash locked to them
+  { name: "p2pkKeys", backup: true },
+];
+
+export function walletTableSpec(name: string): WalletTableSpec | undefined {
+  return WALLET_TABLES.find((spec) => spec.name === name);
+}
 
 export const useDexieStore = defineStore("dexie", {
   state: () => ({
@@ -108,31 +216,49 @@ export const useDexieStore = defineStore("dexie", {
       // start migration
       const { useStorageStore } = await import("./storage");
       await useStorageStore().exportWalletState();
-      parsedProofs.forEach((proof) => {
-        cashuDb.proofs.add(proof);
+      // Commit every proof before the legacy key is removed.
+      await moveLocalStorageKey<WalletProof[]>({
+        key: "cashu.proofs",
+        tables: [cashuDb.proofs],
+        write: async (rows) => {
+          // A proof already in IndexedDB is newer than its legacy copy (it may
+          // be reserved); only add the ones that are missing.
+          const existing = await cashuDb.proofs.bulkGet(
+            rows.map((proof) => proof.secret)
+          );
+          await cashuDb.proofs.bulkAdd(
+            rows.filter((_proof, index) => !existing[index])
+          );
+        },
+        verify: async (rows) => {
+          const stored = await cashuDb.proofs.bulkGet(
+            rows.map((proof) => proof.secret)
+          );
+          return stored.every(Boolean);
+        },
       });
+      const migrated = await proofsStore.getProofs();
       console.log(
-        `Migrated ${cashuDb.proofs.count()} proofs. Before: ${
-          parsedProofs.length
-        } proofs, After: ${(await proofsStore.getProofs()).length} proofs`
+        `Migrated proofs. Before: ${parsedProofs.length} proofs, After: ${migrated.length} proofs`
       );
       console.log(
         `Proofs sum before: ${proofsStore.sumProofs(
           parsedProofs
-        )}, after: ${proofsStore.sumProofs(await proofsStore.getProofs())}`
+        )}, after: ${proofsStore.sumProofs(migrated)}`
       );
       this.migratedToDexie = true;
-      // remove proofs from localstorage
-      localStorage.removeItem("cashu.proofs");
     },
     deleteAllTables: async function () {
-      await Promise.all([
-        cashuDb.proofs.clear(),
-        cashuDb.paymentHistory.clear(),
-        cashuDb.mintQuotes.clear(),
-        cashuDb.meltQuotes.clear(),
-        cashuDb.ecashHistory.clear(),
-      ]);
+      await Promise.all(cashuDb.tables.map((table) => table.clear()));
+    },
+    /**
+     * Delete the whole wallet database (wallet wipe). Unlike clearing its
+     * tables, this closes the connection without reopening it, so a late
+     * write from a listener still running in this tab fails instead of
+     * leaving rows behind. The next start creates an empty database.
+     */
+    deleteWalletDatabase: async function () {
+      await cashuDb.delete({ disableAutoOpen: true });
     },
   },
 });

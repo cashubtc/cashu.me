@@ -466,6 +466,7 @@ export default defineComponent({
     ...mapActions(useMintRecommendationsStore, [
       "discover",
       "startSubscriptions",
+      "hydrateFromDb",
     ]),
     ...mapActions(useP2PKStore, ["generateKeypair", "showKeyDetails"]),
     ...mapActions(useMintsStore, [
@@ -581,6 +582,9 @@ export default defineComponent({
           );
         }
         this.startSubscriptions();
+      } catch (error) {
+        console.error("Mint discovery failed", error);
+        this.notifyError(this.$i18n.t("WalletStorage.load_failed"));
       } finally {
         this.discoveringMints = false;
       }
@@ -661,7 +665,10 @@ export default defineComponent({
       });
     },
   },
-  created: function () {},
+  created: function () {
+    // recommendations are rebuilt from the local reviews DB (no network)
+    this.hydrateFromDb();
+  },
 });
 </script>
 

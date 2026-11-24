@@ -629,6 +629,24 @@ export default {
       },
     },
   },
+  WalletStorage: {
+    load_failed:
+      "Não foi possível carregar os dados da carteira. Recarregue o app para tentar novamente.",
+    migration_failed:
+      "Não foi possível atualizar os dados da carteira (etapa {version}). Uma nova tentativa será feita na próxima inicialização.",
+    save_failed: "Não foi possível salvar os dados da carteira ({name}).",
+    restore_failed:
+      "Não foi possível restaurar o backup por completo. Os dados restaurados foram mantidos; tente novamente.",
+    backup_unsaved:
+      "Algumas alterações não puderam ser salvas, então nenhum backup foi criado.",
+    export_partial:
+      "Backup exportado, mas algumas alterações recentes não puderam ser salvas e não estão nele.",
+    wipe_busy:
+      "Ainda há pagamentos sendo verificados. Tente novamente em instantes.",
+    wipe_failed:
+      "Não foi possível excluir a carteira por completo. O app será recarregado.",
+    backup_failed: "Não foi possível criar o backup.",
+  },
   ErrorNotFound: {
     title: "404",
     text: "Ops. Nada aqui…",

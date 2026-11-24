@@ -17,7 +17,7 @@ import { cashuAmountToNumber } from "src/js/cashu-amount";
 // Shape of a proof row as stored in Dexie (amount may be number or Amount).
 type DexieProofRow = ProofLike & { reserved?: boolean; quote?: string };
 
-function coerceWalletProofs(raw: DexieProofRow[]): WalletProof[] {
+export function coerceWalletProofs(raw: DexieProofRow[]): WalletProof[] {
   return raw.map(({ amount, reserved, quote, ...rest }) => ({
     ...rest,
     amount: cashuAmountToNumber(amount),

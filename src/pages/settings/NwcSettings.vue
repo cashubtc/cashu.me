@@ -112,7 +112,9 @@ export default defineComponent({
   watch: {
     enableNwc: function () {
       if (this.enableNwc) {
-        this.listenToNWCCommands();
+        this.listenToNWCCommands().catch((error) =>
+          console.error("Could not listen to NWC commands", error)
+        );
       } else {
         this.unsubscribeNWC();
       }

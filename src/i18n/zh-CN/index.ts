@@ -603,6 +603,18 @@ export default {
       },
     },
   },
+  WalletStorage: {
+    load_failed: "无法加载钱包数据。请重新加载应用后重试。",
+    migration_failed:
+      "无法更新钱包数据（步骤 {version}）。将在下次启动时重试。",
+    save_failed: "无法保存钱包数据（{name}）。",
+    restore_failed: "无法完整恢复备份。已恢复的数据会保留；请重试。",
+    backup_unsaved: "部分更改未能保存，因此未创建备份。",
+    export_partial: "备份已导出，但部分最近的更改未能保存，因此不在备份中。",
+    wipe_busy: "仍在检查付款。请稍后重试。",
+    wipe_failed: "无法完全删除钱包。应用将重新加载。",
+    backup_failed: "无法创建备份。",
+  },
   ErrorNotFound: {
     title: "404",
     text: "哎呀。这里什么都没有…",

@@ -626,6 +626,23 @@ export default {
       },
     },
   },
+  WalletStorage: {
+    load_failed:
+      "Data peněženky se nepodařilo načíst. Pro nový pokus aplikaci znovu načtěte.",
+    migration_failed:
+      "Data peněženky se nepodařilo aktualizovat (krok {version}). Při příštím spuštění se to zkusí znovu.",
+    save_failed: "Data peněženky se nepodařilo uložit ({name}).",
+    restore_failed:
+      "Zálohu se nepodařilo obnovit celou. Obnovená data zůstávají zachována; zkuste to znovu.",
+    backup_unsaved:
+      "Některé změny se nepodařilo uložit, proto nebyla vytvořena záloha.",
+    export_partial:
+      "Záloha byla exportována, ale některé nedávné změny se nepodařilo uložit a v záloze chybí.",
+    wipe_busy: "Platby se stále ověřují. Zkuste to za chvíli znovu.",
+    wipe_failed:
+      "Peněženku se nepodařilo smazat celou. Aplikace se znovu načte.",
+    backup_failed: "Zálohu se nepodařilo vytvořit.",
+  },
   ErrorNotFound: {
     title: "404",
     text: "Oops. Nic tu není…",

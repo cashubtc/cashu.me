@@ -625,6 +625,20 @@ export default {
       },
     },
   },
+  WalletStorage: {
+    load_failed: "Could not load wallet data. Reload the app to try again.",
+    migration_failed:
+      "Could not update wallet data (step {version}). It will be retried on the next start.",
+    save_failed: "Could not save wallet data ({name}).",
+    restore_failed:
+      "Could not restore the backup completely. Restored data is kept; try again.",
+    backup_unsaved: "Some changes could not be saved, so no backup was made.",
+    export_partial:
+      "Backup exported, but some recent changes could not be saved and are missing from it.",
+    wipe_busy: "Payments are still being checked. Try again in a moment.",
+    wipe_failed: "Could not delete the wallet completely. The app will reload.",
+    backup_failed: "Could not create the backup.",
+  },
   ErrorNotFound: {
     title: "404",
     text: "Oops. Nothing here…",
