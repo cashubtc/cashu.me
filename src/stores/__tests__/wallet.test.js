@@ -1969,6 +1969,146 @@ describe("wallet store", () => {
     expect(h.uiStore.unlockMutex).toHaveBeenCalledTimes(2);
   });
 
+  it.each([
+    [PaymentMethod.Bolt11, "checkMeltQuoteBolt11"],
+    [PaymentMethod.Onchain, "checkMeltQuoteOnchain"],
+  ])(
+    "keeps an in-flight %s melt when the checker sees it UNPAID first",
+    async (method, checkMethod) => {
+      const wallet = useWalletStore();
+      wallet.invoiceHistory = [];
+      const proofs = [{ id: "00aa", amount: 105, secret: "s1" }];
+      const quote = {
+        quote: "in-flight-melt-q",
+        amount: 100,
+        fee_reserve: 5,
+        state: "UNPAID",
+        expiry: 0,
+        request: "lnbc123",
+        payment_preimage: null,
+      };
+      let releaseMelt;
+      let meltStarted;
+      const meltStartedPromise = new Promise((resolve) => {
+        meltStarted = resolve;
+      });
+      const prepareMelt = vi.fn(async () => ({
+        method,
+        inputs: proofs,
+        outputData: [],
+        keysetId: "00aa",
+        quote,
+      }));
+      // The melt request is still on its way: the mint keeps answering UNPAID.
+      const completeMelt = vi.fn(
+        () =>
+          new Promise((resolve) => {
+            releaseMelt = () =>
+              resolve({
+                quote: { ...quote, state: "PAID", payment_preimage: "pre" },
+                change: [],
+                outputData: [],
+              });
+            meltStarted();
+          })
+      );
+      const mintWallet = {
+        mint: {
+          mintUrl: "https://mint-a.example",
+          [checkMethod]: vi.fn(async () => ({ ...quote, state: "UNPAID" })),
+        },
+        unit: "sat",
+        keysetId: "00aa",
+        prepareMelt,
+        completeMelt,
+      };
+      vi.spyOn(wallet, "send").mockResolvedValue({
+        keepProofs: [],
+        sendProofs: proofs,
+      });
+      vi.spyOn(wallet, "mintWallet").mockResolvedValue(mintWallet);
+      h.proofsStore.getProofsForQuote.mockResolvedValue(proofs);
+
+      const melt = wallet.meltGeneric(
+        proofs,
+        quote,
+        mintWallet,
+        true,
+        vi.fn(),
+        method
+      );
+      await meltStartedPromise;
+
+      // The transaction worker's prompt check runs while the melt is in flight.
+      const checkOutcome = await wallet
+        .checkOutgoingInvoice("in-flight-melt-q", false)
+        .then(
+          () => "resolved",
+          () => "rejected"
+        );
+
+      expect(wallet.invoiceHistory).toHaveLength(1);
+      expect(h.proofsStore.setReserved).not.toHaveBeenCalledWith(proofs, false);
+      expect(h.notifyWarning).not.toHaveBeenCalled();
+      expect(
+        h.transactionWorkerStore.removeOutgoingInvoiceFromChecker
+      ).not.toHaveBeenCalled();
+      // Rejecting makes the worker retry the check later.
+      expect(checkOutcome).toBe("rejected");
+
+      releaseMelt();
+      await melt;
+
+      expect(wallet.invoiceHistory).toHaveLength(1);
+      expect(wallet.invoiceHistory[0]).toMatchObject({
+        quote: "in-flight-melt-q",
+        status: "paid",
+        amount: -105,
+      });
+      expect(h.proofsStore.removeProofs).toHaveBeenCalledWith(proofs);
+    }
+  );
+
+  it("still drops an UNPAID outgoing invoice once no melt is in flight", async () => {
+    const wallet = useWalletStore();
+    const proofs = [{ id: "00aa", amount: 105, secret: "s1" }];
+    const checkMeltQuoteBolt11 = vi.fn(async () => ({
+      quote: "failed-melt-q",
+      amount: 100,
+      fee_reserve: 5,
+      state: "UNPAID",
+    }));
+    wallet.invoiceHistory = [
+      {
+        quote: "failed-melt-q",
+        amount: -105,
+        request: "lnbc123",
+        memo: "Outgoing invoice",
+        date: "old",
+        status: "pending",
+        mint: "https://mint-a.example",
+        unit: "sat",
+        type: PaymentMethod.Bolt11,
+      },
+    ];
+    h.proofsStore.getProofsForQuote.mockResolvedValue(proofs);
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue({
+      mint: { checkMeltQuoteBolt11 },
+      unit: "sat",
+    });
+
+    await wallet.checkOutgoingInvoice("failed-melt-q", false);
+
+    expect(h.proofsStore.setReserved).toHaveBeenCalledWith(proofs, false);
+    expect(wallet.invoiceHistory).toHaveLength(0);
+    expect(
+      h.transactionWorkerStore.removeOutgoingInvoiceFromChecker
+    ).toHaveBeenCalledWith("failed-melt-q");
+    expect(h.notifyWarning).toHaveBeenCalledWith(
+      "wallet.notifications.lightning_payment_failed"
+    );
+  });
+
   it("forwards the silent flag and mutex priority through meltInvoiceData", async () => {
     const wallet = useWalletStore();
     const proofs = [{ id: "00aa", amount: 105, secret: "s1" }];

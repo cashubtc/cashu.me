@@ -76,6 +76,15 @@ export type CheckOutgoingMeltQuoteFn = (
 
 const proofsStore = useProofsStore();
 
+// Melt quotes that meltGeneric is paying right now. Until the mint receives
+// the melt request it still reports the quote as UNPAID, so the outgoing
+// payment checker must not treat UNPAID as a failure for these quotes.
+const meltsInFlight = new Set<string>();
+
+export function isMeltInFlight(quote: string) {
+  return meltsInFlight.has(quote);
+}
+
 export function normalizeMeltQuote(
   quote:
     | MeltQuoteBolt11Response
@@ -177,6 +186,7 @@ export async function meltGeneric(
   this.payInvoiceData.paying = true;
   await uIStore.lockMutex(mutexPriority);
   try {
+    meltsInFlight.add(quote.quote);
     await this.addOutgoingPendingInvoiceToHistory(
       quote,
       mintWallet.mint.mintUrl,
@@ -281,6 +291,7 @@ export async function meltGeneric(
     if (!silent) notifyApiError(error, "Payment failed");
     throw error;
   } finally {
+    meltsInFlight.delete(quote.quote);
     this.payInvoiceData.paying = false;
     uIStore.unlockMutex();
   }
@@ -307,7 +318,10 @@ export async function checkOutgoingInvoiceGeneric(
   try {
     const meltQuote = normalizeMeltQuote(await checkQuote(mintWallet, quote));
     await this.updateOutgoingInvoiceInHistory(meltQuote);
-    if (meltQuote.state == MeltQuoteState.PENDING) {
+    if (
+      meltQuote.state == MeltQuoteState.PENDING ||
+      (meltQuote.state == MeltQuoteState.UNPAID && isMeltInFlight(quote))
+    ) {
       console.log("### mintQuote not paid yet");
       if (verbose) {
         notify(this.t("wallet.notifications.invoice_still_pending"));
