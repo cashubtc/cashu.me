@@ -156,17 +156,6 @@ top of a setup function` before any service request.
   from the home screen through Settings initializes the store earlier.
 - Regression: `opens Lightning address settings directly and enables the address`.
 
-### UI-010 — A fresh wallet raises errors before onboarding
-
-- Severity: low; onboarding still becomes available.
-- Reproduce: navigate to `/` in a fresh browser context with no wallet seed.
-- Expected: reach onboarding without unhandled initialization errors.
-- Actual: the page raises `Invalid mnemonic` and an error reading `slice` from
-  an undefined value while initializing the Nostr wallet key.
-- Evidence: traces point to `walletSeedGenerateKeyPair` and
-  `subscribeToNip17DirectMessages` before a seed has been created.
-- Regression: `opening a fresh wallet reaches onboarding without unhandled initialization errors`.
-
 ### UI-011 — Clipboard permission errors are unhandled
 
 - Severity: low; manual payment entry still works.
