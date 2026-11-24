@@ -17,10 +17,11 @@ export const LEGACY_WORKER_QUEUE_KEYS: Record<WorkerQueueKind, string> = {
   outgoing: "cashu.worker.outgoing.queue",
 };
 
-type QueueEntry = { quote: string } | { id: string };
+type QueueEntry = { quote: string } | { id: string; type?: string };
 
+// Outgoing checks are told apart by (type, id), so both go into the ref.
 const queueRef = (entry: QueueEntry) =>
-  "quote" in entry ? entry.quote : entry.id;
+  "quote" in entry ? entry.quote : `${entry.type ?? ""}:${entry.id}`;
 
 /** The stored row for a queue entry; used by migrations and the mirror. */
 const toQueueRow = (kind: WorkerQueueKind) => (entry: QueueEntry) => ({

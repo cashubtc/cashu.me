@@ -530,11 +530,15 @@ export const useMintsStore = defineStore("mints", {
 
       // Navigate to mint details page with mint URL as query parameter
       if (navigate) {
-        void flushPendingWrites().finally(() => {
-          window.location.href = `/mintdetails?mintUrl=${encodeURIComponent(
-            mint.url
-          )}`;
-        });
+        // (a failed write has been reported; stay so nothing is lost)
+        flushPendingWrites().then(
+          () => {
+            window.location.href = `/mintdetails?mintUrl=${encodeURIComponent(
+              mint.url
+            )}`;
+          },
+          () => {}
+        );
       }
     },
     fetchMintInfo: async function (mint: StoredMint) {

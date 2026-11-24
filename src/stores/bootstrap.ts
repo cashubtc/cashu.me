@@ -10,8 +10,55 @@
  */
 
 import { notifyError } from "src/js/notify";
+import { i18n } from "src/boot/i18n";
 
 let ready: Promise<void> | null = null;
+
+/**
+ * The wallet runs in one tab at a time: stores load their tables once and do
+ * not follow writes from other tabs. Thrown (without a notification) when
+ * another tab already holds the wallet; the router shows /already-running.
+ */
+export class WalletOpenInAnotherTabError extends Error {
+  constructor() {
+    super("The wallet is already open in another tab");
+    this.name = "WalletOpenInAnotherTabError";
+  }
+}
+
+let tabLock: Promise<boolean> | null = null;
+
+/**
+ * Hold a Web Lock for this tab's lifetime. Resolves false when another tab
+ * holds it. Without Web Locks every tab proceeds, as before.
+ */
+function acquireTabLock(): Promise<boolean> {
+  if (!tabLock) {
+    const locks = (globalThis.navigator as any)?.locks;
+    if (!locks?.request) {
+      tabLock = Promise.resolve(true);
+    } else {
+      tabLock = new Promise<boolean>((resolve) => {
+        locks
+          .request(
+            "cashu-wallet-tab",
+            { ifAvailable: true },
+            (lock: unknown) => {
+              resolve(!!lock);
+              // keep the lock until the tab closes
+              return lock ? new Promise(() => {}) : undefined;
+            }
+          )
+          .catch(() => resolve(true));
+      }).then((acquired) => {
+        // let a later attempt (e.g. "Retry" after the other tab closed) ask again
+        if (!acquired) tabLock = null;
+        return acquired;
+      });
+    }
+  }
+  return tabLock;
+}
 
 /**
  * Rejects when the wallet data could not be loaded. The user is told, and the
@@ -21,11 +68,11 @@ let ready: Promise<void> | null = null;
 export function walletDataReady(): Promise<void> {
   if (!ready) {
     ready = loadWalletData().catch((error) => {
-      console.error("Failed to load wallet data", error);
-      notifyError(
-        "Could not load wallet data. Reload the app to try again."
-      ).catch(() => {});
       ready = null;
+      if (!(error instanceof WalletOpenInAnotherTabError)) {
+        console.error("Failed to load wallet data", error);
+        notifyError(i18n.global.t("WalletStorage.load_failed")).catch(() => {});
+      }
       throw error;
     });
   }
@@ -35,9 +82,12 @@ export function walletDataReady(): Promise<void> {
 /** For tests: forget that the wallet data was loaded. */
 export function resetWalletDataReadyForTests() {
   ready = null;
+  tabLock = null;
 }
 
 async function loadWalletData() {
+  if (!(await acquireTabLock())) throw new WalletOpenInAnotherTabError();
+
   await withMigrationLock(async () => {
     const { useDexieStore } = await import("src/stores/dexie");
     await useDexieStore().migrateToDexie();

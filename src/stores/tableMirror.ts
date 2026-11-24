@@ -2,6 +2,7 @@ import { ref, watch, type Ref } from "vue";
 import type { IndexableType, Table } from "dexie";
 import { JSONInt } from "@cashu/cashu-ts";
 import { notifyError } from "src/js/notify";
+import { i18n } from "src/boot/i18n";
 
 /**
  * An in-memory array that is written through to a Dexie table.
@@ -32,6 +33,7 @@ export type TableMirror<T> = {
 type PendingWrites = {
   flush: () => Promise<void>;
   suspend: () => void;
+  resume: () => void;
 };
 const pendingWriters = new Set<PendingWrites>();
 
@@ -52,11 +54,76 @@ export function suspendPendingWrites() {
   pendingWriters.forEach((writer) => writer.suspend());
 }
 
+/** For tests: undo suspendPendingWrites. */
+export function resumePendingWritesForTests() {
+  pendingWriters.forEach((writer) => writer.resume());
+}
+
 /** Tell the user once per failing table; the write retries on the next change. */
 export function reportWriteFailure(tableName: string, error: unknown) {
   console.error(`Could not persist ${tableName}`, error);
   // notifications are unavailable outside the app (e.g. in tests)
-  notifyError(`Could not save wallet data (${tableName})`).catch(() => {});
+  notifyError(
+    i18n.global.t("WalletStorage.save_failed", { name: tableName })
+  ).catch(() => {});
+}
+
+export type SerialWriter = {
+  /** Queue a write; changes made before it runs are written together. */
+  schedule: () => void;
+  /** Wait for queued writes; retries a failed one once, then rejects. */
+  flush: () => Promise<void>;
+};
+
+/**
+ * Runs `write` one at a time, coalescing changes made before it starts.
+ * Failures are reported once and retried on the next schedule or flush; the
+ * writer registers itself for flushPendingWrites/suspendPendingWrites.
+ */
+export function createSerialWriter(
+  name: string,
+  write: () => Promise<void>,
+  canWrite: () => boolean
+): SerialWriter {
+  let scheduled = false;
+  let suspended = false;
+  let failure: unknown = null;
+  let chain: Promise<void> = Promise.resolve();
+
+  const schedule = () => {
+    if (!canWrite() || suspended || scheduled) return;
+    scheduled = true;
+    chain = chain
+      .then(async () => {
+        scheduled = false;
+        await write();
+        failure = null;
+      })
+      .catch((error) => {
+        if (!failure) reportWriteFailure(name, error);
+        failure = error;
+      });
+  };
+
+  const flush = async () => {
+    await chain;
+    if (failure) {
+      schedule();
+      await chain;
+      if (failure) throw failure;
+    }
+  };
+
+  registerPendingWrites({
+    flush,
+    suspend: () => {
+      suspended = true;
+    },
+    resume: () => {
+      suspended = false;
+    },
+  });
+  return { schedule, flush };
 }
 
 export type TableMirrorOptions<T> = {
@@ -110,11 +177,6 @@ export function createTableMirror<T>(
   let hydrating: Promise<void> | null = null;
   // serialized row per key, as last written to (or read from) the table
   let persisted = new Map<string, string>();
-  let scheduled = false;
-  let suspended = false;
-  let failure: unknown = null;
-  let chain: Promise<void> = Promise.resolve();
-
   const keyString = (key: IndexableType) => JSONInt.stringify(key) as string;
 
   const keyOfRow = (row: any): IndexableType => {
@@ -124,7 +186,6 @@ export function createTableMirror<T>(
   };
 
   const write = async () => {
-    scheduled = false;
     const rows = toMirrorRows(items.value, options.toRow);
     const next = new Map<string, string>();
     const puts: any[] = [];
@@ -148,20 +209,10 @@ export function createTableMirror<T>(
     }
     // only after the commit, so a failed write is retried with the next change
     persisted = next;
-    failure = null;
   };
 
-  const schedule = () => {
-    if (!isHydrated || suspended || scheduled) return;
-    scheduled = true;
-    chain = chain.then(write).catch((error) => {
-      scheduled = false;
-      if (!failure) reportWriteFailure(table.name, error);
-      failure = error;
-    });
-  };
-
-  watch(items, schedule, { deep: true, flush: "sync" });
+  const writer = createSerialWriter(table.name, write, () => isHydrated);
+  watch(items, writer.schedule, { deep: true, flush: "sync" });
 
   const hydrate = () => {
     if (isHydrated) return Promise.resolve();
@@ -204,7 +255,7 @@ export function createTableMirror<T>(
           }),
         ];
         isHydrated = true;
-        if (early.length) schedule();
+        if (early.length) writer.schedule();
       })().finally(() => {
         hydrating = null;
       });
@@ -212,28 +263,12 @@ export function createTableMirror<T>(
     return hydrating;
   };
 
-  const flush = async () => {
-    await chain;
-    if (failure) {
-      // retry the failed write once before giving up
-      schedule();
-      await chain;
-      if (failure) throw failure;
-    }
-  };
-  registerPendingWrites({
-    flush,
-    suspend: () => {
-      suspended = true;
-    },
-  });
-
   return {
     items,
     hydrated: () => isHydrated,
     hydrate,
-    // a change schedules its write synchronously, so awaiting the chain
-    // covers every change made before this call
-    flush,
+    // a change schedules its write synchronously, so flushing covers every
+    // change made before this call
+    flush: writer.flush,
   };
 }

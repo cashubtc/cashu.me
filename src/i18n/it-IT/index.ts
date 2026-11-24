@@ -580,6 +580,19 @@ export default {
       },
     },
   },
+  WalletStorage: {
+    load_failed:
+      "Impossibile caricare i dati del portafoglio. Ricarica l'app per riprovare.",
+    migration_failed:
+      "Impossibile aggiornare i dati del portafoglio (passo {version}). Verrà ritentato al prossimo avvio.",
+    save_failed: "Impossibile salvare i dati del portafoglio ({name}).",
+    restore_failed:
+      "Impossibile ripristinare completamente il backup. I dati ripristinati vengono mantenuti; riprova.",
+    backup_unsaved:
+      "Alcune modifiche non sono state salvate, quindi non è stato creato alcun backup.",
+    export_partial:
+      "Backup esportato, ma alcune modifiche recenti non sono state salvate e mancano.",
+  },
   ErrorNotFound: {
     title: "404",
     text: "Oops. Niente qui…",

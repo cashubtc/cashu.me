@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { notifyError } from "src/js/notify";
+import { i18n } from "src/boot/i18n";
 
 // Define the migration version type
 export type Migration = {
@@ -58,7 +59,9 @@ export const useMigrationsStore = defineStore("migrations", {
             console.error(`Migration ${migration.version} failed:`, error);
             // Data moves are idempotent and retried on the next start.
             notifyError(
-              `Could not update wallet data (migration ${migration.version}). It will be retried on the next start.`
+              i18n.global.t("WalletStorage.migration_failed", {
+                version: migration.version,
+              })
             ).catch(() => {});
             // Stop running migrations if one fails
             break;
@@ -91,6 +94,8 @@ export const useMigrationsStore = defineStore("migrations", {
         }
       }
 
+      // commit before the migration counts as done
+      await mintStore.mintsTable.flush();
       if (updated) {
         console.log("Successfully updated mint URL");
       } else {
@@ -281,7 +286,7 @@ export const useMigrationsStore = defineStore("migrations", {
           "Moves the incoming quote and outgoing payment check queues to the workerQueue table",
         execute: async () => {
           const { importLegacyWorkerQueues } = await import(
-            "./workerQueueStorage"
+            "src/stores/workerQueueStorage"
           );
           await importLegacyWorkerQueues();
         },

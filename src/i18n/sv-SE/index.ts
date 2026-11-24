@@ -605,6 +605,19 @@ export default {
       },
     },
   },
+  WalletStorage: {
+    load_failed:
+      "Det gick inte att läsa in plånboksdata. Ladda om appen för att försöka igen.",
+    migration_failed:
+      "Det gick inte att uppdatera plånboksdata (steg {version}). Det görs ett nytt försök vid nästa start.",
+    save_failed: "Det gick inte att spara plånboksdata ({name}).",
+    restore_failed:
+      "Det gick inte att återställa hela säkerhetskopian. Återställd data behålls; försök igen.",
+    backup_unsaved:
+      "Vissa ändringar kunde inte sparas, så ingen säkerhetskopia skapades.",
+    export_partial:
+      "Säkerhetskopian exporterades, men några senaste ändringar kunde inte sparas och saknas i den.",
+  },
   ErrorNotFound: {
     title: "404",
     text: "Oops. Ingenting här…",

@@ -1,4 +1,10 @@
 import { cashuDb } from "src/stores/dexie";
+import { i18n } from "src/boot/i18n";
+import { notifyError } from "src/js/notify";
+import {
+  registerPendingWrites,
+  reportWriteFailure,
+} from "src/stores/tableMirror";
 
 /**
  * Nostr event ids we already handled, per scope ("nip17", "nwc:<pubkey>").
@@ -16,6 +22,22 @@ export type SeenEventRow = {
 };
 
 const PRUNE_INTERVAL_MS = 60 * 60 * 1000;
+
+// Seen-event rows are written directly (not through a table mirror); track
+// them so flushPendingWrites/suspendPendingWrites cover them as well.
+const pendingPuts = new Set<Promise<unknown>>();
+let writesSuspended = false;
+registerPendingWrites({
+  flush: async () => {
+    await Promise.all([...pendingPuts]);
+  },
+  suspend: () => {
+    writesSuspended = true;
+  },
+  resume: () => {
+    writesSuspended = false;
+  },
+});
 
 export class SeenEventLog {
   private ids = new Set<string>();
@@ -39,6 +61,9 @@ export class SeenEventLog {
         rows.forEach((row) => this.ids.add(row.id));
       })().catch((error) => {
         this.loaded = null;
+        // the caller does not subscribe without its seen ids (fails closed)
+        console.error(`Could not load seen events (${this.scope})`, error);
+        notifyError(i18n.global.t("WalletStorage.load_failed")).catch(() => {});
         throw error;
       });
     }
@@ -58,9 +83,13 @@ export class SeenEventLog {
       id,
       created_at: createdAt ?? Math.floor(Date.now() / 1000),
     };
-    cashuDb.seenEvents
-      .put(row)
-      .catch((error) => console.error("Could not record seen event", error));
+    if (!writesSuspended) {
+      const put: Promise<unknown> = cashuDb.seenEvents
+        .put(row)
+        .catch((error) => reportWriteFailure("seenEvents", error))
+        .finally(() => pendingPuts.delete(put));
+      pendingPuts.add(put);
+    }
     // long-running sessions keep forgetting expired ids, not only on load
     if (Date.now() - this.lastPrunedAt > PRUNE_INTERVAL_MS) {
       this.prune().catch((error) =>

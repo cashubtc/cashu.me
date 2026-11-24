@@ -201,6 +201,18 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
       this.transactionWorkerRunning = false;
     },
 
+    /** Stop the worker and wait until checks already in flight have finished. */
+    async stopTransactionWorkerAndWait(timeoutMs = 15_000) {
+      this.stopTransactionWorker();
+      const deadline = Date.now() + timeoutMs;
+      while (
+        Object.values(this.mintLaneInFlight).some(Boolean) &&
+        Date.now() < deadline
+      ) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+    },
+
     addInvoiceToChecker(quote: string, forceStart = false) {
       this.addMintQuoteToChecker(
         PaymentMethod.Bolt11,

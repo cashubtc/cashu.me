@@ -16,6 +16,7 @@ import { cashuDb, useDexieStore } from "src/stores/dexie";
 import {
   createTableMirror,
   flushPendingWrites,
+  resumePendingWritesForTests,
   suspendPendingWrites,
   toMirrorRows,
 } from "src/stores/tableMirror";
@@ -69,6 +70,7 @@ describe("table mirror write failures", () => {
     mirror.items.value.push({ id: "b", value: 3 });
     await mirror.flush();
     expect(await cashuDb.paymentRequests.count()).toBe(0);
+    resumePendingWritesForTests();
   });
 });
 
@@ -181,5 +183,104 @@ describe("startup gate", () => {
 
     await expect(walletDataReady()).resolves.toBeUndefined();
     resetWalletDataReadyForTests();
+  });
+});
+
+describe("round 2 failure handling", () => {
+  beforeEach(async () => {
+    localStorage.clear();
+    vi.mocked(notifyError).mockClear();
+  });
+
+  it("restores the same proofs twice without failing", async () => {
+    const { useProofsStore } = await import("src/stores/proofs");
+    await cashuDb.proofs.clear();
+    const proofs = [{ id: "00ab", amount: 4, C: "02cc", secret: "dup-1" }];
+    await useProofsStore().addMissingProofs(proofs as any);
+    await useProofsStore().addMissingProofs(proofs as any);
+    expect(await cashuDb.proofs.count()).toBe(1);
+  });
+
+  it("refuses an incomplete backup when one is required (wallet wipe)", async () => {
+    const mirror = createTableMirror<Item>(cashuDb.paymentRequests, {
+      keyOf: (item) => item.id,
+    });
+    await mirror.hydrate();
+    const bulkPut = vi
+      .spyOn(cashuDb.paymentRequests, "bulkPut")
+      .mockRejectedValue(new Error("quota"));
+    mirror.items.value.push({ id: "unsaved", value: 1 });
+
+    await expect(
+      useStorageStore().exportWalletState({ requireSaved: true })
+    ).rejects.toThrow("quota");
+    expect(notifyError).toHaveBeenCalled();
+
+    bulkPut.mockRestore();
+    await mirror.flush();
+    mirror.items.value = [];
+    await mirror.flush();
+  });
+
+  it("sends a second tab away without loading or notifying", async () => {
+    const { WalletOpenInAnotherTabError } = await import(
+      "src/stores/bootstrap"
+    );
+    resetWalletDataReadyForTests();
+    const locks = {
+      request: vi.fn(async (_name: string, _opts: unknown, cb: any) =>
+        cb(null)
+      ),
+    };
+    vi.stubGlobal("navigator", { ...globalThis.navigator, locks });
+    const migrate = vi.spyOn(useDexieStore(), "migrateToDexie");
+    try {
+      await expect(walletDataReady()).rejects.toBeInstanceOf(
+        WalletOpenInAnotherTabError
+      );
+      expect(migrate).not.toHaveBeenCalled();
+      expect(notifyError).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllGlobals();
+      migrate.mockRestore();
+      resetWalletDataReadyForTests();
+    }
+  });
+
+  it("keeps outgoing token and invoice checks with the same id apart", async () => {
+    const { createWorkerQueueTable } = await import(
+      "src/stores/workerQueueStorage"
+    );
+    await cashuDb.workerQueue.clear();
+    const queue = createWorkerQueueTable<any>("outgoing");
+    await queue.hydrate();
+    const entry = { id: "same", addedAt: 1, lastChecked: 0, checkCount: 0 };
+    queue.items.value.push(
+      { ...entry, type: "token" },
+      { ...entry, type: "invoice" }
+    );
+    await queue.flush();
+    expect(await cashuDb.workerQueue.count()).toBe(2);
+
+    const reloaded = createWorkerQueueTable<any>("outgoing");
+    await reloaded.hydrate();
+    expect(reloaded.items.value.map((e: any) => e.type)).toEqual([
+      "token",
+      "invoice",
+    ]);
+  });
+
+  it("does not finish migration v1 before its write commits", async () => {
+    const { useMigrationsStore } = await import("src/stores/migrations");
+    const { useMintsStore } = await import("src/stores/mints");
+    const mints = useMintsStore();
+    await mints.init();
+    const flush = vi
+      .spyOn(mints.mintsTable, "flush")
+      .mockRejectedValueOnce(new Error("quota"));
+    await expect(
+      useMigrationsStore().migrateStablenutsToCash()
+    ).rejects.toThrow("quota");
+    flush.mockRestore();
   });
 });

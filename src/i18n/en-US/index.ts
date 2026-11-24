@@ -623,6 +623,17 @@ export default {
       },
     },
   },
+  WalletStorage: {
+    load_failed: "Could not load wallet data. Reload the app to try again.",
+    migration_failed:
+      "Could not update wallet data (step {version}). It will be retried on the next start.",
+    save_failed: "Could not save wallet data ({name}).",
+    restore_failed:
+      "Could not restore the backup completely. Restored data is kept; try again.",
+    backup_unsaved: "Some changes could not be saved, so no backup was made.",
+    export_partial:
+      "Backup exported, but some recent changes could not be saved and are missing from it.",
+  },
   ErrorNotFound: {
     title: "404",
     text: "Oops. Nothing here…",

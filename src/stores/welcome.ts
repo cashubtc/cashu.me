@@ -90,10 +90,14 @@ export const useWelcomeStore = defineStore("welcome", {
       // Reset the slide to the beginning for next time (if welcome is ever shown again)
       this.currentSlide = 0;
       // Redirect to home or desired route, once onboarding data is stored
-      void flushPendingWrites().finally(() => {
-        window.location.href =
-          "/" + window.location.search + window.location.hash;
-      });
+      // (a failed write has been reported; stay so nothing is lost)
+      flushPendingWrites().then(
+        () => {
+          window.location.href =
+            "/" + window.location.search + window.location.hash;
+        },
+        () => {}
+      );
     },
     setPath(path: "new" | "recover") {
       this.onboardingPath = path;

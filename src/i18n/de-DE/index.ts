@@ -613,6 +613,19 @@ export default {
       },
     },
   },
+  WalletStorage: {
+    load_failed:
+      "Wallet-Daten konnten nicht geladen werden. Lade die App neu, um es erneut zu versuchen.",
+    migration_failed:
+      "Wallet-Daten konnten nicht aktualisiert werden (Schritt {version}). Beim nächsten Start wird es erneut versucht.",
+    save_failed: "Wallet-Daten konnten nicht gespeichert werden ({name}).",
+    restore_failed:
+      "Das Backup konnte nicht vollständig wiederhergestellt werden. Bereits wiederhergestellte Daten bleiben erhalten; versuche es erneut.",
+    backup_unsaved:
+      "Einige Änderungen konnten nicht gespeichert werden, daher wurde kein Backup erstellt.",
+    export_partial:
+      "Backup exportiert, aber einige letzte Änderungen konnten nicht gespeichert werden und fehlen darin.",
+  },
   ErrorNotFound: {
     title: "404",
     text: "Ups. Nichts gefunden…",

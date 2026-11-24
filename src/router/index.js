@@ -6,7 +6,12 @@ import {
   createWebHashHistory,
 } from "vue-router";
 import routes from "./routes";
-import { walletDataReady } from "src/stores/bootstrap";
+import {
+  walletDataReady,
+  WalletOpenInAnotherTabError,
+} from "src/stores/bootstrap";
+
+const ALREADY_RUNNING_PATH = "/already-running";
 
 /*
  * If not building with SSR mode, you can
@@ -37,13 +42,20 @@ export default route(function (/* { store, ssrContext } */) {
   // Persisted wallet data lives partly in IndexedDB, which loads
   // asynchronously. Wait for it before any page renders.
   // On failure the user is notified and the page still renders (so the app is
-  // not blank); the wallet page does not start its workers in that case.
-  Router.beforeEach(async () => {
+  // not blank); the wallet page does not start its workers in that case. A
+  // second tab is sent to /already-running before it loads anything.
+  Router.beforeEach(async (to) => {
+    if (to.path === ALREADY_RUNNING_PATH) return true;
     try {
       await walletDataReady();
-    } catch {
-      // reported by walletDataReady; retried on the next navigation
+    } catch (error) {
+      if (error instanceof WalletOpenInAnotherTabError) {
+        return { path: ALREADY_RUNNING_PATH, replace: true };
+      }
+      // other failures are reported by walletDataReady and retried on the
+      // next navigation
     }
+    return true;
   });
 
   return Router;

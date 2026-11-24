@@ -385,10 +385,12 @@ export default defineComponent({
       this.$router.push("/welcome");
     },
     nukeWallet: async function () {
-      // stop background work that would write to the tables being wiped
-      useTransactionWorkerStore().stopTransactionWorker();
-      // create a backup just in case (waits for pending writes first)
-      await this.exportWalletState();
+      // stop background work that would write to the tables being wiped, and
+      // let checks already in flight finish
+      await useTransactionWorkerStore().stopTransactionWorkerAndWait();
+      // create a backup just in case; refused (and the wipe stopped) when
+      // some changes could not be saved, so the backup is never incomplete
+      await this.exportWalletState({ requireSaved: true });
       // nothing may write after this point, or it would survive the wipe;
       // let writes that were already queued finish before clearing
       suspendPendingWrites();

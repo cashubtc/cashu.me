@@ -610,6 +610,20 @@ export default {
       },
     },
   },
+  WalletStorage: {
+    load_failed:
+      "Impossible de charger les données du portefeuille. Rechargez l'application pour réessayer.",
+    migration_failed:
+      "Impossible de mettre à jour les données du portefeuille (étape {version}). Une nouvelle tentative aura lieu au prochain démarrage.",
+    save_failed:
+      "Impossible d'enregistrer les données du portefeuille ({name}).",
+    restore_failed:
+      "Impossible de restaurer entièrement la sauvegarde. Les données restaurées sont conservées ; réessayez.",
+    backup_unsaved:
+      "Certaines modifications n'ont pas pu être enregistrées, aucune sauvegarde n'a donc été créée.",
+    export_partial:
+      "Sauvegarde exportée, mais certaines modifications récentes n'ont pas pu être enregistrées et n'y figurent pas.",
+  },
   ErrorNotFound: {
     title: "404",
     text: "Oups. Rien ici…",

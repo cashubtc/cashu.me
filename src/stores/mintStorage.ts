@@ -3,8 +3,7 @@ import type { MintKeys } from "@cashu/cashu-ts";
 import { cashuDb } from "src/stores/dexie";
 import {
   createTableMirror,
-  registerPendingWrites,
-  reportWriteFailure,
+  createSerialWriter,
   toMirrorRows,
   toPlainRow,
   type TableMirror,
@@ -42,7 +41,8 @@ export function mintKeysRows(mints: StoredMint[]): MintKeysRow[] {
   );
 }
 
-const keysKey = (mintUrl: string, id: string) => `${mintUrl}\n${id}`;
+// A serialized [mintUrl, id] tuple, so the key boundary is unambiguous.
+const keysKey = (mintUrl: string, id: string) => JSON.stringify([mintUrl, id]);
 
 export type MintsTable = TableMirror<StoredMint>;
 
@@ -55,13 +55,8 @@ export function createMintsTable(): MintsTable {
 
   let keysHydrated = false;
   let persistedKeys = new Set<string>();
-  let scheduled = false;
-  let suspended = false;
-  let failure: unknown = null;
-  let chain: Promise<void> = Promise.resolve();
 
   const writeKeys = async () => {
-    scheduled = false;
     const current = new Map<string, MintKeysRow>();
     for (const row of mintKeysRows(mirror.items.value)) {
       current.set(keysKey(row.mintUrl, row.id), row);
@@ -71,7 +66,7 @@ export function createMintsTable(): MintsTable {
       .map(([, row]) => row);
     const deletes = [...persistedKeys]
       .filter((key) => !current.has(key))
-      .map((key) => key.split("\n") as [string, string]);
+      .map((key) => JSON.parse(key) as [string, string]);
     if (puts.length || deletes.length) {
       await cashuDb.transaction("rw", cashuDb.mintKeys, async () => {
         if (deletes.length) await cashuDb.mintKeys.bulkDelete(deletes);
@@ -79,17 +74,13 @@ export function createMintsTable(): MintsTable {
       });
     }
     persistedKeys = new Set(current.keys());
-    failure = null;
   };
 
-  const scheduleKeys = () => {
-    if (!keysHydrated || suspended || scheduled) return;
-    scheduled = true;
-    chain = chain.then(writeKeys).catch((error) => {
-      if (!failure) reportWriteFailure("mintKeys", error);
-      failure = error;
-    });
-  };
+  const keysWriter = createSerialWriter(
+    "mintKeys",
+    writeKeys,
+    () => keysHydrated
+  );
 
   // Keys of a keyset never change, so tracking (mint url, keyset id) pairs is
   // enough to know which rows to write or delete.
@@ -100,7 +91,7 @@ export function createMintsTable(): MintsTable {
           (mint.keys || []).map((keys) => keysKey(mint.url, keys.id))
         )
         .join("\t"),
-    scheduleKeys,
+    keysWriter.schedule,
     { flush: "sync" }
   );
 
@@ -126,24 +117,8 @@ export function createMintsTable(): MintsTable {
     }
     persistedKeys = new Set(keyRows.map((row) => keysKey(row.mintUrl, row.id)));
     keysHydrated = true;
-    scheduleKeys();
+    keysWriter.schedule();
   };
-
-  const flushKeys = async () => {
-    await chain;
-    if (failure) {
-      // retry the failed write once before giving up
-      scheduleKeys();
-      await chain;
-      if (failure) throw failure;
-    }
-  };
-  registerPendingWrites({
-    flush: flushKeys,
-    suspend: () => {
-      suspended = true;
-    },
-  });
 
   return {
     items: mirror.items,
@@ -151,7 +126,7 @@ export function createMintsTable(): MintsTable {
     hydrate,
     flush: async () => {
       await mirror.flush();
-      await flushKeys();
+      await keysWriter.flush();
     },
   };
 }

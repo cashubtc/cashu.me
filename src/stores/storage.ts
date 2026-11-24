@@ -21,6 +21,7 @@ import { importLegacyLocalStorageKeys } from "src/stores/legacyImporters";
 import { flushPendingWrites } from "src/stores/tableMirror";
 import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import { deserializeProofs, JSONInt } from "@cashu/cashu-ts";
+import { i18n } from "src/boot/i18n";
 
 export function stringifyBackupTable(rows: unknown[]): string {
   const serialized = JSONInt.stringify(rows);
@@ -85,9 +86,7 @@ export const useStorageStore = defineStore("storage", {
         await this.restoreFromBackupUnchecked(backup);
       } catch (error) {
         console.error("Could not restore backup", error);
-        notifyError(
-          "Could not restore the backup completely. Restored data is kept; try again."
-        );
+        notifyError(i18n.global.t("WalletStorage.restore_failed"));
       }
     },
     restoreFromBackupUnchecked: async function (backup: any) {
@@ -100,7 +99,8 @@ export const useStorageStore = defineStore("storage", {
           // we treat some keys differently *magic*
           if (key === `${BACKUP_TABLE_KEY_PREFIX}proofs`) {
             const proofs = deserializeProofs(backup[key]);
-            await proofsStore.addProofs(proofs);
+            // restoring the same backup twice must not fail on known proofs
+            await proofsStore.addMissingProofs(proofs);
           } else if (key.startsWith(BACKUP_TABLE_KEY_PREFIX)) {
             await restoreBackupTable(
               key.slice(BACKUP_TABLE_KEY_PREFIX.length),
@@ -144,16 +144,31 @@ export const useStorageStore = defineStore("storage", {
         // Backups from older versions carry data in localStorage keys that now
         // live in IndexedDB; move them into their tables.
         await importLegacyLocalStorageKeys();
-        notifySuccess("Backup restored");
+        // only report success once everything is stored
         await flushPendingWrites();
+        notifySuccess("Backup restored");
         window.location.reload();
       }
     },
-    exportWalletState: async function () {
-      // include changes that are still being written
-      await flushPendingWrites().catch((error) => {
+    /**
+     * Download a backup file. Pending writes are flushed first. If some could
+     * not be saved, the backup is still exported (it is the user's safety net)
+     * but flagged as incomplete; with `requireSaved` it is refused instead.
+     */
+    exportWalletState: async function (
+      options: { requireSaved?: boolean } = {}
+    ) {
+      let complete = true;
+      try {
+        await flushPendingWrites();
+      } catch (error) {
         console.error("Exporting with unsaved changes", error);
-      });
+        if (options.requireSaved) {
+          notifyError(i18n.global.t("WalletStorage.backup_unsaved"));
+          throw error;
+        }
+        complete = false;
+      }
       const jsonToSave: any = {};
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
@@ -182,7 +197,11 @@ export const useStorageStore = defineStore("storage", {
       downloadLink.style.display = "none";
       document.body.appendChild(downloadLink);
       downloadLink.click();
-      notifySuccess("Wallet backup exported");
+      if (complete) {
+        notifySuccess("Wallet backup exported");
+      } else {
+        notifyError(i18n.global.t("WalletStorage.export_partial"));
+      }
     },
     checkLocalStorage: async function () {
       const needsCleanup = this.checkLocalStorageQuota();

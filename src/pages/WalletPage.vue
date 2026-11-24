@@ -297,6 +297,7 @@ export default {
         show: false,
       },
       historyHydrated: false,
+      unmounted: false,
       welcomeDialog: {
         show: false,
       },
@@ -587,16 +588,24 @@ export default {
   },
   watch: {},
 
-  mounted: function () {
-    this.initializeNpubCash();
+  mounted: async function () {
     // Ensure wallet action buttons have equal width
     this.$nextTick(this.equalizeButtonWidths);
     // Add window resize listener to handle responsive layouts
     window.addEventListener("resize", this.equalizeButtonWidths);
+    // Background work only runs against loaded wallet data (see created).
+    try {
+      await walletDataReady();
+    } catch {
+      return;
+    }
+    if (this.unmounted) return;
+    this.initializeNpubCash();
     document.addEventListener("visibilitychange", this.handleVisibilityChange);
   },
 
   beforeUnmount: function () {
+    this.unmounted = true;
     // Remove event listener when component is destroyed
     window.removeEventListener("resize", this.equalizeButtonWidths);
     document.removeEventListener(
