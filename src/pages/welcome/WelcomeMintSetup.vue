@@ -225,6 +225,7 @@ export default {
   flex: 1;
   width: 100%;
   max-width: 500px;
+  margin: 0 auto;
 }
 
 .header-icon {

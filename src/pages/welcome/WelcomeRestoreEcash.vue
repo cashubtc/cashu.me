@@ -54,7 +54,7 @@ export default {
 .content {
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* Left-aligned */
+  align-items: center;
   text-align: left;
   flex: 1;
 }
@@ -62,7 +62,7 @@ export default {
 .header-icon {
   margin-bottom: 20px;
   display: flex;
-  justify-content: flex-start; /* Left-aligned */
+  justify-content: center;
   align-items: center;
 }
 
