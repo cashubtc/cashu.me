@@ -50,6 +50,16 @@ describe("PaymentRequestDialog", () => {
     expect(context.locked).toBe(true);
   });
 
+  it("counts only settled payments in the received total", () => {
+    const currentPayments = [
+      { amount: 8, unit: "sat", status: "paid" },
+      { amount: 5, unit: "sat", status: "pending" },
+    ];
+    expect(
+      PaymentRequestDialog.computed.totalsByUnit.call({ currentPayments })
+    ).toEqual({ sat: 8 });
+  });
+
   it("only replaces the request when its description or lock changed", () => {
     const context: any = {
       shownRequest: request,
