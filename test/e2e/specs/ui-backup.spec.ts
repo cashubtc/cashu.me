@@ -146,10 +146,6 @@ test("reveals and copies a seed and restores spendable funds in a fresh wallet",
       })
     ).toBeVisible({ timeout: 60000 });
     await restored.home();
-    test.fail(
-      true,
-      "UI-006: seed restore reports success after a setup-context error"
-    );
     await expect.poll(() => restored.balanceSats(), { timeout: 3000 }).toBe(64);
     await restored.sendEcash(4);
     await expect.poll(() => restored.balanceSats()).toBe(60);
