@@ -103,7 +103,8 @@ export default {
 <template>
   <q-card>
     <div class="text-center">
-      <div>
+      <!-- v-show, not v-if: the scanner needs the video element on mount -->
+      <div v-show="!cameraErrorKey">
         <video ref="cameraEl" style="width: 100%"></video>
       </div>
       <div v-if="cameraErrorKey" class="q-pa-md text-body2">
