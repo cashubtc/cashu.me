@@ -1,11 +1,126 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   bitcoinUriAmount,
   onchainDepositAmountError,
   onchainDepositQrValue,
   onchainDepositAmountInBaseUnits,
   onchainAddressExplorerUrl,
+  fetchTxMetadata,
+  fetchAddressTxMetadata,
 } from "src/js/onchain";
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
+
+describe("on-chain confirmation metadata", () => {
+  it.each(["transaction", "address"])(
+    "does not mark a %s as meeting a three-confirmation requirement when the tip lookup fails",
+    async (lookup) => {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () =>
+            lookup === "transaction"
+              ? { status: { confirmed: true, block_height: 100 } }
+              : [
+                  {
+                    txid: "example-tx",
+                    status: { confirmed: true, block_height: 100 },
+                    vout: [
+                      { scriptpubkey_address: "bc1qexample", value: 1000 },
+                    ],
+                  },
+                ],
+        })
+        .mockResolvedValueOnce({ ok: false });
+      vi.stubGlobal("fetch", fetchMock);
+      vi.spyOn(console, "warn").mockImplementation(() => {});
+
+      const metadata =
+        lookup === "transaction"
+          ? await fetchTxMetadata("example-tx", 3, "bc1qexample")
+          : await fetchAddressTxMetadata("bc1qexample", 3);
+
+      expect(metadata).toMatchObject({
+        confirmed: false,
+        confirmations: 1,
+        confirmationThreshold: 3,
+      });
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    }
+  );
+
+  it("counts one confirmation when the tip lookup fails and only one is required", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            status: { confirmed: true, block_height: 100 },
+          }),
+        })
+        .mockResolvedValueOnce({ ok: false })
+    );
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    expect(await fetchTxMetadata("example-tx", 1, "bc1qexample")).toMatchObject(
+      {
+        confirmed: true,
+        confirmations: 1,
+        confirmationThreshold: 1,
+      }
+    );
+  });
+
+  it("uses the observed tip height when it is available", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            status: { confirmed: true, block_height: 100 },
+          }),
+        })
+        .mockResolvedValueOnce({ ok: true, text: async () => "101" })
+    );
+
+    expect(await fetchTxMetadata("example-tx", 3, "bc1qexample")).toMatchObject(
+      {
+        confirmed: false,
+        confirmations: 2,
+        confirmationThreshold: 3,
+      }
+    );
+  });
+
+  it("does not claim finality when a confirmed response omits its block height", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({ status: { confirmed: true } }),
+        })
+        .mockResolvedValueOnce({ ok: true, text: async () => "101" })
+    );
+
+    expect(await fetchTxMetadata("example-tx", 1, "bc1qexample")).toMatchObject(
+      {
+        confirmed: false,
+        confirmations: 0,
+        confirmationThreshold: 1,
+      }
+    );
+  });
+});
 
 describe("onchainAddressExplorerUrl", () => {
   it("returns the mainnet Mempool address page", () => {
