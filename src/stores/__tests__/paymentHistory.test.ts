@@ -334,8 +334,10 @@ describe("payment history store", () => {
 
     it("deletes the quote rows of pruned payments", async () => {
       const store = usePaymentHistoryStore();
+      // The wallet marks a minted bolt11 payment paid without persisting
+      // the ISSUED state, so the pruned quote row is still PAID.
       await store.addPayment(
-        bolt11Mint("old-q", "2026-03-01T00:00:00.000Z", "paid", "ISSUED")
+        bolt11Mint("old-q", "2026-03-01T00:00:00.000Z", "paid", "PAID")
       );
       await store.addPayment({
         quote: "old-melt-q",
@@ -347,7 +349,7 @@ describe("payment history store", () => {
         mint,
         unit: "sat",
         type: PaymentMethod.Bolt11,
-        meltQuote: { quote: "old-melt-q", amount: 10, state: "PAID" },
+        meltQuote: { quote: "old-melt-q", amount: 10, state: "PENDING" },
       });
       await store.addPayment(
         bolt11Mint("new-q", "2026-03-03T00:00:00.000Z", "paid", "ISSUED")
@@ -476,6 +478,64 @@ describe("payment history store", () => {
       expect(
         (await cashuDb.meltQuotes.toArray()).map((q) => q.quote).sort()
       ).toEqual(["orphan-pending-melt-q", "orphan-reserved-melt-q"]);
+    });
+
+    it("sweeps settled orphans even when no payment needs pruning", async () => {
+      const store = usePaymentHistoryStore();
+      await store.addPayment(
+        bolt11Mint("kept-q", "2026-03-01T00:00:00.000Z", "paid", "PAID")
+      );
+      await cashuDb.mintQuotes.bulkPut([
+        {
+          quote: "issued-q",
+          method: PaymentMethod.Bolt11,
+          request: "x",
+          unit: "sat",
+          state: "ISSUED",
+        },
+        {
+          quote: "offer-done-q",
+          method: PaymentMethod.Bolt12,
+          request: "x",
+          unit: "sat",
+          amount_paid: 50,
+          amount_issued: 50,
+        },
+        {
+          quote: "offer-unclaimed-q",
+          method: PaymentMethod.Bolt12,
+          request: "x",
+          unit: "sat",
+          amount_paid: 80,
+          amount_issued: 50,
+        },
+        {
+          quote: "onchain-unclaimed-q",
+          method: PaymentMethod.Onchain,
+          request: "x",
+          unit: "sat",
+          amount_paid: 1000,
+          amount_issued: 0,
+        },
+        {
+          quote: "unknown-method-q",
+          method: "unknown" as any,
+          request: "x",
+          unit: "sat",
+        },
+      ]);
+
+      await store.deleteOldPaidPayments(200);
+
+      expect(await cashuDb.paymentHistory.count()).toBe(1);
+      expect(
+        (await cashuDb.mintQuotes.toArray()).map((q) => q.quote).sort()
+      ).toEqual([
+        "kept-q",
+        "offer-unclaimed-q",
+        "onchain-unclaimed-q",
+        "unknown-method-q",
+      ]);
     });
   });
 });
