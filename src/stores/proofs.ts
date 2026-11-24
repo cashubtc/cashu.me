@@ -117,8 +117,10 @@ export const useProofsStore = defineStore("proofs", {
         }
       });
     },
+    // Stores the proofs the wallet does not hold yet and returns those.
     async addMissingProofs(proofs: ProofLike[], quote?: string) {
       const walletProofs = this.proofsToWalletProofs(proofs, quote);
+      const added: typeof walletProofs = [];
       await cashuDb.transaction("rw", cashuDb.proofs, async () => {
         const existing = await cashuDb.proofs.bulkGet(
           walletProofs.map((p) => p.secret)
@@ -131,6 +133,7 @@ export const useProofsStore = defineStore("proofs", {
             try {
               await cashuDb.proofs.add(p);
               existingSecrets.add(p.secret);
+              added.push(p);
             } catch (error: any) {
               if (error?.name !== "ConstraintError") {
                 throw error;
@@ -139,6 +142,7 @@ export const useProofsStore = defineStore("proofs", {
           }
         }
       });
+      return added;
     },
     async removeProofs(proofs: ProofLike[]) {
       const walletProofs = this.proofsToWalletProofs(proofs);

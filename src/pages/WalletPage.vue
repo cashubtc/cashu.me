@@ -374,6 +374,7 @@ export default {
       "decodeRequest",
       "initializeMnemonic",
       "initPaymentHistory",
+      "recoverPendingReceives",
     ]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useNWCStore, ["listenToNWCCommands"]),
@@ -719,6 +720,9 @@ export default {
 
     // reconnect all websockets
     this.checkPendingTransactions();
+
+    // finish token receives the app was closed in the middle of
+    this.recoverPendingReceives().catch((error) => console.error(error));
   },
 };
 </script>
