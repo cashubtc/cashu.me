@@ -336,6 +336,7 @@ export default {
       "payInvoiceData",
     ]),
     ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
+    ...mapState(useWalletStore, ["mnemonic"]),
     ...mapState(useTokensStore, ["historyTokens"]),
     ...mapState(usePRStore, ["enablePaymentRequest"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
@@ -700,7 +701,12 @@ export default {
       this.initializeMnemonic();
     }
 
-    this.initSigner();
+    // Nostr keys are derived from the wallet seed, which does not exist yet
+    // while onboarding is still pending.
+    const hasSeed = !!this.mnemonic;
+    if (hasSeed) {
+      this.initSigner();
+    }
 
     // show welcome dialog
     this.showWelcomePage();
@@ -710,7 +716,7 @@ export default {
       this.listenToNWCCommands();
     }
 
-    if (this.enablePaymentRequest) {
+    if (this.enablePaymentRequest && hasSeed) {
       this.subscribeToNip17DirectMessages();
     }
 
