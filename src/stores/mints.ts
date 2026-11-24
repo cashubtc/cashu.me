@@ -105,6 +105,11 @@ type BlindSignatureAudit = {
   r: string;
 };
 
+// Number of activateMint() calls currently in flight. Kept outside the store
+// state on purpose: activeMint() reads it during render, and changing it must
+// not make components re-render.
+let mintActivationsInFlight = 0;
+
 export const useMintsStore = defineStore("mints", {
   state: () => {
     const t = i18n.global.t;
@@ -252,10 +257,10 @@ export const useMintsStore = defineStore("mints", {
         return new MintClass(mint);
       } else {
         if (this.mints.length) {
-          // While addMint() is running, the new mint is already listed but
-          // only becomes active once its info and keys are fetched. That
-          // activation is in flight, so don't start another one.
-          if (!this.addMintBlocking) {
+          // While a mint is being activated (by addMint(), removeMint() or an
+          // earlier call of this fallback), it only becomes active once its
+          // info and keys are fetched. Don't start another activation.
+          if (mintActivationsInFlight === 0) {
             console.error(
               "No active mint. This should not happen. switching to first one."
             );
@@ -462,6 +467,7 @@ export const useMintsStore = defineStore("mints", {
 
       // create new mint.api instance because we can't store it in local storage
       const previousUrl = this.activeMintUrl;
+      mintActivationsInFlight++;
       await uIStore.lockMutex();
       try {
         mint = await this.updateMintInfoAndKeys(mint);
@@ -485,6 +491,7 @@ export const useMintsStore = defineStore("mints", {
         this.mints.filter((m) => m.url === mint.url)[0].errored = true;
         throw error;
       } finally {
+        mintActivationsInFlight--;
         await uIStore.unlockMutex();
       }
     },

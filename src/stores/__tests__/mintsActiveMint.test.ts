@@ -1,6 +1,19 @@
 import { createPinia, setActivePinia } from "pinia";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useMintsStore } from "src/stores/mints";
+
+vi.mock("src/js/notify", () => ({
+  notifySuccess: vi.fn(),
+  notifyError: vi.fn(),
+  notifyWarning: vi.fn(),
+  notifyApiError: vi.fn(),
+  notify: vi.fn(),
+}));
+
+const MINT_A = "https://mint-a.example";
+const MINT_B = "https://mint-b.example";
+
+const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 describe("mints store activeMint()", () => {
   beforeEach(() => {
@@ -8,33 +21,80 @@ describe("mints store activeMint()", () => {
     setActivePinia(createPinia());
   });
 
-  function setupWithoutActiveMint() {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  // Keeps every activation waiting on the mint's info and keys until
+  // `finish()` is called.
+  function setup(urls: string[]) {
     const mints = useMintsStore();
-    mints.mints = [{ url: "https://mint.example", keys: [], keysets: [] }];
+    mints.mints = urls.map((url) => ({ url, keys: [], keysets: [] }));
     mints.activeMintUrl = "";
-    const activate = vi
-      .spyOn(mints, "activateMintUrl")
-      .mockResolvedValue(undefined);
+    const pending: Array<() => void> = [];
+    const fetchInfoAndKeys = vi
+      .spyOn(mints, "updateMintInfoAndKeys")
+      .mockImplementation(
+        (mint) =>
+          new Promise((resolve) => pending.push(() => resolve(mint as any)))
+      );
     const consoleError = vi
       .spyOn(console, "error")
       .mockImplementation(() => {});
-    return { mints, activate, consoleError };
+    const finish = async () => {
+      while (pending.length) {
+        pending.shift()!();
+        await flush();
+      }
+    };
+    return { mints, fetchInfoAndKeys, consoleError, finish };
   }
 
-  it("does not start another activation while a mint is being added", () => {
-    const { mints, activate, consoleError } = setupWithoutActiveMint();
-    mints.addMintBlocking = true;
+  it("does not start another activation while addMint() activates the mint", async () => {
+    const { mints, fetchInfoAndKeys, consoleError, finish } = setup([]);
+    const adding = mints.addMint({ url: MINT_A });
+    await flush();
 
-    expect(mints.activeMint().mint.url).toBe("https://mint.example");
-    expect(activate).not.toHaveBeenCalled();
+    expect(mints.activeMint().mint.url).toBe(MINT_A);
+    expect(mints.activeMint().mint.url).toBe(MINT_A);
     expect(consoleError).not.toHaveBeenCalled();
+
+    await finish();
+    await adding;
+    expect(fetchInfoAndKeys).toHaveBeenCalledTimes(1);
+    expect(mints.activeMintUrl).toBe(MINT_A);
   });
 
-  it("falls back to the first mint when no mint is active", () => {
-    const { mints, activate } = setupWithoutActiveMint();
-    mints.addMintBlocking = false;
+  it("does not start another activation while removeMint() activates the next mint", async () => {
+    const { mints, fetchInfoAndKeys, consoleError, finish } = setup([
+      MINT_A,
+      MINT_B,
+    ]);
+    mints.activeMintUrl = MINT_A;
+    const removing = mints.removeMint(MINT_A);
+    await flush();
 
-    expect(mints.activeMint().mint.url).toBe("https://mint.example");
-    expect(activate).toHaveBeenCalledWith("https://mint.example", false, true);
+    expect(mints.activeMint().mint.url).toBe(MINT_B);
+    expect(consoleError).not.toHaveBeenCalled();
+
+    await finish();
+    await removing;
+    expect(fetchInfoAndKeys).toHaveBeenCalledTimes(1);
+    expect(mints.activeMintUrl).toBe(MINT_B);
+  });
+
+  it("falls back to the first mint once and activates it", async () => {
+    const { mints, fetchInfoAndKeys, consoleError, finish } = setup([MINT_A]);
+
+    expect(mints.activeMint().mint.url).toBe(MINT_A);
+    expect(mints.activeMint().mint.url).toBe(MINT_A);
+    expect(mints.activeMint().mint.url).toBe(MINT_A);
+    await flush();
+
+    expect(consoleError).toHaveBeenCalledTimes(1);
+    expect(fetchInfoAndKeys).toHaveBeenCalledTimes(1);
+
+    await finish();
+    expect(mints.activeMintUrl).toBe(MINT_A);
   });
 });
