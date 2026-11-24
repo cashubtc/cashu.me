@@ -298,6 +298,7 @@ import { useProofsStore } from "src/stores/proofs";
 import { useMintsStore } from "src/stores/mints";
 import { useTokensStore } from "src/stores/tokens";
 import { getShortUrl } from "src/js/wallet-helpers";
+import { notifyApiError } from "src/js/notify";
 import { useSettingsStore } from "src/stores/settings";
 import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import { usePriceStore } from "src/stores/price";
@@ -586,8 +587,12 @@ export default defineComponent({
     handlePaymentRequestSuccess: function () {
       this.showSendTokens = false;
     },
-    preparePaymentRequestTokens: async function () {
-      if (!this.sendData.paymentRequest) {
+    // Prepares the token for `paymentRequest`: the request the caller will
+    // deliver to, even if the dialog's request changes meanwhile.
+    preparePaymentRequestTokens: async function (
+      paymentRequest = this.sendData.paymentRequest
+    ) {
+      if (!paymentRequest) {
         return undefined;
       }
       if (this.sendData.tokensBase64) {
@@ -613,7 +618,7 @@ export default defineComponent({
         this.activeUnit,
         true
       );
-      const request = toPaymentRequest(this.sendData.paymentRequest);
+      const request = toPaymentRequest(paymentRequest);
       const { sendProofs } = await this.sendToRequest(
         this.activeProofs,
         mintWallet,
@@ -638,11 +643,19 @@ export default defineComponent({
         token: serialized,
         unit: this.activeUnit,
         mint: this.activeMintUrl,
-        paymentRequest: this.sendData.paymentRequest,
+        paymentRequest,
         status: "pending",
       };
-      const _id = this.addPendingToken(historyToken);
-      (historyToken as any).id = _id;
+      // The proofs have already left the wallet: a failed history write must
+      // not stop the payment from being delivered.
+      try {
+        (historyToken as any).id = await this.addPendingToken(historyToken);
+      } catch (error: any) {
+        notifyApiError(
+          error,
+          this.$t("wallet.notifications.history_save_failed") as string
+        );
+      }
       if (!this.g.offline) {
         this.onTokenPaid(historyToken);
       }
@@ -670,19 +683,39 @@ export default defineComponent({
           this.sendData.p2pkPubkey,
           mutexPriority
         );
-        // update UI
-        this.sendData.tokens = sendProofs;
-
-        this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
+        const tokensBase64 = this.serializeProofs(sendProofs);
         const historyToken = {
           amount: -this.sendData.amount,
-          token: this.sendData.tokensBase64,
+          token: tokensBase64,
           unit: this.activeUnit,
           mint: this.activeMintUrl,
         };
-        const _id = this.addPendingToken(historyToken as any);
-        (historyToken as any).id = _id;
-        this.sendData.historyToken = historyToken as any;
+        // The proofs have already left the wallet: the token must still be
+        // shown if the history write fails.
+        let savedToHistory = true;
+        try {
+          (historyToken as any).id = await this.addPendingToken(
+            historyToken as any
+          );
+        } catch (error: any) {
+          savedToHistory = false;
+          notifyApiError(
+            error,
+            this.$t("wallet.notifications.history_save_failed") as string
+          );
+        }
+        // Show the token unless the user moved on during the write (closed
+        // the dialog or opened another token); it is in history then. A token
+        // that could not be saved is always shown: history has no copy.
+        const userMovedOn =
+          !this.showSendTokens || !!this.sendData.tokensBase64;
+        if (!savedToHistory || !userMovedOn) {
+          // historyToken first: tokens shows the view that reads it
+          this.sendData.tokensBase64 = tokensBase64;
+          this.sendData.historyToken = historyToken as any;
+          this.sendData.tokens = sendProofs;
+          this.showSendTokens = true;
+        }
 
         if (!this.g.offline) {
           this.onTokenPaid(historyToken);
@@ -731,23 +764,45 @@ export default defineComponent({
           "foreground"
         );
 
-        // update UI
-        this.sendData.tokens = sendProofs;
-        this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
-        this.sendData.historyAmount =
+        const tokensBase64 = this.serializeProofs(sendProofs);
+        const historyAmount =
           -this.sendData.amount * this.activeUnitCurrencyMultiplyer;
 
         const historyToken = {
           amount: -sendAmount,
-          token: this.sendData.tokensBase64,
+          token: tokensBase64,
           unit: this.activeUnit,
           mint: this.activeMintUrl,
           paymentRequest: this.sendData.paymentRequest,
           status: "pending",
         };
-        const _id = this.addPendingToken(historyToken as any);
-        (historyToken as any).id = _id;
-        this.sendData.historyToken = historyToken as any;
+        // The proofs have already left the wallet: the token must still be
+        // shown if the history write fails.
+        let savedToHistory = true;
+        try {
+          (historyToken as any).id = await this.addPendingToken(
+            historyToken as any
+          );
+        } catch (error: any) {
+          savedToHistory = false;
+          notifyApiError(
+            error,
+            this.$t("wallet.notifications.history_save_failed") as string
+          );
+        }
+        // Show the token unless the user moved on during the write (closed
+        // the dialog or opened another token); it is in history then. A token
+        // that could not be saved is always shown: history has no copy.
+        const userMovedOn =
+          !this.showSendTokens || !!this.sendData.tokensBase64;
+        if (!savedToHistory || !userMovedOn) {
+          // historyToken first: tokens shows the view that reads it
+          this.sendData.tokensBase64 = tokensBase64;
+          this.sendData.historyAmount = historyAmount;
+          this.sendData.historyToken = historyToken as any;
+          this.sendData.tokens = sendProofs;
+          this.showSendTokens = true;
+        }
 
         if (!this.g.offline) {
           this.onTokenPaid(historyToken);

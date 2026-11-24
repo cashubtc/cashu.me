@@ -383,8 +383,11 @@ export default defineComponent({
         if (transaction.amount > 0) {
           this.receiveToken(transaction.token);
         } else {
-          // For outgoing ecash transactions, check spendable status
-          this.checkTokenSpendable(transaction);
+          // For outgoing ecash transactions, check spendable status. Errors
+          // are already reported to the user by the check itself.
+          this.checkTokenSpendable(transaction).catch((error) => {
+            console.error(error);
+          });
         }
       } else if (transaction.type === UnifiedTransactionType.Onchain) {
         if (transaction.amount < 0) {

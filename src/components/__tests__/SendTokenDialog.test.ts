@@ -58,7 +58,7 @@ describe("SendTokenDialog", () => {
           sendProofs: [{ amount: 16 }, { amount: 4 }, { amount: 2 }],
         })),
         serializeProofs: vi.fn(() => "cashuA"),
-        addPendingToken: vi.fn(() => "history-id"),
+        addPendingToken: vi.fn(async () => "history-id"),
         g: { offline: true },
       };
       await expect(
@@ -75,6 +75,44 @@ describe("SendTokenDialog", () => {
       );
     }
   );
+
+  it("prepares a payment request token for the request it was given", async () => {
+    const requestA = {
+      id: "request-a",
+      amount: 21,
+      unit: "sat",
+      transport: [],
+    };
+    const requestB = {
+      id: "request-b",
+      amount: 50,
+      unit: "sat",
+      transport: [],
+    };
+    const context = {
+      sendData: { paymentRequest: requestB, amount: 21, tokensBase64: "" },
+      activeUnitCurrencyMultiplyer: 1,
+      activeMintUrl: "https://mint.example",
+      activeUnit: "sat",
+      activeProofs: [],
+      mintWallet: vi.fn(async () => ({})),
+      sendToRequest: vi.fn(async () => ({ sendProofs: [{ amount: 21 }] })),
+      serializeProofs: vi.fn(() => "cashuA"),
+      addPendingToken: vi.fn(async () => "history-id"),
+      g: { offline: true },
+    };
+
+    await SendTokenDialog.methods.preparePaymentRequestTokens.call(
+      context,
+      requestA
+    );
+
+    const [, , sdkRequest] = context.sendToRequest.mock.calls[0] as any[];
+    expect(sdkRequest.id).toBe("request-a");
+    expect(context.addPendingToken).toHaveBeenCalledWith(
+      expect.objectContaining({ paymentRequest: requestA })
+    );
+  });
 
   it.each([
     {
@@ -242,7 +280,7 @@ describe("SendTokenDialog", () => {
       mintWallet: vi.fn(async () => ({ id: "wallet" })),
       send,
       serializeProofs: vi.fn(),
-      addPendingToken: vi.fn(),
+      addPendingToken: vi.fn(async () => "history-id"),
       g: { offline: true },
     };
     const consoleError = vi
@@ -271,6 +309,119 @@ describe("SendTokenDialog", () => {
     expect(uiStore.foregroundPaymentRequests).toBe(0);
 
     consoleError.mockRestore();
+  });
+
+  it("still shows a sent token when saving it to history fails", async () => {
+    let historyTokenWhenShown: unknown = "not shown";
+    const sendData: any = { amount: 21, p2pkPubkey: "" };
+    Object.defineProperty(sendData, "tokens", {
+      get: () => sendData._tokens,
+      set: (value) => {
+        historyTokenWhenShown = sendData.historyToken;
+        sendData._tokens = value;
+      },
+    });
+    const sendProofs = [{ amount: 21 }];
+    const context = {
+      sendingEcash: false,
+      // the dialog was closed while the history write was pending
+      showSendTokens: false,
+      sendData,
+      maybeConvertNpub: vi.fn(() => ""),
+      isValidPubkey: vi.fn(() => false),
+      activeUnitCurrencyMultiplyer: 1,
+      activeMintUrl: "https://mint.example",
+      activeUnit: "sat",
+      activeProofs: [],
+      includeFeesInSendAmount: false,
+      mintWallet: vi.fn(async () => ({ id: "wallet" })),
+      send: vi.fn(async () => ({ sendProofs })),
+      serializeProofs: vi.fn(() => "cashuSent"),
+      addPendingToken: vi.fn(async () => {
+        throw new Error("history write failed");
+      }),
+      onTokenPaid: vi.fn(),
+      $t: (key: string) => key,
+      g: { offline: false },
+    };
+
+    await SendTokenDialog.methods.sendTokens.call(context);
+
+    expect(sendData.tokens).toBe(sendProofs);
+    expect(sendData.tokensBase64).toBe("cashuSent");
+    expect(historyTokenWhenShown).toEqual(
+      expect.objectContaining({ amount: -21, token: "cashuSent" })
+    );
+    expect(context.onTokenPaid).toHaveBeenCalledWith(sendData.historyToken);
+    // History has no copy of the token, so the dialog is shown again.
+    expect(context.showSendTokens).toBe(true);
+  });
+
+  function sentTokenContext(
+    sendData: any,
+    showSendTokens: boolean,
+    addPendingToken: () => Promise<string>
+  ) {
+    return {
+      sendingEcash: false,
+      showSendTokens,
+      sendData,
+      maybeConvertNpub: vi.fn(() => ""),
+      isValidPubkey: vi.fn(() => false),
+      activeUnitCurrencyMultiplyer: 1,
+      activeMintUrl: "https://mint.example",
+      activeUnit: "sat",
+      activeProofs: [],
+      includeFeesInSendAmount: false,
+      mintWallet: vi.fn(async () => ({ id: "wallet" })),
+      send: vi.fn(async () => ({ sendProofs: [{ amount: 21 }] })),
+      serializeProofs: vi.fn(() => "cashuSent"),
+      addPendingToken: vi.fn(addPendingToken),
+      onTokenPaid: vi.fn(),
+      $t: (key: string) => key,
+      g: { offline: false },
+    };
+  }
+
+  it("shows the whole sent token once it is saved to history", async () => {
+    const sendData: any = { amount: 21, p2pkPubkey: "", tokensBase64: "" };
+    const context = sentTokenContext(sendData, true, async () => "history-id");
+
+    await SendTokenDialog.methods.sendTokens.call(context);
+
+    expect(sendData.tokens).toEqual([{ amount: 21 }]);
+    expect(sendData.tokensBase64).toBe("cashuSent");
+    expect(sendData.historyToken).toEqual(
+      expect.objectContaining({ id: "history-id", token: "cashuSent" })
+    );
+    expect(context.onTokenPaid).toHaveBeenCalledWith(sendData.historyToken);
+  });
+
+  it("leaves the view alone if the user moved on during a successful history write", async () => {
+    // closed the dialog
+    const closedData: any = { amount: 21, p2pkPubkey: "", tokensBase64: "" };
+    const closed = sentTokenContext(closedData, true, async () => {
+      closed.showSendTokens = false;
+      return "history-id";
+    });
+    await SendTokenDialog.methods.sendTokens.call(closed);
+    expect(closed.showSendTokens).toBe(false);
+    expect(closedData.tokens).toBeUndefined();
+    expect(closedData.tokensBase64).toBe("");
+    // the token is in history, so it is still checked
+    expect(closed.onTokenPaid).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "history-id", token: "cashuSent" })
+    );
+
+    // opened another token from history
+    const otherData: any = { amount: 21, p2pkPubkey: "", tokensBase64: "" };
+    const other = sentTokenContext(otherData, true, async () => {
+      otherData.tokensBase64 = "cashuOther";
+      return "history-id";
+    });
+    await SendTokenDialog.methods.sendTokens.call(other);
+    expect(otherData.tokensBase64).toBe("cashuOther");
+    expect(otherData.tokens).toBeUndefined();
   });
 
   it("uses foreground priority for a locked ecash send", async () => {

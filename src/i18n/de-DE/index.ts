@@ -71,6 +71,8 @@ export default {
         "Zahlung ausstehend. Rechnung manuell aktualisieren.",
       sent: "{amount} gesendet",
       token_still_pending: "Token noch ausstehend",
+      history_save_failed: "Konnte nicht im Verlauf gespeichert werden",
+      history_delete_failed: "Konnte nicht aus dem Verlauf gelöscht werden",
       received_lightning: "{amount} über Lightning empfangen",
       lightning_payment_failed: "Lightning-Zahlung fehlgeschlagen",
       failed_to_decode_invoice: "Rechnung konnte nicht dekodiert werden",

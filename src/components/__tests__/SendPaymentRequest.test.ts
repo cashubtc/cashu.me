@@ -56,4 +56,32 @@ describe("SendPaymentRequest", () => {
       consoleError.mockRestore();
     }
   });
+
+  it("delivers to the request it started with if the dialog is cleared while preparing", async () => {
+    const request = { id: "request-id", transport: [] };
+    const sendData: any = { paymentRequest: request, tokensBase64: "" };
+    const context = {
+      disable: false,
+      isLoading: false,
+      loading: false,
+      sendData,
+      getPaymentRequestTransport: vi.fn(),
+      prepareToken: vi.fn(async () => {
+        // closing the dialog while the token is prepared clears the request
+        sendData.paymentRequest = undefined;
+        return "cashuPrepared";
+      }),
+      parseAndPayPaymentRequest: vi.fn(async () => true),
+      $emit: vi.fn(),
+    };
+
+    await SendPaymentRequest.methods.clickPaymentRequest.call(context);
+
+    expect(context.prepareToken).toHaveBeenCalledWith(request);
+    expect(context.parseAndPayPaymentRequest).toHaveBeenCalledWith(
+      request,
+      "cashuPrepared"
+    );
+    expect(context.$emit).toHaveBeenCalledWith("success");
+  });
 });

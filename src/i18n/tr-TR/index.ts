@@ -73,6 +73,8 @@ export default {
         "Ödeme beklemede. Faturayı manuel olarak yenileyin.",
       sent: "{amount} gönderildi",
       token_still_pending: "Token hala beklemede",
+      history_save_failed: "Geçmişe kaydedilemedi",
+      history_delete_failed: "Geçmişten silinemedi",
       received_lightning: "Lightning üzerinden {amount} alındı",
       lightning_payment_failed: "Lightning ödemesi başarısız oldu",
       failed_to_decode_invoice: "Fatura çözülemedi",

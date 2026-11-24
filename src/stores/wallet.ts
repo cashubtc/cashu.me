@@ -875,6 +875,7 @@ export const useWalletStore = defineStore("wallet", {
         throw new Error("mint not found");
       }
       await uIStore.lockMutex();
+      let outputAmount: number;
       try {
         // redeem
         const privkey = receiveStore.receiveData.p2pkPrivateKey;
@@ -898,46 +899,7 @@ export const useWalletStore = defineStore("wallet", {
 
         p2pkStore.setPrivateKeyUsed(privkey);
 
-        const outputAmount = proofsStore.sumProofs(proofs);
-
-        // if token is already in history, set to paid, else add to history
-        if (
-          tokenStore.historyTokens.find(
-            (t) =>
-              t.token === receiveStore.receiveData.tokensBase64 && t.amount > 0
-          )
-        ) {
-          tokenStore.setTokenPaid(receiveStore.receiveData.tokensBase64);
-        } else {
-          // if this is a self-sent token, we will find an outgoing token with the inverse amount
-          if (
-            tokenStore.historyTokens.find(
-              (t) =>
-                t.token === receiveStore.receiveData.tokensBase64 &&
-                t.amount < 0
-            )
-          ) {
-            tokenStore.setTokenPaid(receiveStore.receiveData.tokensBase64);
-          }
-          fee = inputAmount - outputAmount;
-          historyToken.fee = fee;
-          historyToken.amount = outputAmount;
-          tokenStore.addPaidToken(historyToken);
-        }
-        useUiStore().vibrate();
-        let message = this.t("wallet.notifications.received", {
-          amount: uIStore.formatCurrency(outputAmount, historyToken.unit),
-        });
-        if (fee > 0) {
-          message += this.t("wallet.notifications.fee", {
-            fee: uIStore.formatCurrency(fee, historyToken.unit),
-          });
-        }
-        notifySuccess(message);
-        if (wasReceiveDialogVisible) {
-          receiveStore.showReceiveTokens = false;
-          uIStore.closeDialogs();
-        }
+        outputAmount = proofsStore.sumProofs(proofs);
       } catch (error: any) {
         console.error(error);
         notifyApiError(error);
@@ -945,7 +907,71 @@ export const useWalletStore = defineStore("wallet", {
       } finally {
         uIStore.unlockMutex();
       }
-      // }
+
+      // The proofs are stored. The history writes below do not need the
+      // wallet mutex, and a failed write must not report the receive as
+      // failed, nor skip the other history write.
+      const receivedToken = historyToken.token;
+      const saveToHistory = async <T>(
+        write: () => Promise<T>
+      ): Promise<T | undefined> => {
+        try {
+          return await write();
+        } catch (error: any) {
+          notifyApiError(
+            error,
+            this.t("wallet.notifications.history_save_failed")
+          );
+          return undefined;
+        }
+      };
+      // if token is already in history, set to paid, else add to history
+      let recorded = false;
+      if (
+        tokenStore.historyTokens.find(
+          (t) => t.token === receivedToken && t.amount > 0
+        )
+      ) {
+        // false means there is no stored row to update (its first write
+        // failed), so a paid row is added below instead
+        recorded =
+          (await saveToHistory(() =>
+            tokenStore.setTokenPaid(receivedToken)
+          )) !== false;
+      }
+      if (!recorded) {
+        // if this is a self-sent token, we will find an outgoing token with the inverse amount
+        if (
+          tokenStore.historyTokens.find(
+            (t) => t.token === receivedToken && t.amount < 0
+          )
+        ) {
+          await saveToHistory(() => tokenStore.setTokenPaid(receivedToken));
+        }
+        fee = inputAmount - outputAmount;
+        historyToken.fee = fee;
+        historyToken.amount = outputAmount;
+        await saveToHistory(() => tokenStore.addPaidToken(historyToken));
+      }
+      useUiStore().vibrate();
+      let message = this.t("wallet.notifications.received", {
+        amount: uIStore.formatCurrency(outputAmount, historyToken.unit),
+      });
+      if (fee > 0) {
+        message += this.t("wallet.notifications.fee", {
+          fee: uIStore.formatCurrency(fee, historyToken.unit),
+        });
+      }
+      notifySuccess(message);
+      // Another token may have been opened meanwhile; only close the receive
+      // view if it still shows this one.
+      if (
+        wasReceiveDialogVisible &&
+        receiveStore.receiveData.tokensBase64 === receivedToken
+      ) {
+        receiveStore.showReceiveTokens = false;
+        uIStore.closeDialogs();
+      }
     },
 
     // Minting and melting
@@ -1036,12 +1062,21 @@ export const useWalletStore = defineStore("wallet", {
             throw new Error("could not serialize proofs.");
           }
           if (update_history) {
-            tokenStore.addPaidToken({
-              amount: -proofsStore.sumProofs(spentProofs),
-              token: serializedProofs,
-              unit: wallet.unit,
-              mint: wallet.mint.mintUrl,
-            });
+            // The spent proofs are already removed: a failed history write
+            // must not abort the check (or a caller's remaining batches).
+            try {
+              await tokenStore.addPaidToken({
+                amount: -proofsStore.sumProofs(spentProofs),
+                token: serializedProofs,
+                unit: wallet.unit,
+                mint: wallet.mint.mintUrl,
+              });
+            } catch (error: any) {
+              notifyApiError(
+                error,
+                this.t("wallet.notifications.history_save_failed")
+              );
+            }
           }
         }
         // return spent proofs
@@ -1065,24 +1100,47 @@ export const useWalletStore = defineStore("wallet", {
       const tokenStore = useTokensStore();
       const proofsStore = useProofsStore();
 
-      const tokenJson = await token.decodeFull(historyToken.token);
-      if (tokenJson == undefined) {
-        throw new Error("no tokens provided.");
-      }
-      const proofs = token.getProofs(tokenJson);
-      const mintWallet = await this.mintWallet(
-        historyToken.mint,
-        historyToken.unit
-      );
+      let proofs: WalletProof[];
+      let mintWallet: Wallet;
+      try {
+        const tokenJson = await token.decodeFull(historyToken.token);
+        if (tokenJson == undefined) {
+          throw new Error("no tokens provided.");
+        }
+        proofs = token.getProofs(tokenJson);
+        mintWallet = await this.mintWallet(
+          historyToken.mint,
+          historyToken.unit
+        );
 
-      const mint = mintStore.mints.find((m) => m.url === historyToken.mint);
-      if (!mint) {
-        throw new Error("mint not found");
+        const mint = mintStore.mints.find((m) => m.url === historyToken.mint);
+        if (!mint) {
+          throw new Error("mint not found");
+        }
+      } catch (error: any) {
+        // checkProofsSpendable reports its own errors; report these here
+        if (verbose) notifyApiError(error);
+        throw error;
       }
       const spentProofs = await this.checkProofsSpendable(proofs, mintWallet);
+      // Report a failed history write here (checks the user started are
+      // verbose), then rethrow so the transaction worker retries the token.
+      const saveToHistory = async (write: () => Promise<unknown>) => {
+        try {
+          await write();
+        } catch (error: any) {
+          if (verbose) {
+            notifyApiError(
+              error,
+              this.t("wallet.notifications.history_save_failed")
+            );
+          }
+          throw error;
+        }
+      };
       if (spentProofs != undefined && spentProofs.length == proofs.length) {
         // all proofs are spent, set token to paid
-        tokenStore.setTokenPaid(historyToken.token);
+        await saveToHistory(() => tokenStore.setTokenPaid(historyToken.token));
       } else if (
         spentProofs != undefined &&
         spentProofs.length &&
@@ -1099,24 +1157,15 @@ export const useWalletStore = defineStore("wallet", {
           proofsStore.serializeProofs(unspentProofs);
 
         if (serializedSpentProofs && serializedUnspentProofs) {
-          const historyToken2 = tokenStore.editHistoryToken(
-            historyToken.token,
-            {
-              newAmount: spentAmount,
-              newStatus: "paid",
-              newToken: serializedSpentProofs,
-            }
+          // mark the spent part as paid and add the unspent proofs back to the
+          // history as a pending entry, in one write
+          await saveToHistory(() =>
+            tokenStore.splitHistoryToken(
+              historyToken.token,
+              { amount: spentAmount, token: serializedSpentProofs },
+              { amount: unspentAmount, token: serializedUnspentProofs }
+            )
           );
-          // add all unspent proofs back to the history
-          // QUICK: we use the historyToken object here because we don't know if the transaction is incoming or outgoing (we don't know the sign of the amount)
-          if (historyToken2) {
-            tokenStore.addPendingToken({
-              amount: unspentAmount * Math.sign(historyToken2.amount),
-              token: serializedUnspentProofs,
-              unit: historyToken2.unit,
-              mint: historyToken2.mint,
-            });
-          }
         }
       }
       if (spentProofs != undefined && spentProofs.length) {
@@ -1281,6 +1330,14 @@ export const useWalletStore = defineStore("wallet", {
                   sendTokensStore.showSendTokens = false;
                   cleanup();
                 }
+              } catch (error) {
+                // No further update will arrive for a spent proof, so release
+                // the subscription; the transaction worker keeps checking.
+                cleanup();
+                console.error(
+                  "Could not check sent token after proof state update. The transaction worker remains active.",
+                  error
+                );
               } finally {
                 proofCheckInProgress = false;
               }

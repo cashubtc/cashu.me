@@ -1290,6 +1290,71 @@ describe("wallet store", () => {
     expect(unsubscribe).toHaveBeenCalledOnce();
   });
 
+  it("releases the sent-token websocket when the spent check fails", async () => {
+    const wallet = useWalletStore();
+    h.mintsStore.mints = [
+      {
+        url: "https://mint-b.example",
+        keys: [{ id: "00bb" }],
+        keysets: [{ id: "00bb", unit: "sat", active: true }],
+        info: {
+          nuts: {
+            17: {
+              supported: [
+                {
+                  method: PaymentMethod.Bolt11,
+                  unit: "sat",
+                  commands: ["proof_state"],
+                },
+              ],
+            },
+          },
+        },
+      },
+    ];
+    const historyToken = {
+      token: "cashu-token-check-fails",
+      amount: -1,
+      mint: "https://mint-b.example",
+      unit: "sat",
+      status: "pending",
+    };
+    h.tokenModule.decodeFull.mockResolvedValue({ proofs: [] });
+    h.tokenModule.getProofs.mockReturnValue([
+      { id: "00bb", amount: 1, secret: "s1" },
+    ]);
+    let onProofStateUpdate;
+    const unsubscribe = vi.fn();
+    const tokenWallet = {
+      on: {
+        proofStateUpdates: vi.fn(async (_proofs, callback) => {
+          onProofStateUpdate = callback;
+          return unsubscribe;
+        }),
+      },
+    };
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue(tokenWallet);
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+
+    await wallet.onTokenPaid(historyToken);
+    vi.spyOn(wallet, "checkTokenSpendable").mockRejectedValueOnce(
+      new Error("history write failed")
+    );
+
+    await expect(
+      onProofStateUpdate({ state: "SPENT" })
+    ).resolves.toBeUndefined();
+    expect(unsubscribe).toHaveBeenCalledOnce();
+
+    // The subscription slot is free again, so the token can be watched anew.
+    await wallet.onTokenPaid(historyToken);
+    expect(tokenWallet.on.proofStateUpdates).toHaveBeenCalledTimes(2);
+
+    consoleError.mockRestore();
+  });
+
   it("serializes Bolt12 minting so concurrent checks use distinct counters", async () => {
     const wallet = useWalletStore();
     wallet.invoiceHistory = [
@@ -2132,8 +2197,7 @@ describe("wallet store", () => {
     expect(wallet.handlePaymentRequest).toHaveBeenCalledWith("CREQB1UPPERCASE");
   });
 
-  it("redeem shows the normalized received amount for v4 proofs", async () => {
-    const wallet = useWalletStore();
+  function mockV4Redeem(wallet) {
     h.receiveTokensStore.receiveData.tokensBase64 = "cashuB500";
 
     const decodedToken = { mint: "https://mint-a.example", unit: "sat" };
@@ -2165,6 +2229,11 @@ describe("wallet store", () => {
         })),
       },
     });
+  }
+
+  it("redeem shows the normalized received amount for v4 proofs", async () => {
+    const wallet = useWalletStore();
+    mockV4Redeem(wallet);
 
     await wallet.redeem();
 
@@ -2175,5 +2244,148 @@ describe("wallet store", () => {
     expect(h.tokensStore.addPaidToken).toHaveBeenCalledWith(
       expect.objectContaining({ amount: 500, fee: 0, unit: "sat" })
     );
+  });
+
+  it("redeem records the incoming row when marking a self-sent token paid fails", async () => {
+    const wallet = useWalletStore();
+    mockV4Redeem(wallet);
+    const historyTokens = h.tokensStore.historyTokens;
+    h.tokensStore.historyTokens = [{ token: "cashuB500", amount: -500 }];
+    const writeError = new Error("status write failed");
+    h.tokensStore.setTokenPaid.mockRejectedValueOnce(writeError);
+
+    try {
+      await expect(wallet.redeem()).resolves.toBeUndefined();
+    } finally {
+      h.tokensStore.historyTokens = historyTokens;
+    }
+
+    expect(h.notifyApiError).toHaveBeenCalledWith(
+      writeError,
+      "wallet.notifications.history_save_failed"
+    );
+    expect(h.tokensStore.addPaidToken).toHaveBeenCalledWith(
+      expect.objectContaining({ amount: 500, fee: 0, unit: "sat" })
+    );
+    expect(h.notifySuccess).toHaveBeenCalledWith(
+      "wallet.notifications.received"
+    );
+  });
+
+  it("checkProofsSpendable returns spent proofs when the history write fails", async () => {
+    const wallet = useWalletStore();
+    const spent = [{ id: "00aa", amount: 2, secret: "s-spent" }];
+    const mintWallet = {
+      unit: "sat",
+      mint: { mintUrl: "https://mint-a.example" },
+      groupProofsByState: vi.fn(async () => ({ spent })),
+    };
+    const serializeProofs = h.proofsStore.serializeProofs;
+    h.proofsStore.serializeProofs = vi.fn(() => "cashuSpent");
+    const writeError = new Error("history write failed");
+    h.tokensStore.addPaidToken.mockRejectedValueOnce(writeError);
+
+    try {
+      await expect(
+        wallet.checkProofsSpendable(spent, mintWallet, true)
+      ).resolves.toEqual(spent);
+    } finally {
+      h.proofsStore.serializeProofs = serializeProofs;
+    }
+
+    expect(h.proofsStore.removeProofs).toHaveBeenCalled();
+    expect(h.notifyApiError).toHaveBeenCalledWith(
+      writeError,
+      "wallet.notifications.history_save_failed"
+    );
+  });
+
+  it("checkTokenSpendable reports a failed history write only when verbose", async () => {
+    const wallet = useWalletStore();
+    const proofs = [{ id: "00aa", amount: 2, secret: "s-sent" }];
+    h.mintsStore.mints = [{ url: "https://mint-a.example" }];
+    h.tokenModule.decodeFull.mockResolvedValue({ proofs });
+    h.tokenModule.getProofs.mockReturnValue(proofs);
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue({});
+    vi.spyOn(wallet, "checkProofsSpendable").mockResolvedValue(proofs);
+    const writeError = new Error("status write failed");
+    const historyToken = {
+      token: "cashuSent",
+      amount: -2,
+      mint: "https://mint-a.example",
+      unit: "sat",
+      status: "pending",
+    };
+
+    h.tokensStore.setTokenPaid.mockRejectedValueOnce(writeError);
+    await expect(wallet.checkTokenSpendable(historyToken)).rejects.toBe(
+      writeError
+    );
+    expect(h.notifyApiError).toHaveBeenCalledWith(
+      writeError,
+      "wallet.notifications.history_save_failed"
+    );
+
+    h.notifyApiError.mockClear();
+    h.tokensStore.setTokenPaid.mockRejectedValueOnce(writeError);
+    // The transaction worker checks quietly and retries on the rejection.
+    await expect(wallet.checkTokenSpendable(historyToken, false)).rejects.toBe(
+      writeError
+    );
+    expect(h.notifyApiError).not.toHaveBeenCalled();
+  });
+
+  it("redeem writes history after releasing the wallet mutex", async () => {
+    const wallet = useWalletStore();
+    mockV4Redeem(wallet);
+    let unlockedBeforeWrite = false;
+    h.tokensStore.addPaidToken.mockImplementationOnce(async () => {
+      unlockedBeforeWrite = h.uiStore.unlockMutex.mock.calls.length > 0;
+      return "paid-id";
+    });
+    h.uiStore.unlockMutex.mockClear();
+
+    await wallet.redeem();
+
+    expect(unlockedBeforeWrite).toBe(true);
+  });
+
+  it("redeem adds a paid row when the incoming entry has no stored row", async () => {
+    const wallet = useWalletStore();
+    mockV4Redeem(wallet);
+    const historyTokens = h.tokensStore.historyTokens;
+    // an incoming entry whose first IndexedDB write failed
+    h.tokensStore.historyTokens = [{ token: "cashuB500", amount: 500 }];
+    h.tokensStore.setTokenPaid.mockResolvedValueOnce(false);
+    h.tokensStore.addPaidToken.mockClear();
+
+    try {
+      await wallet.redeem();
+    } finally {
+      h.tokensStore.historyTokens = historyTokens;
+    }
+
+    expect(h.tokensStore.addPaidToken).toHaveBeenCalledWith(
+      expect.objectContaining({ amount: 500, token: "cashuB500" })
+    );
+  });
+
+  it("redeem still succeeds when only the history write fails", async () => {
+    const wallet = useWalletStore();
+    mockV4Redeem(wallet);
+    const writeError = new Error("history write failed");
+    h.tokensStore.addPaidToken.mockRejectedValueOnce(writeError);
+
+    await expect(wallet.redeem()).resolves.toBeUndefined();
+
+    expect(h.proofsStore.addProofs).toHaveBeenCalled();
+    expect(h.notifyApiError).toHaveBeenCalledWith(
+      writeError,
+      "wallet.notifications.history_save_failed"
+    );
+    expect(h.notifySuccess).toHaveBeenCalledWith(
+      "wallet.notifications.received"
+    );
+    expect(h.uiStore.unlockMutex).toHaveBeenCalled();
   });
 });

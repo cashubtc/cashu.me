@@ -34,6 +34,7 @@ import {
   notifyWarning,
   notify,
 } from "../js/notify";
+import { i18n } from "src/boot/i18n";
 import { useSendTokensStore } from "./sendTokensStore";
 import { usePRStore } from "./payment-request";
 import token from "../js/token";
@@ -552,17 +553,29 @@ export const useNostrStore = defineStore("nostr", {
       const tokens = words.filter((word) => {
         return word.startsWith("cashuA") || word.startsWith("cashuB");
       });
+      const tokensStore = useTokensStore();
+      let unsavedToken: string | undefined;
       for (const tokenStr of tokens) {
         receiveStore.receiveData.tokensBase64 = tokenStr;
         receiveStore.showReceiveTokens = true;
         await this.addPendingTokenToHistory(tokenStr);
+        // A token whose save failed is not in history (it was rolled back).
+        if (!unsavedToken && !tokensStore.tokenAlreadyInHistory(tokenStr)) {
+          unsavedToken = tokenStr;
+        }
+      }
+      // A later token in the message may have replaced the view of one that
+      // could not be saved; show that one again so it stays reachable.
+      if (unsavedToken) {
+        receiveStore.receiveData.tokensBase64 = unsavedToken;
+        receiveStore.showReceiveTokens = true;
       }
     },
-    addPendingTokenToHistory: function (
+    addPendingTokenToHistory: async function (
       tokenStr: string,
       verbose = true,
       paymentRequestId?: string
-    ): string | undefined {
+    ): Promise<string | undefined> {
       const receiveStore = useReceiveTokensStore();
       const tokensStore = useTokensStore();
       if (tokensStore.tokenAlreadyInHistory(tokenStr)) {
@@ -574,14 +587,29 @@ export const useNostrStore = defineStore("nostr", {
       if (decodedToken == undefined) {
         throw Error("could not decode token");
       }
-      const id = tokensStore.addPendingToken({
-        amount: decodedToken.amount,
-        token: tokenStr,
-        mint: token.getMint(decodedToken),
-        unit: token.getUnit(decodedToken),
-        paymentRequestId,
-      });
-      receiveStore.showReceiveTokens = false;
+      let id: string;
+      try {
+        id = await tokensStore.addPendingToken({
+          amount: decodedToken.amount,
+          token: tokenStr,
+          mint: token.getMint(decodedToken),
+          unit: token.getUnit(decodedToken),
+          paymentRequestId,
+        });
+      } catch (error: any) {
+        // Keep the incoming token reachable (receive dialog / auto-receive)
+        // even though it could not be saved to history.
+        notifyApiError(
+          error,
+          i18n.global.t("wallet.notifications.history_save_failed")
+        );
+        return undefined;
+      }
+      // Overlapping messages share the receive dialog: close it only if it
+      // still shows this token, not one a later message opened meanwhile.
+      if (receiveStore.receiveData.tokensBase64 === tokenStr) {
+        receiveStore.showReceiveTokens = false;
+      }
       // show success notification
       if (verbose) {
         notifySuccess("Ecash added to history.");

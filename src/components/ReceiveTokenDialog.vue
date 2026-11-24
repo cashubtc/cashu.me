@@ -215,6 +215,7 @@
                 <template v-else>
                   <q-btn
                     @click="addPendingTokenToHistory(receiveData.tokensBase64)"
+                    :loading="addingToHistory"
                     color="primary"
                     rounded
                     flat
@@ -255,7 +256,9 @@
                     @click="handleReceive"
                     color="primary"
                     rounded
-                    :disabled="addMintBlocking || isReceiving"
+                    :disabled="
+                      addMintBlocking || isReceiving || addingToHistory
+                    "
                     :loading="swapBlocking || isReceiving"
                   >
                     {{
@@ -297,6 +300,7 @@ import { usePriceStore } from "src/stores/price";
 import { useSwapStore } from "src/stores/swap";
 import { useSettingsStore } from "src/stores/settings";
 import token from "src/js/token";
+import { notifyApiError } from "src/js/notify";
 import { Mint, GetInfoResponse } from "@cashu/cashu-ts";
 import { Token } from "@cashu/cashu-ts";
 import type { StoredMint } from "src/stores/mints";
@@ -329,6 +333,7 @@ export default defineComponent({
       swapProcessing: false,
       swapError: false,
       isReceiving: false as boolean,
+      addingToHistory: false,
       receiveError: "" as string,
       selectedSwapMintUrl: "",
       isNotLockedToUs: false as boolean,
@@ -646,7 +651,10 @@ export default defineComponent({
         undefined
       );
     },
-    addPendingTokenToHistory: function (tokenStr: string) {
+    addPendingTokenToHistory: async function (tokenStr: string) {
+      // A second click while the first save is pending would see the unsaved
+      // entry and report "already in history".
+      if (this.addingToHistory) return;
       if (this.tokenAlreadyInHistory(tokenStr)) {
         this.notifySuccess(
           this.$i18n.t(
@@ -656,17 +664,31 @@ export default defineComponent({
         this.showReceiveTokens = false;
         return;
       }
-      const tokensStore = useTokensStore();
       const decodedToken = this.decodeToken(tokenStr);
       if (!decodedToken) return;
 
-      tokensStore.addPendingToken({
-        amount: decodedToken.amount,
-        token: tokenStr,
-        mint: token.getMint(decodedToken),
-        unit: token.getUnit(decodedToken),
-      });
-      this.showReceiveTokens = false;
+      this.addingToHistory = true;
+      try {
+        await this.addPendingToken({
+          amount: decodedToken.amount,
+          token: tokenStr,
+          mint: token.getMint(decodedToken),
+          unit: token.getUnit(decodedToken),
+        });
+      } catch (error: any) {
+        notifyApiError(
+          error,
+          this.$i18n.t("wallet.notifications.history_save_failed") as string
+        );
+        return;
+      } finally {
+        this.addingToHistory = false;
+      }
+      // Another token (e.g. from a Nostr message) may have opened the dialog
+      // during the save; only close it if it still shows this token.
+      if (this.receiveData.tokensBase64 === tokenStr) {
+        this.showReceiveTokens = false;
+      }
       // show success notification
       this.notifySuccess(
         this.$i18n.t(

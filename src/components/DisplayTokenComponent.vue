@@ -306,6 +306,7 @@
         <div class="row q-mt-lg">
           <q-btn
             @click="deleteThisToken"
+            :loading="deletingToken"
             color="negative"
             rounded
             class="q-mr-sm"
@@ -338,7 +339,7 @@ import PaymentRequestInfo from "./PaymentRequestInfo.vue";
 import { getDecodedToken, getEncodedTokenBinary } from "@cashu/cashu-ts";
 import { sumProofAmounts } from "src/js/proofs";
 import token from "src/js/token";
-import { notifyError, notifySuccess } from "src/js/notify";
+import { notifyApiError, notifyError, notifySuccess } from "src/js/notify";
 import { copyToClipboard } from "quasar";
 import {
   Scan as ScanIcon,
@@ -365,6 +366,7 @@ export default defineComponent({
   data: function () {
     return {
       baseURL: location.protocol + "//" + location.host + location.pathname,
+      deletingToken: false,
       showAnimatedQR: false,
       qrCodeFragment: "",
       qrInterval: null as any,
@@ -646,12 +648,30 @@ export default defineComponent({
       this.controller?.abort?.();
       this.scanningCard = false;
     },
-    deleteThisToken: function () {
+    deleteThisToken: async function () {
+      // A second click while the first delete is pending would find no entry
+      // and close the view before the delete is known to have worked.
+      if (this.deletingToken) return;
       const tokenToDelete = this.sendData.tokensBase64;
+      this.deletingToken = true;
+      try {
+        await this.deleteToken(tokenToDelete);
+      } catch (error: any) {
+        notifyApiError(
+          error,
+          this.$t("wallet.notifications.history_delete_failed") as string
+        );
+        return;
+      } finally {
+        this.deletingToken = false;
+      }
       this.removeOutgoingTokenFromChecker(tokenToDelete);
-      this.deleteToken(tokenToDelete);
-      this.showSendTokens = false;
-      this.showDeleteDialog = false;
+      // Another token may have been opened during the delete; only close the
+      // view if it still shows the deleted token.
+      if (this.sendData.tokensBase64 === tokenToDelete) {
+        this.showSendTokens = false;
+        this.showDeleteDialog = false;
+      }
     },
     copyTokens: async function () {
       try {
