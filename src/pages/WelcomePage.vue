@@ -98,7 +98,7 @@
 </template>
 
 <script lang="ts">
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useStorageStore } from "src/stores/storage";
 import WelcomeSlide1 from "./welcome/WelcomeSlide1.vue";
@@ -180,10 +180,6 @@ export default {
       const file = ev.dataTransfer.files[0];
       if (file) readFile(file);
     };
-
-    onMounted(() => {
-      welcomeStore.initializeWelcome();
-    });
 
     return {
       welcomeStore,
