@@ -21,6 +21,7 @@
           <q-toggle
             v-model="nostrMintBackupEnabled"
             color="primary"
+            :disable="backupInProgress"
             @update:model-value="onNostrMintBackupToggle"
           />
         </q-item-section>
@@ -152,7 +153,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { mapActions, mapWritableState } from "pinia";
+import { mapActions, mapState, mapWritableState } from "pinia";
 import { useSettingsStore } from "src/stores/settings";
 import { useNostrMintBackupStore } from "src/stores/nostrMintBackup";
 import { usePriceStore } from "src/stores/price";
@@ -201,6 +202,9 @@ export default defineComponent({
     };
   },
   computed: {
+    // Disable the backup toggle while a backup is being published, so a
+    // second toggle can't race the first one's result.
+    ...mapState(useNostrMintBackupStore, ["backupInProgress"]),
     ...mapWritableState(useSettingsStore, [
       "getBitcoinPrice",
       "bitcoinPriceCurrency",
