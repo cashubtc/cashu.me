@@ -21,8 +21,8 @@ import token from "src/js/token";
 import { notifySuccess, notifyWarning } from "src/js/notify";
 import { useLocalStorage } from "@vueuse/core";
 import { markRaw } from "vue";
-import { cashuDb } from "./dexie";
-import { createTableMirror } from "./tableMirror";
+import { cashuDb } from "src/stores/dexie";
+import { createTableMirror } from "src/stores/tableMirror";
 import { v4 as uuidv4 } from "uuid";
 import { nip19 } from "nostr-tools";
 

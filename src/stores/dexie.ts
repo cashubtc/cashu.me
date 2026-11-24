@@ -1,9 +1,9 @@
 import { defineStore } from "pinia";
 import Dexie, { Table } from "dexie";
 import { useLocalStorage } from "@vueuse/core";
-import { moveLocalStorageKey } from "./legacyStorage";
+import { moveLocalStorageKey } from "src/stores/legacyStorage";
 import type { WalletProof } from "./mints";
-import type { SeenEventRow } from "./seenEvents";
+import type { SeenEventRow } from "src/stores/seenEvents";
 import {
   cashuAmountToNumber,
   normalizeCashuQuoteAmounts,
@@ -217,7 +217,14 @@ export const useDexieStore = defineStore("dexie", {
         key: "cashu.proofs",
         tables: [cashuDb.proofs],
         write: async (rows) => {
-          await cashuDb.proofs.bulkPut(rows);
+          // A proof already in IndexedDB is newer than its legacy copy (it may
+          // be reserved); only add the ones that are missing.
+          const existing = await cashuDb.proofs.bulkGet(
+            rows.map((proof) => proof.secret)
+          );
+          await cashuDb.proofs.bulkAdd(
+            rows.filter((_proof, index) => !existing[index])
+          );
         },
         verify: async (rows) => {
           const stored = await cashuDb.proofs.bulkGet(

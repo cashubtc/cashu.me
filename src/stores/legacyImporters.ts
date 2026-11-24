@@ -1,14 +1,14 @@
-import { cashuDb } from "./dexie";
-import { moveLocalStorageKey } from "./legacyStorage";
-import { toMirrorRows } from "./tableMirror";
-import type { SeenEventRow } from "./seenEvents";
-import { importLegacyMints } from "./mintStorage";
-import { importLegacyKeysetCounters } from "./counterStorage";
-import { importLegacyP2PKKeys } from "./p2pk";
+import { cashuDb } from "src/stores/dexie";
+import { moveLocalStorageKey } from "src/stores/legacyStorage";
+import { toMirrorRows } from "src/stores/tableMirror";
+import type { SeenEventRow } from "src/stores/seenEvents";
+import { importLegacyMints } from "src/stores/mintStorage";
+import { importLegacyKeysetCounters } from "src/stores/counterStorage";
+import { importLegacyP2PKKeys } from "src/stores/p2pk";
 import {
   importLegacyWorkerQueues,
   LEGACY_WORKER_QUEUE_KEYS,
-} from "./workerQueueStorage";
+} from "src/stores/workerQueueStorage";
 
 /**
  * localStorage keys whose data now lives in IndexedDB, with the function
@@ -70,7 +70,7 @@ export async function importLegacyNwcProcessedRequestIds() {
   );
   await cashuDb.seenEvents.bulkPut(rows);
   // Write through the store so its in-memory copy drops the ids as well.
-  const { useNWCStore } = await import("./nwc");
+  const { useNWCStore } = await import("src/stores/nwc");
   useNWCStore().connections = connections.map(
     ({ processedRequestIds: _ids, ...conn }) => conn
   ) as any;

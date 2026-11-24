@@ -9,14 +9,24 @@
  * merely not loaded yet, and never write over data that is still loading.
  */
 
+import { notifyError } from "src/js/notify";
+
 let ready: Promise<void> | null = null;
 
+/**
+ * Rejects when the wallet data could not be loaded. The user is told, and the
+ * next call (e.g. the next navigation) tries again. Stores that did not load
+ * never write, so nothing stored is overwritten in the meantime.
+ */
 export function walletDataReady(): Promise<void> {
   if (!ready) {
     ready = loadWalletData().catch((error) => {
       console.error("Failed to load wallet data", error);
-      // allow a retry on the next navigation
+      notifyError(
+        "Could not load wallet data. Reload the app to try again."
+      ).catch(() => {});
       ready = null;
+      throw error;
     });
   }
   return ready;
@@ -29,9 +39,9 @@ export function resetWalletDataReadyForTests() {
 
 async function loadWalletData() {
   await withMigrationLock(async () => {
-    const { useDexieStore } = await import("./dexie");
+    const { useDexieStore } = await import("src/stores/dexie");
     await useDexieStore().migrateToDexie();
-    const { useMigrationsStore } = await import("./migrations");
+    const { useMigrationsStore } = await import("src/stores/migrations");
     const migrations = useMigrationsStore();
     migrations.initMigrations();
     await migrations.runMigrations();
@@ -41,9 +51,9 @@ async function loadWalletData() {
   // the mints, and no output may be derived before the counters are loaded.
   const [{ useMintsStore }, { useWalletStore: useWallet }, { useP2PKStore }] =
     await Promise.all([
-      import("./mints"),
-      import("./wallet"),
-      import("./p2pk"),
+      import("src/stores/mints"),
+      import("src/stores/wallet"),
+      import("src/stores/p2pk"),
     ]);
   await Promise.all([
     useMintsStore().init(),
@@ -57,10 +67,10 @@ async function loadWalletData() {
     { usePRStore },
     { useTransactionWorkerStore },
   ] = await Promise.all([
-    import("./wallet"),
-    import("./tokens"),
-    import("./payment-request"),
-    import("./transactionWorker"),
+    import("src/stores/wallet"),
+    import("src/stores/tokens"),
+    import("src/stores/payment-request"),
+    import("src/stores/transactionWorker"),
   ]);
   await Promise.all([
     useWalletStore().initPaymentHistory(),
@@ -94,7 +104,7 @@ async function requestPersistentStorage() {
   try {
     const storage = globalThis.navigator?.storage;
     if (!storage?.persist || !storage.persisted) return;
-    const { useWelcomeStore } = await import("./welcome");
+    const { useWelcomeStore } = await import("src/stores/welcome");
     if (useWelcomeStore().showWelcome) return;
     if (!(await storage.persisted())) {
       const granted = await storage.persist();

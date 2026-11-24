@@ -271,7 +271,11 @@ import { useProofsStore } from "src/stores/proofs";
 import { useDexieStore } from "src/stores/dexie";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useStorageStore } from "src/stores/storage";
-import { flushPendingWrites } from "src/stores/tableMirror";
+import {
+  flushPendingWrites,
+  suspendPendingWrites,
+} from "src/stores/tableMirror";
+import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import { useNostrUserStore } from "src/stores/nostrUser";
 import SettingsPageShell from "./SettingsPageShell.vue";
 import SettingsSection from "./SettingsSection.vue";
@@ -381,10 +385,14 @@ export default defineComponent({
       this.$router.push("/welcome");
     },
     nukeWallet: async function () {
-      // create a backup just in case
+      // stop background work that would write to the tables being wiped
+      useTransactionWorkerStore().stopTransactionWorker();
+      // create a backup just in case (waits for pending writes first)
       await this.exportWalletState();
-      // let in-flight writes land first so none of them comes back after the wipe
-      await flushPendingWrites();
+      // nothing may write after this point, or it would survive the wipe;
+      // let writes that were already queued finish before clearing
+      suspendPendingWrites();
+      await flushPendingWrites().catch(() => {});
       // clear dexie tables
       await this.deleteAllTables();
       // clear nostr user databases
@@ -414,7 +422,8 @@ export default defineComponent({
         try {
           const content = f.target.result;
           const backup = JSON.parse(content);
-          this.restoreFromBackup(backup);
+          // restoreFromBackup reports its own failures
+          void this.restoreFromBackup(backup);
         } catch (error) {
           console.error("Error reading backup file:", error);
           this.notifyError("Invalid backup file format");

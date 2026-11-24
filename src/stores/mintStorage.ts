@@ -1,15 +1,16 @@
 import { watch } from "vue";
 import type { MintKeys } from "@cashu/cashu-ts";
-import { cashuDb } from "./dexie";
+import { cashuDb } from "src/stores/dexie";
 import {
   createTableMirror,
   registerPendingWrites,
+  reportWriteFailure,
   toMirrorRows,
   toPlainRow,
   type TableMirror,
-} from "./tableMirror";
-import { moveLocalStorageKey } from "./legacyStorage";
-import type { StoredMint } from "./mints";
+} from "src/stores/tableMirror";
+import { moveLocalStorageKey } from "src/stores/legacyStorage";
+import type { StoredMint } from "src/stores/mints";
 
 /**
  * Persistence for the mints store.
@@ -55,6 +56,8 @@ export function createMintsTable(): MintsTable {
   let keysHydrated = false;
   let persistedKeys = new Set<string>();
   let scheduled = false;
+  let suspended = false;
+  let failure: unknown = null;
   let chain: Promise<void> = Promise.resolve();
 
   const writeKeys = async () => {
@@ -76,13 +79,15 @@ export function createMintsTable(): MintsTable {
       });
     }
     persistedKeys = new Set(current.keys());
+    failure = null;
   };
 
   const scheduleKeys = () => {
-    if (!keysHydrated || scheduled) return;
+    if (!keysHydrated || suspended || scheduled) return;
     scheduled = true;
     chain = chain.then(writeKeys).catch((error) => {
-      console.error("Could not persist mint keys", error);
+      if (!failure) reportWriteFailure("mintKeys", error);
+      failure = error;
     });
   };
 
@@ -124,8 +129,21 @@ export function createMintsTable(): MintsTable {
     scheduleKeys();
   };
 
-  const flushKeys = () => chain;
-  registerPendingWrites(flushKeys);
+  const flushKeys = async () => {
+    await chain;
+    if (failure) {
+      // retry the failed write once before giving up
+      scheduleKeys();
+      await chain;
+      if (failure) throw failure;
+    }
+  };
+  registerPendingWrites({
+    flush: flushKeys,
+    suspend: () => {
+      suspended = true;
+    },
+  });
 
   return {
     items: mirror.items,

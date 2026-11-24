@@ -1,5 +1,5 @@
-import { cashuDb, putKeysetCountersMax } from "./dexie";
-import { moveLocalStorageKey } from "./legacyStorage";
+import { cashuDb, putKeysetCountersMax } from "src/stores/dexie";
+import { moveLocalStorageKey } from "src/stores/legacyStorage";
 
 /**
  * Moves `cashu.keysetCounters` (the current mnemonic's deterministic secret

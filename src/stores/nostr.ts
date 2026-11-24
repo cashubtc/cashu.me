@@ -38,7 +38,7 @@ import { useSendTokensStore } from "./sendTokensStore";
 import { usePRStore } from "./payment-request";
 import token from "../js/token";
 import { HistoryToken } from "./tokens";
-import { SeenEventLog } from "./seenEvents";
+import { SeenEventLog } from "src/stores/seenEvents";
 
 // Gift-wrapped DMs we already handled; forgotten after 10 days.
 export const nip17SeenEvents = new SeenEventLog("nip17", 10 * 24 * 60 * 60);

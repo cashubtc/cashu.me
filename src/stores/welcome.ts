@@ -1,6 +1,6 @@
 // src/stores/welcome.ts
 import { defineStore } from "pinia";
-import { flushPendingWrites } from "./tableMirror";
+import { flushPendingWrites } from "src/stores/tableMirror";
 import { useLocalStorage } from "@vueuse/core";
 import { computed } from "vue";
 

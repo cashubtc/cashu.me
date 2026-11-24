@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
+import { notifyError } from "src/js/notify";
 
 // Define the migration version type
 export type Migration = {
@@ -55,6 +56,10 @@ export const useMigrationsStore = defineStore("migrations", {
             );
           } catch (error) {
             console.error(`Migration ${migration.version} failed:`, error);
+            // Data moves are idempotent and retried on the next start.
+            notifyError(
+              `Could not update wallet data (migration ${migration.version}). It will be retried on the next start.`
+            ).catch(() => {});
             // Stop running migrations if one fails
             break;
           }
@@ -198,7 +203,7 @@ export const useMigrationsStore = defineStore("migrations", {
     },
 
     async migrateNostrStateAndPaymentRequestsToDexie() {
-      const legacy = await import("./legacyImporters");
+      const legacy = await import("src/stores/legacyImporters");
       await legacy.importLegacyMintRecommendations();
       await legacy.importLegacyNip17SeenEvents();
       await legacy.importLegacyNwcProcessedRequestIds();
@@ -263,7 +268,7 @@ export const useMigrationsStore = defineStore("migrations", {
         name: "Move mints and mint keys to Dexie",
         description: "Splits cashu.mints into the mints and mintKeys tables",
         execute: async () => {
-          const { useMintsStore } = await import("./mints");
+          const { useMintsStore } = await import("src/stores/mints");
           await useMintsStore().init();
           await useMintsStore().mintsTable.flush();
         },
@@ -289,7 +294,7 @@ export const useMigrationsStore = defineStore("migrations", {
           "Moves cashu.keysetCounters (never lowering a counter) and cashu.P2PKKeys to IndexedDB",
         execute: async () => {
           const { importLegacyKeysetCounters, importLegacyP2PKKeys } =
-            await import("./legacyImporters");
+            await import("src/stores/legacyImporters");
           await importLegacyKeysetCounters();
           await importLegacyP2PKKeys();
         },

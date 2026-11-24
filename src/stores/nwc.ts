@@ -15,7 +15,7 @@ import { useProofsStore } from "./proofs";
 import { notifyWarning } from "../js/notify";
 import { useNostrStore } from "./nostr";
 import { decode as decodeBolt11 } from "light-bolt11-decoder";
-import { SeenEventLog } from "./seenEvents";
+import { SeenEventLog } from "src/stores/seenEvents";
 
 export type NWCConnection = {
   walletPublicKey: string;

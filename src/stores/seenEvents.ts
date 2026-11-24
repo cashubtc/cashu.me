@@ -1,4 +1,4 @@
-import { cashuDb } from "./dexie";
+import { cashuDb } from "src/stores/dexie";
 
 /**
  * Nostr event ids we already handled, per scope ("nip17", "nwc:<pubkey>").
@@ -15,9 +15,12 @@ export type SeenEventRow = {
   created_at: number;
 };
 
+const PRUNE_INTERVAL_MS = 60 * 60 * 1000;
+
 export class SeenEventLog {
   private ids = new Set<string>();
   private loaded: Promise<void> | null = null;
+  private lastPrunedAt = 0;
 
   constructor(
     readonly scope: string,
@@ -58,10 +61,17 @@ export class SeenEventLog {
     cashuDb.seenEvents
       .put(row)
       .catch((error) => console.error("Could not record seen event", error));
+    // long-running sessions keep forgetting expired ids, not only on load
+    if (Date.now() - this.lastPrunedAt > PRUNE_INTERVAL_MS) {
+      this.prune().catch((error) =>
+        console.error("Could not prune seen events", error)
+      );
+    }
     return true;
   }
 
   async prune() {
+    this.lastPrunedAt = Date.now();
     const cutoff = Math.floor(Date.now() / 1000) - this.maxAgeSeconds;
     const expired = await cashuDb.seenEvents
       .where("scope")

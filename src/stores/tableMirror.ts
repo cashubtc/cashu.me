@@ -1,6 +1,7 @@
 import { ref, watch, type Ref } from "vue";
 import type { IndexableType, Table } from "dexie";
 import { JSONInt } from "@cashu/cashu-ts";
+import { notifyError } from "src/js/notify";
 
 /**
  * An in-memory array that is written through to a Dexie table.
@@ -26,17 +27,36 @@ export type TableMirror<T> = {
   flush: () => Promise<void>;
 };
 
-// Every live mirror's flush, so code that is about to reload or navigate
-// away can wait for pending writes (see flushPendingWrites).
-const pendingWriteFlushers = new Set<() => Promise<void>>();
+// Every live mirror, so code that is about to reload, navigate away or wipe
+// the wallet can wait for (or stop) pending writes.
+type PendingWrites = {
+  flush: () => Promise<void>;
+  suspend: () => void;
+};
+const pendingWriters = new Set<PendingWrites>();
 
-export function registerPendingWrites(flush: () => Promise<void>) {
-  pendingWriteFlushers.add(flush);
+export function registerPendingWrites(writer: PendingWrites) {
+  pendingWriters.add(writer);
 }
 
-/** Wait until every change made so far is in IndexedDB. */
+/**
+ * Wait until every change made so far is in IndexedDB. Rejects when a write
+ * failed, so callers do not reload or navigate away over lost changes.
+ */
 export async function flushPendingWrites() {
-  await Promise.all([...pendingWriteFlushers].map((flush) => flush()));
+  await Promise.all([...pendingWriters].map((writer) => writer.flush()));
+}
+
+/** Stop all mirrors from writing (before the wallet tables are wiped). */
+export function suspendPendingWrites() {
+  pendingWriters.forEach((writer) => writer.suspend());
+}
+
+/** Tell the user once per failing table; the write retries on the next change. */
+export function reportWriteFailure(tableName: string, error: unknown) {
+  console.error(`Could not persist ${tableName}`, error);
+  // notifications are unavailable outside the app (e.g. in tests)
+  notifyError(`Could not save wallet data (${tableName})`).catch(() => {});
 }
 
 export type TableMirrorOptions<T> = {
@@ -51,6 +71,8 @@ export type TableMirrorOptions<T> = {
    * share a table when each loads a disjoint slice of it.
    */
   load?: (table: Table<any, any>) => Promise<any[]>;
+  /** Writes changed rows inside the transaction (defaults to bulkPut). */
+  writeRows?: (rows: any[]) => Promise<void>;
   /**
    * How an item added before hydration combines with a stored item of the
    * same key. Defaults to the in-memory item.
@@ -89,6 +111,8 @@ export function createTableMirror<T>(
   // serialized row per key, as last written to (or read from) the table
   let persisted = new Map<string, string>();
   let scheduled = false;
+  let suspended = false;
+  let failure: unknown = null;
   let chain: Promise<void> = Promise.resolve();
 
   const keyString = (key: IndexableType) => JSONInt.stringify(key) as string;
@@ -116,18 +140,24 @@ export function createTableMirror<T>(
     if (puts.length || deletes.length) {
       await table.db.transaction("rw", table, async () => {
         if (deletes.length) await table.bulkDelete(deletes);
-        if (puts.length) await table.bulkPut(puts);
+        if (puts.length) {
+          if (options.writeRows) await options.writeRows(puts);
+          else await table.bulkPut(puts);
+        }
       });
     }
     // only after the commit, so a failed write is retried with the next change
     persisted = next;
+    failure = null;
   };
 
   const schedule = () => {
-    if (!isHydrated || scheduled) return;
+    if (!isHydrated || suspended || scheduled) return;
     scheduled = true;
     chain = chain.then(write).catch((error) => {
-      console.error(`Could not persist ${table.name}`, error);
+      scheduled = false;
+      if (!failure) reportWriteFailure(table.name, error);
+      failure = error;
     });
   };
 
@@ -182,8 +212,21 @@ export function createTableMirror<T>(
     return hydrating;
   };
 
-  const flush = () => chain;
-  registerPendingWrites(flush);
+  const flush = async () => {
+    await chain;
+    if (failure) {
+      // retry the failed write once before giving up
+      schedule();
+      await chain;
+      if (failure) throw failure;
+    }
+  };
+  registerPendingWrites({
+    flush,
+    suspend: () => {
+      suspended = true;
+    },
+  });
 
   return {
     items,

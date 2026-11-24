@@ -613,7 +613,13 @@ export default {
 
     // Run migrations and load IndexedDB-backed stores (the router already
     // awaited this; it resolves immediately here).
-    await walletDataReady();
+    try {
+      await walletDataReady();
+    } catch {
+      // Stores that failed to load must not be used: don't start workers,
+      // listeners or history (the user has been notified).
+      return;
+    }
     this.historyHydrated = true;
 
     // check if another tab is open

@@ -16,9 +16,9 @@ import {
   cashuDb,
   WALLET_TABLES,
   walletTableSpec,
-} from "./dexie";
-import { importLegacyLocalStorageKeys } from "./legacyImporters";
-import { flushPendingWrites } from "./tableMirror";
+} from "src/stores/dexie";
+import { importLegacyLocalStorageKeys } from "src/stores/legacyImporters";
+import { flushPendingWrites } from "src/stores/tableMirror";
 import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import { deserializeProofs, JSONInt } from "@cashu/cashu-ts";
 
@@ -81,6 +81,16 @@ export const useStorageStore = defineStore("storage", {
   }),
   actions: {
     restoreFromBackup: async function (backup: any) {
+      try {
+        await this.restoreFromBackupUnchecked(backup);
+      } catch (error) {
+        console.error("Could not restore backup", error);
+        notifyError(
+          "Could not restore the backup completely. Restored data is kept; try again."
+        );
+      }
+    },
+    restoreFromBackupUnchecked: async function (backup: any) {
       const proofsStore = useProofsStore();
       if (!backup) {
         notifyError("Unrecognized Backup Format!");
@@ -140,6 +150,10 @@ export const useStorageStore = defineStore("storage", {
       }
     },
     exportWalletState: async function () {
+      // include changes that are still being written
+      await flushPendingWrites().catch((error) => {
+        console.error("Exporting with unsaved changes", error);
+      });
       const jsonToSave: any = {};
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);

@@ -11,9 +11,9 @@ import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { usePRStore } from "./payment-request";
 import { useTransactionWorkerStore } from "./transactionWorker";
 import { markRaw } from "vue";
-import { cashuDb } from "./dexie";
-import { createTableMirror } from "./tableMirror";
-import { importLegacyKeysetCounters } from "./counterStorage";
+import { cashuDb, putKeysetCountersMax } from "src/stores/dexie";
+import { createTableMirror } from "src/stores/tableMirror";
+import { importLegacyKeysetCounters } from "src/stores/counterStorage";
 
 import {
   requestMintBolt11,
@@ -228,6 +228,8 @@ export const useWalletStore = defineStore("wallet", {
           ...early,
           counter: Math.max(stored.counter, early.counter),
         }),
+        // never lower a counter that is already stored
+        writeRows: (rows) => putKeysetCountersMax(rows),
       }
     );
     return {

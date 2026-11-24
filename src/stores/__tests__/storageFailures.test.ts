@@ -1,0 +1,185 @@
+import "fake-indexeddb/auto";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("src/js/notify", () => ({
+  notifyApiError: vi.fn(async () => {}),
+  notifyError: vi.fn(async () => {}),
+  notifySuccess: vi.fn(async () => {}),
+  notifyWarning: vi.fn(async () => {}),
+  notify: vi.fn(async () => {}),
+}));
+
+// wallet.ts creates stores at import time; load it first
+import { useWalletStore } from "src/stores/wallet";
+import { notifyError } from "src/js/notify";
+import { cashuDb, useDexieStore } from "src/stores/dexie";
+import {
+  createTableMirror,
+  flushPendingWrites,
+  suspendPendingWrites,
+  toMirrorRows,
+} from "src/stores/tableMirror";
+import { SeenEventLog } from "src/stores/seenEvents";
+import { useStorageStore } from "src/stores/storage";
+import {
+  resetWalletDataReadyForTests,
+  walletDataReady,
+} from "src/stores/bootstrap";
+
+type Item = { id: string; value: number };
+
+describe("table mirror write failures", () => {
+  beforeEach(async () => {
+    await cashuDb.paymentRequests.clear();
+    vi.mocked(notifyError).mockClear();
+  });
+
+  it("rejects flush and tells the user when a write fails, then retries", async () => {
+    const mirror = createTableMirror<Item>(cashuDb.paymentRequests, {
+      keyOf: (item) => item.id,
+    });
+    await mirror.hydrate();
+    const bulkPut = vi
+      .spyOn(cashuDb.paymentRequests, "bulkPut")
+      .mockRejectedValueOnce(new Error("quota"))
+      .mockRejectedValueOnce(new Error("quota"));
+
+    mirror.items.value.push({ id: "a", value: 1 });
+    await expect(mirror.flush()).rejects.toThrow("quota");
+    expect(notifyError).toHaveBeenCalledOnce();
+    expect(await cashuDb.paymentRequests.get("a")).toBeUndefined();
+
+    // the next flush retries the unsaved change
+    await mirror.flush();
+    expect(await cashuDb.paymentRequests.get("a")).toMatchObject({ value: 1 });
+    bulkPut.mockRestore();
+  });
+
+  it("stops writing once suspended (before a wipe)", async () => {
+    const mirror = createTableMirror<Item>(cashuDb.paymentRequests, {
+      keyOf: (item) => item.id,
+    });
+    await mirror.hydrate();
+    mirror.items.value.push({ id: "a", value: 1 });
+    await flushPendingWrites();
+
+    suspendPendingWrites();
+    await cashuDb.paymentRequests.clear();
+    mirror.items.value[0].value = 2;
+    mirror.items.value.push({ id: "b", value: 3 });
+    await mirror.flush();
+    expect(await cashuDb.paymentRequests.count()).toBe(0);
+  });
+});
+
+describe("keyset counter writes", () => {
+  beforeEach(async () => {
+    localStorage.clear();
+    await cashuDb.keysetCounters.clear();
+  });
+
+  it("never lower a counter raised in the table after loading", async () => {
+    const store = useWalletStore();
+    await store.initKeysetCounters();
+    store.syncCounterToStorage("ks1", 10);
+    await store.keysetCountersTable.flush();
+
+    await cashuDb.keysetCounters.put({ id: "ks1", counter: 50 });
+    store.syncCounterToStorage("ks1", 11);
+    await store.keysetCountersTable.flush();
+
+    expect((await cashuDb.keysetCounters.get("ks1"))?.counter).toBe(50);
+  });
+});
+
+describe("seen event pruning", () => {
+  beforeEach(async () => {
+    await cashuDb.seenEvents.clear();
+  });
+
+  it("keeps pruning expired ids in a long-running session", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    try {
+      const log = new SeenEventLog("prune-test", 60);
+      await log.load();
+      const start = Math.floor(Date.now() / 1000);
+      log.markSeen("old", start);
+
+      vi.setSystemTime(Date.now() + 2 * 60 * 60 * 1000);
+      log.markSeen("new", Math.floor(Date.now() / 1000));
+      await vi.waitFor(async () => {
+        expect(await cashuDb.seenEvents.get(["prune-test", "old"])).toBe(
+          undefined
+        );
+      });
+      expect(log.has("old")).toBe(false);
+      expect(log.has("new")).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
+
+describe("legacy proof migration", () => {
+  beforeEach(async () => {
+    localStorage.clear();
+    await cashuDb.proofs.clear();
+  });
+
+  it("does not overwrite a proof already in IndexedDB", async () => {
+    const exportSpy = vi
+      .spyOn(useStorageStore(), "exportWalletState")
+      .mockResolvedValue(undefined);
+    const current = {
+      id: "00ab",
+      amount: 1,
+      C: "02aa",
+      secret: "s1",
+      reserved: true,
+    };
+    await cashuDb.proofs.put(current);
+    localStorage.setItem(
+      "cashu.proofs",
+      JSON.stringify([
+        { ...current, reserved: false },
+        { id: "00ab", amount: 2, C: "02bb", secret: "s2", reserved: false },
+      ])
+    );
+
+    await useDexieStore().migrateToDexie();
+
+    expect(exportSpy).toHaveBeenCalled();
+    expect((await cashuDb.proofs.get("s1"))?.reserved).toBe(true);
+    expect(await cashuDb.proofs.get("s2")).toBeTruthy();
+    expect(localStorage.getItem("cashu.proofs")).toBeNull();
+  });
+});
+
+describe("backup restore failures", () => {
+  it("reports a failed restore instead of rejecting unseen", async () => {
+    vi.mocked(notifyError).mockClear();
+    await expect(
+      useStorageStore().restoreFromBackup({
+        "cashu.dexie.db.paymentHistory": "not json",
+      })
+    ).resolves.toBeUndefined();
+    expect(notifyError).toHaveBeenCalled();
+  });
+});
+
+describe("startup gate", () => {
+  it("rejects and reports a failed load, then retries", async () => {
+    vi.mocked(notifyError).mockClear();
+    resetWalletDataReadyForTests();
+    const dexie = useDexieStore();
+    vi.spyOn(dexie, "migrateToDexie").mockRejectedValueOnce(
+      new Error("db unavailable")
+    );
+
+    await expect(walletDataReady()).rejects.toThrow("db unavailable");
+    expect(notifyError).toHaveBeenCalled();
+
+    await expect(walletDataReady()).resolves.toBeUndefined();
+    resetWalletDataReadyForTests();
+  });
+});

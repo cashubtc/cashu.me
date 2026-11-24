@@ -1,6 +1,6 @@
-import { cashuDb } from "./dexie";
-import { moveLocalStorageKey } from "./legacyStorage";
-import { createTableMirror, toMirrorRows } from "./tableMirror";
+import { cashuDb } from "src/stores/dexie";
+import { moveLocalStorageKey } from "src/stores/legacyStorage";
+import { createTableMirror, toMirrorRows } from "src/stores/tableMirror";
 
 /**
  * Persistence for the transaction worker's queues. All four share the
@@ -22,12 +22,15 @@ type QueueEntry = { quote: string } | { id: string };
 const queueRef = (entry: QueueEntry) =>
   "quote" in entry ? entry.quote : entry.id;
 
+/** The stored row for a queue entry; used by migrations and the mirror. */
+const toQueueRow = (kind: WorkerQueueKind) => (entry: QueueEntry) => ({
+  ...entry,
+  kind,
+  ref: queueRef(entry),
+});
+
 export function workerQueueRows(kind: WorkerQueueKind, entries: QueueEntry[]) {
-  return toMirrorRows(entries, (entry) => ({
-    ...entry,
-    kind,
-    ref: queueRef(entry),
-  }));
+  return toMirrorRows(entries, toQueueRow(kind));
 }
 
 export function createWorkerQueueTable<T extends QueueEntry>(
@@ -35,7 +38,7 @@ export function createWorkerQueueTable<T extends QueueEntry>(
 ) {
   return createTableMirror<T>(cashuDb.workerQueue, {
     keyOf: (entry) => [kind, queueRef(entry)],
-    toRow: (entry) => ({ ...entry, kind, ref: queueRef(entry) }),
+    toRow: toQueueRow(kind),
     fromRow: ({ kind: _kind, ref: _ref, ...entry }) => entry as T,
     load: (table) => table.where("kind").equals(kind).toArray(),
   });

@@ -36,8 +36,14 @@ export default route(function (/* { store, ssrContext } */) {
 
   // Persisted wallet data lives partly in IndexedDB, which loads
   // asynchronously. Wait for it before any page renders.
+  // On failure the user is notified and the page still renders (so the app is
+  // not blank); the wallet page does not start its workers in that case.
   Router.beforeEach(async () => {
-    await walletDataReady();
+    try {
+      await walletDataReady();
+    } catch {
+      // reported by walletDataReady; retried on the next navigation
+    }
   });
 
   return Router;

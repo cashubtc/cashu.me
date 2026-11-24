@@ -19,8 +19,8 @@ import { useNostrMintBackupStore } from "./nostrMintBackup";
 import { bytesToHex } from "@noble/hashes/utils.js"; // already an installed dependency
 import { PaymentMethod } from "src/stores/walletTypes";
 import { sumProofAmounts } from "src/js/proofs";
-import { createMintsTable, importLegacyMints } from "./mintStorage";
-import { flushPendingWrites } from "./tableMirror";
+import { createMintsTable, importLegacyMints } from "src/stores/mintStorage";
+import { flushPendingWrites } from "src/stores/tableMirror";
 
 export type StoredMint = {
   url: string;
