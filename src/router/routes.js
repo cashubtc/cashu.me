@@ -1,3 +1,5 @@
+import { useWelcomeStore } from "src/stores/welcome";
+
 const routes = [
   {
     path: "/",
@@ -116,6 +118,13 @@ const routes = [
   {
     path: "/welcome",
     component: () => import("layouts/BlankLayout.vue"),
+    // Once onboarding is done (e.g. the user pressed Back from the wallet),
+    // redirect in-app instead of reloading the page.
+    beforeEnter: (to) => {
+      if (!useWelcomeStore().showWelcome) {
+        return { path: "/", query: to.query, hash: to.hash };
+      }
+    },
     children: [
       { path: "", component: () => import("src/pages/WelcomePage.vue") },
     ],
