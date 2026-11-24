@@ -453,21 +453,45 @@ export const usePaymentHistoryStore = defineStore("paymentHistory", {
       await this.refreshFromDexie();
       return true;
     },
+    /**
+     * Delete the payment rows of `quote` and the quote row they referenced,
+     * unless another payment or a stored proof still references that quote.
+     */
     async removePaymentByQuote(quote: string) {
-      const rows = await cashuDb.paymentHistory
-        .where("quote")
-        .equals(quote)
-        .toArray();
-      if (rows.length === 0) {
-        return false;
-      }
-      await cashuDb.transaction("rw", cashuDb.paymentHistory, async () => {
-        for (const row of rows) {
-          await cashuDb.paymentHistory.delete(row.id);
+      const removed = await cashuDb.transaction(
+        "rw",
+        [
+          cashuDb.paymentHistory,
+          cashuDb.mintQuotes,
+          cashuDb.meltQuotes,
+          cashuDb.proofs,
+        ],
+        async () => {
+          const rows = await cashuDb.paymentHistory
+            .where("quote")
+            .equals(quote)
+            .toArray();
+          if (rows.length === 0) return false;
+          await cashuDb.paymentHistory.bulkDelete(rows.map((row) => row.id));
+          const stillReferenced =
+            (await cashuDb.paymentHistory
+              .filter(
+                (payment) =>
+                  payment.quote === quote || payment.parentQuote === quote
+              )
+              .count()) > 0 ||
+            (await cashuDb.proofs.where("quote").equals(quote).count()) > 0;
+          if (stillReferenced) return true;
+          for (const direction of new Set(rows.map((row) => row.direction))) {
+            const table =
+              direction === "mint" ? cashuDb.mintQuotes : cashuDb.meltQuotes;
+            await table.delete(quote);
+          }
+          return true;
         }
-      });
-      await this.refreshFromDexie();
-      return true;
+      );
+      if (removed) await this.refreshFromDexie();
+      return removed;
     },
     async setPaymentPaid(
       quote: string,
@@ -525,7 +549,8 @@ export const usePaymentHistoryStore = defineStore("paymentHistory", {
      * rows that no payment or proof references any more. A quote row is kept
      * while it is in `keepQuotes` (e.g. still queued in the transaction
      * worker) or not yet in a final state. A quote whose payments were all
-     * pruned as paid counts as settled.
+     * pruned as paid counts as settled. An orphaned UNPAID melt quote is a
+     * failed send: its payment row was removed and its proofs unreserved.
      */
     async deleteOldPaidPayments(
       maxHistory = 200,
@@ -567,7 +592,9 @@ export const usePaymentHistoryStore = defineStore("paymentHistory", {
           const meltQuotes = (await cashuDb.meltQuotes.toArray()).filter(
             (quote) =>
               isOrphan(quote) &&
-              (settled.has(quote.quote) || quote.state === MeltQuoteState.PAID)
+              (settled.has(quote.quote) ||
+                quote.state === MeltQuoteState.PAID ||
+                quote.state === MeltQuoteState.UNPAID)
           );
           const candidates = [...mintQuotes, ...meltQuotes].map(
             (quote) => quote.quote

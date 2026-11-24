@@ -580,6 +580,34 @@ describe("wallet store", () => {
     expect(wallet.invoiceHistory).toEqual([]);
   });
 
+  it("deletes the melt quote row when an outgoing payment fails", async () => {
+    const wallet = useWalletStore();
+    wallet.payInvoiceData.input.request = "lnbc123";
+    const quote = {
+      quote: "failed-melt-q",
+      amount: 101,
+      fee_reserve: 4,
+      state: "UNPAID",
+    };
+    await wallet.addOutgoingPendingInvoiceToHistory(
+      quote,
+      "https://mint-a.example",
+      "sat"
+    );
+    expect(await cashuDb.meltQuotes.get("failed-melt-q")).toBeDefined();
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue({
+      mint: { checkMeltQuoteBolt11: vi.fn(async () => quote) },
+      unit: "sat",
+    });
+
+    await wallet.checkOutgoingInvoice("failed-melt-q", false);
+
+    expect(h.proofsStore.setReserved).toHaveBeenCalledWith([], false);
+    expect(await cashuDb.paymentHistory.count()).toBe(0);
+    expect(await cashuDb.meltQuotes.count()).toBe(0);
+    expect(wallet.invoiceHistory).toEqual([]);
+  });
+
   it("records Bolt12 outgoing invoice type for recovery", async () => {
     const wallet = useWalletStore();
     wallet.payInvoiceData.input.request = "lno1offer";
