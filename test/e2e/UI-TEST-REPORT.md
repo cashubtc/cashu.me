@@ -103,20 +103,6 @@ and reports the defects; it does not silently change wallet behavior.
   keys without first validating the backup structure.
 - Regression: `rejects a structurally invalid backup before writing wallet state`.
 
-### UI-006 — Seed restoration errors but reports success
-
-- Severity: high; the recovery flow does not recover the test wallet's funds.
-- Reproduce: mint 64 sats, copy its seed, and restore that seed against the same
-  mint from a fresh browser wallet using Restore Selected Mints.
-- Expected: recover 64 spendable sats.
-- Actual: an error notification says `Must be called at the top of a setup
-function`, followed by `Successfully restored 1 mint(s)`. The balance remains
-  zero. The trace contains no request to the mint's restore endpoint.
-- Cause to investigate: store initialization during restoration. Separately,
-  `restoreMint` catches errors without propagating them, so `restoreSelectedMints`
-  can incorrectly report success.
-- Regression: `reveals and copies a seed and restores spendable funds in a fresh wallet`.
-
 ### UI-007 — QR decoding still depends on a public CDN
 
 - Severity: medium; scanning cannot initialize when the CDN is unreachable.
@@ -142,19 +128,6 @@ function`, followed by `Successfully restored 1 mint(s)`. The balance remains
   existing proof secrets. The asynchronous rejection is not handled by the file
   reader's synchronous `try/catch`.
 - Regression: `reimporting the same backup preserves funds without an unhandled error`.
-
-### UI-009 — Enabling a Lightning address fails after direct settings navigation
-
-- Severity: medium.
-- Reproduce: open `/settings/lightning-address` directly in an initialized
-  wallet, then enable the Lightning address.
-- Expected: display the address and initialize the service settings.
-- Actual: the address stays blank; initialization raises `Must be called at the
-top of a setup function` before any service request.
-- Evidence: `useWalletStore` initializes `useI18n` outside a component setup when
-  the store is first reached through this route's toggle handler. Navigating
-  from the home screen through Settings initializes the store earlier.
-- Regression: `opens Lightning address settings directly and enables the address`.
 
 ### UI-011 — Clipboard permission errors are unhandled
 

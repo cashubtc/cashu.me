@@ -82,16 +82,6 @@ export const useWelcomeStore = defineStore("welcome", {
   },
   actions: {
     /**
-     * Initializes the welcome dialog based on local storage.
-     * Should be called when the store is initialized.
-     */
-    initializeWelcome() {
-      if (!this.showWelcome) {
-        window.location.href = "/";
-      }
-    },
-
-    /**
      * Closes the welcome dialog and marks it as seen.
      */
     closeWelcome() {
