@@ -742,12 +742,15 @@ export const useWalletStore = defineStore("wallet", {
       amount: number,
       invalidate: boolean = false,
       includeFees: boolean = false,
-      mutexPriority: MutexPriority = "normal"
+      mutexPriority: MutexPriority = "normal",
+      quote?: string
     ): Promise<{ keepProofs: ProofLike[]; sendProofs: ProofLike[] }> {
       // Returns sendProofs summing to `amount` (plus input fees when
       // includeFees=true). Tries an offline exact-match first; otherwise
       // swaps via the mint. Reserves sendProofs in proofsStore on success,
       // or removes them if `invalidate` is true (caller takes ownership).
+      // A melt passes its `quote` so the reservation is tied to the payment
+      // from the start and the pending-payment check can release it.
       const proofsStore = useProofsStore();
       const uIStore = useUiStore();
       await uIStore.lockMutex(mutexPriority);
@@ -820,7 +823,7 @@ export const useWalletStore = defineStore("wallet", {
           await proofsStore.removeProofs(sendProofs);
         }
         // Finally, reserve sendProofs as nothing above threw.
-        await proofsStore.setReserved(sendProofs, true);
+        await proofsStore.setReserved(sendProofs, true, quote);
         return { keepProofs, sendProofs };
       } catch (error: any) {
         console.error(error);
@@ -1325,7 +1328,8 @@ export const useWalletStore = defineStore("wallet", {
       quote: AppMeltQuote,
       mint: string,
       unit: string,
-      method: PaymentMethod = PaymentMethod.Bolt11
+      method: PaymentMethod = PaymentMethod.Bolt11,
+      startChecker = true
     ) {
       const invoice = {
         amount: -(quote.amount + quote.fee_reserve),
@@ -1350,10 +1354,12 @@ export const useWalletStore = defineStore("wallet", {
       } catch (error) {
         console.error("Could not persist outgoing payment history", error);
       }
-      useTransactionWorkerStore().addOutgoingInvoiceToChecker?.(
-        quote.quote,
-        true
-      );
+      if (startChecker) {
+        useTransactionWorkerStore().addOutgoingInvoiceToChecker?.(
+          quote.quote,
+          true
+        );
+      }
     },
     removeOutgoingInvoiceFromHistory: async function (quote: string) {
       const index = this.invoiceHistory.findIndex((i) => i.quote === quote);
