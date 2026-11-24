@@ -587,8 +587,12 @@ export default defineComponent({
     handlePaymentRequestSuccess: function () {
       this.showSendTokens = false;
     },
-    preparePaymentRequestTokens: async function () {
-      if (!this.sendData.paymentRequest) {
+    // Prepares the token for `paymentRequest`: the request the caller will
+    // deliver to, even if the dialog's request changes meanwhile.
+    preparePaymentRequestTokens: async function (
+      paymentRequest = this.sendData.paymentRequest
+    ) {
+      if (!paymentRequest) {
         return undefined;
       }
       if (this.sendData.tokensBase64) {
@@ -614,7 +618,7 @@ export default defineComponent({
         this.activeUnit,
         true
       );
-      const request = toPaymentRequest(this.sendData.paymentRequest);
+      const request = toPaymentRequest(paymentRequest);
       const { sendProofs } = await this.sendToRequest(
         this.activeProofs,
         mintWallet,
@@ -639,7 +643,7 @@ export default defineComponent({
         token: serialized,
         unit: this.activeUnit,
         mint: this.activeMintUrl,
-        paymentRequest: this.sendData.paymentRequest,
+        paymentRequest,
         status: "pending",
       };
       // The proofs have already left the wallet: a failed history write must
@@ -700,15 +704,18 @@ export default defineComponent({
             this.$t("wallet.notifications.history_save_failed") as string
           );
         }
-        // Set the whole token view at once, after the write: closing the
-        // dialog meanwhile clears sendData. historyToken must be set before
-        // tokens, which shows the token view that reads it.
-        this.sendData.tokensBase64 = tokensBase64;
-        this.sendData.historyToken = historyToken as any;
-        this.sendData.tokens = sendProofs;
-        // History has no copy of this token, so keep it on screen even if the
-        // dialog was closed while it was being saved.
-        if (!savedToHistory) this.showSendTokens = true;
+        // Show the token unless the user moved on during the write (closed
+        // the dialog or opened another token); it is in history then. A token
+        // that could not be saved is always shown: history has no copy.
+        const userMovedOn =
+          !this.showSendTokens || !!this.sendData.tokensBase64;
+        if (!savedToHistory || !userMovedOn) {
+          // historyToken first: tokens shows the view that reads it
+          this.sendData.tokensBase64 = tokensBase64;
+          this.sendData.historyToken = historyToken as any;
+          this.sendData.tokens = sendProofs;
+          this.showSendTokens = true;
+        }
 
         if (!this.g.offline) {
           this.onTokenPaid(historyToken);
@@ -783,16 +790,19 @@ export default defineComponent({
             this.$t("wallet.notifications.history_save_failed") as string
           );
         }
-        // Set the whole token view at once, after the write: closing the
-        // dialog meanwhile clears sendData. historyToken must be set before
-        // tokens, which shows the token view that reads it.
-        this.sendData.tokensBase64 = tokensBase64;
-        this.sendData.historyAmount = historyAmount;
-        this.sendData.historyToken = historyToken as any;
-        this.sendData.tokens = sendProofs;
-        // History has no copy of this token, so keep it on screen even if the
-        // dialog was closed while it was being saved.
-        if (!savedToHistory) this.showSendTokens = true;
+        // Show the token unless the user moved on during the write (closed
+        // the dialog or opened another token); it is in history then. A token
+        // that could not be saved is always shown: history has no copy.
+        const userMovedOn =
+          !this.showSendTokens || !!this.sendData.tokensBase64;
+        if (!savedToHistory || !userMovedOn) {
+          // historyToken first: tokens shows the view that reads it
+          this.sendData.tokensBase64 = tokensBase64;
+          this.sendData.historyAmount = historyAmount;
+          this.sendData.historyToken = historyToken as any;
+          this.sendData.tokens = sendProofs;
+          this.showSendTokens = true;
+        }
 
         if (!this.g.offline) {
           this.onTokenPaid(historyToken);

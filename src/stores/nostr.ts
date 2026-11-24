@@ -553,10 +553,22 @@ export const useNostrStore = defineStore("nostr", {
       const tokens = words.filter((word) => {
         return word.startsWith("cashuA") || word.startsWith("cashuB");
       });
+      const tokensStore = useTokensStore();
+      let unsavedToken: string | undefined;
       for (const tokenStr of tokens) {
         receiveStore.receiveData.tokensBase64 = tokenStr;
         receiveStore.showReceiveTokens = true;
         await this.addPendingTokenToHistory(tokenStr);
+        // A token whose save failed is not in history (it was rolled back).
+        if (!unsavedToken && !tokensStore.tokenAlreadyInHistory(tokenStr)) {
+          unsavedToken = tokenStr;
+        }
+      }
+      // A later token in the message may have replaced the view of one that
+      // could not be saved; show that one again so it stays reachable.
+      if (unsavedToken) {
+        receiveStore.receiveData.tokensBase64 = unsavedToken;
+        receiveStore.showReceiveTokens = true;
       }
     },
     addPendingTokenToHistory: async function (

@@ -263,16 +263,20 @@ export const useTokensStore = defineStore("tokens", {
       }
       return this.updateHistoryToken(historyToken.id, changes);
     },
-    async setTokenPaid(token: string) {
+    /**
+     * Marks a pending entry as paid. Resolves to false if there is no pending
+     * entry, or no stored row to update (e.g. its first write failed).
+     */
+    async setTokenPaid(token: string): Promise<boolean> {
       const historyToken = this.historyTokens.find(
         (t) => t.token === token && t.status == "pending"
       );
-      if (historyToken) {
-        await this.updateHistoryToken(historyToken.id, {
-          status: "paid",
-          paidDate: currentDateStr(),
-        });
-      }
+      if (!historyToken) return false;
+      const updated = await this.updateHistoryToken(historyToken.id, {
+        status: "paid",
+        paidDate: currentDateStr(),
+      });
+      return updated !== undefined;
     },
     /**
      * Splits a partially spent history token: the existing entry keeps the
@@ -288,23 +292,10 @@ export const useTokensStore = defineStore("tokens", {
     ): Promise<HistoryToken | undefined> {
       const original = this.historyTokens.find((t) => t.token === tokenToSplit);
       if (!original) return undefined;
-      // The sign tells whether the entry is incoming or outgoing.
-      const sign = Math.sign(original.amount);
-      const spentPart = {
-        token: spent.token,
-        amount: spent.amount * sign,
-        status: "paid" as const,
-      };
-      const remainder: HistoryToken = {
-        id: uuidv4(),
-        status: "pending",
-        amount: unspent.amount * sign,
-        date: currentDateStr(),
-        token: unspent.token,
-        mint: original.mint,
-        unit: original.unit,
-      };
-      let split: boolean;
+      const id = original.id;
+      let split:
+        | { spentPart: Partial<HistoryToken>; remainder: HistoryToken }
+        | undefined;
       try {
         split = await cashuDb.transaction(
           "rw",
@@ -312,13 +303,30 @@ export const useTokensStore = defineStore("tokens", {
           async () => {
             // Another check of the same token may have split it while this
             // one was waiting; then there is nothing left to split.
-            const stored = await cashuDb.ecashHistory.get(original.id);
-            if (stored?.token !== tokenToSplit) return false;
+            const stored: HistoryToken | undefined =
+              await cashuDb.ecashHistory.get(id);
+            if (!stored || stored.token !== tokenToSplit) return undefined;
+            // The sign tells whether the entry is incoming or outgoing.
+            const sign = Math.sign(stored.amount);
+            const spentPart = {
+              token: spent.token,
+              amount: spent.amount * sign,
+              status: "paid" as const,
+            };
+            const remainder: HistoryToken = {
+              id: uuidv4(),
+              status: "pending",
+              amount: unspent.amount * sign,
+              date: currentDateStr(),
+              token: unspent.token,
+              mint: stored.mint,
+              unit: stored.unit,
+            };
             await cashuDb.ecashHistory.put(
               toStorable({ ...stored, ...spentPart })
             );
             await cashuDb.ecashHistory.put(toStorable(remainder));
-            return true;
+            return { spentPart, remainder };
           }
         );
       } catch (error) {
@@ -326,9 +334,10 @@ export const useTokensStore = defineStore("tokens", {
         throw error;
       }
       if (!split) return undefined;
+      const { spentPart, remainder } = split;
       // Update the cache only after the commit. The liveQuery may already have
       // replaced it with the committed rows, so match by id.
-      const cached = this.historyTokens.find((t) => t.id === original.id);
+      const cached = this.historyTokens.find((t) => t.id === id);
       if (cached) Object.assign(cached, spentPart);
       if (!this.historyTokens.some((t) => t.id === remainder.id)) {
         this.historyTokens.push(remainder);

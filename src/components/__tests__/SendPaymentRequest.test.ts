@@ -77,6 +77,7 @@ describe("SendPaymentRequest", () => {
 
     await SendPaymentRequest.methods.clickPaymentRequest.call(context);
 
+    expect(context.prepareToken).toHaveBeenCalledWith(request);
     expect(context.parseAndPayPaymentRequest).toHaveBeenCalledWith(
       request,
       "cashuPrepared"

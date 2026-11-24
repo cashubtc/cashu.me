@@ -164,7 +164,7 @@ export default defineComponent({
         const paymentRequest = this.sendData.paymentRequest;
         let tokenStr = this.sendData.tokensBase64;
         if (this.prepareToken) {
-          const prepared = await this.prepareToken();
+          const prepared = await this.prepareToken(paymentRequest);
           if (prepared) {
             tokenStr = prepared;
           }

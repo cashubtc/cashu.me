@@ -2335,6 +2335,41 @@ describe("wallet store", () => {
     expect(h.notifyApiError).not.toHaveBeenCalled();
   });
 
+  it("redeem writes history after releasing the wallet mutex", async () => {
+    const wallet = useWalletStore();
+    mockV4Redeem(wallet);
+    let unlockedBeforeWrite = false;
+    h.tokensStore.addPaidToken.mockImplementationOnce(async () => {
+      unlockedBeforeWrite = h.uiStore.unlockMutex.mock.calls.length > 0;
+      return "paid-id";
+    });
+    h.uiStore.unlockMutex.mockClear();
+
+    await wallet.redeem();
+
+    expect(unlockedBeforeWrite).toBe(true);
+  });
+
+  it("redeem adds a paid row when the incoming entry has no stored row", async () => {
+    const wallet = useWalletStore();
+    mockV4Redeem(wallet);
+    const historyTokens = h.tokensStore.historyTokens;
+    // an incoming entry whose first IndexedDB write failed
+    h.tokensStore.historyTokens = [{ token: "cashuB500", amount: 500 }];
+    h.tokensStore.setTokenPaid.mockResolvedValueOnce(false);
+    h.tokensStore.addPaidToken.mockClear();
+
+    try {
+      await wallet.redeem();
+    } finally {
+      h.tokensStore.historyTokens = historyTokens;
+    }
+
+    expect(h.tokensStore.addPaidToken).toHaveBeenCalledWith(
+      expect.objectContaining({ amount: 500, token: "cashuB500" })
+    );
+  });
+
   it("redeem still succeeds when only the history write fails", async () => {
     const wallet = useWalletStore();
     mockV4Redeem(wallet);

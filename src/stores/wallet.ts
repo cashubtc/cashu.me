@@ -875,6 +875,7 @@ export const useWalletStore = defineStore("wallet", {
         throw new Error("mint not found");
       }
       await uIStore.lockMutex();
+      let outputAmount: number;
       try {
         // redeem
         const privkey = receiveStore.receiveData.p2pkPrivateKey;
@@ -898,62 +899,7 @@ export const useWalletStore = defineStore("wallet", {
 
         p2pkStore.setPrivateKeyUsed(privkey);
 
-        const outputAmount = proofsStore.sumProofs(proofs);
-
-        // The proofs are already stored, so a failed history write must not
-        // report the receive as failed, nor skip the other history write.
-        const saveToHistory = async (write: () => Promise<unknown>) => {
-          try {
-            await write();
-          } catch (error: any) {
-            notifyApiError(
-              error,
-              this.t("wallet.notifications.history_save_failed")
-            );
-          }
-        };
-        // if token is already in history, set to paid, else add to history
-        if (
-          tokenStore.historyTokens.find(
-            (t) =>
-              t.token === receiveStore.receiveData.tokensBase64 && t.amount > 0
-          )
-        ) {
-          await saveToHistory(() =>
-            tokenStore.setTokenPaid(receiveStore.receiveData.tokensBase64)
-          );
-        } else {
-          // if this is a self-sent token, we will find an outgoing token with the inverse amount
-          if (
-            tokenStore.historyTokens.find(
-              (t) =>
-                t.token === receiveStore.receiveData.tokensBase64 &&
-                t.amount < 0
-            )
-          ) {
-            await saveToHistory(() =>
-              tokenStore.setTokenPaid(receiveStore.receiveData.tokensBase64)
-            );
-          }
-          fee = inputAmount - outputAmount;
-          historyToken.fee = fee;
-          historyToken.amount = outputAmount;
-          await saveToHistory(() => tokenStore.addPaidToken(historyToken));
-        }
-        useUiStore().vibrate();
-        let message = this.t("wallet.notifications.received", {
-          amount: uIStore.formatCurrency(outputAmount, historyToken.unit),
-        });
-        if (fee > 0) {
-          message += this.t("wallet.notifications.fee", {
-            fee: uIStore.formatCurrency(fee, historyToken.unit),
-          });
-        }
-        notifySuccess(message);
-        if (wasReceiveDialogVisible) {
-          receiveStore.showReceiveTokens = false;
-          uIStore.closeDialogs();
-        }
+        outputAmount = proofsStore.sumProofs(proofs);
       } catch (error: any) {
         console.error(error);
         notifyApiError(error);
@@ -961,7 +907,71 @@ export const useWalletStore = defineStore("wallet", {
       } finally {
         uIStore.unlockMutex();
       }
-      // }
+
+      // The proofs are stored. The history writes below do not need the
+      // wallet mutex, and a failed write must not report the receive as
+      // failed, nor skip the other history write.
+      const receivedToken = historyToken.token;
+      const saveToHistory = async <T>(
+        write: () => Promise<T>
+      ): Promise<T | undefined> => {
+        try {
+          return await write();
+        } catch (error: any) {
+          notifyApiError(
+            error,
+            this.t("wallet.notifications.history_save_failed")
+          );
+          return undefined;
+        }
+      };
+      // if token is already in history, set to paid, else add to history
+      let recorded = false;
+      if (
+        tokenStore.historyTokens.find(
+          (t) => t.token === receivedToken && t.amount > 0
+        )
+      ) {
+        // false means there is no stored row to update (its first write
+        // failed), so a paid row is added below instead
+        recorded =
+          (await saveToHistory(() =>
+            tokenStore.setTokenPaid(receivedToken)
+          )) !== false;
+      }
+      if (!recorded) {
+        // if this is a self-sent token, we will find an outgoing token with the inverse amount
+        if (
+          tokenStore.historyTokens.find(
+            (t) => t.token === receivedToken && t.amount < 0
+          )
+        ) {
+          await saveToHistory(() => tokenStore.setTokenPaid(receivedToken));
+        }
+        fee = inputAmount - outputAmount;
+        historyToken.fee = fee;
+        historyToken.amount = outputAmount;
+        await saveToHistory(() => tokenStore.addPaidToken(historyToken));
+      }
+      useUiStore().vibrate();
+      let message = this.t("wallet.notifications.received", {
+        amount: uIStore.formatCurrency(outputAmount, historyToken.unit),
+      });
+      if (fee > 0) {
+        message += this.t("wallet.notifications.fee", {
+          fee: uIStore.formatCurrency(fee, historyToken.unit),
+        });
+      }
+      notifySuccess(message);
+      // Another token may have been opened meanwhile; only close the receive
+      // view if it still shows this one.
+      if (
+        wasReceiveDialogVisible &&
+        receiveStore.receiveData.tokensBase64 === receivedToken
+      ) {
+        receiveStore.showReceiveTokens = false;
+        uIStore.closeDialogs();
+      }
     },
 
     // Minting and melting
@@ -1090,19 +1100,27 @@ export const useWalletStore = defineStore("wallet", {
       const tokenStore = useTokensStore();
       const proofsStore = useProofsStore();
 
-      const tokenJson = await token.decodeFull(historyToken.token);
-      if (tokenJson == undefined) {
-        throw new Error("no tokens provided.");
-      }
-      const proofs = token.getProofs(tokenJson);
-      const mintWallet = await this.mintWallet(
-        historyToken.mint,
-        historyToken.unit
-      );
+      let proofs: WalletProof[];
+      let mintWallet: Wallet;
+      try {
+        const tokenJson = await token.decodeFull(historyToken.token);
+        if (tokenJson == undefined) {
+          throw new Error("no tokens provided.");
+        }
+        proofs = token.getProofs(tokenJson);
+        mintWallet = await this.mintWallet(
+          historyToken.mint,
+          historyToken.unit
+        );
 
-      const mint = mintStore.mints.find((m) => m.url === historyToken.mint);
-      if (!mint) {
-        throw new Error("mint not found");
+        const mint = mintStore.mints.find((m) => m.url === historyToken.mint);
+        if (!mint) {
+          throw new Error("mint not found");
+        }
+      } catch (error: any) {
+        // checkProofsSpendable reports its own errors; report these here
+        if (verbose) notifyApiError(error);
+        throw error;
       }
       const spentProofs = await this.checkProofsSpendable(proofs, mintWallet);
       // Report a failed history write here (checks the user started are
