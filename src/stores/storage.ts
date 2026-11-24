@@ -19,6 +19,7 @@ import {
 } from "./dexie";
 import { importLegacyLocalStorageKeys } from "./legacyImporters";
 import { flushPendingWrites } from "./tableMirror";
+import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import { deserializeProofs, JSONInt } from "@cashu/cashu-ts";
 
 export function stringifyBackupTable(rows: unknown[]): string {
@@ -217,7 +218,10 @@ export const useStorageStore = defineStore("storage", {
 
       // from all paid invoices in this.invoiceHistory, delete the oldest so that only max 100 remain
       const max_history = 200;
-      await usePaymentHistoryStore().deleteOldPaidPayments(max_history);
+      await usePaymentHistoryStore().deleteOldPaidPayments(
+        max_history,
+        useTransactionWorkerStore().queuedQuoteIds()
+      );
       walletStore.syncPaymentHistoryCache?.();
 
       // walk through the oldest paid tokenStore.historyTokens and delete the token

@@ -1,9 +1,13 @@
 import { defineStore } from "pinia";
 import { liveQuery } from "dexie";
+import { MeltQuoteState, MintQuoteState } from "@cashu/cashu-ts";
 import { cashuDb } from "./dexie";
 import { PaymentMethod } from "src/stores/walletTypes";
 import { currentDateStr } from "src/js/utils";
-import { normalizeCashuQuoteAmounts } from "src/js/cashu-amount";
+import {
+  cashuAmountOrZero,
+  normalizeCashuQuoteAmounts,
+} from "src/js/cashu-amount";
 
 export type PaymentDirection = "mint" | "melt";
 export type PaymentStatus = "pending" | "paid";
@@ -269,6 +273,30 @@ export function normalizeMeltQuote(
   }) as MeltQuoteRow;
 }
 
+// Bolt11 mint quotes are done once issued, or once the wallet marked their
+// payment paid (it does not always persist the ISSUED state). Reusable
+// bolt12/onchain quotes carry no state; they are done when nothing paid is
+// left to claim. Anything else, or a malformed amount, is kept.
+function isFinalMintQuote(quote: MintQuoteRow, settled: boolean): boolean {
+  if (quote.method === PaymentMethod.Bolt11) {
+    return settled || quote.state === MintQuoteState.ISSUED;
+  }
+  if (
+    quote.method !== PaymentMethod.Bolt12 &&
+    quote.method !== PaymentMethod.Onchain
+  ) {
+    return false;
+  }
+  try {
+    return (
+      cashuAmountOrZero(quote.amount_issued) >=
+      cashuAmountOrZero(quote.amount_paid)
+    );
+  } catch {
+    return false;
+  }
+}
+
 function sortPayments(payments: PaymentHistoryRow[]) {
   return payments.slice().sort((a, b) => {
     const aTime = new Date(a.date).getTime();
@@ -492,19 +520,76 @@ export const usePaymentHistoryStore = defineStore("paymentHistory", {
     findPaymentByQuote(quote: string) {
       return this.invoiceHistory.find((payment) => payment.quote === quote);
     },
-    async deleteOldPaidPayments(maxHistory = 200) {
-      const paid = this.paymentHistory
-        .filter((payment) => payment.status === "paid")
-        .sort(
-          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-        );
-      if (paid.length <= maxHistory) return;
-      const deleteRows = paid.slice(0, paid.length - maxHistory);
-      await cashuDb.transaction("rw", cashuDb.paymentHistory, async () => {
-        for (const row of deleteRows) {
-          await cashuDb.paymentHistory.delete(row.id);
+    /**
+     * Delete the oldest paid payments beyond `maxHistory`, then delete quote
+     * rows that no payment or proof references any more. A quote row is kept
+     * while it is in `keepQuotes` (e.g. still queued in the transaction
+     * worker) or not yet in a final state. A quote whose payments were all
+     * pruned as paid counts as settled.
+     */
+    async deleteOldPaidPayments(
+      maxHistory = 200,
+      keepQuotes: Iterable<string> = []
+    ) {
+      const keep = new Set(keepQuotes);
+      await cashuDb.transaction(
+        "rw",
+        [
+          cashuDb.paymentHistory,
+          cashuDb.mintQuotes,
+          cashuDb.meltQuotes,
+          cashuDb.proofs,
+        ],
+        async () => {
+          const payments = await cashuDb.paymentHistory.toArray();
+          const paid = sortPayments(
+            payments.filter((payment) => payment.status === "paid")
+          );
+          const deleteRows = paid.slice(
+            0,
+            Math.max(0, paid.length - maxHistory)
+          );
+          const deleteIds = new Set(deleteRows.map((row) => row.id));
+          await cashuDb.paymentHistory.bulkDelete([...deleteIds]);
+          const settled = new Set<string>();
+          for (const payment of payments) {
+            const target = deleteIds.has(payment.id) ? settled : keep;
+            target.add(payment.quote);
+            if (payment.parentQuote) target.add(payment.parentQuote);
+          }
+          const isOrphan = (quote: MintQuoteRow | MeltQuoteRow) =>
+            !keep.has(quote.quote);
+          const mintQuotes = (await cashuDb.mintQuotes.toArray()).filter(
+            (quote) =>
+              isOrphan(quote) &&
+              isFinalMintQuote(quote, settled.has(quote.quote))
+          );
+          const meltQuotes = (await cashuDb.meltQuotes.toArray()).filter(
+            (quote) =>
+              isOrphan(quote) &&
+              (settled.has(quote.quote) || quote.state === MeltQuoteState.PAID)
+          );
+          const candidates = [...mintQuotes, ...meltQuotes].map(
+            (quote) => quote.quote
+          );
+          if (candidates.length === 0) return;
+          const reservedFor = new Set(
+            (
+              await cashuDb.proofs.where("quote").anyOf(candidates).toArray()
+            ).map((proof) => proof.quote)
+          );
+          await cashuDb.mintQuotes.bulkDelete(
+            mintQuotes
+              .map((quote) => quote.quote)
+              .filter((id) => !reservedFor.has(id))
+          );
+          await cashuDb.meltQuotes.bulkDelete(
+            meltQuotes
+              .map((quote) => quote.quote)
+              .filter((id) => !reservedFor.has(id))
+          );
         }
-      });
+      );
       await this.refreshFromDexie();
     },
     async migrateLegacyInvoiceHistoryFromLocalStorage() {

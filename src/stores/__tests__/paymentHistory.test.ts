@@ -297,4 +297,245 @@ describe("payment history store", () => {
     expect(walletStore.invoiceData).not.toHaveProperty("meltQuote");
     expect(walletStore.invoiceData).not.toHaveProperty("meltChangeOutputData");
   });
+
+  describe("deleteOldPaidPayments", () => {
+    const mint = "https://mint.example";
+
+    function bolt11Mint(
+      quote: string,
+      date: string,
+      status: "paid" | "pending",
+      state: string
+    ) {
+      return {
+        quote,
+        amount: 21,
+        request: `lnbc-${quote}`,
+        memo: "",
+        date,
+        status,
+        mint,
+        unit: "sat",
+        type: PaymentMethod.Bolt11,
+        mintQuote: {
+          quote,
+          request: `lnbc-${quote}`,
+          unit: "sat",
+          amount: 21,
+          state,
+          expiry: null,
+        },
+      };
+    }
+
+    beforeEach(async () => {
+      await cashuDb.proofs.clear();
+    });
+
+    it("deletes the quote rows of pruned payments", async () => {
+      const store = usePaymentHistoryStore();
+      // The wallet marks a minted bolt11 payment paid without persisting
+      // the ISSUED state, so the pruned quote row is still PAID.
+      await store.addPayment(
+        bolt11Mint("old-q", "2026-03-01T00:00:00.000Z", "paid", "PAID")
+      );
+      await store.addPayment({
+        quote: "old-melt-q",
+        amount: -10,
+        request: "lnbc-out",
+        memo: "",
+        date: "2026-03-02T00:00:00.000Z",
+        status: "paid",
+        mint,
+        unit: "sat",
+        type: PaymentMethod.Bolt11,
+        meltQuote: { quote: "old-melt-q", amount: 10, state: "PENDING" },
+      });
+      await store.addPayment(
+        bolt11Mint("new-q", "2026-03-03T00:00:00.000Z", "paid", "ISSUED")
+      );
+
+      await store.deleteOldPaidPayments(1);
+
+      expect(
+        (await cashuDb.paymentHistory.toArray()).map((p) => p.quote)
+      ).toEqual(["new-q"]);
+      expect((await cashuDb.mintQuotes.toArray()).map((q) => q.quote)).toEqual([
+        "new-q",
+      ]);
+      expect(await cashuDb.meltQuotes.count()).toBe(0);
+      expect(store.mintQuotes.map((q) => q.quote)).toEqual(["new-q"]);
+      expect(store.meltQuotes).toHaveLength(0);
+    });
+
+    it("keeps a bolt12 quote that a surviving payment still references", async () => {
+      const store = usePaymentHistoryStore();
+      await store.addPayment({
+        quote: "offer-q",
+        amount: 100,
+        request: "lno1offer",
+        memo: "",
+        date: "2026-03-01T00:00:00.000Z",
+        status: "paid",
+        mint,
+        unit: "sat",
+        type: PaymentMethod.Bolt12,
+        mintQuote: {
+          quote: "offer-q",
+          request: "lno1offer",
+          unit: "sat",
+          amount: null,
+          amount_paid: 150,
+          amount_issued: 150,
+        },
+      });
+      await store.addPayment({
+        id: "subpayment:1",
+        quote: "offer-q",
+        parentQuote: "offer-q",
+        amount: 50,
+        request: "lno1offer",
+        memo: "",
+        date: "2026-03-02T00:00:00.000Z",
+        status: "paid",
+        mint,
+        unit: "sat",
+        type: PaymentMethod.Bolt12Subpayment,
+      });
+
+      await store.deleteOldPaidPayments(1);
+
+      expect((await cashuDb.paymentHistory.toArray()).map((p) => p.id)).toEqual(
+        ["subpayment:1"]
+      );
+      expect(await cashuDb.mintQuotes.get("offer-q")).toBeDefined();
+    });
+
+    it("leaves pending, unpaid, queued and reserved quotes untouched", async () => {
+      const store = usePaymentHistoryStore();
+      await store.addPayment(
+        bolt11Mint("old-q", "2026-03-01T00:00:00.000Z", "paid", "ISSUED")
+      );
+      await store.addPayment(
+        bolt11Mint("pending-q", "2026-03-02T00:00:00.000Z", "pending", "UNPAID")
+      );
+      await store.addPayment(
+        bolt11Mint("new-q", "2026-03-03T00:00:00.000Z", "paid", "ISSUED")
+      );
+      // Orphaned quote rows that must survive the sweep.
+      await cashuDb.mintQuotes.bulkPut([
+        {
+          quote: "orphan-paid-q",
+          method: PaymentMethod.Bolt11,
+          request: "x",
+          unit: "sat",
+          state: "PAID",
+        },
+        {
+          quote: "orphan-queued-q",
+          method: PaymentMethod.Bolt11,
+          request: "x",
+          unit: "sat",
+          state: "ISSUED",
+        },
+        {
+          quote: "orphan-issued-q",
+          method: PaymentMethod.Bolt11,
+          request: "x",
+          unit: "sat",
+          state: "ISSUED",
+        },
+      ]);
+      await cashuDb.meltQuotes.bulkPut([
+        {
+          quote: "orphan-pending-melt-q",
+          method: PaymentMethod.Bolt11,
+          state: "PENDING",
+        },
+        {
+          quote: "orphan-reserved-melt-q",
+          method: PaymentMethod.Bolt11,
+          state: "PAID",
+        },
+      ]);
+      await cashuDb.proofs.put({
+        secret: "s",
+        id: "keyset",
+        C: "c",
+        amount: 1,
+        reserved: true,
+        quote: "orphan-reserved-melt-q",
+      } as any);
+
+      await store.deleteOldPaidPayments(1, ["orphan-queued-q"]);
+
+      expect(
+        (await cashuDb.paymentHistory.toArray()).map((p) => p.quote).sort()
+      ).toEqual(["new-q", "pending-q"]);
+      expect(
+        (await cashuDb.mintQuotes.toArray()).map((q) => q.quote).sort()
+      ).toEqual(["new-q", "orphan-paid-q", "orphan-queued-q", "pending-q"]);
+      expect(
+        (await cashuDb.meltQuotes.toArray()).map((q) => q.quote).sort()
+      ).toEqual(["orphan-pending-melt-q", "orphan-reserved-melt-q"]);
+    });
+
+    it("sweeps settled orphans even when no payment needs pruning", async () => {
+      const store = usePaymentHistoryStore();
+      await store.addPayment(
+        bolt11Mint("kept-q", "2026-03-01T00:00:00.000Z", "paid", "PAID")
+      );
+      await cashuDb.mintQuotes.bulkPut([
+        {
+          quote: "issued-q",
+          method: PaymentMethod.Bolt11,
+          request: "x",
+          unit: "sat",
+          state: "ISSUED",
+        },
+        {
+          quote: "offer-done-q",
+          method: PaymentMethod.Bolt12,
+          request: "x",
+          unit: "sat",
+          amount_paid: 50,
+          amount_issued: 50,
+        },
+        {
+          quote: "offer-unclaimed-q",
+          method: PaymentMethod.Bolt12,
+          request: "x",
+          unit: "sat",
+          amount_paid: 80,
+          amount_issued: 50,
+        },
+        {
+          quote: "onchain-unclaimed-q",
+          method: PaymentMethod.Onchain,
+          request: "x",
+          unit: "sat",
+          amount_paid: 1000,
+          amount_issued: 0,
+        },
+        {
+          quote: "unknown-method-q",
+          method: "unknown" as any,
+          request: "x",
+          unit: "sat",
+        },
+      ]);
+
+      await store.deleteOldPaidPayments(200);
+
+      expect(await cashuDb.paymentHistory.count()).toBe(1);
+      expect(
+        (await cashuDb.mintQuotes.toArray()).map((q) => q.quote).sort()
+      ).toEqual([
+        "kept-q",
+        "offer-unclaimed-q",
+        "onchain-unclaimed-q",
+        "unknown-method-q",
+      ]);
+    });
+  });
 });
