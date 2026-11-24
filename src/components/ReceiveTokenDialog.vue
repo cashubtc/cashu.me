@@ -256,7 +256,9 @@
                     @click="handleReceive"
                     color="primary"
                     rounded
-                    :disabled="addMintBlocking || isReceiving"
+                    :disabled="
+                      addMintBlocking || isReceiving || addingToHistory
+                    "
                     :loading="swapBlocking || isReceiving"
                   >
                     {{
@@ -662,13 +664,12 @@ export default defineComponent({
         this.showReceiveTokens = false;
         return;
       }
-      const tokensStore = useTokensStore();
       const decodedToken = this.decodeToken(tokenStr);
       if (!decodedToken) return;
 
       this.addingToHistory = true;
       try {
-        await tokensStore.addPendingToken({
+        await this.addPendingToken({
           amount: decodedToken.amount,
           token: tokenStr,
           mint: token.getMint(decodedToken),
@@ -683,7 +684,11 @@ export default defineComponent({
       } finally {
         this.addingToHistory = false;
       }
-      this.showReceiveTokens = false;
+      // Another token (e.g. from a Nostr message) may have opened the dialog
+      // during the save; only close it if it still shows this token.
+      if (this.receiveData.tokensBase64 === tokenStr) {
+        this.showReceiveTokens = false;
+      }
       // show success notification
       this.notifySuccess(
         this.$i18n.t(

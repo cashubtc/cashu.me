@@ -159,6 +159,9 @@ export default defineComponent({
       try {
         // Validate before prepareToken can swap or reserve any wallet proofs.
         this.getPaymentRequestTransport(this.sendData.paymentRequest);
+        // Keep the request: once prepareToken has moved the proofs, closing or
+        // changing the dialog must not cancel or redirect their delivery.
+        const paymentRequest = this.sendData.paymentRequest;
         let tokenStr = this.sendData.tokensBase64;
         if (this.prepareToken) {
           const prepared = await this.prepareToken();
@@ -170,7 +173,7 @@ export default defineComponent({
           throw new Error("No ecash available for payment request.");
         }
         const success = await this.parseAndPayPaymentRequest(
-          this.sendData.paymentRequest,
+          paymentRequest,
           tokenStr
         );
         if (success) {

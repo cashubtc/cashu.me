@@ -666,8 +666,12 @@ export default defineComponent({
         this.deletingToken = false;
       }
       this.removeOutgoingTokenFromChecker(tokenToDelete);
-      this.showSendTokens = false;
-      this.showDeleteDialog = false;
+      // Another token may have been opened during the delete; only close the
+      // view if it still shows the deleted token.
+      if (this.sendData.tokensBase64 === tokenToDelete) {
+        this.showSendTokens = false;
+        this.showDeleteDialog = false;
+      }
     },
     copyTokens: async function () {
       try {

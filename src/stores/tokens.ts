@@ -315,7 +315,7 @@ export const useTokensStore = defineStore("tokens", {
             const stored = await cashuDb.ecashHistory.get(original.id);
             if (stored?.token !== tokenToSplit) return false;
             await cashuDb.ecashHistory.put(
-              toStorable({ ...original, ...spentPart })
+              toStorable({ ...stored, ...spentPart })
             );
             await cashuDb.ecashHistory.put(toStorable(remainder));
             return true;
