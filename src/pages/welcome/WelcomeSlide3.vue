@@ -63,6 +63,7 @@
           :label="$t('WelcomeSlide3.inputs.checkbox.label')"
           color="primary"
           class="validation-checkbox"
+          :disable="hideMnemonic"
         />
       </div>
     </div>
