@@ -51,6 +51,11 @@ export type TableMirrorOptions<T> = {
    * share a table when each loads a disjoint slice of it.
    */
   load?: (table: Table<any, any>) => Promise<any[]>;
+  /**
+   * How an item added before hydration combines with a stored item of the
+   * same key. Defaults to the in-memory item.
+   */
+  merge?: (stored: T, early: T) => T;
 };
 
 /** Plain, structured-clone-safe copy of an item (strips Vue proxies). */
@@ -150,8 +155,12 @@ export function createTableMirror<T>(
             ? options.fromRow(stripPosition(row))
             : (stripPosition(row) as T)
         );
-        // Items added before hydration win over stored rows with the same key.
+        // Items added before hydration are merged over stored rows with the
+        // same key (by default they win).
         const early = items.value;
+        const storedByKey = new Map(
+          stored.map((item) => [keyString(options.keyOf(item)), item])
+        );
         const earlyKeys = new Set(
           early.map((item) => keyString(options.keyOf(item)))
         );
@@ -159,7 +168,10 @@ export function createTableMirror<T>(
           ...stored.filter(
             (item) => !earlyKeys.has(keyString(options.keyOf(item)))
           ),
-          ...early,
+          ...early.map((item) => {
+            const match = storedByKey.get(keyString(options.keyOf(item)));
+            return match && options.merge ? options.merge(match, item) : item;
+          }),
         ];
         isHydrated = true;
         if (early.length) schedule();

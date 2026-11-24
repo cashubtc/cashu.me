@@ -29,6 +29,8 @@ export class CashuDexie extends Dexie {
   mints!: Table<any, string>;
   mintKeys!: Table<any, [string, string]>;
   workerQueue!: Table<any, [string, string]>;
+  keysetCounters!: Table<{ id: string; counter: number }, string>;
+  p2pkKeys!: Table<any, string>;
 
   constructor(databaseName = "db") {
     super(databaseName);
@@ -95,6 +97,11 @@ export class CashuDexie extends Dexie {
     this.version(7).stores({
       workerQueue: "[kind+ref], kind",
     });
+    // v8: deterministic secret counters (current mnemonic) and P2PK keys
+    this.version(8).stores({
+      keysetCounters: "id",
+      p2pkKeys: "publicKey",
+    });
   }
 }
 
@@ -114,7 +121,38 @@ export type WalletTableSpec = {
   name: string;
   backup: boolean;
   normalize?: (row: any) => any;
+  /** Custom restore instead of bulkPut (e.g. merge without going backwards). */
+  restore?: (rows: any[]) => Promise<void>;
 };
+
+/**
+ * Store keyset counters, never lowering one that is already stored: a counter
+ * that goes backwards re-derives outputs the mint has already signed.
+ */
+export async function putKeysetCountersMax(
+  counters: { id: string; counter: number }[]
+) {
+  const valid = counters.filter(
+    (entry) => entry && entry.id && Number.isFinite(entry.counter)
+  );
+  await cashuDb.transaction("rw", cashuDb.keysetCounters, async () => {
+    const existing = await cashuDb.keysetCounters.bulkGet(
+      valid.map((entry) => entry.id)
+    );
+    const rows = new Map<string, any>();
+    valid.forEach((entry, index) => {
+      const stored = existing[index];
+      const previous = rows.get(entry.id);
+      const counter = Math.max(
+        entry.counter,
+        stored?.counter ?? 0,
+        previous?.counter ?? 0
+      );
+      rows.set(entry.id, { ...(stored || {}), ...entry, counter });
+    });
+    await cashuDb.keysetCounters.bulkPut([...rows.values()]);
+  });
+}
 
 export const BACKUP_TABLE_KEY_PREFIX = "cashu.dexie.db.";
 
@@ -132,6 +170,13 @@ export const WALLET_TABLES: WalletTableSpec[] = [
   { name: "mintKeys", backup: true },
   // pending payments to check, so a restored wallet still claims them
   { name: "workerQueue", backup: true },
+  {
+    name: "keysetCounters",
+    backup: true,
+    restore: (rows) => putKeysetCountersMax(rows),
+  },
+  // losing these loses access to ecash locked to them
+  { name: "p2pkKeys", backup: true },
 ];
 
 export function walletTableSpec(name: string): WalletTableSpec | undefined {

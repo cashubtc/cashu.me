@@ -1,5 +1,7 @@
 import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+// wallet.ts creates stores at import time; load it first
+import "src/stores/wallet";
 import { cashuDb, useDexieStore, WALLET_TABLES } from "src/stores/dexie";
 import { moveLocalStorageKey } from "src/stores/legacyStorage";
 import {

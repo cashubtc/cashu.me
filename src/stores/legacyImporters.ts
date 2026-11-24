@@ -3,6 +3,8 @@ import { moveLocalStorageKey } from "./legacyStorage";
 import { toMirrorRows } from "./tableMirror";
 import type { SeenEventRow } from "./seenEvents";
 import { importLegacyMints } from "./mintStorage";
+import { importLegacyKeysetCounters } from "./counterStorage";
+import { importLegacyP2PKKeys } from "./p2pk";
 import {
   importLegacyWorkerQueues,
   LEGACY_WORKER_QUEUE_KEYS,
@@ -94,6 +96,10 @@ export { importLegacyMints };
 
 export { importLegacyWorkerQueues };
 
+// ---- Phase 4 ---------------------------------------------------------------
+
+export { importLegacyKeysetCounters, importLegacyP2PKKeys };
+
 export const LEGACY_KEY_IMPORTERS: LegacyKeyImporter[] = [
   {
     key: "cashu.ndk.mintRecommendations",
@@ -110,6 +116,8 @@ export const LEGACY_KEY_IMPORTERS: LegacyKeyImporter[] = [
     key,
     run: importLegacyWorkerQueues,
   })),
+  { key: "cashu.keysetCounters", run: importLegacyKeysetCounters },
+  { key: "cashu.P2PKKeys", run: importLegacyP2PKKeys },
 ];
 
 export async function importLegacyLocalStorageKeys() {

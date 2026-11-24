@@ -194,3 +194,20 @@ p2pkKeys:       "publicKey, used",
 ## 6. Expected outcome
 
 After Phases 1–3, what remains in localStorage is a few dozen fixed-size scalars, some secrets, and the price map, probably well under 50 KB however long a wallet has been in use. Everything that grows over time is in indexed tables. All of those tables, apart from rebuildable caches, are included automatically in backup, restore and wipe.
+
+## 7. As built
+
+All phases are implemented (Dexie `version(5)` to `version(8)`, `migrations.ts` v6 to v9). Where the implementation differs from the proposal above:
+
+- **Write-through mirrors instead of explicit write actions.** The stores mutate their arrays in place in many places, so routing every write through new actions would have touched a lot of code. `createTableMirror` (`src/stores/tableMirror.ts`) keeps the in-memory array and diffs it per row, writing changed rows and deleting removed ones. Nothing is written before `hydrate()` has run. Payment requests, mints, worker queues, keyset counters and P2PK keys all use it. The dev-only "divergence watcher" from Phase 2 isn't needed with this approach.
+- **Importers double as restore paths.** Each moved key has an idempotent importer in `src/stores/legacyImporters.ts`. Migrations call them, and `restoreFromBackup` runs them after writing an old backup's keys, so old backup files land in the new tables.
+- **Startup gate.** `walletDataReady()` (`src/stores/bootstrap.ts`) runs from a router `beforeEach` guard, inside `navigator.locks.request("cashu-migrations")`. Every route, not just the wallet page, waits for it.
+- **`flushPendingWrites()`** is awaited before the app reloads or navigates away: backup restore, finishing onboarding, MOTD navigation and wallet wipe.
+- **Phase 1:** `receivedPaymentIds` and `selectedPRIndex` are kept as they were. The `ecashHistory.paymentRequestId` index doesn't cover incoming payments, so dropping them would have changed behaviour. NWC seen ids are pruned by age (twice the 24 h subscription window) instead of the 1,000-id cap.
+- **Phase 2:** `mintKeys` is keyed by `[mintUrl+id]`. Keys for inactive keysets are not loaded lazily yet.
+- **Phase 3:** no `nextCheckAt` index. The queue entries were already references (quote id plus scheduling fields), not copies.
+- **Phase 4:**
+  - `keysetCounters` holds the current mnemonic's counters, keyed by keyset id, the same as the old localStorage key. `cashu.oldMnemonicCounters` stays in localStorage because it contains mnemonics.
+  - Counters never go backwards. The migration, restore (`putKeysetCountersMax`) and "changed before load" merges all take the maximum, and a counter source created before load is advanced to the stored values.
+  - **Not done:** bumping the counter in the same IndexedDB transaction as the proof and quote writes. That needs the mint/melt/swap flows restructured and is a follow-up.
+- **Not done from §3.4:** renaming `cleanUpLocalStorage`, and pruning orphaned quote rows. The orphaned-rows fix is in a separate PR.

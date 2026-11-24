@@ -62,10 +62,13 @@ export async function restoreBackupTable(name: string, value: string) {
     console.warn(`Skipping unknown backup table ${name}`);
     return;
   }
-  const rows = parseBackupTable(value);
-  await cashuDb
-    .table(name)
-    .bulkPut(spec.normalize ? rows.map(spec.normalize) : rows);
+  const parsed = parseBackupTable(value);
+  const rows = spec.normalize ? parsed.map(spec.normalize) : parsed;
+  if (spec.restore) {
+    await spec.restore(rows);
+  } else {
+    await cashuDb.table(name).bulkPut(rows);
+  }
 }
 
 export const useStorageStore = defineStore("storage", {

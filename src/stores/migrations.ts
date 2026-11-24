@@ -282,6 +282,19 @@ export const useMigrationsStore = defineStore("migrations", {
         },
       });
 
+      this.registerMigration({
+        version: 9,
+        name: "Move keyset counters and P2PK keys to Dexie",
+        description:
+          "Moves cashu.keysetCounters (never lowering a counter) and cashu.P2PKKeys to IndexedDB",
+        execute: async () => {
+          const { importLegacyKeysetCounters, importLegacyP2PKKeys } =
+            await import("./legacyImporters");
+          await importLegacyKeysetCounters();
+          await importLegacyP2PKKeys();
+        },
+      });
+
       // Add more migrations here in the future
     },
   },

@@ -37,9 +37,19 @@ async function loadWalletData() {
     await migrations.runMigrations();
   });
 
-  // mints first: proofs, history and payment requests resolve against them
-  const { useMintsStore } = await import("./mints");
-  await useMintsStore().init();
+  // Wallet secrets state and mints first: everything else resolves against
+  // the mints, and no output may be derived before the counters are loaded.
+  const [{ useMintsStore }, { useWalletStore: useWallet }, { useP2PKStore }] =
+    await Promise.all([
+      import("./mints"),
+      import("./wallet"),
+      import("./p2pk"),
+    ]);
+  await Promise.all([
+    useMintsStore().init(),
+    useWallet().initKeysetCounters(),
+    useP2PKStore().init(),
+  ]);
 
   const [
     { useWalletStore },
