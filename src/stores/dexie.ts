@@ -3,6 +3,7 @@ import Dexie, { Table } from "dexie";
 import { useLocalStorage } from "@vueuse/core";
 import { moveLocalStorageKey } from "./legacyStorage";
 import type { WalletProof } from "./mints";
+import type { SeenEventRow } from "./seenEvents";
 import {
   cashuAmountToNumber,
   normalizeCashuQuoteAmounts,
@@ -23,6 +24,8 @@ export class CashuDexie extends Dexie {
   mintQuotes!: Table<any>;
   meltQuotes!: Table<any>;
   ecashHistory!: Table<any>;
+  seenEvents!: Table<SeenEventRow, [string, string]>;
+  paymentRequests!: Table<any, string>;
 
   constructor(databaseName = "db") {
     super(databaseName);
@@ -75,6 +78,11 @@ export class CashuDexie extends Dexie {
             Object.assign(quote, normalizeCashuQuoteAmounts(quote));
           });
       });
+    // v5: data moved out of localStorage (see migrations.ts v6)
+    this.version(5).stores({
+      seenEvents: "[scope+id], scope, created_at",
+      paymentRequests: "id",
+    });
   }
 }
 
@@ -105,6 +113,9 @@ export const WALLET_TABLES: WalletTableSpec[] = [
   { name: "mintQuotes", backup: true, normalize: normalizeCashuQuoteAmounts },
   { name: "meltQuotes", backup: true, normalize: normalizeCashuQuoteAmounts },
   { name: "ecashHistory", backup: true },
+  // backed up so a restored wallet does not handle old DMs and NWC requests again
+  { name: "seenEvents", backup: true },
+  { name: "paymentRequests", backup: true },
 ];
 
 export function walletTableSpec(name: string): WalletTableSpec | undefined {

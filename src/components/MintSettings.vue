@@ -466,6 +466,7 @@ export default defineComponent({
     ...mapActions(useMintRecommendationsStore, [
       "discover",
       "startSubscriptions",
+      "hydrateFromDb",
     ]),
     ...mapActions(useP2PKStore, ["generateKeypair", "showKeyDetails"]),
     ...mapActions(useMintsStore, [
@@ -661,7 +662,10 @@ export default defineComponent({
       });
     },
   },
-  created: function () {},
+  created: function () {
+    // recommendations are rebuilt from the local reviews DB (no network)
+    this.hydrateFromDb();
+  },
 });
 </script>
 

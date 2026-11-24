@@ -17,7 +17,7 @@ import {
   WALLET_TABLES,
   walletTableSpec,
 } from "./dexie";
-import { importLegacyLocalStorageKeys } from "./legacyStorage";
+import { importLegacyLocalStorageKeys } from "./legacyImporters";
 import { deserializeProofs, JSONInt } from "@cashu/cashu-ts";
 
 export function stringifyBackupTable(rows: unknown[]): string {

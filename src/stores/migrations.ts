@@ -195,6 +195,14 @@ export const useMigrationsStore = defineStore("migrations", {
       console.log("Migrated historyTokens to Dexie ecashHistory");
     },
 
+    async migrateNostrStateAndPaymentRequestsToDexie() {
+      const legacy = await import("./legacyImporters");
+      await legacy.importLegacyMintRecommendations();
+      await legacy.importLegacyNip17SeenEvents();
+      await legacy.importLegacyNwcProcessedRequestIds();
+      await legacy.importLegacyPaymentRequests();
+    },
+
     // Initialize migrations
     initMigrations() {
       // Register the first migration
@@ -237,6 +245,15 @@ export const useMigrationsStore = defineStore("migrations", {
         name: "Migrate historyTokens to Dexie ecashHistory",
         description: "Moves ecash history from localStorage to Dexie",
         execute: async () => await this.migrateHistoryTokensToEcashHistory(),
+      });
+
+      this.registerMigration({
+        version: 6,
+        name: "Move seen events, payment requests and mint recs to Dexie",
+        description:
+          "Moves NIP-17 and NWC seen event ids to seenEvents, our payment requests to paymentRequests, and drops the cached mint recommendations",
+        execute: async () =>
+          await this.migrateNostrStateAndPaymentRequestsToDexie(),
       });
 
       // Add more migrations here in the future

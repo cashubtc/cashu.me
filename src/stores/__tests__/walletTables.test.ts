@@ -1,11 +1,11 @@
 import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { cashuDb, useDexieStore, WALLET_TABLES } from "src/stores/dexie";
+import { moveLocalStorageKey } from "src/stores/legacyStorage";
 import {
   importLegacyLocalStorageKeys,
   LEGACY_KEY_IMPORTERS,
-  moveLocalStorageKey,
-} from "src/stores/legacyStorage";
+} from "src/stores/legacyImporters";
 import { exportBackupTables, restoreBackupTable } from "src/stores/storage";
 
 describe("wallet table registry", () => {

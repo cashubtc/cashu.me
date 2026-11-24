@@ -39,23 +39,3 @@ export async function moveLocalStorageKey<T>(
   console.log(`Moved ${opts.key} (${raw.length} bytes) to IndexedDB`);
   return true;
 }
-
-/**
- * localStorage keys that now live in IndexedDB, with the function that moves
- * them. Versioned migrations call these on upgrade, and `restoreFromBackup`
- * calls `importLegacyLocalStorageKeys` so that backup files written by older
- * versions land in the new tables instead of in localStorage.
- */
-export type LegacyKeyImporter = {
-  key: string;
-  run: () => Promise<void>;
-};
-
-export const LEGACY_KEY_IMPORTERS: LegacyKeyImporter[] = [];
-
-export async function importLegacyLocalStorageKeys() {
-  for (const importer of LEGACY_KEY_IMPORTERS) {
-    if (localStorage.getItem(importer.key) == null) continue;
-    await importer.run();
-  }
-}

@@ -37,13 +37,16 @@ async function loadWalletData() {
     await migrations.runMigrations();
   });
 
-  const [{ useWalletStore }, { useTokensStore }] = await Promise.all([
-    import("./wallet"),
-    import("./tokens"),
-  ]);
+  const [{ useWalletStore }, { useTokensStore }, { usePRStore }] =
+    await Promise.all([
+      import("./wallet"),
+      import("./tokens"),
+      import("./payment-request"),
+    ]);
   await Promise.all([
     useWalletStore().initPaymentHistory(),
     useTokensStore().initEcashHistory(),
+    usePRStore().init(),
   ]);
 
   void requestPersistentStorage();

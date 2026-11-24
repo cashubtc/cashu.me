@@ -20,6 +20,9 @@ import type { HistoryToken } from "./tokens";
 import token from "src/js/token";
 import { notifySuccess, notifyWarning } from "src/js/notify";
 import { useLocalStorage } from "@vueuse/core";
+import { markRaw } from "vue";
+import { cashuDb } from "./dexie";
+import { createTableMirror } from "./tableMirror";
 import { v4 as uuidv4 } from "uuid";
 import { nip19 } from "nostr-tools";
 
@@ -93,20 +96,25 @@ export type OurPaymentRequest = {
 };
 
 export const usePRStore = defineStore("payment-request", {
-  state: () => ({
-    showPRDialog: false,
-    showPRKData: "" as string,
-    enablePaymentRequest: useLocalStorage<boolean>("cashu.pr.enable", true),
-    receivePaymentRequestsAutomatically: useLocalStorage<boolean>(
-      "cashu.pr.receive",
-      false
-    ),
-    ourPaymentRequests: useLocalStorage<OurPaymentRequest[]>(
-      "cashu.pr.ours",
-      []
-    ),
-    selectedPRIndex: useLocalStorage<number>("cashu.pr.selected_index", 0),
-  }),
+  state: () => {
+    // Stored in the paymentRequests table; loaded by init() at startup.
+    const ourPaymentRequestsTable = createTableMirror<OurPaymentRequest>(
+      cashuDb.paymentRequests,
+      { keyOf: (request) => request.id }
+    );
+    return {
+      showPRDialog: false,
+      showPRKData: "" as string,
+      enablePaymentRequest: useLocalStorage<boolean>("cashu.pr.enable", true),
+      receivePaymentRequestsAutomatically: useLocalStorage<boolean>(
+        "cashu.pr.receive",
+        false
+      ),
+      ourPaymentRequests: ourPaymentRequestsTable.items,
+      ourPaymentRequestsTable: markRaw(ourPaymentRequestsTable),
+      selectedPRIndex: useLocalStorage<number>("cashu.pr.selected_index", 0),
+    };
+  },
   getters: {
     currentPaymentRequest(state): OurPaymentRequest | undefined {
       if (!state.ourPaymentRequests.length) return undefined;
@@ -118,6 +126,9 @@ export const usePRStore = defineStore("payment-request", {
     },
   },
   actions: {
+    async init() {
+      await this.ourPaymentRequestsTable.hydrate();
+    },
     newPaymentRequest(
       amount?: number,
       memo?: string,

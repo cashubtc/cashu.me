@@ -2,7 +2,6 @@ import { defineStore } from "pinia";
 import NDK, { NDKEvent, NDKFilter, NDKKind } from "@nostr-dev-kit/ndk";
 import { useSettingsStore } from "./settings";
 import { useNostrStore } from "./nostr";
-import { useLocalStorage } from "@vueuse/core";
 import Dexie from "dexie";
 
 export type MintReview = {
@@ -51,11 +50,8 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
     inflightInfo: new Set() as Set<string>,
     infoTimeoutMs: 10000,
     httpInfoFetchIntervalSeconds: 60 * 60, // 1 hour
-    // Aggregated list by URL (persisted)
-    recommendations: useLocalStorage<MintRecommendation[]>(
-      "cashu.ndk.mintRecommendations",
-      []
-    ),
+    // Aggregated list by URL, rebuilt from the mintReviews DB (hydrateFromDb)
+    recommendations: [] as MintRecommendation[],
     subsActive: false,
   }),
   actions: {

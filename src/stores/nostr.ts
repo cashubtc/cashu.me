@@ -38,11 +38,10 @@ import { useSendTokensStore } from "./sendTokensStore";
 import { usePRStore } from "./payment-request";
 import token from "../js/token";
 import { HistoryToken } from "./tokens";
+import { SeenEventLog } from "./seenEvents";
 
-type NostrEventLog = {
-  id: string;
-  created_at: number;
-};
+// Gift-wrapped DMs we already handled; forgotten after 10 days.
+export const nip17SeenEvents = new SeenEventLog("nip17", 10 * 24 * 60 * 60);
 
 export enum SignerType {
   NIP07 = "NIP07",
@@ -87,10 +86,6 @@ export const useNostrStore = defineStore("nostr", {
     lastEventTimestamp: useLocalStorage<number>(
       "cashu.ndk.lastEventTimestamp",
       0
-    ),
-    nip17EventIdsWeHaveSeen: useLocalStorage<NostrEventLog[]>(
-      "cashu.ndk.nip17EventIdsWeHaveSeen",
-      []
     ),
   }),
   getters: {
@@ -398,6 +393,7 @@ export const useNostrStore = defineStore("nostr", {
       }
     },
     subscribeToNip17DirectMessages: async function () {
+      await nip17SeenEvents.load();
       await this.walletSeedGenerateKeyPair();
       await this.initNdkReadOnly();
       let nip17DirectMessageEvents: Set<NDKEvent> = new Set();
@@ -420,23 +416,10 @@ export const useNostrStore = defineStore("nostr", {
         );
 
         sub.on("event", (wrapEvent: NDKEvent) => {
-          const eventLog = {
-            id: wrapEvent.id,
-            created_at: wrapEvent.created_at,
-          } as NostrEventLog;
-          if (this.nip17EventIdsWeHaveSeen.find((e) => e.id === wrapEvent.id)) {
-            // console.log(`### Already seen NIP-17 event ${wrapEvent.id} (time: ${wrapEvent.created_at})`);
+          if (!nip17SeenEvents.markSeen(wrapEvent.id, wrapEvent.created_at)) {
             return;
-          } else {
-            console.log(`### New event ${wrapEvent.id}`);
-            this.nip17EventIdsWeHaveSeen.push(eventLog);
-            // remove all events older than 10 days to keep the list small
-            const fourDaysAgo =
-              Math.floor(Date.now() / 1000) - 10 * 24 * 60 * 60;
-            this.nip17EventIdsWeHaveSeen = this.nip17EventIdsWeHaveSeen.filter(
-              (e) => e.created_at > fourDaysAgo
-            );
           }
+          console.log(`### New event ${wrapEvent.id}`);
           let dmEvent: NDKEvent;
           let content: string;
           try {

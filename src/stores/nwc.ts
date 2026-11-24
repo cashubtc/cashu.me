@@ -15,13 +15,15 @@ import { useProofsStore } from "./proofs";
 import { notifyWarning } from "../js/notify";
 import { useNostrStore } from "./nostr";
 import { decode as decodeBolt11 } from "light-bolt11-decoder";
+import { SeenEventLog } from "./seenEvents";
 
-type NWCConnection = {
+export type NWCConnection = {
   walletPublicKey: string;
   walletPrivateKey: string;
   connectionSecret: string;
   connectionPublicKey: string;
   allowanceLeft: number;
+  /** Legacy: moved to the seenEvents table by migration v6. */
   processedRequestIds?: string[];
 };
 
@@ -63,7 +65,19 @@ const NWCKind = {
 };
 
 const NWC_SUBSCRIPTION_WINDOW_SECONDS = 86400; // 24 hours
-const NWC_MAX_TRACKED_REQUEST_IDS = 1000;
+
+// Requests older than the subscription window are ignored anyway, so their
+// ids only need to be remembered a little longer than that.
+const nwcSeenRequestLogs = new Map<string, SeenEventLog>();
+export function nwcSeenRequests(conn: { connectionPublicKey: string }) {
+  const scope = `nwc:${conn.connectionPublicKey}`;
+  let log = nwcSeenRequestLogs.get(scope);
+  if (!log) {
+    log = new SeenEventLog(scope, 2 * NWC_SUBSCRIPTION_WINDOW_SECONDS);
+    nwcSeenRequestLogs.set(scope, log);
+  }
+  return log;
+}
 
 export const useNWCStore = defineStore("nwc", {
   state: () => ({
@@ -470,6 +484,8 @@ export const useNWCStore = defineStore("nwc", {
       await this.generateNWCConnection();
       // we only support one connection for now
       const conn = this.connections[0];
+      const seenRequests = nwcSeenRequests(conn);
+      await seenRequests.load();
 
       const currentUnitTime = Math.floor(Date.now() / 1000);
       const subscribeSince = currentUnitTime - NWC_SUBSCRIPTION_WINDOW_SECONDS; // 24 hours
@@ -511,23 +527,10 @@ export const useNWCStore = defineStore("nwc", {
           return; // ignore events older than 24 hours
         }
 
-        // Initialize processedRequestIds array if not present on connection
-        if (!conn.processedRequestIds) {
-          conn.processedRequestIds = [];
-        }
-
-        // Check if we have already processed this event ID for this connection
-        if (conn.processedRequestIds.includes(event.id)) {
+        // Skip requests we already handled for this connection
+        if (!seenRequests.markSeen(event.id, event.created_at)) {
           return;
         }
-
-        // Track the processed request ID
-        conn.processedRequestIds.push(event.id);
-        if (conn.processedRequestIds.length > NWC_MAX_TRACKED_REQUEST_IDS) {
-          conn.processedRequestIds.shift();
-        }
-        // Re-assign to trigger Vue/Pinia LocalStorage watch
-        this.connections = [...this.connections];
 
         console.log("### NWC request!");
         console.log("### event", event);
