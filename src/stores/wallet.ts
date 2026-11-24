@@ -52,6 +52,8 @@ import {
 
 import _ from "underscore";
 import token from "src/js/token";
+import { sha256 } from "@noble/hashes/sha2.js";
+import { bytesToHex, utf8ToBytes } from "@noble/hashes/utils.js";
 import { sumProofAmounts } from "src/js/proofs";
 import {
   notifyApiError,
@@ -79,6 +81,7 @@ import {
   ProofState,
   KeyChain,
   type CounterSource,
+  type OperationCounters,
   createEphemeralCounterSource,
   StaleKeysetError,
   // ConsoleLogger,
@@ -173,6 +176,72 @@ type KeysetCounter = {
   id: string;
   counter: number;
 };
+
+// A token receive whose new ecash the mint may have signed: kept until the
+// wallet has stored that ecash, so it can be fetched again (NUT-09) if the
+// answer never arrived (app closed, page reloaded, connection lost).
+type PendingReceive = {
+  token: string;
+  mint: string;
+  unit: string;
+  keysetId: string;
+  start: number;
+  count: number;
+  // What the new ecash adds up to: the token's amount less the mint's fee.
+  amount: number;
+  // Which seed reserved the counters.
+  seed: string;
+  createdAt: number;
+  // The mint answered this attempt with an error. It then usually signed
+  // nothing for it, but the error can also answer a resent copy of a request
+  // it did sign, so this only settles a tie between attempts.
+  refused?: boolean;
+};
+
+// What a pending receive turned out to be: the records looked at, the one
+// whose ecash fits (if any) and that ecash, still unspent.
+type FoundReceive = {
+  records: PendingReceive[];
+  match?: PendingReceive;
+  proofs: Proof[];
+};
+
+const PENDING_RECEIVES_KEY = "cashu.pendingReceives";
+
+// While the token is not spent, its swap request may still be on its way to
+// the mint, so the record is kept this long before it is dropped.
+const PENDING_RECEIVE_WAIT_MS = 10 * 60 * 1000;
+
+function readPendingReceives(): PendingReceive[] {
+  try {
+    const stored = JSON.parse(
+      localStorage.getItem(PENDING_RECEIVES_KEY) ?? "[]"
+    );
+    return Array.isArray(stored)
+      ? stored.filter((r) => r && typeof r === "object")
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+function writePendingReceives(receives: PendingReceive[]) {
+  // Written at once, before the swap request leaves the page.
+  localStorage.setItem(PENDING_RECEIVES_KEY, JSON.stringify(receives));
+}
+
+function sameAttempt(a: PendingReceive, b: PendingReceive) {
+  return (
+    a.token === b.token &&
+    a.seed === b.seed &&
+    a.keysetId === b.keysetId &&
+    a.start === b.start
+  );
+}
+
+function seedFingerprint(mnemonic: string) {
+  return bytesToHex(sha256(utf8ToBytes(mnemonic))).slice(0, 16);
+}
 
 const receiveStore = useReceiveTokensStore();
 const tokenStore = useTokensStore();
@@ -877,27 +946,59 @@ export const useWalletStore = defineStore("wallet", {
       try {
         // redeem
         const privkey = receiveStore.receiveData.p2pkPrivateKey;
-        let proofs: Proof[];
+        let receivedProofs: Proof[];
         try {
-          proofs = await this.retryOnceOnRecoverableError(
+          receivedProofs = await this.retryOnceOnRecoverableError(
             mintWallet.keysetId,
-            async () =>
-              mintWallet.ops
-                .receive(receiveStore.receiveData.tokensBase64)
-                .asDeterministic()
-                .privkey(privkey)
-                .proofsWeHave(mintStore.mintUnitProofs(mint, historyToken.unit))
-                .run()
+            async () => {
+              let attempt: PendingReceive | undefined;
+              try {
+                return await mintWallet.ops
+                  .receive(receiveStore.receiveData.tokensBase64)
+                  .asDeterministic()
+                  .privkey(privkey)
+                  .proofsWeHave(
+                    mintStore.mintUnitProofs(mint, historyToken.unit)
+                  )
+                  .onCountersReserved((counters) => {
+                    // The receive has loaded the keysets by now, so the fee
+                    // is known.
+                    attempt = this.rememberPendingReceive(
+                      historyToken,
+                      counters,
+                      inputAmount -
+                        cashuAmountOrZero(mintWallet.getFeesForProofs(proofs))
+                    );
+                  })
+                  .run();
+              } catch (error: any) {
+                if (attempt && error?.status >= 400 && error?.status < 500) {
+                  this.markPendingReceiveRefused(attempt);
+                }
+                throw error;
+              }
+            }
           );
-          await proofsStore.addProofs(proofs);
+          await proofsStore.addProofs(receivedProofs);
+          this.forgetPendingReceives(historyToken.token);
         } catch (error: any) {
           console.error(error);
-          throw new Error("Error receiving tokens: " + error);
+          // An earlier attempt may have been signed without the wallet
+          // hearing back: the token is spent, into this wallet's ecash.
+          const recovered = /already spent/i.test(String(error?.message))
+            ? await this.recoverPendingReceive(historyToken.token).catch(
+                () => null
+              )
+            : null;
+          if (!recovered?.length) {
+            throw new Error("Error receiving tokens: " + error);
+          }
+          receivedProofs = recovered;
         }
 
         p2pkStore.setPrivateKeyUsed(privkey);
 
-        const outputAmount = proofsStore.sumProofs(proofs);
+        const outputAmount = proofsStore.sumProofs(receivedProofs);
 
         // if token is already in history, set to paid, else add to history
         if (
@@ -1800,6 +1901,178 @@ export const useWalletStore = defineStore("wallet", {
         this.mnemonic = generateMnemonic(wordlist);
       }
       return this.mnemonic;
+    },
+    rememberPendingReceive(
+      historyToken: { token: string; mint: string; unit: string },
+      counters: OperationCounters,
+      amount: number
+    ): PendingReceive {
+      const record: PendingReceive = {
+        token: historyToken.token,
+        mint: historyToken.mint,
+        unit: historyToken.unit,
+        keysetId: counters.keysetId,
+        start: counters.start,
+        count: counters.count,
+        amount,
+        seed: seedFingerprint(this.mnemonic),
+        createdAt: Date.now(),
+      };
+      writePendingReceives([...readPendingReceives(), record]);
+      return record;
+    },
+    markPendingReceiveRefused(attempt: PendingReceive) {
+      writePendingReceives(
+        readPendingReceives().map((r) =>
+          sameAttempt(r, attempt) ? { ...r, refused: true } : r
+        )
+      );
+    },
+    forgetPendingReceives(tokenStr: string) {
+      writePendingReceives(
+        readPendingReceives().filter((r) => r.token !== tokenStr)
+      );
+    },
+    /*
+      Asks the mint what became of earlier receives of this token. Returns
+      null while the token is not spent and the swap may still reach the mint.
+      Otherwise asks the mint again (NUT-09) for the ecash each attempt may
+      have been signed for, and returns the one set that fits. Throws when the
+      mint cannot be asked. Stores nothing.
+    */
+    async findPendingReceive(
+      tokenStr: string,
+      tokenSpent = false
+    ): Promise<FoundReceive | null> {
+      const records = readPendingReceives().filter((r) => r.token === tokenStr);
+      // Counters reserved under another seed mean nothing with this one.
+      const seed = seedFingerprint(this.mnemonic);
+      const ours = records.filter((r) => r.seed === seed);
+      if (ours.length === 0) return { records, proofs: [] };
+      const wallet = await this.mintWallet(ours[0].mint, ours[0].unit);
+      if (!tokenSpent) {
+        const decoded = await token.decodeFull(tokenStr);
+        const states = await wallet.checkProofsStates(
+          decoded ? token.getProofs(decoded) : []
+        );
+        if (
+          states.length === 0 ||
+          states.some((s) => s.state !== CheckStateEnum.SPENT)
+        ) {
+          const waited = ours.every(
+            (r) => Date.now() - r.createdAt > PENDING_RECEIVE_WAIT_MS
+          );
+          return waited ? { records, proofs: [] } : null;
+        }
+      }
+      // A swap signs all of its outputs or none, and they add up to what the
+      // receive was worth. Ecash at these counters that does not fit belongs
+      // to another payment, such as the same seed's on another device.
+      const fits: { record: PendingReceive; proofs: Proof[] }[] = [];
+      for (const record of ours) {
+        const { proofs } = await wallet.restore(record.start, record.count, {
+          keysetId: record.keysetId,
+        });
+        if (
+          proofs.length === record.count &&
+          proofsStore.sumProofs(proofs) === record.amount
+        ) {
+          fits.push({ record, proofs });
+        }
+      }
+      // Only one attempt can have spent the token.
+      const pick =
+        fits.length > 1 ? fits.filter((f) => !f.record.refused) : fits;
+      if (pick.length !== 1) {
+        if (fits.length > 1) {
+          console.warn(
+            "[wallet] more than one set of ecash fits an earlier receive; not recovering it"
+          );
+        }
+        return { records, proofs: [] };
+      }
+      const states = await wallet.checkProofsStates(pick[0].proofs);
+      return {
+        records,
+        match: pick[0].record,
+        proofs: pick[0].proofs.filter(
+          (_, i) => states[i]?.state === CheckStateEnum.UNSPENT
+        ),
+      };
+    },
+    /*
+      Stores what findPendingReceive found and returns the ecash the wallet
+      did not hold yet. Call it holding the wallet lock.
+    */
+    async storePendingReceive(found: FoundReceive): Promise<Proof[]> {
+      const pending = readPendingReceives();
+      // A receive of the same token may have settled it in the meantime.
+      if (found.match && !pending.some((r) => sameAttempt(r, found.match!))) {
+        return [];
+      }
+      let added: Proof[] = [];
+      if (found.proofs.length) {
+        const stored = new Set(
+          (await proofsStore.addMissingProofs(found.proofs)).map(
+            (p) => p.secret
+          )
+        );
+        added = found.proofs.filter((p) => stored.has(p.secret));
+      }
+      writePendingReceives(
+        pending.filter((r) => !found.records.some((f) => sameAttempt(f, r)))
+      );
+      return added;
+    },
+    /*
+      For a receive that failed as already spent, holding the wallet lock:
+      stores the ecash an earlier attempt of the same token was signed for.
+    */
+    async recoverPendingReceive(tokenStr: string): Promise<Proof[]> {
+      const found = await this.findPendingReceive(tokenStr, true);
+      return found ? this.storePendingReceive(found) : [];
+    },
+    /*
+      Run when the wallet page opens: finishes receives the app was closed in
+      the middle of. The mint is asked without holding the wallet lock, which
+      is taken only to store what is still pending by then.
+    */
+    async recoverPendingReceives() {
+      const uIStore = useUiStore();
+      const tokens = [...new Set(readPendingReceives().map((r) => r.token))];
+      for (const tokenStr of tokens) {
+        let found: FoundReceive | null;
+        try {
+          found = await this.findPendingReceive(tokenStr);
+        } catch (error) {
+          console.error("[wallet] could not finish an earlier receive", error);
+          continue;
+        }
+        if (!found) continue;
+        await uIStore.lockMutex();
+        try {
+          const proofs = await this.storePendingReceive(found);
+          if (proofs.length === 0 || !found.match) continue;
+          const { mint, unit } = found.match;
+          const amount = proofsStore.sumProofs(proofs);
+          if (
+            tokenStore.historyTokens.find(
+              (t) => t.token === tokenStr && t.amount > 0
+            )
+          ) {
+            tokenStore.setTokenPaid(tokenStr);
+          } else {
+            tokenStore.addPaidToken({ amount, token: tokenStr, unit, mint });
+          }
+          notifySuccess(
+            this.t("wallet.notifications.received", {
+              amount: uIStore.formatCurrency(amount, unit),
+            })
+          );
+        } finally {
+          uIStore.unlockMutex();
+        }
+      }
     },
     async handleOutputsHaveAlreadyBeenSignedError(
       keysetId: string,

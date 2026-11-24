@@ -28,7 +28,7 @@ const h = vi.hoisted(() => {
     sumProofs: vi.fn((proofs) => proofs.reduce((sum, p) => sum + p.amount, 0)),
     removeProofs: vi.fn(),
     addProofs: vi.fn(),
-    addMissingProofs: vi.fn(),
+    addMissingProofs: vi.fn(async (proofs) => proofs ?? []),
     setReserved: vi.fn(),
     getProofsForQuote: vi.fn(),
   };
@@ -228,7 +228,7 @@ vi.mock("@cashu/cashu-ts", () => ({
   StaleKeysetError: h.StaleKeysetErrorMock,
   createRandomSecretKey: () => new Uint8Array(32).fill(1),
   getPubKeyFromPrivKey: () => new Uint8Array(33).fill(2),
-  CheckStateEnum: { SPENT: "SPENT" },
+  CheckStateEnum: { SPENT: "SPENT", UNSPENT: "UNSPENT" },
   MeltQuoteState: { PAID: "PAID", PENDING: "PENDING", UNPAID: "UNPAID" },
   MintQuoteState: { PAID: "PAID", ISSUED: "ISSUED", PENDING: "PENDING" },
   createEphemeralCounterSource: (initial) => {
@@ -2158,12 +2158,15 @@ describe("wallet store", () => {
           asDeterministic: vi.fn(() => ({
             privkey: vi.fn(() => ({
               proofsWeHave: vi.fn(() => ({
-                run: vi.fn(async () => receivedProofs),
+                onCountersReserved: vi.fn(() => ({
+                  run: vi.fn(async () => receivedProofs),
+                })),
               })),
             })),
           })),
         })),
       },
+      getFeesForProofs: () => 0,
     });
 
     await wallet.redeem();
@@ -2175,5 +2178,419 @@ describe("wallet store", () => {
     expect(h.tokensStore.addPaidToken).toHaveBeenCalledWith(
       expect.objectContaining({ amount: 500, fee: 0, unit: "sat" })
     );
+  });
+  const MINUTE = 60 * 1000;
+
+  function receiveTokenSetup(tokenStr) {
+    h.receiveTokensStore.receiveData.tokensBase64 = tokenStr;
+    h.tokenModule.decodeFull.mockResolvedValue({
+      mint: "https://mint-a.example",
+      unit: "sat",
+    });
+    h.tokenModule.getProofs.mockReturnValue([
+      { id: "00aa", amount: 21, secret: "s-in" },
+    ]);
+    h.tokenModule.getMint.mockReturnValue("https://mint-a.example");
+    h.tokenModule.getUnit.mockReturnValue("sat");
+  }
+
+  // Each swap attempt calls run(cb, attempt) and gets a fresh builder.
+  function receiveBuilder(run) {
+    let attempt = 0;
+    const onCountersReserved = vi.fn((cb) => ({
+      run: vi.fn(async () => run(cb, attempt++)),
+    }));
+    return {
+      onCountersReserved,
+      receive: vi.fn(() => ({
+        asDeterministic: vi.fn(() => ({
+          privkey: vi.fn(() => ({
+            proofsWeHave: vi.fn(() => ({ onCountersReserved })),
+          })),
+        })),
+      })),
+    };
+  }
+
+  const storedPending = () =>
+    JSON.parse(localStorage.getItem("cashu.pendingReceives") ?? "[]");
+
+  // Notes an earlier attempt the way redeem does: a fresh wallet, seed
+  // "test seed", counters 7..9 unless given.
+  function walletWithPending(tokenStr, attempts = [{ start: 7 }]) {
+    localStorage.removeItem("cashu.pendingReceives");
+    const wallet = useWalletStore();
+    wallet.mnemonic = "test seed";
+    for (const { start, refused, createdAt } of attempts) {
+      const record = wallet.rememberPendingReceive(
+        { token: tokenStr, mint: "https://mint-a.example", unit: "sat" },
+        { keysetId: "00aa", start, count: 3, next: start + 3 },
+        21
+      );
+      if (refused) wallet.markPendingReceiveRefused(record);
+      if (createdAt) {
+        localStorage.setItem(
+          "cashu.pendingReceives",
+          JSON.stringify(
+            storedPending().map((r) =>
+              r.start === start ? { ...r, createdAt } : r
+            )
+          )
+        );
+      }
+    }
+    return wallet;
+  }
+
+  // The mint's states: the token's own ecash is spent, the rest is not.
+  const statesWithTokenSpent = vi.fn(async (proofs) =>
+    proofs.map((p) => ({ state: p.secret === "s-in" ? "SPENT" : "UNSPENT" }))
+  );
+
+  const signed21 = (tag = "") => [
+    { id: "00aa", amount: 16, secret: `r1${tag}` },
+    { id: "00aa", amount: 4, secret: `r2${tag}` },
+    { id: "00aa", amount: 1, secret: `r3${tag}` },
+  ];
+
+  function failingReceive(message) {
+    return receiveBuilder(() => {
+      throw new Error(message);
+    });
+  }
+
+  it("redeem keeps the receive's counters until its ecash is stored", async () => {
+    localStorage.removeItem("cashu.pendingReceives");
+    const wallet = useWalletStore();
+    wallet.mnemonic = "test seed";
+    receiveTokenSetup("cashuBreceived");
+    let storedDuringSwap = null;
+    const builder = receiveBuilder((cb) => {
+      cb({ keysetId: "00aa", start: 7, count: 3, next: 10 });
+      storedDuringSwap = storedPending();
+      return [{ id: "00aa", amount: 20, secret: "s-out" }];
+    });
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue({
+      ops: { receive: builder.receive },
+      getFeesForProofs: () => 1,
+    });
+
+    await wallet.redeem();
+
+    expect(storedDuringSwap).toEqual([
+      {
+        token: "cashuBreceived",
+        mint: "https://mint-a.example",
+        unit: "sat",
+        keysetId: "00aa",
+        start: 7,
+        count: 3,
+        amount: 20,
+        seed: expect.stringMatching(/^[0-9a-f]{16}$/),
+        createdAt: expect.any(Number),
+      },
+    ]);
+    expect(storedPending()).toEqual([]);
+  });
+
+  it("redeem works out the fee only once the receive has loaded the keysets", async () => {
+    localStorage.removeItem("cashu.pendingReceives");
+    const wallet = useWalletStore();
+    receiveTokenSetup("cashuBnewkeyset");
+    let keysetsLoaded = false;
+    const builder = receiveBuilder((cb) => {
+      keysetsLoaded = true;
+      cb({ keysetId: "00aa", start: 7, count: 1, next: 8 });
+      return [{ id: "00aa", amount: 21, secret: "s-out" }];
+    });
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue({
+      ops: { receive: builder.receive },
+      getFeesForProofs: () => {
+        if (!keysetsLoaded) throw new Error("No keyset found");
+        return 0;
+      },
+    });
+
+    await wallet.redeem();
+
+    expect(h.tokensStore.addPaidToken).toHaveBeenCalledWith(
+      expect.objectContaining({ token: "cashuBnewkeyset", amount: 21 })
+    );
+  });
+
+  it("redeem marks an attempt the mint refused and keeps it", async () => {
+    localStorage.removeItem("cashu.pendingReceives");
+    const wallet = useWalletStore();
+    receiveTokenSetup("cashuBclash");
+    const builder = receiveBuilder((cb, attempt) => {
+      if (attempt === 0) {
+        cb({ keysetId: "00aa", start: 7, count: 3, next: 10 });
+        throw Object.assign(
+          new Error("outputs have already been signed before."),
+          { status: 400 }
+        );
+      }
+      // The retry reaches the mint, but its answer is lost.
+      cb({ keysetId: "00aa", start: 17, count: 3, next: 20 });
+      throw new Error("Failed to fetch");
+    });
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue({
+      ops: { receive: builder.receive },
+      getFeesForProofs: () => 0,
+    });
+
+    await expect(wallet.redeem()).rejects.toThrow("Failed to fetch");
+
+    expect(storedPending()).toEqual([
+      expect.objectContaining({ start: 7, refused: true }),
+      expect.not.objectContaining({ refused: true }),
+    ]);
+    expect(storedPending()[1]).toMatchObject({ start: 17 });
+  });
+
+  it("redeem recovers ecash an earlier, unanswered receive was signed for", async () => {
+    const wallet = walletWithPending("cashuBlost");
+    receiveTokenSetup("cashuBlost");
+    const restore = vi.fn(async () => ({ proofs: signed21() }));
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue({
+      ops: { receive: failingReceive("Token Already Spent").receive },
+      getFeesForProofs: () => 0,
+      restore,
+      checkProofsStates: statesWithTokenSpent,
+    });
+
+    await wallet.redeem();
+
+    expect(restore).toHaveBeenCalledWith(7, 3, { keysetId: "00aa" });
+    expect(h.proofsStore.addMissingProofs).toHaveBeenCalledWith(signed21());
+    expect(h.tokensStore.addPaidToken).toHaveBeenCalledWith(
+      expect.objectContaining({ token: "cashuBlost", amount: 21, fee: 0 })
+    );
+    expect(storedPending()).toEqual([]);
+  });
+
+  it("redeem recovers a signed attempt whose resent copy was refused", async () => {
+    // cashu-ts resends a swap after a lost answer; the copy can be refused
+    // although the first one was signed.
+    const wallet = walletWithPending("cashuBlost", [
+      { start: 7, refused: true },
+    ]);
+    receiveTokenSetup("cashuBlost");
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue({
+      ops: { receive: failingReceive("Token Already Spent").receive },
+      getFeesForProofs: () => 0,
+      restore: vi.fn(async () => ({ proofs: signed21() })),
+      checkProofsStates: statesWithTokenSpent,
+    });
+
+    await wallet.redeem();
+
+    expect(h.proofsStore.addMissingProofs).toHaveBeenCalledWith(signed21());
+  });
+
+  it("redeem does not take ecash that does not fit the receive", async () => {
+    const wallet = walletWithPending("cashuBlost", [
+      { start: 7 },
+      { start: 17 },
+    ]);
+    receiveTokenSetup("cashuBlost");
+    // Another payment's ecash: only some of the counters, or the wrong total.
+    const restore = vi.fn(async (start) => ({
+      proofs:
+        start === 7
+          ? signed21().slice(0, 2)
+          : [
+              ...signed21().slice(0, 2),
+              { id: "00aa", amount: 8, secret: "r9" },
+            ],
+    }));
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue({
+      ops: { receive: failingReceive("Token Already Spent").receive },
+      getFeesForProofs: () => 0,
+      restore,
+      checkProofsStates: statesWithTokenSpent,
+    });
+
+    await expect(wallet.redeem()).rejects.toThrow("Token Already Spent");
+
+    expect(restore).toHaveBeenCalledTimes(2);
+    expect(h.proofsStore.addMissingProofs).not.toHaveBeenCalled();
+    expect(h.tokensStore.addPaidToken).not.toHaveBeenCalled();
+    expect(storedPending()).toEqual([]);
+  });
+
+  it("redeem takes the attempt the mint did not refuse when two fit", async () => {
+    // The same seed on another device already used counters 7..9 for the
+    // same amount; the mint refused that attempt.
+    const wallet = walletWithPending("cashuBclash", [
+      { start: 7, refused: true },
+      { start: 17 },
+    ]);
+    receiveTokenSetup("cashuBclash");
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue({
+      ops: { receive: failingReceive("Token Already Spent").receive },
+      getFeesForProofs: () => 0,
+      restore: vi.fn(async (start) => ({ proofs: signed21(`-${start}`) })),
+      checkProofsStates: statesWithTokenSpent,
+    });
+
+    await wallet.redeem();
+
+    expect(h.proofsStore.addMissingProofs).toHaveBeenCalledWith(
+      signed21("-17")
+    );
+  });
+
+  it("redeem does not guess between two attempts that both fit", async () => {
+    const wallet = walletWithPending("cashuBlost", [
+      { start: 7 },
+      { start: 17 },
+    ]);
+    receiveTokenSetup("cashuBlost");
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue({
+      ops: { receive: failingReceive("Token Already Spent").receive },
+      getFeesForProofs: () => 0,
+      restore: vi.fn(async (start) => ({ proofs: signed21(`-${start}`) })),
+      checkProofsStates: statesWithTokenSpent,
+    });
+
+    await expect(wallet.redeem()).rejects.toThrow("Token Already Spent");
+
+    expect(h.proofsStore.addMissingProofs).not.toHaveBeenCalled();
+  });
+
+  it("redeem still reports a token someone else spent", async () => {
+    localStorage.removeItem("cashu.pendingReceives");
+    const wallet = useWalletStore();
+    receiveTokenSetup("cashuBtheirs");
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue({
+      ops: { receive: failingReceive("Token Already Spent").receive },
+      getFeesForProofs: () => 0,
+      restore: vi.fn(async () => ({ proofs: [] })),
+      checkProofsStates: vi.fn(async () => []),
+    });
+
+    await expect(wallet.redeem()).rejects.toThrow("Token Already Spent");
+    expect(h.tokensStore.addPaidToken).not.toHaveBeenCalled();
+  });
+
+  it("start-up finishes a receive the app was closed in the middle of", async () => {
+    const wallet = walletWithPending("cashuBlater");
+    receiveTokenSetup("cashuBlater");
+    // The user had tapped "Receive later" before receiving it.
+    h.tokensStore.historyTokens = [
+      { token: "cashuBlater", amount: 21, status: "pending" },
+    ];
+    const restore = vi.fn(async () => ({ proofs: signed21() }));
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue({
+      restore,
+      checkProofsStates: statesWithTokenSpent,
+    });
+
+    await wallet.recoverPendingReceives();
+
+    // The mint is asked before the wallet lock is taken.
+    expect(restore.mock.invocationCallOrder[0]).toBeLessThan(
+      h.uiStore.lockMutex.mock.invocationCallOrder[0]
+    );
+    expect(h.proofsStore.addMissingProofs).toHaveBeenCalledWith(signed21());
+    expect(h.tokensStore.setTokenPaid).toHaveBeenCalledWith("cashuBlater");
+    expect(h.tokensStore.addPaidToken).not.toHaveBeenCalled();
+    expect(h.notifySuccess).toHaveBeenCalled();
+    expect(storedPending()).toEqual([]);
+    h.tokensStore.historyTokens = [];
+  });
+
+  it("start-up leaves a receive another receive settled while it asked the mint", async () => {
+    const wallet = walletWithPending("cashuBraced");
+    receiveTokenSetup("cashuBraced");
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue({
+      restore: vi.fn(async () => ({ proofs: signed21() })),
+      checkProofsStates: statesWithTokenSpent,
+    });
+    // A receive of the same token held the lock and stored its ecash.
+    h.uiStore.lockMutex.mockImplementationOnce(async () => {
+      localStorage.setItem("cashu.pendingReceives", "[]");
+    });
+
+    await wallet.recoverPendingReceives();
+
+    expect(h.proofsStore.addMissingProofs).not.toHaveBeenCalled();
+    expect(h.notifySuccess).not.toHaveBeenCalled();
+  });
+
+  it("start-up waits while the token is not spent yet", async () => {
+    const wallet = walletWithPending("cashuBslow");
+    receiveTokenSetup("cashuBslow");
+    const young = storedPending();
+    const restore = vi.fn();
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue({
+      restore,
+      // The swap request has not reached the mint yet.
+      checkProofsStates: vi.fn(async (proofs) =>
+        proofs.map(() => ({ state: "UNSPENT" }))
+      ),
+    });
+
+    await wallet.recoverPendingReceives();
+
+    expect(restore).not.toHaveBeenCalled();
+    expect(storedPending()).toEqual(young);
+
+    // Long after, the token is still not spent: the swap never happened.
+    localStorage.setItem(
+      "cashu.pendingReceives",
+      JSON.stringify(
+        young.map((r) => ({ ...r, createdAt: Date.now() - 11 * MINUTE }))
+      )
+    );
+
+    await wallet.recoverPendingReceives();
+
+    expect(restore).not.toHaveBeenCalled();
+    expect(storedPending()).toEqual([]);
+  });
+
+  it("start-up drops a receive noted under another seed", async () => {
+    const wallet = walletWithPending("cashuBoldseed");
+    receiveTokenSetup("cashuBoldseed");
+    wallet.mnemonic = "another seed";
+    const restore = vi.fn();
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue({
+      restore,
+      checkProofsStates: statesWithTokenSpent,
+    });
+
+    await wallet.recoverPendingReceives();
+
+    expect(restore).not.toHaveBeenCalled();
+    expect(storedPending()).toEqual([]);
+  });
+
+  it("start-up does not announce ecash the wallet already holds", async () => {
+    const wallet = walletWithPending("cashuBkept");
+    receiveTokenSetup("cashuBkept");
+    h.proofsStore.addMissingProofs.mockResolvedValueOnce([]);
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue({
+      restore: vi.fn(async () => ({ proofs: signed21() })),
+      checkProofsStates: statesWithTokenSpent,
+    });
+
+    await wallet.recoverPendingReceives();
+
+    expect(h.proofsStore.addMissingProofs).toHaveBeenCalledWith(signed21());
+    expect(h.notifySuccess).not.toHaveBeenCalled();
+    expect(h.tokensStore.addPaidToken).not.toHaveBeenCalled();
+    expect(h.tokensStore.setTokenPaid).not.toHaveBeenCalled();
+    expect(storedPending()).toEqual([]);
+  });
+
+  it("ignores entries in the stored notes that are not records", async () => {
+    localStorage.setItem("cashu.pendingReceives", "[null, 3]");
+    const wallet = useWalletStore();
+
+    wallet.forgetPendingReceives("cashuBanything");
+
+    expect(storedPending()).toEqual([]);
   });
 });
