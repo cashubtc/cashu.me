@@ -78,6 +78,7 @@
                   flat
                   round
                   icon="content_copy"
+                  class="tap-target"
                   @click="copyText(auditorUrl)"
                   size="sm"
                   color="grey"
@@ -102,6 +103,7 @@
                   flat
                   round
                   icon="content_copy"
+                  class="tap-target"
                   @click="copyText(auditorApiUrl)"
                   size="sm"
                   color="grey"

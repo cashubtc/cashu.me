@@ -61,6 +61,7 @@
         dense
         round
         size="0.8em"
+        class="tap-target"
         :icon="countdown > 0 ? 'close' : 'refresh'"
         :color="countdown > 0 ? 'negative' : 'primary'"
         aria-label="Refresh"

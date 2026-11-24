@@ -107,3 +107,32 @@ body,
 .q-checkbox__svg {
   color: var(--q-dark);
 }
+
+// Minimum tap target for compact controls. The hit area grows to at least
+// 32px; icons and labels keep their size.
+.q-btn.tap-target {
+  min-height: 32px;
+}
+.q-btn.tap-target.q-btn--dense,
+.q-btn.tap-target.q-btn--round {
+  min-width: 32px;
+  min-height: 32px;
+}
+.q-icon.tap-target {
+  box-sizing: content-box;
+  padding: calc((32px - 1em) / 2);
+}
+// Badges keep their visual height; an invisible overlay extends the hit area.
+.q-badge.tap-target {
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 32px;
+    transform: translateY(-50%);
+  }
+}

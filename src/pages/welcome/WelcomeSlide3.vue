@@ -302,10 +302,5 @@ export default {
     top: 12px;
     right: 8px;
   }
-
-  .action-btn {
-    width: 28px;
-    height: 28px;
-  }
 }
 </style>

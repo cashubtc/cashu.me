@@ -25,7 +25,7 @@
                 size="sm"
                 rounded
                 outline
-                class="q-px-md"
+                class="q-px-md tap-target"
                 @click.stop="confirmMnemonic = false"
                 >{{ $t("Settings.advanced.developer.new_seed.cancel") }}</q-btn
               >
@@ -33,7 +33,7 @@
                 size="sm"
                 rounded
                 outline
-                class="q-px-md"
+                class="q-px-md tap-target"
                 color="negative"
                 @click.stop="
                   confirmMnemonic = false;
@@ -180,7 +180,7 @@
                 size="sm"
                 rounded
                 outline
-                class="q-px-md"
+                class="q-px-md tap-target"
                 @click.stop="confirmImport = false"
                 >{{
                   $t("Settings.advanced.developer.import_wallet.cancel")
@@ -190,7 +190,7 @@
                 size="sm"
                 rounded
                 outline
-                class="q-px-md"
+                class="q-px-md tap-target"
                 color="negative"
                 @click.stop="
                   confirmImport = false;
@@ -230,7 +230,7 @@
                 size="sm"
                 rounded
                 outline
-                class="q-px-md"
+                class="q-px-md tap-target"
                 @click.stop="confirmNuke = false"
                 >{{
                   $t("Settings.advanced.developer.reset_wallet.cancel")
@@ -240,7 +240,7 @@
                 size="sm"
                 rounded
                 outline
-                class="q-px-md"
+                class="q-px-md tap-target"
                 color="negative"
                 @click.stop="
                   confirmNuke = false;

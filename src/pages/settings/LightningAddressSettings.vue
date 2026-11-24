@@ -31,7 +31,7 @@
                   @click="copyText(address)"
                   size="xs"
                   color="grey"
-                  class="cursor-pointer"
+                  class="cursor-pointer tap-target"
                 >
                   <q-tooltip>{{
                     $t("Settings.lightning_address.address.copy_tooltip")

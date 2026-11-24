@@ -35,7 +35,7 @@
             v-if="signerType === 'SEED' && seedSignerPrivateKeyNsec"
           >
             <q-badge
-              class="cursor-pointer q-mt-xs"
+              class="cursor-pointer tap-target q-mt-xs"
               @click.stop="copyText(seedSignerPrivateKeyNsec)"
               outline
               color="grey"
@@ -79,7 +79,7 @@
           <q-icon
             name="delete_outline"
             @click.stop="handleResetNip46Signer"
-            class="cursor-pointer"
+            class="cursor-pointer tap-target"
             ><q-tooltip>{{
               $t("Settings.nostr_keys.nsec_bunker.delete_tooltip")
             }}</q-tooltip>
@@ -115,7 +115,7 @@
           <q-icon
             name="delete_outline"
             @click.stop="handleResetPrivateKeySigner"
-            class="cursor-pointer"
+            class="cursor-pointer tap-target"
             ><q-tooltip>{{
               $t("Settings.nostr_keys.use_nsec.delete_tooltip")
             }}</q-tooltip></q-icon
@@ -192,7 +192,7 @@
               @click="copyText(relay)"
               size="xs"
               color="grey"
-              class="cursor-pointer"
+              class="cursor-pointer tap-target"
               ><q-tooltip>{{
                 $t("Settings.sections.nostr.relays.list.copy_tooltip")
               }}</q-tooltip></q-icon
@@ -202,7 +202,7 @@
               @click="removeRelay(relay)"
               size="xs"
               color="grey"
-              class="cursor-pointer"
+              class="cursor-pointer tap-target"
               ><q-tooltip>{{
                 $t("Settings.sections.nostr.relays.list.remove_tooltip")
               }}</q-tooltip></q-icon
@@ -225,7 +225,7 @@
               rounded
               outline
               color="primary"
-              class="q-px-md"
+              class="q-px-md tap-target"
               :loading="wotLoading"
               @click="crawlWebOfTrust(2)"
             >
@@ -242,7 +242,7 @@
               size="sm"
               rounded
               outline
-              class="q-px-md"
+              class="q-px-md tap-target"
               color="negative"
               @click="cancelCrawl"
             >
@@ -253,7 +253,7 @@
               size="sm"
               rounded
               outline
-              class="q-px-md"
+              class="q-px-md tap-target"
               color="grey"
               :disable="wotLoading"
               @click="resetWebOfTrust"
