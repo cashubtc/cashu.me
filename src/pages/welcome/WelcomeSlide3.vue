@@ -145,7 +145,7 @@ export default {
 .content {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   text-align: left;
   flex: 1;
 }
