@@ -907,7 +907,7 @@ export const useWalletStore = defineStore("wallet", {
               t.token === receiveStore.receiveData.tokensBase64 && t.amount > 0
           )
         ) {
-          tokenStore.setTokenPaid(receiveStore.receiveData.tokensBase64);
+          await tokenStore.setTokenPaid(receiveStore.receiveData.tokensBase64);
         } else {
           // if this is a self-sent token, we will find an outgoing token with the inverse amount
           if (
@@ -917,12 +917,14 @@ export const useWalletStore = defineStore("wallet", {
                 t.amount < 0
             )
           ) {
-            tokenStore.setTokenPaid(receiveStore.receiveData.tokensBase64);
+            await tokenStore.setTokenPaid(
+              receiveStore.receiveData.tokensBase64
+            );
           }
           fee = inputAmount - outputAmount;
           historyToken.fee = fee;
           historyToken.amount = outputAmount;
-          tokenStore.addPaidToken(historyToken);
+          await tokenStore.addPaidToken(historyToken);
         }
         useUiStore().vibrate();
         let message = this.t("wallet.notifications.received", {
@@ -1036,7 +1038,7 @@ export const useWalletStore = defineStore("wallet", {
             throw new Error("could not serialize proofs.");
           }
           if (update_history) {
-            tokenStore.addPaidToken({
+            await tokenStore.addPaidToken({
               amount: -proofsStore.sumProofs(spentProofs),
               token: serializedProofs,
               unit: wallet.unit,
@@ -1082,7 +1084,7 @@ export const useWalletStore = defineStore("wallet", {
       const spentProofs = await this.checkProofsSpendable(proofs, mintWallet);
       if (spentProofs != undefined && spentProofs.length == proofs.length) {
         // all proofs are spent, set token to paid
-        tokenStore.setTokenPaid(historyToken.token);
+        await tokenStore.setTokenPaid(historyToken.token);
       } else if (
         spentProofs != undefined &&
         spentProofs.length &&
@@ -1099,7 +1101,7 @@ export const useWalletStore = defineStore("wallet", {
           proofsStore.serializeProofs(unspentProofs);
 
         if (serializedSpentProofs && serializedUnspentProofs) {
-          const historyToken2 = tokenStore.editHistoryToken(
+          const historyToken2 = await tokenStore.editHistoryToken(
             historyToken.token,
             {
               newAmount: spentAmount,
@@ -1110,7 +1112,7 @@ export const useWalletStore = defineStore("wallet", {
           // add all unspent proofs back to the history
           // QUICK: we use the historyToken object here because we don't know if the transaction is incoming or outgoing (we don't know the sign of the amount)
           if (historyToken2) {
-            tokenStore.addPendingToken({
+            await tokenStore.addPendingToken({
               amount: unspentAmount * Math.sign(historyToken2.amount),
               token: serializedUnspentProofs,
               unit: historyToken2.unit,

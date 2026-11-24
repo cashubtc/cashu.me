@@ -296,6 +296,7 @@ import { useProofsStore } from "src/stores/proofs";
 import { useMintsStore } from "src/stores/mints";
 import { useTokensStore } from "src/stores/tokens";
 import { getShortUrl } from "src/js/wallet-helpers";
+import { notifyApiError } from "src/js/notify";
 import { useSettingsStore } from "src/stores/settings";
 import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import { usePriceStore } from "src/stores/price";
@@ -615,7 +616,7 @@ export default defineComponent({
         paymentRequest: this.sendData.paymentRequest,
         status: "pending",
       };
-      const _id = this.addPendingToken(historyToken);
+      const _id = await this.addPendingToken(historyToken);
       (historyToken as any).id = _id;
       if (!this.g.offline) {
         this.onTokenPaid(historyToken);
@@ -654,7 +655,12 @@ export default defineComponent({
           unit: this.activeUnit,
           mint: this.activeMintUrl,
         };
-        const _id = this.addPendingToken(historyToken as any);
+        const _id = await this.addPendingToken(historyToken as any).catch(
+          (error: any) => {
+            notifyApiError(error, "Could not save token to history");
+            throw error;
+          }
+        );
         (historyToken as any).id = _id;
         this.sendData.historyToken = historyToken as any;
 
@@ -719,7 +725,12 @@ export default defineComponent({
           paymentRequest: this.sendData.paymentRequest,
           status: "pending",
         };
-        const _id = this.addPendingToken(historyToken as any);
+        const _id = await this.addPendingToken(historyToken as any).catch(
+          (error: any) => {
+            notifyApiError(error, "Could not save token to history");
+            throw error;
+          }
+        );
         (historyToken as any).id = _id;
         this.sendData.historyToken = historyToken as any;
 

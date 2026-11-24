@@ -297,6 +297,7 @@ import { usePriceStore } from "src/stores/price";
 import { useSwapStore } from "src/stores/swap";
 import { useSettingsStore } from "src/stores/settings";
 import token from "src/js/token";
+import { notifyApiError } from "src/js/notify";
 import { Mint, GetInfoResponse } from "@cashu/cashu-ts";
 import { Token } from "@cashu/cashu-ts";
 import type { StoredMint } from "src/stores/mints";
@@ -646,7 +647,7 @@ export default defineComponent({
         undefined
       );
     },
-    addPendingTokenToHistory: function (tokenStr: string) {
+    addPendingTokenToHistory: async function (tokenStr: string) {
       if (this.tokenAlreadyInHistory(tokenStr)) {
         this.notifySuccess(
           this.$i18n.t(
@@ -660,12 +661,17 @@ export default defineComponent({
       const decodedToken = this.decodeToken(tokenStr);
       if (!decodedToken) return;
 
-      tokensStore.addPendingToken({
-        amount: decodedToken.amount,
-        token: tokenStr,
-        mint: token.getMint(decodedToken),
-        unit: token.getUnit(decodedToken),
-      });
+      try {
+        await tokensStore.addPendingToken({
+          amount: decodedToken.amount,
+          token: tokenStr,
+          mint: token.getMint(decodedToken),
+          unit: token.getUnit(decodedToken),
+        });
+      } catch (error: any) {
+        notifyApiError(error, "Could not save ecash to history");
+        return;
+      }
       this.showReceiveTokens = false;
       // show success notification
       this.notifySuccess(

@@ -67,13 +67,16 @@ export const useTokensStore = defineStore("tokens", {
         (await cashuDb.ecashHistory.toArray()) as HistoryToken[]
       );
     },
-    persistHistoryToken(historyToken: HistoryToken) {
+    async persistHistoryToken(historyToken: HistoryToken): Promise<void> {
       // Strip nested Vue proxies and normalize SDK Amount values before IndexedDB.
-      cashuDb.ecashHistory
-        .put(JSONInt.parse(JSONInt.stringify(historyToken)!))
-        .catch((error) => {
-          console.error("Could not persist ecash history token", error);
-        });
+      try {
+        await cashuDb.ecashHistory.put(
+          JSONInt.parse(JSONInt.stringify(historyToken)!)
+        );
+      } catch (error) {
+        console.error("Could not persist ecash history token", error);
+        throw error;
+      }
     },
     async migrateHistoryTokensFromLocalStorage() {
       const raw = localStorage.getItem("cashu.historyTokens");
@@ -94,7 +97,7 @@ export const useTokensStore = defineStore("tokens", {
     /**
      * @param {{amount: number, token: string, mint: string, unit: string}} param0
      */
-    addPaidToken({
+    async addPaidToken({
       amount,
       token,
       mint,
@@ -112,7 +115,7 @@ export const useTokensStore = defineStore("tokens", {
       paymentRequest?: PaymentRequestData;
       label?: string;
       paymentRequestId?: string;
-    }): string {
+    }): Promise<string> {
       const id = uuidv4();
       const historyToken = {
         id,
@@ -128,10 +131,10 @@ export const useTokensStore = defineStore("tokens", {
         paymentRequestId,
       } as HistoryToken;
       this.historyTokens.push(historyToken);
-      this.persistHistoryToken(historyToken);
+      await this.persistHistoryToken(historyToken);
       return id;
     },
-    addPendingToken({
+    async addPendingToken({
       amount,
       token,
       mint,
@@ -149,7 +152,7 @@ export const useTokensStore = defineStore("tokens", {
       paymentRequest?: PaymentRequestData;
       label?: string;
       paymentRequestId?: string;
-    }): string {
+    }): Promise<string> {
       const id = uuidv4();
       const historyToken = {
         id,
@@ -165,10 +168,10 @@ export const useTokensStore = defineStore("tokens", {
         paymentRequestId,
       };
       this.historyTokens.push(historyToken);
-      this.persistHistoryToken(historyToken);
+      await this.persistHistoryToken(historyToken);
       return id;
     },
-    editHistoryToken(
+    async editHistoryToken(
       tokenToEdit: string,
       options?: {
         newAmount?: number;
@@ -177,7 +180,7 @@ export const useTokensStore = defineStore("tokens", {
         newToken?: string;
         newFee?: number;
       }
-    ): HistoryToken | undefined {
+    ): Promise<HistoryToken | undefined> {
       const index = this.historyTokens.findIndex(
         (t) => t.token === tokenToEdit
       );
@@ -205,20 +208,21 @@ export const useTokensStore = defineStore("tokens", {
           }
         }
 
-        this.persistHistoryToken(this.historyTokens[index]);
-        return this.historyTokens[index];
+        const historyToken = this.historyTokens[index];
+        await this.persistHistoryToken(historyToken);
+        return historyToken;
       }
 
       return undefined;
     },
-    setTokenPaid(token: string) {
+    async setTokenPaid(token: string) {
       const index = this.historyTokens.findIndex(
         (t) => t.token === token && t.status == "pending"
       );
       if (index >= 0) {
         this.historyTokens[index].status = "paid";
         this.historyTokens[index].paidDate = currentDateStr();
-        this.persistHistoryToken(this.historyTokens[index]);
+        await this.persistHistoryToken(this.historyTokens[index]);
       }
     },
     deleteToken(token: string) {

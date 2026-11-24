@@ -558,11 +558,11 @@ export const useNostrStore = defineStore("nostr", {
         await this.addPendingTokenToHistory(tokenStr);
       }
     },
-    addPendingTokenToHistory: function (
+    addPendingTokenToHistory: async function (
       tokenStr: string,
       verbose = true,
       paymentRequestId?: string
-    ): string | undefined {
+    ): Promise<string | undefined> {
       const receiveStore = useReceiveTokensStore();
       const tokensStore = useTokensStore();
       if (tokensStore.tokenAlreadyInHistory(tokenStr)) {
@@ -574,7 +574,7 @@ export const useNostrStore = defineStore("nostr", {
       if (decodedToken == undefined) {
         throw Error("could not decode token");
       }
-      const id = tokensStore.addPendingToken({
+      const id = await tokensStore.addPendingToken({
         amount: decodedToken.amount,
         token: tokenStr,
         mint: token.getMint(decodedToken),

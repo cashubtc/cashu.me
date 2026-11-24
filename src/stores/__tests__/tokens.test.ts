@@ -1,5 +1,5 @@
 import "fake-indexeddb/auto";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { reactive } from "vue";
 import { PaymentRequest, PaymentRequestTransportType } from "@cashu/cashu-ts";
 import { cashuDb } from "src/stores/dexie";
@@ -13,6 +13,10 @@ describe("tokens store", () => {
   beforeEach(async () => {
     localStorage.clear();
     await cashuDb.ecashHistory.clear();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("persists payment request fields as plain data across pending and paid reloads", async () => {
@@ -34,14 +38,14 @@ describe("tokens store", () => {
         { kind: "P2PK", data: "pubkey", tags: [["locktime", "1750000000"]] }
       )
     );
-    const id = store.addPendingToken({
+    const id = await store.addPendingToken({
       amount: -21,
       token: "cashuA",
       mint: "https://mint.example",
       unit: "sat",
       paymentRequest,
     });
-    await expect.poll(async () => (await readEcashHistory()).length).toBe(1);
+    expect(await readEcashHistory()).toHaveLength(1);
     await store.refreshEcashHistory();
     const restored = store.historyTokens.find((row) => row.id === id)!;
     const expectedRequest = {
@@ -63,10 +67,8 @@ describe("tokens store", () => {
     );
     expect(restored.paymentRequest).toEqual(expectedRequest);
     expect(paymentRequest.amount?.toNumber()).toBe(21);
-    store.setTokenPaid("cashuA");
-    await expect
-      .poll(async () => (await readEcashHistory())[0]?.status)
-      .toBe("paid");
+    await store.setTokenPaid("cashuA");
+    expect((await readEcashHistory())[0]?.status).toBe("paid");
     await store.refreshEcashHistory();
     expect(store.historyTokens[0].paymentRequest).toEqual(expectedRequest);
   });
@@ -143,10 +145,10 @@ describe("tokens store", () => {
     expect(await readEcashHistory()).toHaveLength(2);
   });
 
-  it("keeps existing token history actions compatible with the cache", () => {
+  it("keeps existing token history actions compatible with the cache", async () => {
     const store = useTokensStore();
 
-    const id = store.addPendingToken({
+    const id = await store.addPendingToken({
       amount: 12,
       token: "cashuA",
       mint: "https://mint.example",
@@ -162,12 +164,12 @@ describe("tokens store", () => {
       })
     );
 
-    store.editHistoryToken("cashuA", {
+    await store.editHistoryToken("cashuA", {
       newToken: "cashuB",
       addAmount: 3,
       newFee: 2,
     });
-    store.setTokenPaid("cashuB");
+    await store.setTokenPaid("cashuB");
 
     expect(store.historyTokens[0]).toEqual(
       expect.objectContaining({
@@ -179,9 +181,64 @@ describe("tokens store", () => {
       })
     );
     expect(store.historyTokens[0].paidDate).toEqual(expect.any(String));
+    expect(await readEcashHistory()).toEqual([
+      expect.objectContaining({
+        id,
+        status: "paid",
+        amount: 15,
+        token: "cashuB",
+        fee: 2,
+      }),
+    ]);
 
     store.deleteToken("cashuB");
     expect(store.historyTokens).toEqual([]);
+  });
+
+  it("commits history writes before the add actions resolve", async () => {
+    const store = useTokensStore();
+
+    const pendingId = await store.addPendingToken({
+      amount: -5,
+      token: "cashuPending",
+      mint: "https://mint.example",
+      unit: "sat",
+    });
+    expect(await cashuDb.ecashHistory.get(pendingId)).toEqual(
+      expect.objectContaining({ id: pendingId, status: "pending" })
+    );
+
+    const paidId = await store.addPaidToken({
+      amount: 8,
+      token: "cashuPaid",
+      mint: "https://mint.example",
+      unit: "sat",
+      label: "coffee",
+    });
+    expect(await cashuDb.ecashHistory.get(paidId)).toEqual(
+      expect.objectContaining({ id: paidId, status: "paid", label: "coffee" })
+    );
+  });
+
+  it("rejects when the history write fails and keeps the in-memory entry", async () => {
+    const store = useTokensStore();
+    const writeError = new Error("quota exceeded");
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(cashuDb.ecashHistory, "put").mockRejectedValueOnce(writeError);
+
+    await expect(
+      store.addPendingToken({
+        amount: -3,
+        token: "cashuFails",
+        mint: "https://mint.example",
+        unit: "sat",
+      })
+    ).rejects.toBe(writeError);
+
+    expect(store.tokenAlreadyInHistory("cashuFails")).toEqual(
+      expect.objectContaining({ status: "pending", amount: -3 })
+    );
+    expect(await readEcashHistory()).toEqual([]);
   });
 
   it("redacts old paid token payloads from ecashHistory", async () => {
