@@ -12,6 +12,7 @@ import {
   usePaymentHistoryStore,
 } from "./paymentHistory";
 import { cashuDb } from "./dexie";
+import { useTransactionWorkerStore } from "src/stores/transactionWorker";
 import { deserializeProofs, JSONInt } from "@cashu/cashu-ts";
 import { normalizeCashuQuoteAmounts } from "src/js/cashu-amount";
 
@@ -194,7 +195,10 @@ export const useStorageStore = defineStore("storage", {
 
       // from all paid invoices in this.invoiceHistory, delete the oldest so that only max 100 remain
       const max_history = 200;
-      await usePaymentHistoryStore().deleteOldPaidPayments(max_history);
+      await usePaymentHistoryStore().deleteOldPaidPayments(
+        max_history,
+        useTransactionWorkerStore().queuedQuoteIds()
+      );
       walletStore.syncPaymentHistoryCache?.();
 
       // walk through the oldest paid tokenStore.historyTokens and delete the token

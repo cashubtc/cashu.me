@@ -283,6 +283,18 @@ export const useTransactionWorkerStore = defineStore("transactionWorker", {
       return this.quotes;
     },
 
+    // Quote ids the worker may still check, so their quote rows must be kept.
+    queuedQuoteIds(): string[] {
+      return [
+        ...this.quotes.map((entry) => entry.quote),
+        ...this.bolt12Quotes.map((entry) => entry.quote),
+        ...this.onchainQuotes.map((entry) => entry.quote),
+        ...this.outgoingPayments
+          .filter((entry) => entry.type === "invoice")
+          .map((entry) => entry.id),
+      ];
+    },
+
     removeMintQuoteFromChecker(method: IncomingPaymentMethod, quote: string) {
       const queue = this.mintQuoteQueue(method);
       const index = queue.findIndex((entry) => entry.quote === quote);

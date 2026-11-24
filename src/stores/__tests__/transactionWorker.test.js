@@ -1279,4 +1279,34 @@ describe("transaction worker", () => {
     expect(walletStore.syncPaymentHistoryCache).toHaveBeenCalledOnce();
     expect(checkOnchainAndMint).not.toHaveBeenCalled();
   });
+
+  it("lists every quote id the worker may still check", () => {
+    const worker = useTransactionWorkerStore();
+    worker.quotes = [queuedQuote("bolt11-q", 1)];
+    worker.bolt12Quotes = [queuedQuote("bolt12-q", 1)];
+    worker.onchainQuotes = [queuedQuote("onchain-q", 1)];
+    worker.outgoingPayments = [
+      {
+        id: "melt-q",
+        type: "invoice",
+        addedAt: 1,
+        lastChecked: 0,
+        checkCount: 0,
+      },
+      {
+        id: "cashuA-token",
+        type: "token",
+        addedAt: 1,
+        lastChecked: 0,
+        checkCount: 0,
+      },
+    ];
+
+    expect(worker.queuedQuoteIds()).toEqual([
+      "bolt11-q",
+      "bolt12-q",
+      "onchain-q",
+      "melt-q",
+    ]);
+  });
 });
