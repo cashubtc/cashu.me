@@ -324,7 +324,7 @@ export default defineComponent({
       "increaseKeysetCounter",
     ]),
     ...mapActions(useProofsStore, ["serializeProofs"]),
-    ...mapActions(useDexieStore, ["deleteAllTables"]),
+    ...mapActions(useDexieStore, ["deleteAllTables", "deleteWalletDatabase"]),
     ...mapActions(useTransactionWorkerStore, [
       "stopTransactionWorkerAndWait",
       "startTransactionWorker",
@@ -410,7 +410,10 @@ export default defineComponent({
       try {
         // let writes that were already queued finish before clearing
         await flushPendingWrites().catch(() => {});
-        await this.deleteAllTables();
+        // deleting (not clearing) the database also stops writers that
+        // aren't registered (NIP-17, NWC, quote websockets): their late
+        // writes fail instead of surviving the wipe
+        await this.deleteWalletDatabase();
         await useNostrUserStore().clearAllDatabases();
         try {
           const { useMintRecommendationsStore } = await import(

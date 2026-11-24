@@ -179,6 +179,10 @@ describe("mints storage", () => {
     store.mints[1].url = "https://a";
     await store.mintsTable.flush();
 
+    // merged in memory too, so both keysets count before any reload
+    expect(store.mints).toHaveLength(1);
+    expect(store.mints[0].keysets.map((k) => k.id)).toEqual(["00a1", "00b1"]);
+
     const reloaded = await reloadedMints();
     expect(reloaded.mints).toHaveLength(1);
     expect(reloaded.mints[0].keysets.map((k) => k.id)).toEqual([
@@ -209,5 +213,28 @@ describe("mints storage", () => {
     const reloaded = await reloadedMints();
     expect(reloaded.mints.map((m) => m.url)).toEqual(["https://new"]);
     expect(reloaded.mints[0].keys.map((k) => k.id)).toEqual(["00c1"]);
+  });
+
+  it("writes a rename and a new keyset from one snapshot", async () => {
+    const store = useMintsStore();
+    await store.init();
+    store.mints.push(mint("https://old", ["00g1"]));
+    await store.mintsTable.flush();
+
+    store.mints[0].url = "https://new";
+    store.mints[0].keys = [...store.mints[0].keys, keys("00g2")];
+    store.mints[0].keysets.push({
+      id: "00g2",
+      unit: "sat",
+      active: true,
+    } as any);
+    await store.mintsTable.flush();
+
+    expect(
+      await cashuDb.mintKeys.where("mintUrl").equals("https://old").count()
+    ).toBe(0);
+    const reloaded = await reloadedMints();
+    expect(reloaded.mints.map((m) => m.url)).toEqual(["https://new"]);
+    expect(reloaded.mints[0].keys.map((k) => k.id)).toEqual(["00g1", "00g2"]);
   });
 });

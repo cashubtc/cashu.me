@@ -76,10 +76,10 @@ describe("AdvancedSettings", () => {
     }
   );
 
-  it("waits for wallet databases to clear before clearing local storage", async () => {
+  it("waits for wallet databases to be deleted before clearing local storage", async () => {
     let resolveDexieClear!: () => void;
     let resolveNostrClear!: () => void;
-    const deleteAllTables = vi.fn(
+    const deleteWalletDatabase = vi.fn(
       () =>
         new Promise<void>((resolve) => {
           resolveDexieClear = resolve;
@@ -98,10 +98,10 @@ describe("AdvancedSettings", () => {
       stopTransactionWorkerAndWait: vi.fn().mockResolvedValue(true),
       startTransactionWorker: vi.fn(),
       exportWalletState: vi.fn().mockResolvedValue(undefined),
-      deleteAllTables,
+      deleteWalletDatabase,
     });
 
-    await vi.waitFor(() => expect(deleteAllTables).toHaveBeenCalledOnce());
+    await vi.waitFor(() => expect(deleteWalletDatabase).toHaveBeenCalledOnce());
     expect(storeMocks.clearNostrDatabases).not.toHaveBeenCalled();
     expect(clearLocalStorage).not.toHaveBeenCalled();
 
@@ -123,7 +123,7 @@ describe("AdvancedSettings", () => {
       stopTransactionWorkerAndWait: vi.fn().mockResolvedValue(false),
       startTransactionWorker: vi.fn(),
       exportWalletState: vi.fn(),
-      deleteAllTables: vi.fn(),
+      deleteWalletDatabase: vi.fn(),
       notifyError: vi.fn(),
       $t: (key: string) => key,
     };
@@ -131,7 +131,7 @@ describe("AdvancedSettings", () => {
     expect(context.notifyError).toHaveBeenCalledWith("WalletStorage.wipe_busy");
     expect(context.startTransactionWorker).toHaveBeenCalled();
     expect(context.exportWalletState).not.toHaveBeenCalled();
-    expect(context.deleteAllTables).not.toHaveBeenCalled();
+    expect(context.deleteWalletDatabase).not.toHaveBeenCalled();
   });
 
   it("does not wipe when the backup cannot be completed", async () => {
@@ -139,7 +139,7 @@ describe("AdvancedSettings", () => {
       stopTransactionWorkerAndWait: vi.fn().mockResolvedValue(true),
       startTransactionWorker: vi.fn(),
       exportWalletState: vi.fn().mockRejectedValue(new Error("quota")),
-      deleteAllTables: vi.fn(),
+      deleteWalletDatabase: vi.fn(),
       notifyError: vi.fn(),
       $t: (key: string) => key,
     };
@@ -147,7 +147,7 @@ describe("AdvancedSettings", () => {
     expect(context.exportWalletState).toHaveBeenCalledWith({
       requireSaved: true,
     });
-    expect(context.deleteAllTables).not.toHaveBeenCalled();
+    expect(context.deleteWalletDatabase).not.toHaveBeenCalled();
     expect(context.startTransactionWorker).toHaveBeenCalled();
   });
 });

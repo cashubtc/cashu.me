@@ -21,16 +21,21 @@ export const LEGACY_WORKER_QUEUE_KEYS: Record<WorkerQueueKind, string> = {
 
 type QueueEntry = { quote: string } | { id: string; type: "invoice" | "token" };
 
-/** The entry's own id: a quote id, or an outgoing check's invoice/token id. */
-const rawId = (entry: QueueEntry) =>
-  "quote" in entry ? entry.quote : entry.id;
+/**
+ * One classification for both identifiers: an incoming entry is its quote
+ * id; an outgoing check is (type, id), keyed by a hash because a token
+ * check's id is the whole serialized token.
+ */
+function classify(entry: QueueEntry): { rawId: unknown; ref: () => string } {
+  if ("quote" in entry) return { rawId: entry.quote, ref: () => entry.quote };
+  return {
+    rawId: entry.id,
+    ref: () => `${entry.type}:${bytesToHex(sha256(utf8ToBytes(entry.id)))}`,
+  };
+}
 
-// Outgoing checks are told apart by (type, id). A token check's id is the
-// whole serialized token, so the key holds a hash of it instead of a copy.
-const queueRef = (entry: QueueEntry) =>
-  "quote" in entry
-    ? entry.quote
-    : `${entry.type}:${bytesToHex(sha256(utf8ToBytes(entry.id)))}`;
+const rawId = (entry: QueueEntry) => classify(entry).rawId;
+const queueRef = (entry: QueueEntry) => classify(entry).ref();
 
 /** The stored row for a queue entry; used by migrations and the mirror. */
 const toQueueRow = (kind: WorkerQueueKind) => (entry: QueueEntry) => ({

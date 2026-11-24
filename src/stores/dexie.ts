@@ -251,5 +251,14 @@ export const useDexieStore = defineStore("dexie", {
     deleteAllTables: async function () {
       await Promise.all(cashuDb.tables.map((table) => table.clear()));
     },
+    /**
+     * Delete the whole wallet database (wallet wipe). Unlike clearing its
+     * tables, this closes the connection without reopening it, so a late
+     * write from a listener still running in this tab fails instead of
+     * leaving rows behind. The next start creates an empty database.
+     */
+    deleteWalletDatabase: async function () {
+      await cashuDb.delete({ disableAutoOpen: true });
+    },
   },
 });

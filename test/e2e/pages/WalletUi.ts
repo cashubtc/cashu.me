@@ -120,4 +120,45 @@ export class WalletUi extends WalletPage {
   async stored(key: string) {
     return this.page.evaluate((name) => localStorage.getItem(name), key);
   }
+
+  /** Mints as stored in IndexedDB (the `mints` table), in wallet order. */
+  async storedMints(): Promise<{ url: string; nickname?: string }[]> {
+    return this.page.evaluate(
+      () =>
+        new Promise<{ url: string; nickname?: string }[]>((resolve, reject) => {
+          const open = indexedDB.open("db");
+          open.onerror = () => reject(open.error);
+          open.onsuccess = () => {
+            const db = open.result;
+            const request = db
+              .transaction("mints", "readonly")
+              .objectStore("mints")
+              .getAll();
+            request.onsuccess = () => {
+              db.close();
+              resolve(
+                request.result.sort(
+                  (a: any, b: any) => (a._pos ?? 0) - (b._pos ?? 0)
+                )
+              );
+            };
+            request.onerror = () => {
+              db.close();
+              reject(request.error);
+            };
+          };
+        })
+    );
+  }
+
+  /** Stored mints once pending writes have landed (two equal reads). */
+  async settledStoredMints() {
+    let previous = JSON.stringify(await this.storedMints());
+    for (;;) {
+      await this.page.waitForTimeout(200);
+      const current = await this.storedMints();
+      if (JSON.stringify(current) === previous) return current;
+      previous = JSON.stringify(current);
+    }
+  }
 }

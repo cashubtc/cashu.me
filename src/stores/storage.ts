@@ -5,7 +5,7 @@ import { useLocalStorage } from "@vueuse/core";
 import { notifyError, notifySuccess } from "../js/notify";
 import { HistoryToken, useTokensStore } from "./tokens";
 import { currentDateStr } from "src/js/utils";
-import { useProofsStore } from "./proofs";
+import { coerceWalletProofs, useProofsStore } from "src/stores/proofs";
 import {
   buildPaymentRowsFromLegacyInvoice,
   LegacyInvoiceHistory,
@@ -39,20 +39,33 @@ export function parseBackupTable(value: string): any[] {
   return parsed;
 }
 
-/** Serialize every backed-up Dexie table as `cashu.dexie.db.<name>`. */
+/**
+ * Serialize every backed-up Dexie table as `cashu.dexie.db.<name>`. All
+ * tables are read in one read-only transaction, so the backup is a single
+ * consistent snapshot (e.g. a mint rename can't split mint rows and keys).
+ */
 export async function exportBackupTables(): Promise<Record<string, string>> {
+  const specs = WALLET_TABLES.filter((spec) => spec.backup);
+  const rowsByTable = await cashuDb.transaction(
+    "r",
+    specs.map((spec) => cashuDb.table(spec.name)),
+    async () => {
+      const result: Record<string, unknown[]> = {};
+      for (const spec of specs) {
+        result[spec.name] = await cashuDb.table(spec.name).toArray();
+      }
+      return result;
+    }
+  );
   const tables: Record<string, string> = {};
-  for (const spec of WALLET_TABLES) {
-    if (!spec.backup) continue;
+  for (const spec of specs) {
     const key = `${BACKUP_TABLE_KEY_PREFIX}${spec.name}`;
     if (spec.name === "proofs") {
-      // proofs table *magic*
-      const proofs = await useProofsStore().getProofs();
+      // proofs table *magic*: exported as plain proofs with number amounts
+      const proofs = coerceWalletProofs(rowsByTable[spec.name] as any[]);
       tables[key] = JSONInt.stringify(proofs) as string;
     } else {
-      tables[key] = stringifyBackupTable(
-        await cashuDb.table(spec.name).toArray()
-      );
+      tables[key] = stringifyBackupTable(rowsByTable[spec.name]);
     }
   }
   return tables;

@@ -26,7 +26,8 @@ export const useMigrationsStore = defineStore("migrations", {
       }
     },
 
-    async runMigrations() {
+    /** Resolves false when a migration failed (it is retried later). */
+    async runMigrations(): Promise<boolean> {
       // Get migrations that need to be run (newer than current version)
       const pendingMigrations = this.migrations.filter(
         (m) => m.version > this.currentVersion
@@ -34,7 +35,7 @@ export const useMigrationsStore = defineStore("migrations", {
 
       if (pendingMigrations.length === 0) {
         console.log("No migrations to run");
-        return;
+        return true;
       }
 
       console.log(`Running ${pendingMigrations.length} migrations...`);
@@ -43,6 +44,7 @@ export const useMigrationsStore = defineStore("migrations", {
       const { useUiStore } = await import("./ui");
       const uIStore = useUiStore();
       await uIStore.lockMutex();
+      let succeeded = true;
       try {
         for (const migration of pendingMigrations) {
           console.log(
@@ -64,12 +66,14 @@ export const useMigrationsStore = defineStore("migrations", {
               })
             ).catch(() => {});
             // Stop running migrations if one fails
+            succeeded = false;
             break;
           }
         }
       } finally {
         await uIStore.unlockMutex();
       }
+      return succeeded;
     },
 
     // First migration: Update mint URL from stablenuts.cash to umint.cash
@@ -84,18 +88,19 @@ export const useMigrationsStore = defineStore("migrations", {
         if (mintStore.mints[i].url === "https://stablenut.umint.cash") {
           console.log("Updating mint URL from stablenuts.cash to umint.cash");
           mintStore.mints[i].url = "https://stablenut.cashu.network";
-
-          // If this was the active mint, update the active mint URL as well
-          if (mintStore.activeMintUrl === "https://stablenut.umint.cash") {
-            mintStore.activeMintUrl = "https://stablenut.cashu.network";
-          }
-
           updated = true;
         }
       }
 
-      // commit before the migration counts as done
+      // commit before the migration counts as done, and before the active
+      // mint points at the new URL
       await mintStore.mintsTable.flush();
+      if (
+        updated &&
+        mintStore.activeMintUrl === "https://stablenut.umint.cash"
+      ) {
+        mintStore.activeMintUrl = "https://stablenut.cashu.network";
+      }
       if (updated) {
         console.log("Successfully updated mint URL");
       } else {

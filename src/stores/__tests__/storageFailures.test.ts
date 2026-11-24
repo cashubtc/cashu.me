@@ -284,3 +284,89 @@ describe("round 2 failure handling", () => {
     flush.mockRestore();
   });
 });
+
+describe("round 4 failure handling", () => {
+  beforeEach(() => {
+    vi.mocked(notifyError).mockClear();
+  });
+
+  it("does not start when a migration failed", async () => {
+    const { useMigrationsStore } = await import("src/stores/migrations");
+    resetWalletDataReadyForTests();
+    const run = vi
+      .spyOn(useMigrationsStore(), "runMigrations")
+      .mockResolvedValueOnce(false);
+    try {
+      await expect(walletDataReady()).rejects.toThrow("migration failed");
+    } finally {
+      run.mockRestore();
+      resetWalletDataReadyForTests();
+    }
+  });
+
+  it("waits for every writer even when one of them fails", async () => {
+    await cashuDb.paymentRequests.clear();
+    await cashuDb.p2pkKeys.clear();
+    const failing = createTableMirror<Item>(cashuDb.paymentRequests, {
+      keyOf: (item) => item.id,
+    });
+    const slow = createTableMirror<{ publicKey: string }>(cashuDb.p2pkKeys, {
+      keyOf: (item) => item.publicKey,
+    });
+    await Promise.all([failing.hydrate(), slow.hydrate()]);
+    const fail = vi
+      .spyOn(cashuDb.paymentRequests, "bulkPut")
+      .mockRejectedValue(new Error("quota"));
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => (release = resolve));
+    const realPut = cashuDb.p2pkKeys.bulkPut.bind(cashuDb.p2pkKeys);
+    const delay = vi
+      .spyOn(cashuDb.p2pkKeys, "bulkPut")
+      .mockImplementation(async (...args: any[]) => {
+        await gate;
+        return (realPut as any)(...args);
+      });
+
+    failing.items.value.push({ id: "a", value: 1 });
+    slow.items.value.push({ publicKey: "02slow" });
+    let settled = false;
+    const flushing = flushPendingWrites()
+      .catch(() => {})
+      .finally(() => (settled = true));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(settled).toBe(false);
+    release();
+    await flushing;
+    expect(await cashuDb.p2pkKeys.get("02slow")).toBeTruthy();
+
+    fail.mockRestore();
+    delay.mockRestore();
+    failing.items.value = [];
+    slow.items.value = [];
+    await flushPendingWrites();
+  });
+
+  it("refuses late writes once the wallet database is deleted", async () => {
+    const { CashuDexie } = await import("src/stores/dexie");
+    const db = new CashuDexie("wipe-test");
+    await db.open();
+    await db.delete({ disableAutoOpen: true });
+    await expect(
+      db.ecashHistory.put({ id: "late", status: "paid" })
+    ).rejects.toBeTruthy();
+  });
+
+  it("reports a failed recommendations load and retries later", async () => {
+    const { useMintRecommendationsStore } = await import(
+      "src/stores/mintRecommendations"
+    );
+    const store = useMintRecommendationsStore();
+    const read = vi
+      .spyOn(store, "ensureDbInitialized")
+      .mockRejectedValueOnce(new Error("db unavailable"));
+    await store.hydrateFromDb();
+    expect(store.dbHydrated).toBe(false);
+    expect(notifyError).toHaveBeenCalled();
+    read.mockRestore();
+  });
+});

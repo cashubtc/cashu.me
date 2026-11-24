@@ -79,12 +79,13 @@ export function createMintsTable(): MintsTable {
   let keysHydrated = false;
   let persistedKeys = new Set<string>();
 
-  // Runs inside the mint rows' transaction, so a mint row and its keys are
-  // committed together (a URL change moves both or neither).
-  const writeKeys = async () => {
-    if (!keysHydrated) return;
+  // Computed from the same snapshot as the mint rows and applied inside their
+  // transaction, so a mint row and its keys always describe one revision (a
+  // URL change moves both or neither).
+  const prepareKeys = (mints: StoredMint[]) => {
+    if (!keysHydrated) return undefined;
     const current = new Map<string, MintKeysRow>();
-    for (const row of mintKeysRows(mirror.items.value)) {
+    for (const row of mintKeysRows(mints)) {
       current.set(keysKey(row.mintUrl, row.id), row);
     }
     const puts = [...current.entries()]
@@ -93,11 +94,14 @@ export function createMintsTable(): MintsTable {
     const deletes = [...persistedKeys]
       .filter((key) => !current.has(key))
       .map((key) => JSON.parse(key) as [string, string]);
-    if (deletes.length) await cashuDb.mintKeys.bulkDelete(deletes);
-    if (puts.length) await cashuDb.mintKeys.bulkPut(puts);
-    const next = new Set(current.keys());
-    return () => {
-      persistedKeys = next;
+    return {
+      apply: async () => {
+        if (deletes.length) await cashuDb.mintKeys.bulkDelete(deletes);
+        if (puts.length) await cashuDb.mintKeys.bulkPut(puts);
+      },
+      afterCommit: () => {
+        persistedKeys = new Set(current.keys());
+      },
     };
   };
 
@@ -107,7 +111,7 @@ export function createMintsTable(): MintsTable {
     fromRow: (row) => ({ ...row, keys: [] }),
     mergeDuplicates: mergeDuplicateMint,
     extraTables: [cashuDb.mintKeys],
-    writeExtra: writeKeys,
+    prepareExtra: prepareKeys,
   });
 
   // Keys of a keyset never change, so tracking (mint url, keyset id) pairs is

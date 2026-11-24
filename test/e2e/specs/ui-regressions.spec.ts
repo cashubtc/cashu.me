@@ -29,16 +29,16 @@ test("editing a mint rejects a duplicate URL", async ({ page }) => {
   await wallet.onboard(MINT_A_URL);
   await wallet.addMint(MINT_B_URL);
   await wallet.editMint(MINT_B_URL, "Duplicate", MINT_A_URL);
-  const mints = JSON.parse((await wallet.stored("cashu.mints"))!);
+  const mints = await wallet.settledStoredMints();
   test.fail(true, "UI-002: mint URL edits accept duplicates");
-  expect(new Set(mints.map((mint: { url: string }) => mint.url)).size).toBe(2);
+  expect(new Set(mints.map((mint) => mint.url)).size).toBe(2);
 });
 
 test("editing a mint rejects a malformed URL", async ({ page }) => {
   const wallet = new WalletUi(page);
   await wallet.onboard(MINT_A_URL);
   await wallet.editMint(MINT_A_URL, "Invalid", "not a mint url");
-  const mints = JSON.parse((await wallet.stored("cashu.mints"))!);
+  const mints = await wallet.settledStoredMints();
   test.fail(true, "UI-003: mint URL edits accept malformed URLs");
   expect(mints[0].url).toBe(MINT_A_URL);
 });

@@ -94,7 +94,11 @@ async function loadWalletData() {
     const { useMigrationsStore } = await import("src/stores/migrations");
     const migrations = useMigrationsStore();
     migrations.initMigrations();
-    await migrations.runMigrations();
+    // A failed migration (reported, retried later) stops startup: stores
+    // and workers must not run without the data it was moving.
+    if (!(await migrations.runMigrations())) {
+      throw new Error("A wallet data migration failed");
+    }
   });
 
   // Wallet secrets state and mints first: everything else resolves against

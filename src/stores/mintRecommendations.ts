@@ -3,6 +3,8 @@ import NDK, { NDKEvent, NDKFilter, NDKKind } from "@nostr-dev-kit/ndk";
 import { useSettingsStore } from "./settings";
 import { useNostrStore } from "./nostr";
 import Dexie from "dexie";
+import { i18n } from "src/boot/i18n";
+import { notifyError } from "src/js/notify";
 
 export type MintReview = {
   eventId: string;
@@ -101,11 +103,18 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
           list.sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
           this.urlReviews.set(url, list);
         }
+        // recommendations are no longer cached in localStorage, so only mark
+        // the store hydrated once they were rebuilt (a failure retries later)
+        if (!(await this.rebuildAggregates())) {
+          throw new Error("Could not rebuild mint recommendations");
+        }
         this.dbHydrated = true;
-        await this.rebuildAggregates();
         // After hydration, opportunistically refetch stale HTTP info within interval
         //void this.refetchStaleHttpInfoForKnownMints();
-      } catch {}
+      } catch (error) {
+        console.error("Could not load mint recommendations", error);
+        notifyError(i18n.global.t("WalletStorage.load_failed")).catch(() => {});
+      }
     },
     fetchMintInfos: async function () {
       this.init();
@@ -409,7 +418,8 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
         }
       } catch {}
     },
-    rebuildAggregates: async function () {
+    /** Resolves false when the reviews DB could not be read. */
+    rebuildAggregates: async function (): Promise<boolean> {
       try {
         await this.ensureDbInitialized();
         const [reviews, infos, httpRows] = await Promise.all([
@@ -465,7 +475,11 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
             (b.averageRating || 0) - (a.averageRating || 0)
         );
         this.recommendations = recs;
-      } catch {}
+        return true;
+      } catch (error) {
+        console.error("Could not rebuild mint recommendations", error);
+        return false;
+      }
     },
     persistReviewRow: async function (url: string, review: MintReview) {
       try {
