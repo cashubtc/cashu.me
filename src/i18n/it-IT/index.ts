@@ -1037,6 +1037,12 @@ export default {
         },
       },
     },
+    errors: {
+      unit_not_matching_request:
+        "Questa richiesta di pagamento deve essere saldata in {unit}.",
+      mint_lacks_request_methods:
+        "Il mint selezionato non supporta i metodi di pagamento richiesti.",
+    },
   },
   ReceiveDialog: {
     title: "Ricevi",

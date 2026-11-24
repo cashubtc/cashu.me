@@ -1062,6 +1062,12 @@ export default {
         },
       },
     },
+    errors: {
+      unit_not_matching_request:
+        "Den här betalningsförfrågan måste betalas i {unit}.",
+      mint_lacks_request_methods:
+        "Den valda minten stöder inte betalningsmetoderna som förfrågan kräver.",
+    },
   },
   ReceiveDialog: {
     title: "Ta emot",

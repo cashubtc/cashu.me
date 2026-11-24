@@ -4,12 +4,41 @@ import { generateSecretKey, getPublicKey, nip19 } from "nostr-tools";
 import { bytesToHex } from "@noble/hashes/utils.js"; // already an installed dependency
 import { WalletProof } from "stores/mints";
 import token from "src/js/token";
+import {
+  Amount,
+  verifyP2PKSpendingConditions,
+  type Proof,
+} from "@cashu/cashu-ts";
 
 type P2PKKey = {
   publicKey: string;
   privateKey: string;
   used: boolean;
   usedCount: number;
+};
+
+// Keys are stored as "02" + x-only nostr keys and NUT-11 signatures are x-only, so match on x.
+const xOnly = (key: unknown) =>
+  typeof key === "string" && /^0[23][0-9a-f]{64}$/i.test(key)
+    ? key.slice(2).toLowerCase()
+    : "";
+const sameXOnlyKey = (a: unknown, b: unknown) =>
+  xOnly(a) !== "" && xOnly(a) === xOnly(b);
+
+// Whether a proof's own witness already meets its P2PK lock.
+const witnessSatisfiesLock = (secret: string, witness: Proof["witness"]) => {
+  if (!witness) return false;
+  try {
+    return verifyP2PKSpendingConditions({
+      id: "",
+      amount: Amount.zero(),
+      C: "",
+      secret,
+      witness,
+    }).success;
+  } catch {
+    return false;
+  }
 };
 
 export const useP2PKStore = defineStore("p2pk", {
@@ -24,8 +53,11 @@ export const useP2PKStore = defineStore("p2pk", {
   }),
   getters: {},
   actions: {
+    findKey: function (pubkey: string) {
+      return this.p2pkKeys.find((m) => sameXOnlyKey(m.publicKey, pubkey));
+    },
     haveThisKey: function (key: string) {
-      return this.p2pkKeys.filter((m) => m.publicKey == key).length > 0;
+      return !!this.findKey(key);
     },
     maybeConvertNpub: function (key: string) {
       // Check and convert npub to P2PK
@@ -96,7 +128,10 @@ export const useP2PKStore = defineStore("p2pk", {
       };
       this.p2pkKeys = this.p2pkKeys.concat(keyPair);
     },
-    getSecretP2PKPubkey: function (secret: string): string {
+    getSecretP2PKPubkey: function (
+      secret: string,
+      witness?: Proof["witness"]
+    ): string {
       try {
         const secretObject = JSON.parse(secret);
         if (secretObject[0] != "P2PK" || secretObject[1]["data"] == undefined) {
@@ -116,25 +151,33 @@ export const useP2PKStore = defineStore("p2pk", {
           pubkeysTag && pubkeysTag.length > 1 ? pubkeysTag.slice(1) : [];
         const n_sigsTag = tags && tags.find((tag) => tag[0] === "n_sigs");
         const n_sigs = n_sigsTag ? parseInt(n_sigsTag[1], 10) : undefined;
-        // If locktime is in the future, return first owned additional 'pubkeys'
-        // match if multisig ('n_sigs'), otherwise return the main key ('data')
-        if (locktime > now) {
-          console.log("p2pk token - locktime is active");
+        // First owned additional 'pubkeys' match if multisig ('n_sigs'),
+        // otherwise the main key ('data')
+        const mainKey = () => {
           if (n_sigs && n_sigs >= 1) {
             for (const pk of pubkeys) {
               if (this.haveThisKey(pk)) return pk;
             }
           }
           return data; // Main lock key (shows locked state)
+        };
+        if (locktime > now) {
+          console.log("p2pk token - locktime is active");
+          return mainKey();
         }
-        // If locktime expired, return first owned 'refund' key match or
-        // or just return the first refund key to show token is locked
+        // If locktime expired, return first owned 'refund' key match, then an
+        // owned main key (still valid per NUT-11), or just the first refund
+        // key to show token is locked
         if (refundKeys.length > 0) {
           console.log("p2pk token - locked to refund keys");
           for (const pk of refundKeys) {
             if (this.haveThisKey(pk)) return pk;
           }
-          return refundKeys[0]; // First refund key (shows locked state)
+          const main = mainKey();
+          return this.haveThisKey(main) &&
+            !witnessSatisfiesLock(secret, witness)
+            ? main
+            : refundKeys[0];
         }
         console.log("p2pk token - lock has expired");
       } catch {}
@@ -152,9 +195,8 @@ export const useP2PKStore = defineStore("p2pk", {
       return false;
     },
     isLockedToUs: function (proofs: WalletProof[]) {
-      const secrets = proofs.map((p) => p.secret);
-      for (const secret of secrets) {
-        const pubkey = this.getSecretP2PKPubkey(secret);
+      for (const proof of proofs) {
+        const pubkey = this.getSecretP2PKPubkey(proof.secret, proof.witness);
         if (pubkey) {
           return this.haveThisKey(pubkey);
         }
@@ -172,14 +214,11 @@ export const useP2PKStore = defineStore("p2pk", {
         return "";
       }
 
-      const secrets = proofs.map((p) => p.secret);
-      for (const secret of secrets) {
-        const pubkey = this.getSecretP2PKPubkey(secret);
-        if (pubkey && this.haveThisKey(pubkey)) {
-          // NOTE: we assume all tokens are locked to the same key here!
-          return this.p2pkKeys.filter((m) => m.publicKey == pubkey)[0]
-            .privateKey;
-        }
+      for (const proof of proofs) {
+        const pubkey = this.getSecretP2PKPubkey(proof.secret, proof.witness);
+        const key = pubkey ? this.findKey(pubkey) : undefined;
+        // NOTE: we assume all tokens are locked to the same key here!
+        if (key) return key.privateKey;
       }
       return "";
     },

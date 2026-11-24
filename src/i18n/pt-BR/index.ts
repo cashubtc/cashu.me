@@ -1108,6 +1108,10 @@ export default {
       serialization_failed: "Não foi possível preparar o token ecash.",
       mint_not_allowed_by_request:
         "O mint selecionado não é aceito por esta solicitação de pagamento.",
+      unit_not_matching_request:
+        "Esta solicitação de pagamento deve ser paga em {unit}.",
+      mint_lacks_request_methods:
+        "O mint selecionado não oferece suporte aos métodos de pagamento exigidos por esta solicitação.",
     },
   },
   SendPaymentRequest: {
