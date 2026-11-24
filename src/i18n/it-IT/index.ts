@@ -43,6 +43,8 @@ export default {
         "Pagamento in attesa. Aggiorna la fattura manualmente.",
       sent: "Inviato {amount}",
       token_still_pending: "Token ancora in attesa",
+      history_save_failed: "Impossibile salvare nella cronologia",
+      history_delete_failed: "Impossibile eliminare dalla cronologia",
       received_lightning: "Ricevuto {amount} tramite Lightning",
       lightning_payment_failed: "Pagamento Lightning fallito",
       failed_to_decode_invoice: "Impossibile decodificare la fattura",

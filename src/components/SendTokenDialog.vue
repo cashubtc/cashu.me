@@ -647,7 +647,10 @@ export default defineComponent({
       try {
         (historyToken as any).id = await this.addPendingToken(historyToken);
       } catch (error: any) {
-        notifyApiError(error, "Could not save token to history");
+        notifyApiError(
+          error,
+          this.$t("wallet.notifications.history_save_failed") as string
+        );
       }
       if (!this.g.offline) {
         this.onTokenPaid(historyToken);
@@ -676,10 +679,10 @@ export default defineComponent({
           this.sendData.p2pkPubkey,
           mutexPriority
         );
-        this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
+        const tokensBase64 = this.serializeProofs(sendProofs);
         const historyToken = {
           amount: -this.sendData.amount,
-          token: this.sendData.tokensBase64,
+          token: tokensBase64,
           unit: this.activeUnit,
           mint: this.activeMintUrl,
         };
@@ -690,10 +693,16 @@ export default defineComponent({
             historyToken as any
           );
         } catch (error: any) {
-          notifyApiError(error, "Could not save token to history");
+          notifyApiError(
+            error,
+            this.$t("wallet.notifications.history_save_failed") as string
+          );
         }
+        // Set the whole token view at once, after the write: closing the
+        // dialog meanwhile clears sendData. historyToken must be set before
+        // tokens, which shows the token view that reads it.
+        this.sendData.tokensBase64 = tokensBase64;
         this.sendData.historyToken = historyToken as any;
-        // update UI (shows the token, which needs sendData.historyToken)
         this.sendData.tokens = sendProofs;
 
         if (!this.g.offline) {
@@ -743,13 +752,13 @@ export default defineComponent({
           "foreground"
         );
 
-        this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
-        this.sendData.historyAmount =
+        const tokensBase64 = this.serializeProofs(sendProofs);
+        const historyAmount =
           -this.sendData.amount * this.activeUnitCurrencyMultiplyer;
 
         const historyToken = {
           amount: -sendAmount,
-          token: this.sendData.tokensBase64,
+          token: tokensBase64,
           unit: this.activeUnit,
           mint: this.activeMintUrl,
           paymentRequest: this.sendData.paymentRequest,
@@ -762,10 +771,17 @@ export default defineComponent({
             historyToken as any
           );
         } catch (error: any) {
-          notifyApiError(error, "Could not save token to history");
+          notifyApiError(
+            error,
+            this.$t("wallet.notifications.history_save_failed") as string
+          );
         }
+        // Set the whole token view at once, after the write: closing the
+        // dialog meanwhile clears sendData. historyToken must be set before
+        // tokens, which shows the token view that reads it.
+        this.sendData.tokensBase64 = tokensBase64;
+        this.sendData.historyAmount = historyAmount;
         this.sendData.historyToken = historyToken as any;
-        // update UI (shows the token, which needs sendData.historyToken)
         this.sendData.tokens = sendProofs;
 
         if (!this.g.offline) {

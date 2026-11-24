@@ -901,39 +901,44 @@ export const useWalletStore = defineStore("wallet", {
         const outputAmount = proofsStore.sumProofs(proofs);
 
         // The proofs are already stored, so a failed history write must not
-        // report the receive as failed.
-        try {
-          // if token is already in history, set to paid, else add to history
+        // report the receive as failed, nor skip the other history write.
+        const saveToHistory = async (write: () => Promise<unknown>) => {
+          try {
+            await write();
+          } catch (error: any) {
+            notifyApiError(
+              error,
+              this.t("wallet.notifications.history_save_failed")
+            );
+          }
+        };
+        // if token is already in history, set to paid, else add to history
+        if (
+          tokenStore.historyTokens.find(
+            (t) =>
+              t.token === receiveStore.receiveData.tokensBase64 && t.amount > 0
+          )
+        ) {
+          await saveToHistory(() =>
+            tokenStore.setTokenPaid(receiveStore.receiveData.tokensBase64)
+          );
+        } else {
+          // if this is a self-sent token, we will find an outgoing token with the inverse amount
           if (
             tokenStore.historyTokens.find(
               (t) =>
                 t.token === receiveStore.receiveData.tokensBase64 &&
-                t.amount > 0
+                t.amount < 0
             )
           ) {
-            await tokenStore.setTokenPaid(
-              receiveStore.receiveData.tokensBase64
+            await saveToHistory(() =>
+              tokenStore.setTokenPaid(receiveStore.receiveData.tokensBase64)
             );
-          } else {
-            // if this is a self-sent token, we will find an outgoing token with the inverse amount
-            if (
-              tokenStore.historyTokens.find(
-                (t) =>
-                  t.token === receiveStore.receiveData.tokensBase64 &&
-                  t.amount < 0
-              )
-            ) {
-              await tokenStore.setTokenPaid(
-                receiveStore.receiveData.tokensBase64
-              );
-            }
-            fee = inputAmount - outputAmount;
-            historyToken.fee = fee;
-            historyToken.amount = outputAmount;
-            await tokenStore.addPaidToken(historyToken);
           }
-        } catch (error: any) {
-          notifyApiError(error, "Could not save ecash to history");
+          fee = inputAmount - outputAmount;
+          historyToken.fee = fee;
+          historyToken.amount = outputAmount;
+          await saveToHistory(() => tokenStore.addPaidToken(historyToken));
         }
         useUiStore().vibrate();
         let message = this.t("wallet.notifications.received", {
@@ -1047,12 +1052,21 @@ export const useWalletStore = defineStore("wallet", {
             throw new Error("could not serialize proofs.");
           }
           if (update_history) {
-            await tokenStore.addPaidToken({
-              amount: -proofsStore.sumProofs(spentProofs),
-              token: serializedProofs,
-              unit: wallet.unit,
-              mint: wallet.mint.mintUrl,
-            });
+            // The spent proofs are already removed: a failed history write
+            // must not abort the check (or a caller's remaining batches).
+            try {
+              await tokenStore.addPaidToken({
+                amount: -proofsStore.sumProofs(spentProofs),
+                token: serializedProofs,
+                unit: wallet.unit,
+                mint: wallet.mint.mintUrl,
+              });
+            } catch (error: any) {
+              notifyApiError(
+                error,
+                this.t("wallet.notifications.history_save_failed")
+              );
+            }
           }
         }
         // return spent proofs

@@ -301,6 +301,7 @@ describe("SendTokenDialog", () => {
         throw new Error("history write failed");
       }),
       onTokenPaid: vi.fn(),
+      $t: (key: string) => key,
       g: { offline: false },
     };
 
@@ -312,6 +313,46 @@ describe("SendTokenDialog", () => {
       expect.objectContaining({ amount: -21, token: "cashuSent" })
     );
     expect(context.onTokenPaid).toHaveBeenCalledWith(sendData.historyToken);
+  });
+
+  it("shows the whole sent token even if the dialog was cleared during the history write", async () => {
+    const sendData: any = {
+      amount: 21,
+      p2pkPubkey: "",
+      tokensBase64: "",
+      historyToken: undefined,
+    };
+    const sendProofs = [{ amount: 21 }];
+    const context = {
+      sendingEcash: false,
+      sendData,
+      maybeConvertNpub: vi.fn(() => ""),
+      isValidPubkey: vi.fn(() => false),
+      activeUnitCurrencyMultiplyer: 1,
+      activeMintUrl: "https://mint.example",
+      activeUnit: "sat",
+      activeProofs: [],
+      includeFeesInSendAmount: false,
+      mintWallet: vi.fn(async () => ({ id: "wallet" })),
+      send: vi.fn(async () => ({ sendProofs })),
+      serializeProofs: vi.fn(() => "cashuSent"),
+      addPendingToken: vi.fn(async () => {
+        // closing the dialog while the write is pending clears sendData
+        sendData.tokensBase64 = "";
+        sendData.historyToken = undefined;
+        return "history-id";
+      }),
+      onTokenPaid: vi.fn(),
+      g: { offline: true },
+    };
+
+    await SendTokenDialog.methods.sendTokens.call(context);
+
+    expect(sendData.tokens).toBe(sendProofs);
+    expect(sendData.tokensBase64).toBe("cashuSent");
+    expect(sendData.historyToken).toEqual(
+      expect.objectContaining({ id: "history-id", token: "cashuSent" })
+    );
   });
 
   it("uses foreground priority for a locked ecash send", async () => {

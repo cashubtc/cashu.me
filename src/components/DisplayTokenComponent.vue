@@ -306,6 +306,7 @@
         <div class="row q-mt-lg">
           <q-btn
             @click="deleteThisToken"
+            :loading="deletingToken"
             color="negative"
             rounded
             class="q-mr-sm"
@@ -365,6 +366,7 @@ export default defineComponent({
   data: function () {
     return {
       baseURL: location.protocol + "//" + location.host + location.pathname,
+      deletingToken: false,
       showAnimatedQR: false,
       qrCodeFragment: "",
       qrInterval: null as any,
@@ -647,12 +649,21 @@ export default defineComponent({
       this.scanningCard = false;
     },
     deleteThisToken: async function () {
+      // A second click while the first delete is pending would find no entry
+      // and close the view before the delete is known to have worked.
+      if (this.deletingToken) return;
       const tokenToDelete = this.sendData.tokensBase64;
+      this.deletingToken = true;
       try {
         await this.deleteToken(tokenToDelete);
       } catch (error: any) {
-        notifyApiError(error, "Could not delete token from history");
+        notifyApiError(
+          error,
+          this.$t("wallet.notifications.history_delete_failed") as string
+        );
         return;
+      } finally {
+        this.deletingToken = false;
       }
       this.removeOutgoingTokenFromChecker(tokenToDelete);
       this.showSendTokens = false;

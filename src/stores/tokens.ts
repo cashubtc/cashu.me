@@ -72,32 +72,48 @@ export const useTokensStore = defineStore("tokens", {
         (await cashuDb.ecashHistory.toArray()) as HistoryToken[]
       );
     },
-    /**
-     * Writes a history token to IndexedDB. On failure, the optimistic in-memory
-     * change is undone (restored to `previous`, or removed if it was new) so the
-     * cache does not claim a row that IndexedDB does not have, and the error is
-     * rethrown.
-     */
-    async persistHistoryToken(
-      historyToken: HistoryToken,
-      previous?: HistoryToken
-    ): Promise<void> {
+    async persistHistoryToken(historyToken: HistoryToken): Promise<void> {
       try {
         await cashuDb.ecashHistory.put(toStorable(historyToken));
       } catch (error) {
         console.error("Could not persist ecash history token", error);
+        throw error;
+      }
+    },
+    /**
+     * Adds a new entry to the cache right away and waits for its IndexedDB
+     * write. If the write fails, the entry is removed again so the cache does
+     * not claim a row that IndexedDB does not have, and the error is rethrown.
+     */
+    async addHistoryToken(historyToken: HistoryToken): Promise<string> {
+      this.historyTokens.push(historyToken);
+      try {
+        await this.persistHistoryToken(historyToken);
+      } catch (error) {
         const index = this.historyTokens.findIndex(
           (t) => t.id === historyToken.id
         );
-        if (index >= 0) {
-          if (previous) {
-            this.historyTokens.splice(index, 1, previous);
-          } else {
-            this.historyTokens.splice(index, 1);
-          }
-        }
+        if (index >= 0) this.historyTokens.splice(index, 1);
         throw error;
       }
+      return historyToken.id;
+    },
+    /**
+     * Writes changes to an existing entry and applies them to the cache only
+     * once IndexedDB has committed them, so nothing (such as the transaction
+     * worker) acts on a change that may still fail.
+     */
+    async updateHistoryToken(
+      id: string,
+      changes: Partial<HistoryToken>
+    ): Promise<HistoryToken | undefined> {
+      const cached = this.historyTokens.find((t) => t.id === id);
+      if (!cached) return undefined;
+      await this.persistHistoryToken({ ...cached, ...changes });
+      // The liveQuery may already have replaced the cached object.
+      const current = this.historyTokens.find((t) => t.id === id);
+      if (current) Object.assign(current, changes);
+      return current;
     },
     async migrateHistoryTokensFromLocalStorage() {
       const raw = localStorage.getItem("cashu.historyTokens");
@@ -151,9 +167,7 @@ export const useTokensStore = defineStore("tokens", {
         label,
         paymentRequestId,
       } as HistoryToken;
-      this.historyTokens.push(historyToken);
-      await this.persistHistoryToken(historyToken);
-      return id;
+      return this.addHistoryToken(historyToken);
     },
     async addPendingToken({
       amount,
@@ -187,10 +201,8 @@ export const useTokensStore = defineStore("tokens", {
         paymentRequest,
         label,
         paymentRequestId,
-      };
-      this.historyTokens.push(historyToken);
-      await this.persistHistoryToken(historyToken);
-      return id;
+      } as HistoryToken;
+      return this.addHistoryToken(historyToken);
     },
     async editHistoryToken(
       tokenToEdit: string,
@@ -202,50 +214,43 @@ export const useTokensStore = defineStore("tokens", {
         newFee?: number;
       }
     ): Promise<HistoryToken | undefined> {
-      const index = this.historyTokens.findIndex(
+      const historyToken = this.historyTokens.find(
         (t) => t.token === tokenToEdit
       );
-      if (index >= 0) {
-        const previous = { ...this.historyTokens[index] };
-        if (options) {
-          if (options.newToken) {
-            this.historyTokens[index].token = options.newToken;
-          }
-          if (options.newAmount) {
-            this.historyTokens[index].amount =
-              options.newAmount * Math.sign(this.historyTokens[index].amount);
-          }
-          if (options.addAmount) {
-            if (this.historyTokens[index].amount > 0) {
-              this.historyTokens[index].amount += options.addAmount;
-            } else {
-              this.historyTokens[index].amount -= options.addAmount;
-            }
-          }
-          if (options.newStatus) {
-            this.historyTokens[index].status = options.newStatus;
-          }
-          if (options.newFee) {
-            this.historyTokens[index].fee = options.newFee;
-          }
+      if (!historyToken) return undefined;
+      const changes: Partial<HistoryToken> = {};
+      if (options) {
+        if (options.newToken) {
+          changes.token = options.newToken;
         }
-
-        const historyToken = this.historyTokens[index];
-        await this.persistHistoryToken(historyToken, previous);
-        return historyToken;
+        if (options.newAmount) {
+          changes.amount = options.newAmount * Math.sign(historyToken.amount);
+        }
+        if (options.addAmount) {
+          const amount = changes.amount ?? historyToken.amount;
+          changes.amount =
+            amount > 0
+              ? amount + options.addAmount
+              : amount - options.addAmount;
+        }
+        if (options.newStatus) {
+          changes.status = options.newStatus;
+        }
+        if (options.newFee) {
+          changes.fee = options.newFee;
+        }
       }
-
-      return undefined;
+      return this.updateHistoryToken(historyToken.id, changes);
     },
     async setTokenPaid(token: string) {
-      const index = this.historyTokens.findIndex(
+      const historyToken = this.historyTokens.find(
         (t) => t.token === token && t.status == "pending"
       );
-      if (index >= 0) {
-        const previous = { ...this.historyTokens[index] };
-        this.historyTokens[index].status = "paid";
-        this.historyTokens[index].paidDate = currentDateStr();
-        await this.persistHistoryToken(this.historyTokens[index], previous);
+      if (historyToken) {
+        await this.updateHistoryToken(historyToken.id, {
+          status: "paid",
+          paidDate: currentDateStr(),
+        });
       }
     },
     /**
@@ -278,17 +283,28 @@ export const useTokensStore = defineStore("tokens", {
         mint: original.mint,
         unit: original.unit,
       };
+      let split: boolean;
       try {
-        await cashuDb.transaction("rw", cashuDb.ecashHistory, async () => {
-          await cashuDb.ecashHistory.put(
-            toStorable({ ...original, ...spentPart })
-          );
-          await cashuDb.ecashHistory.put(toStorable(remainder));
-        });
+        split = await cashuDb.transaction(
+          "rw",
+          cashuDb.ecashHistory,
+          async () => {
+            // Another check of the same token may have split it while this
+            // one was waiting; then there is nothing left to split.
+            const stored = await cashuDb.ecashHistory.get(original.id);
+            if (stored?.token !== tokenToSplit) return false;
+            await cashuDb.ecashHistory.put(
+              toStorable({ ...original, ...spentPart })
+            );
+            await cashuDb.ecashHistory.put(toStorable(remainder));
+            return true;
+          }
+        );
       } catch (error) {
         console.error("Could not split ecash history token", error);
         throw error;
       }
+      if (!split) return undefined;
       // Update the cache only after the commit. The liveQuery may already have
       // replaced it with the committed rows, so match by id.
       const cached = this.historyTokens.find((t) => t.id === original.id);

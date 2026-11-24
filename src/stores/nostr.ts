@@ -34,6 +34,7 @@ import {
   notifyWarning,
   notify,
 } from "../js/notify";
+import { i18n } from "src/boot/i18n";
 import { useSendTokensStore } from "./sendTokensStore";
 import { usePRStore } from "./payment-request";
 import token from "../js/token";
@@ -586,7 +587,10 @@ export const useNostrStore = defineStore("nostr", {
       } catch (error: any) {
         // Keep the incoming token reachable (receive dialog / auto-receive)
         // even though it could not be saved to history.
-        notifyApiError(error, "Could not save ecash to history");
+        notifyApiError(
+          error,
+          i18n.global.t("wallet.notifications.history_save_failed")
+        );
         return undefined;
       }
       receiveStore.showReceiveTokens = false;

@@ -277,6 +277,71 @@ describe("tokens store", () => {
     );
   });
 
+  it("keeps a status change out of the cache until it is committed", async () => {
+    const store = useTokensStore();
+    const id = await store.addPendingToken({
+      amount: -4,
+      token: "cashuPending",
+      mint: "https://mint.example",
+      unit: "sat",
+    });
+    const table = cashuDb.ecashHistory;
+    const put = table.put;
+    let releaseWrite!: () => void;
+    const writeReleased = new Promise<void>((resolve) => {
+      releaseWrite = resolve;
+    });
+    vi.spyOn(table, "put").mockImplementationOnce(async function (
+      this: any,
+      ...args: any[]
+    ) {
+      await writeReleased;
+      return put.apply(this, args as any);
+    } as any);
+
+    const settingPaid = store.setTokenPaid("cashuPending");
+    await Promise.resolve();
+    // The transaction worker reads this cache; it must not see "paid" yet.
+    expect(store.tokenAlreadyInHistory("cashuPending")?.status).toBe("pending");
+
+    releaseWrite();
+    await settingPaid;
+    expect(store.tokenAlreadyInHistory("cashuPending")).toEqual(
+      expect.objectContaining({ id, status: "paid" })
+    );
+  });
+
+  it("splits a partially spent token only once when checks overlap", async () => {
+    const store = useTokensStore();
+    const id = await store.addPendingToken({
+      amount: -10,
+      token: "cashuAll",
+      mint: "https://mint.example",
+      unit: "sat",
+    });
+
+    const [first, second] = await Promise.all([
+      store.splitHistoryToken(
+        "cashuAll",
+        { amount: 6, token: "cashuSpent" },
+        { amount: 4, token: "cashuUnspent" }
+      ),
+      store.splitHistoryToken(
+        "cashuAll",
+        { amount: 6, token: "cashuSpent" },
+        { amount: 4, token: "cashuUnspent" }
+      ),
+    ]);
+
+    expect([first, second].filter(Boolean)).toHaveLength(1);
+    const rows = await readEcashHistory();
+    expect(rows).toHaveLength(2);
+    expect(rows.find((row) => row.id === id)?.token).toBe("cashuSpent");
+    expect(
+      store.historyTokens.filter((t) => t.token === "cashuUnspent")
+    ).toHaveLength(1);
+  });
+
   it("splits a partially spent token into paid and pending rows", async () => {
     const store = useTokensStore();
     const id = await store.addPendingToken({

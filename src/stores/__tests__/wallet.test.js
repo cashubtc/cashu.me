@@ -2246,6 +2246,60 @@ describe("wallet store", () => {
     );
   });
 
+  it("redeem records the incoming row when marking a self-sent token paid fails", async () => {
+    const wallet = useWalletStore();
+    mockV4Redeem(wallet);
+    const historyTokens = h.tokensStore.historyTokens;
+    h.tokensStore.historyTokens = [{ token: "cashuB500", amount: -500 }];
+    const writeError = new Error("status write failed");
+    h.tokensStore.setTokenPaid.mockRejectedValueOnce(writeError);
+
+    try {
+      await expect(wallet.redeem()).resolves.toBeUndefined();
+    } finally {
+      h.tokensStore.historyTokens = historyTokens;
+    }
+
+    expect(h.notifyApiError).toHaveBeenCalledWith(
+      writeError,
+      "wallet.notifications.history_save_failed"
+    );
+    expect(h.tokensStore.addPaidToken).toHaveBeenCalledWith(
+      expect.objectContaining({ amount: 500, fee: 0, unit: "sat" })
+    );
+    expect(h.notifySuccess).toHaveBeenCalledWith(
+      "wallet.notifications.received"
+    );
+  });
+
+  it("checkProofsSpendable returns spent proofs when the history write fails", async () => {
+    const wallet = useWalletStore();
+    const spent = [{ id: "00aa", amount: 2, secret: "s-spent" }];
+    const mintWallet = {
+      unit: "sat",
+      mint: { mintUrl: "https://mint-a.example" },
+      groupProofsByState: vi.fn(async () => ({ spent })),
+    };
+    const serializeProofs = h.proofsStore.serializeProofs;
+    h.proofsStore.serializeProofs = vi.fn(() => "cashuSpent");
+    const writeError = new Error("history write failed");
+    h.tokensStore.addPaidToken.mockRejectedValueOnce(writeError);
+
+    try {
+      await expect(
+        wallet.checkProofsSpendable(spent, mintWallet, true)
+      ).resolves.toEqual(spent);
+    } finally {
+      h.proofsStore.serializeProofs = serializeProofs;
+    }
+
+    expect(h.proofsStore.removeProofs).toHaveBeenCalled();
+    expect(h.notifyApiError).toHaveBeenCalledWith(
+      writeError,
+      "wallet.notifications.history_save_failed"
+    );
+  });
+
   it("redeem still succeeds when only the history write fails", async () => {
     const wallet = useWalletStore();
     mockV4Redeem(wallet);
@@ -2257,7 +2311,7 @@ describe("wallet store", () => {
     expect(h.proofsStore.addProofs).toHaveBeenCalled();
     expect(h.notifyApiError).toHaveBeenCalledWith(
       writeError,
-      "Could not save ecash to history"
+      "wallet.notifications.history_save_failed"
     );
     expect(h.notifySuccess).toHaveBeenCalledWith(
       "wallet.notifications.received"

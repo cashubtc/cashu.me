@@ -215,6 +215,7 @@
                 <template v-else>
                   <q-btn
                     @click="addPendingTokenToHistory(receiveData.tokensBase64)"
+                    :loading="addingToHistory"
                     color="primary"
                     rounded
                     flat
@@ -330,6 +331,7 @@ export default defineComponent({
       swapProcessing: false,
       swapError: false,
       isReceiving: false as boolean,
+      addingToHistory: false,
       receiveError: "" as string,
       selectedSwapMintUrl: "",
       isNotLockedToUs: false as boolean,
@@ -648,6 +650,9 @@ export default defineComponent({
       );
     },
     addPendingTokenToHistory: async function (tokenStr: string) {
+      // A second click while the first save is pending would see the unsaved
+      // entry and report "already in history".
+      if (this.addingToHistory) return;
       if (this.tokenAlreadyInHistory(tokenStr)) {
         this.notifySuccess(
           this.$i18n.t(
@@ -661,6 +666,7 @@ export default defineComponent({
       const decodedToken = this.decodeToken(tokenStr);
       if (!decodedToken) return;
 
+      this.addingToHistory = true;
       try {
         await tokensStore.addPendingToken({
           amount: decodedToken.amount,
@@ -669,8 +675,13 @@ export default defineComponent({
           unit: token.getUnit(decodedToken),
         });
       } catch (error: any) {
-        notifyApiError(error, "Could not save ecash to history");
+        notifyApiError(
+          error,
+          this.$i18n.t("wallet.notifications.history_save_failed") as string
+        );
         return;
+      } finally {
+        this.addingToHistory = false;
       }
       this.showReceiveTokens = false;
       // show success notification
