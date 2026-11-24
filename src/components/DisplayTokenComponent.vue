@@ -338,7 +338,7 @@ import PaymentRequestInfo from "./PaymentRequestInfo.vue";
 import { getDecodedToken, getEncodedTokenBinary } from "@cashu/cashu-ts";
 import { sumProofAmounts } from "src/js/proofs";
 import token from "src/js/token";
-import { notifyError, notifySuccess } from "src/js/notify";
+import { notifyApiError, notifyError, notifySuccess } from "src/js/notify";
 import { copyToClipboard } from "quasar";
 import {
   Scan as ScanIcon,
@@ -646,10 +646,15 @@ export default defineComponent({
       this.controller?.abort?.();
       this.scanningCard = false;
     },
-    deleteThisToken: function () {
+    deleteThisToken: async function () {
       const tokenToDelete = this.sendData.tokensBase64;
+      try {
+        await this.deleteToken(tokenToDelete);
+      } catch (error: any) {
+        notifyApiError(error, "Could not delete token from history");
+        return;
+      }
       this.removeOutgoingTokenFromChecker(tokenToDelete);
-      this.deleteToken(tokenToDelete);
       this.showSendTokens = false;
       this.showDeleteDialog = false;
     },

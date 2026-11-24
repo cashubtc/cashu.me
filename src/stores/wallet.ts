@@ -1110,24 +1110,13 @@ export const useWalletStore = defineStore("wallet", {
           proofsStore.serializeProofs(unspentProofs);
 
         if (serializedSpentProofs && serializedUnspentProofs) {
-          const historyToken2 = await tokenStore.editHistoryToken(
+          // mark the spent part as paid and add the unspent proofs back to the
+          // history as a pending entry, in one write
+          await tokenStore.splitHistoryToken(
             historyToken.token,
-            {
-              newAmount: spentAmount,
-              newStatus: "paid",
-              newToken: serializedSpentProofs,
-            }
+            { amount: spentAmount, token: serializedSpentProofs },
+            { amount: unspentAmount, token: serializedUnspentProofs }
           );
-          // add all unspent proofs back to the history
-          // QUICK: we use the historyToken object here because we don't know if the transaction is incoming or outgoing (we don't know the sign of the amount)
-          if (historyToken2) {
-            await tokenStore.addPendingToken({
-              amount: unspentAmount * Math.sign(historyToken2.amount),
-              token: serializedUnspentProofs,
-              unit: historyToken2.unit,
-              mint: historyToken2.mint,
-            });
-          }
         }
       }
       if (spentProofs != undefined && spentProofs.length) {
@@ -1292,6 +1281,14 @@ export const useWalletStore = defineStore("wallet", {
                   sendTokensStore.showSendTokens = false;
                   cleanup();
                 }
+              } catch (error) {
+                // No further update will arrive for a spent proof, so release
+                // the subscription; the transaction worker keeps checking.
+                cleanup();
+                console.error(
+                  "Could not check sent token after proof state update. The transaction worker remains active.",
+                  error
+                );
               } finally {
                 proofCheckInProgress = false;
               }

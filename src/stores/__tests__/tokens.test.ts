@@ -191,7 +191,7 @@ describe("tokens store", () => {
       }),
     ]);
 
-    store.deleteToken("cashuB");
+    await store.deleteToken("cashuB");
     expect(store.historyTokens).toEqual([]);
   });
 
@@ -275,6 +275,110 @@ describe("tokens store", () => {
     expect(await cashuDb.ecashHistory.get(id)).toEqual(
       expect.objectContaining({ status: "paid" })
     );
+  });
+
+  it("splits a partially spent token into paid and pending rows", async () => {
+    const store = useTokensStore();
+    const id = await store.addPendingToken({
+      amount: -10,
+      token: "cashuAll",
+      mint: "https://mint.example",
+      unit: "sat",
+    });
+
+    const remainder = await store.splitHistoryToken(
+      "cashuAll",
+      { amount: 6, token: "cashuSpent" },
+      { amount: 4, token: "cashuUnspent" }
+    );
+
+    expect(remainder).toEqual(
+      expect.objectContaining({
+        status: "pending",
+        amount: -4,
+        token: "cashuUnspent",
+        mint: "https://mint.example",
+        unit: "sat",
+      })
+    );
+    expect(await cashuDb.ecashHistory.get(id)).toEqual(
+      expect.objectContaining({
+        status: "paid",
+        amount: -6,
+        token: "cashuSpent",
+      })
+    );
+    expect(await cashuDb.ecashHistory.get(remainder!.id)).toEqual(
+      expect.objectContaining({ status: "pending", token: "cashuUnspent" })
+    );
+    expect(store.tokenAlreadyInHistory("cashuSpent")).toEqual(
+      expect.objectContaining({ id, status: "paid", amount: -6 })
+    );
+    expect(store.tokenAlreadyInHistory("cashuUnspent")?.id).toBe(remainder!.id);
+    expect(store.historyTokens).toHaveLength(2);
+  });
+
+  it("leaves history unchanged when part of a split fails", async () => {
+    const store = useTokensStore();
+    const id = await store.addPendingToken({
+      amount: -10,
+      token: "cashuAll",
+      mint: "https://mint.example",
+      unit: "sat",
+    });
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const table = cashuDb.ecashHistory;
+    const put = table.put;
+    let calls = 0;
+    vi.spyOn(table, "put").mockImplementation(function (this: any, ...args) {
+      calls++;
+      if (calls === 2) return Promise.reject(new Error("write failed")) as any;
+      return put.apply(this, args as any);
+    });
+
+    await expect(
+      store.splitHistoryToken(
+        "cashuAll",
+        { amount: 6, token: "cashuSpent" },
+        { amount: 4, token: "cashuUnspent" }
+      )
+    ).rejects.toThrow("write failed");
+
+    expect(await readEcashHistory()).toEqual([
+      expect.objectContaining({
+        id,
+        status: "pending",
+        amount: -10,
+        token: "cashuAll",
+      }),
+    ]);
+    expect(store.historyTokens).toEqual([
+      expect.objectContaining({ id, status: "pending", token: "cashuAll" }),
+    ]);
+  });
+
+  it("waits for deletes and restores the entry when one fails", async () => {
+    const store = useTokensStore();
+    const id = await store.addPendingToken({
+      amount: -2,
+      token: "cashuDelete",
+      mint: "https://mint.example",
+      unit: "sat",
+    });
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(cashuDb.ecashHistory, "delete").mockRejectedValueOnce(
+      new Error("delete failed")
+    );
+
+    await expect(store.deleteToken("cashuDelete")).rejects.toThrow(
+      "delete failed"
+    );
+    expect(store.tokenAlreadyInHistory("cashuDelete")?.id).toBe(id);
+    expect(await cashuDb.ecashHistory.get(id)).toBeDefined();
+
+    await store.deleteToken("cashuDelete");
+    expect(store.tokenAlreadyInHistory("cashuDelete")).toBeUndefined();
+    expect(await cashuDb.ecashHistory.get(id)).toBeUndefined();
   });
 
   it("redacts old paid token payloads from ecashHistory", async () => {

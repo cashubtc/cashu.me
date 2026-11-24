@@ -41,6 +41,11 @@ function sortHistoryTokens(tokens: HistoryToken[]) {
   });
 }
 
+// Strip nested Vue proxies and normalize SDK Amount values before IndexedDB.
+function toStorable(historyToken: HistoryToken) {
+  return JSONInt.parse(JSONInt.stringify(historyToken)!);
+}
+
 export const useTokensStore = defineStore("tokens", {
   state: () => ({
     historyTokens: [] as HistoryToken[],
@@ -77,11 +82,8 @@ export const useTokensStore = defineStore("tokens", {
       historyToken: HistoryToken,
       previous?: HistoryToken
     ): Promise<void> {
-      // Strip nested Vue proxies and normalize SDK Amount values before IndexedDB.
       try {
-        await cashuDb.ecashHistory.put(
-          JSONInt.parse(JSONInt.stringify(historyToken)!)
-        );
+        await cashuDb.ecashHistory.put(toStorable(historyToken));
       } catch (error) {
         console.error("Could not persist ecash history token", error);
         const index = this.historyTokens.findIndex(
@@ -246,14 +248,71 @@ export const useTokensStore = defineStore("tokens", {
         await this.persistHistoryToken(this.historyTokens[index], previous);
       }
     },
-    deleteToken(token: string) {
+    /**
+     * Splits a partially spent history token: the existing entry keeps the
+     * spent part (marked paid) and a new pending entry holds the unspent
+     * remainder. Both rows are written in one IndexedDB transaction, so the
+     * unspent proofs cannot drop out of history if one of the writes fails.
+     * Returns the new pending entry, or undefined if the token is not in history.
+     */
+    async splitHistoryToken(
+      tokenToSplit: string,
+      spent: { amount: number; token: string },
+      unspent: { amount: number; token: string }
+    ): Promise<HistoryToken | undefined> {
+      const original = this.historyTokens.find((t) => t.token === tokenToSplit);
+      if (!original) return undefined;
+      // The sign tells whether the entry is incoming or outgoing.
+      const sign = Math.sign(original.amount);
+      const spentPart = {
+        token: spent.token,
+        amount: spent.amount * sign,
+        status: "paid" as const,
+      };
+      const remainder: HistoryToken = {
+        id: uuidv4(),
+        status: "pending",
+        amount: unspent.amount * sign,
+        date: currentDateStr(),
+        token: unspent.token,
+        mint: original.mint,
+        unit: original.unit,
+      };
+      try {
+        await cashuDb.transaction("rw", cashuDb.ecashHistory, async () => {
+          await cashuDb.ecashHistory.put(
+            toStorable({ ...original, ...spentPart })
+          );
+          await cashuDb.ecashHistory.put(toStorable(remainder));
+        });
+      } catch (error) {
+        console.error("Could not split ecash history token", error);
+        throw error;
+      }
+      // Update the cache only after the commit. The liveQuery may already have
+      // replaced it with the committed rows, so match by id.
+      const cached = this.historyTokens.find((t) => t.id === original.id);
+      if (cached) Object.assign(cached, spentPart);
+      if (!this.historyTokens.some((t) => t.id === remainder.id)) {
+        this.historyTokens.push(remainder);
+      }
+      return remainder;
+    },
+    async deleteToken(token: string) {
       const index = this.historyTokens.findIndex((t) => t.token === token);
       if (index >= 0) {
-        const id = this.historyTokens[index].id;
+        const historyToken = this.historyTokens[index];
         this.historyTokens.splice(index, 1);
-        cashuDb.ecashHistory.delete(id).catch((error) => {
+        try {
+          await cashuDb.ecashHistory.delete(historyToken.id);
+        } catch (error) {
           console.error("Could not delete ecash history token", error);
-        });
+          // Put the entry back so the cache matches IndexedDB.
+          if (!this.historyTokens.some((t) => t.id === historyToken.id)) {
+            this.historyTokens.splice(index, 0, historyToken);
+          }
+          throw error;
+        }
       }
     },
     tokenAlreadyInHistory(tokenStr: string): HistoryToken | undefined {

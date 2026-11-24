@@ -1290,6 +1290,71 @@ describe("wallet store", () => {
     expect(unsubscribe).toHaveBeenCalledOnce();
   });
 
+  it("releases the sent-token websocket when the spent check fails", async () => {
+    const wallet = useWalletStore();
+    h.mintsStore.mints = [
+      {
+        url: "https://mint-b.example",
+        keys: [{ id: "00bb" }],
+        keysets: [{ id: "00bb", unit: "sat", active: true }],
+        info: {
+          nuts: {
+            17: {
+              supported: [
+                {
+                  method: PaymentMethod.Bolt11,
+                  unit: "sat",
+                  commands: ["proof_state"],
+                },
+              ],
+            },
+          },
+        },
+      },
+    ];
+    const historyToken = {
+      token: "cashu-token-check-fails",
+      amount: -1,
+      mint: "https://mint-b.example",
+      unit: "sat",
+      status: "pending",
+    };
+    h.tokenModule.decodeFull.mockResolvedValue({ proofs: [] });
+    h.tokenModule.getProofs.mockReturnValue([
+      { id: "00bb", amount: 1, secret: "s1" },
+    ]);
+    let onProofStateUpdate;
+    const unsubscribe = vi.fn();
+    const tokenWallet = {
+      on: {
+        proofStateUpdates: vi.fn(async (_proofs, callback) => {
+          onProofStateUpdate = callback;
+          return unsubscribe;
+        }),
+      },
+    };
+    vi.spyOn(wallet, "mintWallet").mockResolvedValue(tokenWallet);
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+
+    await wallet.onTokenPaid(historyToken);
+    vi.spyOn(wallet, "checkTokenSpendable").mockRejectedValueOnce(
+      new Error("history write failed")
+    );
+
+    await expect(
+      onProofStateUpdate({ state: "SPENT" })
+    ).resolves.toBeUndefined();
+    expect(unsubscribe).toHaveBeenCalledOnce();
+
+    // The subscription slot is free again, so the token can be watched anew.
+    await wallet.onTokenPaid(historyToken);
+    expect(tokenWallet.on.proofStateUpdates).toHaveBeenCalledTimes(2);
+
+    consoleError.mockRestore();
+  });
+
   it("serializes Bolt12 minting so concurrent checks use distinct counters", async () => {
     const wallet = useWalletStore();
     wallet.invoiceHistory = [
