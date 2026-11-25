@@ -1,7 +1,7 @@
 import { type Page } from "@playwright/test";
 import { expect, test } from "../fixtures/test";
 import { WalletPage } from "../pages/WalletPage";
-import { WALLET_MUTEX_NAME } from "../../../src/js/walletMutex";
+import { WALLET_MUTEX_NAME } from "src/js/walletMutex";
 
 async function openTerms(page: Page) {
   await page.goto("/terms");

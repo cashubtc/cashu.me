@@ -174,9 +174,11 @@ export async function meltGeneric(
     throw error;
   }
 
+  let ownsMutex = false;
   this.payInvoiceData.paying = true;
   try {
     await uIStore.lockMutex(mutexPriority);
+    ownsMutex = true;
   } catch (error: any) {
     try {
       await proofsStore.setReserved(sendProofs, false);
@@ -197,6 +199,7 @@ export async function meltGeneric(
     await proofsStore.setReserved(sendProofs, true, quote.quote);
 
     if (releaseMutex) {
+      ownsMutex = false;
       uIStore.unlockMutex();
     }
     let data;
@@ -230,6 +233,7 @@ export async function meltGeneric(
     } finally {
       if (releaseMutex) {
         await uIStore.lockMutex(mutexPriority);
+        ownsMutex = true;
       }
     }
 
@@ -293,7 +297,9 @@ export async function meltGeneric(
     throw error;
   } finally {
     this.payInvoiceData.paying = false;
-    uIStore.unlockMutex();
+    if (ownsMutex) {
+      uIStore.unlockMutex();
+    }
   }
 }
 
