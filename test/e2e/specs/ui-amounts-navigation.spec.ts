@@ -153,14 +153,16 @@ test("clipboard denial leaves manual payment entry usable", async ({
     .locator(".q-dialog:visible")
     .getByText("Paste", { exact: true })
     .click();
+  await expect(
+    page
+      .getByRole("alert")
+      .filter({ hasText: "Failed to read clipboard contents." })
+  ).toBeVisible();
   const invoice = await counterpartyRequest(request, "bolt11", 10);
   await wallet.quoteRequest(invoice);
   await expect(page.getByTestId("pay-payment-request")).toBeEnabled();
   await wallet.closeFullscreenDialog();
   await expect.poll(() => wallet.balanceSats()).toBe(40);
-  test.fail(
-    true,
-    "UI-011: clipboard permission denial escapes the paste handler as an unhandled error"
-  );
+
   expect(clipboardErrors).toEqual([]);
 });

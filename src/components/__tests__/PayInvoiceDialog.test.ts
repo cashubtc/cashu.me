@@ -9,6 +9,23 @@ beforeAll(async () => {
 });
 
 describe("PayInvoiceDialog", () => {
+  it("preserves existing input when the clipboard helper returns no text", async () => {
+    const paste = vi
+      .spyOn(useUiStore(), "pasteFromClipboard")
+      .mockResolvedValue("");
+    const context = {
+      payInvoiceData: { input: { request: "existing input" } },
+      decodeAndQuote: vi.fn(),
+    };
+    try {
+      await PayInvoiceDialog.methods.pasteToParseDialog.call(context);
+      expect(context.payInvoiceData.input.request).toBe("existing input");
+      expect(context.decodeAndQuote).not.toHaveBeenCalled();
+    } finally {
+      paste.mockRestore();
+    }
+  });
+
   it("queues a foreground payment before starting the melt", async () => {
     const uiStore = useUiStore();
     let rejectMelt!: (error: Error) => void;
