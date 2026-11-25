@@ -174,8 +174,21 @@ export async function meltGeneric(
     throw error;
   }
 
+  let ownsMutex = false;
   this.payInvoiceData.paying = true;
-  await uIStore.lockMutex(mutexPriority);
+  try {
+    await uIStore.lockMutex(mutexPriority);
+    ownsMutex = true;
+  } catch (error: any) {
+    try {
+      await proofsStore.setReserved(sendProofs, false);
+    } finally {
+      this.payInvoiceData.paying = false;
+    }
+    console.error(error);
+    if (!silent) notifyApiError(error, "Payment failed");
+    throw error;
+  }
   try {
     await this.addOutgoingPendingInvoiceToHistory(
       quote,
@@ -186,6 +199,7 @@ export async function meltGeneric(
     await proofsStore.setReserved(sendProofs, true, quote.quote);
 
     if (releaseMutex) {
+      ownsMutex = false;
       uIStore.unlockMutex();
     }
     let data;
@@ -219,6 +233,7 @@ export async function meltGeneric(
     } finally {
       if (releaseMutex) {
         await uIStore.lockMutex(mutexPriority);
+        ownsMutex = true;
       }
     }
 
@@ -282,7 +297,9 @@ export async function meltGeneric(
     throw error;
   } finally {
     this.payInvoiceData.paying = false;
-    uIStore.unlockMutex();
+    if (ownsMutex) {
+      uIStore.unlockMutex();
+    }
   }
 }
 

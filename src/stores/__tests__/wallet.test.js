@@ -1820,6 +1820,165 @@ describe("wallet store", () => {
     });
   });
 
+  it.each([true, false])(
+    "cleans up when the second mutex acquisition fails (silent=%s)",
+    async (silent) => {
+      const wallet = useWalletStore();
+      wallet.invoiceHistory = [];
+      const proofs = [{ id: "00aa", amount: 105, secret: "s1" }];
+      const quote = {
+        quote: "bolt11-melt-q",
+        amount: 100,
+        fee_reserve: 5,
+        state: "UNPAID",
+      };
+      const mintWallet = {
+        mint: { mintUrl: "https://mint-a.example" },
+        unit: "sat",
+        selectProofsToSend: vi.fn(() => ({ send: proofs, keep: [] })),
+        prepareMelt: vi.fn(),
+        completeMelt: vi.fn(),
+      };
+      const error = new Error("Lock acquisition failed");
+      const checkQuote = vi.fn();
+      h.uiStore.lockMutex.mockResolvedValueOnce().mockRejectedValueOnce(error);
+
+      await expect(
+        wallet.meltGeneric(proofs, quote, mintWallet, silent, checkQuote)
+      ).rejects.toBe(error);
+
+      expect(h.uiStore.lockMutex).toHaveBeenCalledTimes(2);
+      expect(h.uiStore.unlockMutex).toHaveBeenCalledTimes(1);
+      expect(h.proofsStore.setReserved.mock.calls).toEqual([
+        [proofs, true],
+        [proofs, false],
+      ]);
+      expect(wallet.payInvoiceData.paying).toBe(false);
+      expect(wallet.invoiceHistory).toEqual([]);
+      expect(checkQuote).not.toHaveBeenCalled();
+      expect(mintWallet.prepareMelt).not.toHaveBeenCalled();
+      expect(mintWallet.completeMelt).not.toHaveBeenCalled();
+      if (silent) {
+        expect(h.notifyApiError).not.toHaveBeenCalled();
+      } else {
+        expect(h.notifyApiError).toHaveBeenCalledWith(error, "Payment failed");
+      }
+    }
+  );
+
+  it("does not release another owner after a failed multi-mint reacquisition", async () => {
+    const { useUiStore } = await vi.importActual("src/stores/ui");
+    const ui = useUiStore();
+    const originalLocks = Object.getOwnPropertyDescriptor(navigator, "locks");
+    const originalLock = h.uiStore.lockMutex.getMockImplementation();
+    const originalUnlock = h.uiStore.unlockMutex.getMockImplementation();
+    const releases = [];
+    let markThirdRequested;
+    const thirdRequested = new Promise((resolve) => {
+      markThirdRequested = resolve;
+    });
+    let failThird;
+    const thirdFailure = new Promise((_resolve, reject) => {
+      failThird = reject;
+    });
+    let requestCount = 0;
+    let tail = Promise.resolve();
+    const locks = {
+      request: vi.fn((name, options, callback) => {
+        const requestNumber = ++requestCount;
+        const request = tail.then(() => {
+          if (requestNumber === 3) {
+            markThirdRequested();
+            return thirdFailure;
+          }
+          return callback({ name, mode: options.mode });
+        });
+        tail = request.catch(() => {});
+        return request;
+      }),
+    };
+    Object.defineProperty(navigator, "locks", {
+      configurable: true,
+      value: locks,
+    });
+    h.uiStore.lockMutex.mockImplementation((...args) => ui.lockMutex(...args));
+    h.uiStore.unlockMutex.mockImplementation(() => {
+      const release = ui.unlockMutex();
+      releases.push(release);
+      return release;
+    });
+
+    try {
+      const wallet = useWalletStore();
+      wallet.invoiceHistory = [];
+      wallet.payInvoiceData.input.request = "lnbc123";
+      const proofs = [{ id: "00aa", amount: 105, secret: "s1" }];
+      const quote = {
+        quote: "synthetic-melt-quote",
+        amount: 100,
+        fee_reserve: 5,
+        state: "PENDING",
+        expiry: 0,
+        request: "lnbc123",
+        payment_preimage: null,
+      };
+      const mintWallet = {
+        mint: { mintUrl: "https://mint-a.example" },
+        unit: "sat",
+        keysetId: "00aa",
+        selectProofsToSend: vi.fn(() => ({ send: proofs, keep: [] })),
+        prepareMelt: vi.fn(async () => ({ outputData: [] })),
+        completeMelt: vi.fn(async () => ({
+          quote: { ...quote, state: "PAID" },
+          change: [],
+          outputData: [],
+        })),
+      };
+      const error = new Error("Native reacquisition failed");
+      const payment = wallet.meltGeneric(
+        proofs,
+        quote,
+        mintWallet,
+        true,
+        vi.fn(async () => ({ ...quote, state: "PAID" })),
+        PaymentMethod.Bolt11,
+        undefined,
+        true
+      );
+      const failedPayment = expect(payment).rejects.toBe(error);
+      await thirdRequested;
+      const otherOwner = ui.lockMutex();
+      failThird(error);
+      await otherOwner;
+      await failedPayment;
+      await Promise.all(releases);
+
+      expect(locks.request).toHaveBeenCalledTimes(4);
+      expect(ui.globalMutexLock).toBe(true);
+      expect(wallet.payInvoiceData.paying).toBe(false);
+      expect(h.proofsStore.setReserved).not.toHaveBeenCalledWith(proofs, false);
+
+      let entered = false;
+      const nextCaller = ui.lockMutex().then(() => {
+        entered = true;
+      });
+      await Promise.resolve();
+      expect(entered).toBe(false);
+      await ui.unlockMutex();
+      await nextCaller;
+      expect(entered).toBe(true);
+    } finally {
+      await ui.unlockMutex();
+      h.uiStore.lockMutex.mockImplementation(originalLock);
+      h.uiStore.unlockMutex.mockImplementation(originalUnlock);
+      if (originalLocks) {
+        Object.defineProperty(navigator, "locks", originalLocks);
+      } else {
+        delete navigator.locks;
+      }
+    }
+  });
+
   it("persists melt change output data before completing a melt", async () => {
     const wallet = useWalletStore();
     const proofs = [{ id: "00aa", amount: 105, secret: "s1" }];
