@@ -660,12 +660,6 @@ export default {
       }
     }
 
-    // get lightning invoice from a link
-    if (params.get("lightning")) {
-      this.showParseDialog();
-      this.payInvoiceData.input.request = params.get("lightning") as string;
-    }
-
     // Clear all parameters from URL without refreshing the page
     /*
     window.history.pushState(
@@ -725,6 +719,17 @@ export default {
 
     // reconnect all websockets
     this.checkPendingTransactions();
+
+    const lightningRequest = params.get("lightning");
+    if (lightningRequest && useWalletStore().mnemonic) {
+      this.showParseDialog();
+      try {
+        await this.decodeRequest(lightningRequest);
+      } catch (error) {
+        // The payment parser displays the appropriate error notification.
+        console.error("Failed to parse Lightning deep link", error);
+      }
+    }
   },
 };
 </script>
