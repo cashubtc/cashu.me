@@ -374,6 +374,7 @@ export const useWalletStore = defineStore("wallet", {
           // Continue with potentially stale keysets rather than failing
         }
       }
+      await mints.checkForMintKeysetIdCollisions();
       return this.createWalletInstance(storedMint, url, unit);
     },
     // Synchronous wallet creation for non-critical operations (e.g., fee calculation display)

@@ -176,9 +176,10 @@ describe("mint keyset validation", () => {
     ).resolves.toBeInstanceOf(Wallet);
   });
 
-  it("checks repaired keysets before repeating an operation", async () => {
+  it("checks repaired keysets before repeating or starting an operation", async () => {
     const mints = useMintsStore();
     mints.mints = [storedMint()];
+    mints.mints[0].lastKeysetsUpdated = new Date().toISOString();
     const wallet = useWalletStore();
     const subscribe = vi.spyOn(WalletEvents.prototype, "keychainUpdated");
     wallet.createWalletInstance(mints.mints[0], mints.mints[0].url, "sat");
@@ -201,6 +202,33 @@ describe("mint keyset validation", () => {
     ).rejects.toThrow(KeysetDerivationCollisionError);
     expect(operation).toHaveBeenCalledTimes(1);
     expect(notify).not.toHaveBeenCalled();
+
+    const refresh = vi.spyOn(mints, "updateMintInfoAndKeys");
+    const createWallet = vi.spyOn(wallet, "createWalletInstance");
+    for (const updateKeysets of [false, true]) {
+      await expect(
+        wallet.mintWallet(mints.mints[0].url, "sat", updateKeysets)
+      ).rejects.toThrow(KeysetDerivationCollisionError);
+    }
+    expect(refresh).not.toHaveBeenCalled();
+    expect(createWallet).not.toHaveBeenCalled();
+  });
+
+  it("validates saved keysets after a connection error", async () => {
+    const mints = useMintsStore();
+    const mint = storedMint();
+    mint.keysets.push(keyset(LEGACY_B));
+    mints.mints = [mint];
+    const wallet = useWalletStore();
+    const createWallet = vi.spyOn(wallet, "createWalletInstance");
+    vi.spyOn(mints, "updateMintInfoAndKeys").mockRejectedValue(
+      new TypeError("Network request failed")
+    );
+
+    await expect(wallet.mintWallet(mint.url, "sat", true)).rejects.toThrow(
+      KeysetDerivationCollisionError
+    );
+    expect(createWallet).not.toHaveBeenCalled();
   });
 
   it.each([LEGACY_C, V2])(
