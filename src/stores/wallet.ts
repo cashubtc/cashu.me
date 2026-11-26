@@ -1,6 +1,12 @@
 import { defineStore } from "pinia";
 import { currentDateStr } from "src/js/utils";
-import { useMintsStore, WalletProof, MintClass, StoredMint } from "./mints";
+import {
+  useMintsStore,
+  WalletProof,
+  MintClass,
+  StoredMint,
+  KeysetDerivationCollisionError,
+} from "src/stores/mints";
 import { useLocalStorage } from "@vueuse/core";
 import { useProofsStore } from "./proofs";
 import { HistoryToken, useTokensStore } from "./tokens";
@@ -361,6 +367,9 @@ export const useWalletStore = defineStore("wallet", {
           // Re-fetch mint after update to get fresh keysets
           storedMint = mints.mints.find((m) => m.url === url) ?? storedMint;
         } catch (error: any) {
+          if (error instanceof KeysetDerivationCollisionError) {
+            throw error;
+          }
           console.error("Failed to update mint info/keys:", error);
           // Continue with potentially stale keysets rather than failing
         }
@@ -476,6 +485,7 @@ export const useWalletStore = defineStore("wallet", {
         // Cashu TS v4.9.0+ refreshes the wallet snapshot when a mint rejects
         // outputs on a retired keyset, then asks the caller to retry.
         if (error instanceof StaleKeysetError && error.repaired) {
+          await useMintsStore().checkForMintKeysetIdCollisions();
           if (notifyUser) {
             notify(this.t("wallet.notifications.trying_again"));
           }
