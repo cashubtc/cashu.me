@@ -28,12 +28,17 @@
 
       <!-- Terms agreement -->
       <div class="terms-agreement">
-        <p class="terms-text">
-          By continuing, you agree to the
-          <span class="terms-link" @click="showTermsSheet"
-            >Terms of Service</span
-          >
-        </p>
+        <i18n-t
+          keypath="WelcomeSlide1.terms_agreement.text"
+          tag="p"
+          class="terms-text"
+        >
+          <template v-slot:link>
+            <span class="terms-link" @click="showTermsSheet">{{
+              $t("WelcomeSlide1.terms_agreement.link")
+            }}</span>
+          </template>
+        </i18n-t>
       </div>
     </div>
 
@@ -53,7 +58,7 @@
     >
       <div class="language-menu" @click.stop>
         <div class="language-menu-header">
-          <h3>Select Language</h3>
+          <h3>{{ $t("Settings.menu.language.caption") }}</h3>
           <q-btn
             flat
             round
@@ -437,6 +442,8 @@ export default {
         { label: "العربية", value: "ar-SA" },
         { label: "中文", value: "zh-CN" },
         { label: "日本語", value: "ja-JP" },
+        { label: "हिन्दी", value: "hi-IN" },
+        { label: "मराठी", value: "mr-IN" },
       ],
     };
   },
@@ -472,9 +479,8 @@ export default {
   },
   created() {
     this.selectedLanguage =
-      this.languageOptions.find(
-        (option) => option.value === this.$i18n.locale || navigator.language
-      )?.label || "English";
+      this.languageOptions.find((option) => option.value === this.$i18n.locale)
+        ?.label || "English";
   },
 };
 </script>

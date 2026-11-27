@@ -682,6 +682,10 @@ export default {
     p4: {
       text: "This wallet is in beta. We hold no responsibility for people losing access to funds. Use at your own risk! This code is open-source and licensed under the MIT license.",
     },
+    terms_agreement: {
+      text: "By continuing, you agree to the { link }",
+      link: "Terms of Service",
+    },
   },
   WelcomeSlide2: {
     title: "Install PWA",
