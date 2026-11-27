@@ -86,7 +86,7 @@ const h = vi.hoisted(() => {
     ),
     mintUnitProofs: vi.fn(() => []),
     updateMintInfoAndKeys: vi.fn(async () => {}),
-    checkForMintKeysetIdCollisions: vi.fn(async () => true),
+    checkForMintKeysetIdCollisions: vi.fn(() => true),
   };
   const priceStore = {
     bitcoinPrice: 100_000,

@@ -7,6 +7,7 @@ import {
 } from "@cashu/cashu-ts";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { notify, notifyError } from "src/js/notify";
+import { i18n } from "src/boot/i18n";
 import {
   KeysetDerivationCollisionError,
   type StoredMint,
@@ -42,13 +43,17 @@ const mintInfo = {
 };
 
 const keyset = (id: string, active = true) => ({ id, unit: "sat", active });
-const storedMint = (id = LEGACY_A): StoredMint => ({
-  url: "https://mint-a.example",
+const storedMint = (
+  id = LEGACY_A,
+  url = "https://mint-a.example"
+): StoredMint => ({
+  url,
   keysets: [keyset(id)],
   keys: [],
 });
 
 describe("mint keyset validation", () => {
+  const initialLocale = i18n.global.locale;
   beforeEach(() => {
     localStorage.clear();
     vi.clearAllMocks();
@@ -56,6 +61,7 @@ describe("mint keyset validation", () => {
   });
 
   afterEach(() => {
+    i18n.global.locale = initialLocale;
     vi.restoreAllMocks();
   });
 
@@ -63,18 +69,31 @@ describe("mint keyset validation", () => {
     const mints = useMintsStore();
     mints.mints = [storedMint()];
 
-    await expect(
-      mints.checkForMintKeysetIdCollisions([keyset(LEGACY_A), keyset(LEGACY_C)])
-    ).resolves.toBe(true);
+    expect(
+      mints.checkForMintKeysetIdCollisions(mints.mints[0], [
+        keyset(LEGACY_A),
+        keyset(LEGACY_C),
+      ])
+    ).toBe(true);
   });
 
   it("accepts V2 keysets alongside legacy keysets", async () => {
     const mints = useMintsStore();
     mints.mints = [storedMint()];
 
-    await expect(
-      mints.checkForMintKeysetIdCollisions([keyset(V2)])
-    ).resolves.toBe(true);
+    expect(
+      mints.checkForMintKeysetIdCollisions(mints.mints[0], [keyset(V2)])
+    ).toBe(true);
+  });
+
+  it.each([LEGACY_A, V2])("rejects ID %s shared by different mints", (id) => {
+    const mints = useMintsStore();
+    const other = storedMint(id, "https://mint-b.example");
+    mints.mints = [storedMint(id), other];
+
+    expect(() => mints.checkForMintKeysetIdCollisions(other)).toThrow(
+      KeysetDerivationCollisionError
+    );
   });
 
   it.each([
@@ -85,18 +104,21 @@ describe("mint keyset validation", () => {
     const mints = useMintsStore();
     mints.mints = [storedMint(known)];
 
-    await expect(
-      mints.checkForMintKeysetIdCollisions([keyset(incoming)])
-    ).rejects.toThrow(KeysetDerivationCollisionError);
+    expect(() =>
+      mints.checkForMintKeysetIdCollisions(mints.mints[0], [keyset(incoming)])
+    ).toThrow(KeysetDerivationCollisionError);
   });
 
   it("checks keysets within a newly added mint", async () => {
     const mints = useMintsStore();
     mints.mints = [];
 
-    await expect(
-      mints.checkForMintKeysetIdCollisions([keyset(LEGACY_A), keyset(LEGACY_B)])
-    ).rejects.toThrow(KeysetDerivationCollisionError);
+    expect(() =>
+      mints.checkForMintKeysetIdCollisions(storedMint(), [
+        keyset(LEGACY_A),
+        keyset(LEGACY_B),
+      ])
+    ).toThrow(KeysetDerivationCollisionError);
   });
 
   it("keeps inactive keysets in the validation set", async () => {
@@ -105,9 +127,9 @@ describe("mint keyset validation", () => {
     mint.keysets[0].active = false;
     mints.mints = [mint];
 
-    await expect(
-      mints.checkForMintKeysetIdCollisions([keyset(LEGACY_B)])
-    ).rejects.toThrow(KeysetDerivationCollisionError);
+    expect(() =>
+      mints.checkForMintKeysetIdCollisions(mint, [keyset(LEGACY_B)])
+    ).toThrow(KeysetDerivationCollisionError);
   });
 
   it("validates a rotation against the same mint's saved keysets", async () => {
@@ -124,7 +146,8 @@ describe("mint keyset validation", () => {
     expect(mints.mints[0].keysets).toEqual([keyset(LEGACY_A)]);
   });
 
-  it("reports a specific error when adding a mint with conflicting keysets", async () => {
+  it("reports translated validation errors when adding a mint", async () => {
+    i18n.global.locale = "fr-FR";
     const mints = useMintsStore();
     mints.mints = [storedMint()];
     vi.spyOn(Mint.prototype, "getInfo").mockResolvedValue(mintInfo);
@@ -139,8 +162,11 @@ describe("mint keyset validation", () => {
     expect(mints.mints).toHaveLength(1);
     expect(getKeys).not.toHaveBeenCalled();
     expect(notifyError).toHaveBeenCalledWith(
-      expect.stringContaining(new KeysetDerivationCollisionError().message),
-      expect.any(String)
+      mints.t("wallet.mint.notifications.mint_validation_error"),
+      mints.t("wallet.mint.notifications.activation_failed")
+    );
+    expect(new KeysetDerivationCollisionError().message).not.toBe(
+      "Mint validation error"
     );
   });
 
@@ -176,7 +202,7 @@ describe("mint keyset validation", () => {
     ).resolves.toBeInstanceOf(Wallet);
   });
 
-  it("checks repaired keysets before repeating or starting an operation", async () => {
+  it("keeps saved keys and keysets unchanged when a repair is rejected", async () => {
     const mints = useMintsStore();
     mints.mints = [storedMint()];
     mints.mints[0].lastKeysetsUpdated = new Date().toISOString();
@@ -187,12 +213,31 @@ describe("mint keyset validation", () => {
     const cache = KeyChain.mintToCacheDTO(
       mints.mints[0].url,
       [keyset(LEGACY_A, false), keyset(LEGACY_B)],
-      []
+      [{ ...keyset(LEGACY_B), keys: {} }]
     );
+
+    expect(() => onKeychainUpdated({ cache })).toThrow(
+      KeysetDerivationCollisionError
+    );
+    expect(mints.mints[0].keysets).toEqual([keyset(LEGACY_A)]);
+    expect(mints.mints[0].keys).toEqual([]);
+
+    const refresh = vi.spyOn(mints, "updateMintInfoAndKeys");
+    await expect(
+      wallet.mintWallet(mints.mints[0].url, "sat", true)
+    ).resolves.toBeInstanceOf(Wallet);
+    expect(refresh).not.toHaveBeenCalled();
+  });
+
+  it("checks saved keysets before repeating or starting an operation", async () => {
+    const mints = useMintsStore();
+    mints.mints = [storedMint()];
+    mints.mints[0].lastKeysetsUpdated = new Date().toISOString();
+    const wallet = useWalletStore();
     const operation = vi
       .fn()
       .mockImplementationOnce(async () => {
-        onKeychainUpdated({ cache });
+        mints.mints[0].keysets.push(keyset(LEGACY_B));
         throw new StaleKeysetError(true);
       })
       .mockResolvedValueOnce("done");
@@ -212,6 +257,85 @@ describe("mint keyset validation", () => {
     }
     expect(refresh).not.toHaveBeenCalled();
     expect(createWallet).not.toHaveBeenCalled();
+  });
+
+  it("rejects a repaired keyset already used by another mint before saving", () => {
+    const mints = useMintsStore();
+    mints.mints = [
+      storedMint(),
+      storedMint(LEGACY_C, "https://mint-b.example"),
+    ];
+    const wallet = useWalletStore();
+    const subscribe = vi.spyOn(WalletEvents.prototype, "keychainUpdated");
+    wallet.createWalletInstance(mints.mints[0], mints.mints[0].url, "sat");
+    const cache = KeyChain.mintToCacheDTO(
+      mints.mints[0].url,
+      [keyset(LEGACY_A, false), keyset(LEGACY_C)],
+      [{ ...keyset(LEGACY_C), keys: {} }]
+    );
+
+    expect(() => subscribe.mock.calls[0][0]({ cache })).toThrow(
+      KeysetDerivationCollisionError
+    );
+    expect(mints.mints[0].keysets).toEqual([keyset(LEGACY_A)]);
+    expect(mints.mints[0].keys).toEqual([]);
+  });
+
+  it("opens and retries an unrelated mint when other mints conflict", async () => {
+    const mints = useMintsStore();
+    const unrelated = storedMint(LEGACY_C, "https://mint-c.example");
+    unrelated.lastKeysetsUpdated = new Date().toISOString();
+    mints.mints = [
+      storedMint(),
+      storedMint(LEGACY_B, "https://mint-b.example"),
+      unrelated,
+    ];
+    const wallet = useWalletStore();
+
+    await expect(
+      wallet.mintWallet(unrelated.url, "sat", true)
+    ).resolves.toBeInstanceOf(Wallet);
+    await expect(wallet.mintWallet(mints.mints[0].url, "sat")).rejects.toThrow(
+      KeysetDerivationCollisionError
+    );
+
+    const operation = vi
+      .fn()
+      .mockRejectedValueOnce(new StaleKeysetError(true))
+      .mockResolvedValueOnce("done");
+    await expect(
+      wallet.retryOnceOnRecoverableError(LEGACY_C, operation)
+    ).resolves.toBe("done");
+    expect(operation).toHaveBeenCalledTimes(2);
+  });
+
+  it("saves compatible updates for an unrelated mint", () => {
+    const mints = useMintsStore();
+    const unrelated = storedMint(LEGACY_C, "https://mint-c.example");
+    mints.mints = [
+      storedMint(),
+      storedMint(LEGACY_B, "https://mint-b.example"),
+      unrelated,
+    ];
+    const wallet = useWalletStore();
+    const subscribe = vi.spyOn(WalletEvents.prototype, "keychainUpdated");
+    wallet.createWalletInstance(unrelated, unrelated.url, "sat");
+    const next = keyset("0000000000000003");
+    const cache = KeyChain.mintToCacheDTO(
+      unrelated.url,
+      [keyset(LEGACY_C, false), next],
+      [{ ...next, keys: {} }]
+    );
+
+    subscribe.mock.calls[0][0]({ cache });
+    const updated = mints.mints.find((mint) => mint.url === unrelated.url)!;
+    expect(updated.keysets).toEqual([
+      expect.objectContaining(keyset(LEGACY_C, false)),
+      expect.objectContaining(next),
+    ]);
+    expect(updated.keys).toEqual([
+      expect.objectContaining({ ...next, keys: {} }),
+    ]);
   });
 
   it("validates saved keysets after a connection error", async () => {

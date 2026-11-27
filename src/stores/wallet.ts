@@ -374,7 +374,7 @@ export const useWalletStore = defineStore("wallet", {
           // Continue with potentially stale keysets rather than failing
         }
       }
-      await mints.checkForMintKeysetIdCollisions();
+      mints.checkForMintKeysetIdCollisions(storedMint);
       return this.createWalletInstance(storedMint, url, unit);
     },
     // Synchronous wallet creation for non-critical operations (e.g., fee calculation display)
@@ -439,6 +439,7 @@ export const useWalletStore = defineStore("wallet", {
         // Cashu TS repairs its short-lived wallet snapshot after a keyset
         // rejection. Keep that repair for subsequent wallet instances too.
         const { keysets, keys } = KeyChain.cacheToMintDTO(cache);
+        mints.checkForMintKeysetIdCollisions(mint, keysets);
         mint.keysets = [
           ...mint.keysets.filter((existing) =>
             keysets.every((updated) => updated.id !== existing.id)
@@ -486,7 +487,11 @@ export const useWalletStore = defineStore("wallet", {
         // Cashu TS v4.9.0+ refreshes the wallet snapshot when a mint rejects
         // outputs on a retired keyset, then asks the caller to retry.
         if (error instanceof StaleKeysetError && error.repaired) {
-          await useMintsStore().checkForMintKeysetIdCollisions();
+          const mints = useMintsStore();
+          const mint = mints.mints.find((mint) =>
+            mint.keysets.some((keyset) => keyset.id === keysetId)
+          )!;
+          mints.checkForMintKeysetIdCollisions(mint);
           if (notifyUser) {
             notify(this.t("wallet.notifications.trying_again"));
           }

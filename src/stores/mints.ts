@@ -22,7 +22,7 @@ import { sumProofAmounts } from "src/js/proofs";
 
 export class KeysetDerivationCollisionError extends Error {
   constructor() {
-    super("Mint keysets share a legacy derivation path.");
+    super(i18n.global.t("wallet.mint.notifications.mint_validation_error"));
     this.name = "KeysetDerivationCollisionError";
   }
 }
@@ -487,9 +487,12 @@ export const useMintsStore = defineStore("mints", {
       } catch (error: any) {
         // restore previous values because the activation errored
         // this.activeMintUrl = previousUrl;
-        let err_msg = this.t("wallet.mint.notifications.could_not_connect");
-        if (error.message.length) {
-          err_msg = err_msg + ` ${error.message}.`;
+        let err_msg = error.message;
+        if (!(error instanceof KeysetDerivationCollisionError)) {
+          err_msg = this.t("wallet.mint.notifications.could_not_connect");
+          if (error.message.length) {
+            err_msg = err_msg + ` ${error.message}.`;
+          }
         }
         await notifyError(
           err_msg,
@@ -551,13 +554,25 @@ export const useMintsStore = defineStore("mints", {
         throw error;
       }
     },
-    checkForMintKeysetIdCollisions: async function (
+    checkForMintKeysetIdCollisions: function (
+      mint: StoredMint,
       keysets: MintKeyset[] = []
     ) {
-      const collisions = findLegacyDerivationCollisions(
-        [...this.allMintKeysets, ...keysets].map((keyset) => keyset.id)
+      const mintKeysetIds = new Set(
+        [...mint.keysets, ...keysets].map((keyset) => keyset.id)
       );
-      if (collisions.length > 0) {
+      const otherKeysetIds = this.mints
+        .filter((other) => other.url !== mint.url)
+        .flatMap((other) => other.keysets.map((keyset) => keyset.id));
+      const hasSharedId = otherKeysetIds.some((id) => mintKeysetIds.has(id));
+      const collisions = findLegacyDerivationCollisions([
+        ...mintKeysetIds,
+        ...otherKeysetIds,
+      ]);
+      if (
+        hasSharedId ||
+        collisions.some((group) => group.some((id) => mintKeysetIds.has(id)))
+      ) {
         throw new KeysetDerivationCollisionError();
       }
       return true;
@@ -605,7 +620,7 @@ export const useMintsStore = defineStore("mints", {
         const data = await mintClass.api.getKeySets();
         const keysets = data.keysets;
         if (keysets.length > 0) {
-          await this.checkForMintKeysetIdCollisions(keysets);
+          this.checkForMintKeysetIdCollisions(mint, keysets);
           // store keysets in mint and update local storage
           // merge new keysets with existing ones instead of overwriting
           const storedMint = this.mints.find((m) => m.url === mint.url);
