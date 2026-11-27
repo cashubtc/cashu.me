@@ -12,6 +12,8 @@ import arSA from "./ar-SA";
 import zhCN from "./zh-CN";
 import jaJP from "./ja-JP";
 import ptBR from "./pt-BR";
+import hiIN from "./hi-IN";
+import mrIN from "./mr-IN";
 
 export default {
   "en-US": enUS,
@@ -28,4 +30,6 @@ export default {
   "zh-CN": zhCN,
   "ja-JP": jaJP,
   "pt-BR": ptBR,
+  "hi-IN": hiIN,
+  "mr-IN": mrIN,
 };
