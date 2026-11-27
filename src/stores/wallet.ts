@@ -1,6 +1,12 @@
 import { defineStore } from "pinia";
 import { currentDateStr } from "src/js/utils";
-import { useMintsStore, WalletProof, MintClass, StoredMint } from "./mints";
+import {
+  useMintsStore,
+  WalletProof,
+  MintClass,
+  StoredMint,
+  KeysetDerivationCollisionError,
+} from "src/stores/mints";
 import { useLocalStorage } from "@vueuse/core";
 import { useProofsStore } from "./proofs";
 import { HistoryToken, useTokensStore } from "./tokens";
@@ -361,10 +367,14 @@ export const useWalletStore = defineStore("wallet", {
           // Re-fetch mint after update to get fresh keysets
           storedMint = mints.mints.find((m) => m.url === url) ?? storedMint;
         } catch (error: any) {
+          if (error instanceof KeysetDerivationCollisionError) {
+            throw error;
+          }
           console.error("Failed to update mint info/keys:", error);
           // Continue with potentially stale keysets rather than failing
         }
       }
+      mints.checkForMintKeysetIdCollisions(storedMint);
       return this.createWalletInstance(storedMint, url, unit);
     },
     // Synchronous wallet creation for non-critical operations (e.g., fee calculation display)
@@ -429,6 +439,7 @@ export const useWalletStore = defineStore("wallet", {
         // Cashu TS repairs its short-lived wallet snapshot after a keyset
         // rejection. Keep that repair for subsequent wallet instances too.
         const { keysets, keys } = KeyChain.cacheToMintDTO(cache);
+        mints.checkForMintKeysetIdCollisions(mint, keysets);
         mint.keysets = [
           ...mint.keysets.filter((existing) =>
             keysets.every((updated) => updated.id !== existing.id)
@@ -476,6 +487,11 @@ export const useWalletStore = defineStore("wallet", {
         // Cashu TS v4.9.0+ refreshes the wallet snapshot when a mint rejects
         // outputs on a retired keyset, then asks the caller to retry.
         if (error instanceof StaleKeysetError && error.repaired) {
+          const mints = useMintsStore();
+          const mint = mints.mints.find((mint) =>
+            mint.keysets.some((keyset) => keyset.id === keysetId)
+          )!;
+          mints.checkForMintKeysetIdCollisions(mint);
           if (notifyUser) {
             notify(this.t("wallet.notifications.trying_again"));
           }
